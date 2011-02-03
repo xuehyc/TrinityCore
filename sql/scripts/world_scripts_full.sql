@@ -406,6 +406,8 @@ UPDATE `creature_template` SET `ScriptName`='npc_bloodmaul_brutebane' WHERE `ent
 /* BLASTED LANDS */
 UPDATE `creature_template` SET `ScriptName`='npc_deathly_usher' WHERE `entry`=8816;
 UPDATE `creature_template` SET `ScriptName`='npc_fallen_hero_of_horde' WHERE `entry`=7572;
+UPDATE `creature_template` SET `ScriptName` = 'npc_princess_stillpine' WHERE `entry` =17682;
+UPDATE `gameobject_template` SET `ScriptName` = 'go_princess_stillpines_cage' WHERE `entry` =181928;
 
 /* BLOODMYST ISLE */
 UPDATE `creature_template` SET `ScriptName`='mob_webbed_creature' WHERE `entry`=17680;

@@ -149,9 +149,71 @@ public:
 
 };
 
+/*######
+## Quest 9667: Saving Princess Stillpine
+######*/
+
+enum eStillpine
+{
+    QUEST_SAVING_PRINCESS_STILLPINE               = 9667,
+    NPC_PRINCESS_STILLPINE                        = 17682,
+    GO_PRINCESS_STILLPINES_CAGE                   = 181928,
+    SPELL_OPENING_PRINCES_CAGE                    = 31003
+};
+
+class go_princess_stillpines_cage : public GameObjectScript
+{
+public:
+    go_princess_stillpines_cage() : GameObjectScript("go_princess_stillpines_cage") { }
+
+    bool OnGossipHello(Player *pPlayer, GameObject *pGO)
+    {
+        if (Creature* pStillpine = pGO->FindNearestCreature(NPC_PRINCESS_STILLPINE, 25, true))
+        {
+            pGO->SetGoState(GO_STATE_ACTIVE);
+            pStillpine->GetMotionMaster()->MovePoint(1, pGO->GetPositionX(), pGO->GetPositionY()-15, pGO->GetPositionZ());
+            if (pPlayer)
+				pPlayer->CastedCreatureOrGO(NPC_PRINCESS_STILLPINE, pStillpine->GetGUID(), SPELL_OPENING_PRINCES_CAGE);
+         }
+        return true;
+    }
+};
+
+enum estillpine
+{
+    PRINCESS_STILLPINE_SAY =    -1805000//"To the west"
+};
+
+class npc_princess_stillpine : public CreatureScript
+{
+public:
+    npc_princess_stillpine() : CreatureScript("npc_princess_stillpine") { }
+
+    struct npc_princess_stillpineAI : public ScriptedAI
+    {
+        npc_princess_stillpineAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+        void MovementInform(uint32 uiType, uint32 uiId)
+        {
+            if (uiId == 1)
+            {
+                DoScriptText(PRINCESS_STILLPINE_SAY, me);
+                me->ForcedDespawn();
+                return;
+            }
+        }
+    };
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new npc_princess_stillpineAI(creature);
+    }
+};
 
 void AddSC_bloodmyst_isle()
 {
     new mob_webbed_creature();
     new npc_captured_sunhawk_agent();
+    new npc_princess_stillpine();
+    new go_princess_stillpines_cage();
 }
