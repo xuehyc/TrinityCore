@@ -506,9 +506,10 @@ public:
             if (!who || (!who->isAlive())) return;
 
             if (me->IsWithinDistInMap(who, 50.0f) && (who->GetTypeId() == TYPEID_PLAYER) && who->ToPlayer()->GetQuestStatus(10512) == QUEST_STATUS_INCOMPLETE)
-            {
-                PlayerGUID = who->GetGUID();
-            }
+				PlayerGUID = who->GetGUID();
+			else
+				if (me->IsWithinDistInMap(who, 50.0f) && (who->GetTypeId() == TYPEID_PLAYER) && who->ToPlayer()->GetQuestStatus(10545) == QUEST_STATUS_INCOMPLETE)
+					PlayerGUID = who->GetGUID();
         }
 
         void MovementInform(uint32 /*type*/, uint32 id)
