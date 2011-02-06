@@ -1,4 +1,4 @@
-DELETE FROM `script_texts` WHERE `entry` in range (-1800072,-1800079);
+DELETE FROM `script_texts` WHERE `entry` BETWEEN -1800072 AND -1800079;
 INSERT INTO `script_texts` (`npc_entry`, `entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`, `sound`, `type`, `language`, `emote`, `comment`) VALUES
 (18428,-1800072, 'Help! Help! They''re going to eat me!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,1,0,0, NULL),
 (18428,-1800073, 'My children will be made orphans!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,1,0,0, NULL), 

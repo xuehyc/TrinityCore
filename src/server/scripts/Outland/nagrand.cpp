@@ -913,7 +913,7 @@ enum ePrisoner
 {
     QUEST_FINDING_THE_SURVIVORS         = 9948,
     NPC_MAGHAR_PRISONER                 = 18428,
-	SPELL_KEY                           = 32347,
+  SPELL_KEY                           = 32347,
 
     SAY_HELP_1                          = -1800072,//Help! Help! They're going to eat me!
     SAY_HELP_2                          = -1800073,//My children will be made orphans!
@@ -988,31 +988,148 @@ public:
 
         void MovementInform(uint32 uiType, uint32 uiId)
         {
-            if (uiId == 1)                
+            if (uiId == 1)
             {
                 Say_Timer = 5000;
                 ReleasedFromCage = true;
-				DoScriptText(RAND(MAGHAR_PRISONER_SAY_1, MAGHAR_PRISONER_SAY_2, MAGHAR_PRISONER_SAY_3, MAGHAR_PRISONER_SAY_4),me);
+        DoScriptText(RAND(MAGHAR_PRISONER_SAY_1, MAGHAR_PRISONER_SAY_2, MAGHAR_PRISONER_SAY_3, MAGHAR_PRISONER_SAY_4),me);
             }
         };
 
         void UpdateAI(const uint32 diff)
         {
-			if (Say_Timer <= diff && ReleasedFromCage)
+      if (Say_Timer <= diff && ReleasedFromCage)
             {
                 me->ForcedDespawn();
                 ReleasedFromCage = false;
             }
             else
                 Say_Timer -= diff;
-			
-			if (SayHelpTimer <= diff)
-			{
-				CanSayHelp = true;
-				SayHelpTimer = 20000;
-			} else SayHelpTimer -= diff;
-		}
-	};
+
+      if (SayHelpTimer <= diff)
+      {
+        CanSayHelp = true;
+        SayHelpTimer = 20000;
+      } else SayHelpTimer -= diff;
+    }
+  };
+};
+
+enum eCorki
+{
+    // first quest
+    QUEST_HELP                                    = 9923,
+    NPC_CORKI                                     = 18445,
+    GO_CORKIS_PRISON                              = 182349,
+    CORKI_SAY_THANKS                              = -1800080,
+    // 2nd quest
+    QUEST_CORKIS_GONE_MISSING_AGAIN               = 9924,
+    NPC_CORKI_2                                   = 20812,
+    GO_CORKIS_PRISON_2                            = 182350,
+    CORKI_SAY_PROMISE                             = -1800081, //This is the last time I get caught!I promise! Bye!
+    // 3rd quest
+    QUEST_CHOWAR_THE_PILLAGER                     = 9955,
+    NPC_CORKI_3                                   = 18369,
+    NPC_CORKI_CREDIT                              = 18444,
+    GO_CORKIS_PRISON_3                            = 182521,
+    CORKI_SAY_LAST                                = -1800082 //Thank you for saving me again!
+};
+
+class go_corkis_prison : public GameObjectScript
+{
+public:
+    go_corkis_prison() : GameObjectScript("go_corkis_prison") { }
+
+    bool OnGossipHello(Player *pPlayer, GameObject *pGO)
+    {
+        if (pGO->GetEntry() == GO_CORKIS_PRISON)
+        {
+            if (Creature* pCorki = pGO->FindNearestCreature(NPC_CORKI, 25, true))
+            {
+                pGO->SetGoState(GO_STATE_READY);
+                pCorki->GetMotionMaster()->MovePoint(1, pGO->GetPositionX()+5, pGO->GetPositionY(), pGO->GetPositionZ());
+                if (pPlayer)
+                    pPlayer->KilledMonsterCredit(NPC_CORKI, 0);
+            }
+        }
+        if (pGO->GetEntry() == GO_CORKIS_PRISON_2)
+        {
+            if (Creature* pCorki = pGO->FindNearestCreature(NPC_CORKI_2, 25, true))
+            {
+                pGO->SetGoState(GO_STATE_READY);
+                pCorki->GetMotionMaster()->MovePoint(1, pGO->GetPositionX()-5, pGO->GetPositionY(), pGO->GetPositionZ());
+                if (pPlayer)
+                    pPlayer->KilledMonsterCredit(NPC_CORKI_2, 0);
+            }
+        }
+        if (pGO->GetEntry() == GO_CORKIS_PRISON_3)
+        {
+            if (Creature* pCorki = pGO->FindNearestCreature(NPC_CORKI_3, 25, true))
+            {
+                pGO->SetGoState(GO_STATE_READY);
+                pCorki->GetMotionMaster()->MovePoint(1, pGO->GetPositionX()+4, pGO->GetPositionY(), pGO->GetPositionZ());
+                if (pPlayer)
+                    pPlayer->KilledMonsterCredit(NPC_CORKI_CREDIT, 0);
+            }
+        }
+        return true;
+    }
+};
+
+/*######
+## npc_corki
+######*/
+
+class npc_corki : public CreatureScript
+{
+public:
+   npc_corki() : CreatureScript("npc_corki") { }
+
+   CreatureAI *GetAI(Creature *creature) const
+   {
+       return new npc_corkiAI(creature);
+   }
+
+   struct npc_corkiAI : public ScriptedAI
+   {
+       npc_corkiAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+       uint32 Say_Timer;
+       bool ReleasedFromCage;
+
+       void Reset()
+       {
+           ReleasedFromCage = false;
+       }
+
+       void UpdateAI(const uint32 diff)
+       {
+           if (Say_Timer <= diff && ReleasedFromCage)
+           {
+               me->ForcedDespawn();
+               ReleasedFromCage = false;
+           }
+           else
+               Say_Timer -= diff;
+       }
+
+
+       void MovementInform(uint32 uiType, uint32 uiId)
+       {
+           if (uiId == 1)
+           {
+               Say_Timer = 5000;
+               ReleasedFromCage = true;
+               if (me->GetEntry() == NPC_CORKI)
+                   DoScriptText(CORKI_SAY_THANKS, me);
+               if (me->GetEntry() == NPC_CORKI_2)
+                   DoScriptText(CORKI_SAY_PROMISE, me);
+               if (me->GetEntry() == NPC_CORKI_3)
+                   DoScriptText(CORKI_SAY_LAST, me);
+           }
+       };
+
+   };
 };
 
 /*####
@@ -1032,4 +1149,6 @@ void AddSC_nagrand()
     new mob_sparrowhawk();
     new npc_maghar_prisoner();
     new go_warmaul_prison ();
+    new npc_corki();
+    new go_corkis_prison();
 }

@@ -1002,6 +1002,8 @@ UPDATE `creature_template` SET `ScriptName`='mob_sparrowhawk' WHERE `entry`=2297
 UPDATE `creature_template` SET `ScriptName`='npc_maghar_captive' WHERE `entry`=18210;
 UPDATE `creature_template` SET `ScriptName`='npc_maghar_prisoner' WHERE `entry`=18428;
 UPDATE `gameobject_template` SET `ScriptName` ='go_warmaul_prison' WHERE `entry` in (182484,182486,182487,182488,182489,182490,182491,182492,182493,182494,182495,182496,182497,182498,182499,182500,182501,182502,182503,182504);
+UPDATE `creature_template` SET `ScriptName` = 'npc_corki' WHERE `entry` in(18445,20812,18369);
+UPDATE `gameobject_template` SET `ScriptName` = 'go_corkis_prison' WHERE `entry` in(182349,182350,182521);
 
 
 /* NAXXRAMAS */
