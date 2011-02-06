@@ -571,6 +571,15 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`
    (0,-1800069,'Please, rise my friend. Keep the Blessing as a symbol of the strength of the Light and how heroes long gone might once again rise in each of us to inspire. ',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,11,1,'npc_anchorite_truuen - SAY_WP_5'),
    (0,-1800070,'Thank you my friend for making this possible. This is a day that I shall never forget! I think I will stay a while. Please return to High Priestess MacDonnell at the camp. I know that she''ll be keenly interested to know of what has transpired here.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,11,1,'npc_anchorite_truuen - SAY_WP_6'),
    (17682, -1800071, 'Go to the west', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 'Princess Stillpine say'),
+   (18428,-1800072, 'Help! Help! They''re going to eat me!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,1,0,0, NULL),
+   (18428,-1800073, 'My children will be made orphans!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,1,0,0, NULL), 
+   (18428,-1800074, 'The ogres have the keys! Kill the ogres and get me out of here!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,1,0,0, NULL), 
+   (18428,-1800075, 'I''m done for!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,1,0,0, NULL),
+   (18428,-1800076, 'Death to the ogres!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, NULL),
+   (18428,-1800077, 'Spirits watch for you, $R.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, NULL),
+   (18428,-1800078, 'Many Thanks, hero!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, NULL),
+   (18428,-1800079, 'Thank you, $R! Your service to the Mag''har will not be forgotten.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, NULL),
+   
 -- -1 033 000 SHADOWFANG KEEP
    (0,-1033000,'Follow me and I''ll open the courtyard door for you.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,7,1,'prisoner ashcrombe SAY_FREE_AS'),
    (0,-1033001,'I have just the spell to get this door open. Too bad the cell doors weren''t locked so haphazardly.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,7,1,'prisoner ashcrombe SAY_OPEN_DOOR_AS'),

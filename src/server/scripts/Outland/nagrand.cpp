@@ -904,6 +904,116 @@ public:
 
 };
 
+/*########
+## Quest: 9948 - Finding the Survivors
+key = 25604
+########*/
+
+enum ePrisoner
+{
+    QUEST_FINDING_THE_SURVIVORS         = 9948,
+    NPC_MAGHAR_PRISONER                 = 18428,
+	SPELL_KEY                           = 32347,
+
+    SAY_HELP_1                          = -1800072,//Help! Help! They're going to eat me!
+    SAY_HELP_2                          = -1800073,//My children will be made orphans!
+    SAY_HELP_3                          = -1800074,//The ogres have the keys! Kill the ogres and get me out of here!
+    SAY_HELP_4                          = -1800075,//I'm done for!
+
+    MAGHAR_PRISONER_SAY_1               = -1800079,//Thank you,$R!Your service to the Mag'har will not be forgotten.
+    MAGHAR_PRISONER_SAY_2               = -1800078,//Many Thanks, hero!
+    MAGHAR_PRISONER_SAY_3               = -1800077,//Spirits watch for you,$R.
+    MAGHAR_PRISONER_SAY_4               = -1800076 //Death to the ogres!
+
+};
+
+class go_warmaul_prison : public GameObjectScript
+{
+public:
+    go_warmaul_prison() : GameObjectScript("go_warmaul_prison") {}
+
+    bool OnGossipHello(Player *pPlayer, GameObject *pGO)
+    {
+        if (Creature* pMaghar_prisoner = pGO->FindNearestCreature(NPC_MAGHAR_PRISONER, 25, true))
+        {
+            pGO->SetGoState(GO_STATE_READY);
+            pMaghar_prisoner->GetMotionMaster()->MovePoint(1, pGO->GetPositionX()+5, pGO->GetPositionY(), pGO->GetPositionZ());
+            if (pPlayer)
+                pPlayer->CastedCreatureOrGO(NPC_MAGHAR_PRISONER,pMaghar_prisoner->GetGUID(),SPELL_KEY);
+        }
+
+        return true;
+    }
+ };
+
+class npc_maghar_prisoner : public CreatureScript
+{
+public:
+    npc_maghar_prisoner() : CreatureScript("npc_maghar_prisoner") {}
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new npc_maghar_prisonerAI(creature);
+    }
+
+    struct npc_maghar_prisonerAI : public ScriptedAI
+    {
+        npc_maghar_prisonerAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+        uint32 Say_Timer;
+        uint32 SayHelpTimer;
+
+        bool CanSayHelp;
+
+        bool ReleasedFromCage;
+
+        void Reset()
+        {
+            ReleasedFromCage = false;
+            SayHelpTimer = 10000;
+            CanSayHelp = true;
+        }
+
+        void MoveInLineOfSight(Unit *who)
+        {
+            if (CanSayHelp && who->GetTypeId() == TYPEID_PLAYER && me->IsFriendlyTo(who) && me->IsWithinDistInMap(who, 25.0f))
+            {
+                //Random switch between 4 texts
+                DoScriptText(RAND(SAY_HELP_1, SAY_HELP_2, SAY_HELP_3, SAY_HELP_4), me, who);
+
+                SayHelpTimer = 20000;
+                CanSayHelp = false;
+            }
+        }
+
+        void MovementInform(uint32 uiType, uint32 uiId)
+        {
+            if (uiId == 1)                
+            {
+                Say_Timer = 5000;
+                ReleasedFromCage = true;
+				DoScriptText(RAND(MAGHAR_PRISONER_SAY_1, MAGHAR_PRISONER_SAY_2, MAGHAR_PRISONER_SAY_3, MAGHAR_PRISONER_SAY_4),me);
+            }
+        };
+
+        void UpdateAI(const uint32 diff)
+        {
+			if (Say_Timer <= diff && ReleasedFromCage)
+            {
+                me->ForcedDespawn();
+                ReleasedFromCage = false;
+            }
+            else
+                Say_Timer -= diff;
+			
+			if (SayHelpTimer <= diff)
+			{
+				CanSayHelp = true;
+				SayHelpTimer = 20000;
+			} else SayHelpTimer -= diff;
+		}
+	};
+};
 
 /*####
 #
@@ -920,4 +1030,6 @@ void AddSC_nagrand()
     new npc_maghar_captive();
     new npc_creditmarker_visit_with_ancestors();
     new mob_sparrowhawk();
+    new npc_maghar_prisoner();
+    new go_warmaul_prison ();
 }
