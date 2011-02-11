@@ -769,7 +769,7 @@ public:
 
                         case 6:
                             if (Player* pPlayer = GetPlayerForEscort())
-                                pPlayer->AreaExploredOrEventHappens(QUEST_ESCAPE_WINTERFIN_CAVERNS);
+                                pPlayer->GroupEventHappens(QUEST_ESCAPE_WINTERFIN_CAVERNS, me);
                             IntroPhase = 7;
                             IntroTimer = 2500;
                             break;
@@ -2132,7 +2132,7 @@ public:
             {
                 Quest const* qInfo = sObjectMgr->GetQuestTemplate(QUEST_YOU_RE_NOT_SO_BIG_NOW);
                 if (qInfo)
-                    CAST_PLR(pKiller)->KilledMonsterCredit(qInfo->ReqCreatureOrGOId[0],0);
+                    CAST_PLR(pKiller)->RewardPlayerAndGroupAtEvent(uint32(qInfo->ReqCreatureOrGOId[0]), pKiller);
             }
         }
     };
