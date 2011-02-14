@@ -4445,6 +4445,8 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 case 54426:
                     if (unitTarget)
                     {
+                        unitTarget->RemoveAurasDueToSpell(29306); // TODO: remove as soon as decimate is not affected by spell 29306
+
                         int32 damage = int32(unitTarget->GetHealth()) - int32(unitTarget->CountPctFromMaxHealth(5));
                         if (damage > 0)
                             m_caster->CastCustomSpell(28375, SPELLVALUE_BASE_POINT0, damage, unitTarget);
