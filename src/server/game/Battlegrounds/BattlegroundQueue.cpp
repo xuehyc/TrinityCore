@@ -19,6 +19,7 @@
 #include "BattlegroundQueue.h"
 #include "ArenaTeam.h"
 #include "BattlegroundMgr.h"
+#include "ChannelMgr.h"
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "Log.h"
@@ -192,7 +193,8 @@ GroupQueueInfo * BattlegroundQueue::AddGroup(Player *leader, Group* grp, Battleg
         m_QueuedGroups[bracketId][index].push_back(ginfo);
 
         //announce to world, this code needs mutex
-        if (!isRated && !isPremade && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE))
+        if (!isRated && !isPremade && 
+           (sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE) || sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_CHANNEL)))
         {
             if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(ginfo->BgTypeId))
             {
@@ -219,6 +221,25 @@ GroupQueueInfo * BattlegroundQueue::AddGroup(Player *leader, Group* grp, Battleg
                 // System message
                 else
                 {
+                	                    // Announce to Channel bgannounce
+                   if( sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_CHANNEL) )
+                    {
+                        ChannelMgr* cMgr = channelMgr(HORDE);
+                        Channel* chBg = cMgr->GetJoinChannel("bgannounce", HORDE);
+                        // Automatically join player
+                        chBg->Join(leader->GetGUID(), "");
+
+                        char fText[128];
+                        sprintf(fText, "%s -- [%d-%d] A: %d/%d, H: %d/%d", bgName, q_min_level, q_max_level,
+                        qAlliance, (MinPlayers > qAlliance) ? MinPlayers - qAlliance : (uint32)0,
+                        qHorde, (MinPlayers > qHorde) ? MinPlayers - qHorde : (uint32)0);
+
+                        // Announce to channel
+                        chBg->Say(leader->GetGUID(), fText, 0);
+
+                        //leader->Say(fText, 0);
+                    }
+                
                     sWorld->SendWorldText(LANG_BG_QUEUE_ANNOUNCE_WORLD, bgName, q_min_level, q_max_level,
                         qAlliance, (MinPlayers > qAlliance) ? MinPlayers - qAlliance : (uint32)0, qHorde, (MinPlayers > qHorde) ? MinPlayers - qHorde : (uint32)0);
                 }
