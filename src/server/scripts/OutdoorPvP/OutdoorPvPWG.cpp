@@ -479,7 +479,7 @@ void OutdoorPvPWG::ProcessEvent(GameObject *obj, uint32 eventId)
             case 19672: case 19675: // Flamewatch Tower
                 msgStr = "Flamewatch";
                 break;
-            case 18553: case 19677: // Shadowsight Tower
+            case 19674: case 19677: // Shadowsight Tower
                 msgStr = "Shadowsight";
                 break;
             case 19673: case 19676: // Winter's Edge Tower
