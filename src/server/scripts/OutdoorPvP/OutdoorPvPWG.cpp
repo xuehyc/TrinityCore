@@ -617,13 +617,11 @@ void OutdoorPvPWG::ProcessEvent(GameObject *obj, uint32 eventId)
                             for (PlayerSet::iterator itr = m_players[getAttackerTeam()].begin(); itr != m_players[getAttackerTeam()].end(); ++itr)
                                 if ((*itr)->getLevel() > 74)
                                     (*itr)->SetAuraStack(SPELL_TOWER_CONTROL, (*itr), attStack);
-                         else
-                        {
-                            if (m_timer < 600000)
-                                m_timer = 0;
-                            else
-                                m_timer = m_timer - 600000; // - 10 mins
-                        }
+
+                        if (m_timer < 600000)
+                            m_timer = 0;
+                        else
+                            m_timer = m_timer - 600000; // - 10 mins
                     }
                     msgStr = fmtstring(sObjectMgr->GetTrinityStringForDBCLocale(LANG_BG_WG_TOWER_DESTROYED), msgStr.c_str());
                     sWorld->SendZoneText(ZONE_WINTERGRASP, msgStr.c_str());
