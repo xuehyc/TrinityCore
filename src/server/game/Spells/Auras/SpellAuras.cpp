@@ -573,7 +573,7 @@ void Aura::UpdateTargetMap(Unit * caster, bool apply)
         else
         {
             // owner has to be in world, or effect has to be applied to self
-            ASSERT((!GetOwner()->IsInWorld() && GetOwner() == itr->first) || GetOwner()->IsInMap(itr->first));
+            /*ASSERT((!GetOwner()->IsInWorld() && GetOwner() == itr->first) || GetOwner()->IsInMap(itr->first));*/
             itr->first->_CreateAuraApplication(this, itr->second);
             ++itr;
         }
@@ -593,7 +593,7 @@ void Aura::UpdateTargetMap(Unit * caster, bool apply)
         if (AuraApplication * aurApp = GetApplicationOfTarget(itr->first->GetGUID()))
         {
             // owner has to be in world, or effect has to be applied to self
-            ASSERT((!GetOwner()->IsInWorld() && GetOwner() == itr->first) || GetOwner()->IsInMap(itr->first));
+            /*ASSERT((!GetOwner()->IsInWorld() && GetOwner() == itr->first) || GetOwner()->IsInMap(itr->first));*/
             itr->first->_ApplyAura(aurApp, itr->second);
         }
     }

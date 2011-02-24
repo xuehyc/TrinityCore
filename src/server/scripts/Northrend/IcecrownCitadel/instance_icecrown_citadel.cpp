@@ -79,9 +79,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                 saurfangEventNPC = 0;
                 deathbringersCache = 0;
                 saurfangTeleport = 0;
-                plagueSigil = 0;
-                bloodwingSigil = 0;
-                frostwingSigil = 0;
                 memset(putricidePipes, 0, 2*sizeof(uint64));
                 memset(putricideGates, 0, 2*sizeof(uint64));
                 putricideCollision = 0;
@@ -300,21 +297,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_SCOURGE_TRANSPORTER_SAURFANG:
                         saurfangTeleport = go->GetGUID();
                         break;
-                    case GO_PLAGUE_SIGIL:
-                        plagueSigil = go->GetGUID();
-                        if (GetBossState(DATA_PROFESSOR_PUTRICIDE))
-                            HandleGameObject(plagueSigil, true, go);
-                        break;
-                    case GO_BLOODWING_SIGIL:
-                        bloodwingSigil = go->GetGUID();
-                        if (GetBossState(DATA_PROFESSOR_PUTRICIDE))
-                            HandleGameObject(bloodwingSigil, true, go);
-                        break;
-                    case GO_SIGIL_OF_THE_FROSTWING:
-                        frostwingSigil = go->GetGUID();
-                        if (GetBossState(DATA_PROFESSOR_PUTRICIDE))
-                            HandleGameObject(frostwingSigil, true, go);
-                        break;
                     case GO_SCIENTIST_AIRLOCK_DOOR_COLLISION:
                         putricideCollision = go->GetGUID();
                         if (GetBossState(DATA_FESTERGUT) == DONE && GetBossState(DATA_ROTFACE) == DONE)
@@ -508,17 +490,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                             HandleGameObject(putricidePipes[1], true);
                         }
                         break;
-                    case DATA_PROFESSOR_PUTRICIDE:
-                        HandleGameObject(plagueSigil, state != DONE);
-                        break;
-                    case DATA_BLOOD_QUEEN_LANA_THEL:
-                        HandleGameObject(bloodwingSigil, state != DONE);
-                        break;
                     case DATA_VALITHRIA_DREAMWALKER:
-                        break;
                     case DATA_SINDRAGOSA:
-                        HandleGameObject(frostwingSigil, state != DONE);
-                        break;
                     case DATA_THE_LICH_KING:
                         break;
                     default:
@@ -641,27 +614,27 @@ class instance_icecrown_citadel : public InstanceMapScript
                 {
                     case DATA_THE_LICH_KING:
                         if (!CheckPlagueworks(bossId))
-                            return false;
+                            return true;
                         if (!CheckCrimsonHalls(bossId))
-                            return false;
+                            return true;
                         if (!CheckFrostwingHalls(bossId))
-                            return false;
+                            return true;
                         break;
                     case DATA_SINDRAGOSA:
                     case DATA_VALITHRIA_DREAMWALKER:
                         if (!CheckFrostwingHalls(bossId))
-                            return false;
+                            return true;
                         break;
                     case DATA_BLOOD_QUEEN_LANA_THEL:
                     case DATA_BLOOD_PRINCE_COUNCIL:
                         if (!CheckCrimsonHalls(bossId))
-                            return false;
+                            return true;
                         break;
                     case DATA_FESTERGUT:
                     case DATA_ROTFACE:
                     case DATA_PROFESSOR_PUTRICIDE:
                         if (!CheckPlagueworks(bossId))
-                            return false;
+                            return true;
                         break;
                     default:
                         break;
@@ -683,7 +656,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         // no break
                     case DATA_PROFESSOR_PUTRICIDE:
                         if (GetBossState(DATA_FESTERGUT) != DONE || GetBossState(DATA_ROTFACE) != DONE)
-                            return false;
+                            return true;
                         break;
                     default:
                         break;
@@ -702,7 +675,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         // no break
                     case DATA_BLOOD_QUEEN_LANA_THEL:
                         if (GetBossState(DATA_BLOOD_PRINCE_COUNCIL) != DONE)
-                            return false;
+                            return true;
                         break;
                     default:
                         break;
@@ -743,19 +716,19 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case DATA_ROTFACE:
                     case DATA_FESTERGUT:
                         if (GetBossState(DATA_DEATHBRINGER_SAURFANG) != DONE)
-                            return false;
+                            return true;
                         // no break
                     case DATA_DEATHBRINGER_SAURFANG:
                         if (GetBossState(DATA_GUNSHIP_EVENT) != DONE)
-                            return false;
+                            return true;
                         // no break
                     case DATA_GUNSHIP_EVENT:
                         if (GetBossState(DATA_LADY_DEATHWHISPER) != DONE)
-                            return false;
+                            return true;
                         // no break
                     case DATA_LADY_DEATHWHISPER:
                         if (GetBossState(DATA_LORD_MARROWGAR) != DONE)
-                            return false;
+                            return true;
                         // no break
                     case DATA_LORD_MARROWGAR:
                     default:
@@ -817,9 +790,6 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint64 saurfangEventNPC;  // Muradin Bronzebeard or High Overlord Saurfang
             uint64 deathbringersCache;
             uint64 saurfangTeleport;
-            uint64 plagueSigil;
-            uint64 bloodwingSigil;
-            uint64 frostwingSigil;
             uint64 putricidePipes[2];
             uint64 putricideGates[2];
             uint64 putricideCollision;
