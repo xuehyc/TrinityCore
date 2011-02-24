@@ -19,19 +19,47 @@
 #ifndef DEF_TEMPLE_OF_AHNQIRAJ_H
 #define DEF_TEMPLE_OF_AHNQIRAJ_H
 
-#define DATA_SKERAM              1
-#define DATA_KRI                 2
-#define DATA_VEM                 3
-#define DATA_VEMISDEAD           4
-#define DATA_VEM_DEATH           5
-#define DATA_VEKLOR              6
-#define DATA_VEKLORISDEAD        7
-#define DATA_VEKLOR_DEATH        8
-#define DATA_VEKNILASH           9
-#define DATA_VEKNILASHISDEAD    10
-#define DATA_VEKNILASH_DEATH    11
-#define DATA_BUG_TRIO_DEATH     14
+enum Encounters
+{
+    BOSS_SKERAM             = 0,
+    BOSS_VEM                = 1,
+    BOSS_KRI                = 2,
+    BOSS_YAUJ               = 3,
+    BOSS_SARTURA            = 4,
+    BOSS_FANKRISS           = 5,
+    BOSS_HUHURAN            = 6,
+    BOSS_VEKLOR             = 7,
+    BOSS_VEKNILASH          = 8,
+    BOSS_VISCIDUS           = 9,
+    BOSS_OURO               = 10,
+    BOSS_CTHUN              = 11,
+    BOSS_BUG_TRIO           = 12,
+    MAX_ENCOUNTER,
+};
 
-#define DATA_CTHUN_PHASE        20
+enum Creatures
+{
+    NPC_SKERAM              = 15263,
+    NPC_VEM                 = 15544,
+    NPC_KRI                 = 15511,
+    NPC_YAUJ                = 15543,
+    NPC_SARTURA             = 15516,
+    NPC_FANKRISS            = 15510,
+    NPC_HUHURAN             = 15509,
+    NPC_VEKLOR              = 15276,
+    NPC_VEKNILASH           = 15275,
+    NPC_VISCIDUS            = 15299,
+    NPC_OURO                = 15517,
+    NPC_CTHUN               = 15727,
+    NPC_VEKNISS_HATCHLING   = 15962,
+    NPC_YAUJ_BROOD          = 15621,
+};
+
+enum Data
+{
+    DATA_BUG_TRIO           = 14,
+    DATA_CTHUN_PHASE        = 20,
+};
+
 #endif
 

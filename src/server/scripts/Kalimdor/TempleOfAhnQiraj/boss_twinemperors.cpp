@@ -98,7 +98,7 @@ struct boss_twinemperorsAI : public ScriptedAI
     Creature *GetOtherBoss()
     {
         if (pInstance)
-            return Unit::GetCreature(*me, pInstance->GetData64(IAmVeklor() ? DATA_VEKNILASH : DATA_VEKLOR));
+            return Unit::GetCreature(*me, pInstance->GetData64(IAmVeklor() ? BOSS_VEKNILASH : BOSS_VEKLOR));
         else
             return NULL;
     }
