@@ -109,7 +109,7 @@ class boss_kri : public CreatureScript
                         DoCast(me, SPELL_POISON_CLOUD);
                 }
                 if (Creature* yauj = Unit::GetCreature(*me, instance->GetData64(BOSS_YAUJ)))
-					yauj->BossAI::summons.DespawnAll();
+                    yauj->BossAI::summons.DespawnAll();
             }
 
             void EnterCombat(Unit* victim)
@@ -211,7 +211,7 @@ class boss_vem: public CreatureScript
                     }
                 }
                 if (Creature* yauj = Unit::GetCreature(*me, instance->GetData64(BOSS_YAUJ)))
-					yauj->BossAI::summons.DespawnAll();
+                    yauj->BossAI::summons.DespawnAll();
             }
 
             void EnterCombat(Unit* victim)

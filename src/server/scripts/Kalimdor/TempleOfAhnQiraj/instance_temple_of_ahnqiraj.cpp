@@ -144,7 +144,7 @@ class instance_temple_of_ahnqiraj : public InstanceMapScript
                         return _kriGUID;
                     case BOSS_YAUJ:
                         return _yaujGUID;
-					case BOSS_VEM:
+                    case BOSS_VEM:
                         return _vemGUID;
                 }
 
