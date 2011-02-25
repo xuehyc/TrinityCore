@@ -905,6 +905,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         }
         case HUNTER_PET:
         {
+            // use generic combatreach- and boundingradius values, TODO: find correct ones
+            SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 1.0f);
+            SetFloatValue(UNIT_FIELD_COMBATREACH, 1.0f); // DEFAULT_COMBAT_REACH?
+
             SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32(sObjectMgr->GetXPForLevel(petlevel)*PET_XP_FACTOR));
             //these formula may not be correct; however, it is designed to be close to what it should be
             //this makes dps 0.5 of pets level
