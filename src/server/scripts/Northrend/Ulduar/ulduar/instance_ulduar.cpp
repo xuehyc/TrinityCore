@@ -258,7 +258,7 @@ public:
                     case 33327: pCreature->UpdateEntry(32946, HORDE); return;
                     case 32897: pCreature->UpdateEntry(32948, HORDE); return;
                     case 33326: pCreature->UpdateEntry(33330, HORDE); return;
-                    case 32908: pCreature->UpdateEntry(32907, HORDE); return;
+                    case 32907: pCreature->UpdateEntry(32908, HORDE); return;
                     case 32885: pCreature->UpdateEntry(32883, HORDE); return;
                 }
             }
