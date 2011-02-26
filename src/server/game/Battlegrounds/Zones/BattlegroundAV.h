@@ -134,6 +134,10 @@ enum BG_AV_ObjectIds
     BG_AV_OBJECTID_TOWER_BANNER_PA = 179446, //[PH] Alliance H1 Tower Pre-Banner BIG
     BG_AV_OBJECTID_TOWER_BANNER_PH = 179436, //[PH] Horde A1 Tower Pre-Banner BIG
 
+	//Frostwolf Banner & Strompike Banner
+	BG_AV_OBJECTID_QUEST_BANNER_A	= 179024,
+	BG_AV_OBJECTID_QUEST_BANNER_H	= 179025,
+
     //Auras
     BG_AV_OBJECTID_AURA_A               = 180421,
     BG_AV_OBJECTID_AURA_H               = 180422,
@@ -303,8 +307,10 @@ enum BG_AV_ObjectTypes
     BG_AV_OBJECT_MINE_SUPPLY_N_MAX           = 224,
     BG_AV_OBJECT_MINE_SUPPLY_S_MIN           = 225,
     BG_AV_OBJECT_MINE_SUPPLY_S_MAX           = 236,
+	BG_AV_OBJECT_QUEST_BANNER_A				 = 237, //Banner Quest
+	BG_AV_OBJECT_QUEST_BANNER_H				 = 238, //Banner Quest
 
-    BG_AV_OBJECT_MAX                          = 237
+    BG_AV_OBJECT_MAX                          = 239
 };
 
 enum BG_AV_OBJECTS
@@ -351,8 +357,10 @@ enum BG_AV_OBJECTS
     AV_OPLACE_MINE_SUPPLY_N_MAX           = 136,
     AV_OPLACE_MINE_SUPPLY_S_MIN           = 137,
     AV_OPLACE_MINE_SUPPLY_S_MAX           = 148,
+	AV_OPLACE_QUEST_BANNER_A			  = 149, //Banner Quest
+	AV_OPLACE_QUEST_BANNER_H			  =	150, //Banner Quest
 
-    AV_OPLACE_MAX                         = 149
+    AV_OPLACE_MAX                         = 151
 };
 const float BG_AV_ObjectPos[AV_OPLACE_MAX][4] = {
     {638.592f,-32.422f,46.0608f,-1.62316f },//firstaid station
@@ -522,7 +530,10 @@ const float BG_AV_ObjectPos[AV_OPLACE_MAX][4] = {
     {-844.25f,-60.0374f,72.1031f,-2.19912f},
     {-820.644f,-136.043f,63.1977f,2.40855f},
     {-947.642f,-208.807f,77.0101f,1.36136f},
-    {-951.394f,-193.695f,67.634f,0.802851f}
+    {-951.394f,-193.695f,67.634f,0.802851f},
+	//Banner Quest
+	{64.25f,-0.75f,-4.09f,2.08f},
+	{-1550.39f,-360.81f,66.53f,3.87f}
 };
 
 const float BG_AV_DoorPositons[2][4] = {

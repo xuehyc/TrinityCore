@@ -1301,6 +1301,18 @@ bool BattlegroundAV::SetupBattleground()
         sLog->outError("BatteGroundAV: Failed to spawn some object Battleground not created!8");
         return false;
     }
+	//Spawn Horde Banner for Quest
+	if (!AddObject(BG_AV_OBJECT_QUEST_BANNER_H, BG_AV_OBJECTID_QUEST_BANNER_H, BG_AV_ObjectPos[AV_OPLACE_QUEST_BANNER_H][0], BG_AV_ObjectPos[AV_OPLACE_QUEST_BANNER_H][1], BG_AV_ObjectPos[AV_OPLACE_QUEST_BANNER_H][2], BG_AV_ObjectPos[AV_OPLACE_QUEST_BANNER_H][3], 0, 0, sin(BG_AV_ObjectPos[AV_OPLACE_QUEST_BANNER_H][3]/2), cos(BG_AV_ObjectPos[AV_OPLACE_QUEST_BANNER_H][3]/2), RESPAWN_IMMEDIATELY))
+    {
+        sLog->outError("BatteGroundAV: Failed to spawn Horde Banner not created!8.1");
+        return false;
+    }
+	//Spawn Alliance Banner for Quest
+	if (!AddObject(BG_AV_OBJECT_QUEST_BANNER_A, BG_AV_OBJECTID_QUEST_BANNER_A, BG_AV_ObjectPos[AV_OPLACE_QUEST_BANNER_A][0], BG_AV_ObjectPos[AV_OPLACE_QUEST_BANNER_A][1], BG_AV_ObjectPos[AV_OPLACE_QUEST_BANNER_A][2], BG_AV_ObjectPos[AV_OPLACE_QUEST_BANNER_A][3], 0, 0, sin(BG_AV_ObjectPos[AV_OPLACE_QUEST_BANNER_A][3]/2), cos(BG_AV_ObjectPos[AV_OPLACE_QUEST_BANNER_A][3]/2), RESPAWN_IMMEDIATELY))
+    {
+        sLog->outError("BatteGroundAV: Failed to spawn Alliance Banner not created!8.2");
+        return false;
+    }
     for (uint8 i = 0; i < 4; i++)
     {
         if (!AddObject(BG_AV_OBJECT_SNOW_EYECANDY_A+i, BG_AV_OBJECTID_SNOWFALL_CANDY_A ,BG_AV_ObjectPos[AV_OPLACE_SNOW_1+i][0],BG_AV_ObjectPos[AV_OPLACE_SNOW_1+i][1],BG_AV_ObjectPos[AV_OPLACE_SNOW_1+i][2],BG_AV_ObjectPos[AV_OPLACE_SNOW_1+i][3],0,0,sin(BG_AV_ObjectPos[AV_OPLACE_SNOW_1+i][3]/2), cos(BG_AV_ObjectPos[AV_OPLACE_SNOW_1+i][3]/2), RESPAWN_ONE_DAY)
@@ -1343,8 +1355,12 @@ bool BattlegroundAV::SetupBattleground()
     for (i = BG_AV_OBJECT_FLAG_N_SNOWFALL_GRAVE; i <= BG_AV_OBJECT_DOOR_A; i++)
         SpawnBGObject(i, RESPAWN_IMMEDIATELY);
     SpawnBGObject(BG_AV_OBJECT_AURA_N_SNOWFALL_GRAVE,RESPAWN_IMMEDIATELY);
-
-    //creatures
+	
+	//Horde and Alliance Quest Banner
+	SpawnBGObject(BG_AV_OBJECT_QUEST_BANNER_A, RESPAWN_IMMEDIATELY);
+	SpawnBGObject(BG_AV_OBJECT_QUEST_BANNER_H, RESPAWN_IMMEDIATELY);
+    
+	//creatures
     sLog->outDebug(LOG_FILTER_BATTLEGROUND, "BG_AV start poputlating nodes");
     for (BG_AV_Nodes i= BG_AV_NODES_FIRSTAID_STATION; i < BG_AV_NODES_MAX; ++i)
     {
