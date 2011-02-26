@@ -508,11 +508,41 @@ class npc_fizzlebang_toc : public CreatureScript
         }
 };
 
+#define GOSSIP_TELEPORT         "Teleport me out!"
+
 class npc_tirion_toc : public CreatureScript
 {
     public:
 
         npc_tirion_toc() : CreatureScript("npc_tirion_toc") { }
+
+        bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+        {
+            if (pPlayer)
+            {
+                pPlayer->PrepareGossipMenu(pCreature);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TELEPORT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                pPlayer->SEND_GOSSIP_MENU(1, pCreature->GetGUID());
+                return true;
+            }
+
+            return false;
+        }
+
+        bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+        {
+            pPlayer->PlayerTalkClass->ClearMenus();
+
+            switch(uiAction)
+            {
+                case GOSSIP_ACTION_INFO_DEF:
+                    pPlayer->TeleportTo(571, 8515.60f, 727.53f, 558.25f, 4.74f);
+                    break;
+            }
+
+            pPlayer->PlayerTalkClass->CloseGossip();
+            return true;
+        }
 
         struct npc_tirion_tocAI : public ScriptedAI
         {
@@ -805,6 +835,7 @@ class npc_tirion_toc : public CreatureScript
                                 m_pInstance->SetData(TYPE_ANUBARAK, SPECIAL);
                                 m_pInstance->SetData(TYPE_EVENT, 6020);
                             } else m_pInstance->SetData(TYPE_EVENT, 6030);
+                            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                             break;
                         case 6020:
                             me->DespawnOrUnsummon();
