@@ -458,7 +458,6 @@ class Battleground
         void SetBgMap(BattlegroundMap* map) { m_Map = map; }
         BattlegroundMap* GetBgMap()
         {
-            ASSERT(m_Map);
             return m_Map;
         }
 
