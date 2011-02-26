@@ -166,7 +166,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))
         return;
 
-    if (player->isGameMaster())
+    if (player->isGameMaster() || (player->GetSession() && player->GetSession()->GetSecurity() > SEC_PLAYER))
         return;
 
     if (player->anticheatData.disableACCheck || player->isInFlight() || player->GetTransport() || player->GetVehicle())
