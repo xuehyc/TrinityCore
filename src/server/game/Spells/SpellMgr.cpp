@@ -3868,6 +3868,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             count++;
             break;
+        case 66665: // Burning Breath
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            count++;
+            break;
         case 62907: // Freya's Ward
         case 62947:
             spellInfo->DurationIndex = 0;
