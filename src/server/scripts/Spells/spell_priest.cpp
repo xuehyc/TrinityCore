@@ -211,7 +211,9 @@ class spell_pri_penance : public SpellScriptLoader
 
                 uint8 rank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
 
-                if (caster->IsFriendlyTo(unitTarget))
+                if (caster->GetGUID() != unitTarget->GetGUID() && caster->IsFriendlyTo(unitTarget) && (unitTarget->ToPlayer() != NULL && unitTarget->ToPlayer()->duel != NULL))
+					caster->CastSpell(caster, sSpellMgr->GetSpellWithRank(PRIEST_SPELL_PENANCE_R1_HEAL, rank), false, 0);
+				else if (caster->IsFriendlyTo(unitTarget))
                     caster->CastSpell(unitTarget, sSpellMgr->GetSpellWithRank(PRIEST_SPELL_PENANCE_R1_HEAL, rank), false, 0);
                 else
                     caster->CastSpell(unitTarget, sSpellMgr->GetSpellWithRank(PRIEST_SPELL_PENANCE_R1_DAMAGE, rank), false, 0);
