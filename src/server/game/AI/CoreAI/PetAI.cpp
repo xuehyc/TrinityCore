@@ -116,7 +116,7 @@ void PetAI::UpdateAI(const uint32 diff)
             HandleReturnMovement();
     }
     else if (owner && !me->HasUnitState(UNIT_STAT_FOLLOW)) // no charm info and no victim
-        me->GetMotionMaster()->MoveFollow(owner, CalculateFollowDistance(), me->GetFollowAngle());
+        me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, me->GetFollowAngle());
 
     if (!me->GetCharmInfo())
         return;
@@ -361,7 +361,7 @@ void PetAI::HandleReturnMovement()
             {
                 me->GetCharmInfo()->SetIsReturning(true);
                 me->GetMotionMaster()->Clear();
-                me->GetMotionMaster()->MoveFollow(me->GetCharmerOrOwner(), CalculateFollowDistance(), me->GetFollowAngle());
+                me->GetMotionMaster()->MoveFollow(me->GetCharmerOrOwner(), PET_FOLLOW_DIST, me->GetFollowAngle());
             }
         }
     }
@@ -438,29 +438,6 @@ void PetAI::MovementInform(uint32 moveType, uint32 data)
         default:
             break;
     }
-}
-
-float PetAI::CalculateFollowDistance()
-{
-    float distance;
-    CreatureInfo const *cinfo = me->GetCreatureInfo();
-    switch (cinfo->family)
-    {
-        case CREATURE_FAMILY_SPIDER:
-        case CREATURE_FAMILY_DEVILSAUR:
-            distance = -2.0f;
-            break;
-        case CREATURE_FAMILY_CHIMAERA:
-        case CREATURE_FAMILY_CORE_HOUND:
-        case CREATURE_FAMILY_RHINO:
-            distance = -4.0f;
-            break;
-        default:
-            distance = PET_FOLLOW_DIST;
-            break;
-    }
-
-    return distance;
 }
 
 bool PetAI::_CanAttack(Unit *target)
