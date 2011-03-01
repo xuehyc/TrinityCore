@@ -1,1 +1,1 @@
-UPDATE `world`.`quest_template` SET `RewRepValue1`='150' WHERE `entry`='1707';
+UPDATE `quest_template` SET `RewRepValue1`='150' WHERE `entry`='1707';
