@@ -22,7 +22,7 @@
 
 enum Spells
 {
-    SPELL_CLEAVE           = 20677,
+    SPELL_CLEAVE           = 40504,
     SPELL_TOXIC_VOLLEY     = 25812,
     SPELL_POISON_CLOUD     = 26590,
 
@@ -36,7 +36,13 @@ enum Spells
     SPELL_FEAR             = 26580,
     SPELL_RAVAGE           = 3242
 };
-
+/*
+Waypoint 0: X: -8584.493 Y: 2146.365 Z: -7.919866
+Waypoint 1: X: -8584.978 Y: 2149.038 Z: -7.783845
+Waypoint 2: X: -8585.478 Y: 2151.538 Z: -8.033845
+Waypoint 3: X: -8586.728 Y: 2163.788 Z: -5.033845
+Waypoint 4: X: -8587.728 Y: 2171.788 Z: -4.533845
+*/
 enum Events
 {
     EVENT_CLEAVE            = 1,
@@ -94,7 +100,7 @@ class boss_kri : public CreatureScript
                 BossAI::Reset();
 
                 events.ScheduleEvent(EVENT_CLEAVE, 8000);
-                events.ScheduleEvent(EVENT_TOXIC_VOLLEY, 20000);
+                events.ScheduleEvent(EVENT_TOXIC_VOLLEY, 10000);
             }
 
             void JustDied(Unit* /*killer*/)
@@ -141,12 +147,12 @@ class boss_kri : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_TOXIC_VOLLEY:
-                            DoCastVictim(SPELL_TOXIC_VOLLEY);
-                            events.ScheduleEvent(EVENT_TOXIC_VOLLEY, 20000);
+                            DoCastAOE(SPELL_TOXIC_VOLLEY);
+                            events.ScheduleEvent(EVENT_TOXIC_VOLLEY, urand(10000,20000));
                             break;
                         case EVENT_CLEAVE:
                             DoCastVictim(SPELL_CLEAVE);
-                            events.ScheduleEvent(EVENT_CLEAVE, urand(10000, 14000));
+                            events.ScheduleEvent(EVENT_CLEAVE, urand(8000, 13000));
                             break;
                         default:
                             break;
@@ -371,7 +377,6 @@ class boss_yauj : public CreatureScript
                                 DoCast(target, SPELL_HEAL);
                             else if (HealthBelowPct(95))
                                 DoCast(me, SPELL_HEAL);
-
                             events.ScheduleEvent(EVENT_HEAL, urand(10000, 20000));
                             break;
                         case EVENT_RAVAGE:
