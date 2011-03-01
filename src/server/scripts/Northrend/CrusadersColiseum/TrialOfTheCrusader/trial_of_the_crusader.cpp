@@ -185,6 +185,9 @@ class npc_announcer_toc10 : public CreatureScript
                     }
                     break;
                 case GOSSIP_ACTION_INFO_DEF+3:
+                    if (Creature* jaraxxus = Unit::GetCreature(*player, instanceScript->GetData64(NPC_JARAXXUS)))
+                        jaraxxus->DespawnOrUnsummon();
+
                     if (instanceScript->GetData(TYPE_CRUSADERS) != DONE)
                     {
                         if (player->GetTeam() == ALLIANCE)
@@ -826,7 +829,7 @@ class npc_tirion_toc : public CreatureScript
                             break;
                         case 6005:
                             DoScriptText(SAY_STAGE_4_06, me);
-                            me->SummonGameObject(202079, 651.71f, 149.18f, 140.79f, 3.14, 0, 0, 1, 1, 604800);
+                            me->SummonGameObject(202079, 651.71f, 149.18f, 140.79f, 3.14f, 0, 0, 1, 1, 604800);
                             m_uiUpdateTimer = 20000;
                             m_pInstance->SetData(TYPE_EVENT, 6010);
                             break;
