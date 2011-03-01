@@ -4162,6 +4162,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx2 |= SPELL_ATTR2_TRIGGERED_CAN_TRIGGER;
             count++;
             break;
+        case 49206: // Summon Gargoyle
+            spellInfo->DurationIndex = 587;
+            count++;
+            break;
         default:
             break;
         }
