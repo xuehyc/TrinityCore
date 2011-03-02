@@ -94,6 +94,11 @@ enum BossSpells
     SPELL_UNLEASHED_DARK        = 65808,
     SPELL_UNLEASHED_LIGHT       = 65795,
     //PowerUp 67604
+
+    SPELL_POWERING_UP_1         = 67590,
+    SPELL_POWERING_UP_2         = 67602,
+    SPELL_POWERING_UP_3         = 67603,
+    SPELL_POWERING_UP_4         = 67604,
 };
 
 enum Actions
@@ -615,6 +620,22 @@ public:
     {
         mob_unleashed_darkAI(Creature *pCreature) : mob_unleashed_ballAI(pCreature) {}
 
+        void SpellHitTarget(Unit* pWho, const SpellEntry* spell)
+        {
+            if (spell->Id == SPELL_UNLEASHED_DARK && pWho->HasAura(SPELL_DARK_ESSENCE))
+            {   
+                pWho->CastSpell(pWho, RAID_MODE(SPELL_POWERING_UP_1, SPELL_POWERING_UP_2, SPELL_POWERING_UP_3, SPELL_POWERING_UP_4), true);
+                int n = 5 + rand() % 8;
+                if(Aura * aura = pWho->GetAura(RAID_MODE(SPELL_POWERING_UP_1, SPELL_POWERING_UP_2, SPELL_POWERING_UP_3, SPELL_POWERING_UP_4)))
+                {
+                    if(aura->GetStackAmount()+n > 100)
+                        aura->SetStackAmount(100, true);
+                    else
+                    aura->SetStackAmount(aura->GetStackAmount()+n, true);
+                }
+            }
+        }
+        
         void UpdateAI(const uint32 uiDiff)
         {
             if (m_uiRangeCheckTimer < uiDiff)
@@ -624,7 +645,7 @@ public:
                     {
                         DoCastAOE(SPELL_UNLEASHED_DARK);
                         me->GetMotionMaster()->MoveIdle();
-                        me->DespawnOrUnsummon(500);
+                        me->DespawnOrUnsummon(1000);
                     }
                 m_uiRangeCheckTimer = IN_MILLISECONDS;
             }
@@ -649,6 +670,22 @@ public:
     {
         mob_unleashed_lightAI(Creature *pCreature) : mob_unleashed_ballAI(pCreature) {}
 
+        void SpellHitTarget(Unit* pWho, const SpellEntry* spell)
+        {
+            if (spell->Id == SPELL_UNLEASHED_LIGHT && pWho->HasAura(SPELL_LIGHT_ESSENCE))
+            { 
+                pWho->CastSpell(pWho, RAID_MODE(SPELL_POWERING_UP_1, SPELL_POWERING_UP_2, SPELL_POWERING_UP_3, SPELL_POWERING_UP_4), true);
+                int n = 5 + rand() % 8;
+                if(Aura * aura = pWho->GetAura(RAID_MODE(SPELL_POWERING_UP_1, SPELL_POWERING_UP_2, SPELL_POWERING_UP_3, SPELL_POWERING_UP_4)))
+                {
+                    if(aura->GetStackAmount()+n > 100)
+                        aura->SetStackAmount(100, true);
+                    else
+                    aura->SetStackAmount(aura->GetStackAmount()+n, true);
+                }
+            }
+        }
+
         void UpdateAI(const uint32 uiDiff)
         {
             if (m_uiRangeCheckTimer < uiDiff)
@@ -658,7 +695,7 @@ public:
                     {
                         DoCastAOE(SPELL_UNLEASHED_LIGHT);
                         me->GetMotionMaster()->MoveIdle();
-                        me->DespawnOrUnsummon(500);
+                        me->DespawnOrUnsummon(1000);
                     }
                 m_uiRangeCheckTimer = IN_MILLISECONDS;
             }
@@ -668,6 +705,135 @@ public:
 
 };
 
+enum ePoweringUp
+{
+    SPELL_SURGE_OF_SPEED_1      = 65828,
+    SPELL_SURGE_OF_SPEED_2      = 67241,
+    SPELL_SURGE_OF_SPEED_3      = 67242,
+    SPELL_SURGE_OF_SPEED_4      = 67243,
+    SPELL_EMPOWERED_DARKNESS_1  = 65724,
+    SPELL_EMPOWERED_DARKNESS_2  = 67213,
+    SPELL_EMPOWERED_DARKNESS_3  = 67214,
+    SPELL_EMPOWERED_DARKNESS_4  = 67215,
+    SPELL_EMPOWERED_LIGHT_1     = 65748,
+    SPELL_EMPOWERED_LIGHT_2     = 67216,
+    SPELL_EMPOWERED_LIGHT_3     = 67217,
+    SPELL_EMPOWERED_LIGHT_4     = 67218,
+};
+
+class spell_powering_up : public SpellScriptLoader
+{
+public:
+    spell_powering_up() : SpellScriptLoader("spell_powering_up") { }
+
+    class spell_powering_up_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_powering_up_AuraScript);
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* pTarget = GetTarget())
+            {
+                if (Aura* pAura = pTarget->GetAura(GetId()))
+                {
+                    if (pAura->GetStackAmount() == 100)
+                    {
+                        if (pTarget->HasAura(SPELL_DARK_ESSENCE))
+                        {
+                            switch(GetId())
+                            {
+                            case SPELL_POWERING_UP_1:
+                                pTarget->CastSpell(pTarget, SPELL_EMPOWERED_DARKNESS_1, true) ;
+                                break;
+                            case SPELL_POWERING_UP_2:
+                                pTarget->CastSpell(pTarget, SPELL_EMPOWERED_DARKNESS_2, true) ;
+                                break;
+                            case SPELL_POWERING_UP_3:
+                                pTarget->CastSpell(pTarget, SPELL_EMPOWERED_DARKNESS_3, true) ;
+                                break;
+                            case SPELL_POWERING_UP_4:
+                                pTarget->CastSpell(pTarget, SPELL_EMPOWERED_DARKNESS_4, true) ;
+                                break;
+                            }
+                        }
+                        if (pTarget->HasAura(SPELL_LIGHT_ESSENCE))
+                        {
+                            switch(GetId())
+                            {
+                            case SPELL_POWERING_UP_1:
+                                pTarget->CastSpell(pTarget, SPELL_EMPOWERED_LIGHT_1, true) ;
+                                break;
+                            case SPELL_POWERING_UP_2:
+                                pTarget->CastSpell(pTarget, SPELL_EMPOWERED_LIGHT_2, true) ;
+                                break;
+                            case SPELL_POWERING_UP_3:
+                                pTarget->CastSpell(pTarget, SPELL_EMPOWERED_LIGHT_3, true) ;
+                                break;
+                            case SPELL_POWERING_UP_4:
+                                pTarget->CastSpell(pTarget, SPELL_EMPOWERED_LIGHT_4, true) ;
+                                break;
+                            }
+                        }
+                        pTarget->RemoveAurasDueToSpell(GetId());
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_powering_up_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_powering_up_AuraScript();
+    }
+
+    class spell_powering_up_SpellScript : public SpellScript
+    {
+    public:
+        PrepareSpellScript(spell_powering_up_SpellScript)
+        bool Validate(SpellEntry const * /*spellEntry*/)
+        {
+            return true;
+        }
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* pTarget = GetTargetUnit())
+                if (rand()%100 < 30)
+                {
+                    switch(GetSpellInfo()->Id)
+                    {
+                    case SPELL_POWERING_UP_1:
+                        pTarget->CastSpell(pTarget, SPELL_SURGE_OF_SPEED_1, true) ;
+                        break;
+                    case SPELL_POWERING_UP_2:
+                        pTarget->CastSpell(pTarget, SPELL_SURGE_OF_SPEED_2, true) ;
+                        break;
+                    case SPELL_POWERING_UP_3:
+                        pTarget->CastSpell(pTarget, SPELL_SURGE_OF_SPEED_3, true) ;
+                        break;
+                    case SPELL_POWERING_UP_4:
+                        pTarget->CastSpell(pTarget, SPELL_SURGE_OF_SPEED_4, true) ;
+                        break;
+                    }
+                }
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_powering_up_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_powering_up_SpellScript();
+    }
+};
 
 void AddSC_boss_twin_valkyr()
 {
@@ -676,4 +842,5 @@ void AddSC_boss_twin_valkyr()
     new mob_unleashed_light();
     new mob_unleashed_dark();
     new mob_essence_of_twin();
+    new spell_powering_up();
 }
