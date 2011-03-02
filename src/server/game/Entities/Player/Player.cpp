@@ -5226,6 +5226,19 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
 
 void Player::RepopAtGraveyard()
 {
+   if (GetZoneId() == 2037)
+   {
+    	if (GetTeam() == ALLIANCE)
+    	{
+		TeleportTo(0, 3499.737305f, -2105.440430f, 131.407608f, 2.456074f);
+		ResurrectPlayer(0.5f);
+    	}
+    	else if (GetTeam() == HORDE)
+    	{
+		TeleportTo(0, 3431.395264f, -1982.528687f, 131.407211f, 5.576421f);
+		ResurrectPlayer(0.5f);
+    	} 
+   }
     // note: this can be called also when the player is alive
     // for example from WorldSession::HandleMovementOpcodes
 
@@ -7003,6 +7016,21 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, int32 honor, bool pvpt
         }
     }
 
+    if (uVictim && uVictim->GetTypeId() == TYPEID_PLAYER && GetZoneId() == 2037)
+    {
+        if (uVictim == this || uVictim->HasAuraType(SPELL_AURA_NO_PVP_CREDIT))
+            return true;
+
+        if (uVictim->GetTypeId() == TYPEID_PLAYER)
+        {
+            uint32 itemId = 999950;
+            int32 count = 1;
+
+            if(AddItem(itemId, count))
+                ChatHandler(this).SendSysMessage(LANG_QUELTHALAS_AWARD_POINT);
+        }
+    }
+
     return true;
 }
 
@@ -7126,6 +7154,19 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         sOutdoorPvPMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
         sOutdoorPvPMgr->HandlePlayerEnterZone(this, newZone);
         SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
+    }
+
+    // Prevent players from accessing Quel'thalas Keep without Keep Token
+    if (m_zoneUpdateId != 2037 && newZone == 2037 && !HasItemCount( 999951, 1, false ))
+    {
+	  TeleportTo(530, -1838.160034f, 5301.790039f, -12.428000f, 5.951700f);
+        ChatHandler(this).SendSysMessage(LANG_QUELTHALAS_NOT_ACCESS);
+    }  
+  
+   // Deleting Keep Token
+    if (m_zoneUpdateId == 2037 && newZone != 2037)
+    {
+       DestroyItemCount(999951, 1, true, false);
     }
 
     m_zoneUpdateId    = newZone;

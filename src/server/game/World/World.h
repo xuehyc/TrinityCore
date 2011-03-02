@@ -542,6 +542,8 @@ class World
         World();
         ~World();
 
+       uint32 GetPlayersAllianceInZone(uint32 zoneid);
+       uint32 GetPlayersHordeInZone(uint32 zoneid);
         WorldSession* FindSession(uint32 id) const;
 		void SendWintergraspState();
         void AddSession(WorldSession *s);

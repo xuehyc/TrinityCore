@@ -2831,6 +2831,29 @@ void World::ProcessQueryCallbacks()
     }
 }
 
+uint32 World::GetPlayersAllianceInZone(uint32 zoneid)
+{
+    uint32 count=0;
+
+    HashMapHolder<Player>::MapType& m = sObjectAccessor->GetPlayers();
+    for(HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+		if(itr->second->GetZoneId() == zoneid && itr->second->GetTeam() == ALLIANCE)
+			count++;
+	return count;
+}
+
+uint32 World::GetPlayersHordeInZone(uint32 zoneid)
+{
+    uint32 count=0;
+
+    HashMapHolder<Player>::MapType& m = sObjectAccessor->GetPlayers();
+    for(HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+if(itr->second->GetZoneId() == zoneid && itr->second->GetTeam() == HORDE)
+count++;
+
+return count;
+}
+
 void World::SendWintergraspState()
 {
     OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
