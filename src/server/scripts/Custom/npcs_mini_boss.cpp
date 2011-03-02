@@ -59,7 +59,7 @@ enum QuelNagasSpells
     SUMMONED_MURLOC                                         = 27649,
     SPELL_POISON_BOLT_VOLLEY                                = 54098,
     SPELL_ENTANGLE                                          = 38316,
-    SPELL_WRATH                                             = 63259
+    SPELL_WRATH                                             = 20698
 };
 
 // Quel'Nagas yells
@@ -108,7 +108,7 @@ enum PerotharnSpells
     PIERCING_SHADOW                                         = 36698,
     SHADOW_FLAME                                            = 22539,
     HARVEST_SOUL                                            = 28679,
-    SHADOW_BOLT                                             = 61291
+    SHADOW_BOLT                                             = 41957
 };
 
 // Perotharn yells
@@ -161,7 +161,7 @@ public:
 
         void Reset()
         {
-            me->SetDisplayId(17263); // human form
+            me->RestoreDisplayId();
             EnrageTimer = 15000;
             WoundTimer = 5000;
             BiteTimer = 45000;
@@ -186,7 +186,7 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             me->MonsterYell(SAY_LIKANTROPO_DEATH, LANG_UNIVERSAL, 0);
-            me->SetDisplayId(17263); // human form
+            me->RestoreDisplayId();
         }
 
         void UpdateAI(const uint32 uiDiff)
