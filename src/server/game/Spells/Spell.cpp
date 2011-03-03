@@ -1305,7 +1305,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (canEffectTrigger && missInfo != SPELL_MISS_REFLECT)
         {
-            caster->ProcDamageAndSpell(unitTarget, procAttacker, procVictim, procEx, damageInfo.damage, m_attackType, m_spellInfo, m_triggeredByAuraSpell);
+            caster->ProcDamageAndSpell(unitTarget, procAttacker, procVictim, procEx, damageInfo.damage + damageInfo.absorb, m_attackType, m_spellInfo, m_triggeredByAuraSpell);
             if (caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->Attributes & SPELL_ATTR0_STOP_ATTACK_TARGET) == 0 &&
                (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE || m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_RANGED))
                 caster->ToPlayer()->CastItemCombatSpell(unitTarget, m_attackType, procVictim, procEx);
@@ -1314,7 +1314,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         caster->DealSpellDamage(&damageInfo, true);
 
         // Needed by Hooks
-        m_true_damage = damageInfo.damage;
+        m_true_damage = damageInfo.damage + damageInfo.absorb;
 
         // Haunt
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags[1] & 0x40000 && m_spellAura && m_spellAura->GetEffect(1))

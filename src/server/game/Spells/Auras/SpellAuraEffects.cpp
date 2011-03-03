@@ -1404,7 +1404,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             SpellPeriodicAuraLogInfo pInfo(this, damage, overkill, absorb, resist, 0.0f, crit);
             target->SendPeriodicAuraLog(&pInfo);
 
-            caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage, BASE_ATTACK, GetSpellProto());
+            caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage + absorb, BASE_ATTACK, GetSpellProto());
 
             caster->DealDamage(target, damage, &cleanDamage, DOT, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), true);
             break;
@@ -1478,7 +1478,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             damage = (damage <= absorb+resist) ? 0 : (damage-absorb-resist);
             if (damage)
                 procVictim|=PROC_FLAG_TAKEN_DAMAGE;
-            caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage, BASE_ATTACK, GetSpellProto());
+            caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage + absorb, BASE_ATTACK, GetSpellProto());
             int32 new_damage = caster->DealDamage(target, damage, &cleanDamage, DOT, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), false);
 
             if (!target->isAlive() && caster->IsNonMeleeSpellCasted(false))
@@ -1619,7 +1619,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             uint32 procEx = PROC_EX_NORMAL_HIT | PROC_EX_INTERNAL_HOT;
             // ignore item heals
             if (!haveCastItem)
-                caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage, BASE_ATTACK, GetSpellProto());
+                caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage + absorb, BASE_ATTACK, GetSpellProto());
             break;
         }
         case SPELL_AURA_PERIODIC_MANA_LEECH:
@@ -1864,7 +1864,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (damageInfo.damage)
                 procVictim|=PROC_FLAG_TAKEN_DAMAGE;
 
-            caster->ProcDamageAndSpell(damageInfo.target, procAttacker, procVictim, procEx, damageInfo.damage, BASE_ATTACK, spellProto);
+            caster->ProcDamageAndSpell(damageInfo.target, procAttacker, procVictim, procEx, damageInfo.damage + damageInfo.absorb, BASE_ATTACK, spellProto);
 
             caster->DealSpellDamage(&damageInfo, true);
             break;
