@@ -773,6 +773,11 @@ public:
                     } else uiWaitTimer -= uiDiff;
                     break;
                 }
+                case PHASE_ENRAGE:
+                {
+                    DoMeleeAttackIfReady();
+                    break;
+                }
                 default:
                     return;
             }

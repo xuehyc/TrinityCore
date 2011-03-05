@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2008 - 2010 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2008 - 2011 Trinity <http://www.trinitycore.org/>
  *
- * Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,47 +55,47 @@ public:
     struct boss_falricAI : public ScriptedAI
     {
         boss_falricAI(Creature *pCreature) : ScriptedAI(pCreature)
-       {
-            m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
-            Regular = pCreature->GetMap()->IsRegularDifficulty();
-            Reset();
-       }
+        {
+             m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
+             Regular = pCreature->GetMap()->IsRegularDifficulty();
+             Reset();
+        }
 
-       InstanceScript* m_pInstance;
-       bool Regular;
-       bool m_bIsCall;
-       //FUNCTIONS
-       uint32 m_uiBerserkTimer;
-       uint32 m_uiGrowlTimer;
-       uint32 m_uiHorrorTimer;
-       uint32 m_uiStrikeTimer;
-       uint32 m_uiSummonTimer;
-       uint32 m_uiLocNo;
-       uint64 m_uiSummonGUID[16];
-       uint32 m_uiCheckSummon;
+        InstanceScript* m_pInstance;
+        bool Regular;
+        bool m_bIsCall;
+        //FUNCTIONS
+        uint32 m_uiBerserkTimer;
+        uint32 m_uiGrowlTimer;
+        uint32 m_uiHorrorTimer;
+        uint32 m_uiStrikeTimer;
+        uint32 m_uiSummonTimer;
+        uint32 m_uiLocNo;
+        uint64 m_uiSummonGUID[16];
+        uint32 m_uiCheckSummon;
 
-       uint8 SummonCount;
+        uint8 SummonCount;
 
-       uint64 pSummon;
+        uint32 pSummon;
 
         void Reset()
         {
-          m_uiBerserkTimer = 180000;
-          SummonCount = 0;
-          m_bIsCall = false;
-          m_uiGrowlTimer = 20000;
-          m_uiHorrorTimer = urand(14000,20000);
-          m_uiStrikeTimer = 2000;
-          m_uiSummonTimer = 11000;
-          me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-          me->SetVisible(false);
+            m_uiBerserkTimer = 180000;
+            SummonCount = 0;
+            m_bIsCall = false;
+            m_uiGrowlTimer = 20000;
+            m_uiHorrorTimer = urand(14000,20000);
+            m_uiStrikeTimer = 2000;
+            m_uiSummonTimer = 11000;
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetVisible(false);
         }
 
         void EnterCombat(Unit* pVictim)
         {
-          //me->RemoveFlag(MOVEFLAG_WALK, NULL);
-          DoScriptText(SAY_FALRIC_AGGRO, me);
-          DoCast(me, SPELL_HOPELESSNESS);
+            //me->RemoveFlag(MOVEFLAG_WALK, NULL);
+            DoScriptText(SAY_FALRIC_AGGRO, me);
+            DoCast(me, SPELL_HOPELESSNESS);
         }
 
         void KilledUnit(Unit* pVictim)
@@ -109,19 +109,19 @@ public:
 
         void JustDied(Unit* pKiller)
         {
-          if(!m_pInstance) return;
-             m_pInstance->SetData(TYPE_MARWYN, SPECIAL);
-          DoScriptText(SAY_FALRIC_DEATH, me);
+            if(!m_pInstance) return;
+                m_pInstance->SetData(TYPE_MARWYN, SPECIAL);
+            DoScriptText(SAY_FALRIC_DEATH, me);
         }
 
-        void AttackStart(Unit* who) 
-        { 
+        void AttackStart(Unit* who)
+        {
             if(!m_pInstance) return;
 
-               if(m_pInstance->GetData(TYPE_FALRIC) != IN_PROGRESS)
-                 return; 
+                if(m_pInstance->GetData(TYPE_FALRIC) != IN_PROGRESS)
+                    return;
 
-             ScriptedAI::AttackStart(who);
+            ScriptedAI::AttackStart(who);
         }
 
         void Summon()
@@ -130,80 +130,80 @@ public:
 
              for(uint8 i = 0; i < 14; i++)
              {
-                switch(urand(0,3))
-                {
-                   case 0:
-                       switch(urand(1, 3))
-                       {
-                         case 1: pSummon = NPC_DARK_1; break;
-                         case 2: pSummon = NPC_DARK_3; break;
-                         case 3: pSummon = NPC_DARK_6; break;
-                       }
-                       break;
-                   case 1: 
-                       switch(urand(1, 3))
-                       {
-                         case 1: pSummon = NPC_DARK_2; break;
-                         case 2: pSummon = NPC_DARK_3; break;
-                         case 3: pSummon = NPC_DARK_4; break;
-                       }
-                       break;
-                   case 2: 
-                       switch(urand(1, 3))
-                       {
-                         case 1: pSummon = NPC_DARK_2; break;
-                         case 2: pSummon = NPC_DARK_5; break;
-                         case 3: pSummon = NPC_DARK_6; break;
-                       }
-                       break;
-                   case 3: 
-                       switch(urand(1, 3))
-                       {
-                         case 1: pSummon = NPC_DARK_1; break;
-                         case 2: pSummon = NPC_DARK_5; break;
-                         case 3: pSummon = NPC_DARK_4; break;
-                       }
-                       break;
+                 switch(urand(0,3))
+                 {
+                     case 0:
+                         switch(urand(1, 3))
+                         {
+                             case 1: pSummon = NPC_DARK_1; break;
+                             case 2: pSummon = NPC_DARK_3; break;
+                             case 3: pSummon = NPC_DARK_6; break;
+                         }
+                         break;
+                     case 1:
+                         switch(urand(1, 3))
+                         {
+                             case 1: pSummon = NPC_DARK_2; break;
+                             case 2: pSummon = NPC_DARK_3; break;
+                             case 3: pSummon = NPC_DARK_4; break;
+                         }
+                         break;
+                     case 2:
+                         switch(urand(1, 3))
+                         {
+                             case 1: pSummon = NPC_DARK_2; break;
+                             case 2: pSummon = NPC_DARK_5; break;
+                             case 3: pSummon = NPC_DARK_6; break;
+                         }
+                         break;
+                     case 3:
+                         switch(urand(1, 3))
+                         {
+                             case 1: pSummon = NPC_DARK_1; break;
+                             case 2: pSummon = NPC_DARK_5; break;
+                             case 3: pSummon = NPC_DARK_4; break;
+                         }
+                         break;
                  }
 
                  m_uiCheckSummon = 0;
 
                  if(Creature* Summon = me->SummonCreature(pSummon, SpawnLoc[m_uiLocNo].x, SpawnLoc[m_uiLocNo].y, SpawnLoc[m_uiLocNo].z, SpawnLoc[m_uiLocNo].o, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
                  {
-                    m_uiSummonGUID[i] = Summon->GetGUID();
-                    Summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    Summon->setFaction(974);
-                    Summon->SetReactState(REACT_PASSIVE); 
+                     m_uiSummonGUID[i] = Summon->GetGUID();
+                     Summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                     Summon->setFaction(974);
+                     Summon->SetReactState(REACT_PASSIVE);
                  }
                  m_uiLocNo++;
-             }
+            }
         }
 
         void CallFallSoldier()
         {
              for(uint8 i = 0; i < 4; i++)
              {
-                if(Creature* Summon = m_pInstance->instance->GetCreature(m_uiSummonGUID[m_uiCheckSummon]))
-                {
-                   Summon->setFaction(14);
-                   Summon->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                   Summon->SetReactState(REACT_AGGRESSIVE);
-                   Summon->SetInCombatWithZone();
-                }
-                m_uiCheckSummon++;
+                 if(Creature* Summon = m_pInstance->instance->GetCreature(m_uiSummonGUID[m_uiCheckSummon]))
+                 {
+                     Summon->setFaction(14);
+                     Summon->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                     Summon->SetReactState(REACT_AGGRESSIVE);
+                     Summon->SetInCombatWithZone();
+                 }
+                 m_uiCheckSummon++;
              }
         }
 
         void UpdateAI(const uint32 uiDiff)
         {
-            if(!m_pInstance) return;
+            if (!m_pInstance) return;
 
             if (m_pInstance->GetData(TYPE_FALRIC) == SPECIAL) 
             {
                 if(!m_bIsCall) 
                 {
-                   m_bIsCall = true;
-                   Summon();
+                    m_bIsCall = true;
+                    Summon();
                 }
 
                 if (m_uiSummonTimer < uiDiff) 
@@ -223,23 +223,23 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if(m_uiStrikeTimer < uiDiff)
+            if (m_uiStrikeTimer < uiDiff)
             {
                 DoCast(me->getVictim(), Regular ? SPELL_QUIVERING_STRIKE_N : SPELL_QUIVERING_STRIKE_H);
                 m_uiStrikeTimer = (urand(7000, 14000));
             }
             else m_uiStrikeTimer -= uiDiff;
 
-            if(m_uiHorrorTimer < uiDiff)
+            if (m_uiHorrorTimer < uiDiff)
             {
                 DoScriptText(SAY_FALRIC_SP01, me);
                 if(Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM))
-                   DoCast(pTarget, SPELL_IMPENDING_DESPAIR);
+                    DoCast(pTarget, SPELL_IMPENDING_DESPAIR);
                 m_uiHorrorTimer = (urand(15000, 25000));
             }
             else m_uiHorrorTimer -= uiDiff;
 
-            if(m_uiGrowlTimer < uiDiff)
+            if (m_uiGrowlTimer < uiDiff)
             {
                 DoScriptText(SAY_FALRIC_SP02, me);
                 DoCast(me->getVictim(), Regular ? SPELL_DEFILING_HORROR_N : SPELL_DEFILING_HORROR_H);
@@ -258,6 +258,7 @@ public:
             return;
         }
     };
+
     CreatureAI* GetAI(Creature* pCreature) const
     {
         return new boss_falricAI(pCreature);
