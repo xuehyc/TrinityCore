@@ -994,7 +994,7 @@ public:
         void PassengerBoarded(Unit* pWho, int8 /*seatId*/, bool apply)
         {
             if (!apply)
-                me->ForcedDespawn();
+                me->ForcedDespawn(1*IN_MILLISECONDS); // TODO: remove the disc to lord aggro "copy"
         }
 
         void SetData(uint32 /*type*/, uint32 data)
@@ -1039,6 +1039,9 @@ public:
 
         void UpdateAI(const uint32 uiDiff)
         {
+            if (!UpdateVictim())
+                return;
+
             if (me->GetReactState() == REACT_AGGRESSIVE)
             {
                 if (uiCheckTimer <= uiDiff)
@@ -1046,7 +1049,12 @@ public:
                     Unit* pUnit = me->GetVehicleKit()->GetPassenger(0);
                     if (pUnit && pUnit->GetTypeId() == TYPEID_UNIT && pUnit->GetEntry() == NPC_NEXUS_LORD)
                     {
-                        me->AI()->AttackStart(pUnit->getVictim());
+                        Unit* pTarget = pUnit->getVictim();
+                        if (pTarget && pTarget != me->getVictim())
+                        {
+                            me->getThreatManager().modifyThreatPercent(me->getVictim(), -100);
+                            me->AddThreat(pTarget, 9999999.0f);
+                        }
                     }
                     uiCheckTimer = 1*IN_MILLISECONDS;
                 } else uiCheckTimer -= uiDiff;
