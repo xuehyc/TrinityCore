@@ -972,10 +972,12 @@ public:
         npc_hover_discAI(Creature* pCreature) : ScriptedAI(pCreature) {}
 
         uint32 count;
+        uint32 uiCheckTimer;
 
         void Reset()
         {
             count = 1;
+            uiCheckTimer = 1*IN_MILLISECONDS;
         }
 
         void PassengerBoarded(Unit* pWho, int8 /*seatId*/, bool apply)
@@ -1024,7 +1026,21 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 uiDiff) {}
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (me->GetReactState() == REACT_AGGRESSIVE)
+            {
+                if (uiCheckTimer <= uiDiff)
+                {
+                    Unit* pUnit = me->GetVehicleKit()->GetPassenger(0);
+                    if (pUnit && pUnit->GetTypeId() == TYPEID_UNIT && pUnit->GetEntry() == NPC_NEXUS_LORD)
+                    {
+                        me->AI()->AttackStart(pUnit->getVictim());
+                    }
+                    uiCheckTimer = 1*IN_MILLISECONDS;
+                } else uiCheckTimer -= uiDiff;
+            }
+        }
     };
 
     CreatureAI* GetAI(Creature* pCreature) const
