@@ -31,12 +31,149 @@ public:
     struct instance_eye_of_eternity_InstanceMapScript : public InstanceScript
     {
         instance_eye_of_eternity_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
-    };
 
+        uint64 uiMalygosGUID;
+        uint64 uiPlatformGUID;
+        uint64 uiExitPortalGUID;
+        uint64 uiFocusingIrisGUID;
+        uint64 uiGiftGUID;
+        uint64 uiHeartGUID;
+
+        uint8  m_auiEncounter[MAX_ENCOUNTER];
+
+        void Initialize()
+        {
+            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
+            uiMalygosGUID = 0;
+            uiPlatformGUID = 0;
+            uiExitPortalGUID = 0;
+            uiFocusingIrisGUID = 0;
+            uiGiftGUID = 0;
+            uiHeartGUID = 0;
+        }
+
+        bool IsEncounterInProgress() const
+        {
+            for (int i = 0; i < MAX_ENCOUNTER; ++i)
+                if (m_auiEncounter[i] == IN_PROGRESS)
+                    return true;
+
+            return false;
+        }
+
+        void OnCreatureCreate(Creature* creature)
+        {
+            switch (creature->GetEntry())
+            {
+                case NPC_MALYGOS:
+                    uiMalygosGUID = creature->GetGUID();
+                    break;
+            }
+        }
+
+        void OnGameObjectCreate(GameObject* go)
+        {
+            switch(go->GetEntry())
+            {
+                case GO_PLATFORM:
+                    uiPlatformGUID = go->GetGUID();
+                    break;
+                case GO_EXIT_PORTAL:
+                    uiExitPortalGUID = go->GetGUID();
+                    break;
+                case GO_FOCUSING_IRIS:
+                case GO_FOCUSING_IRIS_H:
+                    uiFocusingIrisGUID = go->GetGUID();
+                    break;
+                case GO_ALEXSTRASZAS_GIFT:
+                case GO_ALEXSTRASZAS_GIFT_H:
+                    uiGiftGUID = go->GetGUID();
+                    break;
+                //case GO_HEART_OF_MAGIC:
+                //case GO_HEART_OF_MAGIC_H:
+                //    uiHeartGUID = pGo->GetGUID();
+                //    break;
+            }
+        }
+
+        void SetData(uint32 uiType, uint32 uiData)
+        {
+            switch(uiType)
+            {
+                case TYPE_MALYGOS:
+                    m_auiEncounter[0] = uiData;
+
+                    if (uiData == NOT_STARTED)
+                    {
+                        if (GameObject* pFocusingIris = instance->GetGameObject(uiFocusingIrisGUID))
+                        {
+                            pFocusingIris->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                            pFocusingIris->SetPhaseMask(1, true);
+                        }
+                        if (GameObject* pExitPortal = instance->GetGameObject(uiExitPortalGUID))
+                            pExitPortal->SetPhaseMask(1, true);
+
+                        if (GameObject* pPlatform = instance->GetGameObject(uiPlatformGUID))
+                            if (pPlatform->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
+                                pPlatform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
+                    }
+                    if (uiData == IN_PROGRESS)
+                    {
+                        if (GameObject* pFocusingIris = instance->GetGameObject(uiFocusingIrisGUID))
+                            pFocusingIris->SetPhaseMask(2, true);
+
+                        if (GameObject* pExitPortal = instance->GetGameObject(uiExitPortalGUID))
+                            pExitPortal->SetPhaseMask(2, true);
+                    }
+                    if (uiData == DONE)
+                    {
+                        if (GameObject* pExitPortal = instance->GetGameObject(uiExitPortalGUID))
+                            pExitPortal->SetPhaseMask(1, true);
+                    }
+                    break;
+            }
+
+            if (uiData == DONE)
+                SaveToDB();
+        }
+
+        uint32 GetData(uint32 uiType)
+        {
+            switch (uiType)
+            {
+                case TYPE_MALYGOS: return m_auiEncounter[0];
+            }
+
+            return 0;
+        }
+
+        uint64 GetData64(uint32 uiData)
+        {
+            switch (uiData)
+            {
+                case DATA_MALYGOS: return uiMalygosGUID;
+                case DATA_PLATFORM: return uiPlatformGUID;
+            }
+
+            return 0;
+        }
+
+        void OnPlayerEnter(Player* pPlayer)
+        {
+            // try to work around LOS problems in p3, everything in instance spawned at +400X
+            pPlayer->TeleportTo(616, 1127.942f, 1329.39f, 277.5f, 5.496f);
+
+            if (m_auiEncounter[0] == DONE)
+            {
+                if (Creature *pMount = pPlayer->SummonCreature(NPC_WYRMREST_SKYTALON, pPlayer->GetPositionX(), pPlayer->GetPositionY(), 260.0f, 0.0f))
+                    pPlayer->EnterVehicle(pMount, 0);
+            }
+        }
+    };
 };
 
 void AddSC_instance_eye_of_eternity()
 {
-    // doesn't exist in the database?
-    //new instance_eye_of_eternity();
+    new instance_eye_of_eternity();
 }
