@@ -118,8 +118,8 @@ public:
         {
             if(!m_pInstance) return;
 
-                if(m_pInstance->GetData(TYPE_FALRIC) != IN_PROGRESS)
-                    return;
+            if (m_pInstance->GetData(TYPE_FALRIC) != IN_PROGRESS)
+                return;
 
             ScriptedAI::AttackStart(who);
         }

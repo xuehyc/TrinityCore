@@ -161,12 +161,9 @@ public:
 
         void OnPlayerEnter(Player* pPlayer)
         {
-            // try to work around LOS problems in p3, everything in instance spawned at +400X
-            pPlayer->TeleportTo(616, 1127.942f, 1329.39f, 277.5f, 5.496f);
-
             if (m_auiEncounter[0] == DONE)
             {
-                if (Creature *pMount = pPlayer->SummonCreature(NPC_WYRMREST_SKYTALON, pPlayer->GetPositionX(), pPlayer->GetPositionY(), 260.0f, 0.0f))
+                if (Creature* pMount = pPlayer->SummonCreature(NPC_WYRMREST_SKYTALON, pPlayer->GetPositionX(), pPlayer->GetPositionY(), 260.0f, 0.0f))
                     pPlayer->EnterVehicle(pMount, 0);
             }
         }
