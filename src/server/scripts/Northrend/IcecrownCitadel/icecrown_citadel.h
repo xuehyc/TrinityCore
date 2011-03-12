@@ -42,6 +42,12 @@ enum TeleporterSpells
     SINDRAGOSA_S_LAIR_TELEPORT      = 70861
 };
 
+enum eEnums
+{
+    SOUND_ENDING_7_KING                   = 17360,
+    MODEL_INVISIBLE                       = 11686,
+};
+
 enum DataTypes
 {
     // Encounter States/Boss GUIDs
@@ -56,7 +62,7 @@ enum DataTypes
     DATA_BLOOD_QUEEN_LANA_THEL      = 8,
     DATA_VALITHRIA_DREAMWALKER      = 9,
     DATA_SINDRAGOSA                 = 10,
-    DATA_THE_LICH_KING              = 11,
+    DATA_THE_LICH_KING		        = 11,
 
     // Additional data
     DATA_SAURFANG_EVENT_NPC         = 12,
@@ -177,6 +183,35 @@ enum CreaturesIds
     NPC_ICY_BLAST                               = 38223,
     NPC_FROST_BOMB                              = 37186,
     NPC_ICE_TOMB                                = 36980,
+
+	// Valithria Dreamwalker
+    CREATURE_SWARMING_SHADOWS        = 38163,
+    CREATURE_VALITHRIA_DREAMWALKER   = 36789,
+    CREATURE_PORTAL_NORMAL_MODE_PRE  = 38186,
+    CREATURE_PORTAL_NORMAL_MODE_NPC  = 37945,
+    CREATURE_PORTAL_HEROIC_MODE_PRE  = 38429,
+    CREATURE_PORTAL_HEROIC_MODE_NPC  = 38430,
+    CREATURE_WORM                    = 37907,
+    CREATURE_PORTAL                  = 37945,
+    CREATURE_CLOUD                   = 37985,
+    CREATURE_VOID                    = 38068,
+    CREATURE_ABOMINATION             = 37886,
+    CREATURE_SKELETON                = 36791,
+    CREATURE_ARCHMAGE                = 37868,
+    CREATURE_SUPPRESSER              = 37863,
+    CREATURE_ZOMBIE                  = 37934,
+    CREATURE_COMBAT_TRIGGER          = 38752,
+
+	// The Lich King
+    CREATURE_LICH_KING               = 36597,
+    CREATURE_TIRION_ICC              = 38995,
+    CREAUTRE_MENETHIL                = 38579,
+    CREATURE_FROSTMOURNE_TRIGGER     = 38584,
+    CREATURE_ICE_SPHERE              = 36633,
+    CREATURE_VALKYR                  = 36609,
+    CREATURE_DEFILE                  = 38757,
+    CREATURE_RAGING_SPIRIT           = 36701,
+    CREATURE_TRIGGER                 = 30494,
 };
 
 enum GameObjectsIds
@@ -223,6 +258,7 @@ enum GameObjectsIds
     // Valithria Dreamwalker
     GO_GREEN_DRAGON_BOSS_ENTRANCE           = 201375,
     GO_GREEN_DRAGON_BOSS_EXIT               = 201374,
+	VALITHRIA_ELEVATOR						= 202234,
 
     // Sindragosa
     GO_SINDRAGOSA_ENTRANCE_DOOR             = 201373,
@@ -231,6 +267,9 @@ enum GameObjectsIds
     GO_ICE_WALL                             = 202396,
     GO_ICE_BLOCK                            = 201722,
     GO_SIGIL_OF_THE_FROSTWING               = 202181,
+
+	// The Lich King
+	LICH_TELEPORT							= 202223
 };
 
 enum AchievementCriteriaIds
