@@ -39,19 +39,6 @@ enum Data64
     DATA_OSSIRIAN
 };
 
-enum Creatures
-{
-    NPC_KURINAXX                = 15348,
-    NPC_RAJAXX                  = 15341,
-    NPC_MOAM                    = 15340,
-    NPC_BURU                    = 15370,
-    NPC_AYAMISS                 = 15369,
-    NPC_OSSIRIAN                = 15339,
-    NPC_HIVEZARA_HORNET         = 15934,
-    NPC_HIVEZARA_SWARMER        = 15546,
-    NPC_HIVEZARA_LARVA          = 15555,
-};
-
 enum Bosses
 {
     CREATURE_KURINAXX              = 15348,
