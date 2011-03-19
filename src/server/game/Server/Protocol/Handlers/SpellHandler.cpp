@@ -348,7 +348,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if (mover->GetTypeId() == TYPEID_PLAYER)
     {
         // not have spell in spellbook or spell passive and not casted by client
-        if (!mover->ToPlayer()->HasActiveSpell (spellId) || IsPassiveSpell(spellId))
+        if (!mover->ToPlayer()->HasActiveSpell(spellId) || IsPassiveSpell(spellId))
         {
             //cheater? kick? ban?
             recvPacket.rfinish(); // prevent spam at ignore packet
@@ -360,9 +360,21 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         // not have spell in spellbook or spell passive and not casted by client
         if ((mover->GetTypeId() == TYPEID_UNIT && !mover->ToCreature()->HasSpell(spellId)) || IsPassiveSpell(spellId))
         {
-            //cheater? kick? ban?
-            recvPacket.rfinish(); // prevent spam at ignore packet
-            return;
+            Unit* charmer = mover->GetCharmer();
+            if (mover->IsVehicle() && charmer && charmer->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (!charmer->ToPlayer()->HasActiveSpell(spellId))
+                {
+                    recvPacket.rfinish(); // prevent spam at ignore packet
+                    return;
+                }
+            }
+            else
+            {
+                //cheater? kick? ban?
+                recvPacket.rfinish(); // prevent spam at ignore packet
+                return;
+            }
         }
     }
 
