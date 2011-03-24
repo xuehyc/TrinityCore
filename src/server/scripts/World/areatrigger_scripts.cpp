@@ -325,6 +325,49 @@ class AreaTrigger_at_last_rites : public AreaTriggerScript
         }
 };
 
+/*#####
+## at_sholazar_waygate
+#####*/
+
+enum eAtSholazarWaygate
+{
+	QUEST_THE_ETYMIDIAN						= 12548,
+	QUEST_BACK_THROUGH_THE_WAYGATE			= 12797,
+	SPELL_TELEPORT_SHOLAZAR_TO_UNGORO    	= 52056,
+	SPELL_TELEPORT_UNGORO_TO_SHOLAZAR    	= 52057,
+	AT_SHOLAZAR_WAYGATE                  	= 5046,
+	AT_UNGORO_WAYGATE						= 5047
+};
+
+class AreaTrigger_at_sholazar_waygate : public AreaTriggerScript
+{
+	public :
+		
+		AreaTrigger_at_sholazar_waygate()
+			: AreaTriggerScript("at_sholazar_waygate")
+		{
+		}
+
+		bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+		{
+			if(!player->isDead())
+			{
+				switch(trigger->id)
+				{
+				case AT_SHOLAZAR_WAYGATE:	
+					player->CastSpell(player,SPELL_TELEPORT_SHOLAZAR_TO_UNGORO,false);
+					break;
+				case AT_UNGORO_WAYGATE:
+					player->CastSpell(player,SPELL_TELEPORT_UNGORO_TO_SHOLAZAR,false);
+					break;
+				}
+			}
+			return false;
+		}
+};
+
+
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_aldurthar_gate();
