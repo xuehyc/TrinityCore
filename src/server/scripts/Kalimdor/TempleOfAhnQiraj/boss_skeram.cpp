@@ -295,47 +295,8 @@ public:
 
 };
 
-class spell_skeram_teleport : public SpellScriptLoader
-{
-    public:
-        spell_skeram_teleport() : SpellScriptLoader("spell_skeram_teleport") { }
-
-        class spell_skeram_teleport_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_skeram_teleport_SpellScript);
-
-            void HandleScript(SpellEffIndex effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
-
-                float targetX = GetHitUnit()->GetPositionX();
-                float targetY = GetHitUnit()->GetPositionY();
-                float targetZ = GetHitUnit()->GetPositionZ();
-                GetHitUnit()->DeleteThreatList();
-                GetCaster()->DeleteThreatList();
-
-                // Teleport target to casters current location
-                if (Creature* target = GetHitUnit()->ToCreature())
-                    target->GetMap()->CreatureRelocation(target, GetCaster()->GetPositionX(), GetCaster()->GetPositionY(), GetCaster()->GetPositionZ(), 0);
-                // Teleport caster to targets stored location
-                if (Creature* caster = GetCaster()->ToCreature())
-                    caster->GetMap()->CreatureRelocation(caster, targetX, targetY, targetZ, 0);
-            }
-
-            void Register()
-            {
-                OnEffect += SpellEffectFn(spell_skeram_teleport_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_skeram_teleport_SpellScript();
-        }
-};
 
 void AddSC_boss_skeram()
 {
     new boss_skeram();
-    new spell_skeram_teleport();
 }

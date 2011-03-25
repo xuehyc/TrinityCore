@@ -23,115 +23,105 @@ SDComment:
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
-#include "ObjectMgr.h"
-#include "ScriptMgr.h"
-#include "InstanceScript.h"
-#include "CreatureAI.h"
+#include "ScriptPCH.h"
 #include "temple_of_ahnqiraj.h"
 
 class instance_temple_of_ahnqiraj : public InstanceMapScript
 {
-    public:
-        instance_temple_of_ahnqiraj() : InstanceMapScript("instance_temple_of_ahnqiraj", 531) { }
+public:
+    instance_temple_of_ahnqiraj() : InstanceMapScript("instance_temple_of_ahnqiraj", 531) { }
 
-        struct instance_temple_of_ahnqiraj_InstanceMapScript : public InstanceScript
+    InstanceScript* GetInstanceScript(InstanceMap* pMap) const
+    {
+        return new instance_temple_of_ahnqiraj_InstanceMapScript(pMap);
+    }
+
+    struct instance_temple_of_ahnqiraj_InstanceMapScript : public InstanceScript
+    {
+        instance_temple_of_ahnqiraj_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
+
+        //If Vem is dead...
+        bool IsBossDied[3];
+
+        //Storing Skeram, Vem and Kri.
+        uint64 SkeramGUID;
+        uint64 VemGUID;
+        uint64 KriGUID;
+        uint64 VeklorGUID;
+        uint64 VeknilashGUID;
+
+        uint32 BugTrioDeathCount;
+
+        uint32 CthunPhase;
+
+        void Initialize()
         {
-            instance_temple_of_ahnqiraj_InstanceMapScript(Map* map) : InstanceScript(map)
-            {
-                SetBossNumber(MAX_ENCOUNTER);
+            IsBossDied[0] = false;
+            IsBossDied[1] = false;
+            IsBossDied[2] = false;
 
-                _skeramGUID     = 0;
-                _veklorGUID     = 0;
-                _veknilashGUID  = 0;
-                _cthunPhase     = 0;
-                _yaujGUID       = 0;
-                _kriGUID        = 0;
-                _vemGUID        = 0;
-                lastBugKilledGUID  = 0;
+            SkeramGUID = 0;
+            VemGUID = 0;
+            KriGUID = 0;
+            VeklorGUID = 0;
+            VeknilashGUID = 0;
+
+            BugTrioDeathCount = 0;
+
+            CthunPhase = 0;
+        }
+
+        void OnCreatureCreate(Creature* creature)
+        {
+            switch (creature->GetEntry())
+            {
+                case 15263: SkeramGUID = creature->GetGUID(); break;
+                case 15544: VemGUID = creature->GetGUID(); break;
+                case 15511: KriGUID = creature->GetGUID(); break;
+                case 15276: VeklorGUID = creature->GetGUID(); break;
+                case 15275: VeknilashGUID = creature->GetGUID(); break;
             }
+        }
 
-            void OnCreatureCreate(Creature* creature)
+        bool IsEncounterInProgress() const
+        {
+            //not active in AQ40
+            return false;
+        }
+
+        uint32 GetData(uint32 type)
+        {
+            switch(type)
             {
-                switch (creature->GetEntry())
-                {
-                    case NPC_SKERAM:
-                        _skeramGUID = creature->GetGUID();
-                        break;
-                    case NPC_VEKLOR:
-                        _veklorGUID = creature->GetGUID();
-                        break;
-                    case NPC_VEKNILASH:
-                        _veknilashGUID = creature->GetGUID();
-                        break;
-                    case NPC_KRI:
-                        _kriGUID = creature->GetGUID();
-                        break;
-                    case NPC_VEM:
-                        _vemGUID = creature->GetGUID();
-                        break;
-                    case BOSS_YAUJ:
-                        _yaujGUID = creature->GetGUID();
-                        break;
-                }
+                case DATA_VEMISDEAD:
+                    if (IsBossDied[0])
+                        return 1;
+                    break;
+
+                case DATA_VEKLORISDEAD:
+                    if (IsBossDied[1])
+                        return 1;
+                    break;
+
+                case DATA_VEKNILASHISDEAD:
+                    if (IsBossDied[2])
+                        return 1;
+                    break;
+
+                case DATA_BUG_TRIO_DEATH:
+                    return BugTrioDeathCount;
+
+                case DATA_CTHUN_PHASE:
+                    return CthunPhase;
             }
+            return 0;
+        }
 
-            void SetData(uint32 type, uint32 data)
+        uint64 GetData64 (uint32 identifier)
+        {
+            switch(identifier)
             {
-                switch(type)
-                {
-                    case DATA_CTHUN_PHASE:
-                        _cthunPhase = data;
-                        break;
-                }
-            }
-
-            bool SetBossState(uint32 bossId, EncounterState state)
-            {
-                if (!InstanceScript::SetBossState(bossId, state))
-                    return false;
-  
-                switch (bossId)
-                {
-                    case BOSS_BUG_TRIO:
-                        if (state == DONE)
-                        {
-                            if (Creature* lastKilled = instance->GetCreature(lastBugKilledGUID))
-                               lastKilled->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-                        }
-                        break;
-                    case BOSS_KRI:
-                    case BOSS_VEM:
-                    case BOSS_YAUJ:
-                        if (state == NOT_STARTED)
-                        {
-                            if (Creature* bug = instance->GetCreature(GetData64(bossId)))
-                            {
-                                if (!bug->isAlive())
-                                    bug->Respawn();
-                                bug->AI()->EnterEvadeMode();
-                            }
-                        }
-                        else if (state == DONE)
-                            lastBugKilledGUID = GetData64(bossId);
-                        break;
-                    default:
-                        break;
-                }
-                return true;
-            }
-
-            uint32 GetData(uint32 type)
-            {
-                switch (type)
-                {
-                    case DATA_CTHUN_PHASE:
-                        return _cthunPhase;
-                }
-                return 0;
-            }
-
-            uint64 GetData64(uint32 type)
-            {
+<<<<<<< HEAD
                 switch (type)
                 {
                     case BOSS_SKERAM:
@@ -149,66 +139,49 @@ class instance_temple_of_ahnqiraj : public InstanceMapScript
                 }
 
                 return 0;
+=======
+                case DATA_SKERAM:
+                    return SkeramGUID;
+                case DATA_VEM:
+                    return VemGUID;
+                case DATA_KRI:
+                    return KriGUID;
+                case DATA_VEKLOR:
+                    return VeklorGUID;
+                case DATA_VEKNILASH:
+                    return VeknilashGUID;
+>>>>>>> parent of 4a83a91... Temple of Ahn'Qiraj
             }
+            return 0;
+        }                                                       // end GetData64
 
-            std::string GetSaveData()
-            {
-                OUT_SAVE_INST_DATA;
-
-                std::ostringstream saveStream;
-                saveStream << "A Q T " << GetBossSaveData();
-
-                OUT_SAVE_INST_DATA_COMPLETE;
-                return saveStream.str();
-            }
-
-            void Load(char const* data)
-            {
-                if (!data)
-                {
-                    OUT_LOAD_INST_DATA_FAIL;
-                    return;
-                }
-
-                OUT_LOAD_INST_DATA(data);
-
-                char dataHead1, dataHead2, dataHead3;
-
-                std::istringstream loadStream(data);
-                loadStream >> dataHead1 >> dataHead2 >> dataHead3;
-
-                if (dataHead1 == 'A' && dataHead2 == 'Q' && dataHead3 == 'T')
-                {
-                    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                    {
-                        uint32 tmpState;
-                        loadStream >> tmpState;
-                        if (tmpState == IN_PROGRESS || tmpState > TO_BE_DECIDED)
-                            tmpState = NOT_STARTED;
-                        SetBossState(i, EncounterState(tmpState));
-                    }
-                }
-                else
-                    OUT_LOAD_INST_DATA_FAIL;
-
-                OUT_LOAD_INST_DATA_COMPLETE;
-            }
-
-        private:
-            uint64 _skeramGUID;
-            uint64 _veklorGUID;
-            uint64 _veknilashGUID;
-            uint64 _yaujGUID;
-            uint64 _kriGUID;
-            uint64 _vemGUID;
-            uint64 lastBugKilledGUID;
-            uint8 _cthunPhase;
-        };
-
-        InstanceScript* GetInstanceScript(InstanceMap* map) const
+        void SetData(uint32 type, uint32 data)
         {
-            return new instance_temple_of_ahnqiraj_InstanceMapScript(map);
+            switch(type)
+            {
+                case DATA_VEM_DEATH:
+                    IsBossDied[0] = true;
+                    break;
+
+                case DATA_BUG_TRIO_DEATH:
+                    ++BugTrioDeathCount;
+                    break;
+
+                case DATA_VEKLOR_DEATH:
+                    IsBossDied[1] = true;
+                    break;
+
+                case DATA_VEKNILASH_DEATH:
+                    IsBossDied[2] = true;
+                    break;
+
+                case DATA_CTHUN_PHASE:
+                    CthunPhase = data;
+                    break;
+            }
         }
+    };
+
 };
 
 

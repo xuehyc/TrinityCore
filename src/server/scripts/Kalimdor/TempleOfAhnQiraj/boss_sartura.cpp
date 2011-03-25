@@ -30,7 +30,7 @@ EndScriptData */
 #define SAY_DEATH                   -1531010
 
 #define SPELL_WHIRLWIND                              26083
-#define SPELL_ENRAGE                                 8269
+#define SPELL_ENRAGE                                 28747            //Not sure if right ID.
 #define SPELL_ENRAGEHARD                             28798
 
 //Guard Spell
@@ -105,12 +105,12 @@ public:
                 if (WhirlWindRandom_Timer <= diff)
                 {
                     //Attack random Gamers
-                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,1))
-                    {
-                        me->AddThreat(pTarget, 1.0f);
-                        me->TauntApply(pTarget);
-                        AttackStart(pTarget);
-                    }
+                    Unit *pTarget = NULL;
+                    pTarget = SelectUnit(SELECT_TARGET_RANDOM,1);
+                    if (pTarget)
+                    me->AddThreat(pTarget, 1.0f);
+                    me->TauntApply(pTarget);
+                    AttackStart(pTarget);
 
                     WhirlWindRandom_Timer = 3000 + rand()%4000;
                 } else WhirlWindRandom_Timer -= diff;
@@ -134,14 +134,15 @@ public:
                 if (AggroReset_Timer <= diff)
                 {
                     //Attack random Gamers
-                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,1))
-                    {
-                        me->AddThreat(pTarget, 1.0f);
-                        me->TauntApply(pTarget);
-                        AttackStart(pTarget);
-                    }
-                    AggroReset = true;
-                    AggroReset_Timer = 2000 + rand()%3000;
+                    Unit *pTarget = NULL;
+                    pTarget = SelectUnit(SELECT_TARGET_RANDOM,1);
+                    if (pTarget)
+                    me->AddThreat(pTarget, 1.0f);
+                    me->TauntApply(pTarget);
+                    AttackStart(pTarget);
+
+                        AggroReset = true;
+                        AggroReset_Timer = 2000 + rand()%3000;
                 } else AggroReset_Timer -= diff;
 
                 if (AggroReset)
@@ -241,12 +242,12 @@ public:
                 if (WhirlWindRandom_Timer <= diff)
                 {
                     //Attack random Gamers
-                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,1))
-                    {
-                        me->AddThreat(pTarget, 1.0f);
-                        me->TauntApply(pTarget);
-                        AttackStart(pTarget);
-                    }
+                    Unit *pTarget = NULL;
+                    pTarget = SelectUnit(SELECT_TARGET_RANDOM,1);
+                    if (pTarget)
+                    me->AddThreat(pTarget, 1.0f);
+                    me->TauntApply(pTarget);
+                    AttackStart(pTarget);
 
                     WhirlWindRandom_Timer = 3000 + rand()%4000;
                 } else WhirlWindRandom_Timer -= diff;
@@ -262,12 +263,13 @@ public:
                 if (AggroReset_Timer <= diff)
                 {
                     //Attack random Gamers
-                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,1))
-                    {
-                        me->AddThreat(pTarget, 1.0f);
-                        me->TauntApply(pTarget);
-                        AttackStart(pTarget);
-                    }
+                    Unit *pTarget = NULL;
+                    pTarget = SelectUnit(SELECT_TARGET_RANDOM,1);
+                    if (pTarget)
+                    me->AddThreat(pTarget, 1.0f);
+                    me->TauntApply(pTarget);
+                    AttackStart(pTarget);
+
                     AggroReset = true;
                     AggroReset_Timer = 2000 + rand()%3000;
                 } else AggroReset_Timer -= diff;
@@ -292,7 +294,10 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+
 };
+
+
 
 void AddSC_boss_sartura()
 {

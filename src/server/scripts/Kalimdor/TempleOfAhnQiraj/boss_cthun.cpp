@@ -74,7 +74,7 @@ enum Phases
     PHASE_CTHUN_DONE                            = 6,
 };
 
-enum CtunCreatures
+enum Creatures
 {
     MOB_CTHUN_PORTAL                            = 15896,
 
