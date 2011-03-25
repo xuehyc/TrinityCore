@@ -121,25 +121,6 @@ public:
         {
             switch(identifier)
             {
-<<<<<<< HEAD
-                switch (type)
-                {
-                    case BOSS_SKERAM:
-                        return _skeramGUID;
-                    case BOSS_VEKLOR:
-                        return _veklorGUID;
-                    case BOSS_VEKNILASH:
-                        return _veknilashGUID;
-                    case BOSS_KRI:
-                        return _kriGUID;
-                    case BOSS_YAUJ:
-                        return _yaujGUID;
-                    case BOSS_VEM:
-                        return _vemGUID;
-                }
-
-                return 0;
-=======
                 case DATA_SKERAM:
                     return SkeramGUID;
                 case DATA_VEM:
@@ -150,7 +131,6 @@ public:
                     return VeklorGUID;
                 case DATA_VEKNILASH:
                     return VeknilashGUID;
->>>>>>> parent of 4a83a91... Temple of Ahn'Qiraj
             }
             return 0;
         }                                                       // end GetData64
@@ -183,7 +163,6 @@ public:
     };
 
 };
-
 
 void AddSC_instance_temple_of_ahnqiraj()
 {

@@ -157,28 +157,8 @@ public:
         uint32 KnockBack_Timer;
         uint32 Enrage_Timer;
 
-<<<<<<< .mine            void JustDied(Unit* /*killer*/)
-            {
-                me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-                if (instance)
-                {
-                    instance->SetBossState(BOSS_VEM, DONE);
-                    if (IsBugsEncounterComplete(instance, me))
-                        instance->SetBossState(BOSS_BUG_TRIO, DONE);
-                    else
-                    {
-                        // Yauj and Kri enrages when Vem dies.
-                        if (Creature* yauj = Unit::GetCreature(*me, instance->GetData64(BOSS_YAUJ)))
-                            yauj->CastSpell(yauj, SPELL_ENRAGE, false);
-                        if (Creature* kri = Unit::GetCreature(*me, instance->GetData64(BOSS_KRI)))
-                            kri->CastSpell(kri, SPELL_ENRAGE, false);
-                    }
-                }
-                if (Creature* yauj = Unit::GetCreature(*me, instance->GetData64(BOSS_YAUJ)))
-                    yauj->BossAI::summons.DespawnAll();
-            }
-=======        bool Enraged;
->>>>>>> .theirs
+        bool Enraged;
+
         void Reset()
         {
             Charge_Timer = 15000 + rand()%12000;
@@ -214,7 +194,7 @@ public:
             if (Charge_Timer <= diff)
             {
                 Unit *pTarget = NULL;
-                pTarget = SelectUnit(SELECT_TARGET_RANDOM,0);
+                pTarget = SelectTarget(SELECT_TARGET_RANDOM,0);
                 if (pTarget)
                 {
                     DoCast(pTarget, SPELL_CHARGE);
@@ -293,7 +273,7 @@ public:
 
             for (uint8 i = 0; i < 10; ++i)
             {
-                Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0);
+                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,0);
                 Creature* Summoned = me->SummonCreature(15621,me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),0,TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN,90000);
                 if (Summoned && pTarget)
                     Summoned->AI()->AttackStart(pTarget);
@@ -367,9 +347,6 @@ public:
     };
 
 };
-
-
-
 
 void AddSC_bug_trio()
 {
