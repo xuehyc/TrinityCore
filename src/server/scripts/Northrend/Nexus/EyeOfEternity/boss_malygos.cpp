@@ -522,7 +522,10 @@ public:
                 {
                     SparkMovement(true);
                     me->SetFlying(false);
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+
+                    if (Unit* victim = SelectTarget(SELECT_TARGET_TOPAGGRO))
+                        me->GetMotionMaster()->MoveChase(victim);
+
                     me->SetReactState(REACT_AGGRESSIVE);
                     // give some time to heal vortex dmg
                     uiStormTimer = urand(7*IN_MILLISECONDS, 10*IN_MILLISECONDS);
@@ -663,10 +666,13 @@ public:
                     {
                         if (uiVortexTimer <= uiDiff)
                         {
-                            float x, y, z;
-                            me->getVictim()->GetPosition(x, y, z);
-                            me->GetMotionMaster()->MovePoint(POINT_FLY_DOWN, x, y, z);
-                            uiPhase = PHASE_IDLE;
+                            if (Unit* victim = SelectTarget(SELECT_TARGET_TOPAGGRO))
+                            {
+                                float x, y, z;
+                                victim->GetPosition(x, y, z);
+                                me->GetMotionMaster()->MovePoint(POINT_FLY_DOWN, x, y, z);
+                                uiPhase = PHASE_IDLE;
+                            }
                         } else uiVortexTimer -= uiDiff;
                     }
                     else
