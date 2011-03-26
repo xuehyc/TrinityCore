@@ -2019,6 +2019,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement, b
     // TODO: where do set this instead?
     if (!(achievement->flags & ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
         sAchievementMgr->SetRealmCompleted(achievement);
+    else sAchievementMgr->SetRealmCompletedDelayed(achievement);
 
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT);
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS, achievement->points);
@@ -2551,4 +2552,31 @@ void AchievementGlobalMgr::LoadRewardLocales()
 
     sLog->outString(">> Loaded %lu achievement reward locale strings in %u ms", (unsigned long)m_achievementRewardLocales.size(), GetMSTimeDiffToNow(oldMSTime));
     sLog->outString();
+}
+
+void AchievementGlobalMgr::SetRealmCompletedDelayed(AchievementEntry const* achievement, uint32 delay)
+{
+    m_allDelayedCompletedAchievments.insert(AllDelayedCompletedAchievments::value_type(achievement->ID, delay));
+}
+
+void AchievementGlobalMgr::Update(uint32 const timeDiff)
+{
+    if (!m_allDelayedCompletedAchievments.empty())
+    {
+        for (AllDelayedCompletedAchievments::iterator itr = m_allDelayedCompletedAchievments.begin(); itr != m_allDelayedCompletedAchievments.end();)
+        {
+            // Time is up set RealmCompleted
+            if (itr->second <= timeDiff)
+            {
+                AchievementEntry const *entry = sAchievementStore.LookupEntry(itr->first);
+                SetRealmCompleted(entry);
+                m_allDelayedCompletedAchievments.erase(itr++);
+            }
+            else
+            {
+                itr->second -= timeDiff;
+                ++itr;
+            }
+        }
+    }
 }

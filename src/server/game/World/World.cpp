@@ -1991,6 +1991,9 @@ void World::Update(uint32 diff)
     // update the instance reset times
     sInstanceSaveMgr->Update();
 
+    // update delayed realmcomplete achievments
+    sAchievementMgr->Update(diff);
+
     // And last, but not least handle the issued cli commands
     ProcessCliCommands();
 

@@ -66,6 +66,7 @@ enum AchievementCriteriaDataType
 };
 
 #define MAX_ACHIEVEMENT_CRITERIA_DATA_TYPE               21 // maximum value in AchievementCriteriaDataType enum
+#define TIMER_DELAYED_ACHIEVEMENT_SET_COMPLETE          10000
 
 class Player;
 class Unit;
@@ -346,6 +347,8 @@ class AchievementGlobalMgr
         void LoadCompletedAchievements();
         void LoadRewards();
         void LoadRewardLocales();
+        void SetRealmCompletedDelayed(AchievementEntry const* achievement, uint32 delay = TIMER_DELAYED_ACHIEVEMENT_SET_COMPLETE);
+        void Update(const uint32 timeDiff);
     private:
         AchievementCriteriaDataMap m_criteriaDataMap;
 
@@ -359,6 +362,8 @@ class AchievementGlobalMgr
 
         typedef std::set<uint32> AllCompletedAchievements;
         AllCompletedAchievements m_allCompletedAchievements;
+        typedef std::map<uint32, uint32> AllDelayedCompletedAchievments;
+        AllDelayedCompletedAchievments m_allDelayedCompletedAchievments;
 
         AchievementRewards m_achievementRewards;
         AchievementRewardLocales m_achievementRewardLocales;
