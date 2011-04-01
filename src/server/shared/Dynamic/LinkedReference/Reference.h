@@ -82,7 +82,11 @@ template <class TO, class FROM> class Reference : public LinkedListElement
         Reference<TO,FROM> const * nocheck_prev() const { return((Reference<TO,FROM> const *) LinkedListElement::nocheck_prev()); }
 
         TO* operator ->() const { return iRefTo; }
-        TO* getTarget() const { return iRefTo; }
+        TO* getTarget() const {
+			if (!this)
+				return NULL;
+
+			return iRefTo != NULL ? iRefTo : NULL; }
 
         FROM* getSource() const { return iRefFrom; }
 };
