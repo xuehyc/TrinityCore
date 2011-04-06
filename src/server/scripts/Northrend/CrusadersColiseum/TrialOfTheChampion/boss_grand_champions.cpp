@@ -73,6 +73,12 @@ enum eSpells
     SPELL_POISON_BOTTLE             = 67701
 };
 
+enum eEnums
+{
+    SAY_START_1                      = -1999939,
+    SAY_START_2                      = -1999937
+};
+
 enum eSeat
 {
     SEAT_ID_0                       = 0
@@ -102,10 +108,20 @@ void AggroAllPlayers(Creature* pTemp)
     {
         if (Player* pPlayer = i->getSource())
         {
-            if (pPlayer->isGameMaster())
-                continue;
+            if (pPlayer->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && !pPlayer->isGameMaster())
+            {
+                Creature* pCreature = pPlayer->GetVehicleBase()->ToCreature();  
 
-            if (pPlayer->isAlive())
+                if (pCreature)
+                {
+                    pTemp->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    pTemp->SetReactState(REACT_AGGRESSIVE);
+                    pTemp->SetInCombatWith(pCreature);
+                    pPlayer->SetInCombatWith(pTemp);
+                    pCreature->SetInCombatWith(pTemp);
+                    pTemp->AddThreat(pCreature, 0.0f);
+                 }
+            } else if (pPlayer->isAlive() && !pPlayer->isGameMaster())
             {
                 pTemp->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
                 pTemp->SetReactState(REACT_AGGRESSIVE);
@@ -113,6 +129,9 @@ void AggroAllPlayers(Creature* pTemp)
                 pPlayer->SetInCombatWith(pTemp);
                 pTemp->AddThreat(pPlayer, 0.0f);
             }
+
+            if (pPlayer->isGameMaster())
+                continue;
         }
     }
 }
@@ -255,11 +274,15 @@ public:
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                     {
                         Player* pPlayer = itr->getSource();
-                        if (pPlayer && !pPlayer->isGameMaster() && me->IsInRange(pPlayer,8.0f,25.0f,false))
+                        if (pPlayer && !pPlayer->isGameMaster() && me->IsInRange(pPlayer,8.0f,25.0f,false) && pPlayer->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+                        {
+                            Creature* pVehicle = pPlayer->GetVehicleBase()->ToCreature();
+                            if (pVehicle)
                         {
                             DoResetThreat();
-                            me->AddThreat(pPlayer,1.0f);
-                            DoCast(pPlayer, SPELL_CHARGE);
+                                me->AddThreat(pVehicle,1.0f);
+                                DoCast(pVehicle, SPELL_CHARGE);
+                            }
                             break;
                         }
                     }
@@ -270,23 +293,22 @@ public:
             //dosen't work at all
             if (uiShieldBreakerTimer <= uiDiff)
             {
-                Vehicle *pVehicle = me->GetVehicleKit();
-                if (!pVehicle)
-                    return;
-
-                if (Unit* pPassenger = pVehicle->GetPassenger(SEAT_ID_0))
-                {
                     Map::PlayerList const& players = me->GetMap()->GetPlayers();
                     if (me->GetMap()->IsDungeon() && !players.isEmpty())
                     {
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                         {
                             Player* pPlayer = itr->getSource();
-                            if (pPlayer && !pPlayer->isGameMaster() && me->IsInRange(pPlayer,10.0f,30.0f,false))
+                        if (pPlayer && !pPlayer->isGameMaster() && me->IsInRange(pPlayer,10.0f,30.0f,false) && pPlayer->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
                             {
-                                pPassenger->CastSpell(pPlayer,SPELL_SHIELD_BREAKER,true);
-                                break;
+                            Creature* pVehicle = pPlayer->GetVehicleBase()->ToCreature();
+                            if (pVehicle)
+                            {
+                                DoResetThreat();
+                                me->AddThreat(pVehicle,1.0f);
+                                DoCast(pVehicle,SPELL_SHIELD_BREAKER);
                             }
+                            break;
                         }
                     }
                 }
@@ -364,6 +386,7 @@ public:
             if (!bDone && GrandChampionsOutVehicle(me))
             {
                 bDone = true;
+                DoScriptText(SAY_START_2, me);
 
                 if (pInstance && me->GetGUID() == pInstance->GetData64(DATA_GRAND_CHAMPION_1))
                     me->SetHomePosition(739.678f,662.541f,412.393f,4.49f);
@@ -425,6 +448,7 @@ public:
 
         void JustDied(Unit* /*pKiller*/)
         {
+            DoScriptText(SAY_START_1, me);
             if (pInstance)
                 pInstance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
@@ -564,6 +588,7 @@ public:
 
         void JustDied(Unit* /*pKiller*/)
         {
+            DoScriptText(SAY_START_1, me);
             if (pInstance)
                 pInstance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
@@ -711,6 +736,7 @@ public:
 
         void JustDied(Unit* /*pKiller*/)
         {
+            DoScriptText(SAY_START_1, me);
             if (pInstance)
                 pInstance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
@@ -866,6 +892,7 @@ public:
 
         void JustDied(Unit* /*pKiller*/)
         {
+            DoScriptText(SAY_START_1, me);
             if (pInstance)
                 pInstance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
@@ -987,6 +1014,7 @@ public:
 
         void JustDied(Unit* /*pKiller*/)
         {
+            DoScriptText(SAY_START_1, me);
             if (pInstance)
                 pInstance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
