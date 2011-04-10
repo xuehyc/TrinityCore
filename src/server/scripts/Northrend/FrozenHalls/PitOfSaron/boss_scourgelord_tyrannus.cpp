@@ -182,6 +182,10 @@ class boss_tyrannus : public CreatureScript
             {
                 DoScriptText(SAY_DEATH, me);
                 instance->SetBossState(DATA_TYRANNUS, DONE);
+ if (instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
+ 	          me->SummonCreature(NPC_JAINA_PART2, 1056.9428f, 157.1093f, 628.1562f, 2.8831540f, TEMPSUMMON_MANUAL_DESPAWN);
+                  else
+              me->SummonCreature(NPC_SYLVANAS_PART2, 1056.9428f, 157.1093f, 628.1562f, 2.8831540f, TEMPSUMMON_MANUAL_DESPAWN);
 
                 // Prevent corpse despawning
                 if (TempSummon* summ = me->ToTempSummon())
