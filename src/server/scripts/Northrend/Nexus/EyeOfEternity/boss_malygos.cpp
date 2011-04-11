@@ -1093,10 +1093,14 @@ public:
             uiStep = 1;
             uiStepTimer = 5*IN_MILLISECONDS;
             me->SetFlying(true);
+            me->setActive(true);
         }
 
         void UpdateAI(const uint32 uiDiff)
         {
+            if (uiStep > 5)
+                return;
+
             if (uiStepTimer <= uiDiff)
             {
                 switch (uiStep)
