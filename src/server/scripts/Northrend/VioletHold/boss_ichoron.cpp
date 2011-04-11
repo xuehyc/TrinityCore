@@ -29,6 +29,7 @@ enum Spells
     SPELL_WATER_BOLT_VOLLEY                     = 54241,
     SPELL_WATER_BOLT_VOLLEY_H                   = 59521,
     SPELL_SPLASH                                = 59516,
+    SPELL_BURST                                 = 54379,
     SPELL_WATER_GLOBULE                         = 54268
 };
 
@@ -50,6 +51,11 @@ enum Yells
     SAY_BUBBLE                                  = -1608026
 };
 
+enum Achievements
+{
+    ACHIEVEMENT_DEHYDRATION                     = 2041,
+};
+
 enum Actions
 {
     ACTION_WATER_ELEMENT_HIT                    = 1,
@@ -66,8 +72,6 @@ static Position SpawnLoc[MAX_SPAWN_LOC]=
     {1918.97f, 850.645f, 47.225f, 4.136f},
     {1935.50f, 796.224f, 52.492f, 4.224f},
 };
-
-#define DATA_DEHYDRATION                        1
 
 class boss_ichoron : public CreatureScript
 {
@@ -88,10 +92,11 @@ public:
 
         bool bIsExploded;
         bool bIsFrenzy;
-        bool dehydration;
+        bool bAchievement;
 
         uint32 uiBubbleCheckerTimer;
         uint32 uiWaterBoltVolleyTimer;
+        uint32 uiWaterBlastTimer;
 
         InstanceScript* pInstance;
 
@@ -101,9 +106,10 @@ public:
         {
             bIsExploded = false;
             bIsFrenzy = false;
-            dehydration = true;
+            bAchievement = true;
             uiBubbleCheckerTimer = 1000;
             uiWaterBoltVolleyTimer = urand(10000, 15000);
+            uiWaterBlastTimer = urand(10000, 15000);
 
             me->SetVisible(true);
             DespawnWaterElements();
@@ -165,12 +171,15 @@ public:
                     if (bIsExploded)
                         DoExplodeCompleted();
 
-                    dehydration = false;
+                    bAchievement = false;
                     break;
                 case ACTION_WATER_ELEMENT_KILLED:
                     uint32 damage = me->CountPctFromMaxHealth(3);
-                    me->ModifyHealth(-int32(damage));
-                    me->LowerPlayerDamageReq(damage);
+                    if (me->GetHealth() > damage)
+                    {
+                        me->ModifyHealth(-int32(damage));
+                        me->LowerPlayerDamageReq(damage);
+                    }
                     break;
             }
         }
@@ -196,25 +205,18 @@ public:
             me->GetMotionMaster()->MoveChase(me->getVictim());
         }
 
-        uint32 GetData(uint32 type)
-        {
-            if (type == DATA_DEHYDRATION)
-                return dehydration ? 1 : 0;
-
-            return 0;
-        }
-
         void MoveInLineOfSight(Unit* /*pWho*/) {}
 
         void UpdateAI(const uint32 uiDiff)
         {
+            //Return since we have no target
             if (!UpdateVictim())
                 return;
 
             if (!bIsFrenzy && HealthBelowPct(25) && !bIsExploded)
             {
                 DoScriptText(SAY_ENRAGE, me);
-                DoCast(me, SPELL_FRENZY, true);
+                DoCast(me, DUNGEON_MODE(SPELL_FRENZY,SPELL_FRENZY_H), true);
                 bIsFrenzy = true;
             }
 
@@ -227,8 +229,8 @@ public:
                         if (!me->HasAura(SPELL_PROTECTIVE_BUBBLE, 0))
                         {
                             DoScriptText(SAY_SHATTER, me);
-                            DoCast(me, SPELL_WATER_BLAST);
                             DoCast(me, SPELL_DRAINED);
+                            DoCast(me, SPELL_BURST, true);
                             bIsExploded = true;
                             me->AttackStop();
                             me->SetVisible(false);
@@ -265,10 +267,23 @@ public:
             {
                 if (uiWaterBoltVolleyTimer <= uiDiff)
                 {
-                    DoCast(me, SPELL_WATER_BOLT_VOLLEY);
-                    uiWaterBoltVolleyTimer = urand(10000, 15000);
+                    if(!me->IsNonMeleeSpellCasted(false))
+                    {
+                        DoCast(me, DUNGEON_MODE(SPELL_WATER_BOLT_VOLLEY,SPELL_WATER_BOLT_VOLLEY_H));
+                        uiWaterBoltVolleyTimer = urand(10000, 15000);
+                    }
                 }
                 else uiWaterBoltVolleyTimer -= uiDiff;
+
+                if (uiWaterBlastTimer <= uiDiff)
+                {
+                    if(!me->IsNonMeleeSpellCasted(false))
+                    {
+                        DoCast(me->getVictim(), DUNGEON_MODE(SPELL_WATER_BLAST,SPELL_WATER_BLAST_H));
+                        uiWaterBlastTimer = urand(10000, 15000);
+                    }
+                }
+                else uiWaterBlastTimer -= uiDiff;
 
                 DoMeleeAttackIfReady();
             }
@@ -288,13 +303,22 @@ public:
 
             if (pInstance)
             {
+                if (IsHeroic() && bAchievement)
+                    pInstance->DoCompleteAchievement(ACHIEVEMENT_DEHYDRATION);
+
                 if (pInstance->GetData(DATA_WAVE_COUNT) == 6)
                 {
+                    if(IsHeroic() && pInstance->GetData(DATA_1ST_BOSS_EVENT) == DONE)
+                        me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
                     pInstance->SetData(DATA_1ST_BOSS_EVENT, DONE);
                     pInstance->SetData(DATA_WAVE_COUNT, 7);
                 }
                 else if (pInstance->GetData(DATA_WAVE_COUNT) == 12)
                 {
+                    if(IsHeroic() && pInstance->GetData(DATA_2ND_BOSS_EVENT) == DONE)
+                        me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
                     pInstance->SetData(DATA_2ND_BOSS_EVENT, DONE);
                     pInstance->SetData(DATA_WAVE_COUNT, 13);
                 }
@@ -308,7 +332,7 @@ public:
                 pSummoned->SetSpeed(MOVE_RUN, 0.3f);
                 pSummoned->GetMotionMaster()->MoveFollow(me, 0, 0);
                 m_waterElements.push_back(pSummoned->GetGUID());
-                pInstance->SetData64(DATA_ADD_TRASH_MOB, pSummoned->GetGUID());
+                pInstance->SetData64(DATA_ADD_TRASH_MOB,pSummoned->GetGUID());
             }
         }
 
@@ -317,15 +341,15 @@ public:
             if (pSummoned)
             {
                 m_waterElements.remove(pSummoned->GetGUID());
-                pInstance->SetData64(DATA_DEL_TRASH_MOB, pSummoned->GetGUID());
+                pInstance->SetData64(DATA_DEL_TRASH_MOB,pSummoned->GetGUID());
             }
         }
 
-        void KilledUnit(Unit* victim)
+        void KilledUnit(Unit * victim)
         {
             if (victim == me)
                 return;
-            DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3), me);
+            DoScriptText(RAND(SAY_SLAY_1,SAY_SLAY_2,SAY_SLAY_3), me);
         }
     };
 
@@ -355,7 +379,7 @@ public:
         void Reset()
         {
             uiRangeCheck_Timer = 1000;
-            DoCast(me, SPELL_WATER_GLOBULE);
+            DoCast(me,SPELL_WATER_GLOBULE);
         }
 
         void AttackStart(Unit* /*pWho*/)
@@ -395,29 +419,8 @@ public:
 
 };
 
-class achievement_dehydration : public AchievementCriteriaScript
-{
-    public:
-        achievement_dehydration() : AchievementCriteriaScript("achievement_dehydration")
-        {
-        }
-
-        bool OnCheck(Player* /*player*/, Unit* target)
-        {
-            if (!target)
-                return false;
-
-            if (Creature* Ichoron = target->ToCreature())
-                if (Ichoron->AI()->GetData(DATA_DEHYDRATION))
-                    return true;
-
-            return false;
-        }
-};
-
 void AddSC_boss_ichoron()
 {
     new boss_ichoron();
     new mob_ichor_globule();
-    new achievement_dehydration();
 }

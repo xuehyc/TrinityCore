@@ -18,7 +18,6 @@
 
 #include "Player.h"
 #include "ObjectMgr.h"
-#include "ArenaTeamMgr.h"
 #include "World.h"
 #include "WorldPacket.h"
 
@@ -26,6 +25,7 @@
 #include "Battleground.h"
 #include "BattlegroundMgr.h"
 #include "Creature.h"
+#include "ChannelMgr.h"
 #include "Formulas.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
@@ -479,6 +479,10 @@ inline void Battleground::_ProcessJoin(uint32 diff)
         {
             PlaySoundToAll(SOUND_BG_START);
 
+            uint64 dummy = 0;
+            if (GetPlayers().begin() != GetPlayers().end())
+                dummy = GetPlayers().begin()->first;
+
             for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
                 if (Player* plr = sObjectMgr->GetPlayer(itr->first))
                 {
@@ -488,6 +492,19 @@ inline void Battleground::_ProcessJoin(uint32 diff)
             // Announce BG starting
             if (sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE))
                 sWorld->SendWorldText(LANG_BG_STARTED_ANNOUNCE_WORLD, GetName(), GetMinLevel(), GetMaxLevel());
+
+            // Announce to bgannounce Channel
+            if (sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_CHANNEL) && dummy > 0)
+            {
+                ChannelMgr* cMgr = channelMgr(HORDE);
+                Channel* chBg = cMgr->GetJoinChannel("bgannounce", HORDE);
+
+                char fText[128];
+                sprintf(fText, "%s -- [%d-%d] hat begonnen.", GetName(), GetMinLevel(), GetMaxLevel() );
+
+                // Announce to channel
+                chBg->Say(dummy, fText, 0);
+            }
         }
     }
 }
@@ -539,8 +556,8 @@ inline Player* Battleground::_GetPlayer(BattlegroundPlayerMap::const_iterator it
 
 inline Player* Battleground::_GetPlayerForTeam(uint32 teamId, BattlegroundPlayerMap::const_iterator itr, const char* context) const
 {
-    Player* player = _GetPlayer(itr, context);
-    if (player)
+    Player* player = NULL;
+    if (player = _GetPlayer(itr, context))
     {
         uint32 team = itr->second.Team;
         if (!team)
@@ -560,14 +577,14 @@ void Battleground::SetTeamStartLoc(uint32 TeamID, float X, float Y, float Z, flo
     m_TeamStartLocO[idx] = O;
 }
 
-void Battleground::SendPacketToAll(WorldPacket* packet)
+void Battleground::SendPacketToAll(WorldPacket *packet)
 {
     for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
         if (Player* player = _GetPlayer(itr, "SendPacketToAll"))
             player->GetSession()->SendPacket(packet);
 }
 
-void Battleground::SendPacketToTeam(uint32 TeamID, WorldPacket* packet, Player *sender, bool self)
+void Battleground::SendPacketToTeam(uint32 TeamID, WorldPacket *packet, Player *sender, bool self)
 {
     for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
         if (Player* player = _GetPlayerForTeam(TeamID, itr, "SendPacketToTeam"))
@@ -690,8 +707,8 @@ void Battleground::EndBattleground(uint32 winner)
     // arena rating calculation
     if (isArena() && isRated())
     {
-        winner_arena_team = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(winner));
-        loser_arena_team = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(winner)));
+        winner_arena_team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(winner));
+        loser_arena_team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(winner)));
         if (winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
         {
             if (winner != WINNER_NONE)
@@ -778,7 +795,7 @@ void Battleground::EndBattleground(uint32 winner)
                 if (member)
                     plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, member->PersonalRating);
 
-                winner_arena_team->MemberWon(plr, loser_matchmaker_rating, winner_change);
+                winner_arena_team->MemberWon(plr,loser_matchmaker_rating, winner_change);
             }
             else
             {
@@ -905,7 +922,7 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
         plr->SpawnCorpseBones();
     }
 
-    RemovePlayer(plr, guid, team);                           // BG subclass specific code
+    RemovePlayer(plr, guid);                                // BG subclass specific code
 
     if (participant) // if the player was a match participant, remove auras, calc rating, update queue
     {
@@ -920,6 +937,7 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
             // if arena, remove the specific arena auras
             if (isArena())
             {
+                plr->RemoveArenaAuras(true);                // removes debuffs / dots etc., we don't want the player to die after porting out
                 bgTypeId=BATTLEGROUND_AA;                   // set the bg type to all arenas (it will be used for queue refreshing)
 
                 // unsummon current and summon old pet if there was one and there isn't a current pet
@@ -929,8 +947,8 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
                 if (isRated() && GetStatus() == STATUS_IN_PROGRESS)
                 {
                     //left a rated match while the encounter was in progress, consider as loser
-                    ArenaTeam * winner_arena_team = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(team)));
-                    ArenaTeam * loser_arena_team = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(team));
+                    ArenaTeam * winner_arena_team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(team)));
+                    ArenaTeam * loser_arena_team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(team));
                     if (winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
                         loser_arena_team->MemberLost(plr, GetArenaMatchmakerRating(GetOtherTeam(team)));
                 }
@@ -951,15 +969,15 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
             if (isRated() && GetStatus() == STATUS_IN_PROGRESS)
             {
                 //left a rated match while the encounter was in progress, consider as loser
-                ArenaTeam * others_arena_team = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(team)));
-                ArenaTeam * players_arena_team = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(team));
+                ArenaTeam * others_arena_team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(team)));
+                ArenaTeam * players_arena_team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(team));
                 if (others_arena_team && players_arena_team)
                     players_arena_team->OfflineMemberLost(guid, GetArenaMatchmakerRating(GetOtherTeam(team)));
             }
         }
 
         // remove from raid group if player is member
-        if (Group* group = GetBgRaid(team))
+        if (Group *group = GetBgRaid(team))
         {
             if (!group->RemoveMember(guid))                // group was disbanded
             {
@@ -991,6 +1009,7 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
             plr->TeleportToBGEntryPoint();
 
         sLog->outDetail("BATTLEGROUND: Removed player %s from Battleground.", plr->GetName());
+        plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId(), true);
     }
 
     //battleground object will be deleted next Battleground::Update() call
@@ -1081,16 +1100,16 @@ void Battleground::AddPlayer(Player* plr)
         if (team == ALLIANCE)                                // gold
         {
             if (plr->GetTeam() == HORDE)
-                plr->CastSpell(plr, SPELL_HORDE_GOLD_FLAG, true);
+                plr->CastSpell(plr, SPELL_HORDE_GOLD_FLAG,true);
             else
-                plr->CastSpell(plr, SPELL_ALLIANCE_GOLD_FLAG, true);
+                plr->CastSpell(plr, SPELL_ALLIANCE_GOLD_FLAG,true);
         }
         else                                                // green
         {
             if (plr->GetTeam() == HORDE)
-                plr->CastSpell(plr, SPELL_HORDE_GREEN_FLAG, true);
+                plr->CastSpell(plr, SPELL_HORDE_GREEN_FLAG,true);
             else
-                plr->CastSpell(plr, SPELL_ALLIANCE_GREEN_FLAG, true);
+                plr->CastSpell(plr, SPELL_ALLIANCE_GREEN_FLAG,true);
         }
 
         plr->DestroyConjuredItems(true);
@@ -1112,17 +1131,8 @@ void Battleground::AddPlayer(Player* plr)
             plr->CastSpell(plr, SPELL_PREPARATION, true);   // reduces all mana cost of spells.
     }
 
-    plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);
-    plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);
-    plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DAMAGE_DONE, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);
-    plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);
-    plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);
-    plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);
-    plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);
-    plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);
-    plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);
-    plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);
-    plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);
+    plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());
+    plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DAMAGE_DONE, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());
 
     // setup BG group membership
     PlayerAddedToBGCheckIfBGIsRunning(plr);
@@ -1190,7 +1200,7 @@ void Battleground::EventPlayerLoggedOut(Player* player)
     if (GetStatus() == STATUS_IN_PROGRESS)
     {
         // drop flag and handle other cleanups
-        RemovePlayer(player, player->GetGUID(), GetPlayerTeam(player->GetGUID()));
+        RemovePlayer(player, player->GetGUID());
 
         // 1 player is logging out, if it is the last, then end arena!
         if (isArena())
@@ -1304,6 +1314,7 @@ void Battleground::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, 
             break;
         case SCORE_DEATHS:                                  // Deaths
             itr->second->Deaths += value;
+            Source->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
             break;
         case SCORE_HONORABLE_KILLS:                         // Honorable kills
             itr->second->HonorableKills += value;
@@ -1372,7 +1383,7 @@ bool Battleground::AddObject(uint32 type, uint32 entry, float x, float y, float 
     // Must be created this way, adding to godatamap would add it to the base map of the instance
     // and when loading it (in go::LoadFromDB()), a new guid would be assigned to the object, and a new object would be created
     // So we must create it specific for this instance
-    GameObject* go = new GameObject;
+    GameObject * go = new GameObject;
     if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, GetBgMap(),
         PHASEMASK_NORMAL, x, y, z, o, rotation0, rotation1, rotation2, rotation3, 100, GO_STATE_READY))
     {
@@ -1497,7 +1508,7 @@ Creature* Battleground::AddCreature(uint32 entry, uint32 type, uint32 teamval, f
 
     pCreature->SetHomePosition(x, y, z, o);
 
-    CreatureTemplate const *cinfo = sObjectMgr->GetCreatureTemplate(entry);
+    CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(entry);
     if (!cinfo)
     {
         sLog->outError("Battleground::AddCreature: creature template (entry: %u) does not exist for BG (map: %u, instance id: %u)!",

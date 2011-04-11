@@ -84,7 +84,7 @@ public:
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
             // 1 - OZ, 2 - HOOD, 3 - RAJ, this never gets altered.
-            m_uiOperaEvent      = urand(1, 3);
+            m_uiOperaEvent      = urand(1,3);
             m_uiOzDeathCount    = 0;
 
             m_uiCurtainGUID         = 0;
@@ -138,18 +138,14 @@ public:
                     break;
                 case TYPE_MAIDEN:               m_auiEncounter[2] = uiData; break;
                 case TYPE_OPTIONAL_BOSS:        m_auiEncounter[3] = uiData; break;
-                case TYPE_OPERA:
-                    m_auiEncounter[4] = uiData;
-                    if (uiData == DONE)
-                        UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, 16812, NULL);
-                    break;
+                case TYPE_OPERA:                m_auiEncounter[4] = uiData; break;
                 case TYPE_CURATOR:              m_auiEncounter[5] = uiData; break;
                 case TYPE_ARAN:                 m_auiEncounter[6] = uiData; break;
                 case TYPE_TERESTIAN:            m_auiEncounter[7] = uiData; break;
                 case TYPE_NETHERSPITE:          m_auiEncounter[8] = uiData; break;
                 case TYPE_CHESS:
                     if (uiData == DONE)
-                        DoRespawnGameObject(DustCoveredChest, DAY);
+                        DoRespawnGameObject(DustCoveredChest,DAY);
                     m_auiEncounter[9]  = uiData;
                     break;
                 case TYPE_MALCHEZZAR:           m_auiEncounter[10] = uiData; break;
@@ -170,7 +166,7 @@ public:
                 OUT_SAVE_INST_DATA;
 
                 std::ostringstream saveStream;
-                saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
+            saveStream << "K A " << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
                     << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " " << m_auiEncounter[6] << " "
                     << m_auiEncounter[7] << " " << m_auiEncounter[8] << " " << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11];
 
@@ -298,9 +294,24 @@ public:
             OUT_LOAD_INST_DATA(chrIn);
             std::istringstream loadStream(chrIn);
 
-            loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
-                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
-                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11];
+        char check1, check2;
+        uint32 m_auiEncounterLoad[MAX_ENCOUNTER];
+        memset(&m_auiEncounterLoad, 0, sizeof(m_auiEncounterLoad));
+
+        loadStream >> check1 >> check2 >> m_auiEncounterLoad[0] >> m_auiEncounterLoad[1] >> m_auiEncounterLoad[2] >> m_auiEncounterLoad[3]
+            >> m_auiEncounterLoad[4] >> m_auiEncounterLoad[5] >> m_auiEncounterLoad[6] >> m_auiEncounterLoad[7]
+            >> m_auiEncounterLoad[8] >> m_auiEncounterLoad[9] >> m_auiEncounterLoad[10] >> m_auiEncounterLoad[11];
+
+        if(check1 == 'K' && check2 == 'A')
+        {
+            for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                m_auiEncounter[i] = m_auiEncounterLoad[4];
+        }else
+        {
+            OUT_LOAD_INST_DATA_FAIL;
+            return;
+        }
+
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
                     m_auiEncounter[i] = NOT_STARTED;

@@ -62,15 +62,15 @@ public:
         {
             lifeTimer = 120000;
             me->SetStandState(UNIT_STAND_STATE_DEAD);
-            me->SetUInt32Value(UNIT_FIELD_BYTES_1, 7);   // lay down
+            me->SetUInt32Value(UNIT_FIELD_BYTES_1,7);   // lay down
             spellHit = false;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
         }
 
-        void MoveInLineOfSight(Unit* /*who*/)
+        void MoveInLineOfSight(Unit * /*who*/)
         {
         }
 

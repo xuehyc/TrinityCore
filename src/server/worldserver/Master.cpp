@@ -49,8 +49,8 @@
 extern int m_ServiceStatus;
 #endif
 
-/// Handle worldservers's termination signals
-class WorldServerSignalHandler : public Trinity::SignalHandler
+/// Handle cored's termination signals
+class CoredSignalHandler : public Trinity::SignalHandler
 {
     public:
         virtual void HandleSignal(int SigNum)
@@ -67,6 +67,30 @@ class WorldServerSignalHandler : public Trinity::SignalHandler
                 #endif /* _WIN32 */
                     World::StopNow(SHUTDOWN_EXIT_CODE);
                     break;
+                #ifdef WITH_AUTOBACKTRACE
+                case SIGUSR1:
+                    sLog->outError("Start User Backtrace.");
+                    char buffer[50]; // 24 chars + pid
+
+                    sprintf(buffer, "./createbacktrace %u user", getpid());
+                    if(system(buffer))
+                        sLog->outError("User Backtrace created!");
+                    else
+                        sLog->outError("User Backtrace creation failed!");
+                    break;
+                case SIGSEGV:
+                case SIGILL:
+                case SIGABRT:
+                case SIGBUS:
+                case SIGFPE: {
+                    char buffer[50]; // 26 chars + pid + signum
+
+                    sprintf(buffer, "./createbacktrace %u crash, %u", getpid(), SigNum);
+                    system(buffer);
+                    //exit(CRASH_EXIT_CODE);
+                    break;
+                }
+                #endif /* WITH_AUTOBACKTRACE */
             }
         }
 };
@@ -77,6 +101,7 @@ public:
     FreezeDetectorRunnable() { _delaytime = 0; }
     uint32 m_loops, m_lastchange;
     uint32 w_loops, w_lastchange;
+    uint32 frozenLoop, frozenCount;
     uint32 _delaytime;
     void SetDelayTime(uint32 t) { _delaytime = t; }
     void run(void)
@@ -88,6 +113,8 @@ public:
         w_loops = 0;
         m_lastchange = 0;
         w_lastchange = 0;
+        frozenLoop = 0;
+        frozenCount = 0;
         while (!World::IsStopped())
         {
             ACE_Based::Thread::Sleep(1000);
@@ -99,10 +126,38 @@ public:
                 w_loops = World::m_worldLoopCounter;
             }
             // possible freeze
-            else if (getMSTimeDiff(w_lastchange, curtime) > _delaytime)
+            else if (getMSTimeDiff(w_lastchange,curtime) > _delaytime)
             {
+                #ifdef WITH_AUTOBACKTRACE
+                frozenCount++;
+                
+                if(frozenCount > 2) // kick into the servers ass
+                {
+                    sLog->outError("World Thread hangs, kicking out server!");
+                    *((uint32 volatile*)NULL) = 0;
+                }
+
+                if(w_loops != frozenLoop)
+                {
+                    sLog->outError("World Thread hangs, create backtrace!");
+                    char buffer[50]; // 26 chars + pid
+
+                    sprintf(buffer, "./createbacktrace %u freeze", getpid());
+                    if(system(buffer))
+                        sLog->outError("World Thread hangs, backtrace created!");
+                    else
+                        sLog->outError("World Thread hangs, backtrace creation failed!");
+                    w_lastchange = curtime;
+                    frozenLoop = w_loops;
+                }
+                else
+                {
+                    sLog->outError("World Thread hangs, hang count: %u", frozenCount);
+                }
+                #else /* WITH_AUTOBACKTRACE */
                 sLog->outError("World Thread hangs, kicking out server!");
                 ASSERT(false);
+                #endif /* WITH_AUTOBACKTRACE */
             }
         }
         sLog->outString("Anti-freeze thread exiting without problems.");
@@ -123,7 +178,7 @@ int Master::Run()
     BigNumber seed1;
     seed1.SetRand(16 * 8);
 
-    sLog->outString("%s (worldserver-daemon)", _FULLVERSION);
+    sLog->outString("%s (core-daemon)", _FULLVERSION);
     sLog->outString("<Ctrl-C> to stop.\n");
 
     sLog->outString(" ______                       __");
@@ -143,7 +198,7 @@ int Master::Run()
     sLog->outString("\n");
 #endif //USE_SFMT_FOR_RNG
 
-    /// worldserver PID file creation
+    /// worldd PID file creation
     std::string pidfile = sConfig->GetStringDefault("PidFile", "");
     if (!pidfile.empty())
     {
@@ -168,15 +223,30 @@ int Master::Run()
     sWorld->SetInitialWorldSettings();
 
     // Initialise the signal handlers
-    WorldServerSignalHandler SignalINT, SignalTERM;
+    CoredSignalHandler SignalINT, SignalTERM;
+    
+    #ifdef WITH_AUTOBACKTRACE
+    CoredSignalHandler SignalSEGV, SignalILL, SignalABRT, SignalBUS, SignalFPE, SignalUSR1;
+    #endif /* WITH_AUTOBACKTRACE */
+    
     #ifdef _WIN32
-    WorldServerSignalHandler SignalBREAK;
+    CoredSignalHandler SignalBREAK;
     #endif /* _WIN32 */
 
-    // Register worldserver's signal handlers
+    // Register core's signal handlers
     ACE_Sig_Handler Handler;
     Handler.register_handler(SIGINT, &SignalINT);
     Handler.register_handler(SIGTERM, &SignalTERM);
+    
+    #ifdef WITH_AUTOBACKTRACE
+    Handler.register_handler(SIGSEGV, &SignalSEGV);
+    Handler.register_handler(SIGILL, &SignalILL);
+    Handler.register_handler(SIGABRT, &SignalABRT);
+    Handler.register_handler(SIGBUS, &SignalBUS);
+    Handler.register_handler(SIGFPE, &SignalFPE);
+    Handler.register_handler(SIGUSR1, &SignalUSR1);
+    #endif /* WITH_AUTOBACKTRACE */
+    
     #ifdef _WIN32
     Handler.register_handler(SIGBREAK, &SignalBREAK);
     #endif /* _WIN32 */
@@ -216,11 +286,11 @@ int Master::Run()
 
                 if (!curAff)
                 {
-                    sLog->outError("Processors marked in UseProcessors bitmask (hex) %x are not accessible for the worldserver. Accessible processors bitmask (hex): %x", Aff, appAff);
+                    sLog->outError("Processors marked in UseProcessors bitmask (hex) %x not accessible for Trinityd. Accessible processors bitmask (hex): %x", Aff, appAff);
                 }
                 else
                 {
-                    if (SetProcessAffinityMask(hProcess, curAff))
+                    if (SetProcessAffinityMask(hProcess,curAff))
                         sLog->outString("Using processors (bitmask, hex): %x", curAff);
                     else
                         sLog->outError("Can't set used processors (hex): %x", curAff);
@@ -235,9 +305,9 @@ int Master::Run()
         if (Prio)
         {
             if (SetPriorityClass(hProcess, HIGH_PRIORITY_CLASS))
-                sLog->outString("worldserver process priority class set to HIGH");
+                sLog->outString("TrinityCore process priority class set to HIGH");
             else
-                sLog->outError("Can't set worldserver process priority class.");
+                sLog->outError("Can't set Trinityd process priority class.");
             sLog->outString("");
         }
     }
@@ -456,7 +526,7 @@ bool Master::_StartDB()
     clearOnlineAccounts();
 
     ///- Insert version info into DB
-    WorldDatabase.PExecute("UPDATE version SET core_version = '%s', core_revision = '%s'", _FULLVERSION, _HASH);
+    WorldDatabase.PExecute("UPDATE version SET core_version = '%s', core_revision = '%s'", _FULLVERSION, _REVISION);
 
     sWorld->LoadDBVersion();
 

@@ -21,7 +21,6 @@
 
 #include "Common.h"
 #include <ace/Singleton.h>
-#include <ace/Atomic_Op.h>
 
 #include "DBCStores.h"
 #include "Player.h"
@@ -63,7 +62,7 @@ class WorldObject;
 struct AchievementCriteriaData;
 struct AuctionEntry;
 struct Condition;
-struct ItemTemplate;
+struct ItemPrototype;
 struct OutdoorPvPData;
 
 #define VISIBLE_RANGE       (166.0f)                        //MAX visible range (size of grid)
@@ -238,7 +237,7 @@ class ServerScript : public ScriptObject
         virtual void OnUnknownPacketReceive(WorldSocket* /*socket*/, WorldPacket& /*packet*/) { }
 };
 
-class WorldScript : public ScriptObject
+class WorldScript : public ScriptObject, public UpdatableScript<void>
 {
     protected:
 
@@ -389,7 +388,7 @@ class ItemScript : public ScriptObject
         virtual bool OnUse(Player* /*player*/, Item* /*item*/, SpellCastTargets const& /*targets*/) { return false; }
 
         // Called when the item expires (is destroyed).
-        virtual bool OnExpire(Player* /*player*/, ItemTemplate const* /*proto*/) { return false; }
+        virtual bool OnExpire(Player* /*player*/, ItemPrototype const* /*proto*/) { return false; }
 };
 
 class CreatureScript : public ScriptObject, public UpdatableScript<Creature>
@@ -700,7 +699,7 @@ class PlayerScript : public ScriptObject
         virtual void OnTextEmote(Player* /*player*/, uint32 /*text_emote*/, uint32 /*emoteNum*/, uint64 /*guid*/) { }
 
         // Called in Spell::cast
-        virtual void OnSpellCast(Player* /*player*/, Spell* /*spell*/, bool /*skipCheck*/) { }
+        virtual void OnSpellCast(Player* /*player*/, Spell * /*spell*/, bool /*skipCheck*/) { }
 
         // Called when a player logs in or out
         virtual void OnLogin(Player* /*player*/) { }
@@ -766,9 +765,6 @@ class ScriptMgr
     virtual ~ScriptMgr();
 
     uint32 _scriptCount;
-
-    //atomic op counter for active scripts amount
-    ACE_Atomic_Op<ACE_Thread_Mutex, long> _scheduledScripts;
 
     public: /* Initialization */
 
@@ -840,7 +836,7 @@ class ScriptMgr
         bool OnDummyEffect(Unit* caster, uint32 spellId, SpellEffIndex effIndex, Item* target);
         bool OnQuestAccept(Player* player, Item* item, Quest const* quest);
         bool OnItemUse(Player* player, Item* item, SpellCastTargets const& targets);
-        bool OnItemExpire(Player* player, ItemTemplate const* proto);
+        bool OnItemExpire(Player* player, ItemPrototype const* proto);
 
     public: /* CreatureScript */
 
@@ -928,15 +924,15 @@ class ScriptMgr
 
     public: /* PlayerScript */
 
-        void OnPVPKill(Player* killer, Player* killed);
-        void OnCreatureKill(Player* killer, Creature* killed);
-        void OnPlayerKilledByCreature(Creature* killer, Player* killed);
-        void OnPlayerLevelChanged(Player* player, uint8 oldLevel);
-        void OnPlayerFreeTalentPointsChanged(Player* player, uint32 newPoints);
-        void OnPlayerTalentsReset(Player* player, bool no_cost);
-        void OnPlayerMoneyChanged(Player* player, int32& amount);
-        void OnGivePlayerXP(Player* player, uint32& amount, Unit* victim);
-        void OnPlayerReputationChange(Player* player, uint32 factionID, int32& standing, bool incremental);
+        void OnPVPKill(Player *killer, Player *killed);
+        void OnCreatureKill(Player *killer, Creature *killed);
+        void OnPlayerKilledByCreature(Creature *killer, Player *killed);
+        void OnPlayerLevelChanged(Player *player, uint8 newLevel);
+        void OnPlayerFreeTalentPointsChanged(Player *player, uint32 newPoints);
+        void OnPlayerTalentsReset(Player *player, bool no_cost);
+        void OnPlayerMoneyChanged(Player *player, int32& amount);
+        void OnGivePlayerXP(Player *player, uint32& amount, Unit *victim);
+        void OnPlayerReputationChange(Player *player, uint32 factionID, int32& standing, bool incremental);
         void OnPlayerDuelRequest(Player* target, Player* challenger);
         void OnPlayerDuelStart(Player* player1, Player* player2);
         void OnPlayerDuelEnd(Player* winner, Player* loser, DuelCompleteType type);
@@ -947,7 +943,7 @@ class ScriptMgr
         void OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Channel* channel);
         void OnPlayerEmote(Player* player, uint32 emote);
         void OnPlayerTextEmote(Player* player, uint32 text_emote, uint32 emoteNum, uint64 guid);
-        void OnPlayerSpellCast(Player* player, Spell* spell, bool skipCheck);
+        void OnPlayerSpellCast(Player* player, Spell *spell, bool skipCheck);
         void OnPlayerLogin(Player* player);
         void OnPlayerLogout(Player* player);
         void OnPlayerCreate(Player* player);
@@ -955,12 +951,12 @@ class ScriptMgr
         void OnPlayerBindToInstance(Player* player, Difficulty difficulty, uint32 mapid, bool permanent);
 
     public: /* GuildScript */
-        void OnGuildAddMember(Guild* guild, Player* player, uint8& plRank);
-        void OnGuildRemoveMember(Guild* guild, Player* player, bool isDisbanding, bool isKicked);
-        void OnGuildMOTDChanged(Guild* guild, const std::string& newMotd);
-        void OnGuildInfoChanged(Guild* guild, const std::string& newInfo);
-        void OnGuildCreate(Guild* guild, Player* leader, const std::string& name);
-        void OnGuildDisband(Guild* guild);
+        void OnGuildAddMember(Guild *guild, Player *player, uint8& plRank);
+        void OnGuildRemoveMember(Guild *guild, Player *player, bool isDisbanding, bool isKicked);
+        void OnGuildMOTDChanged(Guild *guild, const std::string& newMotd);
+        void OnGuildInfoChanged(Guild *guild, const std::string& newInfo);
+        void OnGuildCreate(Guild *guild, Player* leader, const std::string& name);
+        void OnGuildDisband(Guild *guild);
         void OnGuildMemberWitdrawMoney(Guild* guild, Player* player, uint32 &amount, bool isRepair);
         void OnGuildMemberDepositMoney(Guild* guild, Player* player, uint32 &amount);
         void OnGuildItemMove(Guild* guild, Player* player, Item* pItem, bool isSrcBank, uint8 srcContainer, uint8 srcSlotId,
@@ -974,12 +970,6 @@ class ScriptMgr
         void OnGroupRemoveMember(Group* group, uint64 guid, RemoveMethod method, uint64 kicker, const char* reason);
         void OnGroupChangeLeader(Group* group, uint64 newLeaderGuid, uint64 oldLeaderGuid);
         void OnGroupDisband(Group* group);
-
-    public: /* Scheduled scripts */
-        uint32 IncreaseScheduledScriptsCount() { return uint32(++_scheduledScripts); }
-        uint32 DecreaseScheduledScriptCount() { return uint32(--_scheduledScripts); }
-        uint32 DecreaseScheduledScriptCount(size_t count) { return uint32(_scheduledScripts -= count); }
-        bool IsScriptScheduled() const { return _scheduledScripts > 0; }
 
     public: /* ScriptRegistry */
 

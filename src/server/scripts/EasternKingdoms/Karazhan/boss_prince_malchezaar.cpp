@@ -42,7 +42,7 @@ EndScriptData */
 // 18 Coordinates for Infernal spawns
 struct InfernalPoint
 {
-    float x, y;
+    float x,y;
 };
 
 #define INFERNAL_Z  275.5f
@@ -117,8 +117,8 @@ public:
         InfernalPoint *point;
 
         void Reset() {}
-        void EnterCombat(Unit* /*who*/) {}
-        void MoveInLineOfSight(Unit* /*who*/) {}
+        void EnterCombat(Unit * /*who*/) {}
+        void MoveInLineOfSight(Unit * /*who*/) {}
 
         void UpdateAI(const uint32 diff)
         {
@@ -149,7 +149,7 @@ public:
                 CAST_CRE(pMalchezaar)->AI()->KilledUnit(who);
         }
 
-        void SpellHit(Unit* /*who*/, const SpellEntry *spell)
+        void SpellHit(Unit * /*who*/, const SpellEntry *spell)
         {
             if (spell->Id == SPELL_INFERNAL_RELAY)
             {
@@ -230,20 +230,20 @@ public:
             Cleave_Timer = 8000;
             InfernalTimer = 45000;
             InfernalCleanupTimer = 47000;
-            AxesTargetSwitchTimer = urand(7500, 20000);
-            SunderArmorTimer = urand(5000, 10000);
+            AxesTargetSwitchTimer = urand(7500,20000);
+            SunderArmorTimer = urand(5000,10000);
             phase = 1;
 
             if (pInstance)
                 pInstance->HandleGameObject(pInstance->GetData64(DATA_GO_NETHER_DOOR), true);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit * /*victim*/)
         {
-            DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3), me);
+            DoScriptText(RAND(SAY_SLAY1,SAY_SLAY2,SAY_SLAY3), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit * /*victim*/)
         {
             DoScriptText(SAY_DEATH, me);
 
@@ -259,7 +259,7 @@ public:
                 pInstance->HandleGameObject(pInstance->GetData64(DATA_GO_NETHER_DOOR), true);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
 
@@ -297,7 +297,7 @@ public:
             SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
 
             //damage
-            const CreatureTemplate *cinfo = me->GetCreatureInfo();
+            const CreatureInfo *cinfo = me->GetCreatureInfo();
             me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, cinfo->mindmg);
             me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, cinfo->maxdmg);
             me->UpdateDamagePhysical(BASE_ATTACK);
@@ -379,7 +379,7 @@ public:
                 DoCast(Infernal, SPELL_INFERNAL_RELAY);
             }
 
-            DoScriptText(RAND(SAY_SUMMON1, SAY_SUMMON2), me);
+            DoScriptText(RAND(SAY_SUMMON1,SAY_SUMMON2), me);
         }
 
         void UpdateAI(const uint32 diff)
@@ -420,7 +420,7 @@ public:
                     SetEquipmentSlots(false, EQUIP_ID_AXE, EQUIP_ID_AXE, EQUIP_NO_CHANGE);
 
                     //damage
-                    const CreatureTemplate *cinfo = me->GetCreatureInfo();
+                    const CreatureInfo *cinfo = me->GetCreatureInfo();
                     me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 2*cinfo->mindmg);
                     me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 2*cinfo->maxdmg);
                     me->UpdateDamagePhysical(BASE_ATTACK);
@@ -477,14 +477,14 @@ public:
                 if (SunderArmorTimer <= diff)
                 {
                     DoCast(me->getVictim(), SPELL_SUNDER_ARMOR);
-                    SunderArmorTimer = urand(10000, 18000);
+                    SunderArmorTimer = urand(10000,18000);
 
                 } else SunderArmorTimer -= diff;
 
                 if (Cleave_Timer <= diff)
                 {
                     DoCast(me->getVictim(), SPELL_CLEAVE);
-                    Cleave_Timer = urand(6000, 12000);
+                    Cleave_Timer = urand(6000,12000);
 
                 } else Cleave_Timer -= diff;
             }
@@ -492,7 +492,7 @@ public:
             {
                 if (AxesTargetSwitchTimer <= diff)
                 {
-                    AxesTargetSwitchTimer = urand(7500, 20000);
+                    AxesTargetSwitchTimer = urand(7500,20000);
 
                     if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     {
@@ -515,7 +515,7 @@ public:
                 {
                     if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         DoCast(pTarget, SPELL_AMPLIFY_DAMAGE);
-                    AmplifyDamageTimer = urand(20000, 30000);
+                    AmplifyDamageTimer = urand(20000,30000);
                 } else AmplifyDamageTimer -= diff;
             }
 

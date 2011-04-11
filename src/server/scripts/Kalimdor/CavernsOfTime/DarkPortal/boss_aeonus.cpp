@@ -26,27 +26,25 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "dark_portal.h"
 
-enum eEnums
-{
-    SAY_ENTER           = -1269012,
-    SAY_AGGRO           = -1269013,
-    SAY_BANISH          = -1269014,
-    SAY_SLAY1           = -1269015,
-    SAY_SLAY2           = -1269016,
-    SAY_DEATH           = -1269017,
-    EMOTE_FRENZY        = -1269018,
+#define CORRUPT_MEDIVH    31326
 
-    SPELL_CLEAVE        = 40504,
-    SPELL_TIME_STOP     = 31422,
-    SPELL_ENRAGE        = 37605,
-    SPELL_SAND_BREATH   = 31473,
-    H_SPELL_SAND_BREATH = 39049
-};
+#define SAY_ENTER         -1269012
+#define SAY_AGGRO         -1269013
+#define SAY_BANISH        -1269014
+#define SAY_SLAY1         -1269015
+#define SAY_SLAY2         -1269016
+#define SAY_DEATH         -1269017
+
+#define SPELL_CLEAVE        40504
+#define SPELL_TIME_STOP     31422
+#define SPELL_ENRAGE        37605
+#define SPELL_SAND_BREATH   31473
+#define H_SPELL_SAND_BREATH 39049
 
 class boss_aeonus : public CreatureScript
 {
 public:
-    boss_aeonus() : CreatureScript("boss_aeonus") { }
+    boss_aeonus() : CreatureScript("boss_aeonus") {}
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
@@ -58,89 +56,154 @@ public:
         boss_aeonusAI(Creature *c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
+            HeroicMode = me->GetMap()->IsHeroic();
         }
 
         InstanceScript *pInstance;
 
+        bool HeroicMode;
+        bool MayNotCastCorrupt;
+        bool IsChanneling;
+
+        uint32 Corrupt_Timer;
         uint32 SandBreath_Timer;
         uint32 TimeStop_Timer;
         uint32 Frenzy_Timer;
 
         void Reset()
         {
-            SandBreath_Timer = 15000+rand()%15000;
-            TimeStop_Timer = 10000+rand()%5000;
-            Frenzy_Timer = 30000+rand()%15000;
+            SandBreath_Timer = 30000;
+            TimeStop_Timer = 40000;
+            Frenzy_Timer = 120000;
+            Corrupt_Timer = 1000;
+            IsChanneling = false;
+
+            if (pInstance)
+                pInstance->SetData(DATA_AEONUSDEATH, 0); 
+
+            Creature *pMedivh = (Creature*)(Unit::GetUnit((*me), pInstance->GetData64(DATA_MEDIVH)));
+            if(pMedivh)
+            {
+                float x,y;
+                pMedivh->GetNearPoint2D(x,y,10,pMedivh->GetAngle(me));
+                me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                (*me).GetMotionMaster()->MovePoint(1,x,y,pMedivh->GetPositionZ());
+            }
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if(type != POINT_MOTION_TYPE)
+                    return;
+
+            if(id == 1)
+            {
+                Creature *pMedivh = (Creature*)(Unit::GetUnit((*me), pInstance->GetData64(DATA_MEDIVH)));
+                if(pMedivh)
+                {
+                    DoCast(pMedivh, CORRUPT_MEDIVH);
+                }
+                IsChanneling = true;
+            }
+        }
+
+        void EnterCombat(Unit * /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
+            me->InterruptNonMeleeSpells(false);
+            IsChanneling = false;
         }
 
-        void MoveInLineOfSight(Unit *who)
-        {
-            //Despawn Time Keeper
-            if (who->GetTypeId() == TYPEID_UNIT && who->GetEntry() == C_TIME_KEEPER)
-            {
-                if (me->IsWithinDistInMap(who, 20.0f))
-                {
-                    DoScriptText(SAY_BANISH, me);
-                    me->DealDamage(who, who->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                }
-            }
-
-            ScriptedAI::MoveInLineOfSight(who);
-        }
-
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit * /*victim*/)
         {
             DoScriptText(SAY_DEATH, me);
 
-             if (pInstance)
-             {
-                 pInstance->SetData(TYPE_RIFT, DONE);
-                 pInstance->SetData(TYPE_MEDIVH, DONE);//FIXME: later should be removed
-             }
+            if (pInstance)
+                pInstance->SetData(DATA_AEONUSDEATH, 1); 
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit * /*victim*/)
         {
-            DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2), me);
+            switch(rand()%2)
+            {
+                case 0: DoScriptText(SAY_SLAY1, me); break;
+                case 1: DoScriptText(SAY_SLAY2, me); break;
+            }
+        }
+
+        void UpdateWorldState(uint32 field, uint32 value)
+        {
+            Map * map = me->GetMap();
+            if(!map->IsDungeon()) return;
+
+            WorldPacket data(SMSG_UPDATE_WORLD_STATE, 8);
+
+            data << field;
+            data << value;
+
+            ((InstanceMap*)map)->SendToPlayers(&data);
+
+            // TODO: Uncomment and remove everything above this line only when the core patch for this is accepted
+            //me->GetMap()->UpdateWorldState(field, value);
         }
 
         void UpdateAI(const uint32 diff)
         {
+            Creature *pMedivh = (Creature*)(Unit::GetUnit((*me), pInstance->GetData64(DATA_MEDIVH)));
+
+            // If we channel corrupt on Medivh, lower Shield by 1% every second
+            if(IsChanneling)
+            {
+                if(Corrupt_Timer < diff)
+                {
+                    if(pInstance)
+                    {
+                        uint32 ShieldPercent = pInstance->GetData(DATA_SHIELDPERCENT);
+                        pInstance->SetData(DATA_SHIELDPERCENT, ShieldPercent-1);
+                        UpdateWorldState(2540, ShieldPercent-1);
+                        //me->GetMap()->UpdateWorldState(2540, ShieldPercent-1);
+                        if(pMedivh && !pMedivh->isDead() && ShieldPercent <= 0)
+                            me->DealDamage(pMedivh, pMedivh->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        }
+
+                    Corrupt_Timer = 1000;
+                }else Corrupt_Timer -= diff;
+            }
+
             //Return since we have no target
-            if (!UpdateVictim())
+            if (!UpdateVictim() )
                 return;
 
             //Sand Breath
-            if (SandBreath_Timer <= diff)
+            if (SandBreath_Timer < diff)
             {
-                DoCast(me->getVictim(), SPELL_SAND_BREATH);
-                SandBreath_Timer = 15000+rand()%10000;
-            } else SandBreath_Timer -= diff;
+                Unit* target = NULL;
+                target = me->getVictim();
+                if (target)
+                    DoCast(target, SPELL_SAND_BREATH);
+                SandBreath_Timer = 30000;
+            }else SandBreath_Timer -= diff;
 
             //Time Stop
-            if (TimeStop_Timer <= diff)
+            if (TimeStop_Timer < diff)
             {
+                DoScriptText(SAY_BANISH, me);
+
                 DoCast(me->getVictim(), SPELL_TIME_STOP);
-                TimeStop_Timer = 20000+rand()%15000;
-            } else TimeStop_Timer -= diff;
+                TimeStop_Timer = 40000;
+            }else TimeStop_Timer -= diff;
 
             //Frenzy
-            if (Frenzy_Timer <= diff)
+            if (Frenzy_Timer < diff)
             {
-                DoScriptText(EMOTE_FRENZY, me);
                 DoCast(me, SPELL_ENRAGE);
-                Frenzy_Timer = 20000+rand()%15000;
-            } else Frenzy_Timer -= diff;
-
-            DoMeleeAttackIfReady();
+                Frenzy_Timer = 120000;
+            }else Frenzy_Timer -= diff;
+        
+            if (!IsChanneling)
+                DoMeleeAttackIfReady();
         }
     };
-
 };
 
 void AddSC_boss_aeonus()

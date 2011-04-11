@@ -54,7 +54,7 @@ public:
             me->LoadCreaturesAddon();
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit * /*killer*/)
         {
             InstanceScript *pInstance = me->GetInstanceScript();
             if (pInstance)
@@ -66,7 +66,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
         }
 
@@ -79,7 +79,7 @@ public:
             if (Immolate_Timer <= diff)
             {
                 Unit *pTarget = NULL;
-                pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                pTarget = SelectTarget(SELECT_TARGET_RANDOM,0);
                 if (pTarget) DoCast(pTarget, SPELL_IMMOLATE);
 
                 Immolate_Timer = 12000;

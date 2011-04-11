@@ -62,7 +62,7 @@ public:
             Timer = 2500;
         }
 
-        void MoveInLineOfSight(Unit* /*who*/) {}
+        void MoveInLineOfSight(Unit * /*who*/) {}
         void EnterCombat(Unit* /*who*/) {}
 
         void UpdateAI(const uint32 diff)
@@ -71,7 +71,7 @@ public:
             {
                 if (Timer <= diff)
                 {
-                    uint32 i = urand(1, 2);
+                    uint32 i = urand(1,2);
                     if (i == 1)
                         DoScriptText(SAY_CONVERTED_1, me);
                     else
@@ -79,7 +79,7 @@ public:
 
                     DoCast(me, SPELL_CONVERT_CREDIT);
                     if (me->isPet())
-                        me->ToPet()->SetDuration(7500);
+                        CAST_PET(me)->SetDuration(7500);
                     Credit = true;
                 } else Timer -= diff;
             }

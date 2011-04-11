@@ -370,9 +370,6 @@ class DatabaseWorkerPool
                 }
             }
 
-            // Clean up now.
-            transaction->Cleanup();
-
             con->Unlock();
         }
 
@@ -414,7 +411,7 @@ class DatabaseWorkerPool
                 return;
 
             char* buf = new char[str.size()*2+1];
-            escape_string(buf, str.c_str(), str.size());
+            escape_string(buf,str.c_str(),str.size());
             str = buf;
             delete[] buf;
         }
@@ -446,7 +443,10 @@ class DatabaseWorkerPool
             if (!to || !from || !length)
                 return 0;
 
-            return mysql_real_escape_string(m_connections[IDX_SYNCH][0]->GetHandle(), to, from, length);
+            T* t = GetFreeConnection();
+            unsigned long ret = mysql_real_escape_string(t->GetHandle(), to, from, length);
+            t->Unlock();
+            return ret;
         }
 
         void Enqueue(SQLOperation* op)

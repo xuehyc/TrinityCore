@@ -113,6 +113,9 @@ public:
 
         void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage)
         {
+            if (uiDamage >= me->GetHealth())
+                uiDamage = me->GetHealth() - 1;
+
             if (HealthBelowPct(20))
             {
                 if (Player* pPlayer = GetPlayerForEscort())
@@ -128,6 +131,7 @@ public:
                     me->CombatStop(true);
 
                     SetRun(false);
+                    me->DespawnOrUnsummon(10000);
                 }
             }
         }

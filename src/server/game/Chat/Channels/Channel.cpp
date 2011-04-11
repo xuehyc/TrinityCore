@@ -76,7 +76,7 @@ Channel::Channel(const std::string& name, uint32 channel_id, uint32 Team)
                         uint64 banned_guid = atol(*iter);
                         if (banned_guid)
                         {
-                            sLog->outDebug(LOG_FILTER_CHATSYS, "Channel(%s) loaded banned guid:" UI64FMTD "", name.c_str(), banned_guid);
+                            sLog->outDebug(LOG_FILTER_CHATSYS,"Channel(%s) loaded banned guid:" UI64FMTD "",name.c_str(), banned_guid);
                             banned.insert(banned_guid);
                         }
                     }
@@ -88,7 +88,7 @@ Channel::Channel(const std::string& name, uint32 channel_id, uint32 Team)
                 stmt->setString(0, name);
                 stmt->setUInt32(1, m_Team);
                 CharacterDatabase.Execute(stmt);
-                sLog->outDebug(LOG_FILTER_CHATSYS, "Channel(%s) saved in database", name.c_str());
+                sLog->outDebug(LOG_FILTER_CHATSYS,"Channel(%s) saved in database", name.c_str());
             }
 
             m_IsSaved = true;
@@ -116,7 +116,7 @@ void Channel::UpdateChannelInDB() const
         stmt->setUInt32(5, m_Team);
         CharacterDatabase.Execute(stmt);
 
-        sLog->outDebug(LOG_FILTER_CHATSYS, "Channel(%s) updated in database", m_name.c_str());
+        sLog->outDebug(LOG_FILTER_CHATSYS,"Channel(%s) updated in database", m_name.c_str());
     }
 
 }
@@ -137,7 +137,7 @@ void Channel::CleanOldChannelsInDB()
         stmt->setUInt32(0, sWorld->getIntConfig(CONFIG_PRESERVE_CUSTOM_CHANNEL_DURATION) * DAY);
         CharacterDatabase.Execute(stmt);
 
-        sLog->outDebug(LOG_FILTER_CHATSYS, "Cleaned out unused custom chat channels.");
+        sLog->outDebug(LOG_FILTER_CHATSYS,"Cleaned out unused custom chat channels.");
     }
 }
 
@@ -205,11 +205,11 @@ void Channel::Join(uint64 p, const char *pass)
     if (!IsConstant())
     {
         // Update last_used timestamp in db
-        if (!players.empty())
+        if(!players.empty())
             UpdateChannelUseageInDB();
 
         // If the channel has no owner yet and ownership is allowed, set the new owner.
-        if (!m_ownerGUID && m_ownership)
+        if ( !m_ownerGUID && m_ownership)
         {
             SetOwner(p, (players.size() > 1 ? true : false));
             players[p].SetModerator(true);
@@ -576,7 +576,7 @@ void Channel::List(Player* player)
             }
         }
 
-        data.put<uint32>(pos, count);
+        data.put<uint32>(pos,count);
 
         SendToOne(&data, p);
     }

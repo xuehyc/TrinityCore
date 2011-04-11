@@ -26,7 +26,7 @@ EndScriptData */
 /* ContentData
 item_draenei_fishing_net(i23654)    Hacklike implements chance to spawn item or creature
 item_nether_wraith_beacon(i31742)   Summons creatures for quest Becoming a Spellfire Tailor (q10832)
-item_flying_machine(i34060, i34061)  Engineering crafted flying machines
+item_flying_machine(i34060,i34061)  Engineering crafted flying machines
 item_gor_dreks_ointment(i30175)     Protecting Our Own(q10488)
 item_only_for_flight                Items which should only useable while flying
 EndContentData */
@@ -75,7 +75,7 @@ public:
             return false;
 
         // error
-        pPlayer->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW, pItem, NULL);
+        pPlayer->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW,pItem,NULL);
         return true;
     }
 };
@@ -95,7 +95,7 @@ public:
     {
         if (pPlayer->GetQuestStatus(9452) == QUEST_STATUS_INCOMPLETE)
         {
-            if (urand(0, 99) < 35)
+            if (urand(0,99) < 35)
             {
                 Creature *Murloc = pPlayer->SummonCreature(17102, pPlayer->GetPositionX(), pPlayer->GetPositionY()+20, pPlayer->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
                 if (Murloc)
@@ -105,13 +105,12 @@ public:
             {
                 ItemPosCountVec dest;
                 uint32 itemId = 23614;
-                InventoryResult msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, 1);
+                uint8 msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, 1);
                 if (msg == EQUIP_ERR_OK)
                 {
                     if (Item* item = pPlayer->StoreNewItem(dest, itemId, true))
                         pPlayer->SendNewItem(item, 1, false, true);
-                }
-                else
+                } else
                     pPlayer->SendEquipError(msg, NULL, NULL, itemId);
             }
         }
@@ -152,11 +151,11 @@ public:
 
     bool OnUse(Player *pPlayer, Item *pItem, SpellCastTargets const& targets)
     {
-        if (targets.GetUnitTarget() && targets.GetUnitTarget()->GetTypeId() == TYPEID_UNIT &&
-            targets.GetUnitTarget()->GetEntry() == 20748 && !targets.GetUnitTarget()->HasAura(32578))
+        if (targets.getUnitTarget() && targets.getUnitTarget()->GetTypeId() == TYPEID_UNIT &&
+            targets.getUnitTarget()->GetEntry() == 20748 && !targets.getUnitTarget()->HasAura(32578))
             return false;
 
-        pPlayer->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW, pItem, NULL);
+        pPlayer->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW,pItem,NULL);
         return true;
     }
 };
@@ -172,11 +171,11 @@ public:
 
     bool OnUse(Player *pPlayer, Item *pItem, SpellCastTargets const & /*targets*/)
     {
-        if (pPlayer->FindNearestCreature(26248, 15) || pPlayer->FindNearestCreature(26249, 15))
+        if (pPlayer->FindNearestCreature(26248,15) || pPlayer->FindNearestCreature(26249,15))
             return false;
         else
         {
-            pPlayer->SendEquipError(EQUIP_ERR_OUT_OF_RANGE, pItem, NULL);
+            pPlayer->SendEquipError(EQUIP_ERR_OUT_OF_RANGE,pItem,NULL);
             return true;
         }
     }
@@ -190,7 +189,7 @@ class item_mysterious_egg : public ItemScript
 {
 public:
     item_mysterious_egg() : ItemScript("item_mysterious_egg") { }
-    bool OnExpire(Player *pPlayer, ItemTemplate const* /*pItemProto*/)
+    bool OnExpire(Player *pPlayer, ItemPrototype const * /*pItemProto*/)
     {
         ItemPosCountVec dest;
         uint8 msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 39883, 1); // Cracked Egg
@@ -210,7 +209,7 @@ class item_disgusting_jar : public ItemScript
 public:
     item_disgusting_jar() : ItemScript("item_disgusting_jar") {}
 
-    bool OnExpire(Player *pPlayer, ItemTemplate const* /*pItemProto*/)
+    bool OnExpire(Player *pPlayer, ItemPrototype const * /*pItemProto*/)
     {
         ItemPosCountVec dest;
         uint8 msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 44718, 1); // Ripe Disgusting Jar
@@ -259,7 +258,7 @@ class item_pile_fake_furs : public ItemScript
 public:
     item_pile_fake_furs() : ItemScript("item_pile_fake_furs") { }
 
-    bool OnUse(Player *pPlayer, Item* /*pItem*/, SpellCastTargets const & /*targets*/)
+    bool OnUse(Player *pPlayer, Item * /*pItem*/, SpellCastTargets const & /*targets*/)
     {
         GameObject *pGo = NULL;
         for (uint8 i = 0; i < CaribouTrapsNum; ++i)
@@ -376,19 +375,19 @@ public:
             return false;
 
         Creature* pMammoth;
-        pMammoth = pPlayer->FindNearestCreature(NPC_TRAPPED_MAMMOTH_CALF, 5.0f);
+        pMammoth = pPlayer->FindNearestCreature(NPC_TRAPPED_MAMMOTH_CALF,5.0f);
         if (!pMammoth)
             return false;
 
         GameObject* pTrap;
         for (uint8 i = 0; i < MammothTrapsNum; ++i)
         {
-            pTrap = pPlayer->FindNearestGameObject(MammothTraps[i], 11.0f);
+            pTrap = pPlayer->FindNearestGameObject(MammothTraps[i],11.0f);
             if (pTrap)
             {
                 pMammoth->AI()->DoAction(1);
                 pTrap->SetGoState(GO_STATE_READY);
-                pPlayer->KilledMonsterCredit(NPC_TRAPPED_MAMMOTH_CALF, 0);
+                pPlayer->KilledMonsterCredit(NPC_TRAPPED_MAMMOTH_CALF,0);
                 return true;
             }
         }
@@ -418,7 +417,7 @@ public:
             } else
                 pPlayer->SendEquipError(EQUIP_ERR_OUT_OF_RANGE, pItem, NULL);
         } else
-            pPlayer->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW , pItem, NULL);
+            pPlayer->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW ,pItem, NULL);
         return true;
     }
 };
@@ -449,6 +448,28 @@ public:
     }
 };
 
+class item_fiery_soul_fragment : public ItemScript
+{
+    public:
+
+        item_fiery_soul_fragment(): ItemScript("fiery_soul_fragment_item"){ }
+
+        bool OnUse(Player* pPlayer, Item* /*item*/, SpellCastTargets const& /*targets*/)
+        {
+			if(pPlayer->FindNearestCreature(21311, 5, true))
+			{
+				pPlayer->CastSpell(pPlayer, 36587, true);
+				pPlayer->CompleteQuest(10525);
+			}
+			return true;
+            
+        }
+};
+
+
+
+
+
 void AddSC_item_scripts()
 {
     new item_only_for_flight();
@@ -463,4 +484,5 @@ void AddSC_item_scripts()
     new item_dehta_trap_smasher();
     new item_trident_of_nazjan();
     new item_captured_frog();
+	new item_fiery_soul_fragment();
 }

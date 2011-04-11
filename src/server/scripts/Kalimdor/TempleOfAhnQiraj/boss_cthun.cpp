@@ -231,7 +231,7 @@ public:
                 pPortal->SetReactState(REACT_PASSIVE);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoZoneInCombat();
             if (pInst)
@@ -241,7 +241,7 @@ public:
         void SpawnEyeTentacle(float x, float y)
         {
             if (Creature* Spawned = DoSpawnCreature(MOB_EYE_TENTACLE, x, y, 0, 0, TEMPSUMMON_CORPSE_DESPAWN, 500))
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,0))
                     if (Spawned->AI())
                         Spawned->AI()->AttackStart(pTarget);
         }
@@ -284,7 +284,7 @@ public:
                     if (BeamTimer <= diff)
                     {
                         //SPELL_GREEN_BEAM
-                        if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM,0))
                         {
                             me->InterruptNonMeleeSpells(false);
                             DoCast(pTarget, SPELL_GREEN_BEAM);
@@ -300,7 +300,7 @@ public:
                     //ClawTentacleTimer
                     if (ClawTentacleTimer <= diff)
                     {
-                        if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM,0))
                         {
                             Creature* Spawned = NULL;
 
@@ -328,7 +328,7 @@ public:
                         me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
 
                         //Select random target for dark beam to start on
-                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,0))
                         {
                             //Face our target
                             DarkGlareAngle = me->GetAngle(pTarget);
@@ -344,6 +344,7 @@ public:
                         DoCast(me, SPELL_FREEZE_ANIM);
                         me->SetOrientation(DarkGlareAngle);
                         me->StopMoving();
+                        me->GetMotionMaster()->MoveRotate(35000, ClockWise ? ROTATE_DIRECTION_LEFT : ROTATE_DIRECTION_RIGHT);
 
                         //Darkbeam for 35 seconds
                         PhaseTimer = 35000;
@@ -357,12 +358,12 @@ public:
                         if (DarkGlareTickTimer <= diff)
                         {
                             //Set angle and cast
-                            if (ClockWise)
-                                me->SetOrientation(DarkGlareAngle + DarkGlareTick * M_PI / 35);
-                            else
-                                me->SetOrientation(DarkGlareAngle - DarkGlareTick * M_PI / 35);
+                            //if (ClockWise)
+                            //    me->SetOrientation(DarkGlareAngle + DarkGlareTick * M_PI / 35);
+                            //else
+                            //    me->SetOrientation(DarkGlareAngle - DarkGlareTick * M_PI / 35);
 
-                            me->StopMoving();
+                            //me->StopMoving();
 
                             //Actual dark glare cast, maybe something missing here?
                             DoCast(me, SPELL_DARK_GLARE, false);
@@ -418,7 +419,7 @@ public:
             }
         }
 
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage)
+        void DamageTaken(Unit * /*done_by*/, uint32 &damage)
         {
             //No instance
             if (!pInst)
@@ -548,7 +549,7 @@ public:
                 pInst->SetData(DATA_CTHUN_PHASE, PHASE_NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoZoneInCombat();
         }
@@ -617,12 +618,12 @@ public:
                         for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
                         {
                             if (Player* pPlr = itr->getSource())
-                                pPlr->PlayDirectSound(RANDOM_SOUND_WHISPER, pPlr);
+                                pPlr->PlayDirectSound(RANDOM_SOUND_WHISPER,pPlr);
                         }
                     }
 
                     //One random wisper every 90 - 300 seconds
-                    WisperTimer = urand(90000, 300000);
+                    WisperTimer = urand(90000,300000);
                 } else WisperTimer -= diff;
 
                 return;
@@ -884,7 +885,7 @@ public:
                 pInst->SetData(DATA_CTHUN_PHASE, PHASE_CTHUN_DONE);
         }
 
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage)
+        void DamageTaken(Unit * /*done_by*/, uint32 &damage)
         {
             //No instance
             if (!pInst)
@@ -967,7 +968,7 @@ public:
             KillSelfTimer = 35000;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoZoneInCombat();
         }
@@ -988,7 +989,7 @@ public:
             //MindflayTimer
             if (MindflayTimer <= diff)
             {
-                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,0);
                 if (pTarget && !pTarget->HasAura(SPELL_DIGESTIVE_ACID))
                     DoCast(pTarget, SPELL_MIND_FLAY);
 
@@ -1042,7 +1043,7 @@ public:
             EvadeTimer = 5000;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoZoneInCombat();
         }
@@ -1064,7 +1065,7 @@ public:
                     //Dissapear and reappear at new position
                     me->SetVisible(false);
 
-                    Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                    Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,0);
                     if (!pTarget)
                     {
                         me->Kill(me);
@@ -1154,7 +1155,7 @@ public:
             EvadeTimer = 5000;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoZoneInCombat();
         }
@@ -1267,7 +1268,7 @@ public:
             BeamTimer = 500;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoZoneInCombat();
         }
@@ -1281,7 +1282,7 @@ public:
             //BeamTimer
             if (BeamTimer <= diff)
             {
-                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,0);
                 if (pTarget && !pTarget->HasAura(SPELL_DIGESTIVE_ACID))
                     DoCast(pTarget, SPELL_GREEN_BEAM);
 
@@ -1312,16 +1313,14 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            if (TempSummon* summon = me->ToTempSummon())
-                if (Unit* summoner = summon->GetSummoner())
-                    if (summoner->IsAIEnabled)
-                        summoner->GetAI()->DoAction(ACTION_FLESH_TENTACLE_KILLED);
+            if (CAST_SUM(me))
+                if (Creature* pSummoner = CAST_CRE(CAST_SUM(me)->GetSummoner()))
+                    if (pSummoner->AI())
+                        pSummoner->AI()->DoAction(ACTION_FLESH_TENTACLE_KILLED);
         }
     };
 
 };
-
-//GetAIs
 
 void AddSC_boss_cthun()
 {

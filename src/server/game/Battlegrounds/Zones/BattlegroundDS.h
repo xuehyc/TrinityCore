@@ -43,10 +43,10 @@ enum BattlegroundDSObjects
 };
 
 enum BattlegroundDSData
-{ // These values are NOT blizzlike... need the correct data!
-    BG_DS_WATERFALL_TIMER_MIN                    = 30000,
+{
+    BG_DS_WATERFALL_TIMER_MIN                    = 35000,
     BG_DS_WATERFALL_TIMER_MAX                    = 60000,
-    BG_DS_WATERFALL_DURATION                     = 10000,
+    BG_DS_WATERFALL_DURATION                     = 30000,
 };
 
 class BattlegroundDSScore : public BattlegroundScore
@@ -71,16 +71,19 @@ class BattlegroundDS : public Battleground
         virtual void StartingEventCloseDoors();
         virtual void StartingEventOpenDoors();
 
-        void RemovePlayer(Player *plr, uint64 guid, uint32 team);
+        void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleground();
         virtual void Reset();
         virtual void FillInitialWorldStates(WorldPacket &d);
-        void HandleKillPlayer(Player* player, Player* killer);
-        bool HandlePlayerUnderMap(Player* plr);
+        void HandleKillPlayer(Player* player, Player *killer);
+        bool HandlePlayerUnderMap(Player * plr);
     private:
         uint32 m_waterTimer;
         bool m_waterfallActive;
+        bool m_knockbackCheck;
+        uint32 m_knockback;
+        void KnockBackPlayer(Unit *pPlayer, float angle, float horizontalSpeed, float verticalSpeed);
     protected:
         bool isWaterFallActive() { return m_waterfallActive; };
         void setWaterFallActive(bool active) { m_waterfallActive = active; };

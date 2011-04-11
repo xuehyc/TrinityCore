@@ -24,6 +24,7 @@ SDCategory: Blackwing Lair
 EndScriptData */
 
 #include "ScriptPCH.h"
+#include "blackwing_lair.h"
 
 //Razorgore Phase 2 Script
 
@@ -49,7 +50,12 @@ public:
 
     struct boss_razorgoreAI : public ScriptedAI
     {
-        boss_razorgoreAI(Creature *c) : ScriptedAI(c) {}
+        boss_razorgoreAI(Creature *c) : ScriptedAI(c)
+        {
+            pInstance = c->GetInstanceScript();
+        }
+
+        InstanceScript* pInstance;
 
         uint32 Cleave_Timer;
         uint32 WarStomp_Timer;
@@ -62,16 +68,25 @@ public:
             WarStomp_Timer = 35000;
             FireballVolley_Timer = 7000;
             Conflagration_Timer = 12000;
+
+        if(pInstance)
+            pInstance->SetData(ENCOUNTER_RAZORGORE,NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoZoneInCombat();
+
+        if(pInstance)
+            pInstance->SetData(ENCOUNTER_RAZORGORE,IN_PROGRESS);
         }
 
         void JustDied(Unit* /*Killer*/)
         {
             DoScriptText(SAY_DEATH, me);
+
+        if(pInstance)
+            pInstance->SetData(ENCOUNTER_RAZORGORE,DONE);
         }
 
         void UpdateAI(const uint32 diff)
@@ -83,21 +98,21 @@ public:
             if (Cleave_Timer <= diff)
             {
                 DoCast(me->getVictim(), SPELL_CLEAVE);
-                Cleave_Timer = urand(7000, 10000);
+                Cleave_Timer = urand(7000,10000);
             } else Cleave_Timer -= diff;
 
             //WarStomp_Timer
             if (WarStomp_Timer <= diff)
             {
                 DoCast(me->getVictim(), SPELL_WARSTOMP);
-                WarStomp_Timer = urand(15000, 25000);
+                WarStomp_Timer = urand(15000,25000);
             } else WarStomp_Timer -= diff;
 
             //FireballVolley_Timer
             if (FireballVolley_Timer <= diff)
             {
                 DoCast(me->getVictim(), SPELL_FIREBALLVOLLEY);
-                FireballVolley_Timer = urand(12000, 15000);
+                FireballVolley_Timer = urand(12000,15000);
             } else FireballVolley_Timer -= diff;
 
             //Conflagration_Timer
@@ -107,7 +122,7 @@ public:
                 //We will remove this threat reduction and add an aura check.
 
                 //if (DoGetThreat(me->getVictim()))
-                //DoModifyThreatPercent(me->getVictim(), -50);
+                //DoModifyThreatPercent(me->getVictim(),-50);
 
                 Conflagration_Timer = 12000;
             } else Conflagration_Timer -= diff;

@@ -149,10 +149,10 @@ public:
             }
         }
 
-        void AddSentinelsNear(Unit* /*nears*/)
+        void AddSentinelsNear(Unit * /*nears*/)
         {
             std::list<Creature*> assistList;
-            me->GetCreatureListWithEntryInGrid(assistList, 15264, 70.0f);
+            me->GetCreatureListWithEntryInGrid(assistList,15264,70.0f);
 
             if (assistList.empty())
                 return;
@@ -233,7 +233,7 @@ public:
             me->AddAura(id, me);
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit * who)
         {
             if (gatherOthersWhenAggro)
                 GetOtherSentinels(who);
@@ -253,6 +253,39 @@ public:
                     continue;
                 sent->ModifyHealth(int32(sent->CountPctFromMaxHealth(50)));
                 CAST_AI(aqsentinelAI, sent->AI())->GainSentinelAbility(ability);
+            }
+        }
+
+        Unit *GetHatedManaUser() const
+        {
+            std::list<HostileReference*> const& threatList = me->getThreatManager().getThreatList();
+            for (std::list<HostileReference*>::const_iterator i = threatList.begin(); i != threatList.end(); ++i)
+                if (Unit* unit = (*i)->getTarget())
+                    if (unit->getPowerType() == POWER_MANA)
+                        return unit;
+
+            return NULL;
+        }
+
+        Unit* GetAuraEffectTriggerTarget(uint32 spellId, uint8 /*effIndex*/)
+        {
+            switch (spellId)
+            {
+                case SPELL_KNOCK_BUFF:
+                case SPELL_THUNDER_BUFF:
+                case SPELL_MSTRIKE_BUFF:
+                case SPELL_STORM_BUFF:
+                    return me->getVictim();
+
+                case SPELL_MANAB_BUFF:
+                    return GetHatedManaUser();
+
+                case SPELL_MENDING_BUFF:
+                case SPELL_REFLECTAF_BUFF:
+                case SPELL_REFLECTSFr_BUFF:
+                case SPELL_THORNS_BUFF:
+                default:
+                    return me;
             }
         }
     };

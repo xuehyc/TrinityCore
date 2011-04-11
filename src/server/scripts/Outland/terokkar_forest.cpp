@@ -77,7 +77,7 @@ public:
             me->setFaction(FACTION_HOSTILE);
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit * /*who*/) {}
 
         void DoNice()
         {
@@ -172,7 +172,7 @@ public:
         mob_infested_root_walkerAI(Creature *c) : ScriptedAI(c) {}
 
         void Reset() { }
-        void EnterCombat(Unit* /*who*/) { }
+        void EnterCombat(Unit * /*who*/) { }
 
         void DamageTaken(Unit *done_by, uint32 &damage)
         {
@@ -267,7 +267,7 @@ public:
         mob_rotting_forest_ragerAI(Creature *c) : ScriptedAI(c) {}
 
         void Reset() { }
-        void EnterCombat(Unit* /*who*/) { }
+        void EnterCombat(Unit * /*who*/) { }
 
         void DamageTaken(Unit *done_by, uint32 &damage)
         {
@@ -288,10 +288,8 @@ public:
 #define QUEST_TARGET        22459
 //#define SPELL_FREE_WEBBED   38950
 
-const uint32 netherwebVictims[6] =
-{
-    18470, 16805, 21242, 18452, 22482, 21285
-};
+const uint32 netherwebVictims[6] = {18470, 16805, 21242, 18452, 22482, 21285};
+
 class mob_netherweb_victim : public CreatureScript
 {
 public:
@@ -307,31 +305,23 @@ public:
         mob_netherweb_victimAI(Creature *c) : ScriptedAI(c) {}
 
         void Reset() { }
-        void EnterCombat(Unit* /*who*/) { }
-        void MoveInLineOfSight(Unit* /*who*/) { }
+        void EnterCombat(Unit * /*who*/) { }
+        void MoveInLineOfSight(Unit * /*who*/) { }
 
         void JustDied(Unit* Killer)
         {
             if (Killer->GetTypeId() == TYPEID_PLAYER)
-            {
                 if (CAST_PLR(Killer)->GetQuestStatus(10873) == QUEST_STATUS_INCOMPLETE)
-                {
                     if (rand()%100 < 25)
                     {
                         me->SummonCreature(QUEST_TARGET, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
                         CAST_PLR(Killer)->KilledMonsterCredit(QUEST_TARGET, 0);
+                        return;
                     }
-                    else
-                        me->SummonCreature(netherwebVictims[rand()%6], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
 
-                    if (rand()%100 < 75)
-                        me->SummonCreature(netherwebVictims[rand()%6], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
-                    me->SummonCreature(netherwebVictims[rand()%6], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
-                }
-            }
+            me->SummonCreature(netherwebVictims[rand()%6], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
         }
     };
-
 };
 
 /*######
@@ -411,7 +401,7 @@ public:
                 me->setFaction(m_uiNormFaction);
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit * /*who*/) {}
 
         void UpdateAI(const uint32 diff)
         {
@@ -577,16 +567,16 @@ public:
         switch(uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF + 1:
-                  pPlayer->CastSpell(pPlayer, 40642, false);
+                  pPlayer->CastSpell(pPlayer,40642,false);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 2:
-                  pPlayer->CastSpell(pPlayer, 40640, false);
+                  pPlayer->CastSpell(pPlayer,40640,false);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 3:
-                  pPlayer->CastSpell(pPlayer, 40632, false);
+                  pPlayer->CastSpell(pPlayer,40632,false);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 4:
-                  pPlayer->CastSpell(pPlayer, 40644, false);
+                  pPlayer->CastSpell(pPlayer,40644,false);
                 break;
         }
     }
@@ -610,7 +600,7 @@ public:
     {
         pPlayer->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_TRADE)
-            pPlayer->GetSession()->SendListInventory(pCreature->GetGUID());
+            pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
 
         return true;
     }
@@ -679,12 +669,12 @@ public:
             switch(i)
             {
                 case 3:
-                    me->SummonCreature(NPC_CABAL_SKRIMISHER, -2795.99f, 5420.33f, -34.53f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
-                    me->SummonCreature(NPC_CABAL_SKRIMISHER, -2793.55f, 5412.79f, -34.53f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
+                    me->SummonCreature(NPC_CABAL_SKRIMISHER,-2795.99f,5420.33f,-34.53f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
+                    me->SummonCreature(NPC_CABAL_SKRIMISHER,-2793.55f,5412.79f,-34.53f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
                     break;
                 case 11:
                     if (pPlayer && pPlayer->GetTypeId() == TYPEID_PLAYER)
-                        pPlayer->GroupEventHappens(QUEST_ESCAPING_THE_TOMB, me);
+                        pPlayer->GroupEventHappens(QUEST_ESCAPING_THE_TOMB,me);
                     break;
             }
         }

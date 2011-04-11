@@ -91,6 +91,27 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`
    (16295,-1000144,'Thank you for saving my life and bringing me back to safety, $N',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,1,0,'lilatha SAY_END1'),
    (16295,-1000145,'Captain Helios, I''ve been rescued from the Amani Catacombs. Reporting for duty, sir!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,1,0,'lilatha SAY_END2'),
    (16295,-1000146,'Liatha, get someone to look at those injuries. Thank you for bringing her back safely.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,1,0,'lilatha CAPTAIN_ANSWER'),
+   (10427,-1000147,'I remember well the sting of defeat at the conclusion of the Third War. I have waited far too long for my revenge. Now the shadow of the Legion falls over this world. It is only a matter of time until all of your failed creation... is undone.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11332,1,0,0,'kazzak SAY_INTRO'),
+   (10427,-1000148,'The Legion will conquer all!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11333,1,0,0,'kazzak SAY_AGGRO1'),
+   (10427,-1000149,'All mortals will perish!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11334,1,0,0,'kazzak SAY_AGGRO2'),
+   (20129,-1000150,'All life must be eradicated!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11335,1,0,0,'kazzak SAY_SURPREME1'),
+   (20129,-1000151,'I''ll rip the flesh from your bones!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11336,1,0,0,'kazzak SAY_SURPREME2'),
+   (20129,-1000152,'Kirel Narak!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11337,1,0,0,'kazzak SAY_KILL1'),
+   (20129,-1000153,'Contemptible wretch!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11338,1,0,0,'kazzak SAY_KILL2'),
+   (20129,-1000154,'The universe will be remade.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11339,1,0,0,'kazzak SAY_KILL3'),
+   (20129,-1000155,'The Legion... will never... fall.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11340,1,0,0,'kazzak SAY_DEATH'),
+   (20129,-1000156,'%s goes into a frenzy!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,2,0,0,'kazzak EMOTE_FRENZY'),
+   (20129,-1000157,'Invaders, you dangle upon the precipice of oblivion! The Burning Legion comes and with it comes your end.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'kazzak SAY_RAND1'),
+   (20129,-1000158,'Impudent whelps, you only delay the inevitable. Where one has fallen, ten shall rise. Such is the will of Kazzak...',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'kazzak SAY_RAND2'),
+   (20129,-1000159,'Do not proceed. You will be eliminated!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11344,1,0,0,'doomwalker SAY_AGGRO'),
+   (20129,-1000160,'Tectonic disruption commencing.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11345,1,0,0,'doomwalker SAY_EARTHQUAKE_1'),
+   (20129,-1000161,'Magnitude set. Release.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11346,1,0,0,'doomwalker SAY_EARTHQUAKE_2'),
+   (20129,-1000162,'Trajectory locked.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11347,1,0,0,'doomwalker SAY_OVERRUN_1'),
+   (20129,-1000163,'Engage maximum speed.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11348,1,0,0,'doomwalker SAY_OVERRUN_2'),
+   (12429,-1000164,'Threat level zero.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11349,1,0,0,'doomwalker SAY_SLAY_1'),
+   (12429,-1000165,'Directive accomplished.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11350,1,0,0,'doomwalker SAY_SLAY_2'),
+   (12429,-1000166,'Target exterminated.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11351,1,0,0,'doomwalker SAY_SLAY_3'),
+   (12429,-1000167,'System failure in five, f-o-u-r...',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11352,1,0,0,'doomwalker SAY_DEATH'),
    (12429,-1000168,'Who dares awaken Aquementas?',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'aquementas AGGRO_YELL_AQUE'),
    (12429,-1000169,'Muahahahaha! You fool! You''ve released me from my banishment in the interstices between space and time!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'nether_drake SAY_NIHIL_1'),
    (12429,-1000170,'All of Draenor shall quick beneath my feet! I will destroy this world and reshape it in my image!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'nether_drake SAY_NIHIL_2'),
@@ -110,6 +131,7 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`
    (0,-1000184,'Yes Master, all goes along as planned.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,7,0,'engineer_spark SAY_TEXT'),
    (0,-1000185,'%s puts the shell to his ear.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,2,7,0,'engineer_spark EMOTE_SHELL'),
    (0,-1000186,'Now I cut you!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,7,0,'engineer_spark SAY_ATTACK'),
+   (0,-1000187,'Thank you, dear $C, you just saved my life.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,7,0,'faulk SAY_HEAL'),
    (0,-1000188,'Deployment sucessful. Trespassers will be neutralized.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,0,0,'converted_sentry SAY_CONVERTED_1'),
    (0,-1000189,'Objective acquired. Initiating security routines.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,0,0,'converted_sentry SAY_CONVERTED_2'),
    (0,-1000190,'In Nagrand, food hunt ogre!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,0,0,' SAY_LUMP_0'),
@@ -702,12 +724,6 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`
    (9503,-1230000,'Ah, hits the spot!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,0,0,'rocknot SAY_GOT_BEER'),
    (9019,-1230001,'Come to aid the Throne!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'dagran SAY_AGGRO'),
    (9019,-1230002,'Hail to the king, baby!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'dagran SAY_SLAY'),
-   (10096,-1230003,'You have been sentenced to death for crimes against the Dark Iron nation!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'npc_grimstone SCRIPT_TEXT1'),
-   (10096,-1230004,'The Sons of Thaurissan shall watch you perish in the Ring of the Law!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'npc_grimstone SCRIPT_TEXT2'),
-   (10096,-1230005,'Unleash the fury and let it be done!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'npc_grimstone SCRIPT_TEXT3'),
-   (10096,-1230006,'Haha! I bet you thought you were done!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'npc_grimstone SCRIPT_TEXT4'),
-   (10096,-1230007,'But your real punishment lies ahead.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'npc_grimstone SCRIPT_TEXT5'),
-   (10096,-1230008,'Good riddance!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'npc_grimstone SCRIPT_TEXT6'),
 
 -- -1 249 000 ONYXIA'S LAIR
    (10184,-1249000,'How fortuitous. Usually, I must leave my lair to feed.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'onyxia SAY_AGGRO'),
@@ -2429,8 +2445,6 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`
    (33515,-1603052,'There is no escape!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15475,1,0,0,'Auriaya SAY_SLAY_2'),
    (33515,-1603053,'Auriaya screams in agony.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,6,0,15476,'Auriaya SAY_DEATH'),
    (33515,-1603054,'You waste my time!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15477,1,0,0,'Auriaya SAY_BERSERK'),
-   (33515,-1603055,'Auriaya begins to cast Terrifying Screech.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,3,0,0,'Auriaya - EMOTE_FEAR'),
-   (33515,-1603056,'Auriaya begins to activate the Feral Defender!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,3,0,0,'Auriaya - EMOTE_DEFENDER'),
 
 -- Flame Leviathan
    (33113,-1603060,'Hostile entities detected. Threat assessment protocol active. Primary target engaged. Time minus thirty seconds to re-evaluation.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15506,1,0,0,'Flame Leviathan SAY_AGGRO'),
@@ -2482,7 +2496,6 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`
    (32914,-1603201,'Matron, flee! They are ruthless....',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15503,1,0,0,'Elder Stonebark SAY_DEATH'),
 
 -- Hodir
-   (32845,-1603209,'Hodir begins to cast Flash Freeze!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,3,0,0,'Hodir - EMOTE_FREEZE'),
    (32845,-1603210,'You will suffer for this trespass!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15552,1,0,0,'Hodir SAY_AGGRO'),
    (32845,-1603211,'Tragic. To come so far, only to fail.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15553,1,0,0,'Hodir SAY_SLAY_1'),
    (32845,-1603212,'Welcome to the endless winter.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15554,1,0,0,'Hodir SAY_SLAY_2'),
@@ -2492,7 +2505,6 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`
    (32845,-1603216,'Enough! This ends now!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15558,1,0,0,'Hodir SAY_BERSERK'),
    (32845,-1603217,'The veil of winter will protect you, champions!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15559,1,0,0,'Hodir SAY_YS_HELP'),
    (32845,-1603218,'Hodir shatters the Rare Cache of Hodir!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,6,0,0,'Hodir SAY_HARD_MODE_MISSED'),
-   (32845,-1603219,'Hodir gains Frozen Blows!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,3,0,0,'Hodir - EMOTE_BLOW'),
 
 -- Ignis
    (33118,-1603220,'Insolent whelps! Your blood will temper the weapons used to reclaim this world!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15564,1,0,0,'Ignis SAY_AGGRO'),

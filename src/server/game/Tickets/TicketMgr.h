@@ -20,10 +20,11 @@
 
 #include <string>
 #include <ace/Singleton.h>
-
-#include "ObjectMgr.h"
-
-class ChatHandler;
+#include "Common.h"
+#include "DatabaseEnv.h"
+#include "SQLStorage.h"
+#include "SQLStorageImpl.h"
+#include "World.h"
 
 // from blizzard lua
 enum GMTicketSystemStatus
@@ -75,90 +76,27 @@ enum LagReportType
     LAG_REPORT_TYPE_SPELL = 6
 };
 
-class GmTicket
+struct GM_Ticket
 {
-public:
-    GmTicket();
-    explicit GmTicket(Player* player, WorldPacket& recv_data);
-    ~GmTicket();
-
-    bool IsClosed() const { return _closedBy; }
-    bool IsCompleted() const { return _completed; }
-    bool IsFromPlayer(const uint64& guid) const { return guid == _playerGuid; }
-    bool IsAssigned() const { return _assignedTo != 0; }
-    bool IsAssignedTo(const uint64& guid) const { return guid == _assignedTo; }
-    bool IsAssignedNotTo(const uint64& guid) const { return IsAssigned() && !IsAssignedTo(guid); }
-
-    uint32 GetId() const { return _id; }
-    Player* GetPlayer() const { return sObjectMgr->GetPlayer(_playerGuid); }
-    std::string GetPlayerName() const { return _playerName; }
-    std::string GetMessage() const { return _message; }
-    Player* GetAssignedPlayer() const { return sObjectMgr->GetPlayer(_assignedTo); }
-    const uint64& GetAssignedToGUID() const { return _assignedTo; }
-    std::string GetAssignedToName() const
-    {
-        std::string name;
-        // save queries if ticket is not assigned
-        if (_assignedTo)
-            sObjectMgr->GetPlayerNameByGUID(_assignedTo, name);
-
-        return name;
-    }
-    const uint64& GetLastModifiedTime() const { return _lastModifiedTime; }
-    GMTicketEscalationStatus GetEscalatedStatus() const { return _escalatedStatus; }
-
-    void SetEscalatedStatus(GMTicketEscalationStatus escalatedStatus) { _escalatedStatus = escalatedStatus; }
-    void SetAssignedTo(const uint64& guid, bool isAdmin)
-    {
-        _assignedTo = guid;
-        if (isAdmin && _escalatedStatus == TICKET_IN_ESCALATION_QUEUE)
-            _escalatedStatus = TICKET_ESCALATED_ASSIGNED;
-        else if (_escalatedStatus == TICKET_UNASSIGNED)
-            _escalatedStatus = TICKET_ASSIGNED;
-    }
-    void SetClosedBy(const int64& value) { _closedBy = value; }
-    void SetMessage(const std::string& message)
-    {
-        _message = message;
-        _lastModifiedTime = uint64(time(NULL));
-    }
-    void SetComment(const std::string& comment) { _comment = comment; }
-    void SetViewed() { _viewed = true; }
-    void SetUnassigned();
-
-    void AppendResponse(const std::string& response) { _response += response; }
-
-    bool LoadFromDB(Field* fields);
-    void SaveToDB(SQLTransaction& trans) const;
-    void DeleteFromDB();
-
-    void WritePacket(WorldPacket& data) const;
-    void SendResponse(WorldSession* session) const;
-
-    void TeleportTo(Player* player) const;
-    std::string FormatMessageString(ChatHandler& handler, bool detailed = false) const;
-    std::string FormatMessageString(ChatHandler& handler, const char* szClosedName, const char* szAssignedToName, const char* szUnassignedName, const char* szDeletedName) const;
-
-private:
-    uint32 _id;
-    uint64 _playerGuid;
-    std::string _playerName;
-    float _posX;
-    float _posY;
-    float _posZ;
-    uint16 _mapId;
-    std::string _message;
-    uint64 _createTime;
-    uint64 _lastModifiedTime;
-    int64 _closedBy; // 0 = Open, -1 = Console, playerGuid = player abandoned ticket, other = GM who closed it.
-    uint64 _assignedTo;
-    std::string _comment;
-    bool _completed;
-    GMTicketEscalationStatus _escalatedStatus;
-    bool _viewed;
-    std::string _response;
+    uint64 guid;
+    uint64 playerGuid;
+    std::string name;
+    float pos_x;
+    float pos_y;
+    float pos_z;
+    uint32 map;
+    std::string message;
+    uint64 createtime;
+    uint64 timestamp;
+    int64 closed; // 0 = Open, -1 = Console, playerGuid = player abandoned ticket, other = GM who closed it.
+    uint64 assignedToGM;
+    std::string comment;
+    bool completed;
+    uint8 escalated;
+    bool viewed;
+    std::string response;
 };
-typedef std::map<uint32, GmTicket*> GmTicketList;
+typedef std::list<GM_Ticket*> GmTicketList;
 
 class TicketMgr
 {
@@ -166,68 +104,63 @@ class TicketMgr
     friend class ACE_Singleton<TicketMgr, ACE_Null_Mutex>;
 
 public:
-    void LoadTickets();
-    void LoadSurveys();
+    void LoadGMTickets();
+    void LoadGMSurveys();
 
-    GmTicket* GetTicket(uint32 ticketId)
+    GM_Ticket *GetGMTicket(uint64 ticketGuid)
     {
-        GmTicketList::iterator itr = _ticketList.find(ticketId);
-        if (itr != _ticketList.end())
-            return itr->second;
+        for (GmTicketList::const_iterator i = m_GMTicketList.begin(); i != m_GMTicketList.end(); ++i)
+            if ((*i) && (*i)->guid == ticketGuid)
+                return (*i);
 
         return NULL;
     }
 
-    GmTicket* GetTicketByPlayer(const uint64& playerGuid)
+    GM_Ticket *GetGMTicketByPlayer(uint64 playerGuid)
     {
-        for (GmTicketList::const_iterator itr = _ticketList.begin(); itr != _ticketList.end(); ++itr)
-            if (itr->second && itr->second->IsFromPlayer(playerGuid) && !itr->second->IsClosed())
-                return itr->second;
+        for (GmTicketList::const_iterator i = m_GMTicketList.begin(); i != m_GMTicketList.end(); ++i)
+            if ((*i) && (*i)->playerGuid == playerGuid && (*i)->closed == 0)
+                return (*i);
 
         return NULL;
     }
 
-    GmTicket* GetOldestOpenTicket()
+    void AddOrUpdateGMTicket(GM_Ticket &ticket, bool create = false);
+    void _AddOrUpdateGMTicket(GM_Ticket &ticket);
+    void RemoveGMTicket(uint64 ticketGuid, int64 source = -1, bool permanently = false);
+    void RemoveGMTicket(GM_Ticket *ticket, int64 source = -1, bool permanently = false);
+    uint64 GenerateGMTicketId();
+    bool GetStatus() const { return status; }
+    void SetStatus(bool newStatus) { status = newStatus; }
+    uint64 GetOpenTicketCount() const { return m_openTickets; }
+    uint64 GetNextSurveyID() { return ++m_GMSurveyID; }
+
+    void Initialize()
     {
-        for (GmTicketList::const_iterator itr = _ticketList.begin(); itr != _ticketList.end(); ++itr)
-            if (itr->second && !itr->second->IsClosed() && !itr->second->IsCompleted())
-                return itr->second;
+        SetStatus(sWorld->getBoolConfig(CONFIG_ALLOW_TICKETS));
+    }
+
+    GM_Ticket *GetOldestOpenGMTicket()
+    {
+        for (GmTicketList::const_iterator i = m_GMTicketList.begin(); i != m_GMTicketList.end(); ++i)
+            if ((*i) && (*i)->closed == 0 && !(*i)->completed)
+                return (*i);
 
         return NULL;
     }
 
-    void AddTicket(GmTicket* ticket);
-    void CloseTicket(uint32 ticketId, int64 source = -1);
-    void RemoveTicket(uint32 ticketId);
+    time_t GetLastChange() const { return lastChange; }
+    void UpdateLastChange() { lastChange = time(NULL); }
 
-    bool GetStatus() const { return _status; }
-    void SetStatus(bool status) { _status = status; }
-
-    uint64 GetLastChange() const { return _lastChange; }
-    void UpdateLastChange() { _lastChange = uint64(time(NULL)); }
-
-    uint32 GenerateTicketId() { return ++_lastTicketId; }
-    uint32 GetOpenTicketCount() const { return _openTicketCount; }
-    uint32 GetNextSurveyID() { return ++_lastSurveyId; }
-
-    void Initialize();
-
-    void ShowList(ChatHandler& handler, bool onlineOnly) const;
-    void ShowClosedList(ChatHandler& handler) const;
-    void ShowEscalatedList(ChatHandler& handler) const;
-
-    void SendTicket(WorldSession* session, GmTicket* ticket) const;
+    GmTicketList m_GMTicketList;
 
 protected:
-    void _RemoveTicket(uint32 ticketId, int64 source = -1, bool permanently = false);
-
-    GmTicketList _ticketList;
-
-    bool   _status;
-    uint32 _lastTicketId;
-    uint32 _lastSurveyId;
-    uint32 _openTicketCount;
-    uint64 _lastChange;
+    uint64 m_GMticketid;
+    uint64 m_GMSurveyID;
+    bool status;
+    uint64 m_openTickets;
+    uint32 m_gmCount;
+    time_t lastChange;
 };
 
 #define sTicketMgr ACE_Singleton<TicketMgr, ACE_Null_Mutex>::instance()

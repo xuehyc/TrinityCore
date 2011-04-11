@@ -27,14 +27,14 @@ EndScriptData */
 
 enum eEnums
 {
-    //signed for 24200, but used by 24200, 27390
+    //signed for 24200, but used by 24200,27390
     YELL_SKARVALD_AGGRO                         = -1574011,
     YELL_SKARVALD_DAL_DIED                      = -1574012,
     YELL_SKARVALD_SKA_DIEDFIRST                 = -1574013,
     YELL_SKARVALD_KILL                          = -1574014,
     YELL_SKARVALD_DAL_DIEDFIRST                 = -1574015,
 
-    //signed for 24201, but used by 24201, 27389
+    //signed for 24201, but used by 24201,27389
     YELL_DALRONN_AGGRO                          = -1574016,
     YELL_DALRONN_SKA_DIED                       = -1574017,
     YELL_DALRONN_DAL_DIEDFIRST                  = -1574018,
@@ -90,10 +90,12 @@ public:
             Dalronn_isDead = false;
             Check_Timer = 5000;
 
+            me->RemoveLootMode(1);
+
             ghost = (me->GetEntry() == MOB_SKARVALD_GHOST);
             if (!ghost && pInstance)
             {
-                Unit* dalronn = Unit::GetUnit((*me), pInstance->GetData64(DATA_DALRONN));
+                Unit* dalronn = Unit::GetUnit((*me),pInstance->GetData64(DATA_DALRONN));
                 if (dalronn && dalronn->isDead())
                     CAST_CRE(dalronn)->Respawn();
 
@@ -101,15 +103,15 @@ public:
             }
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit * who)
         {
             if (!ghost && pInstance)
             {
-                DoScriptText(YELL_SKARVALD_AGGRO, me);
+                DoScriptText(YELL_SKARVALD_AGGRO,me);
 
-                Unit* dalronn = Unit::GetUnit((*me), pInstance->GetData64(DATA_DALRONN));
+                Unit* dalronn = Unit::GetUnit((*me),pInstance->GetData64(DATA_DALRONN));
                 if (dalronn && dalronn->isAlive() && !dalronn->getVictim())
-                    dalronn->getThreatManager().addThreat(who, 0.0f);
+                    dalronn->getThreatManager().addThreat(who,0.0f);
 
                 pInstance->SetData(DATA_SKARVALD_DALRONN_EVENT, IN_PROGRESS);
             }
@@ -119,25 +121,26 @@ public:
         {
             if (!ghost && pInstance)
             {
-                Unit* dalronn = Unit::GetUnit((*me), pInstance->GetData64(DATA_DALRONN));
+                Unit* dalronn = Unit::GetUnit((*me),pInstance->GetData64(DATA_DALRONN));
                 if (dalronn)
                 {
                     if (dalronn->isDead())
                     {
-                        DoScriptText(YELL_SKARVALD_DAL_DIED, me);
+                        DoScriptText(YELL_SKARVALD_DAL_DIED,me);
 
                         pInstance->SetData(DATA_SKARVALD_DALRONN_EVENT, DONE);
                     }
                     else
                     {
-                        DoScriptText(YELL_SKARVALD_SKA_DIEDFIRST, me);
+                        DoScriptText(YELL_SKARVALD_SKA_DIEDFIRST,me);
 
-                        me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                        dalronn->ToCreature()->AddLootMode(1);
+                        //me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                         //DoCast(me, SPELL_SUMMON_SKARVALD_GHOST, true);
-                        Creature* temp = me->SummonCreature(MOB_SKARVALD_GHOST, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 5000);
+                        Creature* temp = me->SummonCreature(MOB_SKARVALD_GHOST,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0,TEMPSUMMON_CORPSE_DESPAWN,5000);
                         if (temp)
                         {
-                            temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            temp->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
                             temp->AI()->AttackStart(Killer);
                         }
                     }
@@ -145,11 +148,11 @@ public:
             }
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit * /*victim*/)
         {
             if (!ghost)
             {
-                DoScriptText(YELL_SKARVALD_KILL, me);
+                DoScriptText(YELL_SKARVALD_KILL,me);
             }
         }
 
@@ -184,7 +187,7 @@ public:
                 {
                     if (Response_Timer <= diff)
                     {
-                        DoScriptText(YELL_SKARVALD_DAL_DIEDFIRST, me);
+                        DoScriptText(YELL_SKARVALD_DAL_DIEDFIRST,me);
 
                         Response_Timer = 0;
                     } else Response_Timer -= diff;
@@ -247,10 +250,12 @@ public:
             Skarvald_isDead = false;
             AggroYell_Timer = 0;
 
+            me->RemoveLootMode(1);
+
             ghost = me->GetEntry() == MOB_DALRONN_GHOST;
             if (!ghost && pInstance)
             {
-                Unit* skarvald = Unit::GetUnit((*me), pInstance->GetData64(DATA_SKARVALD));
+                Unit* skarvald = Unit::GetUnit((*me),pInstance->GetData64(DATA_SKARVALD));
                 if (skarvald && skarvald->isDead())
                     CAST_CRE(skarvald)->Respawn();
 
@@ -258,13 +263,13 @@ public:
             }
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit * who)
         {
             if (!ghost && pInstance)
             {
-                Unit* skarvald = Unit::GetUnit((*me), pInstance->GetData64(DATA_SKARVALD));
+                Unit* skarvald = Unit::GetUnit((*me),pInstance->GetData64(DATA_SKARVALD));
                 if (skarvald && skarvald->isAlive() && !skarvald->getVictim())
-                    skarvald->getThreatManager().addThreat(who, 0.0f);
+                    skarvald->getThreatManager().addThreat(who,0.0f);
 
                 AggroYell_Timer = 5000;
 
@@ -277,26 +282,27 @@ public:
         {
             if (!ghost && pInstance)
             {
-                Unit* skarvald = Unit::GetUnit((*me), pInstance->GetData64(DATA_SKARVALD));
+                Unit* skarvald = Unit::GetUnit((*me),pInstance->GetData64(DATA_SKARVALD));
                 if (skarvald)
                 {
                     if (skarvald->isDead())
                     {
-                        DoScriptText(YELL_DALRONN_SKA_DIED, me);
+                        DoScriptText(YELL_DALRONN_SKA_DIED,me);
 
                         if (pInstance)
                             pInstance->SetData(DATA_SKARVALD_DALRONN_EVENT, DONE);
                     }
                     else
                     {
-                        DoScriptText(YELL_DALRONN_DAL_DIEDFIRST, me);
+                        DoScriptText(YELL_DALRONN_DAL_DIEDFIRST,me);
 
-                        me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                        skarvald->ToCreature()->AddLootMode(1);
+                        //me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                         //DoCast(me, SPELL_SUMMON_DALRONN_GHOST, true);
-                        Creature* temp = me->SummonCreature(MOB_DALRONN_GHOST, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 5000);
+                        Creature* temp = me->SummonCreature(MOB_DALRONN_GHOST,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0,TEMPSUMMON_CORPSE_DESPAWN,5000);
                         if (temp)
                         {
-                            temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            temp->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
                             temp->AI()->AttackStart(Killer);
                         }
                     }
@@ -304,11 +310,11 @@ public:
             }
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit * /*victim*/)
         {
             if (!ghost)
             {
-                DoScriptText(YELL_DALRONN_KILL, me);
+                DoScriptText(YELL_DALRONN_KILL,me);
             }
         }
 
@@ -327,7 +333,7 @@ public:
             {
                 if (AggroYell_Timer <= diff)
                 {
-                    DoScriptText(YELL_DALRONN_AGGRO, me);
+                    DoScriptText(YELL_DALRONN_AGGRO,me);
 
                     AggroYell_Timer = 0;
                 } else AggroYell_Timer -= diff;
@@ -354,7 +360,7 @@ public:
                 {
                     if (Response_Timer <= diff)
                     {
-                        DoScriptText(YELL_DALRONN_SKA_DIEDFIRST, me);
+                        DoScriptText(YELL_DALRONN_SKA_DIEDFIRST,me);
                         Response_Timer = 0;
                     } else Response_Timer -= diff;
                 }

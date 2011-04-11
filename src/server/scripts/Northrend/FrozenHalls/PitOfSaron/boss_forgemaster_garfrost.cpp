@@ -42,9 +42,8 @@ enum Spells
 };
 
 #define SPELL_PERMAFROST_HELPER RAID_MODE<uint32>(68786, 70336)
-#define SPELL_FORGE_BLADE_HELPER RAID_MODE<uint32>(68774, 70334)
 
-enum Events
+enum eEvents
 {
     EVENT_THROW_SARONITE    = 1,
     EVENT_CHILLING_WAVE     = 2,
@@ -54,7 +53,7 @@ enum Events
     EVENT_RESUME_ATTACK     = 6,
 };
 
-enum Phases
+enum ePhases
 {
     PHASE_ONE           = 1,
     PHASE_TWO           = 2,
@@ -65,7 +64,7 @@ enum Phases
     PHASE_THREE_MASK    = 1 << PHASE_THREE,
 };
 
-enum MiscData
+enum eMiscData
 {
     EQUIP_ID_SWORD              = 49345,
     EQUIP_ID_MACE               = 49344,
@@ -73,8 +72,8 @@ enum MiscData
     POINT_FORGE                 = 0,
 };
 
-Position const northForgePos = {722.5643f, -234.1615f, 527.182f, 2.16421f};
-Position const southForgePos = {639.257f, -210.1198f, 529.015f, 0.523599f};
+static const Position northForgePos = {722.5643f, -234.1615f, 527.182f, 2.16421f};
+static const Position southForgePos = {639.257f, -210.1198f, 529.015f, 0.523599f};
 
 class boss_garfrost : public CreatureScript
 {
@@ -158,10 +157,7 @@ class boss_garfrost : public CreatureScript
                 if (events.GetPhaseMask() & PHASE_TWO_MASK)
                     DoCast(me, SPELL_FORGE_BLADE);
                 if (events.GetPhaseMask() & PHASE_THREE_MASK)
-                {
-                    me->RemoveAurasDueToSpell(SPELL_FORGE_BLADE_HELPER);
                     DoCast(me, SPELL_FORGE_MACE);
-                }
                 events.ScheduleEvent(EVENT_RESUME_ATTACK, 5000);
             }
 

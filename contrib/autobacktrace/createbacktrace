@@ -1,0 +1,9 @@
+#!/bin/bash
+
+TRACE_FILE="../logs/trace.log"
+
+# parameter
+#PID=$1
+#TYP=$2
+echo "$2 detected!"
+gdb --batch --quiet -x "./$2backtracecommands" --pid=$1 2>&1 >>"${TRACE_FILE}_`date "+%F %T"`"

@@ -64,7 +64,7 @@ public:
         void EnterCombat(Unit* who)
         {
             if (me->GetEntry() == NPC_CENARION_HOLD_INFANTRY)
-                DoScriptText(RAND(SAY_GUARD_SIL_AGGRO1, SAY_GUARD_SIL_AGGRO2, SAY_GUARD_SIL_AGGRO3), me, who);
+                DoScriptText(RAND(SAY_GUARD_SIL_AGGRO1,SAY_GUARD_SIL_AGGRO2,SAY_GUARD_SIL_AGGRO3), me, who);
             if (SpellEntry const* spell = me->reachWithSpellAttack(who))
                 DoCast(who, spell->Id);
         }
@@ -124,7 +124,7 @@ public:
                         info = SelectSpell(me->getVictim(), 0, 0, SELECT_TARGET_ANY_ENEMY, 0, 0, 0, 0, SELECT_EFFECT_DONTCARE);
 
                     //20% chance to replace our white hit with a spell
-                    if (info && urand(0, 99) < 20 && !globalCooldown)
+                    if (info && urand(0,99) < 20 && !globalCooldown)
                     {
                         //Cast the spell
                         if (healing)
@@ -171,9 +171,9 @@ public:
 
                         //Cast spell
                         if (healing)
-                            DoCast(me, info->Id);
+                            DoCast(me,info->Id);
                         else
-                            DoCast(me->getVictim(), info->Id);
+                            DoCast(me->getVictim(),info->Id);
 
                         //Set our global cooldown
                         globalCooldown = GENERIC_CREATURE_COOLDOWN;
@@ -196,12 +196,12 @@ public:
         {
             switch(emote)
             {
-                case TEXT_EMOTE_KISS:    me->HandleEmoteCommand(EMOTE_ONESHOT_BOW);    break;
-                case TEXT_EMOTE_WAVE:    me->HandleEmoteCommand(EMOTE_ONESHOT_WAVE);   break;
-                case TEXT_EMOTE_SALUTE:  me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE); break;
-                case TEXT_EMOTE_SHY:     me->HandleEmoteCommand(EMOTE_ONESHOT_FLEX);   break;
-                case TEXT_EMOTE_RUDE:
-                case TEXT_EMOTE_CHICKEN: me->HandleEmoteCommand(EMOTE_ONESHOT_POINT);  break;
+                case TEXTEMOTE_KISS:    me->HandleEmoteCommand(EMOTE_ONESHOT_BOW);    break;
+                case TEXTEMOTE_WAVE:    me->HandleEmoteCommand(EMOTE_ONESHOT_WAVE);   break;
+                case TEXTEMOTE_SALUTE:  me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE); break;
+                case TEXTEMOTE_SHY:     me->HandleEmoteCommand(EMOTE_ONESHOT_FLEX);   break;
+                case TEXTEMOTE_RUDE:
+                case TEXTEMOTE_CHICKEN: me->HandleEmoteCommand(EMOTE_ONESHOT_POINT);  break;
             }
         }
 
@@ -268,10 +268,10 @@ public:
             {
                 if (exileTimer <= diff)
                 {
-                    if (Unit* temp = Unit::GetUnit(*me, playerGUID))
+                    if (Unit* temp = Unit::GetUnit(*me,playerGUID))
                     {
-                        temp->CastSpell(temp, SPELL_EXILE, true);
-                        temp->CastSpell(temp, SPELL_BANISH_TELEPORT, true);
+                        temp->CastSpell(temp,SPELL_EXILE,true);
+                        temp->CastSpell(temp,SPELL_BANISH_TELEPORT,true);
                     }
                     playerGUID = 0;
                     exileTimer = 8500;
@@ -333,10 +333,10 @@ public:
             {
                 if (exileTimer <= diff)
                 {
-                    if (Unit* temp = Unit::GetUnit(*me, playerGUID))
+                    if (Unit* temp = Unit::GetUnit(*me,playerGUID))
                     {
-                        temp->CastSpell(temp, SPELL_EXILE, true);
-                        temp->CastSpell(temp, SPELL_BANISH_TELEPORT, true);
+                        temp->CastSpell(temp,SPELL_EXILE,true);
+                        temp->CastSpell(temp,SPELL_BANISH_TELEPORT,true);
                     }
                     playerGUID = 0;
                     exileTimer = 8500;

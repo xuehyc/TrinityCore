@@ -19,7 +19,7 @@
 #include "ScriptedEscortAI.h"
 
 //How to win friends and influence enemies
-// texts signed for creature 28939 but used for 28939, 28940, 28610
+// texts signed for creature 28939 but used for 28939,28940,28610
 enum win_friends
 {
     SAY_PERSUADE1                     = -1609501,
@@ -86,12 +86,12 @@ public:
                     me->SetReactState(REACT_PASSIVE);
                     DoCastAOE(58111, true);
 
-                    DoScriptText(RAND(SAY_PERSUADE1, SAY_PERSUADE2, SAY_PERSUADE3,
-                                      SAY_PERSUADE4, SAY_PERSUADE5, SAY_PERSUADE6,
+                    DoScriptText(RAND(SAY_PERSUADE1,SAY_PERSUADE2,SAY_PERSUADE3,
+                                      SAY_PERSUADE4,SAY_PERSUADE5,SAY_PERSUADE6,
                                       SAY_PERSUADE7), caster);
 
-                    DoScriptText(RAND(SAY_CRUSADER1, SAY_CRUSADER2, SAY_CRUSADER3,
-                                      SAY_CRUSADER4, SAY_CRUSADER5, SAY_CRUSADER6), me);
+                    DoScriptText(RAND(SAY_CRUSADER1,SAY_CRUSADER2,SAY_CRUSADER3,
+                                      SAY_CRUSADER4,SAY_CRUSADER5,SAY_CRUSADER6), me);
                 }
             }
         }
@@ -183,7 +183,7 @@ public:
         {
             pCreature->SetStandState(UNIT_STAND_STATE_STAND);
 
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_koltira_deathweaver::npc_koltira_deathweaverAI, pCreature->AI()))
+            if (npc_escortAI* pEscortAI = CAST_AI(npc_koltira_deathweaver::npc_koltira_deathweaverAI,pCreature->AI()))
                 pEscortAI->Start(false, false, pPlayer->GetGUID());
         }
         return true;
@@ -237,6 +237,7 @@ public:
                     break;
                 case 3:
                     SetEscortPaused(true);
+                me->SetReactState(REACT_PASSIVE);
                     me->SetStandState(UNIT_STAND_STATE_KNEEL);
                     DoScriptText(SAY_BREAKOUT2, me);
                     DoCast(me, SPELL_ANTI_MAGIC_ZONE);  // cast again that makes bubble up
@@ -279,6 +280,12 @@ public:
 
             if (HasEscortState(STATE_ESCORT_PAUSED))
             {
+            if(m_uiWave >= 0 && m_uiWave < 5)
+            {
+                if(!me->HasAuraEffect(SPELL_ANTI_MAGIC_ZONE,0))
+                    DoCast(me,SPELL_ANTI_MAGIC_ZONE,true);
+            }
+
                 if (m_uiWave_Timer <= uiDiff)
                 {
                     switch(m_uiWave)
@@ -322,6 +329,7 @@ public:
                         case 5:
                             DoScriptText(SAY_BREAKOUT9, me);
                             me->RemoveAurasDueToSpell(SPELL_ANTI_MAGIC_ZONE);
+                        me->SetReactState(REACT_DEFENSIVE);
                             // i do not know why the armor will also be removed
                             m_uiWave_Timer = 2500;
                             break;
@@ -375,7 +383,7 @@ public:
             uiStage_timer = 3000;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoScriptText(SAY_TREE2, me);
             me->Unmount();
@@ -505,7 +513,7 @@ public:
         void Shout()
         {
             if (rand()%100 < 15)
-                DoScriptText(RAND(SAY_VALROTH3, SAY_VALROTH4, SAY_VALROTH5), me);
+                DoScriptText(RAND(SAY_VALROTH3,SAY_VALROTH4,SAY_VALROTH5), me);
         }
 
         void JustDied(Unit* killer)
@@ -520,7 +528,7 @@ public:
 /*######
 ## npc_a_special_surprise
 ######*/
-//used by 29032, 29061, 29065, 29067, 29068, 29070, 29074, 29072, 29073, 29071 but signed for 29032
+//used by 29032,29061,29065,29067,29068,29070,29074,29072,29073,29071 but signed for 29032
 enum SpecialSurprise
 {
     SAY_EXEC_START_1            = -1609025,                 // speech for all

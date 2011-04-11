@@ -1,0 +1,23 @@
+set print array on
+set print pretty on
+set listsize 20
+
+printf "Crashlog:"
+printf "\n\n===================================\n"
+printf "===================================\n\n"
+
+up 10
+
+printf "\nCrashed Frame Code:\n"
+list
+
+printf "\n===================================\n\n"
+
+printf "Thread Listing:\n"
+info threads
+
+printf "\n===================================\n\n"
+
+printf "Full Thread Backtrace:\n"
+thread apply all bt full
+kill

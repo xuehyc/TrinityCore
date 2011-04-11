@@ -20,6 +20,7 @@
 #include "Player.h"
 #include "DisableMgr.h"
 #include "ScriptMgr.h"
+#include "OutdoorPvPWG.h"
 
 OutdoorPvPMgr::OutdoorPvPMgr()
 {
@@ -139,7 +140,7 @@ void OutdoorPvPMgr::HandlePlayerLeaveZone(Player *plr, uint32 zoneid)
         return;
 
     itr->second->HandlePlayerLeaveZone(plr, zoneid);
-    sLog->outDebug(LOG_FILTER_OUTDOORPVP, "Player %u left outdoorpvp id %u", plr->GetGUIDLow(), itr->second->GetTypeId());
+    sLog->outDebug(LOG_FILTER_OUTDOORPVP, "Player %u left outdoorpvp id %u",plr->GetGUIDLow(), itr->second->GetTypeId());
 }
 
 OutdoorPvP * OutdoorPvPMgr::GetOutdoorPvPToZoneId(uint32 zoneid)
@@ -164,11 +165,11 @@ void OutdoorPvPMgr::Update(uint32 diff)
     }
 }
 
-bool OutdoorPvPMgr::HandleCustomSpell(Player *plr, uint32 spellId, GameObject* go)
+bool OutdoorPvPMgr::HandleCustomSpell(Player *plr, uint32 spellId, GameObject * go)
 {
     for (OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
     {
-        if ((*itr)->HandleCustomSpell(plr, spellId, go))
+        if ((*itr)->HandleCustomSpell(plr,spellId,go))
             return true;
     }
     return false;
@@ -187,7 +188,7 @@ bool OutdoorPvPMgr::HandleOpenGo(Player *plr, uint64 guid)
 {
     for (OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
     {
-        if ((*itr)->HandleOpenGo(plr, guid))
+        if ((*itr)->HandleOpenGo(plr,guid))
             return true;
     }
     return false;
@@ -197,16 +198,16 @@ void OutdoorPvPMgr::HandleGossipOption(Player *plr, uint64 guid, uint32 gossipid
 {
     for (OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
     {
-        if ((*itr)->HandleGossipOption(plr, guid, gossipid))
+        if ((*itr)->HandleGossipOption(plr,guid,gossipid))
             return;
     }
 }
 
-bool OutdoorPvPMgr::CanTalkTo(Player* player, Creature* creature, GossipMenuItems const& gso)
+bool OutdoorPvPMgr::CanTalkTo(Player * plr, Creature * c, GossipMenuItems gso)
 {
     for (OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
     {
-        if ((*itr)->CanTalkTo(player, creature, gso))
+        if ((*itr)->CanTalkTo(plr,c,gso))
             return true;
     }
     return false;
@@ -216,7 +217,7 @@ void OutdoorPvPMgr::HandleDropFlag(Player *plr, uint32 spellId)
 {
     for (OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
     {
-        if ((*itr)->HandleDropFlag(plr, spellId))
+        if ((*itr)->HandleDropFlag(plr,spellId))
             return;
     }
 }

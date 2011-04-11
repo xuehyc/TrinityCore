@@ -16,8 +16,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
 #include "blackrock_spire.h"
 
 enum Spells
@@ -90,7 +88,7 @@ public:
                         break;
                     case EVENT_MOTHERS_MILK:
                         DoCast(me, SPELL_MOTHERSMILK);
-                        events.ScheduleEvent(EVENT_MOTHERS_MILK, urand(5*IN_MILLISECONDS, 12500));
+                        events.ScheduleEvent(EVENT_MOTHERS_MILK, urand(5*IN_MILLISECONDS,12500));
                         break;
                 }
             }

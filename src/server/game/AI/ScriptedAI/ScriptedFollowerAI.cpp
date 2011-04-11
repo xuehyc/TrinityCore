@@ -49,9 +49,9 @@ void FollowerAI::AttackStart(Unit* pWho)
 //This part provides assistance to a player that are attacked by pWho, even if out of normal aggro range
 //It will cause me to attack pWho that are attacking _any_ player (which has been confirmed may happen also on offi)
 //The flag (type_flag) is unconfirmed, but used here for further research and is a good candidate.
-bool FollowerAI::AssistPlayerInCombat(Unit* who)
+bool FollowerAI::AssistPlayerInCombat(Unit* pWho)
 {
-    if (!who || !who->getVictim())
+    if (!pWho || !pWho->getVictim())
         return false;
 
     //experimental (unknown) flag not present
@@ -59,26 +59,26 @@ bool FollowerAI::AssistPlayerInCombat(Unit* who)
         return false;
 
     //not a player
-    if (!who->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
+    if (!pWho->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
         return false;
 
     //never attack friendly
-    if (me->IsFriendlyTo(who))
+    if (me->IsFriendlyTo(pWho))
         return false;
 
     //too far away and no free sight?
-    if (me->IsWithinDistInMap(who, MAX_PLAYER_DISTANCE) && me->IsWithinLOSInMap(who))
+    if (me->IsWithinDistInMap(pWho, MAX_PLAYER_DISTANCE) && me->IsWithinLOSInMap(pWho))
     {
         //already fighting someone?
         if (!me->getVictim())
         {
-            AttackStart(who);
+            AttackStart(pWho);
             return true;
         }
         else
         {
-            who->SetInCombatWith(me);
-            me->AddThreat(who, 0.0f);
+            pWho->SetInCombatWith(me);
+            me->AddThreat(pWho, 0.0f);
             return true;
         }
     }

@@ -199,12 +199,12 @@ public:
             pInstance->SetData(DATA_KARATHRESSEVENT, IN_PROGRESS);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit * /*victim*/)
         {
-            DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3), me);
+            DoScriptText(RAND(SAY_SLAY1,SAY_SLAY2,SAY_SLAY3), me);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit * /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
 
@@ -215,7 +215,7 @@ public:
             me->SummonCreature(SEER_OLUM, OLUM_X, OLUM_Y, OLUM_Z, OLUM_O, TEMPSUMMON_TIMED_DESPAWN, 3600000);
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit * who)
         {
             StartEvent(who);
         }
@@ -293,7 +293,7 @@ public:
                 if (continueTriggering)
                 {
                     DoCast(me, SPELL_BLESSING_OF_THE_TIDES);
-                    me->MonsterYell(SAY_GAIN_BLESSING_OF_TIDES, LANG_UNIVERSAL, 0);
+                    me->MonsterYell(SAY_GAIN_BLESSING_OF_TIDES, LANG_UNIVERSAL, NULL);
                     DoPlaySoundToSet(me, SOUND_GAIN_BLESSING_OF_TIDES);
                 }
             }
@@ -354,7 +354,7 @@ public:
                 pInstance->SetData(DATA_KARATHRESSEVENT, NOT_STARTED);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit * /*victim*/)
         {
             if (pInstance)
             {
@@ -367,7 +367,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit * who)
         {
             if (pInstance)
             {
@@ -432,7 +432,7 @@ public:
                 pet = true;
                 //uint32 spell_id;
                 uint32 pet_id;
-                if (!urand(0, 1))
+                if (!urand(0,1))
                 {
                     //spell_id = SPELL_SUMMON_FATHOM_LURKER;
                     pet_id = CREATURE_FATHOM_LURKER;
@@ -443,8 +443,8 @@ public:
                     pet_id = CREATURE_FATHOM_SPOREBAT;
                 }
                 //DoCast(me, spell_id, true);
-                Creature *Pet = DoSpawnCreature(pet_id, 0, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
-                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                Creature *Pet = DoSpawnCreature(pet_id,0,0,0,0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
+                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,0);
                 if (Pet && pTarget)
                 {
                     Pet->AI()->AttackStart(pTarget);
@@ -494,7 +494,7 @@ public:
                 pInstance->SetData(DATA_KARATHRESSEVENT, NOT_STARTED);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit * /*victim*/)
         {
             if (pInstance)
             {
@@ -507,7 +507,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit * who)
         {
             if (pInstance)
             {
@@ -621,7 +621,7 @@ public:
                 pInstance->SetData(DATA_KARATHRESSEVENT, NOT_STARTED);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit * /*victim*/)
         {
             if (pInstance)
             {
@@ -634,7 +634,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit * who)
         {
             if (pInstance)
             {

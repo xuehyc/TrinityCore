@@ -65,7 +65,7 @@ public:
             ShadowWordPain_Timer = 5000;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
         }
@@ -81,7 +81,7 @@ public:
                 return;
 
             //Any other actions to do with vorrel? setStandState?
-            if (Unit *vorrel = Unit::GetUnit(*me, pInstance->GetData64(DATA_VORREL)))
+            if (Unit *vorrel = Unit::GetUnit(*me,pInstance->GetData64(DATA_VORREL)))
                 DoScriptText(SAY_TRIGGER_VORREL, vorrel);
         }
 

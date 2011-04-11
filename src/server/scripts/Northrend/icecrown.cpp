@@ -141,7 +141,7 @@ public:
     {
         pPlayer->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_TRADE)
-            pPlayer->GetSession()->SendListInventory(pCreature->GetGUID());
+            pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
         return true;
     }
 };
@@ -187,7 +187,7 @@ public:
         if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
         {
             pPlayer->CLOSE_GOSSIP_MENU();
-            pCreature->SummonCreature(NPC_ARGENT_VALIANT, 8575.451f, 952.472f, 547.554f, 0.38f);
+            pCreature->SummonCreature(NPC_ARGENT_VALIANT,8575.451f,952.472f,547.554f,0.38f);
         }
         return true;
     }
@@ -214,7 +214,7 @@ public:
     {
         npc_argent_valiantAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            pCreature->GetMotionMaster()->MovePoint(0, 8599.258f, 963.951f, 547.553f);
+            pCreature->GetMotionMaster()->MovePoint(0,8599.258f,963.951f,547.553f);
             pCreature->setFaction(35); //wrong faction in db?
         }
 
@@ -240,10 +240,10 @@ public:
             if (uiDamage > me->GetHealth() && pDoneBy->GetTypeId() == TYPEID_PLAYER)
             {
                 uiDamage = 0;
-                CAST_PLR(pDoneBy)->KilledMonsterCredit(NPC_ARGENT_VALIANT_CREDIT, 0);
+                CAST_PLR(pDoneBy)->KilledMonsterCredit(NPC_ARGENT_VALIANT_CREDIT,0);
                 me->setFaction(35);
                 me->DespawnOrUnsummon(5000);
-                me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                me->SetHomePosition(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),me->GetOrientation());
                 EnterEvadeMode();
             }
         }
@@ -381,6 +381,53 @@ public:
     }
 };
 
+/*######
+## npc_webbed_crusader
+######*/
+
+enum eWebbedCrusaderSpells
+{
+    NPC_FORGOTTEN_DEEPS_AMBUSHER = 30204,
+    NPC_FREED_CRUSADER = 30274,
+    SPELL_FREED_CRUSADER = 56423
+};
+// UPDATE creature_template SET scriptname = 'npc_webbed_crusader' WHERE entry in (30273,30268);
+class npc_webbed_crusader : public CreatureScript
+{
+public:
+    npc_webbed_crusader() : CreatureScript("npc_webbed_crusader") { }
+
+    struct npc_webbed_crusaderAI : public Scripted_NoMovementAI
+    {
+        npc_webbed_crusaderAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) {}
+
+        void JustDied(Unit* killer)
+        {
+            switch(urand(0,1))
+            {
+            case 0:
+                {
+                    Creature* temp = DoSpawnCreature(NPC_FREED_CRUSADER,0,0,0,0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
+                    if(Player* pPlayer = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        pPlayer->KilledMonsterCredit(NPC_FREED_CRUSADER,temp->GetGUID());
+                    //DoCast(me,SPELL_FREED_CRUSADER,true);
+                }
+                break;
+            case 1:
+                {
+                    Creature* temp = DoSpawnCreature(NPC_FORGOTTEN_DEEPS_AMBUSHER,0,0,0,0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
+                    temp->AI()->AttackStart(killer);
+                }
+                break;
+            }
+        }
+    };
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new npc_webbed_crusaderAI(creature);
+    }
+};
 void AddSC_icecrown()
 {
     new npc_arete;
@@ -389,4 +436,5 @@ void AddSC_icecrown()
     new npc_argent_valiant;
     new npc_alorah_and_grimmin;
     new npc_guardian_pavilion;
+    new npc_webbed_crusader;
 }

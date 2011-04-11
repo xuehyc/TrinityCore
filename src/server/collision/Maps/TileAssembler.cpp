@@ -262,13 +262,12 @@ namespace VMAP
         int readOperation = 1;
 
         // temporary use defines to simplify read/check code (close file and return at fail)
-        #define READ_OR_RETURN(V, S) if(fread((V), (S), 1, rf) != 1) { \
+        #define READ_OR_RETURN(V,S) if(fread((V), (S), 1, rf) != 1) { \
                                         fclose(rf); printf("readfail, op = %i\n", readOperation); return(false); }readOperation++;
-        // only use this for array deletes
-        #define READ_OR_RETURN_WITH_DELETE(V, S) if(fread((V), (S), 1, rf) != 1) { \
-                                        fclose(rf); printf("readfail, op = %i\n", readOperation); delete[] V; return(false); }readOperation++;
+        #define READ_OR_RETURN_WITH_DELETE(V,S) if(fread((V), (S), 1, rf) != 1) { \
+                                        fclose(rf); printf("readfail, op = %i\n", readOperation); delete V; return(false); }readOperation++;
 
-        #define CMP_OR_RETURN(V, S)  if(strcmp((V), (S)) != 0)        { \
+        #define CMP_OR_RETURN(V,S)  if(strcmp((V),(S)) != 0)        { \
                                         fclose(rf); printf("cmpfail, %s!=%s\n", V, S);return(false); }
 
         READ_OR_RETURN(&ident, 8);
@@ -335,7 +334,6 @@ namespace VMAP
             delete[] vectorarray;
             // drop of temporary use defines
             #undef READ_OR_RETURN
-            #undef READ_OR_RETURN_WITH_DELETE
             #undef CMP_OR_RETURN
         }
         spawn.iBound = modelBound + spawn.iPos;
@@ -364,8 +362,8 @@ namespace VMAP
 
         if (!rf)
         {
-            printf("ERROR: Can't open model file in form: %s", pModelFilename.c_str());
-            printf("...                          or form: %s", filename.c_str() );
+            printf("ERROR: Can't open model file in form: %s",pModelFilename.c_str());
+            printf("...                          or form: %s",filename.c_str() );
             return false;
         }
 
@@ -374,11 +372,11 @@ namespace VMAP
         int readOperation = 1;
 
         // temporary use defines to simplify read/check code (close file and return at fail)
-        #define READ_OR_RETURN(V, S) if(fread((V), (S), 1, rf) != 1) { \
+        #define READ_OR_RETURN(V,S) if(fread((V), (S), 1, rf) != 1) { \
                                         fclose(rf); printf("readfail, op = %i\n", readOperation); return(false); }readOperation++;
-        #define READ_OR_RETURN_WITH_DELETE(V, S) if(fread((V), (S), 1, rf) != 1) { \
-                                        fclose(rf); printf("readfail, op = %i\n", readOperation); delete[] V; return(false); }readOperation++;
-        #define CMP_OR_RETURN(V, S)  if(strcmp((V), (S)) != 0)        { \
+        #define READ_OR_RETURN_WITH_DELETE(V,S) if(fread((V), (S), 1, rf) != 1) { \
+                                        fclose(rf); printf("readfail, op = %i\n", readOperation); delete V; return(false); }readOperation++;
+        #define CMP_OR_RETURN(V,S)  if(strcmp((V),(S)) != 0)        { \
                                         fclose(rf); printf("cmpfail, %s!=%s\n", V, S);return(false); }
 
         READ_OR_RETURN(&ident, 8);
@@ -484,7 +482,6 @@ namespace VMAP
 
             // drop of temporary use defines
             #undef READ_OR_RETURN
-            #undef READ_OR_RETURN_WITH_DELETE
             #undef CMP_OR_RETURN
 
         }
@@ -493,7 +490,7 @@ namespace VMAP
         // write WorldModel
         WorldModel model;
         model.setRootWmoID(RootWMOID);
-        if (!groupsArray.empty())
+        if (groupsArray.size())
         {
             model.setGroupModels(groupsArray);
             success = model.writeFile(iDestDir + "/" + pModelFilename + ".vmo");

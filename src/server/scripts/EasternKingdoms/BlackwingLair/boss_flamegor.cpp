@@ -24,6 +24,7 @@ SDCategory: Blackwing Lair
 EndScriptData */
 
 #include "ScriptPCH.h"
+#include "blackwing_lair.h"
 
 #define EMOTE_FRENZY            -1469031
 
@@ -43,7 +44,12 @@ public:
 
     struct boss_flamegorAI : public ScriptedAI
     {
-        boss_flamegorAI(Creature *c) : ScriptedAI(c) {}
+        boss_flamegorAI(Creature *c) : ScriptedAI(c)
+        {
+            pInstance = c->GetInstanceScript();
+        }
+
+        InstanceScript* pInstance;
 
         uint32 ShadowFlame_Timer;
         uint32 WingBuffet_Timer;
@@ -54,11 +60,35 @@ public:
             ShadowFlame_Timer = 21000;                          //These times are probably wrong
             WingBuffet_Timer = 35000;
             Frenzy_Timer = 10000;
+
+        if(pInstance)
+            pInstance->SetData(ENCOUNTER_FLAMEGOR,NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoZoneInCombat();
+
+        if(pInstance)
+            pInstance->SetData(ENCOUNTER_FLAMEGOR,IN_PROGRESS);
+    }
+
+    void JustDied(Unit *killer)
+    {
+        if(pInstance)
+            pInstance->SetData(ENCOUNTER_FLAMEGOR,DONE);
+    }
+
+    void SpellHitTarget(Unit *pTarget, const SpellEntry *spell)
+    {
+        if(spell->Id == SPELL_SHADOWFLAME)
+        {
+            if(pTarget->GetTypeId() == TYPEID_PLAYER)
+            {
+                if(!pTarget->HasAuraEffect(22683,0))
+                    me->CastSpell(pTarget,22682,true);
+            }
+        }
         }
 
         void UpdateAI(const uint32 diff)
@@ -78,7 +108,7 @@ public:
             {
                 DoCast(me->getVictim(), SPELL_WINGBUFFET);
                 if (DoGetThreat(me->getVictim()))
-                    DoModifyThreatPercent(me->getVictim(), -75);
+                    DoModifyThreatPercent(me->getVictim(),-75);
 
                 WingBuffet_Timer = 25000;
             } else WingBuffet_Timer -= diff;

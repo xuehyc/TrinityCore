@@ -28,7 +28,6 @@
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "MapRefManager.h"
-#include "ScriptMgr.h"
 
 /// Put scripts in the execution queue
 void Map::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, Object* target)
@@ -54,11 +53,11 @@ void Map::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, O
         sa.ownerGUID  = ownerGUID;
 
         sa.script = &iter->second;
-        m_scriptSchedule.insert(ScriptScheduleMap::value_type(time_t(sWorld->GetGameTime() + iter->first), sa));
+        m_scriptSchedule.insert(std::pair<time_t, ScriptAction>(time_t(sWorld->GetGameTime() + iter->first), sa));
         if (iter->first == 0)
             immedScript = true;
 
-        sScriptMgr->IncreaseScheduledScriptsCount();
+        sWorld->IncreaseScheduledScriptsCount();
     }
     ///- If one of the effects should be immediate, launch the script execution
     if (/*start &&*/ immedScript && !i_scriptLock)
@@ -84,9 +83,9 @@ void Map::ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* sou
     sa.ownerGUID  = ownerGUID;
 
     sa.script = &script;
-    m_scriptSchedule.insert(ScriptScheduleMap::value_type(time_t(sWorld->GetGameTime() + delay), sa));
+    m_scriptSchedule.insert(std::pair<time_t, ScriptAction>(time_t(sWorld->GetGameTime() + delay), sa));
 
-    sScriptMgr->IncreaseScheduledScriptsCount();
+    sWorld->IncreaseScheduledScriptsCount();
 
     ///- If effects should be immediate, launch the script execution
     if (delay == 0 && !i_scriptLock)
@@ -290,7 +289,7 @@ void Map::ScriptsProcess()
         return;
 
     ///- Process overdue queued scripts
-    ScriptScheduleMap::iterator iter = m_scriptSchedule.begin();
+    std::multimap<time_t, ScriptAction>::iterator iter = m_scriptSchedule.begin();
     // ok as multimap is a *sorted* associative container
     while (!m_scriptSchedule.empty() && (iter->first <= sWorld->GetGameTime()))
     {
@@ -343,12 +342,14 @@ void Map::ScriptsProcess()
             switch (GUID_HIPART(step.targetGUID))
             {
                 case HIGHGUID_UNIT:
-                case HIGHGUID_VEHICLE:
                     target = HashMapHolder<Creature>::Find(step.targetGUID);
                     break;
                 case HIGHGUID_PET:
                     target = HashMapHolder<Pet>::Find(step.targetGUID);
                     break;
+                //case HIGHGUID_VEHICLE:
+                //    target = HashMapHolder<Vehicle>::Find(step.targetGUID);
+                //    break;
                 case HIGHGUID_PLAYER:                       // empty GUID case also
                     target = HashMapHolder<Player>::Find(step.targetGUID);
                     break;
@@ -511,7 +512,7 @@ void Map::ScriptsProcess()
                 break;
 
             case SCRIPT_COMMAND_TELEPORT_TO:
-                if (step.script->TeleportTo.Flags & SF_TELEPORT_USE_CREATURE)
+                if  (step.script->TeleportTo.Flags & SF_TELEPORT_USE_CREATURE)
                 {
                     // Source or target must be Creature.
                     if (Creature *cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script, true))
@@ -774,7 +775,7 @@ void Map::ScriptsProcess()
                 if (Player* pReceiver = _GetScriptPlayerSourceOrTarget(source, target, step.script))
                 {
                     ItemPosCountVec dest;
-                    InventoryResult msg = pReceiver->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, step.script->CreateItem.ItemEntry, step.script->CreateItem.Amount);
+                    uint8 msg = pReceiver->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, step.script->CreateItem.ItemEntry, step.script->CreateItem.Amount);
                     if (msg == EQUIP_ERR_OK)
                     {
                         if (Item* item = pReceiver->StoreNewItem(dest, step.script->CreateItem.ItemEntry, true))
@@ -907,7 +908,7 @@ void Map::ScriptsProcess()
             case SCRIPT_COMMAND_CLOSE_GOSSIP:
                 // Source must be Player.
                 if (Player *pSource = _GetScriptPlayer(source, true, step.script))
-                    pSource->PlayerTalkClass->SendCloseGossip();
+                    pSource->PlayerTalkClass->CloseGossip();
                 break;
 
             case SCRIPT_COMMAND_PLAYMOVIE:
@@ -922,7 +923,8 @@ void Map::ScriptsProcess()
         }
 
         m_scriptSchedule.erase(iter);
+        sWorld->DecreaseScheduledScriptCount();
+
         iter = m_scriptSchedule.begin();
-        sScriptMgr->DecreaseScheduledScriptCount();
     }
 }

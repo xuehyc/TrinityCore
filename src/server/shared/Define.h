@@ -42,13 +42,9 @@
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
 #  endif //DECLSPEC_NORETURN
-#  ifndef DECLSPEC_DEPRECATED
-#    define DECLSPEC_DEPRECATED __declspec(deprecated)
-#  endif //DECLSPEC_DEPRECATED
 #else //PLATFORM != PLATFORM_WINDOWS
 #  define TRINITY_PATH_MAX PATH_MAX
 #  define DECLSPEC_NORETURN
-#  define DECLSPEC_DEPRECATED
 #endif //PLATFORM
 
 #if !defined(COREDEBUG)
@@ -62,12 +58,10 @@
 
 #if COMPILER == COMPILER_GNU
 #  define ATTR_NORETURN __attribute__((noreturn))
-#  define ATTR_PRINTF(F, V) __attribute__ ((format (printf, F, V)))
-#  define ATTR_DEPRECATED __attribute__((deprecated))
+#  define ATTR_PRINTF(F,V) __attribute__ ((format (printf, F, V)))
 #else //COMPILER != COMPILER_GNU
 #  define ATTR_NORETURN
-#  define ATTR_PRINTF(F, V)
-#  define ATTR_DEPRECATED
+#  define ATTR_PRINTF(F,V)
 #endif //COMPILER == COMPILER_GNU
 
 typedef ACE_INT64 int64;

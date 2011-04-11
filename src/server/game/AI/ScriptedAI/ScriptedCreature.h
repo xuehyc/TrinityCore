@@ -1,32 +1,28 @@
-/*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
+ * Thanks to the original authors: ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+ * This program is free software licensed under GPL version 2
+ * Please see the included DOCS/LICENSE.TXT for more information */
 
-#ifndef SCRIPTEDCREATURE_H_
-#define SCRIPTEDCREATURE_H_
+#ifndef SC_CREATURE_H
+#define SC_CREATURE_H
 
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "CreatureAIImpl.h"
 #include "InstanceScript.h"
 
-#define CAST_PLR(a)     (dynamic_cast<Player*>(a))
-#define CAST_CRE(a)     (dynamic_cast<Creature*>(a))
-#define CAST_AI(a, b)   (dynamic_cast<a*>(b))
+#define SCRIPT_CAST_TYPE dynamic_cast
+
+#define MAX_AGGRO_PULSE_TIMER            5000
+
+#define CAST_PLR(a)     (SCRIPT_CAST_TYPE<Player*>(a))
+#define CAST_CRE(a)     (SCRIPT_CAST_TYPE<Creature*>(a))
+#define CAST_SUM(a)     (SCRIPT_CAST_TYPE<TempSummon*>(a))
+#define CAST_PET(a)     (SCRIPT_CAST_TYPE<Pet*>(a))
+#define CAST_AI(a,b)    (SCRIPT_CAST_TYPE<a*>(b))
+#define CAST_INST(a,b)  (SCRIPT_CAST_TYPE<a*>(b))
 
 #define GET_SPELL(a)    (const_cast<SpellEntry*>(GetSpellStore()->LookupEntry(a)))
 
@@ -238,6 +234,12 @@ struct ScriptedAI : public CreatureAI
         return heroic25;
     }
 
+    void SetImmuneToPushPullEffects(bool set)
+    {
+        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, set);
+        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, set);
+    }
+
     private:
         Difficulty _difficulty;
         uint32 _evadeCheckCooldown;
@@ -247,7 +249,10 @@ struct ScriptedAI : public CreatureAI
 
 struct Scripted_NoMovementAI : public ScriptedAI
 {
-    Scripted_NoMovementAI(Creature* creature) : ScriptedAI(creature) {}
+    Scripted_NoMovementAI(Creature* creature) : ScriptedAI(creature) 
+    {
+        SetImmuneToPushPullEffects(true);
+    }
     virtual ~Scripted_NoMovementAI() {}
 
     //Called at each attack of me by any victim
@@ -260,19 +265,14 @@ class BossAI : public ScriptedAI
         BossAI(Creature* creature, uint32 bossId);
         virtual ~BossAI() {}
 
+    uint32 inFightAggroCheck_Timer;
         InstanceScript* const instance;
         BossBoundaryMap const* GetBoundary() const { return _boundary; }
 
         void JustSummoned(Creature* summon);
         void SummonedCreatureDespawn(Creature* summon);
 
-        virtual void UpdateAI(uint32 const diff);
-
-        // Hook used to execute events scheduled into EventMap without the need
-        // to override UpdateAI
-        // note: You must re-schedule the event within this method if the event
-        // is supposed to run more than once
-        virtual void ExecuteEvent(uint32 const /*eventId*/) { }
+        void UpdateAI(uint32 const diff) = 0;
 
         void Reset() { _Reset(); }
         void EnterCombat(Unit* /*who*/) { _EnterCombat(); }
@@ -284,6 +284,7 @@ class BossAI : public ScriptedAI
         void _EnterCombat();
         void _JustDied();
         void _JustReachedHome() { me->setActive(false); }
+        void _DoAggroPulse(const uint32 diff);
 
         bool CheckInRoom()
         {
@@ -296,43 +297,12 @@ class BossAI : public ScriptedAI
 
         bool CheckBoundary(Unit* who);
         void TeleportCheaters();
-
         EventMap events;
         SummonList summons;
 
     private:
         BossBoundaryMap const* const _boundary;
-        uint32 const _bossId;
-};
-
-class WorldBossAI : public ScriptedAI
-{
-    public:
-        WorldBossAI(Creature* creature);
-        virtual ~WorldBossAI() {}
-
-        void JustSummoned(Creature* summon);
-        void SummonedCreatureDespawn(Creature* summon);
-
-        virtual void UpdateAI(uint32 const diff);
-
-        // Hook used to execute events scheduled into EventMap without the need
-        // to override UpdateAI
-        // note: You must re-schedule the event within this method if the event
-        // is supposed to run more than once
-        virtual void ExecuteEvent(uint32 const /*eventId*/) { }
-
-        void Reset() { _Reset(); }
-        void EnterCombat(Unit* /*who*/) { _EnterCombat(); }
-        void JustDied(Unit* /*killer*/) { _JustDied(); }
-
-    protected:
-        void _Reset();
-        void _EnterCombat();
-        void _JustDied();
-
-        EventMap events;
-        SummonList summons;
+        const uint32 _bossId;
 };
 
 // SD2 grid searchers.
@@ -341,4 +311,4 @@ GameObject* GetClosestGameObjectWithEntry(WorldObject* source, uint32 entry, flo
 void GetCreatureListWithEntryInGrid(std::list<Creature*>& list, WorldObject* source, uint32 entry, float maxSearchRange);
 void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& list, WorldObject* source, uint32 entry, float maxSearchRange);
 
-#endif // SCRIPTEDCREATURE_H_
+#endif

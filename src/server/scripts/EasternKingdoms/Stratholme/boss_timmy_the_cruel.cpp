@@ -52,11 +52,11 @@ public:
             HasYelled = false;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             if (!HasYelled)
             {
-                me->MonsterYell(SAY_SPAWN, LANG_UNIVERSAL, 0);
+                me->MonsterYell(SAY_SPAWN,LANG_UNIVERSAL,NULL);
                 HasYelled = true;
             }
         }

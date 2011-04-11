@@ -78,12 +78,12 @@ public:
         InstanceScript* m_pInstance;
 
         bool m_bIsAura;
+        bool bHit;
 
         uint32 m_uiArcLightning_Timer;
         uint32 m_uiLightningNova_Timer;
         uint32 m_uiPulsingShockwave_Timer;
         uint32 m_uiResumePulsingShockwave_Timer;
-
         uint32 m_uiHealthAmountModifier;
 
         void Reset()
@@ -104,6 +104,17 @@ public:
             }
         }
 
+        void SpellHitTarget(Unit * pTarget, const SpellEntry * spell)
+        {
+            if (spell->Id==SPELL_ARC_LIGHTNING && bHit)
+                if (rand()%100<DUNGEON_MODE(65,80))
+                {
+                    bHit=false;
+                    DoCast(pTarget->FindNearestPlayer(10.0f),SPELL_ARC_LIGHTNING);
+                }
+        }
+
+
         void EnterCombat(Unit* /*pWho*/)
         {
             DoScriptText(SAY_AGGRO, me);
@@ -112,6 +123,22 @@ public:
             {
                 m_pInstance->SetData(TYPE_LOKEN, IN_PROGRESS);
                 m_pInstance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMELY_DEATH_START_EVENT);
+            }
+
+            if (m_pInstance->GetData(TYPE_IONAR)!=DONE)
+            {
+                Map* pMap = me->GetMap();
+                if (pMap->IsDungeon())
+                {
+                    Map::PlayerList const &PlayerList = pMap->GetPlayers();
+                    if (PlayerList.isEmpty())
+                        return;
+
+                    float fDist=0;
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                        if (i->getSource() && i->getSource()->isAlive() && !i->getSource()->isGameMaster())
+                            me->DealDamage(i->getSource(),i->getSource()->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                }
             }
         }
 
@@ -125,7 +152,7 @@ public:
 
         void KilledUnit(Unit* /*pVictim*/)
         {
-            DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3), me);
+            DoScriptText(RAND(SAY_SLAY_1,SAY_SLAY_2,SAY_SLAY_3), me);
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -147,18 +174,17 @@ public:
                         if (PlayerList.isEmpty())
                             return;
 
+                        float fDist=0;
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                             if (i->getSource() && i->getSource()->isAlive() && i->getSource()->isTargetableForAttack())
                             {
-                                int32 dmg;
-                                float m_fDist = me->GetExactDist(i->getSource()->GetPositionX(), i->getSource()->GetPositionY(), i->getSource()->GetPositionZ());
-
-                                dmg = DUNGEON_MODE(100, 150); // need to correct damage
-                                if (m_fDist > 1.0f) // Further from 1 yard
-                                    dmg = int32(dmg*m_fDist);
-
-                                me->CastCustomSpell(i->getSource(), DUNGEON_MODE(52942, 59837), &dmg, 0, 0, false);
+                                float fDistTemp = me->GetExactDist(i->getSource()->GetPositionX(), i->getSource()->GetPositionY(), i->getSource()->GetPositionZ());
+                                if (fDistTemp>fDist)
+                                    fDist=fDistTemp;
                             }
+                        int32 dmg= int32(DUNGEON_MODE(100, 150)*fDist);
+                        int32 range=200;
+                        me->CastCustomSpell(me->getVictim(), DUNGEON_MODE(52942, 59837), &dmg, &range, 0, false);
                     }
                     m_uiPulsingShockwave_Timer = 2000;
                 } else m_uiPulsingShockwave_Timer -= uiDiff;
@@ -170,7 +196,7 @@ public:
                     //breaks at movement, can we assume when it's time, this spell is casted and also must stop movement?
                     DoCast(me, SPELL_PULSING_SHOCKWAVE_AURA, true);
 
-                    DoCast(me, SPELL_PULSING_SHOCKWAVE_N); // need core support
+                    DoCast(me, DUNGEON_MODE(SPELL_PULSING_SHOCKWAVE_N,SPELL_PULSING_SHOCKWAVE_H)); // need core support
                     m_bIsAura = true;
                     m_uiResumePulsingShockwave_Timer = 0;
                 }
@@ -183,6 +209,7 @@ public:
                 if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(pTarget, SPELL_ARC_LIGHTNING);
 
+                bHit=true;
                 m_uiArcLightning_Timer = 15000 + rand()%1000;
             }
             else
@@ -190,13 +217,13 @@ public:
 
             if (m_uiLightningNova_Timer <= uiDiff)
             {
-                DoScriptText(RAND(SAY_NOVA_1, SAY_NOVA_2, SAY_NOVA_3), me);
+                DoScriptText(RAND(SAY_NOVA_1,SAY_NOVA_2,SAY_NOVA_3), me);
                 DoScriptText(EMOTE_NOVA, me);
-                DoCast(me, SPELL_LIGHTNING_NOVA_N);
+                DoCast(me, DUNGEON_MODE(SPELL_LIGHTNING_NOVA_N,SPELL_LIGHTNING_NOVA_H));
 
                 m_bIsAura = false;
                 m_uiResumePulsingShockwave_Timer = DUNGEON_MODE(5000, 4000); // Pause Pulsing Shockwave aura
-                m_uiLightningNova_Timer = 20000 + rand()%1000;
+                m_uiLightningNova_Timer = 30000;
             }
             else
                 m_uiLightningNova_Timer -= uiDiff;

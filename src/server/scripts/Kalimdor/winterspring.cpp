@@ -109,7 +109,7 @@ public:
     {
         pPlayer->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_TRADE)
-            pPlayer->GetSession()->SendListInventory(pCreature->GetGUID());
+            pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
 
         return true;
     }

@@ -23,238 +23,296 @@ SDComment: Place Holder
 SDCategory: Molten Core
 EndScriptData */
 
-#include "ObjectMgr.h"
-#include "ScriptMgr.h"
-#include "InstanceScript.h"
-#include "CreatureAI.h"
+#include "ScriptPCH.h"
 #include "molten_core.h"
 
-Position const SummonPositions[10] =
+#define MAX_ENCOUNTER      10
+
+enum MoltenCoreBosses
 {
-    {737.850f, -1145.35f, -120.288f, 4.71368f},
-    {744.162f, -1151.63f, -119.726f, 4.58204f},
-    {751.247f, -1152.82f, -119.744f, 4.49673f},
-    {759.206f, -1155.09f, -120.051f, 4.30104f},
-    {755.973f, -1152.33f, -120.029f, 4.25588f},
-    {731.712f, -1147.56f, -120.195f, 4.95955f},
-    {726.499f, -1149.80f, -120.156f, 5.24055f},
-    {722.408f, -1152.41f, -120.029f, 5.33087f},
-    {718.994f, -1156.36f, -119.805f, 5.75738f},
-    {838.510f, -829.840f, -232.000f, 2.00000f},
+    ID_LUCIFRON = 12118,
+    ID_MAGMADAR = 11982,
+    ID_GEHENNAS = 12259,
+    ID_GARR = 12057,
+    ID_GEDDON = 12056,
+    ID_SHAZZRAH = 12264,
+    ID_GOLEMAGG = 11988,
+    ID_SULFURON = 12098,
+    ID_DOMO = 12018,
+    ID_RAGNAROS = 11502,
+    ID_FLAMEWAKERPRIEST = 11662
 };
 
 class instance_molten_core : public InstanceMapScript
 {
-    public:
-        instance_molten_core() : InstanceMapScript("instance_molten_core", 409) { }
+public:
+    instance_molten_core() : InstanceMapScript("instance_molten_core", 409) { }
 
-        struct instance_molten_core_InstanceMapScript : public InstanceScript
+    InstanceScript* GetInstanceScript(InstanceMap* pMap) const
+    {
+        return new instance_molten_core_InstanceMapScript (pMap);
+    }
+
+    struct instance_molten_core_InstanceMapScript : public InstanceScript
+    {
+        instance_molten_core_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {};
+
+        uint64 Lucifron, Magmadar, Gehennas, Garr, Geddon, Shazzrah, Sulfuron, Golemagg, Domo, Ragnaros, FlamewakerPriest;
+        uint64 RuneKoro, RuneZeth, RuneMazj, RuneTheri, RuneBlaz, RuneKress, RuneMohn, m_uiFirelordCacheGUID;
+
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
+
+        bool golemagisdead;
+        uint32 ragnarossummoned;
+
+        void Initialize()
         {
-            instance_molten_core_InstanceMapScript(Map* map) : InstanceScript(map)
-            {
-                SetBossNumber(MAX_ENCOUNTER);
-                _golemaggTheIncineratorGUID = 0;
-                _majordomoExecutusGUID = 0;
-                _cacheOfTheFirelordGUID = 0;
-                _executusSchedule = NULL;
-                _deadBossCount = 0;
-                _ragnarosAddDeaths = 0;
-                _isLoading = false;
-                _summonedExecutus = false;
-            }
+            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
-            ~instance_molten_core_InstanceMapScript()
-            {
-                delete _executusSchedule;
-            }
+            Lucifron = 0;
+            Magmadar = 0;
+            Gehennas = 0;
+            Garr = 0;
+            Geddon = 0;
+            Shazzrah = 0;
+            Sulfuron = 0;
+            Golemagg = 0;
+            Domo = 0;
+            Ragnaros = 0;
+            FlamewakerPriest = 0;
 
-            void OnPlayerEnter(Player* /*player*/)
-            {
-                if (_executusSchedule)
-                {
-                    SummonMajordomoExecutus(*_executusSchedule);
-                    delete _executusSchedule;
-                    _executusSchedule = NULL;
-                }
-            }
+            RuneKoro = 0;
+            RuneZeth = 0;
+            RuneMazj = 0;
+            RuneTheri = 0;
+            RuneBlaz = 0;
+            RuneKress = 0;
+            RuneMohn = 0;
 
-            void OnCreatureCreate(Creature* creature)
-            {
-                switch (creature->GetEntry())
-                {
-                    case NPC_GOLEMAGG_THE_INCINERATOR:
-                        _golemaggTheIncineratorGUID = creature->GetGUID();
-                        break;
-                    case NPC_MAJORDOMO_EXECUTUS:
-                        _majordomoExecutusGUID = creature->GetGUID();
-                        break;
-                    default:
-                        break;
-                }
-            }
+            m_uiFirelordCacheGUID = 0;
 
-            void OnGameObjectCreate(GameObject* go)
-            {
-                switch (go->GetEntry())
-                {
-                    case GO_CACHE_OF_THE_FIRELORD:
-                        _cacheOfTheFirelordGUID = go->GetGUID();
-                        break;
-                    default:
-                        break;
-                }
-            }
+            golemagisdead = false;
+            ragnarossummoned = NOT_STARTED;
+        }
 
-            void SetData(uint32 type, uint32 data)
-            {
-                if (type == DATA_RAGNAROS_ADDS)
-                {
-                    if (data == 1)
-                        ++_ragnarosAddDeaths;
-                    else if (data == 0)
-                        _ragnarosAddDeaths = 0;
-                }
-            }
+        bool IsEncounterInProgress() const
+        {
+        for(uint8 i = 0; i < MAX_ENCOUNTER; i++)
+            if(m_auiEncounter[i] == IN_PROGRESS) return true;
 
-            uint32 GetData(uint32 type)
-            {
-                switch (type)
-                {
-                    case DATA_RAGNAROS_ADDS:
-                        return _ragnarosAddDeaths;
-                }
-
-                return 0;
-            }
-
-            uint64 GetData64(uint32 type)
-            {
-                switch (type)
-                {
-                    case BOSS_GOLEMAGG_THE_INCINERATOR:
-                        return _golemaggTheIncineratorGUID;
-                    case BOSS_MAJORDOMO_EXECUTUS:
-                        return _majordomoExecutusGUID;
-                }
-
-                return 0;
-            }
-
-            bool SetBossState(uint32 bossId, EncounterState state)
-            {
-                if (!InstanceScript::SetBossState(bossId, state))
-                    return false;
-
-                if (state == DONE && bossId < BOSS_MAJORDOMO_EXECUTUS)
-                    ++_deadBossCount;
-
-                if (_isLoading)
-                    return true;
-
-                if (_deadBossCount == 8)
-                    SummonMajordomoExecutus(false);
-
-                if (bossId == BOSS_MAJORDOMO_EXECUTUS && state == DONE)
-                    DoRespawnGameObject(_cacheOfTheFirelordGUID, 7 * DAY);
-
-                return true;
-            }
-
-            void SummonMajordomoExecutus(bool done)
-            {
-                if (_summonedExecutus)
-                    return;
-
-                _summonedExecutus = true;
-                if (!done)
-                {
-                    instance->SummonCreature(NPC_MAJORDOMO_EXECUTUS, SummonPositions[0]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[1]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[2]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[3]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[4]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[5]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[6]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[7]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[8]);
-                }
-                else if (TempSummon* summon = instance->SummonCreature(NPC_MAJORDOMO_EXECUTUS, RagnarosTelePos))
-                        summon->AI()->DoAction(ACTION_START_RAGNAROS_ALT);
-            }
-
-            std::string GetSaveData()
-            {
-                OUT_SAVE_INST_DATA;
-
-                std::ostringstream saveStream;
-                saveStream << "M C " << GetBossSaveData();
-
-                OUT_SAVE_INST_DATA_COMPLETE;
-                return saveStream.str();
-            }
-
-            void Load(char const* data)
-            {
-                if (!data)
-                {
-                    OUT_LOAD_INST_DATA_FAIL;
-                    return;
-                }
-
-                _isLoading = true;
-                OUT_LOAD_INST_DATA(data);
-
-                char dataHead1, dataHead2;
-
-                std::istringstream loadStream(data);
-                loadStream >> dataHead1 >> dataHead2;
-
-                if (dataHead1 == 'M' && dataHead2 == 'C')
-                {
-                    EncounterState states[MAX_ENCOUNTER];
-                    uint8 executusCounter = 0;
-
-                    // need 2 loops to check spawning executus/ragnaros
-                    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                    {
-                        uint32 tmpState;
-                        loadStream >> tmpState;
-                        if (tmpState == IN_PROGRESS || tmpState > TO_BE_DECIDED)
-                            tmpState = NOT_STARTED;
-                        states[i] = EncounterState(tmpState);
-
-                         if (tmpState == DONE && i < BOSS_MAJORDOMO_EXECUTUS)
-                            ++executusCounter;
-                   }
-
-                    if (executusCounter >= 8 && states[BOSS_RAGNAROS] != DONE)
-                        _executusSchedule = new bool(states[BOSS_MAJORDOMO_EXECUTUS] == DONE);
-
-                    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                        SetBossState(i, states[i]);
-                }
-                else
-                    OUT_LOAD_INST_DATA_FAIL;
-
-                OUT_LOAD_INST_DATA_COMPLETE;
-                _isLoading = false;
-            }
-
-        private:
-            uint64 _golemaggTheIncineratorGUID;
-            uint64 _majordomoExecutusGUID;
-            uint64 _cacheOfTheFirelordGUID;
-            bool* _executusSchedule;
-            uint8 _deadBossCount;
-            uint8 _ragnarosAddDeaths;
-            bool _isLoading;
-            bool _summonedExecutus;
+            return false;
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const
+        void OnGameObjectCreate(GameObject* pGo)
         {
-            return new instance_molten_core_InstanceMapScript(map);
+            switch(pGo->GetEntry())
+            {
+            case 176951:                                    //Sulfuron
+                RuneKoro = pGo->GetGUID();
+                break;
+            case 176952:                                    //Geddon
+                RuneZeth = pGo->GetGUID();
+                break;
+            case 176953:                                    //Shazzrah
+                RuneMazj = pGo->GetGUID();
+                break;
+            case 176954:                                    //Golemagg
+                RuneTheri = pGo->GetGUID();
+                break;
+            case 176955:                                    //Garr
+                RuneBlaz = pGo->GetGUID();
+                break;
+            case 176956:                                    //Magmadar
+                RuneKress = pGo->GetGUID();
+                break;
+            case 176957:                                    //Gehennas
+                RuneMohn = pGo->GetGUID();
+                break;
+            case 179703:
+                m_uiFirelordCacheGUID = pGo->GetGUID();      //when majordomo event == DONE DoRespawnGameObject(m_uiFirelordCacheGUID,);
+                break;
+            }
         }
+
+        void OnCreatureCreate(Creature* pCreature)
+        {
+            switch (pCreature->GetEntry())
+            {
+            case ID_LUCIFRON: Lucifron = pCreature->GetGUID(); break;
+            case ID_MAGMADAR: Magmadar = pCreature->GetGUID(); break;
+            case ID_GEHENNAS: Gehennas = pCreature->GetGUID(); break;
+            case ID_GARR: Garr = pCreature->GetGUID(); break;
+            case ID_GEDDON: Geddon = pCreature->GetGUID(); break;
+            case ID_SHAZZRAH: Shazzrah = pCreature->GetGUID(); break;
+            case ID_SULFURON: Sulfuron = pCreature->GetGUID(); break;
+            case ID_GOLEMAGG: Golemagg = pCreature->GetGUID(); break;
+            case ID_DOMO: Domo = pCreature->GetGUID(); pCreature->setActive(true); break;
+            case ID_RAGNAROS: Ragnaros = pCreature->GetGUID(); break;
+            case ID_FLAMEWAKERPRIEST: FlamewakerPriest = pCreature->GetGUID(); break;
+            }
+        }
+
+        uint64 GetData64 (uint32 identifier)
+        {
+            switch(identifier)
+            {
+                case DATA_SULFURON:
+                    return Sulfuron;
+                case DATA_GOLEMAGG:
+                    return Golemagg;
+                case DATA_FLAMEWAKERPRIEST:
+                    return FlamewakerPriest;
+                case DATA_MAJORDOMO:
+                    return Domo;
+            }
+            return 0;
+        }
+
+        uint32 GetData(uint32 type)
+        {
+            switch(type)
+            {
+                case DATA_LUCIFRONISDEAD: return m_auiEncounter[0]; break;
+                case DATA_MAGMADARISDEAD: return m_auiEncounter[1]; break;
+                case DATA_GEHENNASISDEAD: return m_auiEncounter[2]; break;
+                case DATA_GARRISDEAD: return m_auiEncounter[3]; break;
+                case DATA_GEDDONISDEAD: return m_auiEncounter[4]; break;
+                case DATA_SHAZZRAHISDEAD: return m_auiEncounter[5]; break;
+                case DATA_SULFURONISDEAD: return m_auiEncounter[6]; break;
+                case DATA_GOLEMAGGISDEAD:  return m_auiEncounter[7]; break;
+                case DATA_MAJORDOMOISDEAD:  return m_auiEncounter[8]; break;
+                case DATA_RAGNAROSISDEAD: return m_auiEncounter[9]; break;
+                case DATA_GOLEMAGG_DEATH: return golemagisdead ? 1 : 0; break;
+                case DATA_RAGNAROSISSUMMONED: return ragnarossummoned; break;
+            }
+
+            return 0;
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            if (type == DATA_GOLEMAGG_DEATH)
+                golemagisdead = true;
+
+            switch(type)
+            {
+            case DATA_GOLEMAGG_DEATH: golemagisdead = true; break;
+
+            case DATA_LUCIFRONISDEAD:
+                if(m_auiEncounter[0] != DONE)
+                    m_auiEncounter[0] = data;
+                break;
+            case DATA_MAGMADARISDEAD:
+                if(m_auiEncounter[1] != DONE)
+                    m_auiEncounter[1] = data;
+                break;
+            case DATA_GEHENNASISDEAD:
+                if(m_auiEncounter[2] != DONE)
+                    m_auiEncounter[2] = data;
+                break;
+            case DATA_GARRISDEAD:
+                if(m_auiEncounter[3] != DONE)
+                    m_auiEncounter[3] = data;
+                break;
+            case DATA_GEDDONISDEAD:
+                if(m_auiEncounter[4] != DONE)
+                    m_auiEncounter[4] = data;
+                break;
+            case DATA_SHAZZRAHISDEAD:
+                if(m_auiEncounter[5] != DONE)
+                    m_auiEncounter[5] = data;
+                break;
+            case DATA_SULFURONISDEAD:
+                if(m_auiEncounter[6] != DONE)
+                    m_auiEncounter[6] = data;
+                break;
+            case DATA_GOLEMAGGISDEAD:
+                if(m_auiEncounter[7] != DONE)
+                    m_auiEncounter[7] = data;
+                break;
+            case DATA_MAJORDOMOISDEAD:
+                if(m_auiEncounter[8] != DONE)
+                {
+                    m_auiEncounter[8] = data;
+
+                    if(data == DONE)
+                        if(GameObject* pGo = instance->GetGameObject(m_uiFirelordCacheGUID))
+                        {
+                            pGo->SetRespawnTime(90000000);
+                            pGo->Respawn();
+                        }
+                }
+                break;
+            case DATA_RAGNAROSISDEAD:
+                if(m_auiEncounter[9] != DONE)
+                    m_auiEncounter[9] = data;
+                break;
+            case DATA_RAGNAROSISSUMMONED:
+                if(ragnarossummoned != DONE)
+                    ragnarossummoned = data;
+                break;
+                }
+
+            if(data == DONE)
+                SaveToDB();
+        }
+
+        std::string GetSaveData()
+        {
+            std::ostringstream ss;
+            ss << "M C " 
+                << m_auiEncounter[0] << " "
+                << m_auiEncounter[1] << " "
+                << m_auiEncounter[2] << " "
+                << m_auiEncounter[3] << " "
+                << m_auiEncounter[4] << " "
+                << m_auiEncounter[5] << " "
+                << m_auiEncounter[6] << " "
+                << m_auiEncounter[7] << " "
+                << m_auiEncounter[8] << " "
+                << ragnarossummoned  << " "
+                << m_auiEncounter[9];
+
+            std::string data = ss.str();
+
+            return data.c_str();
+        }
+
+        void Load(const char* load)
+        {
+            if(!load) return;
+            std::istringstream ss(load);
+            char dataHead1, dataHead2;
+            uint32 data1,data2,data3,data4,data5,data6,data7,data8,data9, data10, data11;
+            ss >> dataHead1 >> dataHead2
+               >> data1 >> data2 >> data3 >> data4 >> data5
+               >> data6 >> data7 >> data8 >> data9 >> data10 >> data11;
+
+            if(dataHead1 == 'M' && dataHead2 == 'C')
+            {
+                m_auiEncounter[0] = data1;
+                m_auiEncounter[1] = data2;
+                m_auiEncounter[2] = data3;
+                m_auiEncounter[3] = data4;
+                m_auiEncounter[4] = data5;
+                m_auiEncounter[5] = data6;
+                m_auiEncounter[6] = data7;
+                m_auiEncounter[7] = data8;
+                m_auiEncounter[8] = data9;
+                ragnarossummoned = data10;
+                m_auiEncounter[9] = data11;
+            }else
+            {
+                sLog->outError("Molten Core: corrupted save data.");
+                for(uint8 i = 0; i < MAX_ENCOUNTER; i++)
+                    m_auiEncounter[i] = NOT_STARTED;
+            }
+        }
+
+        void Update (uint32 diff)
+        {
+        }
+    };
 };
 
 void AddSC_instance_molten_core()

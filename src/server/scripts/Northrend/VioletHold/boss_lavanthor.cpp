@@ -107,22 +107,22 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (uiFireboltTimer <= diff)
-            {
-                DoCast(me->getVictim(), SPELL_FIREBOLT);
-                uiFireboltTimer = urand(5000, 13000);
-            } else uiFireboltTimer -= diff;
-
             if (uiFlameBreathTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FLAME_BREATH);
-                uiFlameBreathTimer = urand(10000, 15000);
+                if(!me->IsNonMeleeSpellCasted(false))
+                {
+                    DoCast(me->getVictim(), SPELL_FLAME_BREATH);
+                    uiFlameBreathTimer = urand(10000,15000);
+                }
             } else uiFlameBreathTimer -= diff;
 
             if (uiLavaBurnTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_LAVA_BURN);
-                uiLavaBurnTimer = urand(15000, 23000);
+                if(!me->IsNonMeleeSpellCasted(false))
+                {
+                    DoCast(me->getVictim(), DUNGEON_MODE(SPELL_LAVA_BURN, H_SPELL_LAVA_BURN));
+                    uiLavaBurnTimer = urand(10000,20000);
+                }
             }
 
             if (IsHeroic())
@@ -130,9 +130,18 @@ public:
                 if (uiCauterizingFlamesTimer <= diff)
                 {
                     DoCast(me->getVictim(), SPELL_CAUTERIZING_FLAMES);
-                    uiCauterizingFlamesTimer = urand(10000, 16000);
+                    uiCauterizingFlamesTimer = urand(10000,16000);
                 } else uiCauterizingFlamesTimer -= diff;
             }
+
+            if (uiFireboltTimer <= diff)
+            {
+                if(!me->IsNonMeleeSpellCasted(false))
+                {
+                    DoCast(me->getVictim(), DUNGEON_MODE(SPELL_FIREBOLT, H_SPELL_FIREBOLT));
+                    uiFireboltTimer = urand(5000,13000);
+                }
+            } else uiFireboltTimer -= diff;
 
             DoMeleeAttackIfReady();
         }
@@ -143,11 +152,17 @@ public:
             {
                 if (pInstance->GetData(DATA_WAVE_COUNT) == 6)
                 {
+                    if(IsHeroic() && pInstance->GetData(DATA_1ST_BOSS_EVENT) == DONE)
+                        me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
                     pInstance->SetData(DATA_1ST_BOSS_EVENT, DONE);
                     pInstance->SetData(DATA_WAVE_COUNT, 7);
                 }
                 else if (pInstance->GetData(DATA_WAVE_COUNT) == 12)
                 {
+                    if(IsHeroic() && pInstance->GetData(DATA_2ND_BOSS_EVENT) == DONE)
+                        me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
                     pInstance->SetData(DATA_2ND_BOSS_EVENT, DONE);
                     pInstance->SetData(DATA_WAVE_COUNT, 13);
                 }

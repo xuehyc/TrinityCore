@@ -93,39 +93,28 @@ public:
             {
                 case 26:
                     DoScriptText(SAY_OOX_AMBUSH, me);
-                    break;
-                case 43:
-                    DoScriptText(SAY_OOX_AMBUSH, me);
-                    break;
-                case 64:
-                    DoScriptText(SAY_OOX_END, me);
-                    if (Player* pPlayer = GetPlayerForEscort())
-                        pPlayer->GroupEventHappens(QUEST_RESQUE_OOX_09, me);
-                    break;
-            }
-        }
-
-        void WaypointStart(uint32 uiPointId)
-        {
-            switch(uiPointId)
-            {
-                case 27:
                     for (uint8 i = 0; i < 3; ++i)
                     {
                         const Position src = {147.927444f, -3851.513428f, 130.893f, 0};
                         Position dst;
                         me->GetRandomPoint(src, 7.0f, dst);
-                        DoSummon(NPC_MARAUDING_OWL, dst, 25000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+                        me->SummonCreature(NPC_MARAUDING_OWL, dst, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
                     }
                     break;
-                case 44:
+                case 43:
+                    DoScriptText(SAY_OOX_AMBUSH, me);
                     for (uint8 i = 0; i < 3; ++i)
                     {
                         const Position src = {-141.151581f, -4291.213867f, 120.130f, 0};
                         Position dst;
                         me->GetRandomPoint(src, 7.0f, dst);
-                        me->SummonCreature(NPC_VILE_AMBUSHER, dst, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000);
+                        me->SummonCreature(NPC_VILE_AMBUSHER, dst, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
                     }
+                    break;
+                case 64:
+                    DoScriptText(SAY_OOX_END, me);
+                    if (Player* pPlayer = GetPlayerForEscort())
+                        pPlayer->GroupEventHappens(QUEST_RESQUE_OOX_09, me);
                     break;
             }
         }
@@ -143,7 +132,7 @@ public:
 
         void JustSummoned(Creature* pSummoned)
         {
-            pSummoned->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+            pSummoned->AI()->AttackStart(me);
         }
     };
 
@@ -250,7 +239,7 @@ public:
                     return;
 
                 //only if attacked and escorter is not in combat?
-                DoScriptText(RAND(SAY_RIN_HELP_1, SAY_RIN_HELP_2), me);
+                DoScriptText(RAND(SAY_RIN_HELP_1,SAY_RIN_HELP_2), me);
             }
         }
 

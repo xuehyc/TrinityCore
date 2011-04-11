@@ -17,10 +17,7 @@
 
 //TODO: Harpoon chain from 62505 should not get removed when other chain is applied
 
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
-#include "ScriptedGossip.h"
-#include "SpellScript.h"
+#include "ScriptPCH.h"
 #include "ulduar.h"
 
 enum Says
@@ -58,12 +55,6 @@ enum Spells
     SPELL_HARPOON_SHOT_2                         = 63657,
     SPELL_HARPOON_SHOT_3                         = 63659,
     SPELL_HARPOON_SHOT_4                         = 63524,
-    // MoleMachine Spells
-    SPELL_SUMMON_MOLE_MACHINE                    = 62899,
-    SPELL_SUMMON_IRON_DWARVES                    = 63116,
-    SPELL_SUMMON_IRON_DWARVES_2                  = 63114,
-    SPELL_SUMMON_IRON_DWARVE_GUARDIAN            = 62926,
-    SPELL_SUMMON_IRON_DWARVE_WATCHER             = 63135,
 };
 
 enum NPC
@@ -216,7 +207,7 @@ class boss_razorscale_controller : public CreatureScript
 
             void DoAction(int32 const action)
             {
-                if (instance->GetBossState(BOSS_RAZORSCALE) != IN_PROGRESS)
+                if (instance->GetBossState(TYPE_RAZORSCALE) != IN_PROGRESS)
                     return;
 
                 switch (action)
@@ -227,7 +218,7 @@ class boss_razorscale_controller : public CreatureScript
                             events.ScheduleEvent(EVENT_BUILD_HARPOON_3, 90000);
                         break;
                     case ACTION_PLACE_BROKEN_HARPOON:
-                        for (uint8 n = 0; n < RAID_MODE(2, 4); n++)
+                        for (uint8 n = 0; n < RAID_MODE(2,4); n++)
                             me->SummonGameObject(GO_RAZOR_BROKEN_HARPOON, PosHarpoon[n].GetPositionX(), PosHarpoon[n].GetPositionY(), PosHarpoon[n].GetPositionZ(), 2.286f, 0, 0, 0, 0, 180000);
                         break;
                 }
@@ -295,11 +286,11 @@ class go_razorscale_harpoon : public GameObjectScript
     public:
         go_razorscale_harpoon() : GameObjectScript("go_razorscale_harpoon") {}
 
-        bool OnGossipHello(Player* /*player*/, GameObject* go)
+        bool OnGossipHello(Player* player, GameObject* go)
         {
             InstanceScript* instance = go->GetInstanceScript();
-            if (ObjectAccessor::GetCreature(*go, instance ? instance->GetData64(BOSS_RAZORSCALE) : 0))
-                go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+            if (Creature* razorscale = ObjectAccessor::GetCreature(*go, instance ? instance->GetData64(TYPE_RAZORSCALE) : 0))
+                go->SetFlag(GAMEOBJECT_FLAGS,  GO_FLAG_UNK1);
             return false;
         }
 };
@@ -311,7 +302,7 @@ class boss_razorscale : public CreatureScript
 
         struct boss_razorscaleAI : public BossAI
         {
-            boss_razorscaleAI(Creature* creature) : BossAI(creature, BOSS_RAZORSCALE)
+            boss_razorscaleAI(Creature* creature) : BossAI(creature, TYPE_RAZORSCALE)
             {
                 // Do not let Razorscale be affected by Battle Shout buff
                 me->ApplySpellImmune(0, IMMUNITY_ID, (SPELL_BATTLE_SHOUT), true);
@@ -333,7 +324,7 @@ class boss_razorscale : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 PermaGround = false;
                 HarpoonCounter = 0;
-                if (Creature* commander = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_EXPEDITION_COMMANDER) : 0))
+                if (Creature* commander = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_EXP_COMMANDER) : 0))
                     commander->AI()->DoAction(ACTION_COMMANDER_RESET);
             }
 
@@ -367,7 +358,7 @@ class boss_razorscale : public CreatureScript
 
             void MovementInform(uint32 type, uint32 id)
             {
-                if (type == POINT_MOTION_TYPE && id == 1)
+                if (id == 1)
                 {
                     phase = PHASE_GROUND;
                     events.SetPhase(PHASE_GROUND);
@@ -431,7 +422,7 @@ class boss_razorscale : public CreatureScript
                                 me->SetFlying(false);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
-                                if (Creature* commander = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_EXPEDITION_COMMANDER) : 0))
+                                if (Creature* commander = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_EXP_COMMANDER) : 0))
                                     commander->AI()->DoAction(ACTION_GROUND_PHASE);
                                 events.ScheduleEvent(EVENT_BREATH, 30000, 0, PHASE_GROUND);
                                 events.ScheduleEvent(EVENT_BUFFET, 33000, 0, PHASE_GROUND);
@@ -548,7 +539,7 @@ class boss_razorscale : public CreatureScript
                     float x = float(irand(540, 640));       // Safe range is between 500 and 650
                     float y = float(irand(-230, -195));     // Safe range is between -235 and -145
                     float z = GROUND_Z;                     // Ground level
-                    me->SummonCreature(MOLE_MACHINE_TRIGGER, x, y, z, 0, TEMPSUMMON_TIMED_DESPAWN, 15000);
+                    me->SummonCreature(MOLE_MACHINE_TRIGGER, x, y, z, 0, TEMPSUMMON_TIMED_DESPAWN, 10000);
                 }
             }
 
@@ -567,7 +558,7 @@ class boss_razorscale : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return GetUlduarAI<boss_razorscaleAI>(creature);
+            return new boss_razorscaleAI(creature);
         }
 };
 
@@ -636,7 +627,7 @@ class npc_expedition_commander : public CreatureScript
                     switch (Phase)
                     {
                         case 1:
-                            instance->SetBossState(BOSS_RAZORSCALE, IN_PROGRESS);
+                            instance->SetBossState(TYPE_RAZORSCALE, IN_PROGRESS);
                             summons.clear();
                             AttackStartTimer = 1000;
                             Phase = 2;
@@ -674,7 +665,7 @@ class npc_expedition_commander : public CreatureScript
                             Phase = 5;
                             break;
                         case 5:
-                            if (Creature* Razorscale = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_RAZORSCALE) : 0))
+                            if (Creature* Razorscale = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(TYPE_RAZORSCALE) : 0))
                             {
                                 Razorscale->AI()->DoAction(ACTION_EVENT_START);
                                 me->SetInCombatWith(Razorscale);
@@ -705,7 +696,7 @@ class npc_expedition_commander : public CreatureScript
         bool OnGossipHello(Player* player, Creature* creature)
         {
             InstanceScript* instance = creature->GetInstanceScript();
-            if (instance && instance->GetBossState(BOSS_RAZORSCALE) == NOT_STARTED)
+            if (instance && instance->GetBossState(TYPE_RAZORSCALE) == NOT_STARTED)
             {
                 player->PrepareGossipMenu(creature);
 
@@ -733,62 +724,45 @@ class npc_mole_machine_trigger : public CreatureScript
         {
             npc_mole_machine_triggerAI(Creature* creature) : Scripted_NoMovementAI(creature)
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+                me->SetVisible(false);
             }
 
-            uint32 SummonGobTimer;
-            uint32 SummonNpcTimer;
-            uint32 DissapearTimer;
-            bool GobSummoned;
-            bool NpcSummoned;
+            uint32 SummonTimer;
 
             void Reset()
             {
-                SummonGobTimer = 2000;
-                SummonNpcTimer = 6000;
-                DissapearTimer = 10000;
-                GobSummoned = false;
-                NpcSummoned = false;
+                if (GameObject* MoleMachine = me->SummonGameObject(GO_MOLE_MACHINE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), float(urand(0, 6)), 0, 0, 0, 0, 300))
+                    MoleMachine->SetGoState(GO_STATE_ACTIVE);
+                SummonTimer = 6000;
             }
 
             void UpdateAI(uint32 const Diff)
             {
-                if (!GobSummoned && SummonGobTimer <= Diff)
-                {
-                    DoCast(SPELL_SUMMON_MOLE_MACHINE);
-                    GobSummoned = true;
-                }
-                else
-                    SummonGobTimer -= Diff;
+                if (!UpdateVictim())
+                    return;
 
-                if (!NpcSummoned && SummonNpcTimer <= Diff)
+                if (SummonTimer <= Diff)
                 {
-                    switch (urand(0, 1 ))
+                    float x = me->GetPositionX();
+                    float y = me->GetPositionY();
+                    float z = me->GetPositionZ();
+
+                    // One mole can spawn a Dark Rune Watcher with 1-2 Guardians, or a lone Sentinel
+                    uint8 id = urand(0, 1);
+                    if (id)
                     {
-                        case 0:
-                            DoCast(SPELL_SUMMON_IRON_DWARVES);
-                            break;
-                        case 1:
-                            DoCast(SPELL_SUMMON_IRON_DWARVES_2);
-                            break;
+                        me->SummonCreature(NPC_DARK_RUNE_WATCHER, x, y, z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 3000);
+                        for (uint8 n = 0; n < urand(1, 2); n++)
+                            me->SummonCreature(NPC_DARK_RUNE_GUARDIAN, x, y, z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 3000);
                     }
+                    else
+                        me->SummonCreature(NPC_DARK_RUNE_SENTINEL, x, y, z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 3000);
 
-                    DoCast(SPELL_SUMMON_IRON_DWARVE_GUARDIAN);
-                    DoCast(SPELL_SUMMON_IRON_DWARVE_WATCHER);
-                    NpcSummoned = true;
+                    SummonTimer = 15000;
                 }
                 else
-                    SummonNpcTimer -= Diff;
-
-                if (DissapearTimer <= Diff)
-                {
-                    if (GameObject* molemachine = me->FindNearestGameObject(GO_MOLE_MACHINE, 1))
-                        molemachine->Delete();
-
-                    me->DisappearAndDie();
-                }
-                else
-                    DissapearTimer -= Diff;
+                    SummonTimer -= Diff;
             }
 
             void JustSummoned(Creature* summoned)
@@ -812,7 +786,8 @@ class npc_devouring_flame : public CreatureScript
         {
             npc_devouring_flameAI(Creature* creature) : Scripted_NoMovementAI(creature)
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
+                me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
             }
 
             void Reset()
@@ -834,7 +809,12 @@ class npc_darkrune_watcher : public CreatureScript
 
         struct npc_darkrune_watcherAI : public ScriptedAI
         {
-            npc_darkrune_watcherAI(Creature* creature) : ScriptedAI(creature){}
+            npc_darkrune_watcherAI(Creature* creature) : ScriptedAI(creature)
+            {
+                instance = me->GetInstanceScript();
+            }
+
+            InstanceScript* instance;
 
             uint32 ChainTimer;
             uint32 LightTimer;
@@ -883,7 +863,12 @@ class npc_darkrune_guardian : public CreatureScript
 
         struct npc_darkrune_guardianAI : public ScriptedAI
         {
-            npc_darkrune_guardianAI(Creature* creature) : ScriptedAI(creature){}
+            npc_darkrune_guardianAI(Creature* creature) : ScriptedAI(creature)
+            {
+                instance = me->GetInstanceScript();
+            }
+
+            InstanceScript* instance;
 
             uint32 StormTimer;
 
@@ -922,7 +907,12 @@ class npc_darkrune_sentinel : public CreatureScript
 
         struct npc_darkrune_sentinelAI : public ScriptedAI
         {
-            npc_darkrune_sentinelAI(Creature* creature) : ScriptedAI(creature){}
+            npc_darkrune_sentinelAI(Creature* creature) : ScriptedAI(creature)
+            {
+                instance = me->GetInstanceScript();
+            }
+
+            InstanceScript* instance;
 
             uint32 HeroicTimer;
             uint32 WhirlTimer;
@@ -988,7 +978,7 @@ class spell_razorscale_devouring_flame : public SpellScriptLoader
                 PreventHitDefaultEffect(effIndex);
                 Unit* caster = GetCaster();
                 uint32 entry = uint32(GetSpellInfo()->EffectMiscValue[effIndex]);
-                WorldLocation const* summonLocation = GetTargetDest();
+                WorldLocation* summonLocation = GetTargetDest();
                 if (!caster || !summonLocation)
                     return;
 

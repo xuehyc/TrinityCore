@@ -506,7 +506,7 @@ private:
         // Defines if player has rights to withdraw item from container
         virtual bool HasWithdrawRights(MoveItemData* /*pOther*/) const { return true; }
         // Checks if container can store specified item
-        bool CanStore(Item* pItem, bool swap, bool sendError);
+        uint8 CanStore(Item* pItem, bool swap, bool sendError);
         // Clones stored item
         bool CloneItem(uint32 count);
         // Remove item from container (if splited update items fields)
@@ -524,7 +524,7 @@ private:
         uint8 GetContainer() const { return m_container; }
         uint8 GetSlotId() const { return m_slotId; }
     protected:
-        virtual InventoryResult _CanStore(Item* pItem, bool swap) = 0;
+        virtual uint8 _CanStore(Item* pItem, bool swap) = 0;
 
         Guild* m_pGuild;
         Player *m_pPlayer;
@@ -547,7 +547,7 @@ private:
         Item* StoreItem(SQLTransaction& trans, Item* pItem);
         void LogBankEvent(SQLTransaction& trans, MoveItemData* pFrom, uint32 count) const;
     protected:
-        InventoryResult _CanStore(Item* pItem, bool swap);
+        uint8 _CanStore(Item* pItem, bool swap);
     };
 
     class BankMoveItemData : public MoveItemData
@@ -566,7 +566,7 @@ private:
         void LogAction(MoveItemData* pFrom) const;
 
     protected:
-        InventoryResult _CanStore(Item* pItem, bool swap);
+        uint8 _CanStore(Item* pItem, bool swap);
 
     private:
         Item* _StoreItem(SQLTransaction& trans, BankTab* pTab, Item *pItem, ItemPosCount& pos, bool clone) const;
@@ -642,14 +642,14 @@ public:
 
     // Broadcasts
     void BroadcastToGuild(WorldSession *session, bool officerOnly, const std::string& msg, uint32 language = LANG_UNIVERSAL) const;
-    void BroadcastPacketToRank(WorldPacket* packet, uint8 rankId) const;
-    void BroadcastPacket(WorldPacket* packet) const;
+    void BroadcastPacketToRank(WorldPacket *packet, uint8 rankId) const;
+    void BroadcastPacket(WorldPacket *packet) const;
 
     template<class Do>
     void BroadcastWorker(Do& _do, Player* except = NULL)
     {
         for (Members::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-            if (Player* player = itr->second->FindPlayer())
+            if (Player *player = itr->second->FindPlayer())
                 if (player != except)
                     _do(player);
     }

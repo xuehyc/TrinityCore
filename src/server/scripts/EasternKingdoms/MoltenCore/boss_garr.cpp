@@ -23,134 +23,142 @@ SDComment: Adds NYI
 SDCategory: Molten Core
 EndScriptData */
 
-#include "ObjectMgr.h"
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
+#include "ScriptPCH.h"
 #include "molten_core.h"
 
-enum Spells
-{
-    // Garr
-    SPELL_ANTIMAGIC_PULSE   = 19492,
-    SPELL_MAGMA_SHACKLES    = 19496,
-    SPELL_ENRAGE            = 19516,
+// Garr spells
+#define SPELL_ANTIMAGICPULSE        19492
+#define SPELL_MAGMASHACKLES         19496
+#define SPELL_ENRAGE                19516                   //Stacking enrage (stacks to 10 times)
 
-    // Adds
-    SPELL_ERUPTION          = 19497,
-    SPELL_IMMOLATE          = 20294,
-};
-
-enum Events
-{
-    EVENT_ANTIMAGIC_PULSE    = 1,
-    EVENT_MAGMA_SHACKLES     = 2,
-};
+//Add spells
+#define SPELL_ERUPTION              19497
+#define SPELL_IMMOLATE              20294
+#define SPELL_SEPARATION_ANXIETY    23492
 
 class boss_garr : public CreatureScript
 {
-    public:
-        boss_garr() : CreatureScript("boss_garr") { }
+public:
+    boss_garr() : CreatureScript("boss_garr") { }
 
-        struct boss_garrAI : public BossAI
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new boss_garrAI (pCreature);
+    }
+
+    struct boss_garrAI : public ScriptedAI
+    {
+        boss_garrAI(Creature *c) : ScriptedAI(c)
         {
-            boss_garrAI(Creature* creature) : BossAI(creature, BOSS_GARR)
-            {
-            }
-
-            void EnterCombat(Unit* victim)
-            {
-                BossAI::EnterCombat(victim);
-                events.ScheduleEvent(EVENT_ANTIMAGIC_PULSE, 25000);
-                events.ScheduleEvent(EVENT_MAGMA_SHACKLES, 15000);
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STAT_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_ANTIMAGIC_PULSE:
-                            DoCast(me, SPELL_ANTIMAGIC_PULSE);
-                            events.ScheduleEvent(EVENT_ANTIMAGIC_PULSE, urand(10000, 15000));
-                            break;
-                        case EVENT_MAGMA_SHACKLES:
-                            DoCast(me, SPELL_MAGMA_SHACKLES);
-                            events.ScheduleEvent(EVENT_MAGMA_SHACKLES, urand(8000, 12000));
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new boss_garrAI(creature);
+            m_pInstance = c->GetInstanceScript();
         }
+
+        InstanceScript *m_pInstance;
+
+        uint32 AntiMagicPulse_Timer;
+        uint32 MagmaShackles_Timer;
+        uint32 CheckAdds_Timer;
+        uint64 Add[8];
+        bool Enraged[8];
+
+        void Reset()
+        {
+        AntiMagicPulse_Timer = 15000;                       //These times are probably wrong
+        MagmaShackles_Timer = 5000;
+            CheckAdds_Timer = 2000;
+
+        if (m_pInstance)
+            m_pInstance->SetData(DATA_GARRISDEAD,NOT_STARTED);
+        }
+
+        void EnterCombat(Unit * /*who*/)
+        {
+        if (m_pInstance)
+            m_pInstance->SetData(DATA_GARRISDEAD,IN_PROGRESS);
+    }
+
+    void JustDied(Unit *who)
+    {
+        if (m_pInstance)
+            m_pInstance->SetData(DATA_GARRISDEAD,DONE);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            //AntiMagicPulse_Timer
+            if (AntiMagicPulse_Timer <= diff)
+            {
+                DoCast(me, SPELL_ANTIMAGICPULSE);
+                AntiMagicPulse_Timer = 10000 + rand()%5000;
+            } else AntiMagicPulse_Timer -= diff;
+
+            //MagmaShackles_Timer
+            if (MagmaShackles_Timer <= diff)
+            {
+                DoCast(me, SPELL_MAGMASHACKLES);
+            MagmaShackles_Timer = 10000;
+            } else MagmaShackles_Timer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
 };
 
 class mob_firesworn : public CreatureScript
 {
-    public:
-        mob_firesworn() : CreatureScript("mob_firesworn") { }
+public:
+    mob_firesworn() : CreatureScript("mob_firesworn") { }
 
-        struct mob_fireswornAI : public ScriptedAI
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new mob_fireswornAI (pCreature);
+    }
+
+    struct mob_fireswornAI : public ScriptedAI
+    {
+        mob_fireswornAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 Immolate_Timer;
+
+        void Reset()
         {
-            mob_fireswornAI(Creature* creature) : ScriptedAI(creature) {}
-
-            uint32 immolateTimer;
-
-            void Reset()
-            {
-                immolateTimer = 4000;                              //These times are probably wrong
-            }
-
-            void DamageTaken(Unit* /*attacker*/, uint32& damage)
-            {
-                uint32 const health10pct = me->CountPctFromMaxHealth(10);
-                uint32 health = me->GetHealth();
-                if (int32(health) - int32(damage) < int32(health10pct))
-                {
-                    damage = 0;
-                    DoCastVictim(SPELL_ERUPTION);
-                    me->DespawnOrUnsummon();
-                }
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if (immolateTimer <= diff)
-                {
-                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        DoCast(target, SPELL_IMMOLATE);
-                    immolateTimer = urand(5000, 10000);
-                }
-                else
-                    immolateTimer -= diff;
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new mob_fireswornAI(creature);
+            Immolate_Timer = 4000;                              //These times are probably wrong
         }
+
+        void EnterCombat(Unit * /*who*/)
+        {
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            //Immolate_Timer
+            if (Immolate_Timer <= diff)
+            {
+                 if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,0))
+                    DoCast(pTarget, SPELL_IMMOLATE);
+
+                Immolate_Timer = urand(5000,10000);
+            } else Immolate_Timer -= diff;
+
+            //Cast Erruption and let them die
+            if (!HealthAbovePct(10))
+            {
+                DoCast(me->getVictim(), SPELL_ERUPTION);
+                me->setDeathState(JUST_DIED);
+                me->RemoveCorpse();
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
 };
 
 void AddSC_boss_garr()

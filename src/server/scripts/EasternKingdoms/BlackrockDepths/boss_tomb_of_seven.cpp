@@ -74,7 +74,7 @@ public:
                 if (InstanceScript* pInstance = pCreature->GetInstanceScript())
                 {
                     //are 5 minutes expected? go template may have data to despawn when used at quest
-                    pInstance->DoRespawnGameObject(pInstance->GetData64(DATA_GO_CHALICE), MINUTE*5);
+                    pInstance->DoRespawnGameObject(pInstance->GetData64(DATA_GO_CHALICE),MINUTE*5);
                 }
                 break;
         }
@@ -129,7 +129,7 @@ public:
                 pCreature->AI()->AttackStart(pPlayer);
                 InstanceScript* pInstance = pCreature->GetInstanceScript();
                 if (pInstance)
-                    pInstance->SetData64(DATA_EVENSTARTER, pPlayer->GetGUID());
+                    pInstance->SetData64(DATA_EVENSTARTER,pPlayer->GetGUID());
                 break;
         }
         return true;
@@ -184,7 +184,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
         }
 
@@ -201,7 +201,7 @@ public:
                 pInstance->SetData64(DATA_EVENSTARTER, 0);
         }
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit * /*who*/)
         {
             if (pInstance)
                 pInstance->SetData(DATA_GHOSTKILL, 1);

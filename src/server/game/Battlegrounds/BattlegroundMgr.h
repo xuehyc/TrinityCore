@@ -84,6 +84,7 @@ class BattlegroundMgr
         uint32 GetPrematureFinishTime() const;
 
         void InitAutomaticArenaPointDistribution();
+        void DistributeArenaPoints();
         void ToggleArenaTesting();
         void ToggleTesting();
 
@@ -109,6 +110,7 @@ class BattlegroundMgr
         static HolidayIds BGTypeToWeekendHolidayId(BattlegroundTypeId bgTypeId);
         static BattlegroundTypeId WeekendHolidayIdToBGType(HolidayIds holiday);
         static bool IsBGWeekend(BattlegroundTypeId bgTypeId);
+        void DoCompleteAchievement(uint32 achievement, Player * player = NULL);
     private:
         BattleMastersMap    mBattleMastersMap;
 

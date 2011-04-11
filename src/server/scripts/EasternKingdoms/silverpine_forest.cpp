@@ -91,7 +91,7 @@ public:
         {
         }
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit * /*who*/)
         {
             me->setFaction(68);
         }
@@ -170,7 +170,7 @@ public:
 
         void EnterCombat(Unit* who)
         {
-            DoScriptText(RAND(SAY_AGGRO_1, SAY_AGGRO_2), me, who);
+            DoScriptText(RAND(SAY_AGGRO_1,SAY_AGGRO_2), me, who);
         }
     };
 
@@ -271,7 +271,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/){}
+        void EnterCombat(Unit * /*who*/){}
 
         void JustSummoned(Creature *pSummoned)
         {
@@ -308,7 +308,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*pKiller*/)
+        void JustDied(Unit * /*pKiller*/)
         {
             if (PlayerGUID)
                 if (Player *pPlayer = Unit::GetPlayer(*me, PlayerGUID))

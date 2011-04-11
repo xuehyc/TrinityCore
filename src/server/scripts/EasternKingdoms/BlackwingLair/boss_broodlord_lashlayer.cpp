@@ -24,6 +24,7 @@ SDCategory: Blackwing Lair
 EndScriptData */
 
 #include "ScriptPCH.h"
+#include "blackwing_lair.h"
 
 #define SAY_AGGRO               -1469000
 #define SAY_LEASH               -1469001
@@ -45,7 +46,12 @@ public:
 
     struct boss_broodlordAI : public ScriptedAI
     {
-        boss_broodlordAI(Creature *c) : ScriptedAI(c) {}
+        boss_broodlordAI(Creature *c) : ScriptedAI(c)
+        {
+            pInstance = c->GetInstanceScript();
+        }
+
+        InstanceScript* pInstance;
 
         uint32 Cleave_Timer;
         uint32 BlastWave_Timer;
@@ -58,12 +64,24 @@ public:
             BlastWave_Timer = 12000;
             MortalStrike_Timer = 20000;
             KnockBack_Timer = 30000;
+
+        if(pInstance)
+            pInstance->SetData(ENCOUNTER_LASHLAYER,NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
             DoZoneInCombat();
+
+        if(pInstance)
+            pInstance->SetData(ENCOUNTER_LASHLAYER,IN_PROGRESS);
+    }
+
+    void JustDied(Unit *killer)
+    {
+        if(pInstance)
+            pInstance->SetData(ENCOUNTER_LASHLAYER,DONE);
         }
 
         void UpdateAI(const uint32 diff)
@@ -82,14 +100,14 @@ public:
             if (BlastWave_Timer <= diff)
             {
                 DoCast(me->getVictim(), SPELL_BLASTWAVE);
-                BlastWave_Timer = urand(8000, 16000);
+                BlastWave_Timer = urand(8000,16000);
             } else BlastWave_Timer -= diff;
 
             //MortalStrike_Timer
             if (MortalStrike_Timer <= diff)
             {
                 DoCast(me->getVictim(), SPELL_MORTALSTRIKE);
-                MortalStrike_Timer = urand(25000, 35000);
+                MortalStrike_Timer = urand(25000,35000);
             } else MortalStrike_Timer -= diff;
 
             if (KnockBack_Timer <= diff)
@@ -97,9 +115,9 @@ public:
                 DoCast(me->getVictim(), SPELL_KNOCKBACK);
                 //Drop 50% aggro
                 if (DoGetThreat(me->getVictim()))
-                    DoModifyThreatPercent(me->getVictim(), -50);
+                    DoModifyThreatPercent(me->getVictim(),-50);
 
-                KnockBack_Timer = urand(15000, 30000);
+                KnockBack_Timer = urand(15000,30000);
             } else KnockBack_Timer -= diff;
 
             if (EnterEvadeIfOutOfCombatArea(diff))

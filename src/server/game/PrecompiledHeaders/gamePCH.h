@@ -8,6 +8,7 @@
 #include "Log.h"
 #include "ObjectAccessor.h"
 #include "ObjectDefines.h"
+#include "SQLStorage.h"
 #include "Opcodes.h"
 #include "SharedDefines.h"
 #include "ObjectMgr.h"

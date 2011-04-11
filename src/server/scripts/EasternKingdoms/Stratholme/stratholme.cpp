@@ -64,14 +64,14 @@ public:
                 if (pGroupie->GetQuestStatus(QUEST_DEAD_MAN_PLEA) == QUEST_STATUS_INCOMPLETE &&
                     !pGroupie->HasAura(SPELL_BARON_ULTIMATUM) &&
                     pGroupie->GetMap() == pGo->GetMap())
-                    pGroupie->CastSpell(pGroupie, SPELL_BARON_ULTIMATUM, true);
+                    pGroupie->CastSpell(pGroupie,SPELL_BARON_ULTIMATUM,true);
             }
         } else if (pPlayer->GetQuestStatus(QUEST_DEAD_MAN_PLEA) == QUEST_STATUS_INCOMPLETE &&
                     !pPlayer->HasAura(SPELL_BARON_ULTIMATUM) &&
                     pPlayer->GetMap() == pGo->GetMap())
-                    pPlayer->CastSpell(pPlayer, SPELL_BARON_ULTIMATUM, true);
+                    pPlayer->CastSpell(pPlayer,SPELL_BARON_ULTIMATUM,true);
 
-        pInstance->SetData(TYPE_BARON_RUN, IN_PROGRESS);
+        pInstance->SetData(TYPE_BARON_RUN,IN_PROGRESS);
         return false;
     }
 
@@ -103,7 +103,7 @@ public:
 
         void Reset()
         {
-            DoScriptText(RAND(SAY_ZAPPED0, SAY_ZAPPED1, SAY_ZAPPED2, SAY_ZAPPED3), me);
+            DoScriptText(RAND(SAY_ZAPPED0,SAY_ZAPPED1,SAY_ZAPPED2,SAY_ZAPPED3), me);
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -162,7 +162,7 @@ public:
 
         void JustSummoned(Creature *summoned)
         {
-            summoned->CastSpell(summoned, SPELL_SOUL_FREED, false);
+            summoned->CastSpell(summoned,SPELL_SOUL_FREED,false);
         }
 
         void JustDied(Unit* /*Killer*/)
@@ -177,7 +177,7 @@ public:
             {
                 if (Die_Timer <= diff)
                 {
-                    if (Unit* pTemp = Unit::GetUnit(*me, Tagger))
+                    if (Unit* pTemp = Unit::GetUnit(*me,Tagger))
                     {
                         CAST_PLR(pTemp)->KilledMonsterCredit(ENTRY_RESTLESS, me->GetGUID());
                         me->Kill(me);
@@ -224,7 +224,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) {}
 
-        void SpellHit(Unit* /*caster*/, const SpellEntry *spell)
+        void SpellHit(Unit * /*caster*/, const SpellEntry *spell)
         {
             if (!Tagged && spell->Id == SPELL_EGAN_BLASTER)
                 Tagged = true;
@@ -237,7 +237,7 @@ public:
                 for (uint32 i = 1; i <= 4; ++i)
                 {
                      //100%, 50%, 33%, 25% chance to spawn
-                     if (urand(1, i) == 1)
+                     if (urand(1,i) == 1)
                          DoSummon(ENTRY_RESTLESS, me, 20.0f, 600000);
                 }
             }
@@ -262,22 +262,22 @@ public:
         {
             switch(emote)
             {
-                case TEXT_EMOTE_DANCE:
+                case TEXTEMOTE_DANCE:
                     EnterEvadeMode();
                     break;
-                case TEXT_EMOTE_RUDE:
+                case TEXTEMOTE_RUDE:
                     if (me->IsWithinDistInMap(pPlayer, 5))
                         DoCast(pPlayer, SPELL_SLAP, false);
                     else
                         me->HandleEmoteCommand(EMOTE_ONESHOT_RUDE);
                     break;
-                case TEXT_EMOTE_WAVE:
+                case TEXTEMOTE_WAVE:
                     me->HandleEmoteCommand(EMOTE_ONESHOT_WAVE);
                     break;
-                case TEXT_EMOTE_BOW:
+                case TEXTEMOTE_BOW:
                     me->HandleEmoteCommand(EMOTE_ONESHOT_BOW);
                     break;
-                case TEXT_EMOTE_KISS:
+                case TEXTEMOTE_KISS:
                     me->HandleEmoteCommand(EMOTE_ONESHOT_FLEX);
                     break;
             }

@@ -42,8 +42,6 @@ struct ScriptPointMove
     uint32 uiWaitTime;
 };
 
-typedef std::vector<ScriptPointMove> ScriptPointVector;
-
 struct StringTextData
 {
     uint32 uiSoundId;
@@ -57,11 +55,10 @@ class SystemMgr
         friend class ACE_Singleton<SystemMgr, ACE_Null_Mutex>;
         SystemMgr() {}
         ~SystemMgr() {}
-
     public:
         //Maps and lists
         typedef UNORDERED_MAP<int32, StringTextData> TextDataMap;
-        typedef UNORDERED_MAP<uint32, ScriptPointVector> PointMoveMap;
+        typedef UNORDERED_MAP<uint32, std::vector<ScriptPointMove> > PointMoveMap;
 
         //Database
         void LoadVersion();
@@ -70,9 +67,9 @@ class SystemMgr
         void LoadScriptWaypoints();
 
         //Retrive from storage
-        StringTextData const* GetTextData(int32 textId) const
+        StringTextData const* GetTextData(int32 uiTextId) const
         {
-            TextDataMap::const_iterator itr = m_mTextDataMap.find(textId);
+            TextDataMap::const_iterator itr = m_mTextDataMap.find(uiTextId);
 
             if (itr == m_mTextDataMap.end())
                 return NULL;
@@ -80,22 +77,22 @@ class SystemMgr
             return &itr->second;
         }
 
-        ScriptPointVector const& GetPointMoveList(uint32 creatureEntry) const
+        std::vector<ScriptPointMove> const &GetPointMoveList(uint32 uiCreatureEntry) const
         {
-            PointMoveMap::const_iterator itr = m_mPointMoveMap.find(creatureEntry);
+            static std::vector<ScriptPointMove> vEmpty;
+
+            PointMoveMap::const_iterator itr = m_mPointMoveMap.find(uiCreatureEntry);
 
             if (itr == m_mPointMoveMap.end())
-                return _empty;
+                return vEmpty;
 
             return itr->second;
         }
 
     protected:
+
         TextDataMap     m_mTextDataMap;                     //additional data for text strings
         PointMoveMap    m_mPointMoveMap;                    //coordinates for waypoints
-
-    private:
-        static ScriptPointVector const _empty;
 };
 
 #define sScriptSystemMgr ACE_Singleton<SystemMgr, ACE_Null_Mutex>::instance()

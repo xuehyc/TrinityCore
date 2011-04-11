@@ -49,7 +49,7 @@ class ChatHandler
         WorldSession * GetSession() { return m_session; }
         explicit ChatHandler(WorldSession* session) : m_session(session) {}
         explicit ChatHandler(Player* player) : m_session(player->GetSession()) {}
-        virtual ~ChatHandler() {}
+         ~ChatHandler() {}
 
         static void FillMessageData(WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, uint64 target_guid, const char *message, Unit *speaker);
 
@@ -63,16 +63,16 @@ class ChatHandler
             FillMessageData(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, 0, message);
         }
 
-        static char* LineFromMessage(char*& pos) { char* start = strtok(pos, "\n"); pos = NULL; return start; }
+        static char* LineFromMessage(char*& pos) { char* start = strtok(pos,"\n"); pos = NULL; return start; }
 
         // function with different implementation for chat/console
         virtual const char *GetTrinityString(int32 entry) const;
         virtual void SendSysMessage(const char *str);
 
         void SendSysMessage(int32     entry);
-        void PSendSysMessage(const char *format, ...) ATTR_PRINTF(2, 3);
+        void PSendSysMessage(const char *format, ...) ATTR_PRINTF(2,3);
         void PSendSysMessage(int32     entry, ...);
-        std::string PGetParseString(int32 entry, ...) const;
+        std::string PGetParseString(int32 entry, ...);
 
         int ParseCommands(const char* text);
 
@@ -118,7 +118,7 @@ class ChatHandler
         std::string GetNameLink(Player* chr) const { return playerLink(chr->GetName()); }
 
         GameObject* GetNearbyGameObject();
-        GameObject* GetObjectGlobalyWithGuidOrNearWithDbGuid(uint32 lowguid, uint32 entry);
+        GameObject* GetObjectGlobalyWithGuidOrNearWithDbGuid(uint32 lowguid,uint32 entry);
         bool HasSentErrorMessage() { return sentErrorMessage;}
         void SetSentErrorMessage(bool val){ sentErrorMessage = val;};
         static bool LoadCommandTable() { return load_command_table;}
@@ -293,6 +293,7 @@ class ChatHandler
         bool HandleHideAreaCommand(const char* args);
         bool HandleAddItemCommand(const char* args);
         bool HandleAddItemSetCommand(const char* args);
+        bool HandlePetTpCommand(const char* args);
         bool HandlePetUnlearnCommand(const char* args);
         bool HandlePetLearnCommand(const char* args);
         bool HandleCreatePetCommand(const char* args);
@@ -351,11 +352,19 @@ class ChatHandler
         // Utility methods for commands
         bool LookupPlayerSearchCommand(QueryResult result, int32 limit);
         bool HandleBanListHelper(QueryResult result);
-        bool HandleBanHelper(BanMode mode, char const* args);
+        bool HandleBanHelper(BanMode mode,char const* args);
         bool HandleBanInfoHelper(uint32 accountid, char const* accountname);
-        bool HandleUnBanHelper(BanMode mode, char const* args);
+        bool HandleUnBanHelper(BanMode mode,char const* args);
         void HandleCharacterLevel(Player* player, uint64 player_guid, uint32 oldlevel, uint32 newlevel);
-        void HandleLearnSkillRecipesHelper(Player* player, uint32 skill_id);
+        void HandleLearnSkillRecipesHelper(Player* player,uint32 skill_id);
+
+        //Wintergrasp
+        bool HandleWintergraspStatusCommand(const char *args);
+        bool HandleWintergraspStartCommand(const char *args);
+        bool HandleWintergraspStopCommand(const char *args);
+        bool HandleWintergraspEnableCommand(const char *args);
+        bool HandleWintergraspSwitchTeamCommand(const char *args);
+        bool HandleWintergraspTimerCommand(const char *args);
 
         // Stores informations about a deleted character
         struct DeletedInfo
@@ -374,8 +383,6 @@ class ChatHandler
         void HandleCharacterDeletedRestoreHelper(DeletedInfo const& delInfo);
 
     private:
-        bool _HandleGMTicketResponseAppendCommand(const char* args, bool newLine);
-
         WorldSession * m_session;                           // != NULL for chat command call and NULL for CLI command
 
         // common global flag

@@ -24,6 +24,7 @@ SDCategory: Blackwing Lair
 EndScriptData */
 
 #include "ScriptPCH.h"
+#include "blackwing_lair.h"
 
 enum Emotes
 {
@@ -42,10 +43,10 @@ enum Spells
     SPELL_NATURE_VULNERABILITY                             = 22280,
     SPELL_ARCANE_VULNERABILITY                             = 22281,
     //Other spells
-    SPELL_INCINERATE                                       = 23308,   //Incinerate 23308, 23309
+    SPELL_INCINERATE                                       = 23308,   //Incinerate 23308,23309
     SPELL_TIMELAPSE                                        = 23310,   //Time lapse 23310, 23311(old threat mod that was removed in 2.01)
     SPELL_CORROSIVEACID                                    = 23313,   //Corrosive Acid 23313, 23314
-    SPELL_IGNITEFLESH                                      = 23315,   //Ignite Flesh 23315, 23316
+    SPELL_IGNITEFLESH                                      = 23315,   //Ignite Flesh 23315,23316
     SPELL_FROSTBURN                                        = 23187,   //Frost burn 23187, 23189
     //Brood Affliction 23173 - Scripted Spell that cycles through all targets within 100 yards and has a chance to cast one of the afflictions on them
     //Since Scripted spells arn't coded I'll just write a function that does the same thing
@@ -73,105 +74,22 @@ public:
     {
         boss_chromaggusAI(Creature *c) : ScriptedAI(c)
         {
+            pInstance = c->GetInstanceScript();
             //Select the 2 breaths that we are going to use until despawned
             //5 possiblities for the first breath, 4 for the second, 20 total possiblites
             //This way we don't end up casting 2 of the same breath
             //TL TL would be stupid
-            switch (urand(0, 19))
+
+            Breath1_Spell = RAND(SPELL_INCINERATE,SPELL_TIMELAPSE,SPELL_CORROSIVEACID,SPELL_IGNITEFLESH,SPELL_FROSTBURN);
+
+            do
             {
-                //B1 - Incin
-                case 0:
-                    Breath1_Spell = SPELL_INCINERATE;
-                    Breath2_Spell = SPELL_TIMELAPSE;
-                    break;
-                case 1:
-                    Breath1_Spell = SPELL_INCINERATE;
-                    Breath2_Spell = SPELL_CORROSIVEACID;
-                    break;
-                case 2:
-                    Breath1_Spell = SPELL_INCINERATE;
-                    Breath2_Spell = SPELL_IGNITEFLESH;
-                    break;
-                case 3:
-                    Breath1_Spell = SPELL_INCINERATE;
-                    Breath2_Spell = SPELL_FROSTBURN;
-                    break;
-
-                    //B1 - TL
-                case 4:
-                    Breath1_Spell = SPELL_TIMELAPSE;
-                    Breath2_Spell = SPELL_INCINERATE;
-                    break;
-                case 5:
-                    Breath1_Spell = SPELL_TIMELAPSE;
-                    Breath2_Spell = SPELL_CORROSIVEACID;
-                    break;
-                case 6:
-                    Breath1_Spell = SPELL_TIMELAPSE;
-                    Breath2_Spell = SPELL_IGNITEFLESH;
-                    break;
-                case 7:
-                    Breath1_Spell = SPELL_TIMELAPSE;
-                    Breath2_Spell = SPELL_FROSTBURN;
-                    break;
-
-                    //B1 - Acid
-                case 8:
-                    Breath1_Spell = SPELL_CORROSIVEACID;
-                    Breath2_Spell = SPELL_INCINERATE;
-                    break;
-                case 9:
-                    Breath1_Spell = SPELL_CORROSIVEACID;
-                    Breath2_Spell = SPELL_TIMELAPSE;
-                    break;
-                case 10:
-                    Breath1_Spell = SPELL_CORROSIVEACID;
-                    Breath2_Spell = SPELL_IGNITEFLESH;
-                    break;
-                case 11:
-                    Breath1_Spell = SPELL_CORROSIVEACID;
-                    Breath2_Spell = SPELL_FROSTBURN;
-                    break;
-
-                    //B1 - Ignite
-                case 12:
-                    Breath1_Spell = SPELL_IGNITEFLESH;
-                    Breath2_Spell = SPELL_INCINERATE;
-                    break;
-                case 13:
-                    Breath1_Spell = SPELL_IGNITEFLESH;
-                    Breath2_Spell = SPELL_CORROSIVEACID;
-                    break;
-                case 14:
-                    Breath1_Spell = SPELL_IGNITEFLESH;
-                    Breath2_Spell = SPELL_TIMELAPSE;
-                    break;
-                case 15:
-                    Breath1_Spell = SPELL_IGNITEFLESH;
-                    Breath2_Spell = SPELL_FROSTBURN;
-                    break;
-
-                    //B1 - Frost
-                case 16:
-                    Breath1_Spell = SPELL_FROSTBURN;
-                    Breath2_Spell = SPELL_INCINERATE;
-                    break;
-                case 17:
-                    Breath1_Spell = SPELL_FROSTBURN;
-                    Breath2_Spell = SPELL_TIMELAPSE;
-                    break;
-                case 18:
-                    Breath1_Spell = SPELL_FROSTBURN;
-                    Breath2_Spell = SPELL_CORROSIVEACID;
-                    break;
-                case 19:
-                    Breath1_Spell = SPELL_FROSTBURN;
-                    Breath2_Spell = SPELL_IGNITEFLESH;
-                    break;
-            };
-
-            EnterEvadeMode();
+                Breath2_Spell = RAND(SPELL_INCINERATE,SPELL_TIMELAPSE,SPELL_CORROSIVEACID,SPELL_IGNITEFLESH,SPELL_FROSTBURN);
+            }while (Breath1_Spell == Breath2_Spell);
+            // Endlosschleife Wahrscheinlichkeit -> 0
         }
+
+        InstanceScript *pInstance;
 
         uint32 Breath1_Spell;
         uint32 Breath2_Spell;
@@ -195,10 +113,21 @@ public:
             Frenzy_Timer = 15000;
 
             Enraged = false;
+
+            if(pInstance)
+                pInstance->SetData(ENCOUNTER_CHROMAGGUS,NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
+            if(pInstance)
+                pInstance->SetData(ENCOUNTER_CHROMAGGUS,IN_PROGRESS);
+        }
+
+        void JustDied(Unit *killer)
+        {
+            if(pInstance)
+                pInstance->SetData(ENCOUNTER_CHROMAGGUS,DONE);
         }
 
         void UpdateAI(const uint32 diff)
@@ -214,8 +143,13 @@ public:
                     me->RemoveAurasDueToSpell(CurrentVurln_Spell);
 
                 //Cast new random vulnerabilty on self
-                uint32 spell = RAND(SPELL_FIRE_VULNERABILITY, SPELL_FROST_VULNERABILITY,
-                    SPELL_SHADOW_VULNERABILITY, SPELL_NATURE_VULNERABILITY, SPELL_ARCANE_VULNERABILITY);
+                uint32 spell;
+                do
+                {
+                    spell = RAND(SPELL_FIRE_VULNERABILITY, SPELL_FROST_VULNERABILITY,
+                        SPELL_SHADOW_VULNERABILITY, SPELL_NATURE_VULNERABILITY, SPELL_ARCANE_VULNERABILITY);
+                }while (spell == CurrentVurln_Spell);
+                // Endlosschleife Wahrscheinlichkeit -> 0
 
                 DoCast(me, spell);
                 CurrentVurln_Spell = spell;
@@ -261,16 +195,23 @@ public:
                                 && pUnit->HasAura(SPELL_BROODAF_BRONZE)
                                 && pUnit->HasAura(SPELL_BROODAF_GREEN))
                             {
-                                //pTarget->RemoveAllAuras();
-                                //DoCast(pTarget, SPELL_CHROMATIC_MUT_1);
+                                if (pUnit->GetTypeId() == TYPEID_PLAYER)
+                                {
+                                    pUnit->RemoveAurasDueToSpell(SPELL_BROODAF_BLUE);
+                                    pUnit->RemoveAurasDueToSpell(SPELL_BROODAF_BLACK);
+                                    pUnit->RemoveAurasDueToSpell(SPELL_BROODAF_RED);
+                                    pUnit->RemoveAurasDueToSpell(SPELL_BROODAF_BRONZE);
+                                    pUnit->RemoveAurasDueToSpell(SPELL_BROODAF_GREEN);
+                                    DoCast(pUnit, SPELL_CHROMATIC_MUT_1, true);
+                                }
 
                                 //Chromatic mutation is causing issues
                                 //Assuming it is caused by a lack of core support for Charm
                                 //So instead we instant kill our target
 
                                 //WORKAROUND
-                                if (pUnit->GetTypeId() == TYPEID_PLAYER)
-                                    pUnit->CastSpell(pUnit, 5, false);
+                                //if (pUnit->GetTypeId() == TYPEID_PLAYER)
+                                //    pUnit->CastSpell(pUnit, 5, false);
                             }
                         }
                     }
@@ -284,7 +225,7 @@ public:
             {
                 DoCast(me, SPELL_FRENZY);
                 DoScriptText(EMOTE_FRENZY, me);
-                Frenzy_Timer = urand(10000, 15000);
+                Frenzy_Timer = urand(10000,15000);
             } else Frenzy_Timer -= diff;
 
             //Enrage if not already enraged and below 20%
@@ -297,10 +238,10 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 void AddSC_boss_chromaggus()
 {
     new boss_chromaggus();
 }
+

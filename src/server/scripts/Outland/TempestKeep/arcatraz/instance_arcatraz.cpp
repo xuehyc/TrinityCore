@@ -28,19 +28,28 @@ EndScriptData */
 
 #define MAX_ENCOUNTER 9
 
-enum eUnits
-{
-    CONTAINMENT_CORE_SECURITY_FIELD_ALPHA = 184318, //door opened when Wrath-Scryer Soccothrates dies
-    CONTAINMENT_CORE_SECURITY_FIELD_BETA  = 184319, //door opened when Dalliah the Doomsayer dies
-    POD_ALPHA                             = 183961, //pod first boss wave
-    POD_BETA                              = 183963, //pod second boss wave
-    POD_DELTA                             = 183964, //pod third boss wave
-    POD_GAMMA                             = 183962, //pod fourth boss wave
-    POD_OMEGA                             = 183965, //pod fifth boss wave
-    WARDENS_SHIELD                        = 184802, // warden shield
-    SEAL_SPHERE                           = 184802, //shield 'protecting' mellichar
+#define CONTAINMENT_CORE_SECURITY_FIELD_ALPHA 184318        //door opened when Wrath-Scryer Soccothrates dies
+#define CONTAINMENT_CORE_SECURITY_FIELD_BETA  184319        //door opened when Dalliah the Doomsayer dies
+#define POD_ALPHA   183961                                  //pod first boss wave
+#define POD_BETA    183963                                  //pod second boss wave
+#define POD_DELTA   183964                                  //pod third boss wave
+#define POD_GAMMA   183962                                  //pod fourth boss wave
+#define POD_OMEGA   183965                                  //pod fifth boss wave
+#define WARDENS_SHIELD  184802                              // warden shield
+#define SEAL_SPHERE 184802                                  //shield 'protecting' mellichar
 
-    MELLICHAR                             = 20904, //skyriss will kill this unit
+#define MELLICHAR   20904                                   //skyriss will kill this unit
+#define ARCA_SPAWN_TRIGGER 21186                            //we need this for spawning Proteans and Eredars
+
+// creature IDs for Eredars
+#define ENTRY_EREDAR_DEATHBRINGER   20880
+#define ENTRY_EREDAR_SOULEATER      20879
+
+float eredar_spawnpoint[3][4] =
+{
+    {301.82f, 127.72f, 22.3f, 1.59f},
+    {287.10f, 144.95f, 22.3f, 0.27f},
+    {305.09f, 149.06f, 24.9f, 3.94f}
 };
 
 /* Arcatraz encounters:
@@ -52,97 +61,146 @@ enum eUnits
 
 class instance_arcatraz : public InstanceMapScript
 {
-    public:
-        instance_arcatraz()
-            : InstanceMapScript("instance_arcatraz", 552)
-        {
-        }
-        struct instance_arcatraz_InstanceMapScript : public InstanceScript
-        {
+public:
+    instance_arcatraz() : InstanceMapScript("instance_arcatraz", 552) { }
+
+    InstanceScript* GetInstanceScript(InstanceMap* pMap) const
+    {
+        return new instance_arcatraz_InstanceMapScript(pMap);
+    }
+
+    struct instance_arcatraz_InstanceMapScript : public InstanceScript
+    {
             instance_arcatraz_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {}
 
-            uint32 m_auiEncounter[MAX_ENCOUNTER];
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
 
-            uint64 Containment_Core_Security_Field_AlphaGUID;
-            uint64 Containment_Core_Security_Field_BetaGUID;
-            uint64 Pod_AlphaGUID;
-            uint64 Pod_GammaGUID;
-            uint64 Pod_BetaGUID;
-            uint64 Pod_DeltaGUID;
-            uint64 Pod_OmegaGUID;
-            uint64 Wardens_ShieldGUID;
-            uint64 GoSphereGUID;
-            uint64 MellicharGUID;
+        uint64 Containment_Core_Security_Field_Alpha;
+        uint64 Containment_Core_Security_Field_Beta;
+        GameObject *Pod_Alpha;
+        GameObject *Pod_Gamma;
+        GameObject *Pod_Beta;
+        GameObject *Pod_Delta;
+        GameObject *Pod_Omega;
+        GameObject *Wardens_Shield;
 
-            void Initialize()
+        uint64 GoSphereGUID;
+        uint64 MellicharGUID;
+
+        uint32 socco_dead;
+        uint32 dalli_dead;
+        uint64 dalli_guid;
+        uint64 socco_guid;
+        uint32 d_hp25;
+        uint32 s_hp25;
+
+        uint64 arca_spawn_triggerGUID;
+        uint64 eredar_spawn[3];
+
+        void Initialize()
+        {
+            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
+            Containment_Core_Security_Field_Alpha = NULL;
+            Containment_Core_Security_Field_Beta  = NULL;
+            Pod_Alpha = NULL;
+            Pod_Beta  = NULL;
+            Pod_Delta = NULL;
+            Pod_Gamma = NULL;
+            Pod_Omega = NULL;
+            Wardens_Shield = NULL;
+
+            socco_dead = NOT_STARTED;
+            dalli_dead = NOT_STARTED;
+
+            GoSphereGUID = NULL;
+            MellicharGUID = NULL;
+            dalli_guid = NULL;
+            socco_guid = NULL;
+            d_hp25 = NULL;
+            s_hp25 = NULL;
+
+            memset(&eredar_spawn, 0, sizeof(eredar_spawn));
+        }
+
+        bool IsEncounterInProgress() const
+        {
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                if (m_auiEncounter[i] == IN_PROGRESS) return true;
+
+            return false;
+        }
+
+        void OnGameObjectCreate(GameObject* pGo)
+        {
+            switch(pGo->GetEntry())
             {
-                memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
-
-                Containment_Core_Security_Field_AlphaGUID = 0;
-                Containment_Core_Security_Field_BetaGUID = 0;
-                Pod_AlphaGUID = 0;
-                        Pod_GammaGUID = 0;
-                        Pod_BetaGUID = 0;
-                        Pod_DeltaGUID = 0;
-                        Pod_OmegaGUID = 0;
-                        Wardens_ShieldGUID = 0;
-                        GoSphereGUID = 0;
-                        MellicharGUID = 0;
+                case CONTAINMENT_CORE_SECURITY_FIELD_ALPHA: 
+                    Containment_Core_Security_Field_Alpha = pGo->GetGUID();
+                    if(socco_dead == DONE)
+                        HandleGameObject(Containment_Core_Security_Field_Alpha,true,pGo);
+                    else
+                        HandleGameObject(Containment_Core_Security_Field_Alpha,false,pGo);
+                    break;
+                case CONTAINMENT_CORE_SECURITY_FIELD_BETA:
+                    Containment_Core_Security_Field_Beta = pGo->GetGUID();
+                     if(dalli_dead == DONE)
+                        HandleGameObject(Containment_Core_Security_Field_Beta,true,pGo);
+                    else
+                        HandleGameObject(Containment_Core_Security_Field_Beta,false,pGo);
+                    break;
+                    break;
+                case SEAL_SPHERE: GoSphereGUID = pGo->GetGUID(); break;
+                case POD_ALPHA: Pod_Alpha = pGo; break;
+                case POD_BETA:  Pod_Beta =  pGo; break;
+                case POD_DELTA: Pod_Delta = pGo; break;
+                case POD_GAMMA: Pod_Gamma = pGo; break;
+                case POD_OMEGA: Pod_Omega = pGo; break;
+                //case WARDENS_SHIELD: Wardens_Shield = pGo; break;
             }
+        }
 
-            bool IsEncounterInProgress() const
+        void OnCreatureCreate(Creature* pCreature)
+        {
+            switch(pCreature->GetEntry())
             {
-                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                    if (m_auiEncounter[i] == IN_PROGRESS) return true;
-
-                return false;
+            case MELLICHAR:
+                MellicharGUID = pCreature->GetGUID();
+                break;
+            case 20885:
+                dalli_guid  = pCreature->GetGUID();
+                break;
+            case 20886:
+                socco_guid = pCreature->GetGUID();
+                break;
+            case ARCA_SPAWN_TRIGGER:
+                SpawnEredar(pCreature);
+                break;
             }
+        }
 
-            void OnGameObjectCreate(GameObject* go)
+        void SetData(uint32 type, uint32 data)
+        {
+            switch(type)
             {
-                switch(go->GetEntry())
-                {
-                case CONTAINMENT_CORE_SECURITY_FIELD_ALPHA: Containment_Core_Security_Field_AlphaGUID = go->GetGUID(); break;
-                case CONTAINMENT_CORE_SECURITY_FIELD_BETA:  Containment_Core_Security_Field_BetaGUID =  go->GetGUID(); break;
-                case POD_ALPHA:                             Pod_AlphaGUID = go->GetGUID();                             break;
-                case POD_GAMMA:                             Pod_GammaGUID = go->GetGUID();                             break;
-                case POD_BETA:                              Pod_BetaGUID =  go->GetGUID();                             break;
-                case POD_DELTA:                             Pod_DeltaGUID = go->GetGUID();                             break;
-                case POD_OMEGA:                             Pod_OmegaGUID = go->GetGUID();                             break;
-                case SEAL_SPHERE:                           GoSphereGUID = go->GetGUID();                              break;
-                //case WARDENS_SHIELD:                        Wardens_ShieldGUID = go->GetGUID();                        break;
-                }
-            }
-
-            void OnCreatureCreate(Creature* creature)
-            {
-                if (creature->GetEntry() == MELLICHAR)
-                    MellicharGUID = creature->GetGUID();
-            }
-
-            void SetData(uint32 type, uint32 data)
-            {
-                switch(type)
-                {
                 case TYPE_ZEREKETH:
                     m_auiEncounter[0] = data;
                     break;
-                case TYPE_DALLIAH:
+
+                case DATA_WRATH_SCRYERSOCCOTHRATESEVENT:
                     if (data == DONE)
-                    {
-                        if (GameObject* go = instance->GetGameObject(Containment_Core_Security_Field_BetaGUID))
-                            go->UseDoorOrButton();
-                    }
-                    m_auiEncounter[1] = data;
+                        HandleGameObject(Containment_Core_Security_Field_Beta,true);
+                    if(m_auiEncounter[1] != DONE)
+                        m_auiEncounter[1] = data;
                     break;
-                case TYPE_SOCCOTHRATES:
+
+                case DATA_DALLIAHTHEDOOMSAYEREVENT:
                     if (data == DONE)
-                    {
-                        if (GameObject* go = instance->GetGameObject(Containment_Core_Security_Field_AlphaGUID))
-                            go->UseDoorOrButton();
-                    }
-                    m_auiEncounter[2] = data;
+                        HandleGameObject(Containment_Core_Security_Field_Alpha,true);
+                    if(m_auiEncounter[2] != DONE)
+                        m_auiEncounter[2] = data;
                     break;
+
                 case TYPE_HARBINGERSKYRISS:
                     if (data == NOT_STARTED || data == FAIL)
                     {
@@ -154,87 +212,166 @@ class instance_arcatraz : public InstanceMapScript
                     }
                     m_auiEncounter[3] = data;
                     break;
+
                 case TYPE_WARDEN_1:
                     if (data == IN_PROGRESS)
-                        if (GameObject* go = instance->GetGameObject(Pod_AlphaGUID))
-                            go->UseDoorOrButton();
+                        if (Pod_Alpha)
+                            Pod_Alpha->UseDoorOrButton();
                     m_auiEncounter[4] = data;
                     break;
+
                 case TYPE_WARDEN_2:
                     if (data == IN_PROGRESS)
-                    {
-                        if (GameObject* go = instance->GetGameObject(Pod_BetaGUID))
-                            go->UseDoorOrButton();
-                    }
+                        if (Pod_Beta)
+                            Pod_Beta->UseDoorOrButton();
                     m_auiEncounter[5] = data;
                     break;
+
                 case TYPE_WARDEN_3:
                     if (data == IN_PROGRESS)
-                    {
-                        if (GameObject* go = instance->GetGameObject(Pod_DeltaGUID))
-                            go->UseDoorOrButton();
-                    }
+                        if (Pod_Delta)
+                            Pod_Delta->UseDoorOrButton();
                     m_auiEncounter[6] = data;
                     break;
+
                 case TYPE_WARDEN_4:
                     if (data == IN_PROGRESS)
-                    {
-                        if (GameObject* go = instance->GetGameObject(Pod_GammaGUID))
-                            go->UseDoorOrButton();
-                    }
+                        if (Pod_Gamma)
+                            Pod_Gamma->UseDoorOrButton();
                     m_auiEncounter[7] = data;
                     break;
+
                 case TYPE_WARDEN_5:
                     if (data == IN_PROGRESS)
-                    {
-                        if (GameObject* go = instance->GetGameObject(Pod_OmegaGUID))
-                            go->UseDoorOrButton();
-                    }
+                        if (Pod_Omega)
+                            Pod_Omega->UseDoorOrButton();
                     m_auiEncounter[8] = data;
                     break;
+
                 case TYPE_SHIELD_OPEN:
                     if (data == IN_PROGRESS)
-                    {
-                        if (GameObject* go = instance->GetGameObject(Wardens_ShieldGUID))
-                            go->UseDoorOrButton();
-                    }
+                        if (Wardens_Shield)
+                            Wardens_Shield->UseDoorOrButton();
                     break;
-                }
+
+                case DATA_DALLIAH25:
+                    d_hp25 = data;
+                    break;
+                case DATA_SOCCOTHRATES25:
+                    s_hp25 = data;
+                    break;
             }
 
-            uint32 GetData(uint32 type)
-            {
-                switch(type)
-                {
-                case TYPE_HARBINGERSKYRISS: return m_auiEncounter[3];
-                case TYPE_WARDEN_1:         return m_auiEncounter[4];
-                case TYPE_WARDEN_2:         return m_auiEncounter[5];
-                case TYPE_WARDEN_3:         return m_auiEncounter[6];
-                case TYPE_WARDEN_4:         return m_auiEncounter[7];
-                case TYPE_WARDEN_5:         return m_auiEncounter[8];
-                }
-                return 0;
-            }
-
-            uint64 GetData64(uint32 data)
-            {
-                switch(data)
-                {
-                case DATA_MELLICHAR:        return MellicharGUID;
-                case DATA_SPHERE_SHIELD:    return GoSphereGUID;
-                }
-                return 0;
-            }
-        };
-
-        InstanceScript* GetInstanceScript(InstanceMap* pMap) const
-        {
-            return new instance_arcatraz_InstanceMapScript(pMap);
+            SaveToDB();
         }
+
+        uint32 GetData(uint32 type)
+        {
+             switch(type)
+            {
+                case TYPE_HARBINGERSKYRISS:
+                    return m_auiEncounter[3];
+                case TYPE_WARDEN_1:
+                    return m_auiEncounter[4];
+                case TYPE_WARDEN_2:
+                    return m_auiEncounter[5];
+                case TYPE_WARDEN_3:
+                    return m_auiEncounter[6];
+                case TYPE_WARDEN_4:
+                    return m_auiEncounter[7];
+                case TYPE_WARDEN_5:
+                    return m_auiEncounter[8];
+                case DATA_DALLIAH25:
+                    return d_hp25;
+                break;
+                case DATA_SOCCOTHRATES25:
+                    return s_hp25;
+                break;
+                case DATA_WRATH_SCRYERSOCCOTHRATESEVENT:
+                    return m_auiEncounter[1];
+                break;
+                case DATA_DALLIAHTHEDOOMSAYEREVENT:
+                    return m_auiEncounter[2];
+                break;
+            }
+            return 0;
+        }
+
+        uint64 GetData64(uint32 data)
+        {
+            switch(data)
+            {
+                case DATA_MELLICHAR:
+                    return MellicharGUID;
+                case DATA_SPHERE_SHIELD:
+                    return GoSphereGUID;
+                case DATA_WRATH_SCRYERSOCCOTHRATES:
+                    return socco_guid;
+                break;
+                case DATA_DALLIAHTHEDOOMSAYER:
+                    return dalli_guid;
+                break;
+            }
+            return 0;
+        }
+
+        std::string GetSaveData()
+        {
+            std::ostringstream ss;
+            ss << "A T " << socco_dead << " " << dalli_dead;
+            return ss.str();;
+        }
+
+        void Load(const char* load)
+        {
+            if(!load) return;
+            std::istringstream ss(load);
+            char dataHead1;
+            char dataHead2;
+            uint32 data1, data2;
+            ss >> dataHead1 >> dataHead2 >> data1 >> data2;
+            if(dataHead1 == 'A' && dataHead2 == 'T')
+            {
+                socco_dead = data1;
+                dalli_dead = data2;
+            }else sLog->outError("SD2: Arcatraz: corrupted save data.");
+        }
+    
+    /*###
+    Randomly Spawn Eredar Deathbringer and Souleater
+    ###*/
+
+        void SpawnEredar (Creature* reference)
+        {
+            if(!reference)
+                return;
+
+            if(eredar_spawn[0] != 0 || eredar_spawn[1] != 0 || eredar_spawn[2] != 0)
+                return;
+
+            uint32 eredar_entry[3];
+            for(uint8 i = 0; i < 3; i++)
+            {
+                eredar_entry[i] = RAND(ENTRY_EREDAR_DEATHBRINGER,ENTRY_EREDAR_SOULEATER);
+            }
+
+            if(eredar_entry[0] == eredar_entry[1] == eredar_entry[2])
+            {
+                uint32 temp_rand = urand(0,2);
+                eredar_entry[temp_rand] = (eredar_entry[temp_rand] == ENTRY_EREDAR_DEATHBRINGER ? ENTRY_EREDAR_SOULEATER : ENTRY_EREDAR_DEATHBRINGER);
+            }
+
+            Creature* temp;
+            for(uint8 i = 0; i < 3; i++)
+            {
+                temp = reference->SummonCreature(eredar_entry[i],eredar_spawnpoint[i][0],eredar_spawnpoint[i][1],eredar_spawnpoint[i][2],eredar_spawnpoint[i][3],TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000);
+                eredar_spawn[i] = temp->GetGUID();
+            }
+        }
+    };
 };
 
 void AddSC_instance_arcatraz()
 {
-    new instance_arcatraz;
+    new instance_arcatraz();
 }
-

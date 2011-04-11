@@ -75,17 +75,17 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ARCANE, true);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit * /*victim*/)
         {
-            DoScriptText(RAND(SAY_KILL1, SAY_KILL2), me);
+            DoScriptText(RAND(SAY_KILL1,SAY_KILL2), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit * /*victim*/)
         {
             DoScriptText(SAY_DEATH, me);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
         }
@@ -159,9 +159,9 @@ public:
                         }
                         else
                         {
-                            if (urand(0, 1) == 0)
+                            if (urand(0,1) == 0)
                             {
-                                DoScriptText(RAND(SAY_SUMMON1, SAY_SUMMON2), me);
+                                DoScriptText(RAND(SAY_SUMMON1,SAY_SUMMON2), me);
                             }
                         }
                     }

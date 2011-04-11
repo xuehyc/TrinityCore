@@ -43,17 +43,17 @@ enum eDeathKnightSpells
 #define EVENT_BLOOD_STRIKE              3
 #define EVENT_DEATH_COIL                4
 
-//used by 29519, 29520, 29565, 29566, 29567 but signed for 29519
+//used by 29519,29520,29565,29566,29567 but signed for 29519
 int32 say_event_start[8] =
 {
-    -1609000, -1609001, -1609002, -1609003,
-    -1609004, -1609005, -1609006, -1609007
+    -1609000,-1609001,-1609002,-1609003,
+    -1609004,-1609005,-1609006,-1609007
 };
 
 int32 say_event_attack[9] =
 {
-    -1609008, -1609009, -1609010, -1609011, -1609012,
-    -1609013, -1609014, -1609015, -1609016
+    -1609008,-1609009,-1609010,-1609011,-1609012,
+    -1609013,-1609014,-1609015,-1609016
 };
 
 uint32 acherus_soul_prison[12] =
@@ -106,9 +106,9 @@ public:
         {
             me->SetReactState(REACT_PASSIVE);
             if (!me->GetEquipmentId())
-                if (const CreatureTemplate *info = sObjectMgr->GetCreatureTemplate(28406))
+                if (const CreatureInfo *info = ObjectMgr::GetCreatureTemplate(28406))
                     if (info->equipmentId)
-                        const_cast<CreatureTemplate*>(me->GetCreatureInfo())->equipmentId = info->equipmentId;
+                        const_cast<CreatureInfo*>(me->GetCreatureInfo())->equipmentId = info->equipmentId;
         }
 
         uint64 playerGUID;
@@ -130,7 +130,7 @@ public:
             me->LoadEquipment(0, true);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             events.ScheduleEvent(EVENT_ICY_TOUCH, 1000, GCD_CAST);
             events.ScheduleEvent(EVENT_PLAGUE_STRIKE, 3000, GCD_CAST);
@@ -192,7 +192,7 @@ public:
 
                     for (uint8 i = 0; i < 12; ++i)
                     {
-                        if (GameObject* temp_prison = me->FindNearestGameObject(acherus_soul_prison[i], 30))
+                        if (GameObject* temp_prison = me->FindNearestGameObject(acherus_soul_prison[i],30))
                         {
                             if (me->IsWithinDist(temp_prison, dist, false))
                             {
@@ -401,7 +401,7 @@ public:
                 return true;
 
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ACCEPT_DUEL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-            pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+            pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature),pCreature->GetGUID());
         }
         return true;
     }
@@ -633,15 +633,12 @@ public:
                 {
                     if (Unit *charmer = caster->GetCharmer())
                     {
-                        if (charmer->HasAura(EFFECT_STOLEN_HORSE))
-                        {
-                            charmer->RemoveAurasDueToSpell(EFFECT_STOLEN_HORSE);
-                            caster->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-                            caster->setFaction(35);
-                            DoCast(caster, CALL_DARK_RIDER, true);
-                            if (Creature* Dark_Rider = me->FindNearestCreature(28654, 15))
-                                CAST_AI(npc_dark_rider_of_acherus::npc_dark_rider_of_acherusAI, Dark_Rider->AI())->InitDespawnHorse(caster);
-                        }
+                        charmer->RemoveAurasDueToSpell(EFFECT_STOLEN_HORSE);
+                        caster->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                        caster->setFaction(35);
+                        DoCast(caster, CALL_DARK_RIDER, true);
+                        if (Creature* Dark_Rider = me->FindNearestCreature(28654, 15))
+                            CAST_AI(npc_dark_rider_of_acherus::npc_dark_rider_of_acherusAI, Dark_Rider->AI())->InitDespawnHorse(caster);
                     }
                 }
             }
@@ -662,7 +659,7 @@ public:
                         {
                             CAST_PLR(charmer)->GroupEventHappens(12687, me);
                             charmer->RemoveAurasDueToSpell(SPELL_EFFECT_OVERTAKE);
-                            CAST_CRE(who)->ForcedDespawn();
+                            CAST_CRE(who)->DespawnOrUnsummon();
                             //CAST_CRE(who)->Respawn(true);
                         }
 
@@ -694,7 +691,7 @@ public:
     {
         npc_ros_dark_riderAI(Creature *c) : ScriptedAI(c) {}
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             me->ExitVehicle();
         }
@@ -710,7 +707,7 @@ public:
                 me->EnterVehicle(deathcharger);
         }
 
-        void JustDied(Unit* killer)
+        void JustDied(Unit *killer)
         {
             Creature* deathcharger = me->FindNearestCreature(28782, 30);
             if (!deathcharger) return;
@@ -761,7 +758,7 @@ public:
                         //Todo: Creatures must not be removed, but, must instead
                         //      stand next to Gothik and be commanded into the pit
                         //      and dig into the ground.
-                        CAST_CRE(who)->ForcedDespawn();
+                        CAST_CRE(who)->DespawnOrUnsummon();
 
                         if (CAST_PLR(owner)->GetQuestStatus(12698) == QUEST_STATUS_COMPLETE)
                             owner->RemoveAllMinionsByEntry(GHOULS);
@@ -790,14 +787,14 @@ public:
             // Ghouls should display their Birth Animation
             // Crawling out of the ground
             //DoCast(me, 35177, true);
-            //me->MonsterSay("Mommy?", LANG_UNIVERSAL, 0);
+            //me->MonsterSay("Mommy?",LANG_UNIVERSAL,0);
             me->SetReactState(REACT_DEFENSIVE);
         }
 
         void FindMinions(Unit *owner)
         {
             std::list<Creature*> MinionList;
-            owner->GetAllMinionsByEntry(MinionList, GHOULS);
+            owner->GetAllMinionsByEntry(MinionList,GHOULS);
 
             if (!MinionList.empty())
             {
@@ -902,7 +899,7 @@ public:
             }
         }
 
-        void PassengerBoarded(Unit* /*who*/, int8 /*seatId*/, bool apply)
+        void PassengerBoarded(Unit * /*who*/, int8 /*seatId*/, bool apply)
         {
             if (!apply)
                 if (Creature *miner = Unit::GetCreature(*me, minerGUID))
@@ -962,7 +959,7 @@ public:
             AddWaypoint(11, 2202.595947f, -6061.325684f, 5.882018f);
             AddWaypoint(12, 2188.974609f, -6080.866699f, 3.370027f);
 
-            if (urand(0, 1))
+            if (urand(0,1))
             {
                 AddWaypoint(13, 2176.483887f, -6110.407227f, 1.855181f);
                 AddWaypoint(14, 2172.516602f, -6146.752441f, 1.074235f);
@@ -998,7 +995,7 @@ public:
                         me->SetInFront(car);
                         me->SendMovementFlagUpdate();
                     }
-                    me->MonsterSay(SAY_SCARLET_MINER1, LANG_UNIVERSAL, 0);
+                    me->MonsterSay(SAY_SCARLET_MINER1,LANG_UNIVERSAL,NULL);
                     SetRun(true);
                     IntroTimer = 4000;
                     IntroPhase = 1;
@@ -1012,7 +1009,7 @@ public:
                         car->SendMonsterStop();
                         car->RemoveAura(SPELL_CART_DRAG);
                     }
-                    me->MonsterSay(SAY_SCARLET_MINER2, LANG_UNIVERSAL, 0);
+                    me->MonsterSay(SAY_SCARLET_MINER2,LANG_UNIVERSAL,NULL);
                     break;
                 default:
                     break;
@@ -1062,7 +1059,7 @@ public:
         if (pPlayer->GetQuestStatus(12701) == QUEST_STATUS_INCOMPLETE)
         {
             // Hack Why Trinity Dont Support Custom Summon Location
-            if (Creature *miner = pPlayer->SummonCreature(28841, 2383.869629f, -5900.312500f, 107.996086f, pPlayer->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 1))
+            if (Creature *miner = pPlayer->SummonCreature(28841, 2383.869629f, -5900.312500f, 107.996086f, pPlayer->GetOrientation(),TEMPSUMMON_DEAD_DESPAWN, 1))
             {
                 pPlayer->CastSpell(pPlayer, SPELL_CART_SUMM, true);
                 if (Creature *car = pPlayer->GetVehicleCreatureBase())

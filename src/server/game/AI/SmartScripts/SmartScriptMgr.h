@@ -88,13 +88,13 @@ enum SMART_EVENT
     SMART_EVENT_HEALT_PCT                = 2,       //1             // HPMin%, HPMax%,  RepeatMin, RepeatMax
     SMART_EVENT_MANA_PCT                 = 3,       //1             // ManaMin%, ManaMax%, RepeatMin, RepeatMax
     SMART_EVENT_AGGRO                    = 4,       //1             // NONE
-    SMART_EVENT_KILL                     = 5,       //1             // CooldownMin0, CooldownMax1, playerOnly2, else creature entry3
+    SMART_EVENT_KILL                     = 5,       //1             // CooldownMin0, CooldownMax1,playerOnly2,else creature entry3
     SMART_EVENT_DEATH                    = 6,       //1             // NONE
     SMART_EVENT_EVADE                    = 7,       //1             // NONE
     SMART_EVENT_SPELLHIT                 = 8,       //1             // SpellID, School, CooldownMin, CooldownMax
     SMART_EVENT_RANGE                    = 9,       //1             // MinDist, MaxDist, RepeatMin, RepeatMax
     SMART_EVENT_OOC_LOS                  = 10,      //1             // NoHostile, MaxRnage, CooldownMin, CooldownMax
-    SMART_EVENT_RESPAWN                  = 11,      //1             // type, MapId, ZoneId
+    SMART_EVENT_RESPAWN                  = 11,      //1             // type, MapId,ZoneId
     SMART_EVENT_TARGET_HEALTH_PCT        = 12,      //1             // HPMin%, HPMax%, RepeatMin, RepeatMax
     SMART_EVENT_TARGET_CASTING           = 13,      //1             // RepeatMin, RepeatMax
     SMART_EVENT_FRIENDLY_HEALTH          = 14,      //1             // HPDeficit, Radius, RepeatMin, RepeatMax
@@ -105,7 +105,7 @@ enum SMART_EVENT
     SMART_EVENT_ACCEPTED_QUEST           = 19,      //1             // QuestID(0any)
     SMART_EVENT_REWARD_QUEST             = 20,      //1             // QuestID(0any)
     SMART_EVENT_REACHED_HOME             = 21,      //1             // NONE
-    SMART_EVENT_RECEIVE_EMOTE            = 22,      //1             // EmoteId, CooldownMin, CooldownMax, condition, val1, val2, val3
+    SMART_EVENT_RECEIVE_EMOTE            = 22,      //1             // EmoteId, CooldownMin, CooldownMax, condition, val1,val2,val3
     SMART_EVENT_HAS_AURA                 = 23,      //1             // Param1 = SpellID, Param2 = Number of Time STacked, Param3/4 RepeatMin, RepeatMax
     SMART_EVENT_TARGET_BUFFED            = 24,      //1             // Param1 = SpellID, Param2 = Number of Time STacked, Param3/4 RepeatMin, RepeatMax
     SMART_EVENT_RESET                    = 25,      //1             // Called after combat, when the creature respawn and spawn.
@@ -151,9 +151,8 @@ enum SMART_EVENT
     SMART_EVENT_GOSSIP_HELLO             = 64,      //1             // none
     SMART_EVENT_FOLLOW_COMPLETED         = 65,      //1             // none
     SMART_EVENT_DUMMY_EFFECT             = 66,      //1             // spellId, effectIndex
-    SMART_EVENT_IS_BEHIND_TARGET         = 67,      //1             // cooldownMin, CooldownMax
 
-    SMART_EVENT_END                      = 68,
+    SMART_EVENT_END                      = 67,
 };
 
 struct SmartEvent
@@ -334,12 +333,6 @@ struct SmartEvent
 
         struct
         {
-            uint32 cooldownMin;
-            uint32 cooldownMax;
-        } behindTarget;
-
-        struct
-        {
             uint32 param1;
             uint32 param2;
             uint32 param3;
@@ -370,7 +363,7 @@ enum SMART_ACTION
     SMART_ACTION_ACTIVATE_GOBJECT                   = 9,      //
     SMART_ACTION_RANDOM_EMOTE                       = 10,     // EmoteId1, EmoteId2, EmoteId3...
     SMART_ACTION_CAST                               = 11,     // SpellId, CastFlags
-    SMART_ACTION_SUMMON_CREATURE                    = 12,     // CreatureID, summonType, duration in ms, storageID, attackInvoker,
+    SMART_ACTION_SUMMON_CREATURE                    = 12,     // CreatureID,summonType, duration in ms, storageID, attackInvoker,
     SMART_ACTION_THREAT_SINGLE_PCT                  = 13,     // Threat%
     SMART_ACTION_THREAT_ALL_PCT                     = 14,     // Threat%
     SMART_ACTION_CALL_AREAEXPLOREDOREVENTHAPPENS    = 15,     // QuestID
@@ -387,7 +380,7 @@ enum SMART_ACTION
     SMART_ACTION_CALL_GROUPEVENTHAPPENS             = 26,     // QuestID
     SMART_ACTION_CALL_CASTEDCREATUREORGO            = 27,     // CreatureId, SpellId
     SMART_ACTION_REMOVEAURASFROMSPELL               = 28,     // Spellid
-    SMART_ACTION_FOLLOW                             = 29,     // Distance, Angle, EndCreatureEntry, credit, creditType (0monsterkill, 1event)
+    SMART_ACTION_FOLLOW                             = 29,     // Distance, Angle, EndCreatureEntry, credit, creditType (0monsterkill,1event)
     SMART_ACTION_RANDOM_PHASE                       = 30,     // PhaseId1, PhaseId2, PhaseId3...
     SMART_ACTION_RANDOM_PHASE_RANGE                 = 31,     // PhaseMin, PhaseMax
     SMART_ACTION_RESET_GOBJECT                      = 32,     //
@@ -398,7 +391,7 @@ enum SMART_ACTION
     SMART_ACTION_DIE                                = 37,     // No Params
     SMART_ACTION_SET_IN_COMBAT_WITH_ZONE            = 38,     // No Params
     SMART_ACTION_CALL_FOR_HELP                      = 39,     // Radius
-    SMART_ACTION_SET_SHEATH                         = 40,     // Sheath (0-unarmed, 1-melee, 2-ranged)
+    SMART_ACTION_SET_SHEATH                         = 40,     // Sheath (0-unarmed,1-melee,2-ranged)
     SMART_ACTION_FORCE_DESPAWN                      = 41,     // timer
     SMART_ACTION_SET_INVINCIBILITY_HP_LEVEL         = 42,     // MinHpValue(+pct, -flat)
     SMART_ACTION_MOUNT_TO_ENTRY_OR_MODEL            = 43,     // Creature_template entry(param1) OR ModelId (param2) (or 0 for both to unmount)
@@ -431,7 +424,7 @@ enum SMART_ACTION
     SMART_ACTION_PLAYMOVIE                          = 68,     // entry
     SMART_ACTION_MOVE_TO_POS                        = 69,     // xyz
     SMART_ACTION_RESPAWN_TARGET                     = 70,     //
-    SMART_ACTION_EQUIP                              = 71,     // entry, slotmask slot1, slot2, slot3   , only slots with mask set will be sent to client, bits are 1, 2, 4, leaving mask 0 is defaulted to mask 7 (send all), slots1-3 are only used if no entry is set
+    SMART_ACTION_EQUIP                              = 71,     // entry, slotmask slot1,slot2,slot3   ,only slots with mask set will be sent to client, bits are 1,2,4, leaving mask 0 is defaulted to mask 7 (send all), slots1-3 are only used if no entry is set
     SMART_ACTION_CLOSE_GOSSIP                       = 72,     // none
     SMART_ACTION_TRIGGER_TIMED_EVENT                = 73,     // id(>1)
     SMART_ACTION_REMOVE_TIMED_EVENT                 = 74,     // id(>1)
@@ -458,11 +451,7 @@ enum SMART_ACTION
 
     SMART_ACTION_SEND_GO_CUSTOM_ANIM                = 93,     // anim id
 
-    SMART_ACTION_SET_DYNAMIC_FLAG                   = 94,     // Flags
-    SMART_ACTION_ADD_DYNAMIC_FLAG                   = 95,     // Flags
-    SMART_ACTION_REMOVE_DYNAMIC_FLAG                = 96,     // Flags
-
-    SMART_ACTION_END                                = 97,
+    SMART_ACTION_END                                = 94,
 };
 
 struct SmartAction
@@ -907,7 +896,7 @@ struct SmartTarget
         raw.param3 = p3;
     }
     SMARTAI_TARGETS type;
-    float x, y, z, o;
+    float x,y,z,o;
     union
     {
         struct
@@ -997,16 +986,16 @@ enum eSmartAI
 
 enum SmartScriptType
 {
-    SMART_SCRIPT_TYPE_CREATURE = 0, //done
-    SMART_SCRIPT_TYPE_GAMEOBJECT = 1, //done
-    SMART_SCRIPT_TYPE_AREATRIGGER = 2, //done
-    SMART_SCRIPT_TYPE_EVENT = 3, //
-    SMART_SCRIPT_TYPE_GOSSIP = 4, //
-    SMART_SCRIPT_TYPE_QUEST = 5, //
-    SMART_SCRIPT_TYPE_SPELL = 6, //
-    SMART_SCRIPT_TYPE_TRANSPORT = 7, //
-    SMART_SCRIPT_TYPE_INSTANCE = 8, //
-    SMART_SCRIPT_TYPE_TIMED_ACTIONLIST = 9, //
+    SMART_SCRIPT_TYPE_CREATURE = 0,//done
+    SMART_SCRIPT_TYPE_GAMEOBJECT = 1,//done
+    SMART_SCRIPT_TYPE_AREATRIGGER = 2,//done
+    SMART_SCRIPT_TYPE_EVENT = 3,//
+    SMART_SCRIPT_TYPE_GOSSIP = 4,//
+    SMART_SCRIPT_TYPE_QUEST = 5,//
+    SMART_SCRIPT_TYPE_SPELL = 6,//
+    SMART_SCRIPT_TYPE_TRANSPORT = 7,//
+    SMART_SCRIPT_TYPE_INSTANCE = 8,//
+    SMART_SCRIPT_TYPE_TIMED_ACTIONLIST = 9,//
     SMART_SCRIPT_TYPE_MAX = 10
 };
 
@@ -1105,9 +1094,8 @@ const uint32 SmartAIEventMask[SMART_EVENT_END][2] =
     {SMART_EVENT_GOSSIP_SELECT,             SMART_SCRIPT_TYPE_MASK_CREATURE + SMART_SCRIPT_TYPE_MASK_GAMEOBJECT },
     {SMART_EVENT_JUST_CREATED,              SMART_SCRIPT_TYPE_MASK_CREATURE + SMART_SCRIPT_TYPE_MASK_GAMEOBJECT },
     {SMART_EVENT_GOSSIP_HELLO,              SMART_SCRIPT_TYPE_MASK_CREATURE + SMART_SCRIPT_TYPE_MASK_GAMEOBJECT },
-    {SMART_EVENT_FOLLOW_COMPLETED,          SMART_SCRIPT_TYPE_MASK_CREATURE },
+    {SMART_EVENT_FOLLOW_COMPLETED,           SMART_SCRIPT_TYPE_MASK_CREATURE },
     {SMART_EVENT_DUMMY_EFFECT,              SMART_SCRIPT_TYPE_MASK_CREATURE },
-    {SMART_EVENT_IS_BEHIND_TARGET,          SMART_SCRIPT_TYPE_MASK_CREATURE }
 
 };
 
@@ -1218,7 +1206,7 @@ class SmartAIMgr
                 return mEventMap[uint32(type)][entry];
             else
             {
-                if (entry > 0)//first search is for guid (negative), do not drop error if not found
+                if(entry > 0)//first search is for guid (negative), do not drop error if not found
                     sLog->outDebug(LOG_FILTER_DATABASE_AI, "SmartAIMgr::GetScript: Could not load Script for Entry %d ScriptType %u.", entry, uint32(type));
                 return temp;
             }
@@ -1229,8 +1217,7 @@ class SmartAIMgr
         SmartAIEventMap mEventMap[SMART_SCRIPT_TYPE_MAX];
 
         bool IsEventValid(SmartScriptHolder &e);
-        bool IsTargetValid(SmartScriptHolder const& e);
-
+        bool IsTargetValid(SmartScriptHolder e);
         /*inline bool IsTargetValid(SmartScriptHolder e, int32 target)
         {
             if (target < SMART_TARGET_NONE || target >= SMART_TARGET_END)
@@ -1240,8 +1227,7 @@ class SmartAIMgr
             }
             return true;
         }*/
-
-        bool IsMinMaxValid(SmartScriptHolder const& e, uint32 min, uint32 max)
+        inline bool IsMinMaxValid(SmartScriptHolder e, uint32 min, uint32 max)
         {
             if (max < min)
             {
@@ -1250,7 +1236,6 @@ class SmartAIMgr
             }
             return true;
         }
-
         /*inline bool IsPercentValid(SmartScriptHolder e, int32 pct)
         {
             if (pct < -100 || pct > 100)
@@ -1260,8 +1245,7 @@ class SmartAIMgr
             }
             return true;
         }*/
-
-        bool NotNULL(SmartScriptHolder const& e, uint32 data)
+        inline bool NotNULL(SmartScriptHolder e, uint32 data)
         {
             if (!data)
             {
@@ -1270,18 +1254,16 @@ class SmartAIMgr
             }
             return true;
         }
-
-        bool IsCreatureValid(SmartScriptHolder const& e, uint32 entry)
+        inline bool IsCreatureValid(SmartScriptHolder e, uint32 entry)
         {
-            if (!sObjectMgr->GetCreatureTemplate(entry))
+            if (!sCreatureStorage.LookupEntry<CreatureInfo>(entry))
             {
                 sLog->outErrorDb("SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses non-existent Creature entry %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), entry);
                 return false;
             }
             return true;
         }
-
-        bool IsQuestValid(SmartScriptHolder const& e, uint32 entry)
+        inline bool IsQuestValid(SmartScriptHolder e, uint32 entry)
         {
             if (!sObjectMgr->GetQuestTemplate(entry))
             {
@@ -1290,18 +1272,16 @@ class SmartAIMgr
             }
             return true;
         }
-
-        bool IsGameObjectValid(SmartScriptHolder const& e, uint32 entry)
+        inline bool IsGameObjectValid(SmartScriptHolder e, uint32 entry)
         {
-            if (!sObjectMgr->GetGameObjectTemplate(entry))
+            if (!sGOStorage.LookupEntry<GameObjectInfo>(uint32(entry)))
             {
                 sLog->outErrorDb("SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses non-existent GameObject entry %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), entry);
                 return false;
             }
             return true;
         }
-
-        bool IsSpellValid(SmartScriptHolder const& e, uint32 entry)
+        inline bool IsSpellValid(SmartScriptHolder e, uint32 entry)
         {
             if (!sSpellStore.LookupEntry(entry))
             {
@@ -1310,8 +1290,7 @@ class SmartAIMgr
             }
             return true;
         }
-
-        bool IsItemValid(SmartScriptHolder const& e, uint32 entry)
+        inline bool IsItemValid(SmartScriptHolder e, uint32 entry)
         {
             if (!sItemStore.LookupEntry(entry))
             {
@@ -1340,8 +1319,7 @@ class SmartAIMgr
             }
             return true;
         }*/
-
-        bool IsTextEmoteValid(SmartScriptHolder const& e, uint32 entry)
+        inline bool IsTextEmoteValid(SmartScriptHolder e, uint32 entry)
         {
             if (!sEmotesTextStore.LookupEntry(entry))
             {
@@ -1350,8 +1328,7 @@ class SmartAIMgr
             }
             return true;
         }
-
-        bool IsEmoteValid(SmartScriptHolder const& e, uint32 entry)
+        inline bool IsEmoteValid(SmartScriptHolder e, uint32 entry)
         {
             if (!sEmotesStore.LookupEntry(entry))
             {
@@ -1360,8 +1337,7 @@ class SmartAIMgr
             }
             return true;
         }
-
-        bool IsAreaTriggerValid(SmartScriptHolder const& e, uint32 entry)
+        inline bool IsAreaTriggerValid(SmartScriptHolder e, uint32 entry)
         {
             if (!sAreaTriggerStore.LookupEntry(entry))
             {
@@ -1370,8 +1346,7 @@ class SmartAIMgr
             }
             return true;
         }
-
-        bool IsSoundValid(SmartScriptHolder const& e, uint32 entry)
+        inline bool IsSoundValid(SmartScriptHolder e, uint32 entry)
         {
             if (!sSoundEntriesStore.LookupEntry(entry))
             {
@@ -1380,8 +1355,7 @@ class SmartAIMgr
             }
             return true;
         }
-
-        bool IsTextValid(SmartScriptHolder const& e, uint32 id);
+        bool IsTextValid(SmartScriptHolder e, uint32 id);
 };
 
 #define sSmartScriptMgr ACE_Singleton<SmartAIMgr, ACE_Null_Mutex>::instance()

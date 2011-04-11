@@ -15,26 +15,27 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
+#include "ScriptPCH.h"
 #include "ulduar.h"
-
-#define GAMEOBJECT_GIVE_OF_THE_OBSERVER 194821
 
 enum Spells
 {
     SPELL_ASCEND                    = 64487,
     SPELL_BERSERK                   = 47008,
-    SPELL_BIG_BANG                  = 64443,
-    H_SPELL_BIG_BANG                = 64584,
-    SPELL_COSMIC_SMASH              = 62301,
-    H_SPELL_COSMIC_SMASH            = 64598,
+    SPELL_BIG_BANG_10               = 64443,
+    SPELL_BIG_BANG_25               = 64584,
+    SPELL_COSMIC_SMASH_10           = 62301,
+    SPELL_COSMIC_SMASH_25           = 64598,
     SPELL_PHASE_PUNCH               = 64412,
-    SPELL_QUANTUM_STRIKE            = 64395,
-    H_SPELL_QUANTUM_STRIKE          = 64592,
+    SPELL_PHASE_PUNCH_PHASE         = 64417,
+    SPELL_QUANTUM_STRIKE_10         = 64395,
+    SPELL_QUANTUM_STRIKE_25         = 64592,
+    SPELL_BLACK_HOLE_DOT            = 62169,
     SPELL_BLACK_HOLE_EXPLOSION      = 64122,
-    SPELL_ARCANE_BARAGE             = 64599,
-    H_SPELL_ARCANE_BARAGE           = 64607
+    SPELL_ARCANE_BARAGE_10          = 64599,
+    SPELL_ARCANE_BARAGE_25          = 64607,
+
+    SPELL_BOSS_FINISHED             = 65184,
 };
 
 enum Creatures
@@ -50,7 +51,7 @@ enum Yells
     SAY_AGGRO                                   = -1603000,
     SAY_SLAY_1                                  = -1603001,
     SAY_SLAY_2                                  = -1603002,
-    SAY_ENGADED_FOR_FIRTS_TIME                  = -1603003,
+    SAY_ENGAGED_FOR_FIRST_TIME                  = -1603003,
     SAY_PHASE_2                                 = -1603004,
     SAY_SUMMON_COLLAPSING_STAR                  = -1603005,
     SAY_DEATH_1                                 = -1603006,
@@ -69,6 +70,18 @@ enum Yells
     SAY_SUMMON_3                                = -1603019,
 };
 
+enum Events
+{
+    EVENT_NONE,
+    EVENT_ASCEND,
+    EVENT_BERSERK,
+    EVENT_BIGBANG,
+    EVENT_COSMICSMASH,
+    EVENT_PHASEPUNCH,
+    EVENT_QUANTUMSTRIKE,
+    EVENT_COLLAPSINGSTAR,
+};
+
 class boss_algalon : public CreatureScript
 {
 public:
@@ -76,42 +89,40 @@ public:
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return GetUlduarAI<boss_algalonAI>(pCreature);
+        return new boss_algalonAI(pCreature);
     }
 
-    struct boss_algalonAI : public ScriptedAI
+    struct boss_algalonAI : public BossAI
     {
-        boss_algalonAI(Creature *c) : ScriptedAI(c)
+        boss_algalonAI(Creature* c) : BossAI(c, TYPE_ALGALON)
         {
-            pInstance = c->GetInstanceScript();
-            Summon = false; // not in reset. intro speech done only once.
+            summon = false;
         }
-
-        InstanceScript* pInstance;
 
         std::list<uint64> m_lCollapsingStarGUIDList;
 
-        uint32 Phase;
-        uint32 Ascend_Timer;
-        uint32 Berserk_Timer;
-        uint32 BigBang_Timer;
-        uint32 CosmicSmash_Timer;
-        uint32 PhasePunch_Timer;
-        uint32 QuantumStrike_Timer;
-        uint32 CollapsingStar_Timer;
-        uint32 uiPhase_timer;
-        uint32 uiStep;
+        uint32 phase;
+        uint32 stepTimer;
+        uint32 step;
+        bool enrage;
+        bool summon;
 
-        uint64 BlackHoleGUID;
+        void Reset()
+        {
+            _Reset();
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
-        bool Enrage;
-        bool Summon;
+            phase = 1;
+            stepTimer = 0;
+            enrage = false;
+        }
 
         void EnterCombat(Unit* who)
         {
-            if (Summon)
+            _EnterCombat();
+
+            if (summon)
             {
-                DoScriptText(SAY_AGGRO, me);
                 me->InterruptSpell(CURRENT_CHANNELED_SPELL);
                 DoZoneInCombat(who->ToCreature());
             }
@@ -119,45 +130,35 @@ public:
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->SetReactState(REACT_PASSIVE);
-                uiStep = 1;
+                step = 1;
             }
 
-            if (pInstance)
-                pInstance->SetData(BOSS_ALGALON, IN_PROGRESS);
+            //events.ScheduleEvent(EVENT_ASCEND, 8*MINUTE*IN_MILLISECONDS);
+            //events.ScheduleEvent(EVENT_BERSERK, 6*MINUTE*IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_BIGBANG, 90*IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_PHASEPUNCH, 15*IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_QUANTUMSTRIKE, urand(4*IN_MILLISECONDS, 14*IN_MILLISECONDS));
+            events.ScheduleEvent(EVENT_COSMICSMASH, 25*IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_COLLAPSINGSTAR, urand(15*IN_MILLISECONDS, 20*IN_MILLISECONDS));
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void FinishEncounter()
+        {
+            instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_BOSS_FINISHED);
+        }
+
+        void KilledUnit(Unit * /*victim*/)
         {
             DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
         }
 
-        void Reset()
+        void JumpToNextStep(uint32 timer)
         {
-            Phase = 1;
-
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            if (pInstance)
-                pInstance->SetData(BOSS_ALGALON, NOT_STARTED);
-
-            BlackHoleGUID = 0;
-
-            uiPhase_timer = 0;
-            Ascend_Timer = 480000; //8 minutes
-            QuantumStrike_Timer = 4000 + rand()%10000;
-            Berserk_Timer = 360000; //6 minutes
-            CollapsingStar_Timer = urand(15000, 20000); //Spawns between 15 to 20 seconds
-            BigBang_Timer = 90000;
-            PhasePunch_Timer = 8000;
-            CosmicSmash_Timer = urand(30000, 60000);
-            Enrage = false;
+            stepTimer = timer;
+            ++step;
         }
 
-        void JumpToNextStep(uint32 uiTimer)
-        {
-            uiPhase_timer = uiTimer;
-            ++uiStep;
-        }
-
+        /*
         void DespawnCollapsingStar()
         {
             if (m_lCollapsingStarGUIDList.empty())
@@ -173,7 +174,6 @@ public:
             }
             m_lCollapsingStarGUIDList.clear();
         }
-
         void JustSummoned(Creature* pSummoned)
         {
             if (pSummoned->GetEntry() == CREATURE_COLLAPSING_STAR)
@@ -184,29 +184,39 @@ public:
                 m_lCollapsingStarGUIDList.push_back(pSummoned->GetGUID());
             }
         }
-
         void SummonCollapsingStar(Unit* target)
         {
             DoScriptText(SAY_SUMMON_COLLAPSING_STAR, me);
-            me->SummonCreature(CREATURE_COLLAPSING_STAR, target->GetPositionX()+15.0f, target->GetPositionY()+15.0f, target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 100000);
-            me->SummonCreature(CREATURE_BLACK_HOLE, target->GetPositionX()+15.0f, target->GetPositionY()+15.0f, target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 27000);
+            me->SummonCreature(CREATURE_COLLAPSING_STAR,target->GetPositionX()+15.0f,target->GetPositionY()+15.0f,target->GetPositionZ(),0, TEMPSUMMON_TIMED_DESPAWN, 100000);
+            //me->SummonCreature(CREATURE_BLACK_HOLE,target->GetPositionX()+15.0f,target->GetPositionY()+15.0f,target->GetPositionZ(),0, TEMPSUMMON_TIMED_DESPAWN, 27000);
+        }*/
+
+        void SpellHitTarget(Unit* target, const SpellEntry* spell)
+        {
+            if (spell->Id == SPELL_PHASE_PUNCH)
+                if (Aura* phasePunch = target->GetAura(SPELL_PHASE_PUNCH))
+                    if (phasePunch->GetStackAmount() > 4)
+                    {
+                        target->CastSpell(target, SPELL_PHASE_PUNCH_PHASE, true);
+                        target->CastSpell(target, SPELL_BLACK_HOLE_DOT, true);
+                        target->RemoveAurasDueToSpell(SPELL_PHASE_PUNCH);
+                    }
         }
 
         void UpdateAI(const uint32 diff)
         {
-            //Return since we have no target
             if (!UpdateVictim())
                 return;
 
-            if (Phase == 1 && HealthBelowPct(20))
+            if (phase == 1 && HealthBelowPct(20))
             {
-                Phase = 2;
+                phase = 2;
                 DoScriptText(SAY_PHASE_2, me);
             }
 
             if (HealthBelowPct(2))
             {
-                me->SummonGameObject(GAMEOBJECT_GIVE_OF_THE_OBSERVER, 1634.258667f, -295.101166f, 417.321381f, 0, 0, 0, 0, 0, 0);
+                me->SummonGameObject(GO_GIFT_OF_THE_OBSERVER, 1634.258667f, -295.101166f,417.321381f,0,0,0,0,0,0);
 
                 // All of them. or random?
                 DoScriptText(SAY_DEATH_1, me);
@@ -216,115 +226,106 @@ public:
                 DoScriptText(SAY_DEATH_5, me);
 
                 me->DisappearAndDie();
-
-                if (pInstance)
-                    pInstance->SetData(BOSS_ALGALON, DONE);
+                _JustDied();
 
                 return;
             }
 
-            if (Phase == 1)
+            if (phase == 1)
             {
-                if (!Summon)
+                if (!summon)
                 {
-                    if (uiPhase_timer <= diff)
+                    if (stepTimer <= diff)
                     {
-                        switch(uiStep)
+                        switch (step)
                         {
                             case 1:
                                 DoScriptText(SAY_SUMMON_1, me);
-                                JumpToNextStep(3000);
+                                JumpToNextStep(7500);
                                 break;
                             case 2:
                                 DoScriptText(SAY_SUMMON_2, me);
-                                JumpToNextStep(3000);
+                                JumpToNextStep(6000);
                                 break;
                             case 3:
                                 DoScriptText(SAY_SUMMON_3, me);
-                                JumpToNextStep(3000);
+                                JumpToNextStep(11000);
                                 break;
                             case 4:
-                                DoScriptText(SAY_ENGADED_FOR_FIRTS_TIME, me);
-                                JumpToNextStep(3000);
+                                DoScriptText(SAY_ENGAGED_FOR_FIRST_TIME, me);
+                                JumpToNextStep(11000);
                                 break;
                             case 5:
+                                DoScriptText(SAY_AGGRO, me);
+                                JumpToNextStep(7000);
+                                break;
+                            case 6:
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                                 me->SetReactState(REACT_AGGRESSIVE);
-                                Summon = true;
+                                summon = true;
                                 break;
                         }
-                    } else uiPhase_timer -= diff;
-
+                    } else stepTimer -= diff;
                     return;
                 }
 
-                if (QuantumStrike_Timer <= diff)
+                _DoAggroPulse(diff);
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STAT_CASTING))
+                    return;
+
+                while (uint32 eventId = events.ExecuteEvent())
                 {
-                    DoCast(me->getVictim(), RAID_MODE(SPELL_QUANTUM_STRIKE, H_SPELL_QUANTUM_STRIKE), true);
-
-                    QuantumStrike_Timer = urand(4000, 14000);
-                } else QuantumStrike_Timer -= diff;
-
-                if (BigBang_Timer <= diff)
-                {
-                    DoScriptText(RAND(SAY_BIG_BANG_1, SAY_BIG_BANG_2), me);
-                    DoCast(me->getVictim(), RAID_MODE(SPELL_BIG_BANG, H_SPELL_BIG_BANG), true);
-
-                    BigBang_Timer = 90000;
-                } else BigBang_Timer -= diff;
-
-                if (Ascend_Timer <= diff)
-                {
-                    DoCast(me->getVictim(), SPELL_ASCEND, true);
-
-                    Ascend_Timer = 480000;
-                } else Ascend_Timer -= diff;
-
-                if (PhasePunch_Timer <= diff)
-                {
-                    DoCast(me->getVictim(), SPELL_PHASE_PUNCH, true);
-
-                    PhasePunch_Timer = 8000;
-                } else PhasePunch_Timer -= diff;
-
-                if (CosmicSmash_Timer <= diff)
-                {
-                    DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0), RAID_MODE(SPELL_COSMIC_SMASH, H_SPELL_COSMIC_SMASH), true);
-
-                    CosmicSmash_Timer = urand(30000, 60000);
-                } else CosmicSmash_Timer -= diff;
-
-                if (Berserk_Timer <= diff)
-                {
-                    DoScriptText(SAY_BERSERK, me);
-                    DoCast(me->getVictim(), SPELL_BERSERK, true);
-
-                    Berserk_Timer = 360000;
-                } else Berserk_Timer -= diff;
+                    switch (eventId)
+                    {
+                        case EVENT_BIGBANG:
+                            DoScriptText(RAND(SAY_BIG_BANG_1, SAY_BIG_BANG_2), me);
+                            DoCast(me->getVictim(), RAID_MODE(SPELL_BIG_BANG_10, SPELL_BIG_BANG_25));
+                            events.ScheduleEvent(EVENT_BIGBANG, 90*IN_MILLISECONDS);
+                            break;
+                        case EVENT_PHASEPUNCH:
+                            DoCast(me->getVictim(), SPELL_PHASE_PUNCH, true);
+                            events.ScheduleEvent(EVENT_PHASEPUNCH, 15*IN_MILLISECONDS);
+                            break;
+                        case EVENT_QUANTUMSTRIKE:
+                            DoCast(me->getVictim(), RAID_MODE(SPELL_QUANTUM_STRIKE_10, SPELL_QUANTUM_STRIKE_25));
+                            events.ScheduleEvent(EVENT_QUANTUMSTRIKE, urand(4*IN_MILLISECONDS, 14*IN_MILLISECONDS));
+                            break;
+                        case EVENT_COSMICSMASH:
+                            DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0), RAID_MODE(SPELL_COSMIC_SMASH_10, SPELL_COSMIC_SMASH_25));
+                            events.ScheduleEvent(EVENT_COSMICSMASH, 25*IN_MILLISECONDS);
+                            break;
+                        case EVENT_COLLAPSINGSTAR:
+                            //SummonCollapsingStar(Unit* target)
+                            events.ScheduleEvent(EVENT_COLLAPSINGSTAR, urand(15*IN_MILLISECONDS, 20*IN_MILLISECONDS));
+                            break;
+                        default:
+                            break;
+                    }
+                }   
 
                 DoMeleeAttackIfReady();
-
                 EnterEvadeIfOutOfCombatArea(diff);
             }
 
-            if (Phase == 2)
+            if (phase == 2)
             {
-                if (Enrage)
+                if (enrage)
                 {
-                    if (Ascend_Timer <= diff)
-                    {
+                    //if (Ascend_Timer <= diff)
+                    //{
                         DoCast(me, SPELL_ASCEND);
                         DoScriptText(SAY_BERSERK, me);
-                        Ascend_Timer = urand(360000, 365000);
-                        Enrage = false;
-                    } else Ascend_Timer -= diff;
+                        //Ascend_Timer = urand(360000,365000);
+                        enrage = true;
+                    //} else Ascend_Timer -= diff;
                 }
             }
 
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 //Collapsing Star
@@ -366,11 +367,30 @@ public:
             } else BlackHoleExplosion_Timer -= diff;
         }
     };
-
 };
 
-void AddSC_boss_Algalon()
+class go_planetarium_access : public GameObjectScript
+{
+public:
+    go_planetarium_access() : GameObjectScript("go_planetarium_access") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        InstanceScript* pInstance = go->GetInstanceScript();
+
+        if (player->HasItemCount(45796, 1) || player->HasItemCount(45798, 1))
+        {
+            pInstance->SetBossState(TYPE_ALGALON, SPECIAL);
+            go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+            go->SetGoState(GO_STATE_ACTIVE);
+        }
+        return true;
+    }
+};
+
+void AddSC_boss_algalon()
 {
     new boss_algalon();
     new mob_collapsing_star();
+    new go_planetarium_access();
 }

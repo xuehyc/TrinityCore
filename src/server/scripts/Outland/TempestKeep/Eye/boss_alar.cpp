@@ -28,7 +28,7 @@ EndScriptData */
 
 enum eSpells
 {
-    SPELL_FLAME_BUFFET           = 34121, // Flame Buffet - every 1, 5 secs in phase 1 if there is no victim in melee range and after Dive Bomb in phase 2 with same conditions
+    SPELL_FLAME_BUFFET           = 34121, // Flame Buffet - every 1,5 secs in phase 1 if there is no victim in melee range and after Dive Bomb in phase 2 with same conditions
     SPELL_FLAME_QUILLS           = 34229, // Randomly after changing position in phase after watching tons of movies, set probability 20%
     SPELL_REBIRTH                = 34342, // Rebirth - beginning of second phase(after losing all health in phase 1)
     SPELL_REBIRTH_2              = 35369, // Rebirth(another, without healing to full HP) - after Dive Bomb in phase 2
@@ -135,7 +135,7 @@ class boss_alar : public CreatureScript
                 me->setActive(false);
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit * /*who*/)
             {
                 if (pInstance)
                     pInstance->SetData(DATA_ALAREVENT, IN_PROGRESS);
@@ -145,7 +145,7 @@ class boss_alar : public CreatureScript
                 me->setActive(true);
             }
 
-            void JustDied(Unit* /*victim*/)
+            void JustDied(Unit * /*victim*/)
             {
                 if (pInstance)
                     pInstance->SetData(DATA_ALAREVENT, DONE);
@@ -158,7 +158,7 @@ class boss_alar : public CreatureScript
                         summon->AI()->AttackStart(pTarget);
             }
 
-            void MoveInLineOfSight(Unit* /*who*/) {}
+            void MoveInLineOfSight(Unit * /*who*/) {}
 
             void AttackStart(Unit* who)
             {
@@ -291,7 +291,7 @@ class boss_alar : public CreatureScript
                                     if (me->IsWithinDist3d(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 5.0f))
                                         dist = 5.0f;
                                     WaitTimer = 1000 + uint32(floor(dist / 80 * 1000.0f));
-                                    me->GetMap()->CreatureRelocation(me, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0.0f);
+                                    me->GetMap()->CreatureRelocation(me, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(),0.0f);
                                     me->StopMoving();
                                     WaitEvent = WE_LAND;
                                 }
@@ -343,7 +343,7 @@ class boss_alar : public CreatureScript
                         }
                         else
                         {
-                            if (urand(0, 4)) // next platform
+                            if (urand(0,4)) // next platform
                             {
                                 DoSpawnCreature(CREATURE_EMBER_OF_ALAR, 0, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5000);
                                 if (cur_wp == 3)
@@ -442,6 +442,7 @@ class boss_alar : public CreatureScript
                             me->AI()->AttackStart(pTarget);
                         else
                         {
+                    if(Phase1)
                             DoCast(me, SPELL_FLAME_BUFFET, true);
                             me->setAttackTimer(BASE_ATTACK, 1500);
                         }
@@ -481,7 +482,7 @@ class mob_ember_of_alar : public CreatureScript
             {
                 toDie = false;
             }
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit * /*who*/)
             {
                 DoZoneInCombat();
             }
@@ -521,7 +522,7 @@ class mob_ember_of_alar : public CreatureScript
                 if (toDie)
                 {
                     me->DealDamage(me, me->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    //me->SetVisibility(VISIBILITY_OFF);
+                    //me->SetVisible(false);
                 }
 
                 DoMeleeAttackIfReady();
@@ -548,7 +549,7 @@ class mob_flame_patch_alar : public CreatureScript
         {
             mob_flame_patch_alarAI(Creature* pCreature) : ScriptedAI(pCreature) {}
             void Reset() {}
-            void EnterCombat(Unit* /*who*/) {}
+            void EnterCombat(Unit * /*who*/) {}
             void AttackStart(Unit* /*who*/) {}
             void MoveInLineOfSight(Unit* /*who*/) {}
             void UpdateAI(const uint32 /*diff*/) {}

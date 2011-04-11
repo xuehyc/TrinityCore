@@ -265,7 +265,7 @@ public:
             me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
         }
 
-        void SpellHit(Unit* /*caster*/, const SpellEntry *spell)
+        void SpellHit(Unit * /*caster*/, const SpellEntry *spell)
         {
             if (spell->Id == SPELL_FLARE || spell->Id == SPELL_FOLLY)
             {
@@ -297,7 +297,7 @@ public:
 
         void ReceiveEmote(Player* /*pPlayer*/, uint32 emote)
         {
-            if (emote == TEXT_EMOTE_SALUTE)
+            if (emote == TEXTEMOTE_SALUTE)
             {
                 if (FlareCount >= 2)
                 {
@@ -381,7 +381,7 @@ public:
             BigWill = 0;
         }
 
-        void EnterCombat(Unit* /*who*/) { }
+        void EnterCombat(Unit * /*who*/) { }
 
         void MoveInLineOfSight(Unit *who)
         {
@@ -394,7 +394,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit* /*victim*/) { }
+        void KilledUnit(Unit * /*victim*/) { }
 
         void UpdateAI(const uint32 diff)
         {
@@ -405,7 +405,10 @@ public:
                     pWarrior = Unit::GetPlayer(*me, PlayerGUID);
 
                 if (!pWarrior)
+                {
+                    EnterEvadeMode();
                     return;
+                }
 
                 if (!pWarrior->isAlive() && pWarrior->GetQuestStatus(1719) == QUEST_STATUS_INCOMPLETE) {
                     EventInProgress = false;
@@ -446,7 +449,7 @@ public:
 
                 if (!EventGrate && EventInProgress)
                 {
-                    float x, y, z;
+                    float x,y,z;
                     pWarrior->GetPosition(x, y, z);
 
                     if (x >= -1684 && x <= -1674 && y >= -4334 && y <= -4324) {
@@ -455,7 +458,7 @@ public:
 
                         for (uint8 i = 0; i < 6; ++i)
                         {
-                            Creature* pCreature = me->SummonCreature(NPC_AFFRAY_CHALLENGER, AffrayChallengerLoc[i][0], AffrayChallengerLoc[i][1], AffrayChallengerLoc[i][2], AffrayChallengerLoc[i][3], TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 600000);
+                            Creature* pCreature = me->SummonCreature(NPC_AFFRAY_CHALLENGER, AffrayChallengerLoc[i][0], AffrayChallengerLoc[i][1], AffrayChallengerLoc[i][2], AffrayChallengerLoc[i][3], TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 300000);
                             if (!pCreature)
                                 continue;
                             pCreature->setFaction(35);

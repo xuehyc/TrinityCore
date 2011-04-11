@@ -54,7 +54,7 @@ public:
             CorruptForces_Timer = 30000;
         }
 
-        void EnterCombat(Unit* /*who*/) { }
+        void EnterCombat(Unit * /*who*/) { }
 
         void JustDied(Unit* /*Killer*/)
         {
@@ -70,7 +70,7 @@ public:
             if (Wrath_Timer <= diff)
             {
                 Unit *pTarget = NULL;
-                pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                pTarget = SelectTarget(SELECT_TARGET_RANDOM,0);
                 if (pTarget)
                     DoCast(pTarget, SPELL_WRATH);
                 Wrath_Timer = 8000;

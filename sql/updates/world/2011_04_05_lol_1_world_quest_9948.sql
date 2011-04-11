@@ -1,0 +1,42 @@
+-- Fix for Quest 9948 Find the Survivors
+UPDATE `quest_template` SET `ReqCreatureOrGOId1`=-182484 WHERE `entry`=9948;
+
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22915;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22916;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22917;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22918;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22919;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22920;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22921;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22922;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22923;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22924;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22925;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22926;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22927;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22928;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22929;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22930;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22931;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22932;
+UPDATE `gameobject` SET `id`=182484 WHERE `guid`=22933;
+
+DELETE FROM `gameobject_template` WHERE `entry`=182486;
+DELETE FROM `gameobject_template` WHERE `entry`=182487;
+DELETE FROM `gameobject_template` WHERE `entry`=182488;
+DELETE FROM `gameobject_template` WHERE `entry`=182489;
+DELETE FROM `gameobject_template` WHERE `entry`=182490;
+DELETE FROM `gameobject_template` WHERE `entry`=182491;
+DELETE FROM `gameobject_template` WHERE `entry`=182492;
+DELETE FROM `gameobject_template` WHERE `entry`=182493;
+DELETE FROM `gameobject_template` WHERE `entry`=182494;
+DELETE FROM `gameobject_template` WHERE `entry`=182495;
+DELETE FROM `gameobject_template` WHERE `entry`=182496;
+DELETE FROM `gameobject_template` WHERE `entry`=182497;
+DELETE FROM `gameobject_template` WHERE `entry`=182498;
+DELETE FROM `gameobject_template` WHERE `entry`=182499;
+DELETE FROM `gameobject_template` WHERE `entry`=182500;
+DELETE FROM `gameobject_template` WHERE `entry`=182501;
+DELETE FROM `gameobject_template` WHERE `entry`=182502;
+DELETE FROM `gameobject_template` WHERE `entry`=182503;
+DELETE FROM `gameobject_template` WHERE `entry`=182504;

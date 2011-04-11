@@ -96,7 +96,7 @@ public:
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(7785) == QUEST_STATUS_NONE &&
-            (pPlayer->HasItemCount(18563, 1, false) || pPlayer->HasItemCount(18564, 1, false)))
+            (pPlayer->HasItemCount(18563,1,false) || pPlayer->HasItemCount(18564,1,false)))
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_DEMITRIAN1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
 
         pPlayer->SEND_GOSSIP_MENU(6812, pCreature->GetGUID());
@@ -287,7 +287,7 @@ npc_anachronos_the_ancient : Creature that controls the event.
 npc_anachronos_quest_trigger: controls the spawning of the BG War mobs.
 go_crystalline_tear : GameObject that begins the event and hands out quest
 TO DO: get correct spell IDs and timings for spells cast upon dragon transformations
-TO DO: Dragons should use the HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF) after transformation, but for some unknown reason it doesnt work.
+TO DO: Dragons should use the HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF) after transformation,but for some unknown reason it doesnt work.
 EndContentData */
 
 #define QUEST_A_PAWN_ON_THE_ETERNAL_BOARD 8519
@@ -310,142 +310,142 @@ static QuestCinematic EventAnim[]=
     {ARYGOS_EMOTE_1, 2, 2000},
     {CAELESTRASZ_SAY_1, 4, 8000},
     {MERITHRA_SAY_2, 3, 6000},
-    {0, 3, 2000},
+    {NULL,3,2000},
     {MERITHRA_YELL_1, 3, 2500},
-    {0, 3, 3000}, //Morph
-    {0, 3, 4000}, //EmoteLiftoff
-    {0, 3, 4000}, // spell
-    {0, 3, 1250}, //fly
-    {0, 3, 250}, //remove flags
+    {NULL, 3, 3000},//Morph
+    {NULL,3,4000},//EmoteLiftoff
+    {NULL, 3, 4000},// spell
+    {NULL, 3, 1250},//fly
+    {NULL, 3, 250},//remove flags
     {ARYGOS_SAY_1, 2, 3000},
-    {0, 3, 2000},
+    {NULL,3,2000},
     {ARYGOS_YELL_1, 2, 3000},
-    {0, 3, 3000}, //Morph
-    {0, 3, 4000}, //EmoteLiftoff
-    {0, 3, 4000}, // spell
-    {0, 3, 1000}, //fly
-    {0, 3, 1000}, //remove flags
+    {NULL, 3, 3000},//Morph
+    {NULL,3,4000},//EmoteLiftoff
+    {NULL, 3, 4000},// spell
+    {NULL, 3, 1000},//fly
+    {NULL, 3, 1000},//remove flags
     {CAELESTRASZ_SAY_2, 4, 5000},
-    {0, 3, 3000},
+    {NULL,3,3000},
     {CAELESTRASZ_YELL_1, 4, 3000},
-    {0, 3, 3000}, //Morph
-    {0, 3, 4000}, //EmoteLiftoff
-    {0, 3, 2500}, // spell
+    {NULL, 3, 3000},//Morph
+    {NULL,3,4000},//EmoteLiftoff
+    {NULL, 3, 2500},// spell
     {ANACHRONOS_SAY_2, 0, 2000},
-    {0, 3, 250}, //fly
-    {0, 3, 25}, //remove flags
+    {NULL, 3, 250},//fly
+    {NULL, 3, 25},//remove flags
     {FANDRAL_SAY_2, 1, 3000},
-    {ANACHRONOS_SAY_3, 0, 10000}, //Both run through the armies
-    {0, 3, 2000}, // Sands will stop
-    {0, 3, 8000}, // Summon Gate
+    {ANACHRONOS_SAY_3, 0, 10000},//Both run through the armies
+    {NULL,3,2000},// Sands will stop
+    {NULL,3,8000},// Summon Gate
     {ANACHRONOS_SAY_4, 0, 4000},
-    {0, 0, 2000}, //spell 1-> Arcane cosmetic (Mobs freeze)
-    {0, 0, 5000}, //Spell 2-> Arcane long cosmetic (barrier appears) (Barrier -> Glyphs)
-    {0, 0, 7000}, //BarrieR
-    {0, 0, 4000}, //Glyphs
+    {NULL, 0, 2000},//spell 1-> Arcane cosmetic (Mobs freeze)
+    {NULL, 0, 5000}, //Spell 2-> Arcane long cosmetic (barrier appears) (Barrier -> Glyphs)
+    {NULL, 0, 7000},//BarrieR
+    {NULL, 0, 4000},//Glyphs
     {ANACHRONOS_SAY_5, 0, 2000},
-    {0, 0, 4000}, // Roots
-    {FANDRAL_SAY_3, 1, 3000}, //Root Text
-    {FANDRAL_EMOTE_1, 1, 3000}, //falls knee
+    {NULL, 0, 4000},// Roots
+    {FANDRAL_SAY_3, 1, 3000},//Root Text
+    {FANDRAL_EMOTE_1, 1, 3000},//falls knee
     {ANACHRONOS_SAY_6, 0, 3000},
     {ANACHRONOS_SAY_7, 0, 3000},
     {ANACHRONOS_SAY_8, 0, 8000},
-    {ANACHRONOS_EMOTE_1, 0, 1000}, //Give Scepter
+    {ANACHRONOS_EMOTE_1, 0, 1000},//Give Scepter
     {FANDRAL_SAY_4, 1, 3000},
-    {FANDRAL_SAY_5, 1, 3000}, //->Equip hammer~Scepter, throw it at door
-    {FANDRAL_EMOTE_2, 1, 3000}, //Throw hammer at door.
+    {FANDRAL_SAY_5, 1, 3000},//->Equip hammer~Scepter, throw it at door
+    {FANDRAL_EMOTE_2, 1, 3000},//Throw hammer at door.
     {ANACHRONOS_SAY_9, 0, 3000},
     {FANDRAL_SAY_6, 1, 3000}, //fandral goes away
     {ANACHRONOS_EMOTE_2, 0, 3000},
     {ANACHRONOS_EMOTE_3, 0, 3000},
-    {0, 0, 2000},
-    {0, 0, 2000},
-    {0, 0, 4000},
+    {NULL, 0, 2000},
+    {NULL, 0, 2000},
+    {NULL, 0, 4000},
     {ANACHRONOS_SAY_10, 0, 3000},
-    {0, 0, 2000},
-    {0, 0, 3000},
-    {0, 0, 15000},
-    {0, 0, 5000},
-    {0, 0, 3500},
-    {0, 0, 5000},
-    {0, 0, 3500},
-    {0, 0, 5000},
-    {0, 0, 0}
+    {NULL, 0, 2000},
+    {NULL, 0, 3000},
+    {NULL, 0, 15000},
+    {NULL, 0, 5000},
+    {NULL, 0, 3500},
+    {NULL, 0, 5000},
+    {NULL, 0, 3500},
+    {NULL, 0, 5000},
+    {NULL, 0, NULL}
 };
 
 //Cordinates for Spawns
 static const Position SpawnLocation[]=
 {
-    {-8085.0f, 1528.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8080.0f, 1526.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8085.0f, 1524.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8080.0f, 1522.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8085.0f, 1520.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
+    {-8085.0f, 1528.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8080.0f, 1526.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8085.0f, 1524.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8080.0f, 1522.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8085.0f, 1520.0f, 2.61f, 3.141592f},//Kaldorei Infantry
 
-    {-8085.0f, 1524.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8080.0f, 1522.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8085.0f, 1520.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8080.0f, 1518.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8085.0f, 1516.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
+    {-8085.0f, 1524.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8080.0f, 1522.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8085.0f, 1520.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8080.0f, 1518.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8085.0f, 1516.0f, 2.61f, 3.141592f},//Kaldorei Infantry
 
-    {-8085.0f, 1518.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8080.0f, 1516.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8080.0f, 1520.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8080.0f, 1424.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8085.0f, 1422.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
+    {-8085.0f, 1518.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8080.0f, 1516.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8080.0f, 1520.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8080.0f, 1424.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8085.0f, 1422.0f, 2.61f, 3.141592f},//Kaldorei Infantry
     // 2 waves of warriors
-    {-8082.0f, 1528.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8078.0f, 1525.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8082.0f, 1524.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8078.0f, 1526.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8082.0f, 1527.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
+    {-8082.0f, 1528.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8078.0f, 1525.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8082.0f, 1524.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8078.0f, 1526.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8082.0f, 1527.0f, 2.61f, 3.141592f},//Kaldorei Infantry
 
-    {-8082.0f, 1524.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8078.0f, 1522.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8082.0f, 1520.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8078.0f, 1518.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8082.0f, 1516.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
+    {-8082.0f, 1524.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8078.0f, 1522.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8082.0f, 1520.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8078.0f, 1518.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8082.0f, 1516.0f, 2.61f, 3.141592f},//Kaldorei Infantry
 
-    {-8082.0f, 1523.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8078.0f, 1521.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8082.0f, 1528.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8078.0f, 1519.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8082.0f, 1526.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
+    {-8082.0f, 1523.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8078.0f, 1521.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8082.0f, 1528.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8078.0f, 1519.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8082.0f, 1526.0f, 2.61f, 3.141592f},//Kaldorei Infantry
 
-    {-8082.0f, 1524.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8078.0f, 1522.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8082.0f, 1520.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8078.0f, 1518.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
-    {-8082.0f, 1516.0f, 2.61f, 3.141592f}, //Kaldorei Infantry
+    {-8082.0f, 1524.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8078.0f, 1522.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8082.0f, 1520.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8078.0f, 1518.0f, 2.61f, 3.141592f},//Kaldorei Infantry
+    {-8082.0f, 1516.0f, 2.61f, 3.141592f},//Kaldorei Infantry
 
-    {-8088.0f, 1510.0f, 2.61f, 0.0f}, //Anubisath Conqueror
-    {-8084.0f, 1520.0f, 2.61f, 0.0f}, //Anubisath Conqueror
-    {-8088.0f, 1530.0f, 2.61f, 0.0f}, //Anubisath Conqueror
+    {-8088.0f, 1510.0f, 2.61f, 0.0f},//Anubisath Conqueror
+    {-8084.0f, 1520.0f, 2.61f, 0.0f},//Anubisath Conqueror
+    {-8088.0f, 1530.0f, 2.61f, 0.0f},//Anubisath Conqueror
 
-    {-8080.0f, 1513.0f, 2.61f, 0.0f}, //Qiraj Wasp
-    {-8082.0f, 1523.0f, 2.61f, 0.0f}, //Qiraj Wasp
-    {-8085.0f, 1518.0f, 2.61f, 0.0f}, //Qiraj Wasp
-    {-8082.0f, 1516.0f, 2.61f, 0.0f}, //Qiraj Wasp
-    {-8085.0f, 1520.0f, 2.61f, 0.0f}, //Qiraj Wasp
-    {-8080.0f, 1528.0f, 2.61f, 0.0f}, //Qiraj Wasp
+    {-8080.0f, 1513.0f, 2.61f, 0.0f},//Qiraj Wasp
+    {-8082.0f, 1523.0f, 2.61f, 0.0f},//Qiraj Wasp
+    {-8085.0f, 1518.0f, 2.61f, 0.0f},//Qiraj Wasp
+    {-8082.0f, 1516.0f, 2.61f, 0.0f},//Qiraj Wasp
+    {-8085.0f, 1520.0f, 2.61f, 0.0f},//Qiraj Wasp
+    {-8080.0f, 1528.0f, 2.61f, 0.0f},//Qiraj Wasp
 
-    {-8082.0f, 1513.0f, 2.61f, 0.0f}, //Qiraj Wasp
-    {-8079.0f, 1523.0f, 2.61f, 0.0f}, //Qiraj Wasp
-    {-8080.0f, 1531.0f, 2.61f, 0.0f}, //Qiraj Wasp
-    {-8079.0f, 1516.0f, 2.61f, 0.0f}, //Qiraj Wasp
-    {-8082.0f, 1520.0f, 2.61f, 0.0f}, //Qiraj Wasp
-    {-8080.0f, 1518.0f, 2.61f, 0.0f}, //Qiraj Wasp
+    {-8082.0f, 1513.0f, 2.61f, 0.0f},//Qiraj Wasp
+    {-8079.0f, 1523.0f, 2.61f, 0.0f},//Qiraj Wasp
+    {-8080.0f, 1531.0f, 2.61f, 0.0f},//Qiraj Wasp
+    {-8079.0f, 1516.0f, 2.61f, 0.0f},//Qiraj Wasp
+    {-8082.0f, 1520.0f, 2.61f, 0.0f},//Qiraj Wasp
+    {-8080.0f, 1518.0f, 2.61f, 0.0f},//Qiraj Wasp
 
-    {-8081.0f, 1514.0f, 2.61f, 0.0f}, //Qiraj Tank
-    {-8081.0f, 1520.0f, 2.61f, 0.0f}, //Qiraj Tank
-    {-8081.0f, 1526.0f, 2.61f, 0.0f}, //Qiraj Tank
-    {-8081.0f, 1512.0f, 2.61f, 0.0f}, //Qiraj Tank
-    {-8082.0f, 1520.0f, 2.61f, 0.0f}, //Qiraj Tank
-    {-8081.0f, 1528.0f, 2.61f, 0.0f}, //Qiraj Tank
+    {-8081.0f, 1514.0f, 2.61f, 0.0f},//Qiraj Tank
+    {-8081.0f, 1520.0f, 2.61f, 0.0f},//Qiraj Tank
+    {-8081.0f, 1526.0f, 2.61f, 0.0f},//Qiraj Tank
+    {-8081.0f, 1512.0f, 2.61f, 0.0f},//Qiraj Tank
+    {-8082.0f, 1520.0f, 2.61f, 0.0f},//Qiraj Tank
+    {-8081.0f, 1528.0f, 2.61f, 0.0f},//Qiraj Tank
 
-    {-8082.0f, 1513.0f, 2.61f, 3.141592f}, //Anubisath Conqueror
-    {-8082.0f, 1520.0f, 2.61f, 3.141592f}, //Anubisath Conqueror
-    {-8082.0f, 1527.0f, 2.61f, 3.141592f}, //Anubisath Conqueror
+    {-8082.0f, 1513.0f, 2.61f, 3.141592f},//Anubisath Conqueror
+    {-8082.0f, 1520.0f, 2.61f, 3.141592f},//Anubisath Conqueror
+    {-8082.0f, 1527.0f, 2.61f, 3.141592f},//Anubisath Conqueror
 };
 
 struct WaveData
@@ -545,17 +545,17 @@ public:
                         break;
                     case 1:
                         Fandral->SetUInt64Value(UNIT_FIELD_TARGET, me->GetGUID());
-                        DoScriptText(FANDRAL_SAY_1, Fandral, me);
+                        DoScriptText(FANDRAL_SAY_1, Fandral,me);
                         break;
                     case 2:
-                        Fandral->SetUInt64Value(UNIT_FIELD_TARGET, 0);
-                        DoScriptText(MERITHRA_EMOTE_1, Merithra);
+                        Fandral->SetUInt64Value(UNIT_FIELD_TARGET,NULL);
+                        DoScriptText(MERITHRA_EMOTE_1,Merithra);
                         break;
                     case 3:
-                        DoScriptText(MERITHRA_SAY_1, Merithra);
+                        DoScriptText(MERITHRA_SAY_1,Merithra);
                         break;
                     case 4:
-                        DoScriptText(ARYGOS_EMOTE_1, Arygos);
+                        DoScriptText(ARYGOS_EMOTE_1,Arygos);
                         break;
                     case 5:
                         Caelestrasz->SetUInt64Value(UNIT_FIELD_TARGET, Fandral->GetGUID());
@@ -565,82 +565,82 @@ public:
                         DoScriptText(MERITHRA_SAY_2, Merithra);
                         break;
                     case 7:
-                        Caelestrasz->SetUInt64Value(UNIT_FIELD_TARGET, 0);
-                        Merithra->GetMotionMaster()->MoveCharge(-8065, 1530, 2.61f, 10);
+                        Caelestrasz->SetUInt64Value(UNIT_FIELD_TARGET, NULL);
+                        Merithra->GetMotionMaster()->MoveCharge(-8065,1530,2.61f,10);
                         break;
                     case 8:
-                        DoScriptText(MERITHRA_YELL_1, Merithra);
+                        DoScriptText(MERITHRA_YELL_1,Merithra);
                         break;
                     case 9:
-                        Merithra->CastSpell(Merithra, 25105, true);
+                        Merithra->CastSpell(Merithra,25105,true);
                         break;
                     case 10:
                         Merithra->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
                         Merithra->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                        Merithra->GetMotionMaster()->MoveCharge(-8065, 1530, 6.61f, 3);
+                        Merithra->GetMotionMaster()->MoveCharge(-8065,1530,6.61f,3);
                         break;
                     case 11:
-                        Merithra->CastSpell(Merithra, 24818, false);
+                        Merithra->CastSpell(Merithra,24818,false);
                         break;
                     case 12:
-                        Merithra->GetMotionMaster()->MoveCharge(-8100, 1530, 50, 42);
+                        Merithra->GetMotionMaster()->MoveCharge(-8100,1530,50,42);
                         break;
                     case 13:
                         break;
                     case 14:
-                        DoScriptText(ARYGOS_SAY_1, Arygos);
+                        DoScriptText(ARYGOS_SAY_1,Arygos);
                         Merithra->SetVisible(false);
                         break;
                     case 15:
-                        Arygos->GetMotionMaster()->MoveCharge(-8065, 1530, 2.61f, 10);
-                        Merithra->GetMotionMaster()->MoveCharge(-8034.535f, 1535.14f, 2.61f, 42);
+                        Arygos->GetMotionMaster()->MoveCharge(-8065,1530,2.61f,10);
+                        Merithra->GetMotionMaster()->MoveCharge(-8034.535f,1535.14f,2.61f,42);
                         break;
                     case 16:
                         DoScriptText(ARYGOS_YELL_1, Arygos);
                         break;
                     case 17:
-                        Arygos->CastSpell(Arygos, 25107, true);
+                        Arygos->CastSpell(Arygos,25107,true);
                         break;
                     case 18:
                         Arygos->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
                         Arygos->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                        Arygos->GetMotionMaster()->MoveCharge(-8065, 1530, 6.61f, 42);
+                        Arygos->GetMotionMaster()->MoveCharge(-8065,1530,6.61f,42);
                         break;
                     case 19:
-                        Arygos->CastSpell(Arygos, 50505, false);
+                        Arygos->CastSpell(Arygos,50505,false);
                         break;
                     case 20:
-                        Arygos->GetMotionMaster()->MoveCharge(-8095, 1530, 50, 42);
+                        Arygos->GetMotionMaster()->MoveCharge(-8095,1530,50,42);
                         break;
                     case 21:
                         break;
                     case 22:
-                        DoScriptText(CAELESTRASZ_SAY_2, Caelestrasz, Fandral);
+                        DoScriptText(CAELESTRASZ_SAY_2,Caelestrasz, Fandral);
                         break;
                     case 23:
-                        Caelestrasz->GetMotionMaster()->MoveCharge(-8065, 1530, 2.61f, 10);
+                        Caelestrasz->GetMotionMaster()->MoveCharge(-8065,1530,2.61f,10);
                         Arygos->SetVisible(false);
-                        Arygos->GetMotionMaster()->MoveCharge(-8034.535f, 1535.14f, 2.61f, 10);
+                        Arygos->GetMotionMaster()->MoveCharge(-8034.535f,1535.14f,2.61f,10);
                         break;
                     case 24:
                         DoScriptText(CAELESTRASZ_YELL_1, Caelestrasz);
                         break;
                     case 25:
-                        Caelestrasz->CastSpell(Caelestrasz, 25106, true);
+                        Caelestrasz->CastSpell(Caelestrasz,25106,true);
                         break;
                     case 26:
                         Caelestrasz->HandleEmoteCommand(254);
                         Caelestrasz->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                        Caelestrasz->GetMotionMaster()->MoveCharge(-8065, 1530, 7.61f, 4);
+                        Caelestrasz->GetMotionMaster()->MoveCharge(-8065,1530,7.61f,4);
                         break;
                     case 27:
-                        Caelestrasz->CastSpell(Caelestrasz, 54293, false);
+                        Caelestrasz->CastSpell(Caelestrasz,54293,false);
                         break;
                     case 28:
-                        DoScriptText(ANACHRONOS_SAY_2, me, Fandral);
+                        DoScriptText(ANACHRONOS_SAY_2,me, Fandral);
                         break;
                     case 29:
-                        Caelestrasz->GetMotionMaster()->MoveCharge(-8095, 1530, 50, 42);
+                        Caelestrasz->GetMotionMaster()->MoveCharge(-8095,1530,50,42);
                         DoScriptText(FANDRAL_SAY_2, Fandral, me);
                         break;
                     case 30:
@@ -650,29 +650,29 @@ public:
                         break;
                     case 32:
                         Caelestrasz->SetVisible(false);
-                        Caelestrasz->GetMotionMaster()->MoveCharge(-8034.535f, 1535.14f, 2.61f, 42);
-                        Fandral->GetMotionMaster()->MoveCharge(-8108, 1529, 2.77f, 8);
-                        me->GetMotionMaster()->MoveCharge(-8113, 1525, 2.77f, 8);
+                        Caelestrasz->GetMotionMaster()->MoveCharge(-8034.535f,1535.14f,2.61f,42);
+                        Fandral->GetMotionMaster()->MoveCharge(-8108,1529,2.77f,8);
+                        me->GetMotionMaster()->MoveCharge(-8113,1525,2.77f,8);
                         break;//both run to the gate
                     case 33:
                         DoScriptText(ANACHRONOS_SAY_4, me);
-                        Caelestrasz->GetMotionMaster()->MoveCharge(-8050, 1473, 65, 15);
+                        Caelestrasz->GetMotionMaster()->MoveCharge(-8050,1473,65,15);
                         break; //Text: sands will stop
                     case 34:
                         DoCast(plr, 23017, true);//Arcane Channeling
                         break;
                     case 35:
-                        me->CastSpell(-8088, 1520.43f, 2.67f, 25158, true);
+                        me->CastSpell(-8088,1520.43f,2.67f,25158,true);
                         break;
                     case 36:
                         DoCast(plr, 25159, true);
                         break;
                     case 37:
-                        me->SummonGameObject(GO_GATE_OF_AHN_QIRAJ, -8130, 1525, 17.5f, 0, 0, 0, 0, 0, 0);
+                        me->SummonGameObject(GO_GATE_OF_AHN_QIRAJ,-8130,1525,17.5f,0,0,0,0,0,0);
                         break;
                     case 38:
                         DoCast(plr, 25166, true);
-                        me->SummonGameObject(GO_GLYPH_OF_AHN_QIRAJ, -8130, 1525, 17.5f, 0, 0, 0, 0, 0, 0);
+                        me->SummonGameObject(GO_GLYPH_OF_AHN_QIRAJ,-8130,1525,17.5f,0,0,0,0,0,0);
                         break;
                     case 39:
                         DoScriptText(ANACHRONOS_SAY_5, me, Fandral);
@@ -681,7 +681,7 @@ public:
                         Fandral->CastSpell(me, 25167, true);
                         break;
                     case 41:
-                        Fandral->SummonGameObject(GO_ROOTS_OF_AHN_QIRAJ, -8130, 1525, 17.5f, 0, 0, 0, 0, 0, 0);
+                        Fandral->SummonGameObject(GO_ROOTS_OF_AHN_QIRAJ,-8130,1525,17.5f,0,0,0,0,0,0);
                         DoScriptText(FANDRAL_SAY_3, Fandral);
                         break;
                     case 42:
@@ -699,70 +699,70 @@ public:
                         break;
                     case 46:
                         DoScriptText(ANACHRONOS_SAY_8, me);
-                        me->GetMotionMaster()->MoveCharge(-8110, 1527, 2.77f, 4);
+                        me->GetMotionMaster()->MoveCharge(-8110,1527,2.77f,4);
                         break;
                     case 47:
                         DoScriptText(ANACHRONOS_EMOTE_1, me);
                         break;
                     case 48:
-                        DoScriptText(FANDRAL_SAY_4, Fandral, me);
+                        DoScriptText(FANDRAL_SAY_4,Fandral,me);
                         break;
                     case 49:
-                        DoScriptText(FANDRAL_SAY_5, Fandral, me);
+                        DoScriptText(FANDRAL_SAY_5,Fandral,me);
                         break;
                     case 50:
-                        DoScriptText(FANDRAL_EMOTE_2, Fandral);
-                        Fandral->CastSpell(-8127, 1525, 17.5f, 33806, true);
+                        DoScriptText(FANDRAL_EMOTE_2,Fandral);
+                        Fandral->CastSpell(-8127,1525,17.5f,33806,true);
                         break;
                     case 51:
                     {
                         uint32 entries[4] = { 15423, 15424, 15414, 15422 };
                         for (uint8 i = 0; i < 4; ++i)
                         {
-                            mob = plr->FindNearestCreature(entries[i], 50, me);
+                            mob = plr->FindNearestCreature(entries[i],50,me);
                             while (mob)
                             {
                                 mob->RemoveFromWorld();
-                                mob = plr->FindNearestCreature(15423, 50, me);
+                                mob = plr->FindNearestCreature(15423,50,me);
                             }
                         }
                         break;
                     }
                     case 52:
-                        Fandral->GetMotionMaster()->MoveCharge(-8028.75f, 1538.795f, 2.61f, 4);
-                        DoScriptText(ANACHRONOS_SAY_9, me, Fandral);
+                        Fandral->GetMotionMaster()->MoveCharge(-8028.75f, 1538.795f, 2.61f,4);
+                        DoScriptText(ANACHRONOS_SAY_9, me,Fandral);
                         break;
                     case 53:
-                        DoScriptText(FANDRAL_SAY_6, Fandral);
+                        DoScriptText(FANDRAL_SAY_6,Fandral);
                         break;
                     case 54:
-                        DoScriptText(ANACHRONOS_EMOTE_2, me);
+                        DoScriptText(ANACHRONOS_EMOTE_2,me);
                         break;
                     case 55:
                         Fandral->SetVisible(false);
                         break;
                     case 56:
                         DoScriptText(ANACHRONOS_EMOTE_3, me);
-                        me->GetMotionMaster()->MoveCharge(-8116, 1522, 3.65f, 4);
+                        me->GetMotionMaster()->MoveCharge(-8116,1522,3.65f,4);
                         break;
                     case 57:
-                        me->GetMotionMaster()->MoveCharge(-8116.7f, 1527, 3.7f, 4);
+                        me->GetMotionMaster()->MoveCharge(-8116.7f,1527,3.7f,4);
                         break;
                     case 58:
-                        me->GetMotionMaster()->MoveCharge(-8112.67f, 1529.9f, 2.86f, 4);
+                        me->GetMotionMaster()->MoveCharge(-8112.67f,1529.9f,2.86f,4);
                         break;
                     case 59:
-                        me->GetMotionMaster()->MoveCharge(-8117.99f, 1532.24f, 3.94f, 4);
+                        me->GetMotionMaster()->MoveCharge(-8117.99f,1532.24f,3.94f,4);
                         break;
                     case 60:
                         if (plr)
-                            DoScriptText(ANACHRONOS_SAY_10, me, plr);
-                        me->GetMotionMaster()->MoveCharge(-8113.46f, 1524.16f, 2.89f, 4);
+                            DoScriptText(ANACHRONOS_SAY_10, me,plr);
+                        me->GetMotionMaster()->MoveCharge(-8113.46f,1524.16f,2.89f,4);
                         break;
                     case 61:
-                        me->GetMotionMaster()->MoveCharge(-8057.1f, 1470.32f, 2.61f, 6);
-                        if (plr->IsInRange(me, 0, 15))
-                            plr->GroupEventHappens(QUEST_A_PAWN_ON_THE_ETERNAL_BOARD , me);
+                        me->GetMotionMaster()->MoveCharge(-8057.1f,1470.32f,2.61f,6);
+                        if (plr->IsInRange(me,0,15))
+                            plr->GroupEventHappens(QUEST_A_PAWN_ON_THE_ETERNAL_BOARD ,me);
                         break;
                     case 62:
                         me->SetDisplayId(15500);
@@ -772,13 +772,13 @@ public:
                         me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                         break;
                     case 64:
-                        me->GetMotionMaster()->MoveCharge(-8000, 1400, 150, 9);
+                        me->GetMotionMaster()->MoveCharge(-8000,1400,150,9);
                         break;
                     case 65:
                         me->SetVisible(false);
                         if (Creature* AnachronosQuestTrigger = (Unit::GetCreature(*me, AnachronosQuestTriggerGUID)))
                         {
-                            DoScriptText(ARYGOS_YELL_1, me);
+                            DoScriptText(ARYGOS_YELL_1,me);
                             AnachronosQuestTrigger->AI()->EnterEvadeMode();
                             eventEnd=true;
                         }
@@ -824,7 +824,7 @@ public:
 
         uint64 MobGUID;
         uint64 PlayerGUID;
-        uint32 SpellTimer1, SpellTimer2, SpellTimer3, SpellTimer4;
+        uint32 SpellTimer1, SpellTimer2, SpellTimer3,SpellTimer4;
         bool Timers;
         bool hasTarget;
 
@@ -888,23 +888,23 @@ public:
             if (!hasTarget)
             {
                 if (me->GetEntry() == 15424 || me->GetEntry() == 15422 || me->GetEntry() == 15414)
-                    pTarget = me->FindNearestCreature(15423, 20, true);
+                    pTarget = me->FindNearestCreature(15423,20,true);
                 if (me->GetEntry() == 15423)
                 {
-                    uint8 tar = urand(0, 2);
+                    uint8 tar = urand(0,2);
 
                     if (tar == 0)
-                        pTarget = me->FindNearestCreature(15422, 20, true);
+                        pTarget = me->FindNearestCreature(15422,20,true);
                     else if (tar == 1)
-                        pTarget = me->FindNearestCreature(15424, 20, true);
+                        pTarget = me->FindNearestCreature(15424,20,true);
                     else if (tar == 2)
-                        pTarget = me->FindNearestCreature(15414, 20, true);
+                        pTarget = me->FindNearestCreature(15414,20,true);
                 }
                 hasTarget = true;
                 if (pTarget)
                     me->AI()->AttackStart(pTarget);
             }
-            if (!(me->FindNearestCreature(15379, 60)))
+            if (!(me->FindNearestCreature(15379,60)))
                 DoCast(me, 33652);
 
             if (!UpdateVictim())
@@ -1091,33 +1091,33 @@ public:
             if (Unit* Anachronos_Quest_Trigger = go->FindNearestCreature(15454, 100, plr))
             {
 
-                Unit *Merithra = Anachronos_Quest_Trigger->SummonCreature(15378, -8034.535f, 1535.14f, 2.61f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 220000);
-                Unit *Caelestrasz = Anachronos_Quest_Trigger->SummonCreature(15379, -8032.767f, 1533.148f, 2.61f, 1.5f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 220000);
-                Unit *Arygos = Anachronos_Quest_Trigger->SummonCreature(15380, -8034.52f, 1537.843f, 2.61f, 5.7f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 220000);
-                /* Unit *Fandral = */ Anachronos_Quest_Trigger->SummonCreature(15382, -8028.462f, 1535.843f, 2.61f, 3.141592f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 220000);
-                Creature *Anachronos = Anachronos_Quest_Trigger->SummonCreature(15381, -8028.75f, 1538.795f, 2.61f, 4, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 220000);
+                Unit *Merithra = Anachronos_Quest_Trigger->SummonCreature(15378,-8034.535f,1535.14f,2.61f,0,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,220000);
+                Unit *Caelestrasz = Anachronos_Quest_Trigger->SummonCreature(15379,-8032.767f, 1533.148f,2.61f, 1.5f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,220000);
+                Unit *Arygos = Anachronos_Quest_Trigger->SummonCreature(15380,-8034.52f, 1537.843f, 2.61f, 5.7f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,220000);
+                /* Unit *Fandral = */ Anachronos_Quest_Trigger->SummonCreature(15382,-8028.462f, 1535.843f, 2.61f, 3.141592f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,220000);
+                Creature *Anachronos = Anachronos_Quest_Trigger->SummonCreature(15381,-8028.75f, 1538.795f, 2.61f, 4,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,220000);
 
                 if (Merithra)
                 {
                     Merithra->SetUInt32Value(UNIT_NPC_FLAGS, 0);
-                    Merithra->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-                    Merithra->SetUInt32Value(UNIT_FIELD_DISPLAYID, 15420);
+                    Merithra->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
+                    Merithra->SetUInt32Value(UNIT_FIELD_DISPLAYID,15420);
                     Merithra->setFaction(35);
                 }
 
                 if (Caelestrasz)
                 {
                     Caelestrasz->SetUInt32Value(UNIT_NPC_FLAGS, 0);
-                    Caelestrasz->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-                    Caelestrasz->SetUInt32Value(UNIT_FIELD_DISPLAYID, 15419);
+                    Caelestrasz->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
+                    Caelestrasz->SetUInt32Value(UNIT_FIELD_DISPLAYID,15419);
                     Caelestrasz->setFaction(35);
                 }
 
                 if (Arygos)
                 {
                     Arygos->SetUInt32Value(UNIT_NPC_FLAGS, 0);
-                    Arygos->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-                    Arygos->SetUInt32Value(UNIT_FIELD_DISPLAYID, 15418);
+                    Arygos->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
+                    Arygos->SetUInt32Value(UNIT_FIELD_DISPLAYID,15418);
                     Arygos->setFaction(35);
                 }
 
@@ -1136,6 +1136,311 @@ public:
 
 };
 
+/*############
+## Wind Stone
+##############*/
+
+#define ENTRY_LESSER_WINDSTONE          180456
+#define ENTRY_GREATER_WINDSTONE         180466
+#define ENTRY_NORMAL_WINDSTONE          180461
+
+// Required Auras
+#define SPELL_TWILIGHT_LESSER           24746
+#define SPELL_TWILIGHT_NORMAL           24748
+#define SPELL_TWILIGHT_GREATER          24782
+
+// Summon Templar - LESSER
+#define SPELL_SUMMON_TEMPLAR_FIRE       24744
+#define ENTRY_TEMPLAR_FIRE              15209
+#define ITEM_CREST_FIRE                 20416
+#define SPELL_SUMMON_TEMPLAR_THUNDER    24756
+#define ENTRY_TEMPLAR_THUNDER           15212
+#define ITEM_CREST_THUNDER              20418
+#define SPELL_SUMMON_TEMPLAR_STONE      24758
+#define ENTRY_TEMPLAR_STONE             15307
+#define ITEM_CREST_STONE                20419
+#define SPELL_SUMMON_TEMPLAR_WATER      24760
+#define ENTRY_TEMPLAR_WATER             15211
+#define ITEM_CREST_WATER                20420
+#define SPELL_SUMMON_TEMPLAR_RANDOM     24734
+
+// Summon Duke - NORMAL
+#define SPELL_SUMMON_DUKE_FIRE          24765
+#define ENTRY_DUKE_FIRE                 15206
+#define ITEM_SIGNET_FIRE                20432
+#define SPELL_SUMMON_DUKE_THUNDER       24768
+#define ENTRY_DUKE_THUNDER              15220
+#define ITEM_SIGNET_THUNDER             20433
+#define SPELL_SUMMON_DUKE_STONE         24770
+#define ENTRY_DUKE_STONE                15208
+#define ITEM_SIGNET_STONE               20435
+#define SPELL_SUMMON_DUKE_WATER         24772
+#define ENTRY_DUKE_WATER                15207
+#define ITEM_SIGNET_WATER               20436
+#define SPELL_SUMMON_DUKE_RANDOM        24763
+
+// Summon Royal - GREATER - Delete Items and activate object ... but doesnt summon
+#define SPELL_SUMMON_ROYAL_FIRE         24786
+#define ENTRY_ROYAL_FIRE                15203
+#define ITEM_SCEPTER_FIRE               20447
+#define SPELL_SUMMON_ROYAL_THUNDER      24788
+#define ENTRY_ROYAL_THUNDER             15204
+#define ITEM_SCEPTER_THUNDER            20448
+#define SPELL_SUMMON_ROYAL_STONE        24789
+#define ENTRY_ROYAL_STONE               15205
+#define ITEM_SCEPTER_STONE              20449
+#define SPELL_SUMMON_ROYAL_WATER        24790
+#define ENTRY_ROYAL_WATER               15305
+#define ITEM_SCEPTER_WATER              20450
+#define SPELL_SUMMON_ROYAL_RANDOM       24784
+
+//Gossip Options PH again
+#define GOSSIP_SUM_TEMPLAR_RANDOM       "[PH]Summon Elemtal Templar"
+#define GOSSIP_SUM_TEMPLAR_FIRE         "[PH]Summon Templar of the Fire"
+#define GOSSIP_SUM_TEMPLAR_WATER        "[PH]Summon Templar of the Water"
+#define GOSSIP_SUM_TEMPLAR_STONE        "[PH]Summon Templar of the Stone"
+#define GOSSIP_SUM_TEMPLAR_THUNDER      "[PH]Summon Templar of the Thunder"
+
+#define GOSSIP_SUM_DUKE_RANDOM          "[PH]Summon Elemtal Duke"
+#define GOSSIP_SUM_DUKE_FIRE            "[PH]Summon Duke of the Fire"
+#define GOSSIP_SUM_DUKE_WATER           "[PH]Summon Duke of the Water"
+#define GOSSIP_SUM_DUKE_STONE           "[PH]Summon Duke of the Stone"
+#define GOSSIP_SUM_DUKE_THUNDER         "[PH]Summon Duke of the Thunder"
+
+#define GOSSIP_SUM_ROYAL_RANDOM         "[PH]Summon Elemtal Royal"
+#define GOSSIP_SUM_ROYAL_FIRE           "[PH]Summon Royal of the Fire"
+#define GOSSIP_SUM_ROYAL_WATER          "[PH]Summon Royal of the Water"
+#define GOSSIP_SUM_ROYAL_STONE          "[PH]Summon Royal of the Stone"
+#define GOSSIP_SUM_ROYAL_THUNDER        "[PH]Summon Royal of the Thunder"
+
+class go_wind_stone : public GameObjectScript
+{
+public:
+    go_wind_stone() : GameObjectScript("go_wind_stone") { }
+
+    bool IsLesserWindStone(GameObject* _GO)
+    {
+        return (_GO->GetEntry() == 180529 || _GO->GetEntry() == 180456 || _GO->GetEntry() == 180518 || _GO->GetEntry() == 180544 || _GO->GetEntry() == 180549 || _GO->GetEntry() == 180564);
+    }
+
+    bool IsNormalWindStone(GameObject* _GO)
+    {
+        return (_GO->GetEntry() == 180502 || _GO->GetEntry() == 180534 || _GO->GetEntry() == 180461 || _GO->GetEntry() == 180554);
+    }
+
+    bool IsGreaterWindStone(GameObject* _GO)
+    {
+        return (_GO->GetEntry() == 180466 || _GO->GetEntry() == 180539 || _GO->GetEntry() == 180559);
+    }
+
+    bool OnGossipHello(Player *player, GameObject* _GO)
+    {
+        if( IsLesserWindStone(_GO) && player->HasAura(SPELL_TWILIGHT_LESSER,0))
+        {
+            player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_TEMPLAR_RANDOM, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+            if(player->HasItemCount(ITEM_CREST_FIRE,1))
+                player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_TEMPLAR_FIRE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 11);
+            if(player->HasItemCount(ITEM_CREST_THUNDER,1))
+                player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_TEMPLAR_THUNDER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 12);
+            if(player->HasItemCount(ITEM_CREST_STONE,1))
+                player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_TEMPLAR_STONE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 13);
+            if(player->HasItemCount(ITEM_CREST_WATER,1))
+                player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_TEMPLAR_WATER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 14);
+            //--
+            player->SEND_GOSSIP_MENU(_GO->GetGOInfo()->questgiver.gossipID, _GO->GetGUID());
+        }
+        else if(IsNormalWindStone(_GO) && player->HasAura(SPELL_TWILIGHT_NORMAL,0))
+        {
+            player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_DUKE_RANDOM, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+
+            if(player->HasItemCount(ITEM_SIGNET_FIRE,1))
+                player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_DUKE_FIRE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 21);
+            if(player->HasItemCount(ITEM_SIGNET_THUNDER,1))
+                player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_DUKE_THUNDER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 22);
+            if(player->HasItemCount(ITEM_SIGNET_STONE,1))
+                player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_DUKE_STONE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 23);
+            if(player->HasItemCount(ITEM_SIGNET_WATER,1))
+                player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_DUKE_WATER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 24);
+            //--
+            player->SEND_GOSSIP_MENU(_GO->GetGOInfo()->questgiver.gossipID, _GO->GetGUID());
+        }
+        else if(IsGreaterWindStone(_GO) && player->HasAura(SPELL_TWILIGHT_GREATER,0))
+        {
+            player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_ROYAL_RANDOM, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+
+            if(player->HasItemCount(ITEM_SCEPTER_FIRE,1))
+                player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_ROYAL_FIRE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 31);
+            if(player->HasItemCount(ITEM_SCEPTER_THUNDER,1))
+                player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_ROYAL_THUNDER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 32);
+            if(player->HasItemCount(ITEM_SCEPTER_STONE,1))
+                player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_ROYAL_STONE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 33);
+            if(player->HasItemCount(ITEM_SCEPTER_WATER,1))
+                player->ADD_GOSSIP_ITEM(0, GOSSIP_SUM_ROYAL_WATER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 34);
+            //--
+            player->SEND_GOSSIP_MENU(_GO->GetGOInfo()->questgiver.gossipID, _GO->GetGUID());
+        }else
+        {
+            // Cast Unknown Fire Spell
+        }
+        return true;
+    }
+
+    void SummonTemplar(Player *player, uint32 typ)
+    {
+        uint32 entry = 0;
+        switch(typ)
+        {
+        case 0:
+            entry = ENTRY_TEMPLAR_FIRE;
+            break;
+        case 1:
+            entry = ENTRY_TEMPLAR_THUNDER;
+            break;
+        case 2:
+            entry = ENTRY_TEMPLAR_STONE;
+            break;
+        case 3:
+            entry = ENTRY_TEMPLAR_WATER;
+            break;
+        }
+
+        float x,y,z;
+        player->GetPosition(x,y,z);
+        Creature* temp = player->SummonCreature(entry,x,y,z,0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
+        temp->AI()->AttackStart(player);
+    }
+
+    void SummonDuke(Player *player, uint32 typ)
+    {
+        uint32 entry = 0;
+        switch(typ)
+        {
+        case 0:
+            entry = ENTRY_DUKE_FIRE;
+            break;
+        case 1:
+            entry = ENTRY_DUKE_THUNDER;
+            break;
+        case 2:
+            entry = ENTRY_DUKE_STONE;
+            break;
+        case 3:
+            entry = ENTRY_DUKE_WATER;
+            break;
+        }
+
+        float x,y,z;
+        player->GetPosition(x,y,z);
+        Creature* temp = player->SummonCreature(entry,x,y,z,0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
+        temp->AI()->AttackStart(player);
+    }
+
+    void SummonRoyal(Player *player, uint32 typ)
+    {
+        uint32 entry = 0;
+        switch(typ)
+        {
+        case 0:
+            entry = ENTRY_ROYAL_FIRE;
+            break;
+        case 1:
+            entry = ENTRY_ROYAL_THUNDER;
+            break;
+        case 2:
+            entry = ENTRY_ROYAL_STONE;
+            break;
+        case 3:
+            entry = ENTRY_ROYAL_WATER;
+            break;
+        }
+
+        float x,y,z;
+        player->GetPosition(x,y,z);
+        Creature* temp = player->SummonCreature(entry,x,y,z,0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
+        temp->AI()->AttackStart(player);
+    }
+
+    void SendActionMenu_go_wind_stone(Player *player, GameObject* _GO, uint32 action)
+    {
+        switch(action)
+        {
+            case GOSSIP_ACTION_INFO_DEF + 1:
+                player->CastSpell(player,SPELL_SUMMON_TEMPLAR_RANDOM,false);
+                SummonTemplar(player,rand()%4);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 11:
+                player->CastSpell(player,SPELL_SUMMON_TEMPLAR_FIRE,false);
+                SummonTemplar(player,0);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 12:
+                player->CastSpell(player,SPELL_SUMMON_TEMPLAR_THUNDER,false);
+                SummonTemplar(player,1);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 13:
+                player->CastSpell(player,SPELL_SUMMON_TEMPLAR_STONE,false);
+                SummonTemplar(player,2);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 14:
+                player->CastSpell(player,SPELL_SUMMON_TEMPLAR_WATER,false);
+                SummonTemplar(player,3);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 2:
+                player->CastSpell(player,SPELL_SUMMON_DUKE_RANDOM,false);
+                SummonDuke(player,rand()%4);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 21:
+                player->CastSpell(player,SPELL_SUMMON_DUKE_FIRE,false);
+                SummonDuke(player,0);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 22:
+                player->CastSpell(player,SPELL_SUMMON_DUKE_THUNDER,false);
+                SummonDuke(player,1);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 23:
+                player->CastSpell(player,SPELL_SUMMON_DUKE_STONE,false);
+                SummonDuke(player,2);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 24:
+                player->CastSpell(player,SPELL_SUMMON_DUKE_WATER,false);
+                SummonDuke(player,3);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 3:
+                player->CastSpell(player,SPELL_SUMMON_ROYAL_RANDOM,false);
+                SummonRoyal(player,rand()%4);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 31:
+                player->CastSpell(player,SPELL_SUMMON_ROYAL_FIRE,false);
+                SummonDuke(player,0);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 32:
+                player->CastSpell(player,SPELL_SUMMON_ROYAL_THUNDER,false);
+                SummonDuke(player,1);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 33:
+                player->CastSpell(player,SPELL_SUMMON_ROYAL_STONE,false);
+                SummonDuke(player,2);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 34:
+                player->CastSpell(player,SPELL_SUMMON_ROYAL_WATER,false);
+                SummonDuke(player,3);
+                break;
+        }
+    }
+
+    bool OnGossipSelect(Player *player, GameObject* _GO, uint32 sender, uint32 action )
+    {
+        switch(sender)
+        {
+            case GOSSIP_SENDER_MAIN:
+                SendActionMenu_go_wind_stone(player, _GO, action);
+                player->CLOSE_GOSSIP_MENU();
+                break;
+        }
+        return true;
+    }
+};
+
 void AddSC_silithus()
 {
     new go_crystalline_tear();
@@ -1144,4 +1449,5 @@ void AddSC_silithus()
     new mob_qiraj_war_spawn();
     new npc_highlord_demitrian();
     new npcs_rutgar_and_frankal();
+    new go_wind_stone(); //update gameobject_template set scriptname = 'go_wind_stone' where entry in (180502,180529,180534,180456,180461,180466,180518,180539,180544,180549,180554,180559,180564);
 }

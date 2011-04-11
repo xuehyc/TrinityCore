@@ -75,7 +75,7 @@ void WorldSession::SendNameQueryOpcodeFromDB(uint64 guid)
             GUID_LOPART(guid)
         );
 
-    _nameQueryCallbacks.insert(lFutureResult);
+    m_nameQueryCallbacks.insert(lFutureResult);
 
 // CharacterDatabase.AsyncPQuery(&WorldSession::SendNameQueryOpcodeFromDBCallBack, GetAccountId(),
 }
@@ -155,7 +155,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket & recv_data)
     uint64 guid;
     recv_data >> guid;
 
-    CreatureTemplate const *ci = sObjectMgr->GetCreatureTemplate(entry);
+    CreatureInfo const *ci = ObjectMgr::GetCreatureTemplate(entry);
     if (ci)
     {
 
@@ -172,7 +172,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket & recv_data)
                 sObjectMgr->GetLocaleString(cl->SubName, loc_idx, SubName);
             }
         }
-        sLog->outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u.", ci->Name.c_str(), entry);
+        sLog->outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u.", ci->Name, entry);
                                                             // guess size
         WorldPacket data(SMSG_CREATURE_QUERY_RESPONSE, 100);
         data << uint32(entry);                              // creature entry
@@ -213,12 +213,12 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket & recv_data)
 /// Only _static_ data send in this packet !!!
 void WorldSession::HandleGameObjectQueryOpcode(WorldPacket & recv_data)
 {
-    uint32 entry;
-    recv_data >> entry;
+    uint32 entryID;
+    recv_data >> entryID;
     uint64 guid;
     recv_data >> guid;
 
-    const GameObjectTemplate *info = sObjectMgr->GetGameObjectTemplate(entry);
+    const GameObjectInfo *info = ObjectMgr::GetGameObjectInfo(entryID);
     if (info)
     {
         std::string Name;
@@ -232,15 +232,15 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket & recv_data)
         int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
         {
-            if (GameObjectLocale const *gl = sObjectMgr->GetGameObjectLocale(entry))
+            if (GameObjectLocale const *gl = sObjectMgr->GetGameObjectLocale(entryID))
             {
                 sObjectMgr->GetLocaleString(gl->Name, loc_idx, Name);
                 sObjectMgr->GetLocaleString(gl->CastBarCaption, loc_idx, CastBarCaption);
             }
         }
-        sLog->outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name.c_str(), entry);
+        sLog->outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name, entryID);
         WorldPacket data (SMSG_GAMEOBJECT_QUERY_RESPONSE, 150);
-        data << uint32(entry);
+        data << uint32(entryID);
         data << uint32(info->type);
         data << uint32(info->displayId);
         data << Name;
@@ -258,9 +258,9 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket & recv_data)
     else
     {
         sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_GAMEOBJECT_QUERY - Missing gameobject info for (GUID: %u, ENTRY: %u)",
-            GUID_LOPART(guid), entry);
+            GUID_LOPART(guid), entryID);
         WorldPacket data (SMSG_GAMEOBJECT_QUERY_RESPONSE, 4);
-        data << uint32(entry | 0x80000000);
+        data << uint32(entryID | 0x80000000);
         SendPacket(&data);
         sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }
@@ -411,12 +411,12 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket & recv_data)
 
     while (pageID)
     {
-        PageText const* pageText = sObjectMgr->GetPageText(pageID);
+        PageText const *pPage = sPageTextStore.LookupEntry<PageText>(pageID);
                                                             // guess size
         WorldPacket data(SMSG_PAGE_TEXT_QUERY_RESPONSE, 50);
         data << pageID;
 
-        if (!pageText)
+        if (!pPage)
         {
             data << "Item page missing.";
             data << uint32(0);
@@ -424,7 +424,7 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket & recv_data)
         }
         else
         {
-            std::string Text = pageText->Text;
+            std::string Text = pPage->Text;
 
             int loc_idx = GetSessionDbLocaleIndex();
             if (loc_idx >= 0)
@@ -432,8 +432,8 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket & recv_data)
                     sObjectMgr->GetLocaleString(pl->Text, loc_idx, Text);
 
             data << Text;
-            data << uint32(pageText->NextPage);
-            pageID = pageText->NextPage;
+            data << uint32(pPage->Next_Page);
+            pageID = pPage->Next_Page;
         }
         SendPacket(&data);
 

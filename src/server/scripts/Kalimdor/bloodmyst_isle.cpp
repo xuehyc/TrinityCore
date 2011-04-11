@@ -63,7 +63,7 @@ public:
         {
             uint32 spawnCreatureID = 0;
 
-            switch (urand(0, 2))
+            switch (urand(0,2))
             {
                 case 0:
                     spawnCreatureID = 17681;
@@ -72,7 +72,7 @@ public:
                     break;
                 case 1:
                 case 2:
-                    spawnCreatureID = possibleSpawns[urand(0, 30)];
+                    spawnCreatureID = possibleSpawns[urand(0,30)];
                     break;
             }
 
@@ -173,8 +173,8 @@ public:
         {
             go->SetGoState(GO_STATE_ACTIVE);
             stillpine->GetMotionMaster()->MovePoint(1, go->GetPositionX(), go->GetPositionY()-15, go->GetPositionZ());
-            player->CastedCreatureOrGO(NPC_PRINCESS_STILLPINE, 0, SPELL_OPENING_PRINCESS_STILLPINE_CREDIT);
-        }
+            player->CastedCreatureOrGO(NPC_PRINCESS_STILLPINE, 0, SPELL_OPENING_PRINCESS_STILLPINE_CREDIT); 
+        }        
         return true;
     }
 };
@@ -190,10 +190,11 @@ public:
 
         void MovementInform(uint32 type, uint32 id)
         {
-            if (type == POINT_MOTION_TYPE && id == 1)
+            if (id == 1)
             {
-                DoScriptText(SAY_DIRECTION, me);
+                DoScriptText(SAY_DIRECTION, me);   
                 me->ForcedDespawn();
+                return;
             }
         }
     };

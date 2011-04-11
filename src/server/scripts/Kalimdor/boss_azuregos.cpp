@@ -72,7 +72,7 @@ public:
             Enraged = false;
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit * /*who*/) {}
 
         void UpdateAI(const uint32 diff)
         {
@@ -122,7 +122,7 @@ public:
             //ManaStorm_Timer
             if (ManaStorm_Timer <= diff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,0))
                     DoCast(pTarget, SPELL_MANASTORM);
                 ManaStorm_Timer = 7500 + rand()%5000;
             } else ManaStorm_Timer -= diff;

@@ -212,7 +212,7 @@ public:
 
     bool OnGossipHello(Player* /*pPlayer*/, GameObject* pGo)
     {
-        pGo->SummonCreature(C_AERANAS, -1321.79f, 4043.80f, 116.24f, 1.25f, TEMPSUMMON_TIMED_DESPAWN, 180000);
+        pGo->SummonCreature(C_AERANAS,-1321.79f, 4043.80f, 116.24f, 1.25f, TEMPSUMMON_TIMED_DESPAWN, 180000);
         return false;
     }
 
@@ -287,7 +287,7 @@ public:
                 pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
                 break;
             case GOSSIP_ACTION_TRADE:
-                pPlayer->GetSession()->SendListInventory(pCreature->GetGUID());
+                pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
                 break;
         }
 
@@ -438,7 +438,7 @@ public:
             case 27:
                 DoScriptText(SAY_ELF_COMPLETE, me, pPlayer);
                 // Award quest credit
-                pPlayer->GroupEventHappens(QUEST_ROAD_TO_FALCON_WATCH, me);
+                pPlayer->GroupEventHappens(QUEST_ROAD_TO_FALCON_WATCH,me);
                 break;
             }
         }
@@ -453,12 +453,58 @@ public:
 
         void JustSummoned(Creature* summoned)
         {
+             // Change faction so mobs attack
+            summoned->setFaction(775);
             summoned->AI()->AttackStart(me);
         }
     };
-
 };
 
+/*######
+## npc_forward_commander_toarch
+######*/
+
+class npc_forward_commander_toarch : public CreatureScript
+{
+public:
+    npc_forward_commander_toarch() : CreatureScript("npc_forward_commander_toarch") { }
+
+    CreatureAI* GetAI(Creature *_Creature) const
+    {
+        return new npc_forward_commander_toarchAI (_Creature);
+    }
+
+    struct npc_forward_commander_toarchAI : public ScriptedAI
+    {
+        npc_forward_commander_toarchAI(Creature* c) : ScriptedAI(c) {}
+
+        void Reset(){}
+        void MoveInLineOfSight(Unit *who)
+        {
+            if(who && me->GetDistance(who) <= 10)
+            {
+                if(who->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if(CAST_PLR(who)->getQuestStatusMap()[10162].m_creatureOrGOcount[0] == 20 &&
+                       CAST_PLR(who)->getQuestStatusMap()[10162].m_creatureOrGOcount[1] == 5 &&
+                       CAST_PLR(who)->getQuestStatusMap()[10162].m_creatureOrGOcount[2] == 5 && CAST_PLR(who)->GetQuestStatus(10162) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        CAST_PLR(who)->AreaExploredOrEventHappens(10162);
+                    }
+
+                }
+            }
+
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+            DoMeleeAttackIfReady();
+        }
+    };
+};
 /*######
 ## npc_fel_guard_hound
 ######*/
@@ -498,13 +544,13 @@ public:
             if (uiType != POINT_MOTION_TYPE || uiId != 1)
                 return;
 
-            if (Creature* pHelboar = me->GetCreature(*me, uiHelboarGUID))
+            if (Creature* pHelboar = me->GetCreature(*me,uiHelboarGUID))
             {
                 pHelboar->RemoveCorpse();
                 DoCast(SPELL_SUMMON_POO);
 
                 if (Player* pOwner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
-                    me->GetMotionMaster()->MoveFollow(pOwner, 0.0f, 0.0f);
+                    me->GetMotionMaster()->MoveFollow(pOwner,0.0f,0.0f);
             }
         }
 
@@ -517,7 +563,7 @@ public:
                     if (pHelboar->GetGUID() != uiHelboarGUID && me->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE && !me->FindCurrentSpellBySpellId(SPELL_SUMMON_POO))
                     {
                         uiHelboarGUID = pHelboar->GetGUID();
-                        me->GetMotionMaster()->MovePoint(1, pHelboar->GetPositionX(), pHelboar->GetPositionY(), pHelboar->GetPositionZ());
+                        me->GetMotionMaster()->MovePoint(1,pHelboar->GetPositionX(),pHelboar->GetPositionY(),pHelboar->GetPositionZ());
                     }
                 }
                 uiCheckTimer = 5000;
@@ -532,6 +578,67 @@ public:
 
 };
 
+/*######
+## npc_shattered_hand_berserker
+######*/
+
+enum eShatteredHandBerserker
+{
+    SPELL_ENRAGE                           = 8599,
+    SPELL_CHARGE                           = 35570,
+    SPELL_SUMMON_FEL_SPIRIT                = 39206,
+    AURA_ANCHORITE_CONTRITION              = 39184
+};
+
+class npc_shattered_hand_berserker : public CreatureScript
+{
+public:
+    npc_shattered_hand_berserker() : CreatureScript("npc_shattered_hand_berserker") { }
+
+    struct npc_shattered_hand_berserkerAI : public ScriptedAI
+    {
+        npc_shattered_hand_berserkerAI(Creature *c) : ScriptedAI(c) {}
+
+        bool bEnraged;
+
+        void Reset()
+        {
+            bEnraged = false;
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            DoCast(who, SPELL_CHARGE);
+        }
+
+        void DamageTaken(Unit* done_by, uint32 &damage)
+        {
+            if (damage >= me->GetHealth())
+                if (me->HasAura(AURA_ANCHORITE_CONTRITION))
+                    if (Player* killer = done_by->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        killer->CastSpell(killer, SPELL_SUMMON_FEL_SPIRIT, true);  //not sure why casting from creature wont do
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (!bEnraged && HealthBelowPct(30))
+            {
+                DoCast(me, SPELL_ENRAGE);
+                bEnraged = true;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new npc_shattered_hand_berserkerAI(creature);
+    }
+};
 void AddSC_hellfire_peninsula()
 {
     new npc_aeranas();
@@ -542,4 +649,6 @@ void AddSC_hellfire_peninsula()
     new npc_trollbane();
     new npc_wounded_blood_elf();
     new npc_fel_guard_hound();
+    new npc_forward_commander_toarch();
+    new npc_shattered_hand_berserker();
 }

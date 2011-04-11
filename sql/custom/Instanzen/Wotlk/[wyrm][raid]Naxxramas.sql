@@ -58,6 +58,7 @@ UPDATE creature_template SET scriptname = 'mob_naxxramas_tash' WHERE entry IN (1
 UPDATE creature_template SET scriptname = 'mob_naxxramas_tash' WHERE entry IN (16243,16244,16168,16297,16306,16236);
 UPDATE creature_template SET scriptname = 'mob_naxxramas_tash' WHERE entry IN (16017,16018,16020,16021,16022,16024,16025,30071,16027);
 UPDATE creature_template SET scriptname = 'mob_naxxramas_tash' WHERE entry IN (16067,16145,16146,16154,16156,16163,16164,16167,16193,16194,16215,16216);
+UPDATE creature_template SET scriptname = 'mob_naxxramas_kelthuzad_tash' WHERE entry IN (16427,16428,16429);
 
 -- Areatrigger to Sapphiron
 DELETE FROM areatrigger_scripts WHERE entry = 4156;

@@ -84,8 +84,8 @@ enum eNetherdrake
     SAY_NIHIL_1                 = -1000169, //signed for 5955
     SAY_NIHIL_2                 = -1000170, //signed for 5955
     SAY_NIHIL_3                 = -1000171, //signed for 5955
-    SAY_NIHIL_4                 = -1000172, //signed for 20021, used by 20021, 21817, 21820, 21821, 21823
-    SAY_NIHIL_INTERRUPT         = -1000173, //signed for 20021, used by 20021, 21817, 21820, 21821, 21823
+    SAY_NIHIL_4                 = -1000172, //signed for 20021, used by 20021,21817,21820,21821,21823
+    SAY_NIHIL_INTERRUPT         = -1000173, //signed for 20021, used by 20021,21817,21820,21821,21823
 
     ENTRY_WHELP                 = 20021,
     ENTRY_PROTO                 = 21821,
@@ -410,7 +410,7 @@ public:
 
             if (obelisk_one == true && obelisk_two == true && obelisk_three == true && obelisk_four == true && obelisk_five == true)
             {
-                pGo->SummonCreature(19963, 2943.40f, 4778.20f, 284.49f, 0.94f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
+                pGo->SummonCreature(19963,2943.40f,4778.20f,284.49f,0.94f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,120000);
                 //reset global var
                 obelisk_one = false;
                 obelisk_two = false;
@@ -536,6 +536,112 @@ public:
 };
 
 /*######
+## mob_aether_ray
+######*/
+
+class mob_wrangled_aether_ray : public CreatureScript
+{
+public:
+    mob_wrangled_aether_ray() : CreatureScript("mob_wrangled_aether_ray") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new mob_wrangled_aether_rayAI(pCreature);
+    }
+
+    struct mob_wrangled_aether_rayAI : public ScriptedAI
+    {
+        mob_wrangled_aether_rayAI(Creature *c) : ScriptedAI(c) { owner = 0; }
+
+        uint64 owner;
+
+        void Reset(){}
+        void EnterCombat(Unit *who) { }
+        void UpdateAI(const uint32 diff)
+        {
+            if(me->GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE)
+            {
+                Unit* ownerlink = me->GetUnit((*me),me->GetOwnerGUID() );
+                if(ownerlink)
+                    me->GetMotionMaster()->MoveFollow(ownerlink,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE);
+            }
+        }
+
+    };
+};
+
+#define EMOTE_READY         "appears ready to be wrangled."
+
+class mob_aether_ray : public CreatureScript
+{
+public:
+    mob_aether_ray() : CreatureScript("mob_aether_ray") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new mob_aether_rayAI(pCreature);
+    }
+
+    struct mob_aether_rayAI : public ScriptedAI
+    {
+        mob_aether_rayAI(Creature *c) : ScriptedAI(c) { }
+
+        bool isready;
+        uint64 wranglerGUID;
+
+        void Reset()
+        {
+            isready = false;
+            wranglerGUID = 0;
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            Player* wrangler = me->GetPlayer(*summon,wranglerGUID);
+            if(wrangler)
+            {
+                //summon->CastSpell(wrangler,40926,true);
+
+                //summon->SetOwnerGUID(wrangler->GetGUID());
+                wrangler->KilledMonsterCredit(summon->GetEntry(),summon->GetGUID());
+                me->DealDamage(me,me->GetHealth());
+                me->RemoveCorpse();
+
+                //summon->CastSpell(wrangler,40926,true);
+                //wrangler->CastSpell(summon,40926,true);
+            }
+        }
+
+        void EnterCombat(Unit *who) { }
+        void DamageTaken(Unit *done_by, uint32 &damage)
+        {
+            if(!isready)
+                if(me->GetHealth() - damage > 0 && me->GetHealth() - damage < (me->GetMaxHealth() * 0.3))
+                {
+                    //DoTextEmote(EMOTE_READY,NULL);
+                    isready = true;
+                }
+        }
+
+        void SpellHit(Unit* target, const SpellEntry* spell)
+        {
+            if(isready)
+            {
+                if(target->GetTypeId() == TYPEID_PLAYER )
+                {
+                    if(spell->Id == 40856)
+                    {
+                        //DoCast(target,40917);
+                        //DoCast(target,40907);
+                        wranglerGUID = target->GetGUID();
+                        DoSpawnCreature(23343,0,0,0,0,TEMPSUMMON_TIMED_DESPAWN, 20000);
+                    }
+                }
+            }
+        }
+    };
+};
+/*######
 ## AddSC
 ######*/
 
@@ -549,4 +655,6 @@ void AddSC_blades_edge_mountains()
     new go_legion_obelisk();
     new npc_bloodmaul_brutebane();
     new npc_ogre_brute();
+    new mob_aether_ray();
+    new mob_wrangled_aether_ray();
 }

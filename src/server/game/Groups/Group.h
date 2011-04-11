@@ -25,7 +25,6 @@
 #include "LootMgr.h"
 #include "QueryResult.h"
 #include "SharedDefines.h"
-#include "Player.h"
 
 class Creature;
 class GroupReference;
@@ -119,7 +118,7 @@ enum GroupUpdateFlags
 };
 
 #define GROUP_UPDATE_FLAGS_COUNT          20
-                                                                // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+                                                                // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19
 static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 2, 2, 2, 1, 2, 2, 2, 2, 4, 8, 8, 1, 2, 2, 2, 1, 2, 2, 8};
 
 class Roll : public LootValidatorRef
@@ -186,11 +185,11 @@ class Group
         bool   Create(Player *leader);
         void   LoadGroupFromDB(Field *field);
         void   LoadMemberFromDB(uint32 guidLow, uint8 memberFlags, uint8 subgroup, uint8 roles);
-        bool   AddInvite(Player* player);
-        void   RemoveInvite(Player* player);
+        bool   AddInvite(Player *player);
+        void   RemoveInvite(Player *player);
         void   RemoveAllInvites();
-        bool   AddLeaderInvite(Player* player);
-        bool   AddMember(Player* player);
+        bool   AddLeaderInvite(Player *player);
+        bool   AddMember(Player *player);
         bool   RemoveMember(const uint64 &guid, const RemoveMethod &method = GROUP_REMOVEMETHOD_DEFAULT, uint64 kicker = 0, const char* reason = NULL);
         void   ChangeLeader(const uint64 &guid);
         void   SetLootMethod(LootMethod method);
@@ -214,7 +213,7 @@ class Group
         const uint64& GetLooterGuid() const;
         ItemQualities GetLootThreshold() const;
 
-        uint32 GetDbStoreId() { return m_dbStoreId; };
+        uint32 GetStorageId() { return m_storageId; };
 
         // member manipulation methods
         bool IsMember(const uint64& guid) const;
@@ -233,6 +232,7 @@ class Group
         MemberSlotList const& GetMemberSlots() const;
         GroupReference* GetFirstMember();
         uint32 GetMembersCount() const;
+
         uint8 GetMemberGroup(uint64 guid) const;
 
         void ConvertToLFG();
@@ -242,7 +242,7 @@ class Group
         GroupJoinBattlegroundResult CanJoinBattlegroundQueue(Battleground const* bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint32 MinPlayerCount, uint32 MaxPlayerCount, bool isRated, uint32 arenaSlot);
 
         void ChangeMembersGroup(const uint64 &guid, const uint8 &group);
-        void ChangeMembersGroup(Player* player, const uint8 &group);
+        void ChangeMembersGroup(Player *player, const uint8 &group);
         void SetTargetIcon(uint8 id, uint64 whoGuid, uint64 targetGuid);
         void SetGroupMemberFlag(uint64 guid, const bool &apply, GroupMemberFlags flag);
         void RemoveUniqueGroupMemberFlag(GroupMemberFlags flag);
@@ -262,8 +262,8 @@ class Group
         void SendUpdate();
         void UpdatePlayerOutOfRange(Player* pPlayer);
                                                             // ignore: GUID of player that will be ignored
-        void BroadcastPacket(WorldPacket* packet, bool ignorePlayersInBGRaid, int group=-1, uint64 ignore=0);
-        void BroadcastReadyCheck(WorldPacket* packet);
+        void BroadcastPacket(WorldPacket *packet, bool ignorePlayersInBGRaid, int group=-1, uint64 ignore=0);
+        void BroadcastReadyCheck(WorldPacket *packet);
         void OfflineReadyCheck();
 
         /*********************************************************/
@@ -302,7 +302,7 @@ class Group
 
     protected:
         bool _setMembersGroup(const uint64 &guid, const uint8 &group);
-        void _homebindIfInstance(Player* player);
+        void _homebindIfInstance(Player *player);
 
         void _initRaidSubGroupsCounter();
         member_citerator _getMemberCSlot(uint64 Guid) const;
@@ -330,6 +330,6 @@ class Group
         uint64              m_guid;
         uint32              m_counter;                      // used only in SMSG_GROUP_LIST
         uint32              m_maxEnchantingLevel;
-        uint32              m_dbStoreId;                    // Represents the ID used in database (Can be reused by other groups if group was disbanded)
+        uint32              m_storageId;                    // Represents the ID used in database (Can be reused by other groups if group was disbanded)
 };
 #endif

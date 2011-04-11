@@ -24,6 +24,7 @@ SDCategory: Blackwing Lair
 EndScriptData */
 
 #include "ScriptPCH.h"
+#include "blackwing_lair.h"
 
 #define SPELL_SHADOWFLAME           22539
 #define SPELL_WINGBUFFET            18500
@@ -42,7 +43,12 @@ public:
 
     struct boss_ebonrocAI : public ScriptedAI
     {
-        boss_ebonrocAI(Creature *c) : ScriptedAI(c) {}
+        boss_ebonrocAI(Creature *c) : ScriptedAI(c)
+        {
+            pInstance = c->GetInstanceScript();
+        }
+
+        InstanceScript* pInstance;
 
         uint32 ShadowFlame_Timer;
         uint32 WingBuffet_Timer;
@@ -55,11 +61,35 @@ public:
             WingBuffet_Timer = 30000;
             ShadowOfEbonroc_Timer = 45000;
             Heal_Timer = 1000;
+
+            if(pInstance)
+                pInstance->SetData(ENCOUNTER_EBONROC,NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoZoneInCombat();
+
+        if(pInstance)
+            pInstance->SetData(ENCOUNTER_EBONROC,IN_PROGRESS);
+    }
+
+    void JustDied(Unit *killer)
+    {
+        if(pInstance)
+            pInstance->SetData(ENCOUNTER_EBONROC,DONE);
+    }
+
+    void SpellHitTarget(Unit *pTarget, const SpellEntry *spell)
+    {
+        if(spell->Id == SPELL_SHADOWFLAME)
+        {
+            if(pTarget->GetTypeId() == TYPEID_PLAYER)
+            {
+                if(!pTarget->HasAuraEffect(22683,0))
+                    me->CastSpell(pTarget,22682,true);
+            }
+        }
         }
 
         void UpdateAI(const uint32 diff)
@@ -71,7 +101,7 @@ public:
             if (ShadowFlame_Timer <= diff)
             {
                 DoCast(me->getVictim(), SPELL_SHADOWFLAME);
-                ShadowFlame_Timer = urand(12000, 15000);
+                ShadowFlame_Timer = urand(12000,15000);
             } else ShadowFlame_Timer -= diff;
 
             //Wing Buffet Timer
@@ -85,7 +115,7 @@ public:
             if (ShadowOfEbonroc_Timer <= diff)
             {
                 DoCast(me->getVictim(), SPELL_SHADOWOFEBONROC);
-                ShadowOfEbonroc_Timer = urand(25000, 350000);
+                ShadowOfEbonroc_Timer = urand(25000,350000);
             } else ShadowOfEbonroc_Timer -= diff;
 
             if (me->getVictim()->HasAura(SPELL_SHADOWOFEBONROC))
@@ -93,7 +123,7 @@ public:
                 if (Heal_Timer <= diff)
                 {
                     DoCast(me, SPELL_HEAL);
-                    Heal_Timer = urand(1000, 3000);
+                    Heal_Timer = urand(1000,3000);
                 } else Heal_Timer -= diff;
             }
 

@@ -23,197 +23,316 @@ SDComment: Correct spawning and Event NYI
 SDCategory: Molten Core
 EndScriptData */
 
-#include "ObjectMgr.h"
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
-#include "ScriptedGossip.h"
+#include "ScriptPCH.h"
 #include "molten_core.h"
 
-enum Texts
-{
-    SAY_AGGRO           = -1409003,
-    SAY_SPAWN           = -1409004,
-    SAY_SLAY            = -1409005,
-    SAY_SPECIAL         = -1409006,
-    SAY_DEFEAT          = -1409007,
+#define SAY_AGGRO           -1409003
+#define SAY_SPAWN           -1409004
+#define SAY_SLAY            -1409005
+#define SAY_SPECIAL         -1409006
+#define SAY_DEFEAT          -1409007
 
-    SAY_SUMMON_MAJ      = -1409008,
-    SAY_ARRIVAL1_RAG    = -1409009,
-    SAY_ARRIVAL2_MAJ    = -1409010,
-    SAY_ARRIVAL3_RAG    = -1409011,
-    SAY_ARRIVAL5_RAG    = -1409012,
-};
+#define SAY_SUMMON_MAJ      -1409008
+#define SAY_ARRIVAL1_RAG    -1409009
+#define SAY_ARRIVAL2_MAJ    -1409010
+#define SAY_ARRIVAL3_RAG    -1409011
+#define SAY_ARRIVAL5_RAG    -1409012
 
-enum Spells
-{
-    SPELL_MAGIC_REFLECTION  = 20619,
-    SPELL_DAMAGE_REFLECTION = 21075,
-    SPELL_BLAST_WAVE        = 20229,
-    SPELL_AEGIS_OF_RAGNAROS = 20620,
-    SPELL_TELEPORT          = 20618,
-    SPELL_SUMMON_RAGNAROS   = 19774,
-};
+#define SPAWN_RAG_X         838.51
+#define SPAWN_RAG_Y         -829.84
+#define SPAWN_RAG_Z         -232.00
+#define SPAWN_RAG_O         1.70
 
-#define GOSSIP_HELLO 4995
-#define GOSSIP_SELECT "Tell me more."
+#define SPAWN_DOMO_X         830.64
+#define SPAWN_DOMO_Y         -814.08
+#define SPAWN_DOMO_Z         -228.92
+#define SPAWN_DOMO_O         5.21
 
-enum Events
-{
-    EVENT_MAGIC_REFLECTION  = 1,
-    EVENT_DAMAGE_REFLECTION = 2,
-    EVENT_BLAST_WAVE        = 3,
-    EVENT_TELEPORT          = 4,
+#define SPELL_MAGIC_REFLECTION      20619
+#define SPELL_DAMAGE_REFLECTION     21075
 
-    EVENT_OUTRO_1           = 5,
-    EVENT_OUTRO_2           = 6,
-    EVENT_OUTRO_3           = 7,
-};
+#define SPELL_BLASTWAVE             20229
+#define SPELL_AEGIS                 20620                   //This is self casted whenever we are below 50%
+#define SPELL_TELEPORT              20618
+#define SPELL_SUMMON_RAGNAROS       19774
+
+#define ENTRY_FLAMEWALKER_HEALER    11663
+#define ENTRY_FLAMEWALKER_ELITE     11664
 
 class boss_majordomo : public CreatureScript
 {
-    public:
-        boss_majordomo() : CreatureScript("boss_majordomo") { }
+public:
+    boss_majordomo() : CreatureScript("boss_majordomo") { }
 
-        struct boss_majordomoAI : public BossAI
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new boss_majordomoAI (pCreature);
+    }
+
+    struct boss_majordomoAI : public ScriptedAI
+    {
+        boss_majordomoAI(Creature *c) : ScriptedAI(c)
         {
-            boss_majordomoAI(Creature *pCreature) : BossAI(pCreature, BOSS_MAJORDOMO_EXECUTUS)
+            m_pInstance = c->GetInstanceScript();
+            AddsKillCounter = 0;
+        }
+
+        InstanceScript *m_pInstance;
+
+        uint32 MagicReflection_Timer;
+        uint32 DamageReflection_Timer;
+        uint32 Blastwave_Timer;
+        uint32 Teleport_Timer;
+        uint32 Spawn_Timer;
+
+        uint32 AddsKillCounter;
+
+        void Reset()
+        {
+            MagicReflection_Timer =  30000;
+            DamageReflection_Timer = 15000;
+            Teleport_Timer = 15000;
+            Blastwave_Timer = 10000;
+            Spawn_Timer = 10000;
+
+            if (m_pInstance)
+                m_pInstance->SetData(DATA_MAJORDOMOISDEAD,NOT_STARTED);
+
+
+            if(!AreBossesDown())
             {
+                me->SetVisible(false);
+                me->setFaction(35);
+            }
+
+            if(m_pInstance && m_pInstance->GetData(DATA_MAJORDOMOISDEAD) != DONE)
+            {
+                std::list<Creature*> list;
+                GetCreatureListWithEntryInGrid(list,me,ENTRY_FLAMEWALKER_HEALER,150.0f);
+
+                for (std::list<Creature*>::iterator iter = list.begin(); iter != list.end(); ++iter)
+                {
+                    Creature *c = *iter;
+                    if (c)
+                    {
+                        if(c->isAlive())
+                            c->AI()->EnterEvadeMode();
+                        else
+                            c->Respawn(true);
+                    }
+                }
+            
+                GetCreatureListWithEntryInGrid(list,me,ENTRY_FLAMEWALKER_ELITE,150.0f);
+                for (std::list<Creature*>::iterator iter = list.begin(); iter != list.end(); ++iter)
+                {
+                    Creature *c = *iter;
+                    if (c)
+                    {
+                        if(c->isAlive())
+                            c->AI()->EnterEvadeMode();
+                        else
+                            c->Respawn(true);
+                    }
+                }
+
+                AddsKillCounter = 0;
+            }else
+            {
+                me->setFaction(35);
+            }
+        }
+
+        void AddKilled()
+        {
+            if(m_pInstance && m_pInstance->GetData(DATA_MAJORDOMOISDEAD) == IN_PROGRESS)
+                AddsKillCounter += 1;
             }
 
             void KilledUnit(Unit* /*victim*/)
             {
-                if (urand(0, 99) < 25)
-                    DoScriptText(SAY_SLAY, me);
+                if (rand()%5)
+                    return;
+
+                DoScriptText(SAY_SLAY, me);
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit * /*who*/)
             {
-                BossAI::EnterCombat(who);
                 DoScriptText(SAY_AGGRO, me);
-                events.ScheduleEvent(EVENT_MAGIC_REFLECTION, 30000);
-                events.ScheduleEvent(EVENT_DAMAGE_REFLECTION, 15000);
-                events.ScheduleEvent(EVENT_BLAST_WAVE, 10000);
-                events.ScheduleEvent(EVENT_TELEPORT, 20000);
-            }
 
-            void UpdateAI(const uint32 diff)
+            if (m_pInstance)
+                m_pInstance->SetData(DATA_MAJORDOMOISDEAD,IN_PROGRESS);
+        }
+
+        bool AreBossesDown()
+        {
+            if(m_pInstance)
             {
-                if (instance && instance->GetBossState(BOSS_MAJORDOMO_EXECUTUS) != DONE)
-                {
-                    if (!UpdateVictim())
-                        return;
-
-                    events.Update(diff);
-
-                    if (!me->FindNearestCreature(NPC_FLAMEWAKER_HEALER, 100.0f) && !me->FindNearestCreature(NPC_FLAMEWAKER_ELITE, 100.0f))
-                    {
-                        instance->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, me->GetEntry(), me);
-                        me->setFaction(35);
-                        me->AI()->EnterEvadeMode();
-                        DoScriptText(SAY_DEFEAT, me);
-                        _JustDied();
-                        events.ScheduleEvent(EVENT_OUTRO_1, 32000);
-                        return;
-                    }
-
-                    if (me->HasUnitState(UNIT_STAT_CASTING))
-                        return;
-
-                    if (HealthBelowPct(50))
-                        DoCast(me, SPELL_AEGIS_OF_RAGNAROS, true);
-
-                    while (uint32 eventId = events.ExecuteEvent())
-                    {
-                        switch (eventId)
-                        {
-                            case EVENT_MAGIC_REFLECTION:
-                                DoCast(me, SPELL_MAGIC_REFLECTION);
-                                events.ScheduleEvent(EVENT_MAGIC_REFLECTION, 30000);
-                                break;
-                            case EVENT_DAMAGE_REFLECTION:
-                                DoCast(me, SPELL_DAMAGE_REFLECTION);
-                                events.ScheduleEvent(EVENT_DAMAGE_REFLECTION, 30000);
-                                break;
-                            case EVENT_BLAST_WAVE:
-                                DoCastVictim(SPELL_BLAST_WAVE);
-                                events.ScheduleEvent(EVENT_BLAST_WAVE, 10000);
-                                break;
-                            case EVENT_TELEPORT:
-                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                                    DoCast(target, SPELL_TELEPORT);
-                                events.ScheduleEvent(EVENT_TELEPORT, 20000);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-
-                    DoMeleeAttackIfReady();
-                }
-                else
-                {
-                    events.Update(diff);
-
-                    while (uint32 eventId = events.ExecuteEvent())
-                    {
-                        switch (eventId)
-                        {
-                            case EVENT_OUTRO_1:
-                                me->NearTeleportTo(RagnarosTelePos.GetPositionX(), RagnarosTelePos.GetPositionY(), RagnarosTelePos.GetPositionZ(), RagnarosTelePos.GetOrientation());
-                                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                                break;
-                            case EVENT_OUTRO_2:
-                                if (instance)
-                                    instance->instance->SummonCreature(NPC_RAGNAROS, RagnarosSummonPos);
-                                break;
-                            case EVENT_OUTRO_3:
-                                DoScriptText(SAY_ARRIVAL2_MAJ, me);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
+                return m_pInstance->GetData(DATA_GARRISDEAD) == DONE && m_pInstance->GetData(DATA_GEDDONISDEAD) == DONE && m_pInstance->GetData(DATA_GEHENNASISDEAD) == DONE &&
+                    m_pInstance->GetData(DATA_GOLEMAGGISDEAD) == DONE && m_pInstance->GetData(DATA_LUCIFRONISDEAD) == DONE && m_pInstance->GetData(DATA_MAGMADARISDEAD) == DONE &&
+                    m_pInstance->GetData(DATA_SHAZZRAHISDEAD) == DONE && m_pInstance->GetData(DATA_SULFURONISDEAD) == DONE;
             }
 
-            void DoAction(const int32 action)
+            return false;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if(!me->IsVisible())
             {
-                if (action == ACTION_START_RAGNAROS)
+                if(AreBossesDown())
                 {
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    DoScriptText(SAY_SUMMON_MAJ, me);
-                    events.ScheduleEvent(EVENT_OUTRO_2, 8000);
-                    events.ScheduleEvent(EVENT_OUTRO_3, 24000);
-                }
-                else if (action == ACTION_START_RAGNAROS_ALT)
-                {
-                    me->setFaction(35);
-                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->SetVisible(true);
+                    me->setFaction(14);
                 }
             }
-        };
 
-        bool OnGossipHello(Player* player, Creature* creature)
+            if(m_pInstance && m_pInstance->GetData(DATA_MAJORDOMOISDEAD) == DONE)
+            {
+                if(me->GetPositionY() < -1000)
+                {
+                    if(Spawn_Timer <= diff)
+                    {
+                        me->SetVisible(false);
+                        me->DealDamage(me,me->GetHealth());
+                        me->RemoveCorpse();
+                        //DoTeleportTo(SPAWN_DOMO_X,SPAWN_DOMO_Y,SPAWN_DOMO_Z);
+                        //me->Relocate(SPAWN_DOMO_X,SPAWN_DOMO_Y,SPAWN_DOMO_Z,SPAWN_DOMO_O);
+                        //me->SetHomePosition(SPAWN_DOMO_X,SPAWN_DOMO_Y,SPAWN_DOMO_Z,SPAWN_DOMO_O);
+                    }else Spawn_Timer -= diff;
+                }
+            }
+
+            if (!UpdateVictim())
+                return;
+
+            if(AddsKillCounter >= 8)
+            {
+                m_pInstance->SetData(DATA_MAJORDOMOISDEAD,DONE);
+                me->AI()->EnterEvadeMode();
+            }
+
+            //Cast Ageis if less than 50% hp
+            if (HealthBelowPct(50))
+            {
+                DoCast(me, SPELL_AEGIS);
+            }
+
+            if (MagicReflection_Timer <= diff)
+            {
+                if(Unit* target = DoSelectLowestHpFriendly(100))
+                {
+                    if(target->isAlive())
+                        DoCast(target, SPELL_MAGIC_REFLECTION);
+                    MagicReflection_Timer = 30000;
+                }
+            } else MagicReflection_Timer -= diff;
+
+            if (DamageReflection_Timer <= diff)
+            {
+                if(Unit* target = DoSelectLowestHpFriendly(100))
+                {
+                    if(target->isAlive())
+                        DoCast(target, SPELL_DAMAGE_REFLECTION);
+                    DamageReflection_Timer = 30000;
+                }
+            } else DamageReflection_Timer -= diff;
+
+            //Blastwave_Timer
+            if (Blastwave_Timer <= diff)
+            {
+                DoCast(me->getVictim(), SPELL_BLASTWAVE);
+                Blastwave_Timer = 10000;
+            } else Blastwave_Timer -= diff;
+
+            if (Teleport_Timer <= diff)
+            {
+                DoCast(me->getVictim(),SPELL_TELEPORT);
+                Teleport_Timer = 30000;
+            }else Teleport_Timer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class mob_flamewalker : public CreatureScript
+{
+public:
+    mob_flamewalker() : CreatureScript("mob_flamewalker") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new mob_flamewalkerAI (pCreature);
+    }
+
+    struct mob_flamewalkerAI : public ScriptedAI
+    {
+        mob_flamewalkerAI(Creature *c) : ScriptedAI(c)
         {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SELECT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-            player->SEND_GOSSIP_MENU(GOSSIP_HELLO, creature->GetGUID());
-            return true;
+            m_pInstance = c->GetInstanceScript();
         }
 
-        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 /*uiAction*/)
+        InstanceScript *m_pInstance;
+
+        void Reset()
         {
-            player->CLOSE_GOSSIP_MENU();
-            creature->AI()->DoAction(ACTION_START_RAGNAROS);
-            return true;
+            if(!AreBossesDown())
+            {
+                me->SetVisible(false);
+                me->setFaction(35);
+            }
         }
 
-        CreatureAI* GetAI(Creature* creature) const
+        void EnterCombat(Unit *who)
         {
-            return new boss_majordomoAI(creature);
+            if (m_pInstance)
+                m_pInstance->SetData(DATA_MAJORDOMOISDEAD,IN_PROGRESS);
         }
+
+        void JustDied(Unit *killer)
+        {
+            if(m_pInstance)
+            {
+                Creature* Majodomo = Creature::GetCreature((*me),m_pInstance->GetData64(DATA_MAJORDOMO));
+                if(Majodomo)
+                    CAST_AI(boss_majordomo::boss_majordomoAI,Majodomo->AI())->AddKilled();
+            }
+        }
+
+        bool AreBossesDown()
+        {
+            if(m_pInstance)
+            {
+                return m_pInstance->GetData(DATA_GARRISDEAD) == DONE && m_pInstance->GetData(DATA_GEDDONISDEAD) == DONE && m_pInstance->GetData(DATA_GEHENNASISDEAD) == DONE &&
+                    m_pInstance->GetData(DATA_GOLEMAGGISDEAD) == DONE && m_pInstance->GetData(DATA_LUCIFRONISDEAD) == DONE && m_pInstance->GetData(DATA_MAGMADARISDEAD) == DONE &&
+                    m_pInstance->GetData(DATA_SHAZZRAHISDEAD) == DONE && m_pInstance->GetData(DATA_SULFURONISDEAD) == DONE;
+            }
+
+            return false;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if(!me->IsVisible())
+            {
+                if(AreBossesDown())
+                {
+                    me->SetVisible(true);
+                    me->setFaction(14);
+                }
+            }
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
 void AddSC_boss_majordomo()
 {
     new boss_majordomo();
+    new mob_flamewalker(); //UPDATE creature_template SET scriptname = 'mob_flamewalker' WHERE entry IN (11664,11663);
 }

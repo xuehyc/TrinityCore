@@ -1,17 +1,8 @@
-# Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
-#
-# This file is free software; as a special exception the author gives
-# unlimited permission to copy and/or distribute it, with or without
-# modifications, as long as this notice is preserved.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
   Northrend/isle_of_conquest.cpp
   Northrend/storm_peaks.cpp
+  Northrend/wintergrasp.cpp
   Northrend/Ulduar/HallsOfLightning/instance_halls_of_lightning.cpp
   Northrend/Ulduar/HallsOfLightning/boss_bjarngrim.cpp
   Northrend/Ulduar/HallsOfLightning/halls_of_lightning.h
@@ -41,20 +32,16 @@ set(scripts_STAT_SRCS
   Northrend/Ulduar/HallsOfStone/boss_maiden_of_grief.cpp
   Northrend/Ulduar/HallsOfStone/boss_sjonnir.cpp
   Northrend/Ulduar/HallsOfStone/halls_of_stone.cpp
-  Northrend/ChamberOfAspects/ObsidianSanctum/instance_obsidian_sanctum.cpp
-  Northrend/ChamberOfAspects/ObsidianSanctum/obsidian_sanctum.h
-  Northrend/ChamberOfAspects/ObsidianSanctum/boss_sartharion.cpp
-  Northrend/ChamberOfAspects/RubySanctum/instance_ruby_sanctum.cpp
-  Northrend/ChamberOfAspects/RubySanctum/ruby_sanctum.h
-  Northrend/ChamberOfAspects/RubySanctum/ruby_sanctum.cpp
-  Northrend/ChamberOfAspects/RubySanctum/boss_baltharus_the_warborn.cpp
-  Northrend/ChamberOfAspects/RubySanctum/boss_saviana_ragefire.cpp
-  Northrend/ChamberOfAspects/RubySanctum/boss_general_zarithrian.cpp
+  Northrend/ObsidianSanctum/instance_obsidian_sanctum.cpp
+  Northrend/ObsidianSanctum/obsidian_sanctum.h
+  Northrend/ObsidianSanctum/boss_sartharion.cpp
+  Northrend/ObsidianSanctum/mob_obsidian_sanctum.cpp
   Northrend/FrozenHalls/HallsOfReflection/halls_of_reflection.h
   Northrend/FrozenHalls/HallsOfReflection/boss_falric.cpp
   Northrend/FrozenHalls/HallsOfReflection/instance_halls_of_reflection.cpp
   Northrend/FrozenHalls/HallsOfReflection/halls_of_reflection.cpp
   Northrend/FrozenHalls/HallsOfReflection/boss_marwyn.cpp
+  Northrend/FrozenHalls/HallsOfReflection/boss_the_lich_king_hor.cpp
   Northrend/FrozenHalls/PitOfSaron/boss_forgemaster_garfrost.cpp
   Northrend/FrozenHalls/PitOfSaron/boss_krickandick.cpp
   Northrend/FrozenHalls/PitOfSaron/pit_of_saron.cpp
@@ -114,7 +101,8 @@ set(scripts_STAT_SRCS
   Northrend/Naxxramas/boss_sapphiron.cpp
   Northrend/Naxxramas/instance_naxxramas.cpp
   Northrend/Naxxramas/boss_grobbulus.cpp
-  Northrend/Naxxramas/boss_noth.cpp
+  Northrend/Naxxramas/boss_noth.cpp 
+  Northrend/Naxxramas/mob_naxxramas.cpp
   Northrend/crystalsong_forest.cpp
   Northrend/VaultOfArchavon/boss_archavon.cpp
   Northrend/VaultOfArchavon/boss_koralon.cpp
@@ -171,7 +159,6 @@ set(scripts_STAT_SRCS
   Northrend/IcecrownCitadel/boss_professor_putricide.cpp
   Northrend/IcecrownCitadel/boss_blood_prince_council.cpp
   Northrend/IcecrownCitadel/boss_blood_queen_lana_thel.cpp
-  Northrend/IcecrownCitadel/boss_valithria_dreamwalker.cpp
   Northrend/IcecrownCitadel/boss_sindragosa.cpp
   Northrend/zuldrak.cpp
   Northrend/icecrown.cpp

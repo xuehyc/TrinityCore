@@ -270,10 +270,10 @@ enum SpellAttr0
     SPELL_ATTR0_UNK4                             = 0x00000010, //  4
     SPELL_ATTR0_TRADESPELL                       = 0x00000020, //  5 trade spells, will be added by client to a sublist of profession spell
     SPELL_ATTR0_PASSIVE                          = 0x00000040, //  6 Passive spell
-    SPELL_ATTR0_HIDDEN_CLIENTSIDE                = 0x00000080, //  7 Spells with this attribute are not visible in spellbook or aura bar
-    SPELL_ATTR0_HIDE_IN_COMBAT_LOG               = 0x00000100, //  8 This attribite controls whether spell appears in combat logs
-    SPELL_ATTR0_TARGET_MAINHAND_ITEM             = 0x00000200, //  9 Client automatically selects item from mainhand slot as a cast target
-    SPELL_ATTR0_UNK10                            = 0x00000400, // 10
+    SPELL_ATTR0_UNK7                             = 0x00000080, //  7 visible?
+    SPELL_ATTR0_UNK8                             = 0x00000100, //  8
+    SPELL_ATTR0_UNK9                             = 0x00000200, //  9
+    SPELL_ATTR0_UNK10                            = 0x00000400, // 10 on next swing 2
     SPELL_ATTR0_UNK11                            = 0x00000800, // 11
     SPELL_ATTR0_DAYTIME_ONLY                     = 0x00001000, // 12 only useable at daytime, not set in 2.4.2
     SPELL_ATTR0_NIGHT_ONLY                       = 0x00002000, // 13 only useable at night, not set in 2.4.2
@@ -285,7 +285,7 @@ enum SpellAttr0
     SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION         = 0x00080000, // 19 spelldamage depends on caster level
     SPELL_ATTR0_STOP_ATTACK_TARGET               = 0x00100000, // 20 Stop attack after use this spell (and not begin attack if use)
     SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK     = 0x00200000, // 21 Cannot be dodged/parried/blocked
-    SPELL_ATTR0_FORCE_FACING_TARGET              = 0x00400000, // 22 Client automatically forces player to face target when casting
+    SPELL_ATTR0_UNK22                            = 0x00400000, // 22 shoot spells
     SPELL_ATTR0_CASTABLE_WHILE_DEAD              = 0x00800000, // 23 castable while dead?
     SPELL_ATTR0_CASTABLE_WHILE_MOUNTED           = 0x01000000, // 24 castable while mounted
     SPELL_ATTR0_DISABLED_WHILE_ACTIVE            = 0x02000000, // 25 Activate and start cooldown after aura fade or remove summoned creature or go
@@ -301,11 +301,11 @@ enum SpellAttr1
 {
     SPELL_ATTR1_DISMISS_PET                      = 0x00000001, //  0 dismiss pet and not allow to summon new one?
     SPELL_ATTR1_DRAIN_ALL_POWER                  = 0x00000002, //  1 use all power (Only paladin Lay of Hands and Bunyanize)
-    SPELL_ATTR1_CHANNELED_1                      = 0x00000004, //  2
+    SPELL_ATTR1_CHANNELED_1                      = 0x00000004, //  2 channeled target
     SPELL_ATTR1_PUT_CASTER_IN_COMBAT             = 0x00000008, //  3 spells that cause a caster to enter a combat
     SPELL_ATTR1_UNK4                             = 0x00000010, //  4 stealth and whirlwind
     SPELL_ATTR1_NOT_BREAK_STEALTH                = 0x00000020, //  5 Not break stealth
-    SPELL_ATTR1_CHANNELED_2                      = 0x00000040, //  6
+    SPELL_ATTR1_CHANNELED_2                      = 0x00000040, //  6 channeled self
     SPELL_ATTR1_NEGATIVE                         = 0x00000080, //  7
     SPELL_ATTR1_NOT_IN_COMBAT_TARGET             = 0x00000100, //  8 Spell req target not to be in combat state
     SPELL_ATTR1_UNK9                             = 0x00000200, //  9 melee spells
@@ -323,7 +323,7 @@ enum SpellAttr1
     SPELL_ATTR1_UNK21                            = 0x00200000, // 21
     SPELL_ATTR1_REQ_COMBO_POINTS2                = 0x00400000, // 22 Req combo points on target
     SPELL_ATTR1_UNK23                            = 0x00800000, // 23
-    SPELL_ATTR1_UNK24                            = 0x01000000, // 24 only fishing spells
+    SPELL_ATTR1_UNK24                            = 0x01000000, // 24 Req fishing pole??
     SPELL_ATTR1_UNK25                            = 0x02000000, // 25
     SPELL_ATTR1_UNK26                            = 0x04000000, // 26 works correctly with [target=focus] and [target=mouseover] macros?
     SPELL_ATTR1_UNK27                            = 0x08000000, // 27
@@ -389,7 +389,7 @@ enum SpellAttr3
     SPELL_ATTR3_UNK15                            = 0x00008000, // 15 Auto Shoot, Shoot, Throw,  - this is autoshot flag
     SPELL_ATTR3_UNK16                            = 0x00010000, // 16 no triggers effects that trigger on casting a spell?? (15290 - 2.2ptr change)
     SPELL_ATTR3_NO_INITIAL_AGGRO                 = 0x00020000, // 17 Soothe Animal, 39758, Mind Soothe
-    SPELL_ATTR3_IGNORE_HIT_RESULT                = 0x00040000, // 18 Spell should always hit its target
+    SPELL_ATTR3_UNK18                            = 0x00040000, // 18 added to Explosive Trap Effect 3.3.0, removed from Mutilate 3.3.0
     SPELL_ATTR3_DISABLE_PROC                     = 0x00080000, // 19 during aura proc no spells can trigger (20178, 20375)
     SPELL_ATTR3_DEATH_PERSISTENT                 = 0x00100000, // 20 Death persistent spells
     SPELL_ATTR3_UNK21                            = 0x00200000, // 21
@@ -410,7 +410,7 @@ enum SpellAttr4
     SPELL_ATTR4_UNK0                             = 0x00000001, //  0
     SPELL_ATTR4_UNK1                             = 0x00000002, //  1 proc on finishing move?
     SPELL_ATTR4_UNK2                             = 0x00000004, //  2
-    SPELL_ATTR4_UNK3                             = 0x00000008, //  3
+    SPELL_ATTR4_CANT_PROC_FROM_SELFCAST          = 0x00000008, //  3
     SPELL_ATTR4_UNK4                             = 0x00000010, //  4 This will no longer cause guards to attack on use??
     SPELL_ATTR4_UNK5                             = 0x00000020, //  5
     SPELL_ATTR4_NOT_STEALABLE                    = 0x00000040, //  6 although such auras might be dispellable, they cannot be stolen
@@ -421,10 +421,10 @@ enum SpellAttr4
     SPELL_ATTR4_UNK11                            = 0x00000800, // 11
     SPELL_ATTR4_UNK12                            = 0x00001000, // 12
     SPELL_ATTR4_UNK13                            = 0x00002000, // 13
-    SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS        = 0x00004000, // 14 doesn't break auras by damage from these spells
+    SPELL_ATTR4_UNK14                            = 0x00004000, // 14
     SPELL_ATTR4_UNK15                            = 0x00008000, // 15
-    SPELL_ATTR4_NOT_USABLE_IN_ARENA              = 0x00010000, // 16
-    SPELL_ATTR4_USABLE_IN_ARENA                  = 0x00020000, // 17
+    SPELL_ATTR4_NOT_USABLE_IN_ARENA              = 0x00010000, // 16 not usable in arena
+    SPELL_ATTR4_USABLE_IN_ARENA                  = 0x00020000, // 17 usable in arena
     SPELL_ATTR4_UNK18                            = 0x00040000, // 18
     SPELL_ATTR4_UNK19                            = 0x00080000, // 19
     SPELL_ATTR4_NOT_CHECK_SELFCAST_POWER         = 0x00100000, // 20 supersedes message "More powerful spell applied" for self casts.
@@ -452,11 +452,11 @@ enum SpellAttr5
     SPELL_ATTR5_UNK6                             = 0x00000040, //  6
     SPELL_ATTR5_UNK7                             = 0x00000080, //  7
     SPELL_ATTR5_UNK8                             = 0x00000100, //  8
-    SPELL_ATTR5_START_PERIODIC_AT_APPLY          = 0x00000200, //  9 begin periodic tick at aura apply
-    SPELL_ATTR5_HIDE_DURATION                    = 0x00000400, // 10 do not send duration to client
+    SPELL_ATTR5_START_PERIODIC_AT_APPLY          = 0x00000200, //  9  begin periodic tick at aura apply
+    SPELL_ATTR5_UNK10                            = 0x00000400, // 10
     SPELL_ATTR5_UNK11                            = 0x00000800, // 11
     SPELL_ATTR5_UNK12                            = 0x00001000, // 12
-    SPELL_ATTR5_HASTE_AFFECT_DURATION            = 0x00002000, // 13 haste effects decrease duration of this
+    SPELL_ATTR5_UNK13                            = 0x00002000, // 13
     SPELL_ATTR5_UNK14                            = 0x00004000, // 14
     SPELL_ATTR5_UNK15                            = 0x00008000, // 15
     SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK         = 0x00010000, // 16 this allows spells with EquippedItemClass to affect spells from other items if the required item is equipped
@@ -518,13 +518,13 @@ enum SpellAttr7
     SPELL_ATTR7_UNK0                             = 0x00000001, //  0 Shaman's new spells (Call of the ...), Feign Death.
     SPELL_ATTR7_UNK1                             = 0x00000002, //  1 Not set in 3.2.2a.
     SPELL_ATTR7_REACTIVATE_AT_RESURRECT          = 0x00000004, //  2 Paladin's auras and 65607 only.
-    SPELL_ATTR7_IS_CHEAT_SPELL                   = 0x00000008, //  3 Cannot cast if caster doesn't have UnitFlag2 & UNIT_FLAG2_ALLOW_CHEAT_SPELLS
+    SPELL_ATTR7_DISABLED_CLIENT_SIDE             = 0x00000008, //  3 used only by client to disable spells client-side. some sort of special player flag (0x40000) bypasses that restriction
     SPELL_ATTR7_UNK4                             = 0x00000010, //  4 Only 66109 test spell.
     SPELL_ATTR7_SUMMON_PLAYER_TOTEM              = 0x00000020, //  5 Only Shaman player totems.
     SPELL_ATTR7_UNK6                             = 0x00000040, //  6 Dark Surge, Surge of Light, Burning Breath triggers (boss spells).
     SPELL_ATTR7_UNK7                             = 0x00000080, //  7 66218 (Launch) spell.
-    SPELL_ATTR7_HORDE_ONLY                       = 0x00000100, //  8 Teleports, mounts and other spells.
-    SPELL_ATTR7_ALLIANCE_ONLY                    = 0x00000200, //  9 Teleports, mounts and other spells.
+    SPELL_ATTR7_UNK8                             = 0x00000100, //  8 Teleports, mounts and other spells.
+    SPELL_ATTR7_UNK9                             = 0x00000200, //  9 Teleports, mounts and other spells.
     SPELL_ATTR7_DISPEL_CHARGES                   = 0x00000400, // 10 Dispel and Spellsteal individual charges instead of whole aura.
     SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER         = 0x00000800, // 11 Only non-player casts interrupt, though Feral Charge - Bear has it.
     SPELL_ATTR7_UNK12                            = 0x00001000, // 12 Not set in 3.2.2a.
@@ -534,19 +534,7 @@ enum SpellAttr7
     SPELL_ATTR7_UNK16                            = 0x00010000, // 16 Druid spells (29166, 54833, 64372, 68285).
     SPELL_ATTR7_UNK17                            = 0x00020000, // 17 Only 27965 (Suicide) spell.
     SPELL_ATTR7_HAS_CHARGE_EFFECT                = 0x00040000, // 18 Only spells that have Charge among effects.
-    SPELL_ATTR7_ZONE_TELEPORT                    = 0x00080000, // 19 Teleports to specific zones.
-    SPELL_ATTR7_UNK20                            = 0x00100000, // 20
-    SPELL_ATTR7_UNK21                            = 0x00200000, // 21
-    SPELL_ATTR7_UNK22                            = 0x00400000, // 22
-    SPELL_ATTR7_UNK23                            = 0x00800000, // 23
-    SPELL_ATTR7_UNK24                            = 0x01000000, // 24
-    SPELL_ATTR7_UNK25                            = 0x02000000, // 25
-    SPELL_ATTR7_UNK26                            = 0x04000000, // 26
-    SPELL_ATTR7_UNK27                            = 0x08000000, // 27
-    SPELL_ATTR7_UNK28                            = 0x10000000, // 28
-    SPELL_ATTR7_UNK29                            = 0x20000000, // 29
-    SPELL_ATTR7_UNK30                            = 0x40000000, // 30
-    SPELL_ATTR7_UNK31                            = 0x80000000  // 31
+    SPELL_ATTR7_ZONE_TELEPORT                    = 0x00080000  // 19 Teleports to specific zones.
 };
 
 #define MIN_TALENT_SPEC         0
@@ -1087,38 +1075,18 @@ enum SpellCustomErrors
     SPELL_CUSTOM_ERROR_GM_ONLY                          = 65, // Only GMs may use that. Your account has been reported for investigation.
     SPELL_CUSTOM_ERROR_REQUIRES_LEVEL_58                = 66, // You must reach level 58 to use this portal.
     SPELL_CUSTOM_ERROR_AT_HONOR_CAP                     = 67, // You already have the maximum amount of honor.
-    SPELL_CUSTOM_ERROR_68                               = 68, // ""
-    SPELL_CUSTOM_ERROR_69                               = 69, // ""
-    SPELL_CUSTOM_ERROR_70                               = 70, // ""
-    SPELL_CUSTOM_ERROR_71                               = 71, // ""
-    SPELL_CUSTOM_ERROR_72                               = 72, // ""
-    SPELL_CUSTOM_ERROR_73                               = 73, // ""
-    SPELL_CUSTOM_ERROR_74                               = 74, // ""
     SPELL_CUSTOM_ERROR_MUST_HAVE_DEMONIC_CIRCLE         = 75, // You must have a demonic circle active.
     SPELL_CUSTOM_ERROR_AT_MAX_RAGE                      = 76, // You already have maximum rage
     SPELL_CUSTOM_ERROR_REQUIRES_350_ENGINEERING         = 77, // Requires Engineering (350)
     SPELL_CUSTOM_ERROR_SOUL_BELONGS_TO_LICH_KING        = 78, // Your soul belongs to the Lich King
     SPELL_CUSTOM_ERROR_ATTENDANT_HAS_PONY               = 79, // Your attendant already has an Argent Pony
-    SPELL_CUSTOM_ERROR_80                               = 80, // ""
-    SPELL_CUSTOM_ERROR_81                               = 81, // ""
-    SPELL_CUSTOM_ERROR_82                               = 82, // ""
     SPELL_CUSTOM_ERROR_MUST_HAVE_FIRE_TOTEM             = 83, // You must have a Fire Totem active.
     SPELL_CUSTOM_ERROR_CANT_TARGET_VAMPIRES             = 84, // You may not bite other vampires.
     SPELL_CUSTOM_ERROR_PET_ALREADY_AT_YOUR_LEVEL        = 85, // Your pet is already at your level.
     SPELL_CUSTOM_ERROR_MISSING_ITEM_REQUIREMENS         = 86, // You do not meet the level requirements for this item.
     SPELL_CUSTOM_ERROR_TOO_MANY_ABOMINATIONS            = 87, // There are too many Mutated Abominations.
     SPELL_CUSTOM_ERROR_ALL_POTIONS_USED                 = 88, // The potions have all been depleted by Professor Putricide.
-    SPELL_CUSTOM_ERROR_89                               = 89, // ""
     SPELL_CUSTOM_ERROR_REQUIRES_LEVEL_65                = 90, // Requires level 65
-    SPELL_CUSTOM_ERROR_91                               = 91, // ""
-    SPELL_CUSTOM_ERROR_92                               = 92, // ""
-    SPELL_CUSTOM_ERROR_93                               = 93, // ""
-    SPELL_CUSTOM_ERROR_94                               = 94, // ""
-    SPELL_CUSTOM_ERROR_95                               = 95, // ""
-    SPELL_CUSTOM_ERROR_MAX_NUMBER_OF_RECRUITS           = 96, // You already have the max number of recruits.
-    SPELL_CUSTOM_ERROR_MAX_NUMBER_OF_VOLUNTEERS         = 97, // You already have the max number of volunteers.
-    SPELL_CUSTOM_ERROR_FROSTMOURNE_RENDERED_RESSURECT   = 98, // Frostmourne has rendered you unable to ressurect.
-    SPELL_CUSTOM_ERROR_CANT_MOUNT_WITH_SHAPESHIFT       = 99, // You can't mount while affected by that shapeshift.
 };
 
 enum StealthType
@@ -1206,7 +1174,7 @@ enum Mechanics
     MECHANIC_FEAR             = 5,
     MECHANIC_GRIP             = 6,
     MECHANIC_ROOT             = 7,
-    MECHANIC_SLOW_ATTACK      = 8,
+    MECHANIC_PACIFY           = 8,                          //0 spells use this mechanic
     MECHANIC_SILENCE          = 9,
     MECHANIC_SLEEP            = 10,
     MECHANIC_SNARE            = 11,
@@ -1232,14 +1200,14 @@ enum Mechanics
     MECHANIC_ENRAGED          = 31
 };
 
-// Used for spell 42292 Immune Movement Impairment and Loss of Control (0x49967ca6)
+// Used for spell 42292 Immune Movement Impairment and Loss of Control (0x49967da6)
 #define IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (\
     (1<<MECHANIC_CHARM)|(1<<MECHANIC_DISORIENTED)|(1<<MECHANIC_FEAR)| \
-    (1<<MECHANIC_ROOT)|(1<<MECHANIC_SLEEP)|(1<<MECHANIC_SNARE)| \
-    (1<<MECHANIC_STUN)|(1<<MECHANIC_FREEZE)|(1<<MECHANIC_KNOCKOUT)| \
-    (1<<MECHANIC_POLYMORPH)|(1<<MECHANIC_BANISH)|(1<<MECHANIC_SHACKLE)| \
-    (1<<MECHANIC_TURN)|(1<<MECHANIC_HORROR)|(1<<MECHANIC_DAZE)| \
-    (1<<MECHANIC_SAPPED))
+    (1<<MECHANIC_ROOT)|(1<<MECHANIC_PACIFY)|(1<<MECHANIC_SLEEP)| \
+    (1<<MECHANIC_SNARE)|(1<<MECHANIC_STUN)|(1<<MECHANIC_FREEZE)| \
+    (1<<MECHANIC_KNOCKOUT)|(1<<MECHANIC_POLYMORPH)|(1<<MECHANIC_BANISH)| \
+    (1<<MECHANIC_SHACKLE)|(1<<MECHANIC_TURN)|(1<<MECHANIC_HORROR)| \
+    (1<<MECHANIC_DAZE)|(1<<MECHANIC_SAPPED))
 
 // Spell dispell type
 enum DispelType
@@ -1260,7 +1228,7 @@ enum DispelType
 
 #define DISPEL_ALL_MASK ((1<<DISPEL_MAGIC) | (1<<DISPEL_CURSE) | (1<<DISPEL_DISEASE) | (1<<DISPEL_POISON))
 
-//To all Immune system, if target has immunes,
+//To all Immune system,if target has immunes,
 //some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
 //some spell_effects that related to ImmuneToEffect<effect>(only this effect in the spell) can't cast to it,
 //some aura(related to Mechanics or ImmuneToState<aura>) can't apply to it.
@@ -1366,7 +1334,7 @@ enum Targets
     TARGET_DEST_DEST                   = 87,
     TARGET_DEST_DYNOBJ_NONE            = 88,
     TARGET_DEST_TRAJ                   = 89,
-    TARGET_UNIT_TARGET_MINIPET         = 90,
+    TARGET_UNIT_TARGET_PUPPET          = 90,
     TARGET_DEST_DEST_RANDOM_DIR_DIST   = 91,
     TARGET_UNIT_SUMMONER               = 92,
     TARGET_CORPSE_AREA_ENEMY_PLAYER_SRC= 93, // TODO
@@ -1471,7 +1439,6 @@ enum GameobjectTypes
 };
 
 #define MAX_GAMEOBJECT_TYPE                  36             // sending to client this or greater value can crash client.
-#define MAX_GAMEOBJECT_DATA                  24             // Max number of uint32 vars in gameobject_template data field
 
 enum GameObjectFlags
 {
@@ -1496,256 +1463,178 @@ enum GameObjectDynamicLowFlags
 
 enum TextEmotes
 {
-    TEXT_EMOTE_AGREE                = 1,
-    TEXT_EMOTE_AMAZE                = 2,
-    TEXT_EMOTE_ANGRY                = 3,
-    TEXT_EMOTE_APOLOGIZE            = 4,
-    TEXT_EMOTE_APPLAUD              = 5,
-    TEXT_EMOTE_BASHFUL              = 6,
-    TEXT_EMOTE_BECKON               = 7,
-    TEXT_EMOTE_BEG                  = 8,
-    TEXT_EMOTE_BITE                 = 9,
-    TEXT_EMOTE_BLEED                = 10,
-    TEXT_EMOTE_BLINK                = 11,
-    TEXT_EMOTE_BLUSH                = 12,
-    TEXT_EMOTE_BONK                 = 13,
-    TEXT_EMOTE_BORED                = 14,
-    TEXT_EMOTE_BOUNCE               = 15,
-    TEXT_EMOTE_BRB                  = 16,
-    TEXT_EMOTE_BOW                  = 17,
-    TEXT_EMOTE_BURP                 = 18,
-    TEXT_EMOTE_BYE                  = 19,
-    TEXT_EMOTE_CACKLE               = 20,
-    TEXT_EMOTE_CHEER                = 21,
-    TEXT_EMOTE_CHICKEN              = 22,
-    TEXT_EMOTE_CHUCKLE              = 23,
-    TEXT_EMOTE_CLAP                 = 24,
-    TEXT_EMOTE_CONFUSED             = 25,
-    TEXT_EMOTE_CONGRATULATE         = 26,
-    TEXT_EMOTE_COUGH                = 27,
-    TEXT_EMOTE_COWER                = 28,
-    TEXT_EMOTE_CRACK                = 29,
-    TEXT_EMOTE_CRINGE               = 30,
-    TEXT_EMOTE_CRY                  = 31,
-    TEXT_EMOTE_CURIOUS              = 32,
-    TEXT_EMOTE_CURTSEY              = 33,
-    TEXT_EMOTE_DANCE                = 34,
-    TEXT_EMOTE_DRINK                = 35,
-    TEXT_EMOTE_DROOL                = 36,
-    TEXT_EMOTE_EAT                  = 37,
-    TEXT_EMOTE_EYE                  = 38,
-    TEXT_EMOTE_FART                 = 39,
-    TEXT_EMOTE_FIDGET               = 40,
-    TEXT_EMOTE_FLEX                 = 41,
-    TEXT_EMOTE_FROWN                = 42,
-    TEXT_EMOTE_GASP                 = 43,
-    TEXT_EMOTE_GAZE                 = 44,
-    TEXT_EMOTE_GIGGLE               = 45,
-    TEXT_EMOTE_GLARE                = 46,
-    TEXT_EMOTE_GLOAT                = 47,
-    TEXT_EMOTE_GREET                = 48,
-    TEXT_EMOTE_GRIN                 = 49,
-    TEXT_EMOTE_GROAN                = 50,
-    TEXT_EMOTE_GROVEL               = 51,
-    TEXT_EMOTE_GUFFAW               = 52,
-    TEXT_EMOTE_HAIL                 = 53,
-    TEXT_EMOTE_HAPPY                = 54,
-    TEXT_EMOTE_HELLO                = 55,
-    TEXT_EMOTE_HUG                  = 56,
-    TEXT_EMOTE_HUNGRY               = 57,
-    TEXT_EMOTE_KISS                 = 58,
-    TEXT_EMOTE_KNEEL                = 59,
-    TEXT_EMOTE_LAUGH                = 60,
-    TEXT_EMOTE_LAYDOWN              = 61,
-    TEXT_EMOTE_MESSAGE              = 62,
-    TEXT_EMOTE_MOAN                 = 63,
-    TEXT_EMOTE_MOON                 = 64,
-    TEXT_EMOTE_MOURN                = 65,
-    TEXT_EMOTE_NO                   = 66,
-    TEXT_EMOTE_NOD                  = 67,
-    TEXT_EMOTE_NOSEPICK             = 68,
-    TEXT_EMOTE_PANIC                = 69,
-    TEXT_EMOTE_PEER                 = 70,
-    TEXT_EMOTE_PLEAD                = 71,
-    TEXT_EMOTE_POINT                = 72,
-    TEXT_EMOTE_POKE                 = 73,
-    TEXT_EMOTE_PRAY                 = 74,
-    TEXT_EMOTE_ROAR                 = 75,
-    TEXT_EMOTE_ROFL                 = 76,
-    TEXT_EMOTE_RUDE                 = 77,
-    TEXT_EMOTE_SALUTE               = 78,
-    TEXT_EMOTE_SCRATCH              = 79,
-    TEXT_EMOTE_SEXY                 = 80,
-    TEXT_EMOTE_SHAKE                = 81,
-    TEXT_EMOTE_SHOUT                = 82,
-    TEXT_EMOTE_SHRUG                = 83,
-    TEXT_EMOTE_SHY                  = 84,
-    TEXT_EMOTE_SIGH                 = 85,
-    TEXT_EMOTE_SIT                  = 86,
-    TEXT_EMOTE_SLEEP                = 87,
-    TEXT_EMOTE_SNARL                = 88,
-    TEXT_EMOTE_SPIT                 = 89,
-    TEXT_EMOTE_STARE                = 90,
-    TEXT_EMOTE_SURPRISED            = 91,
-    TEXT_EMOTE_SURRENDER            = 92,
-    TEXT_EMOTE_TALK                 = 93,
-    TEXT_EMOTE_TALKEX               = 94,
-    TEXT_EMOTE_TALKQ                = 95,
-    TEXT_EMOTE_TAP                  = 96,
-    TEXT_EMOTE_THANK                = 97,
-    TEXT_EMOTE_THREATEN             = 98,
-    TEXT_EMOTE_TIRED                = 99,
-    TEXT_EMOTE_VICTORY              = 100,
-    TEXT_EMOTE_WAVE                 = 101,
-    TEXT_EMOTE_WELCOME              = 102,
-    TEXT_EMOTE_WHINE                = 103,
-    TEXT_EMOTE_WHISTLE              = 104,
-    TEXT_EMOTE_WORK                 = 105,
-    TEXT_EMOTE_YAWN                 = 106,
-    TEXT_EMOTE_BOGGLE               = 107,
-    TEXT_EMOTE_CALM                 = 108,
-    TEXT_EMOTE_COLD                 = 109,
-    TEXT_EMOTE_COMFORT              = 110,
-    TEXT_EMOTE_CUDDLE               = 111,
-    TEXT_EMOTE_DUCK                 = 112,
-    TEXT_EMOTE_INSULT               = 113,
-    TEXT_EMOTE_INTRODUCE            = 114,
-    TEXT_EMOTE_JK                   = 115,
-    TEXT_EMOTE_LICK                 = 116,
-    TEXT_EMOTE_LISTEN               = 117,
-    TEXT_EMOTE_LOST                 = 118,
-    TEXT_EMOTE_MOCK                 = 119,
-    TEXT_EMOTE_PONDER               = 120,
-    TEXT_EMOTE_POUNCE               = 121,
-    TEXT_EMOTE_PRAISE               = 122,
-    TEXT_EMOTE_PURR                 = 123,
-    TEXT_EMOTE_PUZZLE               = 124,
-    TEXT_EMOTE_RAISE                = 125,
-    TEXT_EMOTE_READY                = 126,
-    TEXT_EMOTE_SHIMMY               = 127,
-    TEXT_EMOTE_SHIVER               = 128,
-    TEXT_EMOTE_SHOO                 = 129,
-    TEXT_EMOTE_SLAP                 = 130,
-    TEXT_EMOTE_SMIRK                = 131,
-    TEXT_EMOTE_SNIFF                = 132,
-    TEXT_EMOTE_SNUB                 = 133,
-    TEXT_EMOTE_SOOTHE               = 134,
-    TEXT_EMOTE_STINK                = 135,
-    TEXT_EMOTE_TAUNT                = 136,
-    TEXT_EMOTE_TEASE                = 137,
-    TEXT_EMOTE_THIRSTY              = 138,
-    TEXT_EMOTE_VETO                 = 139,
-    TEXT_EMOTE_SNICKER              = 140,
-    TEXT_EMOTE_STAND                = 141,
-    TEXT_EMOTE_TICKLE               = 142,
-    TEXT_EMOTE_VIOLIN               = 143,
-    TEXT_EMOTE_SMILE                = 163,
-    TEXT_EMOTE_RASP                 = 183,
-    TEXT_EMOTE_PITY                 = 203,
-    TEXT_EMOTE_GROWL                = 204,
-    TEXT_EMOTE_BARK                 = 205,
-    TEXT_EMOTE_SCARED               = 223,
-    TEXT_EMOTE_FLOP                 = 224,
-    TEXT_EMOTE_LOVE                 = 225,
-    TEXT_EMOTE_MOO                  = 226,
-    TEXT_EMOTE_COMMEND              = 243,
-    TEXT_EMOTE_TRAIN                = 264,
-    TEXT_EMOTE_HELPME               = 303,
-    TEXT_EMOTE_INCOMING             = 304,
-    TEXT_EMOTE_CHARGE               = 305,
-    TEXT_EMOTE_FLEE                 = 306,
-    TEXT_EMOTE_ATTACKMYTARGET       = 307,
-    TEXT_EMOTE_OOM                  = 323,
-    TEXT_EMOTE_FOLLOW               = 324,
-    TEXT_EMOTE_HELP                 = 325,
-    TEXT_EMOTE_HEALME               = 326,
-    TEXT_EMOTE_OPENFIRE             = 327,
-    TEXT_EMOTE_FLIRT                = 328,
-    TEXT_EMOTE_JOKE                 = 329,
-    TEXT_EMOTE_GOLFCLAP             = 343,
-    TEXT_EMOTE_WINK                 = 363,
-    TEXT_EMOTE_PAT                  = 364,
-    TEXT_EMOTE_SERIOUS              = 365,
-    TEXT_EMOTE_MOUNTSPECIAL         = 366,
-    TEXT_EMOTE_GOODLUCK             = 367,
-    TEXT_EMOTE_BLAME                = 368,
-    TEXT_EMOTE_BLANK                = 369,
-    TEXT_EMOTE_BRANDISH             = 370,
-    TEXT_EMOTE_BREATH               = 371,
-    TEXT_EMOTE_DISAGREE             = 372,
-    TEXT_EMOTE_DOUBT                = 373,
-    TEXT_EMOTE_EMBARRASS            = 374,
-    TEXT_EMOTE_ENCOURAGE            = 375,
-    TEXT_EMOTE_ENEMY                = 376,
-    TEXT_EMOTE_EYEBROW              = 377,
-    TEXT_EMOTE_TOAST                = 378,
-    TEXT_EMOTE_HIGHFIVE             = 380,
-    TEXT_EMOTE_ABSENT               = 381,
-    TEXT_EMOTE_ARM                  = 382,
-    TEXT_EMOTE_AWE                  = 383,
-    TEXT_EMOTE_BACKPACK             = 384,
-    TEXT_EMOTE_BADFEELING           = 385,
-    TEXT_EMOTE_CHALLENGE            = 386,
-    TEXT_EMOTE_CHUG                 = 387,
-    TEXT_EMOTE_DING                 = 389,
-    TEXT_EMOTE_FACEPALM             = 390,
-    TEXT_EMOTE_FAINT                = 391,
-    TEXT_EMOTE_GO                   = 392,
-    TEXT_EMOTE_GOING                = 393,
-    TEXT_EMOTE_GLOWER               = 394,
-    TEXT_EMOTE_HEADACHE             = 395,
-    TEXT_EMOTE_HICCUP               = 396,
-    TEXT_EMOTE_HISS                 = 398,
-    TEXT_EMOTE_HOLDHAND             = 399,
-    TEXT_EMOTE_HURRY                = 401,
-    TEXT_EMOTE_IDEA                 = 402,
-    TEXT_EMOTE_JEALOUS              = 403,
-    TEXT_EMOTE_LUCK                 = 404,
-    TEXT_EMOTE_MAP                  = 405,
-    TEXT_EMOTE_MERCY                = 406,
-    TEXT_EMOTE_MUTTER               = 407,
-    TEXT_EMOTE_NERVOUS              = 408,
-    TEXT_EMOTE_OFFER                = 409,
-    TEXT_EMOTE_PET                  = 410,
-    TEXT_EMOTE_PINCH                = 411,
-    TEXT_EMOTE_PROUD                = 413,
-    TEXT_EMOTE_PROMISE              = 414,
-    TEXT_EMOTE_PULSE                = 415,
-    TEXT_EMOTE_PUNCH                = 416,
-    TEXT_EMOTE_POUT                 = 417,
-    TEXT_EMOTE_REGRET               = 418,
-    TEXT_EMOTE_REVENGE              = 420,
-    TEXT_EMOTE_ROLLEYES             = 421,
-    TEXT_EMOTE_RUFFLE               = 422,
-    TEXT_EMOTE_SAD                  = 423,
-    TEXT_EMOTE_SCOFF                = 424,
-    TEXT_EMOTE_SCOLD                = 425,
-    TEXT_EMOTE_SCOWL                = 426,
-    TEXT_EMOTE_SEARCH               = 427,
-    TEXT_EMOTE_SHAKEFIST            = 428,
-    TEXT_EMOTE_SHIFTY               = 429,
-    TEXT_EMOTE_SHUDDER              = 430,
-    TEXT_EMOTE_SIGNAL               = 431,
-    TEXT_EMOTE_SILENCE              = 432,
-    TEXT_EMOTE_SING                 = 433,
-    TEXT_EMOTE_SMACK                = 434,
-    TEXT_EMOTE_SNEAK                = 435,
-    TEXT_EMOTE_SNEEZE               = 436,
-    TEXT_EMOTE_SNORT                = 437,
-    TEXT_EMOTE_SQUEAL               = 438,
-    TEXT_EMOTE_SUSPICIOUS           = 440,
-    TEXT_EMOTE_THINK                = 441,
-    TEXT_EMOTE_TRUCE                = 442,
-    TEXT_EMOTE_TWIDDLE              = 443,
-    TEXT_EMOTE_WARN                 = 444,
-    TEXT_EMOTE_SNAP                 = 445,
-    TEXT_EMOTE_CHARM                = 446,
-    TEXT_EMOTE_COVEREARS            = 447,
-    TEXT_EMOTE_CROSSARMS            = 448,
-    TEXT_EMOTE_LOOK                 = 449,
-    TEXT_EMOTE_OBJECT               = 450,
-    TEXT_EMOTE_SWEAT                = 451,
-    TEXT_EMOTE_YW                   = 453,
+    TEXTEMOTE_AGREE                = 1,
+    TEXTEMOTE_AMAZE                = 2,
+    TEXTEMOTE_ANGRY                = 3,
+    TEXTEMOTE_APOLOGIZE            = 4,
+    TEXTEMOTE_APPLAUD              = 5,
+    TEXTEMOTE_BASHFUL              = 6,
+    TEXTEMOTE_BECKON               = 7,
+    TEXTEMOTE_BEG                  = 8,
+    TEXTEMOTE_BITE                 = 9,
+    TEXTEMOTE_BLEED                = 10,
+    TEXTEMOTE_BLINK                = 11,
+    TEXTEMOTE_BLUSH                = 12,
+    TEXTEMOTE_BONK                 = 13,
+    TEXTEMOTE_BORED                = 14,
+    TEXTEMOTE_BOUNCE               = 15,
+    TEXTEMOTE_BRB                  = 16,
+    TEXTEMOTE_BOW                  = 17,
+    TEXTEMOTE_BURP                 = 18,
+    TEXTEMOTE_BYE                  = 19,
+    TEXTEMOTE_CACKLE               = 20,
+    TEXTEMOTE_CHEER                = 21,
+    TEXTEMOTE_CHICKEN              = 22,
+    TEXTEMOTE_CHUCKLE              = 23,
+    TEXTEMOTE_CLAP                 = 24,
+    TEXTEMOTE_CONFUSED             = 25,
+    TEXTEMOTE_CONGRATULATE         = 26,
+    TEXTEMOTE_COUGH                = 27,
+    TEXTEMOTE_COWER                = 28,
+    TEXTEMOTE_CRACK                = 29,
+    TEXTEMOTE_CRINGE               = 30,
+    TEXTEMOTE_CRY                  = 31,
+    TEXTEMOTE_CURIOUS              = 32,
+    TEXTEMOTE_CURTSEY              = 33,
+    TEXTEMOTE_DANCE                = 34,
+    TEXTEMOTE_DRINK                = 35,
+    TEXTEMOTE_DROOL                = 36,
+    TEXTEMOTE_EAT                  = 37,
+    TEXTEMOTE_EYE                  = 38,
+    TEXTEMOTE_FART                 = 39,
+    TEXTEMOTE_FIDGET               = 40,
+    TEXTEMOTE_FLEX                 = 41,
+    TEXTEMOTE_FROWN                = 42,
+    TEXTEMOTE_GASP                 = 43,
+    TEXTEMOTE_GAZE                 = 44,
+    TEXTEMOTE_GIGGLE               = 45,
+    TEXTEMOTE_GLARE                = 46,
+    TEXTEMOTE_GLOAT                = 47,
+    TEXTEMOTE_GREET                = 48,
+    TEXTEMOTE_GRIN                 = 49,
+    TEXTEMOTE_GROAN                = 50,
+    TEXTEMOTE_GROVEL               = 51,
+    TEXTEMOTE_GUFFAW               = 52,
+    TEXTEMOTE_HAIL                 = 53,
+    TEXTEMOTE_HAPPY                = 54,
+    TEXTEMOTE_HELLO                = 55,
+    TEXTEMOTE_HUG                  = 56,
+    TEXTEMOTE_HUNGRY               = 57,
+    TEXTEMOTE_KISS                 = 58,
+    TEXTEMOTE_KNEEL                = 59,
+    TEXTEMOTE_LAUGH                = 60,
+    TEXTEMOTE_LAYDOWN              = 61,
+    TEXTEMOTE_MESSAGE              = 62,
+    TEXTEMOTE_MOAN                 = 63,
+    TEXTEMOTE_MOON                 = 64,
+    TEXTEMOTE_MOURN                = 65,
+    TEXTEMOTE_NO                   = 66,
+    TEXTEMOTE_NOD                  = 67,
+    TEXTEMOTE_NOSEPICK             = 68,
+    TEXTEMOTE_PANIC                = 69,
+    TEXTEMOTE_PEER                 = 70,
+    TEXTEMOTE_PLEAD                = 71,
+    TEXTEMOTE_POINT                = 72,
+    TEXTEMOTE_POKE                 = 73,
+    TEXTEMOTE_PRAY                 = 74,
+    TEXTEMOTE_ROAR                 = 75,
+    TEXTEMOTE_ROFL                 = 76,
+    TEXTEMOTE_RUDE                 = 77,
+    TEXTEMOTE_SALUTE               = 78,
+    TEXTEMOTE_SCRATCH              = 79,
+    TEXTEMOTE_SEXY                 = 80,
+    TEXTEMOTE_SHAKE                = 81,
+    TEXTEMOTE_SHOUT                = 82,
+    TEXTEMOTE_SHRUG                = 83,
+    TEXTEMOTE_SHY                  = 84,
+    TEXTEMOTE_SIGH                 = 85,
+    TEXTEMOTE_SIT                  = 86,
+    TEXTEMOTE_SLEEP                = 87,
+    TEXTEMOTE_SNARL                = 88,
+    TEXTEMOTE_SPIT                 = 89,
+    TEXTEMOTE_STARE                = 90,
+    TEXTEMOTE_SURPRISED            = 91,
+    TEXTEMOTE_SURRENDER            = 92,
+    TEXTEMOTE_TALK                 = 93,
+    TEXTEMOTE_TALKEX               = 94,
+    TEXTEMOTE_TALKQ                = 95,
+    TEXTEMOTE_TAP                  = 96,
+    TEXTEMOTE_THANK                = 97,
+    TEXTEMOTE_THREATEN             = 98,
+    TEXTEMOTE_TIRED                = 99,
+    TEXTEMOTE_VICTORY              = 100,
+    TEXTEMOTE_WAVE                 = 101,
+    TEXTEMOTE_WELCOME              = 102,
+    TEXTEMOTE_WHINE                = 103,
+    TEXTEMOTE_WHISTLE              = 104,
+    TEXTEMOTE_WORK                 = 105,
+    TEXTEMOTE_YAWN                 = 106,
+    TEXTEMOTE_BOGGLE               = 107,
+    TEXTEMOTE_CALM                 = 108,
+    TEXTEMOTE_COLD                 = 109,
+    TEXTEMOTE_COMFORT              = 110,
+    TEXTEMOTE_CUDDLE               = 111,
+    TEXTEMOTE_DUCK                 = 112,
+    TEXTEMOTE_INSULT               = 113,
+    TEXTEMOTE_INTRODUCE            = 114,
+    TEXTEMOTE_JK                   = 115,
+    TEXTEMOTE_LICK                 = 116,
+    TEXTEMOTE_LISTEN               = 117,
+    TEXTEMOTE_LOST                 = 118,
+    TEXTEMOTE_MOCK                 = 119,
+    TEXTEMOTE_PONDER               = 120,
+    TEXTEMOTE_POUNCE               = 121,
+    TEXTEMOTE_PRAISE               = 122,
+    TEXTEMOTE_PURR                 = 123,
+    TEXTEMOTE_PUZZLE               = 124,
+    TEXTEMOTE_RAISE                = 125,
+    TEXTEMOTE_READY                = 126,
+    TEXTEMOTE_SHIMMY               = 127,
+    TEXTEMOTE_SHIVER               = 128,
+    TEXTEMOTE_SHOO                 = 129,
+    TEXTEMOTE_SLAP                 = 130,
+    TEXTEMOTE_SMIRK                = 131,
+    TEXTEMOTE_SNIFF                = 132,
+    TEXTEMOTE_SNUB                 = 133,
+    TEXTEMOTE_SOOTHE               = 134,
+    TEXTEMOTE_STINK                = 135,
+    TEXTEMOTE_TAUNT                = 136,
+    TEXTEMOTE_TEASE                = 137,
+    TEXTEMOTE_THIRSTY              = 138,
+    TEXTEMOTE_VETO                 = 139,
+    TEXTEMOTE_SNICKER              = 140,
+    TEXTEMOTE_STAND                = 141,
+    TEXTEMOTE_TICKLE               = 142,
+    TEXTEMOTE_VIOLIN               = 143,
+    TEXTEMOTE_SMILE                = 163,
+    TEXTEMOTE_RASP                 = 183,
+    TEXTEMOTE_PITY                 = 203,
+    TEXTEMOTE_GROWL                = 204,
+    TEXTEMOTE_BARK                 = 205,
+    TEXTEMOTE_SCARED               = 223,
+    TEXTEMOTE_FLOP                 = 224,
+    TEXTEMOTE_LOVE                 = 225,
+    TEXTEMOTE_MOO                  = 226,
+    TEXTEMOTE_OPENFIRE             = 327,
+    TEXTEMOTE_FLIRT                = 328,
+    TEXTEMOTE_JOKE                 = 329,
+    TEXTEMOTE_COMMEND              = 243,
+    TEXTEMOTE_WINK                 = 363,
+    TEXTEMOTE_PAT                  = 364,
+    TEXTEMOTE_SERIOUS              = 365,
+    TEXTEMOTE_MOUNTSPECIAL         = 366,
+    TEXTEMOTE_GOODLUCK             = 367,
+    TEXTEMOTE_BLAME                = 368,
+    TEXTEMOTE_BLANK                = 369,
+    TEXTEMOTE_BRANDISH             = 370,
+    TEXTEMOTE_BREATH               = 371,
+    TEXTEMOTE_DISAGREE             = 372,
+    TEXTEMOTE_DOUBT                = 373,
+    TEXTEMOTE_EMBARRASS            = 374,
+    TEXTEMOTE_ENCOURAGE            = 375,
+    TEXTEMOTE_ENEMY                = 376,
+    TEXTEMOTE_EYEBROW              = 377,
+    TEXTEMOTE_TOAST                = 378
 };
 
 enum Emote
@@ -2265,11 +2154,11 @@ enum CreatureTypeFlags
     CREATURE_TYPEFLAGS_UNK5             = 0x000010,
     CREATURE_TYPEFLAGS_UNK6             = 0x000020,
     CREATURE_TYPEFLAGS_UNK7             = 0x000040,
-    CREATURE_TYPEFLAGS_DEAD_INTERACT    = 0x000080,         // Player can interact with the creature if its dead (not player dead)
+    CREATURE_TYPEFLAGS_UNK8             = 0x000080,
     CREATURE_TYPEFLAGS_HERBLOOT         = 0x000100,         // Can be looted by herbalist
     CREATURE_TYPEFLAGS_MININGLOOT       = 0x000200,         // Can be looted by miner
     CREATURE_TYPEFLAGS_UNK11            = 0x000400,
-    CREATURE_TYPEFLAGS_MOUNTED_COMBAT   = 0x000800,         // Creature can remain mounted when entering combat
+    CREATURE_TYPEFLAGS_UNK12            = 0x000800,         // ? Related to mounts in some way. If mounted, fight mounted, mount appear as independant when rider dies?
     CREATURE_TYPEFLAGS_AID_PLAYERS      = 0x001000,         // ? Can aid any player in combat if in range?
     CREATURE_TYPEFLAGS_UNK14            = 0x002000,
     CREATURE_TYPEFLAGS_UNK15            = 0x004000,         // ? Possibly not in use
@@ -2322,8 +2211,7 @@ enum HolidayIds
     HOLIDAY_PILGRIMS_BOUNTY          = 404,
     HOLIDAY_WOTLK_LAUNCH             = 406,
     HOLIDAY_DAY_OF_DEAD              = 409,
-    HOLIDAY_CALL_TO_ARMS_IC          = 420,
-    HOLIDAY_KALU_AK_FISHING_DERBY    = 424
+    HOLIDAY_CALL_TO_ARMS_IC          = 420
 };
 
 // values based at QuestInfo.dbc
@@ -2781,26 +2669,28 @@ enum DiminishingReturnsType
 // Diminishing Return Groups
 enum DiminishingGroup
 {
-    DIMINISHING_NONE                = 0,
-    DIMINISHING_BANISH              = 1,
-    DIMINISHING_CHARGE              = 2,
-    DIMINISHING_OPENING_STUN        = 3, // Cheap Shot and Pounce
-    DIMINISHING_CONTROLLED_STUN     = 4,
-    DIMINISHING_CONTROLLED_ROOT     = 5,
-    DIMINISHING_CYCLONE             = 6,
-    DIMINISHING_DISARM              = 7,
-    DIMINISHING_DISORIENT           = 8, // Several spells where name cant be generalized.
-    DIMINISHING_ENTRAPMENT          = 9,
-    DIMINISHING_FEAR                = 10,
-    DIMINISHING_HORROR              = 11,
-    DIMINISHING_MIND_CONTROL        = 12,
-    DIMINISHING_ROOT                = 13,
-    DIMINISHING_STUN                = 14,
-    DIMINISHING_SCATTER_SHOT        = 15,
-    DIMINISHING_SILENCE             = 16,
-    DIMINISHING_SLEEP               = 17,
-    DIMINISHING_TAUNT               = 18,
-    DIMINISHING_LIMITONLY           = 19  // No diminishing return, but duration limited to 10 seconds
+    // Common Groups
+    DIMINISHING_NONE = 0,
+    DIMINISHING_CONTROL_STUN,                               // Player Controlled stuns
+    DIMINISHING_TRIGGER_STUN,                               // By aura proced stuns, usualy chance on hit talents
+    DIMINISHING_CONTROL_ROOT,                               // Immobilizing effects from casted spells
+    DIMINISHING_TRIGGER_ROOT,                               // Immobilizing effects from triggered spells like Frostbite
+    DIMINISHING_CHARM,
+    DIMINISHING_POLYMORPH,              // Also: Gouge, Sap, Repentance, Hungering Cold
+    DIMINISHING_KNOCKOUT,               // Sap, Knockout mechanics
+    DIMINISHING_FEAR_BLIND,             // Intimidating Shout, Howl of Terror, Blind
+    // Warlock Specific
+    DIMINISHING_DEATHCOIL,                                  // Death Coil Diminish only with another Death Coil
+    // Druid Specific
+    DIMINISHING_CYCLONE,                                    // From 2.3.0
+    // Shared Class Specific
+    DIMINISHING_CHEAPSHOT_POUNCE,
+    DIMINISHING_DISARM,                                     // From 2.3.0
+    DIMINISHING_SILENCE,                                    // From 2.3.0
+    DIMINISHING_FREEZE_SLEEP,                               // Hunter's Freezing Trap
+    DIMINISHING_BANISH,
+    DIMINISHING_TAUNT,
+    DIMINISHING_LIMITONLY               // Don't Diminish, but limit duration to 10s
 };
 
 enum SummonCategory
@@ -2810,8 +2700,6 @@ enum SummonCategory
     SUMMON_CATEGORY_PET         = 2,
     SUMMON_CATEGORY_PUPPET      = 3,
     SUMMON_CATEGORY_VEHICLE     = 4,
-    SUMMON_CATEGORY_UNK         = 5, // as of patch 3.3.5a only Bone Spike in Icecrown Citadel
-                                     // uses this category
 };
 
 enum SummonType

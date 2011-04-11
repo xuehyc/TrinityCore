@@ -23,19 +23,11 @@ SDComment: Timers need to be confirmed, Golemagg's Trust need to be checked
 SDCategory: Molten Core
 EndScriptData */
 
-#include "ObjectMgr.h"
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
+#include "ScriptPCH.h"
 #include "molten_core.h"
 
-enum Texts
+enum eEnums
 {
-    EMOTE_LOWHP             = -1409002,
-};
-
-enum Spells
-{
-    // Golemagg
     SPELL_MAGMASPLASH       = 13879,
     SPELL_PYROBLAST         = 20228,
     SPELL_EARTHQUAKE        = 19798,
@@ -43,145 +35,181 @@ enum Spells
     SPELL_GOLEMAGG_TRUST    = 20553,
 
     // Core Rager
+    EMOTE_LOWHP             = -1409002,
     SPELL_MANGLE            = 19820
-};
-
-enum Events
-{
-    EVENT_PYROBLAST     = 1,
-    EVENT_EARTHQUAKE    = 2,
 };
 
 class boss_golemagg : public CreatureScript
 {
-    public:
-        boss_golemagg() : CreatureScript("boss_golemagg") { }
+public:
+    boss_golemagg() : CreatureScript("boss_golemagg") { }
 
-        struct boss_golemaggAI : public BossAI
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new boss_golemaggAI (pCreature);
+    }
+
+    struct boss_golemaggAI : public ScriptedAI
+    {
+        boss_golemaggAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            boss_golemaggAI(Creature* creature) : BossAI(creature, BOSS_GOLEMAGG_THE_INCINERATOR)
-            {
-            }
-
-            void Reset()
-            {
-                BossAI::Reset();
-                DoCast(me, SPELL_MAGMASPLASH, true);
-            }
-
-            void EnterCombat(Unit* victim)
-            {
-                BossAI::EnterCombat(victim);
-                events.ScheduleEvent(EVENT_PYROBLAST, 7000);
-            }
-
-            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
-            {
-                if (HealthBelowPct(10) || me->HasAura(SPELL_ENRAGE))
-                    return;
-
-                DoCast(me, SPELL_ENRAGE, true);
-                events.ScheduleEvent(EVENT_EARTHQUAKE, 3000);
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STAT_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_PYROBLAST:
-                            if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                DoCast(pTarget, SPELL_PYROBLAST);
-                            events.ScheduleEvent(EVENT_PYROBLAST, 7000);
-                            break;
-                        case EVENT_EARTHQUAKE:
-                            DoCastVictim(SPELL_EARTHQUAKE);
-                            events.ScheduleEvent(EVENT_EARTHQUAKE, 3000);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new boss_golemaggAI(creature);
+            m_pInstance = pCreature->GetInstanceScript();
         }
+
+        InstanceScript* m_pInstance;
+
+        uint32 m_uiPyroblastTimer;
+        uint32 m_uiEarthquakeTimer;
+        uint32 m_uiBuffTimer;
+        bool m_bEnraged;
+
+        void Reset()
+        {
+            m_uiPyroblastTimer = 7*IN_MILLISECONDS;              // These timers are probably wrong
+            m_uiEarthquakeTimer = 3*IN_MILLISECONDS;
+            m_uiBuffTimer = 2500;
+            m_bEnraged = false;
+
+            DoCast(me, SPELL_MAGMASPLASH, true);
+
+        if (m_pInstance)
+            m_pInstance->SetData(DATA_GOLEMAGGISDEAD,NOT_STARTED);
+    }
+
+    void EnterCombat(Unit *who)
+    {
+        if (m_pInstance)
+            m_pInstance->SetData(DATA_GOLEMAGGISDEAD,IN_PROGRESS);
+        }
+
+        void JustDied(Unit* /*pKiller*/)
+        {
+            if (m_pInstance)
+        {
+                m_pInstance->SetData(DATA_GOLEMAGG_DEATH, 0);
+            m_pInstance->SetData(DATA_GOLEMAGGISDEAD,DONE);
+        }
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            //Pyroblast
+            if (m_uiPyroblastTimer <= uiDiff)
+            {
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    DoCast(pTarget, SPELL_PYROBLAST);
+
+                m_uiPyroblastTimer = 7*IN_MILLISECONDS;
+            }
+            else
+                m_uiPyroblastTimer -= uiDiff;
+
+            // Enrage
+            if (!m_bEnraged && HealthBelowPct(10))
+            {
+                DoCast(me, SPELL_ENRAGE);
+                m_bEnraged = true;
+            }
+
+            // Earthquake
+            if (m_bEnraged)
+            {
+                if (m_uiEarthquakeTimer <= uiDiff)
+                {
+                    DoCast(me->getVictim(), SPELL_EARTHQUAKE);
+                    m_uiEarthquakeTimer = 3*IN_MILLISECONDS;
+                }
+                else
+                    m_uiEarthquakeTimer -= uiDiff;
+            }
+
+            /*
+            // Golemagg's Trust
+            if (m_uiBuffTimer <= uidiff)
+            {
+                DoCast(me, SPELL_GOLEMAGG_TRUST);
+                m_uiBuffTimer = 2.5*IN_MILLISECONDS;
+            }
+            else
+                m_uiBuffTimer -= uiDiff;
+            */
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
 };
 
 class mob_core_rager : public CreatureScript
 {
-    public:
-        mob_core_rager() : CreatureScript("mob_core_rager") { }
+public:
+    mob_core_rager() : CreatureScript("mob_core_rager") { }
 
-        struct mob_core_ragerAI : public ScriptedAI
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new mob_core_ragerAI (pCreature);
+    }
+
+    struct mob_core_ragerAI : public ScriptedAI
+    {
+        mob_core_ragerAI(Creature *c) : ScriptedAI(c)
         {
-            mob_core_ragerAI(Creature* creature) : ScriptedAI(creature)
-            {
-                instance = creature->GetInstanceScript();
-            }
+            m_pInstance = c->GetInstanceScript();
+        }
 
-            void Reset()
-            {
-                mangleTimer = 7*IN_MILLISECONDS;                 // These times are probably wrong
-            }
+        InstanceScript* m_pInstance;
 
-            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
-            {
-                if (HealthAbovePct(50) || !instance)
-                    return;
+        uint32 m_uiMangleTimer;
 
-                if (Creature* pGolemagg = instance->instance->GetCreature(instance->GetData64(BOSS_GOLEMAGG_THE_INCINERATOR)))
+        void Reset()
+        {
+            m_uiMangleTimer = 7*IN_MILLISECONDS;                 // These times are probably wrong
+        }
+
+        void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage)
+        {
+            if (HealthBelowPct(50))
+            {
+                if (m_pInstance)
                 {
-                    if (pGolemagg->isAlive())
+                    if (Creature* pGolemagg = m_pInstance->instance->GetCreature(m_pInstance->GetData64(DATA_GOLEMAGG)))
                     {
-                        me->AddAura(SPELL_GOLEMAGG_TRUST, me);
-                        DoScriptText(EMOTE_LOWHP, me);
-                        me->SetFullHealth();
+                        if (pGolemagg->isAlive())
+                        {
+                            DoScriptText(EMOTE_LOWHP, me);
+                            me->SetFullHealth();
+                        }
+                        else
+                            uiDamage = me->GetHealth();
                     }
                 }
             }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                // Mangle
-                if (mangleTimer <= diff)
-                {
-                    DoCast(me->getVictim(), SPELL_MANGLE);
-                    mangleTimer = 10*IN_MILLISECONDS;
-                }
-                else
-                    mangleTimer -= diff;
-
-                DoMeleeAttackIfReady();
-            }
-
-        private:
-            InstanceScript* instance;
-            uint32 mangleTimer;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new mob_core_ragerAI(creature);
         }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            // Mangle
+            if (m_uiMangleTimer <= uiDiff)
+            {
+                DoCast(me->getVictim(), SPELL_MANGLE);
+                m_uiMangleTimer = 10*IN_MILLISECONDS;
+            }
+            else
+                m_uiMangleTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
 };
+
+
 
 void AddSC_boss_golemagg()
 {

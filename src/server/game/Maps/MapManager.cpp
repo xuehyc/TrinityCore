@@ -151,7 +151,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
     if (!entry->IsDungeon())
         return true;
 
-    InstanceTemplate const* instance = sObjectMgr->GetInstanceTemplate(mapid);
+    InstanceTemplate const* instance = ObjectMgr::GetInstanceTemplate(mapid);
     if (!instance)
         return false;
 
@@ -201,8 +201,8 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
                 if (corpseMap == mapid)
                     break;
 
-                InstanceTemplate const* instance = sObjectMgr->GetInstanceTemplate(corpseMap);
-                corpseMap = instance ? instance->Parent : 0;
+                InstanceTemplate const* instance = ObjectMgr::GetInstanceTemplate(corpseMap);
+                corpseMap = instance ? instance->parent : 0;
             } while (corpseMap);
 
             if (!corpseMap)
@@ -288,25 +288,20 @@ void MapManager::DoDelayedMovesAndRemoves()
 {
 }
 
-bool MapManager::ExistMapAndVMap(uint32 mapid, float x, float y)
+bool MapManager::ExistMapAndVMap(uint32 mapid, float x,float y)
 {
-    GridPair p = Trinity::ComputeGridPair(x, y);
+    GridPair p = Trinity::ComputeGridPair(x,y);
 
     int gx=63-p.x_coord;
     int gy=63-p.y_coord;
 
-    return Map::ExistMap(mapid, gx, gy) && Map::ExistVMap(mapid, gx, gy);
+    return Map::ExistMap(mapid,gx,gy) && Map::ExistVMap(mapid,gx,gy);
 }
 
-bool MapManager::IsValidMAP(uint32 mapid, bool startUp)
+bool MapManager::IsValidMAP(uint32 mapid)
 {
     MapEntry const* mEntry = sMapStore.LookupEntry(mapid);
-
-    if (startUp)
-        return mEntry ? true : false;
-    else
-        return mEntry && (!mEntry->IsDungeon() || sObjectMgr->GetInstanceTemplate(mapid));
-
+    return mEntry && (!mEntry->IsDungeon() || ObjectMgr::GetInstanceTemplate(mapid));
     // TODO: add check for battleground template
 }
 
@@ -333,7 +328,7 @@ void MapManager::UnloadAll()
 
 uint32 MapManager::GetNumInstances()
 {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, Lock, 0);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, Lock, NULL);
 
     uint32 ret = 0;
     for (MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
@@ -350,7 +345,7 @@ uint32 MapManager::GetNumInstances()
 
 uint32 MapManager::GetNumPlayersInInstances()
 {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, Lock, 0);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, Lock, NULL);
 
     uint32 ret = 0;
     for (MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)

@@ -126,15 +126,12 @@ bool ChatHandler::HandleDismountCommand(const char* /*args*/)
 
 bool ChatHandler::HandleSaveCommand(const char* /*args*/)
 {
-    Player* player = m_session->GetPlayer();
+    Player *player = m_session->GetPlayer();
 
     // save GM account without delay and output message
     if (m_session->GetSecurity() > SEC_PLAYER)
     {
-        if (Player *target = getSelectedPlayer())
-            target->SaveToDB();
-        else
-            player->SaveToDB();
+        player->SaveToDB();
         SendSysMessage(LANG_PLAYER_SAVED);
         return true;
     }

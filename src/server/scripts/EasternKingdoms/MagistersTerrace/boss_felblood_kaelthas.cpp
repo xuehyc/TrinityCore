@@ -89,12 +89,13 @@ public:
 
     struct boss_felblood_kaelthasAI : public ScriptedAI
     {
-        boss_felblood_kaelthasAI(Creature* c) : ScriptedAI(c)
+        boss_felblood_kaelthasAI(Creature* c) : ScriptedAI(c), Summons(me)
         {
             pInstance = c->GetInstanceScript();
         }
 
         InstanceScript* pInstance;
+        SummonList Summons;
 
         uint32 FireballTimer;
         uint32 PhoenixTimer;
@@ -136,6 +137,7 @@ public:
             FirstGravityLapse = true;
             HasTaunted = false;
 
+            Summons.DespawnAll();
             Phase = 0;
 
             if (pInstance)
@@ -147,15 +149,22 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit * /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
+            Summons.DespawnAll();
 
             if (!pInstance)
                 return;
 
-            pInstance->HandleGameObject(pInstance->GetData64(DATA_KAEL_DOOR), true);
+            pInstance->SetData(DATA_KAELTHAS_EVENT, DONE);
+            pInstance->HandleGameObject(pInstance->GetData64(DATA_KAEL_DOOR), true); //TODO: move all door handling to instance
             // Open the encounter door
+        }
+
+        void JustSummoned(Creature *summon)
+        {
+            Summons.Summon(summon);
         }
 
         void DamageTaken(Unit* /*done_by*/, uint32 &damage)
@@ -164,7 +173,7 @@ public:
                 RemoveGravityLapse();                           // Remove Gravity Lapse so that players fall to ground if they kill him when in air.
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             if (!pInstance)
                 return;
@@ -190,8 +199,7 @@ public:
                 return;
 
             std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
-            std::list<HostileReference*>::const_iterator i = m_threatlist.begin();
-            for (i = m_threatlist.begin(); i != m_threatlist.end(); ++i)
+            for (std::list<HostileReference*>::const_iterator i = m_threatlist.begin(); i != m_threatlist.end(); ++i)
             {
                 Unit* pUnit = Unit::GetUnit((*me), (*i)->getUnitGuid());
                 if (pUnit && pUnit->isAlive())
@@ -208,8 +216,8 @@ public:
             float y = KaelLocations[0][1];
             me->GetMap()->CreatureRelocation(me, x, y, LOCATION_Z, 0.0f);
             //me->SendMonsterMove(x, y, LOCATION_Z, 0, 0, 0); // causes some issues...
-            std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
-            for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
+            std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
+            for (std::list<HostileReference*>::const_iterator i = m_threatlist.begin(); i != m_threatlist.end(); ++i)
             {
                 Unit* pUnit = Unit::GetUnit((*me), (*i)->getUnitGuid());
                 if (pUnit && (pUnit->GetTypeId() == TYPEID_PLAYER))
@@ -220,8 +228,8 @@ public:
 
         void CastGravityLapseKnockUp()
         {
-            std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
-            for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
+            std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
+            for (std::list<HostileReference*>::const_iterator i = m_threatlist.begin(); i != m_threatlist.end(); ++i)
             {
                 Unit* pUnit = Unit::GetUnit((*me), (*i)->getUnitGuid());
                 if (pUnit && (pUnit->GetTypeId() == TYPEID_PLAYER))
@@ -232,8 +240,8 @@ public:
 
         void CastGravityLapseFly()                              // Use Fly Packet hack for now as players can't cast "fly" spells unless in map 530. Has to be done a while after they get knocked into the air...
         {
-            std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
-            for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
+            std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
+            for (std::list<HostileReference*>::const_iterator i = m_threatlist.begin(); i != m_threatlist.end(); ++i)
             {
                 Unit* pUnit = Unit::GetUnit((*me), (*i)->getUnitGuid());
                 if (pUnit && (pUnit->GetTypeId() == TYPEID_PLAYER))
@@ -252,8 +260,8 @@ public:
 
         void RemoveGravityLapse()
         {
-            std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
-            for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
+            std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
+            for (std::list<HostileReference*>::const_iterator i = m_threatlist.begin(); i != m_threatlist.end(); ++i)
             {
                 Unit* pUnit = Unit::GetUnit((*me), (*i)->getUnitGuid());
                 if (pUnit && (pUnit->GetTypeId() == TYPEID_PLAYER))
@@ -296,15 +304,15 @@ public:
                     if (FireballTimer <= diff)
                     {
                         DoCast(me->getVictim(), SPELL_FIREBALL_NORMAL);
-                        FireballTimer = urand(2000, 6000);
+                        FireballTimer = urand(2000,6000);
                     } else FireballTimer -= diff;
 
                     if (PhoenixTimer <= diff)
                     {
 
-                        Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1);
+                        Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,1);
 
-                        uint8 random = urand(1, 2);
+                        uint8 random = urand(1,2);
                         float x = KaelLocations[random][0];
                         float y = KaelLocations[random][1];
 
@@ -313,7 +321,10 @@ public:
                         {
                             Phoenix->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE + UNIT_FLAG_NON_ATTACKABLE);
                             SetThreatList(Phoenix);
-                            Phoenix->AI()->AttackStart(pTarget);
+                            if (pTarget)
+                                Phoenix->AI()->AttackStart(pTarget);
+                            else
+                                Phoenix->AI()->AttackStart(me->getVictim());
                         }
 
                         DoScriptText(SAY_PHOENIX, me);
@@ -330,7 +341,7 @@ public:
                             DoCast(pTarget, SPELL_FLAMESTRIKE3, true);
                             DoScriptText(SAY_FLAMESTRIKE, me);
                         }
-                        FlameStrikeTimer = urand(15000, 25000);
+                        FlameStrikeTimer = urand(15000,25000);
                     } else FlameStrikeTimer -= diff;
 
                     // Below 50%
@@ -396,7 +407,7 @@ public:
                                 for (uint8 i = 0; i < 3; ++i)
                                 {
                                     Unit *pTarget = NULL;
-                                    pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                                    pTarget = SelectTarget(SELECT_TARGET_RANDOM,0);
 
                                     Creature* Orb = DoSpawnCreature(CREATURE_ARCANE_SPHERE, 5, 5, 0, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000);
                                     if (Orb && pTarget)
@@ -457,8 +468,8 @@ public:
             DoCast(me, SPELL_FLAMESTRIKE2, true);
         }
 
-        void EnterCombat(Unit* /*who*/) {}
-        void MoveInLineOfSight(Unit* /*who*/) {}
+        void EnterCombat(Unit * /*who*/) {}
+        void MoveInLineOfSight(Unit * /*who*/) {}
         void UpdateAI(const uint32 diff)
         {
             if (FlameStrikeTimer <= diff)
@@ -535,7 +546,7 @@ public:
                 me->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->ClearAllReactives();
-                me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
+                me->SetUInt64Value(UNIT_FIELD_TARGET,0);
                 me->GetMotionMaster()->Clear();
                 me->GetMotionMaster()->MoveIdle();
                 me->SetStandState(UNIT_STAND_STATE_DEAD);
@@ -580,7 +591,7 @@ public:
             if (BurnTimer <= diff)
             {
                 //spell Burn should possible do this, but it doesn't, so do this for now.
-                uint16 dmg = urand(1650, 2050);
+                uint16 dmg = urand(1650,2050);
                 me->DealDamage(me, dmg, 0, DOT, SPELL_SCHOOL_MASK_FIRE, NULL, false);
                 BurnTimer += 2000;
             } BurnTimer -= diff;
@@ -648,7 +659,7 @@ public:
         void Reset()
         {
             DespawnTimer = 30000;
-            ChangeTargetTimer = urand(6000, 12000);
+            ChangeTargetTimer = urand(6000,12000);
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
@@ -678,7 +689,7 @@ public:
                     AttackStart(pTarget);
                 }
 
-                ChangeTargetTimer = urand(5000, 15000);
+                ChangeTargetTimer = urand(5000,15000);
             } else ChangeTargetTimer -= diff;
         }
     };

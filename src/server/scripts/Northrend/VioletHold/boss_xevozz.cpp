@@ -22,8 +22,6 @@ enum Spells
 {
     SPELL_ARCANE_BARRAGE_VOLLEY               = 54202,
     SPELL_ARCANE_BARRAGE_VOLLEY_H             = 59483,
-    SPELL_ARCANE_BUFFET                       = 54226,
-    SPELL_ARCANE_BUFFET_H                     = 59485,
     SPELL_SUMMON_ETHEREAL_SPHERE_1            = 54102,
     SPELL_SUMMON_ETHEREAL_SPHERE_2            = 54137,
     SPELL_SUMMON_ETHEREAL_SPHERE_3            = 54138,
@@ -39,6 +37,8 @@ enum CreatureSpells
 {
     SPELL_ARCANE_POWER                             = 54160,
     H_SPELL_ARCANE_POWER                           = 59474,
+    SPELL_ARCANE_BUFFED                            = 54226,
+    H_SPELL_ARCANE_BUFFED                          = 59485,
     SPELL_SUMMON_PLAYERS                           = 54164,
     SPELL_POWER_BALL_VISUAL                        = 54141,
 };
@@ -92,14 +92,14 @@ public:
 
             uiSummonEtherealSphere_Timer = urand(10000, 12000);
             uiArcaneBarrageVolley_Timer = urand(20000, 22000);
-            uiArcaneBuffet_Timer = uiSummonEtherealSphere_Timer + urand(5000, 6000);
+            uiArcaneBuffet_Timer = urand(5000, 6000);
             DespawnSphere();
         }
 
         void DespawnSphere()
         {
             std::list<Creature*> assistList;
-            GetCreatureListWithEntryInGrid(assistList, me, NPC_ETHEREAL_SPHERE , 150.0f);
+            GetCreatureListWithEntryInGrid(assistList,me, NPC_ETHEREAL_SPHERE ,150.0f);
 
             if (assistList.empty())
                 return;
@@ -163,8 +163,11 @@ public:
 
             if (uiArcaneBarrageVolley_Timer < uiDiff)
             {
-                DoCast(me, SPELL_ARCANE_BARRAGE_VOLLEY);
-                uiArcaneBarrageVolley_Timer = urand(20000, 22000);
+                if(!me->IsNonMeleeSpellCasted(false))
+                {
+                    DoCast(me, SPELL_ARCANE_BARRAGE_VOLLEY);
+                    uiArcaneBarrageVolley_Timer = urand(20000, 22000);
+                }
             }
             else uiArcaneBarrageVolley_Timer -= uiDiff;
 
@@ -172,8 +175,11 @@ public:
             {
                 if (uiArcaneBuffet_Timer < uiDiff)
                 {
-                    DoCast(me->getVictim(), SPELL_ARCANE_BUFFET);
-                    uiArcaneBuffet_Timer = 0;
+                    if(!me->IsNonMeleeSpellCasted(false))
+                    {
+                        DoCast(me->getVictim(), DUNGEON_MODE(SPELL_ARCANE_BUFFED,H_SPELL_ARCANE_BUFFED));
+                        uiArcaneBuffet_Timer = urand(15000, 20000);
+                    }
                 }
                 else uiArcaneBuffet_Timer -= uiDiff;
             }
@@ -186,7 +192,6 @@ public:
                     me->SummonCreature(NPC_ETHEREAL_SPHERE, me->GetPositionX()-5+rand()%10, me->GetPositionY()-5+rand()%10, me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 40000);
 
                 uiSummonEtherealSphere_Timer = urand(45000, 47000);
-                uiArcaneBuffet_Timer = urand(5000, 6000);
             }
             else uiSummonEtherealSphere_Timer -= uiDiff;
 
@@ -203,11 +208,17 @@ public:
             {
                 if (pInstance->GetData(DATA_WAVE_COUNT) == 6)
                 {
+                    if(IsHeroic() && pInstance->GetData(DATA_1ST_BOSS_EVENT) == DONE)
+                        me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
                     pInstance->SetData(DATA_1ST_BOSS_EVENT, DONE);
                     pInstance->SetData(DATA_WAVE_COUNT, 7);
                 }
                 else if (pInstance->GetData(DATA_WAVE_COUNT) == 12)
                 {
+                    if(IsHeroic() && pInstance->GetData(DATA_2ND_BOSS_EVENT) == DONE)
+                        me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
                     pInstance->SetData(DATA_2ND_BOSS_EVENT, NOT_STARTED);
                     pInstance->SetData(DATA_WAVE_COUNT, 13);
                 }
@@ -218,7 +229,7 @@ public:
             if (pVictim == me)
                 return;
 
-            DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3), me);
+            DoScriptText(RAND(SAY_SLAY_1,SAY_SLAY_2,SAY_SLAY_3), me);
         }
     };
 

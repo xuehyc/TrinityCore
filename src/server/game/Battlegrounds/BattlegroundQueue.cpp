@@ -19,9 +19,9 @@
 #include "BattlegroundQueue.h"
 #include "ArenaTeam.h"
 #include "BattlegroundMgr.h"
+#include "ChannelMgr.h"
 #include "Chat.h"
 #include "ObjectMgr.h"
-#include "ArenaTeamMgr.h"
 #include "Log.h"
 #include "Group.h"
 
@@ -159,7 +159,7 @@ GroupQueueInfo * BattlegroundQueue::AddGroup(Player *leader, Group* grp, Battleg
     //announce world (this don't need mutex)
     if (isRated && sWorld->getBoolConfig(CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE))
     {
-        ArenaTeam *Team = sArenaTeamMgr->GetArenaTeamById(arenateamid);
+        ArenaTeam *Team = sObjectMgr->GetArenaTeamById(arenateamid);
         if (Team)
             sWorld->SendWorldText(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_JOIN, Team->GetName().c_str(), ginfo->ArenaType, ginfo->ArenaType, ginfo->ArenaTeamRating);
     }
@@ -193,7 +193,8 @@ GroupQueueInfo * BattlegroundQueue::AddGroup(Player *leader, Group* grp, Battleg
         m_QueuedGroups[bracketId][index].push_back(ginfo);
 
         //announce to world, this code needs mutex
-        if (!isRated && !isPremade && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE))
+        if (!isRated && !isPremade && 
+           (sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE) || sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_CHANNEL)))
         {
             if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(ginfo->BgTypeId))
             {
@@ -220,6 +221,25 @@ GroupQueueInfo * BattlegroundQueue::AddGroup(Player *leader, Group* grp, Battleg
                 // System message
                 else
                 {
+                    // Announce to Channel bgannounce
+                    if( sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_CHANNEL) )
+                    {
+                        ChannelMgr* cMgr = channelMgr(HORDE);
+                        Channel* chBg = cMgr->GetJoinChannel("bgannounce", HORDE);
+                        // Automatically join player
+                        chBg->Join(leader->GetGUID(), "");
+
+                        char fText[128];
+                        sprintf(fText, "%s -- [%d-%d] A: %d/%d, H: %d/%d", bgName, q_min_level, q_max_level,
+                        qAlliance, (MinPlayers > qAlliance) ? MinPlayers - qAlliance : (uint32)0,
+                        qHorde, (MinPlayers > qHorde) ? MinPlayers - qHorde : (uint32)0);
+
+                        // Announce to channel
+                        chBg->Say(leader->GetGUID(), fText, 0);
+
+                        //leader->Say(fText, 0);
+                    }
+                
                     sWorld->SendWorldText(LANG_BG_QUEUE_ANNOUNCE_WORLD, bgName, q_min_level, q_max_level,
                         qAlliance, (MinPlayers > qAlliance) ? MinPlayers - qAlliance : (uint32)0, qHorde, (MinPlayers > qHorde) ? MinPlayers - qHorde : (uint32)0);
                 }
@@ -354,7 +374,7 @@ void BattlegroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
     // announce to world if arena team left queue for rated match, show only once
     if (group->ArenaType && group->IsRated && group->Players.empty() && sWorld->getBoolConfig(CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE))
     {
-        ArenaTeam *Team = sArenaTeamMgr->GetArenaTeamById(group->ArenaTeamId);
+        ArenaTeam *Team = sObjectMgr->GetArenaTeamById(group->ArenaTeamId);
         if (Team)
             sWorld->SendWorldText(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT, Team->GetName().c_str(), group->ArenaType, group->ArenaType, group->ArenaTeamRating);
     }
@@ -362,7 +382,7 @@ void BattlegroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
     //if player leaves queue and he is invited to rated arena match, then he have to lose
     if (group->IsInvitedToBGInstanceGUID && group->IsRated && decreaseInvitedCount)
     {
-        ArenaTeam * at = sArenaTeamMgr->GetArenaTeamById(group->ArenaTeamId);
+        ArenaTeam * at = sObjectMgr->GetArenaTeamById(group->ArenaTeamId);
         if (at)
         {
             sLog->outDebug(LOG_FILTER_BATTLEGROUND, "UPDATING memberLost's personal arena rating for %u by opponents rating: %u", GUID_LOPART(guid), group->OpponentsTeamRating);
@@ -390,7 +410,7 @@ void BattlegroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
         // first send removal information
         if (Player *plr2 = sObjectMgr->GetPlayer(group->Players.begin()->first))
         {
-            Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(group->BgTypeId);
+            Battleground * bg = sBattlegroundMgr->GetBattlegroundTemplate(group->BgTypeId);
             BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(group->BgTypeId, group->ArenaType);
             uint32 queueSlot = plr2->GetBattlegroundQueueIndex(bgQueueTypeId);
             plr2->RemoveBattlegroundQueueId(bgQueueTypeId); // must be called this way, because if you move this call to
@@ -422,7 +442,7 @@ bool BattlegroundQueue::GetPlayerGroupInfoData(const uint64& guid, GroupQueueInf
     return true;
 }
 
-bool BattlegroundQueue::InviteGroupToBG(GroupQueueInfo * ginfo, Battleground* bg, uint32 side)
+bool BattlegroundQueue::InviteGroupToBG(GroupQueueInfo * ginfo, Battleground * bg, uint32 side)
 {
     // set side if needed
     if (side)
@@ -444,7 +464,7 @@ bool BattlegroundQueue::InviteGroupToBG(GroupQueueInfo * ginfo, Battleground* bg
         ginfo->RemoveInviteTime = getMSTime() + INVITE_ACCEPT_WAIT_TIME;
 
         // loop through the players
-        for (std::map<uint64, PlayerQueueInfo*>::iterator itr = ginfo->Players.begin(); itr != ginfo->Players.end(); ++itr)
+        for (std::map<uint64,PlayerQueueInfo*>::iterator itr = ginfo->Players.begin(); itr != ginfo->Players.end(); ++itr)
         {
             // get the player
             Player* plr = sObjectMgr->GetPlayer(itr->first);
@@ -472,7 +492,7 @@ bool BattlegroundQueue::InviteGroupToBG(GroupQueueInfo * ginfo, Battleground* bg
 
             uint32 queueSlot = plr->GetBattlegroundQueueIndex(bgQueueTypeId);
 
-            sLog->outDebug(LOG_FILTER_BATTLEGROUND, "Battleground: invited plr %s (%u) to BG instance %u queueindex %u bgtype %u, I can't help it if they don't press the enter battle button.", plr->GetName(), plr->GetGUIDLow(), bg->GetInstanceID(), queueSlot, bg->GetTypeID());
+            sLog->outDebug(LOG_FILTER_BATTLEGROUND, "Battleground: invited plr %s (%u) to BG instance %u queueindex %u bgtype %u, I can't help it if they don't press the enter battle button.",plr->GetName(),plr->GetGUIDLow(),bg->GetInstanceID(),queueSlot,bg->GetTypeID());
 
             // send status packet
             sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME, 0, ginfo->ArenaType);
@@ -777,14 +797,14 @@ void BattlegroundQueue::Update(BattlegroundTypeId bgTypeId, BattlegroundBracketI
 
     // finished iterating through the bgs with free slots, maybe we need to create a new bg
 
-    Battleground* bg_template = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeId);
+    Battleground * bg_template = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeId);
     if (!bg_template)
     {
         sLog->outError("Battleground: Update: bg template not found for %u", bgTypeId);
         return;
     }
 
-    PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketById(bg_template->GetMapId(), bracket_id);
+    PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketById(bg_template->GetMapId(),bracket_id);
     if (!bracketEntry)
     {
         sLog->outError("Battleground: Update: bg bracket entry not found for map %u bracket id %u", bg_template->GetMapId(), bracket_id);
@@ -835,7 +855,7 @@ void BattlegroundQueue::Update(BattlegroundTypeId bgTypeId, BattlegroundBracketI
         if (CheckPremadeMatch(bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam))
         {
             //create new battleground
-            Battleground* bg2 = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, 0, false);
+            Battleground * bg2 = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, 0, false);
             if (!bg2)
             {
                 sLog->outError("BattlegroundQueue::Update - Cannot create battleground: %u", bgTypeId);
@@ -861,7 +881,7 @@ void BattlegroundQueue::Update(BattlegroundTypeId bgTypeId, BattlegroundBracketI
             || (bg_template->isArena() && CheckSkirmishForSameFaction(bracket_id, MinPlayersPerTeam)))
         {
             // we successfully created a pool
-            Battleground* bg2 = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, arenaType, false);
+            Battleground * bg2 = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, arenaType, false);
             if (!bg2)
             {
                 sLog->outError("BattlegroundQueue::Update - Cannot create battleground: %u", bgTypeId);
@@ -1081,7 +1101,7 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
         BattlegroundQueue &bgQueue = sBattlegroundMgr->m_BattlegroundQueues[m_BgQueueTypeId];
         if (bgQueue.IsPlayerInvited(m_PlayerGuid, m_BgInstanceGUID, m_RemoveTime))
         {
-            sLog->outDebug(LOG_FILTER_BATTLEGROUND, "Battleground: removing player %u from bg queue for instance %u because of not pressing enter battle in time.", plr->GetGUIDLow(), m_BgInstanceGUID);
+            sLog->outDebug(LOG_FILTER_BATTLEGROUND, "Battleground: removing player %u from bg queue for instance %u because of not pressing enter battle in time.",plr->GetGUIDLow(),m_BgInstanceGUID);
 
             plr->RemoveBattlegroundQueueId(m_BgQueueTypeId);
             bgQueue.RemovePlayer(m_PlayerGuid, true);

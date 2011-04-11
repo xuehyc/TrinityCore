@@ -53,6 +53,7 @@ public:
         uint64 m_uiIonarGUID;
         uint64 m_uiLokenGUID;
         uint64 m_uiVolkhanGUID;
+	uint64 m_uiVolkhanAnvilGUID;
 
         uint64 m_uiBjarngrimDoorGUID;
         uint64 m_uiVolkhanDoorGUID;
@@ -68,6 +69,7 @@ public:
             m_uiVolkhanGUID          = 0;
             m_uiIonarGUID            = 0;
             m_uiLokenGUID            = 0;
+		m_uiVolkhanAnvilGUID	 = 0;
 
             m_uiBjarngrimDoorGUID    = 0;
             m_uiVolkhanDoorGUID      = 0;
@@ -91,6 +93,9 @@ public:
                     break;
                 case NPC_LOKEN:
                     m_uiLokenGUID = creature->GetGUID();
+                    break;
+                case NPC_VOLKHAN_ANVIL:
+                    m_uiVolkhanAnvilGUID = creature->GetGUID();
                     break;
             }
         }
@@ -139,29 +144,29 @@ public:
             {
                 case TYPE_BJARNGRIM:
                     if (uiData == DONE)
-                        if (GameObject* pDoor = instance->GetGameObject(m_uiBjarngrimDoorGUID))
-                            pDoor->SetGoState(GO_STATE_ACTIVE);
+				{
+                        DoUseDoorOrButton(m_uiBjarngrimDoorGUID);
+					GameObject* pGo = instance->GetGameObject(m_uiBjarngrimDoorGUID);
+					pGo->SetGoState(GO_STATE_ACTIVE);
+				}
                     m_auiEncounter[0] = uiData;
                     break;
                 case TYPE_VOLKHAN:
                     if (uiData == DONE)
-                        if (GameObject* pDoor = instance->GetGameObject(m_uiVolkhanDoorGUID))
-                            pDoor->SetGoState(GO_STATE_ACTIVE);
+                        DoUseDoorOrButton(m_uiVolkhanDoorGUID);
                     m_auiEncounter[1] = uiData;
                     break;
                 case TYPE_IONAR:
                     if (uiData == DONE)
-                        if (GameObject* pDoor = instance->GetGameObject(m_uiIonarDoorGUID))
-                            pDoor->SetGoState(GO_STATE_ACTIVE);
+                        DoUseDoorOrButton(m_uiIonarDoorGUID);
                     m_auiEncounter[2] = uiData;
                     break;
                 case TYPE_LOKEN:
                     if (uiData == DONE)
                     {
-                        if (GameObject* pDoor = instance->GetGameObject(m_uiLokenDoorGUID))
-                            pDoor->SetGoState(GO_STATE_ACTIVE);
+                        DoUseDoorOrButton(m_uiLokenDoorGUID);
 
-                        // Appears to be type 5 GO with animation. Need to figure out how this work, code below only placeholder
+                        //Appears to be type 5 GO with animation. Need to figure out how this work, code below only placeholder
                         if (GameObject* pGlobe = instance->GetGameObject(m_uiLokenGlobeGUID))
                             pGlobe->SetGoState(GO_STATE_ACTIVE);
                     }
@@ -201,6 +206,8 @@ public:
                     return m_uiIonarGUID;
                 case DATA_LOKEN:
                     return m_uiLokenGUID;
+			case DATA_VOLKHAN_ANVIL:
+				return m_uiVolkhanAnvilGUID;
             }
             return 0;
         }

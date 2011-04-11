@@ -85,7 +85,7 @@ public:
             AmplifyTimer = 2000;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             if (!pInstance)
             {
@@ -119,7 +119,7 @@ public:
                 me->InterruptNonMeleeSpells(false);
                 DoCast(me->getVictim(), SPELL_AMPLIFY_FLAMES);
 
-                AmplifyTimer = urand(10000, 20000);
+                AmplifyTimer = urand(10000,20000);
             } else AmplifyTimer -= diff;
 
             DoMeleeAttackIfReady();
@@ -153,11 +153,11 @@ public:
         void AttackStart(Unit* /*who*/) {}
         void MoveInLineOfSight(Unit* /*who*/) {}
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit * /*killer*/)
         {
             if (SacrificeGUID)
             {
-                Unit* Sacrifice = Unit::GetUnit((*me), SacrificeGUID);
+                Unit* Sacrifice = Unit::GetUnit((*me),SacrificeGUID);
                 if (Sacrifice)
                     Sacrifice->RemoveAurasDueToSpell(SPELL_SACRIFICE);
             }
@@ -178,7 +178,7 @@ public:
 
     struct mob_fiendish_portalAI : public PassiveAI
     {
-        mob_fiendish_portalAI(Creature *c) : PassiveAI(c), summons(me){}
+        mob_fiendish_portalAI(Creature *c) : PassiveAI(c),summons(me){}
 
         SummonList summons;
 
@@ -226,7 +226,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit * /*who*/) {}
 
         void UpdateAI(const uint32 diff)
         {
@@ -333,18 +333,18 @@ public:
 
                 if (pSummoned->GetUInt32Value(UNIT_CREATED_BY_SPELL) == SPELL_FIENDISH_PORTAL_1)
                 {
-                    DoScriptText(RAND(SAY_SUMMON1, SAY_SUMMON2), me);
+                    DoScriptText(RAND(SAY_SUMMON1,SAY_SUMMON2), me);
                     SummonedPortals = true;
                 }
             }
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit * /*victim*/)
         {
-            DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2), me);
+            DoScriptText(RAND(SAY_SLAY1,SAY_SLAY2), me);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit * /*killer*/)
         {
             for (uint8 i = 0; i < 2; ++i)
             {
@@ -380,7 +380,7 @@ public:
                     {
                         CAST_AI(mob_demon_chain::mob_demon_chainAI, Chains->AI())->SacrificeGUID = pTarget->GetGUID();
                         Chains->CastSpell(Chains, SPELL_DEMON_CHAINS, true);
-                        DoScriptText(RAND(SAY_SACRIFICE1, SAY_SACRIFICE2), me);
+                        DoScriptText(RAND(SAY_SACRIFICE1,SAY_SACRIFICE2), me);
                         SacrificeTimer = 30000;
                     }
                 }
@@ -402,7 +402,7 @@ public:
 
                 if (PortalGUID[0] && PortalGUID[1])
                 {
-                    if (Creature* pPortal = Unit::GetCreature(*me, PortalGUID[urand(0, 1)]))
+                    if (Creature* pPortal = Unit::GetCreature(*me, PortalGUID[urand(0,1)]))
                         pPortal->CastSpell(me->getVictim(), SPELL_SUMMON_FIENDISIMP, false);
                     SummonTimer = 5000;
                 }

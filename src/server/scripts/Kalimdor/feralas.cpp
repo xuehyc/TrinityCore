@@ -46,7 +46,7 @@ public:
             pPlayer->SEND_GOSSIP_MENU(2434, pCreature->GetGUID());
         }
         if (uiAction == GOSSIP_ACTION_TRADE)
-            pPlayer->GetSession()->SendListInventory(pCreature->GetGUID());
+            pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
         return true;
     }
 
@@ -170,8 +170,8 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             //For an small probability the npc says something when he get aggro
-            if (urand(0, 9) > 7)
-                DoScriptText(RAND(SAY_OOX_AGGRO1, SAY_OOX_AGGRO2), me);
+            if (urand(0,9) > 7)
+                DoScriptText(RAND(SAY_OOX_AGGRO1,SAY_OOX_AGGRO2), me);
         }
 
         void JustSummoned(Creature* summoned)

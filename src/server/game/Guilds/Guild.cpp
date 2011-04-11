@@ -18,7 +18,6 @@
 
 #include "DatabaseEnv.h"
 #include "Guild.h"
-#include "GuildMgr.h"
 #include "ScriptMgr.h"
 #include "Chat.h"
 #include "Config.h"
@@ -340,7 +339,7 @@ bool Guild::BankTab::LoadItemFromDB(Field* fields)
         return false;
     }
 
-    ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemEntry);
+    ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemEntry);
     if (!proto)
     {
         sLog->outError("Unknown item (GUID: %u, id: %u) in guild bank, skipped.", itemGuid, itemEntry);
@@ -551,7 +550,7 @@ void Guild::Member::ChangeRank(uint8 newRank)
     m_rankId = newRank;
 
     // Update rank information in player's field, if he is online.
-    if (Player* player = FindPlayer())
+    if (Player *player = FindPlayer())
         player->SetRank(newRank);
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SET_GUILD_MEMBER_RANK);
@@ -758,10 +757,10 @@ bool Guild::MoveItemData::CheckItem(uint32& splitedAmount)
     return true;
 }
 
-bool Guild::MoveItemData::CanStore(Item* pItem, bool swap, bool sendError)
+uint8 Guild::MoveItemData::CanStore(Item* pItem, bool swap, bool sendError)
 {
     m_vec.clear();
-    InventoryResult msg = _CanStore(pItem, swap);
+    uint8 msg = _CanStore(pItem, swap);
     if (sendError && msg != EQUIP_ERR_OK)
         m_pPlayer->SendEquipError(msg, pItem);
     return (msg == EQUIP_ERR_OK);
@@ -849,7 +848,7 @@ void Guild::PlayerMoveItemData::LogBankEvent(SQLTransaction& trans, MoveItemData
         pFrom->GetItem()->GetEntry(), count);
 }
 
-inline InventoryResult Guild::PlayerMoveItemData::_CanStore(Item* pItem, bool swap)
+inline uint8 Guild::PlayerMoveItemData::_CanStore(Item* pItem, bool swap)
 {
     return m_pPlayer->CanStoreItem(m_container, m_slotId, m_vec, pItem, swap);
 }
@@ -941,7 +940,7 @@ void Guild::BankMoveItemData::LogAction(MoveItemData* pFrom) const
         sLog->outCommand(m_pPlayer->GetSession()->GetAccountId(),
             "GM %s (Account: %u) deposit item: %s (Entry: %d Count: %u) to guild bank (Guild ID: %u)",
             m_pPlayer->GetName(), m_pPlayer->GetSession()->GetAccountId(),
-            pFrom->GetItem()->GetTemplate()->Name1.c_str(), pFrom->GetItem()->GetEntry(), pFrom->GetItem()->GetCount(),
+            pFrom->GetItem()->GetProto()->Name1, pFrom->GetItem()->GetEntry(), pFrom->GetItem()->GetCount(),
             m_pGuild->GetId());
 }
 
@@ -1021,7 +1020,7 @@ void Guild::BankMoveItemData::_CanStoreItemInTab(Item* pItem, uint8 skipSlotId, 
     }
 }
 
-InventoryResult Guild::BankMoveItemData::_CanStore(Item* pItem, bool swap)
+uint8 Guild::BankMoveItemData::_CanStore(Item* pItem, bool swap)
 {
     sLog->outDebug(LOG_FILTER_GUILD, "GUILD STORAGE: CanStore() tab = %u, slot = %u, item = %u, count = %u",
         m_container, m_slotId, pItem->GetEntry(), pItem->GetCount());
@@ -1093,14 +1092,14 @@ Guild::~Guild()
 bool Guild::Create(Player* pLeader, const std::string& name)
 {
     // Check if guild with such name already exists
-    if (sGuildMgr->GetGuildByName(name))
+    if (sObjectMgr->GetGuildByName(name))
         return false;
 
     WorldSession* pLeaderSession = pLeader->GetSession();
     if (!pLeaderSession)
         return false;
 
-    m_id = sGuildMgr->GenerateGuildId();
+    m_id = sObjectMgr->GenerateGuildId();
     m_leaderGuid = pLeader->GetGUID();
     m_name = name;
     m_info = "";
@@ -1195,7 +1194,7 @@ void Guild::Disband()
     trans->Append(stmt);
 
     CharacterDatabase.CommitTransaction(trans);
-    sGuildMgr->RemoveGuild(m_id);
+    sObjectMgr->RemoveGuild(m_id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1615,9 +1614,6 @@ void Guild::HandleRemoveLowestRank(WorldSession* session)
 
 void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
 {
-    if (!_GetPurchasedTabsSize())
-        return;                                                     // No guild bank tabs - no money in bank
-
     Player* player = session->GetPlayer();
 
     // Call script after validation and before money transfer.
@@ -1648,9 +1644,6 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
 
 bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool repair)
 {
-    if (!_GetPurchasedTabsSize())
-        return false;                                       // No guild bank tabs - no money
-
     if (m_bankMoney < amount)                               // Not enough money in bank
         return false;
 
@@ -1972,7 +1965,7 @@ bool Guild::Validate()
     // Validate ranks data
     // GUILD RANKS represent a sequence starting from 0 = GUILD_MASTER (ALL PRIVILEGES) to max 9 (lowest privileges).
     // The lower rank id is considered higher rank - so promotion does rank-- and demotion does rank++
-    // Between ranks in sequence cannot be gaps - so 0, 1, 2, 4 is impossible
+    // Between ranks in sequence cannot be gaps - so 0,1,2,4 is impossible
     // Min ranks count is 5 and max is 10.
     bool broken_ranks = false;
     if (_GetRanksSize() < GUILD_RANKS_MIN_COUNT || _GetRanksSize() > GUILD_RANKS_MAX_COUNT)
@@ -2039,25 +2032,25 @@ void Guild::BroadcastToGuild(WorldSession *session, bool officerOnly, const std:
         WorldPacket data;
         ChatHandler::FillMessageData(&data, session, officerOnly ? CHAT_MSG_OFFICER : CHAT_MSG_GUILD, language, NULL, 0, msg.c_str(), NULL);
         for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-            if (Player* player = itr->second->FindPlayer())
+            if (Player *player = itr->second->FindPlayer())
                 if (player->GetSession() && _HasRankRight(player, officerOnly ? GR_RIGHT_OFFCHATLISTEN : GR_RIGHT_GCHATLISTEN) &&
                     !player->GetSocial()->HasIgnore(session->GetPlayer()->GetGUIDLow()))
                     player->GetSession()->SendPacket(&data);
     }
 }
 
-void Guild::BroadcastPacketToRank(WorldPacket* packet, uint8 rankId) const
+void Guild::BroadcastPacketToRank(WorldPacket *packet, uint8 rankId) const
 {
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         if (itr->second->IsRank(rankId))
-            if (Player* player = itr->second->FindPlayer())
+            if (Player *player = itr->second->FindPlayer())
                 player->GetSession()->SendPacket(packet);
 }
 
-void Guild::BroadcastPacket(WorldPacket* packet) const
+void Guild::BroadcastPacket(WorldPacket *packet) const
 {
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-        if (Player* player = itr->second->FindPlayer())
+        if (Player *player = itr->second->FindPlayer())
             player->GetSession()->SendPacket(packet);
 }
 
@@ -2135,7 +2128,7 @@ bool Guild::AddMember(const uint64& guid, uint8 rankId)
 void Guild::DeleteMember(const uint64& guid, bool isDisbanding, bool isKicked)
 {
     uint32 lowguid = GUID_LOPART(guid);
-    Player* player = sObjectMgr->GetPlayer(guid);
+    Player *player = sObjectMgr->GetPlayer(guid);
 
     // Guild master can be deleted when loading guild and guid doesn't exist in characters table
     // or when he is removed from guild by gm command
@@ -2297,7 +2290,7 @@ void Guild::_CreateRank(const std::string& name, uint32 rights)
     if (_GetRanksSize() >= GUILD_RANKS_MAX_COUNT)
         return;
 
-    // Ranks represent sequence 0, 1, 2, ... where 0 means guildmaster
+    // Ranks represent sequence 0,1,2,... where 0 means guildmaster
     uint8 newRankId = _GetRanksSize();
 
     RankInfo info(m_id, newRankId, name, rights, 0);
@@ -2716,7 +2709,7 @@ void Guild::_SendBankContentUpdate(uint8 tabId, SlotIds slots) const
 
         for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
             if (_MemberHasTabRights(itr->second->GetGUID(), tabId, GUILD_BANK_RIGHT_VIEW_TAB))
-                if (Player* player = itr->second->FindPlayer())
+                if (Player *player = itr->second->FindPlayer())
                 {
                     data.put<uint32>(rempos, uint32(_GetMemberRemainingSlots(player->GetGUID(), tabId)));
                     player->GetSession()->SendPacket(&data);

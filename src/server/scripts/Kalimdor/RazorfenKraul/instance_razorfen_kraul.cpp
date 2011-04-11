@@ -43,11 +43,13 @@ public:
         instance_razorfen_kraul_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {}
 
         uint64 DoorWardGUID;
-        int WardKeeperDeath;
+        uint32 WardCheck_Timer;
+        int WardKeeperAlive;
 
         void Initialize()
         {
-            WardKeeperDeath = 0;
+            WardKeeperAlive = 1;
+            WardCheck_Timer = 4000;
             DoorWardGUID = 0;
         }
 
@@ -71,25 +73,29 @@ public:
         {
             switch(go->GetEntry())
             {
-                case 21099: DoorWardGUID = go->GetGUID(); break;
+            case 21099: DoorWardGUID = go->GetGUID(); break;
             }
         }
 
-        void Update(uint32 /*diff*/)
+        void Update(uint32 diff)
         {
-            if (WardKeeperDeath == WARD_KEEPERS_NR)
-                if(GameObject* pGo = instance->GetGameObject(DoorWardGUID))
-                {
-                    pGo->SetUInt32Value(GAMEOBJECT_FLAGS, 33);
-                    pGo->SetGoState(GO_STATE_ACTIVE);
-                }
+            if (WardCheck_Timer <= diff)
+            {
+                HandleGameObject(DoorWardGUID, WardKeeperAlive);
+                WardKeeperAlive = 0;
+                WardCheck_Timer = 4000;
+            }else
+                WardCheck_Timer -= diff;
         }
 
-        void SetData(uint32 type, uint32 /*data*/)
+        void SetData(uint32 type, uint32 data)
         {
             switch(type)
             {
-                case EVENT_WARD_KEEPER: WardKeeperDeath++; break;
+                case TYPE_WARD_KEEPERS:
+                    if (data == NOT_STARTED)
+                        WardKeeperAlive = 1;
+                    break;
             }
         }
 

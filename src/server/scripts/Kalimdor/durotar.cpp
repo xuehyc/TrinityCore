@@ -72,11 +72,11 @@ public:
             if (spell->Id == SPELL_AWAKEN_PEON && caster->GetTypeId() == TYPEID_PLAYER
                 && CAST_PLR(caster)->GetQuestStatus(QUEST_LAZY_PEONS) == QUEST_STATUS_INCOMPLETE)
             {
-                caster->ToPlayer()->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
+                caster->ToPlayer()->KilledMonsterCredit(me->GetEntry(),me->GetGUID());
                 DoScriptText(SAY_SPELL_HIT, me, caster);
                 me->RemoveAllAuras();
                 if (GameObject* Lumberpile = me->FindNearestGameObject(GO_LUMBERPILE, 20))
-                    me->GetMotionMaster()->MovePoint(1, Lumberpile->GetPositionX()-1, Lumberpile->GetPositionY(), Lumberpile->GetPositionZ());
+                    me->GetMotionMaster()->MovePoint(1,Lumberpile->GetPositionX()-1,Lumberpile->GetPositionY(),Lumberpile->GetPositionZ());
             }
         }
 
@@ -190,10 +190,7 @@ class npc_tiger_matriarch_credit : public CreatureScript
                     {
                         for (std::list<Creature*>::iterator itr = tigers.begin(); itr != tigers.end(); ++itr)
                         {
-                            if (!(*itr)->isSummon())
-                                continue;
-
-                            if (Unit* summoner = (*itr)->ToTempSummon()->GetSummoner())
+                            if (Unit* summoner = CAST_SUM(*itr)->GetSummoner())
                                 if (!summoner->HasAura(SPELL_NO_SUMMON_AURA) && !summoner->HasAura(SPELL_SUMMON_ZENTABRA_TRIGGER)
                                     && !summoner->isInCombat())
                                 {
@@ -226,10 +223,7 @@ class npc_tiger_matriarch : public CreatureScript
 
         struct npc_tiger_matriarchAI : public ScriptedAI
         {
-            npc_tiger_matriarchAI(Creature* creature) : ScriptedAI(creature),
-                _tiger(NULL)
-            {
-            }
+            npc_tiger_matriarchAI(Creature* creature) : ScriptedAI(creature) {}
 
             void IsSummonedBy(Unit* summoner)
             {
@@ -248,10 +242,10 @@ class npc_tiger_matriarch : public CreatureScript
 
             void KilledUnit(Unit* victim)
             {
-                if (victim->GetTypeId() != TYPEID_UNIT || !victim->isSummon())
+                if (victim->GetTypeId() != TYPEID_UNIT)
                     return;
 
-                if (Unit* vehSummoner = victim->ToTempSummon()->GetSummoner())
+                if (Unit* vehSummoner = CAST_SUM(victim)->GetSummoner())
                 {
                     vehSummoner->RemoveAurasDueToSpell(SPELL_NO_SUMMON_AURA);
                     vehSummoner->RemoveAurasDueToSpell(SPELL_DETECT_INVIS);
@@ -263,14 +257,11 @@ class npc_tiger_matriarch : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32& damage)
             {
-                if (!attacker->isSummon())
-                    return;
-
-                if (HealthBelowPct(20))
-                {
+               if (HealthBelowPct(20))
+               {
                     damage = 0;
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    if (Unit* vehSummoner = attacker->ToTempSummon()->GetSummoner())
+                    if (Unit* vehSummoner = CAST_SUM(attacker)->GetSummoner())
                     {
                         vehSummoner->AddAura(SPELL_SUMMON_ZENTABRA_TRIGGER, vehSummoner);
                         vehSummoner->CastSpell(vehSummoner, SPELL_SUMMON_ZENTABRA, true);
@@ -280,7 +271,6 @@ class npc_tiger_matriarch : public CreatureScript
                         vehSummoner->RemoveAurasDueToSpell(SPELL_SPIRIT_OF_THE_TIGER_RIDER);
                         vehSummoner->RemoveAurasDueToSpell(SPELL_SUMMON_ZENTABRA_TRIGGER);
                     }
-
                     me->ForcedDespawn();
                 }
             }
@@ -304,9 +294,8 @@ class npc_tiger_matriarch : public CreatureScript
                             events.ScheduleEvent(EVENT_POUNCE, 30000);
                             break;
                         case EVENT_NOSUMMON: // Reapply SPELL_NO_SUMMON_AURA
-                            if (_tiger && _tiger->isSummon())
-                                if (Unit* vehSummoner = _tiger->ToTempSummon()->GetSummoner())
-                                    me->AddAura(SPELL_NO_SUMMON_AURA, vehSummoner);
+                            if (Unit* vehSummoner = CAST_SUM(_tiger)->GetSummoner())
+                                me->AddAura(SPELL_NO_SUMMON_AURA, vehSummoner);
                             events.ScheduleEvent(EVENT_NOSUMMON, 50000);
                             break;
                         default:
@@ -331,9 +320,9 @@ class npc_tiger_matriarch : public CreatureScript
 // These models was found in sniff.
 // TODO: generalize these models with race from dbc
 uint32 const trollmodel[] =
-{11665, 11734, 11750, 12037, 12038, 12042, 12049, 12849, 13529, 14759, 15570, 15701,
-15702, 1882, 1897, 1976, 2025, 27286, 2734, 2735, 4084, 4085, 4087, 4089, 4231, 4357,
-4358, 4360, 4361, 4362, 4363, 4370, 4532, 4537, 4540, 4610, 6839, 7037, 9767, 9768};
+{11665,11734,11750,12037,12038,12042,12049,12849,13529,14759,15570,15701,
+15702,1882,1897,1976,2025,27286,2734,2735,4084,4085,4087,4089,4231,4357,
+4358,4360,4361,4362,4363,4370,4532,4537,4540,4610,6839,7037,9767,9768};
 
 class npc_troll_volunteer : public CreatureScript
 {
@@ -347,7 +336,7 @@ class npc_troll_volunteer : public CreatureScript
                 Reset();
                 Player* player = me->GetOwner()->ToPlayer();
 
-                switch (urand(1, 4))
+                switch (urand(1,4))
                 {
                     case 1:
                         _mountModel = 6471;
@@ -424,7 +413,7 @@ class spell_mount_check : public SpellScriptLoader
         class spell_mount_check_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_mount_check_AuraScript)
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellEntry const * /*spellEntry*/)
             {
                 if (!sSpellStore.LookupEntry(SPELL_MOUNTING_CHECK))
                     return false;
@@ -472,7 +461,7 @@ class spell_voljin_war_drums : public SpellScriptLoader
         class spell_voljin_war_drums_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_voljin_war_drums_SpellScript)
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellEntry const * /*spellEntry*/)
             {
                 if (!sSpellStore.LookupEntry(SPELL_MOTIVATE_1))
                     return false;

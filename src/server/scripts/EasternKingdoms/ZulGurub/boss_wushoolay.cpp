@@ -51,7 +51,7 @@ class boss_wushoolay : public CreatureScript
                 LightningWave_Timer = 8000 + rand()%8000;
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit * /*who*/)
             {
             }
 
@@ -71,7 +71,7 @@ class boss_wushoolay : public CreatureScript
                 if (LightningWave_Timer <= diff)
                 {
                     Unit *pTarget = NULL;
-                    pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                    pTarget = SelectTarget(SELECT_TARGET_RANDOM,0);
                     if (pTarget) DoCast(pTarget, SPELL_LIGHTNINGWAVE);
 
                     LightningWave_Timer = 12000 + rand()%4000;

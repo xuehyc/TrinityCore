@@ -28,25 +28,25 @@
 
 class GameObjectAI;
 
-// GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push, N), also any gcc version not support it at some platform
+// GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined(__GNUC__)
 #pragma pack(1)
 #else
-#pragma pack(push, 1)
+#pragma pack(push,1)
 #endif
 
 #define MAX_GAMEOBJECT_QUEST_ITEMS 6
 
 // from `gameobject_template`
-struct GameObjectTemplate
+struct GameObjectInfo
 {
-    uint32  entry;
+    uint32  id;
     uint32  type;
     uint32  displayId;
-    std::string name;
-    std::string IconName;
-    std::string castBarCaption;
-    std::string unk1;
+    char   *name;
+    char   *IconName;
+    char   *castBarCaption;
+    char   *unk1;
     uint32  faction;
     uint32  flags;
     float   size;
@@ -398,12 +398,10 @@ struct GameObjectTemplate
         // not use for specific field access (only for output with loop by all filed), also this determinate max union size
         struct
         {
-            uint32 data[MAX_GAMEOBJECT_DATA];
+            uint32 data[24];
         } raw;
     };
-
-
-    std::string AIName;
+    char const* AIName;
     uint32 ScriptId;
 
     // helpers
@@ -530,9 +528,6 @@ struct GameObjectTemplate
     }
 };
 
-// Benchmarked: Faster than std::map (insert/find)
-typedef UNORDERED_MAP<uint32, GameObjectTemplate> GameObjectTemplateContainer;
-
 class OPvPCapturePoint;
 
 union GameObjectValue
@@ -625,7 +620,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         bool Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMask, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state, uint32 artKit = 0);
         void Update(uint32 p_time);
         static GameObject* GetGameObject(WorldObject& object, uint64 guid);
-        GameObjectTemplate const* GetGOInfo() const { return m_goInfo; }
+        GameObjectInfo const* GetGOInfo() const { return m_goInfo; }
         GameObjectData const* GetGOData() const { return m_goData; }
         GameObjectValue * GetGOValue() const { return m_goValue; }
 
@@ -636,11 +631,11 @@ class GameObject : public WorldObject, public GridObject<GameObject>
 
         void UpdateRotationFields(float rotation2 = 0.0f, float rotation3 = 0.0f);
 
-        void Say(int32 textId, uint32 language, uint64 TargetGuid) { MonsterSay(textId, language, TargetGuid); }
-        void Yell(int32 textId, uint32 language, uint64 TargetGuid) { MonsterYell(textId, language, TargetGuid); }
-        void TextEmote(int32 textId, uint64 TargetGuid) { MonsterTextEmote(textId, TargetGuid); }
-        void Whisper(int32 textId, uint64 receiver) { MonsterWhisper(textId, receiver); }
-        void YellToZone(int32 textId, uint32 language, uint64 TargetGuid) { MonsterYellToZone(textId, language, TargetGuid); }
+        void Say(int32 textId, uint32 language, uint64 TargetGuid) { MonsterSay(textId,language,TargetGuid); }
+        void Yell(int32 textId, uint32 language, uint64 TargetGuid) { MonsterYell(textId,language,TargetGuid); }
+        void TextEmote(int32 textId, uint64 TargetGuid) { MonsterTextEmote(textId,TargetGuid); }
+        void Whisper(int32 textId, uint64 receiver) { MonsterWhisper(textId,receiver); }
+        void YellToZone(int32 textId, uint32 language, uint64 TargetGuid) { MonsterYellToZone(textId,language,TargetGuid); }
 
         // overwrite WorldObject function for proper name localization
         const char* GetNameForLocaleIdx(LocaleConstant locale_idx) const;
@@ -764,7 +759,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>
 
         GameObject* LookupFishingHoleAround(float range);
 
-        void CastSpell(Unit* target, uint32 spell);
+        void CastSpell(Unit *target, uint32 spell);
         void SendCustomAnim(uint32 anim);
         bool IsInRange(float x, float y, float z, float radius) const;
         void TakenDamage(uint32 damage, Unit* who = NULL);
@@ -774,7 +769,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>
 
         uint64 GetRotation() const { return m_rotation; }
         virtual uint32 GetScriptId() const { return GetGOInfo()->ScriptId; }
-        GameObjectAI* AI() const { return m_AI; }
+        GameObjectAI* AI() const { return (GameObjectAI*)m_AI; }
 
         std::string GetAIName() const;
     protected:
@@ -792,11 +787,11 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         std::set<uint32> m_unique_users;
         uint32 m_usetimes;
 
-        typedef std::map<uint32, uint64> ChairSlotAndUser;
+        typedef std::map<uint32,uint64> ChairSlotAndUser;
         ChairSlotAndUser ChairListSlots;
 
         uint32 m_DBTableGuid;                               ///< For new or temporary gameobjects is 0 for saved it is lowguid
-        GameObjectTemplate const* m_goInfo;
+        GameObjectInfo const* m_goInfo;
         GameObjectData const* m_goData;
         GameObjectValue * const m_goValue;
 

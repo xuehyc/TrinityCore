@@ -18,8 +18,8 @@
 
 /* ScriptData
 SDName: Boss Volkhan
-SD%Complete: 90%
-SDComment: Event should be pretty close minus a few visual flaws
+SD%Complete: 60%
+SDComment: Not considered complete. Some events may fail and need further development
 SDCategory: Halls of Lightning
 EndScriptData */
 
@@ -45,22 +45,25 @@ enum eEnums
     SPELL_SHATTERING_STOMP_N                = 52237,
     SPELL_SHATTERING_STOMP_H                = 59529,
 
-    SPELL_TEMPER                            = 52238,
-    SPELL_TEMPER_DUMMY                      = 52654,
+    //unclear how "directions" of spells must be. Last, summoning GO, what is it for? Script depend on:
+    SPELL_TEMPER                            = 52238,        //TARGET_SCRIPT boss->anvil
+    SPELL_TEMPER_DUMMY                      = 52654,        //TARGET_SCRIPT anvil->boss
+
+    //SPELL_TEMPER_VISUAL                     = 52661,        //summons GO
 
     SPELL_SUMMON_MOLTEN_GOLEM               = 52405,
 
-    // Molten Golem
+    //Molten Golem
     SPELL_BLAST_WAVE                        = 23113,
     SPELL_IMMOLATION_STRIKE_N               = 52433,
     SPELL_IMMOLATION_STRIKE_H               = 59530,
     SPELL_SHATTER_N                         = 52429,
     SPELL_SHATTER_H                         = 59527,
 
-    NPC_VOLKHAN_ANVIL                       = 28823,
     NPC_MOLTEN_GOLEM                        = 28695,
     NPC_BRITTLE_GOLEM                       = 28681,
 
+    POINT_ID_ANVIL                          = 0,
     MAX_GOLEM                               = 2,
 
     ACHIEVEMENT_SHATTER_RESISTANT            = 2042
@@ -69,6 +72,7 @@ enum eEnums
 /*######
 ## Boss Volkhan
 ######*/
+
 class boss_volkhan : public CreatureScript
 {
 public:
@@ -93,13 +97,14 @@ public:
         bool m_bHasTemper;
         bool m_bIsStriking;
         bool m_bCanShatterGolem;
+        bool m_bMove;
 
         uint8 GolemsShattered;
         uint32 m_uiPause_Timer;
         uint32 m_uiShatteringStomp_Timer;
         uint32 m_uiShatter_Timer;
-        uint32 m_uiDelay_Timer;
-        uint32 m_uiSummonPhase;
+        uint32 m_uiCheckTimer;
+        uint32 m_uiCheckZ;
 
         uint32 m_uiHealthAmountModifier;
 
@@ -108,18 +113,22 @@ public:
             m_bIsStriking = false;
             m_bHasTemper = false;
             m_bCanShatterGolem = false;
+            m_bMove = false;
 
-            m_uiPause_Timer = 3500;
-            m_uiShatteringStomp_Timer = 0;
-            m_uiShatter_Timer = 5000;
-            m_uiDelay_Timer = 1000;
-            m_uiSummonPhase = 0;
+            m_uiPause_Timer = 1500;
+            m_uiShatteringStomp_Timer = 30000;
+            m_uiShatter_Timer = 3000;
+            m_uiCheckTimer = 1100;
+            m_uiCheckZ = 1000;
             GolemsShattered = 0;
 
             m_uiHealthAmountModifier = 1;
 
             DespawnGolem();
-            m_lGolemGUIDList.clear();
+
+            me->SetReactState(REACT_AGGRESSIVE);
+            if (!me->HasUnitMovementFlag(MOVEMENTFLAG_WALKING))
+                me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
 
             if (m_pInstance)
                 m_pInstance->SetData(TYPE_VOLKHAN, NOT_STARTED);
@@ -172,7 +181,7 @@ public:
 
         void KilledUnit(Unit* /*pVictim*/)
         {
-            DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3), me);
+            DoScriptText(RAND(SAY_SLAY_1,SAY_SLAY_2,SAY_SLAY_3), me);
         }
 
         void DespawnGolem()
@@ -201,11 +210,11 @@ public:
             {
                 if (Creature* pTemp = Unit::GetCreature(*me, *itr))
                 {
-                    // Only shatter brittle golems
+                    // only shatter brittle golems
                     if (pTemp->isAlive() && pTemp->GetEntry() == NPC_BRITTLE_GOLEM)
                     {
                         pTemp->CastSpell(pTemp, DUNGEON_MODE(SPELL_SHATTER_N, SPELL_SHATTER_H), false);
-                        GolemsShattered += 1;
+                        GolemsShattered++;
                     }
                 }
             }
@@ -218,38 +227,44 @@ public:
                 m_lGolemGUIDList.push_back(pSummoned->GetGUID());
 
                 if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0.0f, 0.0f);
+                    pSummoned->AI()->AttackStart(pTarget);
 
-                // Why healing when just summoned?
-                pSummoned->CastSpell(pSummoned, DUNGEON_MODE(SPELL_HEAT_N, SPELL_HEAT_H), false, NULL, NULL, me->GetGUID());
-            }
-        }
-
-        void JustReachedHome()
-        {
-            if (m_uiSummonPhase == 2)
-            {
-                me->SetOrientation(2.29f);
-                m_uiSummonPhase = 3;
+                //useless at this position
+                //pSummoned->CastSpell(pSummoned, DUNGEON_MODE(SPELL_HEAT_N, SPELL_HEAT_H), false, NULL, NULL, me->GetGUID());
             }
         }
 
         void UpdateAI(const uint32 uiDiff)
         {
+            //Return since we have no target
             if (!UpdateVictim())
                 return;
+            
+            //exploit fix, remove later
+            if (m_uiCheckZ <= uiDiff)
+            {
+                if (me->GetPositionZ() < 50.0f)
+                {
+                    EnterEvadeMode();
+                    return;
+                }
+                m_uiCheckZ = 1000;
+            }
+            else m_uiCheckZ -= uiDiff;
 
-            if (m_bIsStriking)
+            if (m_bIsStriking && !m_bMove)
             {
                 if (m_uiPause_Timer <= uiDiff)
                 {
                     if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE)
+                    {
                         if (me->getVictim())
                             me->GetMotionMaster()->MoveChase(me->getVictim());
+                    }
 
                     m_bHasTemper = false;
                     m_bIsStriking = false;
-                    m_uiPause_Timer = 3500;
+                    m_uiPause_Timer = 1500;
                 }
                 else
                     m_uiPause_Timer -= uiDiff;
@@ -257,20 +272,22 @@ public:
                 return;
             }
 
-            // When to start shatter? After 60, 40 or 20% hp?
-            if (!m_bHasTemper && m_uiHealthAmountModifier >= 3)
+            // ShatteringStomp all the Time, 
+            if (!m_bHasTemper && !m_bMove)
             {
                 if (m_uiShatteringStomp_Timer <= uiDiff)
                 {
-                    // Should he stomp even if he has no brittle golem to shatter?
-                    DoScriptText(RAND(SAY_STOMP_1, SAY_STOMP_2), me);
+                    DoScriptText(RAND(SAY_STOMP_1,SAY_STOMP_2), me);
 
-                    DoCast(me, SPELL_SHATTERING_STOMP_N);
+                    DoCast(me, DUNGEON_MODE(SPELL_SHATTERING_STOMP_N,SPELL_SHATTERING_STOMP_H));
 
-                    DoScriptText(EMOTE_SHATTER, me);
+                    if (Creature* temp = me->FindNearestCreature(NPC_BRITTLE_GOLEM,99))
+                    {
+                        DoScriptText(EMOTE_SHATTER, me);
+                        m_bCanShatterGolem = true;
+                    }
 
                     m_uiShatteringStomp_Timer = 30000;
-                    m_bCanShatterGolem = true;
                 }
                 else
                     m_uiShatteringStomp_Timer -= uiDiff;
@@ -289,73 +306,56 @@ public:
                     m_uiShatter_Timer -= uiDiff;
             }
 
+            Creature* pAnvil = m_pInstance->instance->GetCreature(m_pInstance->GetData64(DATA_VOLKHAN_ANVIL));
+
+            float fX, fY, fZ;
+            me->GetContactPoint(pAnvil, fX, fY, fZ, INTERACTION_DISTANCE);
+
             // Health check
-            if (!m_bCanShatterGolem && me->HealthBelowPct(100 - 20 * m_uiHealthAmountModifier))
+            if (!m_bCanShatterGolem && me->HealthBelowPct(100 - 20 * m_uiHealthAmountModifier) && !m_bMove)
             {
                 ++m_uiHealthAmountModifier;
 
                 if (me->IsNonMeleeSpellCasted(false))
                     me->InterruptNonMeleeSpells(false);
 
-                DoScriptText(RAND(SAY_FORGE_1, SAY_FORGE_2), me);
+                DoScriptText(RAND(SAY_FORGE_1,SAY_FORGE_2), me);
 
-                m_bHasTemper = true;
 
-                m_uiSummonPhase = 1;
+                if (me->GetDistance(pAnvil) > 5)
+                {
+                    me->GetMotionMaster()->Clear();
+                    me->SetReactState(REACT_PASSIVE);
+                    me->GetMotionMaster()->MovePoint(5,fX,fY,fZ);
+                }
+
+                DoScriptText(EMOTE_TO_ANVIL, me);
+                m_bMove=true;
             }
 
-            switch (m_uiSummonPhase)
+            if (me->IsWithinMeleeRange(pAnvil,5) && m_bMove)
             {
-                case 1:
-                    // 1 - Start run to Anvil
-                    DoScriptText(EMOTE_TO_ANVIL, me);
-                    me->GetMotionMaster()->MoveTargetedHome();
-                    m_uiSummonPhase = 2;        // Set Next Phase
-                    break;
-
-                case 2:
-                    // 2 - Check if reached Anvil
-                    // This is handled in: void JustReachedHome()
-                    break;
-
-                case 3:
-                    // 3 - Cast Temper on the Anvil
-                    if (Unit* pTarget = GetClosestCreatureWithEntry(me, NPC_VOLKHAN_ANVIL, 1000.0f, true))
-                    {
-                        me->SetOrientation(2.29f);
-                        DoCast(pTarget, SPELL_TEMPER, false);
-                        DoCast(pTarget, SPELL_TEMPER_DUMMY, false);
-                    }
-                    m_uiDelay_Timer = 1000;     // Delay 2 seconds before next phase can begin
-                    m_uiSummonPhase = 4;        // Set Next Phase
-                    break;
-
-                case 4:
-                    // 4 - Wait for delay to expire
-                    if (m_uiDelay_Timer <= uiDiff)
-                    {
-                        if (Unit* pTarget = SelectTarget(SELECT_TARGET_TOPAGGRO, 0))
-                        {
-                            me->SetReactState(REACT_AGGRESSIVE);
-                            me->SetInCombatWith(pTarget);
-                            me->GetMotionMaster()->MoveFollow(pTarget, 0.0f, 0.0f);
-                        }
-                        m_uiSummonPhase = 5;
-                    }
-                    else
-                        m_uiDelay_Timer -= uiDiff;
-                    break;
-
-                case 5:
-                    // 5 - Spawn the Golems
-                    if (Creature* pCreatureTarget = GetClosestCreatureWithEntry(me, NPC_VOLKHAN_ANVIL, 1000.0f, true))
-                        for (uint8 i = 0; i < MAX_GOLEM; ++i)
-                            me->CastSpell(pCreatureTarget, SPELL_SUMMON_MOLTEN_GOLEM, true);
-
-                    m_bIsStriking = true;
-                    m_uiSummonPhase = 0;        // Reset back to Phase 0 for next time
-                    break;
+                me->GetMotionMaster()->Clear();
+                me->SetReactState(REACT_AGGRESSIVE);
+                m_bHasTemper = true;
+                m_bMove=false;
+                for (uint8 i = 0; i < MAX_GOLEM; ++i)
+                {
+                    DoCast(SPELL_SUMMON_MOLTEN_GOLEM);
+                }
+                DoCast(SPELL_TEMPER);
+                m_bIsStriking = true;
             }
+
+            if (me->GetMotionMaster()->GetCurrentMovementGeneratorType()!=POINT_MOTION_TYPE && m_bMove)
+                //if (m_uiCheckTimer<=uiDiff)
+                {
+                    me->GetMotionMaster()->MovePoint(5,fX,fY,fZ);
+                    m_uiCheckTimer=1100;
+                }
+                //else
+                    //m_uiCheckTimer-=uiDiff;
+
 
             DoMeleeAttackIfReady();
         }
@@ -366,6 +366,7 @@ public:
 /*######
 ## mob_molten_golem
 ######*/
+
 class mob_molten_golem : public CreatureScript
 {
 public:
@@ -378,7 +379,9 @@ public:
 
     struct mob_molten_golemAI : public ScriptedAI
     {
-        mob_molten_golemAI(Creature *pCreature) : ScriptedAI(pCreature) { }
+        mob_molten_golemAI(Creature *pCreature) : ScriptedAI(pCreature)
+        {
+        }
 
         bool m_bIsFrozen;
 
@@ -417,8 +420,7 @@ public:
                 uiDamage = 0;
                 me->RemoveAllAuras();
                 me->AttackStop();
-                // me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);  //Set in DB
-                // me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); //Set in DB
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
                 if (me->IsNonMeleeSpellCasted(false))
                     me->InterruptNonMeleeSpells(false);
                 if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE)
@@ -429,15 +431,17 @@ public:
 
         void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell)
         {
-            // This is the dummy effect of the spells
+            //this is the dummy effect of the spells
             if (pSpell->Id == SPELL_SHATTER_N || pSpell->Id == SPELL_SHATTER_H)
+            {
                 if (me->GetEntry() == NPC_BRITTLE_GOLEM)
                     me->DespawnOrUnsummon();
+            }
         }
 
         void UpdateAI(const uint32 uiDiff)
         {
-            // Return since we have no target or if we are frozen
+            //Return since we have no target or if we are frozen
             if (!UpdateVictim() || m_bIsFrozen)
                 return;
 
@@ -460,6 +464,7 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+
 };
 
 void AddSC_boss_volkhan()

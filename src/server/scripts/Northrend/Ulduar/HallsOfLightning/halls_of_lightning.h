@@ -27,6 +27,7 @@ enum eTypes
     DATA_IONAR              = 2,
     DATA_LOKEN              = 3,
     DATA_VOLKHAN            = 4,
+	DATA_VOLKHAN_ANVIL		= 9,
 
     TYPE_BJARNGRIM          = 10,
     TYPE_IONAR              = 11,
@@ -37,6 +38,7 @@ enum eTypes
     NPC_VOLKHAN             = 28587,
     NPC_IONAR               = 28546,
     NPC_LOKEN               = 28923,
+	NPC_VOLKHAN_ANVIL		= 28823,
 
     GO_BJARNGRIM_DOOR       = 191416,                       //_doors10
     GO_VOLKHAN_DOOR         = 191325,                       //_doors07

@@ -53,11 +53,11 @@ public:
             Spirit_Timer = 24000;
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit * /*who*/) {}
 
         void SummonSpirits(Unit* victim)
         {
-            if (Creature *Spirit = DoSpawnCreature(9178, float(irand(-9, 9)), float(irand(-9, 9)), 0, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 60000))
+            if (Creature *Spirit = DoSpawnCreature(9178, float(irand(-9,9)), float(irand(-9,9)), 0, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 60000))
                 Spirit->AI()->AttackStart(victim);
         }
 

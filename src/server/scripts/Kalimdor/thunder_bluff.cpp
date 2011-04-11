@@ -90,7 +90,7 @@ public:
             Uppercut_Timer = 10000;
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit * /*who*/) {}
 
         void UpdateAI(const uint32 diff)
         {
@@ -99,7 +99,7 @@ public:
 
             if (BerserkerCharge_Timer <= diff)
             {
-                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,0);
                 if (pTarget)
                     DoCast(pTarget, SPELL_BERSERKER_CHARGE);
                 BerserkerCharge_Timer = 25000;

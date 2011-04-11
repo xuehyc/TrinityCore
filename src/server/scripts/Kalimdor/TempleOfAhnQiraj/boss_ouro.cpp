@@ -70,7 +70,7 @@ public:
             Submerged = false;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoCast(me->getVictim(), SPELL_BIRTH);
         }
@@ -112,7 +112,7 @@ public:
             if (Submerged && ChangeTarget_Timer <= diff)
             {
                 Unit *pTarget = NULL;
-                pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                pTarget = SelectTarget(SELECT_TARGET_RANDOM,0);
 
                 if (pTarget)
                     DoTeleportTo(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ());

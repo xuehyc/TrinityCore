@@ -26,7 +26,7 @@
 struct WaypointData
 {
     uint32 id;
-    float x, y, z;
+    float x,y,z;
     bool run;
     uint32 delay;
     uint32 event_id;
@@ -34,38 +34,33 @@ struct WaypointData
 };
 
 typedef std::vector<WaypointData*> WaypointPath;
-typedef UNORDERED_MAP<uint32, WaypointPath> WaypointPathContainer;
 
-class WaypointMgr
+class WaypointStore
 {
-        friend class ACE_Singleton<WaypointMgr, ACE_Null_Mutex>;
+    private :
+        uint32  records;
+        UNORDERED_MAP<uint32, WaypointPath*> waypoint_map;
 
     public:
-        // Attempts to reload a single path from database
-        void ReloadPath(uint32 id);
+        // Null Mutex is OK because WaypointMgr is initialized in the World thread before World is initialized
+        static WaypointStore* instance() { return ACE_Singleton<WaypointStore, ACE_Null_Mutex>::instance(); }
 
-        // Loads all paths from database, should only run on startup
+        ~WaypointStore() { Free(); }
+        void UpdatePath(uint32 id);
         void Load();
+        void Free();
 
-        // Returns the path from a given id
-        WaypointPath const* GetPath(uint32 id) const
+        WaypointPath* GetPath(uint32 id)
         {
-            WaypointPathContainer::const_iterator itr = _waypointStore.find(id);
-            if (itr != _waypointStore.end())
-                return &itr->second;
-
-            return NULL;
+            if (waypoint_map.find(id) != waypoint_map.end())
+                return waypoint_map[id];
+            else return 0;
         }
 
-    private:
-        // Only allow instantiation from ACE_Singleton
-        WaypointMgr();
-        ~WaypointMgr();
-
-        WaypointPathContainer _waypointStore;
+        inline uint32 GetRecordsCount() const { return records; }
 };
 
-#define sWaypointMgr ACE_Singleton<WaypointMgr, ACE_Null_Mutex>::instance()
+#define sWaypointMgr WaypointStore::instance()
 
 #endif
 

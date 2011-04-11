@@ -80,6 +80,8 @@ enum ThaddiusYells
 enum ThaddiusSpells
 {
     SPELL_POLARITY_SHIFT        = 28089,
+    SPELL_POSITIVE_CHARGE       = 28059,
+    SPELL_NEGATIVE_CHARGE       = 28084,
     SPELL_BALL_LIGHTNING        = 28299,
     SPELL_CHAIN_LIGHTNING       = 28167,
     H_SPELL_CHAIN_LIGHTNING     = 54531,
@@ -131,11 +133,43 @@ public:
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
                 me->SetReactState(REACT_PASSIVE);
             }
+
+            pInstance = c->GetInstanceScript();
         }
 
         bool checkStalaggAlive;
         bool checkFeugenAlive;
         uint32 uiAddsTimer;
+
+        InstanceScript* pInstance;
+
+        void Reset()
+        {
+            _Reset();
+
+            if (Creature *pFeugen = me->GetCreature(*me, instance->GetData64(DATA_FEUGEN)))
+            {
+                pFeugen->Respawn(true);
+                checkFeugenAlive = pFeugen->isAlive();
+            }
+
+            if (Creature *pStalagg = me->GetCreature(*me, instance->GetData64(DATA_STALAGG)))
+            {
+                pStalagg->Respawn(true);
+                checkStalaggAlive = pStalagg->isAlive();
+            }
+
+            if (!checkFeugenAlive && !checkStalaggAlive)
+            {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
+                me->SetReactState(REACT_AGGRESSIVE);
+            }
+            else
+            {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
+                me->SetReactState(REACT_PASSIVE);
+            }
+        }
 
         void KilledUnit(Unit* /*victim*/)
         {
@@ -147,6 +181,12 @@ public:
         {
             _JustDied();
             DoScriptText(SAY_DEATH, me);
+
+            if (pInstance)
+            {
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_POSITIVE_CHARGE);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_NEGATIVE_CHARGE);
+            }
         }
 
         void DoAction(const int32 action)
@@ -180,16 +220,16 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             _EnterCombat();
-            DoScriptText(RAND(SAY_AGGRO_1, SAY_AGGRO_2, SAY_AGGRO_3), me);
+            DoScriptText(RAND(SAY_AGGRO_1,SAY_AGGRO_2,SAY_AGGRO_3), me);
             events.ScheduleEvent(EVENT_SHIFT, 30000);
-            events.ScheduleEvent(EVENT_CHAIN, urand(10000, 20000));
+            events.ScheduleEvent(EVENT_CHAIN, urand(10000,20000));
             events.ScheduleEvent(EVENT_BERSERK, 360000);
         }
 
-        void DamageTaken(Unit* /*pDoneBy*/, uint32 & /*uiDamage*/)
+        void DamageTaken(Unit * /*pDoneBy*/, uint32 & /*uiDamage*/)
         {
             me->SetReactState(REACT_AGGRESSIVE);
         }
@@ -222,6 +262,7 @@ public:
             if (!UpdateVictim())
                 return;
 
+            _DoAggroPulse(diff);
             events.Update(diff);
 
             if (me->HasUnitState(UNIT_STAT_CASTING))
@@ -234,18 +275,21 @@ public:
                     case EVENT_SHIFT:
                         DoCastAOE(SPELL_POLARITY_SHIFT);
                         events.ScheduleEvent(EVENT_SHIFT, 30000);
+                        events.RescheduleEvent(EVENT_CHAIN, 6000);
                         return;
                     case EVENT_CHAIN:
                         DoCast(me->getVictim(), RAID_MODE(SPELL_CHAIN_LIGHTNING, H_SPELL_CHAIN_LIGHTNING));
-                        events.ScheduleEvent(EVENT_CHAIN, urand(10000, 20000));
+                        events.ScheduleEvent(EVENT_CHAIN, urand(10000,20000));
                         return;
                     case EVENT_BERSERK:
+                        me->InterruptNonMeleeSpells(false);
                         DoCast(me, SPELL_BERSERK);
                         return;
                 }
             }
 
-            if (events.GetTimer() > 15000 && !me->IsWithinMeleeRange(me->getVictim()))
+            Unit* pMelee = SelectTarget(SELECT_TARGET_RANDOM, 0, me->GetMeleeReach(), true);
+            if (events.GetTimer() > 15000 && !pMelee)  // && !me->IsWithinMeleeRange(me->getVictim())
                 DoCast(me->getVictim(), SPELL_BALL_LIGHTNING);
             else
                 DoMeleeAttackIfReady();
@@ -282,16 +326,16 @@ public:
                 if (Creature *pThaddius = me->GetCreature(*me, pInstance->GetData64(DATA_THADDIUS)))
                     if (pThaddius->AI())
                         pThaddius->AI()->DoAction(ACTION_STALAGG_RESET);
-            powerSurgeTimer = urand(20000, 25000);
+            powerSurgeTimer = urand(20000,25000);
             magneticPullTimer = 20000;
         }
 
-        void EnterCombat(Unit* /*pWho*/)
+        void EnterCombat(Unit * /*pWho*/)
         {
             DoCast(SPELL_STALAGG_TESLA);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit * /*killer*/)
         {
             if (pInstance)
                 if (Creature *pThaddius = me->GetCreature(*me, pInstance->GetData64(DATA_THADDIUS)))
@@ -316,11 +360,16 @@ public:
                         // magnetic pull is not working. So just jump.
 
                         // reset aggro to be sure that feugen will not follow the jump
+                        pFeugen->getThreatManager().addThreat(pStalaggVictim, pFeugen->getThreatManager().getThreat(pFeugenVictim));
+                        me->getThreatManager().addThreat(pFeugenVictim, me->getThreatManager().getThreat(pStalaggVictim));                      
                         pFeugen->getThreatManager().modifyThreatPercent(pFeugenVictim, -100);
-                        pFeugenVictim->JumpTo(me, 0.3f);
-
                         me->getThreatManager().modifyThreatPercent(pStalaggVictim, -100);
+
+                        pFeugenVictim->JumpTo(me, 0.3f);
                         pStalaggVictim->JumpTo(pFeugen, 0.3f);
+
+                        me->GetMotionMaster()->MoveDistract(2500);
+                        pFeugen->GetMotionMaster()->MoveDistract(2500);
                     }
                 }
 
@@ -331,7 +380,7 @@ public:
             if (powerSurgeTimer <= uiDiff)
             {
                 DoCast(me, RAID_MODE(SPELL_POWERSURGE, H_SPELL_POWERSURGE));
-                powerSurgeTimer = urand(15000, 20000);
+                powerSurgeTimer = urand(15000,20000);
             } else powerSurgeTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
@@ -370,12 +419,12 @@ public:
             staticFieldTimer = 5000;
         }
 
-        void EnterCombat(Unit* /*pWho*/)
+        void EnterCombat(Unit * /*pWho*/)
         {
             DoCast(SPELL_FEUGEN_TESLA);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit * /*killer*/)
         {
             if (pInstance)
                 if (Creature *pThaddius = me->GetCreature(*me, pInstance->GetData64(DATA_THADDIUS)))

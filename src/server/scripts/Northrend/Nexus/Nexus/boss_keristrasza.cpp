@@ -32,7 +32,6 @@ enum Spells
     SPELL_INTENSE_COLD                            = 48094,
     SPELL_INTENSE_COLD_TRIGGERED                  = 48095
 };
-
 enum Yells
 {
     //Yell
@@ -42,11 +41,13 @@ enum Yells
     SAY_DEATH                                     = -1576043,
     SAY_CRYSTAL_NOVA                              = -1576044
 };
-
+enum Achievements
+{
+    ACHIEV_INTENSE_COLD                           = 2036
+};
 enum Misc
 {
-    DATA_INTENSE_COLD                             = 1,
-    DATA_CONTAINMENT_SPHERES                      = 3,
+    DATA_CONTAINMENT_SPHERES                      = 3
 };
 
 class boss_keristrasza : public CreatureScript
@@ -68,24 +69,24 @@ public:
 
         InstanceScript* pInstance;
 
-        std::list<uint64> intenseColdList;
-        uint64 auiContainmentSphereGUIDs[DATA_CONTAINMENT_SPHERES];
         uint32 uiCrystalfireBreathTimer;
-        uint32 uiCrystalChainsCrystalizeTimer;
+        uint32 uiCrystalChainsTimer;
+        uint32 uiCrystalizeTimer;
         uint32 uiTailSweepTimer;
-        bool intenseCold;
         bool bEnrage;
+
+        std::set<uint64> lIntenseColdPlayers;
+        uint64 auiContainmentSphereGUIDs[DATA_CONTAINMENT_SPHERES];
 
         void Reset()
         {
-            uiCrystalfireBreathTimer = 14*IN_MILLISECONDS;
-            uiCrystalChainsCrystalizeTimer = DUNGEON_MODE(30*IN_MILLISECONDS, 11*IN_MILLISECONDS);
+            uiCrystalfireBreathTimer = 10*IN_MILLISECONDS;
+            uiCrystalChainsTimer = 20*IN_MILLISECONDS;
+            uiCrystalizeTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             uiTailSweepTimer = 5*IN_MILLISECONDS;
             bEnrage = false;
 
-            intenseCold = true;
-            intenseColdList.clear();
-
+            lIntenseColdPlayers.clear();
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
             RemovePrison(CheckContainmentSpheres());
@@ -97,10 +98,16 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
-            DoCastAOE(SPELL_INTENSE_COLD);
+            DoCast(SPELL_INTENSE_COLD);
 
             if (pInstance)
+            {
                 pInstance->SetData(DATA_KERISTRASZA_EVENT, IN_PROGRESS);
+
+                Map::PlayerList const &players = pInstance->instance->GetPlayers();
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    lIntenseColdPlayers.insert(itr->getSource()->GetGUID());
+            }
         }
 
         void JustDied(Unit* /*killer*/)
@@ -108,10 +115,23 @@ public:
             DoScriptText(SAY_DEATH, me);
 
             if (pInstance)
+            {
+                AchievementEntry const *achievIntenseCold = GetAchievementStore()->LookupEntry(ACHIEV_INTENSE_COLD);
+                if (achievIntenseCold && IsHeroic())
+                {
+                    for (std::set<uint64>::const_iterator itr = lIntenseColdPlayers.begin(); itr != lIntenseColdPlayers.end(); ++itr)
+                    {
+                        Player* temp = Unit::GetPlayer(*me, *itr);
+                        if (temp && temp->isAlive() && (temp->GetDistance2d(me) < 50))
+                            temp->CompletedAchievement(achievIntenseCold);
+                    }
+                }
+
                 pInstance->SetData(DATA_KERISTRASZA_EVENT, DONE);
+            }
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit * /*victim*/)
         {
             DoScriptText(SAY_SLAY, me);
         }
@@ -157,10 +177,15 @@ public:
             }
         }
 
-        void SetGUID(uint64 const& guid, int32 id/* = 0 */)
+        void SpellHitTarget(Unit *pTarget, const SpellEntry *spell) 
         {
-            if (id == DATA_INTENSE_COLD)
-                intenseColdList.push_back(guid);
+            if (pTarget->GetTypeId() != TYPEID_PLAYER)
+                return;
+            
+            if (spell->Id == SPELL_INTENSE_COLD_TRIGGERED)
+                 if (Aura* pColdAura = pTarget->GetAura(SPELL_INTENSE_COLD_TRIGGERED))
+                     if (pColdAura->GetStackAmount() > 2)
+                         lIntenseColdPlayers.erase(pTarget->GetGUID());
         }
 
         void UpdateAI(const uint32 diff)
@@ -177,7 +202,7 @@ public:
 
             if (uiCrystalfireBreathTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CRYSTALFIRE_BREATH);
+            DoCast(me->getVictim(), DUNGEON_MODE(SPELL_CRYSTALFIRE_BREATH, H_SPELL_CRYSTALFIRE_BREATH));
                 uiCrystalfireBreathTimer = 14*IN_MILLISECONDS;
             } else uiCrystalfireBreathTimer -= diff;
 
@@ -187,15 +212,22 @@ public:
                 uiTailSweepTimer = 5*IN_MILLISECONDS;
             } else uiTailSweepTimer -= diff;
 
-            if (uiCrystalChainsCrystalizeTimer <= diff)
+            if (uiCrystalChainsTimer <= diff)
             {
-                DoScriptText(SAY_CRYSTAL_NOVA, me);
-                if (IsHeroic())
-                    DoCast(me, SPELL_CRYSTALIZE);
-                else if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(pTarget, SPELL_CRYSTAL_CHAINS);
-                uiCrystalChainsCrystalizeTimer = DUNGEON_MODE(30*IN_MILLISECONDS, 11*IN_MILLISECONDS);
-            } else uiCrystalChainsCrystalizeTimer -= diff;
+                uiCrystalChainsTimer = urand(15*IN_MILLISECONDS, 20*IN_MILLISECONDS);
+            } else uiCrystalChainsTimer -= diff;
+
+            if (IsHeroic()) {
+                if (uiCrystalizeTimer <= diff)
+                {
+                    DoScriptText(SAY_CRYSTAL_NOVA, me);
+                    DoCast(me, SPELL_CRYSTALIZE);
+
+                    uiCrystalizeTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
+                } else uiCrystalizeTimer -= diff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -208,7 +240,7 @@ class containment_sphere : public GameObjectScript
 public:
     containment_sphere() : GameObjectScript("containment_sphere") { }
 
-    bool OnGossipHello(Player* /*pPlayer*/, GameObject *pGO)
+    bool OnGossipHello(Player * /*pPlayer*/, GameObject *pGO)
     {
         InstanceScript *pInstance = pGO->GetInstanceScript();
 
@@ -226,63 +258,8 @@ public:
 
 };
 
-class spell_intense_cold : public SpellScriptLoader
-{
-    public:
-        spell_intense_cold() : SpellScriptLoader("spell_intense_cold") { }
-
-        class spell_intense_cold_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_intense_cold_AuraScript);
-
-            void HandlePeriodicTick(AuraEffect const* aurEff)
-            {
-                Unit* caster = GetCaster();
-                if (!caster)
-                    return;
-
-                if (aurEff->GetBase()->GetStackAmount() >= 2)
-                    caster->GetAI()->SetGUID(GetTarget()->GetGUID(), DATA_INTENSE_COLD);
-            }
-
-            void Register()
-            {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_intense_cold_AuraScript::HandlePeriodicTick, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_intense_cold_AuraScript();
-        }
-};
-
-class achievement_intense_cold : public AchievementCriteriaScript
-{
-    public:
-        achievement_intense_cold() : AchievementCriteriaScript("achievement_intense_cold")
-        {
-        }
-
-        bool OnCheck(Player* player, Unit* target)
-        {
-            if (!target)
-                return false;
-
-            std::list<uint64> intenseColdList = CAST_AI(boss_keristrasza::boss_keristraszaAI, target->ToCreature()->AI())->intenseColdList;
-            if (!intenseColdList.empty())
-                for (std::list<uint64>::iterator itr = intenseColdList.begin(); itr != intenseColdList.end(); ++itr)
-                    if (player->GetGUID() == *itr)
-                        return false;
-
-            return true;
-        }
-};
-
 void AddSC_boss_keristrasza()
 {
     new boss_keristrasza();
     new containment_sphere();
-    new achievement_intense_cold();
-    new spell_intense_cold();
 }

@@ -80,12 +80,12 @@ class boss_void_reaver : public CreatureScript
                             pInstance->SetData(DATA_VOIDREAVEREVENT, NOT_STARTED);
             }
 
-            void KilledUnit(Unit* /*victim*/)
+            void KilledUnit(Unit * /*victim*/)
             {
-                DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3), me);
+                DoScriptText(RAND(SAY_SLAY1,SAY_SLAY2,SAY_SLAY3), me);
             }
 
-            void JustDied(Unit* /*victim*/)
+            void JustDied(Unit * /*victim*/)
             {
                 DoScriptText(SAY_DEATH, me);
                 DoZoneInCombat();
@@ -94,7 +94,7 @@ class boss_void_reaver : public CreatureScript
                     pInstance->SetData(DATA_VOIDREAVEREVENT, DONE);
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit * /*who*/)
             {
                 DoScriptText(SAY_AGGRO, me);
 
@@ -110,7 +110,7 @@ class boss_void_reaver : public CreatureScript
                 if (Pounding_Timer <= diff)
                 {
                     DoCast(me->getVictim(), SPELL_POUNDING);
-                    DoScriptText(RAND(SAY_POUNDING1, SAY_POUNDING2), me);
+                    DoScriptText(RAND(SAY_POUNDING1,SAY_POUNDING2), me);
                     Pounding_Timer = 15000; //cast time(3000) + cooldown time(12000)
                 }
                 else
@@ -126,8 +126,11 @@ class boss_void_reaver : public CreatureScript
                         pTarget = Unit::GetUnit(*me, (*itr)->getUnitGuid());
                         if (!pTarget)
                             continue;
-                        // exclude pets & totems, 18 yard radius minimum
-                        if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->isAlive() && !pTarget->IsWithinDist(me, 18, false))
+                        // exclude pets & totems
+                        if (pTarget->GetTypeId() != TYPEID_PLAYER)
+                            continue;
+                        //18 yard radius minimum
+                        if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->isAlive() && !pTarget->IsWithinDist(me, 18, false))
                             target_list.push_back(pTarget);
                         pTarget = NULL;
                     }
@@ -138,7 +141,7 @@ class boss_void_reaver : public CreatureScript
                         pTarget = me->getVictim();
 
                     if (pTarget)
-                        me->CastSpell(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), SPELL_ARCANE_ORB, false, NULL, NULL, 0, pTarget);
+                        me->CastSpell(pTarget->GetPositionX(),pTarget->GetPositionY(),pTarget->GetPositionZ(), SPELL_ARCANE_ORB, false, NULL, NULL, NULL, pTarget);
                     ArcaneOrb_Timer = 3000;
                 }
                 else
@@ -149,7 +152,7 @@ class boss_void_reaver : public CreatureScript
                     DoCast(me->getVictim(), SPELL_KNOCK_AWAY);
                     //Drop 25% aggro
                     if (DoGetThreat(me->getVictim()))
-                        DoModifyThreatPercent(me->getVictim(), -25);
+                        DoModifyThreatPercent(me->getVictim(),-25);
                     KnockAway_Timer = 30000;
                 }
                 else

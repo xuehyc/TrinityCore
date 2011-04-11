@@ -28,5 +28,6 @@
 #define GAMEOBJECT_PUMPKIN_SHRINE       6
 
 #define DATA_VORREL                     7
+#define DATA_HORSEMAN_PHASE             8
 #endif
 

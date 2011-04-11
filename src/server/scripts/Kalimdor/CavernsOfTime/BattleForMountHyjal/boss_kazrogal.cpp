@@ -84,29 +84,29 @@ public:
                 pInstance->SetData(DATA_KAZROGALEVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             if (pInstance && IsEvent)
                 pInstance->SetData(DATA_KAZROGALEVENT, IN_PROGRESS);
             DoPlaySoundToSet(me, SOUND_ONAGGRO);
-            me->MonsterYell(SAY_ONAGGRO, LANG_UNIVERSAL, 0);
+            me->MonsterYell(SAY_ONAGGRO, LANG_UNIVERSAL, NULL);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit * /*victim*/)
         {
-            switch (urand(0, 2))
+            switch (urand(0,2))
             {
                 case 0:
                     DoPlaySoundToSet(me, SOUND_ONSLAY1);
-                    me->MonsterYell(SAY_ONSLAY1, LANG_UNIVERSAL, 0);
+                    me->MonsterYell(SAY_ONSLAY1, LANG_UNIVERSAL, NULL);
                     break;
                 case 1:
                     DoPlaySoundToSet(me, SOUND_ONSLAY2);
-                    me->MonsterYell(SAY_ONSLAY2, LANG_UNIVERSAL, 0);
+                    me->MonsterYell(SAY_ONSLAY2, LANG_UNIVERSAL, NULL);
                     break;
                 case 2:
                     DoPlaySoundToSet(me, SOUND_ONSLAY3);
-                    me->MonsterYell(SAY_ONSLAY3, LANG_UNIVERSAL, 0);
+                    me->MonsterYell(SAY_ONSLAY3, LANG_UNIVERSAL, NULL);
                     break;
             }
         }
@@ -118,11 +118,11 @@ public:
             {
                 Unit *pTarget = Unit::GetUnit((*me), pInstance->GetData64(DATA_THRALL));
                 if (pTarget && pTarget->isAlive())
-                    me->AddThreat(pTarget, 0.0f);
+                    me->AddThreat(pTarget,0.0f);
             }
         }
 
-        void JustDied(Unit* victim)
+        void JustDied(Unit *victim)
         {
             hyjal_trashAI::JustDied(victim);
             if (pInstance && IsEvent)
@@ -184,22 +184,22 @@ public:
                     Unit *pTarget = Unit::GetUnit(*me, (*itr)->getUnitGuid());
                     if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->getPowerType() == POWER_MANA)
                     {
-                        pTarget->CastSpell(pTarget, SPELL_MARK, true);//only cast on mana users
+                        pTarget->CastSpell(pTarget, SPELL_MARK,true);//only cast on mana users
                     }
                 }
                 MarkTimerBase -= 5000;
                 if (MarkTimerBase < 5500)
                     MarkTimerBase = 5500;
                 MarkTimer = MarkTimerBase;
-                switch (urand(0, 2))
+                switch (urand(0,2))
                 {
                     case 0:
                         DoPlaySoundToSet(me, SOUND_MARK1);
-                        me->MonsterYell(SAY_MARK1, LANG_UNIVERSAL, 0);
+                        me->MonsterYell(SAY_MARK1, LANG_UNIVERSAL, NULL);
                         break;
                     case 1:
                         DoPlaySoundToSet(me, SOUND_MARK2);
-                        me->MonsterYell(SAY_MARK2, LANG_UNIVERSAL, 0);
+                        me->MonsterYell(SAY_MARK2, LANG_UNIVERSAL, NULL);
                         break;
                 }
             } else MarkTimer -= diff;

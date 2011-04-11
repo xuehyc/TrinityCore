@@ -25,7 +25,8 @@ enum Spells
     SPELL_DEATHBLOOM                                       = 29865,
     H_SPELL_DEATHBLOOM                                     = 55053,
     SPELL_INEVITABLE_DOOM                                  = 29204,
-    H_SPELL_INEVITABLE_DOOM                                = 55052
+    H_SPELL_INEVITABLE_DOOM                                = 55052,
+    SPELL_BERSERK                                          = 27680
 };
 
 enum Events
@@ -34,6 +35,7 @@ enum Events
     EVENT_AURA,
     EVENT_BLOOM,
     EVENT_DOOM,
+    EVENT_BERSERK
 };
 
 class boss_loatheb : public CreatureScript
@@ -50,12 +52,18 @@ public:
     {
         boss_loathebAI(Creature *c) : BossAI(c, BOSS_LOATHEB) {}
 
-        void EnterCombat(Unit* /*who*/)
+        void Reset()
+        {
+            _Reset();
+        }
+
+        void EnterCombat(Unit * /*who*/)
         {
             _EnterCombat();
             events.ScheduleEvent(EVENT_AURA, 10000);
             events.ScheduleEvent(EVENT_BLOOM, 5000);
             events.ScheduleEvent(EVENT_DOOM, 120000);
+            events.ScheduleEvent(EVENT_BERSERK, 12*60000);
         }
 
         void UpdateAI(const uint32 diff)
@@ -63,6 +71,7 @@ public:
             if (!UpdateVictim())
                 return;
 
+            _DoAggroPulse(diff);
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -76,12 +85,20 @@ public:
                     case EVENT_BLOOM:
                         // TODO : Add missing text
                         DoCastAOE(SPELL_SUMMON_SPORE, true);
-                        DoCastAOE(RAID_MODE(SPELL_DEATHBLOOM, H_SPELL_DEATHBLOOM));
+                        DoCastAOE(RAID_MODE(SPELL_DEATHBLOOM,H_SPELL_DEATHBLOOM));
                         events.ScheduleEvent(EVENT_BLOOM, 30000);
                         break;
                     case EVENT_DOOM:
-                        DoCastAOE(RAID_MODE(SPELL_INEVITABLE_DOOM, H_SPELL_INEVITABLE_DOOM));
+                        DoCastAOE(RAID_MODE(SPELL_INEVITABLE_DOOM,H_SPELL_INEVITABLE_DOOM));
                         events.ScheduleEvent(EVENT_DOOM, events.GetTimer() < 5*60000 ? 30000 : 15000);
+                        break;
+                    case EVENT_BERSERK:
+                        if(GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+                        {
+                            if(!me->HasAura(SPELL_BERSERK))
+                                DoCast(me,SPELL_BERSERK,true);
+                        }
+                         events.ScheduleEvent(EVENT_BERSERK, 60000);
                         break;
                 }
             }
@@ -92,7 +109,71 @@ public:
 
 };
 
+
+enum SporeSpells
+{
+    SPELL_FUNGAL_CREEP                                     = 29232
+};
+
+class mob_loatheb_spore : public CreatureScript
+{
+public:
+    mob_loatheb_spore() : CreatureScript("mob_loatheb_spore") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new mob_loatheb_sporeAI (pCreature);
+    }
+
+    struct mob_loatheb_sporeAI : public ScriptedAI
+    {
+        mob_loatheb_sporeAI(Creature *c) : ScriptedAI(c) {}
+
+        void JustDied(Unit* killer)
+        {
+            DoCastAOE(SPELL_FUNGAL_CREEP, true); //A Little bit hacky ... but it works now (without triggered no cast on death)
+        }
+    };
+};
+
+class spell_fungal_creep_targeting : public SpellScriptLoader
+{
+    public:
+        spell_fungal_creep_targeting() : SpellScriptLoader("spell_fungal_creep_targeting") { }
+
+        class spell_fungal_creep_targeting_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_fungal_creep_targeting_SpellScript);
+
+            void FilterTargetsInitial(std::list<Unit*>& unitList)
+            {
+                sharedUnitList = unitList;
+            }
+
+            void FilterTargetsSubsequent(std::list<Unit*>& unitList)
+            {
+                unitList = sharedUnitList;
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_fungal_creep_targeting_SpellScript::FilterTargetsInitial, EFFECT_0, TARGET_UNIT_AREA_ENEMY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_fungal_creep_targeting_SpellScript::FilterTargetsSubsequent, EFFECT_1, TARGET_UNIT_AREA_ENEMY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_fungal_creep_targeting_SpellScript::FilterTargetsSubsequent, EFFECT_2, TARGET_UNIT_AREA_ENEMY_SRC);
+            }
+
+            std::list<Unit*> sharedUnitList;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_fungal_creep_targeting_SpellScript();
+        }
+};
+
 void AddSC_boss_loatheb()
 {
     new boss_loatheb();
+    new mob_loatheb_spore();
+    new spell_fungal_creep_targeting();
 }

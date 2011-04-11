@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,107 +16,130 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ObjectMgr.h"
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
+/* ScriptData
+SDName: Boss_Kurinnaxx
+SD%Complete: 100
+SDComment: VERIFY SCRIPT AND SQL
+SDCategory: Ruins of Ahn'Qiraj
+EndScriptData */
+
+#include "ScriptPCH.h"
 #include "ruins_of_ahnqiraj.h"
 
 enum Spells
 {
-    SPELL_MORTALWOUND       = 25646,
-    SPELL_SANDTRAP          = 25648,
-    SPELL_ENRAGE            = 26527,
-    SPELL_SUMMON_PLAYER     = 26446,
-    SPELL_TRASH             =  3391, // Should perhaps be triggered by an aura? Couldn't find any though
-    SPELL_WIDE_SLASH        = 25814
-};
-
-enum Events
-{
-    EVENT_MORTAL_WOUND      = 1,
-    EVENT_SANDTRAP          = 2,
-    EVENT_TRASH             = 3,
-    EVENT_WIDE_SLASH        = 4
+    SPELL_MORTALWOUND            = 25646,
+    SPELL_SANDTRAP               = 25656,
+    SPELL_ENRAGE                 = 28798,
+    SPELL_SUMMON_PLAYER          = 26446,
+    SPELL_TRASH                  =  3391,
+    SPELL_WIDE_SLASH             = 25814
 };
 
 class boss_kurinnaxx : public CreatureScript
 {
-    public:
-        boss_kurinnaxx() : CreatureScript("boss_kurinnaxx") { }
+public:
+    boss_kurinnaxx() : CreatureScript("boss_kurinnaxx") { }
 
-        struct boss_kurinnaxxAI : public BossAI
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new boss_kurinnaxxAI (pCreature);
+    }
+
+    struct boss_kurinnaxxAI : public ScriptedAI
+    {
+        boss_kurinnaxxAI(Creature *c) : ScriptedAI(c)
         {
-            boss_kurinnaxxAI(Creature* creature) : BossAI(creature, BOSS_KURINNAXX)
-            {
-            }
-
-            void Reset()
-            {
-                _Reset();
-                _enraged = false;
-                events.ScheduleEvent(EVENT_MORTAL_WOUND, 8000);
-                events.ScheduleEvent(EVENT_SANDTRAP, urand(5000,15000));
-                events.ScheduleEvent(EVENT_TRASH, 1000);
-                events.ScheduleEvent(EVENT_WIDE_SLASH, 11000);
-            }
-
-            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
-            {
-                if (!_enraged && HealthBelowPct(30))
-                {
-                    DoCast(me, SPELL_ENRAGE);
-                    _enraged = true;
-                }
-            }
-
-            void UpdateAI(const uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STAT_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_MORTAL_WOUND:
-                            DoCastVictim(SPELL_MORTALWOUND);
-                            events.ScheduleEvent(EVENT_MORTAL_WOUND, 8000);
-                            break;
-                        case EVENT_SANDTRAP:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                target->CastSpell(target, SPELL_SANDTRAP, true);
-                            else
-                                me->getVictim()->CastSpell(me->getVictim(), SPELL_SANDTRAP, true);
-                            events.ScheduleEvent(EVENT_SANDTRAP, urand(5000,15000));
-                            break;
-                        case EVENT_WIDE_SLASH:
-                            DoCast(me, SPELL_WIDE_SLASH);
-                            events.ScheduleEvent(EVENT_WIDE_SLASH, 11000);
-                            break;
-                        case EVENT_TRASH:
-                            DoCast(me, SPELL_TRASH);
-                            events.ScheduleEvent(EVENT_WIDE_SLASH, 16000);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-            private:
-                bool _enraged;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new boss_kurinnaxxAI (creature);
+            pInstance = c->GetInstanceScript();
         }
+
+        uint32 uiMortalWoundTimer;
+        uint32 uiSandtrapTimer;
+        uint32 uiWideSlashTimer;
+        uint32 uiSummonPlayerTimer;
+        uint32 uiTrashTimer;
+        bool bIsEnraged;
+
+        InstanceScript* pInstance;
+
+        void Reset()
+        {
+            bIsEnraged = false;
+            uiMortalWoundTimer = urand(2000,7000);
+            uiSandtrapTimer = urand(20000,30000);
+            uiWideSlashTimer = urand(10000,15000);
+            uiTrashTimer = urand(20000,25000);
+            uiSummonPlayerTimer = urand(30000,40000);
+
+            if (pInstance)
+                pInstance->SetData(DATA_KURINNAXX_EVENT, NOT_STARTED);
+        }
+
+        void EnterCombat(Unit * /*who*/)
+        {
+            if (pInstance)
+                pInstance->SetData(DATA_KURINNAXX_EVENT, IN_PROGRESS);
+        }
+
+        void JustDied(Unit * /*killer*/)
+        {
+            if (pInstance)
+                pInstance->SetData(DATA_KURINNAXX_EVENT, DONE);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            //If we are <30% cast enrage
+            if (!bIsEnraged && !HealthAbovePct(30) && !me->IsNonMeleeSpellCasted(false))
+            {
+                bIsEnraged = true;
+                DoCast(me, SPELL_ENRAGE);
+            }
+
+            //Mortal Wound spell
+            if (uiMortalWoundTimer <= diff)
+            {
+                DoCast(me->getVictim(), SPELL_MORTALWOUND);
+                uiMortalWoundTimer = urand(2000,7000);
+            } else uiMortalWoundTimer -= diff;
+
+            //Santrap spell
+            if (uiSandtrapTimer <= diff)
+            {
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                    DoCast(pTarget, SPELL_SANDTRAP);
+                uiSandtrapTimer = 30000;
+            } else uiSandtrapTimer -= diff;
+
+            //Wide Slash spell
+            if (uiWideSlashTimer <= diff)
+            {
+                DoCast(me->getVictim(), SPELL_WIDE_SLASH);
+                uiWideSlashTimer = urand(10000,15000);
+            } else uiWideSlashTimer -= diff;
+
+            //Trash spell
+            if (uiTrashTimer <= diff)
+            {
+                DoCast(me, SPELL_TRASH);
+                uiTrashTimer = urand(20000,25000);
+            } else uiTrashTimer -= diff;
+
+            //Summon Player spell
+            if (uiSummonPlayerTimer <= diff)
+            {
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                    DoCast(pTarget, SPELL_SUMMON_PLAYER);
+                uiSummonPlayerTimer = urand(30000,40000);
+            } else uiSummonPlayerTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
 };
 
 void AddSC_boss_kurinnaxx()

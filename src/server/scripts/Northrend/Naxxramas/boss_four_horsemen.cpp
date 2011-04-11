@@ -54,28 +54,40 @@ const Position WaypointPositions[12] =
     {2517.8f, -2896.6f, 241.28f, 2.315f},
 };
 
+const Position HomePositions[4] =
+{
+    // Thane
+    {2520.5f, -2955.38f, 245.635f, 5.58f},
+    // Lady
+    {2517.62f, -2959.38f, 245.636f, 5.72f},
+    // Baron
+    {2524.32f, -2951.28f, 245.633f, 5.43f},
+    // Sir
+    {2528.79f, -2948.58f, 245.633f, 5.27f}
+};
+
 const uint32 MOB_HORSEMEN[]     =   {16064, 16065, 30549, 16063};
 const uint32 SPELL_MARK[]       =   {28832, 28833, 28834, 28835};
-#define SPELL_PRIMARY(i)            RAID_MODE(SPELL_PRIMARY_N[i], SPELL_PRIMARY_H[i])
+#define SPELL_PRIMARY(i)            RAID_MODE(SPELL_PRIMARY_N[i],SPELL_PRIMARY_H[i])
 const uint32 SPELL_PRIMARY_N[]  =   {28884, 28863, 28882, 28883};
 const uint32 SPELL_PRIMARY_H[]  =   {57467, 57463, 57369, 57466};
-#define SPELL_SECONDARY(i)          RAID_MODE(SPELL_SECONDARY_N[i], SPELL_SECONDARY_H[i])
+#define SPELL_SECONDARY(i)          RAID_MODE(SPELL_SECONDARY_N[i],SPELL_SECONDARY_H[i])
 const uint32 SPELL_SECONDARY_N[]=   {0, 57374, 0, 57376};
 const uint32 SPELL_SECONDARY_H[]=   {0, 57464, 0, 57465};
 const uint32 SPELL_PUNISH[]     =   {0, 57381, 0, 57377};
 #define SPELL_BERSERK               26662
 
-// used by 16063, 16064, 16065, 30549, but signed for 16063
+// used by 16063,16064,16065,30549, but signed for 16063
 const int32 SAY_AGGRO[]     =   {-1533051, -1533044, -1533065, -1533058};
 const int32 SAY_TAUNT[3][4] ={  {-1533052, -1533045, -1533071, -1533059},
                                 {-1533053, -1533046, -1533072, -1533060},
-                                {-1533054, -1533047, -1533073, -1533061}, };
+                                {-1533054, -1533047, -1533073, -1533061},};
 const int32 SAY_SPECIAL[]   =   {-1533055, -1533048, -1533070, -1533062};
 const int32 SAY_SLAY[]      =   {-1533056, -1533049, -1533068, -1533063};
 const int32 SAY_DEATH[]     =   {-1533057, -1533050, -1533074, -1533064};
 
-#define SAY_BARON_AGGRO     RAND(-1533065, -1533066, -1533067)
-#define SAY_BARON_SLAY      RAND(-1533068, -1533069)
+#define SAY_BARON_AGGRO     RAND(-1533065,-1533066,-1533067)
+#define SAY_BARON_SLAY      RAND(-1533068,-1533069)
 
 class boss_four_horsemen : public CreatureScript
 {
@@ -129,6 +141,13 @@ public:
             encounterActionReset = false;
             doDelayPunish = false;
             _Reset();
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MovePoint(15, HomePositions[id]);
+            Reset();
         }
 
         bool DoEncounterAction(Unit *who, bool attack, bool reset, bool checkAllDead)
@@ -216,7 +235,7 @@ public:
 
         void MovementInform(uint32 type, uint32 id)
         {
-            if (type != POINT_MOTION_TYPE)
+            if (type != POINT_MOTION_TYPE || id == 15)
                 return;
 
             if (id == 2 || id == 5 || id == 8 || id == 11)
@@ -253,7 +272,7 @@ public:
             if (me->getVictim() && me->GetDistanceOrder(who, me->getVictim()) && me->canAttack(who))
             {
                 me->getThreatManager().modifyThreatPercent(me->getVictim(), -100);
-                me->AddThreat(who, 1000000.0f);
+                me->AddThreat(who, 99999999.9f);
             }
         }
 
@@ -315,7 +334,7 @@ public:
             DoScriptText(SAY_DEATH[id], me);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             _EnterCombat();
 
@@ -324,9 +343,19 @@ public:
             else
                 DoScriptText(SAY_AGGRO[id], me);
 
-            events.ScheduleEvent(EVENT_MARK, 15000);
+            events.ScheduleEvent(EVENT_MARK, 24000);
             events.ScheduleEvent(EVENT_CAST, 20000+rand()%5000);
             events.ScheduleEvent(EVENT_BERSERK, 15*100*1000);
+        }
+
+        void SpellHitTarget(Unit* target, const SpellEntry *spell)
+        {
+            if(target->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if(spell->Id == SPELL_MARK[0] || spell->Id == SPELL_MARK[1] || spell->Id == SPELL_MARK[2] || spell->Id == SPELL_MARK[3])
+                me->getThreatManager().modifyThreatPercent(target,-50);
+
         }
 
         void UpdateAI(const uint32 diff)
@@ -340,6 +369,7 @@ public:
             if (!UpdateVictim() || !CheckInRoom() || !movementCompleted)
                 return;
 
+            _DoAggroPulse(diff);
             events.Update(diff);
 
             if (me->HasUnitState(UNIT_STAT_CASTING))
@@ -350,28 +380,34 @@ public:
                 switch(eventId)
                 {
                     case EVENT_MARK:
-                        if (!(rand()%5))
-                            DoScriptText(SAY_SPECIAL[id], me);
-                        DoCastAOE(SPELL_MARK[id]);
-                        events.ScheduleEvent(EVENT_MARK, 15000);
+                        if(!me->IsNonMeleeSpellCasted(false))
+                        {
+                            if (!(rand()%5))
+                                DoScriptText(SAY_SPECIAL[id], me);
+                            DoCastAOE(SPELL_MARK[id]);
+                            events.ScheduleEvent(EVENT_MARK, caster ? 15000 : 12000);
+                        }else events.ScheduleEvent(EVENT_MARK, 100);
                         break;
                     case EVENT_CAST:
-                        if (!(rand()%5))
-                            DoScriptText(SAY_TAUNT[rand()%3][id], me);
-
-                        if (caster)
+                        if(!me->IsNonMeleeSpellCasted(false))
                         {
-                            if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f))
-                                DoCast(pTarget, SPELL_PRIMARY(id));
-                        }
-                        else
-                            DoCast(me->getVictim(), SPELL_PRIMARY(id));
+                            if (!(rand()%5))
+                                DoScriptText(SAY_TAUNT[rand()%3][id], me);
 
-                        events.ScheduleEvent(EVENT_CAST, 15000);
+                            if (caster)
+                            {
+                                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f))
+                                    DoCast(pTarget, SPELL_PRIMARY(id));
+                            }
+                            else
+                                DoCast(me->getVictim(), SPELL_PRIMARY(id));
+
+                            events.ScheduleEvent(EVENT_CAST, 15000);
+                        }
                         break;
                     case EVENT_BERSERK:
                         DoScriptText(SAY_SPECIAL[id], me);
-                        DoCast(me, EVENT_BERSERK);
+                        DoCast(me, SPELL_BERSERK, true);
                         break;
                 }
             }
@@ -380,7 +416,25 @@ public:
             {
                 if (doDelayPunish)
                 {
-                    DoCastAOE(SPELL_PUNISH[id], true);
+                    // try to find a new target
+                    Unit *pTemp = NULL;
+
+                    std::list<Unit *> playerList;
+                    SelectTargetList(playerList, 10, SELECT_TARGET_NEAREST, 45);
+                    for (std::list<Unit*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                    {
+                        pTemp = (*itr);
+                        if (me->IsWithinLOSInMap(pTemp) && !pTemp->IsImmunedToDamage(SPELL_SCHOOL_MASK_ALL))
+                        {
+                            SelectNearestTarget(pTemp);
+                            break;
+                        }
+                        pTemp = NULL;
+                    }
+
+                    if (!pTemp)
+                        DoCastAOE(SPELL_PUNISH[id], true);
+    
                     doDelayPunish = false;
                 }
                 punishTimer = 2000;

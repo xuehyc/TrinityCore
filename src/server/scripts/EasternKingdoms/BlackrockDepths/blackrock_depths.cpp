@@ -113,8 +113,8 @@ public:
             if (pInstance->GetData(TYPE_RING_OF_LAW) == IN_PROGRESS || pInstance->GetData(TYPE_RING_OF_LAW) == DONE)
                 return false;
 
-            pInstance->SetData(TYPE_RING_OF_LAW, IN_PROGRESS);
-            pPlayer->SummonCreature(NPC_GRIMSTONE, 625.559f, -205.618f, -52.735f, 2.609f, TEMPSUMMON_DEAD_DESPAWN, 0);
+            pInstance->SetData(TYPE_RING_OF_LAW,IN_PROGRESS);
+            pPlayer->SummonCreature(NPC_GRIMSTONE,625.559f,-205.618f,-52.735f,2.609f,TEMPSUMMON_DEAD_DESPAWN,0);
 
             return false;
         }
@@ -129,12 +129,12 @@ public:
 
 enum GrimstoneTexts
 {
-    SCRIPT_TEXT1 = -1230003,
-    SCRIPT_TEXT2 = -1230004,
-    SCRIPT_TEXT3 = -1230005,
-    SCRIPT_TEXT4 = -1230006,
-    SCRIPT_TEXT5 = -1230007,
-    SCRIPT_TEXT6 = -1230008
+    SCRIPT_TEXT1                                           = -1000000,
+    SCRIPT_TEXT2                                           = -1000001,
+    SCRIPT_TEXT3                                           = -1000002,
+    SCRIPT_TEXT4                                           = -1000003,
+    SCRIPT_TEXT5                                           = -1000004,
+    SCRIPT_TEXT6                                           = -1000005
 };
 
 //TODO: implement quest part of event (different end boss)
@@ -191,7 +191,7 @@ public:
         //TODO: move them to center
         void SummonRingMob()
         {
-            if (Creature* tmp = me->SummonCreature(RingMob[MobSpawnId], 608.960f, -235.322f, -53.907f, 1.857f, TEMPSUMMON_DEAD_DESPAWN, 0))
+            if (Creature* tmp = me->SummonCreature(RingMob[MobSpawnId],608.960f,-235.322f,-53.907f,1.857f,TEMPSUMMON_DEAD_DESPAWN,0))
                 RingMobGUID[MobCount] = tmp->GetGUID();
 
             ++MobCount;
@@ -203,7 +203,7 @@ public:
         //TODO: move them to center
         void SummonRingBoss()
         {
-            if (Creature* tmp = me->SummonCreature(RingBoss[rand()%6], 644.300f, -175.989f, -53.739f, 3.418f, TEMPSUMMON_DEAD_DESPAWN, 0))
+            if (Creature* tmp = me->SummonCreature(RingBoss[rand()%6],644.300f,-175.989f,-53.739f,3.418f,TEMPSUMMON_DEAD_DESPAWN,0))
                 RingBossGUID = tmp->GetGUID();
 
             MobDeath_Timer = 2500;
@@ -238,7 +238,7 @@ public:
                 if (pInstance)
                 {
                     pInstance->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, NPC_GRIMSTONE, me);
-                    pInstance->SetData(TYPE_RING_OF_LAW, DONE);
+                    pInstance->SetData(TYPE_RING_OF_LAW,DONE);
                     sLog->outDebug(LOG_FILTER_TSCR, "TSCR: npc_grimstone: event reached end and set complete.");
                 }
                 break;
@@ -263,7 +263,7 @@ public:
 
                     if (RingBossGUID)
                     {
-                        Creature *boss = Unit::GetCreature(*me, RingBossGUID);
+                        Creature *boss = Unit::GetCreature(*me,RingBossGUID);
                         if (boss && !boss->isAlive() && boss->isDead())
                         {
                             RingBossGUID = 0;
@@ -276,7 +276,7 @@ public:
 
                     for (uint8 i = 0; i < MAX_MOB_AMOUNT; ++i)
                     {
-                        Creature *mob = Unit::GetCreature(*me, RingMobGUID[i]);
+                        Creature *mob = Unit::GetCreature(*me,RingMobGUID[i]);
                         if (mob && !mob->isAlive() && mob->isDead())
                         {
                             RingMobGUID[i] = 0;
@@ -574,7 +574,7 @@ public:
             pPlayer->CastSpell(pPlayer, SPELL_CREATE_THORIUM_BROTHERHOOD_CONTRACT_DND, false);
         }
         if (uiAction == GOSSIP_ACTION_TRADE)
-            pPlayer->GetSession()->SendListInventory(pCreature->GetGUID());
+            pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
 
         return true;
     }
@@ -626,9 +626,9 @@ public:
     {
         npc_dughal_stormwingAI* dughal_stormwingAI = new npc_dughal_stormwingAI(pCreature);
 
-        dughal_stormwingAI->AddWaypoint(0, 280.42f, -82.86f, -77.12f, 0);
-        dughal_stormwingAI->AddWaypoint(1, 287.64f, -87.01f, -76.79f, 0);
-        dughal_stormwingAI->AddWaypoint(2, 354.63f, -64.95f, -67.53f, 0);
+        dughal_stormwingAI->AddWaypoint(0, 280.42f,-82.86f, -77.12f,0);
+        dughal_stormwingAI->AddWaypoint(1, 287.64f,-87.01f, -76.79f,0);
+        dughal_stormwingAI->AddWaypoint(2, 354.63f,-64.95f, -67.53f,0);
 
         return dughal_stormwingAI;
     }
@@ -641,7 +641,7 @@ public:
             pPlayer->CLOSE_GOSSIP_MENU();
             CAST_AI(npc_escort::npc_escortAI, (pCreature->AI()))->Start(false, true, pPlayer->GetGUID());
             pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-            pInstance->SetData(DATA_QUEST_JAIL_BREAK, ENCOUNTER_STATE_IN_PROGRESS);
+            pInstance->SetData(DATA_QUEST_JAIL_BREAK,ENCOUNTER_STATE_IN_PROGRESS);
         }
         return true;
     }
@@ -665,12 +665,12 @@ public:
         switch(i)
             {
             case 0:me->Say(SAY_DUGHAL_FREE, LANG_UNIVERSAL, PlayerGUID); break;
-            case 1:pInstance->SetData(DATA_DUGHAL, ENCOUNTER_STATE_OBJECTIVE_COMPLETED);break;
+            case 1:pInstance->SetData(DATA_DUGHAL,ENCOUNTER_STATE_OBJECTIVE_COMPLETED);break;
             case 2:
                 me->SetVisibility(VISIBILITY_OFF);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                pInstance->SetData(DATA_DUGHAL, ENCOUNTER_STATE_ENDED);
+                pInstance->SetData(DATA_DUGHAL,ENCOUNTER_STATE_ENDED);
                 break;
             }
         }
@@ -685,7 +685,7 @@ public:
                 me->SetVisibility(VISIBILITY_OFF);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                pInstance->SetData(DATA_DUGHAL, ENCOUNTER_STATE_ENDED);
+                pInstance->SetData(DATA_DUGHAL,ENCOUNTER_STATE_ENDED);
             }
         }
 
@@ -737,26 +737,26 @@ public:
     {
         npc_marshal_windsorAI* marshal_windsorAI = new npc_marshal_windsorAI(pCreature);
 
-        marshal_windsorAI->AddWaypoint(0, 316.336f, -225.528f, -77.7258f, 7000);
-        marshal_windsorAI->AddWaypoint(1, 316.336f, -225.528f, -77.7258f, 2000);
-        marshal_windsorAI->AddWaypoint(2, 322.96f, -207.13f, -77.87f, 0);
-        marshal_windsorAI->AddWaypoint(3, 281.05f, -172.16f, -75.12f, 0);
-        marshal_windsorAI->AddWaypoint(4, 272.19f, -139.14f, -70.61f, 0);
-        marshal_windsorAI->AddWaypoint(5, 283.62f, -116.09f, -70.21f, 0);
-        marshal_windsorAI->AddWaypoint(6, 296.18f, -94.30f, -74.08f, 0);
-        marshal_windsorAI->AddWaypoint(7, 294.57f, -93.11f, -74.08f, 0);
-        marshal_windsorAI->AddWaypoint(8, 314.31f, -74.31f, -76.09f, 0);
-        marshal_windsorAI->AddWaypoint(9, 360.22f, -62.93f, -66.77f, 0);
-        marshal_windsorAI->AddWaypoint(10, 383.38f, -69.40f, -63.25f, 0);
-        marshal_windsorAI->AddWaypoint(11, 389.99f, -67.86f, -62.57f, 0);
-        marshal_windsorAI->AddWaypoint(12, 400.98f, -72.01f, -62.31f, 0);
-        marshal_windsorAI->AddWaypoint(13, 404.22f, -62.30f, -63.50f, 2300);
-        marshal_windsorAI->AddWaypoint(14, 404.22f, -62.30f, -63.50f, 1500);
-        marshal_windsorAI->AddWaypoint(15, 407.65f, -51.86f, -63.96f, 0);
-        marshal_windsorAI->AddWaypoint(16, 403.61f, -51.71f, -63.92f, 1000);
-        marshal_windsorAI->AddWaypoint(17, 403.61f, -51.71f, -63.92f, 2000);
-        marshal_windsorAI->AddWaypoint(18, 403.61f, -51.71f, -63.92f, 1000);
-        marshal_windsorAI->AddWaypoint(19, 403.61f, -51.71f, -63.92f, 0);
+        marshal_windsorAI->AddWaypoint(0, 316.336f,-225.528f, -77.7258f,7000);
+        marshal_windsorAI->AddWaypoint(1, 316.336f,-225.528f, -77.7258f,2000);
+        marshal_windsorAI->AddWaypoint(2, 322.96f,-207.13f, -77.87f,0);
+        marshal_windsorAI->AddWaypoint(3, 281.05f,-172.16f, -75.12f,0);
+        marshal_windsorAI->AddWaypoint(4, 272.19f,-139.14f, -70.61f,0);
+        marshal_windsorAI->AddWaypoint(5, 283.62f,-116.09f, -70.21f,0);
+        marshal_windsorAI->AddWaypoint(6, 296.18f,-94.30f, -74.08f,0);
+        marshal_windsorAI->AddWaypoint(7, 294.57f,-93.11f, -74.08f,0);
+        marshal_windsorAI->AddWaypoint(8, 314.31f,-74.31f, -76.09f,0);
+        marshal_windsorAI->AddWaypoint(9, 360.22f,-62.93f, -66.77f,0);
+        marshal_windsorAI->AddWaypoint(10, 383.38f,-69.40f, -63.25f,0);
+        marshal_windsorAI->AddWaypoint(11, 389.99f,-67.86f, -62.57f,0);
+        marshal_windsorAI->AddWaypoint(12, 400.98f,-72.01f, -62.31f,0);
+        marshal_windsorAI->AddWaypoint(13, 404.22f,-62.30f, -63.50f,2300);
+        marshal_windsorAI->AddWaypoint(14, 404.22f,-62.30f, -63.50f,1500);
+        marshal_windsorAI->AddWaypoint(15, 407.65f,-51.86f, -63.96f,0);
+        marshal_windsorAI->AddWaypoint(16, 403.61f,-51.71f, -63.92f,1000);
+        marshal_windsorAI->AddWaypoint(17, 403.61f,-51.71f, -63.92f,2000);
+        marshal_windsorAI->AddWaypoint(18, 403.61f,-51.71f, -63.92f,1000);
+        marshal_windsorAI->AddWaypoint(19, 403.61f,-51.71f, -63.92f,0);
 
         return marshal_windsorAI;
     }
@@ -768,7 +768,7 @@ public:
             if (pInstance->GetData(DATA_QUEST_JAIL_BREAK) == ENCOUNTER_STATE_NOT_STARTED)
             {
                     CAST_AI(npc_escort::npc_escortAI, (pCreature->AI()))->Start(true, false, pPlayer->GetGUID());
-                    pInstance->SetData(DATA_QUEST_JAIL_BREAK, ENCOUNTER_STATE_IN_PROGRESS);
+                    pInstance->SetData(DATA_QUEST_JAIL_BREAK,ENCOUNTER_STATE_IN_PROGRESS);
                     pCreature->setFaction(11);
             }
 
@@ -806,7 +806,7 @@ public:
                 me->HandleEmoteCommand(EMOTE_STATE_USESTANDING);//EMOTE_STATE_WORK
                 break;
             case 14:
-                pInstance->SetData(DATA_GATE_SR, 0);
+                pInstance->SetData(DATA_GATE_SR,0);
                 me->setFaction(11);
                 break;
             case 16:
@@ -816,13 +816,13 @@ public:
                 me->HandleEmoteCommand(EMOTE_STATE_USESTANDING);//EMOTE_STATE_WORK
                 break;
             case 18:
-                pInstance->SetData(DATA_GATE_SC, 0);
+                pInstance->SetData(DATA_GATE_SC,0);
                 break;
             case 19:
                 me->SetVisibility(VISIBILITY_OFF);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SummonCreature(MOB_ENTRY_REGINALD_WINDSOR, 403.61f, -51.71f, -63.92f, 3.600434f, TEMPSUMMON_DEAD_DESPAWN , 0);
+                me->SummonCreature(MOB_ENTRY_REGINALD_WINDSOR,403.61f,-51.71f,-63.92f,3.600434f,TEMPSUMMON_DEAD_DESPAWN ,0);
                 pInstance->SetData(DATA_SUPPLY_ROOM, ENCOUNTER_STATE_ENDED);
                 break;
             }
@@ -830,7 +830,7 @@ public:
 
         void EnterCombat(Unit* who)
             {
-            switch (urand(0, 2))
+            switch (urand(0,2))
             {
                 case 0: me->Say(SAY_WINDSOR_AGGRO1, LANG_UNIVERSAL, PlayerGUID); break;
                 case 1: me->Say(SAY_WINDSOR_AGGRO2, LANG_UNIVERSAL, PlayerGUID); break;
@@ -842,7 +842,7 @@ public:
 
         void JustDied(Unit *slayer)
         {
-            pInstance->SetData(DATA_QUEST_JAIL_BREAK, ENCOUNTER_STATE_FAILED);
+            pInstance->SetData(DATA_QUEST_JAIL_BREAK,ENCOUNTER_STATE_FAILED);
         }
 
         void UpdateAI(const uint32 diff)
@@ -911,41 +911,41 @@ public:
     {
         npc_marshal_reginald_windsorAI* marshal_reginald_windsorAI = new npc_marshal_reginald_windsorAI(pCreature);
 
-        marshal_reginald_windsorAI->AddWaypoint(0, 403.61f, -52.71f, -63.92f, 4000);
-        marshal_reginald_windsorAI->AddWaypoint(1, 403.61f, -52.71f, -63.92f, 4000);
-        marshal_reginald_windsorAI->AddWaypoint(2, 406.33f, -54.87f, -63.95f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(3, 407.99f, -73.91f, -62.26f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(4, 557.03f, -119.71f, -61.83f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(5, 573.40f, -124.39f, -65.07f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(6, 593.91f, -130.29f, -69.25f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(7, 593.21f, -132.16f, -69.25f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(8, 593.21f, -132.16f, -69.25f, 3000);
-        marshal_reginald_windsorAI->AddWaypoint(9, 622.81f, -135.55f, -71.92f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(10, 634.68f, -151.29f, -70.32f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(11, 635.06f, -153.25f, -70.32f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(12, 635.06f, -153.25f, -70.32f, 3000);
-        marshal_reginald_windsorAI->AddWaypoint(13, 635.06f, -153.25f, -70.32f, 1500);
-        marshal_reginald_windsorAI->AddWaypoint(14, 655.25f, -172.39f, -73.72f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(15, 654.79f, -226.30f, -83.06f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(16, 622.85f, -268.85f, -83.96f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(17, 579.45f, -275.56f, -80.44f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(18, 561.19f, -266.85f, -75.59f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(19, 547.91f, -253.92f, -70.34f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(20, 549.20f, -252.40f, -70.34f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(21, 549.20f, -252.40f, -70.34f, 4000);
-        marshal_reginald_windsorAI->AddWaypoint(22, 555.33f, -269.16f, -74.40f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(23, 554.31f, -270.88f, -74.40f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(24, 554.31f, -270.88f, -74.40f, 4000);
-        marshal_reginald_windsorAI->AddWaypoint(25, 536.10f, -249.60f, -67.47f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(26, 520.94f, -216.65f, -59.28f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(27, 505.99f, -148.74f, -62.17f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(28, 484.21f, -56.24f, -62.43f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(29, 470.39f, -6.01f, -70.10f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(30, 451.27f, 30.85f, -70.07f, 0);
-        marshal_reginald_windsorAI->AddWaypoint(31, 452.45f, 29.85f, -70.37f, 1500);
-        marshal_reginald_windsorAI->AddWaypoint(32, 452.45f, 29.85f, -70.37f, 7000);
-        marshal_reginald_windsorAI->AddWaypoint(33, 452.45f, 29.85f, -70.37f, 10000);
-        marshal_reginald_windsorAI->AddWaypoint(34, 451.27f, 31.85f, -70.07f, 0);
+        marshal_reginald_windsorAI->AddWaypoint(0, 403.61f,-52.71f, -63.92f,4000);
+        marshal_reginald_windsorAI->AddWaypoint(1, 403.61f,-52.71f, -63.92f,4000);
+        marshal_reginald_windsorAI->AddWaypoint(2, 406.33f,-54.87f, -63.95f,0);
+        marshal_reginald_windsorAI->AddWaypoint(3, 407.99f,-73.91f, -62.26f,0);
+        marshal_reginald_windsorAI->AddWaypoint(4, 557.03f,-119.71f, -61.83f,0);
+        marshal_reginald_windsorAI->AddWaypoint(5, 573.40f,-124.39f, -65.07f,0);
+        marshal_reginald_windsorAI->AddWaypoint(6, 593.91f,-130.29f, -69.25f,0);
+        marshal_reginald_windsorAI->AddWaypoint(7, 593.21f,-132.16f, -69.25f,0);
+        marshal_reginald_windsorAI->AddWaypoint(8, 593.21f,-132.16f, -69.25f,3000);
+        marshal_reginald_windsorAI->AddWaypoint(9, 622.81f,-135.55f, -71.92f,0);
+        marshal_reginald_windsorAI->AddWaypoint(10, 634.68f,-151.29f, -70.32f,0);
+        marshal_reginald_windsorAI->AddWaypoint(11, 635.06f,-153.25f, -70.32f,0);
+        marshal_reginald_windsorAI->AddWaypoint(12, 635.06f,-153.25f, -70.32f,3000);
+        marshal_reginald_windsorAI->AddWaypoint(13, 635.06f,-153.25f, -70.32f,1500);
+        marshal_reginald_windsorAI->AddWaypoint(14, 655.25f,-172.39f, -73.72f,0);
+        marshal_reginald_windsorAI->AddWaypoint(15, 654.79f,-226.30f, -83.06f,0);
+        marshal_reginald_windsorAI->AddWaypoint(16, 622.85f,-268.85f, -83.96f,0);
+        marshal_reginald_windsorAI->AddWaypoint(17, 579.45f,-275.56f, -80.44f,0);
+        marshal_reginald_windsorAI->AddWaypoint(18, 561.19f,-266.85f, -75.59f,0);
+        marshal_reginald_windsorAI->AddWaypoint(19, 547.91f,-253.92f, -70.34f,0);
+        marshal_reginald_windsorAI->AddWaypoint(20, 549.20f,-252.40f, -70.34f,0);
+        marshal_reginald_windsorAI->AddWaypoint(21, 549.20f,-252.40f, -70.34f,4000);
+        marshal_reginald_windsorAI->AddWaypoint(22, 555.33f,-269.16f, -74.40f,0);
+        marshal_reginald_windsorAI->AddWaypoint(23, 554.31f,-270.88f, -74.40f,0);
+        marshal_reginald_windsorAI->AddWaypoint(24, 554.31f,-270.88f, -74.40f,4000);
+        marshal_reginald_windsorAI->AddWaypoint(25, 536.10f,-249.60f, -67.47f,0);
+        marshal_reginald_windsorAI->AddWaypoint(26, 520.94f,-216.65f, -59.28f,0);
+        marshal_reginald_windsorAI->AddWaypoint(27, 505.99f,-148.74f, -62.17f,0);
+        marshal_reginald_windsorAI->AddWaypoint(28, 484.21f,-56.24f, -62.43f,0);
+        marshal_reginald_windsorAI->AddWaypoint(29, 470.39f,-6.01f, -70.10f,0);
+        marshal_reginald_windsorAI->AddWaypoint(30, 451.27f,30.85f, -70.07f,0);
+        marshal_reginald_windsorAI->AddWaypoint(31, 452.45f,29.85f, -70.37f,1500);
+        marshal_reginald_windsorAI->AddWaypoint(32, 452.45f,29.85f, -70.37f,7000);
+        marshal_reginald_windsorAI->AddWaypoint(33, 452.45f,29.85f, -70.37f,10000);
+        marshal_reginald_windsorAI->AddWaypoint(34, 451.27f,31.85f, -70.07f,0);
 
         return marshal_reginald_windsorAI;
     }
@@ -1035,7 +1035,7 @@ public:
 
         void EnterCombat(Unit* who)
             {
-            switch (urand(0, 2))
+            switch (urand(0,2))
             {
                 case 0: me->Say(SAY_WINDSOR_AGGRO1, LANG_UNIVERSAL, PlayerGUID); break;
                 case 1: me->Say(SAY_WINDSOR_AGGRO2, LANG_UNIVERSAL, PlayerGUID); break;
@@ -1046,7 +1046,7 @@ public:
 
         void JustDied(Unit *slayer)
         {
-            pInstance->SetData(DATA_QUEST_JAIL_BREAK, ENCOUNTER_STATE_FAILED);
+            pInstance->SetData(DATA_QUEST_JAIL_BREAK,ENCOUNTER_STATE_FAILED);
         }
 
         void UpdateAI(const uint32 diff)
@@ -1056,25 +1056,25 @@ public:
                 {
                 if (!pInstance->GetData(DATA_GATE_J) && pInstance->GetData(DATA_JAZ) == ENCOUNTER_STATE_NOT_STARTED)
                     {
-                        pInstance->SetData(DATA_CREATURE_JAZ, 1);
-                        pInstance->SetData(DATA_JAZ, ENCOUNTER_STATE_IN_PROGRESS);
+                        pInstance->SetData(DATA_CREATURE_JAZ,1);
+                        pInstance->SetData(DATA_JAZ,ENCOUNTER_STATE_IN_PROGRESS);
                     }
                 if (pInstance->GetData(DATA_CREATURE_JAZ) && pInstance->GetData(DATA_CREATURE_OGRABISI) && pInstance->GetData(DATA_JAZ) == ENCOUNTER_STATE_IN_PROGRESS)
                     {
                         SetEscortPaused(false);
-                        pInstance->SetData(DATA_JAZ, ENCOUNTER_STATE_ENDED);
+                        pInstance->SetData(DATA_JAZ,ENCOUNTER_STATE_ENDED);
                     }
                 }
             else if (wp == 11)
                 {
                 if (!pInstance->GetData(DATA_GATE_S) && pInstance->GetData(DATA_SHILL) == ENCOUNTER_STATE_NOT_STARTED)
                     {
-                        pInstance->SetData(DATA_CREATURE_SHILL, 1);
-                        pInstance->SetData(DATA_SHILL, ENCOUNTER_STATE_IN_PROGRESS);
+                        pInstance->SetData(DATA_CREATURE_SHILL,1);
+                        pInstance->SetData(DATA_SHILL,ENCOUNTER_STATE_IN_PROGRESS);
                     }
                 if (pInstance->GetData(DATA_CREATURE_SHILL) && pInstance->GetData(DATA_SHILL) == ENCOUNTER_STATE_IN_PROGRESS)
                     {
-                        pInstance->SetData(DATA_SHILL, ENCOUNTER_STATE_ENDED);
+                        pInstance->SetData(DATA_SHILL,ENCOUNTER_STATE_ENDED);
                         SetEscortPaused(false);
                     }
                 }
@@ -1082,14 +1082,14 @@ public:
                 {
                 if (!pInstance->GetData(DATA_GATE_C) && pInstance->GetData(DATA_CREST) == ENCOUNTER_STATE_NOT_STARTED)
                     {
-                        pInstance->SetData(DATA_CREATURE_CREST, 1);
+                        pInstance->SetData(DATA_CREATURE_CREST,1);
                         me->Say(SAY_REGINALD_WINDSOR_13_2, LANG_UNIVERSAL, PlayerGUID);
-                        pInstance->SetData(DATA_CREST, ENCOUNTER_STATE_IN_PROGRESS);
+                        pInstance->SetData(DATA_CREST,ENCOUNTER_STATE_IN_PROGRESS);
                     }
                 if (pInstance->GetData(DATA_CREATURE_CREST) && pInstance->GetData(DATA_CREST) == ENCOUNTER_STATE_IN_PROGRESS)
                     {
                         SetEscortPaused(false);
-                        pInstance->SetData(DATA_CREST, ENCOUNTER_STATE_ENDED);
+                        pInstance->SetData(DATA_CREST,ENCOUNTER_STATE_ENDED);
                     }
                 }
             if (pInstance->GetData(DATA_TOBIAS) == ENCOUNTER_STATE_OBJECTIVE_COMPLETED) SetEscortPaused(false);
@@ -1131,7 +1131,7 @@ public:
             pPlayer->CLOSE_GOSSIP_MENU();
             CAST_AI(npc_escort::npc_escortAI, (pCreature->AI()))->Start(false, true, pPlayer->GetGUID());
             pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-            pInstance->SetData(DATA_TOBIAS, ENCOUNTER_STATE_IN_PROGRESS);
+            pInstance->SetData(DATA_TOBIAS,ENCOUNTER_STATE_IN_PROGRESS);
         }
         return true;
     }
@@ -1160,7 +1160,7 @@ public:
                 me->SetVisibility(VISIBILITY_OFF);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                pInstance->SetData(DATA_TOBIAS, ENCOUNTER_STATE_ENDED);
+                pInstance->SetData(DATA_TOBIAS,ENCOUNTER_STATE_ENDED);
             }
         }
 
@@ -1170,12 +1170,12 @@ public:
             {
             case 0:me->Say(SAY_TOBIAS_FREE, LANG_UNIVERSAL, PlayerGUID); break;
             case 2:
-                pInstance->SetData(DATA_TOBIAS, ENCOUNTER_STATE_OBJECTIVE_COMPLETED);break;
+                pInstance->SetData(DATA_TOBIAS,ENCOUNTER_STATE_OBJECTIVE_COMPLETED);break;
             case 4:
                 me->SetVisibility(VISIBILITY_OFF);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                pInstance->SetData(DATA_TOBIAS, ENCOUNTER_STATE_ENDED);
+                pInstance->SetData(DATA_TOBIAS,ENCOUNTER_STATE_ENDED);
                 break;
             }
         }
@@ -1323,7 +1323,7 @@ public:
             {
                 if (BreakKeg_Timer <= diff)
                 {
-                    DoGo(DATA_GO_BAR_KEG, 0);
+                    DoGo(DATA_GO_BAR_KEG,0);
                     BreakKeg_Timer = 0;
                     BreakDoor_Timer = 1000;
                 } else BreakKeg_Timer -= diff;
@@ -1333,16 +1333,16 @@ public:
             {
                 if (BreakDoor_Timer <= diff)
                 {
-                    DoGo(DATA_GO_BAR_DOOR, 2);
-                    DoGo(DATA_GO_BAR_KEG_TRAP, 0);               //doesn't work very well, leaving code here for future
+                    DoGo(DATA_GO_BAR_DOOR,2);
+                    DoGo(DATA_GO_BAR_KEG_TRAP,0);               //doesn't work very well, leaving code here for future
                     //spell by trap has effect61, this indicate the bar go hostile
 
-                    if (Unit *tmp = Unit::GetUnit(*me, pInstance->GetData64(DATA_PHALANX)))
+                    if (Unit *tmp = Unit::GetUnit(*me,pInstance->GetData64(DATA_PHALANX)))
                         tmp->setFaction(14);
 
                     //for later, this event(s) has alot more to it.
                     //optionally, DONE can trigger bar to go hostile.
-                    pInstance->SetData(TYPE_BAR, DONE);
+                    pInstance->SetData(TYPE_BAR,DONE);
 
                     BreakDoor_Timer = 0;
                 } else BreakDoor_Timer -= diff;
@@ -1355,8 +1355,386 @@ public:
 };
 
 /*######
-##
+## coren direbrew
 ######*/
+
+enum eCorenDirebrew
+{
+    SPELL_DISARM                                      = 47310,
+    SPELL_DISARM_PRECAST                              = 47407,
+    SPELL_MOLE_MACHINE_EMERGE                         = 50313,  // wrong spell
+    QUEST_INSULT_COREN_DIREBREW                       = 12062,
+    NPC_ILSA_DIREBREW                                 = 26764,
+    NPC_URSULA_DIREBREW                               = 26822,
+    NPC_DIREBREW_MINION                               = 26776
+};
+
+static Position Loc[]=
+{
+  {890.87f, -133.95f, -48.0f, 0.0f},
+  {892.47f, -133.26f, -48.0f, 0.0f},
+  {893.54f, -131.81f, -48.0f, 0.0f}
+};
+
+class npc_coren_direbrew : public CreatureScript
+{
+public:
+    npc_coren_direbrew() : CreatureScript("npc_coren_direbrew") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_coren_direbrewAI(pCreature);
+    }
+
+    struct npc_coren_direbrewAI : public ScriptedAI
+    {
+        npc_coren_direbrewAI(Creature *c) : ScriptedAI(c), lSummons(me) { }
+
+        SummonList lSummons;
+        
+        uint32 Add_Timer;
+        uint32 Disarm_Timer;
+
+        bool SpawnedIlsa;
+        bool SpawnedUrsula;
+
+        uint64 AddGUID[3];
+
+        void Reset()
+        {
+            me->setFaction(35);
+
+            Add_Timer = 20000;
+            Disarm_Timer = urand(10000, 15000);
+
+            SpawnedIlsa = false;
+            SpawnedUrsula = false; 
+
+            lSummons.DespawnAll();
+            me->SetCorpseDelay(90); // 1.5 minutes
+  
+            for (uint8 i = 0; i < 3; ++i)
+            {
+                if (Creature* pCreature = me->SummonCreature(NPC_DIREBREW_MINION, Loc[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000))
+                {
+                    AddGUID[i] = pCreature->GetGUID();
+
+                    pCreature->setFaction(35);
+                    pCreature->SetInFront(me);
+                    pCreature->SetReactState(REACT_PASSIVE);
+                    pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                }
+            }
+        }
+
+        void StartEvent(Player* pPlayer)
+        {
+            if (!pPlayer)
+                return;
+
+            me->RestoreFaction();
+            me->AI()->AttackStart(pPlayer);
+
+            for (uint8 i = 0; i < 3; ++i)
+            {
+                if (AddGUID[i])
+                {
+                    Creature* pCreature = Unit::GetCreature((*me), AddGUID[i]);
+                    if (pCreature && pCreature->isAlive())
+                    {
+                        pCreature->RestoreFaction();
+                        pCreature->SetReactState(REACT_AGGRESSIVE);
+                        pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        pCreature->AI()->AttackStart(pPlayer);
+                    }
+                    AddGUID[i] = 0;
+                }
+            }
+        }
+
+        void SetInCombat()
+        {
+            Map *map = me->GetMap();
+            if (!map->IsDungeon())
+                return;
+
+            Map::PlayerList const &PlayerList = map->GetPlayers();
+            for(Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            {
+                if (Player* i_pl = i->getSource())
+                    if (!i_pl->isGameMaster() && i_pl->isAlive() && me->GetDistance(i_pl) <= 100)
+                    {
+                        me->SetInCombatWith(i_pl);
+                        i_pl->SetInCombatWith(me);
+                        me->AddThreat(i_pl, 1.0f);
+                    }
+            }
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            SetInCombat();
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            //Return since we have no target
+            if (!UpdateVictim())
+                return;
+
+            // disarm
+            if (Disarm_Timer <= diff)
+            {
+                DoCast(SPELL_DISARM_PRECAST);
+                DoCast(me->getVictim(), SPELL_DISARM, false);
+                Disarm_Timer = urand(20000, 25000);
+            } else Disarm_Timer -= diff;
+
+            //spawn non-elite adds
+            if (Add_Timer <= diff)
+            {
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                {
+                    float posX, posY, posZ;
+                    pTarget->GetPosition(posX, posY, posZ);
+                    pTarget->CastSpell(pTarget, SPELL_MOLE_MACHINE_EMERGE, true, 0, 0, me->GetGUID());
+                    me->SummonCreature(NPC_DIREBREW_MINION, posX, posY, posZ, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
+
+                    Add_Timer = 20000;
+                    if (SpawnedIlsa) Add_Timer -= 4000;
+                    if (SpawnedUrsula) Add_Timer -= 4000;
+                }
+            } else Add_Timer -= diff;
+
+            if (!SpawnedIlsa && HealthBelowPct(66))
+            {
+                DoSpawnCreature(NPC_ILSA_DIREBREW, 0, 0, 0, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
+                SpawnedIlsa = true;
+            }
+
+            if (!SpawnedUrsula && HealthBelowPct(33))
+            {
+                DoSpawnCreature(NPC_URSULA_DIREBREW, 0, 0, 0, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
+                SpawnedUrsula = true;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+        void JustSummoned(Creature *summon)
+        {
+            summon->setFaction(736);
+
+            if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                summon->AI()->AttackStart(pTarget);
+            
+            lSummons.Summon(summon);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            lSummons.DespawnAll();
+        }
+    };
+
+    bool OnQuestReward(Player* pPlayer, Creature* pCreature, const Quest *_quest, uint32 /*item*/)
+    {
+        if (_quest->GetQuestId() == QUEST_INSULT_COREN_DIREBREW)
+        {
+            CAST_AI(npc_coren_direbrew::npc_coren_direbrewAI, pCreature->AI())->StartEvent(pPlayer);
+        }
+        return true;
+    }
+};
+
+/*######
+## dark iron brewmaiden
+######*/
+
+enum eBrewmaiden
+{
+    SPELL_SEND_FIRST_MUG                              = 47333,
+    SPELL_SEND_SECOND_MUG                             = 47339,
+    SPELL_CREATE_BREW                                 = 47345,
+    SPELL_HAS_BREW_BUFF                               = 47376,
+    SPELL_HAS_BREW                                    = 47331,
+    SPELL_DARK_BREWMAIDENS_STUN                       = 47340,
+    SPELL_CONSUME_BREW                                = 47377,
+    SPELL_BARRELED                                    = 47442,
+    SPELL_CHUCK_MUG                                   = 50276
+};
+
+class npc_brewmaiden : public CreatureScript
+{
+public:
+    npc_brewmaiden() : CreatureScript("npc_brewmaiden") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_brewmaidenAI(pCreature);
+    }
+
+    struct npc_brewmaidenAI : public ScriptedAI
+    {
+        npc_brewmaidenAI(Creature *c) : ScriptedAI(c) 
+        {
+            //some workarounds
+            SpellEntry* TempSpell;
+            TempSpell = GET_SPELL(SPELL_HAS_BREW);
+            if (TempSpell)
+                TempSpell->DurationIndex = 18; //20 seconds due to item aura issues when item is not equipped
+            TempSpell = GET_SPELL(SPELL_SEND_FIRST_MUG);
+            if (TempSpell)
+                TempSpell->EffectTriggerSpell[0] = 0; //disable, triggers on main target only
+            TempSpell = GET_SPELL(SPELL_SEND_SECOND_MUG);
+            if (TempSpell)
+                TempSpell->EffectTriggerSpell[0] = 0; //disable, triggers on main target only
+        }
+        
+        uint32 Brew_Timer;
+        uint32 Barrel_Timer;
+        uint32 Chuck_Mug_Timer;
+
+        void Reset()
+        {
+            Brew_Timer = 2000;
+            Barrel_Timer = 5000;
+            Chuck_Mug_Timer = 10000;
+        }
+
+        void SetInCombat()
+        {
+            Map *map = me->GetMap();
+            if (!map->IsDungeon())
+                return;
+
+            Map::PlayerList const &PlayerList = map->GetPlayers();
+            for(Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            {
+                if (Player* i_pl = i->getSource())
+                    if (!i_pl->isGameMaster() && i_pl->isAlive() && me->GetDistance(i_pl) <= 100)
+                    {
+                        me->SetInCombatWith(i_pl);
+                        i_pl->SetInCombatWith(me);
+                        me->AddThreat(i_pl, 1.0f);
+                    }
+            }
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            SetInCombat();
+        }
+
+        void AttackStart(Unit* pWho)
+        {
+            if (!pWho)
+                return;
+
+            if (me->Attack(pWho, true))
+            {
+                me->AddThreat(pWho, 1.0f);
+                me->SetInCombatWith(pWho);
+                pWho->SetInCombatWith(me);
+
+                if (me->GetEntry() == NPC_URSULA_DIREBREW)
+                    me->GetMotionMaster()->MoveFollow(pWho, 10.0f, 0.0f);
+                else
+                    me->GetMotionMaster()->MoveChase(pWho);
+            }
+        }
+
+        void SpellHitTarget(Unit *pTarget, const SpellEntry *spell) 
+        {
+            if (spell->Id == SPELL_SEND_FIRST_MUG)
+            {
+                pTarget->CastSpell(pTarget, SPELL_CREATE_BREW, true);
+                pTarget->CastSpell(pTarget, SPELL_HAS_BREW, true);
+                pTarget->CastSpell(pTarget, SPELL_HAS_BREW_BUFF, true);
+            }
+
+            if (spell->Id == SPELL_SEND_SECOND_MUG)
+            {
+                pTarget->CastSpell(pTarget, SPELL_DARK_BREWMAIDENS_STUN, true);
+                pTarget->CastSpell(pTarget, SPELL_CONSUME_BREW, true);
+                pTarget->RemoveAurasDueToSpell(SPELL_HAS_BREW);
+            }
+        } 
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (Brew_Timer <= diff)
+            {
+                if(!me->IsNonMeleeSpellCasted(false))
+                {
+                    Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
+
+                    if (pTarget && me->GetDistance(pTarget) > 5.0f)
+                    {
+                        DoCast(pTarget, SPELL_SEND_FIRST_MUG);
+                        Brew_Timer = 12000;
+                    }
+                }
+            } else Brew_Timer -= diff;
+
+            if (Chuck_Mug_Timer <= diff)
+            {
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                    DoCast(pTarget, SPELL_CHUCK_MUG);
+
+                Chuck_Mug_Timer = 15000;
+            } else Chuck_Mug_Timer -= diff;
+
+            if (me->GetEntry() == NPC_URSULA_DIREBREW)
+            {
+                if (Barrel_Timer <= diff)
+                {
+                    if(!me->IsNonMeleeSpellCasted(false))
+                    {
+                        DoCast(me->getVictim(), SPELL_BARRELED);
+                        Barrel_Timer = 18000;
+                    }
+                } else Barrel_Timer -= diff;
+            } else
+                DoMeleeAttackIfReady();
+        }
+    };
+};
+
+/*######
+## go_mole_machine_console
+######*/
+
+enum eMoleMachineConsole
+{
+    SPELL_TELEPORT           = 49466 //wrong spell
+};
+
+#define GOSSIP_ITEM_MOLE_CONSOLE  "[PH] Please teleport me."
+
+class go_mole_machine_console : public GameObjectScript
+{
+public:
+    go_mole_machine_console() : GameObjectScript("go_mole_machine_console") { }
+
+    bool OnGossipHello (Player* pPlayer, GameObject* pGO)
+    {
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_MOLE_CONSOLE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        pPlayer->SEND_GOSSIP_MENU(12709, pGO->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, GameObject* pGO, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+            pPlayer->CastSpell(pPlayer, SPELL_TELEPORT, true);
+        return true;
+    }
+};
+
 
 void AddSC_blackrock_depths()
 {
@@ -1371,4 +1749,7 @@ void AddSC_blackrock_depths()
     //new npc_marshal_windsor();
     //new npc_marshal_reginald_windsor();
     new npc_rocknot();
+    new npc_coren_direbrew();
+    new npc_brewmaiden();
+    new go_mole_machine_console();
 }

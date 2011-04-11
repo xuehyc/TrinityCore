@@ -26,7 +26,7 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "shadowfang_keep.h"
 
-#define MAX_ENCOUNTER              4
+#define MAX_ENCOUNTER              5
 
 enum eEnums
 {
@@ -43,16 +43,17 @@ enum eEnums
     GO_SORCERER_DOOR        = 18972,                        //door to open when Fenrus the Devourer
     GO_ARUGAL_DOOR          = 18971,                        //door to open when Wolf Master Nandos
 
-    SPELL_ASHCROMBE_TELEPORT    = 15742
+    SPELL_ASHCROMBE_TELEPORT    = 15742,
+    ACTION_SPAWN_CRAZED         = 3
 };
 
 const Position SpawnLocation[] =
 {
-    {-148.199f, 2165.647f, 128.448f, 1.026f},
-    {-153.110f, 2168.620f, 128.448f, 1.026f},
-    {-145.905f, 2180.520f, 128.448f, 4.183f},
-    {-140.794f, 2178.037f, 128.448f, 4.090f},
-    {-138.640f, 2170.159f, 136.577f, 2.737f}
+    {-148.199f,2165.647f,128.448f,1.026f},
+    {-153.110f,2168.620f,128.448f,1.026f},
+    {-145.905f,2180.520f,128.448f,4.183f},
+    {-140.794f,2178.037f,128.448f,4.090f},
+    {-138.640f,2170.159f,136.577f,2.737f}
 };
 class instance_shadowfang_keep : public InstanceMapScript
 {
@@ -74,6 +75,10 @@ public:
         uint64 uiAshGUID;
         uint64 uiAdaGUID;
         uint64 uiArchmageArugalGUID;
+        
+        uint64 uiFryeGUID;
+        uint64 uiHummelGUID;
+        uint64 uiBaxterGUID;
 
         uint64 DoorCourtyardGUID;
         uint64 DoorSorcererGUID;
@@ -81,6 +86,7 @@ public:
 
         uint8 uiPhase;
         uint16 uiTimer;
+        uint32 uiSpawnCrazedTimer;
 
         void Initialize()
         {
@@ -89,6 +95,10 @@ public:
             uiAshGUID = 0;
             uiAdaGUID = 0;
             uiArchmageArugalGUID = 0;
+
+            uiFryeGUID = 0;
+            uiHummelGUID = 0;
+            uiBaxterGUID = 0;
 
             DoorCourtyardGUID = 0;
             DoorSorcererGUID = 0;
@@ -105,6 +115,9 @@ public:
                 case NPC_ASH: uiAshGUID = creature->GetGUID(); break;
                 case NPC_ADA: uiAdaGUID = creature->GetGUID(); break;
                 case NPC_ARCHMAGE_ARUGAL: uiArchmageArugalGUID = creature->GetGUID(); break;
+                case NPC_FRYE: uiFryeGUID = creature->GetGUID(); break;
+                case NPC_HUMMEL: uiHummelGUID = creature->GetGUID(); break;
+                case NPC_BAXTER: uiBaxterGUID = creature->GetGUID(); break;
             }
         }
 
@@ -115,17 +128,17 @@ public:
                 case GO_COURTYARD_DOOR:
                     DoorCourtyardGUID = go->GetGUID();
                     if (m_auiEncounter[0] == DONE)
-                        HandleGameObject(0, true, go);
+                        HandleGameObject(NULL, true, go);
                     break;
                 case GO_SORCERER_DOOR:
                     DoorSorcererGUID = go->GetGUID();
                     if (m_auiEncounter[2] == DONE)
-                        HandleGameObject(0, true, go);
+                        HandleGameObject(NULL, true, go);
                     break;
                 case GO_ARUGAL_DOOR:
                     DoorArugalGUID = go->GetGUID();
                     if (m_auiEncounter[3] == DONE)
-                        HandleGameObject(0, true, go);
+                        HandleGameObject(NULL, true, go);
                     break;
             }
         }
@@ -137,8 +150,8 @@ public:
 
             if (pAda && pAda->isAlive() && pAsh && pAsh->isAlive())
             {
-                DoScriptText(SAY_BOSS_DIE_AD, pAda);
-                DoScriptText(SAY_BOSS_DIE_AS, pAsh);
+                DoScriptText(SAY_BOSS_DIE_AD,pAda);
+                DoScriptText(SAY_BOSS_DIE_AS,pAsh);
             }
         }
 
@@ -174,6 +187,11 @@ public:
                         DoUseDoorOrButton(DoorArugalGUID);
                     m_auiEncounter[3] = data;
                     break;
+                case TYPE_CROWN:
+                    if (data == NOT_STARTED)
+                        uiSpawnCrazedTimer = urand(15000, 20000);
+                    m_auiEncounter[4] = data;
+                    break;
             }
 
             if (data == DONE)
@@ -202,6 +220,20 @@ public:
                     return m_auiEncounter[2];
                 case TYPE_NANDOS:
                     return m_auiEncounter[3];
+                case TYPE_CROWN:
+                    return m_auiEncounter[4];
+            }
+            return 0;
+        }
+
+        uint64 GetData64(uint32 id)
+        {
+            switch(id)
+            {
+                case DATA_DOOR:   return DoorCourtyardGUID;
+                case DATA_FRYE:   return uiFryeGUID;
+                case DATA_HUMMEL: return uiHummelGUID;
+                case DATA_BAXTER: return uiBaxterGUID;
             }
             return 0;
         }
@@ -235,6 +267,16 @@ public:
 
         void Update(uint32 uiDiff)
         {
+            if (GetData(TYPE_CROWN) == IN_PROGRESS)
+            {
+                if (uiSpawnCrazedTimer <= uiDiff)
+                {
+                    if (Creature* pHummel = instance->GetCreature(uiHummelGUID))
+                        pHummel->AI()->DoAction(ACTION_SPAWN_CRAZED);
+                    uiSpawnCrazedTimer = urand(5000, 7500);
+                } else uiSpawnCrazedTimer -= uiDiff;
+            }
+
             if (GetData(TYPE_FENRUS) != DONE)
                 return;
 
@@ -251,19 +293,19 @@ public:
                     switch(uiPhase)
                     {
                         case 1:
-                            pSummon = pArchmage->SummonCreature(pArchmage->GetEntry(), SpawnLocation[4], TEMPSUMMON_TIMED_DESPAWN, 10000);
+                            pSummon = pArchmage->SummonCreature(pArchmage->GetEntry(),SpawnLocation[4],TEMPSUMMON_TIMED_DESPAWN,10000);
                             pSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                             pSummon->SetReactState(REACT_DEFENSIVE);
-                            pSummon->CastSpell(pSummon, SPELL_ASHCROMBE_TELEPORT, true);
-                            DoScriptText(SAY_ARCHMAGE, pSummon);
+                            pSummon->CastSpell(pSummon,SPELL_ASHCROMBE_TELEPORT,true);
+                            DoScriptText(SAY_ARCHMAGE,pSummon);
                             uiTimer = 2000;
                             uiPhase = 2;
                             break;
                         case 2:
-                            pArchmage->SummonCreature(NPC_ARUGAL_VOIDWALKER, SpawnLocation[0], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
-                            pArchmage->SummonCreature(NPC_ARUGAL_VOIDWALKER, SpawnLocation[1], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
-                            pArchmage->SummonCreature(NPC_ARUGAL_VOIDWALKER, SpawnLocation[2], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
-                            pArchmage->SummonCreature(NPC_ARUGAL_VOIDWALKER, SpawnLocation[3], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+                            pArchmage->SummonCreature(NPC_ARUGAL_VOIDWALKER,SpawnLocation[0],TEMPSUMMON_CORPSE_TIMED_DESPAWN,60000);
+                            pArchmage->SummonCreature(NPC_ARUGAL_VOIDWALKER,SpawnLocation[1],TEMPSUMMON_CORPSE_TIMED_DESPAWN,60000);
+                            pArchmage->SummonCreature(NPC_ARUGAL_VOIDWALKER,SpawnLocation[2],TEMPSUMMON_CORPSE_TIMED_DESPAWN,60000);
+                            pArchmage->SummonCreature(NPC_ARUGAL_VOIDWALKER,SpawnLocation[3],TEMPSUMMON_CORPSE_TIMED_DESPAWN,60000);
                             uiPhase = 0;
                             break;
 

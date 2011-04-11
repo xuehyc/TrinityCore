@@ -97,7 +97,7 @@ public:
             me->SetStandState(UNIT_STAND_STATE_SLEEP);
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit * /*who*/) {}
 
         void MoveInLineOfSight(Unit *who)
         {
@@ -138,7 +138,7 @@ public:
                     {
                         DoScriptText(RAND(SAY_HEAL1, SAY_HEAL2, SAY_HEAL3, SAY_HEAL4), me, pPlayer);
 
-                        pPlayer->TalkedToCreature(me->GetEntry(), me->GetGUID());
+                        pPlayer->TalkedToCreature(me->GetEntry(),me->GetGUID());
                     }
 
                     me->GetMotionMaster()->Clear();
@@ -314,9 +314,9 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit * /*who*/) {}
 
-        void MoveInLineOfSight(Unit* /*who*/)
+        void MoveInLineOfSight(Unit * /*who*/)
         {
         }
 
@@ -390,7 +390,7 @@ public:
             case 29:
                 DoScriptText(EMOTE_HUG, me, pPlayer);
                 DoScriptText(SAY_END2, me, pPlayer);
-                pPlayer->GroupEventHappens(QUEST_A_CRY_FOR_SAY_HELP, me);
+                pPlayer->GroupEventHappens(QUEST_A_CRY_FOR_SAY_HELP,me);
                 break;
             }
         }
@@ -533,7 +533,7 @@ public:
                 if ((*itr)->GetQuestStatus(QUEST_TREES_COMPANY) == QUEST_STATUS_INCOMPLETE
                     &&(*itr)->HasAura(SPELL_TREE_DISGUISE))
                 {
-                    (*itr)->KilledMonsterCredit(MOB_SPARK, 0);
+                    (*itr)->KilledMonsterCredit(MOB_SPARK,0);
                 }
             }
         }
@@ -541,7 +541,7 @@ public:
         void DespawnNagaFlag(bool despawn)
         {
             std::list<GameObject*> FlagList;
-            me->GetGameObjectListWithEntryInGrid(FlagList, GO_NAGA_FLAG, 100.0f);
+            me->GetGameObjectListWithEntryInGrid(FlagList,GO_NAGA_FLAG, 100.0f);
 
             if (!FlagList.empty())
             {
@@ -592,7 +592,7 @@ public:
         {
             if (Creature* ravager = pGo->FindNearestCreature(NPC_DEATH_RAVAGER, 5.0f, true))
             {
-                ravager->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                ravager->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
                 ravager->SetReactState(REACT_AGGRESSIVE);
                 ravager->AI()->AttackStart(pPlayer);
             }
@@ -655,109 +655,75 @@ public:
 /*########
 ## Quest: The Prophecy of Akida
 ########*/
-
 enum BristlelimbCage
 {
     QUEST_THE_PROPHECY_OF_AKIDA         = 9544,
     NPC_STILLPINE_CAPITIVE              = 17375,
     GO_BRISTELIMB_CAGE                  = 181714,
-
     CAPITIVE_SAY_1                      = -1000474,
     CAPITIVE_SAY_2                      = -1000475,
-    CAPITIVE_SAY_3                      = -1000476,
-
-    POINT_INIT                          = 1,
-    EVENT_DESPAWN                       = 1,
+    CAPITIVE_SAY_3                      = -1000476
 };
 
 class npc_stillpine_capitive : public CreatureScript
 {
-    public:
-        npc_stillpine_capitive() : CreatureScript("npc_stillpine_capitive") { }
+public:
+    npc_stillpine_capitive() : CreatureScript("npc_stillpine_capitive") { }
 
-        struct npc_stillpine_capitiveAI : public ScriptedAI
+    struct npc_stillpine_capitiveAI : public ScriptedAI
+    {
+        npc_stillpine_capitiveAI(Creature *c) : ScriptedAI(c){}
+
+        uint32 FleeTimer;
+
+        void Reset()
         {
-            npc_stillpine_capitiveAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
-
-            void Reset()
-            {
-                if (GameObject* cage = me->FindNearestGameObject(GO_BRISTELIMB_CAGE, 5.0f))
-                {
-                    cage->SetLootState(GO_JUST_DEACTIVATED);
-                    cage->SetGoState(GO_STATE_READY);
-                }
-                _events.Reset();
-                _player = NULL;
-                _movementComplete = false;
-            }
-
-            void StartMoving(Player* owner)
-            {
-                if (owner)
-                {
-                    DoScriptText(RAND(CAPITIVE_SAY_1, CAPITIVE_SAY_2, CAPITIVE_SAY_3), me, owner);
-                    _player = owner;
-                }
-                Position pos;
-                me->GetNearPosition(pos, 3.0f, 0.0f);
-                me->GetMotionMaster()->MovePoint(POINT_INIT, pos);
-            }
-
-            void MovementInform(uint32 type, uint32 id)
-            {
-                if (type != POINT_MOTION_TYPE || id != POINT_INIT)
-                    return;
-
-                if (_player)
-                    _player->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
-
-                _movementComplete = true;
-                _events.ScheduleEvent(EVENT_DESPAWN, 3500);
-            }
-
-            void UpdateAI(uint32 const diff)
-            {
-                if (!_movementComplete)
-                    return;
-
-                _events.Update(diff);
-
-                if (_events.ExecuteEvent() == EVENT_DESPAWN)
-                    me->DespawnOrUnsummon();
-            }
-
-        private:
-            Player* _player;
-            EventMap _events;
-            bool _movementComplete;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_stillpine_capitiveAI(creature);
+            FleeTimer = 0;
+            GameObject* cage = me->FindNearestGameObject(GO_BRISTELIMB_CAGE, 5.0f);
+            if(cage)
+                cage->ResetDoorOrButton();
         }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if(FleeTimer)
+            {
+                if(FleeTimer <= diff)
+                    me->DespawnOrUnsummon();
+                else FleeTimer -= diff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_stillpine_capitiveAI(pCreature);
+    }
+
 };
 
 class go_bristlelimb_cage : public GameObjectScript
 {
-    public:
-        go_bristlelimb_cage() : GameObjectScript("go_bristlelimb_cage") { }
+public:
+    go_bristlelimb_cage() : GameObjectScript("go_bristlelimb_cage") { }
 
-        bool OnGossipHello(Player* player, GameObject* go)
+    bool OnGossipHello(Player* pPlayer, GameObject* pGo)
+    {
+        if(pPlayer->GetQuestStatus(QUEST_THE_PROPHECY_OF_AKIDA) == QUEST_STATUS_INCOMPLETE)
         {
-            if (player->GetQuestStatus(QUEST_THE_PROPHECY_OF_AKIDA) == QUEST_STATUS_INCOMPLETE)
+            Creature* pCreature = pGo->FindNearestCreature(NPC_STILLPINE_CAPITIVE, 5.0f, true);
+            if(pCreature)
             {
-                if (Creature* capitive = go->FindNearestCreature(NPC_STILLPINE_CAPITIVE, 5.0f, true))
-                {
-                    go->ResetDoorOrButton();
-                    CAST_AI(npc_stillpine_capitive::npc_stillpine_capitiveAI, capitive->AI())->StartMoving(player);
-                    return false;
-                }
+                DoScriptText(RAND(CAPITIVE_SAY_1, CAPITIVE_SAY_2, CAPITIVE_SAY_3), pCreature, pPlayer);
+                pCreature->GetMotionMaster()->MoveFleeing(pPlayer, 3500);
+                pPlayer->KilledMonsterCredit(pCreature->GetEntry(), pCreature->GetGUID());
+                CAST_AI(npc_stillpine_capitive::npc_stillpine_capitiveAI, pCreature->AI())->FleeTimer = 3500;
+                return false;
             }
-            return true;
         }
+        return true;
+    }
+
 };
 
 void AddSC_azuremyst_isle()

@@ -79,24 +79,32 @@ enum VehicleSpells
 
 struct VehicleSeat
 {
-    explicit VehicleSeat(VehicleSeatEntry const *seatInfo) : SeatInfo(seatInfo), Passenger(0) {}
-    VehicleSeatEntry const *SeatInfo;
-    uint64 Passenger;
+    explicit VehicleSeat(VehicleSeatEntry const *_seatInfo) : seatInfo(_seatInfo), passenger(NULL) {}
+    VehicleSeatEntry const *seatInfo;
+    uint64 passenger;
 };
 
 struct VehicleAccessory
 {
-    VehicleAccessory(uint32 entry, int8 seatId, bool isMinion, uint8 summonType, uint32 summonTime) :
-        AccessoryEntry(entry), SeatId(seatId), IsMinion(isMinion), SummonedType(summonType), SummonTime(summonTime) {}
-    uint32 AccessoryEntry;
-    int8 SeatId;
-    uint32 IsMinion;
-    uint8 SummonedType;
-    uint32 SummonTime;
+    explicit VehicleAccessory(uint32 _uiAccessory, int8 _uiSeat, bool _bMinion, uint8 _uiSummonType, uint32 _uiSummonTime) :
+        uiAccessory(_uiAccessory), uiSeat(_uiSeat), bMinion(_bMinion), uiSummonType(_uiSummonType), uiSummonTime(_uiSummonTime) {}
+    uint32 uiAccessory;
+    int8 uiSeat;
+    uint32 bMinion;
+    uint8 uiSummonType;
+    uint32 uiSummonTime;
+};
+
+struct VehicleScalingInfo
+{
+    uint32 ID;
+    float baseItemLevel;
+    float scalingFactor;
 };
 
 typedef std::vector<VehicleAccessory> VehicleAccessoryList;
 typedef std::map<uint32, VehicleAccessoryList> VehicleAccessoryMap;
+typedef std::map<uint32, VehicleScalingInfo> VehicleScalingMap;
 typedef std::map<int8, VehicleSeat> SeatMap;
 
 class Vehicle
@@ -105,33 +113,32 @@ class Vehicle
     friend class WorldSession;
 
     public:
-        explicit Vehicle(Unit* unit, VehicleEntry const* vehInfo, uint32 creatureEntry);
+        explicit Vehicle(Unit *unit, VehicleEntry const *vehInfo, uint32 creatureEntry);
         virtual ~Vehicle();
 
         void Install();
         void Uninstall();
-        void Reset(bool evading = false);
-        void InstallAllAccessories(bool evading);
-        void ApplyAllImmunities();
+        void Reset();
+        void InstallAllAccessories();
 
-        Unit* GetBase() const { return _me; }
-        VehicleEntry const* GetVehicleInfo() const { return _vehicleInfo; }
-        uint32 const& GetCreatureEntry() const { return _creatureEntry; }
+        Unit *GetBase() const { return me; }
+        VehicleEntry const *GetVehicleInfo() const { return m_vehicleInfo; }
+        uint32 const& GetCreatureEntry() const { return m_creatureEntry; }
 
         bool HasEmptySeat(int8 seatId) const;
-        Unit* GetPassenger(int8 seatId) const;
+        Unit *GetPassenger(int8 seatId) const;
         int8 GetNextEmptySeat(int8 seatId, bool next) const;
         uint8 GetAvailableSeatCount() const;
 
-        bool AddPassenger(Unit* passenger, int8 seatId = -1);
+        bool AddPassenger(Unit *passenger, int8 seatId = -1);
         void EjectPassenger(Unit* passenger, Unit* controller);
         void RemovePassenger(Unit *passenger);
         void RelocatePassengers(float x, float y, float z, float ang);
         void RemoveAllPassengers();
         void Dismiss();
-        bool IsVehicleInUse() { return Seats.begin() != Seats.end(); }
+        bool IsVehicleInUse() { return m_Seats.begin() != m_Seats.end(); }
 
-        SeatMap Seats;
+        SeatMap m_Seats;
 
     protected:
         uint16 GetExtraMovementFlagsForBase() const;
@@ -140,11 +147,14 @@ class Vehicle
     private:
         SeatMap::iterator GetSeatIteratorForPassenger(Unit* passenger);
         void InitMovementInfoForBase();
-        void InstallAccessory(uint32 entry, int8 seatId, bool minion, uint8 type, uint32 summonTime);
 
-        Unit* _me;
-        VehicleEntry const* _vehicleInfo;
-        uint32 _usableSeatNum;         // Number of seats that match VehicleSeatEntry::UsableByPlayer, used for proper display flags
-        uint32 _creatureEntry;         // Can be different than me->GetBase()->GetEntry() in case of players
+    protected:
+        Unit *me;
+        VehicleEntry const *m_vehicleInfo;
+        uint32 m_usableSeatNum;         // Number of seats that match VehicleSeatEntry::UsableByPlayer, used for proper display flags
+        uint32 m_bonusHP;
+        uint32 m_creatureEntry;         // Can be different than me->GetBase()->GetEntry() in case of players
+
+        void InstallAccessory(uint32 entry, int8 seatId, bool minion, uint8 type, uint32 summonTime);
 };
 #endif

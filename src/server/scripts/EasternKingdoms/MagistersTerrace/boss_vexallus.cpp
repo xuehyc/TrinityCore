@@ -96,18 +96,18 @@ public:
                 pInstance->SetData(DATA_VEXALLUS_EVENT, NOT_STARTED);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit * /*victim*/)
         {
             DoScriptText(SAY_KILL, me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit * /*victim*/)
         {
             if (pInstance)
                 pInstance->SetData(DATA_VEXALLUS_EVENT, DONE);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
 
@@ -118,10 +118,10 @@ public:
         void JustSummoned(Creature *summoned)
         {
             if (Unit *temp = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                summoned->GetMotionMaster()->MoveFollow(temp, 0, 0);
+                summoned->GetMotionMaster()->MoveFollow(temp,0,0);
 
             //spells are SUMMON_TYPE_GUARDIAN, so using setOwner should be ok
-            summoned->CastSpell(summoned, SPELL_ENERGY_BOLT, false, 0, 0, me->GetGUID());
+            summoned->CastSpell(summoned,SPELL_ENERGY_BOLT,false,0,0,me->GetGUID());
         }
 
         void UpdateAI(const uint32 diff)
@@ -219,9 +219,9 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) {}
-        void MoveInLineOfSight(Unit* /*who*/) {}
-        void AttackStart(Unit* /*who*/) {}
+        void EnterCombat(Unit * /*who*/) {}
+        void MoveInLineOfSight(Unit * /*who*/) {}
+        void AttackStart(Unit * /*who*/) {}
     };
 
 };

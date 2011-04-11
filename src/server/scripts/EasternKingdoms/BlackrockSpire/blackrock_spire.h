@@ -18,6 +18,8 @@
 #ifndef DEF_BLACKROCK_SPIRE_H
 #define DEF_BLACKROCK_SPIRE_H
 
+uint32 const MAX_ENCOUNTER          = 14;
+
 enum Data
 {
     DATA_OMOKK,
@@ -35,6 +37,7 @@ enum Data
     DATA_THE_BEAST,
     DATA_GENERAL_DRAKKISATH
 };
+
 enum Npc
 {
     NPC_OMOKK                       = 9196,
@@ -53,16 +56,9 @@ enum Npc
     NPC_GENERAL_DRAKKISATH          = 10363,
 };
 
-enum AdditionalData
+enum AchievementCriteriaIds
 {
-    SPELL_SUMMON_ROOKERY_WHELP      = 15745,
-    MAX_ENCOUNTER                   = 14,
-};
-
-enum GameObjects
-{
-    GO_WHELP_SPAWNER                = 175622, //trap spawned by go id 175124
+    CRITERIA_LEEROY                 = 7622,
 };
 
 #endif
-

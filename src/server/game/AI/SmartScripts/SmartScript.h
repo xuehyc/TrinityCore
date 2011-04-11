@@ -47,9 +47,9 @@ class SmartScript
         void UpdateTimer(SmartScriptHolder& e, uint32 const diff);
         void InitTimer(SmartScriptHolder& e);
         void ProcessAction(SmartScriptHolder& e, Unit* unit = NULL, uint32 var0 = 0, uint32 var1 = 0, bool bvar = false, const SpellEntry* spell = NULL, GameObject* gob = NULL);
-        ObjectList* GetTargets(SmartScriptHolder const& e, Unit* invoker = NULL);
+        ObjectList* GetTargets(SmartScriptHolder e, Unit* invoker = NULL);
         ObjectList* GetWorldObjectsInDist(float dist);
-        void InstallTemplate(SmartScriptHolder const& e);
+        void InstallTemplate(SmartScriptHolder e);
         SmartScriptHolder CreateEvent(SMART_EVENT e, uint32 event_flags, uint32 event_param1, uint32 event_param2, uint32 event_param3, uint32 event_param4, SMART_ACTION action, uint32 action_param1, uint32 action_param2, uint32 action_param3, uint32 action_param4, uint32 action_param5, uint32 action_param6, SMARTAI_TARGETS t, uint32 target_param1, uint32 target_param2, uint32 target_param3, uint32 phaseMask = 0);
         void AddEvent(SMART_EVENT e, uint32 event_flags, uint32 event_param1, uint32 event_param2, uint32 event_param3, uint32 event_param4, SMART_ACTION action, uint32 action_param1, uint32 action_param2, uint32 action_param3, uint32 action_param4, uint32 action_param5, uint32 action_param6, SMARTAI_TARGETS t, uint32 target_param1, uint32 target_param2, uint32 target_param3, uint32 phaseMask = 0);
         void SetPathId(uint32 id) { mPathId = id; }
@@ -101,7 +101,7 @@ class SmartScript
 
         Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff);
         void DoFindFriendlyCC(std::list<Creature*>& _list, float range);
-        void DoFindFriendlyMissingBuff(std::list<Creature*>& list, float range, uint32 spellid);
+        void DoFindFriendlyMissingBuff(std::list<Creature*>& _list, float range, uint32 spellid);
 
         void StoreTargetList(ObjectList* targets, uint32 id)
         {
@@ -124,8 +124,7 @@ class SmartScript
                 smart = false;
 
             if (!smart)
-                sLog->outErrorDb("SmartScript: Action target Creature(entry: %u) is not using SmartAI, action skipped to prevent crash.", c ? c->GetEntry() : (me ? me->GetEntry() : 0));
-
+                sLog->outErrorDb("SmartScript: Action target Creature(entry: %u) is not using SmartAI, action skipped to prevent crash.", c?c->GetEntry():(me?me->GetEntry():0));
             return smart;
         }
 
@@ -138,15 +137,15 @@ class SmartScript
             if (!go || go->GetAIName() != "SmartGameObjectAI")
                 smart = false;
             if (!smart)
-                sLog->outErrorDb("SmartScript: Action target GameObject(entry: %u) is not using SmartGameObjectAI, action skipped to prevent crash.", g ? g->GetEntry() : (go ? go->GetEntry() : 0));
 
+                sLog->outErrorDb("SmartScript: Action target GameObject(entry: %u) is not using SmartGameObjectAI, action skipped to prevent crash.", g?g->GetEntry():(go?go->GetEntry():0));
             return smart;
         }
 
         ObjectList* GetTargetList(uint32 id)
         {
             ObjectListMap::iterator itr = mTargetStorage->find(id);
-            if (itr != mTargetStorage->end())
+            if(itr != mTargetStorage->end())
                 return (*itr).second;
             return NULL;
         }
@@ -217,7 +216,7 @@ class SmartScript
     private:
         void IncPhase(int32 p = 1)
         {
-            if (p >= 0)
+            if(p >= 0)
                 mEventPhase += (uint32)p;
             else
                 DecPhase(abs(p));

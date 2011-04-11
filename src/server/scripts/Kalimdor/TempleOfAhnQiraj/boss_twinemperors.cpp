@@ -103,7 +103,7 @@ struct boss_twinemperorsAI : public ScriptedAI
             return NULL;
     }
 
-    void DamageTaken(Unit* /*done_by*/, uint32 &damage)
+    void DamageTaken(Unit * /*done_by*/, uint32 &damage)
     {
         Unit *pOtherBoss = GetOtherBoss();
         if (pOtherBoss)
@@ -139,7 +139,7 @@ struct boss_twinemperorsAI : public ScriptedAI
         DoPlaySoundToSet(me, IAmVeklor() ? SOUND_VL_KILL : SOUND_VN_KILL);
     }
 
-    void EnterCombat(Unit* who)
+    void EnterCombat(Unit * who)
     {
         DoZoneInCombat();
         Creature *pOtherBoss = GetOtherBoss();
@@ -194,7 +194,7 @@ struct boss_twinemperorsAI : public ScriptedAI
         if (Heal_Timer <= diff)
         {
             Unit *pOtherBoss = GetOtherBoss();
-            if (pOtherBoss && pOtherBoss->IsWithinDist(me, 60))
+            if (pOtherBoss && pOtherBoss->IsWithinDist(me,60))
             {
                 DoCast(pOtherBoss, SPELL_HEAL_BROTHER);
                 Heal_Timer = 1000;
@@ -311,8 +311,8 @@ struct boss_twinemperorsAI : public ScriptedAI
     Creature *RespawnNearbyBugsAndGetOne()
     {
         std::list<Creature*> lUnitList;
-        me->GetCreatureListWithEntryInGrid(lUnitList, 15316, 150.0f);
-        me->GetCreatureListWithEntryInGrid(lUnitList, 15317, 150.0f);
+        me->GetCreatureListWithEntryInGrid(lUnitList,15316,150.0f);
+        me->GetCreatureListWithEntryInGrid(lUnitList,15317,150.0f);
 
         if (lUnitList.empty())
             return NULL;

@@ -18,109 +18,123 @@
 
 /* ScriptData
 SDName: Boss_Shazzrah
-SD%Complete: 75
-SDComment: Teleport NYI
+SD%Complete: 99
+SDComment: Teleport Workaround
 SDCategory: Molten Core
 EndScriptData */
 
-#include "ObjectMgr.h"
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
+#include "ScriptPCH.h"
 #include "molten_core.h"
 
-enum Spells
-{
-    SPELL_ARCANE_EXPLOSION  = 19712,
-    SPELL_SHAZZRAH_CURSE    = 19713,
-    SPELL_MAGIC_GROUNDING   = 19714,
-    SPELL_COUNTERSPELL      = 19715,
-};
-
-enum Events
-{
-    EVENT_ARCANE_EXPLOSION  = 1,
-    EVENT_SHAZZRAH_CURSE    = 2,
-    EVENT_MAGIC_GROUNDING   = 3,
-    EVENT_COUNTERSPELL      = 4,
-    EVENT_BLINK             = 5,
-};
+#define SPELL_ARCANEEXPLOSION           19712
+#define SPELL_SHAZZRAHCURSE             19713
+#define SPELL_DEADENMAGIC               19714
+#define SPELL_COUNTERSPELL              19715
 
 class boss_shazzrah : public CreatureScript
 {
-    public:
-        boss_shazzrah() : CreatureScript("boss_shazzrah") { }
+public:
+    boss_shazzrah() : CreatureScript("boss_shazzrah") { }
 
-        struct boss_shazzrahAI : public BossAI
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new boss_shazzrahAI (pCreature);
+    }
+
+    struct boss_shazzrahAI : public ScriptedAI
+    {
+        boss_shazzrahAI(Creature *c) : ScriptedAI(c)
         {
-            boss_shazzrahAI(Creature* creature) : BossAI(creature, BOSS_SHAZZRAH)
+            m_pInstance = c->GetInstanceScript();
+        }
+
+        InstanceScript *m_pInstance;
+
+        uint32 ArcaneExplosion_Timer;
+        uint32 ShazzrahCurse_Timer;
+        uint32 DeadenMagic_Timer;
+        uint32 Countspell_Timer;
+        uint32 Blink_Timer;
+
+        void Reset()
+        {
+            ArcaneExplosion_Timer = 6000;                       //These times are probably wrong
+            ShazzrahCurse_Timer = 10000;
+            DeadenMagic_Timer = 24000;
+            Countspell_Timer = 15000;
+            Blink_Timer = 30000;
+
+        if (m_pInstance)
+            m_pInstance->SetData(DATA_SHAZZRAHISDEAD,NOT_STARTED);
+        }
+
+        void EnterCombat(Unit * /*who*/)
+        {
+        if (m_pInstance)
+            m_pInstance->SetData(DATA_SHAZZRAHISDEAD,IN_PROGRESS);
+    }
+
+    void JustDied(Unit *who)
+    {
+        if (m_pInstance)
+            m_pInstance->SetData(DATA_SHAZZRAHISDEAD,DONE);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            //ArcaneExplosion_Timer
+            if (ArcaneExplosion_Timer <= diff)
             {
-            }
+                DoCast(me->getVictim(), SPELL_ARCANEEXPLOSION);
+                ArcaneExplosion_Timer = 5000 + rand()%4000;
+            } else ArcaneExplosion_Timer -= diff;
 
-            void EnterCombat(Unit* target)
+            //ShazzrahCurse_Timer
+            if (ShazzrahCurse_Timer <= diff)
             {
-                BossAI::EnterCombat(target);
-                events.ScheduleEvent(EVENT_ARCANE_EXPLOSION, 6000);
-                events.ScheduleEvent(EVENT_SHAZZRAH_CURSE, 10000);
-                events.ScheduleEvent(EVENT_MAGIC_GROUNDING, 24000);
-                events.ScheduleEvent(EVENT_COUNTERSPELL, 15000);
-                events.ScheduleEvent(EVENT_BLINK, 30000);
-            }
+                Unit *pTarget = NULL;
+                pTarget = SelectTarget(SELECT_TARGET_RANDOM,0);
+                if (pTarget) DoCast(pTarget, SPELL_SHAZZRAHCURSE);
 
-            void UpdateAI(const uint32 diff)
+                ShazzrahCurse_Timer = 25000 + rand()%5000;
+            } else ShazzrahCurse_Timer -= diff;
+
+            //DeadenMagic_Timer
+            if (DeadenMagic_Timer <= diff)
             {
-                if (!UpdateVictim())
-                    return;
+                DoCast(me, SPELL_DEADENMAGIC);
+                DeadenMagic_Timer = 35000;
+            } else DeadenMagic_Timer -= diff;
 
-                events.Update(diff);
+            //Countspell_Timer
+            if (Countspell_Timer <= diff)
+            {
+                DoCast(me->getVictim(), SPELL_COUNTERSPELL);
+                Countspell_Timer = 16000 + rand()%4000;
+            } else Countspell_Timer -= diff;
 
-                if (me->HasUnitState(UNIT_STAT_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
+            //Blink_Timer
+            if (Blink_Timer <= diff)
+            {
+                // Teleporting him to a random gamer and casting Arcane Explosion after that.
+                // Blink is not working cause of LoS System we need to do this hardcoded.
+                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,0, 100, true))
                 {
-                    switch (eventId)
-                    {
-                        case EVENT_ARCANE_EXPLOSION:
-                            DoCastVictim(SPELL_ARCANE_EXPLOSION);
-                            events.ScheduleEvent(EVENT_ARCANE_EXPLOSION, urand(5000, 9000));
-                            break;
-                        case EVENT_SHAZZRAH_CURSE:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -EVENT_SHAZZRAH_CURSE))
-                                DoCast(target, SPELL_SHAZZRAH_CURSE);
-                            events.ScheduleEvent(EVENT_SHAZZRAH_CURSE, urand(25000, 30000));
-                            break;
-                        case EVENT_MAGIC_GROUNDING:
-                            DoCast(me, SPELL_MAGIC_GROUNDING);
-                            events.ScheduleEvent(EVENT_MAGIC_GROUNDING, 35000);
-                            break;
-                        case EVENT_COUNTERSPELL:
-                            DoCastVictim(SPELL_COUNTERSPELL);
-                            events.ScheduleEvent(EVENT_COUNTERSPELL, urand(16000, 20000));
-                            break;
-                        case EVENT_BLINK:
-                            // Teleporting him to a random player and casting Arcane Explosion after that.
-                            // Blink is not working cause of LoS System we need to do this hardcoded.
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
-                            {
-                                DoTeleportTo(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
-                                DoCast(target, SPELL_ARCANE_EXPLOSION);
-                                DoResetThreat();
-                            }
-                            events.ScheduleEvent(EVENT_BLINK, 45000);
-                            break;
-                        default:
-                            break;
-                    }
+                    DoTeleportTo(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ());
+                    DoCast(pTarget, SPELL_ARCANEEXPLOSION);
+                    DoResetThreat();
                 }
 
-                DoMeleeAttackIfReady();
-            }
-        };
+            Blink_Timer = 30000;
+            } else Blink_Timer -= diff;
 
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new boss_shazzrahAI(creature);
+            DoMeleeAttackIfReady();
         }
+    };
+
 };
 
 void AddSC_boss_shazzrah()

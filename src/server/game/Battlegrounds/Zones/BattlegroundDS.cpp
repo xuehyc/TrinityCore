@@ -37,6 +37,9 @@ BattlegroundDS::BattlegroundDS()
     m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_ARENA_THIRTY_SECONDS;
     m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_ARENA_FIFTEEN_SECONDS;
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
+
+    m_knockback = 5000;
+    m_knockbackCheck = true;
 }
 
 BattlegroundDS::~BattlegroundDS()
@@ -76,6 +79,23 @@ void BattlegroundDS::Update(uint32 diff)
     }
     else
         setWaterFallTimer(getWaterFallTimer() - diff);
+
+        if (GetStatus() == STATUS_IN_PROGRESS)
+        {
+                if(m_knockback < diff && m_knockbackCheck)
+                {
+                        for(BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end();itr++)
+                        {
+                                Player * plr = sObjectMgr->GetPlayer(itr->first);
+                                if (plr->GetTeam() == ALLIANCE && plr->GetDistance2d(1214, 765) <= 50 && plr->GetPositionZ() > 10)
+                                        KnockBackPlayer(plr, 6.15f, 50.00f, 7.00f);
+                                if (plr->GetTeam() == HORDE && plr->GetDistance2d(1369, 817) <= 50 && plr->GetPositionZ() > 10)
+                                        KnockBackPlayer(plr, 3.10f, 50.00f, 7.00f);
+                                plr->RemoveAurasDueToSpell(48018);
+                        }
+                        m_knockbackCheck = false;
+                 } else m_knockback -= diff;
+        }
 }
 
 void BattlegroundDS::StartingEventCloseDoors()
@@ -97,6 +117,9 @@ void BattlegroundDS::StartingEventOpenDoors()
 
     for (uint32 i = BG_DS_OBJECT_WATER_1; i <= BG_DS_OBJECT_WATER_2; ++i)
         SpawnBGObject(i, getWaterFallTimer());
+
+    m_knockback = 5000;
+    m_knockbackCheck = true;
 }
 
 void BattlegroundDS::AddPlayer(Player *plr)
@@ -110,7 +133,7 @@ void BattlegroundDS::AddPlayer(Player *plr)
     UpdateArenaWorldState();
 }
 
-void BattlegroundDS::RemovePlayer(Player* /*plr*/, uint64 /*guid*/, uint32 /*team*/)
+void BattlegroundDS::RemovePlayer(Player * /*plr*/, uint64 /*guid*/)
 {
     if (GetStatus() == STATUS_WAIT_LEAVE)
         return;
@@ -130,7 +153,7 @@ void BattlegroundDS::HandleKillPlayer(Player* player, Player* killer)
         return;
     }
 
-    Battleground::HandleKillPlayer(player, killer);
+    Battleground::HandleKillPlayer(player,killer);
 
     UpdateArenaWorldState();
     CheckArenaWinConditions();
@@ -153,7 +176,7 @@ void BattlegroundDS::HandleAreaTrigger(Player *Source, uint32 Trigger)
     }
 }
 
-bool BattlegroundDS::HandlePlayerUnderMap(Player* player)
+bool BattlegroundDS::HandlePlayerUnderMap(Player *player)
 {
     player->TeleportTo(GetMapId(), 1299.046f, 784.825f, 9.338f, 2.422f, false);
     return true;
@@ -169,6 +192,8 @@ void BattlegroundDS::Reset()
 {
     //call parent's class reset
     Battleground::Reset();
+    m_knockback = 5000;
+    m_knockbackCheck = true;
 }
 
 bool BattlegroundDS::SetupBattleground()
@@ -188,4 +213,21 @@ bool BattlegroundDS::SetupBattleground()
     }
 
     return true;
+}
+
+void BattlegroundDS::KnockBackPlayer(Unit *pPlayer, float angle, float horizontalSpeed, float verticalSpeed)
+{
+    if(pPlayer->GetTypeId() == TYPEID_PLAYER)
+    {
+        WorldPacket data(SMSG_MOVE_KNOCK_BACK, 8+4+4+4+4+2);
+        data.append(pPlayer->GetPackGUID());
+        data << uint32(0);
+        data << float(cos(angle));
+        data << float(sin(angle));
+        data << float(horizontalSpeed);
+        data << float(-verticalSpeed);
+        ((Player*)pPlayer)->GetSession()->SendPacket(&data);
+    }
+    else
+        sLog->outError("The target of KnockBackPlayer must be a player !");
 }

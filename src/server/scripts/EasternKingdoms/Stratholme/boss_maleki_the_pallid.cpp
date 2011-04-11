@@ -61,14 +61,14 @@ public:
             DrainLife_Timer = 31000;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
         }
 
         void JustDied(Unit* /*Killer*/)
         {
             if (pInstance)
-                pInstance->SetData(TYPE_PALLID, IN_PROGRESS);
+                pInstance->SetData(TYPE_PALLID,IN_PROGRESS);
         }
 
         void UpdateAI(const uint32 diff)

@@ -51,19 +51,83 @@ public:
     {
         boss_commander_kolurgAI(Creature *c) : ScriptedAI(c) {}
 
-        void Reset() {}
-        void EnterCombat(Unit* /*who*/) {}
-        void AttackStart(Unit* /*who*/) {}
-        void MoveInLineOfSight(Unit* /*who*/) {}
-        void UpdateAI(const uint32 /*diff*/)
+        bool bChargePause;
+
+        uint32 uiChargePauseTimer;
+        uint32 uiBattleShoutTimer;
+        uint32 uiFearTimer;
+        uint32 uiWhirlwindTimer;
+
+        void Reset() 
+        {
+            bChargePause=false;
+            uiChargePauseTimer=0;
+            uiBattleShoutTimer=0;
+            uiFearTimer=20000;
+            uiWhirlwindTimer=15000;
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            DoScriptText(SAY_AGGRO, me);
+        }
+
+        void UpdateAI(const uint32 diff)
         {
             //Return since we have no target
             if (!UpdateVictim())
                 return;
 
+            if (!bChargePause)
+                {
+                    if (Unit* pTemp=SelectTarget(SELECT_TARGET_FARTHEST,0,25,true))
+                        if (me->GetExactDist(pTemp->GetPositionX(),pTemp->GetPositionY(),pTemp->GetPositionZ())>8)
+                        {
+                            DoCast(pTemp,SPELL_CHARGE);
+                            uiChargePauseTimer=5000;
+                            bChargePause=true;
+                        }
+                }
+
+            if (bChargePause)
+                if (uiChargePauseTimer<=diff)
+                    bChargePause=false;
+                else
+                    uiChargePauseTimer-=diff;
+
+            if (uiBattleShoutTimer<=diff)
+            {
+                DoCast(me,SPELL_BATTLE_SHOUT);
+                uiBattleShoutTimer=120000;
+            } else
+                uiBattleShoutTimer-=diff;
+        
+            if (uiWhirlwindTimer<=diff)
+            {
+                DoCast(me,SPELL_WHIRLWIND_2);
+                uiWhirlwindTimer=15000;
+                uiChargePauseTimer=3500;
+                bChargePause=true;
+            } else uiWhirlwindTimer-=diff;
+
+            if (uiFearTimer<=diff)
+            {
+                DoCast(me,SPELL_FRIGHTENING_SHOUT);
+                uiFearTimer=20000;
+            } else uiFearTimer-=diff;
+
             DoMeleeAttackIfReady();
         }
-        void JustDied(Unit* /*killer*/)  {}
+
+        void JustDied(Unit* /*killer*/)
+        {
+            DoScriptText(SAY_DEATH, me);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/)
+        {
+            DoScriptText(SAY_KILL, me);
+        }
     };
 
 };

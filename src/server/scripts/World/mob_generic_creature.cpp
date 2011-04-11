@@ -143,8 +143,8 @@ public:
                             IsSelfRooted = true;
 
                         //Cast spell
-                        if (Healing) DoCastSpell(me, info);
-                        else DoCastSpell(me->getVictim(), info);
+                        if (Healing) DoCastSpell(me,info);
+                        else DoCastSpell(me->getVictim(),info);
 
                         //Set our global cooldown
                         GlobalCooldown = GENERIC_CREATURE_COOLDOWN;
@@ -211,7 +211,7 @@ public:
     struct trigger_deathAI : public NullCreatureAI
     {
         trigger_deathAI(Creature* c) : NullCreatureAI(c) {}
-        void JustDied(Unit* killer)
+        void JustDied(Unit *killer)
         {
             if (me->m_spells[0])
                 me->CastSpell(killer, me->m_spells[0], true);

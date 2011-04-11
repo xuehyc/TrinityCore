@@ -22,6 +22,7 @@
 #include "World.h"
 #include "SpellMgr.h"
 #include "Vehicle.h"
+#include "Group.h"
 
 //Disable CreatureAI when charmed
 void CreatureAI::OnCharmed(bool /*apply*/)
@@ -56,13 +57,13 @@ void CreatureAI::DoZoneInCombat(Creature* creature /*= NULL*/)
 
     if (!creature->HasReactState(REACT_PASSIVE) && !creature->getVictim())
     {
-        if (Unit* target = creature->SelectNearestTarget(50))
+        if (Unit *target = creature->SelectNearestTarget(50))
             creature->AI()->AttackStart(target);
         else if (creature->isSummon())
         {
             if (Unit *summoner = creature->ToTempSummon()->GetSummoner())
             {
-                Unit* target = summoner->getAttackerForHelper();
+                Unit *target = summoner->getAttackerForHelper();
                 if (!target && summoner->CanHaveThreatList() && !summoner->getThreatManager().isThreatListEmpty())
                     target = summoner->getThreatManager().getHostilTarget();
                 if (target && (creature->IsFriendlyTo(summoner) || creature->IsHostileTo(target)))
@@ -107,7 +108,56 @@ void CreatureAI::DoZoneInCombat(Creature* creature /*= NULL*/)
     }
 }
 
-// scripts does not take care about MoveInLineOfSight loops
+void CreatureAI::DoAttackerAreaInCombat(Unit* attacker, float range, Unit* pUnit)
+{
+    if (!attacker)
+        attacker = me;
+
+    if (!pUnit)
+        pUnit = me;
+
+    Map *map = pUnit->GetMap();
+
+    if (!map->IsDungeon())
+        return;
+
+    if (!pUnit->CanHaveThreatList() || pUnit->getThreatManager().isThreatListEmpty())
+        return;
+
+    Map::PlayerList const &PlayerList = map->GetPlayers();
+    for(Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+    {
+        if (Player* i_pl = i->getSource())
+            if (i_pl->isAlive() && attacker->GetDistance(i_pl) <= range )
+            {
+                pUnit->SetInCombatWith(i_pl);
+                i_pl->SetInCombatWith(pUnit);
+                pUnit->AddThreat(i_pl, 0.0f);
+            }
+    }
+}
+
+void CreatureAI::DoAttackerGroupInCombat(Player* attacker)
+{
+    if(attacker)
+    {
+        if( Group *pGroup = attacker->GetGroup() )
+        {
+            for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                Player *pGroupGuy = itr->getSource();
+
+                if(pGroupGuy && pGroupGuy->isAlive() && pGroupGuy->GetMapId() == me->GetMapId())
+                {
+                    me->SetInCombatWith(pGroupGuy);
+                    pGroupGuy->SetInCombatWith(me);
+                    me->AddThreat(pGroupGuy, 0.0f);
+                }
+            }
+        }
+    }
+}
+
 // MoveInLineOfSight can be called inside another MoveInLineOfSight and cause stack overflow
 void CreatureAI::MoveInLineOfSight_Safe(Unit *who)
 {
@@ -155,7 +205,7 @@ void CreatureAI::EnterEvadeMode()
     Reset();
 
     if (me->IsVehicle()) // use the same sequence of addtoworld, aireset may remove all summons!
-        me->GetVehicleKit()->Reset(true);
+        me->GetVehicleKit()->Reset();
 }
 
 /*void CreatureAI::AttackedBy(Unit* attacker)

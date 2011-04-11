@@ -16,8 +16,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
 #include "blackrock_spire.h"
 
 enum Spells
@@ -59,7 +57,7 @@ public:
             _Reset();
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             _EnterCombat();
             events.ScheduleEvent(EVENT_SNAP_KICK, 8*IN_MILLISECONDS);

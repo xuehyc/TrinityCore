@@ -36,7 +36,7 @@ struct ItemSetEffect
     SpellEntry const *spells[8];
 };
 
-enum InventoryResult
+enum InventoryChangeFailure
 {
     EQUIP_ERR_OK                                 = 0,
     EQUIP_ERR_CANT_EQUIP_LEVEL_I                 = 1,
@@ -79,7 +79,7 @@ enum InventoryResult
     EQUIP_ERR_YOU_ARE_DEAD                       = 38,
     EQUIP_ERR_CANT_DO_RIGHT_NOW                  = 39,
     EQUIP_ERR_INT_BAG_ERROR                      = 40,
-    EQUIP_ERR_CAN_EQUIP_ONLY1_BOLT               = 41,
+    EQUIP_ERR_CAN_EQUIP_ONLY1_QUIVER2            = 41,
     EQUIP_ERR_CAN_EQUIP_ONLY1_AMMOPOUCH          = 42,
     EQUIP_ERR_STACKABLE_CANT_BE_WRAPPED          = 43,
     EQUIP_ERR_EQUIPPED_CANT_BE_WRAPPED           = 44,
@@ -129,7 +129,7 @@ enum InventoryResult
     EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_EQUIPPED_EXCEEDED  = 89
 };
 
-enum BuyResult
+enum BuyFailure
 {
     BUY_ERR_CANT_FIND_ITEM                      = 0,
     BUY_ERR_ITEM_ALREADY_SOLD                   = 1,
@@ -142,7 +142,7 @@ enum BuyResult
     BUY_ERR_REPUTATION_REQUIRE                  = 12
 };
 
-enum SellResult
+enum SellFailure
 {
     SELL_ERR_CANT_FIND_ITEM                      = 1,
     SELL_ERR_CANT_SELL_ITEM                      = 2,       // merchant doesn't like that item
@@ -221,7 +221,7 @@ struct ItemRequiredTarget
     bool IsFitToRequirements(Unit* pUnitTarget) const;
 };
 
-bool ItemCanGoIntoBag(ItemTemplate const *proto, ItemTemplate const *pBagProto);
+bool ItemCanGoIntoBag(ItemPrototype const *proto, ItemPrototype const *pBagProto);
 
 class Item : public Object
 {
@@ -233,7 +233,7 @@ class Item : public Object
 
         virtual bool Create(uint32 guidlow, uint32 itemid, Player const* owner);
 
-        ItemTemplate const* GetTemplate() const;
+        ItemPrototype const* GetProto() const;
 
         uint64 const& GetOwnerGUID()    const { return GetUInt64Value(ITEM_FIELD_OWNER); }
         void SetOwnerGUID(uint64 guid) { SetUInt64Value(ITEM_FIELD_OWNER, guid); }
@@ -241,7 +241,7 @@ class Item : public Object
 
         void SetBinding(bool val) { ApplyModFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_SOULBOUND, val); }
         bool IsSoulBound() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_SOULBOUND); }
-        bool IsBoundAccountWide() const { return (GetTemplate()->Flags & ITEM_PROTO_FLAG_BIND_TO_ACCOUNT) != 0; }
+        bool IsBoundAccountWide() const { return (GetProto()->Flags & ITEM_PROTO_FLAG_BIND_TO_ACCOUNT) != 0; }
         bool IsBindedNotWith(Player const* player) const;
         bool IsBoundByEnchant() const;
         virtual void SaveToDB(SQLTransaction& trans);
@@ -257,7 +257,7 @@ class Item : public Object
         const Bag* ToBag() const { if (IsBag()) return reinterpret_cast<const Bag*>(this); else return NULL; }
 
         bool IsLocked() const { return !HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_UNLOCKED); }
-        bool IsBag() const { return GetTemplate()->InventoryType == INVTYPE_BAG; }
+        bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
         bool IsNotEmptyBag() const;
         bool IsBroken() const { return GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && GetUInt32Value(ITEM_FIELD_DURABILITY) == 0; }
         bool CanBeTraded(bool mail = false, bool trade = false) const;
@@ -274,10 +274,10 @@ class Item : public Object
 
         uint32 GetCount() const { return GetUInt32Value(ITEM_FIELD_STACK_COUNT); }
         void SetCount(uint32 value) { SetUInt32Value(ITEM_FIELD_STACK_COUNT, value); }
-        uint32 GetMaxStackCount() const { return GetTemplate()->GetMaxStackSize(); }
+        uint32 GetMaxStackCount() const { return GetProto()->GetMaxStackSize(); }
         uint8 GetGemCountWithID(uint32 GemID) const;
         uint8 GetGemCountWithLimitCategory(uint32 limitCategory) const;
-        InventoryResult CanBeMergedPartlyWith(ItemTemplate const* proto) const;
+        uint8 CanBeMergedPartlyWith(ItemPrototype const* proto) const;
 
         uint8 GetSlot() const {return m_slot;}
         Bag *GetContainer() { return m_container; }
@@ -314,7 +314,7 @@ class Item : public Object
 
         // spell charges (signed but stored as unsigned)
         int32 GetSpellCharges(uint8 index/*0..5*/ = 0) const { return GetInt32Value(ITEM_FIELD_SPELL_CHARGES + index); }
-        void  SetSpellCharges(uint8 index/*0..5*/, int32 value) { SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index, value); }
+        void  SetSpellCharges(uint8 index/*0..5*/, int32 value) { SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index,value); }
 
         Loot loot;
         bool m_lootGenerated;
@@ -322,8 +322,8 @@ class Item : public Object
         // Update States
         ItemUpdateState GetState() const { return uState; }
         void SetState(ItemUpdateState state, Player *forplayer = NULL);
-        void AddToUpdateQueueOf(Player* player);
-        void RemoveFromUpdateQueueOf(Player* player);
+        void AddToUpdateQueueOf(Player *player);
+        void RemoveFromUpdateQueueOf(Player *player);
         bool IsInUpdateQueue() const { return uQueuePos != -1; }
         uint16 GetQueuePos() const { return uQueuePos; }
         void FSetState(ItemUpdateState state)               // forced
@@ -331,12 +331,12 @@ class Item : public Object
             uState = state;
         }
 
-        bool hasQuest(uint32 quest_id) const { return GetTemplate()->StartQuest == quest_id; }
+        bool hasQuest(uint32 quest_id) const { return GetProto()->StartQuest == quest_id; }
         bool hasInvolvedQuest(uint32 /*quest_id*/) const { return false; }
-        bool IsPotion() const { return GetTemplate()->IsPotion(); }
-        bool IsWeaponVellum() const { return GetTemplate()->IsWeaponVellum(); }
-        bool IsArmorVellum() const { return GetTemplate()->IsArmorVellum(); }
-        bool IsConjuredConsumable() const { return GetTemplate()->IsConjuredConsumable(); }
+        bool IsPotion() const { return GetProto()->IsPotion(); }
+        bool IsWeaponVellum() const { return GetProto()->IsWeaponVellum(); }
+        bool IsArmorVellum() const { return GetProto()->IsArmorVellum(); }
+        bool IsConjuredConsumable() const { return GetProto()->IsConjuredConsumable(); }
 
         // Item Refund system
         void SetNotRefundable(Player *owner, bool changestate = true);
@@ -357,7 +357,7 @@ class Item : public Object
 
         void BuildUpdate(UpdateDataMapType&);
 
-        uint32 GetScriptId() const { return GetTemplate()->ScriptId; }
+        uint32 GetScriptId() const { return GetProto()->ScriptId; }
     private:
         std::string m_text;
         uint8 m_slot;

@@ -113,7 +113,7 @@ public:
 
         void ReceiveEmote(Player* pPlayer, uint32 emote)
         {
-            if (emote == TEXT_EMOTE_SALUTE && pPlayer->GetQuestStatus(QUEST_SHATTERED_SALUTE) == QUEST_STATUS_INCOMPLETE)
+            if (emote == TEXTEMOTE_SALUTE && pPlayer->GetQuestStatus(QUEST_SHATTERED_SALUTE) == QUEST_STATUS_INCOMPLETE)
             {
                 if (CanEmote)
                 {
@@ -216,7 +216,7 @@ public:
             Shock_Timer = 8000;
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit * /*who*/) {}
 
         void UpdateAI(const uint32 diff)
         {

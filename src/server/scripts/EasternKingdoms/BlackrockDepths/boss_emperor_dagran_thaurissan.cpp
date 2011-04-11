@@ -37,6 +37,11 @@ enum Spells
     SPELL_AVATAROFFLAME                                    = 15636
 };
 
+enum Creatures
+{
+    MOIRA_BRONZEBEARD                                      = 8929
+};
+
 class boss_emperor_dagran_thaurissan : public CreatureScript
 {
 public:
@@ -62,7 +67,7 @@ public:
             //Counter= 0;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
             me->CallForHelp(VISIBLE_RANGE);
@@ -81,7 +86,7 @@ public:
 
             if (HandOfThaurissan_Timer <= diff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,0))
                     DoCast(pTarget, SPELL_HANDOFTHAURISSAN);
 
                 //3 Hands of Thaurissan will be casted
@@ -105,6 +110,16 @@ public:
             } else AvatarOfFlame_Timer -= diff;
 
             DoMeleeAttackIfReady();
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            if (Creature* pMoira = me->FindNearestCreature(MOIRA_BRONZEBEARD, 100.0f, true))
+            {
+                pMoira->setFaction(35);
+                pMoira->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                pMoira->AI()->EnterEvadeMode();
+            }
         }
     };
 

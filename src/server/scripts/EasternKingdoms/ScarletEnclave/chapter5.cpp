@@ -243,7 +243,7 @@ void UpdateWorldState(Map *map, uint32 id, uint32 state)
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
         {
             if (Player* pPlayer = itr->getSource())
-                pPlayer->SendUpdateWorldState(id, state);
+                pPlayer->SendUpdateWorldState(id,state);
         }
     }
 }
@@ -377,11 +377,11 @@ public:
                 uiTotal_scourge = ENCOUNTER_TOTAL_SCOURGE;
                 uiSummon_counter = 0;
 
-                uiAnti_magic_zone = urand(1000, 6000);
-                uiDeath_strike = urand(5000, 10000);
-                uiDeath_embrace = urand(5000, 10000);
-                uiIcy_touch = urand(5000, 10000);
-                uiUnholy_blight = urand(5000, 10000);
+                uiAnti_magic_zone = urand(1000,6000);
+                uiDeath_strike = urand(5000,10000);
+                uiDeath_embrace = urand(5000,10000);
+                uiIcy_touch = urand(5000,10000);
+                uiUnholy_blight = urand(5000,10000);
 
                 uiFight_speech = 15000;
                 uiSpawncheck = 1000;
@@ -406,11 +406,11 @@ public:
                 if (Creature* pTemp = Unit::GetCreature(*me, uiRayneGUID))
                     pTemp->setDeathState(JUST_DIED);
 
-                uiTirionGUID = 0;
-                uiKorfaxGUID = 0;
-                uiMaxwellGUID = 0;
-                uiEligorGUID = 0;
-                uiRayneGUID = 0;
+                uiTirionGUID = NULL;
+                uiKorfaxGUID = NULL;
+                uiMaxwellGUID = NULL;
+                uiEligorGUID = NULL;
+                uiRayneGUID = NULL;
 
                 for (uint8 i = 0; i < ENCOUNTER_DEFENDER_NUMBER; ++i)
                 {
@@ -434,10 +434,10 @@ public:
                 if (Creature* pTemp = Unit::GetCreature(*me, uiLichKingGUID))
                     pTemp->Respawn();
 
-                uiKoltiraGUID = 0;
-                uiOrbazGUID = 0;
-                uiThassarianGUID = 0;
-                uiLichKingGUID = 0;
+                uiKoltiraGUID = NULL;
+                uiOrbazGUID = NULL;
+                uiThassarianGUID = NULL;
+                uiLichKingGUID = NULL;
                 for (uint8 i = 0; i < ENCOUNTER_ABOMINATION_NUMBER; ++i)
                 {
                     if (Creature* pTemp = Unit::GetCreature(*me, uiAbominationGUID[i]))
@@ -527,7 +527,7 @@ public:
                     NPCChangeTarget(uiThassarianGUID);
 
                     me->Unmount();
-                    me->CastSpell(me, SPELL_THE_MIGHT_OF_MOGRAINE, true); // need to fix, on player only
+                //me->CastSpell(me, SPELL_THE_MIGHT_OF_MOGRAINE, true); // need to fix, on player only
 
                     if (Creature* pTemp = Unit::GetCreature(*me, uiKoltiraGUID))
                         pTemp->Unmount();
@@ -737,6 +737,7 @@ public:
 
                         case 9: // charge begins
                             SetHoldState(false);
+                        me->CastSpell(me, SPELL_THE_MIGHT_OF_MOGRAINE, true); // need to fix, on player only
                             if (Creature* pTemp = Unit::GetCreature(*me, uiKoltiraGUID))
                             {
                                 pTemp->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
@@ -1381,11 +1382,11 @@ public:
 
                 if (uiFight_speech <= diff)
                 {
-                    DoScriptText(RAND(SAY_LIGHT_OF_DAWN09, SAY_LIGHT_OF_DAWN10, SAY_LIGHT_OF_DAWN11,
-                                      SAY_LIGHT_OF_DAWN12, SAY_LIGHT_OF_DAWN13, SAY_LIGHT_OF_DAWN14,
-                                      SAY_LIGHT_OF_DAWN15, SAY_LIGHT_OF_DAWN16, SAY_LIGHT_OF_DAWN17,
-                                      SAY_LIGHT_OF_DAWN18, SAY_LIGHT_OF_DAWN19, SAY_LIGHT_OF_DAWN20,
-                                      SAY_LIGHT_OF_DAWN21, SAY_LIGHT_OF_DAWN22, SAY_LIGHT_OF_DAWN23,
+                    DoScriptText(RAND(SAY_LIGHT_OF_DAWN09,SAY_LIGHT_OF_DAWN10,SAY_LIGHT_OF_DAWN11,
+                                      SAY_LIGHT_OF_DAWN12,SAY_LIGHT_OF_DAWN13,SAY_LIGHT_OF_DAWN14,
+                                      SAY_LIGHT_OF_DAWN15,SAY_LIGHT_OF_DAWN16,SAY_LIGHT_OF_DAWN17,
+                                      SAY_LIGHT_OF_DAWN18,SAY_LIGHT_OF_DAWN19,SAY_LIGHT_OF_DAWN20,
+                                      SAY_LIGHT_OF_DAWN21,SAY_LIGHT_OF_DAWN22,SAY_LIGHT_OF_DAWN23,
                                       SAY_LIGHT_OF_DAWN24), me);
                     uiFight_speech = 15000 + rand()%5000;
                 } else uiFight_speech -= diff;
@@ -1535,7 +1536,7 @@ public:
         {
             if (Creature* pTemp = Unit::GetCreature(*me, ui_GUID))
                 if (pTemp->isAlive())
-                    if (Unit* pTarger = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    if (Unit* pTarger = SelectTarget(SELECT_TARGET_RANDOM,0))
                         if (pTarger->isAlive())
                         {
                             // pTemp->DeleteThreatList();
@@ -1680,7 +1681,7 @@ public:
     {
         npc_the_lich_king_tirion_dawnAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
         void Reset() {}
-        void AttackStart(Unit* /*who*/) {} // very sample, just don't make them aggreesive
+        void AttackStart(Unit * /*who*/) {} // very sample, just don't make them aggreesive
         void UpdateAI(const uint32 /*diff*/) {}
         void JustDied(Unit* /*killer*/) {}
     };

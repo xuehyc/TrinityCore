@@ -108,7 +108,7 @@ public:
                     if (creature->isAlive())
                     {
                         ++m_uiFelOverseerCount;
-                        sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Shadow Labyrinth: counting %u Fel Overseers.", m_uiFelOverseerCount);
+                        sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Shadow Labyrinth: counting %u Fel Overseers.",m_uiFelOverseerCount);
                     }
                     break;
             }
@@ -133,7 +133,7 @@ public:
                         --m_uiFelOverseerCount;
 
                         if (m_uiFelOverseerCount)
-                            sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Shadow Labyrinth: %u Fel Overseers left to kill.", m_uiFelOverseerCount);
+                            sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Shadow Labyrinth: %u Fel Overseers left to kill.",m_uiFelOverseerCount);
                         else
                         {
                             m_auiEncounter[1] = DONE;
@@ -167,7 +167,7 @@ public:
                 OUT_SAVE_INST_DATA;
 
                 std::ostringstream saveStream;
-                saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " "
+            saveStream << "S L " << m_auiEncounter[0] << " " << m_auiEncounter[1] << " "
                     << m_auiEncounter[2] << " " << m_auiEncounter[3] << " " << m_auiEncounter[4];
 
                 str_data = saveStream.str();
@@ -211,9 +211,23 @@ public:
             }
 
             OUT_LOAD_INST_DATA(in);
+        char dataHead1, dataHead2;
+        uint32 temp_auiEncounter[MAX_ENCOUNTER];
+        memset(&temp_auiEncounter, 0, sizeof(temp_auiEncounter));
+
 
             std::istringstream loadStream(in);
-            loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3] >> m_auiEncounter[4];
+        loadStream >> dataHead1 >> dataHead2 >> temp_auiEncounter[0] >> temp_auiEncounter[1] >> temp_auiEncounter[2] >> temp_auiEncounter[3] >> temp_auiEncounter[4];
+        
+        if(dataHead1 == 'S' && dataHead2 == 'L')
+        {
+            for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                m_auiEncounter[i] = temp_auiEncounter[i];
+        }else
+        {
+            OUT_LOAD_INST_DATA_FAIL;
+            return;
+        }
 
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)

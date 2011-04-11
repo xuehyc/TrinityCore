@@ -1,0 +1,1 @@
+UPDATE `gameobject_loot_template`SET `item` = '7911' WHERE `entry`= '5045'; 
