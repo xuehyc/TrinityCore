@@ -4268,6 +4268,10 @@ void Spell::EffectThreat(SpellEffIndex /*effIndex*/)
     if (!unitTarget->CanHaveThreatList())
         return;
 
+    // Wind Shear - estimated value
+    if (m_spellInfo->Id == 57994)
+        damage = -int32(pow(float(m_caster->getLevel()), 2.0f) / 3);
+
     unitTarget->AddThreat(m_caster, float(damage));
 }
 
