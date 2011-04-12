@@ -446,11 +446,12 @@ public:
     }
 };
 
-// Tallhorn Stage
+// Tallhorn Stag
 
-enum etallhornstage
+enum eTallhornStag
 {
-    OBJECT_HAUNCH                   = 188665
+    OBJECT_HAUNCH        = 188665,
+    SPELL_GORE           = 32019
 };
 
 class npc_tallhorn_stag : public CreatureScript
@@ -463,13 +464,15 @@ public:
         npc_tallhorn_stagAI(Creature* pCreature) : ScriptedAI(pCreature) {}
 
         uint8 m_uiPhase;
+        uint32 goreTimer;
 
         void Reset()
         {
             m_uiPhase = 1;
+            goreTimer = urand(3*IN_MILLISECONDS, 5*IN_MILLISECONDS);
         }
 
-        void UpdateAI(const uint32 /*uiDiff*/)
+        void UpdateAI(const uint32 diff)
         {
             if (m_uiPhase == 1)
             {
@@ -481,6 +484,18 @@ public:
                 }
                 m_uiPhase = 0;
             }
+
+            if (!UpdateVictim())
+                return;
+
+            if (goreTimer <= diff)
+            {
+                DoCast(SPELL_GORE);
+                goreTimer = 15*IN_MILLISECONDS;
+            }
+            else goreTimer -= diff;
+
+            DoMeleeAttackIfReady();
         }
     };
 
