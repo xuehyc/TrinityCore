@@ -17,7 +17,6 @@
 
 #include "ScriptLoader.h"
 
-
 //examples
 void AddSC_example_creature();
 void AddSC_example_escort();
@@ -320,6 +319,7 @@ void AddSC_wailing_caverns();                //Wailing caverns
 void AddSC_instance_wailing_caverns();
 void AddSC_zulfarrak();                     //Zul'Farrak generic
 void AddSC_instance_zulfarrak();            //Zul'Farrak instance script
+void AddSC_npc_pusillin();                  //Dire Maul Pusillin
 
 void AddSC_ashenvale();
 void AddSC_azshara();
@@ -401,6 +401,8 @@ void AddSC_boss_varos();
 void AddSC_boss_eregos();
 void AddSC_instance_oculus();
 void AddSC_oculus();
+void AddSC_boss_malygos();              // The Nexus: Eye of Eternity
+void AddSC_instance_eye_of_eternity();
 void AddSC_boss_sartharion();            //Obsidian Sanctum
 void AddSC_instance_obsidian_sanctum();
 void AddSC_boss_bjarngrim();             //Ulduar Halls of Lightning
@@ -471,7 +473,7 @@ void AddSC_instance_halls_of_reflection();   // Halls of Reflection
 void AddSC_halls_of_reflection();
 void AddSC_boss_falric();
 void AddSC_boss_marwyn();
-void AddSC_boss_lich_king_hr();
+//void AddSC_boss_lich_king_hr();
 void AddSC_boss_lord_marrowgar();       // Icecrown Citadel
 void AddSC_boss_lady_deathwhisper();
 void AddSC_boss_deathbringer_saurfang();
@@ -486,6 +488,12 @@ void AddSC_boss_the_lich_king();
 void AddSC_icecrown_citadel_teleport();
 void AddSC_instance_icecrown_citadel();
 void AddSC_icecrown_citadel();
+
+void AddSC_boss_baltharus();
+void AddSC_boss_halion();
+void AddSC_boss_ragefire();
+void AddSC_boss_zarithrian();
+void AddSC_instance_ruby_sanctum();
 
 void AddSC_dalaran();
 void AddSC_borean_tundra();
@@ -932,6 +940,7 @@ void AddKalimdorScripts()
     AddSC_instance_wailing_caverns();
     AddSC_zulfarrak();                      //Zul'Farrak generic
     AddSC_instance_zulfarrak();             //Zul'Farrak instance script
+    AddSC_npc_pusillin();                   //Dire maul npc Pusillin
 
     AddSC_ashenvale();
     AddSC_azshara();
@@ -1103,6 +1112,8 @@ void AddNorthrendScripts()
     AddSC_boss_eregos();
     AddSC_instance_oculus();
     AddSC_oculus();
+    AddSC_boss_malygos();              // The Nexus: Eye of Eternity
+    AddSC_instance_eye_of_eternity();
     AddSC_boss_sartharion();            //Obsidian Sanctum
     AddSC_instance_obsidian_sanctum();
     AddSC_boss_bjarngrim();             //Ulduar Halls of Lightning
@@ -1173,7 +1184,7 @@ void AddNorthrendScripts()
     AddSC_halls_of_reflection();
     AddSC_boss_falric();
     AddSC_boss_marwyn();
-    AddSC_boss_lich_king_hr();
+    //AddSC_boss_lich_king_hr();   TEMPORARY!!!
     AddSC_boss_lord_marrowgar();        // Icecrown Citadel
     AddSC_boss_lady_deathwhisper();
     AddSC_boss_deathbringer_saurfang();
@@ -1188,6 +1199,11 @@ void AddNorthrendScripts()
     AddSC_icecrown_citadel_teleport();
     AddSC_instance_icecrown_citadel();
     AddSC_icecrown_citadel();
+	AddSC_boss_baltharus();
+	AddSC_boss_halion();
+	AddSC_boss_ragefire();
+	AddSC_boss_zarithrian();
+	AddSC_instance_ruby_sanctum();
 
     AddSC_dalaran();
     AddSC_borean_tundra();
@@ -1229,6 +1245,7 @@ void AddSC_npc_guildhouses();
 void AddSC_npc_lottery();
 void AddSC_npcs_mini_boss();
 void AddSC_npc_quelthalas();
+void AddSC_npc_zingara();
 #endif
 
 void AddCustomScripts()
@@ -1239,5 +1256,6 @@ void AddCustomScripts()
     AddSC_npc_lottery();
     AddSC_npcs_mini_boss();
 	AddSC_npc_quelthalas();
+    AddSC_npc_zingara();
 #endif
 }
