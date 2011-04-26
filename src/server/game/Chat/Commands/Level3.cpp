@@ -296,10 +296,10 @@ bool ChatHandler::HandleAddItemCommand(const char *args)
     Item* item = plTarget->StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
 
     // remove binding (let GM give it to another player later)
-    if (pl == plTarget)
-        for (ItemPosCountVec::const_iterator itr = dest.begin(); itr != dest.end(); ++itr)
-            if (Item* item1 = pl->GetItemByPos(itr->pos))
-                item1->SetBinding(false);
+    //if (pl == plTarget)
+    //    for (ItemPosCountVec::const_iterator itr = dest.begin(); itr != dest.end(); ++itr)
+    //        if (Item* item1 = pl->GetItemByPos(itr->pos))
+    //            item1->SetBinding(false);
 
     if (count > 0 && item)
     {
