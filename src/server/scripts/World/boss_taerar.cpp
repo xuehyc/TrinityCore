@@ -200,6 +200,7 @@ class boss_taerar : public CreatureScript
                     _banished = false;
 
                     me->RemoveAurasDueToSpell(SPELL_SHADE);
+                    me->SendMovementFlagUpdate();
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
                 }
