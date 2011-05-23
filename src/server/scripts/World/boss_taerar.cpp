@@ -194,7 +194,7 @@ class boss_taerar : public CreatureScript
                 // If all three shades are dead, OR it has taken too long,
                 // end the current event and get Taerar back into business
                 if (_banishedTimer > 0)
-                    --_banishedTimer;
+                    _banishedTimer -= diff;
 
                 if (_banished && (!_shades || !_banishedTimer))
                 {
