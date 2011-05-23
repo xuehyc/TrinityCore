@@ -131,7 +131,6 @@ class boss_taerar : public CreatureScript
                 DoCast(SPELL_MARK_OF_NATURE_S);
             }
 
-/* --- DISABLED FOR NOW
             void KilledUnit(Unit* victim)
             {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -139,10 +138,10 @@ class boss_taerar : public CreatureScript
                     me->AddAura(SPELL_MARK_OF_NATURE_E, victim);
                 }
             }
---- */
 
             void JustSummoned(Creature* shade)
             {
+                summons.Summons(shade);
                 Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, -10.0f, true);
                 if (!target)
                     target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
