@@ -16,240 +16,338 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* ScriptData
-SDName: Taerar
-SD%Complete: 70
-SDComment: Mark of Nature & Teleport NYI. Fix the way to be banished.
-SDCategory: Bosses
-EndScriptData */
-
 #include "ScriptPCH.h"
 
-enum eEnums
+/* ORIG INCLUDES */
+
+#include "ObjectMgr.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+
+/*
+ * LAST UPDATE: 2011.05.22 12:25
+ *
+ * TODO:
+ * - Fix player tank summoning when wandering off too far
+ * - Fix Dream Fog
+ *   (Trigger NPCs are attackable?)
+ * - Fix Mark of Nature
+ *   (???)
+ */
+
+/*
+  SQL-texts:
+  DELETE FROM `creature_text` WHERE `entry`=14890;
+  INSERT INTO `creature_text`(`entry`,`groupid`,`text`,`type`,`comment`) VALUES
+  (14890,0,'Peace is but a fleeting dream! Let the NIGHTMARE reign!',14,'Taerar - SAY_TAERAR_AGGRO'),
+  (14890,1,'Children of Madness - I release you upon this world!',14,'Taerar - SAY_TAERAR_SUMMON_SHADE');
+
+  Creature-updates
+  UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry`=15224;
+*/
+
+enum TaerarTexts
 {
-    SAY_AGGRO               = -1000399, //signed for 20021
-    SAY_SUMMONSHADE         = -1000400, //signed for 20021
-
-    //Spells of Taerar
-    SPELL_SLEEP             = 24777,
-    SPELL_NOXIOUSBREATH     = 24818,
-    SPELL_TAILSWEEP         = 15847,
-    SPELL_ARCANEBLAST       = 24857,
-    SPELL_BELLOWINGROAR     = 22686,
-
-    SPELL_SUMMONSHADE_1     = 24841,
-    SPELL_SUMMONSHADE_2     = 24842,
-    SPELL_SUMMONSHADE_3     = 24843,
-
-    //Spells of Shades of Taerar
-    SPELL_POSIONCLOUD       = 24840,
-    SPELL_POSIONBREATH      = 20667
+    SAY_TAERAR_AGGRO        = 0,
+    SAY_TAERAR_SUMMON_SHADE = 1,
 };
 
-uint32 m_auiSpellSummonShade[] =
+// NOTE: The shade-effect is not 100% verified - seems to be the
+// correct one, but doesn't seem to be removed properly o.O
+
+enum TaerarSpells
 {
-    SPELL_SUMMONSHADE_1, SPELL_SUMMONSHADE_2, SPELL_SUMMONSHADE_3
+    SPELL_SHADE             = 24313,
+
+    SPELL_TAIL_SWEEP        = 15847,
+    SPELL_SUMMON_PLAYER     = 24776,
+    SPELL_NOXIOUS_BREATH    = 24818,
+    SPELL_ARCANE_BLAST      = 24857,
+
+    SPELL_BELLOWING_ROAR    = 22686,
+
+    SPELL_SEEPING_FOG_1     = 24813,    // summon left
+    SPELL_SEEPING_FOG_2     = 24814,    // summon right
+
+    SPELL_DREAM_FOG         = 24777,    // 24778 triggers serverside spell 24781
+
+    SPELL_SUMMON_SHADE_1    = 24841,
+    SPELL_SUMMON_SHADE_2    = 24842,
+    SPELL_SUMMON_SHADE_3    = 24843,
+};
+
+uint32 const shadeSpells[] =
+{
+    SPELL_SUMMON_SHADE_1, SPELL_SUMMON_SHADE_2, SPELL_SUMMON_SHADE_3
+};
+
+enum TaerarEvents
+{
+    EVENT_SEEPING_FOG       = 1,
+    EVENT_NOXIOUS_BREATH    = 2,
+    EVENT_TAIL_SWEEP        = 3,
+    EVENT_ARCANE_BLAST      = 4,
+    EVENT_BELLOWING_ROAR    = 5,
+
+    ACTION_BANISH_SELF      = 10,
+    ACTION_SUMMON_PLAYER    = 11,
 };
 
 class boss_taerar : public CreatureScript
 {
-public:
-    boss_taerar() : CreatureScript("boss_taerar") { }
+    public:
+        boss_taerar() : CreatureScript("boss_taerar") { }
 
-    struct boss_taerarAI : public ScriptedAI
-    {
-        boss_taerarAI(Creature *c) : ScriptedAI(c) {}
-
-        uint32 m_uiSleep_Timer;
-        uint32 m_uiNoxiousBreath_Timer;
-        uint32 m_uiTailSweep_Timer;
-        uint32 m_uiArcaneBlast_Timer;
-        uint32 m_uiBellowingRoar_Timer;
-        uint32 m_uiShades_Timer;
-        uint32 m_uiShadesSummoned;
-
-        bool m_bShades;
-
-        void Reset()
+        struct boss_taerarAI : public BossAI
         {
-            m_uiSleep_Timer = 15000 + rand()%5000;
-            m_uiNoxiousBreath_Timer = 8000;
-            m_uiTailSweep_Timer = 4000;
-            m_uiArcaneBlast_Timer = 12000;
-            m_uiBellowingRoar_Timer = 30000;
-            m_uiShades_Timer = 60000;                               //The time that Taerar is banished
-            m_uiShadesSummoned = 0;
-
-            m_bShades = false;
-        }
-
-        void EnterCombat(Unit* /*pWho*/)
-        {
-            DoScriptText(SAY_AGGRO, me);
-        }
-
-        void JustSummoned(Creature* pSummoned)
-        {
-            if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                pSummoned->AI()->AttackStart(pTarget);
-        }
-
-        void UpdateAI(const uint32 uiDiff)
-        {
-            if (m_bShades && m_uiShades_Timer <= uiDiff)
+            boss_taerarAI(Creature* creature) : BossAI(creature, 0)
             {
-                //Become unbanished again
-                me->setFaction(14);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                m_bShades = false;
-            }
-            else if (m_bShades)
-            {
-                m_uiShades_Timer -= uiDiff;
-                //Do nothing while banished
-                return;
+                _stage = 0;
+                _shades = 0;
+                _banished = false;
+                _banishedTimer = 0;
             }
 
-            //Return since we have no target
-            if (!UpdateVictim())
-                return;
-
-            //Sleep_Timer
-            if (m_uiSleep_Timer <= uiDiff)
+            void Reset()
             {
-                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    DoCast(pTarget, SPELL_SLEEP);
+                _Reset();
 
-                m_uiSleep_Timer = 8000 + rand()%7000;
+                _stage = 0;
+                _shades = 0;
+                _banished = false;
+                _banishedTimer = 0;
+
+                me->RemoveAurasDueToSpell(SPELL_SHADE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+
+                events.ScheduleEvent(EVENT_SEEPING_FOG, urand(5000, 10000));
+                events.ScheduleEvent(EVENT_NOXIOUS_BREATH, 8000);
+                events.ScheduleEvent(EVENT_TAIL_SWEEP, 4000);
+                events.ScheduleEvent(EVENT_ARCANE_BLAST, 12000);
+                events.ScheduleEvent(EVENT_BELLOWING_ROAR, 30000);
             }
-            else
-                m_uiSleep_Timer -= uiDiff;
 
-            //NoxiousBreath_Timer
-            if (m_uiNoxiousBreath_Timer <= uiDiff)
+            void EnterCombat(Unit* /*who*/)
             {
-                DoCast(me->getVictim(), SPELL_NOXIOUSBREATH);
-                m_uiNoxiousBreath_Timer = 14000 + rand()%6000;
+                Talk(SAY_TAERAR_AGGRO);
             }
-            else
-                m_uiNoxiousBreath_Timer -= uiDiff;
 
-            //Tailsweep every 2 seconds
-            if (m_uiTailSweep_Timer <= uiDiff)
+            void JustSummoned(Creature* shade)
             {
-                DoCast(me, SPELL_TAILSWEEP);
-                m_uiTailSweep_Timer = 2000;
+                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, -10.0f, true);
+                if (!target)
+                    target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
+                shade->AI()->AttackStart(target);
             }
-            else
-                m_uiTailSweep_Timer -= uiDiff;
 
-            //ArcaneBlast_Timer
-            if (m_uiArcaneBlast_Timer <= uiDiff)
+            void SummonedCreatureDies(Creature* /*shade*/, Unit* /*killer*/)
             {
-                DoCast(me->getVictim(), SPELL_ARCANEBLAST);
-                m_uiArcaneBlast_Timer = 7000 + rand()%5000;
+                --_shades;
             }
-            else
-                m_uiArcaneBlast_Timer -= uiDiff;
 
-            //BellowingRoar_Timer
-            if (m_uiBellowingRoar_Timer <= uiDiff)
+            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
             {
-                DoCast(me->getVictim(), SPELL_BELLOWINGROAR);
-                m_uiBellowingRoar_Timer = 20000 + rand()%10000;
-            }
-            else
-                m_uiBellowingRoar_Timer -= uiDiff;
-
-            //Summon 3 Shades at 75%, 50% and 25% (if bShades is true we already left in line 117, no need to check here again)
-            if (!m_bShades && !HealthAbovePct(100 - 25 * m_uiShadesSummoned))
-            {
-                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                // At 75, 50 or 25 percent health, we need to activate the shades and go "banished"
+                // Note: _stage holds the amount of times they have been summoned
+                if (!_banished && !HealthAbovePct(75 - 25 * _stage))
                 {
-                    //Interrupt any spell casting
+                    _banished = true;
+                    _banishedTimer = 60000;
+
                     me->InterruptNonMeleeSpells(false);
+                    DoStopAttack();
 
-                    //horrible workaround, need to fix
-                    me->setFaction(35);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    Talk(SAY_TAERAR_SUMMON_SHADE);
 
-                    DoScriptText(SAY_SUMMONSHADE, me);
+                    int count = sizeof(shadeSpells) / sizeof(uint32);
+                    for (int i = 0; i < count; ++i)
+                        DoCastVictim(shadeSpells[i], true);
+                    _shades = count;
 
-                    int iSize = sizeof(m_auiSpellSummonShade) / sizeof(uint32);
+                    me->SetReactState(REACT_PASSIVE);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+                    DoCast(me, SPELL_SHADE);
 
-                    for (int i = 0; i < iSize; ++i)
-                        DoCast(pTarget, m_auiSpellSummonShade[i], true);
-
-                    ++m_uiShadesSummoned;                       // prevent casting twice at same health
-                    m_bShades = true;
+                    ++_stage;
                 }
-                m_uiShades_Timer = 60000;
             }
 
-            DoMeleeAttackIfReady();
-        }
-    };
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
 
-    CreatureAI *GetAI(Creature *creature) const
-    {
-        return new boss_taerarAI(creature);
-    }
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STAT_CASTING))
+                    return;
+
+                // If all three shades are dead, OR it has taken too long,
+                // end the current event and get Taerar back into business
+
+                if (_banished && (!_shades || !_banishedTimer))
+                {
+                    _banished = false;
+
+                    me->RemoveAurasDueToSpell(SPELL_SHADE);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+                }
+
+                if (!me->getVictim())
+                    return;
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        // Cast seeping fog (Dream Fog) and make players fall asleep (annoying, eh?)
+                        case EVENT_SEEPING_FOG:
+                            DoCast(me, SPELL_SEEPING_FOG_1);
+                            DoCast(me, SPELL_SEEPING_FOG_2);
+                            events.ScheduleEvent(EVENT_SEEPING_FOG, urand(8000, 15000));
+                            break;
+                        case EVENT_NOXIOUS_BREATH:
+                            DoCastVictim(SPELL_NOXIOUS_BREATH);
+                            events.ScheduleEvent(EVENT_NOXIOUS_BREATH, urand(14000, 20000));
+                            break;
+                        case EVENT_TAIL_SWEEP:
+                            DoCast(me, SPELL_TAIL_SWEEP);
+                            events.ScheduleEvent(EVENT_TAIL_SWEEP, 2000);
+                            break;
+                        case EVENT_ARCANE_BLAST:
+                            DoCastVictim(SPELL_ARCANE_BLAST);
+                            events.ScheduleEvent(EVENT_ARCANE_BLAST, urand(7000, 12000));
+                            break;
+                        case EVENT_BELLOWING_ROAR:
+                            DoCastVictim(SPELL_BELLOWING_ROAR);
+                            events.ScheduleEvent(EVENT_BELLOWING_ROAR, urand(20000, 30000));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+        private:
+            bool    _banished;                              // used for shades activation testing
+            uint32  _banishedTimer;                         // counter for banishment timeout
+            uint8   _shades;                                // keep track of how many shades are dead
+            uint8   _stage;                                 // check which "shade phase" we're at (75-50-25 percentage counters)
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new boss_taerarAI(creature);
+        }
+};
+
+/*
+ * Taerars shades
+ */
+
+enum ShadeEvents
+{
+    EVENT_SHADE_POISON_CLOUD      = 1,
+    EVENT_SHADE_POISON_BREATH     = 2,
+};
+
+enum ShadeSpells
+{
+    SPELL_POISON_CLOUD      = 24840,
+    SPELL_POISON_BREATH     = 20667,
 };
 
 class boss_shadeoftaerar : public CreatureScript
 {
-public:
-    boss_shadeoftaerar() : CreatureScript("boss_shade_of_taerar") { }
+    public:
+        boss_shadeoftaerar() : CreatureScript("boss_shade_of_taerar") { }
 
-    struct boss_shadeoftaerarAI : public ScriptedAI
-    {
-        boss_shadeoftaerarAI(Creature *c) : ScriptedAI(c) {}
-
-        uint32 m_uiPoisonCloud_Timer;
-        uint32 m_uiPosionBreath_Timer;
-
-        void Reset()
+        struct boss_shadeoftaerarAI : public ScriptedAI
         {
-            m_uiPoisonCloud_Timer = 8000;
-            m_uiPosionBreath_Timer = 12000;
-        }
+            boss_shadeoftaerarAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
 
-        void UpdateAI(const uint32 uiDiff)
+            void Reset()
+            {
+                _events.Reset();
+                _events.ScheduleEvent(EVENT_SHADE_POISON_CLOUD, 30000);
+                _events.ScheduleEvent(EVENT_SHADE_POISON_BREATH, 12000);
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                _events.Update(diff);
+
+                while (uint32 eventId = _events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_SHADE_POISON_CLOUD:
+                            DoCast(me, SPELL_POISON_CLOUD);
+                            _events.ScheduleEvent(EVENT_SHADE_POISON_CLOUD, 30000);
+                            break;
+                        case EVENT_SHADE_POISON_BREATH:
+                            DoCast(me, SPELL_POISON_BREATH);
+                            _events.ScheduleEvent(EVENT_SHADE_POISON_BREATH, 12000);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+        private:
+            EventMap _events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
         {
-            if (!UpdateVictim())
-                return;
-
-            //PoisonCloud_Timer
-            if (m_uiPoisonCloud_Timer <= uiDiff)
-            {
-                DoCast(me->getVictim(), SPELL_POSIONCLOUD);
-                m_uiPoisonCloud_Timer = 30000;
-            }
-            else
-                m_uiPoisonCloud_Timer -= uiDiff;
-
-            //PosionBreath_Timer
-            if (m_uiPosionBreath_Timer <= uiDiff)
-            {
-                DoCast(me->getVictim(), SPELL_POSIONBREATH);
-                m_uiPosionBreath_Timer = 12000;
-            }
-            else
-                m_uiPosionBreath_Timer -= uiDiff;
-
-            DoMeleeAttackIfReady();
+            return new boss_shadeoftaerarAI(creature);
         }
-    };
+};
 
-    CreatureAI *GetAI(Creature *creature) const
-    {
-        return new boss_shadeoftaerarAI(creature);
-    }
+class npc_dream_fog : public CreatureScript
+{
+    public:
+        npc_dream_fog() : CreatureScript("npc_dream_fog") { }
+
+        struct npc_dream_fogAI : public ScriptedAI
+        {
+            npc_dream_fogAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void Reset()
+            {
+                DoCast(me, SPELL_DREAM_FOG);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+                me->SetReactState(REACT_PASSIVE);
+                me->GetMotionMaster()->MoveRandom(25.0f);
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_dream_fogAI(creature);
+        }
 };
 
 void AddSC_boss_taerar()
 {
-    new boss_taerar;
-    new boss_shadeoftaerar;
+    new boss_taerar();
+    new boss_shadeoftaerar();
+    new npc_dream_fog();
 }
-
