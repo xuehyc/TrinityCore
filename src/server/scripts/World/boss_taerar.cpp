@@ -141,7 +141,7 @@ class boss_taerar : public CreatureScript
 
             void JustSummoned(Creature* shade)
             {
-                summons.Summons(shade);
+                summons.Summon(shade);
                 Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, -10.0f, true);
                 if (!target)
                     target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
