@@ -55,25 +55,35 @@ enum TaerarTexts
 // NOTE: The shade-effect is not 100% verified - seems to be the
 // correct one, but doesn't seem to be removed properly o.O
 
-enum TaerarSpells
+enum DragonSpells
 {
-    SPELL_SHADE             = 24313,
-
     SPELL_TAIL_SWEEP        = 15847,
-    SPELL_SUMMON_PLAYER     = 24776,
-    SPELL_NOXIOUS_BREATH    = 24818,
-    SPELL_ARCANE_BLAST      = 24857,
 
-    SPELL_BELLOWING_ROAR    = 22686,
+    SPELL_MARK_OF_NATURE_E  = 25040,
+    SPELL_MARK_OF_NATURE_S  = 25041,
+
+    SPELL_AURA_OF_NATURE    = 25043,
+
+    SPELL_SUMMON_PLAYER     = 24776,
+
+    SPELL_DREAM_FOG         = 24777,    // 24778 triggers serverside spell 24781
 
     SPELL_SEEPING_FOG_1     = 24813,    // summon left
     SPELL_SEEPING_FOG_2     = 24814,    // summon right
 
-    SPELL_DREAM_FOG         = 24777,    // 24778 triggers serverside spell 24781
+    SPELL_NOXIOUS_BREATH    = 24818,
+}
+
+enum TaerarSpells
+{
+    SPELL_BELLOWING_ROAR    = 22686,
+    SPELL_SHADE             = 24313,
 
     SPELL_SUMMON_SHADE_1    = 24841,
     SPELL_SUMMON_SHADE_2    = 24842,
     SPELL_SUMMON_SHADE_3    = 24843,
+
+    SPELL_ARCANE_BLAST      = 24857,
 };
 
 uint32 const shadeSpells[] =
