@@ -16,10 +16,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
-
-/* ORIG INCLUDES */
-
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -33,13 +29,13 @@
  */
 
 /*
-  SQL-texts:
+  -- SQL-texts:
   DELETE FROM `creature_text` WHERE `entry`=14890;
   INSERT INTO `creature_text`(`entry`,`groupid`,`text`,`type`,`comment`) VALUES
   (14890,0,'Peace is but a fleeting dream! Let the NIGHTMARE reign!',14,'Taerar - SAY_TAERAR_AGGRO'),
   (14890,1,'Children of Madness - I release you upon this world!',14,'Taerar - SAY_TAERAR_SUMMON_SHADE');
 
-  Creature-updates
+  -- Creature-updates
   UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry`=15224;
 */
 
@@ -109,7 +105,6 @@ class boss_taerar : public CreatureScript
 
             void Reset()
             {
-                summons.DespawnAll();
                 _Reset();
 
                 _stage = 0;
@@ -121,22 +116,17 @@ class boss_taerar : public CreatureScript
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
 
-//                events.ScheduleEvent(EVENT_SEEPING_FOG, urand(5000, 10000));
-//                events.ScheduleEvent(EVENT_NOXIOUS_BREATH, 8000);
-//                events.ScheduleEvent(EVENT_TAIL_SWEEP, 4000);
-//                events.ScheduleEvent(EVENT_ARCANE_BLAST, 12000);
-//                events.ScheduleEvent(EVENT_BELLOWING_ROAR, 30000);
-
-                sLog->outString("---> Reset");
-                sLog->outString("_banished  : %u    _shades    : %u     _stage:    : %u", _banished, _shades, _stage);
+                events.ScheduleEvent(EVENT_SEEPING_FOG, urand(5000, 10000));
+                events.ScheduleEvent(EVENT_NOXIOUS_BREATH, 8000);
+                events.ScheduleEvent(EVENT_TAIL_SWEEP, 4000);
+                events.ScheduleEvent(EVENT_ARCANE_BLAST, 12000);
+                events.ScheduleEvent(EVENT_BELLOWING_ROAR, 30000);
             }
 
             void EnterCombat(Unit* /*who*/)
             {
                 Talk(SAY_TAERAR_AGGRO);
                 DoCast(SPELL_MARK_OF_NATURE_S);
-                sLog->outString("---> EnterCombat");
-                sLog->outString("_banished  : %u    _shades    : %u     _stage:    : %u", _banished, _shades, _stage);
             }
 
             void KilledUnit(Unit* victim)
@@ -159,8 +149,6 @@ class boss_taerar : public CreatureScript
             void SummonedCreatureDies(Creature* /*shade*/, Unit* /*killer*/)
             {
                 --_shades;
-                sLog->outString("---> SummonDies");
-                sLog->outString("_banished  : %u    _shades    : %u     _stage:    : %u", _banished, _shades, _stage);
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
@@ -169,7 +157,7 @@ class boss_taerar : public CreatureScript
                 // Note: _stage holds the amount of times they have been summoned
                 if (!_banished && !HealthAbovePct(75 - 25 * _stage))
                 {
-                    _banished = true;                    
+                    _banished = true;
                     events.ScheduleEvent(EVENT_TIMED_DESHADE, 60000);
                     me->InterruptNonMeleeSpells(false);
                     DoStopAttack();
@@ -186,8 +174,6 @@ class boss_taerar : public CreatureScript
                     me->SetReactState(REACT_PASSIVE);
 
                     ++_stage;
-                    sLog->outString("---> Banished");
-                    sLog->outString("_banished  : %u    _shades    : %u     _stage:    : %u", _banished, _shades, _stage);
                 }
             }
 
@@ -199,8 +185,6 @@ class boss_taerar : public CreatureScript
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
                 events.CancelEvent(EVENT_TIMED_DESHADE);
-                sLog->outString("---> Unbanished");
-                sLog->outString("_banished  : %u    _shades    : %u     _stage:    : %u", _banished, _shades, _stage);
             }
 
             void UpdateAI(uint32 const diff)
@@ -224,25 +208,25 @@ class boss_taerar : public CreatureScript
                     {
                         // Cast seeping fog (Dream Fog) and make players fall asleep (annoying, eh?)
                         case EVENT_SEEPING_FOG:
-//                            DoCast(me, SPELL_SEEPING_FOG_1);
-//                            DoCast(me, SPELL_SEEPING_FOG_2);
+                            DoCast(me, SPELL_SEEPING_FOG_1);
+                            DoCast(me, SPELL_SEEPING_FOG_2);
                             events.ScheduleEvent(EVENT_SEEPING_FOG, urand(8000, 15000));
                             break;
                         case EVENT_NOXIOUS_BREATH:
-//                            DoCastVictim(SPELL_NOXIOUS_BREATH);
-//                            events.ScheduleEvent(EVENT_NOXIOUS_BREATH, urand(14000, 20000));
+                            DoCastVictim(SPELL_NOXIOUS_BREATH);
+                            events.ScheduleEvent(EVENT_NOXIOUS_BREATH, urand(14000, 20000));
                             break;
                         case EVENT_TAIL_SWEEP:
-//                            DoCast(me, SPELL_TAIL_SWEEP);
-//                            events.ScheduleEvent(EVENT_TAIL_SWEEP, 2000);
+                            DoCast(me, SPELL_TAIL_SWEEP);
+                            events.ScheduleEvent(EVENT_TAIL_SWEEP, 2000);
                             break;
                         case EVENT_ARCANE_BLAST:
-//                            DoCastVictim(SPELL_ARCANE_BLAST);
-//                            events.ScheduleEvent(EVENT_ARCANE_BLAST, urand(7000, 12000));
+                            DoCastVictim(SPELL_ARCANE_BLAST);
+                            events.ScheduleEvent(EVENT_ARCANE_BLAST, urand(7000, 12000));
                             break;
                         case EVENT_BELLOWING_ROAR:
-//                            DoCastVictim(SPELL_BELLOWING_ROAR);
-//                            events.ScheduleEvent(EVENT_BELLOWING_ROAR, urand(20000, 30000));
+                            DoCastVictim(SPELL_BELLOWING_ROAR);
+                            events.ScheduleEvent(EVENT_BELLOWING_ROAR, urand(20000, 30000));
                             break;
                         case EVENT_TIMED_DESHADE:
                             RemoveShade();
