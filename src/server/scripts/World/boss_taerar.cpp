@@ -335,19 +335,15 @@ class npc_dream_fog : public CreatureScript
         {
             npc_dream_fogAI(Creature* creature) : ScriptedAI(creature)
             {
+                DoCast(me, SPELL_DREAM_FOG);
             }
 
             void Reset()
             {
-                DoCast(me, SPELL_DREAM_FOG);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
-                me->SetReactState(REACT_PASSIVE);
                 me->GetMotionMaster()->MoveRandom(25.0f);
             }
 
-            void UpdateAI(const uint32 diff)
-            {
-            }
+            void UpdateAI(const uint32 diff){}
         };
 
         CreatureAI* GetAI(Creature* creature) const
