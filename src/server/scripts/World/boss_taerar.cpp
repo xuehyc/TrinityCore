@@ -31,8 +31,11 @@
  * - Fix player tank summoning when wandering off too far
  * - Fix Dream Fog
  *   (Trigger NPCs are attackable?)
- * - Fix Mark of Nature
+
+ * - Handle Mark of Nature 
  *   (???)
+ * - Find a proper way to remove the "banished" state model from Taerar
+ *
  */
 
 /*
@@ -46,23 +49,12 @@
   UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry`=15224;
 */
 
-enum TaerarTexts
-{
-    SAY_TAERAR_AGGRO        = 0,
-    SAY_TAERAR_SUMMON_SHADE = 1,
-};
-
 // NOTE: The shade-effect is not 100% verified - seems to be the
 // correct one, but doesn't seem to be removed properly o.O
 
 enum DragonSpells
 {
     SPELL_TAIL_SWEEP        = 15847,
-
-    SPELL_MARK_OF_NATURE_E  = 25040,
-    SPELL_MARK_OF_NATURE_S  = 25041,
-
-    SPELL_AURA_OF_NATURE    = 25043,
 
     SPELL_SUMMON_PLAYER     = 24776,
 
@@ -72,19 +64,37 @@ enum DragonSpells
     SPELL_SEEPING_FOG_2     = 24814,    // summon right
 
     SPELL_NOXIOUS_BREATH    = 24818,
+
+    SPELL_MARK_OF_NATURE_E  = 25040,
+    SPELL_MARK_OF_NATURE_S  = 25041,
+
+    SPELL_AURA_OF_NATURE    = 25043,
 }
 
+enum DragonActions
+{
+    ACTION_BANISH_SELF      = 1,
+    ACTION_SUMMON_PLAYER    = 2,
+}
+
+/* TAERAR */
+
+enum TaerarTexts
+{
+    SAY_TAERAR_AGGRO        = 0,
+    SAY_TAERAR_SUMMON_SHADE = 1,
+};
 enum TaerarSpells
 {
     SPELL_BELLOWING_ROAR    = 22686,
     SPELL_SHADE             = 24313,
-
     SPELL_SUMMON_SHADE_1    = 24841,
     SPELL_SUMMON_SHADE_2    = 24842,
     SPELL_SUMMON_SHADE_3    = 24843,
-
     SPELL_ARCANE_BLAST      = 24857,
 };
+
+/* SHADES */
 
 uint32 const shadeSpells[] =
 {
@@ -98,9 +108,6 @@ enum TaerarEvents
     EVENT_TAIL_SWEEP        = 3,
     EVENT_ARCANE_BLAST      = 4,
     EVENT_BELLOWING_ROAR    = 5,
-
-    ACTION_BANISH_SELF      = 10,
-    ACTION_SUMMON_PLAYER    = 11,
 };
 
 class boss_taerar : public CreatureScript
@@ -140,8 +147,16 @@ class boss_taerar : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 Talk(SAY_TAERAR_AGGRO);
+                DoCast(SPELL_MARK_OF_NATURE_S);
             }
 
+            void KilledUnit(Unit* victim)
+            {
+                if (victim->GetTypeId() == TYPEID_PLAYER)
+                {
+                    me->AddAura(SPELL_MARK_OF_NATURE_E, victim);
+                }
+            }
             void JustSummoned(Creature* shade)
             {
                 Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, -10.0f, true);
@@ -172,7 +187,7 @@ class boss_taerar : public CreatureScript
                     int count = sizeof(shadeSpells) / sizeof(uint32);
                     for (int i = 0; i < count; ++i)
                         DoCastVictim(shadeSpells[i], true);
-                    _shades = count;
+                    _shades += count;
 
                     me->SetReactState(REACT_PASSIVE);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
@@ -195,7 +210,7 @@ class boss_taerar : public CreatureScript
                 // If all three shades are dead, OR it has taken too long,
                 // end the current event and get Taerar back into business
 
-                if (_banished && (!_shades || !_banishedTimer))
+                if (_banished && (!_shades || _banishedTimer == 0))
                 {
                     _banished = false;
 
@@ -207,6 +222,9 @@ class boss_taerar : public CreatureScript
 
                 if (!me->getVictim())
                     return;
+
+                if (_banished && _banishedTimer > 0)
+                    --_banishedtimer;
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
@@ -238,9 +256,6 @@ class boss_taerar : public CreatureScript
                             break;
                     }
                 }
-
-                if (_banished && _banishedTimer)
-                    --_banishedtimer;
 
                 DoMeleeAttackIfReady();
             }
