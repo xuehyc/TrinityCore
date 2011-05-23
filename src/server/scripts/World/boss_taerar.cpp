@@ -25,17 +25,11 @@
 #include "ScriptedCreature.h"
 
 /*
- * LAST UPDATE: 2011.05.22 12:25
- *
  * TODO:
  * - Fix player tank summoning when wandering off too far
- * - Fix Dream Fog
- *   (Trigger NPCs are attackable?)
-
- * - Handle Mark of Nature 
- *   (???)
+ * - Fix Dream Fog (trigger NPCs are attackable?)
+ * - Handle Mark of Nature
  * - Find a proper way to remove the "banished" state model from Taerar
- *
  */
 
 /*
@@ -55,27 +49,15 @@
 enum DragonSpells
 {
     SPELL_TAIL_SWEEP        = 15847,
-
     SPELL_SUMMON_PLAYER     = 24776,
-
     SPELL_DREAM_FOG         = 24777,    // 24778 triggers serverside spell 24781
-
     SPELL_SEEPING_FOG_1     = 24813,    // summon left
     SPELL_SEEPING_FOG_2     = 24814,    // summon right
-
     SPELL_NOXIOUS_BREATH    = 24818,
-
     SPELL_MARK_OF_NATURE_E  = 25040,
     SPELL_MARK_OF_NATURE_S  = 25041,
-
     SPELL_AURA_OF_NATURE    = 25043,
-}
-
-enum DragonActions
-{
-    ACTION_BANISH_SELF      = 1,
-    ACTION_SUMMON_PLAYER    = 2,
-}
+};
 
 /* TAERAR */
 
@@ -84,6 +66,7 @@ enum TaerarTexts
     SAY_TAERAR_AGGRO        = 0,
     SAY_TAERAR_SUMMON_SHADE = 1,
 };
+
 enum TaerarSpells
 {
     SPELL_BELLOWING_ROAR    = 22686,
@@ -157,6 +140,7 @@ class boss_taerar : public CreatureScript
                     me->AddAura(SPELL_MARK_OF_NATURE_E, victim);
                 }
             }
+
             void JustSummoned(Creature* shade)
             {
                 Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, -10.0f, true);
@@ -224,7 +208,7 @@ class boss_taerar : public CreatureScript
                     return;
 
                 if (_banished && _banishedTimer > 0)
-                    --_banishedtimer;
+                    --_banishedTimer;
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
