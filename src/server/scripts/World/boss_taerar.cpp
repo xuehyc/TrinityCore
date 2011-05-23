@@ -84,6 +84,7 @@ enum TaerarEvents
     EVENT_TAIL_SWEEP        = 3,
     EVENT_ARCANE_BLAST      = 4,
     EVENT_BELLOWING_ROAR    = 5,
+    EVENT_TIMED_DESHADE     = 6,
 };
 
 uint32 const shadeSpells[] =
@@ -168,9 +169,8 @@ class boss_taerar : public CreatureScript
                 // Note: _stage holds the amount of times they have been summoned
                 if (!_banished && !HealthAbovePct(75 - 25 * _stage))
                 {
-                    _banished = true;
-                    _banishedTimer = 60000;
-
+                    _banished = true;                    
+                    events.ScheduleEvent(EVENT_TIMED_DESHADE, 60000);
                     me->InterruptNonMeleeSpells(false);
                     DoStopAttack();
 
@@ -191,6 +191,18 @@ class boss_taerar : public CreatureScript
                 }
             }
 
+            void RemoveShade()
+            {
+                _banished = false;
+                me->RemoveAurasDueToSpell(SPELL_SHADE);
+                me->SendMovementFlagUpdate();
+                me->SetReactState(REACT_AGGRESSIVE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+                events.CancelEvent(EVENT_TIMED_DESHADE);
+                sLog->outString("---> Unbanished");
+                sLog->outString("_banished  : %u    _shades    : %u     _stage:    : %u", _banished, _shades, _stage);
+            }
+
             void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
@@ -200,26 +212,10 @@ class boss_taerar : public CreatureScript
                     return;
 
                 // if banished, run the default tests to see if we can exit from it
-                if (_banished)
+                if (_banished && !_shades)
                 {
-                    // If all three shades are dead, OR it has taken too long,
-                    // end the current event and get Taerar back into business
-                    if (_banishedTimer <= diff || !_shades)
-                    {
-                        _banished = false;
-
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
-                        me->RemoveAurasDueToSpell(SPELL_SHADE);
-                        me->SetReactState(REACT_AGGRESSIVE);
-
-                        sLog->outString("---> Unbanished");
-                        sLog->outString("_banished  : %u    _shades    : %u     _stage:    : %u", _banished, _shades, _stage);
-                    } else {
-                        _banishedTimer -= diff;
-                    }
-                    return;
+                    RemoveShade();
                 }
-
                 events.Update(diff);
 
                 while (uint32 eventId = events.ExecuteEvent())
@@ -247,6 +243,9 @@ class boss_taerar : public CreatureScript
                         case EVENT_BELLOWING_ROAR:
 //                            DoCastVictim(SPELL_BELLOWING_ROAR);
 //                            events.ScheduleEvent(EVENT_BELLOWING_ROAR, urand(20000, 30000));
+                            break;
+                        case EVENT_TIMED_DESHADE:
+                            RemoveShade();
                             break;
                         default:
                             break;
