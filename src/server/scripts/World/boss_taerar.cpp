@@ -238,6 +238,9 @@ class boss_taerar : public CreatureScript
                     }
                 }
 
+                if (_banished && _banishedTimer)
+                    --_banishedtimer;
+
                 DoMeleeAttackIfReady();
             }
 
