@@ -120,16 +120,14 @@ class boss_taerar : public CreatureScript
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
 
-                events.ScheduleEvent(EVENT_SEEPING_FOG, urand(5000, 10000));
-                events.ScheduleEvent(EVENT_NOXIOUS_BREATH, 8000);
-                events.ScheduleEvent(EVENT_TAIL_SWEEP, 4000);
-                events.ScheduleEvent(EVENT_ARCANE_BLAST, 12000);
-                events.ScheduleEvent(EVENT_BELLOWING_ROAR, 30000);
+//                events.ScheduleEvent(EVENT_SEEPING_FOG, urand(5000, 10000));
+//                events.ScheduleEvent(EVENT_NOXIOUS_BREATH, 8000);
+//                events.ScheduleEvent(EVENT_TAIL_SWEEP, 4000);
+//                events.ScheduleEvent(EVENT_ARCANE_BLAST, 12000);
+//                events.ScheduleEvent(EVENT_BELLOWING_ROAR, 30000);
 
                 sLog->outString("---> Reset");
-                sLog->outString("_banished  : %u", _banished);
-                sLog->outString("_shades    : %u", _shades);
-                sLog->outString("_stage:    : %u", _stage);
+                sLog->outString("_banished  : %u    _shades    : %u     _stage:    : %u", _banished, _shades, _stage);
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -137,9 +135,7 @@ class boss_taerar : public CreatureScript
                 Talk(SAY_TAERAR_AGGRO);
                 DoCast(SPELL_MARK_OF_NATURE_S);
                 sLog->outString("---> EnterCombat");
-                sLog->outString("_banished  : %u", _banished);
-                sLog->outString("_shades    : %u", _shades);
-                sLog->outString("_stage:    : %u", _stage);
+                sLog->outString("_banished  : %u    _shades    : %u     _stage:    : %u", _banished, _shades, _stage);
             }
 
             void KilledUnit(Unit* victim)
@@ -157,19 +153,13 @@ class boss_taerar : public CreatureScript
                 if (!target)
                     target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
                 shade->AI()->AttackStart(target);
-                sLog->outString("---> JustSummoned");
-                sLog->outString("_banished  : %u", _banished);
-                sLog->outString("_shades    : %u", _shades);
-                sLog->outString("_stage:    : %u", _stage);
             }
 
             void SummonedCreatureDies(Creature* /*shade*/, Unit* /*killer*/)
             {
                 --_shades;
                 sLog->outString("---> SummonDies");
-                sLog->outString("_banished  : %u", _banished);
-                sLog->outString("_shades    : %u", _shades);
-                sLog->outString("_stage:    : %u", _stage);
+                sLog->outString("_banished  : %u    _shades    : %u     _stage:    : %u", _banished, _shades, _stage);
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
@@ -197,9 +187,7 @@ class boss_taerar : public CreatureScript
 
                     ++_stage;
                     sLog->outString("---> Banished");
-                    sLog->outString("_banished  : %u", _banished);
-                    sLog->outString("_shades    : %u", _shades);
-                    sLog->outString("_stage:    : %u", _stage);
+                    sLog->outString("_banished  : %u    _shades    : %u     _stage:    : %u", _banished, _shades, _stage);
                 }
             }
 
@@ -225,9 +213,7 @@ class boss_taerar : public CreatureScript
                         me->SetReactState(REACT_AGGRESSIVE);
 
                         sLog->outString("---> Unbanished");
-                        sLog->outString("_banished  : %u", _banished);
-                        sLog->outString("_shades    : %u", _shades);
-                        sLog->outString("_stage:    : %u", _stage);
+                        sLog->outString("_banished  : %u    _shades    : %u     _stage:    : %u", _banished, _shades, _stage);
                     } else {
                         _banishedTimer -= diff;
                     }
@@ -245,27 +231,22 @@ class boss_taerar : public CreatureScript
 //                            DoCast(me, SPELL_SEEPING_FOG_1);
 //                            DoCast(me, SPELL_SEEPING_FOG_2);
                             events.ScheduleEvent(EVENT_SEEPING_FOG, urand(8000, 15000));
-                            sLog->outString("---> Event: Seeping Fog");
                             break;
                         case EVENT_NOXIOUS_BREATH:
 //                            DoCastVictim(SPELL_NOXIOUS_BREATH);
-                            events.ScheduleEvent(EVENT_NOXIOUS_BREATH, urand(14000, 20000));
-                            sLog->outString("---> Event: Noxious breath");
+//                            events.ScheduleEvent(EVENT_NOXIOUS_BREATH, urand(14000, 20000));
                             break;
                         case EVENT_TAIL_SWEEP:
 //                            DoCast(me, SPELL_TAIL_SWEEP);
-                            events.ScheduleEvent(EVENT_TAIL_SWEEP, 2000);
-                            sLog->outString("---> Event: Tail sweep");
+//                            events.ScheduleEvent(EVENT_TAIL_SWEEP, 2000);
                             break;
                         case EVENT_ARCANE_BLAST:
 //                            DoCastVictim(SPELL_ARCANE_BLAST);
-                            events.ScheduleEvent(EVENT_ARCANE_BLAST, urand(7000, 12000));
-                            sLog->outString("---> Event: Arcane blast");
+//                            events.ScheduleEvent(EVENT_ARCANE_BLAST, urand(7000, 12000));
                             break;
                         case EVENT_BELLOWING_ROAR:
 //                            DoCastVictim(SPELL_BELLOWING_ROAR);
-                            events.ScheduleEvent(EVENT_BELLOWING_ROAR, urand(20000, 30000));
-                            sLog->outString("---> Event: Bellowing roar");
+//                            events.ScheduleEvent(EVENT_BELLOWING_ROAR, urand(20000, 30000));
                             break;
                         default:
                             break;
@@ -320,7 +301,6 @@ class boss_shadeoftaerar : public CreatureScript
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_SHADE_POISON_CLOUD, 30000);
                 _events.ScheduleEvent(EVENT_SHADE_ACID_BREATH, 12000);
-                sLog->outString("---> SHADES: Reset");
             }
 
             void UpdateAI(const uint32 diff)
@@ -337,12 +317,10 @@ class boss_shadeoftaerar : public CreatureScript
                         case EVENT_SHADE_POISON_CLOUD:
                             DoCast(me, SPELL_POISON_CLOUD);
                             _events.ScheduleEvent(EVENT_SHADE_POISON_CLOUD, 30000);
-                            sLog->outString("---> SHADES: Poison Cloud");
                             break;
                         case EVENT_SHADE_ACID_BREATH:
                             DoCast(me, SPELL_ACID_BREATH);
                             _events.ScheduleEvent(EVENT_SHADE_ACID_BREATH, 12000);
-                            sLog->outString("---> SHADES: Acid Breath");
                             break;
                         default:
                             break;
