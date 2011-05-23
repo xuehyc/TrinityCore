@@ -77,13 +77,6 @@ enum TaerarSpells
     SPELL_ARCANE_BLAST      = 24857,
 };
 
-/* SHADES */
-
-uint32 const shadeSpells[] =
-{
-    SPELL_SUMMON_SHADE_1, SPELL_SUMMON_SHADE_2, SPELL_SUMMON_SHADE_3
-};
-
 enum TaerarEvents
 {
     EVENT_SEEPING_FOG       = 1,
@@ -91,6 +84,11 @@ enum TaerarEvents
     EVENT_TAIL_SWEEP        = 3,
     EVENT_ARCANE_BLAST      = 4,
     EVENT_BELLOWING_ROAR    = 5,
+};
+
+uint32 const shadeSpells[] =
+{
+    SPELL_SUMMON_SHADE_1, SPELL_SUMMON_SHADE_2, SPELL_SUMMON_SHADE_3
 };
 
 class boss_taerar : public CreatureScript
@@ -133,6 +131,7 @@ class boss_taerar : public CreatureScript
                 DoCast(SPELL_MARK_OF_NATURE_S);
             }
 
+/* --- DISABLED FOR NOW
             void KilledUnit(Unit* victim)
             {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -140,6 +139,7 @@ class boss_taerar : public CreatureScript
                     me->AddAura(SPELL_MARK_OF_NATURE_E, victim);
                 }
             }
+--- */
 
             void JustSummoned(Creature* shade)
             {
@@ -193,8 +193,10 @@ class boss_taerar : public CreatureScript
 
                 // If all three shades are dead, OR it has taken too long,
                 // end the current event and get Taerar back into business
+                if (_banishedTimer > 0)
+                    --_banishedTimer;
 
-                if (_banished && (!_shades || _banishedTimer == 0))
+                if (_banished && (!_shades || !_banishedTimer))
                 {
                     _banished = false;
 
@@ -206,9 +208,6 @@ class boss_taerar : public CreatureScript
 
                 if (!me->getVictim())
                     return;
-
-                if (_banished && _banishedTimer > 0)
-                    --_banishedTimer;
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
