@@ -27,8 +27,8 @@
 /*
  * TODO:
  * - Fix player tank summoning when wandering off too far
- * - Fix Dream Fog (trigger NPCs are attackable?)
- * - Handle Mark of Nature
+ * - Handle Dream Fog (trigger NPCs are attackable, spellcasts)
+ * - Handle Mark of Nature properly
  * - Find a proper way to remove the "banished" state model from Taerar
  */
 
@@ -108,6 +108,7 @@ class boss_taerar : public CreatureScript
 
             void Reset()
             {
+                summons.DespawnAll();
                 _Reset();
 
                 _stage = 0;
@@ -116,6 +117,7 @@ class boss_taerar : public CreatureScript
                 _banishedTimer = 0;
 
                 me->RemoveAurasDueToSpell(SPELL_SHADE);
+                me->SetReactState(REACT_AGGRESSIVE);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
 
                 events.ScheduleEvent(EVENT_SEEPING_FOG, urand(5000, 10000));
@@ -123,12 +125,21 @@ class boss_taerar : public CreatureScript
                 events.ScheduleEvent(EVENT_TAIL_SWEEP, 4000);
                 events.ScheduleEvent(EVENT_ARCANE_BLAST, 12000);
                 events.ScheduleEvent(EVENT_BELLOWING_ROAR, 30000);
+
+                sLog->outString("---> Reset");
+                sLog->outString("_banished  : %u", _banished);
+                sLog->outString("_shades    : %u", _shades);
+                sLog->outString("_stage:    : %u", _stage);
             }
 
             void EnterCombat(Unit* /*who*/)
             {
                 Talk(SAY_TAERAR_AGGRO);
                 DoCast(SPELL_MARK_OF_NATURE_S);
+                sLog->outString("---> EnterCombat");
+                sLog->outString("_banished  : %u", _banished);
+                sLog->outString("_shades    : %u", _shades);
+                sLog->outString("_stage:    : %u", _stage);
             }
 
             void KilledUnit(Unit* victim)
@@ -146,11 +157,19 @@ class boss_taerar : public CreatureScript
                 if (!target)
                     target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
                 shade->AI()->AttackStart(target);
+                sLog->outString("---> JustSummoned");
+                sLog->outString("_banished  : %u", _banished);
+                sLog->outString("_shades    : %u", _shades);
+                sLog->outString("_stage:    : %u", _stage);
             }
 
             void SummonedCreatureDies(Creature* /*shade*/, Unit* /*killer*/)
             {
                 --_shades;
+                sLog->outString("---> SummonDies");
+                sLog->outString("_banished  : %u", _banished);
+                sLog->outString("_shades    : %u", _shades);
+                sLog->outString("_stage:    : %u", _stage);
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
@@ -172,11 +191,15 @@ class boss_taerar : public CreatureScript
                         DoCastVictim(shadeSpells[i], true);
                     _shades += count;
 
-                    me->SetReactState(REACT_PASSIVE);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
                     DoCast(me, SPELL_SHADE);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+                    me->SetReactState(REACT_PASSIVE);
 
                     ++_stage;
+                    sLog->outString("---> Banished");
+                    sLog->outString("_banished  : %u", _banished);
+                    sLog->outString("_shades    : %u", _shades);
+                    sLog->outString("_stage:    : %u", _stage);
                 }
             }
 
@@ -188,27 +211,28 @@ class boss_taerar : public CreatureScript
                 if (me->HasUnitState(UNIT_STAT_CASTING))
                     return;
 
-                // If all three shades are dead, OR it has taken too long,
-                // end the current event and get Taerar back into business
-                //if (_banishedTimer > 0)
-                //    _banishedTimer -= diff;
-
+                // if banished, run the default tests to see if we can exit from it
                 if (_banished)
                 {
+                    // If all three shades are dead, OR it has taken too long,
+                    // end the current event and get Taerar back into business
                     if (_banishedTimer <= diff || !_shades)
                     {
                         _banished = false;
 
-                        me->RemoveAurasDueToSpell(SPELL_SHADE);
-                        me->SendMovementFlagUpdate();
-                        me->SetReactState(REACT_AGGRESSIVE);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
-                    } else _banishedTimer -= diff;
-                }
+                        me->RemoveAurasDueToSpell(SPELL_SHADE);
+                        me->SetReactState(REACT_AGGRESSIVE);
 
-                // Do not update the events or do anything else while banished
-                if (_banished)
+                        sLog->outString("---> Unbanished");
+                        sLog->outString("_banished  : %u", _banished);
+                        sLog->outString("_shades    : %u", _shades);
+                        sLog->outString("_stage:    : %u", _stage);
+                    } else {
+                        _banishedTimer -= diff;
+                    }
                     return;
+                }
 
                 events.Update(diff);
 
@@ -218,25 +242,30 @@ class boss_taerar : public CreatureScript
                     {
                         // Cast seeping fog (Dream Fog) and make players fall asleep (annoying, eh?)
                         case EVENT_SEEPING_FOG:
-                            DoCast(me, SPELL_SEEPING_FOG_1);
-                            DoCast(me, SPELL_SEEPING_FOG_2);
+//                            DoCast(me, SPELL_SEEPING_FOG_1);
+//                            DoCast(me, SPELL_SEEPING_FOG_2);
                             events.ScheduleEvent(EVENT_SEEPING_FOG, urand(8000, 15000));
+                            sLog->outString("---> Event: Seeping Fog");
                             break;
                         case EVENT_NOXIOUS_BREATH:
-                            DoCastVictim(SPELL_NOXIOUS_BREATH);
+//                            DoCastVictim(SPELL_NOXIOUS_BREATH);
                             events.ScheduleEvent(EVENT_NOXIOUS_BREATH, urand(14000, 20000));
+                            sLog->outString("---> Event: Noxious breath");
                             break;
                         case EVENT_TAIL_SWEEP:
-                            DoCast(me, SPELL_TAIL_SWEEP);
+//                            DoCast(me, SPELL_TAIL_SWEEP);
                             events.ScheduleEvent(EVENT_TAIL_SWEEP, 2000);
+                            sLog->outString("---> Event: Tail sweep");
                             break;
                         case EVENT_ARCANE_BLAST:
-                            DoCastVictim(SPELL_ARCANE_BLAST);
+//                            DoCastVictim(SPELL_ARCANE_BLAST);
                             events.ScheduleEvent(EVENT_ARCANE_BLAST, urand(7000, 12000));
+                            sLog->outString("---> Event: Arcane blast");
                             break;
                         case EVENT_BELLOWING_ROAR:
-                            DoCastVictim(SPELL_BELLOWING_ROAR);
+//                            DoCastVictim(SPELL_BELLOWING_ROAR);
                             events.ScheduleEvent(EVENT_BELLOWING_ROAR, urand(20000, 30000));
+                            sLog->outString("---> Event: Bellowing roar");
                             break;
                         default:
                             break;
@@ -265,14 +294,14 @@ class boss_taerar : public CreatureScript
 
 enum ShadeEvents
 {
-    EVENT_SHADE_POISON_CLOUD      = 1,
-    EVENT_SHADE_POISON_BREATH     = 2,
+    EVENT_SHADE_POISON_CLOUD    = 1,
+    EVENT_SHADE_ACID_BREATH     = 2,
 };
 
 enum ShadeSpells
 {
-    SPELL_POISON_CLOUD      = 24840,
-    SPELL_POISON_BREATH     = 20667,
+    SPELL_POISON_CLOUD          = 24840,
+    SPELL_ACID_BREATH           = 20667,
 };
 
 class boss_shadeoftaerar : public CreatureScript
@@ -290,7 +319,8 @@ class boss_shadeoftaerar : public CreatureScript
             {
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_SHADE_POISON_CLOUD, 30000);
-                _events.ScheduleEvent(EVENT_SHADE_POISON_BREATH, 12000);
+                _events.ScheduleEvent(EVENT_SHADE_ACID_BREATH, 12000);
+                sLog->outString("---> SHADES: Reset");
             }
 
             void UpdateAI(const uint32 diff)
@@ -307,10 +337,12 @@ class boss_shadeoftaerar : public CreatureScript
                         case EVENT_SHADE_POISON_CLOUD:
                             DoCast(me, SPELL_POISON_CLOUD);
                             _events.ScheduleEvent(EVENT_SHADE_POISON_CLOUD, 30000);
+                            sLog->outString("---> SHADES: Poison Cloud");
                             break;
-                        case EVENT_SHADE_POISON_BREATH:
-                            DoCast(me, SPELL_POISON_BREATH);
-                            _events.ScheduleEvent(EVENT_SHADE_POISON_BREATH, 12000);
+                        case EVENT_SHADE_ACID_BREATH:
+                            DoCast(me, SPELL_ACID_BREATH);
+                            _events.ScheduleEvent(EVENT_SHADE_ACID_BREATH, 12000);
+                            sLog->outString("---> SHADES: Acid Breath");
                             break;
                         default:
                             break;
