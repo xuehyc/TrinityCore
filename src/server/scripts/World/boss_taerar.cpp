@@ -190,17 +190,20 @@ class boss_taerar : public CreatureScript
 
                 // If all three shades are dead, OR it has taken too long,
                 // end the current event and get Taerar back into business
-                if (_banishedTimer > 0)
-                    _banishedTimer -= diff;
+                //if (_banishedTimer > 0)
+                //    _banishedTimer -= diff;
 
-                if (_banished && (!_shades || !_banishedTimer))
+                if (_banished)
                 {
-                    _banished = false;
+                    if (_banishedTimer <= diff || !_shades)
+                    {
+                        _banished = false;
 
-                    me->RemoveAurasDueToSpell(SPELL_SHADE);
-                    me->SendMovementFlagUpdate();
-                    me->SetReactState(REACT_AGGRESSIVE);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+                        me->RemoveAurasDueToSpell(SPELL_SHADE);
+                        me->SendMovementFlagUpdate();
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+                    } else _banishedTimer -= diff;
                 }
 
                 // Do not update the events or do anything else while banished
