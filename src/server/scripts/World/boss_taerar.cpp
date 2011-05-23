@@ -185,8 +185,6 @@ class boss_taerar : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-                events.Update(diff);
-
                 if (me->HasUnitState(UNIT_STAT_CASTING))
                     return;
 
@@ -205,8 +203,11 @@ class boss_taerar : public CreatureScript
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
                 }
 
-                if (!me->getVictim())
+                // Do not update the events or do anything else while banished
+                if (_banished)
                     return;
+
+                events.Update(diff);
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
