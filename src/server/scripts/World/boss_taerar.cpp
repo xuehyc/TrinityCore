@@ -328,14 +328,15 @@ class npc_dream_fog : public CreatureScript
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
                 me->SetSpeed(MOVE_WALK,2.0f);
-            }
 
+                _movementTimer = urand(5000, 7500);
+            }
 
             void UpdateAI(const uint32 diff)
             {
-                if (_movemementTimer)
+                if (_movementTimer)
                 {
-                    me->GetMotionMaster()->MoveRandom(30.0f);
+                    me->GetMotionMaster()->MoveRandom(25.0f);
                     _movementTimer = urand(5000, 7500);
                     DoCast(me, SPELL_DREAM_FOG);
                 }
@@ -344,7 +345,7 @@ class npc_dream_fog : public CreatureScript
             }
 
         private:
-            uint32  _banishedTimer;                         // counter for banishment timeout
+            uint32  _movementTimer;                         // counter for movement-change
         };
 
         CreatureAI* GetAI(Creature* creature) const
