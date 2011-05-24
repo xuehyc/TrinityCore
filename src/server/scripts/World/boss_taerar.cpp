@@ -22,10 +22,8 @@
 
 /*
  * TODO:
- * - Fix player tank summoning when wandering off too far
- * - Handle Dream Fog (trigger NPCs are attackable, spellcasts)
  * - Handle Mark of Nature properly
- * - Find a proper way to remove the "banished" state model from Taerar
+ * - Fix player tank summoning when wandering off too far
  */
 
 /*
@@ -34,9 +32,6 @@
   INSERT INTO `creature_text`(`entry`,`groupid`,`text`,`type`,`comment`) VALUES
   (14890,0,'Peace is but a fleeting dream! Let the NIGHTMARE reign!',14,'Taerar - SAY_TAERAR_AGGRO'),
   (14890,1,'Children of Madness - I release you upon this world!',14,'Taerar - SAY_TAERAR_SUMMON_SHADE');
-
-  -- Creature-updates
-  UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry`=15224;
 */
 
 // NOTE: The shade-effect is not 100% verified - seems to be the
@@ -50,9 +45,9 @@ enum DragonSpells
     SPELL_SEEPING_FOG_1     = 24813,    // summon left
     SPELL_SEEPING_FOG_2     = 24814,    // summon right
     SPELL_NOXIOUS_BREATH    = 24818,
-    SPELL_MARK_OF_NATURE_E  = 25040,
-    SPELL_MARK_OF_NATURE_S  = 25041,
-    SPELL_AURA_OF_NATURE    = 25043,
+    SPELL_MARK_OF_NATURE_T  = 25040,    // Mark of Nature trigger
+    SPELL_MARK_OF_NATURE_A  = 25041,    // Mark of Nature aura
+    SPELL_AURA_OF_NATURE    = 25043,    // Used in combo with Mark of Nature aura to put player into sleep for 2 minutes, not 4 seconds
 };
 
 /* TAERAR */
@@ -125,14 +120,14 @@ class boss_taerar : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 Talk(SAY_TAERAR_AGGRO);
-                DoCast(SPELL_MARK_OF_NATURE_S);
+                DoCast(SPELL_MARK_OF_NATURE_A);
             }
 
             void KilledUnit(Unit* victim)
             {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
                 {
-                    me->AddAura(SPELL_MARK_OF_NATURE_E, victim);
+                    me->AddAura(SPELL_MARK_OF_NATURE_T, victim);
                 }
             }
 
@@ -210,8 +205,8 @@ class boss_taerar : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_SEEPING_FOG:
-                            DoCast(me, SPELL_SEEPING_FOG_1);
-                            DoCast(me, SPELL_SEEPING_FOG_2);
+                            DoCast(me, SPELL_SEEPING_FOG_1, true);
+                            DoCast(me, SPELL_SEEPING_FOG_2, true);
                             events.ScheduleEvent(EVENT_SEEPING_FOG, urand(8000, 15000));
                             break;
                         case EVENT_NOXIOUS_BREATH:
@@ -331,15 +326,21 @@ class npc_dream_fog : public CreatureScript
 
             void Reset()
             {
-                DoCast(me, SPELL_DREAM_FOG, true);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
-                me->SetReactState(REACT_PASSIVE);
-                me->SetSpeed(MOVE_WALK,1.5f);
-                me->GetMotionMaster()->MoveRandom(25.0f);
+                me->SetSpeed(MOVE_WALK,2.0f);
             }
 
-            void UpdateAI(const uint32 /*diff*/)
+
+            void UpdateAI(const uint32 diff)
             {
+                if (_movemementTimer)
+                {
+                    me->GetMotionMaster()->MoveRandom(30.0f);
+                    _movementTimer = urand(5000, 7500);
+                    DoCast(me, SPELL_DREAM_FOG);
+                }
+                else
+                    _movementTimer -= diff;
             }
         };
 
