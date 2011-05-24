@@ -342,6 +342,9 @@ class npc_dream_fog : public CreatureScript
                 else
                     _movementTimer -= diff;
             }
+
+        private:
+            uint32  _banishedTimer;                         // counter for banishment timeout
         };
 
         CreatureAI* GetAI(Creature* creature) const
