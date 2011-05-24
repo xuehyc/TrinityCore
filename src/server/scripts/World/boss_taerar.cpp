@@ -80,7 +80,6 @@ enum TaerarEvents
     EVENT_TAIL_SWEEP        = 3,
     EVENT_ARCANE_BLAST      = 4,
     EVENT_BELLOWING_ROAR    = 5,
-    EVENT_TIMED_DESHADE     = 6,
 };
 
 uint32 const shadeSpells[] =
@@ -158,7 +157,8 @@ class boss_taerar : public CreatureScript
                 if (!_banished && !HealthAbovePct(75 - 25 * _stage))
                 {
                     _banished = true;
-                    events.ScheduleEvent(EVENT_TIMED_DESHADE, 60000);
+                    _banishedTimer = 60000;
+
                     me->InterruptNonMeleeSpells(false);
                     DoStopAttack();
 
@@ -177,16 +177,6 @@ class boss_taerar : public CreatureScript
                 }
             }
 
-            void RemoveShade()
-            {
-                _banished = false;
-                me->RemoveAurasDueToSpell(SPELL_SHADE);
-                me->SendMovementFlagUpdate();
-                me->SetReactState(REACT_AGGRESSIVE);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
-                events.CancelEvent(EVENT_TIMED_DESHADE);
-            }
-
             void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
@@ -195,18 +185,30 @@ class boss_taerar : public CreatureScript
                 if (me->HasUnitState(UNIT_STAT_CASTING))
                     return;
 
-                // if banished, run the default tests to see if we can exit from it
-                if (_banished && !_shades)
+                if (_banished)
                 {
-                    RemoveShade();
+                    // If all three shades are dead, OR it has taken too long, end the current event and get Taerar back into business
+                    if (_banishedTimer <= diff || !_shades)
+                    {
+                        _banished = false;
+
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+                        me->RemoveAurasDueToSpell(SPELL_SHADE);
+                        me->SetReactState(REACT_AGGRESSIVE);
+                    // _banishtimer has not expired, and we still have active shades:
+                    }
+                    else
+                        _banishedTimer -= diff;
+
+                    return;
                 }
+
                 events.Update(diff);
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
                     switch (eventId)
                     {
-                        // Cast seeping fog (Dream Fog) and make players fall asleep (annoying, eh?)
                         case EVENT_SEEPING_FOG:
                             DoCast(me, SPELL_SEEPING_FOG_1);
                             DoCast(me, SPELL_SEEPING_FOG_2);
@@ -227,11 +229,6 @@ class boss_taerar : public CreatureScript
                         case EVENT_BELLOWING_ROAR:
                             DoCastVictim(SPELL_BELLOWING_ROAR);
                             events.ScheduleEvent(EVENT_BELLOWING_ROAR, urand(20000, 30000));
-                            break;
-                        case EVENT_TIMED_DESHADE:
-                            RemoveShade();
-                            break;
-                        default:
                             break;
                     }
                 }
@@ -305,8 +302,6 @@ class boss_shadeoftaerar : public CreatureScript
                             DoCast(me, SPELL_ACID_BREATH);
                             _events.ScheduleEvent(EVENT_SHADE_ACID_BREATH, 12000);
                             break;
-                        default:
-                            break;
                     }
                 }
 
@@ -332,15 +327,20 @@ class npc_dream_fog : public CreatureScript
         {
             npc_dream_fogAI(Creature* creature) : ScriptedAI(creature)
             {
-                DoCast(me, SPELL_DREAM_FOG);
             }
 
             void Reset()
             {
+                DoCast(me, SPELL_DREAM_FOG, true);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+                me->SetReactState(REACT_PASSIVE);
+                me->SetSpeed(MOVE_WALK,1.5f);
                 me->GetMotionMaster()->MoveRandom(25.0f);
             }
 
-            void UpdateAI(const uint32 diff){}
+            void UpdateAI(const uint32 /*diff*/)
+            {
+            }
         };
 
         CreatureAI* GetAI(Creature* creature) const
