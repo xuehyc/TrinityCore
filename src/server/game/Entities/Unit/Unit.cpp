@@ -956,12 +956,6 @@ void Unit::CastSpell(GameObject *go, uint32 spellId, bool triggered, Item *castI
         return;
     }
 
-    if (!(spellInfo->Targets & (TARGET_FLAG_OBJECT | TARGET_FLAG_OBJECT_CASTER)))
-    {
-        sLog->outError("CastSpell: spell id %i by caster: %s %u) is not gameobject spell", spellId, (GetTypeId() == TYPEID_PLAYER ? "player (GUID:" : "creature (Entry:"), (GetTypeId() == TYPEID_PLAYER ? GetGUIDLow() : GetEntry()));
-        return;
-    }
-
     if (castItem)
         sLog->outStaticDebug("WORLD: cast Item spellId - %i", spellInfo->Id);
 
@@ -5647,12 +5641,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     triggered_spell_id = 70701;
                     break;
                 }
+                // Essence of the Blood Queen
                 case 70871:
                 {
-                    target = this;
-                    triggered_spell_id = 70872;
                     basepoints0 = CalculatePctN(int32(damage), triggerAmount);
-                    break;
+                    CastCustomSpell(70872, SPELLVALUE_BASE_POINT0, basepoints0, this);
+                    return true;
                 }
                 case 65032: // Boom aura (321 Boombot)
                 {
