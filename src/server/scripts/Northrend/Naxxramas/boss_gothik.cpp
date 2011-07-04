@@ -172,7 +172,7 @@ class boss_gothik : public CreatureScript
                 LiveTriggerGUID.clear();
                 DeadTriggerGUID.clear();
 
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 me->SetReactState(REACT_PASSIVE);
                 if (instance)
                     instance->SetData(DATA_GOTHIK_GATE, GO_STATE_ACTIVE);
@@ -199,13 +199,19 @@ class boss_gothik : public CreatureScript
                 }
 
                 _EnterCombat();
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 waveCount = 0;
                 events.ScheduleEvent(EVENT_SUMMON, 30000);
                 DoTeleportTo(PosPlatform);
                 DoScriptText(SAY_SPEECH, me);
                 if (instance)
                     instance->SetData(DATA_GOTHIK_GATE, GO_STATE_READY);
+            }
+
+            void DamageTaken(Unit* /*pSource*/, uint32 &uiDamage)
+            {
+                if (!phaseTwo)
+                    uiDamage = 0;
             }
 
             void JustSummoned(Creature* summon)
