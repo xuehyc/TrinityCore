@@ -600,7 +600,7 @@ class boss_stormcaller_brundir : public CreatureScript
                         events.RescheduleEvent(EVENT_CHAIN_LIGHTNING, urand(7000, 12000));
                         events.RescheduleEvent(EVENT_OVERLOAD, urand(40000, 50000));
                         if (phase >= 2)
-                            events.RescheduleEvent(EVENT_LIGHTNING_WHIRL, urand(15000, 250000));
+                            events.RescheduleEvent(EVENT_LIGHTNING_WHIRL, urand(15000, 25000));
                         if (phase >= 3)
                         {
                             DoCast(me, SPELL_STORMSHIELD);
