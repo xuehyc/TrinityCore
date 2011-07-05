@@ -233,8 +233,8 @@ public:
         {
 	    me->CastSpell(me, SPELL_DEFEND, true);
 	    me->CastSpell(me, SPELL_DEFEND, true);
-            Creature->GetMotionMaster()->MovePoint(0, 8599.258f, 963.951f, 547.553f);
-            Creature->setFaction(35); //wrong faction in db?
+            pCreature->GetMotionMaster()->MovePoint(0, 8599.258f, 963.951f, 547.553f);
+            pCreature->setFaction(35); //wrong faction in db?
         }
 
         uint32 uiChargeTimer;
