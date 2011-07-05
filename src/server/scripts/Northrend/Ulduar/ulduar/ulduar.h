@@ -131,6 +131,7 @@ enum UlduarGameObjects
     GO_FREYA_CHEST                        = 194324,
     GO_LEVIATHAN_DOOR                     = 194905,
     GO_LEVIATHAN_GATE                     = 194630,
+    GO_XT002_DOOR                         = 194631,
     GO_VEZAX_DOOR                         = 194750,
     GO_MOLE_MACHINE                       = 194316,
     GO_RAZOR_HARPOON_1                    = 194542,
@@ -141,6 +142,7 @@ enum UlduarGameObjects
     GO_HODIR_DOOR                         = 194634,
     GO_HODIR_ICE_DOOR                     = 194441,
     GO_ARCHIVUM_DOOR                      = 194556,
+    GO_ASSEMBLY_DOOR                      = 194554,
 };
 
 enum LeviathanData

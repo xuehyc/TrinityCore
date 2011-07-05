@@ -43,7 +43,6 @@ class instance_ulduar : public InstanceMapScript
             uint64 IgnisGUID;
             uint64 RazorscaleGUID;
             uint64 RazorscaleController;
-            uint64 RazorHarpoonGUIDs[4];
             uint64 ExpeditionCommanderGUID;
             uint64 XT002GUID;
             uint64 XTToyPileGUIDs[4];
@@ -60,10 +59,12 @@ class instance_ulduar : public InstanceMapScript
             uint64 VezaxGUID;
             uint64 YoggSaronGUID;
             uint64 AlgalonGUID;
-            uint64 LeviathanGateGUID;
-            uint64 VezaxDoorGUID;
 
             // GameObjects
+            uint64 RazorHarpoonGUIDs[4];
+            uint64 LeviathanGateGUID;
+            uint64 XT002DoorGUID;
+            uint64 VezaxDoorGUID;
             uint64 KologarnChestGUID;
             uint64 KologarnBridgeGUID;
             uint64 KologarnDoorGUID;
@@ -74,6 +75,7 @@ class instance_ulduar : public InstanceMapScript
             uint64 HodirDoorGUID;
             uint64 HodirIceDoorGUID;
             uint64 ArchivumDoorGUID;
+            uint64 AssemblyDoorGUID;
 
             // Miscellaneous
             uint32 TeamInInstance;
@@ -111,10 +113,12 @@ class instance_ulduar : public InstanceMapScript
                 HodirChestGUID                   = 0;
                 FreyaChestGUID                   = 0;
                 LeviathanGateGUID                = 0;
+                XT002DoorGUID                    = 0;
                 VezaxDoorGUID                    = 0;
                 HodirDoorGUID                    = 0;
                 HodirIceDoorGUID                 = 0;
                 ArchivumDoorGUID                 = 0;
+                AssemblyDoorGUID                 = 0;
                 TeamInInstance                   = 0;
                 HodirRareCacheData               = 0;
                 elderCount                       = 0;
@@ -314,6 +318,10 @@ class instance_ulduar : public InstanceMapScript
                         if (GetBossState(BOSS_LEVIATHAN) == DONE)
                             gameObject->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
                         break;
+                    case GO_XT002_DOOR:
+                        XT002DoorGUID = gameObject->GetGUID();
+                        HandleGameObject(0, true, gameObject);
+                        break;
                     case GO_VEZAX_DOOR:
                         VezaxDoorGUID = gameObject->GetGUID();
                         HandleGameObject(0, false, gameObject);
@@ -343,6 +351,10 @@ class instance_ulduar : public InstanceMapScript
                         ArchivumDoorGUID = gameObject->GetGUID();
                         if (GetBossState(BOSS_ASSEMBLY_OF_IRON) != DONE)
                             HandleGameObject(ArchivumDoorGUID, false);
+                        break;
+                    case GO_ASSEMBLY_DOOR:
+                        AssemblyDoorGUID = gameObject->GetGUID();
+                        HandleGameObject(AssemblyDoorGUID, true);
                         break;
                 }
             }
@@ -415,13 +427,22 @@ class instance_ulduar : public InstanceMapScript
                     case BOSS_LEVIATHAN:
                     case BOSS_IGNIS:
                     case BOSS_RAZORSCALE:
-                    case BOSS_XT002:
                     case BOSS_AURIAYA:
                     case BOSS_MIMIRON:
+                        break;
+                    case BOSS_XT002:
+                        if (state == IN_PROGRESS)
+                            HandleGameObject(XT002DoorGUID, false);
+                        else
+                            HandleGameObject(XT002DoorGUID, true);
                         break;
                     case BOSS_ASSEMBLY_OF_IRON:
                         if (state == DONE)
                             HandleGameObject(ArchivumDoorGUID, true);
+                        if (state == IN_PROGRESS)
+                            HandleGameObject(AssemblyDoorGUID, false);
+                        else
+                            HandleGameObject(AssemblyDoorGUID, true);
                         break;
                     case BOSS_VEZAX:
                         if (state == DONE)

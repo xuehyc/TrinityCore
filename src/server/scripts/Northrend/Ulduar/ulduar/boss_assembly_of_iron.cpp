@@ -133,7 +133,7 @@ enum AssemblyNPCs
 
 #define EMOTE_OVERLOAD                           "Stormcaller Brundir begins to Overload!" // Move it to DB
 #define FLOOR_Z                                  427.28f
-#define FINAL_FLIGHT_Z                           435.0f
+#define FINAL_FLIGHT_Z                           440.0f
 
 bool IsEncounterComplete(InstanceScript* instance, Creature* me)
 {
@@ -619,13 +619,13 @@ class boss_stormcaller_brundir : public CreatureScript
                 else
                     me->SetLootRecipient(NULL);
 
-            if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MOLGEIM)))
-                if (Molgeim->isAlive())
-                    Molgeim->AI()->DoAction(ACTION_MOLGEIM);
+                if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MOLGEIM)))
+                    if (Molgeim->isAlive())
+                        Molgeim->AI()->DoAction(ACTION_MOLGEIM);
 
-            if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_STEELBREAKER)))
-                if (Steelbreaker->isAlive())
-                    Steelbreaker->AI()->DoAction(ACTION_STEELBREAKER);
+                if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_STEELBREAKER)))
+                    if (Steelbreaker->isAlive())
+                        Steelbreaker->AI()->DoAction(ACTION_STEELBREAKER);
 
                 // Prevent to have Brundir somewhere in the air when he die in Air phase
                 if (me->GetPositionZ() > FLOOR_Z/* + 5.0f*/)
@@ -720,6 +720,7 @@ class boss_stormcaller_brundir : public CreatureScript
                                     if (me->GetDistance(trigger) >= 50.0f)
                                         me->GetMotionMaster()->MovePoint(0, trigger->GetPositionX(), trigger->GetPositionY(), FLOOR_Z);
                             }
+							events.DelayEvents(3000);
                             events.ScheduleEvent(EVENT_MOVE_POSITION, urand(7500, 10000));
                             break;
                         default:

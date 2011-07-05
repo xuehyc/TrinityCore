@@ -4211,6 +4211,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->MaxAffectedTargets = 1;
             ++count;
             break;
+        case 62505: // Harpoon Chain (Razorscale)
         case 62716: // Growth of Nature (Freya)
         case 65584: // Growth of Nature (Freya)
         case 64381: // Strength of the Pack (Auriaya)
