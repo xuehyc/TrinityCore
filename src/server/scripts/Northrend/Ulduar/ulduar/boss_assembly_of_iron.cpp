@@ -720,7 +720,7 @@ class boss_stormcaller_brundir : public CreatureScript
                                     if (me->GetDistance(trigger) >= 50.0f)
                                         me->GetMotionMaster()->MovePoint(0, trigger->GetPositionX(), trigger->GetPositionY(), FLOOR_Z);
                             }
-							events.DelayEvents(3000);
+                            events.DelayEvents(3000);
                             events.ScheduleEvent(EVENT_MOVE_POSITION, urand(7500, 10000));
                             break;
                         default:
