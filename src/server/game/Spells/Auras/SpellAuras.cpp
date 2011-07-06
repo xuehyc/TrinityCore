@@ -212,13 +212,13 @@ void AuraApplication::HandleEffect(uint8 effIndex, bool apply)
 
     if (!GetBase()->HasEffect(effIndex))
     {
-        sLog->outError("AuraApplication::HandleEffect: tried to %s nonexisting aura effect - id: %u effIndex: %u", (apply ? "APPLY" : "UNNAPLY"), GetBase()->GetSpellProto()->Id, effIndex);
+        //sLog->outError("AuraApplication::HandleEffect: tried to %s nonexisting aura effect - id: %u effIndex: %u", (apply ? "APPLY" : "UNNAPLY"), GetBase()->GetSpellProto()->Id, effIndex);
         return;
     }
 
     if (!GetTarget())
     {
-        sLog->outError("AuraApplication::HandleEffect: target is NULL at %s - id: %u effIndex: %u", (apply ? "APPLY" : "UNNAPLY"), GetBase()->GetSpellProto()->Id, effIndex);
+        //sLog->outError("AuraApplication::HandleEffect: target is NULL at %s - id: %u effIndex: %u", (apply ? "APPLY" : "UNNAPLY"), GetBase()->GetSpellProto()->Id, effIndex);
         return;
     }
     else if (!GetTarget()->isAlive())
