@@ -13039,7 +13039,7 @@ int32 Unit::CalcSpellDuration(SpellEntry const* spellProto)
 int32 Unit::ModSpellDuration(SpellEntry const* spellProto, Unit const* target, int32 duration, bool positive)
 {
     // don't mod permament auras duration
-    if (duration < 0)
+    if (duration < 0 || ( spellProto->SpellFamilyName == SPELLFAMILY_ROGUE && spellProto->SpellFamilyFlags[1] & 0x8))
         return duration;
 
     // cut duration only of negative effects
