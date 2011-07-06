@@ -68,6 +68,7 @@ class AuraApplication
         bool IsPositive() const { return m_flags & AFLAG_POSITIVE; }
         bool IsSelfcasted() const { return m_flags & AFLAG_CASTER; }
         uint8 GetEffectsToApply() const { return m_effectsToApply; }
+        void HandleEffect(uint8 effIndex, bool apply);
 
         void SetRemoveMode(AuraRemoveMode mode) { m_removeMode = mode; }
         AuraRemoveMode GetRemoveMode() const {return m_removeMode;}

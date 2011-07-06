@@ -3961,7 +3961,7 @@ void Unit::RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1, ui
 
 void Unit::RemoveMovementImpairingAuras()
 {
-    RemoveAurasWithMechanic((1<<MECHANIC_SNARE)|(1<<MECHANIC_ROOT));
+    HandleAuraEffectsWithMechanic(false, (1 << MECHANIC_SNARE) | (1 << MECHANIC_ROOT));
 }
 
 void Unit::RemoveAurasWithMechanic(uint32 mechanic_mask, AuraRemoveMode removemode, uint32 except)
@@ -4109,6 +4109,54 @@ void Unit::RemoveAllAurasExceptType(AuraType type)
             RemoveOwnedAura(iter, AURA_REMOVE_BY_DEFAULT);
         else
             ++iter;
+    }
+}
+
+void Unit::HandleAuraEffectsWithMechanic(bool apply, uint32 mechanic_mask, AuraRemoveMode removemode, uint32 except)
+{
+    if (apply)
+    {
+        for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end(); ++iter)
+        {
+            Aura const * aura = iter->second->GetBase();
+            if (!except || aura->GetId() != except)
+                for (int32 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
+                    if ((aura->GetSpellProto()->Effect[effIndex] != SPELL_EFFECT_APPLY_AURA) &&
+                        (mechanic_mask & (1 << aura->GetSpellProto()->EffectMechanic[effIndex])))
+                        iter->second->HandleEffect(effIndex, true);
+        }
+        return;
+    }
+    else
+    {
+        for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+        {
+            Aura const * aura = iter->second->GetBase();
+            if (!except || aura->GetId() != except)
+            {
+                if ((1 << aura->GetSpellProto()->Mechanic) & mechanic_mask)
+                {
+                    RemoveAura(iter, removemode);
+                    continue;
+                }
+                bool cont = false;
+                for (int32 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
+                    if (mechanic_mask & (1 << aura->GetSpellProto()->EffectMechanic[effIndex]))
+                    {
+                        iter->second->HandleEffect(effIndex, false);
+                        if (!iter->second->GetEffectMask())
+                        {
+                            RemoveAura(iter, removemode);
+                            cont = true;
+                            break;
+                        }
+                    }
+                if (cont)
+                    continue;
+            }
+            ++iter;
+        }
+        return;
     }
 }
 
@@ -5465,7 +5513,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                         return false;
 
                     // Remove any stun effect on target
-                    pVictim->RemoveAurasWithMechanic(1<<MECHANIC_STUN, AURA_REMOVE_BY_ENEMY_SPELL);
+                    pVictim->HandleAuraEffectsWithMechanic(false, (1 << MECHANIC_STUN), AURA_REMOVE_BY_ENEMY_SPELL);
                     return true;
                 }
                 // Glyph of Life Tap
@@ -11594,9 +11642,9 @@ bool Unit::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) con
         // Check for immune to application of harmful magical effects
         AuraEffectList const& immuneAuraApply = GetAuraEffectsByType(SPELL_AURA_MOD_IMMUNE_AURA_APPLY_SCHOOL);
         for (AuraEffectList::const_iterator iter = immuneAuraApply.begin(); iter != immuneAuraApply.end(); ++iter)
-            if (spellInfo->Dispel == DISPEL_MAGIC &&                                      // Magic debuff
-                ((*iter)->GetMiscValue() & GetSpellSchoolMask(spellInfo)) &&  // Check school
-                !IsPositiveEffect(spellInfo->Id, index))                                  // Harmful
+            if ((spellInfo->Dispel == DISPEL_MAGIC) &&                              // Magic debuff
+                ((*iter)->GetMiscValue() & GetSpellSchoolMask(spellInfo)) &&        // Check school
+                !IsPositiveEffect(spellInfo->Id, index))                            // Harmful
                 return true;
     }
 
@@ -16272,13 +16320,14 @@ Aura * Unit::AddAura(SpellEntry const *spellInfo, uint8 effMask, Unit* target)
     if (target->IsImmunedToSpell(spellInfo))
         return NULL;
 
-    for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    for (uint32 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
     {
-        if (!(effMask & (1<<i)))
+        if (!(effMask & (1 << effIndex)))
             continue;
-        if (target->IsImmunedToSpellEffect(spellInfo, i))
-            effMask &= ~(1<<i);
-    }
+        if ((spellInfo->Effect[effIndex] == SPELL_EFFECT_APPLY_AURA) &&
+            (target->IsImmunedToSpellEffect(spellInfo, effIndex)))
+            effMask &= ~(1 << effIndex);
+    }  
 
     if (Aura* aura = Aura::TryRefreshStackOrCreate(spellInfo, effMask, target, this))
     {
