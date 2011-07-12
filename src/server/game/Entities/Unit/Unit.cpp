@@ -730,7 +730,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             {
                 bg->UpdatePlayerScore(killer, SCORE_DAMAGE_DONE, damage);
                 /** World of Warcraft Armory **/
-                if (Battleground *bgV = ((Player*)pVictim)->GetBattleground())
+                if (Battleground *bgV = ((Player*)Victim)->GetBattleground())
                     bgV->UpdatePlayerScore(((Player*)pVictim), SCORE_DAMAGE_TAKEN, damage);
                 /** World of Warcraft Armory **/
             }
@@ -10212,7 +10212,7 @@ int32 Unit::DealHeal(Unit* victim, uint32 addhealth)
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_HEALING_RECEIVED, gain);
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALING_RECEIVED, addhealth);
         /** World of Warcraft Armory **/
-        if (Battleground *bgV = pVictim->ToPlayer()->GetBattleground())
+        if (Battleground *bgV = Victim->ToPlayer()->GetBattleground())
             bgV->UpdatePlayerScore((Player*)pVictim, SCORE_HEALING_TAKEN, gain);
         /** World of Warcraft Armory **/
     }
