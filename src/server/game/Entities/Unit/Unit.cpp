@@ -6767,9 +6767,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         if (beaconTarget->IsWithinLOSInMap(victim))
                         {
                             basepoints0 = damage;
-                            triggered_spell_id = 53654;
-                            target = beaconTarget;
-                            break;
+                            victim->CastCustomSpell(beaconTarget, 53654, &basepoints0, NULL, NULL, true);
+                            return true;
                         }
                     }
                 }
