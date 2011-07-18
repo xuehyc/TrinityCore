@@ -954,13 +954,13 @@ public:
 };
 
 /*######
-* npc_crok_scourgebane
+* npc_crok_scourgebane_at
 ######*/
 
-class npc_crok_scourgebane : public CreatureScript
+class npc_crok_scourgebane_at : public CreatureScript
 {
 public:
-	npc_crok_scourgebane(): CreatureScript("npc_crok_scourgebane"){}
+	npc_crok_scourgebane_at(): CreatureScript("npc_crok_scourgebane_at"){}
 
 	bool OnGossipHello(Player* pPlayer, Creature* pCreature)
 	{
@@ -1397,7 +1397,7 @@ void AddSC_icecrown()
     new npc_justicar_mariel_trueheart;
     new npc_crusader_rhydalla;
     new npc_eadric_the_pure;
-    new npc_crok_scourgebane;
+    new npc_crok_scourgebane_at;
     new npc_valis_windchaser;
     new npc_rugan_steelbelly;
     new npc_jeran_lockwood;
