@@ -156,6 +156,8 @@ struct boss_twin_baseAI : public ScriptedAI
         me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
         me->SetFlying(true); */
         m_bIsBerserk = false;
+        if (m_pInstance)
+         m_pInstance->SetData(TYPE_VALKIRIES, NOT_STARTED);
 
         m_uiWaveCount = 1;
         m_uiColorballsTimer = 15*IN_MILLISECONDS;
