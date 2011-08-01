@@ -351,7 +351,7 @@ class boss_gothik : public CreatureScript
                 return false;
             }
 
-            void SpellHit(Unit* /*caster*/, SpellEntry const* spell)
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
             {
                 uint32 spellId = 0;
                 switch(spell->Id)
@@ -368,7 +368,7 @@ class boss_gothik : public CreatureScript
                 }
             }
 
-            void SpellHitTarget(Unit* target, SpellEntry const* spell)
+            void SpellHitTarget(Unit* target, SpellInfo const* spell)
             {
                 if (!me->isInCombat())
                     return;

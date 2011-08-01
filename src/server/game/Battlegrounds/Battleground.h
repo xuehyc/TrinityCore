@@ -427,8 +427,8 @@ class Battleground
 
         uint32 GetReviveQueueSize() const { return m_ReviveQueue.size(); }
 
-        void AddPlayerToResurrectQueue(const uint64& npc_guid, const uint64& player_guid);
-        void RemovePlayerFromResurrectQueue(const uint64& player_guid);
+        void AddPlayerToResurrectQueue(const uint64 npc_guid, const uint64 player_guid);
+        void RemovePlayerFromResurrectQueue(const uint64 player_guid);
 
         void StartBattleground();
 
@@ -530,7 +530,7 @@ class Battleground
         virtual void EventPlayerUsedGO(Player* /*player*/, GameObject* /*go*/){}
 
         // this function can be used by spell to interact with the BG map
-        virtual void DoAction(uint32 /*action*/, const uint64& /*var*/) {}
+        virtual void DoAction(uint32 /*action*/, const uint64 /*var*/) {}
 
         virtual void HandlePlayerResurrect(Player* /*player*/) {}
 
@@ -541,10 +541,10 @@ class Battleground
 
         void AddOrSetPlayerToCorrectBgGroup(Player* player, uint32 team);
 
-        virtual void RemovePlayerAtLeave(const uint64& guid, bool Transport, bool SendPacket);
+        virtual void RemovePlayerAtLeave(const uint64 guid, bool Transport, bool SendPacket);
                                                             // can be extended in in BG subclass
 
-        void HandleTriggerBuff(const uint64& go_guid);
+        void HandleTriggerBuff(const uint64 go_guid);
         void SetHoliday(bool is_holiday);
 
         // TODO: make this protected:
@@ -558,7 +558,7 @@ class Battleground
         bool DelCreature(uint32 type);
         bool DelObject(uint32 type);
         bool AddSpiritGuide(uint32 type, float x, float y, float z, float o, uint32 team);
-        int32 GetObjectType(const uint64& guid);
+        int32 GetObjectType(const uint64 guid);
 
         void DoorOpen(uint32 type);
         void DoorClose(uint32 type);
@@ -568,9 +568,9 @@ class Battleground
         virtual bool HandlePlayerUnderMap(Player* /*plr*/) { return false; }
 
         // since arenas can be AvA or Hvh, we have to get the "temporary" team of a player
-        uint32 GetPlayerTeam(const uint64& guid) const;
+        uint32 GetPlayerTeam(const uint64 guid) const;
         uint32 GetOtherTeam(uint32 teamId) const;
-        bool IsPlayerInBattleground(const uint64& guid) const;
+        bool IsPlayerInBattleground(const uint64 guid) const;
 
         void SetDeleteThis() { m_SetDeleteThis = true; }
 
@@ -585,7 +585,7 @@ class Battleground
         void EndNow();
         void PlayerAddedToBGCheckIfBGIsRunning(Player* plr);
 
-        Player* _GetPlayer(const uint64& guid, bool offlineRemove, const char* context) const;
+        Player* _GetPlayer(const uint64 guid, bool offlineRemove, const char* context) const;
         Player* _GetPlayer(BattlegroundPlayerMap::iterator itr, const char* context);
         Player* _GetPlayer(BattlegroundPlayerMap::const_iterator itr, const char* context) const;
         Player* _GetPlayerForTeam(uint32 teamId, BattlegroundPlayerMap::const_iterator itr, const char* context) const;
