@@ -4112,8 +4112,8 @@ void Unit::HandleAuraEffectsWithMechanic(bool apply, uint32 mechanic_mask, AuraR
             Aura const * aura = iter->second->GetBase();
             if (!except || aura->GetId() != except)
                 for (int32 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
-                    if ((aura->GetSpellProto()->Effect[effIndex] != SPELL_EFFECT_APPLY_AURA) &&
-                        (mechanic_mask & (1 << aura->GetSpellProto()->EffectMechanic[effIndex])))
+                    if ((aura->GetSpellInfo()->Effects[effIndex] != SPELL_EFFECT_APPLY_AURA) &&
+                        (mechanic_mask & (1 << aura->GetSpellInfo()->EffectMechanic[effIndex])))
                         iter->second->HandleEffect(effIndex, true);
         }
         return;
@@ -4125,14 +4125,14 @@ void Unit::HandleAuraEffectsWithMechanic(bool apply, uint32 mechanic_mask, AuraR
             Aura const * aura = iter->second->GetBase();
             if (!except || aura->GetId() != except)
             {
-                if ((1 << aura->GetSpellProto()->Mechanic) & mechanic_mask)
+                if ((1 << aura->GetSpellInfo()->Mechanic) & mechanic_mask)
                 {
                     RemoveAura(iter, removemode);
                     continue;
                 }
                 bool cont = false;
                 for (int32 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
-                    if (mechanic_mask & (1 << aura->GetSpellProto()->EffectMechanic[effIndex]))
+                    if (mechanic_mask & (1 << aura->GetSpellInfo()->EffectMechanic[effIndex]))
                     {
                         iter->second->HandleEffect(effIndex, false);
                         if (!iter->second->GetEffectMask())
@@ -16412,7 +16412,7 @@ Aura* Unit::AddAura(SpellInfo const* spellInfo, uint8 effMask, Unit* target)
     {
         if (!(effMask & (1 << effIndex)))
             continue;
-        if ((spellInfo->Effect[effIndex] == SPELL_EFFECT_APPLY_AURA) &&
+        if ((spellInfo->Effects[effIndex] == SPELL_EFFECT_APPLY_AURA) &&
             (target->IsImmunedToSpellEffect(spellInfo, effIndex)))
             effMask &= ~(1 << effIndex);
     }  

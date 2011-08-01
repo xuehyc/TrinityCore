@@ -519,9 +519,9 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
                 uint8 effReapply = 0;
                 for (uint32 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
                     if (existing->second & (1 << effIndex))
-                        if ((GetSpellProto()->Effect[effIndex] != SPELL_EFFECT_APPLY_AURA) &&
-                            (GetSpellProto()->EffectMechanic[effIndex]) &&
-                            (!appIter->second->GetTarget()->IsImmunedToSpellEffect(GetSpellProto(), effIndex)))
+                        if ((GetSpellInfo()->Effects[effIndex] != SPELL_EFFECT_APPLY_AURA) &&
+                            (GetSpellInfo()->EffectMechanic[effIndex]) &&
+                            (!appIter->second->GetTarget()->IsImmunedToSpellEffect(GetSpellInfo(), effIndex)))
                             effReapply |= (1 << effIndex);
                 if (effReapply)
                     targetsToReapply[appIter->second->GetTarget()] = std::make_pair<AuraApplication *, uint8>(appIter->second, effReapply);
@@ -568,8 +568,8 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
         {
             for (uint32 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
                 if (itr->second & (1 << effIndex))
-                    if ((GetSpellProto()->EffectMechanic[effIndex]) &&
-                        (itr->first->IsImmunedToSpellEffect(GetSpellProto(), effIndex)))
+                    if ((GetSpellInfo()->EffectMechanic[effIndex]) &&
+                        (itr->first->IsImmunedToSpellEffect(GetSpellInfo(), effIndex)))
                         itr->second &= ~(1 << effIndex);
 
             if (!itr->second)
@@ -1696,7 +1696,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     else
                         target->RemoveAurasDueToSpell(64364, GetCasterGUID());
                     break;
-            if (GetSpellSpecific(GetSpellProto()) == SPELL_SPECIFIC_AURA)
+            if (GetSpellSpecific(GetSpellInfo()) == SPELL_SPECIFIC_AURA)
 	  	  {
                 // Improved devotion aura
                 if (caster->HasAura(20140) || caster->HasAura(20138) || caster->HasAura(20139))
@@ -1705,7 +1705,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     else target->RemoveAura(63514);
                 // 63531 - linked aura for both Sanctified Retribution and Swift Retribution talents
                 // Not allow for Retribution Aura (prevent stacking)
-                if ((GetSpellProto()->SpellIconID != 555) && (caster->HasAura(53648) || caster->HasAura(53484) || caster->HasAura(53379) || caster->HasAura(31869)))
+                if ((GetSpellInfo()->SpellIconID != 555) && (caster->HasAura(53648) || caster->HasAura(53484) || caster->HasAura(53379) || caster->HasAura(31869)))
                     if (apply)
                         target->CastSpell(target, 63531, true);
                     else target->RemoveAura(63531);
