@@ -86,7 +86,7 @@ void BattlegroundDS::Update(uint32 diff)
                 {
                         for(BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end();itr++)
                         {
-                                Player * plr = sObjectMgr->GetPlayer(itr->first);
+                                Player *plr = ObjectAccessor::FindPlayer(itr->first);
                                 if (plr->GetTeam() == ALLIANCE && plr->GetDistance2d(1214, 765) <= 50 && plr->GetPositionZ() > 10)
                                         KnockBackPlayer(plr, 6.15f, 50.00f, 7.00f);
                                 if (plr->GetTeam() == HORDE && plr->GetDistance2d(1369, 817) <= 50 && plr->GetPositionZ() > 10)
