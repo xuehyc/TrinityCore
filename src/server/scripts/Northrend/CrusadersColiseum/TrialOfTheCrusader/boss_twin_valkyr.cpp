@@ -149,15 +149,17 @@ struct boss_twin_baseAI : public ScriptedAI
     Position HomeLocation;
     Position EssenceLocation[2];
 
-    void Reset() {
+    void Reset()
+    {
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
         me->SetReactState(REACT_PASSIVE);
         /* Uncomment this once that they are flying above the ground
         me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
         me->SetFlying(true); */
         m_bIsBerserk = false;
+
         if (m_pInstance)
-         m_pInstance->SetData(TYPE_VALKIRIES, NOT_STARTED);
+            m_pInstance->SetData(TYPE_VALKIRIES, NOT_STARTED);
 
         m_uiWaveCount = 1;
         m_uiColorballsTimer = 15*IN_MILLISECONDS;
