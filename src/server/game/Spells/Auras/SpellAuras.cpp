@@ -519,8 +519,8 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
                 uint8 effReapply = 0;
                 for (uint32 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
                     if (existing->second & (1 << effIndex))
-                        if ((GetSpellInfo()->Effects[effIndex] != SPELL_EFFECT_APPLY_AURA) &&
-                            (GetSpellInfo()->EffectMechanic[effIndex]) &&
+                        if ((GetSpellInfo()->Effects[effIndex].Effect != SPELL_EFFECT_APPLY_AURA) &&
+                            (GetSpellInfo()->Effects[effIndex].Mechanic) &&
                             (!appIter->second->GetTarget()->IsImmunedToSpellEffect(GetSpellInfo(), effIndex)))
                             effReapply |= (1 << effIndex);
                 if (effReapply)
@@ -562,13 +562,13 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
 
         bool addUnit = true;
         // check target immunities
-        if (itr->first->IsImmunedToSpell(GetSpellInfo())
+        if (itr->first->IsImmunedToSpell(GetSpellInfo()))
             addUnit = false;
         else
         {
             for (uint32 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
                 if (itr->second & (1 << effIndex))
-                    if ((GetSpellInfo()->EffectMechanic[effIndex]) &&
+                    if ((GetSpellInfo()->Effects[effIndex].Mechanic) &&
                         (itr->first->IsImmunedToSpellEffect(GetSpellInfo(), effIndex)))
                         itr->second &= ~(1 << effIndex);
 
@@ -1696,7 +1696,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     else
                         target->RemoveAurasDueToSpell(64364, GetCasterGUID());
                     break;
-            if (GetSpellSpecific(GetSpellInfo()) == SPELL_SPECIFIC_AURA)
+            if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_AURA)
 	  	  {
                 // Improved devotion aura
                 if (caster->HasAura(20140) || caster->HasAura(20138) || caster->HasAura(20139))
