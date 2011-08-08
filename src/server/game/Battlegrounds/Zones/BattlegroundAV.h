@@ -1534,12 +1534,9 @@ class BattlegroundAVScore : public BattlegroundScore
 
 class BattlegroundAV : public Battleground
 {
-    friend class BattlegroundMgr;
-
     public:
         BattlegroundAV();
         ~BattlegroundAV();
-        void Update(uint32 diff);
 
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player *plr);
@@ -1571,6 +1568,8 @@ class BattlegroundAV : public Battleground
         bool IsAllTowersControlledAndCaptainAlive(uint32 team) const;
 
     private:
+        virtual void PostUpdateImpl(uint32 diff);
+
         /* Nodes occupying */
         void EventPlayerAssaultsPoint(Player* player, uint32 object);
         void EventPlayerDefendsPoint(Player* player, uint32 object);

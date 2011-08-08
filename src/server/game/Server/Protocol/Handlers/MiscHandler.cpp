@@ -495,14 +495,6 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket & recv_data)
     recv_data >> guid;
 
     _player->SetSelection(guid);
-
-    // update reputation list if need
-    Unit* unit = ObjectAccessor::GetUnit(*_player, guid);
-    if (!unit)
-        return;
-
-    if (FactionTemplateEntry const* factionTemplateEntry = sFactionTemplateStore.LookupEntry(unit->getFaction()))
-        _player->GetReputationMgr().SetVisible(factionTemplateEntry);
 }
 
 void WorldSession::HandleStandStateChangeOpcode(WorldPacket & recv_data)

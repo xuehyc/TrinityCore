@@ -320,6 +320,9 @@ class SpellScript : public _SpellScript
         // Creates item. Calls Spell::DoCreateItem method.
         void CreateItem(uint32 effIndex, uint32 itemId);
 
+        // Returns SpellInfo from the spell that triggered the current one
+        SpellInfo const* GetTriggeringSpell();
+
         // finishes spellcast prematurely with selected error message
         void FinishCast(SpellCastResult result);
 
@@ -585,7 +588,7 @@ class AuraScript : public _SpellScript
         uint32 GetId() const;
 
         // returns guid of object which casted the aura (m_originalCaster of the Spell class)
-        uint64 const GetCasterGUID() const;
+        uint64 GetCasterGUID() const;
         // returns unit which casted the aura or NULL if not avalible (caster logged out for example)
         Unit* GetCaster() const;
         // returns object on which aura was casted, target for non-area auras, area aura source for area auras

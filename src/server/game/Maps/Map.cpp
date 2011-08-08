@@ -544,7 +544,7 @@ void Map::Update(const uint32 t_diff)
     {
         Player* plr = m_mapRefIter->getSource();
 
-        if (!plr->IsInWorld())
+        if (!plr || !plr->IsInWorld())
             continue;
 
         // update players at tick
@@ -559,7 +559,7 @@ void Map::Update(const uint32 t_diff)
         WorldObject* obj = *m_activeNonPlayersIter;
         ++m_activeNonPlayersIter;
 
-        if (!obj->IsInWorld())
+        if (!obj || !obj->IsInWorld())
             continue;
 
         VisitNearbyCellsOf(obj, grid_object_update, world_object_update);
@@ -1869,8 +1869,8 @@ void Map::UpdateObjectsVisibilityFor(Player* player, Cell cell, CellPair cellpai
     cell.SetNoCreate();
     TypeContainerVisitor<Trinity::VisibleNotifier, WorldTypeMapContainer > world_notifier(notifier);
     TypeContainerVisitor<Trinity::VisibleNotifier, GridTypeMapContainer  > grid_notifier(notifier);
-    cell.Visit(cellpair, world_notifier, *this, *player, player->GetVisibilityRange());
-    cell.Visit(cellpair, grid_notifier,  *this, *player, player->GetVisibilityRange());
+    cell.Visit(cellpair, world_notifier, *this, *player, player->GetSightRange());
+    cell.Visit(cellpair, grid_notifier,  *this, *player, player->GetSightRange());
 
     // send data
     notifier.SendToSelf();
