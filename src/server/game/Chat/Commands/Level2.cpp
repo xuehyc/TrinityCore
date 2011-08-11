@@ -307,7 +307,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         Field* fields = result->Fetch();
         username = fields[0].GetString();
         security = fields[1].GetUInt32();
-        email = fields[2].GetString();
+        email = "---@---.--"
         muteTime = fields[5].GetUInt64();
 
         if (email.empty())
