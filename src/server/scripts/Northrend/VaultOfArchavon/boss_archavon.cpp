@@ -25,6 +25,7 @@
 #define SPELL_CRUSHING_LEAP      RAID_MODE(58960, 60894)//Instant (10-80yr range) -- Leaps at an enemy, inflicting 8000 Physical damage, knocking all nearby enemies away, and creating a cloud of choking debris.
 #define SPELL_STOMP              RAID_MODE(58663, 60880)
 #define SPELL_IMPALE             RAID_MODE(58666, 60882) //Lifts an enemy off the ground with a spiked fist, inflicting 47125 to 52875 Physical damage and 9425 to 10575 additional damage each second for 8 sec.
+#define SPELL_CHOKING_CLOUD      RAID_MODE(58965, 61672)
 #define SPELL_BERSERK            47008
 //Spells Archavon Warders
 #define SPELL_ROCK_SHOWER        RAID_MODE(60919, 60923)
@@ -94,8 +95,11 @@ class boss_archavon : public CreatureScript
                             events.ScheduleEvent(EVENT_ROCK_SHARDS, 15000);
                             break;
                         case EVENT_CHOKING_CLOUD:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                            {
                                 DoCast(target, SPELL_CRUSHING_LEAP, true); //10y~80y, ignore range
+                                DoCast(target, SPELL_CHOKING_CLOUD, true);
+                            }
                             events.ScheduleEvent(EVENT_CHOKING_CLOUD, 30000);
                             break;
                         case EVENT_STOMP:

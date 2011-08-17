@@ -242,6 +242,7 @@ class mob_tempest_minion : public CreatureScript
                     {
                         if (overchargedAura->GetStackAmount() == 10)
                         {
+                            me->RemoveAurasDueToSpell(SPELL_OVERCHARGED);
                             DoCast(me, SPELL_OVERCHARGED_BLAST);
                             me->DespawnOrUnsummon();
                             DoScriptText(EMOTE_MINION_RESPAWN, me);
