@@ -240,6 +240,7 @@ class ValithriaDespawner : public BasicEvent
                 case NPC_GLUTTONOUS_ABOMINATION:
                 case NPC_MANA_VOID:
                 case NPC_COLUMN_OF_FROST:
+                case NPC_ROT_WORM:
                     creature->DespawnOrUnsummon();
                     return;
                 case NPC_RISEN_ARCHMAGE:
@@ -1177,7 +1178,7 @@ class spell_dreamwalker_summoner : public SpellScriptLoader
 
             void FilterTargets(std::list<Unit*>& targets)
             {
-                targets.remove_if(SummonTargetSelector());
+                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
                 if (targets.empty())
                     return;
 
