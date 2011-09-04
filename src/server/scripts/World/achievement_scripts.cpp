@@ -1,4 +1,4 @@
-/*
+2 /*
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -23,7 +23,6 @@
 #include "BattlegroundSA.h"
 #include "BattlegroundAV.h"
 #include "Vehicle.h"
-#include "BattlegroundAV.h"
 
 class achievement_storm_glory : public AchievementCriteriaScript
 {
@@ -207,48 +206,6 @@ public:
 
         return false;
     }
-};
-
-class achievement_everything_counts : public AchievementCriteriaScript
-{
-    public:
-        achievement_everything_counts() : AchievementCriteriaScript("achievement_everything_counts") { }
-
-        bool OnCheck(Player* source, Unit* /*target*/)
-        {
-            Battleground* bg = source->GetBattleground();
-            if (!bg)
-                return false;
-
-            if (source->GetBattlegroundTypeId() != BATTLEGROUND_AV)
-                return false;
-
-            if (static_cast<BattlegroundAV*>(bg)->IsBothMinesControlledByTeam(source->GetTeam()))
-                return true;
-
-            return false;
-        }
-};
-
-class achievement_bg_av_perfection : public AchievementCriteriaScript
-{
-    public:
-        achievement_bg_av_perfection() : AchievementCriteriaScript("achievement_bg_av_perfection") { }
-
-        bool OnCheck(Player* source, Unit* /*target*/)
-        {
-            Battleground* bg = source->GetBattleground();
-            if (!bg)
-                return false;
-
-            if (source->GetBattlegroundTypeId() != BATTLEGROUND_AV)
-                return false;
-
-            if (static_cast<BattlegroundAV*>(bg)->IsAllTowersControlledAndCaptainAlive(source->GetTeam()))
-                return true;
-
-            return false;
-        }
 };
 
 class achievement_wg_didnt_stand_a_chance : public AchievementCriteriaScript
