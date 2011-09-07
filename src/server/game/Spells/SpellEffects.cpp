@@ -405,6 +405,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         damage = (distance > radius) ? 0 : int32(m_spellInfo->Effects[EFFECT_0].CalcValue(m_caster) * distance);
                         break;
                     }
+                    // Emalon's Lightning Nova
+                    case 65279:
+                    {
+                        float radius = m_spellInfo->Effects[EFFECT_0].CalcRadius(m_caster);
+                        if (!radius)
+                            return;
+                        float distance = m_caster->GetDistance2d(unitTarget);
+                        if (distance > 2.0f)
+                            damage = (int32(m_spellInfo->Effects[EFFECT_0].CalcValue(m_caster) / distance) * 2);
+                        break;
+                    }
                     // TODO: add spell specific target requirement hook for spells
                     // Shadowbolts only affects targets with Shadow Mark (Gothik)
                     case 27831:
