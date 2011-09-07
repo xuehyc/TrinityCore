@@ -367,7 +367,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //311 0 spells in 3.3.5
     &AuraEffect::HandleNULL,                                      //312 0 spells in 3.3.5
     &AuraEffect::HandleNULL,                                      //313 0 spells in 3.3.5
-    &AuraEffect::HandlePreventResurrection,                       //314 SPELL_AURA_PREVENT_RESSURECTION todo
+    &AuraEffect::HandlePreventResurrection,                       //314 SPELL_AURA_PREVENT_RESURRECTION todo
     &AuraEffect::HandleNoImmediateEffect,                         //315 SPELL_AURA_UNDERWATER_WALKING todo
     &AuraEffect::HandleNoImmediateEffect,                         //316 SPELL_AURA_PERIODIC_HASTE implemented in AuraEffect::CalculatePeriodic
 };
@@ -4524,7 +4524,7 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
     }
     else
     {
-        // done in Player::_ApplyWeaponDependentAuraMods for !SPELL_SCHOOL_MASK_NORMAL and also for wand case
+        // done in Player::_ApplyWeaponDependentAuraMods for SPELL_SCHOOL_MASK_NORMAL && EquippedItemClass != -1 and also for wand case
     }
 }
 
@@ -5233,12 +5233,11 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             {
                 if (apply)
                 {
-                    uint64 guid = caster->m_SummonSlot[3];
-                    if (guid)
+                    if (uint64 guid = caster->m_SummonSlot[4])
                     {
-                        Creature* totem = caster->GetMap()->GetCreature(guid);
-                        if (totem && totem->isTotem())
-                            caster->ToPlayer()->CastSpell(totem, 6277, true);
+                        if (Creature* totem = caster->GetMap()->GetCreature(guid))
+                            if (totem->isTotem())
+                                caster->ToPlayer()->CastSpell(totem, 6277, true);
                     }
                 }
                 else
