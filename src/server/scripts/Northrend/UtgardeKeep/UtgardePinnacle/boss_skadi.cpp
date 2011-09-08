@@ -134,11 +134,15 @@ enum eSpells
 {
     //Skadi Spells
     SPELL_CRUSH             = 50234,
-    SPELL_POISONED_SPEAR    = 50225, //isn't being casted =/
-    SPELL_WHIRLWIND         = 50228, //random target, but not the tank approx. every 20s
+    SPELL_CRUSH_H           = 59330,
+    SPELL_POISONED_SPEAR    = 50255,
+    SPELL_POISONED_SPEAR_H  = 59331,
+    SPELL_WHIRLWIND         = 50228,
+    SPELL_WHIRLWIND_H       = 59322, //random target, but not the tank approx. every 20s
     SPELL_RAPID_FIRE        = 56570,
     SPELL_HARPOON_DAMAGE    = 56578,
     SPELL_FREEZING_CLOUD    = 47579,
+    SPELL_FREEZING_CLOUD_H  = 60020
 };
 
 enum eCreature
@@ -262,7 +266,7 @@ public:
                         summoned->AI()->AttackStart(target);
                     break;
                 case CREATURE_TRIGGER:
-                    summoned->CastSpell((Unit*)NULL, SPELL_FREEZING_CLOUD, true);
+                    summoned->CastSpell((Unit*)NULL, DUNGEON_MODE(SPELL_FREEZING_CLOUD, SPELL_FREEZING_CLOUD_H), true);
                     summoned->DespawnOrUnsummon(10*IN_MILLISECONDS);
                     break;
             }
@@ -310,7 +314,7 @@ public:
                     if (!UpdateVictim())
                         return;
 
-                    if (me->GetPositionX() >= 519)
+                    if (me->GetPositionX() >= 512)
                     {
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                         if (!m_bSaidEmote)
@@ -385,20 +389,20 @@ public:
 
                     if (m_uiCrushTimer <= diff)
                     {
-                        DoCastVictim(SPELL_CRUSH);
+                        DoCastVictim(DUNGEON_MODE(SPELL_CRUSH, SPELL_CRUSH_H));
                         m_uiCrushTimer = 8000;
                     } else m_uiCrushTimer -= diff;
 
                     if (m_uiPoisonedSpearTimer <= diff)
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
-                            DoCast(target, SPELL_POISONED_SPEAR);
+                            DoCast(target, DUNGEON_MODE(SPELL_POISONED_SPEAR, SPELL_POISONED_SPEAR_H));
                         m_uiPoisonedSpearTimer = 10000;
                     } else m_uiPoisonedSpearTimer -= diff;
 
                     if (m_uiWhirlwindTimer <= diff)
                     {
-                        DoCastAOE(SPELL_WHIRLWIND);
+                        DoCastAOE(DUNGEON_MODE(SPELL_WHIRLWIND, SPELL_WHIRLWIND_H));
                         m_uiWhirlwindTimer = 20000;
                     } else m_uiWhirlwindTimer -= diff;
 
