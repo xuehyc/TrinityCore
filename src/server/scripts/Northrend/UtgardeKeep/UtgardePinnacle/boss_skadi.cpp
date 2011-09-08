@@ -134,15 +134,11 @@ enum eSpells
 {
     //Skadi Spells
     SPELL_CRUSH             = 50234,
-    SPELL_CRUSH_H           = 59330,
     SPELL_POISONED_SPEAR    = 50255,
-    SPELL_POISONED_SPEAR_H  = 59331,
-    SPELL_WHIRLWIND         = 50228,
-    SPELL_WHIRLWIND_H       = 59322, //random target, but not the tank approx. every 20s
+    SPELL_WHIRLWIND         = 50228, //random target, but not the tank approx. every 20s
     SPELL_RAPID_FIRE        = 56570,
     SPELL_HARPOON_DAMAGE    = 56578,
-    SPELL_FREEZING_CLOUD    = 47579,
-    SPELL_FREEZING_CLOUD_H  = 60020
+    SPELL_FREEZING_CLOUD    = 47579
 };
 
 enum eCreature
@@ -266,7 +262,7 @@ public:
                         summoned->AI()->AttackStart(target);
                     break;
                 case CREATURE_TRIGGER:
-                    summoned->CastSpell((Unit*)NULL, DUNGEON_MODE(SPELL_FREEZING_CLOUD, SPELL_FREEZING_CLOUD_H), true);
+                    summoned->CastSpell((Unit*)NULL, SPELL_FREEZING_CLOUD, true);
                     summoned->DespawnOrUnsummon(10*IN_MILLISECONDS);
                     break;
             }
@@ -389,20 +385,20 @@ public:
 
                     if (m_uiCrushTimer <= diff)
                     {
-                        DoCastVictim(DUNGEON_MODE(SPELL_CRUSH, SPELL_CRUSH_H));
+                        DoCastVictim(SPELL_CRUSH);
                         m_uiCrushTimer = 8000;
                     } else m_uiCrushTimer -= diff;
 
                     if (m_uiPoisonedSpearTimer <= diff)
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
-                            DoCast(target, DUNGEON_MODE(SPELL_POISONED_SPEAR, SPELL_POISONED_SPEAR_H));
+                            DoCast(target, SPELL_POISONED_SPEAR);
                         m_uiPoisonedSpearTimer = 10000;
                     } else m_uiPoisonedSpearTimer -= diff;
 
                     if (m_uiWhirlwindTimer <= diff)
                     {
-                        DoCastAOE(DUNGEON_MODE(SPELL_WHIRLWIND, SPELL_WHIRLWIND_H));
+                        DoCastAOE(SPELL_WHIRLWIND);
                         m_uiWhirlwindTimer = 20000;
                     } else m_uiWhirlwindTimer -= diff;
 
