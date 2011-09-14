@@ -496,7 +496,7 @@ public:
 const uint32 ArgentTournamentVendor[10][4] =
 {
 	{33553,13726,2,14460}, // Orc
-	{33554,13726,8,14464}, // Troll
+	{33554,13727,8,14464}, // Troll
 	{33556,13728,6,14458}, // Tauren
 	{33555,13729,5,14459}, // Undead
 	{33557,13731,10,14465}, // Blood Elf
@@ -524,7 +524,7 @@ public:
 			if(pCreature->GetEntry() == ArgentTournamentVendor[i][0])
 			{
 				npcCheck = true;
-				questCheck = pPlayer->GetQuestStatus(ArgentTournamentVendor[i][1]) == QUEST_STATUS_COMPLETE;
+				questCheck = pPlayer->GetQuestStatus(ArgentTournamentVendor[i][1]) == QUEST_STATUS_REWARDED;
 				raceCheck = pPlayer->getRace() == ArgentTournamentVendor[i][2];
 				textId = ArgentTournamentVendor[i][3];
 			}
