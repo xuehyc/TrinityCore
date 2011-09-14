@@ -1973,7 +1973,7 @@ void SpellMgr::LoadSpellThreats()
         ste.apPctMod = fields[3].GetFloat();
 
         mSpellThreatMap[entry] = ste;
-        count++;
+        ++count;
     } while (result->NextRow());
 
     sLog->outString(">> Loaded %u SpellThreatEntries in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
@@ -1988,7 +1988,7 @@ void SpellMgr::LoadSkillLineAbilityMap()
 
     uint32 count = 0;
 
-    for (uint32 i = 0; i < sSpellMgr->GetSpellInfoStoreSize(); ++i)
+    for (uint32 i = 0; i < sSkillLineAbilityStore.GetNumRows(); ++i)
     {
         SkillLineAbilityEntry const* SkillInfo = sSkillLineAbilityStore.LookupEntry(i);
         if (!SkillInfo)
@@ -3232,6 +3232,11 @@ void SpellMgr::LoadDbcDataCorrections()
                 // may be db data bug, or blizz may keep reapplying area auras every update with checking immunity
                 // that will be clear if we get more spells with problem like this
                 spellInfo->AttributesEx |= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;
+                break;
+            case 62584: // Lifebinder's Gift
+            case 64185: // Lifebinder's Gift
+                spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_NEARBY_ENTRY;
+                spellInfo->EffectImplicitTargetB[2] = TARGET_UNIT_NEARBY_ENTRY;
                 break;
             // ENDOF ULDUAR SPELLS
             //

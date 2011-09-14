@@ -2902,7 +2902,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         return;
     }
 
-    if (sDisableMgr->IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, m_caster))
+    if (DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, m_caster))
     {
         SendCastResult(SPELL_FAILED_SPELL_UNAVAILABLE);
         finish(false);
@@ -3061,25 +3061,11 @@ void Spell::cast(bool skipCheck)
     // update pointers base at GUIDs to prevent access to non-existed already object
     UpdatePointers();
 
-    if (Unit* target = m_targets.GetUnitTarget())
+    // cancel at lost explicit target during cast
+    if (m_targets.GetObjectTargetGUID() && !m_targets.GetObjectTarget())
     {
-        // three check: prepare, cast (m_casttime > 0), hit (delayed)
-        if (m_casttime && target->isAlive() && !target->IsFriendlyTo(m_caster) && !m_caster->canSeeOrDetect(target))
-        {
-            SendCastResult(SPELL_FAILED_BAD_TARGETS);
-            SendInterrupted(0);
-            finish(false);
-            return;
-        }
-    }
-    else
-    {
-        // cancel at lost main target unit
-        if (m_targets.GetUnitTargetGUID() && m_targets.GetUnitTargetGUID() != m_caster->GetGUID())
-        {
-            cancel();
-            return;
-        }
+        cancel();
+        return;
     }
 
     // now that we've done the basic check, now run the scripts
@@ -3100,8 +3086,8 @@ void Spell::cast(bool skipCheck)
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, true);
     }
 
-    // triggered cast called from Spell::prepare where it was already checked
-    if (!IsTriggered() || !skipCheck)
+    // skip check if done already (for instant cast spells for example)
+    if (!skipCheck)
     {
         SpellCastResult castResult = CheckCast(false);
         if (castResult != SPELL_CAST_OK)

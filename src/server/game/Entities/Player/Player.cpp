@@ -73,6 +73,7 @@
 #include "CharacterDatabaseCleaner.h"
 #include "InstanceScript.h"
 #include <cmath>
+#include "AccountMgr.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -654,7 +655,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     //m_pad = 0;
 
     // players always accept
-    if (GetSession()->GetSecurity() == SEC_PLAYER)
+    if (AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
         SetAcceptWhispers(true);
 
     m_curSelection = 0;
@@ -996,7 +997,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
         ? sWorld->getIntConfig(CONFIG_START_PLAYER_LEVEL)
         : sWorld->getIntConfig(CONFIG_START_HEROIC_PLAYER_LEVEL);
 
-    if (GetSession()->GetSecurity() >= SEC_MODERATOR)
+    if (!AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
     {
         uint32 gm_level = sWorld->getIntConfig(CONFIG_START_GM_LEVEL);
         if (gm_level > start_level)
@@ -2085,7 +2086,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         return false;
     }
 
-    if ((GetSession()->GetSecurity() < SEC_GAMEMASTER) && sDisableMgr->IsDisabledFor(DISABLE_TYPE_MAP, mapid, this))
+    if (AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()) && DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, mapid, this))
     {
         sLog->outError("Player (GUID: %u, name: %s) tried to enter a forbidden map %u", GetGUIDLow(), GetName(), mapid);
         SendTransferAborted(mapid, TRANSFER_ABORT_MAP_NOT_ALLOWED);
@@ -2325,6 +2326,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
 bool Player::TeleportToBGEntryPoint()
 {
+    if (m_bgData.joinPos.m_mapId == MAPID_INVALID)
+        return false;
+
     ScheduleDelayedOperation(DELAYED_BG_MOUNT_RESTORE);
     ScheduleDelayedOperation(DELAYED_BG_TAXI_RESTORE);
     return TeleportTo(m_bgData.joinPos);
@@ -3116,7 +3120,7 @@ void Player::InitTalentForLevel()
         // if used more that have then reset
         if (m_usedTalentCount > talentPointsForLevel)
         {
-            if (GetSession()->GetSecurity() < SEC_ADMINISTRATOR)
+            if (!AccountMgr::IsAdminAccount(GetSession()->GetSecurity()))
                 resetTalents(true);
             else
                 SetFreeTalentPoints(0);
@@ -5756,35 +5760,37 @@ float Player::GetMeleeCritFromAgility()
     return crit*100.0f;
 }
 
-float Player::GetDodgeFromAgility()
+void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
 {
     // Table for base dodge values
-    float dodge_base[MAX_CLASSES] = {
-         0.0075f,   // Warrior
-         0.00652f,  // Paladin
-        -0.0545f,   // Hunter
-        -0.0059f,   // Rogue
-         0.03183f,  // Priest
-         0.0114f,   // DK
-         0.0167f,   // Shaman
-         0.034575f, // Mage
-         0.02011f,  // Warlock
+    const float dodge_base[MAX_CLASSES] =
+    {
+         0.036640f, // Warrior
+         0.034943f, // Paladi
+        -0.040873f, // Hunter
+         0.020957f, // Rogue
+         0.034178f, // Priest
+         0.036640f, // DK
+         0.021080f, // Shaman
+         0.036587f, // Mage
+         0.024211f, // Warlock
          0.0f,      // ??
-        -0.0187f    // Druid
+         0.056097f  // Druid
     };
-    // Crit/agility to dodge/agility coefficient multipliers
-    float crit_to_dodge[MAX_CLASSES] = {
-         1.1f,      // Warrior
-         1.0f,      // Paladin
-         1.6f,      // Hunter
-         2.0f,      // Rogue
-         1.0f,      // Priest
-         1.0f,      // DK?
-         1.0f,      // Shaman
-         1.0f,      // Mage
-         1.0f,      // Warlock
-         0.0f,      // ??
-         1.7f       // Druid
+    // Crit/agility to dodge/agility coefficient multipliers; 3.2.0 increased required agility by 15%
+    const float crit_to_dodge[MAX_CLASSES] =
+    {
+         0.85f/1.15f,    // Warrior
+         1.00f/1.15f,    // Paladin
+         1.11f/1.15f,    // Hunter
+         2.00f/1.15f,    // Rogue
+         1.00f/1.15f,    // Priest
+         0.85f/1.15f,    // DK
+         1.60f/1.15f,    // Shaman
+         1.00f/1.15f,    // Mage
+         0.97f/1.15f,    // Warlock (?)
+         0.0f,           // ??
+         2.00f/1.15f     // Druid
     };
 
     uint8 level = getLevel();
@@ -5793,13 +5799,18 @@ float Player::GetDodgeFromAgility()
     if (level > GT_MAX_LEVEL)
         level = GT_MAX_LEVEL;
 
-    // Dodge per agility for most classes equal crit per agility (but for some classes need apply some multiplier)
+    // Dodge per agility is proportional to crit per agility, which is available from DBC files
     GtChanceToMeleeCritEntry  const *dodgeRatio = sGtChanceToMeleeCritStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
     if (dodgeRatio == NULL || pclass > MAX_CLASSES)
-        return 0.0f;
+        return;
 
-    float dodge=dodge_base[pclass-1] + GetStat(STAT_AGILITY) * dodgeRatio->ratio * crit_to_dodge[pclass-1];
-    return dodge*100.0f;
+    // TODO: research if talents/effects that increase total agility by x% should increase non-diminishing part
+    float base_agility = GetCreateStat(STAT_AGILITY) * m_auraModifiersGroup[UNIT_MOD_STAT_START + STAT_AGILITY][BASE_PCT];
+    float bonus_agility = GetStat(STAT_AGILITY) - base_agility;
+
+    // calculate diminishing (green in char screen) and non-diminishing (white) contribution
+    diminishing = 100.0f * bonus_agility * dodgeRatio->ratio * crit_to_dodge[pclass-1];
+    nondiminishing = 100.0f * (dodge_base[pclass-1] + base_agility * dodgeRatio->ratio * crit_to_dodge[pclass-1]);
 }
 
 float Player::GetSpellCritFromIntellect()
@@ -14525,7 +14536,7 @@ bool Player::CanSeeStartQuest(Quest const *pQuest)
         SatisfyQuestExclusiveGroup(pQuest, false) && SatisfyQuestReputation(pQuest, false) &&
         SatisfyQuestPreviousQuest(pQuest, false) && SatisfyQuestNextChain(pQuest, false) &&
         SatisfyQuestPrevChain(pQuest, false) && SatisfyQuestDay(pQuest, false) && SatisfyQuestWeek(pQuest, false) &&
-        !sDisableMgr->IsDisabledFor(DISABLE_TYPE_QUEST, pQuest->GetQuestId(), this))
+        !DisableMgr::IsDisabledFor(DISABLE_TYPE_QUEST, pQuest->GetQuestId(), this))
     {
         return getLevel() + sWorld->getIntConfig(CONFIG_QUEST_HIGH_LEVEL_HIDE_DIFF) >= pQuest->GetMinLevel();
     }
@@ -14541,7 +14552,7 @@ bool Player::CanTakeQuest(Quest const *pQuest, bool msg)
         && SatisfyQuestPreviousQuest(pQuest, msg) && SatisfyQuestTimed(pQuest, msg)
         && SatisfyQuestNextChain(pQuest, msg) && SatisfyQuestPrevChain(pQuest, msg)
         && SatisfyQuestDay(pQuest, msg) && SatisfyQuestWeek(pQuest, msg)
-        && !sDisableMgr->IsDisabledFor(DISABLE_TYPE_QUEST, pQuest->GetQuestId(), this)
+        && !DisableMgr::IsDisabledFor(DISABLE_TYPE_QUEST, pQuest->GetQuestId(), this)
         && SatisfyQuestConditions(pQuest, msg);
 }
 
@@ -16512,7 +16523,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     // check name limitations
     if (ObjectMgr::CheckPlayerName(m_name) != CHAR_NAME_SUCCESS ||
-        (GetSession()->GetSecurity() == SEC_PLAYER && sObjectMgr->IsReservedName(m_name)))
+        (AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()) && sObjectMgr->IsReservedName(m_name)))
     {
         CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid ='%u'", uint32(AT_LOGIN_RENAME), guid);
         return false;
@@ -17042,7 +17053,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     outDebugValues();
 
     // GM state
-    if (GetSession()->GetSecurity() > SEC_PLAYER)
+    if (!AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
     {
         switch (sWorld->getIntConfig(CONFIG_GM_LOGIN_STATE))
         {
@@ -18143,7 +18154,7 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
         else if (ar->item2 && !HasItemCount(ar->item2, 1))
             missingItem = ar->item2;
 
-        if (sDisableMgr->IsDisabledFor(DISABLE_TYPE_MAP, target_map, this))
+        if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, target_map, this))
         {
             GetSession()->SendAreaTriggerMessage("%s", GetSession()->GetTrinityString(LANG_INSTANCE_CLOSED));
             return false;
@@ -18968,7 +18979,7 @@ void Player::outDebugValues() const
 void Player::UpdateSpeakTime()
 {
     // ignore chat spam protection for GMs in any mode
-    if (GetSession()->GetSecurity() > SEC_PLAYER)
+    if (!AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
         return;
 
     time_t current = time (NULL);
@@ -20981,7 +20992,6 @@ void Player::SetBattlegroundEntryPoint()
 
         // On taxi we don't need check for dungeon
         m_bgData.joinPos = WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-        return;
     }
     else
     {
@@ -21001,23 +21011,17 @@ void Player::SetBattlegroundEntryPoint()
         if (GetMap()->IsDungeon())
         {
             if (const WorldSafeLocsEntry* entry = sObjectMgr->GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam()))
-            {
                 m_bgData.joinPos = WorldLocation(entry->map_id, entry->x, entry->y, entry->z, 0.0f);
-                return;
-            }
             else
                 sLog->outError("SetBattlegroundEntryPoint: Dungeon map %u has no linked graveyard, setting home location as entry point.", GetMapId());
         }
         // If new entry point is not BG or arena set it
         else if (!GetMap()->IsBattlegroundOrArena())
-        {
             m_bgData.joinPos = WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-            return;
-        }
     }
 
-    // In error cases use homebind position
-    m_bgData.joinPos = WorldLocation(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, 0.0f);
+    if (m_bgData.joinPos.m_mapId == MAPID_INVALID) // In error cases use homebind position
+        m_bgData.joinPos = WorldLocation(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, 0.0f);
 }
 
 void Player::LeaveBattleground(bool teleportToEntryPoint)
@@ -21146,7 +21150,7 @@ bool Player::IsVisibleGloballyFor(Player* u) const
         return true;
 
     // GMs are visible for higher gms (or players are visible for gms)
-    if (u->GetSession()->GetSecurity() > SEC_PLAYER)
+    if (!AccountMgr::IsPlayerAccount(u->GetSession()->GetSecurity()))
         return GetSession()->GetSecurity() <= u->GetSession()->GetSecurity();
 
     // non faction visibility non-breakable for non-GMs
@@ -24164,23 +24168,20 @@ void Player::_SaveBGData(SQLTransaction& trans)
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_PLAYER_BGDATA);
     stmt->setUInt32(0, GetGUIDLow());
     trans->Append(stmt);
-    if (m_bgData.bgInstanceID)
-    {
-        /* guid, bgInstanceID, bgTeam, x, y, z, o, map, taxi[0], taxi[1], mountSpell */
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_ADD_PLAYER_BGDATA);
-        stmt->setUInt32(0, GetGUIDLow());
-        stmt->setUInt32(1, m_bgData.bgInstanceID);
-        stmt->setUInt16(2, m_bgData.bgTeam);
-        stmt->setFloat (3, m_bgData.joinPos.GetPositionX());
-        stmt->setFloat (4, m_bgData.joinPos.GetPositionY());
-        stmt->setFloat (5, m_bgData.joinPos.GetPositionZ());
-        stmt->setFloat (6, m_bgData.joinPos.GetOrientation());
-        stmt->setUInt16(7, m_bgData.joinPos.GetMapId());
-        stmt->setUInt16(8, m_bgData.taxiPath[0]);
-        stmt->setUInt16(9, m_bgData.taxiPath[1]);
-        stmt->setUInt16(10, m_bgData.mountSpell);
-        trans->Append(stmt);
-    }
+    /* guid, bgInstanceID, bgTeam, x, y, z, o, map, taxi[0], taxi[1], mountSpell */
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_ADD_PLAYER_BGDATA);
+    stmt->setUInt32(0, GetGUIDLow());
+    stmt->setUInt32(1, m_bgData.bgInstanceID);
+    stmt->setUInt16(2, m_bgData.bgTeam);
+    stmt->setFloat (3, m_bgData.joinPos.GetPositionX());
+    stmt->setFloat (4, m_bgData.joinPos.GetPositionY());
+    stmt->setFloat (5, m_bgData.joinPos.GetPositionZ());
+    stmt->setFloat (6, m_bgData.joinPos.GetOrientation());
+    stmt->setUInt16(7, m_bgData.joinPos.GetMapId());
+    stmt->setUInt16(8, m_bgData.taxiPath[0]);
+    stmt->setUInt16(9, m_bgData.taxiPath[1]);
+    stmt->setUInt16(10, m_bgData.mountSpell);
+    trans->Append(stmt);
 }
 
 void Player::DeleteEquipmentSet(uint64 setGuid)
