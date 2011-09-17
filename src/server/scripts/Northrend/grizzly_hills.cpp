@@ -326,7 +326,7 @@ public:
         return true;
     }
 
-    CreatureAI *GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_emilyAI(creature);
     }
@@ -377,7 +377,7 @@ public:
         }
     };
 
-    CreatureAI *GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_mrfloppyAI(creature);
     }
@@ -441,7 +441,7 @@ public:
         }
     };
 
-    CreatureAI *GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_outhouse_bunnyAI(creature);
     }
@@ -485,7 +485,7 @@ public:
         }
     };
 
-    CreatureAI *GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_tallhorn_stagAI(creature);
     }
@@ -551,7 +551,7 @@ public:
         }
     };
 
-    CreatureAI *GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_amberpine_woodsmanAI(creature);
     }
@@ -595,7 +595,7 @@ public:
                 me->DespawnOrUnsummon(DespawnTimer);
         }
 
-        void SpellHit(Unit* caster, const SpellInfo *spell)
+        void SpellHit(Unit* caster, const SpellInfo* spell)
         {
             if (spell->Id == SPELL_RENEW_SKIRMISHER && caster->GetTypeId() == TYPEID_PLAYER
                 && caster->ToPlayer()->GetQuestStatus(12288) == QUEST_STATUS_INCOMPLETE)
@@ -621,7 +621,7 @@ public:
         }
     };
 
-    CreatureAI *GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_wounded_skirmisherAI(creature);
     }
@@ -644,7 +644,7 @@ class npc_lightning_sentry : public CreatureScript
 public:
     npc_lightning_sentry() : CreatureScript("npc_lightning_sentry") { }
 
-    CreatureAI *GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_lightning_sentryAI(creature);
     }
@@ -711,7 +711,7 @@ class npc_venture_co_straggler : public CreatureScript
 public:
     npc_venture_co_straggler() : CreatureScript("npc_venture_co_straggler") { }
 
-    CreatureAI *GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_venture_co_stragglerAI(creature);
     }
@@ -785,7 +785,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void SpellHit(Unit* pCaster, const SpellInfo *pSpell)
+        void SpellHit(Unit* pCaster, const SpellInfo* pSpell)
         {
             if (pCaster && pCaster->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_SMOKE_BOMB)
             {

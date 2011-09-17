@@ -31,7 +31,7 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket & recv_data)
 
     sLog->outStaticDebug("WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid));
 
-    Unit *pEnemy = ObjectAccessor::GetUnit(*_player, guid);
+    Unit* pEnemy = ObjectAccessor::GetUnit(*_player, guid);
 
     if (!pEnemy)
     {
@@ -45,7 +45,7 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if (!_player->canAttack(pEnemy))
+    if (!_player->IsValidAttackTarget(pEnemy))
     {
         // stop attack state at client
         SendAttackStop(pEnemy);
