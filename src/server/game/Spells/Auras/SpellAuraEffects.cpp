@@ -3435,9 +3435,7 @@ void AuraEffect::HandleModMechanicImmunity(AuraApplication const* aurApp, uint8 
     }
 
     if (apply && GetSpellInfo()->AttributesEx & SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY)
-        target->HandleAuraEffectsWithMechanic(false, mechanic, AURA_REMOVE_BY_DEFAULT, GetId());
-    else
-        target->HandleAuraEffectsWithMechanic(true, mechanic, AURA_REMOVE_NONE, GetId());
+        target->RemoveAurasWithMechanic(mechanic, AURA_REMOVE_BY_DEFAULT, GetId());
 }
 
 void AuraEffect::HandleAuraModEffectImmunity(AuraApplication const* aurApp, uint8 mode, bool apply) const
