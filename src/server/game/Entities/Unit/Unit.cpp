@@ -9257,6 +9257,7 @@ FactionTemplateEntry const* Unit::getFactionTemplateEntry() const
     return entry;
 }
 
+// function based on function Unit::UnitReaction from 13850 client
 ReputationRank Unit::GetReactionTo(Unit const* target) const
 {
     // always friendly to self
@@ -9286,7 +9287,9 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
 
                 // same group - checks dependant only on our faction - skip FFA_PVP for example
                 if (selfPlayerOwner->IsInRaidWith(targetPlayerOwner))
-                    return GetFactionReactionTo(getFactionTemplateEntry(), target);
+                    return REP_FRIENDLY; // return true to allow config option AllowTwoSide.Interaction.Group to work
+                    // however client seems to allow mixed group parties, because in 13850 client it works like:
+                    // return GetFactionReactionTo(getFactionTemplateEntry(), target);
             }
 
             // check FFA_PVP
@@ -12390,6 +12393,7 @@ bool Unit::IsValidAttackTarget(Unit const* target) const
     return _IsValidAttackTarget(target, NULL);
 }
 
+// function based on function Unit::CanAttack from 13850 client
 bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell) const
 {
     ASSERT(target);
@@ -12457,6 +12461,7 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell) co
             return true;
 
     // PvP case - can't attack when attacker or target are in sanctuary
+    // however, 13850 client doesn't allow to attack when one of the unit's has sanctuary flag and is pvp
     if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE)
         && ((target->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_SANCTUARY) || (GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_SANCTUARY)))
         return false;
@@ -12482,6 +12487,7 @@ bool Unit::IsValidAssistTarget(Unit const* target) const
     return _IsValidAssistTarget(target, NULL);
 }
 
+// function based on function Unit::CanAssist from 13850 client
 bool Unit::_IsValidAssistTarget(Unit const* target, SpellInfo const* bySpell) const
 {
     ASSERT(target);
