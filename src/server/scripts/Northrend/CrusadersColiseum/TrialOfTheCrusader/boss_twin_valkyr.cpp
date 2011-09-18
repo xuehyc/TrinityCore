@@ -296,11 +296,7 @@ struct boss_twin_baseAI : public ScriptedAI
 
             m_pInstance->SetData(TYPE_VALKIRIES, IN_PROGRESS);
         }
-        if (me->isAlive())
-        {
-            me->SummonCreature(m_uiEssenceNpcId, EssenceLocation[0].GetPositionX(), EssenceLocation[0].GetPositionY(), EssenceLocation[0].GetPositionZ());
-            me->SummonCreature(m_uiEssenceNpcId, EssenceLocation[1].GetPositionX(), EssenceLocation[1].GetPositionY(), EssenceLocation[1].GetPositionZ());
-        }
+
         DoScriptText(SAY_AGGRO, me);
         DoCast(me, m_uiSurgeSpellId);
     }
@@ -655,7 +651,7 @@ public:
         void SpellHitTarget(Unit* who, const SpellInfo* /*spell*/)
         {
             if (who->HasAura(SPELL_DARK_ESSENCE_HELPER))
-                who->CastSpell(who, SPELL_POWERING_UP, true);
+                who->CastCustomSpell(SPELL_POWERING_UP, SPELLVALUE_AURA_STACK, urand(6, 9), who, true);
         }
     };
 
@@ -694,7 +690,7 @@ public:
         void SpellHitTarget(Unit* who, const SpellInfo* /*spell*/)
         {
             if (who->HasAura(SPELL_LIGHT_ESSENCE_HELPER))
-                who->CastSpell(who, SPELL_POWERING_UP, true);
+                who->CastCustomSpell(SPELL_POWERING_UP, SPELLVALUE_AURA_STACK, urand(6, 9), who, true);
         }
     };
 
