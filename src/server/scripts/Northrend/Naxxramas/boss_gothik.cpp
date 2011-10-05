@@ -208,12 +208,6 @@ class boss_gothik : public CreatureScript
                     instance->SetData(DATA_GOTHIK_GATE, GO_STATE_READY);
             }
 
-            void DamageTaken(Unit* /*pSource*/, uint32 &uiDamage)
-            {
-                if (!phaseTwo)
-                    uiDamage = 0;
-            }
-
             void JustSummoned(Creature* summon)
             {
                 if (summon->GetEntry() == WORLD_TRIGGER)
