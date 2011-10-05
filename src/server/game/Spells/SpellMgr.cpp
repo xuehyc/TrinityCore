@@ -1135,7 +1135,7 @@ void SpellMgr::LoadSpellRanks()
     }
     mSpellChains.clear();
 
-    QueryResult result = WorldDatabase.Query("SELECT first_spell_id, spell_id, rank from spell_ranks ORDER BY first_spell_id , rank");
+    QueryResult result = WorldDatabase.Query("SELECT first_spell_id, spell_id, rank from spell_ranks ORDER BY first_spell_id, rank");
 
     if (!result)
     {
@@ -1820,7 +1820,7 @@ void SpellMgr::LoadSpellProcs()
         baseProcEntry.cooldown        = uint32(cooldown);
         baseProcEntry.charges         = fields[14].GetUInt32();
 
-        while(true)
+        while (true)
         {
             if (mSpellProcMap.find(spellId) != mSpellProcMap.end())
             {
@@ -2803,6 +2803,10 @@ void SpellMgr::LoadSpellCustomAttr()
             case 43140: // Flame Breath
             case 43215: // Flame Breath
             case 70461: // Coldflame Trap
+            case 72133: // Pain and Suffering
+            case 73788: // Pain and Suffering
+            case 73789: // Pain and Suffering
+            case 73790: // Pain and Suffering
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
                 break;
             case 24340: // Meteor
@@ -2846,6 +2850,10 @@ void SpellMgr::LoadSpellCustomAttr()
             case 69293: // Wing Buffet
             case 74439: // Machine Gun
             case 63278: // Mark of the Faceless (General Vezax)
+            case 72255: // Mark of the Fallen Champion (Deathbringer Saurfang)
+            case 72444: // Mark of the Fallen Champion (Deathbringer Saurfang)
+            case 72445: // Mark of the Fallen Champion (Deathbringer Saurfang)
+            case 72446: // Mark of the Fallen Champion (Deathbringer Saurfang)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 break;
             case 64422: // Sonic Screech (Auriaya)
@@ -2905,11 +2913,6 @@ void SpellMgr::LoadDbcDataCorrections()
                     if (!spellInfo->speed && !spellInfo->SpellFamilyName)
                         spellInfo->speed = SPEED_CHARGE;
                     break;
-                case SPELL_EFFECT_TRIGGER_SPELL:
-                    if (SpellImplicitTargetInfo::IsPosition(spellInfo->EffectImplicitTargetA[j]) ||
-                        spellInfo->Targets & (TARGET_FLAG_SOURCE_LOCATION | TARGET_FLAG_DEST_LOCATION))
-                        spellInfo->Effect[j] = SPELL_EFFECT_TRIGGER_MISSILE;
-                    break;
             }
         }
 
@@ -2956,19 +2959,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 59372: // Energize Cores
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_SRC_AREA_ENEMY;
                 break;
-            case 3286:  // Bind
-                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
-                spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
-                break;
             case 8494: // Mana Shield (rank 2)
                 // because of bug in dbc
                 spellInfo->procChance = 0;
-                break;
-            case 32182: // Heroism
-                spellInfo->excludeCasterAuraSpell = 57723; // Exhaustion
-                break;
-            case 2825:  // Bloodlust
-                spellInfo->excludeCasterAuraSpell = 57724; // Sated
                 break;
             case 20335: // Heart of the Crusader
             case 20336:
@@ -2976,14 +2969,6 @@ void SpellMgr::LoadDbcDataCorrections()
             case 63320: // Glyph of Life Tap
             // Entries were not updated after spell effect change, we have to do that manually :/
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED;
-                break;
-            case 16007: // Draco-Incarcinatrix 900
-                // was 46, but effect is aura effect
-                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_NEARBY_ENTRY;
-                spellInfo->EffectImplicitTargetB[0] = TARGET_DEST_NEARBY_ENTRY;
-                break;
-            case 19465: // Improved Stings, only rank 2 of this spell has target for effect 2 = TARGET_DST_DB
-                spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_CASTER;
                 break;
             case 59725: // Improved Spell Reflection - aoe aura
                 // Target entry seems to be wrong for this spell :/
@@ -3007,13 +2992,8 @@ void SpellMgr::LoadDbcDataCorrections()
             case 42611: // Shoot
             case 62374: // Pursued
             case 61588: // Blazing Harpoon
-                spellInfo->MaxAffectedTargets = 1;
-                break;
             case 52479: // Gift of the Harvester
                 spellInfo->MaxAffectedTargets = 1;
-                // a trap always has dst = src?
-                spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_CASTER;
-                spellInfo->EffectImplicitTargetA[1] = TARGET_DEST_CASTER;
                 break;
             case 41376: // Spite
             case 39992: // Needle Spine
@@ -3091,15 +3071,10 @@ void SpellMgr::LoadDbcDataCorrections()
                 // add corruption to affected spells
                 spellInfo->EffectSpellClassMask[1][0] |= 2;
                 break;
-            case 49305: // Teleport to Boss 1 DND
-            case 64981: // Summon Random Vanquished Tentacle
-                spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_CASTER;
-                break;
             case 51852: // The Eye of Acherus (no spawn in phase 2 in db)
                 spellInfo->EffectMiscValue[0] |= 1;
                 break;
-            case 18541: // Ritual of Doom Effect (temp hack, current targeting system requires implicit targets to be set. Was target_dest_caster)
-            case 51904: // Summon Ghouls On Scarlet Crusade (core does not know the triggered spell is summon spell)
+            case 51904: // Summon Ghouls On Scarlet Crusade (this should use conditions table, script for this spell needs to be fixed)
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
                 break;
             case 29809: // Desecration Arm - 36 instead of 37 - typo? :/
@@ -3119,6 +3094,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 47569: // Improved Shadowform (Rank 1)
                 // with this spell atrribute aura can be stacked several times
                 spellInfo->Attributes &= ~SPELL_ATTR0_NOT_SHAPESHIFT;
+                break;
+            case 64904: //Hymn of Hope
+                spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT;
                 break;
             case 30421: // Nether Portal - Perseverence
                 spellInfo->EffectBasePoints[2] += 30000;
@@ -3151,10 +3129,6 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_SRC_AREA_ALLY;
                 spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_SRC_AREA_ALLY;
                 break;
-            case 31687: // Summon Water Elemental
-                // 322-330 switch - effect changed to dummy, target entry not changed in client:(
-                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
-                break;
             case 57994: // Wind Shear - improper data for EFFECT_1 in 3.3.5 DBC, but is correct in 4.x
                 spellInfo->Effect[EFFECT_1] = SPELL_EFFECT_MODIFY_THREAT_PERCENT;
                 spellInfo->EffectBasePoints[EFFECT_1] = -6; // -5%
@@ -3173,12 +3147,12 @@ void SpellMgr::LoadDbcDataCorrections()
             case 53246: // Marked for Death (Rank 5)
                 spellInfo->EffectSpellClassMask[0] = flag96(423937, 276955137, 2049);
                 break;
-            case 70728: // Exploit Weakness
-            case 70840: // Devious Minds
+            case 70728: // Exploit Weakness (needs target selection script)
+            case 70840: // Devious Minds (needs target selection script)
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
                 spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_PET;
                 break;
-            case 70893: // Culling The Herd
+            case 70893: // Culling The Herd (needs target selection script)
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
                 spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_MASTER;
                 break;
@@ -3311,10 +3285,10 @@ void SpellMgr::LoadDbcDataCorrections()
             case 72507: // Mutated Plague (Professor Putricide)
                 spellInfo->EffectRadiusIndex[0] = 28;   // 50000yd
                 break;
-            case 70911: // Unbound Plague (Professor Putricide)
-            case 72854: // Unbound Plague (Professor Putricide)
-            case 72855: // Unbound Plague (Professor Putricide)
-            case 72856: // Unbound Plague (Professor Putricide)
+            case 70911: // Unbound Plague (Professor Putricide) (needs target selection script)
+            case 72854: // Unbound Plague (Professor Putricide) (needs target selection script)
+            case 72855: // Unbound Plague (Professor Putricide) (needs target selection script)
+            case 72856: // Unbound Plague (Professor Putricide) (needs target selection script)
                 spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_TARGET_ENEMY;
                 break;
             case 71518: // Unholy Infusion Quest Credit (Professor Putricide)
@@ -3341,7 +3315,7 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71085: // Mana Void (periodic aura)
                 spellInfo->DurationIndex = 9; // 30 seconds (missing)
                 break;
-            case 70936: // Summon Suppressor
+            case 70936: // Summon Suppressor (needs target selection script)
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
                 spellInfo->EffectImplicitTargetB[0] = 0;
                 break;
@@ -3357,6 +3331,91 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_TARGET_ANY;
                 spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_TARGET_ANY;
                 spellInfo->Effect[1] = 0;
+                break;
+            case 71614: // Ice Lock
+                spellInfo->Mechanic = MECHANIC_STUN;
+                break;
+            case 72762: // Defile
+                spellInfo->DurationIndex = 559; // 53 seconds
+                break;
+            case 72743: // Defile
+                spellInfo->DurationIndex = 22; // 45 seconds
+                break;
+            case 72754: // Defile
+            case 73708: // Defile
+            case 73709: // Defile
+            case 73710: // Defile
+                spellInfo->EffectRadiusIndex[0] = 22;   // 200yd
+                spellInfo->EffectRadiusIndex[1] = 22;   // 200yd
+                break;
+            case 69030: // Val'kyr Target Search
+                spellInfo->EffectRadiusIndex[0] = 22;   // 200yd
+                spellInfo->EffectRadiusIndex[1] = 22;   // 200yd
+                break;
+            case 69198: // Raging Spirit Visual
+                spellInfo->rangeIndex = 13;             // 50000yd
+                break;
+            case 73654: // Harvest Souls
+            case 74295: // Harvest Souls
+            case 74296: // Harvest Souls
+            case 74297: // Harvest Souls
+                spellInfo->EffectRadiusIndex[0] = 28;   // 50000yd
+                spellInfo->EffectRadiusIndex[1] = 28;   // 50000yd
+                spellInfo->EffectRadiusIndex[2] = 28;   // 50000yd
+                break;
+            case 73655: // Harvest Soul
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
+                break;
+            case 73540: // Summon Shadow Trap
+                spellInfo->DurationIndex = 23;          // 90 seconds
+                break;
+            case 73530: // Shadow Trap (visual)
+                spellInfo->DurationIndex = 28;          // 5 seconds
+                break;
+            case 73529: // Shadow Trap
+                spellInfo->EffectRadiusIndex[1] = 13;   // 10yd
+                break;
+            case 74282: // Shadow Trap (searcher)
+                spellInfo->EffectRadiusIndex[0] = 15;   // 3yd
+                break;
+            case 72595: // Restore Soul
+            case 73650: // Restore Soul
+                spellInfo->EffectRadiusIndex[0] = 22;   // 200yd
+                break;
+            case 74086: // Destroy Soul
+                spellInfo->EffectRadiusIndex[0] = 22;   // 200yd
+                break;
+            case 74302: // Summon Spirit Bomb
+            case 74342: // Summon Spirit Bomb
+                spellInfo->EffectRadiusIndex[0] = 22;   // 200yd
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 74341: // Summon Spirit Bomb
+            case 74343: // Summon Spirit Bomb
+                spellInfo->EffectRadiusIndex[0] = 22;   // 200yd
+                spellInfo->MaxAffectedTargets = 3;
+                break;
+            case 73579: // Summon Spirit Bomb
+                spellInfo->EffectRadiusIndex[0] = 20;   // 25yd
+                break;
+            case 72350: // Fury of Frostmourne
+                spellInfo->EffectRadiusIndex[0] = 28;   // 50000yd
+                spellInfo->EffectRadiusIndex[1] = 28;   // 50000yd
+                break;
+            case 75127: // Kill Frostmourne Players
+            case 72351: // Fury of Frostmourne
+            case 72429: // Mass Resurrection
+            case 73159: // Play Movie
+            case 73582: // Trigger Vile Spirit (Inside, Heroic)
+                spellInfo->EffectRadiusIndex[0] = 28;   // 50000yd
+                break;
+            case 72376: // Raise Dead
+                spellInfo->MaxAffectedTargets = 3;
+                spellInfo->EffectRadiusIndex[0] = 28;   // 50000yd
+                break;
+            case 71809: // Jump
+                spellInfo->rangeIndex = 3;              // 20yd
+                spellInfo->EffectRadiusIndex[0] = 20;   // 25yd
                 break;
             default:
                 break;

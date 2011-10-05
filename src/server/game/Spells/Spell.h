@@ -202,6 +202,14 @@ enum SpellState
     SPELL_STATE_DELAYED   = 5
 };
 
+enum SpellEffectHandleMode
+{
+    SPELL_EFFECT_HANDLE_LAUNCH,
+    SPELL_EFFECT_HANDLE_LAUNCH_TARGET,
+    SPELL_EFFECT_HANDLE_HIT,
+    SPELL_EFFECT_HANDLE_HIT_TARGET,
+};
+
 enum SpellTargets
 {
     SPELL_TARGETS_NONE      = 0,
@@ -274,7 +282,6 @@ class Spell
         void EffectLearnPetSpell(SpellEffIndex effIndex);
         void EffectWeaponDmg(SpellEffIndex effIndex);
         void EffectForceCast(SpellEffIndex effIndex);
-        void EffectForceCastWithValue(SpellEffIndex effIndex);
         void EffectTriggerSpell(SpellEffIndex effIndex);
         void EffectTriggerMissileSpell(SpellEffIndex effIndex);
         void EffectThreat(SpellEffIndex effIndex);
@@ -329,7 +336,6 @@ class Spell
         void EffectUnlearnSpecialization(SpellEffIndex effIndex);
         void EffectHealPct(SpellEffIndex effIndex);
         void EffectEnergizePct(SpellEffIndex effIndex);
-        void EffectTriggerSpellWithValue(SpellEffIndex effIndex);
         void EffectTriggerRitualOfSummoning(SpellEffIndex effIndex);
         void EffectSummonRaFFriend(SpellEffIndex effIndex);
         void EffectKillCreditPersonal(SpellEffIndex effIndex);
@@ -400,6 +406,7 @@ class Spell
 
         void InitExplicitTargets(SpellCastTargets const& targets);
         void SelectSpellTargets();
+        void SelectEffectTypeImplicitTargets(uint8 effIndex);
         uint32 SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur);
         void SelectTrajTargets();
 
@@ -431,7 +438,7 @@ class Spell
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target);
 
-        void HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOTarget, uint32 i);
+        void HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOTarget, uint32 i, SpellEffectHandleMode mode);
         void HandleThreatSpells();
 
         SpellInfo const* const m_spellInfo;
@@ -530,6 +537,7 @@ class Spell
         Item* itemTarget;
         GameObject* gameObjTarget;
         int32 damage;
+        SpellEffectHandleMode effectHandleMode;
         // used in effects handlers
         Aura* m_spellAura;
 
@@ -603,11 +611,8 @@ class Spell
         void SearchChainTarget(std::list<Unit*> &unitList, float radius, uint32 unMaxTargets, SpellTargets TargetType);
         WorldObject* SearchNearbyTarget(float range, SpellTargets TargetType, SpellEffIndex effIndex);
         bool IsValidDeadOrAliveTarget(Unit const* target) const;
-        void CalculateDamageDoneForAllTargets();
-        int32 CalculateDamageDone(Unit* unit, const uint32 effectMask, float *multiplier);
-        void SpellDamageSchoolDmg(SpellEffIndex effIndex);
-        void SpellDamageWeaponDmg(SpellEffIndex effIndex);
-        void SpellDamageHeal(SpellEffIndex effIndex);
+        void HandleLaunchPhase();
+        void DoAllEffectOnLaunchTarget(TargetInfo& targetInfo, float* multiplier);
 
         void PrepareTargetProcessing();
         void FinishTargetProcessing();
@@ -621,7 +626,7 @@ class Spell
         void LoadScripts();
         SpellCastResult CallScriptCheckCastHandlers();
         void PrepareScriptHitHandlers();
-        bool CallScriptEffectHandlers(SpellEffIndex effIndex);
+        bool CallScriptEffectHandlers(SpellEffIndex effIndex, SpellEffectHandleMode mode);
         void CallScriptBeforeHitHandlers();
         void CallScriptOnHitHandlers();
         void CallScriptAfterHitHandlers();
@@ -652,7 +657,6 @@ class Spell
         SpellInfo const* m_triggeredByAuraSpell;
 
         bool m_skipCheck;
-        uint32 m_effectMask;
         uint8 m_auraScaleMask;
 
         ByteBuffer * m_effectExecuteData[MAX_SPELL_EFFECTS];
@@ -719,7 +723,7 @@ namespace Trinity
                         break;
                 }
 
-                switch(i_push_type)
+                switch (i_push_type)
                 {
                     case PUSH_SRC_CENTER:
                     case PUSH_DST_CENTER:

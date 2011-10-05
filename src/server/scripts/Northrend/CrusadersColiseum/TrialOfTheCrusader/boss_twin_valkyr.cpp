@@ -81,8 +81,8 @@ enum BossSpells
     SPELL_DARK_ESSENCE          = 65684,
     SPELL_EMPOWERED_DARK        = 65724,
     SPELL_TWIN_EMPATHY_DARK     = 66132,
-    SPELL_UNLEASHED_DARK        = 65808,    
-    
+    SPELL_UNLEASHED_DARK        = 65808,
+
     SPELL_CONTROLLER_PERIODIC    = 66149,
     SPELL_POWER_TWINS           = 65879,
     SPELL_BERSERK               = 64238,
@@ -412,7 +412,7 @@ public:
         {
             m_pInstance = (InstanceScript*)creature->GetInstanceScript();
         }
-        
+
         InstanceScript* m_pInstance;
 
         void Reset() {
@@ -449,7 +449,7 @@ public:
             me->SummonCreature(NPC_BULLET_CONTROLLER, ToCCommonLoc[1].GetPositionX(), ToCCommonLoc[1].GetPositionY(), ToCCommonLoc[1].GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN);
             boss_twin_baseAI::EnterCombat(who);
         }
-        
+
         void EnterEvadeMode()
         {
             m_pInstance->DoUseDoorOrButton(m_pInstance->GetData64(GO_MAIN_GATE_DOOR));
@@ -731,10 +731,10 @@ class spell_powering_up : public SpellScriptLoader
                     {
                         if (pAura->GetStackAmount() == 100)
                         {
-                            if(target->GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2206, EFFECT_1))
+                            if (target->GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2206, EFFECT_1))
                                 target->CastSpell(target, SPELL_EMPOWERED_DARK, true);
 
-                            if(target->GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2845, EFFECT_1))
+                            if (target->GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2845, EFFECT_1))
                                 target->CastSpell(target, SPELL_EMPOWERED_LIGHT, true);
 
                             target->RemoveAurasDueToSpell(GetId());
@@ -761,7 +761,7 @@ class spell_powering_up : public SpellScriptLoader
 
             uint32 spellId;
 
-            bool Validate(SpellEntry const*  /*spellEntry*/)
+            bool Validate(SpellEntry const* /*spellEntry*/)
             {
                 spellId = sSpellMgr->GetSpellIdForDifficulty(SPELL_SURGE_OF_SPEED, GetCaster());
                 if (!sSpellMgr->GetSpellInfo(spellId))
@@ -778,7 +778,7 @@ class spell_powering_up : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_powering_up_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_powering_up_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
@@ -807,7 +807,7 @@ class spell_valkyr_essences : public SpellScriptLoader
                 return true;
             }
 
-            void Absorb(AuraEffect*  /*aurEff*/, DamageInfo & /*dmgInfo*/, uint32 & /*absorbAmount*/)
+            void Absorb(AuraEffect* /*aurEff*/, DamageInfo & /*dmgInfo*/, uint32 & /*absorbAmount*/)
             {
                 if (urand(0, 99) < 5)
                     GetTarget()->CastSpell(GetTarget(), spellId, true);

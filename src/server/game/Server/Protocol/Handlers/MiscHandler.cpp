@@ -339,6 +339,12 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
         if ((matchcount++) >= sWorld->getIntConfig(CONFIG_MAX_WHO))
             continue;
 
+        if (itr->second->isGameMaster())
+        {
+            pname = "<GM>";
+            pname.append(itr->second->GetName());
+        }
+
         data << pname;                                    // player name
         data << gname;                                    // guild name
         data << uint32(lvl);                              // player level
@@ -814,7 +820,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
 
     if (player->GetMapId() != atEntry->mapid)
     {
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "Player '%s' (GUID: %u) too far (trigger map: %u player map: %u), ignore Area Trigger ID: %u", 
+        sLog->outDebug(LOG_FILTER_NETWORKIO, "Player '%s' (GUID: %u) too far (trigger map: %u player map: %u), ignore Area Trigger ID: %u",
             player->GetName(), atEntry->mapid, player->GetMapId(), player->GetGUIDLow(), triggerId);
         return;
     }
@@ -1030,7 +1036,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
     }
     else
     {
-        switch(type)
+        switch (type)
         {
             case ACTION_BUTTON_MACRO:
             case ACTION_BUTTON_CMACRO:
@@ -1341,7 +1347,7 @@ void WorldSession::HandleComplainOpcode(WorldPacket & recv_data)
     std::string description = "";
     recv_data >> spam_type;                                 // unk 0x01 const, may be spam type (mail/chat)
     recv_data >> spammer_guid;                              // player guid
-    switch(spam_type)
+    switch (spam_type)
     {
         case 0:
             recv_data >> unk1;                              // const 0
@@ -1395,7 +1401,7 @@ void WorldSession::HandleFarSightOpcode(WorldPacket & recv_data)
     uint8 apply;
     recv_data >> apply;
 
-    switch(apply)
+    switch (apply)
     {
         case 0:
             sLog->outDebug(LOG_FILTER_NETWORKIO, "Player %u set vision to self", _player->GetGUIDLow());
