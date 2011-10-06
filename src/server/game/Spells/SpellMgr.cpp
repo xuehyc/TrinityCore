@@ -3404,6 +3404,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             case 75127: // Kill Frostmourne Players
             case 72351: // Fury of Frostmourne
+            case 72431: // Jump (removes Fury of Frostmourne debuff)
             case 72429: // Mass Resurrection
             case 73159: // Play Movie
             case 73582: // Trigger Vile Spirit (Inside, Heroic)
@@ -3416,6 +3417,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71809: // Jump
                 spellInfo->rangeIndex = 3;              // 20yd
                 spellInfo->EffectRadiusIndex[0] = 20;   // 25yd
+                break;
+            case 72405: // Broken Frostmourne
+                spellInfo->EffectRadiusIndex[1] = 22;   // 200yd
                 break;
             default:
                 break;
