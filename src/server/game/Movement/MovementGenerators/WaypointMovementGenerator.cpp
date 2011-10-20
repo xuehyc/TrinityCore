@@ -206,7 +206,13 @@ WaypointMovementGenerator<Creature>::Update(Creature &unit, const uint32 diff)
             MovementInform(unit);
             unit.UpdateWaypointID(i_currentNode);
             unit.ClearUnitState(UNIT_STAT_ROAMING);
-            unit.Relocate(node->x, node->y, node->z);
+            if (node->orientation)
+            {
+                unit.Relocate(node->x, node->y, node->z, node->orientation);
+                unit.SetFacing(node->orientation, NULL);
+            }
+            else
+                unit.Relocate(node->x, node->y, node->z);
         }
     }
     else
@@ -266,7 +272,7 @@ void FlightPathMovementGenerator::Finalize(Player & player)
     float y = 0;
     float z = 0;
     i_destinationHolder.GetLocationNow(player.GetBaseMap(), x, y, z);
-    player.SetPosition(x, y, z, player.GetOrientation());
+    player.UpdatePosition(x, y, z, player.GetOrientation());
 
 }
 

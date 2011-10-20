@@ -141,34 +141,36 @@ void InstanceScript::AddDoor(GameObject* door, bool add)
 
     for (DoorInfoMap::iterator itr = lower; itr != upper; ++itr)
     {
+        DoorInfo const& data = itr->second;
+
         if (add)
         {
-            itr->second.bossInfo->door[itr->second.type].insert(door);
-            switch (itr->second.boundary)
+            data.bossInfo->door[data.type].insert(door);
+            switch (data.boundary)
             {
                 default:
                 case BOUNDARY_NONE:
                     break;
                 case BOUNDARY_N:
                 case BOUNDARY_S:
-                    itr->second.bossInfo->boundary[itr->second.boundary] = door->GetPositionX();
+                    data.bossInfo->boundary[data.boundary] = door->GetPositionX();
                     break;
                 case BOUNDARY_E:
                 case BOUNDARY_W:
-                    itr->second.bossInfo->boundary[itr->second.boundary] = door->GetPositionY();
+                    data.bossInfo->boundary[data.boundary] = door->GetPositionY();
                     break;
                 case BOUNDARY_NW:
                 case BOUNDARY_SE:
-                    itr->second.bossInfo->boundary[itr->second.boundary] = door->GetPositionX() + door->GetPositionY();
+                    data.bossInfo->boundary[data.boundary] = door->GetPositionX() + door->GetPositionY();
                     break;
                 case BOUNDARY_NE:
                 case BOUNDARY_SW:
-                    itr->second.bossInfo->boundary[itr->second.boundary] = door->GetPositionX() - door->GetPositionY();
+                    data.bossInfo->boundary[data.boundary] = door->GetPositionX() - door->GetPositionY();
                     break;
             }
         }
         else
-            itr->second.bossInfo->door[itr->second.type].erase(door);
+            data.bossInfo->door[data.type].erase(door);
     }
 
     if (add)
@@ -253,35 +255,35 @@ void InstanceScript::DoUseDoorOrButton(uint64 uiGuid, uint32 uiWithRestoreTime, 
     if (!uiGuid)
         return;
 
-    GameObject* pGo = instance->GetGameObject(uiGuid);
+    GameObject* go = instance->GetGameObject(uiGuid);
 
-    if (pGo)
+    if (go)
     {
-        if (pGo->GetGoType() == GAMEOBJECT_TYPE_DOOR || pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON)
+        if (go->GetGoType() == GAMEOBJECT_TYPE_DOOR || go->GetGoType() == GAMEOBJECT_TYPE_BUTTON)
         {
-            if (pGo->getLootState() == GO_READY)
-                pGo->UseDoorOrButton(uiWithRestoreTime, bUseAlternativeState);
-            else if (pGo->getLootState() == GO_ACTIVATED)
-                pGo->ResetDoorOrButton();
+            if (go->getLootState() == GO_READY)
+                go->UseDoorOrButton(uiWithRestoreTime, bUseAlternativeState);
+            else if (go->getLootState() == GO_ACTIVATED)
+                go->ResetDoorOrButton();
         }
         else
-            sLog->outError("SD2: Script call DoUseDoorOrButton, but gameobject entry %u is type %u.", pGo->GetEntry(), pGo->GetGoType());
+            sLog->outError("SD2: Script call DoUseDoorOrButton, but gameobject entry %u is type %u.", go->GetEntry(), go->GetGoType());
     }
 }
 
 void InstanceScript::DoRespawnGameObject(uint64 uiGuid, uint32 uiTimeToDespawn)
 {
-    if (GameObject* pGo = instance->GetGameObject(uiGuid))
+    if (GameObject* go = instance->GetGameObject(uiGuid))
     {
         //not expect any of these should ever be handled
-        if (pGo->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE || pGo->GetGoType() == GAMEOBJECT_TYPE_DOOR ||
-            pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON || pGo->GetGoType() == GAMEOBJECT_TYPE_TRAP)
+        if (go->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE || go->GetGoType() == GAMEOBJECT_TYPE_DOOR ||
+            go->GetGoType() == GAMEOBJECT_TYPE_BUTTON || go->GetGoType() == GAMEOBJECT_TYPE_TRAP)
             return;
 
-        if (pGo->isSpawned())
+        if (go->isSpawned())
             return;
 
-        pGo->SetRespawnTime(uiTimeToDespawn);
+        go->SetRespawnTime(uiTimeToDespawn);
     }
 }
 
@@ -292,8 +294,8 @@ void InstanceScript::DoUpdateWorldState(uint32 uiStateId, uint32 uiStateData)
     if (!lPlayers.isEmpty())
     {
         for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-            if (Player* pPlayer = itr->getSource())
-                pPlayer->SendUpdateWorldState(uiStateId, uiStateData);
+            if (Player* player = itr->getSource())
+                player->SendUpdateWorldState(uiStateId, uiStateData);
     }
     else
         sLog->outDebug(LOG_FILTER_TSCR, "TSCR: DoUpdateWorldState attempt send data but no players in map.");
@@ -311,8 +313,8 @@ void InstanceScript::DoSendNotifyToInstance(const char *format, ...)
         va_start(ap, format);
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
         {
-            if (Player* pPlayer = i->getSource())
-                if (WorldSession* pSession = pPlayer->GetSession())
+            if (Player* player = i->getSource())
+                if (WorldSession* pSession = player->GetSession())
                     pSession->SendNotification(format, ap);
         }
         va_end(ap);
@@ -326,8 +328,8 @@ void InstanceScript::DoUpdateAchievementCriteria(AchievementCriteriaTypes type, 
 
     if (!PlayerList.isEmpty())
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-            if (Player* pPlayer = i->getSource())
-                pPlayer->UpdateAchievementCriteria(type, miscValue1, miscValue2, unit);
+            if (Player* player = i->getSource())
+                player->UpdateAchievementCriteria(type, miscValue1, miscValue2, unit);
 }
 
 // Start timed achievement for all players in instance
@@ -337,8 +339,8 @@ void InstanceScript::DoStartTimedAchievement(AchievementCriteriaTimedTypes type,
 
     if (!PlayerList.isEmpty())
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-            if (Player* pPlayer = i->getSource())
-                pPlayer->GetAchievementMgr().StartTimedAchievement(type, entry);
+            if (Player* player = i->getSource())
+                player->GetAchievementMgr().StartTimedAchievement(type, entry);
 }
 
 // Stop timed achievement for all players in instance
@@ -348,8 +350,8 @@ void InstanceScript::DoStopTimedAchievement(AchievementCriteriaTimedTypes type, 
 
     if (!PlayerList.isEmpty())
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-            if (Player* pPlayer = i->getSource())
-                pPlayer->GetAchievementMgr().RemoveTimedAchievement(type, entry);
+            if (Player* player = i->getSource())
+                player->GetAchievementMgr().RemoveTimedAchievement(type, entry);
 }
 
 // Remove Auras due to Spell on all players in instance

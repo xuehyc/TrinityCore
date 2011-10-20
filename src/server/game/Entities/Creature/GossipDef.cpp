@@ -261,9 +261,9 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
 
         uint32 questID = qmi.QuestId;
 
-        if (Quest const* pQuest = sObjectMgr->GetQuestTemplate(questID))
+        if (Quest const* quest = sObjectMgr->GetQuestTemplate(questID))
         {
-            std::string title = pQuest->GetTitle();
+            std::string title = quest->GetTitle();
 
             int loc_idx = _session->GetSessionDbLocaleIndex();
             if (loc_idx >= 0)
@@ -272,8 +272,8 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
 
             data << uint32(questID);
             data << uint32(qmi.QuestIcon);
-            data << int32(pQuest->GetQuestLevel());
-            data << uint32(pQuest->GetFlags());             // 3.3.3 quest flags
+            data << int32(quest->GetQuestLevel());
+            data << uint32(quest->GetFlags());             // 3.3.3 quest flags
             data << uint8(0);                               // 3.3.3 changes icon: blue question or yellow exclamation
             data << title;
         }
@@ -371,7 +371,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
 
     // rewarded honor points. Multiply with 10 to satisfy client
     data << 10 * Trinity::Honor::hk_honor_at_level(_session->GetPlayer()->getLevel(), quest->GetRewHonorMultiplier());
-    data << float(0);                                       // new 3.3.0, honor multiplier?
+    data << float(0.0f);                                       // new 3.3.0, honor multiplier?
     data << uint32(quest->GetRewSpell());                   // reward spell, this spell will display (icon) (casted if RewSpellCast == 0)
     data << int32(quest->GetRewSpellCast());                // casted spell
     data << uint32(quest->GetCharTitleId());                // CharTitleId, new 2.4.0, player gets this title (id from CharTitles)

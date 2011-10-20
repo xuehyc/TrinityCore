@@ -719,7 +719,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         case SPELL_AURA_MOD_THREAT:
         {
             uint8 level_diff = 0;
-            float multiplier = 0.0;
+            float multiplier = 0.0f;
             switch (GetId())
             {
                 // Arcane Shroud
@@ -899,25 +899,6 @@ void AuraEffect::CalculateSpellMod()
                         }
                         break;
                     }
-                    break;
-                default:
-                    break;
-            }
-        case SPELL_AURA_MOD_SPELL_CRIT_CHANCE:
-            switch (GetId())
-            {
-                case 51466: // Elemental oath
-                case 51470: // Elemental oath
-                    // "while Clearcasting from Elemental Focus is active, you deal 5%/10% more spell damage."
-                    if (!m_spellmod)
-                    {
-                        m_spellmod = new SpellModifier(GetBase());
-                        m_spellmod->op = SPELLMOD_EFFECT2;
-                        m_spellmod->type = SPELLMOD_FLAT;
-                        m_spellmod->spellId = GetId();
-                        m_spellmod->mask[1] = 0x0004000;
-                    }
-                    m_spellmod->value = GetBase()->GetUnitOwner()->CalculateSpellDamage(GetBase()->GetUnitOwner(), GetSpellInfo(), 1);
                     break;
                 default:
                     break;
@@ -4003,8 +3984,18 @@ void AuraEffect::HandleAuraModIncreaseEnergyPercent(AuraApplication const* aurAp
     //    return;
 
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + powerType);
+    float amount = float(GetAmount());
 
-    target->HandleStatModifier(unitMod, TOTAL_PCT, float(GetAmount()), apply);
+    if (apply)
+    {
+        target->HandleStatModifier(unitMod, TOTAL_PCT, amount, apply);
+        target->ModifyPowerPct(powerType, amount, apply);
+    }
+    else
+    {
+        target->ModifyPowerPct(powerType, amount, apply);
+        target->HandleStatModifier(unitMod, TOTAL_PCT, amount, apply);
+    }
 }
 
 void AuraEffect::HandleAuraModIncreaseHealthPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4655,7 +4646,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 if (target->GetTypeId() != TYPEID_PLAYER)
                     return;
                 //  ..while they are casting
-                if (target->IsNonMeleeSpellCasted(false, false, true, false, false))
+                if (target->IsNonMeleeSpellCasted(false, false, true, false, true))
                     if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARRIOR, 2775, 0))
                         switch (aurEff->GetId())
                         {
@@ -5732,9 +5723,8 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                         // eff_radius == 0
                         float radius = GetSpellInfo()->GetMaxRange(false);
 
-                        CellPair p(Trinity::ComputeCellPair(target->GetPositionX(), target->GetPositionY()));
+                        CellCoord p(Trinity::ComputeCellCoord(target->GetPositionX(), target->GetPositionY()));
                         Cell cell(p);
-                        cell.data.Part.reserved = ALL_DISTRICT;
 
                         Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck u_check(target, radius);
                         Trinity::UnitListSearcher<Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck> checker(target, targets, u_check);

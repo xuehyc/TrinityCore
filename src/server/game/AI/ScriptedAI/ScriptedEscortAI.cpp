@@ -218,7 +218,7 @@ void npc_escortAI::UpdateAI(uint32 const diff)
                     if (m_bCanReturnToStart)
                     {
                         float fRetX, fRetY, fRetZ;
-                        me->GetRespawnCoord(fRetX, fRetY, fRetZ);
+                        me->GetRespawnPosition(fRetX, fRetY, fRetZ);
 
                         me->GetMotionMaster()->MovePoint(POINT_HOME, fRetX, fRetY, fRetZ);
 
@@ -493,7 +493,7 @@ void npc_escortAI::SetEscortPaused(bool on)
 
 bool npc_escortAI::SetNextWaypoint(uint32 pointId, float x, float y, float z, float orientation)
 {
-    me->SetPosition(x, y, z, orientation);
+    me->UpdatePosition(x, y, z, orientation);
     return SetNextWaypoint(pointId, false, true);
 }
 
@@ -516,7 +516,7 @@ bool npc_escortAI::SetNextWaypoint(uint32 pointId, bool setPosition, bool resetW
         if (waypoint.id == pointId)
         {
             if (setPosition)
-                me->SetPosition(waypoint.x, waypoint.y, waypoint.z, me->GetOrientation());
+                me->UpdatePosition(waypoint.x, waypoint.y, waypoint.z, me->GetOrientation());
 
             CurrentWP = WaypointList.begin();
             return true;

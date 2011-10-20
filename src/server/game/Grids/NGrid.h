@@ -69,7 +69,7 @@ typedef enum
 
 template
 <
-unsigned int N,
+uint32 N,
 class ACTIVE_OBJECT,
 class WORLD_OBJECT_TYPES,
 class GRID_OBJECT_TYPES
@@ -87,15 +87,13 @@ class NGrid
 
         const GridType& operator()(unsigned short x, unsigned short y) const
         {
-            ASSERT(x < N);
-            ASSERT(y < N);
+            ASSERT(x < N && y < N);
             return i_cells[x][y];
         }
 
         GridType& operator()(unsigned short x, unsigned short y)
         {
-            ASSERT(x < N);
-            ASSERT(y < N);
+            ASSERT(x < N && y < N);
             return i_cells[x][y];
         }
 
@@ -133,14 +131,18 @@ class NGrid
             getGridType(x, y).RemoveWorldObject(obj);
         }
 
-        template<class T, class TT> void Visit(TypeContainerVisitor<T, TypeMapContainer<TT> > &visitor)
+        // Visit all Grids (cells) in NGrid (grid)
+        template<class T, class TT>
+        void VisitAllGrids(TypeContainerVisitor<T, TypeMapContainer<TT> > &visitor)
         {
-            for (unsigned int x=0; x < N; ++x)
-                for (unsigned int y=0; y < N; ++y)
+            for (uint32 x = 0; x < N; ++x)
+                for (uint32 y = 0; y < N; ++y)
                     getGridType(x, y).Visit(visitor);
         }
 
-        template<class T, class TT> void Visit(const uint32 x, const uint32 y, TypeContainerVisitor<T, TypeMapContainer<TT> > &visitor)
+        // Visit a single Grid (cell) in NGrid (grid)
+        template<class T, class TT>
+        void VisitGrid(const uint32 x, const uint32 y, TypeContainerVisitor<T, TypeMapContainer<TT> > &visitor)
         {
             getGridType(x, y).Visit(visitor);
         }
@@ -168,8 +170,7 @@ class NGrid
 
         GridType& getGridType(const uint32 x, const uint32 y)
         {
-            ASSERT(x < N);
-            ASSERT(y < N);
+            ASSERT(x < N && y < N);
             return i_cells[x][y];
         }
 
