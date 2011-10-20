@@ -181,8 +181,8 @@ struct boss_twin_baseAI : public ScriptedAI
         me->SetFlying(true); */
         m_bIsBerserk = false;
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VALKIRIES, NOT_STARTED);
+        if (m_instance)
+            m_instance->SetData(TYPE_VALKIRIES, NOT_STARTED);
 
         m_uiSpecialAbilityTimer = MINUTE*IN_MILLISECONDS;
         m_uiSpikeTimer = 20*IN_MILLISECONDS;
