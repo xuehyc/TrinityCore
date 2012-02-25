@@ -27,7 +27,10 @@ enum Yells
     SAY_AGGRO_4     = -1533013,
     SAY_SLAY_1      = -1533014,
     SAY_SLAY_2      = -1533015,
-    SAY_DEATH       = -1533016
+    SAY_DEATH       = -1533016,
+    SAY_FRENZY          = -1999973,
+    EMOTE_CUSTOM_FRENZY = -1999974,
+    EMOTE_CUSTOM_EMBRACE = -1999975
 };
 
 enum Spells
@@ -109,7 +112,7 @@ class boss_faerlina : public CreatureScript
             {
                 if (spell->Id == SPELL_WIDOWS_EMBRACE || spell->Id == H_SPELL_WIDOWS_EMBRACE)
                 {
-                    // TODO : Add Text
+                    DoScriptText(EMOTE_CUSTOM_EMBRACE, me);
                     ++_frenzyDispels;
                     _delayFrenzy = true;
                     me->Kill(caster);
@@ -133,6 +136,8 @@ class boss_faerlina : public CreatureScript
                 {
                     _delayFrenzy = false;
                     DoCast(me, RAID_MODE(SPELL_FRENZY, H_SPELL_FRENZY), true);
+                    DoScriptText(SAY_FRENZY, me);
+                    DoScriptText(EMOTE_CUSTOM_FRENZY, me);
                 }
 
                 events.Update(diff);
@@ -155,9 +160,12 @@ class boss_faerlina : public CreatureScript
                             events.ScheduleEvent(EVENT_FIRE, urand(6000, 18000));
                             break;
                         case EVENT_FRENZY:
-                            // TODO : Add Text
                             if (!me->HasAura(SPELL_WIDOWS_EMBRACE_HELPER))
+                            {
                                 DoCast(me, RAID_MODE(SPELL_FRENZY, H_SPELL_FRENZY));
+                                DoScriptText(SAY_FRENZY, me);
+                                DoScriptText(EMOTE_CUSTOM_FRENZY, me);
+                            }
                             else
                                 _delayFrenzy = true;
 

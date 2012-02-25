@@ -29,9 +29,9 @@ class Player;
 
 enum LFGenum
 {
-    LFG_TIME_ROLECHECK                           = 2*MINUTE,
-    LFG_TIME_BOOT                                = 2*MINUTE,
-    LFG_TIME_PROPOSAL                            = 2*MINUTE,
+    LFG_TIME_ROLECHECK                           = 45,
+    LFG_TIME_BOOT                                = 45,
+    LFG_TIME_PROPOSAL                            = 45,
     LFG_TANKS_NEEDED                             = 1,
     LFG_HEALERS_NEEDED                           = 1,
     LFG_DPS_NEEDED                               = 3,

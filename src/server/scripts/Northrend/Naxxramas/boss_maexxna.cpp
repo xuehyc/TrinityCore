@@ -56,6 +56,10 @@ enum Events
     EVENT_FRENZY,
 };
 
+#define EMOTE_CUSTOM_WRAP           -1999989
+#define EMOTE_CUSTOM_SPRAY          -1999990
+#define EMOTE_CUSTOM_SUMMON         -1999991
+
 class boss_maexxna : public CreatureScript
 {
 public:
@@ -101,7 +105,7 @@ public:
                 switch (eventId)
                 {
                     case EVENT_WRAP:
-                        // TODO : Add missing text
+                        DoScriptText(EMOTE_CUSTOM_WRAP, me);
                         for (uint8 i = 0; i < RAID_MODE(1, 2); ++i)
                         {
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true, -SPELL_WEB_WRAP))
@@ -116,6 +120,7 @@ public:
                         events.ScheduleEvent(EVENT_WRAP, 40000);
                         break;
                     case EVENT_SPRAY:
+                        DoScriptText(EMOTE_CUSTOM_SPRAY, me);
                         DoCastAOE(RAID_MODE(SPELL_WEB_SPRAY_10, SPELL_WEB_SPRAY_25));
                         events.ScheduleEvent(EVENT_SPRAY, 40000);
                         break;
@@ -132,7 +137,7 @@ public:
                         events.ScheduleEvent(EVENT_FRENZY, 600000);
                         break;
                     case EVENT_SUMMON:
-                        // TODO : Add missing text
+                        DoScriptText(EMOTE_CUSTOM_SUMMON, me);
                         uint8 amount = urand(8, 10);
                         for (uint8 i = 0; i < amount; ++i)
                             DoSummon(MOB_SPIDERLING, me, 0, TEMPSUMMON_CORPSE_DESPAWN);
@@ -166,16 +171,16 @@ public:
         void SetGUID(uint64 guid, int32 /*param*/)
         {
             victimGUID = guid;
-            if (me->m_spells[0] && victimGUID)
+            if (victimGUID)
                 if (Unit* victim = Unit::GetUnit(*me, victimGUID))
-                    victim->CastSpell(victim, me->m_spells[0], true, NULL, NULL, me->GetGUID());
+                    victim->CastSpell(victim, SPELL_WEB_WRAP, true, NULL, NULL, me->GetGUID());
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            if (me->m_spells[0] && victimGUID)
+            if (victimGUID)
                 if (Unit* victim = Unit::GetUnit(*me, victimGUID))
-                    victim->RemoveAurasDueToSpell(me->m_spells[0], me->GetGUID());
+                    victim->RemoveAurasDueToSpell(SPELL_WEB_WRAP, me->GetGUID());
         }
     };
 

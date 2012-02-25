@@ -22,6 +22,8 @@ enum
     TYPE_EVENT_NPC              = 102,
     TYPE_NORTHREND_BEASTS       = 103,
 
+    DATA_HEALTH_TWIN_SHARED     = 201,
+
     DATA_SNOBOLD_COUNT                   = 301,
     DATA_MISTRESS_OF_PAIN_COUNT          = 302,
     DATA_TRIBUTE_TO_IMMORTALITY_ELEGIBLE = 303,
@@ -33,24 +35,20 @@ enum
     SPELL_JARAXXUS_CHAINS       = 67924,
 
     DESPAWN_TIME                = 300000,
-};
 
-const Position ToCSpawnLoc[]=
-{
-    {563.912f, 261.625f, 394.73f, 4.70437f},  //  0 Center
-    {575.451f, 261.496f, 394.73f,  4.6541f},  //  1 Left
-    {549.951f,  261.55f, 394.73f, 4.74835f},  //  2 Right
+    SPAWNED_NEXT_BOSS_1         = 10,
+    SPAWNED_NEXT_BOSS_2         = 11
 };
 
 const Position ToCCommonLoc[]=
 {
     {559.257996f, 90.266197f, 395.122986f, 0},  //  0 Barrent
 
-    {563.672974f, 139.571f, 393.837006f, 0},    //  1 Center
-    {563.833008f, 187.244995f, 394.5f, 0},      //  2 Backdoor
+    {563.672974f, 139.571f, 394.8f, 0},    //  1 Center
+    {563.833008f, 187.244995f, 394.8f, 0},      //  2 Backdoor
     {577.347839f, 195.338888f, 395.14f, 0},     //  3 - Right
     {550.955933f, 195.338888f, 395.14f, 0},     //  4 - Left
-    {563.833008f, 195.244995f, 394.585561f, 0}, //  5 - Center
+    {563.7f, 167.6f, 394.8f, 0},                //  5 - Center
     {573.5f, 180.5f, 395.14f, 0},               //  6 Move 0 Right
     {553.5f, 180.5f, 395.14f, 0},               //  7 Move 0 Left
     {585.5f, 170.0f, 395.14f, 0},               //  8 Move 1 Right
@@ -66,7 +64,7 @@ const Position ToCCommonLoc[]=
     {569.534119f, 195.214478f, 395.139526f, 0}, // 11
     {569.231201f, 195.941071f, 395.139526f, 0}, // 12
     {558.811610f, 195.985779f, 394.671661f, 0}, // 13
-    {567.641724f, 195.351501f, 394.659943f, 0}, // 14
+    {567.641724f, 195.351501f, 394.8f, 0}, // 14
     {560.633972f, 195.391708f, 395.137543f, 0}, // 15
     {565.816956f, 195.477921f, 395.136810f, 0}, // 16
 };
@@ -74,9 +72,9 @@ const Position ToCCommonLoc[]=
 const Position JaraxxusLoc[]=
 {
     {508.104767f, 138.247345f, 395.128052f, 0}, // 0 - Fizzlebang start location
-    {548.610596f, 139.807800f, 394.321838f, 0}, // 1 - fizzlebang end
-    {581.854187f, 138.0f, 394.319f, 0},         // 2 - Portal Right
-    {550.558838f, 138.0f, 394.319f, 0},         // 3 - Portal Left
+    {548.610596f, 139.807800f, 394.8f, 0}, // 1 - fizzlebang end
+    {581.854187f, 138.0f, 394.8f, 0},         // 2 - Portal Right
+    {550.558838f, 138.0f, 394.8f, 0},         // 3 - Portal Left
 };
 
 const Position FactionChampionLoc[]=
@@ -93,13 +91,13 @@ const Position FactionChampionLoc[]=
     {625.845f, 112.914f, 421.575f, 0},               //  8 - Ally Initial Pos 3
     {615.566f, 109.653f, 418.234f, 0},               //  9 - Ally Initial Pos 4
 
-    {535.469f, 113.012f, 394.66f, 0},                // 10 - Horde Final Pos 0
-    {526.417f, 137.465f, 394.749f, 0},               // 11 - Horde Final Pos 1
+    {535.469f, 113.012f, 394.8f, 0},                // 10 - Horde Final Pos 0
+    {526.417f, 137.465f, 394.8f, 0},               // 11 - Horde Final Pos 1
     {528.108f, 111.057f, 395.289f, 0},               // 12 - Horde Final Pos 2
     {519.92f, 134.285f, 395.289f, 0},                // 13 - Horde Final Pos 3
-    {533.648f, 119.148f, 394.646f, 0},               // 14 - Horde Final Pos 4
-    {531.399f, 125.63f, 394.708f, 0},                // 15 - Horde Final Pos 5
-    {528.958f, 131.47f, 394.73f, 0},                 // 16 - Horde Final Pos 6
+    {533.648f, 119.148f, 394.8f, 0},               // 14 - Horde Final Pos 4
+    {531.399f, 125.63f, 394.8f, 0},                // 15 - Horde Final Pos 5
+    {528.958f, 131.47f, 394.8f, 0},                 // 16 - Horde Final Pos 6
     {526.309f, 116.667f, 394.833f, 0},               // 17 - Horde Final Pos 7
     {524.238f, 122.411f, 394.819f, 0},               // 18 - Horde Final Pos 8
     {521.901f, 128.488f, 394.832f, 0},               // 19 - Horde Final Pos 9
@@ -107,15 +105,15 @@ const Position FactionChampionLoc[]=
 
 const Position TwinValkyrsLoc[]=
 {
-    {586.060242f, 117.514809f, 394.314026f, 0}, // 0 - Dark essence 1
-    {541.602112f, 161.879837f, 394.587952f, 0}, // 1 - Dark essence 2
+    {586.060242f, 117.514809f, 394.8f, 0}, // 0 - Dark essence 1
+    {541.602112f, 161.879837f, 394.8f, 0}, // 1 - Dark essence 2
     {541.021118f, 117.262932f, 395.314819f, 0}, // 2 - Light essence 1
-    {586.200562f, 162.145523f, 394.626129f, 0}, // 3 - Light essence 2
+    {586.200562f, 162.145523f, 394.8f, 0}, // 3 - Light essence 2
 };
 
 const Position LichKingLoc[]=
 {
-    {563.549f, 152.474f, 394.393f, 0},          // 0 - Lich king start
+    {563.549f, 152.474f, 394.8f, 0},          // 0 - Lich king start
     {563.547f, 141.613f, 393.908f, 0},          // 1 - Lich king end
 };
 
@@ -214,9 +212,6 @@ enum eCreature
 
     NPC_LIGHTBANE               = 34497,
     NPC_DARKBANE                = 34496,
-
-    NPC_DARK_ESSENCE            = 34567,
-    NPC_LIGHT_ESSENCE           = 34568,
 
     NPC_ANUBARAK                = 34564,
 };

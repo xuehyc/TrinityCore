@@ -21,9 +21,13 @@
 const DoorData doorData[] =
 {
     {181126,    BOSS_ANUBREKHAN, DOOR_TYPE_ROOM,     BOUNDARY_S},
+    {181235,    BOSS_ANUBREKHAN, DOOR_TYPE_PASSAGE,  0},
     {181195,    BOSS_ANUBREKHAN, DOOR_TYPE_PASSAGE,  0},
+    {181235,    BOSS_FAERLINA,  DOOR_TYPE_ROOM,     BOUNDARY_S},
     {194022,    BOSS_FAERLINA,  DOOR_TYPE_PASSAGE,  0},
+    {181197,    BOSS_FAERLINA,  DOOR_TYPE_PASSAGE,  0},
     {181209,    BOSS_FAERLINA,  DOOR_TYPE_PASSAGE,  0},
+    {181197,    BOSS_MAEXXNA,   DOOR_TYPE_ROOM,     BOUNDARY_SW},
     {181209,    BOSS_MAEXXNA,   DOOR_TYPE_ROOM,     BOUNDARY_SW},
     {181200,    BOSS_NOTH,      DOOR_TYPE_ROOM,     BOUNDARY_N},
     {181201,    BOSS_NOTH,      DOOR_TYPE_PASSAGE,  BOUNDARY_E},
@@ -31,6 +35,7 @@ const DoorData doorData[] =
     {181202,    BOSS_HEIGAN,    DOOR_TYPE_ROOM,     BOUNDARY_N},
     {181203,    BOSS_HEIGAN,    DOOR_TYPE_PASSAGE,  BOUNDARY_E},
     {181241,    BOSS_HEIGAN,    DOOR_TYPE_PASSAGE,  0},
+    {181496,    BOSS_HEIGAN,    DOOR_TYPE_PASSAGE,  0},
     {181241,    BOSS_LOATHEB,   DOOR_TYPE_ROOM,     BOUNDARY_W},
     {181123,    BOSS_PATCHWERK, DOOR_TYPE_PASSAGE,  0},
     {181123,    BOSS_GROBBULUS, DOOR_TYPE_ROOM,     0},
@@ -43,6 +48,7 @@ const DoorData doorData[] =
     {181119,    BOSS_GOTHIK,    DOOR_TYPE_PASSAGE,  0},
     {181119,    BOSS_HORSEMEN,  DOOR_TYPE_ROOM,     BOUNDARY_NE},
     {181225,    BOSS_SAPPHIRON, DOOR_TYPE_PASSAGE,  BOUNDARY_W},
+    {181228,    BOSS_SAPPHIRON, DOOR_TYPE_PASSAGE,  BOUNDARY_W},
     {181228,    BOSS_KELTHUZAD, DOOR_TYPE_ROOM,     BOUNDARY_S},
     {0,         0,              DOOR_TYPE_ROOM,     0}, // EOF
 };
@@ -142,8 +148,6 @@ public:
 
         uint32 AbominationCount;
 
-        GOState gothikDoorState;
-
         time_t minHorsemenDiedTime;
         time_t maxHorsemenDiedTime;
 
@@ -167,16 +171,31 @@ public:
             kelthuzadTriggerGUID      = 0;
 
             playerDied                = 0;
-            gothikDoorState           = GO_STATE_ACTIVE;
 
             memset(portalsGUID, 0, sizeof(portalsGUID));
         }
 
         void OnCreatureCreate(Creature* creature)
         {
+            if (!creature)
+                return;
+
+            HandleCreatureSpawning(creature, true);
+        }
+
+        void OnCreatureRemove(Creature* creature)
+        {
+            if (!creature)
+                return;
+
+            HandleCreatureSpawning(creature, false);
+        }
+
+        void HandleCreatureSpawning(Creature* creature, bool add)
+        {
             switch (creature->GetEntry())
             {
-                case 15989: sapphironGUID = creature->GetGUID(); return;
+                case 15989: sapphironGUID = add ? creature->GetGUID() : 0; return;
                 case 15953: faerlinaGUID = creature->GetGUID(); return;
                 case 16064: thaneGUID = creature->GetGUID(); return;
                 case 16065: ladyGUID = creature->GetGUID(); return;
@@ -189,84 +208,59 @@ public:
                 case 15990: kelthuzadGUID = creature->GetGUID(); return;
             }
 
-            AddMinion(creature, true);
-        }
-
-        void OnCreatureRemove(Creature* creature)
-        {
-            AddMinion(creature, false);
+            AddMinion(creature, add);
         }
 
         void OnGameObjectCreate(GameObject* go)
         {
-            if (go->GetGOInfo()->displayId == 6785 || go->GetGOInfo()->displayId == 1287)
-            {
-                uint32 section = GetEruptionSection(go->GetPositionX(), go->GetPositionY());
-                heiganEruptionGUID[section].insert(go->GetGUID());
-
+            if (!go)
                 return;
-            }
 
-            switch (go->GetEntry())
-            {
-                case GO_GOTHIK_GATE:
-                    gothikGateGUID = go->GetGUID();
-                    go->SetGoState(gothikDoorState);
-                    break;
-                case GO_HORSEMEN_CHEST:
-                    horsemenChestGUID = go->GetGUID();
-                    break;
-                case GO_HORSEMEN_CHEST_HERO:
-                    horsemenChestGUID = go->GetGUID();
-                    break;
-                case GO_KELTHUZAD_PORTAL01:
-                    portalsGUID[0] = go->GetGUID();
-                    break;
-                case GO_KELTHUZAD_PORTAL02:
-                    portalsGUID[1] = go->GetGUID();
-                    break;
-                case GO_KELTHUZAD_PORTAL03:
-                    portalsGUID[2] = go->GetGUID();
-                    break;
-                case GO_KELTHUZAD_PORTAL04:
-                    portalsGUID[3] = go->GetGUID();
-                    break;
-                case GO_KELTHUZAD_TRIGGER:
-                    kelthuzadTriggerGUID = go->GetGUID();
-                    break;
-                default:
-                    break;
-            }
-
-            AddDoor(go, true);
+            HandleGameObjectSpawning(go, true);
         }
 
         void OnGameObjectRemove(GameObject* go)
         {
+            if (!go)
+                return;
+
+            HandleGameObjectSpawning(go, false);
+        }
+
+        void HandleGameObjectSpawning(GameObject* go, bool add)
+        {
             if (go->GetGOInfo()->displayId == 6785 || go->GetGOInfo()->displayId == 1287)
             {
                 uint32 section = GetEruptionSection(go->GetPositionX(), go->GetPositionY());
-
-                heiganEruptionGUID[section].erase(go->GetGUID());
+                if (add)
+                    heiganEruptionGUID[section].insert(go->GetGUID());
+                else
+                    heiganEruptionGUID[section].erase(go->GetGUID());
                 return;
             }
 
             switch (go->GetEntry())
             {
                 case GO_BIRTH:
-                    if (sapphironGUID)
-                    {
-                        if (Creature* pSapphiron = instance->GetCreature(sapphironGUID))
-                            pSapphiron->AI()->DoAction(DATA_SAPPHIRON_BIRTH);
-                        return;
-                    }
-                    break;
-                default:
-                    break;
+                if (!add && sapphironGUID)
+                {
+                    if (Creature* pSapphiron = instance->GetCreature(sapphironGUID))
+                        pSapphiron->AI()->DoAction(DATA_SAPPHIRON_BIRTH);
+                    return;
+                }
+                case GO_GOTHIK_GATE: gothikGateGUID = go->GetGUID(); break;
+                case GO_HORSEMEN_CHEST: horsemenChestGUID = add ? go->GetGUID() : 0; break;
+                case GO_HORSEMEN_CHEST_HERO: horsemenChestGUID = add ? go->GetGUID() : 0; break;
+                case GO_KELTHUZAD_PORTAL01: portalsGUID[0] = go->GetGUID(); break;
+                case GO_KELTHUZAD_PORTAL02: portalsGUID[1] = go->GetGUID(); break;
+                case GO_KELTHUZAD_PORTAL03: portalsGUID[2] = go->GetGUID(); break;
+                case GO_KELTHUZAD_PORTAL04: portalsGUID[3] = go->GetGUID(); break;
+                case GO_KELTHUZAD_TRIGGER: kelthuzadTriggerGUID = go->GetGUID(); break;
             }
 
-            AddDoor(go, false);
+            AddDoor(go, add);
         }
+
 
         void OnUnitDeath(Unit* unit)
         {
@@ -287,8 +281,8 @@ public:
                 case DATA_GOTHIK_GATE:
                     if (GameObject* gothikGate = instance->GetGameObject(gothikGateGUID))
                         gothikGate->SetGoState(GOState(value));
-                    gothikDoorState = GOState(value);
                     break;
+
                 case DATA_HORSEMEN0:
                 case DATA_HORSEMEN1:
                 case DATA_HORSEMEN2:
@@ -447,28 +441,265 @@ public:
         std::string GetSaveData()
         {
             std::ostringstream saveStream;
-            saveStream << GetBossSaveData() << gothikDoorState << ' ' << playerDied;
+            saveStream << GetBossSaveData() << playerDied;
             return saveStream.str();
         }
 
         void Load(const char * data)
         {
             std::istringstream loadStream(LoadBossState(data));
-            uint32 temp, buff, buff2;
+            uint32 temp, buff;
 
             for (uint32 i = 0; i < MAX_BOSS_NUMBER; ++i)
                 loadStream >> temp;
 
             loadStream >> buff;
-            gothikDoorState = GOState(buff);
-            loadStream >> buff2;
-            playerDied = buff2;
+            playerDied = buff;
         }
     };
+};
 
+
+const Position TargetPos[3] =
+{
+    {3176.42f, -3132.7f, 295.0f, 0.0f},
+    {3154.90f, -3123.03f, 295.0f, 0.0f},
+    {3136.50f, -3118.55f, 295.0f, 0.0f}
+};
+
+class mob_living_poison : public CreatureScript
+{
+public:
+    mob_living_poison() : CreatureScript("mob_living_poison") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_living_poisonAI(creature);
+    }
+
+    struct mob_living_poisonAI : public ScriptedAI
+    {
+        mob_living_poisonAI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint32 SpawnTimer;
+
+        void Reset()
+        {
+            SpawnTimer = 8000;
+            LivingPoisonStart();
+        }
+
+        void LivingPoisonStart()
+            {
+            if (me->GetPositionX() <= 3160.0f && me->GetPositionX() >= 3150.0f)
+                me->GetMotionMaster()->MovePoint(1, TargetPos[0].GetPositionX(), TargetPos[0].GetPositionY(), TargetPos[0].GetPositionZ());
+            else if (me->GetPositionX() <= 3150.0f && me->GetPositionX() >= 3135.0f)
+                me->GetMotionMaster()->MovePoint(1, TargetPos[1].GetPositionX(), TargetPos[1].GetPositionY(), TargetPos[1].GetPositionZ());
+            else if (me->GetPositionX() <= 3135.0f && me->GetPositionX() >= 3125.0f)
+                me->GetMotionMaster()->MovePoint(1, TargetPos[2].GetPositionX(), TargetPos[2].GetPositionY(), TargetPos[2].GetPositionZ());
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            if (id == 1 && me->isSummon())
+                me->DespawnOrUnsummon();
+            else if (id == 1)
+                me->SetVisible(false);
+
+        }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (me->IsHostileTo(who) && me->GetExactDist(who->GetPositionX(), who->GetPositionY(), who->GetPositionZ()) <= 2.5f && !me->IsVisible() == false && who->isAlive())
+            {
+                me->DealDamage(who, 30000);
+                me->SetVisible(false);
+            }
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (me->GetInstanceScript())
+                if (me->GetInstanceScript()->GetBossState(BOSS_GROBBULUS) == DONE)
+                {
+                    me->DespawnOrUnsummon();
+                    return;
+            }
+
+            if (SpawnTimer <= diff && !me->isSummon())
+            {
+                DoSummon(me->GetEntry(), me->GetHomePosition());
+                SpawnTimer = 8000;
+            } else SpawnTimer -= diff;
+        }
+    };
+};
+
+#define SPELL_SLIME             49870
+
+class mob_slime_trigger : public CreatureScript
+{
+public:
+    mob_slime_trigger() : CreatureScript("mob_slime_trigger") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_slime_triggerAI(creature);
+    }
+
+    struct mob_slime_triggerAI : public ScriptedAI
+    {
+        mob_slime_triggerAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (who->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if (me->GetPositionX() <= 3350.0f && me->GetPositionX() >= 3000.0f && me->GetPositionY() <= -3100.0f && me->GetPositionY() >= -3300.0f)
+            {
+                if (me->GetExactDist(who->GetPositionX(), who->GetPositionY(), who->GetPositionZ()) <= 3.35f && who->isAlive() && !who->HasAura(SPELL_SLIME))
+                    if (me->GetInstanceScript())
+                        if (me->GetInstanceScript()->GetBossState(BOSS_PATCHWERK) == IN_PROGRESS)
+                            who->AddAura(SPELL_SLIME, who);
+            }
+            else
+            {
+                if (who->isAlive() && who->IsInWater() && !CAST_PLR(who)->isGameMaster())
+                    me->Kill(who, false);
+            }
+        }
+    };
+};
+
+class mob_avoid_corpsedecay : public CreatureScript
+{
+public:
+    mob_avoid_corpsedecay() : CreatureScript("mob_avoid_corpsedecay") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_avoid_corpsedecayAI(creature);
+    }
+
+    struct mob_avoid_corpsedecayAI : public CombatAI
+    {
+        mob_avoid_corpsedecayAI(Creature* c) : CombatAI(c) {}
+
+        uint32 combatStopTimer;
+        bool combatStopEnabled;
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (!who || !me->GetMap())
+                return;
+
+            if (me->GetEntry() == 16236) // Augenstrunk
+            {
+                if (me->IsHostileTo(who) && me->GetDistance(who) <= 25.0f && !me->isInCombat())
+                    if (me->Attack(who, false))
+                    {
+                        DoCast(who, me->GetMap()->IsHeroic() ? 54805 : 29407);
+                        me->GetMotionMaster()->MoveIdle();
+                        combatStopEnabled = true;
+                        combatStopTimer = 6000;
+                    }
+            }
+            else
+                CombatAI::MoveInLineOfSight(who);
+        }
+
+        void JustDied(Unit* killer)
+        {
+            CombatAI::JustDied(killer);
+            me->SetRespawnTime(me->GetRespawnDelay());
+            me->setDeathState(DEAD);
+            me->SelectNearbyTarget();
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (me->GetEntry() == 16236) // Augenstrunk
+            {
+                if (!me->isInCombat())
+                    return;
+                else if (me->getThreatManager().isThreatListEmpty())
+                {
+                    EnterEvadeMode();
+                    return;
+                }
+
+                if (combatStopTimer <= diff && combatStopEnabled)
+                {
+                    combatStopEnabled = false;
+                    me->DeleteThreatList();
+                }else combatStopTimer -= diff;
+            }
+            else
+            {
+                CombatAI::UpdateAI(diff);
+            }
+        }
+    };
+};
+
+class npc_portal_naxxramas : public CreatureScript
+{
+public:
+    npc_portal_naxxramas() : CreatureScript("npc_portal_naxxramas") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (!creature || !player || !creature->GetInstanceScript() || creature->GetMapId() != 533)
+            return false;
+
+        float x, y;
+        creature->GetPosition(x, y);
+
+        // Loatheb Teleporter
+        if (x <= 2914.0f && x >= 2904.0f && y <= -4020.0f && y >= -4030.0f)
+            if (creature->GetInstanceScript()->GetBossState(BOSS_LOATHEB) == DONE)
+            {
+                player->CastSpell(player, 72613, true); // Sapphiron Exit Spell, teleports to center
+                return true;
+            }
+
+        // Four Horsemen Teleporter
+        if (x <= 2498.0f && x >= 2488.0f && y <= -2916.0f && y >= -2926.0f)
+            if (creature->GetInstanceScript()->GetBossState(BOSS_HORSEMEN) == DONE)
+            {
+                player->CastSpell(player, 72613, true); // Sapphiron Exit Spell, teleports to center
+                return true;
+            }
+
+        // Maexxna Teleporter
+        if (x <= 3474.0f && x >= 3464.0f && y <= -3929.0f && y >= -3939.0f)
+            if (creature->GetInstanceScript()->GetBossState(BOSS_MAEXXNA) == DONE)
+            {
+                player->CastSpell(player, 72613, true); // Sapphiron Exit Spell, teleports to center
+                return true;
+            }
+
+        // Thaddius Teleporter
+        if (x <= 3543.0f && x >= 3533.0f && y <= -2931.0f && y >= -2941.0f)
+            if (creature->GetInstanceScript()->GetBossState(BOSS_THADDIUS) == DONE)
+            {
+                player->CastSpell(player, 72613, true); // Sapphiron Exit Spell, teleports to center
+                return true;
+            }
+
+        return false;
+    }
 };
 
 void AddSC_instance_naxxramas()
 {
     new instance_naxxramas();
+    new mob_living_poison();
+    new mob_slime_trigger();
+    new mob_avoid_corpsedecay();
+    new npc_portal_naxxramas();
 }

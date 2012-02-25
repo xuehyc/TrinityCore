@@ -180,6 +180,75 @@ void Vehicle::ApplyAllImmunities()
             // why we need to apply this? we can simple add immunities to slow mechanic in DB
             _me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
             break;
+        // Wintergrasp Siege Engine -- need to remove general knockback immunity here
+        case 117:
+        case 324:
+            _me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, false);
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 50652, true); // Ram - used by Wintergrasp Demolisher
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 61391, true); // Typhoon - Rank 1 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 61390, true); // Typhoon - Rank 2 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 61388, true); // Typhoon - Rank 3 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 61387, true); // Typhoon - Rank 4 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 53227, true); // Typhoon - Rank 5 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 51490, true); // Thunderstorm - Rank 1 - Shaman talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 59156, true); // Thunderstorm - Rank 2 - Shaman talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 59158, true); // Thunderstorm - Rank 3 - Shaman talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 59159, true); // Thunderstorm - Rank 4 - Shaman talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 11113, true); // Blast Wave - Rank 1 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 13018, true); // Blast Wave - Rank 2 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 13019, true); // Blast Wave - Rank 3 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 13020, true); // Blast Wave - Rank 4 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 13021, true); // Blast Wave - Rank 5 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 27133, true); // Blast Wave - Rank 6 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 33933, true); // Blast Wave - Rank 7 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 42944, true); // Blast Wave - Rank 8 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 42945, true); // Blast Wave - Rank 9 - Mage talent
+            break;
+        // Wintergrasp Demolisher -- need to remove general knockback immunity here
+        case 106:
+            _me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, false);
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 51678, true); // Ram - used by Wintergrasp Siege Engine
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 61391, true); // Typhoon - Rank 1 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 61390, true); // Typhoon - Rank 2 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 61388, true); // Typhoon - Rank 3 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 61387, true); // Typhoon - Rank 4 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 53227, true); // Typhoon - Rank 5 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 51490, true); // Thunderstorm - Rank 1 - Shaman talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 59156, true); // Thunderstorm - Rank 2 - Shaman talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 59158, true); // Thunderstorm - Rank 3 - Shaman talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 59159, true); // Thunderstorm - Rank 4 - Shaman talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 11113, true); // Blast Wave - Rank 1 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 13018, true); // Blast Wave - Rank 2 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 13019, true); // Blast Wave - Rank 3 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 13020, true); // Blast Wave - Rank 4 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 13021, true); // Blast Wave - Rank 5 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 27133, true); // Blast Wave - Rank 6 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 33933, true); // Blast Wave - Rank 7 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 42944, true); // Blast Wave - Rank 8 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 42945, true); // Blast Wave - Rank 9 - Mage talent
+            break;
+        // Battleground Demolisher -- need to remove general knockback immunity here
+        case 158:
+            _me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, false);
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 61391, true); // Typhoon - Rank 1 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 61390, true); // Typhoon - Rank 2 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 61388, true); // Typhoon - Rank 3 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 61387, true); // Typhoon - Rank 4 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 53227, true); // Typhoon - Rank 5 - Druid talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 51490, true); // Thunderstorm - Rank 1 - Shaman talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 59156, true); // Thunderstorm - Rank 2 - Shaman talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 59158, true); // Thunderstorm - Rank 3 - Shaman talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 59159, true); // Thunderstorm - Rank 4 - Shaman talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 11113, true); // Blast Wave - Rank 1 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 13018, true); // Blast Wave - Rank 2 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 13019, true); // Blast Wave - Rank 3 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 13020, true); // Blast Wave - Rank 4 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 13021, true); // Blast Wave - Rank 5 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 27133, true); // Blast Wave - Rank 6 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 33933, true); // Blast Wave - Rank 7 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 42944, true); // Blast Wave - Rank 8 - Mage talent
+            _me->ApplySpellImmune(0, IMMUNITY_ID, 42945, true); // Blast Wave - Rank 9 - Mage talent
+            break;
         default:
             break;
     }

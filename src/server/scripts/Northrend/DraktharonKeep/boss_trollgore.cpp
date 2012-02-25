@@ -29,7 +29,9 @@ enum Spells
     SPELL_CORPSE_EXPLODE                          = 49555,
     SPELL_CONSUME                                 = 49380,
     SPELL_CONSUME_AURA                            = 49381,
+    SPELL_CORPSE_EXPLODE_NH                       = 49618,
     //Heroic spells
+    SPELL_CORPSE_EXPLODE_HC                       = 59809,
     H_SPELL_CORPSE_EXPLODE                        = 59807,
     H_SPELL_CONSUME                               = 59803,
     H_SPELL_CONSUME_AURA                          = 59805,
@@ -116,12 +118,36 @@ public:
             {
                 uint32 spawnNumber = urand(2, DUNGEON_MODE(3, 5));
                 for (uint8 i = 0; i < spawnNumber; ++i)
-                    DoSummon(RAND(NPC_DRAKKARI_INVADER_1, NPC_DRAKKARI_INVADER_2), AddSpawnPoint, 0, TEMPSUMMON_DEAD_DESPAWN);
+                    if (Creature* temp = DoSummon(RAND(NPC_DRAKKARI_INVADER_1, NPC_DRAKKARI_INVADER_2), AddSpawnPoint, 0, TEMPSUMMON_DEAD_DESPAWN))
+                    {
+                        if (temp->GetAI())
+                        {
+                            temp->GetAI()->AttackStart(me);
+                            temp->AddThreat(me, 5000000.0f);
+                        }
+                    }
                 uiSpawnTimer = urand(30*IN_MILLISECONDS, 40*IN_MILLISECONDS);
             } else uiSpawnTimer -= diff;
 
             if (uiConsumeTimer <= diff)
-            {
+           {
+                std::list<HostileReference *> t_list = me->getThreatManager().getThreatList();
+
+                if (!t_list.empty())
+                {
+                    for (std::list<HostileReference *>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
+                    {
+                        if (Unit* target = Unit::GetUnit((*me), (*itr)->getUnitGuid()))
+                        {
+                            if (me->GetDistance(target) <= 50.0f && target->isAlive() && me->IsValidAttackTarget(target))
+                            {
+                                // Apply aura for every target in 50yards ~ 45m
+                                DoCast(me, DUNGEON_MODE(SPELL_CONSUME_AURA, H_SPELL_CONSUME), true);
+                            }
+                        }
+                    }
+                }
+
                 DoScriptText(SAY_CONSUME, me);
                 DoCast(SPELL_CONSUME);
                 uiConsumeTimer = 15*IN_MILLISECONDS;
@@ -148,8 +174,27 @@ public:
 
             if (uiExplodeCorpseTimer <= diff)
             {
-                DoCast(SPELL_CORPSE_EXPLODE);
-                DoScriptText(SAY_EXPLODE, me);
+                std::list<Creature*> addList;
+                me->GetCreatureListWithEntryInGrid(addList,NPC_DRAKKARI_INVADER_1, 10.0f);
+                me->GetCreatureListWithEntryInGrid(addList,NPC_DRAKKARI_INVADER_2, 10.0f);
+
+                if(!addList.empty())
+                {
+                    DoCast(SPELL_CORPSE_EXPLODE);
+                    DoScriptText(SAY_EXPLODE, me);
+
+                    for(std::list<Creature*>::iterator i = addList.begin(); i != addList.end(); i++)
+                    {
+                        if ((*i))
+                        {
+                            if(!(*i)->isAlive())
+                            {
+                                DoCast((*i), DUNGEON_MODE(SPELL_CORPSE_EXPLODE_NH, SPELL_CORPSE_EXPLODE_HC), true);
+                                (*i)->DespawnOrUnsummon();
+                            }
+                        }
+                    }
+                }
                 uiExplodeCorpseTimer = urand(15*IN_MILLISECONDS, 19*IN_MILLISECONDS);
             } else uiExplodeCorpseTimer -= diff;
 

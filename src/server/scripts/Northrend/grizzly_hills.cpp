@@ -693,6 +693,75 @@ public:
     };
 };
 
+/*######
+## Quest 12296: Life or Death!
+## Uses some definitions from the previous enum - they are commented out here
+######*/
+
+enum eInfantry
+{
+    SPELL_RENEW_INFANTRY    = 48845,
+    CREDIT_NPC_12296        = 27466,
+    QUEST_LIFE_OR_DEATH     = 12296,
+};
+
+class npc_wounded_infantry : public CreatureScript
+{
+public:
+    npc_wounded_infantry() : CreatureScript("npc_wounded_infantry") { }
+
+    struct npc_wounded_infantryAI : public ScriptedAI
+    {
+        npc_wounded_infantryAI(Creature *c) : ScriptedAI(c) {}
+
+        uint64 uiPlayerGUID;
+
+        uint32 DespawnTimer;
+
+        void Reset ()
+        {
+            DespawnTimer = 5000;
+            uiPlayerGUID = 0;
+        }
+
+        void MovementInform(uint32, uint32 id)
+        {
+            if (id == 1)
+                me->DespawnOrUnsummon(DespawnTimer);
+        }
+
+        void SpellHit(Unit *caster, const SpellEntry *spell)
+        {
+            if (spell->Id == SPELL_RENEW_INFANTRY && caster->GetTypeId() == TYPEID_PLAYER
+                && caster->ToPlayer()->GetQuestStatus(QUEST_LIFE_OR_DEATH) == QUEST_STATUS_INCOMPLETE)
+            {
+                caster->ToPlayer()->KilledMonsterCredit(CREDIT_NPC_12296, 0);
+                DoScriptText(RAND(RANDOM_SAY_1, RANDOM_SAY_2, RANDOM_SAY_3), caster);
+                if(me->IsStandState())
+                    me->GetMotionMaster()->MovePoint(1, me->GetPositionX()+7, me->GetPositionY()+7, me->GetPositionZ());
+                else
+                {
+                    me->SetStandState(UNIT_STAND_STATE_STAND);
+                    me->DespawnOrUnsummon(DespawnTimer);
+                }
+
+            }
+        }
+
+        void UpdateAI(const uint32 /*diff*/)
+        {
+            if (!UpdateVictim())
+                return;
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new npc_wounded_infantryAI(creature);
+    }
+};
+
 void AddSC_grizzly_hills()
 {
     new npc_emily;
@@ -703,4 +772,5 @@ void AddSC_grizzly_hills()
     new npc_wounded_skirmisher;
     new npc_lightning_sentry();
     new npc_venture_co_straggler();
+    new npc_wounded_infantry;
 }

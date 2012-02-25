@@ -100,8 +100,13 @@ class boss_archaedas : public CreatureScript
 
                 if (pMinion && pMinion->isAlive())
                 {
-                    DoCast(pMinion, SPELL_AWAKEN_VAULT_WALKER, bFlag);
-                    pMinion->CastSpell(pMinion, SPELL_ARCHAEDAS_AWAKEN, true);
+                    if (pMinion->GetTypeId() == TYPEID_UNIT)
+                    {
+                        DoCast(pMinion, SPELL_AWAKEN_VAULT_WALKER, bFlag);
+                        pMinion->CastSpell(pMinion, SPELL_ARCHAEDAS_AWAKEN, true);
+                        pMinion->setFaction(14);
+                        DoZoneInCombat(pMinion->ToCreature());
+                    }
                 }
             }
 

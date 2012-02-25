@@ -1071,7 +1071,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     if (*itr < 0)
                         target->RemoveAurasDueToSpell(-(*itr));
                     else if (removeMode != AURA_REMOVE_BY_DEATH)
-                        target->CastSpell(target, *itr, true, NULL, NULL, GetCasterGUID());
+                    {
+                        // Item - Rogue T10 4P Bonus (70803) - Replace Mayhem (70802) spell hack
+                        if (*itr == 70802)
+                        {
+                            if (target && target->getVictim() && target->IsValidAttackTarget(target->getVictim()))
+                                target->CastSpell(target->getVictim(), *itr, true, NULL, NULL, GetCasterGUID());
+                        }
+                        else
+                            target->CastSpell(target, *itr, true, NULL, NULL, GetCasterGUID());
+                    }
                 }
             }
             if (std::vector<int32> const* spellTriggered = sSpellMgr->GetSpellLinked(GetId() + SPELL_LINK_AURA))

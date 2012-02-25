@@ -38,7 +38,6 @@ public:
             portalTriggers.clear();
 
             malygosGUID = 0;
-            lastPortalGUID = 0;
             platformGUID = 0;
             exitPortalGUID = 0;
         };
@@ -62,8 +61,12 @@ public:
                         }
                     }
 
-                    SpawnGameObject(GO_FOCUSING_IRIS, focusingIrisPosition);
-                    SpawnGameObject(GO_EXIT_PORTAL, exitPortalPosition);
+                    if (instance->GetSpawnMode() == 1)
+                        SpawnGameObject(GO_FOCUSING_IRIS_H,focusingIrisPosition);
+                    else
+                        SpawnGameObject(GO_FOCUSING_IRIS,focusingIrisPosition);
+
+                    SpawnGameObject(GO_EXIT_PORTAL,exitPortalPosition);
 
                     if (GameObject* platform = instance->GetGameObject(platformGUID))
                         platform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
@@ -110,6 +113,7 @@ public:
                     platformGUID = go->GetGUID();
                     break;
                 case GO_FOCUSING_IRIS:
+                case GO_FOCUSING_IRIS_H:
                     go->GetPosition(&focusingIrisPosition);
                     break;
                 case GO_EXIT_PORTAL:
@@ -191,22 +195,30 @@ public:
 
         void PowerSparksHandling()
         {
-            bool next =  (lastPortalGUID == portalTriggers.back() || !lastPortalGUID ? true : false);
+            if (portalTriggers.empty())
+                return;
+
+            uint8 randomPortalnumber = urand(1, portalTriggers.size());
+            uint8 slopeCount = 1;
 
             for (std::list<uint64>::const_iterator itr_trigger = portalTriggers.begin(); itr_trigger != portalTriggers.end(); ++itr_trigger)
             {
-                if (next)
+                if (Creature* trigger = instance->GetCreature(*itr_trigger))
                 {
-                    if (Creature* trigger = instance->GetCreature(*itr_trigger))
+                    if (trigger->HasAura(SPELL_PORTAL_OPENED))
                     {
-                        lastPortalGUID = trigger->GetGUID();
-                        trigger->CastSpell(trigger, SPELL_PORTAL_OPENED, true);
-                        return;
+                        trigger->RemoveAurasDueToSpell(SPELL_PORTAL_OPENED);
+                        trigger->CastSpell(trigger, SPELL_PORTAL_VISUAL_CLOSED, true);
                     }
-                }
 
-                if (*itr_trigger == lastPortalGUID)
-                    next = true;
+                    if (randomPortalnumber == slopeCount)
+                    {
+                        trigger->RemoveAurasDueToSpell(SPELL_PORTAL_VISUAL_CLOSED);
+                        trigger->CastSpell(trigger,SPELL_PORTAL_OPENED,true);
+                    }
+
+                    slopeCount++;
+                }
             }
         }
 
@@ -284,7 +296,6 @@ public:
             std::list<uint64> vortexTriggers;
             std::list<uint64> portalTriggers;
             uint64 malygosGUID;
-            uint64 lastPortalGUID;
             uint64 platformGUID;
             uint64 exitPortalGUID;
             uint64 chestGUID;

@@ -152,6 +152,7 @@ class npc_announcer_toc10 : public CreatureScript
         bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
         {
             player->PlayerTalkClass->ClearMenus();
+
             player->CLOSE_GOSSIP_MENU();
             InstanceScript* instanceScript = creature->GetInstanceScript();
             if (!instanceScript)
@@ -173,7 +174,9 @@ class npc_announcer_toc10 : public CreatureScript
                         jaraxxus->RemoveAurasDueToSpell(SPELL_JARAXXUS_CHAINS);
                         jaraxxus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         jaraxxus->SetReactState(REACT_AGGRESSIVE);
-                        jaraxxus->SetInCombatWithZone();
+
+                        if (Unit* target = jaraxxus->SelectNearestTarget(150))
+                            jaraxxus->AI()->AttackStart(target);
                     }
                     else if (instanceScript->GetData(TYPE_JARAXXUS) != DONE)
                     {
@@ -182,12 +185,45 @@ class npc_announcer_toc10 : public CreatureScript
                     }
                     break;
                 case GOSSIP_ACTION_INFO_DEF+3:
+
+                    uint32 TeamInInstance;
+                    TeamInInstance = 0;
+
                     if (instanceScript->GetData(TYPE_CRUSADERS) != DONE)
                     {
-                        if (player->GetTeam() == ALLIANCE)
+                        if (instanceScript->instance)
+                        {
+                            Map::PlayerList const &players = instanceScript->instance->GetPlayers();
+                            uint8 HordeCount = 0;
+                            uint8 AllianceCount = 0;
+        
+                            if (!players.isEmpty())
+                            {
+                                for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                                {
+                                    if (Player* player = i->getSource())
+                                    {
+                                        if (player->GetTeam() == HORDE)
+                                            HordeCount++;
+                                        else if (player->GetTeam() == ALLIANCE)
+                                            AllianceCount++;
+                                    }
+                                }
+        
+                                if (AllianceCount > HordeCount)
+                                    TeamInInstance = ALLIANCE;
+                                else if (HordeCount > AllianceCount)
+                                    TeamInInstance = HORDE;
+                                else if (HordeCount == AllianceCount)
+                                    TeamInInstance = RAND(ALLIANCE, HORDE);
+                            }
+                        }
+
+                        if (TeamInInstance == ALLIANCE)
                             instanceScript->SetData(TYPE_EVENT, 3000);
                         else
                             instanceScript->SetData(TYPE_EVENT, 3001);
+
                         instanceScript->SetData(TYPE_CRUSADERS, NOT_STARTED);
                     }
                     break;
@@ -209,12 +245,12 @@ class npc_announcer_toc10 : public CreatureScript
                     creature->CastSpell(creature, 69016, false);
 
                     Creature* anubArak = Unit::GetCreature(*creature, instanceScript->GetData64(NPC_ANUBARAK));
-                    if (!anubArak || !anubArak->isAlive())
+                    if (!anubArak)
                         anubArak = creature->SummonCreature(NPC_ANUBARAK, AnubarakLoc[0].GetPositionX(), AnubarakLoc[0].GetPositionY(), AnubarakLoc[0].GetPositionZ(), 3, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME);
 
                     instanceScript->SetData(TYPE_ANUBARAK, NOT_STARTED);
 
-                    if (creature->IsVisible())
+                    if (creature->IsVisible() == false)
                         creature->SetVisible(false);
                     break;
                 }
@@ -330,6 +366,7 @@ class boss_lich_king_toc : public CreatureScript
 
                                 m_instance->SetData(TYPE_EVENT, 0);
                             }
+
                             me->DespawnOrUnsummon();
                             m_uiUpdateTimer = 20000;
                             break;
@@ -372,7 +409,9 @@ class npc_fizzlebang_toc : public CreatureScript
                 {
                     temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     temp->SetReactState(REACT_AGGRESSIVE);
-                    temp->SetInCombatWithZone();
+
+                    if (Unit* target = temp->SelectNearestTarget(150))
+                        temp->AI()->AttackStart(target);
                 }
             }
 
@@ -393,7 +432,6 @@ class npc_fizzlebang_toc : public CreatureScript
                         me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                         if (m_instance)
                         {
-                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
                             m_instance->SetData(TYPE_EVENT, 1120);
                             m_instance->SetData(TYPE_EVENT_TIMER, 1000);
                         }
@@ -492,10 +530,7 @@ class npc_fizzlebang_toc : public CreatureScript
                             if (Creature* temp = Unit::GetCreature(*me, m_instance->GetData64(NPC_JARAXXUS)))
                             {
                                 //1-shot Fizzlebang
-                                temp->CastSpell(me, 67888, false);
-                                me->SetInCombatWith(temp);
-                                temp->AddThreat(me, 1000.0f);
-                                temp->AI()->AttackStart(me);
+                                temp->Kill(me);
                             }
                             m_instance->SetData(TYPE_EVENT, 1160);
                             m_uiUpdateTimer = 3000;
@@ -553,17 +588,17 @@ class npc_tirion_toc : public CreatureScript
                             DoScriptText(SAY_STAGE_0_02, me);
                             m_uiUpdateTimer = 5000;
                             m_instance->SetData(TYPE_EVENT, 150);
+                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
                             break;
                         case 150:
                             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
                             if (m_instance->GetData(TYPE_BEASTS) != DONE)
                             {
-                                m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
-
-                                if (Creature* temp = me->SummonCreature(NPC_GORMOK, ToCSpawnLoc[0].GetPositionX(), ToCSpawnLoc[0].GetPositionY(), ToCSpawnLoc[0].GetPositionZ(), 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30*IN_MILLISECONDS))
+                                if (Creature* temp = me->SummonCreature(NPC_GORMOK, ToCCommonLoc[10].GetPositionX(), ToCCommonLoc[10].GetPositionY(), ToCCommonLoc[10].GetPositionZ(), 5, TEMPSUMMON_CORPSE_DESPAWN))
                                 {
-                                    temp->GetMotionMaster()->MovePoint(0, ToCCommonLoc[5].GetPositionX(), ToCCommonLoc[5].GetPositionY(), ToCCommonLoc[5].GetPositionZ());
-                                    temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                                    temp->GetMotionMaster()->MovePoint(1, ToCCommonLoc[5].GetPositionX(), ToCCommonLoc[5].GetPositionY(), ToCCommonLoc[5].GetPositionZ());
+                                    temp->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                    temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
                                     temp->SetReactState(REACT_PASSIVE);
                                 }
                             }
@@ -571,6 +606,12 @@ class npc_tirion_toc : public CreatureScript
                             m_instance->SetData(TYPE_EVENT, 155);
                             break;
                         case 155:
+                            if (Creature* temp = Unit::GetCreature((*me), m_instance->GetData64(NPC_GORMOK)))
+                            {
+                                temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                                temp->SetReactState(REACT_AGGRESSIVE);
+                            }
+                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
                             m_instance->SetData(TYPE_BEASTS, IN_PROGRESS);
                             m_uiUpdateTimer = 5000;
                             m_instance->SetData(TYPE_EVENT, 160);
@@ -583,21 +624,23 @@ class npc_tirion_toc : public CreatureScript
                         case 205:
                             m_uiUpdateTimer = 3000;
                             m_instance->SetData(TYPE_EVENT, 210);
+                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
                             break;
                         case 210:
                             if (m_instance->GetData(TYPE_BEASTS) != DONE)
                             {
-                                m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
-                                if (Creature* temp = me->SummonCreature(NPC_DREADSCALE, ToCSpawnLoc[1].GetPositionX(), ToCSpawnLoc[1].GetPositionY(), ToCSpawnLoc[1].GetPositionZ(), 5, TEMPSUMMON_MANUAL_DESPAWN))
+                                if (Creature* temp = me->SummonCreature(NPC_DREADSCALE, ToCCommonLoc[3].GetPositionX(), ToCCommonLoc[3].GetPositionY(), ToCCommonLoc[3].GetPositionZ(), 5, TEMPSUMMON_MANUAL_DESPAWN))
                                 {
-                                    temp->GetMotionMaster()->MovePoint(0, ToCCommonLoc[8].GetPositionX(), ToCCommonLoc[8].GetPositionY(), ToCCommonLoc[8].GetPositionZ());
-                                    temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                                    temp->GetMotionMaster()->MovePoint(1, ToCCommonLoc[6].GetPositionX(), ToCCommonLoc[6].GetPositionY(), ToCCommonLoc[6].GetPositionZ());
+                                    temp->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                    temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
                                     temp->SetReactState(REACT_PASSIVE);
                                 }
-                                if (Creature* temp = me->SummonCreature(NPC_ACIDMAW, ToCCommonLoc[9].GetPositionX(), ToCCommonLoc[9].GetPositionY(), ToCCommonLoc[9].GetPositionZ(), 5, TEMPSUMMON_MANUAL_DESPAWN))
+                                if (Creature* temp = me->SummonCreature(NPC_ACIDMAW, ToCCommonLoc[4].GetPositionX(), ToCCommonLoc[4].GetPositionY(), ToCCommonLoc[4].GetPositionZ(), 5, TEMPSUMMON_MANUAL_DESPAWN))
                                 {
-                                    temp->SetVisible(true);
-                                    temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                                    temp->GetMotionMaster()->MovePoint(1, ToCCommonLoc[7].GetPositionX(), ToCCommonLoc[7].GetPositionY(), ToCCommonLoc[7].GetPositionZ());
+                                    temp->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                    temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
                                     temp->SetReactState(REACT_PASSIVE);
                                 }
                             }
@@ -605,7 +648,18 @@ class npc_tirion_toc : public CreatureScript
                             m_instance->SetData(TYPE_EVENT, 220);
                             break;
                         case 220:
+                            if (Creature* temp = Unit::GetCreature((*me), m_instance->GetData64(NPC_DREADSCALE)))
+                            {
+                                temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                                temp->SetReactState(REACT_AGGRESSIVE);
+                            }
+                            if (Creature* temp = Unit::GetCreature((*me), m_instance->GetData64(NPC_ACIDMAW)))
+                            {
+                                temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                                temp->SetReactState(REACT_AGGRESSIVE);
+                            }
                             m_instance->SetData(TYPE_EVENT, 230);
+                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
                             break;
                         case 300:
                             DoScriptText(SAY_STAGE_0_05, me);
@@ -615,23 +669,21 @@ class npc_tirion_toc : public CreatureScript
                         case 305:
                             m_uiUpdateTimer = 3000;
                             m_instance->SetData(TYPE_EVENT, 310);
+                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
                             break;
                         case 310:
                             if (m_instance->GetData(TYPE_BEASTS) != DONE)
                             {
-                                m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
-                                if (Creature* temp = me->SummonCreature(NPC_ICEHOWL, ToCSpawnLoc[0].GetPositionX(), ToCSpawnLoc[0].GetPositionY(), ToCSpawnLoc[0].GetPositionZ(), 5, TEMPSUMMON_DEAD_DESPAWN))
+                                if (Creature* temp = me->SummonCreature(NPC_ICEHOWL, ToCCommonLoc[10].GetPositionX(), ToCCommonLoc[10].GetPositionY(), ToCCommonLoc[10].GetPositionZ(), 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME))
                                 {
                                     temp->GetMotionMaster()->MovePoint(2, ToCCommonLoc[5].GetPositionX(), ToCCommonLoc[5].GetPositionY(), ToCCommonLoc[5].GetPositionZ());
-                                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                                    me->SetReactState(REACT_PASSIVE);
-
                                 }
                             }
                             m_uiUpdateTimer = 5000;
                             m_instance->SetData(TYPE_EVENT, 315);
                             break;
                         case 315:
+                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
                             m_instance->SetData(TYPE_EVENT, 320);
                             break;
                         case 400:
@@ -648,7 +700,7 @@ class npc_tirion_toc : public CreatureScript
                             DoScriptText(SAY_STAGE_1_01, me);
                             m_uiUpdateTimer = 7000;
                             m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
-                            me->SummonCreature(NPC_FIZZLEBANG, ToCSpawnLoc[0].GetPositionX(), ToCSpawnLoc[0].GetPositionY(), ToCSpawnLoc[0].GetPositionZ(), 2, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME);
+                            me->SummonCreature(NPC_FIZZLEBANG, ToCCommonLoc[10].GetPositionX(), ToCCommonLoc[10].GetPositionY(), ToCCommonLoc[10].GetPositionZ(), 2, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME);
                             m_instance->SetData(TYPE_EVENT, 0);
                             break;
                         case 1180:
@@ -688,6 +740,7 @@ class npc_tirion_toc : public CreatureScript
                             break;
                         //Summoning crusaders
                         case 3091:
+                            
                             if (Creature* pChampionController = me->SummonCreature(NPC_CHAMPIONS_CONTROLLER, ToCCommonLoc[1]))
                                 pChampionController->AI()->SetData(0, HORDE);
                             m_uiUpdateTimer = 3000;
@@ -718,40 +771,30 @@ class npc_tirion_toc : public CreatureScript
                             break;
                         case 4010:
                             DoScriptText(SAY_STAGE_3_02, me);
-                            if (Creature* temp = me->SummonCreature(NPC_LIGHTBANE, ToCSpawnLoc[1].GetPositionX(), ToCSpawnLoc[1].GetPositionY(), ToCSpawnLoc[1].GetPositionZ(), 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME))
-                            {
-                                temp->SetVisible(false);
-                                temp->SetReactState(REACT_PASSIVE);
-                                temp->SummonCreature(NPC_LIGHT_ESSENCE, TwinValkyrsLoc[0].GetPositionX(), TwinValkyrsLoc[0].GetPositionY(), TwinValkyrsLoc[0].GetPositionZ());
-                                temp->SummonCreature(NPC_LIGHT_ESSENCE, TwinValkyrsLoc[1].GetPositionX(), TwinValkyrsLoc[1].GetPositionY(), TwinValkyrsLoc[1].GetPositionZ());
-                            }
-                            if (Creature* temp = me->SummonCreature(NPC_DARKBANE, ToCSpawnLoc[2].GetPositionX(), ToCSpawnLoc[2].GetPositionY(), ToCSpawnLoc[2].GetPositionZ(), 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME))
-                            {
-                                temp->SetVisible(false);
-                                temp->SetReactState(REACT_PASSIVE);
-                                temp->SummonCreature(NPC_DARK_ESSENCE, TwinValkyrsLoc[2].GetPositionX(), TwinValkyrsLoc[2].GetPositionY(), TwinValkyrsLoc[2].GetPositionZ());
-                                temp->SummonCreature(NPC_DARK_ESSENCE, TwinValkyrsLoc[3].GetPositionX(), TwinValkyrsLoc[3].GetPositionY(), TwinValkyrsLoc[3].GetPositionZ());
-                            }
+                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
                             m_uiUpdateTimer = 3000;
                             m_instance->SetData(TYPE_EVENT, 4015);
                             break;
                         case 4015:
-                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
-                            if (Creature* temp = Unit::GetCreature((*me), m_instance->GetData64(NPC_LIGHTBANE)))
+                            if (Creature* temp = me->SummonCreature(NPC_LIGHTBANE, ToCCommonLoc[3].GetPositionX(), ToCCommonLoc[3].GetPositionY(), ToCCommonLoc[3].GetPositionZ(), 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME))
                             {
-                                temp->GetMotionMaster()->MovePoint(1, ToCCommonLoc[8].GetPositionX(), ToCCommonLoc[8].GetPositionY(), ToCCommonLoc[8].GetPositionZ());
-                                temp->SetVisible(true);
+                                temp->GetMotionMaster()->MovePoint(0, ToCCommonLoc[6].GetPositionX(), ToCCommonLoc[6].GetPositionY(), ToCCommonLoc[6].GetPositionZ());
+                                temp->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                me->SetReactState(REACT_PASSIVE);
                             }
-                            if (Creature* temp = Unit::GetCreature((*me), m_instance->GetData64(NPC_DARKBANE)))
+
+                            if (Creature* temp = me->SummonCreature(NPC_DARKBANE, ToCCommonLoc[4].GetPositionX(), ToCCommonLoc[4].GetPositionY(), ToCCommonLoc[4].GetPositionZ(), 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME))
                             {
-                                temp->GetMotionMaster()->MovePoint(1, ToCCommonLoc[9].GetPositionX(), ToCCommonLoc[9].GetPositionY(), ToCCommonLoc[9].GetPositionZ());
-                                temp->SetVisible(true);
+                                temp->GetMotionMaster()->MovePoint(0, ToCCommonLoc[7].GetPositionX(), ToCCommonLoc[7].GetPositionY(), ToCCommonLoc[7].GetPositionZ());
+                                temp->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                me->SetReactState(REACT_PASSIVE);
                             }
                             m_uiUpdateTimer = 5000;
                             m_instance->SetData(TYPE_EVENT, 4016);
                             break;
                         case 4016:
                             m_instance->SetData(TYPE_EVENT, 4017);
+                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
                             break;
                         case 4040:
                             m_uiUpdateTimer = 60000;
@@ -765,7 +808,7 @@ class npc_tirion_toc : public CreatureScript
                         case 5005:
                             m_uiUpdateTimer = 8000;
                             m_instance->SetData(TYPE_EVENT, 5010);
-                            me->SummonCreature(NPC_LICH_KING_1, ToCSpawnLoc[0].GetPositionX(), ToCSpawnLoc[0].GetPositionY(), ToCSpawnLoc[0].GetPositionZ(), 5);
+                            me->SummonCreature(NPC_LICH_KING_1, ToCCommonLoc[2].GetPositionX(), ToCCommonLoc[2].GetPositionY(), ToCCommonLoc[2].GetPositionZ(), 5);
                             break;
                         case 5020:
                             DoScriptText(SAY_STAGE_4_03, me);
@@ -964,6 +1007,450 @@ class npc_varian_toc : public CreatureScript
         }
 };
 
+#define MAX_ITEMSWITCH      353
+
+uint32 itemswitch[MAX_ITEMSWITCH][2] =
+{
+    // Alliance ID, Horde ID
+    {46958, 47255},
+    {46959, 47252},
+    {46960, 47251},
+    {46961, 47253},
+    {46962, 47254},
+    {46963, 47260},
+    {46964, 47421},
+    {46965, 47412},
+    {46966, 47413},
+    {46967, 47414},
+    {46968, 47415},
+    {46969, 47416},
+    {46970, 47257},
+    {46971, 47418},
+    {46972, 47258},
+    {46973, 47419},
+    {46974, 47259},
+    {46975, 47420},
+    {46976, 47256},
+    {46977, 47417},
+    {46979, 47261},
+    {46980, 47422},
+    {46985, 47263},
+    {46986, 47424},
+    {46988, 47262},
+    {46989, 47423},
+    {46990, 47265},
+    {46991, 47426},
+    {46992, 47264},
+    {46993, 47425},
+    {46994, 47267},
+    {46995, 47428},
+    {46996, 47266},
+    {46997, 47269},
+    {46999, 47268},
+    {47000, 47270},
+    {47001, 47427},
+    {47002, 47429},
+    {47004, 47431},
+    {47041, 47271},
+    {47042, 47275},
+    {47043, 47272},
+    {47051, 47274},
+    {47052, 47273},
+    {47053, 47276},
+    {47054, 47327},
+    {47055, 47277},
+    {47056, 47280},
+    {47057, 47279},
+    {47059, 47432},
+    {47060, 47433},
+    {47061, 47434},
+    {47062, 47435},
+    {47063, 47436},
+    {47064, 47437},
+    {47066, 47438},
+    {47067, 47440},
+    {47068, 47441},
+    {47069, 47285},
+    {47070, 47282},
+    {47071, 47284},
+    {47072, 47283},
+    {47073, 47281},
+    {47074, 47442},
+    {47075, 47443},
+    {47076, 47444},
+    {47077, 47445},
+    {47078, 47446},
+    {47079, 47287},
+    {47080, 47290},
+    {47081, 47286},
+    {47082, 47288},
+    {47083, 47289},
+    {47084, 47447},
+    {47085, 47448},
+    {47086, 47449},
+    {47087, 47450},
+    {47088, 47451},
+    {47089, 47291},
+    {47090, 47295},
+    {47092, 47293},
+    {47093, 47294},
+    {47094, 47292},
+    {47095, 47452},
+    {47096, 47453},
+    {47097, 47454},
+    {47098, 47455},
+    {47099, 47456},
+    {47104, 47300},
+    {47105, 47297},
+    {47106, 47296},
+    {47107, 47299},
+    {47108, 47298},
+    {47109, 47457},
+    {47110, 47458},
+    {47111, 47459},
+    {47112, 47460},
+    {47113, 47461},
+    {47114, 47302},
+    {47115, 47303},
+    {47116, 47305},
+    {47121, 47304},
+    {47126, 47301},
+    {47129, 47462},
+    {47130, 47463},
+    {47131, 47464},
+    {47132, 47465},
+    {47133, 47466},
+    {47138, 47309},
+    {47139, 47307},
+    {47140, 47308},
+    {47141, 47306},
+    {47142, 47310},
+    {47143, 47467},
+    {47144, 47468},
+    {47145, 47469},
+    {47146, 47470},
+    {47147, 47471},
+    {47148, 47314},
+    {47149, 47315},
+    {47150, 47312},
+    {47151, 47313},
+    {47152, 47311},
+    {47153, 47472},
+    {47154, 47473},
+    {47155, 47474},
+    {47156, 47475},
+    {47157, 47476},
+    {47182, 47316},
+    {47183, 47320},
+    {47184, 47319},
+    {47186, 47318},
+    {47187, 47317},
+    {47188, 47477},
+    {47189, 47478},
+    {47190, 47479},
+    {47191, 47480},
+    {47192, 47481},
+    {47193, 47322},
+    {47194, 47321},
+    {47195, 47323},
+    {47203, 47324},
+    {47204, 47325},
+    {47205, 47482},
+    {47206, 47483},
+    {47207, 47484},
+    {47208, 47485},
+    {47209, 47486},
+    {47223, 47278},
+    {47224, 47439},
+    {47225, 47328},
+    {47233, 47329},
+    {47234, 47330},
+    {47235, 47326},
+    {47236, 47487},
+    {47237, 47489},
+    {47238, 47490},
+    {47239, 47491},
+    {47240, 47492},
+    {47578, 47854},
+    {47607, 47849},
+    {47608, 47853},
+    {47609, 47851},
+    {47610, 47850},
+    {47611, 47852},
+    {47612, 47856},
+    {47613, 47857},
+    {47614, 47859},
+    {47615, 47858},
+    {47616, 47860},
+    {47617, 47855},
+    {47618, 47862},
+    {47619, 47864},
+    {47620, 47865},
+    {47621, 47866},
+    {47622, 47640},
+    {47623, 47641},
+    {47624, 47644},
+    {47625, 47645},
+    {47626, 47643},
+    {47627, 47642},
+    {47628, 47650},
+    {47629, 47646},
+    {47630, 47649},
+    {47631, 47648},
+    {47632, 47652},
+    {47633, 47653},
+    {47634, 47651},
+    {47635, 47647},
+    {47654, 47639},
+    {47655, 47638},
+    {47656, 47637},
+    {47657, 47636},
+    {47663, 47861},
+    {47669, 47863},
+    {47676, 47871},
+    {47679, 47872},
+    {47680, 47869},
+    {47683, 47867},
+    {47700, 47888},
+    {47703, 47868},
+    {47717, 47876},
+    {47718, 47875},
+    {47719, 47878},
+    {47720, 47877},
+    {47721, 47873},
+    {47724, 47874},
+    {47725, 47881},
+    {47726, 47879},
+    {47727, 47882},
+    {47728, 47880},
+    {47736, 47886},
+    {47737, 47884},
+    {47738, 47885},
+    {47739, 47887},
+    {47740, 47883},
+    {47741, 47907},
+    {47742, 47913},
+    {47743, 47892},
+    {47744, 47893},
+    {47745, 47889},
+    {47746, 47891},
+    {47747, 47890},
+    {47808, 47898},
+    {47809, 47894},
+    {47810, 47899},
+    {47811, 47896},
+    {47812, 47895},
+    {47813, 47897},
+    {47814, 47903},
+    {47815, 47900},
+    {47816, 47905},
+    {47829, 47901},
+    {47830, 47902},
+    {47832, 47904},
+    {47834, 47911},
+    {47835, 47910},
+    {47836, 47908},
+    {47837, 47909},
+    {47838, 47906},
+    {47915, 47988},
+    {47916, 47989},
+    {47917, 47990},
+    {47918, 47991},
+    {47919, 47992},
+    {47920, 47993},
+    {47921, 47994},
+    {47922, 47995},
+    {47923, 47996},
+    {47924, 47997},
+    {47925, 47998},
+    {47926, 47999},
+    {47927, 48000},
+    {47928, 48001},
+    {47929, 48002},
+    {47930, 48003},
+    {47931, 48004},
+    {47932, 48005},
+    {47933, 48006},
+    {47934, 48007},
+    {47935, 48008},
+    {47938, 48010},
+    {47939, 48011},
+    {47940, 48012},
+    {47941, 48013},
+    {47942, 48014},
+    {47943, 48015},
+    {47944, 48016},
+    {47945, 48017},
+    {47946, 48018},
+    {47947, 48019},
+    {47948, 48020},
+    {47949, 48021},
+    {47950, 48022},
+    {47951, 48023},
+    {47952, 48024},
+    {47953, 48025},
+    {47954, 48026},
+    {47955, 48027},
+    {47956, 48028},
+    {47957, 48030},
+    {47958, 48032},
+    {47959, 48034},
+    {47960, 48036},
+    {47961, 48038},
+    {47962, 48039},
+    {47963, 48040},
+    {47964, 48041},
+    {47965, 48042},
+    {47966, 48043},
+    {47967, 48044},
+    {47968, 48045},
+    {47969, 48046},
+    {47970, 48047},
+    {47971, 48048},
+    {47972, 48049},
+    {47973, 48050},
+    {47974, 48051},
+    {47975, 48052},
+    {47976, 48053},
+    {47977, 48054},
+    {47978, 48055},
+    {47979, 48056},
+    {49231, 49232},
+    {49234, 49233},
+    {49235, 49236},
+    {49238, 49237},
+    {47003, 47430},
+    {47711, 47870},
+    {47937, 48009},
+    {47506, 47513},
+    {47515, 47516},
+    {47517, 47518},
+    {47519, 47520},
+    {47521, 47523},
+    {47524, 47525},
+    {47526, 47528},
+    {47545, 47546},
+    {47547, 47548},
+    {47549, 47550},
+    {47552, 47551},
+    {47553, 47554},
+    {48671, 48666},
+    {48672, 48667},
+    {48673, 48668},
+    {48674, 48669},
+    {48675, 48670},
+    {48708, 48701},
+    {48709, 48693},
+    {48710, 48705},
+    {48711, 48697},
+    {48712, 48703},
+    {48713, 48695},
+    {48714, 48699},
+    {49044, 49046},
+    {47570, 47571},
+    {47572, 47573},
+    {47574, 47575},
+    {47576, 47577},
+    {47579, 47580},
+    {47581, 47582},
+    {47583, 47584},
+    {47585, 47586},
+    {47587, 47588},
+    {47589, 47590},
+    {47591, 47592},
+    {47593, 47594},
+    {47595, 47596},
+    {47597, 47598},
+    {47599, 47600},
+    {47602, 47601},
+    {47603, 47604},
+    {47605, 47606}
+};
+
+class npc_pdk_murloc_toc : public CreatureScript
+{
+    public:
+        npc_pdk_murloc_toc() : CreatureScript("npc_pdk_murloc_toc") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        InstanceScript* m_instance = creature->GetInstanceScript();
+
+        if (!m_instance)
+            return false;
+
+        if (player->isInCombat() || m_instance->IsEncounterInProgress())
+            return true;
+
+        Creature* temp = Unit::GetCreature((*creature), m_instance->GetData64(NPC_ANUBARAK));
+
+        // Prevent this processing if we are the upper floor murloc, only allow it for the lower floor!
+        // Murloc is spawned at 140 Z on the lower floor right now
+        if (creature->GetPositionZ() <= 150.0f)
+            if (!temp || m_instance->GetData(TYPE_ANUBARAK) == DONE)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleportiere mich vor die Instanz!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tausche meine Items um!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+
+        player->SEND_GOSSIP_MENU(50030, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        if (!player)
+            return true;
+
+        player->CLOSE_GOSSIP_MENU();
+
+        switch (action)
+        {
+            case GOSSIP_ACTION_INFO_DEF+1:
+                player->TeleportTo(571, 8515.552f, 725.856f, 558.3f, 1.61f);
+                break;
+            case GOSSIP_ACTION_INFO_DEF+2:
+                for (uint32 i = 0; i < MAX_ITEMSWITCH; i++)
+                {
+                    if (player->GetTeamId() == TEAM_HORDE)
+                    {
+                        if (Item* item = player->GetItemByEntry(itemswitch[i][0]))
+                        {
+                            ItemPosCountVec dest;
+                            InventoryResult msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemswitch[i][1], 1);
+
+                            if (msg == EQUIP_ERR_OK)
+                            {
+                                sLog->outString("TSCR: PDK Murloc Item Switch: Item %u swapped with item %u for player %s", itemswitch[i][0], itemswitch[i][1], player->GetName());
+
+                                player->StoreNewItem(dest, itemswitch[i][1], true, Item::GenerateItemRandomPropertyId(itemswitch[i][1]));
+                                player->DestroyItemCount(itemswitch[i][0], 1, true, false);
+                            }
+                        }
+                    }
+                    else if (player->GetTeamId() == TEAM_ALLIANCE)
+                    {
+                        if (Item* item = player->GetItemByEntry(itemswitch[i][1]))
+                        {
+                            ItemPosCountVec dest;
+                            InventoryResult msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemswitch[i][0], 1);
+
+                            if (msg == EQUIP_ERR_OK)
+                            {
+                                sLog->outString("TSCR: PDK Murloc Item Switch: Item %u swapped with item %u for player %s", itemswitch[i][1], itemswitch[i][0], player->GetName());
+
+                                player->StoreNewItem(dest, itemswitch[i][0], true, Item::GenerateItemRandomPropertyId(itemswitch[i][0]));
+                                player->DestroyItemCount(itemswitch[i][1], 1, true, false);
+                            }
+                        }
+                    }
+                }
+                break;
+        }
+
+        return true;
+    }
+};
+
 void AddSC_trial_of_the_crusader()
 {
     new npc_announcer_toc10();
@@ -972,4 +1459,5 @@ void AddSC_trial_of_the_crusader()
     new npc_tirion_toc();
     new npc_garrosh_toc();
     new npc_varian_toc();
+    new npc_pdk_murloc_toc();
 }

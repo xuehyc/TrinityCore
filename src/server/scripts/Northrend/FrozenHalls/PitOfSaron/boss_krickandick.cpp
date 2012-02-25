@@ -337,6 +337,13 @@ class boss_krick : public CreatureScript
                 }
             }
 
+            void IsSummonedBy(Unit* summoner)
+            {
+                // Summoned by Ick, but Ick is dead or invalid pointer, we can not mount Ick!
+                if (!summoner || !summoner->isAlive())
+                    me->DespawnOrUnsummon();
+            }
+
             void DoAction(const int32 actionId)
             {
                 if (actionId == ACTION_OUTRO)

@@ -462,13 +462,13 @@ void Log::outCrash(const char * err, ...)
     va_list ap;
 
     va_start(ap, err);
-    vutf8printf(stderr, err, &ap);
+    vutf8printf(stdout, err, &ap);
     va_end(ap);
 
     if (m_colored)
         ResetColor(false);
 
-    fprintf(stderr, "\n");
+    fprintf(stdout, "\n");
     if (logfile)
     {
         outTimestamp(logfile);
@@ -481,7 +481,7 @@ void Log::outCrash(const char * err, ...)
         fprintf(logfile, "\n");
         fflush(logfile);
     }
-    fflush(stderr);
+    fflush(stdout);
 }
 
 void Log::outError(const char * err, ...)
@@ -505,13 +505,13 @@ void Log::outError(const char * err, ...)
     va_list ap;
 
     va_start(ap, err);
-    vutf8printf(stderr, err, &ap);
+    vutf8printf(stdout, err, &ap);
     va_end(ap);
 
     if (m_colored)
         ResetColor(false);
 
-    fprintf( stderr, "\n");
+    fprintf(stdout, "\n");
     if (logfile)
     {
         outTimestamp(logfile);
@@ -524,7 +524,7 @@ void Log::outError(const char * err, ...)
         fprintf(logfile, "\n");
         fflush(logfile);
     }
-    fflush(stderr);
+    fflush(stdout);
 }
 
 void Log::outArena(const char * str, ...)
@@ -583,13 +583,13 @@ void Log::outErrorDb(const char * err, ...)
     va_list ap;
 
     va_start(ap, err);
-    vutf8printf(stderr, err, &ap);
+    vutf8printf(stdout, err, &ap);
     va_end(ap);
 
     if (m_colored)
         ResetColor(false);
 
-    fprintf( stderr, "\n" );
+    fprintf(stdout, "\n" );
 
     if (logfile)
     {
@@ -614,7 +614,7 @@ void Log::outErrorDb(const char * err, ...)
         fprintf(dberLogfile, "\n" );
         fflush(dberLogfile);
     }
-    fflush(stderr);
+    fflush(stdout);
 }
 
 void Log::outBasic(const char * str, ...)

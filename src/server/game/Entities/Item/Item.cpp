@@ -277,6 +277,16 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 
     SetUInt32Value(ITEM_FIELD_DURATION, abs(itemProto->Duration));
     SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, 0);
+
+    /* World of Warcraft Armory */
+    if (itemProto->Quality > 2 && itemProto->Flags != 2048 && (itemProto->Class == ITEM_CLASS_WEAPON || itemProto->Class == ITEM_CLASS_ARMOR))
+    {
+        if (!GetOwner())
+            return true;
+        GetOwner()->CreateWowarmoryFeed(2, itemid, guidlow, itemProto->Quality);
+    }
+    /* World of Warcraft Armory */
+
     return true;
 }
 
@@ -1027,6 +1037,28 @@ Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)
         if (pItem->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_ITEM), item, player))
         {
             pItem->SetCount(count);
+
+            // Castle log instance kills + important items
+            if (pProto->Quality > 2)
+            {
+                if (player)
+                {
+                    std::string name = pProto->Name1;
+                    std::string player_name = player->GetName();
+
+                    if (ItemLocale const *il = sObjectMgr->GetItemLocale(pProto->ItemId))
+                        sObjectMgr->GetLocaleString(il->Name, LOCALE_deDE, name);
+
+                    CharacterDatabase.EscapeString(name);
+                    CharacterDatabase.EscapeString(player_name);
+
+                    if (pItem->GetEntry() == 40752 || pItem->GetEntry() == 40753 || pItem->GetEntry() == 45624 || pItem->GetEntry() == 47241 || pItem->GetEntry() == 49426 || pItem->GetEntry() == 29434 || pItem->GetEntry() == 43102 || pItem->GetEntry() == 49908 || pItem->GetEntry() == 47556 || pItem->GetEntry() == 45087 || pItem->GetEntry() == 50274 || pItem->GetEntry() == 47242 || pItem->GetEntry() == 52027 || pItem->GetEntry() == 52030 || pItem->GetEntry() == 52025 || pItem->GetEntry() == 52026 || pItem->GetEntry() == 52028 || pItem->GetEntry() == 52029)
+                        CharacterDatabase.PExecute("INSERT INTO castle_log VALUES (%u,'%s',3,UNIX_TIMESTAMP(),%u,%u,%u,'%s')", player->GetGUIDLow(), player_name.c_str(), pProto->ItemId, player->GetItemCount(pProto->ItemId, true), count, name.c_str());
+                    else
+                        CharacterDatabase.PExecute("INSERT INTO castle_log VALUES (%u,'%s',2,UNIX_TIMESTAMP(),%u,%u,0,'%s')", player->GetGUIDLow(), player_name.c_str(), pProto->ItemId, pItem->GetGUIDLow(), name.c_str());
+                }
+            }
+
             return pItem;
         }
         else

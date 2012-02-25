@@ -1057,6 +1057,22 @@ private:
     bool _isPvP;
 };
 
+/* World of Warcraft Armory */
+struct WowarmoryFeedEntry
+{
+    uint32 guid;         // Player GUID
+    time_t date;         // Log date
+    uint32 type;         // TYPE_ACHIEVEMENT_FEED, TYPE_ITEM_FEED, TYPE_BOSS_FEED
+    uint32 data;         // TYPE_ITEM_FEED: item_entry, TYPE_BOSS_FEED: creature_entry
+    uint32 item_guid;    // Can be 0
+    uint32 item_quality; // Can be 0
+    uint8  difficulty;   // Can be 0
+    int    counter;      // Can be 0
+};
+
+typedef std::vector<WowarmoryFeedEntry> WowarmoryFeeds;
+/* World of Warcraft Armory */
+
 class Player : public Unit, public GridObject<Player>
 {
     friend class WorldSession;
@@ -1065,6 +1081,21 @@ class Player : public Unit, public GridObject<Player>
     public:
         explicit Player (WorldSession* session);
         ~Player ();
+
+        //movement anticheat
+        uint32 m_anti_lastmovetime;     //last movement time
+        float  m_anti_MovedLen;         //Length of traveled way
+        uint32 m_anti_NextLenCheck;
+        float  m_anti_BeginFallZ;    //alternative falling begin
+        uint32 m_anti_lastalarmtime;    //last time when alarm generated
+        uint32 m_anti_alarmcount;       //alarm counter
+        uint32 m_anti_TeleTime;
+        bool m_CanFly;
+        uint32 Anti__GetLastTeleTime() const { return m_anti_TeleTime; }
+        void Anti__SetLastTeleTime(uint32 TeleTime) { m_anti_TeleTime=TeleTime; }
+        //bool CanFly() const { return HasUnitMovementFlag(MOVEMENTFLAG_CAN_FLY); }
+        bool CanFly() const { return m_CanFly;  }
+        void SetCanFly(bool CanFly) { m_CanFly=CanFly; }
 
         void CleanupsBeforeDelete(bool finalCleanup = true);
 
@@ -1981,7 +2012,7 @@ class Player : public Unit, public GridObject<Player>
         void LeaveLFGChannel();
 
         void UpdateDefense();
-        void UpdateWeaponSkill (WeaponAttackType attType);
+        void UpdateWeaponSkill (WeaponAttackType attType, Unit* victim);
         void UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence);
 
         void SetSkill(uint16 id, uint16 step, uint16 currVal, uint16 maxVal);
@@ -2353,6 +2384,11 @@ class Player : public Unit, public GridObject<Player>
 
         void SendCinematicStart(uint32 CinematicSequenceId);
         void SendMovieStart(uint32 MovieId);
+
+        /* World of Warcraft Armory */
+        void CreateWowarmoryFeed(uint32 type, uint32 data, uint32 item_guid, uint32 item_quality);
+        void InitWowarmoryFeeds();
+        /* World of Warcraft Armory */
 
         /*********************************************************/
         /***                 INSTANCE SYSTEM                   ***/
@@ -2841,6 +2877,11 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_timeSyncTimer;
         uint32 m_timeSyncClient;
         uint32 m_timeSyncServer;
+
+        /* World of Warcraft Armory */
+        // World of Warcraft Armory Feeds
+        WowarmoryFeeds m_wowarmory_feeds;
+        /* World of Warcraft Armory */
 
         InstanceTimeMap _instanceResetTimes;
         uint32 _pendingBindId;

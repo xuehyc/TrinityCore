@@ -44,8 +44,10 @@ enum eRainspeaker
     SAY_END_IRO                         = -1571002,
 
     QUEST_FORTUNATE_MISUNDERSTANDINGS   = 12570,
+    QUEST_JUST_FOLLOWING_ORDERS         = 12540,
     FACTION_ESCORTEE_A                  = 774,
-    FACTION_ESCORTEE_H                  = 775
+    FACTION_ESCORTEE_H                  = 775,
+    NPC_INJURED_RAINSPEAKER_ORACLE      = 28217
 };
 
 class npc_injured_rainspeaker_oracle : public CreatureScript
@@ -116,6 +118,20 @@ public:
               if (player->GetQuestStatus(QUEST_FORTUNATE_MISUNDERSTANDINGS) != QUEST_STATUS_COMPLETE)
                 player->FailQuest(QUEST_FORTUNATE_MISUNDERSTANDINGS);
             }
+        }
+
+        // Req. for quest "Just following orders", prevents a dummy-crocodile from being killed!
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (!who)
+                return;
+
+            if (who->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if (Player* player = who->ToPlayer())
+                if (player->GetQuestStatus(QUEST_JUST_FOLLOWING_ORDERS) == QUEST_STATUS_INCOMPLETE)
+                    player->RewardPlayerAndGroupAtEvent(NPC_INJURED_RAINSPEAKER_ORACLE, player);
         }
     };
 

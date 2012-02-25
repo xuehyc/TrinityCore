@@ -23,7 +23,7 @@
 
 #include "SpellAuraEffects.h"
 #include "Unit.h"
-
+#include "Group.h"
 
 enum PaladinSpells
 {
@@ -42,6 +42,10 @@ enum PaladinSpells
     SPELL_DIVINE_STORM                           = 53385,
     SPELL_DIVINE_STORM_DUMMY                     = 54171,
     SPELL_DIVINE_STORM_HEAL                      = 54172,
+    AURA_GLYPH_DIVINE_STORM                      = 63220,
+
+    SPELL_RIGHTEOUS_DEFENSE                      = 31789,
+    SPELL_RIGHTEOUS_DEFENSE_EFFECT_1             = 31790,
 };
 
 // 31850 - Ardent Defender
@@ -325,48 +329,6 @@ class spell_pal_judgement_of_command : public SpellScriptLoader
         }
 };
 
-class spell_pal_divine_storm : public SpellScriptLoader
-{
-    public:
-        spell_pal_divine_storm() : SpellScriptLoader("spell_pal_divine_storm") { }
-
-        class spell_pal_divine_storm_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pal_divine_storm_SpellScript);
-
-            uint32 healPct;
-
-            bool Validate(SpellInfo const* /* spell */)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DIVINE_STORM_DUMMY))
-                    return false;
-                return true;
-            }
-
-            bool Load()
-            {
-                healPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
-                return true;
-            }
-
-            void TriggerHeal()
-            {
-                Unit* caster = GetCaster();
-                caster->CastCustomSpell(SPELL_DIVINE_STORM_DUMMY, SPELLVALUE_BASE_POINT0, (GetHitDamage() * healPct) / 100, caster, true);
-            }
-
-            void Register()
-            {
-                AfterHit += SpellHitFn(spell_pal_divine_storm_SpellScript::TriggerHeal);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_pal_divine_storm_SpellScript();
-        }
-};
-
 class spell_pal_divine_storm_dummy : public SpellScriptLoader
 {
     public:
@@ -383,32 +345,187 @@ class spell_pal_divine_storm_dummy : public SpellScriptLoader
                 return true;
             }
 
-            void CountTargets(std::list<Unit*>& targetList)
-            {
-                _targetCount = targetList.size();
-            }
-
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
-                if (!_targetCount || ! GetHitUnit())
+                if (!GetHitUnit() || !GetCaster())
                     return;
 
-                int32 heal = GetEffectValue() / _targetCount;
+                int32 heal = GetEffectValue();
                 GetCaster()->CastCustomSpell(GetHitUnit(), SPELL_DIVINE_STORM_HEAL, &heal, NULL, NULL, true);
             }
-        private:
-            uint32 _targetCount;
 
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_pal_divine_storm_dummy_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_pal_divine_storm_dummy_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
             return new spell_pal_divine_storm_dummy_SpellScript();
+        }
+};
+
+// 53385 Divine Storm
+// SQL-Update:
+// DELETE FROM `spell_script_names` WHERE `spell_id` IN (-53385, 53385);
+// INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (-53385, 'spell_pal_divine_storm');
+class spell_pal_divine_storm : public SpellScriptLoader
+{
+    public:
+        spell_pal_divine_storm() : SpellScriptLoader("spell_pal_divine_storm") { }
+
+        class spell_pal_divine_storm_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pal_divine_storm_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellEntry*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_DIVINE_STORM))
+                    return false;
+                return true;
+            }
+
+            void HandleDummy()
+            {
+                // Basic vars
+                Unit* caster = GetCaster();     // me
+                int32 damage = GetHitDamage();  // damage dealt
+                Group* casterGrp = NULL;
+                const SpellInfo* divineStormHealApplyer = sSpellMgr->GetSpellInfo(SPELL_DIVINE_STORM_DUMMY);
+
+                // Extended vars
+                Player* casterPlayer = NULL;
+
+                if (caster)
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        casterPlayer = caster->ToPlayer();
+
+                if (casterPlayer)
+                    casterGrp = casterPlayer->GetGroup();
+                else
+                    return;
+
+                if (!casterGrp || damage <= 0 || !divineStormHealApplyer)
+                    return;
+
+                int32 healThroughDamage = 0;
+
+                if (casterPlayer->HasAura(AURA_GLYPH_DIVINE_STORM))    // Divine storm glyph
+                    healThroughDamage = CalculatePctN(damage, 40);
+                else
+                    healThroughDamage = CalculatePctN(damage, 25);
+
+                if (healThroughDamage <= 0)
+                    return;
+
+                // list of players
+                std::list<Player*> players;
+
+                // select and iterate group
+                for (GroupReference* itr = casterGrp->GetFirstMember(); itr != NULL; itr = itr->next())
+                {
+                    Player* player = itr->getSource();
+
+                    if (player)
+                    {
+                        // Add player only if in 100 yard range and not caster himself
+                        if (casterPlayer->GetDistance(player) <= 100.0f && (player->GetGUID() != casterPlayer->GetGUID()))
+                            players.push_back(player);
+                    }
+                }
+
+                // Sort players by health percent
+                players.sort(Trinity::HealthPctOrderPred());
+
+                // Check http://www.wowwiki.com/Divine_storm for information on how healing is supposed to work
+                int32 index = 0;
+
+                for (std::list<Player*>::const_iterator it = players.begin(); it != players.end() && index < 3; ++it)
+                {
+                    if (Player* current = (*it))
+                    {
+                        int32 healed = current->GetMaxHealth() - current->GetHealth();
+
+                        // Once we reach a player with full hp, skip further processing
+                        if (healed <= 0)
+                            break;
+
+                        // Healing maximum reached - stop loop
+                        if (healed >= healThroughDamage)
+                        {
+                            casterPlayer->CastCustomSpell(SPELL_DIVINE_STORM_HEAL, SPELLVALUE_BASE_POINT0, healThroughDamage, current);
+                            break;
+                        }
+                        else
+                        {
+                            // reduce the overall healing with the used
+                            casterPlayer->CastCustomSpell(SPELL_DIVINE_STORM_HEAL, SPELLVALUE_BASE_POINT0, healed, current);
+                            healThroughDamage -= healed;
+
+                            if(healThroughDamage <= 0)
+                            {
+                                // Healing maximum reached - stop loop
+                                break;
+                            }
+                        }
+
+                        // Increase counting for max unit number
+                        index++;
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_pal_divine_storm_SpellScript::HandleDummy);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pal_divine_storm_SpellScript();
+        }
+};
+
+// 31789 Righteous Defense
+// SQL UPDATE:
+// -- Fix paladin spell 31789 Righteous Defense / Rechtschaffende Verteidigung
+// DELETE FROM `spell_script_names` WHERE `spell_id` = 31789;
+// INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
+// (31789, 'spell_pal_righteous_defense');
+class spell_pal_righteous_defense : public SpellScriptLoader
+{
+    public:
+        spell_pal_righteous_defense() : SpellScriptLoader("spell_pal_righteous_defense") { }
+
+        class spell_pal_righteous_defense_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pal_righteous_defense_SpellScript);
+
+           bool Validate(SpellInfo const* /*spellEntry*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_RIGHTEOUS_DEFENSE))
+                    return false;
+                return true;
+            }
+
+            void HandleSpellEffectTriggerSpell(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                    if (Unit* targetUnit = GetHitUnit())
+                        caster->CastSpell(targetUnit, SPELL_RIGHTEOUS_DEFENSE_EFFECT_1, true);
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pal_righteous_defense_SpellScript::HandleSpellEffectTriggerSpell, EFFECT_1, SPELL_EFFECT_TRIGGER_SPELL);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pal_righteous_defense_SpellScript();
         }
 };
 
@@ -420,6 +537,7 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_guarded_by_the_light();
     new spell_pal_holy_shock();
     new spell_pal_judgement_of_command();
-    new spell_pal_divine_storm();
     new spell_pal_divine_storm_dummy();
+    new spell_pal_divine_storm();
+    new spell_pal_righteous_defense();
 }

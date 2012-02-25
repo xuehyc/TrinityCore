@@ -44,7 +44,10 @@ enum InstanceNpcs
     NPC_HOVER_DISK_CASTER   = 30248,
     NPC_ARCANE_OVERLOAD     = 30282,
     NPC_WYRMREST_SKYTALON   = 30161,
-    NPC_ALEXSTRASZA         = 32295
+    NPC_ALEXSTRASZA         = 32295,
+    NPC_SURGE_TRIGGER       = 30334,
+    NPC_SCION_OF_ETERNITY   = 30249,
+    NPC_NEXUS_LORD          = 30245
 };
 
 enum InstanceGameObjects
@@ -52,6 +55,7 @@ enum InstanceGameObjects
     GO_NEXUS_RAID_PLATFORM      = 193070,
     GO_EXIT_PORTAL              = 193908,
     GO_FOCUSING_IRIS            = 193958,
+    GO_FOCUSING_IRIS_H          = 193960,
     GO_ALEXSTRASZA_S_GIFT       = 193905,
     GO_ALEXSTRASZA_S_GIFT_2     = 193967
 };
@@ -66,6 +70,7 @@ enum InstanceSpells
     SPELL_VORTEX_4          = 55853, // damage | used to enter to the vehicle
     SPELL_VORTEX_5          = 56263, // damage | used to enter to the vehicle
     SPELL_PORTAL_OPENED     = 61236,
+    SPELL_PORTAL_VISUAL_CLOSED = 55949,
     SPELL_RIDE_RED_DRAGON   = 56071,
 };
 

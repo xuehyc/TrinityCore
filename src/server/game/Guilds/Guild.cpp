@@ -299,11 +299,12 @@ void Guild::RankInfo::SetBankTabSlotsAndRights(uint8 tabId, GuildBankRightsAndSl
     {
         PreparedStatement* stmt = NULL;
 
+        SQLTransaction trans = CharacterDatabase.BeginTransaction();
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_BANK_RIGHT);
         stmt->setUInt32(0, m_guildId);
         stmt->setUInt8 (1, tabId);
         stmt->setUInt8 (2, m_rankId);
-        CharacterDatabase.Execute(stmt);
+        trans->Append(stmt);
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_GUILD_BANK_RIGHT);
         stmt->setUInt32(0, m_guildId);
@@ -311,12 +312,13 @@ void Guild::RankInfo::SetBankTabSlotsAndRights(uint8 tabId, GuildBankRightsAndSl
         stmt->setUInt8 (2, m_rankId);
         stmt->setUInt8 (3, m_bankTabRightsAndSlots[tabId].rights);
         stmt->setUInt32(4, m_bankTabRightsAndSlots[tabId].slots);
-        CharacterDatabase.Execute(stmt);
+        trans->Append(stmt);
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GUILD_RANK_BANK_TIME0 + tabId);
         stmt->setUInt32(0, m_guildId);
         stmt->setUInt8 (1, m_rankId);
-        CharacterDatabase.Execute(stmt);
+        trans->Append(stmt);
+        CharacterDatabase.CommitTransaction(trans);
     }
 }
 

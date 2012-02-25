@@ -64,6 +64,8 @@
 #include "AccountMgr.h"
 #include "InstanceScript.h"
 
+#include "OutdoorPvPWG.h"
+
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
     &Spell::EffectNULL,                                     //  0
@@ -752,6 +754,16 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
     switch (m_spellInfo->SpellFamilyName)
     {
         case SPELLFAMILY_PALADIN:
+            // Divine Storm
+            if (m_spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_PALADIN_DIVINESTORM && effIndex == 1)
+            {
+                int32 dmg = CalculatePctN(m_damage, damage);
+                if (!unitTarget)
+                    unitTarget = m_caster;
+                m_caster->CastCustomSpell(unitTarget, 54171, &dmg, 0, 0, true);
+                return;
+            }
+
             switch (m_spellInfo->Id)
             {
                 case 31789:                                 // Righteous Defense (step 1)
@@ -945,11 +957,13 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 return;
             }
             // Righteous Defense
+            /*
+            This one does not seem to work, moved effects to spellscripts
             case 31980:
             {
                 m_caster->CastSpell(unitTarget, 31790, true);
                 return;
-            }
+            }*/
             // Cloak of Shadows
             case 35729:
             {
@@ -3779,6 +3793,24 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
         {
             switch (m_spellInfo->Id)
             {
+                //Teleport to Lake Wintergrasp
+                case 58622:
+                {
+                    if(OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
+                        if(pvpWG->isWarTime() || pvpWG->m_timer<300000)
+                        {
+                            if ((pvpWG->getDefenderTeam()==TEAM_ALLIANCE) && (unitTarget->ToPlayer()->GetTeam() == ALLIANCE))
+                                unitTarget->CastSpell(unitTarget, SPELL_TELEPORT_FORTRESS, true);
+                            else if ((pvpWG->getDefenderTeam()==TEAM_ALLIANCE) && (unitTarget->ToPlayer()->GetTeam() == HORDE))
+                                unitTarget->CastSpell(unitTarget, SPELL_TELEPORT_HORDE_CAMP, true);
+
+                            if ((pvpWG->getDefenderTeam()!=TEAM_ALLIANCE) && (unitTarget->ToPlayer()->GetTeam() == HORDE))
+                                unitTarget->CastSpell(unitTarget, SPELL_TELEPORT_FORTRESS, true);
+                            else if ((pvpWG->getDefenderTeam()!=TEAM_ALLIANCE) && (unitTarget->ToPlayer()->GetTeam() == ALLIANCE))
+                                unitTarget->CastSpell(unitTarget, SPELL_TELEPORT_ALLIENCE_CAMP, true);
+                        }
+                    return;
+                }
                 // Glyph of Backstab
                 case 63975:
                 {
@@ -4159,7 +4191,10 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         return;
 
                     // Remove Taunt cooldown
-                    unitTarget->ToPlayer()->RemoveSpellCooldown(355, true);
+                    if (m_originalCaster)
+                        if (m_originalCaster->GetTypeId() == TYPEID_PLAYER)
+                            if (m_originalCaster->ToPlayer()->IsInSameRaidWith(unitTarget->ToPlayer()))
+                                m_originalCaster->ToPlayer()->RemoveSpellCooldown(355, true);
 
                     return;
                 }
@@ -6611,6 +6646,19 @@ void Spell::EffectPlayerNotification(SpellEffIndex effIndex)
     switch (m_spellInfo->Id)
     {
         case 58730: // Restricted Flight Area
+            if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
+            {
+                if(OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
+                {
+                    if (pvpWG->isWarTime()==true)
+                    {
+                        unitTarget->ToPlayer()->GetSession()->SendNotification(LANG_ZONE_NOFLYZONE);
+                        unitTarget->PlayDirectSound(9417); // Fel Reaver sound
+                        unitTarget->MonsterTextEmote("The air is too thin in Wintergrasp for normal flight. You will be ejected in 9 sec.",unitTarget->GetGUID(),true);
+                    } else unitTarget->RemoveAura(58730);
+                }
+             }
+            break;
         case 58600: // Restricted Flight Area
             unitTarget->ToPlayer()->GetSession()->SendNotification(LANG_ZONE_NOFLYZONE);
             break;

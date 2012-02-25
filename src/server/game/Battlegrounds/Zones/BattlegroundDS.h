@@ -83,6 +83,7 @@ class BattlegroundDS : public Battleground
     private:
         uint32 _waterfallTimer;
         uint8 _waterfallStatus;
+        uint32 _checkTimer;
 
         virtual void PostUpdateImpl(uint32 diff);
     protected:
@@ -90,5 +91,7 @@ class BattlegroundDS : public Battleground
         void setWaterFallStatus(uint32 status) { _waterfallStatus = status; };
         void setWaterFallTimer(uint32 timer) { _waterfallTimer = timer; };
         uint32 getWaterFallTimer() { return _waterfallTimer; };
+        void setCheckTimer(uint32 timer) { _checkTimer = timer; };
+        uint32 getCheckTimer() { return _checkTimer; };
 };
 #endif

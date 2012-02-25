@@ -18,7 +18,7 @@
 #include "ScriptPCH.h"
 #include "obsidian_sanctum.h"
 
-#define MAX_ENCOUNTER     1
+#define MAX_ENCOUNTER     4
 
 /* Obsidian Sanctum encounters:
 0 - Sartharion
@@ -44,9 +44,7 @@ public:
         uint64 m_uiShadronGUID;
         uint64 m_uiVesperonGUID;
 
-        bool m_bTenebronKilled;
-        bool m_bShadronKilled;
-        bool m_bVesperonKilled;
+        std::string str_data;
 
         void Initialize()
         {
@@ -56,10 +54,56 @@ public:
             m_uiTenebronGUID   = 0;
             m_uiShadronGUID    = 0;
             m_uiVesperonGUID   = 0;
+        }
 
-            m_bTenebronKilled = false;
-            m_bShadronKilled = false;
-            m_bVesperonKilled = false;
+        std::string GetSaveData()
+        {
+            OUT_SAVE_INST_DATA;
+
+            std::ostringstream saveStream;
+
+            saveStream << "O B" << m_auiEncounter[0]
+                << " " << m_auiEncounter[1]
+                << " " << m_auiEncounter[2]
+                << " " << m_auiEncounter[3];
+
+            str_data = saveStream.str();
+
+            OUT_SAVE_INST_DATA_COMPLETE;
+            return str_data;
+        }
+
+        void Load(const char* in)
+        {
+            if (!in)
+            {
+                OUT_LOAD_INST_DATA_FAIL;
+                return;
+            }
+
+            OUT_LOAD_INST_DATA(in);
+
+            char dataHead1, dataHead2;
+            uint16 data0, data1, data2, data3;
+
+            std::istringstream loadStream(in);
+            loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2 >> data3;
+
+            if (dataHead1 == 'O' && dataHead2 == 'B')
+            {
+                m_auiEncounter[0] = data0;
+                m_auiEncounter[1] = data1;
+                m_auiEncounter[2] = data2;
+                m_auiEncounter[3] = data3;
+
+                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                {
+                    if (m_auiEncounter[i] == IN_PROGRESS)
+                        m_auiEncounter[i] = NOT_STARTED;
+                }
+            } else OUT_LOAD_INST_DATA_FAIL;
+
+            OUT_LOAD_INST_DATA_COMPLETE;
         }
 
         bool IsEncounterInProgress() const
@@ -100,11 +144,14 @@ public:
             if (uiType == TYPE_SARTHARION_EVENT)
                 m_auiEncounter[0] = uiData;
             else if (uiType == TYPE_TENEBRON_PREKILLED)
-                m_bTenebronKilled = true;
+                m_auiEncounter[1] = uiData;
             else if (uiType == TYPE_SHADRON_PREKILLED)
-                m_bShadronKilled = true;
+                m_auiEncounter[2] = uiData;
             else if (uiType == TYPE_VESPERON_PREKILLED)
-                m_bVesperonKilled = true;
+                m_auiEncounter[3] = uiData;
+
+            if (uiData == DONE)
+                SaveToDB();
         }
 
         uint32 GetData(uint32 uiType)
@@ -112,11 +159,11 @@ public:
             if (uiType == TYPE_SARTHARION_EVENT)
                 return m_auiEncounter[0];
             else if (uiType == TYPE_TENEBRON_PREKILLED)
-                return m_bTenebronKilled;
+                return m_auiEncounter[1];
             else if (uiType == TYPE_SHADRON_PREKILLED)
-                return m_bShadronKilled;
+                return m_auiEncounter[2];
             else if (uiType == TYPE_VESPERON_PREKILLED)
-                return m_bVesperonKilled;
+                return m_auiEncounter[3];
 
             return 0;
         }

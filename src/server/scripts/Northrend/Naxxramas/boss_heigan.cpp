@@ -23,6 +23,9 @@
 #define SAY_TAUNT           RAND(-1533113, -1533114, -1533115, -1533116, -1533117)
 #define SAY_DEATH           -1533118
 
+#define EMOTE_CUSTOM_FIGHT_TO_DANCE           -1999982
+#define EMOTE_CUSTOM_DANCE_TO_FIGHT           -1999983
+
 #define SPELL_SPELL_DISRUPTION  29310
 #define SPELL_DECREPIT_FEVER    RAID_MODE(29998, 55011)
 #define SPELL_PLAGUE_CLOUD      29350
@@ -143,7 +146,7 @@ public:
                         events.ScheduleEvent(EVENT_FEVER, urand(20000, 25000));
                         break;
                     case EVENT_PHASE:
-                        // TODO : Add missing texts for both phase switches
+                        DoScriptText(phase == PHASE_FIGHT ? EMOTE_CUSTOM_FIGHT_TO_DANCE : EMOTE_CUSTOM_DANCE_TO_FIGHT, me);
                         EnterPhase(phase == PHASE_FIGHT ? PHASE_DANCE : PHASE_FIGHT);
                         break;
                     case EVENT_ERUPT:
@@ -157,7 +160,7 @@ public:
 
                         eruptDirection ? ++eruptSection : --eruptSection;
 
-                        events.ScheduleEvent(EVENT_ERUPT, phase == PHASE_FIGHT ? 10000 : 3000);
+                        events.ScheduleEvent(EVENT_ERUPT, phase == PHASE_FIGHT ? 10000 : 4000);
                         break;
                 }
             }

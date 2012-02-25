@@ -85,6 +85,30 @@ void BattlegroundRV::PostUpdateImpl(uint32 diff)
     }
     else
         setTimer(getTimer() - diff);
+
+    if (GetStatus() != STATUS_IN_PROGRESS)
+        return;
+
+    if (getCheckTimer() < diff)
+    {
+        for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+        {
+            if (Player* player = ObjectAccessor::FindPlayer(itr->first))
+            {
+                float pos_z = player->GetPositionZ();
+
+                if (player->GetPositionZ() < 26.0f)
+                {
+                    HandlePlayerUnderMap(player);
+                    continue;
+                }
+            }
+        }
+
+        setCheckTimer(5000);
+    }
+    else
+        setCheckTimer(getCheckTimer() - diff);
 }
 
 void BattlegroundRV::StartingEventCloseDoors()
@@ -102,6 +126,7 @@ void BattlegroundRV::StartingEventOpenDoors()
 
     setState(BG_RV_STATE_OPEN_FENCES);
     setTimer(BG_RV_FIRST_TIMER);
+    setCheckTimer(25000);
 
     TogglePillarCollision(true);
 }

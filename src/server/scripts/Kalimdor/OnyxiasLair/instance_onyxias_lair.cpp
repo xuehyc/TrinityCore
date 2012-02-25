@@ -114,6 +114,8 @@ public:
             {
                 //THIS GOB IS A TRAP - What shall i do? =(
                 //Cast it spell? Copyed Heigan method
+                pFloorEruption->SetUInt64Value(OBJECT_FIELD_CREATED_BY, m_uiOnyxiasGUID);
+                pFloorEruption->SetGoAnimProgress(0);
                 pFloorEruption->SendCustomAnim(pFloorEruption->GetGoAnimProgress());
                 pFloorEruption->CastSpell(NULL, Difficulty(instance->GetSpawnMode()) == RAID_DIFFICULTY_10MAN_NORMAL ? 17731 : 69294); //pFloorEruption->GetGOInfo()->trap.spellId
 

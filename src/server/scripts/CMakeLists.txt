@@ -52,7 +52,7 @@ message("")
 
 include_directories(
   ${CMAKE_BINARY_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
+  ${CMAKE_SOURCE_DIR}/dep/g3dlite/include  
   ${CMAKE_SOURCE_DIR}/dep/SFMT
   ${CMAKE_SOURCE_DIR}/dep/mersennetwister
   ${CMAKE_SOURCE_DIR}/dep/zlib
@@ -70,7 +70,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
   ${CMAKE_SOURCE_DIR}/src/server/collision
   ${CMAKE_SOURCE_DIR}/src/server/collision/Management
-  ${CMAKE_SOURCE_DIR}/src/server/collision/Models
+  ${CMAKE_SOURCE_DIR}/src/server/collision/Models  
   ${CMAKE_SOURCE_DIR}/src/server/shared
   ${CMAKE_SOURCE_DIR}/src/server/shared/Database
   ${CMAKE_SOURCE_DIR}/src/server/game/Accounts
@@ -112,7 +112,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/Grids/Notifiers
   ${CMAKE_SOURCE_DIR}/src/server/game/Groups
   ${CMAKE_SOURCE_DIR}/src/server/game/Guilds
-  ${CMAKE_SOURCE_DIR}/src/server/game/Handlers
+  ${CMAKE_SOURCE_DIR}/src/server/game/Handlers  
   ${CMAKE_SOURCE_DIR}/src/server/game/Instances
   ${CMAKE_SOURCE_DIR}/src/server/game/LookingForGroup
   ${CMAKE_SOURCE_DIR}/src/server/game/Loot
@@ -124,6 +124,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/Movement/Waypoints
   ${CMAKE_SOURCE_DIR}/src/server/game/Opcodes
   ${CMAKE_SOURCE_DIR}/src/server/game/OutdoorPvP
+  ${CMAKE_SOURCE_DIR}/src/server/scripts/OutdoorPvP  
   ${CMAKE_SOURCE_DIR}/src/server/game/Pools
   ${CMAKE_SOURCE_DIR}/src/server/game/PrecompiledHeaders
   ${CMAKE_SOURCE_DIR}/src/server/game/Quests

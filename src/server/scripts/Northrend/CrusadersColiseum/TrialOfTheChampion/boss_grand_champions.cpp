@@ -31,14 +31,14 @@ EndScriptData */
 enum eSpells
 {
     //Vehicle
+    SPELL_THRUST                    = 68505,
     SPELL_CHARGE                    = 63010,
     SPELL_SHIELD_BREAKER            = 68504,
-    SPELL_SHIELD                    = 66482,
+    SPELL_DEFEND                    = 62552,
 
     // Marshal Jacob Alerius && Mokra the Skullcrusher || Warrior
-    SPELL_MORTAL_STRIKE             = 68783,
-    SPELL_MORTAL_STRIKE_H           = 68784,
-    SPELL_BLADESTORM                = 63784,
+    SPELL_MORTAL_STRIKE             = 67542,
+    SPELL_BLADESTORM                = 67541,
     SPELL_INTERCEPT                 = 67540,
     SPELL_ROLLING_THROW             = 47115, //not implemented in the AI yet...
 
@@ -61,8 +61,8 @@ enum eSpells
 
     // Jaelyne Evensong && Zul'tore || Hunter
     SPELL_DISENGAGE                 = 68340, //not implemented in the AI yet...
-    SPELL_LIGHTNING_ARROWS          = 66083,
-    SPELL_MULTI_SHOT                = 66081,
+    SPELL_LIGHTNING_ARROWS          = 66085,
+    SPELL_MULTI_SHOT                = 49047,
     SPELL_SHOOT                     = 65868,
     SPELL_SHOOT_H                   = 67988,
 
@@ -71,6 +71,11 @@ enum eSpells
     SPELL_EVISCERATE_H              = 68317,
     SPELL_FAN_OF_KNIVES             = 67706,
     SPELL_POISON_BOTTLE             = 67701
+};
+enum eEnums
+{
+    SAY_START_1                      = -1999939,
+    SAY_START_2                      = -1999937
 };
 
 enum eSeat
@@ -131,8 +136,11 @@ bool GrandChampionsOutVehicle(Creature* me)
     if (pGrandChampion1 && pGrandChampion2 && pGrandChampion3)
     {
         if (!pGrandChampion1->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) &&
+            !pGrandChampion1->GetVehicle() &&
             !pGrandChampion2->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) &&
-            !pGrandChampion3->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+            !pGrandChampion2->GetVehicle() &&
+            !pGrandChampion3->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) &&
+            !pGrandChampion3->GetVehicle())
             return true;
     }
 
@@ -161,17 +169,23 @@ public:
 
         InstanceScript* instance;
 
-        uint32 uiChargeTimer;
+        bool combatEntered;
+        uint32 combatCheckTimer;
+
         uint32 uiShieldBreakerTimer;
-        uint32 uiBuffTimer;
+        uint32 uiDefendTimer;
+        uint32 uiChargeTimer;
+        uint32 uiThrustTimer;
 
         uint32 uiWaypointPath;
 
         void Reset()
         {
+            combatCheckTimer = 500;
+            uiThrustTimer = 3000;
             uiChargeTimer = 5000;
             uiShieldBreakerTimer = 8000;
-            uiBuffTimer = urand(30000, 60000);
+            uiDefendTimer = urand(30000, 60000);
         }
 
         void SetData(uint32 uiType, uint32 /*uiData*/)
@@ -179,23 +193,36 @@ public:
             switch (uiType)
             {
                 case 1:
-                    AddWaypoint(0, 747.36f, 634.07f, 411.572f);
-                    AddWaypoint(1, 780.43f, 607.15f, 411.82f);
-                    AddWaypoint(2, 785.99f, 599.41f, 411.92f);
-                    AddWaypoint(3, 778.44f, 601.64f, 411.79f);
+                    AddWaypoint(0, 746.45f, 647.03f, 411.57f);
+                    AddWaypoint(1, 771.434f, 642.606f, 411.9f);
+                    AddWaypoint(2, 779.807f, 617.535f, 411.716f);
+                    AddWaypoint(3, 771.098f, 594.635f, 411.625f);
+                    AddWaypoint(4, 746.887f, 583.425f, 411.668f);
+                    AddWaypoint(5, 715.176f, 583.782f, 412.394f);
+                    AddWaypoint(6, 720.719f, 591.141f, 411.737f);
                     uiWaypointPath = 1;
                     break;
                 case 2:
-                    AddWaypoint(0, 747.35f, 634.07f, 411.57f);
-                    AddWaypoint(1, 768.72f, 581.01f, 411.92f);
-                    AddWaypoint(2, 763.55f, 590.52f, 411.71f);
+                    AddWaypoint(0, 746.45f, 647.03f, 411.57f);
+                    AddWaypoint(1, 771.434f, 642.606f, 411.9f);
+                    AddWaypoint(2, 779.807f, 617.535f, 411.716f);
+                    AddWaypoint(3, 771.098f, 594.635f, 411.625f);
+                    AddWaypoint(4, 746.887f, 583.425f, 411.668f);
+                    AddWaypoint(5, 746.16f, 571.678f, 412.389f);
+                    AddWaypoint(6, 746.887f, 583.425f, 411.668f);
                     uiWaypointPath = 2;
                     break;
                 case 3:
-                    AddWaypoint(0, 747.35f, 634.07f, 411.57f);
-                    AddWaypoint(1, 784.02f, 645.33f, 412.39f);
-                    AddWaypoint(2, 775.67f, 641.91f, 411.91f);
+                    AddWaypoint(0, 746.45f, 647.03f, 411.57f);
+                    AddWaypoint(1, 771.434f, 642.606f, 411.9f);
+                    AddWaypoint(2, 779.807f, 617.535f, 411.716f);
+                    AddWaypoint(3, 771.098f, 594.635f, 411.625f);
+                    AddWaypoint(4, 777.759f, 584.577f, 412.393f);
+                    AddWaypoint(5, 772.48f, 592.99f, 411.68f);
                     uiWaypointPath = 3;
+                    break;
+                case 4:
+                    combatEntered = true;
                     break;
             }
 
@@ -220,75 +247,195 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            DoCastSpellShield();
+            DoCastSpellDefend();
+            me->CallForHelp(VISIBLE_RANGE);
         }
 
-        void DoCastSpellShield()
+        void DoCastSpellDefend()
         {
             for (uint8 i = 0; i < 3; ++i)
-                DoCast(me, SPELL_SHIELD, true);
+                DoCast(me, SPELL_DEFEND, true);
         }
 
-        void UpdateAI(const uint32 uiDiff)
+        void SpellHit(Unit* source, const SpellInfo* spell)
         {
-            npc_escortAI::UpdateAI(uiDiff);
 
-            if (!UpdateVictim())
-                return;
+            uint32 defendAuraStackAmount = 0;
 
-            if (uiBuffTimer <= uiDiff)
+            if (me->HasAura(SPELL_DEFEND))
+                if (Aura* defendAura = me->GetAura(SPELL_DEFEND))
+                    defendAuraStackAmount = defendAura->GetStackAmount();
+
+            // Shield-Break by player vehicle
+            if (spell->Id == 62575)
             {
-                if (!me->HasAura(SPELL_SHIELD))
-                    DoCastSpellShield();
+                source->DealDamage(me, uint32(2000 * (1 - 0.3f * defendAuraStackAmount)));
+                source->SendSpellNonMeleeDamageLog(me, 62575, uint32(2000 * (1 - 0.3f * defendAuraStackAmount)), SPELL_SCHOOL_MASK_NORMAL, 0, 0, true, 0, false);
 
-                uiBuffTimer = urand(30000, 45000);
-            }else uiBuffTimer -= uiDiff;
+                if (me->HasAura(SPELL_DEFEND))
+                    me->RemoveAuraFromStack(SPELL_DEFEND);
+            }
+    
+            // Charge by player vehicle
+            if (spell->Id == 68282)
+            {
+                source->DealDamage(me, uint32(20000 * (1 - 0.3f * defendAuraStackAmount)));
+                source->SendSpellNonMeleeDamageLog(me, 68282, uint32(20000 * (1 - 0.3f * defendAuraStackAmount)), SPELL_SCHOOL_MASK_NORMAL, 0, 0, true, 0, false);
 
-            if (uiChargeTimer <= uiDiff)
+                if (source->GetMotionMaster())
+                    source->GetMotionMaster()->MoveCharge(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+
+                if (me->HasAura(SPELL_DEFEND))
+                    me->RemoveAuraFromStack(SPELL_DEFEND);
+            }
+        }
+
+        bool StayInCombatAndCleanup(bool combat, bool cleanup)
+        {
+            if (me->GetMap())
             {
                 Map::PlayerList const& players = me->GetMap()->GetPlayers();
+                bool foundtarget = false;
+
                 if (me->GetMap()->IsDungeon() && !players.isEmpty())
                 {
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                     {
                         Player* player = itr->getSource();
-                        if (player && !player->isGameMaster() && me->IsInRange(player, 8.0f, 25.0f, false))
+                        if (player && !player->isGameMaster() && player->isAlive())
                         {
-                            DoResetThreat();
-                            me->AddThreat(player, 1.0f);
-                            DoCast(player, SPELL_CHARGE);
-                            break;
+                            // Handle combat variable
+                            if (combat)
+                            {
+                                if (combatEntered)
+                                {
+                                    me->SetInCombatWith(player);
+                                    player->SetInCombatWith(me);
+                                    me->AddThreat(player, 0.0f);
+
+                                    foundtarget = true;
+
+                                    if (Vehicle* pVehicle = player->GetVehicle())
+                                    {
+                                        if (Unit* vehicleCreature = pVehicle->GetBase())
+                                        {
+                                            me->SetInCombatWith(vehicleCreature);
+                                            vehicleCreature->SetInCombatWith(me);
+                                            me->AddThreat(vehicleCreature, 0.0f);
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Handle cleanup variable
+                            if (cleanup)
+                                if (player->HasAura(SPELL_DEFEND))
+                                    player->RemoveAurasDueToSpell(SPELL_DEFEND);
                         }
                     }
                 }
-                uiChargeTimer = 5000;
-            }else uiChargeTimer -= uiDiff;
 
-            //dosen't work at all
+                if (combatEntered && combat && !foundtarget)
+                {
+                    me->SetFullHealth();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        void EnterEvadeMode()
+        {
+            // Try to stay in combat, otherwise reset
+            if (!StayInCombatAndCleanup(true, false))
+                ScriptedAI::EnterEvadeMode();
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            // Try to keep players clean of defend aura
+            if (combatEntered)
+            {
+                if (combatCheckTimer <= uiDiff)
+                {
+                    StayInCombatAndCleanup(false, true);
+                    combatCheckTimer = 1000;
+                }else combatCheckTimer -= uiDiff;
+            }
+
+            npc_escortAI::UpdateAI(uiDiff);
+
+            if (!UpdateVictim())
+                return;
+
+            if (uiDefendTimer <= uiDiff)
+            {
+                DoCastSpellDefend();
+                uiDefendTimer = urand(30000, 45000);
+            }else uiDefendTimer -= uiDiff;
+
             if (uiShieldBreakerTimer <= uiDiff)
             {
-                Vehicle* pVehicle = me->GetVehicleKit();
-                if (!pVehicle)
-                    return;
-
-                if (Unit* pPassenger = pVehicle->GetPassenger(SEAT_ID_0))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                 {
-                    Map::PlayerList const& players = me->GetMap()->GetPlayers();
-                    if (me->GetMap()->IsDungeon() && !players.isEmpty())
+                    if (target->GetTypeId() == TYPEID_PLAYER && me->GetDistance(target) > 10.0f && me->GetDistance(target) < 30.0f)
                     {
-                        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                        if (target->GetVehicle())
                         {
-                            Player* player = itr->getSource();
-                            if (player && !player->isGameMaster() && me->IsInRange(player, 10.0f, 30.0f, false))
+                            if (Unit* vehTarget = target->GetVehicle()->GetBase())
                             {
-                                pPassenger->CastSpell(player, SPELL_SHIELD_BREAKER, true);
-                                break;
+                                DoCast(vehTarget, SPELL_SHIELD_BREAKER);
+                                vehTarget->RemoveAuraFromStack(SPELL_DEFEND);
                             }
                         }
                     }
+                    else if (target->GetTypeId() == TYPEID_UNIT && me->GetDistance(target) > 8.0f && me->GetDistance(target) < 25.0f)
+                    {
+                        DoCast(target, SPELL_SHIELD_BREAKER);
+                        target->RemoveAuraFromStack(SPELL_DEFEND);
+                    }
                 }
-                uiShieldBreakerTimer = 7000;
+
+                uiShieldBreakerTimer = urand(15000, 20000);
             }else uiShieldBreakerTimer -= uiDiff;
+
+            if (uiChargeTimer <= uiDiff)
+            {
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                {
+                    if (target->GetTypeId() == TYPEID_PLAYER && me->GetDistance(target) > 8.0f && me->GetDistance(target) < 25.0f)
+                    {
+                        if (target->GetVehicle())
+                        {
+                            if (Unit* vehTarget = target->GetVehicle()->GetBase())
+                            {
+                                DoCast(vehTarget, SPELL_CHARGE);
+
+                                if (vehTarget->HasAura(SPELL_DEFEND))
+                                    vehTarget->RemoveAuraFromStack(SPELL_DEFEND);
+                            }
+                        }
+                    }
+                    else if (target->GetTypeId() == TYPEID_UNIT && me->GetDistance(target) > 8.0f && me->GetDistance(target) < 25.0f)
+                    {
+                        DoCast(target, SPELL_CHARGE);
+
+                        if (target->HasAura(SPELL_DEFEND))
+                            target->RemoveAuraFromStack(SPELL_DEFEND);
+                    }
+                }
+
+                uiChargeTimer = urand(10000, 30000);
+            }else uiChargeTimer -= uiDiff;
+
+            if (uiThrustTimer <= uiDiff)
+            {
+                if (me->getVictim() && me->GetDistance(me->getVictim()) < 5.0f)
+                    DoCast(me->getVictim(), SPELL_THRUST);
+
+                uiThrustTimer = urand(8000, 1400);
+            }else uiThrustTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
         }
@@ -319,7 +466,6 @@ public:
             uiPhaseTimer = 0;
 
             me->SetReactState(REACT_PASSIVE);
-            // THIS IS A HACK, SHOULD BE REMOVED WHEN THE EVENT IS FULL SCRIPTED
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
         }
 
@@ -332,6 +478,7 @@ public:
         uint32 uiInterceptTimer;
         uint32 uiMortalStrikeTimer;
         uint32 uiAttackTimer;
+        uint32 uiResetTimer;
 
         bool bDone;
         bool bHome;
@@ -362,6 +509,8 @@ public:
             {
                 bDone = true;
 
+                DoScriptText(SAY_START_2, me);
+
                 if (instance && me->GetGUID() == instance->GetData64(DATA_GRAND_CHAMPION_1))
                     me->SetHomePosition(739.678f, 662.541f, 412.393f, 4.49f);
                 else if (instance && me->GetGUID() == instance->GetData64(DATA_GRAND_CHAMPION_2))
@@ -382,7 +531,7 @@ public:
                 }
             }else uiPhaseTimer -= uiDiff;
 
-            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) || me->GetVehicle())
                 return;
 
             if (uiInterceptTimer <= uiDiff)
@@ -452,7 +601,6 @@ public:
             uiPhaseTimer = 0;
 
             me->SetReactState(REACT_PASSIVE);
-            // THIS IS A HACK, SHOULD BE REMOVED WHEN THE EVENT IS FULL SCRIPTED
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
         }
 
@@ -519,14 +667,7 @@ public:
                 }
             }else uiPhaseTimer -= uiDiff;
 
-            if (uiFireBallTimer <= uiDiff)
-            {
-                if (me->getVictim())
-                    DoCastVictim(SPELL_FIREBALL);
-                uiFireBallTimer = 5000;
-            } else uiFireBallTimer -= uiDiff;
-
-            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) || me->GetVehicle())
                 return;
 
             if (uiFireBallTimer <= uiDiff)
@@ -561,8 +702,11 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
+            DoScriptText(SAY_START_1, me);
+
             if (instance)
                 instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
+        
         }
     };
 
@@ -591,7 +735,6 @@ public:
             uiPhaseTimer = 0;
 
             me->SetReactState(REACT_PASSIVE);
-            // THIS IS A HACK, SHOULD BE REMOVED WHEN THE EVENT IS FULL SCRIPTED
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
         }
 
@@ -664,7 +807,7 @@ public:
                 }
             }else uiPhaseTimer -= uiDiff;
 
-            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) || me->GetVehicle())
                 return;
 
             if (uiChainLightningTimer <= uiDiff)
@@ -708,6 +851,8 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
+            DoScriptText(SAY_START_1, me);
+
             if (instance)
                 instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
@@ -718,6 +863,7 @@ public:
         return new boss_shaman_toc5AI(creature);
     }
 };
+
 
 class boss_hunter_toc5 : public CreatureScript
 {
@@ -738,7 +884,6 @@ public:
             uiPhaseTimer = 0;
 
             me->SetReactState(REACT_PASSIVE);
-            // THIS IS A HACK, SHOULD BE REMOVED WHEN THE EVENT IS FULL SCRIPTED
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
         }
 
@@ -748,6 +893,7 @@ public:
         uint32 uiPhaseTimer;
 
         uint32 uiShootTimer;
+        uint32 uiDisengageCooldown;
         uint32 uiMultiShotTimer;
         uint32 uiLightningArrowsTimer;
 
@@ -762,6 +908,7 @@ public:
             uiShootTimer = 12000;
             uiMultiShotTimer = 0;
             uiLightningArrowsTimer = 7000;
+            uiDisengageCooldown = 10000;
 
             uiTargetGUID = 0;
 
@@ -810,8 +957,18 @@ public:
                 }
             }else uiPhaseTimer -= uiDiff;
 
-            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) || me->GetVehicle())
                 return;
+
+            if (uiDisengageCooldown <= uiDiff)
+            {
+                if (me->IsWithinDistInMap(me->getVictim(), 5) && uiDisengageCooldown == 0)
+                {
+                    DoCast(me, SPELL_DISENGAGE);
+                    uiDisengageCooldown = 35000;
+                }
+                uiDisengageCooldown = 20000;
+            }else uiDisengageCooldown -= uiDiff;
 
             if (uiLightningArrowsTimer <= uiDiff)
             {
@@ -864,6 +1021,7 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
+            DoScriptText(SAY_START_1, me);
             if (instance)
                 instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
@@ -874,6 +1032,7 @@ public:
         return new boss_hunter_toc5AI(creature);
     }
 };
+
 
 class boss_rouge_toc5 : public CreatureScript
 {
@@ -958,7 +1117,7 @@ public:
                 }
             } else uiPhaseTimer -= uiDiff;
 
-            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) || me->GetVehicle())
                 return;
 
             if (uiEviscerateTimer <= uiDiff)

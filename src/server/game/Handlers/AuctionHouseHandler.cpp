@@ -29,6 +29,8 @@
 #include "Util.h"
 #include "AccountMgr.h"
 
+#include "TriniChat/IRCClient.h"
+
 //please DO NOT use iterator++, because it is slower than ++iterator!!!
 //post-incrementation is always slower than pre-incrementation !
 
@@ -312,6 +314,9 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
             for (uint32 i = 0; i < itemsCount; ++i)
             {
                 Item* item = items[i];
+
+                if((sIRC.BOTMASK & 1024) != 0)
+                    sIRC.AHFunc(item->GetEntry(), item->GetTemplate()->Name1, _player->GetName(), AH->GetHouseId());
 
                 if (item->GetCount() == count[i])
                 {

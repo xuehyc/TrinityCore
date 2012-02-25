@@ -75,36 +75,6 @@ public:
         return true;
     }
 
-    bool EffectDummyCreature(Unit* pCaster, uint32 spellId, uint32 effIndex, Creature* creatureTarget)
-    {
-        //always check spellid and effectindex
-        if (spellId == SPELL_KODO_KOMBO_ITEM && effIndex == 0)
-        {
-            //no effect if player/creature already have aura from spells
-            if (pCaster->HasAura(SPELL_KODO_KOMBO_PLAYER_BUFF) || creatureTarget->HasAura(SPELL_KODO_KOMBO_DESPAWN_BUFF))
-                return true;
-
-            if (creatureTarget->GetEntry() == NPC_AGED_KODO ||
-                creatureTarget->GetEntry() == NPC_DYING_KODO ||
-                creatureTarget->GetEntry() == NPC_ANCIENT_KODO)
-            {
-                pCaster->CastSpell(pCaster, SPELL_KODO_KOMBO_PLAYER_BUFF, true);
-
-                creatureTarget->UpdateEntry(NPC_TAMED_KODO);
-                creatureTarget->CastSpell(creatureTarget, SPELL_KODO_KOMBO_DESPAWN_BUFF, false);
-
-                if (creatureTarget->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
-                    creatureTarget->GetMotionMaster()->MoveIdle();
-
-                creatureTarget->GetMotionMaster()->MoveFollow(pCaster, PET_FOLLOW_DIST,  creatureTarget->GetFollowAngle());
-            }
-
-            //always return true when we are handling this spell and effect
-            return true;
-        }
-        return false;
-    }
-
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_aged_dying_ancient_kodoAI(creature);
@@ -138,8 +108,33 @@ public:
             }
         }
 
-        void SpellHit(Unit* /*pCaster*/, SpellInfo const* pSpell)
+        void SpellHit(Unit* pCaster, SpellInfo const* pSpell)
         {
+            if (!pSpell || !pCaster)
+                return;
+
+            if (pSpell->Id == SPELL_KODO_KOMBO_ITEM)
+            {
+                //no effect if player/creature already have aura from spells
+                if (pCaster->HasAura(SPELL_KODO_KOMBO_PLAYER_BUFF) || me->HasAura(SPELL_KODO_KOMBO_DESPAWN_BUFF))
+                    return;
+
+                if (me->GetEntry() == NPC_AGED_KODO ||
+                    me->GetEntry() == NPC_DYING_KODO ||
+                    me->GetEntry() == NPC_ANCIENT_KODO)
+                {
+                    pCaster->CastSpell(pCaster,SPELL_KODO_KOMBO_PLAYER_BUFF,true);
+
+                    me->UpdateEntry(NPC_TAMED_KODO);
+                    me->CastSpell(me,SPELL_KODO_KOMBO_DESPAWN_BUFF,false);
+
+                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                        me->GetMotionMaster()->MoveIdle();
+
+                    me->GetMotionMaster()->MoveFollow(pCaster, PET_FOLLOW_DIST,  me->GetFollowAngle());
+                }
+            }
+
             if (pSpell->Id == SPELL_KODO_KOMBO_GOSSIP)
             {
                 me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);

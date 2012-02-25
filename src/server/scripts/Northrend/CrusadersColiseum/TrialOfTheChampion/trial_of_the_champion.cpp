@@ -39,7 +39,206 @@ EndContentData */
 ## npc_announcer_toc5
 ######*/
 
-const Position SpawnPosition = {746.261f, 657.401f, 411.681f, 4.65f};
+const Position SpawnPosition = {746.843f, 695.68f, 412.339f, 4.70776f};
+
+enum eEnums
+{
+    SAY_START             = -1999926,
+    SAY_START2            = -1999950,
+    SAY_START3            = -1999940,
+    SAY_START5            = -1999936,
+    SAY_START11           = -1999953,
+    AN_1                  = -1999942,
+    AN_2                  = -1999943,
+    AN_3                  = -1999944,
+    AN_4                  = -1999945,
+    AN_5                  = -1999946,
+    AN_6                  = -1999947,
+    AN_7                  = -1999948,
+    AN_8                  = -1999949
+};
+
+enum IntroPhase
+{
+    IDLE,
+    INTRO,
+    FINISHED
+};
+
+enum Creatures
+{
+    CREATURE_TRALL                        = 34994, 
+    CREATURE_GARROSH                      = 34995, 
+    CREATURE_KING                         = 34990, 
+    CREATURE_LADY                         = 34992, 
+    CREATURE_HIGHLORD                     = 34996,
+    CREATURE_ANNOUNCER                    = 35004
+};
+
+class npc_anstart : public CreatureScript
+{
+public:
+    npc_anstart() : CreatureScript("npc_anstart") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_anstartAI(creature);
+    }
+
+    struct npc_anstartAI : public ScriptedAI
+    {
+        npc_anstartAI(Creature *c) : ScriptedAI(c)
+        {
+            instance = c->GetInstanceScript();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
+        }
+
+        uint32 uiIntroTimer;
+    
+        uint8 uiIntroPhase;
+
+        IntroPhase Phase;
+
+        Creature* pTrall;
+        Creature* pGarrosh;
+        Creature* pKing;
+        Creature* pLady;
+        Creature* pHighlord;
+
+        InstanceScript* instance;
+
+        void Reset()
+        {
+            Phase = IDLE;
+            uiIntroTimer = 0;
+            uiIntroPhase = 0;
+            pTrall = NULL;
+            pGarrosh = NULL;
+            pKing = NULL;
+            pLady = NULL;
+            pHighlord = NULL;
+        }
+
+        void MoveInLineOfSight(Unit* pWho)
+        {
+            if (!pWho)
+                return;
+
+            if (Phase == IDLE && pWho->isTargetableForAttack() && me->IsHostileTo(pWho) && me->IsWithinDistInMap(pWho, 20))
+            {
+                Phase = INTRO;
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+                if (pTrall = me->SummonCreature(CREATURE_TRALL, 685.569f, 615.103f, 435.396f, 6.23544f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000))
+                {
+                    pTrall->SetReactState(REACT_PASSIVE);
+                    pTrall->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                }
+                if (pGarrosh = me->SummonCreature(CREATURE_GARROSH, 685.7f, 621.134f, 435.396f, 6.259f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000))
+                {
+                    pGarrosh->SetReactState(REACT_PASSIVE);
+                    pGarrosh->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                }
+                if (pKing = me->SummonCreature(CREATURE_KING, 807.724f, 617.9f, 435.396f, 3.18416f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000))
+                {
+                    pKing->SetReactState(REACT_PASSIVE);
+                    pKing->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                }
+                if (pLady = me->SummonCreature(CREATURE_LADY, 807.401f, 613.667f, 435.397f, 3.0585f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000))
+                {
+                    pLady->SetReactState(REACT_PASSIVE);
+                    pLady->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                }
+                if (pHighlord = me->SummonCreature(CREATURE_HIGHLORD, 746.482f, 556.857f, 435.396f, 1.5898f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000))
+                {
+                    pHighlord->SetReactState(REACT_PASSIVE);
+                    pHighlord->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                }
+            }
+        }
+
+        void AttackStart(Unit* who) {}
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (Phase != INTRO)
+                return;
+
+            if (uiIntroTimer <= diff)
+            {
+                if(!pTrall)
+                    return;
+                if(!pGarrosh)
+                    return;
+                if(!pKing)
+                    return;
+                if(!pLady)
+                    return;
+                if(!pHighlord)
+                    return;
+
+                switch (uiIntroPhase)
+                {
+                    case 0:
+                        ++uiIntroPhase;
+                        uiIntroTimer = 4000;
+                        break;
+                    case 1:
+                        DoScriptText(AN_1, me);
+                        ++uiIntroPhase;
+                        uiIntroTimer = 10000;
+                        break;
+                    case 2:
+                        DoScriptText(AN_2, me);
+                        ++uiIntroPhase;
+                        uiIntroTimer = 13000;
+                        break;
+                    case 3:
+                        DoScriptText(AN_3, pTrall);
+                        ++uiIntroPhase;
+                        uiIntroTimer = 8000;
+                        break;
+                    case 4:
+                        DoScriptText(AN_4, pGarrosh);
+                        ++uiIntroPhase;
+                        uiIntroTimer = 6000;
+                        break;
+                    case 5:
+                        DoScriptText(AN_5, pKing);
+                        ++uiIntroPhase;
+                        uiIntroTimer = 8000;
+                        break;
+                    case 6:
+                        DoScriptText(AN_6, pLady);
+                        ++uiIntroPhase;
+                        uiIntroTimer = 8000;
+                        break;
+                    case 7:
+                        DoScriptText(AN_7, pHighlord);
+                        ++uiIntroPhase;
+                        uiIntroTimer = 3000;
+                        break;
+                    case 8:
+                        DoScriptText(AN_8, me);
+                        ++uiIntroPhase;
+                        uiIntroTimer = 4000;
+                        break;
+                    case 9:
+                        if (Creature* pAnnouncertoc5 = me->SummonCreature(CREATURE_ANNOUNCER, 746.626f, 618.54f, 411.09f, 4.63158f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000))
+                        {
+                            me->DisappearAndDie();
+                            pAnnouncertoc5->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            pAnnouncertoc5->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            pAnnouncertoc5->SetReactState(REACT_PASSIVE);
+                            Phase = FINISHED;
+                        }
+                        else Reset();
+                        return;
+                }
+            } else uiIntroTimer -= diff;
+        }
+    };
+};
 
 class npc_announcer_toc5 : public CreatureScript
 {
@@ -96,6 +295,7 @@ public:
         uint32 uiPhase;
         uint32 uiTimer;
 
+        uint64 uiBlackKnightGUID;
         uint64 uiVehicle1GUID;
         uint64 uiVehicle2GUID;
         uint64 uiVehicle3GUID;
@@ -105,6 +305,10 @@ public:
         std::list<uint64> Champion1List;
         std::list<uint64> Champion2List;
         std::list<uint64> Champion3List;
+
+        bool firstEventStarted;
+        bool secondEventStarted;
+        bool thirdEventStarted;
 
         void NextStep(uint32 uiTimerStep, bool bNextStep = true, uint8 uiPhaseStep = 0)
         {
@@ -120,14 +324,31 @@ public:
             switch (uiType)
             {
                 case DATA_START:
+                    if (instance)
+                    {
+                        if (GameObject* go = GameObject::GetGameObject(*me, instance->GetData64(DATA_MAIN_GATE)))
+                            instance->HandleGameObject(go->GetGUID(), true);
+
+                        if (GameObject* go = GameObject::GetGameObject(*me, instance->GetData64(DATA_MAIN_GATE1)))
+                            instance->HandleGameObject(go->GetGUID(), false);
+                    }
+
+                    DoScriptText(SAY_START, me);
                     DoSummonGrandChampion(uiFirstBoss);
                     NextStep(10000, false, 1);
                     break;
                 case DATA_IN_POSITION: //movement done.
-                    me->GetMotionMaster()->MovePoint(1, 735.81f, 661.92f, 412.39f);
-                    if (GameObject* pGO = GameObject::GetGameObject(*me, instance->GetData64(DATA_MAIN_GATE)))
-                        instance->HandleGameObject(pGO->GetGUID(), false);
-                    NextStep(10000, false, 3);
+                    me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);
+                    me->GetMotionMaster()->MovePoint(1, 735.898f, 651.961f, 411.93f);
+                    DoScriptText(SAY_START2, me);
+
+                    if (instance)
+                    {
+                        if (GameObject* go = GameObject::GetGameObject(*me, instance->GetData64(DATA_MAIN_GATE)))
+                            instance->HandleGameObject(go->GetGUID(), false);
+                    }
+
+                    NextStep(20000, false, 3);
                     break;
                 case DATA_LESSER_CHAMPIONS_DEFEATED:
                 {
@@ -221,9 +442,10 @@ public:
                     {
                         uiVehicle1GUID = pBoss->GetGUID();
                         uint64 uiGrandChampionBoss1 = 0;
-                        if (Vehicle* pVehicle = pBoss->GetVehicleKit())
-                            if (Unit* unit = pVehicle->GetPassenger(0))
-                                uiGrandChampionBoss1 = unit->GetGUID();
+                        if (Creature* pBoss = Unit::GetCreature(*me, uiVehicle1GUID))
+                            if (Vehicle* pVehicle = pBoss->GetVehicleKit())
+                                if (Unit* pUnit = pVehicle->GetPassenger(0))
+                                    uiGrandChampionBoss1 = pUnit->GetGUID();
                         if (instance)
                         {
                             instance->SetData64(DATA_GRAND_CHAMPION_VEHICLE_1, uiVehicle1GUID);
@@ -236,9 +458,10 @@ public:
                     {
                         uiVehicle2GUID = pBoss->GetGUID();
                         uint64 uiGrandChampionBoss2 = 0;
-                        if (Vehicle* pVehicle = pBoss->GetVehicleKit())
-                            if (Unit* unit = pVehicle->GetPassenger(0))
-                                uiGrandChampionBoss2 = unit->GetGUID();
+                        if (Creature* pBoss = Unit::GetCreature(*me, uiVehicle2GUID))
+                            if (Vehicle* pVehicle = pBoss->GetVehicleKit())
+                                if (Unit* pUnit = pVehicle->GetPassenger(0))
+                                    uiGrandChampionBoss2 = pUnit->GetGUID();
                         if (instance)
                         {
                             instance->SetData64(DATA_GRAND_CHAMPION_VEHICLE_2, uiVehicle2GUID);
@@ -251,9 +474,10 @@ public:
                     {
                         uiVehicle3GUID = pBoss->GetGUID();
                         uint64 uiGrandChampionBoss3 = 0;
-                        if (Vehicle* pVehicle = pBoss->GetVehicleKit())
-                            if (Unit* unit = pVehicle->GetPassenger(0))
-                                uiGrandChampionBoss3 = unit->GetGUID();
+                        if (Creature* pBoss = Unit::GetCreature(*me, uiVehicle3GUID))
+                            if (Vehicle* pVehicle = pBoss->GetVehicleKit())
+                                if (Unit* pUnit = pVehicle->GetPassenger(0))
+                                    uiGrandChampionBoss3 = pUnit->GetGUID();
                         if (instance)
                         {
                             instance->SetData64(DATA_GRAND_CHAMPION_VEHICLE_3, uiVehicle3GUID);
@@ -303,9 +527,8 @@ public:
 
         void DoStartArgentChampionEncounter()
         {
-            me->GetMotionMaster()->MovePoint(1, 735.81f, 661.92f, 412.39f);
-
-            if (me->SummonCreature(uiArgentChampion, SpawnPosition))
+            DoScriptText(SAY_START3, me);
+            if (Creature* pBoss = me->SummonCreature(uiArgentChampion, SpawnPosition))
             {
                 for (uint8 i = 0; i < 3; ++i)
                 {
@@ -317,6 +540,10 @@ public:
                         pTrash->AI()->SetData(i, 0);
                 }
             }
+        }
+
+        void EnterCombat(Unit* who)
+        {
         }
 
         void SetGrandChampionsForEncounter()
@@ -352,22 +579,66 @@ public:
 
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
+            if (GameObject* go = GameObject::GetGameObject(*me, instance->GetData64(DATA_MAIN_GATE1)))
+               instance->HandleGameObject(go->GetGUID(), false);
+
             if (instance->GetData(BOSS_BLACK_KNIGHT) == NOT_STARTED)
             {
                 if (instance->GetData(BOSS_ARGENT_CHALLENGE_E) == NOT_STARTED && instance->GetData(BOSS_ARGENT_CHALLENGE_P) == NOT_STARTED)
                 {
                     if (instance->GetData(BOSS_GRAND_CHAMPIONS) == NOT_STARTED)
-                        me->AI()->SetData(DATA_START, 0);
+                    {
+                        if (!firstEventStarted)
+                        {
+                            firstEventStarted = true;
+                            me->AI()->SetData(DATA_START,0);
+                        }
+                    }
 
                     if (instance->GetData(BOSS_GRAND_CHAMPIONS) == DONE)
-                        DoStartArgentChampionEncounter();
+                    {
+                        if (!secondEventStarted)
+                        {
+                            secondEventStarted = true;
+                            DoStartArgentChampionEncounter();
+                        }
+                    }
                 }
 
-               if ((instance->GetData(BOSS_GRAND_CHAMPIONS) == DONE &&
-                   instance->GetData(BOSS_ARGENT_CHALLENGE_E) == DONE) ||
+               if (instance->GetData(BOSS_GRAND_CHAMPIONS) == DONE &&
+                   instance->GetData(BOSS_ARGENT_CHALLENGE_E) == DONE ||
                    instance->GetData(BOSS_ARGENT_CHALLENGE_P) == DONE)
-                    me->SummonCreature(VEHICLE_BLACK_KNIGHT, 769.834f, 651.915f, 447.035f, 0);
+                    {
+                        if (!thirdEventStarted)
+                        {
+                            thirdEventStarted = true;
+
+                            if (Unit* pBlackKnight = me->SummonCreature(VEHICLE_BLACK_KNIGHT,801.369507f, 640.574280f, 469.314362f, 3.97124f,TEMPSUMMON_DEAD_DESPAWN,180000))
+                            {
+                                uiBlackKnightGUID = pBlackKnight->GetGUID();
+                                pBlackKnight->SetUInt64Value(UNIT_FIELD_TARGET, me->GetGUID());
+                                me->SetUInt64Value(UNIT_FIELD_TARGET, uiBlackKnightGUID);
+
+                                if (GameObject* go = GameObject::GetGameObject(*me, instance->GetData64(DATA_MAIN_GATE)))
+                                    instance->HandleGameObject(go->GetGUID(), false);
+                            }
+
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            DoScriptText(SAY_START5, me);
+                        }
+                    }
+
+                }
             }
+
+        void Reset()
+        {
+            uiBlackKnightGUID = 0;
+            firstEventStarted = false;
+            secondEventStarted = false;
+            thirdEventStarted = false;
         }
 
         void AggroAllPlayers(Creature* temp)
@@ -376,6 +647,11 @@ public:
 
             if (PlList.isEmpty())
                 return;
+
+            temp->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+            temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+            temp->SetReactState(REACT_AGGRESSIVE);
+            temp->AI()->SetData(4, 0);
 
             for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
             {
@@ -386,16 +662,24 @@ public:
 
                     if (player->isAlive())
                     {
-                        temp->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-                        temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        temp->SetReactState(REACT_AGGRESSIVE);
                         temp->SetInCombatWith(player);
                         player->SetInCombatWith(temp);
                         temp->AddThreat(player, 0.0f);
+
+                        if (Vehicle *pVehicle = player->GetVehicle())
+                        {
+                            if (Unit *vehicleCreature = pVehicle->GetBase())
+                            {
+                                temp->SetInCombatWith(vehicleCreature);
+                                vehicleCreature->SetInCombatWith(temp);
+                                temp->AddThreat(vehicleCreature, 0.0f);
+                            }
+                        }
                     }
                 }
             }
         }
+
 
        void UpdateAI(const uint32 uiDiff)
         {
@@ -468,9 +752,9 @@ public:
         InstanceScript* instance = creature->GetInstanceScript();
 
         if (instance &&
-            ((instance->GetData(BOSS_GRAND_CHAMPIONS) == DONE &&
+            instance->GetData(BOSS_GRAND_CHAMPIONS) == DONE &&
             instance->GetData(BOSS_BLACK_KNIGHT) == DONE &&
-            instance->GetData(BOSS_ARGENT_CHALLENGE_E) == DONE) ||
+            (instance->GetData(BOSS_ARGENT_CHALLENGE_E) == DONE ||
             instance->GetData(BOSS_ARGENT_CHALLENGE_P) == DONE))
             return false;
 
@@ -493,8 +777,14 @@ public:
         player->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
         {
-            player->CLOSE_GOSSIP_MENU();
-            CAST_AI(npc_announcer_toc5::npc_announcer_toc5AI, creature->AI())->StartEncounter();
+            if (creature && creature->GetMap())
+            {
+                if (creature->GetMap()->IsDungeon())
+                {
+                    CAST_AI(npc_announcer_toc5::npc_announcer_toc5AI, creature->AI())->StartEncounter();
+                    player->CLOSE_GOSSIP_MENU();
+                }
+            }
         }
 
         return true;
@@ -504,4 +794,5 @@ public:
 void AddSC_trial_of_the_champion()
 {
     new npc_announcer_toc5();
+    new npc_anstart();
 }

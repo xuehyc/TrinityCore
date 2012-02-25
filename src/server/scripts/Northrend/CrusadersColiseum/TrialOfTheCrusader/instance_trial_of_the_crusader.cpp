@@ -44,6 +44,10 @@ class instance_trial_of_the_crusader : public InstanceMapScript
             std::string SaveDataBuffer;
             bool   NeedSave;
 
+            uint32 DataDamageTwin;
+            uint32 FjolaCasting;
+            uint32 EydisCasting;
+
             uint64 BarrentGUID;
             uint64 TirionGUID;
             uint64 FizzlebangGUID;
@@ -60,7 +64,6 @@ class instance_trial_of_the_crusader : public InstanceMapScript
             uint64 LightbaneGUID;
             uint64 AnubarakGUID;
 
-            uint64 CrusadersCacheGUID;
             uint64 FloorGUID;
 
             uint64 TributeChestGUID;
@@ -75,6 +78,10 @@ class instance_trial_of_the_crusader : public InstanceMapScript
             uint8  SnoboldCount;
             uint8  MistressOfPainCount;
             bool   TributeToImmortalityElegible;
+            std::list<uint32> m_vScarabTimeOfDeath;
+
+            bool firstBossAlreadySpawned;
+            bool secondBossAlreadySpawned;
 
             void Initialize()
             {
@@ -85,6 +92,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 EventStage = 0;
 
                 TributeChestGUID = 0;
+                DataDamageTwin = 0;
 
                 MainGateDoorGUID = 0;
                 EastPortcullisGUID = 0;
@@ -101,6 +109,9 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 TributeToImmortalityElegible = true;
 
                 NeedSave = false;
+
+                firstBossAlreadySpawned = false;
+                secondBossAlreadySpawned = false;
             }
 
             bool IsEncounterInProgress() const
@@ -190,22 +201,6 @@ class instance_trial_of_the_crusader : public InstanceMapScript
             {
                 switch (go->GetEntry())
                 {
-                    case GO_CRUSADERS_CACHE_10:
-                        if (instance->GetSpawnMode() == RAID_DIFFICULTY_10MAN_NORMAL)
-                            CrusadersCacheGUID = go->GetGUID();
-                        break;
-                    case GO_CRUSADERS_CACHE_25:
-                        if (instance->GetSpawnMode() == RAID_DIFFICULTY_25MAN_NORMAL)
-                            CrusadersCacheGUID = go->GetGUID();
-                        break;
-                    case GO_CRUSADERS_CACHE_10_H:
-                        if (instance->GetSpawnMode() == RAID_DIFFICULTY_10MAN_HEROIC)
-                            CrusadersCacheGUID = go->GetGUID();
-                        break;
-                    case GO_CRUSADERS_CACHE_25_H:
-                        if (instance->GetSpawnMode() == RAID_DIFFICULTY_25MAN_HEROIC)
-                            CrusadersCacheGUID = go->GetGUID();
-                        break;
                     case GO_ARGENT_COLISEUM_FLOOR:
                         FloorGUID = go->GetGUID();
                         break;
@@ -236,6 +231,18 @@ class instance_trial_of_the_crusader : public InstanceMapScript
             {
                 switch (type)
                 {
+                    case SPAWNED_NEXT_BOSS_1:
+                        if (data == 1)
+                            firstBossAlreadySpawned = true;
+                        else
+                            firstBossAlreadySpawned = false;
+                        break;
+                    case SPAWNED_NEXT_BOSS_2:
+                        if (data == 1)
+                            secondBossAlreadySpawned = true;
+                        else
+                            secondBossAlreadySpawned = false;
+                        break;
                     case TYPE_JARAXXUS:
                         if (data == DONE)
                             EventStage = 2000;
@@ -252,9 +259,25 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                                 break;
                             case DONE:
                                 DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_DEFEAT_FACTION_CHAMPIONS);
+
                                 if (ResilienceWillFixItTimer > 0)
                                     DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_CHAMPIONS_KILLED_IN_MINUTE);
-                                DoRespawnGameObject(CrusadersCacheGUID, 7*DAY);
+
+                                uint32 entry = 0;
+
+                                switch (instance->GetDifficulty())
+                                {
+                                    case RAID_DIFFICULTY_10MAN_NORMAL: entry = GO_CRUSADERS_CACHE_10; break;
+                                    case RAID_DIFFICULTY_25MAN_NORMAL: entry = GO_CRUSADERS_CACHE_25; break;
+                                    case RAID_DIFFICULTY_10MAN_HEROIC: entry = GO_CRUSADERS_CACHE_10_H; break;
+                                    case RAID_DIFFICULTY_25MAN_HEROIC: entry = GO_CRUSADERS_CACHE_25_H; break;
+                                }
+
+                                if (entry)
+                                    if (Creature* tirion =  instance->GetCreature(TirionGUID))
+                                        if (GameObject* chest = tirion->SummonGameObject(entry, 563.673f, 139.571f, 393.837f, 4.7106f, 0, 0, 0, 0, 90000000))
+                                            chest->SetRespawnTime(chest->GetRespawnDelay());
+
                                 EventStage = 3100;
                                 break;
                         }
@@ -336,9 +359,12 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                         switch (data)
                         {
                             case GORMOK_DONE:
-                                EventStage = 200;
-                                SetData(TYPE_NORTHREND_BEASTS, IN_PROGRESS);
-                                SetData(TYPE_BEASTS, IN_PROGRESS);
+                                if (!firstBossAlreadySpawned)
+                                {
+                                    EventStage = 200;
+                                    SetData(TYPE_NORTHREND_BEASTS, IN_PROGRESS);
+                                    SetData(TYPE_BEASTS, IN_PROGRESS);
+                                }
                                 break;
                             case SNAKES_IN_PROGRESS:
                                 NotOneButTwoJormungarsTimer = 0;
@@ -349,9 +375,12 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                             case SNAKES_DONE:
                                 if (NotOneButTwoJormungarsTimer > 0)
                                     DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_WORMS_KILLED_IN_10_SECONDS);
-                                EventStage = 300;
-                                SetData(TYPE_NORTHREND_BEASTS, IN_PROGRESS);
-                                SetData(TYPE_BEASTS, IN_PROGRESS);
+                                if (!secondBossAlreadySpawned)
+                                {
+                                    EventStage = 300;
+                                    SetData(TYPE_NORTHREND_BEASTS, IN_PROGRESS);
+                                    SetData(TYPE_BEASTS, IN_PROGRESS);
+                                }
                                 break;
                             case ICEHOWL_DONE:
                                 EventStage = 400;
@@ -363,6 +392,11 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                                 break;
                         }
                         break;
+                    case DATA_HEALTH_TWIN_SHARED:
+                        DataDamageTwin = data;
+                        data = NOT_STARTED;
+                        break;
+
                     //Achievements
                     case DATA_SNOBOLD_COUNT:
                         if (data == INCREASE)
@@ -396,7 +430,16 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                     sLog->outDetail("[ToCr] EncounterStatus[type %u] %u = data %u;", type, EncounterStatus[type], data);
                     if (data == FAIL)
                     {
-                        --TrialCounter;
+                        // Remove IsRaidWiped() check, if we come here, the raid must have wiped
+
+                        // Prevent unsigned integer overflow
+                        if (TrialCounter > 0)
+                        {
+                            --TrialCounter;
+                            DoUpdateWorldState(UPDATE_STATE_UI_SHOW, 1);
+                            DoUpdateWorldState(UPDATE_STATE_UI_COUNT, GetData(TYPE_COUNTER));
+                        }
+
                         NeedSave = true;
                         EventStage = (type == TYPE_BEASTS ? 666 : 0);
                         data = NOT_STARTED;
@@ -486,6 +529,8 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                         return NorthrendBeasts;
                     case TYPE_EVENT_TIMER:
                         return EventTimer;
+                    case DATA_HEALTH_TWIN_SHARED:
+                        return DataDamageTwin;
                     case TYPE_EVENT_NPC:
                         switch (EventStage)
                         {
@@ -515,19 +560,18 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                             case 3091:
                             case 3092:
                             case 3100:
-                            case 3110:
                             case 4000:
                             case 4010:
                             case 4015:
                             case 4016:
                             case 4040:
-                            case 4050:
                             case 5000:
                             case 5005:
                             case 5020:
                             case 6000:
                             case 6005:
                             case 6010:
+                            case 6020:
                                 EventNPCId = NPC_TIRION;
                                 break;
                             case 5010:
@@ -583,20 +627,20 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
             void Update(uint32 diff)
             {
-                if (GetData(TYPE_NORTHREND_BEASTS) == SNAKES_SPECIAL && NotOneButTwoJormungarsTimer)
+                if (GetData(TYPE_NORTHREND_BEASTS) == SNAKES_SPECIAL)
                 {
-                    if (NotOneButTwoJormungarsTimer <= diff)
-                        NotOneButTwoJormungarsTimer = 0;
-                    else
-                        NotOneButTwoJormungarsTimer -= diff;
+                    if (NotOneButTwoJormungarsTimer)
+                        if (NotOneButTwoJormungarsTimer <= diff)
+                            NotOneButTwoJormungarsTimer = 0;
+                        else NotOneButTwoJormungarsTimer -= diff;
                 }
 
-                if (GetData(TYPE_CRUSADERS) == IN_PROGRESS && ResilienceWillFixItTimer)
+                if (GetData(TYPE_CRUSADERS) == IN_PROGRESS)
                 {
-                    if (ResilienceWillFixItTimer <= diff)
-                        ResilienceWillFixItTimer = 0;
-                    else
-                        ResilienceWillFixItTimer -= diff;
+                    if (ResilienceWillFixItTimer)
+                        if (ResilienceWillFixItTimer <= diff)
+                            ResilienceWillFixItTimer = 0;
+                        else ResilienceWillFixItTimer -= diff;
                 }
             }
 

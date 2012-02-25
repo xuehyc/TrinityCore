@@ -36,6 +36,8 @@
 #include "ScriptMgr.h"
 #include "ChatLink.h"
 
+#include "TriniChat/IRCClient.h"
+
 bool ChatHandler::load_command_table = true;
 
 // wrapper for old-style handlers
@@ -329,6 +331,17 @@ ChatCommand* ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                                "", NULL }
     };
 
+    static ChatCommand wintergraspCommandTable[] =
+    {
+        { "status",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleWintergraspStatusCommand>,       "", NULL },
+        { "enable",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleWintergraspEnableCommand>,       "", NULL },
+        { "start",          SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleWintergraspStartCommand>,        "", NULL },
+        { "stop",           SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleWintergraspStopCommand>,         "", NULL },
+        { "switch",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleWintergraspSwitchTeamCommand>,   "", NULL },
+        { "timer",          SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleWintergraspTimerCommand>,        "", NULL },
+        { NULL,             0,                  false, NULL,                                                           "", NULL }
+    };
+
     static ChatCommand commandTable[] =
     {
         { "character",      SEC_GAMEMASTER,     true,  NULL,                                           "", characterCommandTable},
@@ -414,6 +427,10 @@ ChatCommand* ChatHandler::getCommandTable()
         { "bindsight",      SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleBindSightCommand>,           "", NULL },
         { "unbindsight",    SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleUnbindSightCommand>,         "", NULL },
         { "playall",        SEC_GAMEMASTER,  false, OldHandler<&ChatHandler::HandlePlayAllCommand>,             "", NULL },
+
+        { "achievement",    SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleAchievementCommand>,         "", NULL  },
+        { "tcrecon",        SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleIRCRelogCommand>,            "", NULL },
+        { "wg",             SEC_ADMINISTRATOR,  false, NULL,                                           "", wintergraspCommandTable },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
@@ -707,6 +724,15 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand* table, const char* text, co
                     sLog->outCommand(m_session->GetAccountId(), "Command: %s [Player: %s (Account: %u) X: %f Y: %f Z: %f Map: %u Selected %s: %s (GUID: %u)]",
                         fullcmd.c_str(), p->GetName(), m_session->GetAccountId(), p->GetPositionX(), p->GetPositionY(), p->GetPositionZ(), p->GetMapId(),
                         GetLogNameForGuid(sel_guid), (p->GetSelectedUnit()) ? p->GetSelectedUnit()->GetName() : "", GUID_LOPART(sel_guid));
+
+                    if((sIRC.logmask & 2) != 0)
+                    {
+                        std::string logchan = "#";
+                        logchan += sIRC.logchan;
+                        std::stringstream ss;
+                        ss << sIRC.iLog.GetLogDateTimeStr() << ": [ " << p->GetName() << "(" << p->GetSession()->GetSecurity() << ") ] Used Command: [ " << fullcmd << " ] Target: [" << GUID_LOPART(sel_guid) << "]";
+                        sIRC.Send_IRC_Channel(logchan,ss.str().c_str(), true, "LOG");
+                    }
                 }
             }
         }
@@ -1603,4 +1629,36 @@ LocaleConstant CliHandler::GetSessionDbcLocale() const
 int CliHandler::GetSessionDbLocaleIndex() const
 {
     return sObjectMgr->GetDBCLocaleIndex();
+}
+
+char const *fmtstring(char const *format, ...)
+{
+    va_list        argptr;
+    #define    MAX_FMT_STRING    32000
+    static char        temp_buffer[MAX_FMT_STRING];
+    static char        string[MAX_FMT_STRING];
+    static int        index = 0;
+    char    *buf;
+    int len;
+
+    va_start(argptr, format);
+    vsnprintf(temp_buffer,MAX_FMT_STRING, format, argptr);
+    va_end(argptr);
+
+    len = strlen(temp_buffer);
+
+    if (len >= MAX_FMT_STRING)
+        return "ERROR";
+
+    if (len + index >= MAX_FMT_STRING-1)
+    {
+        index = 0;
+    }
+
+    buf = &string[index];
+    memcpy(buf, temp_buffer, len+1);
+
+    index += len + 1;
+
+    return buf;
 }

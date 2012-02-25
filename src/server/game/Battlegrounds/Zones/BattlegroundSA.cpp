@@ -856,6 +856,8 @@ void BattlegroundSA::EndBattleground(uint32 winner)
     RewardHonorToTeam(GetBonusHonorFromKill(2), ALLIANCE);
     RewardHonorToTeam(GetBonusHonorFromKill(2), HORDE);
 
+    RewardMarksAndShardsToTeams(winner, true);
+
     Battleground::EndBattleground(winner);
 }
 

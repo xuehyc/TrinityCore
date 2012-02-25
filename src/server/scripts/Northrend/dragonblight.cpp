@@ -69,7 +69,88 @@ public:
     }
 };
 
+enum MinebombRelated
+{
+    QUEST_LEAVE_NOTHING_TO_CHANCE = 12277,
+    UPPER_BUNNY = 27436,
+    LOWER_BUNNY = 27437
+};
+
+class npc_minebomb_of_wintergarde : public CreatureScript
+{
+public:
+    npc_minebomb_of_wintergarde() : CreatureScript("npc_minebomb_of_wintergarde") {}
+
+    struct npc_minebomb_of_wintergardeAI : public ScriptedAI
+    {
+        npc_minebomb_of_wintergardeAI(Creature* c) : ScriptedAI(c) {}
+
+        uint32 _deathTimer;
+        bool _upperBunnyGranted;
+        bool _lowerBunnyGranted;
+
+        void Reset()
+        {
+            // be alive for approximately 10 seconds
+            _deathTimer = 10 * IN_MILLISECONDS;
+            _upperBunnyGranted = false;
+            _lowerBunnyGranted = false;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself();
+
+            // In error case, npc can despawn immediately
+            if (!owner || owner->GetQuestStatus(QUEST_LEAVE_NOTHING_TO_CHANCE) != QUEST_STATUS_INCOMPLETE)
+            {
+                // If we did not give a credit before, despawn
+                if (!_upperBunnyGranted && !_lowerBunnyGranted)
+                {
+                    me->DespawnOrUnsummon();
+                    return;
+                }
+            }
+
+            if(!_upperBunnyGranted)
+            {
+                // Search for nearby upper bunny and give credits
+                if (Creature* triggerBunny = me->FindNearestCreature(UPPER_BUNNY, 10.0f, true))
+                {
+                    owner->KilledMonsterCredit(UPPER_BUNNY, 0);
+                    _upperBunnyGranted = true;
+                }
+            }
+
+            if(!_lowerBunnyGranted)
+            {
+                // Search for nearby lower bunny and give credits
+                if (Creature* triggerBunny = me->FindNearestCreature(LOWER_BUNNY, 10.0f, true))
+                {
+                    owner->KilledMonsterCredit(LOWER_BUNNY, 0);
+                    _lowerBunnyGranted = true;
+                }
+            }
+
+            if (_deathTimer)
+            {
+                if (_deathTimer <= diff)
+                {
+                    me->DespawnOrUnsummon();
+                    _deathTimer = 0;
+                } else _deathTimer -= diff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_minebomb_of_wintergardeAI(creature);
+    }
+};
+
 void AddSC_dragonblight()
 {
     new npc_alexstrasza_wr_gate;
+    new npc_minebomb_of_wintergarde;
 }

@@ -50,29 +50,80 @@ public:
 
         InstanceScript* instance;
 
+        uint32 uiCorruptingBlightTimer;
+        uint32 uiVoidStrikeTimer;
+
         void Reset()
         {
+            uiVoidStrikeTimer = urand(2000, 5000);
+            uiCorruptingBlightTimer = urand(3000, 8000);
+
             if (instance)
                 instance->SetData(DATA_INFINITE_EVENT, NOT_STARTED);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
+            DoZoneInCombat();
+
+            DoScriptText(SAY_AGGRO, me, 0);
+
             if (instance)
                 instance->SetData(DATA_INFINITE_EVENT, IN_PROGRESS);
         }
 
-        void UpdateAI(const uint32 /*diff*/)
+        void UpdateAI(const uint32 diff)
         {
+            if (instance)
+            {
+                if (instance->GetData(DATA_TIMER) == 0)
+                {
+                    DoScriptText(SAY_FAIL, me, 0);
+                    me->DisappearAndDie();
+                }
+            }
+
             //Return since we have no target
             if (!UpdateVictim())
                 return;
+
+            if (uiCorruptingBlightTimer < diff)
+            {
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM,0))
+                    DoCast(target, SPELL_CORRUPTING_BLIGHT);
+                uiCorruptingBlightTimer = urand(3000, 8000);
+            } else uiCorruptingBlightTimer -= diff;
+
+            if (uiVoidStrikeTimer < diff)
+            {
+                DoCast(me->getVictim(), SPELL_VOID_STRIKE);
+                uiVoidStrikeTimer = urand(3000, 6000);
+            } else uiVoidStrikeTimer -= diff;
 
             DoMeleeAttackIfReady();
         }
 
         void JustDied(Unit* /*killer*/)
         {
+            DoScriptText(SAY_DEATH, me, 0);
+
+            std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
+
+            if (!m_threatlist.empty())
+            {
+                for (std::list<HostileReference*>::const_iterator itr = m_threatlist.begin(); itr != m_threatlist.end(); ++itr)
+                {
+                    if ((*itr))
+                    {
+                        if (Unit* pUnit = Unit::GetUnit((*me), (*itr)->getUnitGuid()))
+                        {
+                            if (pUnit->HasAura(SPELL_CORRUPTING_BLIGHT))
+                                pUnit->RemoveAurasDueToSpell(SPELL_CORRUPTING_BLIGHT);
+                        }
+                    }
+                }
+            }
+
             if (instance)
                 instance->SetData(DATA_INFINITE_EVENT, DONE);
         }

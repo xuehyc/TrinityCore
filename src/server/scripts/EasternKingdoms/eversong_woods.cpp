@@ -63,8 +63,8 @@ enum eNpc
 
 enum eFaction
 {
-    FACTION_HOSTILE                   = 45,
-    FACTION_FRIENDLY                  = 7,
+    FACTION_HOSTILE                   = 14,
+    FACTION_FRIENDLY                  = 35,
 };
 
 enum eSays

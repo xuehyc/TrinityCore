@@ -90,8 +90,6 @@ enum Texts
 
 enum BrannCreatures
 {
-    CREATURE_TRIBUNAL_OF_THE_AGES       = 28234,
-    CREATURE_BRANN_BRONZEBEARD          = 28070,
     CREATURE_DARK_MATTER_TARGET         = 28237,
     CREATURE_SEARING_GAZE_TARGET        = 28265,
     CREATURE_DARK_RUNE_PROTECTOR        = 27983,
@@ -101,18 +99,15 @@ enum BrannCreatures
 
 enum Spells
 {
-    SPELL_STEALTH                       = 58506,
     //Kadrak
     SPELL_GLARE_OF_THE_TRIBUNAL         = 50988,
-    H_SPELL_GLARE_OF_THE_TRIBUNAL       = 59868,
+    H_SPELL_GLARE_OF_THE_TRIBUNAL       = 59870,
     //Marnak
     SPELL_DARK_MATTER                   = 51012,
     H_SPELL_DARK_MATTER                 = 59868,
     //Abedneum
     SPELL_SEARING_GAZE                  = 51136,
-    H_SPELL_SEARING_GAZE                = 59867,
-
-    SPELL_REWARD_ACHIEVEMENT            = 59046,
+    H_SPELL_SEARING_GAZE                = 59867
 };
 
 enum Quests
@@ -123,6 +118,8 @@ enum Quests
 #define GOSSIP_ITEM_START               "Brann, it would be our honor!"
 #define GOSSIP_ITEM_PROGRESS            "Let's move Brann, enough of the history lessons!"
 #define DATA_BRANN_SPARKLIN_NEWS        1
+
+const Position BrannHome = {1077.41f, 474.16f, 207.803f, 2.70526f};
 
 static Position SpawnLocations[]=
 {
@@ -154,11 +151,10 @@ public:
         uint32 uiMarnakEncounterTimer;
         uint32 uiAbedneumEncounterTimer;
 
+        bool activatedByBrann;
         bool bKaddrakActivated;
         bool bMarnakActivated;
         bool bAbedneumActivated;
-
-        std::list<uint64> KaddrakGUIDList;
 
         void Reset()
         {
@@ -166,62 +162,81 @@ public:
             uiMarnakEncounterTimer = 10000;
             uiAbedneumEncounterTimer = 10000;
 
+            activatedByBrann = false;
             bKaddrakActivated = false;
             bMarnakActivated = false;
             bAbedneumActivated = false;
 
             if (instance)
             {
+                instance->HandleGameObject(instance->GetData64(DATA_GO_TRIBUNAL_CONSOLE), false);
                 instance->HandleGameObject(instance->GetData64(DATA_GO_KADDRAK), false);
                 instance->HandleGameObject(instance->GetData64(DATA_GO_MARNAK), false);
                 instance->HandleGameObject(instance->GetData64(DATA_GO_ABEDNEUM), false);
                 instance->HandleGameObject(instance->GetData64(DATA_GO_SKY_FLOOR), false);
             }
-
-            KaddrakGUIDList.clear();
         }
 
-        void UpdateFacesList()
+        Unit* FindRandomTargetController()
         {
-            /*GetCreatureListWithEntryInGrid(lKaddrakGUIDList, me, CREATURE_KADDRAK, 50.0f);
-            if (!lKaddrakGUIDList.empty())
+            Map* map = me->GetMap();
+            std::list<uint64> playerGuids;
+
+            if (map && map->IsDungeon())
             {
-                uint32 uiPositionCounter = 0;
-                for (std::list<Creature*>::const_iterator itr = lKaddrakGUIDList.begin(); itr != lKaddrakGUIDList.end(); ++itr)
+                Map::PlayerList const &PlayerList = map->GetPlayers();
+
+                if (!PlayerList.isEmpty())
                 {
-                    if ((*itr)->isAlive())
+                    // Get all valid player guids
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     {
-                        if (uiPositionCounter == 0)
-                        {
-                            (*itr)->GetMap()->CreatureRelocation((*itr), 927.265f, 333.200f, 218.780f, (*itr)->GetOrientation());
-                            (*itr)->SendMonsterMove(927.265f, 333.200f, 218.780f, 0, (*itr)->GetMovementFlags(), 1);
-                        }
-                        else
-                        {
-                            (*itr)->GetMap()->CreatureRelocation((*itr), 921.745f, 328.076f, 218.780f, (*itr)->GetOrientation());
-                            (*itr)->SendMonsterMove(921.745f, 328.076f, 218.780f, 0, (*itr)->GetMovementFlags(), 1);
-                        }
+                        if (i->getSource())
+                            if (i->getSource()->isAlive() && me->GetDistance(i->getSource()) < 100.0f && me->IsValidAttackTarget(i->getSource()))
+                                playerGuids.push_back(i->getSource()->GetGUID());
                     }
-                    ++uiPositionCounter;
+
+                    if (!playerGuids.empty())
+                    {
+                        std::list<uint64>::iterator itr = playerGuids.begin();
+                        std::advance(itr, rand()%playerGuids.size());
+                        return Unit::GetUnit((*me), (*itr));
+                    }
                 }
-            }*/
+            }
+
+            return NULL;
         }
 
         void UpdateAI(const uint32 diff)
         {
+            if (!activatedByBrann)
+                return;
+
+            if (instance)
+            {
+                if (instance->GetData(DATA_BRANN_EVENT) != IN_PROGRESS)
+                {
+                    EnterEvadeMode();
+                    return;
+                }
+            }
+            else
+            {
+                EnterEvadeMode();
+                return;
+            }
+
             if (bKaddrakActivated)
             {
                 if (uiKaddrakEncounterTimer <= diff)
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                        if (!KaddrakGUIDList.empty())
-                            for (std::list<uint64>::const_iterator itr = KaddrakGUIDList.begin(); itr != KaddrakGUIDList.end(); ++itr)
+                    if (Unit* target = FindRandomTargetController())
+                        if(instance)
+                            if (Creature* pKaddrak = Unit::GetCreature(*me, instance->GetData64(DATA_KADDRAK)))
                             {
-                                if (Creature* pKaddrak = Unit::GetCreature(*me, *itr))
-                                {
-                                    if (pKaddrak->isAlive())
-                                        pKaddrak->CastSpell(target, DUNGEON_MODE(SPELL_GLARE_OF_THE_TRIBUNAL, H_SPELL_GLARE_OF_THE_TRIBUNAL), true);
-                                }
+                                if (pKaddrak->isAlive())
+                                    pKaddrak->CastSpell(target, DUNGEON_MODE(SPELL_GLARE_OF_THE_TRIBUNAL, H_SPELL_GLARE_OF_THE_TRIBUNAL), true);
                             }
                     uiKaddrakEncounterTimer = 1500;
                 } else uiKaddrakEncounterTimer -= diff;
@@ -230,12 +245,10 @@ public:
             {
                 if (uiMarnakEncounterTimer <= diff)
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                    if (Unit* target = FindRandomTargetController())
                     {
-                        if (Creature* summon = me->SummonCreature(CREATURE_DARK_MATTER_TARGET, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000))
+                        if (Creature* summon = me->SummonCreature(CREATURE_DARK_MATTER_TARGET, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 1000))
                         {
-                            summon->SetDisplayId(11686);
-                            summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             summon->CastSpell(target, DUNGEON_MODE(SPELL_DARK_MATTER, H_SPELL_DARK_MATTER), true);
                         }
                     }
@@ -246,12 +259,10 @@ public:
             {
                 if (uiAbedneumEncounterTimer <= diff)
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                    if (Unit* target = FindRandomTargetController())
                     {
-                        if (Creature* summon = me->SummonCreature(CREATURE_SEARING_GAZE_TARGET, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000))
+                        if (Creature* summon = me->SummonCreature(CREATURE_SEARING_GAZE_TARGET, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 10000))
                         {
-                            summon->SetDisplayId(11686);
-                            summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             summon->CastSpell(target, DUNGEON_MODE(SPELL_SEARING_GAZE, H_SPELL_SEARING_GAZE), true);
                         }
                     }
@@ -274,7 +285,7 @@ public:
         if (uiAction == GOSSIP_ACTION_INFO_DEF+1 || uiAction == GOSSIP_ACTION_INFO_DEF+2)
         {
             player->CLOSE_GOSSIP_MENU();
-            CAST_AI(npc_brann_hos::npc_brann_hosAI, creature->AI())->StartWP();
+            CAST_AI(npc_brann_hos::npc_brann_hosAI, creature->AI())->StartWP(player->GetGUID());
         }
 
         return true;
@@ -285,7 +296,10 @@ public:
         if (creature->isQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_START, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        if (creature->GetInstanceScript())
+            if (creature->GetInstanceScript()->GetData(DATA_BRANN_EVENT) != DONE)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_START, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+
         player->SEND_GOSSIP_MENU(TEXT_ID_START, creature->GetGUID());
 
         return true;
@@ -329,7 +343,8 @@ public:
                 DespawnDwarf();
 
                 if (instance)
-                    instance->SetData(DATA_BRANN_EVENT, NOT_STARTED);
+                    if (instance->GetData(DATA_BRANN_EVENT) != DONE)
+                        instance->SetData(DATA_BRANN_EVENT, NOT_STARTED);
             }
         }
 
@@ -351,12 +366,17 @@ public:
             switch (uiPointId)
             {
                 case 7:
-                    if (Creature* creature = GetClosestCreatureWithEntry(me, CREATURE_TRIBUNAL_OF_THE_AGES, 100.0f))
+                    if (instance)
                     {
-                        if (!creature->isAlive())
-                            creature->Respawn();
-                        CAST_AI(mob_tribuna_controller::mob_tribuna_controllerAI, creature->AI())->UpdateFacesList();
-                        uiControllerGUID = creature->GetGUID();
+                        if (Creature* pController = Unit::GetCreature((*me), instance->GetData64(DATA_TRIBUNAL_CONTROLLER)))
+                        {
+                            if (!pController->isAlive())
+                                pController->Respawn();
+
+                            uiControllerGUID = pController->GetGUID();
+
+                            CAST_AI(mob_tribuna_controller::mob_tribuna_controllerAI, pController->AI())->activatedByBrann = true;
+                        }
                     }
                     break;
                 case 13:
@@ -413,12 +433,33 @@ public:
           ++uiStep;
         }
 
-        void StartWP()
+        void StartWP(uint64 playerGuid)
         {
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             SetEscortPaused(false);
             uiStep = 1;
-            Start();
+            Start(true, false, playerGuid, NULL, true);
+            SetMaxPlayerDistance(100.0f);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            DespawnDwarf();
+
+            if (instance)
+            {
+                if (Creature* pController = Unit::GetCreature((*me), instance->GetData64(DATA_TRIBUNAL_CONTROLLER)))
+                    CAST_AI(mob_tribuna_controller::mob_tribuna_controllerAI, pController->AI())->EnterEvadeMode();
+
+                instance->HandleGameObject(instance->GetData64(DATA_GO_TRIBUNAL_CONSOLE), false);
+                instance->HandleGameObject(instance->GetData64(DATA_GO_KADDRAK), false);
+                instance->HandleGameObject(instance->GetData64(DATA_GO_MARNAK), false);
+                instance->HandleGameObject(instance->GetData64(DATA_GO_ABEDNEUM), false);
+                instance->HandleGameObject(instance->GetData64(DATA_GO_SKY_FLOOR), false);
+            }
+
+            me->SetHomePosition(BrannHome);
+            me->Respawn();
         }
 
         void DamageTaken(Unit* /*done_by*/, uint32 & /*damage*/)
@@ -476,7 +517,12 @@ public:
                     case 8:
                         DoScriptText(SAY_EVENT_A_3, me);
                         if (instance)
-                            instance->HandleGameObject(instance->GetData64(DATA_GO_KADDRAK), true);
+                            if (GameObject* goKaddrak = instance->instance->GetGameObject(instance->GetData64(DATA_GO_KADDRAK)))
+                            {
+                                goKaddrak->SetGoAnimProgress(0);
+                                goKaddrak->SendCustomAnim(goKaddrak->GetGoAnimProgress());
+                            }
+
                         if (Creature* temp = Unit::GetCreature(*me, uiControllerGUID))
                             CAST_AI(mob_tribuna_controller::mob_tribuna_controllerAI, temp->AI())->bKaddrakActivated = true;
                         JumpToNextStep(5000);
@@ -500,7 +546,12 @@ public:
                     case 12:
                         DoScriptText(SAY_EVENT_B_3, me);
                         if (instance)
-                            instance->HandleGameObject(instance->GetData64(DATA_GO_MARNAK), true);
+                            if (GameObject* goMarnak = instance->instance->GetGameObject(instance->GetData64(DATA_GO_MARNAK)))
+                            {
+                                goMarnak->SetGoAnimProgress(0);
+                                goMarnak->SendCustomAnim(goMarnak->GetGoAnimProgress());
+                            }
+
                         if (Creature* temp = Unit::GetCreature(*me, uiControllerGUID))
                             CAST_AI(mob_tribuna_controller::mob_tribuna_controllerAI, temp->AI())->bMarnakActivated = true;
                         JumpToNextStep(10000);
@@ -532,7 +583,12 @@ public:
                     case 18:
                         DoScriptText(SAY_EVENT_C_3, me);
                         if (instance)
-                            instance->HandleGameObject(instance->GetData64(DATA_GO_ABEDNEUM), true);
+                            if (GameObject* goAbedneum = instance->instance->GetGameObject(instance->GetData64(DATA_GO_ABEDNEUM)))
+                            {
+                                goAbedneum->SetGoAnimProgress(0);
+                                goAbedneum->SendCustomAnim(goAbedneum->GetGoAnimProgress());
+                            }
+
                         if (Creature* temp = Unit::GetCreature(*me, uiControllerGUID))
                             CAST_AI(mob_tribuna_controller::mob_tribuna_controllerAI, temp->AI())->bAbedneumActivated = true;
                         JumpToNextStep(5000);
@@ -585,21 +641,48 @@ public:
                         me->SetReactState(REACT_DEFENSIVE);
                         DoScriptText(SAY_EVENT_END_01, me);
                         me->SetStandState(UNIT_STAND_STATE_STAND);
+
+                        DespawnDwarf();
+
                         if (instance)
+                        {
                             instance->HandleGameObject(instance->GetData64(DATA_GO_SKY_FLOOR), true);
+                            instance->HandleGameObject(instance->GetData64(DATA_GO_KADDRAK), true);
+                            instance->HandleGameObject(instance->GetData64(DATA_GO_MARNAK), true);
+                            instance->HandleGameObject(instance->GetData64(DATA_GO_ABEDNEUM), true);
+                        }
+
                         if (Creature* temp = Unit::GetCreature(*me, uiControllerGUID))
+                        {
+                            CAST_AI(mob_tribuna_controller::mob_tribuna_controllerAI, temp->AI())->activatedByBrann = false;
                             temp->DealDamage(temp, temp->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        }
                         bIsBattle = true;
                         SetEscortPaused(false);
                         JumpToNextStep(6500);
                         break;
                     case 29:
+                    {
                         DoScriptText(SAY_EVENT_END_02, me);
                         if (instance)
+                        {
                             instance->SetData(DATA_BRANN_EVENT, DONE);
-                        me->CastSpell(me, SPELL_REWARD_ACHIEVEMENT, true);
+
+                            // Achievement criteria is with spell 59046 which does not exist.
+                            // There is thus no way it can be given by casting the spell on the players.
+                            instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, 59046, me);
+                        }
+
+                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+                        Player* player = GetPlayerForEscort();
+                        if (player)
+                            player->GroupEventHappens(QUEST_HALLS_OF_STONE, me);
+
                         JumpToNextStep(5500);
                         break;
+                    }
                     case 30:
                         if (instance)
                             if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(DATA_ABEDNEUM)))
@@ -700,15 +783,12 @@ public:
                     {
                         if (instance)
                         {
+                            instance->HandleGameObject(instance->GetData64(DATA_GO_TRIBUNAL_CONSOLE), false);
                             instance->HandleGameObject(instance->GetData64(DATA_GO_KADDRAK), false);
                             instance->HandleGameObject(instance->GetData64(DATA_GO_MARNAK), false);
                             instance->HandleGameObject(instance->GetData64(DATA_GO_ABEDNEUM), false);
                             instance->HandleGameObject(instance->GetData64(DATA_GO_SKY_FLOOR), false);
                         }
-                        Player* player = GetPlayerForEscort();
-                        if (player)
-                            player->GroupEventHappens(QUEST_HALLS_OF_STONE, me);
-                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         JumpToNextStep(180000);
                         break;
                     }

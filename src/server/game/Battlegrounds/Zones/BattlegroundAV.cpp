@@ -472,6 +472,8 @@ void BattlegroundAV::EndBattleground(uint32 winner)
             RewardHonorToTeam(GetBonusHonor(kills[i]), (i == 0)?ALLIANCE:HORDE);
     }
 
+    RewardMarksAndShardsToTeams(winner, false);
+
     //TODO add enterevademode for all attacking creatures
     Battleground::EndBattleground(winner);
 }

@@ -54,6 +54,9 @@
 #include "InstanceScript.h"
 #include "SpellInfo.h"
 
+#include "OutdoorPvPWG.h"
+#include "OutdoorPvPMgr.h"
+
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
 SpellCastTargets::SpellCastTargets() : m_elevation(0), m_speed(0)
@@ -1412,7 +1415,19 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         // if target is fallged for pvp also flag caster if a player
         if (unit->IsPvP() && m_caster->GetTypeId() == TYPEID_PLAYER)
-            m_caster->ToPlayer()->UpdatePvP(true);
+        {
+            if (m_caster->GetInstanceId() != 0 && m_caster->GetInstanceId() == unit->GetInstanceId() && unit->GetInstanceId() != 0 && unit->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (!unit->IsInRaidWith(m_caster))
+                {
+                    m_caster->ToPlayer()->UpdatePvP(true);
+                }
+            }
+            else
+            {
+                m_caster->ToPlayer()->UpdatePvP(true);
+            }
+        }
 
         CallScriptAfterHitHandlers();
     }
@@ -1470,9 +1485,22 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
             // assisting case, healing and resurrection
             if (unit->HasUnitState(UNIT_STATE_ATTACK_PLAYER))
             {
-                m_caster->SetContestedPvP();
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    m_caster->ToPlayer()->UpdatePvP(true);
+                {
+                    if (m_caster->GetInstanceId() != 0 && m_caster->GetInstanceId() == unit->GetInstanceId() && unit->GetInstanceId() != 0 && unit->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (!unit->IsInRaidWith(m_caster))
+                        {
+                            m_caster->SetContestedPvP();
+                            m_caster->ToPlayer()->UpdatePvP(true);
+                        }
+                    }
+                    else
+                    {
+                        m_caster->SetContestedPvP();
+                        m_caster->ToPlayer()->UpdatePvP(true);
+                    }
+                }
             }
             if (unit->isInCombat() && !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO))
             {
@@ -2724,6 +2752,14 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
                             power = POWER_HEALTH;
                             break;
                         case 57669: // Replenishment
+                            // Remove existing Replenishment buffs of the group
+                            for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end(); itr++)
+                            {
+                                if ((*itr))
+                                    if ((*itr)->HasAura(57669))
+                                        (*itr)->RemoveAurasDueToSpell(57669);
+                            }
+
                             // In arenas Replenishment may only affect the caster
                             if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->InArena())
                             {
@@ -4618,10 +4654,26 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
-    if (m_spellInfo->AttributesEx7 & SPELL_ATTR7_IS_CHEAT_SPELL && !m_caster->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS))
+    // Allow all cheat spells for creatures and gamemasters
+    if (m_spellInfo->AttributesEx7 & SPELL_ATTR7_IS_CHEAT_SPELL)
     {
-        m_customError = SPELL_CUSTOM_ERROR_GM_ONLY;
-        return SPELL_FAILED_CUSTOM_ERROR;
+        if (m_caster)
+        {
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (m_caster->ToPlayer())
+                {
+                    if (m_caster->ToPlayer()->GetSession())
+                    {
+                        if (m_caster->ToPlayer()->GetSession()->GetSecurity() == SEC_PLAYER)
+                        {
+                            m_customError = SPELL_CUSTOM_ERROR_GM_ONLY;
+                            return SPELL_FAILED_CUSTOM_ERROR;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // Check global cooldown
@@ -5446,8 +5498,20 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_originalCaster && m_originalCaster->GetTypeId() == TYPEID_PLAYER && m_originalCaster->isAlive())
                 {
                     if (AreaTableEntry const* pArea = GetAreaEntryByAreaID(m_originalCaster->GetAreaId()))
+                    {
                         if (pArea->flags & AREA_FLAG_NO_FLY_ZONE)
                             return (_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_HERE;
+
+                        // Wintergrasp Antifly check
+                        if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
+                        {
+                            if (OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
+                            {
+                                if (m_originalCaster->GetZoneId() == 4197 && pvpWG->isWarTime()==true)
+                                    return IsTriggered() ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_HERE;
+                            }
+                        }
+                    }
                 }
                 break;
             }

@@ -1738,6 +1738,10 @@ class spell_item_rocket_boots : public SpellScriptLoader
                 if (Battleground* bg = caster->GetBattleground())
                     bg->EventPlayerDroppedFlag(caster);
 
+                // Spell 30452: Rocket Boots Engaged
+                if (caster)
+                    caster->RemoveSpellCooldown(SPELL_ROCKET_BOOTS_PROC, true);
+
                 caster->CastSpell(caster, SPELL_ROCKET_BOOTS_PROC, true, NULL);
             }
 

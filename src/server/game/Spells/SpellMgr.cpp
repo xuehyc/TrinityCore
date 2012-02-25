@@ -31,6 +31,9 @@
 #include "MapManager.h"
 #include "BattlegroundIC.h"
 
+#include "OutdoorPvPMgr.h"
+#include "OutdoorPvPWG.h"
+
 bool IsPrimaryProfessionSkill(uint32 skill)
 {
     SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
@@ -1128,6 +1131,21 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
                 return false;
             break;
         }
+        case 58730: // No fly Zone - Wintergrasp
+            {
+                if (!player)
+                    return false;
+
+                if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
+                {
+                    if (OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
+                    {
+                        if ((pvpWG->isWarTime()==false) || !player || !player->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && !player->HasAuraType(SPELL_AURA_FLY) || player->HasAura(45472) || player->HasAura(44795))
+                            return false;
+                    }
+                }
+             }
+            break;
         case 68719: // Oil Refinery - Isle of Conquest.
         case 68720: // Quarry - Isle of Conquest.
         {
@@ -3018,6 +3036,13 @@ void SpellMgr::LoadDbcDataCorrections()
             case 50785: // Energize Cores
             case 59372: // Energize Cores
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_SRC_AREA_ENEMY;
+                break;
+            case 50988: // Glare of the Tribunal
+            case 59870: // Glare of the Tribunal
+                spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_TARGET_ENEMY;
+                break;
+            case 25742: // Seal of Righteousness
+                spellInfo->SpellFamilyFlags[0] |= 0x400;
                 break;
             case 8494: // Mana Shield (rank 2)
                 // because of bug in dbc

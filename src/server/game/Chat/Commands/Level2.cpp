@@ -43,6 +43,9 @@
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "CreatureGroups.h"
 
+#include "TriniChat/IRCClient.h"
+#include "OutdoorPvPWG.h"
+
 //mute player for some times
 bool ChatHandler::HandleMuteCommand(const char* args)
 {
@@ -1146,5 +1149,230 @@ bool ChatHandler::HandleCharacterTitlesCommand(const char* args)
                 PSendSysMessage(LANG_TITLE_LIST_CONSOLE, id, titleInfo->bit_index, name.c_str(), localeNames[loc], knownStr, activeStr);
         }
     }
+    return true;
+}
+
+bool ChatHandler::HandleIRCpmCommand(const char* args)
+{
+    std::string Msg = args;
+    if (Msg.find(" ") == std::string::npos)
+        return false;
+    std::string To = Msg.substr(0, Msg.find(" "));
+    Msg = Msg.substr(Msg.find(" ") + 1);
+    std::size_t pos;
+    while((pos = To.find("||")) != std::string::npos)
+    {
+        std::size_t find1 = To.find("||", pos);
+        To.replace(pos, find1 - pos + 2, "|");
+    }
+    sIRC.SendIRC("PRIVMSG "+To+" : <WoW>["+m_session->GetPlayerName()+"] : " + Msg);
+    sIRC.Send_WoW_Player(m_session->GetPlayer(), "|cffCC4ACCTo ["+To+"]: "+Msg);
+    return true;
+}
+
+bool ChatHandler::HandleAchievementCommand(const char* args)
+{
+    if (!*args)
+       return false;
+
+    bool pushInFirstArg = true;
+
+    std::string completeString = args;
+    std::string arg1 = "";
+    std::string arg2 = "";
+
+    for (uint32 i = 0; i < completeString.length(); i++)
+    {
+        if (completeString[i])
+        {
+            if (completeString[i] == ' ')
+            {
+                pushInFirstArg = false;
+                continue;
+            }
+
+            if (pushInFirstArg)
+                arg1.push_back(completeString[i]);
+            else
+                arg2.push_back(completeString[i]);
+        }
+    }
+
+    uint32 achievementId = (uint32)atoi((char*)arg2.c_str());
+
+    if (!achievementId)
+        return false;
+
+    AchievementEntry const* pAE = GetAchievementStore()->LookupEntry(achievementId);
+
+    if (!pAE)
+        return false;
+
+    if (Unit *target = getSelectedUnit())
+    {
+        if (target->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (arg1 == "add")
+            {
+                target->ToPlayer()->CompletedAchievement(pAE);
+                return true;
+            }
+            else if (arg1 == "del")
+            {
+                target->ToPlayer()->GetAchievementMgr().RemoveAchievement(pAE);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool ChatHandler::HandleWintergraspStatusCommand(const char* /*args*/)
+{
+    OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
+
+    if (!pvpWG || !sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
+    {
+        SendSysMessage(LANG_BG_WG_DISABLE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    PSendSysMessage(LANG_BG_WG_STATUS, sObjectMgr->GetTrinityStringForDBCLocale(
+        pvpWG->getDefenderTeam() == TEAM_ALLIANCE ? LANG_BG_AB_ALLY : LANG_BG_AB_HORDE),
+        secsToTimeString(pvpWG->GetTimer(), true).c_str(),
+        pvpWG->isWarTime() ? "Yes" : "No",
+        pvpWG->GetNumPlayersH(),
+        pvpWG->GetNumPlayersA());
+    return true;
+}
+
+bool ChatHandler::HandleWintergraspStartCommand(const char* /*args*/)
+{
+    OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
+
+    if (!pvpWG || !sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
+    {
+        SendSysMessage(LANG_BG_WG_DISABLE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+    pvpWG->forceStartBattle();
+    PSendSysMessage(LANG_BG_WG_BATTLE_FORCE_START);
+    return true;
+}
+
+bool ChatHandler::HandleWintergraspStopCommand(const char* /*args*/)
+{
+    OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
+
+    if (!pvpWG || !sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
+    {
+        SendSysMessage(LANG_BG_WG_DISABLE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+    pvpWG->forceStopBattle();
+    PSendSysMessage(LANG_BG_WG_BATTLE_FORCE_STOP);
+    return true;
+}
+
+bool ChatHandler::HandleWintergraspEnableCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
+
+    if (!pvpWG || !sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
+    {
+        SendSysMessage(LANG_BG_WG_DISABLE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (!strncmp(args, "on", 3))
+    {
+        if (!sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
+        {
+            pvpWG->forceStopBattle();
+            sWorld->setBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED, true);
+        }
+        PSendSysMessage(LANG_BG_WG_ENABLE);
+        return true;
+    }
+    else if (!strncmp(args, "off", 4))
+    {
+        if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
+       {
+            pvpWG->forceStopBattle();
+            sWorld->setBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED, false);
+        }
+        PSendSysMessage(LANG_BG_WG_DISABLE);
+        return true;
+    }
+    else
+    {
+        SendSysMessage(LANG_USE_BOL);
+        SetSentErrorMessage(true);
+        return false;
+    }
+}
+
+bool ChatHandler::HandleWintergraspTimerCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
+
+    if (!pvpWG)
+    {
+        SendSysMessage(LANG_BG_WG_DISABLE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    int32 time = atoi (args);
+
+    // Min value 1 min
+    if (1 > time)
+        time = 1;
+    // Max value during wartime = 60. No wartime = 1440 (day)
+    if (pvpWG->isWarTime())
+    {
+        if (60 < time)
+            return false;
+    }
+    else
+        if (1440 < time)
+            return false;
+    time *= MINUTE * IN_MILLISECONDS;
+
+    pvpWG->setTimer((uint32)time);
+
+    PSendSysMessage(LANG_BG_WG_CHANGE_TIMER, secsToTimeString(pvpWG->GetTimer(), true).c_str());
+    return true;
+}
+
+bool ChatHandler::HandleWintergraspSwitchTeamCommand(const char* /*args*/)
+{
+    OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
+
+    if (!pvpWG)
+    {
+        SendSysMessage(LANG_BG_WG_DISABLE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+    uint32 timer = pvpWG->GetTimer();
+    pvpWG->forceChangeTeam();
+    pvpWG->setTimer(timer);
+    PSendSysMessage(LANG_BG_WG_SWITCH_FACTION, GetTrinityString(pvpWG->getDefenderTeam() == TEAM_ALLIANCE ? LANG_BG_AB_ALLY : LANG_BG_AB_HORDE));
     return true;
 }

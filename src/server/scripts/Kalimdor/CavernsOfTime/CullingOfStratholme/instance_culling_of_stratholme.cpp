@@ -28,13 +28,6 @@
 4 - Infinite Corruptor (Heroic only)
 */
 
-enum Texts
-{
-    SAY_CRATES_COMPLETED    = 0,
-};
-
-Position const ChromieSummonPos = {1813.298f, 1283.578f, 142.3258f, 3.878161f};
-
 class instance_culling_of_stratholme : public InstanceMapScript
 {
     public:
@@ -60,9 +53,8 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 _malGanisGate2GUID = 0;
                 _exitGateGUID = 0;
                 _malGanisChestGUID = 0;
-                _genericBunnyGUID = 0;
+                _heroicTimerMinutes = 100;
                 memset(&_encounterState[0], 0, sizeof(uint32) * MAX_ENCOUNTER);
-                _crateCount = 0;
             }
 
             bool IsEncounterInProgress() const
@@ -74,13 +66,16 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 return false;
             }
 
-            void FillInitialWorldStates(WorldPacket& data)
+            void OnPlayerEnter(Player* player)
             {
-                data << uint32(WORLDSTATE_SHOW_CRATES) << uint32(1);
-                data << uint32(WORLDSTATE_CRATES_REVEALED) << uint32(_crateCount);
-                data << uint32(WORLDSTATE_WAVE_COUNT) << uint32(0);
-                data << uint32(WORLDSTATE_TIME_GUARDIAN) << uint32(25);
-                data << uint32(WORLDSTATE_TIME_GUARDIAN_SHOW) << uint32(0);
+                if (!player)
+                    return;
+
+                if (_heroicTimerMinutes <= 25)
+                {
+                    DoUpdateWorldState(3931, _heroicTimerMinutes);
+                    DoUpdateWorldState(3932, _heroicTimerMinutes);
+                }
             }
 
             void OnCreatureCreate(Creature* creature)
@@ -104,9 +99,6 @@ class instance_culling_of_stratholme : public InstanceMapScript
                         break;
                     case NPC_INFINITE:
                         _infiniteGUID = creature->GetGUID();
-                        break;
-                    case NPC_GENERIC_BUNNY:
-                        _genericBunnyGUID = creature->GetGUID();
                         break;
                 }
             }
@@ -172,20 +164,11 @@ class instance_culling_of_stratholme : public InstanceMapScript
                     case DATA_INFINITE_EVENT:
                         _encounterState[4] = data;
                         break;
-                    case DATA_CRATE_COUNT:
-                        _crateCount = data;
-                        if (_crateCount == 5)
-                        {
-                            if (Creature* bunny = instance->GetCreature(_genericBunnyGUID))
-                                bunny->CastSpell(bunny, SPELL_CRATES_CREDIT, true);
-
-                            // Summon Chromie and global whisper
-                            if (Creature* chromie = instance->SummonCreature(NPC_CHROMIE_2, ChromieSummonPos))
-                                if (!instance->GetPlayers().isEmpty())
-                                    if (Player* player = instance->GetPlayers().getFirst()->getSource())
-                                        sCreatureTextMgr->SendChat(chromie, SAY_CRATES_COMPLETED, player->GetGUID(), CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_MAP);
-                        }
-                        DoUpdateWorldState(WORLDSTATE_CRATES_REVEALED, _crateCount);
+                    case DATA_TIMER:
+                        _heroicTimerMinutes = data;
+                        DoUpdateWorldState(3931, data);
+                        DoUpdateWorldState(3932, data);
+                        SaveToDB();
                         break;
                 }
 
@@ -207,8 +190,8 @@ class instance_culling_of_stratholme : public InstanceMapScript
                         return _encounterState[3];
                     case DATA_INFINITE_EVENT:
                         return _encounterState[4];
-                    case DATA_CRATE_COUNT:
-                        return _crateCount;
+                    case DATA_TIMER:
+                        return _heroicTimerMinutes;
                 }
                 return 0;
             }
@@ -249,7 +232,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
 
                 std::ostringstream saveStream;
                 saveStream << "C S " << _encounterState[0] << ' ' << _encounterState[1] << ' '
-                    << _encounterState[2] << ' ' << _encounterState[3] << ' ' << _encounterState[4];
+                    << _encounterState[2] << ' ' << _encounterState[3] << ' ' << _encounterState[4] << ' ' << _heroicTimerMinutes;
 
                 OUT_SAVE_INST_DATA_COMPLETE;
                 return saveStream.str();
@@ -266,10 +249,10 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 OUT_LOAD_INST_DATA(in);
 
                 char dataHead1, dataHead2;
-                uint16 data0, data1, data2, data3, data4;
+                uint16 data0, data1, data2, data3, data4, data5;
 
                 std::istringstream loadStream(in);
-                loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2 >> data3 >> data4;
+                loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2 >> data3 >> data4 >> data5;
 
                 if (dataHead1 == 'C' && dataHead2 == 'S')
                 {
@@ -278,6 +261,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                     _encounterState[2] = data2;
                     _encounterState[3] = data3;
                     _encounterState[4] = data4;
+                    _heroicTimerMinutes = data5;
 
                     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                         if (_encounterState[i] == IN_PROGRESS)
@@ -302,9 +286,8 @@ class instance_culling_of_stratholme : public InstanceMapScript
             uint64 _malGanisGate2GUID;
             uint64 _exitGateGUID;
             uint64 _malGanisChestGUID;
-            uint64 _genericBunnyGUID;
+            uint32 _heroicTimerMinutes;
             uint32 _encounterState[MAX_ENCOUNTER];
-            uint32 _crateCount;
         };
 };
 

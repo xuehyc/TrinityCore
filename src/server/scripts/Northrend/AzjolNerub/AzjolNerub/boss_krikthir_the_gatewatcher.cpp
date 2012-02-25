@@ -119,9 +119,24 @@ public:
             DoScriptText(SAY_AGGRO, me);
             Summon();
             uiSummonTimer = 15*IN_MILLISECONDS;
+            DoZoneInCombat();
 
             if (instance)
+            {
                 instance->SetData(DATA_KRIKTHIR_THE_GATEWATCHER_EVENT, IN_PROGRESS);
+
+                Creature* creature = Unit::GetCreature(*me, instance->GetData64(DATA_WATCHER_GASHRA));
+                if (creature && creature->isAlive())
+                    creature->SetInCombatWithZone();
+
+                creature = Unit::GetCreature(*me, instance->GetData64(DATA_WATCHER_SILTHIK));
+                if (creature && creature->isAlive())
+                    creature->SetInCombatWithZone();
+
+                creature = Unit::GetCreature(*me, instance->GetData64(DATA_WATCHER_NARJIL));
+                if (creature && creature->isAlive())
+                    creature->SetInCombatWithZone();
+            }
         }
 
         void Summon()
@@ -155,6 +170,9 @@ public:
                 uiSummonTimer = 15*IN_MILLISECONDS;
             } else uiSummonTimer -= diff;
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             if (uiMindFlayTimer <= diff)
             {
                     DoCast(me->getVictim(), SPELL_MIND_FLAY);
@@ -163,11 +181,8 @@ public:
 
             if (uiCurseFatigueTimer <= diff)
             {
-                //WowWiki say "Curse of Fatigue-Kirk'thir will cast Curse of Fatigue on 2-3 targets periodically."
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(target, SPELL_CURSE_OF_FATIGUE);
-                if (Unit* tankTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true))
-                    DoCast(tankTarget, SPELL_CURSE_OF_FATIGUE);
 
                 uiCurseFatigueTimer = 10*IN_MILLISECONDS;
             } else uiCurseFatigueTimer -= diff;
@@ -216,8 +231,24 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            //The spell is not working propperly
-            DoCast(me->getVictim(), SPELL_ACID_SPLASH, true);
+            if (me->GetMap())
+            {
+                Map::PlayerList const& players = me->GetMap()->GetPlayers();
+
+                if (me->GetMap()->IsDungeon() && !players.isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    {
+                        Player* player = itr->getSource();
+
+                        // Only apply to attackable, alive and in 5 yards players
+                        if (player && !player->isGameMaster() && player->isAlive() && me->IsValidAttackTarget(player) && me->GetDistance(player) <= 5.0f)
+                        {
+                            player->AddAura(DUNGEON_MODE(SPELL_ACID_SPLASH, H_SPELL_ACID_SPLASH), player);
+                        }
+                    }
+                }
+            }
         }
     };
 

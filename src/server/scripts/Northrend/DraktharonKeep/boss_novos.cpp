@@ -112,10 +112,13 @@ public:
                 instance->SetData(DATA_NOVOS_EVENT, NOT_STARTED);
                 for (uint8 n = 0; n < 4; ++n)
                     luiCrystals.push_back(instance->GetData64(DATA_NOVOS_CRYSTAL_1 + n));
-                for (std::list<uint64>::const_iterator itr = luiCrystals.begin(); itr != luiCrystals.end(); ++itr)
+                if (!luiCrystals.empty())
                 {
-                    if (GameObject* temp = instance->instance->GetGameObject(*itr))
-                        temp->SetGoState(GO_STATE_READY);
+                    for (std::list<uint64>::const_iterator itr = luiCrystals.begin(); itr != luiCrystals.end(); ++itr)
+                    {
+                        if (GameObject* temp = instance->instance->GetGameObject(*itr))
+                            temp->SetGoState(GO_STATE_READY);
+                    }
                 }
             }
         }
@@ -129,10 +132,13 @@ public:
             DoCast(SPELL_ARCANE_FIELD);
             if (instance)
             {
-                for (std::list<uint64>::const_iterator itr = luiCrystals.begin(); itr != luiCrystals.end(); ++itr)
+                if (!luiCrystals.empty())
                 {
-                    if (GameObject* temp = instance->instance->GetGameObject(*itr))
-                        temp->SetGoState(GO_STATE_ACTIVE);
+                    for (std::list<uint64>::const_iterator itr = luiCrystals.begin(); itr != luiCrystals.end(); ++itr)
+                    {
+                        if (GameObject* temp = instance->instance->GetGameObject(*itr))
+                            temp->SetGoState(GO_STATE_ACTIVE);
+                    }
                 }
                 instance->SetData(DATA_NOVOS_EVENT, IN_PROGRESS);
             }
@@ -148,8 +154,9 @@ public:
                 case PHASE_1:
                     if (uiTimer <= diff)
                     {
-                        Creature* summon = me->SummonCreature(RAND(CREATURE_FETID_TROLL_CORPSE, CREATURE_HULKING_CORPSE, CREATURE_RISEN_SHADOWCASTER), AddSpawnPoint, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20*IN_MILLISECONDS);
-                        summon->GetMotionMaster()->MovePoint(0, AddDestinyPoint);
+                        if (Creature* summon = me->SummonCreature(RAND(CREATURE_FETID_TROLL_CORPSE, CREATURE_HULKING_CORPSE, CREATURE_RISEN_SHADOWCASTER), AddSpawnPoint, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20*IN_MILLISECONDS))
+                            summon->GetMotionMaster()->MovePoint(0, AddDestinyPoint);
+
                         //If spell is casted stops casting arcane field so no spell casting
                         //DoCast(me, SPELL_SUMMON_MINIONS);
                         uiTimer = 3*IN_MILLISECONDS;
@@ -159,8 +166,10 @@ public:
                         if (uiCrystalHandlerTimer <= diff)
                         {
                             DoScriptText(SAY_NECRO_ADD, me);
-                            Creature* pCrystalHandler = me->SummonCreature(CREATURE_CRYSTAL_HANDLER, CrystalHandlerSpawnPoint, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20*IN_MILLISECONDS);
-                            pCrystalHandler->GetMotionMaster()->MovePoint(0, AddDestinyPoint);
+
+                            if (Creature* pCrystalHandler = me->SummonCreature(CREATURE_CRYSTAL_HANDLER, CrystalHandlerSpawnPoint, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20*IN_MILLISECONDS))
+                                pCrystalHandler->GetMotionMaster()->MovePoint(0, AddDestinyPoint);
+
                             uiCrystalHandlerTimer = urand(20*IN_MILLISECONDS, 30*IN_MILLISECONDS);
                         } else uiCrystalHandlerTimer -= diff;
                     }
@@ -168,6 +177,9 @@ public:
                 case PHASE_2:
                     if (uiTimer <= diff)
                     {
+                        if (me->HasUnitState(UNIT_STATE_CASTING))
+                            return;
+
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                             DoCast(target, DUNGEON_MODE(RAND(SPELL_ARCANE_BLAST, SPELL_BLIZZARD, SPELL_FROSTBOLT, SPELL_WRATH_OF_MISERY),
                                                          RAND(H_SPELL_ARCANE_BLAST, H_SPELL_BLIZZARD, H_SPELL_FROSTBOLT, H_SPELL_WRATH_OF_MISERY)));
@@ -195,6 +207,9 @@ public:
 
         void JustSummoned(Creature* summon)
         {
+            if (!summon)
+                return;
+
             if (summon->GetEntry() == CREATURE_CRYSTAL_HANDLER)
                 crystalHandlerAmount++;
 

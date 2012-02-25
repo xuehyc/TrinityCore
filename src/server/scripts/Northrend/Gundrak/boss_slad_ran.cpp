@@ -236,21 +236,34 @@ public:
             if (uiGripOfSladRanTimer <= diff)
             {
                 Unit* target = me->getVictim();
-
-                DoCast(target, SPELL_GRIP_OF_SLAD_RAN);
                 uiGripOfSladRanTimer = urand(3, 6)*IN_MILLISECONDS;
 
-                Aura* grip = target->GetAura(SPELL_GRIP_OF_SLAD_RAN, me->GetGUID());
-                if (grip && grip->GetStackAmount() == 5)
+                if (!target)
+                    return;
+
+                if (!target->HasAura(SPELL_GRIP_OF_SLAD_RAN))
                 {
-                    target->RemoveAurasDueToSpell(SPELL_GRIP_OF_SLAD_RAN, me->GetGUID());
-                    target->CastSpell(target, SPELL_SNAKE_WRAP, true);
+                    me->AddAura(SPELL_GRIP_OF_SLAD_RAN, target);
+                    return;
+                }
 
-                    if (TempSummon* _me = me->ToTempSummon())
-                        if (Creature* sladran = _me->GetSummoner()->ToCreature())
-                            sladran->AI()->SetGUID(target->GetGUID() ,DATA_SNAKES_WHYD_IT_HAVE_TO_BE_SNAKES);
+                if (Aura* grip = target->GetAura(SPELL_GRIP_OF_SLAD_RAN))
+                {
+                    if (grip->GetStackAmount() < 5)
+                    {
+                        grip->SetStackAmount(grip->GetStackAmount() + 1);
+                    }
+                    else
+                    {
+                        target->RemoveAurasDueToSpell(SPELL_GRIP_OF_SLAD_RAN, me->GetGUID());
+                        target->CastSpell(target, SPELL_SNAKE_WRAP, true);
 
-                    me->DespawnOrUnsummon();
+                        if (TempSummon* _me = me->ToTempSummon())
+                            if (Creature* sladran = _me->GetSummoner()->ToCreature())
+                                sladran->AI()->SetGUID(target->GetGUID() ,DATA_SNAKES_WHYD_IT_HAVE_TO_BE_SNAKES);
+
+                        me->DespawnOrUnsummon();
+                    }
                 }
             } else uiGripOfSladRanTimer -= diff;
         }

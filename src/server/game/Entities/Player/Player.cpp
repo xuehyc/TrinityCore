@@ -75,6 +75,9 @@
 #include <cmath>
 #include "AccountMgr.h"
 
+#include "OutdoorPvPWG.h"
+#include "TriniChat/IRCClient.h"
+
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
 #define PLAYER_SKILL_INDEX(x)       (PLAYER_SKILL_INFO_1_1 + ((x)*3))
@@ -768,6 +771,17 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
     m_rest_bonus=0;
     rest_type=REST_TYPE_NO;
     ////////////////////Rest System/////////////////////
+
+    //movement anticheat
+    m_anti_lastmovetime = 0;   //last movement time
+    m_anti_NextLenCheck = 0;
+    m_anti_MovedLen = 0.0f;
+    m_anti_BeginFallZ = INVALID_HEIGHT;
+    m_anti_lastalarmtime = 0;    //last time when alarm generated
+    m_anti_alarmcount = 0;       //alarm counter
+    m_anti_TeleTime = 0;
+    m_CanFly=false;
+    /////////////////////////////////
 
     m_mailsLoaded = false;
     m_mailsUpdated = false;
@@ -2390,6 +2404,16 @@ void Player::AddToWorld()
     for (uint8 i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; ++i)
         if (m_items[i])
             m_items[i]->AddToWorld();
+
+    //TODO: FIXME
+    if(sIRC.ajoin == 1)
+    {
+        QueryResult result = WorldDatabase.PQuery("SELECT `name` FROM `irc_inchan` WHERE `name` = '%s'", Unit::GetName() );
+        if(!result)
+        {
+            sIRC.AutoJoinChannel(this);
+        }
+    }
 }
 
 void Player::RemoveFromWorld()
@@ -3039,6 +3063,17 @@ void Player::GiveLevel(uint8 level)
     InitTalentForLevel();
     InitTaxiNodesForLevel();
     InitGlyphsForLevel();
+
+    if((sIRC.BOTMASK & 64) != 0)
+    {
+        char  temp [5];
+        sprintf(temp, "%u", getLevel());
+        std::string plevel = temp;
+        std::string pname = GetName();
+        std::string ircchan = "#";
+        ircchan += sIRC._irc_chan[sIRC.Status].c_str();
+        sIRC.Send_IRC_Channel(ircchan, "\00311["+pname+"] : Has Reached Level: "+plevel, true);
+    }
 
     UpdateAllStats();
 
@@ -4947,6 +4982,11 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             trans->PAppend("DELETE FROM character_talent WHERE guid = '%u'", guid);
             trans->PAppend("DELETE FROM character_skills WHERE guid = '%u'", guid);
 
+            /* World of Warcraft Armory */
+            trans->PAppend("DELETE FROM armory_character_stats WHERE guid = '%u'", guid);
+            trans->PAppend("DELETE FROM character_feed_log WHERE guid = '%u'", guid);
+            /* World of Warcraft Armory */
+
             CharacterDatabase.CommitTransaction(trans);
             break;
         }
@@ -6209,10 +6249,13 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
     return false;
 }
 
-void Player::UpdateWeaponSkill(WeaponAttackType attType)
+void Player::UpdateWeaponSkill(WeaponAttackType attType, Unit* victim)
 {
+    // is pointer not null
+    if (!victim)
+        return;
+
     // no skill gain in pvp
-    Unit* victim = getVictim();
     if (victim && victim->GetTypeId() == TYPEID_PLAYER)
         return;
 
@@ -6267,7 +6310,7 @@ void Player::UpdateCombatSkills(Unit* victim, WeaponAttackType attType, bool def
         if (defence)
             UpdateDefense();
         else
-            UpdateWeaponSkill(attType);
+            UpdateWeaponSkill(attType, victim);
     }
     else
         return;
@@ -9068,6 +9111,13 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
     data << uint32(0x8d3) << uint32(0x0);                   // 6
                                                             // 7 1 - Arena season in progress, 0 - end of season
     data << uint32(0xC77) << uint32(sWorld->getBoolConfig(CONFIG_ARENA_SEASON_IN_PROGRESS));
+
+    // May be send timer to start Wintergrasp
+    if(sWorld->GetWintergrapsState()==4354)
+        data << uint32(0x1102) << sWorld->GetWintergrapsTimer();
+    else
+        data << uint32(0xEC5) << sWorld->GetWintergrapsTimer();
+
                                                             // 8 Arena season id
     data << uint32(0xF3D) << uint32(sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID));
 
@@ -12451,6 +12501,23 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
     Item* pItem = GetItemByPos(bag, slot);
     if (pItem)
     {
+        // Castle log instance kills + important items
+        if (pItem->GetEntry() == 40752 || pItem->GetEntry() == 40753 || pItem->GetEntry() == 45624 || pItem->GetEntry() == 47241 || pItem->GetEntry() == 49426 || pItem->GetEntry() == 29434 || pItem->GetEntry() == 43102 || pItem->GetEntry() == 49908 || pItem->GetEntry() == 47556 || pItem->GetEntry() == 45087 || pItem->GetEntry() == 50274 || pItem->GetEntry() == 47242 || pItem->GetEntry() == 52027 || pItem->GetEntry() == 52030 || pItem->GetEntry() == 52025 || pItem->GetEntry() == 52026 || pItem->GetEntry() == 52028 || pItem->GetEntry() == 52029)
+        {
+            if (ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(pItem->GetEntry()))
+            {
+                std::string name = pProto->Name1;
+                std::string player_name = GetName();
+
+                if (ItemLocale const *il = sObjectMgr->GetItemLocale(pItem->GetEntry()))
+                    sObjectMgr->GetLocaleString(il->Name, LOCALE_deDE, name);
+
+                CharacterDatabase.EscapeString(name);
+                CharacterDatabase.EscapeString(player_name);
+                CharacterDatabase.PExecute("INSERT INTO castle_log VALUES (%u,'%s',4,UNIX_TIMESTAMP(),%u,%u,%u,'%s')", GetGUIDLow(), player_name.c_str(), pItem->GetEntry(), GetItemCount(pItem->GetEntry(), true), pItem->GetCount(), name.c_str());
+            }
+        }
+
         sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "STORAGE:  DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
         // Also remove all contained items if the item is a bag.
         // This if () prevents item saving crashes if the condition for a bag to be empty before being destroyed was bypassed somehow.
@@ -12544,6 +12611,23 @@ void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequ
 {
     sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "STORAGE:  DestroyItemCount item = %u, count = %u", item, count);
     uint32 remcount = 0;
+
+    // Castle log instance kills + important items
+    if (item == 40752 || item == 40753 || item == 45624 || item == 47241 || item == 49426 || item == 29434 || item == 43102 || item == 49908 || item == 47556 || item == 45087 || item == 50274 || item == 47242 || item == 52027 || item == 52030 || item == 52025 || item == 52026 || item == 52028 || item == 52029)
+    {
+        if (ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(item))
+        {
+            std::string name = pProto->Name1;
+            std::string player_name = GetName();
+
+            if (ItemLocale const *il = sObjectMgr->GetItemLocale(item))
+                sObjectMgr->GetLocaleString(il->Name, LOCALE_deDE, name);
+
+            CharacterDatabase.EscapeString(name);
+            CharacterDatabase.EscapeString(player_name);
+            CharacterDatabase.PExecute("INSERT INTO castle_log VALUES (%u,'%s',4,UNIX_TIMESTAMP(),%u,%u,%u,'%s')", GetGUIDLow(), player_name.c_str(), item, GetItemCount(item, true), count, name.c_str());
+        }
+    }
 
     // in inventory
     for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
@@ -16619,6 +16703,11 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         return false;
     }
 
+    /* World of Warcraft Armory */
+    // Cleanup old Wowarmory feeds
+    InitWowarmoryFeeds();
+    /* World of Warcraft Armory */
+
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
 
@@ -18471,7 +18560,7 @@ void Player::SaveToDB(bool create /*=false*/)
     outDebugValues();
 
     PreparedStatement* stmt = NULL;
-    uint16 index = 0;
+    uint8 index = 0;
 
     if (create)
     {
@@ -18510,12 +18599,12 @@ void Player::SaveToDB(bool create /*=false*/)
         //save, far from tavern/city
         //save, but in tavern/city
         stmt->setUInt32(index++, m_resetTalentsCost);
-        stmt->setUInt32(index++, m_resetTalentsTime);
+        stmt->setUInt32(index++, (uint32)m_resetTalentsTime);
         stmt->setUInt16(index++, (uint16)m_ExtraFlags);
         stmt->setUInt8(index++,  m_stableSlots);
         stmt->setUInt16(index++, (uint16)m_atLoginFlags);
         stmt->setUInt16(index++, GetZoneId());
-        stmt->setUInt32(index++, m_deathExpireTime);
+        stmt->setUInt32(index++, (uint32)m_deathExpireTime);
 
         ss.str("");
         ss << m_taxi.SaveTaxiDestinationsToString();
@@ -18621,12 +18710,12 @@ void Player::SaveToDB(bool create /*=false*/)
         //save, far from tavern/city
         //save, but in tavern/city
         stmt->setUInt32(index++, m_resetTalentsCost);
-        stmt->setUInt32(index++, m_resetTalentsTime);
+        stmt->setUInt32(index++, (uint32)m_resetTalentsTime);
         stmt->setUInt16(index++, (uint16)m_ExtraFlags);
         stmt->setUInt8(index++,  m_stableSlots);
         stmt->setUInt16(index++, (uint16)m_atLoginFlags);
         stmt->setUInt16(index++, GetZoneId());
-        stmt->setUInt32(index++, m_deathExpireTime);
+        stmt->setUInt32(index++, (uint32)m_deathExpireTime);
 
         ss.str("");
         ss << m_taxi.SaveTaxiDestinationsToString();
@@ -18722,10 +18811,77 @@ void Player::SaveToDB(bool create /*=false*/)
 
     CharacterDatabase.CommitTransaction(trans);
 
+    /* World of Warcraft Armory */
+    // Place this code AFTER CharacterDatabase.CommitTransaction(); to avoid some character saving errors.
+    // Wowarmory feeds
+    std::ostringstream sWowarmory;
+    for (WowarmoryFeeds::iterator iter = m_wowarmory_feeds.begin(); iter < m_wowarmory_feeds.end(); ++iter) {
+        sWowarmory << "INSERT IGNORE INTO character_feed_log (guid,type,data,date,counter,difficulty,item_guid,item_quality) VALUES ";
+        //                      guid                    type                        data                    date                            counter                   difficulty                        item_guid                      item_quality
+        sWowarmory << "(" << (*iter).guid << ", " << (*iter).type << ", " << (*iter).data << ", " << uint64((*iter).date) << ", " << (*iter).counter << ", " << uint32((*iter).difficulty) << ", " << (*iter).item_guid << ", " << (*iter).item_quality <<  ");";
+        CharacterDatabase.PExecute(sWowarmory.str().c_str());
+        sWowarmory.str("");
+    }
+    // Clear old saved feeds from storage - they are not required for server core.
+    InitWowarmoryFeeds();
+    // Character stats
+    std::ostringstream ps;
+    time_t t = time(NULL);
+    //CharacterDatabase.PExecute("DELETE FROM armory_character_stats WHERE guid = %u", GetGUIDLow());
+    ps << "REPLACE INTO armory_character_stats (guid, data, save_date) VALUES (" << GetGUIDLow() << ", '";
+    for (uint16 i = 0; i < m_valuesCount; ++i)
+        ps << GetUInt32Value(i) << " ";
+    ps << "', " << uint64(t) << ");";
+    CharacterDatabase.PExecute(ps.str().c_str());
+    /* World of Warcraft Armory */
+
     // save pet (hunter pet level and experience and all type pets health/mana).
     if (Pet* pet = GetPet())
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
+
+/* World of Warcraft Armory */
+void Player::InitWowarmoryFeeds()
+{
+    // Clear feeds
+    m_wowarmory_feeds.clear();
+}
+
+void Player::CreateWowarmoryFeed(uint32 type, uint32 data, uint32 item_guid, uint32 item_quality)
+{
+    /*
+        1 - TYPE_ACHIEVEMENT_FEED
+        2 - TYPE_ITEM_FEED
+        3 - TYPE_BOSS_FEED
+    */
+    if (GetGUIDLow() == 0)
+    {
+        sLog->outError("[Wowarmory]: player is not initialized, unable to create log entry!");
+        return;
+    }
+    if (type <= 0 || type > 3)
+    {
+        sLog->outError("[Wowarmory]: unknown feed type: %d, ignore.", type);
+        return;
+    }
+    if (data == 0)
+    {
+        sLog->outError("[Wowarmory]: empty data (GUID: %u), ignore.", GetGUIDLow());
+        return;
+    }
+    WowarmoryFeedEntry feed;
+    feed.guid = GetGUIDLow();
+    feed.type = type;
+    feed.data = data;
+    feed.difficulty = type == 3 ? GetMap()->GetDifficulty() : 0;
+    feed.item_guid  = item_guid;
+    feed.item_quality = item_quality;
+    feed.counter = 0;
+    feed.date = time(NULL);
+    sLog->outDebug(LOG_FILTER_UNITS, "[Wowarmory]: create wowarmory feed (GUID: %u, type: %d, data: %u).", feed.guid, feed.type, feed.data);
+    m_wowarmory_feeds.push_back(feed);
+}
+/* World of Warcraft Armory */
 
 // fast save function for item/money cheating preventing - save only inventory and money state
 void Player::SaveInventoryAndGoldToDB(SQLTransaction& trans)
@@ -21307,6 +21463,10 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
         // call after remove to be sure that player resurrected for correct cast
         if (bg->isBattleground() && !isGameMaster() && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
         {
+            // Avoid deserter cast on server restart
+            if (sWorld->IsShuttingDown())
+                return;
+
             if (bg->GetStatus() == STATUS_IN_PROGRESS || bg->GetStatus() == STATUS_WAIT_JOIN)
             {
                 //lets check if player was teleported from BG and schedule delayed Deserter spell cast
@@ -23780,6 +23940,8 @@ void Player::HandleFall(MovementInfo const& movementInfo)
 {
     // calculate total z distance of the fall
     float z_diff = m_lastFallZ - movementInfo.pos.GetPositionZ();
+
+    m_anti_BeginFallZ=INVALID_HEIGHT;
     //sLog->outDebug("zDiff = %f", z_diff);
 
     //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored

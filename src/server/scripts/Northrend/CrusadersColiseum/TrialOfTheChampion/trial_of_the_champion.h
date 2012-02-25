@@ -26,16 +26,21 @@ enum eData
     BOSS_ARGENT_CHALLENGE_P,
     BOSS_BLACK_KNIGHT,
     DATA_MOVEMENT_DONE,
+    DATA_AGGRO_DONE,
+    DATA_AGRO_DONE,
     DATA_LESSER_CHAMPIONS_DEFEATED,
     DATA_START,
     DATA_IN_POSITION,
-    DATA_ARGENT_SOLDIER_DEFEATED
+    DATA_ARGENT_SOLDIER_DEFEATED,
+    DATA_BLACK_KNIGHT,
+    DATA_KNIGHT
 };
 
 enum Data64
 {
     DATA_ANNOUNCER,
     DATA_MAIN_GATE,
+    DATA_MAIN_GATE1,
 
     DATA_GRAND_CHAMPION_VEHICLE_1,
     DATA_GRAND_CHAMPION_VEHICLE_2,
@@ -62,25 +67,35 @@ enum eNpcs
     NPC_JAELYNE                 = 34657,
     NPC_LANA                    = 34703,
 
+    // Crusader Champions
     NPC_EADRIC                  = 35119,
     NPC_PALETRESS               = 34928,
 
+    // Crusader mobs
     NPC_ARGENT_LIGHWIELDER      = 35309,
     NPC_ARGENT_MONK             = 35305,
     NPC_PRIESTESS               = 35307,
 
+    // Black Knight
     NPC_BLACK_KNIGHT            = 35451,
 
+    // Black Knight's add
     NPC_RISEN_JAEREN            = 35545,
     NPC_RISEN_ARELAS            = 35564,
 
-    NPC_JAEREN                  = 35004,
-    NPC_ARELAS                  = 35005
+    // Announcer
+    NPC_JAEREN_AN               = 35004,
+    NPC_ARELAS_AN               = 35005,
+
+    // Announcer Start Event
+    NPC_JAEREN                  = 35589,
+    NPC_ARELAS                  = 35604
 };
 
 enum eGameObjects
 {
     GO_MAIN_GATE                = 195647,
+    GO_MAIN_GATE1               = 195650,
 
     GO_CHAMPIONS_LOOT           = 195709,
     GO_CHAMPIONS_LOOT_H            = 195710,
@@ -101,11 +116,11 @@ enum eVehicles
     VEHICLE_EVENSONG_MOUNT                          = 34658,
     VEHICLE_LANA_STOUTHAMMER_MOUNT                  = 35636,
     //Faction Champions (ALLIANCE)
-    VEHICLE_DARNASSIA_NIGHTSABER                    = 33319,
-    VEHICLE_EXODAR_ELEKK                            = 33318,
-    VEHICLE_STORMWIND_STEED                         = 33217,
-    VEHICLE_GNOMEREGAN_MECHANOSTRIDER               = 33317,
-    VEHICLE_IRONFORGE_RAM                           = 33316,
+    VEHICLE_DARNASSIA_NIGHTSABER                    = 33298,
+    VEHICLE_EXODAR_ELEKK                            = 33416,
+    VEHICLE_STORMWIND_STEED                         = 33297,
+    VEHICLE_GNOMEREGAN_MECHANOSTRIDER               = 33301,
+    VEHICLE_IRONFORGE_RAM                           = 33408,
     //Grand Champions Horde Vehicles
     VEHICLE_MOKRA_SKILLCRUSHER_MOUNT                = 35638,
     VEHICLE_ERESSEA_DAWNSINGER_MOUNT                = 35635,
@@ -113,11 +128,11 @@ enum eVehicles
     VEHICLE_ZUL_TORE_MOUNT                          = 35641,
     VEHICLE_DEATHSTALKER_VESCERI_MOUNT              = 35634,
     //Faction Champions (HORDE)
-    VEHICLE_FORSAKE_WARHORSE                        = 33324,
-    VEHICLE_THUNDER_BLUFF_KODO                      = 33322,
-    VEHICLE_ORGRIMMAR_WOLF                          = 33320,
-    VEHICLE_SILVERMOON_HAWKSTRIDER                  = 33323,
-    VEHICLE_DARKSPEAR_RAPTOR                        = 33321,
+    VEHICLE_FORSAKE_WARHORSE                        = 33414,
+    VEHICLE_THUNDER_BLUFF_KODO                      = 33300,
+    VEHICLE_ORGRIMMAR_WOLF                          = 33409,
+    VEHICLE_SILVERMOON_HAWKSTRIDER                  = 33418,
+    VEHICLE_DARKSPEAR_RAPTOR                        = 33299,
 
     VEHICLE_ARGENT_WARHORSE                         = 35644,
     VEHICLE_ARGENT_BATTLEWORG                       = 36558,

@@ -26,6 +26,25 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "halls_of_lightning.h"
 
+float WaypointsBjarngrim[14][3] =
+{
+    //pos_x   pos_y     pos_z
+    {1331.98f, -26.7737f, 40.1805f},
+    {1351.58f, -7.1757f, 40.1805f},
+    {1375.49f, 16.7299f, 50.0383f},
+    {1395.08f, 36.472f, 50.0382f},
+    {1375.49f, 16.7299f, 50.0383f},
+    {1351.58f, -7.1757f, 40.1805f},
+    {1331.98f, -26.7737f, 40.1805f},
+    {1312.77f, -26.7693f, 40.1807f},
+    {1281.57f, -26.8057f, 33.5058f},
+    {1262.22f, -26.8317f, 33.5057f},
+    {1262.19f, 99.496f, 33.5056f},
+    {1262.22f, -26.8317f, 33.5057f},
+    {1281.57f, -26.8057f, 33.5058f},
+    {1312.77f, -26.7693f, 40.1807f}
+};
+
 enum eEnums
 {
     //Yell
@@ -93,18 +112,20 @@ public:
 
     struct boss_bjarngrimAI : public ScriptedAI
     {
-        boss_bjarngrimAI(Creature* creature) : ScriptedAI(creature)
+        boss_bjarngrimAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
             m_instance = creature->GetInstanceScript();
             m_uiStance = STANCE_DEFENSIVE;
-            memset(&m_auiStormforgedLieutenantGUID, 0, sizeof(m_auiStormforgedLieutenantGUID));
-            canBuff = true;
         }
+
+        SummonList Summons;
 
         InstanceScript* m_instance;
 
         bool m_bIsChangingStance;
-        bool canBuff;
+
+        uint8 m_waypoint;
+        bool m_nextWP;
 
         uint8 m_uiChargingStatus;
         uint8 m_uiStance;
@@ -124,20 +145,17 @@ public:
         uint32 m_uiMortalStrike_Timer;
         uint32 m_uiSlam_Timer;
 
-        uint64 m_auiStormforgedLieutenantGUID[2];
-
         void Reset()
         {
-            if (canBuff)
-                if (!me->HasAura(SPELL_TEMPORARY_ELECTRICAL_CHARGE))
-                    me->AddAura(SPELL_TEMPORARY_ELECTRICAL_CHARGE, me);
-
             m_bIsChangingStance = false;
 
             m_uiChargingStatus = 0;
             m_uiCharge_Timer = 1000;
 
-            m_uiChangeStance_Timer = urand(20000, 25000);
+            m_waypoint = 0;
+            m_nextWP = true;
+
+            m_uiChangeStance_Timer = 20000 + rand()%5000;
 
             m_uiReflection_Timer = 8000;
             m_uiKnockAway_Timer = 20000;
@@ -151,14 +169,7 @@ public:
             m_uiMortalStrike_Timer = 8000;
             m_uiSlam_Timer = 10000;
 
-            for (uint8 i = 0; i < 2; ++i)
-            {
-                if (Creature* pStormforgedLieutenant = (Unit::GetCreature((*me), m_auiStormforgedLieutenantGUID[i])))
-                {
-                    if (!pStormforgedLieutenant->isAlive())
-                        pStormforgedLieutenant->Respawn();
-                }
-            }
+            Summons.DespawnAll();
 
             if (m_uiStance != STANCE_DEFENSIVE)
             {
@@ -173,22 +184,50 @@ public:
                 m_instance->SetData(TYPE_BJARNGRIM, NOT_STARTED);
         }
 
-        void EnterEvadeMode()
+        void MovementInform(uint32 type, uint32 id)
         {
-            if (me->HasAura(SPELL_TEMPORARY_ELECTRICAL_CHARGE))
-                canBuff = true;
-            else
-                canBuff = false;
+            if (type != POINT_MOTION_TYPE || me->isInCombat())
+                return;
 
-            ScriptedAI::EnterEvadeMode();
+            switch (id)
+            {
+                case 0:
+                case 9:
+                    DoCast(me, SPELL_TEMPORARY_ELECTRICAL_CHARGE);
+                    break;
+                case 6:
+                case 11:
+                    me->RemoveAurasDueToSpell(SPELL_TEMPORARY_ELECTRICAL_CHARGE);
+                    break;
+            }
+
+            if(m_waypoint == 13)
+                m_waypoint = 0;
+            else
+                ++m_waypoint;
+
+            m_nextWP = true;
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
+            DoZoneInCombat();
+
+            me->GetMotionMaster()->Clear();
+            m_nextWP = false;
 
             //must get both lieutenants here and make sure they are with him
             me->CallForHelp(30.0f);
+
+            for (uint8 i = 0; i < 2; ++i)
+            {
+                if (Creature* pStormforgedLieutenant = DoSpawnCreature(NPC_STORMFORGED_LIEUTENANT, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0))
+                {
+                    DoZoneInCombat(pStormforgedLieutenant);
+                    Summons.Summon(pStormforgedLieutenant);
+                }
+            }
 
             if (m_instance)
                 m_instance->SetData(TYPE_BJARNGRIM, IN_PROGRESS);
@@ -202,6 +241,7 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
+            Summons.DespawnAll();
 
             if (m_instance)
                 m_instance->SetData(TYPE_BJARNGRIM, DONE);
@@ -226,6 +266,13 @@ public:
 
         void UpdateAI(const uint32 uiDiff)
         {
+            if (m_nextWP && !me->isInCombat())
+            {
+                me->GetMotionMaster()->MovePoint(m_waypoint, WaypointsBjarngrim[m_waypoint][0], WaypointsBjarngrim[m_waypoint][1], WaypointsBjarngrim[m_waypoint][2]);
+                m_nextWP = false;
+            }
+
+
             //Return since we have no target
             if (!UpdateVictim())
                 return;
@@ -445,11 +492,45 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+};
 
+class npc_bjarngrim_door : public CreatureScript
+{
+public:
+    npc_bjarngrim_door() : CreatureScript("npc_bjarngrim_door") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if(InstanceScript* m_instance = creature->GetInstanceScript())
+            if(m_instance->GetData(TYPE_BJARNGRIM) == DONE)
+            {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bitte oeffne uns die Tuer!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+                player->SEND_GOSSIP_MENU(1, creature->GetGUID());
+            }
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 uiSender, uint32 uiAction)
+    {
+        switch (uiAction)
+        {
+            case GOSSIP_ACTION_INFO_DEF+1:
+                if(InstanceScript* m_instance = creature->GetInstanceScript())
+                    if(m_instance->GetData(TYPE_BJARNGRIM) == DONE)
+                        if(GameObject* go = m_instance->instance->GetGameObject(m_instance->GetData64(GO_BJARNGRIM_DOOR)))
+                        {
+                            go->SetGoState(GO_STATE_ACTIVE);
+                            player->CLOSE_GOSSIP_MENU();
+                        }
+            break;
+        }
+        return true;
+    }
 };
 
 void AddSC_boss_bjarngrim()
 {
     new boss_bjarngrim();
     new mob_stormforged_lieutenant();
+    new npc_bjarngrim_door();
 }

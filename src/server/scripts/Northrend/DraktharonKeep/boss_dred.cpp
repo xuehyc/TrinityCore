@@ -90,6 +90,9 @@ class boss_dred : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
                 if (uiBellowingRoarTimer <= diff)
                 {
                     DoCastAOE(SPELL_BELLOWING_ROAR, false);

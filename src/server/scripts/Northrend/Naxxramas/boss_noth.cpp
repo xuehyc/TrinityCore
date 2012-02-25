@@ -63,6 +63,12 @@ enum Events
     EVENT_GROUND,
 };
 
+#define EMOTE_CUSTOM_WARRIOR        -1999992
+#define EMOTE_CUSTOM_BLINK          -1999993
+#define EMOTE_CUSTOM_SUMMON         -1999994
+#define EMOTE_CUSTOM_BALCONY        -1999995
+#define EMOTE_CUSTOM_GROUND         -1999996
+
 class boss_noth : public CreatureScript
 {
 public:
@@ -86,11 +92,24 @@ public:
             _Reset();
         }
 
+        void DamageTaken(Unit* /*pDoneBy*/, uint32 &uiDamage)
+        {
+            // If Noth is unselectable, he is in balkony phase...do not allow damage to kill him
+            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            {
+                if (uiDamage >= me->GetHealth())
+                {
+                    uiDamage = 0;
+                }
+            }
+        }
+
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
             DoScriptText(SAY_AGGRO, me);
             balconyCount = 0;
+            events.ScheduleEvent(EVENT_BALCONY, 90000);
             EnterPhaseGround();
         }
 
@@ -103,9 +122,8 @@ public:
                 EnterEvadeMode();
             else
             {
-                events.ScheduleEvent(EVENT_BALCONY, 110000);
                 events.ScheduleEvent(EVENT_CURSE, 10000+rand()%15000);
-                events.ScheduleEvent(EVENT_WARRIOR, 30000);
+                events.ScheduleEvent(EVENT_WARRIOR, 10000 + rand()%10000);
                 if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                     events.ScheduleEvent(EVENT_BLINK, urand(20000, 40000));
             }
@@ -157,16 +175,19 @@ public:
                         return;
                     case EVENT_WARRIOR:
                         DoScriptText(SAY_SUMMON, me);
+                        DoScriptText(EMOTE_CUSTOM_WARRIOR, me);
                         SummonUndead(MOB_WARRIOR, RAID_MODE(2, 3));
                         events.ScheduleEvent(EVENT_WARRIOR, 30000);
                         return;
                     case EVENT_BLINK:
+                        DoScriptText(EMOTE_CUSTOM_BLINK, me);
                         DoCastAOE(SPELL_CRIPPLE, true);
                         DoCastAOE(SPELL_BLINK);
                         DoResetThreat();
                         events.ScheduleEvent(EVENT_BLINK, 40000);
                         return;
                     case EVENT_BALCONY:
+                        DoScriptText(EMOTE_CUSTOM_BALCONY, me);
                         me->SetReactState(REACT_PASSIVE);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         me->AttackStop();
@@ -178,6 +199,7 @@ public:
                         return;
                     case EVENT_WAVE:
                         DoScriptText(SAY_SUMMON, me);
+                        DoScriptText(EMOTE_CUSTOM_SUMMON, me);
                         switch (balconyCount)
                         {
                             case 0: SummonUndead(MOB_CHAMPION, RAID_MODE(2, 4)); break;
@@ -192,6 +214,7 @@ public:
                         return;
                     case EVENT_GROUND:
                     {
+                        DoScriptText(EMOTE_CUSTOM_GROUND, me);
                         ++balconyCount;
                         float x, y, z, o;
                         me->GetHomePosition(x, y, z, o);

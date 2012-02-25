@@ -199,15 +199,19 @@ class AreaTrigger_at_last_rites : public AreaTriggerScript
 
             switch (trigger->id)
             {
-                case 5332:
-                case 5338:
+                case 5332:                                  // trigger on the lower entrance
+                case 5338:                                  // trigger on top 
+                case 5339:                                  // trigger inside
                     pPosition = WorldLocation(571, 3733.68f, 3563.25f, 290.812f, 3.665192f);
                     break;
                 case 5334:
                     pPosition = WorldLocation(571, 3802.38f, 3585.95f, 49.5765f, 0.0f);
                     break;
                 case 5340:
-                    pPosition = WorldLocation(571, 3687.91f, 3577.28f, 473.342f, 0.0f);
+                    if(player->GetTeam() == ALLIANCE)    // Quest "Last Rites" - alliance only
+                        pPosition = WorldLocation(571, 3687.91f, 3577.28f, 473.342f, 0.0f);
+                    else                                    // Quest "Breaking through" - horde only
+                        pPosition = WorldLocation(571, 3745.8806f, 3570.0364f, 341.6437f, 0.4917f);
                     break;
                 default:
                     return false;

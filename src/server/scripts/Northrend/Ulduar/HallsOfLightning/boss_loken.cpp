@@ -157,7 +157,8 @@ public:
                                 if (m_fDist > 1.0f) // Further from 1 yard
                                     dmg = int32(dmg*m_fDist);
 
-                                me->CastCustomSpell(i->getSource(), DUNGEON_MODE(52942, 59837), &dmg, 0, 0, false);
+                                //me->CastCustomSpell(i->getSource(), DUNGEON_MODE(52942, 59837), &dmg, 0, 0, false);
+                                me->CastCustomSpell(i->getSource(), 5176, &dmg, 0, 0, true);
                             }
                     }
                     m_uiPulsingShockwave_Timer = 2000;
@@ -168,9 +169,9 @@ public:
                 if (m_uiResumePulsingShockwave_Timer <= uiDiff)
                 {
                     //breaks at movement, can we assume when it's time, this spell is casted and also must stop movement?
-                    DoCast(me, SPELL_PULSING_SHOCKWAVE_AURA, true);
+                    //DoCast(me, SPELL_PULSING_SHOCKWAVE_AURA, true);
 
-                    DoCast(me, SPELL_PULSING_SHOCKWAVE_N); // need core support
+                    //DoCast(me, SPELL_PULSING_SHOCKWAVE_N); // need core support
                     m_bIsAura = true;
                     m_uiResumePulsingShockwave_Timer = 0;
                 }

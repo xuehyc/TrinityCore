@@ -20,33 +20,38 @@
 
 enum Events
 {
+    EVENT_NONE,
+
     // Koralon
-    EVENT_BURNING_BREATH    = 1,
-    EVENT_BURNING_FURY      = 2,
-    EVENT_FLAME_CINDER_A    = 3,
-    EVENT_METEOR_FISTS_A    = 4,
-    EVENT_METEOR_FISTS_B    = 5,
+    EVENT_BURNING_BREATH,
+    EVENT_FLAME_CINDER,
+    EVENT_METEOR_FISTS,
 
     // Flame Warder
-    EVENT_FW_LAVA_BIRST     = 6,
-    EVENT_FW_METEOR_FISTS_A = 7,
-    EVENT_FW_METEOR_FISTS_B = 8,
+    EVENT_FW_LAVA_BURST,
+    EVENT_FW_METEOR_FISTS,
 };
 
 enum Spells
 {
     // Spells Koralon
-    SPELL_BURNING_BREATH                        = 66665,
-    SPELL_BURNING_FURY                          = 66721,
-    SPELL_FLAME_CINDER_A                        = 66684,
-    SPELL_FLAME_CINDER_B                        = 66681, // don't know the real relation to SPELL_FLAME_CINDER_A atm.
-    SPELL_METEOR_FISTS_A                        = 66725,
-    SPELL_METEOR_FISTS_B                        = 67333,
+    SPELL_BURNING_BREATH                        = 66670,
+    SPELL_BURNING_BREATH_H                      = 67329,
+    SPELL_BURNING_FURY_REPEAT                   = 66895,
+    SPELL_FLAME_CINDER                          = 66684,
+    SPELL_FLAME_CINDER_H                        = 67332,
+    SPELL_METEOR_FISTS_VISUAL                   = 66725,
+    SPELL_METEOR_FISTS_VISUAL_H                 = 68161,
+    SPELL_METEOR_FISTS                          = 66809,
+    SPELL_METEOR_FISTS_H                        = 67331,
 
     // Spells Flame Warder
-    SPELL_FW_LAVA_BIRST                         = 66813,
-    SPELL_FW_METEOR_FISTS_A                     = 66808,
-    SPELL_FW_METEOR_FISTS_B                     = 67331,
+    SPELL_FW_METEOR_FISTS_VISUAL                = 66808,
+    SPELL_FW_METEOR_FISTS_VISUAL_H              = 68160,
+    SPELL_FW_METEOR_FISTS                       = 66765,
+    SPELL_FW_METEOR_FISTS_H                     = 67333,
+    SPELL_FW_LAVA_BURST                         = 66813,
+    SPELL_FW_LAVA_BURST_H                       = 67330,
 };
 
 class boss_koralon : public CreatureScript
@@ -60,14 +65,21 @@ class boss_koralon : public CreatureScript
             {
             }
 
+            uint8 breathCount;
+
+            void Reset()
+            {
+                breathCount = 0;
+                _Reset();
+            }
+
             void EnterCombat(Unit* /*who*/)
             {
-                DoCast(me, SPELL_BURNING_FURY);
+                DoCast(me, SPELL_BURNING_FURY_REPEAT);
 
-                events.ScheduleEvent(EVENT_BURNING_FURY, 20000);    // TODO check timer
                 events.ScheduleEvent(EVENT_BURNING_BREATH, 15000);  // 1st after 15sec, then every 45sec
-                events.ScheduleEvent(EVENT_METEOR_FISTS_A, 75000);  // 1st after 75sec, then every 45sec
-                events.ScheduleEvent(EVENT_FLAME_CINDER_A, 30000);  // TODO check timer
+                events.ScheduleEvent(EVENT_METEOR_FISTS, 75000);  // 1st after 75sec, then every 45sec
+                events.ScheduleEvent(EVENT_FLAME_CINDER, 30000);  // TODO check timer
 
                 _EnterCombat();
             }
@@ -86,30 +98,35 @@ class boss_koralon : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case EVENT_BURNING_FURY:
-                            DoCast(me, SPELL_BURNING_FURY);
-                            events.ScheduleEvent(EVENT_BURNING_FURY, 20000);
-                            break;
                         case EVENT_BURNING_BREATH:
-                            DoCast(me, SPELL_BURNING_BREATH);
-                            events.ScheduleEvent(EVENT_BURNING_BREATH, 45000);
+                            DoCast(me->getVictim(), RAID_MODE(SPELL_BURNING_BREATH, SPELL_BURNING_BREATH_H));
+                            breathCount++;
+                            if (breathCount == 3)
+                            {
+                                breathCount = 0;
+                                events.ScheduleEvent(EVENT_BURNING_BREATH, 45000);
+                            }
+                            else
+                                events.ScheduleEvent(EVENT_BURNING_BREATH, 1000);
                             break;
-                        case EVENT_METEOR_FISTS_A:
-                            DoCast(me, SPELL_METEOR_FISTS_A);
-                            events.ScheduleEvent(EVENT_METEOR_FISTS_B, 1500);
+                        case EVENT_METEOR_FISTS:
+                            DoCast(me, SPELL_METEOR_FISTS_VISUAL);
+                            events.ScheduleEvent(EVENT_METEOR_FISTS, 45000);
                             break;
-                        case EVENT_METEOR_FISTS_B:
-                            DoCast(me, SPELL_METEOR_FISTS_B);
-                            events.ScheduleEvent(EVENT_METEOR_FISTS_A, 45000);
-                            break;
-                        case EVENT_FLAME_CINDER_A:
-                            DoCast(me, SPELL_FLAME_CINDER_A);
-                            events.ScheduleEvent(EVENT_FLAME_CINDER_A, 30000);
-                            break;
-                        default:
+                        case EVENT_FLAME_CINDER:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                                DoCast(target, RAID_MODE(SPELL_FLAME_CINDER, SPELL_FLAME_CINDER_H));
+                            events.ScheduleEvent(EVENT_FLAME_CINDER, 30000);
                             break;
                     }
                 }
+
+                // Meele check for Meteor Fists, if has visual aura and mainhand equipped
+                if(me->HasAura(RAID_MODE(SPELL_METEOR_FISTS_VISUAL, SPELL_METEOR_FISTS_VISUAL_H)))
+                    if (me->isAttackReady())
+                        if (me->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0))
+                            if (me->IsWithinMeleeRange(me->getVictim()))
+                                DoCast(me->getVictim(), RAID_MODE(SPELL_METEOR_FISTS, SPELL_METEOR_FISTS_H));
 
                 DoMeleeAttackIfReady();
             }
@@ -144,8 +161,8 @@ class mob_flame_warder : public CreatureScript
             {
                 DoZoneInCombat();
 
-                events.ScheduleEvent(EVENT_FW_LAVA_BIRST, 5000);
-                events.ScheduleEvent(EVENT_FW_METEOR_FISTS_A, 10000);
+                events.ScheduleEvent(EVENT_FW_LAVA_BURST, 5000);
+                events.ScheduleEvent(EVENT_FW_METEOR_FISTS, 10000);
             }
 
             void UpdateAI(const uint32 diff)
@@ -159,22 +176,23 @@ class mob_flame_warder : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case EVENT_FW_LAVA_BIRST:
-                            DoCastVictim(SPELL_FW_LAVA_BIRST);
-                            events.ScheduleEvent(EVENT_FW_LAVA_BIRST, 15000);
+                        case EVENT_FW_LAVA_BURST:
+                            DoCastVictim(SPELL_FW_LAVA_BURST);
+                            events.ScheduleEvent(EVENT_FW_LAVA_BURST, 15000);
                             break;
-                        case EVENT_FW_METEOR_FISTS_A:
-                            DoCast(me, SPELL_FW_METEOR_FISTS_A);
-                            events.ScheduleEvent(EVENT_FW_METEOR_FISTS_B, 1500);
-                            break;
-                        case EVENT_FW_METEOR_FISTS_B:
-                            DoCast(me, SPELL_FW_METEOR_FISTS_B);
-                            events.ScheduleEvent(EVENT_FW_METEOR_FISTS_A, 20000);
-                            break;
-                        default:
+                        case EVENT_FW_METEOR_FISTS:
+                            DoCast(me, SPELL_METEOR_FISTS_VISUAL);
+                            events.ScheduleEvent(EVENT_FW_METEOR_FISTS, 20000);
                             break;
                     }
                 }
+
+                // Meele check for Meteor Fists, if has visual aura and mainhand equipped
+                if(me->HasAura(RAID_MODE(SPELL_FW_METEOR_FISTS_VISUAL, SPELL_FW_METEOR_FISTS_VISUAL_H)))
+                    if (me->isAttackReady())
+                        if (me->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0))
+                            if (me->IsWithinMeleeRange(me->getVictim()))
+                                DoCast(me->getVictim(), RAID_MODE(SPELL_FW_METEOR_FISTS, SPELL_FW_METEOR_FISTS_H));
 
                 DoMeleeAttackIfReady();
             }

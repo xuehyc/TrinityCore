@@ -492,11 +492,7 @@ bool Group::RemoveMember(uint64 guid, const RemoveMethod &method /*= GROUP_REMOV
         }
 
         // Remove player from group in DB
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GROUP_MEMBER);
-
-        stmt->setUInt32(0, GUID_LOPART(guid));
-
-        CharacterDatabase.Execute(stmt);
+        CharacterDatabase.DirectPExecute("DELETE FROM group_member WHERE memberGuid = %u", GUID_LOPART(guid));
 
         DelinkMember(guid);
 

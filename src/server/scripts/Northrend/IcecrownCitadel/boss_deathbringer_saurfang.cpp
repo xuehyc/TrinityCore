@@ -97,12 +97,20 @@ enum Spells
     SPELL_FRENZY                        = 72737,
     SPELL_BLOOD_NOVA_TRIGGER            = 72378,
     SPELL_BLOOD_NOVA                    = 72380,
+    SPELL_BLOOD_NOVA_2                  = 72438,
+    SPELL_BLOOD_NOVA_3                  = 72439,
+    SPELL_BLOOD_NOVA_4                  = 72440,
     SPELL_BLOOD_POWER                   = 72371,
     SPELL_BLOOD_LINK_POWER              = 72195,
     SPELL_BLOOD_LINK_DUMMY              = 72202,
     SPELL_MARK_OF_THE_FALLEN_CHAMPION   = 72293,
     SPELL_BOILING_BLOOD                 = 72385,
     SPELL_RUNE_OF_BLOOD                 = 72410,
+
+    SPELL_MARK_OF_THE_FALLEN_CHAMPION_DMG1 = 72255,
+    SPELL_MARK_OF_THE_FALLEN_CHAMPION_DMG2 = 72444,
+    SPELL_MARK_OF_THE_FALLEN_CHAMPION_DMG3 = 72445,
+    SPELL_MARK_OF_THE_FALLEN_CHAMPION_DMG4 = 72446,
 
     // Blood Beast
     SPELL_BLOOD_LINK_BEAST              = 72176,
@@ -337,7 +345,26 @@ class boss_deathbringer_saurfang : public CreatureScript
             void KilledUnit(Unit* victim)
             {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
+                {
                     Talk(SAY_KILL);
+
+                    // This aura remains after death!
+                    if (victim->HasAura(SPELL_MARK_OF_THE_FALLEN_CHAMPION))
+                    {
+                        uint32 setHealthVal = 0;
+
+                        uint32 percentageAddVal = (uint32)(me->GetMaxHealth() * RAID_MODE(0.05, 0.2, 0.05, 0.2));
+                        uint32 currentHealthVal = me->GetHealth();
+
+                        setHealthVal = percentageAddVal + currentHealthVal;
+
+                        if (setHealthVal > me->GetMaxHealth())
+                            setHealthVal = me->GetMaxHealth();
+
+                        if (setHealthVal != 0)
+                            me->SetHealth(setHealthVal);
+                    }
+                }
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
@@ -353,7 +380,12 @@ class boss_deathbringer_saurfang : public CreatureScript
             void JustSummoned(Creature* summon)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
+                {
                     summon->AI()->AttackStart(target);
+                    summon->SetInCombatWithZone();
+                }
+                else
+                    DoZoneInCombat(summon);
 
                 if (IsHeroic())
                     DoCast(summon, SPELL_SCENT_OF_BLOOD);
@@ -384,10 +416,10 @@ class boss_deathbringer_saurfang : public CreatureScript
                     case SPELL_MARK_OF_THE_FALLEN_CHAMPION:
                         Talk(SAY_MARK_OF_THE_FALLEN_CHAMPION);
                         break;
-                    case 72255: // Mark of the Fallen Champion, triggered id
-                    case 72444:
-                    case 72445:
-                    case 72446:
+                    case SPELL_MARK_OF_THE_FALLEN_CHAMPION_DMG1: // Mark of the Fallen Champion, triggered id
+                    case SPELL_MARK_OF_THE_FALLEN_CHAMPION_DMG2:
+                    case SPELL_MARK_OF_THE_FALLEN_CHAMPION_DMG3:
+                    case SPELL_MARK_OF_THE_FALLEN_CHAMPION_DMG4:
                         if (me->GetPower(POWER_ENERGY) != me->GetMaxPower(POWER_ENERGY))
                             target->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 1, me, true);
                         break;
@@ -452,7 +484,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                             if (!target)
                                 target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true);    // noone? select melee
                             if (target)
-                                DoCast(target, SPELL_BLOOD_NOVA_TRIGGER);
+                                DoCast(target, RAID_MODE(SPELL_BLOOD_NOVA, SPELL_BLOOD_NOVA_2, SPELL_BLOOD_NOVA_3, SPELL_BLOOD_NOVA_4));
                             events.ScheduleEvent(EVENT_BLOOD_NOVA, urand(20000, 25000), 0, PHASE_COMBAT);
                             break;
                         }
@@ -461,7 +493,9 @@ class boss_deathbringer_saurfang : public CreatureScript
                             events.ScheduleEvent(EVENT_RUNE_OF_BLOOD, urand(20000, 25000), 0, PHASE_COMBAT);
                             break;
                         case EVENT_BOILING_BLOOD:
-                            DoCast(me, SPELL_BOILING_BLOOD);
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -BOILING_BLOOD_HELPER))
+                                me->AddAura(BOILING_BLOOD_HELPER, target);
+
                             events.ScheduleEvent(EVENT_BOILING_BLOOD, urand(15000, 20000), 0, PHASE_COMBAT);
                             break;
                         case EVENT_BERSERK:
@@ -1219,43 +1253,6 @@ class spell_deathbringer_blood_nova_targeting : public SpellScriptLoader
         }
 };
 
-class spell_deathbringer_boiling_blood : public SpellScriptLoader
-{
-    public:
-        spell_deathbringer_boiling_blood() : SpellScriptLoader("spell_deathbringer_boiling_blood") { }
-
-        class spell_deathbringer_boiling_blood_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_deathbringer_boiling_blood_SpellScript);
-
-            bool Load()
-            {
-                return GetCaster()->GetTypeId() == TYPEID_UNIT;
-            }
-
-            void FilterTargets(std::list<Unit*>& unitList)
-            {
-                unitList.remove(GetCaster()->getVictim());
-                if (unitList.empty())
-                    return;
-
-                Unit* target = SelectRandomContainerElement(unitList);
-                unitList.clear();
-                unitList.push_back(target);
-            }
-
-            void Register()
-            {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_deathbringer_boiling_blood_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_deathbringer_boiling_blood_SpellScript();
-        }
-};
-
 class achievement_ive_gone_and_made_a_mess : public AchievementCriteriaScript
 {
     public:
@@ -1284,6 +1281,5 @@ void AddSC_boss_deathbringer_saurfang()
     new spell_deathbringer_rune_of_blood();
     new spell_deathbringer_blood_nova();
     new spell_deathbringer_blood_nova_targeting();
-    new spell_deathbringer_boiling_blood();
     new achievement_ive_gone_and_made_a_mess();
 }

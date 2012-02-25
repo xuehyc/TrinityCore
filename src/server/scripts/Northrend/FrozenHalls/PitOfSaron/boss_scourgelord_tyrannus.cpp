@@ -207,10 +207,38 @@ class boss_tyrannus : public CreatureScript
                 }
             }
 
+            void CheckPlayerPositions()
+            {
+                Map* map = me->GetMap();
+                if (map && map->IsDungeon())
+                {
+                    Map::PlayerList const &PlayerList = map->GetPlayers();
+
+                    if (PlayerList.isEmpty())
+                        return;
+
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    {
+                        if (i->getSource())
+                        {
+                            if (i->getSource()->isAlive())
+                            {
+                                if (i->getSource()->GetDistance(994.7f, 164.3f, 628.4f) > 60.0f && i->getSource()->GetDistance(994.7f, 164.3f, 628.4f) < 90.0f)
+                                {
+                                    i->getSource()->TeleportTo(658, 994.7f, 164.3f, 628.4f, 0.5f);
+                                }
+                            }
+                        }
+                   }
+                }
+            }
+
             void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim() && !(events.GetPhaseMask() & (1 << PHASE_INTRO)))
                     return;
+
+                CheckPlayerPositions();
 
                 events.Update(diff);
 
@@ -226,16 +254,15 @@ class boss_tyrannus : public CreatureScript
                             break;
                         case EVENT_INTRO_3:
                             me->ExitVehicle();
-                            me->GetMotionMaster()->MovePoint(0, miscPos);
+                            DoZoneInCombat();
                             break;
                         case EVENT_COMBAT_START:
                             if (Creature* rimefang = me->GetCreature(*me, instance->GetData64(DATA_RIMEFANG)))
                                 rimefang->AI()->DoAction(ACTION_START_RIMEFANG);    //set rimefang also infight
                             events.SetPhase(PHASE_COMBAT);
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                             me->SetReactState(REACT_AGGRESSIVE);
                             DoCast(me, SPELL_FULL_HEAL);
-                            DoZoneInCombat();
                             events.ScheduleEvent(EVENT_OVERLORD_BRAND, urand(5000, 7000));
                             events.ScheduleEvent(EVENT_FORCEFUL_SMASH, urand(14000, 16000));
                             events.ScheduleEvent(EVENT_MARK_OF_RIMEFANG, urand(25000, 27000));
@@ -297,12 +324,22 @@ class boss_rimefang : public CreatureScript
                 _hoarfrostTargetGUID = 0;
                 me->SetFlying(true);
                 me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
             void JustReachedHome()
             {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 _vehicle->InstallAllAccessories(false);
+            }
+
+            void SpellHit(Unit* caster, const SpellInfo* spell)
+            {
+                if (!caster || !spell)
+                    return;
+
+                // Tyrannus casting ride vehicle spell on rimefang => unattackable
+                if (caster->GetTypeId() == TYPEID_UNIT && (caster->GetEntry() == 36658 || caster->GetEntry() ==  36938) && spell->Id == 46598)
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
             void DoAction(const int32 actionId)
@@ -315,7 +352,7 @@ class boss_rimefang : public CreatureScript
                     _events.ScheduleEvent(EVENT_ICY_BLAST, 15000, 0, PHASE_COMBAT);
                 }
                 else if (actionId == ACTION_END_COMBAT)
-                    _EnterEvadeMode();
+                    me->DespawnOrUnsummon();
             }
 
             void SetGUID(uint64 guid, int32 type)

@@ -30,15 +30,17 @@ enum Spells
 {
     SPELL_LIGHTING_RING                                    = 51849, //Periodic Trigger (interval 2s) spell = 50841
     H_SPELL_LIGHTING_RING                                  = 59861, //Periodic Trigger (interval 2s) spell = 59849
-    SPELL_LIGHTING_RING_1                                  = 50840, //Periodic Trigger (interval 2s) spell = 50841
-    H_SPELL_LIGHTING_RING_1                                = 59848, //Periodic Trigger (interval 2s) spell = 59849
     SPELL_STATIC_CHARGE                                    = 50834, //Periodic Trigger 2s interval, spell =50835
     H_SPELL_STATIC_CHARGE                                  = 59846, //Periodic Trigger 2s interval, spell =50847
     SPELL_CHAIN_LIGHTING                                   = 50830,
     H_SPELL_CHAIN_LIGHTING                                 = 59844,
     SPELL_LIGHTING_SHIELD                                  = 50831,
     H_SPELL_LIGHTING_SHIELD                                = 59845,
-    SPELL_FRENZY                                           = 28747
+    SPELL_FRENZY                                           = 28747,
+
+    // Iron Sludge
+    SPELL_TOXIC_VOLLEY                                     = 50838,
+    H_SPELL_TOXIC_VOLLEY                                   = 59853
 };
 
 enum Yells
@@ -62,21 +64,16 @@ enum SjonnirCreatures
 
 #define DATA_TIME_BEFORE_OOZE                              150000 //2min 30 secs
 
-struct Locations
+const Position PipePositions[] =
 {
-    float x, y, z;
-};
-
-static Locations PipeLocations[] =
-{
-    {1295.44f, 734.07f, 200.3f}, //left
-    {1297.7f,  595.6f,  199.9f} //right
+    {1295.44f, 734.07f, 200.3f, 4.6f}, //left
+    {1297.7f,  595.6f,  199.9f, 1.5f} //right
 };
 
 #define ACTION_OOZE_DEAD                                   1
 #define DATA_ABUSE_THE_OOZE                                2
 
-static Locations CenterPoint = {1295.21f, 667.157f, 189.691f};
+const Position CenterPoint = {1295.21f, 667.157f, 189.691f, 3.1f};
 
 class boss_sjonnir : public CreatureScript
 {
@@ -164,14 +161,14 @@ public:
             if (uiLightningShieldTimer <= diff)
             {
                 DoCast(me, SPELL_LIGHTING_SHIELD);
-                uiLightningShieldTimer -= diff;
-            }
+                uiLightningShieldTimer = urand(15000, 25000);
+            } else uiLightningShieldTimer -= diff;
 
             if (uiStaticChargeTimer <= diff)
             {
                 DoCast(me->getVictim(), SPELL_STATIC_CHARGE);
                 uiStaticChargeTimer = urand(20000, 25000);
-            } uiStaticChargeTimer -= diff;
+            } else uiStaticChargeTimer -= diff;
 
             if (uiLightningRingTimer <= diff)
             {
@@ -186,7 +183,7 @@ public:
                 uint32 uiSummonPipe = rand()%2;
                 me->SummonCreature(uiEncounterTimer > DATA_TIME_BEFORE_OOZE ? CREATURE_MALFORMED_OOZE :
                                            RAND(CREATURE_FORGED_IRON_DWARF, CREATURE_FORGED_IRON_TROGG),
-                                           PipeLocations[uiSummonPipe].x, PipeLocations[uiSummonPipe].y, PipeLocations[uiSummonPipe].z, 0.0f,
+                                           PipePositions[uiSummonPipe].m_positionX, PipePositions[uiSummonPipe].m_positionY, PipePositions[uiSummonPipe].m_positionZ, PipePositions[uiSummonPipe].m_orientation,
                                            TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
                 uiSummonTimer = 20000;
             } else uiSummonTimer -= diff;
@@ -208,9 +205,11 @@ public:
 
         void JustSummoned(Creature* summon)
         {
-            summon->GetMotionMaster()->MovePoint(0, CenterPoint.x, CenterPoint.y, CenterPoint.z);
-            /*if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                summon->AI()->AttackStart(target);*/
+            if (summon->GetEntry() == CREATURE_MALFORMED_OOZE)
+                summon->GetMotionMaster()->MovePoint(0, CenterPoint.m_positionX, CenterPoint.m_positionY, CenterPoint.m_positionZ);
+            else
+                DoZoneInCombat(summon);
+
             lSummons.Summon(summon);
         }
 
@@ -308,11 +307,33 @@ public:
 
         InstanceScript* instance;
 
+        uint32 toxicVolleytimer;
+
+        void Reset()
+        {
+            toxicVolleytimer = urand(5000, 15000);
+            DoZoneInCombat();
+        }
+
         void JustDied(Unit* /*killer*/)
         {
             if (instance)
                 if (Creature* Sjonnir = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SJONNIR)))
                     Sjonnir->AI()->DoAction(ACTION_OOZE_DEAD);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (toxicVolleytimer <= diff)
+            {
+                DoCast(me->getVictim(), DUNGEON_MODE(SPELL_TOXIC_VOLLEY, H_SPELL_TOXIC_VOLLEY));
+                toxicVolleytimer = urand(5000, 15000);
+            } else toxicVolleytimer -= diff;
+
+            DoMeleeAttackIfReady();
         }
     };
 

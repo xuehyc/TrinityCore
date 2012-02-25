@@ -15,28 +15,27 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*** SQL START ***
+UPDATE `creature_template` SET `ScriptName`='boss_toravon' WHERE `entry`='38433';
+UPDATE `creature_template` SET `ScriptName`='mob_frost_warder' WHERE `entry`='38482';
+UPDATE `creature_template` SET `ScriptName`='mob_frozen_orb_stalker' WHERE `entry`='38461';
+UPDATE `creature_template` SET `ScriptName`='mob_frozen_orb' WHERE `entry`='38456';
+*** SQL END ***/
+
 #include "ScriptPCH.h"
 #include "vault_of_archavon.h"
 
-enum Spells
-{
-    // Toravon
-    SPELL_FREEZING_GROUND   = 72090,    // don't know cd... using 20 secs.
-    SPELL_FROZEN_ORB        = 72091,
-    SPELL_WHITEOUT          = 72034,    // Every 38 sec. cast. (after SPELL_FROZEN_ORB)
-    SPELL_FROZEN_MALLET     = 71993,
+// Spells Toravon
+#define SPELL_FREEZING_GROUND   RAID_MODE(72090,72104)  // don't know cd... using 20 secs.
+#define SPELL_WHITEOUT          RAID_MODE(72034,72096)  // Every 38 sec. cast. (after SPELL_FROZEN_ORB)
+#define SPELL_FROZEN_MALLET     RAID_MODE(72122, 71993)
 
-    // Frost Warder
-    SPELL_FROST_BLAST       = 72123,    // don't know cd... using 20 secs.
-    SPELL_FROZEN_MALLET_2   = 72122,
+// Spells Frost Warder
+#define SPELL_FROST_BLAST   RAID_MODE(72123,72124)      // don't know cd... using 20 secs.
 
-    // Frozen Orb
-    SPELL_FROZEN_ORB_DMG    = 72081,    // priodic dmg aura
-    SPELL_FROZEN_ORB_AURA   = 72067,    // make visible
-
-    // Frozen Orb Stalker
-    SPELL_FROZEN_ORB_SUMMON = 72093,    // summon orb
-};
+// Spell Frozen Orb
+#define SPELL_FROZEN_ORB_DMG    72081   // priodic dmg aura
+#define SPELL_FROZEN_ORB_AURA   72067   // make visible
 
 // Events boss
 enum Events
@@ -88,7 +87,12 @@ class boss_toravon : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_FROZEN_ORB:
-                            me->CastCustomSpell(SPELL_FROZEN_ORB, SPELLVALUE_MAX_TARGETS, 1, me);
+                            for (uint8 i = 0; i < RAID_MODE(1,3); i++)
+                            {
+                                Position NearPos;
+                                me->GetNearPosition(NearPos, 10.0f, 0.0f);
+                                me->SummonCreature(MOB_FROZEN_ORB, NearPos, TEMPSUMMON_CORPSE_DESPAWN);
+                            }
                             events.ScheduleEvent(EVENT_FROZEN_ORB, 38000);
                             break;
                         case EVENT_WHITEOUT:
@@ -136,7 +140,7 @@ class mob_frost_warder : public CreatureScript
             {
                 DoZoneInCombat();
 
-                DoCast(me, SPELL_FROZEN_MALLET_2);
+                DoCast(me, SPELL_FROZEN_MALLET);
 
                 events.ScheduleEvent(EVENT_FROST_BLAST, 5000);
             }
@@ -169,6 +173,7 @@ class mob_frost_warder : public CreatureScript
             return new mob_frost_warderAI(creature);
         }
 };
+
 
 /*######
 ##  Mob Frozen Orb
@@ -225,61 +230,9 @@ public:
     }
 };
 
-/*######
-##  Mob Frozen Orb Stalker
-######*/
-class mob_frozen_orb_stalker : public CreatureScript
-{
-    public:
-        mob_frozen_orb_stalker() : CreatureScript("mob_frozen_orb_stalker") { }
-
-        struct mob_frozen_orb_stalkerAI : public Scripted_NoMovementAI
-        {
-            mob_frozen_orb_stalkerAI(Creature* creature) : Scripted_NoMovementAI(creature)
-            {
-                creature->SetVisible(false);
-                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
-                creature->SetReactState(REACT_PASSIVE);
-
-                instance = creature->GetInstanceScript();
-                spawned = false;
-            }
-
-            void UpdateAI(const uint32 /*diff*/)
-            {
-                if (spawned)
-                    return;
-
-                spawned = true;
-                Unit* toravon = me->GetCreature(*me, instance ? instance->GetData64(DATA_TORAVON) : 0);
-                if (!toravon)
-                    return;
-
-                uint8 num_orbs = RAID_MODE(1, 3);
-                for (uint8 i = 0; i < num_orbs; ++i)
-                {
-                    Position pos;
-                    me->GetNearPoint(toravon, pos.m_positionX, pos.m_positionY, pos.m_positionZ, 0.0f, 10.0f, 0.0f);
-                    me->SetPosition(pos);
-                    DoCast(me, SPELL_FROZEN_ORB_SUMMON);
-                }
-            }
-
-        private:
-            InstanceScript* instance;
-            bool spawned;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new mob_frozen_orb_stalkerAI(creature);
-        }
-};
-
 void AddSC_boss_toravon()
 {
     new boss_toravon();
     new mob_frost_warder();
     new mob_frozen_orb();
-    new mob_frozen_orb_stalker();
 }

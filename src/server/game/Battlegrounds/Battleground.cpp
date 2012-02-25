@@ -36,6 +36,11 @@
 #include "SpellAuraEffects.h"
 #include "Util.h"
 
+#include "TriniChat/IRCClient.h"
+
+#define ITEM_WINTERGRASP_MARK_OF_HONOR   43589
+#define ITEM_STONE_KEEPERS_SHARD         43228
+
 namespace Trinity
 {
     class BattlegroundChatBuilder
@@ -657,6 +662,69 @@ void Battleground::YellToAll(Creature* creature, const char* text, uint32 langua
         }
 }
 
+void Battleground::RewardMarksAndShardsToTeams(uint32 winner, bool lowBG)
+{
+    for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    {
+        Player* plr = ObjectAccessor::FindPlayer(itr->first);
+
+        if (!plr || itr->second.OfflineRemoveTime)
+            continue;
+
+        uint32 team = itr->second.Team;
+
+        if (!team)
+            team = plr->GetTeam();
+
+        uint8 count_mark = 0, count_shard = 0;
+
+        if (team == winner)
+        {
+            count_mark = 2;
+            count_shard = 3;
+
+            if (lowBG)
+                count_mark = 1;
+        }
+        else
+        {
+            count_mark = 1;
+            count_shard = 2;
+
+            if (lowBG)
+                count_mark = 0;
+        }
+
+        if (count_mark > 0)
+        {
+            ItemPosCountVec dest;
+            InventoryResult msg = plr->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_WINTERGRASP_MARK_OF_HONOR, count_mark);
+
+            if (msg == EQUIP_ERR_OK)
+            {
+                Item* item = plr->StoreNewItem(dest, ITEM_WINTERGRASP_MARK_OF_HONOR, true);
+
+                if (item)
+                    plr->SendNewItem(item,count_mark,false,true);
+            }
+        }
+
+        if (count_shard > 0)
+        {
+            ItemPosCountVec dest;
+            InventoryResult msg = plr->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_STONE_KEEPERS_SHARD, count_shard);
+
+            if (msg == EQUIP_ERR_OK)
+            {
+                Item* item = plr->StoreNewItem(dest, ITEM_STONE_KEEPERS_SHARD, true);
+
+                if (item)
+                    plr->SendNewItem(item,count_shard,false,true);
+            }
+        }
+    }
+}
+
 void Battleground::RewardHonorToTeam(uint32 Honor, uint32 TeamID)
 {
     for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
@@ -749,6 +817,49 @@ void Battleground::EndBattleground(uint32 winner)
                 SetArenaMatchmakerRating(GetOtherTeam(winner), loser_matchmaker_rating + loser_matchmaker_change);
                 SetArenaTeamRatingChangeForTeam(winner, winner_change);
                 SetArenaTeamRatingChangeForTeam(GetOtherTeam(winner), loser_change);
+
+                /** World of Warcraft Armory **/
+                uint32 maxChartID;
+                QueryResult result = CharacterDatabase.PQuery("SELECT MAX(gameid) FROM armory_game_chart");
+                if(!result)
+                    maxChartID = 0;
+                else
+                {
+                    maxChartID = (*result)[0].GetUInt32();
+                    result.release();
+                }
+                uint32 gameID = maxChartID+1;
+                for(BattlegroundScoreMap::const_iterator itr = PlayerScores.begin(); itr != PlayerScores.end(); ++itr)
+                {
+                    Player* plr = ObjectAccessor::FindPlayer(itr->first);
+                    if (!plr)
+                        continue;
+                    uint32 plTeamID = plr->GetArenaTeamId(winner_arena_team->GetSlot());
+                    int changeType;
+                    uint32 resultRating;
+                    uint32 resultTeamID;
+                    int32 ratingChange;
+                    if (plTeamID == winner_arena_team->GetId())
+                    {
+                        changeType = 1; //win
+                        resultRating = winner_team_rating;
+                        resultTeamID = plTeamID;
+                        ratingChange = winner_change;
+                    }
+                    else
+                    {
+                        changeType = 2; //lose
+                        resultRating = loser_team_rating;
+                        resultTeamID = loser_arena_team->GetId();
+                        ratingChange = loser_change;
+                    }
+                    std::ostringstream sql_query;
+                    //                                                        gameid,              teamid,                     guid,                    changeType,             ratingChange,               teamRating,                  damageDone,                          deaths,                          healingDone,                           damageTaken,,                           healingTaken,                         killingBlows,                      mapId,                 start,                   end
+                    sql_query << "INSERT INTO armory_game_chart VALUES ('" << gameID << "', '" << resultTeamID << "', '" << plr->GetGUID() << "', '" << changeType << "', '" << ratingChange  << "', '" << resultRating << "', '" << itr->second->DamageDone << "', '" << itr->second->Deaths << "', '" << itr->second->HealingDone << "', '" << itr->second->DamageTaken << "', '" << itr->second->HealingTaken << "', '" << itr->second->KillingBlows << "', '" << m_MapId << "', '" << m_StartTime << "', '" << m_EndTime << "')";
+                    CharacterDatabase.Execute(sql_query.str().c_str());
+                }
+                /** World of Warcraft Armory **/
+
                 sLog->outArena("Arena match Type: %u for Team1Id: %u - Team2Id: %u ended. WinnerTeamId: %u. Winner rating: +%d, Loser rating: %d", m_ArenaType, m_ArenaTeamIds[BG_TEAM_ALLIANCE], m_ArenaTeamIds[BG_TEAM_HORDE], winner_arena_team->GetId(), winner_change, loser_change);
                 if (sWorld->getBoolConfig(CONFIG_ARENA_LOG_EXTENDED_INFO))
                     for (Battleground::BattlegroundScoreMap::const_iterator itr = GetPlayerScoresBegin(); itr != GetPlayerScoresEnd(); ++itr)
@@ -1076,7 +1187,28 @@ void Battleground::StartBattleground()
     // and it doesn't matter if we call StartBattleground() more times, because m_Battlegrounds is a map and instance id never changes
     sBattlegroundMgr->AddBattleground(GetInstanceID(), GetTypeID(), this);
     if (m_IsRated)
+    {
+        // irc announce
+        std::string arenamsg;
+        char arenatmp[16];
+
+        arenamsg = "PRIVMSG #wowarena ";
+        arenamsg += "Arena match type: ";
+        sprintf(arenatmp, "%d", m_ArenaType);
+        arenamsg += arenatmp;
+        arenamsg += "for Team1Id: ";
+        sprintf(arenatmp, "%d", m_ArenaTeamIds[BG_TEAM_ALLIANCE]);
+        arenamsg += arenatmp;
+        arenamsg += " - Team2Id: ";
+        sprintf(arenatmp, "%d", m_ArenaTeamIds[BG_TEAM_HORDE]);
+        arenamsg += arenatmp;
+        arenamsg += " started.";
+
+        sIRC.SendIRC(arenamsg);
+
+        // arena log output
         sLog->outArena("Arena match type: %u for Team1Id: %u - Team2Id: %u started.", m_ArenaType, m_ArenaTeamIds[BG_TEAM_ALLIANCE], m_ArenaTeamIds[BG_TEAM_HORDE]);
+    }
 }
 
 void Battleground::AddPlayer(Player* player)
@@ -1364,6 +1496,16 @@ void Battleground::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, 
         case SCORE_HEALING_DONE:                            // Healing Done
             itr->second->HealingDone += value;
             break;
+
+        /** World of Warcraft Armory **/
+        case SCORE_DAMAGE_TAKEN:
+            itr->second->DamageTaken += value;              // Damage Taken
+            break;
+        case SCORE_HEALING_TAKEN:
+            itr->second->HealingTaken += value;             // Healing Taken
+            break;
+        /** World of Warcraft Armory **/
+
         default:
             sLog->outError("Battleground::UpdatePlayerScore: unknown score type (%u) for BG (map: %u, instance id: %u)!",
                 type, m_MapId, m_InstanceID);

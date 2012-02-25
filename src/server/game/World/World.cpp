@@ -75,6 +75,9 @@
 #include "SmartAI.h"
 #include "Channel.h"
 
+#include "OutdoorPvPWG.h"
+#include "TriniChat/IRCClient.h"
+
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
 volatile uint32 World::m_worldLoopCounter = 0;
@@ -563,6 +566,18 @@ void World::LoadConfigSettings(bool reload)
         rate_values[RATE_DURABILITY_LOSS_BLOCK] = 0.0f;
     }
     ///- Read other configuration items from the config file
+
+    // movement anticheat
+    m_MvAnticheatEnable                     = ConfigMgr::GetBoolDefault("Anticheat.Movement.Enable",false);
+    m_MvAnticheatKick                       = ConfigMgr::GetBoolDefault("Anticheat.Movement.Kick",false);
+    m_MvAnticheatAlarmCount                 = (uint32)ConfigMgr::GetIntDefault("Anticheat.Movement.AlarmCount", 5);
+    m_MvAnticheatAlarmPeriod                = (uint32)ConfigMgr::GetIntDefault("Anticheat.Movement.AlarmTime", 5000);
+    m_MvAntiCheatBan                        = (unsigned char)ConfigMgr::GetIntDefault("Anticheat.Movement.BanType",0);
+    m_MvAnticheatBanTime                    = ConfigMgr::GetStringDefault("Anticheat.Movement.BanTime","1m");
+    m_MvAnticheatGmLevel                    = (unsigned char)ConfigMgr::GetIntDefault("Anticheat.Movement.GmLevel",0);
+    m_MvAnticheatKill                       = ConfigMgr::GetBoolDefault("Anticheat.Movement.Kill",false);
+    m_MvAnticheatMaxXYT                     = ConfigMgr::GetFloatDefault("Anticheat.Movement.MaxXYT",0.04f);
+    m_MvAnticheatIgnoreAfterTeleport        = (uint16)ConfigMgr::GetIntDefault("Anticheat.Movement.IgnoreSecAfterTeleport",10);
 
     m_bool_configs[CONFIG_DURABILITY_LOSS_IN_PVP] = ConfigMgr::GetBoolDefault("DurabilityLoss.InPvP", false);
 
@@ -1159,6 +1174,172 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_NUMTHREADS] = ConfigMgr::GetIntDefault("MapUpdate.Threads", 1);
     m_int_configs[CONFIG_MAX_RESULTS_LOOKUP_COMMANDS] = ConfigMgr::GetIntDefault("Command.LookupMaxResults", 0);
 
+    // wintergrasp config
+    m_bool_configs[CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED]         = ConfigMgr::GetBoolDefault("OutdoorPvP.Wintergrasp.Enabled", true);
+    m_int_configs[CONFIG_OUTDOORPVP_WINTERGRASP_SAVESTATE_PERIOD] = ConfigMgr::GetIntDefault("OutdoorPvP.Wintergrasp.SaveState.Period", 10000);
+    m_int_configs[CONFIG_OUTDOORPVP_WINTERGRASP_START_TIME]       = ConfigMgr::GetIntDefault("OutdoorPvP.Wintergrasp.StartTime", 30);
+    m_int_configs[CONFIG_OUTDOORPVP_WINTERGRASP_BATTLE_TIME]      = ConfigMgr::GetIntDefault("OutdoorPvP.Wintergrasp.BattleTime", 30);
+    m_int_configs[CONFIG_OUTDOORPVP_WINTERGRASP_INTERVAL]         = ConfigMgr::GetIntDefault("OutdoorPvP.Wintergrasp.Interval", 150);
+    m_bool_configs[CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR]    = ConfigMgr::GetBoolDefault("OutdoorPvP.Wintergrasp.CustomHonorRewards", false);
+    m_int_configs[CONFIG_OUTDOORPVP_WINTERGRASP_WIN_BATTLE]       = ConfigMgr::GetIntDefault("OutdoorPvP.Wintergrasp.CustomHonorBattleWin", 3000);
+    m_int_configs[CONFIG_OUTDOORPVP_WINTERGRASP_LOSE_BATTLE]      = ConfigMgr::GetIntDefault("OutdoorPvP.Wintergrasp.CustomHonorBattleLose", 1250);
+    m_int_configs[CONFIG_OUTDOORPVP_WINTERGRASP_DAMAGED_TOWER]    = ConfigMgr::GetIntDefault("OutdoorPvP.Wintergrasp.CustomHonorDamageTower", 750);
+    m_int_configs[CONFIG_OUTDOORPVP_WINTERGRASP_DESTROYED_TOWER]  = ConfigMgr::GetIntDefault("OutdoorPvP.Wintergrasp.CustomHonorDestroyedTower", 750);
+    m_int_configs[CONFIG_OUTDOORPVP_WINTERGRASP_DAMAGED_BUILDING] = ConfigMgr::GetIntDefault("OutdoorPvP.Wintergrasp.CustomHonorDamagedBuilding", 750);
+    m_int_configs[CONFIG_OUTDOORPVP_WINTERGRASP_INTACT_BUILDING]  = ConfigMgr::GetIntDefault("OutdoorPvP.Wintergrasp.CustomHonorIntactBuilding", 1500);
+
+    // IRC Configurations.
+    int ConfCnt = 0;
+    sIRC._chan_count = 0;
+    if(ConfigMgr::GetIntDefault("irc.active", 1) == 1)
+        sIRC.Active = true;
+    else
+        sIRC.Active = false;
+    sIRC._Host = ConfigMgr::GetStringDefault("irc.host", "irc.freenode.net");
+    if(sIRC._Host.size() > 0)
+        ConfCnt++;
+    sIRC._Mver = "Version 2.0.0";
+    sIRC._Port = ConfigMgr::GetIntDefault("irc.port", 6667);
+    sIRC._User = ConfigMgr::GetStringDefault("irc.user", "TriniChat");
+    sIRC._Pass = ConfigMgr::GetStringDefault("irc.pass", "Services Password");
+    sIRC._Nick = ConfigMgr::GetStringDefault("irc.nick", "TriniChat");
+    sIRC._Auth = ConfigMgr::GetIntDefault("irc.auth", 0);
+    sIRC._Auth_Nick = ConfigMgr::GetStringDefault("irc.auth.nick", "AuthNick");
+    sIRC._ICC = ConfigMgr::GetStringDefault("irc.icc", "001");
+    sIRC._defchan = ConfigMgr::GetStringDefault("irc.defchan", "lobby");
+    sIRC._ldefc = ConfigMgr::GetIntDefault("irc.ldef", 0);
+    sIRC._wct = ConfigMgr::GetIntDefault("irc.wct", 30000);
+    sIRC.ajoin = ConfigMgr::GetIntDefault("irc.ajoin", 1);
+    sIRC.ajchan = ConfigMgr::GetStringDefault("irc.ajchan", "world");
+    sIRC.onlrslt = ConfigMgr::GetIntDefault("irc.online.result", 10);
+    sIRC.BOTMASK = ConfigMgr::GetIntDefault("Botmask", 0);
+    sIRC.logfile = ConfigMgr::GetStringDefault("irc.logfile.prefix", "IRC_");
+    sIRC.logmask = ConfigMgr::GetIntDefault("irc.logmask", 0);
+    sIRC.logchan = ConfigMgr::GetStringDefault("irc.logchannel","");
+    sIRC.logchanpw = ConfigMgr::GetStringDefault("irc.logchannelpassword","");
+    for(int i = 1; i < MAX_CONF_CHANNELS;i++)
+    {
+        std::ostringstream ss;
+        ss << i;
+        std::string ci = "irc.chan_" + ss.str();
+        std::string pw = "irc.pass_" + ss.str();
+        std::string t_chan = ConfigMgr::GetStringDefault(ci.c_str(), "");
+        if(t_chan.size() > 0)
+        {
+            sIRC._chan_count++;
+            sIRC._irc_chan[sIRC._chan_count] = t_chan;
+            sIRC._irc_pass[sIRC._chan_count] = ConfigMgr::GetStringDefault(pw.c_str(), t_chan.c_str());
+            ci = "wow.chan_" + ss.str();
+            sIRC._wow_chan[sIRC._chan_count] = ConfigMgr::GetStringDefault(ci.c_str(), t_chan.c_str());
+        }
+    }
+    sIRC.JoinMsg = ConfigMgr::GetStringDefault("irc.joinmsg", "Whhaaazzzzaaaa, TriniChat $Ver Baby!!");
+    sIRC.RstMsg  = ConfigMgr::GetStringDefault("irc.rstmsg", "TriniChat Is Restarting, I Will Be Right Back!");
+    sIRC.kikmsg = ConfigMgr::GetStringDefault("irc.kickmsg", "Do Not Kick Me Again, Severe Actions Will Be Taken!");
+    // IRC LINES
+    sIRC.ILINES[WOW_IRC] = ConfigMgr::GetStringDefault("chat.wow_irc", "\003<WoW>[\002$Name($Level)\002\003] $Msg");
+    sIRC.ILINES[IRC_WOW] = ConfigMgr::GetStringDefault("chat.irc_wow", "\003<IRC>[$Name]: $Msg");
+    sIRC.ILINES[JOIN_WOW] = ConfigMgr::GetStringDefault("chat.join_wow", "\00312>>\00304 $Name \003Joined The Channel!");
+    sIRC.ILINES[JOIN_IRC] = ConfigMgr::GetStringDefault("chat.join_irc", "\003[$Name]: Has Joined IRC!");
+    sIRC.ILINES[LEAVE_WOW] = ConfigMgr::GetStringDefault("chat.leave_wow", "\00312<<\00304 $Name \003Left The Channel!");
+    sIRC.ILINES[LEAVE_IRC] = ConfigMgr::GetStringDefault("chat.leave_irc", "\003[$Name]: Has Left IRC!");
+    sIRC.ILINES[CHANGE_NICK] = ConfigMgr::GetStringDefault("chat.change_nick", "\003<> $Name Is Now Known As $NewName!");
+    // TriniChat Options
+    sIRC._MCA = ConfigMgr::GetIntDefault("irc.maxattempt", 10);
+    sIRC._autojoinkick = ConfigMgr::GetIntDefault("irc.autojoin_kick", 1);
+    sIRC._cmd_prefx = ConfigMgr::GetStringDefault("irc.command_prefix", ".");
+
+    sIRC._op_gm = ConfigMgr::GetIntDefault("irc.op_gm_login", 0);
+    sIRC._op_gm_lev = ConfigMgr::GetIntDefault("irc.op_gm_level", 3);
+
+    // Misc Options
+    sIRC.games = ConfigMgr::GetIntDefault("irc.fun.games", 0);
+    sIRC.gmlog = ConfigMgr::GetIntDefault("irc.gmlog", 1);
+    sIRC.BOTMASK = ConfigMgr::GetIntDefault("BotMask", 0);
+    sIRC.Status = ConfigMgr::GetIntDefault("irc.StatusChannel", 1);
+    sIRC.anchn = ConfigMgr::GetIntDefault("irc.AnnounceChannel", 1);
+    sIRC.autoanc = ConfigMgr::GetIntDefault("irc.auto.announce", 30);
+    sIRC.ojGM1 = ConfigMgr::GetStringDefault("irc.gm1", "[Moderator]");
+    sIRC.ojGM2 = ConfigMgr::GetStringDefault("irc.gm2", "[Game Master]");
+    sIRC.ojGM3 = ConfigMgr::GetStringDefault("irc.gm3", "[BugTracker]");
+    sIRC.ojGM4 = ConfigMgr::GetStringDefault("irc.gm4", "[DevTeam Admin]");
+    sIRC.ojGM5 = ConfigMgr::GetStringDefault("irc.gm5", "[Root Admin]");
+    // REQUIRED GM LEVEL
+    QueryResult result = WorldDatabase.PQuery("SELECT `Command`, `gmlevel` FROM `irc_commands` ORDER BY `Command`");
+    if(result)
+    {
+        Field *fields = result->Fetch();
+        for (uint64 i=0; i < result->GetRowCount(); i++)
+        {
+            //TODO: ELSEIF? STRCMP?
+            std::string command = fields[0].GetCString();
+            uint32 gmlvl = fields[1].GetUInt32();
+            if(command == "acct") sIRC.CACCT = gmlvl;
+            if(command == "ban") sIRC.CBAN = gmlvl;
+            if(command == "char") sIRC.CCHAN = gmlvl;
+            if(command == "char") sIRC.CCHAR = gmlvl;
+            if(command == "fun") sIRC.CFUN = gmlvl;
+            if(command == "help") sIRC.CHELP = gmlvl;
+            if(command == "inchan") sIRC.CINCHAN = gmlvl;
+            if(command == "info") sIRC.CINFO = gmlvl;
+            if(command == "item") sIRC.CITEM = gmlvl;
+            if(command == "jail") sIRC.CJAIL = gmlvl;
+            if(command == "kick") sIRC.CKICK = gmlvl;
+            if(command == "kill") sIRC._KILL = gmlvl;
+            if(command == "level") sIRC.CLEVEL = gmlvl;
+            if(command == "lookup") sIRC.CLOOKUP = gmlvl;
+            if(command == "money") sIRC.CMONEY = gmlvl;
+            if(command == "mute") sIRC.CMUTE = gmlvl;
+            if(command == "online") sIRC.CONLINE = gmlvl;
+            if(command == "pm") sIRC.CPM = gmlvl;
+            if(command == "reconnect") sIRC.CRECONNECT = gmlvl;
+            if(command == "reload") sIRC.CRELOAD = gmlvl;
+            if(command == "restart") sIRC.CSHUTDOWN = gmlvl;
+            if(command == "revive") sIRC.CREVIVE = gmlvl;
+            if(command == "saveall") sIRC.CSAVEALL = gmlvl;
+            if(command == "server") sIRC.CSERVERCMD = gmlvl;
+            if(command == "shutdown") sIRC.CSHUTDOWN = gmlvl;
+            if(command == "spell") sIRC.CSPELL = gmlvl;
+            if(command == "sysmsg") sIRC.CSYSMSG = gmlvl;
+            if(command == "tele") sIRC.CTELE = gmlvl;
+            if(command == "top") sIRC.CTOP = gmlvl;
+            if(command == "who") sIRC.CWHO = gmlvl;
+            result->NextRow();
+        }
+    }
+    else
+    {
+        sIRC.CACCT     = 3;
+        sIRC.CBAN      = 3;
+        sIRC.CCHAN     = 3;
+        sIRC.CCHAR     = 3;
+        sIRC.CFUN      = 3;
+        sIRC.CHELP     = 3;
+        sIRC.CINCHAN   = 3;
+        sIRC.CINFO     = 3;
+        sIRC.CITEM     = 3;
+        sIRC.CJAIL     = 3;
+        sIRC.CKICK     = 3;
+        sIRC._KILL     = 3;
+        sIRC.CLEVEL    = 3;
+        sIRC.CLOOKUP   = 3;
+        sIRC.CMONEY    = 3;
+        sIRC.CMUTE     = 3;
+        sIRC.CONLINE   = 3;
+        sIRC.CPM       = 3;
+        sIRC.CRECONNECT= 3;
+        sIRC.CRELOAD   = 3;
+        sIRC.CREVIVE   = 3;
+        sIRC.CSAVEALL  = 3;
+        sIRC.CSERVERCMD= 3;
+        sIRC.CSHUTDOWN = 3;
+        sIRC.CSPELL    = 3;
+        sIRC.CSYSMSG   = 3;
+        sIRC.CTELE     = 3;
+        sIRC.CTOP      = 3;
+        sIRC.CWHO      = 3;
+    }
+
     // chat logging
     m_bool_configs[CONFIG_CHATLOG_CHANNEL] = ConfigMgr::GetBoolDefault("ChatLogs.Channel", false);
     m_bool_configs[CONFIG_CHATLOG_WHISPER] = ConfigMgr::GetBoolDefault("ChatLogs.Whisper", false);
@@ -1579,6 +1760,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Creature Formations...");
     FormationMgr::LoadCreatureFormations();
 
+    sLog->outString("Loading World States...");              // must be loaded before battleground, outdoor PvP and conditions
+    LoadWorldStates();
+
     sLog->outString("Loading Conditions...");
     sConditionMgr->LoadConditions();
 
@@ -1706,9 +1890,6 @@ void World::SetInitialWorldSettings()
 
     sTicketMgr->Initialize();
 
-    sLog->outString("Loading World States...");              // must be loaded before battleground and outdoor PvP
-    LoadWorldStates();
-
     ///- Initialize Battlegrounds
     sLog->outString("Starting Battleground System");
     sBattlegroundMgr->CreateInitialBattlegrounds();
@@ -1726,6 +1907,15 @@ void World::SetInitialWorldSettings()
 
     sLog->outString("Deleting expired bans...");
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate<>bandate");
+
+    sLog->outString("Updating preserved accounts...");
+    LoginDatabase.Execute("UPDATE account SET last_login=NOW() WHERE id IN(SELECT account FROM account_preserved) AND id NOT IN (SELECT id FROM account_banned WHERE bandate = unbandate OR unbandate > NOW())");
+
+    sLog->outString("Remove entries from castle log older than a week...");
+    CharacterDatabase.Execute("DELETE FROM castle_log WHERE date <= UNIX_TIMESTAMP()-604800");
+
+    sLog->outString("Delete inactive accounts...");
+    AccountMgr::DeleteInactiveAccounts();
 
     sLog->outString("Calculate next daily quest reset time...");
     InitDailyQuestResetTime();
@@ -1946,6 +2136,9 @@ void World::Update(uint32 diff)
         stmt->setUInt64(3, uint64(m_startTime));
 
         LoginDatabase.Execute(stmt);
+
+        // Prevent a strange offline realm bug; Set server to online if running every 10 minutes
+        LoginDatabase.PExecute("UPDATE realmlist SET color = 0 WHERE id = %u AND color = 2", realmID);
     }
 
     /// <li> Clean logs table
@@ -2494,6 +2687,12 @@ void World::ShutdownMsg(bool show, Player* player)
 
         SendServerMessage(msgid, str.c_str(), player);
         sLog->outStaticDebug("Server is %s in %s", (m_ShutdownMask & SHUTDOWN_MASK_RESTART ? "restart" : "shuttingdown"), str.c_str());
+
+        if (m_ShutdownTimer == 30)
+        {
+            sObjectAccessor->SaveAllPlayers();
+            SendWorldText(LANG_PLAYERS_SAVED);
+        }
     }
 }
 
@@ -2627,16 +2826,20 @@ void World::_UpdateRealmCharCount(PreparedQueryResult resultCharCount)
         uint32 accountId = fields[0].GetUInt32();
         uint32 charCount = fields[1].GetUInt32();
 
+        SQLTransaction trans = LoginDatabase.BeginTransaction();
+
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_REALM_CHARACTERS);
         stmt->setUInt32(0, accountId);
         stmt->setUInt32(1, realmID);
-        LoginDatabase.Execute(stmt);
+        trans->Append(stmt);
 
         stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_REALM_CHARACTERS);
         stmt->setUInt32(0, charCount);
         stmt->setUInt32(1, accountId);
         stmt->setUInt32(2, realmID);
-        LoginDatabase.Execute(stmt);
+        trans->Append(stmt);
+
+        LoginDatabase.CommitTransaction(trans);
     }
 }
 
@@ -2957,4 +3160,30 @@ CharacterNameData const* World::GetCharacterNameData(uint32 guid) const
         return &itr->second;
     else
         return NULL;
+}
+
+void World::SendWintergraspState()
+{
+    OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
+    if (!pvpWG)
+        return;
+
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    {
+        if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
+            continue;
+
+            if (pvpWG->isWarTime())
+            {
+                // "Battle in progress"
+                itr->second->GetPlayer()->SendUpdateWorldState(ClockWorldState[1], uint32((time(NULL))));
+            } else
+                // Time to next battle
+            {
+                pvpWG->SendInitWorldStatesTo(itr->second->GetPlayer());
+                itr->second->GetPlayer()->SendUpdateWorldState(ClockWorldState[1], (uint32(time(NULL)) + pvpWG->GetTimer()));
+                // Hide unneeded info which in center of screen
+                itr->second->GetPlayer()->SendInitWorldStates(itr->second->GetPlayer()->GetZoneId(), itr->second->GetPlayer()->GetAreaId());
+            }
+    }
 }

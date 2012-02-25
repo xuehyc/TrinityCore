@@ -153,11 +153,14 @@ public:
 
                         std::list<Unit*> playerList;
                         SelectTargetList(playerList, 5, SELECT_TARGET_TOPAGGRO, 0, true);
-                        for (std::list<Unit*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                        if (!playerList.empty())
                         {
-                            Unit* temp = (*itr);
-                            me->AddAura(SPELL_GIFT_OF_THARON_JA, temp);
-                            temp->SetDisplayId(MODEL_SKELETON);
+                            for (std::list<Unit*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                            {
+                                Unit* temp = (*itr);
+                                me->AddAura(SPELL_GIFT_OF_THARON_JA, temp);
+                                temp->SetDisplayId(MODEL_SKELETON);
+                            }
                         }
                         uiPhaseTimer = 20*IN_MILLISECONDS;
                         uiLightningBreathTimer = urand(3*IN_MILLISECONDS, 4*IN_MILLISECONDS);
@@ -208,12 +211,15 @@ public:
 
                         std::list<Unit*> playerList;
                         SelectTargetList(playerList, 5, SELECT_TARGET_TOPAGGRO, 0, true);
-                        for (std::list<Unit*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                        if (!playerList.empty())
                         {
-                            Unit* temp = (*itr);
-                            if (temp->HasAura(SPELL_GIFT_OF_THARON_JA))
-                                temp->RemoveAura(SPELL_GIFT_OF_THARON_JA);
-                            temp->DeMorph();
+                            for (std::list<Unit*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                            {
+                                Unit* temp = (*itr);
+                                if (temp->HasAura(SPELL_GIFT_OF_THARON_JA))
+                                    temp->RemoveAura(SPELL_GIFT_OF_THARON_JA);
+                                temp->DeMorph();
+                            }
                         }
                     } else uiPhaseTimer -= diff;
                     break;
@@ -234,9 +240,10 @@ public:
                 // clean morph on players
                 Map::PlayerList const &PlayerList = instance->instance->GetPlayers();
 
-                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                    if (Player* player = i->getSource())
-                        player->DeMorph();
+                if (!PlayerList.isEmpty())
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                        if (Player* player = i->getSource())
+                            player->DeMorph();
 
                 DoCast(me, SPELL_ACHIEVEMENT_CHECK);
 

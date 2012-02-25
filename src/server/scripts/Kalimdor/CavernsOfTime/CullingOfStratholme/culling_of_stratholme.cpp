@@ -242,7 +242,7 @@ public:
         switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF:
-                ai->Start(true, true, player->GetGUID(), 0, false, false);
+                ai->Start(true, true, player->GetGUID(), 0, true, false);
                 ai->SetDespawnAtEnd(false);
                 ai->bStepping = false;
                 ai->uiStep = 1;
@@ -355,8 +355,14 @@ public:
 
         uint32 uiExorcismTimer;
 
+        bool bHeroicTimerEnabled;
+        uint32 uiHeroicTimer;
+
         void Reset()
         {
+            bHeroicTimerEnabled = false;
+            uiHeroicTimer = 60000;
+
             uiUtherGUID = 0;
             uiJainaGUID = 0;
 
@@ -507,6 +513,16 @@ public:
                 case 25:
                     SetRun(false);
                     SpawnTimeRift(0, &uiInfiniteDraconianGUID[0]);
+
+                    for (uint8 i = 0; i < ENCOUNTER_DRACONIAN_NUMBER; ++i)
+                    {
+                        if (Creature *temp = Unit::GetCreature((*me), uiInfiniteDraconianGUID[i]))
+                        {
+                            temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                            temp->SetReactState(REACT_AGGRESSIVE);
+                        }
+                    }
+
                     DoScriptText(SAY_PHASE307, me);
                     break;
                 case 29:
@@ -560,7 +576,17 @@ public:
                 case 54:
                     uiGossipStep = 5;
                     me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    SetDespawnAtFar(false);
                     SetHoldState(true);
+
+                    if (IsHeroic())
+                    {
+                        if (instance->GetData(DATA_TIMER) > 0 && instance->GetData(DATA_INFINITE) != DONE)
+                        {
+                            me->SummonCreature(NPC_INFINITE, 2309.28f, 1358.16f, 127.4f, 1.148f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 900000);
+                        }
+                    }
+
                     break;
              }
         }
@@ -568,6 +594,27 @@ public:
         void UpdateAI(const uint32 diff)
         {
             npc_escortAI::UpdateAI(diff);
+
+            if (bHeroicTimerEnabled)
+            {
+                if (IsHeroic() && instance)
+                {
+                    if (uiHeroicTimer < diff)
+                    {
+                        if (instance->GetData(DATA_TIMER) <= 25 && instance->GetData(DATA_TIMER) != 0)
+                        {
+                            instance->SetData(DATA_TIMER, instance->GetData(DATA_TIMER) - 1);
+                        }
+
+                        if (instance->GetData(DATA_TIMER) == 0)
+                        {
+                            bHeroicTimerEnabled = false;
+                        }
+
+                        uiHeroicTimer = 60000;
+                    } else uiHeroicTimer -= diff;
+                }
+            }
 
             DoMeleeAttackIfReady();
 
@@ -865,7 +912,20 @@ public:
 
                             uiBossEvent = DATA_MEATHOOK_EVENT;
                             if (instance)
+                            {
                                 instance->SetData(DATA_ARTHAS_EVENT, IN_PROGRESS);
+
+                                if (IsHeroic())
+                                {
+                                    bHeroicTimerEnabled = true;
+
+                                    // Starting value, freshly set by instance
+                                    if (instance->GetData(DATA_TIMER) == 100)
+                                    {
+                                        instance->SetData(DATA_TIMER, 25);
+                                    }
+                                }
+                            }
 
                             me->SetReactState(REACT_DEFENSIVE);
                             SetDespawnAtFar(false);
@@ -933,7 +993,7 @@ public:
                                     pBoss->GetMotionMaster()->MovePoint(0, 2194.110f, 1332.00f, 130.00f);
                                 }
                             }
-                            JumpToNextStep(30000);
+                            JumpToNextStep(5000);
                             break;
                         case 50: //Wait Boss death
                         case 60:
@@ -1207,45 +1267,7 @@ public:
 
 };
 
-class npc_crate_helper : public CreatureScript
-{
-    public:
-        npc_crate_helper() : CreatureScript("npc_create_helper_cot") { }
-
-        struct npc_crate_helperAI : public NullCreatureAI
-        {
-            npc_crate_helperAI(Creature* creature) : NullCreatureAI(creature)
-            {
-                _marked = false;
-            }
-
-            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
-            {
-                if (spell->Id == SPELL_ARCANE_DISRUPTION && !_marked)
-                {
-                    _marked = true;
-                    if (InstanceScript* instance = me->GetInstanceScript())
-                        instance->SetData(DATA_CRATE_COUNT, instance->GetData(DATA_CRATE_COUNT) + 1);
-                    if (GameObject* crate = me->FindNearestGameObject(GO_SUSPICIOUS_CRATE, 5.0f))
-                    {
-                        crate->SummonGameObject(GO_PLAGUED_CRATE, crate->GetPositionX(), crate->GetPositionY(), crate->GetPositionZ(), crate->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, DAY);
-                        crate->Delete();
-                    }
-                }
-            }
-
-        private:
-            bool _marked;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_crate_helperAI(creature);
-        }
-};
-
 void AddSC_culling_of_stratholme()
 {
     new npc_arthas();
-    new npc_crate_helper();
 }

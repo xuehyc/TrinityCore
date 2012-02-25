@@ -28,6 +28,14 @@
 * Hadronox to make his way to you. When Hadronox enters the main room, she will web the doors, and no more non-elites will spawn.
 */
 
+/*
+WoW-Castle SQL:
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (59417, 53030);
+INSERT INTO `spell_script_names` (spell_id, ScriptName) VALUES
+(53030, 'spell_leech_poison_hadronox'),
+(59417, 'spell_leech_poison_hadronox');
+*/
+
 #include "ScriptPCH.h"
 #include "azjol_nerub.h"
 
@@ -37,12 +45,27 @@ enum Spells
     SPELL_LEECH_POISON                            = 53030, // Victim
     SPELL_PIERCE_ARMOR                            = 53418, // Victim
     SPELL_WEB_GRAB                                = 57731, // Victim
-    SPELL_WEB_FRONT_DOORS                         = 53177, // Self
-    SPELL_WEB_SIDE_DOORS                          = 53185, // Self
     H_SPELL_ACID_CLOUD                            = 59419,
     H_SPELL_LEECH_POISON                          = 59417,
-    H_SPELL_WEB_GRAB                              = 59421
+    H_SPELL_WEB_GRAB                              = 59421,
+    SPELL_LEECH_POISON_HEAL                       = 53800
 };
+
+enum CreatureIDs
+{
+    NPC_ANUBAR_CHAMPION = 29062,
+    NPC_ANUBAR_CRYPT_FIEND = 29063,
+    NPC_ANUBAR_NECROMANCER = 29098,
+    BOSS_HADRONOX_ENTRY = 28921
+};
+
+enum AchievementID
+{
+    ACHIEVEMENT_HADRONOX_DENIED = 1297
+};
+
+const Position SpawnPoint = { 531.8f, 579.2f, 733.7f, 4.7f };
+const Position CenterPoint = { 529.2f, 550.4f, 731.9f, 1.5f };
 
 class boss_hadronox : public CreatureScript
 {
@@ -51,28 +74,28 @@ public:
 
     struct boss_hadronoxAI : public ScriptedAI
     {
-        boss_hadronoxAI(Creature* c) : ScriptedAI(c)
+        boss_hadronoxAI(Creature* c) : ScriptedAI(c), Summons(me)
         {
             instance = c->GetInstanceScript();
-            fMaxDistance = 50.0f;
-            bFirstTime = true;
         }
 
         InstanceScript* instance;
+
+        SummonList Summons;
 
         uint32 uiAcidTimer;
         uint32 uiLeechTimer;
         uint32 uiPierceTimer;
         uint32 uiGrabTimer;
         uint32 uiDoorsTimer;
-        uint32 uiCheckDistanceTimer;
+        uint32 uiSummonTimer;
+        uint32 uiCheckTimer;
 
-        bool bFirstTime;
-
-        float fMaxDistance;
+        bool bClosedDoor;
 
         void Reset()
         {
+            me->SetHealth(me->GetMaxHealth());
             me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 9.0f);
             me->SetFloatValue(UNIT_FIELD_COMBATREACH, 9.0f);
 
@@ -81,73 +104,140 @@ public:
             uiPierceTimer = urand(1*IN_MILLISECONDS, 3*IN_MILLISECONDS);
             uiGrabTimer = urand(15*IN_MILLISECONDS, 19*IN_MILLISECONDS);
             uiDoorsTimer = urand(20*IN_MILLISECONDS, 30*IN_MILLISECONDS);
-            uiCheckDistanceTimer = 2*IN_MILLISECONDS;
+            uiSummonTimer = 5*IN_MILLISECONDS;
+            uiCheckTimer = 2*IN_MILLISECONDS;
 
-            if (instance && (instance->GetData(DATA_HADRONOX_EVENT) != DONE && !bFirstTime))
+            bClosedDoor = false;
+
+            Summons.DespawnAll();
+
+            if (instance && (instance->GetData(DATA_HADRONOX_EVENT) != DONE))
                 instance->SetData(DATA_HADRONOX_EVENT, FAIL);
-
-            bFirstTime = false;
-        }
-
-        //when Hadronox kills any enemy (that includes a party member) she will regain 10% of her HP if the target had Leech Poison on
-        void KilledUnit(Unit* Victim)
-        {
-            // not sure if this aura check is correct, I think it is though
-            if (!Victim || !Victim->HasAura(DUNGEON_MODE(SPELL_LEECH_POISON, H_SPELL_LEECH_POISON)) || !me->isAlive())
-                return;
-
-            me->ModifyHealth(int32(me->CountPctFromMaxHealth(10)));
         }
 
         void JustDied(Unit* /*Killer*/)
         {
+            Summons.DespawnAll();
+
             if (instance)
+            {
                 instance->SetData(DATA_HADRONOX_EVENT, DONE);
+
+                if (IsHeroic() && !bClosedDoor)
+                {
+                    instance->DoCompleteAchievement(ACHIEVEMENT_HADRONOX_DENIED);
+                }
+            }
+        }
+
+        void JustSummoned(Creature *summon)
+        {
+            if (summon)
+            {
+                Summons.Summon(summon);
+
+                if (summon->AI())
+                    summon->AI()->AttackStart(me);
+            }
+        }
+
+        void SummonedCreatureDespawn(Creature *summon)
+        {
+            if (summon)
+                Summons.Despawn(summon);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             if (instance)
                 instance->SetData(DATA_HADRONOX_EVENT, IN_PROGRESS);
-            me->SetInCombatWithZone();
         }
 
-        void CheckDistance(float dist, const uint32 uiDiff)
+        bool CheckPlayersInDistance()
         {
-            if (!me->isInCombat())
-                return;
+            bool returnValue = false;
 
-            float x=0.0f, y=0.0f, z=0.0f;
-            me->GetRespawnPosition(x, y, z);
-
-            if (uiCheckDistanceTimer <= uiDiff)
-                uiCheckDistanceTimer = 5*IN_MILLISECONDS;
-            else
+            if (me->GetMap())
             {
-                uiCheckDistanceTimer -= uiDiff;
-                return;
+                Map::PlayerList const& players = me->GetMap()->GetPlayers();
+
+                if (me->GetMap()->IsDungeon() && !players.isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    {
+                        Player* player = itr->getSource();
+
+                        // Only apply to attackable, alive and in 70.0 yards players
+                        if (player && !player->isGameMaster() && player->isAlive() && me->IsValidAttackTarget(player))
+                        {
+                            if (player->GetDistance(CenterPoint) <= 70.0f)
+                                returnValue = true;
+
+                            // In combat with that player, check, that player does not get too far away
+                            if (DoGetThreat(player))
+                            {
+                                if (player->GetDistance(CenterPoint) > 40.0f)
+                                {
+                                    player->NearTeleportTo(CenterPoint.GetPositionX(), CenterPoint.GetPositionY(), CenterPoint.GetPositionZ(), CenterPoint.GetOrientation());
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            if (me->IsInEvadeMode() || !me->getVictim())
-                return;
-            if (me->GetDistance(x, y, z) > dist)
-                EnterEvadeMode();
+
+            return returnValue;
+        }
+
+        void SummonAdds()
+        {
+            DoSummon(NPC_ANUBAR_CHAMPION, SpawnPoint, 30000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+            DoSummon(NPC_ANUBAR_CRYPT_FIEND, SpawnPoint, 30000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+            DoSummon(NPC_ANUBAR_NECROMANCER, SpawnPoint, 30000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+
+            if (IsHeroic())
+                DoSummon(NPC_ANUBAR_CRYPT_FIEND, SpawnPoint, 30000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
         }
 
         void UpdateAI(const uint32 diff)
         {
+            if (uiCheckTimer <= diff)
+            {
+                if (CheckPlayersInDistance())
+                {
+                    if (!me->isInCombat())
+                    {
+                        SummonAdds();
+                    }
+                }
+                else if (me->isInCombat())
+                {
+                    Summons.DespawnAll();
+                    EnterEvadeMode();
+                }
+
+                uiCheckTimer = 2*IN_MILLISECONDS;
+            } else uiCheckTimer -= diff;
+
             //Return since we have no target
             if (!UpdateVictim()) return;
 
-            // Without he comes up through the air to players on the bridge after krikthir if players crossing this bridge!
-            CheckDistance(fMaxDistance, diff);
-
-            if (me->HasAura(SPELL_WEB_FRONT_DOORS) || me->HasAura(SPELL_WEB_SIDE_DOORS))
+            if (!bClosedDoor)
             {
-                if (IsCombatMovementAllowed())
-                    SetCombatMovement(false);
+                if (uiSummonTimer <= diff)
+                {
+                    SummonAdds();
+                    uiSummonTimer = 5*IN_MILLISECONDS;
+                } else uiSummonTimer -= diff;
+
+                if (uiDoorsTimer <= diff)
+                {
+                    bClosedDoor = true;
+                } else uiDoorsTimer -= diff;
             }
-            else if (!IsCombatMovementAllowed())
-                SetCombatMovement(true);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
 
             if (uiPierceTimer <= diff)
             {
@@ -179,11 +269,6 @@ public:
                 uiGrabTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
             } else uiGrabTimer -= diff;
 
-            if (uiDoorsTimer <= diff)
-            {
-                uiDoorsTimer = urand(30*IN_MILLISECONDS, 60*IN_MILLISECONDS);
-            } else uiDoorsTimer -= diff;
-
             DoMeleeAttackIfReady();
         }
     };
@@ -194,7 +279,43 @@ public:
     }
 };
 
+class spell_leech_poison_hadronox : public SpellScriptLoader
+{
+    public:
+        spell_leech_poison_hadronox() : SpellScriptLoader("spell_leech_poison_hadronox") { }
+
+        class spell_leech_poison_hadronox_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_leech_poison_hadronox_AuraScript);
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* target = GetTarget();
+                Unit* caster = GetCaster();
+
+                if (!target || !caster || caster->GetEntry() != BOSS_HADRONOX_ENTRY)
+                    return;
+
+                if (!target->isAlive())
+                {
+                    caster->CastSpell(caster, SPELL_LEECH_POISON_HEAL, true);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectRemove += AuraEffectRemoveFn(spell_leech_poison_hadronox_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_LEECH, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_leech_poison_hadronox_AuraScript();
+        }
+};
+
 void AddSC_boss_hadronox()
 {
     new boss_hadronox;
+    new spell_leech_poison_hadronox;
 }

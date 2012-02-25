@@ -54,7 +54,9 @@ enum Yells
     SAY_SPECIAL_2                                          = -1533107,
     SAY_SPECIAL_3                                          = -1533108,
     SAY_REQUEST_AID                                        = -1533103, //start of phase 3
-    SAY_ANSWER_REQUEST                                     = -1533104  //lich king answer
+    SAY_ANSWER_REQUEST                                     = -1533104, //lich king answer
+    EMOTE_CUSTOM_PHASE                                     = -1999984,
+    EMOTE_CUSTOM_GUARD                                     = -1999985
 };
 enum Event
 {
@@ -133,7 +135,8 @@ enum Creatures
     NPC_WASTE                                              = 16427, // Soldiers of the Frozen Wastes
     NPC_ABOMINATION                                        = 16428, // Unstoppable Abominations
     NPC_WEAVER                                             = 16429, // Soul Weavers
-    NPC_ICECROWN                                           = 16441 // Guardians of Icecrown
+    NPC_ICECROWN                                           = 16441, // Guardians of Icecrown
+    NPC_SHADOW_FISSURE                                     = 16129 // Shadow Fissure
 };
 
 const Position Pos[12] =
@@ -286,6 +289,9 @@ public:
 
         SummonList spawns; // adds spawn by the trigger. kept in separated list (i.e. not in summons)
 
+        uint64 FissureGuid;
+        uint32 FissureExplodeTimer;
+
         void Reset()
         {
             _Reset();
@@ -331,11 +337,33 @@ public:
             Phase = 0;
             nAbomination = 0;
             nWeaver = 0;
+
+            FissureGuid = 0;
         }
 
         void KilledUnit(Unit* /*victim*/)
         {
             DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            if (summon && summon->GetEntry() == NPC_SHADOW_FISSURE)
+            {
+                summons.Summon(summon);
+                // DB seems to have wrong values here, Flags Extra 128 would make invisible
+                summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                summon->SetReactState(REACT_PASSIVE);
+                summon->setFaction(me->getFaction());
+                FissureGuid = summon->GetGUID();
+                FissureExplodeTimer = 5000;
+                return;
+            }
+
+            summons.Summon(summon);
+            if (me->isInCombat())
+                DoZoneInCombat(summon);
         }
 
         void JustDied(Unit* /*Killer*/)
@@ -428,6 +456,7 @@ public:
                             events.PopEvent();
                             break;
                         case EVENT_PHASE:
+                            DoScriptText(EMOTE_CUSTOM_PHASE, me);
                             events.Reset();
                             DoScriptText(RAND(SAY_AGGRO_1, SAY_AGGRO_2, SAY_AGGRO_3), me);
                             spawns.DespawnAll();
@@ -435,11 +464,11 @@ public:
                             me->CastStop();
 
                             DoStartMovement(me->getVictim());
-                            events.ScheduleEvent(EVENT_BOLT, urand(5000, 10000));
+                            events.ScheduleEvent(EVENT_BOLT, urand(1000, 10000));
                             events.ScheduleEvent(EVENT_NOVA, 15000);
                             events.ScheduleEvent(EVENT_DETONATE, urand(30000, 40000));
                             events.ScheduleEvent(EVENT_FISSURE, urand(10000, 30000));
-                            events.ScheduleEvent(EVENT_BLAST, urand(60000, 120000));
+                            events.ScheduleEvent(EVENT_BLAST, urand(30000, 60000));
                             if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                                 events.ScheduleEvent(EVENT_CHAIN, urand(30000, 60000));
                             Phase = 2;
@@ -477,13 +506,25 @@ public:
                 {
                     if (uiGuardiansOfIcecrownTimer <= diff)
                     {
-                        // TODO : Add missing text
+                        DoScriptText(EMOTE_CUSTOM_GUARD, me);
                         if (Creature* pGuardian = DoSummon(NPC_ICECROWN, Pos[RAND(2, 5, 8, 11)]))
                             pGuardian->SetFloatValue(UNIT_FIELD_COMBATREACH, 2);
                         ++nGuardiansOfIcecrownCount;
                         uiGuardiansOfIcecrownTimer = 5000;
                     }
                     else uiGuardiansOfIcecrownTimer -= diff;
+                }
+
+                if (FissureGuid) // We have a fissure, so explode after 5 sec
+                {
+                    if (FissureExplodeTimer <= diff)
+                    {
+                        if (Unit* Fissure = me->GetCreature(*me, FissureGuid))
+                        {
+                            Fissure->CastSpell((Unit*)NULL, SPELL_VOID_BLAST, true);
+                            FissureGuid = 0;
+                        }
+                    }else FissureExplodeTimer -= diff;
                 }
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -495,7 +536,7 @@ public:
                     {
                         case EVENT_BOLT:
                             DoCastVictim(RAID_MODE(SPELL_FROST_BOLT, H_SPELL_FROST_BOLT));
-                            events.RepeatEvent(urand(5000, 10000));
+                            events.RepeatEvent(urand(2000, 10000));
                             break;
                         case EVENT_NOVA:
                             DoCastAOE(RAID_MODE(SPELL_FROST_BOLT_AOE, H_SPELL_FROST_BOLT_AOE));

@@ -44,14 +44,14 @@ endif()
 
 include_directories(
   ${CMAKE_BINARY_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
+  ${CMAKE_SOURCE_DIR}/dep/g3dlite/include  
   ${CMAKE_SOURCE_DIR}/dep/gsoap
   ${CMAKE_SOURCE_DIR}/dep/sockets/include
   ${CMAKE_SOURCE_DIR}/dep/SFMT
   ${CMAKE_SOURCE_DIR}/dep/mersennetwister
   ${CMAKE_SOURCE_DIR}/src/server/collision
   ${CMAKE_SOURCE_DIR}/src/server/collision/Management
-  ${CMAKE_SOURCE_DIR}/src/server/collision/Models
+  ${CMAKE_SOURCE_DIR}/src/server/collision/Models  
   ${CMAKE_SOURCE_DIR}/src/server/shared
   ${CMAKE_SOURCE_DIR}/src/server/shared/Configuration
   ${CMAKE_SOURCE_DIR}/src/server/shared/Cryptography
@@ -108,7 +108,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/Grids
   ${CMAKE_SOURCE_DIR}/src/server/game/Groups
   ${CMAKE_SOURCE_DIR}/src/server/game/Guilds
-  ${CMAKE_SOURCE_DIR}/src/server/game/Handlers
+  ${CMAKE_SOURCE_DIR}/src/server/game/Handlers  
   ${CMAKE_SOURCE_DIR}/src/server/game/Instances
   ${CMAKE_SOURCE_DIR}/src/server/game/Loot
   ${CMAKE_SOURCE_DIR}/src/server/game/Mails

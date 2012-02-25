@@ -25,6 +25,7 @@ enum Spells
     SPELL_FRENZY                                = 28131,
     SPELL_BERSERK                               = 26662,
     SPELL_SLIME_BOLT                            = 32309,
+    SPELL_SLIME                                 = 49870,
 };
 
 enum Yells
@@ -42,7 +43,9 @@ enum Events
     EVENT_NONE,
     EVENT_BERSERK,
     EVENT_HATEFUL,
-    EVENT_SLIME
+    EVENT_SLIME,
+    EVENT_FRENZY,
+    EVENT_SLIME_DAMAGE
 };
 
 enum
@@ -65,6 +68,7 @@ public:
         boss_patchwerkAI(Creature* c) : BossAI(c, BOSS_PATCHWERK) {}
 
         bool Enraged;
+        bool Berserk;
 
         void Reset()
         {
@@ -89,13 +93,35 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
+            Berserk = false;
             Enraged = false;
             DoScriptText(RAND(SAY_AGGRO_1, SAY_AGGRO_2), me);
+            events.ScheduleEvent(EVENT_SLIME_DAMAGE, 1000);
             events.ScheduleEvent(EVENT_HATEFUL, 1000);
             events.ScheduleEvent(EVENT_BERSERK, 360000);
 
             if (instance)
                 instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_MAKE_QUICK_WERK_OF_HIM_STARTING_EVENT);
+        }
+
+        void DoSlimeDamage()
+        {
+            Map* map = me->GetMap();
+            if (map && map->IsDungeon())
+            {
+                Map::PlayerList const &PlayerList = map->GetPlayers();
+                if (!PlayerList.isEmpty() && me->isInCombat() && me->isAlive())
+                {
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    {
+                        if (i->getSource() && i->getSource()->isAlive() && i->getSource()->HasAura(SPELL_SLIME))
+                        {
+                            i->getSource()->RemoveAurasDueToSpell(SPELL_SLIME);
+                            me->DealDamage(i->getSource(), uint32(i->getSource()->GetHealth() * 0.1f));
+                        }
+                    }
+                }
+            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -135,20 +161,34 @@ public:
                         break;
                     }
                     case EVENT_BERSERK:
+                        if (!Berserk)
+                        {
+                            Berserk = true;
+                            DoScriptText(EMOTE_BERSERK, me);
+                            events.ScheduleEvent(EVENT_SLIME, 2000);
+                        }
+
                         DoCast(me, SPELL_BERSERK, true);
-                        DoScriptText(EMOTE_BERSERK, me);
-                        events.ScheduleEvent(EVENT_SLIME, 2000);
+                        events.ScheduleEvent(EVENT_BERSERK, 300000);
                         break;
                     case EVENT_SLIME:
                         DoCast(me->getVictim(), SPELL_SLIME_BOLT, true);
                         events.ScheduleEvent(EVENT_SLIME, 2000);
+                        break;
+                    case EVENT_FRENZY:
+                        DoCast(me, SPELL_FRENZY);
+                        events.ScheduleEvent(EVENT_FRENZY, 300000, true);
+                        break;
+                    case EVENT_SLIME_DAMAGE:
+                        DoSlimeDamage();
+                        events.ScheduleEvent(EVENT_SLIME_DAMAGE, 1000);
                         break;
                 }
             }
 
             if (!Enraged && HealthBelowPct(5))
             {
-                DoCast(me, SPELL_FRENZY, true);
+                events.ScheduleEvent(EVENT_FRENZY, 0);
                 DoScriptText(EMOTE_ENRAGE, me);
                 Enraged = true;
             }

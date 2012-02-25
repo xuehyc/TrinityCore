@@ -120,6 +120,7 @@ class BattlegroundRV : public Battleground
     private:
         uint32 Timer;
         uint32 State;
+        uint32 _checkTimer;
 
         virtual void PostUpdateImpl(uint32 diff);
 
@@ -130,5 +131,7 @@ class BattlegroundRV : public Battleground
         uint32 getState() { return State; };
         void setState(uint32 state) { State = state; };
         void TogglePillarCollision(bool apply);
+        void setCheckTimer(uint32 timer) { _checkTimer = timer; };
+        uint32 getCheckTimer() { return _checkTimer; };
 };
 #endif

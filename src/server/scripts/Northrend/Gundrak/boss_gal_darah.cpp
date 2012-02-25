@@ -32,6 +32,8 @@ enum Spells
     SPELL_STAMPEDE                                = 55218,
     SPELL_WHIRLING_SLASH                          = 55250,
     H_SPELL_WHIRLING_SLASH                        = 59824,
+    SPELL_STAMPEDE_ADDS                           = 55220,
+    H_SPELL_STAMPEDE_ADDS                         = 59823
 };
 
 //Yells
@@ -167,8 +169,12 @@ public:
                     {
                         if (uiStampedeTimer <= diff)
                         {
-                            DoCast(me, SPELL_STAMPEDE);
-                            DoScriptText(RAND(SAY_SUMMON_RHINO_1, SAY_SUMMON_RHINO_2, SAY_SUMMON_RHINO_3), me);
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                            {
+                                DoCast(target, DUNGEON_MODE(SPELL_STAMPEDE_ADDS, H_SPELL_STAMPEDE_ADDS), true);
+                                DoScriptText(RAND(SAY_SUMMON_RHINO_1, SAY_SUMMON_RHINO_2, SAY_SUMMON_RHINO_3), me);
+                            }
+
                             uiStampedeTimer = 15*IN_MILLISECONDS;
                         } else uiStampedeTimer -= diff;
 

@@ -580,7 +580,7 @@ class npc_highlord_tirion_fordring_lh : public CreatureScript
         }
 };
 
-class npc_rotting_frost_giant : public CreatureScript
+/*class npc_rotting_frost_giant : public CreatureScript
 {
     public:
         npc_rotting_frost_giant() : CreatureScript("npc_rotting_frost_giant") { }
@@ -599,7 +599,7 @@ class npc_rotting_frost_giant : public CreatureScript
                 _events.ScheduleEvent(EVENT_ARCTIC_BREATH, urand(10000, 15000));
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* killer)
             {
                 _events.Reset();
             }
@@ -650,7 +650,7 @@ class npc_rotting_frost_giant : public CreatureScript
         {
             return GetIcecrownCitadelAI<npc_rotting_frost_giantAI>(creature);
         }
-};
+};*/
 
 class npc_frost_freeze_trap : public CreatureScript
 {
@@ -1666,7 +1666,7 @@ class npc_impaling_spear : public CreatureScript
         }
 };
 
-class spell_icc_stoneform : public SpellScriptLoader
+/*class spell_icc_stoneform : public SpellScriptLoader
 {
     public:
         spell_icc_stoneform() : SpellScriptLoader("spell_icc_stoneform") { }
@@ -1675,7 +1675,7 @@ class spell_icc_stoneform : public SpellScriptLoader
         {
             PrepareAuraScript(spell_icc_stoneform_AuraScript);
 
-            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes mode)
             {
                 if (Creature* target = GetTarget()->ToCreature())
                 {
@@ -1685,7 +1685,7 @@ class spell_icc_stoneform : public SpellScriptLoader
                 }
             }
 
-            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
             {
                 if (Creature* target = GetTarget()->ToCreature())
                 {
@@ -1706,9 +1706,9 @@ class spell_icc_stoneform : public SpellScriptLoader
         {
             return new spell_icc_stoneform_AuraScript();
         }
-};
+};*/
 
-class spell_icc_sprit_alarm : public SpellScriptLoader
+/*class spell_icc_sprit_alarm : public SpellScriptLoader
 {
     public:
         spell_icc_sprit_alarm() : SpellScriptLoader("spell_icc_sprit_alarm") { }
@@ -1768,7 +1768,7 @@ class spell_icc_sprit_alarm : public SpellScriptLoader
         {
             return new spell_icc_sprit_alarm_SpellScript();
         }
-};
+};*/
 
 class DeathPlagueTargetSelector
 {
@@ -2050,7 +2050,7 @@ class at_icc_start_frostwing_gauntlet : public AreaTriggerScript
 void AddSC_icecrown_citadel()
 {
     new npc_highlord_tirion_fordring_lh();
-    new npc_rotting_frost_giant();
+    //new npc_rotting_frost_giant();
     new npc_frost_freeze_trap();
     new npc_alchemist_adrianna();
     new boss_sister_svalna();
@@ -2061,8 +2061,8 @@ void AddSC_icecrown_citadel()
     new npc_captain_rupert();
     new npc_frostwing_vrykul();
     new npc_impaling_spear();
-    new spell_icc_stoneform();
-    new spell_icc_sprit_alarm();
+    //new spell_icc_stoneform();
+    //new spell_icc_sprit_alarm();
     new spell_frost_giant_death_plague();
     new spell_icc_harvest_blight_specimen();
     new spell_trigger_spell_from_caster("spell_svalna_caress_of_death", SPELL_IMPALING_SPEAR_KILL);

@@ -201,6 +201,8 @@ public:
                     return m_uiIonarGUID;
                 case DATA_LOKEN:
                     return m_uiLokenGUID;
+                case GO_BJARNGRIM_DOOR:
+                    return m_uiBjarngrimDoorGUID;
             }
             return 0;
         }

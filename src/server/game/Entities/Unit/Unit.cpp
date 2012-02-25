@@ -683,7 +683,14 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         // in bg, count dmg if victim is also a player
         if (victim->GetTypeId() == TYPEID_PLAYER)
             if (Battleground* bg = killer->GetBattleground())
+            {
                 bg->UpdatePlayerScore(killer, SCORE_DAMAGE_DONE, damage);
+
+                /** World of Warcraft Armory **/
+                if (Battleground* bgV = victim->ToPlayer()->GetBattleground())
+                    bgV->UpdatePlayerScore(victim->ToPlayer(), SCORE_DAMAGE_TAKEN, damage);
+                /** World of Warcraft Armory **/
+            }
 
         killer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DAMAGE_DONE, damage, 0, victim);
         killer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HIT_DEALT, damage);
@@ -6590,7 +6597,14 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 float ap = GetTotalAttackPowerValue(BASE_ATTACK);
                 int32 holy = SpellBaseDamageBonus(SPELL_SCHOOL_MASK_HOLY) +
                              SpellBaseDamageBonusForVictim(SPELL_SCHOOL_MASK_HOLY, victim);
-                basepoints0 = (int32)GetAttackTime(BASE_ATTACK) * int32(ap * 0.022f + 0.044f * holy) / 1000;
+                float exactValue = GetAttackTime(BASE_ATTACK) * (ap*0.022f + 0.044f * holy) / 1000;
+                int32 roundValue = int32(GetAttackTime(BASE_ATTACK) * (ap*0.022f + 0.044f * holy) / 1000);
+
+                // Additionally perform a secure rounding value check here
+                if (exactValue - roundValue < 0.5)
+                    basepoints0 = (int32)(GetAttackTime(BASE_ATTACK) * (ap*0.022f + 0.044f * holy) / 1000);
+                else
+                    basepoints0 = (int32)(GetAttackTime(BASE_ATTACK) * (ap*0.022f + 0.044f * holy) / 1000) + 1;
                 break;
             }
             // Light's Beacon - Beacon of Light
@@ -6764,10 +6778,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     // At melee attack or Hammer of the Righteous spell damage considered as melee attack
                     bool stacker = !procSpell || procSpell->Id == 53595;
                     // spells with SPELL_DAMAGE_CLASS_MELEE excluding Judgements
-                    bool damager = procSpell && procSpell->EquippedItemClass != -1;
-
-                    if (!stacker && !damager)
-                        return false;
+                    bool damager = procSpell && procSpell->EquippedItemClass == ITEM_CLASS_WEAPON;
 
                     triggered_spell_id = 31803;
 
@@ -6776,15 +6787,35 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     {
                         if (aur->GetStackAmount() == 5)
                         {
-                            if (stacker)
-                                aur->RefreshDuration();
+                            aur->RefreshDuration();
                             CastSpell(victim, 42463, true);
                             return true;
                         }
-                    }
+                        else  // since the aura exists, but isn't maximized, the amount of stacks is between 1 and 4
+                        {
+                            if (!stacker && !damager)
+                                return false;
 
-                    if (!stacker)
-                        return false;
+                            if (stacker)
+                            {
+                                AddAura(triggered_spell_id, victim);
+                                aur->RefreshDuration();
+                                CastSpell(victim, 42463, true);
+                            }
+                        }
+                        return true;
+                    }
+                    else
+                    {
+                        if (!stacker)
+                            return false;
+                        else
+                        {
+                            // aura does not exist yet, create it!
+                            AddAura(triggered_spell_id, victim);
+                            return true;
+                        }
+                    }
                     break;
                 }
                 // Seal of Corruption
@@ -6796,10 +6827,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     // At melee attack or Hammer of the Righteous spell damage considered as melee attack
                     bool stacker = !procSpell || procSpell->Id == 53595;
                     // spells with SPELL_DAMAGE_CLASS_MELEE excluding Judgements
-                    bool damager = procSpell && procSpell->EquippedItemClass != -1;
-
-                    if (!stacker && !damager)
-                        return false;
+                    bool damager = procSpell && procSpell->EquippedItemClass == ITEM_CLASS_WEAPON;
 
                     triggered_spell_id = 53742;
 
@@ -6808,15 +6836,35 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     {
                         if (aur->GetStackAmount() == 5)
                         {
-                            if (stacker)
-                                aur->RefreshDuration();
+                            aur->RefreshDuration();
                             CastSpell(victim, 53739, true);
                             return true;
                         }
-                    }
+                        else  // since the aura exists, but isn't maximized, the amount of stacks is between 1 and 4
+                        {
+                            if (!stacker && !damager)
+                                return false;
 
-                    if (!stacker)
-                        return false;
+                            if (stacker)
+                            {
+                                AddAura(triggered_spell_id, victim);
+                                aur->RefreshDuration();
+                                CastSpell(victim, 53739, true);
+                            }
+                        }
+                        return true;
+                    }
+                    else
+                    {
+                        if (!stacker)
+                            return false;
+                        else
+                        {
+                            // aura does not exist yet, create it!
+                            AddAura(triggered_spell_id, victim);
+                            return true;
+                        }
+                    }
                     break;
                 }
                 // Spiritual Attunement
@@ -7881,26 +7929,6 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     RemoveAuraFromStack(71564);
                     *handled = true;
                     break;
-                // Gaseous Bloat
-                case 70672:
-                case 72455:
-                case 72832:
-                case 72833:
-                {
-                    *handled = true;
-                    uint32 stack = triggeredByAura->GetStackAmount();
-                    int32 const mod = (GetMap()->GetSpawnMode() & 1) ? 1500 : 1250;
-                    int32 dmg = 0;
-                    for (uint8 i = 1; i < stack; ++i)
-                        dmg += mod * stack;
-                    if (Unit* caster = triggeredByAura->GetCaster())
-                    {
-                        caster->CastCustomSpell(70701, SPELLVALUE_BASE_POINT0, dmg);
-                        if (Creature* creature = caster->ToCreature())
-                            creature->DespawnOrUnsummon(1);
-                    }
-                    break;
-                }
                 // Ball of Flames Proc
                 case 71756:
                 case 72782:
@@ -8712,6 +8740,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             // Can proc only if target has hp below 35%
             if (!victim || !victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, procSpell, this))
                 return false;
+            break;
+        // Item - Rogue T10 4P Bonus (70803) - Replace Mayhem spell hack
+        case 70802:
+            trigger_spell_id = 44329;
             break;
         // Deathbringer Saurfang - Blood Beast's Blood Link
         case 72176:
@@ -9983,6 +10015,11 @@ int32 Unit::DealHeal(Unit* victim, uint32 addhealth)
     {
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_HEALING_RECEIVED, gain);
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALING_RECEIVED, addhealth);
+
+        /** World of Warcraft Armory **/
+        if (Battleground* bgV = player->GetBattleground())
+            bgV->UpdatePlayerScore(player, SCORE_HEALING_TAKEN, gain);
+        /** World of Warcraft Armory **/
     }
 
     return gain;
@@ -10530,6 +10567,11 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
                 if (AuraEffect* aurEff = GetAuraEffect(64962, EFFECT_1))
                     AddPctN(DoneTotal, aurEff->GetAmount());
 
+            // Death and Decay - Item - Death Knight T10 Tank 2P Bonus
+            if (spellProto->Id == 52212)
+                if (HasAura(70650))
+                    DoneTotalMod *= 1.2f;
+
             // Glacier Rot
             if (spellProto->SpellFamilyFlags[0] & 0x2 || spellProto->SpellFamilyFlags[1] & 0x6)
                 if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 196, 0))
@@ -10930,6 +10972,12 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                     return true;
                             break;
                         }
+                        // Player Fire Totems have same spell crit chance like Player spell crit
+                        if (isTotem() && IS_PLAYER_GUID(GetOwnerGUID()) && schoolMask & SPELL_SCHOOL_MASK_FIRE)
+                        {
+                            return GetOwner()->isSpellCrit(victim, spellProto, schoolMask, attackType);
+                            break;
+                        }
                     break;
                 }
             }
@@ -11014,6 +11062,10 @@ uint32 Unit::SpellCriticalDamageBonus(SpellInfo const* spellProto, uint32 damage
         AddPctF(crit_bonus, crit_mod);
 
     crit_bonus -= damage;
+
+    // all these spells should have only 50% bonus damage on crit like a magic spells
+    if (spellProto->Id == 55078 || spellProto->Id == 61840 || (spellProto->SpellFamilyName == SPELLFAMILY_HUNTER && spellProto->SpellFamilyFlags[0] & 0x4000))
+        crit_bonus /= 2;
 
     // adds additional damage to crit_bonus (from talents)
     if (Player* modOwner = GetSpellModOwner())
@@ -12131,12 +12183,14 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell) co
             return false;
     }
     // check flags
-    if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_TAXI_FLIGHT | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_UNK_16)
+    if  (
+        target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_TAXI_FLIGHT | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_UNK_16)
         || (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
         || (!target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
-        || (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
+        || (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC) && !target->isInCombat())
         // check if this is a world trigger cast - GOs are using world triggers to cast their spells, so we need to ignore their immunity flag here, this is a temp workaround, needs removal when go cast is implemented properly
-        || (GetEntry() != WORLD_TRIGGER && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC)))
+        || (GetEntry() != WORLD_TRIGGER && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC) && !isInCombat())
+        )
         return false;
 
     // CvC case - can attack each other only when one of them is hostile
@@ -15327,14 +15381,6 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
     if (!victim->GetHealth())
         return;
 
-    // Inform pets (if any) when player kills target)
-    if (Player* player = ToPlayer())
-    {
-        Pet* pet = player->GetPet();
-        if (pet && pet->isAlive() && pet->isControlled())
-            pet->AI()->KilledUnit(victim);
-    }
-
     // find player: owner of controlled `this` or `this` itself maybe
     Player* player = GetCharmerOrOwnerPlayerOrPlayerItself();
     Creature* creature = victim->ToCreature();
@@ -15463,6 +15509,16 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
         victim->setDeathState(JUST_DIED);
     }
 
+    // Inform pets (if any) when player kills target)
+    // MUST come after victim->setDeathState(JUST_DIED); or pet next target
+    // selection will get stuck on same target and break pet react state
+    if (Player* player = ToPlayer())
+    {
+        Pet* pet = player->GetPet();
+        if (pet && pet->isAlive() && pet->isControlled())
+            pet->AI()->KilledUnit(victim);
+    }
+
     // 10% durability loss on death
     // clean InHateListOf
     if (Player* plrVictim = victim->ToPlayer())
@@ -15526,10 +15582,36 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
 
             if (instanceMap->IsDungeon() && creditedPlayer)
             {
+                // Castle log instance kills + important items
+                if (creature->IsDungeonBoss())
+                {
+                    Map::PlayerList const &PlayerList = instanceMap->GetPlayers();
+                    if (!PlayerList.isEmpty())
+                    {
+                        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                        {
+                            if (i->getSource())
+                            {
+                                if (i->getSource()->IsInRaidWith(creditedPlayer))
+                                {
+                                    std::string player_name = i->getSource()->GetName();
+                                    std::string creature_name = creature->GetNameForLocaleIdx(LOCALE_deDE);
+                                    CharacterDatabase.EscapeString(player_name);
+                                    CharacterDatabase.EscapeString(creature_name);
+                                    CharacterDatabase.PExecute("INSERT INTO castle_log VALUES (%u,'%s',1,UNIX_TIMESTAMP(),%u,%u,%u,'%s')", i->getSource()->GetGUIDLow(), player_name.c_str(), creature->GetEntry(), creature->GetCreatureInfo()->Entry, instanceMap->GetDifficulty(), creature_name.c_str());
+                                }
+                            }
+                        }
+                    }
+                }
+
                 if (instanceMap->IsRaidOrHeroicDungeon())
                 {
                     if (creature->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
+                    {
                         ((InstanceMap*)instanceMap)->PermBindAllPlayers(creditedPlayer);
+                        creditedPlayer->CreateWowarmoryFeed(3, creature->GetCreatureInfo()->Entry, 0, 0);
+                    }
                 }
                 else
                 {
@@ -17393,7 +17475,11 @@ bool CharmInfo::IsCommandAttack()
 
 void CharmInfo::SaveStayPosition()
 {
-    m_unit->GetPosition(m_stayX, m_stayY, m_stayZ);
+    //! At this point a new spline destination is enabled because of Unit::StopMoving()
+    G3D::Vector3 const stayPos = m_unit->movespline->FinalDestination();
+    m_stayX = stayPos.x;
+    m_stayY = stayPos.y;
+    m_stayZ = stayPos.z;
 }
 
 void CharmInfo::GetStayPosition(float &x, float &y, float &z)

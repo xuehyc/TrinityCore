@@ -299,7 +299,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             }
 
             // Weekly quest spawn prevention
-            uint32 GetCreatureEntry(uint32 /*guidLow*/, CreatureData const* data)
+            /*uint32 GetCreatureEntry(uint32 guidLow, CreatureData const* data)
             {
                 uint32 entry = data->id;
                 switch (entry)
@@ -329,7 +329,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 }
 
                 return entry;
-            }
+            }*/
 
             void OnUnitDeath(Unit* unit)
             {
@@ -711,8 +711,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         }
                         break;
                     case DATA_VALITHRIA_DREAMWALKER:
-                        if (state == DONE && sPoolMgr->IsSpawnedObject<Quest>(WeeklyQuestData[8].questId[instance->GetSpawnMode() & 1]))
-                            instance->SummonCreature(NPC_VALITHRIA_DREAMWALKER_QUEST, ValithriaSpawnPos);
+                        /*if (state == DONE && sPoolMgr->IsSpawnedObject<Quest>(WeeklyQuestData[8].questId[instance->GetSpawnMode() & 1]))
+                            instance->SummonCreature(NPC_VALITHRIA_DREAMWALKER_QUEST, ValithriaSpawnPos);*/
                         break;
                     case DATA_SINDRAGOSA:
                         HandleGameObject(FrostwingSigilGUID, state != DONE);
@@ -879,8 +879,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                             break;
 
                         // 5 is the index of Blood Quickening
-                        if (!sPoolMgr->IsSpawnedObject<Quest>(WeeklyQuestData[5].questId[instance->GetSpawnMode() & 1]))
-                            break;
+                        /*if (!sPoolMgr->IsSpawnedObject<Quest>(WeeklyQuestData[5].questId[instance->GetSpawnMode() & 1]))
+                            break;*/
 
                         switch (data)
                         {

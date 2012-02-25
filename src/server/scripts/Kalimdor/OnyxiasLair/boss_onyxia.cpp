@@ -89,8 +89,6 @@ static sOnyxMove aMoveData[]=
 
 const Position MiddleRoomLocation = {-23.6155f, -215.357f, -55.7344f, 0.0f};
 
-const Position Phase2Location = {-80.924f, -214.299f, -82.942f, 0.0f};
-
 static Position aSpawnLocations[3]=
 {
     //Whelps
@@ -139,7 +137,12 @@ public:
 
         uint32 m_uiBellowingRoarTimer;
 
+        uint32 m_uiCheckPlayerSummonWhelpTimer;
+        uint32 m_uiSummonWhelpPhase3Timer;
+        bool logWhelpSummons;
+
         uint8 m_uiSummonWhelpCount;
+        uint8 m_uiSummonLairGuardCount;
         bool m_bIsMoving;
 
         void Reset()
@@ -155,18 +158,23 @@ public:
             m_uiWingBuffetTimer = urand(10000, 20000);
 
             m_uiMovePoint = urand(0, 5);
-            m_uiMovementTimer = 14000;
+            m_uiMovementTimer = 20000;
             m_pPointData = GetMoveData();
 
             m_uiFireballTimer = 15000;
-            m_uiWhelpTimer = 60000;
-            m_uiLairGuardTimer = 60000;
+            m_uiWhelpTimer = 1000;
+            m_uiLairGuardTimer = 15000;
             m_uiDeepBreathTimer = 85000;
 
             m_uiBellowingRoarTimer = 30000;
 
+            m_uiCheckPlayerSummonWhelpTimer = 1000;
+            m_uiSummonWhelpPhase3Timer = 15000;
+            logWhelpSummons = true;
+
             Summons.DespawnAll();
             m_uiSummonWhelpCount = 0;
+            m_uiSummonLairGuardCount = 0;
             m_bIsMoving = false;
 
             if (m_instance)
@@ -206,10 +214,12 @@ public:
             switch (summoned->GetEntry())
             {
                 case NPC_WHELP:
+                if (logWhelpSummons)
                     ++m_uiSummonWhelpCount;
                     break;
                 case NPC_LAIRGUARD:
                     summoned->setActive(true);
+                    ++m_uiSummonLairGuardCount;
                     break;
             }
             Summons.Summon(summoned);
@@ -260,24 +270,6 @@ public:
                         me->GetMotionMaster()->MoveChase(me->getVictim());
                         m_uiBellowingRoarTimer = 1000;
                         break;
-                    case 10:
-                        me->SetFlying(true);
-                        me->GetMotionMaster()->MovePoint(11, Phase2Location.GetPositionX(), Phase2Location.GetPositionY(), Phase2Location.GetPositionZ()+25);
-                        me->SetSpeed(MOVE_FLIGHT, 1.0f);
-                        DoScriptText(SAY_PHASE_2_TRANS, me);
-                        if (m_instance)
-                            m_instance->SetData(DATA_ONYXIA_PHASE, m_uiPhase);
-                        m_uiWhelpTimer = 5000;
-                        m_uiLairGuardTimer = 15000;
-                        break;
-                    case 11:
-                        if (m_pPointData)
-                            me->GetMotionMaster()->MovePoint(m_pPointData->uiLocId, m_pPointData->fX, m_pPointData->fY, m_pPointData->fZ);
-                        me->GetMotionMaster()->Clear(false);
-                        me->GetMotionMaster()->MoveIdle();
-
-                        break;
-
                     default:
                         m_bIsMoving = false;
                         break;
@@ -333,9 +325,56 @@ public:
             m_uiMovePoint = iTemp;
         }
 
+        void CheckPlayersCoordinatesSummonWhelps()
+        {
+            Map* map = me->GetMap();
+            if (map && map->IsDungeon())
+            {
+                Map::PlayerList const &PlayerList = map->GetPlayers();
+                if (!PlayerList.isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    {
+                        if (!i->getSource() || !i->getSource()->isAlive())
+                            continue;
+
+                        float x = i->getSource()->GetPositionX(), y = i->getSource()->GetPositionY(), z = i->getSource()->GetPositionZ();
+
+                        if ((x >= -23.8f || (x <= -23.8f && x >= -70.4f && y <= -177.7f && y >= -251.1f) ||
+                            (x <= -70.4f && x >= -76.1f && y <= -183.7f && y >= -248.0f) ||
+                            (x <= -76.1f && x >= -85.0f && y <= -187.8f && y >= -239.1f) ||
+                            (x <= -85.0f && x >= -88.0f && y <= -191.3f && y >= -237.0f) ||
+                            (x <= -88.0f && x >= -106.5f && y <= -203.3f && y >= -224.5f && z >= -89.0f)) &&
+                            (z <= -62.0f && z >= -95.0f))
+                            continue;
+                        else
+                        {
+                            i->getSource()->TeleportTo(249, 4.9f, -217.8f, -86.0f, 3.123f);
+                            logWhelpSummons = false;
+                            for (uint8 count = 0; count < RAID_MODE(5,10); count++)
+                                me->SummonCreature(NPC_WHELP, 4.9f, -217.8f, -86.0f, 3.123f, TEMPSUMMON_CORPSE_DESPAWN);
+
+                            logWhelpSummons = true;
+                        }
+                    }
+                }
+            }
+        }
+
         void UpdateAI(const uint32 uiDiff)
         {
             if (!UpdateVictim())
+                return;
+
+            if (m_uiCheckPlayerSummonWhelpTimer <= uiDiff)
+            {
+                CheckPlayersCoordinatesSummonWhelps();
+                m_uiCheckPlayerSummonWhelpTimer = 1000;
+            }
+            else
+                m_uiCheckPlayerSummonWhelpTimer -= uiDiff;
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             //Common to PHASE_START && PHASE_END
@@ -346,9 +385,22 @@ public:
                 {
                     if (HealthBelowPct(60))
                     {
-                        SetCombatMovement(false);
                         m_uiPhase = PHASE_BREATH;
-                        me->GetMotionMaster()->MovePoint(10, Phase2Location);
+                    
+                        if (m_instance)
+                            m_instance->SetData(DATA_ONYXIA_PHASE, m_uiPhase);
+
+                        SetCombatMovement(false);
+                        me->GetMotionMaster()->Clear(false);
+                        me->GetMotionMaster()->MoveIdle();
+                        me->SetFlying(true);
+
+                        DoScriptText(SAY_PHASE_2_TRANS, me);
+
+                        if (m_pPointData)
+                            me->GetMotionMaster()->MovePoint(m_pPointData->uiLocId, m_pPointData->fX, m_pPointData->fY, m_pPointData->fZ);
+
+                        m_uiWhelpTimer = 1000;
                         return;
                     }
                 }
@@ -368,6 +420,20 @@ public:
                     }
                     else
                         m_uiBellowingRoarTimer -= uiDiff;
+
+                    if (m_uiSummonWhelpPhase3Timer <= uiDiff)
+                    {
+                        logWhelpSummons = false;
+                        for (uint8 counter = 0; counter < RAID_MODE(1,2); counter++)
+                        {
+                            me->SummonCreature(NPC_WHELP, aSpawnLocations[0].GetPositionX(), aSpawnLocations[0].GetPositionY(), aSpawnLocations[0].GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
+                            me->SummonCreature(NPC_WHELP, aSpawnLocations[1].GetPositionX(), aSpawnLocations[1].GetPositionY(), aSpawnLocations[1].GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
+                        }
+                        logWhelpSummons = true;
+                        m_uiSummonWhelpPhase3Timer = 15000;
+                    }
+                    else
+                        m_uiSummonWhelpPhase3Timer -= uiDiff;
                 }
 
                 if (m_uiFlameBreathTimer <= uiDiff)
@@ -466,16 +532,23 @@ public:
                 else
                     m_uiFireballTimer -= uiDiff;
 
-                if (m_uiLairGuardTimer <= uiDiff)
-                {
-                    me->SummonCreature(NPC_LAIRGUARD, aSpawnLocations[2].GetPositionX(), aSpawnLocations[2].GetPositionY(), aSpawnLocations[2].GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
-                    m_uiLairGuardTimer = 30000;
-                }
-                else
-                    m_uiLairGuardTimer -= uiDiff;
+                    if (m_uiLairGuardTimer <= uiDiff)
+                    {
+                        me->SummonCreature(NPC_LAIRGUARD, aSpawnLocations[2].GetPositionX(), aSpawnLocations[2].GetPositionY(), aSpawnLocations[2].GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
+                        if (m_uiSummonLairGuardCount >= RAID_MODE(1,2))
+                        {
+                            m_uiSummonLairGuardCount = 0;
+                            m_uiLairGuardTimer = 30000;
+                        }
+                        else
+                            m_uiLairGuardTimer = 2000;
+                    }
+                    else
+                        m_uiLairGuardTimer -= uiDiff;
 
                 if (m_uiWhelpTimer <= uiDiff)
                 {
+                    logWhelpSummons = true;
                     me->SummonCreature(NPC_WHELP, aSpawnLocations[0].GetPositionX(), aSpawnLocations[0].GetPositionY(), aSpawnLocations[0].GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
                     me->SummonCreature(NPC_WHELP, aSpawnLocations[1].GetPositionX(), aSpawnLocations[1].GetPositionY(), aSpawnLocations[1].GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
                     if (m_uiSummonWhelpCount >= RAID_MODE(20, 40))

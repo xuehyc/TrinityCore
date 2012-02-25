@@ -160,6 +160,7 @@ set(scripts_STAT_SRCS
   Northrend/VioletHold/boss_erekem.cpp
   Northrend/VioletHold/violet_hold.cpp
   Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp
+  Northrend/IcecrownCitadel/icc_lower_spire_trash.cpp  
   Northrend/IcecrownCitadel/icecrown_citadel.cpp
   Northrend/IcecrownCitadel/icecrown_citadel.h
   Northrend/IcecrownCitadel/icecrown_citadel_teleport.cpp
@@ -176,6 +177,7 @@ set(scripts_STAT_SRCS
   Northrend/IcecrownCitadel/boss_the_lich_king.cpp
   Northrend/zuldrak.cpp
   Northrend/icecrown.cpp
+  Northrend/wintergrasp.cpp  
   Northrend/Gundrak/boss_slad_ran.cpp
   Northrend/Gundrak/instance_gundrak.cpp
   Northrend/Gundrak/boss_drakkari_colossus.cpp

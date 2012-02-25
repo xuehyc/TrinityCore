@@ -78,6 +78,41 @@ void BattlegroundDS::PostUpdateImpl(uint32 diff)
     }
     else
         setWaterFallTimer(getWaterFallTimer() - diff);
+
+    if (getCheckTimer() < diff)
+    {
+        for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+        {
+            if (Player* player = ObjectAccessor::FindPlayer(itr->first))
+            {
+                float pos_z = player->GetPositionZ();
+                float dist1 = player->GetDistance(1218.007f, 764.795f, 14.73f);
+                float dist2 = player->GetDistance(1361.760f, 817.337f, 14.85f);
+
+                if (pos_z < 3.0f)
+                {
+                    HandlePlayerUnderMap(player);
+                    continue;
+                }
+
+                if (pos_z > 10.0f && dist1 < 30.0f)
+                {
+                    player->TeleportTo(GetMapId(), 1269.54f, 768.34f, 8.5f, 0.7f, false);
+                    continue;
+                }
+
+                if (pos_z > 10.0f && dist2 < 30.0f)
+                {
+                    player->TeleportTo(GetMapId(), 1313.89f, 813.63f, 8.5f, 3.9f, false);
+                    continue;
+                }
+            }
+        }
+
+        setCheckTimer(5000);
+    }
+    else
+        setCheckTimer(getCheckTimer() - diff);
 }
 
 void BattlegroundDS::StartingEventCloseDoors()
@@ -96,6 +131,7 @@ void BattlegroundDS::StartingEventOpenDoors()
 
     setWaterFallTimer(urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX));
     setWaterFallStatus(BG_DS_WATERFALL_STATUS_OFF);
+    setCheckTimer(10000);
 
     SpawnBGObject(BG_DS_OBJECT_WATER_2, RESPAWN_IMMEDIATELY);
     DoorOpen(BG_DS_OBJECT_WATER_2);

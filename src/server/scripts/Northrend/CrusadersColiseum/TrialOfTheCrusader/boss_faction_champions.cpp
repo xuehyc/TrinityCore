@@ -69,14 +69,12 @@ public:
 
         InstanceScript* m_instance;
         SummonList Summons;
-        uint32 m_uiChampionsNotStarted;
         uint32 m_uiChampionsFailed;
         uint32 m_uiChampionsKilled;
         bool   m_bInProgress;
 
         void Reset()
         {
-            m_uiChampionsNotStarted = 0;
             m_uiChampionsFailed = 0;
             m_uiChampionsKilled = 0;
             m_bInProgress = false;
@@ -212,17 +210,10 @@ public:
                     {
                         case FAIL:
                             m_uiChampionsFailed++;
-                            if (m_uiChampionsFailed + m_uiChampionsKilled >= Summons.size())
-                            {
-                                m_instance->SetData(TYPE_CRUSADERS, FAIL);
-                                Summons.DespawnAll();
-                                me->DespawnOrUnsummon();
-                            }
                             break;
                         case IN_PROGRESS:
                             if (!m_bInProgress)
                             {
-                                m_uiChampionsNotStarted = 0;
                                 m_uiChampionsFailed = 0;
                                 m_uiChampionsKilled = 0;
                                 m_bInProgress = true;
@@ -232,22 +223,45 @@ public:
                             break;
                         case DONE:
                             m_uiChampionsKilled++;
-                            if (m_uiChampionsKilled == 1)
-                                m_instance->SetData(TYPE_CRUSADERS, SPECIAL);
-                            else if (m_uiChampionsKilled >= Summons.size())
-                            {
-                                m_instance->SetData(TYPE_CRUSADERS, DONE);
-                                Summons.DespawnAll();
-                                me->DespawnOrUnsummon();
-                            }
                             break;
                     }
+
+                    // Special case for achievements?
+                    if (m_uiChampionsKilled == 1)
+                        m_instance->SetData(TYPE_CRUSADERS, SPECIAL);
+
+                    // At least one champion failed - Wait for all to die or to fail and finally reset
+                    if (m_uiChampionsFailed >= 1)
+                    {
+                        if ((m_uiChampionsFailed + m_uiChampionsKilled) >= Summons.size())
+                        {
+                            m_instance->SetData(TYPE_CRUSADERS, FAIL);
+                            Summons.DespawnAll();
+                            me->DespawnOrUnsummon();
+                        }
+                    }
+
+                    // No champions failed until now - Continue checking if all are dead
+                    if (m_uiChampionsFailed == 0)
+                    {
+                        if (m_uiChampionsKilled >= Summons.size())
+                        {
+                            m_instance->SetData(TYPE_CRUSADERS, DONE);
+                            Summons.DespawnAll();
+                            me->DespawnOrUnsummon();
+                        }
+                    }
+
+                    sLog->outString("TSCR: PDK DEBUG: Champions Failed : %u", m_uiChampionsFailed);
+                    sLog->outString("TSCR: PDK DEBUG: Champions Killed : %u", m_uiChampionsKilled);
+                    sLog->outString("TSCR: PDK DEBUG: Champions Size : %u", Summons.size());
                     break;
             }
         }
     };
 
 };
+
 
 struct boss_faction_championsAI : public ScriptedAI
 {
@@ -273,9 +287,11 @@ struct boss_faction_championsAI : public ScriptedAI
 
     void JustReachedHome()
     {
-        if (m_instance)
-            if (Creature* pChampionController = Unit::GetCreature((*me), m_instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
-                pChampionController->AI()->SetData(2, FAIL);
+        if (mAIType != AI_PET)
+            if (m_instance)
+                if (Creature* pChampionController = Unit::GetCreature((*me), m_instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
+                    pChampionController->AI()->SetData(2, FAIL);
+
         me->DespawnOrUnsummon();
     }
 
@@ -290,7 +306,9 @@ struct boss_faction_championsAI : public ScriptedAI
     void UpdateThreat()
     {
         std::list<HostileReference*> const& tList = me->getThreatManager().getThreatList();
-        for (std::list<HostileReference*>::const_iterator itr = tList.begin(); itr != tList.end(); ++itr)
+        std::list<HostileReference*>::const_iterator itr;
+        bool empty = true;
+        for (itr = tList.begin(); itr!=tList.end(); ++itr)
         {
             Unit* unit = Unit::GetUnit((*me), (*itr)->getUnitGuid());
             if (unit && me->getThreatManager().getThreat(unit))
@@ -300,6 +318,7 @@ struct boss_faction_championsAI : public ScriptedAI
                     float threat = CalculateThreat(me->GetDistance2d(unit), (float)unit->GetArmor(), unit->GetHealth());
                     me->getThreatManager().modifyThreatPercent(unit, -100);
                     me->AddThreat(unit, 1000000.0f * threat);
+                    empty = false;
                 }
             }
         }
@@ -334,22 +353,19 @@ struct boss_faction_championsAI : public ScriptedAI
     void EnterCombat(Unit* /*who*/)
     {
         DoCast(me, SPELL_ANTI_AOE, true);
-        me->SetInCombatWithZone();
-        if (m_instance)
-            if (Creature* pChampionController = Unit::GetCreature((*me), m_instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
-                pChampionController->AI()->SetData(2, IN_PROGRESS);
+        DoZoneInCombat();
+
+        if (mAIType != AI_PET)
+            if (m_instance)
+                if (Creature* pChampionController = Unit::GetCreature((*me), m_instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
+                    pChampionController->AI()->SetData(2, IN_PROGRESS);
     }
 
     void KilledUnit(Unit* who)
     {
         if (who->GetTypeId() == TYPEID_PLAYER)
         {
-            Map::PlayerList const &players = me->GetMap()->GetPlayers();
-            uint32 TeamInInstance = 0;
-
-            if (!players.isEmpty())
-                if (Player* player = players.begin()->getSource())
-                    TeamInInstance = player->GetTeam();
+            uint32 TeamInInstance = who->ToPlayer()->GetTeam();
 
             if (m_instance)
             {
@@ -381,12 +397,11 @@ struct boss_faction_championsAI : public ScriptedAI
     {
         std::list<HostileReference*> const& tList = me->getThreatManager().getThreatList();
         std::list<HostileReference*>::const_iterator iter;
-        Unit* target;
         for (iter = tList.begin(); iter!=tList.end(); ++iter)
         {
-            target = Unit::GetUnit((*me), (*iter)->getUnitGuid());
-            if (target && target->getPowerType() == POWER_MANA)
-                return target;
+            if (Unit* target = Unit::GetUnit((*me), (*iter)->getUnitGuid()))
+                if (target->getPowerType() == POWER_MANA)
+                    return target;
         }
         return NULL;
     }
@@ -396,11 +411,11 @@ struct boss_faction_championsAI : public ScriptedAI
         std::list<HostileReference*> const& tList = me->getThreatManager().getThreatList();
         std::list<HostileReference*>::const_iterator iter;
         uint32 count = 0;
-        Unit* target;
         for (iter = tList.begin(); iter!=tList.end(); ++iter)
         {
-            target = Unit::GetUnit((*me), (*iter)->getUnitGuid());
-                if (target && me->GetDistance2d(target) < distance)
+            Unit* target;
+            if (target = Unit::GetUnit((*me), (*iter)->getUnitGuid()))
+                if (me->GetDistance2d(target) < distance)
                     ++count;
         }
         return count;
@@ -478,17 +493,15 @@ public:
         mob_toc_druidAI(Creature* creature) : boss_faction_championsAI(creature, AI_HEALER) {}
 
         uint32 m_uiNatureGraspTimer;
-        uint32 m_uiTranquilityTimer;
         uint32 m_uiBarkskinTimer;
         uint32 m_uiCommonTimer;
 
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiNatureGraspTimer = IN_MILLISECONDS;
-            m_uiTranquilityTimer = IN_MILLISECONDS;
-            m_uiBarkskinTimer = IN_MILLISECONDS;
-            m_uiCommonTimer = IN_MILLISECONDS;
+            m_uiNatureGraspTimer = urand(4000, 7000);
+            m_uiBarkskinTimer = urand(6000, 9000);
+            m_uiCommonTimer = urand(2000, 4000);
             SetEquipmentSlots(false, 51799, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
         }
 
@@ -499,20 +512,14 @@ public:
             if (m_uiNatureGraspTimer <= uiDiff)
             {
                 DoCast(me, SPELL_NATURE_GRASP);
-                m_uiNatureGraspTimer = urand(40*IN_MILLISECONDS, 80*IN_MILLISECONDS);
+                m_uiNatureGraspTimer = urand(15*1000, 25*1000);
             } else m_uiNatureGraspTimer -= uiDiff;
-
-            if (m_uiTranquilityTimer <= uiDiff)
-            {
-                DoCastAOE(SPELL_TRANQUILITY);
-                m_uiTranquilityTimer = urand(40*IN_MILLISECONDS, 90*IN_MILLISECONDS);
-            } else m_uiTranquilityTimer -= uiDiff;
 
             if (m_uiBarkskinTimer <= uiDiff)
             {
                 if (HealthBelowPct(50))
                     DoCast(me, SPELL_BARKSKIN);
-                m_uiBarkskinTimer = urand(45*IN_MILLISECONDS, 90*IN_MILLISECONDS);
+                m_uiBarkskinTimer = urand(20*1000, 35*1000);
             } else m_uiBarkskinTimer -= uiDiff;
 
             if (m_uiCommonTimer <= uiDiff)
@@ -520,23 +527,27 @@ public:
                 switch (urand(0, 4))
                 {
                     case 0:
-                        DoCast(me, SPELL_LIFEBLOOM);
+                        if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                            DoCast(target, SPELL_LIFEBLOOM);
                         break;
                     case 1:
-                        DoCast(me, SPELL_NOURISH);
+                        if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                            DoCast(target, SPELL_NOURISH);
                         break;
                     case 2:
-                        DoCast(me, SPELL_REGROWTH);
+                        if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                            DoCast(target, SPELL_REGROWTH);
                         break;
                     case 3:
-                        DoCast(me, SPELL_REJUVENATION);
+                        if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                            DoCast(target, SPELL_REJUVENATION);
                         break;
                     case 4:
                         if (Creature* target = SelectRandomFriendlyMissingBuff(SPELL_THORNS))
                             DoCast(target, SPELL_THORNS);
                         break;
                 }
-                m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiCommonTimer = urand(3*1000, 6*1000);
             } else m_uiCommonTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);
@@ -580,9 +591,9 @@ public:
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiHeroismOrBloodlustTimer = IN_MILLISECONDS;
-            m_uiHexTimer = IN_MILLISECONDS;
-            m_uiCommonTimer = IN_MILLISECONDS;
+            m_uiHeroismOrBloodlustTimer = urand(15000, 25000);
+            m_uiHexTimer = urand(5000, 8000);
+            m_uiCommonTimer = urand(2000, 4000);
             SetEquipmentSlots(false, 49992, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
         }
 
@@ -600,14 +611,14 @@ public:
                 else
                     if (!me->HasAura(AURA_SATED))
                         DoCastAOE(SPELL_BLOODLUST);
-                m_uiHeroismOrBloodlustTimer = 300*IN_MILLISECONDS;
+                m_uiHeroismOrBloodlustTimer = urand(30*IN_MILLISECONDS, 60*IN_MILLISECONDS);
             } else m_uiHeroismOrBloodlustTimer -= uiDiff;
 
             if (m_uiHexTimer <= uiDiff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_HEX);
-                m_uiHexTimer = urand(10*IN_MILLISECONDS, 40*IN_MILLISECONDS);
+                m_uiHexTimer = urand(15*1000, 35*1000);
             } else m_uiHexTimer -= uiDiff;
 
             if (m_uiCommonTimer <= uiDiff)
@@ -615,23 +626,27 @@ public:
                 switch (urand(0, 5))
                 {
                     case 0: case 1:
-                        DoCast(me, SPELL_HEALING_WAVE);
+                        if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                            DoCast(target, SPELL_HEALING_WAVE);
                         break;
                     case 2:
-                        DoCast(me, SPELL_RIPTIDE);
+                        if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                            DoCast(target, SPELL_RIPTIDE);
                         break;
                     case 3:
-                        DoCast(me, SPELL_EARTH_SHOCK);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            DoCast(target, SPELL_EARTH_SHOCK);
                         break;
                     case 4:
-                        DoCast(me, SPELL_SPIRIT_CLEANSE);
+                        if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                            DoCast(target, SPELL_SPIRIT_CLEANSE);
                         break;
                     case 5:
                         if (Unit* target = SelectRandomFriendlyMissingBuff(SPELL_EARTH_SHIELD))
                             DoCast(target, SPELL_EARTH_SHIELD);
                         break;
                 }
-                m_uiCommonTimer = urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS);
+                m_uiCommonTimer = urand(5*1000, 12*1000);
             } else m_uiCommonTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);
@@ -647,7 +662,6 @@ enum ePaladinSpells
     SPELL_CLEANSE             = 66116,
     SPELL_FLASH_OF_LIGHT      = 66113,
     SPELL_HOLY_LIGHT          = 66112,
-    SPELL_HOLY_SHOCK          = 66114,
     SPELL_HAND_OF_PROTECTION  = 66009,
     SPELL_HAMMER_OF_JUSTICE   = 66613,
 };
@@ -668,7 +682,6 @@ public:
 
         uint32 m_uiBubbleTimer;
         uint32 m_uiHandOfProtectionTimer;
-        uint32 m_uiHolyShockTimer;
         uint32 m_uiHandOfFreedomTimer;
         uint32 m_uiHammerOfJusticeTimer;
         uint32 m_uiCommonTimer;
@@ -676,12 +689,11 @@ public:
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiBubbleTimer = urand(0*IN_MILLISECONDS, 360*IN_MILLISECONDS);
-            m_uiHandOfProtectionTimer = urand(0*IN_MILLISECONDS, 360*IN_MILLISECONDS);
-            m_uiHolyShockTimer = urand(6*IN_MILLISECONDS, 15*IN_MILLISECONDS);
-            m_uiHandOfFreedomTimer = urand(25*IN_MILLISECONDS, 40*IN_MILLISECONDS);
-            m_uiHammerOfJusticeTimer = urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS);
-            m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+            m_uiBubbleTimer = urand(30*1000, 50*1000);
+            m_uiHandOfProtectionTimer = urand(40*1000, 60*1000);
+            m_uiHandOfFreedomTimer = urand(12*1000, 23*1000);
+            m_uiHammerOfJusticeTimer = urand(5*1000, 12*1000);
+            m_uiCommonTimer = urand(3*1000, 5*1000);
             SetEquipmentSlots(false, 50771, 47079, EQUIP_NO_CHANGE);
         }
 
@@ -694,7 +706,7 @@ public:
                 //cast bubble at 20% hp
                 if (HealthBelowPct(20))
                     DoCast(me, SPELL_BUBBLE);
-                m_uiBubbleTimer = urand(0*IN_MILLISECONDS, 360*IN_MILLISECONDS);
+                m_uiBubbleTimer = urand(60*1000, 80*1000);
             } else m_uiBubbleTimer -= uiDiff;
 
             if (m_uiHandOfProtectionTimer <= uiDiff)
@@ -702,28 +714,21 @@ public:
                 if (Unit* target = DoSelectLowestHpFriendly(40.0f))
                     if (target->HealthBelowPct(15))
                         DoCast(target, SPELL_HAND_OF_PROTECTION);
-                m_uiHandOfProtectionTimer = urand(0*IN_MILLISECONDS, 360*IN_MILLISECONDS);
+                m_uiHandOfProtectionTimer = urand(50*1000, 65*1000);
             } else m_uiHandOfProtectionTimer -= uiDiff;
-
-            if (m_uiHolyShockTimer <= uiDiff)
-            {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    DoCast(target, SPELL_HOLY_SHOCK);
-                m_uiHolyShockTimer = urand(6*IN_MILLISECONDS, 15*IN_MILLISECONDS);
-            } else m_uiHolyShockTimer -= uiDiff;
 
             if (m_uiHandOfFreedomTimer <= uiDiff)
             {
                 if (Unit* target = SelectRandomFriendlyMissingBuff(SPELL_HAND_OF_FREEDOM))
                     DoCast(target, SPELL_HAND_OF_FREEDOM);
-                m_uiHandOfFreedomTimer = urand(25*IN_MILLISECONDS, 40*IN_MILLISECONDS);
+                m_uiHandOfFreedomTimer = urand(13*1000, 25*1000);
             } else m_uiHandOfFreedomTimer -= uiDiff;
 
             if (m_uiHammerOfJusticeTimer <= uiDiff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_HAMMER_OF_JUSTICE);
-                m_uiHammerOfJusticeTimer = urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS);
+                m_uiHammerOfJusticeTimer = urand(5*1000, 12*1000);
             } else m_uiHammerOfJusticeTimer -= uiDiff;
 
             if (m_uiCommonTimer <= uiDiff)
@@ -731,16 +736,19 @@ public:
                 switch (urand(0, 4))
                 {
                     case 0: case 1:
-                        DoCast(me, SPELL_FLASH_OF_LIGHT);
+                        if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                            DoCast(target, SPELL_FLASH_OF_LIGHT);
                         break;
                     case 2: case 3:
-                        DoCast(me, SPELL_HOLY_LIGHT);
+                        if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                            DoCast(target, SPELL_HOLY_LIGHT);
                         break;
                     case 4:
-                        DoCast(me, SPELL_CLEANSE);
+                        if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                            DoCast(target, SPELL_CLEANSE);
                         break;
                 }
-                m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiCommonTimer = urand(3*1000, 7*1000);
             } else m_uiCommonTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);
@@ -779,8 +787,8 @@ public:
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiPsychicScreamTimer = IN_MILLISECONDS;
-            m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+            m_uiPsychicScreamTimer = urand(8000, 12000);
+            m_uiCommonTimer = urand(3*1000, 5*1000);
             SetEquipmentSlots(false, 49992, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
         }
 
@@ -797,26 +805,26 @@ public:
 
             if (m_uiCommonTimer <= uiDiff)
             {
-                switch (urand(0, 5))
+                switch (urand(0, 4))
                 {
                     case 0:
-                        DoCast(me, SPELL_RENEW);
+                        if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                            DoCast(target, SPELL_RENEW);
                         break;
                     case 1:
-                        DoCast(me, SPELL_SHIELD);
+                        if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                            DoCast(target, SPELL_SHIELD);
                         break;
                     case 2: case 3:
-                        DoCast(me, SPELL_FLASH_HEAL);
+                        if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                            DoCast(target, SPELL_FLASH_HEAL);
                         break;
                     case 4:
                         if (Unit* target = urand(0, 1) ? SelectTarget(SELECT_TARGET_RANDOM, 0) : DoSelectLowestHpFriendly(40.0f))
                             DoCast(target, SPELL_DISPEL);
                         break;
-                    case 5:
-                        DoCast(me, SPELL_MANA_BURN);
-                        break;
                 }
-                m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiCommonTimer = urand(4*1000, 10*1000);
             } else m_uiCommonTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);
@@ -863,11 +871,11 @@ public:
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiPsychicScreamTimer = urand(5*IN_MILLISECONDS, 25*IN_MILLISECONDS);
-            m_uiDispersionTimer = urand(1*IN_MILLISECONDS, 180*IN_MILLISECONDS);
-            m_uiSilenceTimer = urand(8*IN_MILLISECONDS, 15*IN_MILLISECONDS);
-            m_uiMindBlastTimer = urand(3*IN_MILLISECONDS, 8*IN_MILLISECONDS);
-            m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+            m_uiPsychicScreamTimer = urand(8*1000, 15*1000);
+            m_uiDispersionTimer = urand(30*1000, 45*1000);
+            m_uiSilenceTimer = urand(6*1000, 10*1000);
+            m_uiMindBlastTimer = urand(3*1000, 5*1000);
+            m_uiCommonTimer = urand(2*1000, 5*1000);
             SetEquipmentSlots(false, 50040, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
             DoCast(me, SPELL_SHADOWFORM);
         }
@@ -892,7 +900,7 @@ public:
             {
                 if (HealthBelowPct(20))
                     DoCast(me, SPELL_DISPERSION);
-                m_uiDispersionTimer = urand(1*IN_MILLISECONDS, 180*IN_MILLISECONDS);
+                m_uiDispersionTimer = urand(45*1000, 60*1000);
             } else m_uiDispersionTimer -= uiDiff;
 
             if (m_uiSilenceTimer <= uiDiff)
@@ -926,11 +934,11 @@ public:
                             DoCast(target, SPELL_SW_PAIN);
                         break;
                    case 4:
-                        if (Unit* target = urand(0, 1) ? SelectTarget(SELECT_TARGET_RANDOM, 0) : DoSelectLowestHpFriendly(40.0f))
+                        if (Unit* target = urand(0, 1) ? SelectTarget(SELECT_TARGET_RANDOM, 0) : DoSelectLowestHpFriendly(50.0f))
                             DoCast(target, SPELL_DISPEL);
                         break;
                 }
-                m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiCommonTimer = urand(5*1000, 12*1000);
             } else m_uiCommonTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);
@@ -965,9 +973,7 @@ public:
 
     struct mob_toc_warlockAI : public boss_faction_championsAI
     {
-        mob_toc_warlockAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED), Summons(me) {}
-
-        SummonList Summons;
+        mob_toc_warlockAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) {}
 
         uint32 m_uiFearTimer;
         uint32 m_uiHellfireTimer;
@@ -975,27 +981,32 @@ public:
         uint32 m_uiCommonTimer;
         uint32 m_uiSummonPetTimer;
 
+        bool summonedPet;
+
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiFearTimer = urand(4*IN_MILLISECONDS, 15*IN_MILLISECONDS);
-            m_uiHellfireTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
-            m_uiUnstableAfflictionTimer = urand(2*IN_MILLISECONDS, 10*IN_MILLISECONDS);
-            m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+            m_uiFearTimer = urand(4*1000, 15*1000);
+            m_uiHellfireTimer = urand(10*1000, 20*1000);
+            m_uiUnstableAfflictionTimer = urand(2*1000, 10*1000);
+            m_uiCommonTimer = urand(5*1000, 12*1000);
             SetEquipmentSlots(false, 49992, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
-
-            m_uiSummonPetTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
-            DoCast(SPELL_SUMMON_FELHUNTER);
+            summonedPet = false;
         }
 
         void UpdateAI(const uint32 uiDiff)
         {
             if (!UpdateVictim()) return;
 
+            if (!summonedPet)
+            {
+                summonedPet = true;
+                DoCast(me, SPELL_SUMMON_FELHUNTER, true);
+            }
+
             if (m_uiFearTimer <= uiDiff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    DoCast(target, SPELL_FEAR);
+                DoCastAOE(SPELL_FEAR);
                 m_uiFearTimer = urand(4*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             } else m_uiFearTimer -= uiDiff;
 
@@ -1012,11 +1023,6 @@ public:
                     DoCast(target, SPELL_UNSTABLE_AFFLICTION);
                 m_uiUnstableAfflictionTimer = urand(2*IN_MILLISECONDS, 10*IN_MILLISECONDS);
             } else m_uiUnstableAfflictionTimer -= uiDiff;
-
-            if (m_uiSummonPetTimer <= uiDiff)
-            {
-                m_uiSummonPetTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
-            } else m_uiSummonPetTimer -= uiDiff;
 
             if (m_uiCommonTimer <= uiDiff)
             {
@@ -1039,7 +1045,7 @@ public:
                             DoCast(target, SPELL_CURSE_OF_EXHAUSTION);
                         break;
                 }
-                m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiCommonTimer = urand(4*1000, 8*1000);
             } else m_uiCommonTimer -= uiDiff;
             boss_faction_championsAI::UpdateAI(uiDiff);
         }
@@ -1083,11 +1089,11 @@ public:
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiCounterspellTimer = urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS);
-            m_uiBlinkTimer = urand(7*IN_MILLISECONDS, 25*IN_MILLISECONDS);
-            m_uiIceBlockTimer = urand(0*IN_MILLISECONDS, 360*IN_MILLISECONDS);
-            m_uiPolymorphTimer = urand(15*IN_MILLISECONDS, 40*IN_MILLISECONDS);
-            m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+            m_uiCounterspellTimer = urand(5*1000, 15*1000);
+            m_uiBlinkTimer = urand(7*1000, 25*1000);
+            m_uiIceBlockTimer = urand(40*1000, 60*1000);
+            m_uiPolymorphTimer = urand(15*1000, 25*1000);
+            m_uiCommonTimer = urand(5*1000, 12*1000);
             SetEquipmentSlots(false, 47524, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
         }
 
@@ -1116,14 +1122,14 @@ public:
             {
                 if (HealthBelowPct(20))
                     DoCast(me, SPELL_ICE_BLOCK);
-                m_uiIceBlockTimer = urand(0*IN_MILLISECONDS, 360*IN_MILLISECONDS);
+                m_uiIceBlockTimer = urand(40*1000, 60*1000);
             } else m_uiIceBlockTimer -= uiDiff;
 
             if (m_uiPolymorphTimer <= uiDiff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_POLYMORPH);
-                m_uiPolymorphTimer = urand(15*IN_MILLISECONDS, 40*IN_MILLISECONDS);
+                m_uiPolymorphTimer = urand(20*1000, 35*1000);
             } else m_uiPolymorphTimer -= uiDiff;
 
             if (m_uiCommonTimer <= uiDiff)
@@ -1131,7 +1137,7 @@ public:
                 switch (urand(0, 2))
                 {
                     case 0:
-                        DoCast(me, SPELL_ARCANE_BARRAGE);
+                        DoCastVictim(SPELL_ARCANE_BARRAGE);
                         break;
                     case 1:
                         DoCastVictim(SPELL_ARCANE_BLAST);
@@ -1140,7 +1146,7 @@ public:
                         DoCastVictim(SPELL_FROSTBOLT);
                         break;
                 }
-                m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiCommonTimer = urand(5*1000, 12*1000);
             } else m_uiCommonTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);
@@ -1175,9 +1181,7 @@ public:
 
     struct mob_toc_hunterAI : public boss_faction_championsAI
     {
-        mob_toc_hunterAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED), Summons(me) {}
-
-        SummonList Summons;
+        mob_toc_hunterAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) {}
 
         uint32 m_uiDisengageTimer;
         uint32 m_uiDeterrenceTimer;
@@ -1185,51 +1189,56 @@ public:
         uint32 m_uiFrostTrapTimer;
         uint32 m_uiWingClipTimer;
         uint32 m_uiCommonTimer;
-        uint32 m_uiSummonPetTimer;
+
+        bool summonedPet;
 
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiDisengageTimer = urand(12*IN_MILLISECONDS, 20*IN_MILLISECONDS);
-            m_uiDeterrenceTimer = urand(20*IN_MILLISECONDS, 120*IN_MILLISECONDS);
-            m_uiWyvernStingTimer = urand(7*IN_MILLISECONDS, 60*IN_MILLISECONDS);
-            m_uiFrostTrapTimer = urand(12*IN_MILLISECONDS, 30*IN_MILLISECONDS);
-            m_uiWingClipTimer = urand(4*IN_MILLISECONDS, 8*IN_MILLISECONDS);
-            m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+            m_uiDisengageTimer = urand(12*1000, 20*1000);
+            m_uiDeterrenceTimer = urand(30*1000, 45*1000);
+            m_uiWyvernStingTimer = urand(7*1000, 17*1000);
+            m_uiFrostTrapTimer = urand(12*1000, 20*1000);
+            m_uiWingClipTimer = urand(4*1000, 8*1000);
+            m_uiCommonTimer = urand(5*1000, 12*1000);
             SetEquipmentSlots(false, 47156, EQUIP_NO_CHANGE, 48711);
-
-            m_uiSummonPetTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
-            DoCast(SPELL_CALL_PET);
+            summonedPet = false;
         }
 
         void UpdateAI(const uint32 uiDiff)
         {
             if (!UpdateVictim()) return;
 
+            if (!summonedPet)
+            {
+                summonedPet = true;
+                DoCast(SPELL_CALL_PET);
+            }
+
             if (m_uiDisengageTimer <= uiDiff)
             {
                 if (EnemiesInRange(10.0f) > 3)
-                    DoCast(SPELL_DISENGAGE);
-                m_uiDisengageTimer = urand(12*IN_MILLISECONDS, 20*IN_MILLISECONDS);
+                    DoCast(me, SPELL_DISENGAGE);
+                m_uiDisengageTimer = urand(12*1000, 20*1000);
             } else m_uiDisengageTimer -= uiDiff;
 
             if (m_uiDeterrenceTimer <= uiDiff)
             {
                 if (HealthBelowPct(20))
-                    DoCast(SPELL_DETERRENCE);
-                m_uiDeterrenceTimer = urand(20*IN_MILLISECONDS, 120*IN_MILLISECONDS);
+                    DoCast(me, SPELL_DETERRENCE);
+                m_uiDeterrenceTimer = urand(30*1000, 45*1000);
             } else m_uiDeterrenceTimer -= uiDiff;
 
             if (m_uiWyvernStingTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_WYVERN_STING);
-                m_uiWyvernStingTimer = urand(7*IN_MILLISECONDS, 60*IN_MILLISECONDS);
+                m_uiWyvernStingTimer = urand(7*1000, 17*1000);
             } else m_uiWyvernStingTimer -= uiDiff;
 
             if (m_uiFrostTrapTimer <= uiDiff)
             {
                 DoCast(SPELL_FROST_TRAP);
-                m_uiFrostTrapTimer = urand(12*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiFrostTrapTimer = urand(12*1000, 25*1000);
             } else m_uiFrostTrapTimer -= uiDiff;
 
             if (m_uiWingClipTimer <= uiDiff)
@@ -1238,11 +1247,6 @@ public:
                     DoCastVictim(SPELL_WING_CLIP);
                 m_uiWingClipTimer = urand(4*IN_MILLISECONDS, 8*IN_MILLISECONDS);
             } else m_uiWingClipTimer -= uiDiff;
-
-            if (m_uiSummonPetTimer <= uiDiff)
-            {
-                m_uiSummonPetTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
-            } else m_uiSummonPetTimer -= uiDiff;
 
             if (m_uiCommonTimer <= uiDiff)
             {
@@ -1258,7 +1262,7 @@ public:
                         DoCastVictim(SPELL_AIMED_SHOT);
                         break;
                 }
-                m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiCommonTimer = urand(5*1000, 8*1000);
             } else m_uiCommonTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);
@@ -1302,11 +1306,11 @@ public:
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiBarkskinTimer = urand(5*IN_MILLISECONDS, 120*IN_MILLISECONDS);
-            m_uiCycloneTimer = urand(5*IN_MILLISECONDS, 40*IN_MILLISECONDS);
-            m_uiEntanglingRootsTimer = urand(5*IN_MILLISECONDS, 40*IN_MILLISECONDS);
-            m_uiFaerieFireTimer = urand(10*IN_MILLISECONDS, 40*IN_MILLISECONDS);
-            m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+            m_uiBarkskinTimer = urand(15*1000, 20*1000);
+            m_uiCycloneTimer = urand(5*1000, 25*1000);
+            m_uiEntanglingRootsTimer = urand(10*1000, 25*1000);
+            m_uiFaerieFireTimer = urand(10*1000, 25*1000);
+            m_uiCommonTimer = urand(5*1000, 8*1000);
             SetEquipmentSlots(false, 50966, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
         }
 
@@ -1318,27 +1322,27 @@ public:
             {
                 if (HealthBelowPct(50))
                     DoCast(me, SPELL_BARKSKIN);
-                m_uiBarkskinTimer = urand(5*IN_MILLISECONDS, 120*IN_MILLISECONDS);
+                m_uiBarkskinTimer = urand(15*1000, 20*1000);
             } else m_uiBarkskinTimer -= uiDiff;
 
             if (m_uiCycloneTimer <= uiDiff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_CYCLONE);
-                m_uiCycloneTimer = urand(5*IN_MILLISECONDS, 40*IN_MILLISECONDS);
+                m_uiCycloneTimer = urand(15*1000, 25*1000);
             } else m_uiCycloneTimer -= uiDiff;
 
             if (m_uiEntanglingRootsTimer <= uiDiff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_ENTANGLING_ROOTS);
-                m_uiEntanglingRootsTimer = urand(5*IN_MILLISECONDS, 40*IN_MILLISECONDS);
+                m_uiEntanglingRootsTimer = urand(10*1000, 17*1000);
             } else m_uiEntanglingRootsTimer -= uiDiff;
 
             if (m_uiFaerieFireTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_FAERIE_FIRE);
-                m_uiFaerieFireTimer = urand(10*IN_MILLISECONDS, 40*IN_MILLISECONDS);
+                m_uiFaerieFireTimer = urand(10*1000, 25*1000);
             } else m_uiFaerieFireTimer -= uiDiff;
 
             if (m_uiCommonTimer <= uiDiff)
@@ -1358,7 +1362,7 @@ public:
                         DoCastVictim(SPELL_WRATH);
                         break;
                 }
-                m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiCommonTimer = urand(5*1000, 12*1000);
             } else m_uiCommonTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);
@@ -1410,15 +1414,15 @@ public:
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiBladestormTimer = urand(20*IN_MILLISECONDS, 30*IN_MILLISECONDS);
-            m_uiIntimidatingShoutTimer = urand(10*IN_MILLISECONDS, 60*IN_MILLISECONDS);
-            m_uiMortalStrikeTimer = urand(6*IN_MILLISECONDS, 25*IN_MILLISECONDS);
-            m_uiSunderArmorTimer = urand(5*IN_MILLISECONDS, 25*IN_MILLISECONDS);
-            m_uiChargeTimer = urand(3*IN_MILLISECONDS, 25*IN_MILLISECONDS);
-            m_uiRetaliationTimer = urand(30*IN_MILLISECONDS, 60*IN_MILLISECONDS);
-            m_uiOverpowerTimer = urand(30*IN_MILLISECONDS, 90*IN_MILLISECONDS);
-            m_uiShatteringThrowTimer = urand(10*IN_MILLISECONDS, 25*IN_MILLISECONDS);
-            m_uiDisarmTimer = urand(20*IN_MILLISECONDS, 80*IN_MILLISECONDS);
+            m_uiBladestormTimer = urand(20*1000, 30*1000);
+            m_uiIntimidatingShoutTimer = urand(15*1000, 25*1000);
+            m_uiMortalStrikeTimer = urand(6*1000, 12*1000);
+            m_uiSunderArmorTimer = urand(5*1000, 15*1000);
+            m_uiChargeTimer = urand(15*1000, 25*1000);
+            m_uiRetaliationTimer = urand(12*1000, 24*1000);
+            m_uiOverpowerTimer = urand(25*1000, 35*1000);
+            m_uiShatteringThrowTimer = urand(15*1000, 25*1000);
+            m_uiDisarmTimer = urand(15*1000, 30*1000);
             SetEquipmentSlots(false, 47427, 46964, EQUIP_NO_CHANGE);
         }
 
@@ -1435,37 +1439,37 @@ public:
             if (m_uiIntimidatingShoutTimer <= uiDiff)
             {
                 DoCast(me, SPELL_INTIMIDATING_SHOUT);
-                m_uiIntimidatingShoutTimer = urand(10*IN_MILLISECONDS, 60*IN_MILLISECONDS);
+                m_uiIntimidatingShoutTimer = urand(25*1000, 45*1000);
             } else m_uiIntimidatingShoutTimer -= uiDiff;
 
             if (m_uiMortalStrikeTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_MORTAL_STRIKE);
-                m_uiMortalStrikeTimer = urand(6*IN_MILLISECONDS, 25*IN_MILLISECONDS);
+                m_uiMortalStrikeTimer = urand(6*1000, 14*1000);
             } else m_uiMortalStrikeTimer -= uiDiff;
 
             if (m_uiSunderArmorTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_SUNDER_ARMOR);
-                m_uiSunderArmorTimer = urand(5*IN_MILLISECONDS, 25*IN_MILLISECONDS);
+                m_uiSunderArmorTimer = urand(12*1000, 20*1000);
             } else m_uiSunderArmorTimer -= uiDiff;
 
             if (m_uiChargeTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_CHARGE);
-                m_uiChargeTimer = urand(3*IN_MILLISECONDS, 25*IN_MILLISECONDS);
+                m_uiChargeTimer = urand(25*1000, 30*1000);
             } else m_uiChargeTimer -= uiDiff;
 
             if (m_uiRetaliationTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_RETALIATION);
-                m_uiRetaliationTimer = urand(30*IN_MILLISECONDS, 60*IN_MILLISECONDS);
+                m_uiRetaliationTimer = urand(15*1000, 25*1000);
             } else m_uiRetaliationTimer -= uiDiff;
 
             if (m_uiOverpowerTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_OVERPOWER);
-                m_uiOverpowerTimer = urand(30*IN_MILLISECONDS, 90*IN_MILLISECONDS);
+                m_uiOverpowerTimer = urand(30*1000, 45*1000);
             } else m_uiOverpowerTimer -= uiDiff;
 
             if (m_uiShatteringThrowTimer <= uiDiff)
@@ -1477,7 +1481,7 @@ public:
             if (m_uiDisarmTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_DISARM);
-                m_uiDisarmTimer = urand(20*IN_MILLISECONDS, 80*IN_MILLISECONDS);
+                m_uiDisarmTimer = urand(20*1000, 30*1000);
             } else m_uiDisarmTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);
@@ -1522,13 +1526,13 @@ public:
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiIceboundFortitudeTimer = urand(5*IN_MILLISECONDS, 90*IN_MILLISECONDS);
-            m_uiChainsOfIceTimer = urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS);
-            m_uiDeathCoilTimer = urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS);
-            m_uiStrangulateTimer = urand(10*IN_MILLISECONDS, 90*IN_MILLISECONDS);
-            m_uiFrostStrikeTimer = urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS);
-            m_uiIcyTouchTimer = urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS);
-            m_uiDeathGripTimer = urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS);
+            m_uiIceboundFortitudeTimer = urand(15*1000, 35*1000);
+            m_uiChainsOfIceTimer = urand(5*1000, 12*1000);
+            m_uiDeathCoilTimer = urand(7*1000, 14*1000);
+            m_uiStrangulateTimer = urand(10*1000, 15*1000);
+            m_uiFrostStrikeTimer = urand(8*1000, 15*1000);
+            m_uiIcyTouchTimer = urand(7*1000, 12*1000);
+            m_uiDeathGripTimer = urand(10*1000, 17*1000);
             SetEquipmentSlots(false, 47518, 51021, EQUIP_NO_CHANGE);
         }
 
@@ -1540,7 +1544,7 @@ public:
             {
                 if (HealthBelowPct(50))
                     DoCast(me, SPELL_ICEBOUND_FORTITUDE);
-                m_uiIceboundFortitudeTimer = urand(5*IN_MILLISECONDS, 90*IN_MILLISECONDS);
+                m_uiIceboundFortitudeTimer = urand(45*1000, 65*1000);
             } else m_uiIceboundFortitudeTimer -= uiDiff;
 
             if (m_uiChainsOfIceTimer <= uiDiff)
@@ -1560,7 +1564,7 @@ public:
             {
                 if (Unit* target = SelectEnemyCaster(false))
                     DoCast(target, SPELL_STRANGULATE);
-                m_uiStrangulateTimer = urand(10*IN_MILLISECONDS, 90*IN_MILLISECONDS);
+                m_uiStrangulateTimer = urand(10*1000, 15*1000);
             } else m_uiStrangulateTimer -= uiDiff;
 
             if (m_uiFrostStrikeTimer <= uiDiff)
@@ -1624,13 +1628,13 @@ public:
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiFanOfKnivesTimer = urand(8*IN_MILLISECONDS, 10*IN_MILLISECONDS);
-            m_uiHemorrhageTimer = urand(5*IN_MILLISECONDS, 8*IN_MILLISECONDS);
-            m_uiEviscerateTimer = urand(15*IN_MILLISECONDS, 20*IN_MILLISECONDS);
-            m_uiShadowstepTimer = urand(10*IN_MILLISECONDS, 80*IN_MILLISECONDS);
-            m_uiBlindTimer = urand(7*IN_MILLISECONDS, 8*IN_MILLISECONDS);
-            m_uiCloakTimer = urand(20*IN_MILLISECONDS, 120*IN_MILLISECONDS);
-            m_uiBladeFlurryTimer = urand(12*IN_MILLISECONDS, 120*IN_MILLISECONDS);
+            m_uiFanOfKnivesTimer = urand(8*1000, 10*1000);
+            m_uiHemorrhageTimer = urand(5*1000, 8*1000);
+            m_uiEviscerateTimer = urand(15*1000, 20*1000);
+            m_uiShadowstepTimer = urand(25*1000, 35*1000);
+            m_uiBlindTimer = urand(7*1000, 14*1000);
+            m_uiCloakTimer = urand(35*1000, 55*1000);
+            m_uiBladeFlurryTimer = urand(24*1000, 35*1000);
             SetEquipmentSlots(false, 47422, 49982, EQUIP_NO_CHANGE);
         }
 
@@ -1661,7 +1665,7 @@ public:
             {
                 if (me->IsInRange(me->getVictim(), 10.0f, 40.0f))
                     DoCastVictim(SPELL_SHADOWSTEP);
-                m_uiShadowstepTimer = urand(10*IN_MILLISECONDS, 80*IN_MILLISECONDS);
+                m_uiShadowstepTimer = urand(25*1000, 35*1000);
             } else m_uiShadowstepTimer -= uiDiff;
 
             if (m_uiBlindTimer <= uiDiff)
@@ -1669,20 +1673,20 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                     if (me->IsInRange(target, 0.0f, 15.0f, false))
                         DoCast(target, SPELL_BLIND);
-                m_uiBlindTimer = urand(7*IN_MILLISECONDS, 8*IN_MILLISECONDS);
+                m_uiBlindTimer = urand(10*1000, 20*1000);
             } else m_uiBlindTimer -= uiDiff;
 
             if (m_uiCloakTimer <= uiDiff)
             {
                 if (HealthBelowPct(50))
                     DoCast(me, SPELL_CLOAK);
-                m_uiCloakTimer = urand(20*IN_MILLISECONDS, 120*IN_MILLISECONDS);
+                m_uiCloakTimer = urand(35*1000, 55*1000);
             } else m_uiCloakTimer -= uiDiff;
 
             if (m_uiBladeFlurryTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_BLADE_FLURRY);
-                m_uiBladeFlurryTimer = urand(12*IN_MILLISECONDS, 120*IN_MILLISECONDS);
+                m_uiBladeFlurryTimer = urand(12*1000, 30*1000);
             } else m_uiBladeFlurryTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);
@@ -1694,7 +1698,6 @@ public:
 enum eEnhShamanSpells
 {
     SPELL_EARTH_SHOCK_ENH   = 65973,
-    SPELL_LAVA_LASH         = 65974,
     SPELL_STORMSTRIKE       = 65970,
 };
 
@@ -1710,65 +1713,19 @@ public:
 
     struct mob_toc_enh_shamanAI : public boss_faction_championsAI
     {
-        mob_toc_enh_shamanAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE), Summons(me) {}
-
-        SummonList Summons;
+        mob_toc_enh_shamanAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) {}
 
         uint32 m_uiHeroismOrBloodlustTimer;
         uint32 m_uiEarthShockTimer;
         uint32 m_uiStormstrikeTimer;
-        uint32 m_uiLavaLashTimer;
-        uint32 m_uiDeployTotemTimer;
-        uint8  m_uiTotemCount;
-        float  m_fTotemOldCenterX, m_fTotemOldCenterY;
 
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiHeroismOrBloodlustTimer = urand(25*IN_MILLISECONDS, 60*IN_MILLISECONDS);
-            m_uiEarthShockTimer = urand(5*IN_MILLISECONDS, 8*IN_MILLISECONDS);
-            m_uiStormstrikeTimer = urand(5*IN_MILLISECONDS, 90*IN_MILLISECONDS);
-            m_uiLavaLashTimer = urand(5*IN_MILLISECONDS, 8*IN_MILLISECONDS);
-            m_uiDeployTotemTimer = urand(1*IN_MILLISECONDS, 3*IN_MILLISECONDS);
-            m_uiTotemCount = 0;
-            m_fTotemOldCenterX = me->GetPositionX();
-            m_fTotemOldCenterY = me->GetPositionY();
+            m_uiHeroismOrBloodlustTimer = urand(15*1000, 25*1000);
+            m_uiEarthShockTimer = urand(5*1000, 8*1000);
+            m_uiStormstrikeTimer = urand(9*1000, 15*1000);
             SetEquipmentSlots(false, 51803, 48013, EQUIP_NO_CHANGE);
-            Summons.DespawnAll();
-        }
-
-        void JustSummoned(Creature* summoned)
-        {
-            Summons.Summon(summoned);
-        }
-
-        void SummonedCreatureDespawn(Creature* /*pSummoned*/)
-        {
-            --m_uiTotemCount;
-        }
-
-        void DeployTotem()
-        {
-            m_uiTotemCount = 4;
-            m_fTotemOldCenterX = me->GetPositionX();
-            m_fTotemOldCenterY = me->GetPositionY();
-            /*
-            -Windfury (16% melee haste)
-            -Grounding (redirects one harmful magic spell to the totem)
-
-            -Healing Stream (unable to find amount of healing in our logs)
-
-            -Tremor (prevents fear effects)
-            -Strength of Earth (155 strength and agil for the opposing team)
-
-            -Searing (average ~3500 damage on a random target every ~3.5 seconds)
-            */
-        }
-
-        void JustDied(Unit* killer)
-        {
-            boss_faction_championsAI::JustDied(killer);
-            Summons.DespawnAll();
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -1790,28 +1747,16 @@ public:
 
             if (m_uiEarthShockTimer <= uiDiff)
             {
-                DoCastVictim(SPELL_EARTH_SHOCK_ENH);
-                m_uiEarthShockTimer = urand(5*IN_MILLISECONDS, 8*IN_MILLISECONDS);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    DoCast(target, SPELL_EARTH_SHOCK_ENH);
+                m_uiEarthShockTimer = urand(2*1000, 4*1000);
             } else m_uiEarthShockTimer -= uiDiff;
 
             if (m_uiStormstrikeTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_STORMSTRIKE);
-                m_uiStormstrikeTimer = urand(5*IN_MILLISECONDS, 90*IN_MILLISECONDS);
+                m_uiStormstrikeTimer = urand(3*1000, 5*1000);
             } else m_uiStormstrikeTimer -= uiDiff;
-
-            if (m_uiLavaLashTimer <= uiDiff)
-            {
-                DoCastVictim(SPELL_LAVA_LASH);
-                m_uiLavaLashTimer = urand(5*IN_MILLISECONDS, 8*IN_MILLISECONDS);
-            } else m_uiLavaLashTimer -= uiDiff;
-
-            if (m_uiDeployTotemTimer <= uiDiff)
-            {
-                if (m_uiTotemCount < 4 || me->GetDistance2d(m_fTotemOldCenterX, m_fTotemOldCenterY) > 20.0f)
-                    DeployTotem();
-                m_uiDeployTotemTimer = urand(1*IN_MILLISECONDS, 3*IN_MILLISECONDS);
-            } else m_uiDeployTotemTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);
         }
@@ -1856,12 +1801,12 @@ public:
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiRepeteanceTimer = 60*IN_MILLISECONDS;
-            m_uiCrusaderStrikeTimer = urand(6*IN_MILLISECONDS, 18*IN_MILLISECONDS);
-            m_uiAvengingWrathTimer = 180*IN_MILLISECONDS;
-            m_uiDivineShieldTimer = urand(0*IN_MILLISECONDS, 360*IN_MILLISECONDS);
-            m_uiDivineStormTimer = 10*IN_MILLISECONDS;
-            m_uiJudgementOfCommandTimer = urand(8*IN_MILLISECONDS, 15*IN_MILLISECONDS);
+            m_uiRepeteanceTimer = urand(15*1000, 35*1000);
+            m_uiCrusaderStrikeTimer = urand(6*1000, 12*1000);
+            m_uiAvengingWrathTimer = urand(30*1000, 45*1000);
+            m_uiDivineShieldTimer = urand(35*1000, 55*1000);
+            m_uiDivineStormTimer = 10*1000;
+            m_uiJudgementOfCommandTimer = urand(8*1000, 15*1000);
             SetEquipmentSlots(false, 47519, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
         }
 
@@ -1879,26 +1824,26 @@ public:
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_REPENTANCE);
-                m_uiRepeteanceTimer = 60*IN_MILLISECONDS;
+                m_uiRepeteanceTimer = urand(25*1000, 55*1000);
             } else m_uiRepeteanceTimer -= uiDiff;
 
             if (m_uiCrusaderStrikeTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_CRUSADER_STRIKE);
-                m_uiCrusaderStrikeTimer = urand(6*IN_MILLISECONDS, 18*IN_MILLISECONDS);
+                m_uiCrusaderStrikeTimer = urand(6*1000, 12*1000);
             } else m_uiCrusaderStrikeTimer -= uiDiff;
 
             if (m_uiAvengingWrathTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_AVENGING_WRATH);
-                m_uiAvengingWrathTimer = 180*IN_MILLISECONDS;
+                m_uiAvengingWrathTimer = urand(30*1000, 45*1000);
             } else m_uiAvengingWrathTimer -= uiDiff;
 
             if (m_uiDivineShieldTimer <= uiDiff)
             {
                 if (HealthBelowPct(20))
                     DoCast(me, SPELL_DIVINE_SHIELD);
-                m_uiDivineShieldTimer = urand(0*IN_MILLISECONDS, 360*IN_MILLISECONDS);
+                m_uiDivineShieldTimer = urand(45*1000, 65*1000);
             } else m_uiDivineShieldTimer -= uiDiff;
 
             if (m_uiDivineStormTimer <= uiDiff)
@@ -1945,8 +1890,8 @@ public:
         void Reset()
         {
             boss_faction_championsAI::Reset();
-            m_uiDevourMagicTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
-            m_uiSpellLockTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+            m_uiDevourMagicTimer = urand(5*1000, 8*1000);
+            m_uiSpellLockTimer = urand(12*1000, 16*1000);
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -1956,13 +1901,13 @@ public:
             if (m_uiDevourMagicTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_DEVOUR_MAGIC);
-                m_uiDevourMagicTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiDevourMagicTimer = urand(10*1000, 25*1000);
             } else m_uiDevourMagicTimer -= uiDiff;
 
             if (m_uiSpellLockTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_SPELL_LOCK);
-                m_uiSpellLockTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiSpellLockTimer = urand(20*1000, 25*1000);
             } else m_uiSpellLockTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);

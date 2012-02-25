@@ -36,7 +36,10 @@ enum Spells
 
     //Spark of Ionar
     SPELL_SPARK_VISUAL_TRIGGER                    = 52667,
-    H_SPELL_SPARK_VISUAL_TRIGGER                  = 59833
+    H_SPELL_SPARK_VISUAL_TRIGGER                  = 59833,
+    //casted by Sparks
+    SPELL_ARCING_BURN_N                           = 52671,
+    SPELL_ARCING_BURN_H                           = 59834
 };
 
 enum Yells
@@ -198,14 +201,7 @@ public:
                 lSparkList.Summon(summoned);
 
                 summoned->CastSpell(summoned, DUNGEON_MODE(SPELL_SPARK_VISUAL_TRIGGER, H_SPELL_SPARK_VISUAL_TRIGGER), true);
-
-                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0);
-                if (target)
-                {
-                    summoned->SetInCombatWith(target);
-                    summoned->GetMotionMaster()->Clear();
-                    summoned->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
-                }
+                DoZoneInCombat(summoned);
             }
         }
 
@@ -292,6 +288,8 @@ public:
 
 };
 
+
+
 /*######
 ## mob_spark_of_ionar
 ######*/
@@ -362,6 +360,18 @@ public:
                             me->SetSpeed(MOVE_RUN, 2.0f);
                             me->GetMotionMaster()->Clear();
                             me->GetMotionMaster()->MovePoint(DATA_POINT_CALLBACK, pos);
+                        }
+                        else if (me->GetMotionMaster() && me->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE)
+                        {
+                            Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 0);
+                            if (target)
+                            {
+                                DoResetThreat();
+                                me->AddThreat(target, 1.0f);
+                                me->AI()->AttackStart(target);
+                            }
+                    
+                            DoCast(me->getVictim(), DUNGEON_MODE(SPELL_ARCING_BURN_N, SPELL_ARCING_BURN_H));
                         }
                     }
                     else

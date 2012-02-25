@@ -2255,6 +2255,7 @@ public:
 #define GOSSIP_ENGINEERING3   "Sholazar Basin."
 #define GOSSIP_ENGINEERING4   "Icecrown."
 #define GOSSIP_ENGINEERING5   "Storm Peaks."
+#define GOSSIP_ENGINEERING6   "The Underworld..."
 
 enum eWormhole
 {
@@ -2282,6 +2283,12 @@ public:
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ENGINEERING3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ENGINEERING4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ENGINEERING5, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+
+                uint32 roll = urand(0,9);
+                if (roll < 2) // Add Underworld Gossip Entry (20% Chance)
+                {
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ENGINEERING6, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+6);
+                }
 
                 player->PlayerTalkClass->SendGossipMenu(TEXT_WORMHOLE, creature->GetGUID());
             }
@@ -2318,6 +2325,10 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 5: //Storm peaks
                 player->CLOSE_GOSSIP_MENU();
                 player->CastSpell(player, SPELL_STORM_PEAKS, true);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 6: // The Underground...
+                player->CLOSE_GOSSIP_MENU();
+                player->TeleportTo(571, 5857.403320f, 516.381104f, 599.817993f, 2.112741f);
                 break;
         }
         return true;
@@ -2969,7 +2980,7 @@ public:
                 // Check if we are near Elune'ara lake south, if so try to summon Omen or a minion
                 if (me->GetZoneId() == ZONE_MOONGLADE)
                 {
-                    if (!me->FindNearestCreature(NPC_OMEN, 100.0f, false) && me->GetDistance2d(omenSummonPos.GetPositionX(), omenSummonPos.GetPositionY()) <= 100.0f)
+                    if (!me->FindNearestCreature(NPC_OMEN, 100.0f) && me->GetDistance2d(omenSummonPos.GetPositionX(), omenSummonPos.GetPositionY()) <= 100.0f)
                     {
                         switch (urand(0,9))
                         {
@@ -3099,6 +3110,184 @@ public:
     };
 };
 
+/*#####
+# npc_lvl60
+#####*/
+
+#define VOTEPOINTS_PRICE_LEVEL_40       70
+#define VOTEPOINTS_PRICE_LEVEL_50       70
+#define VOTEPOINTS_PRICE_LEVEL_60       70
+
+class npc_lvl60 : public CreatureScript
+{
+public:
+    npc_lvl60() : CreatureScript("npc_lvl60") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        uint32 playerLevel = player->getLevel();
+        uint32 playerAccountId = player->GetSession()->GetAccountId();
+        uint32 playerVotepoints = 0;
+
+        if (playerLevel >= 60 || playerLevel < 30)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Du bist nicht zwischen Level 30 und 60 und kannst mich daher nicht benutzen!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
+            player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
+            return true;
+        }
+
+        // Get amount of votepoints
+        QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `voteshop`.`voting_points` WHERE `id` = %u AND `lock` = 0 LIMIT 1", playerAccountId);
+        if (!result)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Es ist ein Fehler in der Abfrage fuer deine Votepunkte aufgetreten!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
+            player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
+            return true;
+        }
+
+        // Skip if no result found
+        if (result->GetRowCount() == 0)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Es wurde kein Wert fuer deine Votepunkte gefunden! Hast du noch nicht gevoted?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
+            player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
+            return true;
+        }
+
+        // Store player votepoints
+        Field* fields = result->Fetch();
+        playerVotepoints = fields[0].GetUInt32();
+
+        // Everything seems to be correct here, generate gossip menu matching to level
+        if (playerLevel >= 30 && playerLevel < 40)
+        {
+            if (playerVotepoints >= VOTEPOINTS_PRICE_LEVEL_40)
+            {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bitte setze mich auf Level 40! (70 Votepunkte)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+                player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
+                return true;
+            }
+            else
+            {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Du hast nicht genuegend Votepunkte, um dich auf Level 40 setzen zu lassen!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
+                player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
+                return true;
+            }
+        }
+
+        if (playerLevel >= 40 && playerLevel < 50)
+        {
+            if (playerVotepoints >= VOTEPOINTS_PRICE_LEVEL_50)
+            {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bitte setze mich auf Level 50! (70 Votepunkte)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
+                return true;
+            }
+            else
+            {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Du hast nicht genuegend Votepunkte, um dich auf Level 50 setzen zu lassen!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
+                player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
+                return true;
+            }
+        }
+
+        if (playerLevel >= 50 && playerLevel < 60)
+        {
+            if (playerVotepoints >= VOTEPOINTS_PRICE_LEVEL_60)
+            {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bitte setze mich auf Level 60! (70 Votepunkte)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+                player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
+                return true;
+            }
+            else
+            {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Du hast nicht genuegend Votepunkte, um dich auf Level 60 setzen zu lassen!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
+                player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
+                return true;
+            }
+        }
+
+        player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 uiSender, uint32 uiAction)
+    {
+        uint32 playerLevel = player->getLevel();
+        uint32 playerAccountId = player->GetSession()->GetAccountId();
+        uint32 playerVotepoints = 0;
+
+        if (playerLevel >= 60 || playerLevel < 30)
+        {
+            player->CLOSE_GOSSIP_MENU();
+            return true;
+        }
+
+        // Get amount of votepoints
+        QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `voteshop`.`voting_points` WHERE `id` = %u AND `lock` = 0 LIMIT 1", playerAccountId);
+        if (!result)
+        {
+            player->CLOSE_GOSSIP_MENU();
+            return true;
+        }
+
+        // Skip if no result found
+        if (result->GetRowCount() == 0)
+        {
+            player->CLOSE_GOSSIP_MENU();
+            return true;
+        }
+
+        // Store player votepoints
+        Field* fields = result->Fetch();
+        playerVotepoints = fields[0].GetUInt32();
+
+        switch (uiAction)
+        {
+            case GOSSIP_ACTION_INFO_DEF+1:
+                if (playerLevel >= 30 && playerLevel < 40)
+                {
+                    if (playerVotepoints >= VOTEPOINTS_PRICE_LEVEL_40)
+                    {
+                        QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", VOTEPOINTS_PRICE_LEVEL_40, playerAccountId);
+                        sLog->outString("WOW-CASTLE SCHWEIN: Player %s set to level 40 for %u voteshop points.", player->GetName(), VOTEPOINTS_PRICE_LEVEL_40);
+                        player->GiveLevel(40);
+                    }
+                }
+                break;
+
+            case GOSSIP_ACTION_INFO_DEF+2:
+                if (playerLevel >= 40 && playerLevel < 50)
+                {
+                    if (playerVotepoints >= VOTEPOINTS_PRICE_LEVEL_50)
+                    {
+                        QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", VOTEPOINTS_PRICE_LEVEL_50, playerAccountId);
+                        sLog->outString("WOW-CASTLE SCHWEIN: Player %s set to level 50 for %u voteshop points.", player->GetName(), VOTEPOINTS_PRICE_LEVEL_50);
+                        player->GiveLevel(50);
+                    }
+                }
+                break;
+
+            case GOSSIP_ACTION_INFO_DEF+3:
+                if (playerLevel >= 50 && playerLevel < 60)
+                {
+                    if (playerVotepoints >= VOTEPOINTS_PRICE_LEVEL_60)
+                    {
+                        QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id`= %u AND `lock` = 0 LIMIT 1", VOTEPOINTS_PRICE_LEVEL_60, playerAccountId);
+                        sLog->outString("WOW-CASTLE SCHWEIN: Player %s set to level 60 for %u voteshop points.", player->GetName(), VOTEPOINTS_PRICE_LEVEL_60);
+                        player->GiveLevel(60);
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        player->CLOSE_GOSSIP_MENU();
+        return true;
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -3132,4 +3321,5 @@ void AddSC_npcs_special()
     new npc_earth_elemental;
     new npc_firework;
     new npc_spring_rabbit();
+    new npc_lvl60;
 }

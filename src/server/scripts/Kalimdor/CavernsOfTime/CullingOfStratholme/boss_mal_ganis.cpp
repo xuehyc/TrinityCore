@@ -239,7 +239,8 @@ public:
                 instance->SetData(DATA_MAL_GANIS_EVENT, DONE);
 
                 // give achievement credit and LFG rewards to players. criteria use spell 58630 which doesn't exist, but it was created in spell_dbc
-                DoCast(me, SPELL_KILL_CREDIT);
+                // DoCast(me, SPELL_KILL_CREDIT);
+                instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, 58630, me);
             }
         }
 

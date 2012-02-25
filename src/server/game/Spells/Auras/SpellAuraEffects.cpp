@@ -37,6 +37,8 @@
 #include "ScriptMgr.h"
 #include "Vehicle.h"
 
+#include "OutdoorPvPWG.h"
+
 class Aura;
 //
 // EFFECT HANDLER NOTES
@@ -2852,9 +2854,21 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const* aurApp, uint8 mode
         // allow flying
         WorldPacket data;
         if (apply)
+        {
+            if (target)
+                if (target->ToPlayer())
+                target->ToPlayer()->SetCanFly(true);
+
             data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+        }
         else
+        {
+            if (target)
+                if (target->ToPlayer())
+                    target->ToPlayer()->SetCanFly(false);
+
             data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
+        }
         data.append(target->GetPackGUID());
         data << uint32(0);                                      // unk
         player->SendDirectMessage(&data);
@@ -2877,9 +2891,21 @@ void AuraEffect::HandleAuraWaterWalk(AuraApplication const* aurApp, uint8 mode, 
 
     WorldPacket data;
     if (apply)
+    {
+        if (target)
+            if (target->ToPlayer())
+                target->ToPlayer()->SetCanFly(true);
+
         data.Initialize(SMSG_MOVE_WATER_WALK, 8+4);
+    }
     else
+    {
+        if (target)
+            if (target->ToPlayer())
+                target->ToPlayer()->SetCanFly(false);
+
         data.Initialize(SMSG_MOVE_LAND_WALK, 8+4);
+    }
     data.append(target->GetPackGUID());
     data << uint32(0);
     target->SendMessageToSet(&data, true);
@@ -3250,9 +3276,19 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const* aurApp,
             {
                 WorldPacket data;
                 if (apply)
+                {
+                    if (player)
+                        player->SetCanFly(true);
+
                     data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+                }
                 else
+                {
+                    if (player)
+                        player->SetCanFly(false);
+
                     data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
+                }
                 data.append(player->GetPackGUID());
                 data << uint32(0);                                      // unknown
                 player->SendDirectMessage(&data);
@@ -4890,6 +4926,13 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             if (aurApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
                                 target->CastSpell(target, 58601, true);
                             break;
+                        case 58730: // Restricted Flight Area
+                            if (aurApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                            {
+                                target->CastSpell(target, 58601, true);
+                                target->CastSpell(target, 45472, true);
+                            }
+                            break;
                     }
                     break;
                 case SPELLFAMILY_MAGE:
@@ -5059,11 +5102,8 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 case 57723: // Exhaustion
                 case 57724: // Sated
                 {
-                    switch (GetId())
-                    {
-                        case 57723: target->ApplySpellImmune(GetId(), IMMUNITY_ID, 32182, apply); break; // Heroism
-                        case 57724: target->ApplySpellImmune(GetId(), IMMUNITY_ID, 2825, apply);  break; // Bloodlust
-                    }
+                    target->ApplySpellImmune(GetId(), IMMUNITY_ID, 32182, apply); // Heroism
+                    target->ApplySpellImmune(GetId(), IMMUNITY_ID, 2825, apply); // Bloodlust
                     break;
                 }
                 case 57819: // Argent Champion

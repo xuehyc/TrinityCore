@@ -44,6 +44,7 @@ public:
         uint64 uiMaidenOfGrief;
         uint64 uiKrystallus;
         uint64 uiSjonnir;
+        uint64 uiTribunalController;
 
         uint64 uiKaddrak;
         uint64 uiAbedneum;
@@ -69,15 +70,14 @@ public:
             uiMaidenOfGrief = 0;
             uiKrystallus = 0;
             uiSjonnir = 0;
+            uiTribunalController = 0;
 
             uiKaddrak = 0;
             uiMarnak = 0;
             uiAbedneum = 0;
             uiBrann = 0;
 
-            uiMaidenOfGriefDoor = 0;
             uiSjonnirDoor = 0;
-            uiBrannDoor = 0;
             uiKaddrakGo = 0;
             uiMarnakGo = 0;
             uiAbedneumGo = 0;
@@ -100,6 +100,7 @@ public:
                 case CREATURE_KADDRAK: uiKaddrak = creature->GetGUID(); break;
                 case CREATURE_ABEDNEUM: uiAbedneum = creature->GetGUID(); break;
                 case CREATURE_BRANN: uiBrann = creature->GetGUID(); break;
+                case CREATURE_TRIBUNAL_CONTROLLER: uiTribunalController = creature->GetGUID(); break;
             }
         }
 
@@ -116,20 +117,6 @@ public:
                 case GO_KADDRAK:
                     uiKaddrakGo = go->GetGUID();
                     break;
-                case GO_MAIDEN_DOOR:
-                    uiMaidenOfGriefDoor = go->GetGUID();
-                    if (m_auiEncounter[0] == DONE)
-                        go->SetGoState(GO_STATE_ACTIVE);
-                    else
-                        go->SetGoState(GO_STATE_READY);
-                    break;
-                case GO_BRANN_DOOR:
-                    uiBrannDoor = go->GetGUID();
-                    if (m_auiEncounter[1] == DONE)
-                        go->SetGoState(GO_STATE_ACTIVE);
-                    else
-                        go->SetGoState(GO_STATE_READY);
-                    break;
                 case GO_SJONNIR_DOOR:
                     uiSjonnirDoor = go->GetGUID();
                     if (m_auiEncounter[2] == DONE)
@@ -141,10 +128,20 @@ public:
                     uiTribunalConsole = go->GetGUID();
                     break;
                 case GO_TRIBUNAL_CHEST:
+                    if (!this->instance->IsHeroic())
+                    {
+                        uiTribunalChest = go->GetGUID();
+                        if (m_auiEncounter[2] == DONE)
+                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                    }
+                    break;
                 case GO_TRIBUNAL_CHEST_HERO:
-                    uiTribunalChest = go->GetGUID();
-                    if (m_auiEncounter[2] == DONE)
-                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                    if (this->instance->IsHeroic())
+                    {
+                        uiTribunalChest = go->GetGUID();
+                        if (m_auiEncounter[2] == DONE)
+                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                    }
                     break;
                 case 191527:
                     uiTribunalSkyFloor = go->GetGUID();
@@ -158,13 +155,9 @@ public:
             {
                 case DATA_MAIDEN_OF_GRIEF_EVENT:
                     m_auiEncounter[1] = data;
-                    if (m_auiEncounter[1] == DONE)
-                        HandleGameObject(uiBrannDoor, true);
                     break;
                 case DATA_KRYSTALLUS_EVENT:
                     m_auiEncounter[0] = data;
-                    if (m_auiEncounter[0] == DONE)
-                        HandleGameObject(uiMaidenOfGriefDoor, true);
                     break;
                 case DATA_SJONNIR_EVENT:
                     m_auiEncounter[3] = data;
@@ -191,8 +184,8 @@ public:
             {
                 case DATA_KRYSTALLUS_EVENT:                return m_auiEncounter[0];
                 case DATA_MAIDEN_OF_GRIEF_EVENT:           return m_auiEncounter[1];
-                case DATA_SJONNIR_EVENT:                   return m_auiEncounter[2];
-                case DATA_BRANN_EVENT:                     return m_auiEncounter[3];
+                case DATA_BRANN_EVENT:                     return m_auiEncounter[2];
+                case DATA_SJONNIR_EVENT:                   return m_auiEncounter[3];
             }
 
             return 0;
@@ -215,6 +208,8 @@ public:
                 case DATA_GO_SKY_FLOOR:                    return uiTribunalSkyFloor;
                 case DATA_SJONNIR_DOOR:                    return uiSjonnirDoor;
                 case DATA_MAIDEN_DOOR:                     return uiMaidenOfGriefDoor;
+                case DATA_TRIBUNAL_CONTROLLER:             return uiTribunalController;
+                case DATA_BRANN:                           return uiBrann;
             }
 
             return 0;

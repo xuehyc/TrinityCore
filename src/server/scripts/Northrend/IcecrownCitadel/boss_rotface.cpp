@@ -19,7 +19,6 @@
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellAuras.h"
-#include "GridNotifiers.h"
 #include "icecrown_citadel.h"
 
 // KNOWN BUGS:
@@ -104,6 +103,7 @@ class boss_rotface : public CreatureScript
                 events.ScheduleEvent(EVENT_MUTATED_INFECTION, 14000);
                 infectionStage = 0;
                 infectionCooldown = 14000;
+                aimOrientation = 0.0f;
             }
 
             void EnterCombat(Unit* who)
@@ -162,10 +162,20 @@ class boss_rotface : public CreatureScript
                 // don't enter combat
             }
 
+            void SummonedCreatureDespawn(Creature* summon)
+            {
+                if (summon)
+                    if (summon->GetEntry() == NPC_OOZE_SPRAY_STALKER)
+                        aimOrientation = 0.0f;
+            }
+
             void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim() || !CheckInRoom())
                     return;
+
+                if (aimOrientation != 0.0f)
+                    me->SetOrientation(aimOrientation);
 
                 events.Update(diff);
 
@@ -179,9 +189,12 @@ class boss_rotface : public CreatureScript
                         case EVENT_SLIME_SPRAY:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                             {
-                                DoSummon(NPC_OOZE_SPRAY_STALKER, *target, 8000, TEMPSUMMON_TIMED_DESPAWN);
-                                Talk(EMOTE_SLIME_SPRAY);
-                                DoCast(me, SPELL_SLIME_SPRAY);
+                                if (Creature* orientationTarget = DoSummon(NPC_OOZE_SPRAY_STALKER, *target, 8000, TEMPSUMMON_TIMED_DESPAWN))
+                                {
+                                    Talk(EMOTE_SLIME_SPRAY);
+                                    aimOrientation = me->GetAngle(orientationTarget);
+                                    DoCast(me, SPELL_SLIME_SPRAY);
+                                }
                             }
                             events.ScheduleEvent(EVENT_SLIME_SPRAY, 20000);
                             break;
@@ -193,9 +206,16 @@ class boss_rotface : public CreatureScript
                             }
                             break;
                         case EVENT_MUTATED_INFECTION:
-                            me->CastCustomSpell(SPELL_MUTATED_INFECTION, SPELLVALUE_MAX_TARGETS, 1, NULL, false);
+                        {
+                            Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -MUTATED_INFECTION);
+                            if (!target)
+                                target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -MUTATED_INFECTION);
+                            if (target)
+                                me->AddAura(MUTATED_INFECTION, target);
+
                             events.ScheduleEvent(EVENT_MUTATED_INFECTION, infectionCooldown);
                             break;
+                        }
                         default:
                             break;
                     }
@@ -207,6 +227,7 @@ class boss_rotface : public CreatureScript
         private:
             uint32 infectionCooldown;
             uint32 infectionStage;
+            float aimOrientation;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -447,15 +468,12 @@ class spell_rotface_ooze_flood : public SpellScriptLoader
 
             void FilterTargets(std::list<Unit*>& targetList)
             {
-                // get 2 targets except 2 nearest
+                // get 2 nearest targets
                 targetList.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
 
                 // .resize() runs pop_back();
-                if (targetList.size() > 4)
-                    targetList.resize(4);
-
-                while (targetList.size() > 2)
-                    targetList.pop_front();
+                if (targetList.size() > 3)
+                    targetList.resize(3);
             }
 
             void Register()

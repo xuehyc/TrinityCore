@@ -22,6 +22,9 @@
 #define SAY_AGGRO           RAND(-1533001, -1533002, -1533003)
 #define SAY_SLAY            -1533008
 
+#define EMOTE_CUSTOM_LOCUST             -1999976
+#define EMOTE_CUSTOM_GUARDIAN           -1999977
+
 #define MOB_CRYPT_GUARD     16573
 
 const Position GuardSummonPos = {3333.72f, -3476.30f, 287.1f, 6.2801f};
@@ -94,7 +97,8 @@ public:
             //Force the player to spawn corpse scarabs via spell, TODO: Check percent chance for scarabs, 20% at the moment
             if (!(rand()%5))
                 if (victim->GetTypeId() == TYPEID_PLAYER)
-                    victim->CastSpell(victim, SPELL_SUMMON_CORPSE_SCARABS_PLR, true, NULL, NULL, me->GetGUID());
+                    // Need to change to creature casting spell, because of summons faction
+                    me->CastSpell(me, SPELL_SUMMON_CORPSE_SCARABS_PLR, true, NULL, NULL, me->GetGUID());
 
             DoScriptText(SAY_SLAY, me);
         }
@@ -160,13 +164,13 @@ public:
                         events.ScheduleEvent(EVENT_IMPALE, urand(10000, 20000));
                         break;
                     case EVENT_LOCUST:
-                        // TODO : Add Text
+                        DoScriptText(EMOTE_CUSTOM_LOCUST, me);
                         DoCast(me, RAID_MODE(SPELL_LOCUST_SWARM_10, SPELL_LOCUST_SWARM_25));
                         DoSummon(MOB_CRYPT_GUARD, GuardSummonPos, 0, TEMPSUMMON_CORPSE_DESPAWN);
                         events.ScheduleEvent(EVENT_LOCUST, 90000);
                         break;
                     case EVENT_SPAWN_GUARDIAN_NORMAL:
-                        // TODO : Add Text
+                        DoScriptText(EMOTE_CUSTOM_GUARDIAN, me);
                         DoSummon(MOB_CRYPT_GUARD, GuardSummonPos, 0, TEMPSUMMON_CORPSE_DESPAWN);
                         break;
                     case EVENT_BERSERK:

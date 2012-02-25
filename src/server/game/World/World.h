@@ -160,6 +160,9 @@ enum WorldBoolConfigs
     CONFIG_PRESERVE_CUSTOM_CHANNELS,
     CONFIG_PDUMP_NO_PATHS,
     CONFIG_PDUMP_NO_OVERWRITE,
+
+    CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED,
+    CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR,
     CONFIG_QUEST_IGNORE_AUTO_ACCEPT,
     CONFIG_QUEST_IGNORE_AUTO_COMPLETE,
     BOOL_CONFIG_VALUE_COUNT
@@ -309,6 +312,17 @@ enum WorldIntConfigs
     CONFIG_PRESERVE_CUSTOM_CHANNEL_DURATION,
     CONFIG_PERSISTENT_CHARACTER_CLEAN_FLAGS,
     CONFIG_MAX_INSTANCES_PER_HOUR,
+
+    CONFIG_OUTDOORPVP_WINTERGRASP_START_TIME,
+    CONFIG_OUTDOORPVP_WINTERGRASP_BATTLE_TIME,
+    CONFIG_OUTDOORPVP_WINTERGRASP_INTERVAL,
+    CONFIG_OUTDOORPVP_WINTERGRASP_WIN_BATTLE,
+    CONFIG_OUTDOORPVP_WINTERGRASP_LOSE_BATTLE,
+    CONFIG_OUTDOORPVP_WINTERGRASP_DAMAGED_TOWER,
+    CONFIG_OUTDOORPVP_WINTERGRASP_DESTROYED_TOWER,
+    CONFIG_OUTDOORPVP_WINTERGRASP_DAMAGED_BUILDING,
+    CONFIG_OUTDOORPVP_WINTERGRASP_INTACT_BUILDING,
+    CONFIG_OUTDOORPVP_WINTERGRASP_SAVESTATE_PERIOD,
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -711,6 +725,43 @@ class World
         static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
         static float GetMaxVisibleDistanceInInstances()     { return m_MaxVisibleDistanceInInstances;  }
         static float GetMaxVisibleDistanceInBGArenas()      { return m_MaxVisibleDistanceInBGArenas;   }
+
+        //movement anticheat enable flag
+        bool m_MvAnticheatEnable;
+        bool m_MvAnticheatKick;
+        uint32 m_MvAnticheatAlarmCount;
+        uint32 m_MvAnticheatAlarmPeriod;
+        unsigned char m_MvAntiCheatBan;
+        std::string m_MvAnticheatBanTime;
+        unsigned char m_MvAnticheatGmLevel;
+        bool m_MvAnticheatKill;
+        float m_MvAnticheatMaxXYT;
+        uint16 m_MvAnticheatIgnoreAfterTeleport;
+
+        //movement anticheat enable flag
+        inline bool GetMvAnticheatEnable()             {return m_MvAnticheatEnable;}
+        inline bool GetMvAnticheatKick()               {return m_MvAnticheatKick;}
+        inline uint32 GetMvAnticheatAlarmCount()       {return m_MvAnticheatAlarmCount;}
+        inline uint32 GetMvAnticheatAlarmPeriod()      {return m_MvAnticheatAlarmPeriod;}
+        inline unsigned char GetMvAnticheatBan()       {return m_MvAntiCheatBan;}
+        inline std::string GetMvAnticheatBanTime()     {return m_MvAnticheatBanTime;}
+        inline unsigned char GetMvAnticheatGmLevel()   {return m_MvAnticheatGmLevel;}
+        inline bool GetMvAnticheatKill()               {return m_MvAnticheatKill;}
+        inline float GetMvAnticheatMaxXYT()            {return m_MvAnticheatMaxXYT;}
+        inline uint16 GetMvAnticheatIgnoreAfterTeleport()   {return m_MvAnticheatIgnoreAfterTeleport;}
+
+        uint32 m_WintergrapsTimer;
+        uint32 m_WintergrapsState;
+
+        void SendWintergraspState();
+        void SetWintergrapsTimer(uint32 timer, uint32 state)
+        {
+            m_WintergrapsTimer = timer;
+            m_WintergrapsState = state;
+        }
+
+        uint32 GetWintergrapsTimer() { return m_WintergrapsTimer; }
+        uint32 GetWintergrapsState() { return m_WintergrapsState; }
 
         static int32 GetVisibilityNotifyPeriodOnContinents(){ return m_visibility_notify_periodOnContinents; }
         static int32 GetVisibilityNotifyPeriodInInstances() { return m_visibility_notify_periodInInstances;  }

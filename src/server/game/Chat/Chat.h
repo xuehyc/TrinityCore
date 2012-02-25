@@ -349,6 +349,21 @@ class ChatHandler
         //bool HandleSet32Bit(const char* args);
         bool HandleSaveAllCommand(const char* args);
 
+        // Custom wintergrasp commands
+        bool HandleWintergraspStatusCommand(const char *args);
+        bool HandleWintergraspStartCommand(const char *args);
+        bool HandleWintergraspStopCommand(const char *args);
+        bool HandleWintergraspEnableCommand(const char *args);
+        bool HandleWintergraspSwitchTeamCommand(const char *args);
+        bool HandleWintergraspTimerCommand(const char *args);
+
+        // Custom achievement command
+        bool HandleAchievementCommand(const char * args);
+
+        // Custom irc commands
+        bool HandleIRCRelogCommand(const char *args);
+        bool HandleIRCpmCommand(const char* args);
+
         // Utility methods for commands
         bool LookupPlayerSearchCommand(QueryResult result, int32 limit);
         bool HandleBanListHelper(QueryResult result);
@@ -403,5 +418,7 @@ class CliHandler : public ChatHandler
         void* m_callbackArg;
         Print* m_print;
 };
+
+char const *fmtstring(char const *format, ...);
 
 #endif

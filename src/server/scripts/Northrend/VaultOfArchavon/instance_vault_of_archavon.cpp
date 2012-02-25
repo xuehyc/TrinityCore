@@ -127,6 +127,15 @@ class instance_archavon : public InstanceMapScript
                 return false;
             }
 
+            bool IsEncounterInProgress() const
+            {
+                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                    if (GetBossState(i) == IN_PROGRESS)
+                        return true;
+
+                return false;
+            }
+
         private:
             uint64 EmalonGUID;
             uint64 ToravonGUID;

@@ -629,6 +629,8 @@ void BattlegroundAB::EndBattleground(uint32 winner)
     RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
     RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
 
+    RewardMarksAndShardsToTeams(winner, true);
+
     Battleground::EndBattleground(winner);
 }
 

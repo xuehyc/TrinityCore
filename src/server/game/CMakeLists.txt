@@ -47,6 +47,7 @@ file(GLOB_RECURSE sources_Skills Skills/*.cpp Skills/*.h)
 file(GLOB_RECURSE sources_Spells Spells/*.cpp Spells/*.h)
 file(GLOB_RECURSE sources_Texts Texts/*.cpp Texts/*.h)
 file(GLOB_RECURSE sources_Tools Tools/*.cpp Tools/*.h)
+file(GLOB_RECURSE sources_TriniChat TriniChat/*.cpp TriniChat/*.h)
 file(GLOB_RECURSE sources_Tickets Tickets/*.cpp Tickets/*.h)
 file(GLOB_RECURSE sources_Weather Weather/*.cpp Weather/*.h)
 file(GLOB_RECURSE sources_World World/*.cpp World/*.h)
@@ -80,7 +81,7 @@ set(game_STAT_SRCS
   ${sources_Grids}
   ${sources_Groups}
   ${sources_Guilds}
-  ${sources_Handlers}
+  ${sources_Handlers}  
   ${sources_Instances}
   ${sources_Loot}
   ${sources_Mails}
@@ -97,6 +98,7 @@ set(game_STAT_SRCS
   ${sources_Spells}
   ${sources_Texts}
   ${sources_Tools}
+  ${sources_TriniChat}
   ${sources_Tickets}
   ${sources_Weather}
   ${sources_World}
@@ -111,7 +113,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/collision
   ${CMAKE_SOURCE_DIR}/src/server/collision/Management
   ${CMAKE_SOURCE_DIR}/src/server/collision/Models
-  ${CMAKE_SOURCE_DIR}/src/server/collision/Maps
+  ${CMAKE_SOURCE_DIR}/src/server/collision/Maps  
   ${CMAKE_SOURCE_DIR}/src/server/shared
   ${CMAKE_SOURCE_DIR}/src/server/shared/Configuration
   ${CMAKE_SOURCE_DIR}/src/server/shared/Cryptography
@@ -167,7 +169,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Grids
   ${CMAKE_CURRENT_SOURCE_DIR}/Groups
   ${CMAKE_CURRENT_SOURCE_DIR}/Guilds
-  ${CMAKE_CURRENT_SOURCE_DIR}/Handlers
+  ${CMAKE_CURRENT_SOURCE_DIR}/Handlers  
   ${CMAKE_CURRENT_SOURCE_DIR}/Instances
   ${CMAKE_CURRENT_SOURCE_DIR}/Loot
   ${CMAKE_CURRENT_SOURCE_DIR}/Mails
@@ -190,10 +192,12 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Spells/Auras
   ${CMAKE_CURRENT_SOURCE_DIR}/Texts
   ${CMAKE_CURRENT_SOURCE_DIR}/Tools
+  ${CMAKE_CURRENT_SOURCE_DIR}/TriniChat  
   ${CMAKE_CURRENT_SOURCE_DIR}/Tickets
   ${CMAKE_CURRENT_SOURCE_DIR}/Weather
   ${CMAKE_CURRENT_SOURCE_DIR}/World
   ${CMAKE_SOURCE_DIR}/src/server/scripts/PrecompiledHeaders
+  ${CMAKE_SOURCE_DIR}/src/server/scripts/OutdoorPvP  
   ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
   ${OPENSSL_INCLUDE_DIR}
