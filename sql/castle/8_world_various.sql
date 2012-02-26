@@ -331,3 +331,55 @@ UPDATE `creature_loot_template` SET `maxcount` = '3' WHERE `creature_loot_templa
 
 -- remove recipes from fjola
 DELETE FROM `creature_loot_template` WHERE `entry` IN (35352, 35350) AND `mincountOrRef` IN (-34314, -34328);
+
+-- #1068/#1069 Quest-Pooling and Classmasks for Argent Tournament
+-- Sunreaver / Silver Covenant Quest Pooling
+SET @pool_narasi := 20300;
+SET @pool_savinia := @pool_narasi+1;
+SET @pool_girana := @pool_narasi+2;
+SET @pool_tylos := @pool_narasi+3;
+
+DELETE FROM `pool_template` WHERE `entry` IN (@pool_narasi, @pool_savinia, @pool_girana, @pool_tylos);
+INSERT INTO `pool_template` (`entry`, `max_limit`, `description`) VALUES
+(@pool_narasi, 1, 'Narasi Snowdawn <The Silver Covenant> - Daily Quests'),
+(@pool_savinia, 1, 'Savinia Loresong <The Silver Covenant> - Daily Quests'),
+(@pool_girana, 1, 'Girana the Blooded <The Sunreavers> - Daily Quests'),
+(@pool_tylos, 1, 'Tylos Dawnrunner <The Sunreavers> - Daily Quests');
+
+DELETE FROM `pool_quest` WHERE `entry` IN (SELECT quest FROM creature_questrelation WHERE id IN (34771, 34912, 34880, 34914));
+INSERT INTO `pool_quest` (`entry`, `pool_entry`, `description`) VALUES
+-- Narasi Snowdawn
+(14074, @pool_narasi, 'A Leg Up'),
+(14152, @pool_narasi, 'Rescue at Sea'),
+(14080, @pool_narasi, 'Stop The Aggressors'),
+(14077, @pool_narasi, 'The Light''s Mercy'),
+(14096, @pool_narasi, 'You''ve Really Done It This Time, Kul'),
+-- Savinia
+(14076, @pool_savinia, 'Breakfast of Champions'),
+(14090, @pool_savinia, 'Gormok Wants His Snobolds'),
+(14112, @pool_savinia, 'What Do You Feed a Yeti, Anyway?'),
+-- Girana
+(14143, @pool_girana, 'A Leg Up'),
+(14136, @pool_girana, 'Rescue at Sea'),
+(14140, @pool_girana, 'Stop The Aggressors'),
+(14144, @pool_girana, 'The Light''s Mercy'),
+(14142, @pool_girana, 'You''ve Really Done It This Time, Kul'),
+-- Tylos
+(14092, @pool_tylos, 'Breakfast of Champions'),
+(14141, @pool_tylos, 'Gormok Wants His Snobolds'),
+(14145, @pool_tylos, 'What Do You Feed a Yeti, Anyway?');
+
+-- Argent Tournament: Separate Death-Knight quests from those of other classes
+-- Set Quests to DK only
+UPDATE `quest_template` SET `RequiredClasses` = 32 WHERE `id` IN 
+(13863, 13864, -- Battle Before The Citadel
+ 13788, 13812, -- Threat From Above
+ 13793, 13814, -- Among The Champions
+ 13791, 13813); -- Taking Battle To The Enemy
+ 
+-- Set quests to NON-DK only
+UPDATE `quest_template` SET `RequiredClasses` = 1|2|4|8|16|64|128|256|512 WHERE `id` IN 
+(13790, 13811, -- Among the Champions
+ 13861, 13862, -- Battle Before The Citadel
+ 13682, 13809, -- Threat From Above
+ 13789, 13810); -- Taking Battle To The Enemy
