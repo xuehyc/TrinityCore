@@ -383,3 +383,9 @@ UPDATE `quest_template` SET `RequiredClasses` = 1|2|4|8|16|64|128|256|512 WHERE 
  13861, 13862, -- Battle Before The Citadel
  13682, 13809, -- Threat From Above
  13789, 13810); -- Taking Battle To The Enemy
+
+-- no issue: fix gnomish army knife resurrection spells availability to grand master engineers only
+-- Gnomish Army Knife Resurrection (54732) is restricted to Grand Master Engineers (51306)
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 17 AND `SourceEntry` = 54732 LIMIT 1;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(17, 0, 54732, 0, 0, 25, 0, 51306, 0, 0, 0, 1335, '', 'Only Grand-Masters in Engineering can use the Gnomish Army Knife to resurrect players.');
