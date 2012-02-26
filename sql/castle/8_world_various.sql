@@ -320,6 +320,9 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (17, 0, 35476, 0, 0, 27, 0, 79, 4, 0, 0, 0, '', 'Drums of Battle - Do not allow usage at Level 80'),
 (17, 0, 35478, 0, 0, 27, 0, 79, 4, 0, 0, 0, '', 'Drums of Restoration - Do not allow usage at Level 80');
 
+-- fix broken RequiredNpcOrGoId1 in quest 13828 (Master of the Melee), Horde was already working
+UPDATE quest_template SET RequiredNpcOrGo1 = 33973 WHERE id = 13828 LIMIT 1;
+
 -- #1008: Twin Valkyrs Loot Balancing
 -- reduce maxcount for eydis darkbane
 UPDATE `creature_loot_template` SET `maxcount` = '1' WHERE `creature_loot_template`.`entry` =35347 AND `creature_loot_template`.`item`=1 LIMIT 1;
