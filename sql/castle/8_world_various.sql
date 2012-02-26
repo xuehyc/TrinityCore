@@ -319,3 +319,15 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 17 AND `SourceEntry` 
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (17, 0, 35476, 0, 0, 27, 0, 79, 4, 0, 0, 0, '', 'Drums of Battle - Do not allow usage at Level 80'),
 (17, 0, 35478, 0, 0, 27, 0, 79, 4, 0, 0, 0, '', 'Drums of Restoration - Do not allow usage at Level 80');
+
+-- #1008: Twin Valkyrs Loot Balancing
+-- reduce maxcount for eydis darkbane
+UPDATE `creature_loot_template` SET `maxcount` = '1' WHERE `creature_loot_template`.`entry` =35347 AND `creature_loot_template`.`item`=1 LIMIT 1;
+UPDATE `creature_loot_template` SET `maxcount` = '1' WHERE `creature_loot_template`.`entry` =35349 AND `creature_loot_template`.`item`=1 LIMIT 1;
+
+-- raise maxcount for fjola lightbane
+UPDATE `creature_loot_template` SET `maxcount` = '3' WHERE `creature_loot_template`.`entry` =35352 AND `creature_loot_template`.`item`=1 LIMIT 1;
+UPDATE `creature_loot_template` SET `maxcount` = '3' WHERE `creature_loot_template`.`entry` =35350 AND `creature_loot_template`.`item`=1 LIMIT 1;
+
+-- remove recipes from fjola
+DELETE FROM `creature_loot_template` WHERE `entry` IN (35352, 35350) AND `mincountOrRef` IN (-34314, -34328);
