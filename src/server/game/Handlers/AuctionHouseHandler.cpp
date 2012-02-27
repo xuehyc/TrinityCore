@@ -243,6 +243,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
         else
             AH->auctioneer = GUID_LOPART(auctioneer);
 
+        // Required stack size of auction matches to current item stack size, just move item to auctionhouse
         if (itemsCount == 1 && item->GetCount() == count[i])
         {
             if (GetSecurity() > SEC_PLAYER && sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
@@ -280,7 +281,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
             GetPlayer()->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CREATE_AUCTION, 1);
             return;
         }
-        else
+        else // Required stack size of auction does not match to current item stack size, clone item and set correct stack size
         {
             Item* newItem = item->CloneItem(finalCount, _player);
             if (!newItem)
@@ -315,16 +316,17 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
             {
                 Item* item = items[i];
 
+                // Item stack count equals required count, ready to delete item - cloned item will be used for auction
                 if (item->GetCount() == count[i])
                 {
                     _player->MoveItemFromInventory(item->GetBagSlot(), item->GetSlot(), true);
 
                     SQLTransaction trans = CharacterDatabase.BeginTransaction();
                     item->DeleteFromInventoryDB(trans);
-                    item->SaveToDB(trans);
+                    item->DeleteFromDB(trans);
                     CharacterDatabase.CommitTransaction(trans);
                 }
-                else
+                else // Item stack count is bigger than required count, update item stack count and save to database - cloned item will be used for auction
                 {
                     item->SetCount(item->GetCount() - count[i]);
                     item->SetState(ITEM_CHANGED, _player);
