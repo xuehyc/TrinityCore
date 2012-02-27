@@ -381,7 +381,7 @@ UPDATE `quest_template` SET `RequiredClasses` = 32 WHERE `id` IN
  13791, 13813); -- Taking Battle To The Enemy
  
 -- Set quests to NON-DK only
-UPDATE `quest_template` SET `RequiredClasses` = 1|2|4|8|16|64|128|256|512 WHERE `id` IN 
+UPDATE `quest_template` SET `RequiredClasses` = 1|2|4|8|16|64|128|256|1024 WHERE `id` IN 
 (13790, 13811, -- Among the Champions
  13861, 13862, -- Battle Before The Citadel
  13682, 13809, -- Threat From Above
