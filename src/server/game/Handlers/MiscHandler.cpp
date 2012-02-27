@@ -170,12 +170,10 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_WHO Message");
 
-    /*
     time_t now = time(NULL);
-    if (now - timeLastWhoCommand < 5)
+    if (now - timeLastWhoCommand < 2)
         return;
     else timeLastWhoCommand = now;
-    */
 
     uint32 matchcount = 0;
 
