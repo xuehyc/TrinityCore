@@ -315,9 +315,6 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
             {
                 Item* item = items[i];
 
-                if((sIRC.BOTMASK & 1024) != 0)
-                    sIRC.AHFunc(item->GetEntry(), item->GetTemplate()->Name1, _player->GetName(), AH->GetHouseId());
-
                 if (item->GetCount() == count[i])
                 {
                     _player->MoveItemFromInventory(item->GetBagSlot(), item->GetSlot(), true);
