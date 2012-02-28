@@ -318,29 +318,29 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
             sAuctionMgr->AddAItem(newItem);
             auctionHouse->AddAuction(AH);
 
-            for (uint32 i = 0; i < itemsCount; ++i)
+            for (uint32 j = 0; j < itemsCount; ++j)
             {
-                Item* item = items[i];
+                Item* item2 = items[j];
 
                 // Item stack count equals required count, ready to delete item - cloned item will be used for auction
-                if (item->GetCount() == count[i])
+                if (item2->GetCount() == count[j])
                 {
-                    _player->MoveItemFromInventory(item->GetBagSlot(), item->GetSlot(), true);
+                    _player->MoveItemFromInventory(item2->GetBagSlot(), item2->GetSlot(), true);
 
                     SQLTransaction trans = CharacterDatabase.BeginTransaction();
-                    item->DeleteFromInventoryDB(trans);
-                    item->DeleteFromDB(trans);
+                    item2->DeleteFromInventoryDB(trans);
+                    item2->DeleteFromDB(trans);
                     CharacterDatabase.CommitTransaction(trans);
                 }
                 else // Item stack count is bigger than required count, update item stack count and save to database - cloned item will be used for auction
                 {
-                    item->SetCount(item->GetCount() - count[i]);
-                    item->SetState(ITEM_CHANGED, _player);
-                    _player->ItemRemovedQuestCheck(item->GetEntry(), count[i]);
-                    item->SendUpdateToPlayer(_player);
+                    item2->SetCount(item2->GetCount() - count[j]);
+                    item2->SetState(ITEM_CHANGED, _player);
+                    _player->ItemRemovedQuestCheck(item2->GetEntry(), count[j]);
+                    item2->SendUpdateToPlayer(_player);
 
                     SQLTransaction trans = CharacterDatabase.BeginTransaction();
-                    item->SaveToDB(trans);
+                    item2->SaveToDB(trans);
                     CharacterDatabase.CommitTransaction(trans);
                 }
             }
