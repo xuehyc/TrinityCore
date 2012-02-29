@@ -880,6 +880,6 @@ void AddSC_terokkar_forest()
     new npc_skywing();
     new npc_slim();
     new npc_akuno();
-	new go_mana_bomb();
+    new go_mana_bomb();
     new npc_mana_bomb_trigger();
 }
