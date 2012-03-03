@@ -566,6 +566,10 @@ public:
 
             if (Enraged)
             {
+                // If protection active, do nothing
+                if (HasProtected)
+                    return;
+
                 if (HandOfDeathTimer <= diff)
                 {
                     DoCast(me->getVictim(), SPELL_HAND_OF_DEATH);
