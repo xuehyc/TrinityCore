@@ -697,6 +697,177 @@ public:
 
 };
 
+/*######
+## npc_mana_bomb_trigger
+## go_mana_bomb
+## Corresponds to:
+## http://www.wowhead.com/quest=10446 The Final Code (Alliance)
+## http://www.wowhead.com/quest=10447 The Final Code (Horde)
+######*/
+
+enum
+{
+    SAY_COUNT_5                 = -1000472,
+    SAY_COUNT_4                 = -1000473,
+    SAY_COUNT_3                 = -1000474,
+    SAY_COUNT_2                 = -1000475,
+    SAY_COUNT_1                 = -1000476,
+    GO_MANA_BOMB                = 184725,
+    SPELL_MANA_BOMB_LIGHTNING   = 37843,
+    SPELL_MANA_BOMB_EXPL        = 35513,
+    NPC_MANA_BOMB_EXPL_TRIGGER  = 20767,
+    NPC_MANA_BOMB_KILL_TRIGGER  = 21039,
+    QUEST_FINAL_CODE_A = 10446,
+    QUEST_FINAL_CODE_H = 10447,
+    COUNTER_STEP_TIME = 2 * IN_MILLISECONDS,
+    EVENT_COUNTER_SEC_5 = 1,
+    EVENT_COUNTER_SEC_4 = 2,
+    EVENT_COUNTER_SEC_3 = 3,
+    EVENT_COUNTER_SEC_2 = 4,
+    EVENT_COUNTER_SEC_1 = 5,
+    EVENT_BOMB_EXPLODE = 6,
+    EVENT_RESET = 7
+};
+
+class npc_mana_bomb_trigger : public CreatureScript
+{
+public:
+    npc_mana_bomb_trigger() : CreatureScript("npc_mana_bomb_trigger") {}
+
+    struct npc_mana_bomb_triggerAI : public Scripted_NoMovementAI
+    {
+        EventMap events;
+        bool isActive;
+        GameObject* myBomb;
+        Player* activator;
+
+        npc_mana_bomb_triggerAI(Creature* creature) : Scripted_NoMovementAI(creature) 
+        { 
+            this->Reset(); 
+        }
+
+        void Reset()
+        {
+            this->isActive = false;
+            this->events.Reset();
+            this->myBomb = 0;
+            this->activator = 0;
+        }
+
+        void AttackStart(Unit* target)
+        {
+            // Regularly, this should not happen, buf if it does, we have to stop it until reset.
+            if(this->isActive)
+                return;
+
+            if(Player* player = target->ToPlayer())
+            {
+                if(this->myBomb = GetClosestGameObjectWithEntry(me, GO_MANA_BOMB, INTERACTION_DISTANCE))
+                {
+                    this->isActive = true;
+                    this->activator = player;
+                    this->events.ScheduleEvent(EVENT_COUNTER_SEC_5, COUNTER_STEP_TIME);
+                }
+            }
+        }
+
+        void DamageTaken(Unit* /*caster*/, uint32& damage)
+        {
+            damage = 0;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if(!this->isActive)
+                return;
+            this->events.Update(diff);
+
+            while(uint32 event = this->events.ExecuteEvent())
+            {
+                me->CastSpell(me, SPELL_MANA_BOMB_LIGHTNING, false);
+                switch(event)
+                {
+                case EVENT_COUNTER_SEC_5:
+                    {
+                        if(this->myBomb)
+                            this->myBomb->SetGoState(GO_STATE_ACTIVE);
+                        DoScriptText(SAY_COUNT_5, me);
+                        this->events.ScheduleEvent(EVENT_COUNTER_SEC_4, COUNTER_STEP_TIME);
+                    }
+                    break;
+                case EVENT_COUNTER_SEC_4:
+                    {
+                        DoScriptText(SAY_COUNT_4, me);                     
+                        this->events.ScheduleEvent(EVENT_COUNTER_SEC_3, COUNTER_STEP_TIME);
+                    }
+                    break;
+                case EVENT_COUNTER_SEC_3:
+                    {
+                        DoScriptText(SAY_COUNT_3, me);
+                        this->events.ScheduleEvent(EVENT_COUNTER_SEC_2, COUNTER_STEP_TIME);
+                    }
+                    break;
+                case EVENT_COUNTER_SEC_2:
+                    {
+                        DoScriptText(SAY_COUNT_2, me);
+                        this->events.ScheduleEvent(EVENT_COUNTER_SEC_1, COUNTER_STEP_TIME);
+                    }
+                    break;
+                case EVENT_COUNTER_SEC_1:
+                    {
+                        DoScriptText(SAY_COUNT_1, me);
+                        this->events.ScheduleEvent(EVENT_BOMB_EXPLODE, COUNTER_STEP_TIME);
+                    }
+                    break;
+                case EVENT_BOMB_EXPLODE:
+                    {
+                        // BEWARE: If players are in the reach of the bomb, they will be killed by the explosion! (blizz-like)                        
+                        me->CastSpell(me, SPELL_MANA_BOMB_EXPL, false);
+                        // We are _directly_ granting this credit, since granting the kill-credit only does not seem to work... why-ever
+                        if(this->activator)
+                            activator->CompleteQuest( activator->GetTeam() == ALLIANCE ? QUEST_FINAL_CODE_A : QUEST_FINAL_CODE_H );
+                            // activator->KilledMonsterCredit(NPC_MANA_BOMB_KILL_TRIGGER, me->GetGUID());
+                        this->events.ScheduleEvent(EVENT_RESET, 30000);
+                    }
+                    break;
+                case EVENT_RESET:
+                    {
+                        if(this->myBomb)
+                            this->myBomb->SetGoState(GO_STATE_READY);
+                        this->Reset();
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_mana_bomb_triggerAI (creature);
+    }
+};
+
+class go_mana_bomb : public GameObjectScript
+{
+public:
+    go_mana_bomb() : GameObjectScript("go_mana_bomb") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (Creature* creature = GetClosestCreatureWithEntry(go, NPC_MANA_BOMB_EXPL_TRIGGER, INTERACTION_DISTANCE))
+        {
+            if (creature->AI())
+            {
+                creature->AI()->AttackStart(player);
+            }           
+        }
+        return true;
+    }
+};
+
 void AddSC_terokkar_forest()
 {
     new mob_unkor_the_ruthless();
@@ -709,4 +880,6 @@ void AddSC_terokkar_forest()
     new npc_skywing();
     new npc_slim();
     new npc_akuno();
+    new go_mana_bomb();
+    new npc_mana_bomb_trigger();
 }
