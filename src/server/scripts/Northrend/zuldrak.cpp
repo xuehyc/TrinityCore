@@ -619,7 +619,7 @@ public:
 
         void MovementInform(uint32 uiType, uint32 /*uiId*/)
         {
-            if (uiType != POINT_MOTION_TYPE)
+            if (uiType != EFFECT_MOTION_TYPE)
                 return;
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
