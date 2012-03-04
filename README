@@ -1,3 +1,15 @@
 = Next Generation Realm Daemon =
+https://github.com/Anubisss/ngrealmd
 
-Some of the code based on: https://bitbucket.org/Anubisss/realmd
+
+
+~ LICENSE
+    - GNU GPL, Version 2 -> check file COPYING
+    - Some of the code based on: https://bitbucket.org/Anubisss/realmd
+
+
+~ FEATURES
+    - Can compile only authserver (or worldserver) via CMake.
+        * Use: -DAUTHSERVER=1 -DWORLDSERVER=0
+        * Note: If compilation of scripts needed (-DSCRIPTS=1) then
+                have to build worldserver (-DWORLDSERVER=1) too.
