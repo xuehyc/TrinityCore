@@ -410,16 +410,8 @@ public:
                                     break;
                             }
 
-                            uint8 location = 2;
                             for (uint8 i = 0; i < count; i++)
-                            {
-                                location++;
-
-                                if (location >= 6)
-                                    location = 2;
-
-                                me->SummonCreature(NPC_SCARAB, AnubarakLoc[location], TEMPSUMMON_CORPSE_DESPAWN);
-                            }
+                                me->SummonCreature(NPC_SCARAB, AnubarakLoc[i+2], TEMPSUMMON_CORPSE_DESPAWN);
                         }
 
                         m_uiSummonScarabTimer = 10000;
