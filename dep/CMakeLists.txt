@@ -15,13 +15,13 @@ elseif( MSVC )
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-  if(SERVERS)
+  if( AUTHSERVER OR WORLDSERVER )
     add_subdirectory(jemalloc)
   endif()
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-  if(SERVERS)
+  if( AUTHSERVER OR WORLDSERVER )
     add_subdirectory(acelite)
     if(USE_MYSQL_SOURCES)
       add_subdirectory(mysqllite)
@@ -35,7 +35,7 @@ endif()
 
 add_subdirectory(g3dlite)
 
-if(SERVERS)
+if( WORLDSERVER )
   add_subdirectory(gsoap)
 endif()
 

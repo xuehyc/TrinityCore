@@ -18,17 +18,27 @@ message("")
 
 # Show infomation about the options selected during configuration
 
-if( SERVERS )
-  message("* Build world/auth       : Yes (default)")
+if( WORLDSERVER )
+  message("* Build worldserver       : Yes  (default)")
 else()
-  message("* Build world/authserver : No")
+  message("* Build worldserver      : No")
 endif()
 
-if( SCRIPTS )
-  message("* Build with scripts     : Yes (default)")
+if( AUTHSERVER )
+  message("* Build authserver      : Yes  (default)")
+else()
+  message("* Build authserver : No")
+endif()
+
+if( WORLDSERVER AND SCRIPTS )
+  message("* Build with scripts     : Yes  (default)")
   add_definitions(-DSCRIPTS)
 else()
-  message("* Build with scripts     : No")
+  if( WORLDSERVER )
+    message("* Build with scripts     : No")
+  else()
+    message("* Build with scripts     : No  (because worldserver no builded")
+  endif()
   set(USE_SCRIPTPCH 0)
 endif()
 
