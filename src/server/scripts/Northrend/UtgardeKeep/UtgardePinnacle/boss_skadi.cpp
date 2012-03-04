@@ -276,9 +276,9 @@ public:
             Summons.Despawn(summoned);
         }
 
-        void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
+        void DoAction(const int32 param)
         {
-            if (spell->Id == SPELL_HARPOON_DAMAGE)
+            if (param == 1) // Skadi Harpoon Event
             {
                 m_uiSpellHitCount++;
                 if (m_uiSpellHitCount >= 3)
@@ -300,6 +300,7 @@ public:
                     me->AI()->AttackStart(SelectTarget(SELECT_TARGET_RANDOM));
                 }
             }
+
         }
 
         void UpdateAI(const uint32 diff)
@@ -469,6 +470,7 @@ public:
         if (Creature* pSkadi = Unit::GetCreature((*pGO), m_instance->GetData64(DATA_SKADI_THE_RUTHLESS)))
         {
             player->CastSpell(pSkadi, SPELL_RAPID_FIRE, true);
+            pSkadi->GetAI()->DoAction(1);
         }
         return false;
     }
