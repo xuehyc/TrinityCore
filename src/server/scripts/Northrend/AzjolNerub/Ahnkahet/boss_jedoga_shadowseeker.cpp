@@ -450,6 +450,13 @@ public:
                         {
                             CAST_AI(boss_jedoga_shadowseeker::boss_jedoga_shadowseekerAI, boss->AI())->bOpFerok = true;
                             CAST_AI(boss_jedoga_shadowseeker::boss_jedoga_shadowseekerAI, boss->AI())->bOpFerokFail = false;
+
+                            // sacrifice health transfer
+                            if ((boss->GetHealth() + me->GetHealth()) >= boss->GetMaxHealth())
+                            	boss->SetFullHealth();
+                            else
+                            	boss->SetHealth(boss->GetHealth() + me->GetHealth());
+
                             me->Kill(me);
                         }
                     }

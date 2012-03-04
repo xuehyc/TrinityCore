@@ -191,7 +191,11 @@ public:
             if (me->GetEntry() == NPC_HEALTHY_MUSHROOM && killer->GetTypeId() == TYPEID_PLAYER)
             {
                 me->InterruptNonMeleeSpells(false);
-                DoCast(killer, SPELL_HEALTHY_MUSHROOM_POTENT_FUNGUS, false);
+                //DoCast(killer, SPELL_HEALTHY_MUSHROOM_POTENT_FUNGUS, false);
+                if (killer->HasAura(SPELL_MINI))
+                	killer->RemoveAurasDueToSpell(SPELL_MINI);
+                else
+                	killer->AddAura(SPELL_HEALTHY_MUSHROOM_POTENT_FUNGUS, killer);
             }
         }
 

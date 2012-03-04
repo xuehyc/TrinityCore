@@ -79,7 +79,7 @@ public:
 
     struct boss_taldaramAI : public ScriptedAI
     {
-        boss_taldaramAI(Creature* c) : ScriptedAI(c)
+        boss_taldaramAI(Creature* c) : ScriptedAI(c), Summons(me)
         {
             instance = c->GetInstanceScript();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
@@ -99,9 +99,21 @@ public:
         CombatPhase Phase;
 
         InstanceScript* instance;
+        SummonList Summons;
+
+        void JustSummoned(Creature* summon)
+        {
+        	Summons.Summon(summon);
+        }
+
+        void SummonedCreateDespawn(Creature* summon)
+        {
+        	Summons.Despawn(summon);
+        }
 
         void Reset()
         {
+        	Summons.DespawnAll();
             uiBloodthirstTimer = 10*IN_MILLISECONDS;
             uiVanishTimer = urand(25*IN_MILLISECONDS, 35*IN_MILLISECONDS);
             uiEmbraceTimer = 20*IN_MILLISECONDS;
@@ -201,7 +213,7 @@ public:
 
                         if (uiFlamesphereTimer <= diff)
                         {
-                            DoCast(me, SPELL_CONJURE_FLAME_SPHERE);
+                            DoCastVictim(SPELL_CONJURE_FLAME_SPHERE); // spell visual needs enemy target
                             Phase = CASTING_FLAME_SPHERES;
                             uiPhaseTimer = 3*IN_MILLISECONDS + diff;
                             uiFlamesphereTimer = 15*IN_MILLISECONDS;
@@ -261,6 +273,7 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
+            Summons.DespawnAll();
 
             if (instance)
                 instance->SetData(DATA_PRINCE_TALDARAM_EVENT, DONE);

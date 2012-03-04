@@ -204,7 +204,8 @@ class boss_elder_nadox : public CreatureScript
 enum AddSpells
 {
     SPELL_SPRINT                                  = 56354,
-    SPELL_GUARDIAN_AURA                           = 56151
+    SPELL_GUARDIAN_AURA                           = 56151,
+    SPELL_GUARDIAN_AURA_LINKED                    = 56153
 };
 
 class mob_ahnkahar_nerubian : public CreatureScript
@@ -224,6 +225,8 @@ class mob_ahnkahar_nerubian : public CreatureScript
 
             void Reset()
             {
+            	me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_GUARDIAN_AURA_LINKED, true);
+
                 if (me->GetEntry() == MOB_AHNKAHAR_GUARDIAN_ENTRY)
                     DoCast(me, SPELL_GUARDIAN_AURA, true);
                 uiSprintTimer = 10000;
@@ -245,8 +248,8 @@ class mob_ahnkahar_nerubian : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-                if (me->GetEntry() == MOB_AHNKAHAR_GUARDIAN_ENTRY)
-                    me->RemoveAurasDueToSpell(SPELL_GUARDIAN_AURA);
+                //if (me->GetEntry() == MOB_AHNKAHAR_GUARDIAN_ENTRY)
+                //    me->RemoveAurasDueToSpell(SPELL_GUARDIAN_AURA);
 
                 if (instance)
                     if (instance->GetData(DATA_ELDER_NADOX_EVENT) != IN_PROGRESS)
