@@ -154,6 +154,8 @@ enum eCreature
 enum eAchievments
 {
     ACHIEV_TIMED_START_EVENT                      = 17726,
+    DATA_SKADI_ALL_THE_TIME                       = 1
+
 };
 
 class boss_skadi : public CreatureScript
@@ -186,7 +188,9 @@ public:
         uint32 m_uiMountTimer;
         uint32 m_uiSummonTimer;
         uint8  m_uiSpellHitCount;
+        uint8  m_uiSpellHitPerPhase;
         bool   m_bSaidEmote;
+        bool   m_bSkadiAllTheTime;
 
         eCombatPhase Phase;
 
@@ -201,6 +205,8 @@ public:
             m_uiWaypointId = 0;
             m_bSaidEmote = false;
             m_uiSpellHitCount = 0;
+            m_uiSpellHitPerPhase = 0;
+            m_bSkadiAllTheTime = false;
 
             Phase = SKADI;
 
@@ -281,8 +287,13 @@ public:
             if (param == 1) // Skadi Harpoon Event
             {
                 m_uiSpellHitCount++;
-                if (m_uiSpellHitCount >= 3)
+                m_uiSpellHitPerPhase++;
+                if (m_uiSpellHitCount >= 3 && Phase == FLYING)
                 {
+                    if (m_uiSpellHitPerPhase == 3)
+                        m_bSkadiAllTheTime = true;
+
+
                     Phase = SKADI;
                     me->SetFlying(false);
                     me->Dismount();
@@ -303,6 +314,14 @@ public:
 
         }
 
+        uint32 GetData(uint32 type)
+        {
+            if (type == DATA_SKADI_ALL_THE_TIME)
+                return m_bSkadiAllTheTime ? 1 : 0;
+
+            return 0;
+        }
+
         void UpdateAI(const uint32 diff)
         {
             switch (Phase)
@@ -316,6 +335,7 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                         if (!m_bSaidEmote)
                         {
+                            m_uiSpellHitPerPhase = 0;
                             DoScriptText(EMOTE_RANGE, me);
                             m_bSaidEmote = true;
                         }
@@ -477,8 +497,20 @@ public:
 
 };
 
+class achievement_skadi_all_the_time : public AchievementCriteriaScript
+{
+    public:
+        achievement_skadi_all_the_time() : AchievementCriteriaScript("achievement_skadi_all_the_time") { }
+
+        bool OnCheck(Player* /*source*/, Unit* target)
+        {
+            return target && target->GetAI()->GetData(DATA_SKADI_ALL_THE_TIME);
+        }
+};
+
 void AddSC_boss_skadi()
 {
     new boss_skadi();
     new go_harpoon_launcher();
+    new achievement_skadi_all_the_time();
 }
