@@ -324,17 +324,10 @@ public:
                         if (m_uiSummonNerubianTimer <= uiDiff)
                         {
                             uint8 maxSpawns = RAID_MODE(1, 2, 2, 4);
+
                             for (uint8 i = 0; i < maxSpawns; i++)
-                            {
-                                uint8 location = 0;
+                                me->SummonCreature(NPC_BURROWER, AnubarakLoc[i+2], TEMPSUMMON_CORPSE_DESPAWN);
 
-                                if (i == 0 || i == 2)
-                                    location = 4;
-                                else
-                                    location = 5;
-
-                                me->SummonCreature(NPC_BURROWER, AnubarakLoc[location], TEMPSUMMON_CORPSE_DESPAWN);
-                            }
                             m_uiSummonNerubianTimer = 40000;
                         } else m_uiSummonNerubianTimer -= uiDiff;
                     }
@@ -380,8 +373,16 @@ public:
 
                         if (playersInFrostSphere > 0)
                         {
+                            uint8 location = 2;
                             for (uint8 i = 0; i < playersInFrostSphere * RAID_MODE(1, 2, 2, 3); i++)
-                                me->SummonCreature(NPC_SCARAB, AnubarakLoc[1].GetPositionX()+urand(0, 50)-25, AnubarakLoc[1].GetPositionY()+urand(0, 50)-25, AnubarakLoc[1].GetPositionZ());
+                            {
+                                location++;
+
+                                if (location >= 6)
+                                    location = 2;
+
+                                me->SummonCreature(NPC_SCARAB, AnubarakLoc[location], TEMPSUMMON_CORPSE_DESPAWN);
+                            }
                         }
                         else
                         {
@@ -409,8 +410,16 @@ public:
                                     break;
                             }
 
+                            uint8 location = 2;
                             for (uint8 i = 0; i < count; i++)
-                                me->SummonCreature(NPC_SCARAB, AnubarakLoc[1].GetPositionX()+urand(0, 50)-25, AnubarakLoc[1].GetPositionY()+urand(0, 50)-25, AnubarakLoc[1].GetPositionZ());
+                            {
+                                location++;
+
+                                if (location >= 6)
+                                    location = 2;
+
+                                me->SummonCreature(NPC_SCARAB, AnubarakLoc[location], TEMPSUMMON_CORPSE_DESPAWN);
+                            }
                         }
 
                         m_uiSummonScarabTimer = 10000;
