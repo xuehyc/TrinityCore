@@ -103,17 +103,17 @@ public:
 
         void JustSummoned(Creature* summon)
         {
-        	Summons.Summon(summon);
+            Summons.Summon(summon);
         }
 
         void SummonedCreateDespawn(Creature* summon)
         {
-        	Summons.Despawn(summon);
+            Summons.Despawn(summon);
         }
 
         void Reset()
         {
-        	Summons.DespawnAll();
+            Summons.DespawnAll();
             uiBloodthirstTimer = 10*IN_MILLISECONDS;
             uiVanishTimer = urand(25*IN_MILLISECONDS, 35*IN_MILLISECONDS);
             uiEmbraceTimer = 20*IN_MILLISECONDS;

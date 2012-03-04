@@ -453,9 +453,9 @@ public:
 
                             // sacrifice health transfer
                             if ((boss->GetHealth() + me->GetHealth()) >= boss->GetMaxHealth())
-                            	boss->SetFullHealth();
+                                boss->SetFullHealth();
                             else
-                            	boss->SetHealth(boss->GetHealth() + me->GetHealth());
+                                boss->SetHealth(boss->GetHealth() + me->GetHealth());
 
                             me->Kill(me);
                         }

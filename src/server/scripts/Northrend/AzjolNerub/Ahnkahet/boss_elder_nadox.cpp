@@ -225,7 +225,7 @@ class mob_ahnkahar_nerubian : public CreatureScript
 
             void Reset()
             {
-            	me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_GUARDIAN_AURA_LINKED, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_GUARDIAN_AURA_LINKED, true);
 
                 if (me->GetEntry() == MOB_AHNKAHAR_GUARDIAN_ENTRY)
                     DoCast(me, SPELL_GUARDIAN_AURA, true);

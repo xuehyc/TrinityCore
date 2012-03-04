@@ -193,9 +193,9 @@ public:
                 me->InterruptNonMeleeSpells(false);
                 //DoCast(killer, SPELL_HEALTHY_MUSHROOM_POTENT_FUNGUS, false);
                 if (killer->HasAura(SPELL_MINI))
-                	killer->RemoveAurasDueToSpell(SPELL_MINI);
+                    killer->RemoveAurasDueToSpell(SPELL_MINI);
                 else
-                	killer->AddAura(SPELL_HEALTHY_MUSHROOM_POTENT_FUNGUS, killer);
+                    killer->AddAura(SPELL_HEALTHY_MUSHROOM_POTENT_FUNGUS, killer);
             }
         }
 
