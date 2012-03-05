@@ -15,3 +15,7 @@ UPDATE `creature_template` SET `modelid1` = 26981, `modelid2` = 0 WHERE `entry` 
 
 -- Amanitar should bind to instance on heroic
 UPDATE `creature_template` SET `flags_extra` = 1 WHERE `entry` = 31463;
+
+-- Fix damage of ghosts in encounter Volazj
+UPDATE `creature_template` SET `dmg_multiplier` = 0.15 WHERE `entry` = 30625;
+UPDATE `creature_template` SET `mindmg` = 316, `maxdmg` = 450, `attackpower` = 320, `dmg_multiplier` = 0.3 WHERE `entry` = 31480;
