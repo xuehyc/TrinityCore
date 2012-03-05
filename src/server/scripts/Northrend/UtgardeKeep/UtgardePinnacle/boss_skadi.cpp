@@ -154,8 +154,14 @@ enum eCreature
 enum eAchievments
 {
     ACHIEV_TIMED_START_EVENT                      = 17726,
-    DATA_SKADI_ALL_THE_TIME                       = 1
+};
 
+enum eDataSkadi
+{
+    DATA_SKADI_ALL_THE_TIME                       = 1,
+    DATA_SKADI_HARPOON_EVENT                      = 2,
+    DATA_SKADI_PHASE                              = 3,
+    DATA_SKADI_MOVE_JUMP_FINISHED                 = 4,
 };
 
 class boss_skadi : public CreatureScript
@@ -284,7 +290,7 @@ public:
 
         void DoAction(const int32 param)
         {
-            if (param == 1) // Skadi Harpoon Event
+            if (param == DATA_SKADI_HARPOON_EVENT) // Skadi Harpoon Event
             {
                 m_uiSpellHitCount++;
                 m_uiSpellHitPerPhase++;
@@ -292,7 +298,6 @@ public:
                 {
                     if (m_uiSpellHitPerPhase == 3)
                         m_bSkadiAllTheTime = true;
-
 
                     Phase = SKADI;
                     me->SetFlying(false);
@@ -302,13 +307,13 @@ public:
                         pGrauf->GetMotionMaster()->MoveFall();
                         pGrauf->HandleEmoteCommand(EMOTE_ONESHOT_FLYDEATH);
                     }
-                    me->GetMotionMaster()->MoveJump(Location[4].GetPositionX(), Location[4].GetPositionY(), Location[4].GetPositionZ(), 5.0f, 10.0f);
+                    me->GetMotionMaster()->MoveJump(Location[4].GetPositionX(), Location[4].GetPositionY(), Location[4].GetPositionZ(), 20.0f, 20.0f, DATA_SKADI_MOVE_JUMP_FINISHED);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                     DoScriptText(SAY_DRAKE_DEATH, me);
                     m_uiCrushTimer = 8000;
                     m_uiPoisonedSpearTimer = 10000;
                     m_uiWhirlwindTimer = 20000;
-                    me->AI()->AttackStart(SelectTarget(SELECT_TARGET_RANDOM));
+                    // me->AI()->AttackStart(SelectTarget(SELECT_TARGET_RANDOM));
                 }
             }
 
@@ -319,7 +324,21 @@ public:
             if (type == DATA_SKADI_ALL_THE_TIME)
                 return m_bSkadiAllTheTime ? 1 : 0;
 
+            if (type == DATA_SKADI_PHASE)
+                return (uint32)Phase;
+
             return 0;
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type != EFFECT_MOTION_TYPE)
+                return;
+
+            if (id == DATA_SKADI_MOVE_JUMP_FINISHED)
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                    if (me->GetMotionMaster())
+                        me->GetMotionMaster()->MoveChase(target);
         }
 
         void UpdateAI(const uint32 diff)
@@ -489,8 +508,14 @@ public:
 
         if (Creature* pSkadi = Unit::GetCreature((*pGO), m_instance->GetData64(DATA_SKADI_THE_RUTHLESS)))
         {
-            player->CastSpell(pSkadi, SPELL_RAPID_FIRE, true);
-            pSkadi->GetAI()->DoAction(1);
+            if (!(pSkadi->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE)))
+            {
+                if (pSkadi->AI()->GetData(DATA_SKADI_PHASE) == FLYING)
+                {
+                    player->CastSpell(pSkadi, SPELL_RAPID_FIRE, true);
+                    pSkadi->AI()->DoAction(DATA_SKADI_HARPOON_EVENT);
+                }
+            }
         }
         return false;
     }
