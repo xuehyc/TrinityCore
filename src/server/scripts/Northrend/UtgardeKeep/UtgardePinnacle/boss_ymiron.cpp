@@ -174,7 +174,7 @@ public:
 
             m_uiActivedNumber        = 0;
             m_uiHealthAmountModifier = 1;
-            m_uiHealthAmountMultipler = DUNGEON_MODE(20, 25);
+            m_uiHealthAmountMultipler = DUNGEON_MODE(35, 20);
 
             DespawnBoatGhosts(m_uiActivedCreatureGUID);
             DespawnBoatGhosts(m_uiOrbGUID);
@@ -212,9 +212,9 @@ public:
                 if (m_uiPause_Timer <= diff)
                 {
                     DoScriptText(ActiveBoat[m_uiActiveOrder[m_uiActivedNumber]].say, me);
-                    DoCast(me, SPELL_CHANNEL_YMIRON_TO_SPIRIT); // should be on spirit
                     if (Creature* temp = me->SummonCreature(ActiveBoat[m_uiActiveOrder[m_uiActivedNumber]].npc, ActiveBoat[m_uiActiveOrder[m_uiActivedNumber]].SpawnX, ActiveBoat[m_uiActiveOrder[m_uiActivedNumber]].SpawnY, ActiveBoat[m_uiActiveOrder[m_uiActivedNumber]].SpawnZ, ActiveBoat[m_uiActiveOrder[m_uiActivedNumber]].SpawnO, TEMPSUMMON_CORPSE_DESPAWN, 0))
                     {
+                        DoCast(temp, SPELL_CHANNEL_YMIRON_TO_SPIRIT); // should be on spirit
                         m_uiActivedCreatureGUID = temp->GetGUID();
                         temp->CastSpell(me, SPELL_CHANNEL_SPIRIT_TO_YMIRON, true);
                         temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
@@ -287,7 +287,8 @@ public:
                     if (Creature* temp = me->SummonCreature(CREATURE_SPIRIT_FOUNT, 385.0f + rand() % 10, -330.0f + rand() % 10, 104.756f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 180000))
                     {
                         temp->SetSpeed(MOVE_RUN, 0.4f);
-                        temp->CastSpell(temp, DUNGEON_MODE(SPELL_SPIRIT_FOUNT, H_SPELL_SPIRIT_FOUNT), true);
+                        temp->AddAura(DUNGEON_MODE(SPELL_SPIRIT_FOUNT, H_SPELL_SPIRIT_FOUNT), temp);
+                        temp->setFaction(14);
                         temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         temp->SetDisplayId(11686);
                         m_uiOrbGUID = temp->GetGUID();
@@ -321,6 +322,7 @@ public:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             {
                                 temp->AddThreat(target, 0.0f);
+                                temp->setFaction(14);
                                 temp->AI()->AttackStart(target);
                             }
                         }

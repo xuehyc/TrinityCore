@@ -5,3 +5,6 @@ INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value
 (7595, 12, 1, 0, '');
 
 DELETE FROM `disables` WHERE `sourceType` = 4 AND `entry` = 7595;
+
+-- remove trigger model for spirit fount
+UPDATE `creature_template` SET `modelid1` = 11686, `modelid2` = 0 WHERE `entry` IN (27339, 30808):
