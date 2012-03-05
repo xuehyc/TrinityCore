@@ -8,3 +8,6 @@ DELETE FROM `disables` WHERE `sourceType` = 4 AND `entry` = 7595;
 
 -- remove trigger model for spirit fount
 UPDATE `creature_template` SET `modelid1` = 11686, `modelid2` = 0 WHERE `entry` IN (27339, 30808):
+
+-- correct factions for ymiron encounter (avenging spirits, spirit fountain)
+UPDATE `creature_template` SET `faction_A` = '14', `faction_H` = '14' WHERE `entry` IN (27339,30808, 27386, 30756);

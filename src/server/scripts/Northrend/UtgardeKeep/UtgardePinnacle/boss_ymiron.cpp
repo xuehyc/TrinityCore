@@ -174,7 +174,7 @@ public:
 
             m_uiActivedNumber        = 0;
             m_uiHealthAmountModifier = 1;
-            m_uiHealthAmountMultipler = DUNGEON_MODE(35, 20);
+            m_uiHealthAmountMultipler = DUNGEON_MODE(33, 20);
 
             DespawnBoatGhosts(m_uiActivedCreatureGUID);
             DespawnBoatGhosts(m_uiOrbGUID);
@@ -287,8 +287,7 @@ public:
                     if (Creature* temp = me->SummonCreature(CREATURE_SPIRIT_FOUNT, 385.0f + rand() % 10, -330.0f + rand() % 10, 104.756f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 180000))
                     {
                         temp->SetSpeed(MOVE_RUN, 0.4f);
-                        temp->AddAura(DUNGEON_MODE(SPELL_SPIRIT_FOUNT, H_SPELL_SPIRIT_FOUNT), temp);
-                        temp->setFaction(14);
+                        temp->CastSpell(temp, DUNGEON_MODE(SPELL_SPIRIT_FOUNT, H_SPELL_SPIRIT_FOUNT), true);
                         temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         temp->SetDisplayId(11686);
                         m_uiOrbGUID = temp->GetGUID();
@@ -322,7 +321,6 @@ public:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             {
                                 temp->AddThreat(target, 0.0f);
-                                temp->setFaction(14);
                                 temp->AI()->AttackStart(target);
                             }
                         }
@@ -331,7 +329,7 @@ public:
                 } else m_uiAbility_TORGYN_Timer -= diff;
 
                 // Health check -----------------------------------------------------------------------------
-                if (me->HealthBelowPct(100 - m_uiHealthAmountMultipler * m_uiHealthAmountModifier))
+                if ((m_uiHealthAmountModifier - 1) < DUNGEON_MODE(2, 4) && me->HealthBelowPct(100 - m_uiHealthAmountMultipler * m_uiHealthAmountModifier))
                 {
                     uint8 m_uiOrder = m_uiHealthAmountModifier - 1;
                     ++m_uiHealthAmountModifier;
