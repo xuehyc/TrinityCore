@@ -94,10 +94,10 @@ enum SvalaPhase
     SVALADEAD
 };
 
-enum SvalaPoint
+/*enum SvalaPoint
 {
     POINT_FALL_GROUND = 1,
-};
+};*/
 
 #define DATA_INCREDIBLE_HULK 2043
 
@@ -240,7 +240,7 @@ public:
                 Talk(SAY_SLAY);
         }
 
-        void DamageTaken(Unit* attacker, uint32 &damage)
+        /*void DamageTaken(Unit* attacker, uint32 &damage)
         {
             if (Phase == SVALADEAD)
             {
@@ -274,7 +274,7 @@ public:
 
             if (pointId == POINT_FALL_GROUND)
                 me->DealDamage(me, me->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-        }
+        }*/
 
         void JustDied(Unit* /*killer*/)
         {
@@ -459,6 +459,13 @@ public:
 
                             DoCast(me, SPELL_RITUAL_OF_THE_SWORD);
                             sacrificed = true;
+
+                            me->StopMoving();
+                            if (me->GetMotionMaster())
+                            {
+                                me->GetMotionMaster()->Clear(false);
+                                me->GetMotionMaster()->MoveIdle();
+                            }
                         }
                     }
                 }

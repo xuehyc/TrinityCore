@@ -143,6 +143,10 @@ public:
                 if (temp && !temp->isAlive())
                     temp->Respawn();
 
+                temp = Unit::GetCreature((*me), instance->GetData64(DATA_MOB_ORB));
+                if (temp)
+                    temp->DisappearAndDie();
+
                 GameObject* go = instance->instance->GetGameObject(instance->GetData64(DATA_GORTOK_PALEHOOF_SPHERE));
                 if (go)
                 {
@@ -480,8 +484,6 @@ public:
                 who->SetInCombatWith(me);
                 DoStartMovement(who);
             }
-            if (instance)
-                instance->SetData(DATA_GORTOK_PALEHOOF_EVENT, IN_PROGRESS);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -796,7 +798,7 @@ public:
                         pNext->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_IMMUNE_TO_PC);
                         pNext->SetStandState(UNIT_STAND_STATE_STAND);
                         pNext->SetInCombatWithZone();
-                        pNext->Attack(pNext->SelectNearestTarget(100), true);
+                        pNext->AI()->AttackStart(pNext->SelectNearestTarget(100));
 
                    }
                    currentPhase = PHASE_NONE;
