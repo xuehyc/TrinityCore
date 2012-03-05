@@ -329,7 +329,7 @@ public:
                 } else m_uiAbility_TORGYN_Timer -= diff;
 
                 // Health check -----------------------------------------------------------------------------
-                if ((m_uiHealthAmountModifier - 1) < DUNGEON_MODE(2, 4) && me->HealthBelowPct(100 - m_uiHealthAmountMultipler * m_uiHealthAmountModifier))
+                if ((m_uiHealthAmountModifier - 1) < (uint32)DUNGEON_MODE(2, 4) && me->HealthBelowPct(100 - m_uiHealthAmountMultipler * m_uiHealthAmountModifier))
                 {
                     uint8 m_uiOrder = m_uiHealthAmountModifier - 1;
                     ++m_uiHealthAmountModifier;
