@@ -22,3 +22,25 @@ DELETE FROM `smart_scripts` WHERE `entryorguid` = @npc AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (@npc, 0, 0, 1, 22, 0, 100, 1, 125, 0, 0, 0, 11, @spell, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Abandoned Pack Mules - On /Raise Quest Credit Send The Packing'),
 (@npc, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Abandoned Pack Mules - Despawn after Quest Credit');
+
+-- fix kill credit cast back on spellhit for mission: eternal flame, closes #526, #529
+SET @spell := 42564; -- Ever-burning Torches
+
+SET @credit1 := 42632;
+SET @credit2 := 42633;
+SET @credit3 := 42634;
+SET @credit4 := 42635;
+
+SET @bunny1 := 23921;
+SET @bunny2 := 23922;
+SET @bunny3 := 23923;
+SET @bunny4 := 23924;
+
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN (@bunny1, @bunny2, @bunny3, @bunny4);
+
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@bunny1, @bunny2, @bunny3, @bunny4) AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(@bunny1, 0, 0, 0, 8, 0, 100, 0, @spell, 0, 0, 0, 11, @credit1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Mission: Eternal Flame - On Spell Hit Credit 1'),
+(@bunny2, 0, 0, 0, 8, 0, 100, 0, @spell, 0, 0, 0, 11, @credit2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Mission: Eternal Flame - On Spell Hit Credit 2'),
+(@bunny3, 0, 0, 0, 8, 0, 100, 0, @spell, 0, 0, 0, 11, @credit3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Mission: Eternal Flame - On Spell Hit Credit 3'),
+(@bunny4, 0, 0, 0, 8, 0, 100, 0, @spell, 0, 0, 0, 11, @credit4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Mission: Eternal Flame - On Spell Hit Credit 4');
