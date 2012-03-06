@@ -9,8 +9,8 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (@npc, 0, 0, 1, 64, 0, 100, 0, 0, 0, 0, 0, 56, @item, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Ravaged Crystalline Ice Giant - On Gossip Hello create Sample of Rockflesh'),
 (@npc, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 51, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Ravaged Crystalline Ice Giant - On Gossip Hello Instant Kill');
 
--- remove erroneous item drop Abandoned Adventurer's Satchel from Twilight Apostle (AhnKahet)
-DELETE FROM `creature_loot_template` WHERE `entry` = 31471 AND `item` = 44663;
+-- remove erroneous item drops from Twilight Apostle (AhnKahet)
+DELETE FROM `creature_loot_template` WHERE `entry` = 31471 AND `item` IN (44686, 44663);
 
 -- fix emote castback for send them packing, closes #531
 SET @npc := 23977; -- Abandoned Pack Mules
@@ -44,3 +44,8 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (@bunny2, 0, 0, 0, 8, 0, 100, 0, @spell, 0, 0, 0, 11, @credit2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Mission: Eternal Flame - On Spell Hit Credit 2'),
 (@bunny3, 0, 0, 0, 8, 0, 100, 0, @spell, 0, 0, 0, 11, @credit3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Mission: Eternal Flame - On Spell Hit Credit 3'),
 (@bunny4, 0, 0, 0, 8, 0, 100, 0, @spell, 0, 0, 0, 11, @credit4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Mission: Eternal Flame - On Spell Hit Credit 4');
+
+-- fix quest drop for All Things in Good Time (Daily HC) in Ahnkahet
+DELETE FROM `creature_loot_template` WHERE entry = 31104 AND item = 43494;
+INSERT INTO `creature_loot_template` (entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount) VALUES
+(31104, 43494, -100, 1, 0, 1, 1); -- Ahn'kahar Watcher's Corpse
