@@ -65,7 +65,7 @@ public:
 
     struct boss_darkweaver_sythAI : public ScriptedAI
     {
-        boss_darkweaver_sythAI(Creature* c) : ScriptedAI(c)
+        boss_darkweaver_sythAI(Creature* c) : ScriptedAI(c), Summons(me)
         {
         }
 
@@ -79,8 +79,12 @@ public:
         bool summon50;
         bool summon10;
 
+        SummonList Summons;
+
         void Reset()
         {
+            Summons.DespawnAll();
+
             flameshock_timer = 2000;
             arcaneshock_timer = 4000;
             frostshock_timer = 6000;
@@ -90,6 +94,11 @@ public:
             summon90 = false;
             summon50 = false;
             summon10 = false;
+        }
+
+        void SummonedCreateDespawn(Creature* summon)
+        {
+            Summons.Despawn(summon);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -114,6 +123,9 @@ public:
         {
             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                 summoned->AI()->AttackStart(target);
+
+            Summons.Summon(summoned);
+
         }
 
         void SythSummoning()
