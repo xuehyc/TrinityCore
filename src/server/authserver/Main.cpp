@@ -32,6 +32,7 @@
 #include "SignalHandler.h"
 #include "RealmList.h"
 #include "RealmAcceptor.h"
+#include "CLITask.h"
 
 #ifndef _TRINITY_REALM_CONFIG
 # define _TRINITY_REALM_CONFIG  "authserver.conf"
@@ -219,6 +220,9 @@ extern int main(int argc, char **argv)
     else
         sLog->SetLogDB(false);
 
+    CLITask* cliThread = new CLITask();
+    cliThread->Start(); // start the CLI
+
     // Wait for termination signal
     while (!stopEvent)
     {
@@ -235,6 +239,9 @@ extern int main(int argc, char **argv)
             LoginDatabase.KeepAlive();
         }
     }
+
+    cliThread->Stop(); // stop the CLI
+    delete cliThread;
 
     // Close the Database Pool and library
     StopDB();

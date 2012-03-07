@@ -11,6 +11,7 @@
 ########### authserver ###############
 
 file(GLOB_RECURSE sources_authentication Authentication/*.cpp Authentication/*.h)
+file(GLOB_RECURSE sources_cli CLI/*.cpp CLI/*.h)
 file(GLOB_RECURSE sources_realms Realms/*.cpp Realms/*.h)
 file(GLOB_RECURSE sources_server Server/*.cpp Server/*.h)
 file(GLOB sources_localdir *.cpp *.h)
@@ -29,6 +30,7 @@ endif()
 set(authserver_SRCS
   ${authserver_SRCS}
   ${sources_authentication}
+  ${sources_cli}
   ${sources_realms}
   ${sources_server}
   ${sources_localdir}
@@ -55,6 +57,8 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/Authentication
+  ${CMAKE_CURRENT_SOURCE_DIR}/CLI
+  ${CMAKE_CURRENT_SOURCE_DIR}/CLI/Commands
   ${CMAKE_CURRENT_SOURCE_DIR}/Realms
   ${CMAKE_CURRENT_SOURCE_DIR}/Server
   ${ACE_INCLUDE_DIR}
@@ -90,6 +94,7 @@ target_link_libraries(authserver
   ${OPENSSL_LIBRARIES}
   ${OPENSSL_EXTRA_LIBRARIES}
   ${OSX_LIBS}
+  ${READLINE_LIBRARY}
 )
 
 if( WIN32 )

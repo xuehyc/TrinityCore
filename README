@@ -13,3 +13,4 @@ https://github.com/Anubisss/ngrealmd
         * Use: -DAUTHSERVER=1 -DWORLDSERVER=0
         * Note: If compilation of scripts needed (-DSCRIPTS=1) then
                 have to build worldserver (-DWORLDSERVER=1) too.
+    - Basic CLI for realmd.
