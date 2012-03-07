@@ -28,8 +28,6 @@
 
 #include <iostream>
 
-#include <ace/Thread_Manager.h>
-
 /**
  *  @brief  This command is just an example and also can be used for debugging.
  */
@@ -41,7 +39,6 @@ public:
 
     /* virtual */ void Execute()
     {
-        ACE_Thread_Manager::instance()->wait(&ACE_Time_Value((time_t)10));
         std::cout << "Hello World!" << std::endl;
     }
 };
