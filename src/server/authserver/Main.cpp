@@ -33,6 +33,7 @@
 #include "RealmList.h"
 #include "RealmAcceptor.h"
 #include "CLITask.h"
+#include "RealmdManager.h"
 
 #ifndef _TRINITY_REALM_CONFIG
 # define _TRINITY_REALM_CONFIG  "authserver.conf"
@@ -91,6 +92,8 @@ extern int main(int argc, char **argv)
         }
         ++c;
     }
+
+    sRealmdManager; // init this singleton
 
     if (!ConfigMgr::Load(cfg_file))
     {

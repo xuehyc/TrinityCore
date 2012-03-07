@@ -27,6 +27,11 @@
 #include "Command.h"
 
 #include <iostream>
+#include <ctime>
+
+#include "SystemConfig.h"
+#include "Util.h"
+#include "RealmdManager.h"
 
 /**
  *  @brief  This command is just an example and also can be used for debugging.
@@ -44,6 +49,29 @@ public:
 };
 
 /**
+ *  @brief    Print some info about the daemon.
+ *  @details  Print some info about the daemon compilation, like:
+              "TrinityCore rev. 2012-03-04 18:21:08 +0100 (f5730e82ced8+) (Unix, DEBUG)"@n
+              Print the daemon's uptime, like: "Uptime: 4 Minute(s) 32 Second(s).".
+ *  @todo     Print active connections.@n
+ *            Print max active connections.@n
+ *            Print update time diff.@n
+ *            Print max update time diff.@n
+ */
+
+class Command_Info : public Command
+{
+public:
+    Command_Info() : Command("info") {}
+
+    /* virtual */ void Execute()
+    {
+        std::cout << _FULLVERSION << std::endl
+                  << "Uptime: " << secsToTimeString(sRealmdManager->GetUpTime()) << std::endl;
+    }
+};
+
+/**
  *  @brief  This method allocates resources for the implemented commands.
  *          Function called in CLITask's constructor.
  *  @see    CLITask::CLITask()
@@ -52,4 +80,5 @@ public:
 void Impl_RegisterCommands()
 {
     new Command_Test();
+    new Command_Info();
 }
