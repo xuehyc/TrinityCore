@@ -52,9 +52,9 @@ public:
     ~CommandManager();
 
     /**
-     *  @brief   Returns a Command pointer by the specific name.
-     *  @return  NULL if there is no command with that name.
-     *  @return  Pointer to the command.
+     *  @brief   Returns (find) a Command pointer by the specific name.
+     *  @retval  NULL   If there is no command with that name.
+     *  @retval  ptrCommand  If there is a command with equivalent name.
      *  @param   name  The name (of the command) which looking for.
      */
     Command* FindCommand(std::string const name);
