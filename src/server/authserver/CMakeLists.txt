@@ -94,7 +94,6 @@ target_link_libraries(authserver
   ${OPENSSL_LIBRARIES}
   ${OPENSSL_EXTRA_LIBRARIES}
   ${OSX_LIBS}
-  ${READLINE_LIBRARY}
 )
 
 if( WIN32 )
