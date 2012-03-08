@@ -782,6 +782,9 @@ public:
                             {
                                 if (Right1->AI() && Right2->AI() && Right3->AI())
                                 {
+                                    Right1->SetSpeed(MOVE_SWIM, 1.6f);
+                                    Right2->SetSpeed(MOVE_SWIM, 1.6f);
+                                    Right3->SetSpeed(MOVE_SWIM, 1.6f);
                                     Right1->GetMotionMaster()->MovePoint(1, FlameRight1Direction.GetPositionX(), FlameRight1Direction.GetPositionY(), FlameRight1Direction.GetPositionZ());
                                     Right2->GetMotionMaster()->MovePoint(1, FlameRight2Direction.GetPositionX(), FlameRight2Direction.GetPositionY(), FlameRight2Direction.GetPositionZ());
                                     Right3->GetMotionMaster()->MovePoint(1, FlameRight3Direction.GetPositionX(), FlameRight3Direction.GetPositionY(), FlameRight3Direction.GetPositionZ());
@@ -805,6 +808,8 @@ public:
                             {
                                 if (Left1->AI() && Left2->AI())
                                 {
+                                    Left1->SetSpeed(MOVE_SWIM, 1.6f);
+                                    Left2->SetSpeed(MOVE_SWIM, 1.6f);
                                     Left1->GetMotionMaster()->MovePoint(2, FlameLeft1Direction.GetPositionX(), FlameLeft1Direction.GetPositionY(), FlameLeft1Direction.GetPositionZ());
                                     Left2->GetMotionMaster()->MovePoint(2, FlameLeft2Direction.GetPositionX(), FlameLeft2Direction.GetPositionY(), FlameLeft2Direction.GetPositionZ());
                                     Left1->AI()->SetData(1, 2);
