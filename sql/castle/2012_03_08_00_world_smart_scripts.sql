@@ -1,0 +1,2 @@
+-- @DorianGrey: Due to the gossip_menu_option table, the 'id' of gossip-entry 21293 is 3, but the smart-script considered 0.
+UPDATE `smart_scripts` SET `event_param2`=3 WHERE `entryorguid`=18351 AND `source_type`=0 AND `id`=2 AND `link`=0;
