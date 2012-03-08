@@ -36,7 +36,7 @@
 #include "SpellAuraEffects.h"
 #include "Util.h"
 
-#include "TriniChat/IRCClient.h"
+// #include "TriniChat/IRCClient.h"
 
 #define ITEM_WINTERGRASP_MARK_OF_HONOR   43589
 #define ITEM_STONE_KEEPERS_SHARD         43228
@@ -1188,6 +1188,7 @@ void Battleground::StartBattleground()
     sBattlegroundMgr->AddBattleground(GetInstanceID(), GetTypeID(), this);
     if (m_IsRated)
     {
+        /* Disable #wowarena Logging Channel
         // irc announce
         std::string arenamsg;
         char arenatmp[16];
@@ -1205,6 +1206,7 @@ void Battleground::StartBattleground()
         arenamsg += " started.";
 
         sIRC.SendIRC(arenamsg);
+        */
 
         // arena log output
         sLog->outArena("Arena match type: %u for Team1Id: %u - Team2Id: %u started.", m_ArenaType, m_ArenaTeamIds[BG_TEAM_ALLIANCE], m_ArenaTeamIds[BG_TEAM_HORDE]);

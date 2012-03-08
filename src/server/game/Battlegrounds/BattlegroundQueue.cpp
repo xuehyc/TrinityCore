@@ -25,7 +25,7 @@
 #include "Log.h"
 #include "Group.h"
 
-#include "TriniChat/IRCClient.h"
+// #include "TriniChat/IRCClient.h"
 
 /*********************************************************/
 /***            BATTLEGROUND QUEUE SYSTEM              ***/
@@ -160,9 +160,10 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, Battlegr
 
     uint32 lastOnlineTime = getMSTime();
 
+    /* Disable #wowarena Logging Channel
     if (isRated)
     {
-        if (ArenaTeam* Team = sArenaTeamMgr->GetArenaTeamById(arenateamid))
+        if (false && ArenaTeam* Team = sArenaTeamMgr->GetArenaTeamById(arenateamid))
         {
             // irc announce anytime
             std::string arenamsg;
@@ -181,6 +182,7 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, Battlegr
             sIRC.SendIRC(arenamsg);
         }
     }
+    */
 
     //announce world (this don't need mutex)
     if (isRated && sWorld->getBoolConfig(CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE))
@@ -380,6 +382,7 @@ void BattlegroundQueue::RemovePlayer(uint64 guid, bool decreaseInvitedCount)
         if (ArenaTeam* Team = sArenaTeamMgr->GetArenaTeamById(group->ArenaTeamId))
             sWorld->SendWorldText(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT, Team->GetName().c_str(), group->ArenaType, group->ArenaType, group->ArenaTeamRating);
 
+    /* Disable #wowarena Logging Channel
     if (group->ArenaType && group->IsRated && group->Players.empty())
     {
         if (ArenaTeam* Team = sArenaTeamMgr->GetArenaTeamById(group->ArenaTeamId))
@@ -401,6 +404,7 @@ void BattlegroundQueue::RemovePlayer(uint64 guid, bool decreaseInvitedCount)
             sIRC.SendIRC(arenamsg);
         }
     }
+    */
 
     // if player leaves queue and he is invited to rated arena match, then he have to lose
     if (group->IsInvitedToBGInstanceGUID && group->IsRated && decreaseInvitedCount)
