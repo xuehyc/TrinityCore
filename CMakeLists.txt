@@ -63,6 +63,9 @@ include(cmake/genrev.cmake)
 # print out the results before continuing
 include(cmake/showoptions.cmake)
 
+# generate doxygen documentations
+include(cmake/doxygen.cmake)
+
 # add dependencies
 add_subdirectory(dep)
 
