@@ -28,6 +28,8 @@
 
 #include <ace/Task.h>
 
+#include "LogTrace.h"
+
 /**
  *  @brief    Command line interface thread.
  *  @details  Inherit from class ACE_Task_Base which makes the task

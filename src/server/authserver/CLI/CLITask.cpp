@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 
 #include "Command.h"
 #include "CommandManager.h"
@@ -38,8 +39,10 @@
 
 CLITask::CLITask()
 {
+    LOG_TRACE("Initializing CLITask...");
     void Impl_RegisterCommands(); // forward declaration
     Impl_RegisterCommands();
+    LOG_TRACE("CLITask initialized.");
 }
 
 /**
@@ -48,6 +51,7 @@ CLITask::CLITask()
 
 /* virtual */ int CLITask::svc()
 {
+    LOG_TRACE("CLITask loop start.");
     while (_running)
     {
         std::cout << "TC> "; // prompt
@@ -55,7 +59,26 @@ CLITask::CLITask()
         std::cin >> input;
         // try to find a command for the input
         if (Command* cmd = sCommandManager->FindCommand(input))
+        {
+            std::ostringstream oss;
+            oss << "Command found: \"" << input << "\" and executing it...";
+            LOG_TRACE(oss.str());
+
             cmd->Execute(); // if find a valid: execute it
+
+            // reset the stream
+            oss.str(std::string());
+            oss.clear();
+            oss << "Command executed: \"" << input << "\".";
+            LOG_TRACE(oss.str());
+        }
+        else
+        {
+            std::ostringstream oss;
+            oss << "Unknown command: \"" << input << "\".";
+            LOG_TRACE(oss.str());
+        }
     }
+    LOG_TRACE("CLITask loop end.");
     return 0;
 }

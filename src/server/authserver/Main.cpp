@@ -34,6 +34,7 @@
 #include "RealmAcceptor.h"
 #include "CLITask.h"
 #include "RealmdManager.h"
+#include "LogTrace.h"
 
 #ifndef _TRINITY_REALM_CONFIG
 # define _TRINITY_REALM_CONFIG  "authserver.conf"
@@ -73,6 +74,8 @@ void usage(const char *prog)
 // Launch the auth server
 extern int main(int argc, char **argv)
 {
+    LOG_TRACE("Realmd starting...");
+
     sLog->SetLogDB(false);
     // Command line parsing to get the configuration file name
     char const* cfg_file = _TRINITY_REALM_CONFIG;
@@ -226,6 +229,7 @@ extern int main(int argc, char **argv)
     CLITask* cliThread = new CLITask();
     cliThread->Start(); // start the CLI
 
+    LOG_TRACE("Loop starting...");
     // Wait for termination signal
     while (!stopEvent)
     {
@@ -242,6 +246,8 @@ extern int main(int argc, char **argv)
             LoginDatabase.KeepAlive();
         }
     }
+
+    LOG_TRACE("Realmd stopping...");
 
     cliThread->Stop(); // stop the CLI
     delete cliThread;

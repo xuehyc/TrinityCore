@@ -32,6 +32,7 @@
 #include "SystemConfig.h"
 #include "Util.h"
 #include "RealmdManager.h"
+#include "LogTrace.h"
 
 /**
  *  @brief  This command is just an example and also can be used for debugging.
@@ -45,6 +46,7 @@ public:
     /* virtual */ void Execute()
     {
         std::cout << "Hello World!" << std::endl;
+        LOG_TRACE("Command executed.");
     }
 };
 
@@ -68,6 +70,7 @@ public:
     {
         std::cout << _FULLVERSION << std::endl
                   << "Uptime: " << secsToTimeString(sRealmdManager->GetUpTime()) << std::endl;
+        LOG_TRACE("Command executed.");
     }
 };
 
@@ -81,4 +84,5 @@ void Impl_RegisterCommands()
 {
     new Command_Test();
     new Command_Info();
+    LOG_TRACE("Resources for implemented commands allocated.");
 }

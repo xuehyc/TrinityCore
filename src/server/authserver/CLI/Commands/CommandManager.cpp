@@ -24,6 +24,10 @@
 
 #include "CommandManager.h"
 
+#include <sstream>
+
+#include "LogTrace.h"
+
 CommandManager::~CommandManager()
 {
     for (CommandMap_ConstItr itr = _commandMap.begin(); itr != _commandMap.end(); ++itr)
@@ -41,4 +45,8 @@ Command* CommandManager::FindCommand(std::string const name)
 void CommandManager::RegisterCommand(std::string const name, Command* cmdPtr)
 {
     _commandMap[name] = cmdPtr;
+
+    std::ostringstream oss;
+    oss << "Command registered with the CommandManager: \"" << name << "\"";
+    LOG_TRACE(oss.str());
 }

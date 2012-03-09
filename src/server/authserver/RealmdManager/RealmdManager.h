@@ -28,6 +28,8 @@
 #include <ace/Singleton.h>
 #include <ace/Null_Mutex.h>
 
+#include "LogTrace.h"
+
 /**
  *  @brief  Singleton which manages global realmd related things.
  */
@@ -43,6 +45,7 @@ public:
     RealmdManager()
     {
         _startTime = time(NULL);
+        LOG_TRACE("RealmdManager initialized.");
     }
 
     /**
