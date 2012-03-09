@@ -14,3 +14,8 @@ https://github.com/Anubisss/ngrealmd
         * Note: If compilation of scripts needed (-DSCRIPTS=1) then
                 have to build worldserver (-DWORLDSERVER=1) too.
     - Basic CLI for realmd.
+    - Nice doxygen documentation.
+    - A LogTrace class which can generate nice trace logs to the
+      standad output. For more information just look at
+      src/server/authserver/LogTrace/LogTrace.h LogTrace::Trace
+      documentation, there is examples for the ouput.
