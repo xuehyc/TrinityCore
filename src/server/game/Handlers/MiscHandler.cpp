@@ -258,15 +258,6 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
             // player can see MODERATOR, GAME MASTER, ADMINISTRATOR only if CONFIG_GM_IN_WHO_LIST
             if ((itr->second->GetSession()->GetSecurity() > AccountTypes(gmLevelInWhoList)))
                 continue;
-
-            // player cannot see targets on arena maps
-            uint32 map = itr->second->GetMapId();
-            if (map == 559 || // Nagrand Arena
-                map == 562 || // Blade's Edge Arena
-                map == 572 || // Ruins of Lordaeron
-                map == 617 || // Dalaran Sewers
-                map == 618)   // Ring of Valor
-                continue;
         }
 
         //do not process players which are not in world
