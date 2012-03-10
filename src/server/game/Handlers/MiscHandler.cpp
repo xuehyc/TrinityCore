@@ -283,7 +283,9 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
         if (!(racemask & (1 << race)))
             continue;
 
-        uint32 pzoneid = itr->second->GetZoneId();
+        // hide arena position from players, show joining zone instead
+        uint32 pzoneid = itr->second->GetZoneIdWithArenaHidden(!AccountMgr::IsPlayerAccount(security));
+
         uint8 gender = itr->second->getGender();
 
         bool z_show = true;

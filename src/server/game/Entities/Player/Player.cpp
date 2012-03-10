@@ -25259,3 +25259,23 @@ bool Player::IsInWhisperWhiteList(uint64 guid)
     }
     return false;
 }
+
+uint32 Player::GetZoneIdWithArenaHidden(bool isGamemaster /*= false*/)
+{
+    if (InArena() && !isGamemaster)
+    {
+        // Is position valid
+        if (GetBattlegroundEntryPoint().GetMapId() != MAPID_INVALID)
+        {
+            uint32 zoneIdJoinPos = sMapMgr->GetZoneId(GetBattlegroundEntryPoint().GetMapId(), GetBattlegroundEntryPoint().GetPositionX(), GetBattlegroundEntryPoint().GetPositionY(), GetBattlegroundEntryPoint().GetPositionZ());
+
+            // Return zone id from join position if possible, otherwise return real zone id
+            if (zoneIdJoinPos)
+                return zoneIdJoinPos;
+            else
+                return GetZoneId();
+        }
+    }
+
+    return GetZoneId();
+}

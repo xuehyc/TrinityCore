@@ -634,7 +634,7 @@ void Guild::Member::WritePacket(WorldPacket& data) const
         data << uint8(player->getLevel());
         data << uint8(player->getClass());
         data << uint8(0);                               // new 2.4.0
-        data << uint32(player->GetZoneId());
+        data << uint32(player->GetZoneIdWithArenaHidden()); // hide arena position from players, show joining zone instead
     }
     else
     {

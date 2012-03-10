@@ -1096,6 +1096,7 @@ class Player : public Unit, public GridObject<Player>
         //bool CanFly() const { return HasUnitMovementFlag(MOVEMENTFLAG_CAN_FLY); }
         bool CanFly() const { return m_CanFly;  }
         void SetCanFly(bool CanFly) { m_CanFly=CanFly; }
+        uint32 GetZoneIdWithArenaHidden(bool isGamemaster = false);
 
         void CleanupsBeforeDelete(bool finalCleanup = true);
 
