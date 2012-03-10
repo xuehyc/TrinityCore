@@ -50,6 +50,7 @@ public:
      */
     void Start()
     {
+        LOG_TRACE("Starting CLI thread...");
         _running = true;
         activate();
     }
@@ -57,7 +58,11 @@ public:
      *  @brief  Stop the loop.
      *  @see    svc()
      */
-    void Stop() { _running = false; }
+    void Stop()
+    {
+        LOG_TRACE("Stopping CLI thread...");
+        _running = false;
+    }
 
     /**
      *  @brief  The new running thread's "loop".

@@ -75,6 +75,26 @@ public:
 };
 
 /**
+ *  @brief  Shutdown the daemon.
+ *  @todo   Need a better "thing" than a global variable
+ *          for stopping the realmd.@n
+ *          A singleton should be good. eg.: RealmdManager
+ */
+
+class Command_Shutdown : public Command
+{
+public:
+    Command_Shutdown() : Command("shutdown") {}
+
+    /* virtual */ void Execute()
+    {
+        extern bool stopEvent; // forward declaration from Main.cpp
+        stopEvent = true;
+        LOG_TRACE("Command executed.");
+    }
+};
+
+/**
  *  @brief  This method allocates resources for the implemented commands.
  *          Function called in CLITask's constructor.
  *  @see    CLITask::CLITask()
@@ -84,5 +104,6 @@ void Impl_RegisterCommands()
 {
     new Command_Test();
     new Command_Info();
+    new Command_Shutdown();
     LOG_TRACE("Resources for implemented commands allocated.");
 }
