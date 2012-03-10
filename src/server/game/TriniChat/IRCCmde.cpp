@@ -364,7 +364,7 @@ void IRCCmd::Char_Player(_CDATA *CD)
         }
         if(_PARAMS[1] == "combatstop")
         {
-            if(!plr->isInCombat())
+            if(plr->isInCombat())
             {
                 plr->CombatStop();
                 Send_IRCA(ChanOrPM(CD), MakeMsg("\00313[%s] : Was Dropped From Combat",_PARAMS[0].c_str()), true, CD->TYPE);

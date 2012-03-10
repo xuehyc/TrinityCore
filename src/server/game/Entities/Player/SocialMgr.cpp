@@ -241,7 +241,13 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friendGUID, FriendInfo &fri
             friendInfo.Status = FRIEND_STATUS_AFK;
         if (pFriend->isDND())
             friendInfo.Status = FRIEND_STATUS_DND;
-        friendInfo.Area = pFriend->GetZoneId();
+
+        // hide arena position from players, show joining zone instead
+        if(AccountMgr::IsPlayerAccount(security) && pFriend->InArena())
+            friendInfo.Area = pFriend->GetBattlegroundEntryPointZoneId();
+        else
+            friendInfo.Area = pFriend->GetZoneId();
+
         friendInfo.Level = pFriend->getLevel();
         friendInfo.Class = pFriend->getClass();
     }
