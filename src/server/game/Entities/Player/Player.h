@@ -970,7 +970,6 @@ struct BGData
     uint32 taxiPath[2];
 
     WorldLocation joinPos;                  ///< From where player entered BG
-    uint32 joinZoneId;
 
     void ClearTaxiPath()     { taxiPath[0] = taxiPath[1] = 0; }
     bool HasTaxiPath() const { return taxiPath[0] && taxiPath[1]; }
@@ -2242,7 +2241,6 @@ class Player : public Unit, public GridObject<Player>
             return false;
         }
         WorldLocation const& GetBattlegroundEntryPoint() const { return m_bgData.joinPos; }
-        uint32 GetBattlegroundEntryPointZoneId() const { return m_bgData.joinZoneId; }
         void SetBattlegroundEntryPoint();
 
         void SetBGTeam(uint32 team) { m_bgData.bgTeam = team; }

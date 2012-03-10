@@ -16597,10 +16597,6 @@ void Player::_LoadBGData(PreparedQueryResult result)
     m_bgData.taxiPath[0]  = fields[7].GetUInt32();
     m_bgData.taxiPath[1]  = fields[8].GetUInt32();
     m_bgData.mountSpell   = fields[9].GetUInt32();
-
-    // we do not save ZoneId because it is only relevant to SocialMgr::GetFriendInfo to hide Arena games from Friend List.
-    // instead we default to Zone 4395 (Dalaran), so joinZoneId is never empty or invalid.
-    m_bgData.joinZoneId   = 4395;
 }
 
 bool Player::LoadPositionFromDB(uint32& mapid, float& x, float& y, float& z, float& o, bool& in_flight, uint64 guid)
@@ -21432,7 +21428,6 @@ void Player::SetBattlegroundEntryPoint()
 
         // On taxi we don't need check for dungeon
         m_bgData.joinPos = WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-        m_bgData.joinZoneId = GetZoneId();
     }
     else
     {
@@ -21452,27 +21447,17 @@ void Player::SetBattlegroundEntryPoint()
         if (GetMap()->IsDungeon())
         {
             if (const WorldSafeLocsEntry* entry = sObjectMgr->GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam()))
-            {
                 m_bgData.joinPos = WorldLocation(entry->map_id, entry->x, entry->y, entry->z, 0.0f);
-                m_bgData.joinZoneId = GetZoneId();
-            }
             else
                 sLog->outError("SetBattlegroundEntryPoint: Dungeon map %u has no linked graveyard, setting home location as entry point.", GetMapId());
         }
         // If new entry point is not BG or arena set it
         else if (!GetMap()->IsBattlegroundOrArena())
-        {
             m_bgData.joinPos = WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-            m_bgData.joinZoneId = GetZoneId();
-        }
-
     }
 
     if (m_bgData.joinPos.m_mapId == MAPID_INVALID) // In error cases use homebind position
-    {
         m_bgData.joinPos = WorldLocation(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, 0.0f);
-        m_bgData.joinZoneId = GetZoneId();
-    }
 }
 
 void Player::LeaveBattleground(bool teleportToEntryPoint)

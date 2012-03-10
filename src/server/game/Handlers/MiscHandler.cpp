@@ -259,6 +259,14 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
             if ((itr->second->GetSession()->GetSecurity() > AccountTypes(gmLevelInWhoList)))
                 continue;
 
+            // player cannot see targets on arena maps
+            uint32 map = itr->second->GetMapId();
+            if (map == 559 || // Nagrand Arena
+                map == 562 || // Blade's Edge Arena
+                map == 572 || // Ruins of Lordaeron
+                map == 617 || // Dalaran Sewers
+                map == 618)   // Ring of Valor
+                continue;
         }
 
         //do not process players which are not in world
@@ -284,11 +292,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
         if (!(racemask & (1 << race)))
             continue;
 
-        // player cannot see targets on arena maps, sees entrypoint zone instead
         uint32 pzoneid = itr->second->GetZoneId();
-        if (AccountMgr::IsPlayerAccount(security) && itr->second->InArena())
-            pzoneid = itr->second->GetBattlegroundEntryPointZoneId();
-
         uint8 gender = itr->second->getGender();
 
         bool z_show = true;
