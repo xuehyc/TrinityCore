@@ -77,6 +77,7 @@ enum WorldTimers
     WUPDATE_MAILBOXQUEUE,
     WUPDATE_DELETECHARS,
     WUPDATE_PINGDB,
+    WUPDATE_SEND_PVP_INFO,
     WUPDATE_COUNT
 };
 
@@ -762,6 +763,10 @@ class World
 
         uint32 GetWintergrapsTimer() { return m_WintergrapsTimer; }
         uint32 GetWintergrapsState() { return m_WintergrapsState; }
+
+        // Send custom pvp information
+        void SendCustomPvpInformationUpdate();
+        void SendMessageToAllPlayersInChannel(std::string channel_name, std::string message);
 
         static int32 GetVisibilityNotifyPeriodOnContinents(){ return m_visibility_notify_periodOnContinents; }
         static int32 GetVisibilityNotifyPeriodInInstances() { return m_visibility_notify_periodInInstances;  }

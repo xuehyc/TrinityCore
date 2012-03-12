@@ -77,6 +77,8 @@
 
 #include "OutdoorPvPWG.h"
 #include "TriniChat/IRCClient.h"
+#include "ChannelMgr.h"
+#include "BattlegroundQueue.h"
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1858,6 +1860,9 @@ void World::SetInitialWorldSettings()
 
     m_timers[WUPDATE_PINGDB].SetInterval(getIntConfig(CONFIG_DB_PING_INTERVAL)*MINUTE*IN_MILLISECONDS);    // Mysql ping time in minutes
 
+    // Send custom pvp information
+    m_timers[WUPDATE_SEND_PVP_INFO].SetInterval(5 * MINUTE * IN_MILLISECONDS);
+
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
     //one second is 1000 -(tested on win system)
@@ -2197,6 +2202,13 @@ void World::Update(uint32 diff)
     {
         m_timers[WUPDATE_CORPSES].Reset();
         sObjectAccessor->RemoveOldCorpses();
+    }
+
+    ///- Send custom pvp information
+    if (m_timers[WUPDATE_SEND_PVP_INFO].Passed())
+    {
+        m_timers[WUPDATE_SEND_PVP_INFO].Reset();
+        SendCustomPvpInformationUpdate();
     }
 
     ///- Process Game events when necessary
@@ -3185,5 +3197,255 @@ void World::SendWintergraspState()
                 // Hide unneeded info which in center of screen
                 itr->second->GetPlayer()->SendInitWorldStates(itr->second->GetPlayer()->GetZoneId(), itr->second->GetPlayer()->GetAreaId());
             }
+    }
+}
+
+void World::SendCustomPvpInformationUpdate()
+{
+    if (!sBattlegroundMgr)
+        return;
+
+    // In first step, try to find active games
+    bool activeGameFound = false;
+    std::ostringstream messageActive;
+    uint32 arenaCount2vs2 = 0;
+    uint32 arenaCount3vs3 = 0;
+    uint32 arenaCount5vs5 = 0;
+
+    // Iteration over all possible battleground types
+    for (uint32 i = BATTLEGROUND_TYPE_NONE; i < MAX_BATTLEGROUND_TYPE_ID; i++)
+    {
+        // Init vars and get all instances of a battleground type
+        std::map<uint32, std::pair<uint32, uint32>> storedBattlegroundCounts;
+        BattlegroundSet Battlegrounds = sBattlegroundMgr->GetBattlegroundsByTypeId(BattlegroundTypeId(i));
+
+        if (!Battlegrounds.empty())
+        {
+            for (BattlegroundSet::const_iterator itr = Battlegrounds.begin(); itr != Battlegrounds.end(); ++itr)
+            {
+                if ((*itr).second)
+                {
+                    // Only count rated arena matches
+                    if ((*itr).second->isArena() && (*itr).second->isRated())
+                    {
+                        switch ((*itr).second->GetArenaType())
+                        {
+                            case 2:
+                                arenaCount2vs2++;
+                                break;
+                            case 3:
+                                arenaCount3vs3++;
+                                break;
+                            case 5:
+                                arenaCount5vs5++;
+                                break;
+                            default:
+                                break;
+                        }
+
+                        continue;
+                    }
+
+                    // For battlegrounds, count for each bracket
+                    if ((*itr).second->isBattleground() && (*itr).second->GetStatus() >= STATUS_WAIT_JOIN)
+                    {
+                        std::map<uint32, std::pair<uint32, uint32>>::iterator itr2 = storedBattlegroundCounts.find((*itr).second->GetMinLevel());
+
+                        if (itr2 != storedBattlegroundCounts.end())
+                            itr2->second.second++;
+                        else
+                            storedBattlegroundCounts.insert(std::pair<uint32, std::pair<uint32, uint32>>((*itr).second->GetMinLevel(), std::pair<uint32, uint32>((*itr).second->GetMaxLevel(), 1)));
+                    }
+                }
+            }
+        }
+
+        if (!storedBattlegroundCounts.empty())
+        {
+            if (!activeGameFound)
+            {
+                activeGameFound = true;
+                SendMessageToAllPlayersInChannel("pvp", "========== Aktive Spiele ==========");
+            }
+
+            if (BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(i))
+            {
+                for (std::map<uint32, std::pair<uint32, uint32>>::const_iterator itr = storedBattlegroundCounts.begin(); itr != storedBattlegroundCounts.end(); ++itr)
+                {
+                    if ((*itr).first && (*itr).second.first && (*itr).second.second)
+                    {
+                        messageActive << bl->name[GetDefaultDbcLocale()] << " [" << (*itr).first << "-" << (*itr).second.first << "] : " << (*itr).second.second;
+                        SendMessageToAllPlayersInChannel("pvp", messageActive.str());
+                        messageActive.str("");
+                    }
+                }
+            }
+        }
+    }
+
+    if (arenaCount2vs2 || arenaCount3vs3 || arenaCount5vs5)
+    {
+        if (!activeGameFound)
+        {
+            activeGameFound = true;
+            SendMessageToAllPlayersInChannel("pvp", "========== Aktive Spiele ==========");
+        }
+
+        messageActive << "Gewertete Arenen";
+
+        if (arenaCount2vs2)
+            messageActive << " - 2vs2 : " << arenaCount2vs2;
+
+        if (arenaCount3vs3)
+            messageActive << " - 3vs3 : " << arenaCount3vs3;
+
+        if (arenaCount5vs5)
+            messageActive << " - 5vs5 : " << arenaCount5vs5;
+
+        SendMessageToAllPlayersInChannel("pvp", messageActive.str());
+        messageActive.str("");
+    }
+
+    // Now process queue status
+    bool overallQueueFound = false;
+    std::ostringstream messageQueue;
+    for (uint32 battlegroundQueue = BATTLEGROUND_QUEUE_NONE; battlegroundQueue < MAX_BATTLEGROUND_QUEUE_TYPES; ++battlegroundQueue)
+    {
+        bool singleQueueFound = false;
+        uint8 counter = 0;
+        for (uint32 bracket = BG_BRACKET_ID_FIRST; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
+        {
+            uint32 allianceCount = 0;
+            uint32 hordeCount = 0;
+            for (uint32 queueType = 0; queueType < BG_QUEUE_GROUP_TYPES_COUNT; ++queueType)
+            {
+                for (std::list<GroupQueueInfo*>::const_iterator itr = sBattlegroundMgr->m_BattlegroundQueues[battlegroundQueue].m_QueuedGroups[bracket][queueType].begin(); itr != sBattlegroundMgr->m_BattlegroundQueues[battlegroundQueue].m_QueuedGroups[bracket][queueType].end(); ++itr)
+                {
+                    if ((*itr))
+                    {
+                        // When we are in arena queues and fight is not rated, skip
+                        if ((battlegroundQueue == BATTLEGROUND_QUEUE_2v2 || battlegroundQueue == BATTLEGROUND_QUEUE_3v3 || battlegroundQueue == BATTLEGROUND_QUEUE_5v5) && !(*itr)->IsRated)
+                            continue;
+
+                        if (queueType == BG_QUEUE_PREMADE_ALLIANCE || queueType == BG_QUEUE_NORMAL_ALLIANCE)
+                        {
+                            if (battlegroundQueue == BATTLEGROUND_QUEUE_2v2 || battlegroundQueue == BATTLEGROUND_QUEUE_3v3 || battlegroundQueue == BATTLEGROUND_QUEUE_5v5)
+                                allianceCount++;
+                            else
+                                allianceCount += (*itr)->Players.size();
+                        }
+
+                        if (queueType == BG_QUEUE_PREMADE_HORDE || queueType == BG_QUEUE_NORMAL_HORDE)
+                        {
+                            if (battlegroundQueue == BATTLEGROUND_QUEUE_2v2 || battlegroundQueue == BATTLEGROUND_QUEUE_3v3 || battlegroundQueue == BATTLEGROUND_QUEUE_5v5)
+                                hordeCount++;
+                            else
+                                hordeCount += (*itr)->Players.size();
+                        }
+                    }
+                }
+            }
+
+            if (allianceCount != 0 || hordeCount != 0)
+            {
+                if (!overallQueueFound)
+                {
+                    overallQueueFound = true;
+                    SendMessageToAllPlayersInChannel("pvp", "========== Warteschlangen ==========");
+                }
+
+                if (!singleQueueFound)
+                {
+                    singleQueueFound = true;
+
+                    if (battlegroundQueue == BATTLEGROUND_QUEUE_2v2 || battlegroundQueue == BATTLEGROUND_QUEUE_3v3 || battlegroundQueue == BATTLEGROUND_QUEUE_5v5)
+                    {
+                        switch (battlegroundQueue)
+                        {
+                            case BATTLEGROUND_QUEUE_2v2:
+                                messageQueue << "Gewertete Arenen - 2vs2 : " << allianceCount + hordeCount << " Team(s)";
+                                break;
+                            case BATTLEGROUND_QUEUE_3v3:
+                                messageQueue << "Gewertete Arenen - 3vs3 : " << allianceCount + hordeCount << " Team(s)";
+                                break;
+                            case BATTLEGROUND_QUEUE_5v5:
+                                messageQueue << "Gewertete Arenen - 5vs5 : " << allianceCount + hordeCount << " Team(s)";
+                                break;
+                            default:
+                                break;
+                        }
+
+                        SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
+                        messageQueue.str("");
+                    }
+                    else if (BattlegroundTypeId typeId = sBattlegroundMgr->BGTemplateId(BattlegroundQueueTypeId(battlegroundQueue)))
+                        if (uint32(typeId))
+                            if (BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(uint32(typeId)))
+                                messageQueue << bl->name[GetDefaultDbcLocale()];
+                }
+
+                // Just print bracket info for non arena
+                if (battlegroundQueue != BATTLEGROUND_QUEUE_2v2 && battlegroundQueue != BATTLEGROUND_QUEUE_3v3 && battlegroundQueue != BATTLEGROUND_QUEUE_5v5)
+                {
+                    if (BattlegroundTypeId typeId = sBattlegroundMgr->BGTemplateId(BattlegroundQueueTypeId(battlegroundQueue)))
+                    {
+                        if (Battleground* bgTemplate = sBattlegroundMgr->GetBattlegroundTemplate(typeId))
+                        {
+                            if (PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketById(bgTemplate->GetMapId(), BattlegroundBracketId(bracket)))
+                            {
+                                messageQueue << " - [" << bracketEntry->minLevel << "-" << bracketEntry->maxLevel << "](A:" << allianceCount << "/" << bgTemplate->GetMaxPlayersPerTeam() << "H: " << hordeCount << "/" << bgTemplate->GetMaxPlayersPerTeam() << ")";
+                                counter++;
+
+                                if (counter >= 5)
+                                {
+                                    counter = 0;
+                                    SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
+                                    messageQueue.str("");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!messageQueue.str().empty())
+        {
+            SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
+            messageQueue.str("");
+        }
+
+    }
+}
+
+void World::SendMessageToAllPlayersInChannel(std::string channel_name, std::string message)
+{
+    if (channel_name.empty() || message.empty())
+        return;
+
+    HashMapHolder<Player>::MapType const &m = sObjectAccessor->GetPlayers();
+    for(HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+    {
+        if (itr->second && itr->second->GetSession()->GetPlayer() && itr->second->GetSession()->GetPlayer()->IsInWorld())
+        {
+            if(ChannelMgr* cMgr = channelMgr(itr->second->GetSession()->GetPlayer()->GetTeam()))
+            {
+                if(Channel *chn = cMgr->GetChannel(channel_name.c_str(), itr->second->GetSession()->GetPlayer()))
+                {
+                    WorldPacket data;
+                    data.Initialize(SMSG_MESSAGECHAT);
+                    data << (uint8)CHAT_MSG_CHANNEL;
+                    data << (uint32)LANG_UNIVERSAL;
+                    data << (uint64)0;
+                    data << (uint32)0;
+                    data << channel_name.c_str();
+                    data << (uint64)0;
+                    data << (uint32) (strlen(message.c_str()) + 1);
+                    data << message.c_str();
+                    data << (uint8)0;
+                    itr->second->GetSession()->SendPacket(&data);
+                }
+            }
+        }
     }
 }
