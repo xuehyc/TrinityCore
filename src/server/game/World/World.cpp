@@ -1861,7 +1861,7 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_PINGDB].SetInterval(getIntConfig(CONFIG_DB_PING_INTERVAL)*MINUTE*IN_MILLISECONDS);    // Mysql ping time in minutes
 
     // Send custom pvp information
-    m_timers[WUPDATE_SEND_PVP_INFO].SetInterval(5 * MINUTE * IN_MILLISECONDS);
+    m_timers[WUPDATE_SEND_PVP_INFO].SetInterval(3 * MINUTE * IN_MILLISECONDS);
 
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
@@ -3205,7 +3205,125 @@ void World::SendCustomPvpInformationUpdate()
     if (!sBattlegroundMgr)
         return;
 
-    // In first step, try to find active games
+    // Process queue status
+    bool overallQueueFound = false;
+    std::ostringstream messageQueue;
+    for (uint32 battlegroundQueue = BATTLEGROUND_QUEUE_NONE; battlegroundQueue < MAX_BATTLEGROUND_QUEUE_TYPES; ++battlegroundQueue)
+    {
+        bool singleQueueFound = false;
+        uint8 counter = 0;
+        for (uint32 bracket = BG_BRACKET_ID_FIRST; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
+        {
+            uint32 allianceCount = 0;
+            uint32 hordeCount = 0;
+            for (uint32 queueType = 0; queueType < BG_QUEUE_GROUP_TYPES_COUNT; ++queueType)
+            {
+                for (std::list<GroupQueueInfo*>::const_iterator itr = sBattlegroundMgr->m_BattlegroundQueues[battlegroundQueue].m_QueuedGroups[bracket][queueType].begin(); itr != sBattlegroundMgr->m_BattlegroundQueues[battlegroundQueue].m_QueuedGroups[bracket][queueType].end(); ++itr)
+                {
+                    if ((*itr))
+                    {
+                        // When we are in arena queues and fight is not rated, skip
+                        if ((battlegroundQueue == BATTLEGROUND_QUEUE_2v2 || battlegroundQueue == BATTLEGROUND_QUEUE_3v3 || battlegroundQueue == BATTLEGROUND_QUEUE_5v5) && !(*itr)->IsRated)
+                            continue;
+
+                        if (queueType == BG_QUEUE_PREMADE_ALLIANCE || queueType == BG_QUEUE_NORMAL_ALLIANCE)
+                        {
+                            if (battlegroundQueue == BATTLEGROUND_QUEUE_2v2 || battlegroundQueue == BATTLEGROUND_QUEUE_3v3 || battlegroundQueue == BATTLEGROUND_QUEUE_5v5)
+                                allianceCount++;
+                            else
+                                allianceCount += (*itr)->Players.size();
+                        }
+
+                        if (queueType == BG_QUEUE_PREMADE_HORDE || queueType == BG_QUEUE_NORMAL_HORDE)
+                        {
+                            if (battlegroundQueue == BATTLEGROUND_QUEUE_2v2 || battlegroundQueue == BATTLEGROUND_QUEUE_3v3 || battlegroundQueue == BATTLEGROUND_QUEUE_5v5)
+                                hordeCount++;
+                            else
+                                hordeCount += (*itr)->Players.size();
+                        }
+                    }
+                }
+            }
+
+            if (allianceCount != 0 || hordeCount != 0)
+            {
+                if (!overallQueueFound)
+                {
+                    overallQueueFound = true;
+                    SendMessageToAllPlayersInChannel("pvp", "========== Warteschlangen ==========");
+                }
+
+                if (!singleQueueFound)
+                {
+                    singleQueueFound = true;
+
+                    if (battlegroundQueue == BATTLEGROUND_QUEUE_2v2 || battlegroundQueue == BATTLEGROUND_QUEUE_3v3 || battlegroundQueue == BATTLEGROUND_QUEUE_5v5)
+                    {
+                        switch (battlegroundQueue)
+                        {
+                            case BATTLEGROUND_QUEUE_2v2:
+                                messageQueue << "Gewertete Arenen - 2vs2 : " << allianceCount + hordeCount << " Team(s)";
+                                break;
+                            case BATTLEGROUND_QUEUE_3v3:
+                                messageQueue << "Gewertete Arenen - 3vs3 : " << allianceCount + hordeCount << " Team(s)";
+                                break;
+                            case BATTLEGROUND_QUEUE_5v5:
+                                messageQueue << "Gewertete Arenen - 5vs5 : " << allianceCount + hordeCount << " Team(s)";
+                                break;
+                            default:
+                                break;
+                        }
+
+                        SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
+                        messageQueue.str("");
+                    }
+                    else if (BattlegroundTypeId typeId = sBattlegroundMgr->BGTemplateId(BattlegroundQueueTypeId(battlegroundQueue)))
+                    {
+                        if (uint32(typeId))
+                        {
+                            if (BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(uint32(typeId)))
+                            {
+                                messageQueue << "--- " << bl->name[GetDefaultDbcLocale()] << " ---";
+                                SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
+                                messageQueue.str("");
+                            }
+                        }
+                    }
+                }
+
+                // Just print bracket info for non arena
+                if (battlegroundQueue != BATTLEGROUND_QUEUE_2v2 && battlegroundQueue != BATTLEGROUND_QUEUE_3v3 && battlegroundQueue != BATTLEGROUND_QUEUE_5v5)
+                {
+                    if (BattlegroundTypeId typeId = sBattlegroundMgr->BGTemplateId(BattlegroundQueueTypeId(battlegroundQueue)))
+                    {
+                        if (Battleground* bgTemplate = sBattlegroundMgr->GetBattlegroundTemplate(typeId))
+                        {
+                            if (PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketById(bgTemplate->GetMapId(), BattlegroundBracketId(bracket)))
+                            {
+                                messageQueue << "- [" << bracketEntry->minLevel << "-" << bracketEntry->maxLevel << "] (A:" << allianceCount << "/" << bgTemplate->GetMinPlayersPerTeam() << " H:" << hordeCount << "/" << bgTemplate->GetMinPlayersPerTeam() << ") -";
+                                counter++;
+
+                                if (counter >= 2)
+                                {
+                                    counter = 0;
+                                    SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
+                                    messageQueue.str("");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!messageQueue.str().empty())
+        {
+            SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
+            messageQueue.str("");
+        }
+    }
+
+    // Try to find active games
     bool activeGameFound = false;
     std::ostringstream messageActive;
     uint32 arenaCount2vs2 = 0;
@@ -3304,117 +3422,6 @@ void World::SendCustomPvpInformationUpdate()
 
         SendMessageToAllPlayersInChannel("pvp", messageActive.str());
         messageActive.str("");
-    }
-
-    // Now process queue status
-    bool overallQueueFound = false;
-    std::ostringstream messageQueue;
-    for (uint32 battlegroundQueue = BATTLEGROUND_QUEUE_NONE; battlegroundQueue < MAX_BATTLEGROUND_QUEUE_TYPES; ++battlegroundQueue)
-    {
-        bool singleQueueFound = false;
-        uint8 counter = 0;
-        for (uint32 bracket = BG_BRACKET_ID_FIRST; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
-        {
-            uint32 allianceCount = 0;
-            uint32 hordeCount = 0;
-            for (uint32 queueType = 0; queueType < BG_QUEUE_GROUP_TYPES_COUNT; ++queueType)
-            {
-                for (std::list<GroupQueueInfo*>::const_iterator itr = sBattlegroundMgr->m_BattlegroundQueues[battlegroundQueue].m_QueuedGroups[bracket][queueType].begin(); itr != sBattlegroundMgr->m_BattlegroundQueues[battlegroundQueue].m_QueuedGroups[bracket][queueType].end(); ++itr)
-                {
-                    if ((*itr))
-                    {
-                        // When we are in arena queues and fight is not rated, skip
-                        if ((battlegroundQueue == BATTLEGROUND_QUEUE_2v2 || battlegroundQueue == BATTLEGROUND_QUEUE_3v3 || battlegroundQueue == BATTLEGROUND_QUEUE_5v5) && !(*itr)->IsRated)
-                            continue;
-
-                        if (queueType == BG_QUEUE_PREMADE_ALLIANCE || queueType == BG_QUEUE_NORMAL_ALLIANCE)
-                        {
-                            if (battlegroundQueue == BATTLEGROUND_QUEUE_2v2 || battlegroundQueue == BATTLEGROUND_QUEUE_3v3 || battlegroundQueue == BATTLEGROUND_QUEUE_5v5)
-                                allianceCount++;
-                            else
-                                allianceCount += (*itr)->Players.size();
-                        }
-
-                        if (queueType == BG_QUEUE_PREMADE_HORDE || queueType == BG_QUEUE_NORMAL_HORDE)
-                        {
-                            if (battlegroundQueue == BATTLEGROUND_QUEUE_2v2 || battlegroundQueue == BATTLEGROUND_QUEUE_3v3 || battlegroundQueue == BATTLEGROUND_QUEUE_5v5)
-                                hordeCount++;
-                            else
-                                hordeCount += (*itr)->Players.size();
-                        }
-                    }
-                }
-            }
-
-            if (allianceCount != 0 || hordeCount != 0)
-            {
-                if (!overallQueueFound)
-                {
-                    overallQueueFound = true;
-                    SendMessageToAllPlayersInChannel("pvp", "========== Warteschlangen ==========");
-                }
-
-                if (!singleQueueFound)
-                {
-                    singleQueueFound = true;
-
-                    if (battlegroundQueue == BATTLEGROUND_QUEUE_2v2 || battlegroundQueue == BATTLEGROUND_QUEUE_3v3 || battlegroundQueue == BATTLEGROUND_QUEUE_5v5)
-                    {
-                        switch (battlegroundQueue)
-                        {
-                            case BATTLEGROUND_QUEUE_2v2:
-                                messageQueue << "Gewertete Arenen - 2vs2 : " << allianceCount + hordeCount << " Team(s)";
-                                break;
-                            case BATTLEGROUND_QUEUE_3v3:
-                                messageQueue << "Gewertete Arenen - 3vs3 : " << allianceCount + hordeCount << " Team(s)";
-                                break;
-                            case BATTLEGROUND_QUEUE_5v5:
-                                messageQueue << "Gewertete Arenen - 5vs5 : " << allianceCount + hordeCount << " Team(s)";
-                                break;
-                            default:
-                                break;
-                        }
-
-                        SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
-                        messageQueue.str("");
-                    }
-                    else if (BattlegroundTypeId typeId = sBattlegroundMgr->BGTemplateId(BattlegroundQueueTypeId(battlegroundQueue)))
-                        if (uint32(typeId))
-                            if (BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(uint32(typeId)))
-                                messageQueue << bl->name[GetDefaultDbcLocale()];
-                }
-
-                // Just print bracket info for non arena
-                if (battlegroundQueue != BATTLEGROUND_QUEUE_2v2 && battlegroundQueue != BATTLEGROUND_QUEUE_3v3 && battlegroundQueue != BATTLEGROUND_QUEUE_5v5)
-                {
-                    if (BattlegroundTypeId typeId = sBattlegroundMgr->BGTemplateId(BattlegroundQueueTypeId(battlegroundQueue)))
-                    {
-                        if (Battleground* bgTemplate = sBattlegroundMgr->GetBattlegroundTemplate(typeId))
-                        {
-                            if (PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketById(bgTemplate->GetMapId(), BattlegroundBracketId(bracket)))
-                            {
-                                messageQueue << " - [" << bracketEntry->minLevel << "-" << bracketEntry->maxLevel << "](A:" << allianceCount << "/" << bgTemplate->GetMaxPlayersPerTeam() << "H: " << hordeCount << "/" << bgTemplate->GetMaxPlayersPerTeam() << ")";
-                                counter++;
-
-                                if (counter >= 5)
-                                {
-                                    counter = 0;
-                                    SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
-                                    messageQueue.str("");
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!messageQueue.str().empty())
-        {
-            SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
-            messageQueue.str("");
-        }
-
     }
 }
 
