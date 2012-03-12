@@ -321,7 +321,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
             continue;
 
         std::string aname;
-        if (AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(itr->second->GetZoneId()))
+        if (AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(itr->second->GetZoneIdWithArenaHidden(!AccountMgr::IsPlayerAccount(security))))
             aname = areaEntry->area_name[GetSessionDbcLocale()];
 
         bool s_show = true;
