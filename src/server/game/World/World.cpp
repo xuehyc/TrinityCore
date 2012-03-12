@@ -3216,7 +3216,7 @@ void World::SendCustomPvpInformationUpdate()
     for (uint32 i = BATTLEGROUND_TYPE_NONE; i < MAX_BATTLEGROUND_TYPE_ID; i++)
     {
         // Init vars and get all instances of a battleground type
-        std::map<uint32, std::pair<uint32, uint32>> storedBattlegroundCounts;
+        std::map<uint32, std::pair<uint32, uint32> > storedBattlegroundCounts;
         BattlegroundSet Battlegrounds = sBattlegroundMgr->GetBattlegroundsByTypeId(BattlegroundTypeId(i));
 
         if (!Battlegrounds.empty())
@@ -3249,12 +3249,12 @@ void World::SendCustomPvpInformationUpdate()
                     // For battlegrounds, count for each bracket
                     if ((*itr).second->isBattleground() && (*itr).second->GetStatus() >= STATUS_WAIT_JOIN)
                     {
-                        std::map<uint32, std::pair<uint32, uint32>>::iterator itr2 = storedBattlegroundCounts.find((*itr).second->GetMinLevel());
+                        std::map<uint32, std::pair<uint32, uint32> >::iterator itr2 = storedBattlegroundCounts.find((*itr).second->GetMinLevel());
 
                         if (itr2 != storedBattlegroundCounts.end())
                             itr2->second.second++;
                         else
-                            storedBattlegroundCounts.insert(std::pair<uint32, std::pair<uint32, uint32>>((*itr).second->GetMinLevel(), std::pair<uint32, uint32>((*itr).second->GetMaxLevel(), 1)));
+                            storedBattlegroundCounts.insert(std::pair<uint32, std::pair<uint32, uint32> >((*itr).second->GetMinLevel(), std::pair<uint32, uint32>((*itr).second->GetMaxLevel(), 1)));
                     }
                 }
             }
@@ -3270,7 +3270,7 @@ void World::SendCustomPvpInformationUpdate()
 
             if (BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(i))
             {
-                for (std::map<uint32, std::pair<uint32, uint32>>::const_iterator itr = storedBattlegroundCounts.begin(); itr != storedBattlegroundCounts.end(); ++itr)
+                for (std::map<uint32, std::pair<uint32, uint32> >::const_iterator itr = storedBattlegroundCounts.begin(); itr != storedBattlegroundCounts.end(); ++itr)
                 {
                     if ((*itr).first && (*itr).second.first && (*itr).second.second)
                     {
