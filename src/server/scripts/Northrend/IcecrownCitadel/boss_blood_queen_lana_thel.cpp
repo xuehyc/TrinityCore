@@ -414,7 +414,9 @@ class boss_blood_queen_lana_thel : public CreatureScript
                                     foundTargets = true;
 
                                     // Either victim or offtank changed, recalculate the whole aura linking
-                                    if (me->getVictim()->GetGUID() != _victimGUID || newOfftankPointer->GetGUID() != _offtankGUID)
+                                    uint32 spellIdTank = sSpellMgr->GetSpellIdForDifficulty(SPELL_BLOOD_MIRROR_DAMAGE, me->getVictim());
+                                    uint32 spellIdOffTank = sSpellMgr->GetSpellIdForDifficulty(SPELL_BLOOD_MIRROR_DUMMY, newOfftankPointer);
+                                    if (me->getVictim()->GetGUID() != _victimGUID || newOfftankPointer->GetGUID() != _offtankGUID || !me->getVictim()->HasAura(spellIdTank) || !newOfftankPointer->HasAura(spellIdOffTank))
                                     {
                                         _victimGUID = me->getVictim()->GetGUID();
                                         _offtankGUID = newOfftankPointer->GetGUID();
@@ -603,16 +605,8 @@ class spell_blood_queen_vampiric_bite : public SpellScriptLoader
                 return true;
             }
 
-            bool Load()
-            {
-                _targetGUID = 0;
-                _originalTarget = false;
-                return true;
-            }
-
             SpellCastResult CheckTarget()
             {
-                Player* checkPlayer = NULL;
                 bool bloodqueenFound = false;
 
                 if (GetCaster())
@@ -625,44 +619,29 @@ class spell_blood_queen_vampiric_bite : public SpellScriptLoader
                     {
                         if (Player* casterPlayer = GetCaster()->ToPlayer())
                         {
-                            // First, try to use target unit
-                            if (GetTargetUnit())
+                            if (casterPlayer->GetSelectedUnit())
                             {
-                                if (GetTargetUnit()->GetTypeId() == TYPEID_PLAYER)
+                                if (casterPlayer->GetSelectedUnit()->GetTypeId() == TYPEID_PLAYER)
                                 {
-                                    if (GetTargetUnit()->GetGUID() != casterPlayer->GetGUID())
+                                    if (Player* targetPlayer = casterPlayer->GetSelectedUnit()->ToPlayer())
                                     {
-                                        checkPlayer = GetTargetUnit()->ToPlayer();
-                                        _originalTarget = true;
-                                    }
-                                }
-                            }
+                                        if (!IsVampire(targetPlayer) && bloodqueenFound)
+                                        {
+                                            if (GetTargetUnit()->GetGUID() != targetPlayer->GetGUID())
+                                            {
+                                                uint32 recastSpellId = sSpellMgr->GetSpellIdForDifficulty(SPELL_VAMPIRIC_BITE_PLR, GetCaster());
+                                                GetCaster()->CastSpell(targetPlayer, recastSpellId, false);
+                                                SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_NONE);
+                                                return SPELL_FAILED_CUSTOM_ERROR;
+                                            }
 
-                            // Then, try to use selection unit
-                            if (!checkPlayer)
-                            {
-                                if (casterPlayer->GetSelectedUnit())
-                                {
-                                    if (casterPlayer->GetSelectedUnit()->GetTypeId() == TYPEID_PLAYER)
-                                    {
-                                        checkPlayer = casterPlayer->GetSelectedUnit()->ToPlayer();
+                                            return SPELL_CAST_OK;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
-
-                if (checkPlayer)
-                {
-                    if (IsVampire(checkPlayer) || !bloodqueenFound)
-                    {
-                        SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_CANT_TARGET_VAMPIRES);
-                        return SPELL_FAILED_CUSTOM_ERROR;
-                    }
-
-                    _targetGUID = checkPlayer->GetGUID();
-                    return SPELL_CAST_OK;
                 }
 
                 SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_CANT_TARGET_VAMPIRES);
@@ -671,22 +650,8 @@ class spell_blood_queen_vampiric_bite : public SpellScriptLoader
 
             void OnCast()
             {
-                if (!GetCaster() || GetCaster()->GetTypeId() != TYPEID_PLAYER || !_targetGUID)
+                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
                     return;
-
-                Player* targetPlayer = Unit::GetPlayer((*GetCaster()), _targetGUID);
-
-                if (!targetPlayer)
-                    return;
-
-                if (!_originalTarget)
-                {
-                    uint32 recastSpellId = sSpellMgr->GetSpellIdForDifficulty(SPELL_VAMPIRIC_BITE_PLR, GetCaster());
-                    PreventHitDefaultEffect(EFFECT_0);
-                    PreventHitDefaultEffect(EFFECT_1);
-                    GetCaster()->CastSpell(targetPlayer, recastSpellId, false);
-                    return;
-                }
 
                 uint32 spellId = sSpellMgr->GetSpellIdForDifficulty(SPELL_FRENZIED_BLOODTHIRST, GetCaster());
                 GetCaster()->RemoveAura(spellId, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
@@ -718,9 +683,6 @@ class spell_blood_queen_vampiric_bite : public SpellScriptLoader
                 OnCheckCast += SpellCheckCastFn(spell_blood_queen_vampiric_bite_SpellScript::CheckTarget);
                 BeforeHit += SpellHitFn(spell_blood_queen_vampiric_bite_SpellScript::OnCast);
             }
-
-            uint64 _targetGUID;
-            bool _originalTarget;
         };
 
         SpellScript* GetSpellScript() const
