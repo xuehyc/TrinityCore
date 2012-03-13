@@ -386,7 +386,7 @@ void IRCCmd::Char_Player(_CDATA *CD)
                 {
                     QName = cQName+1;
                     WorldDatabase.EscapeString(QName);
-                    QueryResult result = WorldDatabase.PQuery("SELECT entry FROM quest_template WHERE name = '%s'", QName.c_str());
+                    QueryResult result = WorldDatabase.PQuery("SELECT Id FROM quest_template WHERE Title = '%s'", QName.c_str());
                     if (!result)
                     {
                         Send_IRCA(CD->USER, "\0034[ERROR] : Quest Not Found!", true, "ERROR");
@@ -398,7 +398,7 @@ void IRCCmd::Char_Player(_CDATA *CD)
             else
             {
                 qId = atoi(args);
-                QueryResult result = WorldDatabase.PQuery("SELECT title FROM quest_template WHERE entry = '%d'", qId);
+                QueryResult result = WorldDatabase.PQuery("SELECT Title FROM quest_template WHERE Id = '%d'", qId);
                 if (!result)
                 {
                     Send_IRCA(CD->USER, "\0034[ERROR] : Quest Not Found!", true, "ERROR");
@@ -1005,7 +1005,7 @@ void IRCCmd::Lookup_Player(_CDATA *CD)
             plguid = sObjectMgr->GetPlayerGUIDByName(_PARAMS[1].c_str());
         if(plguid > 0)
         {
-            QueryResult result = CharacterDatabase.PQuery("SELECT guid, account, name, race, class, online, SUBSTRING_INDEX(SUBSTRING_INDEX(`data`, ' ' , 35), ' ' , -1) AS level, SUBSTRING_INDEX(SUBSTRING_INDEX(`data`, ' ' , 238), ' ' , -1) AS guildid, SUBSTRING_INDEX(SUBSTRING_INDEX(`data`, ' ' , 239), ' ' , -1) AS guildrank, SUBSTRING_INDEX(SUBSTRING_INDEX(`data`, ' ' , 927), ' ' , -1) AS xp, SUBSTRING_INDEX(SUBSTRING_INDEX(`data`, ' ' , 928), ' ' , -1) AS maxxp, SUBSTRING_INDEX(SUBSTRING_INDEX(data, ' ' , 1462), ' ' , -1) AS gold, SUBSTRING_INDEX(SUBSTRING_INDEX(`data`, ' ' , 1454), ' ' , -1) AS hk, totaltime FROM characters WHERE guid =%i", plguid);
+            QueryResult result = CharacterDatabase.PQuery("SELECT guid, account, name, race, class, online, level, money, totaltime FROM characters WHERE guid =%i", plguid);
             uint32 latency = 0;
             Player *chr = ObjectAccessor::FindPlayer(plguid);
             if(chr)
@@ -1024,32 +1024,22 @@ void IRCCmd::Lookup_Player(_CDATA *CD)
                 uint32 pclassid = fields[4].GetUInt32();
                 std::string ponline = (fields[5].GetInt32() == 1 ? "\x3\x30\x33Online" : "\x3\x30\x34Offline\xF");
                 std::string plevel = fields[6].GetCString();
-                uint32 pguildid = fields[7].GetUInt32();
-                uint32 pguildrank = fields[8].GetUInt32();
-                std::string pxp = fields[9].GetCString();
-                std::string pmaxxp = fields[10].GetCString();
-                unsigned int money = fields[11].GetInt32();
-                std::string hk = fields[12].GetCString();
-                std::string totaltim = SecToDay(fields[13].GetCString());
-                std::string sqlquery = "SELECT gmlevel FROM account_access WHERE id = '" + pacct + "';";
-                QueryResult result = LoginDatabase.Query(sqlquery.c_str());
-                Field *fields2 = result->Fetch();
-                std::string pgmlvl = fields2[0].GetCString();
-                std::string guildinfo = "";
-                if (pguildid != 0)
+                unsigned int money = fields[7].GetInt32();
+                std::string totaltim = SecToDay(fields[8].GetCString());
+                std::string pgmlvl = "0";
+
+                std::string sqlquery = "SELECT gmlevel FROM account_access WHERE id = '" + pacct + "' LIMIT 1;";
+                QueryResult result2 = LoginDatabase.Query(sqlquery.c_str());
+
+                if (result2)
                 {
-                    Guild* guild = sGuildMgr->GetGuildById(pguildid);
-                    if (guild)
-                    {
-                        guildinfo = " Member Of " + guild->GetName();
-                    }
+                    Field *fields2 = result2->Fetch();
+                    pgmlvl = fields2[0].GetCString();
                 }
-                else guildinfo = " None";
+
                 ChrRacesEntry const* prace = sChrRacesStore.LookupEntry(praceid);
                 ChrClassesEntry const* pclass = sChrClassesStore.LookupEntry(pclassid);
 
-                if ((atoi(plevel.c_str()) < 0 ? 0 : (uint32)atoi(plevel.c_str())) < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
-                    plevel += " (" + pxp + "/" + pmaxxp + ")";
                 unsigned int gold = money / 10000;
                 unsigned int silv = (money % 10000) / 100;
                 unsigned int cop = (money % 10000) % 100;
@@ -1070,7 +1060,7 @@ void IRCCmd::Lookup_Player(_CDATA *CD)
                     }
                 }
                 std::string pinfo  = "\x2 About Player:\x3\x31\x30 " +pname+ "\xF |\x2 GM Level:\x3\x31\x30 " +pgmlvl+ "\xF |\x2 AcctID:\x3\x31\x30 " +pacct+ "\xF |\x2 CharID:\x3\x31\x30 " +pguid+ " \xF |\x2 Played Time:\x2\x3\x31\x30 " +totaltim.c_str()+" \xF |\x2 Latency:\x2\x3\x31\x30 "+templatency;
-                std::string pinfo2 = "\x2 Race:\x2\x3\x31\x30 " + (std::string)prace->name[sWorld->GetDefaultDbcLocale()] + "\xF |\x2 Level:\x2\x3\x31\x30 " + plevel + "\xF |\x2 Money:\x2 " + tempgold + "\xF |\x2 Guild Info:\x2\x3\x31\x30 "+guildinfo+"\xF |\x2 Status:\x2 " + ponline;
+                std::string pinfo2 = "\x2 Race:\x2\x3\x31\x30 " + (std::string)prace->name[sWorld->GetDefaultDbcLocale()] + "\xF |\x2 Level:\x2\x3\x31\x30 " + plevel + "\xF |\x2 Money:\x2 " + tempgold + "\xF |\x2 Status:\x2 " + ponline;
                 //        pinfo3 = " :" + " \x2Honor Kills:\x2\x3\x31\x30 " + hk;
                 Send_IRCA(ChanOrPM(CD),pinfo , true, CD->TYPE);
                 Send_IRCA(ChanOrPM(CD),pinfo2 , true, CD->TYPE);
@@ -1107,7 +1097,7 @@ void IRCCmd::Lookup_Player(_CDATA *CD)
         if(atoi(creature.c_str()) > 0)
         {
             WorldDatabase.EscapeString(_PARAMS[1]);
-            QueryResult result = WorldDatabase.PQuery("SELECT entry, modelid_A, name, (minlevel*maxlevel/2) as level, faction_A, armor,  (SELECT count(*) FROM creature WHERE id = '%s') as spawns FROM creature_template WHERE entry = '%s';", _PARAMS[1].c_str(), _PARAMS[1].c_str());
+            QueryResult result = WorldDatabase.PQuery("SELECT entry, modelid1, name, (minlevel+maxlevel/2) as level, faction_A, armor, (SELECT count(*) FROM creature WHERE id = '%s') as spawns FROM creature_template WHERE entry = '%s';", _PARAMS[1].c_str(), _PARAMS[1].c_str());
             if(result)
             {
                 Field *fields = result->Fetch();
@@ -1281,7 +1271,7 @@ void IRCCmd::Lookup_Player(_CDATA *CD)
         if(atoi(quest.c_str()) > 0)
         {
             WorldDatabase.EscapeString(_PARAMS[1]);
-            QueryResult result = WorldDatabase.PQuery("SELECT entry, Title FROM quest_template WHERE entry = '%s';", _PARAMS[1].c_str(), _PARAMS[1].c_str());
+            QueryResult result = WorldDatabase.PQuery("SELECT Id, Title FROM quest_template WHERE Id = '%s';", _PARAMS[1].c_str(), _PARAMS[1].c_str());
             if(result)
             {
                 QueryResult result2 = CharacterDatabase.PQuery("SELECT count(*) FROM character_queststatus WHERE quest = '%s' AND status = '1';", _PARAMS[1].c_str());
@@ -1298,7 +1288,7 @@ void IRCCmd::Lookup_Player(_CDATA *CD)
         }
         else
         {
-            QueryResult result = WorldDatabase.PQuery("SELECT entry, Title FROM quest_template WHERE Title LIKE '%%%s%%' LIMIT 10", _PARAMS[1].c_str());
+            QueryResult result = WorldDatabase.PQuery("SELECT Id, Title FROM quest_template WHERE Title LIKE '%%%s%%' LIMIT 10", _PARAMS[1].c_str());
             if(result)
             {
                 Field *fields = result->Fetch();
@@ -1463,7 +1453,7 @@ void IRCCmd::Level_Player(_CDATA *CD)
         return;
     } else if ( i_newlvl < 1 || i_newlvl > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) )
     {
-        Send_IRCA(CD->USER, MakeMsg("\0034[ERROR] : Level Must Be Between 1 And %i!",ConfigMgr::GetIntDefault("MaxPlayerLevel", 70)), true, "ERROR");
+        Send_IRCA(CD->USER, MakeMsg("\0034[ERROR] : Level Must Be Between 1 And %i!",ConfigMgr::GetIntDefault("MaxPlayerLevel", 80)), true, "ERROR");
         return;
     } else
     {
@@ -1549,7 +1539,7 @@ void IRCCmd::Money_Player(_CDATA *CD)
                         Send_Player(chr, MakeMsg("You Have Been Liquidated By: %s. Total Money Is Now 0.", CD->USER.c_str()));
                     }
                     else
-                        CharacterDatabase.PExecute("UPDATE `characters` SET data=concat(substring_index(data,' ',1462-1),' ','%u',' ', right(data,length(data)-length(substring_index(data,' ',1462))-1) ) where guid='%u'",newmoney, guid );
+                        CharacterDatabase.PExecute("UPDATE `characters` SET money='%u' where guid='%u'",newmoney, guid );
                 }
                 else
                 {
@@ -1560,7 +1550,7 @@ void IRCCmd::Money_Player(_CDATA *CD)
                         Send_Player(chr, MakeMsg("You Have Had %s Copper Taken From You By: %s.", _PARAMS[1].c_str(), CD->USER.c_str()));
                     }
                     else
-                        CharacterDatabase.PExecute("UPDATE `characters` SET data=concat(substring_index(data,' ',1462-1),' ','%u',' ', right(data,length(data)-length(substring_index(data,' ',1462))-1) ) where guid='%u'",newmoney, guid );
+                        CharacterDatabase.PExecute("UPDATE `characters` SET money='%u' where guid='%u'",newmoney, guid );
                 }
             }
             else
@@ -1572,7 +1562,7 @@ void IRCCmd::Money_Player(_CDATA *CD)
                     Send_Player(chr, MakeMsg("You Have Been Given %s Copper. From: %s.", _PARAMS[1].c_str(), CD->USER.c_str()));
                 }
                 else
-                    CharacterDatabase.PExecute("UPDATE `characters` SET data=concat(substring_index(data,' ',1462-1),' ','%u',' ', right(data,length(data)-length(substring_index(data,' ',1462))-1) ) where guid='%u'",newmoney, guid );
+                    CharacterDatabase.PExecute("UPDATE `characters` SET money='%u' where guid='%u'",newmoney, guid );
             }
     }
 }
@@ -2155,7 +2145,7 @@ void IRCCmd::Top_Player(_CDATA *CD)
     }
     if(_PARAMS[0] == "money")
     {
-        QueryResult result = CharacterDatabase.PQuery("SELECT name, CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(data, ' ', 1462), ' ', -1) AS UNSIGNED) AS money FROM characters ORDER BY money DESC LIMIT 0, %d ", limitr);
+        QueryResult result = CharacterDatabase.PQuery("SELECT name, money FROM characters ORDER BY money DESC LIMIT 0, %d ", limitr);
         if(result)
         {
             Field *fields = result->Fetch();
