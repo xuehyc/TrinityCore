@@ -154,8 +154,13 @@ public:
             if (!instance)
                 return;
 
-            instance->HandleGameObject(instance->GetData64(DATA_KAEL_DOOR), true);
             // Open the encounter door
+            instance->HandleGameObject(instance->GetData64(DATA_KAEL_DOOR), true);
+
+            // Enable the Translocation Orb Exit
+            if (instance->instance)
+                if (GameObject* EscapeOrb = instance->instance->GetGameObject(instance->GetData64(DATA_ESCAPE_ORB)))
+                    EscapeOrb->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
         }
 
         void DamageTaken(Unit* /*done_by*/, uint32 &damage)

@@ -63,6 +63,7 @@ public:
         uint64 DelrissaDoorGUID;
         uint64 KaelDoorGUID;
         uint64 KaelStatue[2];
+        uint64 EscapeOrbGUID;
 
         bool InitializedItr;
 
@@ -83,6 +84,7 @@ public:
             KaelDoorGUID = 0;
             KaelStatue[0] = 0;
             KaelStatue[1] = 0;
+            EscapeOrbGUID = 0;
 
             InitializedItr = false;
         }
@@ -151,15 +153,51 @@ public:
         {
             switch (go->GetEntry())
             {
-                case 187896:  VexallusDoorGUID = go->GetGUID();       break;
+                case 187896:
+                    VexallusDoorGUID = go->GetGUID();
+                    if (m_auiEncounter[1] == DONE)
+                        HandleGameObject(VexallusDoorGUID, true, go);
+                    else
+                        HandleGameObject(VexallusDoorGUID, false, go);
+
+                    break;
                 //SunwellRaid Gate 02
-                case 187979:  SelinDoorGUID = go->GetGUID();          break;
+                case 187979:
+                    SelinDoorGUID = go->GetGUID();
+                    if (m_auiEncounter[0] == DONE)
+                        HandleGameObject(SelinDoorGUID, true, go);
+                    else
+                        HandleGameObject(SelinDoorGUID, false, go);
+
+                    break;
                 //Assembly Chamber Door
-                case 188065:  SelinEncounterDoorGUID = go->GetGUID(); break;
-                case 187770:  DelrissaDoorGUID = go->GetGUID();       break;
-                case 188064:  KaelDoorGUID = go->GetGUID();           break;
+                case 188065:
+                    SelinEncounterDoorGUID = go->GetGUID();
+                    if (m_auiEncounter[0] == DONE)
+                        HandleGameObject(SelinEncounterDoorGUID, true, go);
+                    else
+                        HandleGameObject(SelinEncounterDoorGUID, false, go);
+
+                    break;
+                case 187770:
+                    DelrissaDoorGUID = go->GetGUID();
+                    if (m_auiEncounter[2] == DONE)
+                        HandleGameObject(DelrissaDoorGUID, true, go);
+                    else
+                        HandleGameObject(DelrissaDoorGUID, false, go);
+
+                    break;
+                case 188064:
+                    KaelDoorGUID = go->GetGUID();
+                    if (m_auiEncounter[3] == DONE)
+                        HandleGameObject(KaelDoorGUID, true, go);
+                    else
+                        HandleGameObject(KaelDoorGUID, false, go);
+
+                    break;
                 case 188165:  KaelStatue[0] = go->GetGUID();          break;
                 case 188166:  KaelStatue[1] = go->GetGUID();          break;
+                case 188173:  EscapeOrbGUID = go->GetGUID();          break;
             }
         }
 
@@ -176,6 +214,7 @@ public:
                 case DATA_KAEL_DOOR:            return KaelDoorGUID;
                 case DATA_KAEL_STATUE_LEFT:     return KaelStatue[0];
                 case DATA_KAEL_STATUE_RIGHT:    return KaelStatue[1];
+                case DATA_ESCAPE_ORB:           return EscapeOrbGUID;
 
                 case DATA_FEL_CRYSTAL:
                 {

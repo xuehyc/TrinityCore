@@ -3200,6 +3200,32 @@ void World::SendWintergraspState()
     }
 }
 
+char* World::GetBattlegroundAbbreviation(BattlegroundTypeId type)
+{
+
+    switch (type) {
+
+    case BATTLEGROUND_WS:
+        return "WS";
+    case BATTLEGROUND_AB:
+        return "AB";
+    case BATTLEGROUND_AV:
+        return "AV";
+    case BATTLEGROUND_EY:
+        return "EOS";
+    case BATTLEGROUND_SA:
+        return "SOTA";
+    case BATTLEGROUND_IC:
+        return "IOC";
+    case BATTLEGROUND_RB:
+        return "RBG";
+    default:
+        return "??";
+
+    }
+
+}
+
 void World::SendCustomPvpInformationUpdate()
 {
     if (!sBattlegroundMgr)
@@ -3250,7 +3276,7 @@ void World::SendCustomPvpInformationUpdate()
                 if (!overallQueueFound)
                 {
                     overallQueueFound = true;
-                    SendMessageToAllPlayersInChannel("pvp", "========== Warteschlangen ==========");
+                    SendMessageToAllPlayersInChannel("pvp", "=== Offene Warteschlangen ===");
                 }
 
                 if (!singleQueueFound)
@@ -3262,13 +3288,13 @@ void World::SendCustomPvpInformationUpdate()
                         switch (battlegroundQueue)
                         {
                             case BATTLEGROUND_QUEUE_2v2:
-                                messageQueue << "Gewertete Arenen - 2vs2 : " << allianceCount + hordeCount << " Team(s)";
+                                messageQueue << "2s Arena (Rated): " << allianceCount + hordeCount << " Team(s)";
                                 break;
                             case BATTLEGROUND_QUEUE_3v3:
-                                messageQueue << "Gewertete Arenen - 3vs3 : " << allianceCount + hordeCount << " Team(s)";
+                                messageQueue << "3s Arena (Rated): " << allianceCount + hordeCount << " Team(s)";
                                 break;
                             case BATTLEGROUND_QUEUE_5v5:
-                                messageQueue << "Gewertete Arenen - 5vs5 : " << allianceCount + hordeCount << " Team(s)";
+                                messageQueue << "5s Arena (Rated): " << allianceCount + hordeCount << " Team(s)";
                                 break;
                             default:
                                 break;
@@ -3277,18 +3303,6 @@ void World::SendCustomPvpInformationUpdate()
                         SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
                         messageQueue.str("");
                     }
-                    else if (BattlegroundTypeId typeId = sBattlegroundMgr->BGTemplateId(BattlegroundQueueTypeId(battlegroundQueue)))
-                    {
-                        if (uint32(typeId))
-                        {
-                            if (BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(uint32(typeId)))
-                            {
-                                messageQueue << "--- " << bl->name[GetDefaultDbcLocale()] << " ---";
-                                SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
-                                messageQueue.str("");
-                            }
-                        }
-                    }
                 }
 
                 // Just print bracket info for non arena
@@ -3296,19 +3310,15 @@ void World::SendCustomPvpInformationUpdate()
                 {
                     if (BattlegroundTypeId typeId = sBattlegroundMgr->BGTemplateId(BattlegroundQueueTypeId(battlegroundQueue)))
                     {
-                        if (Battleground* bgTemplate = sBattlegroundMgr->GetBattlegroundTemplate(typeId))
+                        Battleground* bgTemplate = sBattlegroundMgr->GetBattlegroundTemplate(typeId);
+                        if (bgTemplate)
                         {
                             if (PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketById(bgTemplate->GetMapId(), BattlegroundBracketId(bracket)))
                             {
-                                messageQueue << "- [" << bracketEntry->minLevel << "-" << bracketEntry->maxLevel << "] (A:" << allianceCount << "/" << bgTemplate->GetMinPlayersPerTeam() << " H:" << hordeCount << "/" << bgTemplate->GetMinPlayersPerTeam() << ") -";
-                                counter++;
+                                messageQueue << GetBattlegroundAbbreviation(bgTemplate->GetTypeID(false))  << " (" << bracketEntry->minLevel << "-" << bracketEntry->maxLevel << ") A: " << allianceCount << "/" << bgTemplate->GetMinPlayersPerTeam() << " -- H: " << hordeCount << "/" << bgTemplate->GetMinPlayersPerTeam();
+                                SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
+                                messageQueue.str("");
 
-                                if (counter >= 2)
-                                {
-                                    counter = 0;
-                                    SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
-                                    messageQueue.str("");
-                                }
                             }
                         }
                     }
@@ -3343,6 +3353,7 @@ void World::SendCustomPvpInformationUpdate()
             {
                 if ((*itr).second)
                 {
+
                     // Only count rated arena matches
                     if ((*itr).second->isArena() && (*itr).second->isRated())
                     {
@@ -3383,7 +3394,7 @@ void World::SendCustomPvpInformationUpdate()
             if (!activeGameFound)
             {
                 activeGameFound = true;
-                SendMessageToAllPlayersInChannel("pvp", "========== Aktive Spiele ==========");
+                SendMessageToAllPlayersInChannel("pvp", "=== Aktive Schlachten ===");
             }
 
             if (BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(i))
@@ -3392,7 +3403,8 @@ void World::SendCustomPvpInformationUpdate()
                 {
                     if ((*itr).first && (*itr).second.first && (*itr).second.second)
                     {
-                        messageActive << bl->name[GetDefaultDbcLocale()] << " [" << (*itr).first << "-" << (*itr).second.first << "] : " << (*itr).second.second;
+
+                        messageActive << GetBattlegroundAbbreviation((BattlegroundTypeId) i) << " (" << (*itr).first << "-" << (*itr).second.first << "): " << (*itr).second.second << " Schlachtfeld(er)";
                         SendMessageToAllPlayersInChannel("pvp", messageActive.str());
                         messageActive.str("");
                     }
@@ -3406,19 +3418,17 @@ void World::SendCustomPvpInformationUpdate()
         if (!activeGameFound)
         {
             activeGameFound = true;
-            SendMessageToAllPlayersInChannel("pvp", "========== Aktive Spiele ==========");
+            SendMessageToAllPlayersInChannel("pvp", "=== Aktive Schlachten ===:");
         }
 
-        messageActive << "Gewertete Arenen";
-
         if (arenaCount2vs2)
-            messageActive << " - 2vs2 : " << arenaCount2vs2;
+            messageActive << "2s (Rated): " << arenaCount2vs2;
 
         if (arenaCount3vs3)
-            messageActive << " - 3vs3 : " << arenaCount3vs3;
+            messageActive << "3s (Rated): " << arenaCount3vs3;
 
         if (arenaCount5vs5)
-            messageActive << " - 5vs5 : " << arenaCount5vs5;
+            messageActive << "5s (Rated): " << arenaCount5vs5;
 
         SendMessageToAllPlayersInChannel("pvp", messageActive.str());
         messageActive.str("");

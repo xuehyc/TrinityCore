@@ -379,7 +379,8 @@ class spell_warr_concussion_blow : public SpellScriptLoader
 
 enum Bloodthirst
 {
-    SPELL_BLOODTHIRST = 23885,
+    SPELL_BLOODTHIRST           = 23881,
+    SPELL_BLOODTHIRST_HEAL      = 23880
 };
 
 class spell_warr_bloodthirst : public SpellScriptLoader
@@ -391,16 +392,29 @@ class spell_warr_bloodthirst : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
 
-            void HandleDummy(SpellEffIndex /* effIndex */)
+            bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                int32 damage = GetEffectValue();
-                if (GetHitUnit())
-                    GetCaster()->CastCustomSpell(GetHitUnit(), SPELL_BLOODTHIRST, &damage, NULL, NULL, true, NULL);
+                if (!sSpellMgr->GetSpellInfo(SPELL_BLOODTHIRST) || !sSpellMgr->GetSpellInfo(SPELL_BLOODTHIRST_HEAL))
+                    return false;
+                return true;
+            }
+
+            void HandleHeal(SpellEffIndex /* effIndex */)
+            {
+                if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_BLOODTHIRST))
+                {
+                    // Get the percent of max health here
+                    int32 percentOfMaxHealth = spellInfo->Effects[EFFECT_1].CalcValue();
+
+                    // Calculate heal value
+                    int32 damage = GetCaster()->CountPctFromMaxHealth(percentOfMaxHealth);
+                    SetHitHeal(damage);
+                }
             }
 
             void Register()
             {
-                OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
             }
         };
 

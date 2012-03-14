@@ -40,6 +40,8 @@
 
 #define DATA_DELRISSA_DEATH_COUNT   16
 
+#define DATA_ESCAPE_ORB             17
+
 #define ERROR_INST_DATA      "TSCR Error: Instance Data not set properly for Magister's Terrace instance (map 585). Encounters will be buggy."
 #endif
 
