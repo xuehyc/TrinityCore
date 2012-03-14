@@ -764,7 +764,7 @@ class World
         uint32 GetWintergrapsTimer() { return m_WintergrapsTimer; }
         uint32 GetWintergrapsState() { return m_WintergrapsState; }
 
-        char* GetBattlegroundAbbreviation(BattlegroundTypeId type);
+        std::string GetBattlegroundAbbreviation(BattlegroundTypeId type);
 
         // Send custom pvp information
         void SendCustomPvpInformationUpdate();

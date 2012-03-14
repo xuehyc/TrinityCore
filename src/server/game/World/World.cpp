@@ -3200,30 +3200,27 @@ void World::SendWintergraspState()
     }
 }
 
-char* World::GetBattlegroundAbbreviation(BattlegroundTypeId type)
+std::string World::GetBattlegroundAbbreviation(BattlegroundTypeId type)
 {
-
-    switch (type) {
-
-    case BATTLEGROUND_WS:
-        return "WS";
-    case BATTLEGROUND_AB:
-        return "AB";
-    case BATTLEGROUND_AV:
-        return "AV";
-    case BATTLEGROUND_EY:
-        return "EOS";
-    case BATTLEGROUND_SA:
-        return "SOTA";
-    case BATTLEGROUND_IC:
-        return "IOC";
-    case BATTLEGROUND_RB:
-        return "RBG";
-    default:
-        return "??";
-
+    switch (type)
+    {
+        case BATTLEGROUND_WS:
+            return "WS";
+        case BATTLEGROUND_AB:
+            return "AB";
+        case BATTLEGROUND_AV:
+            return "AV";
+        case BATTLEGROUND_EY:
+            return "EOS";
+        case BATTLEGROUND_SA:
+            return "SOTA";
+        case BATTLEGROUND_IC:
+            return "IOC";
+        case BATTLEGROUND_RB:
+            return "RBG";
+        default:
+            return "??";
     }
-
 }
 
 void World::SendCustomPvpInformationUpdate()
@@ -3234,14 +3231,16 @@ void World::SendCustomPvpInformationUpdate()
     // Process queue status
     bool overallQueueFound = false;
     std::ostringstream messageQueue;
+
     for (uint32 battlegroundQueue = BATTLEGROUND_QUEUE_NONE; battlegroundQueue < MAX_BATTLEGROUND_QUEUE_TYPES; ++battlegroundQueue)
     {
         bool singleQueueFound = false;
-        uint8 counter = 0;
+
         for (uint32 bracket = BG_BRACKET_ID_FIRST; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
         {
             uint32 allianceCount = 0;
             uint32 hordeCount = 0;
+
             for (uint32 queueType = 0; queueType < BG_QUEUE_GROUP_TYPES_COUNT; ++queueType)
             {
                 for (std::list<GroupQueueInfo*>::const_iterator itr = sBattlegroundMgr->m_BattlegroundQueues[battlegroundQueue].m_QueuedGroups[bracket][queueType].begin(); itr != sBattlegroundMgr->m_BattlegroundQueues[battlegroundQueue].m_QueuedGroups[bracket][queueType].end(); ++itr)
@@ -3310,26 +3309,18 @@ void World::SendCustomPvpInformationUpdate()
                 {
                     if (BattlegroundTypeId typeId = sBattlegroundMgr->BGTemplateId(BattlegroundQueueTypeId(battlegroundQueue)))
                     {
-                        Battleground* bgTemplate = sBattlegroundMgr->GetBattlegroundTemplate(typeId);
-                        if (bgTemplate)
+                        if (Battleground* bgTemplate = sBattlegroundMgr->GetBattlegroundTemplate(typeId))
                         {
                             if (PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketById(bgTemplate->GetMapId(), BattlegroundBracketId(bracket)))
                             {
-                                messageQueue << GetBattlegroundAbbreviation(bgTemplate->GetTypeID(false))  << " (" << bracketEntry->minLevel << "-" << bracketEntry->maxLevel << ") A: " << allianceCount << "/" << bgTemplate->GetMinPlayersPerTeam() << " -- H: " << hordeCount << "/" << bgTemplate->GetMinPlayersPerTeam();
+                                messageQueue << GetBattlegroundAbbreviation(typeId) << " (" << bracketEntry->minLevel << "-" << bracketEntry->maxLevel << ") A: " << allianceCount << "/" << bgTemplate->GetMinPlayersPerTeam() << " -- H: " << hordeCount << "/" << bgTemplate->GetMinPlayersPerTeam();
                                 SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
                                 messageQueue.str("");
-
                             }
                         }
                     }
                 }
             }
-        }
-
-        if (!messageQueue.str().empty())
-        {
-            SendMessageToAllPlayersInChannel("pvp", messageQueue.str());
-            messageQueue.str("");
         }
     }
 
@@ -3353,7 +3344,6 @@ void World::SendCustomPvpInformationUpdate()
             {
                 if ((*itr).second)
                 {
-
                     // Only count rated arena matches
                     if ((*itr).second->isArena() && (*itr).second->isRated())
                     {
@@ -3403,8 +3393,7 @@ void World::SendCustomPvpInformationUpdate()
                 {
                     if ((*itr).first && (*itr).second.first && (*itr).second.second)
                     {
-
-                        messageActive << GetBattlegroundAbbreviation((BattlegroundTypeId) i) << " (" << (*itr).first << "-" << (*itr).second.first << "): " << (*itr).second.second << " Schlachtfeld(er)";
+                        messageActive << GetBattlegroundAbbreviation((BattlegroundTypeId)i) << " (" << (*itr).first << "-" << (*itr).second.first << "): " << (*itr).second.second << " Schlachtfeld(er)";
                         SendMessageToAllPlayersInChannel("pvp", messageActive.str());
                         messageActive.str("");
                     }
@@ -3422,13 +3411,13 @@ void World::SendCustomPvpInformationUpdate()
         }
 
         if (arenaCount2vs2)
-            messageActive << "2s (Rated): " << arenaCount2vs2;
+            messageActive << "2s Arena (Rated): " << arenaCount2vs2;
 
         if (arenaCount3vs3)
-            messageActive << "3s (Rated): " << arenaCount3vs3;
+            messageActive << "3s Arena (Rated): " << arenaCount3vs3;
 
         if (arenaCount5vs5)
-            messageActive << "5s (Rated): " << arenaCount5vs5;
+            messageActive << "5s Arena (Rated): " << arenaCount5vs5;
 
         SendMessageToAllPlayersInChannel("pvp", messageActive.str());
         messageActive.str("");
