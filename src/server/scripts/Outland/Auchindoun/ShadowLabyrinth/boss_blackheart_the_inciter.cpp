@@ -112,6 +112,15 @@ public:
                 instance->SetData(DATA_BLACKHEARTTHEINCITEREVENT, IN_PROGRESS);
         }
 
+        void EnterEvadeMode()
+        {
+            // prevent reset from Incite Chaos
+            if (InciteChaos)
+                return;
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
         void UpdateAI(const uint32 diff)
         {
             //Return since we have no target
