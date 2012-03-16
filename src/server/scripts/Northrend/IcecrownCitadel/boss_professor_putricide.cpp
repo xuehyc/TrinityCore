@@ -635,7 +635,7 @@ class boss_professor_putricide : public CreatureScript
                             }
                             else
                             {
-                                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, -7.0f, true);
+                                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, -7.0f, true);
                                 if (!target)
                                     target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true);
 
