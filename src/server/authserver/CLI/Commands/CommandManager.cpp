@@ -30,21 +30,21 @@
 
 CommandManager::~CommandManager()
 {
-    for (CommandMap_ConstItr itr = _commandMap.begin(); itr != _commandMap.end(); ++itr)
+    for (CommandMap_ConstItr itr = _commands.begin(); itr != _commands.end(); ++itr)
         delete itr->second;
-    _commandMap.clear();
+    _commands.clear();
 }
 
 Command* CommandManager::FindCommand(std::string const name)
 {
-    if (_commandMap.find(name) == _commandMap.end())
+    if (_commands.find(name) == _commands.end())
         return NULL;
-    return _commandMap[name];
+    return _commands[name];
 }
 
 void CommandManager::RegisterCommand(std::string const name, Command* cmdPtr)
 {
-    _commandMap[name] = cmdPtr;
+    _commands[name] = cmdPtr;
 
     std::ostringstream oss;
     oss << "Command registered with the CommandManager: \"" << name << "\"";
