@@ -84,7 +84,7 @@ private:
     /**
      *  @brief  This stores the registered commands.
      */
-    CommandMap _commandMap;
+    CommandMap _commands;
 };
 
 /**
