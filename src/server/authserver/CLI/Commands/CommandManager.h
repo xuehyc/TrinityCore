@@ -43,8 +43,8 @@ class CommandManager
 {
 public:
     /**
-     *  @brief    Free up resources.
-     *  @details  Deallocate resources which allocated by
+     *  @brief    Frees up resources.
+     *  @details  Deallocates resources which allocated by
      *            the registered commands.
      *            All the allocations done in Impl_RegisterCommands()
      *  @see      Impl_RegisterCommands()
@@ -60,8 +60,8 @@ public:
     Command* FindCommand(std::string const name);
 
     /**
-     *  @brief    Register the specific command with the specific name.
-     *  @details  Push the command pointer into the CommandMap.
+     *  @brief    Registers the specific command with the specific name.
+     *  @details  Pushes the command pointer into the CommandMap.
      *  @todo     Handle if there is another command with the same name or
      *            another command with the same pointer (same memory address).
      */
@@ -69,7 +69,7 @@ public:
 
 private:
     /**
-     *  @brief    This type is for store the registered commands.
+     *  @brief    This type is for storing the registered commands.
      *  @details  Key is a string which is the command's name.
      *            Value is a pointer to the stored command.
      *  @todo     Use an unordered map.
@@ -78,6 +78,7 @@ private:
 
     /**
      *  @brief  Just a macro for CommandMap::const_iterator
+     *  @see    CommandMap
      */
     typedef CommandMap::const_iterator CommandMap_ConstItr;
 

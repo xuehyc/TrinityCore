@@ -51,10 +51,10 @@ public:
 };
 
 /**
- *  @brief    Print some info about the daemon.
- *  @details  Print some info about the daemon compilation, like:
+ *  @brief    Prints some info about the daemon.
+ *  @details  Prints some info about the daemon compilation, like:
               "TrinityCore rev. 2012-03-04 18:21:08 +0100 (f5730e82ced8+) (Unix, DEBUG)"@n
-              Print the daemon's uptime, like: "Uptime: 1 Day(s) 39 Minute(s) 21 Second(s).".
+              Prints the daemon's uptime, like: "Uptime: 1 Day(s) 39 Minute(s) 21 Second(s).".
  *  @todo     Print active connections.@n
  *            Print max active connections.@n
  *            Print update time diff.@n
@@ -75,7 +75,7 @@ public:
 };
 
 /**
- *  @brief  Shutdown the daemon.
+ *  @brief  Shutdowns the daemon.
  *  @todo   Need a better "thing" than a global variable
  *          for stopping the realmd.@n
  *          A singleton should be good. eg.: RealmdManager

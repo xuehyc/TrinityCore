@@ -18,8 +18,8 @@
 
 /**
  *  @file
- *  @brief
- *  @author  Anubisss, <anubisss210@gmail.com>
+ *  @brief   All in all just a macro for logging and debugging.
+ *  @author  Anubisss <anubisss210@gmail.com>
  */
 
 #ifndef __LOG_TRACE_H__

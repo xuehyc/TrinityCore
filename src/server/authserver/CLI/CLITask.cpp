@@ -32,8 +32,8 @@
 #include "CommandManager.h"
 
 /**
- *  @brief  Allocate resources for commands and
- *          register them to the CommandHandler.
+ *  @brief  Allocates resources for commands and
+ *          registers them to the CommandHandler.
  *  @see    Impl_RegisterCommands()
  */
 
