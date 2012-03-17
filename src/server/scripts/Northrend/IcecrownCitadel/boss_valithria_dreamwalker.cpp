@@ -1283,8 +1283,6 @@ class spell_dreamwalker_decay_periodic_timer : public SpellScriptLoader
                 if (newTimer <= 5000)
                     newTimer = urand(5000, 15000);
 
-                sLog->outErrorDb("SPELLID: %u - TIMER: %u", aurEff->GetSpellInfo()->Id, newTimer);
-
                 aurEff->SetPeriodicTimer(newTimer);
             }
 
