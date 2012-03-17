@@ -3411,16 +3411,25 @@ void World::SendCustomPvpInformationUpdate()
         }
 
         if (arenaCount2vs2)
+        {
             messageActive << "2s Arena (Rated): " << arenaCount2vs2;
+            SendMessageToAllPlayersInChannel("pvp", messageActive.str());
+            messageActive.str("");
+        }
 
         if (arenaCount3vs3)
+        {
             messageActive << "3s Arena (Rated): " << arenaCount3vs3;
+            SendMessageToAllPlayersInChannel("pvp", messageActive.str());
+            messageActive.str("");
+        }
 
         if (arenaCount5vs5)
+        {
             messageActive << "5s Arena (Rated): " << arenaCount5vs5;
-
-        SendMessageToAllPlayersInChannel("pvp", messageActive.str());
-        messageActive.str("");
+            SendMessageToAllPlayersInChannel("pvp", messageActive.str());
+            messageActive.str("");
+        }
     }
 }
 
