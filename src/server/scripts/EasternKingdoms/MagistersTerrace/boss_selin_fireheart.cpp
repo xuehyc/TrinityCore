@@ -85,6 +85,7 @@ public:
 
         std::list<uint64> Crystals;
 
+        uint32 DelayDoorTimer;
         uint32 DrainLifeTimer;
         uint32 DrainManaTimer;
         uint32 FelExplosionTimer;
@@ -122,6 +123,7 @@ public:
                 instance->SetData(DATA_SELIN_EVENT, NOT_STARTED);
             } else sLog->outError(ERROR_INST_DATA);
 
+            DelayDoorTimer = 0;
             DrainLifeTimer = urand(3000, 7000);
             DrainManaTimer = DrainLifeTimer + 5000;
             FelExplosionTimer = 2100;
@@ -195,10 +197,8 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
+            DelayDoorTimer = 0;
 
-            if (instance)
-                instance->HandleGameObject(instance->GetData64(DATA_SELIN_ENCOUNTER_DOOR), false);
-                //Close the encounter door, open it in JustDied/Reset
          }
 
         void KilledUnit(Unit* /*victim*/)
@@ -241,10 +241,22 @@ public:
             ShatterRemainingCrystals();
         }
 
+        void DelayCloseDoor()
+        {
+            if (instance)
+                instance->HandleGameObject(instance->GetData64(DATA_SELIN_ENCOUNTER_DOOR), false);
+                // Delay closing of encounter door, because depending on level the first character to go around corner pulls the boss.
+        }
+
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
+
+            if (DelayDoorTimer && DelayDoorTimer > 5000)
+                DelayCloseDoor();
+            else DelayDoorTimer+=diff;
+
 
             if (!DrainingCrystal)
             {
