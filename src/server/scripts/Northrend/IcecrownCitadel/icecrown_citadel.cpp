@@ -106,8 +106,11 @@ enum Spells
     SPELL_DEATH_PLAGUE_AURA         = 72865,
     SPELL_RECENTLY_INFECTED         = 72884,
     SPELL_DEATH_PLAGUE_KILL         = 72867,
-    SPELL_STOMP                     = 64652,
+    SPELL_STOMP                     = 64639,
+    SPELL_STOMP_H                   = 64652,
     SPELL_ARCTIC_BREATH             = 72848,
+    SPELL_WHITEOUT                  = 72034,
+    SPELL_WHITEOUT_H                = 72096,
 
     // Frost Freeze Trap
     SPELL_COLDFLAME_JETS            = 70460,
@@ -129,6 +132,7 @@ enum Spells
     SPELL_IMPALING_SPEAR            = 71443,
     SPELL_AETHER_SHIELD             = 71463,
     SPELL_HURL_SPEAR                = 71466,
+    SPELL_DIVINE_SURGE              = 71465,
 
     // Captain Arnath
     SPELL_DOMINATE_MIND             = 14515,
@@ -204,9 +208,9 @@ enum EventTypes
     EVENT_MURADIN_RUN                   = 24,
 
     // Rotting Frost Giant
-    EVENT_DEATH_PLAGUE                  = 25,
+    EVENT_CHECK_POSITION                = 25,
     EVENT_STOMP                         = 26,
-    EVENT_ARCTIC_BREATH                 = 27,
+    EVENT_WHITEOUT                      = 27,
 
     // Frost Freeze Trap
     EVENT_ACTIVATE_TRAP                 = 28,
@@ -277,6 +281,8 @@ enum MovementPoints
 {
     POINT_LAND  = 1,
 };
+
+Position const SvalnaLandPos = {4356.71f, 2484.33f, 358.5f, 1.571f};
 
 class FrostwingVrykulSearcher
 {
@@ -580,7 +586,7 @@ class npc_highlord_tirion_fordring_lh : public CreatureScript
         }
 };
 
-/*class npc_rotting_frost_giant : public CreatureScript
+class npc_rotting_frost_giant : public CreatureScript
 {
     public:
         npc_rotting_frost_giant() : CreatureScript("npc_rotting_frost_giant") { }
@@ -594,9 +600,9 @@ class npc_highlord_tirion_fordring_lh : public CreatureScript
             void Reset()
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_DEATH_PLAGUE, 15000);
-                _events.ScheduleEvent(EVENT_STOMP, urand(5000, 8000));
-                _events.ScheduleEvent(EVENT_ARCTIC_BREATH, urand(10000, 15000));
+                _events.ScheduleEvent(EVENT_CHECK_POSITION, 5000);
+                _events.ScheduleEvent(EVENT_STOMP, urand(3000, 6000));
+                _events.ScheduleEvent(EVENT_WHITEOUT, 10000);
             }
 
             void JustDied(Unit* killer)
@@ -618,21 +624,25 @@ class npc_highlord_tirion_fordring_lh : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case EVENT_DEATH_PLAGUE:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
+                        case EVENT_CHECK_POSITION:
+                            if (me->GetPositionZ() < 195.0f)
                             {
-                                Talk(EMOTE_DEATH_PLAGUE_WARNING, target->GetGUID());
-                                DoCast(target, SPELL_DEATH_PLAGUE);
+                                if (me->getVictim())
+                                {
+                                    me->Relocate(me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ() + 1.0f);
+                                    me->MonsterMoveWithSpeed(me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ() + 1.0f, 0.0f);
+                                }
                             }
-                            _events.ScheduleEvent(EVENT_DEATH_PLAGUE, 15000);
+
+                            _events.ScheduleEvent(EVENT_CHECK_POSITION, 5000);
                             break;
                         case EVENT_STOMP:
-                            DoCastVictim(SPELL_STOMP);
-                            _events.ScheduleEvent(EVENT_STOMP, urand(15000, 18000));
+                            DoCastVictim(RAID_MODE(SPELL_STOMP, SPELL_STOMP_H, SPELL_STOMP, SPELL_STOMP_H), true);
+                            _events.ScheduleEvent(EVENT_STOMP, urand(6000, 9000));
                             break;
-                        case EVENT_ARCTIC_BREATH:
-                            DoCastVictim(SPELL_ARCTIC_BREATH);
-                            _events.ScheduleEvent(EVENT_ARCTIC_BREATH, urand(26000, 33000));
+                        case EVENT_WHITEOUT:
+                            DoCastVictim(RAID_MODE(SPELL_WHITEOUT, SPELL_WHITEOUT_H, SPELL_WHITEOUT, SPELL_WHITEOUT_H), true);
+                            _events.ScheduleEvent(EVENT_WHITEOUT, 30000);
                             break;
                         default:
                             break;
@@ -650,7 +660,7 @@ class npc_highlord_tirion_fordring_lh : public CreatureScript
         {
             return GetIcecrownCitadelAI<npc_rotting_frost_giantAI>(creature);
         }
-};*/
+};
 
 class npc_frost_freeze_trap : public CreatureScript
 {
@@ -762,9 +772,10 @@ class boss_sister_svalna : public CreatureScript
                 _EnterCombat();
                 if (Creature* crok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CROK_SCOURGEBANE)))
                     crok->AI()->Talk(SAY_CROK_COMBAT_SVALNA);
-                events.ScheduleEvent(EVENT_SVALNA_COMBAT, 9000);
+                events.ScheduleEvent(EVENT_SVALNA_COMBAT, 1);
                 events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(40000, 50000));
                 events.ScheduleEvent(EVENT_AETHER_SHIELD, urand(100000, 110000));
+                DoCast(SPELL_DIVINE_SURGE);
             }
 
             void KilledUnit(Unit* victim)
@@ -809,7 +820,7 @@ class boss_sister_svalna : public CreatureScript
                     case ACTION_START_GAUNTLET:
                         me->setActive(true);
                         _isEventInProgress = true;
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
                         events.ScheduleEvent(EVENT_SVALNA_START, 25000);
                         break;
                     case ACTION_RESURRECT_CAPTAINS:
@@ -843,8 +854,10 @@ class boss_sister_svalna : public CreatureScript
 
                 _isEventInProgress = false;
                 me->setActive(false);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
                 me->SetFlying(false);
+                me->SendMovementFlagUpdate();
+                DoZoneInCombat(me, 150.0f);
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -1101,7 +1114,7 @@ class npc_crok_scourgebane : public CreatureScript
                     }
                 }
 
-                if (HealthBelowPct(10))
+                if (HealthBelowPct(10) || damage >= me->GetHealth())
                 {
                     if (!_didUnderTenPercentText)
                     {
@@ -1263,8 +1276,11 @@ struct npc_argent_captainAI : public ScriptedAI
 
         void EnterEvadeMode()
         {
+            if (IsUndead)
+                me->DespawnOrUnsummon();
+
             // not yet following
-            if (me->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_IDLE) != CHASE_MOTION_TYPE || IsUndead)
+            if (me->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_IDLE) != CHASE_MOTION_TYPE)
             {
                 ScriptedAI::EnterEvadeMode();
                 return;
@@ -1311,6 +1327,8 @@ struct npc_argent_captainAI : public ScriptedAI
                 Talk(SAY_CAPTAIN_RESURRECTED);
                 me->UpdateEntry(newEntry, Instance->GetData(DATA_TEAM_IN_INSTANCE), me->GetCreatureData());
                 DoCast(me, SPELL_UNDEATH, true);
+                me->SetReactState(REACT_AGGRESSIVE);
+                DoZoneInCombat(me, 150.0f);
             }
         }
 
@@ -1918,13 +1936,8 @@ class spell_svalna_revive_champion : public SpellScriptLoader
                 if (!caster)
                     return;
 
-                Position pos;
-                caster->GetPosition(&pos);
-                caster->GetNearPosition(pos, 5.0f, 0.0f);
-                pos.m_positionZ = caster->GetBaseMap()->GetHeight(caster->GetPhaseMask(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), true, 20.0f);
-                pos.m_positionZ += 0.05f;
-                caster->SetHomePosition(pos);
-                caster->GetMotionMaster()->MovePoint(POINT_LAND, pos);
+                caster->SetHomePosition(SvalnaLandPos);
+                caster->GetMotionMaster()->MovePoint(POINT_LAND, SvalnaLandPos);
             }
 
             void Register()
@@ -2050,7 +2063,7 @@ class at_icc_start_frostwing_gauntlet : public AreaTriggerScript
 void AddSC_icecrown_citadel()
 {
     new npc_highlord_tirion_fordring_lh();
-    //new npc_rotting_frost_giant();
+    new npc_rotting_frost_giant();
     new npc_frost_freeze_trap();
     new npc_alchemist_adrianna();
     new boss_sister_svalna();

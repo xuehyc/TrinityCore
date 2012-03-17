@@ -3041,6 +3041,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 59870: // Glare of the Tribunal
                 spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_TARGET_ENEMY;
                 break;
+            case 71464: // Divine Surge
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS;
+                break;
             case 25742: // Seal of Righteousness
                 spellInfo->SpellFamilyFlags[0] |= 0x400;
                 break;

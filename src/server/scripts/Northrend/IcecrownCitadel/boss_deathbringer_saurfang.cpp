@@ -480,7 +480,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                         case EVENT_BLOOD_NOVA:
                         {
                             // select at range only
-                            Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, -10.0f, true);
+                            Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, -10.0f, true);
                             if (!target)
                                 target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true);    // noone? select melee
                             if (target)
