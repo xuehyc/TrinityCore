@@ -41,8 +41,9 @@ static Yell RandomTaunt[]=
     {-1544005},
 };
 
-enum eSays
+enum Says
 {
+    SAY_BONDS_WEAKEN           = -1544014,
     SAY_FREED                  = -1544006,
     SAY_AGGRO                  = -1544007,
     SAY_BANISH                 = -1544008,
@@ -51,50 +52,48 @@ enum eSays
     SAY_DEATH                  = -1544011,
 };
 
-enum eEmotes
+enum Emotes
 {
     EMOTE_BERSERK              = -1544012,
     EMOTE_BLASTNOVA            = -1544013,
     EMOTE_BEGIN                = -1544014,
 };
 
-enum eCreatures
+enum Creatures
 {
-    MOB_MAGTHERIDON    = 17257,
-    MOB_ROOM           = 17516,
-    MOB_CHANNELLER     = 17256,
-    MOB_ABYSSAL        = 17454,
+    NPC_ROOM                    = 17516,
+    NPC_ABYSSAL                 = 17454,
 };
 
-enum eSpells
+enum Spells
 {
     SPELL_BLASTNOVA            = 30616,
     SPELL_CLEAVE               = 30619,
-    SPELL_QUAKE_TRIGGER        = 30657, //must be cast with 30561 as the proc spell
+    SPELL_QUAKE_TRIGGER        = 30657, // must be cast with 30561 as the proc spell
     SPELL_QUAKE_KNOCKBACK      = 30571,
     SPELL_BLAZE_TARGET         = 30541,
     SPELL_BLAZE_TRAP           = 30542,
     SPELL_DEBRIS_KNOCKDOWN     = 36449,
     SPELL_DEBRIS_VISUAL        = 30632,
-    SPELL_DEBRIS_DAMAGE        = 30631, //core bug, does not support target 8
+    SPELL_DEBRIS_DAMAGE        = 30631, // core bug, does not support target 8
     SPELL_CAMERA_SHAKE         = 36455,
     SPELL_BERSERK              = 27680,
     SPELL_SHADOW_CAGE          = 30168,
     SPELL_SHADOW_GRASP         = 30410,
     SPELL_SHADOW_GRASP_VISUAL  = 30166,
-    SPELL_MIND_EXHAUSTION      = 44032, //Casted by the cubes when channeling ends
+    SPELL_MIND_EXHAUSTION      = 44032, // casted by the cubes when channeling ends
     SPELL_SHADOW_CAGE_C        = 30205,
     SPELL_SHADOW_GRASP_C       = 30207,
     SPELL_SHADOW_BOLT_VOLLEY   = 30510,
     SPELL_DARK_MENDING         = 30528,
-    SPELL_FEAR                 = 30530, //39176
+    SPELL_FEAR                 = 30530, // 39176
     SPELL_BURNING_ABYSSAL      = 30511,
-    SPELL_SOUL_TRANSFER        = 30531, //core bug, does not support target 7
+    SPELL_SOUL_TRANSFER        = 30531, // core bug, does not support target 7
     SPELL_FIRE_BLAST           = 37110,
 };
 
-//count of clickers needed to interrupt blast nova
-#define CLICKERS_COUNT              5
+// count of clickers needed to interrupt blast nova
+#define CLICKERS_COUNT          5
 
 typedef std::map<uint64, uint64> CubeMap;
 
@@ -255,6 +254,9 @@ class boss_magtheridon : public CreatureScript
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 me->AddUnitState(UNIT_STATE_STUNNED);
                 DoCast(me, SPELL_SHADOW_CAGE_C, true);
+
+                if (instance)
+                    instance->SetData(DATA_MAGTHERIDON_EVENT, NOT_STARTED); // ensure the door opens after wipe
             }
 
             void JustReachedHome()
@@ -275,7 +277,7 @@ class boss_magtheridon : public CreatureScript
                 NeedCheckCube = true;
             }
 
-            //function to interrupt channeling and debuff clicker with mind exh(used if second person clicks with same cube or after dispeling/ending shadow grasp DoT)
+            // function to interrupt channeling and debuff clicker with mind exh(used if second person clicks with same cube or after dispeling/ending shadow grasp DoT)
             void DebuffClicker(Unit* clicker)
             {
                 if (!clicker || !clicker->isAlive())
@@ -416,7 +418,7 @@ class boss_magtheridon : public CreatureScript
                     {
                         float x, y, z;
                         target->GetPosition(x, y, z);
-                        Creature* summon = me->SummonCreature(MOB_ABYSSAL, x, y, z, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                        Creature* summon = me->SummonCreature(NPC_ABYSSAL, x, y, z, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
                         if (summon)
                         {
                             CAST_AI(mob_abyssal::mob_abyssalAI, summon->AI())->SetTrigger(2);
@@ -450,7 +452,7 @@ class boss_magtheridon : public CreatureScript
                         {
                             float x, y, z;
                             target->GetPosition(x, y, z);
-                            Creature* summon = me->SummonCreature(MOB_ABYSSAL, x, y, z, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                            Creature* summon = me->SummonCreature(NPC_ABYSSAL, x, y, z, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
                             if (summon)
                                 CAST_AI(mob_abyssal::mob_abyssalAI, summon->AI())->SetTrigger(1);
                         }
@@ -488,6 +490,7 @@ class mob_hellfire_channeler : public CreatureScript
 
             InstanceScript* instance;
 
+            uint32 ShadowGraspRefresh_Timer;
             uint32 ShadowBoltVolley_Timer;
             uint32 DarkMending_Timer;
             uint32 Fear_Timer;
@@ -497,6 +500,7 @@ class mob_hellfire_channeler : public CreatureScript
 
             void Reset()
             {
+                ShadowGraspRefresh_Timer = 10000;
                 ShadowBoltVolley_Timer = urand(8000, 10000);
                 DarkMending_Timer = 10000;
                 Fear_Timer = urand(15000, 20000);
@@ -541,6 +545,17 @@ class mob_hellfire_channeler : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
+                if (!me->isInCombat())
+                {
+                    if (ShadowGraspRefresh_Timer <= diff)
+                    {
+                        DoCast(me, SPELL_SHADOW_GRASP);
+                        DoCast(me, SPELL_SHADOW_GRASP_VISUAL);
+                    }
+                    else
+                        ShadowGraspRefresh_Timer -= diff;
+                }
+
                 if (!UpdateVictim())
                     return;
 
