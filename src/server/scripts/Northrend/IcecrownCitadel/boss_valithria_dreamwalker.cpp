@@ -662,11 +662,12 @@ class npc_the_lich_king_controller : public CreatureScript
                 summon->SetPhaseMask((summon->GetPhaseMask() & ~0x10), true);
                 if (summon->GetEntry() != NPC_SUPPRESSER)
                 {
-                    DoZoneInCombat(summon, 150.0f);
-
                     if (_instance)
                         if (Creature* valithria = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_DREAMWALKER)))
-                            me->AddThreat(valithria, 0.0f);
+                            if (me->AI())
+                                me->AI()->AttackStart(valithria);
+
+                    DoZoneInCombat(summon, 150.0f);
                 }
             }
 
@@ -1068,11 +1069,12 @@ class npc_rot_worm : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
-                DoZoneInCombat(me, 150.0f);
-
                 if (_instance)
                     if (Creature* valithria = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_DREAMWALKER)))
-                        me->AddThreat(valithria, 0.0f);
+                        if (me->AI())
+                            me->AI()->AttackStart(valithria);
+
+                DoZoneInCombat(me, 150.0f);
             }
 
             void UpdateAI(uint32 const /*diff*/)
