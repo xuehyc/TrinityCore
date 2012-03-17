@@ -3407,7 +3407,7 @@ void World::SendCustomPvpInformationUpdate()
         if (!activeGameFound)
         {
             activeGameFound = true;
-            SendMessageToAllPlayersInChannel("pvp", "=== Aktive Schlachten ===:");
+            SendMessageToAllPlayersInChannel("pvp", "=== Aktive Schlachten ===");
         }
 
         if (arenaCount2vs2)
