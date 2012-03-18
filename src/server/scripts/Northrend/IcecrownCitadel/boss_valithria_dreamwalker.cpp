@@ -607,7 +607,8 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                 for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
                     if (Unit* target = (*itr)->getTarget())
                         if (target->GetTypeId() == TYPEID_PLAYER)
-                            return; // found any player, return
+                            if (target->GetInstanceId() == me->GetInstanceId())
+                                return; // found any player in same instance, return
 
                 EnterEvadeMode();
             }
