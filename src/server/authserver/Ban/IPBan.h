@@ -50,8 +50,6 @@ public:
 
     /**
      *  @brief   Tells the ban is active or not.
-     *  @retval  True  If the ban is active.
-     *  @retval  false If the ban is expired.
      */
     bool IsActive() const { return _permanent ? true : time(NULL) < _unbanDate; }
 
