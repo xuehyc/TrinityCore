@@ -55,13 +55,13 @@ CLITask::CLITask()
     while (_running)
     {
         std::cout << "TC> "; // prompt
-        std::string input = "";
-        std::cin >> input;
-        // try to find a command for the input
-        if (Command* cmd = sCommandManager->FindCommand(input))
+        std::string commandParent = "";
+        std::cin >> commandParent;
+        // try to find a command
+        if (Command* cmd = sCommandManager->FindCommand(commandParent))
         {
             std::ostringstream oss;
-            oss << "Command found: \"" << input << "\" and executing it...";
+            oss << "Command found: \"" << commandParent << "\" and executing it...";
             LOG_TRACE(oss.str());
 
             cmd->Execute(); // if find a valid: execute it
@@ -69,13 +69,13 @@ CLITask::CLITask()
             // reset the stream
             oss.str(std::string());
             oss.clear();
-            oss << "Command executed: \"" << input << "\".";
+            oss << "Command executed: \"" << commandParent << "\".";
             LOG_TRACE(oss.str());
         }
         else
         {
             std::ostringstream oss;
-            oss << "Unknown command: \"" << input << "\".";
+            oss << "Unknown command: \"" << commandParent << "\".";
             LOG_TRACE(oss.str());
         }
     }
