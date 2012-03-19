@@ -26,8 +26,15 @@
 
 #include "Timer.h"
 #include "LogTrace.h"
-#include "IPBan.h"
 #include "Database/DatabaseEnv.h"
+#include "BanTimers.h"
+#include "Configuration/Config.h"
+
+BanManager::BanManager()
+{
+    _deleteExpiredIPBansInterval.set(ConfigMgr::GetIntDefault("Ban.IP.DeleteInterval", 1800));
+    ACE_Reactor::instance()->schedule_timer(new DeleteExpiredIPBansTimer(), NULL, _deleteExpiredIPBansInterval, _deleteExpiredIPBansInterval);
+}
 
 BanManager::~BanManager()
 {
@@ -77,5 +84,29 @@ void BanManager::LoadIPBans()
 
     std::ostringstream oss;
     oss << GetIPBansCount() << " IP bans loaded in " << GetMSTimeDiffToNow(oldMSTime) << " ms.";
+    LOG_TRACE(oss.str());
+}
+
+void BanManager::DeleteExpiredIpBans()
+{
+    LOG_TRACE("Deleting expired IP bans...");
+    uint32 oldMSTime = getMSTime();
+
+    size_t sizeBeforeDelete = GetIPBansCount();
+    for (IPBanMap_Itr itr = _ipBans.begin(); itr != _ipBans.end();)
+    {
+        IPBan const* IPBan = itr->second;
+        if (!IPBan->IsActive())
+        {
+            IPBan->DeleteFromDB();
+            delete itr->second;
+            _ipBans.erase(itr++);
+        }
+        else
+            ++itr;
+    }
+
+    std::ostringstream oss;
+    oss << sizeBeforeDelete - GetIPBansCount() << " IP bans deleted in " << GetMSTimeDiffToNow(oldMSTime) << " ms.";
     LOG_TRACE(oss.str());
 }

@@ -28,6 +28,8 @@
 #include <string>
 #include <ctime>
 
+#include "Database/DatabaseEnv.h"
+
 /**
  *  @brief  This class represents an IP ban with the concrete address.
  */
@@ -52,6 +54,16 @@ public:
      *  @brief   Tells the ban is active or not.
      */
     bool IsActive() const { return _permanent ? true : time(NULL) < _unbanDate; }
+
+    /**
+     *  @brief  Deletes the IP ban from the DataBase.
+     */
+    void DeleteFromDB() const
+    {
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_IP_NOT_BANNED);
+        stmt->setString(0, _ip);
+        LoginDatabase.Execute(stmt);
+    }
 
 private:
     /**

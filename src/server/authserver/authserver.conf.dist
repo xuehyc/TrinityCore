@@ -220,6 +220,13 @@ WrongPass.BanTime = 600
 WrongPass.BanType = 0
 
 #
+#    Ban.IP.DeleteInterval
+#        Description: The interval of deleting expired IP bans, in seconds.
+#        Default:     1800 (30 minutes)
+
+Ban.IP.DeleteInterval = 1800
+
+#
 ###################################################################################################
 
 ###################################################################################################

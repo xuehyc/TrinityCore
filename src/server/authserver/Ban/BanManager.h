@@ -29,6 +29,7 @@
 
 #include <ace/Singleton.h>
 #include <ace/Null_Mutex.h>
+#include <ace/Time_Value.h>
 
 #include "IPBan.h"
 
@@ -40,6 +41,13 @@
 class BanManager
 {
 public:
+    /**
+     *  @brief    Init things for the manager.
+     *  @details  Register ban deletion timers with the Reactor.
+     *  @see      DeleteExpiredIPBansTimer
+     */
+    BanManager();
+
     /**
      *  @brief  Resources deallocation.
      */
@@ -54,6 +62,11 @@ public:
      *  @brief  Loads ip bans only.
      */
     void LoadIPBans();
+
+    /**
+     *  @brief  Deletes expired (temporary) IP bans.
+     */
+    void DeleteExpiredIpBans();
 
     /**
      *  @brief  Tells that the specific IP address is banned (active) or not.
@@ -94,11 +107,22 @@ private:
      *  @see    IPBanMap
      */
     typedef IPBanMap::const_iterator IPBanMap_ConstItr;
+    /**
+     *  @brief  Macro for IPBanMap::iterator
+     *  @see    IPBanMap
+     */
+    typedef IPBanMap::iterator IPBanMap_Itr;
 
     /**
      *  @brief  This stores the IP bans.
      */
     IPBanMap _ipBans;
+
+    /**
+     *  @brief  Set the timer's interval via this variable.
+     *  @see    DeleteExpiredIPBansTimer
+     */
+    ACE_Time_Value _deleteExpiredIPBansInterval;
 };
 
 /**
