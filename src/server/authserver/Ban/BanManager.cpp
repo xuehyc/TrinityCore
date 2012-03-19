@@ -48,6 +48,7 @@ void BanManager::LoadBans()
     LOG_TRACE("Loading bans...");
     uint32 oldMSTime = getMSTime();
 
+    DeleteExpiredIpBans(); // delete expired bans before loading it
     LoadIPBans();
 
     std::ostringstream oss;
