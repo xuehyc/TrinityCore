@@ -7284,7 +7284,8 @@ bool Spell::CanExecuteTriggersOnHit(uint8 effMask, SpellInfo const* spellInfo) c
     // If triggered spell doesn't have SPELL_ATTR4_PROC_ONLY_ON_DUMMY then it can NOT proc on SPELL_EFFECT_DUMMY (needs confirmation)
     for (uint8 i = 0;i < MAX_SPELL_EFFECTS; ++i)
     {
-        if ((effMask & (1 << i)) && (only_on_dummy == (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_DUMMY)))
+        if ((effMask & (1 << i)) && ((only_on_dummy == (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_DUMMY)) &&
+            !(m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellFamilyFlags[1] & 0x8 && i != 0))) // This is a hack to avoid double procs of Envenom
             return true;
     }
     return false;
