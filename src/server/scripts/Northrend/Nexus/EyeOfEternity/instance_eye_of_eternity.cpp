@@ -40,6 +40,7 @@ public:
             malygosGUID = 0;
             platformGUID = 0;
             exitPortalGUID = 0;
+            focusingIrisGUID = 0;
         };
 
         bool SetBossState(uint32 type, EncounterState state)
@@ -61,12 +62,11 @@ public:
                         }
                     }
 
-                    if (instance->GetSpawnMode() == 1)
-                        SpawnGameObject(GO_FOCUSING_IRIS_H,focusingIrisPosition);
-                    else
-                        SpawnGameObject(GO_FOCUSING_IRIS,focusingIrisPosition);
+                    if (GameObject* focusingIris = instance->GetGameObject(focusingIrisGUID))
+                        focusingIris->SetPhaseMask(1, true);
 
-                    SpawnGameObject(GO_EXIT_PORTAL,exitPortalPosition);
+                    if (GameObject* portal = instance->GetGameObject(exitPortalGUID))
+                        portal->SetPhaseMask(1, true);
 
                     if (GameObject* platform = instance->GetGameObject(platformGUID))
                         platform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
@@ -76,7 +76,8 @@ public:
                     if (Creature* malygos = instance->GetCreature(malygosGUID))
                         malygos->SummonCreature(NPC_ALEXSTRASZA, 829.0679f, 1244.77f, 279.7453f, 2.32f);
 
-                    SpawnGameObject(GO_EXIT_PORTAL, exitPortalPosition);
+                    if (GameObject* portal = instance->GetGameObject(exitPortalGUID))
+                        portal->SetPhaseMask(1, true);
 
                     // we make the platform appear again because at the moment we don't support looting using a vehicle
                     if (GameObject* platform = instance->GetGameObject(platformGUID))
@@ -89,22 +90,6 @@ public:
             return true;
         }
 
-        //TODO: this should be handled in map, maybe add a summon function in map
-        // There is no other way afaik...
-        void SpawnGameObject(uint32 entry, Position& pos)
-        {
-            GameObject* go = new GameObject;
-            if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, instance,
-                PHASEMASK_NORMAL, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(),
-                0, 0, 0, 0, 120, GO_STATE_READY))
-            {
-                delete go;
-                return;
-            }
-
-            instance->AddToMap(go);
-        }
-
         void OnGameObjectCreate(GameObject* go)
         {
             switch (go->GetEntry())
@@ -114,11 +99,10 @@ public:
                     break;
                 case GO_FOCUSING_IRIS:
                 case GO_FOCUSING_IRIS_H:
-                    go->GetPosition(&focusingIrisPosition);
+                    focusingIrisGUID = go->GetGUID();
                     break;
                 case GO_EXIT_PORTAL:
                     exitPortalGUID = go->GetGUID();
-                    go->GetPosition(&exitPortalPosition);
                     break;
                 case GO_ALEXSTRASZA_S_GIFT:
                 case GO_ALEXSTRASZA_S_GIFT_2:
@@ -148,13 +132,13 @@ public:
             if (eventId == EVENT_FOCUSING_IRIS)
             {
                 if (GameObject* go = obj->ToGameObject())
-                    go->Delete(); // this is not the best way.
+                    go->SetPhaseMask(2, true);
 
                 if (Creature* malygos = instance->GetCreature(malygosGUID))
                     malygos->GetMotionMaster()->MovePoint(4, 770.10f, 1275.33f, 267.23f); // MOVE_INIT_PHASE_ONE
 
                 if (GameObject* exitPortal = instance->GetGameObject(exitPortalGUID))
-                    exitPortal->Delete();
+                    exitPortal->SetPhaseMask(2, true);
             }
         }
 
@@ -299,8 +283,7 @@ public:
             uint64 platformGUID;
             uint64 exitPortalGUID;
             uint64 chestGUID;
-            Position focusingIrisPosition;
-            Position exitPortalPosition;
+            uint64 focusingIrisGUID;
     };
 };
 

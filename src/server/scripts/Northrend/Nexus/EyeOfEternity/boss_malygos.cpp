@@ -226,7 +226,6 @@ public:
 
         void Reset()
         {
-
             _Reset();
 
             _bersekerTimer = 0;
@@ -364,6 +363,8 @@ public:
 
             SetPhase(PHASE_THREE, true);
 
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
             // this despawns Hover Disks
             summons.DespawnAll();
             // players that used Hover Disk are no in the aggro list
@@ -382,7 +383,10 @@ public:
             }
 
             if (GameObject* go = GameObject::GetGameObject(*me, instance->GetData64(DATA_PLATFORM)))
+            {
                 go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED); // In sniffs it has this flag, but i don't know how is applied.
+                go->EnableCollision(false);
+            }
 
             // pos sniffed
             me->GetMotionMaster()->MoveIdle();
@@ -640,8 +644,7 @@ public:
                     break;
                 case MOVE_DEEP_BREATH_ROTATION:
                     _currentPos = _currentPos == MALYGOS_MAX_WAYPOINTS - 1 ? 0 : _currentPos+1;
-                    me->GetMotionMaster()->MovementExpired();
-                    me->GetMotionMaster()->MovePoint(MOVE_DEEP_BREATH_ROTATION, MalygosPhaseTwoWaypoints[_currentPos]);
+                    _delayedMovement = true;
                     break;
                 case MOVE_INIT_PHASE_ONE:
                     me->SetInCombatWithZone();
@@ -661,9 +664,11 @@ public:
 
             me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
             me->SetFlying(true);
-
+            me->GetMotionMaster()->Clear();
             me->GetMotionMaster()->MoveIdle();
             me->GetMotionMaster()->MovePoint(MOVE_DEEP_BREATH_ROTATION, MalygosPhaseTwoWaypoints[0]);
+
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
             for (uint8 i = 0; i < RAID_MODE(2, 6); i++)
             {
@@ -1256,11 +1261,17 @@ public:
                 {
                     if (malygos->HasAura(SPELL_VORTEX_1))
                     {
-                        me->GetMotionMaster()->MoveIdle();
+                        if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
+                        {
+                            me->StopMoving();
+                            me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MoveIdle();
+                        }
+
                         return;
                     }
 
-                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
+                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
                         me->GetMotionMaster()->MoveFollow(malygos, 0.0f, 0.0f);
                 }
             }
@@ -1273,6 +1284,7 @@ public:
                 _falling = true;
                 damage = 0;
                 me->GetMotionMaster()->MoveFall();
+                me->GetMotionMaster()->Clear();
                 me->GetMotionMaster()->MoveIdle();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 DoCast(me, SPELL_POWER_SPARK_DEATH, true);
