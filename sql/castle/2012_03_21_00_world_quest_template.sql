@@ -1,0 +1,3 @@
+-- Set ExclusiveGroup for Shattrath Daily Quests, you can have only one, pooling is already in place...
+UPDATE `quest_template` SET `ExclusiveGroup` = 11364 WHERE `Id` IN (11376, 11383, 11385, 11371, 11389, 11500, 11364, 11387);
+UPDATE `quest_template` SET `ExclusiveGroup` = 11354 WHERE `Id` IN (11382, 11368, 11378, 11374, 11499, 11370, 11372, 11369, 11388, 11362, 11363, 11375, 11354, 11386, 11373, 11384);
