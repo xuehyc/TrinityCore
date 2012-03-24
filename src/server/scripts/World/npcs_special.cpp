@@ -3288,6 +3288,40 @@ public:
     }
 };
 
+/*#####
+# npc_fun_squirrel
+#####*/
+
+// SQL:
+// UPDATE `creature_template` SET `ScriptName` = 'npc_fun_squirrel' WHERE `entry` = 1412;
+
+class npc_fun_squirrel : public CreatureScript
+{
+public:
+    npc_fun_squirrel() : CreatureScript("npc_fun_squirrel") { }
+
+    struct npc_fun_squirrelAI : public ScriptedAI
+    {
+        npc_fun_squirrelAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void DamageTaken(Unit* doneBy, uint32& damage)
+        {
+            if (!doneBy)
+                return;
+
+            damage = 0;
+            DoScriptText(-1999902, me);
+            me->Kill(doneBy, false);
+            DoCast(47008);
+        }
+    };
+
+    CreatureAI *GetAI(Creature* creature) const
+    {
+        return new npc_fun_squirrelAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -3322,4 +3356,5 @@ void AddSC_npcs_special()
     new npc_firework;
     new npc_spring_rabbit();
     new npc_lvl60;
+    new npc_fun_squirrel;
 }
