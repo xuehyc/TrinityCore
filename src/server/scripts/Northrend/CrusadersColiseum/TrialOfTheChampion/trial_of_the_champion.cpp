@@ -67,10 +67,10 @@ enum IntroPhase
 
 enum Creatures
 {
-    CREATURE_TRALL                        = 34994, 
-    CREATURE_GARROSH                      = 34995, 
-    CREATURE_KING                         = 34990, 
-    CREATURE_LADY                         = 34992, 
+    CREATURE_TRALL                        = 34994,
+    CREATURE_GARROSH                      = 34995,
+    CREATURE_KING                         = 34990,
+    CREATURE_LADY                         = 34992,
     CREATURE_HIGHLORD                     = 34996,
     CREATURE_ANNOUNCER                    = 35004
 };
@@ -94,7 +94,7 @@ public:
         }
 
         uint32 uiIntroTimer;
-    
+
         uint8 uiIntroPhase;
 
         IntroPhase Phase;

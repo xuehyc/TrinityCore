@@ -397,10 +397,10 @@ public:
         {
             if (!target)
                 return;
-    
+
             if (!spell)
                 return;
-    
+
             if (spell->Id == SPELL_FIRE_BOMB && !fireBombHitTarget)
             {
                 fireBombHitTarget = true;
@@ -416,7 +416,7 @@ public:
             Summons.Summon(summon);
         }
 
-        void SummonedCreatureDespawn(Creature* summon) 
+        void SummonedCreatureDespawn(Creature* summon)
         {
             Summons.Despawn(summon);
         }
@@ -681,7 +681,7 @@ struct boss_jormungarAI : public ScriptedAI
         Summons.Summon(summon);
     }
 
-    void SummonedCreatureDespawn(Creature* summon) 
+    void SummonedCreatureDespawn(Creature* summon)
     {
         Summons.Despawn(summon);
     }
