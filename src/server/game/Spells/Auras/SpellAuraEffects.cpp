@@ -4984,9 +4984,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     switch (GetId())
                     {
                         case 34477: // Misdirection
-                            if (aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
-                                target->SetReducedThreatPercent(0, 0);
-                            break;
                         case 35079: // Misdirection proc
                             target->SetReducedThreatPercent(0, 0);
                             break;

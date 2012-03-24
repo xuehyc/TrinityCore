@@ -434,7 +434,7 @@ public:
                 if (me->getVictim() && me->GetDistance(me->getVictim()) < 5.0f)
                     DoCast(me->getVictim(), SPELL_THRUST);
 
-                uiThrustTimer = urand(8000, 1400);
+                uiThrustTimer = urand(8000, 14000);
             }else uiThrustTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
