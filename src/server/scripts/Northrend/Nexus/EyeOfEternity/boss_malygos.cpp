@@ -35,6 +35,11 @@ Script Data End */
 enum Achievements
 {
     ACHIEV_TIMED_START_EVENT                      = 20387,
+
+    ACHIEV_POKE_IN_THE_EYE                        = 1869,
+    ACHIEV_POKE_IN_THE_EYE_H                      = 1870,
+    ACHIEV_POKE_IN_THE_EYE_COUNT                  = 9,
+    ACHIEV_POKE_IN_THE_EYE_H_COUNT                = 21,
 };
 
 enum Events
@@ -258,6 +263,8 @@ public:
             summonGuid1 = 0;
             summonGuid2 = 0;
 
+            participants.clear();
+
             std::list<Creature*> despawnCreatureList;
             me->GetCreatureListWithEntryInGrid(despawnCreatureList, NPC_ARCANE_OVERLOAD, 250.0f);
 
@@ -436,7 +443,26 @@ public:
             DoCast(SPELL_BERSEKER); // periodic aura, first tick in 10 minutes
 
             if (instance)
+            {
                 instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
+
+                // Remember players that were in Zone when combat started, relevant for Poke in the Eye Achievement
+                Map* _map = me->GetMap();
+                Map::PlayerList const& _playerList = _map->GetPlayers();
+
+                for (Map::PlayerList::const_iterator itr = _playerList.begin(); itr != _playerList.end(); ++itr)
+                {
+                    if (Player* player = itr->getSource())
+                    {
+                        if (player->isGameMaster())
+                            continue;
+
+                        participants.push_back(player->GetGUID());
+                    }
+                }
+
+            }
+
         }
 
         void KilledUnit(Unit* who)
@@ -977,6 +1003,16 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
+            // ugly hackfix for poke in the eye...
+            if (participants.size() < DUNGEON_MODE(ACHIEV_POKE_IN_THE_EYE_COUNT, ACHIEV_POKE_IN_THE_EYE_H_COUNT))
+            {
+                AchievementEntry const* pAE = GetAchievementStore()->LookupEntry(DUNGEON_MODE(ACHIEV_POKE_IN_THE_EYE, ACHIEV_POKE_IN_THE_EYE_H));
+                if (pAE)
+                    for (std::list<uint64>::const_iterator itr = participants.begin(); itr != participants.end(); ++itr)
+                        if (Player* player = ObjectAccessor::FindPlayer((*itr)))
+                            player->CompletedAchievement(pAE);
+            }
+
             Talk(SAY_DEATH);
             _JustDied();
         }
@@ -1002,6 +1038,8 @@ public:
         bool updateOrientationPhase3;
 
         uint64 targetGuid1, targetGuid2, targetGuid3, summonGuid1, summonGuid2;
+
+        std::list<uint64> participants;
     };
 
 };
