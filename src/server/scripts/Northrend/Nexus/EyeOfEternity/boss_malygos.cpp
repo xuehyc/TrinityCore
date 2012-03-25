@@ -1005,13 +1005,10 @@ public:
         {
             // ugly hackfix for poke in the eye...
             if (participants.size() < DUNGEON_MODE(ACHIEV_POKE_IN_THE_EYE_COUNT, ACHIEV_POKE_IN_THE_EYE_H_COUNT))
-            {
-                AchievementEntry const* pAE = GetAchievementStore()->LookupEntry(DUNGEON_MODE(ACHIEV_POKE_IN_THE_EYE, ACHIEV_POKE_IN_THE_EYE_H));
-                if (pAE)
+                if (AchievementEntry const* pAE = GetAchievementStore()->LookupEntry(DUNGEON_MODE(ACHIEV_POKE_IN_THE_EYE, ACHIEV_POKE_IN_THE_EYE_H)))
                     for (std::list<uint64>::const_iterator itr = participants.begin(); itr != participants.end(); ++itr)
                         if (Player* player = ObjectAccessor::FindPlayer((*itr)))
                             player->CompletedAchievement(pAE);
-            }
 
             Talk(SAY_DEATH);
             _JustDied();
