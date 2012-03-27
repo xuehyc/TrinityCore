@@ -3344,36 +3344,39 @@ void World::SendCustomPvpInformationUpdate()
             {
                 if ((*itr).second)
                 {
-                    // Only count rated arena matches
-                    if ((*itr).second->isArena() && (*itr).second->isRated())
+                    // Only count active matches
+                    if ((*itr).second->GetStatus() >= STATUS_WAIT_JOIN && (*itr).second->GetStatus() != STATUS_WAIT_LEAVE)
                     {
-                        switch ((*itr).second->GetArenaType())
+                        // Only count rated arena matches
+                        if ((*itr).second->isArena() && (*itr).second->isRated())
                         {
-                            case 2:
-                                arenaCount2vs2++;
-                                break;
-                            case 3:
-                                arenaCount3vs3++;
-                                break;
-                            case 5:
-                                arenaCount5vs5++;
-                                break;
-                            default:
-                                break;
+                            switch ((*itr).second->GetArenaType())
+                            {
+                                case 2:
+                                    arenaCount2vs2++;
+                                    break;
+                                case 3:
+                                    arenaCount3vs3++;
+                                    break;
+                                case 5:
+                                    arenaCount5vs5++;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            continue;
                         }
 
-                        continue;
-                    }
-
-                    // For battlegrounds, count for each bracket
-                    if ((*itr).second->isBattleground() && (*itr).second->GetStatus() >= STATUS_WAIT_JOIN)
-                    {
+                        // For battlegrounds, count for each bracket
+                        if ((*itr).second->isBattleground())
+                        {
                         std::map<uint32, std::pair<uint32, uint32> >::iterator itr2 = storedBattlegroundCounts.find((*itr).second->GetMinLevel());
 
-                        if (itr2 != storedBattlegroundCounts.end())
-                            itr2->second.second++;
-                        else
-                            storedBattlegroundCounts.insert(std::pair<uint32, std::pair<uint32, uint32> >((*itr).second->GetMinLevel(), std::pair<uint32, uint32>((*itr).second->GetMaxLevel(), 1)));
+                            if (itr2 != storedBattlegroundCounts.end())
+                                itr2->second.second++;
+                            else
+                                storedBattlegroundCounts.insert(std::pair<uint32, std::pair<uint32, uint32> >((*itr).second->GetMinLevel(), std::pair<uint32, uint32>((*itr).second->GetMaxLevel(), 1)));
+                        }
                     }
                 }
             }
