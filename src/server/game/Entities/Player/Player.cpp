@@ -18467,6 +18467,10 @@ bool Player::CheckInstanceLoginValid()
     if (!GetMap()->IsDungeon() || isGameMaster())
         return true;
 
+    // map must be instance map here, check for maximum player amount reached
+    if (((InstanceMap*)GetMap())->GetMaxPlayers() < GetMap()->GetPlayersCountExceptGMs())
+        return false;
+
     if (GetMap()->IsRaid())
     {
         // cannot be in raid instance without a group
