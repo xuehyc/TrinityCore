@@ -298,6 +298,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case NPC_SINDRAGOSAS_WARD:
                         SindragosasWardGUID = creature->GetGUID();
+						break;
                     default:
                         break;
                 }
