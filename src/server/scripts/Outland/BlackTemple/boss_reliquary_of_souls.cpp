@@ -191,6 +191,9 @@ public:
             if (who->GetTypeId() != TYPEID_PLAYER)
                 return;
 
+            if (me->GetDistance(who) > 30.0f)
+                return;
+
             if (me->Attack(who, true))
                 DoStartNoMovement(who);
         }
