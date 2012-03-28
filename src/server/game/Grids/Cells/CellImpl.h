@@ -54,8 +54,19 @@ inline CellArea Cell::CalculateCellArea(float x, float y, float radius)
         return CellArea(center, center);
     }
 
-    CellCoord centerX = Trinity::ComputeCellCoord(x - radius, y - radius).normalize();
-    CellCoord centerY = Trinity::ComputeCellCoord(x + radius, y + radius).normalize();
+    float x_val_negative = x - radius;
+    float y_val_negative = y - radius;
+    float x_val_positive = x + radius;
+    float y_val_positive = y + radius;
+
+    // prevent invalid coordinates
+    Trinity::NormalizeMapCoord(x_val_negative);
+    Trinity::NormalizeMapCoord(y_val_negative);
+    Trinity::NormalizeMapCoord(x_val_positive);
+    Trinity::NormalizeMapCoord(y_val_positive);
+
+    CellCoord centerX = Trinity::ComputeCellCoord(x_val_negative, y_val_negative).normalize();
+    CellCoord centerY = Trinity::ComputeCellCoord(x_val_positive, y_val_positive).normalize();
 
     return CellArea(centerX, centerY);
 }
