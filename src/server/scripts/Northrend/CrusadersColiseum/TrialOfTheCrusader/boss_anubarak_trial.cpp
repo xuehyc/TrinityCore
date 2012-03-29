@@ -257,19 +257,19 @@ public:
 
             Summons.Despawn(summoned);
         }
-    
+
         uint32 GetPlayerCountInFrostSphereZones()
         {
             uint32 counter = 0;
             Map* map = me->GetMap();
-    
+
             if (map && map->IsDungeon())
             {
                 Map::PlayerList const &PlayerList = map->GetPlayers();
-    
+
                 if (PlayerList.isEmpty())
                     return 0;
-    
+
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 {
                     if (i->getSource())
@@ -456,10 +456,10 @@ public:
                             }
                         }
                     }
-    
+
                     for(uint8 i = 0; i < 6 - frostSpheresWithAuraCount; i++)
                         me->SummonCreature(NPC_FROST_SPHERE, SphereSpawn[urand(0, 5)]);
-    
+
                     m_uiSummonFrostSphereTimer = urand(20, 30)*1000;
                 } else m_uiSummonFrostSphereTimer -= uiDiff;
             }
@@ -535,10 +535,10 @@ public:
             if (m_uiAcidMandibleTimer <= uiDiff)
             {
                 m_uiAcidMandibleTimer = 3500;
-    
+
                 if (!me->getVictim())
                     return;
-    
+
                 //If we are within range melee the target
                 if (me->IsWithinMeleeRange(me->getVictim()))
                 {
@@ -550,7 +550,7 @@ public:
                             {
                                 aur->SetStackAmount(aur->GetStackAmount() + 1);
                             }
-    
+
                             if (aur->GetStackAmount() == 40)
                             {
                                 aur->SetStackAmount(40);
@@ -563,7 +563,7 @@ public:
                     }
                 }
             } else m_uiAcidMandibleTimer -= uiDiff;
-    
+
             DoMeleeAttackIfReady();
         }
     };

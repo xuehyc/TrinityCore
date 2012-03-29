@@ -26,10 +26,29 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "magtheridons_lair.h"
 
-enum eSpells
+enum Creatures
 {
-    SPELL_SOUL_TRANSFER        = 30531, // core bug, does not support target 7
-    SPELL_BLAZE_TARGET         = 30541, // core bug, does not support target 7
+    NPC_MAGTHERIDON             = 17257,
+    NPC_CHANNELER               = 17256,
+};
+
+enum GameObjects
+{
+    GO_MANTRICON_CUBE           = 181713,
+    GO_ENCOUNTER_DOOR           = 183847,
+    GO_FX01                     = 184653, // hall
+    GO_MAGTHERIDON_COLUMN_3     = 184634, // six columns
+    GO_MAGTHERIDON_COLUMN_2     = 184635,
+    GO_MAGTHERIDON_COLUMN_4     = 184636,
+    GO_MAGTHERIDON_COLUMN_5     = 184637,
+    GO_MAGTHERIDON_COLUMN_0     = 184638,
+    GO_MAGTHERIDON_COLUMN_1     = 184639,
+};
+
+enum Spells
+{
+    SPELL_SOUL_TRANSFER         = 30531, // core bug, does not support target 7
+    SPELL_BLAZE_TARGET          = 30541, // core bug, does not support target 7
 };
 
 #define CHAMBER_CENTER_X            -15.14
@@ -38,15 +57,13 @@ enum eSpells
 
 #define MAX_ENCOUNTER 2
 
-#define EMOTE_BONDS_WEAKEN          "'s bonds begin to weaken!"
+#define EMOTE_BONDS_WEAKEN          "Magtheridon's bonds begin to weaken!"
 
 class instance_magtheridons_lair : public InstanceMapScript
 {
     public:
         instance_magtheridons_lair()
-            : InstanceMapScript("instance_magtheridons_lair", 544)
-        {
-        }
+            : InstanceMapScript("instance_magtheridons_lair", 544) {}
 
         struct instance_magtheridons_lair_InstanceMapScript : public InstanceScript
         {
@@ -54,7 +71,7 @@ class instance_magtheridons_lair : public InstanceMapScript
             {
             }
 
-            uint32 m_auiEncounter[MAX_ENCOUNTER];
+            uint32 Encounter[MAX_ENCOUNTER];
 
             uint64 MagtheridonGUID;
             std::set<uint64> ChannelerGUID;
@@ -66,7 +83,7 @@ class instance_magtheridons_lair : public InstanceMapScript
 
             void Initialize()
             {
-                memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+                memset(&Encounter, 0, sizeof(Encounter));
 
                 MagtheridonGUID = 0;
                 ChannelerGUID.clear();
@@ -80,7 +97,7 @@ class instance_magtheridons_lair : public InstanceMapScript
             bool IsEncounterInProgress() const
             {
                 for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                    if (m_auiEncounter[i] == IN_PROGRESS) return true;
+                    if (Encounter[i] == IN_PROGRESS) return true;
                 return false;
             }
 
@@ -88,10 +105,10 @@ class instance_magtheridons_lair : public InstanceMapScript
             {
                 switch (creature->GetEntry())
                 {
-                case 17257:
+                case NPC_MAGTHERIDON:
                     MagtheridonGUID = creature->GetGUID();
                     break;
-                case 17256:
+                case NPC_CHANNELER:
                     ChannelerGUID.insert(creature->GetGUID());
                     break;
                 }
@@ -101,19 +118,19 @@ class instance_magtheridons_lair : public InstanceMapScript
             {
                 switch (go->GetEntry())
                 {
-                case 181713:
+                case GO_MANTRICON_CUBE:
                     go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
                     break;
-                case 183847:
+                case GO_ENCOUNTER_DOOR:
                     DoorGUID = go->GetGUID();
                     break;
-                case 184653: // hall
-                case 184634: // six columns
-                case 184635:
-                case 184636:
-                case 184637:
-                case 184638:
-                case 184639:
+                case GO_FX01:
+                case GO_MAGTHERIDON_COLUMN_3:
+                case GO_MAGTHERIDON_COLUMN_2:
+                case GO_MAGTHERIDON_COLUMN_4:
+                case GO_MAGTHERIDON_COLUMN_5:
+                case GO_MAGTHERIDON_COLUMN_0:
+                case GO_MAGTHERIDON_COLUMN_1:
                     ColumnGUID.insert(go->GetGUID());
                     break;
                 }
@@ -134,7 +151,7 @@ class instance_magtheridons_lair : public InstanceMapScript
                 switch (type)
                 {
                 case DATA_MAGTHERIDON_EVENT:
-                    m_auiEncounter[0] = data;
+                    Encounter[0] = data;
                     if (data == NOT_STARTED)
                         RespawnTimer = 10000;
                     if (data != IN_PROGRESS)
@@ -144,9 +161,9 @@ class instance_magtheridons_lair : public InstanceMapScript
                     switch (data)
                     {
                     case NOT_STARTED: // Reset all channelers once one is reset.
-                        if (m_auiEncounter[1] != NOT_STARTED)
+                        if (Encounter[1] != NOT_STARTED)
                         {
-                            m_auiEncounter[1] = NOT_STARTED;
+                            Encounter[1] = NOT_STARTED;
                             for (std::set<uint64>::const_iterator i = ChannelerGUID.begin(); i != ChannelerGUID.end(); ++i)
                             {
                                 if (Creature* Channeler = instance->GetCreature(*i))
@@ -162,9 +179,9 @@ class instance_magtheridons_lair : public InstanceMapScript
                         }
                         break;
                     case IN_PROGRESS: // Event start.
-                        if (m_auiEncounter[1] != IN_PROGRESS)
+                        if (Encounter[1] != IN_PROGRESS)
                         {
-                            m_auiEncounter[1] = IN_PROGRESS;
+                            Encounter[1] = IN_PROGRESS;
                             // Let all five channelers aggro.
                             for (std::set<uint64>::const_iterator i = ChannelerGUID.begin(); i != ChannelerGUID.end(); ++i)
                             {
@@ -189,13 +206,14 @@ class instance_magtheridons_lair : public InstanceMapScript
                             if (Channeler && Channeler->isAlive())
                             {
                                 //Channeler->CastSpell(Channeler, SPELL_SOUL_TRANSFER, true);
+                                Channeler->AddAura(SPELL_SOUL_TRANSFER, Channeler); // use AddAura because CastSpell does not work...
                                 data = IN_PROGRESS;
                                 break;
                             }
                         }
                         break;
                     }
-                    m_auiEncounter[1] = data;
+                    Encounter[1] = data;
                     break;
                 case DATA_COLLAPSE:
                     // true - collapse / false - reset
@@ -210,7 +228,7 @@ class instance_magtheridons_lair : public InstanceMapScript
             uint32 GetData(uint32 type)
             {
                 if (type == DATA_MAGTHERIDON_EVENT)
-                    return m_auiEncounter[0];
+                    return Encounter[0];
                 return 0;
             }
 
@@ -224,7 +242,7 @@ class instance_magtheridons_lair : public InstanceMapScript
                         if (Magtheridon && Magtheridon->isAlive())
                         {
                             Magtheridon->ClearUnitState(UNIT_STATE_STUNNED);
-                            Magtheridon->AI()->AttackStart(Magtheridon->SelectNearestTarget(999));
+                            Magtheridon->AI()->AttackStart(Magtheridon->SelectNearestTarget(45)); // 45 yards prevent her from aggroing people outside the room
                         }
                         CageTimer = 0;
                     } else CageTimer -= diff;

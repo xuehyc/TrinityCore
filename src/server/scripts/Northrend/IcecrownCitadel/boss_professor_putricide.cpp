@@ -284,6 +284,18 @@ class boss_professor_putricide : public CreatureScript
                 switch (summon->GetEntry())
                 {
                     case NPC_GROWING_OOZE_PUDDLE:
+
+                        // These should only spawned in combat, if this one here is true, all spawns are invalid
+                        // Avoids puddles staying around if boss is dead or resetted, since they are summoned after death or reset
+                        if (instance)
+                        {
+                            if (instance->GetBossState(DATA_PROFESSOR_PUTRICIDE) != IN_PROGRESS)
+                            {
+                                summons.DespawnAll();
+                                return;
+                            }
+                        }
+
                         summon->CastSpell(summon, SPELL_GROW_STACKER, true);
                         summon->CastSpell(summon, SPELL_SLIME_PUDDLE_AURA, true);
                         // blizzard casts this spell 7 times initially (confirmed in sniff)
@@ -635,7 +647,7 @@ class boss_professor_putricide : public CreatureScript
                             }
                             else
                             {
-                                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, -7.0f, true);
+                                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, -7.0f, true);
                                 if (!target)
                                     target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true);
 
@@ -1109,29 +1121,6 @@ class spell_putricide_slime_puddle : public SpellScriptLoader
             void ScaleRange(std::list<Unit*>& targets)
             {
                 targets.remove_if(ExactDistanceCheck(GetCaster(), 2.5f * GetCaster()->GetFloatValue(OBJECT_FIELD_SCALE_X)));
-
-                // Despawn if putricide is dead OR in error case
-                bool despawn = true;
-
-                if (GetCaster())
-                {
-                    if (GetCaster()->isSummon())
-                    {
-                        if (GetCaster()->ToTempSummon())
-                        {
-                            if (GetCaster()->ToTempSummon()->GetSummoner())
-                            {
-                                if (GetCaster()->ToTempSummon()->GetSummoner()->isAlive())
-                                {
-                                    despawn = false;
-                                }
-                            }
-
-                            if (despawn)
-                                GetCaster()->ToTempSummon()->DespawnOrUnsummon();
-                        }
-                    }
-                }
             }
 
             void Register()

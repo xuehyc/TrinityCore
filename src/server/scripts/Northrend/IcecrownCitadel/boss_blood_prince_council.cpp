@@ -139,8 +139,7 @@ enum Actions
     ACTION_CAST_INVOCATION      = 2,
     ACTION_REMOVE_INVOCATION    = 3,
     ACTION_KINETIC_BOMB_JUMP    = 4,
-    ACTION_FLAME_BALL_CHASE     = 5,
-    ACTION_EVADE_OTHER          = 6
+    ACTION_FLAME_BALL_CHASE     = 5
 };
 
 enum Points
@@ -388,7 +387,6 @@ class boss_prince_keleseth_icc : public CreatureScript
                 events.Reset();
                 summons.DespawnAll();
 
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 _isEmpowered = false;
                 me->SetHealth(_spawnHealth);
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
@@ -500,7 +498,7 @@ class boss_prince_keleseth_icc : public CreatureScript
                 {
                     case ACTION_STAND_UP:
                         me->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                         me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                         me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
                         me->ForceValuesUpdateAtIndex(UNIT_NPC_FLAGS);   // was in sniff. don't ask why
@@ -516,9 +514,6 @@ class boss_prince_keleseth_icc : public CreatureScript
                         me->RemoveAurasDueToSpell(SPELL_INVOCATION_VISUAL_ACTIVE);
                         me->RemoveAurasDueToSpell(SPELL_INVOCATION_OF_BLOOD_KELESETH);
                         _isEmpowered = false;
-                        break;
-                    case ACTION_EVADE_OTHER:
-                        ScriptedAI::EnterEvadeMode();
                         break;
                     default:
                         break;
@@ -540,11 +535,23 @@ class boss_prince_keleseth_icc : public CreatureScript
             {
                 if (instance)
                 {
-                    if (Creature* taldaram = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_TALDARAM_GUID)))
-                        taldaram->AI()->DoAction(ACTION_EVADE_OTHER);
+                    Creature* taldaram = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_TALDARAM_GUID));
+                    Creature* valanar = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_VALANAR_GUID));
 
-                    if (Creature* valanar = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_VALANAR_GUID)))
-                        valanar->AI()->DoAction(ACTION_EVADE_OTHER);
+                    if (taldaram && valanar)
+                    {
+                        if (taldaram->getVictim())
+                        {
+                            taldaram->AI()->DoZoneInCombat(me, 100.0f);
+                            return;
+                        }
+
+                        if (valanar->getVictim())
+                        {
+                            valanar->AI()->DoZoneInCombat(me, 100.0f);
+                            return;
+                        }
+                    }
                 }
 
                 ScriptedAI::EnterEvadeMode();
@@ -633,7 +640,6 @@ class boss_prince_taldaram_icc : public CreatureScript
                 events.Reset();
                 summons.DespawnAll();
 
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 _isEmpowered = false;
                 me->SetHealth(_spawnHealth);
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
@@ -692,7 +698,7 @@ class boss_prince_taldaram_icc : public CreatureScript
             void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
-                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, -10.0f, true); // first try at distance
+                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, -10.0f, true); // first try at distance
                 if (!target)
                     target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);     // too bad for you raiders, its going to boom
 
@@ -733,7 +739,7 @@ class boss_prince_taldaram_icc : public CreatureScript
                 {
                     case ACTION_STAND_UP:
                         me->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                         me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                         me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
                         me->ForceValuesUpdateAtIndex(UNIT_NPC_FLAGS);   // was in sniff. don't ask why
@@ -749,9 +755,6 @@ class boss_prince_taldaram_icc : public CreatureScript
                         me->RemoveAurasDueToSpell(SPELL_INVOCATION_VISUAL_ACTIVE);
                         me->RemoveAurasDueToSpell(SPELL_INVOCATION_OF_BLOOD_TALDARAM);
                         _isEmpowered = false;
-                        break;
-                    case ACTION_EVADE_OTHER:
-                        ScriptedAI::EnterEvadeMode();
                         break;
                     default:
                         break;
@@ -773,11 +776,23 @@ class boss_prince_taldaram_icc : public CreatureScript
             {
                 if (instance)
                 {
-                    if (Creature* keleseth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_KELESETH_GUID)))
-                        keleseth->AI()->DoAction(ACTION_EVADE_OTHER);
+                    Creature* keleseth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_KELESETH_GUID));
+                    Creature* valanar = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_VALANAR_GUID));
 
-                    if (Creature* valanar = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_VALANAR_GUID)))
-                        valanar->AI()->DoAction(ACTION_EVADE_OTHER);
+                    if (keleseth && valanar)
+                    {
+                        if (keleseth->getVictim())
+                        {
+                            keleseth->AI()->DoZoneInCombat(me, 100.0f);
+                            return;
+                        }
+
+                        if (valanar->getVictim())
+                        {
+                            valanar->AI()->DoZoneInCombat(me, 100.0f);
+                            return;
+                        }
+                    }
                 }
 
                 ScriptedAI::EnterEvadeMode();
@@ -867,7 +882,6 @@ class boss_prince_valanar_icc : public CreatureScript
                 events.Reset();
                 summons.DespawnAll();
 
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 _isEmpowered = false;
                 me->SetHealth(me->GetMaxHealth());
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
@@ -981,7 +995,7 @@ class boss_prince_valanar_icc : public CreatureScript
                 {
                     case ACTION_STAND_UP:
                         me->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                         me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                         me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
                         me->ForceValuesUpdateAtIndex(UNIT_NPC_FLAGS);   // was in sniff. don't ask why
@@ -997,9 +1011,6 @@ class boss_prince_valanar_icc : public CreatureScript
                         me->RemoveAurasDueToSpell(SPELL_INVOCATION_VISUAL_ACTIVE);
                         me->RemoveAurasDueToSpell(SPELL_INVOCATION_OF_BLOOD_VALANAR);
                         _isEmpowered = false;
-                        break;
-                    case ACTION_EVADE_OTHER:
-                        ScriptedAI::EnterEvadeMode();
                         break;
                     default:
                         break;
@@ -1021,11 +1032,23 @@ class boss_prince_valanar_icc : public CreatureScript
             {
                 if (instance)
                 {
-                    if (Creature* keleseth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_KELESETH_GUID)))
-                        keleseth->AI()->DoAction(ACTION_EVADE_OTHER);
+                    Creature* keleseth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_KELESETH_GUID));
+                    Creature* taldaram = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_TALDARAM_GUID));
 
-                    if (Creature* taldaram = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_TALDARAM_GUID)))
-                        taldaram->AI()->DoAction(ACTION_EVADE_OTHER);
+                    if (keleseth && taldaram)
+                    {
+                        if (keleseth->getVictim())
+                        {
+                            keleseth->AI()->DoZoneInCombat(me, 100.0f);
+                            return;
+                        }
+
+                        if (taldaram->getVictim())
+                        {
+                            taldaram->AI()->DoZoneInCombat(me, 100.0f);
+                            return;
+                        }
+                    }
                 }
 
                 ScriptedAI::EnterEvadeMode();

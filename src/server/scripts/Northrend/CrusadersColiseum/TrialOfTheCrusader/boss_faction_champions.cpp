@@ -295,6 +295,17 @@ struct boss_faction_championsAI : public ScriptedAI
         me->DespawnOrUnsummon();
     }
 
+    void EnterEvadeMode()
+    {
+        DoZoneInCombat(me, 100.0f);
+
+        // If target was found, abort here, otherwise reset
+        if (me->getVictim())
+            return;
+
+        ScriptedAI::EnterEvadeMode();
+    }
+
     float CalculateThreat(float distance, float armor, uint32 health)
     {
         float dist_mod = (mAIType == AI_MELEE || mAIType == AI_PET) ? 15.0f/(15.0f + distance) : 1.0f;

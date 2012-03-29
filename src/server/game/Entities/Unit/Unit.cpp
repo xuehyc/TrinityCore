@@ -5490,6 +5490,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     }
                     break;
                 }
+                case 71875: // Item - Black Bruise: Necrotic Touch Proc
+                case 71877:
+                {
+                    basepoints0 = CalculatePctN(int32(damage), triggerAmount);
+                    triggered_spell_id = 71879;
+                    break;
+                }
                 // Item - Shadowmourne Legendary
                 case 71903:
                 {
@@ -6574,9 +6581,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             {
                 case 34477: // Misdirection
                 {
+                    if (!GetMisdirectionTarget())
+                        return false;
                     triggered_spell_id = 35079; // 4 sec buff on self
                     target = this;
-                    return true;
+                    break;
                 }
                 case 57870: // Glyph of Mend Pet
                 {
@@ -12761,6 +12770,7 @@ void Unit::setDeathState(DeathState s)
         GetMotionMaster()->Clear(false);
         GetMotionMaster()->MoveIdle();
         StopMoving();
+        DisableSpline();
         // without this when removing IncreaseMaxHealth aura player may stuck with 1 hp
         // do not why since in IncreaseMaxHealth currenthealth is checked
         SetHealth(0);
@@ -16553,7 +16563,41 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
         return;
 
     if (IsInWorld())
-        RemoveNotOwnSingleTargetAuras(newPhaseMask);        // we can lost access to caster or target
+    {
+        RemoveNotOwnSingleTargetAuras(newPhaseMask);            // we can lost access to caster or target
+
+        // modify hostile references for new phasemask, some special cases deal with hostile references themselves
+        if (GetTypeId() == TYPEID_UNIT || (!ToPlayer()->isGameMaster() && !ToPlayer()->GetSession()->PlayerLogout()))
+        {
+            HostileRefManager& refManager = getHostileRefManager();
+            HostileReference* ref = refManager.getFirst();
+
+            while (ref)
+            {
+                if (Unit* unit = ref->getSource()->getOwner())
+                    if (Creature* creature = unit->ToCreature())
+                        refManager.setOnlineOfflineState(creature, creature->InSamePhase(newPhaseMask));
+
+                ref = ref->next();
+            }
+
+            // modify threat lists for new phasemask
+            if (GetTypeId() != TYPEID_PLAYER)
+            {
+                std::list<HostileReference*> threatList = getThreatManager().getThreatList();
+                std::list<HostileReference*> offlineThreatList = getThreatManager().getOfflineThreatList();
+
+                // merge expects sorted lists
+                threatList.sort();
+                offlineThreatList.sort();
+                threatList.merge(offlineThreatList);
+
+                for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+                    if (Unit* unit = (*itr)->getTarget())
+                        unit->getHostileRefManager().setOnlineOfflineState(ToCreature(), unit->InSamePhase(newPhaseMask));
+            }
+        }
+    }
 
     WorldObject::SetPhaseMask(newPhaseMask, update);
 
@@ -17256,12 +17300,16 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
             GetMap()->CreatureRelocation(ToCreature(), x, y, z, orientation);
     }
     else if (turn)
-        SetOrientation(orientation);
-
-    if ((relocated || turn) && IsVehicle())
-        GetVehicleKit()->RelocatePassengers(x, y, z, orientation);
+        UpdateOrientation(orientation);
 
     return (relocated || turn);
+}
+
+void Unit::UpdateOrientation(float orientation)
+{
+    SetOrientation(orientation);
+    if (IsVehicle())
+        GetVehicleKit()->RelocatePassengers(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 }
 
 void Unit::SendThreatListUpdate()

@@ -35,6 +35,11 @@ Script Data End */
 enum Achievements
 {
     ACHIEV_TIMED_START_EVENT                      = 20387,
+
+    ACHIEV_POKE_IN_THE_EYE                        = 1869,
+    ACHIEV_POKE_IN_THE_EYE_H                      = 1870,
+    ACHIEV_POKE_IN_THE_EYE_COUNT                  = 9,
+    ACHIEV_POKE_IN_THE_EYE_H_COUNT                = 21,
 };
 
 enum Events
@@ -226,7 +231,6 @@ public:
 
         void Reset()
         {
-
             _Reset();
 
             _bersekerTimer = 0;
@@ -258,6 +262,8 @@ public:
             targetGuid3 = 0;
             summonGuid1 = 0;
             summonGuid2 = 0;
+
+            participants.clear();
 
             std::list<Creature*> despawnCreatureList;
             me->GetCreatureListWithEntryInGrid(despawnCreatureList, NPC_ARCANE_OVERLOAD, 250.0f);
@@ -364,6 +370,8 @@ public:
 
             SetPhase(PHASE_THREE, true);
 
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
             // this despawns Hover Disks
             summons.DespawnAll();
             // players that used Hover Disk are no in the aggro list
@@ -382,7 +390,10 @@ public:
             }
 
             if (GameObject* go = GameObject::GetGameObject(*me, instance->GetData64(DATA_PLATFORM)))
+            {
                 go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED); // In sniffs it has this flag, but i don't know how is applied.
+                go->EnableCollision(false);
+            }
 
             // pos sniffed
             me->GetMotionMaster()->MoveIdle();
@@ -432,7 +443,26 @@ public:
             DoCast(SPELL_BERSEKER); // periodic aura, first tick in 10 minutes
 
             if (instance)
+            {
                 instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
+
+                // Remember players that were in Zone when combat started, relevant for Poke in the Eye Achievement
+                Map* _map = me->GetMap();
+                Map::PlayerList const& _playerList = _map->GetPlayers();
+
+                for (Map::PlayerList::const_iterator itr = _playerList.begin(); itr != _playerList.end(); ++itr)
+                {
+                    if (Player* player = itr->getSource())
+                    {
+                        if (player->isGameMaster())
+                            continue;
+
+                        participants.push_back(player->GetGUID());
+                    }
+                }
+
+            }
+
         }
 
         void KilledUnit(Unit* who)
@@ -640,8 +670,7 @@ public:
                     break;
                 case MOVE_DEEP_BREATH_ROTATION:
                     _currentPos = _currentPos == MALYGOS_MAX_WAYPOINTS - 1 ? 0 : _currentPos+1;
-                    me->GetMotionMaster()->MovementExpired();
-                    me->GetMotionMaster()->MovePoint(MOVE_DEEP_BREATH_ROTATION, MalygosPhaseTwoWaypoints[_currentPos]);
+                    _delayedMovement = true;
                     break;
                 case MOVE_INIT_PHASE_ONE:
                     me->SetInCombatWithZone();
@@ -661,9 +690,11 @@ public:
 
             me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
             me->SetFlying(true);
-
+            me->GetMotionMaster()->Clear();
             me->GetMotionMaster()->MoveIdle();
             me->GetMotionMaster()->MovePoint(MOVE_DEEP_BREATH_ROTATION, MalygosPhaseTwoWaypoints[0]);
+
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
             for (uint8 i = 0; i < RAID_MODE(2, 6); i++)
             {
@@ -972,6 +1003,13 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
+            // ugly hackfix for poke in the eye...
+            if (participants.size() < uint32(DUNGEON_MODE(ACHIEV_POKE_IN_THE_EYE_COUNT, ACHIEV_POKE_IN_THE_EYE_H_COUNT)))
+                if (AchievementEntry const* pAE = GetAchievementStore()->LookupEntry(DUNGEON_MODE(ACHIEV_POKE_IN_THE_EYE, ACHIEV_POKE_IN_THE_EYE_H)))
+                    for (std::list<uint64>::const_iterator itr = participants.begin(); itr != participants.end(); ++itr)
+                        if (Player* player = ObjectAccessor::FindPlayer((*itr)))
+                            player->CompletedAchievement(pAE);
+
             Talk(SAY_DEATH);
             _JustDied();
         }
@@ -997,6 +1035,8 @@ public:
         bool updateOrientationPhase3;
 
         uint64 targetGuid1, targetGuid2, targetGuid3, summonGuid1, summonGuid2;
+
+        std::list<uint64> participants;
     };
 
 };
@@ -1256,11 +1296,17 @@ public:
                 {
                     if (malygos->HasAura(SPELL_VORTEX_1))
                     {
-                        me->GetMotionMaster()->MoveIdle();
+                        if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
+                        {
+                            me->StopMoving();
+                            me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MoveIdle();
+                        }
+
                         return;
                     }
 
-                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
+                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
                         me->GetMotionMaster()->MoveFollow(malygos, 0.0f, 0.0f);
                 }
             }
@@ -1273,6 +1319,7 @@ public:
                 _falling = true;
                 damage = 0;
                 me->GetMotionMaster()->MoveFall();
+                me->GetMotionMaster()->Clear();
                 me->GetMotionMaster()->MoveIdle();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 DoCast(me, SPELL_POWER_SPARK_DEATH, true);

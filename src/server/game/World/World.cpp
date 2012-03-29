@@ -1454,6 +1454,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading SpellInfo store...");
     sSpellMgr->LoadSpellInfoStore();
 
+    sLog->outString("Loading SkillLineAbilityMultiMap Data...");
+    sSpellMgr->LoadSkillLineAbilityMap();
+
     sLog->outString("Loading spell custom attributes...");
     sSpellMgr->LoadSpellCustomAttr();
 
@@ -1465,9 +1468,6 @@ void World::SetInitialWorldSettings()
 
     sLog->outString("Loading Instance Template...");
     sObjectMgr->LoadInstanceTemplate();
-
-    sLog->outString("Loading SkillLineAbilityMultiMap Data...");
-    sSpellMgr->LoadSkillLineAbilityMap();
 
     // Must be called before `creature_respawn`/`gameobject_respawn` tables
     sLog->outString("Loading instances...");
@@ -3344,36 +3344,39 @@ void World::SendCustomPvpInformationUpdate()
             {
                 if ((*itr).second)
                 {
-                    // Only count rated arena matches
-                    if ((*itr).second->isArena() && (*itr).second->isRated())
+                    // Only count active matches
+                    if ((*itr).second->GetStatus() >= STATUS_WAIT_JOIN && (*itr).second->GetStatus() != STATUS_WAIT_LEAVE)
                     {
-                        switch ((*itr).second->GetArenaType())
+                        // Only count rated arena matches
+                        if ((*itr).second->isArena() && (*itr).second->isRated())
                         {
-                            case 2:
-                                arenaCount2vs2++;
-                                break;
-                            case 3:
-                                arenaCount3vs3++;
-                                break;
-                            case 5:
-                                arenaCount5vs5++;
-                                break;
-                            default:
-                                break;
+                            switch ((*itr).second->GetArenaType())
+                            {
+                                case 2:
+                                    arenaCount2vs2++;
+                                    break;
+                                case 3:
+                                    arenaCount3vs3++;
+                                    break;
+                                case 5:
+                                    arenaCount5vs5++;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            continue;
                         }
 
-                        continue;
-                    }
-
-                    // For battlegrounds, count for each bracket
-                    if ((*itr).second->isBattleground() && (*itr).second->GetStatus() >= STATUS_WAIT_JOIN)
-                    {
+                        // For battlegrounds, count for each bracket
+                        if ((*itr).second->isBattleground())
+                        {
                         std::map<uint32, std::pair<uint32, uint32> >::iterator itr2 = storedBattlegroundCounts.find((*itr).second->GetMinLevel());
 
-                        if (itr2 != storedBattlegroundCounts.end())
-                            itr2->second.second++;
-                        else
-                            storedBattlegroundCounts.insert(std::pair<uint32, std::pair<uint32, uint32> >((*itr).second->GetMinLevel(), std::pair<uint32, uint32>((*itr).second->GetMaxLevel(), 1)));
+                            if (itr2 != storedBattlegroundCounts.end())
+                                itr2->second.second++;
+                            else
+                                storedBattlegroundCounts.insert(std::pair<uint32, std::pair<uint32, uint32> >((*itr).second->GetMinLevel(), std::pair<uint32, uint32>((*itr).second->GetMaxLevel(), 1)));
+                        }
                     }
                 }
             }
@@ -3407,20 +3410,29 @@ void World::SendCustomPvpInformationUpdate()
         if (!activeGameFound)
         {
             activeGameFound = true;
-            SendMessageToAllPlayersInChannel("pvp", "=== Aktive Schlachten ===:");
+            SendMessageToAllPlayersInChannel("pvp", "=== Aktive Schlachten ===");
         }
 
         if (arenaCount2vs2)
+        {
             messageActive << "2s Arena (Rated): " << arenaCount2vs2;
+            SendMessageToAllPlayersInChannel("pvp", messageActive.str());
+            messageActive.str("");
+        }
 
         if (arenaCount3vs3)
+        {
             messageActive << "3s Arena (Rated): " << arenaCount3vs3;
+            SendMessageToAllPlayersInChannel("pvp", messageActive.str());
+            messageActive.str("");
+        }
 
         if (arenaCount5vs5)
+        {
             messageActive << "5s Arena (Rated): " << arenaCount5vs5;
-
-        SendMessageToAllPlayersInChannel("pvp", messageActive.str());
-        messageActive.str("");
+            SendMessageToAllPlayersInChannel("pvp", messageActive.str());
+            messageActive.str("");
+        }
     }
 }
 
