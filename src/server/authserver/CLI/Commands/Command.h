@@ -26,6 +26,7 @@
 #define __COMMAND_H__
 
 #include <string>
+#include <queue>
 
 /**
  *  @brief    That class represents a base class for commands.
@@ -40,6 +41,12 @@ class Command
 {
 public:
     /**
+     *  @brief  Command args should be passed via this type.
+     */
+    typedef std::queue<std::string /* arg */> CommandArgQueue;
+
+public:
+    /**
      *  @brief  That constructor registers the specific command
      *          to the CommandManager.
      *  @see    CommandManager::RegisterCommand()
@@ -47,13 +54,16 @@ public:
     Command(std::string const name);
 
     /**
-     *  @brief    This function should do a command's real work.
-     *  @details  This virtual function should be implemented by child class,
-     *            that child class is a concrete command implementation.
-     *            This function called in CLI's loop.
-     *  @see      CLITask::svc()
+     *  @brief      This function should do a command's real work.
+     *  @details    This virtual function should be implemented by child class,
+     *              that child class is a concrete command implementation.
+     *              This function called in CLI's loop.
+     *  @param[in]  args  A queue (Command::CommandArgQueue) which contains the args
+     *                    which passed to this command.
+     *  @see        CLITask::svc()
+     *  @see        Command::CommandArgQueue
      */
-    virtual void Execute() = 0;
+    virtual void Execute(CommandArgQueue& args) = 0;
 
     /**
      *  @brief   Return swith the command's name.

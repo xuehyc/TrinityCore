@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <ctime>
+#include <sstream>
 
 #include "SystemConfig.h"
 #include "Util.h"
@@ -43,7 +44,7 @@ class Command_Test : public Command
 public:
     Command_Test() : Command("test") {}
 
-    /* virtual */ void Execute()
+    /* virtual */ void Execute(Command::CommandArgQueue& /* args */)
     {
         std::cout << "Hello World!" << std::endl;
         LOG_TRACE("Command executed.");
@@ -66,7 +67,7 @@ class Command_Info : public Command
 public:
     Command_Info() : Command("info") {}
 
-    /* virtual */ void Execute()
+    /* virtual */ void Execute(Command::CommandArgQueue& /* args */)
     {
         std::cout << _FULLVERSION << std::endl
                   << "Uptime: " << secsToTimeString(sRealmdManager->GetUpTime()) << std::endl;
@@ -86,7 +87,7 @@ class Command_Shutdown : public Command
 public:
     Command_Shutdown() : Command("shutdown") {}
 
-    /* virtual */ void Execute()
+    /* virtual */ void Execute(Command::CommandArgQueue& /* args */)
     {
         extern bool stopEvent; // forward declaration from Main.cpp
         stopEvent = true;

@@ -55,27 +55,45 @@ CLITask::CLITask()
     while (_running)
     {
         std::cout << "TC> "; // prompt
-        std::string input = "";
-        std::cin >> input;
-        // try to find a command for the input
-        if (Command* cmd = sCommandManager->FindCommand(input))
+
+        std::string buffer;
+        std::string command;
+        Command::CommandArgQueue args;
+
+        getline(std::cin, buffer); // get all the input line
+        std::stringbuf strBuf(buffer);
+        // convert to istream, then we can easly extract args from it
+        std::istream inputStream(&strBuf);
+
+        inputStream >> command >> std::ws;
+
+        // try to find a command
+        if (Command* cmd = sCommandManager->FindCommand(command))
         {
             std::ostringstream oss;
-            oss << "Command found: \"" << input << "\" and executing it...";
+            oss << "Command found: \"" << command << "\" and executing it...";
             LOG_TRACE(oss.str());
 
-            cmd->Execute(); // if find a valid: execute it
+            while (!inputStream.eof())
+            {
+                std::string arg;
+                inputStream >> arg >> std::ws;
+                args.push(arg);
+            }
+
+            cmd->Execute(args); // if find a valid: execute it
 
             // reset the stream
             oss.str(std::string());
             oss.clear();
-            oss << "Command executed: \"" << input << "\".";
+
+            oss << "Command executed: \"" << command << "\".";
             LOG_TRACE(oss.str());
         }
         else
         {
             std::ostringstream oss;
-            oss << "Unknown command: \"" << input << "\".";
+            oss << "Unknown command: \"" << command << "\".";
             LOG_TRACE(oss.str());
         }
     }
