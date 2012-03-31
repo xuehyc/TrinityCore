@@ -35,6 +35,7 @@
 #include "CLITask.h"
 #include "RealmdManager.h"
 #include "LogTrace.h"
+#include "BanManager.h"
 
 #ifndef _TRINITY_REALM_CONFIG
 # define _TRINITY_REALM_CONFIG  "authserver.conf"
@@ -225,6 +226,8 @@ extern int main(int argc, char **argv)
     }
     else
         sLog->SetLogDB(false);
+
+    sBanManager->LoadBans();
 
     CLITask* cliThread = new CLITask();
     cliThread->Start(); // start the CLI

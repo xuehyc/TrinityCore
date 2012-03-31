@@ -18,35 +18,36 @@
 
 /**
  *  @file
- *  @brief   Implementation of the CommandManager class.
+ *  @brief   This file contains all the timers which related to bans.
  *  @author  Anubisss <anubisss210@gmail.com>
  */
 
-#include "CommandManager.h"
+#ifndef __BAN_TIMERS_H__
+#define __BAN_TIMERS_H__
 
-#include <sstream>
+#include <ace/Event_Handler.h>
 
 #include "LogTrace.h"
+#include "BanManager.h"
 
-CommandManager::~CommandManager()
+/**
+ *  @brief  This class is a timer which deletes the expired IP bans.
+ */
+
+class DeleteExpiredIPBansTimer : public ACE_Event_Handler
 {
-    for (CommandMap_ConstItr itr = _commands.begin(); itr != _commands.end(); ++itr)
-        delete itr->second;
-    _commands.clear();
-}
+public:
+    /**
+     *  @brief  This function called when the timer expires.
+     *  @see    BanManager::DeleteExpiredIpBans()
+     */
+    /* virtual */ int handle_timeout(ACE_Time_Value const& /* TV */,
+                                     void const* /* ACT = NULL */)
+    {
+        LOG_TRACE("Timeout.");
+        sBanManager->DeleteExpiredIpBans();
+        return 0;
+    }
+};
 
-Command* CommandManager::FindCommand(std::string const name)
-{
-    if (_commands.find(name) == _commands.end())
-        return NULL;
-    return _commands[name];
-}
-
-void CommandManager::RegisterCommand(std::string const name, Command* cmdPtr)
-{
-    _commands[name] = cmdPtr;
-
-    std::ostringstream oss;
-    oss << "Command registered with the CommandManager: \"" << name << "\"";
-    LOG_TRACE(oss.str());
-}
+#endif /* __BAN_TIMERS_H__ */

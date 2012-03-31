@@ -32,7 +32,7 @@
 
 /**
  *  @brief    Command line interface thread.
- *  @details  Inherit from class ACE_Task_Base which makes the task
+ *  @details  Inherited from class ACE_Task_Base which makes the task
  *            to running on a new thread.
  */
 
@@ -45,7 +45,7 @@ public:
     CLITask();
 
     /**
-     *  @brief  Create a new thread and enter into its loop.
+     *  @brief  Creates a new thread and enter into its loop.
      *  @see    svc()
      */
     void Start()
@@ -55,7 +55,7 @@ public:
         activate();
     }
     /**
-     *  @brief  Stop the loop.
+     *  @brief  Stops the loop.
      *  @see    svc()
      */
     void Stop()

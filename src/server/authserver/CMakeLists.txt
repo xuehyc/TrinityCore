@@ -11,6 +11,7 @@
 ########### authserver ###############
 
 file(GLOB_RECURSE sources_authentication Authentication/*.cpp Authentication/*.h)
+file(GLOB_RECURSE sources_ban Ban/*.cpp Ban/*.h)
 file(GLOB_RECURSE sources_cli CLI/*.cpp CLI/*.h)
 file(GLOB_RECURSE sources_log_trace LogTrace/*.cpp LogTrace/*.h)
 file(GLOB_RECURSE sources_realmd_manager RealmdManager/*.cpp RealmdManager/*.h)
@@ -32,6 +33,7 @@ endif()
 set(authserver_SRCS
   ${authserver_SRCS}
   ${sources_authentication}
+  ${sources_ban}
   ${sources_cli}
   ${sources_log_trace}
   ${sources_realmd_manager}
@@ -61,6 +63,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/Authentication
+  ${CMAKE_CURRENT_SOURCE_DIR}/Ban
   ${CMAKE_CURRENT_SOURCE_DIR}/CLI
   ${CMAKE_CURRENT_SOURCE_DIR}/CLI/Commands
   ${CMAKE_CURRENT_SOURCE_DIR}/LogTrace

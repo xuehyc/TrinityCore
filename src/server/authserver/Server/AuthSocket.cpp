@@ -29,6 +29,7 @@
 #include "AuthCodes.h"
 #include "SHA1.h"
 #include "openssl/crypto.h"
+#include "BanManager.h"
 
 #define ChunkSize 2048
 
@@ -355,14 +356,8 @@ bool AuthSocket::_HandleLogonChallenge()
     pkt << (uint8)AUTH_LOGON_CHALLENGE;
     pkt << (uint8)0x00;
 
-    // Verify that this IP is not in the ip_banned table
-    LoginDatabase.Execute(LoginDatabase.GetPreparedStatement(LOGIN_DEL_EXPIRED_IP_BANS));
-
     const std::string& ip_address = socket().getRemoteAddress();
-    PreparedStatement *stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_IP_BANNED);
-    stmt->setString(0, ip_address);
-    PreparedQueryResult result = LoginDatabase.Query(stmt);
-    if (result)
+    if (sBanManager->IsIPBanned(ip_address))
     {
         pkt << (uint8)WOW_FAIL_BANNED;
         sLog->outBasic("'%s:%d' [AuthChallenge] Banned ip tries to login!",socket().getRemoteAddress().c_str(), socket().getRemotePort());
@@ -371,7 +366,7 @@ bool AuthSocket::_HandleLogonChallenge()
     {
         // Get the account details from the account table
         // No SQL injection (prepared statement)
-        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_LOGONCHALLENGE);
+        PreparedStatement *stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_LOGONCHALLENGE);
         stmt->setString(0, _login);
 
         PreparedQueryResult res2 = LoginDatabase.Query(stmt);
