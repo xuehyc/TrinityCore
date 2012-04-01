@@ -63,6 +63,7 @@ enum eEnums
     SPELL_TAIL_LASH_H                           = 58957,    // A sweeping tail strike hits all enemies behind the caster, inflicting 4375 to 5625 damage and stunning them for 2 sec.
     SPELL_WILL_OF_SARTHARION                    = 61254,    // Sartharion's presence bolsters the resolve of the Twilight Drakes, increasing their total health by 25%. This effect also increases Sartharion's health by 25%.
     SPELL_LAVA_STRIKE                           = 57571,    // (Real spell casted should be 57578) 57571 then trigger visual missile, then summon Lava Blaze on impact(spell 57572)
+    SPELL_LAVA_STRIKE_EFFECT1                   = 57591,
     SPELL_TWILIGHT_REVENGE                      = 60639,
 
     SPELL_PYROBUFFET                            = 57557,    // currently used for hard enrage after 15 minutes
@@ -271,7 +272,8 @@ public:
 
         uint32 m_uiCheckPlayerTimer;
         bool hasSoftEnraged;
-        bool giveVolcanoAchievement;
+
+        std::set<uint64> playersHitByLavaStrike;
 
         void Reset()
         {
@@ -296,7 +298,8 @@ public:
 
             m_uiLavaStrikeTimer = 15000;
             m_uiCheckPlayerTimer = 2000;
-            giveVolcanoAchievement = true;
+
+            playersHitByLavaStrike.clear();
 
             if (me->HasAura(SPELL_TWILIGHT_REVENGE))
                 me->RemoveAurasDueToSpell(SPELL_TWILIGHT_REVENGE);
@@ -399,13 +402,6 @@ public:
             }
         }
 
-        void SetData(uint32 id, uint32 value)
-        {
-            if (id == 1)
-                if (value == 1)
-                    giveVolcanoAchievement = false;
-        }
-
         void JustReachedHome()
         {
             if (instance)
@@ -447,11 +443,6 @@ public:
                     pVesperon->DisappearAndDie();
 
                 instance->SetData(TYPE_SARTHARION_EVENT, DONE);
-
-                if (giveVolcanoAchievement)
-                {
-                    instance->DoCompleteAchievement(RAID_MODE(ACHIEV_VULCAN, H_ACHIEV_VULCAN));
-                }
             }
         }
 
@@ -669,6 +660,17 @@ public:
                             if (i->getSource() && i->getSource()->isAlive())
                                 DoScriptText(WHISPER_LAVA_CHURN, me, i->getSource());
                 }
+        }
+
+        void SpellHitTarget(Unit* who, SpellInfo const* spell)
+        {
+            if (who && who->GetTypeId() == TYPEID_PLAYER && spell->Id == SPELL_LAVA_STRIKE_EFFECT1)
+                playersHitByLavaStrike.insert(who->GetGUID());
+        }
+
+        bool wasPlayerHitByLavaStrike(uint64 guid)
+        {
+            return playersHitByLavaStrike.count(guid) == 0;
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -1832,11 +1834,6 @@ public:
             {
                 if (pSpell->Id == SPELL_FLAME_TSUNAMI_DMG_AURA)
                 {
-                    if (InstanceScript* instance = me->GetInstanceScript())
-                        if (Creature* Sartharion = Unit::GetCreature((*me), instance->GetData64(DATA_SARTHARION)))
-                            if (Sartharion->AI())
-                                Sartharion->AI()->SetData(1, 1);
-
                     if (isRightDirection)
                     {
                         if (target->GetPositionX() > 3276.0)
@@ -2033,6 +2030,26 @@ class achievement_twilight_zone : public AchievementCriteriaScript
         }
 };
 
+class achievement_volcano_blows : public AchievementCriteriaScript
+{
+    public:
+        achievement_volcano_blows() : AchievementCriteriaScript("achievement_volcano_blows")
+        {
+        }
+
+        bool OnCheck(Player* player, Unit* target)
+        {
+            if (!target)
+                return false;
+
+            if (boss_sartharion::boss_sartharionAI* sartharionAI = CAST_AI(boss_sartharion::boss_sartharionAI, target->GetAI()))
+                return sartharionAI->wasPlayerHitByLavaStrike(player->GetGUID());
+
+            return false;
+        }
+};
+
+
 class go_portal_sartharion : public GameObjectScript
 {
     public:
@@ -2184,5 +2201,6 @@ void AddSC_boss_sartharion()
     new achievement_twilight_assist();
     new achievement_twilight_duo();
     new achievement_twilight_zone();
+    new achievement_volcano_blows();
     new go_portal_sartharion();
 }
