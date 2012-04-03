@@ -1037,10 +1037,7 @@ class spell_cultist_dark_martyrdom : public SpellScriptLoader
             {
                 if (GetCaster()->isSummon())
                     if (Unit* owner = GetCaster()->ToTempSummon()->GetSummoner())
-                    {
-                        sLog->outString("Cultist::DarkMartyrdom -- I am %u", GetCaster()->GetGUID());
                         owner->GetAI()->SetGUID(GetCaster()->GetGUID(), GUID_CULTIST);
-                    }
 
                 GetCaster()->Kill(GetCaster());
                 GetCaster()->SetDisplayId(uint32(GetCaster()->GetEntry() == NPC_CULT_FANATIC ? 38009 : 38010));
