@@ -178,7 +178,7 @@ enum DeprogrammingData
 
 enum Data
 {
-    DATA_PHASEMASK          = 1,
+    DATA_CANCEL_MARTYRDOM_P2          = 1,
 };
 
 enum Achievements
@@ -377,9 +377,8 @@ class boss_lady_deathwhisper : public CreatureScript
                     damage -= me->GetPower(POWER_MANA);
                     me->SetPower(POWER_MANA, 0);
                     me->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
-                    for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
-                        if (Unit* unit = ObjectAccessor::GetUnit(*me, *itr))
-                            unit->GetAI()->SetData(DATA_PHASEMASK, PHASE_TWO); // let summons know we hit phase two, so they stop martyrdom casting
+                    summons.DoAction(NPC_CULT_FANATIC, DATA_CANCEL_MARTYRDOM_P2);
+                    summons.DoAction(NPC_CULT_ADHERENT, DATA_CANCEL_MARTYRDOM_P2);
                     events.SetPhase(PHASE_TWO);
                     events.ScheduleEvent(EVENT_P2_FROSTBOLT, urand(10000, 12000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_P2_FROSTBOLT_VOLLEY, urand(19000, 21000), 0, PHASE_TWO);
@@ -585,7 +584,8 @@ class boss_lady_deathwhisper : public CreatureScript
                     return;
 
                 Talk(SAY_ANIMATE_DEAD);
-                cultist->Respawn();
+                if (cultist->isDead())
+                    cultist->Respawn();
                 // transformation does not work on dead npcs...
                 DoCast(cultist, SPELL_DARK_MARTYRDOM_T);
             }
@@ -655,7 +655,6 @@ class npc_cult_fanatic : public CreatureScript
 
             void Reset()
             {
-                phase = PHASE_ONE; // spawns only happen in PHASE_ONE
                 Events.Reset();
                 Events.ScheduleEvent(EVENT_FANATIC_NECROTIC_STRIKE, urand(10000, 12000));
                 Events.ScheduleEvent(EVENT_FANATIC_SHADOW_CLEAVE, urand(14000, 16000));
@@ -676,10 +675,10 @@ class npc_cult_fanatic : public CreatureScript
                 }
             }
 
-            void SetData(uint32 type, uint32 data)
+            void DoAction(int32 const action)
             {
-                if (type == DATA_PHASEMASK)
-                    phase = data;
+                if (action == DATA_CANCEL_MARTYRDOM_P2)
+                    Events.CancelEvent(EVENT_CULTIST_DARK_MARTYRDOM);
             }
 
             void UpdateAI(uint32 const diff)
@@ -694,9 +693,6 @@ class npc_cult_fanatic : public CreatureScript
 
                 while (uint32 eventId = Events.ExecuteEvent())
                 {
-                    if (phase == PHASE_TWO && eventId == EVENT_CULTIST_DARK_MARTYRDOM)
-                        continue;
-
                     switch (eventId)
                     {
                         case EVENT_FANATIC_NECROTIC_STRIKE:
@@ -720,8 +716,6 @@ class npc_cult_fanatic : public CreatureScript
 
                 DoMeleeAttackIfReady();
             }
-        private:
-            uint32 phase;
 
         protected:
             EventMap Events;
@@ -744,7 +738,6 @@ class npc_cult_adherent : public CreatureScript
 
             void Reset()
             {
-                phase = PHASE_ONE; // spawns only happen in PHASE_ONE
                 Events.Reset();
                 Events.ScheduleEvent(EVENT_ADHERENT_FROST_FEVER, urand(10000, 12000));
                 Events.ScheduleEvent(EVENT_ADHERENT_DEATHCHILL, urand(14000, 16000));
@@ -766,10 +759,10 @@ class npc_cult_adherent : public CreatureScript
                 }
             }
 
-            void SetData(uint32 type, uint32 data)
+            void DoAction(int32 const action)
             {
-                if (type == DATA_PHASEMASK)
-                    phase = data;
+                if (action == DATA_CANCEL_MARTYRDOM_P2)
+                    Events.CancelEvent(EVENT_CULTIST_DARK_MARTYRDOM);
             }
 
             void UpdateAI(uint32 const diff)
@@ -784,9 +777,6 @@ class npc_cult_adherent : public CreatureScript
 
                 while (uint32 eventId = Events.ExecuteEvent())
                 {
-                    if (phase == PHASE_TWO && eventId == EVENT_CULTIST_DARK_MARTYRDOM)
-                        continue;
-
                     switch (eventId)
                     {
                         case EVENT_ADHERENT_FROST_FEVER:
@@ -818,8 +808,6 @@ class npc_cult_adherent : public CreatureScript
 
                 DoMeleeAttackIfReady();
             }
-        private:
-            uint32 phase;
 
         protected:
             EventMap Events;
