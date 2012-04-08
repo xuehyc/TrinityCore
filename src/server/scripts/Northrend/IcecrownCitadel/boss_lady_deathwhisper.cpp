@@ -176,6 +176,11 @@ enum DeprogrammingData
     POINT_DESPAWN           = 384721,
 };
 
+enum Data
+{
+    DATA_CANCEL_MARTYRDOM_P2          = 1,
+};
+
 enum Achievements
 {
     ACHIEVEMENT_FULL_HOUSE_10 = 4535,
@@ -372,6 +377,8 @@ class boss_lady_deathwhisper : public CreatureScript
                     damage -= me->GetPower(POWER_MANA);
                     me->SetPower(POWER_MANA, 0);
                     me->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
+                    summons.DoAction(NPC_CULT_FANATIC, DATA_CANCEL_MARTYRDOM_P2);
+                    summons.DoAction(NPC_CULT_ADHERENT, DATA_CANCEL_MARTYRDOM_P2);
                     events.SetPhase(PHASE_TWO);
                     events.ScheduleEvent(EVENT_P2_FROSTBOLT, urand(10000, 12000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_P2_FROSTBOLT_VOLLEY, urand(19000, 21000), 0, PHASE_TWO);
@@ -577,6 +584,9 @@ class boss_lady_deathwhisper : public CreatureScript
                     return;
 
                 Talk(SAY_ANIMATE_DEAD);
+                if (cultist->isDead())
+                    cultist->Respawn();
+                // transformation does not work on dead npcs...
                 DoCast(cultist, SPELL_DARK_MARTYRDOM_T);
             }
 
@@ -665,6 +675,12 @@ class npc_cult_fanatic : public CreatureScript
                 }
             }
 
+            void DoAction(int32 const action)
+            {
+                if (action == DATA_CANCEL_MARTYRDOM_P2)
+                    Events.CancelEvent(EVENT_CULTIST_DARK_MARTYRDOM);
+            }
+
             void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
@@ -741,6 +757,12 @@ class npc_cult_adherent : public CreatureScript
                     me->InterruptNonMeleeSpells(true);
                     DoCast(me, SPELL_DARK_EMPOWERMENT);
                 }
+            }
+
+            void DoAction(int32 const action)
+            {
+                if (action == DATA_CANCEL_MARTYRDOM_P2)
+                    Events.CancelEvent(EVENT_CULTIST_DARK_MARTYRDOM);
             }
 
             void UpdateAI(uint32 const diff)
