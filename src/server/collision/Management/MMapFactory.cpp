@@ -40,7 +40,9 @@ namespace MMAP
     {
         Unit* unit = NULL;
         if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, mapId, unit))
-            return sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS);
+            return true;
+
+        return sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS);
     }
 
     void MMapFactory::clear()
