@@ -195,9 +195,8 @@ void Map::LoadMap(int gx, int gy, bool reload)
     // loading data
     GridMaps[gx][gy] = new GridMap();
     if (!GridMaps[gx][gy]->loadData(tmp))
-    {
         sLog->outError("Error loading map file: \n %s\n", tmp);
-    }
+
     delete [] tmp;
 
     sScriptMgr->OnLoadGridMap(this, GridMaps[gx][gy], gx, gy);
@@ -206,9 +205,11 @@ void Map::LoadMap(int gx, int gy, bool reload)
 void Map::LoadMapAndVMap(int gx, int gy)
 {
     LoadMap(gx, gy);
-    LoadMMap(gx, gy);
     if (i_InstanceId == 0)
+    {
         LoadVMap(gx, gy);                                   // Only load the data for the base map
+        LoadMMap(gx, gy);
+    }
 }
 
 void Map::InitStateMachine()
