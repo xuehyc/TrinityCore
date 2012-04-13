@@ -127,7 +127,7 @@ else
 fi
 echo | tee -a $LOG_FILE
 
-echo "`date`: Start extracting dataz for TrinityCore, DBCs/maps $USE_AD, vmaps $USE_VMAPS, mmaps $USE_MMAPS on $NUM_CPU processes" | tee $DETAIL_LOG_FILE
+echo "`date`: Start extracting dataz for TrinityCore, DBCs/maps $USE_MAPS, vmaps $USE_VMAPS, mmaps $USE_MMAPS on $NUM_CPU processes" | tee $DETAIL_LOG_FILE
 echo | tee -a $DETAIL_LOG_FILE
 
 ## Extract dbcs and maps
