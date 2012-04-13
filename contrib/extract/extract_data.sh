@@ -97,7 +97,7 @@ then
 fi
 
 ## Give some status
-echo "Current Settings: Extract DBCs/maps: $USE_AD, Extract vmaps: $USE_VMAPS, Extract mmaps: $USE_MMAPS on $NUM_CPU processes"
+echo "Current Settings: Extract DBCs/maps: $USE_MAPS, Extract vmaps: $USE_VMAPS, Extract mmaps: $USE_MMAPS on $NUM_CPU processes"
 if [ "$1" != "a" ]
 then
   echo "If you don't like this settings, interrupt with CTRL+C"
@@ -107,7 +107,7 @@ fi
 echo "`date`: Start extracting dataz for TrinityCore" | tee $LOG_FILE
 
 ## Handle log messages
-if [ "$USE_AD" = "1" ];
+if [ "$USE_MAPS" = "1" ];
 then
   echo "DBC and map files will be extracted" | tee -a $LOG_FILE
 else
@@ -131,7 +131,7 @@ echo "`date`: Start extracting dataz for TrinityCore, DBCs/maps $USE_AD, vmaps $
 echo | tee -a $DETAIL_LOG_FILE
 
 ## Extract dbcs and maps
-if [ "$USE_AD" = "1" ]
+if [ "$USE_MAPS" = "1" ]
 then
  echo "`date`: Start extraction of DBCs and map files..." | tee -a $LOG_FILE
  ad | tee -a $DETAIL_LOG_FILE
