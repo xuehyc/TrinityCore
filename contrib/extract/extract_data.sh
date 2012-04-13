@@ -134,7 +134,7 @@ echo | tee -a $DETAIL_LOG_FILE
 if [ "$USE_MAPS" = "1" ]
 then
  echo "`date`: Start extraction of DBCs and map files..." | tee -a $LOG_FILE
- ad | tee -a $DETAIL_LOG_FILE
+ mapextractor | tee -a $DETAIL_LOG_FILE
  echo "`date`: Extracting of DBCs and map files finished" | tee -a $LOG_FILE
  echo | tee -a $LOG_FILE
  echo | tee -a $DETAIL_LOG_FILE
