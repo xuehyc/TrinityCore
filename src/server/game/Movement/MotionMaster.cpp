@@ -120,9 +120,10 @@ void MotionMaster::DirectClean(bool reset)
 {
     while (size() > 1)
     {
-        MovementGenerator *curr = top();
+        MovementGenerator* curr = top();
         pop();
-        if (curr) DirectDelete(curr);
+        if (curr)
+            DirectDelete(curr);
     }
 
     if (needInitTop())

@@ -124,9 +124,6 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
         return true;
     }
 
-    //if (!i_target->isInAccessiblePlaceFor(&owner))
-    //    return false;
-
     // prevent movement while casting spells with cast time or channel time
     if (owner.IsNonMeleeSpellCasted(false, false,  true))
     {
