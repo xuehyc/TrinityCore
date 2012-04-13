@@ -43,8 +43,8 @@ template<class T>
 void ConfusedMovementGenerator<T>::Reset(T &unit)
 {
     i_nextMoveTime.Reset(0);
-    unit.StopMoving();
     unit.AddUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_CONFUSED_MOVE);
+    unit.StopMoving();
 }
 
 template<class T>
