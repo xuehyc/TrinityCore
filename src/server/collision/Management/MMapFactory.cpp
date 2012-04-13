@@ -19,6 +19,7 @@
 #include "MMapFactory.h"
 #include "World.h"
 #include "Config.h"
+#include "DisableMgr.h"
 #include <set>
 
 namespace MMAP
@@ -26,9 +27,6 @@ namespace MMAP
     // ######################## MMapFactory ########################
     // our global singleton copy
     MMapManager* g_MMapManager = NULL;
-
-    // stores list of mapids which do not use pathfinding
-    std::set<uint32>* g_mmapDisabledIds = NULL;
 
     MMapManager* MMapFactory::createOrGetMMapManager()
     {
@@ -38,38 +36,15 @@ namespace MMAP
         return g_MMapManager;
     }
 
-    void MMapFactory::preventPathfindingOnMaps(const char* ignoreMapIds)
-    {
-        if (!g_mmapDisabledIds)
-            g_mmapDisabledIds = new std::set<uint32>();
-
-        uint32 strLenght = strlen(ignoreMapIds)+1;
-        char* mapList = new char[strLenght];
-        memcpy(mapList, ignoreMapIds, sizeof(char)*strLenght);
-
-        char* idstr = strtok(mapList, ",");
-        while (idstr)
-        {
-            g_mmapDisabledIds->insert(uint32(atoi(idstr)));
-            idstr = strtok(NULL, ",");
-        }
-
-        delete[] mapList;
-    }
-
     bool MMapFactory::IsPathfindingEnabled(uint32 mapId)
     {
-        return sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS);
+        Unit* unit = NULL;
+        if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, mapId, unit))
+            return sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS);
     }
 
     void MMapFactory::clear()
     {
-        if (g_mmapDisabledIds)
-        {
-            delete g_mmapDisabledIds;
-            g_mmapDisabledIds = NULL;
-        }
-
         if (g_MMapManager)
         {
             delete g_MMapManager;
