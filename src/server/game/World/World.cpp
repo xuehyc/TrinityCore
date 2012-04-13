@@ -1123,6 +1123,7 @@ void World::LoadConfigSettings(bool reload)
         sLog->outString("Using DataDir %s", m_dataPath.c_str());
     }
 
+    // MMap related
     m_bool_configs[CONFIG_ENABLE_MMAPS] = ConfigMgr::GetBoolDefault("mmap.enablePathFinding", true);
     sLog->outString("WORLD: MMap data directory is: %smmaps", m_dataPath.c_str());
 
