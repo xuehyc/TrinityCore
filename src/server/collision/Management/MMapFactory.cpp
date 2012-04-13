@@ -25,7 +25,7 @@ namespace MMAP
 {
     // ######################## MMapFactory ########################
     // our global singleton copy
-    MMapManager *g_MMapManager = NULL;
+    MMapManager* g_MMapManager = NULL;
 
     // stores list of mapids which do not use pathfinding
     std::set<uint32>* g_mmapDisabledIds = NULL;
@@ -59,8 +59,7 @@ namespace MMAP
 
     bool MMapFactory::IsPathfindingEnabled(uint32 mapId)
     {
-        bool enablePathfinding = ConfigMgr::GetBoolDefault("mmap.enablePathFinding", true);
-        return enablePathfinding && g_mmapDisabledIds->find(mapId) == g_mmapDisabledIds->end();
+        return sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS);
     }
 
     void MMapFactory::clear()
