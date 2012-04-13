@@ -38,8 +38,7 @@ namespace MMAP
 
     bool MMapFactory::IsPathfindingEnabled(uint32 mapId)
     {
-        Unit* unit = NULL;
-        if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, mapId, unit))
+        if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, mapId, NULL))
             return true;
 
         return sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS);
