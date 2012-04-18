@@ -733,11 +733,11 @@ class npc_putricide_ooze : public CreatureScript
 
         struct npc_putricide_oozeAI : public ScriptedAI
         {
-            npc_putricide_oozeAI(Creature* creature) : ScriptedAI(creature) {}
+            npc_putricide_oozeAI(Creature* creature) : ScriptedAI(creature) { }            
 
             void Reset()
-            {
-                _CheckTimer = 1000;
+            {                
+                _CheckTimer = 4000; 
                 _securityCounter = 0;
                 _oozeMode = false;
                 _gasMode = false;
@@ -910,7 +910,7 @@ class npc_putricide_ooze : public CreatureScript
                             me->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, me, false);
                     }
 
-                    _CheckTimer = 1000;
+                    _CheckTimer = 3000;
                 }
                 else
                     _CheckTimer -= diff;
