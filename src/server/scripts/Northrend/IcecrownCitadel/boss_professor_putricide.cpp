@@ -737,7 +737,8 @@ class npc_putricide_ooze : public CreatureScript
 
             void Reset()
             {                
-                _CheckTimer = 1000; 
+                _CheckTimer = 1000;
+                _TargetSelectTimer = 0;  
                 _securityCounter = 0;
                 _oozeMode = false;
                 _gasMode = false;
@@ -814,118 +815,115 @@ class npc_putricide_ooze : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if(_TargetSelectTimer <= diff)
+                // Start checking here
+                if (_CheckTimer <= diff)
                 {
-                    // Start checking here
-                    if (_CheckTimer <= diff)
+                    // Process new target search here
+                    if (_needSearchNewTarget && (_TargetSelectTimer <= diff))
                     {
-                        // Trigger explosion effect
-                        if (me->getVictim())
-                        {
-                            if (me->GetDistance(me->getVictim()) < 3.0f && TargetHasMyAttackingSpell(me->getVictim()))
-                            {
-                                if (_oozeMode)
-                                    DoCastVictim(SPELL_OOZE_ERUPTION_SEARCH, true);
-                                else if (_gasMode)
-                                    DoCastVictim(SPELL_EXPUNGED_GAS, true);
-                            }
-                        }
-
-                        // Stop moving and continue moving in relation to Tear Gas stun ability of Putricide on all players
-                        if (me->getVictim() && me->GetMotionMaster())
-                        {
-                            if (me->getVictim()->HasAura(SPELL_TEAR_GAS_1) || me->getVictim()->HasAura(SPELL_TEAR_GAS_2))
-                            {
-                                if (!_movementDisabled)
-                                {
-                                    _movementDisabled = true;
-                                    me->StopMoving();
-                                    me->GetMotionMaster()->Clear();
-                                    me->GetMotionMaster()->MoveIdle();
-                                }
-                            }
-                            else
-                            {
-                                if (_movementDisabled)
-                                {
-                                    _movementDisabled = false;
-                                    me->GetMotionMaster()->MovePoint(0, me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ());
-                                }
-                            }
-                        }
-
-                        // Security check - after 4 sec after spellcast a victim having our attacking spell should be found
-                        if (_enableSecurityCheck)
-                        {
-                            if (_securityCounter < 4)
-                                _securityCounter++;
-                            else if (_securityCounter == 4)
-                            {
-                                _enableSecurityCheck = false;
-
-                                if (!me->getVictim())
-                                    me->DespawnOrUnsummon();
-
-                                if (me->getVictim())
-                                    if (!TargetHasMyAttackingSpell(me->getVictim()))
-                                        me->DespawnOrUnsummon();
-                            }
-                        }
-
-                        // Our victim had the attacking spell active => Enable system for target switching, if victim does not have attacking spell anymore
-                        if (me->getVictim())
-                        {
-                            if (TargetHasMyAttackingSpell(me->getVictim()))
-                            {
-                                _victimFound = true;
-
-                                // Move POINT to target, move chase will skip because of spellcasting
-                                if (!_movementDisabled)
-                                    if (me->GetMotionMaster())
-                                        me->GetMotionMaster()->MovePoint(0, me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ());
-                            }
-                        }
-
-                        // Only check for new targets, if new target search has not been scheduled yet and a victim has already been set by spell casting
-                        if (!_needSearchNewTarget && _victimFound)
-                        {
-                            // Search new target if no victim
-                            if (!me->getVictim())
-                            {
-                                _TargetSelectTimer = 3000;
-                                _needSearchNewTarget = true;
-                            }
-
-                            // Search new target if victim does not have our attacking aura OR victim is dead OR victim is not attackable
-                            if (me->getVictim() && (!TargetHasMyAttackingSpell(me->getVictim()) || !me->getVictim()->isAlive() || !me->IsValidAttackTarget(me->getVictim())))
-                            {
-                                _TargetSelectTimer = 3000;
-                                _needSearchNewTarget = true;
-                            }
-                        }
-
-                        // Process new target search here
-                        if (_needSearchNewTarget && (_TargetSelectTimer < diff))
-                        {
-                            _needSearchNewTarget = false;
-                            _victimFound = false;
-                            _securityCounter = 0;
-                            _enableSecurityCheck = true;
-
-                            if (_oozeMode)
-                                me->CastSpell(me, SPELL_VOLATILE_OOZE_ADHESIVE, false);
-                            else if (_gasMode)
-                                me->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, me, false);
-                        }
-
-                        _CheckTimer = 1000;
+                        _needSearchNewTarget = false;
+                        _victimFound = false;
+                        _securityCounter = 0;
+                        _enableSecurityCheck = true;
+                        sLog->outString(">> PP: Ooze searching for target...");
+                        if (_oozeMode)
+                            me->CastSpell(me, SPELL_VOLATILE_OOZE_ADHESIVE, false);
+                        else if (_gasMode)
+                            me->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, me, false);
                     }
-                    else
-                        _CheckTimer -= diff;
+
+                    // Trigger explosion effect
+                    if (me->getVictim())
+                    {
+                        if (me->GetDistance(me->getVictim()) < 3.0f && TargetHasMyAttackingSpell(me->getVictim()))
+                        {
+                            if (_oozeMode)
+                                DoCastVictim(SPELL_OOZE_ERUPTION_SEARCH, true);
+                            else if (_gasMode)
+                                DoCastVictim(SPELL_EXPUNGED_GAS, true);
+                        }
+                    }
+
+                    // Stop moving and continue moving in relation to Tear Gas stun ability of Putricide on all players
+                    if (me->getVictim() && me->GetMotionMaster())
+                    {
+                        if (me->getVictim()->HasAura(SPELL_TEAR_GAS_1) || me->getVictim()->HasAura(SPELL_TEAR_GAS_2))
+                        {
+                            if (!_movementDisabled)
+                            {
+                                _movementDisabled = true;
+                                me->StopMoving();
+                                me->GetMotionMaster()->Clear();
+                                me->GetMotionMaster()->MoveIdle();
+                            }
+                        }
+                        else
+                        {
+                            if (_movementDisabled)
+                            {
+                                _movementDisabled = false;
+                                me->GetMotionMaster()->MovePoint(0, me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ());
+                            }
+                        }
+                    }
+
+                    // Security check - after 4 sec after spellcast a victim having our attacking spell should be found
+                    if (_enableSecurityCheck)
+                    {
+                        if (_securityCounter < 4)
+                            _securityCounter++;
+                        else if (_securityCounter == 4)
+                        {
+                            _enableSecurityCheck = false;
+
+                            if (!me->getVictim())
+                                me->DespawnOrUnsummon();
+
+                            if (me->getVictim())
+                                if (!TargetHasMyAttackingSpell(me->getVictim()))
+                                    me->DespawnOrUnsummon();
+                        }
+                    }
+
+                    // Our victim had the attacking spell active => Enable system for target switching, if victim does not have attacking spell anymore
+                    if (me->getVictim())
+                    {
+                        if (TargetHasMyAttackingSpell(me->getVictim()))
+                        {
+                            _victimFound = true;
+
+                            // Move POINT to target, move chase will skip because of spellcasting
+                            if (!_movementDisabled)
+                                if (me->GetMotionMaster())
+                                    me->GetMotionMaster()->MovePoint(0, me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ());
+                        }
+                    }
+
+                    // Only check for new targets, if new target search has not been scheduled yet and a victim has already been set by spell casting
+                    if (!_needSearchNewTarget && _victimFound)
+                    {
+                        // Search new target if no victim
+                        if (!me->getVictim())
+                        {
+                            _TargetSelectTimer = 2000;
+                            _needSearchNewTarget = true;
+                        }
+
+                        // Search new target if victim does not have our attacking aura OR victim is dead OR victim is not attackable
+                        if (me->getVictim() && (!TargetHasMyAttackingSpell(me->getVictim()) || !me->getVictim()->isAlive() || !me->IsValidAttackTarget(me->getVictim())))
+                        {
+                            _TargetSelectTimer = 2000;
+                            _needSearchNewTarget = true;
+                        }
+                    }                    
+
+                    _CheckTimer = 1000;
                 }
                 else
-                    _TargetSelectTimer -= diff;
+                    _CheckTimer -= diff;
                 
+                if(_TargetSelectTimer > diff)
+                    _TargetSelectTimer -= diff;
             }
 
         private:
