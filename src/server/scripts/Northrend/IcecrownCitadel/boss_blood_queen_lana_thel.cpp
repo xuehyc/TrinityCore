@@ -924,7 +924,9 @@ class achievement_once_bitten_twice_shy_n : public AchievementCriteriaScript
                 return false;
 
             if (LanaThelAI* lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
-                return !lanaThelAI->WasVampire(source->GetGUID());
+                if (lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
+                    return !lanaThelAI->WasVampire(source->GetGUID());
+
             return false;
         }
 };
@@ -940,8 +942,46 @@ class achievement_once_bitten_twice_shy_v : public AchievementCriteriaScript
                 return false;
 
             if (LanaThelAI* lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
-                return lanaThelAI->WasVampire(source->GetGUID());
+                if (lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
+                    return lanaThelAI->WasVampire(source->GetGUID());
+
             return false;
+        }
+};
+
+class achievement_once_bitten_twice_shy_n25 : public AchievementCriteriaScript
+{
+    public:
+        achievement_once_bitten_twice_shy_n25() : AchievementCriteriaScript("achievement_once_bitten_twice_shy_n25") { }
+
+        bool OnCheck(Player* source, Unit* target)
+        {
+            if (!target)
+                return false;
+
+            if (LanaThelAI* lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
+                if (lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                    return !lanaThelAI->WasVampire(source->GetGUID());
+
+            return false;
+        }
+};
+
+class achievement_once_bitten_twice_shy_v25 : public AchievementCriteriaScript
+{
+    public:
+        achievement_once_bitten_twice_shy_v25() : AchievementCriteriaScript("achievement_once_bitten_twice_shy_v25") { }
+
+        bool OnCheck(Player* source, Unit* target)
+        {
+            if (!target)
+                return false;
+
+            if (LanaThelAI* lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
+                if (lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                    return lanaThelAI->WasVampire(source->GetGUID());
+
+             return false;
         }
 };
 
@@ -997,5 +1037,7 @@ void AddSC_boss_blood_queen_lana_thel()
     new spell_blood_queen_pact_of_the_darkfallen_dmg_target();
     new achievement_once_bitten_twice_shy_n();
     new achievement_once_bitten_twice_shy_v();
+    new achievement_once_bitten_twice_shy_n25();
+    new achievement_once_bitten_twice_shy_v25();
     new spell_blood_queen_uncontrollable_frenzy();
 }
