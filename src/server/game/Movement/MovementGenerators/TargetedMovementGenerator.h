@@ -40,7 +40,7 @@ class TargetedMovementGeneratorMedium : public MovementGeneratorMedium< T, D >, 
     protected:
         TargetedMovementGeneratorMedium(Unit &target, float offset, float angle) :
             TargetedMovementGeneratorBase(target), i_recheckDistance(0), i_path(NULL),
-            i_offset(offset), i_angle(angle),
+            i_offset(offset), i_angle(angle), i_targetSearchingTimer(0),
             i_recalculateTravel(false), i_targetReached(false)
         {
         }
@@ -57,6 +57,7 @@ class TargetedMovementGeneratorMedium : public MovementGeneratorMedium< T, D >, 
         void _setTargetLocation(T &);
 
         TimeTrackerSmall i_recheckDistance;
+        uint32 i_targetSearchingTimer;
         float i_offset;
         float i_angle;
         bool i_recalculateTravel : 1;
