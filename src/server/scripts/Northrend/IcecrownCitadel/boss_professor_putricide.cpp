@@ -733,11 +733,12 @@ class npc_putricide_ooze : public CreatureScript
 
         struct npc_putricide_oozeAI : public ScriptedAI
         {
-            npc_putricide_oozeAI(Creature* creature) : ScriptedAI(creature) {}
+            npc_putricide_oozeAI(Creature* creature) : ScriptedAI(creature) { }            
 
             void Reset()
-            {
+            {                
                 _CheckTimer = 1000;
+                _TargetSelectTimer = 0;  
                 _securityCounter = 0;
                 _oozeMode = false;
                 _gasMode = false;
@@ -817,6 +818,20 @@ class npc_putricide_ooze : public CreatureScript
                 // Start checking here
                 if (_CheckTimer <= diff)
                 {
+                    // Process new target search here
+                    if (_needSearchNewTarget && (_TargetSelectTimer <= diff))
+                    {
+                        _needSearchNewTarget = false;
+                        _victimFound = false;
+                        _securityCounter = 0;
+                        _enableSecurityCheck = true;
+                        sLog->outString(">> PP: Ooze searching for target...");
+                        if (_oozeMode)
+                            me->CastSpell(me, SPELL_VOLATILE_OOZE_ADHESIVE, false);
+                        else if (_gasMode)
+                            me->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, me, false);
+                    }
+
                     // Trigger explosion effect
                     if (me->getVictim())
                     {
@@ -889,35 +904,31 @@ class npc_putricide_ooze : public CreatureScript
                     {
                         // Search new target if no victim
                         if (!me->getVictim())
+                        {
+                            _TargetSelectTimer = 2000;
                             _needSearchNewTarget = true;
+                        }
 
                         // Search new target if victim does not have our attacking aura OR victim is dead OR victim is not attackable
                         if (me->getVictim() && (!TargetHasMyAttackingSpell(me->getVictim()) || !me->getVictim()->isAlive() || !me->IsValidAttackTarget(me->getVictim())))
+                        {
+                            _TargetSelectTimer = 2000;
                             _needSearchNewTarget = true;
-                    }
-
-                    // Process new target search here
-                    if (_needSearchNewTarget)
-                    {
-                        _needSearchNewTarget = false;
-                        _victimFound = false;
-                        _securityCounter = 0;
-                        _enableSecurityCheck = true;
-
-                        if (_oozeMode)
-                            me->CastSpell(me, SPELL_VOLATILE_OOZE_ADHESIVE, false);
-                        else if (_gasMode)
-                            me->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, me, false);
-                    }
+                        }
+                    }                    
 
                     _CheckTimer = 1000;
                 }
                 else
                     _CheckTimer -= diff;
+                
+                if(_TargetSelectTimer > diff)
+                    _TargetSelectTimer -= diff;
             }
 
         private:
             uint32 _CheckTimer;
+            uint32 _TargetSelectTimer;
             uint8 _securityCounter;
             bool _oozeMode;
             bool _gasMode;
