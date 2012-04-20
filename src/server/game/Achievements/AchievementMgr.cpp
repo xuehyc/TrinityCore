@@ -867,7 +867,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
         AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
         if (!achievement)
             continue;
-
         if (!CanUpdateCriteria(achievementCriteria, achievement))
             continue;
 
@@ -2246,8 +2245,9 @@ bool AchievementMgr::CanUpdateCriteria(AchievementCriteriaEntry const* criteria,
     if (DisableMgr::IsDisabledFor(DISABLE_TYPE_ACHIEVEMENT_CRITERIA, criteria->ID, NULL))
         return false;
 
-    if (achievement->mapID != -1 && GetPlayer()->GetMapId() != uint32(achievement->mapID))
-        return false;
+    if (criteria->ID != 12780 && criteria->ID != 13011) // ignore wrong dbc data mapID for Once bitten, twice shy (10 players)
+        if (achievement->mapID != -1 && GetPlayer()->GetMapId() != uint32(achievement->mapID))
+            return false;
 
     if ((achievement->requiredFaction == ACHIEVEMENT_FACTION_HORDE    && GetPlayer()->GetTeam() != HORDE) ||
         (achievement->requiredFaction == ACHIEVEMENT_FACTION_ALLIANCE && GetPlayer()->GetTeam() != ALLIANCE))
