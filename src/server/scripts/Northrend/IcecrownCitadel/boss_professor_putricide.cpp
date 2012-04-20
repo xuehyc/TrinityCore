@@ -312,7 +312,7 @@ class boss_professor_putricide : public CreatureScript
                     case NPC_VOLATILE_OOZE:
                         // no possible aura seen in sniff adding the aurastate
                         summon->ModifyAuraState(AURA_STATE_UNKNOWN19, true);
-                        //summon->CastSpell(summon, SPELL_VOLATILE_OOZE_ADHESIVE, false);
+                        // summon->CastSpell(summon, SPELL_VOLATILE_OOZE_ADHESIVE, false);
                         summon->SetReactState(REACT_PASSIVE);
                         return;
                     case NPC_CHOKING_GAS_BOMB:
@@ -733,11 +733,11 @@ class npc_putricide_ooze : public CreatureScript
 
         struct npc_putricide_oozeAI : public ScriptedAI
         {
-            npc_putricide_oozeAI(Creature* creature) : ScriptedAI(creature) { }            
+            npc_putricide_oozeAI(Creature* creature) : ScriptedAI(creature) {}
 
             void Reset()
-            {                
-                _CheckTimer = 1000;  
+            {
+                _CheckTimer = 1000;
                 _securityCounter = 0;
                 _oozeMode = false;
                 _gasMode = false;
@@ -824,7 +824,7 @@ class npc_putricide_ooze : public CreatureScript
                         _victimFound = false;
                         _securityCounter = 0;
                         _enableSecurityCheck = true;
-                        sLog->outString(">> PP: Ooze searching for target...");
+
                         if (_oozeMode)
                             me->CastSpell(me, SPELL_VOLATILE_OOZE_ADHESIVE, false);
                         else if (_gasMode)
@@ -908,13 +908,14 @@ class npc_putricide_ooze : public CreatureScript
                         // Search new target if victim does not have our attacking aura OR victim is dead OR victim is not attackable
                         if (me->getVictim() && (!TargetHasMyAttackingSpell(me->getVictim()) || !me->getVictim()->isAlive() || !me->IsValidAttackTarget(me->getVictim())))
                             _needSearchNewTarget = true;
-                        
-                    }                    
+                    }
 
+                    // Delay new target search here
                     if (_needSearchNewTarget)
                     {
                         _CheckTimer = 4000;
-                    }                    
+                        return;
+                    }
 
                     _CheckTimer = 1000;
                 }
