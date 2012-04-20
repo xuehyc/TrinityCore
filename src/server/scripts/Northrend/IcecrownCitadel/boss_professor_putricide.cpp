@@ -306,13 +306,13 @@ class boss_professor_putricide : public CreatureScript
                         // no possible aura seen in sniff adding the aurastate
                         summon->ModifyAuraState(AURA_STATE_UNKNOWN22, true);
                         summon->CastSpell(summon, SPELL_GASEOUS_BLOAT_PROC, true);
-                        summon->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, summon, false);
+                        // summon->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, summon, false);
                         summon->SetReactState(REACT_PASSIVE);
                         return;
                     case NPC_VOLATILE_OOZE:
                         // no possible aura seen in sniff adding the aurastate
                         summon->ModifyAuraState(AURA_STATE_UNKNOWN19, true);
-                        summon->CastSpell(summon, SPELL_VOLATILE_OOZE_ADHESIVE, false);
+                        //summon->CastSpell(summon, SPELL_VOLATILE_OOZE_ADHESIVE, false);
                         summon->SetReactState(REACT_PASSIVE);
                         return;
                     case NPC_CHOKING_GAS_BOMB:
@@ -737,12 +737,11 @@ class npc_putricide_ooze : public CreatureScript
 
             void Reset()
             {                
-                _CheckTimer = 1000;
-                _TargetSelectTimer = 0;  
+                _CheckTimer = 1000;  
                 _securityCounter = 0;
                 _oozeMode = false;
                 _gasMode = false;
-                _victimFound = false;
+                _victimFound = true;
                 _needSearchNewTarget = false;
                 _movementDisabled = false;
                 _enableSecurityCheck = true;
@@ -819,7 +818,7 @@ class npc_putricide_ooze : public CreatureScript
                 if (_CheckTimer <= diff)
                 {
                     // Process new target search here
-                    if (_needSearchNewTarget && (_TargetSelectTimer <= diff))
+                    if (_needSearchNewTarget)
                     {
                         _needSearchNewTarget = false;
                         _victimFound = false;
@@ -904,31 +903,27 @@ class npc_putricide_ooze : public CreatureScript
                     {
                         // Search new target if no victim
                         if (!me->getVictim())
-                        {
-                            _TargetSelectTimer = 2000;
                             _needSearchNewTarget = true;
-                        }
 
                         // Search new target if victim does not have our attacking aura OR victim is dead OR victim is not attackable
                         if (me->getVictim() && (!TargetHasMyAttackingSpell(me->getVictim()) || !me->getVictim()->isAlive() || !me->IsValidAttackTarget(me->getVictim())))
-                        {
-                            _TargetSelectTimer = 2000;
                             _needSearchNewTarget = true;
-                        }
+                        
+                    }                    
+
+                    if (_needSearchNewTarget)
+                    {
+                        _CheckTimer = 4000;
                     }                    
 
                     _CheckTimer = 1000;
                 }
                 else
                     _CheckTimer -= diff;
-                
-                if(_TargetSelectTimer > diff)
-                    _TargetSelectTimer -= diff;
             }
 
         private:
             uint32 _CheckTimer;
-            uint32 _TargetSelectTimer;
             uint8 _securityCounter;
             bool _oozeMode;
             bool _gasMode;
