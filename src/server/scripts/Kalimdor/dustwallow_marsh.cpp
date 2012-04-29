@@ -713,7 +713,7 @@ class spell_ooze_zap : public SpellScriptLoader
                 if (!GetCaster()->HasAura(GetSpellInfo()->Effects[EFFECT_1].CalcValue()))
                     return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW; // This is actually correct
 
-                if (!GetTargetUnit())
+                if (!GetExplTargetUnit())
                     return SPELL_FAILED_BAD_TARGETS;
 
                 return SPELL_CAST_OK;
@@ -847,7 +847,7 @@ public:
                 player->KilledMonsterCredit(NPC_THERAMORE_PRISONER, 0);
 
             prisoner->AI()->Talk(SAY_FREE); // We also emote cry here (handled in creature_text.emote)
-            prisoner->ForcedDespawn(6000);
+            prisoner->DespawnOrUnsummon(6000);
         }
         return true;
     }
