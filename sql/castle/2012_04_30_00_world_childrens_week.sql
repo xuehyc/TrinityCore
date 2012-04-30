@@ -104,6 +104,12 @@ UPDATE `quest_template` SET `StartScript` = 13934 WHERE `Id` = 13934;
 DELETE FROM `quest_start_scripts` WHERE `id` = 13934;
 INSERT INTO `quest_start_scripts` (id, delay, command, datalong, datalong2, dataint, x, y, z, o) VALUES
 (13934, 0, 7, 13934, 10, 0, 0, 0, 0, 0);
+DELETE FROM `creature_involvedrelation` WHERE `quest` = 13957;
+INSERT INTO `creature_involvedrelation` (id, quest) VALUES (27986, 13957);
+UPDATE `quest_template` SET `StartScript` = 13957 WHERE `Id` = 13957;
+DELETE FROM `quest_start_scripts` WHERE `id` = 13957;
+INSERT INTO `quest_start_scripts` (id, delay, command, datalong, datalong2, dataint, x, y, z, o) VALUES
+(13957, 0, 7, 13957, 10, 0, 0, 0, 0, 0);
 -- Cleanup queries
 -- DELETE FROM `character_queststatus` WHERE `quest` IN (1468, 558, 1687, 1479, 1558, 4822, 171, 172, 5502, 925, 910, 911, 1800, 915, 10943, 10952, 10950, 10966, 10954, 10956, 10968, 10962, 10942, 10951, 10967, 10945, 11975, 10963, 10953, 10960, 13926, 13937, 13959, 13956, 13950, 13929, 13933, 13954, 13927, 13960, 13930, 13951, 13934, 13955, 13957, 13938);
 -- DELETE FROM `character_queststatus_rewarded` WHERE `quest` IN (1468, 558, 1687, 1479, 1558, 4822, 171, 172, 5502, 925, 910, 911, 1800, 915, 10943, 10952, 10950, 10966, 10954, 10956, 10968, 10962, 10942, 10951, 10967, 10945, 11975, 10963, 10953, 10960, 13926, 13937, 13959, 13956, 13950, 13929, 13933, 13954, 13927, 13960, 13930, 13951, 13934, 13955, 13957, 13938);
