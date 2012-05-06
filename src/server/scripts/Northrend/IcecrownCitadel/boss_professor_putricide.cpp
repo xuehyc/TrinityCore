@@ -746,6 +746,9 @@ class npc_putricide_ooze : public CreatureScript
                 _movementDisabled = false;
                 _enableSecurityCheck = true;
 
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+
                 switch (me->GetEntry())
                 {
                     // Volatile Ooze
