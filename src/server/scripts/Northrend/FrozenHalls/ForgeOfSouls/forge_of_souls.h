@@ -26,6 +26,7 @@ enum Data
     DATA_DEVOURER           = 1,
     DATA_DEVOURER_EVENT     = 2,
     DATA_TEAM_IN_INSTANCE   = 3,
+    DATA_SOUL_FRAGMENTS     = 4,
 };
 
 enum Creatures
@@ -47,5 +48,6 @@ enum Creatures
     NPC_CHAMPION_1_ALLIANCE                       = 37496,
     NPC_CHAMPION_2_ALLIANCE                       = 37497,
     NPC_CRUCIBLE_OF_SOULS                         = 37094,
+    NPC_CORRUPT_SOUL                              = 36535,
 };
 #endif

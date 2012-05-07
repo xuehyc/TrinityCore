@@ -80,6 +80,8 @@ class boss_bronjahm : public CreatureScript
 
             void Reset()
             {
+                _soulFragmentCount = 0;
+
                 events.Reset();
                 events.SetPhase(PHASE_1);
                 events.ScheduleEvent(EVENT_SHADOW_BOLT, 2000);
@@ -87,6 +89,14 @@ class boss_bronjahm : public CreatureScript
                 events.ScheduleEvent(EVENT_CORRUPT_SOUL, urand(25000, 35000), 0, PHASE_1);
 
                 instance->SetBossState(DATA_BRONJAHM, NOT_STARTED);
+            }
+
+            uint32 GetData(uint32 type)
+            {
+                if (type == DATA_SOUL_FRAGMENTS)
+                    return _soulFragmentCount;
+
+                return 0;
             }
 
             void JustReachedHome()
@@ -106,6 +116,7 @@ class boss_bronjahm : public CreatureScript
             {
                 DoScriptText(SAY_DEATH, me);
 
+                summons.DespawnAll();
                 instance->SetBossState(DATA_BRONJAHM, DONE);
             }
 
@@ -115,8 +126,15 @@ class boss_bronjahm : public CreatureScript
                     DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+            void DamageTaken(Unit* /*attacker*/, uint32& damage)
             {
+                if (damage >= me->GetHealth())
+                    // Soul Power Achievement
+                    for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
+                        if (Unit* unit = ObjectAccessor::GetUnit(*me, *itr))
+                            if (unit->isAlive() && unit->GetEntry() == NPC_CORRUPT_SOUL)
+                                _soulFragmentCount++;
+
                 if (events.GetPhaseMask() & (1 << PHASE_1) && !HealthAbovePct(30))
                 {
                     events.SetPhase(PHASE_2);
@@ -183,6 +201,9 @@ class boss_bronjahm : public CreatureScript
 
                 DoMeleeAttackIfReady();
             }
+
+        private:
+            uint8 _soulFragmentCount;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -405,6 +426,22 @@ class spell_bronjahm_soulstorm_targeting : public SpellScriptLoader
         }
 };
 
+class achievement_soul_power : public AchievementCriteriaScript
+{
+    public:
+        achievement_soul_power() : AchievementCriteriaScript("achievement_soul_power") { }
+
+        bool OnCheck(Player* /*source*/, Unit* target)
+        {
+            if (target)
+                if (Creature* bronjahm = target->ToCreature())
+                    if (bronjahm->AI()->GetData(DATA_SOUL_FRAGMENTS) >= 4)
+                        return true;
+
+            return false;
+        }
+};
+
 void AddSC_boss_bronjahm()
 {
     new boss_bronjahm();
@@ -414,4 +451,5 @@ void AddSC_boss_bronjahm()
     new spell_bronjahm_soulstorm_channel();
     new spell_bronjahm_soulstorm_visual();
     new spell_bronjahm_soulstorm_targeting();
+    new achievement_soul_power();
 }
