@@ -10027,7 +10027,11 @@ uint32 Player::GetItemCount(uint32 item, bool inBankAlso, Item* skipItem) const
 
     for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
         if (Bag* pBag = GetBagByPos(i))
+        {
+            if (pBag->GetEntry() == item)
+                count++;
             count += pBag->GetItemCount(item, skipItem);
+        }
 
     if (skipItem && skipItem->GetTemplate()->GemProperties)
         for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
@@ -10044,7 +10048,11 @@ uint32 Player::GetItemCount(uint32 item, bool inBankAlso, Item* skipItem) const
 
         for (uint8 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
             if (Bag* pBag = GetBagByPos(i))
+            {
+                if (pBag->GetEntry() == item)
+                    count++;
                 count += pBag->GetItemCount(item, skipItem);
+            }
 
         if (skipItem && skipItem->GetTemplate()->GemProperties)
             for (uint8 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
