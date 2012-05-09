@@ -114,9 +114,17 @@ class boss_bronjahm : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
+                // Soul Power Achievement
+                for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
+                    if (Unit* unit = ObjectAccessor::GetUnit(*me, *itr))
+                        if (unit->isAlive() && unit->GetEntry() == NPC_CORRUPT_SOUL)
+                            _soulFragmentCount++;
+
+                if (_soulFragmentCount >= 4)
+                    instance->DoCompleteAchievement(4522);
+
                 DoScriptText(SAY_DEATH, me);
 
-                summons.DespawnAll();
                 instance->SetBossState(DATA_BRONJAHM, DONE);
             }
 
@@ -128,13 +136,6 @@ class boss_bronjahm : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage)
             {
-                if (damage >= me->GetHealth())
-                    // Soul Power Achievement
-                    for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
-                        if (Unit* unit = ObjectAccessor::GetUnit(*me, *itr))
-                            if (unit->isAlive() && unit->GetEntry() == NPC_CORRUPT_SOUL)
-                                _soulFragmentCount++;
-
                 if (events.GetPhaseMask() & (1 << PHASE_1) && !HealthAbovePct(30))
                 {
                     events.SetPhase(PHASE_2);
@@ -226,7 +227,7 @@ class mob_corrupted_soul_fragment : public CreatureScript
 
             void MovementInform(uint32 type, uint32 id)
             {
-                if (type != CHASE_MOTION_TYPE)
+                if (type != FOLLOW_MOTION_TYPE)
                     return;
 
                 if (instance)
@@ -451,5 +452,5 @@ void AddSC_boss_bronjahm()
     new spell_bronjahm_soulstorm_channel();
     new spell_bronjahm_soulstorm_visual();
     new spell_bronjahm_soulstorm_targeting();
-    new achievement_soul_power();
+    // new achievement_soul_power();
 }
