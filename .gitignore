@@ -1,5 +1,6 @@
 bin*/
 build*/
+spellwork_cs*/
 .directory
 .mailmap
 *.orig
