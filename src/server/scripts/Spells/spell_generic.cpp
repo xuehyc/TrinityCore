@@ -2543,49 +2543,45 @@ class spell_gen_chaos_blast : public SpellScriptLoader
         }
 };
 
-enum
+enum ScarletRavenPriestImageSpells
 {
-    SPELL_SCARLET_RAVEN_PRIEST_IMAGE_MALE = 48763,
+    SPELL_SCARLET_RAVEN_PRIEST_IMAGE_MALE   = 48763,
     SPELL_SCARLET_RAVEN_PRIEST_IMAGE_FEMALE = 48761
 };
 
 class spell_gen_scarlet_raven_priest_image : public SpellScriptLoader
 {
-public:
-    spell_gen_scarlet_raven_priest_image() : SpellScriptLoader("spell_gen_scarlet_raven_priest_image") {}
+    public:
+        spell_gen_scarlet_raven_priest_image() : SpellScriptLoader("spell_gen_scarlet_raven_priest_image") {}
 
-    class spell_gen_scarlet_raven_priest_image_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_gen_scarlet_raven_priest_image_SpellScript)
-
-        bool Validate(SpellInfo const* /*SpellEntry*/)
+        class spell_gen_scarlet_raven_priest_image_SpellScript : public SpellScript
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SCARLET_RAVEN_PRIEST_IMAGE_MALE) || !sSpellMgr->GetSpellInfo(SPELL_SCARLET_RAVEN_PRIEST_IMAGE_FEMALE))
-                return false;
-            return true;
-        }
+            PrepareSpellScript(spell_gen_scarlet_raven_priest_image_SpellScript)
 
-        void HandleScript(SpellEffIndex  /*effIndex*/)
-        {            
-            if(Unit* target = GetHitUnit())
+            bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                if(Player* p = target->ToPlayer())
-                {
-                    p->CastSpell(p, p->getGender() == GENDER_FEMALE ? SPELL_SCARLET_RAVEN_PRIEST_IMAGE_FEMALE : SPELL_SCARLET_RAVEN_PRIEST_IMAGE_MALE, false);
-                }
-            }     
-        }
+                if (!sSpellMgr->GetSpellInfo(SPELL_SCARLET_RAVEN_PRIEST_IMAGE_MALE) || !sSpellMgr->GetSpellInfo(SPELL_SCARLET_RAVEN_PRIEST_IMAGE_FEMALE))
+                    return false;
+                return true;
+            }
 
-        void Register()
+            void HandleScript(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* target = GetHitUnit())
+                    if (Player* player = target->ToPlayer())
+                        player->CastSpell(player, player->getGender() == GENDER_FEMALE ? SPELL_SCARLET_RAVEN_PRIEST_IMAGE_FEMALE : SPELL_SCARLET_RAVEN_PRIEST_IMAGE_MALE, false);
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_gen_scarlet_raven_priest_image_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
         {
-            OnEffectHitTarget += SpellEffectFn(spell_gen_scarlet_raven_priest_image_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            return new spell_gen_scarlet_raven_priest_image_SpellScript();
         }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_gen_scarlet_raven_priest_image_SpellScript();
-    }
 };
 
 void AddSC_generic_spell_scripts()

@@ -456,9 +456,9 @@ public:
 
 enum eSkirmisher
 {
-    SPELL_RENEW_SKIRMISHER = 48812,
-    SPELL_RENEW_INFANTRY   = 48845,
-    CREDIT_NPC             = 27466,
+    SPELL_RENEW_SKIRMISHER  = 48812,
+    SPELL_RENEW_INFANTRY    = 48845,
+    CREDIT_NPC              = 27466,
 
     QUEST_LIFE_OR_DEATH    = 12296,
     QUEST_OVERWHELMED      = 12288,
@@ -466,9 +466,9 @@ enum eSkirmisher
     NPC_WOUNDED_INFANTRY   = 27482,
     NPC_WOUNDED_SKIRMISHER = 27463,
 
-    RANDOM_SAY_1           = -1800044,        //Ahh..better..
-    RANDOM_SAY_2           = -1800045,        //Whoa.. i nearly died there. Thank you, $Race!
-    RANDOM_SAY_3           = -1800046         //Thank you. $Class!
+    RANDOM_SAY_1             =  -1800044,        //Ahh..better..
+    RANDOM_SAY_2             =  -1800045,        //Whoa.. i nearly died there. Thank you, $Race!
+    RANDOM_SAY_3             =  -1800046         //Thank you. $Class!
 };
 
 class npc_wounded_skirmisher : public CreatureScript
@@ -496,8 +496,9 @@ public:
         void SpellHit(Unit* caster, const SpellInfo* spell)
         {
             if (caster->GetTypeId() == TYPEID_PLAYER)
+            {
                 if ((me->GetEntry() == NPC_WOUNDED_INFANTRY && spell->Id == SPELL_RENEW_INFANTRY && caster->ToPlayer()->GetQuestStatus(QUEST_LIFE_OR_DEATH) == QUEST_STATUS_INCOMPLETE) ||
-                        (me->GetEntry() == NPC_WOUNDED_SKIRMISHER && spell->Id == SPELL_RENEW_SKIRMISHER && caster->ToPlayer()->GetQuestStatus(QUEST_OVERWHELMED) == QUEST_STATUS_INCOMPLETE))
+                    (me->GetEntry() == NPC_WOUNDED_SKIRMISHER && spell->Id == SPELL_RENEW_SKIRMISHER && caster->ToPlayer()->GetQuestStatus(QUEST_OVERWHELMED) == QUEST_STATUS_INCOMPLETE))
                 {
                     caster->ToPlayer()->KilledMonsterCredit(CREDIT_NPC, 0);
                     DoScriptText(RAND(RANDOM_SAY_1, RANDOM_SAY_2, RANDOM_SAY_3), caster);
@@ -509,6 +510,7 @@ public:
                         me->DespawnOrUnsummon(DespawnTimer);
                     }
                 }
+            }
         }
 
         void UpdateAI(const uint32 /*diff*/)
@@ -699,12 +701,12 @@ public:
 
 void AddSC_grizzly_hills()
 {
-    new npc_emily();
-    new npc_mrfloppy();
-    new npc_outhouse_bunny();
-    new npc_tallhorn_stag();
-    new npc_amberpine_woodsman();
-    new npc_wounded_skirmisher();
+    new npc_emily;
+    new npc_mrfloppy;
+    new npc_outhouse_bunny;
+    new npc_tallhorn_stag;
+    new npc_amberpine_woodsman;
+    new npc_wounded_skirmisher;
     new npc_lightning_sentry();
     new npc_venture_co_straggler();
 }
