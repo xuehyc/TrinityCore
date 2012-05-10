@@ -1402,11 +1402,11 @@ void OutdoorPvPWG::UpdateTenacityStack()
     int32 newStack = 0;
 
     for (PlayerSet::iterator itr = m_players[TEAM_ALLIANCE].begin(); itr != m_players[TEAM_ALLIANCE].end(); ++itr)
-        if ((*itr)->getLevel() > 74)
+        if ((*itr)->getLevel() > 74 && !(*itr)->isGameMaster())
             ++allianceNum;
 
     for (PlayerSet::iterator itr = m_players[TEAM_HORDE].begin(); itr != m_players[TEAM_HORDE].end(); ++itr)
-        if ((*itr)->getLevel() > 74)
+        if ((*itr)->getLevel() > 74 && !(*itr)->isGameMaster())
             ++hordeNum;
 
     if (allianceNum && hordeNum)
@@ -1431,7 +1431,7 @@ void OutdoorPvPWG::UpdateTenacityStack()
     if (team != TEAM_NEUTRAL)
     {
         for (PlayerSet::const_iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
-            if ((*itr)->getLevel() > 74)
+            if ((*itr)->getLevel() > 74 && !(*itr)->isGameMaster())
                 (*itr)->RemoveAurasDueToSpell(SPELL_TENACITY);
 
         for (CreatureSet::const_iterator itr = m_vehicles[team].begin(); itr != m_vehicles[team].end(); ++itr)
@@ -1448,7 +1448,7 @@ void OutdoorPvPWG::UpdateTenacityStack()
             newStack = 20;
 
         for (PlayerSet::const_iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
-            if ((*itr)->getLevel() > 74)
+            if ((*itr)->getLevel() > 74 && !(*itr)->isGameMaster())
                 (*itr)->SetAuraStack(SPELL_TENACITY, (*itr), newStack);
 
         for (CreatureSet::const_iterator itr = m_vehicles[team].begin(); itr != m_vehicles[team].end(); ++itr)
