@@ -120,9 +120,6 @@ class boss_bronjahm : public CreatureScript
                         if (unit->isAlive() && unit->GetEntry() == NPC_CORRUPT_SOUL)
                             _soulFragmentCount++;
 
-                if (_soulFragmentCount >= 4)
-                    instance->DoCompleteAchievement(4522);
-
                 DoScriptText(SAY_DEATH, me);
 
                 instance->SetBossState(DATA_BRONJAHM, DONE);
@@ -452,5 +449,5 @@ void AddSC_boss_bronjahm()
     new spell_bronjahm_soulstorm_channel();
     new spell_bronjahm_soulstorm_visual();
     new spell_bronjahm_soulstorm_targeting();
-    // new achievement_soul_power();
+    new achievement_soul_power();
 }
