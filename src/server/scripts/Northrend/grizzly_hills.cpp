@@ -451,17 +451,24 @@ public:
     }
 };
 /*######
-## Quest 12288: Overwhelmed!
+## Quest 12288: Overwhelmed! / Quest: 12296: Life or Death
 ######*/
 
 enum eSkirmisher
 {
-    SPELL_RENEW_SKIRMISHER  = 48812,
-    CREDIT_NPC              = 27466,
+    SPELL_RENEW_SKIRMISHER = 48812,
+    SPELL_RENEW_INFANTRY   = 48845,
+    CREDIT_NPC             = 27466,
 
-    RANDOM_SAY_1             =  -1800044,        //Ahh..better..
-    RANDOM_SAY_2             =  -1800045,        //Whoa.. i nearly died there. Thank you, $Race!
-    RANDOM_SAY_3             =  -1800046         //Thank you. $Class!
+    QUEST_LIFE_OR_DEATH    = 12296,
+    QUEST_OVERWHELMED      = 12288,
+
+    NPC_WOUNDED_INFANTRY   = 27482,
+    NPC_WOUNDED_SKIRMISHER = 27463,
+
+    RANDOM_SAY_1           = -1800044,        //Ahh..better..
+    RANDOM_SAY_2           = -1800045,        //Whoa.. i nearly died there. Thank you, $Race!
+    RANDOM_SAY_3           = -1800046         //Thank you. $Class!
 };
 
 class npc_wounded_skirmisher : public CreatureScript
@@ -473,14 +480,11 @@ public:
     {
         npc_wounded_skirmisherAI(Creature* c) : ScriptedAI(c) {}
 
-        uint64 uiPlayerGUID;
-
         uint32 DespawnTimer;
 
         void Reset ()
         {
             DespawnTimer = 5000;
-            uiPlayerGUID = 0;
         }
 
         void MovementInform(uint32, uint32 id)
@@ -491,20 +495,20 @@ public:
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
         {
-            if (spell->Id == SPELL_RENEW_SKIRMISHER && caster->GetTypeId() == TYPEID_PLAYER
-                && caster->ToPlayer()->GetQuestStatus(12288) == QUEST_STATUS_INCOMPLETE)
-            {
-                caster->ToPlayer()->KilledMonsterCredit(CREDIT_NPC, 0);
-                DoScriptText(RAND(RANDOM_SAY_1, RANDOM_SAY_2, RANDOM_SAY_3), caster);
-                if (me->IsStandState())
-                    me->GetMotionMaster()->MovePoint(1, me->GetPositionX()+7, me->GetPositionY()+7, me->GetPositionZ());
-                else
+            if (caster->GetTypeId() == TYPEID_PLAYER)
+                if ((me->GetEntry() == NPC_WOUNDED_INFANTRY && spell->Id == SPELL_RENEW_INFANTRY && caster->ToPlayer()->GetQuestStatus(QUEST_LIFE_OR_DEATH) == QUEST_STATUS_INCOMPLETE) ||
+                        (me->GetEntry() == NPC_WOUNDED_SKIRMISHER && spell->Id == SPELL_RENEW_SKIRMISHER && caster->ToPlayer()->GetQuestStatus(QUEST_OVERWHELMED) == QUEST_STATUS_INCOMPLETE))
                 {
-                    me->SetStandState(UNIT_STAND_STATE_STAND);
-                    me->DespawnOrUnsummon(DespawnTimer);
+                    caster->ToPlayer()->KilledMonsterCredit(CREDIT_NPC, 0);
+                    DoScriptText(RAND(RANDOM_SAY_1, RANDOM_SAY_2, RANDOM_SAY_3), caster);
+                    if (me->IsStandState())
+                        me->GetMotionMaster()->MovePoint(1, me->GetPositionX()+7, me->GetPositionY()+7, me->GetPositionZ());
+                    else
+                    {
+                        me->SetStandState(UNIT_STAND_STATE_STAND);
+                        me->DespawnOrUnsummon(DespawnTimer);
+                    }
                 }
-
-            }
         }
 
         void UpdateAI(const uint32 /*diff*/)
@@ -693,84 +697,14 @@ public:
     };
 };
 
-/*######
-## Quest 12296: Life or Death!
-## Uses some definitions from the previous enum - they are commented out here
-######*/
-
-enum eInfantry
-{
-    SPELL_RENEW_INFANTRY    = 48845,
-    CREDIT_NPC_12296        = 27466,
-    QUEST_LIFE_OR_DEATH     = 12296,
-};
-
-class npc_wounded_infantry : public CreatureScript
-{
-public:
-    npc_wounded_infantry() : CreatureScript("npc_wounded_infantry") { }
-
-    struct npc_wounded_infantryAI : public ScriptedAI
-    {
-        npc_wounded_infantryAI(Creature *c) : ScriptedAI(c) {}
-
-        uint64 uiPlayerGUID;
-
-        uint32 DespawnTimer;
-
-        void Reset ()
-        {
-            DespawnTimer = 5000;
-            uiPlayerGUID = 0;
-        }
-
-        void MovementInform(uint32, uint32 id)
-        {
-            if (id == 1)
-                me->DespawnOrUnsummon(DespawnTimer);
-        }
-
-        void SpellHit(Unit *caster, const SpellEntry *spell)
-        {
-            if (spell->Id == SPELL_RENEW_INFANTRY && caster->GetTypeId() == TYPEID_PLAYER
-                && caster->ToPlayer()->GetQuestStatus(QUEST_LIFE_OR_DEATH) == QUEST_STATUS_INCOMPLETE)
-            {
-                caster->ToPlayer()->KilledMonsterCredit(CREDIT_NPC_12296, 0);
-                DoScriptText(RAND(RANDOM_SAY_1, RANDOM_SAY_2, RANDOM_SAY_3), caster);
-                if(me->IsStandState())
-                    me->GetMotionMaster()->MovePoint(1, me->GetPositionX()+7, me->GetPositionY()+7, me->GetPositionZ());
-                else
-                {
-                    me->SetStandState(UNIT_STAND_STATE_STAND);
-                    me->DespawnOrUnsummon(DespawnTimer);
-                }
-
-            }
-        }
-
-        void UpdateAI(const uint32 /*diff*/)
-        {
-            if (!UpdateVictim())
-                return;
-            DoMeleeAttackIfReady();
-        }
-    };
-
-    CreatureAI *GetAI(Creature *creature) const
-    {
-        return new npc_wounded_infantryAI(creature);
-    }
-};
-
 void AddSC_grizzly_hills()
 {
-    new npc_emily;
-    new npc_mrfloppy;
-    new npc_outhouse_bunny;
-    new npc_tallhorn_stag;
-    new npc_amberpine_woodsman;
-    new npc_wounded_skirmisher;
+    new npc_emily();
+    new npc_mrfloppy();
+    new npc_outhouse_bunny();
+    new npc_tallhorn_stag();
+    new npc_amberpine_woodsman();
+    new npc_wounded_skirmisher();
     new npc_lightning_sentry();
     new npc_venture_co_straggler();
-    new npc_wounded_infantry;
 }
