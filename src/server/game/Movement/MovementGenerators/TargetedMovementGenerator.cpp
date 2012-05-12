@@ -38,7 +38,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
         return;
 
     float x, y, z;
-    bool targetIsVictim = owner.getVictim() && owner.getVictim()->GetGUID() == i_target->GetGUID();
+
     //! Following block of code deleted by MrSmite in issue 4891
     //! Code kept for learning and diagnostical purposes
 //
@@ -54,7 +54,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
     {
         // to nearest contact position
         float dist = 0.0f;
-        if (targetIsVictim)
+        if (owner.getVictim() && owner.getVictim()->GetGUID() == i_target->GetGUID())
             dist = owner.GetFloatValue(UNIT_FIELD_COMBATREACH) + i_target->GetFloatValue(UNIT_FIELD_COMBATREACH) - i_target->GetObjectSize() - owner.GetObjectSize() - 1.0f;
 
         if (dist < 0.5f)
@@ -65,7 +65,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
     else
     {
         // to at i_offset distance from target and i_angle from target facing
-        i_target->GetClosePoint(x, y, z, owner.GetObjectSize(), i_offset, i_angle);
+        i_target->GetClosePoint(x, y, z, owner.GetCombatReach(), i_offset, i_angle);
     }
 
     if (!i_path)
@@ -121,12 +121,12 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
         return false;
 
     if (!&owner || !owner.isAlive())
-        return false;
+        return true;
 
     if (owner.HasUnitState(UNIT_STATE_NOT_MOVE))
     {
         D::_clearUnitStateMove(owner);
-        return false;
+        return true;
     }
 
     // prevent movement while casting spells with cast time or channel time
@@ -150,42 +150,22 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
         i_recheckDistance.Reset(RECHECK_DISTANCE_TIMER);
 
         //More distance let have better performance, less distance let have more sensitive reaction at target move.
-        G3D::Vector3 dest = owner.movespline->FinalDestination();
-        float allowed_dist = 0.0f;
-        bool targetIsVictim = owner.getVictim() && owner.getVictim()->GetGUID() == i_target->GetGUID();
-        if (targetIsVictim)
-            allowed_dist = owner.IsWithinMeleeRange(owner.getVictim()) - i_target->GetObjectSize();
+        float allowedDist = 0.0f;
+        if (owner.getVictim() && owner.getVictim()->GetGUID() == i_target->GetGUID())
+            allowedDist = owner.GetCombatReach() + i_target->GetCombatReach() + sWorld->getRate(RATE_TARGET_POS_RECALCULATION_RANGE) - 1.0f;
         else
-            allowed_dist = i_target->GetObjectSize() + owner.GetObjectSize() + sWorld->getRate(RATE_TARGET_POS_RECALCULATION_RANGE);
+            allowedDist = i_target->GetCombatReach() + owner.GetCombatReach() + sWorld->getRate(RATE_TARGET_POS_RECALCULATION_RANGE);
 
-        if (allowed_dist < owner.GetObjectSize())
-            allowed_dist = owner.GetObjectSize();
+        if (allowedDist < owner.GetCombatReach())
+            allowedDist = owner.GetCombatReach();
+
+        G3D::Vector3 dest = owner.movespline->FinalDestination();
 
         bool targetMoved = false;
-        if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->IsLevitating())
-            targetMoved = !i_target->IsWithinDist3d(dest.x, dest.y, dest.z, allowed_dist);
+        if (owner.GetTypeId() == TYPEID_UNIT && (((Creature*)&owner)->CanFly() || ((Creature*)&owner)->getVictim()))
+            targetMoved = !i_target->IsWithinDist3d(dest.x, dest.y, dest.z, allowedDist);
         else
-            targetMoved = !i_target->IsWithinDist2d(dest.x, dest.y, allowed_dist);
-
-        if (targetIsVictim && owner.GetTypeId() == TYPEID_UNIT && !((Creature*)&owner)->isPet())
-        {
-            if ((!owner.getVictim() || !owner.getVictim()->isAlive()) && owner.movespline->Finalized())
-                return false;
-
-            if (!i_offset && owner.movespline->Finalized() && !owner.IsWithinMeleeRange(owner.getVictim())
-                && !i_target->m_movementInfo.HasMovementFlag(MOVEMENTFLAG_PENDING_STOP))
-            {
-                if (i_targetSearchingTimer >= 1000)
-                    return false;
-                else
-                {
-                    i_targetSearchingTimer += RECHECK_DISTANCE_TIMER;
-                    targetMoved = true;
-                }
-            }
-            else
-                i_targetSearchingTimer = 0;
-        }
+            targetMoved = !i_target->IsWithinDist2d(dest.x, dest.y, allowedDist);
 
         if (targetMoved)
             _setTargetLocation(owner);
