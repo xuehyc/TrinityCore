@@ -19,6 +19,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "ObjectMgr.h"
+#include "GameEventMgr.h"
 #include "BattlegroundMgr.h"
 #include "Battleground.h"
 #include "BattlegroundAB.h"
@@ -119,7 +120,8 @@ void BattlegroundAB::PostUpdateImpl(uint32 diff)
                 m_ReputationScoreTics[team] += BG_AB_TickPoints[points];
                 if (m_ReputationScoreTics[team] >= m_ReputationTics)
                 {
-                    (team == BG_TEAM_ALLIANCE) ? RewardReputationToTeam(509, 10, ALLIANCE) : RewardReputationToTeam(510, 10, HORDE);
+                    uint32 m_ReputationGain = IsHolidayActive(HOLIDAY_CALL_TO_ARMS_AB) ? 13 : 10;
+                    (team == BG_TEAM_ALLIANCE) ? RewardReputationToTeam(509, m_ReputationGain, ALLIANCE) : RewardReputationToTeam(510, m_ReputationGain, HORDE);
                     m_ReputationScoreTics[team] -= m_ReputationTics;
                 }
                 if (m_HonorScoreTics[team] >= m_HonorTics)

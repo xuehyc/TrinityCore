@@ -18,6 +18,7 @@
 
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
+#include "GameEventMgr.h"
 
 #include "Battleground.h"
 #include "BattlegroundAV.h"
