@@ -501,7 +501,7 @@ public:
                     (me->GetEntry() == NPC_WOUNDED_SKIRMISHER && spell->Id == SPELL_RENEW_SKIRMISHER && caster->ToPlayer()->GetQuestStatus(QUEST_OVERWHELMED) == QUEST_STATUS_INCOMPLETE))
                 {
                     caster->ToPlayer()->KilledMonsterCredit(CREDIT_NPC, 0);
-                    DoScriptText(RAND(RANDOM_SAY_1, RANDOM_SAY_2, RANDOM_SAY_3), caster);
+                    DoScriptText(RAND(RANDOM_SAY_1, RANDOM_SAY_2, RANDOM_SAY_3), me);
                     if (me->IsStandState())
                         me->GetMotionMaster()->MovePoint(1, me->GetPositionX()+7, me->GetPositionY()+7, me->GetPositionZ());
                     else
