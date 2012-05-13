@@ -39,33 +39,20 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
 
     float x, y, z;
 
-    //! Following block of code deleted by MrSmite in issue 4891
-    //! Code kept for learning and diagnostical purposes
-//
-//     if (i_offset && i_target->IsWithinDistInMap(&owner,2*i_offset))
-//     {
-//         if (!owner.movespline->Finalized())
-//             return;
-//
-//         owner.GetPosition(x, y, z);
-//     }
-//     else
     if (!i_offset)
     {
-        // to nearest contact position
-        float dist = 0.0f;
-        if (owner.getVictim() && owner.getVictim()->GetGUID() == i_target->GetGUID())
-            dist = owner.GetFloatValue(UNIT_FIELD_COMBATREACH) + i_target->GetFloatValue(UNIT_FIELD_COMBATREACH) - i_target->GetObjectSize() - owner.GetObjectSize() - 1.0f;
+        if (i_target->IsWithinMeleeRange(&owner))
+            return;
 
-        if (dist < 0.5f)
-            dist = 0.5f;
-
-        i_target->GetContactPoint(&owner, x, y, z, dist);
+        // to nearest random contact position
+        i_target->GetRandomContactPoint(&owner, x, y, z, 0, MELEE_RANGE - 0.5f);
     }
     else
     {
+        if (i_target->IsWithinDistInMap(&owner, i_offset + 1.0f))
+            return;
         // to at i_offset distance from target and i_angle from target facing
-        i_target->GetClosePoint(x, y, z, owner.GetCombatReach(), i_offset, i_angle);
+        i_target->GetClosePoint(x, y, z, owner.GetObjectSize(), i_offset, i_angle);
     }
 
     if (!i_path)
@@ -120,7 +107,7 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
     if (!i_target.isValid() || !i_target->IsInWorld())
         return false;
 
-    if (!&owner || !owner.isAlive())
+    if (!owner.isAlive())
         return true;
 
     if (owner.HasUnitState(UNIT_STATE_NOT_MOVE))
@@ -149,20 +136,11 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
     {
         i_recheckDistance.Reset(RECHECK_DISTANCE_TIMER);
 
-        //More distance let have better performance, less distance let have more sensitive reaction at target move.
-        float allowedDist = 0.0f;
-        if (owner.getVictim() && owner.getVictim()->GetGUID() == i_target->GetGUID())
-            allowedDist = owner.GetCombatReach() + i_target->GetCombatReach() + sWorld->getRate(RATE_TARGET_POS_RECALCULATION_RANGE) - 1.0f;
-        else
-            allowedDist = i_target->GetCombatReach() + owner.GetCombatReach() + sWorld->getRate(RATE_TARGET_POS_RECALCULATION_RANGE);
-
-        if (allowedDist < owner.GetCombatReach())
-            allowedDist = owner.GetCombatReach();
-
+        float allowedDist = owner.GetObjectSize() + MELEE_RANGE - 0.5f;
         G3D::Vector3 dest = owner.movespline->FinalDestination();
 
         bool targetMoved = false;
-        if (owner.GetTypeId() == TYPEID_UNIT && (((Creature*)&owner)->CanFly() || ((Creature*)&owner)->getVictim()))
+        if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly())
             targetMoved = !i_target->IsWithinDist3d(dest.x, dest.y, dest.z, allowedDist);
         else
             targetMoved = !i_target->IsWithinDist2d(dest.x, dest.y, allowedDist);
@@ -196,7 +174,7 @@ template<class T>
 void ChaseMovementGenerator<T>::_reachTarget(T &owner)
 {
     if (owner.IsWithinMeleeRange(this->i_target.getTarget()))
-        owner.Attack(this->i_target.getTarget(),true);
+        owner.Attack(this->i_target.getTarget(), true);
 }
 
 template<>

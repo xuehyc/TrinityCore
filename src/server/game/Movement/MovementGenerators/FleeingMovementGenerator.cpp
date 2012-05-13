@@ -119,9 +119,6 @@ void FleeingMovementGenerator<T>::Initialize(T &owner)
     owner.AddUnitState(UNIT_STATE_FLEEING|UNIT_STATE_FLEEING_MOVE);
     owner.StopMoving();
 
-    if (owner.GetTypeId() == TYPEID_UNIT)
-        return;
-
     _setTargetLocation(owner);
 }
 
