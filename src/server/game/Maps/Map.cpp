@@ -72,7 +72,7 @@ Map::~Map()
         sScriptMgr->DecreaseScheduledScriptCount(m_scriptSchedule.size());
 
     MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(GetId());
-    MMAP::MMapFactory::createOrGetMMapManager()->unloadMapInstance(GetId(), i_InstanceId);
+    MMAP::MMapFactory::createOrGetMMapManager()->unloadMapInstance(GetId(), GetInstanceId());
 }
 
 bool Map::ExistMap(uint32 mapid, int gx, int gy)
