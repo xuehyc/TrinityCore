@@ -767,13 +767,14 @@ public:
 
 enum Artruis
 {
-    SPELL_FROSTBOLT     = 15530,
-    SPELL_ICE_LANCE     = 54261,
-    SPELL_ICY_VEINS     = 54792,
-    SPELL_FROST_NOVA    = 11831,
-    SPELL_BINDINGS      = 52185,
+    SPELL_FROSTBOLT         = 15530,
+    SPELL_ICE_LANCE         = 54261,
+    SPELL_ICY_VEINS         = 54792,
+    SPELL_FROST_NOVA        = 11831,
+    SPELL_BINDINGS          = 52185,
+    SPELL_SUMMON_PHYLACTERY = 52518,
 
-    GO_ARTRUISS_PHYLACTERY  = 190777,
+    GO_ARTRUIS_PHYLACTERY  = 190777,
 
     NPC_ZEPIK   = 28668,
     NPC_JALOOT  = 28667,
@@ -787,6 +788,13 @@ enum Artruis
     ACTION_BIND             = 1,
     ACTION_SET_QUESTGIVER   = 2,
     ACTION_RESET            = 3,
+
+    SAY_AGGRO       = 0,
+    SAY_80PERC      = 1,
+    SAY_60PERC      = 2,
+    SAY_30PERC      = 3,
+    EMOTE_SHIELDED  = 4,
+    SAY_5PERC       = 5,
 };
 
 
@@ -808,6 +816,8 @@ class npc_artruis : public CreatureScript
                 wasImmune = false;
                 isBound = false;
 
+                talkPhase = 0;
+
                 me->SetReactState(REACT_DEFENSIVE);
 
                 // set event into a sane state, cannot start without zepik&jaloot, despawn phylactery
@@ -821,14 +831,12 @@ class npc_artruis : public CreatureScript
                 else if (Creature* jaloot = me->FindNearestCreature(NPC_JALOOT, 60.0f, true))
                     jaloot->GetAI()->Reset();
 
-                if (GameObject* phylactery = me->FindNearestGameObject(GO_ARTRUISS_PHYLACTERY, 60.0f))
-                    phylactery->Delete();
+                //if (GameObject* phylactery = me->FindNearestGameObject(GO_ARTRUIS_PHYLACTERY, 60.0f))
+                //    phylactery->Delete();
             }
 
             void EnterCombat(Unit* who)
             {
-                // Talk(SAY_AGGRO);
-
                 events.ScheduleEvent(EVENT_FROSTBOLT, 1000);
                 events.ScheduleEvent(EVENT_ICE_LANCE, 200);
                 events.ScheduleEvent(EVENT_FROST_NOVA, 100);
@@ -843,12 +851,29 @@ class npc_artruis : public CreatureScript
                 if (me->getVictim()->GetTypeId() != TYPEID_PLAYER)
                     EnterEvadeMode();
 
+                // dialog
+                if (talkPhase == SAY_AGGRO)
+                {
+                    Talk(SAY_AGGRO);
+                    talkPhase++;
+                }
+                else if (me->GetHealthPct() <= 80.0f && talkPhase++ == SAY_80PERC)
+                    Talk(SAY_80PERC);
+                else if (me->GetHealthPct() <= 60.0f && talkPhase++ == SAY_60PERC)
+                    Talk(SAY_60PERC);
+                else if (me->GetHealthPct() <= 5.0f && talkPhase++ == SAY_5PERC)
+                    Talk(SAY_5PERC);
+
+
                 // Immune-Choosing-Phase
                 if (me->GetHealthPct() <= 30 && !wasImmune)
                 {
                     me->InterruptNonMeleeSpells(true);
                     DoCastVictim(SPELL_BINDINGS); // has implicit targeting
-                    // TALK(EMOTE_SHIELDED);
+
+                    Talk(SAY_30PERC);
+                    Talk(EMOTE_SHIELDED);
+                    talkPhase+=2;
 
                     // workaround for SpellHit not being called for implicit targeting
                     if (Creature* zepik = me->FindNearestCreature(NPC_ZEPIK, 60.0f, true))
@@ -890,7 +915,8 @@ class npc_artruis : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-                GameObject* phylactery = me->SummonGameObject(GO_ARTRUISS_PHYLACTERY, me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY(), me->GetHomePosition().GetPositionZ()+2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3*MINUTE);
+                // DoCastVictim(SPELL_SUMMON_PHYLACTERY);
+                // stupid spell, manual spawn for new, screw you!
 
                 // enable quests for the chosen npc
                 if (Creature* zepik = me->FindNearestCreature(NPC_ZEPIK, 120.0f, true))
@@ -900,8 +926,6 @@ class npc_artruis : public CreatureScript
                 if (Creature* jaloot = me->FindNearestCreature(NPC_JALOOT, 120.0f, true))
                     if (jaloot->isAlive())
                         jaloot->GetAI()->DoAction(ACTION_SET_QUESTGIVER);
-
-                // Talk(SAY_DEATH);
             }
 
             void DoAction(const int32 actionId)
@@ -916,6 +940,7 @@ class npc_artruis : public CreatureScript
         private:
             bool wasImmune;
             bool isBound;
+            uint8 talkPhase;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -943,6 +968,8 @@ enum ZepikJaloot
 
     FACTION_FRIENDLY    = 250,
     FACTION_MONSTER   = 14,
+
+    SAY_FREED    = 0,
 };
 
 class npc_zepik_jaloot : public CreatureScript
@@ -958,14 +985,8 @@ class npc_zepik_jaloot : public CreatureScript
 
             void Reset()
             {
-                if (Creature* artruis = me->FindNearestCreature(NPC_ARTRUIS, 120.0f, false))
-                    return; // this is really important, if reset is not blocked they will ice block and neither give quest nor assist
-
                 events.Reset();
                 me->setFaction(FACTION_FRIENDLY);
-                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                //DoCast(me, SPELL_TOMB_OF_HEARTLESS, false);
-                me->AddAura(SPELL_TOMB_OF_HEARTLESS, me);
 
                 switch (me->GetEntry())
                 {
@@ -980,6 +1001,8 @@ class npc_zepik_jaloot : public CreatureScript
                 }
 
                 me->RemoveAurasDueToSpell(SPELL_BINDINGS);
+
+                me->GetMotionMaster()->MoveTargetedHome();
             }
 
             void UpdateAI(uint32 const diff)
@@ -1050,6 +1073,8 @@ class npc_zepik_jaloot : public CreatureScript
                         assistant->GetMotionMaster()->MoveChase(artruis);
                         assistant->setFaction(FACTION_FRIENDLY);
                         assistant->Attack(artruis, true);
+
+                        Talk(SAY_FREED);
                     }
                 }
             }
@@ -1057,6 +1082,14 @@ class npc_zepik_jaloot : public CreatureScript
             void JustReachedHome()
             {
                 me->DeleteThreatList();
+
+                if (Creature* artruis = me->FindNearestCreature(NPC_ARTRUIS, 120.0f, false))
+                    return; // this is really important, if reset is not blocked they will ice block and neither give quest nor assist
+
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+                //DoCast(me, SPELL_TOMB_OF_HEARTLESS, false);
+                me->AddAura(SPELL_TOMB_OF_HEARTLESS, me);
             }
 
             void DoAction(const int32 actionId)
@@ -1069,7 +1102,6 @@ class npc_zepik_jaloot : public CreatureScript
                 {
                     if (Creature* artruis = me->FindNearestCreature(NPC_ARTRUIS, 120.0f, true))
                     {
-                        sLog->outString("ATTAAAAAAAAAAAAAAAAAAAAACK");
                         me->setFaction(FACTION_MONSTER);
                         me->Attack(artruis->getVictim(), true);
                         me->GetMotionMaster()->MoveChase(artruis->getVictim());
