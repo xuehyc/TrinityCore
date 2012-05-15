@@ -761,6 +761,334 @@ public:
     }
 };
 
+/*######
+## Artruis the Heartless
+######*/
+
+enum Artruis
+{
+    SPELL_FROSTBOLT     = 15530,
+    SPELL_ICE_LANCE     = 54261,
+    SPELL_ICY_VEINS     = 54792,
+    SPELL_FROST_NOVA    = 11831,
+    SPELL_BINDINGS      = 52185,
+
+    GO_ARTRUISS_PHYLACTERY  = 190777,
+
+    NPC_ZEPIK   = 28668,
+    NPC_JALOOT  = 28667,
+
+    EVENT_FROSTBOLT     = 1,
+    EVENT_ICE_LANCE     = 2,
+    EVENT_ICY_VEINS     = 3,
+    EVENT_FROST_NOVA    = 4,
+
+    ACTION_UNBIND           = 0,
+    ACTION_BIND             = 1,
+    ACTION_SET_QUESTGIVER   = 2,
+    ACTION_RESET            = 3,
+};
+
+
+class npc_artruis : public CreatureScript
+{
+    public:
+        npc_artruis() : CreatureScript("npc_artruis") {}
+
+        struct npc_artruisAI : public ScriptedAI
+        {
+            npc_artruisAI(Creature* creature) : ScriptedAI(creature) {}
+
+            EventMap events;
+
+            void Reset()
+            {
+                events.Reset();
+
+                wasImmune = false;
+                isBound = false;
+
+                me->SetReactState(REACT_DEFENSIVE);
+
+                // set event into a sane state, cannot start without zepik&jaloot, despawn phylactery
+                if (Creature* zepik = me->FindNearestCreature(NPC_ZEPIK, 60.0f, false))
+                    zepik->Respawn();
+                else if (Creature* zepik = me->FindNearestCreature(NPC_ZEPIK, 60.0f, true))
+                    zepik->GetAI()->Reset();
+
+                if (Creature* jaloot = me->FindNearestCreature(NPC_JALOOT, 60.0f, false))
+                    jaloot->Respawn();
+                else if (Creature* jaloot = me->FindNearestCreature(NPC_JALOOT, 60.0f, true))
+                    jaloot->GetAI()->Reset();
+
+                if (GameObject* phylactery = me->FindNearestGameObject(GO_ARTRUISS_PHYLACTERY, 60.0f))
+                    phylactery->Delete();
+            }
+
+            void EnterCombat(Unit* who)
+            {
+                // Talk(SAY_AGGRO);
+
+                events.ScheduleEvent(EVENT_FROSTBOLT, 1000);
+                events.ScheduleEvent(EVENT_ICE_LANCE, 200);
+                events.ScheduleEvent(EVENT_FROST_NOVA, 100);
+                events.ScheduleEvent(EVENT_ICY_VEINS, 4500);
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (me->getVictim()->GetTypeId() != TYPEID_PLAYER)
+                    EnterEvadeMode();
+
+                // Immune-Choosing-Phase
+                if (me->GetHealthPct() <= 30 && !wasImmune)
+                {
+                    me->InterruptNonMeleeSpells(true);
+                    DoCastVictim(SPELL_BINDINGS); // has implicit targeting
+                    // TALK(EMOTE_SHIELDED);
+
+                    // workaround for SpellHit not being called for implicit targeting
+                    if (Creature* zepik = me->FindNearestCreature(NPC_ZEPIK, 60.0f, true))
+                        zepik->GetAI()->DoAction(ACTION_BIND);
+
+                    if (Creature* jaloot = me->FindNearestCreature(NPC_JALOOT, 60.0f, true))
+                        jaloot->GetAI()->DoAction(ACTION_BIND);
+
+                    wasImmune = true;
+                    isBound = true;
+                }
+
+                events.Update(diff);
+
+                if (isBound || me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 eventId = events.ExecuteEvent())
+                    switch (eventId)
+                    {
+                        case EVENT_FROSTBOLT:
+                            DoCastVictim(SPELL_FROSTBOLT);
+                            events.ScheduleEvent(EVENT_FROSTBOLT, 4000);
+                            break;
+                        case EVENT_ICE_LANCE:
+                            DoCastVictim(SPELL_ICE_LANCE);
+                            events.ScheduleEvent(EVENT_ICE_LANCE, 7000);
+                            break;
+                        case EVENT_FROST_NOVA:
+                            DoCastVictim(SPELL_FROST_NOVA);
+                            events.ScheduleEvent(EVENT_FROST_NOVA, 14000);
+                            break;
+                        case EVENT_ICY_VEINS:
+                            DoCast(me, SPELL_ICY_VEINS);
+                            events.ScheduleEvent(EVENT_ICY_VEINS, 25000);
+                            break;
+                    }
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                GameObject* phylactery = me->SummonGameObject(GO_ARTRUISS_PHYLACTERY, me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY(), me->GetHomePosition().GetPositionZ()+2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3*MINUTE);
+
+                // enable quests for the chosen npc
+                if (Creature* zepik = me->FindNearestCreature(NPC_ZEPIK, 120.0f, true))
+                    if (zepik->isAlive())
+                        zepik->GetAI()->DoAction(ACTION_SET_QUESTGIVER);
+
+                if (Creature* jaloot = me->FindNearestCreature(NPC_JALOOT, 120.0f, true))
+                    if (jaloot->isAlive())
+                        jaloot->GetAI()->DoAction(ACTION_SET_QUESTGIVER);
+
+                // Talk(SAY_DEATH);
+            }
+
+            void DoAction(const int32 actionId)
+            {
+                if (actionId == ACTION_UNBIND)
+                {
+                    me->RemoveAurasDueToSpell(SPELL_BINDINGS);
+                    isBound = false;
+                }
+            }
+
+        private:
+            bool wasImmune;
+            bool isBound;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_artruisAI(creature);
+        }
+};
+
+enum ZepikJaloot
+{
+    SPELL_TOMB_OF_HEARTLESS = 52182,
+    // Zepik
+    SPELL_OPEN_WOUND        = 52873,
+    SPELL_SPIKE_TRAP        = 52886,
+    // Jaloot
+    SPELL_LIGHTNING_WHIRL   = 52943,
+    SPELL_SPARK_FRENZY      = 52964,
+
+    NPC_ARTRUIS = 28659,
+
+    EVENT_OPEN_WOUND        = 1,
+    EVENT_SPIKE_TRAP        = 2,
+    EVENT_LIGHTNING_WHIRL   = 3,
+    EVENT_SPARK_FRENZY      = 4,
+
+    FACTION_FRIENDLY    = 250,
+    FACTION_MONSTER   = 14,
+};
+
+class npc_zepik_jaloot : public CreatureScript
+{
+    public:
+    npc_zepik_jaloot() : CreatureScript("npc_zepik_jaloot") {}
+
+        struct npc_zepik_jalootAI : public ScriptedAI
+        {
+            npc_zepik_jalootAI(Creature* creature) : ScriptedAI(creature) {}
+
+            EventMap events;
+
+            void Reset()
+            {
+                if (Creature* artruis = me->FindNearestCreature(NPC_ARTRUIS, 120.0f, false))
+                    return; // this is really important, if reset is not blocked they will ice block and neither give quest nor assist
+
+                events.Reset();
+                me->setFaction(FACTION_FRIENDLY);
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                //DoCast(me, SPELL_TOMB_OF_HEARTLESS, false);
+                me->AddAura(SPELL_TOMB_OF_HEARTLESS, me);
+
+                switch (me->GetEntry())
+                {
+                    case NPC_ZEPIK:
+                        events.ScheduleEvent(EVENT_OPEN_WOUND, 2000);
+                        events.ScheduleEvent(EVENT_SPIKE_TRAP, 4000);
+                        break;
+                    case NPC_JALOOT:
+                        events.ScheduleEvent(EVENT_LIGHTNING_WHIRL, 2000);
+                        events.ScheduleEvent(EVENT_SPARK_FRENZY, 4000);
+                        break;
+                }
+
+                me->RemoveAurasDueToSpell(SPELL_BINDINGS);
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (!me->HasAura(SPELL_BINDINGS))
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 eventId = events.ExecuteEvent())
+                    switch (eventId)
+                    {
+                        case EVENT_OPEN_WOUND:
+                            DoCastVictim(SPELL_OPEN_WOUND);
+                            events.ScheduleEvent(EVENT_OPEN_WOUND, 4000);
+                            break;
+                        case EVENT_SPIKE_TRAP:
+                            DoCastVictim(SPELL_SPIKE_TRAP);
+                            events.ScheduleEvent(EVENT_SPIKE_TRAP, 4000);
+                            break;
+                        case EVENT_LIGHTNING_WHIRL:
+                            DoCastVictim(SPELL_LIGHTNING_WHIRL);
+                            events.ScheduleEvent(EVENT_LIGHTNING_WHIRL, 4000);
+                            break;
+                        case EVENT_SPARK_FRENZY:
+                            DoCastVictim(SPELL_SPARK_FRENZY);
+                            events.ScheduleEvent(EVENT_SPARK_FRENZY, 14000);
+                            break;
+                    }
+            }
+
+            // Spell: Bindings of Submission target Zepik&Jaloot implicitly, but don't turn up in SpellHit(), makes developer sad ;-(
+            void SpellHit(Unit* who, const SpellEntry* spell)
+            {
+                // Artruis chains Zepik&Jaloot, removes Tomb of Heartless, both attack player
+                if (spell->Id == SPELL_BINDINGS)
+                {
+                    me->RemoveAurasDueToSpell(SPELL_TOMB_OF_HEARTLESS);
+                    if (Creature* artruis = me->FindNearestCreature(NPC_ARTRUIS, 120.0f, true))
+                    {
+                        me->setFaction(FACTION_MONSTER);
+                        me->Attack(artruis->getVictim(), true);
+                        me->GetMotionMaster()->MoveChase(artruis->getVictim());
+                    }
+                }
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                if (Creature* artruis = me->FindNearestCreature(NPC_ARTRUIS, 120.0f, true))
+                {
+                    // determine players choice
+                    uint32 assistantEntry = (me->GetEntry() == NPC_ZEPIK) ? NPC_JALOOT : NPC_ZEPIK;
+
+                    // and start assisting
+                    if (Creature* assistant = me->FindNearestCreature(assistantEntry, 120.0f, true))
+                    {
+                        artruis->GetAI()->DoAction(ACTION_UNBIND); // do this first, because otherwise he is immune
+                        assistant->RemoveAurasDueToSpell(SPELL_BINDINGS);
+
+                        assistant->AddThreat(artruis, 25000.0f);
+                        assistant->GetMotionMaster()->MoveChase(artruis);
+                        assistant->setFaction(FACTION_FRIENDLY);
+                        assistant->Attack(artruis, true);
+                    }
+                }
+            }
+
+            void JustReachedHome()
+            {
+                me->DeleteThreatList();
+            }
+
+            void DoAction(const int32 actionId)
+            {
+                if (actionId == ACTION_SET_QUESTGIVER)
+                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+                // replacement for SpellHit-Method
+                else if (actionId == ACTION_BIND)
+                {
+                    if (Creature* artruis = me->FindNearestCreature(NPC_ARTRUIS, 120.0f, true))
+                    {
+                        sLog->outString("ATTAAAAAAAAAAAAAAAAAAAAACK");
+                        me->setFaction(FACTION_MONSTER);
+                        me->Attack(artruis->getVictim(), true);
+                        me->GetMotionMaster()->MoveChase(artruis->getVictim());
+                    }
+                    me->RemoveAurasDueToSpell(SPELL_TOMB_OF_HEARTLESS);
+                }
+
+                else if (actionId == ACTION_RESET)
+                    Reset();
+
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_zepik_jalootAI(creature);
+        }
+};
+
 void AddSC_sholazar_basin()
 {
     new npc_injured_rainspeaker_oracle();
@@ -771,4 +1099,6 @@ void AddSC_sholazar_basin()
     new npc_adventurous_dwarf();
     new npc_jungle_punch_target();
     new spell_q12620_the_lifewarden_wrath();
+    new npc_artruis();
+    new npc_zepik_jaloot();
 }
