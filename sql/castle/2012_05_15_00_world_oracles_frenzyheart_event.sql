@@ -32,3 +32,9 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 DELETE FROM gameobject WHERE id = 190777;
 INSERT INTO gameobject (id,map,spawnMask,phaseMask,position_x,position_y,position_z,orientation,rotation0,rotation1,rotation2,rotation3,spawntimesecs,animprogress,state) VALUES
 (190777, 571, 1, 1, 5610.05, 3789.69, -91.184, 5.8553, 0, 0, 0.212312, -0.977202, 300, 0, 1);
+
+-- set implicit spell target for Bindings of Submission
+DELETE FROM conditions WHERE SourceTypeOrReferenceId = 13 AND SourceEntry = 52185;
+INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorTextId, ScriptName, Comment) VALUES 
+(13,0,52185,0,0,18,0,1,28667,0,0,0,'','Bindings of Submission - Implict Target Jaloot'),
+(13, 0, 52185, 0, 0, 18, 0, 1, 28668, 0, 0, 0, '', 'Bindings of Submission - Implict Target Zepik');
