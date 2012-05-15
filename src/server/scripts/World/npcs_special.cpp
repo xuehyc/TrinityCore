@@ -2272,6 +2272,11 @@ class npc_wormhole : public CreatureScript
 public:
     npc_wormhole() : CreatureScript("npc_wormhole") { }
 
+    void Reset()
+    {
+        underbelly_roll = 0; // will never occur by urand(1,10)
+    }
+
     bool OnGossipHello(Player* player, Creature* creature)
     {
         if (creature->isSummon())
@@ -2284,8 +2289,11 @@ public:
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ENGINEERING4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ENGINEERING5, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
 
-                uint32 roll = urand(0,9);
-                if (roll < 2) // Add Underworld Gossip Entry (20% Chance)
+                // ensure same roll for every gossip hello to prevent exploiting reroll
+                if (underbelly_roll == 0)
+                    underbelly_roll = urand(1,10);
+
+                if (underbelly_roll < 3) // Add Underworld Gossip Entry (20% Chance)
                 {
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ENGINEERING6, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+6);
                 }
@@ -2333,6 +2341,8 @@ public:
         }
         return true;
     }
+private:
+    uint32 underbelly_roll;
 };
 
 /*######
