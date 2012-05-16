@@ -849,7 +849,10 @@ class npc_artruis : public CreatureScript
                     return;
 
                 if (me->getVictim()->GetTypeId() != TYPEID_PLAYER)
+                {
                     EnterEvadeMode();
+                    return;
+                }
 
                 // dialog
                 if (talkPhase == SAY_AGGRO)
@@ -863,7 +866,6 @@ class npc_artruis : public CreatureScript
                     Talk(SAY_60PERC);
                 else if (me->GetHealthPct() <= 5.0f && talkPhase++ == SAY_5PERC)
                     Talk(SAY_5PERC);
-
 
                 // Immune-Choosing-Phase
                 if (me->GetHealthPct() <= 30 && !wasImmune)

@@ -207,7 +207,6 @@ class mob_flame_warder : public CreatureScript
         }
 };
 
-
 void AddSC_boss_koralon()
 {
     new boss_koralon();
