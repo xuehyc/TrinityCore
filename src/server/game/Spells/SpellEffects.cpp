@@ -3355,6 +3355,8 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             {
                 case 69055:     // Saber Lash
                 case 70814:     // Saber Lash
+                case 66765:     // Meteor Fists (10)
+                case 67333:     // Meteor Fists (25)
                 {
                     uint32 count = 0;
                     for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)

@@ -42,14 +42,14 @@ enum Spells
     SPELL_FLAME_CINDER_H                        = 67332,
     SPELL_METEOR_FISTS_VISUAL                   = 66725,
     SPELL_METEOR_FISTS_VISUAL_H                 = 68161,
-    SPELL_METEOR_FISTS                          = 66809,
-    SPELL_METEOR_FISTS_H                        = 67331,
+    SPELL_METEOR_FISTS                          = 66765,
+    SPELL_METEOR_FISTS_H                        = 67333,
 
     // Spells Flame Warder
     SPELL_FW_METEOR_FISTS_VISUAL                = 66808,
     SPELL_FW_METEOR_FISTS_VISUAL_H              = 68160,
-    SPELL_FW_METEOR_FISTS                       = 66765,
-    SPELL_FW_METEOR_FISTS_H                     = 67333,
+    SPELL_FW_METEOR_FISTS                       = 66809,
+    SPELL_FW_METEOR_FISTS_H                     = 67331,
     SPELL_FW_LAVA_BURST                         = 66813,
     SPELL_FW_LAVA_BURST_H                       = 67330,
 };
@@ -114,7 +114,7 @@ class boss_koralon : public CreatureScript
                             events.ScheduleEvent(EVENT_METEOR_FISTS, 45000);
                             break;
                         case EVENT_FLAME_CINDER:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true))
                                 DoCast(target, RAID_MODE(SPELL_FLAME_CINDER, SPELL_FLAME_CINDER_H));
                             events.ScheduleEvent(EVENT_FLAME_CINDER, 30000);
                             break;
@@ -206,6 +206,7 @@ class mob_flame_warder : public CreatureScript
             return new mob_flame_warderAI(creature);
         }
 };
+
 
 void AddSC_boss_koralon()
 {
