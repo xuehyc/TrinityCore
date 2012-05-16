@@ -797,7 +797,6 @@ enum Artruis
     SAY_5PERC       = 5,
 };
 
-
 class npc_artruis : public CreatureScript
 {
     public:
@@ -875,7 +874,7 @@ class npc_artruis : public CreatureScript
 
                     Talk(SAY_30PERC);
                     Talk(EMOTE_SHIELDED);
-                    talkPhase+=2;
+                    talkPhase += 2;
 
                     // workaround for SpellHit not being called for implicit targeting
                     if (Creature* zepik = me->FindNearestCreature(NPC_ZEPIK, 60.0f, true))
