@@ -325,7 +325,7 @@ class boss_sindragosa : public CreatureScript
                         me->SetFacingTo(float(M_PI));
                         events.ScheduleEvent(EVENT_AIR_MOVEMENT_FAR, 1);
                         _frostBombCounter = 0;
-                        events.ScheduleEvent(EVENT_FROST_BOMB, 10000);
+                        events.ScheduleEvent(EVENT_FROST_BOMB, 11000);
                         break;
                     case POINT_AIR_PHASE_FAR:
                         me->SetFacingTo(float(M_PI));
@@ -646,6 +646,7 @@ class npc_ice_tomb : public CreatureScript
                 if (Player* player = ObjectAccessor::GetPlayer(*me, _trappedPlayerGUID))
                 {
                     _trappedPlayerGUID = 0;
+                    player->RemoveAurasDueToSpell(SPELL_ICE_TOMB_UNTARGETABLE);
                     player->RemoveAurasDueToSpell(SPELL_ICE_TOMB_DAMAGE);
                     player->RemoveAurasDueToSpell(SPELL_ASPHYXIATION);
                 }

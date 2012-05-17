@@ -86,12 +86,12 @@ class at_frozen_throne_teleport : public AreaTriggerScript
                 return true;
             }
             
-            if (InstanceScript* instance = player->GetInstanceScript())
+            /*if (InstanceScript* instance = player->GetInstanceScript())
                 if (instance->GetBossState(DATA_PROFESSOR_PUTRICIDE) == DONE &&
                     instance->GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) == DONE &&
                     instance->GetBossState(DATA_SINDRAGOSA) == DONE &&
                     instance->GetBossState(DATA_THE_LICH_KING) != IN_PROGRESS)
-                    player->CastSpell(player, FROZEN_THRONE_TELEPORT, true);
+                    player->CastSpell(player, FROZEN_THRONE_TELEPORT, true);*/
 
             return true;
         }
