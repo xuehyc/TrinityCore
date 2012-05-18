@@ -447,9 +447,8 @@ class Map : public GridRefManager<NGridType>
         bool getObjectHitPos(uint32 phasemask, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float &ry, float& rz, float modifyDist);
     private:
         void LoadMapAndVMap(int gx, int gy);
-        void LoadVMap(int gx, int gy);
+        bool LoadVMapAndMMap(int gx, int gy);
         void LoadMap(int gx, int gy, bool reload = false);
-        void LoadMMap(int gx, int gy);
         GridMap* GetGrid(float x, float y);
 
         void SetTimer(uint32 t) { i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t; }

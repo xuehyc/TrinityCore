@@ -121,28 +121,10 @@ bool Map::ExistVMap(uint32 mapid, int gx, int gy)
     return true;
 }
 
-void Map::LoadMMap(int gx, int gy)
-{
-    // DONT CHANGE "gy" and "gx" - Its necessary !
-    int mmapLoadResult = MMAP::MMapFactory::createOrGetMMapManager()->loadMap((sWorld->GetDataPath() + "mmaps").c_str(), GetId(), gy, gx);
-    switch (mmapLoadResult)
-    {
-        case MMAP::MMAP_LOAD_RESULT_OK:
-            sLog->outDetail("MMAP loaded name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
-    	    break;
-        case MMAP::MMAP_LOAD_RESULT_ERROR:
-            sLog->outDetail("Could not load MMAP name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
-            break;
-        case MMAP::MMAP_LOAD_RESULT_IGNORED:
-            sLog->outStaticDebug("Ignored MMAP name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
-            break;
-    }
-}
-
-void Map::LoadVMap(int gx, int gy)
+bool Map::LoadVMapAndMMap(int gx, int gy)
 {
                                                             // x and y are swapped !!
-    int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld->GetDataPath()+ "vmaps").c_str(),  GetId(), gx, gy);
+    int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld->GetDataPath() + "vmaps").c_str(),  GetId(), gx, gy);
     switch (vmapLoadResult)
     {
         case VMAP::VMAP_LOAD_RESULT_OK:
@@ -155,6 +137,10 @@ void Map::LoadVMap(int gx, int gy)
             sLog->outStaticDebug("Ignored VMAP name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
             break;
     }
+
+    // DONT CHANGE "gy" and "gx" - Its necessary !
+    int mmapLoadResult = MMAP::MMapFactory::createOrGetMMapManager()->loadMap((sWorld->GetDataPath() + "mmaps").c_str(), GetId(), gy, gx);
+    return mmapLoadResult;
 }
 
 void Map::LoadMap(int gx, int gy, bool reload)
@@ -205,9 +191,8 @@ void Map::LoadMap(int gx, int gy, bool reload)
 void Map::LoadMapAndVMap(int gx, int gy)
 {
     LoadMap(gx, gy);
-    LoadMMap(gx, gy);
     if (GetInstanceId() == 0)
-        LoadVMap(gx, gy);                                   // Only load the data for the base map
+        LoadVMapAndMMap(gx, gy);                                   // Only load the data for the base map
 }
 
 void Map::InitStateMachine()
