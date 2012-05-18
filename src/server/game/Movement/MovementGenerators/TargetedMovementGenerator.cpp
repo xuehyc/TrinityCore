@@ -140,7 +140,7 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
         G3D::Vector3 dest = owner.movespline->FinalDestination();
 
         bool targetMoved = false;
-        if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly())
+        if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->IsFlying())
             targetMoved = !i_target->IsWithinDist3d(dest.x, dest.y, dest.z, allowedDist);
         else
             targetMoved = !i_target->IsWithinDist2d(dest.x, dest.y, allowedDist);
