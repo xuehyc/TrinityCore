@@ -1,8 +1,8 @@
-commit f3e83f691088de6b66de62479233ff0b653534ee
+commit e78a02e66f29a54f37ed805de2fc7c7ff6531e87
 Author: Venugh <venugh@gmx.net>
-Date:   Fri Apr 13 18:43:00 2012 +0200
+Date:   Sat May 19 15:18:33 2012 +0200
 
-    mmaps patch v0.9.0
+    mmaps patch 009a.
 
 diff --git a/dep/CMakeLists.txt b/dep/CMakeLists.txt
 index d658ba4..48a2fd5 100644
@@ -17,18 +17,17 @@ index d658ba4..48a2fd5 100644
  if(SERVERS)
    add_subdirectory(gsoap)
 diff --git a/dep/PackageList.txt b/dep/PackageList.txt
-index ef1b9b5..e28f9ea 100644
+index e5003ec..a787eb0 100644
 --- a/dep/PackageList.txt
 +++ b/dep/PackageList.txt
 @@ -39,3 +39,7 @@ zlib (A Massively Spiffy Yet Delicately Unobtrusive Compression Library)
  gSOAP (a portable development toolkit for C and C++ XML Web services and XML data bindings)
    http://gsoap2.sourceforge.net/
-   Version: 2.8.0
+   Version: 2.8.2
 +
 +recastnavigation (Recast is state of the art navigation mesh construction toolset for games)
 +  http://code.google.com/p/recastnavigation/
 +  Version: 1.4
-\ No newline at end of file
 diff --git a/dep/recastnavigation/CMakeLists.txt b/dep/recastnavigation/CMakeLists.txt
 new file mode 100644
 index 0000000..4a406f7
@@ -14549,10 +14548,10 @@ index 0000000..f4de6e5
 \ No newline at end of file
 diff --git a/src/server/collision/Management/MMapFactory.h b/src/server/collision/Management/MMapFactory.h
 new file mode 100644
-index 0000000..a006aed
+index 0000000..8592b43
 --- /dev/null
 +++ b/src/server/collision/Management/MMapFactory.h
-@@ -0,0 +1,50 @@
+@@ -0,0 +1,43 @@
 +/*
 + * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
 + * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
@@ -14582,13 +14581,6 @@ index 0000000..a006aed
 +
 +namespace MMAP
 +{
-+    enum MMAP_LOAD_RESULT
-+    {
-+        MMAP_LOAD_RESULT_ERROR,
-+        MMAP_LOAD_RESULT_OK,
-+        MMAP_LOAD_RESULT_IGNORED,
-+    };
-+
 +    // static class
 +    // holds all mmap global data
 +    // access point to MMapManager singleton
@@ -15082,10 +15074,10 @@ index 8b81a48..9ff2109 100644
    ${CMAKE_SOURCE_DIR}/dep/SFMT
    ${CMAKE_SOURCE_DIR}/dep/zlib
 diff --git a/src/server/game/Entities/Object/Object.cpp b/src/server/game/Entities/Object/Object.cpp
-index 70b680c..1e5343a 100755
+index fc1b56c..0cfc85b 100755
 --- a/src/server/game/Entities/Object/Object.cpp
 +++ b/src/server/game/Entities/Object/Object.cpp
-@@ -1579,6 +1579,13 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
+@@ -1584,6 +1584,13 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
      {
          case TYPEID_UNIT:
          {
@@ -15100,10 +15092,10 @@ index 70b680c..1e5343a 100755
              // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
              if (!ToCreature()->CanFly())
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-index eebfd25..503ba68 100755
+index a4d02ee..ea91de7 100755
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
-@@ -366,7 +366,7 @@ bool Unit::haveOffhandWeapon() const
+@@ -367,7 +367,7 @@ bool Unit::haveOffhandWeapon() const
          return m_canDualWield;
  }
  
@@ -15113,7 +15105,7 @@ index eebfd25..503ba68 100755
      Movement::MoveSplineInit init(*this);
      init.MoveTo(x,y,z);
 diff --git a/src/server/game/Entities/Unit/Unit.h b/src/server/game/Entities/Unit/Unit.h
-index 00d6651..9c9596b 100755
+index f246f59..7d156b1 100755
 --- a/src/server/game/Entities/Unit/Unit.h
 +++ b/src/server/game/Entities/Unit/Unit.h
 @@ -498,6 +498,7 @@ enum UnitState
@@ -15124,7 +15116,7 @@ index 00d6651..9c9596b 100755
      UNIT_STATE_UNATTACKABLE    = (UNIT_STATE_IN_FLIGHT | UNIT_STATE_ONVEHICLE),
      // for real move using movegen check and stop (except unstoppable flight)
      UNIT_STATE_MOVING          = UNIT_STATE_ROAMING_MOVE | UNIT_STATE_CONFUSED_MOVE | UNIT_STATE_FLEEING_MOVE | UNIT_STATE_CHASE_MOVE | UNIT_STATE_FOLLOW_MOVE ,
-@@ -1626,7 +1627,7 @@ class Unit : public WorldObject
+@@ -1627,7 +1628,7 @@ class Unit : public WorldObject
          void JumpTo(float speedXY, float speedZ, bool forward = true);
          void JumpTo(WorldObject* obj, float speedZ);
  
@@ -15134,7 +15126,7 @@ index 00d6651..9c9596b 100755
          void SendMonsterMoveExitVehicle(Position const* newPos);
          //void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time, Player* player = NULL);
 diff --git a/src/server/game/Maps/Map.cpp b/src/server/game/Maps/Map.cpp
-index a1b3d91..04bebb4 100755
+index a1b3d91..4eb4943 100755
 --- a/src/server/game/Maps/Map.cpp
 +++ b/src/server/game/Maps/Map.cpp
 @@ -20,6 +20,7 @@
@@ -15151,36 +15143,35 @@ index a1b3d91..04bebb4 100755
          sScriptMgr->DecreaseScheduledScriptCount(m_scriptSchedule.size());
 +
 +    MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(GetId());
-+    MMAP::MMapFactory::createOrGetMMapManager()->unloadMapInstance(GetId(), i_InstanceId);
++    MMAP::MMapFactory::createOrGetMMapManager()->unloadMapInstance(GetId(), GetInstanceId());
  }
  
  bool Map::ExistMap(uint32 mapid, int gx, int gy)
-@@ -117,6 +121,24 @@ bool Map::ExistVMap(uint32 mapid, int gx, int gy)
+@@ -117,10 +121,10 @@ bool Map::ExistVMap(uint32 mapid, int gx, int gy)
      return true;
  }
  
-+void Map::LoadMMap(int gx, int gy)
-+{
-+    // DONT CHANGE "gy" and "gx" - Its necessary !
-+    int mmapLoadResult = MMAP::MMapFactory::createOrGetMMapManager()->loadMap((sWorld->GetDataPath() + "mmaps").c_str(), GetId(), gy, gx);
-+    switch (mmapLoadResult)
-+    {
-+        case MMAP::MMAP_LOAD_RESULT_OK:
-+            sLog->outDetail("MMAP loaded name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
-+    	    break;
-+        case MMAP::MMAP_LOAD_RESULT_ERROR:
-+            sLog->outDetail("Could not load MMAP name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
-+            break;
-+        case MMAP::MMAP_LOAD_RESULT_IGNORED:
-+            sLog->outStaticDebug("Ignored MMAP name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
-+            break;
-+    }
-+}
-+
- void Map::LoadVMap(int gx, int gy)
+-void Map::LoadVMap(int gx, int gy)
++bool Map::LoadVMapAndMMap(int gx, int gy)
  {
                                                              // x and y are swapped !!
-@@ -173,9 +195,8 @@ void Map::LoadMap(int gx, int gy, bool reload)
+-    int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld->GetDataPath()+ "vmaps").c_str(),  GetId(), gx, gy);
++    int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld->GetDataPath() + "vmaps").c_str(),  GetId(), gx, gy);
+     switch (vmapLoadResult)
+     {
+         case VMAP::VMAP_LOAD_RESULT_OK:
+@@ -133,6 +137,10 @@ void Map::LoadVMap(int gx, int gy)
+             sLog->outStaticDebug("Ignored VMAP name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
+             break;
+     }
++
++    // DONT CHANGE "gy" and "gx" - Its necessary !
++    int mmapLoadResult = MMAP::MMapFactory::createOrGetMMapManager()->loadMap((sWorld->GetDataPath() + "mmaps").c_str(), GetId(), gy, gx);
++    return mmapLoadResult;
+ }
+ 
+ void Map::LoadMap(int gx, int gy, bool reload)
+@@ -173,9 +181,8 @@ void Map::LoadMap(int gx, int gy, bool reload)
      // loading data
      GridMaps[gx][gy] = new GridMap();
      if (!GridMaps[gx][gy]->loadData(tmp))
@@ -15191,18 +15182,18 @@ index a1b3d91..04bebb4 100755
      delete [] tmp;
  
      sScriptMgr->OnLoadGridMap(this, GridMaps[gx][gy], gx, gy);
-@@ -185,7 +206,10 @@ void Map::LoadMapAndVMap(int gx, int gy)
+@@ -184,8 +191,8 @@ void Map::LoadMap(int gx, int gy, bool reload)
+ void Map::LoadMapAndVMap(int gx, int gy)
  {
      LoadMap(gx, gy);
-     if (i_InstanceId == 0)
-+    {
-         LoadVMap(gx, gy);                                   // Only load the data for the base map
-+        LoadMMap(gx, gy);
-+    }
+-    if (i_InstanceId == 0)
+-        LoadVMap(gx, gy);                                   // Only load the data for the base map
++    if (GetInstanceId() == 0)
++        LoadVMapAndMMap(gx, gy);                                   // Only load the data for the base map
  }
  
  void Map::InitStateMachine()
-@@ -996,6 +1020,7 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
+@@ -996,6 +1003,7 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
              }
              // x and y are swapped
              VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gx, gy);
@@ -15211,7 +15202,7 @@ index a1b3d91..04bebb4 100755
          else
              ((MapInstanced*)m_parentMap)->RemoveGridMapReference(GridCoord(gx, gy));
 diff --git a/src/server/game/Maps/Map.h b/src/server/game/Maps/Map.h
-index 766e3d2..925adfb 100755
+index 6ba0864..d798137 100755
 --- a/src/server/game/Maps/Map.h
 +++ b/src/server/game/Maps/Map.h
 @@ -76,6 +76,8 @@ struct map_fileheader
@@ -15223,14 +15214,15 @@ index 766e3d2..925adfb 100755
  };
  
  #define MAP_AREA_NO_AREA      0x0001
-@@ -447,6 +449,7 @@ class Map : public GridRefManager<NGridType>
+@@ -445,7 +447,7 @@ class Map : public GridRefManager<NGridType>
+         bool getObjectHitPos(uint32 phasemask, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float &ry, float& rz, float modifyDist);
+     private:
          void LoadMapAndVMap(int gx, int gy);
-         void LoadVMap(int gx, int gy);
+-        void LoadVMap(int gx, int gy);
++        bool LoadVMapAndMMap(int gx, int gy);
          void LoadMap(int gx, int gy, bool reload = false);
-+        void LoadMMap(int gx, int gy);
          GridMap* GetGrid(float x, float y);
  
-         void SetTimer(uint32 t) { i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t; }
 diff --git a/src/server/game/Maps/MapInstanced.cpp b/src/server/game/Maps/MapInstanced.cpp
 index 5543251..5924b92 100755
 --- a/src/server/game/Maps/MapInstanced.cpp
@@ -15252,7 +15244,7 @@ index 5543251..5924b92 100755
          // so in the next map creation, (EnsureGridCreated actually) VMaps will be reloaded
          Map::UnloadAll();
 diff --git a/src/server/game/Miscellaneous/SharedDefines.h b/src/server/game/Miscellaneous/SharedDefines.h
-index 22f0ea3..9e7c20f 100755
+index 06aca10..da1bcb1 100755
 --- a/src/server/game/Miscellaneous/SharedDefines.h
 +++ b/src/server/game/Miscellaneous/SharedDefines.h
 @@ -19,6 +19,7 @@
@@ -15298,10 +15290,10 @@ index 22f0ea3..9e7c20f 100755
 +
  #endif
 diff --git a/src/server/game/Movement/MotionMaster.cpp b/src/server/game/Movement/MotionMaster.cpp
-index b0ac0b7..57d20d8 100755
+index c0e1eb8..096dd1f 100755
 --- a/src/server/game/Movement/MotionMaster.cpp
 +++ b/src/server/game/Movement/MotionMaster.cpp
-@@ -120,9 +120,10 @@ void MotionMaster::DirectClean(bool reset)
+@@ -123,9 +123,10 @@ void MotionMaster::DirectClean(bool reset)
  {
      while (size() > 1)
      {
@@ -15314,7 +15306,7 @@ index b0ac0b7..57d20d8 100755
      }
  
      if (needInitTop())
-@@ -280,18 +281,18 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlo
+@@ -283,18 +284,18 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlo
      }
  }
  
@@ -15336,7 +15328,7 @@ index b0ac0b7..57d20d8 100755
      }
  }
  
-@@ -396,7 +397,7 @@ void MotionMaster::MoveFall(uint32 id/*=0*/)
+@@ -399,7 +400,7 @@ void MotionMaster::MoveFall(uint32 id/*=0*/)
      Mutate(new EffectMovementGenerator(id), MOTION_SLOT_CONTROLLED);
  }
  
@@ -15345,7 +15337,7 @@ index b0ac0b7..57d20d8 100755
  {
      if (Impl[MOTION_SLOT_CONTROLLED] && Impl[MOTION_SLOT_CONTROLLED]->GetMovementGeneratorType() != DISTRACT_MOTION_TYPE)
          return;
-@@ -404,13 +405,13 @@ void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id)
+@@ -407,13 +408,13 @@ void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id)
      if (_owner->GetTypeId() == TYPEID_PLAYER)
      {
          sLog->outStaticDebug("Player (GUID: %u) charge point (X: %f Y: %f Z: %f)", _owner->GetGUIDLow(), x, y, z);
@@ -15564,7 +15556,7 @@ index 7f2226e..72ffd7b 100755
  #endif
  
 diff --git a/src/server/game/Movement/MovementGenerators/FleeingMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/FleeingMovementGenerator.cpp
-index 08e27ab..e2c8f89 100755
+index 08e27ab..c053ed7 100755
 --- a/src/server/game/Movement/MovementGenerators/FleeingMovementGenerator.cpp
 +++ b/src/server/game/Movement/MovementGenerators/FleeingMovementGenerator.cpp
 @@ -20,6 +20,7 @@
@@ -15852,7 +15844,7 @@ index 08e27ab..e2c8f89 100755
  
      return true;
  }
-@@ -284,45 +117,12 @@ void FleeingMovementGenerator<T>::Initialize(T &owner)
+@@ -284,52 +117,17 @@ void FleeingMovementGenerator<T>::Initialize(T &owner)
  
      owner.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
      owner.AddUnitState(UNIT_STATE_FLEEING|UNIT_STATE_FLEEING_MOVE);
@@ -15877,16 +15869,15 @@ index 08e27ab..e2c8f89 100755
 -    i_cur_angle = 0.0f;
 -    i_last_distance_from_caster = 0.0f;
 -    i_to_distance_from_caster = 0.0f;
--    _setTargetLocation(owner);
--}
--
--template<>
+     _setTargetLocation(owner);
+ }
+ 
+ template<>
 -void FleeingMovementGenerator<Creature>::_Init(Creature &owner)
 -{
 -    if (!&owner)
-+    if (owner.GetTypeId() == TYPEID_UNIT)
-         return;
- 
+-        return;
+-
 -    //owner.SetTargetGuid(ObjectGuid());
 -    is_water_ok = owner.canSwim();
 -    is_land_ok  = owner.canWalk();
@@ -15897,11 +15888,10 @@ index 08e27ab..e2c8f89 100755
 -{
 -    is_water_ok = true;
 -    is_land_ok  = true;
-+    _setTargetLocation(owner);
- }
- 
- template<>
-@@ -330,6 +130,7 @@ void FleeingMovementGenerator<Player>::Finalize(Player &owner)
+-}
+-
+-template<>
+ void FleeingMovementGenerator<Player>::Finalize(Player &owner)
  {
      owner.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
      owner.ClearUnitState(UNIT_STATE_FLEEING|UNIT_STATE_FLEEING_MOVE);
@@ -15909,7 +15899,7 @@ index 08e27ab..e2c8f89 100755
  }
  
  template<>
-@@ -367,8 +168,6 @@ bool FleeingMovementGenerator<T>::Update(T &owner, const uint32 &time_diff)
+@@ -367,8 +165,6 @@ bool FleeingMovementGenerator<T>::Update(T &owner, const uint32 &time_diff)
  
  template void FleeingMovementGenerator<Player>::Initialize(Player &);
  template void FleeingMovementGenerator<Creature>::Initialize(Creature &);
@@ -15943,18 +15933,10 @@ index aec93ad..cb3bd1c 100755
          TimeTracker i_nextCheckTime;
  };
 diff --git a/src/server/game/Movement/MovementGenerators/HomeMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/HomeMovementGenerator.cpp
-index 311b69c..a317279 100755
+index a8bdb69..a317279 100755
 --- a/src/server/game/Movement/MovementGenerators/HomeMovementGenerator.cpp
 +++ b/src/server/game/Movement/MovementGenerators/HomeMovementGenerator.cpp
-@@ -25,7 +25,6 @@
- 
- void HomeMovementGenerator<Creature>::Initialize(Creature & owner)
- {
--    owner.AddUnitState(UNIT_STATE_EVADE);
-     _setTargetLocation(owner);
- }
- 
-@@ -41,12 +40,12 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature & owner)
+@@ -40,12 +40,12 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature & owner)
      Movement::MoveSplineInit init(owner);
      float x, y, z, o;
      // at apply we can select more nice return points base at current movegen
@@ -16901,7 +16883,7 @@ index 0000000..f4edd1a
 +
 +#endif
 diff --git a/src/server/game/Movement/MovementGenerators/PointMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/PointMovementGenerator.cpp
-index a922c93..8514b83 100755
+index a922c93..6644331 100755
 --- a/src/server/game/Movement/MovementGenerators/PointMovementGenerator.cpp
 +++ b/src/server/game/Movement/MovementGenerators/PointMovementGenerator.cpp
 @@ -32,9 +32,9 @@ void PointMovementGenerator<T>::Initialize(T &unit)
@@ -16916,20 +16898,32 @@ index a922c93..8514b83 100755
      if (speed > 0.0f)
          init.SetVelocity(speed);
      init.Launch();
-@@ -59,7 +59,8 @@ bool PointMovementGenerator<T>::Update(T &unit, const uint32 & /*diff*/)
+@@ -59,7 +59,7 @@ bool PointMovementGenerator<T>::Update(T &unit, const uint32 & /*diff*/)
  template<class T>
  void PointMovementGenerator<T>::Finalize(T &unit)
  {
 -    unit.ClearUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
-+    if (unit.HasUnitState(UNIT_STATE_CHARGING))
-+        unit.ClearUnitState(UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE);
++    unit.ClearUnitState(UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE);
  
      if (unit.movespline->Finalized())
          MovementInform(unit);
-@@ -120,11 +121,11 @@ void EffectMovementGenerator::Finalize(Unit &unit)
+@@ -81,11 +81,6 @@ void PointMovementGenerator<T>::MovementInform(T & /*unit*/)
+ 
+ template <> void PointMovementGenerator<Creature>::MovementInform(Creature &unit)
+ {
+-    //if (id == EVENT_FALL_GROUND)
+-    //{
+-    //    unit.setDeathState(JUST_DIED);
+-    //    unit.SetFlying(true);
+-    //}
+     if (unit.AI())
+         unit.AI()->MovementInform(POINT_MOTION_TYPE, id);
+ }
+@@ -119,12 +114,4 @@ void EffectMovementGenerator::Finalize(Unit &unit)
+ 
      if (((Creature&)unit).AI())
          ((Creature&)unit).AI()->MovementInform(EFFECT_MOTION_TYPE, m_Id);
-     // Need restore previous movement since we have no proper states system
+-    // Need restore previous movement since we have no proper states system
 -    //if (unit.isAlive() && !unit.HasUnitState(UNIT_STATE_CONFUSED|UNIT_STATE_FLEEING))
 -    //{
 -    //    if (Unit * victim = unit.getVictim())
@@ -16937,13 +16931,6 @@ index a922c93..8514b83 100755
 -    //    else
 -    //        unit.GetMotionMaster()->Initialize();
 -    //}
-+    if (unit.isAlive() && !unit.HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_FLEEING))
-+    {
-+        if (Unit* victim = unit.getVictim())
-+            unit.GetMotionMaster()->MoveChase(victim);
-+        else
-+            unit.GetMotionMaster()->Initialize();
-+    }
  }
 diff --git a/src/server/game/Movement/MovementGenerators/PointMovementGenerator.h b/src/server/game/Movement/MovementGenerators/PointMovementGenerator.h
 index 13be9fe..404d336 100755
@@ -16990,19 +16977,38 @@ index 84cd9e8..759c2b2 100755
      init.Launch();
  
 diff --git a/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp
-index fdff5a9..fa800ca 100755
+index fdff5a9..6f5a6f8 100755
 --- a/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp
 +++ b/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.cpp
-@@ -26,8 +26,6 @@
+@@ -26,7 +26,7 @@
  #include "MoveSpline.h"
  #include "Player.h"
  
 -#include <cmath>
--
++#define RECHECK_DISTANCE_TIMER 50
+ 
  template<class T, typename D>
  void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
- {
-@@ -65,30 +63,22 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
+@@ -38,17 +38,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
+         return;
+ 
+     float x, y, z;
+-    //! Following block of code deleted by MrSmite in issue 4891
+-    //! Code kept for learning and diagnostical purposes
+-//
+-//     if (i_offset && i_target->IsWithinDistInMap(&owner,2*i_offset))
+-//     {
+-//         if (!owner.movespline->Finalized())
+-//             return;
+-//
+-//         owner.GetPosition(x, y, z);
+-//     }
+-//     else
++
+     if (!i_offset)
+     {
+         if (i_target->IsWithinMeleeRange(&owner))
+@@ -65,30 +55,22 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
          i_target->GetClosePoint(x, y, z, owner.GetObjectSize(), i_offset, i_angle);
      }
  
@@ -17042,40 +17048,38 @@ index fdff5a9..fa800ca 100755
      init.SetWalk(((D*)this)->EnableWalking());
      init.Launch();
  }
-@@ -125,7 +115,7 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
-     if (!i_target.isValid() || !i_target->IsInWorld())
-         return false;
- 
--    if (!owner.isAlive())
-+    if (!&owner || !owner.isAlive())
-         return true;
- 
-     if (owner.HasUnitState(UNIT_STATE_NOT_MOVE))
-@@ -152,11 +142,19 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
+@@ -152,11 +134,18 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
      i_recheckDistance.Update(time_diff);
      if (i_recheckDistance.Passed())
      {
 -        i_recheckDistance.Reset(50);
-+        i_recheckDistance.Reset(100);
-+
-         //More distance let have better performance, less distance let have more sensitive reaction at target move.
+-        //More distance let have better performance, less distance let have more sensitive reaction at target move.
 -        float allowed_dist = i_target->GetObjectSize() + owner.GetObjectSize() + MELEE_RANGE - 0.5f;
 -        float dist = (owner.movespline->FinalDestination() - G3D::Vector3(i_target->GetPositionX(),i_target->GetPositionY(),i_target->GetPositionZ())).squaredLength();
 -        if (dist >= allowed_dist * allowed_dist)
-+        float allowed_dist = owner.GetCombatReach() + sWorld->getRate(RATE_TARGET_POS_RECALCULATION_RANGE);
++        i_recheckDistance.Reset(RECHECK_DISTANCE_TIMER);
++
++        float allowedDist = owner.GetObjectSize() + MELEE_RANGE - 0.5f;
 +        G3D::Vector3 dest = owner.movespline->FinalDestination();
 +
 +        bool targetMoved = false;
-+        if (owner.GetTypeId() == TYPEID_UNIT && (((Creature*)&owner)->CanFly() || ((Creature*)&owner)->getVictim()))
-+            targetMoved = !i_target->IsWithinDist3d(dest.x, dest.y, dest.z, allowed_dist);
++        if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->IsFlying())
++            targetMoved = !i_target->IsWithinDist3d(dest.x, dest.y, dest.z, allowedDist);
 +        else
-+            targetMoved = !i_target->IsWithinDist2d(dest.x, dest.y, allowed_dist);
++            targetMoved = !i_target->IsWithinDist2d(dest.x, dest.y, allowedDist);
 +
 +        if (targetMoved)
              _setTargetLocation(owner);
      }
  
-@@ -191,7 +189,7 @@ void ChaseMovementGenerator<T>::_reachTarget(T &owner)
+@@ -185,13 +174,13 @@ template<class T>
+ void ChaseMovementGenerator<T>::_reachTarget(T &owner)
+ {
+     if (owner.IsWithinMeleeRange(this->i_target.getTarget()))
+-        owner.Attack(this->i_target.getTarget(),true);
++        owner.Attack(this->i_target.getTarget(), true);
+ }
+ 
  template<>
  void ChaseMovementGenerator<Player>::Initialize(Player &owner)
  {
@@ -17084,7 +17088,7 @@ index fdff5a9..fa800ca 100755
      _setTargetLocation(owner);
  }
  
-@@ -199,14 +197,14 @@ template<>
+@@ -199,14 +188,16 @@ template<>
  void ChaseMovementGenerator<Creature>::Initialize(Creature &owner)
  {
      owner.SetWalk(false);
@@ -17098,11 +17102,13 @@ index fdff5a9..fa800ca 100755
  {
 -    owner.ClearUnitState(UNIT_STATE_CHASE|UNIT_STATE_CHASE_MOVE);
 +    owner.ClearUnitState(UNIT_STATE_CHASE | UNIT_STATE_CHASE_MOVE);
++    if (owner.GetTypeId() == TYPEID_UNIT && !((Creature*)&owner)->isPet() && owner.isAlive())
++        owner.GetMotionMaster()->MoveTargetedHome();
  }
  
  template<class T>
 diff --git a/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.h b/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.h
-index 29fd736..d855dfa 100755
+index 29fd736..1a3ec4a 100755
 --- a/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.h
 +++ b/src/server/game/Movement/MovementGenerators/TargetedMovementGenerator.h
 @@ -23,6 +23,7 @@
@@ -17118,8 +17124,9 @@ index 29fd736..d855dfa 100755
      protected:
          TargetedMovementGeneratorMedium(Unit &target, float offset, float angle) :
 -            TargetedMovementGeneratorBase(target), i_recheckDistance(0),
+-            i_offset(offset), i_angle(angle),
 +            TargetedMovementGeneratorBase(target), i_recheckDistance(0), i_path(NULL),
-             i_offset(offset), i_angle(angle),
++            i_offset(offset), i_angle(angle), i_targetSearchingTimer(0),
              i_recalculateTravel(false), i_targetReached(false)
          {
          }
@@ -17128,7 +17135,7 @@ index 29fd736..d855dfa 100755
  
      public:
          bool Update(T &, const uint32 &);
-@@ -51,7 +52,7 @@ class TargetedMovementGeneratorMedium : public MovementGeneratorMedium< T, D >,
+@@ -51,15 +52,17 @@ class TargetedMovementGeneratorMedium : public MovementGeneratorMedium< T, D >,
  
          void unitSpeedChanged() { i_recalculateTravel=true; }
          void UpdateFinalDistance(float fDistance);
@@ -17137,7 +17144,9 @@ index 29fd736..d855dfa 100755
      protected:
          void _setTargetLocation(T &);
  
-@@ -60,6 +61,7 @@ class TargetedMovementGeneratorMedium : public MovementGeneratorMedium< T, D >,
+         TimeTrackerSmall i_recheckDistance;
++        uint32 i_targetSearchingTimer;
+         float i_offset;
          float i_angle;
          bool i_recalculateTravel : 1;
          bool i_targetReached : 1;
@@ -17146,10 +17155,10 @@ index 29fd736..d855dfa 100755
  
  template<class T>
 diff --git a/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp b/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp
-index 81fe160..6d06066 100755
+index 25730f9..a7c8cd4 100755
 --- a/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp
 +++ b/src/server/game/Movement/MovementGenerators/WaypointMovementGenerator.cpp
-@@ -319,331 +319,3 @@ void FlightPathMovementGenerator::PreloadEndGrid()
+@@ -320,331 +320,3 @@ void FlightPathMovementGenerator::PreloadEndGrid()
      else
          sLog->outDetail("Unable to determine map to preload flightmaster grid");
  }
@@ -17652,7 +17661,7 @@ index b6ddaa9..0389585 100755
  #endif
  
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 6e32d33..a5ec6be 100755
+index 6e32d33..7c38a33 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -21,6 +21,7 @@
@@ -17679,17 +17688,18 @@ index 6e32d33..a5ec6be 100755
  
      //TODO free addSessQueue
  }
-@@ -1120,6 +1123,9 @@ void World::LoadConfigSettings(bool reload)
+@@ -1120,6 +1123,10 @@ void World::LoadConfigSettings(bool reload)
          sLog->outString("Using DataDir %s", m_dataPath.c_str());
      }
  
++    // MMap related
 +    m_bool_configs[CONFIG_ENABLE_MMAPS] = ConfigMgr::GetBoolDefault("mmap.enablePathFinding", true);
 +    sLog->outString("WORLD: MMap data directory is: %smmaps", m_dataPath.c_str());
 +
      m_bool_configs[CONFIG_VMAP_INDOOR_CHECK] = ConfigMgr::GetBoolDefault("vmap.enableIndoorCheck", 0);
      bool enableIndoor = ConfigMgr::GetBoolDefault("vmap.enableIndoorCheck", true);
      bool enableLOS = ConfigMgr::GetBoolDefault("vmap.enableLOS", true);
-@@ -1216,6 +1222,9 @@ void World::SetInitialWorldSettings()
+@@ -1216,6 +1223,9 @@ void World::SetInitialWorldSettings()
      ///- Initialize the random number generator
      srand((unsigned int)time(NULL));
  
@@ -17712,7 +17722,7 @@ index 95e9fbd..ec3d090 100755
  };
  
 diff --git a/src/server/scripts/CMakeLists.txt b/src/server/scripts/CMakeLists.txt
-index f0136b0..3d21085 100644
+index 792fdeb..3d21085 100644
 --- a/src/server/scripts/CMakeLists.txt
 +++ b/src/server/scripts/CMakeLists.txt
 @@ -51,6 +51,8 @@ message("")
@@ -17724,14 +17734,6 @@ index f0136b0..3d21085 100644
    ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
    ${CMAKE_SOURCE_DIR}/dep/SFMT
    ${CMAKE_SOURCE_DIR}/dep/zlib
-@@ -119,6 +121,7 @@ include_directories(
-   ${CMAKE_SOURCE_DIR}/src/server/game/Maps
-   ${CMAKE_SOURCE_DIR}/src/server/game/Movement
-   ${CMAKE_SOURCE_DIR}/src/server/game/Movement/MovementGenerators
-+  ${CMAKE_SOURCE_DIR}/src/server/game/Movement/Spline
-   ${CMAKE_SOURCE_DIR}/src/server/game/Movement/Waypoints
-   ${CMAKE_SOURCE_DIR}/src/server/game/Opcodes
-   ${CMAKE_SOURCE_DIR}/src/server/game/OutdoorPvP
 diff --git a/src/server/shared/CMakeLists.txt b/src/server/shared/CMakeLists.txt
 index de99844..e016ad2 100644
 --- a/src/server/shared/CMakeLists.txt
