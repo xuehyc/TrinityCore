@@ -1290,7 +1290,16 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
             {
                 Position pos;
                 GetHitUnit()->GetPosition(&pos);
-                if (TempSummon* summon = GetCaster()->SummonCreature(NPC_ICE_TOMB, pos))
+
+                float angle = GetCaster()->GetAngle(GetHitUnit());
+                float distance = GetCaster()->GetExactDist2d(GetHitUnit()) + 2.75f;
+                float summonX = GetCaster()->GetPositionX() + cos(angle) * distance;
+                float summonY = GetCaster()->GetPositionY() + sin(angle) * distance;
+                float summonZ = 206.0f;
+
+                GetCaster()->UpdateGroundPositionZ(summonX, summonY, summonZ);
+
+                if (TempSummon* summon = GetCaster()->SummonCreature(NPC_ICE_TOMB, summonX, summonY, summonZ))
                 {
                     summon->AI()->SetGUID(GetHitUnit()->GetGUID(), DATA_TRAPPED_PLAYER);
                     if (GameObject* go = summon->SummonGameObject(GO_ICE_BLOCK, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0))
