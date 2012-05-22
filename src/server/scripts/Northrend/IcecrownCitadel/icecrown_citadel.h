@@ -346,7 +346,7 @@ enum GameObjectsIds
     GO_SINDRAGOSA_SHORTCUT_ENTRANCE_DOOR    = 201369,
     GO_SINDRAGOSA_SHORTCUT_EXIT_DOOR        = 201379,
     GO_ICE_WALL                             = 202396,
-    GO_ICE_BLOCK                            = 201722,
+    GO_ICE_BLOCK                            = 188142,
     GO_SIGIL_OF_THE_FROSTWING               = 202181,
 
     // The Lich King
