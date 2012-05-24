@@ -10078,7 +10078,7 @@ uint32 Player::GetItemCountWithLimitCategory(uint32 limitCategory, Item* skipIte
         if (Bag* pBag = GetBagByPos(i))
             count += pBag->GetItemCountWithLimitCategory(limitCategory, skipItem);
 
-    for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
+    for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_BAG_END; ++i)
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem != skipItem)
                 if (ItemTemplate const* pProto = pItem->GetTemplate())
@@ -10104,7 +10104,7 @@ Item* Player::GetItemByGuid(uint64 guid) const
             if (pItem->GetGUID() == guid)
                 return pItem;
 
-    for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
+    for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_BAG_END; ++i)
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->GetGUID() == guid)
                 return pItem;
