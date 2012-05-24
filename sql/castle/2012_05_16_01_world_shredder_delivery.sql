@@ -11,8 +11,8 @@ INSERT INTO `creature_template_addon` (`entry`,`mount`,`bytes1`,`bytes2`,`emote`
 
 -- mounting the shredder
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = @shredder;
-INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES 
-(@shredder, 62309, 1, 0);
+INSERT INTO `npc_spellclick_spells` (npc_entry, spell_id, quest_start, quest_start_active, quest_end, cast_flags, aura_required, aura_forbidden, user_type) VALUES
+(@shredder, 62309, 0, 0, 0, 1, 0, 0, 0);
 
 -- despawn on hand in
 DELETE FROM `spell_scripts` WHERE `id` = 48610;

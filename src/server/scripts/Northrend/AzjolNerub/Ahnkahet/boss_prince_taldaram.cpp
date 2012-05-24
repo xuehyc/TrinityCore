@@ -42,9 +42,9 @@ enum Misc
 {
     DATA_EMBRACE_DMG                              = 20000,
     H_DATA_EMBRACE_DMG                            = 40000,
-    DATA_SPHERE_DISTANCE                          =    15
+    DATA_SPHERE_DISTANCE                          =    60
 };
-#define DATA_SPHERE_ANGLE_OFFSET            0.7f
+#define DATA_SPHERE_ANGLE_OFFSET            2.1f
 #define DATA_GROUND_POSITION_Z             11.4f
 
 enum Yells
