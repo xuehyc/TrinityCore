@@ -30,9 +30,9 @@
 
 const uint32 WintergraspFaction[3] = {1802, 1801, 35};
 const uint32 WG_MARK_OF_HONOR = 43589;
-const uint32 VehNumWorldState[2] = {3680,3490};
-const uint32 MaxVehNumWorldState[2] = {3681,3491};
-const uint32 ClockWorldState[2] = {3781,4354};
+const uint32 VehNumWorldState[2] = {3680, 3490};
+const uint32 MaxVehNumWorldState[2] = {3681, 3491};
+const uint32 ClockWorldState[2] = {3781, 4354};
 const Team TeamId2Team[3] = {ALLIANCE, HORDE, TEAM_OTHER};
 
 enum OutdoorPvPWGSpell
@@ -62,6 +62,66 @@ enum OutdoorPvPWGSpell
     SPELL_VICTORY_AURA                           = 60044,
 };
 
+enum OutdoorPvPWGCreatures
+{
+    // engineers & spirit guides
+    NPC_GNOMISH_DEMOLISHER      = 30499, // Gnomish Engineer <Demolisher Engineer>
+    NPC_GOBLIN_MECHANIC         = 30400, // Goblin Mechanic <Demolisher Engineer>
+    NPC_DWARVEN_SPIRIT_GUIDE    = 31842, // Dwarven Spirit Guide
+    NPC_TAUNKA_SPIRIT_GUIDE     = 31841, // Taunka Spirit Guide
+    NPC_SPIRIT_HEALER           = 6491,  // Spirit Healer
+    NPC_RP_GG                   = 30560, // The RP-GG (not implemented)
+
+    // vehicles
+    NPC_WG_CATAPULT             = 27881, // Wintergrasp Catapult
+    NPC_WG_DEMOLISHER           = 28094, // Wintergrasp Demolisher
+    NPC_ALLIANCE_SIEGE_ENGINE   = 28312, // Wintergrasp Siege Engine (Alliance)
+    NPC_ALLIANCE_TURRET         = 28319, // Wintergrasp Siege Turret (Alliance)
+    NPC_HORDE_SIEGE_ENGINE      = 32627, // Wintergrasp Siege Engine (Horde)
+    NPC_HORDE_TURRET            = 32629, // Wintergrasp Siege Turret (Horde)
+    NPC_TOWER_CANNON            = 28366, // Wintergrasp Tower Cannon
+
+    // guards       defend workshops and castle
+    // champions    defend assault on the vendors and questgivers in the castle (additional spawns)
+    NPC_ALLIANCE_CHAMPION       = 30740, // Valiance Expedition Champion
+    NPC_ALLIANCE_GUARD          = 32308, // Valiance Expedition Guard
+    NPC_HORDE_CHAMPION          = 30739, // Warsong Champion
+    NPC_HORDE_GUARD             = 32307, // Warsong Guard
+
+    // vendors
+    NPC_ALLIANCE_KAYLANA        = 31051, // Sorceress Kaylana <Enchantress>
+    NPC_HORDE_FUJIN             = 31101, // Hoodoo Master Fu'jin <Master Hexxer>
+    NPC_ALLIANCE_DAMERON        = 32296, // Knight Dameron <Wintergrasp Quartermaster>      Patch 3.0.2
+    NPC_HORDE_MUKAR             = 32294, // Stone Guard Mukar <Wintergrasp Quartermaster>   Patch 3.0.2
+    NPC_ALLIANCE_MAGRUDER       = 39172, // Marshal Magruder <Wintergrasp Quartermaster>    Patch 3.3.2
+    NPC_HORDE_ROSSLAI           = 39173, // Champion Ros'slai <Wintergrasp Quartermaster>   Patch 3.3.2
+
+    // questgivers
+    NPC_ALLIANCE_RANDOLPH       = 31052, // Bowyer Randolph
+    NPC_HORDE_BLAZEFEATHER      = 31102, // Vieron Blazefeather
+    NPC_ALLIANCE_LEGOSO         = 31109, // Senior Demolitionist Legoso
+    NPC_HORDE_MURP              = 31107, // Lieutenant Murp
+    NPC_ALLIANCE_ABRAHMIS       = 31153, // Tactical Officer Ahbramis
+    NPC_HORDE_KILRATH           = 31151, // Tactical Officer Kilrath
+    NPC_ALLIANCE_STOUTHANDLE    = 31108, // Siege Master Stouthandle
+    NPC_HORDE_STRONGHOOF        = 31106, // Siegesmith Stronghoof
+    NPC_ALLIANCE_TESSA          = 31054, // Anchorite Tessa
+    NPC_HORDE_MULFORT           = 31053, // Primalist Mulfort
+    NPC_ALLIANCE_ZANNETH        = 31036, // Commander Zanneth
+    NPC_HORDE_DARDOSH           = 31091, // Commander Dardosh
+    NPC_ALLIANCE_GENERAL        = 32626, // Alliance Brigadier General
+    NPC_HORDE_WARBRINGER        = 32615, // Horde Warbringer
+
+    // flight master
+    NPC_ALLIANCE_SAFEFLIGHT     = 30870, // Herzo Safeflight <Flight Master>
+    NPC_HORDE_SAFEFLIGHT        = 30869, // Arzo Safeflight <Flight Master>
+};
+
+enum OutdoorPvPWGObjects
+{
+    GO_TITAN_RELIC              = 192829,
+};
+
 const uint16 GameEventWintergraspDefender[2] = {50, 51};
 
 enum OutdoorPvP_WG_Sounds
@@ -74,8 +134,8 @@ enum OutdoorPvP_WG_Sounds
     OutdoorPvP_WG_SOUND_NEAR_VICTORY            = 8456,
     OutdoorPvP_WG_SOUND_HORDE_WINS              = 8454,
     OutdoorPvP_WG_SOUND_ALLIANCE_WINS           = 8455,
-    OutdoorPvP_WG_SOUND_WORKSHOP_Horde          = 6205, // время убивать орда
-    OutdoorPvP_WG_SOUND_WORKSHOP_ALLIANCE       = 6298, // к оружию альянс
+    OutdoorPvP_WG_SOUND_WORKSHOP_Horde          = 6205,
+    OutdoorPvP_WG_SOUND_WORKSHOP_ALLIANCE       = 6298,
     OutdoorPvP_WG_HORDE_CAPTAIN                 = 8333,
     OutdoorPvP_WG_ALLIANCE_CAPTAIN              = 8232,
 //    OutdoorPvP_WG_SOUND_START_BATTLE            = 11803,   //L70ETC Concert
@@ -140,14 +200,6 @@ enum OutdoorPvPWGQuest
     H_VICTORY_IN_WG                              = 13183,
     CRE_PVP_KILL                                 = 31086, //Quest Objective - Fixme: this should be handled by DB
     CRE_PVP_KILL_V                               = 31093, //Quest Objective - Fixme: this should be handled by DB
-};
-
-enum OutdoorPvPWGCreEntry
-{
-    CRE_ENG_A                                    = 30499,
-    CRE_ENG_H                                    = 30400,
-    CRE_SPI_A                                    = 31842,
-    CRE_SPI_H                                    = 31841,
 };
 
 const TeamPair OutdoorPvPWGCreEntryPair[] =
@@ -266,12 +318,22 @@ class OutdoorPvPWG : public OutdoorPvP
         // BG end
         void SendInitWorldStatesTo(Player *player = NULL) const;
         uint32 m_timer;
+
+        // Relocate System
+        void RelocateTeleport(Creature* creature, Position pos);
+        void RelocateSummonDespawn(Creature* creature, bool condition);
+        void RelocateCreature(Creature* creature);
+
+        // Sound Handler
+        void PlayTeamSound(TeamId team, uint32 sound);
     protected:
         // Temporal BG specific till 3.2
         std::vector<uint64> m_ResurrectQueue;               // Player GUID
         uint32 m_LastResurrectTime;
         // Spirit Guide guid + Player list GUIDS
         std::map<uint64, std::vector<uint64> >  m_ReviveQueue;
+        std::map<uint32, Position> fortressPosition;
+        std::map<uint32, Position> homePosition;
 
         uint32 GetLastResurrectTime() const { return m_LastResurrectTime; }
         uint32 GetReviveQueueSize() const { return m_ReviveQueue.size(); }
