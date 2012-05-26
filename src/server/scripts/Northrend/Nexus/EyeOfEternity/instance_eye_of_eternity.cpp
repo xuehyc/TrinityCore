@@ -84,7 +84,7 @@ public:
                         platform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
 
                     if (GameObject* chest = instance->GetGameObject(chestGUID))
-                        chest->SetRespawnTime(7*DAY);
+                        chest->SetPhaseMask(1, true);
                 }
             }
             return true;
