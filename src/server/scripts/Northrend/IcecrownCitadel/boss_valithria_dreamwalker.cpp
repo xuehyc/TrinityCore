@@ -583,8 +583,15 @@ class npc_green_dragon_combat_trigger : public CreatureScript
             {
                 if (action == ACTION_DEATH)
                 {
-                    instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, NOT_STARTED);
-                    me->m_Events.AddEvent(new ValithriaDespawner(me), me->m_Events.CalculateTime(5000));
+                    if (instance)
+                    {
+                        // Stop spawning creatures etc
+                        if (Creature* lichKing = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALITHRIA_LICH_KING)))
+                            lichKing->AI()->EnterEvadeMode();
+
+                        instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, NOT_STARTED);
+                        me->m_Events.AddEvent(new ValithriaDespawner(me), me->m_Events.CalculateTime(5000));
+                    }
                 }
             }
 
