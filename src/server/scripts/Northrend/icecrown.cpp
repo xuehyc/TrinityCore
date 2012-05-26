@@ -28,7 +28,7 @@ npc_arete
 EndContentData */
 
 #include "ScriptPCH.h"
-#include "Vehicles.h"
+#include "Vehicle.h"
 
 /*######
 ## npc_arete
