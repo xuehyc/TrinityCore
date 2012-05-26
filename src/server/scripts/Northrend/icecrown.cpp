@@ -28,6 +28,7 @@ npc_arete
 EndContentData */
 
 #include "ScriptPCH.h"
+#include "Vehicles.h"
 
 /*######
 ## npc_arete
@@ -296,7 +297,7 @@ public:
 
         void DamageTaken(Unit* pDoneBy, uint32& uiDamage)
         {
-            if (uiDamage > me->GetHealth() && pDoneBy->GetTypeId() == TYPEID_PLAYER)
+            if (uiDamage >= me->GetHealth() && pDoneBy->GetTypeId() == TYPEID_PLAYER)
             {
                 uiDamage = 0;
                 if (me->GetEntry() == NPC_ARGENT_VALIANT)
@@ -508,6 +509,10 @@ public:
         if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
         {
             player->CLOSE_GOSSIP_MENU();
+
+            if (!player->GetVehicle())
+                return false;
+
             creature->GetAI()->SetData(DATA_PLAYER, player->GetGUID());
             creature->GetAI()->DoAction(EVENT_START);
         }
@@ -526,10 +531,11 @@ public:
         bool bDefeated;
         Position arenaCenter;
 
-        Player* challengee;
+        uint32 challengeeGUID;
 
         void Reset()
         {
+            me->m_CombatDistance = 100.0f; // lawl, copied from zuldrak.cpp
             me->setFaction(35);
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             DoCast(me, SPELL_READYJOUST_POSE_EFFECT, true);
@@ -541,14 +547,14 @@ public:
             bCharge = false;
             bDefeated = false;
 
-            challengee = NULL;
+            challengeeGUID = 0;
 
             if (GetCustomType() == TYPE_CHAMPION)
-                arenaCenter = {8428.757f, 945.349f, 544.675f};
+                arenaCenter.Relocate(8428.757f, 945.349f, 544.675f);
             else if (GetCustomType() == TYPE_VALIANT_ALLIANCE)
-                arenaCenter = {8656.402f, 722.827f, 547.523f};
+                arenaCenter.Relocate(8656.402f, 722.827f, 547.523f);
             else if (GetCustomType() == TYPE_VALIANT_HORDE)
-                arenaCenter = {8334.375f, 721.165f, 553.702f};
+                arenaCenter.Relocate(8334.375f, 721.165f, 553.702f);
 
         }
 
@@ -566,14 +572,15 @@ public:
         void SetData(uint32 type, uint32 data)
         {
             if (type == DATA_PLAYER)
-                challengee = ObjectAccessor::GetPlayer(*me, data);
+                challengeeGUID = data;
         }
 
-        void DoAction(int32 type) {
-
+        void DoAction(int32 const type)
+        {
             if (type == EVENT_START)
             {
                 // check valid player
+                Player* challengee = ObjectAccessor::GetPlayer(*me, challengeeGUID);
                 if (!challengee)
                     return;
 
@@ -698,17 +705,24 @@ public:
             {
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 me->setFaction(14);
-                me->Attack(challengee, false);
+
+                if (Player* player = ObjectAccessor::GetPlayer(*me, challengeeGUID))
+                {
+                    if (player->GetVehicle())
+                        AttackStart(player->GetVehicle()->GetBase());
+                    else
+                        AttackStart(player);
+                }
             }
         }
 
         void DamageTaken(Unit* who, uint32& damage)
         {
-            if (damage > me->GetHealth() && who->GetTypeId() == TYPEID_PLAYER && !bDefeated)
+            if (damage >= me->GetHealth() && who->GetTypeId() == TYPEID_PLAYER && !bDefeated)
             {
                 bDefeated = true;
                 damage = 0;
-                GrantCredit(challengee);
+                GrantCredit(who);
                 me->setFaction(35);
                 me->DespawnOrUnsummon(5000);
                 me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
@@ -726,7 +740,7 @@ public:
             {
                 case TYPE_CHAMPION:
                 {
-                    challengee->CastSpell(challengee, SPELL_MOUNTED_MELEE_VICTORY_C, true);
+                    who->CastSpell(who, SPELL_MOUNTED_MELEE_VICTORY_C, true);
                     uint32 creditSpell;
                     switch (me->GetEntry())
                     {
@@ -761,14 +775,14 @@ public:
                             creditSpell = SPELL_BESTED_UNDERCITY;
                             break;
                     }
-                    challengee->CastSpell(challengee, creditSpell, false);
-                    challengee->CastSpell(challengee, creditSpell, false); // second cast for criteria check...which is checked before aura is applied...HILARIOUS!
+                    who->CastSpell(who, creditSpell, false);
+                    who->CastSpell(who, creditSpell, false); // second cast for criteria check...which is checked before aura is applied...HILARIOUS!
                     break;
                 }
                 case TYPE_VALIANT_ALLIANCE:
                 case TYPE_VALIANT_HORDE:
                 {
-                    challengee->CastSpell(challengee, SPELL_MOUNTED_MELEE_VICTORY_V, true);
+                    who->CastSpell(who, SPELL_MOUNTED_MELEE_VICTORY_V, true);
                     break;
                 }
             }
