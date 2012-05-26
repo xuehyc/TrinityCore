@@ -257,7 +257,7 @@ public:
         uint32 uiShieldBreakerTimer;
         uint32 uiShieldTimer;
         uint32 uiThrustTimer;
-        bool bPreCharge;
+        bool bCharge;
 
         void Reset()
         {
@@ -265,7 +265,7 @@ public:
             uiShieldBreakerTimer = 10000;
             uiShieldTimer = 4000;
             uiThrustTimer = 2000;
-            bPreCharge = false;
+            bCharge = false;
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -280,7 +280,7 @@ public:
                 return;
 
             // charge after moving away from the victim
-            if (me->isInCombat() && bPreCharge)
+            if (me->isInCombat() && bCharge)
             {
                 me->GetMotionMaster()->Clear();
                 // but only after rangecheck
@@ -288,7 +288,7 @@ public:
                     DoCastVictim(SPELL_CHARGE);
                 me->GetMotionMaster()->MoveChase(me->getVictim());
                 uiChargeTimer = 7000;
-                bPreCharge = false;
+                bCharge = false;
             }
             else
                 me->setFaction(14);
@@ -321,18 +321,18 @@ public:
                 uiShieldTimer = 4000;
             } else uiShieldTimer -= uiDiff;
 
-            if (uiChargeTimer <= uiDiff && !bPreCharge)
+            if (uiChargeTimer <= uiDiff && !bCharge)
             {
                 // move away for charge...
                 float angle = me->GetAngle(me->getVictim());
                 float x = me->GetPositionX() + 20.0f * cos(angle);
                 float y = me->GetPositionY() + 20.0f * sin(angle);
                 me->GetMotionMaster()->MovePoint(0, x, y, me->GetPositionZ());
-                bPreCharge = true;
+                bCharge = true;
             } else uiChargeTimer -= uiDiff;
 
             // prevent shieldbreaker while moving away, npc is not facing player at that time
-            if (bPreCharge)
+            if (bCharge)
                 return;
 
             if (uiShieldBreakerTimer <= uiDiff)
@@ -356,6 +356,467 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_argent_combatantAI(creature);
+    }
+};
+
+/*#####
+## npc_argent_faction_rider
+######*/
+
+enum eArgentFactionRiders
+{
+    NPC_EXODAR_VALIANT          = 33562,
+    NPC_DARNASSUS_VALIANT       = 33559,
+    NPC_GNOMEREGAN_VALIANT      = 33558,
+    NPC_IRONFORGE_VALIANT       = 33564,
+    NPC_STORMWIND_VALIANT       = 33561,
+    NPC_SILVERMOON_VALIANT      = 33382,
+    NPC_THUNDER_BLUFF_VALIANT   = 33383,
+    NPC_UNDERCITY_VALIANT       = 33384,
+    NPC_ORGRIMMAR_VALIANT       = 33306,
+    NPC_SENJIN_VALIANT          = 33285,
+    NPC_EXODAR_CHAMPION         = 33739,
+    NPC_DARNASSUS_CHAMPION      = 33738,
+    NPC_STORMWIND_CHAMPION      = 33747,
+    NPC_IRONFORGE_CHAMPION      = 33743,
+    NPC_GNOMEREGAN_CHAMPION     = 33740,
+    NPC_SILVERMOON_CHAMPION     = 33746,
+    NPC_THUNDER_BLUFF_CHAMPION  = 33748,
+    NPC_ORGRIMMAR_CHAMPION      = 33744,
+    NPC_SENJIN_CHAMPION         = 33745,
+    NPC_UNDERCITY_CHAMPION      = 33749,
+
+    QUEST_AMONG_CHAMPIONS_H_DK  = 13814,
+    QUEST_AMONG_CHAMPIONS_H     = 13811,
+    QUEST_AMONG_CHAMPIONS_A_DK  = 13793,
+    QUEST_AMONG_CHAMPIONS_A     = 13790,
+    QUEST_GRAND_MELEE_SM        = 13787,
+    QUEST_GRAND_MELEE_UC        = 13782,
+    QUEST_GRAND_MELEE_TB        = 13777,
+    QUEST_GRAND_MELEE_SJ        = 13772,
+    QUEST_GRAND_MELEE_OG        = 13767,
+    QUEST_GRAND_MELEE_DA        = 13761,
+    QUEST_GRAND_MELEE_EX        = 13756,
+    QUEST_GRAND_MELEE_GN        = 13750,
+    QUEST_GRAND_MELEE_IF        = 13745,
+    QUEST_GRAND_MELEE_SW        = 13665,
+
+    SPELL_BESTED_DARNASSUS          = 64805,
+    SPELL_BESTED_EXODAR             = 64808,
+    SPELL_BESTED_GNOMEREGAN         = 64809,
+    SPELL_BESTED_IRONFORGE          = 64810,
+    SPELL_BESTED_ORGRIMMAR          = 64811,
+    SPELL_BESTED_SENJIN             = 64812,
+    SPELL_BESTED_SILVERMOON         = 64813,
+    SPELL_BESTED_STORMWIND          = 64814,
+    SPELL_BESTED_THUNDER_BLUFF      = 64815,
+    SPELL_BESTED_UNDERCITY          = 64816,
+    SPELL_MOUNTED_MELEE_VICTORY_C   = 63596,
+    SPELL_MOUNTED_MELEE_VICTORY_V   = 62724,
+    SPELL_READYJOUST_POSE_EFFECT    = 64723,
+
+    ITEM_MARK_OF_CHAMPION       = 45500,
+    ITEM_MARK_OF_VALIANT        = 45127,
+
+    EVENT_START                 = 1,
+
+    TYPE_VALIANT_ALLIANCE       = 1,
+    TYPE_VALIANT_HORDE          = 2,
+    TYPE_CHAMPION               = 3,
+    TYPE_OTHER                  = 4,
+
+    DATA_PLAYER                 = 1,
+    DATA_TYPE                   = 2,
+    DATA_DEFEATED               = 3,
+
+    GOSSIP_TEXTID_CHAMPION      = 14421,
+    GOSSIP_TEXTID_VALIANT       = 14384,
+};
+
+#define GOSSIP_FACTION_RIDER_1 "I am ready to fight!"
+
+class npc_argent_faction_rider : public CreatureScript
+{
+public:
+    npc_argent_faction_rider() : CreatureScript("npc_argent_faction_rider") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        // prevent gossip when defeated
+        if (creature->GetAI()->GetData(DATA_DEFEATED) > 0)
+            return false;
+
+        uint32 type = creature->GetAI()->GetData(DATA_TYPE);
+
+        // valiants can only be challenged by own faction, while champions fight every faction
+        switch (type)
+        {
+            case TYPE_CHAMPION:
+            {
+                if (player->GetItemCount(ITEM_MARK_OF_CHAMPION, true) == 4)
+                    return false;
+
+                if (player->GetQuestStatus(QUEST_AMONG_CHAMPIONS_H_DK) == QUEST_STATUS_INCOMPLETE ||
+                        player->GetQuestStatus(QUEST_AMONG_CHAMPIONS_H) == QUEST_STATUS_INCOMPLETE ||
+                        player->GetQuestStatus(QUEST_AMONG_CHAMPIONS_A_DK) == QUEST_STATUS_INCOMPLETE ||
+                        player->GetQuestStatus(QUEST_AMONG_CHAMPIONS_A) == QUEST_STATUS_INCOMPLETE)
+                {
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_FACTION_RIDER_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+                }
+                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_CHAMPION, creature->GetGUID());
+                break;
+            }
+            case TYPE_VALIANT_ALLIANCE:
+            {
+                if (player->GetItemCount(ITEM_MARK_OF_VALIANT, true) == 3)
+                    return false;
+
+                if (player->GetQuestStatus(QUEST_GRAND_MELEE_EX) == QUEST_STATUS_INCOMPLETE ||
+                        player->GetQuestStatus(QUEST_GRAND_MELEE_DA) == QUEST_STATUS_INCOMPLETE ||
+                        player->GetQuestStatus(QUEST_GRAND_MELEE_GN) == QUEST_STATUS_INCOMPLETE ||
+                        player->GetQuestStatus(QUEST_GRAND_MELEE_IF) == QUEST_STATUS_INCOMPLETE ||
+                        player->GetQuestStatus(QUEST_GRAND_MELEE_SW) == QUEST_STATUS_INCOMPLETE)
+                {
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_FACTION_RIDER_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+                }
+                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_VALIANT, creature->GetGUID());
+                break;
+            }
+            case TYPE_VALIANT_HORDE:
+            {
+                if (player->GetItemCount(ITEM_MARK_OF_VALIANT, true) == 3)
+                    return false;
+
+                if (player->GetQuestStatus(QUEST_GRAND_MELEE_SM) == QUEST_STATUS_INCOMPLETE ||
+                        player->GetQuestStatus(QUEST_GRAND_MELEE_UC) == QUEST_STATUS_INCOMPLETE ||
+                        player->GetQuestStatus(QUEST_GRAND_MELEE_TB) == QUEST_STATUS_INCOMPLETE ||
+                        player->GetQuestStatus(QUEST_GRAND_MELEE_SJ) == QUEST_STATUS_INCOMPLETE ||
+                        player->GetQuestStatus(QUEST_GRAND_MELEE_OG) == QUEST_STATUS_INCOMPLETE)
+                {
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_FACTION_RIDER_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+                }
+                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_VALIANT, creature->GetGUID());
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        {
+            player->CLOSE_GOSSIP_MENU();
+            creature->GetAI()->SetData(DATA_PLAYER, player->GetGUID());
+            creature->GetAI()->DoAction(EVENT_START);
+        }
+        return true;
+    }
+
+    struct npc_argent_faction_riderAI : public ScriptedAI
+    {
+        npc_argent_faction_riderAI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint32 uiChargeTimer;
+        uint32 uiShieldBreakerTimer;
+        uint32 uiShieldTimer;
+        uint32 uiThrustTimer;
+        bool bCharge;
+        bool bDefeated;
+        Position arenaCenter;
+
+        Player* challengee;
+
+        void Reset()
+        {
+            me->setFaction(35);
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            DoCast(me, SPELL_READYJOUST_POSE_EFFECT, true);
+
+            uiChargeTimer = 7000;
+            uiShieldBreakerTimer = 10000;
+            uiShieldTimer = 4000;
+            uiThrustTimer = 2000;
+            bCharge = false;
+            bDefeated = false;
+
+            challengee = NULL;
+
+            if (GetCustomType() == TYPE_CHAMPION)
+                arenaCenter = {8428.757f, 945.349f, 544.675f};
+            else if (GetCustomType() == TYPE_VALIANT_ALLIANCE)
+                arenaCenter = {8656.402f, 722.827f, 547.523f};
+            else if (GetCustomType() == TYPE_VALIANT_HORDE)
+                arenaCenter = {8334.375f, 721.165f, 553.702f};
+
+        }
+
+        uint32 GetData(uint32 type)
+        {
+            if (type == DATA_TYPE)
+                return GetCustomType();
+
+            if (type == DATA_DEFEATED)
+                return bDefeated ? 1 : 0;
+
+            return 0;
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            if (type == DATA_PLAYER)
+                challengee = ObjectAccessor::GetPlayer(*me, data);
+        }
+
+        void DoAction(int32 type) {
+
+            if (type == EVENT_START)
+            {
+                // check valid player
+                if (!challengee)
+                    return;
+
+                // check for cooldown
+                bool playerCooldown;
+                switch (me->GetEntry())
+                {
+                    case NPC_EXODAR_CHAMPION:
+                        playerCooldown = challengee->HasAura(SPELL_BESTED_EXODAR);
+                        break;
+                    case NPC_DARNASSUS_CHAMPION:
+                        playerCooldown = challengee->HasAura(SPELL_BESTED_DARNASSUS);
+                        break;
+                    case NPC_STORMWIND_CHAMPION:
+                        playerCooldown = challengee->HasAura(SPELL_BESTED_STORMWIND);
+                        break;
+                    case NPC_IRONFORGE_CHAMPION:
+                        playerCooldown = challengee->HasAura(SPELL_BESTED_IRONFORGE);
+                        break;
+                    case NPC_GNOMEREGAN_CHAMPION:
+                        playerCooldown = challengee->HasAura(SPELL_BESTED_GNOMEREGAN);
+                        break;
+                    case NPC_SILVERMOON_CHAMPION:
+                        playerCooldown = challengee->HasAura(SPELL_BESTED_SILVERMOON);
+                        break;
+                    case NPC_THUNDER_BLUFF_CHAMPION:
+                        playerCooldown = challengee->HasAura(SPELL_BESTED_THUNDER_BLUFF);
+                        break;
+                    case NPC_ORGRIMMAR_CHAMPION:
+                        playerCooldown = challengee->HasAura(SPELL_BESTED_ORGRIMMAR);
+                        break;
+                    case NPC_SENJIN_CHAMPION:
+                        playerCooldown = challengee->HasAura(SPELL_BESTED_SENJIN);
+                        break;
+                    case NPC_UNDERCITY_CHAMPION:
+                        playerCooldown = challengee->HasAura(SPELL_BESTED_UNDERCITY);
+                        break;
+                    default:
+                        playerCooldown = false;
+                        break;
+                }
+
+                if (playerCooldown)
+                    return;
+
+                // remove gossip flag
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+                // remove pose aura, otherwise no walking animation
+                me->RemoveAura(SPELL_READYJOUST_POSE_EFFECT);
+
+                // move towards arena center
+                float angle = me->GetAngle(&arenaCenter);
+                float x = me->GetPositionX() + 22.0f * cos(angle);
+                float y = me->GetPositionY() + 22.0f * sin(angle);
+                me->GetMotionMaster()->MovePoint(0, x, y, me->GetPositionZ());
+            }
+
+        }
+
+        uint32 GetCustomType()
+        {
+            switch (me->GetEntry())
+            {
+                case NPC_EXODAR_CHAMPION:
+                case NPC_DARNASSUS_CHAMPION:
+                case NPC_STORMWIND_CHAMPION:
+                case NPC_IRONFORGE_CHAMPION:
+                case NPC_GNOMEREGAN_CHAMPION:
+                case NPC_SILVERMOON_CHAMPION:
+                case NPC_THUNDER_BLUFF_CHAMPION:
+                case NPC_ORGRIMMAR_CHAMPION:
+                case NPC_SENJIN_CHAMPION:
+                case NPC_UNDERCITY_CHAMPION:
+                    return TYPE_CHAMPION;
+                case NPC_EXODAR_VALIANT:
+                case NPC_DARNASSUS_VALIANT:
+                case NPC_GNOMEREGAN_VALIANT:
+                case NPC_IRONFORGE_VALIANT:
+                case NPC_STORMWIND_VALIANT:
+                    return TYPE_VALIANT_ALLIANCE;
+                case NPC_SILVERMOON_VALIANT:
+                case NPC_THUNDER_BLUFF_VALIANT:
+                case NPC_UNDERCITY_VALIANT:
+                case NPC_ORGRIMMAR_VALIANT:
+                case NPC_SENJIN_VALIANT:
+                    return TYPE_VALIANT_HORDE;
+                default:
+                    return TYPE_OTHER;
+            }
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            uint8 stackAmount;
+            if (GetCustomType() == TYPE_CHAMPION)
+                stackAmount = 3;
+            else
+                stackAmount = 2;
+
+            for (uint8 i = 0; i < stackAmount; ++i)
+                DoCast(me, SPELL_DEFEND, true);
+        }
+
+        void MovementInform(uint32 uiType, uint32 /*uiId*/)
+        {
+            if (uiType != POINT_MOTION_TYPE)
+                return;
+
+            // charge after moving away from the victim
+            if (me->isInCombat() && bCharge)
+            {
+                me->GetMotionMaster()->Clear();
+                // but only after rangecheck
+                if (me->GetDistance(me->getVictim()) > 5.0f && me->GetDistance(me->getVictim()) <= 30.0f)
+                    DoCastVictim(SPELL_CHARGE);
+                me->GetMotionMaster()->MoveChase(me->getVictim());
+                uiChargeTimer = GetCustomType() == TYPE_CHAMPION ? 6500 : 7500;
+                bCharge = false;
+            }
+            else
+            {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                me->setFaction(14);
+                me->Attack(challengee, false);
+            }
+        }
+
+        void DamageTaken(Unit* who, uint32& damage)
+        {
+            if (damage > me->GetHealth() && who->GetTypeId() == TYPEID_PLAYER && !bDefeated)
+            {
+                bDefeated = true;
+                damage = 0;
+                GrantCredit(challengee);
+                me->setFaction(35);
+                me->DespawnOrUnsummon(5000);
+                me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                EnterEvadeMode();
+            }
+        }
+
+        void GrantCredit(Unit* who)
+        {
+            Player* player;
+            if (!(player = who->ToPlayer()))
+                return;
+
+            switch (GetCustomType())
+            {
+                case TYPE_CHAMPION:
+                {
+                    challengee->CastSpell(challengee, SPELL_MOUNTED_MELEE_VICTORY_C, true);
+                    uint32 creditSpell;
+                    switch (me->GetEntry())
+                    {
+                        case NPC_EXODAR_CHAMPION:
+                            creditSpell = SPELL_BESTED_EXODAR;
+                            break;
+                        case NPC_DARNASSUS_CHAMPION:
+                            creditSpell = SPELL_BESTED_DARNASSUS;
+                            break;
+                        case NPC_STORMWIND_CHAMPION:
+                            creditSpell = SPELL_BESTED_STORMWIND;
+                            break;
+                        case NPC_IRONFORGE_CHAMPION:
+                            creditSpell = SPELL_BESTED_IRONFORGE;
+                            break;
+                        case NPC_GNOMEREGAN_CHAMPION:
+                            creditSpell = SPELL_BESTED_GNOMEREGAN;
+                            break;
+                        case NPC_SILVERMOON_CHAMPION:
+                            creditSpell = SPELL_BESTED_SILVERMOON;
+                            break;
+                        case NPC_THUNDER_BLUFF_CHAMPION:
+                            creditSpell = SPELL_BESTED_THUNDER_BLUFF;
+                            break;
+                        case NPC_ORGRIMMAR_CHAMPION:
+                            creditSpell = SPELL_BESTED_ORGRIMMAR;
+                            break;
+                        case NPC_SENJIN_CHAMPION:
+                            creditSpell = SPELL_BESTED_SENJIN;
+                            break;
+                        case NPC_UNDERCITY_CHAMPION:
+                            creditSpell = SPELL_BESTED_UNDERCITY;
+                            break;
+                    }
+                    challengee->CastSpell(challengee, creditSpell, false);
+                    challengee->CastSpell(challengee, creditSpell, false); // second cast for criteria check...which is checked before aura is applied...HILARIOUS!
+                    break;
+                }
+                case TYPE_VALIANT_ALLIANCE:
+                case TYPE_VALIANT_HORDE:
+                {
+                    challengee->CastSpell(challengee, SPELL_MOUNTED_MELEE_VICTORY_V, true);
+                    break;
+                }
+            }
+
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (uiShieldTimer <= uiDiff)
+            {
+                me->CastSpell(me, SPELL_DEFEND);
+                uiShieldTimer = GetCustomType() == TYPE_CHAMPION ? 3500 : 4500;
+            } else uiShieldTimer -= uiDiff;
+
+            if (uiChargeTimer <= uiDiff && !bCharge)
+            {
+                // move away for charge...
+                float angle = me->GetAngle(me->getVictim());
+                float x = me->GetPositionX() + 20.0f * cos(angle);
+                float y = me->GetPositionY() + 20.0f * sin(angle);
+                me->GetMotionMaster()->MovePoint(0, x, y, me->GetPositionZ());
+                bCharge = true;
+            } else uiChargeTimer -= uiDiff;
+
+            if (uiShieldBreakerTimer <= uiDiff)
+            {
+                DoCastVictim(SPELL_SHIELD_BREAKER);
+                uiShieldBreakerTimer = GetCustomType() == TYPE_CHAMPION ? 9000 : 10000;
+            } else uiShieldBreakerTimer -= uiDiff;
+
+            if (me->IsWithinMeleeRange(me->getVictim()))
+            {
+                if (uiThrustTimer <= uiDiff)
+                {
+                    DoCastVictim(SPELL_THRUST);
+                    uiThrustTimer = GetCustomType() == TYPE_CHAMPION ? 1800 : 2000;
+                }
+                else uiThrustTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_argent_faction_riderAI(creature);
     }
 };
 
@@ -612,6 +1073,7 @@ void AddSC_icecrown()
     new npc_arete;
     new npc_argent_squire;
     new npc_argent_combatant;
+    new npc_argent_faction_rider;
     new npc_guardian_pavilion;
     new npc_vereth_the_cunning;
     new npc_tournament_training_dummy;
