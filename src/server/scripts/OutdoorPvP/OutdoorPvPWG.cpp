@@ -34,42 +34,42 @@ OutdoorPvPWG::OutdoorPvPWG()
     m_SpecialEng = NULL;
     m_SpecialSpi = NULL;
 
-    homePosition[NPC_ALLIANCE_RANDOLPH]         = {5100.069824f, 2168.889893f, 365.778992f, 1.972220f};
-    homePosition[NPC_ALLIANCE_TESSA]            = {5088.609863f, 2167.659912f, 365.688995f, 0.680678f};
-    homePosition[NPC_ALLIANCE_KAYLANA]          = {5081.700195f, 2173.729980f, 365.877991f, 0.855211f};
-    homePosition[NPC_ALLIANCE_ZANNETH]          = {5078.279785f, 2183.699951f, 365.028992f, 1.466080f};
-    homePosition[NPC_ALLIANCE_ABRAHMIS]         = {5088.490234f, 2188.179932f, 365.647003f, 5.253440f};
-    homePosition[NPC_ALLIANCE_STOUTHANDLE]      = {5095.669922f, 2193.280029f, 365.924011f, 4.939280f};
-    homePosition[NPC_ALLIANCE_LEGOSO]           = {5080.399902f, 2199.000000f, 359.489014f, 2.967060f};
+    homePosition[NPC_ALLIANCE_RANDOLPH].Relocate(5100.069824f, 2168.889893f, 365.778992f, 1.972220f);
+    homePosition[NPC_ALLIANCE_TESSA].Relocate(5088.609863f, 2167.659912f, 365.688995f, 0.680678f);
+    homePosition[NPC_ALLIANCE_KAYLANA].Relocate(5081.700195f, 2173.729980f, 365.877991f, 0.855211f);
+    homePosition[NPC_ALLIANCE_ZANNETH].Relocate(5078.279785f, 2183.699951f, 365.028992f, 1.466080f);
+    homePosition[NPC_ALLIANCE_ABRAHMIS].Relocate(5088.490234f, 2188.179932f, 365.647003f, 5.253440f);
+    homePosition[NPC_ALLIANCE_STOUTHANDLE].Relocate(5095.669922f, 2193.280029f, 365.924011f, 4.939280f);
+    homePosition[NPC_ALLIANCE_LEGOSO].Relocate(5080.399902f, 2199.000000f, 359.489014f, 2.967060f);
 
-    homePosition[NPC_HORDE_BLAZEFEATHER]        = {5030.44f, 3659.82f, 363.194f, 1.83336f};
-    homePosition[NPC_HORDE_MURP]                = {5008.64f, 3659.91f, 361.07f, 4.0796f};
-    homePosition[NPC_HORDE_FUJIN]               = {5016.57f, 3677.53f, 362.982f, 5.7525f};
-    homePosition[NPC_HORDE_KILRATH]             = {5032.33f, 3680.7f, 363.018f, 3.43167f};
-    homePosition[NPC_HORDE_STRONGHOOF]          = {5032.66f, 3674.28f, 363.053f, 2.9447f};
-    homePosition[NPC_HORDE_MULFORT]             = {5032.44f, 3668.66f, 363.11f, 2.87402f};
-    homePosition[NPC_HORDE_DARDOSH]             = {5022.43f, 3659.91f, 361.61f, 1.35426f};
+    homePosition[NPC_HORDE_BLAZEFEATHER].Relocate(5030.44f, 3659.82f, 363.194f, 1.83336f);
+    homePosition[NPC_HORDE_MURP].Relocate(5008.64f, 3659.91f, 361.07f, 4.0796f);
+    homePosition[NPC_HORDE_FUJIN].Relocate(5016.57f, 3677.53f, 362.982f, 5.7525f);
+    homePosition[NPC_HORDE_KILRATH].Relocate(5032.33f, 3680.7f, 363.018f, 3.43167f);
+    homePosition[NPC_HORDE_STRONGHOOF].Relocate(5032.66f, 3674.28f, 363.053f, 2.9447f);
+    homePosition[NPC_HORDE_MULFORT].Relocate(5032.44f, 3668.66f, 363.11f, 2.87402f);
+    homePosition[NPC_HORDE_DARDOSH].Relocate(5022.43f, 3659.91f, 361.61f, 1.35426f);
 
-    fortressPosition[NPC_HORDE_MUKAR]           = {5373.470215f, 2789.060059f, 409.322998f, 2.600540f};
-    fortressPosition[NPC_ALLIANCE_DAMERON]      = {5373.470215f, 2789.060059f, 409.322998f, 2.600540f};
-    fortressPosition[NPC_HORDE_ROSSLAI]         = {5370.414062f, 2786.045898f, 409.329071f, 2.667296f};
-    fortressPosition[NPC_ALLIANCE_MAGRUDER]     = {5370.414062f, 2786.045898f, 409.329071f, 2.667296f};
-    fortressPosition[NPC_HORDE_DARDOSH]         = {5366.129883f, 2850.129883f, 409.239441f, 3.151590f};
-    fortressPosition[NPC_ALLIANCE_ZANNETH]      = {5366.129883f, 2833.399902f, 409.322998f, 3.141590f};
-    fortressPosition[NPC_HORDE_MULFORT]         = {5378.062012f, 3024.062500f, 409.113953f, 3.140740f};
-    fortressPosition[NPC_ALLIANCE_TESSA]        = {5378.062012f, 3024.062500f, 409.113953f, 3.140740f};
-    fortressPosition[NPC_HORDE_KILRATH]         = {5366.129883f, 2833.399902f, 409.322998f, 3.141590f};
-    fortressPosition[NPC_ALLIANCE_ABRAHMIS]     = {5366.129883f, 2850.129883f, 409.239441f, 3.151590f};
-    fortressPosition[NPC_HORDE_FUJIN]           = {5298.617676f, 2790.405273f, 409.192322f, 0.730418f};
-    fortressPosition[NPC_ALLIANCE_KAYLANA]      = {5300.063477f, 2886.717773f, 409.191833f, 5.543853f};
-    fortressPosition[NPC_HORDE_BLAZEFEATHER]    = {5298.430176f, 2738.760010f, 409.316010f, 3.971740f};
-    fortressPosition[NPC_ALLIANCE_RANDOLPH]     = {5299.093750f, 2751.792236f, 409.192017f, 6.028575f};
-    fortressPosition[NPC_HORDE_STRONGHOOF]      = {5296.860352f, 2930.155029f, 409.191498f, 0.534910f};
-    fortressPosition[NPC_ALLIANCE_STOUTHANDLE]  = {5296.860352f, 2930.155029f, 409.191498f, 0.534910f};
-    fortressPosition[NPC_HORDE_MURP]            = {5234.970215f, 2883.399902f, 409.274994f, 4.293510f};
-    fortressPosition[NPC_ALLIANCE_LEGOSO]       = {5234.586426f, 2795.128906f, 409.191772f, 1.972659f};
-    fortressPosition[NPC_ALLIANCE_GENERAL]      = {5468.782715f, 2840.573730f, 418.675354f, 3.144451f};
-    fortressPosition[NPC_HORDE_WARBRINGER]      = {5468.782715f, 2840.573730f, 418.675354f, 3.144451f};
+    fortressPosition[NPC_HORDE_MUKAR].Relocate(5373.470215f, 2789.060059f, 409.322998f, 2.600540f);
+    fortressPosition[NPC_ALLIANCE_DAMERON].Relocate(5373.470215f, 2789.060059f, 409.322998f, 2.600540f);
+    fortressPosition[NPC_HORDE_ROSSLAI].Relocate(5370.414062f, 2786.045898f, 409.329071f, 2.667296f);
+    fortressPosition[NPC_ALLIANCE_MAGRUDER].Relocate(5370.414062f, 2786.045898f, 409.329071f, 2.667296f);
+    fortressPosition[NPC_HORDE_DARDOSH].Relocate(5366.129883f, 2850.129883f, 409.239441f, 3.151590f);
+    fortressPosition[NPC_ALLIANCE_ZANNETH].Relocate(5366.129883f, 2833.399902f, 409.322998f, 3.141590f);
+    fortressPosition[NPC_HORDE_MULFORT].Relocate(5378.062012f, 3024.062500f, 409.113953f, 3.140740f);
+    fortressPosition[NPC_ALLIANCE_TESSA].Relocate(5378.062012f, 3024.062500f, 409.113953f, 3.140740f);
+    fortressPosition[NPC_HORDE_KILRATH].Relocate(5366.129883f, 2833.399902f, 409.322998f, 3.141590f);
+    fortressPosition[NPC_ALLIANCE_ABRAHMIS].Relocate(5366.129883f, 2850.129883f, 409.239441f, 3.151590f);
+    fortressPosition[NPC_HORDE_FUJIN].Relocate(5298.617676f, 2790.405273f, 409.192322f, 0.730418f);
+    fortressPosition[NPC_ALLIANCE_KAYLANA].Relocate(5300.063477f, 2886.717773f, 409.191833f, 5.543853f);
+    fortressPosition[NPC_HORDE_BLAZEFEATHER].Relocate(5298.430176f, 2738.760010f, 409.316010f, 3.971740f);
+    fortressPosition[NPC_ALLIANCE_RANDOLPH].Relocate(5299.093750f, 2751.792236f, 409.192017f, 6.028575f);
+    fortressPosition[NPC_HORDE_STRONGHOOF].Relocate(5296.860352f, 2930.155029f, 409.191498f, 0.534910f);
+    fortressPosition[NPC_ALLIANCE_STOUTHANDLE].Relocate(5296.860352f, 2930.155029f, 409.191498f, 0.534910f);
+    fortressPosition[NPC_HORDE_MURP].Relocate(5234.970215f, 2883.399902f, 409.274994f, 4.293510f);
+    fortressPosition[NPC_ALLIANCE_LEGOSO].Relocate(5234.586426f, 2795.128906f, 409.191772f, 1.972659f);
+    fortressPosition[NPC_ALLIANCE_GENERAL].Relocate(5468.782715f, 2840.573730f, 418.675354f, 3.144451f);
+    fortressPosition[NPC_HORDE_WARBRINGER].Relocate(5468.782715f, 2840.573730f, 418.675354f, 3.144451f);
 }
 
 void _LoadTeamPair(TeamPairMap &pairMap, const TeamPair *pair)
@@ -167,7 +167,7 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
     {
         do
         {
-            Position posHorde, posAlli;
+            // Position posHorde, posAlli;
             Field *fields = result->Fetch();
             switch(fields[1].GetUInt32())
             {
