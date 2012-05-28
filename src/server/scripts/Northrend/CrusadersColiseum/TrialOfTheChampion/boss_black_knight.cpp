@@ -436,7 +436,7 @@ public:
                 }
                 bEventInProgress = true;
             }
-            else if (uiPhase == PHASE_GHOST && !bCredit)
+            else if (uiDamage >= me->GetHealth() && uiPhase == PHASE_GHOST && !bCredit)
             {
                 bCredit = true;
                 DoCastToAllHostilePlayers(68663);
