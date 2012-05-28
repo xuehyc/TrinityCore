@@ -671,6 +671,16 @@ public:
                             // Achievement criteria is with spell 59046 which does not exist.
                             // There is thus no way it can be given by casting the spell on the players.
                             instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, 59046, me);
+                            // workaround for achievement credit, which doesnt work through updateencounterstate atm
+                            Map::PlayerList const& players = instance->instance->GetPlayers();
+                            if (!players.isEmpty())
+                            {
+                                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                                {
+                                    if (Player* player = itr->getSource())
+                                        DoCast(player, 59046, true);
+                                }
+                            }
                         }
 
                         me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);

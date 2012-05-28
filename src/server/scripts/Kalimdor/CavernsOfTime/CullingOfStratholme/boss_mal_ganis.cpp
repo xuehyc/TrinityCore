@@ -122,7 +122,21 @@ public:
         void DamageTaken(Unit* done_by, uint32 &damage)
         {
             if (damage >= me->GetHealth() && done_by != me)
+            {
                 damage = me->GetHealth()-1;
+
+                // workaround for achievement credit
+                Map::PlayerList const& players = instance->instance->GetPlayers();
+                if (!players.isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    {
+                        if (Player* player = itr->getSource())
+                            DoCast(player, 58630, true);
+                    }
+                }
+
+            }
         }
 
         void UpdateAI(const uint32 diff)
