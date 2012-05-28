@@ -777,11 +777,9 @@ class achievement_toc5_argent_challenge : public AchievementCriteriaScript
 {
     public:
         uint32 creature_entry;
-        const char* script_name;
 
         achievement_toc5_argent_challenge(const char* name, uint32 original_entry) : AchievementCriteriaScript(name) {
             creature_entry = original_entry;
-            script_name = name;
         }
 
         bool OnCheck(Player* source, Unit* target)
