@@ -388,6 +388,9 @@ class boss_sindragosa : public CreatureScript
             {
                 if (uint32 spellId = sSpellMgr->GetSpellIdForDifficulty(70127, me))
                 {
+                    if (target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
                     if (spellId == spell->Id)
                     {
                         if (Aura const* mysticBuffet = target->GetAura(spell->Id))
