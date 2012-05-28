@@ -126,6 +126,7 @@ public:
         boss_eadricAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            bCredit = false;
             creature->SetReactState(REACT_PASSIVE);
             creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
@@ -138,6 +139,7 @@ public:
         uint32 uiResetTimer;
 
         bool bDone;
+        bool bCredit;
 
         void Reset()
         {
@@ -156,6 +158,11 @@ public:
             if (damage >= me->GetHealth())
             {
                 damage = 0;
+                if (!bCredit)
+                {
+                    bCredit = true;
+                    DoCastToAllHostilePlayers(68575);
+                }
                 EnterEvadeMode();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -172,7 +179,7 @@ public:
                         instance->HandleGameObject(go->GetGUID(), true);
 
                     // Instance encounter counting mechanics
-                    instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, 68574, me);
+                    // instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, 68574, me);
 
                     instance->SetData(BOSS_ARGENT_CHALLENGE_E, DONE);
                 }
@@ -240,6 +247,8 @@ public:
         {
             instance = creature->GetInstanceScript();
 
+            bCredit = false;
+
             MemoryGUID = 0;
             creature->SetReactState(REACT_PASSIVE);
             creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -254,6 +263,7 @@ public:
 
         bool bHealth;
         bool bDone;
+        bool bCredit;
 
         uint32 uiHolyFireTimer;
         uint32 uiHolySmiteTimer;
@@ -292,6 +302,11 @@ public:
             if (damage >= me->GetHealth())
             {
                 damage = 0;
+                if (!bCredit)
+                {
+                    bCredit = true;
+                    DoCastToAllHostilePlayers(68574);
+                }
                 EnterEvadeMode();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -308,7 +323,7 @@ public:
                         instance->HandleGameObject(go->GetGUID(), true);
 
                     // Instance encounter counting mechanics
-                    instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, 68574, me);
+                    // instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, 68574, me);
 
                     instance->SetData(BOSS_ARGENT_CHALLENGE_P, DONE);
                 }
@@ -758,6 +773,30 @@ public:
     }
 };
 
+class achievement_toc5_argent_challenge : public AchievementCriteriaScript
+{
+    public:
+        uint32 creature_entry;
+        const char* script_name;
+
+        achievement_toc5_argent_challenge(const char* name, uint32 original_entry) : AchievementCriteriaScript(name) {
+            creature_entry = original_entry;
+            script_name = name;
+        }
+
+        bool OnCheck(Player* source, Unit* target)
+        {
+            if (!target)
+                return false;
+
+            if (Creature* creature = target->ToCreature())
+                if (creature->GetOriginalEntry() == creature_entry)
+                    return true;
+
+            return false;
+        }
+};
+
 void AddSC_boss_argent_challenge()
 {
     new boss_eadric();
@@ -765,4 +804,6 @@ void AddSC_boss_argent_challenge()
     new boss_paletress();
     new npc_memory();
     new npc_argent_soldier();
+    new achievement_toc5_argent_challenge("achievement_toc5_paletress", NPC_PALETRESS);
+    new achievement_toc5_argent_challenge("achievement_toc5_eadric", NPC_EADRIC);
 }

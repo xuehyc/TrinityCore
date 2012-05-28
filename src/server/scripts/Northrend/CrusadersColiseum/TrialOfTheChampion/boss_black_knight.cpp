@@ -107,6 +107,7 @@ public:
         boss_black_knightAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            bCredit = false;
         }
 
         InstanceScript* instance;
@@ -119,6 +120,7 @@ public:
         bool bDeathArmyDone;
         bool bEventInBattle;
         bool bFight;
+        bool bCredit;
 
         uint8 uiPhase;
         uint8 uiIntroPhase;
@@ -434,6 +436,11 @@ public:
                 }
                 bEventInProgress = true;
             }
+            else if (uiPhase == PHASE_GHOST && !bCredit)
+            {
+                bCredit = true;
+                DoCastToAllHostilePlayers(68663);
+            }
         }
 
         void JustDied(Unit* /*killer*/)
@@ -446,7 +453,7 @@ public:
                 instance->SetData(BOSS_BLACK_KNIGHT, DONE);
 
                 // Instance encounter counting mechanics
-                instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, 68663, me);
+                //instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, 68663, me);
 
                 if (GameObject* go = GameObject::GetGameObject(*me, instance->GetData64(DATA_MAIN_GATE1)))
                     instance->HandleGameObject(go->GetGUID(), true);

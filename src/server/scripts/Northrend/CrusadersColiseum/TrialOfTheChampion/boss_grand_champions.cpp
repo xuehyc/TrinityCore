@@ -70,7 +70,10 @@ enum eSpells
     SPELL_EVISCERATE                = 67709,
     SPELL_EVISCERATE_H              = 68317,
     SPELL_FAN_OF_KNIVES             = 67706,
-    SPELL_POISON_BOTTLE             = 67701
+    SPELL_POISON_BOTTLE             = 67701,
+
+    // Achievement Credit
+    SPELL_GRAND_CHAMPIONS_CREDIT    = 68572,
 };
 enum eEnums
 {
@@ -461,6 +464,7 @@ public:
 
             bDone = false;
             bHome = false;
+            bCredited = false;
 
             uiPhase = 0;
             uiPhaseTimer = 0;
@@ -482,6 +486,7 @@ public:
 
         bool bDone;
         bool bHome;
+        bool bCredited;
 
         void Reset()
         {
@@ -569,6 +574,16 @@ public:
             DoMeleeAttackIfReady();
         }
 
+        void DamageTaken(Unit* /*who*/, uint32& damage)
+        {
+            if (!bCredited && damage >= me->GetHealth())
+            {
+                bCredited = true;
+                // Instance encounter counting mechanics
+                DoCastToAllHostilePlayers(SPELL_GRAND_CHAMPIONS_CREDIT);
+            }
+        }
+
         void JustDied(Unit* /*killer*/)
         {
             if (instance)
@@ -596,6 +611,7 @@ public:
 
             bDone = false;
             bHome = false;
+            bCredited = false;
 
             uiPhase = 0;
             uiPhaseTimer = 0;
@@ -616,6 +632,7 @@ public:
 
         bool bDone;
         bool bHome;
+        bool bCredited;
 
         void Reset()
         {
@@ -700,13 +717,21 @@ public:
             DoMeleeAttackIfReady();
         }
 
+        void DamageTaken(Unit* /*who*/, uint32& damage)
+        {
+            if (!bCredited && damage >= me->GetHealth())
+            {
+                bCredited = true;
+                // Instance encounter counting mechanics
+                DoCastToAllHostilePlayers(SPELL_GRAND_CHAMPIONS_CREDIT);
+            }
+        }
+
         void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_START_1, me);
-
             if (instance)
                 instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
-        
         }
     };
 
@@ -730,6 +755,7 @@ public:
 
             bDone = false;
             bHome = false;
+            bCredited = false;
 
             uiPhase = 0;
             uiPhaseTimer = 0;
@@ -750,6 +776,7 @@ public:
 
         bool bDone;
         bool bHome;
+        bool bCredited;
 
         void Reset()
         {
@@ -849,10 +876,19 @@ public:
             DoMeleeAttackIfReady();
         }
 
+        void DamageTaken(Unit* /*who*/, uint32& damage)
+        {
+            if (!bCredited && damage >= me->GetHealth())
+            {
+                bCredited = true;
+                // Instance encounter counting mechanics
+                DoCastToAllHostilePlayers(SPELL_GRAND_CHAMPIONS_CREDIT);
+            }
+        }
+
         void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_START_1, me);
-
             if (instance)
                 instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
@@ -879,6 +915,7 @@ public:
 
             bDone = false;
             bHome = false;
+            bCredited = false;
 
             uiPhase = 0;
             uiPhaseTimer = 0;
@@ -902,6 +939,7 @@ public:
         bool bShoot;
         bool bDone;
         bool bHome;
+        bool bCredited;
 
         void Reset()
         {
@@ -1019,6 +1057,16 @@ public:
             DoMeleeAttackIfReady();
         }
 
+        void DamageTaken(Unit* /*who*/, uint32& damage)
+        {
+            if (!bCredited && damage >= me->GetHealth())
+            {
+                bCredited = true;
+                // Instance encounter counting mechanics
+                DoCastToAllHostilePlayers(SPELL_GRAND_CHAMPIONS_CREDIT);
+            }
+        }
+
         void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_START_1, me);
@@ -1048,6 +1096,7 @@ public:
 
             bDone = false;
             bHome = false;
+            bCredited = false;
 
             uiPhase = 0;
             uiPhaseTimer = 0;
@@ -1067,6 +1116,7 @@ public:
 
         bool bDone;
         bool bHome;
+        bool bCredited;
 
         void Reset()
         {
@@ -1142,6 +1192,16 @@ public:
             DoMeleeAttackIfReady();
         }
 
+        void DamageTaken(Unit* /*who*/, uint32& damage)
+        {
+            if (!bCredited && damage >= me->GetHealth())
+            {
+                bCredited = true;
+                // Instance encounter counting mechanics
+                DoCastToAllHostilePlayers(SPELL_GRAND_CHAMPIONS_CREDIT);
+            }
+        }
+
         void JustDied(Unit* /*killer*/)
         {
             if (instance)
@@ -1155,6 +1215,28 @@ public:
     }
 };
 
+class achievement_toc5_grand_champions : public AchievementCriteriaScript
+{
+    public:
+        uint32 creature_entry;
+
+        achievement_toc5_grand_champions(const char* name, uint32 original_entry) : AchievementCriteriaScript(name) {
+            creature_entry = original_entry;
+        }
+
+        bool OnCheck(Player* source, Unit* target)
+        {
+            if (!target)
+                return false;
+
+            if (Creature* creature = target->ToCreature())
+                if (creature->GetOriginalEntry() == creature_entry)
+                    return true;
+
+            return false;
+        }
+};
+
 void AddSC_boss_grand_champions()
 {
     new generic_vehicleAI_toc5();
@@ -1163,4 +1245,14 @@ void AddSC_boss_grand_champions()
     new boss_shaman_toc5();
     new boss_hunter_toc5();
     new boss_rouge_toc5();
+    new achievement_toc5_grand_champions("achievement_toc5_champions_mokra", NPC_MOKRA);
+    new achievement_toc5_grand_champions("achievement_toc5_champions_eressea", NPC_ERESSEA);
+    new achievement_toc5_grand_champions("achievement_toc5_champions_runok", NPC_RUNOK);
+    new achievement_toc5_grand_champions("achievement_toc5_champions_zultore", NPC_ZULTORE);
+    new achievement_toc5_grand_champions("achievement_toc5_champions_visceri", NPC_VISCERI);
+    new achievement_toc5_grand_champions("achievement_toc5_champions_alerius", NPC_JACOB);
+    new achievement_toc5_grand_champions("achievement_toc5_champions_ambrose", NPC_AMBROSE);
+    new achievement_toc5_grand_champions("achievement_toc5_champions_colosos", NPC_COLOSOS);
+    new achievement_toc5_grand_champions("achievement_toc5_champions_jaelyne", NPC_JAELYNE);
+    new achievement_toc5_grand_champions("achievement_toc5_champions_lana", NPC_LANA);
 }
