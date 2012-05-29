@@ -161,7 +161,7 @@ public:
                 if (!bCredit)
                 {
                     bCredit = true;
-                    DoCastToAllHostilePlayers(68575);
+                    HandleSpellOnPlayersInInstanceToC5(me, 68575);
                 }
                 EnterEvadeMode();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -305,7 +305,7 @@ public:
                 if (!bCredit)
                 {
                     bCredit = true;
-                    DoCastToAllHostilePlayers(68574);
+                    HandleSpellOnPlayersInInstanceToC5(me, 68574);
                 }
                 EnterEvadeMode();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);

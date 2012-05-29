@@ -570,6 +570,25 @@ public:
 
 };
 
+void HandleSpellOnPlayersInInstanceToC5(Unit* caller, uint32 spellId)
+{
+    if (spellId <= 0 || !caller)
+        return;
+
+    Map* map = caller->GetMap();
+    if (map && map->IsDungeon())
+    {
+        Map::PlayerList const &PlayerList = map->GetPlayers();
+
+        if (PlayerList.isEmpty())
+            return;
+
+        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            if (i->getSource() && i->getSource()->isAlive() && !i->getSource()->isGameMaster())
+                caller->CastSpell(i->getSource(), spellId);
+    }
+}
+
 void AddSC_instance_trial_of_the_champion()
 {
     new instance_trial_of_the_champion();

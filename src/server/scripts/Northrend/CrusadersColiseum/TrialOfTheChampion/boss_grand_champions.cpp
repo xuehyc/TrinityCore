@@ -580,7 +580,7 @@ public:
             {
                 bCredited = true;
                 // Instance encounter counting mechanics
-                DoCastToAllHostilePlayers(SPELL_GRAND_CHAMPIONS_CREDIT);
+                HandleSpellOnPlayersInInstanceToC5(me, SPELL_GRAND_CHAMPIONS_CREDIT);
             }
         }
 
@@ -723,7 +723,7 @@ public:
             {
                 bCredited = true;
                 // Instance encounter counting mechanics
-                DoCastToAllHostilePlayers(SPELL_GRAND_CHAMPIONS_CREDIT);
+                HandleSpellOnPlayersInInstanceToC5(me, SPELL_GRAND_CHAMPIONS_CREDIT);
             }
         }
 
@@ -882,7 +882,7 @@ public:
             {
                 bCredited = true;
                 // Instance encounter counting mechanics
-                DoCastToAllHostilePlayers(SPELL_GRAND_CHAMPIONS_CREDIT);
+                HandleSpellOnPlayersInInstanceToC5(me, SPELL_GRAND_CHAMPIONS_CREDIT);
             }
         }
 
@@ -1063,7 +1063,7 @@ public:
             {
                 bCredited = true;
                 // Instance encounter counting mechanics
-                DoCastToAllHostilePlayers(SPELL_GRAND_CHAMPIONS_CREDIT);
+                HandleSpellOnPlayersInInstanceToC5(me, SPELL_GRAND_CHAMPIONS_CREDIT);
             }
         }
 
@@ -1198,7 +1198,7 @@ public:
             {
                 bCredited = true;
                 // Instance encounter counting mechanics
-                DoCastToAllHostilePlayers(SPELL_GRAND_CHAMPIONS_CREDIT);
+                HandleSpellOnPlayersInInstanceToC5(me, SPELL_GRAND_CHAMPIONS_CREDIT);
             }
         }
 

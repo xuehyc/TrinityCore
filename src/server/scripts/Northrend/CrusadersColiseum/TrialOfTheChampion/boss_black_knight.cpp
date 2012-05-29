@@ -439,7 +439,7 @@ public:
             else if (uiDamage >= me->GetHealth() && uiPhase == PHASE_GHOST && !bCredit)
             {
                 bCredit = true;
-                DoCastToAllHostilePlayers(68663);
+                HandleSpellOnPlayersInInstanceToC5(me, 68663);
             }
         }
 
