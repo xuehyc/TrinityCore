@@ -460,17 +460,21 @@ void OutdoorPvPWG::ProcessEvent(WorldObject* object, uint32 eventId)
         if (itr == m_buildingStates.end())
             return;
 
+        uint32 towerAreaCredit;
         std::string msgStr;
         switch(eventId)
         { // TODO - Localized msgs of GO names
             case 19672: case 19675: // Flamewatch Tower
                 msgStr = "Flamewatch";
+                towerAreaCredit = AREA_FLAMEWATCH_TOWER;
                 break;
             case 18553: case 19677: // Shadowsight Tower
                 msgStr = "Shadowsight";
+                towerAreaCredit = AREA_SHADOWSIGHT_TOWER;
                 break;
             case 19673: case 19676: // Winter's Edge Tower
                 msgStr = "Winter's Edge";
+                towerAreaCredit = AREA_WINTERSEDGE_TOWER;
                 break;
             case 19776: case 19778: // E Workshop damaged
                 msgStr = "Sunken Ring";
@@ -577,8 +581,17 @@ void OutdoorPvPWG::ProcessEvent(WorldObject* object, uint32 eventId)
                         if (m_towerDestroyedCount[getAttackerTeam()])
                         {
                             for (PlayerSet::iterator itr = m_players[getDefenderTeam()].begin(); itr != m_players[getDefenderTeam()].end(); ++itr)
+                            {
                                 if ((*itr)->getLevel() > 74)
                                     (*itr)->SetAuraStack(SPELL_TOWER_CONTROL, (*itr), m_towerDestroyedCount[getAttackerTeam()]);
+                                if ((*itr)->GetAreaId() == towerAreaCredit)
+                                {
+                                    // quest credit
+                                    (*itr)->KilledMonsterCredit(NPC_SOUTHERN_TOWER_CREDIT, (*itr)->GetGUID());
+                                    // leaning tower achievement credit
+                                    (*itr)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 20723);
+                                }
+                            }
                         }
 
                         if (attStack)
@@ -661,10 +674,10 @@ OutdoorPvPWGCreType OutdoorPvPWG::GetCreatureType(uint32 entry) const
         case NPC_WG_DEMOLISHER:
         case NPC_ALLIANCE_SIEGE_ENGINE:
         case NPC_HORDE_SIEGE_ENGINE:
-        case NPC_TOWER_CANNON:
-            return CREATURE_SIEGE_VEHICLE;
         case NPC_HORDE_TURRET:
         case NPC_ALLIANCE_TURRET:
+            return CREATURE_SIEGE_VEHICLE;
+        case NPC_TOWER_CANNON:
             return CREATURE_TURRET;
         case NPC_GNOMISH_DEMOLISHER: // Alliance Engineer
         case NPC_GOBLIN_MECHANIC: // Horde Engineer

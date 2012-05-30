@@ -35,6 +35,13 @@ const uint32 MaxVehNumWorldState[2] = {3681, 3491};
 const uint32 ClockWorldState[2] = {3781, 4354};
 const Team TeamId2Team[3] = {ALLIANCE, HORDE, TEAM_OTHER};
 
+enum OutdoorPvPWGArea
+{
+    AREA_FLAMEWATCH_TOWER   = 4581,
+    AREA_WINTERSEDGE_TOWER  = 4582,
+    AREA_SHADOWSIGHT_TOWER  = 4583,
+};
+
 enum OutdoorPvPWGSpell
 {
     // Wartime auras
@@ -91,8 +98,8 @@ enum OutdoorPvPWGCreatures
     // vendors
     NPC_ALLIANCE_KAYLANA        = 31051, // Sorceress Kaylana <Enchantress>
     NPC_HORDE_FUJIN             = 31101, // Hoodoo Master Fu'jin <Master Hexxer>
-    NPC_ALLIANCE_DAMERON        = 32296, // Knight Dameron <Wintergrasp Quartermaster>      Patch 3.0.2
-    NPC_HORDE_MUKAR             = 32294, // Stone Guard Mukar <Wintergrasp Quartermaster>   Patch 3.0.2
+    NPC_ALLIANCE_DAMERON        = 32294, // Knight Dameron <Wintergrasp Quartermaster>      Patch 3.0.2
+    NPC_HORDE_MUKAR             = 32296, // Stone Guard Mukar <Wintergrasp Quartermaster>   Patch 3.0.2
     NPC_ALLIANCE_MAGRUDER       = 39172, // Marshal Magruder <Wintergrasp Quartermaster>    Patch 3.3.2
     NPC_HORDE_ROSSLAI           = 39173, // Champion Ros'slai <Wintergrasp Quartermaster>   Patch 3.3.2
 
@@ -115,6 +122,9 @@ enum OutdoorPvPWGCreatures
     // flight master
     NPC_ALLIANCE_SAFEFLIGHT     = 30870, // Herzo Safeflight <Flight Master>
     NPC_HORDE_SAFEFLIGHT        = 30869, // Arzo Safeflight <Flight Master>
+
+    // credits
+    NPC_SOUTHERN_TOWER_CREDIT   = 35074,
 };
 
 enum OutdoorPvPWGObjects
