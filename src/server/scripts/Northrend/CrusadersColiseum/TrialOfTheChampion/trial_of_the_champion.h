@@ -140,4 +140,6 @@ enum eVehicles
     VEHICLE_BLACK_KNIGHT                            = 35491
 };
 
+void HandleSpellOnPlayersInInstanceToC5(Unit* caller, uint32 spellId);
+
 #endif

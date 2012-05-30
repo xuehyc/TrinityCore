@@ -691,7 +691,7 @@ public:
                 return;
 
             // charge after moving away from the victim
-            if (me->isInCombat() && bCharge)
+            if (me->isInCombat() && bCharge && me->getVictim())
             {
                 me->GetMotionMaster()->Clear();
                 // but only after rangecheck
