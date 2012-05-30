@@ -661,10 +661,10 @@ OutdoorPvPWGCreType OutdoorPvPWG::GetCreatureType(uint32 entry) const
         case NPC_WG_DEMOLISHER:
         case NPC_ALLIANCE_SIEGE_ENGINE:
         case NPC_HORDE_SIEGE_ENGINE:
-        case NPC_TOWER_CANNON:
-            return CREATURE_SIEGE_VEHICLE;
         case NPC_HORDE_TURRET:
         case NPC_ALLIANCE_TURRET:
+            return CREATURE_SIEGE_VEHICLE;
+        case NPC_TOWER_CANNON:
             return CREATURE_TURRET;
         case NPC_GNOMISH_DEMOLISHER: // Alliance Engineer
         case NPC_GOBLIN_MECHANIC: // Horde Engineer

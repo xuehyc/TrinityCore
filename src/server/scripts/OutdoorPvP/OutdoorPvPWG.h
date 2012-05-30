@@ -91,8 +91,8 @@ enum OutdoorPvPWGCreatures
     // vendors
     NPC_ALLIANCE_KAYLANA        = 31051, // Sorceress Kaylana <Enchantress>
     NPC_HORDE_FUJIN             = 31101, // Hoodoo Master Fu'jin <Master Hexxer>
-    NPC_ALLIANCE_DAMERON        = 32296, // Knight Dameron <Wintergrasp Quartermaster>      Patch 3.0.2
-    NPC_HORDE_MUKAR             = 32294, // Stone Guard Mukar <Wintergrasp Quartermaster>   Patch 3.0.2
+    NPC_ALLIANCE_DAMERON        = 32294, // Knight Dameron <Wintergrasp Quartermaster>      Patch 3.0.2
+    NPC_HORDE_MUKAR             = 32296, // Stone Guard Mukar <Wintergrasp Quartermaster>   Patch 3.0.2
     NPC_ALLIANCE_MAGRUDER       = 39172, // Marshal Magruder <Wintergrasp Quartermaster>    Patch 3.3.2
     NPC_HORDE_ROSSLAI           = 39173, // Champion Ros'slai <Wintergrasp Quartermaster>   Patch 3.3.2
 
