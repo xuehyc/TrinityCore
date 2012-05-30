@@ -1535,7 +1535,7 @@ class spell_item_impale_leviroth : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 if (Unit* target = GetHitCreature())
-                    if (target->GetEntry() == NPC_LEVIROTH && target->HealthBelowPct(95))
+                    if (target->GetEntry() == NPC_LEVIROTH && !target->HealthBelowPct(95))
                         target->CastSpell(target, SPELL_LEVIROTH_SELF_IMPALE, true);
             }
 
@@ -2044,7 +2044,7 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            if (Unit* target = GetHitUnit())
+            if (GetHitUnit())
                 GetCaster()->CastSpell(GetCaster(),SPELL_FORCE_CAST_SUMMON_GNOME_SOUL);
         }
 

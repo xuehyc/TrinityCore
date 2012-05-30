@@ -451,7 +451,7 @@ enum SMART_ACTION
     SMART_ACTION_OVERRIDE_SCRIPT_BASE_OBJECT        = 76,     // WARNING: CAN CRASH CORE, do not use if you dont know what you are doing
     SMART_ACTION_RESET_SCRIPT_BASE_OBJECT           = 77,     // none
     SMART_ACTION_CALL_SCRIPT_RESET                  = 78,     // none
-    // Unused                                       = 79,
+    SMART_ACTION_SET_RANGED_MOVEMENT                = 79,     // Distance, angle
     SMART_ACTION_CALL_TIMED_ACTIONLIST              = 80,     // ID (overwrites already running actionlist), stop after combat?(0/1), timer update type(0-OOC, 1-IC, 2-ALWAYS)
     SMART_ACTION_SET_NPC_FLAG                       = 81,     // Flags
     SMART_ACTION_ADD_NPC_FLAG                       = 82,     // Flags
@@ -895,6 +895,12 @@ struct SmartAction
 
         struct
         {
+            float distance;
+            float angle;
+        } setRangedMovement;
+
+        struct
+        {
             uint32 param1;
             uint32 param2;
             uint32 param3;
@@ -1175,7 +1181,8 @@ enum SmartEventFlags
     SMART_EVENT_FLAG_DEBUG_ONLY            = 0x080,                     //Event only occurs in debug build
     SMART_EVENT_FLAG_DONT_RESET            = 0x100,                     //Event will not reset in SmartScript::OnReset()
 
-    SMART_EVENT_FLAG_DIFFICULTY_ALL        = (SMART_EVENT_FLAG_DIFFICULTY_0|SMART_EVENT_FLAG_DIFFICULTY_1|SMART_EVENT_FLAG_DIFFICULTY_2|SMART_EVENT_FLAG_DIFFICULTY_3)
+    SMART_EVENT_FLAG_DIFFICULTY_ALL        = (SMART_EVENT_FLAG_DIFFICULTY_0|SMART_EVENT_FLAG_DIFFICULTY_1|SMART_EVENT_FLAG_DIFFICULTY_2|SMART_EVENT_FLAG_DIFFICULTY_3),
+    SMART_EVENT_FLAGS_ALL                  = (SMART_EVENT_FLAG_NOT_REPEATABLE|SMART_EVENT_FLAG_DIFFICULTY_ALL|SMART_EVENT_FLAG_RESERVED_5|SMART_EVENT_FLAG_RESERVED_6|SMART_EVENT_FLAG_DEBUG_ONLY|SMART_EVENT_FLAG_DONT_RESET)
 };
 
 enum SmartCastFlags
