@@ -149,8 +149,169 @@ public:
     }
 };
 
+
+enum HighAbbot
+{
+    ACTION_PREPARE_MOVING = 0,
+
+    QUEST_A_FALL_FROM_GRACE = 12274,
+    NPC_HIGH_ABBOT_KILL_BUNNY = 27444,
+
+    SAY_HIGH_ABBOT_FOLLOW_ME = -1700070,
+    SAY_HIGH_ABBOT_DISGUISE_FAILED = -1700071,
+    SAY_HIGH_ABBOT_THE_MASTER = -1700072,
+    SAY_HIGH_ABBOT_NOT_DIE_BY_YOUR_HAND = -1700073,
+    SAY_HIGH_ABBOT_MY_CHOOSING = -1700074,
+    SAY_HIGH_ABBOT_SCREAMING_JUMP = -1700075,
+
+    EVENT_SPEECH_DISGUISE = 1,
+    EVENT_SPEECH_MASTER = 2,
+    EVENT_SPEECH_NOT_YOU = 3,
+    EVENT_SPEECH_CHOOSING = 4,
+    EVENT_JUMP_OFF_CLIFF_PT1 = 5,
+    EVENT_JUMP_OFF_CLIFF_PT2 = 6,
+    EVENT_DIE = 7
+};
+
+Position dummyTarget = {2735.9446f, -533.7491f, 105.7517f};
+Position jumpTarget = {2728.7979f, -553.4839f, 17.2747f};    // Note that orientation is not required here, since he dies :o
+
+class npc_high_abbot_lundgren : public CreatureScript
+{
+public:
+    npc_high_abbot_lundgren() : CreatureScript("npc_high_abbot_lundgren") {}
+
+    bool OnGossipHello(Player* player, Creature* me)
+    {
+        QuestStatus status = player->GetQuestStatus(QUEST_A_FALL_FROM_GRACE);
+        if (status == QUEST_STATUS_INCOMPLETE)
+            player->ADD_GOSSIP_ITEM( 0, "High Abbot, can I have a talk with you?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+
+        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, me->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        switch (uiAction)
+        {
+        case GOSSIP_ACTION_INFO_DEF+1:
+            player->CLOSE_GOSSIP_MENU();
+            if(creature->AI())
+            {                
+                creature->AI()->DoAction(ACTION_PREPARE_MOVING);
+                creature->AI()->SetGUID(player->GetGUID());     // Note: This starts the escort.
+            }
+            break;
+        }
+        return true;
+    }
+
+    struct npc_high_abbot_lundgrenAI : public npc_escortAI 
+    {
+        npc_high_abbot_lundgrenAI(Creature* creature) : npc_escortAI(creature), isMoving(false) {}
+
+        void Reset()
+        {
+            isMoving = false;
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+            if(isMoving)
+                damage = 0;
+        }
+
+        void SetGUID(uint64 activator, int32 /* = 0 */)
+        {
+            Start(false, false, activator);
+        }
+
+        void DoAction(const int32 actionid)
+        {
+            switch (actionid)
+            {
+                case ACTION_PREPARE_MOVING:
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    DoScriptText(SAY_HIGH_ABBOT_FOLLOW_ME, me);
+                    isMoving = true;
+                    break;
+            }
+        }
+
+        void UpdateEscortAI(const uint32 diff)
+        {
+            if (!isMoving)
+                return;
+            events.Update(diff);
+            while (uint32 event = events.ExecuteEvent())
+            {
+                switch (event)
+                {
+                    case EVENT_SPEECH_DISGUISE:
+                        DoScriptText(SAY_HIGH_ABBOT_DISGUISE_FAILED, me);
+                        events.ScheduleEvent(EVENT_SPEECH_MASTER, 5000);
+                        break;
+                    case EVENT_SPEECH_MASTER:
+                        DoScriptText(SAY_HIGH_ABBOT_THE_MASTER, me);
+                        events.ScheduleEvent(EVENT_SPEECH_NOT_YOU, 5000);
+                        break;
+                    case EVENT_SPEECH_NOT_YOU:
+                        DoScriptText(SAY_HIGH_ABBOT_NOT_DIE_BY_YOUR_HAND, me);
+                        events.ScheduleEvent(EVENT_SPEECH_CHOOSING, 5000);
+                        break;
+                    case EVENT_SPEECH_CHOOSING:
+                        DoScriptText(SAY_HIGH_ABBOT_MY_CHOOSING, me);
+                        events.ScheduleEvent(EVENT_JUMP_OFF_CLIFF_PT1, 5000);
+                        break;               
+                    case EVENT_JUMP_OFF_CLIFF_PT1:
+                        if (Player* p = GetPlayerForEscort())
+                        {
+                            p->KilledMonsterCredit(NPC_HIGH_ABBOT_KILL_BUNNY, 0);
+                        } 
+                        me->GetMotionMaster()->MoveJump(dummyTarget.GetPositionX(), dummyTarget.GetPositionY(), dummyTarget.GetPositionZ(), 15.0f, 15.0f);
+                        events.ScheduleEvent(EVENT_JUMP_OFF_CLIFF_PT2, 200);
+                        break;
+                    case EVENT_JUMP_OFF_CLIFF_PT2:
+                        DoScriptText(SAY_HIGH_ABBOT_SCREAMING_JUMP, me);
+                        me->GetMotionMaster()->MoveJump(jumpTarget.GetPositionX(), jumpTarget.GetPositionY(), jumpTarget.GetPositionZ(), 30.0f, 30.0f);
+                        events.ScheduleEvent(EVENT_DIE, 10000);
+                        break;
+                    case EVENT_DIE:                               
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        me->ForcedDespawn(0);
+                        break;
+                }
+            }
+        }
+
+        void WaypointReached(uint32 i)
+        {
+            switch (i)
+            {
+            case 9: // 0-8 are irrelevant, 10 is a dummy. 
+                SetEscortPaused(true);
+                if(Player* p = GetPlayerForEscort())
+                    me->SetFacingToObject(p);
+                events.ScheduleEvent(EVENT_SPEECH_DISGUISE, 1000);
+                break;
+            }
+        }
+
+        EventMap events;
+        bool isMoving;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_high_abbot_lundgrenAI(creature);
+    }
+};
+
 void AddSC_dragonblight()
 {
     new npc_alexstrasza_wr_gate;
     new npc_minebomb_of_wintergarde;
+    new npc_high_abbot_lundgren;
 }
