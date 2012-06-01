@@ -1340,11 +1340,13 @@ void OutdoorPvPWG::UpdateTenacityStack()
     int32 newStack = 0;
 
     for (PlayerSet::iterator itr = m_players[TEAM_ALLIANCE].begin(); itr != m_players[TEAM_ALLIANCE].end(); ++itr)
-        if ((*itr)->getLevel() >= WG_MIN_LEVEL && !(*itr)->isGameMaster())
+        if ((*itr)->getLevel() >= WG_MIN_LEVEL && !(*itr)->isGameMaster() &&
+                !(*itr)->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && (*itr)->GetPositionZ() < 500.0)
             ++allianceNum;
 
     for (PlayerSet::iterator itr = m_players[TEAM_HORDE].begin(); itr != m_players[TEAM_HORDE].end(); ++itr)
-        if ((*itr)->getLevel() >= WG_MIN_LEVEL && !(*itr)->isGameMaster())
+        if ((*itr)->getLevel() >= WG_MIN_LEVEL && !(*itr)->isGameMaster() &&
+                !(*itr)->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && (*itr)->GetPositionZ() < 500.0)
             ++hordeNum;
 
     if (allianceNum && hordeNum)
