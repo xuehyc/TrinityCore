@@ -2136,6 +2136,7 @@ void OPvPCapturePointWG::ChangeTeam(TeamId oldTeam)
 void OutdoorPvPWG::RelocateTeleport(Creature* creature, Position pos)
 {
     creature->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), false);
+    creature->SetHomePosition(pos);
 }
 void OutdoorPvPWG::RelocateSummonDespawn(Creature* creature, bool condition)
 {
