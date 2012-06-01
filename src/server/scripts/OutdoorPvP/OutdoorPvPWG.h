@@ -27,6 +27,7 @@
 #define ZONE_WINTERGRASP         4197
 #define POS_X_CENTER             5100
 #define MAX_VEHICLE_PER_WORKSHOP    4
+#define WG_MIN_LEVEL               80
 
 const uint32 WintergraspFaction[3] = {1802, 1801, 35};
 const uint32 WG_MARK_OF_HONOR = 43589;
