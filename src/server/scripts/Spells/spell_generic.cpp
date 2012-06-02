@@ -2584,6 +2584,67 @@ class spell_gen_scarlet_raven_priest_image : public SpellScriptLoader
         }
 };
 
+
+// Unnamed... flame war, go ahead plx.
+enum
+{
+    SPELL_PLACE_MAGHAR_BATTLE_STANDARD = 32205,
+    NPC_BURNING_BLADE_PYRE_DUMMY_1 = 18305,
+    NPC_BURNING_BLADE_PYRE_DUMMY_2 = 18306,
+    NPC_BURNING_BLADE_PYRE_DUMMY_3 = 18307
+};
+
+// Note that this script is dirty somehow, but since I haven't found a better solution...
+class spell_gen_place_maghar_battle_standard : public SpellScriptLoader
+{
+public:
+    spell_gen_place_maghar_battle_standard() : SpellScriptLoader("spell_gen_place_maghar_battle_standard") {}
+
+    class spell_gen_place_maghar_battle_standard_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_place_maghar_battle_standard_SpellScript)
+
+        bool Validate(SpellInfo const* /*SpellEntry*/)
+        {
+            if(sSpellMgr->GetSpellInfo(SPELL_PLACE_MAGHAR_BATTLE_STANDARD))
+                return true;
+            return false;
+        }
+        
+        void HandleScript(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Player* p = caster->ToPlayer())
+                {
+                    if ( Creature* c = p->FindNearestCreature(NPC_BURNING_BLADE_PYRE_DUMMY_1, 15.0f) )
+                    {
+                        p->KilledMonsterCredit(NPC_BURNING_BLADE_PYRE_DUMMY_1, 0);
+                    }
+                    else if ( Creature* c = p->FindNearestCreature(NPC_BURNING_BLADE_PYRE_DUMMY_2, 15.0f) )
+                    {
+                        p->KilledMonsterCredit(NPC_BURNING_BLADE_PYRE_DUMMY_2, 0);
+                    }
+                    else if ( Creature* c = p->FindNearestCreature(NPC_BURNING_BLADE_PYRE_DUMMY_3, 15.0f) )
+                    {
+                        p->KilledMonsterCredit(NPC_BURNING_BLADE_PYRE_DUMMY_3, 0);
+                    }                   
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectLaunch += SpellEffectFn(spell_gen_place_maghar_battle_standard_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gen_place_maghar_battle_standard_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -2634,4 +2695,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_tournament_pennant();
     new spell_gen_chaos_blast();
     new spell_gen_scarlet_raven_priest_image();
+    new spell_gen_place_maghar_battle_standard();
 }
