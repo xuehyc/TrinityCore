@@ -974,6 +974,7 @@ void OutdoorPvPWG::RebuildAllBuildings()
         }
 
         itr->second->damageState = DAMAGE_INTACT;
+        itr->second->building->SetDestructibleState(GO_DESTRUCTIBLE_INTACT, NULL, true);
         itr->second->SetTeam(getDefenderTeam() == TEAM_ALLIANCE ? OTHER_TEAM(itr->second->defaultTeam) : itr->second->defaultTeam);
     }
     m_towerDamagedCount[TEAM_ALLIANCE] = 0;
