@@ -724,6 +724,12 @@ void BattlegroundWS::Reset()
 
 void BattlegroundWS::EndBattleground(uint32 winner)
 {
+    // remove flag debuff
+    RemoveAuraOnTeam(BG_WS_SPELL_FOCUSED_ASSAULT, ALLIANCE);
+    RemoveAuraOnTeam(BG_WS_SPELL_BRUTAL_ASSAULT, ALLIANCE);
+    RemoveAuraOnTeam(BG_WS_SPELL_FOCUSED_ASSAULT, HORDE);
+    RemoveAuraOnTeam(BG_WS_SPELL_BRUTAL_ASSAULT, HORDE);
+
     //win reward
     if (winner == ALLIANCE)
         RewardHonorToTeam(GetBonusHonorFromKill(m_HonorWinKills), ALLIANCE);
