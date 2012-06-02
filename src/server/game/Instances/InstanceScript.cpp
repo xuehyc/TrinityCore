@@ -23,6 +23,7 @@
 #include "GameObject.h"
 #include "Creature.h"
 #include "CreatureAI.h"
+#include "CreatureAIImpl.h"
 #include "Log.h"
 #include "LFGMgr.h"
 
@@ -336,6 +337,42 @@ void InstanceScript::DoCompleteAchievement(uint32 achievement)
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
             if (Player *pPlayer = i->getSource())
                 pPlayer->CompletedAchievement(pAE);
+}
+
+uint32 InstanceScript::GetMajorityTeam()
+{
+    uint32 hordePlayers = 0, alliancePlayers = 0;
+    if (instance)
+    {
+        const Map::PlayerList& players = instance->GetPlayers();
+        if (!players.isEmpty())
+        {
+            for (Map::PlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
+            {
+                if (Player* player = it->getSource())
+                {
+                    // Filter gamemasters, they may be present for observation and should not affect the counter. 
+                    if (!player->isGameMaster())
+                    {
+                        // If it's not an alliance member, it's a horde member... should be logical :)
+                        if (player->GetTeam() == ALLIANCE)
+                            alliancePlayers++;
+                        else
+                            hordePlayers++;
+                        if (!ServerAllowsTwoSideGroups())
+                            break;
+                    }
+                }
+            }
+        }
+    }
+    /*
+        Decision rules:
+        #Horde > #Alliance: HORDE
+        #Horde == #Alliance: Random(HORDE, ALLIANCE)
+        else: ALLIANCE
+    */
+    return hordePlayers > alliancePlayers ? HORDE : (hordePlayers == alliancePlayers ? RAND(HORDE, ALLIANCE) : ALLIANCE);
 }
 
 // Update Achievement Criteria for all players in instance

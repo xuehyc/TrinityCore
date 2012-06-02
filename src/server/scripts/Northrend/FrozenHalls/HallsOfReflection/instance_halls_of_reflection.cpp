@@ -187,10 +187,7 @@ public:
         {
             if (uiTeamInInstance == 0)
             {
-                Map::PlayerList const &players = instance->GetPlayers();
-                if (!players.isEmpty())
-                    if (Player* player = players.begin()->getSource())
-                        uiTeamInInstance = player->GetTeam();
+                uiTeamInInstance = GetMajorityTeam();
             }
 
             switch (creature->GetEntry())

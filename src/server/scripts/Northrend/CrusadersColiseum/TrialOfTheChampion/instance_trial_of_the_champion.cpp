@@ -130,13 +130,7 @@ public:
         {
             if (TeamInInstance == 0)
             {
-                if (instance)
-                {
-                    Map::PlayerList const &players = instance->GetPlayers();
-                    if (!players.isEmpty())
-                        if (Player* player = players.begin()->getSource())
-                            TeamInInstance = player->GetTeam();
-                }
+                TeamInInstance = GetMajorityTeam();
             }
 
             switch (creature->GetEntry())
