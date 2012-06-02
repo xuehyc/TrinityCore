@@ -741,6 +741,7 @@ class mob_frost_sphere : public CreatureScript
                     if (!_isFalling)
                     {
                         _isFalling = true;
+                        me->GetMotionMaster()->Clear();
                         me->GetMotionMaster()->MoveIdle();
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         //At hit the ground
