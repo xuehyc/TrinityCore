@@ -80,6 +80,9 @@ public:
 
     bool OnTrigger(Player* player, const AreaTriggerEntry* /*at*/)
     {
+        if (player->isGameMaster())
+            return true;
+
         if (InstanceScript* instance = player->GetInstanceScript())
         {
             if (instance->GetData(TYPE_RING_OF_LAW) == IN_PROGRESS || instance->GetData(TYPE_RING_OF_LAW) == DONE)
