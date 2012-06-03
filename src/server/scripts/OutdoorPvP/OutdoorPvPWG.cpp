@@ -468,7 +468,7 @@ void OutdoorPvPWG::ProcessEvent(WorldObject* object, uint32 eventId)
                 msgStr = "Flamewatch";
                 towerAreaCredit = AREA_FLAMEWATCH_TOWER;
                 break;
-            case 18553: case 19677: // Shadowsight Tower
+            case 19674: case 19677: // Shadowsight Tower
                 msgStr = "Shadowsight";
                 towerAreaCredit = AREA_SHADOWSIGHT_TOWER;
                 break;
