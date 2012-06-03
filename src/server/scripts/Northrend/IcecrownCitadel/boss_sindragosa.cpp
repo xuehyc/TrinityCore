@@ -1599,7 +1599,7 @@ class PermeatingChillTargetSelector
         {
             if (Player* player = unit->ToPlayer())
                 if (Unit* unit = player->GetSelectedUnit())
-                    if (player->GetSelectedUnit()->GetEntry() == NPC_SINDRAGOSA)
+                    if (unit->GetEntry() == NPC_SINDRAGOSA)
                         return false;
 
             return true;
