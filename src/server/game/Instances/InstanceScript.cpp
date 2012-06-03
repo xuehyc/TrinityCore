@@ -366,13 +366,22 @@ uint32 InstanceScript::GetMajorityTeam()
             }
         }
     }
-    /*
-        Decision rules:
-        #Horde > #Alliance: HORDE
-        #Horde == #Alliance: Random(HORDE, ALLIANCE)
-        else: ALLIANCE
-    */
-    return hordePlayers > alliancePlayers ? HORDE : (hordePlayers == alliancePlayers ? RAND(HORDE, ALLIANCE) : ALLIANCE);
+
+    // Note: We have to return 0 if we cannot make a decision, i.e. when there's no player in the instance (yet).
+    if (hordePlayers == 0 && alliancePlayers == 0)
+    {
+        return 0;
+    }
+    else
+    {
+        /*
+            Decision rules:
+            #Horde > #Alliance: HORDE
+            #Horde == #Alliance: Random(HORDE, ALLIANCE)
+            else: ALLIANCE
+        */
+        return hordePlayers > alliancePlayers ? HORDE : (hordePlayers == alliancePlayers ? RAND(HORDE, ALLIANCE) : ALLIANCE);
+    }
 }
 
 // Update Achievement Criteria for all players in instance
