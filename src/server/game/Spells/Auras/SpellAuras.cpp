@@ -1133,6 +1133,42 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         break;
                 }
                 break;
+            case SPELLFAMILY_POTION:
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (sSpellMgr->IsSpellMemberOfSpellGroup(GetSpellInfo()->Id, SPELL_GROUP_ELIXIR_BATTLE) ||
+                        sSpellMgr->IsSpellMemberOfSpellGroup(GetSpellInfo()->Id, SPELL_GROUP_ELIXIR_GUARDIAN))
+                    {
+                        if (target->HasAura(53042) && target->HasSpell(GetSpellInfo()->Effects[0].TriggerSpell))
+                        {
+                            // Mixology Effect Bonus
+                            switch (GetSpellInfo()->Id)
+                            {
+                                case 53758: // Flask of Stoneblood
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.5f);
+                                    break;
+                                case 53755: // Flask of the Frost Wyrm
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.376f);
+                                    GetEffect(1)->SetAmount(GetEffect(1)->GetAmount() * 1.376f);
+                                    break;
+                                case 53760: // Flask of Endless Rage
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.356f);
+                                    GetEffect(1)->SetAmount(GetEffect(1)->GetAmount() * 1.356f);
+                                    break;
+                                case 54212: // Flask of the Mojo
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.445f);
+                                    break;
+                                default:
+                                    // more research needs to be done for other potions and flasks...
+                                    // several changes were done to mixology in patches 3.2.2 and 3.3.2
+                                    // so we should not consider bonuses prior to those patches although
+                                    // a smaller bonus is better than none at all.
+                                    break;
+                            }
+                        }
+                    }
+                }
+                break;
             case SPELLFAMILY_DRUID:
                 if (!caster)
                     break;
