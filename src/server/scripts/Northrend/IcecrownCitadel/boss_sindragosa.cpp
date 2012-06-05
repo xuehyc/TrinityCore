@@ -1590,6 +1590,48 @@ class spell_frostwarden_handler_focus_fire : public SpellScriptLoader
         }
 };
 
+class PermeatingChillTargetSelector
+{
+    public:
+        PermeatingChillTargetSelector() { }
+
+        bool operator()(Unit* unit)
+        {
+            if (Player* player = unit->ToPlayer())
+                if (Unit* unit = player->GetSelectedUnit())
+                    if (unit->GetEntry() == NPC_SINDRAGOSA)
+                        return false;
+
+            return true;
+        }
+};
+
+class spell_sindragosa_permeating_chill : public SpellScriptLoader
+{
+    public:
+        spell_sindragosa_permeating_chill() : SpellScriptLoader("spell_sindragosa_permeating_chill") { }
+
+        class spell_sindragosa_permeating_chill_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_sindragosa_permeating_chill_SpellScript);
+
+            void FilterTargets(std::list<Unit*>& unitList)
+            {
+                unitList.remove_if(PermeatingChillTargetSelector());
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_sindragosa_permeating_chill_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_sindragosa_permeating_chill_SpellScript();
+        }
+};
+
 class at_sindragosa_lair : public AreaTriggerScript
 {
     public:
@@ -1597,6 +1639,9 @@ class at_sindragosa_lair : public AreaTriggerScript
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
         {
+            if (player->isGameMaster())
+                return true;
+
             if (InstanceScript* instance = player->GetInstanceScript())
             {
                 if (!instance->GetData(DATA_SPINESTALKER))
@@ -1654,6 +1699,7 @@ void AddSC_boss_sindragosa()
     new spell_frostwarden_handler_focus_fire();
     new spell_trigger_spell_from_caster("spell_sindragosa_ice_tomb", SPELL_ICE_TOMB_DUMMY);
     new spell_trigger_spell_from_caster("spell_sindragosa_ice_tomb_dummy", SPELL_FROST_BEACON);
+    new spell_sindragosa_permeating_chill();
     new at_sindragosa_lair();
     new achievement_all_you_can_eat();
 }
