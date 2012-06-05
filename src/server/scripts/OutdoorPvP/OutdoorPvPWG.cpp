@@ -105,7 +105,7 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
     }
 
     // load worldstates
-    QueryResult result = CharacterDatabase.PQuery("SELECT `entry`, `value` from `worldstates` where `entry` in (31001, 31002 , 31003) order by `entry`");
+    QueryResult result = CharacterDatabase.PQuery("SELECT `entry`, `value` from `worldstates` where `entry` in (31001, 31002 , 31003, 31004, 31005) order by `entry`");
     
     m_WSSaveTimer = sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_SAVESTATE_PERIOD);
 
@@ -125,6 +125,13 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
                 case 31003:
                     m_defender = TeamId(fields[1].GetUInt32());
                     break;
+                case 31004:
+                    allianceWinStreak = fields[1].GetUInt32();
+                    break;
+                case 31005:
+                    hordeWinStreak = fields[1].GetUInt32();
+                    break;
+
             }
         } while(result->NextRow());
     }
@@ -133,6 +140,8 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
         m_wartime = false;
         m_timer = sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_START_TIME) * MINUTE * IN_MILLISECONDS;
         m_defender = TeamId(rand()%2);
+        allianceWinStreak = 0;
+        hordeWinStreak = 0;
     }
 
     sWorld->setWorldState(WORLDSTATE_WINTERGRASP_CONTROLLING_FACTION, getDefenderTeam());
@@ -143,9 +152,6 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
     m_workshopCount[TEAM_HORDE] = 0;
     m_tenacityStack = 0;
     m_gate = NULL;
-
-    allianceWinStreak = 0;
-    hordeWinStreak = 0;
 
     std::list<uint32> engineers;
     std::list<uint32> spiritGuides;
@@ -1568,6 +1574,8 @@ bool OutdoorPvPWG::Update(uint32 diff)
         CharacterDatabase.PExecute("replace  `worldstates` set `entry`='31001', `value`='%d', `comment`='wg m_wartime'",m_wartime);
         CharacterDatabase.PExecute("replace  `worldstates` set `entry`='31002', `value`='%d', `comment`='wg m_timer'",m_timer);
         CharacterDatabase.PExecute("replace  `worldstates` set `entry`='31003', `value`='%d', `comment`='wg m_defender'",m_defender);
+        CharacterDatabase.PExecute("replace  `worldstates` set `entry`='31004', `value`='%d', `comment`='wg allianceWinStreaks'", allianceWinStreak);
+        CharacterDatabase.PExecute("replace  `worldstates` set `entry`='31005', `value`='%d', `comment`='wg hordeWinStreaks'", hordeWinStreak);
         m_WSSaveTimer = sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_SAVESTATE_PERIOD);
     } else m_WSSaveTimer -= diff;
 
