@@ -172,7 +172,7 @@ enum OutdoorPvP_WG_KeepStatus
 
 enum OutdoorPVPWGStatus
 {
- WORLDSTATE_WINTERGRASP_CONTROLING_FACTION,
+ WORLDSTATE_WINTERGRASP_CONTROLLING_FACTION,
  WORLDSTATE_VALUE_COUNT,
 };
 
@@ -373,6 +373,8 @@ class OutdoorPvPWG : public OutdoorPvP
         uint32 m_towerDestroyedCount[2];
         uint32 m_towerDamagedCount[2];
         uint32 m_WSSaveTimer;
+        uint32 allianceWinStreak;
+        uint32 hordeWinStreak;
 
         Creature *m_SpecialEng;
         Creature *m_SpecialSpi;

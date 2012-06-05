@@ -100,7 +100,7 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
 {
     if (!sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
     {
-        sWorld->setWorldState(WORLDSTATE_WINTERGRASP_CONTROLING_FACTION, TEAM_NEUTRAL);
+        sWorld->setWorldState(WORLDSTATE_WINTERGRASP_CONTROLLING_FACTION, TEAM_NEUTRAL);
         return false;
     }
 
@@ -135,7 +135,7 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
         m_defender = TeamId(rand()%2);
     }
 
-    sWorld->setWorldState(WORLDSTATE_WINTERGRASP_CONTROLING_FACTION, getDefenderTeam());
+    sWorld->setWorldState(WORLDSTATE_WINTERGRASP_CONTROLLING_FACTION, getDefenderTeam());
     m_changeDefender = false;
     m_announce_30_done = false;
     m_announce_10_done = false;
@@ -143,6 +143,9 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
     m_workshopCount[TEAM_HORDE] = 0;
     m_tenacityStack = 0;
     m_gate = NULL;
+
+    allianceWinStreak = 0;
+    hordeWinStreak = 0;
 
     std::list<uint32> engineers;
     std::list<uint32> spiritGuides;
@@ -1261,11 +1264,18 @@ void OutdoorPvPWG::PromotePlayer(Player *killer, bool wasPlayerKill) const
     //if (!wasPlayerKill)
     //    return;
 
+    // player eligible for insta-promote balancing?
+    bool instaPromote = false;
+    uint32 winStreak = getDefenderTeam() == TEAM_ALLIANCE ? allianceWinStreak : hordeWinStreak;
+    if (winStreak > 1)
+        if (killer->GetTeamId() == getAttackerTeam())
+            instaPromote = true;
+
     Aura * aura;
 
     if (aura = killer->GetAura(SPELL_RECRUIT))
     {
-        if (aura->GetStackAmount() >= 5)
+        if (aura->GetStackAmount() >= 5 || instaPromote)
         {
             killer->RemoveAura(SPELL_RECRUIT);
             killer->CastSpell(killer, SPELL_CORPORAL, true);
@@ -1276,7 +1286,7 @@ void OutdoorPvPWG::PromotePlayer(Player *killer, bool wasPlayerKill) const
     }
     else if (aura = killer->GetAura(SPELL_CORPORAL))
     {
-        if (aura->GetStackAmount() >= 5)
+        if (aura->GetStackAmount() >= 5 || instaPromote)
         {
             killer->RemoveAura(SPELL_CORPORAL);
             killer->CastSpell(killer, SPELL_LIEUTENANT, true);
@@ -1637,7 +1647,7 @@ void OutdoorPvPWG::StartBattle()
     TeamCastSpell(getDefenderTeam(), SPELL_TELEPORT_FORTRESS);
 
     // Remove Essence of Wintergrasp from all players
-    sWorld->setWorldState(WORLDSTATE_WINTERGRASP_CONTROLING_FACTION, TEAM_NEUTRAL);
+    sWorld->setWorldState(WORLDSTATE_WINTERGRASP_CONTROLLING_FACTION, TEAM_NEUTRAL);
     sWorld->UpdateAreaDependentAuras();
 
     // destroyed all vehicles
@@ -1690,14 +1700,22 @@ void OutdoorPvPWG::StartBattle()
 void OutdoorPvPWG::EndBattle()
 {
     // Cast Essence of Wintergrasp to all players (CheckCast will determine who to cast)
-    sWorld->setWorldState(WORLDSTATE_WINTERGRASP_CONTROLING_FACTION, getDefenderTeam());
+    sWorld->setWorldState(WORLDSTATE_WINTERGRASP_CONTROLLING_FACTION, getDefenderTeam());
     sWorld->UpdateAreaDependentAuras();
 
-    // End Battle Sound
+    // End Battle Sound and Balance Handling
     if (getDefenderTeam() == TEAM_ALLIANCE)
+    {
+        allianceWinStreak++;
+        hordeWinStreak = 0;
         PlayTeamSound(getDefenderTeam(), OutdoorPvP_WG_SOUND_ALLIANCE_WINS);
+    }
     else
+    {
+        allianceWinStreak = 0;
+        hordeWinStreak++;
         PlayTeamSound(getDefenderTeam(), OutdoorPvP_WG_SOUND_HORDE_WINS);
+    }
 
     // Lost Battle Sound
     PlayTeamSound(getAttackerTeam(), OutdoorPvP_WG_SOUND_NEAR_VICTORY);
