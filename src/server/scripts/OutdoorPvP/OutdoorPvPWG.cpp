@@ -583,6 +583,17 @@ void OutdoorPvPWG::ProcessEvent(WorldObject* object, uint32 eventId)
 
                         if (m_towerDestroyedCount[getAttackerTeam()])
                         {
+                            // Set all cannons in destroyed towers area invisible
+                            if (towerAreaCredit > 0)
+                            {
+                                for (CreatureSet::iterator itr = m_creatures.begin(); itr != m_creatures.end(); ++itr)
+                                {
+                                    Creature* creature = (*itr);
+                                    if (GetCreatureType(creature->GetEntry()) == CREATURE_TURRET && creature->GetAreaId() == towerAreaCredit)
+                                        creature->SetVisible(false);
+                                }
+                            }
+
                             for (PlayerSet::iterator itr = m_players[getDefenderTeam()].begin(); itr != m_players[getDefenderTeam()].end(); ++itr)
                             {
                                 if ((*itr)->getLevel() >= WG_MIN_LEVEL)
@@ -1037,7 +1048,13 @@ bool OutdoorPvPWG::UpdateCreatureInfo(Creature *creature)
             {
                 if (!creature->isAlive())
                     creature->Respawn(true);
-                creature->setFaction(WintergraspFaction[getDefenderTeam()]);
+                // southern tower cannons
+                if (creature->GetAreaId() == AREA_FLAMEWATCH_TOWER ||
+                        creature->GetAreaId() == AREA_SHADOWSIGHT_TOWER ||
+                        creature->GetAreaId() == AREA_WINTERSEDGE_TOWER)
+                    creature->setFaction(WintergraspFaction[getAttackerTeam()]);
+                else // fortress cannons
+                    creature->setFaction(WintergraspFaction[getDefenderTeam()]);
                 creature->SetVisible(true);
             }
             else
