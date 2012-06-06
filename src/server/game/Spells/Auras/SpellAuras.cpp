@@ -1152,15 +1152,52 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                     GetEffect(1)->SetAmount(GetEffect(1)->GetAmount() * 1.376f);
                                     break;
                                 case 53760: // Flask of Endless Rage
-                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.356f);
-                                    GetEffect(1)->SetAmount(GetEffect(1)->GetAmount() * 1.356f);
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.445f);
+                                    GetEffect(1)->SetAmount(GetEffect(1)->GetAmount() * 1.445f);
                                     break;
                                 case 54212: // Flask of the Mojo
                                     GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.445f);
                                     break;
+                                case 53752: // Lesser Flask of Toughness
+                                case 62380: // Lesser Flask of Resistance
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.8f);
+                                    break;
+                                case 33721: // Spellpower Elixir
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.397f);
+                                    GetEffect(1)->SetAmount(GetEffect(1)->GetAmount() * 1.397f);
+                                    break;
+                                case 40068: // Wrath Elixir
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.356f); // fixme: patch 3.0.3
+                                    GetEffect(1)->SetAmount(GetEffect(1)->GetAmount() * 1.356f); // fixme: patch 3.0.3
+                                    break;
+                                case 53747: // Elixir of Spirit
+                                case 53748: // Elixir of Mighty Strength
+                                case 53749: // Guru's Elixir
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.4f);
+                                    break;
+                                case 53751: // Elixir of Mighty Fortitude
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.572f);
+                                    GetEffect(1)->SetAmount(GetEffect(1)->GetAmount() * 1.5f); // fixme: no source for this, just an educated guess
+                                    break;
+                                case 53763: // Elixir of Protection
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.35f);
+                                    break;
+                                case 28497: // Elixir of Mighty Agility
+                                case 60340: // Elixir of Accuracy
+                                case 60341: // Elixir of Deadly Strikes
+                                case 60343: // Elixir of Mighty Defense
+                                case 60344: // Elixir of Expertise
+                                case 60345: // Elixir of Armor Piercing
+                                case 60346: // Elixir of Lightning Speed
+                                case 60347: // Elixir of Mighty Thoughts
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.445f);
+                                    break;
+                                case 53764: // Elixir of Mighty Mageblood
+                                    GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() * 1.334f); // fixme: patch 3.0.3
+                                    break;
                                 default:
                                     // more research needs to be done for other potions and flasks...
-                                    // several changes were done to mixology in patches 3.2.2 and 3.3.2
+                                    // several changes were done to mixology in patches 3.2.0 and 3.3.2
                                     // so we should not consider bonuses prior to those patches although
                                     // a smaller bonus is better than none at all.
                                     break;
