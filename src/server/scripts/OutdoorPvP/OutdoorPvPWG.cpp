@@ -747,6 +747,11 @@ void OutdoorPvPWG::OnCreatureCreate(Creature *creature)
         return;
 
     HandleCreatureSpawning(creature, true);
+
+    // relocate initial spawns of questgivers and vendors directly on spawn
+    if (GetCreatureType(creature->GetEntry()) == CREATURE_QUESTGIVER ||
+            GetCreatureType(creature->GetEntry()) == CREATURE_SPECIAL)
+            RelocateCreature(creature);
 }
 
 void OutdoorPvPWG::OnCreatureRemove(Creature *creature)
