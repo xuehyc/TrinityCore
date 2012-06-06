@@ -79,9 +79,72 @@ bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint3
             me->SetReactState(REACT_PASSIVE);
         }
     };
-
 };
+
+/*#########
+# npc_wg_guard
+##########*/
+
+enum wg_guard_spells
+{
+    SPELL_STRIKE = 52532, // custom strike spell
+};
+
+class npc_wg_guard : public CreatureScript
+{
+public:
+    npc_wg_guard() : CreatureScript("npc_wg_guard") { }
+
+    struct npc_wg_guardAI : public CreatureAI
+    {
+        npc_wg_guardAI(Creature* creature) : CreatureAI(creature) {}
+
+        uint32 combatStuckTimer;
+        uint32 strikeTimer;
+
+        void Reset()
+        {
+            combatStuckTimer = 5000;
+            strikeTimer = 6000;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (strikeTimer <= diff)
+            {
+                DoCastVictim(SPELL_STRIKE);
+                strikeTimer = urand(4000, 6000);
+            } else
+                strikeTimer -= diff;
+
+            if (combatStuckTimer <= diff)
+            {
+                bool playerInCombatRange = false;
+                for (std::list<HostileReference*>::const_iterator itr = me->getThreatManager().getThreatList().begin(); itr != me->getThreatManager().getThreatList().end(); ++itr)
+                    if ((*itr)->getTarget() && (*itr)->getTarget()->GetTypeId() == TYPEID_PLAYER)
+                        if (me->GetDistance((*itr)->getTarget()) < 60.0f)
+                            playerInCombatRange = true;
+                if (!playerInCombatRange)
+                    EnterEvadeMode();
+                combatStuckTimer = 5000;
+            } else
+                combatStuckTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_wg_guardAI(creature);
+    }
+};
+
 void AddSC_wintergrasp()
 {
     new npc_demolisher_engineerer();
+    new npc_wg_guard();
 }
