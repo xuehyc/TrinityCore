@@ -123,11 +123,15 @@ public:
             if (combatStuckTimer <= diff)
             {
                 bool playerInCombatRange = false;
+                bool playerInThreatList = false;
                 for (std::list<HostileReference*>::const_iterator itr = me->getThreatManager().getThreatList().begin(); itr != me->getThreatManager().getThreatList().end(); ++itr)
                     if ((*itr)->getTarget() && (*itr)->getTarget()->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        playerInThreatList = true;
                         if (me->GetDistance((*itr)->getTarget()) < 60.0f)
                             playerInCombatRange = true;
-                if (!playerInCombatRange)
+                    }
+                if (!playerInCombatRange && playerInThreatList)
                     EnterEvadeMode();
                 combatStuckTimer = 5000;
             } else
