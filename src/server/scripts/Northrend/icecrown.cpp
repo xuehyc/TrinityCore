@@ -281,7 +281,7 @@ public:
                 return;
 
             // charge after moving away from the victim
-            if (me->isInCombat() && bCharge)
+            if (me->isInCombat() && me->getVictim() && bCharge)
             {
                 me->GetMotionMaster()->Clear();
                 // but only after rangecheck
@@ -324,12 +324,18 @@ public:
 
             if (uiChargeTimer <= uiDiff && !bCharge)
             {
-                // move away for charge...
-                float angle = me->GetAngle(me->getVictim());
-                float x = me->GetPositionX() + 20.0f * cos(angle);
-                float y = me->GetPositionY() + 20.0f * sin(angle);
-                me->GetMotionMaster()->MovePoint(0, x, y, me->GetPositionZ());
-                bCharge = true;
+                // directly charge if range is ok
+                if (me->GetDistance(me->getVictim()) > 5.0f && me->GetDistance(me->getVictim()) <= 30.0f)
+                    DoCastVictim(SPELL_CHARGE);
+                else
+                {
+                    // move away for charge...
+                    float angle = me->GetAngle(me->getVictim());
+                    float x = me->GetPositionX() + 20.0f * cos(angle);
+                    float y = me->GetPositionY() + 20.0f * sin(angle);
+                    me->GetMotionMaster()->MovePoint(0, x, y, me->GetPositionZ());
+                    bCharge = true;
+                }
             } else uiChargeTimer -= uiDiff;
 
             // prevent shieldbreaker while moving away, npc is not facing player at that time
@@ -691,7 +697,7 @@ public:
                 return;
 
             // charge after moving away from the victim
-            if (me->isInCombat() && bCharge && me->getVictim())
+            if (me->isInCombat() && me->getVictim() && bCharge)
             {
                 me->GetMotionMaster()->Clear();
                 // but only after rangecheck
@@ -802,12 +808,18 @@ public:
 
             if (uiChargeTimer <= uiDiff && !bCharge)
             {
-                // move away for charge...
-                float angle = me->GetAngle(me->getVictim());
-                float x = me->GetPositionX() + 20.0f * cos(angle);
-                float y = me->GetPositionY() + 20.0f * sin(angle);
-                me->GetMotionMaster()->MovePoint(0, x, y, me->GetPositionZ());
-                bCharge = true;
+                // directly charge if range is ok
+                if (me->GetDistance(me->getVictim()) > 5.0f && me->GetDistance(me->getVictim()) <= 30.0f)
+                    DoCastVictim(SPELL_CHARGE);
+                else
+                {
+                    // move away for charge...
+                    float angle = me->GetAngle(me->getVictim());
+                    float x = me->GetPositionX() + 20.0f * cos(angle);
+                    float y = me->GetPositionY() + 20.0f * sin(angle);
+                    me->GetMotionMaster()->MovePoint(0, x, y, me->GetPositionZ());
+                    bCharge = true;
+                }
             } else uiChargeTimer -= uiDiff;
 
             if (uiShieldBreakerTimer <= uiDiff)
