@@ -1,4 +1,4 @@
--- Fix quest 10427 Creatures fo the Eco-Domes/Fauna der Biokuppel in zone Netherstorm, fix quest credit counting
+-- Fix quest 10427 Creatures of the Eco-Domes / Fauna der Biokuppel in zone Netherstorm, fix quest credit counting
 -- by Tollmer
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (20610, 20777) AND `source_type` = 0;
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (2077700, 2061000) AND `source_type` = 9;
