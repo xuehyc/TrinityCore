@@ -370,7 +370,7 @@ uint32 InstanceScript::GetMajorityTeam()
                         if (!ServerAllowsTwoSideGroups())
                             break;
                     }
-                }               
+                }
             }
         }
     }
