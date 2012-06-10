@@ -1698,6 +1698,12 @@ void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recv_data*/)
     if (!atEntry || !(atEntry->flags & AREA_FLAG_WINTERGRASP_2))
         return;
 
+    // Wintergrasp special handling, do not allow teleport if in combat
+    // Note: This is not blizzlike, but since it is really unfair, it should not be allowed
+    if (_player->GetZoneId() == 4197)
+        if (_player->isInCombat())
+            return;
+
     _player->BuildPlayerRepop();
     _player->ResurrectPlayer(100);
     _player->TeleportTo(_player->m_homebindMapId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ, _player->GetOrientation());
