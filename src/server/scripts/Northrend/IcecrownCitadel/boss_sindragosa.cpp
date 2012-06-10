@@ -489,8 +489,8 @@ class boss_sindragosa : public CreatureScript
                             DoCast(me, SPELL_ICY_GRIP);
                             events.ScheduleEvent(EVENT_BLISTERING_COLD, 1000, EVENT_GROUP_LAND_PHASE);
 
-                            if (_isThirdPhase) // Need to reschedule in phase three, since it cannot be done via movement any longer
-                                events.RescheduleEvent(EVENT_ICY_GRIP, 40000);
+                            if (_isThirdPhase) // Need to schedule in phase three, since it cannot be done via movement any longer
+                                events.ScheduleEvent(EVENT_ICY_GRIP, 40000);
                             break;
                         case EVENT_BLISTERING_COLD:
                             Talk(EMOTE_WARN_BLISTERING_COLD);
