@@ -1747,6 +1747,11 @@ void LFGMgr::UpdateBoot(Player* player, bool accept)
 void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*/)
 {
     sLog->outDebug(LOG_FILTER_LFG, "LFGMgr::TeleportPlayer: [" UI64FMTD "] is being teleported %s", player->GetGUID(), out ? "out" : "in");
+
+    // This is a hack to avoid using teleport if in combat or using teleport when not in LFG system
+    if (player->isInCombat() || !player->GetGroup() || !player->GetGroup()->isLFGGroup())
+        return;
+
     if (out)
     {
         player->RemoveAurasDueToSpell(LFG_SPELL_LUCK_OF_THE_DRAW);
