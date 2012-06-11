@@ -221,6 +221,7 @@ class boss_sindragosa : public CreatureScript
                 events.ScheduleEvent(EVENT_AIR_PHASE, 50000);
                 events.ScheduleEvent(EVENT_CHECK_PLAYERS, 5000);
                 _frostBombCounter = 0;
+                _iceTombCounter = 0;
                 _mysticBuffetStack = 0;
                 _isInAirPhase = false;
                 _isThirdPhase = false;
@@ -489,8 +490,12 @@ class boss_sindragosa : public CreatureScript
                             DoCast(me, SPELL_ICY_GRIP);
                             events.ScheduleEvent(EVENT_BLISTERING_COLD, 1000, EVENT_GROUP_LAND_PHASE);
 
-                            if (_isThirdPhase) // Need to schedule in phase three, since it cannot be done via movement any longer
-                                events.ScheduleEvent(EVENT_ICY_GRIP, 40000);
+                            // Reset Ice Tomb counter, and schedule Ice Tombs again in phase 3
+                            if (_isThirdPhase)
+                            {
+                                _iceTombCounter = 0;
+                                events.ScheduleEvent(EVENT_ICE_TOMB, urand(7000, 10000));
+                            }
                             break;
                         case EVENT_BLISTERING_COLD:
                             Talk(EMOTE_WARN_BLISTERING_COLD);
@@ -529,7 +534,12 @@ class boss_sindragosa : public CreatureScript
                                 Talk(EMOTE_WARN_FROZEN_ORB, target->GetGUID());
                                 DoCast(target, SPELL_ICE_TOMB_DUMMY, true);
                             }
-                            events.ScheduleEvent(EVENT_ICE_TOMB, 20000);
+
+                            _iceTombCounter++;
+                            if (_iceTombCounter < 4) // Avoid casting ice tomb more than 4 times between icy grips
+                                events.ScheduleEvent(EVENT_ICE_TOMB, urand(16000, 23000));
+                            else // We are done with all ice tombs, start icy grip timer
+                                events.ScheduleEvent(EVENT_ICY_GRIP, 20000);
                             break;
                         case EVENT_FROST_BOMB:
                         {
@@ -572,8 +582,9 @@ class boss_sindragosa : public CreatureScript
                             if (!_isInAirPhase)
                             {
                                 Talk(SAY_PHASE_2);
-                                events.ScheduleEvent(EVENT_ICE_TOMB, 17000);
-                                events.RescheduleEvent(EVENT_ICY_GRIP, 40000);
+                                _iceTombCounter = 2; // Set to 2 here, so we get 2 casts until first icy grip
+                                events.ScheduleEvent(EVENT_ICE_TOMB, urand(7000, 10000));
+                                events.CancelEvent(EVENT_ICY_GRIP);
                                 DoCast(me, SPELL_MYSTIC_BUFFET, true);
                             }
                             else
@@ -594,6 +605,7 @@ class boss_sindragosa : public CreatureScript
 
         private:
             uint8 _frostBombCounter;
+            uint8 _iceTombCounter;
             uint8 _mysticBuffetStack;
             bool _isInAirPhase;
             bool _isThirdPhase;
