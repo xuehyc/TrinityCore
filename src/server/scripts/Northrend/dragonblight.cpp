@@ -309,9 +309,43 @@ public:
     }
 };
 
+enum
+{
+    NPC_LEVIROTH = 26452
+};
+
+class npc_leviroth : public CreatureScript
+{
+public:
+    npc_leviroth() : CreatureScript("npc_leviroth") {}
+    struct npc_levirothAI : public ScriptedAI
+    {
+        npc_levirothAI(Creature* c) : ScriptedAI(c) {}
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            // If there is no known attacker or the damage is too low to kill us, ignore it.
+            if (!attacker || damage < me->GetHealth())
+                return;
+
+            // Note: This NPC gets hit by himself due to a spell (regularly, during Q11626), thus, we enforce that the killing player gets the credit.           
+            if (Player* p = attacker->ToPlayer())
+            {
+                p->KilledMonsterCredit(NPC_LEVIROTH, 0);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_levirothAI(creature);
+    }
+};
+
 void AddSC_dragonblight()
 {
     new npc_alexstrasza_wr_gate;
     new npc_minebomb_of_wintergarde;
     new npc_high_abbot_lundgren;
+    new npc_leviroth;
 }

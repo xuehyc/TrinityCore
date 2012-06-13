@@ -2645,6 +2645,53 @@ public:
     }
 };
 
+enum
+{
+    SPELL_LEVIROTH_SELF_IMPALE = 49882
+};
+
+class spell_gen_leviroth_self_impale : public SpellScriptLoader
+{
+public:
+    spell_gen_leviroth_self_impale() : SpellScriptLoader("spell_gen_leviroth_self_impale") {}
+
+    class spell_gen_leviroth_self_impale_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_leviroth_self_impale_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellEntry*/)
+        {
+            if(sSpellMgr->GetSpellInfo(SPELL_LEVIROTH_SELF_IMPALE))
+                return true;
+            return false;
+        }
+
+        void Adjust()
+        {
+            if (Unit* target = GetHitUnit())
+            {                  
+                if (GetSpellInfo()) // Just for the case...
+                {
+                    // Try to deal damage directly. Note that this leads to non-granting the kill-credit to the player.
+                    // Note: target=caster, since spell 49882 targets self.
+                    // @see dragonblight.cpp::npc_leviroth
+                    target->DealDamage(target, target->CountPctFromMaxHealth(GetSpellInfo()->Effects[0].CalcValue()), 0, SELF_DAMAGE);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_gen_leviroth_self_impale_SpellScript::Adjust);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gen_leviroth_self_impale_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -2696,4 +2743,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_chaos_blast();
     new spell_gen_scarlet_raven_priest_image();
     new spell_gen_place_maghar_battle_standard();
+    new spell_gen_leviroth_self_impale();
 }

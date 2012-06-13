@@ -20,6 +20,7 @@
 #include "DatabaseEnv.h"
 #include "Map.h"
 #include "Player.h"
+#include "Group.h"
 #include "GameObject.h"
 #include "Creature.h"
 #include "CreatureAI.h"
@@ -347,15 +348,22 @@ uint32 InstanceScript::GetMajorityTeam()
         const Map::PlayerList& players = instance->GetPlayers();
         if (!players.isEmpty())
         {
-            for (Map::PlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
+            Player* arbitraryPlayer = players.getFirst()->getSource();  // Just get the first one - it doesn't matter, we may take anyone. 
+            if (!arbitraryPlayer)
+                return 0;   // Cannot make a decision if there's no player
+
+            Group* group = arbitraryPlayer->GetGroup();                 // Decisions are based on the players group, despite they are in the instance or not.
+            if (!group)
+                return 0;   // Cannot make a decision if there's no group-reference
+
+            for (GroupReference* it = group->GetFirstMember(); it != 0; it = it->next())
             {
-                if (Player* player = it->getSource())
+                if (Player* member = it->getSource())
                 {
-                    // Filter gamemasters, they may be present for observation and should not affect the counter. 
-                    if (!player->isGameMaster())
+                    if (!member->isGameMaster())
                     {
                         // If it's not an alliance member, it's a horde member... should be logical :)
-                        if (player->GetTeam() == ALLIANCE)
+                        if (member->GetTeam() == ALLIANCE)
                             alliancePlayers++;
                         else
                             hordePlayers++;
