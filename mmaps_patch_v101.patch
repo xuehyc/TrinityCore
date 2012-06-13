@@ -1,8 +1,8 @@
-commit e78a02e66f29a54f37ed805de2fc7c7ff6531e87
+commit f595f8affd2facad17afe22c6f248cb82ed1ce92
 Author: Venugh <venugh@gmx.net>
-Date:   Sat May 19 15:18:33 2012 +0200
+Date:   Wed Jun 13 07:27:27 2012 +0200
 
-    mmaps patch 009a.
+    mmaps patch v 0.1.0
 
 diff --git a/dep/CMakeLists.txt b/dep/CMakeLists.txt
 index d658ba4..48a2fd5 100644
@@ -15092,7 +15092,7 @@ index fc1b56c..0cfc85b 100755
              // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
              if (!ToCreature()->CanFly())
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-index a4d02ee..ea91de7 100755
+index a993566..7b2f6dc 100755
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
 @@ -367,7 +367,7 @@ bool Unit::haveOffhandWeapon() const
@@ -15105,7 +15105,7 @@ index a4d02ee..ea91de7 100755
      Movement::MoveSplineInit init(*this);
      init.MoveTo(x,y,z);
 diff --git a/src/server/game/Entities/Unit/Unit.h b/src/server/game/Entities/Unit/Unit.h
-index f246f59..7d156b1 100755
+index 9b63de0..3284326 100755
 --- a/src/server/game/Entities/Unit/Unit.h
 +++ b/src/server/game/Entities/Unit/Unit.h
 @@ -498,6 +498,7 @@ enum UnitState
@@ -15116,17 +15116,17 @@ index f246f59..7d156b1 100755
      UNIT_STATE_UNATTACKABLE    = (UNIT_STATE_IN_FLIGHT | UNIT_STATE_ONVEHICLE),
      // for real move using movegen check and stop (except unstoppable flight)
      UNIT_STATE_MOVING          = UNIT_STATE_ROAMING_MOVE | UNIT_STATE_CONFUSED_MOVE | UNIT_STATE_FLEEING_MOVE | UNIT_STATE_CHASE_MOVE | UNIT_STATE_FOLLOW_MOVE ,
-@@ -1627,7 +1628,7 @@ class Unit : public WorldObject
+@@ -1614,7 +1615,7 @@ class Unit : public WorldObject
          void JumpTo(float speedXY, float speedZ, bool forward = true);
          void JumpTo(WorldObject* obj, float speedZ);
  
 -        void MonsterMoveWithSpeed(float x, float y, float z, float speed);
 +        void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false);
          //void SetFacing(float ori, WorldObject* obj = NULL);
-         void SendMonsterMoveExitVehicle(Position const* newPos);
          //void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time, Player* player = NULL);
+         void SendMovementFlagUpdate();
 diff --git a/src/server/game/Maps/Map.cpp b/src/server/game/Maps/Map.cpp
-index a1b3d91..4eb4943 100755
+index 82659e3..1d1c3e2 100755
 --- a/src/server/game/Maps/Map.cpp
 +++ b/src/server/game/Maps/Map.cpp
 @@ -20,6 +20,7 @@
@@ -15202,7 +15202,7 @@ index a1b3d91..4eb4943 100755
          else
              ((MapInstanced*)m_parentMap)->RemoveGridMapReference(GridCoord(gx, gy));
 diff --git a/src/server/game/Maps/Map.h b/src/server/game/Maps/Map.h
-index 6ba0864..d798137 100755
+index 214f50e..003018f 100755
 --- a/src/server/game/Maps/Map.h
 +++ b/src/server/game/Maps/Map.h
 @@ -76,6 +76,8 @@ struct map_fileheader
@@ -15214,8 +15214,8 @@ index 6ba0864..d798137 100755
  };
  
  #define MAP_AREA_NO_AREA      0x0001
-@@ -445,7 +447,7 @@ class Map : public GridRefManager<NGridType>
-         bool getObjectHitPos(uint32 phasemask, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float &ry, float& rz, float modifyDist);
+@@ -477,7 +479,7 @@ class Map : public GridRefManager<NGridType>
+ 
      private:
          void LoadMapAndVMap(int gx, int gy);
 -        void LoadVMap(int gx, int gy);
@@ -15224,7 +15224,7 @@ index 6ba0864..d798137 100755
          GridMap* GetGrid(float x, float y);
  
 diff --git a/src/server/game/Maps/MapInstanced.cpp b/src/server/game/Maps/MapInstanced.cpp
-index 5543251..5924b92 100755
+index 2c1bdb0..341db80 100755
 --- a/src/server/game/Maps/MapInstanced.cpp
 +++ b/src/server/game/Maps/MapInstanced.cpp
 @@ -21,6 +21,7 @@
@@ -15235,7 +15235,7 @@ index 5543251..5924b92 100755
  #include "InstanceSaveMgr.h"
  #include "World.h"
  #include "Group.h"
-@@ -258,6 +259,7 @@ bool MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
+@@ -260,6 +261,7 @@ bool MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
      if (m_InstancedMaps.size() <= 1 && sWorld->getBoolConfig(CONFIG_GRID_UNLOAD))
      {
          VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(itr->second->GetId());
@@ -15290,7 +15290,7 @@ index 06aca10..da1bcb1 100755
 +
  #endif
 diff --git a/src/server/game/Movement/MotionMaster.cpp b/src/server/game/Movement/MotionMaster.cpp
-index c0e1eb8..096dd1f 100755
+index bc0570b..91ddeed 100755
 --- a/src/server/game/Movement/MotionMaster.cpp
 +++ b/src/server/game/Movement/MotionMaster.cpp
 @@ -123,9 +123,10 @@ void MotionMaster::DirectClean(bool reset)
@@ -15328,7 +15328,7 @@ index c0e1eb8..096dd1f 100755
      }
  }
  
-@@ -399,7 +400,7 @@ void MotionMaster::MoveFall(uint32 id/*=0*/)
+@@ -397,7 +398,7 @@ void MotionMaster::MoveFall(uint32 id/*=0*/)
      Mutate(new EffectMovementGenerator(id), MOTION_SLOT_CONTROLLED);
  }
  
@@ -15337,7 +15337,7 @@ index c0e1eb8..096dd1f 100755
  {
      if (Impl[MOTION_SLOT_CONTROLLED] && Impl[MOTION_SLOT_CONTROLLED]->GetMovementGeneratorType() != DISTRACT_MOTION_TYPE)
          return;
-@@ -407,13 +408,13 @@ void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id)
+@@ -405,13 +406,13 @@ void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id)
      if (_owner->GetTypeId() == TYPEID_PLAYER)
      {
          sLog->outStaticDebug("Player (GUID: %u) charge point (X: %f Y: %f Z: %f)", _owner->GetGUIDLow(), x, y, z);
@@ -15354,7 +15354,7 @@ index c0e1eb8..096dd1f 100755
  }
  
 diff --git a/src/server/game/Movement/MotionMaster.h b/src/server/game/Movement/MotionMaster.h
-index d6144bf..6a3321c 100755
+index 727f626..918896a 100755
 --- a/src/server/game/Movement/MotionMaster.h
 +++ b/src/server/game/Movement/MotionMaster.h
 @@ -154,13 +154,13 @@ class MotionMaster //: private std::stack<MovementGenerator *>
@@ -15365,8 +15365,8 @@ index d6144bf..6a3321c 100755
 +        void MovePoint(uint32 id, float x, float y, float z, bool generatePath = true);
  
          // These two movement types should only be used with creatures having landing/takeoff animations
-         void MoveLand(uint32 id, Position const& pos, float speed);
-         void MoveTakeoff(uint32 id, Position const& pos, float speed);
+         void MoveLand(uint32 id, Position const& pos);
+         void MoveTakeoff(uint32 id, Position const& pos);
  
 -        void MoveCharge(float x, float y, float z, float speed = SPEED_CHARGE, uint32 id = EVENT_CHARGE);
 +        void MoveCharge(float x, float y, float z, float speed = SPEED_CHARGE, uint32 id = EVENT_CHARGE, bool generatePath = true);
@@ -17512,10 +17512,10 @@ index d4b19b2..4ec8d2c 100644
          bool Initialized() const { return !spline.empty();}
  
 diff --git a/src/server/game/Movement/Spline/MoveSplineInit.cpp b/src/server/game/Movement/Spline/MoveSplineInit.cpp
-index e586cb4..924db9a 100644
+index c539dd3..1d0feda 100644
 --- a/src/server/game/Movement/Spline/MoveSplineInit.cpp
 +++ b/src/server/game/Movement/Spline/MoveSplineInit.cpp
-@@ -54,7 +54,7 @@ namespace Movement
+@@ -56,7 +56,7 @@ namespace Movement
          return MOVE_RUN;
      }
  
@@ -17524,7 +17524,16 @@ index e586cb4..924db9a 100644
      {
          MoveSpline& move_spline = *unit.movespline;
  
-@@ -86,7 +86,7 @@ namespace Movement
+@@ -79,7 +79,7 @@ namespace Movement
+ 
+         // should i do the things that user should do? - no.
+         if (args.path.empty())
+-            return;
++            return 0;
+ 
+         // corrent first vertex
+         args.path[0] = real_position;
+@@ -97,7 +97,7 @@ namespace Movement
              args.velocity = unit.GetSpeed(SelectSpeedType(moveFlags));
  
          if (!args.Validate())
@@ -17533,8 +17542,8 @@ index e586cb4..924db9a 100644
  
          if (moveFlags & MOVEMENTFLAG_ROOT)
              moveFlags &= ~MOVEMENTFLAG_MASK_MOVING;
-@@ -98,6 +98,8 @@ namespace Movement
-         data.append(unit.GetPackGUID());
+@@ -115,6 +115,8 @@ namespace Movement
+ 
          PacketBuilder::WriteMonsterMove(move_spline, data);
          unit.SendMessageToSet(&data,true);
 +
@@ -17542,56 +17551,17 @@ index e586cb4..924db9a 100644
      }
  
      MoveSplineInit::MoveSplineInit(Unit& m) : unit(m)
-diff --git a/src/server/game/Movement/Spline/MoveSplineInit.h b/src/server/game/Movement/Spline/MoveSplineInit.h
-index 7ef6cd7..24563f2 100644
---- a/src/server/game/Movement/Spline/MoveSplineInit.h
-+++ b/src/server/game/Movement/Spline/MoveSplineInit.h
-@@ -20,6 +20,7 @@
- #define TRINITYSERVER_MOVESPLINEINIT_H
- 
- #include "MoveSplineInitArgs.h"
-+#include "PathFinderMovementGenerator.h"
- 
- class Unit;
- 
-@@ -43,7 +44,7 @@ namespace Movement
- 
-         /*  Final pass of initialization that launches spline movement.
-          */
--        void Launch();
-+        int32 Launch();
- 
-         /* Adds movement by parabolic trajectory
-          * @param amplitude  - the maximum height of parabola, value could be negative and positive
-@@ -72,8 +73,8 @@ namespace Movement
- 
-         /* Initializes simple A to B mition, A is current unit's position, B is destination
-          */
--        void MoveTo(const Vector3& destination);
--        void MoveTo(float x, float y, float z);
-+        void MoveTo(const Vector3& destination, bool generatePath = false, bool forceDestination = false);
-+        void MoveTo(float x, float y, float z, bool generatePath = false, bool forceDestination = false);
- 
-         /* Sets Id of fisrt point of the path. When N-th path point will be done ILisener will notify that pointId + N done
-          * Needed for waypoint movement where path splitten into parts
-@@ -133,17 +134,26 @@ namespace Movement
-         args.path.assign(controls.begin(),controls.end());
+@@ -146,12 +148,21 @@ namespace Movement
+         args.flags.EnableFacingAngle();
      }
  
--    inline void MoveSplineInit::MoveTo(float x, float y, float z)
-+    inline void MoveSplineInit::MoveTo(float x, float y, float z, bool generatePath, bool forceDestination)
-     {
-         Vector3 v(x,y,z);
--        MoveTo(v);
-+        MoveTo(v, generatePath, forceDestination);
-     }
- 
--    inline void MoveSplineInit::MoveTo(const Vector3& dest)
-+    inline void MoveSplineInit::MoveTo(const Vector3& dest, bool generatePath, bool forceDestination)
+-    void MoveSplineInit::MoveTo(Vector3 const& dest)
++    void MoveSplineInit::MoveTo(Vector3 const& dest, bool generatePath, bool forceDestination)
      {
 -        args.path_Idx_offset = 0;
 -        args.path.resize(2);
--        args.path[1] = dest;
+-        TransportPathTransform transform(unit, args.TransformForTransport);
+-        args.path[1] = transform(dest);
 +        if (generatePath)
 +        {
 +            PathFinderMovementGenerator path(&unit);
@@ -17602,8 +17572,55 @@ index 7ef6cd7..24563f2 100644
 +        {
 +            args.path_Idx_offset = 0;
 +            args.path.resize(2);
-+            args.path[1] = dest;
++            TransportPathTransform transform(unit, args.TransformForTransport);
++            args.path[1] = transform(dest);
 +        }
+     }
+ 
+     Vector3 TransportPathTransform::operator()(Vector3 input)
+diff --git a/src/server/game/Movement/Spline/MoveSplineInit.h b/src/server/game/Movement/Spline/MoveSplineInit.h
+index ef84780..02ad1f6 100644
+--- a/src/server/game/Movement/Spline/MoveSplineInit.h
++++ b/src/server/game/Movement/Spline/MoveSplineInit.h
+@@ -20,6 +20,7 @@
+ #define TRINITYSERVER_MOVESPLINEINIT_H
+ 
+ #include "MoveSplineInitArgs.h"
++#include "PathFinderMovementGenerator.h"
+ 
+ class Unit;
+ 
+@@ -56,7 +57,7 @@ namespace Movement
+ 
+         /*  Final pass of initialization that launches spline movement.
+          */
+-        void Launch();
++        int32 Launch();
+ 
+         /* Adds movement by parabolic trajectory
+          * @param amplitude  - the maximum height of parabola, value could be negative and positive
+@@ -85,8 +86,8 @@ namespace Movement
+ 
+         /* Initializes simple A to B mition, A is current unit's position, B is destination
+          */
+-        void MoveTo(const Vector3& destination);
+-        void MoveTo(float x, float y, float z);
++        void MoveTo(const Vector3& destination, bool generatePath = false, bool forceDestination = false);
++        void MoveTo(float x, float y, float z, bool generatePath = false, bool forceDestination = false);
+ 
+         /* Sets Id of fisrt point of the path. When N-th path point will be done ILisener will notify that pointId + N done
+          * Needed for waypoint movement where path splitten into parts
+@@ -158,10 +159,10 @@ namespace Movement
+         std::transform(controls.begin(), controls.end(), args.path.begin(), TransportPathTransform(unit, args.TransformForTransport));
+     }
+ 
+-    inline void MoveSplineInit::MoveTo(float x, float y, float z)
++    inline void MoveSplineInit::MoveTo(float x, float y, float z, bool generatePath, bool forceDestination)
+     {
+-        Vector3 v(x, y, z);
+-        MoveTo(v);
++        Vector3 v(x , y, z);
++        MoveTo(v, generatePath, forceDestination);
      }
  
      inline void MoveSplineInit::SetParabolic(float amplitude, float time_shift)
@@ -17661,7 +17678,7 @@ index b6ddaa9..0389585 100755
  #endif
  
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 6e32d33..7c38a33 100755
+index 5bd5961..16e06e2 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -21,6 +21,7 @@
@@ -17791,7 +17808,7 @@ index 0d51f30..a6d8c3c 100644
    ${READLINE_LIBRARY}
    ${TERMCAP_LIBRARY}
 diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
-index 5d83710..e891ab1 100644
+index b14038c..0a900f1 100644
 --- a/src/server/worldserver/worldserver.conf.dist
 +++ b/src/server/worldserver/worldserver.conf.dist
 @@ -267,6 +267,14 @@ PlayerSave.Stats.MinLevel = 0
@@ -17819,7 +17836,7 @@ index a956655..2d37896 100644
  add_subdirectory(vmap4_extractor)
 +add_subdirectory(mmaps_generator)
 diff --git a/src/tools/map_extractor/System.cpp b/src/tools/map_extractor/System.cpp
-index cf2f218..c7bddbe 100644
+index 1505f2c..0ac58a4 100644
 --- a/src/tools/map_extractor/System.cpp
 +++ b/src/tools/map_extractor/System.cpp
 @@ -292,6 +292,8 @@ struct map_fileheader
@@ -17831,7 +17848,7 @@ index cf2f218..c7bddbe 100644
  };
  
  #define MAP_AREA_NO_AREA      0x0001
-@@ -826,6 +828,28 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x, uint32
+@@ -826,6 +828,28 @@ bool ConvertADT(char *filename, char *filename2, int /*cell_y*/, int /*cell_x*/,
              map.liquidMapSize += sizeof(float)*liquidHeader.width*liquidHeader.height;
      }
  
@@ -17860,7 +17877,7 @@ index cf2f218..c7bddbe 100644
      // Ok all data prepared - store it
      FILE *output=fopen(filename2, "wb");
      if(!output)
-@@ -875,6 +899,9 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x, uint32
+@@ -875,6 +899,9 @@ bool ConvertADT(char *filename, char *filename2, int /*cell_y*/, int /*cell_x*/,
                  fwrite(&liquid_height[y+liquidHeader.offsetY][liquidHeader.offsetX], sizeof(float), liquidHeader.width, output);
          }
      }
