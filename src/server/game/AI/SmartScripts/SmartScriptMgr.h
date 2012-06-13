@@ -153,9 +153,10 @@ enum SMART_EVENT
     SMART_EVENT_IS_BEHIND_TARGET         = 67,      //1             // cooldownMin, CooldownMax
     SMART_EVENT_GAME_EVENT_START         = 68,      //1             // game_event.Entry
     SMART_EVENT_GAME_EVENT_END           = 69,      //1             // game_event.Entry
-    SMART_EVENT_GO_STATE_CHANGED         = 70,      //                 go state
+    SMART_EVENT_GO_STATE_CHANGED         = 70,      //1             // go state
+    SMART_EVENT_GO_EVENT_INFORM          = 71,      //1             // eventId
 
-    SMART_EVENT_END                      = 71,
+    SMART_EVENT_END                      = 72,
 };
 
 struct SmartEvent
@@ -352,6 +353,11 @@ struct SmartEvent
 
         struct
         {
+            uint32 eventId;
+        } eventInform;
+
+        struct
+        {
             uint32 param1;
             uint32 param2;
             uint32 param3;
@@ -398,7 +404,7 @@ enum SMART_ACTION
     SMART_ACTION_FLEE_FOR_ASSIST                    = 25,     // With Emote
     SMART_ACTION_CALL_GROUPEVENTHAPPENS             = 26,     // QuestID
     SMART_ACTION_CALL_CASTEDCREATUREORGO            = 27,     // CreatureId, SpellId
-    SMART_ACTION_REMOVEAURASFROMSPELL               = 28,     // Spellid
+    SMART_ACTION_REMOVEAURASFROMSPELL               = 28,     // Spellid, 0 removes all auras
     SMART_ACTION_FOLLOW                             = 29,     // Distance (0 = default), Angle (0 = default), EndCreatureEntry, credit, creditType (0monsterkill, 1event)
     SMART_ACTION_RANDOM_PHASE                       = 30,     // PhaseId1, PhaseId2, PhaseId3...
     SMART_ACTION_RANDOM_PHASE_RANGE                 = 31,     // PhaseMin, PhaseMax
@@ -1166,7 +1172,7 @@ const uint32 SmartAIEventMask[SMART_EVENT_END][2] =
     {SMART_EVENT_GAME_EVENT_START,          SMART_SCRIPT_TYPE_MASK_CREATURE + SMART_SCRIPT_TYPE_MASK_GAMEOBJECT },
     {SMART_EVENT_GAME_EVENT_END,            SMART_SCRIPT_TYPE_MASK_CREATURE + SMART_SCRIPT_TYPE_MASK_GAMEOBJECT },
     {SMART_EVENT_GO_STATE_CHANGED,          SMART_SCRIPT_TYPE_MASK_GAMEOBJECT },
-
+    {SMART_EVENT_GO_EVENT_INFORM,           SMART_SCRIPT_TYPE_MASK_GAMEOBJECT },
 };
 
 enum SmartEventFlags

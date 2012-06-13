@@ -1417,6 +1417,10 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
                 waitTimesMap[(*it)->GetGUID()] = int32(joinTime - itQueue->second->joinTime);
         }
 
+        // Set the dungeon difficulty
+        LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(pProposal->dungeonId);
+        ASSERT(dungeon);
+        
         // Create a new group (if needed)
         LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_GROUP_FOUND);
         Group* grp = pProposal->groupLowGuid ? sGroupMgr->GetGroupByGUID(pProposal->groupLowGuid) : NULL;
@@ -1481,11 +1485,12 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
             m_teleport.push_back(pguid);
             grp->SetLfgRoles(pguid, pProposal->players[pguid]->role);
             SetState(pguid, LFG_STATE_DUNGEON);
+            
+            // Add the cooldown spell if queued for a random dungeon
+            if (dungeon->type == LFG_TYPE_RANDOM)
+                player->CastSpell(player, LFG_SPELL_DUNGEON_COOLDOWN, false);
         }
 
-        // Set the dungeon difficulty
-        LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(pProposal->dungeonId);
-        ASSERT(dungeon);
         grp->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
         uint64 gguid = grp->GetGUID();
         SetDungeon(gguid, dungeon->Entry());
@@ -1626,6 +1631,7 @@ void LFGMgr::InitBoot(Group* grp, uint64 kicker, uint64 victim, std::string reas
 {
     if (!grp)
         return;
+
     uint64 gguid = grp->GetGUID();
     SetState(gguid, LFG_STATE_BOOT);
 
@@ -1635,7 +1641,6 @@ void LFGMgr::InitBoot(Group* grp, uint64 kicker, uint64 victim, std::string reas
     pBoot->reason = reason;
     pBoot->victim = victim;
     pBoot->votedNeeded = GetVotesNeeded(gguid);
-    PlayerSet players;
 
     // Set votes
     for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
@@ -1651,14 +1656,10 @@ void LFGMgr::InitBoot(Group* grp, uint64 kicker, uint64 victim, std::string reas
             else
             {
                 pBoot->votes[guid] = LFG_ANSWER_PENDING;   // Other members need to vote
-                players.insert(plrg);
+                plrg->GetSession()->SendLfgBootPlayer(pBoot);
             }
         }
     }
-
-    // Notify players
-    for (PlayerSet::const_iterator it = players.begin(); it != players.end(); ++it)
-        (*it)->GetSession()->SendLfgBootPlayer(pBoot);
 
     m_Boots[grp->GetLowGUID()] = pBoot;
 }
@@ -1770,6 +1771,9 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
         uint64 gguid = grp->GetGUID();
         LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(GetDungeon(gguid));
 
+        if (GetState(gguid) == LFG_STATE_FINISHED_DUNGEON)
+            error = LFG_TELEPORTERROR_INVALID_LOCATION;
+
         if (!dungeon)
             error = LFG_TELEPORTERROR_INVALID_LOCATION;
         else if (player->GetMapId() != uint32(dungeon->map))  // Do not teleport players in dungeon to the entrance
@@ -1817,7 +1821,7 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
 
             if (error == LFG_TELEPORTERROR_OK)
             {
-                if (!player->GetMap()->IsDungeon() && !player->GetMap()->IsRaid())
+                if (!player->GetMap()->IsDungeon())
                     player->SetBattlegroundEntryPoint();
 
                 if (player->isInFlight())
