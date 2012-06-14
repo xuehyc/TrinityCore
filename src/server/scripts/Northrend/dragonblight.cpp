@@ -170,7 +170,13 @@ enum HighAbbot
     EVENT_SPEECH_CHOOSING = 4,
     EVENT_JUMP_OFF_CLIFF_PT1 = 5,
     EVENT_JUMP_OFF_CLIFF_PT2 = 6,
-    EVENT_DIE = 7
+    EVENT_DIE = 7,
+
+    FACTION_FRIENDLY_TO_ALL = 35,
+    FACTION_SCARLET_CRUSADE = 67,
+
+    SPELL_SCARLET_RAVEN_PRIEST_IMAGE_MALE   = 48763,
+    SPELL_SCARLET_RAVEN_PRIEST_IMAGE_FEMALE = 48761
 };
 
 Position dummyTarget = {2735.9446f, -533.7491f, 105.7517f};
@@ -210,16 +216,30 @@ public:
 
     struct npc_high_abbot_lundgrenAI : public npc_escortAI 
     {
-        npc_high_abbot_lundgrenAI(Creature* creature) : npc_escortAI(creature), isMoving(false) {}
+        npc_high_abbot_lundgrenAI(Creature* creature) : npc_escortAI(creature) {}
 
         void Reset()
-        {
-            isMoving = false;
+        {       
+            me->setFaction(FACTION_SCARLET_CRUSADE);   
+        }
+
+        void EnterCombat(Unit* attacker)
+        {            
+            if (IsEscorted())
+            {
+                // Note: Since we cannot enter combat while being friendly to all in a regular way, we prefer evasion over irregular behavior.
+                EnterEvadeMode();
+            }
+            else
+            {
+                // If we're not friendly (i.e. not being escorted), get this handled by the base class.
+                npc_escortAI::EnterCombat(attacker);
+            }
         }
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
-            if(isMoving)
+            if(IsEscorted())
                 damage = 0;
         }
 
@@ -235,20 +255,20 @@ public:
                 case ACTION_PREPARE_MOVING:
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     DoScriptText(SAY_HIGH_ABBOT_FOLLOW_ME, me);
-                    isMoving = true;
+                    me->setFaction(FACTION_FRIENDLY_TO_ALL);
                     break;
             }
         }
 
         void UpdateEscortAI(const uint32 diff)
         {
-            if (!isMoving)
-                return;
-            events.Update(diff);
-            while (uint32 event = events.ExecuteEvent())
+            if (IsEscorted())
             {
-                switch (event)
+                events.Update(diff);
+                while (uint32 event = events.ExecuteEvent())
                 {
+                    switch (event)
+                    {
                     case EVENT_SPEECH_DISGUISE:
                         DoScriptText(SAY_HIGH_ABBOT_DISGUISE_FAILED, me);
                         events.ScheduleEvent(EVENT_SPEECH_MASTER, 5000);
@@ -270,7 +290,7 @@ public:
                         {
                             p->KilledMonsterCredit(NPC_HIGH_ABBOT_KILL_BUNNY, 0);
                         } 
-                        me->GetMotionMaster()->MoveJump(dummyTarget.GetPositionX(), dummyTarget.GetPositionY(), dummyTarget.GetPositionZ(), 15.0f, 15.0f);
+                        me->GetMotionMaster()->MoveJump(dummyTarget.GetPositionX(), dummyTarget.GetPositionY(), dummyTarget.GetPositionZ(), 10.0f, 10.0f);
                         events.ScheduleEvent(EVENT_JUMP_OFF_CLIFF_PT2, 200);
                         break;
                     case EVENT_JUMP_OFF_CLIFF_PT2:
@@ -282,7 +302,16 @@ public:
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         me->ForcedDespawn(0);
                         break;
+                    }
                 }
+            }
+            else
+            {
+                if (!UpdateVictim())
+                {
+                    return;
+                }
+                DoMeleeAttackIfReady();
             }
         }
 
@@ -290,17 +319,38 @@ public:
         {
             switch (i)
             {
-            case 9: // 0-8 are irrelevant, 10 is a dummy. 
-                SetEscortPaused(true);
-                if(Player* p = GetPlayerForEscort())
-                    me->SetFacingToObject(p);
-                events.ScheduleEvent(EVENT_SPEECH_DISGUISE, 1000);
-                break;
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                    if (Player* p = GetPlayerForEscort())
+                    {
+                        // If player is out of range or has lost his aura, evade!
+                        if ( !p->IsInRange(me, 0.0f, GetMaxPlayerDistance()) || (!p->HasAura(SPELL_SCARLET_RAVEN_PRIEST_IMAGE_MALE) && !p->HasAura(SPELL_SCARLET_RAVEN_PRIEST_IMAGE_FEMALE)) ) 
+                        {
+                            EnterEvadeMode();
+                        }
+                    }
+                    else
+                        EnterEvadeMode();   // Should not happen regularly, but...
+                    break;
+                case 9: // 0-8 are irrelevant, 10 is a dummy. 
+                    SetEscortPaused(true);
+                    if(Player* p = GetPlayerForEscort())
+                        me->SetFacingToObject(p);
+                    else
+                        EnterEvadeMode();   // Should not happen regularly, but...
+                    events.ScheduleEvent(EVENT_SPEECH_DISGUISE, 1000);
+                    break;
             }
         }
 
         EventMap events;
-        bool isMoving;
     };
 
     CreatureAI* GetAI(Creature* creature) const
