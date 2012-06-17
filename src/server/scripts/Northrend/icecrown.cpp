@@ -810,7 +810,10 @@ public:
             {
                 // directly charge if range is ok
                 if (me->GetDistance(me->getVictim()) > 5.0f && me->GetDistance(me->getVictim()) <= 30.0f)
+                {
                     DoCastVictim(SPELL_CHARGE);
+                    uiChargeTimer = GetCustomType() == TYPE_CHAMPION ? 6500 : 7500;
+                }
                 else
                 {
                     // move away for charge...
