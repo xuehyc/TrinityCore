@@ -416,6 +416,7 @@ class FrozenThroneResetWorker
                 case GO_DOODAD_ICECROWN_THRONEFROSTYWIND01:
                     go->SetGoState(GO_STATE_ACTIVE);
                     break;
+                case GO_DOODAD_ICECROWN_SNOWEDGEWARNING01:
                 case GO_DOODAD_ICECROWN_THRONEFROSTYEDGE01:
                     go->SetGoState(GO_STATE_READY);
                     break;
@@ -464,14 +465,72 @@ class VileSpiritActivateEvent : public BasicEvent
 
         bool Execute(uint64 /*time*/, uint32 /*diff*/)
         {
+            // We need this for threat management later
+            if (TempSummon* summon = _owner->ToTempSummon())
+                if (Unit* summoner = summon->GetSummoner())
+                    if (Creature* summonerCreature = summoner->ToCreature())
+                        if (summonerCreature->isInCombat() && summonerCreature->AI())
+                            summonerCreature->AI()->DoZoneInCombat(_owner);
+
             _owner->SetReactState(REACT_AGGRESSIVE);
             _owner->CastSpell(_owner, SPELL_VILE_SPIRIT_MOVE_SEARCH, true);
-            _owner->CastSpell((Unit*)NULL, SPELL_VILE_SPIRIT_DAMAGE_SEARCH, true);
+            // Activated via database template addon, otherwise it would be lost after wrong enter evade, if target is ported to frostmourne
+            // _owner->CastSpell((Unit*)NULL, SPELL_VILE_SPIRIT_DAMAGE_SEARCH, true);
             return true;
         }
 
     private:
         Creature* _owner;
+};
+
+class IceSphereMovementEvent : public BasicEvent
+{
+    public:
+        explicit IceSphereMovementEvent(Creature* owner, Unit* target)
+            : _owner(owner), _target(target)
+        {
+        }
+
+        bool Execute(uint64 /*time*/, uint32 /*diff*/)
+        {
+            if (!_owner)
+                return true;
+
+            if (_target && _target->isAlive() && _owner->IsValidAttackTarget(_target) && _target->GetPositionZ() > 830.0f && _target->GetInstanceId() == _owner->GetInstanceId())
+            {
+                _owner->GetMotionMaster()->MovePoint(1, _target->GetPositionX(), _target->GetPositionY(), _target->GetPositionZ());
+                _owner->m_Events.AddEvent(new IceSphereMovementEvent(_owner, _target), _owner->m_Events.CalculateTime(500));
+                return true;
+            }
+            else if (Unit* newTarget = _owner->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+            {
+                if (newTarget->isAlive() && _owner->IsValidAttackTarget(newTarget) && newTarget->GetPositionZ() > 830.0f && newTarget->GetInstanceId() == _owner->GetInstanceId())
+                {
+                    _owner->CastSpell(newTarget, SPELL_ICE_PULSE, false);
+                    _owner->ClearUnitState(UNIT_STATE_CASTING);
+                    _owner->m_Events.AddEvent(new IceSphereMovementEvent(_owner, newTarget), _owner->m_Events.CalculateTime(500));
+                    return true;
+                }
+            }
+
+            _owner->DespawnOrUnsummon();
+            return true;
+        }
+
+    private:
+        Creature* _owner;
+        Unit* _target;
+};
+
+class HeightFilterValkyrTargetSelection
+{
+    public:
+        HeightFilterValkyrTargetSelection() { }
+
+        bool operator()(Unit* unit) const
+        {
+            return unit->GetPositionZ() < 830.0f;
+        }
 };
 
 class boss_the_lich_king : public CreatureScript
@@ -542,8 +601,8 @@ class boss_the_lich_king : public CreatureScript
 
             bool CanAIAttack(Unit const* target) const
             {
-                // The Lich King must not select targets in frostmourne room if he killed everyone outside
-                return !target->HasAura(SPELL_IN_FROSTMOURNE_ROOM);
+                // The Lich King must not select targets in frostmourne room if he killed everyone outside and no falling targets
+                return !target->HasAura(SPELL_IN_FROSTMOURNE_ROOM) && target->GetPositionZ() > 830.0f;
             }
 
             void EnterEvadeMode()
@@ -584,8 +643,8 @@ class boss_the_lich_king : public CreatureScript
                         SendLightOverride(0, 5000);
                         break;
                     case ACTION_BREAK_FROSTMOURNE:
-                        DoCastAOE(SPELL_SUMMON_BROKEN_FROSTMOURNE);
-                        DoCastAOE(SPELL_SUMMON_BROKEN_FROSTMOURNE_2);
+                        me->CastSpell((Unit*)NULL, SPELL_SUMMON_BROKEN_FROSTMOURNE, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
+                        me->CastSpell((Unit*)NULL, SPELL_SUMMON_BROKEN_FROSTMOURNE_2, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
                         SetEquipmentSlots(false, EQUIP_BROKEN_FROSTMOURNE);
                         events.ScheduleEvent(EVENT_OUTRO_TALK_6, 2500, 0, PHASE_OUTRO);
                         break;
@@ -695,7 +754,7 @@ class boss_the_lich_king : public CreatureScript
                             summon->CastSpell(summon, SPELL_ICE_BURST_TARGET_SEARCH, false);
                             summon->CastSpell(target, SPELL_ICE_PULSE, false);
                             summon->ClearUnitState(UNIT_STATE_CASTING);
-                            summon->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
+                            summon->m_Events.AddEvent(new IceSphereMovementEvent(summon, target), summon->m_Events.CalculateTime(500));
                         }
                         else
                             summon->DespawnOrUnsummon();
@@ -797,6 +856,7 @@ class boss_the_lich_king : public CreatureScript
                         me->SetFacingTo(0.0f);
                         Talk(SAY_LK_REMORSELESS_WINTER);
                         SendMusicToPlayers(MUSIC_SPECIAL);
+                        me->InterruptNonMeleeSpells(true); // Otherwise remorseless winter might fail
                         me->SetReactState(REACT_PASSIVE);
                         me->AttackStop();
                         DoCast(me, SPELL_REMORSELESS_WINTER_1);
@@ -814,6 +874,7 @@ class boss_the_lich_king : public CreatureScript
                         me->SetFacingTo(0.0f);
                         Talk(SAY_LK_REMORSELESS_WINTER);
                         SendMusicToPlayers(MUSIC_SPECIAL);
+                        me->InterruptNonMeleeSpells(true); // Otherwise remorseless winter might fail
                         me->SetReactState(REACT_PASSIVE);
                         me->AttackStop();
                         DoCast(me, SPELL_REMORSELESS_WINTER_2);
@@ -946,7 +1007,7 @@ class boss_the_lich_king : public CreatureScript
                         case EVENT_PAIN_AND_SUFFERING:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                                 me->CastSpell(target, SPELL_PAIN_AND_SUFFERING, TRIGGERED_NONE);
-                            events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, urand(1500, 4000), 0, PHASE_TRANSITION);
+                            events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, urand(1500, 3000), 0, PHASE_TRANSITION);
                             break;
                         case EVENT_SUMMON_ICE_SPHERE:
                             DoCastAOE(SPELL_SUMMON_ICE_SPHERE);
@@ -1064,12 +1125,11 @@ class boss_the_lich_king : public CreatureScript
                             Talk(SAY_LK_OUTRO_6);
                             if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
                                 tirion->SetFacingToObject(me);
-                            me->ClearUnitState(UNIT_STATE_CASTING);
-                            DoCastAOE(SPELL_SUMMON_BROKEN_FROSTMOURNE_3);
+                            me->CastSpell((Unit*)NULL, SPELL_SUMMON_BROKEN_FROSTMOURNE_3, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
                             SetEquipmentSlots(false, EQUIP_UNEQUIP);
                             break;
                         case EVENT_OUTRO_SOUL_BARRAGE:
-                            DoCastAOE(SPELL_SOUL_BARRAGE);
+                            me->CastSpell((Unit*)NULL, SPELL_SOUL_BARRAGE, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
                             sCreatureTextMgr->SendSound(me, SOUND_PAIN, CHAT_MSG_MONSTER_YELL, 0, TEXT_RANGE_NORMAL, TEAM_OTHER, false);
                             // set flight
                             me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
@@ -1326,6 +1386,12 @@ class npc_shambling_horror_icc : public CreatureScript
                 _events.ScheduleEvent(EVENT_ENRAGE, urand(11000, 14000));
             }
 
+            bool CanAIAttack(Unit const* target) const
+            {
+                // Must not select falling targets
+                return target->GetPositionZ() > 830.0f;
+            }
+
             void DamageTaken(Unit* /*attacker*/, uint32& damage)
             {
                 if (!_frenzied && IsHeroic() && me->HealthBelowPctDamaged(20, damage))
@@ -1398,6 +1464,12 @@ class npc_raging_spirit : public CreatureScript
                     if (Unit* summoner = summon->GetSummoner())
                         summoner->CastSpell(me, SPELL_RAGING_SPIRIT_VISUAL_CLONE, true);
                 DoCast(me, SPELL_BOSS_HITTIN_YA, true);
+            }
+
+            bool CanAIAttack(Unit const* target) const
+            {
+                // Must not select falling targets
+                return target->GetPositionZ() > 830.0f;
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
@@ -1515,8 +1587,15 @@ class npc_valkyr_shadowguard : public CreatureScript
                 switch (id)
                 {
                     case POINT_DROP_PLAYER:
-                        DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
-                        me->DespawnOrUnsummon(1000);
+                        // On stun point motion is finalized, this can restart it if necessary
+                        // If position is reached, distance is null
+                        if (!me->GetDistance(_dropPoint))
+                        {
+                            DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
+                            me->DespawnOrUnsummon(1000);
+                        }
+                        else
+                            _events.ScheduleEvent(EVENT_MOVE_TO_DROP_POS, 500);
                         break;
                     case POINT_CHARGE:
                         if (Player* target = ObjectAccessor::GetPlayer(*me, _grabbedPlayer))
@@ -1880,6 +1959,12 @@ class npc_spirit_warden : public CreatureScript
                     terenas->AI()->DoAction(ACTION_TELEPORT_BACK);
             }
 
+            void KilledUnit(Unit* victim)
+            {
+                if (victim->GetTypeId() == TYPEID_PLAYER)
+                    victim->RemoveAurasDueToSpell(IsHeroic() ? SPELL_HARVEST_SOULS_TELEPORT : SPELL_HARVEST_SOUL_TELEPORT);
+            }
+
             void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
@@ -2120,40 +2205,31 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
         {
             PrepareSpellScript(spell_the_lich_king_necrotic_plague_SpellScript);
 
-            bool Load()
-            {
-                _hadAura = false;
-                return true;
-            }
-
-            void SelectTarget(std::list<Unit*>& targets)
-            {
-                targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
-                if (targets.size() < 2)
-                    return;
-
-                targets.resize(1);
-            }
-
-            void CheckAura()
-            {
-                if (GetHitUnit()->HasAura(GetSpellInfo()->Id))
-                    _hadAura = true;
-            }
-
             void AddMissingStack()
             {
-                if (GetHitAura() && !_hadAura && GetSpellValue()->EffectBasePoints[EFFECT_1] != AURA_REMOVE_BY_ENEMY_SPELL)
+                // Add stack if we were not removed by dispel
+                if (GetHitAura() && GetSpellValue()->EffectBasePoints[EFFECT_1] != AURA_REMOVE_BY_ENEMY_SPELL)
                     GetHitAura()->ModStackAmount(1);
+
+                // Add stack if target has LK spell on it
+                if (GetHitAura() && GetHitUnit())
+                {
+                    if (GetHitUnit()->HasAura(70337) || GetHitUnit()->HasAura(73912) || GetHitUnit()->HasAura(73913) || GetHitUnit()->HasAura(73914))
+                    {
+                        GetHitUnit()->RemoveAurasDueToSpell(70337);
+                        GetHitUnit()->RemoveAurasDueToSpell(73912);
+                        GetHitUnit()->RemoveAurasDueToSpell(73913);
+                        GetHitUnit()->RemoveAurasDueToSpell(73914);
+
+                        GetHitAura()->ModStackAmount(1);
+                    }
+                }
             }
 
             void Register()
             {
-                BeforeHit += SpellHitFn(spell_the_lich_king_necrotic_plague_SpellScript::CheckAura);
                 OnHit += SpellHitFn(spell_the_lich_king_necrotic_plague_SpellScript::AddMissingStack);
             }
-
-            bool _hadAura;
         };
 
         class spell_the_lich_king_necrotic_plague_AuraScript : public AuraScript
@@ -2546,6 +2622,7 @@ class spell_the_lich_king_valkyr_target_search : public SpellScriptLoader
                 if (unitList.empty())
                     return;
 
+                unitList.remove_if(HeightFilterValkyrTargetSelection());
                 unitList.remove_if(Trinity::UnitAuraCheck(true, GetSpellInfo()->Id));
                 if (unitList.empty())
                     return;
@@ -2566,7 +2643,8 @@ class spell_the_lich_king_valkyr_target_search : public SpellScriptLoader
             void HandleScript(SpellEffIndex effIndex)
             {
                 PreventHitDefaultEffect(effIndex);
-                GetCaster()->CastSpell(GetHitUnit(), SPELL_CHARGE, true);
+                if (GetCaster() && GetCaster()->GetMotionMaster() && GetHitUnit())
+                    GetCaster()->GetMotionMaster()->MoveCharge(GetHitUnit()->GetPositionX(), GetHitUnit()->GetPositionY(), GetHitUnit()->GetPositionZ());
             }
 
             void Register()
@@ -2755,6 +2833,10 @@ class spell_the_lich_king_vile_spirit_move_target_search : public SpellScriptLoa
 
             void SelectTarget(std::list<Unit*>& targets)
             {
+                // Only move towards players in range of 200 yards
+                targets.remove_if(Trinity::ObjectTypeIdCheck(TYPEID_PLAYER, false));
+                targets.remove_if(ExactDistanceCheck(GetCaster(), 200.0f));
+
                 if (targets.empty())
                     return;
 

@@ -756,6 +756,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                             }
                         }
 
+                        if (state == FAIL)
+                            Events.CancelEvent(EVENT_QUAKE_SHATTER);
+
                         if (state == DONE)
                         {
                             if (GameObject* bolvar = instance->GetGameObject(FrozenBolvarGUID))
