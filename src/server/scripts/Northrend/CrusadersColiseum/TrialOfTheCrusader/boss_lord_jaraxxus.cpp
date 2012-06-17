@@ -258,6 +258,8 @@ public:
 
             if (m_uiNetherPowerTimer <= uiDiff)
             {
+                if (m_uiFelLightningTimer < 5000) // prevent instant (buffed) fel lightning, give players time to purge
+                    m_uiFelLightningTimer = 5000;
                 if (!me->HasAura(SPELL_NETHER_POWER))
                 {
                     if (Aura* netherAura = me->AddAura(SPELL_NETHER_POWER, me))
