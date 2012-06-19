@@ -1007,7 +1007,7 @@ class boss_the_lich_king : public CreatureScript
                         case EVENT_PAIN_AND_SUFFERING:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                                 me->CastSpell(target, SPELL_PAIN_AND_SUFFERING, TRIGGERED_NONE);
-                            events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, urand(1500, 3000), 0, PHASE_TRANSITION);
+                            events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, urand(1500, 4000), 0, PHASE_TRANSITION);
                             break;
                         case EVENT_SUMMON_ICE_SPHERE:
                             DoCastAOE(SPELL_SUMMON_ICE_SPHERE);
@@ -1542,6 +1542,9 @@ class npc_valkyr_shadowguard : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
                 me->SetSpeed(MOVE_FLIGHT, 0.642857f, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+                _movementWasStopped = true;
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
@@ -1587,15 +1590,14 @@ class npc_valkyr_shadowguard : public CreatureScript
                 switch (id)
                 {
                     case POINT_DROP_PLAYER:
-                        // On stun point motion is finalized, this can restart it if necessary
-                        // If position is reached, distance is null
+                        // On stun point motion is finalized, if position is really reached, distance is null
                         if (!me->GetDistance(_dropPoint))
                         {
                             DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
                             me->DespawnOrUnsummon(1000);
                         }
                         else
-                            _events.ScheduleEvent(EVENT_MOVE_TO_DROP_POS, 500);
+                            _movementWasStopped = true;
                         break;
                     case POINT_CHARGE:
                         if (Player* target = ObjectAccessor::GetPlayer(*me, _grabbedPlayer))
@@ -1613,7 +1615,6 @@ class npc_valkyr_shadowguard : public CreatureScript
                                 DoCast(target, SPELL_VALKYR_CARRY);
                                 _dropPoint.Relocate(triggers.front());
                                 _events.ScheduleEvent(EVENT_MOVE_TO_DROP_POS, 1500);
-
                             }
                         }
                         else
@@ -1651,7 +1652,13 @@ class npc_valkyr_shadowguard : public CreatureScript
                             }
                             break;
                         case EVENT_MOVE_TO_DROP_POS:
-                            me->GetMotionMaster()->MovePoint(POINT_DROP_PLAYER, _dropPoint);
+                            if (!me->HasAuraType(SPELL_AURA_MOD_STUN) && _movementWasStopped)
+                            {
+                                _movementWasStopped = false;
+                                me->GetMotionMaster()->MovePoint(POINT_DROP_PLAYER, _dropPoint);
+                            }
+
+                            _events.ScheduleEvent(EVENT_MOVE_TO_DROP_POS, 500);
                             break;
                         case EVENT_LIFE_SIPHON:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
@@ -1671,6 +1678,7 @@ class npc_valkyr_shadowguard : public CreatureScript
             Position _dropPoint;
             uint64 _grabbedPlayer;
             InstanceScript* _instance;
+            bool _movementWasStopped;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1709,12 +1717,15 @@ class npc_strangulate_vehicle : public CreatureScript
                 if (action != ACTION_TELEPORT_BACK)
                     return;
 
+                // Teleport to fixed location, otherwise we might land under the map
                 if (TempSummon* summ = me->ToTempSummon())
                     if (Unit* summoner = summ->GetSummoner())
-                        DoCast(summoner, SPELL_HARVEST_SOUL_TELEPORT_BACK);
+                        summoner->NearTeleportTo(OutroPosition1.GetPositionX(), OutroPosition1.GetPositionY(), OutroPosition1.GetPositionZ(), OutroPosition1.GetOrientation());
 
                 if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
                     lichKing->AI()->SummonedCreatureDespawn(me);
+
+                me->DespawnOrUnsummon(2000);
             }
 
             void UpdateAI(uint32 const diff)
@@ -1848,6 +1859,12 @@ class npc_terenas_menethil : public CreatureScript
                         if (Creature* warden = me->FindNearestCreature(NPC_SPIRIT_WARDEN, 20.0f))
                         {
                             warden->CastSpell((Unit*)NULL, SPELL_DESTROY_SOUL, TRIGGERED_NONE);
+
+                            // In case player is immune to spell
+                            if (Player* player = warden->SelectNearestPlayer(200.0f))
+                                if (player->isAlive())
+                                    warden->Kill(player);
+
                             warden->DespawnOrUnsummon(2000);
                         }
 
@@ -1905,7 +1922,14 @@ class npc_terenas_menethil : public CreatureScript
                         case EVENT_DESTROY_SOUL:
                             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             if (Creature* warden = me->FindNearestCreature(NPC_SPIRIT_WARDEN, 20.0f))
+                            {
                                 warden->CastSpell((Unit*)NULL, SPELL_DESTROY_SOUL, TRIGGERED_NONE);
+
+                                // In case player is immune to spell
+                                if (Player* player = warden->SelectNearestPlayer(200.0f))
+                                    if (player->isAlive())
+                                        warden->Kill(player);
+                            }
                             DoCast(SPELL_TERENAS_LOSES_INSIDE);
                             _events.ScheduleEvent(EVENT_TELEPORT_BACK, 1000);
                             break;
@@ -2105,6 +2129,46 @@ class npc_broken_frostmourne : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return GetIcecrownCitadelAI<npc_broken_frostmourneAI>(creature);
+        }
+};
+
+class npc_vile_spirit : public CreatureScript
+{
+    public:
+        npc_vile_spirit() : CreatureScript("npc_vile_spirit") { }
+
+        struct npc_vile_spiritAI : public ScriptedAI
+        {
+            npc_vile_spiritAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void Reset()
+            {
+                // Ugly hack, IsHeroic of ScriptedAI does not work in CanAIAttack, probably related to missing const attribute for IsHeroic
+                // That change should be pull requested to TC some day
+                isHeroic = IsHeroic();
+            }
+
+            bool CanAIAttack(Unit const* target) const
+            {
+                // Must only select non falling players, who are not in frostmourne zone in non heroic, or who are in frostmourne zone in heroic
+                return target->GetTypeId() == TYPEID_PLAYER && target->GetPositionZ() > 830.0f && ((!isHeroic && !target->HasAura(SPELL_IN_FROSTMOURNE_ROOM)) || (isHeroic && target->HasAura(SPELL_IN_FROSTMOURNE_ROOM)));
+            }
+
+            void UpdateAI(uint32 const /*diff*/)
+            {
+                UpdateVictim();
+                // no melee attacks
+            }
+
+        private:
+            bool isHeroic;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return GetIcecrownCitadelAI<npc_vile_spiritAI>(creature);
         }
 };
 
@@ -3242,6 +3306,33 @@ class spell_the_lich_king_play_movie : public SpellScriptLoader
         }
 };
 
+class spell_the_lich_king_wings_of_the_damned : public SpellScriptLoader
+{
+    public:
+        spell_the_lich_king_wings_of_the_damned() : SpellScriptLoader("spell_the_lich_king_wings_of_the_damned") { }
+
+        class spell_the_lich_king_wings_of_the_damned_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_the_lich_king_wings_of_the_damned_AuraScript);
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (AuraEffect* effect = GetAura()->GetEffect(EFFECT_0))
+                    effect->SetAmount(32); // 32 is the half of 0.64 movement speed modificator
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_the_lich_king_wings_of_the_damned_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_MINIMUM_SPEED, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_the_lich_king_wings_of_the_damned_AuraScript();
+        }
+};
+
 class achievement_been_waiting_long_time : public AchievementCriteriaScript
 {
     public:
@@ -3282,6 +3373,7 @@ void AddSC_boss_the_lich_king()
     new npc_spirit_warden();
     new npc_spirit_bomb();
     new npc_broken_frostmourne();
+    new npc_vile_spirit();
     new spell_the_lich_king_infest();
     new spell_the_lich_king_necrotic_plague();
     new spell_the_lich_king_necrotic_plague_jump();
@@ -3312,6 +3404,7 @@ void AddSC_boss_the_lich_king()
     new spell_the_lich_king_jump_remove_aura();
     new spell_trigger_spell_from_caster("spell_the_lich_king_mass_resurrection", SPELL_MASS_RESURRECTION_REAL);
     new spell_the_lich_king_play_movie();
+    new spell_the_lich_king_wings_of_the_damned();
     new achievement_been_waiting_long_time();
     new achievement_neck_deep_in_vile();
 }
