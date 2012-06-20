@@ -261,6 +261,9 @@ enum Events
     EVENT_TELEPORT                  = 62,
     EVENT_MOVE_TO_LICH_KING         = 63,
     EVENT_DESPAWN_SELF              = 64,
+
+    // Vile Spirits
+    EVENT_VILE_SPIRIT_START_ATTACK  = 65,
 };
 
 enum EventGroups
@@ -336,6 +339,8 @@ enum EncounterActions
     ACTION_SUMMON_TERENAS       = 6,
     ACTION_FINISH_OUTRO         = 7,
     ACTION_TELEPORT_BACK        = 8,
+    ACTION_START_ATTACK_1       = 9,
+    ACTION_START_ATTACK_2       = 10,
 };
 
 enum MiscData
@@ -452,34 +457,6 @@ class StartMovementEvent : public BasicEvent
 
     private:
         Creature* _summoner;
-        Creature* _owner;
-};
-
-class VileSpiritActivateEvent : public BasicEvent
-{
-    public:
-        explicit VileSpiritActivateEvent(Creature* owner)
-            : _owner(owner)
-        {
-        }
-
-        bool Execute(uint64 /*time*/, uint32 /*diff*/)
-        {
-            // We need this for threat management later
-            if (TempSummon* summon = _owner->ToTempSummon())
-                if (Unit* summoner = summon->GetSummoner())
-                    if (Creature* summonerCreature = summoner->ToCreature())
-                        if (summonerCreature->isInCombat() && summonerCreature->AI())
-                            summonerCreature->AI()->DoZoneInCombat(_owner);
-
-            _owner->SetReactState(REACT_AGGRESSIVE);
-            _owner->CastSpell(_owner, SPELL_VILE_SPIRIT_MOVE_SEARCH, true);
-            // Activated via database template addon, otherwise it would be lost after wrong enter evade, if target is ported to frostmourne
-            // _owner->CastSpell((Unit*)NULL, SPELL_VILE_SPIRIT_DAMAGE_SEARCH, true);
-            return true;
-        }
-
-    private:
         Creature* _owner;
 };
 
@@ -787,7 +764,7 @@ class boss_the_lich_king : public CreatureScript
                         summon->SetReactState(REACT_PASSIVE);
                         summon->SetSpeed(MOVE_FLIGHT, 0.5f);
                         summon->GetMotionMaster()->MoveRandom(10.0f);
-                        summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(15000));
+                        summon->AI()->DoAction(ACTION_START_ATTACK_1);
                         return;
                     }
                     case NPC_STRANGULATE_VEHICLE:
@@ -1167,8 +1144,7 @@ class boss_the_lich_king : public CreatureScript
                 summon->SetReactState(REACT_PASSIVE);
                 summon->NearTeleportTo(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), dest.GetOrientation());
                 summon->SetSpeed(MOVE_FLIGHT, 0.5f);
-                summon->m_Events.KillAllEvents(true);
-                summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(1000));
+                summon->AI()->DoAction(ACTION_START_ATTACK_2);
             }
 
             void SendMusicToPlayers(uint32 musicId) const
@@ -1859,12 +1835,6 @@ class npc_terenas_menethil : public CreatureScript
                         if (Creature* warden = me->FindNearestCreature(NPC_SPIRIT_WARDEN, 20.0f))
                         {
                             warden->CastSpell((Unit*)NULL, SPELL_DESTROY_SOUL, TRIGGERED_NONE);
-
-                            // In case player is immune to spell
-                            if (Player* player = warden->SelectNearestPlayer(200.0f))
-                                if (player->isAlive())
-                                    warden->Kill(player);
-
                             warden->DespawnOrUnsummon(2000);
                         }
 
@@ -1922,14 +1892,8 @@ class npc_terenas_menethil : public CreatureScript
                         case EVENT_DESTROY_SOUL:
                             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             if (Creature* warden = me->FindNearestCreature(NPC_SPIRIT_WARDEN, 20.0f))
-                            {
                                 warden->CastSpell((Unit*)NULL, SPELL_DESTROY_SOUL, TRIGGERED_NONE);
 
-                                // In case player is immune to spell
-                                if (Player* player = warden->SelectNearestPlayer(200.0f))
-                                    if (player->isAlive())
-                                        warden->Kill(player);
-                            }
                             DoCast(SPELL_TERENAS_LOSES_INSIDE);
                             _events.ScheduleEvent(EVENT_TELEPORT_BACK, 1000);
                             break;
@@ -2145,25 +2109,64 @@ class npc_vile_spirit : public CreatureScript
 
             void Reset()
             {
-                // Ugly hack, IsHeroic of ScriptedAI does not work in CanAIAttack, probably related to missing const attribute for IsHeroic
-                // That change should be pull requested to TC some day
-                isHeroic = IsHeroic();
+                _attackStarted = false;
+                _events.Reset();
             }
 
             bool CanAIAttack(Unit const* target) const
             {
                 // Must only select non falling players, who are not in frostmourne zone in non heroic, or who are in frostmourne zone in heroic
-                return target->GetTypeId() == TYPEID_PLAYER && target->GetPositionZ() > 830.0f && ((!isHeroic && !target->HasAura(SPELL_IN_FROSTMOURNE_ROOM)) || (isHeroic && target->HasAura(SPELL_IN_FROSTMOURNE_ROOM)));
+                return target->GetTypeId() == TYPEID_PLAYER && target->GetPositionZ() > 830.0f && ((!IsHeroic() && !target->HasAura(SPELL_IN_FROSTMOURNE_ROOM)) || (IsHeroic() && target->HasAura(SPELL_IN_FROSTMOURNE_ROOM)));
             }
 
-            void UpdateAI(uint32 const /*diff*/)
+            void DoAction(int32 const action)
             {
-                UpdateVictim();
+                switch (action)
+                {
+                    case ACTION_START_ATTACK_1:
+                        if (!_attackStarted)
+                            _events.RescheduleEvent(EVENT_VILE_SPIRIT_START_ATTACK, 15000);
+                        break;
+                    case ACTION_START_ATTACK_2:
+                        if (!_attackStarted)
+                            _events.RescheduleEvent(EVENT_VILE_SPIRIT_START_ATTACK, 1000);
+                        break;
+                }
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (_attackStarted)
+                    UpdateVictim();
+
+                _events.Update(diff);
+
+                while (uint32 eventId = _events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_VILE_SPIRIT_START_ATTACK:
+                            _attackStarted = true;
+
+                            // We need this for threat management later
+                            if (TempSummon* summon = me->ToTempSummon())
+                                if (Unit* summoner = summon->GetSummoner())
+                                    if (Creature* summonerCreature = summoner->ToCreature())
+                                        if (summonerCreature->isInCombat() && summonerCreature->AI())
+                                            summonerCreature->AI()->DoZoneInCombat(me);
+
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            me->CastSpell(me, SPELL_VILE_SPIRIT_MOVE_SEARCH, true);
+                            break;
+                    }
+                }
+
                 // no melee attacks
             }
 
         private:
-            bool isHeroic;
+            bool _attackStarted;
+            EventMap _events;
         };
 
         CreatureAI* GetAI(Creature* creature) const
