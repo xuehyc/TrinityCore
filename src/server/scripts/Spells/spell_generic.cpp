@@ -2692,6 +2692,67 @@ public:
     }
 };
 
+
+enum
+{
+    SPELL_SUMMON_SPIRIT_REXXARS_WHISTLE = 38173,
+    NPC_SPIRITWING = 22460,
+    NPC_BLOODMAUL_CHATTER_CREDIT_BUNNY = 22383,
+    NPC_BLOODMAUL_TASK_MASTER = 22160, 
+    NPC_BLOODMAUL_SOOTHSAYER = 22384
+};
+
+class spell_gen_summon_spirit_rexxars_whistle : public SpellScriptLoader
+{
+public:
+    spell_gen_summon_spirit_rexxars_whistle(): SpellScriptLoader("spell_gen_summon_spirit_rexxars_whistle") {}
+
+    class spell_gen_summon_spirit_rexxars_whistle_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_summon_spirit_rexxars_whistle_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellEntry*/)
+        {
+            if(sSpellMgr->GetSpellInfo(SPELL_SUMMON_SPIRIT_REXXARS_WHISTLE))
+                return true;
+            return false;
+        }
+
+        void HandleDummy_EffOne(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                Position p = { 0 };
+                caster->GetPosition(&p);
+                caster->SummonCreature(NPC_SPIRITWING, p, TEMPSUMMON_TIMED_DESPAWN, 60000); 
+            }
+        }
+
+        void HandleDummy_EffTwo(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Player* p = caster->ToPlayer())
+                {
+                    if (p->FindNearestCreature(NPC_BLOODMAUL_SOOTHSAYER, 50.0f) && p->FindNearestCreature(NPC_BLOODMAUL_TASK_MASTER, 50.0f))
+                        p->KilledMonsterCredit(NPC_BLOODMAUL_CHATTER_CREDIT_BUNNY, 0);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectLaunch += SpellEffectFn(spell_gen_summon_spirit_rexxars_whistle_SpellScript::HandleDummy_EffOne, EFFECT_0, SPELL_EFFECT_DUMMY);
+            OnEffectLaunch += SpellEffectFn(spell_gen_summon_spirit_rexxars_whistle_SpellScript::HandleDummy_EffTwo, EFFECT_1, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gen_summon_spirit_rexxars_whistle_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -2744,4 +2805,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_scarlet_raven_priest_image();
     new spell_gen_place_maghar_battle_standard();
     new spell_gen_leviroth_self_impale();
+    new spell_gen_summon_spirit_rexxars_whistle();
 }
