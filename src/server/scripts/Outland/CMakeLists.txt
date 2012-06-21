@@ -44,6 +44,7 @@ set(scripts_STAT_SRCS
   Outland/CoilfangReservoir/SerpentShrine/boss_morogrim_tidewalker.cpp
   Outland/CoilfangReservoir/underbog/boss_hungarfen.cpp
   Outland/CoilfangReservoir/underbog/boss_the_black_stalker.cpp
+  Outland/CoilfangReservoir/SlavePens/boss_ahune.cpp
   Outland/shattrath_city.cpp
   Outland/TempestKeep/Mechanar/boss_mechano_lord_capacitus.cpp
   Outland/TempestKeep/Mechanar/boss_pathaleon_the_calculator.cpp
