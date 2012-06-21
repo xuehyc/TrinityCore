@@ -2075,7 +2075,8 @@ class npc_broken_frostmourne : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                UpdateVictim();
+                // Do not update victim, not relevant and causes auras to be removed in EnterEvadeMode (visual)
+                // UpdateVictim();
 
                 _events.Update(diff);
 
