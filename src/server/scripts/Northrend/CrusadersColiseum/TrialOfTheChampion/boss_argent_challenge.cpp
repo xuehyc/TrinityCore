@@ -31,11 +31,15 @@ enum eSpells
     //Eadric
     SPELL_EADRIC_ACHIEVEMENT    = 68197,
     SPELL_HAMMER_JUSTICE        = 66863,
+    SPELL_HAMMER_JUSTICE_STUN   = 66940,
     SPELL_HAMMER_RIGHTEOUS      = 66867,
+    SPELL_HAMMER_OVERRIDE_BAR   = 66904, // overrides players cast bar
+    SPELL_HAMMER_THROWBACK_DMG  = 66905, // the hammer that is thrown back by the player
     SPELL_RADIANCE              = 66935,
     SPELL_VENGEANCE             = 66865,
 
     //Paletress
+    SPELL_CONFESSOR_ACHIEVEMENT = 68206,
     SPELL_SMITE                 = 66536,
     SPELL_SMITE_H               = 67674,
     SPELL_HOLY_FIRE             = 66538,
@@ -107,6 +111,36 @@ class spell_eadric_radiance : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_eadric_radiance_SpellScript();
+        }
+};
+
+class spell_eadric_hoj : public SpellScriptLoader
+{
+    public:
+        spell_eadric_hoj() : SpellScriptLoader("spell_eadric_hoj") { }
+        class spell_eadric_hoj_SpellScript: public SpellScript
+        {
+            PrepareSpellScript(spell_eadric_hoj_SpellScript);
+            void HandleOnHit()
+            {
+                if (GetHitUnit() && GetHitUnit()->GetTypeId() == TYPEID_PLAYER)
+                    if (!GetHitUnit()->HasAura(SPELL_HAMMER_JUSTICE_STUN)) // FIXME: Has Catched Hammer...
+                    {
+                        SetHitDamage(0);
+                        GetHitUnit()->AddAura(SPELL_HAMMER_OVERRIDE_BAR, GetHitUnit());
+                    }
+
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_eadric_hoj_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_eadric_hoj_SpellScript();
         }
 };
 
@@ -184,6 +218,14 @@ public:
                     instance->SetData(BOSS_ARGENT_CHALLENGE_E, DONE);
                 }
             }
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            if (IsHeroic() && !bDone)
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                    if (spell->Id == SPELL_HAMMER_THROWBACK_DMG && me->GetHealth() <= spell->Effects[0].BasePoints)
+                        DoCast(caster, SPELL_EADRIC_ACHIEVEMENT);
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -479,8 +521,11 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* killer)
         {
+            // TODO:
+        	// DoCast(killer, SPELL_CONFESSOR_ACHIEVEMENT);
+
             if (me->isSummon())
                 if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                     if (summoner->isAlive())
@@ -799,6 +844,7 @@ void AddSC_boss_argent_challenge()
 {
     new boss_eadric();
     new spell_eadric_radiance();
+    new spell_eadric_hoj();
     new boss_paletress();
     new npc_memory();
     new npc_argent_soldier();
