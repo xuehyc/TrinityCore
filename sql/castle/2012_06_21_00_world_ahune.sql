@@ -45,7 +45,7 @@ UPDATE `creature_template` SET
 -- spawn ice stone
 DELETE FROM `gameobject` WHERE `id` = 187882 AND `map` = 547;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
-(440701, 187882, 547, 15, 1, -62.151, -160.632, -1.80114, 3.40964, 0, 0, 0.703812, 0.710386, 300, 0, 1);
+(440701, 187882, 547, 3, 1, -62.151, -160.632, -1.80114, 3.40964, 0, 0, 0.703812, 0.710386, 300, 0, 1);
 DELETE FROM `game_event_gameobject` WHERE `guid` IN (440701,440795,440768,440770,440772,440774,440776,440778,440794);
 INSERT INTO `game_event_gameobject` (`guid`, `evententry`) VALUES
 (440701,1);
