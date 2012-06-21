@@ -264,6 +264,9 @@ enum Events
 
     // Vile Spirits
     EVENT_VILE_SPIRIT_START_ATTACK  = 65,
+
+    // Hack - Remove instance buff
+    EVENT_REMOVE_INSTANCE_BUFF      = 66,
 };
 
 enum EventGroups
@@ -558,6 +561,9 @@ class boss_the_lich_king : public CreatureScript
                 events.ScheduleEvent(EVENT_INFEST, 5000, 0, PHASE_ONE);
                 events.ScheduleEvent(EVENT_NECROTIC_PLAGUE, urand(30000, 33000), 0, PHASE_ONE);
                 events.ScheduleEvent(EVENT_BERSERK, 900000, EVENT_GROUP_BERSERK);
+                events.ScheduleEvent(EVENT_REMOVE_INSTANCE_BUFF, 10000);
+                instance->DoRemoveAurasDueToSpellOnPlayers(73818); // Horde
+                instance->DoRemoveAurasDueToSpellOnPlayers(73824); // Alliance
                 if (IsHeroic())
                     events.ScheduleEvent(EVENT_SHADOW_TRAP, 15500, 0, PHASE_ONE);
             }
@@ -1064,6 +1070,11 @@ class boss_the_lich_king : public CreatureScript
                                         TeleportSpirit(summon);
                                 }
                             }
+                            break;
+                        case EVENT_REMOVE_INSTANCE_BUFF:
+                            instance->DoRemoveAurasDueToSpellOnPlayers(73818); // Horde
+                            instance->DoRemoveAurasDueToSpellOnPlayers(73824); // Alliance
+                            events.ScheduleEvent(EVENT_REMOVE_INSTANCE_BUFF, 10000);
                             break;
                         case EVENT_OUTRO_TALK_1:
                             Talk(SAY_LK_OUTRO_1);
