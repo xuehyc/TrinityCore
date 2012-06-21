@@ -4040,9 +4040,8 @@ UPDATE `creature_template` SET `equipment_id`=2501 WHERE `entry`=25863;
 UPDATE `smart_scripts` SET `event_param3` = 12000, `event_param4` = 15000 WHERE `entryorguid` = 26204 AND `id` = 1;
 UPDATE `conditions` SET `ConditionValue1` = 1, `ConditionTypeOrReference` = 18, `SourceGroup` = 0 WHERE `SourceEntry` IN (47104, 45437, 29705) AND `SourceTypeOrReferenceId` = 13;
 -- Loot for item 54536 Satchel of Chilled Goods / Beutel mit gekuehlten Waren
-DELETE FROM `gameobject_loot_template` WHERE `entry` = 28682 AND `item` IN (49426, 54806, 53641);
+DELETE FROM `gameobject_loot_template` WHERE `entry` = 28682 AND `item` IN (54806, 53641);
 INSERT INTO `gameobject_loot_template` (entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount) VALUES
-(28682, 49426, 100, 1, 0, 1, 1),
 (28682, 54806, 20, 1, 0, 1, 1),
 (28682, 53641, 20, 1, 0, 1, 1);
 -- Fix achievement 272 Torch Juggler / Fackeljongleur only in Dalaran
