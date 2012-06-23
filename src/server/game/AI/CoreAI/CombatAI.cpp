@@ -195,7 +195,7 @@ ArcherAI::ArcherAI(Creature* c) : CreatureAI(c)
 
 void ArcherAI::AttackStart(Unit* who)
 {
-    if (!who)
+    if (!who || who->GetTypeId() == TYPEID_PLAYER) // also ignore players, because they shoot through phases
         return;
 
     if (me->IsWithinCombatRange(who, m_minRange))
@@ -250,7 +250,7 @@ bool TurretAI::CanAIAttack(const Unit* /*who*/) const
 
 void TurretAI::AttackStart(Unit* who)
 {
-    if (who)
+    if (who && who->GetTypeId() != TYPEID_PLAYER) // ignore players, because they shoot through phases
         me->Attack(who, false);
 }
 
