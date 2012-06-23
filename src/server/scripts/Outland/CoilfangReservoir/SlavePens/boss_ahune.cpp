@@ -378,14 +378,22 @@ class npc_frozen_core : public CreatureScript
                 {
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                     {
-                        if (summoner->GetHealth() > damage)
-                            summoner->SetHealth(summoner->GetHealth() - damage);
+                        if (me->GetHealth() > damage)
+                            summoner->SetHealth((summoner->GetMaxHealth() / 100) * me->GetHealthPct());
                         else
                             who->Kill(summoner);
                     }
                 }
                 if (!me->HasAura(SPELL_GHOST_VISUAL))
                     DoCast(me, SPELL_GHOST_VISUAL);
+            }
+
+            void JustDied(Unit* killer)
+            {
+                if (me->ToTempSummon())
+                    if (Unit* summoner = me->ToTempSummon()->GetSummoner())
+                        if (summoner->isAlive())
+                            killer->Kill(summoner);
             }
 
             void UpdateAI(const uint32 diff)
