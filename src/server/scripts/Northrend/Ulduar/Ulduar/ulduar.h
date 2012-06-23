@@ -45,10 +45,10 @@ enum UlduarBosses
     BOSS_VEZAX               = 17,
     BOSS_YOGGSARON           = 18,
     BOSS_ALGALON             = 19,
-    TYPE_SARA,
-    TYPE_BRAIN_DOOR_1,
-    TYPE_BRAIN_DOOR_2,
-    TYPE_BRAIN_DOOR_3,
+    DATA_SARA,
+    DATA_BRAIN_DOOR_1,
+    DATA_BRAIN_DOOR_2,
+    DATA_BRAIN_DOOR_3,
     DATA_KEEPER_SUPPORT_YOGG,
 
     // Assembly of Iorn
@@ -66,9 +66,9 @@ enum UlduarBosses
     DATA_TOY_PILE_3,
 
     // Freya Elders
-    TYPE_ELDER_BRIGHTLEAF,
-    TYPE_ELDER_IRONBRANCH,
-    TYPE_ELDER_STONEBARK,
+    DATA_ELDER_BRIGHTLEAF,
+    DATA_ELDER_IRONBRANCH,
+    DATA_ELDER_STONEBARK,
 
     // Thorim
     DATA_RUNIC_COLOSSUS,
