@@ -125,10 +125,10 @@ enum Phases
 
 Position const SummonPositions[4] =
 {
-        {-88.495071, -254.462997, -1.077302, 1.84}, // Ahune / Frozen-Core
-        {-90.891891, -243.488068, -1.116222}, // Hailstone
-        {-97.389175, -239.780701, -1.264044}, // Coldweave #1
-        {-85.160637, -236.127808, -1.572418}, // Coldweave #2
+        {-88.495071f, -254.462997f, -1.077302f, 1.84f}, // Ahune / Frozen-Core
+        {-90.891891f, -243.488068f, -1.116222f}, // Hailstone
+        {-97.389175f, -239.780701f, -1.264044f}, // Coldweave #1
+        {-85.160637f, -236.127808f, -1.572418f}, // Coldweave #2
 };
 
 class boss_ahune : public CreatureScript

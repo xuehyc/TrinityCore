@@ -330,10 +330,10 @@ class instance_ulduar : public InstanceMapScript
                     case GO_MOLE_MACHINE:
                         if (GetBossState(BOSS_RAZORSCALE) == IN_PROGRESS)
                             gameObject->SetGoState(GO_STATE_ACTIVE);
-                    case GO_HODIR_DOOR:
+                    case GO_HODIR_OUT_DOOR_STONE:
                         HodirDoorGUID = gameObject->GetGUID();
                         break;
-                    case GO_HODIR_ICE_DOOR:
+                    case GO_HODIR_OUT_DOOR_ICE:
                         HodirIceDoorGUID = gameObject->GetGUID();
                         break;
                     case GO_ARCHIVUM_DOOR:
@@ -376,7 +376,7 @@ class instance_ulduar : public InstanceMapScript
                     case NPC_GUARDIAN_OF_LIFE:
                         if (!conSpeedAtory)
                         {
-                            DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, CRITERIA_CON_SPEED_ATORY);
+                            DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_CRITERIA_CON_SPEED_ATORY);
                             conSpeedAtory = true;
                         }
                         break;
