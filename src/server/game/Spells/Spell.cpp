@@ -6867,10 +6867,9 @@ SpellCastResult Spell::CanOpenLock(uint32 effIndex, uint32 lockId, SkillType& sk
                         0 : m_caster->ToPlayer()->GetSkillValue(skillId);
 
                     // skill bonus provided by casting spell (mostly item spells)
-                    // add the damage modifier from the spell casted (cheat lock / skeleton key etc.)
-                    if (skillId != SKILL_LOCKPICKING)
-                        if (m_spellInfo->Effects[effIndex].TargetA.GetTarget() == TARGET_GAMEOBJECT_ITEM_TARGET || m_spellInfo->Effects[effIndex].TargetB.GetTarget() == TARGET_GAMEOBJECT_ITEM_TARGET)
-                            skillValue += uint32(CalculateDamage(effIndex, NULL));
+                    // add the effect base points modifier from the spell casted (cheat lock / skeleton key etc.)
+                    if (m_spellInfo->Effects[effIndex].TargetA.GetTarget() == TARGET_GAMEOBJECT_ITEM_TARGET || m_spellInfo->Effects[effIndex].TargetB.GetTarget() == TARGET_GAMEOBJECT_ITEM_TARGET)
+                        skillValue += m_spellInfo->Effects[effIndex].CalcValue();
 
                     if (skillValue < reqSkillValue)
                         return SPELL_FAILED_LOW_CASTLEVEL;
