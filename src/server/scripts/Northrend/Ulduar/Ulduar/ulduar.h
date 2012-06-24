@@ -51,6 +51,15 @@ enum UlduarBosses
     DATA_BRAIN_DOOR_3,
     DATA_KEEPER_SUPPORT_YOGG,
 
+    // Razorscale
+    DATA_EXPEDITION_COMMANDER,
+
+    // Hodir
+    DATA_HODIR_RARE_CACHE,
+
+    // Collosus (Leviathan)
+    DATA_COLOSSUS,               
+
     // Assembly of Iorn
     DATA_STEELBREAKER,
     DATA_MOLGEIM,
@@ -78,13 +87,13 @@ enum UlduarBosses
     DATA_HODIR_RARE_CHEST,
 
     DATA_CALL_TRAM,
-    //Mimiron
+    // Mimiron
     DATA_LEVIATHAN_MK_II,
     DATA_VX_001,
     DATA_AERIAL_UNIT,
     DATA_MIMIRON_ELEVATOR,
 
-    //Pre YoggSaron
+    // Pre YoggSaron
     DATA_ADD_HELP_FLAG,
 
     // YoggSaron himself - phase during fight
@@ -93,22 +102,24 @@ enum UlduarBosses
 
 enum UlduarBossDeadFlags
 {
-    DEAD_FLAME_LEVIATHAN  = 0x0001,
-    DEAD_IGNIS            = 0x0002,
-    DEAD_RAZORSCALE       = 0x0004,
-    DEAD_XT002            = 0x0008,
-    DEAD_ASSEMBLY         = 0x0010,
-    DEAD_KOLOGARN         = 0x0020,
-    DEAD_AURIAYA          = 0x0040,
-    DEAD_HODIR            = 0x0080,
-    DEAD_THORIM           = 0x0100,
-    DEAD_FREYA            = 0x0200,
-    DEAD_MIMIRON          = 0x0400,
-    DEAD_VEZAX            = 0x0800,
-    DEAD_YOGGSARON        = 0x1000
+    DEAD_NONE             =        0,   // Death is registered, but irrelevant
+    DEAD_FLAME_LEVIATHAN  = (1 << 0),
+    DEAD_IGNIS            = (1 << 1),
+    DEAD_RAZORSCALE       = (1 << 2),
+    DEAD_XT002            = (1 << 3),
+    DEAD_ASSEMBLY         = (1 << 4),
+    DEAD_KOLOGARN         = (1 << 5),
+    DEAD_AURIAYA          = (1 << 6),
+    DEAD_HODIR            = (1 << 7),
+    DEAD_THORIM           = (1 << 8),
+    DEAD_FREYA            = (1 << 9),
+    DEAD_MIMIRON          = (1 << 10),
+    DEAD_VEZAX            = (1 << 11),
+    DEAD_YOGGSARON        = (1 << 12),
+    DEAD_ALGALON          = (1 << 13)
 };
 
-enum UlduarNPCs
+enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-NPCs
 {
     NPC_LEVIATHAN               = 33113,
     NPC_SALVAGED_DEMOLISHER     = 33109,
@@ -339,22 +350,10 @@ enum UlduarAchievements
 // Used for Yogg-Saron fight
 enum UlduarKeeperSupport
 {
-    THORIM_SUPPORT                      = 0x01,
-    HODIR_SUPPORT                       = 0x02,
-    FREYA_SUPPORT                       = 0x04,
-    MIMIRON_SUPPORT                     = 0x08
-};
-
-enum UlduarData
-{
-    // Collosus (Leviathan)
-    DATA_COLOSSUS                = 20,
-
-    // Razorscale
-    DATA_EXPEDITION_COMMANDER,
-
-    // Hodir
-    DATA_HODIR_RARE_CACHE,
+    THORIM_SUPPORT                      = (1 << 0),
+    HODIR_SUPPORT                       = (1 << 1),
+    FREYA_SUPPORT                       = (1 << 2),
+    MIMIRON_SUPPORT                     = (1 << 3)
 };
 
 enum UlduarAchievementData
@@ -371,7 +370,8 @@ enum UlduarWorldstates
 
 enum UlduarArea
 {
-    AREA_FORMATION_GROUNDS = 4652
+    MAP_ULDUAR              = 603,
+    AREA_FORMATION_GROUNDS  = 4652
 };
 
 // Cute guard, really...

@@ -35,7 +35,6 @@ The teleporter appears to be active and stable.
 
 enum UlduarTeleporter
 {
-    MAP_ULDUAR   = 603,
     // Definitions for actions & gossips
     BASE_CAMP    = GOSSIP_ACTION_INFO_DEF + 0,
     GROUNDS      = GOSSIP_ACTION_INFO_DEF + 1,
@@ -86,7 +85,7 @@ class ulduar_teleporter : public GameObjectScript
                 player->Dismount();
                 player->RemoveAurasByType(SPELL_AURA_MOUNTED);
             }            
-            player->TeleportTo(603, TeleportPointsUlduar[action][0], TeleportPointsUlduar[action][1], TeleportPointsUlduar[action][2], 0.0f);
+            player->TeleportTo(MAP_ULDUAR, TeleportPointsUlduar[action][0], TeleportPointsUlduar[action][1], TeleportPointsUlduar[action][2], 0.0f);
             return true;
         }
 
