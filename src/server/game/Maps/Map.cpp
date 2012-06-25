@@ -1238,7 +1238,7 @@ bool GridMap::loadLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
     return true;
 }
 
-uint16 GridMap::getArea(float x, float y)
+uint16 GridMap::getArea(float x, float y) const
 {
     if (!_areaMap)
         return _gridArea;
@@ -1471,7 +1471,7 @@ float GridMap::getHeightFromUint16(float x, float y) const
     return (float)((a * x) + (b * y) + c)*_gridIntHeightMultiplier + _gridHeight;
 }
 
-float GridMap::getLiquidLevel(float x, float y)
+float GridMap::getLiquidLevel(float x, float y) const
 {
     if (!_liquidMap)
         return _liquidLevel;
@@ -1491,7 +1491,7 @@ float GridMap::getLiquidLevel(float x, float y)
 }
 
 // Why does this return LIQUID data?
-uint8 GridMap::getTerrainType(float x, float y)
+uint8 GridMap::getTerrainType(float x, float y) const
 {
     if (!_liquidFlags)
         return 0;
