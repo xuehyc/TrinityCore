@@ -62,6 +62,7 @@ class instance_ulduar : public InstanceMapScript
         {
             instance_ulduar_InstanceMapScript(InstanceMap* map) : InstanceScript(map) { }
 
+        private:
             uint32 Encounter[MAX_ENCOUNTER];
             std::string m_strInstData;
 
@@ -178,8 +179,8 @@ class instance_ulduar : public InstanceMapScript
             uint32 CountdownTimer;
             uint8 elderCount;
             bool conSpeedAtory;
-            bool Unbroken;
 
+        public:
             void Initialize()
             {
                 // Pretty please: Use type-safe fill instead of raw memset !   
@@ -290,7 +291,6 @@ class instance_ulduar : public InstanceMapScript
                 CountdownTimer      = 1*MINUTE*IN_MILLISECONDS;
                 elderCount          = 0;
                 conSpeedAtory       = false;
-                Unbroken            = true;
             }
 
             bool IsEncounterInProgress() const
@@ -1093,7 +1093,8 @@ class instance_ulduar : public InstanceMapScript
                         }
                         break;
                     case DATA_UNBROKEN:
-                        Unbroken = bool(data);
+                        if (Creature* Leviathan = instance->GetCreature(LeviathanGUID))
+                            Leviathan->AI()->SetData(type, data);
                         break;
                     default:
                         break;
@@ -1172,7 +1173,8 @@ class instance_ulduar : public InstanceMapScript
                     case DATA_HODIR_RARE_CACHE:
                         return HodirRareCacheData;
                     case DATA_UNBROKEN:
-                        return uint32(Unbroken);
+                        if (Creature* Leviathan = instance->GetCreature(LeviathanGUID))
+                            return Leviathan->AI()->GetData(type);
                     default:
                         break;
                 }
