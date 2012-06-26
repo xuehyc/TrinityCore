@@ -90,8 +90,9 @@ enum Creatures
 
 enum AchievementData
 {
-    DATA_SHATTERED                  = 29252926,
-    ACHIEVEMENT_IGNIS_START_EVENT   = 20951,
+    DATA_SHATTERED                      = 29252926,
+    ACHIEVEMENT_IGNIS_START_EVENT       = 20951,
+    ACHIEVEMENT_SHATTERED_TIME_LIMIT    = 5*IN_MILLISECONDS
 };
 
 #define CONSTRUCT_SPAWN_POINTS 20
@@ -125,6 +126,59 @@ Position const ConstructSpawnPosition[CONSTRUCT_SPAWN_POINTS] =
     - Shatter Achievement (2925/2926)
     - Check if Grab Pot works
 */
+
+class AchievShatterHelper
+{
+    public:
+        explicit AchievShatterHelper(const uint64 timeLimit) : gotInformed(false), achievFulfilled(false), timer(0), limit(timeLimit) {}
+
+        // Called when an Iron Construct got Shattered
+        void Inform()
+        {
+            if (achievFulfilled)
+                return; // Nothing to be done
+
+            if (gotInformed)                // Check if timer is ok
+                if (timer <= limit)
+                    achievFulfilled = true;
+            else                            // First information, start tracking
+            {
+                gotInformed = true;
+                timer = 0;
+            }
+        }
+
+        void Reset()
+        {
+            gotInformed = achievFulfilled = false;
+            timer = 0;
+        }
+
+        // Updated by boss script
+        void Update(const uint32 diff)
+        {
+            if (achievFulfilled || !gotInformed)    // Nothing to be done if achievement got already fulfilled, or tracking was not started yet.
+                return;
+
+            timer += diff;
+            if (timer > limit)  // Check timeout
+            {
+                gotInformed = false;
+                timer = 0;
+            }
+        }
+
+        bool GotAchievFulfilled() const
+        {
+            return achievFulfilled;
+        }
+    private:        
+        bool gotInformed;       // Starts time-tracking
+        bool achievFulfilled;   // Set if achievement was completed successfully
+        const uint64 limit;     // Time-limit, set on construction
+        uint64 timer;           // Current timer
+};
+
 class boss_ignis : public CreatureScript
 {
     public:
@@ -132,7 +186,7 @@ class boss_ignis : public CreatureScript
 
         struct boss_ignis_AI : public BossAI
         {
-            boss_ignis_AI(Creature* creature) : BossAI(creature, BOSS_IGNIS), vehicle(me->GetVehicleKit())
+            boss_ignis_AI(Creature* creature) : BossAI(creature, BOSS_IGNIS), vehicle(me->GetVehicleKit()), shatteredHelper(ACHIEVEMENT_SHATTERED_TIME_LIMIT)
             {
                 ASSERT(vehicle);
             }
@@ -144,6 +198,7 @@ class boss_ignis : public CreatureScript
                     vehicle->RemoveAllPassengers();
 
                 summons.DespawnAll();
+                shatteredHelper.Reset();
 
                 for (uint8 i = 0; i < CONSTRUCT_SPAWN_POINTS; i++)
                 {
@@ -165,8 +220,6 @@ class boss_ignis : public CreatureScript
                 events.ScheduleEvent(EVENT_END_POT, 40000);
                 events.ScheduleEvent(EVENT_BERSERK, 480000);
                 slagPotGUID = 0;
-                shattered = false;
-                constructTimer = 0;
                 instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_IGNIS_START_EVENT);
             }
 
@@ -174,6 +227,10 @@ class boss_ignis : public CreatureScript
             {
                 _JustDied();
                 DoScriptText(SAY_DEATH, me);
+                if (shatteredHelper.GotAchievFulfilled())
+                {
+                    instance->DoCompleteAchievement(RAID_MODE(2925,2926));
+                }
             }
 
             void SummonedCreatureDespawn(Creature* summon)      // Gets called then an Iron Construct despawns through its own script
@@ -191,7 +248,7 @@ class boss_ignis : public CreatureScript
             uint32 GetData(uint32 type)
             {
                 if (type == DATA_SHATTERED)
-                    return shattered ? 1 : 0;
+                    return shatteredHelper.GotAchievFulfilled() ? 1 : 0;
 
                 return 0;
             }
@@ -208,13 +265,8 @@ class boss_ignis : public CreatureScript
                 {
                     case ACTION_REMOVE_BUFF: // Action is called every time a construct is shattered.
                         me->RemoveAuraFromStack(SPELL_STRENGTH);
-                        // Shattered Achievement - not really working yet.
-                        // But this way is easier than getting real time :o
-                        if (constructTimer >= 5000)
-                            constructTimer = 0;
-                        else
-                            shattered = true;
-                        break;
+                        // Shattered Achievement - testing stage
+                        shatteredHelper.Inform();
                 }
             }
 
@@ -223,7 +275,7 @@ class boss_ignis : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-                constructTimer += diff;
+                shatteredHelper.Update(diff);
                 events.Update(diff);
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -316,10 +368,9 @@ class boss_ignis : public CreatureScript
             }
 
         private:
+            AchievShatterHelper shatteredHelper;
             uint64 slagPotGUID;
             Vehicle* vehicle;
-            uint64 constructTimer;
-            bool shattered;
         };
 
         CreatureAI* GetAI(Creature* creature) const
