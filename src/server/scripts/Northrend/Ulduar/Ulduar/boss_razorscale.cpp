@@ -762,7 +762,7 @@ class npc_expedition_commander : public CreatureScript
 
 class npc_mole_machine_trigger : public CreatureScript
 {
-    enum { EVENT_SUMMON_GOB, EVENT_SUMMON_NPC, EVENT_DISSAPPEAR };
+    enum { EVENT_SUMMON_GOB = 1, EVENT_SUMMON_NPC, EVENT_DISSAPPEAR };
 
     public:
         npc_mole_machine_trigger() : CreatureScript("npc_mole_machine_trigger") {}
@@ -867,7 +867,7 @@ class npc_devouring_flame : public CreatureScript
 
 class npc_darkrune_watcher : public CreatureScript
 {
-    enum { EVENT_CHAIN_LIGHTNING, EVENT_LIGHTNING_BOLT };
+    enum { EVENT_CHAIN_LIGHTNING = 1, EVENT_LIGHTNING_BOLT };
 
     public:
         npc_darkrune_watcher() : CreatureScript("npc_darkrune_watcher") {}
@@ -974,7 +974,7 @@ class npc_darkrune_guardian : public CreatureScript
 
 class npc_darkrune_sentinel : public CreatureScript
 {
-    enum { EVENT_HEROIC_STRIKE, EVENT_WHIRLWIND, EVENT_BATTLE_SHOUT };
+    enum { EVENT_HEROIC_STRIKE = 1, EVENT_WHIRLWIND, EVENT_BATTLE_SHOUT };
     public:
         npc_darkrune_sentinel() : CreatureScript("npc_darkrune_sentinel") {}
 
