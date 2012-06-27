@@ -682,6 +682,9 @@ class PlayerScript : public ScriptObject
         // Called when a player's reputation changes (before it is actually changed)
         virtual void OnReputationChange(Player* /*player*/, uint32 /*factionId*/, int32& /*standing*/, bool /*incremental*/) { }
 
+        // Called when a player equips an item
+        virtual void OnEquipItem(Player* /*player*/, uint32 /*item*/) { }
+
         // Called when a duel is requested
         virtual void OnDuelRequest(Player* /*target*/, Player* /*challenger*/) { }
 
@@ -977,6 +980,7 @@ class ScriptMgr
         void OnPlayerMoneyChanged(Player* player, int32& amount);
         void OnGivePlayerXP(Player* player, uint32& amount, Unit* victim);
         void OnPlayerReputationChange(Player* player, uint32 factionID, int32& standing, bool incremental);
+        void OnPlayerEquipItem(Player* player, uint32 item);
         void OnPlayerDuelRequest(Player* target, Player* challenger);
         void OnPlayerDuelStart(Player* player1, Player* player2);
         void OnPlayerDuelEnd(Player* winner, Player* loser, DuelCompleteType type);

@@ -146,6 +146,11 @@ void LFGScripts::OnLevelChanged(Player* player, uint8 /*oldLevel*/)
     sLFGMgr->InitializeLockedDungeons(player);
 }
 
+void LFGScripts::OnEquipItem(Player* player, uint32 /*item*/)
+{
+    sLFGMgr->InitializeLockedDungeons(player);
+}
+
 void LFGScripts::OnLogout(Player* player)
 {
     sLFGMgr->Leave(player);

@@ -12320,6 +12320,8 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, pItem->GetEntry(), slot);
 
+    sScriptMgr->OnPlayerEquipItem(this, pItem->GetEntry());
+
     return pItem;
 }
 
@@ -12341,6 +12343,8 @@ void Player::QuickEquipItem(uint16 pos, Item* pItem)
 
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, pItem->GetEntry(), slot);
+
+        sScriptMgr->OnPlayerEquipItem(this, pItem->GetEntry());
     }
 }
 

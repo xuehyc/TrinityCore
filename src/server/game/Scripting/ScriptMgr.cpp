@@ -1215,6 +1215,11 @@ void ScriptMgr::OnPlayerReputationChange(Player* player, uint32 factionID, int32
     FOREACH_SCRIPT(PlayerScript)->OnReputationChange(player, factionID, standing, incremental);
 }
 
+void ScriptMgr::OnPlayerEquipItem(Player* player, uint32 item)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnEquipItem(player, item);
+}
+
 void ScriptMgr::OnPlayerDuelRequest(Player* target, Player* challenger)
 {
     FOREACH_SCRIPT(PlayerScript)->OnDuelRequest(target, challenger);
