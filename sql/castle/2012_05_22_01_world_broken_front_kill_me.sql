@@ -21,6 +21,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (31273, 0, 0, 0, 62, 0, 100, 0, 31273, 0, 0, 0, 33, 31272, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Dying berserker - bunny credit on gossip');
 
 -- Conditions.
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 15 AND `SourceGroup` IN (10040, 31273);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
 (15, 10040, 0, 0, 0, 9, 0, 13231, 0, 0, 0, 0, '', 'Dying soldier - gossip prohibition aside from being on the corresponding quest'),
 (15, 10040, 1, 0, 0, 9, 0, 13232, 0, 0, 0, 0, '', 'Dying soldier - gossip prohibition aside from being on the corresponding quest'),

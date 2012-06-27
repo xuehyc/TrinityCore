@@ -2,7 +2,8 @@
 UPDATE quest_template SET RequiredNpcOrGo1=26472 WHERE id=12414 LIMIT 1;
 
 -- close #119: insert missing creature start relationship for portaanus (quel'danas)
-INSERT INTO `creature_questrelation` (`id`, `quest`) VALUES ('25034', '11534');
+DELETE FROM `creature_questrelation` WHERE quest = 11534;
+INSERT INTO `creature_questrelation` (`id`, `quest`) VALUES (25034, 11534);
 
 -- close #505: grant credit in falcon vs hawk, cast back + despawn
 SET @npc := 24747; -- Fjord Falcon
