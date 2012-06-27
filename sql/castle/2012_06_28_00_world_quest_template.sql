@@ -1,0 +1,2 @@
+-- make wintergrasp quests raid-completable (type 41 [PVP] -> 62 [RAID])
+UPDATE quest_template SET type = 62 WHERE id IN (SELECT quest FROM creature_questrelation WHERE id IN (31052, 31102, 31109, 31107, 31153, 31151, 31108, 31106, 31054, 31053, 31036, 31091, 32626, 32615, 31051, 31101));
