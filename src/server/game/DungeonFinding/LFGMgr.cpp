@@ -439,6 +439,44 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
             locktype = LFG_LOCKSTATUS_TOO_LOW_LEVEL;
         else if (dungeon->maxlevel < level)
             locktype = LFG_LOCKSTATUS_TOO_HIGH_LEVEL;
+        else if (locktype == LFG_LOCKSTATUS_OK && dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC && dungeon->minlevel == 80) // enforce item level locking to northrend heroic dungeons
+        {
+            // TODO: this data should probably not be hardcoded but being delivered from the LFGDungeonEntry instead.
+            switch (dungeon->map)
+            {
+                case 668: // halls of reflection
+                    if (player->GetAverageItemLevel() < 219)
+                        locktype = LFG_LOCKSTATUS_TOO_LOW_GEAR_SCORE;
+                    break;
+                case 658: // pit of saron
+                case 650: // trial of the champion
+                case 632: // forge of souls
+                    if (player->GetAverageItemLevel() < 200)
+                        locktype = LFG_LOCKSTATUS_TOO_LOW_GEAR_SCORE;
+                    break;
+                case 619: // ahn kahet
+                case 608: // violet hold
+                case 604: // gundrak
+                case 602: // halls of lightning
+                case 601: // azjol-nerub
+                case 600: // drak'tharon keep
+                case 599: // halls of stone
+                case 595: // culling of stratholme
+                case 578: // oculus
+                case 576: // nexus
+                case 575: // utgarde pinnacle
+                case 574: // utgarde keep
+                    if (player->GetAverageItemLevel() < 180)
+                        locktype = LFG_LOCKSTATUS_TOO_LOW_GEAR_SCORE;
+                    break;
+            }
+
+            // this applies to meta dungeons (rnd hc, wrath of the lk hc checkbox, etc.)
+            // TODO: what dungeon->id is responsible for what? move to switch with commenting.
+            if (locktype == LFG_LOCKSTATUS_OK)
+                if (player->GetAverageItemLevel() < 180)
+                    locktype = LFG_LOCKSTATUS_TOO_LOW_GEAR_SCORE;
+        }
         else if (locktype == LFG_LOCKSTATUS_OK && ar)
         {
             if (ar->achievement && !player->GetAchievementMgr().HasAchieved(ar->achievement))
