@@ -12,11 +12,11 @@ UPDATE `creature_template` SET `ScriptName`='npc_freya_ward_of_life' WHERE `entr
 -- Part 1.1: Mimirons Inferno Bunny - it should walk around.
 DELETE FROM `waypoints` WHERE `entry`=33370;
 INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES 
-(33370, 0, 266.689, -33.391, 409.99, 'Mimirons Inferno - Waypoint of dummy'), 
-(33370, 1, 379.158, -33.318, 409.81, 'Mimirons Inferno - Waypoint of dummy 2'), 
-(33370, 2, 266.611, -133.387, 409.81, 'Mimirons Inferno - Waypoint of dummy 3'), 
-(33370, 3, 158.411, -33.311, 409.81, 'Mimirons Inferno - Waypoint of dummy 4'), 
-(33370, 4, 266.699, 66.632, 409.81, 'Mimirons Inferno - Waypoint of dummy 5');
+(33370, 1, 266.689, -33.391, 409.99, 'Mimirons Inferno - Waypoint of dummy'), 
+(33370, 2, 379.158, -33.318, 409.81, 'Mimirons Inferno - Waypoint of dummy 2'), 
+(33370, 3, 266.611, -133.387, 409.81, 'Mimirons Inferno - Waypoint of dummy 3'), 
+(33370, 4, 158.411, -33.311, 409.81, 'Mimirons Inferno - Waypoint of dummy 4'), 
+(33370, 5, 266.699, 66.632, 409.81, 'Mimirons Inferno - Waypoint of dummy 5');
 
 -- Part 2: Areatrigger. These are the triggers at the repair stations (194261,194262).
 DELETE FROM `areatrigger_scripts` WHERE `entry` IN (5369, 5423);
