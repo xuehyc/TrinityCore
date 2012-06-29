@@ -76,6 +76,8 @@ struct map_fileheader
     uint32 heightMapSize;
     uint32 liquidMapOffset;
     uint32 liquidMapSize;
+    uint32 holesOffset;
+    uint32 holesSize;
 };
 
 #define MAP_AREA_NO_AREA      0x0001
@@ -477,7 +479,7 @@ class Map : public GridRefManager<NGridType>
 
     private:
         void LoadMapAndVMap(int gx, int gy);
-        void LoadVMap(int gx, int gy);
+        bool LoadVMapAndMMap(int gx, int gy);
         void LoadMap(int gx, int gy, bool reload = false);
         GridMap* GetGrid(float x, float y);
 
