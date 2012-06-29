@@ -1,0 +1,2 @@
+-- Fix loot for creature 20596 Warbringer O'mrogg / Kriegshetzer O'mrogg in HEROIC instance / Instanz Hellfire Citadel / Höllenfeuerzitadelle (by Tollmer)
+UPDATE `creature_loot_template` SET `groupid` = 1 WHERE `entry` = 20596 AND `mincountOrRef` = -25020;
