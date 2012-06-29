@@ -430,16 +430,20 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
             locktype = LFG_LOCKSTATUS_INSUFFICIENT_EXPANSION;
         else if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, dungeon->map, player))
             locktype = LFG_LOCKSTATUS_RAID_LOCKED;
-        else if (dungeon->difficulty > DUNGEON_DIFFICULTY_NORMAL && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
-        {
-            if (!player->GetGroup() || !player->GetGroup()->isLFGGroup() || GetDungeon(player->GetGroup()->GetGUID(), true) != dungeon->ID || GetState(player->GetGroup()->GetGUID()) != LFG_STATE_DUNGEON)
-                locktype = LFG_LOCKSTATUS_RAID_LOCKED;
-        }
         else if (dungeon->minlevel > level)
             locktype = LFG_LOCKSTATUS_TOO_LOW_LEVEL;
         else if (dungeon->maxlevel < level)
             locktype = LFG_LOCKSTATUS_TOO_HIGH_LEVEL;
-        else if (locktype == LFG_LOCKSTATUS_OK && dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC && dungeon->minlevel == 80) // enforce item level locking to northrend heroic dungeons
+
+        // We cannot be sure, that dungeon will be locked if this here is true, so it cannot be in else if structure
+        if (locktype == LFG_LOCKSTATUS_OK && dungeon->difficulty > DUNGEON_DIFFICULTY_NORMAL && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
+        {
+            if (!player->GetGroup() || !player->GetGroup()->isLFGGroup() || GetDungeon(player->GetGroup()->GetGUID(), true) != dungeon->ID || GetState(player->GetGroup()->GetGUID()) != LFG_STATE_DUNGEON)
+                locktype = LFG_LOCKSTATUS_RAID_LOCKED;
+        }
+
+        // We cannot be sure, that dungeon will be locked if this here is true, so it cannot be in else if structure
+        if (locktype == LFG_LOCKSTATUS_OK && dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC && dungeon->minlevel == 80) // enforce item level locking to northrend heroic dungeons
         {
             // TODO: this data should probably not be hardcoded but being delivered from the LFGDungeonEntry instead.
             switch (dungeon->map)
@@ -477,7 +481,9 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
                 if (player->GetAverageItemLevel() < 180)
                     locktype = LFG_LOCKSTATUS_TOO_LOW_GEAR_SCORE;
         }
-        else if (locktype == LFG_LOCKSTATUS_OK && ar)
+
+        // We cannot be sure, that dungeon will be locked if this here is true, so it cannot be in else if structure
+        if (locktype == LFG_LOCKSTATUS_OK && ar)
         {
             if (ar->achievement && !player->GetAchievementMgr().HasAchieved(ar->achievement))
                 locktype = LFG_LOCKSTATUS_RAID_LOCKED;       // FIXME: Check the correct lock value
