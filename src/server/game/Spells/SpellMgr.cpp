@@ -3545,6 +3545,11 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->manaCost = 0;
                 spellInfo->manaPerSecond = 0;
                 break;
+/*Aethoz Change */
+            case 24259: // Spell Lock silence
+                spellInfo->speed = 80;
+                break;
+
             default:
                 break;
         }
