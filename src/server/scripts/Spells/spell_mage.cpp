@@ -39,6 +39,36 @@ enum MageSpells
     SPELL_MAGE_SUMMON_WATER_ELEMENTAL_PERMANENT  = 70908,
     SPELL_MAGE_SUMMON_WATER_ELEMENTAL_TEMPORARY  = 70907,
     SPELL_MAGE_GLYPH_OF_BLAST_WAVE               = 62126,
+    SPELL_MAGE_BLINK                         = 1953, /*CUSTOM!*/
+};
+
+class spell_mage_blink : public SpellScriptLoader
+{
+    public:
+        spell_mage_blink() : SpellScriptLoader("spell_mage_blink") { }
+
+        class spell_mage_blink_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_blink_SpellScript);
+
+            void HandleAfterHit()
+            {
+                if (Unit* unitTarget = GetHitUnit()){
+					unitTarget->RemoveAurasDueToSpell(SPELL_MAGE_BLINK);
+					unitTarget->RemoveAurasWithMechanic(IMMUNITY_MECHANIC);
+				}
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_mage_blink_SpellScript::HandleAfterHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_mage_blink_SpellScript;
+        }
 };
 
 class spell_mage_blast_wave : public SpellScriptLoader
@@ -390,4 +420,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_polymorph_cast_visual();
     new spell_mage_summon_water_elemental();
     new spell_mage_living_bomb();
+    new spell_mage_blink;
 }
