@@ -271,7 +271,7 @@ class boss_kologarn : public CreatureScript
             Unit* GetEyeBeamTarget()
             {
                 Map* map = me->GetMap();
-                if (map && map->IsDungeon() && me->getVictim()) // Safety for the checks below
+                if (map && map->IsDungeon())
                 {
                     std::list<Player*> playerList;
                     Map::PlayerList const& players = map->GetPlayers();
@@ -279,8 +279,12 @@ class boss_kologarn : public CreatureScript
                     {
                         if (Player* player = itr->getSource())
                         {                         
-                            if (player->isDead() || player->HasAura(SPELL_STONE_GRIP_DOT) || player->isGameMaster() || me->getVictim()->GetGUID() == player->GetGUID())
+                            if (player->isDead() || player->HasAura(SPELL_STONE_GRIP_DOT) || player->isGameMaster())
                                 continue;
+
+                            if (me->getVictim())
+                                if (me->getVictim()->GetGUID() == player->GetGUID())
+                                    continue;
 
                             float Distance = player->GetDistance(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
                             if (Distance < 20.0f || Distance > 60.0f)
