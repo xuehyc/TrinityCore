@@ -177,7 +177,7 @@ class boss_auriaya : public CreatureScript
                 {
                     if (!summoned->isInCombat() && me->getVictim())
                         summoned->AI()->AttackStart(me->getVictim());
-                    summoned->SetAuraStack(SPELL_FERAL_ESSENCE, summoned, 9);
+                    summoned->SetAuraStack(SPELL_FERAL_ESSENCE, summoned, defenderLives);
                     DoZoneInCombat(summoned);
                 }
             }
