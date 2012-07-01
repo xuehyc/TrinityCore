@@ -189,7 +189,7 @@ class boss_auriaya : public CreatureScript
                     case DATA_NINE_LIVES:
                         return nineLives ? 1 : 0;
                     case DATA_CRAZY_CAT_LADY:
-                        return crazyCatLady ? 1 : 0;
+                        return crazyCatLady ? 1 : 0;                    
                 }
                 return 0;
             }
@@ -235,15 +235,7 @@ class boss_auriaya : public CreatureScript
                 {
                     case ACTION_RESPAWN_DEFENDER:
                         if (defenderLives > 0)
-                            if (Creature* defender = me->SummonCreature(NPC_FERAL_DEFENDER, *me, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000)) // 30 secs equal the automated respawn time (due to script)
-                            {
-                                summons.Summon(defender);
-                                if (defenderLives)
-                                    defender->SetAuraStack(SPELL_FERAL_ESSENCE, defender, defenderLives);
-                                defender->SetInCombatWithZone();
-                                if (!defender->isInCombat())
-                                    defender->AI()->AttackStart(me->getVictim());
-                            }
+                            me->SummonCreature(NPC_FERAL_DEFENDER, *me, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000); // 30 secs equal the automated respawn time (due to script)                            
                         break;
                 }
             }
@@ -303,10 +295,10 @@ class boss_auriaya : public CreatureScript
                 DoMeleeAttackIfReady();
             }
 
-        private:
-            uint8 defenderLives;
-            bool crazyCatLady;
-            bool nineLives;
+            private:
+                uint8 defenderLives;
+                bool crazyCatLady;
+                bool nineLives;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -322,27 +314,24 @@ class npc_auriaya_seeping_trigger : public CreatureScript
 
         struct npc_auriaya_seeping_triggerAI : public ScriptedAI
         {
-            npc_auriaya_seeping_triggerAI(Creature* creature) : ScriptedAI(creature)
+            npc_auriaya_seeping_triggerAI(Creature* creature) : ScriptedAI(creature), instance(me->GetInstanceScript()) {}
+
+            void Reset()
             {
-                instance = me->GetInstanceScript();
+                me->SetDisplayId(MODEL_INVISIBLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE);
+                me->ForcedDespawn(600000);
+                DoCast(me, SPELL_SEEPING_FERAL_ESSENCE);
             }
 
-        void Reset()
-        {
-            me->SetDisplayId(MODEL_INVISIBLE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE);
-            me->ForcedDespawn(600000);
-            DoCast(me, SPELL_SEEPING_FERAL_ESSENCE);
-        }
+            void UpdateAI(uint32 const /*diff*/)
+            {
+                if (instance->GetBossState(BOSS_AURIAYA) != IN_PROGRESS)
+                    me->ForcedDespawn();
+            }
 
-        void UpdateAI(uint32 const /*diff*/)
-        {
-            if (instance->GetBossState(BOSS_AURIAYA) != IN_PROGRESS)
-                me->ForcedDespawn();
-        }
-
-        private:
-            InstanceScript* instance;
+            private:
+                InstanceScript* instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -360,10 +349,7 @@ class npc_sanctum_sentry : public CreatureScript
 
         struct npc_sanctum_sentryAI : public ScriptedAI
         {
-            npc_sanctum_sentryAI(Creature* creature) : ScriptedAI(creature)
-            {
-                instance = me->GetInstanceScript();
-            }
+            npc_sanctum_sentryAI(Creature* creature) : ScriptedAI(creature), instance(me->GetInstanceScript()) {}
 
             void Reset()
             {
@@ -419,9 +405,9 @@ class npc_sanctum_sentry : public CreatureScript
             }
 
             // Moved "JustDied" behavior to SummonedCreatureDies
-        private:
-            InstanceScript* instance;
-            EventMap events;
+            private:
+                InstanceScript* instance;
+                EventMap events;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -439,10 +425,7 @@ class npc_feral_defender : public CreatureScript
 
         struct npc_feral_defenderAI : public ScriptedAI
         {
-            npc_feral_defenderAI(Creature* creature) : ScriptedAI(creature)
-            {
-                instance = me->GetInstanceScript();
-            }
+            npc_feral_defenderAI(Creature* creature) : ScriptedAI(creature), instance(me->GetInstanceScript()) {}
 
             void Reset()
             {
@@ -507,9 +490,9 @@ class npc_feral_defender : public CreatureScript
                                 auriaya->AI()->DoAction(ACTION_RESPAWN_DEFENDER);
             }
 
-        private:
-            InstanceScript* instance;
-            EventMap events;
+            private:
+                InstanceScript* instance;
+                EventMap events;
         };
 
         CreatureAI* GetAI(Creature* creature) const
