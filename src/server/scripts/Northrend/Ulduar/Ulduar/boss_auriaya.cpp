@@ -112,7 +112,6 @@ class boss_auriaya : public CreatureScript
         EVENT_TERRIFYING_SCREECH,     
         EVENT_SUMMON_SWARMING_GUARDIAN, 
         EVENT_ACTIVATE_DEFENDER, 
-        EVENT_RESPAWN_DEFENDER,
         EVENT_BERSERK, 
     };
 
@@ -138,7 +137,7 @@ class boss_auriaya : public CreatureScript
 
                 // Guardians are despawned by _Reset, but since they walk around with Auriaya, summon them again.
                 for (uint8 i = 0; i < SENTRY_NUMBER; i++)
-                    if (Creature* sentry = me->SummonCreature(NPC_SANCTUM_SENTRY, *me, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+                    if (Creature* sentry = me->SummonCreature(NPC_SANCTUM_SENTRY, *me, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000)) // 30 secs equal the automated respawn time (due to script)
                     {
                         sentry->GetMotionMaster()->MoveFollow(me, (i < 2) ? 0.5f : 4.0f, M_PI - i - 1.5f);
                         summons.Summon(sentry);
@@ -220,8 +219,6 @@ class boss_auriaya : public CreatureScript
                             break;
                         }
                         me->SummonCreature(NPC_SEEPING_TRIGGER, *summon);
-                        if (defenderLives > 0)
-                            events.ScheduleEvent(EVENT_RESPAWN_DEFENDER, 30000);
                         break;
                     case NPC_SANCTUM_SENTRY:
                         SetData(DATA_CRAZY_CAT_LADY, 0);
@@ -230,6 +227,25 @@ class boss_auriaya : public CreatureScript
                         break;
                 }
                 summons.Despawn(summon);
+            }
+
+            void DoAction(const int32 id)
+            {
+                switch (id)
+                {
+                    case ACTION_RESPAWN_DEFENDER:
+                        if (defenderLives > 0)
+                            if (Creature* defender = me->SummonCreature(NPC_FERAL_DEFENDER, *me, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000)) // 30 secs equal the automated respawn time (due to script)
+                            {
+                                summons.Summon(defender);
+                                if (defenderLives)
+                                    defender->SetAuraStack(SPELL_FERAL_ESSENCE, defender, defenderLives);
+                                defender->SetInCombatWithZone();
+                                if (!defender->isInCombat())
+                                    defender->AI()->AttackStart(me->getVictim());
+                            }
+                        break;
+                }
             }
 
             void JustDied(Unit* /*who*/)
@@ -271,17 +287,6 @@ class boss_auriaya : public CreatureScript
                             DoCast(SPELL_DEFENDER_TRIGGER);
                             if (Creature* trigger = me->FindNearestCreature(NPC_FERAL_DEFENDER_TRIGGER, 50.0f, true))
                                 DoCast(trigger, SPELL_ACTIVATE_DEFENDER, true);
-                            break;
-                        case EVENT_RESPAWN_DEFENDER:
-                            if (Creature* Defender = me->FindNearestCreature(NPC_FERAL_DEFENDER, 500.0f, false))
-                            {
-                                Defender->Respawn();
-                                if (defenderLives)
-                                    Defender->SetAuraStack(SPELL_FERAL_ESSENCE, Defender, defenderLives);
-                                Defender->SetInCombatWithZone();
-                                if (!Defender->isInCombat())
-                                    Defender->AI()->AttackStart(me->getVictim());
-                            }
                             break;
                         case EVENT_SUMMON_SWARMING_GUARDIAN:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
@@ -491,6 +496,15 @@ class npc_feral_defender : public CreatureScript
             {
                 DoCast(me, SPELL_SUMMON_ESSENCE);
                 // Moved other behavior to SummonedCreatureDies
+            }
+
+            void CorpseRemoved(uint32& /*respawnDelay*/)
+            {
+                if (instance)
+                    if (uint64 auriID = instance->GetData64(BOSS_AURIAYA))
+                        if (Creature* auriaya = ObjectAccessor::GetCreature(*me, auriID))
+                            if (auriaya->IsAIEnabled)
+                                auriaya->AI()->DoAction(ACTION_RESPAWN_DEFENDER);
             }
 
         private:
