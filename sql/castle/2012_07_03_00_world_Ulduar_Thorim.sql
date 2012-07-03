@@ -28,17 +28,17 @@ UPDATE `creature_template` SET `equipment_id`=1852 WHERE `entry`=33150;
 UPDATE `creature_template` SET `modelid1`=16925, `modelid2`=0 WHERE `entry` IN (33378, 32892);
 
 -- Thorim Mini bosses : Runic Colossus, Ancient Rune Giant, Sif
-UPDATE `creature_template` SET `mechanic_immune_mask` = 650854239, `flags_extra` = 1, `ScriptName` = 'npc_runic_colossus' WHERE `entry` = 32872;
-UPDATE `creature_template` SET `mechanic_immune_mask` = 650854239, `flags_extra` = 1, `ScriptName` = 'npc_ancient_rune_giant' WHERE `entry` = 32873;
-UPDATE `creature_template` SET `mechanic_immune_mask` = 650854239, `flags_extra` = 1, `ScriptName` = 'npc_sif' WHERE `entry` = 33196;
-UPDATE `creature_template` SET `ScriptName` = 'npc_thorim_arena_phase_add' WHERE `entry` IN (32876, 32904, 32878, 32877, 32874, 32875, 33110);
+UPDATE `creature_template` SET `mechanic_immune_mask`= 650854239, `flags_extra`=1, `ScriptName`='npc_runic_colossus' WHERE `entry`=32872;
+UPDATE `creature_template` SET `mechanic_immune_mask`= 650854239, `flags_extra`=1, `ScriptName`='npc_ancient_rune_giant' WHERE `entry`=32873;
+UPDATE `creature_template` SET `mechanic_immune_mask`= 650854239, `flags_extra`=1, `ScriptName`='npc_sif' WHERE `entry`=33196;
+UPDATE `creature_template` SET `ScriptName`='npc_thorim_arena_phase_add' WHERE `entry` IN (32876, 32904, 32878, 32877, 32874, 32875, 33110);
 DELETE FROM `creature_addon` WHERE `guid` IN (136059, 136816);
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
 (136059, 0, 0, 0, 1, 0, 40775),
 (136816, 0, 0, 0, 1, 0, 40775);
 
 -- "Lever" should open "Dark Iron Portcullis".
-UPDATE `gameobject_template` SET `type`=1, `faction`=35, `data1`=0, `data4`=0 WHERE `entry`=194264
+UPDATE `gameobject_template` SET `type`=1, `faction`=35, `data1`=0, `data4`=0 WHERE `entry`=194264;
 DELETE FROM `gameobject_scripts` WHERE `id`=55194;
 INSERT INTO `gameobject_scripts` (`id`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`, `z`, `o`) VALUES
 (55194, 0, 11, 34155, 15, 0, 0, 0, 0, 0);
