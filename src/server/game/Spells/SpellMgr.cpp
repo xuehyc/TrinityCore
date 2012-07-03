@@ -3269,6 +3269,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 61719: // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with
                 spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_HITBYSPELL | AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
                 break;
+            case 70650: // Death Knight T10 Tank 2P Bonus
+                spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_PCT_MODIFIER;
+                break;
             // ULDUAR SPELLS
             //
             case 62374: // Pursued (Flame Leviathan)
@@ -3438,7 +3441,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;   // 200yd
                 break;
             case 70598: // Sindragosa's Fury
-                spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_CASTER;
+                spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_DEST;
                 break;
             case 69846: // Frost Bomb
                 spellInfo->speed = 0.0f;    // This spell's summon happens instantly
