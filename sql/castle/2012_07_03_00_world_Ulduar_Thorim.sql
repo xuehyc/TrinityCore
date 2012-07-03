@@ -34,8 +34,8 @@ UPDATE `creature_template` SET `mechanic_immune_mask`= 650854239, `flags_extra`=
 UPDATE `creature_template` SET `ScriptName`='npc_thorim_arena_phase_add' WHERE `entry` IN (32876, 32904, 32878, 32877, 32874, 32875, 33110);
 DELETE FROM `creature_addon` WHERE `guid` IN (136059, 136816);
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
-(136059, 0, 0, 0, 1, 0, 40775),
-(136816, 0, 0, 0, 1, 0, 40775);
+(136059, 0, 0, 0, 1, 0, '40775 0'),
+(136816, 0, 0, 0, 1, 0, '40775 0');
 
 -- "Lever" should open "Dark Iron Portcullis".
 UPDATE `gameobject_template` SET `type`=1, `faction`=35, `data1`=0, `data4`=0 WHERE `entry`=194264;
