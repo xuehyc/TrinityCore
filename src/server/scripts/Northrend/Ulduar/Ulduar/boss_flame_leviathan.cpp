@@ -596,7 +596,7 @@ class boss_flame_leviathan : public CreatureScript
                 if (!me->HasAura(SPELL_SYSTEMS_SHUTDOWN))
                     DoBatteringRamIfReady();
 
-                EnterEvadeIfOutOfCombatArea(diff);
+                // EnterEvadeIfOutOfCombatArea(diff);
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
