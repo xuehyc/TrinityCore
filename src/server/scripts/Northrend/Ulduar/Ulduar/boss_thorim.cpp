@@ -262,14 +262,17 @@ class boss_thorim : public CreatureScript
             boss_thorimAI(Creature* creature) : BossAI(creature, BOSS_THORIM)
             {
                 gotAddsWiped = false;
-                gotEncounterFinished = false;
                 homePosition = creature->GetHomePosition();
             }
 
             void Reset()
             {
-                if (gotEncounterFinished)  // May be called during fight if Thorim gets outfight... hm
+                gotEncounterFinished = (instance->GetBossState(BOSS_THORIM) == DONE);
+                if (gotEncounterFinished) // May be called during fight if Thorim gets outfight... hm, should _not_ happen regularly
+                {
+                    me->setFaction(35);
                     return;
+                }
 
                 if (gotAddsWiped)
                     DoScriptText(SAY_WIPE, me);
@@ -315,7 +318,6 @@ class boss_thorim : public CreatureScript
                 DoScriptText(SAY_DEATH, me);
                 me->setFaction(35);
                 me->ForcedDespawn(7000);
-                EnterEvadeMode();
 
                 if (instance)
                 {

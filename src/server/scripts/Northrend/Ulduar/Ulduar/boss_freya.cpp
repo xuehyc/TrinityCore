@@ -373,10 +373,16 @@ class boss_freya : public CreatureScript
 
             void Reset()
             {
+                EncounterFinished = (instance->GetBossState(BOSS_FREYA) == DONE);
+                if (EncounterFinished) // May be called during fight if Freya gets outfight... hm, should _not_ happen regularly
+                {
+                    me->setFaction(35);
+                    return;
+                }
                 _Reset();                
                 trioWaveCount = 0;
                 trioWaveController = 0;
-                elderCount = 0;
+                elderCount = 0;                
 
                 for (uint8 i = 0; i < 3; ++i)
                     for (uint8 n = 0; n < 2; ++n)
@@ -413,11 +419,11 @@ class boss_freya : public CreatureScript
                 if (amount >= me->GetHealth())
                 {
                     amount = 0;
-                    EncounterIsDone();
+                    EncounterPostProgress();
                 }
             }
 
-            void EncounterIsDone()
+            void EncounterPostProgress()
             {
                 if (EncounterFinished)
                     return;
@@ -431,26 +437,19 @@ class boss_freya : public CreatureScript
                     /* 10N */   {62950,  62953,  62955,  62957},
                     /* 25N */   {62952,  62954,  62956,  62958}
                 };
-
-                DoScriptText(SAY_DEATH, me);
                 me->CastSpell((Unit*)NULL, summonSpell[me->GetMap()->GetDifficulty()][elderCount], true);   // GetDifficulty should return 0 or 1 (numeric)
 
                 DoScriptText(SAY_DEATH, me);
-                me->SetReactState(REACT_PASSIVE);
-                _JustDied();
+                me->SetReactState(REACT_PASSIVE);                
                 me->RemoveAllAuras();
                 me->AttackStop();
                 me->setFaction(35);
                 me->DeleteThreatList();
                 me->CombatStop(true);
-                me->DespawnOrUnsummon(7500);
                 me->CastSpell(me, SPELL_KNOCK_ON_WOOD_CREDIT, true);                            
 
                 // getting back to nature achievement
-                attunedToNature = me->GetAuraCount(SPELL_ATTUNED_TO_NATURE);
-
-                EnterEvadeMode();
-                me->ForcedDespawn(7500);
+                attunedToNature = me->GetAuraCount(SPELL_ATTUNED_TO_NATURE);                
 
                 // achievements credit
                 DoCast(me, SPELL_ACHIEVEMENT_CHECK, true);
@@ -468,6 +467,8 @@ class boss_freya : public CreatureScript
                             Elder[n]->GetAI()->DoAction(ACTION_ELDER_FREYA_KILLED);
                         }
                 }
+                me->ForcedDespawn(7500);
+                _JustDied();
             }
 
             void EnterCombat(Unit* who)
@@ -2097,7 +2098,7 @@ class spell_freya_natural_bomb_spell : public SpellScriptLoader
 class achievement_getting_back_to_nature : public AchievementCriteriaScript
 {
     public:
-        achievement_getting_back_to_nature() : AchievementCriteriaScript("achievement_getting_back_to_nature") {}
+        achievement_getting_back_to_nature(const char* name) : AchievementCriteriaScript(name) {}
 
         bool OnCheck(Player* /*player*/, Unit* target)
         {
@@ -2115,7 +2116,7 @@ class achievement_getting_back_to_nature : public AchievementCriteriaScript
 class achievement_knock_on_wood : public AchievementCriteriaScript
 {
    public:
-       achievement_knock_on_wood() : AchievementCriteriaScript("achievement_knock_on_wood") {}
+       achievement_knock_on_wood(const char* name) : AchievementCriteriaScript(name) {}
 
        bool OnCheck(Player* /*player*/, Unit* target)
        {
@@ -2133,7 +2134,7 @@ class achievement_knock_on_wood : public AchievementCriteriaScript
 class achievement_knock_knock_on_wood : public AchievementCriteriaScript
 {
    public:
-       achievement_knock_knock_on_wood() : AchievementCriteriaScript("achievement_knock_knock_on_wood") {}
+       achievement_knock_knock_on_wood(const char* name) : AchievementCriteriaScript(name) {}
 
        bool OnCheck(Player* /*player*/, Unit* target)
        {
@@ -2151,7 +2152,7 @@ class achievement_knock_knock_on_wood : public AchievementCriteriaScript
 class achievement_knock_knock_knock_on_wood : public AchievementCriteriaScript
 {
    public:
-       achievement_knock_knock_knock_on_wood() : AchievementCriteriaScript("achievement_knock_knock_knock_on_wood") {}
+       achievement_knock_knock_knock_on_wood(const char* name) : AchievementCriteriaScript(name) {}
 
        bool OnCheck(Player* /*player*/, Unit* target)
        {
@@ -2190,10 +2191,14 @@ void AddSC_boss_freya()
     new spell_freya_attuned_to_nature_dose_reduction();
     new spell_freya_iron_roots();
 	new spell_elder_brightleaf_unstable_sun_beam(); 
-    new achievement_getting_back_to_nature();
-    new achievement_knock_on_wood();
-    new achievement_knock_knock_on_wood();
-    new achievement_knock_knock_knock_on_wood();
+    new achievement_getting_back_to_nature("achievement_getting_back_to_nature");           // 10m 2982 [10445] 
+    new achievement_getting_back_to_nature("achievement_getting_back_to_nature_25");        // 25m 2983 [10758]
+    new achievement_knock_on_wood("achievement_knock_on_wood");                             // 10m 3177 [10447] 
+    new achievement_knock_on_wood("achievement_knock_on_wood_25");                          // 25m 3185 [10459]
+    new achievement_knock_knock_on_wood("achievement_knock_knock_on_wood");                 // 10m 3178 [10448] 
+    new achievement_knock_knock_on_wood("achievement_knock_knock_on_wood_25");              // 25m 3186 [10460]
+    new achievement_knock_knock_knock_on_wood("achievement_knock_knock_knock_on_wood");     // 10m 3179 [10449] 
+    new achievement_knock_knock_knock_on_wood("achievement_knock_knock_knock_on_wood_25");  // 25m 3187 [10461]
 }
 
 #undef SPELL_TOUCH_OF_EONAR 
