@@ -114,12 +114,6 @@ class boss_bronjahm : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-                // Soul Power Achievement
-                for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
-                    if (Unit* unit = ObjectAccessor::GetUnit(*me, *itr))
-                        if (unit->isAlive() && unit->GetEntry() == NPC_CORRUPT_SOUL)
-                            _soulFragmentCount++;
-
                 DoScriptText(SAY_DEATH, me);
 
                 instance->SetBossState(DATA_BRONJAHM, DONE);
@@ -149,6 +143,12 @@ class boss_bronjahm : public CreatureScript
                 summon->GetMotionMaster()->Clear();
                 summon->GetMotionMaster()->MoveFollow(me, me->GetObjectSize(), 0.0f);
                 summon->CastSpell(summon, SPELL_PURPLE_BANISH_VISUAL, true);
+                _soulFragmentCount++;
+            }
+
+            void SummonedCreatureDespawn(Creature* summon)
+            {
+                _soulFragmentCount--;
             }
 
             void UpdateAI(const uint32 diff)
