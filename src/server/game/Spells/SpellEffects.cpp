@@ -2617,6 +2617,9 @@ void Spell::EffectDistract(SpellEffIndex /*effIndex*/)
 
     if (unitTarget->GetTypeId() == TYPEID_UNIT)
         unitTarget->GetMotionMaster()->MoveDistract(damage * IN_MILLISECONDS);
+
+    unitTarget->SendMovementFlagUpdate(); /*Aethoz to fix  rogue distract*/
+
 }
 
 void Spell::EffectPickPocket(SpellEffIndex /*effIndex*/)
