@@ -1,0 +1,2 @@
+-- Fix gameobject 201959 Cache of the Dreamwalker / Truhe des Traumwandlers, only 2 equip items should drop
+UPDATE `gameobject_loot_template` SET `maxcount` = 2 WHERE `entry` = 28052 AND `mincountOrRef` = -34241;
