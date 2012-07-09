@@ -24,8 +24,8 @@ UPDATE `creature_template` SET `vehicleid`=370, `mechanic_immune_mask`=650854235
 UPDATE `creature_template` SET `mechanic_immune_mask`=650854235, `flags_extra`=1 WHERE `entry`=34106;
 -- Leviathan MKII Turret
 UPDATE `creature_template` SET `mechanic_immune_mask`=650854235, `ScriptName`='boss_leviathan_mk_turret' WHERE `entry`=34071;
-DELETE FROM `vehicle_template_accessory WHERE entry = 33432;
-INSERT INTO `vehicle_template_accessory` VALUE (33432, 34071, 3, 1, 'Leviathan Mk II turret', 8, 0);
+DELETE FROM `vehicle_template_accessory` WHERE entry = 33432;
+INSERT INTO `vehicle_template_accessory` VALUES (33432, 34071, 3, 1, 'Leviathan Mk II turret', 8, 0);
 -- Leviathan skills and skill-helper
 UPDATE `creature_template` SET ScriptName='npc_proximity_mine' WHERE entry=34362;
 DELETE FROM `creature_model_info` WHERE `modelid`=28831;
