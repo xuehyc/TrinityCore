@@ -1897,14 +1897,14 @@ class IsNoAllyOfNature
         }
 };
 
-class spell_essence_targeting : public SpellScriptLoader
+class spell_essence_targeting_ironbranch : public SpellScriptLoader
 {
     public:
-        spell_essence_targeting(const char* name) : SpellScriptLoader(name) {}
+        spell_essence_targeting_ironbranch() : SpellScriptLoader("spell_elder_ironbranch_essence_targeting") {}
 
-        class spell_elder_ironbranchs_essence_targeting_SpellScript : public SpellScript
+        class spell_essence_targeting_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_elder_ironbranchs_essence_targeting_SpellScript);
+            PrepareSpellScript(spell_essence_targeting_SpellScript);
 
             void FilterTargets(std::list<Unit*>& unitList)
             {
@@ -1912,16 +1912,44 @@ class spell_essence_targeting : public SpellScriptLoader
             }
 
             void Register()
-            {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_elder_ironbranchs_essence_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
+            {                
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_essence_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);                         
             }
         };
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_elder_ironbranchs_essence_targeting_SpellScript();
+            return new spell_essence_targeting_SpellScript();
         }
 };
+
+class spell_essence_targeting_brightleaf : public SpellScriptLoader
+{
+public:
+    spell_essence_targeting_brightleaf() : SpellScriptLoader("spell_elder_brightleaf_essence_targeting") {}
+
+    class spell_essence_targeting_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_essence_targeting_SpellScript);
+
+        void FilterTargets(std::list<Unit*>& unitList)
+        {
+            unitList.remove_if(IsNoAllyOfNature());
+        }
+
+        void Register()
+        {                
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_essence_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_essence_targeting_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ALLY);                         
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_essence_targeting_SpellScript();
+    }
+};
+
 
 class spell_aggregation_pheromones_targeting : public SpellScriptLoader
 {
@@ -2184,13 +2212,13 @@ void AddSC_boss_freya()
     new npc_healthy_spore();
     new npc_unstable_sun_beam();
     new npc_iron_roots();
-    new spell_essence_targeting("spell_elder_stonebark_essence_targeting");
-    new spell_essence_targeting("spell_elder_ironbranch_essence_targeting");
-    new spell_essence_targeting("spell_elder_brightleaf_essence_targeting");
+    // new spell_essence_targeting("spell_elder_stonebark_essence_targeting");
+    new spell_essence_targeting_ironbranch();
+    new spell_essence_targeting_brightleaf();
     new spell_aggregation_pheromones_targeting();       // more or less for NPCs that are always in this area
     new spell_freya_attuned_to_nature_dose_reduction();
     new spell_freya_iron_roots();
-	new spell_elder_brightleaf_unstable_sun_beam(); 
+    new spell_elder_brightleaf_unstable_sun_beam(); 
     new achievement_getting_back_to_nature("achievement_getting_back_to_nature");           // 10m 2982 [10445] 
     new achievement_getting_back_to_nature("achievement_getting_back_to_nature_25");        // 25m 2983 [10758]
     new achievement_knock_on_wood("achievement_knock_on_wood");                             // 10m 3177 [10447] 

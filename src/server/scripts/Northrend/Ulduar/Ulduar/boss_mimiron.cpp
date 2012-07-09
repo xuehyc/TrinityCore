@@ -15,8 +15,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// https://github.com/darkman1983/TrinityCore 
-
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "ulduar.h"
@@ -52,7 +50,7 @@ enum Yells
 
 enum Spells
 {
-   SPELL_JETPACK                               = 63341,
+   SPELL_JETPACK                               = 63341, // Unused
    SPELL_EMERGENCY_MODE                        = 64582,
    SPELL_SELF_REPAIR                           = 64383,
 
@@ -67,12 +65,12 @@ enum Spells
    SPELL_EXPLOSION                             = 66351,
 
    // VX 001
-   SPELL_FROSTBOMB                             = 64623,
+   SPELL_FROSTBOMB                             = 64623, // 64627 ?
    SPELL_FROST_BOMB_VISUAL                     = 64624,
    SPELL_FROST_BOMB_EXPLOSION_10               = 64626,
    SPELL_FROST_BOMB_EXPLOSION_25               = 65333,
 
-   SPELL_P3WX2_LASER_BARRAGE                   = 63293,
+   SPELL_P3WX2_LASER_BARRAGE                   = 63293, // Casted through SPELL_SPINNING_UP
    SPELL_RAPID_BURST                           = 63382,
    SPELL_RAPID_BURST_LEFT_10                   = 63387,
    SPELL_RAPID_BURST_RIGHT_10                  = 64019,
@@ -108,8 +106,6 @@ enum Spells
    SPELL_NOT_SO_FRIENDLY_FIRE                  = 65040,
 
    SPELL_WATER_SPRAY                           = 64619,
-   SPELL_FROST_BOMB_HARD_MODE                  = 64627,
-   SPELL_DISARM                                = 1842,
    SPELL_RIDE_VEHICLE                          = 46598,
 };
 
@@ -135,7 +131,6 @@ enum Actions
     DO_AERIAL_ASSEMBLED,
     DO_AERIAL_SELF_REPAIR_START,
     DO_AERIAL_SELF_REPAIR_END,
-    // DO_ACTIVATE_DEATH_TIMER,
     DO_ENTER_ENRAGE,
     DO_ACTIVATE_HARD_MODE,
     DO_INCREASE_FLAME_COUNT,
@@ -165,12 +160,13 @@ enum Npcs
 // Achiev 2989: Criterias 10543, 10544, 10545
 // Achiev 3237: Criterias 10546, 10547, 10548
 // Which criteria is reponsible for which step ?
+// 26491 - 38080 - 45033 <- what do these numbers mean ?
 
-enum BombIndices
+enum BombIndices // Scripts are present, but criteria-id <-> script is missing
 {
     DATA_AVOIDED_PROXIMITY_MINES     = 30,
     DATA_AVOIDED_ROCKET_STRIKES,
-    DATA_AVOIDED_BOOM_BOT_EXPLOSION             // Done
+    DATA_AVOIDED_BOOM_BOT_EXPLOSION             
 };
 
 enum MimironChests
@@ -223,7 +219,6 @@ class boss_mimiron : public CreatureScript
 
             // Events for bot-alive-checks
             EVENT_CHECK_BOTALIVE,
-            // EVENT_SELF_REPAIR_COMPLETED
         };
         enum
         {
@@ -231,7 +226,7 @@ class boss_mimiron : public CreatureScript
         };
         enum MyPhase
         {
-            PHASE_NULL = 0,
+            PHASE_IDLE = 0,
             PHASE_INTRO,
             PHASE_COMBAT, 
             PHASE_VX001_ACTIVATION,
@@ -278,7 +273,7 @@ class boss_mimiron : public CreatureScript
 
                 instance->SetData(DATA_MIMIRON_ELEVATOR, GO_STATE_ACTIVE);
 
-                phase = PHASE_NULL;
+                phase = PHASE_IDLE;
                 events.SetPhase(phase);
                 flameCount = 0;
                 gotHardMode = false;
@@ -334,10 +329,10 @@ class boss_mimiron : public CreatureScript
                 if (instance)
                 {
                      if (gotHardMode)
-                        me->SummonGameObject(RAID_MODE<uint32>(CACHE_OF_INNOVATION_HARDMODE_10, CACHE_OF_INNOVATION_HARDMODE_25), 2744.65f, 2569.46f,
+                        me->SummonGameObject(RAID_MODE(CACHE_OF_INNOVATION_HARDMODE_10, CACHE_OF_INNOVATION_HARDMODE_25), 2744.65f, 2569.46f,
                         364.314f, 3.14159f, 0, 0, 0.7f, 0.7f, 604800);
                     else
-                        me->SummonGameObject(RAID_MODE<uint32>(CACHE_OF_INNOVATION_10, CACHE_OF_INNOVATION_25), 2744.65f, 2569.46f, 364.314f, 3.14159f,
+                        me->SummonGameObject(RAID_MODE(CACHE_OF_INNOVATION_10, CACHE_OF_INNOVATION_25), 2744.65f, 2569.46f, 364.314f, 3.14159f,
                         0, 0, 0.7f, 0.7f, 604800);
 
                     instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, NPC_LEVIATHAN_MKII, 1);
@@ -793,7 +788,7 @@ class boss_leviathan_mk : public CreatureScript
         };
         enum Events
         {
-            EVENT_PROXIMITY_MINE        = 1,
+            EVENT_PROXIMITY_MINE                    = 1,
             EVENT_NAPALM_SHELL,
             EVENT_PLASMA_BLAST,
             EVENT_SHOCK_BLAST,
@@ -1158,7 +1153,7 @@ class boss_vx_001 : public CreatureScript
         };
         enum Events
         {
-            EVENT_RAPID_BURST               = 1,
+            EVENT_RAPID_BURST                   = 1,
             EVENT_LASER_BARRAGE,
             EVENT_LASER_BARRAGE_END,
             EVENT_ROCKET_STRIKE,
@@ -1320,12 +1315,12 @@ class boss_vx_001 : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim())
+                if (!UpdateVictim() || phase == PHASE_IDLE)
                     return;
 
                 events.Update(diff);
 
-                if (me->HasUnitState(UNIT_STATE_CASTING) || phase == PHASE_IDLE)
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 if (spinning)
@@ -2186,14 +2181,10 @@ public:
 
     bool OnCheck(Player* player, Unit* /*target*/)
     {
-        if (!player)
-            return false;
-
-        if (InstanceScript* instance = player->GetInstanceScript())
-            if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
-                if (mimiron->AI()->GetData(DATA_GET_HARD_MODE))
-                    return true;
-
+        if (player)
+            if (InstanceScript* instance = player->GetInstanceScript())
+                if (Creature* mimiron = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_MIMIRON)))
+                    return (mimiron->AI()->GetData(DATA_GET_HARD_MODE));
         return false;
     }
 };
