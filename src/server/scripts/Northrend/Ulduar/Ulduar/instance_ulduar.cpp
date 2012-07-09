@@ -1276,7 +1276,7 @@ public:
         switch (pGo->GetEntry())
         {
             case 194914:
-            /*case 194438:*/
+            case 194438:
                 pInstance->SetData(DATA_CALL_TRAM, 0);
                 break;
             case 194912:

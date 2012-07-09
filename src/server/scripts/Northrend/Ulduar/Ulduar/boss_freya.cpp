@@ -373,7 +373,7 @@ class boss_freya : public CreatureScript
 
             void Reset()
             {
-                EncounterFinished = (instance->GetBossState(BOSS_FREYA) == DONE);
+                EncounterFinished = EncounterFinished || (instance->GetBossState(BOSS_FREYA) == DONE);
                 if (EncounterFinished) // May be called during fight if Freya gets outfight... hm, should _not_ happen regularly
                 {
                     me->setFaction(35);

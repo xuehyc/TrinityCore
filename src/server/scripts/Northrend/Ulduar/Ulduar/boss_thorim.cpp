@@ -267,7 +267,7 @@ class boss_thorim : public CreatureScript
 
             void Reset()
             {
-                gotEncounterFinished = (instance->GetBossState(BOSS_THORIM) == DONE);
+                gotEncounterFinished = gotEncounterFinished || (instance->GetBossState(BOSS_THORIM) == DONE);
                 if (gotEncounterFinished) // May be called during fight if Thorim gets outfight... hm, should _not_ happen regularly
                 {
                     me->setFaction(35);
