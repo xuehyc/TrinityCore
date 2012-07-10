@@ -26,6 +26,8 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
 
+#define in_array(item, array) std::find(array, array+(sizeof(array) / sizeof(uint32)), item) != array+(sizeof(array) / sizeof(uint32))
+
 class instance_trial_of_the_crusader : public InstanceMapScript
 {
     public:
@@ -77,7 +79,9 @@ class instance_trial_of_the_crusader : public InstanceMapScript
             uint32 ResilienceWillFixItTimer;
             uint8  SnoboldCount;
             uint8  MistressOfPainCount;
-            bool   TributeToImmortalityElegible;
+            bool   TributeToImmortalityEligible;
+            bool   DedicatedInsanityEligible;
+            uint64 DedicatedInsanityDummyCheckGUID;
             std::list<uint32> m_vScarabTimeOfDeath;
 
             bool firstBossAlreadySpawned;
@@ -106,7 +110,9 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 ResilienceWillFixItTimer = 0;
                 SnoboldCount = 0;
                 MistressOfPainCount = 0;
-                TributeToImmortalityElegible = true;
+                TributeToImmortalityEligible = true;
+                DedicatedInsanityEligible = true;
+                DedicatedInsanityDummyCheckGUID = 0;
 
                 NeedSave = false;
 
@@ -227,8 +233,29 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 }
             }
 
+            void SetData64(uint32 type, uint64 data)
+            {
+                switch (type)
+                {
+                    case DATA_TRIBUTE_TO_DEDICATED_INSANITY_CHECK:
+                        if (Player* player = ObjectAccessor::FindPlayer(data))
+                        {
+                            bool playerMeet = CheckDedicatedInsanityPlayerMeet(player, true);
+                            if (DedicatedInsanityEligible && !playerMeet)
+                                sLog->outString("DedicatedInsanity::EquipItemCheck - Player %s (%d) violated criteria in instance id %d.", player->GetName(), player->GetGUID(), instance->GetInstanceId());
+                        }
+                        break;
+                    case DATA_TRIBUTE_TO_DEDICATED_INSTANY_DUMMY_CHECK:
+                        DedicatedInsanityDummyCheckGUID = data; // remember player guid for murloc test menu
+                        break;
+                }
+            }
+
             void SetData(uint32 type, uint32 data)
             {
+                if (instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC && data == IN_PROGRESS)
+                    CheckDedicatedInsanityGroupMeet(false); // on encounter set in progress check group for dedicated insanity
+
                 switch (type)
                 {
                     case SPAWNED_NEXT_BOSS_1:
@@ -410,8 +437,8 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                         else if (data == DECREASE)
                             --MistressOfPainCount;
                         break;
-                    case DATA_TRIBUTE_TO_IMMORTALITY_ELEGIBLE:
-                        TributeToImmortalityElegible = false;
+                    case DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE:
+                        TributeToImmortalityEligible = false;
                         break;
                 }
                 if (IsEncounterInProgress())
@@ -618,6 +645,12 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                                 break;
                         };
                         return EventNPCId;
+                    case DATA_TRIBUTE_TO_DEDICATED_INSANITY_CHECK:
+                        return DedicatedInsanityEligible ? 0 : 1;
+                    case DATA_TRIBUTE_TO_DEDICATED_INSTANY_DUMMY_CHECK:
+                        if (Player* player = ObjectAccessor::FindPlayer(DedicatedInsanityDummyCheckGUID))
+                            return CheckDedicatedInsanityPlayerMeet(player, false) ? 1 : 0;
+                        return 2;
                     default:
                         break;
                 }
@@ -654,6 +687,8 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                     saveStream << EncounterStatus[i] << ' ';
 
                 saveStream << TrialCounter;
+                saveStream << ' ';
+                saveStream << DedicatedInsanityEligible ? 1 : 0;
                 SaveDataBuffer = saveStream.str();
 
                 SaveToDB();
@@ -687,6 +722,10 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 }
 
                 loadStream >> TrialCounter;
+                uint8 DedicatedInsanityRestore;
+                loadStream >> DedicatedInsanityRestore;
+
+                DedicatedInsanityEligible = DedicatedInsanityRestore > 0 ? true : false;
                 EventStage = 0;
 
                 OUT_LOAD_INST_DATA_COMPLETE;
@@ -719,12 +758,82 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                         return TrialCounter == 50;
                     case A_TRIBUTE_TO_IMMORTALITY_HORDE:
                     case A_TRIBUTE_TO_IMMORTALITY_ALLIANCE:
-                        return TrialCounter == 50 && TributeToImmortalityElegible;
+                        return TrialCounter == 50 && TributeToImmortalityEligible;
                     case A_TRIBUTE_TO_DEDICATED_INSANITY:
-                        return false/*uiGrandCrusaderAttemptsLeft == 50 && !bHasAtAnyStagePlayerEquippedTooGoodItem*/;
+                        return TrialCounter == 50 && TributeToImmortalityEligible && DedicatedInsanityEligible;
                 }
 
                 return false;
+            }
+
+            void CheckDedicatedInsanityGroupMeet(bool inCombatChangeable)
+            {
+                if (!DedicatedInsanityEligible || instance->GetDifficulty() != RAID_DIFFICULTY_10MAN_HEROIC)
+                    return;
+
+                Map::PlayerList const& players = instance->GetPlayers();
+                if (players.isEmpty()) // no players, no violation, no need to check anything at this point
+                    return;
+
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    if (Player* player = itr->getSource())
+                    {
+                        if (player->isGameMaster())
+                            continue;
+                        bool playerMeet = CheckDedicatedInsanityPlayerMeet(player, inCombatChangeable);
+                        if (DedicatedInsanityEligible && !playerMeet)
+                            sLog->outString("DedicatedInsanity::EnterCombatCheck - Player %s (%d) violated criteria in instance id %d.", player->GetName(), player->GetGUID(), instance->GetInstanceId());
+                        DedicatedInsanityEligible &= playerMeet;
+                    }
+            }
+
+            bool CheckDedicatedInsanityPlayerMeet(Player* player, bool inCombatChangeable)
+            {
+                bool itemCheck = true;
+                uint32 itemSlotStartPos = inCombatChangeable ? EQUIPMENT_SLOT_MAINHAND : EQUIPMENT_SLOT_START;
+                uint32 itemSlotEndPos = inCombatChangeable ? EQUIPMENT_SLOT_TABARD : EQUIPMENT_SLOT_END;
+
+                for (int i = itemSlotStartPos; i < itemSlotEndPos; ++i)
+                {
+                    if (i == EQUIPMENT_SLOT_TABARD || i == EQUIPMENT_SLOT_BODY)
+                        continue;
+
+                    if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                        if (ItemTemplate const* item_template = item->GetTemplate())
+                            itemCheck &= CheckDedicatedInsanityItemMeet(item_template);
+                }
+
+                return itemCheck;
+            }
+
+            bool CheckDedicatedInsanityItemMeet(ItemTemplate const* item_template)
+            {
+                // Based on information from http://www.wowhead.com/achievement=4080/a-tribute-to-dedicated-insanity#comments:id=842633
+
+                // You *can* use:
+                // • Any item below item level 245.
+                if (item_template->ItemLevel < 245 ||
+                // • The item level 245 set pieces that drop from 25-player Trial of the Crusader but also appear in the 10-player Tribute Chest.
+                    in_array(item_template->ItemId, DedicatedInsanity_Tier9_5_Set) ||
+                // • Any gear that drops in 10-player Trial of the Crusader [is allowed through ilvl < 245 already] or Trial of the Grand Crusader, including item level 245 Trial of the Grand Crusader drops and item level 258 cloaks from the 10-player Tribute Chest
+                    in_array(item_template->ItemId, DedicatedInsanity_ToC10_Tribute_Cloaks) ||
+                // • Any item level 245 items purchased with Badges of Triumph.
+                    in_array(item_template->ItemId, DedicatedInsanity_Triumph_Badges_Gear) ||
+                // • Any item level 245 Bind on Equip item, including crafted pieces.
+                    (item_template->ItemLevel == 245 && item_template->Bonding == BIND_WHEN_EQUIPED))
+                    return true;
+
+                // You *cannot* use:
+                // • Any item level 245 item not included above (primarily Bind on Pickup drops from 25-player Trial of the Crusader, but also notably Val’anyr).
+                if (in_array(item_template->ItemId, DedicatedInsanity_ToC25_BindOnPickup) ||
+                    item_template->ItemId == DedicatedInsanity_Val_anyr ||
+                // • Any item over item level 245 except for the 10-player Tribute cloak.
+                    item_template->ItemLevel > 245 ||
+                // • Any higher item level loot introduced in future patches (25 player Onyxia 245s, Icecrown loot in the future, etc.)
+                    in_array(item_template->ItemId, DedicatedInsanity_Ony25))
+                    return false;
+
+                return true; // In dubio pro reo
             }
         };
 

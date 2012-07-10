@@ -29,6 +29,7 @@ EndScriptData */
 
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
+#include "Group.h"
 
 enum eYells
 {
@@ -1392,6 +1393,9 @@ class npc_pdk_murloc_toc : public CreatureScript
 
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tausche meine Items um!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
 
+        if (player->GetRaidDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC) // add check for dedicated insanity in 10 man heroic
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Sind wir bereit für den sicheren Wahnsinn?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+
         player->SEND_GOSSIP_MENU(50030, creature->GetGUID());
         return true;
     }
@@ -1445,10 +1449,56 @@ class npc_pdk_murloc_toc : public CreatureScript
                     }
                 }
                 break;
+            case GOSSIP_ACTION_INFO_DEF+3:
+                if (InstanceScript* instance = player->GetInstanceScript())
+                {
+                    Group* group = player->GetGroup();
+                    if (!group)
+                        return true;
+
+                    player->PlayerTalkClass->ClearMenus();
+
+                    if (group->GetMembersCount() == 0)
+                        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Oops, da ist etwas schief gelaufen!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                    else
+                        for (GroupReference* itr = group->GetFirstMember(); itr != 0; itr = itr->next())
+                            if (Player* member = itr->getSource())
+                            {
+                                if (member->isGameMaster())
+                                    continue;
+                                instance->SetData64(DATA_TRIBUTE_TO_DEDICATED_INSTANY_DUMMY_CHECK, member->GetGUID());
+                                player->ADD_GOSSIP_ITEM(instance->GetData(DATA_TRIBUTE_TO_DEDICATED_INSTANY_DUMMY_CHECK) > 0 ? GOSSIP_ICON_DOT : GOSSIP_ICON_BATTLE, member->GetName(), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
+                            }
+
+                    player->SEND_GOSSIP_MENU(50031, creature->GetGUID());
+                }
+                break;
+            case GOSSIP_ACTION_INFO_DEF+4:
+                // do nothing when player clicked on a players name in dedicated insanity submenu
+                break;
         }
 
         return true;
     }
+};
+
+class DedicatedInsanityItemCheck : public PlayerScript
+{
+    public:
+        DedicatedInsanityItemCheck() : PlayerScript("DedicatedInsanityItemCheck") { }
+
+    void OnEquipItem(Player* player, uint32 /*item*/)
+    {
+        if (player->GetMapId() != 649 || player->GetRaidDifficulty() != RAID_DIFFICULTY_10MAN_HEROIC)
+            return; // Dedicated Insanity is limited to ToC10 (Heroic)
+
+        if (!player->isInCombat())
+            return; // Complete Gearcheck is done on SetData In_PROGRESS, so we need to check only when in combat (like weapon changes etc.)
+
+        if (InstanceScript* instance = player->GetInstanceScript())
+            instance->SetData64(DATA_TRIBUTE_TO_DEDICATED_INSANITY_CHECK, player->GetGUID());
+    }
+
 };
 
 void AddSC_trial_of_the_crusader()
@@ -1460,4 +1510,5 @@ void AddSC_trial_of_the_crusader()
     new npc_garrosh_toc();
     new npc_varian_toc();
     new npc_pdk_murloc_toc();
+    new DedicatedInsanityItemCheck();
 }

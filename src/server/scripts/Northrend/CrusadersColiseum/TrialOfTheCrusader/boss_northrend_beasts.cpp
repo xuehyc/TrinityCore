@@ -650,7 +650,7 @@ struct boss_jormungarAI : public ScriptedAI
         if (who->GetTypeId() == TYPEID_PLAYER)
         {
             if (m_instance)
-                m_instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELEGIBLE, 0);
+                m_instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
         }
     }
 
@@ -1111,7 +1111,7 @@ public:
             if (who->GetTypeId() == TYPEID_PLAYER)
             {
                 if (m_instance)
-                    m_instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELEGIBLE, 0);
+                    m_instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
             }
         }
 
