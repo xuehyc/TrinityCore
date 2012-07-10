@@ -56,7 +56,7 @@ namespace Movement
         return MOVE_RUN;
     }
 
-    int32 MoveSplineInit::Launch()
+    void MoveSplineInit::Launch()
     {
         MoveSpline& move_spline = *unit.movespline;
 
@@ -79,7 +79,7 @@ namespace Movement
 
         // should i do the things that user should do? - no.
         if (args.path.empty())
-            return 0;
+            return;
 
         // corrent first vertex
         args.path[0] = real_position;
@@ -97,7 +97,7 @@ namespace Movement
             args.velocity = unit.GetSpeed(SelectSpeedType(moveFlags));
 
         if (!args.Validate())
-            return 0;
+            return;
 
         if (moveFlags & MOVEMENTFLAG_ROOT)
             moveFlags &= ~MOVEMENTFLAG_MASK_MOVING;
@@ -115,8 +115,6 @@ namespace Movement
 
         PacketBuilder::WriteMonsterMove(move_spline, data);
         unit.SendMessageToSet(&data,true);
-
-        return move_spline.Duration();
     }
 
     MoveSplineInit::MoveSplineInit(Unit& m) : unit(m)
@@ -148,21 +146,12 @@ namespace Movement
         args.flags.EnableFacingAngle();
     }
 
-    void MoveSplineInit::MoveTo(Vector3 const& dest, bool generatePath, bool forceDestination)
+    void MoveSplineInit::MoveTo(Vector3 const& dest)
     {
-        if (generatePath)
-        {
-            PathFinderMovementGenerator path(&unit);
-            path.calculate(dest.x, dest.y, dest.z, forceDestination);
-            MovebyPath(path.getPath());
-        }
-        else
-        {
-            args.path_Idx_offset = 0;
-            args.path.resize(2);
-            TransportPathTransform transform(unit, args.TransformForTransport);
-            args.path[1] = transform(dest);
-        }
+        args.path_Idx_offset = 0;
+        args.path.resize(2);
+        TransportPathTransform transform(unit, args.TransformForTransport);
+        args.path[1] = transform(dest);
     }
 
     Vector3 TransportPathTransform::operator()(Vector3 input)

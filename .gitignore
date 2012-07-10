@@ -8,6 +8,7 @@ build*/
 .hg/
 *.kdev*
 *.bak
+*.patch
 *.diff
 *.REMOTE.*
 *.BACKUP.*
