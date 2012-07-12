@@ -354,7 +354,7 @@ uint32 InstanceScript::GetMajorityTeam()
 
             Group* group = arbitraryPlayer->GetGroup();                 // Decisions are based on the players group, despite they are in the instance or not.
             if (!group)
-                return 0;   // Cannot make a decision if there's no group-reference
+                return arbitraryPlayer->GetTeam();   // Only one player -> get his team
 
             for (GroupReference* it = group->GetFirstMember(); it != 0; it = it->next())
             {

@@ -140,21 +140,41 @@ public:
                     if (TeamInInstance == HORDE)
                         creature->UpdateEntry(VEHICLE_MARSHAL_JACOB_ALERIUS_MOUNT, ALLIANCE);
                     break;
+                case NPC_MOKRA:
+                    if (TeamInInstance == HORDE)
+                        creature->UpdateEntry(NPC_JACOB, ALLIANCE);
+                    break;
                 case VEHICLE_ERESSEA_DAWNSINGER_MOUNT:
                     if (TeamInInstance == HORDE)
                         creature->UpdateEntry(VEHICLE_AMBROSE_BOLTSPARK_MOUNT, ALLIANCE);
+                    break;
+                case NPC_ERESSEA:
+                    if (TeamInInstance == HORDE)
+                        creature->UpdateEntry(NPC_AMBROSE, ALLIANCE);
                     break;
                 case VEHICLE_RUNOK_WILDMANE_MOUNT:
                     if (TeamInInstance == HORDE)
                         creature->UpdateEntry(VEHICLE_COLOSOS_MOUNT, ALLIANCE);
                     break;
+                case NPC_RUNOK:
+                    if (TeamInInstance == HORDE)
+                        creature->UpdateEntry(NPC_COLOSOS, ALLIANCE);
+                    break;
                 case VEHICLE_ZUL_TORE_MOUNT:
                     if (TeamInInstance == HORDE)
                         creature->UpdateEntry(VEHICLE_EVENSONG_MOUNT, ALLIANCE);
                     break;
+                case NPC_ZULTORE:
+                    if (TeamInInstance == HORDE)
+                        creature->UpdateEntry(NPC_JAELYNE, ALLIANCE);
+                    break;
                 case VEHICLE_DEATHSTALKER_VESCERI_MOUNT:
                     if (TeamInInstance == HORDE)
                         creature->UpdateEntry(VEHICLE_LANA_STOUTHAMMER_MOUNT, ALLIANCE);
+                    break;
+                case NPC_VISCERI:
+                    if (TeamInInstance == HORDE)
+                        creature->UpdateEntry(NPC_LANA, ALLIANCE);
                     break;
                 case VEHICLE_ORGRIMMAR_WOLF:
                     if (TeamInInstance == HORDE)
