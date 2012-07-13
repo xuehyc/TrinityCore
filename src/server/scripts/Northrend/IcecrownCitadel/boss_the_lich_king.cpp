@@ -452,9 +452,9 @@ class StartMovementEvent : public BasicEvent
 
         bool Execute(uint64 /*time*/, uint32 /*diff*/)
         {
+            _owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             _owner->SetReactState(REACT_AGGRESSIVE);
-            if (Unit* target = _summoner->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(_summoner)))
-                _owner->AI()->AttackStart(target);
+            _summoner->AI()->DoZoneInCombat(_owner);
             return true;
         }
 
@@ -682,6 +682,9 @@ class boss_the_lich_king : public CreatureScript
                 if (events.GetPhaseMask() & PHASE_MASK_ONE && !HealthAbovePct(70))
                 {
                     events.SetPhase(PHASE_TRANSITION);
+                    me->InterruptNonMeleeSpells(true); // Otherwise remorseless winter might fail
+                    me->SetReactState(REACT_PASSIVE); // Needs to be done here, otherwise LK might get taunted while moving, destroying script mechanisms
+                    me->AttackStop();
                     me->GetMotionMaster()->MovePoint(POINT_CENTER_1, CenterPosition);
                     return;
                 }
@@ -689,6 +692,9 @@ class boss_the_lich_king : public CreatureScript
                 if (events.GetPhaseMask() & PHASE_MASK_TWO && !HealthAbovePct(40))
                 {
                     events.SetPhase(PHASE_TRANSITION);
+                    me->InterruptNonMeleeSpells(true); // Otherwise remorseless winter might fail
+                    me->SetReactState(REACT_PASSIVE); // Needs to be done here, otherwise LK might get taunted while moving, destroying script mechanisms
+                    me->AttackStop();
                     me->GetMotionMaster()->MovePoint(POINT_CENTER_2, CenterPosition);
                     return;
                 }
@@ -839,9 +845,6 @@ class boss_the_lich_king : public CreatureScript
                         me->SetFacingTo(0.0f);
                         Talk(SAY_LK_REMORSELESS_WINTER);
                         SendMusicToPlayers(MUSIC_SPECIAL);
-                        me->InterruptNonMeleeSpells(true); // Otherwise remorseless winter might fail
-                        me->SetReactState(REACT_PASSIVE);
-                        me->AttackStop();
                         DoCast(me, SPELL_REMORSELESS_WINTER_1);
                         events.DelayEvents(62500, EVENT_GROUP_BERSERK); // delay berserk timer, its not ticking during phase transitions
                         events.ScheduleEvent(EVENT_QUAKE, 62500, 0, PHASE_TRANSITION);
@@ -857,9 +860,6 @@ class boss_the_lich_king : public CreatureScript
                         me->SetFacingTo(0.0f);
                         Talk(SAY_LK_REMORSELESS_WINTER);
                         SendMusicToPlayers(MUSIC_SPECIAL);
-                        me->InterruptNonMeleeSpells(true); // Otherwise remorseless winter might fail
-                        me->SetReactState(REACT_PASSIVE);
-                        me->AttackStop();
                         DoCast(me, SPELL_REMORSELESS_WINTER_2);
                         summons.DespawnEntry(NPC_VALKYR_SHADOWGUARD);
                         events.DelayEvents(62500, EVENT_GROUP_BERSERK); // delay berserk timer, its not ticking during phase transitions
@@ -1690,6 +1690,7 @@ class npc_strangulate_vehicle : public CreatureScript
             {
                 me->SetFacingToObject(summoner);
                 DoCast(summoner, SPELL_HARVEST_SOUL_VEHICLE);
+                summoner->ClearUnitState(UNIT_STATE_ONVEHICLE); // HACK: Target needs to be healable
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_MOVE_TO_LICH_KING, 2000);
                 _events.ScheduleEvent(EVENT_TELEPORT, 6000);
@@ -1704,13 +1705,16 @@ class npc_strangulate_vehicle : public CreatureScript
                 if (action != ACTION_TELEPORT_BACK)
                     return;
 
-                // Teleport to fixed location, otherwise we might land under the map
-                if (TempSummon* summ = me->ToTempSummon())
-                    if (Unit* summoner = summ->GetSummoner())
-                        summoner->NearTeleportTo(OutroPosition1.GetPositionX(), OutroPosition1.GetPositionY(), OutroPosition1.GetPositionZ(), OutroPosition1.GetOrientation());
-
                 if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
+                {
                     lichKing->AI()->SummonedCreatureDespawn(me);
+
+                    // Teleport to main tank location, otherwise we might land under the map or inside defile
+                    if (TempSummon* summ = me->ToTempSummon())
+                        if (Unit* summoner = summ->GetSummoner())
+                            if (Unit* victim = lichKing->getVictim())
+                                summoner->NearTeleportTo(victim->GetPositionX(), victim->GetPositionY(), victim->GetPositionZ() + 1.0f, victim->GetOrientation());
+                }
 
                 me->DespawnOrUnsummon(2000);
             }
