@@ -793,7 +793,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 uint32 itemSlotStartPos = inCombatChangeable ? EQUIPMENT_SLOT_MAINHAND : EQUIPMENT_SLOT_START;
                 uint32 itemSlotEndPos = inCombatChangeable ? EQUIPMENT_SLOT_TABARD : EQUIPMENT_SLOT_END;
 
-                for (int i = itemSlotStartPos; i < itemSlotEndPos; ++i)
+                for (uint8 i = itemSlotStartPos; i < itemSlotEndPos; ++i)
                 {
                     if (i == EQUIPMENT_SLOT_TABARD || i == EQUIPMENT_SLOT_BODY)
                         continue;
