@@ -3549,6 +3549,10 @@ void SpellMgr::LoadDbcDataCorrections()
             case 24259: // Spell Lock silence
                 spellInfo->speed = 80;
                 break;
+			case 5171: // Slice and Dice
+				spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_INITIAL_AGGRO;
+				count++;
+				break;
 
             default:
                 break;
