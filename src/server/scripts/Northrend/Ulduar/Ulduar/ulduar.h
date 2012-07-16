@@ -45,7 +45,7 @@ enum UlduarBosses
     BOSS_VEZAX               = 17,
     BOSS_YOGGSARON           = 18,
     BOSS_ALGALON             = 19,
-    DATA_SARA,
+    BOSS_SARA                = 20,
     DATA_BRAIN_DOOR_1,
     DATA_BRAIN_DOOR_2,
     DATA_BRAIN_DOOR_3,

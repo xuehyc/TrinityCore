@@ -328,6 +328,11 @@ class boss_flame_leviathan : public CreatureScript
                 return count;
             }
 
+            void JustSummoned(Creature* summon)
+            {
+                summons.Summon(summon);
+            }
+
             void HandleAccessorys(bool doInstall)
             {
                 if (doInstall)
@@ -391,6 +396,7 @@ class boss_flame_leviathan : public CreatureScript
                             if (seat->GetVehicleKit()->HasEmptySeat(SEAT_PLAYER) && !seat->GetVehicleKit()->HasEmptySeat(SEAT_TURRET))
                             {
                                 passenger->EnterVehicle(seat, SEAT_PLAYER);
+                                passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
                                 return;
                             }
             }
@@ -553,10 +559,9 @@ class boss_flame_leviathan : public CreatureScript
                             me->MonsterTextEmote(EMOTE_REPAIR, 0, true);
                             me->ClearUnitState(UNIT_STATE_STUNNED | UNIT_STATE_ROOT);
                             events.ScheduleEvent(EVENT_SHUTDOWN, 150*IN_MILLISECONDS);
-                            events.CancelEvent(EVENT_REPAIR);
                             break;
                         case EVENT_THORIMS_HAMMER: // Tower of Storms
-                            for (uint8 i = 0; i < RAID_MODE(7, 15); ++i)
+                            for (uint8 i = 0; i < RAID_MODE(7, 15); i++)
                             {
                                 Position pos = Misc[0];                                
                                 pos.m_positionX += frand(-100, 105);
@@ -565,30 +570,26 @@ class boss_flame_leviathan : public CreatureScript
                                     thorimBeacon->GetMotionMaster()->MoveRandom(100);
                             }
                             DoScriptText(SAY_TOWER_STORM, me);
-                            events.CancelEvent(EVENT_THORIMS_HAMMER);
                             break;
                         case EVENT_MIMIRONS_INFERNO: // Tower of Flames
                             me->SummonCreature(NPC_MIMIRON_BEACON, InfernoStart);
                             DoScriptText(SAY_TOWER_FLAME, me);
-                            events.CancelEvent(EVENT_MIMIRONS_INFERNO);
                             break;
                         case EVENT_HODIRS_FURY:      // Tower of Frost
-                            for (uint8 i = 0; i < 7; ++i)   // TODO: Check where this "7" comes from
+                            for (uint8 i = 0; i < 7; i++)   // TODO: Check where this "7" comes from
                             {
-                                if (Creature* hodir = DoSummon(NPC_HODIR_BEACON, me, 50, 0))
+                                if (Creature* hodir = DoSummon(NPC_HODIR_BEACON, me, 50.0f, 0))
                                     hodir->GetMotionMaster()->MoveRandom(100);
                             }
                             DoScriptText(SAY_TOWER_FROST, me);
-                            events.CancelEvent(EVENT_HODIRS_FURY);
                             break;
                         case EVENT_FREYAS_WARD:    // Tower of Nature
                             DoScriptText(SAY_TOWER_NATURE, me);
-                            for (int32 i = 0; i < 4; ++i)   // TODO: Check where this "4" comes from
+                            for (int32 i = 0; i < 4; i++)   // TODO: Check where this "4" comes from
                                 me->SummonCreature(NPC_FREYA_BEACON, FreyaBeacons[i]);
 
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                                 DoCast(target, SPELL_FREYAS_WARD);
-                            events.CancelEvent(EVENT_FREYAS_WARD);
                             break;
                     }
                 }
@@ -1012,6 +1013,7 @@ class npc_mechanolift : public CreatureScript
                         }
 
                         me->RemoveUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
+                        me->SendMovementFlagUpdate();
                     }                    
                 }
             }
@@ -1171,8 +1173,10 @@ class npc_colossus : public CreatureScript
 
             void JustDied(Unit* /*Who*/)
             {
-                if (me->GetHomePosition().IsInDist(&Center, 50.f))
-                    instance->SetData(DATA_COLOSSUS, instance->GetData(DATA_COLOSSUS)+1);
+                // Check is required, since there are 5 colossus in the instance :: Check if the distance is enough
+                // Given distance ends up with ~106 x/y distance.
+                if (me->GetDistance2d(Center.GetPositionX(), Center.GetPositionY()) < 150.0f)
+                    instance->SetData(DATA_COLOSSUS, instance->GetData(DATA_COLOSSUS) + 1);
             }
 
             void UpdateAI(uint32 const diff)
@@ -1183,7 +1187,7 @@ class npc_colossus : public CreatureScript
                 if (groundSlamTimer <= diff)
                 {
                     DoCastVictim(SPELL_GROUND_SLAM);
-                    groundSlamTimer = urand(20, 25) *IN_MILLISECONDS;
+                    groundSlamTimer = urand(20, 25) * IN_MILLISECONDS;
                 }
                 else
                     groundSlamTimer -= diff;
@@ -1198,7 +1202,7 @@ class npc_colossus : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_colossusAI(creature);
+            return GetUlduarAI<npc_colossusAI>(creature);
         }
 };
 

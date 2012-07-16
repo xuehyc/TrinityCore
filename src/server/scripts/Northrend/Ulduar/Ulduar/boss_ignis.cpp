@@ -292,7 +292,7 @@ class boss_ignis : public CreatureScript
                             events.ScheduleEvent(EVENT_JET, urand(35000, 40000));
                             break;
                         case EVENT_SLAG_POT:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
                             {
                                 DoScriptText(SAY_SLAG_POT, me);
                                 slagPotGUID = target->GetGUID();
@@ -306,7 +306,7 @@ class boss_ignis : public CreatureScript
                             if (Unit* slagPotTarget = ObjectAccessor::GetUnit(*me, slagPotGUID))
                             {
                                 slagPotTarget->EnterVehicle(me, 0);
-                                events.CancelEvent(EVENT_GRAB_POT);
+                                slagPotTarget->ClearUnitState(UNIT_STATE_ONVEHICLE);    // Hack, see LK - target should be healable
                                 events.ScheduleEvent(EVENT_CHANGE_POT, 1000);
                             }
                             break;
@@ -315,7 +315,7 @@ class boss_ignis : public CreatureScript
                             {
                                 slagPotTarget->AddAura(SPELL_SLAG_POT, slagPotTarget);
                                 slagPotTarget->EnterVehicle(me, 1);
-                                events.CancelEvent(EVENT_CHANGE_POT);
+                                slagPotTarget->ClearUnitState(UNIT_STATE_ONVEHICLE);
                                 events.ScheduleEvent(EVENT_END_POT, 10000);
                             }
                             break;
@@ -325,7 +325,6 @@ class boss_ignis : public CreatureScript
                                 slagPotTarget->ExitVehicle();
                                 slagPotTarget = NULL;
                                 slagPotGUID = 0;
-                                events.CancelEvent(EVENT_END_POT);
                             }
                             break;
                         case EVENT_SCORCH:
@@ -367,10 +366,10 @@ class boss_ignis : public CreatureScript
                 EnterEvadeIfOutOfCombatArea(diff);
             }
 
-        private:
-            AchievShatterHelper shatteredHelper;
-            uint64 slagPotGUID;
-            Vehicle* vehicle;
+            private:
+                AchievShatterHelper shatteredHelper;
+                uint64 slagPotGUID;
+                Vehicle* vehicle;
         };
 
         CreatureAI* GetAI(Creature* creature) const
