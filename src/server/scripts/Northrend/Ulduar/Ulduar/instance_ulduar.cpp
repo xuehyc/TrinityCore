@@ -1153,7 +1153,7 @@ class instance_ulduar : public InstanceMapScript
 
                     // Yogg-Saron
                     case BOSS_YOGGSARON:            return YoggSaronGUID;
-                    case DATA_SARA:                 return SaraGUID;
+                    case BOSS_SARA:                 return SaraGUID;
                     case DATA_BRAIN_DOOR_1 :        return YoggSaronBrainDoor1GUID;
                     case DATA_BRAIN_DOOR_2 :        return YoggSaronBrainDoor2GUID;
                     case DATA_BRAIN_DOOR_3 :        return YoggSaronBrainDoor3GUID;

@@ -264,7 +264,6 @@ class boss_mimiron : public CreatureScript
                     return;
 
                 _Reset();
-                events.Reset();
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_USE_STANDING);
                 me->SetVisible(true);
@@ -756,8 +755,7 @@ class boss_mimiron : public CreatureScript
 
             private:
                 std::map< uint32, bool > isSelfRepairing;
-                std::map< BombIndices, bool> setUpUsTheBomb;
-                EventMap events;
+                std::map< BombIndices, bool > setUpUsTheBomb;
                 MyPhase phase;
                 uint32 flameCount;
                 bool gotHardMode;
