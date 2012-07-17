@@ -69,19 +69,19 @@ enum Yells
     SAY_SUMMON_3                                = -1603019,
 };
 
-class boss_algalon : public CreatureScript
+class boss_algalon_the_observer : public CreatureScript
 {
 public:
-    boss_algalon() : CreatureScript("boss_algalon") { }
+    boss_algalon_the_observer() : CreatureScript("boss_algalon_the_observer") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return GetUlduarAI<boss_algalonAI>(creature);
+        return GetUlduarAI<boss_algalon_the_observerAI>(creature);
     }
 
-    struct boss_algalonAI : public ScriptedAI
+    struct boss_algalon_the_observerAI : public ScriptedAI
     {
-        boss_algalonAI(Creature* c) : ScriptedAI(c)
+        boss_algalon_the_observerAI(Creature* c) : ScriptedAI(c)
         {
             instance = c->GetInstanceScript();
             Summon = false; // not in reset. intro speech done only once.
@@ -369,8 +369,8 @@ public:
 
 };
 
-void AddSC_boss_Algalon()
+void AddSC_boss_Algalon_The_Observer()
 {
-    new boss_algalon();
+    new boss_algalon_the_observer();
     new mob_collapsing_star();
 }
