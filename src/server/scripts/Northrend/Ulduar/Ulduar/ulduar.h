@@ -97,7 +97,18 @@ enum UlduarBosses
     DATA_ADD_HELP_FLAG,
 
     // YoggSaron himself - phase during fight
-    DATA_PORTAL_PHASE
+    DATA_PORTAL_PHASE,
+
+    // Algalon the Observer
+    DATA_ALGALON_SUMMON_STATE,
+    DATA_SIGILDOOR_01,
+    DATA_SIGILDOOR_02,
+    DATA_SIGILDOOR_03,
+    DATA_UNIVERSE_FLOOR_01,
+    DATA_UNIVERSE_FLOOR_02,
+    DATA_UNIVERSE_GLOBE,
+    DATA_ALGALON_TRAPDOOR,
+    DATA_BRANN_BRONZEBEARD_ALG,
 };
 
 enum UlduarBossDeadFlags
@@ -338,6 +349,7 @@ enum UlduarAchievementCriteria
     ACHIEVEMENT_CRITERIA_KILL_WITHOUT_DEATHS_ALGALON_25             = 10570,
     ACHIEVEMENT_CRITERIA_CON_SPEED_ATORY                            = 21597,
     ACHIEVEMENT_CRITERIA_DISARMED                                   = 21687,
+    ACHIEVEMENT_CRITERIA_HERALD_OF_TITANS                           = 10678,
 };
 
 // Achievements for "Do not die during boss-fights"
@@ -360,12 +372,21 @@ enum UlduarAchievementData
 {
     // FL Achievement boolean
     DATA_UNBROKEN = 29052906, // 2905, 2906 are achievement IDs,
+    MAX_HERALD_ARMOR_ITEMLEVEL  = 226,
+    MAX_HERALD_WEAPON_ITEMLEVEL = 232,
+};
+
+enum UlduarEvents
+{
+    EVENT_DESPAWN_ALGALON       = 1,
+    EVENT_UPDATE_ALGALON_TIMER  = 2,
+    ACTION_INIT_ALGALON         = 6,
 };
 
 enum UlduarWorldstates
 {
-    WORLDSTATE_ALGALON_TIME = 4131,
-    WORLDSTATE_ALGALON_SHOW = 4132
+    WORLD_STATE_ALGALON_DESPAWN_TIMER = 4131,
+    WORLD_STATE_ALGALON_TIMER_ENABLED = 4132
 };
 
 enum UlduarArea

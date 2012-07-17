@@ -293,6 +293,12 @@ class instance_ulduar : public InstanceMapScript
                 conSpeedAtory       = false;
             }
 
+            void FillInitialWorldStates(WorldPacket& packet)
+            {
+                packet << static_cast<uint32>(WORLD_STATE_ALGALON_TIMER_ENABLED) << static_cast<uint32>(AlgalonCountdown && AlgalonCountdown < 61);
+                packet << static_cast<uint32>(WORLD_STATE_ALGALON_DESPAWN_TIMER) << static_cast<uint32>(std::min<uint32>(AlgalonCountdown, 60)); // cast to uint32 required since std::min returns const uint32&
+            }
+
             bool IsEncounterInProgress() const
             {
                 for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
@@ -307,7 +313,7 @@ class instance_ulduar : public InstanceMapScript
             void OnPlayerEnter(Player* player)
             {
                 if (!TeamInInstance)
-                    TeamInInstance = player->GetTeam();
+                    TeamInInstance = GetMajorityTeam();
             }
 
             void __OnPlayerDeath(Player* /*player*/) 
@@ -317,7 +323,7 @@ class instance_ulduar : public InstanceMapScript
                     if (Encounter[i] == IN_PROGRESS)
                     {
                         if (i == BOSS_ALGALON)
-                            ++AlgalonKillCount; // Some happens to Algalon on player death, thus count them
+                            ++AlgalonKillCount; // Something happens to Algalon on player death, thus count them
                         PlayerDeathFlag |= BossId_2_PlayerDiedFlag[i][1];
                     }                                               
                 }  
@@ -993,8 +999,8 @@ class instance_ulduar : public InstanceMapScript
                                     algalon->setFaction(7);
                                     algalon->setActive(true);
                                     algalon->SetVisible(true);
-                                    DoUpdateWorldState(WORLDSTATE_ALGALON_SHOW, 1);
-                                    DoUpdateWorldState(WORLDSTATE_ALGALON_TIME, 60);
+                                    DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 1);
+                                    DoUpdateWorldState(WORLD_STATE_ALGALON_DESPAWN_TIMER, 60);
                                 }
                                 HandleGameObject(AlgalonDoor1GUID, true);
                                 HandleGameObject(AlgalonDoor2GUID, true);
@@ -1011,8 +1017,8 @@ class instance_ulduar : public InstanceMapScript
                                 if (AlgalonCountdown > 60)
                                 {
                                     AlgalonCountdown = 60;
-                                    DoUpdateWorldState(WORLDSTATE_ALGALON_SHOW, 1);
-                                    DoUpdateWorldState(WORLDSTATE_ALGALON_TIME, AlgalonCountdown);
+                                    DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 1);
+                                    DoUpdateWorldState(WORLD_STATE_ALGALON_DESPAWN_TIMER, AlgalonCountdown);
                                     SaveToDB();
                                 }
                                 HandleGameObject(AlgalonGlobeGUID, true);
@@ -1022,7 +1028,7 @@ class instance_ulduar : public InstanceMapScript
                                 break;
                             case DONE:
                                 AlgalonCountdown = 0;
-                                DoUpdateWorldState(WORLDSTATE_ALGALON_SHOW, 0);
+                                DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 0);
                                 SaveToDB();
                                 HandleGameObject(AlgalonGlobeGUID, false);
                                 HandleGameObject(AlgalonBridgeGUID, false);
@@ -1238,8 +1244,8 @@ class instance_ulduar : public InstanceMapScript
 
                         if (AlgalonCountdown)
                         {
-                            DoUpdateWorldState(WORLDSTATE_ALGALON_SHOW, 1);
-                            DoUpdateWorldState(WORLDSTATE_ALGALON_TIME, AlgalonCountdown);
+                            DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 1);
+                            DoUpdateWorldState(WORLD_STATE_ALGALON_DESPAWN_TIMER, AlgalonCountdown);
                         }
                         else
                         {
