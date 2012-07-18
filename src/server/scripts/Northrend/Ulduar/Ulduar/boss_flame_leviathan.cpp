@@ -2551,6 +2551,8 @@ class spell_leviathan_flame_vents_triggered : public SpellScriptLoader
 
 class spell_shield_generator : public SpellScriptLoader
 {
+    private:
+        enum { SPELL_SHIELD_GENERATOR = 64677 };
     public:
         spell_shield_generator() : SpellScriptLoader("spell_shield_generator") { }
 
@@ -2560,7 +2562,7 @@ class spell_shield_generator : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spell*/)
             {
-                if(!sSpellMgr->GetSpellInfo(64677))
+                if(!sSpellMgr->GetSpellInfo(SPELL_SHIELD_GENERATOR))
                     return false;
                 return true;
             }

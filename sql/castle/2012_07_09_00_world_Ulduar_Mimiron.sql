@@ -13,7 +13,7 @@ INSERT INTO `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `
 DELETE FROM `gameobject_template` WHERE `entry`=194438;
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `ScriptName`, `WDBVerified`) VALUES
 (194438,1,8504,'Activate Tram','' ,'' ,'',0,32,1,0,0,0,0,0,0,0,0,3000,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'go_call_tram',12340);
-DELETE FROM `gameobject` WHERE id = '194438';
+DELETE FROM `gameobject` WHERE id=194438;
 INSERT INTO `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (194438,603,1,1,2306.99,2589.35,424.382,4.71676,0,0,0.705559,-0.708651,300,0,1);
 

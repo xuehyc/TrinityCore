@@ -949,6 +949,7 @@ class boss_stormcaller_brundir : public CreatureScript
                             DoCast(me, SPELL_STORMSHIELD);
                             events.RescheduleEvent(EVENT_LIGHTNING_TENDRILS_START, urand(50000, 60000));
                             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);    // Apply immunity to stuns
+                            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                         }
                         break;
                     case ACTION_UPDATEPHASE:
@@ -961,6 +962,7 @@ class boss_stormcaller_brundir : public CreatureScript
                         {
                             me->ResetLootMode();
                             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
+                            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                             DoCast(me, SPELL_STORMSHIELD, true);
                             if (events.GetNextEventTime(EVENT_LIGHTNING_TENDRILS_START) == 0)
                                 events.RescheduleEvent(EVENT_LIGHTNING_TENDRILS_START, urand(40000, 80000));

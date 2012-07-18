@@ -7,7 +7,6 @@ UPDATE `creature_template` SET `mechanic_immune_mask`=650853247, `flags_extra`=1
 33293,   -- XT002
 32867,   -- Steelbreaker
 32927,   -- Runemaster Molgeim
-32857,   -- Stormcaller Brundir
 32930,   -- Kologarn
 33515,   -- Auriaya
 32906,   -- Freya
@@ -23,3 +22,5 @@ UPDATE `creature_template` SET `mechanic_immune_mask`=650853247, `flags_extra`=1
 33134,   -- Sara
 33890    -- Brain of Yogg-Saron
 );
+-- Stormcaller Brundir, immunities to stun and interrupt are gained infight.
+UPDATE `creature_template` SET `mechanic_immune_mask`=617296767, `flags_extra`=1 WHERE `entry` IN (32857);   
