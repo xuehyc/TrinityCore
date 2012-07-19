@@ -805,7 +805,7 @@ class boss_sara : public CreatureScript
                 if (Creature* yogg = DoSummon(NPC_YOGG_SARON, SaraLocation, 0, TEMPSUMMON_MANUAL_DESPAWN))
                     yogg->SetLootMode(LOOT_MODE_DEFAULT);
 
-                if (Creature* yoggbrain = me->GetCreature(*me, guidYoggBrain))
+                if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, guidYoggBrain))
                     yoggbrain->DespawnOrUnsummon();
                 DoSummon(NPC_BRAIN_OF_YOGG_SARON, BrainLocation, 0, TEMPSUMMON_MANUAL_DESPAWN);
 
@@ -843,6 +843,7 @@ class boss_sara : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)
             {
+                me->SetFloatValue(UNIT_FIELD_COMBATREACH, 100.0f);
                 _EnterCombat();                       
                 events.ScheduleEvent(EVENT_ENRAGE, 900000);
 
@@ -850,6 +851,7 @@ class boss_sara : public CreatureScript
                     DoZoneInCombat(yogg);            
 
                 lastBrainAction = Actions(0);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
             void ReceiveEmote(Player* pPlayer, uint32 emote)
@@ -947,6 +949,56 @@ class boss_sara : public CreatureScript
                 {
                     me->GetMotionMaster()->Clear(false);
                     me->GetMotionMaster()->MoveIdle();
+                }
+            }
+
+            void DoAction(const int32 action)
+            {
+                switch (action)
+                {
+                    case ACTION_NOVA_HIT:
+                        if(myPhase != PHASE_SARA)
+                            return;
+
+                        NovaHitCounter--;
+
+                        if(NovaHitCounter <= 0)
+                            SetPhase(PHASE_BRAIN);
+                        else 
+                            me->ModifyHealth(-25000);
+                        break;
+                    case ACTION_BRAIN_UNDER_30_PERCENT:
+                        SetPhase(PHASE_YOGG);
+                        break;
+                    case ACTION_YOGGSARON_KILLED:
+                        if(Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg))
+                            yogg->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
+                        if (events.GetNextEventTime(EVENT_ENRAGE) >= 480000)
+                            instance->DoCompleteAchievement(RAID_MODE(ACHIEVMENT_HE_S_NOT_GETTING_ANY_OLDER_10, ACHIEVMENT_HE_S_NOT_GETTING_ANY_OLDER_25));
+                        if (!usedMindcontrol)
+                            instance->DoCompleteAchievement(RAID_MODE(ACHIEVMENT_DRIVE_ME_CRAZY_10, ACHIEVMENT_DRIVE_ME_CRAZY_25));
+                        if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL && uiAmountKeeperActive == 0)
+                            instance->DoCompleteAchievement(ACHIEVMENT_REALM_FIRST_DEATHS_DEMISE);
+                        switch(uiAmountKeeperActive)
+                        {
+                            case 0:
+                                instance->DoCompleteAchievement(RAID_MODE(ACHIEVMENT_ALONE_IN_THE_DARKNESS_10, ACHIEVMENT_ALONE_IN_THE_DARKNESS_25));
+                            case 1:
+                                instance->DoCompleteAchievement(RAID_MODE(ACHIEVMENT_ONE_LIGHTS_IN_THE_DARKNESS_10, ACHIEVMENT_ONE_LIGHTS_IN_THE_DARKNESS_25));
+                            case 2:
+                                instance->DoCompleteAchievement(RAID_MODE(ACHIEVMENT_TWO_LIGHTS_IN_THE_DARKNESS_10, ACHIEVMENT_TWO_LIGHTS_IN_THE_DARKNESS_25));
+                            case 3:
+                                instance->DoCompleteAchievement(RAID_MODE(ACHIEVMENT_THREE_LIGHTS_IN_THE_DARKNESS_10, ACHIEVMENT_THREE_LIGHTS_IN_THE_DARKNESS_25));
+                                break;
+                            default: 
+                                break;
+                        }
+                        me->Kill(me);
+                        break;
+                    case ACTION_USED_MINDCONTROL:
+                        usedMindcontrol = true;
+                        break;
                 }
             }
 
@@ -1068,13 +1120,11 @@ class boss_sara : public CreatureScript
                     case NPC_YOGG_SARON:
                         guidYogg = pSummoned->GetGUID();
                         pSummoned->SetReactState(REACT_PASSIVE);
-                        pSummoned->setFaction(14);
-                        //pSummoned->SetVisible(false);
                         pSummoned->SetStandState(UNIT_STAND_STATE_SUBMERGED);
                         pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         pSummoned->SetFloatValue(UNIT_FIELD_COMBATREACH, 20.0f);
                         pSummoned->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 20.0f);
-                        return; // Do Not Save Yoggy in Summons because he shouldn't despawn on encounter finish
+                        return; 
                     case NPC_BRAIN_OF_YOGG_SARON:
                         guidYoggBrain = pSummoned->GetGUID();
                         pSummoned->setActive(true);
@@ -1102,7 +1152,8 @@ class boss_sara : public CreatureScript
                         pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         break;
                 }
-                summons.Summon(pSummoned);
+                if (!(pSummoned->GetEntry() == NPC_YOGG_SARON)) // Do Not Save Yoggy in summons because he shouldn't despawn on encounter finish
+                    summons.Summon(pSummoned);
             }
 
             bool IsEncounterInProgress()
@@ -1487,7 +1538,7 @@ class boss_sara : public CreatureScript
                             events.ScheduleEvent(EVENT_RANDOM_YELL, urand(40000, 60000));
                             break;
                         case EVENT_ENRAGE:
-                            if (Creature* yogg = me->GetCreature(*me, guidYogg))
+                            if (Creature* yogg = ObjectAccessor::GetCreature(*me, guidYogg))
                             {
                                 yogg->InterruptNonMeleeSpells(false);
                                 yogg->CastSpell(yogg, SPELL_EXTINGUISH_ALL_LIFE, false);
@@ -1801,11 +1852,11 @@ class npc_guardian_of_yogg_saron : public CreatureScript
                 if (target)
                     if (target->ToPlayer())
                     {
-                        switch(spell->Id)
+                        switch (spell->Id)
                         {
                             case SPELL_DARK_VOLLEY:
-                                if(Creature* cSara = me->GetCreature(*me, instance->GetData64(BOSS_SARA)))
-                                    CAST_AI(boss_sara::boss_saraAI,cSara->AI())->ModifySanity(target->ToPlayer(), -2);
+                                if(Creature* cSara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
+                                    CAST_AI(boss_sara::boss_saraAI, cSara->AI())->ModifySanity(target->ToPlayer(), -2);
                                 break;
                         }
                     }
@@ -1822,11 +1873,11 @@ class npc_guardian_of_yogg_saron : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-                DoCast(me,SPELL_SHADOW_NOVA,true);
+                DoCast(me, SPELL_SHADOW_NOVA, true);
                 if (instance)
                 {
-                    if (Creature* cSara = me->GetCreature(*me,instance->GetData64(BOSS_SARA)))
-                        if (me->GetDistance2d(cSara) <= 15)
+                    if (Creature* cSara = ObjectAccessor::GetCreature(*me,instance->GetData64(BOSS_SARA)))
+                        if (me->GetDistance2d(cSara) <= 100.0f)
                             cSara->AI()->DoAction(ACTION_NOVA_HIT);
                 }
                 me->DespawnOrUnsummon(5000);
@@ -2122,6 +2173,15 @@ class boss_brain_of_yogg_saron : public CreatureScript
                 me->SetFlying(true);
             }
 
+            void Reset()
+            {
+                if (Creature* cSara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
+                    if (cSara->isInCombat())
+                        EnterCombat(cSara->getVictim());
+                else
+                    return;
+            }
+
             void DamageTaken(Unit* /*dealer*/, uint32 &damage)
             {
                 if (HealthBelowPct(31)) // "immortality" is not granted if not yet in phase 3 (starts when health gets below 31%)
@@ -2129,32 +2189,33 @@ class boss_brain_of_yogg_saron : public CreatureScript
                         damage = me->GetHealth()-1;                 
             }
 
-            void SpellHitTarget(Unit *target, const SpellInfo *spell)
+            void SpellHitTarget(Unit* target, const SpellInfo* spell)
             {
-                if(!target->ToPlayer())
+                if (!target->ToPlayer())
                     return;
 
-                if(spell->Id == SPELL_INDUCE_MADNESS)
+                if (spell->Id == SPELL_INDUCE_MADNESS)
                 {
-                    if(IsPlayerInBrainRoom(target->ToPlayer()))
+                    if (IsPlayerInBrainRoom(target->ToPlayer()))
                         target->RemoveAurasDueToSpell(SPELL_SANITY);
                 }
-            }
-
-            InstanceScript* instance;
+            }            
 
             void UpdateAI(uint32 const /*diff*/)
             {
-                if(HealthBelowPct(31))
+                if (HealthBelowPct(31))
                 {
-                    if(Creature* cSara = me->GetCreature(*me, instance->GetData64(BOSS_SARA)))
+                    if (Creature* cSara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
                             cSara->AI()->DoAction(ACTION_BRAIN_UNDER_30_PERCENT);
 
-                    if(!me->HasAura(SPELL_BRAIN_HURT_VISUAL))
+                    if (!me->HasAura(SPELL_BRAIN_HURT_VISUAL))
                         DoCast(me, SPELL_BRAIN_HURT_VISUAL, true);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                 }
             }
+
+            private:
+                InstanceScript* instance;
         };
 
         CreatureAI* GetAI(Creature* pCreature) const
@@ -2185,7 +2246,7 @@ class boss_yogg_saron : public CreatureScript
 
             void JustDied(Unit* killer)
             {
-                if(Creature* cSara = me->GetCreature(*me, instance->GetData64(BOSS_SARA)))
+                if(Creature* cSara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
                     cSara->AI()->DoAction(ACTION_YOGGSARON_KILLED);
 
                 DoScriptText(SAY_DEATH, me);
@@ -2201,7 +2262,7 @@ class boss_yogg_saron : public CreatureScript
                         switch(spell->Id)
                         {
                             case SPELL_LUNATIC_GAZE_EFFECT:
-                                if(Creature* cSara = me->GetCreature(*me, instance->GetData64(BOSS_SARA)))
+                                if(Creature* cSara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
                                     CAST_AI(boss_sara::boss_saraAI, cSara->AI())->ModifySanity(target->ToPlayer(), -4);
                                 break;
                         }
@@ -2234,7 +2295,7 @@ class boss_yogg_saron : public CreatureScript
                                     // Tell Sara we used Mindcontrol - for Archievment ... we need only one mind-controlled Player to cancel Achievment
                                     if(!UsedMindControl)
                                     {
-                                        if(Creature* cSara = me->GetCreature(*me, instance->GetData64(BOSS_SARA)))
+                                        if(Creature* cSara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
                                             cSara->AI()->DoAction(ACTION_USED_MINDCONTROL);
                                         UsedMindControl = true;
                                     }
@@ -2610,11 +2671,11 @@ class npc_sanity_well : public CreatureScript
 
                     for (std::list<Player*>::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                     {
-                        if((*itr))
+                        if ((*itr))
                         {
-                            if((*itr)->HasAura(SPELL_SANITY_WELL_DEBUFF))
+                            if ((*itr)->HasAura(SPELL_SANITY_WELL_DEBUFF))
                             {
-                                if(Creature* sara = Creature::GetCreature((*me),instance->GetData64(BOSS_SARA)))
+                                if (Creature* sara = ObjectAccessor::GetCreature((*me), instance->GetData64(BOSS_SARA)))
                                     CAST_AI(boss_sara::boss_saraAI,sara->AI())->ModifySanity((*itr), 10);
                             }
                         }
@@ -2662,7 +2723,7 @@ class npc_laughting_skull : public CreatureScript
                             switch (spell->Id)
                             {
                                 case SPELL_LS_LUNATIC_GAZE_EFFECT:
-                                    if(Creature* cSara = me->GetCreature(*me,instance->GetData64(BOSS_SARA)))
+                                    if (Creature* cSara = ObjectAccessor::GetCreature(*me,instance->GetData64(BOSS_SARA)))
                                         CAST_AI(boss_sara::boss_saraAI,cSara->AI())->ModifySanity(target->ToPlayer(),-2);
                                     break;
                             }

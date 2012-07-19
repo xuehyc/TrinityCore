@@ -1,4 +1,5 @@
 -- Updates for the various NPCs in Yogg-Saron encounter.
+UPDATE `creature_template` SET `faction_A`=14, `faction_H`=14 where `entry` in (33134, 33288, 33552);
 UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=33134;
 UPDATE `creature_template` SET `ScriptName`='npc_ominous_cloud' WHERE `entry`=33292;
 UPDATE `creature_template` SET `ScriptName`='npc_guardian_of_yogg_saron' WHERE `entry`=33136;

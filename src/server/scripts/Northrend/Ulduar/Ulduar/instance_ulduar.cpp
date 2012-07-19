@@ -1043,7 +1043,8 @@ class instance_ulduar : public InstanceMapScript
                     GetBossState(BOSS_HODIR) == DONE &&
                     GetBossState(BOSS_THORIM) == DONE)
                     if (GameObject* go = instance->GetGameObject(WayToYoggGUID))
-                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+                        HandleGameObject(WayToYoggGUID, true);
+                        //go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
 
                 return true;
             }
