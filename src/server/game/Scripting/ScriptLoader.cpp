@@ -84,6 +84,10 @@ void AddSC_npcs_special();
 void AddSC_npc_taxi();
 void AddSC_achievement_scripts();
 
+//serverscripts
+void AddSC_rewardscript();
+void AddSC_televotescript();
+void AddSC_skill_npc();
 //eastern kingdoms
 void AddSC_alterac_valley();                 //Alterac Valley
 void AddSC_boss_balinda();
@@ -696,6 +700,9 @@ void AddWorldScripts()
     AddSC_npc_taxi();
     AddSC_achievement_scripts();
     AddSC_chat_log();
+    AddSC_rewardscript();    //serverscripts
+    AddSC_televotescript();
+    AddSC_skill_npc();
 #endif
 }
 

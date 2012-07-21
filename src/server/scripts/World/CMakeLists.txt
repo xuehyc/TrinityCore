@@ -22,6 +22,9 @@ set(scripts_STAT_SRCS
   World/npc_professions.cpp
   World/npc_taxi.cpp
   World/npcs_special.cpp
+  World/serverscripts/rewardscript.cpp
+  World/serverscripts/televotescript.cpp
+  World/serverscripts/skill_npc.cpp
 )
 
 message("  -> Prepared: World")
