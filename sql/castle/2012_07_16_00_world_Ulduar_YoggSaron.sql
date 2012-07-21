@@ -1,5 +1,9 @@
 -- Updates for the various NPCs in Yogg-Saron encounter.
-UPDATE `creature_template` SET `faction_A`=14, `faction_H`=14 where `entry` in (33134, 33288, 33552);
+UPDATE `creature_template` SET `minlevel`=83, `maxlevel`=83, `faction_A`=14, `faction_H`=14, `mindmg`=104, `maxdmg`=138, `attackpower`=252, `dmg_multiplier`=7.5, `unit_flags`=33554432|4|2, `InhabitType`=7, `ScriptName`='npc_yogg_saron_encounter_controller' WHERE `entry`=29224;
+DELETE FROM `creature` WHERE `id`=29224;
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES (29224, 603, 1, 1, 0, 0, 1980.28, -25.5868, 329.397, 2.91365, 300, 0, 0, 7841, 0, 0, 0, 0, 0);
+UPDATE `creature_template` SET `faction_A`=35, `faction_H`=35 WHERE `entry` IN (33134, 34332);
+UPDATE `creature_template` SET `faction_A`=14, `faction_H`=14 WHERE `entry` IN (33288, 33955);
 UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=33134;
 UPDATE `creature_template` SET `ScriptName`='npc_ominous_cloud' WHERE `entry`=33292;
 UPDATE `creature_template` SET `ScriptName`='npc_guardian_of_yogg_saron' WHERE `entry`=33136;

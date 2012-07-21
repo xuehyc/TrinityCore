@@ -98,6 +98,9 @@ enum UlduarBosses
 
     // YoggSaron himself - phase during fight
     DATA_PORTAL_PHASE,
+    DATA_IS_ENCOUNTER_IN_PROGRESS,
+    DATA_BRAIN_EVT_CNT,
+    DATA_KEEPER_CNT,
 
     // Algalon the Observer
     DATA_ALGALON_SUMMON_STATE,
@@ -164,6 +167,7 @@ enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-N
     NPC_ELDER_BRIGHTLEAF        = 32915,
     NPC_VEZAX                   = 33271,
     NPC_YOGGSARON               = 33288,
+    NPC_YOGGSARON_CTRL          = 29224,
     NPC_SARA                    = 33134,
     NPC_ALGALON                 = 32871,
 

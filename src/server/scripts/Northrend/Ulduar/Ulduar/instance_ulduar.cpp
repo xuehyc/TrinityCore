@@ -63,7 +63,6 @@ class instance_ulduar : public InstanceMapScript
             instance_ulduar_InstanceMapScript(InstanceMap* map) : InstanceScript(map) { }
 
         private:
-            uint32 Encounter[MAX_ENCOUNTER];
             std::string m_strInstData;
 
             // 2012/06/24 @DorianGrey - reordered those, due to logical relation (GO to npc and vice versa). Maybe change that again.
@@ -142,6 +141,7 @@ class instance_ulduar : public InstanceMapScript
             uint64 VezaxDoorGUID;
 
             // Yogg-Saron
+            uint64 YoggSaronCtrlGUID;
             uint64 YoggSaronGUID;
             uint64 SaraGUID;
             uint64 YoggSaronDoorGUID;
@@ -186,7 +186,6 @@ class instance_ulduar : public InstanceMapScript
                 // Pretty please: Use type-safe fill instead of raw memset !   
                 SetBossNumber(MAX_ENCOUNTER);
                 LoadDoorData(doorData);
-                std::fill(Encounter, Encounter + MAX_ENCOUNTER, 0);
 
                 // Leviathan
                 leviathanChestGUID  = 0;
@@ -259,6 +258,7 @@ class instance_ulduar : public InstanceMapScript
                 VezaxDoorGUID   = 0;
 
                 // Yogg-Saron
+                YoggSaronCtrlGUID       = 0;
                 YoggSaronGUID           = 0;
                 SaraGUID                = 0;
                 YoggSaronDoorGUID       = 0;
@@ -297,18 +297,7 @@ class instance_ulduar : public InstanceMapScript
             {
                 packet << static_cast<uint32>(WORLD_STATE_ALGALON_TIMER_ENABLED) << static_cast<uint32>(AlgalonCountdown && AlgalonCountdown < 61);
                 packet << static_cast<uint32>(WORLD_STATE_ALGALON_DESPAWN_TIMER) << static_cast<uint32>(std::min<uint32>(AlgalonCountdown, 60)); // cast to uint32 required since std::min returns const uint32&
-            }
-
-            bool IsEncounterInProgress() const
-            {
-                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                {
-                    if (Encounter[i] == IN_PROGRESS)
-                        return true;
-                }
-
-                return false;
-            }
+            }            
 
             void OnPlayerEnter(Player* player)
             {
@@ -320,7 +309,7 @@ class instance_ulduar : public InstanceMapScript
             {
                 for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
                 {
-                    if (Encounter[i] == IN_PROGRESS)
+                    if (GetBossState(UlduarBosses(i)) == IN_PROGRESS)
                     {
                         if (i == BOSS_ALGALON)
                             ++AlgalonKillCount; // Something happens to Algalon on player death, thus count them
@@ -445,8 +434,8 @@ class instance_ulduar : public InstanceMapScript
                             if (GetBossState(BOSS_YOGGSARON) != IN_PROGRESS)
                                 return false;
 
-                            if (Creature* Sara = instance->GetCreature(SaraGUID))
-                                return (Sara->AI()->GetData(DATA_PORTAL_PHASE) == 0);
+                            if (Creature* ctrl = instance->GetCreature(YoggSaronCtrlGUID))
+                                return (ctrl->AI()->GetData(DATA_PORTAL_PHASE) == 0);
 
                             return false;
                         }
@@ -456,8 +445,8 @@ class instance_ulduar : public InstanceMapScript
                             if (GetBossState(BOSS_YOGGSARON) != IN_PROGRESS)
                                 return false;
 
-                            if (Creature* Sara = instance->GetCreature(SaraGUID))
-                                return (Sara->AI()->GetData(DATA_PORTAL_PHASE) == 2);
+                            if (Creature* ctrl = instance->GetCreature(YoggSaronCtrlGUID))
+                                return (ctrl->AI()->GetData(DATA_PORTAL_PHASE) == 2);
 
                             return false;
                         }
@@ -467,8 +456,8 @@ class instance_ulduar : public InstanceMapScript
                             if (GetBossState(BOSS_YOGGSARON) != IN_PROGRESS)
                                 return false;
 
-                            if (Creature* Sara = instance->GetCreature(SaraGUID))
-                                return (Sara->AI()->GetData(DATA_PORTAL_PHASE) == 1);
+                            if (Creature* ctrl = instance->GetCreature(YoggSaronCtrlGUID))
+                                return (ctrl->AI()->GetData(DATA_PORTAL_PHASE) == 1);
 
                             return false;
                         }
@@ -645,6 +634,9 @@ class instance_ulduar : public InstanceMapScript
                         break;
                     case NPC_YOGGSARON:
                         YoggSaronGUID = creature->GetGUID();
+                        break;
+                    case NPC_YOGGSARON_CTRL:
+                        YoggSaronCtrlGUID = creature->GetGUID();
                         break;
 
                     // Algalon
@@ -897,8 +889,8 @@ class instance_ulduar : public InstanceMapScript
                     return false;
                 
                 if (UlduarBosses(type) <= BOSS_ALGALON)
-                    if (Encounter[UlduarBosses(type)] != DONE)
-                        Encounter[UlduarBosses(type)] = state;
+                    if (GetBossState(UlduarBosses(type)) != DONE)
+                        InstanceScript::SetBossState(UlduarBosses(type), state);
 
                 if (state == DONE)
                     SaveToDB();
@@ -1052,7 +1044,7 @@ class instance_ulduar : public InstanceMapScript
             EncounterState GetBossState(uint32 id)
             {
                 if (UlduarBosses(id) <= BOSS_ALGALON)
-                    return EncounterState(Encounter[UlduarBosses(id)]);
+                    return InstanceScript::GetBossState(UlduarBosses(id));
                 return NOT_STARTED;
             }
 
@@ -1073,7 +1065,7 @@ class instance_ulduar : public InstanceMapScript
                         break;
                     case DATA_CALL_TRAM:
                         if (GameObject* go = instance->GetGameObject(MimironTrainGUID))
-                            go->UseDoorOrButton();
+                            go->SetGoState(GOState(data));
                         break;
                     case DATA_MIMIRON_ELEVATOR:
                         if (GameObject* go = instance->GetGameObject(MimironElevatorGUID))
@@ -1159,6 +1151,7 @@ class instance_ulduar : public InstanceMapScript
                     case DATA_AERIAL_UNIT:          return AerialUnitGUID;
 
                     // Yogg-Saron
+                    case NPC_YOGGSARON_CTRL:        return YoggSaronCtrlGUID;
                     case BOSS_YOGGSARON:            return YoggSaronGUID;
                     case BOSS_SARA:                 return SaraGUID;
                     case DATA_BRAIN_DOOR_1 :        return YoggSaronBrainDoor1GUID;
@@ -1216,14 +1209,13 @@ class instance_ulduar : public InstanceMapScript
 
                 if (dataHead1 == 'U' && dataHead2 == 'U')
                 {
-                    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                    for (uint32 i = 0; i < MAX_ENCOUNTER; i++)
                     {
                         uint32 tmpState;
                         loadStream >> tmpState;
                         if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
                             tmpState = NOT_STARTED;
-
-                        Encounter[i] = tmpState;
+                        SetBossState(i, EncounterState(tmpState));
                     }
 
                     loadStream >> ColossusData;
@@ -1282,14 +1274,24 @@ public:
 
         switch (pGo->GetEntry())
         {
-            case 194914:
-            case 194438:
+            // Activate
+            case 194437:    // [ok]           
+            case 194912:
                 pInstance->SetData(DATA_CALL_TRAM, 0);
                 break;
-            case 194912:
-            case 194437:
+            // Call
+            case 194438:
+            case 194914:    // [ok]
                 pInstance->SetData(DATA_CALL_TRAM, 1);
                 break;
+//             case 194914:    // At sanctuary
+//             case 194437:            
+//                 pInstance->SetData(DATA_CALL_TRAM, 0);
+//                 break;
+//             case 194912:    // At Mimiron        
+//             case 194438:
+//                 pInstance->SetData(DATA_CALL_TRAM, 1);
+//                 break;
         }
         return true;
     }
