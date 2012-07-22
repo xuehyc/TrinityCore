@@ -702,6 +702,7 @@ class boss_the_lich_king : public CreatureScript
                 if (events.GetPhaseMask() & PHASE_MASK_THREE && !HealthAbovePct(10))
                 {
                     me->SetReactState(REACT_PASSIVE);
+                    me->InterruptNonMeleeSpells(true);
                     me->AttackStop();
                     events.Reset();
                     events.SetPhase(PHASE_OUTRO);
