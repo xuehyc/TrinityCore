@@ -120,13 +120,15 @@ class instance_ulduar : public InstanceMapScript
             std::list<uint64> MimironDoorGUIDList;
 
             // Thorim
+            uint64 ThorimCtrlGUID;
             uint64 ThorimGUID;
-            uint64 ThorimDoorGUID;
+            uint64 ThorimLightningFieldGUID;
             uint64 RunicColossusGUID;
             uint64 RuneGiantGUID;
             uint64 RunicDoorGUID;
             uint64 StoneDoorGUID;
             uint64 ThorimChestGUID;
+            uint64 ThorimDarkIronPortCullisGUID;
 
             // Freya
             uint64 FreyaGUID;
@@ -237,13 +239,15 @@ class instance_ulduar : public InstanceMapScript
                 MimironElevatorGUID = 0;
 
                 // Thorim
-                ThorimGUID          = 0;
-                ThorimDoorGUID      = 0;
-                RunicColossusGUID   = 0;
-                RuneGiantGUID       = 0;
-                RunicDoorGUID       = 0;
-                StoneDoorGUID       = 0;
-                ThorimChestGUID     = 0;
+                ThorimCtrlGUID               = 0;
+                ThorimGUID                   = 0;
+                ThorimLightningFieldGUID     = 0;
+                RunicColossusGUID            = 0;
+                RuneGiantGUID                = 0;
+                RunicDoorGUID                = 0;
+                StoneDoorGUID                = 0;
+                ThorimChestGUID              = 0;
+                ThorimDarkIronPortCullisGUID = 0;
 
                 // Freya
                 FreyaGUID           = 0;
@@ -601,7 +605,17 @@ class instance_ulduar : public InstanceMapScript
                     case NPC_THORIM:
                         ThorimGUID = creature->GetGUID();
                         break;
-
+                    case NPC_THORIM_CTRL:
+                        ThorimCtrlGUID = creature->GetGUID();
+                        break;
+                    case NPC_MERCENARY_CAPTAIN_A:
+                        if (TeamInInstance == ALLIANCE)
+                            creature->UpdateEntry(NPC_MERCENARY_CAPTAIN_H, 1692);
+                        break;
+                    case NPC_MERCENARY_SOLDIER_A:
+                        if (TeamInInstance == ALLIANCE)
+                            creature->UpdateEntry(NPC_MERCENARY_SOLDIER_H, 1692);
+                        break;
                     // Freya
                     case NPC_FREYA:
                         FreyaGUID = creature->GetGUID();
@@ -721,12 +735,15 @@ class instance_ulduar : public InstanceMapScript
                         break;
 
                     // Thorim related
+                    case GO_THORIM_DARK_IRON_PROTCULLIS:
+                        ThorimDarkIronPortCullisGUID = gameObject->GetGUID();
+                        break;
                     case GO_THORIM_CHEST_HERO:
                     case GO_THORIM_CHEST:
                         ThorimChestGUID = gameObject->GetGUID();
                         break;
-                    case GO_THORIM_ENCOUNTER_DOOR:
-                        ThorimDoorGUID = gameObject->GetGUID();
+                    case GO_THORIM_LIGHTNING_FIELD:
+                        ThorimLightningFieldGUID = gameObject->GetGUID();
                         break;
                     case GO_THORIM_STONE_DOOR:
                         StoneDoorGUID = gameObject->GetGUID();
@@ -978,7 +995,7 @@ class instance_ulduar : public InstanceMapScript
                         {
                             if (GameObject* gameObject = instance->GetGameObject(ThorimChestGUID))
                                 gameObject->SetRespawnTime(gameObject->GetRespawnDelay());
-                            if (GameObject* gameObject = instance->GetGameObject(ThorimDoorGUID))
+                            if (GameObject* gameObject = instance->GetGameObject(ThorimLightningFieldGUID))
                                 gameObject->SetGoState(state == IN_PROGRESS ? GO_STATE_READY : GO_STATE_ACTIVE);
                         }
                         break;
@@ -1143,6 +1160,11 @@ class instance_ulduar : public InstanceMapScript
                     case BOSS_BRIGHTLEAF:           return KeeperGUIDs[0];
                     case BOSS_IRONBRANCH:           return KeeperGUIDs[1];
                     case BOSS_STONEBARK:            return KeeperGUIDs[2];
+
+                    // Thorim
+                    case GO_THORIM_DARK_IRON_PROTCULLIS: return ThorimDarkIronPortCullisGUID;
+                    case GO_THORIM_LIGHTNING_FIELD:      return ThorimLightningFieldGUID;
+                    case NPC_THORIM_CTRL:                return ThorimCtrlGUID;
 
                     // Mimiron
                     case BOSS_MIMIRON:              return MimironGUID;

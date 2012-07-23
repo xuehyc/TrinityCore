@@ -181,6 +181,16 @@ enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-N
     NPC_BRIGHTLEAF               = 32915,
     NPC_STONEBARK                = 32914,
 
+    // Thorim
+    NPC_THORIM_CTRL              = 32879,
+    // Thorim_PrePhaseAddEntries
+    NPC_JORMUNGAR_BEHEMOTH       = 32882,
+    NPC_MERCENARY_CAPTAIN_A      = 32908,
+    NPC_MERCENARY_SOLDIER_A      = 32885,
+    NPC_DARK_RUNE_ACOLYTE        = 32886,
+    NPC_MERCENARY_CAPTAIN_H      = 32907,
+    NPC_MERCENARY_SOLDIER_H      = 32883,
+
     // Hodir's Helper NPCs
     NPC_TOR_GREYCLOUD            = 32941,
     NPC_KAR_GREYCLOUD            = 33333,
@@ -220,11 +230,12 @@ enum UlduarGameObjects
     GO_KOLOGARN_BRIDGE          = 194232,
     GO_KOLOGARN_DOOR            = 194553,
 
-    GO_THORIM_CHEST_HERO        = 194315,
-    GO_THORIM_CHEST             = 194314,
-    GO_THORIM_ENCOUNTER_DOOR    = 194559,
-    GO_THORIM_STONE_DOOR        = 194558,
-    GO_THORIM_RUNIC_DOOR        = 194557,
+    GO_THORIM_DARK_IRON_PROTCULLIS  = 194560,
+    GO_THORIM_CHEST_HERO            = 194315,
+    GO_THORIM_CHEST                 = 194314,
+    GO_THORIM_LIGHTNING_FIELD       = 194559,
+    GO_THORIM_STONE_DOOR            = 194558,
+    GO_THORIM_RUNIC_DOOR            = 194557,
 
     GO_HODIR_RARE_CACHE_OF_WINTER_HERO  = 194201,
     GO_HODIR_RARE_CACHE_OF_WINTER       = 194200,
