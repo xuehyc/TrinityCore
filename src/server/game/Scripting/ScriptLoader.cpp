@@ -424,6 +424,7 @@ void AddSC_boss_kologarn();
 void AddSC_boss_assembly_of_iron();
 void AddSC_boss_general_vezax();
 void AddSC_ulduar_teleporter();
+void AddSC_ulduar_trash();
 void AddSC_boss_mimiron();
 void AddSC_boss_hodir();
 void AddSC_boss_thorim();
@@ -1138,6 +1139,7 @@ void AddNorthrendScripts()
     AddSC_boss_assembly_of_iron();
     AddSC_boss_kologarn();
     AddSC_ulduar_teleporter();
+    AddSC_ulduar_trash();
     AddSC_boss_mimiron();
     AddSC_boss_hodir();
     AddSC_boss_thorim();
