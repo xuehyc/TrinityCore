@@ -563,7 +563,8 @@ class spell_pollinate : public SpellScriptLoader
                     if (Creature* creature = (*it)->ToCreature())
                         if (creature->GetEntry() != NPC_GUARDIAN_LASHER)
                             it = unitList.erase(it);
-                    it = unitList.erase(it);
+                    else 
+                        it = unitList.erase(it);
                 }
             }
 
