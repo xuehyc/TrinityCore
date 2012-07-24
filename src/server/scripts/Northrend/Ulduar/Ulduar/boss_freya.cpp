@@ -369,7 +369,10 @@ class boss_freya : public CreatureScript
 
         struct boss_freyaAI : public BossAI
         {
-            boss_freyaAI(Creature* creature) : BossAI(creature, BOSS_FREYA) {}            
+            boss_freyaAI(Creature* creature) : BossAI(creature, BOSS_FREYA) 
+            {
+                EncounterFinished = false;
+            }          
 
             void Reset()
             {
@@ -1729,16 +1732,16 @@ class npc_eonars_gift : public CreatureScript
         {
             npc_eonars_giftAI(Creature* creature) : Scripted_NoMovementAI(creature) {}
 
-            void InitializeAI()
-            {                
-                DoCast(me, SPELL_GROW);
-                DoCast(me, SPELL_PHEROMONES, true);
-                DoCast(me, SPELL_EONAR_VISUAL, true);
-            }
-
             void Reset()
             {
                 lifeBindersGiftTimer = 12000;
+            }
+
+            void IsSummonedBy(Unit* /* summoner */)
+            {
+                DoCast(me, SPELL_GROW);
+                DoCast(me, SPELL_PHEROMONES, true);
+                DoCast(me, SPELL_EONAR_VISUAL, true);
             }
 
             void UpdateAI(uint32 const diff)
@@ -1788,9 +1791,12 @@ class npc_nature_bomb : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
+                if (GameObject* go = me->FindNearestGameObject(GAMEOBJECT_NATURE_BOMB, 5.0f))
+                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);                
+
                 if (bombTimer <= diff)
                 {
-                    if (GameObject* go = me->FindNearestGameObject(GAMEOBJECT_NATURE_BOMB, 1.0f))
+                    if (GameObject* go = me->FindNearestGameObject(GAMEOBJECT_NATURE_BOMB, 5.0f))
                     {
                         go->SetGoState(GO_STATE_ACTIVE);
                         DoCast(me, SPELL_NATURE_BOMB);

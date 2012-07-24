@@ -300,12 +300,14 @@ class boss_hodir : public CreatureScript
             boss_hodirAI(Creature* creature) : BossAI(creature, BOSS_HODIR)
             {
                 me->SetReactState(REACT_PASSIVE);
+                gotEncounterFinished = false;
             }            
 
             void Reset()
             {
                 _Reset();
                 me->SetReactState(REACT_PASSIVE);
+                gotEncounterFinished = gotEncounterFinished || (instance->GetBossState(BOSS_HODIR) == DONE);
 
                 // Note: NPC translation alliance -> horde is performed by OnCreatureCreate (instance-script)
                 for (uint8 n = 0; n < FRIENDS_COUNT; ++n)
@@ -344,6 +346,10 @@ class boss_hodir : public CreatureScript
                 if (damage >= me->GetHealth())
                 {
                     damage = 0;
+                    if (gotEncounterFinished)
+                        return;
+
+                    gotEncounterFinished = true;
                     DoScriptText(SAY_DEATH, me);
                     if (iCouldSayThatThisCacheWasRare)
                         instance->SetData(DATA_HODIR_RARE_CACHE, 1);
@@ -489,6 +495,7 @@ class boss_hodir : public CreatureScript
                 bool cheeseTheFreeze;
                 bool iHaveTheCoolestFriends;
                 bool iCouldSayThatThisCacheWasRare;
+                bool gotEncounterFinished;
         };
 
         CreatureAI* GetAI(Creature* creature) const

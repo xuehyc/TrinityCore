@@ -120,6 +120,7 @@ enum Achievments
 
 enum Entrys
 {
+    // TODO: Those need to be spawned
     NPC_HELP_KEEPER_FREYA                       = 33241,
     NPC_HELP_KEEPER_MIMIRON                     = 33244,
     NPC_HELP_KEEPER_THORIM                      = 33242,

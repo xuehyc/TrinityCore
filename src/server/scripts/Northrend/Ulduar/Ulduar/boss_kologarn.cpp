@@ -268,7 +268,7 @@ class boss_kologarn : public CreatureScript
             }
 
             // try to get ranged target, not too far away
-            Unit* GetEyeBeamTarget()
+            Player* GetEyeBeamTarget()
             {
                 Map* map = me->GetMap();
                 if (map && map->IsDungeon())
@@ -446,7 +446,7 @@ class boss_kologarn : public CreatureScript
                             events.CancelEvent(EVENT_RESPAWN_RIGHT_ARM);
                             break;                        
                         case EVENT_FOCUSED_EYEBEAM:
-                            if (Unit* eyebeamTargetUnit = GetEyeBeamTarget())
+                            if (Player* eyebeamTargetUnit = GetEyeBeamTarget())
                             {
                                 eyebeamTarget = eyebeamTargetUnit->GetGUID();
                                 me->MonsterWhisper(EMOTE_EYEBEAM, eyebeamTarget, true);
