@@ -79,8 +79,8 @@ INSERT creature_loot_template (entry, item, ChanceOrQuestChance, lootmode, group
 
 (29304, 43228, 100, 1, 0, @min_nh, @max_nh), -- Slad'ran
 (31370, 43228, 100, 1, 0, @min_hc, @max_hc), 
-(29307, 43228, 100, 1, 0, @min_nh, @max_nh), -- Drakkari Colossus
-(31365, 43228, 100, 1, 0, @min_hc, @max_hc), 
+(29573, 43228, 100, 1, 0, @min_nh, @max_nh), -- Drakkari Elemental
+(31367, 43228, 100, 1, 0, @min_nh, @max_nh), 
 (29305, 43228, 100, 1, 0, @min_nh, @max_nh), -- Moorabi
 (30530, 43228, 100, 1, 0, @min_hc, @max_hc), 
 (29932, 43228, 100, 1, 0, @min_hc, @max_hc), -- Eck (only HC)
