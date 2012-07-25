@@ -1119,6 +1119,15 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
     // Extra conditions -- leaving the possibility add extra conditions...
     switch (spellId)
     {
+        case 57940: // Essence of Wintergrasp - Northrend
+        case 58045: // Essence of Wintergrasp - Wintergrasp
+            if (!player)
+                return false;
+
+            if (OutdoorPvPWG* wg = dynamic_cast<OutdoorPvPWG*>(sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197)))
+                if (wg->getDefenderTeam() != player->GetTeamId())
+                    return false;
+            break;
         case 58600: // No fly Zone - Dalaran
         {
             if (!player)

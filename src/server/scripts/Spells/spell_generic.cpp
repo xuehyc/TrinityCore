@@ -2824,38 +2824,6 @@ class spell_gen_ribbon_pole_dancer_check : public SpellScriptLoader
         }
 };
 
-class spell_gen_essence_of_wintergrasp : public SpellScriptLoader
-{
-    public:
-        spell_gen_essence_of_wintergrasp() : SpellScriptLoader("spell_gen_essence_of_wintergrasp") {}
-
-        class spell_gen_essence_of_wintergrasp_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_gen_essence_of_wintergrasp_SpellScript)
-
-            void HandleAfterHit()
-            {
-                if (!GetHitUnit())
-                    return;
-
-                if (Player* player = GetHitUnit()->ToPlayer())
-                    if (OutdoorPvPWG* wg = dynamic_cast<OutdoorPvPWG*>(sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197)))
-                        if (wg->getDefenderTeam() != player->GetTeamId())
-                            PreventHitAura();
-            }
-
-            void Register()
-            {
-                AfterHit += SpellHitFn(spell_gen_essence_of_wintergrasp_SpellScript::HandleAfterHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_gen_essence_of_wintergrasp_SpellScript();
-        }
-};
-
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -2910,5 +2878,4 @@ void AddSC_generic_spell_scripts()
     new spell_gen_leviroth_self_impale();
     new spell_gen_summon_spirit_rexxars_whistle();
     new spell_gen_ribbon_pole_dancer_check();
-    new spell_gen_essence_of_wintergrasp();
 }

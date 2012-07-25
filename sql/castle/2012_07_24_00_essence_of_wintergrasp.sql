@@ -36,9 +36,9 @@ INSERT INTO spell_area VALUES
 
 -- 2) add spell script eligibility check
 DELETE FROM spell_script_names WHERE spell_id IN (57940, 58045);
-INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
-(57940, 'spell_gen_essence_of_wintergrasp'),
-(58045, 'spell_gen_essence_of_wintergrasp');
+-- INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+-- (57940, 'spell_gen_essence_of_wintergrasp'),
+-- (58045, 'spell_gen_essence_of_wintergrasp');
 
 -- 3) add stone keeper's shard to northrend dungeon bosses
 DELETE FROM creature_loot_template WHERE item = 43228;
