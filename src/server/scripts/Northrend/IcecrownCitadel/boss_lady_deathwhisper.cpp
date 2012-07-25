@@ -377,8 +377,12 @@ class boss_lady_deathwhisper : public CreatureScript
                     damage -= me->GetPower(POWER_MANA);
                     me->SetPower(POWER_MANA, 0);
                     me->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
-                    summons.DoAction(NPC_CULT_FANATIC, DATA_CANCEL_MARTYRDOM_P2);
-                    summons.DoAction(NPC_CULT_ADHERENT, DATA_CANCEL_MARTYRDOM_P2);
+                    // on normal mode the cultists do get reanimated anymore
+                    if (!IsHeroic())
+                    {
+                        summons.DoAction(NPC_CULT_FANATIC, DATA_CANCEL_MARTYRDOM_P2);
+                        summons.DoAction(NPC_CULT_ADHERENT, DATA_CANCEL_MARTYRDOM_P2);
+                    }
                     events.SetPhase(PHASE_TWO);
                     events.ScheduleEvent(EVENT_P2_FROSTBOLT, urand(10000, 12000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_P2_FROSTBOLT_VOLLEY, urand(19000, 21000), 0, PHASE_TWO);
