@@ -41,9 +41,19 @@ UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_dark_rune_ravager'
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_faceless_horror' WHERE `entry`=33772; 
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_adherent' WHERE `entry`=33818; 
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_frost_mage' WHERE `entry`=33819;  
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_pyromancer' WHERE `entry`=33820;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_enslaved_fire_elemental' WHERE `entry`=33838;  
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_guardian' WHERE `entry`=33822;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_slayer' WHERE `entry`=33823;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_shadowblade' WHERE `entry`=33824;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_molten_colossus' WHERE `entry`=34069;   
 
 DELETE FROM `spell_script_names` WHERE `spell_id`=63059;
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63059, 'spell_pollinate');
+
+DELETE FROM `spell_linked_spell` WHERE  `spell_trigger`=62317 AND `spell_effect`=57807 AND `type`=1;
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (62317, 57807, 1, 'Twilight Guardian - Link Devastate to Sunder Armor');
+
   
 */
 
@@ -195,7 +205,7 @@ class npc_steelforged_defender : public CreatureScript
                             events.ScheduleEvent(EVENT_LIGHTNING_BOLT, 9*IN_MILLISECONDS);
                             break;
                         case EVENT_SUNDER_ARMOR:                            
-                            DoCast(me->getVictim(), SPELL_SUNDER_ARMOR);
+                            DoCastVictim( SPELL_SUNDER_ARMOR);
                             if (Unit* vic = me->getVictim())
                                 if (Aura* sunder = vic->GetAura(SPELL_SUNDER_ARMOR))
                                     if (sunder->GetStackAmount() == 5)  // If stacks are maximized, we will take a longer delay.
@@ -260,7 +270,7 @@ class npc_ironwork_cannon : public CreatureScript
                     {
                         case EVENT_FLAME_CANNON:
                             if ( Unit* dest = SelectTarget(SELECT_TARGET_RANDOM, 0, RangeCheck(me, 30.0f, 200.0f)) )
-                                DoCast(dest, SPELL_FLAME_CANNON);
+                                (DoCast)(dest, SPELL_FLAME_CANNON);
                             events.ScheduleEvent(EVENT_FLAME_CANNON, 1500);
                             break;
                     }
@@ -279,6 +289,78 @@ class npc_ironwork_cannon : public CreatureScript
         }
 };
 
+class npc_molten_colossus : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_EARTHQUAKE = 1,
+            EVENT_MAGMA_SPLASH,
+            EVENT_PYROBLAST,
+        };
+        enum Spells
+        {
+            SPELL_EARTHQUAKE    = 64697,
+            SPELL_MAGMA_SPLASH  = 64699,
+            SPELL_PYROBLAST     = 64698,
+        };
+    public:
+        npc_molten_colossus () : CreatureScript("npc_molten_colossus") {}
+
+        struct npc_molten_colossusAI: public ScriptedAI
+        {
+            npc_molten_colossusAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_EARTHQUAKE, urand(4*IN_MILLISECONDS, 8*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_MAGMA_SPLASH, urand(3*IN_MILLISECONDS, 4*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_PYROBLAST, urand(6*IN_MILLISECONDS, 9*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_EARTHQUAKE:
+                            DoCastAOE(SPELL_EARTHQUAKE);
+                            events.ScheduleEvent(EVENT_EARTHQUAKE, urand(4*IN_MILLISECONDS, 8*IN_MILLISECONDS));
+                            break;
+                        case EVENT_MAGMA_SPLASH:
+                            DoCastVictim(SPELL_MAGMA_SPLASH);
+                            events.ScheduleEvent(EVENT_MAGMA_SPLASH, urand(3*IN_MILLISECONDS, 4*IN_MILLISECONDS));
+                            break;
+                        case EVENT_PYROBLAST:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f))
+                                DoCast(target, SPELL_PYROBLAST);
+                            events.ScheduleEvent(EVENT_PYROBLAST, urand(6*IN_MILLISECONDS, 9*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_molten_colossusAI(creature);
+        }
+};
 
 /************************************************************************/
 /*                          Outer Sanctuary                             */
@@ -333,7 +415,7 @@ class npc_storm_tempered_keeper : public CreatureScript
                 switch (action)
                 {
                     case ACTION_VENGEFUL_SURGE:
-                        DoCast(SPELL_VENGEFUL_SURGE);
+                        ((((DoCast))))(SPELL_VENGEFUL_SURGE);
                         break;
                 }
             }
@@ -510,7 +592,7 @@ class npc_dark_rune_thunderer : public CreatureScript
                     switch (event)
                     {
                         case EVENT_LIGHTNING_BRAND:
-                            DoCast(me->getVictim(), RAID_MODE(SPELL_LIGHTNING_BRAND_10, SPELL_LIGHTNING_BRAND_25));
+                            DoCastVictim( RAID_MODE(SPELL_LIGHTNING_BRAND_10, SPELL_LIGHTNING_BRAND_25));
                             events.ScheduleEvent(EVENT_LIGHTNING_BRAND, urand(2*IN_MILLISECONDS, 3*IN_MILLISECONDS));
                             break;
                     }
@@ -565,7 +647,7 @@ class npc_dark_rune_ravager : public CreatureScript
                     switch (event)
                     {
                     case EVENT_RAVAGE_ARMOR:
-                        DoCast(me->getVictim(), SPELL_RAVAGE_ARMOR);
+                        DoCastVictim( SPELL_RAVAGE_ARMOR);
                         events.ScheduleEvent(EVENT_RAVAGE_ARMOR, 2*IN_MILLISECONDS);
                         break;
                     }
@@ -701,7 +783,7 @@ class npc_misguided_nymph : public CreatureScript
                             events.ScheduleEvent(EVENT_BIND_LIFE, 6*IN_MILLISECONDS);
                             break;
                         case EVENT_FROST_SPEAR:
-                            DoCast(me->getVictim(), RAID_MODE(SPELL_FROST_SPEAR_10, SPELL_FROST_SPEAR_25), true);
+                            DoCastVictim( RAID_MODE(SPELL_FROST_SPEAR_10, SPELL_FROST_SPEAR_25), true);
                             events.ScheduleEvent(EVENT_FROST_SPEAR, 8*IN_MILLISECONDS);
                             break;
                         case EVENT_WINTERS_EMBRACE:
@@ -1116,6 +1198,7 @@ class npc_faceless_horror : public CreatureScript
         {   
             EVENT_DEATH_GRIP = 1,
             EVENT_SHADOW_CRASH,
+            EVENT_VOID_BARRIER_BEGIN,
             EVENT_VOID_BARRIER_END,
             EVENT_VOID_WAVE
         };
@@ -1148,10 +1231,9 @@ class npc_faceless_horror : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->GetHealthPct() < 30.0f)
+                if (me->GetHealthPct()<30.0f && events.GetNextEventTime(EVENT_VOID_BARRIER_BEGIN)==0 && events.GetNextEventTime(EVENT_VOID_BARRIER_END)==0) // If on low health and skills not yet scheduled...
                 {
-                    DoCast(SPELL_VOID_BARRIER);
-                    events.ScheduleEvent(EVENT_VOID_BARRIER_END, 10*IN_MILLISECONDS);
+                    events.ScheduleEvent(EVENT_VOID_BARRIER_BEGIN, 0);
                 }
 
                 while (uint32 event = events.ExecuteEvent())
@@ -1174,8 +1256,13 @@ class npc_faceless_horror : public CreatureScript
                             }
                             events.ScheduleEvent(EVENT_SHADOW_CRASH, urand(6*IN_MILLISECONDS, 12*IN_MILLISECONDS));
                             break;
+                        case EVENT_VOID_BARRIER_BEGIN:
+                            DoCast(SPELL_VOID_BARRIER);
+                            events.ScheduleEvent(EVENT_VOID_BARRIER_END, 10*IN_MILLISECONDS);
+                            break;
                         case EVENT_VOID_BARRIER_END:
                             me->RemoveAurasDueToSpell(SPELL_VOID_BARRIER);
+                            events.ScheduleEvent(EVENT_VOID_BARRIER_BEGIN, 10*IN_MILLISECONDS);
                             break;
                     }
                 }
@@ -1259,7 +1346,7 @@ class npc_twilight_adherent : public CreatureScript
                             DoCast(SPELL_ARCANE_BURST); // is paired with blink, so no need to reschedule this
                             break;
                         case EVENT_BLINK:
-                            DoCast( SelectTarget(SELECT_TARGET_FARTHEST, 0, RangeCheck(me, 0.0f, 150.0f)), SPELL_BLINK );
+                            DoCast( SelectTarget(SELECT_TARGET_FARTHEST, 0, 150.0f), SPELL_BLINK );
                             events.ScheduleEvent(EVENT_BLINK, urand(8*IN_MILLISECONDS, 15*IN_MILLISECONDS));
                             events.ScheduleEvent(EVENT_ARCANE_BURST, 1*IN_MILLISECONDS);
                             break;
@@ -1345,7 +1432,7 @@ class npc_twilight_frost_mage : public CreatureScript
                             DoCast(SPELL_ARCANE_BURST); // is paired with blink, so no need to reschedule this
                             break;
                         case EVENT_BLINK:
-                            DoCast( SelectTarget(SELECT_TARGET_FARTHEST, 0, RangeCheck(me, 0.0f, 150.0f)), SPELL_BLINK );                            
+                            DoCast( SelectTarget(SELECT_TARGET_FARTHEST, 0, 150.0f), SPELL_BLINK );                            
                             events.ScheduleEvent(EVENT_ARCANE_BURST, 1*IN_MILLISECONDS);
                             break;
                         case EVENT_FROST_NOVA:
@@ -1373,6 +1460,411 @@ class npc_twilight_frost_mage : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return new npc_twilight_frost_mageAI(creature);
+        }
+};
+
+class npc_twilight_pyromancer : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_ARCANE_BURST = 1,
+            EVENT_BLINK,
+            EVENT_FIREBALL,
+            EVENT_FLAME_STRIKE,
+            EVENT_SUMMON_FIRE_ELE,
+        };
+        enum Spells
+        {
+            SPELL_ARCANE_BURST      = 64663,
+            SPELL_BLINK             = 64662,
+            SPELL_FIREBALL          = 63789,
+            SPELL_FLAME_STRIKE      = 63775,
+            SPELL_SUMMON_FIRE_ELE   = 63774
+        };
+    public:
+        npc_twilight_pyromancer () : CreatureScript("npc_twilight_pyromancer") {}
+
+        struct npc_twilight_pyromancerAI: public ScriptedAI
+        {
+            npc_twilight_pyromancerAI(Creature* creature) : ScriptedAI(creature), summons(me) {}
+
+            void Reset()
+            {
+                summons.DespawnAll();
+                events.Reset();
+
+                DoCast(SPELL_SUMMON_FIRE_ELE);
+
+                events.ScheduleEvent(EVENT_BLINK, urand(8*IN_MILLISECONDS, 15*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_FIREBALL, urand(3*IN_MILLISECONDS, 5*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_FLAME_STRIKE, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));                
+            }
+
+            void JustSummoned(Creature* summon)
+            {
+                summons.Summon(summon);
+            }
+
+            void SummonedCreatureDies(Creature* creature, Unit* /*killer*/)
+            {
+                summons.Despawn(creature);
+                if (creature->GetEntry() == 33838) // Enslaved fire elemental
+                    events.ScheduleEvent(EVENT_SUMMON_FIRE_ELE, 1*IN_MILLISECONDS);
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_ARCANE_BURST:
+                            DoCast(SPELL_ARCANE_BURST); // is paired with blink, so no need to reschedule this
+                            break;
+                        case EVENT_BLINK:
+                            DoCast( SelectTarget(SELECT_TARGET_FARTHEST, 0, 150.0f), SPELL_BLINK );
+                            events.ScheduleEvent(EVENT_BLINK, urand(8*IN_MILLISECONDS, 15*IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_ARCANE_BURST, 1*IN_MILLISECONDS);
+                            break;
+                        case EVENT_SUMMON_FIRE_ELE:
+                            DoCast(SPELL_SUMMON_FIRE_ELE);
+                            break;
+                        case EVENT_FIREBALL:
+                            DoCast( SelectTarget(SELECT_TARGET_RANDOM), SPELL_FIREBALL );
+                            events.ScheduleEvent(EVENT_FIREBALL, urand(3*IN_MILLISECONDS, 5*IN_MILLISECONDS));
+                            break;
+                        case EVENT_FLAME_STRIKE:
+                            DoCast( SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f), SPELL_FLAME_STRIKE );
+                            events.ScheduleEvent(EVENT_FLAME_STRIKE, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+                SummonList summons;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_twilight_pyromancerAI(creature);
+        }
+};
+
+class npc_enslaved_fire_elemental : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_FIRE_SHIELD_CHECK = 1,
+            EVENT_BLAST_WAVE,
+        };
+        enum Spells
+        {
+            SPELL_FIRE_SHIELD   = 63778,
+            SPELL_BLAST_WAVE    = 38064
+        };
+    public:
+        npc_enslaved_fire_elemental () : CreatureScript("npc_enslaved_fire_elemental") {}
+
+        struct npc_enslaved_fire_elementalAI: public ScriptedAI
+        {
+            npc_enslaved_fire_elementalAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                DoCast(me, SPELL_FIRE_SHIELD);
+                events.Reset();
+                events.ScheduleEvent(EVENT_FIRE_SHIELD_CHECK, 1*IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_BLAST_WAVE, 6*IN_MILLISECONDS);
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_FIRE_SHIELD_CHECK:
+                            {
+                                std::list<Unit*> allies;
+                                Trinity::AnyFriendlyUnitInObjectRangeCheck checker(me, me, 20.0f);
+                                Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, allies, checker);
+                                me->VisitNearbyObject(20.0f, searcher);
+                                allies.push_back(me->ToUnit());                // Add me to list
+                                allies.remove_if(Trinity::UnitAuraCheck(true, SPELL_FIRE_SHIELD)); // Fulfills here, since the call-to-predicate does not require a const one
+                                if (!allies.empty())
+                                    DoCast( SelectRandomContainerElement(allies), SPELL_FIRE_SHIELD );
+                                events.ScheduleEvent(EVENT_FIRE_SHIELD_CHECK, 1*IN_MILLISECONDS);
+                            }
+                            break;
+                        case EVENT_BLAST_WAVE:
+                            DoCast(SPELL_BLAST_WAVE);
+                            events.ScheduleEvent(EVENT_BLAST_WAVE, 6*IN_MILLISECONDS);
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_enslaved_fire_elementalAI(creature);
+        }
+};
+
+class npc_twilight_guardian : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_CONCUSSION_BLOW = 1,
+            EVENT_DEVASTATE,
+            EVENT_SUNDER_ARMOR,
+            EVENT_THUNDERCLAP,
+        };
+        enum Spells
+        {
+            SPELL_CONCUSSION_BLOW   = 52719,
+            SPELL_DEVASTATE         = 62317,
+            SPELL_SUNDER_ARMOR      = 57807,
+            SPELL_THUNDERCLAP       = 63757,
+        };
+    public:
+        npc_twilight_guardian () : CreatureScript("npc_twilight_guardian") {}
+
+        struct npc_twilight_guardianAI: public ScriptedAI
+        {
+            npc_twilight_guardianAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_CONCUSSION_BLOW, urand(3*IN_MILLISECONDS, 6*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_DEVASTATE, urand(1500, 2500));
+                events.ScheduleEvent(EVENT_THUNDERCLAP, urand (5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_CONCUSSION_BLOW:
+                            DoCastVictim(SPELL_CONCUSSION_BLOW);
+                            DoResetThreat();
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                            {
+                                me->AddThreat(target, 1000.0f);
+                                AttackStart(target);
+                            }                                
+                            events.ScheduleEvent(EVENT_CONCUSSION_BLOW, urand(3*IN_MILLISECONDS, 6*IN_MILLISECONDS));
+                            break;
+                        case EVENT_DEVASTATE:
+                            DoCastVictim(SPELL_DEVASTATE);
+                            events.ScheduleEvent(EVENT_DEVASTATE, urand(1500, 2500));
+                            break;
+                        case EVENT_THUNDERCLAP:
+                            DoCast(SPELL_THUNDERCLAP);
+                            events.ScheduleEvent(EVENT_THUNDERCLAP, urand (5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_twilight_guardianAI(creature);
+        }
+};
+
+// I hope that this one will really slay Twilight :)
+class npc_twilight_slayer : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_BLADESTORM = 1,
+            EVENT_MORTAL_STRIKE
+        };
+        enum Spells
+        {
+            SPELL_BLADESTORM = 63784,
+            SPELL_MORTAL_STRIKE = 35054,
+        };
+    public:
+        npc_twilight_slayer () : CreatureScript("npc_twilight_slayer") {}
+
+        struct npc_twilight_slayerAI: public ScriptedAI
+        {
+            npc_twilight_slayerAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {   
+                events.Reset();
+                events.ScheduleEvent(EVENT_BLADESTORM, urand(4*IN_MILLISECONDS, 8*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_MORTAL_STRIKE, urand(3*IN_MILLISECONDS, 6*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))   // for bladestorm
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_BLADESTORM:
+                            DoCastVictim(SPELL_BLADESTORM, true);
+                            events.DelayEvents(8*IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_BLADESTORM, urand(12*IN_MILLISECONDS, 16*IN_MILLISECONDS));
+                            break;
+                        case EVENT_MORTAL_STRIKE:
+                            DoCastVictim(SPELL_MORTAL_STRIKE);
+                            events.ScheduleEvent(EVENT_MORTAL_STRIKE, urand(4*IN_MILLISECONDS, 6*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_twilight_slayerAI(creature);
+        }
+};
+
+class npc_twilight_shadowblade : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_SHADOWSTEP = 1,
+            EVENT_BACKSTAB,
+            EVENT_FAN_OF_KNIVES,
+            EVENT_DEADLY_POSION,
+        };
+        enum Spells
+        {
+            SPELL_STEALTH = 30831,
+            SPELL_SHADOWSTEP = 36554,
+            SPELL_BACKSTAB = 63754,
+            SPELL_FAN_OF_KNIVES = 63753,
+            SPELL_DEADLY_POSION = 63755,
+        };
+    public:
+        npc_twilight_shadowblade () : CreatureScript("npc_twilight_shadowblade") {}
+
+        struct npc_twilight_shadowbladeAI: public ScriptedAI
+        {
+            npc_twilight_shadowbladeAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                me->SetReactState(REACT_DEFENSIVE);
+                events.Reset();
+
+                events.ScheduleEvent(EVENT_DEADLY_POSION, urand(12*IN_MILLISECONDS, 15*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_FAN_OF_KNIVES, urand(6*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+            }
+
+            void MoveInLineOfSight(Unit* target)
+            {
+                if (Player* player = target->ToPlayer())
+                    if (me->IsWithinDist(player, 25.0f))
+                        events.ScheduleEvent(EVENT_SHADOWSTEP, 500);
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_DEADLY_POSION:
+                            DoCastVictim(SPELL_DEADLY_POSION);
+                            events.ScheduleEvent(EVENT_DEADLY_POSION, urand(12*IN_MILLISECONDS, 15*IN_MILLISECONDS));
+                            break;
+                        case EVENT_FAN_OF_KNIVES:
+                            DoCast(SPELL_FAN_OF_KNIVES);
+                            events.ScheduleEvent(EVENT_FAN_OF_KNIVES, urand(6*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                            break;
+                        case EVENT_SHADOWSTEP:
+                            DoResetThreat();
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                            {
+                                DoCast(target, SPELL_SHADOWSTEP);
+                                AttackStart(target);                            
+                                events.ScheduleEvent(EVENT_BACKSTAB, 300);
+                            }
+                            events.ScheduleEvent(EVENT_SHADOWSTEP, urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS));
+                            break;
+                        case EVENT_BACKSTAB:                            
+                            DoCastVictim(SPELL_BACKSTAB);
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_twilight_shadowbladeAI(creature);
         }
 };
 
@@ -1426,9 +1918,12 @@ class spell_pollinate : public SpellScriptLoader
 
 void AddSC_ulduar_trash()
 {
-    // OS
+    // GA
     new npc_steelforged_defender();
     new npc_ironwork_cannon();
+    new npc_molten_colossus();
+
+    // OS
 
     // IS
     new npc_storm_tempered_keeper();
@@ -1442,6 +1937,11 @@ void AddSC_ulduar_trash()
     new npc_faceless_horror();
     new npc_twilight_adherent();
     new npc_twilight_frost_mage();
+    new npc_twilight_pyromancer();
+    new npc_enslaved_fire_elemental();
+    new npc_twilight_guardian();
+    new npc_twilight_slayer();
+    new npc_twilight_shadowblade();
 
     // IS - Freya
     new npc_corrupted_servitor();
