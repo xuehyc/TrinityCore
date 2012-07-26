@@ -270,7 +270,7 @@ class npc_ironwork_cannon : public CreatureScript
                     {
                         case EVENT_FLAME_CANNON:
                             if ( Unit* dest = SelectTarget(SELECT_TARGET_RANDOM, 0, RangeCheck(me, 30.0f, 200.0f)) )
-                                (DoCast)(dest, SPELL_FLAME_CANNON);
+                                DoCast(dest, SPELL_FLAME_CANNON);
                             events.ScheduleEvent(EVENT_FLAME_CANNON, 1500);
                             break;
                     }
@@ -415,7 +415,7 @@ class npc_storm_tempered_keeper : public CreatureScript
                 switch (action)
                 {
                     case ACTION_VENGEFUL_SURGE:
-                        ((((DoCast))))(SPELL_VENGEFUL_SURGE);
+                        DoCast(SPELL_VENGEFUL_SURGE);
                         break;
                 }
             }
