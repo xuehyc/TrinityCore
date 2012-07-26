@@ -877,8 +877,9 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
             void MoveInLineOfSight(Unit* target)
             {
                 if (myPhase == PHASE_NONE)
-                {
-                    if (target && me->GetDistance2d(target) <= 100.0f && target->ToPlayer() && !target->ToPlayer()->isGameMaster() && me->IsWithinLOSInMap(target))
+                {                    
+                    // LoS-distance should be ~30.0f, since the players should be able to talk to the keepers; Combat-reach gets increased in UpdatePhase()
+                    if (target && me->GetDistance2d(target) <= 30.0f && target->ToPlayer() && !target->ToPlayer()->isGameMaster() && me->IsWithinLOSInMap(target))
                     {
                         if (instance->GetBossState(BOSS_VEZAX) == DONE)
                         {
@@ -922,6 +923,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                 guidEventSkulls.DespawnAll();
                 guidEventTentacles.DespawnAll();
                 currentBrainEventPhase = PORTAL_PHASE_BRAIN_NONE;  
+                me->SetFloatValue(UNIT_FIELD_COMBATREACH, 30.0f); 
             }
 
             void SetData(uint32 type, uint32 val)
@@ -1379,6 +1381,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                                     yogg->AddLootMode(LOOT_MODE_HARD_MODE_2);
                                 yogg->AI()->SetData(ACTION_DO_CHANGE_PHASE, PHASE_SARA);
                             }
+                            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 100.0f); 
                         }
                         break;
                     case PHASE_BRAIN:                        
