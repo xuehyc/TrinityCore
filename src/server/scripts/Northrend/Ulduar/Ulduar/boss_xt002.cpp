@@ -164,6 +164,14 @@ class boss_xt002 : public CreatureScript
     private:
         // Internal definitions
         enum XT002Phase { PHASE_ONE = 1, PHASE_TWO };
+        enum XT002HeartPhase
+        {
+            PHASE_AT_100_PERCT      = 100,
+            PHASE_ABOVE_75_PERCT    = 75,
+            PHASE_ABOVE_50_PERCT    = 50,
+            PHASE_ABOVE_25_PERCT    = 25,
+            PHASE_ABOVE_0_PERCT     = 0,
+        };
         enum XT002Events
         {
             EVENT_TYMPANIC_TANTRUM = 1,
@@ -196,9 +204,7 @@ class boss_xt002 : public CreatureScript
 
         struct boss_xt002_AI : public BossAI
         {
-            boss_xt002_AI(Creature* creature) : BossAI(creature, BOSS_XT002)
-            {
-            }
+            boss_xt002_AI(Creature* creature) : BossAI(creature, BOSS_XT002) {}
 
             void Reset()
             {
@@ -210,10 +216,13 @@ class boss_xt002 : public CreatureScript
                 gravityBombCasualty = false;
                 hardMode = false;
 
+                SetPhaseOne();
+
+                transferHealth = 0;
                 phase = PHASE_ONE;
+                heartPhase = PHASE_AT_100_PERCT;
                 events.Reset();
                 events.SetPhase(PHASE_ONE);
-                heartExposed = 0;
 
                 if (!instance)
                     return;
@@ -230,11 +239,12 @@ class boss_xt002 : public CreatureScript
                 events.ScheduleEvent(EVENT_GRAVITY_BOMB, TIMER_GRAVITY_BOMB, 0, PHASE_ONE);
                 events.ScheduleEvent(EVENT_SEARING_LIGHT, TIMER_SEARING_LIGHT, 0, PHASE_ONE);
                 // Due to Hordeguides, the first Tympanic Tantrum gets scheduled after ~1min.
-                events.ScheduleEvent(EVENT_TYMPANIC_TANTRUM, urand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX) * 2, 0, PHASE_ONE);                               
+                events.ScheduleEvent(EVENT_TYMPANIC_TANTRUM, urand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX)*2, 0, PHASE_ONE);                               
 
                 if (!instance)
                     return;
 
+                heartPhase = PHASE_ABOVE_75_PERCT;
                 instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_MUST_DECONSTRUCT_FASTER);
             }
 
@@ -246,10 +256,6 @@ class boss_xt002 : public CreatureScript
                         events.ScheduleEvent(EVENT_ENTER_HARD_MODE, 1);
                         break;
                     case ACTION_XT002_REACHED:
-                        // Need this so we can properly determine when to expose heart again in DamageTaken hook
-                        if (me->GetHealthPct() > (25 * (4 - heartExposed)))
-                            ++heartExposed;
-
                         healthRecovered = true;
                         break;
                 }
@@ -268,7 +274,7 @@ class boss_xt002 : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
             {
-                if (!hardMode && phase == PHASE_ONE && !HealthAbovePct(100 - 25 * (heartExposed+1)))
+                if (!hardMode && phase == PHASE_ONE && HealthBelowPct(heartPhase)) // Bearbeiten: Phasenwechsel
                     ExposeHeart();
             }            
 
@@ -292,7 +298,7 @@ class boss_xt002 : public CreatureScript
                 switch (type)
                 {
                     case DATA_TRANSFERED_HEALTH:
-                        _transferHealth = data;
+                        transferHealth = data;
                         break;
                     case DATA_GRAVITY_BOMB_CASUALTY:
                         gravityBombCasualty = (data > 0) ? true : false;
@@ -375,6 +381,27 @@ class boss_xt002 : public CreatureScript
                     DoMeleeAttackIfReady();
             }
 
+            void RecalcHeartPhase()
+            {
+                /*  Note: I'm not sure about this, since I did not find any source that covers the following scenario:
+                    - XT on phase 2
+                    - Players' damage too low
+                    - Bots get him repaired above the last limit (say, if he got down to <75%, they heal him up to >75%)
+                    - Does the XT schedule another step at the last limit (in the example mentioned above: at 75%) or will he fall through ?
+                    The code below assumes the first option.
+                    I know that this will be a rather rare scenario, but it need to be covered by our code ;)
+                */
+                float healthPct = me->GetHealthPct();
+                if (healthPct > 75)
+                    heartPhase = PHASE_ABOVE_75_PERCT;
+                else if (healthPct > 50)
+                    heartPhase = PHASE_ABOVE_50_PERCT;
+                else if (healthPct > 25)
+                    heartPhase = PHASE_ABOVE_25_PERCT;
+                else
+                    heartPhase = PHASE_ABOVE_0_PERCT;
+            }
+
             void ExposeHeart()
             {
                 DoScriptText(SAY_HEART_OPENED, me);
@@ -382,7 +409,7 @@ class boss_xt002 : public CreatureScript
                 me->RemoveAurasDueToSpell(SPELL_TYMPANIC_TANTRUM);
                 me->GetMotionMaster()->MoveIdle();                             
 
-                DoCast(me, SPELL_SUBMERGE);  // WIll make creature untargetable                
+                DoCast(me, SPELL_SUBMERGE);  // Will make creature untargetable                
 
                 me->AttackStop();
                 me->SetReactState(REACT_PASSIVE);
@@ -390,6 +417,7 @@ class boss_xt002 : public CreatureScript
                 Unit* heart = me->GetVehicleKit() ? me->GetVehicleKit()->GetPassenger(HEART_VEHICLE_SEAT) : NULL;
                 if (heart)
                 {
+                    heart->ClearUnitState(UNIT_STATE_ONVEHICLE);
                     heart->CastSpell(heart, SPELL_HEART_OVERLOAD, false);
                     heart->CastSpell(me, SPELL_HEART_LIGHTNING_TETHER, false);
                     heart->CastSpell(heart, SPELL_HEART_HEAL_TO_FULL, true);
@@ -405,13 +433,12 @@ class boss_xt002 : public CreatureScript
 
                 // Phase 2 has officially started
                 phase = PHASE_TWO;
+                RecalcHeartPhase();
                 // Start "end of phase 2 timer"
                 events.SetPhase(PHASE_TWO);
                 events.ScheduleEvent(EVENT_DISPOSE_HEART, TIMER_HEART_PHASE, 0, PHASE_TWO);                
                 // Hordeguides: Add-spawn is running in phase 2
                 events.ScheduleEvent(EVENT_SPAWN_ADDS, 12*IN_MILLISECONDS, 0, PHASE_TWO);               
-                
-                heartExposed++;
             }
 
             void SetPhaseOne()
@@ -429,7 +456,7 @@ class boss_xt002 : public CreatureScript
                 
                 events.RescheduleEvent(EVENT_SEARING_LIGHT, TIMER_SEARING_LIGHT / 2, 0, PHASE_ONE);
                 events.RescheduleEvent(EVENT_GRAVITY_BOMB, TIMER_GRAVITY_BOMB, 0, PHASE_ONE);
-                events.RescheduleEvent(EVENT_TYMPANIC_TANTRUM, urand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX), 0, PHASE_ONE);
+                events.RescheduleEvent(EVENT_TYMPANIC_TANTRUM, urand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX)*2, 0, PHASE_ONE);
 
                 Unit* heart = me->GetVehicleKit() ? me->GetVehicleKit()->GetPassenger(HEART_VEHICLE_SEAT) : NULL;
                 if (!heart)
@@ -440,10 +467,15 @@ class boss_xt002 : public CreatureScript
 
                 if (!hardMode)
                 {
-                    if (!_transferHealth)
-                        _transferHealth = (heart->GetMaxHealth() - heart->GetHealth());
+                    if (!transferHealth) // Not settled == heart did not die
+                        if ( uint32 healthDiff = (heart->GetMaxHealth() - heart->GetHealth()) )
+                        {
+                            me->DealDamage(me, healthDiff);
+                            me->LowerPlayerDamageReq(healthDiff);
+                        }                    
 
-                    me->ModifyHealth(-((int32)_transferHealth));
+                    // Note: if the heart did not go down enough or the players sucked too much (heal through bots), we may have jumped back in heart-phase
+                    RecalcHeartPhase();
                 }
             }
 
@@ -454,8 +486,8 @@ class boss_xt002 : public CreatureScript
                 bool gravityBombCasualty;   // Did someone die because of Gravity Bomb damage?
 
                 XT002Phase phase;
-                uint8 heartExposed;
-                uint32 _transferHealth;
+                XT002HeartPhase heartPhase;
+                uint32 transferHealth;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -866,8 +898,10 @@ class spell_xt002_searing_light_spawn_life_spark : public SpellScriptLoader
             {
                 if (Player* player = GetOwner()->ToPlayer())
                     if (Unit* xt002 = GetCaster())
-                        if (xt002->HasAura(aurEff->GetAmount()))   // Heartbreak aura indicating hard mode
-                            player->CastSpell(player, SPELL_SUMMON_LIFE_SPARK, true);
+                        if (Creature* xt002c = xt002->ToCreature())   // Heartbreak aura indicating hard mode
+                            if (xt002c->IsAIEnabled)
+                                if (xt002c->AI()->GetData(DATA_HARD_MODE))
+                                    player->CastSpell(player, SPELL_SUMMON_VOID_ZONE, true);    // TODO: Check if casting this spell works as intended, may have problems due to target selection
             }
 
             void Register()
@@ -902,8 +936,10 @@ class spell_xt002_gravity_bomb_aura : public SpellScriptLoader
             {
                 if (Player* player = GetOwner()->ToPlayer())
                     if (Unit* xt002 = GetCaster())
-                        if (xt002->HasAura(aurEff->GetAmount()))   // Heartbreak aura indicating hard mode
-                            player->CastSpell(player, SPELL_SUMMON_VOID_ZONE, true);    // TODO: Check if casting this spell works as intended, may have problems due to target selection
+                        if (Creature* xt002c = xt002->ToCreature())   // Heartbreak aura indicating hard mode
+                            if (xt002c->IsAIEnabled)
+                                if (xt002c->AI()->GetData(DATA_HARD_MODE))
+                                    player->CastSpell(player, SPELL_SUMMON_VOID_ZONE, true);    // TODO: Check if casting this spell works as intended, may have problems due to target selection
             }
 
             void OnPeriodic(AuraEffect const* aurEff)
