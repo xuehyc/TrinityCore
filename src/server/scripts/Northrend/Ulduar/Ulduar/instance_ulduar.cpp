@@ -732,6 +732,7 @@ class instance_ulduar : public InstanceMapScript
                         break;
                     case GO_KOLOGARN_DOOR:
                         KologarnDoorGUID = gameObject->GetGUID();
+                        HandleGameObject(KologarnDoorGUID, GetBossState(BOSS_ASSEMBLY_OF_IRON)==DONE);
                         break;
 
                     // Thorim related
@@ -1155,6 +1156,9 @@ class instance_ulduar : public InstanceMapScript
                     case BOSS_STEELBREAKER:         return AssemblyGUIDs[0];
                     case BOSS_MOLGEIM:              return AssemblyGUIDs[1];
                     case BOSS_BRUNDIR:              return AssemblyGUIDs[2];
+
+                    // Kologarn
+                    case GO_KOLOGARN_DOOR:          return KologarnDoorGUID;
 
                     // Freya's Keepers
                     case BOSS_BRIGHTLEAF:           return KeeperGUIDs[0];

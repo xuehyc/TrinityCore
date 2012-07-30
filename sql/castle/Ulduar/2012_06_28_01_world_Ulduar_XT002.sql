@@ -4,3 +4,6 @@ DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_xt002_gravity_bomb_au
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES 
 (63024, 'spell_xt002_gravity_bomb_aura_target'), 
 (64234, 'spell_xt002_gravity_bomb_aura_target');
+
+-- Remove unconfirmed flag.
+UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~32768 WHERE `entry` IN (33329, 33995);

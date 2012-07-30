@@ -72,19 +72,22 @@ class ulduar_teleporter : public GameObjectScript
                 return false;
             if (!player->getAttackers().empty())
                 return false;
-            
-            action -= GOSSIP_ACTION_INFO_DEF;   // eases evaluation
-
             if (action < BASE_CAMP || action > MADNESS)
                 return false;
 
+            action -= GOSSIP_ACTION_INFO_DEF;   // eases evaluation
+
             player->CLOSE_GOSSIP_MENU();
+
+            if (player->GetVehicle())    // If player is on vehicle, throw him out - we cannot teleport both (or maybe we can? dunno)                 
+                player->ExitVehicle();
+
             if (action > SCRAPYARD)
             {
-                // Drop player from mount - they are only allowed on the outside, up to XT002
+                // Drop player from mount - they are only allowed on the outside, up to XT002               
                 player->Dismount();
                 player->RemoveAurasByType(SPELL_AURA_MOUNTED);
-            }            
+            }
             player->TeleportTo(MAP_ULDUAR, TeleportPointsUlduar[action][0], TeleportPointsUlduar[action][1], TeleportPointsUlduar[action][2], 0.0f);
             return true;
         }

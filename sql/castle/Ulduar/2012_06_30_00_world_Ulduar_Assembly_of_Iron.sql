@@ -1,8 +1,9 @@
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (61902, 61911, 63495);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (61902, 61911, 63495, 61920);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES 
 (61902, 'spell_steelbreaker_electrical_charge'),
 (61911, 'spell_steelbreaker_static_disruption'),
-(63495, 'spell_steelbreaker_static_disruption');
+(63495, 'spell_steelbreaker_static_disruption'),
+(61920, 'spell_supercharge');
 
 DELETE FROM `achievement_criteria_data` WHERE `criteria_id` IN (10084,10087,10088,10418,10419,10089,10420,10421,10090,10422,10423,10091,10424,10425);
 INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value2`, `ScriptName`) VALUES 
