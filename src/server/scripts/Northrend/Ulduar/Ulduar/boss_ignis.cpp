@@ -313,9 +313,9 @@ class boss_ignis : public CreatureScript
                         case EVENT_CHANGE_POT:
                             if (Unit* slagPotTarget = ObjectAccessor::GetUnit(*me, slagPotGUID))
                             {
-                                slagPotTarget->AddAura(SPELL_SLAG_POT, slagPotTarget);
                                 slagPotTarget->EnterVehicle(me, 1);
                                 slagPotTarget->ClearUnitState(UNIT_STATE_ONVEHICLE);
+                                DoCast(slagPotTarget, SPELL_SLAG_POT);                                                                
                                 events.ScheduleEvent(EVENT_END_POT, 10000);
                             }
                             break;
@@ -323,7 +323,6 @@ class boss_ignis : public CreatureScript
                             if (Unit* slagPotTarget = ObjectAccessor::GetUnit(*me, slagPotGUID))
                             {
                                 slagPotTarget->ExitVehicle();
-                                slagPotTarget = NULL;
                                 slagPotGUID = 0;
                             }
                             break;

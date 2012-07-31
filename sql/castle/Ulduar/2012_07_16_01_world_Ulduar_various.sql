@@ -8,7 +8,6 @@ UPDATE `creature_template` SET `mechanic_immune_mask`=650853247, `flags_extra`=1
 32867,   -- Steelbreaker
 32927,   -- Runemaster Molgeim
 32930,   -- Kologarn
-33515,   -- Auriaya
 32906,   -- Freya
 32845,   -- Hodir
 33350,   -- Mimiron
@@ -22,5 +21,8 @@ UPDATE `creature_template` SET `mechanic_immune_mask`=650853247, `flags_extra`=1
 33134,   -- Sara
 33890    -- Brain of Yogg-Saron
 );
+
+-- Auriaya should be interruptible, due to Sentinel Blast
+UPDATE `creature_template` SET `mechanic_immune_mask`=617298815 WHERE `entry` IN (33515);
 -- Stormcaller Brundir, immunities to stun and interrupt are gained infight.
 UPDATE `creature_template` SET `mechanic_immune_mask`=617296767, `flags_extra`=1 WHERE `entry` IN (32857);   

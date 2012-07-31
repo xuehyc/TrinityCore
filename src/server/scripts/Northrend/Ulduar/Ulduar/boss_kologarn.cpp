@@ -794,6 +794,15 @@ class spell_ulduar_stone_grip : public SpellScriptLoader
                 }
             }
 
+            void OnEnterVehicle(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Player* caster = GetCaster() ? GetCaster()->ToPlayer() : 0;
+                if (caster)
+                    caster->ClearUnitState(UNIT_STATE_ONVEHICLE);                
+                // TODO: Check if this works, but due to the code below, GetCaster() should return the player. 
+                // It appears that this function will be called after entering the "vehicle" arm. 
+            }
+
             void OnRemoveVehicle(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
             {
                 if (!(mode & AURA_EFFECT_HANDLE_REAL))
@@ -802,7 +811,7 @@ class spell_ulduar_stone_grip : public SpellScriptLoader
                 if (GetOwner()->GetTypeId() != TYPEID_UNIT)
                     return;
 
-                Player* caster = GetCaster() ? GetCaster()->ToPlayer() : NULL;
+                Player* caster = GetCaster() ? GetCaster()->ToPlayer() : 0;
                 if (!caster || !caster->IsOnVehicle(GetOwner()->ToUnit()))
                     return;
 
@@ -814,6 +823,7 @@ class spell_ulduar_stone_grip : public SpellScriptLoader
 
             void Register()
             {
+                AfterEffectApply += AuraEffectApplyFn(spell_ulduar_stone_grip_AuraScript::OnEnterVehicle, EFFECT_0, SPELL_AURA_CONTROL_VEHICLE, AURA_EFFECT_HANDLE_REAL);
                 OnEffectRemove += AuraEffectRemoveFn(spell_ulduar_stone_grip_AuraScript::OnRemoveVehicle, EFFECT_0, SPELL_AURA_CONTROL_VEHICLE, AURA_EFFECT_HANDLE_REAL);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_ulduar_stone_grip_AuraScript::OnRemoveStun, EFFECT_2, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
             }
