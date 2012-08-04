@@ -3250,6 +3250,7 @@ public:
         // Store player votepoints
         Field* fields = result->Fetch();
         playerVotepoints = fields[0].GetUInt32();
+        uint32 skill_increase = 0;
 
         switch (uiAction)
         {
@@ -3260,6 +3261,7 @@ public:
                     {
                         QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", VOTEPOINTS_PRICE_LEVEL_40, playerAccountId);
                         sLog->outString("WOW-CASTLE SCHWEIN: Player %s set to level 40 for %u voteshop points.", player->GetName(), VOTEPOINTS_PRICE_LEVEL_40);
+                        skill_increase = (40 - playerLevel) * 5;
                         player->GiveLevel(40);
                     }
                 }
@@ -3272,6 +3274,7 @@ public:
                     {
                         QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", VOTEPOINTS_PRICE_LEVEL_50, playerAccountId);
                         sLog->outString("WOW-CASTLE SCHWEIN: Player %s set to level 50 for %u voteshop points.", player->GetName(), VOTEPOINTS_PRICE_LEVEL_50);
+                        skill_increase = (50 - playerLevel) * 5;
                         player->GiveLevel(50);
                     }
                 }
@@ -3284,6 +3287,7 @@ public:
                     {
                         QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id`= %u AND `lock` = 0 LIMIT 1", VOTEPOINTS_PRICE_LEVEL_60, playerAccountId);
                         sLog->outString("WOW-CASTLE SCHWEIN: Player %s set to level 60 for %u voteshop points.", player->GetName(), VOTEPOINTS_PRICE_LEVEL_60);
+                        skill_increase = (60 - playerLevel) * 5;
                         player->GiveLevel(60);
                     }
                 }
@@ -3291,6 +3295,34 @@ public:
 
             default:
                 break;
+        }
+
+        if (skill_increase > 0)
+        {
+            uint32 mainhand_skill = 0;
+
+            // mainhand
+            if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                if (item->GetSkill() != 0)
+                {
+                    mainhand_skill = item->GetSkill(); // remember mainhand skill so we dont increase twice if mh skill = oh skill
+                    player->UpdateSkill(item->GetSkill(), skill_increase);
+                    sLog->outString("WOW-CASTLE SCHWEIN: Player %s has its main-hand weapon skill (%d) set to %d/%d (+%d)", player->GetName(), item->GetSkill(), player->GetSkillValue(item->GetSkill()), player->getLevel() * 5, skill_increase);
+                }
+            // offhand
+            if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                if (item->GetSkill() != 0 && item->GetSkill() != SKILL_SHIELD && item->GetSkill() != mainhand_skill)
+                {
+                    player->UpdateSkill(item->GetSkill(), skill_increase);
+                    sLog->outString("WOW-CASTLE SCHWEIN: Player %s has its off-hand weapon skill (%d) set to %d/%d (+%d)", player->GetName(), item->GetSkill(), player->GetSkillValue(item->GetSkill()), player->getLevel() * 5, skill_increase);
+                }
+            // ranged
+            if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+                if (item->GetSkill() != 0)
+                {
+                    player->UpdateSkill(item->GetSkill(), skill_increase);
+                    sLog->outString("WOW-CASTLE SCHWEIN: Player %s has its ranged weapon skill (%d) set to %d/%d (+%d)", player->GetName(), item->GetSkill(), player->GetSkillValue(item->GetSkill()), player->getLevel() * 5, skill_increase);
+                }
         }
 
         player->CLOSE_GOSSIP_MENU();
