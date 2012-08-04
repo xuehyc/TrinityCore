@@ -1287,7 +1287,6 @@ class instance_ulduar : public InstanceMapScript
         }
 };
 
-// TODO: Register script-name at database (not done yet 2012/06/24 14:50)
 class go_call_tram : public GameObjectScript
 {
 public:

@@ -312,6 +312,49 @@ class boss_mimiron : public CreatureScript
                 setUpUsTheBomb[DATA_AVOIDED_BOOM_BOT_EXPLOSION] = true;
             }
 
+            void BotAliveCheck()
+            {
+                if (phase != PHASE_COMBAT)
+                    return;
+
+                struct EqualHelper
+                {
+                    EqualHelper(bool& base) : __base(base) {}
+                    void operator()(std::pair<uint32, bool> value)
+                    {
+                        __base = __base && value.second;
+                    }
+
+                    private:
+                        bool& __base;
+                };
+
+                mapMutex.acquire();
+                bool res = true;
+                // Check if there is still a false value.
+                std::for_each(isSelfRepairing.begin(), isSelfRepairing.end(), EqualHelper(res));
+                mapMutex.release();
+                if (res)
+                {
+                    // We're down, baby.
+                    Creature* Leviathan = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_LEVIATHAN_MK_II));
+                    Creature* VX_001 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VX_001));
+                    Creature* AerialUnit = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_AERIAL_UNIT));
+                    if (Leviathan && VX_001 && AerialUnit)
+                    {
+                        Leviathan->DisappearAndDie();
+                        VX_001->DisappearAndDie();
+                        AerialUnit->DisappearAndDie();
+                        DespawnCreatures(NPC_FLAMES_INITIAL, 100.0f);
+                        DespawnCreatures(NPC_PROXIMITY_MINE, 100.0f);
+                        DespawnCreatures(NPC_ROCKET, 100);
+                        me->ExitVehicle();
+                        EncounterPostProgress();
+                    }
+                }
+                
+            }
+
             void EncounterPostProgress()
             {
                 if (gotEncounterFinished)
@@ -375,28 +418,6 @@ class boss_mimiron : public CreatureScript
                             return;
                         }
                         events.ScheduleEvent(EVENT_CHECK_TARGET, 7000);
-                        break;
-                    case EVENT_CHECK_BOTALIVE:  // Check if all are dead
-                        if (isSelfRepairing[DATA_LEVIATHAN_MK_II] && isSelfRepairing[DATA_AERIAL_UNIT] && isSelfRepairing[DATA_VX_001])
-                        {
-                            // We're down, baby.
-                            Creature* Leviathan = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_LEVIATHAN_MK_II));
-                            Creature* VX_001 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VX_001));
-                            Creature* AerialUnit = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_AERIAL_UNIT));
-                            if (Leviathan && VX_001 && AerialUnit)
-                            {
-                                Leviathan->DisappearAndDie();
-                                VX_001->DisappearAndDie();
-                                AerialUnit->DisappearAndDie();
-                                DespawnCreatures(NPC_FLAMES_INITIAL, 100.0f);
-                                DespawnCreatures(NPC_PROXIMITY_MINE, 100.0f);
-                                DespawnCreatures(NPC_ROCKET, 100);
-                                me->ExitVehicle();
-                                EncounterPostProgress();
-                            }
-                        }
-                        else
-                            events.ScheduleEvent(EVENT_CHECK_BOTALIVE, 500);
                         break;
                     case EVENT_ENRAGE:
                         DoScriptText(SAY_BERSERK, me);
@@ -722,23 +743,37 @@ class boss_mimiron : public CreatureScript
                         break;
                     // Repair stuff
                     case DO_LEVIATHAN_SELF_REPAIR_START:
+                        mapMutex.acquire();
                         isSelfRepairing[DATA_LEVIATHAN_MK_II] = true;
-                        events.RescheduleEvent(EVENT_CHECK_BOTALIVE, TIMER_BOT_ALIVE_CHECK);
+                        mapMutex.release();
+                        BotAliveCheck();
+                        break;
                     case DO_LEVIATHAN_SELF_REPAIR_END:
+                        mapMutex.acquire();
                         isSelfRepairing[DATA_LEVIATHAN_MK_II] = false;
-                        events.CancelEvent(EVENT_CHECK_BOTALIVE);   // Not needed if at least one is repaired
+                        mapMutex.release();
+                        break;
                     case DO_VX001_SELF_REPAIR_START:
+                        mapMutex.acquire();
                         isSelfRepairing[DATA_VX_001] = true;
-                        events.RescheduleEvent(EVENT_CHECK_BOTALIVE, TIMER_BOT_ALIVE_CHECK);
+                        mapMutex.release();
+                        BotAliveCheck();
+                        break;
                     case DO_VX001_SELF_REPAIR_END:
+                        mapMutex.acquire();
                         isSelfRepairing[DATA_VX_001] = false;
-                        events.CancelEvent(EVENT_CHECK_BOTALIVE);   // Not needed if at least one is repaired
+                        mapMutex.release();
+                        break;
                     case DO_AERIAL_SELF_REPAIR_START:
+                        mapMutex.acquire();
                         isSelfRepairing[DATA_AERIAL_UNIT] = true;
-                        events.RescheduleEvent(EVENT_CHECK_BOTALIVE, TIMER_BOT_ALIVE_CHECK);
+                        mapMutex.release();
+                        BotAliveCheck();
+                        break;
                     case DO_AERIAL_SELF_REPAIR_END:
+                        mapMutex.acquire();
                         isSelfRepairing[DATA_AERIAL_UNIT] = false;
-                        events.CancelEvent(EVENT_CHECK_BOTALIVE);   // Not needed if at least one is repaired
+                        mapMutex.release();
                         break;
                     // Achiev
                     case DATA_AVOIDED_ROCKET_STRIKES:
@@ -754,6 +789,7 @@ class boss_mimiron : public CreatureScript
             }
 
             private:
+                ACE_Mutex mapMutex;
                 std::map< uint32, bool > isSelfRepairing;
                 std::map< BombIndices, bool > setUpUsTheBomb;
                 MyPhase phase;
@@ -795,12 +831,13 @@ class boss_leviathan_mk : public CreatureScript
     public:
         boss_leviathan_mk() : CreatureScript("boss_leviathan_mk") {}
 
-        struct boss_leviathan_mkAI : public BossAI
+        struct boss_leviathan_mkAI : public ScriptedAI
         {
-            boss_leviathan_mkAI(Creature* creature) : BossAI(creature, BOSS_MIMIRON) {}            
+            boss_leviathan_mkAI(Creature* creature) : ScriptedAI(creature) {}            
 
             void InitializeAI()
             {
+                instance = me->GetInstanceScript();
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
@@ -815,6 +852,7 @@ class boss_leviathan_mk : public CreatureScript
                 phase = PHASE_IDLE;
                 events.SetPhase(phase);
                 gotMimironHardMode = false;
+                isInPhaseChangeHook = false;
 
                 if (Creature* turret = CAST_CRE(me->GetVehicleKit()->GetPassenger(3)))
                 {
@@ -840,9 +878,12 @@ class boss_leviathan_mk : public CreatureScript
                 if (!caster || !spell)
                     return;
                 if (spell->Id == SPELL_SELF_REPAIR)
+                {
+                    isInPhaseChangeHook = false;
                     DoAction(DO_LEVIATHAN_SELF_REPAIR_END);
-                if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
-                    Mimiron->AI()->DoAction(DO_LEVIATHAN_SELF_REPAIR_END);
+                    if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
+                        Mimiron->AI()->DoAction(DO_LEVIATHAN_SELF_REPAIR_END);
+                }
             }
 
             void DamageTaken(Unit* /*who*/, uint32 &damage)
@@ -850,16 +891,19 @@ class boss_leviathan_mk : public CreatureScript
                 if (damage >= me->GetHealth())
                 {
                     // Common stuff
-                    damage = 0;                     
+                    damage = 0;
+                    if (isInPhaseChangeHook)
+                        return;
+                    isInPhaseChangeHook = true;
                     me->InterruptNonMeleeSpells(true);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
                     me->AttackStop();
                     me->SetReactState(REACT_PASSIVE);
-                    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
-                    me->SetHealth(me->GetMaxHealth());
+                    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);                    
                     switch (phase)
                     {
-                        case PHASE_LEVIATHAN_SOLO__GLOBAL_1:                                                                                                  
+                        case PHASE_LEVIATHAN_SOLO__GLOBAL_1:  
+                            me->SetHealth(me->GetMaxHealth());                                                                                                
                             if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
                                 Mimiron->AI()->DoAction(DO_ACTIVATE_VX001);
                             if (Creature* turret = CAST_CRE(me->GetVehicleKit()->GetPassenger(3)))
@@ -913,21 +957,21 @@ class boss_leviathan_mk : public CreatureScript
                         events.SetPhase(phase);
                         DoZoneInCombat();
                         break;
-                    case DO_LEVIATHAN_ASSEMBLED:                            // Assemble and self-repair share some stuff, so the fallthrough is intended!
+                    case DO_LEVIATHAN_ASSEMBLED:                            // Assemble and self-repair share some stuff, so the fallthrough is intended!                        
+                        me->SetHealth( (me->GetMaxHealth() >> 1) );                        
+                    case DO_LEVIATHAN_SELF_REPAIR_END:
                         if (gotMimironHardMode)
                             if (!me->HasAura(SPELL_EMERGENCY_MODE))
                                 DoCast(me, SPELL_EMERGENCY_MODE, true);
-                        me->SetHealth( (me->GetMaxHealth() >> 1) );
                         phase = PHASE_LEVIATHAN_ASSEMBLED__GLOBAL_4;
                         events.SetPhase(phase);
-                    case DO_LEVIATHAN_SELF_REPAIR_END:
                         me->InterruptNonMeleeSpells(false);                
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->SetSpeed(MOVE_RUN, 1.0f, true);
                         me->SetStandState(UNIT_STAND_STATE_STAND);                
                         events.RescheduleEvent(EVENT_PROXIMITY_MINE, 1000, 0, PHASE_LEVIATHAN_ASSEMBLED__GLOBAL_4);
-                        events.RescheduleEvent(EVENT_SHOCK_BLAST, 30000, 0, PHASE_LEVIATHAN_ASSEMBLED__GLOBAL_4);
+                        events.RescheduleEvent(EVENT_SHOCK_BLAST, 3000, 0, PHASE_LEVIATHAN_ASSEMBLED__GLOBAL_4);
                         break;
                     case DO_ENTER_ENRAGE:
                         DoCast(me, SPELL_BERSERK, true);
@@ -950,10 +994,10 @@ class boss_leviathan_mk : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_PROXIMITY_MINE:
-                            for (uint8 i = 0; i < 10; i++)
-                                DoCast(SPELL_MINES_SPAWN);
-                            DoCast(SPELL_PROXIMITY_MINES);
-                            events.RescheduleEvent(EVENT_PROXIMITY_MINE, 35000, phase);
+                            {                                                                
+                                DoCast(SPELL_PROXIMITY_MINES);
+                                events.RescheduleEvent(EVENT_PROXIMITY_MINE, 35000, phase);
+                            }
                             break;
                         case EVENT_PLASMA_BLAST:
                             me->MonsterTextEmote(EMOTE_LEVIATHAN, 0, true);
@@ -977,7 +1021,10 @@ class boss_leviathan_mk : public CreatureScript
 
             private:
                 MyPhase phase;
+                EventMap events;
                 bool gotMimironHardMode;
+                bool isInPhaseChangeHook;
+                InstanceScript* instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1078,13 +1125,9 @@ class npc_proximity_mine : public CreatureScript
 
             void InitializeAI()
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);                
-            }
-
-            void Reset()
-            {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED); 
                 uiBoomTimer = 35000;
-                boomLocked = false;
+                boomLocked = false;               
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -1101,12 +1144,16 @@ class npc_proximity_mine : public CreatureScript
 
             void MoveInLineOfSight(Unit* who)
             {
-                if (!boomLocked && me->IsWithinDistInMap(who, 0.5f) && who->ToPlayer() && !who->ToPlayer()->isGameMaster())
-                {
-                    DoCastAOE(SPELL_EXPLOSION);
-                    boomLocked = true;
-                    me->ForcedDespawn(200);
-                }
+                if (!who)
+                    return;
+                if (Player* player = who->ToPlayer())
+                    if (!player->isGameMaster())
+                        if (!boomLocked && me->GetDistance2d(player)<3.0f)
+                        {
+                            DoCastAOE(SPELL_EXPLOSION);
+                            boomLocked = true;
+                            me->ForcedDespawn(1000);
+                        }                           
             }
 
             void UpdateAI(const uint32 diff)
@@ -1133,6 +1180,69 @@ class npc_proximity_mine : public CreatureScript
             return new npc_proximity_mineAI(creature);
         }
 };
+
+class spell_proximity_mines_triggered : public SpellScriptLoader // Spell 63016
+{
+    public:
+        spell_proximity_mines_triggered() : SpellScriptLoader("spell_proximity_mines_triggered") {}
+
+        class spell_proximity_mines_triggered_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_proximity_mines_triggered_SpellScript);
+
+            void HandleDummyTick(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    Position base;
+                    caster->GetPosition(&base);
+                    caster->GetRandomNearPosition(base, 15.0f); // wowhead: Mines should land in 15 yards away from caster.
+                    caster->SummonCreature(NPC_PROXIMITY_MINE, base);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHit += SpellEffectFn(spell_proximity_mines_triggered_SpellScript::HandleDummyTick, EFFECT_0, SPELL_EFFECT_SUMMON);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_proximity_mines_triggered_SpellScript();
+        }
+};
+
+class spell_proximity_mines : public SpellScriptLoader // Spell 63027
+{
+    public:
+        spell_proximity_mines() : SpellScriptLoader("spell_proximity_mines") {}
+
+        class spell_proximity_mines_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_proximity_mines_SpellScript);
+
+            void HandleDummyTick(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    for (uint8 i = 0; i < 10; i++)
+                        caster->CastSpell(caster, SPELL_MINES_SPAWN, true);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHit += SpellEffectFn(spell_proximity_mines_SpellScript::HandleDummyTick, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_proximity_mines_SpellScript();
+        }
+};
+
 
 /************************************************************************/
 /*                               VX-001                                 */
@@ -1162,12 +1272,13 @@ class boss_vx_001 : public CreatureScript
     public:
         boss_vx_001() : CreatureScript("boss_vx_001") {}
 
-        struct boss_vx_001AI : public BossAI
+        struct boss_vx_001AI : public Scripted_NoMovementAI
         {
-            boss_vx_001AI(Creature* creature) : BossAI(creature, BOSS_MIMIRON) {}
+            boss_vx_001AI(Creature* creature) : Scripted_NoMovementAI(creature) {}
 
             void InitializeAI()
             {
+                instance = me->GetInstanceScript();
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }            
@@ -1186,6 +1297,7 @@ class boss_vx_001 : public CreatureScript
                 phase = PHASE_IDLE;
                 events.SetPhase(phase);
                 MimironHardMode = false;
+                isInPhaseChangeHook = false;
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -1229,13 +1341,14 @@ class boss_vx_001 : public CreatureScript
                         events.SetPhase(phase);
                         DoZoneInCombat();
                         break;
-                    case DO_VX001_ASSEMBLED:                                // Reassemble and heal share some stuff, fallthrough is intended
+                    case DO_VX001_ASSEMBLED:                                // Reassemble and heal share some stuff, fallthrough is intended                        
+                        me->SetHealth( (me->GetMaxHealth() >> 1) );                        
+                    case DO_VX001_SELF_REPAIR_END:
                         if (MimironHardMode)
-                            DoCast(me, SPELL_EMERGENCY_MODE, true);
-                        me->SetHealth( (me->GetMaxHealth() >> 1) );
+                            if (!me->HasAura(SPELL_EMERGENCY_MODE))
+                                DoCast(me, SPELL_EMERGENCY_MODE, true);
                         phase = PHASE_VX001_ASSEMBLED__GLOBAL_4;
                         events.SetPhase(phase);
-                    case DO_VX001_SELF_REPAIR_END:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);                
                         me->SetStandState(UNIT_STAND_STATE_STAND);                
                         events.RescheduleEvent(EVENT_LASER_BARRAGE, urand(35000, 40000), 0, PHASE_VX001_ASSEMBLED__GLOBAL_4);
@@ -1255,16 +1368,20 @@ class boss_vx_001 : public CreatureScript
                 if (damage >= me->GetHealth())
                 {
                     damage = 0;
+                    if (isInPhaseChangeHook)
+                        return;
+                    isInPhaseChangeHook = true;
                     spinning = false;
                     me->InterruptNonMeleeSpells(true);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
                     me->AttackStop();
-                    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
-                    me->SetHealth(me->GetMaxHealth());
+                    me->SetReactState(REACT_PASSIVE);
+                    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);                    
                     me->SetStandState(UNIT_STAND_STATE_DEAD);                                       
                     switch (phase)
                     {
                         case PHASE_VX001_SOLO__GLOBAL_2:
+                            me->SetHealth(me->GetMaxHealth());
                             if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
                                 Mimiron->AI()->DoAction(DO_ACTIVATE_AERIAL);
                             break;
@@ -1285,9 +1402,12 @@ class boss_vx_001 : public CreatureScript
                 if (!caster || !spell)
                     return;
                 if (spell->Id == SPELL_SELF_REPAIR)
+                {
+                    isInPhaseChangeHook = false;
                     DoAction(DO_VX001_SELF_REPAIR_END);
-                if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
-                    Mimiron->AI()->DoAction(DO_VX001_SELF_REPAIR_END);
+                    if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
+                        Mimiron->AI()->DoAction(DO_VX001_SELF_REPAIR_END);
+                }
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -1365,7 +1485,7 @@ class boss_vx_001 : public CreatureScript
                             }
                             direction = RAND(true, false);
                             spinning = true;
-                            DoCast(SPELL_SPINNING_UP);
+                            DoCast(SPELL_SPINNING_UP); // The triggered spells should be casted on another target, seem to be self-casted 63274,66490
                             events.DelayEvents(15000);
                             events.RescheduleEvent(EVENT_LASER_BARRAGE, 60000, 0, phase);
                             events.RescheduleEvent(EVENT_LASER_BARRAGE_END, 14000, 0, phase);
@@ -1417,7 +1537,10 @@ class boss_vx_001 : public CreatureScript
 
             private:
                 MyPhase phase;
+                EventMap events;
+                InstanceScript* instance;
                 bool MimironHardMode;
+                bool isInPhaseChangeHook;
                 bool spinning;
                 bool direction;
                 uint32 spinTimer;
@@ -1534,12 +1657,13 @@ class boss_aerial_unit : public CreatureScript
     public:
         boss_aerial_unit() : CreatureScript("boss_aerial_unit") {}    
 
-        struct boss_aerial_unitAI : public BossAI
+        struct boss_aerial_unitAI : public ScriptedAI
         {
-            boss_aerial_unitAI(Creature* creature) : BossAI(creature, BOSS_MIMIRON), phase(PHASE_IDLE) {}            
+            boss_aerial_unitAI(Creature* creature) : ScriptedAI(creature), summons(me), phase(PHASE_IDLE) {}            
 
             void InitializeAI()
             {
+                instance = me->GetInstanceScript();
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetUnitMovementFlags(MOVEMENTFLAG_FLYING);
@@ -1558,6 +1682,7 @@ class boss_aerial_unit : public CreatureScript
                 events.SetPhase(PHASE_IDLE);
                 summons.DespawnAll();
                 gotMimironHardMode = false;
+                isInPhaseChangeHook = false;
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -1578,9 +1703,12 @@ class boss_aerial_unit : public CreatureScript
                 if (!caster || !spell)
                     return;
                 if (spell->Id == SPELL_SELF_REPAIR)
+                {
+                    isInPhaseChangeHook = false;
                     DoAction(DO_AERIAL_SELF_REPAIR_END);
-                if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
-                    Mimiron->AI()->DoAction(DO_AERIAL_SELF_REPAIR_END);
+                    if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
+                        Mimiron->AI()->DoAction(DO_AERIAL_SELF_REPAIR_END);
+                }
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -1593,6 +1721,11 @@ class boss_aerial_unit : public CreatureScript
                 
                 events.ScheduleEvent(EVENT_PLASMA_BALL, 1000);
                 events.ScheduleEvent(EVENT_SUMMON_JUNK_BOT, 10000, 0, PHASE_AERIAL_SOLO__GLOBAL_3);
+            }
+
+            void AttackStart(Unit* target)
+            {
+                AttackStartCaster(target, 100.0f);
             }
 
             void DoAction(int32 const action)
@@ -1625,12 +1758,13 @@ class boss_aerial_unit : public CreatureScript
                         }
                         break;
                     case DO_AERIAL_ASSEMBLED:
-                        me->SetHealth( (me->GetMaxHealth() >> 1) );               // Once again, re-assemble and repairing share some stuff, so the fallthrough is intended!
-                        phase = PHASE_AERIAL_ASSEMBLED__GLOBAL_4;
-                        events.SetPhase(phase);
+                        me->SetHealth( (me->GetMaxHealth() >> 1) );               // Once again, re-assemble and repairing share some stuff, so the fallthrough is intended!                        
                     case DO_AERIAL_SELF_REPAIR_END:
                         if (gotMimironHardMode)
-                            DoCast(me, SPELL_EMERGENCY_MODE, true);
+                            if (!me->HasAura(SPELL_EMERGENCY_MODE))
+                                DoCast(me, SPELL_EMERGENCY_MODE, true);
+                        phase = PHASE_AERIAL_ASSEMBLED__GLOBAL_4;
+                        events.SetPhase(phase);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
                         me->SetReactState(REACT_AGGRESSIVE);                
                         me->SetStandState(UNIT_STAND_STATE_STAND);                
@@ -1723,17 +1857,20 @@ class boss_aerial_unit : public CreatureScript
                 if (damage >= me->GetHealth())
                 {
                     damage = 0;
+                    if (isInPhaseChangeHook)
+                        return;
+                    isInPhaseChangeHook = true;
                     me->InterruptNonMeleeSpells(true);
                     me->GetMotionMaster()->Clear(true);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
-                    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
-                    me->SetHealth(me->GetMaxHealth());                    
+                    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);                                       
                     me->SetStandState(UNIT_STAND_STATE_DEAD);
                     switch (phase)
                     {
                         case PHASE_AERIAL_SOLO__GLOBAL_3:
+                            me->SetHealth(me->GetMaxHealth()); 
                             events.CancelEvent(EVENT_SUMMON_JUNK_BOT);
                             if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
                                 Mimiron->AI()->DoAction(DO_ACTIVATE_V0L7R0N);
@@ -1752,7 +1889,11 @@ class boss_aerial_unit : public CreatureScript
 
             private:
                 MyPhase phase;
+                EventMap events;
+                SummonList summons;
+                InstanceScript* instance;
                 bool gotMimironHardMode;
+                bool isInPhaseChangeHook;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1761,9 +1902,6 @@ class boss_aerial_unit : public CreatureScript
         }
 };
 
-/* TODO:
-- check if spawn mechanism works correctly
-*/
 class npc_magnetic_core : public CreatureScript
 {
     public:
@@ -2250,6 +2388,8 @@ void AddSC_boss_mimiron()
     new npc_frost_bomb();
 
     new spell_rapid_burst();    
+    new spell_proximity_mines_triggered();
+    new spell_proximity_mines();
     
     new go_not_push_button();
 

@@ -71,6 +71,7 @@ INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value
 (10463, 11, 0, 0, 'achievement_firefighter_25');
 
 -- Spell stuff
-DELETE FROM `spell_script_names` WHERE `spell_id`=63382;
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (63382, 63016, 63027);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63382, 'spell_rapid_burst');
-DELETE FROM `spell_script_names` WHERE  `spell_id`=63027 AND `ScriptName`='spell_ulduar_proximity_mines'; -- no longer required
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63016, 'spell_proximity_mines_triggered');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63027, 'spell_proximity_mines');

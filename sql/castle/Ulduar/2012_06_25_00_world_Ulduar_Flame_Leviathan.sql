@@ -45,10 +45,10 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 -- Part 4.1: Renamed - the resulting effect is called "Pursued", not "Pursue". Period.
 UPDATE `spell_script_names` SET `ScriptName`='spell_pursued' WHERE `spell_id`=62374;
 
--- Part 5: Game-objects.
+-- Part 5: Game-objects: Replaced them if position is incorrect.
 DELETE FROM `gameobject` WHERE `id` IN (194261, 194262);
 INSERT INTO `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
-(194262, 603, 1, 1, 171.648, 51.9844, 409.804, 5.42748, 0, 0, 0.414917, -0.909859, 300, 0, 1),
-(194261, 603, 1, 1, 171.648, 51.9844, 409.804, 5.42748, 0, 0, 0.414917, -0.909859, 300, 0, 1),
-(194261, 603, 1, 1, 171.258, -128.004, 409.804, 0.686815, 0, 0, 0.336697, 0.941613, 300, 0, 1),
-(194262, 603, 1, 1, 171.258, -128.004, 409.804, 0.686815, 0, 0, 0.336697, 0.941613, 300, 0, 1);
+(194261, 603, 3, 1, 130.553, -128.063, 409.804, 2.87979, 0, 0, 0, 1, 180, 255, 1),
+(194261, 603, 3, 1, 138.516, 56.1078, 409.804, 2.87979, 0, 0, 0, 1, 180, 255, 1),
+(194262, 603, 3, 1, 131.895, -128.264, 409.804, 0, 0, 0, 0, 1, 180, 255, 1),
+(194262, 603, 3, 1, 139.857, 55.9064, 409.804, 0, 0, 0, 0, 1, 180, 255, 1);

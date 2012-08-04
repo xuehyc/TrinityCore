@@ -56,10 +56,10 @@ enum Spells
     SPELL_NAPALM                   = 63666,
     SPELL_INVIS_AND_STEALTH_DETECT = 18950, // Passive
     //TOWER Additional SPELLS
-    SPELL_THORIMS_HAMMER           = 62911, // Tower of Storms
+    SPELL_THORIMS_HAMMER           = 62912, // Tower of Storms // 62911 should trigger it, but it doesn't in the proper place
     SPELL_MIMIRONS_INFERNO         = 62909, // Tower of Flames
     SPELL_HODIRS_FURY              = 62533, // Tower of Frost
-    SPELL_FREYAS_WARD              = 62906, // Tower of Nature
+    SPELL_FREYAS_WARD              = 62907, // Tower of Nature // 62906 should trigger it, but it doesn't in the proper place
     SPELL_FREYA_SUMMONS            = 62947, // Tower of Nature
     //TOWER ap & health spells
     SPELL_BUFF_TOWER_OF_STORMS     = 65076,
@@ -272,11 +272,6 @@ class boss_flame_leviathan : public CreatureScript
         {
             boss_flame_leviathanAI(Creature* creature) : BossAI(creature, BOSS_LEVIATHAN), vehicle(creature->GetVehicleKit()) {}
 
-        private:
-            Vehicle* vehicle;
-            uint8 Shutdown;
-            bool towerOfStorms, towerOfLife, towerOfFlames, towerOfFrost, Shutout, Unbroken, Pursued;
-
         public:
             void InitializeAI()
             {
@@ -287,6 +282,7 @@ class boss_flame_leviathan : public CreatureScript
                 // Note: I'll consider those as active on start, since this is causally correct.
                 towerOfStorms = towerOfLife = towerOfFlames = towerOfFrost = true;  // Towers
                 Shutout = Unbroken = true;                                          // Achievs
+                checkUnbrokenOnReset = false;
                 DoCast(SPELL_INVIS_AND_STEALTH_DETECT);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
             }           
@@ -298,6 +294,8 @@ class boss_flame_leviathan : public CreatureScript
                 Pursued = false;
                 pursueTarget = 0;
                 me->SetReactState(REACT_DEFENSIVE);
+                if (checkUnbrokenOnReset) // A fight was already performed, the raid got wiped before starting this Reset() call -> Unbroken can only be done on first try!
+                    SetData(DATA_UNBROKEN, 0);
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -311,6 +309,7 @@ class boss_flame_leviathan : public CreatureScript
                 events.ScheduleEvent(EVENT_SPEED, 15*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SUMMON, 1*IN_MILLISECONDS);
                 PerformTowerCheck();
+                checkUnbrokenOnReset = true;
             }
 
             bool HaveActiveTowers() const
@@ -713,6 +712,9 @@ class boss_flame_leviathan : public CreatureScript
                 }
 
                 uint64 pursueTarget;
+                Vehicle* vehicle;
+                uint8 Shutdown;
+                bool towerOfStorms, towerOfLife, towerOfFlames, towerOfFrost, Shutout, Unbroken, Pursued, checkUnbrokenOnReset;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1243,9 +1245,6 @@ class npc_thorims_hammer : public CreatureScript
 
                     events.ScheduleEvent(EVENT_LIGHTNING_SKYBEAM, urand(2, 10) *IN_MILLISECONDS);
                     dedicatedTarget = who->GetGUID();
-
-                    if (Creature* trigger = DoSummonFlyer(NPC_THORIM_TARGET_BEACON, me, 20.0f, 0, 1000, TEMPSUMMON_TIMED_DESPAWN))
-                        trigger->CastSpell(who, SPELL_THORIMS_HAMMER, true);
                 }
             }
 
@@ -1331,7 +1330,8 @@ class npc_mimirons_inferno : public CreatureScript
                         if (Creature* trigger = DoSummonFlyer(NPC_MIMIRON_TARGET_BEACON, me, 30.0f, 0, 2*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN))
                         {
                             // TODO: Check if this works properly, the spell's target selection is somehow curious oÔ
-                            trigger->CastSpell(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), SPELL_MIMIRONS_INFERNO, true);
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f))
+                                trigger->CastSpell(target, SPELL_MIMIRONS_INFERNO, true);
                             infernoTimer = 2*IN_MILLISECONDS;
                         }
                     }
@@ -1475,7 +1475,8 @@ class npc_freyas_ward : public CreatureScript
                     if (Creature* trigger = DoSummonFlyer(NPC_FREYA_BEACON, me, 50.0f, 0, 10*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN))
                     {
                         // TODO: Check if this is the correct spell, only the triggered one does something :o
-                        trigger->CastSpell(me, SPELL_FREYAS_WARD, true);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f))
+                            trigger->CastSpell(target, SPELL_FREYAS_WARD, true);
                         summonTimer = 30*IN_MILLISECONDS;
                     }
                     else
@@ -1756,7 +1757,7 @@ class at_RX_214_repair_o_matic_station : public AreaTriggerScript
                             leviathan->AI()->SetData(DATA_UNBROKEN, 0); // Unbroken failed
                     }
                 }
-            }           
+            }                       
             return true;
         }
 };
@@ -1793,6 +1794,10 @@ class go_ulduar_tower : public GameObjectScript
                 trigger->DisappearAndDie();
         }
 };
+
+/************************************************************************/
+/*                          Achievements                                */
+/************************************************************************/
 
 class achievement_three_car_garage_demolisher : public AchievementCriteriaScript
 {
@@ -1926,7 +1931,6 @@ class achievement_nuked_from_orbit : public AchievementCriteriaScript
         }
 };
 
-
 class achievement_orbit_uary : public AchievementCriteriaScript
 {
     public:
@@ -1944,6 +1948,10 @@ class achievement_orbit_uary : public AchievementCriteriaScript
             return false;
         }
 };
+
+/************************************************************************/
+/*                              Spells                                  */
+/************************************************************************/
 
 class spell_anti_air_rocket : public SpellScriptLoader
 {

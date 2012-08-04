@@ -27,3 +27,6 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63059, 'spel
 
 DELETE FROM `spell_linked_spell` WHERE  `spell_trigger`=62317 AND `spell_effect`=57807 AND `type`=1;
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (62317, 57807, 1, 'Twilight Guardian - Link Devastate to Sunder Armor');
+
+-- Other stuff
+UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~(33554432|262144) WHERE `entry`=34184;
