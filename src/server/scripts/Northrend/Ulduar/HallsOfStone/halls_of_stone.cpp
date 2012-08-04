@@ -117,7 +117,7 @@ enum Quests
 
 #define GOSSIP_ITEM_START               "Brann, it would be our honor!"
 #define GOSSIP_ITEM_PROGRESS            "Let's move Brann, enough of the history lessons!"
-#define DATA_BRANN_SPARKLIN_NEWS        1
+#define DATA_BRANN_SPANKIN_NEW          1
 
 const Position BrannHome = {1077.41f, 474.16f, 207.803f, 2.70526f};
 
@@ -470,7 +470,7 @@ public:
 
         uint32 GetData(uint32 type)
         {
-            if (type == DATA_BRANN_SPARKLIN_NEWS)
+            if (type == DATA_BRANN_SPANKIN_NEW)
                 return brannSparklinNews ? 1 : 0;
 
             return 0;
@@ -838,7 +838,7 @@ class achievement_brann_spankin_new : public AchievementCriteriaScript
                 return false;
 
             if (Creature* Brann = target->ToCreature())
-                if (Brann->AI()->GetData(DATA_BRANN_SPARKLIN_NEWS))
+                if (Brann->AI()->GetData(DATA_BRANN_SPANKIN_NEW))
                     return true;
 
             return false;
