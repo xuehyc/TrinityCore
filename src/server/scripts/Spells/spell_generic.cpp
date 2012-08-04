@@ -27,8 +27,6 @@
 #include "GridNotifiers.h"
 #include "Group.h"
 #include "LFGMgr.h"
-#include "OutdoorPvPMgr.h"
-#include "OutdoorPvPWG.h"
 
 class spell_gen_absorb0_hitlimit1 : public SpellScriptLoader
 {

@@ -104,7 +104,7 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
         return false;
     }
 
-    // load worldstates
+    // load worldstates (boy this is ugly...needs to be converted to use world thread to read worldstates)
     QueryResult result = CharacterDatabase.PQuery("SELECT `entry`, `value` from `worldstates` where `entry` in (31001, 31002 , 31003, 31004, 31005) order by `entry`");
     
     m_WSSaveTimer = sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_SAVESTATE_PERIOD);
@@ -1576,11 +1576,11 @@ bool OutdoorPvPWG::Update(uint32 diff)
 
     if (m_WSSaveTimer < diff)
     {
-        CharacterDatabase.PExecute("replace  `worldstates` set `entry`='31001', `value`='%d', `comment`='wg m_wartime'",m_wartime);
-        CharacterDatabase.PExecute("replace  `worldstates` set `entry`='31002', `value`='%d', `comment`='wg m_timer'",m_timer);
-        CharacterDatabase.PExecute("replace  `worldstates` set `entry`='31003', `value`='%d', `comment`='wg m_defender'",m_defender);
-        CharacterDatabase.PExecute("replace  `worldstates` set `entry`='31004', `value`='%d', `comment`='wg allianceWinStreaks'", allianceWinStreak);
-        CharacterDatabase.PExecute("replace  `worldstates` set `entry`='31005', `value`='%d', `comment`='wg hordeWinStreaks'", hordeWinStreak);
+        sWorld->setWorldState(31001, m_wartime);
+        sWorld->setWorldState(31002, m_timer);
+        sWorld->setWorldState(31003, m_defender);
+        sWorld->setWorldState(31004, allianceWinStreak);
+        sWorld->setWorldState(31004, hordeWinStreak);
         m_WSSaveTimer = sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_SAVESTATE_PERIOD);
     } else m_WSSaveTimer -= diff;
 

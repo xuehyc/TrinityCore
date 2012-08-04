@@ -31,9 +31,6 @@
 #include "MapManager.h"
 #include "BattlegroundIC.h"
 
-#include "OutdoorPvPMgr.h"
-#include "OutdoorPvPWG.h"
-
 bool IsPrimaryProfessionSkill(uint32 skill)
 {
     SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
@@ -1124,9 +1121,8 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
             if (!player)
                 return false;
 
-            if (OutdoorPvPWG* wg = dynamic_cast<OutdoorPvPWG*>(sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197)))
-                if (wg->getDefenderTeam() != player->GetTeamId())
-                    return false;
+            if (sWorld->getWorldState(31003) != player->GetTeamId())
+                return false;
             break;
         case 58600: // No fly Zone - Dalaran
         {
@@ -1147,9 +1143,9 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
 
                 if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
                 {
-                    if (OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
+                    if (uint64 isWarTime = sWorld->getWorldState(31001))
                     {
-                        if ((pvpWG->isWarTime()==false) || !player || !player->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && !player->HasAuraType(SPELL_AURA_FLY) || player->HasAura(45472) || player->HasAura(44795))
+                        if ((isWarTime == 0) || !player || !player->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && !player->HasAuraType(SPELL_AURA_FLY) || player->HasAura(45472) || player->HasAura(44795))
                             return false;
                     }
                 }

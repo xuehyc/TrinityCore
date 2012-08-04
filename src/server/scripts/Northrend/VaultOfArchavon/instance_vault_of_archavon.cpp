@@ -150,7 +150,27 @@ class instance_archavon : public InstanceMapScript
         }
 };
 
+class at_vault_of_archavon_entrance : public AreaTriggerScript
+{
+    public:
+        at_vault_of_archavon_entrance() : AreaTriggerScript("at_vault_of_archavon_entrance") { }
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
+        {
+            if (sWorld->getWorldState(31001) == 1) // do not allow entry to voa if wg is active
+            {
+                player->SendTransferAborted(624, TRANSFER_ABORT_MAP_NOT_ALLOWED);
+                return true;
+            }
+
+            player->TeleportTo(624, -505.96f, -103.353f, 157.0f, 0, 0);
+
+            return true;
+        }
+};
+
 void AddSC_instance_archavon()
 {
     new instance_archavon();
+    new at_vault_of_archavon_entrance();
 }
