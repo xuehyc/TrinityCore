@@ -23,6 +23,7 @@
 
 #include <limits>
 #include <map>
+#include "ace\Mutex.h"
 
 enum Yells
 {
@@ -192,6 +193,18 @@ Position const SummonPos[9] =
 
 #define FLAME_CAP 200 // find a good (blizzlike!) value
 
+struct EqualHelper // Helper for Mimirons map that stores the members repair states
+{
+    EqualHelper(bool& base) : __base(base) {}
+    void operator()(std::pair<uint32, bool> value)
+    {
+        __base = __base && value.second;
+    }
+
+private:
+    bool& __base;
+};
+
 /************************************************************************/
 /*                              Mimiron                                 */
 /************************************************************************/
@@ -315,19 +328,7 @@ class boss_mimiron : public CreatureScript
             void BotAliveCheck()
             {
                 if (phase != PHASE_COMBAT)
-                    return;
-
-                struct EqualHelper
-                {
-                    EqualHelper(bool& base) : __base(base) {}
-                    void operator()(std::pair<uint32, bool> value)
-                    {
-                        __base = __base && value.second;
-                    }
-
-                    private:
-                        bool& __base;
-                };
+                    return;                
 
                 mapMutex.acquire();
                 bool res = true;
@@ -1195,7 +1196,6 @@ class spell_proximity_mines_triggered : public SpellScriptLoader // Spell 63016
                 if (Unit* caster = GetCaster())
                 {
                     Position base;
-                    caster->GetPosition(&base);
                     caster->GetRandomNearPosition(base, 15.0f); // wowhead: Mines should land in 15 yards away from caster.
                     caster->SummonCreature(NPC_PROXIMITY_MINE, base);
                 }
