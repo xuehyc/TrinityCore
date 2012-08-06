@@ -262,14 +262,17 @@ class npc_thorim_controller : public CreatureScript
                 instance = creature->GetInstanceScript();
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                gotActivated = false;
             }
 
             void Reset()
             {
-                gotActivated = false;
-                instance->HandleGameObject(instance->GetData64(GO_THORIM_LIGHTNING_FIELD), true); // Open the entrance door.
-                instance->HandleGameObject(instance->GetData64(GO_THORIM_DARK_IRON_PROTCULLIS), false); // Close the up-way door.   
-                events.ScheduleEvent(EVENT_CHECK_PLAYER_IN_RANGE, 1000);              
+                if (!gotActivated)
+                {
+                    instance->HandleGameObject(instance->GetData64(GO_THORIM_LIGHTNING_FIELD), true); // Open the entrance door.
+                    instance->HandleGameObject(instance->GetData64(GO_THORIM_DARK_IRON_PROTCULLIS), false); // Close the up-way door.   
+                    events.ScheduleEvent(EVENT_CHECK_PLAYER_IN_RANGE, 1000);  
+                }                            
             }
 
             void JustSummoned(Creature* summon)
@@ -320,7 +323,7 @@ class npc_thorim_controller : public CreatureScript
                                     if (!player->isGameMaster())
                                     {                                        
                                         for (uint8 i = 0; i < 6; i++)   // Spawn Pre-Phase Adds
-                                            me->SummonCreature(preAddLocations[i].entry, preAddLocations[i].pos);
+                                            me->SummonCreature(preAddLocations[i].entry, preAddLocations[i].pos, TEMPSUMMON_CORPSE_DESPAWN);
                                         gotActivated = true;                            
                                     }
                                 if (!gotActivated)
@@ -404,6 +407,8 @@ class boss_thorim : public CreatureScript
 
                 me->GetMotionMaster()->Clear();
                 me->GetMotionMaster()->MoveRandom(5.0f);
+
+                instance->HandleGameObject(instance->GetData64(GO_THORIM_LIGHTNING_FIELD), true); // Open the entrance door if the raid got past the first adds, since in this case, it will not be performed by the controller bunny.
             }
 
             void KilledUnit(Unit* /*victim*/)
@@ -795,7 +800,7 @@ class PrePhaseAddHelper
 class npc_thorim_pre_phase_add : public CreatureScript
 {
     private:
-        enum { EVENT_PRIMARY_SKILL = 1, EVENT_SECONDARY_SKILL };
+        enum { EVENT_PRIMARY_SKILL = 1, EVENT_SECONDARY_SKILL, EVENT_CHECK_PLAYER_IN_RANGE };
     public:
         npc_thorim_pre_phase_add() : CreatureScript("npc_thorim_pre_phase_add") {}        
 
@@ -805,11 +810,23 @@ class npc_thorim_pre_phase_add : public CreatureScript
             {
                 pInstance = pCreature->GetInstanceScript();
                 me->setFaction(14);
+                me->SetReactState(REACT_AGGRESSIVE);
                 myIndex = myHelper[me->GetEntry()];
                 amIHealer = HealerCheck(true)(me);
             }            
 
             void Reset()
+            {                
+                events.Reset();
+                events.ScheduleEvent(EVENT_CHECK_PLAYER_IN_RANGE, 1*IN_MILLISECONDS);
+            }
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
+                Reset();
+            }
+
+            void EnterCombat(Unit* /*target*/)
             {
                 events.ScheduleEvent(EVENT_PRIMARY_SKILL, urand(3000, 6000));
                 events.ScheduleEvent(EVENT_SECONDARY_SKILL, urand (12000, 15000));
@@ -825,17 +842,34 @@ class npc_thorim_pre_phase_add : public CreatureScript
             {
                 if (myIndex == INDEX_DARK_RUNE_ACOLYTE)
                     AttackStartCaster(target, 30.0f);
+                else
+                    ScriptedAI::AttackStart(target);
             }
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 while (uint32 event = events.ExecuteEvent())
                 {
                     switch (event)
                     {
+                        case EVENT_CHECK_PLAYER_IN_RANGE:
+                            if (!me->isInCombat())
+                            {
+                                Player* player = 0;
+                                Trinity::AnyPlayerInObjectRangeCheck u_check(me, 30.0f, true);
+                                Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, player, u_check);
+                                me->VisitNearbyObject(30.0f, searcher);
+                                if (player)
+                                    if (!player->isGameMaster())
+                                        AttackStart(player);
+                                events.ScheduleEvent(EVENT_CHECK_PLAYER_IN_RANGE, 1000);
+                            }                            
+                            break;
                         case EVENT_PRIMARY_SKILL:
                             if (Unit* target = amIHealer ? (me->GetHealthPct() > 40? DoSelectLowestHpFriendly(40) : me) : me->getVictim())
                             {
@@ -1343,7 +1377,7 @@ class npc_ancient_rune_giant : public CreatureScript
                 // Spawn trashes
                 summons.DespawnAll();
                 for (uint8 i = 0; i < 5; i++)
-                    me->SummonCreature(giantAddLocations[i].entry, giantAddLocations[i].pos.GetPositionX() ,giantAddLocations[i].pos.GetPositionY(), giantAddLocations[i].pos.GetPositionZ(), giantAddLocations[i].pos.GetOrientation(),TEMPSUMMON_CORPSE_TIMED_DESPAWN,3000);
+                    me->SummonCreature(giantAddLocations[i].entry, giantAddLocations[i].pos.GetPositionX(), giantAddLocations[i].pos.GetPositionY(), giantAddLocations[i].pos.GetPositionZ(), giantAddLocations[i].pos.GetOrientation(),TEMPSUMMON_CORPSE_TIMED_DESPAWN,3000);
             }
 
             void JustSummoned(Creature *summon)

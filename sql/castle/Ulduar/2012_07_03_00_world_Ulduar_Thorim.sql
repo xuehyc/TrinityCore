@@ -25,25 +25,29 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 UPDATE `creature_template` SET `unit_flags`=33685508 WHERE `entry`=33378;
 
 -- Pre-phase adds: Register scripts.
-UPDATE `creature_template` SET `ScriptName`='npc_thorim_pre_phase_add' WHERE `entry` IN (32885,32883,32908,32907,32882,32886);
+UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~32768,`dynamicflags`=0,`ScriptName`='npc_thorim_pre_phase_add' WHERE `entry` IN (32885,32883,32908,32907,32882,32886);
 UPDATE `creature_template` SET `equipment_id`=1847 WHERE `entry`=33152;
 UPDATE `creature_template` SET `equipment_id`=1849 WHERE `entry` IN (32885,33153);
 UPDATE `creature_template` SET `equipment_id`=1850 WHERE `entry` IN (32908,33151);
 UPDATE `creature_template` SET `equipment_id`=1852 WHERE `entry`=33150;
 UPDATE `creature_template` SET `modelid1`=16925, `modelid2`=0 WHERE `entry` IN (33378, 32892);
+UPDATE `creature_template` SET `unit_flags`=`unit_flags`|131072 WHERE `entry` IN (33054,33725);
 DELETE FROM `creature` WHERE `id` IN (32882,32908,32885,32886,32907,32883); -- NPCs are spawned by script.
 
 -- Thorim Mini bosses : Runic Colossus, Ancient Rune Giant, Sif
-UPDATE `creature_template` SET `mechanic_immune_mask`= 650854239, `flags_extra`=1, `ScriptName`='npc_runic_colossus' WHERE `entry`=32872;
-UPDATE `creature_template` SET `mechanic_immune_mask`= 650854239, `flags_extra`=1, `ScriptName`='npc_ancient_rune_giant' WHERE `entry`=32873;
+UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~256, `mechanic_immune_mask`= 650854239, `flags_extra`=1, `ScriptName`='npc_runic_colossus' WHERE `entry`=32872;
+UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~256, `mechanic_immune_mask`= 650854239, `flags_extra`=1, `ScriptName`='npc_ancient_rune_giant' WHERE `entry`=32873;
 UPDATE `creature_template` SET `mechanic_immune_mask`= 650854239, `flags_extra`=1, `ScriptName`='npc_sif' WHERE `entry`=33196;
-UPDATE `creature_template` SET `ScriptName`='npc_thorim_arena_phase_add' WHERE `entry` IN (32876, 32904, 32878, 32877, 32874, 32875, 33110);
+UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~256, `ScriptName`='npc_thorim_arena_phase_add' WHERE `entry` IN (32876, 32904, 32878, 32877, 32874, 32875, 33110);
 DELETE FROM `creature_addon` WHERE `guid` IN (136059, 136816);
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
 (136059, 0, 0, 0, 1, 0, '40775'),
 (136816, 0, 0, 0, 1, 0, '40775');
 DELETE FROM `creature` WHERE `id` IN (33140,33141); -- Left- and right-hands are used in RunicSmash().
 UPDATE `creature_template` SET `ScriptName`='npc_runic_smash' WHERE `entry` IN (33140, 33141);
+
+-- Caches.
+UPDATE `gameobject_template` SET `flags`=`flags`&~16 WHERE `entry` IN (194312,194313,194314,194315);
 
 -- "Lever" should open "Dark Iron Portcullis".
 UPDATE `gameobject_template` SET `type`=1, `faction`=35, `data1`=0, `data4`=0 WHERE `entry`=194264;
