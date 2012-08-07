@@ -224,7 +224,7 @@ public:
         {
             if (IsHeroic() && !bDone)
                 if (caster->GetTypeId() == TYPEID_PLAYER)
-                    if (spell->Id == SPELL_HAMMER_THROWBACK_DMG && me->GetHealth() <= spell->Effects[0].BasePoints)
+                    if (spell->Id == SPELL_HAMMER_THROWBACK_DMG && me->GetHealth() <= uint32(spell->Effects[0].BasePoints))
                         DoCast(caster, SPELL_EADRIC_ACHIEVEMENT);
         }
 
