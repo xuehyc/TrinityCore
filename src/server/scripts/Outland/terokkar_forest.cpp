@@ -707,11 +707,11 @@ public:
 
 enum
 {
-    SAY_COUNT_5                 = -1000472,
-    SAY_COUNT_4                 = -1000473,
-    SAY_COUNT_3                 = -1000474,
-    SAY_COUNT_2                 = -1000475,
-    SAY_COUNT_1                 = -1000476,
+    SAY_COUNT_5                 = -1999960,
+    SAY_COUNT_4                 = -1999961,
+    SAY_COUNT_3                 = -1999962,
+    SAY_COUNT_2                 = -1999963,
+    SAY_COUNT_1                 = -1999964,
     GO_MANA_BOMB                = 184725,
     SPELL_MANA_BOMB_LIGHTNING   = 37843,
     SPELL_MANA_BOMB_EXPL        = 35513,

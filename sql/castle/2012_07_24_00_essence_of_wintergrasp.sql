@@ -183,22 +183,20 @@ SELECT 1, entry, item, 0, 0, 1, 0, 57940, 0, 0, 0, 0, '', 'Stone Keeper''s Shard
 -- 5) repeat 3) and 4) for bosses that drop their loot in GOs
 DELETE FROM gameobject_loot_template WHERE item = 43228;
 INSERT gameobject_loot_template (entry, item, ChanceOrQuestChance, lootmode, groupid, minCountOrRef, maxcount) VALUES
-(190663, 43228, 100, 1, 0, @min_nh, @max_nh), -- Mal'Ganis
-(193597, 43228, 100, 1, 0, @min_hc, @max_hc),
-(190586, 43228, 100, 1, 0, @min_nh, @max_nh), -- Tribunal of Ages
-(193996, 43228, 100, 1, 0, @min_hc, @max_hc), 
-(191349, 43228, 100, 1, 0, @min_nh, @max_nh), -- Eregos
-(193603, 43228, 100, 1, 0, @min_hc, @max_hc), 
-(195709, 43228, 100, 1, 0, @min_nh, @max_nh), -- Faction Champions
-(195710, 43228, 100, 1, 0, @min_hc, @max_hc),
-(195323, 43228, 100, 1, 0, @min_nh, @max_nh), -- Argent Confessor Paletress
-(195324, 43228, 100, 1, 0, @min_hc, @max_hc),
-(195374, 43228, 100, 1, 0, @min_nh, @max_nh), -- Eadric the Pure
-(195375, 43228, 100, 1, 0, @min_hc, @max_hc), 
-(202212, 43228, 100, 1, 0, @min_nh, @max_nh), -- The Lich King (HoR)
-(201710, 43228, 100, 1, 0, @min_nh, @max_nh),
-(202336, 43228, 100, 1, 0, @min_hc, @max_hc),
-(202337, 43228, 100, 1, 0, @min_hc, @max_hc);
+(24556, 43228, 100, 1, 0, @min_nh, @max_nh), -- Mal'Ganis
+(24589, 43228, 100, 1, 0, @min_hc, @max_hc),
+(24661, 43228, 100, 1, 0, @min_nh, @max_nh), -- Tribunal of Ages
+(26260, 43228, 100, 1, 0, @min_hc, @max_hc),
+(24462, 43228, 100, 1, 0, @min_nh, @max_nh), -- Eregos
+(24524, 43228, 100, 1, 0, @min_hc, @max_hc),
+(27321, 43228, 100, 1, 0, @min_nh, @max_nh), -- Faction Champions
+(27414, 43228, 100, 1, 0, @min_hc, @max_hc),
+(27327, 43228, 100, 1, 0, @min_nh, @max_nh), -- Argent Confessor Paletress
+(27417, 43228, 100, 1, 0, @min_hc, @max_hc),
+(27325, 43228, 100, 1, 0, @min_nh, @max_nh), -- Eadric the Pure
+(27416, 43228, 100, 1, 0, @min_hc, @max_hc),
+(27985, 43228, 100, 1, 0, @min_nh, @max_nh), -- The Lich King (HoR)
+(27993, 43228, 100, 1, 0, @min_hc, @max_hc);
 
 DELETE FROM conditions WHERE SourceTypeOrReferenceId = 4 AND SourceEntry = 43228;
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorTextId, ScriptName, Comment)
