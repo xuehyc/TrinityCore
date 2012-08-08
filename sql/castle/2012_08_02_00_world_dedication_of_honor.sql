@@ -1,5 +1,6 @@
-DELETE FROM `gameobject` WHERE `id`=202443;
-INSERT INTO `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (202443, 571, 1, 1, 5804.72, 640.837, 647.627, 2.46273, 0, 0, 0.942945, 0.332949, 300, 0, 1);
+DELETE FROM `gameobject` WHERE `id` = 202443;
+INSERT INTO `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES 
+(202443, 571, 1, 1, 5804.526, 638.5417, 647.6481, 2.460913, 0, 0, 0.942945, 0.332949, 300, 0, 1);
 
 UPDATE `gameobject_template` SET `AIName`='SmartGameObjectAI' WHERE `entry`=202443;
 DELETE FROM `smart_scripts` WHERE `entryorguid` =202443 AND `source_type`=0;
