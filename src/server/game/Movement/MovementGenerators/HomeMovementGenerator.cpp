@@ -25,7 +25,6 @@
 
 void HomeMovementGenerator<Creature>::Initialize(Creature & owner)
 {
-    owner.AddUnitState(UNIT_STATE_EVADE);
     _setTargetLocation(owner);
 }
 
@@ -35,9 +34,6 @@ void HomeMovementGenerator<Creature>::Reset(Creature &)
 
 void HomeMovementGenerator<Creature>::_setTargetLocation(Creature & owner)
 {
-    if (!&owner)
-        return;
-
     if (owner.HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED | UNIT_STATE_DISTRACTED))
         return;
 
@@ -65,12 +61,9 @@ bool HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32 /*tim
 
 void HomeMovementGenerator<Creature>::Finalize(Creature& owner)
 {
-    // sometimes movement wont be finished, clear UNIT_STATE_EVADE anyways
-    // TODO: why?
-    owner.ClearUnitState(UNIT_STATE_EVADE);
-
     if (arrived)
     {
+        owner.ClearUnitState(UNIT_STATE_EVADE);
         owner.SetWalk(true);
         owner.LoadCreaturesAddon(true);
         owner.AI()->JustReachedHome();

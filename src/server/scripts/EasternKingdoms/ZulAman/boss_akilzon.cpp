@@ -25,7 +25,12 @@ SQLUpdate:
 
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "Cell.h"
+#include "CellImpl.h"
 #include "zulaman.h"
 #include "Weather.h"
 
@@ -72,9 +77,9 @@ class boss_akilzon : public CreatureScript
 
         struct boss_akilzonAI : public ScriptedAI
         {
-            boss_akilzonAI(Creature* c) : ScriptedAI(c)
+            boss_akilzonAI(Creature* creature) : ScriptedAI(creature)
             {
-                instance = c->GetInstanceScript();
+                instance = creature->GetInstanceScript();
             }
             InstanceScript* instance;
 
@@ -131,7 +136,7 @@ class boss_akilzon : public CreatureScript
                     instance->SetData(DATA_AKILZONEVENT, IN_PROGRESS);
             }
 
-            void JustDied(Unit* /*Killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 me->MonsterYell(SAY_ONDEATH, LANG_UNIVERSAL, 0);
                 DoPlaySoundToSet(me, SOUND_ONDEATH);
@@ -209,9 +214,7 @@ class boss_akilzon : public CreatureScript
                     for (std::list<Unit*>::const_iterator i = tempUnitMap.begin(); i != tempUnitMap.end(); ++i)
                     {
                         if (!Cloud->IsWithinDist(*i, 6, false))
-                        {
                             Cloud->CastCustomSpell(*i, 43137, &bp0, NULL, NULL, true, 0, 0, me->GetGUID());
-                        }
                     }
                     // visual
                     float x, y, z;
@@ -311,7 +314,8 @@ class boss_akilzon : public CreatureScript
                     isRaining = true;
                 }
 
-                if (ElectricalStorm_Timer <= diff) {
+                if (ElectricalStorm_Timer <= diff)
+                {
                     Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50, true);
                     if (!target)
                     {
@@ -324,16 +328,16 @@ class boss_akilzon : public CreatureScript
                     target->GetPosition(x, y, z);
                     if (target)
                     {
-                        target->SetUnitMovementFlags(MOVEMENTFLAG_LEVITATING);
+                        target->SetUnitMovementFlags(MOVEMENTFLAG_DISABLE_GRAVITY);
                         target->MonsterMoveWithSpeed(x, y, me->GetPositionZ()+15, 0);
                     }
                     Unit* Cloud = me->SummonTrigger(x, y, me->GetPositionZ()+16, 0, 15000);
                     if (Cloud)
                     {
                         CloudGUID = Cloud->GetGUID();
-                        Cloud->SetUnitMovementFlags(MOVEMENTFLAG_LEVITATING);
+                        Cloud->SetUnitMovementFlags(MOVEMENTFLAG_DISABLE_GRAVITY);
                         Cloud->StopMoving();
-                        Cloud->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+                        Cloud->SetObjectScale(1.0f);
                         Cloud->setFaction(35);
                         Cloud->SetMaxHealth(9999999);
                         Cloud->SetHealth(9999999);
@@ -390,15 +394,11 @@ class boss_akilzon : public CreatureScript
 class mob_akilzon_eagle : public CreatureScript
 {
     public:
-
-        mob_akilzon_eagle()
-            : CreatureScript("mob_akilzon_eagle")
-        {
-        }
+        mob_akilzon_eagle() : CreatureScript("mob_akilzon_eagle") { }
 
         struct mob_akilzon_eagleAI : public ScriptedAI
         {
-            mob_akilzon_eagleAI(Creature* c) : ScriptedAI(c) {}
+            mob_akilzon_eagleAI(Creature* creature) : ScriptedAI(creature) { }
 
             uint32 EagleSwoop_Timer;
             bool arrived;
@@ -409,10 +409,13 @@ class mob_akilzon_eagle : public CreatureScript
                 EagleSwoop_Timer = urand(5000, 10000);
                 arrived = true;
                 TargetGUID = 0;
-                me->SetUnitMovementFlags(MOVEMENTFLAG_LEVITATING);
+                me->SetUnitMovementFlags(MOVEMENTFLAG_DISABLE_GRAVITY);
             }
 
-            void EnterCombat(Unit* /*who*/) {DoZoneInCombat();}
+            void EnterCombat(Unit* /*who*/)
+            {
+                DoZoneInCombat();
+            }
 
             void MoveInLineOfSight(Unit* /*who*/) {}
 

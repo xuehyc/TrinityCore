@@ -23,7 +23,8 @@ SDComment: sound not implemented
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SOUND_SENTENCE_YOU 8588
 #define SOUND_SERVE_TO     8589
@@ -49,7 +50,7 @@ public:
 
     struct boss_fankrissAI : public ScriptedAI
     {
-        boss_fankrissAI(Creature* c) : ScriptedAI(c) {}
+        boss_fankrissAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 MortalWound_Timer;
         uint32 SpawnHatchlings_Timer;

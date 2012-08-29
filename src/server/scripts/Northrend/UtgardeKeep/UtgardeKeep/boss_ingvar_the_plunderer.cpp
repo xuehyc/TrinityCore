@@ -22,7 +22,8 @@ SDComment: Some Problems with Annhylde Movement, Blizzlike Timers (just shadow a
 SDCategory: Udgarde Keep
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "utgarde_keep.h"
 
 enum Yells
@@ -309,9 +310,9 @@ public:
 
     struct mob_annhylde_the_callerAI : public ScriptedAI
     {
-        mob_annhylde_the_callerAI(Creature* c) : ScriptedAI(c)
+        mob_annhylde_the_callerAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         float x, y, z;
@@ -321,6 +322,7 @@ public:
 
         void Reset()
         {
+            //! HACK: Creature's can't have MOVEMENTFLAG_FLYING
             me->AddUnitMovementFlag(MOVEMENTFLAG_FLYING | MOVEMENTFLAG_HOVER);
             me->SetSpeed(MOVE_SWIM, 1.0f);
             me->SetSpeed(MOVE_RUN, 1.0f);
@@ -343,7 +345,7 @@ public:
         {
             if (type != POINT_MOTION_TYPE)
                 return;
-            Unit* ingvar = Unit::GetUnit((*me), instance ? instance->GetData64(DATA_INGVAR) : 0);
+            Unit* ingvar = Unit::GetUnit(*me, instance ? instance->GetData64(DATA_INGVAR) : 0);
             if (ingvar)
             {
                 switch (id)
@@ -423,7 +425,7 @@ public:
 
     struct mob_ingvar_throw_dummyAI : public ScriptedAI
     {
-        mob_ingvar_throw_dummyAI(Creature* c) : ScriptedAI(c)
+        mob_ingvar_throw_dummyAI(Creature* creature) : ScriptedAI(creature)
         {
         }
 
@@ -444,6 +446,7 @@ public:
         void AttackStart(Unit* /*who*/) {}
         void MoveInLineOfSight(Unit* /*who*/) {}
         void EnterCombat(Unit* /*who*/) {}
+
         void UpdateAI(const uint32 diff)
         {
             if (uiDespawnTimer <= diff)
@@ -454,7 +457,6 @@ public:
             } else uiDespawnTimer -= diff;
         }
     };
-
 };
 
 void AddSC_boss_ingvar_the_plunderer()

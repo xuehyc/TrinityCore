@@ -16,7 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "nexus.h"
 
 enum Spells
@@ -101,7 +102,7 @@ class boss_anomalus : public CreatureScript
                     instance->SetData(DATA_ANOMALUS_EVENT, IN_PROGRESS);
             }
 
-            void JustDied(Unit* /*who*/)
+            void JustDied(Unit* /*killer*/)
             {
                 DoScriptText(SAY_DEATH, me);
 

@@ -23,7 +23,8 @@ SDComment: Correct timers, after whirlwind melee attack bug, prayer of healing
 SDCategory: Gruul's Lair
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "gruuls_lair.h"
 
 #define SAY_AGGRO               -1565000
@@ -118,9 +119,9 @@ public:
 
     struct boss_high_king_maulgarAI : public ScriptedAI
     {
-        boss_high_king_maulgarAI(Creature* c) : ScriptedAI(c)
+        boss_high_king_maulgarAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             for (uint8 i = 0; i < 4; ++i)
                 Council[i] = 0;
         }
@@ -173,7 +174,7 @@ public:
             DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3), me);
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
 
@@ -223,7 +224,7 @@ public:
             //Only if not incombat check if the event is started
             if (!me->isInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
             {
-                Unit* target = Unit::GetUnit((*me), instance->GetData64(DATA_MAULGAREVENT_TANK));
+                Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_MAULGAREVENT_TANK));
 
                 if (target)
                 {
@@ -317,9 +318,9 @@ public:
 
     struct boss_olm_the_summonerAI : public ScriptedAI
     {
-        boss_olm_the_summonerAI(Creature* c) : ScriptedAI(c)
+        boss_olm_the_summonerAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 DarkDecay_Timer;
@@ -363,7 +364,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (instance)
             {
@@ -383,7 +384,7 @@ public:
             //Only if not incombat check if the event is started
             if (!me->isInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
             {
-                Unit* target = Unit::GetUnit((*me), instance->GetData64(DATA_MAULGAREVENT_TANK));
+                Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_MAULGAREVENT_TANK));
 
                 if (target)
                 {
@@ -445,9 +446,9 @@ public:
 
     struct boss_kiggler_the_crazedAI : public ScriptedAI
     {
-        boss_kiggler_the_crazedAI(Creature* c) : ScriptedAI(c)
+        boss_kiggler_the_crazedAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 GreaterPolymorph_Timer;
@@ -478,7 +479,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (instance)
             {
@@ -498,7 +499,7 @@ public:
             //Only if not incombat check if the event is started
             if (!me->isInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
             {
-                Unit* target = Unit::GetUnit((*me), instance->GetData64(DATA_MAULGAREVENT_TANK));
+                Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_MAULGAREVENT_TANK));
 
                 if (target)
                 {
@@ -567,9 +568,9 @@ public:
 
     struct boss_blindeye_the_seerAI : public ScriptedAI
     {
-        boss_blindeye_the_seerAI(Creature* c) : ScriptedAI(c)
+        boss_blindeye_the_seerAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 GreaterPowerWordShield_Timer;
@@ -598,7 +599,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (instance)
             {
@@ -618,7 +619,7 @@ public:
             //Only if not incombat check if the event is started
             if (!me->isInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
             {
-                Unit* target = Unit::GetUnit((*me), instance->GetData64(DATA_MAULGAREVENT_TANK));
+                Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_MAULGAREVENT_TANK));
 
                 if (target)
                 {
@@ -677,9 +678,9 @@ public:
 
     struct boss_krosh_firehandAI : public ScriptedAI
     {
-        boss_krosh_firehandAI(Creature* c) : ScriptedAI(c)
+        boss_krosh_firehandAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 GreaterFireball_Timer;
@@ -708,7 +709,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (instance)
             {
@@ -728,7 +729,7 @@ public:
             //Only if not incombat check if the event is started
             if (!me->isInCombat() && instance && instance->GetData(DATA_MAULGAREVENT))
             {
-                Unit* target = Unit::GetUnit((*me), instance->GetData64(DATA_MAULGAREVENT_TANK));
+                Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_MAULGAREVENT_TANK));
 
                 if (target)
                 {

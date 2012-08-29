@@ -23,7 +23,8 @@ SDComment: TODO: Intro, consecutive attacks to a random target durin time wrap, 
 SDCategory:
 Script Data End */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "culling_of_stratholme.h"
 
 enum Spells
@@ -60,9 +61,9 @@ public:
 
     struct boss_epochAI : public ScriptedAI
     {
-        boss_epochAI(Creature* c) : ScriptedAI(c)
+        boss_epochAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint8 uiStep;

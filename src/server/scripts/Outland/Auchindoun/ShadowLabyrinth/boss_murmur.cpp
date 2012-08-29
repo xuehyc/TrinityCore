@@ -23,7 +23,8 @@ SDComment: Timers may be incorrect
 SDCategory: Auchindoun, Shadow Labyrinth
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "shadow_labyrinth.h"
 
 #define EMOTE_SONIC_BOOM            -1555036
@@ -48,7 +49,7 @@ public:
 
     struct boss_murmurAI : public ScriptedAI
     {
-        boss_murmurAI(Creature* c) : ScriptedAI(c)
+        boss_murmurAI(Creature* creature) : ScriptedAI(creature)
         {
             SetCombatMovement(false);
         }
@@ -166,7 +167,7 @@ public:
                 {
                     std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
                     for (std::list<HostileReference*>::const_iterator i = m_threatlist.begin(); i != m_threatlist.end(); ++i)
-                        if (Unit* target = Unit::GetUnit((*me), (*i)->getUnitGuid()))
+                        if (Unit* target = Unit::GetUnit(*me, (*i)->getUnitGuid()))
                             if (target->isAlive() && !me->IsWithinDist(target, 35, false))
                                 DoCast(target, SPELL_THUNDERING_STORM, true);
                     ThunderingStorm_Timer = 15000;
@@ -189,7 +190,7 @@ public:
             {
                 std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
                 for (std::list<HostileReference*>::const_iterator i = m_threatlist.begin(); i != m_threatlist.end(); ++i)
-                    if (Unit* target = Unit::GetUnit((*me), (*i)->getUnitGuid()))
+                    if (Unit* target = Unit::GetUnit(*me, (*i)->getUnitGuid()))
                         if (target->isAlive() && me->IsWithinMeleeRange(target))
                         {
                             me->TauntApply(target);

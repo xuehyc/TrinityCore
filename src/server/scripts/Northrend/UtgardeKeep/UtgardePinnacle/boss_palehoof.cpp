@@ -23,7 +23,8 @@ SDComment:
 SDCategory:
 Script Data End */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "utgarde_pinnacle.h"
 
 enum Spells
@@ -94,9 +95,9 @@ public:
 
     struct boss_palehoofAI : public ScriptedAI
     {
-        boss_palehoofAI(Creature* c) : ScriptedAI(c)
+        boss_palehoofAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 uiArcingSmashTimer;
@@ -145,7 +146,7 @@ public:
 
                 temp = Unit::GetCreature((*me), instance->GetData64(DATA_MOB_ORB));
                 if (temp)
-                    temp->DisappearAndDie();
+                    temp->DespawnOrUnsummon();
 
                 GameObject* go = instance->instance->GetGameObject(instance->GetData64(DATA_GORTOK_PALEHOOF_SPHERE));
                 if (go)
@@ -301,9 +302,9 @@ public:
 
     struct mob_ravenous_furbolgAI : public ScriptedAI
     {
-        mob_ravenous_furbolgAI(Creature* c) : ScriptedAI(c)
+        mob_ravenous_furbolgAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 uiChainLightingTimer;
@@ -414,9 +415,9 @@ public:
 
     struct mob_frenzied_worgenAI : public ScriptedAI
     {
-        mob_frenzied_worgenAI(Creature* c) : ScriptedAI(c)
+        mob_frenzied_worgenAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 uiMortalWoundTimer;
@@ -484,6 +485,8 @@ public:
                 who->SetInCombatWith(me);
                 DoStartMovement(who);
             }
+            /*if (instance)
+                instance->SetData(DATA_GORTOK_PALEHOOF_EVENT, IN_PROGRESS);*/
         }
 
         void JustDied(Unit* /*killer*/)
@@ -528,9 +531,9 @@ public:
 
     struct mob_ferocious_rhinoAI : public ScriptedAI
     {
-        mob_ferocious_rhinoAI(Creature* c) : ScriptedAI(c)
+        mob_ferocious_rhinoAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 uiStompTimer;
@@ -648,9 +651,9 @@ public:
 
     struct mob_massive_jormungarAI : public ScriptedAI
     {
-        mob_massive_jormungarAI(Creature* c) : ScriptedAI(c)
+        mob_massive_jormungarAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 uiAcidSpitTimer;
@@ -754,9 +757,9 @@ public:
 
     struct mob_palehoof_orbAI : public ScriptedAI
     {
-        mob_palehoof_orbAI(Creature* c) : ScriptedAI(c)
+        mob_palehoof_orbAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -767,6 +770,7 @@ public:
         {
             currentPhase = PHASE_NONE;
             SummonTimer = 5000;
+            //! HACK: Creature's can't have MOVEMENTFLAG_FLYING
             me->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
             me->RemoveAurasDueToSpell(SPELL_ORB_VISUAL);
             me->SetSpeed(MOVE_FLIGHT, 0.5f);
@@ -836,15 +840,15 @@ class go_palehoof_sphere : public GameObjectScript
 public:
     go_palehoof_sphere() : GameObjectScript("go_palehoof_sphere") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* pGO)
+    bool OnGossipHello(Player* /*player*/, GameObject* go)
     {
-        InstanceScript* instance = pGO->GetInstanceScript();
+        InstanceScript* instance = go->GetInstanceScript();
 
-        Creature* pPalehoof = Unit::GetCreature(*pGO, instance ? instance->GetData64(DATA_GORTOK_PALEHOOF) : 0);
+        Creature* pPalehoof = Unit::GetCreature(*go, instance ? instance->GetData64(DATA_GORTOK_PALEHOOF) : 0);
         if (pPalehoof && pPalehoof->isAlive())
         {
-            pGO->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-            pGO->SetGoState(GO_STATE_ACTIVE);
+            go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+            go->SetGoState(GO_STATE_ACTIVE);
 
             CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->NextPhase();
         }

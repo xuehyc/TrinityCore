@@ -56,7 +56,7 @@ enum KologarnSpells
     SPELL_PETRIFY_BREATH_25             = 63980,
     SPELL_STONE_GRIP_10                 = 62166,
     SPELL_STONE_GRIP_25                 = 63981,
-    SPELL_STONE_GRIP_DOT_10             = 64290, 
+    SPELL_STONE_GRIP_DOT_10             = 64290,
     SPELL_STONE_GRIP_DOT_25             = 64292,
     SPELL_STONE_GRIP_CANCEL             = 65594,
     SPELL_SUMMON_RUBBLE                 = 63633,
@@ -151,7 +151,7 @@ class boss_kologarn : public CreatureScript
                 DoCast(SPELL_KOLOGARN_REDUCE_PARRY);
                 SetCombatMovement(false);
                 Reset();
-            }            
+            }
 
             void Reset()
             {
@@ -185,7 +185,7 @@ class boss_kologarn : public CreatureScript
 
                 me->SetReactState(REACT_AGGRESSIVE);
                 _EnterCombat();
-            }            
+            }
 
             void JustDied(Unit* /*victim*/)
             {
@@ -278,7 +278,7 @@ class boss_kologarn : public CreatureScript
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                     {
                         if (Player* player = itr->getSource())
-                        {                         
+                        {
                             if (player->isDead() || player->HasAura(SPELL_STONE_GRIP_DOT) || player->isGameMaster())
                                 continue;
 
@@ -303,10 +303,10 @@ class boss_kologarn : public CreatureScript
                             else
                                 return 0;
                         else
-                            return 0;    
+                            return 0;
                     }
 
-                    return SelectRandomContainerElement(playerList);
+                    return Trinity::Containers::SelectRandomContainerElement(playerList);
                 }
                 else
                     return 0;
@@ -407,18 +407,18 @@ class boss_kologarn : public CreatureScript
                                 {
                                     DoCast(target, SPELL_ARM_SWEEP, true);
                                     DoScriptText(SAY_SHOCKWAVE, me);
-                                }  
-                            }                            
+                                }
+                            }
                             events.ScheduleEvent(EVENT_SWEEP, 25 * IN_MILLISECONDS);
                             break;
-                        case EVENT_STONE_GRIP:      // Cast for right arm                        
+                        case EVENT_STONE_GRIP:      // Cast for right arm
                             if (haveRightArm)
                             {
                                 DoCast(SPELL_STONE_GRIP);
                                 me->MonsterTextEmote(EMOTE_STONE, 0, true);
                                 DoScriptText(SAY_GRAB_PLAYER, me);
                             }
-                            events.ScheduleEvent(EVENT_STONE_GRIP, 25 * IN_MILLISECONDS);                        
+                            events.ScheduleEvent(EVENT_STONE_GRIP, 25 * IN_MILLISECONDS);
                             break;
                         case EVENT_SMASH:
                             if (haveLeftArm && haveRightArm)
@@ -444,7 +444,7 @@ class boss_kologarn : public CreatureScript
                             RespawnArm(NPC_RIGHT_ARM);
                             me->MonsterTextEmote(EMOTE_RIGHT, 0, true);
                             events.CancelEvent(EVENT_RESPAWN_RIGHT_ARM);
-                            break;                        
+                            break;
                         case EVENT_FOCUSED_EYEBEAM:
                             if (Player* eyebeamTargetUnit = GetEyeBeamTarget())
                             {
@@ -559,12 +559,12 @@ class spell_ulduar_rubble_summon : public SpellScriptLoader
 };
 
 // predicate function to select non main tank target
-class StoneGripTargetSelector : public std::unary_function<Unit*, bool>
+class StoneGripTargetSelector
 {
     public:
         StoneGripTargetSelector(Creature* me, Unit const* victim) : _me(me), _victim(victim) {}
 
-        bool operator() (Unit* target)
+        bool operator() (WorldObject* target)
         {
             if (target == _victim && _me->getThreatManager().getThreatList().size() > 1)
                 return true;
@@ -595,28 +595,28 @@ class spell_ulduar_stone_grip_cast_target : public SpellScriptLoader
                 return true;
             }
 
-            void FilterTargetsInitial(std::list<Unit*>& unitList)
+            void FilterTargetsInitial(std::list<WorldObject*>& targets)
             {
                 // Remove "main tank" and non-player targets
-                unitList.remove_if (StoneGripTargetSelector(GetCaster()->ToCreature(), GetCaster()->getVictim()));
+                targets.remove_if (StoneGripTargetSelector(GetCaster()->ToCreature(), GetCaster()->getVictim()));
                 // Maximum affected targets per difficulty mode
                 uint32 maxTargets = GetSpellInfo()->Id == 63981 ? 3 : 1; // 63981 -> 25 man raid
 
                 // Return a random amount of targets based on maxTargets
-                while (maxTargets < unitList.size())
+                while (maxTargets < targets.size())
                 {
-                    std::list<Unit*>::iterator itr = unitList.begin();
-                    advance(itr, urand(0, unitList.size()-1));
-                    unitList.erase(itr);
+                    std::list<WorldObject*>::iterator itr = targets.begin();
+                    advance(itr, urand(0, targets.size()-1));
+                    targets.erase(itr);
                 }
 
                 // For subsequent effects
-                m_unitList = unitList;
+                m_targets = targets;
             }
 
-            void FillTargetsSubsequential(std::list<Unit*>& unitList)
+            void FillTargetsSubsequential(std::list<WorldObject*>& targets)
             {
-                unitList = m_unitList;
+                targets = m_targets;
             }
 
             void HandleForceCast(SpellEffIndex i)
@@ -627,20 +627,20 @@ class spell_ulduar_stone_grip_cast_target : public SpellScriptLoader
                     return;
 
                 // Don't send m_originalCasterGUID param here or underlying AuraEffect::HandleAuraControlVehicle will fail on caster == target
-                player->CastSpell(GetTargetUnit(), GetSpellInfo()->Effects[i].TriggerSpell, true);
+                player->CastSpell(GetExplTargetUnit(), GetSpellInfo()->Effects[i].TriggerSpell, true);
                 PreventHitEffect(i);
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_ulduar_stone_grip_cast_target_SpellScript::FilterTargetsInitial, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ulduar_stone_grip_cast_target_SpellScript::FilterTargetsInitial, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnEffectHitTarget += SpellEffectFn(spell_ulduar_stone_grip_cast_target_SpellScript::HandleForceCast, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_ulduar_stone_grip_cast_target_SpellScript::FillTargetsSubsequential, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_ulduar_stone_grip_cast_target_SpellScript::FillTargetsSubsequential, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ulduar_stone_grip_cast_target_SpellScript::FillTargetsSubsequential, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ulduar_stone_grip_cast_target_SpellScript::FillTargetsSubsequential, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
             }
 
             // Shared between effects
-            std::list<Unit*> m_unitList;
+            std::list<WorldObject*> m_targets;
         };
 
         SpellScript* GetSpellScript() const
@@ -798,9 +798,9 @@ class spell_ulduar_stone_grip : public SpellScriptLoader
             {
                 Player* caster = GetCaster() ? GetCaster()->ToPlayer() : 0;
                 if (caster)
-                    caster->ClearUnitState(UNIT_STATE_ONVEHICLE);                
-                // TODO: Check if this works, but due to the code below, GetCaster() should return the player. 
-                // It appears that this function will be called after entering the "vehicle" arm. 
+                    caster->ClearUnitState(UNIT_STATE_ONVEHICLE);
+                // TODO: Check if this works, but due to the code below, GetCaster() should return the player.
+                // It appears that this function will be called after entering the "vehicle" arm.
             }
 
             void OnRemoveVehicle(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
@@ -844,14 +844,14 @@ class spell_kologarn_stone_shout : public SpellScriptLoader
         {
             PrepareSpellScript(spell_kologarn_stone_shout_SpellScript);
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<WorldObject*>& targets)
             {
-                unitList.remove_if (PlayerOrPetCheck());
+                targets.remove_if (PlayerOrPetCheck());
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_kologarn_stone_shout_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_kologarn_stone_shout_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 
@@ -951,13 +951,3 @@ void AddSC_boss_kologarn()
     new achievement_with_open_arms("achievement_with_open_arms");
     new achievement_with_open_arms("achievement_with_open_arms_25");
 }
-
-#undef SPELL_ARM_DEAD_DAMAGE           
-#undef SPELL_TWO_ARM_SMASH             
-#undef SPELL_ONE_ARM_SMASH             
-#undef SPELL_ARM_SWEEP                 
-#undef SPELL_STONE_SHOUT               
-#undef SPELL_PETRIFY_BREATH            
-#undef SPELL_STONE_GRIP                
-#undef SPELL_FOCUSED_EYEBEAM_PERIODIC
-#undef SPELL_STONE_GRIP_DOT     

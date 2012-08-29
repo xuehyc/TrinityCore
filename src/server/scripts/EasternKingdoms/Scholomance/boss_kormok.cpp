@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Scholomance
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SPELL_SHADOWBOLTVOLLEY      20741
 #define SPELL_BONESHIELD            27688
@@ -40,7 +41,7 @@ public:
 
     struct boss_kormokAI : public ScriptedAI
     {
-        boss_kormokAI(Creature* c) : ScriptedAI(c) {}
+        boss_kormokAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 ShadowVolley_Timer;
         uint32 BoneShield_Timer;

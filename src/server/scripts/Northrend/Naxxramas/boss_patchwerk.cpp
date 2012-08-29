@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "naxxramas.h"
 
 enum Spells
@@ -44,7 +45,6 @@ enum Events
     EVENT_BERSERK,
     EVENT_HATEFUL,
     EVENT_SLIME,
-    EVENT_FRENZY,
     EVENT_SLIME_DAMAGE
 };
 
@@ -65,10 +65,9 @@ public:
 
     struct boss_patchwerkAI : public BossAI
     {
-        boss_patchwerkAI(Creature* c) : BossAI(c, BOSS_PATCHWERK) {}
+        boss_patchwerkAI(Creature* creature) : BossAI(creature, BOSS_PATCHWERK) {}
 
         bool Enraged;
-        bool Berserk;
 
         void Reset()
         {
@@ -84,7 +83,7 @@ public:
                 DoScriptText(SAY_SLAY, me);
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             _JustDied();
             DoScriptText(SAY_DEATH, me);
@@ -93,7 +92,6 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
-            Berserk = false;
             Enraged = false;
             DoScriptText(RAND(SAY_AGGRO_1, SAY_AGGRO_2), me);
             events.ScheduleEvent(EVENT_SLIME_DAMAGE, 1000);
@@ -161,23 +159,13 @@ public:
                         break;
                     }
                     case EVENT_BERSERK:
-                        if (!Berserk)
-                        {
-                            Berserk = true;
-                            DoScriptText(EMOTE_BERSERK, me);
-                            events.ScheduleEvent(EVENT_SLIME, 2000);
-                        }
-
                         DoCast(me, SPELL_BERSERK, true);
-                        events.ScheduleEvent(EVENT_BERSERK, 300000);
+                        DoScriptText(EMOTE_BERSERK, me);
+                        events.ScheduleEvent(EVENT_SLIME, 2000);
                         break;
                     case EVENT_SLIME:
                         DoCast(me->getVictim(), SPELL_SLIME_BOLT, true);
                         events.ScheduleEvent(EVENT_SLIME, 2000);
-                        break;
-                    case EVENT_FRENZY:
-                        DoCast(me, SPELL_FRENZY);
-                        events.ScheduleEvent(EVENT_FRENZY, 300000, true);
                         break;
                     case EVENT_SLIME_DAMAGE:
                         DoSlimeDamage();
@@ -188,7 +176,7 @@ public:
 
             if (!Enraged && HealthBelowPct(5))
             {
-                events.ScheduleEvent(EVENT_FRENZY, 0);
+                DoCast(me, SPELL_FRENZY, true);
                 DoScriptText(EMOTE_ENRAGE, me);
                 Enraged = true;
             }

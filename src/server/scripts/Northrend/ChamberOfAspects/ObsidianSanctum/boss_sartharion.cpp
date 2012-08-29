@@ -26,7 +26,12 @@ INSERT INTO `spell_script_target` (entry, type, targetEntry) VALUES
 (60430, 1, 30643);
 */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "Cell.h"
+#include "CellImpl.h"
 #include "obsidian_sanctum.h"
 
 enum eEnums
@@ -599,7 +604,7 @@ public:
                     if (temp->isAlive() && !temp->getVictim())
                     {
                         if (temp->HasUnitMovementFlag(MOVEMENTFLAG_WALKING))
-                            temp->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                            temp->SetWalk(false);
 
                         if (temp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                             temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -1118,10 +1123,7 @@ struct dummy_dragonAI : public ScriptedAI
                         instance->SetData(TYPE_SHADRON_PREKILLED, DONE);
 
                 if (Creature* pAcolyte = me->FindNearestCreature(NPC_ACOLYTE_OF_SHADRON, 100.0f))
-                {
                     pAcolyte->Kill(pAcolyte);
-                }
-
                 break;
             case NPC_VESPERON:
                 iTextId = SAY_VESPERON_DEATH;
@@ -1132,9 +1134,7 @@ struct dummy_dragonAI : public ScriptedAI
                         instance->SetData(TYPE_VESPERON_PREKILLED, DONE);
 
                 if (Creature* pAcolyte = me->FindNearestCreature(NPC_ACOLYTE_OF_VESPERON, 100.0f))
-                {
                     pAcolyte->Kill(pAcolyte);
-                }
                 break;
         }
 
@@ -1151,7 +1151,7 @@ struct dummy_dragonAI : public ScriptedAI
                 return;
 
             // Twilight Revenge to main boss
-            if (Unit* pSartharion = Unit::GetUnit((*me), instance->GetData64(DATA_SARTHARION)))
+            if (Unit* pSartharion = Unit::GetUnit(*me, instance->GetData64(DATA_SARTHARION)))
             {
                 if (pSartharion->isAlive())
                 {

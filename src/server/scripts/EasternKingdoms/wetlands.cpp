@@ -28,7 +28,8 @@ npc_mikhail
 npc_tapoke_slim_jahn
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 
 /*######
@@ -67,14 +68,13 @@ public:
                 m_bFriendSummoned = false;
         }
 
-        void WaypointReached(uint32 uiPointId)
+        void WaypointReached(uint32 waypointId)
         {
-            switch (uiPointId)
+            switch (waypointId)
             {
                 case 2:
                     if (me->HasStealthAura())
                         me->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
-
                     SetRun();
                     me->setFaction(FACTION_ENEMY);
                     break;
@@ -132,7 +132,6 @@ public:
             }
         }
     };
-
 };
 
 /*######
@@ -161,7 +160,6 @@ public:
         }
         return false;
     }
-
 };
 
 /*######

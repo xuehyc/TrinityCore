@@ -15,7 +15,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "ScriptedEscortAI.h"
 #include "halls_of_stone.h"
 
@@ -90,6 +92,8 @@ enum Texts
 
 enum BrannCreatures
 {
+    CREATURE_TRIBUNAL_OF_THE_AGES       = 28234,
+    CREATURE_BRANN_BRONZEBEARD          = 28070,
     CREATURE_DARK_MATTER_TARGET         = 28237,
     CREATURE_SEARING_GAZE_TARGET        = 28265,
     CREATURE_DARK_RUNE_PROTECTOR        = 27983,
@@ -99,6 +103,7 @@ enum BrannCreatures
 
 enum Spells
 {
+    SPELL_STEALTH                       = 58506,
     //Kadrak
     SPELL_GLARE_OF_THE_TRIBUNAL         = 50988,
     H_SPELL_GLARE_OF_THE_TRIBUNAL       = 59870,
@@ -107,7 +112,9 @@ enum Spells
     H_SPELL_DARK_MATTER                 = 59868,
     //Abedneum
     SPELL_SEARING_GAZE                  = 51136,
-    H_SPELL_SEARING_GAZE                = 59867
+    H_SPELL_SEARING_GAZE                = 59867,
+
+    SPELL_REWARD_ACHIEVEMENT            = 59046,
 };
 
 enum Quests
@@ -117,7 +124,7 @@ enum Quests
 
 #define GOSSIP_ITEM_START               "Brann, it would be our honor!"
 #define GOSSIP_ITEM_PROGRESS            "Let's move Brann, enough of the history lessons!"
-#define DATA_BRANN_SPANKIN_NEW          1
+#define DATA_BRANN_SPARKLIN_NEWS          1
 
 const Position BrannHome = {1077.41f, 474.16f, 207.803f, 2.70526f};
 
@@ -139,9 +146,9 @@ public:
 
     struct mob_tribuna_controllerAI : public ScriptedAI
     {
-        mob_tribuna_controllerAI(Creature* c) : ScriptedAI(c)
+        mob_tribuna_controllerAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             SetCombatMovement(false);
         }
 
@@ -279,10 +286,10 @@ class npc_brann_hos : public CreatureScript
 public:
     npc_brann_hos() : CreatureScript("npc_brann_hos") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF+1 || uiAction == GOSSIP_ACTION_INFO_DEF+2)
+        if (action == GOSSIP_ACTION_INFO_DEF+1 || action == GOSSIP_ACTION_INFO_DEF+2)
         {
             player->CLOSE_GOSSIP_MENU();
             CAST_AI(npc_brann_hos::npc_brann_hosAI, creature->AI())->StartWP(player->GetGUID());
@@ -312,9 +319,9 @@ public:
 
     struct npc_brann_hosAI : public npc_escortAI
     {
-        npc_brann_hosAI(Creature* c) : npc_escortAI(c)
+        npc_brann_hosAI(Creature* creature) : npc_escortAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 uiStep;
@@ -361,9 +368,9 @@ public:
             lDwarfGUIDList.clear();
         }
 
-        void WaypointReached(uint32 uiPointId)
+        void WaypointReached(uint32 waypointId)
         {
-            switch (uiPointId)
+            switch (waypointId)
             {
                 case 7:
                     if (instance)
@@ -470,7 +477,7 @@ public:
 
         uint32 GetData(uint32 type)
         {
-            if (type == DATA_BRANN_SPANKIN_NEW)
+            if (type == DATA_BRANN_SPARKLIN_NEWS)
                 return brannSparklinNews ? 1 : 0;
 
             return 0;
@@ -670,8 +677,9 @@ public:
 
                             // Achievement criteria is with spell 59046 which does not exist.
                             // There is thus no way it can be given by casting the spell on the players.
-                            instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, 59046, me);
                             // workaround for achievement credit, which doesnt work through updateencounterstate atm
+                            /* instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, 59046, me);
+
                             Map::PlayerList const& players = instance->instance->GetPlayers();
                             if (!players.isEmpty())
                             {
@@ -680,9 +688,10 @@ public:
                                     if (Player* player = itr->getSource())
                                         DoCast(player, 59046, true);
                                 }
-                            }
+                            }*/
                         }
 
+                        me->CastSpell(me, SPELL_REWARD_ACHIEVEMENT, true);
                         me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
 
@@ -838,7 +847,7 @@ class achievement_brann_spankin_new : public AchievementCriteriaScript
                 return false;
 
             if (Creature* Brann = target->ToCreature())
-                if (Brann->AI()->GetData(DATA_BRANN_SPANKIN_NEW))
+                if (Brann->AI()->GetData(DATA_BRANN_SPARKLIN_NEWS))
                     return true;
 
             return false;

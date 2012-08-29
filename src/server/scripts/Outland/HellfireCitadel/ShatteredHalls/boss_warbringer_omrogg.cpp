@@ -28,7 +28,8 @@ mob_omrogg_heads
 boss_warbringer_omrogg
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "shattered_halls.h"
 
 enum eEnums
@@ -143,9 +144,9 @@ class mob_omrogg_heads : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new mob_omrogg_headsAI (Creature);
+            return new mob_omrogg_headsAI(creature);
         }
 };
 
@@ -295,7 +296,7 @@ class boss_warbringer_omrogg : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*Killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 Unit* pLeftHead  = Unit::GetUnit(*me, LeftHeadGUID);
                 Unit* pRightHead = Unit::GetUnit(*me, RightHeadGUID);

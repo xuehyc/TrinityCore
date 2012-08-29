@@ -139,7 +139,7 @@ enum Actions
     ACTION_CAST_INVOCATION      = 2,
     ACTION_REMOVE_INVOCATION    = 3,
     ACTION_KINETIC_BOMB_JUMP    = 4,
-    ACTION_FLAME_BALL_CHASE     = 5
+    ACTION_FLAME_BALL_CHASE     = 5,
 };
 
 enum Points
@@ -211,19 +211,19 @@ class boss_blood_council_controller : public CreatureScript
 
                 if (Creature* keleseth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_KELESETH_GUID)))
                 {
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, keleseth);
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, keleseth);
                     DoZoneInCombat(keleseth, 100.0f);
                 }
 
                 if (Creature* taldaram = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_TALDARAM_GUID)))
                 {
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, taldaram);
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, taldaram);
                     DoZoneInCombat(taldaram, 100.0f);
                 }
 
                 if (Creature* valanar = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_VALANAR_GUID)))
                 {
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, valanar);
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, valanar);
                     DoZoneInCombat(valanar, 100.0f);
                 }
 
@@ -421,12 +421,12 @@ class boss_prince_keleseth_icc : public CreatureScript
                 summons.DespawnAll();
 
                 Talk(SAY_KELESETH_DEATH);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
             void JustReachedHome()
             {
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->SetHealth(_spawnHealth);
                 _isEmpowered = false;
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
@@ -452,20 +452,12 @@ class boss_prince_keleseth_icc : public CreatureScript
             {
                 summons.Summon(summon);
                 Position pos;
-                pos.Relocate(summon);
+                me->GetPosition(&pos);
                 float maxRange = me->GetDistance2d(summon);
                 float angle = me->GetAngle(summon);
-                // prevent spawning outside of room
-                while (!me->IsWithinLOS(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()))
-                {
-                    maxRange -= 5.0f;
-                    if (maxRange < 5.0f)
-                        break;
-
-                    summon->MovePosition(pos, float(rand_norm() * maxRange), angle);
-                }
-
+                me->MovePositionToFirstCollision(pos, maxRange, angle);
                 summon->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
+                summon->ToTempSummon()->SetTempSummonType(TEMPSUMMON_CORPSE_DESPAWN);
             }
 
             void DamageDealt(Unit* /*target*/, uint32& damage, DamageEffectType damageType)
@@ -668,12 +660,12 @@ class boss_prince_taldaram_icc : public CreatureScript
                 summons.DespawnAll();
 
                 Talk(EMOTE_TALDARAM_DEATH);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
             void JustReachedHome()
             {
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->SetHealth(_spawnHealth);
                 _isEmpowered = false;
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
@@ -910,12 +902,12 @@ class boss_prince_valanar_icc : public CreatureScript
                 summons.DespawnAll();
 
                 Talk(SAY_VALANAR_DEATH);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
             void JustReachedHome()
             {
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->SetHealth(me->GetMaxHealth());
                 _isEmpowered = false;
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
@@ -1129,7 +1121,7 @@ class npc_blood_queen_lana_thel : public CreatureScript
             void Reset()
             {
                 _events.Reset();
-                me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                me->SetDisableGravity(true);
                 if (_instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == DONE)
                 {
                     me->SetVisible(false);
@@ -1144,7 +1136,7 @@ class npc_blood_queen_lana_thel : public CreatureScript
                 if (_introDone)
                     return;
 
-                if (!me->IsWithinDistInMap(who, 35.0f))
+                if (!me->IsWithinDistInMap(who, 35.0f, false))
                     return;
 
                 _introDone = true;
@@ -1406,7 +1398,7 @@ class npc_dark_nucleus : public CreatureScript
                 me->DespawnOrUnsummon();
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -1414,10 +1406,10 @@ class npc_dark_nucleus : public CreatureScript
                 if (_targetAuraCheck <= diff)
                 {
                     _targetAuraCheck = 1000;
-
                     if (Unit* victim = me->getVictim())
                     {
-                        if (me->GetDistance(victim) < 15.0f && !victim->HasAura(SPELL_SHADOW_RESONANCE_RESIST, me->GetGUID()))
+                        if (me->GetDistance(victim) < 15.0f &&
+                            !victim->HasAura(SPELL_SHADOW_RESONANCE_RESIST, me->GetGUID()))
                         {
                             DoCast(victim, SPELL_SHADOW_RESONANCE_RESIST);
                             me->ClearUnitState(UNIT_STATE_CASTING);
@@ -1593,10 +1585,11 @@ class spell_valanar_kinetic_bomb : public SpellScriptLoader
 
             void ChangeSummonPos(SpellEffIndex /*effIndex*/)
             {
-                WorldLocation summonPos = *GetTargetDest();
+                WorldLocation summonPos = *GetExplTargetDest();
                 Position offset = {0.0f, 0.0f, 20.0f, 0.0f};
                 summonPos.RelocateOffset(offset);
-                SetTargetDest(summonPos);
+                SetExplTargetDest(summonPos);
+                GetHitDest()->RelocateOffset(offset);
             }
 
             void Register()
@@ -1661,7 +1654,7 @@ class spell_valanar_kinetic_bomb_knockback : public SpellScriptLoader
 
             void Register()
             {
-                AfterHit += SpellHitFn(spell_valanar_kinetic_bomb_knockback_SpellScript::KnockIntoAir);
+                BeforeHit += SpellHitFn(spell_valanar_kinetic_bomb_knockback_SpellScript::KnockIntoAir);
             }
         };
 
@@ -1738,7 +1731,7 @@ class spell_blood_council_shadow_prison_damage : public SpellScriptLoader
             void AddExtraDamage()
             {
                 if (Aura* aur = GetHitUnit()->GetAura(GetSpellInfo()->Id))
-                    if (AuraEffect const* eff = aur->GetEffect(1))
+                    if (AuraEffect const* eff = aur->GetEffect(EFFECT_1))
                         SetHitDamage(GetHitDamage() + eff->GetAmount());
             }
 

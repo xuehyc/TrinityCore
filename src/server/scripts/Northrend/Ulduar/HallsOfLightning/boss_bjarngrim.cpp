@@ -23,7 +23,8 @@ SDComment: Waypoint needed, we expect boss to always have 2x Stormforged Lieuten
 SDCategory: Halls of Lightning
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "halls_of_lightning.h"
 
 float WaypointsBjarngrim[14][3] =
@@ -48,17 +49,15 @@ float WaypointsBjarngrim[14][3] =
 enum eEnums
 {
     //Yell
-    SAY_AGGRO                               = -1602000,
-    SAY_SLAY_1                              = -1602001,
-    SAY_SLAY_2                              = -1602002,
-    SAY_SLAY_3                              = -1602003,
-    SAY_DEATH                               = -1602004,
-    SAY_BATTLE_STANCE                       = -1602005,
-    EMOTE_BATTLE_STANCE                     = -1602006,
-    SAY_BERSEKER_STANCE                     = -1602007,
-    EMOTE_BERSEKER_STANCE                   = -1602008,
-    SAY_DEFENSIVE_STANCE                    = -1602009,
-    EMOTE_DEFENSIVE_STANCE                  = -1602010,
+    SAY_AGGRO                               = 0,
+    SAY_DEFENSIVE_STANCE                    = 1,
+    SAY_BATTLE_STANCE                       = 2,
+    SAY_BERSEKER_STANCE                     = 3,
+    SAY_SLAY                                = 4,
+    SAY_DEATH                               = 5,
+    EMOTE_DEFENSIVE_STANCE                  = 6,
+    EMOTE_BATTLE_STANCE                     = 7,
+    EMOTE_BERSEKER_STANCE                   = 8,
 
     SPELL_DEFENSIVE_STANCE                  = 53790,
     //SPELL_DEFENSIVE_AURA                    = 41105,
@@ -114,13 +113,13 @@ public:
     {
         boss_bjarngrimAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
-            m_instance = creature->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             m_uiStance = STANCE_DEFENSIVE;
         }
 
         SummonList Summons;
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
 
         bool m_bIsChangingStance;
 
@@ -155,7 +154,7 @@ public:
             m_waypoint = 0;
             m_nextWP = true;
 
-            m_uiChangeStance_Timer = 20000 + rand()%5000;
+            m_uiChangeStance_Timer = urand(20000, 25000);
 
             m_uiReflection_Timer = 8000;
             m_uiKnockAway_Timer = 20000;
@@ -180,8 +179,8 @@ public:
 
             SetEquipmentSlots(false, EQUIP_SWORD, EQUIP_SHIELD, EQUIP_NO_CHANGE);
 
-            if (m_instance)
-                m_instance->SetData(TYPE_BJARNGRIM, NOT_STARTED);
+            if (instance)
+                instance->SetData(TYPE_BJARNGRIM, NOT_STARTED);
         }
 
         void MovementInform(uint32 type, uint32 id)
@@ -211,7 +210,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            DoScriptText(SAY_AGGRO, me);
+            Talk(SAY_AGGRO);
             DoZoneInCombat();
 
             me->GetMotionMaster()->Clear();
@@ -229,22 +228,22 @@ public:
                 }
             }
 
-            if (m_instance)
-                m_instance->SetData(TYPE_BJARNGRIM, IN_PROGRESS);
+            if (instance)
+                instance->SetData(TYPE_BJARNGRIM, IN_PROGRESS);
         }
 
         void KilledUnit(Unit* /*victim*/)
         {
-            DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3), me);
+            Talk(SAY_SLAY);
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            DoScriptText(SAY_DEATH, me);
+            Talk(SAY_DEATH);
             Summons.DespawnAll();
 
-            if (m_instance)
-                m_instance->SetData(TYPE_BJARNGRIM, DONE);
+            if (instance)
+                instance->SetData(TYPE_BJARNGRIM, DONE);
         }
 
         //TODO: remove when removal is done by the core
@@ -272,7 +271,6 @@ public:
                 m_nextWP = false;
             }
 
-
             //Return since we have no target
             if (!UpdateVictim())
                 return;
@@ -296,20 +294,20 @@ public:
                 switch (m_uiStance)
                 {
                     case STANCE_DEFENSIVE:
-                        DoScriptText(SAY_DEFENSIVE_STANCE, me);
-                        DoScriptText(EMOTE_DEFENSIVE_STANCE, me);
+                        Talk(SAY_DEFENSIVE_STANCE);
+                        Talk(EMOTE_DEFENSIVE_STANCE);
                         DoCast(me, SPELL_DEFENSIVE_STANCE);
                         SetEquipmentSlots(false, EQUIP_SWORD, EQUIP_SHIELD, EQUIP_NO_CHANGE);
                         break;
                     case STANCE_BERSERKER:
-                        DoScriptText(SAY_BERSEKER_STANCE, me);
-                        DoScriptText(EMOTE_BERSEKER_STANCE, me);
+                        Talk(SAY_BERSEKER_STANCE);
+                        Talk(EMOTE_BERSEKER_STANCE);
                         DoCast(me, SPELL_BERSEKER_STANCE);
                         SetEquipmentSlots(false, EQUIP_SWORD, EQUIP_SWORD, EQUIP_NO_CHANGE);
                         break;
                     case STANCE_BATTLE:
-                        DoScriptText(SAY_BATTLE_STANCE, me);
-                        DoScriptText(EMOTE_BATTLE_STANCE, me);
+                        Talk(SAY_BATTLE_STANCE);
+                        Talk(EMOTE_BATTLE_STANCE);
                         DoCast(me, SPELL_BATTLE_STANCE);
                         SetEquipmentSlots(false, EQUIP_MACE, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
                         break;
@@ -434,10 +432,10 @@ public:
     {
         mob_stormforged_lieutenantAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_instance = creature->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
 
         uint32 m_uiArcWeld_Timer;
         uint32 m_uiRenewSteel_Timer;
@@ -450,9 +448,9 @@ public:
 
         void EnterCombat(Unit* who)
         {
-            if (m_instance)
+            if (instance)
             {
-                if (Creature* pBjarngrim = m_instance->instance->GetCreature(m_instance->GetData64(DATA_BJARNGRIM)))
+                if (Creature* pBjarngrim = instance->instance->GetCreature(instance->GetData64(DATA_BJARNGRIM)))
                 {
                     if (pBjarngrim->isAlive() && !pBjarngrim->getVictim())
                         pBjarngrim->AI()->AttackStart(who);
@@ -476,9 +474,9 @@ public:
 
             if (m_uiRenewSteel_Timer <= uiDiff)
             {
-                if (m_instance)
+                if (instance)
                 {
-                    if (Creature* pBjarngrim = m_instance->instance->GetCreature(m_instance->GetData64(DATA_BJARNGRIM)))
+                    if (Creature* pBjarngrim = instance->instance->GetCreature(instance->GetData64(DATA_BJARNGRIM)))
                     {
                         if (pBjarngrim->isAlive())
                             DoCast(pBjarngrim, SPELL_RENEW_STEEL_N);
@@ -501,29 +499,40 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if(InstanceScript* m_instance = creature->GetInstanceScript())
-            if(m_instance->GetData(TYPE_BJARNGRIM) == DONE)
+        if(InstanceScript* instance = creature->GetInstanceScript())
+        {
+            if(instance->GetData(TYPE_BJARNGRIM) == DONE)
             {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bitte oeffne uns die Tuer!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
                 player->SEND_GOSSIP_MENU(1, creature->GetGUID());
             }
+        }
+
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 uiSender, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
-        switch (uiAction)
+        switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF+1:
-                if(InstanceScript* m_instance = creature->GetInstanceScript())
-                    if(m_instance->GetData(TYPE_BJARNGRIM) == DONE)
-                        if(GameObject* go = m_instance->instance->GetGameObject(m_instance->GetData64(GO_BJARNGRIM_DOOR)))
+            {
+                if(InstanceScript* instance = creature->GetInstanceScript())
+                {
+                    if(instance->GetData(TYPE_BJARNGRIM) == DONE)
+                    {
+                        if(GameObject* go = instance->instance->GetGameObject(instance->GetData64(GO_BJARNGRIM_DOOR)))
                         {
                             go->SetGoState(GO_STATE_ACTIVE);
                             player->CLOSE_GOSSIP_MENU();
                         }
-            break;
+                    }
+                }
+
+                break;
+            }
         }
+
         return true;
     }
 };

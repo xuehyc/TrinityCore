@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "gundrak.h"
 
 #define MAX_ENCOUNTER     5
@@ -131,7 +132,8 @@ public:
        bool IsEncounterInProgress() const
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS) return true;
+                if (m_auiEncounter[i] == IN_PROGRESS)
+                    return true;
 
             return false;
         }
@@ -519,17 +521,17 @@ class go_gundrak_altar : public GameObjectScript
 public:
     go_gundrak_altar() : GameObjectScript("go_gundrak_altar") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* pGO)
+    bool OnGossipHello(Player* /*player*/, GameObject* go)
     {
-        InstanceScript* instance = pGO->GetInstanceScript();
+        InstanceScript* instance = go->GetInstanceScript();
         uint64 uiStatue = 0;
 
-        pGO->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-        pGO->SetGoState(GO_STATE_ACTIVE);
+        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+        go->SetGoState(GO_STATE_ACTIVE);
 
         if (instance)
         {
-            switch (pGO->GetEntry())
+            switch (go->GetEntry())
             {
                 case 192518:
                     uiStatue = instance->GetData64(DATA_SLAD_RAN_STATUE);
@@ -545,8 +547,8 @@ public:
             if (!instance->GetData64(DATA_STATUE_ACTIVATE))
             {
                 instance->SetData64(DATA_STATUE_ACTIVATE, uiStatue);
-                pGO->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                pGO->SetGoState(GO_STATE_ACTIVE);
+                go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                go->SetGoState(GO_STATE_ACTIVE);
             }
             return true;
         }

@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "naxxramas.h"
 
 #define SAY_GREET           RAND(-1533000, -1533004, -1533005, -1533006, -1533007)
@@ -66,7 +67,7 @@ public:
 
     struct boss_anubrekhanAI : public BossAI
     {
-        boss_anubrekhanAI(Creature* c) : BossAI(c, BOSS_ANUBREKHAN) {}
+        boss_anubrekhanAI(Creature* creature) : BossAI(creature, BOSS_ANUBREKHAN) {}
 
         bool hasTaunted;
 
@@ -103,7 +104,7 @@ public:
             DoScriptText(SAY_SLAY, me);
         }
 
-        void JustDied(Unit*)
+        void JustDied(Unit* /*killer*/)
         {
             _JustDied();
 

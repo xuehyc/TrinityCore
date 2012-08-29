@@ -22,7 +22,8 @@ SDComment: missing yells. not sure about timers.
 SDCategory: Trial of the Champion
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 #include "trial_of_the_champion.h"
 #include "Vehicle.h"
@@ -222,11 +223,12 @@ public:
 
         void UpdateAI(const uint32 uiDiff)
         {
-
+            //Return since we have no target
             if (!UpdateVictim())
                 return;
 
             if (bEventInProgress)
+            {
                 if (uiResurrectTimer <= uiDiff)
                 {
                     me->SetFullHealth();
@@ -249,7 +251,8 @@ public:
                     bEventInProgress = false;
                     me->ClearUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED);
                 } else uiResurrectTimer -= uiDiff;
-                
+            }
+
             switch (uiPhase)
             {
                 case PHASE_UNDEAD:
@@ -523,9 +526,9 @@ public:
 
         InstanceScript* instance;
 
-        void WaypointReached(uint32 uiPointId)
+        void WaypointReached(uint32 waypointId)
         {
-            switch(uiPointId)
+            switch(waypointId)
             {
                     case 1:
                         me->SetSpeed(MOVE_FLIGHT, 2.0f);

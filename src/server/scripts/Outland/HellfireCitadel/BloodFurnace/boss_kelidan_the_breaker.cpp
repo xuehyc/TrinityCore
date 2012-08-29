@@ -28,7 +28,9 @@ boss_kelidan_the_breaker
 mob_shadowmoon_channeler
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellAuras.h"
 #include "blood_furnace.h"
 
 enum eKelidan
@@ -158,7 +160,9 @@ class boss_kelidan_the_breaker : public CreatureScript
             uint64 GetChanneled(Creature* channeler1)
             {
                 SummonChannelers();
-                if (!channeler1) return 0;
+                if (!channeler1)
+                    return 0;
+
                 uint8 i;
                 for (i=0; i<5; ++i)
                 {
@@ -183,7 +187,7 @@ class boss_kelidan_the_breaker : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*Killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 DoScriptText(SAY_DIE, me);
 
@@ -268,9 +272,9 @@ class boss_kelidan_the_breaker : public CreatureScript
 
         };
 
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_kelidan_the_breakerAI (Creature);
+            return new boss_kelidan_the_breakerAI(creature);
         }
 };
 
@@ -324,10 +328,10 @@ class mob_shadowmoon_channeler : public CreatureScript
                 DoStartMovement(who);
             }
 
-            void JustDied(Unit* Killer)
+            void JustDied(Unit* killer)
             {
                if (Creature* Kelidan = me->FindNearestCreature(ENTRY_KELIDAN, 100))
-                   CAST_AI(boss_kelidan_the_breaker::boss_kelidan_the_breakerAI, Kelidan->AI())->ChannelerDied(Killer);
+                   CAST_AI(boss_kelidan_the_breaker::boss_kelidan_the_breakerAI, Kelidan->AI())->ChannelerDied(killer);
             }
 
             void UpdateAI(const uint32 diff)
@@ -371,9 +375,9 @@ class mob_shadowmoon_channeler : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new mob_shadowmoon_channelerAI (Creature);
+            return new mob_shadowmoon_channelerAI(creature);
         }
 };
 

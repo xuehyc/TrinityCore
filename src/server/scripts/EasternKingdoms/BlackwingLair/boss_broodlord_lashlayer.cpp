@@ -23,7 +23,9 @@ SDComment:
 SDCategory: Blackwing Lair
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+
 enum Say
 {
     SAY_AGGRO               = -1469000,
@@ -59,10 +61,10 @@ public:
 
         void Reset()
         {
-            Cleave_Timer           = 8000;     // These times are probably wrong
-            BlastWave_Timer        = 12000;
-            MortalStrike_Timer     = 20000;
-            KnockBack_Timer        = 30000;
+            Cleave_Timer = 8000;                                // These times are probably wrong
+            BlastWave_Timer = 12000;
+            MortalStrike_Timer = 20000;
+            KnockBack_Timer = 30000;
         }
 
         void EnterCombat(Unit* /*who*/)

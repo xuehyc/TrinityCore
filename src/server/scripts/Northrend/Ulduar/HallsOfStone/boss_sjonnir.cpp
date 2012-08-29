@@ -23,13 +23,16 @@ SDComment:
 SDCategory:
 Script Data End */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "halls_of_stone.h"
 
 enum Spells
 {
     SPELL_LIGHTING_RING                                    = 51849, //Periodic Trigger (interval 2s) spell = 50841
     H_SPELL_LIGHTING_RING                                  = 59861, //Periodic Trigger (interval 2s) spell = 59849
+    SPELL_LIGHTING_RING_1                                  = 50840, //Periodic Trigger (interval 2s) spell = 50841
+    H_SPELL_LIGHTING_RING_1                                = 59848, //Periodic Trigger (interval 2s) spell = 59849
     SPELL_STATIC_CHARGE                                    = 50834, //Periodic Trigger 2s interval, spell =50835
     H_SPELL_STATIC_CHARGE                                  = 59846, //Periodic Trigger 2s interval, spell =50847
     SPELL_CHAIN_LIGHTING                                   = 50830,
@@ -87,9 +90,9 @@ public:
 
     struct boss_sjonnirAI : public ScriptedAI
     {
-        boss_sjonnirAI(Creature* c) : ScriptedAI(c), lSummons(me)
+        boss_sjonnirAI(Creature* creature) : ScriptedAI(creature), lSummons(me)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         bool bIsFrenzy;
@@ -257,7 +260,7 @@ public:
 
     struct mob_malformed_oozeAI : public ScriptedAI
     {
-        mob_malformed_oozeAI(Creature* c) : ScriptedAI(c) {}
+        mob_malformed_oozeAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 uiMergeTimer;
 
@@ -300,9 +303,9 @@ public:
 
     struct mob_iron_sludgeAI : public ScriptedAI
     {
-        mob_iron_sludgeAI(Creature* c) : ScriptedAI(c)
+        mob_iron_sludgeAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;

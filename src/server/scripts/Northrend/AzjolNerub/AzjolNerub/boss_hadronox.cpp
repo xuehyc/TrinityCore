@@ -36,7 +36,8 @@ INSERT INTO `spell_script_names` (spell_id, ScriptName) VALUES
 (59417, 'spell_leech_poison_hadronox');
 */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "azjol_nerub.h"
 
 enum Spells
@@ -74,9 +75,9 @@ public:
 
     struct boss_hadronoxAI : public ScriptedAI
     {
-        boss_hadronoxAI(Creature* c) : ScriptedAI(c), Summons(me)
+        boss_hadronoxAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -115,7 +116,7 @@ public:
                 instance->SetData(DATA_HADRONOX_EVENT, FAIL);
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             Summons.DespawnAll();
 
@@ -220,7 +221,8 @@ public:
             } else uiCheckTimer -= diff;
 
             //Return since we have no target
-            if (!UpdateVictim()) return;
+            if (!UpdateVictim())
+                return;
 
             if (!bClosedDoor)
             {

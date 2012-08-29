@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "violet_hold.h"
 
 enum Spells
@@ -41,9 +42,9 @@ public:
 
     struct boss_lavanthorAI : public ScriptedAI
     {
-        boss_lavanthorAI(Creature* c) : ScriptedAI(c)
+        boss_lavanthorAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 uiFireboltTimer;

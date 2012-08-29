@@ -27,7 +27,11 @@ EndScriptData */
 npc_shadowfang_prisoner
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
 #include "ScriptedEscortAI.h"
 #include "shadowfang_keep.h"
 
@@ -63,10 +67,10 @@ public:
         return new npc_shadowfang_prisonerAI(creature);
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        if (action == GOSSIP_ACTION_INFO_DEF+1)
         {
             player->CLOSE_GOSSIP_MENU();
 
@@ -90,18 +94,18 @@ public:
 
     struct npc_shadowfang_prisonerAI : public npc_escortAI
     {
-        npc_shadowfang_prisonerAI(Creature* c) : npc_escortAI(c)
+        npc_shadowfang_prisonerAI(Creature* creature) : npc_escortAI(creature)
         {
-            instance = c->GetInstanceScript();
-            uiNpcEntry = c->GetEntry();
+            instance = creature->GetInstanceScript();
+            uiNpcEntry = creature->GetEntry();
         }
 
         InstanceScript* instance;
         uint32 uiNpcEntry;
 
-        void WaypointReached(uint32 uiPoint)
+        void WaypointReached(uint32 waypointId)
         {
-            switch (uiPoint)
+            switch (waypointId)
             {
                 case 0:
                     if (uiNpcEntry == NPC_ASH)
@@ -175,10 +179,7 @@ public:
             if (uiDarkOffering <= uiDiff)
             {
                 if (Creature* pFriend = me->FindNearestCreature(me->GetEntry(), 25.0f, true))
-                {
-                    if (pFriend)
-                        DoCast(pFriend, SPELL_DARK_OFFERING);
-                }
+                    DoCast(pFriend, SPELL_DARK_OFFERING);
                 else
                     DoCast(me, SPELL_DARK_OFFERING);
                 uiDarkOffering = urand(4400, 12500);
@@ -196,8 +197,48 @@ public:
 
 };
 
+class spell_shadowfang_keep_haunting_spirits : public SpellScriptLoader
+{
+    public:
+        spell_shadowfang_keep_haunting_spirits() : SpellScriptLoader("spell_shadowfang_keep_haunting_spirits") { }
+
+        class spell_shadowfang_keep_haunting_spirits_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_shadowfang_keep_haunting_spirits_AuraScript);
+
+            void CalcPeriodic(AuraEffect const* /*aurEff*/, bool& isPeriodic, int32& amplitude)
+            {
+                isPeriodic = true;
+                amplitude = (irand(0, 60) + 30) * IN_MILLISECONDS;
+            }
+
+            void HandleDummyTick(AuraEffect const* aurEff)
+            {
+                GetTarget()->CastSpell((Unit*)NULL, aurEff->GetAmount(), true);
+            }
+
+            void HandleUpdatePeriodic(AuraEffect* aurEff)
+            {
+                aurEff->CalculatePeriodic(GetCaster());
+            }
+
+            void Register()
+            {
+                DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(spell_shadowfang_keep_haunting_spirits_AuraScript::CalcPeriodic, EFFECT_0, SPELL_AURA_DUMMY);
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_shadowfang_keep_haunting_spirits_AuraScript::HandleDummyTick, EFFECT_0, SPELL_AURA_DUMMY);
+                OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_shadowfang_keep_haunting_spirits_AuraScript::HandleUpdatePeriodic, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_shadowfang_keep_haunting_spirits_AuraScript();
+        }
+};
+
 void AddSC_shadowfang_keep()
 {
     new npc_shadowfang_prisoner();
     new npc_arugal_voidwalker();
+    new spell_shadowfang_keep_haunting_spirits();
 }

@@ -23,7 +23,8 @@ SDComment: Possesion Support
 SDCategory: Coilfang Resevoir, Serpent Shrine Cavern
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "serpent_shrine.h"
 
 // --- Spells used by Leotheras The Blind
@@ -80,7 +81,7 @@ public:
 
     struct mob_inner_demonAI : public ScriptedAI
     {
-        mob_inner_demonAI(Creature* c) : ScriptedAI(c)
+        mob_inner_demonAI(Creature* creature) : ScriptedAI(creature)
         {
             victimGUID = 0;
         }
@@ -109,9 +110,9 @@ public:
             return 0;
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
-            Unit* unit = Unit::GetUnit((*me), victimGUID);
+            Unit* unit = Unit::GetUnit(*me, victimGUID);
             if (unit && unit->HasAura(SPELL_INSIDIOUS_WHISPER))
                 unit->RemoveAurasDueToSpell(SPELL_INSIDIOUS_WHISPER);
         }
@@ -127,7 +128,8 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            if (!victimGUID) return;
+            if (!victimGUID)
+                return;
         }
 
         void UpdateAI(const uint32 diff)
@@ -139,7 +141,7 @@ public:
             if (me->getVictim()->GetGUID() != victimGUID)
             {
                 DoModifyThreatPercent(me->getVictim(), -100);
-                Unit* owner = Unit::GetUnit((*me), victimGUID);
+                Unit* owner = Unit::GetUnit(*me, victimGUID);
                 if (owner && owner->isAlive())
                 {
                     me->AddThreat(owner, 999999);
@@ -185,10 +187,10 @@ public:
 
     struct boss_leotheras_the_blindAI : public ScriptedAI
     {
-        boss_leotheras_the_blindAI(Creature* c) : ScriptedAI(c)
+        boss_leotheras_the_blindAI(Creature* creature) : ScriptedAI(creature)
         {
-            c->GetPosition(x, y, z);
-            instance = c->GetInstanceScript();
+            creature->GetPosition(x, y, z);
+            instance = creature->GetInstanceScript();
             Demon = 0;
 
             for (uint8 i = 0; i < 3; ++i)//clear guids
@@ -398,7 +400,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
 
@@ -616,7 +618,7 @@ public:
 
     struct boss_leotheras_the_blind_demonformAI : public ScriptedAI
     {
-        boss_leotheras_the_blind_demonformAI(Creature* c) : ScriptedAI(c) {}
+        boss_leotheras_the_blind_demonformAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 ChaosBlast_Timer;
         bool DealDamage;
@@ -640,7 +642,7 @@ public:
             DoScriptText(RAND(SAY_DEMON_SLAY1, SAY_DEMON_SLAY2, SAY_DEMON_SLAY3), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             //invisibility (blizzlike, at the end of the fight he doesn't die, he disappears)
             DoCast(me, 8149, true);
@@ -689,9 +691,9 @@ public:
 
     struct mob_greyheart_spellbinderAI : public ScriptedAI
     {
-        mob_greyheart_spellbinderAI(Creature* c) : ScriptedAI(c)
+        mob_greyheart_spellbinderAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             leotherasGUID = 0;
             AddedBanish = false;
         }

@@ -22,7 +22,8 @@ SDComment: Is not working SPELL_ARCANE_SHIELD. SPELL_FROSTBOMB has some issues, 
 SDCategory: Instance Script
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "oculus.h"
 
 enum Spells
@@ -203,7 +204,7 @@ public:
             if (!instance || instance->GetData(DATA_UROM_PLATAFORM) > 2)
                 return;
 
-            for (uint8 i = 0; i < 4 ; i++)
+            for (uint8 i = 0; i < 4; i++)
             {
                 SetPosition(i);
                 me->SummonCreature(Group[group[instance->GetData(DATA_UROM_PLATAFORM)]].entry[i], x, y, me->GetPositionZ(), me->GetOrientation());
@@ -316,7 +317,9 @@ public:
                     LeaveCombat();
                     break;
                 case SPELL_TELEPORT:
-                    me->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY); // with out it the npc will fall down while is casting
+                    //! Unconfirmed, previous below
+                    me->SetDisableGravity(true);
+                    //me->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY); // with out it the npc will fall down while is casting
                     canCast = true;
                     break;
                 default:

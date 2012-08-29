@@ -27,7 +27,8 @@ EndScriptData */
 mob_yenniku
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 /*######
 ## mob_yenniku
@@ -45,7 +46,7 @@ public:
 
     struct mob_yennikuAI : public ScriptedAI
     {
-        mob_yennikuAI(Creature* c) : ScriptedAI(c)
+        mob_yennikuAI(Creature* creature) : ScriptedAI(creature)
         {
             bReset = false;
         }
@@ -114,7 +115,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 /*######

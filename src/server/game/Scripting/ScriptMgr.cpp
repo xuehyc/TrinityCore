@@ -16,7 +16,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
@@ -27,6 +26,10 @@
 #include "ScriptSystem.h"
 #include "Transport.h"
 #include "Vehicle.h"
+#include "SpellInfo.h"
+#include "SpellScript.h"
+#include "GossipDef.h"
+#include "CreatureAI.h"
 
 // This is the global static registry of scripts.
 template<class TScript>
@@ -51,7 +54,7 @@ class ScriptRegistry
             {
                 if (it->second == script)
                 {
-                    sLog->outError("Script '%s' has same memory pointer as '%s'.",
+                    sLog->outError(LOG_FILTER_TSCR, "Script '%s' has same memory pointer as '%s'.",
                         script->GetName().c_str(), it->second->GetName().c_str());
 
                     return;
@@ -87,7 +90,7 @@ class ScriptRegistry
                     else
                     {
                         // If the script is already assigned -> delete it!
-                        sLog->outError("Script '%s' already assigned with the same script name, so the script can't work.",
+                        sLog->outError(LOG_FILTER_TSCR, "Script '%s' already assigned with the same script name, so the script can't work.",
                             script->GetName().c_str());
 
                         ASSERT(false); // Error that should be fixed ASAP.
@@ -97,7 +100,7 @@ class ScriptRegistry
                 {
                     // The script uses a script name from database, but isn't assigned to anything.
                     if (script->GetName().find("example") == std::string::npos && script->GetName().find("Smart") == std::string::npos)
-                        sLog->outErrorDb("Script named '%s' does not have a script name assigned in database.",
+                        sLog->outError(LOG_FILTER_SQL, "Script named '%s' does not have a script name assigned in database.",
                             script->GetName().c_str());
                 }
             }
@@ -159,13 +162,13 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* target)
 {
     if (!pSource)
     {
-        sLog->outError("TSCR: DoScriptText entry %i, invalid Source pointer.", iTextEntry);
+        sLog->outError(LOG_FILTER_TSCR, "DoScriptText entry %i, invalid Source pointer.", iTextEntry);
         return;
     }
 
     if (iTextEntry >= 0)
     {
-        sLog->outError("TSCR: DoScriptText with source entry %u (TypeId=%u, guid=%u) attempts to process text entry %i, but text entry must be negative.", pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
+        sLog->outError(LOG_FILTER_TSCR, "DoScriptText with source entry %u (TypeId=%u, guid=%u) attempts to process text entry %i, but text entry must be negative.", pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
         return;
     }
 
@@ -173,18 +176,18 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* target)
 
     if (!pData)
     {
-        sLog->outError("TSCR: DoScriptText with source entry %u (TypeId=%u, guid=%u) could not find text entry %i.", pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
+        sLog->outError(LOG_FILTER_TSCR, "DoScriptText with source entry %u (TypeId=%u, guid=%u) could not find text entry %i.", pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
         return;
     }
 
-    sLog->outDebug(LOG_FILTER_TSCR, "TSCR: DoScriptText: text entry=%i, Sound=%u, Type=%u, Language=%u, Emote=%u", iTextEntry, pData->uiSoundId, pData->uiType, pData->uiLanguage, pData->uiEmote);
+    sLog->outDebug(LOG_FILTER_TSCR, "DoScriptText: text entry=%i, Sound=%u, Type=%u, Language=%u, Emote=%u", iTextEntry, pData->uiSoundId, pData->uiType, pData->uiLanguage, pData->uiEmote);
 
     if (pData->uiSoundId)
     {
-        if (GetSoundEntriesStore()->LookupEntry(pData->uiSoundId))
+        if (sSoundEntriesStore.LookupEntry(pData->uiSoundId))
             pSource->SendPlaySound(pData->uiSoundId, false);
         else
-            sLog->outError("TSCR: DoScriptText entry %i tried to process invalid sound id %u.", iTextEntry, pData->uiSoundId);
+            sLog->outError(LOG_FILTER_TSCR, "DoScriptText entry %i tried to process invalid sound id %u.", iTextEntry, pData->uiSoundId);
     }
 
     if (pData->uiEmote)
@@ -192,7 +195,7 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* target)
         if (pSource->GetTypeId() == TYPEID_UNIT || pSource->GetTypeId() == TYPEID_PLAYER)
             ((Unit*)pSource)->HandleEmoteCommand(pData->uiEmote);
         else
-            sLog->outError("TSCR: DoScriptText entry %i tried to process emote for invalid TypeId (%u).", iTextEntry, pSource->GetTypeId());
+            sLog->outError(LOG_FILTER_TSCR, "DoScriptText entry %i tried to process emote for invalid TypeId (%u).", iTextEntry, pSource->GetTypeId());
     }
 
     switch (pData->uiType)
@@ -214,7 +217,7 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* target)
             if (target && target->GetTypeId() == TYPEID_PLAYER)
                 pSource->MonsterWhisper(iTextEntry, target->GetGUID());
             else
-                sLog->outError("TSCR: DoScriptText entry %i cannot whisper without target unit (TYPEID_PLAYER).", iTextEntry);
+                sLog->outError(LOG_FILTER_TSCR, "DoScriptText entry %i cannot whisper without target unit (TYPEID_PLAYER).", iTextEntry);
 
             break;
         }
@@ -223,7 +226,7 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* target)
             if (target && target->GetTypeId() == TYPEID_PLAYER)
                 pSource->MonsterWhisper(iTextEntry, target->GetGUID(), true);
             else
-                sLog->outError("TSCR: DoScriptText entry %i cannot whisper without target unit (TYPEID_PLAYER).", iTextEntry);
+                sLog->outError(LOG_FILTER_TSCR, "DoScriptText entry %i cannot whisper without target unit (TYPEID_PLAYER).", iTextEntry);
 
             break;
         }
@@ -248,19 +251,19 @@ void ScriptMgr::Initialize()
 
     LoadDatabase();
 
-    sLog->outString("Loading C++ scripts");
+    sLog->outInfo(LOG_FILTER_TSCR, "Loading C++ scripts");
 
     FillSpellSummary();
     AddScripts();
 
-    sLog->outString(">> Loaded %u C++ scripts in %u ms", GetScriptCount(), GetMSTimeDiffToNow(oldMSTime));
-    sLog->outString();
+    sLog->outInfo(LOG_FILTER_TSCR, ">> Loaded %u C++ scripts in %u ms", GetScriptCount(), GetMSTimeDiffToNow(oldMSTime));
+
 }
 
 void ScriptMgr::Unload()
 {
     #define SCR_CLEAR(T) \
-        FOR_SCRIPTS(T, itr, end) \
+        for (SCR_REG_ITR(T) itr = SCR_REG_LST(T).begin(); itr != SCR_REG_LST(T).end(); ++itr) \
             delete itr->second; \
         SCR_REG_LST(T).clear();
 
@@ -582,7 +585,7 @@ void ScriptMgr::OnCreateMap(Map* map)
 {
     ASSERT(map);
 
-    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsContinent);
+    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
         itr->second->OnCreate(map);
     SCR_MAP_END;
 
@@ -599,7 +602,7 @@ void ScriptMgr::OnDestroyMap(Map* map)
 {
     ASSERT(map);
 
-    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsContinent);
+    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
         itr->second->OnDestroy(map);
     SCR_MAP_END;
 
@@ -617,7 +620,7 @@ void ScriptMgr::OnLoadGridMap(Map* map, GridMap* gmap, uint32 gx, uint32 gy)
     ASSERT(map);
     ASSERT(gmap);
 
-    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsContinent);
+    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
         itr->second->OnLoadGridMap(map, gmap, gx, gy);
     SCR_MAP_END;
 
@@ -635,7 +638,7 @@ void ScriptMgr::OnUnloadGridMap(Map* map, GridMap* gmap, uint32 gx, uint32 gy)
     ASSERT(map);
     ASSERT(gmap);
 
-    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsContinent);
+    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
         itr->second->OnUnloadGridMap(map, gmap, gx, gy);
     SCR_MAP_END;
 
@@ -653,7 +656,7 @@ void ScriptMgr::OnPlayerEnterMap(Map* map, Player* player)
     ASSERT(map);
     ASSERT(player);
 
-    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsContinent);
+    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
         itr->second->OnPlayerEnter(map, player);
     SCR_MAP_END;
 
@@ -671,7 +674,7 @@ void ScriptMgr::OnPlayerLeaveMap(Map* map, Player* player)
     ASSERT(map);
     ASSERT(player);
 
-    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsContinent);
+    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
         itr->second->OnPlayerLeave(map, player);
     SCR_MAP_END;
 
@@ -688,7 +691,7 @@ void ScriptMgr::OnMapUpdate(Map* map, uint32 diff)
 {
     ASSERT(map);
 
-    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsContinent);
+    SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
         itr->second->OnUpdate(map, diff);
     SCR_MAP_END;
 
@@ -937,6 +940,22 @@ void ScriptMgr::OnGameObjectDamaged(GameObject* go, Player* player)
     tmpscript->OnDamaged(go, player);
 }
 
+void ScriptMgr::OnGameObjectLootStateChanged(GameObject* go, uint32 state, Unit* unit)
+{
+    ASSERT(go);
+
+    GET_SCRIPT(GameObjectScript, go->GetScriptId(), tmpscript);
+    tmpscript->OnLootStateChanged(go, state, unit);
+}
+
+void ScriptMgr::OnGameObjectStateChanged(GameObject* go, uint32 state)
+{
+    ASSERT(go);
+
+    GET_SCRIPT(GameObjectScript, go->GetScriptId(), tmpscript);
+    tmpscript->OnGameObjectStateChanged(go, state);
+}
+
 void ScriptMgr::OnGameObjectUpdate(GameObject* go, uint32 diff)
 {
     ASSERT(go);
@@ -952,6 +971,14 @@ bool ScriptMgr::OnDummyEffect(Unit* caster, uint32 spellId, SpellEffIndex effInd
 
     GET_SCRIPT_RET(GameObjectScript, target->GetScriptId(), tmpscript, false);
     return tmpscript->OnDummyEffect(caster, spellId, effIndex, target);
+}
+
+GameObjectAI* ScriptMgr::GetGameObjectAI(GameObject* go)
+{
+    ASSERT(go);
+
+    GET_SCRIPT_RET(GameObjectScript, go->GetScriptId(), tmpscript, NULL);
+    return tmpscript->GetAI(go);
 }
 
 bool ScriptMgr::OnAreaTrigger(Player* player, AreaTriggerEntry const* trigger)
@@ -1300,6 +1327,11 @@ void ScriptMgr::OnPlayerBindToInstance(Player* player, Difficulty difficulty, ui
     FOREACH_SCRIPT(PlayerScript)->OnBindToInstance(player, difficulty, mapid, permanent);
 }
 
+void ScriptMgr::OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 newArea)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnUpdateZone(player, newZone, newArea);
+}
+
 // Guild
 void ScriptMgr::OnGuildAddMember(Guild* guild, Player* player, uint8& plRank)
 {
@@ -1415,8 +1447,8 @@ FormulaScript::FormulaScript(const char* name)
 WorldMapScript::WorldMapScript(const char* name, uint32 mapId)
     : ScriptObject(name), MapScript<Map>(mapId)
 {
-    if (GetEntry() && !GetEntry()->IsContinent())
-        sLog->outError("WorldMapScript for map %u is invalid.", mapId);
+    if (GetEntry() && !GetEntry()->IsWorldMap())
+        sLog->outError(LOG_FILTER_TSCR, "WorldMapScript for map %u is invalid.", mapId);
 
     ScriptRegistry<WorldMapScript>::AddScript(this);
 }
@@ -1425,7 +1457,7 @@ InstanceMapScript::InstanceMapScript(const char* name, uint32 mapId)
     : ScriptObject(name), MapScript<InstanceMap>(mapId)
 {
     if (GetEntry() && !GetEntry()->IsDungeon())
-        sLog->outError("InstanceMapScript for map %u is invalid.", mapId);
+        sLog->outError(LOG_FILTER_TSCR, "InstanceMapScript for map %u is invalid.", mapId);
 
     ScriptRegistry<InstanceMapScript>::AddScript(this);
 }
@@ -1434,7 +1466,7 @@ BattlegroundMapScript::BattlegroundMapScript(const char* name, uint32 mapId)
     : ScriptObject(name), MapScript<BattlegroundMap>(mapId)
 {
     if (GetEntry() && !GetEntry()->IsBattleground())
-        sLog->outError("BattlegroundMapScript for map %u is invalid.", mapId);
+        sLog->outError(LOG_FILTER_TSCR, "BattlegroundMapScript for map %u is invalid.", mapId);
 
     ScriptRegistry<BattlegroundMapScript>::AddScript(this);
 }

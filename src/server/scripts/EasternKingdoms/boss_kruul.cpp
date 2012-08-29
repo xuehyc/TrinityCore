@@ -23,7 +23,8 @@ SDComment: Highlord Kruul are presumably no longer in-game on regular bases, how
 SDCategory: Bosses
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SPELL_SHADOWVOLLEY          21341
 #define SPELL_CLEAVE                20677
@@ -45,7 +46,7 @@ public:
 
     struct boss_kruulAI : public ScriptedAI
     {
-        boss_kruulAI(Creature* c) : ScriptedAI(c) {}
+        boss_kruulAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 ShadowVolley_Timer;
         uint32 Cleave_Timer;
@@ -151,7 +152,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 void AddSC_boss_kruul()

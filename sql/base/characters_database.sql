@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.9, for Win64 (x86)
+-- MySQL dump 10.13  Distrib 5.5.21, for Win64 (x86)
 --
 -- Host: localhost    Database: characters
 -- ------------------------------------------------------
--- Server version    5.5.9
+-- Server version	5.5.21
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -547,25 +547,26 @@ CREATE TABLE `character_equipmentsets` (
   `setindex` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `name` varchar(31) NOT NULL,
   `iconname` varchar(100) NOT NULL,
-  `item0` int(10) unsigned NOT NULL DEFAULT '0',
-  `item1` int(10) unsigned NOT NULL DEFAULT '0',
-  `item2` int(10) unsigned NOT NULL DEFAULT '0',
-  `item3` int(10) unsigned NOT NULL DEFAULT '0',
-  `item4` int(10) unsigned NOT NULL DEFAULT '0',
-  `item5` int(10) unsigned NOT NULL DEFAULT '0',
-  `item6` int(10) unsigned NOT NULL DEFAULT '0',
-  `item7` int(10) unsigned NOT NULL DEFAULT '0',
-  `item8` int(10) unsigned NOT NULL DEFAULT '0',
-  `item9` int(10) unsigned NOT NULL DEFAULT '0',
-  `item10` int(10) unsigned NOT NULL DEFAULT '0',
-  `item11` int(10) unsigned NOT NULL DEFAULT '0',
-  `item12` int(10) unsigned NOT NULL DEFAULT '0',
-  `item13` int(10) unsigned NOT NULL DEFAULT '0',
-  `item14` int(10) unsigned NOT NULL DEFAULT '0',
-  `item15` int(10) unsigned NOT NULL DEFAULT '0',
-  `item16` int(10) unsigned NOT NULL DEFAULT '0',
-  `item17` int(10) unsigned NOT NULL DEFAULT '0',
-  `item18` int(10) unsigned NOT NULL DEFAULT '0',
+  `ignore_mask` int(11) unsigned NOT NULL DEFAULT '0',
+  `item0` int(11) unsigned NOT NULL DEFAULT '0',
+  `item1` int(11) unsigned NOT NULL DEFAULT '0',
+  `item2` int(11) unsigned NOT NULL DEFAULT '0',
+  `item3` int(11) unsigned NOT NULL DEFAULT '0',
+  `item4` int(11) unsigned NOT NULL DEFAULT '0',
+  `item5` int(11) unsigned NOT NULL DEFAULT '0',
+  `item6` int(11) unsigned NOT NULL DEFAULT '0',
+  `item7` int(11) unsigned NOT NULL DEFAULT '0',
+  `item8` int(11) unsigned NOT NULL DEFAULT '0',
+  `item9` int(11) unsigned NOT NULL DEFAULT '0',
+  `item10` int(11) unsigned NOT NULL DEFAULT '0',
+  `item11` int(11) unsigned NOT NULL DEFAULT '0',
+  `item12` int(11) unsigned NOT NULL DEFAULT '0',
+  `item13` int(11) unsigned NOT NULL DEFAULT '0',
+  `item14` int(11) unsigned NOT NULL DEFAULT '0',
+  `item15` int(11) unsigned NOT NULL DEFAULT '0',
+  `item16` int(11) unsigned NOT NULL DEFAULT '0',
+  `item17` int(11) unsigned NOT NULL DEFAULT '0',
+  `item18` int(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`setguid`),
   UNIQUE KEY `idx_set` (`guid`,`setguid`,`setindex`),
   KEY `Idx_setindex` (`setindex`)
@@ -1176,7 +1177,7 @@ CREATE TABLE `characters` (
   `chosenTitle` int(10) unsigned NOT NULL DEFAULT '0',
   `knownCurrencies` bigint(20) unsigned NOT NULL DEFAULT '0',
   `watchedFaction` int(10) unsigned NOT NULL DEFAULT '0',
-  `drunk` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `drunk` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `health` int(10) unsigned NOT NULL DEFAULT '0',
   `power1` int(10) unsigned NOT NULL DEFAULT '0',
   `power2` int(10) unsigned NOT NULL DEFAULT '0',
@@ -1266,6 +1267,7 @@ DROP TABLE IF EXISTS `creature_respawn`;
 CREATE TABLE `creature_respawn` (
   `guid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `respawnTime` int(10) unsigned NOT NULL DEFAULT '0',
+  `mapId` smallint(10) unsigned NOT NULL DEFAULT '0',
   `instanceId` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Instance Identifier',
   PRIMARY KEY (`guid`,`instanceId`),
   KEY `idx_instance` (`instanceId`)
@@ -1339,6 +1341,7 @@ DROP TABLE IF EXISTS `gameobject_respawn`;
 CREATE TABLE `gameobject_respawn` (
   `guid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `respawnTime` int(10) unsigned NOT NULL DEFAULT '0',
+  `mapId` smallint(10) unsigned NOT NULL DEFAULT '0',
   `instanceId` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Instance Identifier',
   PRIMARY KEY (`guid`,`instanceId`),
   KEY `idx_instance` (`instanceId`)
@@ -1932,6 +1935,8 @@ CREATE TABLE `lag_reports` (
   `posX` float NOT NULL DEFAULT '0',
   `posY` float NOT NULL DEFAULT '0',
   `posZ` float NOT NULL DEFAULT '0',
+  `latency` int(10) unsigned NOT NULL DEFAULT '0',
+  `createTime` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`reportId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Player System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1953,11 +1958,11 @@ DROP TABLE IF EXISTS `lfg_data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `lfg_data` (
-  `guid` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
-  `dungeon` INT(10) UNSIGNED NOT NULL DEFAULT '0',
-  `state` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+  `guid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
+  `dungeon` int(10) unsigned NOT NULL DEFAULT '0',
+  `state` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COMMENT='LFG Data';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='LFG Data';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2215,6 +2220,29 @@ LOCK TABLES `reserved_name` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `warden_action`
+--
+
+DROP TABLE IF EXISTS `warden_action`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `warden_action` (
+  `wardenId` smallint(5) unsigned NOT NULL,
+  `action` tinyint(3) unsigned DEFAULT NULL,
+  PRIMARY KEY (`wardenId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `warden_action`
+--
+
+LOCK TABLES `warden_action` WRITE;
+/*!40000 ALTER TABLE `warden_action` DISABLE KEYS */;
+/*!40000 ALTER TABLE `warden_action` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `worldstates`
 --
 
@@ -2247,3 +2275,5 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2012-03-25 21:14:19

@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Sunwell_Plateau
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "sunwell_plateau.h"
 
 enum Yells
@@ -115,9 +116,9 @@ public:
 
     struct boss_kalecgosAI : public ScriptedAI
     {
-        boss_kalecgosAI(Creature* c) : ScriptedAI(c)
+        boss_kalecgosAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             SathGUID = 0;
             DoorGUID = 0;
             bJustReset = false;
@@ -159,7 +160,7 @@ public:
             if (!bJustReset) //first reset at create
             {
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE + UNIT_FLAG_NOT_SELECTABLE);
-                me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                me->SetDisableGravity(false);
                 me->SetVisible(true);
                 me->SetStandState(UNIT_STAND_STATE_SLEEP);
             }
@@ -231,7 +232,7 @@ public:
                     if (ResetTimer <= diff)
                     {
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
-                        me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                        me->SetDisableGravity(false);
                         me->SetVisible(true);
                         me->SetStandState(UNIT_STAND_STATE_SLEEP);
                         ResetTimer = 10000;
@@ -269,7 +270,7 @@ public:
                         }
                         else
                         {
-                            sLog->outError("TSCR: Didn't find Shathrowar. Kalecgos event reseted.");
+                            sLog->outError(LOG_FILTER_TSCR, "Didn't find Shathrowar. Kalecgos event reseted.");
                             EnterEvadeMode();
                             return;
                         }
@@ -400,7 +401,7 @@ public:
                 TalkTimer = 10000;
                 break;
             case 3:
-                me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                me->SetDisableGravity(true);
                 me->GetMotionMaster()->MovePoint(0, FLY_X, FLY_Y, FLY_Z);
                 TalkTimer = 600000;
                 break;
@@ -418,7 +419,7 @@ public:
                 TalkTimer = 3000;
                 break;
             case 2:
-                me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                me->SetDisableGravity(true);
                 me->GetMotionMaster()->MovePoint(0, FLY_X, FLY_Y, FLY_Z);
                 TalkTimer = 15000;
                 break;
@@ -456,9 +457,9 @@ public:
 
         bool isEnraged; // if demon is enraged
 
-        boss_kalecAI(Creature* c) : ScriptedAI(c)
+        boss_kalecAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         void Reset()
@@ -575,9 +576,9 @@ public:
 
     struct boss_sathrovarrAI : public ScriptedAI
     {
-        boss_sathrovarrAI(Creature* c) : ScriptedAI(c)
+        boss_sathrovarrAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             KalecGUID = 0;
             KalecgosGUID = 0;
         }
@@ -676,7 +677,9 @@ public:
         void TeleportAllPlayersBack()
         {
             Map* map = me->GetMap();
-            if (!map->IsDungeon()) return;
+            if (!map->IsDungeon())
+                return;
+
             Map::PlayerList const &PlayerList = map->GetPlayers();
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
             {

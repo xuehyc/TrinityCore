@@ -15,14 +15,15 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /* ScriptData
 SDName: Instance Trial of the Champion
 SDComment:
 SDCategory: Trial Of the Champion
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "InstanceScript.h"
 #include "trial_of_the_champion.h"
 
 #define MAX_ENCOUNTER  4
@@ -256,18 +257,18 @@ public:
 
             for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
             {
-                if(Player* pPlayer = i->getSource())
+                if(Player* player = i->getSource())
                 {
-                    if(pPlayer->isGameMaster())
+                    if(player->isGameMaster())
                         continue;
 
-                    if(pPlayer->isAlive())
+                    if(player->isAlive())
                     {
                         temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
                         temp->SetReactState(REACT_AGGRESSIVE);
-                        temp->SetInCombatWith(pPlayer);
-                        pPlayer->SetInCombatWith(temp);
-                        temp->AddThreat(pPlayer, 0.0f);
+                        temp->SetInCombatWith(player);
+                        player->SetInCombatWith(temp);
+                        temp->AddThreat(player, 0.0f);
                     }
                 }
             }

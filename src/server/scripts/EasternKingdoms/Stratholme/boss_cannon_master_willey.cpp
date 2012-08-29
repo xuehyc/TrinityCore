@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Stratholme
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 //front, left
 #define ADD_1X 3553.851807f
@@ -88,7 +89,7 @@ public:
 
     struct boss_cannon_master_willeyAI : public ScriptedAI
     {
-        boss_cannon_master_willeyAI(Creature* c) : ScriptedAI(c) {}
+        boss_cannon_master_willeyAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 KnockAway_Timer;
         uint32 Pummel_Timer;
@@ -103,7 +104,7 @@ public:
             SummonRifleman_Timer = 15000;
         }
 
-        void JustDied(Unit* /*Victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             me->SummonCreature(11054, ADD_1X, ADD_1Y, ADD_1Z, ADD_1O, TEMPSUMMON_TIMED_DESPAWN, 240000);
             me->SummonCreature(11054, ADD_2X, ADD_2Y, ADD_2Z, ADD_2O, TEMPSUMMON_TIMED_DESPAWN, 240000);

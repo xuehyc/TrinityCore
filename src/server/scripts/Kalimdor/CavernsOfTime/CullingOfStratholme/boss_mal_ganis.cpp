@@ -23,7 +23,8 @@ SDComment: TODO: Intro & outro
 SDCategory:
 Script Data End */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "culling_of_stratholme.h"
 
 enum Spells
@@ -77,9 +78,9 @@ public:
 
     struct boss_mal_ganisAI : public ScriptedAI
     {
-        boss_mal_ganisAI(Creature* c) : ScriptedAI(c)
+        boss_mal_ganisAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 uiCarrionSwarmTimer;

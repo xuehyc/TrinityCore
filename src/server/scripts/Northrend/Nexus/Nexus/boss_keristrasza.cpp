@@ -16,7 +16,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
 #include "nexus.h"
 
 enum Spells
@@ -61,9 +64,9 @@ public:
 
     struct boss_keristraszaAI : public ScriptedAI
     {
-        boss_keristraszaAI(Creature* c) : ScriptedAI(c)
+        boss_keristraszaAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -208,16 +211,16 @@ class containment_sphere : public GameObjectScript
 public:
     containment_sphere() : GameObjectScript("containment_sphere") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* pGO)
+    bool OnGossipHello(Player* /*player*/, GameObject* go)
     {
-        InstanceScript* instance = pGO->GetInstanceScript();
+        InstanceScript* instance = go->GetInstanceScript();
 
-        Creature* pKeristrasza = Unit::GetCreature(*pGO, instance ? instance->GetData64(DATA_KERISTRASZA) : 0);
+        Creature* pKeristrasza = Unit::GetCreature(*go, instance ? instance->GetData64(DATA_KERISTRASZA) : 0);
         if (pKeristrasza && pKeristrasza->isAlive())
         {
             // maybe these are hacks :(
-            pGO->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-            pGO->SetGoState(GO_STATE_ACTIVE);
+            go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+            go->SetGoState(GO_STATE_ACTIVE);
 
             CAST_AI(boss_keristrasza::boss_keristraszaAI, pKeristrasza->AI())->CheckContainmentSpheres(true);
         }

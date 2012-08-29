@@ -5,9 +5,13 @@
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "ScriptPCH.h"
+#include "ScriptedCreature.h"
 #include "Item.h"
 #include "Spell.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "Cell.h"
+#include "CellImpl.h"
 #include "ObjectMgr.h"
 #include "TemporarySummon.h"
 
@@ -27,18 +31,6 @@ void SummonList::DoZoneInCombat(uint32 entry)
         if (summon && summon->IsAIEnabled
             && (!entry || summon->GetEntry() == entry))
             summon->AI()->DoZoneInCombat();
-    }
-}
-
-void SummonList::DoAction(uint32 entry, int32 info)
-{
-    for (iterator i = begin(); i != end();)
-    {
-        Creature* summon = Unit::GetCreature(*me, *i);
-        ++i;
-        if (summon && summon->IsAIEnabled
-            && (!entry || summon->GetEntry() == entry))
-            summon->AI()->DoAction(info);
     }
 }
 
@@ -126,15 +118,7 @@ void ScriptedAI::UpdateAI(uint32 const /*diff*/)
     if (!UpdateVictim())
         return;
 
-    if (me->isAttackReady())
-    {
-        //If we are within range melee the target
-        if (me->IsWithinMeleeRange(me->getVictim()))
-        {
-            me->AttackerStateUpdate(me->getVictim());
-            me->resetAttackTimer();
-        }
-    }
+    DoMeleeAttackIfReady();
 }
 
 void ScriptedAI::DoStartMovement(Unit* victim, float distance, float angle)
@@ -171,9 +155,9 @@ void ScriptedAI::DoPlaySoundToSet(WorldObject* source, uint32 soundId)
     if (!source)
         return;
 
-    if (!GetSoundEntriesStore()->LookupEntry(soundId))
+    if (!sSoundEntriesStore.LookupEntry(soundId))
     {
-        sLog->outError("TSCR: Invalid soundId %u used in DoPlaySoundToSet (Source: TypeId %u, GUID %u)", soundId, source->GetTypeId(), source->GetGUIDLow());
+        sLog->outError(LOG_FILTER_TSCR, "Invalid soundId %u used in DoPlaySoundToSet (Source: TypeId %u, GUID %u)", soundId, source->GetTypeId(), source->GetGUIDLow());
         return;
     }
 
@@ -189,11 +173,11 @@ SpellInfo const* ScriptedAI::SelectSpell(Unit* target, uint32 school, uint32 mec
 {
     //No target so we can't cast
     if (!target)
-        return false;
+        return NULL;
 
     //Silenced so we can't cast
     if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
-        return false;
+        return NULL;
 
     //Using the extended script system we first create a list of viable spells
     SpellInfo const* apSpell[CREATURE_MAX_SPELLS];
@@ -266,7 +250,7 @@ void ScriptedAI::DoResetThreat()
 {
     if (!me->CanHaveThreatList() || me->getThreatManager().isThreatListEmpty())
     {
-        sLog->outError("TSCR: DoResetThreat called for creature that either cannot have threat list or has empty threat list (me entry = %d)", me->GetEntry());
+        sLog->outError(LOG_FILTER_TSCR, "DoResetThreat called for creature that either cannot have threat list or has empty threat list (me entry = %d)", me->GetEntry());
         return;
     }
 
@@ -274,7 +258,7 @@ void ScriptedAI::DoResetThreat()
 
     for (std::list<HostileReference*>::iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
     {
-        Unit* unit = Unit::GetUnit((*me), (*itr)->getUnitGuid());
+        Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid());
 
         if (unit && DoGetThreat(unit))
             DoModifyThreatPercent(unit, -100);
@@ -309,14 +293,13 @@ void ScriptedAI::DoTeleportTo(const float position[4])
 
 void ScriptedAI::DoTeleportPlayer(Unit* unit, float x, float y, float z, float o)
 {
-    if (!unit || unit->GetTypeId() != TYPEID_PLAYER)
-    {
-        if (unit)
-            sLog->outError("TSCR: Creature " UI64FMTD " (Entry: %u) Tried to teleport non-player unit (Type: %u GUID: " UI64FMTD ") to x: %f y:%f z: %f o: %f. Aborted.", me->GetGUID(), me->GetEntry(), unit->GetTypeId(), unit->GetGUID(), x, y, z, o);
+    if (!unit)
         return;
-    }
 
-    CAST_PLR(unit)->TeleportTo(unit->GetMapId(), x, y, z, o, TELE_TO_NOT_LEAVE_COMBAT);
+    if (Player* player = unit->ToPlayer())
+        player->TeleportTo(unit->GetMapId(), x, y, z, o, TELE_TO_NOT_LEAVE_COMBAT);
+    else
+        sLog->outError(LOG_FILTER_TSCR, "Creature " UI64FMTD " (Entry: %u) Tried to teleport non-player unit (Type: %u GUID: " UI64FMTD ") to x: %f y:%f z: %f o: %f. Aborted.", me->GetGUID(), me->GetEntry(), unit->GetTypeId(), unit->GetGUID(), x, y, z, o);
 }
 
 void ScriptedAI::DoTeleportAll(float x, float y, float z, float o)
@@ -448,7 +431,7 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(uint32 const diff)
                 return false;
             break;
         default: // For most of creatures that certain area is their home area.
-            sLog->outDetail("TSCR: EnterEvadeIfOutOfCombatArea used for creature entry %u, but does not have any definition. Using the default one.", me->GetEntry());
+            sLog->outInfo(LOG_FILTER_GENERAL, "TSCR: EnterEvadeIfOutOfCombatArea used for creature entry %u, but does not have any definition. Using the default one.", me->GetEntry());
             uint32 homeAreaId = me->GetMap()->GetAreaId(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY(), me->GetHomePosition().GetPositionZ());
             if (me->GetAreaId() == homeAreaId)
                 return false;

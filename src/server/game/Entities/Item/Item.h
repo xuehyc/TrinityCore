@@ -211,7 +211,7 @@ class Item : public Object
         static Item* CreateItem(uint32 item, uint32 count, Player const* player = NULL);
         Item* CloneItem(uint32 count, Player const* player = NULL) const;
 
-        Item ();
+        Item();
 
         virtual bool Create(uint32 guidlow, uint32 itemid, Player const* owner);
 
@@ -240,6 +240,7 @@ class Item : public Object
 
         bool IsLocked() const { return !HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_UNLOCKED); }
         bool IsBag() const { return GetTemplate()->InventoryType == INVTYPE_BAG; }
+        bool IsCurrencyToken() const { return GetTemplate()->IsCurrencyToken(); }
         bool IsNotEmptyBag() const;
         bool IsBroken() const { return GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && GetUInt32Value(ITEM_FIELD_DURABILITY) == 0; }
         bool CanBeTraded(bool mail = false, bool trade = false) const;

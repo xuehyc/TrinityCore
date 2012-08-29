@@ -23,7 +23,10 @@ SDComment: VERIFY SCRIPT
 SDCategory: Naxxramas
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
 #include "naxxramas.h"
 
 enum Yells
@@ -88,6 +91,7 @@ enum Spells
     SPELL_SHADOW_FISURE                                    = 27810,
     SPELL_VOID_BLAST                                       = 27812,
     SPELL_MANA_DETONATION                                  = 27819,
+    SPELL_MANA_DETONATION_DAMAGE                           = 27820,
     SPELL_FROST_BLAST                                      = 27808,
     SPELL_CHAINS_OF_KELTHUZAD                              = 28410, //28408 script effect
     SPELL_KELTHUZAD_CHANNEL                                = 29423,
@@ -135,8 +139,7 @@ enum Creatures
     NPC_WASTE                                              = 16427, // Soldiers of the Frozen Wastes
     NPC_ABOMINATION                                        = 16428, // Unstoppable Abominations
     NPC_WEAVER                                             = 16429, // Soul Weavers
-    NPC_ICECROWN                                           = 16441, // Guardians of Icecrown
-    NPC_SHADOW_FISSURE                                     = 16129 // Shadow Fissure
+    NPC_ICECROWN                                           = 16441 // Guardians of Icecrown
 };
 
 const Position Pos[12] =
@@ -269,7 +272,7 @@ public:
 
     struct boss_kelthuzadAI : public BossAI
     {
-        boss_kelthuzadAI(Creature* c) : BossAI(c, BOSS_KELTHUZAD), spawns(c)
+        boss_kelthuzadAI(Creature* creature) : BossAI(creature, BOSS_KELTHUZAD), spawns(creature)
         {
             uiFaction = me->getFaction();
         }
@@ -289,9 +292,6 @@ public:
 
         SummonList spawns; // adds spawn by the trigger. kept in separated list (i.e. not in summons)
 
-        uint64 FissureGuid;
-        uint32 FissureExplodeTimer;
-
         void Reset()
         {
             _Reset();
@@ -305,7 +305,7 @@ public:
             for (itr = chained.begin(); itr != chained.end(); ++itr)
             {
                 if (Player* charmed = Unit::GetPlayer(*me, (*itr).first))
-                    charmed->SetFloatValue(OBJECT_FIELD_SCALE_X, (*itr).second);
+                    charmed->SetObjectScale((*itr).second);
             }
 
             chained.clear();
@@ -337,8 +337,6 @@ public:
             Phase = 0;
             nAbomination = 0;
             nWeaver = 0;
-
-            FissureGuid = 0;
         }
 
         void KilledUnit(Unit* /*victim*/)
@@ -346,27 +344,7 @@ public:
             DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
         }
 
-        void JustSummoned(Creature* summon)
-        {
-            if (summon && summon->GetEntry() == NPC_SHADOW_FISSURE)
-            {
-                summons.Summon(summon);
-                // DB seems to have wrong values here, Flags Extra 128 would make invisible
-                summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                summon->SetReactState(REACT_PASSIVE);
-                summon->setFaction(me->getFaction());
-                FissureGuid = summon->GetGUID();
-                FissureExplodeTimer = 5000;
-                return;
-            }
-
-            summons.Summon(summon);
-            if (me->isInCombat())
-                DoZoneInCombat(summon);
-        }
-
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             _JustDied();
             DoScriptText(SAY_DEATH, me);
@@ -375,7 +353,7 @@ public:
             for (itr = chained.begin(); itr != chained.end(); ++itr)
             {
                 if (Player* player = Unit::GetPlayer(*me, (*itr).first))
-                    player->SetFloatValue(OBJECT_FIELD_SCALE_X, (*itr).second);
+                    player->SetObjectScale((*itr).second);
             }
             chained.clear();
         }
@@ -464,11 +442,11 @@ public:
                             me->CastStop();
 
                             DoStartMovement(me->getVictim());
-                            events.ScheduleEvent(EVENT_BOLT, urand(1000, 10000));
+                            events.ScheduleEvent(EVENT_BOLT, urand(5000, 10000));
                             events.ScheduleEvent(EVENT_NOVA, 15000);
                             events.ScheduleEvent(EVENT_DETONATE, urand(30000, 40000));
                             events.ScheduleEvent(EVENT_FISSURE, urand(10000, 30000));
-                            events.ScheduleEvent(EVENT_BLAST, urand(30000, 60000));
+                            events.ScheduleEvent(EVENT_BLAST, urand(60000, 120000));
                             if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                                 events.ScheduleEvent(EVENT_CHAIN, urand(30000, 60000));
                             Phase = 2;
@@ -486,7 +464,7 @@ public:
                 {
                     if (HealthBelowPct(45))
                     {
-                        Phase = 3 ;
+                        Phase = 3;
                         DoScriptText(SAY_REQUEST_AID, me);
                         //here Lich King should respond to KelThuzad but I don't know which Creature to make talk
                         //so for now just make Kelthuzad says it.
@@ -515,18 +493,6 @@ public:
                     else uiGuardiansOfIcecrownTimer -= diff;
                 }
 
-                if (FissureGuid) // We have a fissure, so explode after 5 sec
-                {
-                    if (FissureExplodeTimer <= diff)
-                    {
-                        if (Unit* Fissure = me->GetCreature(*me, FissureGuid))
-                        {
-                            Fissure->CastSpell((Unit*)NULL, SPELL_VOID_BLAST, true);
-                            FissureGuid = 0;
-                        }
-                    }else FissureExplodeTimer -= diff;
-                }
-
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
@@ -536,7 +502,7 @@ public:
                     {
                         case EVENT_BOLT:
                             DoCastVictim(RAID_MODE(SPELL_FROST_BOLT, H_SPELL_FROST_BOLT));
-                            events.RepeatEvent(urand(2000, 10000));
+                            events.RepeatEvent(urand(5000, 10000));
                             break;
                         case EVENT_NOVA:
                             DoCastAOE(RAID_MODE(SPELL_FROST_BOLT_AOE, H_SPELL_FROST_BOLT_AOE));
@@ -553,7 +519,7 @@ public:
                                     DoCast(target, SPELL_CHAINS_OF_KELTHUZAD);
                                     float scale = target->GetFloatValue(OBJECT_FIELD_SCALE_X);
                                     chained.insert(std::make_pair(target->GetGUID(), scale));
-                                    target->SetFloatValue(OBJECT_FIELD_SCALE_X, scale * 2);
+                                    target->SetObjectScale(scale * 2);
                                     events.ScheduleEvent(EVENT_CHAINED_SPELL, 2000); //core has 2000ms to set unit flag charm
                                 }
                             }
@@ -571,7 +537,7 @@ public:
                                 {
                                     if (!player->isCharmed())
                                     {
-                                        player->SetFloatValue(OBJECT_FIELD_SCALE_X, (*itr).second);
+                                        player->SetObjectScale((*itr).second);
                                         std::map<uint64, float>::iterator next = itr;
                                         ++next;
                                         chained.erase(itr);
@@ -708,7 +674,7 @@ public:
         if (!instance || instance->IsEncounterInProgress() || instance->GetBossState(BOSS_KELTHUZAD) == DONE)
             return false;
 
-        Creature* pKelthuzad = CAST_CRE(Unit::GetUnit(*player, instance->GetData64(DATA_KELTHUZAD)));
+        Creature* pKelthuzad = Unit::GetCreature(*player, instance->GetData64(DATA_KELTHUZAD));
         if (!pKelthuzad)
             return false;
 
@@ -755,7 +721,6 @@ public:
 
         return true;
     }
-
 };
 
 class npc_kelthuzad_abomination : public CreatureScript
@@ -767,16 +732,13 @@ class npc_kelthuzad_abomination : public CreatureScript
         {
             npc_kelthuzad_abominationAI(Creature* creature) : ScriptedAI(creature)
             {
-                instance = me->GetInstanceScript();
+                _instance = creature->GetInstanceScript();
             }
-
-            InstanceScript* instance;
-            EventMap events;
 
             void Reset()
             {
-                events.Reset();
-                events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(2000, 5000));
+                _events.Reset();
+                _events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(2000, 5000));
                 DoCast(me, SPELL_FRENZY, true);
             }
 
@@ -785,15 +747,15 @@ class npc_kelthuzad_abomination : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-                events.Update(diff);
+                _events.Update(diff);
 
-                while (uint32 eventId = events.ExecuteEvent())
+                while (uint32 eventId = _events.ExecuteEvent())
                 {
                     switch (eventId)
                     {
                         case EVENT_MORTAL_WOUND:
                             DoCastVictim(SPELL_MORTAL_WOUND, true);
-                            events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(10000, 15000));
+                            _events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(10000, 15000));
                             break;
                         default:
                             break;
@@ -801,11 +763,15 @@ class npc_kelthuzad_abomination : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*who*/)
+            void JustDied(Unit* /*killer*/)
             {
-                if (instance)
-                    instance->SetData(DATA_ABOMINATION_KILLED, instance->GetData(DATA_ABOMINATION_KILLED) + 1);
+                if (_instance)
+                    _instance->SetData(DATA_ABOMINATION_KILLED, _instance->GetData(DATA_ABOMINATION_KILLED) + 1);
             }
+
+        private:
+            InstanceScript* _instance;
+            EventMap _events;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -814,12 +780,50 @@ class npc_kelthuzad_abomination : public CreatureScript
         }
 };
 
+class spell_kelthuzad_detonate_mana : public SpellScriptLoader
+{
+    public:
+        spell_kelthuzad_detonate_mana() : SpellScriptLoader("spell_kelthuzad_detonate_mana") { }
+
+        class spell_kelthuzad_detonate_mana_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_kelthuzad_detonate_mana_AuraScript);
+
+            bool Validate(SpellInfo const* /*spell*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_MANA_DETONATION_DAMAGE))
+                    return false;
+                return true;
+            }
+
+            void HandleScript(AuraEffect const* aurEff)
+            {
+                PreventDefaultAction();
+
+                Unit* target = GetTarget();
+                if (int32 mana = int32(target->GetMaxPower(POWER_MANA) / 10))
+                {
+                    mana = target->ModifyPower(POWER_MANA, -mana);
+                    target->CastCustomSpell(SPELL_MANA_DETONATION_DAMAGE, SPELLVALUE_BASE_POINT0, -mana * 10, target, true, NULL, aurEff);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_kelthuzad_detonate_mana_AuraScript::HandleScript, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_kelthuzad_detonate_mana_AuraScript();
+        }
+};
+
 class achievement_just_cant_get_enough : public AchievementCriteriaScript
 {
    public:
-       achievement_just_cant_get_enough() : AchievementCriteriaScript("achievement_just_cant_get_enough")
-       {
-       }
+       achievement_just_cant_get_enough() : AchievementCriteriaScript("achievement_just_cant_get_enough") { }
 
        bool OnCheck(Player* /*player*/, Unit* target)
        {
@@ -839,5 +843,6 @@ void AddSC_boss_kelthuzad()
     new boss_kelthuzad();
     new at_kelthuzad_center();
     new npc_kelthuzad_abomination();
+    new spell_kelthuzad_detonate_mana();
     new achievement_just_cant_get_enough();
 }

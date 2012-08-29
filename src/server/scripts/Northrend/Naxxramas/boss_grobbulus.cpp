@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "naxxramas.h"
 
 #define SPELL_BOMBARD_SLIME         28280
@@ -24,7 +25,7 @@
 #define SPELL_MUTATING_INJECTION    28169
 #define SPELL_SLIME_SPRAY           RAID_MODE(28157, 54364)
 #define SPELL_BERSERK               26662
-#define SPELL_POISON_CLOUD_ADD      RAID_MODE(28158, 54362)
+#define SPELL_POISON_CLOUD_ADD      59116
 
 #define EVENT_BERSERK   1
 #define EVENT_CLOUD     2
@@ -47,7 +48,7 @@ public:
 
     struct boss_grobbulusAI : public BossAI
     {
-        boss_grobbulusAI(Creature* c) : BossAI(c, BOSS_GROBBULUS)
+        boss_grobbulusAI(Creature* creature) : BossAI(creature, BOSS_GROBBULUS)
         {
             me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_POISON_CLOUD_ADD, true);
         }
@@ -55,17 +56,17 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
-            events.ScheduleEvent(EVENT_CLOUD, urand(5000, 15000));
-            events.ScheduleEvent(EVENT_INJECT, urand(10000, 15000));
-            events.ScheduleEvent(EVENT_SPRAY, 30000);
-            events.ScheduleEvent(EVENT_BERSERK, 9*60000);
+            events.ScheduleEvent(EVENT_CLOUD, 15000);
+            events.ScheduleEvent(EVENT_INJECT, 20000);
+            events.ScheduleEvent(EVENT_SPRAY, 15000+rand()%15000); //not sure
+            events.ScheduleEvent(EVENT_BERSERK, 12*60000);
         }
 
         void SpellHitTarget(Unit* target, const SpellInfo* spell)
         {
             if (spell->Id == uint32(SPELL_SLIME_SPRAY))
             {
-                if (TempSummon* slime = me->SummonCreature(MOB_FALLOUT_SLIME, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 75000))
+                if (TempSummon* slime = me->SummonCreature(MOB_FALLOUT_SLIME, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 0))
                     DoZoneInCombat(slime);
             }
         }
@@ -87,18 +88,17 @@ public:
                         return;
                     case EVENT_BERSERK:
                         DoCastAOE(SPELL_BERSERK);
-                        events.ScheduleEvent(EVENT_BERSERK, 5*60000);
                         return;
                     case EVENT_SPRAY:
                         DoScriptText(EMOTE_CUSTOM_SPRAY, me);
                         DoCastAOE(SPELL_SLIME_SPRAY);
-                        events.ScheduleEvent(EVENT_SPRAY, urand(30000, 45000));
+                        events.ScheduleEvent(EVENT_SPRAY, 15000+rand()%15000);
                         return;
                     case EVENT_INJECT:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                             if (!target->HasAura(SPELL_MUTATING_INJECTION))
                                 DoCast(target, SPELL_MUTATING_INJECTION);
-                        events.ScheduleEvent(EVENT_INJECT, uint32(8000 + 12000 * me->GetHealth() / me->GetMaxHealth()));
+                        events.ScheduleEvent(EVENT_INJECT, 8000 + uint32(120 * me->GetHealthPct()));
                         return;
                 }
             }
@@ -123,23 +123,24 @@ public:
     {
         npc_grobbulus_poison_cloudAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
+            Reset();
         }
 
-        bool castedCloud;
+        uint32 Cloud_Timer;
 
         void Reset()
         {
-            castedCloud = false;
+            Cloud_Timer = 1000;
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
         void UpdateAI(const uint32 diff)
         {
-            if (!castedCloud)
+            if (Cloud_Timer <= diff)
             {
-                castedCloud = true;
-                DoCast(me, SPELL_POISON_CLOUD_ADD, true);
-            }
+                DoCast(me, SPELL_POISON_CLOUD_ADD);
+                Cloud_Timer = 10000;
+            } else Cloud_Timer -= diff;
         }
     };
 

@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Stratholme
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "stratholme.h"
 
 #define SPELL_DRAININGBLOW    16793
@@ -46,7 +47,7 @@ public:
 
     struct boss_magistrate_barthilasAI : public ScriptedAI
     {
-        boss_magistrate_barthilasAI(Creature* c) : ScriptedAI(c) {}
+        boss_magistrate_barthilasAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 DrainingBlow_Timer;
         uint32 CrowdPummel_Timer;
@@ -75,7 +76,7 @@ public:
             ScriptedAI::MoveInLineOfSight(who);
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             me->SetDisplayId(MODEL_HUMAN);
         }

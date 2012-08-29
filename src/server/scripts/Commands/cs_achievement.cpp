@@ -35,6 +35,7 @@ public:
         static ChatCommand achievementCommandTable[] =
         {
             { "add",            SEC_ADMINISTRATOR,  false,  &HandleAchievementAddCommand,      "", NULL },
+            { "del",            SEC_ADMINISTRATOR,  false,  &HandleAchievementDelCommand,      "", NULL },
             { NULL,             0,                  false,  NULL,                              "", NULL }
         };
         static ChatCommand commandTable[] =
@@ -67,8 +68,36 @@ public:
             return false;
         }
 
-        if (AchievementEntry const* achievementEntry = GetAchievementStore()->LookupEntry(achievementId))
+        if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(achievementId))
             target->CompletedAchievement(achievementEntry);
+
+        return true;
+    }
+
+    static bool HandleAchievementDelCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        uint32 achievementId = atoi((char*)args);
+        if (!achievementId)
+        {
+            if (char* id = handler->extractKeyFromLink((char*)args, "Hachievement"))
+                achievementId = atoi(id);
+            if (!achievementId)
+                return false;
+        }
+
+        Player* target = handler->getSelectedPlayer();
+        if (!target)
+        {
+            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(achievementId))
+            target->ToPlayer()->GetAchievementMgr().RemoveAchievement(achievementEntry);
 
         return true;
     }

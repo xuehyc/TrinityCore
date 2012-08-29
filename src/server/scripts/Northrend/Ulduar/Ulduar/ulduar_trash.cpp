@@ -32,21 +32,21 @@ UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_guardian_lasher' W
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_forest_swarmer' WHERE `entry`=33431;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_mangrove_ent' WHERE `entry`=33525;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_ironroot_lasher' WHERE `entry`=33526;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_natures_blade' WHERE `entry`=33527;  
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_guardian_of_life' WHERE `entry`=33528; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_storm_tempered_keeper' WHERE `entry` IN (33699, 33722); 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_natures_blade' WHERE `entry`=33527;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_guardian_of_life' WHERE `entry`=33528;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_storm_tempered_keeper' WHERE `entry` IN (33699, 33722);
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_charged_sphere' WHERE `entry`=33715;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_dark_rune_thunderer' WHERE `entry`=33754; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_dark_rune_ravager' WHERE `entry`=33755; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_faceless_horror' WHERE `entry`=33772; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_adherent' WHERE `entry`=33818; 
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_frost_mage' WHERE `entry`=33819;  
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_dark_rune_thunderer' WHERE `entry`=33754;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_dark_rune_ravager' WHERE `entry`=33755;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_faceless_horror' WHERE `entry`=33772;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_adherent' WHERE `entry`=33818;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_frost_mage' WHERE `entry`=33819;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_pyromancer' WHERE `entry`=33820;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_enslaved_fire_elemental' WHERE `entry`=33838;  
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_enslaved_fire_elemental' WHERE `entry`=33838;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_guardian' WHERE `entry`=33822;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_slayer' WHERE `entry`=33823;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_shadowblade' WHERE `entry`=33824;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_molten_colossus' WHERE `entry`=34069;   
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_molten_colossus' WHERE `entry`=34069;
 
 DELETE FROM `spell_script_names` WHERE `spell_id`=63059;
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63059, 'spell_pollinate');
@@ -54,7 +54,7 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63059, 'spel
 DELETE FROM `spell_linked_spell` WHERE  `spell_trigger`=62317 AND `spell_effect`=57807 AND `type`=1;
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (62317, 57807, 1, 'Twilight Guardian - Link Devastate to Sunder Armor');
 
-  
+
 */
 
 // class npc_ : public CreatureScript
@@ -62,46 +62,46 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 // private:
 //     enum MyEvents
 //     {
-// 
+//
 //     };
 //     enum Spells
 //     {
-// 
+//
 //     };
 // public:
 //     npc_ () : CreatureScript("") {}
-// 
+//
 //     struct npc_AI: public ScriptedAI
 //     {
 //         npc_AI(Creature* creature) : ScriptedAI(creature) {}
-// 
+//
 //         void Reset()
 //         {
 //             events.Reset();
 //         }
-// 
+//
 //         void UpdateAI(uint32 const diff)
 //         {
 //             if (!UpdateVictim())
 //                 return;
-// 
+//
 //             events.Update(diff);
-// 
+//
 //             while (uint32 event = events.ExecuteEvent())
 //             {
 //                 switch (event)
 //                 {
-// 
+//
 //                 }
 //             }
-// 
+//
 //             DoMeleeAttackIfReady();
 //         }
-// 
+//
 //     private:
 //         EventMap events;
 //     };
-// 
+//
 //     CreatureAI* GetAI(Creature* creature) const
 //     {
 //         return new npc_AI(creature);
@@ -112,7 +112,7 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 /*                       Predicates                                     */
 /************************************************************************/
 
-struct RangeCheck : public std::unary_function<Unit*, bool>
+struct RangeCheck
 {
     RangeCheck(Unit* base, float min, float max) : __base(base), __mindist(min), __maxdist(max) {}
 
@@ -132,7 +132,7 @@ struct RangeCheck : public std::unary_function<Unit*, bool>
 
 // Note: This predicate also works in SelectTarget(...), while Trinity::UnitAuraCheck does not (due to missing const-specifier)
 template<bool IsApplied>
-struct AuraAppliedCheck : public std::unary_function<Unit*, bool>    	
+struct AuraAppliedCheck
 {
     AuraAppliedCheck(uint32 spellId) : __spellId(spellId) {}
     bool operator()(Unit* const target) const
@@ -198,13 +198,13 @@ class npc_steelforged_defender : public CreatureScript
                     {
                         case EVENT_HAMSTRING:
                             DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 5.0f), SPELL_HAMSTRING);
-                            events.ScheduleEvent(EVENT_HAMSTRING, 10*IN_MILLISECONDS);                          
+                            events.ScheduleEvent(EVENT_HAMSTRING, 10*IN_MILLISECONDS);
                             break;
                         case EVENT_LIGHTNING_BOLT:
                             DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f), SPELL_LIGHTNING_BOLT);
                             events.ScheduleEvent(EVENT_LIGHTNING_BOLT, 9*IN_MILLISECONDS);
                             break;
-                        case EVENT_SUNDER_ARMOR:                            
+                        case EVENT_SUNDER_ARMOR:
                             DoCastVictim( SPELL_SUNDER_ARMOR);
                             if (Unit* vic = me->getVictim())
                                 if (Aura* sunder = vic->GetAura(SPELL_SUNDER_ARMOR))
@@ -246,7 +246,7 @@ class npc_ironwork_cannon : public CreatureScript
 
         struct npc_ironwork_cannonAI: public ScriptedAI
         {
-            npc_ironwork_cannonAI(Creature* creature) : ScriptedAI(creature) 
+            npc_ironwork_cannonAI(Creature* creature) : ScriptedAI(creature)
             {
                 me->SetFloatValue(UNIT_FIELD_COMBATREACH, 200.0f);
             }
@@ -394,7 +394,7 @@ class npc_storm_tempered_keeper : public CreatureScript
         };
         enum Misc
         {
-            ACTION_VENGEFUL_SURGE = 1,            
+            ACTION_VENGEFUL_SURGE = 1,
         };
     public:
         npc_storm_tempered_keeper () : CreatureScript("npc_storm_tempered_keeper") {}
@@ -442,7 +442,7 @@ class npc_storm_tempered_keeper : public CreatureScript
                 GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_2, 30.0f);
                 targets.sort(Trinity::ObjectDistanceOrderPred(me));
                 if ( !me->IsInRange( (*targets.begin()), 0.0f, 15.0f) )
-                    DoCast(SPELL_SEPARATION_ANXIETY);                
+                    DoCast(SPELL_SEPARATION_ANXIETY);
             }
 
             void UpdateAI(uint32 const diff)
@@ -533,7 +533,7 @@ class npc_charged_sphere : public CreatureScript
                                 DoCast(dest, SPELL_SUPERCHARGED);
                             else if (Creature* dest = me->FindNearestCreature(NPC_STORM_TEMPERED_KEEPER_2, 5.0f))
                                 DoCast(dest, SPELL_SUPERCHARGED);
-                            me->ForcedDespawn(500);
+                            me->DespawnOrUnsummon(500);
                             break;
                     }
                 }
@@ -713,7 +713,7 @@ class npc_corrupted_servitor : public CreatureScript
                             DoCast(SelectTarget(SELECT_TARGET_RANDOM), SPELL_VIOLENT_EARTH);
                             events.ScheduleEvent(EVENT_VIOLENT_EARTH, urand(6*IN_MILLISECONDS, 9*IN_MILLISECONDS));
                             break;
-                        case EVENT_PETRIFY_JOINTS:                            
+                        case EVENT_PETRIFY_JOINTS:
                             DoCast( SelectTarget(SELECT_TARGET_RANDOM, 0, AuraAppliedCheck<false>(RAID_MODE(SPELL_PETRIFY_JOINTS_10, SPELL_PETRIFY_JOINTS_25))), RAID_MODE(SPELL_PETRIFY_JOINTS_10, SPELL_PETRIFY_JOINTS_25) );
                             events.ScheduleEvent(EVENT_PETRIFY_JOINTS, 5*IN_MILLISECONDS);
                             break;
@@ -818,7 +818,7 @@ class npc_guardian_lasher : public CreatureScript
         {
             SPELL_GUARDIANS_LASH_10     = 63047,
             SPELL_GUARDIANS_LASH_25     = 63550,
-            SPELL_GUARDIAN_PHEROMONES   = 63007 
+            SPELL_GUARDIAN_PHEROMONES   = 63007
         };
     public:
         npc_guardian_lasher () : CreatureScript("npc_guardian_lasher") {}
@@ -830,7 +830,7 @@ class npc_guardian_lasher : public CreatureScript
             void Reset()
             {
                 DoCast(SPELL_GUARDIAN_PHEROMONES);
-                events.Reset();                
+                events.Reset();
                 events.ScheduleEvent(EVENT_GUARDIANS_LASH, 2*IN_MILLISECONDS);
             }
 
@@ -872,7 +872,7 @@ class npc_forest_swarmer : public CreatureScript
 {
     private:
         enum MyEvents
-        {   
+        {
             EVENT_POLLINATE = 1,
         };
         enum Spells
@@ -903,7 +903,7 @@ class npc_forest_swarmer : public CreatureScript
                 {
                     switch (event)
                     {
-                        case EVENT_POLLINATE:   
+                        case EVENT_POLLINATE:
                             DoCast(SPELL_POLLINATE);    // Targeting is done by spell-script
                             events.ScheduleEvent(EVENT_POLLINATE, 30*IN_MILLISECONDS);
                             break;
@@ -966,7 +966,7 @@ class npc_mangrove_ent : public CreatureScript
                     return;
 
                 while (uint32 event = events.ExecuteEvent())
-                {                    
+                {
                     switch (event)
                     {
                         case EVENT_HURRICANE:
@@ -1048,7 +1048,7 @@ class npc_ironroot_lasher : public CreatureScript
                             Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, allies, checker);
                             me->VisitNearbyObject(40.0f, searcher);
                             allies.push_back(me->ToUnit());
-                            DoCast( SelectRandomContainerElement(allies), RAID_MODE(SPELL_IRONROOT_THORNS_10, SPELL_IRONROOT_THORNS_25) );
+                            DoCast(Trinity::Containers::SelectRandomContainerElement(allies), RAID_MODE(SPELL_IRONROOT_THORNS_10, SPELL_IRONROOT_THORNS_25) );
                             events.ScheduleEvent(EVENT_IRONROOT_THORNS, 2*IN_MILLISECONDS);
                             break;
                     }
@@ -1110,7 +1110,7 @@ class npc_natures_blade : public CreatureScript
                                 DoCast( RAID_MODE(SPELL_LIVING_TSUNAMI_10, SPELL_LIVING_TSUNAMI_25) );
                             }
                             events.ScheduleEvent(EVENT_LIVING_TSUNAMI, 3*IN_MILLISECONDS);
-                            break;                        
+                            break;
                     }
                 }
 
@@ -1195,7 +1195,7 @@ class npc_faceless_horror : public CreatureScript
 {
     private:
         enum MyEvents
-        {   
+        {
             EVENT_DEATH_GRIP = 1,
             EVENT_SHADOW_CRASH,
             EVENT_VOID_BARRIER_BEGIN,
@@ -1297,7 +1297,7 @@ class npc_twilight_adherent : public CreatureScript
             SPELL_BLINK             = 64662,
             SPELL_GREATER_HEAL      = 63760,
             SPELL_PSYCHIC_SCREAM    = 13704,
-            SPELL_RENEW             = 37978,  
+            SPELL_RENEW             = 37978,
         };
     public:
         npc_twilight_adherent () : CreatureScript("npc_twilight_adherent") {}
@@ -1432,7 +1432,7 @@ class npc_twilight_frost_mage : public CreatureScript
                             DoCast(SPELL_ARCANE_BURST); // is paired with blink, so no need to reschedule this
                             break;
                         case EVENT_BLINK:
-                            DoCast( SelectTarget(SELECT_TARGET_FARTHEST, 0, 150.0f), SPELL_BLINK );                            
+                            DoCast( SelectTarget(SELECT_TARGET_FARTHEST, 0, 150.0f), SPELL_BLINK );
                             events.ScheduleEvent(EVENT_ARCANE_BURST, 1*IN_MILLISECONDS);
                             break;
                         case EVENT_FROST_NOVA:
@@ -1498,7 +1498,7 @@ class npc_twilight_pyromancer : public CreatureScript
 
                 events.ScheduleEvent(EVENT_BLINK, urand(8*IN_MILLISECONDS, 15*IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_FIREBALL, urand(3*IN_MILLISECONDS, 5*IN_MILLISECONDS));
-                events.ScheduleEvent(EVENT_FLAME_STRIKE, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));                
+                events.ScheduleEvent(EVENT_FLAME_STRIKE, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
             }
 
             void JustSummoned(Creature* summon)
@@ -1611,7 +1611,7 @@ class npc_enslaved_fire_elemental : public CreatureScript
                                 allies.push_back(me->ToUnit());                // Add me to list
                                 allies.remove_if(Trinity::UnitAuraCheck(true, SPELL_FIRE_SHIELD)); // Fulfills here, since the call-to-predicate does not require a const one
                                 if (!allies.empty())
-                                    DoCast( SelectRandomContainerElement(allies), SPELL_FIRE_SHIELD );
+                                    DoCast(Trinity::Containers::SelectRandomContainerElement(allies), SPELL_FIRE_SHIELD);
                                 events.ScheduleEvent(EVENT_FIRE_SHIELD_CHECK, 1*IN_MILLISECONDS);
                             }
                             break;
@@ -1685,7 +1685,7 @@ class npc_twilight_guardian : public CreatureScript
                             {
                                 me->AddThreat(target, 1000.0f);
                                 AttackStart(target);
-                            }                                
+                            }
                             events.ScheduleEvent(EVENT_CONCUSSION_BLOW, urand(3*IN_MILLISECONDS, 6*IN_MILLISECONDS));
                             break;
                         case EVENT_DEVASTATE:
@@ -1734,7 +1734,7 @@ class npc_twilight_slayer : public CreatureScript
             npc_twilight_slayerAI(Creature* creature) : ScriptedAI(creature) {}
 
             void Reset()
-            {   
+            {
                 events.Reset();
                 events.ScheduleEvent(EVENT_BLADESTORM, urand(4*IN_MILLISECONDS, 8*IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_MORTAL_STRIKE, urand(3*IN_MILLISECONDS, 6*IN_MILLISECONDS));
@@ -1844,12 +1844,12 @@ class npc_twilight_shadowblade : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                             {
                                 DoCast(target, SPELL_SHADOWSTEP);
-                                AttackStart(target);                            
+                                AttackStart(target);
                                 events.ScheduleEvent(EVENT_BACKSTAB, 300);
                             }
                             events.ScheduleEvent(EVENT_SHADOWSTEP, urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS));
                             break;
-                        case EVENT_BACKSTAB:                            
+                        case EVENT_BACKSTAB:
                             DoCastVictim(SPELL_BACKSTAB);
                             break;
                     }
@@ -1888,25 +1888,25 @@ class spell_pollinate : public SpellScriptLoader
                 return true;
             }
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<WorldObject*>& targets)
             {
-                for (std::list<Unit*>::iterator it = unitList.begin(); it != unitList.end(); ++it)
+                for (std::list<WorldObject*>::iterator it = targets.begin(); it != targets.end(); ++it)
                 {
                     if (Creature* creature = (*it)->ToCreature())
                     {
                         if (creature->GetEntry() != NPC_GUARDIAN_LASHER)
-                            it = unitList.erase(it);
+                            it = targets.erase(it);
                     }
-                    else 
-                        it = unitList.erase(it);
+                    else
+                        it = targets.erase(it);
                 }
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_pollinate_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_pollinate_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ALLY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_pollinate_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ALLY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pollinate_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_NEARBY_ENTRY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pollinate_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_NEARBY_ENTRY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pollinate_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_NEARBY_ENTRY);
             }
         };
 

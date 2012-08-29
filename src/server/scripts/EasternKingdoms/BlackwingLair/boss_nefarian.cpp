@@ -23,7 +23,8 @@ SDComment: Some issues with class calls effecting more than one class
 SDCategory: Blackwing Lair
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum Say
 {
@@ -92,15 +93,15 @@ public:
 
         void Reset()
         {
-            ShadowFlame_Timer         = 12000;  // These times are probably wrong
-            BellowingRoar_Timer       = 30000;
-            VeilOfShadow_Timer        = 15000;
-            Cleave_Timer              = 7000;
-            TailLash_Timer            = 10000;
-            ClassCall_Timer           = 35000;  // 35-40 seconds
+            ShadowFlame_Timer = 12000;                          // These times are probably wrong
+            BellowingRoar_Timer = 30000;
+            VeilOfShadow_Timer = 15000;
+            Cleave_Timer = 7000;
+            TailLash_Timer = 10000;
+            ClassCall_Timer = 35000;                            // 35-40 seconds
             Phase3 = false;
 
-            DespawnTimer              = 5000;
+            DespawnTimer = 5000;
         }
 
         void KilledUnit(Unit* Victim)
@@ -111,7 +112,7 @@ public:
             DoScriptText(SAY_SLAY, me, Victim);
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
         }

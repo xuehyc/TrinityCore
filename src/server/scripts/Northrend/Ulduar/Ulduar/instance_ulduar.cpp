@@ -29,7 +29,7 @@ static DoorData const doorData[] =
 };
 
 // Used to map boss-identifier to "player-died-in-fight-against"-flag, since not all "bosses" are relevant
-static const uint32 BossId_2_PlayerDiedFlag[][2] = 
+static const uint32 BossId_2_PlayerDiedFlag[][2] =
 {
     { BOSS_LEVIATHAN        , DEAD_FLAME_LEVIATHAN  },
     { BOSS_IGNIS            , DEAD_IGNIS            },
@@ -109,7 +109,7 @@ class instance_ulduar : public InstanceMapScript
             uint64 HodirEntranceDoorGUID;
             uint64 HodirChestGUID;
             uint64 HodirRareCacheGUID;
-            
+
             // Mimiron
             uint64 MimironTrainGUID;
             uint64 MimironGUID;
@@ -185,7 +185,7 @@ class instance_ulduar : public InstanceMapScript
         public:
             void Initialize()
             {
-                // Pretty please: Use type-safe fill instead of raw memset !   
+                // Pretty please: Use type-safe fill instead of raw memset !
                 SetBossNumber(MAX_ENCOUNTER);
                 LoadDoorData(doorData);
 
@@ -200,8 +200,8 @@ class instance_ulduar : public InstanceMapScript
                 // Razorscale
                 RazorscaleGUID          = 0;
                 RazorscaleController    = 0;
-                ExpeditionCommanderGUID = 0;                
-                std::fill(RazorHarpoonGUIDs, RazorHarpoonGUIDs + 4, 0);             
+                ExpeditionCommanderGUID = 0;
+                std::fill(RazorHarpoonGUIDs, RazorHarpoonGUIDs + 4, 0);
 
                 // XT-002
                 XT002GUID       = 0;
@@ -301,7 +301,7 @@ class instance_ulduar : public InstanceMapScript
             {
                 packet << static_cast<uint32>(WORLD_STATE_ALGALON_TIMER_ENABLED) << static_cast<uint32>(AlgalonCountdown && AlgalonCountdown < 61);
                 packet << static_cast<uint32>(WORLD_STATE_ALGALON_DESPAWN_TIMER) << static_cast<uint32>(std::min<uint32>(AlgalonCountdown, 60)); // cast to uint32 required since std::min returns const uint32&
-            }            
+            }
 
             void OnPlayerEnter(Player* player)
             {
@@ -309,7 +309,7 @@ class instance_ulduar : public InstanceMapScript
                     TeamInInstance = GetMajorityTeam();
             }
 
-            void __OnPlayerDeath(Player* /*player*/) 
+            void __OnPlayerDeath(Player* /*player*/)
             {
                 for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
                 {
@@ -318,8 +318,8 @@ class instance_ulduar : public InstanceMapScript
                         if (i == BOSS_ALGALON)
                             ++AlgalonKillCount; // Something happens to Algalon on player death, thus count them
                         PlayerDeathFlag |= BossId_2_PlayerDiedFlag[i][1];
-                    }                                               
-                }  
+                    }
+                }
             }
 
             void __OnCreatureDeath(Creature* creature)
@@ -375,9 +375,9 @@ class instance_ulduar : public InstanceMapScript
             void OnUnitDeath(Unit* unit)
             {
                 if (Player* player = unit->ToPlayer())
-                    __OnPlayerDeath(player);                      
+                    __OnPlayerDeath(player);
                 else if (Creature* creature = unit->ToCreature())
-                    __OnCreatureDeath(creature);                                
+                    __OnCreatureDeath(creature);
             }
 
             bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target = NULL*/, uint32 /*miscvalue1 = 0*/)
@@ -480,7 +480,7 @@ class instance_ulduar : public InstanceMapScript
                     case NPC_RUNE_GIANT:
                         RuneGiantGUID = creature->GetGUID();
                         break;
-                    
+
                     // Flame Leviathan
                     case NPC_LEVIATHAN:
                         LeviathanGUID = creature->GetGUID();
@@ -658,13 +658,13 @@ class instance_ulduar : public InstanceMapScript
                         AlgalonGUID = creature->GetGUID();
                         creature->SetReactState(REACT_DEFENSIVE);   // Maybe move this to script
                         if (AlgalonCountdown < 62)
-                        { 
+                        {
                             creature->setFaction(7);
                             creature->setActive(true);
                         }
                         else
                             creature->SetVisible(false);
-                        break;                  
+                        break;
                 }
             }
 
@@ -703,7 +703,7 @@ class instance_ulduar : public InstanceMapScript
                         if (GetBossState(BOSS_RAZORSCALE) == IN_PROGRESS)
                             gameObject->SetGoState(GO_STATE_ACTIVE);
                         break;
-                    
+
                     // XT002 related
                     case GO_XT_002_DOOR:
                         AddDoor(gameObject, true);
@@ -778,7 +778,7 @@ class instance_ulduar : public InstanceMapScript
                     case GO_FREYA_CHEST:
                         FreyaChestGUID = gameObject->GetGUID();
                         break;
-                   
+
                     // Mimiron related
                     case GO_MIMIRON_TRAIN:
                         gameObject->setActive(true);
@@ -807,7 +807,7 @@ class instance_ulduar : public InstanceMapScript
                     case GO_VEZAX_DOOR:
                         VezaxDoorGUID = gameObject->GetGUID();
                         HandleGameObject(0, false, gameObject);
-                        break;                                       
+                        break;
 
                     // Yogg-Saron related
                     case GO_YOGGSARON_DOOR:
@@ -905,7 +905,7 @@ class instance_ulduar : public InstanceMapScript
             {
                 if (!InstanceScript::SetBossState(type, state))
                     return false;
-                
+
                 if (UlduarBosses(type) <= BOSS_ALGALON)
                     if (GetBossState(UlduarBosses(type)) != DONE)
                         InstanceScript::SetBossState(UlduarBosses(type), state);
@@ -943,7 +943,7 @@ class instance_ulduar : public InstanceMapScript
                             HandleGameObject(ArchivumDoorGUID, true);
                         break;
                         break;
-                    case BOSS_AURIAYA:                    
+                    case BOSS_AURIAYA:
                     case BOSS_FREYA:
                         break;
                     case BOSS_MIMIRON:
@@ -1123,24 +1123,24 @@ class instance_ulduar : public InstanceMapScript
             uint64 GetData64(uint32 data)
             {
                 switch (data)
-                {                    
-                    case BOSS_IGNIS:                return IgnisGUID;                 
+                {
+                    case BOSS_IGNIS:                return IgnisGUID;
                     case BOSS_KOLOGARN:             return KologarnGUID;
-                    case BOSS_AURIAYA:              return AuriayaGUID;      
+                    case BOSS_AURIAYA:              return AuriayaGUID;
                     case BOSS_HODIR:                return HodirGUID;
                     case BOSS_THORIM:               return ThorimGUID;
                     case BOSS_FREYA:                return FreyaGUID;
                     case BOSS_VEZAX:                return VezaxGUID;
-                    case BOSS_ALGALON:              return AlgalonGUID;                   
+                    case BOSS_ALGALON:              return AlgalonGUID;
 
                     // Leviathan
                     case BOSS_LEVIATHAN:            return LeviathanGUID;
                     case DATA_RUNIC_COLOSSUS:       return RunicColossusGUID;
                     case DATA_RUNE_GIANT:           return RuneGiantGUID;
 
-                    // Razorscale 
+                    // Razorscale
                     case BOSS_RAZORSCALE:           return RazorscaleGUID;
-                    case DATA_RAZORSCALE_CONTROL:   return RazorscaleController;  
+                    case DATA_RAZORSCALE_CONTROL:   return RazorscaleController;
                     case DATA_EXPEDITION_COMMANDER: return ExpeditionCommanderGUID;
                     case GO_RAZOR_HARPOON_1:        return RazorHarpoonGUIDs[0];
                     case GO_RAZOR_HARPOON_2:        return RazorHarpoonGUIDs[1];
@@ -1152,7 +1152,7 @@ class instance_ulduar : public InstanceMapScript
                     case DATA_TOY_PILE_0:
                     case DATA_TOY_PILE_1:
                     case DATA_TOY_PILE_2:
-                    case DATA_TOY_PILE_3:           return XTToyPileGUIDs[data - DATA_TOY_PILE_0];            
+                    case DATA_TOY_PILE_3:           return XTToyPileGUIDs[data - DATA_TOY_PILE_0];
 
                     // Assembly of Iron
                     case BOSS_STEELBREAKER:         return AssemblyGUIDs[0];
@@ -1302,7 +1302,7 @@ public:
         switch (pGo->GetEntry())
         {
             // Activate
-            case 194437:    // [ok]           
+            case 194437:    // [ok]
             case 194912:
                 pInstance->SetData(DATA_CALL_TRAM, 0);
                 break;
@@ -1312,10 +1312,10 @@ public:
                 pInstance->SetData(DATA_CALL_TRAM, 1);
                 break;
 //             case 194914:    // At sanctuary
-//             case 194437:            
+//             case 194437:
 //                 pInstance->SetData(DATA_CALL_TRAM, 0);
 //                 break;
-//             case 194912:    // At Mimiron        
+//             case 194912:    // At Mimiron
 //             case 194438:
 //                 pInstance->SetData(DATA_CALL_TRAM, 1);
 //                 break;

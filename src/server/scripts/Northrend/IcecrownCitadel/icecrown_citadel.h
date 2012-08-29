@@ -51,6 +51,7 @@ enum SharedSpells
     SPELL_GREEN_BLIGHT_RESIDUE          = 72145,
 
     // The Lich King
+    SPELL_ARTHAS_TELEPORTER_CEREMONY    = 72915,
     SPELL_FROSTMOURNE_TELEPORT_VISUAL   = 73078,
 };
 
@@ -277,6 +278,9 @@ enum CreaturesIds
     NPC_SPIRIT_BOMB                             = 39189,
     NPC_FROSTMOURNE_TRIGGER                     = 38584,
 
+    // Generic
+    NPC_INVISIBLE_STALKER                       = 30298,
+
     // Sindragosas Ward
     NPC_SINDRAGOSAS_WARD                        = 37503,
     NPC_NERUBAR_WEBWEAVER                       = 37502,
@@ -340,6 +344,10 @@ enum GameObjectsIds
     GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_02   = 201381,
     GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_03   = 201382,
     GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_04   = 201383,
+    GO_CACHE_OF_THE_DREAMWALKER_10N         = 201959,
+    GO_CACHE_OF_THE_DREAMWALKER_25N         = 202339,
+    GO_CACHE_OF_THE_DREAMWALKER_10H         = 202338,
+    GO_CACHE_OF_THE_DREAMWALKER_25H         = 202340,
 
     // Sindragosa
     GO_SINDRAGOSA_ENTRANCE_DOOR             = 201373,
@@ -350,6 +358,7 @@ enum GameObjectsIds
     GO_SIGIL_OF_THE_FROSTWING               = 202181,
 
     // The Lich King
+    GO_SCOURGE_TRANSPORTER_LK               = 202223,
     GO_ARTHAS_PLATFORM                      = 202161,
     GO_ARTHAS_PRECIPICE                     = 202078,
     GO_DOODAD_ICECROWN_THRONEFROSTYWIND01   = 202188,

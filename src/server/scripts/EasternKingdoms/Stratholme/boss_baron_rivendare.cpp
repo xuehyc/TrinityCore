@@ -23,7 +23,8 @@ SDComment: aura applied/defined in database
 SDCategory: Stratholme
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "stratholme.h"
 
 #define SAY_0    "Intruders! More pawns of the Argent Dawn, no doubt. I already count one of their number among my prisoners. Withdraw from my domain before she is executed!"
@@ -89,7 +90,7 @@ public:
 
     struct boss_baron_rivendareAI : public ScriptedAI
     {
-        boss_baron_rivendareAI(Creature* c) : ScriptedAI(c)
+        boss_baron_rivendareAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = me->GetInstanceScript();
         }
@@ -126,7 +127,7 @@ public:
                 summoned->AI()->AttackStart(target);
         }
 
-         void JustDied(Unit* /*Killer*/)
+         void JustDied(Unit* /*killer*/)
          {
              if (instance)
                  instance->SetData(TYPE_BARON, DONE);

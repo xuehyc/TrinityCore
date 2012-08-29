@@ -23,7 +23,8 @@ SDComment: Some spells not implemented
 SDCategory: Caverns of Time, The Dark Portal
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "dark_portal.h"
 
 enum eEnums
@@ -55,9 +56,9 @@ public:
 
     struct boss_aeonusAI : public ScriptedAI
     {
-        boss_aeonusAI(Creature* c) : ScriptedAI(c)
+        boss_aeonusAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -93,7 +94,7 @@ public:
             ScriptedAI::MoveInLineOfSight(who);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
 

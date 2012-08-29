@@ -15,7 +15,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "InstanceScript.h"
 #include "ahnkahet.h"
 
 /* Ahn'kahet encounters:
@@ -87,7 +89,8 @@ public:
         bool IsEncounterInProgress() const
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS) return true;
+                if (m_auiEncounter[i] == IN_PROGRESS)
+                    return true;
 
             return false;
         }
@@ -109,26 +112,37 @@ public:
         {
             switch (go->GetEntry())
             {
-                case 193564:     Prince_TaldaramPlatform = go->GetGUID();
-                    if (m_auiEncounter[1] == DONE) HandleGameObject(0, true, go); break;
-                case 193093:     Prince_TaldaramSpheres[0] = go->GetGUID();
+                case 193564:
+                    Prince_TaldaramPlatform = go->GetGUID();
+                    if (m_auiEncounter[1] == DONE)
+                        HandleGameObject(0, true, go);
+                    break;
+
+                case 193093:
+                    Prince_TaldaramSpheres[0] = go->GetGUID();
                     if (spheres[0] == IN_PROGRESS)
                     {
                         go->SetGoState(GO_STATE_ACTIVE);
                         go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     }
-                    else go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    else
+                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
-                case 193094:     Prince_TaldaramSpheres[1] = go->GetGUID();
+                case 193094:
+                    Prince_TaldaramSpheres[1] = go->GetGUID();
                     if (spheres[1] == IN_PROGRESS)
                     {
                         go->SetGoState(GO_STATE_ACTIVE);
                         go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     }
-                    else go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    else
+                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
-                case 192236:    Prince_TaldaramGate = go->GetGUID(); // Web gate past Prince Taldaram
-                    if (m_auiEncounter[1] == DONE)HandleGameObject(0, true, go);break;
+                case 192236:
+                    Prince_TaldaramGate = go->GetGUID(); // Web gate past Prince Taldaram
+                    if (m_auiEncounter[1] == DONE)
+                        HandleGameObject(0, true, go);
+                    break;
             }
         }
 
@@ -136,8 +150,13 @@ public:
         {
             switch (idx)
             {
-                case DATA_ADD_JEDOGA_OPFER: JedogaSacrifices = guid; break;
-                case DATA_PL_JEDOGA_TARGET: JedogaTarget = guid; break;
+                case DATA_ADD_JEDOGA_OPFER:
+                    JedogaSacrifices = guid;
+                    break;
+
+                case DATA_PL_JEDOGA_TARGET:
+                    JedogaTarget = guid;
+                    break;
             }
         }
 
@@ -178,7 +197,9 @@ public:
         {
             switch (type)
             {
-                case DATA_ELDER_NADOX_EVENT: m_auiEncounter[0] = data; break;
+                case DATA_ELDER_NADOX_EVENT:
+                    m_auiEncounter[0] = data;
+                    break;
                 case DATA_PRINCE_TALDARAM_EVENT:
                     if (data == DONE)
                         HandleGameObject(Prince_TaldaramGate, true);
@@ -200,11 +221,21 @@ public:
                         }
                     }
                     break;
-                case DATA_HERALD_VOLAZJ_EVENT: m_auiEncounter[3] = data; break;
-                case DATA_AMANITAR_EVENT: m_auiEncounter[4] = data; break;
-                case DATA_SPHERE1_EVENT: spheres[0] = data; break;
-                case DATA_SPHERE2_EVENT: spheres[1] = data; break;
-                case DATA_JEDOGA_TRIGGER_SWITCH: switchtrigger = data; break;
+                case DATA_HERALD_VOLAZJ_EVENT:
+                    m_auiEncounter[3] = data;
+                    break;
+                case DATA_AMANITAR_EVENT:
+                    m_auiEncounter[4] = data;
+                    break;
+                case DATA_SPHERE1_EVENT:
+                    spheres[0] = data;
+                    break;
+                case DATA_SPHERE2_EVENT:
+                    spheres[1] = data;
+                    break;
+                case DATA_JEDOGA_TRIGGER_SWITCH:
+                    switchtrigger = data;
+                    break;
                 case DATA_JEDOGA_RESET_INITIANDS:
                     for (std::set<uint64>::const_iterator itr = InitiandGUIDs.begin(); itr != InitiandGUIDs.end(); ++itr)
                     {
@@ -236,7 +267,8 @@ public:
                     for (std::set<uint64>::const_iterator itr = InitiandGUIDs.begin(); itr != InitiandGUIDs.end(); ++itr)
                     {
                         Creature* cr = instance->GetCreature(*itr);
-                        if (!cr || (cr && cr->isAlive())) return 0;
+                        if (!cr || (cr && cr->isAlive()))
+                            return 0;
                     }
                     return 1;
                 case DATA_JEDOGA_TRIGGER_SWITCH: return switchtrigger;

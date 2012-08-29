@@ -21,6 +21,10 @@
  * Scriptnames of files in this file should be prefixed with "spell_mage_".
  */
 
+#include "ScriptMgr.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
+
 
 enum MageSpells
 {
@@ -119,6 +123,12 @@ class spell_mage_cold_snap : public SpellScriptLoader
         }
 };
 
+enum SilvermoonPolymorph
+{
+    NPC_AUROSALIA   = 18744,
+};
+
+// TODO: move out of here and rename - not a mage spell
 class spell_mage_polymorph_cast_visual : public SpellScriptLoader
 {
     public:
@@ -128,22 +138,22 @@ class spell_mage_polymorph_cast_visual : public SpellScriptLoader
         {
             PrepareSpellScript(spell_mage_polymorph_cast_visual_SpellScript);
 
-            static const uint32 spell_list[6];
+            static const uint32 PolymorhForms[6];
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
                 // check if spell ids exist in dbc
-                for (int i = 0; i < 6; i++)
-                    if (!sSpellMgr->GetSpellInfo(spell_list[i]))
+                for (uint32 i = 0; i < 6; i++)
+                    if (!sSpellMgr->GetSpellInfo(PolymorhForms[i]))
                         return false;
                 return true;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                if (Unit* unitTarget = GetHitUnit())
-                    if (unitTarget->GetTypeId() == TYPEID_UNIT)
-                        unitTarget->CastSpell(unitTarget, spell_list[urand(0, 5)], true);
+                if (Unit* target = GetCaster()->FindNearestCreature(NPC_AUROSALIA, 30.0f))
+                    if (target->GetTypeId() == TYPEID_UNIT)
+                        target->CastSpell(target, PolymorhForms[urand(0, 5)], true);
             }
 
             void Register()
@@ -159,7 +169,7 @@ class spell_mage_polymorph_cast_visual : public SpellScriptLoader
         }
 };
 
-const uint32 spell_mage_polymorph_cast_visual::spell_mage_polymorph_cast_visual_SpellScript::spell_list[6] =
+const uint32 spell_mage_polymorph_cast_visual::spell_mage_polymorph_cast_visual_SpellScript::PolymorhForms[6] =
 {
     SPELL_MAGE_SQUIRREL_FORM,
     SPELL_MAGE_GIRAFFE_FORM,
@@ -240,9 +250,11 @@ class spell_mage_frost_warding_trigger : public SpellScriptLoader
 
                     if (roll_chance_i(chance))
                     {
-                        absorbAmount = dmgInfo.GetDamage();
-                        int32 bp = absorbAmount;
+                        int32 bp = dmgInfo.GetDamage();
+                        dmgInfo.AbsorbDamage(bp);
                         target->CastCustomSpell(target, SPELL_MAGE_FROST_WARDING_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
+                        absorbAmount = 0;
+                        PreventDefaultAction();
                     }
                 }
             }
@@ -330,13 +342,52 @@ public:
     }
 };
 
+class spell_mage_living_bomb : public SpellScriptLoader
+{
+    public:
+        spell_mage_living_bomb() : SpellScriptLoader("spell_mage_living_bomb") { }
+
+        class spell_mage_living_bomb_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_mage_living_bomb_AuraScript);
+
+            bool Validate(SpellInfo const* spell)
+            {
+                if (!sSpellMgr->GetSpellInfo(uint32(spell->Effects[EFFECT_1].CalcValue())))
+                    return false;
+                return true;
+            }
+
+            void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            {
+                AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
+                if (removeMode != AURA_REMOVE_BY_ENEMY_SPELL && removeMode != AURA_REMOVE_BY_EXPIRE)
+                    return;
+
+                if (Unit* caster = GetCaster())
+                    caster->CastSpell(GetTarget(), uint32(aurEff->GetAmount()), true, NULL, aurEff);
+            }
+
+            void Register()
+            {
+                AfterEffectRemove += AuraEffectRemoveFn(spell_mage_living_bomb_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_mage_living_bomb_AuraScript();
+        }
+};
+
 void AddSC_mage_spell_scripts()
 {
-    new spell_mage_blast_wave;
-    new spell_mage_cold_snap;
+    new spell_mage_blast_wave();
+    new spell_mage_cold_snap();
     new spell_mage_frost_warding_trigger();
     new spell_mage_incanters_absorbtion_absorb();
     new spell_mage_incanters_absorbtion_manashield();
-    new spell_mage_polymorph_cast_visual;
-    new spell_mage_summon_water_elemental;
+    new spell_mage_polymorph_cast_visual();
+    new spell_mage_summon_water_elemental();
+    new spell_mage_living_bomb();
 }

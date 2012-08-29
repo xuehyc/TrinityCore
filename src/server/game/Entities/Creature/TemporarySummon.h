@@ -36,6 +36,7 @@ class TempSummon : public Creature
         Unit* GetSummoner() const;
         uint64 GetSummonerGUID() { return m_summonerGUID; }
         TempSummonType const& GetSummonType() { return m_type; }
+        uint32 GetTimer() { return m_timer; }
 
         const SummonPropertiesEntry* const m_Properties;
     private:
@@ -107,4 +108,3 @@ private:
     TempSummon& m_owner;
 };
 #endif
-

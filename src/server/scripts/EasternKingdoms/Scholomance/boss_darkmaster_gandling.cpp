@@ -23,7 +23,8 @@ SDComment: Doors missing in instance script.
 SDCategory: Scholomance
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "scholomance.h"
 
 #define SPELL_ARCANEMISSILES           22272
@@ -62,7 +63,7 @@ public:
 
     struct boss_darkmaster_gandlingAI : public ScriptedAI
     {
-        boss_darkmaster_gandlingAI(Creature* c) : ScriptedAI(c)
+        boss_darkmaster_gandlingAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = me->GetInstanceScript();
         }

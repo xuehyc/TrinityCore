@@ -33,42 +33,33 @@
 
 void WorldSession::SendNameQueryOpcode(uint64 guid)
 {
-    Player* player = NULL;
-    const CharacterNameData* nameData = sWorld->GetCharacterNameData(GUID_LOPART(guid));
-    if (nameData)
-        player = ObjectAccessor::FindPlayer(guid);
+    Player* player = ObjectAccessor::FindPlayer(guid);
+    CharacterNameData const* nameData = sWorld->GetCharacterNameData(GUID_LOPART(guid));
 
-                                                            // guess size
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8+1+1+1+1+1+10));
     data.appendPackGUID(guid);
-    data << uint8(0);                                       // added in 3.1
-    if (nameData)
+    if (!nameData)
     {
-        data << nameData->m_name;                                   // played name
-        data << uint8(0);                                       // realm name for cross realm BG usage
-        data << uint8(nameData->m_race);
-        data << uint8(nameData->m_gender);
-        data << uint8(nameData->m_class);
-    }
-    else
-    {
-        data << std::string(GetTrinityString(LANG_NON_EXIST_CHARACTER));
-        data << uint32(0);
+        data << uint8(1);                           // name unknown
+        SendPacket(&data);
+        return;
     }
 
-    if (player)
+    data << uint8(0);                               // name known
+    data << nameData->m_name;                       // played name
+    data << uint8(0);                               // realm name - only set for cross realm interaction (such as Battlegrounds)
+    data << uint8(nameData->m_race);
+    data << uint8(nameData->m_gender);
+    data << uint8(nameData->m_class);
+
+    if (DeclinedName const* names = (player ? player->GetDeclinedNames() : NULL))
     {
-        if (DeclinedName const* names = player->GetDeclinedNames())
-        {
-            data << uint8(1);                                   // is declined
-            for (int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-                data << names->name[i];
-        }
-        else
-            data << uint8(0);                                   // is not declined
+        data << uint8(1);                           // Name is declined
+        for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            data << names->name[i];
     }
-    else //TODO: decline names may also need to be stored in char name data
-        data << uint8(0);
+    else
+        data << uint8(0);                           // Name is not declined
 
     SendPacket(&data);
 }
@@ -76,11 +67,10 @@ void WorldSession::SendNameQueryOpcode(uint64 guid)
 void WorldSession::HandleNameQueryOpcode(WorldPacket& recv_data)
 {
     uint64 guid;
-
     recv_data >> guid;
 
     // This is disable by default to prevent lots of console spam
-    // sLog->outString("HandleNameQueryOpcode %u", guid);
+    // sLog->outInfo(LOG_FILTER_NETWORKIO, "HandleNameQueryOpcode %u", guid);
 
     SendNameQueryOpcode(guid);
 }
@@ -123,7 +113,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket & recv_data)
                 ObjectMgr::GetLocaleString(cl->SubName, loc_idx, SubName);
             }
         }
-        sLog->outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u.", ci->Name.c_str(), entry);
+        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u.", ci->Name.c_str(), entry);
                                                             // guess size
         WorldPacket data(SMSG_CREATURE_QUERY_RESPONSE, 100);
         data << uint32(entry);                              // creature entry
@@ -189,7 +179,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket & recv_data)
                 ObjectMgr::GetLocaleString(gl->CastBarCaption, loc_idx, CastBarCaption);
             }
         }
-        sLog->outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name.c_str(), entry);
+        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name.c_str(), entry);
         WorldPacket data (SMSG_GAMEOBJECT_QUERY_RESPONSE, 150);
         data << uint32(entry);
         data << uint32(info->type);
@@ -219,7 +209,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
 {
-    sLog->outDetail("WORLD: Received MSG_CORPSE_QUERY");
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received MSG_CORPSE_QUERY");
 
     Corpse* corpse = GetPlayer()->GetCorpse();
 
@@ -274,7 +264,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recv_data)
     uint64 guid;
 
     recv_data >> textID;
-    sLog->outDetail("WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID);
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID);
 
     recv_data >> guid;
     GetPlayer()->SetSelection(guid);
@@ -354,7 +344,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recv_data)
 /// Only _static_ data is sent in this packet !!!
 void WorldSession::HandlePageTextQueryOpcode(WorldPacket & recv_data)
 {
-    sLog->outDetail("WORLD: Received CMSG_PAGE_TEXT_QUERY");
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_PAGE_TEXT_QUERY");
 
     uint32 pageID;
     recv_data >> pageID;

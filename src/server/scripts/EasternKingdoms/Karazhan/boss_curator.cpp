@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Karazhan
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SAY_AGGRO                       -1532057
 #define SAY_SUMMON1                     -1532058
@@ -55,7 +56,7 @@ public:
 
     struct boss_curatorAI : public ScriptedAI
     {
-        boss_curatorAI(Creature* c) : ScriptedAI(c) {}
+        boss_curatorAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 AddTimer;
         uint32 HatefulBoltTimer;
@@ -80,7 +81,7 @@ public:
             DoScriptText(RAND(SAY_KILL1, SAY_KILL2), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
         }

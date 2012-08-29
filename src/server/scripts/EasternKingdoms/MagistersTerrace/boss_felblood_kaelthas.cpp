@@ -23,7 +23,8 @@ SDComment: Normal and Heroic Support. Issues: Arcane Spheres do not initially fo
 SDCategory: Magisters' Terrace
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "magisters_terrace.h"
 #include "WorldPacket.h"
 
@@ -197,7 +198,7 @@ public:
             std::list<HostileReference*>::const_iterator i = m_threatlist.begin();
             for (i = m_threatlist.begin(); i != m_threatlist.end(); ++i)
             {
-                Unit* unit = Unit::GetUnit((*me), (*i)->getUnitGuid());
+                Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                 if (unit && unit->isAlive())
                 {
                     float threat = me->getThreatManager().getThreat(unit);
@@ -215,7 +216,7 @@ public:
             std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
             for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
             {
-                Unit* unit = Unit::GetUnit((*me), (*i)->getUnitGuid());
+                Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                 if (unit && (unit->GetTypeId() == TYPEID_PLAYER))
                     unit->CastSpell(unit, SPELL_TELEPORT_CENTER, true);
             }
@@ -227,7 +228,7 @@ public:
             std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
             for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
             {
-                Unit* unit = Unit::GetUnit((*me), (*i)->getUnitGuid());
+                Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                 if (unit && (unit->GetTypeId() == TYPEID_PLAYER))
                     // Knockback into the air
                     unit->CastSpell(unit, SPELL_GRAVITY_LAPSE_DOT, true, 0, 0, me->GetGUID());
@@ -239,7 +240,7 @@ public:
             std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
             for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
             {
-                Unit* unit = Unit::GetUnit((*me), (*i)->getUnitGuid());
+                Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                 if (unit && (unit->GetTypeId() == TYPEID_PLAYER))
                 {
                     // Also needs an exception in spell system.
@@ -259,7 +260,7 @@ public:
             std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
             for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
             {
-                Unit* unit = Unit::GetUnit((*me), (*i)->getUnitGuid());
+                Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                 if (unit && (unit->GetTypeId() == TYPEID_PLAYER))
                 {
                     unit->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_FLY);
@@ -501,7 +502,7 @@ public:
         void Reset()
         {
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE + UNIT_FLAG_NON_ATTACKABLE);
-            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+            me->SetDisableGravity(true);
             DoCast(me, SPELL_PHOENIX_BURN, true);
             BurnTimer = 2000;
             Death_Timer = 3000;
@@ -548,7 +549,7 @@ public:
 
         }
 
-        void JustDied(Unit* /*slayer*/)
+        void JustDied(Unit* /*killer*/)
         {
             me->SummonCreature(CREATURE_PHOENIX_EGG, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 45000);
         }
@@ -655,7 +656,7 @@ public:
             ChangeTargetTimer = urand(6000, 12000);
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+            me->SetDisableGravity(true);
             me->setFaction(14);
             DoCast(me, SPELL_ARCANE_SPHERE_PASSIVE, true);
         }

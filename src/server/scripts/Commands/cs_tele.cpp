@@ -97,15 +97,16 @@ public:
         if (!*args)
             return false;
 
-        std::string name = args;
-
-        if (!sObjectMgr->DeleteGameTele(name))
+         // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
+        GameTele const* tele = handler->extractGameTeleFromLink((char*)args);
+        if (!tele)
         {
             handler->SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
             handler->SetSentErrorMessage(true);
             return false;
         }
-
+        std::string name = tele->name;
+        sObjectMgr->DeleteGameTele(name);
         handler->SendSysMessage(LANG_COMMAND_TP_DELETED);
         return true;
     }
@@ -131,12 +132,15 @@ public:
                 target->TeleportTo(target->m_homebindMapId, target->m_homebindX, target->m_homebindY, target->m_homebindZ, target->GetOrientation());
             else
             {
-                QueryResult resultDB = CharacterDatabase.PQuery("SELECT mapId, zoneId, posX, posY, posZ FROM character_homebind WHERE guid = %u", target_guid);
+                PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_HOMEBIND);
+                stmt->setUInt32(0, target_guid);
+                PreparedQueryResult resultDB = CharacterDatabase.Query(stmt);
+
                 if (resultDB)
                 {
                     Field* fieldsDB = resultDB->Fetch();
-                    uint32 mapId = fieldsDB[0].GetUInt32();
-                    uint32 zoneId = fieldsDB[1].GetUInt32();
+                    uint32 mapId = fieldsDB[0].GetUInt16();
+                    uint32 zoneId = fieldsDB[1].GetUInt16();
                     float posX = fieldsDB[2].GetFloat();
                     float posY = fieldsDB[3].GetFloat();
                     float posZ = fieldsDB[4].GetFloat();

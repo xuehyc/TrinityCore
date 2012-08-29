@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "drak_tharon_keep.h"
 
 enum Spells
@@ -72,9 +73,9 @@ public:
 
     struct boss_novosAI : public Scripted_NoMovementAI
     {
-        boss_novosAI(Creature* c) : Scripted_NoMovementAI(c), lSummons(me)
+        boss_novosAI(Creature* creature) : Scripted_NoMovementAI(creature), lSummons(me)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 uiTimer;
@@ -275,9 +276,9 @@ public:
 
     struct mob_crystal_handlerAI : public ScriptedAI
     {
-        mob_crystal_handlerAI(Creature* c) : ScriptedAI(c)
+        mob_crystal_handlerAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 uiFlashOfDarknessTimer;
@@ -332,9 +333,9 @@ public:
 
     struct mob_novos_minionAI : public ScriptedAI
     {
-        mob_novos_minionAI(Creature* c) : ScriptedAI(c)
+        mob_novos_minionAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;

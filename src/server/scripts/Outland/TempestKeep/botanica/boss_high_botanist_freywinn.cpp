@@ -23,7 +23,8 @@ SDComment: some strange visual related to tree form(if aura lost before normal d
 SDCategory: Tempest Keep, The Botanica
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum eSays
 {
@@ -107,7 +108,7 @@ class boss_high_botanist_freywinn : public CreatureScript
                 DoScriptText(RAND(SAY_KILL_1, SAY_KILL_2), me);
             }
 
-            void JustDied(Unit* /*Killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 DoScriptText(SAY_DEATH, me);
             }
@@ -195,9 +196,9 @@ class boss_high_botanist_freywinn : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_high_botanist_freywinnAI (Creature);
+            return new boss_high_botanist_freywinnAI(creature);
         }
 };
 

@@ -102,6 +102,7 @@ inline void Cell::Visit(CellCoord const& standing_cell, TypeContainerVisitor<T, 
     //if radius is known to reach cell area more than 4x4 then we should call optimized VisitCircle
     //currently this technique works with MAX_NUMBER_OF_CELLS 16 and higher, with lower values
     //there are nothing to optimize because SIZE_OF_GRID_CELL is too big...
+    // Reverted commit by trinity here, because it was rather a hack
     if (((area.high_bound.x_coord - area.low_bound.x_coord) > 4) && ((area.high_bound.y_coord - area.low_bound.y_coord) > 4))
     {
         VisitCircle(visitor, map, area.low_bound, area.high_bound);

@@ -23,7 +23,8 @@ SDComment: Missing spawns pre-event, missing speech to be coordinated with rest 
 SDCategory: Caverns of Time, Old Hillsbrad Foothills
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "old_hillsbrad.h"
 
 #define SAY_ENTER1                  -1560013
@@ -54,9 +55,9 @@ public:
 
     struct boss_epoch_hunterAI : public ScriptedAI
     {
-        boss_epoch_hunterAI(Creature* c) : ScriptedAI(c)
+        boss_epoch_hunterAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -84,7 +85,7 @@ public:
             DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
 

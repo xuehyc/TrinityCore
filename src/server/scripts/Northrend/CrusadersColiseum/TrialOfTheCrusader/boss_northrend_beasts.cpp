@@ -29,7 +29,8 @@ EndScriptData */
 // Snakes - miss the 1-hitkill from emerging
 //        - visual changes between mobile and stationary models seems not to work sometimes
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "trial_of_the_crusader.h"
 
 enum Yells
@@ -181,10 +182,10 @@ public:
     {
         boss_gormokAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_instance = (InstanceScript*)creature->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
 
         uint32 m_uiImpaleTimer;
         uint32 m_uiStaggeringStompTimer;
@@ -215,18 +216,18 @@ public:
         {
             HandleAuraOnRaidNorthrendBeasts(me, RAID_MODE(SPELL_IMPALE_0, SPELL_IMPALE_1, SPELL_IMPALE_2, SPELL_IMPALE_3), true, false, 0);
 
-            if (m_instance)
-                m_instance->SetData(TYPE_NORTHREND_BEASTS, GORMOK_DONE);
+            if (instance)
+                instance->SetData(TYPE_NORTHREND_BEASTS, GORMOK_DONE);
         }
 
         void JustReachedHome()
         {
-            if (m_instance)
+            if (instance)
             {
-                if (m_instance->GetData(TYPE_NORTHREND_BEASTS) != FAIL)
+                if (instance->GetData(TYPE_NORTHREND_BEASTS) != FAIL)
                 {
-                    m_instance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
-                    m_instance->SetData(SPAWNED_NEXT_BOSS_1, 0);
+                    instance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+                    instance->SetData(SPAWNED_NEXT_BOSS_1, 0);
                 }
             }
             me->DespawnOrUnsummon();
@@ -250,7 +251,7 @@ public:
         {
             DoZoneInCombat();
             me->SetHomePosition(ToCCommonLoc[5].GetPositionX(), ToCCommonLoc[5].GetPositionY(), ToCCommonLoc[5].GetPositionZ(), 0);
-            m_instance->SetData(TYPE_NORTHREND_BEASTS, GORMOK_IN_PROGRESS);
+            instance->SetData(TYPE_NORTHREND_BEASTS, GORMOK_IN_PROGRESS);
         }
 
         void JustSummoned(Creature* summon)
@@ -303,13 +304,13 @@ public:
                 {
                     if (m_summonNextBossHeroicTimer <= diff)
                     {
-                        if (m_instance)
+                        if (instance)
                         {
                             nextBossSpawnInitiated = true;
-                            m_instance->SetData(TYPE_EVENT, 200);
-                            m_instance->SetData(SPAWNED_NEXT_BOSS_1, 1);
-                            m_instance->SetData(TYPE_NORTHREND_BEASTS, IN_PROGRESS);
-                            m_instance->SetData(TYPE_BEASTS, IN_PROGRESS);
+                            instance->SetData(TYPE_EVENT, 200);
+                            instance->SetData(SPAWNED_NEXT_BOSS_1, 1);
+                            instance->SetData(TYPE_NORTHREND_BEASTS, IN_PROGRESS);
+                            instance->SetData(TYPE_BEASTS, IN_PROGRESS);
                         }
                     } else m_summonNextBossHeroicTimer -= diff;
                 }
@@ -345,7 +346,6 @@ public:
 
 };
 
-
 class mob_snobold_vassal : public CreatureScript
 {
 public:
@@ -360,12 +360,12 @@ public:
     {
         mob_snobold_vassalAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
-            m_instance = (InstanceScript*)creature->GetInstanceScript();
-            if (m_instance)
-                m_instance->SetData(DATA_SNOBOLD_COUNT, INCREASE);
+            instance = creature->GetInstanceScript();
+            if (instance)
+                instance->SetData(DATA_SNOBOLD_COUNT, INCREASE);
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
         uint32 m_uiFireBombTimer;
         uint32 m_uiBatterTimer;
         uint32 m_uiHeadCrackTimer;
@@ -385,8 +385,8 @@ public:
 
             m_uiTargetGUID = 0;
 
-            if (m_instance)
-                m_uiBossGUID = m_instance->GetData64(NPC_GORMOK);
+            if (instance)
+                m_uiBossGUID = instance->GetData64(NPC_GORMOK);
             //Workaround for Snobold
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
 
@@ -446,8 +446,8 @@ public:
         {
             Summons.DespawnAll();
 
-            if (m_instance)
-                m_instance->SetData(DATA_SNOBOLD_COUNT, DECREASE);
+            if (instance)
+                instance->SetData(DATA_SNOBOLD_COUNT, DECREASE);
         }
 
         void UpdateAI(uint32 const diff)
@@ -493,16 +493,15 @@ public:
 
 };
 
-
 struct boss_jormungarAI : public ScriptedAI
 {
     boss_jormungarAI(Creature* creature) : ScriptedAI(creature), Summons(me)
     {
-        m_instance = (InstanceScript*)creature->GetInstanceScript();
+        instance = creature->GetInstanceScript();
         m_wasCombat = false;
     }
 
-    InstanceScript* m_instance;
+    InstanceScript* instance;
 
     uint32 m_uiSisterID;
 
@@ -601,45 +600,45 @@ struct boss_jormungarAI : public ScriptedAI
     {
         Summons.DespawnAll();
 
-        if (m_instance)
+        if (instance)
         {
-            if (Creature* pSister = Unit::GetCreature((*me), m_instance->GetData64(m_uiSisterID)))
+            if (Creature* pSister = Unit::GetCreature((*me), instance->GetData64(m_uiSisterID)))
             {
                 if (!pSister->isAlive())
                 {
-                    m_instance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_DONE);
+                    instance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_DONE);
                     pSister->DespawnOrUnsummon();
                     me->DespawnOrUnsummon();
                 }
                 else
                 {
-                    m_instance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_SPECIAL);
+                    instance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_SPECIAL);
                 }
             }
             else // should never happen though!
             {
                 me->DespawnOrUnsummon();
-                m_instance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_DONE);
+                instance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_DONE);
             }
         }
     }
 
     void JustReachedHome()
     {
-        if (m_instance)
+        if (instance)
         {
-            if (m_instance->GetData(TYPE_NORTHREND_BEASTS) != FAIL)
+            if (instance->GetData(TYPE_NORTHREND_BEASTS) != FAIL)
             {
-               m_instance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+               instance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
             }
         }
 
-        if (m_instance)
+        if (instance)
         {
-            if (Creature* pSister = Unit::GetCreature((*me), m_instance->GetData64(m_uiSisterID)))
+            if (Creature* pSister = Unit::GetCreature((*me), instance->GetData64(m_uiSisterID)))
                 pSister->DespawnOrUnsummon();
 
-            m_instance->SetData(SPAWNED_NEXT_BOSS_2, 0);
+            instance->SetData(SPAWNED_NEXT_BOSS_2, 0);
         }
 
         me->DespawnOrUnsummon();
@@ -649,8 +648,8 @@ struct boss_jormungarAI : public ScriptedAI
     {
         if (who->GetTypeId() == TYPEID_PLAYER)
         {
-            if (m_instance)
-                m_instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
+            if (instance)
+                instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
         }
     }
 
@@ -668,12 +667,12 @@ struct boss_jormungarAI : public ScriptedAI
             me->SetHomePosition(ToCCommonLoc[7].GetPositionX(), ToCCommonLoc[7].GetPositionY(), ToCCommonLoc[7].GetPositionZ(), 0);
         }
 
-        if (m_instance)
-            if (Creature* pSister = Unit::GetCreature((*me), m_instance->GetData64(m_uiSisterID)))
+        if (instance)
+            if (Creature* pSister = Unit::GetCreature((*me), instance->GetData64(m_uiSisterID)))
                 DoZoneInCombat(pSister);
 
-        if (m_instance)
-            m_instance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_IN_PROGRESS);
+        if (instance)
+            instance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_IN_PROGRESS);
     }
 
     void JustSummoned(Creature* summon)
@@ -794,11 +793,11 @@ void boss_jormungarAI::UpdateAI(const uint32 diff)
         {
             if (m_summonNextBossHeroicTimer <= diff)
             {
-                if (m_instance)
+                if (instance)
                 {
                     nextBossSpawnInitiated = true;
 
-                    if (Creature* pSister = Unit::GetCreature((*me), m_instance->GetData64(m_uiSisterID)))
+                    if (Creature* pSister = Unit::GetCreature((*me), instance->GetData64(m_uiSisterID)))
                     {
                         bool sisterSpawnedNextBoss = false;
 
@@ -818,16 +817,16 @@ void boss_jormungarAI::UpdateAI(const uint32 diff)
                             return;
                     }
 
-                    m_instance->SetData(TYPE_EVENT, 300);
-                    m_instance->SetData(SPAWNED_NEXT_BOSS_2, 1);
-                    m_instance->SetData(TYPE_NORTHREND_BEASTS, IN_PROGRESS);
-                    m_instance->SetData(TYPE_BEASTS, IN_PROGRESS);
+                    instance->SetData(TYPE_EVENT, 300);
+                    instance->SetData(SPAWNED_NEXT_BOSS_2, 1);
+                    instance->SetData(TYPE_NORTHREND_BEASTS, IN_PROGRESS);
+                    instance->SetData(TYPE_BEASTS, IN_PROGRESS);
                 }
             } else m_summonNextBossHeroicTimer -= diff;
         }
     }
 
-    if (m_instance && m_instance->GetData(TYPE_NORTHREND_BEASTS) == SNAKES_SPECIAL && !m_bEnraged)
+    if (instance && instance->GetData(TYPE_NORTHREND_BEASTS) == SNAKES_SPECIAL && !m_bEnraged)
     {
         DoScriptText(SAY_EMERGE, me);
         me->RemoveAurasDueToSpell(SPELL_SUBMERGE_0);
@@ -985,7 +984,7 @@ public:
         {
             casted = false;
             me->SetReactState(REACT_PASSIVE);
-            me->ForcedDespawn(60*IN_MILLISECONDS);
+            me->DespawnOrUnsummon(60*IN_MILLISECONDS);
         }
 
         void UpdateAI(const uint32 /*diff*/)
@@ -1014,10 +1013,10 @@ public:
     {
         boss_icehowlAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_instance = (InstanceScript*)creature->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
 
         uint32 m_uiFerociousButtTimer;
         uint32 m_uiArticBreathTimer;
@@ -1054,8 +1053,8 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            if (m_instance)
-                m_instance->SetData(TYPE_NORTHREND_BEASTS, ICEHOWL_DONE);
+            if (instance)
+                instance->SetData(TYPE_NORTHREND_BEASTS, ICEHOWL_DONE);
         }
 
         void MovementInform(uint32 type, uint32 pointId)
@@ -1095,11 +1094,11 @@ public:
 
         void JustReachedHome()
         {
-            if (m_instance)
+            if (instance)
             {
-                if (m_instance->GetData(TYPE_NORTHREND_BEASTS) != FAIL)
+                if (instance->GetData(TYPE_NORTHREND_BEASTS) != FAIL)
                 {
-                    m_instance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+                    instance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
                 }
             }
 
@@ -1110,32 +1109,32 @@ public:
         {
             if (who->GetTypeId() == TYPEID_PLAYER)
             {
-                if (m_instance)
-                    m_instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
+                if (instance)
+                    instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
             }
         }
 
         void DamageTaken(Unit* /*who*/, uint32 &damage)
         {
-            if (m_instance)
+            if (instance)
             {
                 bool foundBossAlive = false;
 
-                if (Unit* Gormok = Unit::GetUnit((*me), m_instance->GetData64(NPC_GORMOK)))
+                if (Unit* Gormok = Unit::GetUnit((*me), instance->GetData64(NPC_GORMOK)))
                 {
                     if (Gormok->isAlive())
                     {
                         foundBossAlive = true;
                     }
                 }
-                else if (Unit* Dreadscale = Unit::GetUnit((*me), m_instance->GetData64(NPC_DREADSCALE)))
+                else if (Unit* Dreadscale = Unit::GetUnit((*me), instance->GetData64(NPC_DREADSCALE)))
                 {
                     if (Dreadscale->isAlive())
                     {
                         foundBossAlive = true;
                     }
                 }
-                else if (Unit* Acidmaw = Unit::GetUnit((*me), m_instance->GetData64(NPC_ACIDMAW)))
+                else if (Unit* Acidmaw = Unit::GetUnit((*me), instance->GetData64(NPC_ACIDMAW)))
                 {
                     if (Acidmaw->isAlive())
                     {
@@ -1159,11 +1158,11 @@ public:
 
             me->SetHomePosition(ToCCommonLoc[5].GetPositionX(), ToCCommonLoc[5].GetPositionY(), ToCCommonLoc[5].GetPositionZ(), 0);
 
-            if (m_instance)
-                m_instance->SetData(TYPE_NORTHREND_BEASTS, ICEHOWL_IN_PROGRESS);
+            if (instance)
+                instance->SetData(TYPE_NORTHREND_BEASTS, ICEHOWL_IN_PROGRESS);
         }
 
-        void SpellHitTarget(Unit* target, const SpellInfo* spell)
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
         {
             if (spell->Id == SPELL_TRAMPLE && target->GetTypeId() == TYPEID_PLAYER)
             {
@@ -1227,7 +1226,7 @@ public:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                     {
                         m_uiTrampleTargetGUID = target->GetGUID();
-                        me->SetUInt64Value(UNIT_FIELD_TARGET, m_uiTrampleTargetGUID);
+                        me->SetTarget(m_uiTrampleTargetGUID);
                         DoScriptText(SAY_TRAMPLE_STARE, me, target);
                         m_bTrampleCasted = false;
                         SetCombatMovement(false);
@@ -1242,7 +1241,7 @@ public:
                 case 3:
                     if (m_uiTrampleTimer <= diff)
                     {
-                        if (Unit* target = Unit::GetUnit((*me), m_uiTrampleTargetGUID))
+                        if (Unit* target = Unit::GetPlayer(*me, m_uiTrampleTargetGUID))
                         {
                             m_bTrampleCasted = false;
                             m_bMovementStarted = true;
@@ -1262,7 +1261,7 @@ public:
                 case 4:
                     DoScriptText(SAY_TRAMPLE_START, me);
                     me->GetMotionMaster()->MoveCharge(m_fTrampleTargetX, m_fTrampleTargetY, m_fTrampleTargetZ+2, 42, 1);
-                    me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
+                    me->SetTarget(0);
                     m_uiStage = 5;
                     break;
                 case 5:
@@ -1282,12 +1281,14 @@ public:
                             for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
                             {
                                 if (Unit* player = itr->getSource())
+                                {
                                     if (player->isAlive() && me->GetExactDist2d(player->GetPositionX(), player->GetPositionY()) < 12.0f)
                                     {
                                         DoCastAOE(SPELL_TRAMPLE, true);
                                         m_uiTrampleTimer = 1000;
                                         break;
                                     }
+                                }
                             }
                         }
                     } else m_uiTrampleTimer -= diff;

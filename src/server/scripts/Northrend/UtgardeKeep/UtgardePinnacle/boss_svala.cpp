@@ -15,7 +15,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
 #include "utgarde_pinnacle.h"
 
 enum Spells
@@ -94,11 +97,6 @@ enum SvalaPhase
     SVALADEAD
 };
 
-/*enum SvalaPoint
-{
-    POINT_FALL_GROUND = 1,
-};*/
-
 #define DATA_INCREDIBLE_HULK 2043
 
 static const float spectatorWP[2][3] =
@@ -158,14 +156,10 @@ public:
             summons.DespawnAll();
             me->RemoveAllAuras();
 
-            if (Phase > INTRO)
-            {
-                me->SetFlying(true);
-                me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-            }
-
             if (Phase > NORMAL)
                 Phase = NORMAL;
+
+            me->SetDisableGravity(Phase == NORMAL);
 
             introTimer = 1 * IN_MILLISECONDS;
             introPhase = 0;
@@ -175,17 +169,6 @@ public:
             {
                 instance->SetData(DATA_SVALA_SORROWGRAVE_EVENT, NOT_STARTED);
                 instance->SetData64(DATA_SACRIFICED_PLAYER, 0);
-            }
-        }
-
-        void JustReachedHome()
-        {
-            if (Phase > INTRO)
-            {
-                me->SetFlying(false);
-                me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                me->SetOrientation(1.58f);
-                me->SendMovementFlagUpdate();
             }
         }
 
@@ -240,44 +223,13 @@ public:
                 Talk(SAY_SLAY);
         }
 
-        /*void DamageTaken(Unit* attacker, uint32 &damage)
-        {
-            if (Phase == SVALADEAD)
-            {
-                if (attacker != me)
-                    damage = 0;
-                return;
-            }
-
-            if (damage >= me->GetHealth())
-            {
-                if (Phase == SACRIFICING)
-                    SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
-
-                damage = 0;
-                Phase = SVALADEAD;
-                me->InterruptNonMeleeSpells(true);
-                me->RemoveAllAuras();
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SetHealth(1);
-
-                SetCombatMovement(false);
-                me->HandleEmoteCommand(EMOTE_ONESHOT_FLYDEATH);
-                me->GetMotionMaster()->MoveFall(POINT_FALL_GROUND);
-            }
-        }
-
-        void MovementInform(uint32 motionType, uint32 pointId)
-        {
-            if (motionType != EFFECT_MOTION_TYPE)
-                return;
-
-            if (pointId == POINT_FALL_GROUND)
-                me->DealDamage(me, me->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-        }*/
-
         void JustDied(Unit* /*killer*/)
         {
+            if (Phase == SACRIFICING)
+                SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
+
+            me->HandleEmoteCommand(EMOTE_ONESHOT_FLYDEATH);
+
             summons.DespawnAll();
 
             if (instance)
@@ -325,11 +277,9 @@ public:
                             break;
                         case 2:
                             arthas->CastSpell(me, SPELL_TRANSFORMING_CHANNEL, false);
-                            me->SetFlying(true);
-                            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                             pos.Relocate(me);
                             pos.m_positionZ += 8.0f;
-                            me->GetMotionMaster()->MoveTakeoff(0, pos, 3.30078125f);
+                            me->GetMotionMaster()->MoveTakeoff(0, pos);
                             // spectators flee event
                             if (instance)
                             {
@@ -340,7 +290,7 @@ public:
                                     if ((*itr)->isAlive())
                                     {
                                         (*itr)->SetStandState(UNIT_STAND_STATE_STAND);
-                                        (*itr)->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                        (*itr)->SetWalk(false);
                                         (*itr)->GetMotionMaster()->MovePoint(1, spectatorWP[0][0], spectatorWP[0][1], spectatorWP[0][2]);
                                     }
                                 }
@@ -382,14 +332,13 @@ public:
                             introTimer = 13800;
                             break;
                         case 8:
-                            me->SetFlying(false);
-                            me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                            me->SendMovementFlagUpdate();
                             pos.Relocate(me);
                             pos.m_positionX = me->GetHomePosition().GetPositionX();
                             pos.m_positionY = me->GetHomePosition().GetPositionY();
                             pos.m_positionZ = 90.6065f;
-                            me->GetMotionMaster()->MoveLand(0, pos, 6.247422f);
+                            me->GetMotionMaster()->MoveLand(0, pos);
+                            me->SetDisableGravity(false, true);
+                            me->SetHover(true);
                             ++introPhase;
                             introTimer = 3000;
                             break;
@@ -403,7 +352,8 @@ public:
                             break;
                     }
                 }
-                else introTimer -= diff;
+                else
+                    introTimer -= diff;
 
                 return;
             }
@@ -414,33 +364,29 @@ public:
                 if (!UpdateVictim())
                     return;
 
-                if (me->IsWithinMeleeRange(me->getVictim()) && me->HasUnitMovementFlag(MOVEMENTFLAG_LEVITATING))
-                {
-                    me->SetFlying(false);
-                    me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                    me->SendMovementFlagUpdate();
-                }
-
                 if (sinsterStrikeTimer <= diff)
                 {
                     DoCast(me->getVictim(), SPELL_SINSTER_STRIKE);
                     sinsterStrikeTimer = urand(5 * IN_MILLISECONDS, 9 * IN_MILLISECONDS);
-                } else sinsterStrikeTimer -= diff;
+                }
+                else
+                    sinsterStrikeTimer -= diff;
 
                 if (callFlamesTimer <= diff)
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                     {
                         DoCast(target, SPELL_CALL_FLAMES);
                         callFlamesTimer = urand(10 * IN_MILLISECONDS, 20 * IN_MILLISECONDS);
                     }
-                } else callFlamesTimer -= diff;
+                }
+                    else callFlamesTimer -= diff;
 
                 if (!sacrificed)
                 {
                     if (HealthBelowPct(50))
                     {
-                        if (Unit* sacrificeTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 80, true))
+                        if (Unit* sacrificeTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true))
                         {
                             if (instance)
                                 instance->SetData64(DATA_SACRIFICED_PLAYER, sacrificeTarget->GetGUID());
@@ -450,8 +396,6 @@ public:
                             DoCast(sacrificeTarget, SPELL_RITUAL_PREPARATION);
 
                             SetCombatMovement(false);
-                            me->SetFlying(true);
-                            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
 
                             Phase = SACRIFICING;
                             sacrePhase = 0;
@@ -588,12 +532,12 @@ public:
     };
 };
 
-class checkRitualTarget
+class RitualTargetCheck
 {
     public:
-        explicit checkRitualTarget(Unit* _caster) : caster(_caster) { }
+        explicit RitualTargetCheck(Unit* _caster) : caster(_caster) { }
 
-        bool operator() (Unit* unit)
+        bool operator() (WorldObject* unit) const
         {
             if (InstanceScript* instance = caster->GetInstanceScript())
                 if (instance->GetData64(DATA_SACRIFICED_PLAYER) == unit->GetGUID())
@@ -615,14 +559,14 @@ class spell_paralyze_pinnacle : public SpellScriptLoader
         {
             PrepareSpellScript(spell_paralyze_pinnacle_SpellScript);
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<WorldObject*>& unitList)
             {
-                unitList.remove_if(checkRitualTarget(GetCaster()));
+                unitList.remove_if(RitualTargetCheck(GetCaster()));
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_paralyze_pinnacle_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_paralyze_pinnacle_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 

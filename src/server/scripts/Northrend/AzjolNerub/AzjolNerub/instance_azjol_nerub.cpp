@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "azjol_nerub.h"
 
 #define MAX_ENCOUNTER     3
@@ -64,7 +65,8 @@ public:
         bool IsEncounterInProgress() const
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (auiEncounter[i] == IN_PROGRESS) return true;
+                if (auiEncounter[i] == IN_PROGRESS)
+                    return true;
 
             return false;
         }

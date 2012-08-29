@@ -28,8 +28,11 @@ npc_vekjik
 avatar_of_freya
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "ScriptedEscortAI.h"
+#include "SpellScript.h"
 
 /*######
 ## npc_injured_rainspeaker_oracle
@@ -57,7 +60,7 @@ public:
 
     struct npc_injured_rainspeaker_oracleAI : public npc_escortAI
     {
-        npc_injured_rainspeaker_oracleAI(Creature* c) : npc_escortAI(c) { c_guid = c->GetGUID(); }
+        npc_injured_rainspeaker_oracleAI(Creature* creature) : npc_escortAI(creature) { c_guid = creature->GetGUID(); }
 
         uint64 c_guid;
 
@@ -72,39 +75,40 @@ public:
             }
         }
 
-        void WaypointReached(uint32 i)
+        void WaypointReached(uint32 waypointId)
         {
             Player* player = GetPlayerForEscort();
-
             if (!player)
                 return;
 
-            switch (i)
+            switch (waypointId)
             {
-            case 1: SetRun(); break;
-            case 10:
-            case 11:
-            case 12:
-            case 13:
-            case 14:
-            case 15:
-            case 16:
-            case 17:
-            case 18:
-                me->RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-                me->RemoveUnitMovementFlag(MOVEMENTFLAG_JUMPING);
-                me->SetSpeed(MOVE_SWIM, 0.85f, true);
-                me->AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_LEVITATING);
-                break;
-            case 19:
-                me->SetUnitMovementFlags(MOVEMENTFLAG_JUMPING);
-                break;
-            case 28:
-                player->GroupEventHappens(QUEST_FORTUNATE_MISUNDERSTANDINGS, me);
-              //  me->RestoreFaction();
-                DoScriptText(SAY_END_IRO, me);
-                SetRun(false);
-                break;
+                case 1:
+                    SetRun();
+                    break;
+                case 10:
+                case 11:
+                case 12:
+                case 13:
+                case 14:
+                case 15:
+                case 16:
+                case 17:
+                case 18:
+                    me->RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+                    me->RemoveUnitMovementFlag(MOVEMENTFLAG_FALLING);
+                    me->SetSpeed(MOVE_SWIM, 0.85f, true);
+                    me->AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_DISABLE_GRAVITY);
+                    break;
+                case 19:
+                    me->SetUnitMovementFlags(MOVEMENTFLAG_FALLING);
+                    break;
+                case 28:
+                    player->GroupEventHappens(QUEST_FORTUNATE_MISUNDERSTANDINGS, me);
+                    // me->RestoreFaction();
+                    DoScriptText(SAY_END_IRO, me);
+                    SetRun(false);
+                    break;
             }
         }
 
@@ -115,8 +119,8 @@ public:
 
             if (Player* player = GetPlayerForEscort())
             {
-              if (player->GetQuestStatus(QUEST_FORTUNATE_MISUNDERSTANDINGS) != QUEST_STATUS_COMPLETE)
-                player->FailQuest(QUEST_FORTUNATE_MISUNDERSTANDINGS);
+                if (player->GetQuestStatus(QUEST_FORTUNATE_MISUNDERSTANDINGS) != QUEST_STATUS_COMPLETE)
+                    player->FailQuest(QUEST_FORTUNATE_MISUNDERSTANDINGS);
             }
         }
 
@@ -148,14 +152,14 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        if (action == GOSSIP_ACTION_INFO_DEF+1)
         {
             CAST_AI(npc_escortAI, (creature->AI()))->Start(true, false, player->GetGUID());
             CAST_AI(npc_escortAI, (creature->AI()))->SetMaxPlayerDistance(35.0f);
-            creature->SetUnitMovementFlags(MOVEMENTFLAG_JUMPING);
+            creature->SetUnitMovementFlags(MOVEMENTFLAG_FALLING);
             DoScriptText(SAY_START_IRO, creature);
 
             switch (player->GetTeam()){
@@ -222,10 +226,10 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        switch (uiAction)
+        switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF+1:
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_VEKJIK_ITEM2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
@@ -279,10 +283,10 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        switch (uiAction)
+        switch (action)
         {
         case GOSSIP_ACTION_INFO_DEF+1:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_AOF2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
@@ -321,10 +325,9 @@ public:
             if (me->isDead())
                 return;
 
-            if (me->isSummon())
-                if (Unit* summoner = me->ToTempSummon()->GetSummoner())
-                    if (summoner)
-                        me->GetMotionMaster()->MovePoint(0, summoner->GetPositionX(), summoner->GetPositionY(), summoner->GetPositionZ());
+            if (TempSummon* summ = me->ToTempSummon())
+                if (Unit* summoner = summ->GetSummoner())
+                    me->GetMotionMaster()->MovePoint(0, summoner->GetPositionX(), summoner->GetPositionY(), summoner->GetPositionZ());
 
             Reset();
         }
@@ -375,10 +378,11 @@ public:
 
         uint32 m_uiChatTimer;
 
-        void WaypointReached(uint32 i)
+        void WaypointReached(uint32 waypointId)
         {
             Player* player = GetPlayerForEscort();
-            switch (i)
+
+            switch (waypointId)
             {
                 case 0:
                     DoScriptText(SAY_WP_2, me);
@@ -417,12 +421,12 @@ public:
         {
             m_uiChatTimer = 4000;
         }
+
         void JustDied(Unit* /*killer*/)
         {
-            Player* player = GetPlayerForEscort();
             if (HasEscortState(STATE_ESCORT_ESCORTING))
             {
-                if (player)
+                if (Player* player = GetPlayerForEscort())
                     player->FailQuest(QUEST_DISASTER);
             }
         }
@@ -663,11 +667,11 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
         uint32 spellId = 0;
-        switch (uiAction)
+        switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF + 1: spellId = SPELL_ADD_ORANGE;     break;
             case GOSSIP_ACTION_INFO_DEF + 2: spellId = SPELL_ADD_BANANAS;    break;
@@ -758,6 +762,130 @@ public:
     SpellScript* GetSpellScript() const
     {
         return new spell_q12620_the_lifewarden_wrath_SpellScript();
+    }
+};
+
+/*######
+## Quest Kick, What Kick? (12589)
+######*/
+
+enum KickWhatKick
+{
+    NPC_LUCKY_WILHELM = 28054,
+    NPC_APPLE = 28053,
+    NPC_DROSTAN = 28328,
+    NPC_CRUNCHY = 28346,
+    NPC_THICKBIRD = 28093,
+
+    SPELL_HIT_APPLE = 51331,
+    SPELL_MISS_APPLE = 51332,
+    SPELL_MISS_BIRD_APPLE = 51366,
+    SPELL_APPLE_FALL = 51371,
+    SPELL_BIRD_FALL = 51369,
+
+    EVENT_MISS = 0,
+    EVENT_HIT = 1,
+    EVENT_MISS_BIRD = 2,
+
+    SAY_WILHELM_MISS = 0,
+    SAY_WILHELM_HIT = 1,
+    SAY_DROSTAN_REPLY_MISS = 0,
+};
+
+class spell_q12589_shoot_rjr : public SpellScriptLoader
+{
+public:
+    spell_q12589_shoot_rjr() : SpellScriptLoader("spell_q12589_shoot_rjr") { }
+
+    class spell_q12589_shoot_rjr_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q12589_shoot_rjr_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* target = GetExplTargetUnit())
+                if (target->GetEntry() == NPC_LUCKY_WILHELM)
+                    return SPELL_CAST_OK;
+
+            SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_MUST_TARGET_WILHELM);
+            return SPELL_FAILED_CUSTOM_ERROR;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            uint32 roll = urand(1, 100);
+
+            uint8 ev;
+            if (roll <= 50)
+                ev = EVENT_MISS;
+            else if (roll <= 83)
+                ev = EVENT_HIT;
+            else
+                ev = EVENT_MISS_BIRD;
+
+            Unit* shooter = GetCaster();
+            Creature* wilhelm = GetHitUnit()->ToCreature();
+            Creature* apple = shooter->FindNearestCreature(NPC_APPLE, 30);
+            Creature* drostan = shooter->FindNearestCreature(NPC_DROSTAN, 30);
+
+            if (!wilhelm || !apple || !drostan)
+                return;
+
+            switch (ev)
+            {
+                case EVENT_MISS_BIRD:
+                {
+                    Creature* crunchy = shooter->FindNearestCreature(NPC_CRUNCHY, 30);
+                    Creature* bird = shooter->FindNearestCreature(NPC_THICKBIRD, 30);
+
+                    if (!bird || !crunchy)
+                        ; // fall to EVENT_MISS
+                    else
+                    {
+                        shooter->CastSpell(bird, SPELL_MISS_BIRD_APPLE);
+                        bird->CastSpell(bird, SPELL_BIRD_FALL);
+                        wilhelm->AI()->Talk(SAY_WILHELM_MISS);
+                        drostan->AI()->Talk(SAY_DROSTAN_REPLY_MISS);
+
+                        bird->Kill(bird);
+                        crunchy->GetMotionMaster()->MovePoint(0, bird->GetPositionX(), bird->GetPositionY(),
+                            bird->GetMap()->GetWaterOrGroundLevel(bird->GetPositionX(), bird->GetPositionY(), bird->GetPositionZ()));
+                        // TODO: Make crunchy perform emote eat when he reaches the bird
+
+                        break;
+                    }
+                }
+                case EVENT_MISS:
+                {
+                    shooter->CastSpell(wilhelm, SPELL_MISS_APPLE);
+                    wilhelm->AI()->Talk(SAY_WILHELM_MISS);
+                    drostan->AI()->Talk(SAY_DROSTAN_REPLY_MISS);
+                    break;
+                }
+                case EVENT_HIT:
+                {
+                    shooter->CastSpell(apple, SPELL_HIT_APPLE);
+                    apple->CastSpell(apple, SPELL_APPLE_FALL);
+                    wilhelm->AI()->Talk(SAY_WILHELM_HIT);
+                    if (Player* player = shooter->ToPlayer())
+                        player->KilledMonsterCredit(NPC_APPLE, 0);
+                    apple->DespawnOrUnsummon();
+
+                    break;
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_q12589_shoot_rjr_SpellScript::CheckCast);
+            OnEffectHitTarget += SpellEffectFn(spell_q12589_shoot_rjr_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_q12589_shoot_rjr_SpellScript();
     }
 };
 
@@ -893,6 +1021,7 @@ class npc_artruis : public CreatureScript
                     return;
 
                 while (uint32 eventId = events.ExecuteEvent())
+                {
                     switch (eventId)
                     {
                         case EVENT_FROSTBOLT:
@@ -912,6 +1041,7 @@ class npc_artruis : public CreatureScript
                             events.ScheduleEvent(EVENT_ICY_VEINS, 25000);
                             break;
                     }
+                }
             }
 
             void JustDied(Unit* /*killer*/)
@@ -1020,6 +1150,7 @@ class npc_zepik_jaloot : public CreatureScript
                     return;
 
                 while (uint32 eventId = events.ExecuteEvent())
+                {
                     switch (eventId)
                     {
                         case EVENT_OPEN_WOUND:
@@ -1039,6 +1170,7 @@ class npc_zepik_jaloot : public CreatureScript
                             events.ScheduleEvent(EVENT_SPARK_FRENZY, 14000);
                             break;
                     }
+                }
             }
 
             // Spell: Bindings of Submission target Zepik&Jaloot implicitly, but don't turn up in SpellHit(), makes developer sad ;-(
@@ -1132,6 +1264,7 @@ void AddSC_sholazar_basin()
     new npc_adventurous_dwarf();
     new npc_jungle_punch_target();
     new spell_q12620_the_lifewarden_wrath();
+    new spell_q12589_shoot_rjr();
     new npc_artruis();
     new npc_zepik_jaloot();
 }

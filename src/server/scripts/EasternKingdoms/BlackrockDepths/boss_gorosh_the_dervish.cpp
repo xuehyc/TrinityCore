@@ -16,7 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum Spells
 {
@@ -43,8 +44,8 @@ public:
 
         void Reset()
         {
-            WhirlWind_Timer     = 12000;
-            MortalStrike_Timer  = 22000;
+            WhirlWind_Timer = 12000;
+            MortalStrike_Timer = 22000;
         }
 
         void EnterCombat(Unit* /*who*/)

@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Zul'Gurub
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "zulgurub.h"
 
 #define SPELL_LIGHTNINGCLOUD         25033
@@ -40,7 +41,7 @@ class boss_wushoolay : public CreatureScript
 
         struct boss_wushoolayAI : public ScriptedAI
         {
-            boss_wushoolayAI(Creature* c) : ScriptedAI(c) {}
+            boss_wushoolayAI(Creature* creature) : ScriptedAI(creature) {}
 
             uint32 LightningCloud_Timer;
             uint32 LightningWave_Timer;

@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Tempest Keep, The Mechanar
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum eSays
 {
@@ -86,7 +87,7 @@ class boss_gatewatcher_iron_hand : public CreatureScript
                     DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
                 }
 
-                void JustDied(Unit* /*Killer*/)
+                void JustDied(Unit* /*killer*/)
                 {
                     DoScriptText(SAY_DEATH_1, me);
                     //TODO: Add door check/open code

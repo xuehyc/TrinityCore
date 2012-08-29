@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Stratholme
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "stratholme.h"
 
 #define SPELL_FROSTBOLT    17503
@@ -43,7 +44,7 @@ public:
 
     struct boss_maleki_the_pallidAI : public ScriptedAI
     {
-        boss_maleki_the_pallidAI(Creature* c) : ScriptedAI(c)
+        boss_maleki_the_pallidAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = me->GetInstanceScript();
         }
@@ -65,7 +66,7 @@ public:
         {
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (instance)
                 instance->SetData(TYPE_PALLID, IN_PROGRESS);

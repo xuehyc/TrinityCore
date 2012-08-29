@@ -30,7 +30,8 @@ EndScriptData */
 // Redone summon's scripts in SAI
 // Add immunities to the boss and summons
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "trial_of_the_crusader.h"
 
 enum Yells
@@ -66,19 +67,23 @@ enum Summons
 
 enum BossSpells
 {
-    SPELL_NETHER_POWER          = 67108,
-    SPELL_INFERNAL              = 66258,
-    SPELL_INFERNAL_ERUPTION     = 66255,
-    SPELL_FEL_FIREBALL          = 66532,
-    SPELL_FEL_LIGHTING          = 66528,
-    SPELL_INCINERATE_FLESH_0    = 66237,
+    SPELL_LEGION_FLAME          = 66197, // player should run away from raid because he triggers Legion Flame
+    SPELL_LEGION_FLAME_EFFECT   = 66201, // used by trigger npc
+    SPELL_NETHER_POWER          = 67108, // +20% of spell damage per stack, stackable up to 5/10 times, must be dispelled/stealed
+    SPELL_FEL_LIGHTING          = 66528, // jumps to nearby targets
+    SPELL_FEL_FIREBALL          = 66532, // does heavy damage to the tank, interruptable
+    SPELL_INCINERATE_FLESH_0    = 66237, // target must be healed or will trigger Burning Inferno
     SPELL_INCINERATE_FLESH_1    = 67049,
     SPELL_INCINERATE_FLESH_2    = 67050,
     SPELL_INCINERATE_FLESH_3    = 67051,
-    SPELL_BURNING_INFERNO       = 66242,
+    SPELL_BURNING_INFERNO       = 66242, // triggered by Incinerate Flesh
+    SPELL_INFERNAL_ERUPTION     = 66255,
+    SPELL_INFERNAL              = 66258,
     SPELL_NETHER_PORTAL         = 66264,
-    SPELL_LEGION_FLAME          = 66197,
-    SPELL_LEGION_FLAME_EFFECT   = 66201,
+
+    SPELL_BERSERK                     = 64238, // unused
+
+    // Mistress of Pain spells
     SPELL_SHIVAN_SLASH          = 67098,
     SPELL_SPINNING_STRIKE       = 66316,
     SPELL_MISTRESS_KISS         = 66359,
@@ -87,7 +92,6 @@ enum BossSpells
     SPELL_FEL_STREAK_1          = 67042,
     SPELL_FEL_STREAK_2          = 67043,
     SPELL_FEL_STREAK_3          = 67044,
-    SPELL_BERSERK               = 64238,
 };
 
 /*######
@@ -108,18 +112,17 @@ public:
     {
         boss_jaraxxusAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_instance = creature->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             Reset();
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
 
         uint32 m_uiFelFireballTimer;
         uint32 m_uiFelLightningTimer;
         uint32 m_uiIncinerateFleshTimer;
         uint32 m_uiNetherPowerTimer;
         uint32 m_uiLegionFlameTimer;
-        uint32 m_uiTouchOfJaraxxusTimer;
         uint32 m_uiSummonNetherPortalTimer;
         uint32 m_uiSummonInfernalEruptionTimer;
 
@@ -128,22 +131,22 @@ public:
             DespawnAdds();
             me->SetReactState(REACT_PASSIVE);
 
-            if (m_instance)
-                m_instance->SetData(TYPE_JARAXXUS, NOT_STARTED);
+            if (instance)
+                instance->SetData(TYPE_JARAXXUS, NOT_STARTED);
             SetEquipmentSlots(false, EQUIP_MAIN, EQUIP_OFFHAND, EQUIP_RANGED);
-            m_uiFelFireballTimer = 5*1000;
-            m_uiFelLightningTimer = urand(8*1000, 12*1000);
-            m_uiIncinerateFleshTimer = urand(18*1000, 23*1000);
-            m_uiNetherPowerTimer = urand(16*1000, 20*1000);
-            m_uiLegionFlameTimer = urand(25*1000, 35*1000);
+            m_uiFelFireballTimer = 5*IN_MILLISECONDS;
+            m_uiFelLightningTimer = urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS);
+            m_uiIncinerateFleshTimer = urand(18*IN_MILLISECONDS, 23*IN_MILLISECONDS);
+            m_uiNetherPowerTimer = urand(16*IN_MILLISECONDS, 20*IN_MILLISECONDS);
+            m_uiLegionFlameTimer = urand(25*IN_MILLISECONDS, 35*IN_MILLISECONDS);
             m_uiSummonNetherPortalTimer = 1*MINUTE*IN_MILLISECONDS;
             m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
         }
 
         void JustReachedHome()
         {
-            if (m_instance)
-                m_instance->SetData(TYPE_JARAXXUS, FAIL);
+            if (instance)
+                instance->SetData(TYPE_JARAXXUS, FAIL);
             DoCast(me, SPELL_JARAXXUS_CHAINS);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
@@ -174,8 +177,8 @@ public:
         {
             if (who->GetTypeId() == TYPEID_PLAYER)
             {
-                if (m_instance)
-                    m_instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
+                if (instance)
+                    instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
             }
         }
 
@@ -183,16 +186,16 @@ public:
         {
             DespawnAdds();
             DoScriptText(SAY_DEATH, me);
-            if (m_instance)
-                m_instance->SetData(TYPE_JARAXXUS, DONE);
+            if (instance)
+                instance->SetData(TYPE_JARAXXUS, DONE);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             DoZoneInCombat();
 
-            if (m_instance)
-                m_instance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
+            if (instance)
+                instance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
             DoScriptText(SAY_AGGRO, me);
         }
 
@@ -222,7 +225,7 @@ public:
             if (m_uiFelFireballTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_FEL_FIREBALL);
-                m_uiFelFireballTimer = urand(9*1000, 16*1000);
+                m_uiFelFireballTimer = urand(9*IN_MILLISECONDS, 16*IN_MILLISECONDS);
             } else m_uiFelFireballTimer -= uiDiff;
 
             if (m_uiFelLightningTimer <= uiDiff)
@@ -258,8 +261,9 @@ public:
 
             if (m_uiNetherPowerTimer <= uiDiff)
             {
-                if (m_uiFelLightningTimer < 5000) // prevent instant (buffed) fel lightning, give players time to purge
-                    m_uiFelLightningTimer = 5000;
+                if (m_uiFelLightningTimer < 5*IN_MILLISECONDS) // prevent instant (buffed) fel lightning, give players time to purge
+                    m_uiFelLightningTimer = 5*IN_MILLISECONDS;
+
                 if (!me->HasAura(SPELL_NETHER_POWER))
                 {
                     if (Aura* netherAura = me->AddAura(SPELL_NETHER_POWER, me))
@@ -268,7 +272,7 @@ public:
                         netherAura->SetCharges(RAID_MODE(5, 10, 5, 10));
                     }
                 }
-                m_uiNetherPowerTimer = urand(30*1000, 40*1000);
+                m_uiNetherPowerTimer = urand(30*IN_MILLISECONDS, 40*IN_MILLISECONDS);
             } else m_uiNetherPowerTimer -= uiDiff;
 
             if (m_uiLegionFlameTimer <= uiDiff)
@@ -278,7 +282,7 @@ public:
                     DoScriptText(EMOTE_LEGION_FLAME, me, target);
                     DoCast(target, SPELL_LEGION_FLAME);
                 }
-                m_uiLegionFlameTimer = urand(20*1000, 30*1000);
+                m_uiLegionFlameTimer = urand(20*IN_MILLISECONDS, 30*IN_MILLISECONDS);
             } else m_uiLegionFlameTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
@@ -312,13 +316,11 @@ public:
 
         void UpdateAI(const uint32 /*uiDiff*/)
         {
-            if (!UpdateVictim())
-                return;
+            UpdateVictim();
         }
     };
 
 };
-
 
 class mob_infernal_volcano : public CreatureScript
 {
@@ -334,11 +336,11 @@ public:
     {
         mob_infernal_volcanoAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
-            m_instance = (InstanceScript*)creature->GetInstanceScript();
+            instance = (InstanceScript*)creature->GetInstanceScript();
             Reset();
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
 
         uint8 m_Count;
         uint8 m_CountMax;
@@ -391,7 +393,6 @@ public:
 
 };
 
-
 class mob_fel_infernal : public CreatureScript
 {
 public:
@@ -406,11 +407,11 @@ public:
     {
         mob_fel_infernalAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_instance = (InstanceScript*)creature->GetInstanceScript();
+            instance = (InstanceScript*)creature->GetInstanceScript();
             Reset();
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
         uint32 m_uiFelStreakStartTimer;
 
         bool doFelStreaks;
@@ -488,7 +489,6 @@ public:
 
 };
 
-
 class mob_nether_portal : public CreatureScript
 {
 public:
@@ -503,11 +503,11 @@ public:
     {
         mob_nether_portalAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_instance = (InstanceScript*)creature->GetInstanceScript();
+            instance = (InstanceScript*)creature->GetInstanceScript();
             Reset();
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
 
         uint32 m_Timer;
         uint8  m_Count;
@@ -554,7 +554,6 @@ public:
 
 };
 
-
 class mob_mistress_of_pain : public CreatureScript
 {
 public:
@@ -569,13 +568,13 @@ public:
     {
         mob_mistress_of_painAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_instance = (InstanceScript*)creature->GetInstanceScript();
-            if (m_instance)
-                m_instance->SetData(DATA_MISTRESS_OF_PAIN_COUNT, INCREASE);
+            instance = (InstanceScript*)creature->GetInstanceScript();
+            if (instance)
+                instance->SetData(DATA_MISTRESS_OF_PAIN_COUNT, INCREASE);
             Reset();
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
         uint32 m_uiShivanSlashTimer;
         uint32 m_uiSpinningStrikeTimer;
         uint32 m_uiMistressKissTimer;
@@ -594,8 +593,8 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            if (m_instance)
-                m_instance->SetData(DATA_MISTRESS_OF_PAIN_COUNT, DECREASE);
+            if (instance)
+                instance->SetData(DATA_MISTRESS_OF_PAIN_COUNT, DECREASE);
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -606,7 +605,7 @@ public:
             if (m_uiShivanSlashTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_SHIVAN_SLASH);
-                m_uiShivanSlashTimer = urand(15*1000, 35*1000);
+                m_uiShivanSlashTimer = urand(15*IN_MILLISECONDS, 35*IN_MILLISECONDS);
             } else m_uiShivanSlashTimer -= uiDiff;
 
             if (m_uiSpinningStrikeTimer <= uiDiff)
@@ -616,7 +615,7 @@ public:
                     int32 damage = target->GetMaxHealth() / 2;
                     target->CastCustomSpell(target, SPELL_SPINNING_STRIKE, &damage, 0, 0, true, 0, 0, me->GetGUID());
                 }
-                m_uiSpinningStrikeTimer = urand(15*1000, 35*1000);
+                m_uiSpinningStrikeTimer = urand(15*IN_MILLISECONDS, 35*IN_MILLISECONDS);
             } else m_uiSpinningStrikeTimer -= uiDiff;
 
             if (IsHeroic())
@@ -625,7 +624,7 @@ public:
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(target, SPELL_MISTRESS_KISS);
-                    m_uiMistressKissTimer = urand(15*1000, 20*1000);
+                    m_uiMistressKissTimer = urand(15*IN_MILLISECONDS, 20*IN_MILLISECONDS);
                 } else m_uiMistressKissTimer -= uiDiff;
             }
 

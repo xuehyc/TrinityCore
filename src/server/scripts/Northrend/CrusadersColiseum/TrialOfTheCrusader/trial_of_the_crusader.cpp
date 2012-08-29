@@ -27,7 +27,9 @@ EndScriptData */
 // - Need better implementation of Gossip and correct gossip text and option
 // - Misses Dalaran Teleport at the end.
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "trial_of_the_crusader.h"
 #include "Group.h"
 
@@ -107,10 +109,10 @@ class npc_announcer_toc10 : public CreatureScript
         {
             npc_announcer_toc10AI(Creature* creature) : ScriptedAI(creature)
             {
-                m_instance = (InstanceScript*)creature->GetInstanceScript();
+                instance = creature->GetInstanceScript();
             }
 
-            InstanceScript* m_instance;
+            InstanceScript* instance;
 
             void Reset()
             {
@@ -153,7 +155,6 @@ class npc_announcer_toc10 : public CreatureScript
         bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
         {
             player->PlayerTalkClass->ClearMenus();
-
             player->CLOSE_GOSSIP_MENU();
             InstanceScript* instanceScript = creature->GetInstanceScript();
             if (!instanceScript)
@@ -276,10 +277,10 @@ class boss_lich_king_toc : public CreatureScript
         {
             boss_lich_king_tocAI(Creature* creature) : ScriptedAI(creature)
             {
-                m_instance = (InstanceScript*)creature->GetInstanceScript();
+                instance = creature->GetInstanceScript();
             }
 
-            InstanceScript* m_instance;
+            InstanceScript* instance;
             uint32 m_uiUpdateTimer;
 
             void Reset()
@@ -291,8 +292,8 @@ class boss_lich_king_toc : public CreatureScript
                     summoned->CastSpell(summoned, 51807, false);
                     summoned->SetDisplayId(11686);
                 }
-                if (m_instance) m_instance->SetData(TYPE_LICH_KING, IN_PROGRESS);
-                me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                if (instance) instance->SetData(TYPE_LICH_KING, IN_PROGRESS);
+                me->SetWalk(true);
             }
 
             void MovementInform(uint32 uiType, uint32 uiId)
@@ -302,78 +303,80 @@ class boss_lich_king_toc : public CreatureScript
                 switch (uiId)
                 {
                     case 0:
-                        m_instance->SetData(TYPE_EVENT, 5030);
+                        instance->SetData(TYPE_EVENT, 5030);
                         break;
                     case 1:
-                        m_instance->SetData(TYPE_EVENT, 5050);
+                        instance->SetData(TYPE_EVENT, 5050);
                         break;
                 }
             }
 
             void UpdateAI(const uint32 uiDiff)
             {
-                if (!m_instance) return;
-                if (m_instance->GetData(TYPE_EVENT_NPC) != NPC_LICH_KING_1) return;
+                if (!instance)
+                    return;
 
-                m_uiUpdateTimer = m_instance->GetData(TYPE_EVENT_TIMER);
+                if (instance->GetData(TYPE_EVENT_NPC) != NPC_LICH_KING_1)
+                    return;
+
+                m_uiUpdateTimer = instance->GetData(TYPE_EVENT_TIMER);
                 if (m_uiUpdateTimer <= uiDiff)
                 {
-                    switch (m_instance->GetData(TYPE_EVENT))
+                    switch (instance->GetData(TYPE_EVENT))
                     {
                         case 5010:
                             DoScriptText(SAY_STAGE_4_02, me);
                             m_uiUpdateTimer = 3000;
                             me->GetMotionMaster()->MovePoint(0, LichKingLoc[0]);
-                            m_instance->SetData(TYPE_EVENT, 5020);
+                            instance->SetData(TYPE_EVENT, 5020);
                             break;
                         case 5030:
                             DoScriptText(SAY_STAGE_4_04, me);
                             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_TALK);
                             m_uiUpdateTimer = 10000;
-                            m_instance->SetData(TYPE_EVENT, 5040);
+                            instance->SetData(TYPE_EVENT, 5040);
                             break;
                         case 5040:
                             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
                             me->GetMotionMaster()->MovePoint(1, LichKingLoc[1]);
                             m_uiUpdateTimer = 1000;
-                            m_instance->SetData(TYPE_EVENT, 0);
+                            instance->SetData(TYPE_EVENT, 0);
                             break;
                         case 5050:
                             me->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);
                             m_uiUpdateTimer = 3000;
-                            m_instance->SetData(TYPE_EVENT, 5060);
+                            instance->SetData(TYPE_EVENT, 5060);
                             break;
                         case 5060:
                             DoScriptText(SAY_STAGE_4_05, me);
                             me->HandleEmoteCommand(EMOTE_ONESHOT_KNEEL);
                             m_uiUpdateTimer = 2500;
-                            m_instance->SetData(TYPE_EVENT, 5070);
+                            instance->SetData(TYPE_EVENT, 5070);
                             break;
                         case 5070:
                             me->CastSpell(me, 68198, false);
                             m_uiUpdateTimer = 1500;
-                            m_instance->SetData(TYPE_EVENT, 5080);
+                            instance->SetData(TYPE_EVENT, 5080);
                             break;
                         case 5080:
-                            if (GameObject* pGoFloor = m_instance->instance->GetGameObject(m_instance->GetData64(GO_ARGENT_COLISEUM_FLOOR)))
-                                pGoFloor->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+                            if (GameObject* go = instance->instance->GetGameObject(instance->GetData64(GO_ARGENT_COLISEUM_FLOOR)))
+                                go->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
                             me->CastSpell(me, 69016, false);
-                            if (m_instance)
+                            if (instance)
                             {
-                                m_instance->SetData(TYPE_LICH_KING, DONE);
-                                Creature* temp = Unit::GetCreature(*me, m_instance->GetData64(NPC_ANUBARAK));
+                                instance->SetData(TYPE_LICH_KING, DONE);
+                                Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_ANUBARAK));
                                 if (!temp || !temp->isAlive())
                                     temp = me->SummonCreature(NPC_ANUBARAK, AnubarakLoc[0].GetPositionX(), AnubarakLoc[0].GetPositionY(), AnubarakLoc[0].GetPositionZ(), 3, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME);
 
-                                m_instance->SetData(TYPE_EVENT, 0);
+                                instance->SetData(TYPE_EVENT, 0);
                             }
-
                             me->DespawnOrUnsummon();
                             m_uiUpdateTimer = 20000;
                             break;
                     }
                 } else m_uiUpdateTimer -= uiDiff;
-                m_instance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
+                instance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
             }
         };
 
@@ -393,10 +396,10 @@ class npc_fizzlebang_toc : public CreatureScript
         {
             npc_fizzlebang_tocAI(Creature* creature) : ScriptedAI(creature), Summons(me)
             {
-                m_instance = (InstanceScript*)me->GetInstanceScript();
+                instance = me->GetInstanceScript();
             }
 
-            InstanceScript* m_instance;
+            InstanceScript* instance;
             SummonList Summons;
             uint32 m_uiUpdateTimer;
             uint64 m_uiPortalGUID;
@@ -405,8 +408,8 @@ class npc_fizzlebang_toc : public CreatureScript
             void JustDied(Unit* killer)
             {
                 DoScriptText(SAY_STAGE_1_06, me, killer);
-                m_instance->SetData(TYPE_EVENT, 1180);
-                if (Creature* temp = Unit::GetCreature(*me, m_instance->GetData64(NPC_JARAXXUS)))
+                instance->SetData(TYPE_EVENT, 1180);
+                if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_JARAXXUS)))
                 {
                     temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     temp->SetReactState(REACT_AGGRESSIVE);
@@ -418,23 +421,24 @@ class npc_fizzlebang_toc : public CreatureScript
 
             void Reset()
             {
-                me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                me->SetWalk(true);
                 m_uiPortalGUID = 0;
                 me->GetMotionMaster()->MovePoint(1, ToCCommonLoc[10].GetPositionX(), ToCCommonLoc[10].GetPositionY()-60, ToCCommonLoc[10].GetPositionZ());
             }
 
             void MovementInform(uint32 uiType, uint32 uiId)
             {
-                if (uiType != POINT_MOTION_TYPE) return;
+                if (uiType != POINT_MOTION_TYPE)
+                    return;
 
                 switch (uiId)
                 {
                     case 1:
-                        me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                        if (m_instance)
+                        me->SetWalk(false);
+                        if (instance)
                         {
-                            m_instance->SetData(TYPE_EVENT, 1120);
-                            m_instance->SetData(TYPE_EVENT_TIMER, 1000);
+                            instance->SetData(TYPE_EVENT, 1120);
+                            instance->SetData(TYPE_EVENT_TIMER, 1000);
                         }
                         break;
                 }
@@ -447,22 +451,24 @@ class npc_fizzlebang_toc : public CreatureScript
 
             void UpdateAI(const uint32 uiDiff)
             {
-                if (!m_instance) return;
+                if (!instance)
+                    return;
 
-                if (m_instance->GetData(TYPE_EVENT_NPC) != NPC_FIZZLEBANG) return;
+                if (instance->GetData(TYPE_EVENT_NPC) != NPC_FIZZLEBANG)
+                    return;
 
-                m_uiUpdateTimer = m_instance->GetData(TYPE_EVENT_TIMER);
+                m_uiUpdateTimer = instance->GetData(TYPE_EVENT_TIMER);
                 if (m_uiUpdateTimer <= uiDiff)
                 {
-                    switch (m_instance->GetData(TYPE_EVENT))
+                    switch (instance->GetData(TYPE_EVENT))
                     {
                         case 1110:
-                            m_instance->SetData(TYPE_EVENT, 1120);
+                            instance->SetData(TYPE_EVENT, 1120);
                             m_uiUpdateTimer = 4000;
                             break;
                         case 1120:
                             DoScriptText(SAY_STAGE_1_02, me);
-                            m_instance->SetData(TYPE_EVENT, 1130);
+                            instance->SetData(TYPE_EVENT, 1130);
                             m_uiUpdateTimer = 12000;
                             break;
                         case 1130:
@@ -472,16 +478,16 @@ class npc_fizzlebang_toc : public CreatureScript
                             if (Unit* pTrigger =  me->SummonCreature(NPC_TRIGGER, ToCCommonLoc[1].GetPositionX(), ToCCommonLoc[1].GetPositionY(), ToCCommonLoc[1].GetPositionZ(), 4.69494f, TEMPSUMMON_MANUAL_DESPAWN))
                             {
                                 m_uiTriggerGUID = pTrigger->GetGUID();
-                                pTrigger->SetFloatValue(OBJECT_FIELD_SCALE_X, 2.0f);
+                                pTrigger->SetObjectScale(2.0f);
                                 pTrigger->SetDisplayId(22862);
                                 pTrigger->CastSpell(pTrigger, SPELL_WILFRED_PORTAL, false);
                             }
-                            m_instance->SetData(TYPE_EVENT, 1132);
+                            instance->SetData(TYPE_EVENT, 1132);
                             m_uiUpdateTimer = 4000;
                             break;
                         case 1132:
                             me->GetMotionMaster()->MovementExpired();
-                            m_instance->SetData(TYPE_EVENT, 1134);
+                            instance->SetData(TYPE_EVENT, 1134);
                             m_uiUpdateTimer = 4000;
                             break;
                         case 1134:
@@ -489,15 +495,15 @@ class npc_fizzlebang_toc : public CreatureScript
                             if (Creature* pPortal = me->SummonCreature(NPC_WILFRED_PORTAL, ToCCommonLoc[1].GetPositionX(), ToCCommonLoc[1].GetPositionY(), ToCCommonLoc[1].GetPositionZ(), 4.71239f, TEMPSUMMON_MANUAL_DESPAWN))
                             {
                                 pPortal->SetReactState(REACT_PASSIVE);
-                                pPortal->SetFloatValue(OBJECT_FIELD_SCALE_X, 2.0f);
+                                pPortal->SetObjectScale(2.0f);
                                 pPortal->CastSpell(pPortal, SPELL_WILFRED_PORTAL, false);
                                 m_uiPortalGUID = pPortal->GetGUID();
                             }
                             m_uiUpdateTimer = 4000;
-                            m_instance->SetData(TYPE_EVENT, 1135);
+                            instance->SetData(TYPE_EVENT, 1135);
                             break;
                         case 1135:
-                            m_instance->SetData(TYPE_EVENT, 1140);
+                            instance->SetData(TYPE_EVENT, 1140);
                             m_uiUpdateTimer = 3000;
                             break;
                         case 1140:
@@ -508,37 +514,37 @@ class npc_fizzlebang_toc : public CreatureScript
                                 temp->SetReactState(REACT_PASSIVE);
                                 temp->GetMotionMaster()->MovePoint(0, ToCCommonLoc[1].GetPositionX(), ToCCommonLoc[1].GetPositionY()-10, ToCCommonLoc[1].GetPositionZ());
                             }
-                            m_instance->SetData(TYPE_EVENT, 1142);
+                            instance->SetData(TYPE_EVENT, 1142);
                             m_uiUpdateTimer = 5000;
                             break;
                         case 1142:
-                            if (Creature* temp = Unit::GetCreature(*me, m_instance->GetData64(NPC_JARAXXUS)))
+                            if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_JARAXXUS)))
                                 temp->SetTarget(me->GetGUID());
                             if (Creature* pTrigger = Unit::GetCreature(*me, m_uiTriggerGUID))
                                 pTrigger->DespawnOrUnsummon();
                             if (Creature* pPortal = Unit::GetCreature(*me, m_uiPortalGUID))
                                 pPortal->DespawnOrUnsummon();
-                            m_instance->SetData(TYPE_EVENT, 1144);
+                            instance->SetData(TYPE_EVENT, 1144);
                             m_uiUpdateTimer = 10000;
                             break;
                         case 1144:
-                            if (Creature* temp = Unit::GetCreature(*me, m_instance->GetData64(NPC_JARAXXUS)))
+                            if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_JARAXXUS)))
                                 DoScriptText(SAY_STAGE_1_05, temp);
-                            m_instance->SetData(TYPE_EVENT, 1150);
+                            instance->SetData(TYPE_EVENT, 1150);
                             m_uiUpdateTimer = 5000;
                             break;
                         case 1150:
-                            if (Creature* temp = Unit::GetCreature(*me, m_instance->GetData64(NPC_JARAXXUS)))
+                            if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_JARAXXUS)))
                             {
                                 //1-shot Fizzlebang
                                 temp->Kill(me);
                             }
-                            m_instance->SetData(TYPE_EVENT, 1160);
+                            instance->SetData(TYPE_EVENT, 1160);
                             m_uiUpdateTimer = 3000;
                             break;
                     }
                 } else m_uiUpdateTimer -= uiDiff;
-                m_instance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
+                instance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
             }
         };
 
@@ -558,10 +564,10 @@ class npc_tirion_toc : public CreatureScript
         {
             npc_tirion_tocAI(Creature* creature) : ScriptedAI(creature)
             {
-                m_instance = (InstanceScript*)me->GetInstanceScript();
+                instance = me->GetInstanceScript();
             }
 
-            InstanceScript* m_instance;
+            InstanceScript* instance;
             uint32 m_uiUpdateTimer;
 
             void Reset() {}
@@ -570,110 +576,113 @@ class npc_tirion_toc : public CreatureScript
 
             void UpdateAI(const uint32 uiDiff)
             {
-                if (!m_instance) return;
-                if (m_instance->GetData(TYPE_EVENT_NPC) != NPC_TIRION) return;
+                if (!instance)
+                    return;
 
-                m_uiUpdateTimer = m_instance->GetData(TYPE_EVENT_TIMER);
+                if (instance->GetData(TYPE_EVENT_NPC) != NPC_TIRION)
+                    return;
+
+                m_uiUpdateTimer = instance->GetData(TYPE_EVENT_TIMER);
                 if (m_uiUpdateTimer <= uiDiff)
                 {
-                    switch (m_instance->GetData(TYPE_EVENT))
+                    switch (instance->GetData(TYPE_EVENT))
                     {
                         case 110:
                             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_TALK);
                             DoScriptText(SAY_STAGE_0_01, me);
                             m_uiUpdateTimer = 22000;
-                            m_instance->SetData(TYPE_EVENT, 120);
+                            instance->SetData(TYPE_EVENT, 120);
                             break;
                         case 140:
                             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_TALK);
                             DoScriptText(SAY_STAGE_0_02, me);
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 150);
-                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
+                            instance->SetData(TYPE_EVENT, 150);
+                            instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
                             break;
                         case 150:
                             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
-                            if (m_instance->GetData(TYPE_BEASTS) != DONE)
+                            if (instance->GetData(TYPE_BEASTS) != DONE)
                             {
                                 if (Creature* temp = me->SummonCreature(NPC_GORMOK, ToCCommonLoc[10].GetPositionX(), ToCCommonLoc[10].GetPositionY(), ToCCommonLoc[10].GetPositionZ(), 5, TEMPSUMMON_CORPSE_DESPAWN))
                                 {
                                     temp->GetMotionMaster()->MovePoint(1, ToCCommonLoc[5].GetPositionX(), ToCCommonLoc[5].GetPositionY(), ToCCommonLoc[5].GetPositionZ());
-                                    temp->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                    temp->SetWalk(true);
                                     temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
                                     temp->SetReactState(REACT_PASSIVE);
                                 }
                             }
                             m_uiUpdateTimer = 3000;
-                            m_instance->SetData(TYPE_EVENT, 155);
+                            instance->SetData(TYPE_EVENT, 155);
                             break;
                         case 155:
-                            if (Creature* temp = Unit::GetCreature((*me), m_instance->GetData64(NPC_GORMOK)))
+                            if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_GORMOK)))
                             {
                                 temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
                                 temp->SetReactState(REACT_AGGRESSIVE);
                             }
-                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
-                            m_instance->SetData(TYPE_BEASTS, IN_PROGRESS);
+                            instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
+                            instance->SetData(TYPE_BEASTS, IN_PROGRESS);
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 160);
+                            instance->SetData(TYPE_EVENT, 160);
                             break;
                         case 200:
                             DoScriptText(SAY_STAGE_0_04, me);
                             m_uiUpdateTimer = 8000;
-                            m_instance->SetData(TYPE_EVENT, 205);
+                            instance->SetData(TYPE_EVENT, 205);
                             break;
                         case 205:
                             m_uiUpdateTimer = 3000;
-                            m_instance->SetData(TYPE_EVENT, 210);
-                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
+                            instance->SetData(TYPE_EVENT, 210);
+                            instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
                             break;
                         case 210:
-                            if (m_instance->GetData(TYPE_BEASTS) != DONE)
+                            if (instance->GetData(TYPE_BEASTS) != DONE)
                             {
                                 if (Creature* temp = me->SummonCreature(NPC_DREADSCALE, ToCCommonLoc[3].GetPositionX(), ToCCommonLoc[3].GetPositionY(), ToCCommonLoc[3].GetPositionZ(), 5, TEMPSUMMON_MANUAL_DESPAWN))
                                 {
                                     temp->GetMotionMaster()->MovePoint(1, ToCCommonLoc[6].GetPositionX(), ToCCommonLoc[6].GetPositionY(), ToCCommonLoc[6].GetPositionZ());
-                                    temp->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                    temp->SetWalk(true);
                                     temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
                                     temp->SetReactState(REACT_PASSIVE);
                                 }
                                 if (Creature* temp = me->SummonCreature(NPC_ACIDMAW, ToCCommonLoc[4].GetPositionX(), ToCCommonLoc[4].GetPositionY(), ToCCommonLoc[4].GetPositionZ(), 5, TEMPSUMMON_MANUAL_DESPAWN))
                                 {
                                     temp->GetMotionMaster()->MovePoint(1, ToCCommonLoc[7].GetPositionX(), ToCCommonLoc[7].GetPositionY(), ToCCommonLoc[7].GetPositionZ());
-                                    temp->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                    temp->SetWalk(true);
                                     temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
                                     temp->SetReactState(REACT_PASSIVE);
                                 }
                             }
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 220);
+                            instance->SetData(TYPE_EVENT, 220);
                             break;
                         case 220:
-                            if (Creature* temp = Unit::GetCreature((*me), m_instance->GetData64(NPC_DREADSCALE)))
+                            if (Creature* temp = Unit::GetCreature((*me), instance->GetData64(NPC_DREADSCALE)))
                             {
                                 temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
                                 temp->SetReactState(REACT_AGGRESSIVE);
                             }
-                            if (Creature* temp = Unit::GetCreature((*me), m_instance->GetData64(NPC_ACIDMAW)))
+                            if (Creature* temp = Unit::GetCreature((*me), instance->GetData64(NPC_ACIDMAW)))
                             {
                                 temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
                                 temp->SetReactState(REACT_AGGRESSIVE);
                             }
-                            m_instance->SetData(TYPE_EVENT, 230);
-                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
+                            instance->SetData(TYPE_EVENT, 230);
+                            instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
                             break;
                         case 300:
                             DoScriptText(SAY_STAGE_0_05, me);
                             m_uiUpdateTimer = 8000;
-                            m_instance->SetData(TYPE_EVENT, 305);
+                            instance->SetData(TYPE_EVENT, 305);
                             break;
                         case 305:
                             m_uiUpdateTimer = 3000;
-                            m_instance->SetData(TYPE_EVENT, 310);
-                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
+                            instance->SetData(TYPE_EVENT, 310);
+                            instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
                             break;
                         case 310:
-                            if (m_instance->GetData(TYPE_BEASTS) != DONE)
+                            if (instance->GetData(TYPE_BEASTS) != DONE)
                             {
                                 if (Creature* temp = me->SummonCreature(NPC_ICEHOWL, ToCCommonLoc[10].GetPositionX(), ToCCommonLoc[10].GetPositionY(), ToCCommonLoc[10].GetPositionZ(), 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME))
                                 {
@@ -681,168 +690,167 @@ class npc_tirion_toc : public CreatureScript
                                 }
                             }
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 315);
+                            instance->SetData(TYPE_EVENT, 315);
                             break;
                         case 315:
-                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
-                            m_instance->SetData(TYPE_EVENT, 320);
+                            instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
+                            instance->SetData(TYPE_EVENT, 320);
                             break;
                         case 400:
                             DoScriptText(SAY_STAGE_0_06, me);
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 0);
+                            instance->SetData(TYPE_EVENT, 0);
                             break;
                         case 666:
                             DoScriptText(SAY_STAGE_0_WIPE, me);
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 0);
+                            instance->SetData(TYPE_EVENT, 0);
                             break;
                         case 1010:
                             DoScriptText(SAY_STAGE_1_01, me);
                             m_uiUpdateTimer = 7000;
-                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
+                            instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
                             me->SummonCreature(NPC_FIZZLEBANG, ToCCommonLoc[10].GetPositionX(), ToCCommonLoc[10].GetPositionY(), ToCCommonLoc[10].GetPositionZ(), 2, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME);
-                            m_instance->SetData(TYPE_EVENT, 0);
+                            instance->SetData(TYPE_EVENT, 0);
                             break;
                         case 1180:
                             DoScriptText(SAY_STAGE_1_07, me);
                             m_uiUpdateTimer = 3000;
-                            m_instance->SetData(TYPE_EVENT, 0);
+                            instance->SetData(TYPE_EVENT, 0);
                             break;
                         case 2000:
                             DoScriptText(SAY_STAGE_1_08, me);
                             m_uiUpdateTimer = 18000;
-                            m_instance->SetData(TYPE_EVENT, 2010);
+                            instance->SetData(TYPE_EVENT, 2010);
                             break;
                         case 2030:
                             DoScriptText(SAY_STAGE_1_11, me);
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 0);
+                            instance->SetData(TYPE_EVENT, 0);
                             break;
                         case 3000:
                             DoScriptText(SAY_STAGE_2_01, me);
                             m_uiUpdateTimer = 12000;
-                            m_instance->SetData(TYPE_EVENT, 3050);
+                            instance->SetData(TYPE_EVENT, 3050);
                             break;
                         case 3001:
                             DoScriptText(SAY_STAGE_2_01, me);
                             m_uiUpdateTimer = 12000;
-                            m_instance->SetData(TYPE_EVENT, 3051);
+                            instance->SetData(TYPE_EVENT, 3051);
                             break;
                         case 3060:
                             DoScriptText(SAY_STAGE_2_03, me);
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 3070);
+                            instance->SetData(TYPE_EVENT, 3070);
                             break;
                         case 3061:
                             DoScriptText(SAY_STAGE_2_03, me);
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 3071);
+                            instance->SetData(TYPE_EVENT, 3071);
                             break;
                         //Summoning crusaders
                         case 3091:
-                            
                             if (Creature* pChampionController = me->SummonCreature(NPC_CHAMPIONS_CONTROLLER, ToCCommonLoc[1]))
                                 pChampionController->AI()->SetData(0, HORDE);
                             m_uiUpdateTimer = 3000;
-                            m_instance->SetData(TYPE_EVENT, 3092);
+                            instance->SetData(TYPE_EVENT, 3092);
                             break;
                         //Summoning crusaders
                         case 3090:
                             if (Creature* pChampionController = me->SummonCreature(NPC_CHAMPIONS_CONTROLLER, ToCCommonLoc[1]))
                                 pChampionController->AI()->SetData(0, ALLIANCE);
                             m_uiUpdateTimer = 3000;
-                            m_instance->SetData(TYPE_EVENT, 3092);
+                            instance->SetData(TYPE_EVENT, 3092);
                             break;
                         case 3092:
-                            if (Creature* pChampionController = Unit::GetCreature((*me), m_instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
+                            if (Creature* pChampionController = Unit::GetCreature((*me), instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
                                 pChampionController->AI()->SetData(1, NOT_STARTED);
-                            m_instance->SetData(TYPE_EVENT, 3095);
+                            instance->SetData(TYPE_EVENT, 3095);
                             break;
                         //Crusaders battle end
                         case 3100:
                             DoScriptText(SAY_STAGE_2_06, me);
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 0);
+                            instance->SetData(TYPE_EVENT, 0);
                             break;
                         case 4000:
                             DoScriptText(SAY_STAGE_3_01, me);
                             m_uiUpdateTimer = 13000;
-                            m_instance->SetData(TYPE_EVENT, 4010);
+                            instance->SetData(TYPE_EVENT, 4010);
                             break;
                         case 4010:
                             DoScriptText(SAY_STAGE_3_02, me);
-                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
+                            instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
                             m_uiUpdateTimer = 3000;
-                            m_instance->SetData(TYPE_EVENT, 4015);
+                            instance->SetData(TYPE_EVENT, 4015);
                             break;
                         case 4015:
                             if (Creature* temp = me->SummonCreature(NPC_LIGHTBANE, ToCCommonLoc[3].GetPositionX(), ToCCommonLoc[3].GetPositionY(), ToCCommonLoc[3].GetPositionZ(), 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME))
                             {
                                 temp->GetMotionMaster()->MovePoint(0, ToCCommonLoc[6].GetPositionX(), ToCCommonLoc[6].GetPositionY(), ToCCommonLoc[6].GetPositionZ());
-                                temp->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                temp->SetWalk(true);
                                 me->SetReactState(REACT_PASSIVE);
                             }
 
                             if (Creature* temp = me->SummonCreature(NPC_DARKBANE, ToCCommonLoc[4].GetPositionX(), ToCCommonLoc[4].GetPositionY(), ToCCommonLoc[4].GetPositionZ(), 5, TEMPSUMMON_CORPSE_TIMED_DESPAWN, DESPAWN_TIME))
                             {
                                 temp->GetMotionMaster()->MovePoint(0, ToCCommonLoc[7].GetPositionX(), ToCCommonLoc[7].GetPositionY(), ToCCommonLoc[7].GetPositionZ());
-                                temp->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                temp->SetWalk(true);
                                 me->SetReactState(REACT_PASSIVE);
                             }
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 4016);
+                            instance->SetData(TYPE_EVENT, 4016);
                             break;
                         case 4016:
-                            m_instance->SetData(TYPE_EVENT, 4017);
-                            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
+                            instance->SetData(TYPE_EVENT, 4017);
+                            instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
                             break;
                         case 4040:
                             m_uiUpdateTimer = 60000;
-                            m_instance->SetData(TYPE_EVENT, 5000);
+                            instance->SetData(TYPE_EVENT, 5000);
                             break;
                         case 5000:
                             DoScriptText(SAY_STAGE_4_01, me);
                             m_uiUpdateTimer = 10000;
-                            m_instance->SetData(TYPE_EVENT, 5005);
+                            instance->SetData(TYPE_EVENT, 5005);
                             break;
                         case 5005:
                             m_uiUpdateTimer = 8000;
-                            m_instance->SetData(TYPE_EVENT, 5010);
+                            instance->SetData(TYPE_EVENT, 5010);
                             me->SummonCreature(NPC_LICH_KING_1, ToCCommonLoc[2].GetPositionX(), ToCCommonLoc[2].GetPositionY(), ToCCommonLoc[2].GetPositionZ(), 5);
                             break;
                         case 5020:
                             DoScriptText(SAY_STAGE_4_03, me);
                             m_uiUpdateTimer = 1000;
-                            m_instance->SetData(TYPE_EVENT, 0);
+                            instance->SetData(TYPE_EVENT, 0);
                             break;
                         case 6000:
                             me->NearTeleportTo(AnubarakLoc[0].GetPositionX(), AnubarakLoc[0].GetPositionY(), AnubarakLoc[0].GetPositionZ(), 4.0f);
                             m_uiUpdateTimer = 20000;
-                            m_instance->SetData(TYPE_EVENT, 6005);
+                            instance->SetData(TYPE_EVENT, 6005);
                             break;
                         case 6005:
                             DoScriptText(SAY_STAGE_4_06, me);
                             m_uiUpdateTimer = 20000;
-                            m_instance->SetData(TYPE_EVENT, 6010);
+                            instance->SetData(TYPE_EVENT, 6010);
                             break;
                         case 6010:
                             if (IsHeroic())
                             {
                                 DoScriptText(SAY_STAGE_4_07, me);
                                 m_uiUpdateTimer = 60000;
-                                m_instance->SetData(TYPE_ANUBARAK, SPECIAL);
-                                m_instance->SetData(TYPE_EVENT, 6020);
-                            } else m_instance->SetData(TYPE_EVENT, 6030);
+                                instance->SetData(TYPE_ANUBARAK, SPECIAL);
+                                instance->SetData(TYPE_EVENT, 6020);
+                            } else instance->SetData(TYPE_EVENT, 6030);
                             break;
                         case 6020:
                             me->DespawnOrUnsummon();
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 6030);
+                            instance->SetData(TYPE_EVENT, 6030);
                             break;
                     }
                 } else m_uiUpdateTimer -= uiDiff;
-                m_instance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
+                instance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
             }
         };
 
@@ -862,10 +870,10 @@ class npc_garrosh_toc : public CreatureScript
         {
             npc_garrosh_tocAI(Creature* creature) : ScriptedAI(creature)
             {
-                m_instance = (InstanceScript*)me->GetInstanceScript();
+                instance = me->GetInstanceScript();
             }
 
-            InstanceScript* m_instance;
+            InstanceScript* instance;
             uint32 m_uiUpdateTimer;
 
             void Reset() {}
@@ -874,53 +882,56 @@ class npc_garrosh_toc : public CreatureScript
 
             void UpdateAI(const uint32 uiDiff)
             {
-                if (!m_instance) return;
-                if (m_instance->GetData(TYPE_EVENT_NPC) != NPC_GARROSH) return;
+                if (!instance)
+                    return;
 
-                m_uiUpdateTimer = m_instance->GetData(TYPE_EVENT_TIMER);
+                if (instance->GetData(TYPE_EVENT_NPC) != NPC_GARROSH)
+                    return;
+
+                m_uiUpdateTimer = instance->GetData(TYPE_EVENT_TIMER);
                 if (m_uiUpdateTimer <= uiDiff)
                 {
-                    switch (m_instance->GetData(TYPE_EVENT))
+                    switch (instance->GetData(TYPE_EVENT))
                     {
                         case 130:
                             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_TALK);
                             DoScriptText(SAY_STAGE_0_03h, me);
                             m_uiUpdateTimer = 3000;
-                            m_instance->SetData(TYPE_EVENT, 132);
+                            instance->SetData(TYPE_EVENT, 132);
                             break;
                         case 132:
                             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 140);
+                            instance->SetData(TYPE_EVENT, 140);
                             break;
                         case 2010:
                             DoScriptText(SAY_STAGE_1_09, me);
                             m_uiUpdateTimer = 9000;
-                            m_instance->SetData(TYPE_EVENT, 2020);
+                            instance->SetData(TYPE_EVENT, 2020);
                             break;
                         case 3050:
                             DoScriptText(SAY_STAGE_2_02h, me);
                             m_uiUpdateTimer = 15000;
-                            m_instance->SetData(TYPE_EVENT, 3060);
+                            instance->SetData(TYPE_EVENT, 3060);
                             break;
                         case 3070:
                             DoScriptText(SAY_STAGE_2_04h, me);
                             m_uiUpdateTimer = 6000;
-                            m_instance->SetData(TYPE_EVENT, 3080);
+                            instance->SetData(TYPE_EVENT, 3080);
                             break;
                         case 3081:
                             DoScriptText(SAY_STAGE_2_05h, me);
                             m_uiUpdateTimer = 3000;
-                            m_instance->SetData(TYPE_EVENT, 3091);
+                            instance->SetData(TYPE_EVENT, 3091);
                             break;
                         case 4030:
                             DoScriptText(SAY_STAGE_3_03h, me);
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 4040);
+                            instance->SetData(TYPE_EVENT, 4040);
                             break;
                     }
                 } else m_uiUpdateTimer -= uiDiff;
-                m_instance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
+                instance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
             }
         };
 
@@ -940,10 +951,10 @@ class npc_varian_toc : public CreatureScript
         {
             npc_varian_tocAI(Creature* creature) : ScriptedAI(creature)
             {
-                m_instance = (InstanceScript*)me->GetInstanceScript();
+                instance = me->GetInstanceScript();
             }
 
-            InstanceScript* m_instance;
+            InstanceScript* instance;
             uint32 m_uiUpdateTimer;
 
             void Reset() {}
@@ -952,53 +963,56 @@ class npc_varian_toc : public CreatureScript
 
             void UpdateAI(const uint32 uiDiff)
             {
-                if (!m_instance) return;
-                if (m_instance->GetData(TYPE_EVENT_NPC) != NPC_VARIAN) return;
+                if (!instance)
+                    return;
 
-                m_uiUpdateTimer = m_instance->GetData(TYPE_EVENT_TIMER);
+                if (instance->GetData(TYPE_EVENT_NPC) != NPC_VARIAN)
+                    return;
+
+                m_uiUpdateTimer = instance->GetData(TYPE_EVENT_TIMER);
                 if (m_uiUpdateTimer <= uiDiff)
                 {
-                    switch (m_instance->GetData(TYPE_EVENT))
+                    switch (instance->GetData(TYPE_EVENT))
                     {
                         case 120:
                             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_TALK);
                             DoScriptText(SAY_STAGE_0_03a, me);
                             m_uiUpdateTimer = 2000;
-                            m_instance->SetData(TYPE_EVENT, 122);
+                            instance->SetData(TYPE_EVENT, 122);
                             break;
                         case 122:
                             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
                             m_uiUpdateTimer = 3000;
-                            m_instance->SetData(TYPE_EVENT, 130);
+                            instance->SetData(TYPE_EVENT, 130);
                             break;
                         case 2020:
                             DoScriptText(SAY_STAGE_1_10, me);
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 2030);
+                            instance->SetData(TYPE_EVENT, 2030);
                             break;
                         case 3051:
                             DoScriptText(SAY_STAGE_2_02a, me);
                             m_uiUpdateTimer = 10000;
-                            m_instance->SetData(TYPE_EVENT, 3061);
+                            instance->SetData(TYPE_EVENT, 3061);
                             break;
                         case 3071:
                             DoScriptText(SAY_STAGE_2_04a, me);
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 3081);
+                            instance->SetData(TYPE_EVENT, 3081);
                             break;
                         case 3080:
                             DoScriptText(SAY_STAGE_2_05a, me);
                             m_uiUpdateTimer = 3000;
-                            m_instance->SetData(TYPE_EVENT, 3090);
+                            instance->SetData(TYPE_EVENT, 3090);
                             break;
                         case 4020:
                             DoScriptText(SAY_STAGE_3_03a, me);
                             m_uiUpdateTimer = 5000;
-                            m_instance->SetData(TYPE_EVENT, 4040);
+                            instance->SetData(TYPE_EVENT, 4040);
                             break;
                     }
                 } else m_uiUpdateTimer -= uiDiff;
-                m_instance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
+                instance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
             }
         };
 
@@ -1375,20 +1389,20 @@ class npc_pdk_murloc_toc : public CreatureScript
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        InstanceScript* m_instance = creature->GetInstanceScript();
+        InstanceScript* instance = creature->GetInstanceScript();
 
-        if (!m_instance)
+        if (!instance)
             return false;
 
-        if (player->isInCombat() || m_instance->IsEncounterInProgress())
+        if (player->isInCombat() || instance->IsEncounterInProgress())
             return true;
 
-        Creature* temp = Unit::GetCreature((*creature), m_instance->GetData64(NPC_ANUBARAK));
+        Creature* temp = Unit::GetCreature((*creature), instance->GetData64(NPC_ANUBARAK));
 
         // Prevent this processing if we are the upper floor murloc, only allow it for the lower floor!
         // Murloc is spawned at 140 Z on the lower floor right now
         if (creature->GetPositionZ() <= 150.0f)
-            if (!temp || m_instance->GetData(TYPE_ANUBARAK) == DONE)
+            if (!temp || instance->GetData(TYPE_ANUBARAK) == DONE)
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleportiere mich vor die Instanz!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tausche meine Items um!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
@@ -1424,7 +1438,7 @@ class npc_pdk_murloc_toc : public CreatureScript
 
                             if (msg == EQUIP_ERR_OK)
                             {
-                                sLog->outString("TSCR: PDK Murloc Item Switch: Item %u swapped with item %u for player %s", itemswitch[i][0], itemswitch[i][1], player->GetName());
+                                sLog->outInfo(LOG_FILTER_TSCR, "PDK Murloc Item Switch: Item %u swapped with item %u for player %s", itemswitch[i][0], itemswitch[i][1], player->GetName());
 
                                 player->StoreNewItem(dest, itemswitch[i][1], true, Item::GenerateItemRandomPropertyId(itemswitch[i][1]));
                                 player->DestroyItemCount(itemswitch[i][0], 1, true, false);
@@ -1440,7 +1454,7 @@ class npc_pdk_murloc_toc : public CreatureScript
 
                             if (msg == EQUIP_ERR_OK)
                             {
-                                sLog->outString("TSCR: PDK Murloc Item Switch: Item %u swapped with item %u for player %s", itemswitch[i][1], itemswitch[i][0], player->GetName());
+                                sLog->outInfo(LOG_FILTER_TSCR, "PDK Murloc Item Switch: Item %u swapped with item %u for player %s", itemswitch[i][1], itemswitch[i][0], player->GetName());
 
                                 player->StoreNewItem(dest, itemswitch[i][0], true, Item::GenerateItemRandomPropertyId(itemswitch[i][0]));
                                 player->DestroyItemCount(itemswitch[i][1], 1, true, false);

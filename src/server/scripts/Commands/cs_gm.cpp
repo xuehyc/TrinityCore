@@ -156,7 +156,11 @@ public:
     static bool HandleGMListFullCommand(ChatHandler* handler, char const* /*args*/)
     {
         ///- Get the accounts with GM Level >0
-        QueryResult result = LoginDatabase.PQuery("SELECT a.username, aa.gmlevel FROM account a, account_access aa WHERE a.id=aa.id AND aa.gmlevel >= %u AND (aa.realmid = -1 OR aa.realmid = %u)", SEC_MODERATOR, realmID);
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_GM_ACCOUNTS);
+        stmt->setUInt8(0, uint8(SEC_MODERATOR));
+        stmt->setInt32(1, int32(realmID));
+        PreparedQueryResult result = LoginDatabase.Query(stmt);
+
         if (result)
         {
             handler->SendSysMessage(LANG_GMLIST);
@@ -192,11 +196,16 @@ public:
             return true;
         }
 
+        const uint32 VISUAL_AURA = 37800;
         std::string param = (char*)args;
+        Player* player = handler->GetSession()->GetPlayer();
 
         if (param == "on")
         {
-            handler->GetSession()->GetPlayer()->SetGMVisible(true);
+            if (player->HasAura(VISUAL_AURA, 0))
+                player->RemoveAurasDueToSpell(VISUAL_AURA);
+
+            player->SetGMVisible(true);
             handler->GetSession()->SendNotification(LANG_INVISIBLE_VISIBLE);
             return true;
         }
@@ -204,7 +213,10 @@ public:
         if (param == "off")
         {
             handler->GetSession()->SendNotification(LANG_INVISIBLE_INVISIBLE);
-            handler->GetSession()->GetPlayer()->SetGMVisible(false);
+            player->SetGMVisible(false);
+
+            player->AddAura(VISUAL_AURA, player);
+
             return true;
         }
 

@@ -19,9 +19,9 @@
 #ifndef TRINITY_CREATUREAI_H
 #define TRINITY_CREATUREAI_H
 
+#include "Creature.h"
 #include "UnitAI.h"
 #include "Common.h"
-#include "CreatureTextMgr.h"
 
 class WorldObject;
 class Unit;
@@ -128,8 +128,6 @@ class CreatureAI : public UnitAI
 
         void OnCharmed(bool apply);
 
-        //virtual void SpellClick(Player* player) {}
-
         // Called at reaching home after evade
         virtual void JustReachedHome() {}
 
@@ -137,6 +135,12 @@ class CreatureAI : public UnitAI
 
         // Called at text emote receive from player
         virtual void ReceiveEmote(Player* /*player*/, uint32 /*emoteId*/) {}
+
+        // Called when owner takes damage
+        virtual void OwnerDamagedBy(Unit* /*attacker*/) {}
+
+        // Called when owner attacks something
+        virtual void OwnerAttacked(Unit* /*target*/) {}
 
         /// == Triggered Actions Requested ==================
 
@@ -164,6 +168,8 @@ class CreatureAI : public UnitAI
         //Creature* const me;
 
         virtual void PassengerBoarded(Unit* /*passenger*/, int8 /*seatId*/, bool /*apply*/) {}
+
+        virtual void OnSpellClick(Unit* /*clicker*/) { }
 
         virtual bool CanSeeAlways(WorldObject const* /*obj*/) { return false; }
     protected:

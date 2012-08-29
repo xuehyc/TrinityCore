@@ -25,8 +25,6 @@
 #include "Log.h"
 #include "Group.h"
 
-// #include "TriniChat/IRCClient.h"
-
 /*********************************************************/
 /***            BATTLEGROUND QUEUE SYSTEM              ***/
 /*********************************************************/
@@ -131,7 +129,7 @@ bool BattlegroundQueue::SelectionPool::AddGroup(GroupQueueInfo* ginfo, uint32 de
 // add group or player (grp == NULL) to bg queue with the given leader and bg specifications
 GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, BattlegroundTypeId BgTypeId, PvPDifficultyEntry const*  bracketEntry, uint8 ArenaType, bool isRated, bool isPremade, uint32 ArenaRating, uint32 MatchmakerRating, uint32 arenateamid)
 {
-    BattlegroundBracketId bracketId =  bracketEntry->GetBracketId();
+    BattlegroundBracketId bracketId = bracketEntry->GetBracketId();
 
     // create new ginfo
     GroupQueueInfo* ginfo            = new GroupQueueInfo;
@@ -159,30 +157,6 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, Battlegr
     sLog->outDebug(LOG_FILTER_BATTLEGROUND, "Adding Group to BattlegroundQueue bgTypeId : %u, bracket_id : %u, index : %u", BgTypeId, bracketId, index);
 
     uint32 lastOnlineTime = getMSTime();
-
-    /* Disable #wowarena Logging Channel
-    if (isRated)
-    {
-        if (false && ArenaTeam* Team = sArenaTeamMgr->GetArenaTeamById(arenateamid))
-        {
-            // irc announce anytime
-            std::string arenamsg;
-            char arenatmp[16];
-
-            arenamsg = "PRIVMSG #wowarena Team ";
-            arenamsg += Team->GetName().c_str();
-            arenamsg += " (Rating:";
-            sprintf(arenatmp, "%u", ginfo->ArenaTeamRating);
-            arenamsg += arenatmp;
-            arenamsg += ", Typ:";
-            sprintf(arenatmp, "%u", ginfo->ArenaType);
-            arenamsg += arenatmp;
-            arenamsg += "s) joined arena queue.";
-
-            sIRC.SendIRC(arenamsg);
-        }
-    }
-    */
 
     //announce world (this don't need mutex)
     if (isRated && sWorld->getBoolConfig(CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE))
@@ -320,7 +294,7 @@ void BattlegroundQueue::RemovePlayer(uint64 guid, bool decreaseInvitedCount)
     itr = m_QueuedPlayers.find(guid);
     if (itr == m_QueuedPlayers.end())
     {
-        sLog->outError("BattlegroundQueue: couldn't find player to remove GUID: %u", GUID_LOPART(guid));
+        sLog->outError(LOG_FILTER_BATTLEGROUND, "BattlegroundQueue: couldn't find player to remove GUID: %u", GUID_LOPART(guid));
         return;
     }
 
@@ -354,7 +328,7 @@ void BattlegroundQueue::RemovePlayer(uint64 guid, bool decreaseInvitedCount)
     //player can't be in queue without group, but just in case
     if (bracket_id == -1)
     {
-        sLog->outError("BattlegroundQueue: ERROR Cannot find groupinfo for player GUID: %u", GUID_LOPART(guid));
+        sLog->outError(LOG_FILTER_BATTLEGROUND, "BattlegroundQueue: ERROR Cannot find groupinfo for player GUID: %u", GUID_LOPART(guid));
         return;
     }
     sLog->outDebug(LOG_FILTER_BATTLEGROUND, "BattlegroundQueue: Removing player GUID %u, from bracket_id %u", GUID_LOPART(guid), (uint32)bracket_id);
@@ -381,30 +355,6 @@ void BattlegroundQueue::RemovePlayer(uint64 guid, bool decreaseInvitedCount)
     if (group->ArenaType && group->IsRated && group->Players.empty() && sWorld->getBoolConfig(CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE))
         if (ArenaTeam* Team = sArenaTeamMgr->GetArenaTeamById(group->ArenaTeamId))
             sWorld->SendWorldText(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT, Team->GetName().c_str(), group->ArenaType, group->ArenaType, group->ArenaTeamRating);
-
-    /* Disable #wowarena Logging Channel
-    if (group->ArenaType && group->IsRated && group->Players.empty())
-    {
-        if (ArenaTeam* Team = sArenaTeamMgr->GetArenaTeamById(group->ArenaTeamId))
-        {
-            // irc announce anytime
-            std::string arenamsg;
-            char arenatmp[16];
-
-            arenamsg = "PRIVMSG #wowarena Team ";
-            arenamsg += Team->GetName().c_str();
-            arenamsg += " (Rating:";
-            sprintf(arenatmp, "%u", group->ArenaTeamRating);
-            arenamsg += arenatmp;
-            arenamsg += ", Typ:";
-            sprintf(arenatmp, "%u", group->ArenaType);
-            arenamsg += arenatmp;
-            arenamsg += "s) left arena queue.";
-
-            sIRC.SendIRC(arenamsg);
-        }
-    }
-    */
 
     // if player leaves queue and he is invited to rated arena match, then he have to lose
     if (group->IsInvitedToBGInstanceGUID && group->IsRated && decreaseInvitedCount)
@@ -830,14 +780,14 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
     Battleground* bg_template = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeId);
     if (!bg_template)
     {
-        sLog->outError("Battleground: Update: bg template not found for %u", bgTypeId);
+        sLog->outError(LOG_FILTER_BATTLEGROUND, "Battleground: Update: bg template not found for %u", bgTypeId);
         return;
     }
 
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketById(bg_template->GetMapId(), bracket_id);
     if (!bracketEntry)
     {
-        sLog->outError("Battleground: Update: bg bracket entry not found for map %u bracket id %u", bg_template->GetMapId(), bracket_id);
+        sLog->outError(LOG_FILTER_BATTLEGROUND, "Battleground: Update: bg bracket entry not found for map %u bracket id %u", bg_template->GetMapId(), bracket_id);
         return;
     }
 
@@ -888,7 +838,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
             Battleground* bg2 = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, 0, false);
             if (!bg2)
             {
-                sLog->outError("BattlegroundQueue::Update - Cannot create battleground: %u", bgTypeId);
+                sLog->outError(LOG_FILTER_BATTLEGROUND, "BattlegroundQueue::Update - Cannot create battleground: %u", bgTypeId);
                 return;
             }
             //invite those selection pools
@@ -914,7 +864,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
             Battleground* bg2 = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, arenaType, false);
             if (!bg2)
             {
-                sLog->outError("BattlegroundQueue::Update - Cannot create battleground: %u", bgTypeId);
+                sLog->outError(LOG_FILTER_BATTLEGROUND, "BattlegroundQueue::Update - Cannot create battleground: %u", bgTypeId);
                 return;
             }
 
@@ -1031,7 +981,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
             Battleground* arena = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, arenaType, true);
             if (!arena)
             {
-                sLog->outError("BattlegroundQueue::Update couldn't create arena instance for rated arena match!");
+                sLog->outError(LOG_FILTER_BATTLEGROUND, "BattlegroundQueue::Update couldn't create arena instance for rated arena match!");
                 return;
             }
 

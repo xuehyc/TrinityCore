@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SAY_AGGRO                   -1531008
 #define SAY_SLAY                    -1531009
@@ -49,7 +50,7 @@ public:
 
     struct boss_sarturaAI : public ScriptedAI
     {
-        boss_sarturaAI(Creature* c) : ScriptedAI(c) {}
+        boss_sarturaAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 WhirlWind_Timer;
         uint32 WhirlWindRandom_Timer;
@@ -84,7 +85,7 @@ public:
             DoScriptText(SAY_AGGRO, me);
         }
 
-         void JustDied(Unit* /*Killer*/)
+         void JustDied(Unit* /*killer*/)
          {
              DoScriptText(SAY_DEATH, me);
          }
@@ -192,7 +193,7 @@ public:
 
     struct mob_sartura_royal_guardAI : public ScriptedAI
     {
-        mob_sartura_royal_guardAI(Creature* c) : ScriptedAI(c) {}
+        mob_sartura_royal_guardAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 WhirlWind_Timer;
         uint32 WhirlWindRandom_Timer;

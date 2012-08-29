@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Tempest Keep, The Eye
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "the_eye.h"
 
 #define MAX_ENCOUNTER 5
@@ -78,7 +79,8 @@ class instance_the_eye : public InstanceMapScript
             bool IsEncounterInProgress() const
             {
                 for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                    if (m_auiEncounter[i] == IN_PROGRESS) return true;
+                    if (m_auiEncounter[i] == IN_PROGRESS)
+                        return true;
 
                 return false;
             }

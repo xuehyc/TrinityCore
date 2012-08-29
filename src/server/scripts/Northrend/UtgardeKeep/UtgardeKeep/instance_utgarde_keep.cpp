@@ -22,7 +22,8 @@ SDComment: Instance Data Scripts and functions to acquire mobs and set encounter
 SDCategory: Utgarde Keep
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "utgarde_keep.h"
 
 #define MAX_ENCOUNTER     3
@@ -100,7 +101,8 @@ public:
         bool IsEncounterInProgress() const
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS) return true;
+                if (m_auiEncounter[i] == IN_PROGRESS)
+                    return true;
 
             return false;
         }
@@ -118,7 +120,7 @@ public:
                 }
             }
 
-            sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Instance Utgarde Keep: GetPlayerInMap, but PlayerList is empty!");
+            sLog->outDebug(LOG_FILTER_TSCR, "Instance Utgarde Keep: GetPlayerInMap, but PlayerList is empty!");
             return NULL;
         }
 

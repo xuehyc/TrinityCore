@@ -23,7 +23,8 @@ SDComment: Blood siphon spell buggy cause of Core Issue.
 SDCategory: Zul'Gurub
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "zulgurub.h"
 
 #define SAY_AGGRO                   -1309020
@@ -55,12 +56,12 @@ class boss_hakkar : public CreatureScript
 
         struct boss_hakkarAI : public ScriptedAI
         {
-            boss_hakkarAI(Creature* c) : ScriptedAI(c)
+            boss_hakkarAI(Creature* creature) : ScriptedAI(creature)
             {
-                m_instance = c->GetInstanceScript();
+                instance = creature->GetInstanceScript();
             }
 
-            InstanceScript* m_instance;
+            InstanceScript* instance;
 
             uint32 BloodSiphon_Timer;
             uint32 CorruptedBlood_Timer;
@@ -156,9 +157,9 @@ class boss_hakkar : public CreatureScript
                 //Checking if Jeklik is dead. If not we cast her Aspect
                 if (CheckJeklik_Timer <= diff)
                 {
-                    if (m_instance)
+                    if (instance)
                     {
-                        if (m_instance->GetData(DATA_JEKLIK) != DONE)
+                        if (instance->GetData(DATA_JEKLIK) != DONE)
                         {
                             if (AspectOfJeklik_Timer <= diff)
                             {
@@ -173,9 +174,9 @@ class boss_hakkar : public CreatureScript
                 //Checking if Venoxis is dead. If not we cast his Aspect
                 if (CheckVenoxis_Timer <= diff)
                 {
-                    if (m_instance)
+                    if (instance)
                     {
-                        if (m_instance->GetData(DATA_VENOXIS) != DONE)
+                        if (instance->GetData(DATA_VENOXIS) != DONE)
                         {
                             if (AspectOfVenoxis_Timer <= diff)
                             {
@@ -190,9 +191,9 @@ class boss_hakkar : public CreatureScript
                 //Checking if Marli is dead. If not we cast her Aspect
                 if (CheckMarli_Timer <= diff)
                 {
-                    if (m_instance)
+                    if (instance)
                     {
-                        if (m_instance->GetData(DATA_MARLI) != DONE)
+                        if (instance->GetData(DATA_MARLI) != DONE)
                         {
                             if (AspectOfMarli_Timer <= diff)
                             {
@@ -208,9 +209,9 @@ class boss_hakkar : public CreatureScript
                 //Checking if Thekal is dead. If not we cast his Aspect
                 if (CheckThekal_Timer <= diff)
                 {
-                    if (m_instance)
+                    if (instance)
                     {
-                        if (m_instance->GetData(DATA_THEKAL) != DONE)
+                        if (instance->GetData(DATA_THEKAL) != DONE)
                         {
                             if (AspectOfThekal_Timer <= diff)
                             {
@@ -225,9 +226,9 @@ class boss_hakkar : public CreatureScript
                 //Checking if Arlokk is dead. If yes we cast her Aspect
                 if (CheckArlokk_Timer <= diff)
                 {
-                    if (m_instance)
+                    if (instance)
                     {
-                        if (m_instance->GetData(DATA_ARLOKK) != DONE)
+                        if (instance->GetData(DATA_ARLOKK) != DONE)
                         {
                             if (AspectOfArlokk_Timer <= diff)
                             {

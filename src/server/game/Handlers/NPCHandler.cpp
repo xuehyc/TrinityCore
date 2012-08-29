@@ -135,7 +135,7 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
     if (!unit->isCanTrainingOf(_player, true))
         return;
 
-    CreatureTemplate const* ci = unit->GetCreatureInfo();
+    CreatureTemplate const* ci = unit->GetCreatureTemplate();
 
     if (!ci)
     {
@@ -169,7 +169,7 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
 
         bool valid = true;
         bool primary_prof_first_rank = false;
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS ; ++i)
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
             if (!tSpell->learnedSpell[i])
                 continue;
@@ -199,7 +199,7 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
         data << uint32(tSpell->reqSkillValue);
         //prev + req or req + 0
         uint8 maxReq = 0;
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS ; ++i)
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
             if (!tSpell->learnedSpell[i])
                 continue;
@@ -319,8 +319,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
 
     if (unit->isArmorer() || unit->isCivilian() || unit->isQuestGiver() || unit->isServiceProvider() || unit->isGuard())
     {
-        if (!unit->GetTransport())
-            unit->StopMoving();
+        unit->StopMoving();
     }
 
     // If spiritguide, no need for gossip menu, just put player into resurrect queue
@@ -338,7 +337,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
     if (!sScriptMgr->OnGossipHello(_player, unit))
     {
 //        _player->TalkedToCreature(unit->GetEntry(), unit->GetGUID());
-        _player->PrepareGossipMenu(unit, unit->GetCreatureInfo()->GossipMenuId, true);
+        _player->PrepareGossipMenu(unit, unit->GetCreatureTemplate()->GossipMenuId, true);
         _player->SendPreparedGossip(unit);
     }
     unit->AI()->sGossipHello(_player);
@@ -616,7 +615,7 @@ void WorldSession::HandleStablePet(WorldPacket & recv_data)
     Pet* pet = _player->GetPet();
 
     // can't place in stable dead pet
-    if (!pet||!pet->isAlive()||pet->getPetType() != HUNTER_PET)
+    if (!pet || !pet->isAlive() || pet->getPetType() != HUNTER_PET)
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;
@@ -854,16 +853,22 @@ void WorldSession::HandleStableSwapPetCallback(PreparedQueryResult result, uint3
         return;
     }
 
-    // move alive pet to slot or delete dead pet
     Pet* pet = _player->GetPet();
+    // The player's pet could have been removed during the delay of the DB callback
+    if (!pet)
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
 
+    // move alive pet to slot or delete dead pet
     _player->RemovePet(pet, pet->isAlive() ? PetSaveMode(slot) : PET_SAVE_AS_DELETED);
 
     // summon unstabled pet
-    Pet* newpet = new Pet(_player);
-    if (!newpet->LoadPetFromDB(_player, petEntry, petId))
+    Pet* newPet = new Pet(_player);
+    if (!newPet->LoadPetFromDB(_player, petEntry, petId))
     {
-        delete newpet;
+        delete newPet;
         SendStableResult(STABLE_ERR_STABLE);
     }
     else

@@ -23,7 +23,8 @@ SDComment:  Only Horde Heroic
 SDCategory:
 Script Data End */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SPELL_BATTLE_SHOUT                                       31403
 #define SPELL_CHARGE                                             60067
@@ -49,7 +50,7 @@ public:
 
     struct boss_commander_stoutbeardAI : public ScriptedAI
     {
-        boss_commander_stoutbeardAI(Creature* c) : ScriptedAI(c) {}
+        boss_commander_stoutbeardAI(Creature* creature) : ScriptedAI(creature) {}
 
         void Reset() {}
         void EnterCombat(Unit* /*who*/)

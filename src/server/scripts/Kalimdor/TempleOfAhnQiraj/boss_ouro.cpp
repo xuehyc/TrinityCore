@@ -23,7 +23,8 @@ SDComment: No model for submerging. Currently just invisible.
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "temple_of_ahnqiraj.h"
 
 #define SPELL_SWEEP             26103
@@ -45,7 +46,7 @@ public:
 
     struct boss_ouroAI : public ScriptedAI
     {
-        boss_ouroAI(Creature* c) : ScriptedAI(c) {}
+        boss_ouroAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 Sweep_Timer;
         uint32 SandBlast_Timer;

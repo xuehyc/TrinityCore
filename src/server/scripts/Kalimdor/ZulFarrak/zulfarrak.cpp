@@ -28,7 +28,9 @@ npc_sergeant_bly
 npc_weegli_blastfuse
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "zulfarrak.h"
 
 /*######
@@ -44,8 +46,8 @@ enum blyAndCrewFactions
 
 enum blySays
 {
-    SAY_1 = -1209002,
-    SAY_2 = -1209003
+    SAY_1 = 0,
+    SAY_2 = 1
 };
 
 enum blySpells
@@ -61,10 +63,10 @@ class npc_sergeant_bly : public CreatureScript
 public:
     npc_sergeant_bly() : CreatureScript("npc_sergeant_bly") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        if (action == GOSSIP_ACTION_INFO_DEF+1)
         {
             player->CLOSE_GOSSIP_MENU();
             CAST_AI(npc_sergeant_bly::npc_sergeant_blyAI, creature->AI())->PlayerGUID = player->GetGUID();
@@ -133,11 +135,11 @@ public:
                             //weegli doesn't fight - he goes & blows up the door
                             if (Creature* pWeegli = instance->instance->GetCreature(instance->GetData64(ENTRY_WEEGLI)))
                                 pWeegli->AI()->DoAction(0);
-                            DoScriptText(SAY_1, me);
+                            Talk(SAY_1);
                             Text_Timer = 5000;
                             break;
                         case 2:
-                            DoScriptText(SAY_2, me);
+                            Talk(SAY_2);
                             Text_Timer = 5000;
                             break;
                         case 3:
@@ -199,18 +201,6 @@ public:
 +## go_troll_cage
 +######*/
 
-void initBlyCrewMember(InstanceScript* instance, uint32 entry, float x, float y, float z)
-{
-   if (Creature* crew = instance->instance->GetCreature(instance->GetData64(entry)))
-   {
-        crew->SetReactState(REACT_AGGRESSIVE);
-        crew->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
-        crew->SetHomePosition(x, y, z, 0);
-        crew->GetMotionMaster()->MovePoint(1, x, y, z);
-        crew->setFaction(FACTION_FREED);
-    }
-}
-
 class go_troll_cage : public GameObjectScript
 {
 public:
@@ -231,6 +221,18 @@ public:
         return false;
     }
 
+private:
+    void initBlyCrewMember(InstanceScript* instance, uint32 entry, float x, float y, float z)
+    {
+        if (Creature* crew = instance->instance->GetCreature(instance->GetData64(entry)))
+        {
+            crew->SetReactState(REACT_AGGRESSIVE);
+            crew->SetWalk(true);
+            crew->SetHomePosition(x, y, z, 0);
+            crew->GetMotionMaster()->MovePoint(1, x, y, z);
+            crew->setFaction(FACTION_FREED);
+        }
+    }
 };
 
 /*######
@@ -258,10 +260,10 @@ class npc_weegli_blastfuse : public CreatureScript
 public:
     npc_weegli_blastfuse() : CreatureScript("npc_weegli_blastfuse") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        if (action == GOSSIP_ACTION_INFO_DEF+1)
         {
             player->CLOSE_GOSSIP_MENU();
             //here we make him run to door, set the charge and run away off to nowhere
@@ -322,7 +324,7 @@ public:
             AttackStartCaster(victim, 10);//keep back & toss bombs/shoot
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             /*if (instance)
                 instance->SetData(0, DONE);*/
@@ -399,9 +401,9 @@ public:
 
 enum
 {
-    ZOMBIE = 7286,
-    DEAD_HERO = 7276,
-    ZOMBIE_CHANCE = 65,
+    ZOMBIE           = 7286,
+    DEAD_HERO        = 7276,
+    ZOMBIE_CHANCE    = 65,
     DEAD_HERO_CHANCE = 10
 };
 
@@ -419,13 +421,12 @@ public:
             if (randomchance < ZOMBIE_CHANCE)
                 go->SummonCreature(ZOMBIE, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
             else
-                if ((randomchance-ZOMBIE_CHANCE) < DEAD_HERO_CHANCE)
+                if ((randomchance - ZOMBIE_CHANCE) < DEAD_HERO_CHANCE)
                     go->SummonCreature(DEAD_HERO, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
         }
         go->AddUse();
         return false;
     }
-
 };
 
 /*######

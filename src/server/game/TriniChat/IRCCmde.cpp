@@ -1529,7 +1529,7 @@ void IRCCmd::Money_Player(_CDATA *CD)
             sprintf(s_newmoney,"%d",newmoney);
             if(addmoney < 0)
             {
-                sLog->outDetail("USER1: %i, ADD: %i, DIF: %i\\n", moneyuser, addmoney, newmoney);
+                sLog->outDebug(LOG_FILTER_CHATSYS, "USER1: %i, ADD: %i, DIF: %i\\n", moneyuser, addmoney, newmoney);
                 if(newmoney <= 0 )
                 {
                     Send_IRCA(ChanOrPM(CD), "\00313["+player+"] : Has Had All Money Taken By: "+CD->USER.c_str()+".", true, CD->TYPE);

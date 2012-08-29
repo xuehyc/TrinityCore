@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "naxxramas.h"
 
 #define SAY_AGGRO               RAND(-1533075, -1533076, -1533077)
@@ -81,7 +82,7 @@ public:
 
     struct boss_nothAI : public BossAI
     {
-        boss_nothAI(Creature* c) : BossAI(c, BOSS_NOTH) {}
+        boss_nothAI(Creature* creature) : BossAI(creature, BOSS_NOTH) {}
 
         uint32 waveCount, balconyCount;
 
@@ -123,7 +124,7 @@ public:
             else
             {
                 events.ScheduleEvent(EVENT_CURSE, 10000+rand()%15000);
-                events.ScheduleEvent(EVENT_WARRIOR, 10000 + rand()%10000);
+                events.ScheduleEvent(EVENT_WARRIOR, 30000);
                 if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                     events.ScheduleEvent(EVENT_BLINK, urand(20000, 40000));
             }
@@ -142,7 +143,7 @@ public:
             summon->AI()->DoZoneInCombat();
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             _JustDied();
             DoScriptText(SAY_DEATH, me);

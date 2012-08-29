@@ -23,7 +23,10 @@ SDComment: Complete
 SDCategory: NPCs
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
+#include "GameEventMgr.h"
 
 #define HALLOWEEN_EVENTID       12
 #define SPELL_TRICK_OR_TREATED  24755
@@ -79,10 +82,10 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF+HALLOWEEN_EVENTID && IsEventActive(HALLOWEEN_EVENTID) && !player->HasAura(SPELL_TRICK_OR_TREATED))
+        if (action == GOSSIP_ACTION_INFO_DEF+HALLOWEEN_EVENTID && IsEventActive(HALLOWEEN_EVENTID) && !player->HasAura(SPELL_TRICK_OR_TREATED))
         {
             player->CastSpell(player, SPELL_TRICK_OR_TREATED, true);
 
@@ -116,7 +119,7 @@ public:
 
         player->CLOSE_GOSSIP_MENU();
 
-        switch (uiAction)
+        switch (action)
         {
             case GOSSIP_ACTION_TRADE: player->GetSession()->SendListInventory(creature->GetGUID()); break;
             case GOSSIP_ACTION_INN: player->SetBindPoint(creature->GetGUID()); break;

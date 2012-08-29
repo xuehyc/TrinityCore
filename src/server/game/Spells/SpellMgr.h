@@ -360,17 +360,6 @@ struct SpellThreatEntry
 
 typedef std::map<uint32, SpellThreatEntry> SpellThreatMap;
 
-// Spell script target related declarations (accessed using SpellMgr functions)
-enum SpellScriptTargetType
-{
-    SPELL_TARGET_TYPE_GAMEOBJECT = 0,
-    SPELL_TARGET_TYPE_CREATURE   = 1,
-    SPELL_TARGET_TYPE_DEAD       = 2,
-    SPELL_TARGET_TYPE_CONTROLLED = 3,
-};
-
-#define MAX_SPELL_TARGET_TYPE 4
-
 // coordinates for spells (accessed using SpellMgr functions)
 struct SpellTargetPosition
 {
@@ -616,7 +605,7 @@ class SpellMgr
 
     // Accessors (const or static functions)
     public:
-        // Spell correctess for client using
+        // Spell correctness for client using
         static bool IsSpellValid(SpellInfo const* spellInfo, Player* player = NULL, bool msg = true);
 
         // Spell difficulty
@@ -704,7 +693,6 @@ class SpellMgr
     public:
 
         // Loading data at server startup
-        void LoadSpellInfos();
         void LoadSpellRanks();
         void LoadSpellRequired();
         void LoadSpellLearnSkills();
@@ -726,6 +714,7 @@ class SpellMgr
         void LoadSpellAreas();
         void LoadSpellInfoStore();
         void UnloadSpellInfoStore();
+        void UnloadSpellInfoImplicitTargetConditionLists();
         void LoadSpellCustomAttr();
         void LoadDbcDataCorrections();
 

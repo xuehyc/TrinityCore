@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "vault_of_archavon.h"
 
 /* Vault of Archavon encounters:
@@ -163,9 +164,8 @@ class at_vault_of_archavon_entrance : public AreaTriggerScript
                 return true;
             }
 
-            player->TeleportTo(624, -505.96f, -103.353f, 157.0f, 0, 0);
-
-            return true;
+            // Otherwise use normal teleport mechanisms
+            return false;
         }
 };
 

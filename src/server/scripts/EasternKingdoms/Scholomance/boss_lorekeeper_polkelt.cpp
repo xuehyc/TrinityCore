@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Scholomance
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "scholomance.h"
 
 #define SPELL_VOLATILEINFECTION      24928
@@ -43,7 +44,7 @@ public:
 
     struct boss_lorekeeperpolkeltAI : public ScriptedAI
     {
-        boss_lorekeeperpolkeltAI(Creature* c) : ScriptedAI(c) {}
+        boss_lorekeeperpolkeltAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 VolatileInfection_Timer;
         uint32 Darkplague_Timer;

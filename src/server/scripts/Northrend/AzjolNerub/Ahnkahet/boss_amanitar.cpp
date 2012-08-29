@@ -19,7 +19,8 @@
  * Comment:  Find correct mushrooms spell to make them visible - buffs of the mushrooms not ever applied to the users...
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "ahnkahet.h"
 
 enum Spells
@@ -48,9 +49,9 @@ public:
 
     struct boss_amanitarAI : public ScriptedAI
     {
-        boss_amanitarAI(Creature* c) : ScriptedAI(c)
+        boss_amanitarAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             bFirstTime = true;
         }
 
@@ -83,7 +84,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (instance)
             {
@@ -167,7 +168,7 @@ public:
 
     struct mob_amanitar_mushroomsAI : public Scripted_NoMovementAI
     {
-        mob_amanitar_mushroomsAI(Creature* c) : Scripted_NoMovementAI(c) {}
+        mob_amanitar_mushroomsAI(Creature* creature) : Scripted_NoMovementAI(creature) {}
 
         uint32 uiAuraTimer;
         uint32 uiDeathTimer;

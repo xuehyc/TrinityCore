@@ -19,7 +19,9 @@
  * Comment: TODO: spawn troll waves
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellAuras.h"
 #include "drak_tharon_keep.h"
 
 enum Spells
@@ -63,9 +65,9 @@ public:
 
     struct boss_trollgoreAI : public ScriptedAI
     {
-        boss_trollgoreAI(Creature* c) : ScriptedAI(c), lSummons(me)
+        boss_trollgoreAI(Creature* creature) : ScriptedAI(creature), lSummons(me)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 uiConsumeTimer;

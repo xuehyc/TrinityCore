@@ -87,7 +87,7 @@ enum FreyaSpells
     SPELL_TOUCH_OF_EONAR_10                      = 62528,
     SPELL_TOUCH_OF_EONAR_25                      = 62892,
     SPELL_SUNBEAM_10                             = 62623,
-    SPELL_SUNBEAM_25                             = 62872,  
+    SPELL_SUNBEAM_25                             = 62872,
     SPELL_FREYA_GROUND_TREMOR_10                 = 62437,
     SPELL_FREYA_GROUND_TREMOR_25                 = 62859,
     SPELL_ROOTS_FREYA_10                         = 62438,
@@ -95,7 +95,7 @@ enum FreyaSpells
     SPELL_STONEBARK_ESSENCE                      = 62483,
     SPELL_IRONBRANCH_ESSENCE                     = 62484,
     SPELL_BRIGHTLEAF_ESSENCE                     = 62485,
-    SPELL_DRAINED_OF_POWER                       = 62467,   
+    SPELL_DRAINED_OF_POWER                       = 62467,
 
     // Stonebark
     SPELL_FISTS_OF_STONE                         = 62344,
@@ -118,8 +118,8 @@ enum FreyaSpells
     SPELL_FLUX                                   = 62262,
     SPELL_FLUX_PLUS                              = 62251,
     SPELL_FLUX_MINUS                             = 62252,
-    SPELL_SOLAR_FLARE_10                         = 62240, 
-    SPELL_SOLAR_FLARE_25                         = 62920, 
+    SPELL_SOLAR_FLARE_10                         = 62240,
+    SPELL_SOLAR_FLARE_25                         = 62920,
     SPELL_UNSTABLE_SUN_BEAM_SUMMON               = 62207, // Trigger 62221
 
     // Stack Removing of Attuned to Nature
@@ -279,12 +279,12 @@ enum FreyaEvents
     EVENT_STRENGTHENED_IRON_ROOTS                = 5,
     EVENT_GROUND_TREMOR                          = 6,
     EVENT_SUNBEAM                                = 7,
-    EVENT_ENRAGE                                 = 8,    
+    EVENT_ENRAGE                                 = 8,
 };
 
 enum Data
 {
-    DATA_GETTING_BACK_TO_NATURE = 1, 
+    DATA_GETTING_BACK_TO_NATURE = 1,
     DATA_KNOCK_ON_WOOD,
     DATA_ELEMENTAL_DIED,
     DATA_LASHER_DIED,
@@ -310,7 +310,7 @@ class npc_iron_roots : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
                 me->setFaction(FACTION_HOSTILE);
-                me->SetReactState(REACT_PASSIVE); 
+                me->SetReactState(REACT_PASSIVE);
             }
 
             void Reset()
@@ -369,10 +369,10 @@ class boss_freya : public CreatureScript
 
         struct boss_freyaAI : public BossAI
         {
-            boss_freyaAI(Creature* creature) : BossAI(creature, BOSS_FREYA) 
+            boss_freyaAI(Creature* creature) : BossAI(creature, BOSS_FREYA)
             {
                 EncounterFinished = false;
-            }          
+            }
 
             void Reset()
             {
@@ -382,10 +382,10 @@ class boss_freya : public CreatureScript
                     me->setFaction(35);
                     return;
                 }
-                _Reset();                
+                _Reset();
                 trioWaveCount = 0;
                 trioWaveController = 0;
-                elderCount = 0;                
+                elderCount = 0;
 
                 for (uint8 i = 0; i < 3; ++i)
                     for (uint8 n = 0; n < 2; ++n)
@@ -409,7 +409,7 @@ class boss_freya : public CreatureScript
                             elder->ResetLootMode();
                             elder->AI()->EnterEvadeMode();
                         }
-                }               
+                }
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -443,16 +443,16 @@ class boss_freya : public CreatureScript
                 me->CastSpell((Unit*)NULL, summonSpell[me->GetMap()->GetDifficulty()][elderCount], true);   // GetDifficulty should return 0 or 1 (numeric)
 
                 DoScriptText(SAY_DEATH, me);
-                me->SetReactState(REACT_PASSIVE);                
+                me->SetReactState(REACT_PASSIVE);
                 me->RemoveAllAuras();
                 me->AttackStop();
                 me->setFaction(35);
                 me->DeleteThreatList();
                 me->CombatStop(true);
-                me->CastSpell(me, SPELL_KNOCK_ON_WOOD_CREDIT, true);                            
+                me->CastSpell(me, SPELL_KNOCK_ON_WOOD_CREDIT, true);
 
                 // getting back to nature achievement
-                attunedToNature = me->GetAuraCount(SPELL_ATTUNED_TO_NATURE);                
+                attunedToNature = me->GetAuraCount(SPELL_ATTUNED_TO_NATURE);
 
                 // achievements credit
                 DoCast(me, SPELL_ACHIEVEMENT_CHECK, true);
@@ -470,7 +470,7 @@ class boss_freya : public CreatureScript
                             Elder[n]->GetAI()->DoAction(ACTION_ELDER_FREYA_KILLED);
                         }
                 }
-                me->ForcedDespawn(7500);
+                me->DespawnOrUnsummon(7500);
                 _JustDied();
             }
 
@@ -587,7 +587,7 @@ class boss_freya : public CreatureScript
                                 {
                                     SpawnWave();
                                     events.ScheduleEvent(EVENT_WAVE, WAVE_TIME);
-                                }                            
+                                }
                             break;
                         case EVENT_EONAR_GIFT:
                             DoCast(me, SPELL_SUMMON_EONAR_GIFT);
@@ -649,7 +649,7 @@ class boss_freya : public CreatureScript
                                         for (uint8 n = 0; n < 3; ++n)
                                         {
                                             summons.remove(Elemental[n][i]->GetGUID());
-                                            Elemental[n][i]->ForcedDespawn(5000);
+                                            Elemental[n][i]->DespawnOrUnsummon(5000);
                                             trioDefeated[i] = true; // Stack-decrease spell is automatically performed through SummonedCreatureDespawn
                                         }
                                     }
@@ -770,7 +770,7 @@ class boss_freya : public CreatureScript
                         break;
                     case NPC_ANCIENT_CONSERVATOR:
                         summoned->CastSpell(me, SPELL_REMOVE_25STACK, true);
-                        summoned->ForcedDespawn(5000);
+                        summoned->DespawnOrUnsummon(5000);
                         summons.Despawn(summoned);
                         break;
                 }
@@ -783,7 +783,7 @@ class boss_freya : public CreatureScript
                     case NPC_DETONATING_LASHER:
                         summoned->CastSpell(me, SPELL_REMOVE_2STACK, true);
                         summoned->CastSpell(who, SPELL_DETONATE, true);
-                        summoned->ForcedDespawn(5000);
+                        summoned->DespawnOrUnsummon(5000);
                         summons.Despawn(summoned);
                         break;
                     case NPC_SNAPLASHER:
@@ -808,7 +808,7 @@ class boss_freya : public CreatureScript
                 }
             }
 
-            void SetGUID(uint64 guid, int32 id) 
+            void SetGUID(uint64 guid, int32 id)
             {
                 switch (id)
                 {
@@ -848,7 +848,7 @@ class boss_freya : public CreatureScript
                                     break;
                             }
                         }
-                        break;                        
+                        break;
                 }
             }
 
@@ -879,7 +879,7 @@ class boss_elder_brightleaf : public CreatureScript
 {
     private:
         enum
-        { 
+        {
             EVENT_SOLAR_FLARE                            = 15,
             EVENT_UNSTABLE_SUN_BEAM                      = 16,
             EVENT_FLUX                                   = 17,
@@ -1152,7 +1152,7 @@ class boss_elder_ironbranch : public CreatureScript
             EVENT_IMPALE                                 = 12,
             EVENT_IRON_ROOTS                             = 13,
             EVENT_THORN_SWARM                            = 14,
-        };        
+        };
     public:
         boss_elder_ironbranch() : CreatureScript("boss_elder_ironbranch") {}
 
@@ -1650,7 +1650,7 @@ class npc_sun_beam : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetDisplayId(MODEL_INVISIBLE);
-                me->ForcedDespawn(12000);
+                me->DespawnOrUnsummon(12000);
                 DoCast(me, SPELL_FREYA_UNSTABLE_ENERGY_VISUAL, true); // visual
             }
 
@@ -1683,7 +1683,7 @@ class npc_healthy_spore : public CreatureScript
         {
             npc_healthy_sporeAI(Creature* creature) : Scripted_NoMovementAI(creature)
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);                
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
             }
 
             void Reset()
@@ -1700,13 +1700,13 @@ class npc_healthy_spore : public CreatureScript
                 if (InstanceScript* inst = me->GetInstanceScript())
                     if (inst->GetBossState(BOSS_FREYA) != IN_PROGRESS)
                         me->DisappearAndDie();
-                else 
+                else
                     me->DisappearAndDie();
 
                 if (lifeTimer <= diff)
                 {
                     me->RemoveAurasDueToSpell(SPELL_GROW);
-                    me->ForcedDespawn(2200);
+                    me->DespawnOrUnsummon(2200);
                     lifeTimer = urand(22000, 30000);
                 }
                 else
@@ -1749,14 +1749,14 @@ class npc_eonars_gift : public CreatureScript
                 if (InstanceScript* inst = me->GetInstanceScript())
                     if (inst->GetBossState(BOSS_FREYA) != IN_PROGRESS)
                         me->DisappearAndDie();
-                else 
+                else
                     me->DisappearAndDie();
-                
+
                 if (lifeBindersGiftTimer <= diff)
                 {
                     me->RemoveAurasDueToSpell(SPELL_GROW);
                     DoCast(SPELL_LIFEBINDERS_GIFT);
-                    me->ForcedDespawn(2500);
+                    me->DespawnOrUnsummon(2500);
                     // lifeBindersGiftTimer = 12000;   // Wt... ? Cannot cast after being despawned...
                 }
                 else
@@ -1792,7 +1792,7 @@ class npc_nature_bomb : public CreatureScript
             void UpdateAI(uint32 const diff)
             {
                 if (GameObject* go = me->FindNearestGameObject(GAMEOBJECT_NATURE_BOMB, 5.0f))
-                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);                
+                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
 
                 if (bombTimer <= diff)
                 {
@@ -1883,16 +1883,16 @@ class npc_unstable_sun_beam : public CreatureScript
 class IsNoAllyOfNature
 {
     public:
-        bool operator() (Unit* unit)
+        bool operator() (WorldObject* target)
         {
-            if (unit->ToCreature())
+            if (target->ToCreature())
             {
-                switch (unit->ToCreature()->GetEntry())
+                switch (target->ToCreature()->GetEntry())
                 {
                     case NPC_DETONATING_LASHER:
                     case NPC_ANCIENT_WATER_SPIRIT:
                     case NPC_STORM_LASHER:
-                    case NPC_SNAPLASHER: 
+                    case NPC_SNAPLASHER:
                     case NPC_ANCIENT_CONSERVATOR:
                         return false;
                     default:
@@ -1912,14 +1912,14 @@ class spell_essence_targeting_ironbranch : public SpellScriptLoader
         {
             PrepareSpellScript(spell_essence_targeting_SpellScript);
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<WorldObject*>& targets)
             {
-                unitList.remove_if(IsNoAllyOfNature());
+                targets.remove_if(IsNoAllyOfNature());
             }
 
             void Register()
-            {                
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_essence_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);                         
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_essence_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
             }
         };
 
@@ -1938,15 +1938,15 @@ public:
     {
         PrepareSpellScript(spell_essence_targeting_SpellScript);
 
-        void FilterTargets(std::list<Unit*>& unitList)
+        void FilterTargets(std::list<WorldObject*>& targets)
         {
-            unitList.remove_if(IsNoAllyOfNature());
+            targets.remove_if(IsNoAllyOfNature());
         }
 
         void Register()
-        {                
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_essence_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_essence_targeting_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ALLY);                         
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_essence_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_essence_targeting_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ALLY);
         }
     };
 
@@ -1966,18 +1966,18 @@ class spell_aggregation_pheromones_targeting : public SpellScriptLoader
         {
             PrepareSpellScript(spell_aggregation_pheromones_targeting_SpellScript);
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<WorldObject*>& targets)
             {
                 // remove caster if this is the only target
-                if (unitList.size() < 2)
-                    unitList.clear();
+                if (targets.size() < 2)
+                    targets.clear();
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_aggregation_pheromones_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_aggregation_pheromones_targeting_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ALLY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_aggregation_pheromones_targeting_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ALLY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_aggregation_pheromones_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_aggregation_pheromones_targeting_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ALLY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_aggregation_pheromones_targeting_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ALLY);
             }
         };
 
@@ -2224,33 +2224,13 @@ void AddSC_boss_freya()
     new spell_aggregation_pheromones_targeting();       // more or less for NPCs that are always in this area
     new spell_freya_attuned_to_nature_dose_reduction();
     new spell_freya_iron_roots();
-    new spell_elder_brightleaf_unstable_sun_beam(); 
-    new achievement_getting_back_to_nature("achievement_getting_back_to_nature");           // 10m 2982 [10445] 
+    new spell_elder_brightleaf_unstable_sun_beam();
+    new achievement_getting_back_to_nature("achievement_getting_back_to_nature");           // 10m 2982 [10445]
     new achievement_getting_back_to_nature("achievement_getting_back_to_nature_25");        // 25m 2983 [10758]
-    new achievement_knock_on_wood("achievement_knock_on_wood");                             // 10m 3177 [10447] 
+    new achievement_knock_on_wood("achievement_knock_on_wood");                             // 10m 3177 [10447]
     new achievement_knock_on_wood("achievement_knock_on_wood_25");                          // 25m 3185 [10459]
-    new achievement_knock_knock_on_wood("achievement_knock_knock_on_wood");                 // 10m 3178 [10448] 
+    new achievement_knock_knock_on_wood("achievement_knock_knock_on_wood");                 // 10m 3178 [10448]
     new achievement_knock_knock_on_wood("achievement_knock_knock_on_wood_25");              // 25m 3186 [10460]
-    new achievement_knock_knock_knock_on_wood("achievement_knock_knock_knock_on_wood");     // 10m 3179 [10449] 
+    new achievement_knock_knock_knock_on_wood("achievement_knock_knock_knock_on_wood");     // 10m 3179 [10449]
     new achievement_knock_knock_knock_on_wood("achievement_knock_knock_knock_on_wood_25");  // 25m 3187 [10461]
 }
-
-#undef SPELL_TOUCH_OF_EONAR 
-#undef SPELL_SUNBEAM 
-#undef SPELL_FREYA_UNSTABLE_ENERGY 
-#undef SPELL_IRON_ROOTS 
-#undef SPELL_FREYA_GROUND_TREMOR 
-#undef SPELL_LIFEBINDERS_GIFT 
-#undef SPELL_DETONATE 
-#undef SPELL_TIDAL_WAVE 
-#undef SPELL_LIGHTNING_LASH 
-#undef SPELL_STORMBOLT 
-#undef SPELL_HARDENED_BARK 
-#undef SPELL_NATURES_FURY 
-#undef SPELL_SOLAR_FLARE 
-#undef SPELL_UNSTABLE_ENERGY 
-#undef SPELL_IMPALE 
-#undef SPELL_THORN_SWARM 
-#undef SPELL_ROOTS_FREYA 
-#undef SPELL_GROUND_TREMOR 
-#undef SPELL_PETRIFIED_BARK

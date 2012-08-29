@@ -27,7 +27,11 @@ EndScriptData */
 npc_alexstrasza_wr_gate
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
 #include "ScriptedEscortAI.h"
 
 enum eEnums
@@ -56,10 +60,10 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        if (action == GOSSIP_ACTION_INFO_DEF+1)
         {
             player->CLOSE_GOSSIP_MENU();
             player->SendMovieStart(MOVIE_ID_GATES);
@@ -69,86 +73,102 @@ public:
     }
 };
 
-enum MinebombRelated
+/*######
+## Quest Strengthen the Ancients (12096|12092)
+######*/
+
+enum StrengthenAncientsMisc
 {
-    QUEST_LEAVE_NOTHING_TO_CHANCE = 12277,
-    UPPER_BUNNY = 27436,
-    LOWER_BUNNY = 27437
+    SAY_WALKER_FRIENDLY = 0,
+    SAY_WALKER_ENEMY = 1,
+    SAY_LOTHALOR = 0,
+
+    SPELL_CREATE_ITEM_BARK = 47550,
+    SPELL_CONFUSED = 47044,
+
+    NPC_LOTHALOR = 26321,
+
+    FACTION_WALKER_ENEMY = 14,
 };
 
-class npc_minebomb_of_wintergarde : public CreatureScript
+class spell_q12096_q12092_dummy : public SpellScriptLoader // Strengthen the Ancients: On Interact Dummy to Woodlands Walker
 {
 public:
-    npc_minebomb_of_wintergarde() : CreatureScript("npc_minebomb_of_wintergarde") {}
+    spell_q12096_q12092_dummy() : SpellScriptLoader("spell_q12096_q12092_dummy") { }
 
-    struct npc_minebomb_of_wintergardeAI : public ScriptedAI
+    class spell_q12096_q12092_dummy_SpellScript : public SpellScript
     {
-        npc_minebomb_of_wintergardeAI(Creature* c) : ScriptedAI(c) {}
+        PrepareSpellScript(spell_q12096_q12092_dummy_SpellScript);
 
-        uint32 _deathTimer;
-        bool _upperBunnyGranted;
-        bool _lowerBunnyGranted;
-
-        void Reset()
+        void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            // be alive for approximately 10 seconds
-            _deathTimer = 10 * IN_MILLISECONDS;
-            _upperBunnyGranted = false;
-            _lowerBunnyGranted = false;
+            uint32 roll = rand() % 2;
+
+            Creature* tree = GetHitCreature();
+            Player* player = GetCaster()->ToPlayer();
+
+            if (!tree || !player)
+                return;
+
+            tree->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+
+            if (roll == 1) // friendly version
+            {
+                tree->CastSpell(player, SPELL_CREATE_ITEM_BARK);
+                tree->AI()->Talk(SAY_WALKER_FRIENDLY, player->GetGUID());
+                tree->DespawnOrUnsummon(1000);
+            }
+            else if (roll == 0) // enemy version
+            {
+                tree->AI()->Talk(SAY_WALKER_ENEMY, player->GetGUID());
+                tree->setFaction(FACTION_WALKER_ENEMY);
+                tree->Attack(player, true);
+            }
         }
 
-        void UpdateAI(const uint32 diff)
+        void Register()
         {
-            Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself();
-
-            // In error case, npc can despawn immediately
-            if (!owner || owner->GetQuestStatus(QUEST_LEAVE_NOTHING_TO_CHANCE) != QUEST_STATUS_INCOMPLETE)
-            {
-                // If we did not give a credit before, despawn
-                if (!_upperBunnyGranted && !_lowerBunnyGranted)
-                {
-                    me->DespawnOrUnsummon();
-                    return;
-                }
-            }
-
-            if(!_upperBunnyGranted)
-            {
-                // Search for nearby upper bunny and give credits
-                if (Creature* triggerBunny = me->FindNearestCreature(UPPER_BUNNY, 10.0f, true))
-                {
-                    owner->KilledMonsterCredit(UPPER_BUNNY, 0);
-                    _upperBunnyGranted = true;
-                }
-            }
-
-            if(!_lowerBunnyGranted)
-            {
-                // Search for nearby lower bunny and give credits
-                if (Creature* triggerBunny = me->FindNearestCreature(LOWER_BUNNY, 10.0f, true))
-                {
-                    owner->KilledMonsterCredit(LOWER_BUNNY, 0);
-                    _lowerBunnyGranted = true;
-                }
-            }
-
-            if (_deathTimer)
-            {
-                if (_deathTimer <= diff)
-                {
-                    me->DespawnOrUnsummon();
-                    _deathTimer = 0;
-                } else _deathTimer -= diff;
-            }
+            OnEffectHitTarget += SpellEffectFn(spell_q12096_q12092_dummy_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    SpellScript* GetSpellScript() const
     {
-        return new npc_minebomb_of_wintergardeAI(creature);
+        return new spell_q12096_q12092_dummy_SpellScript();
     }
 };
 
+class spell_q12096_q12092_bark : public SpellScriptLoader // Bark of the Walkers
+{
+public:
+    spell_q12096_q12092_bark() : SpellScriptLoader("spell_q12096_q12092_bark") { }
+
+    class spell_q12096_q12092_bark_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q12096_q12092_bark_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Creature* lothalor = GetHitCreature();
+            if (!lothalor || lothalor->GetEntry() != NPC_LOTHALOR)
+                return;
+
+            lothalor->AI()->Talk(SAY_LOTHALOR);
+            lothalor->RemoveAura(SPELL_CONFUSED);
+            lothalor->DespawnOrUnsummon(4000);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_q12096_q12092_bark_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_q12096_q12092_bark_SpellScript();
+    }
+};
 
 enum HighAbbot
 {
@@ -187,44 +207,48 @@ class npc_high_abbot_lundgren : public CreatureScript
 public:
     npc_high_abbot_lundgren() : CreatureScript("npc_high_abbot_lundgren") {}
 
-    bool OnGossipHello(Player* player, Creature* me)
+    bool OnGossipHello(Player* player, Creature* creature)
     {
         QuestStatus status = player->GetQuestStatus(QUEST_A_FALL_FROM_GRACE);
         if (status == QUEST_STATUS_INCOMPLETE)
             player->ADD_GOSSIP_ITEM( 0, "High Abbot, can I have a talk with you?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
-        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, me->GetGUID());
+        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        switch (uiAction)
+
+        switch (action)
         {
-        case GOSSIP_ACTION_INFO_DEF+1:
-            player->CLOSE_GOSSIP_MENU();
-            if(creature->AI())
-            {                
-                creature->AI()->DoAction(ACTION_PREPARE_MOVING);
-                creature->AI()->SetGUID(player->GetGUID());     // Note: This starts the escort.
+            case GOSSIP_ACTION_INFO_DEF+1:
+            {
+                player->CLOSE_GOSSIP_MENU();
+
+                if(creature->AI())
+                {
+                    creature->AI()->DoAction(ACTION_PREPARE_MOVING);
+                    creature->AI()->SetGUID(player->GetGUID());     // Note: This starts the escort.
+                }
+                break;
             }
-            break;
         }
         return true;
     }
 
-    struct npc_high_abbot_lundgrenAI : public npc_escortAI 
+    struct npc_high_abbot_lundgrenAI : public npc_escortAI
     {
         npc_high_abbot_lundgrenAI(Creature* creature) : npc_escortAI(creature) {}
 
         void Reset()
-        {       
-            me->setFaction(FACTION_SCARLET_CRUSADE);   
+        {
+            me->setFaction(FACTION_SCARLET_CRUSADE);
         }
 
-        void EnterCombat(Unit* attacker)
-        {            
+        void EnterCombat(Unit* who)
+        {
             if (IsEscorted())
             {
                 // Note: Since we cannot enter combat while being friendly to all in a regular way, we prefer evasion over irregular behavior.
@@ -233,7 +257,7 @@ public:
             else
             {
                 // If we're not friendly (i.e. not being escorted), get this handled by the base class.
-                npc_escortAI::EnterCombat(attacker);
+                npc_escortAI::EnterCombat(who);
             }
         }
 
@@ -269,55 +293,54 @@ public:
                 {
                     switch (event)
                     {
-                    case EVENT_SPEECH_DISGUISE:
-                        DoScriptText(SAY_HIGH_ABBOT_DISGUISE_FAILED, me);
-                        events.ScheduleEvent(EVENT_SPEECH_MASTER, 5000);
-                        break;
-                    case EVENT_SPEECH_MASTER:
-                        DoScriptText(SAY_HIGH_ABBOT_THE_MASTER, me);
-                        events.ScheduleEvent(EVENT_SPEECH_NOT_YOU, 5000);
-                        break;
-                    case EVENT_SPEECH_NOT_YOU:
-                        DoScriptText(SAY_HIGH_ABBOT_NOT_DIE_BY_YOUR_HAND, me);
-                        events.ScheduleEvent(EVENT_SPEECH_CHOOSING, 5000);
-                        break;
-                    case EVENT_SPEECH_CHOOSING:
-                        DoScriptText(SAY_HIGH_ABBOT_MY_CHOOSING, me);
-                        events.ScheduleEvent(EVENT_JUMP_OFF_CLIFF_PT1, 5000);
-                        break;               
-                    case EVENT_JUMP_OFF_CLIFF_PT1:
-                        if (Player* p = GetPlayerForEscort())
-                        {
-                            p->KilledMonsterCredit(NPC_HIGH_ABBOT_KILL_BUNNY, 0);
-                        } 
-                        me->GetMotionMaster()->MoveJump(dummyTarget.GetPositionX(), dummyTarget.GetPositionY(), dummyTarget.GetPositionZ(), 10.0f, 10.0f);
-                        events.ScheduleEvent(EVENT_JUMP_OFF_CLIFF_PT2, 200);
-                        break;
-                    case EVENT_JUMP_OFF_CLIFF_PT2:
-                        DoScriptText(SAY_HIGH_ABBOT_SCREAMING_JUMP, me);
-                        me->GetMotionMaster()->MoveJump(jumpTarget.GetPositionX(), jumpTarget.GetPositionY(), jumpTarget.GetPositionZ(), 30.0f, 30.0f);
-                        events.ScheduleEvent(EVENT_DIE, 10000);
-                        break;
-                    case EVENT_DIE:                               
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                        me->ForcedDespawn(0);
-                        break;
+                        case EVENT_SPEECH_DISGUISE:
+                            DoScriptText(SAY_HIGH_ABBOT_DISGUISE_FAILED, me);
+                            events.ScheduleEvent(EVENT_SPEECH_MASTER, 5000);
+                            break;
+                        case EVENT_SPEECH_MASTER:
+                            DoScriptText(SAY_HIGH_ABBOT_THE_MASTER, me);
+                            events.ScheduleEvent(EVENT_SPEECH_NOT_YOU, 5000);
+                            break;
+                        case EVENT_SPEECH_NOT_YOU:
+                            DoScriptText(SAY_HIGH_ABBOT_NOT_DIE_BY_YOUR_HAND, me);
+                            events.ScheduleEvent(EVENT_SPEECH_CHOOSING, 5000);
+                            break;
+                        case EVENT_SPEECH_CHOOSING:
+                            DoScriptText(SAY_HIGH_ABBOT_MY_CHOOSING, me);
+                            events.ScheduleEvent(EVENT_JUMP_OFF_CLIFF_PT1, 5000);
+                            break;
+                        case EVENT_JUMP_OFF_CLIFF_PT1:
+                            if (Player* player = GetPlayerForEscort())
+                            {
+                                player->KilledMonsterCredit(NPC_HIGH_ABBOT_KILL_BUNNY, 0);
+                            }
+                            me->GetMotionMaster()->MoveJump(dummyTarget.GetPositionX(), dummyTarget.GetPositionY(), dummyTarget.GetPositionZ(), 10.0f, 10.0f);
+                            events.ScheduleEvent(EVENT_JUMP_OFF_CLIFF_PT2, 200);
+                            break;
+                        case EVENT_JUMP_OFF_CLIFF_PT2:
+                            DoScriptText(SAY_HIGH_ABBOT_SCREAMING_JUMP, me);
+                            me->GetMotionMaster()->MoveJump(jumpTarget.GetPositionX(), jumpTarget.GetPositionY(), jumpTarget.GetPositionZ(), 30.0f, 30.0f);
+                            events.ScheduleEvent(EVENT_DIE, 10000);
+                            break;
+                        case EVENT_DIE:
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            me->DespawnOrUnsummon();
+                            break;
                     }
                 }
             }
             else
             {
                 if (!UpdateVictim())
-                {
                     return;
-                }
+
                 DoMeleeAttackIfReady();
             }
         }
 
-        void WaypointReached(uint32 i)
+        void WaypointReached(uint32 waypointId)
         {
-            switch (i)
+            switch (waypointId)
             {
                 case 0:
                 case 1:
@@ -328,10 +351,10 @@ public:
                 case 6:
                 case 7:
                 case 8:
-                    if (Player* p = GetPlayerForEscort())
+                    if (Player* player = GetPlayerForEscort())
                     {
                         // If player is out of range or has lost his aura, evade!
-                        if ( !p->IsInRange(me, 0.0f, GetMaxPlayerDistance()) || (!p->HasAura(SPELL_SCARLET_RAVEN_PRIEST_IMAGE_MALE) && !p->HasAura(SPELL_SCARLET_RAVEN_PRIEST_IMAGE_FEMALE)) ) 
+                        if (!player->IsInRange(me, 0.0f, GetMaxPlayerDistance()) || (!player->HasAura(SPELL_SCARLET_RAVEN_PRIEST_IMAGE_MALE) && !player->HasAura(SPELL_SCARLET_RAVEN_PRIEST_IMAGE_FEMALE)))
                         {
                             EnterEvadeMode();
                         }
@@ -339,10 +362,10 @@ public:
                     else
                         EnterEvadeMode();   // Should not happen regularly, but...
                     break;
-                case 9: // 0-8 are irrelevant, 10 is a dummy. 
+                case 9: // 0-8 are irrelevant, 10 is a dummy.
                     SetEscortPaused(true);
-                    if(Player* p = GetPlayerForEscort())
-                        me->SetFacingToObject(p);
+                    if(Player* player = GetPlayerForEscort())
+                        me->SetFacingToObject(player);
                     else
                         EnterEvadeMode();   // Should not happen regularly, but...
                     events.ScheduleEvent(EVENT_SPEECH_DISGUISE, 1000);
@@ -368,9 +391,10 @@ class npc_leviroth : public CreatureScript
 {
 public:
     npc_leviroth() : CreatureScript("npc_leviroth") {}
+
     struct npc_levirothAI : public ScriptedAI
     {
-        npc_levirothAI(Creature* c) : ScriptedAI(c) {}
+        npc_levirothAI(Creature* creature) : ScriptedAI(creature) {}
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
@@ -378,10 +402,10 @@ public:
             if (!attacker || damage < me->GetHealth())
                 return;
 
-            // Note: This NPC gets hit by himself due to a spell (regularly, during Q11626), thus, we enforce that the killing player gets the credit.           
-            if (Player* p = attacker->ToPlayer())
+            // Note: This NPC gets hit by himself due to a spell (regularly, during Q11626), thus, we enforce that the killing player gets the credit.
+            if (Player* player = attacker->ToPlayer())
             {
-                p->KilledMonsterCredit(NPC_LEVIROTH, 0);
+                player->KilledMonsterCredit(NPC_LEVIROTH, 0);
             }
         }
     };
@@ -395,7 +419,8 @@ public:
 void AddSC_dragonblight()
 {
     new npc_alexstrasza_wr_gate;
-    new npc_minebomb_of_wintergarde;
+    new spell_q12096_q12092_dummy;
+    new spell_q12096_q12092_bark;
     new npc_high_abbot_lundgren;
     new npc_leviroth;
 }

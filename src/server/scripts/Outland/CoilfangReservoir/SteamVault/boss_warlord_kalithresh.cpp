@@ -23,7 +23,8 @@ SDComment: Contains workarounds regarding warlord's rage spells not acting as ex
 SDCategory: Coilfang Resevoir, The Steamvault
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "steam_vault.h"
 
 #define SAY_INTRO                   -1545016
@@ -54,9 +55,9 @@ public:
 
     struct mob_naga_distillerAI : public ScriptedAI
     {
-        mob_naga_distillerAI(Creature* c) : ScriptedAI(c)
+        mob_naga_distillerAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -112,9 +113,9 @@ public:
 
     struct boss_warlord_kalithreshAI : public ScriptedAI
     {
-        boss_warlord_kalithreshAI(Creature* c) : ScriptedAI(c)
+        boss_warlord_kalithreshAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -157,7 +158,7 @@ public:
                         me->RemoveAurasDueToSpell(SPELL_WARLORDS_RAGE_PROC);
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
 

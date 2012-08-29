@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Scholomance
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "scholomance.h"
 
 #define SPELL_TRAMPLE           15550
@@ -43,7 +44,7 @@ public:
 
     struct boss_theravenianAI : public ScriptedAI
     {
-        boss_theravenianAI(Creature* c) : ScriptedAI(c) {}
+        boss_theravenianAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 Trample_Timer;
         uint32 Cleave_Timer;

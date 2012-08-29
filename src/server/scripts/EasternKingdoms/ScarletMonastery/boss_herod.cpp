@@ -23,7 +23,8 @@ SDComment: Should in addition spawn Myrmidons in the hallway outside
 SDCategory: Scarlet Monastery
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 
 enum Says
@@ -152,7 +153,12 @@ public:
         uint32 Start_Timer;
 
         void Reset() {}
-        void WaypointReached(uint32 /*point*/) {}
+
+        void WaypointReached(uint32 /*waypointId*/)
+        {
+
+        }
+
         void EnterCombat(Unit* /*who*/) {}
 
         void UpdateAI(const uint32 diff)

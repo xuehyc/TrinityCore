@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Gruul's Lair
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "gruuls_lair.h"
 
 #define MAX_ENCOUNTER 2
@@ -77,7 +78,8 @@ public:
         bool IsEncounterInProgress() const
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS) return true;
+                if (m_auiEncounter[i] == IN_PROGRESS)
+                    return true;
 
             return false;
         }
@@ -136,12 +138,18 @@ public:
             switch (type)
             {
                 case DATA_MAULGAREVENT:
-                    if (data == DONE) HandleGameObject(MaulgarDoor, true);
-                    m_auiEncounter[0] = data; break;
+                    if (data == DONE)
+                        HandleGameObject(MaulgarDoor, true);
+                    m_auiEncounter[0] = data;
+                    break;
+
                 case DATA_GRUULEVENT:
-                    if (data == IN_PROGRESS) HandleGameObject(GruulDoor, false);
-                    else HandleGameObject(GruulDoor, true);
-                    m_auiEncounter[1] = data; break;
+                    if (data == IN_PROGRESS)
+                        HandleGameObject(GruulDoor, false);
+                    else
+                        HandleGameObject(GruulDoor, true);
+                    m_auiEncounter[1] = data;
+                    break;
             }
 
             if (data == DONE)

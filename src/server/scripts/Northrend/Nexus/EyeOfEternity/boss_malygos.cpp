@@ -27,7 +27,11 @@ Script Data End */
 // Remove hack that re-adds targets to the aggro list after they enter to a vehicle when it works as expected
 // Improve whatever can be improved :)
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
+#include "PassiveAI.h"
 #include "eye_of_eternity.h"
 #include "ScriptedEscortAI.h"
 #include "Vehicle.h"
@@ -247,7 +251,7 @@ public:
 
             _cannotMove = true;
 
-            me->SetFlying(true);
+            me->SetCanFly(true);
 
             powerSparkBuffCount = 0;
             powerSparkBuffTimer = 10000;
@@ -344,7 +348,7 @@ public:
 
             me->SetHomePosition(_homePosition);
 
-            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+            me->SetDisableGravity(true);
 
             BossAI::EnterEvadeMode();
 
@@ -433,8 +437,8 @@ public:
         {
             _EnterCombat();
 
-            me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-            me->SetFlying(false);
+            me->SetDisableGravity(false);
+            me->SetCanFly(false);
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
@@ -516,8 +520,8 @@ public:
 
         void PrepareForVortex()
         {
-            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-            me->SetFlying(true);
+            me->SetDisableGravity(true);
+            me->SetCanFly(true);
 
             me->GetMotionMaster()->MovementExpired();
             me->GetMotionMaster()->MovePoint(MOVE_VORTEX, MalygosPositions[1].GetPositionX(), MalygosPositions[1].GetPositionY(), MalygosPositions[1].GetPositionZ());
@@ -688,8 +692,8 @@ public:
         {
             SetPhase(PHASE_TWO, true);
 
-            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-            me->SetFlying(true);
+            me->SetDisableGravity(true);
+            me->SetCanFly(true);
             me->GetMotionMaster()->Clear();
             me->GetMotionMaster()->MoveIdle();
             me->GetMotionMaster()->MovePoint(MOVE_DEEP_BREATH_ROTATION, MalygosPhaseTwoWaypoints[0]);
@@ -1005,7 +1009,7 @@ public:
         {
             // ugly hackfix for poke in the eye...
             if (participants.size() < uint32(DUNGEON_MODE(ACHIEV_POKE_IN_THE_EYE_COUNT, ACHIEV_POKE_IN_THE_EYE_H_COUNT)))
-                if (AchievementEntry const* pAE = GetAchievementStore()->LookupEntry(DUNGEON_MODE(ACHIEV_POKE_IN_THE_EYE, ACHIEV_POKE_IN_THE_EYE_H)))
+                if (AchievementEntry const* pAE = sAchievementStore.LookupEntry(DUNGEON_MODE(ACHIEV_POKE_IN_THE_EYE, ACHIEV_POKE_IN_THE_EYE_H)))
                     for (std::list<uint64>::const_iterator itr = participants.begin(); itr != participants.end(); ++itr)
                         if (Player* player = ObjectAccessor::FindPlayer((*itr)))
                             player->CompletedAchievement(pAE);
@@ -1115,8 +1119,8 @@ class spell_malygos_vortex_visual : public SpellScriptLoader
                         // Anyway even with this issue, the boss does not enter in evade mode - this prevents iterate an empty list in the next vortex execution.
                         malygos->SetInCombatWithZone();
 
-                        malygos->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                        malygos->SetFlying(false);
+                        malygos->SetDisableGravity(false);
+                        malygos->SetCanFly(false);
 
                         malygos->GetMotionMaster()->MoveChase(caster->getVictim());
                         malygos->RemoveAura(SPELL_VORTEX_1);
@@ -1146,28 +1150,28 @@ public:
     {
         PrepareSpellScript(spell_malygos_arcane_storm_SpellScript)
 
-        void FilterTargets(std::list<Unit*>& unitList)
+        void FilterTargets(std::list<WorldObject*>& targets)
         {
-            std::list<Unit*> newUnitList;
+            std::list<WorldObject*> newTargets;
 
-            if (!unitList.empty())
+            if (!targets.empty())
             {
-                for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+                for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
                     // Randomize 33%
                     if (!(urand(0, 2)) && (*itr))
                     {
-                        newUnitList.push_back((*itr));
+                        newTargets.push_back((*itr));
                     }
                 }
 
-                unitList = newUnitList;
+                targets = newTargets;
             }
         }
 
         void Register()
         {
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_malygos_arcane_storm_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_malygos_arcane_storm_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         }
     };
 
@@ -1261,7 +1265,7 @@ public:
         void Reset()
         {
             _falling = false;
-            me->SetFlying(true);
+            me->SetCanFly(true);
             me->SetReactState(REACT_PASSIVE);
             MoveToMalygos();
         }
@@ -1427,7 +1431,7 @@ public:
             // we dont do melee damage!
         }
 
-        void WaypointReached(uint32 /*i*/)
+        void WaypointReached(uint32 /*waypointId*/)
         {
 
         }

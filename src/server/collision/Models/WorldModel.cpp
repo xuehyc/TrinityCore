@@ -17,6 +17,7 @@
  */
 
 #include "WorldModel.h"
+#include "ModelInstance.h"
 #include "VMapDefinitions.h"
 #include "MapTree.h"
 
@@ -41,7 +42,7 @@ namespace VMAP
         const Vector3 p(ray.direction().cross(e2));
         const float a = e1.dot(p);
 
-        if (abs(a) < EPS) {
+        if (fabs(a) < EPS) {
             // Determinant is ill-conditioned; abort early
             return false;
         }
@@ -391,9 +392,8 @@ namespace VMAP
 
     uint32 GroupModel::GetLiquidType() const
     {
-        // convert to type mask, matching MAP_LIQUID_TYPE_* defines in Map.h
         if (iLiquid)
-            return (1 << iLiquid->GetType());
+            return iLiquid->GetType();
         return 0;
     }
 

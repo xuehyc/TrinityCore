@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Zul'Gurub
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "zulgurub.h"
 
 #define SPELL_AVARTAR                24646                  //The Enrage Spell
@@ -32,15 +33,11 @@ EndScriptData */
 class boss_grilek : public CreatureScript
 {
     public:
-
-        boss_grilek()
-            : CreatureScript("boss_grilek")
-        {
-        }
+        boss_grilek() : CreatureScript("boss_grilek") { }
 
         struct boss_grilekAI : public ScriptedAI
         {
-            boss_grilekAI(Creature* c) : ScriptedAI(c) {}
+            boss_grilekAI(Creature* creature) : ScriptedAI(creature) { }
 
             uint32 Avartar_Timer;
             uint32 GroundTremor_Timer;

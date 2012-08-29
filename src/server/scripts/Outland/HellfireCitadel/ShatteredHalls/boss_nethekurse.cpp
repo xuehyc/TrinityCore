@@ -29,7 +29,8 @@ mob_fel_orc_convert
 mob_lesser_shadow_fissure
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "shattered_halls.h"
 
 struct Say
@@ -224,7 +225,7 @@ class boss_grand_warlock_nethekurse : public CreatureScript
                 DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
             }
 
-            void JustDied(Unit* /*Killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 DoScriptText(SAY_DIE, me);
 
@@ -301,9 +302,9 @@ class boss_grand_warlock_nethekurse : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_grand_warlock_nethekurseAI (Creature);
+            return new boss_grand_warlock_nethekurseAI(creature);
         }
 };
 
@@ -356,7 +357,7 @@ class mob_fel_orc_convert : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*Killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 if (instance)
                 {
@@ -383,9 +384,9 @@ class mob_fel_orc_convert : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new mob_fel_orc_convertAI (Creature);
+            return new mob_fel_orc_convertAI(creature);
         }
 };
 

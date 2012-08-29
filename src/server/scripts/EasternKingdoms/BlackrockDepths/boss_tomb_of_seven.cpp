@@ -16,7 +16,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "blackrock_depths.h"
 
 enum Spells
@@ -45,7 +47,7 @@ class boss_gloomrel : public CreatureScript
 public:
     boss_gloomrel() : CreatureScript("boss_gloomrel") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*Sender*/, uint32 action)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
         switch (action)
@@ -104,7 +106,7 @@ class boss_doomrel : public CreatureScript
 public:
     boss_doomrel() : CreatureScript("boss_doomrel") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*Sender*/, uint32 action)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
         switch (action)
@@ -156,11 +158,11 @@ public:
 
         void Reset()
         {
-            ShadowVolley_Timer      = 10000;
-            Immolate_Timer          = 18000;
-            CurseOfWeakness_Timer   = 5000;
-            DemonArmor_Timer        = 16000;
-            Voidwalkers             = false;
+            ShadowVolley_Timer = 10000;
+            Immolate_Timer = 18000;
+            CurseOfWeakness_Timer = 5000;
+            DemonArmor_Timer = 16000;
+            Voidwalkers = false;
 
             me->setFaction(FACTION_FRIEND);
 
@@ -193,7 +195,7 @@ public:
                 instance->SetData64(DATA_EVENSTARTER, 0);
         }
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (instance)
                 instance->SetData(DATA_GHOSTKILL, 1);

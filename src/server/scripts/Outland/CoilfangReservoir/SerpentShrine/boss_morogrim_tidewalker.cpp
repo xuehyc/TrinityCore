@@ -23,7 +23,8 @@ SDComment: Water globules don't explode properly, remove hacks
 SDCategory: Coilfang Resevoir, Serpent Shrine Cavern
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "serpent_shrine.h"
 
 enum eEnums
@@ -89,9 +90,9 @@ public:
 
     struct boss_morogrim_tidewalkerAI : public ScriptedAI
     {
-        boss_morogrim_tidewalkerAI(Creature* c) : ScriptedAI(c)
+        boss_morogrim_tidewalkerAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -140,7 +141,7 @@ public:
             DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
 
@@ -296,7 +297,7 @@ public:
 
     struct mob_water_globuleAI : public ScriptedAI
     {
-        mob_water_globuleAI(Creature* c) : ScriptedAI(c) {}
+        mob_water_globuleAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 Check_Timer;
 

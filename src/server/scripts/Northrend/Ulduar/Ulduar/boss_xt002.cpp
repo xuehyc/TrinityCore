@@ -147,7 +147,7 @@ enum Yells
 /************************************************
 -----------------SPAWN LOCATIONS-----------------
 ************************************************/
-const Position spawnLocations[] = 
+const Position spawnLocations[] =
 {
     { 796.0f, -94.0f, 412.0f, 0.0 }, // Lower right
     { 796.0f,  57.0f, 412.0f, 0.0 }, // Lower left
@@ -200,7 +200,7 @@ class boss_xt002 : public CreatureScript
         };
 
     public:
-        boss_xt002() : CreatureScript("boss_xt002") {}        
+        boss_xt002() : CreatureScript("boss_xt002") {}
 
         struct boss_xt002_AI : public BossAI
         {
@@ -226,7 +226,7 @@ class boss_xt002 : public CreatureScript
 
                 if (!instance)
                     return;
-                
+
                 instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_MUST_DECONSTRUCT_FASTER);
             }
 
@@ -239,7 +239,7 @@ class boss_xt002 : public CreatureScript
                 events.ScheduleEvent(EVENT_GRAVITY_BOMB, TIMER_GRAVITY_BOMB, 0, PHASE_ONE);
                 events.ScheduleEvent(EVENT_SEARING_LIGHT, TIMER_SEARING_LIGHT, 0, PHASE_ONE);
                 // Due to Hordeguides, the first Tympanic Tantrum gets scheduled after ~1min.
-                events.ScheduleEvent(EVENT_TYMPANIC_TANTRUM, urand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX)*2, 0, PHASE_ONE);                               
+                events.ScheduleEvent(EVENT_TYMPANIC_TANTRUM, urand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX)*2, 0, PHASE_ONE);
 
                 if (!instance)
                     return;
@@ -276,7 +276,7 @@ class boss_xt002 : public CreatureScript
             {
                 if (!hardMode && phase == PHASE_ONE && HealthBelowPct(heartPhase)) // Bearbeiten: Phasenwechsel
                     ExposeHeart();
-            }            
+            }
 
             uint32 GetData(uint32 type)
             {
@@ -356,16 +356,16 @@ class boss_xt002 : public CreatureScript
                             DoScriptText(SAY_SUMMON, me);
 
                             // Spawn Pummeller
-                            me->SummonCreature(NPC_XM024_PUMMELLER, spawnLocations[rand() % 4], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);                         
+                            me->SummonCreature(NPC_XM024_PUMMELLER, spawnLocations[rand() % 4], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
 
                             // Spawn 5 Scrapbots
                             for (uint8 n = 0; n < 5; n++)
                             {
                                 uint8 pos = rand() % 4;
-                                me->SummonCreature(NPC_XS013_SCRAPBOT, 
-                                    frand(spawnLocations[pos].GetPositionX() - 3.0f, spawnLocations[pos].GetPositionX() + 3.0f), 
-                                    frand(spawnLocations[pos].GetPositionY() - 3.0f, spawnLocations[pos].GetPositionY() + 3.0f), 
-                                    spawnLocations[pos].GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000); 
+                                me->SummonCreature(NPC_XS013_SCRAPBOT,
+                                    frand(spawnLocations[pos].GetPositionX() - 3.0f, spawnLocations[pos].GetPositionX() + 3.0f),
+                                    frand(spawnLocations[pos].GetPositionY() - 3.0f, spawnLocations[pos].GetPositionY() + 3.0f),
+                                    spawnLocations[pos].GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
                             }
 
                             // Spawn 3 Bombs
@@ -407,9 +407,9 @@ class boss_xt002 : public CreatureScript
                 DoScriptText(SAY_HEART_OPENED, me);
                 me->MonsterTextEmote(EMOTE_HEART, 0, true);
                 me->RemoveAurasDueToSpell(SPELL_TYMPANIC_TANTRUM);
-                me->GetMotionMaster()->MoveIdle();                             
+                me->GetMotionMaster()->MoveIdle();
 
-                DoCast(me, SPELL_SUBMERGE);  // Will make creature untargetable                
+                DoCast(me, SPELL_SUBMERGE);  // Will make creature untargetable
 
                 me->AttackStop();
                 me->SetReactState(REACT_PASSIVE);
@@ -436,16 +436,16 @@ class boss_xt002 : public CreatureScript
                 RecalcHeartPhase();
                 // Start "end of phase 2 timer"
                 events.SetPhase(PHASE_TWO);
-                events.ScheduleEvent(EVENT_DISPOSE_HEART, TIMER_HEART_PHASE, 0, PHASE_TWO);                
+                events.ScheduleEvent(EVENT_DISPOSE_HEART, TIMER_HEART_PHASE, 0, PHASE_TWO);
                 // Hordeguides: Add-spawn is running in phase 2
-                events.ScheduleEvent(EVENT_SPAWN_ADDS, 12*IN_MILLISECONDS, 0, PHASE_TWO);               
+                events.ScheduleEvent(EVENT_SPAWN_ADDS, 12*IN_MILLISECONDS, 0, PHASE_TWO);
             }
 
             void SetPhaseOne()
             {
                 DoScriptText(SAY_HEART_CLOSED, me);
                 if (me->HasAura(SPELL_SUBMERGE))
-                    me->RemoveAurasDueToSpell(SPELL_SUBMERGE);               
+                    me->RemoveAurasDueToSpell(SPELL_SUBMERGE);
                 DoCast(me, SPELL_STAND);
                 // Just for the case this isn't done by the spell above.
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
@@ -453,7 +453,7 @@ class boss_xt002 : public CreatureScript
 
                 phase = PHASE_ONE;
                 events.SetPhase(PHASE_ONE);
-                
+
                 events.RescheduleEvent(EVENT_SEARING_LIGHT, TIMER_SEARING_LIGHT / 2, 0, PHASE_ONE);
                 events.RescheduleEvent(EVENT_GRAVITY_BOMB, TIMER_GRAVITY_BOMB, 0, PHASE_ONE);
                 events.RescheduleEvent(EVENT_TYMPANIC_TANTRUM, urand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX)*2, 0, PHASE_ONE);
@@ -472,7 +472,7 @@ class boss_xt002 : public CreatureScript
                         {
                             me->DealDamage(me, healthDiff);
                             me->LowerPlayerDamageReq(healthDiff);
-                        }                    
+                        }
 
                     // Note: if the heart did not go down enough or the players sucked too much (heal through bots), we may have jumped back in heart-phase
                     RecalcHeartPhase();
@@ -504,7 +504,7 @@ class boss_xt002 : public CreatureScript
 class mob_xt002_heart : public CreatureScript
 {
     public:
-        mob_xt002_heart() : CreatureScript("mob_xt002_heart") {}        
+        mob_xt002_heart() : CreatureScript("mob_xt002_heart") {}
 
         struct mob_xt002_heartAI : public Scripted_NoMovementAI
         {
@@ -548,7 +548,7 @@ class mob_xt002_heart : public CreatureScript
 class mob_scrapbot : public CreatureScript
 {
     public:
-        mob_scrapbot() : CreatureScript("mob_scrapbot") {}        
+        mob_scrapbot() : CreatureScript("mob_scrapbot") {}
 
         struct mob_scrapbotAI : public ScriptedAI
         {
@@ -613,16 +613,16 @@ class mob_scrapbot : public CreatureScript
 class mob_pummeller : public CreatureScript
 {
     private:
-        enum 
-        { 
+        enum
+        {
             EVENT_ARCING_SMASH = 1, EVENT_TRAMPLE, EVENT_UPPERCUT, // 1,2,3...
             TIMER_ARCING_SMASH = 7000,
             TIMER_TRAMPLE      = 2000,
-            TIMER_UPPERCUT     = 7000, 
+            TIMER_UPPERCUT     = 7000,
         };
 
     public:
-        mob_pummeller() : CreatureScript("mob_pummeller") {}        
+        mob_pummeller() : CreatureScript("mob_pummeller") {}
 
         struct mob_pummellerAI : public ScriptedAI
         {
@@ -671,7 +671,7 @@ class mob_pummeller : public CreatureScript
                                 DoCast(me->getVictim(), SPELL_UPPERCUT);
                                 events.ScheduleEvent(EVENT_UPPERCUT, TIMER_UPPERCUT);
                                 break;
-                        }                        
+                        }
                     }
                 }
 
@@ -718,7 +718,7 @@ class BoomEvent : public BasicEvent
 class mob_boombot : public CreatureScript
 {
     public:
-        mob_boombot() : CreatureScript("mob_boombot") {}        
+        mob_boombot() : CreatureScript("mob_boombot") {}
 
         struct mob_boombotAI : public ScriptedAI
         {
@@ -801,7 +801,7 @@ class mob_life_spark : public CreatureScript
     private:
         enum { TIMER_SHOCK = 12000 };
     public:
-        mob_life_spark() : CreatureScript("mob_life_spark") {}        
+        mob_life_spark() : CreatureScript("mob_life_spark") {}
 
         struct mob_life_sparkAI : public ScriptedAI
         {
@@ -969,14 +969,14 @@ class spell_xt002_gravity_bomb_aura : public SpellScriptLoader
         }
 };
 
-class BombTargetSelector : public std::unary_function<Unit *, bool>
+class BombTargetSelector
 {
 public:
     BombTargetSelector(Creature* me, const Unit* victim) : _me(me), _victim(victim) {}
 
-    bool operator() (Unit* target)
+    bool operator() (WorldObject* target)
     {
-        /* 
+        /*
             Decision rule:
             - If currently checked target is out current target, check if there are more targets in our threat-list.
                 - If there are, cut off the current target (in most cases, the tank).
@@ -1007,32 +1007,32 @@ class spell_xt002_gravity_bomb_aura_target : public SpellScriptLoader
                 return GetCaster()->GetTypeId() == TYPEID_UNIT;
             }
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<WorldObject*>& targets)
             {
-                unitList.remove_if(BombTargetSelector(GetCaster()->ToCreature(), GetCaster()->getVictim()));
+                targets.remove_if(BombTargetSelector(GetCaster()->ToCreature(), GetCaster()->getVictim()));
 
-                if (unitList.empty())
+                if (targets.empty())
                     return;
 
-                _target = SelectRandomContainerElement(unitList);
-                unitList.clear();
-                unitList.push_back(_target);
+                _target = Trinity::Containers::SelectRandomContainerElement(targets);
+                targets.clear();
+                targets.push_back(_target);
             }
 
-            void SetTarget(std::list<Unit*>& unitList)
+            void SetTarget(std::list<WorldObject*>& targets)
             {
-                unitList.clear();
+                targets.clear();
                 if (_target)
-                    unitList.push_back(_target);
+                    targets.push_back(_target);
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_xt002_gravity_bomb_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_xt002_gravity_bomb_targeting_SpellScript::SetTarget, EFFECT_2, TARGET_UNIT_DEST_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_xt002_gravity_bomb_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_xt002_gravity_bomb_targeting_SpellScript::SetTarget, EFFECT_2, TARGET_UNIT_DEST_AREA_ENEMY);
             }
 
-            Unit* _target;
+            WorldObject* _target;
         };
 
         SpellScript* GetSpellScript() const
@@ -1148,15 +1148,15 @@ class spell_xt002_tympanic_tantrum : public SpellScriptLoader
         {
             PrepareSpellScript(spell_xt002_tympanic_tantrum_SpellScript);
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<WorldObject*>& targets)
             {
-                unitList.remove_if (PlayerOrPetCheck());
+                targets.remove_if (PlayerOrPetCheck());
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_xt002_tympanic_tantrum_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_xt002_tympanic_tantrum_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_xt002_tympanic_tantrum_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_xt002_tympanic_tantrum_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 
@@ -1294,9 +1294,3 @@ void AddSC_boss_xt002()
     new achievement_heartbreaker();
     new achievement_nerf_gravity_bombs();
 }
-
-#undef SPELL_SEARING_LIGHT
-#undef SPELL_GRAVITY_BOMB
-#undef SPELL_HEARTBREAK
-#undef SPELL_CONSUMPTION
-#undef SPELL_STATIC_CHARGED

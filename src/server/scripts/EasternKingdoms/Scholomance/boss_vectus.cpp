@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Scholomance
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum eEnums
 {
@@ -45,7 +46,7 @@ public:
 
     struct boss_vectusAI : public ScriptedAI
     {
-        boss_vectusAI(Creature* c) : ScriptedAI(c) {}
+        boss_vectusAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 m_uiFireShield_Timer;
         uint32 m_uiBlastWave_Timer;

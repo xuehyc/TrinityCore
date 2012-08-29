@@ -23,7 +23,8 @@ SDComment: Missing adds to heal him. Surge should be used on target furthest awa
 SDCategory: Hellfire Citadel, Hellfire Ramparts
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum eSays
 {
@@ -87,7 +88,7 @@ class boss_watchkeeper_gargolmar : public CreatureScript
             {
                 if (!me->getVictim() && me->canCreatureAttack(who))
                 {
-                    if (!me->canFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+                    if (!me->CanFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
                         return;
 
                     float attackRadius = me->GetAttackDistance(who);
@@ -109,7 +110,7 @@ class boss_watchkeeper_gargolmar : public CreatureScript
                 DoScriptText(RAND(SAY_KILL_1, SAY_KILL_2), me);
             }
 
-            void JustDied(Unit* /*Killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 DoScriptText(SAY_DIE, me);
             }
@@ -163,9 +164,9 @@ class boss_watchkeeper_gargolmar : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_watchkeeper_gargolmarAI (Creature);
+            return new boss_watchkeeper_gargolmarAI(creature);
         }
 };
 

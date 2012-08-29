@@ -21,7 +21,12 @@ SD%Complete: 0
 SDComment:
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "Cell.h"
+#include "CellImpl.h"
 #include "sunwell_plateau.h"
 
 enum Yells
@@ -115,9 +120,9 @@ public:
 
     struct boss_felmystAI : public ScriptedAI
     {
-        boss_felmystAI(Creature* c) : ScriptedAI(c)
+        boss_felmystAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -137,7 +142,7 @@ public:
 
             uiFlightCount = 0;
 
-            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+            me->SetDisableGravity(true);
             me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 10);
             me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10);
 
@@ -184,7 +189,7 @@ public:
             DoScriptText(YELL_BIRTH, me);
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(YELL_DEATH, me);
 
@@ -254,7 +259,7 @@ public:
                 events.ScheduleEvent(EVENT_FLIGHT, 60000);
                 break;
             case PHASE_FLIGHT:
-                me->SetUnitMovementFlags(MOVEMENTFLAG_LEVITATING);
+                me->SetUnitMovementFlags(MOVEMENTFLAG_DISABLE_GRAVITY);
                 events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 1000);
                 uiFlightCount = 0;
                 uiBreathCount = 0;
@@ -391,7 +396,7 @@ public:
                 }
                 break;
             case 10:
-                me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                me->SetDisableGravity(false);
                 me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
                 EnterPhase(PHASE_GROUND);
                 AttackStart(SelectTarget(SELECT_TARGET_TOPAGGRO));
@@ -522,7 +527,7 @@ public:
 
     struct mob_felmyst_vaporAI : public ScriptedAI
     {
-        mob_felmyst_vaporAI(Creature* c) : ScriptedAI(c)
+        mob_felmyst_vaporAI(Creature* creature) : ScriptedAI(creature)
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetSpeed(MOVE_RUN, 0.8f);
@@ -555,7 +560,7 @@ public:
 
     struct mob_felmyst_trailAI : public ScriptedAI
     {
-        mob_felmyst_trailAI(Creature* c) : ScriptedAI(c)
+        mob_felmyst_trailAI(Creature* creature) : ScriptedAI(creature)
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             DoCast(me, SPELL_TRAIL_TRIGGER, true);

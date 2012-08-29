@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "vault_of_archavon.h"
 
 enum Events
@@ -99,8 +100,10 @@ class boss_koralon : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_BURNING_BREATH:
+                        {
                             DoCast(me->getVictim(), RAID_MODE(SPELL_BURNING_BREATH, SPELL_BURNING_BREATH_H));
                             breathCount++;
+
                             if (breathCount == 3)
                             {
                                 breathCount = 0;
@@ -108,7 +111,9 @@ class boss_koralon : public CreatureScript
                             }
                             else
                                 events.ScheduleEvent(EVENT_BURNING_BREATH, 1000);
+
                             break;
+                        }
                         case EVENT_METEOR_FISTS:
                             DoCast(me, SPELL_METEOR_FISTS_VISUAL);
                             events.ScheduleEvent(EVENT_METEOR_FISTS, 45000);

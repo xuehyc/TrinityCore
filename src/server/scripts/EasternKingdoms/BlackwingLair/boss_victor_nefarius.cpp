@@ -23,7 +23,9 @@ SDComment: Missing some text, Vael beginning event, and spawns Nef in wrong plac
 SDCategory: Blackwing Lair
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 
 enum Says
 {
@@ -83,10 +85,10 @@ class boss_victor_nefarius : public CreatureScript
 public:
     boss_victor_nefarius() : CreatureScript("boss_victor_nefarius") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*Sender*/, uint32 Action)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        switch (Action)
+        switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF+1:
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
@@ -220,13 +222,13 @@ public:
 
         void Reset()
         {
-            SpawnedAdds       = 0;
-            AddSpawnTimer     = 10000;
-            ShadowBoltTimer   = 5000;
-            FearTimer         = 8000;
-            ResetTimer        = 900000; //On official it takes him 15 minutes(900 seconds) to reset. We are only doing 1 minute to make testing easier
-            NefarianGUID      = 0;
-            NefCheckTime      = 2000;
+            SpawnedAdds = 0;
+            AddSpawnTimer = 10000;
+            ShadowBoltTimer = 5000;
+            FearTimer = 8000;
+            ResetTimer = 900000;                                // On official it takes him 15 minutes(900 seconds) to reset. We are only doing 1 minute to make testing easier
+            NefarianGUID = 0;
+            NefCheckTime = 2000;
 
             me->SetUInt32Value(UNIT_NPC_FLAGS, 1);
             me->setFaction(35);
@@ -362,7 +364,7 @@ public:
                             Nefarian->setFaction(103);
                             NefarianGUID = Nefarian->GetGUID();
                         }
-                        else sLog->outError("TSCR: Blackwing Lair: Unable to spawn nefarian properly.");
+                        else sLog->outError(LOG_FILTER_TSCR, "Blackwing Lair: Unable to spawn nefarian properly.");
                     }
 
                     AddSpawnTimer = 4000;

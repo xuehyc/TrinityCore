@@ -28,8 +28,9 @@ npc_greatmother_geyah
 npc_maghar_captive
 npc_creditmarker_visit_with_ancestors
 EndContentData */
-
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "ScriptedEscortAI.h"
 
 /*######
@@ -57,10 +58,10 @@ class npc_greatmother_geyah : public CreatureScript
 public:
     npc_greatmother_geyah() : CreatureScript("npc_greatmother_geyah") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        switch (uiAction)
+        switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF + 1:
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SGG1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
@@ -90,7 +91,6 @@ public:
                 player->AreaExploredOrEventHappens(10044);
                 player->CLOSE_GOSSIP_MENU();
                 break;
-
             case GOSSIP_ACTION_INFO_DEF + 10:
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SGG7, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 11);
                 player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
@@ -135,12 +135,10 @@ public:
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
         }
         else
-
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
 
         return true;
     }
-
 };
 
 /*#####
@@ -224,9 +222,9 @@ public:
             DoCast(me, SPELL_EARTHBIND_TOTEM, false);
         }
 
-        void WaypointReached(uint32 uiPointId)
+        void WaypointReached(uint32 waypointId)
         {
-            switch (uiPointId)
+            switch (waypointId)
             {
                 case 7:
                     DoScriptText(SAY_MAG_MORE, me);
@@ -235,7 +233,6 @@ public:
                         DoScriptText(SAY_MAG_MORE_REPLY, temp);
 
                     me->SummonCreature(NPC_MURK_PUTRIFIER, m_afAmbushB[0]-2.5f, m_afAmbushB[1]-2.5f, m_afAmbushB[2], 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
-
                     me->SummonCreature(NPC_MURK_SCAVENGER, m_afAmbushB[0]+2.5f, m_afAmbushB[1]+2.5f, m_afAmbushB[2], 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
                     me->SummonCreature(NPC_MURK_SCAVENGER, m_afAmbushB[0]+2.5f, m_afAmbushB[1]-2.5f, m_afAmbushB[2], 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
                     break;
@@ -258,7 +255,7 @@ public:
             if (summoned->isTotem())
                 return;
 
-            summoned->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            summoned->SetWalk(false);
             summoned->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
             summoned->AI()->AttackStart(me);
 
@@ -311,7 +308,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 /*######
@@ -330,7 +326,7 @@ public:
 
     struct npc_creditmarker_visit_with_ancestorsAI : public ScriptedAI
     {
-        npc_creditmarker_visit_with_ancestorsAI(Creature* c) : ScriptedAI(c) {}
+        npc_creditmarker_visit_with_ancestorsAI(Creature* creature) : ScriptedAI(creature) {}
 
         void Reset() {}
 
@@ -356,7 +352,6 @@ public:
             }
         }
     };
-
 };
 
 /*######
@@ -401,6 +396,7 @@ public:
                   player->KilledMonsterCredit(NPC_CORKI_CREDIT_1, 0);
           }
       }
+
       if (go->GetEntry() == GO_CORKIS_PRISON_2)
       {
           if (Creature* corki = go->FindNearestCreature(NPC_CORKI_2, 25, true))
@@ -411,6 +407,7 @@ public:
                   player->KilledMonsterCredit(NPC_CORKI_2, 0);
           }
       }
+
       if (go->GetEntry() == GO_CORKIS_PRISON_3)
       {
           if (Creature* corki = go->FindNearestCreature(NPC_CORKI_3, 25, true))
@@ -444,18 +441,22 @@ public:
 
       void Reset()
       {
+          Say_Timer = 5000;
           ReleasedFromCage = false;
       }
 
       void UpdateAI(uint32 const diff)
       {
-          if (Say_Timer <= diff && ReleasedFromCage)
+          if (ReleasedFromCage)
           {
-              me->ForcedDespawn();
-              ReleasedFromCage = false;
+              if (Say_Timer <= diff)
+              {
+                  me->DespawnOrUnsummon();
+                  ReleasedFromCage = false;
+              }
+              else
+                  Say_Timer -= diff;
           }
-          else
-              Say_Timer -= diff;
       }
 
       void MovementInform(uint32 type, uint32 id)
@@ -565,9 +566,9 @@ public:
             }
         }
 
-        void WaypointReached(uint32 PointId)
+        void WaypointReached(uint32 waypointId)
         {
-            switch(PointId)
+            switch (waypointId)
             {
                 case 3:
                 {
@@ -603,7 +604,7 @@ public:
             if (summoned->isTotem())
                 return;
 
-            summoned->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            summoned->SetWalk(false);
             summoned->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
             summoned->AI()->AttackStart(me);
         }
@@ -685,15 +686,11 @@ class go_warmaul_prison : public GameObjectScript
 
             if (Creature* prisoner = go->FindNearestCreature(NPC_MAGHAR_PRISONER, 5.0f))
             {
-                if (prisoner)
-                {
-                    go->UseDoorOrButton();
-                    if (player)
-                        player->KilledMonsterCredit(NPC_MAGHAR_PRISONER, 0);
+                go->UseDoorOrButton();
+                player->KilledMonsterCredit(NPC_MAGHAR_PRISONER, 0);
 
-                    prisoner->AI()->Talk(SAY_FREE, player->GetGUID());
-                    prisoner->ForcedDespawn(6000);
-                }
+                prisoner->AI()->Talk(SAY_FREE, player->GetGUID());
+                prisoner->DespawnOrUnsummon(6000);
             }
             return true;
         }

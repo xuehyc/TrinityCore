@@ -22,7 +22,9 @@ SDComment: AI for Argent Soldiers are not implemented. AI from bosses need more 
 SDCategory: Trial of the Champion
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
 #include "trial_of_the_champion.h"
 #include "ScriptedEscortAI.h"
 
@@ -80,9 +82,9 @@ class OrientationCheck : public std::unary_function<Unit*, bool>
 {
     public:
         explicit OrientationCheck(Unit* _caster) : caster(_caster) { }
-        bool operator() (Unit* unit)
+        bool operator()(WorldObject* object)
         {
-            return !unit->isInFront(caster, 40.0f, 2.5f);
+            return !object->isInFront(caster, 2.5f) || !object->IsWithinDist(caster, 40.0f);
         }
 
     private:
@@ -96,15 +98,16 @@ class spell_eadric_radiance : public SpellScriptLoader
         class spell_eadric_radiance_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_eadric_radiance_SpellScript);
-            void FilterTargets(std::list<Unit*>& unitList)
+
+            void FilterTargets(std::list<WorldObject*>& unitList)
             {
-                unitList.remove_if (OrientationCheck(GetCaster()));
+                unitList.remove_if(OrientationCheck(GetCaster()));
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_eadric_radiance_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_eadric_radiance_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_eadric_radiance_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_eadric_radiance_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 
@@ -117,19 +120,21 @@ class spell_eadric_radiance : public SpellScriptLoader
 class spell_eadric_hoj : public SpellScriptLoader
 {
     public:
-        spell_eadric_hoj() : SpellScriptLoader("spell_eadric_hoj") { }
+        spell_eadric_hoj() : SpellScriptLoader("spell_eadric_hoj") {}
+
         class spell_eadric_hoj_SpellScript: public SpellScript
         {
             PrepareSpellScript(spell_eadric_hoj_SpellScript);
             void HandleOnHit()
             {
                 if (GetHitUnit() && GetHitUnit()->GetTypeId() == TYPEID_PLAYER)
+                {
                     if (!GetHitUnit()->HasAura(SPELL_HAMMER_JUSTICE_STUN)) // FIXME: Has Catched Hammer...
                     {
                         SetHitDamage(0);
                         GetHitUnit()->AddAura(SPELL_HAMMER_OVERRIDE_BAR, GetHitUnit());
                     }
-
+                }
             }
 
             void Register()
@@ -300,7 +305,6 @@ public:
 
         InstanceScript* instance;
 
-        Creature* pMemory;
         uint64 MemoryGUID;
 
         bool bHealth;
@@ -521,7 +525,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* killer)
+        void JustDied(Unit* /*killer*/)
         {
             // TODO:
         	// DoCast(killer, SPELL_CONFESSOR_ACHIEVEMENT);
@@ -823,7 +827,8 @@ class achievement_toc5_argent_challenge : public AchievementCriteriaScript
     public:
         uint32 creature_entry;
 
-        achievement_toc5_argent_challenge(const char* name, uint32 original_entry) : AchievementCriteriaScript(name) {
+        achievement_toc5_argent_challenge(const char* name, uint32 original_entry) : AchievementCriteriaScript(name)
+        {
             creature_entry = original_entry;
         }
 

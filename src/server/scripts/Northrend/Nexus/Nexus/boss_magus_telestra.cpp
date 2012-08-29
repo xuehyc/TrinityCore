@@ -16,7 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "nexus.h"
 
 enum Spells
@@ -67,9 +68,9 @@ public:
 
     struct boss_magus_telestraAI : public ScriptedAI
     {
-        boss_magus_telestraAI(Creature* c) : ScriptedAI(c)
+        boss_magus_telestraAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;

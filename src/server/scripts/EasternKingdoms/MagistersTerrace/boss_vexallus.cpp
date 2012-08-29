@@ -23,7 +23,8 @@ SDComment: Heroic and Normal support. Needs further testing.
 SDCategory: Magister's Terrace
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "magisters_terrace.h"
 
 enum eEnums
@@ -101,7 +102,7 @@ public:
             DoScriptText(SAY_KILL, me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (instance)
                 instance->SetData(DATA_VEXALLUS_EVENT, DONE);

@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Karazhan
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SAY_AGGRO               -1532018
 #define SAY_SLAY1               -1532019
@@ -51,7 +52,7 @@ public:
 
     struct boss_maiden_of_virtueAI : public ScriptedAI
     {
-        boss_maiden_of_virtueAI(Creature* c) : ScriptedAI(c) {}
+        boss_maiden_of_virtueAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 Repentance_Timer;
         uint32 Holyfire_Timer;
@@ -78,7 +79,7 @@ public:
                 DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3), me);
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
         }

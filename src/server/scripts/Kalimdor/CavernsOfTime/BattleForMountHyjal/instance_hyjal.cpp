@@ -23,15 +23,16 @@ SDComment: Instance Data Scripts and functions to acquire mobs and set encounter
 SDCategory: Caverns of Time, Mount Hyjal
 EndScriptData */
 
-#include "ScriptPCH.h"
-#include "hyjal.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
+#include "ScriptedCreature.h"
 #include "hyjal_trash.h"
 
-enum eEnums
+enum Misc
 {
     MAX_ENCOUNTER       = 5,
 
-    GO_ANCIENT_GEM      = 185557
+    GO_ANCIENT_GEM      = 185557,
 };
 /* Battle of Mount Hyjal encounters:
 0 - Rage Winterchill event
@@ -110,7 +111,8 @@ public:
         bool IsEncounterInProgress() const
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS) return true;
+                if (m_auiEncounter[i] == IN_PROGRESS)
+                    return true;
 
             return false;
         }
@@ -175,17 +177,23 @@ public:
         {
             switch (type)
             {
-                case DATA_RAGEWINTERCHILLEVENT: m_auiEncounter[0] = data; break;
+                case DATA_RAGEWINTERCHILLEVENT:
+                    m_auiEncounter[0] = data;
+                    break;
                 case DATA_ANETHERONEVENT:
                     m_auiEncounter[1] = data;
                     break;
-                case DATA_KAZROGALEVENT:        m_auiEncounter[2] = data; break;
+                case DATA_KAZROGALEVENT:
+                    m_auiEncounter[2] = data;
+                    break;
                 case DATA_AZGALOREVENT:
                     {
                         m_auiEncounter[3] = data;
                         if (data == DONE)
                         {
-                            if (ArchiYell)break;
+                            if (ArchiYell)
+                                break;
+
                             ArchiYell = true;
 
                             Creature* creature = instance->GetCreature(Azgalor);
@@ -219,12 +227,17 @@ public:
                         }
                     }
                     break;
-                case DATA_ARCHIMONDEEVENT:      m_auiEncounter[4] = data; break;
-                case DATA_RESET_TRASH_COUNT:    Trash = 0;            break;
-
+                case DATA_ARCHIMONDEEVENT:
+                    m_auiEncounter[4] = data;
+                    break;
+                case DATA_RESET_TRASH_COUNT:
+                    Trash = 0;
+                    break;
                 case DATA_TRASH:
-                    if (data) Trash = data;
-                    else     Trash--;
+                    if (data)
+                        Trash = data;
+                    else
+                        Trash--;
                     DoUpdateWorldState(WORLD_STATE_ENEMYCOUNT, Trash);
                     break;
                 case TYPE_RETREAT:
@@ -260,7 +273,7 @@ public:
                     break;
             }
 
-             sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Instance Hyjal: Instance data updated for event %u (Data=%u)", type, data);
+             sLog->outDebug(LOG_FILTER_TSCR, "Instance Hyjal: Instance data updated for event %u (Data=%u)", type, data);
 
             if (data == DONE)
             {

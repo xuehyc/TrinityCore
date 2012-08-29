@@ -23,7 +23,8 @@ SDComment: Timers may be incorrect
 SDCategory: Coilfang Resevoir, Underbog
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SPELL_LEVITATE             31704
 #define SPELL_SUSPENSION           31719
@@ -47,7 +48,7 @@ public:
 
     struct boss_the_black_stalkerAI : public ScriptedAI
     {
-        boss_the_black_stalkerAI(Creature* c) : ScriptedAI(c)
+        boss_the_black_stalkerAI(Creature* creature) : ScriptedAI(creature)
         {
         }
 
@@ -88,7 +89,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit* /*killer*/)
         {
             for (std::list<uint64>::const_iterator i = Striders.begin(); i != Striders.end(); ++i)
                 if (Creature* strider = Unit::GetCreature(*me, *i))

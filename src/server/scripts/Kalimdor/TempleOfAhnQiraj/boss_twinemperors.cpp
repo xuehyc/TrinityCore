@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "temple_of_ahnqiraj.h"
 #include "WorldPacket.h"
 
@@ -61,9 +62,9 @@ EndScriptData */
 
 struct boss_twinemperorsAI : public ScriptedAI
 {
-    boss_twinemperorsAI(Creature* c): ScriptedAI(c)
+    boss_twinemperorsAI(Creature* creature): ScriptedAI(creature)
     {
-        instance = c->GetInstanceScript();
+        instance = creature->GetInstanceScript();
     }
 
     InstanceScript* instance;
@@ -120,7 +121,7 @@ struct boss_twinemperorsAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* /*Killer*/)
+    void JustDied(Unit* /*killer*/)
     {
         Creature* pOtherBoss = GetOtherBoss();
         if (pOtherBoss)
@@ -393,7 +394,7 @@ public:
     struct boss_veknilashAI : public boss_twinemperorsAI
     {
         bool IAmVeklor() {return false;}
-        boss_veknilashAI(Creature* c) : boss_twinemperorsAI(c) {}
+        boss_veknilashAI(Creature* creature) : boss_twinemperorsAI(creature) {}
 
         uint32 UpperCut_Timer;
         uint32 UnbalancingStrike_Timer;
@@ -479,7 +480,7 @@ public:
     struct boss_veklorAI : public boss_twinemperorsAI
     {
         bool IAmVeklor() {return true;}
-        boss_veklorAI(Creature* c) : boss_twinemperorsAI(c) {}
+        boss_veklorAI(Creature* creature) : boss_twinemperorsAI(creature) {}
 
         uint32 ShadowBolt_Timer;
         uint32 Blizzard_Timer;

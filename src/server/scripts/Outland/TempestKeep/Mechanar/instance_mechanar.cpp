@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Mechanar
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "mechanar.h"
 
 #define MAX_ENCOUNTER      1
@@ -66,7 +67,7 @@ class instance_mechanar : public InstanceMapScript
                 return false;
             }
 
-            uint64 GetData64 (uint32 /*identifier*/)
+            uint64 GetData64(uint32 /*identifier*/)
             {
                 return 0;
             }

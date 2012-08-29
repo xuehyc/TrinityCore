@@ -49,7 +49,7 @@ enum Spells
     SPELL_STRENGTH              = 64473,
     SPELL_GRAB                  = 62707,
     SPELL_BERSERK               = 47008,
-    SPELL_GRAB_ENTER_VEHICLE    = 62711,    
+    SPELL_GRAB_ENTER_VEHICLE    = 62711,
 
     // Iron Construct
     SPELL_HEAT                  = 65667,
@@ -121,8 +121,8 @@ Position const ConstructSpawnPosition[CONSTRUCT_SPAWN_POINTS] =
     {543.256f, 224.831f, 360.891f, 0.122173f},
 };
 
-/* 
-    TODO: 
+/*
+    TODO:
     - Shatter Achievement (2925/2926)
     - Check if Grab Pot works
 */
@@ -172,7 +172,7 @@ class AchievShatterHelper
         {
             return achievFulfilled;
         }
-    private:        
+    private:
         bool gotInformed;       // Starts time-tracking
         bool achievFulfilled;   // Set if achievement was completed successfully
         const uint64 limit;     // Time-limit, set on construction
@@ -207,12 +207,12 @@ class boss_ignis : public CreatureScript
                 }
 
                 instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_IGNIS_START_EVENT);
-            }            
+            }
 
             void EnterCombat(Unit* /*who*/)
             {
                 _EnterCombat();
-                DoScriptText(SAY_AGGRO, me);                
+                DoScriptText(SAY_AGGRO, me);
                 events.ScheduleEvent(EVENT_JET, 30000);
                 events.ScheduleEvent(EVENT_SCORCH, 25000);
                 events.ScheduleEvent(EVENT_SLAG_POT, 35000);
@@ -238,7 +238,7 @@ class boss_ignis : public CreatureScript
                 if (summon->GetEntry() == NPC_IRON_CONSTRUCT)
                     summons.Despawn(summon);
             }
-            
+
             void SummonedCreatureDies(Creature* summon, Unit* /*killer*/)
             {
                 if (summon->GetEntry() == NPC_IRON_CONSTRUCT)
@@ -315,7 +315,7 @@ class boss_ignis : public CreatureScript
                             {
                                 slagPotTarget->EnterVehicle(me, 1);
                                 slagPotTarget->ClearUnitState(UNIT_STATE_ONVEHICLE);
-                                DoCast(slagPotTarget, SPELL_SLAG_POT);                                                                
+                                DoCast(slagPotTarget, SPELL_SLAG_POT);
                                 events.ScheduleEvent(EVENT_END_POT, 10000);
                             }
                             break;
@@ -338,7 +338,7 @@ class boss_ignis : public CreatureScript
 
                             if (!summons.empty())
                             {
-                                uint64 selectedConstruct = SelectRandomContainerElement(summons);                                
+                                uint64 selectedConstruct = Trinity::Containers::SelectRandomContainerElement(summons);
                                 if (Creature* construct = ObjectAccessor::GetCreature(*me, selectedConstruct))
                                 {
                                     construct->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
@@ -350,7 +350,7 @@ class boss_ignis : public CreatureScript
                                     // Due to Spellworks, this spell requires a given target position.
                                     me->CastSpell(construct->GetPositionX(), construct->GetPositionY(), construct->GetPositionZ(), SPELL_ACTIVATE_CONSTRUCT, true);
                                 }
-                            }                           
+                            }
                             events.ScheduleEvent(EVENT_CONSTRUCT, RAID_MODE(40000, 30000));
                             break;
                         case EVENT_BERSERK:
@@ -575,16 +575,16 @@ class spell_ignis_flame_jets : public SpellScriptLoader
         {
             PrepareSpellScript(spell_ignis_flame_jets_SpellScript);
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<WorldObject*>& targets)
             {
-                unitList.remove_if(PlayerOrPetCheck());
+                targets.remove_if(PlayerOrPetCheck());
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_ignis_flame_jets_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_ignis_flame_jets_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_ignis_flame_jets_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ignis_flame_jets_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ignis_flame_jets_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ignis_flame_jets_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 
@@ -617,7 +617,3 @@ void AddSC_boss_ignis()
     new spell_ignis_flame_jets();
     new achievement_ignis_shattered();
 }
-
-#undef SPELL_FLAME_JETS
-#undef SPELL_SCORCH
-#undef SPELL_BRITTLE 

@@ -23,7 +23,8 @@ SDComment: TODO: if this guy not involved in some special event, remove (and let
 SDCategory: Scarlet Monastery
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum eSpells
 {
@@ -66,9 +67,15 @@ public:
             Sleep_Timer = 30000;
             Dispel_Timer = 20000;
             PowerWordShield = false;
+            me->SetStandState(UNIT_STAND_STATE_DEAD);
+            me->SetUInt32Value(UNIT_FIELD_BYTES_1, 7);
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/)
+        {
+            me->SetStandState(UNIT_STAND_STATE_STAND);
+            me->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+        }
 
         void UpdateAI(const uint32 diff)
         {

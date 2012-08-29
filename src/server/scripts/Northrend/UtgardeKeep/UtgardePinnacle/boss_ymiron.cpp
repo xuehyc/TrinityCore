@@ -23,7 +23,8 @@ SDComment:
 SDCategory:
 Script Data End */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "utgarde_pinnacle.h"
 
 enum Spells
@@ -108,9 +109,9 @@ public:
 
     struct boss_ymironAI : public ScriptedAI
     {
-        boss_ymironAI(Creature* c) : ScriptedAI(c)
+        boss_ymironAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             for (int i = 0; i < 4; ++i)
                 m_uiActiveOrder[i] = i;
             for (int i = 0; i < 3; ++i)
@@ -219,7 +220,7 @@ public:
                         m_uiActivedCreatureGUID = temp->GetGUID();
                         temp->CastSpell(me, SPELL_CHANNEL_SPIRIT_TO_YMIRON, true);
                         temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                        temp->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                        temp->SetDisableGravity(true);
                         switch (m_uiActiveOrder[m_uiActivedNumber])
                         {
                             case 0: m_bIsActiveWithBJORN  = true; break;

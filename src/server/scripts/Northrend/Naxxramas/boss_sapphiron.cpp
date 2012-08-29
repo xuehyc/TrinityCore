@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "naxxramas.h"
 
 #define EMOTE_BREATH            -1533082
@@ -83,7 +84,7 @@ public:
 
     struct boss_sapphironAI : public BossAI
     {
-        boss_sapphironAI(Creature* c) : BossAI(c, BOSS_SAPPHIRON)
+        boss_sapphironAI(Creature* creature) : BossAI(creature, BOSS_SAPPHIRON)
             , phase(PHASE_NULL)
         {
             map = me->GetMap();
@@ -93,7 +94,6 @@ public:
         uint32 iceboltCount;
         IceBlockMap iceblocks;
 
-        bool Berserk;
         bool CanTheHundredClub; // needed for achievement: The Hundred Club(2146, 2147)
         uint32 CheckFrostResistTimer;
         Map* map;
@@ -118,12 +118,11 @@ public:
             {
                 ClearIceBlock();
                 me->SetReactState(REACT_AGGRESSIVE);
-                me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                me->SendMovementFlagUpdate();
+                me->SetDisableGravity(false);
             }
 
             phase = PHASE_NULL;
-            Berserk = false;
+
             CanTheHundredClub = true;
             CheckFrostResistTimer = 5000;
         }
@@ -134,15 +133,8 @@ public:
 
             me->CastSpell(me, SPELL_FROST_AURA, true);
 
-            phase = PHASE_GROUND;
-            me->SetReactState(REACT_AGGRESSIVE);
-            events.SetPhase(PHASE_GROUND);
-            events.ScheduleEvent(EVENT_CLEAVE, 5000+rand()%10000, 0, PHASE_GROUND);
-            events.ScheduleEvent(EVENT_TAIL, 5000+rand()%10000, 0, PHASE_GROUND);
-            events.ScheduleEvent(EVENT_DRAIN, 10000, 0, PHASE_GROUND);
-            events.ScheduleEvent(EVENT_BLIZZARD, 5000+rand()%5000, 0, PHASE_GROUND);
-            events.ScheduleEvent(EVENT_FLIGHT, 50000);
             events.ScheduleEvent(EVENT_BERSERK, 15*60000);
+            EnterPhaseGround();
 
             CheckPlayersFrostResist();
         }
@@ -160,7 +152,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit* /*killer*/)
         {
             _JustDied();
             me->CastSpell(me, SPELL_DIES, true);
@@ -168,7 +160,7 @@ public:
             CheckPlayersFrostResist();
             if (CanTheHundredClub)
             {
-                AchievementEntry const* AchievTheHundredClub = GetAchievementStore()->LookupEntry(ACHIEVEMENT_THE_HUNDRED_CLUB);
+                AchievementEntry const* AchievTheHundredClub = sAchievementStore.LookupEntry(ACHIEVEMENT_THE_HUNDRED_CLUB);
                 if (AchievTheHundredClub)
                 {
                     if (map && map->IsDungeon())
@@ -222,9 +214,9 @@ public:
             events.SetPhase(PHASE_GROUND);
             events.ScheduleEvent(EVENT_CLEAVE, 5000+rand()%10000, 0, PHASE_GROUND);
             events.ScheduleEvent(EVENT_TAIL, 5000+rand()%10000, 0, PHASE_GROUND);
-            events.ScheduleEvent(EVENT_DRAIN, 1000, 0, PHASE_GROUND);
+            events.ScheduleEvent(EVENT_DRAIN, 24000, 0, PHASE_GROUND);
             events.ScheduleEvent(EVENT_BLIZZARD, 5000+rand()%5000, 0, PHASE_GROUND);
-            events.ScheduleEvent(EVENT_FLIGHT, 65000);
+            events.ScheduleEvent(EVENT_FLIGHT, 45000);
         }
 
         void ClearIceBlock()
@@ -258,23 +250,16 @@ public:
                 } else CheckFrostResistTimer -= diff;
             }
 
-            while (uint32 eventId = events.ExecuteEvent())
+            if (phase == PHASE_GROUND)
             {
-                switch (eventId)
+                while (uint32 eventId = events.ExecuteEvent())
                 {
-                    case EVENT_BERSERK:
-                    if (!Berserk)
+                    switch (eventId)
                     {
-                        DoScriptText(EMOTE_ENRAGE, me);
-                        Berserk = true;
-                    }
-
-                    DoCast(me, SPELL_BERSERK, true);
-                    events.ScheduleEvent(EVENT_BERSERK, 5 * 60000);
-                    break;
-
-                    if (phase == PHASE_GROUND)
-                    {
+                        case EVENT_BERSERK:
+                            DoScriptText(EMOTE_ENRAGE, me);
+                            DoCast(me, SPELL_BERSERK);
+                            return;
                         case EVENT_CLEAVE:
                             DoCast(me->getVictim(), SPELL_CLEAVE);
                             events.ScheduleEvent(EVENT_CLEAVE, 5000+rand()%10000, 0, PHASE_GROUND);
@@ -285,7 +270,7 @@ public:
                             return;
                         case EVENT_DRAIN:
                             DoCastAOE(SPELL_LIFE_DRAIN);
-                            events.ScheduleEvent(EVENT_DRAIN, urand(20000, 24000), 0, PHASE_GROUND);
+                            events.ScheduleEvent(EVENT_DRAIN, 24000, 0, PHASE_GROUND);
                             return;
                         case EVENT_BLIZZARD:
                         {
@@ -307,15 +292,24 @@ public:
                                 me->GetMotionMaster()->MovePoint(1, x, y, z);
                                 return;
                             }
+                            break;
                     }
-                    else
+                }
+
+                DoMeleeAttackIfReady();
+            }
+            else
+            {
+                if (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
                     {
                         case EVENT_LIFTOFF:
                             DoScriptText(EMOTE_CUSTOM_LIFTOFF, me);
                             me->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
-                            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                            me->SetDisableGravity(true);
                             me->SendMovementFlagUpdate();
-                            events.ScheduleEvent(EVENT_ICEBOLT, 4000);
+                            events.ScheduleEvent(EVENT_ICEBOLT, 1500);
                             iceboltCount = RAID_MODE(2, 3);
                             return;
                         case EVENT_ICEBOLT:
@@ -338,9 +332,9 @@ public:
                             }
 
                             if (iceboltCount)
-                                events.ScheduleEvent(EVENT_ICEBOLT, 4000);
+                                events.ScheduleEvent(EVENT_ICEBOLT, 1000);
                             else
-                                events.ScheduleEvent(EVENT_BREATH, 4000);
+                                events.ScheduleEvent(EVENT_BREATH, 1000);
                             return;
                         }
                         case EVENT_BREATH:
@@ -353,13 +347,13 @@ public:
                         case EVENT_EXPLOSION:
                             CastExplosion();
                             ClearIceBlock();
-                            events.ScheduleEvent(EVENT_LAND, 6000);
+                            events.ScheduleEvent(EVENT_LAND, 3000);
                             return;
                         case EVENT_LAND:
                             me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
-                            me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                            me->SetDisableGravity(false);
                             me->SendMovementFlagUpdate();
-                            events.ScheduleEvent(EVENT_GROUND, 3000);
+                            events.ScheduleEvent(EVENT_GROUND, 1500);
                             return;
                         case EVENT_GROUND:
                             DoScriptText(EMOTE_CUSTOM_GROUND, me);
@@ -371,10 +365,8 @@ public:
                             me->SetReactState(REACT_AGGRESSIVE);
                             return;
                     }
-                }
-            }
-
-            DoMeleeAttackIfReady();
+                }//if (uint32 eventId = events.ExecuteEvent())
+            }//if (phase == PHASE_GROUND)
         }
 
         void CastExplosion()

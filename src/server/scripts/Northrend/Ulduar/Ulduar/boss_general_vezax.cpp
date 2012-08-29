@@ -110,7 +110,7 @@ class boss_general_vezax : public CreatureScript
 
         struct boss_general_vezaxAI : public BossAI
         {
-            boss_general_vezaxAI(Creature* creature) : BossAI(creature, BOSS_VEZAX) {}            
+            boss_general_vezaxAI(Creature* creature) : BossAI(creature, BOSS_VEZAX) {}
 
             void Reset()
             {
@@ -158,8 +158,8 @@ class boss_general_vezax : public CreatureScript
                             break;
                         case EVENT_MARK_OF_THE_FACELESS:
                             if (Unit* target = CheckPlayersInRange(RAID_MODE(4, 9), 15.0f, 50.0f))
-                                DoCast(target, SPELL_MARK_OF_THE_FACELESS);                                
-                            events.ScheduleEvent(EVENT_MARK_OF_THE_FACELESS, urand(35000, 45000));  
+                                DoCast(target, SPELL_MARK_OF_THE_FACELESS);
+                            events.ScheduleEvent(EVENT_MARK_OF_THE_FACELESS, urand(35000, 45000));
                             break;
                         case EVENT_SURGE_OF_DARKNESS:
                             DoScriptText(EMOTE_SURGE_OF_DARKNESS, me);
@@ -168,7 +168,7 @@ class boss_general_vezax : public CreatureScript
                             events.ScheduleEvent(EVENT_SURGE_OF_DARKNESS, urand(50000, 70000));
                             break;
                         case EVENT_SUMMON_SARONITE_VAPOR:
-                            DoCast(me, SPELL_SUMMON_SARONITE_VAPORS, true);   // Spells summons 33488 in a random place in 40 meters                            
+                            DoCast(me, SPELL_SUMMON_SARONITE_VAPORS, true);   // Spells summons 33488 in a random place in 40 meters
                             events.ScheduleEvent(EVENT_SUMMON_SARONITE_VAPOR, urand(30000, 35000));
                             break;
                         case EVENT_BERSERK:
@@ -194,7 +194,7 @@ class boss_general_vezax : public CreatureScript
                 {
                     case NPC_SARONITE_VAPOR:
                         if (summons.size() >= 6) // summons include both vapors and saronite animus, but since the animus was not spawned yet...
-                        {                                                                                  
+                        {
                             events.CancelEvent(EVENT_SUMMON_SARONITE_VAPOR);    // Should always be cancelled after six vapors got spawned
                             if (!vaporKilled && notHardModed)                   // If animus was not spawned yet and no vapor got killed yet...
                                 DoCast(SPELL_SUMMON_SARONITE_ANIMUS);
@@ -208,7 +208,7 @@ class boss_general_vezax : public CreatureScript
                         DoCast(SPELL_SARONITE_BARRIER);
                         me->AddLootMode(LOOT_MODE_HARD_MODE_1);
                         break;
-                }                
+                }
                 DoZoneInCombat(summoned);
             }
 
@@ -246,7 +246,7 @@ class boss_general_vezax : public CreatureScript
                         return shadowDodger ? 1 : 0;
                     // Hardmode-condition: !notHardModed <=> Saronite Animus dead; vaporSummonedCount>=6 <=> Saronite Animus summoned; !vaporKilled <=> one or more vapors got killed
                     case DATA_SMELL_OF_SARONITE:
-                        return summons.size()>=6 && !notHardModed && !vaporKilled ? 1 : 0; 
+                        return summons.size()>=6 && !notHardModed && !vaporKilled ? 1 : 0;
                 }
                 return 0;
             }
@@ -254,7 +254,7 @@ class boss_general_vezax : public CreatureScript
             void DoAction(int32 const action)
             {
                 switch (action)
-                {   
+                {
                     case ACTION_VAPORS_DIE:
                         vaporKilled = true;
                         break;
@@ -287,7 +287,7 @@ class boss_general_vezax : public CreatureScript
                     if (PlayerList.empty() || PlayerList.size()<playersMin)
                         return SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true);
 
-                    return SelectRandomContainerElement(PlayerList);
+                    return Trinity::Containers::SelectRandomContainerElement(PlayerList);
                 }
                 return 0;
             }
@@ -387,9 +387,9 @@ class npc_saronite_vapors : public CreatureScript
                 DoScriptText(EMOTE_VAPORS, me);
                 instance = me->GetInstanceScript();
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true); 
+                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true); 
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
                 me->SetReactState(REACT_PASSIVE);
             }
 
@@ -403,7 +403,7 @@ class npc_saronite_vapors : public CreatureScript
             {
                 if (instance->GetBossState(BOSS_VEZAX) != IN_PROGRESS)
                     me->DisappearAndDie();
-                    
+
                 events.Update(diff);
 
                 while (uint32 eventId = events.ExecuteEvent())
@@ -516,7 +516,7 @@ public:
 class spell_mark_of_the_faceless : public SpellScriptLoader
 {
     public:
-        spell_mark_of_the_faceless() : SpellScriptLoader("spell_mark_of_the_faceless") {}        
+        spell_mark_of_the_faceless() : SpellScriptLoader("spell_mark_of_the_faceless") {}
 
         class spell_mark_of_the_faceless_AuraScript : public AuraScript
         {
@@ -556,14 +556,14 @@ public:
     {
         PrepareSpellScript(spell_mark_of_the_faceless_drain_SpellScript);
 
-        void FilterTargets(std::list<Unit*>& unitList)
+        void FilterTargets(std::list<WorldObject*>& targets)
         {
-            unitList.remove(GetTargetUnit());   // The target of this spell should _not_ be in this list (due to spell definition), yet it seems it occurs there sometimes...
+            targets.remove(GetExplTargetUnit());   // The target of this spell should _not_ be in this list (due to spell definition), yet it seems it occurs there sometimes...
         }
 
         void Register()
         {
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_mark_of_the_faceless_drain_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mark_of_the_faceless_drain_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
         }
     };
 
@@ -617,10 +617,10 @@ void AddSC_boss_general_vezax()
 
     new spell_aura_of_despair_aura();
     new spell_mark_of_the_faceless_drain();
-    new spell_mark_of_the_faceless();
+    // new spell_mark_of_the_faceless(); // Temporary disabled, so it will not cause any startup errors
 
     new achievement_shadowdodger("achievement_shadowdodger");       // 10m 10173 (2996)
     new achievement_shadowdodger("achievement_shadowdodger_25");    // 25m 10306 (2997)
-    new achievement_i_love_the_smell_of_saronite_in_the_morning("achievement_i_love_the_smell_of_saronite_in_the_morning");     // 10m 10451 (3181) 
+    new achievement_i_love_the_smell_of_saronite_in_the_morning("achievement_i_love_the_smell_of_saronite_in_the_morning");     // 10m 10451 (3181)
     new achievement_i_love_the_smell_of_saronite_in_the_morning("achievement_i_love_the_smell_of_saronite_in_the_morning_25");  // 25m 10462 (3188)
 }

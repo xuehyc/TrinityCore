@@ -29,7 +29,8 @@ go_mausoleum_door
 go_mausoleum_trigger
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 /*######
 ## npc_calvin_montague
@@ -150,7 +151,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 /*######
@@ -185,7 +185,6 @@ public:
 
         return false;
     }
-
 };
 
 class go_mausoleum_trigger : public GameObjectScript
@@ -207,7 +206,6 @@ public:
 
         return false;
     }
-
 };
 
 void AddSC_tirisfal_glades()

@@ -23,7 +23,8 @@ SDComment: by /dev/rsa
 SDCategory: Trial of the Crusader
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "trial_of_the_crusader.h"
 
 #define in_array(item, array) std::find(array, array+(sizeof(array) / sizeof(uint32)), item) != array+(sizeof(array) / sizeof(uint32))
@@ -242,7 +243,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                         {
                             bool playerMeet = CheckDedicatedInsanityPlayerMeet(player, true);
                             if (DedicatedInsanityEligible && !playerMeet)
-                                sLog->outString("DedicatedInsanity::EquipItemCheck - Player %s (%d) violated criteria in instance id %d.", player->GetName(), player->GetGUID(), instance->GetInstanceId());
+                                sLog->outInfo(LOG_FILTER_TSCR, "DedicatedInsanity::EquipItemCheck - Player %s (%d) violated criteria in instance id %d.", player->GetName(), player->GetGUID(), instance->GetInstanceId());
                         }
                         break;
                     case DATA_TRIBUTE_TO_DEDICATED_INSTANY_DUMMY_CHECK:
@@ -286,7 +287,6 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                                 break;
                             case DONE:
                                 DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_DEFEAT_FACTION_CHAMPIONS);
-
                                 if (ResilienceWillFixItTimer > 0)
                                     DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_CHAMPIONS_KILLED_IN_MINUTE);
 
@@ -454,7 +454,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
                 if (type < MAX_ENCOUNTERS)
                 {
-                    sLog->outDetail("[ToCr] EncounterStatus[type %u] %u = data %u;", type, EncounterStatus[type], data);
+                    sLog->outInfo(LOG_FILTER_TSCR, "[ToCr] EncounterStatus[type %u] %u = data %u;", type, EncounterStatus[type], data);
                     if (data == FAIL)
                     {
                         // Remove IsRaidWiped() check, if we come here, the raid must have wiped
@@ -587,18 +587,20 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                             case 3091:
                             case 3092:
                             case 3100:
+                            // case 3110: // unused?
                             case 4000:
                             case 4010:
                             case 4015:
                             case 4016:
                             case 4040:
+                            // case 4050: // unused?
                             case 5000:
                             case 5005:
                             case 5020:
                             case 6000:
                             case 6005:
                             case 6010:
-                            case 6020:
+                            case 6020: // Added number for Tirion
                                 EventNPCId = NPC_TIRION;
                                 break;
                             case 5010:
@@ -782,7 +784,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                             continue;
                         bool playerMeet = CheckDedicatedInsanityPlayerMeet(player, inCombatChangeable);
                         if (DedicatedInsanityEligible && !playerMeet)
-                            sLog->outString("DedicatedInsanity::EnterCombatCheck - Player %s (%d) violated criteria in instance id %d.", player->GetName(), player->GetGUID(), instance->GetInstanceId());
+                            sLog->outInfo(LOG_FILTER_TSCR, "DedicatedInsanity::EnterCombatCheck - Player %s (%d) violated criteria in instance id %d.", player->GetName(), player->GetGUID(), instance->GetInstanceId());
                         DedicatedInsanityEligible &= playerMeet;
                     }
             }

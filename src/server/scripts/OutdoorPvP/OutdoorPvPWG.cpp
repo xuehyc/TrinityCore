@@ -171,7 +171,7 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
          NPC_ALLIANCE_DAMERON, NPC_HORDE_MUKAR,
          NPC_ALLIANCE_MAGRUDER, NPC_HORDE_ROSSLAI);
     if (!result)
-        sLog->outError("Cannot find siege workshop master or spirit guides in creature!");
+        sLog->outError(LOG_FILTER_BATTLEGROUND, "Cannot find siege workshop master or spirit guides in creature!");
     else
     {
         do
@@ -298,7 +298,7 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
 
             if (!engGuid)
             {
-                sLog->outError("Cannot find nearby siege workshop master!");
+                sLog->outError(LOG_FILTER_BATTLEGROUND, "Cannot find nearby siege workshop master!");
                 continue;
             }
             else
@@ -324,7 +324,7 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
             if (goData->posX < POS_X_CENTER && !workshop->SetCapturePointData(capturePointEntry, goData->mapid, goData->posX + 40 * cos(goData->orientation + M_PI / 2), goData->posY + 40 * sin(goData->orientation + M_PI / 2), goData->posZ))
             {
                 delete workshop;
-                sLog->outError("Cannot add capture point!");
+                sLog->outError(LOG_FILTER_BATTLEGROUND, "Cannot add capture point!");
                 continue;
             }
 
@@ -363,7 +363,7 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
 
     if (!m_gate)
     {
-        sLog->outError("Cannot find wintergrasp fortress gate!");
+        sLog->outError(LOG_FILTER_BATTLEGROUND, "Cannot find wintergrasp fortress gate!");
         return false;
     }
 
@@ -662,7 +662,7 @@ void OutdoorPvPWG::ModifyWorkshopCount(TeamId team, bool add)
     else if (m_workshopCount[team])
         --m_workshopCount[team];
     else
-        sLog->outError("OutdoorPvPWG::ModifyWorkshopCount: negative workshop count!");
+        sLog->outError(LOG_FILTER_BATTLEGROUND, "OutdoorPvPWG::ModifyWorkshopCount: negative workshop count!");
 
     SendUpdateWorldState(MaxVehNumWorldState[team], m_workshopCount[team] * MAX_VEHICLE_PER_WORKSHOP);
 }
@@ -1152,7 +1152,7 @@ bool OutdoorPvPWG::UpdateGameObjectInfo(GameObject *go) const
         defFaction = WintergraspFaction[getDefenderTeam()];
 
         if (attFaction == 35 || defFaction == 35)
-            sLog->outString("OutdoorPvPWG: (AttackerFaction = %d), (DefenderFaction = %d), which is impossible during battle", attFaction, defFaction);
+            sLog->outInfo(LOG_FILTER_BATTLEGROUND, "OutdoorPvPWG: (AttackerFaction = %d), (DefenderFaction = %d), which is impossible during battle", attFaction, defFaction);
     }
 
     switch(go->GetGOInfo()->displayId)
@@ -1960,7 +1960,7 @@ void OutdoorPvPWG::RewardMarkOfHonor(Player* player, uint32 count)
 
     if (msg == EQUIP_ERR_ITEM_NOT_FOUND)
     {
-        sLog->outErrorDb("Wintergrasp reward item (Entry %u) not exist in `item_template`.", WG_MARK_OF_HONOR);
+        sLog->outError(LOG_FILTER_BATTLEGROUND, "Wintergrasp reward item (Entry %u) not exist in `item_template`.", WG_MARK_OF_HONOR);
         return;
     }
 
@@ -2189,7 +2189,6 @@ void OutdoorPvPWG::RelocateTeleport(Creature* creature, Position pos)
 }
 void OutdoorPvPWG::RelocateSummonDespawn(Creature* creature, bool condition)
 {
-    //sLog->outString("RelocateSummonDespawn - Entry: %d, Name: %s, Condition: %s", creature->GetEntry(), creature->GetName(), condition ? "true" : "false");
     if (condition)
     {
         creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
@@ -2226,7 +2225,6 @@ void OutdoorPvPWG::RelocateCreature(Creature* creature)
         case NPC_HORDE_MULFORT:
         case NPC_HORDE_DARDOSH:
         case NPC_HORDE_FUJIN:
-            //sLog->outString("RelocateTeleport - Entry: %d, Name: %s, Fortress: %s", creature->GetEntry(), creature->GetName(), getDefenderTeam() == TEAM_HORDE ? "true" : "false");
             RelocateTeleport(creature, getDefenderTeam() == TEAM_HORDE ? fortressPosition[creature->GetEntry()] : homePosition[creature->GetEntry()]);
             break;
         // only fortress (summon & despawn)

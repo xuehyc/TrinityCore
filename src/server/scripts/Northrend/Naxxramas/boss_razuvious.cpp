@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "naxxramas.h"
 
 //Razuvious - NO TEXT sound only
@@ -64,7 +65,7 @@ public:
 
     struct boss_razuviousAI : public BossAI
     {
-        boss_razuviousAI(Creature* c) : BossAI(c, BOSS_RAZUVIOUS) {}
+        boss_razuviousAI(Creature* creature) : BossAI(creature, BOSS_RAZUVIOUS) {}
 
         void KilledUnit(Unit* /*victim*/)
         {

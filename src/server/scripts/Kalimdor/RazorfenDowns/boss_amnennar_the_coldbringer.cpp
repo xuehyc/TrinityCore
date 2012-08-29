@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Razorfen Downs
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SAY_AGGRO               -1129000
 #define SAY_SUMMON60            -1129001
@@ -48,7 +49,7 @@ public:
 
     struct boss_amnennar_the_coldbringerAI : public ScriptedAI
     {
-        boss_amnennar_the_coldbringerAI(Creature* c) : ScriptedAI(c) {}
+        boss_amnennar_the_coldbringerAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 AmnenarsWrath_Timer;
         uint32 FrostBolt_Timer;

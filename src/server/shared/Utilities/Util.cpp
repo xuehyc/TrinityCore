@@ -16,17 +16,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
 #include "Util.h"
 #include "utf8.h"
-#ifdef USE_SFMT_FOR_RNG
 #include "SFMT.h"
-#else
-#include "MersenneTwister.h"
-#endif
 #include <ace/TSS_T.h>
 #include <ace/INET_Addr.h>
 
-#ifdef USE_SFMT_FOR_RNG
 typedef ACE_TSS<SFMTRand> SFMTRandTSS;
 static SFMTRandTSS sfmtRand;
 
@@ -59,41 +55,6 @@ double rand_chance(void)
 {
     return sfmtRand->Random() * 100.0;
 }
-
-#else
-typedef ACE_TSS<MTRand> MTRandTSS;
-static MTRandTSS mtRand;
-
-int32 irand(int32 min, int32 max)
-{
-    return int32(mtRand->randInt(max - min)) + min;
-}
-
-uint32 urand(uint32 min, uint32 max)
-{
-    return mtRand->randInt(max - min) + min;
-}
-
-float frand(float min, float max)
-{
-    return float(mtRand->randExc(max - min) + min);
-}
-
-int32 rand32()
-{
-    return mtRand->randInt();
-}
-
-double rand_norm(void)
-{
-    return mtRand->randExc();
-}
-
-double rand_chance(void)
-{
-    return mtRand->randExc(100.0);
-}
-#endif
 
 Tokens::Tokens(const std::string &src, const char sep, uint32 vectorReserve)
 {
@@ -529,3 +490,15 @@ void hexEncodeByteArray(uint8* bytes, uint32 arrayLen, std::string& result)
     result = ss.str();
 }
 
+std::string ByteArrayToHexStr(uint8* bytes, uint32 length)
+{
+    std::ostringstream ss;
+    for (uint32 i = 0; i < length; ++i)
+    {
+        char buffer[4];
+        sprintf(buffer, "%02X ", bytes[i]);
+        ss << buffer;
+    }
+
+    return ss.str();
+}

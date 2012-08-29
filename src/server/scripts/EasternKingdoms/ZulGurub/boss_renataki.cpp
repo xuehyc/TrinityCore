@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Zul'Gurub
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "zulgurub.h"
 
 #define SPELL_AMBUSH            24337
@@ -42,7 +43,7 @@ class boss_renataki : public CreatureScript
 
         struct boss_renatakiAI : public ScriptedAI
         {
-            boss_renatakiAI(Creature* c) : ScriptedAI(c) {}
+            boss_renatakiAI(Creature* creature) : ScriptedAI(creature) {}
 
             uint32 Invisible_Timer;
             uint32 Ambush_Timer;

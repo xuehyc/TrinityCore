@@ -23,7 +23,8 @@ SDComment: Includes Sapling (need some better control with these).
 SDCategory: Tempest Keep, The Botanica
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum eSays
 {
@@ -118,9 +119,9 @@ class mob_warp_splinter_treant : public CreatureScript
                     DoMeleeAttackIfReady();
             }
         };
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new mob_warp_splinter_treantAI (Creature);
+            return new mob_warp_splinter_treantAI(creature);
         }
 };
 
@@ -169,7 +170,7 @@ class boss_warp_splinter : public CreatureScript
                 DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
             }
 
-            void JustDied(Unit* /*Killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 DoScriptText(SAY_DEATH, me);
             }
@@ -226,9 +227,9 @@ class boss_warp_splinter : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_warp_splinterAI (Creature);
+            return new boss_warp_splinterAI(creature);
         }
 };
 

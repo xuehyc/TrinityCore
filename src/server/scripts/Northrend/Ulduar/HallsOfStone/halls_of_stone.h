@@ -58,6 +58,8 @@ enum GameObjects
     GO_ABEDNEUM                                            = 191669,
     GO_MARNAK                                              = 191670,
     GO_KADDRAK                                             = 191671,
+    GO_MAIDEN_DOOR                                         = 191292,
+    GO_BRANN_DOOR                                          = 191295,
     GO_SJONNIR_DOOR                                        = 191296,
     GO_TRIBUNAL_CONSOLE                                    = 193907,
     GO_TRIBUNAL_CHEST                                      = 190586,

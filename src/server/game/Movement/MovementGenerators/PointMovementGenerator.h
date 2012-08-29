@@ -23,8 +23,7 @@
 #include "FollowerReference.h"
 
 template<class T>
-class PointMovementGenerator
-: public MovementGeneratorMedium< T, PointMovementGenerator<T> >
+class PointMovementGenerator : public MovementGeneratorMedium< T, PointMovementGenerator<T> >
 {
     public:
         PointMovementGenerator(uint32 _id, float _x, float _y, float _z, float _speed = 0.0f) : id(_id),
@@ -49,8 +48,7 @@ class PointMovementGenerator
         bool i_recalculateSpeed;
 };
 
-class AssistanceMovementGenerator
-: public PointMovementGenerator<Creature>
+class AssistanceMovementGenerator : public PointMovementGenerator<Creature>
 {
     public:
         AssistanceMovementGenerator(float _x, float _y, float _z) :
@@ -68,7 +66,7 @@ class EffectMovementGenerator : public MovementGenerator
         void Initialize(Unit &) {}
         void Finalize(Unit &unit);
         void Reset(Unit &) {}
-        bool Update(Unit &u, const uint32);
+        bool Update(Unit &u, const uint32&);
         MovementGeneratorType GetMovementGeneratorType() { return EFFECT_MOTION_TYPE; }
     private:
         uint32 m_Id;

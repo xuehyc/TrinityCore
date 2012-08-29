@@ -23,7 +23,8 @@ SDComment: Need confirmation if spell data are same in both modes. Summons shoul
 SDCategory: Coilfang Resevoir, Underbog
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SPELL_FOUL_SPORES   31673
 #define SPELL_ACID_GEYSER   38739
@@ -40,7 +41,7 @@ public:
 
     struct boss_hungarfenAI : public ScriptedAI
     {
-        boss_hungarfenAI(Creature* c) : ScriptedAI(c)
+        boss_hungarfenAI(Creature* creature) : ScriptedAI(creature)
         {
         }
 
@@ -112,7 +113,7 @@ public:
 
     struct mob_underbog_mushroomAI : public ScriptedAI
     {
-        mob_underbog_mushroomAI(Creature* c) : ScriptedAI(c) {}
+        mob_underbog_mushroomAI(Creature* creature) : ScriptedAI(creature) {}
 
         bool Stop;
         uint32 Grow_Timer;

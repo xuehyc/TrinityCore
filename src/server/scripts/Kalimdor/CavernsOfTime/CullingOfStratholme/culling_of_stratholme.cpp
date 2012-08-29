@@ -15,9 +15,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "culling_of_stratholme.h"
 #include "ScriptedEscortAI.h"
+#include "PassiveAI.h"
 
 enum Says
 {
@@ -452,9 +455,9 @@ public:
             ++uiStep;
         }
 
-        void WaypointReached(uint32 uiPointId)
+        void WaypointReached(uint32 waypointId)
         {
-            switch (uiPointId)
+            switch (waypointId)
             {
                 case 0:
                 case 1:
@@ -638,11 +641,11 @@ public:
                         }
                         //After waypoint 0
                         case 1:
-                            me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                            me->SetWalk(false);
                             if (Unit* pUther = me->SummonCreature(NPC_UTHER, 1794.357f, 1272.183f, 140.558f, 1.37f, TEMPSUMMON_DEAD_DESPAWN, 180000))
                             {
                                 uiUtherGUID = pUther->GetGUID();
-                                pUther->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                pUther->SetWalk(false);
                                 pUther->GetMotionMaster()->MovePoint(0, 1897.018f, 1287.487f, 143.481f);
                                 pUther->SetTarget(me->GetGUID());
                                 me->SetTarget(uiUtherGUID);
@@ -727,7 +730,7 @@ public:
                         case 17:
                             if (Creature* pUther = Unit::GetCreature(*me, uiUtherGUID))
                             {
-                                pUther->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                pUther->SetWalk(true);
                                 pUther->GetMotionMaster()->MovePoint(0, 1794.357f, 1272.183f, 140.558f);
                             }
                             JumpToNextStep(1000);
@@ -736,7 +739,7 @@ public:
                             if (Creature* pJaina = Unit::GetCreature(*me, uiJainaGUID))
                             {
                                 me->SetTarget(uiJainaGUID);
-                                pJaina->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                pJaina->SetWalk(true);
                                 pJaina->GetMotionMaster()->MovePoint(0, 1794.357f, 1272.183f, 140.558f);
                             }
                             JumpToNextStep(1000);
@@ -802,7 +805,7 @@ public:
                             if (Creature* pCityman = Unit::GetCreature(*me, uiCitymenGUID[0]))
                             {
                                 pCityman->SetTarget(me->GetGUID());
-                                pCityman->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                pCityman->SetWalk(true);
                                 pCityman->GetMotionMaster()->MovePoint(0, 2088.625f, 1279.191f, 140.743f);
                             }
                             JumpToNextStep(2000);
@@ -989,7 +992,7 @@ public:
                                 if (Unit* pBoss = me->SummonCreature(uiBossID, 2232.19f, 1331.933f, 126.662f, 3.15f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 900000))
                                 {
                                     uiBossGUID = pBoss->GetGUID();
-                                    pBoss->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                    pBoss->SetWalk(true);
                                     pBoss->GetMotionMaster()->MovePoint(0, 2194.110f, 1332.00f, 130.00f);
                                 }
                             }

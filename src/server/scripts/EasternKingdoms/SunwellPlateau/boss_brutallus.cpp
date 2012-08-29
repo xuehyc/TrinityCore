@@ -22,7 +22,8 @@ SD%Complete: 80
 SDComment: Find a way to start the intro, best code for the intro
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "sunwell_plateau.h"
 
 enum Quotes
@@ -78,9 +79,9 @@ public:
 
     struct boss_brutallusAI : public ScriptedAI
     {
-        boss_brutallusAI(Creature* c) : ScriptedAI(c)
+        boss_brutallusAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             Intro = true;
         }
 
@@ -132,7 +133,7 @@ public:
             DoScriptText(RAND(YELL_KILL1, YELL_KILL2, YELL_KILL3), me);
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(YELL_DEATH, me);
 
@@ -170,7 +171,7 @@ public:
             else
             {
                 //Madrigosa not found, end intro
-                sLog->outError("Madrigosa was not found");
+                sLog->outError(LOG_FILTER_TSCR, "Madrigosa was not found");
                 EndIntro();
             }
         }
@@ -216,7 +217,7 @@ public:
                     break;
                 case 3:
                     DoCast(me, SPELL_INTRO_FROST_BLAST);
-                    Madrigosa->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                    Madrigosa->SetDisableGravity(true);
                     me->AttackStop();
                     Madrigosa->AttackStop();
                     IntroFrostBoltTimer = 3000;

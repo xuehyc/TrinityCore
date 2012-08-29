@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef TRINITY_MAIL_H
 #define TRINITY_MAIL_H
 
@@ -55,8 +56,9 @@ enum MailStationery
     MAIL_STATIONERY_DEFAULT = 41,
     MAIL_STATIONERY_GM      = 61,
     MAIL_STATIONERY_AUCTION = 62,
-    MAIL_STATIONERY_VAL     = 64,
-    MAIL_STATIONERY_CHR     = 65,
+    MAIL_STATIONERY_VAL     = 64,                           // Valentine
+    MAIL_STATIONERY_CHR     = 65,                           // Christmas
+    MAIL_STATIONERY_ORP     = 67,                           // Orphan
 };
 
 enum MailState
@@ -64,17 +66,6 @@ enum MailState
     MAIL_STATE_UNCHANGED = 1,
     MAIL_STATE_CHANGED   = 2,
     MAIL_STATE_DELETED   = 3
-};
-
-enum MailAuctionAnswers
-{
-    AUCTION_OUTBIDDED           = 0,
-    AUCTION_WON                 = 1,
-    AUCTION_SUCCESSFUL          = 2,
-    AUCTION_EXPIRED             = 3,
-    AUCTION_CANCELLED_TO_BIDDER = 4,
-    AUCTION_CANCELED            = 5,
-    AUCTION_SALE_PENDING        = 6
 };
 
 enum MailShowFlags

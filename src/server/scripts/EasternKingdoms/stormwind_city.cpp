@@ -33,7 +33,9 @@ npc_marzon_silent_blade
 npc_lord_gregor_lescovar
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "ScriptedEscortAI.h"
 
 /*######
@@ -47,10 +49,10 @@ class npc_archmage_malin : public CreatureScript
 public:
     npc_archmage_malin() : CreatureScript("npc_archmage_malin") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF)
+        if (action == GOSSIP_ACTION_INFO_DEF)
         {
             player->CLOSE_GOSSIP_MENU();
             creature->CastSpell(player, 42711, true);
@@ -71,7 +73,6 @@ public:
 
         return true;
     }
-
 };
 
 /*######
@@ -106,9 +107,9 @@ public:
 
     struct npc_bartlebyAI : public ScriptedAI
     {
-        npc_bartlebyAI(Creature* c) : ScriptedAI(c)
+        npc_bartlebyAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_uiNormalFaction = c->getFaction();
+            m_uiNormalFaction = creature->getFaction();
         }
 
         uint32 m_uiNormalFaction;
@@ -143,7 +144,6 @@ public:
             }
         }
     };
-
 };
 
 /*######
@@ -160,10 +160,10 @@ class npc_lady_katrana_prestor : public CreatureScript
 public:
     npc_lady_katrana_prestor() : CreatureScript("npc_lady_katrana_prestor") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        switch (uiAction)
+        switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF:
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_KAT_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
@@ -197,7 +197,6 @@ public:
 
         return true;
     }
-
 };
 
 /*######
@@ -271,9 +270,9 @@ public:
             }
         }
 
-        void WaypointReached(uint32 uiPointId)
+        void WaypointReached(uint32 waypointId)
         {
-            switch (uiPointId)
+            switch (waypointId)
             {
                 case 14:
                     SetEscortPaused(true);
@@ -370,7 +369,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 /*######
@@ -391,7 +389,7 @@ public:
     {
         npc_marzon_silent_bladeAI(Creature* creature) : ScriptedAI(creature)
         {
-            me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            me->SetWalk(true);
         }
 
         void Reset()
@@ -407,7 +405,7 @@ public:
             {
                 if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                 {
-                    if (summoner && summoner->GetTypeId() == TYPEID_UNIT && summoner->isAlive() && !summoner->isInCombat())
+                    if (summoner->GetTypeId() == TYPEID_UNIT && summoner->isAlive() && !summoner->isInCombat())
                         summoner->ToCreature()->AI()->AttackStart(who);
                 }
             }
@@ -421,7 +419,7 @@ public:
             {
                 if (Unit* summoner = me->ToTempSummon()->GetSummoner())
                 {
-                    if (summoner && summoner->GetTypeId() == TYPEID_UNIT && summoner->isAlive())
+                    if (summoner->GetTypeId() == TYPEID_UNIT && summoner->isAlive())
                         summoner->ToCreature()->DisappearAndDie();
                 }
             }
@@ -457,7 +455,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 /*######
@@ -502,9 +499,9 @@ public:
             uiPhase = 0;
         }
 
-        void WaypointReached(uint32 uiPointId)
+        void WaypointReached(uint32 waypointId)
         {
-            switch (uiPointId)
+            switch (waypointId)
             {
                 case 1:
                     SetEscortPaused(true);
@@ -606,7 +603,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 /*######

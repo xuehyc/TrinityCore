@@ -23,7 +23,6 @@
 #include "CreatureAI.h"
 #include "Unit.h"
 #include "ConditionMgr.h"
-#include "CreatureTextMgr.h"
 #include "Spell.h"
 
 #include "SmartScript.h"
@@ -63,6 +62,7 @@ class SmartAI : public CreatureAI
         void RemoveEscortState(uint32 uiEscortState) { mEscortState &= ~uiEscortState; }
         void SetAutoAttack(bool on) { mCanAutoAttack = on; }
         void SetCombatMove(bool on);
+        bool CanCombatMove() { return mCanCombatMove; }
         void SetFollow(Unit* target, float dist = 0.0f, float angle = 0.0f, uint32 credit = 0, uint32 end = 0, uint32 creditType = 0);
 
         void SetScript9(SmartScriptHolder& e, uint32 entry, Unit* invoker);
@@ -175,7 +175,7 @@ class SmartAI : public CreatureAI
 
         void SetSwim(bool swim = true);
 
-        void SetInvinceabilityHpLevel(uint32 level) { mInvinceabilityHpLevel = level; }
+        void SetInvincibilityHpLevel(uint32 level) { mInvincibilityHpLevel = level; }
 
         void sGossipHello(Player* player);
         void sGossipSelect(Player* player, uint32 sender, uint32 action);
@@ -197,6 +197,8 @@ class SmartAI : public CreatureAI
         void StartDespawn() { mDespawnState = 2; }
 
         void RemoveAuras();
+
+        void OnSpellClick(Unit* clicker);
 
     private:
         uint32 mFollowCreditType;
@@ -224,8 +226,7 @@ class SmartAI : public CreatureAI
         bool mCanAutoAttack;
         bool mCanCombatMove;
         bool mForcedPaused;
-        uint32 mInvinceabilityHpLevel;
-
+        uint32 mInvincibilityHpLevel;
         bool AssistPlayerInCombat(Unit* who);
 
         uint32 mDespawnTime;
@@ -236,30 +237,31 @@ class SmartAI : public CreatureAI
 
 class SmartGameObjectAI : public GameObjectAI
 {
-public:
-    SmartGameObjectAI(GameObject* g) : GameObjectAI(g), go(g) {}
-    ~SmartGameObjectAI() {}
+    public:
+        SmartGameObjectAI(GameObject* g) : GameObjectAI(g), go(g) {}
+        ~SmartGameObjectAI() {}
 
-    void UpdateAI(const uint32 diff);
-    void InitializeAI();
-    void Reset();
-    SmartScript* GetScript() { return &mScript; }
-    static int Permissible(const GameObject* g);
+        void UpdateAI(uint32 diff);
+        void InitializeAI();
+        void Reset();
+        SmartScript* GetScript() { return &mScript; }
+        static int Permissible(const GameObject* g);
 
-    bool GossipHello(Player* player) ;
-    bool GossipSelect(Player* player, uint32 sender, uint32 action);
-    bool GossipSelectCode(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/, const char* /*code*/);
-    bool QuestAccept(Player* player, Quest const* quest);
-    bool QuestReward(Player* player, Quest const* quest, uint32 opt);
-    uint32 GetDialogStatus(Player* /*player*/);
-    void Destroyed(Player* player, uint32 eventId);
-    void SetData(uint32 id, uint32 value);
-    void SetScript9(SmartScriptHolder& e, uint32 entry, Unit* invoker);
-    void OnGameEvent(bool start, uint16 eventId);
-    void OnStateChanged(uint32 state, Unit* unit);
+        bool GossipHello(Player* player);
+        bool GossipSelect(Player* player, uint32 sender, uint32 action);
+        bool GossipSelectCode(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/, const char* /*code*/);
+        bool QuestAccept(Player* player, Quest const* quest);
+        bool QuestReward(Player* player, Quest const* quest, uint32 opt);
+        uint32 GetDialogStatus(Player* /*player*/);
+        void Destroyed(Player* player, uint32 eventId);
+        void SetData(uint32 id, uint32 value);
+        void SetScript9(SmartScriptHolder& e, uint32 entry, Unit* invoker);
+        void OnGameEvent(bool start, uint16 eventId);
+        void OnStateChanged(uint32 state, Unit* unit);
+        void EventInform(uint32 eventId);
 
-protected:
-    GameObject* const go;
-    SmartScript mScript;
+    protected:
+        GameObject* const go;
+        SmartScript mScript;
 };
 #endif

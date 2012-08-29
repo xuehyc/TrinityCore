@@ -25,10 +25,17 @@ EndScriptData */
 
 // Known bugs:
 //    - They should be floating but they aren't respecting the floor =(
-//    - Lacks the powering up effect that leads to Empowering
-//    - There's a workaround for the shared life effect
+//    - Hardcoded bullets spawner
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "Cell.h"
+#include "CellImpl.h"
 #include "trial_of_the_crusader.h"
 #include "Spell.h"
 
@@ -158,10 +165,10 @@ struct boss_twin_baseAI : public ScriptedAI
 {
     boss_twin_baseAI(Creature* creature) : ScriptedAI(creature), Summons(me)
     {
-        m_instance = (InstanceScript*)creature->GetInstanceScript();
+        instance = creature->GetInstanceScript();
     }
 
-    InstanceScript* m_instance;
+    InstanceScript* instance;
     SummonList Summons;
 
     bool   m_bIsBerserk;
@@ -172,8 +179,8 @@ struct boss_twin_baseAI : public ScriptedAI
     uint32 m_uiTouchTimer;
     uint32 m_uiBerserkTimer;
 
-    uint32 m_uiVortexSay;
-    uint32 m_uiVortexEmote;
+    int32 m_uiVortexSay;
+    int32 m_uiVortexEmote;
     uint32 m_uiSisterNpcId;
     uint32 m_uiColorballNpcId;
     uint32 m_uiEssenceNpcId;
@@ -195,7 +202,7 @@ struct boss_twin_baseAI : public ScriptedAI
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
         me->SetReactState(REACT_PASSIVE);
         /* Uncomment this once that they are flying above the ground
-        me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+        me->SetLevitate(true);
         me->SetFlying(true); */
         m_bIsBerserk = false;
 
@@ -209,8 +216,8 @@ struct boss_twin_baseAI : public ScriptedAI
         HandleAuraOnRaidTwinValkyr(me, SPELL_POWER_UP, true, false, 0);
         Summons.DespawnAll();
 
-        if (m_instance)
-            m_instance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetMaxHealth());
+        if (instance)
+            instance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetMaxHealth());
     }
 
     void SpellHit(Unit* caster, const SpellInfo* spell)
@@ -226,19 +233,19 @@ struct boss_twin_baseAI : public ScriptedAI
                 spell->Id == SPELL_LIGHT_TWIN_PACT_2 ||
                 spell->Id == SPELL_LIGHT_TWIN_PACT_3)
             {
-                if (m_instance)
+                if (instance)
                 {
                     uint32 setHealthVal = 0;
 
                     uint32 percentageAddVal = (uint32)(me->GetMaxHealth() * RAID_MODE(0.2, 0.2, 0.5, 0.5));
-                    uint32 currentHealthVal = m_instance->GetData(DATA_HEALTH_TWIN_SHARED);
+                    uint32 currentHealthVal = instance->GetData(DATA_HEALTH_TWIN_SHARED);
 
                     setHealthVal = percentageAddVal + currentHealthVal;
 
                     if (setHealthVal > me->GetMaxHealth())
                         setHealthVal = me->GetMaxHealth();
 
-                    m_instance->SetData(DATA_HEALTH_TWIN_SHARED, setHealthVal);
+                    instance->SetData(DATA_HEALTH_TWIN_SHARED, setHealthVal);
                 }
             }
         }
@@ -246,10 +253,10 @@ struct boss_twin_baseAI : public ScriptedAI
 
     void JustReachedHome()
     {
-        if (m_instance)
+        if (instance)
         {
-            m_instance->SetData(TYPE_VALKIRIES, FAIL);
-            m_instance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetMaxHealth());
+            instance->SetData(TYPE_VALKIRIES, FAIL);
+            instance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetMaxHealth());
         }
 
         me->DespawnOrUnsummon();
@@ -262,7 +269,8 @@ struct boss_twin_baseAI : public ScriptedAI
 
     void MovementInform(uint32 uiType, uint32 uiId)
     {
-        if (uiType != POINT_MOTION_TYPE) return;
+        if (uiType != POINT_MOTION_TYPE)
+            return;
 
         switch (uiId)
         {
@@ -298,8 +306,8 @@ struct boss_twin_baseAI : public ScriptedAI
             who->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE);
 
         DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, me);
-        if (m_instance)
-            m_instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
+        if (instance)
+            instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
     }
 
     void JustSummoned(Creature* summoned)
@@ -360,11 +368,11 @@ struct boss_twin_baseAI : public ScriptedAI
                 uiDamage += uiDamage;
         }
 
-        if (m_instance)
+        if (instance)
         {
             // Force update health values here, needed for correct further calculations
-            if (m_instance->GetData(DATA_HEALTH_TWIN_SHARED) != 0)
-                me->SetHealth(m_instance->GetData(DATA_HEALTH_TWIN_SHARED));
+            if (instance->GetData(DATA_HEALTH_TWIN_SHARED) != 0)
+                me->SetHealth(instance->GetData(DATA_HEALTH_TWIN_SHARED));
             else if (me->getVictim() && HealthBelowPct(10)) // If we come here, we usually should have low hp
             {
                 me->LowerPlayerDamageReq(me->GetMaxHealth());
@@ -374,15 +382,15 @@ struct boss_twin_baseAI : public ScriptedAI
 
             if (me->GetHealth() > uiDamage)
             {
-                if (m_instance->GetData(DATA_HEALTH_TWIN_SHARED) > me->GetHealth() - uiDamage)
+                if (instance->GetData(DATA_HEALTH_TWIN_SHARED) > me->GetHealth() - uiDamage)
                 {
-                    m_instance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetHealth() - uiDamage);
+                    instance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetHealth() - uiDamage);
                 }
             }
             else
             {
                 me->LowerPlayerDamageReq(me->GetMaxHealth());
-                m_instance->SetData(DATA_HEALTH_TWIN_SHARED, 0);
+                instance->SetData(DATA_HEALTH_TWIN_SHARED, 0);
             }
         }
     }
@@ -410,21 +418,21 @@ struct boss_twin_baseAI : public ScriptedAI
         HandleAuraOnRaidTwinValkyr(me, SPELL_LIGHT_ESSENCE, true, false, 0);
         HandleAuraOnRaidTwinValkyr(me, SPELL_DARK_ESSENCE, true, false, 0);
 
-        if (m_instance)
+        if (instance)
         {
-            m_instance->SetData(DATA_HEALTH_TWIN_SHARED, 0);
+            instance->SetData(DATA_HEALTH_TWIN_SHARED, 0);
 
             if (Creature* pSister = GetSister())
             {
                 if (!pSister->isAlive())
                 {
-                    m_instance->SetData(TYPE_VALKIRIES, DONE);
+                    instance->SetData(TYPE_VALKIRIES, DONE);
                 }
                 else
-                    m_instance->SetData(TYPE_VALKIRIES, SPECIAL);
+                    instance->SetData(TYPE_VALKIRIES, SPECIAL);
             }
             else
-                m_instance->SetData(TYPE_VALKIRIES, DONE); // In case we cannot find sister, set done by default
+                instance->SetData(TYPE_VALKIRIES, DONE); // In case we cannot find sister, set done by default
         }
 
         Summons.DespawnAll();
@@ -433,18 +441,18 @@ struct boss_twin_baseAI : public ScriptedAI
     // Called when sister pointer needed
     Creature* GetSister()
     {
-        if (m_instance)
-            return Unit::GetCreature((*me), m_instance->GetData64(m_uiSisterNpcId));
+        if (instance)
+            return Unit::GetCreature((*me), instance->GetData64(m_uiSisterNpcId));
         else
             return NULL;
     }
 
     void EnterCombat(Unit* /*who*/)
     {
-        if (m_instance)
+        if (instance)
         {
-            m_instance->SetData(TYPE_VALKIRIES, IN_PROGRESS);
-            m_instance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetMaxHealth());
+            instance->SetData(TYPE_VALKIRIES, IN_PROGRESS);
+            instance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetMaxHealth());
         }
 
         DoZoneInCombat();
@@ -460,11 +468,11 @@ struct boss_twin_baseAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (!m_instance || !UpdateVictim())
+        if (!instance || !UpdateVictim())
             return;
 
-        if (m_instance->GetData(DATA_HEALTH_TWIN_SHARED) != 0)
-            me->SetHealth(m_instance->GetData(DATA_HEALTH_TWIN_SHARED));
+        if (instance->GetData(DATA_HEALTH_TWIN_SHARED) != 0)
+            me->SetHealth(instance->GetData(DATA_HEALTH_TWIN_SHARED));
         else if (me->getVictim())
         {
             me->LowerPlayerDamageReq(me->GetMaxHealth());
@@ -491,23 +499,23 @@ struct boss_twin_baseAI : public ScriptedAI
                 {
                     for (std::list<Unit* >::const_iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
                     {
-                        Unit* pUnit = (*itr);
-                        if (pUnit && pUnit->isAlive())
+                        Unit* unit = (*itr);
+                        if (unit && unit->isAlive())
                         {
-                            if (!pUnit->HasAura(SPELL_POWER_UP))
-                                pUnit->AddAura(SPELL_POWER_UP, pUnit);
+                            if (!unit->HasAura(SPELL_POWER_UP))
+                                unit->AddAura(SPELL_POWER_UP, unit);
 
-                            if (Aura* aur = pUnit->GetAura(SPELL_POWER_UP))
+                            if (Aura* aur = unit->GetAura(SPELL_POWER_UP))
                             {
                                 if (aur->GetStackAmount() + 30 > 100)
                                 {
-                                    pUnit->RemoveAurasDueToSpell(SPELL_POWER_UP);
-                                    pUnit->CastSpell(pUnit, me->GetEntry() == NPC_LIGHTBANE ? SPELL_EMPOWERED_LIGHT : SPELL_EMPOWERED_DARK, true);
+                                    unit->RemoveAurasDueToSpell(SPELL_POWER_UP);
+                                    unit->CastSpell(unit, me->GetEntry() == NPC_LIGHTBANE ? SPELL_EMPOWERED_LIGHT : SPELL_EMPOWERED_DARK, true);
                                 }
                                 else
                                 {
                                     if (urand(0, 100) <= 15)
-                                        pUnit->CastSpell(pUnit, SPELL_SPEED, true);
+                                        unit->CastSpell(unit, SPELL_SPEED, true);
 
                                     aur->SetStackAmount(aur->GetStackAmount() + 30);
                                 }
@@ -598,7 +606,12 @@ public:
 
     struct boss_fjolaAI : public boss_twin_baseAI
     {
-        boss_fjolaAI(Creature* creature) : boss_twin_baseAI(creature) {}
+        boss_fjolaAI(Creature* creature) : boss_twin_baseAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
 
         void Reset() {
             boss_twin_baseAI::Reset();
@@ -636,24 +649,23 @@ public:
             EssenceLocation[0] = TwinValkyrsLoc[2];
             EssenceLocation[1] = TwinValkyrsLoc[3];
 
-            if (m_instance)
+            if (instance)
             {
-                m_instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  EVENT_START_TWINS_FIGHT);
+                instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  EVENT_START_TWINS_FIGHT);
             }
         }
 
         void EnterCombat(Unit* who)
         {
             boss_twin_baseAI::EnterCombat(who);
-            if (m_instance)
+            if (instance)
             {
-                m_instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  EVENT_START_TWINS_FIGHT);
+                instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  EVENT_START_TWINS_FIGHT);
             }
         }
     };
 
 };
-
 
 /*######
 ## boss_eydis
@@ -741,15 +753,14 @@ public:
     }
 };
 
-
 struct mob_unleashed_ballAI : public ScriptedAI
 {
     mob_unleashed_ballAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_instance = (InstanceScript*)creature->GetInstanceScript();
+        instance = creature->GetInstanceScript();
     }
 
-    InstanceScript* m_instance;
+    InstanceScript* instance;
     uint32 m_uiRangeCheckTimer;
 
     void KilledUnit(Unit* who)
@@ -785,8 +796,8 @@ struct mob_unleashed_ballAI : public ScriptedAI
     {
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
         me->SetReactState(REACT_PASSIVE);
-        me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-        me->SetFlying(true);
+        me->SetDisableGravity(true);
+        me->SetCanFly(true);
         SetCombatMovement(false);
         MoveToNextPoint();
         m_uiRangeCheckTimer = 500;
@@ -794,7 +805,8 @@ struct mob_unleashed_ballAI : public ScriptedAI
 
     void MovementInform(uint32 uiType, uint32 uiId)
     {
-        if (uiType != POINT_MOTION_TYPE) return;
+        if (uiType != POINT_MOTION_TYPE)
+            return;
 
         switch (uiId)
         {
@@ -845,23 +857,23 @@ public:
                             {
                                 for (std::list<Unit* >::const_iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
                                 {
-                                    Unit* pUnit = (*itr);
-                                    if (pUnit && pUnit->isAlive())
+                                    Unit* unit = (*itr);
+                                    if (unit && unit->isAlive())
                                     {
-                                        if (!pUnit->HasAura(SPELL_POWER_UP))
-                                            pUnit->AddAura(SPELL_POWER_UP, pUnit);
+                                        if (!unit->HasAura(SPELL_POWER_UP))
+                                            unit->AddAura(SPELL_POWER_UP, unit);
     
-                                        if (Aura* aur = pUnit->GetAura(SPELL_POWER_UP))
+                                        if (Aura* aur = unit->GetAura(SPELL_POWER_UP))
                                         {
                                             if (aur->GetStackAmount() + 6 > 100)
                                             {
-                                                pUnit->RemoveAurasDueToSpell(SPELL_POWER_UP);
-                                                pUnit->CastSpell(pUnit, SPELL_EMPOWERED_DARK, true);
+                                                unit->RemoveAurasDueToSpell(SPELL_POWER_UP);
+                                                unit->CastSpell(unit, SPELL_EMPOWERED_DARK, true);
                                             }
                                             else
                                             {
                                                 if (urand(0, 100) <= 15)
-                                                    pUnit->CastSpell(pUnit, SPELL_SPEED, true);
+                                                    unit->CastSpell(unit, SPELL_SPEED, true);
     
                                                 aur->SetStackAmount(aur->GetStackAmount() + 6);
                                             }
@@ -881,7 +893,6 @@ public:
         }
     };
 };
-
 
 class mob_unleashed_light : public CreatureScript
 {
@@ -920,23 +931,23 @@ public:
                             {
                                 for (std::list<Unit* >::const_iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
                                 {
-                                    Unit* pUnit = (*itr);
-                                    if (pUnit && pUnit->isAlive())
+                                    Unit* unit = (*itr);
+                                    if (unit && unit->isAlive())
                                     {
-                                        if (!pUnit->HasAura(SPELL_POWER_UP))
-                                            pUnit->AddAura(SPELL_POWER_UP, pUnit);
+                                        if (!unit->HasAura(SPELL_POWER_UP))
+                                            unit->AddAura(SPELL_POWER_UP, unit);
     
-                                        if (Aura* aur = pUnit->GetAura(SPELL_POWER_UP))
+                                        if (Aura* aur = unit->GetAura(SPELL_POWER_UP))
                                         {
                                             if (aur->GetStackAmount() + 6 > 100)
                                             {
-                                                pUnit->RemoveAurasDueToSpell(SPELL_POWER_UP);
-                                                pUnit->CastSpell(pUnit, SPELL_EMPOWERED_LIGHT, true);
+                                                unit->RemoveAurasDueToSpell(SPELL_POWER_UP);
+                                                unit->CastSpell(unit, SPELL_EMPOWERED_LIGHT, true);
                                             }
                                             else
                                             {
                                                 if (urand(0, 100) <= 15)
-                                                    pUnit->CastSpell(pUnit, SPELL_SPEED, true);
+                                                    unit->CastSpell(unit, SPELL_SPEED, true);
     
                                                 aur->SetStackAmount(aur->GetStackAmount() + 6);
                                             }

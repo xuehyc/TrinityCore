@@ -31,7 +31,8 @@ EndScriptData */
 // Scarab   - Kill credit isn't crediting?
 // FrostSph - often they are casting Permafrost a little above the ground
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "trial_of_the_crusader.h"
 
 enum Yells
@@ -143,10 +144,10 @@ public:
     {
         boss_anubarak_trialAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
-            m_instance = (InstanceScript*)creature->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
 
         SummonList Summons;
 
@@ -192,8 +193,8 @@ public:
             if (who->GetTypeId() == TYPEID_PLAYER)
             {
                 DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, me);
-                if (m_instance)
-                    m_instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
+                if (instance)
+                    instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
             }
         }
 
@@ -208,16 +209,16 @@ public:
 
         void JustReachedHome()
         {
-            if (m_instance)
-                m_instance->SetData(TYPE_ANUBARAK, FAIL);
+            if (instance)
+                instance->SetData(TYPE_ANUBARAK, FAIL);
         }
 
         void JustDied(Unit* /*killer*/)
         {
             Summons.DespawnAll();
             DoScriptText(SAY_DEATH, me);
-            if (m_instance)
-                m_instance->SetData(TYPE_ANUBARAK, DONE);
+            if (instance)
+                instance->SetData(TYPE_ANUBARAK, DONE);
         }
 
         void JustSummoned(Creature* summoned)
@@ -291,8 +292,8 @@ public:
             DoScriptText(SAY_AGGRO, me);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             DoZoneInCombat();
-            if (m_instance)
-                m_instance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
+            if (instance)
+                instance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
 
             //Spawn Frost Spheres
             for (int i=0; i < 6; i++)
@@ -302,6 +303,9 @@ public:
         void UpdateAI(const uint32 uiDiff)
         {
             if (!UpdateVictim())
+                return;
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             switch (m_uiStage)
@@ -336,7 +340,8 @@ public:
                     {
                         if (m_uiNerubianShadowStrikeTimer <= uiDiff)
                         {
-                            Summons.DoAction(NPC_BURROWER, ACTION_SHADOW_STRIKE);
+                            EntryCheckPredicate pred(NPC_BURROWER);
+                            Summons.DoAction(ACTION_SHADOW_STRIKE, pred);
                             m_uiNerubianShadowStrikeTimer = urand(20*1000, 30*1000);
                         } else m_uiNerubianShadowStrikeTimer -= uiDiff;
                     }
@@ -483,7 +488,6 @@ public:
 
 };
 
-
 class mob_swarm_scarab : public CreatureScript
 {
 public:
@@ -498,10 +502,10 @@ public:
     {
         mob_swarm_scarabAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_instance = (InstanceScript*)creature->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
 
         uint32 m_uiDeterminationTimer;
         uint32 m_uiAcidMandibleTimer;
@@ -526,6 +530,7 @@ public:
             if (!UpdateVictim())
                 return;
 
+            /* Bosskillers don't recognize */
             if (m_uiDeterminationTimer <= uiDiff)
             {
                 DoCast(me, SPELL_DETERMINATION);
@@ -570,7 +575,6 @@ public:
 
 };
 
-
 class mob_nerubian_burrower : public CreatureScript
 {
 public:
@@ -585,10 +589,10 @@ public:
     {
         mob_nerubian_burrowerAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_instance = (InstanceScript*)creature->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
 
         uint32 m_uiSpiderFrenzyTimer;
         uint32 m_uiSubmergeTimer;
@@ -726,8 +730,11 @@ class mob_frost_sphere : public CreatureScript
             {
                 _isFalling = false;
                 me->SetReactState(REACT_PASSIVE);
-                me->SetFlying(true);
-                me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
+                //! Confirmed sniff 3.3.5.a
+                me->SetDisableGravity(true);
+                me->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+                //! end
+                me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
                 me->SetSpeed(MOVE_RUN, 0.5f, false);
                 me->GetMotionMaster()->MoveRandom(20.0f);
                 DoCast(SPELL_FROST_SPHERE);
@@ -759,10 +766,10 @@ class mob_frost_sphere : public CreatureScript
                 {
                     case POINT_FALL_GROUND:
                         me->RemoveAurasDueToSpell(SPELL_FROST_SPHERE);
-                        me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
+                        me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
                         DoCast(SPELL_PERMAFROST_VISUAL);
                         DoCast(SPELL_PERMAFROST);
-                        me->SetFloatValue(OBJECT_FIELD_SCALE_X, 2.0f);
+                        me->SetObjectScale(2.0f);
                         break;
                 }
             }
@@ -791,10 +798,10 @@ public:
     {
         mob_anubarak_spikeAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_instance = (InstanceScript*)creature->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
         uint32 m_uiIncreaseSpeedTimer;
         uint8  m_uiSpeed;
         uint64 m_uiTargetGUID;
@@ -802,6 +809,11 @@ public:
         void Reset()
         {
             m_uiTargetGUID = 0;
+        }
+
+        bool CanAIAttack(Unit const* victim) const
+        {
+            return victim->GetTypeId() == TYPEID_PLAYER;
         }
 
         void AttackStart(Unit* who)

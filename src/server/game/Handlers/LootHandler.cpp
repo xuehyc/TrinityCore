@@ -80,9 +80,9 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket & recv_data)
     {
         Creature* creature = GetPlayer()->GetMap()->GetCreature(lguid);
 
-        bool ok_loot = creature && creature->isAlive() == (player->getClass() == CLASS_ROGUE && creature->lootForPickPocketed);
+        bool lootAllowed = creature && creature->isAlive() == (player->getClass() == CLASS_ROGUE && creature->lootForPickPocketed);
 
-        if (!ok_loot || !creature->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
+        if (!lootAllowed || !creature->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
         {
             player->SendLootRelease(lguid);
             return;
@@ -220,16 +220,18 @@ void WorldSession::HandleLootOpcode(WorldPacket & recv_data)
         GetPlayer()->InterruptNonMeleeSpells(false);
 }
 
-void WorldSession::HandleLootReleaseOpcode(WorldPacket & recv_data)
+void WorldSession::HandleLootReleaseOpcode(WorldPacket& recvData)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_LOOT_RELEASE");
 
     // cheaters can modify lguid to prevent correct apply loot release code and re-loot
     // use internal stored guid
-    recv_data.read_skip<uint64>();                          // guid;
+    uint64 guid;
+    recvData >> guid;
 
     if (uint64 lguid = GetPlayer()->GetLootGUID())
-        DoLootRelease(lguid);
+        if (lguid == guid)
+            DoLootRelease(lguid);
 }
 
 void WorldSession::DoLootRelease(uint64 lguid)
@@ -386,8 +388,8 @@ void WorldSession::DoLootRelease(uint64 lguid)
     {
         Creature* creature = GetPlayer()->GetMap()->GetCreature(lguid);
 
-        bool ok_loot = creature && creature->isAlive() == (player->getClass() == CLASS_ROGUE && creature->lootForPickPocketed);
-        if (!ok_loot || !creature->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
+        bool lootAllowed = creature && creature->isAlive() == (player->getClass() == CLASS_ROGUE && creature->lootForPickPocketed);
+        if (!lootAllowed || !creature->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
             return;
 
         loot = &creature->loot;
@@ -448,7 +450,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket & recv_data)
     if (_player->GetLootGUID() != lootguid)
         return;
 
-    Loot* pLoot = NULL;
+    Loot* loot = NULL;
 
     if (IS_CRE_OR_VEH_GUID(GetPlayer()->GetLootGUID()))
     {
@@ -456,7 +458,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket & recv_data)
         if (!creature)
             return;
 
-        pLoot = &creature->loot;
+        loot = &creature->loot;
     }
     else if (IS_GAMEOBJECT_GUID(GetPlayer()->GetLootGUID()))
     {
@@ -464,22 +466,24 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket & recv_data)
         if (!pGO)
             return;
 
-        pLoot = &pGO->loot;
+        loot = &pGO->loot;
     }
 
-    if (!pLoot)
+    if (!loot)
         return;
 
-    if (slotid > pLoot->items.size())
+    if (slotid >= loot->items.size() + loot->quest_items.size())
     {
-        sLog->outDebug(LOG_FILTER_LOOT, "MasterLootItem: Player %s might be using a hack! (slot %d, size %lu)", GetPlayer()->GetName(), slotid, (unsigned long)pLoot->items.size());
+        sLog->outDebug(LOG_FILTER_LOOT, "MasterLootItem: Player %s might be using a hack! (slot %d, size %lu)", GetPlayer()->GetName(), slotid, (unsigned long)loot->items.size());
         return;
     }
 
-    LootItem& item = pLoot->items[slotid];
+    LootItem& item = slotid >= loot->items.size() ? loot->quest_items[slotid - loot->items.size()] : loot->items[slotid];
 
     ItemPosCountVec dest;
     InventoryResult msg = target->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item.itemid, item.count);
+    if (item.follow_loot_rules && !item.AllowedForPlayer(target))
+        msg = EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
     if (msg != EQUIP_ERR_OK)
     {
         target->SendEquipError(msg, NULL, NULL, item.itemid);
@@ -495,14 +499,13 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket & recv_data)
     Item* newitem = target->StoreNewItem(dest, item.itemid, true, item.randomPropertyId, looters);
     target->SendNewItem(newitem, uint32(item.count), false, false, true);
     target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item.itemid, item.count);
-    target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, pLoot->loot_type, item.count);
+    target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, loot->loot_type, item.count);
     target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item.itemid, item.count);
 
     // mark as looted
     item.count=0;
     item.is_looted=true;
 
-    pLoot->NotifyItemRemoved(slotid);
-    --pLoot->unlootedCount;
+    loot->NotifyItemRemoved(slotid);
+    --loot->unlootedCount;
 }
-

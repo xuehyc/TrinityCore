@@ -15,7 +15,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellAuras.h"
 #include "gundrak.h"
 
 //Spells
@@ -80,9 +82,9 @@ public:
 
     struct boss_slad_ranAI : public ScriptedAI
     {
-        boss_slad_ranAI(Creature* c) : ScriptedAI(c), lSummons(me)
+        boss_slad_ranAI(Creature* creature) : ScriptedAI(creature), lSummons(me)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         uint32 uiPoisonNovaTimer;
@@ -219,7 +221,7 @@ public:
 
     struct mob_slad_ran_constrictorAI : public ScriptedAI
     {
-        mob_slad_ran_constrictorAI(Creature* c) : ScriptedAI(c) {}
+        mob_slad_ran_constrictorAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 uiGripOfSladRanTimer;
 
@@ -285,7 +287,7 @@ public:
 
     struct mob_slad_ran_viperAI : public ScriptedAI
     {
-        mob_slad_ran_viperAI(Creature* c) : ScriptedAI(c) {}
+        mob_slad_ran_viperAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 uiVenomousBiteTimer;
 

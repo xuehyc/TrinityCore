@@ -15,7 +15,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
 #include "naxxramas.h"
 
 #define SAY_AGGRO           RAND(-1533109, -1533110, -1533111)
@@ -60,7 +62,7 @@ public:
 
     struct boss_heiganAI : public BossAI
     {
-        boss_heiganAI(Creature* c) : BossAI(c, BOSS_HEIGAN) {}
+        boss_heiganAI(Creature* creature) : BossAI(creature, BOSS_HEIGAN) {}
 
         uint32 eruptSection;
         bool eruptDirection;
@@ -89,7 +91,7 @@ public:
             return 0;
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             _JustDied();
             DoScriptText(SAY_DEATH, me);
@@ -160,7 +162,7 @@ public:
 
                         eruptDirection ? ++eruptSection : --eruptSection;
 
-                        events.ScheduleEvent(EVENT_ERUPT, phase == PHASE_FIGHT ? 10000 : 4000);
+                        events.ScheduleEvent(EVENT_ERUPT, phase == PHASE_FIGHT ? 10000 : 3000);
                         break;
                 }
             }

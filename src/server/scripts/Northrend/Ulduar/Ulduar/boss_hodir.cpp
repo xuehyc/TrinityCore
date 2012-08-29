@@ -122,7 +122,7 @@ enum HodirEvents
     EVENT_ICICLE,
     EVENT_BLOWS,
     EVENT_RARE_CACHE,
-    EVENT_BERSERK, 
+    EVENT_BERSERK,
 };
 
 enum HodirActions
@@ -172,9 +172,9 @@ class npc_flash_freeze : public CreatureScript
         {
             npc_flash_freezeAI(Creature* creature) : Scripted_NoMovementAI(creature), instance(me->GetInstanceScript())
             {
-                me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
+                me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
-            }            
+            }
 
             void Reset()
             {
@@ -239,10 +239,10 @@ class npc_ice_block : public CreatureScript
             npc_ice_blockAI(Creature* creature) : Scripted_NoMovementAI(creature)
             {
                 instance = me->GetInstanceScript();
-                me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
+                me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
                 targetGUID = 0;
-            }            
+            }
 
             void IsSummonedBy(Unit* summoner)
             {
@@ -301,7 +301,7 @@ class boss_hodir : public CreatureScript
             {
                 me->SetReactState(REACT_PASSIVE);
                 gotEncounterFinished = false;
-            }            
+            }
 
             void Reset()
             {
@@ -513,10 +513,10 @@ class npc_icicle : public CreatureScript
         {
             npc_icicleAI(Creature* creature) : Scripted_NoMovementAI(creature)
             {
-                me->SetDisplayId(me->GetCreatureInfo()->Modelid1);
+                me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetReactState(REACT_PASSIVE);
-            }           
+            }
 
             void Reset()
             {
@@ -562,10 +562,10 @@ class npc_snowpacked_icicle : public CreatureScript
         {
             npc_snowpacked_icicleAI(Creature* creature) : Scripted_NoMovementAI(creature)
             {
-                me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
+                me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
                 me->SetReactState(REACT_PASSIVE);
-            }            
+            }
 
             void Reset()
             {
@@ -726,7 +726,7 @@ class npc_hodir_shaman : public CreatureScript
                                 }
                                 else
                                     events.ScheduleEvent(EVENT_STORM_CLOUD, urand(2000, 3000)); // No target found, check again in a short period of time
-                            
+
                             }
                             break;
                         default:
@@ -921,7 +921,7 @@ class npc_toasty_fire : public CreatureScript
         {
             npc_toasty_fireAI(Creature* creature) : ScriptedAI(creature)
             {
-                me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
+                me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
             }
 
             void Reset()
@@ -1073,7 +1073,3 @@ void AddSC_boss_hodir()
     new achievement_staying_buffed_all_winter("achievement_staying_buffed_all_winter");
     new achievement_staying_buffed_all_winter("achievement_staying_buffed_all_winter_25");
 }
-
-#undef SPELL_FROZEN_BLOWS
-#undef SPELL_STORM_CLOUD
-#undef SPELL_STORM_POWER

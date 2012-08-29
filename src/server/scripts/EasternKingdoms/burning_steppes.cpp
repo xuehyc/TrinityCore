@@ -27,7 +27,9 @@ EndScriptData */
 npc_ragged_john
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 
 /*######
 ## npc_ragged_john
@@ -51,10 +53,10 @@ class npc_ragged_john : public CreatureScript
 public:
     npc_ragged_john() : CreatureScript("npc_ragged_john") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        switch (uiAction)
+        switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF:
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SELECT1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
@@ -127,7 +129,7 @@ public:
 
     struct npc_ragged_johnAI : public ScriptedAI
     {
-        npc_ragged_johnAI(Creature* c) : ScriptedAI(c) {}
+        npc_ragged_johnAI(Creature* creature) : ScriptedAI(creature) {}
 
         void Reset() {}
 
@@ -147,7 +149,6 @@ public:
 
         void EnterCombat(Unit* /*who*/) {}
     };
-
 };
 
 void AddSC_burning_steppes()

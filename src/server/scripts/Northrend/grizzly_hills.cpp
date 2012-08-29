@@ -16,7 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 #include "Vehicle.h"
 
@@ -75,12 +76,13 @@ public:
                 summoned->AI()->AttackStart(me->getVictim());
         }
 
-        void WaypointReached(uint32 i)
+        void WaypointReached(uint32 waypointId)
         {
             Player* player = GetPlayerForEscort();
             if (!player)
                 return;
-            switch (i)
+
+            switch (waypointId)
             {
                 case 9:
                     if (Creature* Mrfloppy = GetClosestCreatureWithEntry(me, NPC_MRFLOPPY, 100.0f))
@@ -163,7 +165,7 @@ public:
                         player->GroupEventHappens(QUEST_PERILOUS_ADVENTURE, me);
                         DoScriptText(SAY_QUEST_COMPLETE, me, player);
                     }
-                    me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                    me->SetWalk(false);
                     break;
                 case 25:
                     DoScriptText(SAY_VICTORY4, me);
@@ -195,9 +197,7 @@ public:
             if (HasEscortState(STATE_ESCORT_ESCORTING))
             {
                 if (m_uiChatTimer <= uiDiff)
-                {
                     m_uiChatTimer = 12000;
-                }
                 else
                     m_uiChatTimer -= uiDiff;
             }
@@ -210,9 +210,7 @@ public:
         {
             DoScriptText(SAY_QUEST_ACCEPT, creature);
             if (Creature* Mrfloppy = GetClosestCreatureWithEntry(creature, NPC_MRFLOPPY, 180.0f))
-            {
                 Mrfloppy->GetMotionMaster()->MoveFollow(creature, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-            }
 
             if (npc_escortAI* pEscortAI = CAST_AI(npc_emily::npc_emilyAI, (creature->AI())))
                 pEscortAI->Start(true, false, player->GetGUID());
@@ -234,7 +232,7 @@ public:
 
     struct npc_mrfloppyAI : public ScriptedAI
     {
-        npc_mrfloppyAI(Creature* c) : ScriptedAI(c) {}
+        npc_mrfloppyAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint64 EmilyGUID;
         uint64 RWORGGUID;
@@ -319,7 +317,7 @@ public:
         void SpellHit(Unit* pCaster, const SpellInfo* pSpell)
         {
              if (pSpell->Id == SPELL_OUTHOUSE_GROANS)
-            {
+             {
                 ++m_counter;
                 if (m_counter < 5)
                     DoCast(pCaster, SPELL_CAMERA_SHAKE, true);
@@ -328,8 +326,13 @@ public:
                 DoCast(me, SPELL_DUST_FIELD, true);
                 switch (m_gender)
                 {
-                    case GENDER_FEMALE: DoPlaySoundToSet(me, SOUND_FEMALE); break;
-                    case GENDER_MALE: DoPlaySoundToSet(me, SOUND_MALE); break;
+                    case GENDER_FEMALE:
+                        DoPlaySoundToSet(me, SOUND_FEMALE);
+                        break;
+
+                    case GENDER_MALE:
+                        DoPlaySoundToSet(me, SOUND_MALE);
+                        break;
                 }
             }
         }
@@ -479,11 +482,11 @@ public:
 
     struct npc_wounded_skirmisherAI : public ScriptedAI
     {
-        npc_wounded_skirmisherAI(Creature* c) : ScriptedAI(c) {}
+        npc_wounded_skirmisherAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 DespawnTimer;
 
-        void Reset ()
+        void Reset()
         {
             DespawnTimer = 5000;
         }
@@ -518,6 +521,7 @@ public:
         {
             if (!UpdateVictim())
                 return;
+
             DoMeleeAttackIfReady();
         }
     };
@@ -730,12 +734,12 @@ public:
 
 void AddSC_grizzly_hills()
 {
-    new npc_emily;
-    new npc_mrfloppy;
-    new npc_outhouse_bunny;
-    new npc_tallhorn_stag;
-    new npc_amberpine_woodsman;
-    new npc_wounded_skirmisher;
+    new npc_emily();
+    new npc_mrfloppy();
+    new npc_outhouse_bunny();
+    new npc_tallhorn_stag();
+    new npc_amberpine_woodsman();
+    new npc_wounded_skirmisher();
     new npc_lightning_sentry();
     new npc_venture_co_straggler();
     new spell_shredder_delivery();

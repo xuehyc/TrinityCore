@@ -20,7 +20,11 @@ UPDATE `creature_template` SET `spell8` = 27928 WHERE `entry` IN (16125, 29985);
 UPDATE `creature_template` SET `spell8` = 27935 WHERE `entry` IN (16126, 29986);
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
+#include "GridNotifiers.h"
+#include "CombatAI.h"
 #include "naxxramas.h"
 
 enum Yells
@@ -32,6 +36,7 @@ enum Yells
     EMOTE_CUSTOM_GATE           = -1999971,
     EMOTE_CUSTOM_TELEPORT       = -1999972
 };
+
 //Gothik
 enum Spells
 {
@@ -43,8 +48,11 @@ enum Spells
     SPELL_INFORM_LIVE_RIDER     = 27935,
     SPELL_INFORM_DEAD_TRAINEE   = 27915,
     SPELL_INFORM_DEAD_KNIGHT    = 27931,
-    SPELL_INFORM_DEAD_RIDER     = 27937
+    SPELL_INFORM_DEAD_RIDER     = 27937,
+
+    SPELL_SHADOW_MARK           = 27825
 };
+
 enum Creatures
 {
     MOB_LIVE_TRAINEE    = 16124,
@@ -56,35 +64,44 @@ enum Creatures
     MOB_DEAD_HORSE      = 16149
 };
 
-struct Waves { uint32 entry, time; };
-// wave setups are the same in heroic and normal difficulty, only count of mobs is different, but this is handled in DoGothikSummon function
-
+struct Waves { uint32 entry, time, mode; };
+// wave setups are not the same in heroic and normal difficulty,
+// mode is 0 only normal, 1 both and 2 only heroic
+// but this is handled in DoGothikSummon function
 const Waves waves[] =
 {
-    {MOB_LIVE_TRAINEE, 20000},
-    {MOB_LIVE_TRAINEE, 20000},
-    {MOB_LIVE_TRAINEE, 10000},
-    {MOB_LIVE_KNIGHT, 10000},
-    {MOB_LIVE_TRAINEE, 15000},
-    {MOB_LIVE_KNIGHT, 5000},
-    {MOB_LIVE_TRAINEE, 20000},
-    {MOB_LIVE_TRAINEE, 0},
-    {MOB_LIVE_KNIGHT, 10000},
-    {MOB_LIVE_RIDER, 10000},
-    {MOB_LIVE_TRAINEE, 5000},
-    {MOB_LIVE_KNIGHT, 15000},
-    {MOB_LIVE_RIDER, 0},
-    {MOB_LIVE_TRAINEE, 10000},
-    {MOB_LIVE_KNIGHT, 10000},
-    {MOB_LIVE_TRAINEE, 10000},
-    {MOB_LIVE_RIDER, 5000},
-    {MOB_LIVE_KNIGHT, 5000},
-    {MOB_LIVE_TRAINEE, 20000},
-    {MOB_LIVE_RIDER, 0},
-    {MOB_LIVE_KNIGHT, 0},
-    {MOB_LIVE_TRAINEE, 20000},
-    {MOB_LIVE_TRAINEE, 25000},
-    {0, 0},
+    {MOB_LIVE_TRAINEE, 20000, 1},
+    {MOB_LIVE_TRAINEE, 20000, 1},
+    {MOB_LIVE_TRAINEE, 10000, 1},
+    {MOB_LIVE_KNIGHT, 10000, 1},
+    {MOB_LIVE_TRAINEE, 15000, 1},
+    {MOB_LIVE_KNIGHT, 5000, 1},
+    {MOB_LIVE_TRAINEE, 20000, 1},
+    {MOB_LIVE_TRAINEE, 0, 1},
+    {MOB_LIVE_KNIGHT, 10000, 1},
+    {MOB_LIVE_TRAINEE, 10000, 2},
+    {MOB_LIVE_RIDER, 10000, 0},
+    {MOB_LIVE_RIDER, 5000, 2},
+    {MOB_LIVE_TRAINEE, 5000, 0},
+    {MOB_LIVE_TRAINEE, 15000, 2},
+    {MOB_LIVE_KNIGHT, 15000, 0},
+    {MOB_LIVE_TRAINEE, 0, 0},
+    {MOB_LIVE_RIDER, 10000, 1},
+    {MOB_LIVE_KNIGHT, 10000, 1},
+    {MOB_LIVE_TRAINEE, 10000, 0},
+    {MOB_LIVE_RIDER, 10000, 2},
+    {MOB_LIVE_TRAINEE, 0, 2},
+    {MOB_LIVE_RIDER, 5000, 1},
+    {MOB_LIVE_TRAINEE, 0, 2},
+    {MOB_LIVE_KNIGHT, 5000, 1},
+    {MOB_LIVE_RIDER, 0, 2},
+    {MOB_LIVE_TRAINEE, 20000, 1},
+    {MOB_LIVE_RIDER, 0, 1},
+    {MOB_LIVE_KNIGHT, 0, 1},
+    {MOB_LIVE_TRAINEE, 25000, 2},
+    {MOB_LIVE_TRAINEE, 15000, 0},
+    {MOB_LIVE_TRAINEE, 25000, 0},
+    {0, 0, 1},
 };
 
 #define POS_Y_GATE  -3360.78f
@@ -93,9 +110,7 @@ const Waves waves[] =
 #define POS_X_NORTH  2750.49f
 #define POS_X_SOUTH  2633.84f
 
-#define GO_GOTHIK_GATE  181170
-
-#define SIDE_CHECK(who) (liveSide == (who->GetPositionY() < POS_Y_GATE))
+#define IN_LIVE_SIDE(who) (who->GetPositionY() < POS_Y_GATE)
 
 enum Events
 {
@@ -134,6 +149,20 @@ float const PosGroundLiveSide[4] = {2691.2f, -3387.0f, 267.68f, 1.52f};
 float const PosGroundDeadSide[4] = {2693.5f, -3334.6f, 267.68f, 4.67f};
 float const PosPlatform[4] = {2640.5f, -3360.6f, 285.26f, 0.0f};
 
+// Predicate function to check that the r   efzr unit is NOT on the same side as the source.
+struct NotOnSameSide : public std::unary_function<Unit*, bool>
+{
+    NotOnSameSide(Unit* source) : _onLiveSide(IN_LIVE_SIDE(source)) {}
+
+    bool operator() (Unit const* target)
+    {
+        return (_onLiveSide != IN_LIVE_SIDE(target));
+    }
+
+    private:
+        bool _onLiveSide;
+};
+
 class boss_gothik : public CreatureScript
 {
     public:
@@ -158,34 +187,13 @@ class boss_gothik : public CreatureScript
                 LiveTriggerGUID.clear();
                 DeadTriggerGUID.clear();
 
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_DISABLE_MOVE);
                 me->SetReactState(REACT_PASSIVE);
-                GothikDoorState(GO_STATE_ACTIVE);
+                if (instance)
+                    instance->SetData(DATA_GOTHIK_GATE, GO_STATE_ACTIVE);
                 _Reset();
                 mergedSides = false;
                 phaseTwo = false;
                 thirtyPercentReached = false;
-            }
-
-            void DamageTaken(Unit* attacker, uint32 &damage)
-            {
-                if (!attacker || !me)
-                    return;
-
-                if ((((me->GetPositionY() <= POS_Y_GATE && attacker->GetPositionY() >= POS_Y_GATE) || (me->GetPositionY() >= POS_Y_GATE && attacker->GetPositionY() <= POS_Y_GATE)) && !thirtyPercentReached) || !phaseTwo)
-                    damage = 0;
-            }
-
-            void GothikDoorState(uint32 value)
-            {
-                if (GameObject* go = me->FindNearestGameObject(GO_GOTHIK_GATE, 150.0f))
-                {
-                    go->SetGoState(GOState(value));
-                }
-                else if (instance)
-                {
-                    instance->SetData(DATA_GOTHIK_GATE, value);
-                }
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -199,18 +207,18 @@ class boss_gothik : public CreatureScript
 
                 if (LiveTriggerGUID.size() < POS_LIVE || DeadTriggerGUID.size() < POS_DEAD)
                 {
-                    sLog->outError("Script Gothik: cannot summon triggers!");
+                    sLog->outError(LOG_FILTER_TSCR, "Script Gothik: cannot summon triggers!");
                     EnterEvadeMode();
                     return;
                 }
 
                 _EnterCombat();
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_DISABLE_MOVE);
                 waveCount = 0;
                 events.ScheduleEvent(EVENT_SUMMON, 30000);
                 DoTeleportTo(PosPlatform);
                 DoScriptText(SAY_SPEECH, me);
-                GothikDoorState(GO_STATE_READY);
+                if (instance)
+                    instance->SetData(DATA_GOTHIK_GATE, GO_STATE_READY);
             }
 
             void JustSummoned(Creature* summon)
@@ -241,13 +249,14 @@ class boss_gothik : public CreatureScript
                     DoScriptText(SAY_KILL, me);
             }
 
-            void JustDied(Unit* /*Killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 LiveTriggerGUID.clear();
                 DeadTriggerGUID.clear();
                 _JustDied();
                 DoScriptText(SAY_DEATH, me);
-                GothikDoorState(GO_STATE_ACTIVE);
+                if (instance)
+                    instance->SetData(DATA_GOTHIK_GATE, GO_STATE_ACTIVE);
             }
 
             void DoGothikSummon(uint32 entry)
@@ -288,8 +297,8 @@ class boss_gothik : public CreatureScript
                     {
                         case MOB_LIVE_TRAINEE:
                         {
-                            if (Creature* liveTrigger = Unit::GetCreature(*me, LiveTriggerGUID[0]))
-                                DoSummon(MOB_LIVE_TRAINEE, liveTrigger, 1);
+                            if (Creature* liveTrigger0 = Unit::GetCreature(*me, LiveTriggerGUID[0]))
+                                DoSummon(MOB_LIVE_TRAINEE, liveTrigger0, 1);
                             if (Creature* liveTrigger1 = Unit::GetCreature(*me, LiveTriggerGUID[1]))
                                 DoSummon(MOB_LIVE_TRAINEE, liveTrigger1, 1);
                             break;
@@ -366,6 +375,12 @@ class boss_gothik : public CreatureScript
                 }
             }
 
+            void DamageTaken(Unit* /*who*/, uint32& damage)
+            {
+                if (!phaseTwo)
+                    damage = 0;
+            }
+
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
             {
                 if (!me->isInCombat())
@@ -383,19 +398,6 @@ class boss_gothik : public CreatureScript
                         DoSummon(MOB_DEAD_RIDER, target, 1.0f);
                         DoSummon(MOB_DEAD_HORSE, target, 1.0f);
                         break;
-                    case SPELL_SHADOW_BOLT:
-                    case H_SPELL_SHADOW_BOLT:
-                        if (me->getVictim() && !thirtyPercentReached && phaseTwo && target)
-                        {
-                            if ((me->GetPositionY() <= POS_Y_GATE && target->GetPositionY() >= POS_Y_GATE) || (me->GetPositionY() >= POS_Y_GATE && target->GetPositionY() <= POS_Y_GATE))
-                            {
-                                if (me->GetPositionY() <= POS_Y_GATE)
-                                    DoTeleportTo(PosGroundDeadSide);
-                                else
-                                    DoTeleportTo(PosGroundLiveSide);
-                            }
-                        }
-                        break;
                 }
             }
 
@@ -406,11 +408,12 @@ class boss_gothik : public CreatureScript
 
                 events.Update(diff);
 
-                if (HealthBelowPct(30) && !thirtyPercentReached && phaseTwo && !mergedSides)
+                if (!thirtyPercentReached && HealthBelowPct(30) && phaseTwo)
                 {
                     DoScriptText(EMOTE_CUSTOM_GATE, me);
                     thirtyPercentReached = true;
-                    GothikDoorState(GO_STATE_ACTIVE);
+                    if (instance)
+                        instance->SetData(DATA_GOTHIK_GATE, GO_STATE_ACTIVE);
                 }
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -423,20 +426,35 @@ class boss_gothik : public CreatureScript
                         case EVENT_SUMMON:
                             if (waves[waveCount].entry)
                             {
-                                DoGothikSummon(waves[waveCount].entry);
-                                events.ScheduleEvent(EVENT_SUMMON, waves[waveCount].time);
+                                if ((waves[waveCount].mode == 2) && (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL))
+                                   DoGothikSummon(waves[waveCount].entry);
+                                else if ((waves[waveCount].mode == 0) && (GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL))
+                                    DoGothikSummon(waves[waveCount].entry);
+                                else if (waves[waveCount].mode == 1)
+                                    DoGothikSummon(waves[waveCount].entry);
 
                                 // if group is not splitted, open gate and merge both sides at ~ 2 minutes (wave 11)
                                 if (waveCount == 11)
                                 {
                                     if (!CheckGroupSplitted())
                                     {
-                                        GothikDoorState(GO_STATE_ACTIVE);
-                                        summons.DoAction(0, 0);
+                                        if (instance)
+                                            instance->SetData(DATA_GOTHIK_GATE, GO_STATE_ACTIVE);
+                                        DummyEntryCheckPredicate pred;
+                                        summons.DoAction(0, pred);  //! Magic numbers fail
                                         summons.DoZoneInCombat();
                                         mergedSides = true;
                                     }
                                 }
+
+                                if (waves[waveCount].mode == 1)
+                                    events.ScheduleEvent(EVENT_SUMMON, waves[waveCount].time);
+                                else if ((waves[waveCount].mode == 2) && (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL))
+                                    events.ScheduleEvent(EVENT_SUMMON, waves[waveCount].time);
+                                else if ((waves[waveCount].mode == 0) && (GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL))
+                                    events.ScheduleEvent(EVENT_SUMMON, waves[waveCount].time);
+                                else
+                                    events.ScheduleEvent(EVENT_SUMMON, 0);
 
                                 ++waveCount;
                             }
@@ -447,11 +465,11 @@ class boss_gothik : public CreatureScript
                                 DoScriptText(SAY_TELEPORT, me);
                                 DoTeleportTo(PosGroundLiveSide);
                                 me->SetReactState(REACT_AGGRESSIVE);
-                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                                summons.DoAction(0, 0);
+                                DummyEntryCheckPredicate pred;
+                                summons.DoAction(0, pred);  //! Magic numbers fail
                                 summons.DoZoneInCombat();
                                 events.ScheduleEvent(EVENT_BOLT, 1000);
-                                events.ScheduleEvent(EVENT_HARVEST, urand(3000, 5000));
+                                events.ScheduleEvent(EVENT_HARVEST, urand(3000, 15000));
                                 events.ScheduleEvent(EVENT_TELEPORT, 20000);
                             }
                             break;
@@ -466,40 +484,16 @@ class boss_gothik : public CreatureScript
                         case EVENT_TELEPORT:
                             if (!thirtyPercentReached)
                             {
-                                Unit* target = NULL;
-
-                                if (CheckGroupSplitted() && !target)
-                                    {
-                                    Map* map = me->GetMap();
-                                    if (map && map->IsDungeon())
-                                    {
-                                        Map::PlayerList const &PlayerList = map->GetPlayers();
-                                        if (!PlayerList.isEmpty())
-                                        {
-                                            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                                            {
-                                                if (me->GetPositionY() >= POS_Y_GATE && i->getSource() && i->getSource()->isAlive() && i->getSource()->GetPositionX() <= POS_X_NORTH && i->getSource()->GetPositionX() >= POS_X_SOUTH && i->getSource()->GetPositionY() <= POS_Y_GATE && i->getSource()->GetPositionY() >= POS_Y_EAST && (!target || i->getSource()->GetDistance(me) < target->GetDistance(me)))
-                                                    target = i->getSource();
-                                                else if (me->GetPositionY() <= POS_Y_GATE && i->getSource() && i->getSource()->isAlive() && i->getSource()->GetPositionX() <= POS_X_NORTH && i->getSource()->GetPositionX() >= POS_X_SOUTH && i->getSource()->GetPositionY() >= POS_Y_GATE && i->getSource()->GetPositionY() <= POS_Y_WEST && (!target || i->getSource()->GetDistance(me) < target->GetDistance(me)))
-                                                    target = i->getSource();
-                                            }
-                                        }
-                                    }
-                                }
-
                                 me->AttackStop();
-
-                                if (me->GetPositionY() <= POS_Y_GATE)
+                                if (IN_LIVE_SIDE(me))
                                     DoTeleportTo(PosGroundDeadSide);
                                 else
                                     DoTeleportTo(PosGroundLiveSide);
 
-                                DoZoneInCombat();
-                                DoResetThreat();
-
-                                if (target)
+                                me->getThreatManager().resetAggro(NotOnSameSide(me));
+                                if (Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 0))
                                 {
-                                    me->AddThreat(target, 100.0f);
+                                    me->getThreatManager().addThreat(target, 100.0f);
                                     AttackStart(target);
                                 }
 
@@ -509,7 +503,8 @@ class boss_gothik : public CreatureScript
                     }
                 }
 
-                DoMeleeAttackIfReady();
+                if (!phaseTwo)
+                    DoMeleeAttackIfReady();
             }
         };
 
@@ -528,11 +523,16 @@ class mob_gothik_minion : public CreatureScript
         {
             mob_gothik_minionAI(Creature* creature) : CombatAI(creature)
             {
-                liveSide = me->GetPositionY() < POS_Y_GATE;
+                liveSide = IN_LIVE_SIDE(me);
             }
 
             bool liveSide;
             bool gateClose;
+
+            bool isOnSameSide(Unit const* who) const
+            {
+                return (liveSide == IN_LIVE_SIDE(who));
+            }
 
             void DoAction(int32 const param)
             {
@@ -541,17 +541,15 @@ class mob_gothik_minion : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32 &damage)
             {
-                if (gateClose && !SIDE_CHECK(attacker))
+                if (gateClose && !isOnSameSide(attacker))
                     damage = 0;
             }
 
             void JustDied(Unit* /*killer*/)
             {
                 if (me->isSummon())
-                {
                     if (Unit* owner = me->ToTempSummon()->GetSummoner())
                         CombatAI::JustDied(owner);
-                }
             }
 
             void EnterEvadeMode()
@@ -573,7 +571,7 @@ class mob_gothik_minion : public CreatureScript
                     {
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                         {
-                            if (i->getSource() && i->getSource()->isAlive() && SIDE_CHECK(i->getSource()))
+                            if (i->getSource() && i->getSource()->isAlive() && isOnSameSide(i->getSource()))
                             {
                                 AttackStart(i->getSource());
                                 return;
@@ -588,7 +586,7 @@ class mob_gothik_minion : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (gateClose && (!SIDE_CHECK(me) || me->getVictim() && !SIDE_CHECK(me->getVictim())))
+                if (gateClose && (!isOnSameSide(me) || (me->getVictim() && !isOnSameSide(me->getVictim()))))
                 {
                     EnterEvadeMode();
                     return;
@@ -604,8 +602,35 @@ class mob_gothik_minion : public CreatureScript
         }
 };
 
+class spell_gothik_shadow_bolt_volley : public SpellScriptLoader
+{
+    public:
+        spell_gothik_shadow_bolt_volley() : SpellScriptLoader("spell_gothik_shadow_bolt_volley") { }
+
+        class spell_gothik_shadow_bolt_volley_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gothik_shadow_bolt_volley_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& targets)
+            {
+                targets.remove_if(Trinity::UnitAuraCheck(false, SPELL_SHADOW_MARK));
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gothik_shadow_bolt_volley_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gothik_shadow_bolt_volley_SpellScript();
+        }
+};
+
 void AddSC_boss_gothik()
 {
     new boss_gothik();
     new mob_gothik_minion();
+    new spell_gothik_shadow_bolt_volley();
 }

@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Scholomance
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SPELL_FROSTBOLT         21369
 #define SPELL_ICEARMOR          18100                       //This is actually a buff he gives himself
@@ -44,7 +45,7 @@ public:
 
     struct boss_rasfrostAI : public ScriptedAI
     {
-        boss_rasfrostAI(Creature* c) : ScriptedAI(c) {}
+        boss_rasfrostAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 IceArmor_Timer;
         uint32 Frostbolt_Timer;

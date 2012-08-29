@@ -43,7 +43,7 @@ uint32 GuildMgr::GenerateGuildId()
 {
     if (NextGuildId >= 0xFFFFFFFE)
     {
-        sLog->outError("Guild ids overflow!! Can't continue, shutting down server. ");
+        sLog->outError(LOG_FILTER_GUILD, "Guild ids overflow!! Can't continue, shutting down server. ");
         World::StopNow(ERROR_EXIT_CODE);
     }
     return NextGuildId++;
@@ -93,7 +93,7 @@ Guild* GuildMgr::GetGuildByLeader(uint64 guid) const
 void GuildMgr::LoadGuilds()
 {
     // 1. Load all guilds
-    sLog->outString("Loading guilds definitions...");
+    sLog->outInfo(LOG_FILTER_GUILD, "Loading guilds definitions...");
     {
         uint32 oldMSTime = getMSTime();
 
@@ -105,8 +105,8 @@ void GuildMgr::LoadGuilds()
 
         if (!result)
         {
-            sLog->outString(">> Loaded 0 guild definitions. DB table `guild` is empty.");
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded 0 guild definitions. DB table `guild` is empty.");
+
             return;
         }
         else
@@ -128,13 +128,13 @@ void GuildMgr::LoadGuilds()
             }
             while (result->NextRow());
 
-            sLog->outString(">> Loaded %u guild definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded %u guild definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
         }
     }
 
     // 2. Load all guild ranks
-    sLog->outString("Loading guild ranks...");
+    sLog->outInfo(LOG_FILTER_GUILD, "Loading guild ranks...");
     {
         uint32 oldMSTime = getMSTime();
 
@@ -146,8 +146,8 @@ void GuildMgr::LoadGuilds()
 
         if (!result)
         {
-            sLog->outString(">> Loaded 0 guild ranks. DB table `guild_rank` is empty.");
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded 0 guild ranks. DB table `guild_rank` is empty.");
+
         }
         else
         {
@@ -164,13 +164,13 @@ void GuildMgr::LoadGuilds()
             }
             while (result->NextRow());
 
-            sLog->outString(">> Loaded %u guild ranks in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded %u guild ranks in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
         }
     }
 
     // 3. Load all guild members
-    sLog->outString("Loading guild members...");
+    sLog->outInfo(LOG_FILTER_GUILD, "Loading guild members...");
     {
         uint32 oldMSTime = getMSTime();
 
@@ -189,8 +189,8 @@ void GuildMgr::LoadGuilds()
 
         if (!result)
         {
-            sLog->outString(">> Loaded 0 guild members. DB table `guild_member` is empty.");
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded 0 guild members. DB table `guild_member` is empty.");
+
         }
         else
         {
@@ -208,27 +208,26 @@ void GuildMgr::LoadGuilds()
             }
             while (result->NextRow());
 
-            sLog->outString(">> Loaded %u guild members int %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded %u guild members int %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
         }
     }
 
     // 4. Load all guild bank tab rights
-    sLog->outString("Loading bank tab rights...");
+    sLog->outInfo(LOG_FILTER_GUILD, "Loading bank tab rights...");
     {
         uint32 oldMSTime = getMSTime();
 
         // Delete orphaned guild bank right entries before loading the valid ones
         CharacterDatabase.DirectExecute("DELETE gbr FROM guild_bank_right gbr LEFT JOIN guild g ON gbr.guildId = g.guildId WHERE g.guildId IS NULL");
 
-
                                                      //       0        1      2    3        4
         QueryResult result = CharacterDatabase.Query("SELECT guildid, TabId, rid, gbright, SlotPerDay FROM guild_bank_right ORDER BY guildid ASC, TabId ASC");
 
         if (!result)
         {
-            sLog->outString(">> Loaded 0 guild bank tab rights. DB table `guild_bank_right` is empty.");
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded 0 guild bank tab rights. DB table `guild_bank_right` is empty.");
+
         }
         else
         {
@@ -245,13 +244,13 @@ void GuildMgr::LoadGuilds()
             }
             while (result->NextRow());
 
-            sLog->outString(">> Loaded %u bank tab rights in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded %u bank tab rights in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
         }
     }
 
     // 5. Load all event logs
-    sLog->outString("Loading guild event logs...");
+    sLog->outInfo(LOG_FILTER_GUILD, "Loading guild event logs...");
     {
         uint32 oldMSTime = getMSTime();
 
@@ -262,8 +261,8 @@ void GuildMgr::LoadGuilds()
 
         if (!result)
         {
-            sLog->outString(">> Loaded 0 guild event logs. DB table `guild_eventlog` is empty.");
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded 0 guild event logs. DB table `guild_eventlog` is empty.");
+
         }
         else
         {
@@ -280,13 +279,13 @@ void GuildMgr::LoadGuilds()
             }
             while (result->NextRow());
 
-            sLog->outString(">> Loaded %u guild event logs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded %u guild event logs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
         }
     }
 
     // 6. Load all bank event logs
-    sLog->outString("Loading guild bank event logs...");
+    sLog->outInfo(LOG_FILTER_GUILD, "Loading guild bank event logs...");
     {
         uint32 oldMSTime = getMSTime();
 
@@ -298,8 +297,8 @@ void GuildMgr::LoadGuilds()
 
         if (!result)
         {
-            sLog->outString(">> Loaded 0 guild bank event logs. DB table `guild_bank_eventlog` is empty.");
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded 0 guild bank event logs. DB table `guild_bank_eventlog` is empty.");
+
         }
         else
         {
@@ -316,13 +315,13 @@ void GuildMgr::LoadGuilds()
             }
             while (result->NextRow());
 
-            sLog->outString(">> Loaded %u guild bank event logs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded %u guild bank event logs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
         }
     }
 
     // 7. Load all guild bank tabs
-    sLog->outString("Loading guild bank tabs...");
+    sLog->outInfo(LOG_FILTER_GUILD, "Loading guild bank tabs...");
     {
         uint32 oldMSTime = getMSTime();
 
@@ -334,8 +333,8 @@ void GuildMgr::LoadGuilds()
 
         if (!result)
         {
-            sLog->outString(">> Loaded 0 guild bank tabs. DB table `guild_bank_tab` is empty.");
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded 0 guild bank tabs. DB table `guild_bank_tab` is empty.");
+
         }
         else
         {
@@ -352,13 +351,13 @@ void GuildMgr::LoadGuilds()
             }
             while (result->NextRow());
 
-            sLog->outString(">> Loaded %u guild bank tabs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded %u guild bank tabs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
         }
     }
 
     // 8. Fill all guild bank tabs
-    sLog->outString("Filling bank tabs with items...");
+    sLog->outInfo(LOG_FILTER_GUILD, "Filling bank tabs with items...");
     {
         uint32 oldMSTime = getMSTime();
 
@@ -372,8 +371,8 @@ void GuildMgr::LoadGuilds()
 
         if (!result)
         {
-            sLog->outString(">> Loaded 0 guild bank tab items. DB table `guild_bank_item` or `item_instance` is empty.");
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded 0 guild bank tab items. DB table `guild_bank_item` or `item_instance` is empty.");
+
         }
         else
         {
@@ -390,13 +389,13 @@ void GuildMgr::LoadGuilds()
             }
             while (result->NextRow());
 
-            sLog->outString(">> Loaded %u guild bank tab items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-            sLog->outString();
+            sLog->outInfo(LOG_FILTER_GUILD, ">> Loaded %u guild bank tab items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
         }
     }
 
     // 9. Validate loaded guild data
-    sLog->outString("Validating data of loaded guilds...");
+    sLog->outInfo(LOG_FILTER_GUILD, "Validating data of loaded guilds...");
     {
         uint32 oldMSTime = getMSTime();
 
@@ -413,7 +412,7 @@ void GuildMgr::LoadGuilds()
             }
         }
 
-        sLog->outString(">> Validated data of loaded guilds in %u ms", GetMSTimeDiffToNow(oldMSTime));
-        sLog->outString();
+        sLog->outInfo(LOG_FILTER_GUILD, ">> Validated data of loaded guilds in %u ms", GetMSTimeDiffToNow(oldMSTime));
+
     }
 }

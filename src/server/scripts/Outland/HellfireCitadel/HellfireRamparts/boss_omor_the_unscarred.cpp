@@ -23,7 +23,8 @@ SDComment: Temporary solution for orbital/shadow whip-ability. Needs more core s
 SDCategory: Hellfire Citadel, Hellfire Ramparts
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum eSays
 {
@@ -113,7 +114,7 @@ class boss_omor_the_unscarred : public CreatureScript
                 ++SummonedCount;
             }
 
-            void JustDied(Unit* /*Killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 DoScriptText(SAY_DIE, me);
             }
@@ -143,7 +144,7 @@ class boss_omor_the_unscarred : public CreatureScript
                         if (Player* temp = Unit::GetPlayer(*me, PlayerGUID))
                         {
                             //if unit dosen't have this flag, then no pulling back (script will attempt cast, even if orbital strike was resisted)
-                            if (temp->HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
+                            if (temp->HasUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR))
                             {
                                 me->InterruptNonMeleeSpells(false);
                                 DoCast(temp, SPELL_SHADOW_WHIP);
@@ -219,9 +220,9 @@ class boss_omor_the_unscarred : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_omor_the_unscarredAI (Creature);
+            return new boss_omor_the_unscarredAI(creature);
         }
 };
 

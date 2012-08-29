@@ -39,6 +39,7 @@ class Creature;
 class CreatureAI;
 class DynamicObject;
 class GameObject;
+class GameObjectAI;
 class Guild;
 class GridMap;
 class Group;
@@ -313,7 +314,7 @@ template<class TMap> class MapScript : public UpdatableScript<TMap>
             : _mapEntry(sMapStore.LookupEntry(mapId))
         {
             if (!_mapEntry)
-                sLog->outError("Invalid MapScript for %u; no such map ID.", mapId);
+                sLog->outError(LOG_FILTER_TSCR, "Invalid MapScript for %u; no such map ID.", mapId);
         }
 
     public:
@@ -471,6 +472,15 @@ class GameObjectScript : public ScriptObject, public UpdatableScript<GameObject>
 
         // Called when the game object is damaged (destructible buildings only).
         virtual void OnDamaged(GameObject* /*go*/, Player* /*player*/) { }
+
+        // Called when the game object loot state is changed.
+        virtual void OnLootStateChanged(GameObject* /*go*/, uint32 /*state*/, Unit* /*unit*/) { }
+
+        // Called when the game object state is changed.
+        virtual void OnGameObjectStateChanged(GameObject* /*go*/, uint32 /*state*/) { }
+
+        // Called when a GameObjectAI object is needed for the gameobject.
+        virtual GameObjectAI* GetAI(GameObject* /*go*/) const { return NULL; }
 };
 
 class AreaTriggerScript : public ScriptObject
@@ -727,6 +737,9 @@ class PlayerScript : public ScriptObject
 
         // Called when a player is bound to an instance
         virtual void OnBindToInstance(Player* /*player*/, Difficulty /*difficulty*/, uint32 /*mapId*/, bool /*permanent*/) { }
+
+        // Called when a player switches to a new zone
+        virtual void OnUpdateZone(Player* /*player*/, uint32 /*newZone*/, uint32 /*newArea*/) { }
 };
 
 class GuildScript : public ScriptObject
@@ -910,7 +923,10 @@ class ScriptMgr
         uint32 GetDialogStatus(Player* player, GameObject* go);
         void OnGameObjectDestroyed(GameObject* go, Player* player);
         void OnGameObjectDamaged(GameObject* go, Player* player);
+        void OnGameObjectLootStateChanged(GameObject* go, uint32 state, Unit* unit);
+        void OnGameObjectStateChanged(GameObject* go, uint32 state);
         void OnGameObjectUpdate(GameObject* go, uint32 diff);
+        GameObjectAI* GetGameObjectAI(GameObject* go);
 
     public: /* AreaTriggerScript */
 
@@ -997,6 +1013,7 @@ class ScriptMgr
         void OnPlayerCreate(Player* player);
         void OnPlayerDelete(uint64 guid);
         void OnPlayerBindToInstance(Player* player, Difficulty difficulty, uint32 mapid, bool permanent);
+        void OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 newArea);
 
     public: /* GuildScript */
 

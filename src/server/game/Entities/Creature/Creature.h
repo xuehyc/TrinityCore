@@ -134,6 +134,7 @@ struct CreatureTemplate
     std::string AIName;
     uint32  MovementType;
     uint32  InhabitType;
+    float   HoverHeight;
     float   ModHealth;
     float   ModMana;
     float   ModArmor;
@@ -265,7 +266,6 @@ struct CreatureData
 // `creature_addon` table
 struct CreatureAddon
 {
-    uint32 guidOrEntry;
     uint32 path_id;
     uint32 mount;
     uint32 bytes1;
@@ -337,7 +337,9 @@ struct VendorItemData
 
     VendorItem* GetItem(uint32 slot) const
     {
-        if (slot >= m_items.size()) return NULL;
+        if (slot >= m_items.size())
+            return NULL;
+
         return m_items[slot];
     }
     bool Empty() const { return m_items.empty(); }
@@ -372,7 +374,7 @@ struct TrainerSpell
 {
     TrainerSpell() : spell(0), spellCost(0), reqSkill(0), reqSkillValue(0), reqLevel(0)
     {
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS ; ++i)
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             learnedSpell[i] = 0;
     }
 
@@ -457,17 +459,17 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 
         void Update(uint32 time);                         // overwrited Unit::Update
         void GetRespawnPosition(float &x, float &y, float &z, float* ori = NULL, float* dist =NULL) const;
-        uint32 GetEquipmentId() const { return GetCreatureInfo()->equipmentId; }
+        uint32 GetEquipmentId() const { return GetCreatureTemplate()->equipmentId; }
 
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         uint32 GetCorpseDelay() const { return m_corpseDelay; }
-        bool isRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
-        bool isCivilian() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
-        bool isTrigger() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER; }
-        bool isGuard() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_GUARD; }
-        bool canWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
-        bool canSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
-        //bool canFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
+        bool isRacialLeader() const { return GetCreatureTemplate()->RacialLeader; }
+        bool isCivilian() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
+        bool isTrigger() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER; }
+        bool isGuard() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_GUARD; }
+        bool canWalk() const { return GetCreatureTemplate()->InhabitType & INHABIT_GROUND; }
+        bool canSwim() const { return GetCreatureTemplate()->InhabitType & INHABIT_WATER; }
+        bool CanFly()  const { return GetCreatureTemplate()->InhabitType & INHABIT_AIR; }
 
         void SetReactState(ReactStates st) { m_reactState = st; }
         ReactStates GetReactState() { return m_reactState; }
@@ -486,7 +488,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         bool isCanTrainingOf(Player* player, bool msg) const;
         bool isCanInteractWithBattleMaster(Player* player, bool msg) const;
         bool isCanTrainingAndResetTalentsOf(Player* player) const;
-        bool canCreatureAttack(Unit const* pVictim, bool force = true) const;
+        bool canCreatureAttack(Unit const* victim, bool force = true) const;
         bool IsImmunedToSpell(SpellInfo const* spellInfo);
                                                             // redefine Unit::IsImmunedToSpell
         bool IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const;
@@ -496,7 +498,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
             if (isPet())
                 return false;
 
-            uint32 rank = GetCreatureInfo()->rank;
+            uint32 rank = GetCreatureTemplate()->rank;
             return rank != CREATURE_ELITE_NORMAL && rank != CREATURE_ELITE_RARE;
         }
 
@@ -505,7 +507,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
             if (isPet())
                 return false;
 
-            return GetCreatureInfo()->rank == CREATURE_ELITE_WORLDBOSS;
+            return GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_BOSS;
         }
 
         bool IsDungeonBoss() const;
@@ -520,8 +522,9 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void AI_SendMoveToPacket(float x, float y, float z, uint32 time, uint32 MovementFlags, uint8 type);
         CreatureAI* AI() const { return (CreatureAI*)i_AI; }
 
-        void SetWalk(bool enable);
-        void SetLevitate(bool enable);
+        bool SetWalk(bool enable);
+        bool SetDisableGravity(bool disable, bool packetOnly = false);
+        bool SetHover(bool enable);
 
         uint32 GetShieldBlockValue() const                  //dunno mob block value
         {
@@ -558,7 +561,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 
         TrainerSpellData const* GetTrainerSpells() const;
 
-        CreatureTemplate const* GetCreatureInfo() const { return m_creatureInfo; }
+        CreatureTemplate const* GetCreatureTemplate() const { return m_creatureInfo; }
         CreatureData const* GetCreatureData() const { return m_creatureData; }
         CreatureAddon const* GetCreatureAddon() const;
 
@@ -602,8 +605,8 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void RemoveLootMode(uint16 lootMode) { m_LootMode &= ~lootMode; }
         void ResetLootMode() { m_LootMode = LOOT_MODE_DEFAULT; }
 
-        SpellInfo const* reachWithSpellAttack(Unit* pVictim);
-        SpellInfo const* reachWithSpellCure(Unit* pVictim);
+        SpellInfo const* reachWithSpellAttack(Unit* victim);
+        SpellInfo const* reachWithSpellCure(Unit* victim);
 
         uint32 m_spells[CREATURE_MAX_SPELLS];
         CreatureSpellCooldowns m_CreatureSpellCooldowns;
@@ -632,7 +635,6 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 
         void RemoveCorpse(bool setSpawnTime = true);
 
-        void ForcedDespawn(uint32 timeMSToDespawn = 0);
         void DespawnOrUnsummon(uint32 msTimeToDespawn = 0);
 
         time_t const& GetRespawnTime() const { return m_respawnTime; }
@@ -674,6 +676,11 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void SetHomePosition(const Position &pos) { m_homePosition.Relocate(pos); }
         void GetHomePosition(float &x, float &y, float &z, float &ori) { m_homePosition.GetPosition(x, y, z, ori); }
         Position GetHomePosition() { return m_homePosition; }
+
+        void SetTransportHomePosition(float x, float y, float z, float o) { m_transportHomePosition.Relocate(x, y, z, o); }
+        void SetTransportHomePosition(const Position &pos) { m_transportHomePosition.Relocate(pos); }
+        void GetTransportHomePosition(float &x, float &y, float &z, float &ori) { m_transportHomePosition.GetPosition(x, y, z, ori); }
+        Position GetTransportHomePosition() { return m_transportHomePosition; }
 
         uint32 GetWaypointPath(){return m_path_id;}
         void LoadPath(uint32 pathid) { m_path_id = pathid; }
@@ -748,6 +755,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         uint32 m_originalEntry;
 
         Position m_homePosition;
+        Position m_transportHomePosition;
 
         bool DisableReputationGain;
 
@@ -760,6 +768,8 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         bool IsInvisibleDueToDespawn() const;
         bool CanAlwaysSee(WorldObject const* obj) const;
     private:
+        void ForcedDespawn(uint32 timeMSToDespawn = 0);
+
         //WaypointMovementGenerator vars
         uint32 m_waypointID;
         uint32 m_path_id;

@@ -32,7 +32,9 @@ npc_maxx_a_million
 go_captain_tyralius_prison
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "ScriptedEscortAI.h"
 
 /*######
@@ -78,7 +80,7 @@ public:
 
     struct npc_manaforge_control_consoleAI : public ScriptedAI
     {
-        npc_manaforge_control_consoleAI(Creature* c) : ScriptedAI(c) {}
+        npc_manaforge_control_consoleAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 Event_Timer;
         uint32 Wave_Timer;
@@ -115,7 +117,7 @@ public:
 
             if (someplayer)
             {
-                Unit* p = Unit::GetUnit((*me), someplayer);
+                Unit* p = Unit::GetUnit(*me, someplayer);
                 if (p && p->GetTypeId() == TYPEID_PLAYER)
                 {
                     switch (me->GetEntry())
@@ -142,7 +144,7 @@ public:
 
             if (goConsole)
             {
-                if (GameObject* go = GameObject::GetGameObject((*me), goConsole))
+                if (GameObject* go = GameObject::GetGameObject(*me, goConsole))
                     go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
             }
         }
@@ -243,7 +245,7 @@ public:
                     case 1:
                         if (someplayer)
                         {
-                            Unit* u = Unit::GetUnit((*me), someplayer);
+                            Unit* u = Unit::GetUnit(*me, someplayer);
                             if (u && u->GetTypeId() == TYPEID_PLAYER) DoScriptText(EMOTE_START, me, u);
                         }
                         Event_Timer = 60000;
@@ -271,14 +273,14 @@ public:
                         DoScriptText(EMOTE_COMPLETE, me);
                         if (someplayer)
                         {
-                            Unit* u = Unit::GetUnit((*me), someplayer);
+                            Unit* u = Unit::GetUnit(*me, someplayer);
                             if (u && u->GetTypeId() == TYPEID_PLAYER)
                                 CAST_PLR(u)->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
                             DoCast(me, SPELL_DISABLE_VISUAL);
                         }
                         if (goConsole)
                         {
-                            if (GameObject* go = GameObject::GetGameObject((*me), goConsole))
+                            if (GameObject* go = GameObject::GetGameObject(*me, goConsole))
                                 go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
                         }
                         ++Phase;
@@ -295,7 +297,6 @@ public:
             }
         }
     };
-
 };
 
 /*######
@@ -350,7 +351,6 @@ public:
         }
         return true;
     }
-
 };
 
 /*######
@@ -396,7 +396,7 @@ public:
 
     struct npc_commander_dawnforgeAI : public ScriptedAI
     {
-        npc_commander_dawnforgeAI(Creature* c) : ScriptedAI(c) { Reset (); }
+        npc_commander_dawnforgeAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
 
         uint64 PlayerGUID;
         uint64 ardonisGUID;
@@ -498,7 +498,7 @@ public:
                 return true;
             }
 
-            sLog->outDebug(LOG_FILTER_TSCR, "TSCR: npc_commander_dawnforge event already in progress, need to wait.");
+            sLog->outDebug(LOG_FILTER_TSCR, "npc_commander_dawnforge event already in progress, need to wait.");
             return false;
         }
 
@@ -633,7 +633,6 @@ public:
             }
          }
     };
-
 };
 
 class at_commander_dawnforge : public AreaTriggerScript
@@ -650,7 +649,6 @@ public:
         if (player->isAlive() && player->GetQuestStatus(QUEST_INFO_GATHERING) == QUEST_STATUS_INCOMPLETE)
         {
             Creature* Dawnforge = player->FindNearestCreature(CreatureEntry[1], 30.0f);
-
             if (!Dawnforge)
                 return false;
 
@@ -659,7 +657,6 @@ public:
         }
         return false;
     }
-
 };
 
 /*######
@@ -690,10 +687,10 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        if (action == GOSSIP_ACTION_INFO_DEF+1)
         {
             creature->CastSpell(player, SPELL_PHASE_DISTRUPTOR, false);
             player->CLOSE_GOSSIP_MENU();
@@ -714,7 +711,6 @@ public:
 
         return true;
     }
-
 };
 
 /*######
@@ -750,7 +746,7 @@ public:
 
     struct mob_phase_hunterAI : public ScriptedAI
     {
-        mob_phase_hunterAI(Creature* c) : ScriptedAI(c) {}
+        mob_phase_hunterAI(Creature* creature) : ScriptedAI(creature) {}
 
         bool Weak;
         bool Materialize;
@@ -783,10 +779,10 @@ public:
                 PlayerGUID = who->GetGUID();
         }
 
-        void SpellHit(Unit* /*caster*/, const SpellInfo* /*spell*/)
-        {
-            DoCast(me, SPELL_DE_MATERIALIZE);
-        }
+        //void SpellHit(Unit* /*caster*/, const SpellInfo* /*spell*/)
+        //{
+        //    DoCast(me, SPELL_DE_MATERIALIZE);
+        //}
 
         void UpdateAI(const uint32 diff)
         {
@@ -818,7 +814,7 @@ public:
                 }
                 if (!UnitsWithMana.empty())
                 {
-                    DoCast(SelectRandomContainerElement(UnitsWithMana), SPELL_MANA_BURN);
+                    DoCast(Trinity::Containers::SelectRandomContainerElement(UnitsWithMana), SPELL_MANA_BURN);
                     ManaBurnTimer = 8000 + (rand() % 10 * 1000); // 8-18 sec cd
                 }
                 else
@@ -849,7 +845,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 /*######
@@ -888,8 +883,7 @@ public:
 
     struct npc_bessyAI : public npc_escortAI
     {
-
-        npc_bessyAI(Creature* c) : npc_escortAI(c) {}
+        npc_bessyAI(Creature* creature) : npc_escortAI(creature) {}
 
         void JustDied(Unit* /*killer*/)
         {
@@ -897,34 +891,32 @@ public:
                 player->FailQuest(Q_ALMABTRIEB);
         }
 
-        void WaypointReached(uint32 i)
+        void WaypointReached(uint32 waypointId)
         {
             Player* player = GetPlayerForEscort();
-
             if (!player)
                 return;
 
-            switch (i)
+            switch (waypointId)
             {
                 case 3: //first spawn
                     me->SummonCreature(SPAWN_FIRST, 2449.67f, 2183.11f, 96.85f, 6.20f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
                     me->SummonCreature(SPAWN_FIRST, 2449.53f, 2184.43f, 96.36f, 6.27f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
                     me->SummonCreature(SPAWN_FIRST, 2449.85f, 2186.34f, 97.57f, 6.08f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
                     break;
-
                 case 7:
                     me->SummonCreature(SPAWN_SECOND, 2309.64f, 2186.24f, 92.25f, 6.06f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
                     me->SummonCreature(SPAWN_SECOND, 2309.25f, 2183.46f, 91.75f, 6.22f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
                     break;
-
                 case 12:
-                    if (player)
-                        player->GroupEventHappens(Q_ALMABTRIEB, me);
+                    player->GroupEventHappens(Q_ALMABTRIEB, me);
                     if (me->FindNearestCreature(N_THADELL, 30))
-                        DoScriptText(SAY_THADELL_1, me); break;
+                        DoScriptText(SAY_THADELL_1, me);
+                    break;
                 case 13:
                     if (me->FindNearestCreature(N_THADELL, 30))
-                        DoScriptText(SAY_THADELL_2, me, player); break;
+                        DoScriptText(SAY_THADELL_2, me, player);
+                    break;
             }
         }
 
@@ -937,9 +929,7 @@ public:
         {
             me->RestoreFaction();
         }
-
     };
-
 };
 
 /*######
@@ -975,13 +965,13 @@ public:
             uiTakeTimer=3000;
         }
 
-        void WaypointReached(uint32 i)
+        void WaypointReached(uint32 waypointId)
         {
             Player* player = GetPlayerForEscort();
             if (!player)
                 return;
 
-            switch (i)
+            switch (waypointId)
             {
                 case 7:
                 case 17:
@@ -996,16 +986,14 @@ public:
                     }
                     break;
                 case 36: //return and quest_complete
-                    if (player)
-                        player->CompleteQuest(QUEST_MARK_V_IS_ALIVE);
+                    player->CompleteQuest(QUEST_MARK_V_IS_ALIVE);
                     break;
             }
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            Player* player = GetPlayerForEscort();
-            if (player)
+            if (Player* player = GetPlayerForEscort())
                 player->FailQuest(QUEST_MARK_V_IS_ALIVE);
         }
 
@@ -1018,12 +1006,12 @@ public:
                 if (uiTakeTimer < uiDiff)
                 {
                     me->HandleEmoteCommand(EMOTE_STATE_NONE);
-                    if (GameObject* pGO = GetClosestGameObjectWithEntry(me, GO_DRAENEI_MACHINE, INTERACTION_DISTANCE))
+                    if (GameObject* go = GetClosestGameObjectWithEntry(me, GO_DRAENEI_MACHINE, INTERACTION_DISTANCE))
                     {
                         SetEscortPaused(false);
                         bTake=false;
                         uiTakeTimer = 3000;
-                        pGO->Delete();
+                        go->Delete();
                     }
                 }
                 else
@@ -1071,7 +1059,7 @@ class go_captain_tyralius_prison : public GameObjectScript
                 player->KilledMonsterCredit(NPC_CAPTAIN_TYRALIUS, 0);
 
                 tyralius->AI()->Talk(SAY_FREE);
-                tyralius->ForcedDespawn(8000);
+                tyralius->DespawnOrUnsummon(8000);
             }
             return true;
         }

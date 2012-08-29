@@ -380,8 +380,10 @@ class boss_lady_deathwhisper : public CreatureScript
                     // on normal mode the cultists do get reanimated anymore
                     if (!IsHeroic())
                     {
-                        summons.DoAction(NPC_CULT_FANATIC, DATA_CANCEL_MARTYRDOM_P2);
-                        summons.DoAction(NPC_CULT_ADHERENT, DATA_CANCEL_MARTYRDOM_P2);
+                        EntryCheckPredicate pred1(NPC_CULT_FANATIC);
+                        EntryCheckPredicate pred2(NPC_CULT_ADHERENT);
+                        summons.DoAction(DATA_CANCEL_MARTYRDOM_P2, pred1);
+                        summons.DoAction(DATA_CANCEL_MARTYRDOM_P2, pred2);
                     }
                     events.SetPhase(PHASE_TWO);
                     events.ScheduleEvent(EVENT_P2_FROSTBOLT, urand(10000, 12000), 0, PHASE_TWO);
@@ -626,7 +628,7 @@ class boss_lady_deathwhisper : public CreatureScript
                     return;
 
                 // select random cultist
-                Creature* cultist = SelectRandomContainerElement(temp);
+                Creature* cultist = Trinity::Containers::SelectRandomContainerElement(temp);
                 DoCast(cultist, cultist->GetEntry() == NPC_CULT_FANATIC ? SPELL_DARK_TRANSFORMATION_T : SPELL_DARK_EMPOWERMENT_T, true);
                 Talk(uint8(cultist->GetEntry() == NPC_CULT_FANATIC ? SAY_DARK_TRANSFORMATION : SAY_DARK_EMPOWERMENT));
             }

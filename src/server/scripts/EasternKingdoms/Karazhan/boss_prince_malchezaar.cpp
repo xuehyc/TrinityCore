@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Karazhan
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "karazhan.h"
 
 #define SAY_AGGRO           -1532091
@@ -108,7 +109,7 @@ public:
 
     struct netherspite_infernalAI : public ScriptedAI
     {
-        netherspite_infernalAI(Creature* c) : ScriptedAI(c),
+        netherspite_infernalAI(Creature* creature) : ScriptedAI(creature),
             HellfireTimer(0), CleanupTimer(0), malchezaar(0), point(NULL) {}
 
         uint32 HellfireTimer;
@@ -183,9 +184,9 @@ public:
 
     struct boss_malchezaarAI : public ScriptedAI
     {
-        boss_malchezaarAI(Creature* c) : ScriptedAI(c)
+        boss_malchezaarAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -243,7 +244,7 @@ public:
             DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
 
@@ -297,7 +298,7 @@ public:
             SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
 
             //damage
-            const CreatureTemplate* cinfo = me->GetCreatureInfo();
+            const CreatureTemplate* cinfo = me->GetCreatureTemplate();
             me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, cinfo->mindmg);
             me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, cinfo->maxdmg);
             me->UpdateDamagePhysical(BASE_ATTACK);
@@ -420,7 +421,7 @@ public:
                     SetEquipmentSlots(false, EQUIP_ID_AXE, EQUIP_ID_AXE, EQUIP_NO_CHANGE);
 
                     //damage
-                    const CreatureTemplate* cinfo = me->GetCreatureInfo();
+                    const CreatureTemplate* cinfo = me->GetCreatureTemplate();
                     me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 2*cinfo->mindmg);
                     me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 2*cinfo->maxdmg);
                     me->UpdateDamagePhysical(BASE_ATTACK);

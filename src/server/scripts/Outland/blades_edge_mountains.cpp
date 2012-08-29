@@ -33,7 +33,13 @@ go_legion_obelisk
 go_thunderspike
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "Cell.h"
+#include "CellImpl.h"
 
 //Support for quest: You're Fired! (10821)
 bool     obelisk_one, obelisk_two, obelisk_three, obelisk_four, obelisk_five;
@@ -61,7 +67,7 @@ public:
 
     struct mobs_bladespire_ogreAI : public ScriptedAI
     {
-        mobs_bladespire_ogreAI(Creature* c) : ScriptedAI(c) {}
+        mobs_bladespire_ogreAI(Creature* creature) : ScriptedAI(creature) {}
 
         void Reset() { }
 
@@ -73,7 +79,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 /*######
@@ -113,7 +118,7 @@ public:
 
     struct mobs_nether_drakeAI : public ScriptedAI
     {
-        mobs_nether_drakeAI(Creature* c) : ScriptedAI(c) {}
+        mobs_nether_drakeAI(Creature* creature) : ScriptedAI(creature) {}
 
         bool IsNihil;
         uint32 NihilSpeech_Timer;
@@ -253,7 +258,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 /*######
@@ -278,7 +282,7 @@ public:
 
     struct npc_daranelleAI : public ScriptedAI
     {
-        npc_daranelleAI(Creature* c) : ScriptedAI(c) {}
+        npc_daranelleAI(Creature* creature) : ScriptedAI(creature) {}
 
         void Reset() { }
 
@@ -299,7 +303,6 @@ public:
             ScriptedAI::MoveInLineOfSight(who);
         }
     };
-
 };
 
 /*######
@@ -313,10 +316,10 @@ class npc_overseer_nuaar : public CreatureScript
 public:
     npc_overseer_nuaar() : CreatureScript("npc_overseer_nuaar") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        if (action == GOSSIP_ACTION_INFO_DEF+1)
         {
             player->SEND_GOSSIP_MENU(10533, creature->GetGUID());
             player->AreaExploredOrEventHappens(10682);
@@ -333,7 +336,6 @@ public:
 
         return true;
     }
-
 };
 
 /*######
@@ -348,10 +350,10 @@ class npc_saikkal_the_elder : public CreatureScript
 public:
     npc_saikkal_the_elder() : CreatureScript("npc_saikkal_the_elder") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        switch (uiAction)
+        switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF+1:
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SELECT_STE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
@@ -374,7 +376,6 @@ public:
 
         return true;
     }
-
 };
 
 /*######
@@ -423,7 +424,6 @@ public:
 
         return true;
     }
-
 };
 
 /*######
@@ -469,7 +469,6 @@ public:
 
         void UpdateAI(const uint32 /*uiDiff*/) {}
     };
-
 };
 
 /*######
@@ -499,7 +498,8 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (!who || (!who->isAlive())) return;
+            if (!who || (!who->isAlive()))
+                return;
 
             if (me->IsWithinDistInMap(who, 50.0f))
             {
@@ -523,7 +523,7 @@ public:
                 me->GetMotionMaster()->MoveTargetedHome();
                 Creature* Credit = me->FindNearestCreature(NPC_QUEST_CREDIT, 50, true);
                 if (player && Credit)
-                    player->KilledMonster(Credit->GetCreatureInfo(), Credit->GetGUID());
+                    player->KilledMonster(Credit->GetCreatureTemplate(), Credit->GetGUID());
             }
         }
 
@@ -534,7 +534,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 /*######
@@ -658,7 +657,7 @@ class npc_simon_bunny : public CreatureScript
             {
                 _events.Update(diff);
 
-                switch(_events.ExecuteEvent())
+                switch (_events.ExecuteEvent())
                 {
                     case EVENT_SIMON_PERIODIC_PLAYER_CHECK:
                         if (!CheckPlayer())
@@ -759,7 +758,7 @@ class npc_simon_bunny : public CreatureScript
             // Used for getting involved player guid. Parameter id is used for defining if is a large(Monument) or small(Relic) node
             void SetGUID(uint64 guid, int32 id)
             {
-                me->SetFlying(true);
+                me->SetCanFly(true);
 
                 large = (bool)id;
                 playerGUID = guid;
@@ -781,7 +780,7 @@ class npc_simon_bunny : public CreatureScript
                 colorSequence.clear();
                 playableSequence.clear();
                 playerSequence.clear();
-                me->SetFloatValue(OBJECT_FIELD_SCALE_X, large ? 2.0f : 1.0f);
+                me->SetObjectScale(large ? 2.0f : 1.0f);
 
                 std::list<WorldObject*> ClusterList;
                 Trinity::AllWorldObjectsInRange objects(me, searchDistance);
@@ -797,20 +796,42 @@ class npc_simon_bunny : public CreatureScript
                         {
                             switch (go->GetGOInfo()->displayId)
                             {
-                                case GO_BLUE_CLUSTER_DISPLAY_LARGE: clusterIds[SIMON_BLUE] = go->GetEntry(); break;
-                                case GO_RED_CLUSTER_DISPLAY_LARGE: clusterIds[SIMON_RED] = go->GetEntry(); break;
-                                case GO_GREEN_CLUSTER_DISPLAY_LARGE: clusterIds[SIMON_GREEN] = go->GetEntry(); break;
-                                case GO_YELLOW_CLUSTER_DISPLAY_LARGE: clusterIds[SIMON_YELLOW] = go->GetEntry(); break;
+                                case GO_BLUE_CLUSTER_DISPLAY_LARGE:
+                                    clusterIds[SIMON_BLUE] = go->GetEntry();
+                                    break;
+
+                                case GO_RED_CLUSTER_DISPLAY_LARGE:
+                                    clusterIds[SIMON_RED] = go->GetEntry();
+                                    break;
+
+                                case GO_GREEN_CLUSTER_DISPLAY_LARGE:
+                                    clusterIds[SIMON_GREEN] = go->GetEntry();
+                                    break;
+
+                                case GO_YELLOW_CLUSTER_DISPLAY_LARGE:
+                                    clusterIds[SIMON_YELLOW] = go->GetEntry();
+                                    break;
                             }
                         }
                         else
                         {
                             switch (go->GetGOInfo()->displayId)
                             {
-                                case GO_BLUE_CLUSTER_DISPLAY: clusterIds[SIMON_BLUE] = go->GetEntry(); break;
-                                case GO_RED_CLUSTER_DISPLAY: clusterIds[SIMON_RED] = go->GetEntry(); break;
-                                case GO_GREEN_CLUSTER_DISPLAY: clusterIds[SIMON_GREEN] = go->GetEntry(); break;
-                                case GO_YELLOW_CLUSTER_DISPLAY: clusterIds[SIMON_YELLOW] = go->GetEntry(); break;
+                                case GO_BLUE_CLUSTER_DISPLAY:
+                                    clusterIds[SIMON_BLUE] = go->GetEntry();
+                                    break;
+
+                                case GO_RED_CLUSTER_DISPLAY:
+                                    clusterIds[SIMON_RED] = go->GetEntry();
+                                    break;
+
+                                case GO_GREEN_CLUSTER_DISPLAY:
+                                    clusterIds[SIMON_GREEN] = go->GetEntry();
+                                    break;
+
+                                case GO_YELLOW_CLUSTER_DISPLAY:
+                                    clusterIds[SIMON_YELLOW] = go->GetEntry();
+                                    break;
                             }
                         }
                     }
@@ -840,7 +861,7 @@ class npc_simon_bunny : public CreatureScript
                 if (GameObject* relic = me->FindNearestGameObject(large ? GO_APEXIS_MONUMENT : GO_APEXIS_RELIC, searchDistance))
                     relic->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
 
-                me->ForcedDespawn(1000);
+                me->DespawnOrUnsummon(1000);
             }
 
             /*

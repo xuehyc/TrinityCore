@@ -21,15 +21,13 @@
 #include "DisableMgr.h"
 #include "ScriptMgr.h"
 
-#include "OutdoorPvPWG.h"
-
 OutdoorPvPMgr::OutdoorPvPMgr()
 {
     m_UpdateTimer = 0;
     //sLog->outDebug(LOG_FILTER_OUTDOORPVP, "Instantiating OutdoorPvPMgr");
 }
 
-OutdoorPvPMgr::~OutdoorPvPMgr()
+void OutdoorPvPMgr::Die()
 {
     //sLog->outDebug(LOG_FILTER_OUTDOORPVP, "Deleting OutdoorPvPMgr");
     for (OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
@@ -43,13 +41,13 @@ void OutdoorPvPMgr::InitOutdoorPvP()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                                       0       1
+    //                                                 0       1
     QueryResult result = WorldDatabase.Query("SELECT TypeId, ScriptName FROM outdoorpvp_template");
 
     if (!result)
     {
-        sLog->outErrorDb(">> Loaded 0 outdoor PvP definitions. DB table `outdoorpvp_template` is empty.");
-        sLog->outString();
+        sLog->outError(LOG_FILTER_SQL, ">> Loaded 0 outdoor PvP definitions. DB table `outdoorpvp_template` is empty.");
+
         return;
     }
 
@@ -60,14 +58,14 @@ void OutdoorPvPMgr::InitOutdoorPvP()
     {
         Field* fields = result->Fetch();
 
-        typeId = fields[0].GetUInt32();
+        typeId = fields[0].GetUInt8();
 
         if (DisableMgr::IsDisabledFor(DISABLE_TYPE_OUTDOORPVP, typeId, NULL))
             continue;
 
         if (typeId >= MAX_OUTDOORPVP_TYPES)
         {
-            sLog->outErrorDb("Invalid OutdoorPvPTypes value %u in outdoorpvp_template; skipped.", typeId);
+            sLog->outError(LOG_FILTER_SQL, "Invalid OutdoorPvPTypes value %u in outdoorpvp_template; skipped.", typeId);
             continue;
         }
 
@@ -87,20 +85,20 @@ void OutdoorPvPMgr::InitOutdoorPvP()
         OutdoorPvPDataMap::iterator iter = m_OutdoorPvPDatas.find(OutdoorPvPTypes(i));
         if (iter == m_OutdoorPvPDatas.end())
         {
-            sLog->outErrorDb("Could not initialize OutdoorPvP object for type ID %u; no entry in database.", uint32(i));
+            sLog->outError(LOG_FILTER_SQL, "Could not initialize OutdoorPvP object for type ID %u; no entry in database.", uint32(i));
             continue;
         }
 
         pvp = sScriptMgr->CreateOutdoorPvP(iter->second);
         if (!pvp)
         {
-            sLog->outError("Could not initialize OutdoorPvP object for type ID %u; got NULL pointer from script.", uint32(i));
+            sLog->outError(LOG_FILTER_OUTDOORPVP, "Could not initialize OutdoorPvP object for type ID %u; got NULL pointer from script.", uint32(i));
             continue;
         }
 
         if (!pvp->SetupOutdoorPvP())
         {
-            sLog->outError("Could not initialize OutdoorPvP object for type ID %u; SetupOutdoorPvP failed.", uint32(i));
+            sLog->outError(LOG_FILTER_OUTDOORPVP, "Could not initialize OutdoorPvP object for type ID %u; SetupOutdoorPvP failed.", uint32(i));
             delete pvp;
             continue;
         }
@@ -108,8 +106,8 @@ void OutdoorPvPMgr::InitOutdoorPvP()
         m_OutdoorPvPSet.push_back(pvp);
     }
 
-    sLog->outString(">> Loaded %u outdoor PvP definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    sLog->outString();
+    sLog->outInfo(LOG_FILTER_OUTDOORPVP, ">> Loaded %u outdoor PvP definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
 }
 
 void OutdoorPvPMgr::AddZone(uint32 zoneid, OutdoorPvP* handle)

@@ -23,7 +23,8 @@ SDComment: More abilities need to be implemented
 SDCategory: Caverns of Time, The Dark Portal
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "dark_portal.h"
 
 enum eEnums
@@ -54,9 +55,9 @@ public:
 
     struct boss_temporusAI : public ScriptedAI
     {
-        boss_temporusAI(Creature* c) : ScriptedAI(c)
+        boss_temporusAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -84,7 +85,7 @@ public:
             DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
 

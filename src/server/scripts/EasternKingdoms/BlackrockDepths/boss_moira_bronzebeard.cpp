@@ -16,7 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum Spells
 {
@@ -49,10 +50,10 @@ public:
 
         void Reset()
         {
-            Heal_Timer            = 12000;                 // These times are probably wrong
-            MindBlast_Timer       = 16000;
-            ShadowWordPain_Timer  = 2000;
-            Smite_Timer           = 8000;
+            Heal_Timer = 12000;                                 //These times are probably wrong
+            MindBlast_Timer = 16000;
+            ShadowWordPain_Timer = 2000;
+            Smite_Timer = 8000;
         }
 
         void EnterCombat(Unit* /*who*/) {}

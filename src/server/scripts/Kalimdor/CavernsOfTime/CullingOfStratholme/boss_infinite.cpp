@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "culling_of_stratholme.h"
 
 enum Spells
@@ -43,9 +44,9 @@ public:
 
     struct boss_infinite_corruptorAI : public ScriptedAI
     {
-        boss_infinite_corruptorAI(Creature* c) : ScriptedAI(c)
+        boss_infinite_corruptorAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;

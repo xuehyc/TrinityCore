@@ -23,7 +23,8 @@ SDComment: Saber Lash missing, Fatal Attraction slightly incorrect; need to dama
 SDCategory: Black Temple
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "black_temple.h"
 
 //Speech'n'Sounds
@@ -90,9 +91,9 @@ public:
 
     struct boss_shahrazAI : public ScriptedAI
     {
-        boss_shahrazAI(Creature* c) : ScriptedAI(c)
+        boss_shahrazAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -149,7 +150,7 @@ public:
             DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (instance)
                 instance->SetData(DATA_MOTHERSHAHRAZEVENT, DONE);
@@ -250,7 +251,7 @@ public:
                         Unit* unit = NULL;
                         if (TargetGUID[i])
                         {
-                            unit = Unit::GetUnit((*me), TargetGUID[i]);
+                            unit = Unit::GetUnit(*me, TargetGUID[i]);
                             if (unit)
                                 unit->CastSpell(unit, SPELL_ATTRACTION, true);
                             TargetGUID[i] = 0;

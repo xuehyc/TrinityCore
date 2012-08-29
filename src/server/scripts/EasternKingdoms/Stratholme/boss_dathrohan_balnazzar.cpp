@@ -23,7 +23,8 @@ SDComment: Possibly need to fix/improve summons after death
 SDCategory: Stratholme
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum eEnums
 {
@@ -77,7 +78,7 @@ public:
 
     struct boss_dathrohan_balnazzarAI : public ScriptedAI
     {
-        boss_dathrohan_balnazzarAI(Creature* c) : ScriptedAI(c) {}
+        boss_dathrohan_balnazzarAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 m_uiCrusadersHammer_Timer;
         uint32 m_uiCrusaderStrike_Timer;
@@ -105,7 +106,7 @@ public:
                 me->UpdateEntry(NPC_DATHROHAN);
         }
 
-        void JustDied(Unit* /*Victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             static uint32 uiCount = sizeof(m_aSummonPoint)/sizeof(SummonDef);
 

@@ -23,7 +23,8 @@ SDComment: Is missing the ai to make the npcs look for a new mount and use it.
 SDCategory: Trial Of the Champion
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 #include "Vehicle.h"
 #include "trial_of_the_champion.h"
@@ -233,17 +234,19 @@ public:
                 Start(false, true, 0, NULL);
         }
 
-        void WaypointReached(uint32 i)
+        void WaypointReached(uint32 waypointId)
         {
-            switch (i)
+            if (!instance)
+                return;
+
+            switch (waypointId)
             {
                 case 2:
-                    if ((instance && uiWaypointPath == 3) || uiWaypointPath == 2)
+                    if (uiWaypointPath == 3 || uiWaypointPath == 2)
                         instance->SetData(DATA_MOVEMENT_DONE, instance->GetData(DATA_MOVEMENT_DONE)+1);
                     break;
                 case 3:
-                    if (instance)
-                        instance->SetData(DATA_MOVEMENT_DONE, instance->GetData(DATA_MOVEMENT_DONE)+1);
+                    instance->SetData(DATA_MOVEMENT_DONE, instance->GetData(DATA_MOVEMENT_DONE)+1);
                     break;
             }
         }
@@ -318,9 +321,9 @@ public:
 
                                     foundtarget = true;
 
-                                    if (Vehicle* pVehicle = player->GetVehicle())
+                                    if (Vehicle* vehicle = player->GetVehicle())
                                     {
-                                        if (Unit* vehicleCreature = pVehicle->GetBase())
+                                        if (Unit* vehicleCreature = vehicle->GetBase())
                                         {
                                             me->SetInCombatWith(vehicleCreature);
                                             vehicleCreature->SetInCombatWith(me);

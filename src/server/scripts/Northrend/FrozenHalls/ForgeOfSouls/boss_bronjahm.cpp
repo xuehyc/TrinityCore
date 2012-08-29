@@ -15,7 +15,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "forge_of_souls.h"
 
@@ -125,7 +127,7 @@ class boss_bronjahm : public CreatureScript
                     DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& damage)
+            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
             {
                 if (events.GetPhaseMask() & (1 << PHASE_1) && !HealthAbovePct(30))
                 {
@@ -378,7 +380,7 @@ class DistanceCheck
     public:
         explicit DistanceCheck(Unit* _caster) : caster(_caster) { }
 
-        bool operator() (Unit* unit)
+        bool operator() (WorldObject* unit) const
         {
             if (caster->GetExactDist2d(unit) <= 10.0f)
                 return true;
@@ -397,25 +399,25 @@ class spell_bronjahm_soulstorm_targeting : public SpellScriptLoader
         {
             PrepareSpellScript(spell_bronjahm_soulstorm_targeting_SpellScript);
 
-            void FilterTargetsInitial(std::list<Unit*>& unitList)
+            void FilterTargetsInitial(std::list<WorldObject*>& targets)
             {
-                unitList.remove_if (DistanceCheck(GetCaster()));
-                sharedUnitList = unitList;
+                targets.remove_if(DistanceCheck(GetCaster()));
+                sharedTargets = targets;
             }
 
             // use the same target for first and second effect
-            void FilterTargetsSubsequent(std::list<Unit*>& unitList)
+            void FilterTargetsSubsequent(std::list<WorldObject*>& targets)
             {
-                unitList = sharedUnitList;
+                targets = sharedTargets;
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_bronjahm_soulstorm_targeting_SpellScript::FilterTargetsInitial, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_bronjahm_soulstorm_targeting_SpellScript::FilterTargetsSubsequent, EFFECT_2, TARGET_UNIT_DEST_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_bronjahm_soulstorm_targeting_SpellScript::FilterTargetsInitial, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_bronjahm_soulstorm_targeting_SpellScript::FilterTargetsSubsequent, EFFECT_2, TARGET_UNIT_DEST_AREA_ENEMY);
             }
 
-            std::list<Unit*> sharedUnitList;
+            std::list<WorldObject*> sharedTargets;
         };
 
         SpellScript* GetSpellScript() const

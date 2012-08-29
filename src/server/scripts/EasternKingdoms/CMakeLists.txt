@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -33,7 +33,6 @@ set(scripts_STAT_SRCS
   EasternKingdoms/Scholomance/boss_ras_frostwhisper.cpp
   EasternKingdoms/isle_of_queldanas.cpp
   EasternKingdoms/boss_kruul.cpp
-  EasternKingdoms/searing_gorge.cpp
   EasternKingdoms/ZulGurub/boss_hakkar.cpp
   EasternKingdoms/ZulGurub/boss_mandokir.cpp
   EasternKingdoms/ZulGurub/boss_marli.cpp
@@ -85,7 +84,6 @@ set(scripts_STAT_SRCS
   EasternKingdoms/MoltenCore/instance_molten_core.cpp
   EasternKingdoms/MoltenCore/boss_sulfuron_harbinger.cpp
   EasternKingdoms/MoltenCore/boss_magmadar.cpp
-  EasternKingdoms/MoltenCore/molten_core.cpp
   EasternKingdoms/MoltenCore/boss_shazzrah.cpp
   EasternKingdoms/Stratholme/boss_baroness_anastari.cpp
   EasternKingdoms/Stratholme/boss_nerubenkan.cpp

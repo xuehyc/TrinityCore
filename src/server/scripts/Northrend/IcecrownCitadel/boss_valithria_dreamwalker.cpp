@@ -236,7 +236,7 @@ class ValithriaDespawner : public BasicEvent
                 case NPC_VALITHRIA_DREAMWALKER:
                     if (InstanceScript* instance = creature->GetInstanceScript())
                     {
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, creature);
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, creature);
 
                         if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == NOT_STARTED)
                             if (!creature->isAlive())
@@ -272,7 +272,7 @@ class ValithriaDespawner : public BasicEvent
 
             if (CreatureData const* data = creature->GetCreatureData())
                 creature->SetPosition(data->posX, data->posY, data->posZ, data->orientation);
-            creature->ForcedDespawn();
+            creature->DespawnOrUnsummon();
 
             creature->SetCorpseDelay(corpseDelay);
             creature->SetRespawnDelay(respawnDelay);
@@ -316,10 +316,7 @@ class boss_valithria_dreamwalker : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL_PCT, true);
                 // Glyph of Dispel Magic - not a percent heal by effect, its cast with custom basepoints
                 me->ApplySpellImmune(0, IMMUNITY_ID, 56131, true);
-
-                if (_instance)
-                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
-
+                _instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 _missedPortals = 0;
                 _under25PercentTalkDone = false;
                 _over75PercentTalkDone = false;
@@ -337,18 +334,20 @@ class boss_valithria_dreamwalker : public CreatureScript
                     return;
 
                 DoCast(me, SPELL_COPY_DAMAGE);
-
-                if (_instance)
-                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
-
+                _instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 _events.ScheduleEvent(EVENT_INTRO_TALK, 15000);
                 _events.ScheduleEvent(EVENT_DREAM_PORTAL, urand(45000, 48000));
                 if (IsHeroic())
                     _events.ScheduleEvent(EVENT_BERSERK, 420000);
             }
 
-            void HealReceived(Unit* /*healer*/, uint32& heal)
+            void HealReceived(Unit* healer, uint32& heal)
             {
+                if (!me->hasLootRecipient())
+                    me->SetLootRecipient(healer);
+
+                me->LowerPlayerDamageReq(heal);
+
                 int32 reductionPercent = me->GetTotalAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
 
                 if (reductionPercent < 0)
@@ -368,28 +367,22 @@ class boss_valithria_dreamwalker : public CreatureScript
                 {
                     _done = true;
                     Talk(SAY_VALITHRIA_SUCCESS);
-
-                    if (_instance)
-                        _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
-
+                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     me->RemoveAurasDueToSpell(SPELL_CORRUPTION_VALITHRIA);
                     DoCast(me, SPELL_ACHIEVEMENT_CHECK);
                     DoCastAOE(SPELL_DREAMWALKERS_RAGE);
                     _events.ScheduleEvent(EVENT_DREAM_SLIP, 3500);
-
-                    if (_instance)
-                        if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
-                            lichKing->AI()->EnterEvadeMode();
+                    if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
+                        lichKing->AI()->EnterEvadeMode();
                 }
                 else if (!_over75PercentTalkDone && me->HealthAbovePctHealed(75, heal))
                 {
                     _over75PercentTalkDone = true;
                     Talk(SAY_VALITHRIA_75_PERCENT);
                 }
-                else if (_instance)
-                        if (_instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == NOT_STARTED)
-                            if (Creature* archmage = me->FindNearestCreature(NPC_RISEN_ARCHMAGE, 30.0f))
-                                archmage->AI()->DoZoneInCombat();   // call EnterCombat on one of them, that will make it all start
+                else if (_instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == NOT_STARTED)
+                    if (Creature* archmage = me->FindNearestCreature(NPC_RISEN_ARCHMAGE, 30.0f))
+                        archmage->AI()->DoZoneInCombat();   // call EnterCombat on one of them, that will make it all start
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage)
@@ -409,14 +402,9 @@ class boss_valithria_dreamwalker : public CreatureScript
                         {
                             _justDied = true;
                             Talk(SAY_VALITHRIA_DEATH);
-
-                            if (_instance)
-                            {
-                                _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
-
-                                if (Creature* trigger = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_TRIGGER)))
-                                    trigger->AI()->DoAction(ACTION_DEATH);
-                            }
+                            _instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                            if (Creature* trigger = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_TRIGGER)))
+                                trigger->AI()->DoAction(ACTION_DEATH);
                         }
                     }
                 }
@@ -432,6 +420,8 @@ class boss_valithria_dreamwalker : public CreatureScript
                     me->SetDisplayId(11686);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     me->DespawnOrUnsummon(4000);
+                    if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
+                        lichKing->CastSpell(lichKing, SPELL_SPAWN_CHEST, false);
 
                     if (_instance)
                     {
@@ -468,9 +458,8 @@ class boss_valithria_dreamwalker : public CreatureScript
             void UpdateAI(uint32 const diff)
             {
                 // does not enter combat
-                if (_instance)
-                    if (_instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != IN_PROGRESS)
-                        return;
+                if (_instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != IN_PROGRESS)
+                    return;
 
                 _events.Update(diff);
 
@@ -583,15 +572,12 @@ class npc_green_dragon_combat_trigger : public CreatureScript
             {
                 if (action == ACTION_DEATH)
                 {
-                    if (instance)
-                    {
-                        // Stop spawning creatures etc
-                        if (Creature* lichKing = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALITHRIA_LICH_KING)))
-                            lichKing->AI()->EnterEvadeMode();
+                    // Stop spawning creatures etc
+                    if (Creature* lichKing = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALITHRIA_LICH_KING)))
+                        lichKing->AI()->EnterEvadeMode();
 
-                        instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, NOT_STARTED);
-                        me->m_Events.AddEvent(new ValithriaDespawner(me), me->m_Events.CalculateTime(5000));
-                    }
+                    instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, NOT_STARTED);
+                    me->m_Events.AddEvent(new ValithriaDespawner(me), me->m_Events.CalculateTime(5000));
                 }
             }
 
@@ -769,17 +755,14 @@ class npc_risen_archmage : public CreatureScript
                     for (std::list<Creature*>::iterator itr = archmages.begin(); itr != archmages.end(); ++itr)
                         (*itr)->AI()->DoAction(ACTION_ENTER_COMBAT);
 
-                    if (_instance)
-                    {
-                        if (Creature* valithria = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_DREAMWALKER)))
-                            valithria->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    if (Creature* valithria = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_DREAMWALKER)))
+                        valithria->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
-                        if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
-                            lichKing->AI()->DoZoneInCombat();
+                    if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
+                        lichKing->AI()->DoZoneInCombat();
 
-                        if (Creature* trigger = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_TRIGGER)))
-                            trigger->AI()->DoZoneInCombat();
-                    }
+                    if (Creature* trigger = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_TRIGGER)))
+                        trigger->AI()->DoZoneInCombat();
                 }
             }
 
@@ -934,9 +917,8 @@ class npc_suppresser : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
-                if (_instance)
-                    if (Creature* valithria = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_DREAMWALKER)))
-                        AttackStart(valithria);
+                if (Creature* valithria = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_DREAMWALKER)))
+                    AttackStart(valithria);
             }
 
             void UpdateAI(uint32 const diff)
@@ -1133,11 +1115,8 @@ class npc_dream_portal : public CreatureScript
             {
             }
 
-            void DoAction(int32 const action)
+            void OnSpellClick(Unit* /*clicker*/)
             {
-                if (action != EVENT_SPELLCLICK)
-                    return;
-
                 _used = true;
                 me->DespawnOrUnsummon();
             }
@@ -1185,9 +1164,8 @@ class npc_dream_cloud : public CreatureScript
             void UpdateAI(uint32 const diff)
             {
                 // trigger
-                if (_instance)
-                    if (_instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != IN_PROGRESS)
-                        return;
+                if (_instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != IN_PROGRESS)
+                    return;
 
                 _events.Update(diff);
 
@@ -1206,12 +1184,9 @@ class npc_dream_cloud : public CreatureScript
                         }
                         case EVENT_EXPLODE:
                             me->GetMotionMaster()->MoveIdle();
-
                             // must use originalCaster the same for all clouds to allow stacking
-                            if (_instance)
-                                me->CastSpell(me, EMERALD_VIGOR, false, NULL, NULL, _instance->GetData64(DATA_VALITHRIA_DREAMWALKER));
-
-                            me->ForcedDespawn(100);
+                            me->CastSpell(me, EMERALD_VIGOR, false, NULL, NULL, _instance->GetData64(DATA_VALITHRIA_DREAMWALKER));
+                            me->DespawnOrUnsummon(100);
                             break;
                         default:
                             break;
@@ -1331,13 +1306,13 @@ class spell_dreamwalker_summoner : public SpellScriptLoader
                 return true;
             }
 
-            void FilterTargets(std::list<Unit*>& targets)
+            void FilterTargets(std::list<WorldObject*>& targets)
             {
-                targets.remove_if (Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
+                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
                 if (targets.empty())
                     return;
 
-                Unit* target = SelectRandomContainerElement(targets);
+                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
                 targets.clear();
                 targets.push_back(target);
             }
@@ -1353,7 +1328,7 @@ class spell_dreamwalker_summoner : public SpellScriptLoader
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_dreamwalker_summoner_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dreamwalker_summoner_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
                 OnEffectHitTarget += SpellEffectFn(spell_dreamwalker_summoner_SpellScript::HandleForceCast, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
             }
         };
@@ -1382,7 +1357,7 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
 
                 std::list<Creature*> summoners;
                 GetCreatureListWithEntryInGrid(summoners, caster, NPC_WORLD_TRIGGER, 100.0f);
-                Trinity::RandomResizeList(summoners, 2);
+                Trinity::Containers::RandomResizeList(summoners, 2);
                 if (summoners.empty())
                     return;
 

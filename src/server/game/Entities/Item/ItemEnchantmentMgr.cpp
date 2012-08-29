@@ -49,6 +49,7 @@ void LoadRandomEnchantmentsTable()
 
     RandomItemEnch.clear();                                 // for reload case
 
+    //                                                 0      1      2
     QueryResult result = WorldDatabase.Query("SELECT entry, ench, chance FROM item_enchantment_template");
 
     if (result)
@@ -69,13 +70,13 @@ void LoadRandomEnchantmentsTable()
             ++count;
         } while (result->NextRow());
 
-        sLog->outString(">> Loaded %u Item Enchantment definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-        sLog->outString();
+        sLog->outInfo(LOG_FILTER_PLAYER_ITEMS, ">> Loaded %u Item Enchantment definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
     }
     else
     {
-        sLog->outErrorDb(">> Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
-        sLog->outString();
+        sLog->outError(LOG_FILTER_SQL, ">> Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
+
     }
 }
 
@@ -90,7 +91,7 @@ uint32 GetItemEnchantMod(int32 entry)
     EnchantmentStore::const_iterator tab = RandomItemEnch.find(entry);
     if (tab == RandomItemEnch.end())
     {
-        sLog->outErrorDb("Item RandomProperty / RandomSuffix id #%u used in `item_template` but it does not have records in `item_enchantment_template` table.", entry);
+        sLog->outError(LOG_FILTER_SQL, "Item RandomProperty / RandomSuffix id #%u used in `item_template` but it does not have records in `item_enchantment_template` table.", entry);
         return 0;
     }
 
@@ -101,18 +102,20 @@ uint32 GetItemEnchantMod(int32 entry)
     {
         fCount += ench_iter->chance;
 
-        if (fCount > dRoll) return ench_iter->ench;
+        if (fCount > dRoll)
+            return ench_iter->ench;
     }
 
     //we could get here only if sum of all enchantment chances is lower than 100%
-    dRoll =  (irand(0, (int)floor(fCount * 100) + 1)) / 100;
+    dRoll = (irand(0, (int)floor(fCount * 100) + 1)) / 100;
     fCount = 0;
 
     for (EnchStoreList::const_iterator ench_iter = tab->second.begin(); ench_iter != tab->second.end(); ++ench_iter)
     {
         fCount += ench_iter->chance;
 
-        if (fCount > dRoll) return ench_iter->ench;
+        if (fCount > dRoll)
+            return ench_iter->ench;
     }
 
     return 0;

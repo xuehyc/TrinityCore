@@ -20,13 +20,14 @@
 #include "DatabaseEnv.h"
 #include "Map.h"
 #include "Player.h"
-#include "Group.h"
 #include "GameObject.h"
 #include "Creature.h"
 #include "CreatureAI.h"
-#include "CreatureAIImpl.h"
 #include "Log.h"
 #include "LFGMgr.h"
+
+#include "Group.h"
+#include "CreatureAIImpl.h"
 
 void InstanceScript::SaveToDB()
 {
@@ -48,7 +49,7 @@ void InstanceScript::HandleGameObject(uint64 GUID, bool open, GameObject* go)
     if (go)
         go->SetGoState(open ? GO_STATE_ACTIVE : GO_STATE_READY);
     else
-        sLog->outDebug(LOG_FILTER_TSCR, "TSCR: InstanceScript: HandleGameObject failed");
+        sLog->outDebug(LOG_FILTER_TSCR, "InstanceScript: HandleGameObject failed");
 }
 
 bool InstanceScript::IsEncounterInProgress() const
@@ -199,7 +200,7 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
         if (bossInfo->state == TO_BE_DECIDED) // loading
         {
             bossInfo->state = state;
-            //sLog->outError("Inialize boss %u state as %u.", id, (uint32)state);
+            //sLog->outError(LOG_FILTER_GENERAL, "Inialize boss %u state as %u.", id, (uint32)state);
             return false;
         }
         else
@@ -269,7 +270,7 @@ void InstanceScript::DoUseDoorOrButton(uint64 uiGuid, uint32 uiWithRestoreTime, 
                 go->ResetDoorOrButton();
         }
         else
-            sLog->outError("SD2: Script call DoUseDoorOrButton, but gameobject entry %u is type %u.", go->GetEntry(), go->GetGoType());
+            sLog->outError(LOG_FILTER_GENERAL, "SD2: Script call DoUseDoorOrButton, but gameobject entry %u is type %u.", go->GetEntry(), go->GetGoType());
     }
 }
 
@@ -300,7 +301,7 @@ void InstanceScript::DoUpdateWorldState(uint32 uiStateId, uint32 uiStateData)
                 player->SendUpdateWorldState(uiStateId, uiStateData);
     }
     else
-        sLog->outDebug(LOG_FILTER_TSCR, "TSCR: DoUpdateWorldState attempt send data but no players in map.");
+        sLog->outDebug(LOG_FILTER_TSCR, "DoUpdateWorldState attempt send data but no players in map.");
 }
 
 // Send Notify to all players in instance
@@ -325,12 +326,12 @@ void InstanceScript::DoSendNotifyToInstance(char const* format, ...)
 // Complete Achievement for all players in instance
 void InstanceScript::DoCompleteAchievement(uint32 achievement)
 {
-    AchievementEntry const* pAE = GetAchievementStore()->LookupEntry(achievement);
+    AchievementEntry const* pAE = sAchievementStore.LookupEntry(achievement);
     Map::PlayerList const &PlayerList = instance->GetPlayers();
 
     if (!pAE)
     {
-        sLog->outError("TSCR: DoCompleteAchievement called for not existing achievement %u", achievement);
+        sLog->outError(LOG_FILTER_TSCR, "DoCompleteAchievement called for not existing achievement %u", achievement);
         return;
     }
 
@@ -456,7 +457,7 @@ void InstanceScript::DoCastSpellOnPlayers(uint32 spell)
 
 bool InstanceScript::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/ /*= NULL*/, uint32 /*miscvalue1*/ /*= 0*/)
 {
-    sLog->outError("Achievement system call InstanceScript::CheckAchievementCriteriaMeet but instance script for map %u not have implementation for achievement criteria %u",
+    sLog->outError(LOG_FILTER_GENERAL, "Achievement system call InstanceScript::CheckAchievementCriteriaMeet but instance script for map %u not have implementation for achievement criteria %u",
         instance->GetId(), criteria_id);
     return false;
 }
@@ -469,22 +470,22 @@ void InstanceScript::SendEncounterUnit(uint32 type, Unit* unit /*= NULL*/, uint8
 
     switch (type)
     {
-        case ENCOUNTER_FRAME_ADD:
-        case ENCOUNTER_FRAME_REMOVE:
-        case 2:
+        case ENCOUNTER_FRAME_ENGAGE:
+        case ENCOUNTER_FRAME_DISENGAGE:
+        case ENCOUNTER_FRAME_UPDATE_PRIORITY:
             data.append(unit->GetPackGUID());
             data << uint8(param1);
             break;
-        case 3:
-        case 4:
-        case 6:
+        case ENCOUNTER_FRAME_ADD_TIMER:
+        case ENCOUNTER_FRAME_ENABLE_OBJECTIVE:
+        case ENCOUNTER_FRAME_DISABLE_OBJECTIVE:
+            data << uint8(param1);
+            break;
+        case ENCOUNTER_FRAME_UPDATE_OBJECTIVE:
             data << uint8(param1);
             data << uint8(param2);
             break;
-        case 5:
-            data << uint8(param1);
-            break;
-        case 7:
+        case ENCOUNTER_FRAME_UNK7:
         default:
             break;
     }

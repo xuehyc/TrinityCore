@@ -67,27 +67,21 @@ enum eNpcs
     NPC_JAELYNE                 = 34657,
     NPC_LANA                    = 34703,
 
-    // Crusader Champions
     NPC_EADRIC                  = 35119,
     NPC_PALETRESS               = 34928,
 
-    // Crusader mobs
     NPC_ARGENT_LIGHWIELDER      = 35309,
     NPC_ARGENT_MONK             = 35305,
     NPC_PRIESTESS               = 35307,
 
-    // Black Knight
     NPC_BLACK_KNIGHT            = 35451,
 
-    // Black Knight's add
     NPC_RISEN_JAEREN            = 35545,
     NPC_RISEN_ARELAS            = 35564,
 
-    // Announcer
     NPC_JAEREN_AN               = 35004,
     NPC_ARELAS_AN               = 35005,
 
-    // Announcer Start Event
     NPC_JAEREN                  = 35589,
     NPC_ARELAS                  = 35604
 };

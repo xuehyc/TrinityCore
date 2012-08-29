@@ -23,7 +23,8 @@ SDComment: Immunities are wrong, must be adjusted to use resistance from creatur
 SDCategory: Tempest Keep, The Botanica
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum eSpells
 {
@@ -211,9 +212,9 @@ class boss_laj : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_lajAI (Creature);
+            return new boss_lajAI(creature);
         }
 };
 

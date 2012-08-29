@@ -29,7 +29,8 @@ npc_warden_mellichar
 mob_zerekethvoidzone
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "arcatraz.h"
 
 /*#####
@@ -128,7 +129,7 @@ class npc_millhouse_manastorm : public CreatureScript
                 Talk(SAY_KILL);
             }
 
-            void JustDied(Unit* /*victim*/)
+            void JustDied(Unit* /*killer*/)
             {
                 Talk(SAY_DEATH);
 
@@ -316,7 +317,7 @@ class npc_warden_mellichar : public CreatureScript
 
                 if (!me->getVictim() && me->canCreatureAttack(who))
                 {
-                    if (!me->canFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+                    if (!me->CanFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
                         return;
                     if (who->GetTypeId() != TYPEID_PLAYER)
                         return;

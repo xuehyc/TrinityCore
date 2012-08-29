@@ -116,19 +116,21 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
         return NULL;
 
     Map* map = NULL;
-    uint32 NewInstanceId = 0;                       // instanceId of the resulting map
+    uint32 newInstanceId = 0;                       // instanceId of the resulting map
 
     if (IsBattlegroundOrArena())
     {
         // instantiate or find existing bg map for player
         // the instance id is set in battlegroundid
-        NewInstanceId = player->GetBattlegroundId();
-        if (!NewInstanceId) return NULL;
-        map = sMapMgr->FindMap(mapId, NewInstanceId);
+        newInstanceId = player->GetBattlegroundId();
+        if (!newInstanceId)
+            return NULL;
+
+        map = sMapMgr->FindMap(mapId, newInstanceId);
         if (!map)
         {
             if (Battleground* bg = player->GetBattleground())
-                map = CreateBattleground(NewInstanceId, bg);
+                map = CreateBattleground(newInstanceId, bg);
             else
             {
                 player->TeleportToBGEntryPoint();
@@ -158,24 +160,24 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
         if (pSave)
         {
             // solo/perm/group
-            NewInstanceId = pSave->GetInstanceId();
-            map = FindInstanceMap(NewInstanceId);
+            newInstanceId = pSave->GetInstanceId();
+            map = FindInstanceMap(newInstanceId);
             // it is possible that the save exists but the map doesn't
             if (!map)
-                map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty());
+                map = CreateInstance(newInstanceId, pSave, pSave->GetDifficulty());
         }
         else
         {
             // if no instanceId via group members or instance saves is found
             // the instance will be created for the first time
-            NewInstanceId = sMapMgr->GenerateInstanceId();
+            newInstanceId = sMapMgr->GenerateInstanceId();
 
             Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficulty(IsRaid()) : player->GetDifficulty(IsRaid());
             //Seems it is now possible, but I do not know if it should be allowed
             //ASSERT(!FindInstanceMap(NewInstanceId));
-            map = FindInstanceMap(NewInstanceId);
+            map = FindInstanceMap(newInstanceId);
             if (!map)
-                map = CreateInstance(NewInstanceId, NULL, diff);
+                map = CreateInstance(newInstanceId, NULL, diff);
         }
     }
 
@@ -191,13 +193,13 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave* save,
     const MapEntry* entry = sMapStore.LookupEntry(GetId());
     if (!entry)
     {
-        sLog->outError("CreateInstance: no entry for map %d", GetId());
+        sLog->outError(LOG_FILTER_MAPS, "CreateInstance: no entry for map %d", GetId());
         ASSERT(false);
     }
     const InstanceTemplate* iTemplate = sObjectMgr->GetInstanceTemplate(GetId());
     if (!iTemplate)
     {
-        sLog->outError("CreateInstance: no instance template for map %d", GetId());
+        sLog->outError(LOG_FILTER_MAPS, "CreateInstance: no instance template for map %d", GetId());
         ASSERT(false);
     }
 
@@ -208,6 +210,8 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave* save,
 
     InstanceMap* map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId, difficulty, this);
     ASSERT(map->IsDungeon());
+
+    map->LoadRespawnTimes();
 
     bool load_data = save != NULL;
     map->CreateInstanceData(load_data);

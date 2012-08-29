@@ -23,7 +23,8 @@ Comment:
 Category: Hellfire Citadel, Hellfire Ramparts
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum eSpells
 {
@@ -145,8 +146,8 @@ class boss_nazan : public CreatureScript
                         flight = false;
                         BellowingRoar_Timer = 6000;
                         ConeOfFire_Timer = 12000;
-                        me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                        me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                        me->SetDisableGravity(false);
+                        me->SetWalk(true);
                         me->GetMotionMaster()->Clear();
                         if (Unit* victim = SelectTarget(SELECT_TARGET_NEAREST, 0))
                             me->AI()->AttackStart(victim);
@@ -194,9 +195,9 @@ class boss_nazan : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_nazanAI (Creature);
+            return new boss_nazanAI(creature);
         }
 };
 
@@ -236,9 +237,9 @@ class boss_vazruden : public CreatureScript
                     DoScriptText(RAND(SAY_KILL_1, SAY_KILL_2), me);
             }
 
-            void JustDied(Unit* who)
+            void JustDied(Unit* killer)
             {
-                if (who && who != me)
+                if (killer && killer != me)
                     DoScriptText(SAY_DIE, me);
             }
 
@@ -272,9 +273,9 @@ class boss_vazruden : public CreatureScript
                 DoMeleeAttackIfReady();
             }
         };
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_vazrudenAI (Creature);
+            return new boss_vazrudenAI(creature);
         }
 };
 
@@ -374,7 +375,7 @@ class boss_vazruden_the_herald : public CreatureScript
                 if (summoned->GetEntry() == ENTRY_NAZAN)
                 {
                     CAST_AI(boss_nazan::boss_nazanAI, summoned->AI())->VazrudenGUID = VazrudenGUID;
-                    summoned->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                    summoned->SetDisableGravity(true);
                     summoned->SetSpeed(MOVE_FLIGHT, 2.5f);
                     if (victim)
                         AttackStartNoMove(victim);
@@ -453,9 +454,9 @@ class boss_vazruden_the_herald : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_vazruden_the_heraldAI (Creature);
+            return new boss_vazruden_the_heraldAI(creature);
         }
 };
 
@@ -480,10 +481,10 @@ class mob_hellfire_sentry : public CreatureScript
 
             void EnterCombat(Unit* /*who*/) {}
 
-            void JustDied(Unit* who)
+            void JustDied(Unit* killer)
             {
                 if (Creature* herald = me->FindNearestCreature(ENTRY_VAZRUDEN_HERALD, 150))
-                    CAST_AI(boss_vazruden_the_herald::boss_vazruden_the_heraldAI, herald->AI())->SentryDownBy(who);
+                    CAST_AI(boss_vazruden_the_herald::boss_vazruden_the_heraldAI, herald->AI())->SentryDownBy(killer);
             }
 
             void UpdateAI(const uint32 diff)
@@ -503,9 +504,9 @@ class mob_hellfire_sentry : public CreatureScript
                 DoMeleeAttackIfReady();
             }
         };
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new mob_hellfire_sentryAI (Creature);
+            return new mob_hellfire_sentryAI(creature);
         }
 };
 void AddSC_boss_vazruden_the_herald()

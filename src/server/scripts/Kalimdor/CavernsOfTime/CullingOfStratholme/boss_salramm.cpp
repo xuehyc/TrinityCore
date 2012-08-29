@@ -23,7 +23,8 @@ SDComment: TODO: Intro
 SDCategory:
 Script Data End */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "culling_of_stratholme.h"
 
 enum Spells
@@ -66,9 +67,9 @@ public:
 
     struct boss_salrammAI : public ScriptedAI
     {
-        boss_salrammAI(Creature* c) : ScriptedAI(c)
+        boss_salrammAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             if (instance)
                 DoScriptText(SAY_SPAWN, me);
         }

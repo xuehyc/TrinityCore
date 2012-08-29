@@ -15,7 +15,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "InstanceScript.h"
 #include "naxxramas.h"
 
 const DoorData doorData[] =
@@ -148,6 +150,8 @@ public:
 
         uint32 AbominationCount;
 
+        GOState gothikDoorState;
+
         time_t minHorsemenDiedTime;
         time_t maxHorsemenDiedTime;
 
@@ -171,31 +175,16 @@ public:
             kelthuzadTriggerGUID      = 0;
 
             playerDied                = 0;
+            gothikDoorState           = GO_STATE_ACTIVE;
 
             memset(portalsGUID, 0, sizeof(portalsGUID));
         }
 
         void OnCreatureCreate(Creature* creature)
         {
-            if (!creature)
-                return;
-
-            HandleCreatureSpawning(creature, true);
-        }
-
-        void OnCreatureRemove(Creature* creature)
-        {
-            if (!creature)
-                return;
-
-            HandleCreatureSpawning(creature, false);
-        }
-
-        void HandleCreatureSpawning(Creature* creature, bool add)
-        {
             switch (creature->GetEntry())
             {
-                case 15989: sapphironGUID = add ? creature->GetGUID() : 0; return;
+                case 15989: sapphironGUID = creature->GetGUID(); return;
                 case 15953: faerlinaGUID = creature->GetGUID(); return;
                 case 16064: thaneGUID = creature->GetGUID(); return;
                 case 16065: ladyGUID = creature->GetGUID(); return;
@@ -208,59 +197,84 @@ public:
                 case 15990: kelthuzadGUID = creature->GetGUID(); return;
             }
 
-            AddMinion(creature, add);
+            AddMinion(creature, true);
+        }
+
+        void OnCreatureRemove(Creature* creature)
+        {
+            AddMinion(creature, false);
         }
 
         void OnGameObjectCreate(GameObject* go)
         {
-            if (!go)
-                return;
+            if (go->GetGOInfo()->displayId == 6785 || go->GetGOInfo()->displayId == 1287)
+            {
+                uint32 section = GetEruptionSection(go->GetPositionX(), go->GetPositionY());
+                heiganEruptionGUID[section].insert(go->GetGUID());
 
-            HandleGameObjectSpawning(go, true);
+                return;
+            }
+
+            switch (go->GetEntry())
+            {
+                case GO_GOTHIK_GATE:
+                    gothikGateGUID = go->GetGUID();
+                    go->SetGoState(gothikDoorState);
+                    break;
+                case GO_HORSEMEN_CHEST:
+                    horsemenChestGUID = go->GetGUID();
+                    break;
+                case GO_HORSEMEN_CHEST_HERO:
+                    horsemenChestGUID = go->GetGUID();
+                    break;
+                case GO_KELTHUZAD_PORTAL01:
+                    portalsGUID[0] = go->GetGUID();
+                    break;
+                case GO_KELTHUZAD_PORTAL02:
+                    portalsGUID[1] = go->GetGUID();
+                    break;
+                case GO_KELTHUZAD_PORTAL03:
+                    portalsGUID[2] = go->GetGUID();
+                    break;
+                case GO_KELTHUZAD_PORTAL04:
+                    portalsGUID[3] = go->GetGUID();
+                    break;
+                case GO_KELTHUZAD_TRIGGER:
+                    kelthuzadTriggerGUID = go->GetGUID();
+                    break;
+                default:
+                    break;
+            }
+
+            AddDoor(go, true);
         }
 
         void OnGameObjectRemove(GameObject* go)
         {
-            if (!go)
-                return;
-
-            HandleGameObjectSpawning(go, false);
-        }
-
-        void HandleGameObjectSpawning(GameObject* go, bool add)
-        {
             if (go->GetGOInfo()->displayId == 6785 || go->GetGOInfo()->displayId == 1287)
             {
                 uint32 section = GetEruptionSection(go->GetPositionX(), go->GetPositionY());
-                if (add)
-                    heiganEruptionGUID[section].insert(go->GetGUID());
-                else
-                    heiganEruptionGUID[section].erase(go->GetGUID());
+
+                heiganEruptionGUID[section].erase(go->GetGUID());
                 return;
             }
 
             switch (go->GetEntry())
             {
                 case GO_BIRTH:
-                if (!add && sapphironGUID)
-                {
-                    if (Creature* pSapphiron = instance->GetCreature(sapphironGUID))
-                        pSapphiron->AI()->DoAction(DATA_SAPPHIRON_BIRTH);
-                    return;
-                }
-                case GO_GOTHIK_GATE: gothikGateGUID = go->GetGUID(); break;
-                case GO_HORSEMEN_CHEST: horsemenChestGUID = add ? go->GetGUID() : 0; break;
-                case GO_HORSEMEN_CHEST_HERO: horsemenChestGUID = add ? go->GetGUID() : 0; break;
-                case GO_KELTHUZAD_PORTAL01: portalsGUID[0] = go->GetGUID(); break;
-                case GO_KELTHUZAD_PORTAL02: portalsGUID[1] = go->GetGUID(); break;
-                case GO_KELTHUZAD_PORTAL03: portalsGUID[2] = go->GetGUID(); break;
-                case GO_KELTHUZAD_PORTAL04: portalsGUID[3] = go->GetGUID(); break;
-                case GO_KELTHUZAD_TRIGGER: kelthuzadTriggerGUID = go->GetGUID(); break;
+                    if (sapphironGUID)
+                    {
+                        if (Creature* pSapphiron = instance->GetCreature(sapphironGUID))
+                            pSapphiron->AI()->DoAction(DATA_SAPPHIRON_BIRTH);
+                        return;
+                    }
+                    break;
+                default:
+                    break;
             }
 
-            AddDoor(go, add);
+            AddDoor(go, false);
         }
-
 
         void OnUnitDeath(Unit* unit)
         {
@@ -281,8 +295,8 @@ public:
                 case DATA_GOTHIK_GATE:
                     if (GameObject* gothikGate = instance->GetGameObject(gothikGateGUID))
                         gothikGate->SetGoState(GOState(value));
+                    gothikDoorState = GOState(value);
                     break;
-
                 case DATA_HORSEMEN0:
                 case DATA_HORSEMEN1:
                 case DATA_HORSEMEN2:
@@ -441,20 +455,22 @@ public:
         std::string GetSaveData()
         {
             std::ostringstream saveStream;
-            saveStream << GetBossSaveData() << playerDied;
+            saveStream << GetBossSaveData() << gothikDoorState << ' ' << playerDied;
             return saveStream.str();
         }
 
         void Load(const char * data)
         {
             std::istringstream loadStream(LoadBossState(data));
-            uint32 temp, buff;
+            uint32 temp, buff, buff2;
 
             for (uint32 i = 0; i < MAX_BOSS_NUMBER; ++i)
                 loadStream >> temp;
 
             loadStream >> buff;
-            playerDied = buff;
+            gothikDoorState = GOState(buff);
+            loadStream >> buff2;
+            playerDied = buff2;
         }
     };
 };
@@ -490,7 +506,7 @@ public:
         }
 
         void LivingPoisonStart()
-            {
+        {
             if (me->GetPositionX() <= 3160.0f && me->GetPositionX() >= 3150.0f)
                 me->GetMotionMaster()->MovePoint(1, TargetPos[0].GetPositionX(), TargetPos[0].GetPositionY(), TargetPos[0].GetPositionZ());
             else if (me->GetPositionX() <= 3150.0f && me->GetPositionX() >= 3135.0f)

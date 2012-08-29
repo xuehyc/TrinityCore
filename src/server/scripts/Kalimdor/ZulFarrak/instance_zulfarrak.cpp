@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "zulfarrak.h"
 
 #define NPC_GAHZRILLA 7273
@@ -301,14 +302,15 @@ public:
            {
                if (npc->isAlive())
                {
-                    npc->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                    npc->SetWalk(true);
                     npc->GetMotionMaster()->MovePoint(1, x, y, z);
                     npc->SetHomePosition(x, y, z, o);
                }
             }
         }
 
-        void SpawnPyramidWave(uint32 wave){
+        void SpawnPyramidWave(uint32 wave)
+        {
             for (int i = 0; i < pyramidSpawnTotal; i++)
             {
                 if (pyramidSpawns[i][0] == (float)wave)
@@ -321,7 +323,8 @@ public:
             }
         }
 
-        bool IsWaveAllDead(){
+        bool IsWaveAllDead()
+        {
             for (std::list<uint64>::iterator itr = addsAtBase.begin(); itr != addsAtBase.end(); ++itr)
             {
                 if (Creature* add = instance->GetCreature((*itr)))

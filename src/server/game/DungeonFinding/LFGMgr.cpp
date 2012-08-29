@@ -38,7 +38,8 @@ m_NumWaitTimeAvg(0), m_NumWaitTimeTank(0), m_NumWaitTimeHealer(0), m_NumWaitTime
     m_update = sWorld->getBoolConfig(CONFIG_DUNGEON_FINDER_ENABLE);
     if (m_update)
     {
-        new LFGScripts();
+        new LFGPlayerScript();
+        new LFGGroupScript();
 
         // Initialize dungeon cache
         for (uint32 i = 0; i < sLFGDungeonStore.GetNumRows(); ++i)
@@ -134,8 +135,8 @@ void LFGMgr::LoadRewards()
 
     if (!result)
     {
-        sLog->outErrorDb(">> Loaded 0 lfg dungeon rewards. DB table `lfg_dungeon_rewards` is empty!");
-        sLog->outString();
+        sLog->outError(LOG_FILTER_SQL, ">> Loaded 0 lfg dungeon rewards. DB table `lfg_dungeon_rewards` is empty!");
+
         return;
     }
 
@@ -156,25 +157,25 @@ void LFGMgr::LoadRewards()
 
         if (!sLFGDungeonStore.LookupEntry(dungeonId))
         {
-            sLog->outErrorDb("Dungeon %u specified in table `lfg_dungeon_rewards` does not exist!", dungeonId);
+            sLog->outError(LOG_FILTER_SQL, "Dungeon %u specified in table `lfg_dungeon_rewards` does not exist!", dungeonId);
             continue;
         }
 
         if (!maxLevel || maxLevel > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
         {
-            sLog->outErrorDb("Level %u specified for dungeon %u in table `lfg_dungeon_rewards` can never be reached!", maxLevel, dungeonId);
+            sLog->outError(LOG_FILTER_SQL, "Level %u specified for dungeon %u in table `lfg_dungeon_rewards` can never be reached!", maxLevel, dungeonId);
             maxLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
         }
 
         if (firstQuestId && !sObjectMgr->GetQuestTemplate(firstQuestId))
         {
-            sLog->outErrorDb("First quest %u specified for dungeon %u in table `lfg_dungeon_rewards` does not exist!", firstQuestId, dungeonId);
+            sLog->outError(LOG_FILTER_SQL, "First quest %u specified for dungeon %u in table `lfg_dungeon_rewards` does not exist!", firstQuestId, dungeonId);
             firstQuestId = 0;
         }
 
         if (otherQuestId && !sObjectMgr->GetQuestTemplate(otherQuestId))
         {
-            sLog->outErrorDb("Other quest %u specified for dungeon %u in table `lfg_dungeon_rewards` does not exist!", otherQuestId, dungeonId);
+            sLog->outError(LOG_FILTER_SQL, "Other quest %u specified for dungeon %u in table `lfg_dungeon_rewards` does not exist!", otherQuestId, dungeonId);
             otherQuestId = 0;
         }
 
@@ -182,8 +183,8 @@ void LFGMgr::LoadRewards()
         ++count;
     } while (result->NextRow());
 
-    sLog->outString(">> Loaded %u lfg dungeon rewards in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    sLog->outString();
+    sLog->outInfo(LOG_FILTER_LFG, ">> Loaded %u lfg dungeon rewards in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
 }
 
 void LFGMgr::Update(uint32 diff)
@@ -309,7 +310,7 @@ void LFGMgr::Update(uint32 diff)
             LfgQueueInfo* queue = itQueue->second;
             if (!queue)
             {
-                sLog->outError("LFGMgr::Update: [" UI64FMTD "] queued with null queue info!", itQueue->first);
+                sLog->outError(LOG_FILTER_LFG, "LFGMgr::Update: [" UI64FMTD "] queued with null queue info!", itQueue->first);
                 continue;
             }
             uint32 dungeonId = (*queue->dungeons.begin());
@@ -834,7 +835,7 @@ LfgProposal* LFGMgr::FindNewGroups(LfgGuidList& check, LfgGuidList& all)
     sLog->outDebug(LOG_FILTER_LFG, "LFGMgr::FindNewGroup: (%s) - all(%s)", ConcatenateGuids(check).c_str(), ConcatenateGuids(all).c_str());
 
     LfgProposal* pProposal = NULL;
-    if (!check.size() || check.size() > MAXGROUPSIZE || !CheckCompatibility(check, pProposal))
+    if (check.empty() || check.size() > MAXGROUPSIZE || !CheckCompatibility(check, pProposal))
         return NULL;
 
     // Try to match with queued groups
@@ -906,7 +907,7 @@ bool LFGMgr::CheckCompatibility(LfgGuidList check, LfgProposal*& pProposal)
         LfgQueueInfoMap::iterator itQueue = m_QueueInfoMap.find(guid);
         if (itQueue == m_QueueInfoMap.end() || GetState(guid) != LFG_STATE_QUEUED)
         {
-            sLog->outError("LFGMgr::CheckCompatibility: [" UI64FMTD "] is not queued but listed as queued!", (*it));
+            sLog->outError(LOG_FILTER_LFG, "LFGMgr::CheckCompatibility: [" UI64FMTD "] is not queued but listed as queued!", (*it));
             RemoveFromQueue(guid);
             return false;
         }
@@ -1066,7 +1067,7 @@ bool LFGMgr::CheckCompatibility(LfgGuidList check, LfgProposal*& pProposal)
     // Select a random dungeon from the compatible list
     // TODO - Select the dungeon based on group item Level, not just random
     // Create a new proposal
-    pProposal = new LfgProposal(SelectRandomContainerElement(compatibleDungeons));
+    pProposal = new LfgProposal(Trinity::Containers::SelectRandomContainerElement(compatibleDungeons));
     pProposal->cancelTime = time_t(time(NULL)) + LFG_TIME_PROPOSAL;
     pProposal->state = LFG_PROPOSAL_INITIATING;
     pProposal->queues = check;
@@ -1210,7 +1211,7 @@ void LFGMgr::UpdateRoleCheck(uint64 gguid, uint64 guid /* = 0 */, uint8 roles /*
         }
 
         m_QueueInfoMap[gguid] = pqInfo;
-        if(GetState(gguid) != LFG_STATE_NONE)
+        if (GetState(gguid) != LFG_STATE_NONE)
         {
             LfgGuidList& currentQueue = m_currentQueue[team];
             currentQueue.push_front(gguid);
@@ -1447,18 +1448,22 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
             LfgProposalPlayer* player = pProposal->players[(*it)->GetGUID()];
             uint32 lowgroupguid = (*it)->GetGroup() ? (*it)->GetGroup()->GetLowGUID() : 0;
             if (player->groupLowGuid != lowgroupguid)
-                sLog->outError("LFGMgr::UpdateProposal: [" UI64FMTD "] group mismatch: actual (%u) - queued (%u)", (*it)->GetGUID(), lowgroupguid, player->groupLowGuid);
+                sLog->outError(LOG_FILTER_LFG, "LFGMgr::UpdateProposal: [" UI64FMTD "] group mismatch: actual (%u) - queued (%u)", (*it)->GetGUID(), lowgroupguid, player->groupLowGuid);
 
             uint64 guid2 = player->groupLowGuid ? MAKE_NEW_GUID(player->groupLowGuid, 0, HIGHGUID_GROUP) : (*it)->GetGUID();
             LfgQueueInfoMap::iterator itQueue = m_QueueInfoMap.find(guid2);
             if (itQueue == m_QueueInfoMap.end())
             {
-                sLog->outError("LFGMgr::UpdateProposal: Queue info for guid [" UI64FMTD "] not found!", guid);
+                sLog->outError(LOG_FILTER_LFG, "LFGMgr::UpdateProposal: Queue info for guid [" UI64FMTD "] not found!", guid);
                 waitTimesMap[(*it)->GetGUID()] = -1;
             }
             else
                 waitTimesMap[(*it)->GetGUID()] = int32(joinTime - itQueue->second->joinTime);
         }
+
+        // Set the dungeon difficulty
+        LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(pProposal->dungeonId);
+        ASSERT(dungeon);
 
         // Create a new group (if needed)
         LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_GROUP_FOUND);
@@ -1470,6 +1475,7 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
             Group* group = player->GetGroup();
             if (sendUpdate)
                 player->GetSession()->SendLfgUpdateProposal(proposalId, pProposal);
+
             if (group)
             {
                 player->GetSession()->SendLfgUpdateParty(updateData);
@@ -1521,14 +1527,16 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
                     break;
                 }
             }
+
             m_teleport.push_back(pguid);
             grp->SetLfgRoles(pguid, pProposal->players[pguid]->role);
             SetState(pguid, LFG_STATE_DUNGEON);
+
+            // Add the cooldown spell if queued for a random dungeon
+            if (dungeon->type == LFG_TYPE_RANDOM)
+                player->CastSpell(player, LFG_SPELL_DUNGEON_COOLDOWN, false);
         }
 
-        // Set the dungeon difficulty
-        LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(pProposal->dungeonId);
-        ASSERT(dungeon);
         grp->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
         uint64 gguid = grp->GetGUID();
         SetDungeon(gguid, dungeon->Entry());
@@ -1669,6 +1677,7 @@ void LFGMgr::InitBoot(Group* grp, uint64 kicker, uint64 victim, std::string reas
 {
     if (!grp)
         return;
+
     uint64 gguid = grp->GetGUID();
     SetState(gguid, LFG_STATE_BOOT);
 
@@ -1678,7 +1687,6 @@ void LFGMgr::InitBoot(Group* grp, uint64 kicker, uint64 victim, std::string reas
     pBoot->reason = reason;
     pBoot->victim = victim;
     pBoot->votedNeeded = GetVotesNeeded(gguid);
-    PlayerSet players;
 
     // Set votes
     for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
@@ -1694,14 +1702,10 @@ void LFGMgr::InitBoot(Group* grp, uint64 kicker, uint64 victim, std::string reas
             else
             {
                 pBoot->votes[guid] = LFG_ANSWER_PENDING;   // Other members need to vote
-                players.insert(plrg);
+                plrg->GetSession()->SendLfgBootPlayer(pBoot);
             }
         }
     }
-
-    // Notify players
-    for (PlayerSet::const_iterator it = players.begin(); it != players.end(); ++it)
-        (*it)->GetSession()->SendLfgBootPlayer(pBoot);
 
     m_Boots[grp->GetLowGUID()] = pBoot;
 }
@@ -1796,14 +1800,6 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
     if (player->isInCombat() || !player->GetGroup() || !player->GetGroup()->isLFGGroup())
         return;
 
-    if (out)
-    {
-        player->RemoveAurasDueToSpell(LFG_SPELL_LUCK_OF_THE_DRAW);
-        player->TeleportToBGEntryPoint();
-        return;
-    }
-
-    // TODO Add support for LFG_TELEPORTERROR_FATIGUE
     LfgTeleportError error = LFG_TELEPORTERROR_OK;
     Group* grp = player->GetGroup();
 
@@ -1813,10 +1809,25 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
         error = LFG_TELEPORTERROR_PLAYER_DEAD;
     else if (player->IsFalling() || player->HasUnitState(UNIT_STATE_JUMPING))
         error = LFG_TELEPORTERROR_FALLING;
+    else if (player->IsMirrorTimerActive(FATIGUE_TIMER))
+        error = LFG_TELEPORTERROR_FATIGUE;
     else
     {
-        uint64 gguid = grp->GetGUID();
-        LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(GetDungeon(gguid));
+        LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(GetDungeon(grp->GetGUID()));
+
+        if (out)
+        {
+            // Player needs to be inside the LFG dungeon to be able to teleport out
+            if (dungeon && player->GetMapId() == uint32(dungeon->map))
+            {
+                player->RemoveAurasDueToSpell(LFG_SPELL_LUCK_OF_THE_DRAW);
+                player->TeleportToBGEntryPoint();
+            }
+            else
+                player->GetSession()->SendLfgTeleportError(LFG_TELEPORTERROR_DONT_REPORT); // Not sure which error message to send
+
+            return;
+        }
 
         if (!dungeon)
             error = LFG_TELEPORTERROR_INVALID_LOCATION;
@@ -1850,7 +1861,7 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
                 AreaTrigger const* at = sObjectMgr->GetMapEntranceTrigger(dungeon->map);
                 if (!at)
                 {
-                    sLog->outError("LfgMgr::TeleportPlayer: Failed to teleport [" UI64FMTD "]: No areatrigger found for map: %u difficulty: %u", player->GetGUID(), dungeon->map, dungeon->difficulty);
+                    sLog->outError(LOG_FILTER_LFG, "LfgMgr::TeleportPlayer: Failed to teleport [" UI64FMTD "]: No areatrigger found for map: %u difficulty: %u", player->GetGUID(), dungeon->map, dungeon->difficulty);
                     error = LFG_TELEPORTERROR_INVALID_LOCATION;
                 }
                 else
@@ -1865,7 +1876,7 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
 
             if (error == LFG_TELEPORTERROR_OK)
             {
-                if (!player->GetMap()->IsDungeon() && !player->GetMap()->IsRaid())
+                if (!player->GetMap()->IsDungeon())
                     player->SetBattlegroundEntryPoint();
 
                 if (player->isInFlight())
@@ -1880,7 +1891,7 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
                 else
                 {
                     error = LFG_TELEPORTERROR_INVALID_LOCATION;
-                    sLog->outError("LfgMgr::TeleportPlayer: Failed to teleport [" UI64FMTD "] to map %u: ", player->GetGUID(), mapid);
+                    sLog->outError(LOG_FILTER_LFG, "LfgMgr::TeleportPlayer: Failed to teleport [" UI64FMTD "] to map %u: ", player->GetGUID(), mapid);
                 }
             }
         }

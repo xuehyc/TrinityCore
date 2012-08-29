@@ -21,6 +21,9 @@
  * Scriptnames of files in this file should be prefixed with "spell_q#questID_".
  */
 
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
 #include "Vehicle.h"
 
 class spell_generic_quest_update_entry_SpellScript : public SpellScript
@@ -272,7 +275,7 @@ class spell_q11396_11399_scourging_crystal_controller : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                if (Unit* target = GetTargetUnit())
+                if (Unit* target = GetExplTargetUnit())
                     if (target->GetTypeId() == TYPEID_UNIT && target->HasAura(SPELL_FORCE_SHIELD_ARCANE_PURPLE_X3))
                         // Make sure nobody else is channeling the same target
                         if (!target->HasAura(SPELL_SCOURGING_CRYSTAL_CONTROLLER))
@@ -633,6 +636,10 @@ class spell_q12851_going_bearback : public SpellScriptLoader
                 if (Unit* caster = GetCaster())
                 {
                     Unit* target = GetTarget();
+                    // Already in fire
+                    if (target->HasAura(SPELL_ABLAZE))
+                        return;
+
                     if (Player* player = caster->GetCharmerOrOwnerPlayerOrPlayerItself())
                     {
                         switch (target->GetEntry())
@@ -830,7 +837,7 @@ class spell_q12659_ahunaes_knife : public SpellScriptLoader
                 Player* caster = GetCaster()->ToPlayer();
                 if (Creature* target = GetHitCreature())
                 {
-                    target->ForcedDespawn();
+                    target->DespawnOrUnsummon();
                     caster->KilledMonsterCredit(NPC_SCALPS_KC_BUNNY, 0);
                 }
             }
@@ -1022,9 +1029,9 @@ class spell_q14112_14145_chum_the_water: public SpellScriptLoader
 // http://old01.wowhead.com/quest=9452 - Red Snapper - Very Tasty!
 enum RedSnapperVeryTasty
 {
-    SPELL_CAST_NET      = 29866,
-    ITEM_RED_SNAPPER    = 23614,
-    NPC_ANGRY_MURLOC    = 17102,
+    SPELL_CAST_NET          = 29866,
+    ITEM_RED_SNAPPER        = 23614,
+    SPELL_NEW_SUMMON_TEST   = 49214,
 };
 
 class spell_q9452_cast_net: public SpellScriptLoader
@@ -1044,16 +1051,10 @@ class spell_q9452_cast_net: public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Player* caster = GetCaster()->ToPlayer();
-                switch (urand(0, 2))
-                {
-                    case 0: case 1:
-                        caster->AddItem(ITEM_RED_SNAPPER, 1);
-                        break;
-                    case 2:
-                        if (Creature* murloc = caster->SummonCreature(NPC_ANGRY_MURLOC, caster->GetPositionX()+5, caster->GetPositionY(), caster->GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 120000))
-                            murloc->AI()->AttackStart(caster);
-                        break;
-                }
+                if (roll_chance_i(66))
+                    caster->AddItem(ITEM_RED_SNAPPER, 1);
+                else
+                    caster->CastSpell(caster, SPELL_NEW_SUMMON_TEST, true);
             }
 
             void Register()
@@ -1065,6 +1066,182 @@ class spell_q9452_cast_net: public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_q9452_cast_net_SpellScript();
+        }
+};
+
+#define SAY_1 "Sons of Hodir! I humbly present to you..."
+#define SAY_2 "The Helm of Hodir!"
+#define NPC_KILLCREDIT 30210 // Hodir's Helm KC Bunny
+
+class spell_q12987_read_pronouncement : public SpellScriptLoader
+{
+public:
+    spell_q12987_read_pronouncement() : SpellScriptLoader("spell_q12987_read_pronouncement") { }
+
+    class spell_q12987_read_pronouncement_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_q12987_read_pronouncement_AuraScript);
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            // player must cast kill credit and do emote text, according to sniff
+            if (Player* target = GetTarget()->ToPlayer())
+            {
+                target->MonsterWhisper(SAY_1, target->GetGUID(), true);
+                target->KilledMonsterCredit(NPC_KILLCREDIT, 0);
+                target->MonsterWhisper(SAY_2, target->GetGUID(), true);
+            }
+        }
+
+        void Register()
+        {
+            AfterEffectApply += AuraEffectApplyFn(spell_q12987_read_pronouncement_AuraScript::OnApply, EFFECT_0, SPELL_AURA_NONE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_q12987_read_pronouncement_AuraScript();
+    }
+};
+
+enum LeaveNothingToChance
+{
+    NPC_UPPER_MINE_SHAFT            = 27436,
+    NPC_LOWER_MINE_SHAFT            = 27437,
+
+    SPELL_UPPER_MINE_SHAFT_CREDIT   = 48744,
+    SPELL_LOWER_MINE_SHAFT_CREDIT   = 48745,
+};
+
+class spell_q12277_wintergarde_mine_explosion : public SpellScriptLoader
+{
+    public:
+        spell_q12277_wintergarde_mine_explosion() : SpellScriptLoader("spell_q12277_wintergarde_mine_explosion") { }
+
+        class spell_q12277_wintergarde_mine_explosion_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_q12277_wintergarde_mine_explosion_SpellScript);
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (Creature* unitTarget = GetHitCreature())
+                {
+                    if (Unit* caster = GetCaster())
+                    {
+                        if (caster->GetTypeId() == TYPEID_UNIT)
+                        {
+                            if (Unit* owner = caster->GetOwner())
+                            {
+                                switch (unitTarget->GetEntry())
+                                {
+                                    case NPC_UPPER_MINE_SHAFT:
+                                        caster->CastSpell(owner, SPELL_UPPER_MINE_SHAFT_CREDIT, true);
+                                        break;
+                                    case NPC_LOWER_MINE_SHAFT:
+                                        caster->CastSpell(owner, SPELL_LOWER_MINE_SHAFT_CREDIT, true);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_q12277_wintergarde_mine_explosion_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_q12277_wintergarde_mine_explosion_SpellScript();
+        }
+};
+
+enum FocusOnTheBeach
+{
+    SPELL_BUNNY_CREDIT_BEAM = 47390,
+};
+
+class spell_q12066_bunny_kill_credit : public SpellScriptLoader
+{
+public:
+    spell_q12066_bunny_kill_credit() : SpellScriptLoader("spell_q12066_bunny_kill_credit") { }
+
+    class spell_q12066_bunny_kill_credit_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q12066_bunny_kill_credit_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Creature* target = GetHitCreature())
+                target->CastSpell(GetCaster(), SPELL_BUNNY_CREDIT_BEAM, false);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_q12066_bunny_kill_credit_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_q12066_bunny_kill_credit_SpellScript();
+    }
+};
+
+enum ACleansingSong
+{
+    SPELL_SUMMON_SPIRIT_ATAH        = 52954,
+    SPELL_SUMMON_SPIRIT_HAKHALAN    = 52958,
+    SPELL_SUMMON_SPIRIT_KOOSU       = 52959,
+
+    AREA_BITTERTIDELAKE             = 4385,
+    AREA_RIVERSHEART                = 4290,
+    AREA_WINTERGRASPRIVER           = 4388,
+};
+
+class spell_q12735_song_of_cleansing : public SpellScriptLoader
+{
+    public:
+        spell_q12735_song_of_cleansing() : SpellScriptLoader("spell_q12735_song_of_cleansing") { }
+
+        class spell_q12735_song_of_cleansing_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_q12735_song_of_cleansing_SpellScript);
+
+            void HandleScript(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                switch (caster->GetAreaId())
+                {
+                    case AREA_BITTERTIDELAKE:
+                        caster->CastSpell(caster, SPELL_SUMMON_SPIRIT_ATAH);
+                        break;
+                    case AREA_RIVERSHEART:
+                        caster->CastSpell(caster, SPELL_SUMMON_SPIRIT_HAKHALAN);
+                        break;
+                    case AREA_WINTERGRASPRIVER:
+                        caster->CastSpell(caster, SPELL_SUMMON_SPIRIT_KOOSU);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_q12735_song_of_cleansing_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_q12735_song_of_cleansing_SpellScript();
         }
 };
 
@@ -1093,4 +1270,8 @@ void AddSC_quest_spell_scripts()
     new spell_q13280_13283_plant_battle_standard();
     new spell_q14112_14145_chum_the_water();
     new spell_q9452_cast_net();
+    new spell_q12987_read_pronouncement();
+    new spell_q12277_wintergarde_mine_explosion();
+    new spell_q12066_bunny_kill_credit();
+    new spell_q12735_song_of_cleansing();
 }

@@ -30,7 +30,9 @@ npc_the_scourge_cauldron
 npc_andorhal_tower
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "ScriptedEscortAI.h"
 
 /*######
@@ -49,10 +51,10 @@ class npcs_dithers_and_arbington : public CreatureScript
 public:
     npcs_dithers_and_arbington() : CreatureScript("npcs_dithers_and_arbington") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        switch (uiAction)
+        switch (action)
         {
             case GOSSIP_ACTION_TRADE:
                 player->GetSession()->SendListInventory(creature->GetGUID());
@@ -85,6 +87,7 @@ public:
     {
         if (creature->isQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
+
         if (creature->isVendor())
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
@@ -95,12 +98,12 @@ public:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HDA3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HDA4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
             player->SEND_GOSSIP_MENU(3985, creature->GetGUID());
-        }else
+        }
+        else
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
 
         return true;
     }
-
 };
 
 /*######
@@ -121,10 +124,10 @@ class npc_myranda_the_hag : public CreatureScript
 public:
     npc_myranda_the_hag() : CreatureScript("npc_myranda_the_hag") { }
 
-    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
         {
             player->CLOSE_GOSSIP_MENU();
             player->CastSpell(player, SPELL_SCARLET_ILLUSION, false);
@@ -149,7 +152,6 @@ public:
 
         return true;
     }
-
 };
 
 /*######
@@ -168,7 +170,7 @@ public:
 
     struct npc_the_scourge_cauldronAI : public ScriptedAI
     {
-        npc_the_scourge_cauldronAI(Creature* c) : ScriptedAI(c) {}
+        npc_the_scourge_cauldronAI(Creature* creature) : ScriptedAI(creature) {}
 
         void Reset() {}
 
@@ -229,7 +231,6 @@ public:
             }
         }
     };
-
 };
 
 /*######
@@ -253,7 +254,7 @@ public:
 
     struct npc_andorhal_towerAI : public Scripted_NoMovementAI
     {
-        npc_andorhal_towerAI(Creature* c) : Scripted_NoMovementAI(c) {}
+        npc_andorhal_towerAI(Creature* creature) : Scripted_NoMovementAI(creature) {}
 
         void MoveInLineOfSight(Unit* who)
         {
@@ -264,7 +265,6 @@ public:
                 CAST_PLR(who)->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
         }
     };
-
 };
 
 /*######
@@ -330,10 +330,11 @@ public:
                 summoned->AI()->AttackStart(me);
         }
 
-        void WaypointReached(uint32 i)
+        void WaypointReached(uint32 waypointId)
         {
             Player* player = GetPlayerForEscort();
-            switch (i)
+
+            switch (waypointId)
             {
                 case 8:
                     DoScriptText(SAY_WP_0, me);
@@ -359,7 +360,7 @@ public:
                     break;
                 case 23:
                     Ughost = me->SummonCreature(NPC_GHOST_UTHER, 971.86f, -1825.42f, 81.99f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-                    Ughost->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                    Ughost->SetDisableGravity(true);
                     DoScriptText(SAY_WP_4, Ughost, me);
                     m_uiChatTimer = 4000;
                     break;
@@ -382,8 +383,7 @@ public:
 
          void JustDied(Unit* /*killer*/)
         {
-           Player* player = GetPlayerForEscort();
-            if (player)
+            if (Player* player = GetPlayerForEscort())
                 player->FailQuest(QUEST_TOMB_LIGHTBRINGER);
         }
 
@@ -395,7 +395,6 @@ public:
                 m_uiChatTimer = 6000;
         }
     };
-
 };
 
 /*######

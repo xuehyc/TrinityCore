@@ -26,7 +26,9 @@ EndScriptData */
 npc_announcer_toc5
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "trial_of_the_champion.h"
 #include "Vehicle.h"
 
@@ -87,9 +89,9 @@ public:
 
     struct npc_anstartAI : public ScriptedAI
     {
-        npc_anstartAI(Creature *c) : ScriptedAI(c)
+        npc_anstartAI(Creature *creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
         }
 
@@ -338,7 +340,7 @@ public:
                     NextStep(10000, false, 1);
                     break;
                 case DATA_IN_POSITION: //movement done.
-                    me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);
+                    me->SetWalk(true);
                     me->GetMotionMaster()->MovePoint(1, 735.898f, 651.961f, 411.93f);
                     DoScriptText(SAY_START2, me);
 
@@ -442,10 +444,9 @@ public:
                     {
                         uiVehicle1GUID = pBoss->GetGUID();
                         uint64 uiGrandChampionBoss1 = 0;
-                        if (Creature* pBoss = Unit::GetCreature(*me, uiVehicle1GUID))
-                            if (Vehicle* pVehicle = pBoss->GetVehicleKit())
-                                if (Unit* pUnit = pVehicle->GetPassenger(0))
-                                    uiGrandChampionBoss1 = pUnit->GetGUID();
+                        if (Vehicle* pVehicle = pBoss->GetVehicleKit())
+                            if (Unit* unit = pVehicle->GetPassenger(0))
+                                uiGrandChampionBoss1 = unit->GetGUID();
                         if (instance)
                         {
                             instance->SetData64(DATA_GRAND_CHAMPION_VEHICLE_1, uiVehicle1GUID);
@@ -458,10 +459,9 @@ public:
                     {
                         uiVehicle2GUID = pBoss->GetGUID();
                         uint64 uiGrandChampionBoss2 = 0;
-                        if (Creature* pBoss = Unit::GetCreature(*me, uiVehicle2GUID))
-                            if (Vehicle* pVehicle = pBoss->GetVehicleKit())
-                                if (Unit* pUnit = pVehicle->GetPassenger(0))
-                                    uiGrandChampionBoss2 = pUnit->GetGUID();
+                        if (Vehicle* pVehicle = pBoss->GetVehicleKit())
+                            if (Unit* unit = pVehicle->GetPassenger(0))
+                                uiGrandChampionBoss2 = unit->GetGUID();
                         if (instance)
                         {
                             instance->SetData64(DATA_GRAND_CHAMPION_VEHICLE_2, uiVehicle2GUID);
@@ -474,10 +474,9 @@ public:
                     {
                         uiVehicle3GUID = pBoss->GetGUID();
                         uint64 uiGrandChampionBoss3 = 0;
-                        if (Creature* pBoss = Unit::GetCreature(*me, uiVehicle3GUID))
-                            if (Vehicle* pVehicle = pBoss->GetVehicleKit())
-                                if (Unit* pUnit = pVehicle->GetPassenger(0))
-                                    uiGrandChampionBoss3 = pUnit->GetGUID();
+                        if (Vehicle* pVehicle = pBoss->GetVehicleKit())
+                            if (Unit* unit = pVehicle->GetPassenger(0))
+                                uiGrandChampionBoss3 = unit->GetGUID();
                         if (instance)
                         {
                             instance->SetData64(DATA_GRAND_CHAMPION_VEHICLE_3, uiVehicle3GUID);
@@ -616,8 +615,8 @@ public:
                             if (Unit* pBlackKnight = me->SummonCreature(VEHICLE_BLACK_KNIGHT,801.369507f, 640.574280f, 469.314362f, 3.97124f,TEMPSUMMON_DEAD_DESPAWN,180000))
                             {
                                 uiBlackKnightGUID = pBlackKnight->GetGUID();
-                                pBlackKnight->SetUInt64Value(UNIT_FIELD_TARGET, me->GetGUID());
-                                me->SetUInt64Value(UNIT_FIELD_TARGET, uiBlackKnightGUID);
+                                pBlackKnight->SetTarget(me->GetGUID());
+                                me->SetTarget(uiBlackKnightGUID);
 
                                 if (GameObject* go = GameObject::GetGameObject(*me, instance->GetData64(DATA_MAIN_GATE)))
                                     instance->HandleGameObject(go->GetGUID(), false);
@@ -666,9 +665,9 @@ public:
                         player->SetInCombatWith(temp);
                         temp->AddThreat(player, 0.0f);
 
-                        if (Vehicle *pVehicle = player->GetVehicle())
+                        if (Vehicle *vehicle = player->GetVehicle())
                         {
-                            if (Unit *vehicleCreature = pVehicle->GetBase())
+                            if (Unit *vehicleCreature = vehicle->GetBase())
                             {
                                 temp->SetInCombatWith(vehicleCreature);
                                 vehicleCreature->SetInCombatWith(temp);
@@ -679,7 +678,6 @@ public:
                 }
             }
         }
-
 
        void UpdateAI(const uint32 uiDiff)
         {
@@ -772,10 +770,10 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        if (action == GOSSIP_ACTION_INFO_DEF+1)
         {
             if (creature && creature->GetMap())
             {

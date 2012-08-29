@@ -522,8 +522,11 @@ enum TrinityStrings
     LANG_YOURS_EXPLORE_SET_ALL          = 553,
     LANG_YOURS_EXPLORE_SET_NOTHING      = 554,
 
-    LANG_HOVER_ENABLED                  = 555,
-    LANG_HOVER_DISABLED                 = 556,
+    LANG_NPC_SETDATA                    = 555,
+
+    //! Old ones now free:
+    // LANG_HOVER_DISABLED              = 556,
+
     LANG_YOURS_LEVEL_UP                 = 557,
     LANG_YOURS_LEVEL_DOWN               = 558,
     LANG_YOURS_LEVEL_PROGRESS_RESET     = 559,
@@ -834,7 +837,9 @@ enum TrinityStrings
     LANG_MOVEGENS_FOLLOW_CREATURE       = 1140,
     LANG_MOVEGENS_FOLLOW_NULL           = 1141,
     LANG_MOVEGENS_EFFECT                = 1142,
-    // Room for more level 3              1143-1199 not used
+    LANG_MOVEFLAGS_GET                  = 1143,
+    LANG_MOVEFLAGS_SET                  = 1144,
+    // Room for more level 3              1144-1199 not used
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
@@ -975,7 +980,10 @@ enum TrinityStrings
     LANG_COMMAND_LOOKUP_MAX_RESULTS     = 5029,
     LANG_FLEE                           = 5030,
     LANG_NPCINFO_AIINFO                 = 5031,
-    // Room for more Trinity strings      5032-9999
+    LANG_COMMAND_NO_BATTLEGROUND_FOUND  = 5032,
+    LANG_COMMAND_NO_ACHIEVEMENT_CRITERIA_FOUND = 5033,
+    LANG_COMMAND_NO_OUTDOOR_PVP_FORUND  = 5034,
+    // Room for more Trinity strings      5035-9999
 
     // Level requirement notifications
     LANG_SAY_REQ                        = 6604,

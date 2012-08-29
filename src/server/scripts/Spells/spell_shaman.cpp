@@ -21,6 +21,10 @@
  * Scriptnames of files in this file should be prefixed with "spell_sha_".
  */
 
+#include "ScriptMgr.h"
+#include "GridNotifiers.h"
+#include "Unit.h"
+#include "SpellScript.h"
 #include "SpellAuraEffects.h"
 
 enum ShamanSpells
@@ -32,9 +36,18 @@ enum ShamanSpells
     SHAMAN_SPELL_SATED                     = 57724,
     SHAMAN_SPELL_EXHAUSTION                = 57723,
 
+    SHAMAN_SPELL_STORM_EARTH_AND_FIRE      = 51483,
+    EARTHBIND_TOTEM_SPELL_EARTHGRAB        = 64695,
+
     // For Earthen Power
     SHAMAN_TOTEM_SPELL_EARTHBIND_TOTEM     = 6474,
     SHAMAN_TOTEM_SPELL_EARTHEN_POWER       = 59566,
+
+    SHAMAN_BIND_SIGHT                      = 6277,
+
+    ICON_ID_SHAMAN_LAVA_FLOW               = 3087,
+    SHAMAN_LAVA_FLOWS_R1                   = 51480,
+    SHAMAN_LAVA_FLOWS_TRIGGERED_R1         = 64694,
 };
 
 // 51474 - Astral shift
@@ -206,26 +219,84 @@ class spell_sha_earthbind_totem : public SpellScriptLoader
                 return true;
             }
 
-            void HandleEffectPeriodic(AuraEffect const* aurEff)
+            void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
             {
-                if (Unit* target = GetTarget())
-                    if (Unit* caster = aurEff->GetBase()->GetCaster())
-                        if (TempSummon* summon = caster->ToTempSummon())
-                            if (Unit* owner = summon->GetOwner())
-                                if (AuraEffect* aur = owner->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2289, 0))
-                                    if (roll_chance_i(aur->GetBaseAmount()) && target->HasAuraWithMechanic(1 << MECHANIC_SNARE))
-                                        caster->CastSpell(caster, SHAMAN_TOTEM_SPELL_EARTHEN_POWER, true, NULL, aurEff);
+                if (!GetCaster())
+                    return;
+                if (Player* owner = GetCaster()->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    if (AuraEffect* aur = owner->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2289, 0))
+                        if (roll_chance_i(aur->GetBaseAmount()))
+                            GetTarget()->CastSpell((Unit*)NULL, SHAMAN_TOTEM_SPELL_EARTHEN_POWER, true);
+            }
+
+            void Apply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (!GetCaster())
+                    return;
+                Player* owner = GetCaster()->GetCharmerOrOwnerPlayerOrPlayerItself();
+                if (!owner)
+                    return;
+                // Storm, Earth and Fire
+                if (AuraEffect* aurEff = owner->GetAuraEffectOfRankedSpell(SHAMAN_SPELL_STORM_EARTH_AND_FIRE, EFFECT_1))
+                {
+                    if (roll_chance_i(aurEff->GetAmount()))
+                        GetCaster()->CastSpell(GetCaster(), EARTHBIND_TOTEM_SPELL_EARTHGRAB, false);
+                }
             }
 
             void Register()
             {
                  OnEffectPeriodic += AuraEffectPeriodicFn(spell_sha_earthbind_totem_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+                 OnEffectApply += AuraEffectApplyFn(spell_sha_earthbind_totem_AuraScript::Apply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
         AuraScript* GetAuraScript() const
         {
             return new spell_sha_earthbind_totem_AuraScript();
+        }
+};
+
+class EarthenPowerTargetSelector
+{
+    public:
+        EarthenPowerTargetSelector() { }
+
+        bool operator() (WorldObject* target)
+        {
+            if (!target->ToUnit())
+                return true;
+
+            if (!target->ToUnit()->HasAuraWithMechanic(1 << MECHANIC_SNARE))
+                return true;
+
+            return false;
+        }
+};
+
+class spell_sha_earthen_power : public SpellScriptLoader
+{
+    public:
+        spell_sha_earthen_power() : SpellScriptLoader("spell_sha_earthen_power") { }
+
+        class spell_sha_earthen_power_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_sha_earthen_power_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& unitList)
+            {
+                unitList.remove_if(EarthenPowerTargetSelector());
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sha_earthen_power_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_sha_earthen_power_SpellScript();
         }
 };
 
@@ -245,9 +316,10 @@ class spell_sha_bloodlust : public SpellScriptLoader
                 return true;
             }
 
-            void RemoveInvalidTargets(std::list<Unit*>& targets)
+            void RemoveInvalidTargets(std::list<WorldObject*>& targets)
             {
-                targets.remove_if (Trinity::UnitAuraCheck(true, SHAMAN_SPELL_SATED));
+                targets.remove_if(Trinity::UnitAuraCheck(true, SHAMAN_SPELL_SATED));
+                targets.remove_if(Trinity::UnitAuraCheck(true, SHAMAN_SPELL_EXHAUSTION));
             }
 
             void ApplyDebuff()
@@ -258,9 +330,9 @@ class spell_sha_bloodlust : public SpellScriptLoader
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_sha_bloodlust_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_sha_bloodlust_SpellScript::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_CASTER_AREA_RAID);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_sha_bloodlust_SpellScript::RemoveInvalidTargets, EFFECT_2, TARGET_UNIT_CASTER_AREA_RAID);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sha_bloodlust_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sha_bloodlust_SpellScript::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_CASTER_AREA_RAID);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sha_bloodlust_SpellScript::RemoveInvalidTargets, EFFECT_2, TARGET_UNIT_CASTER_AREA_RAID);
                 AfterHit += SpellHitFn(spell_sha_bloodlust_SpellScript::ApplyDebuff);
             }
         };
@@ -287,9 +359,10 @@ class spell_sha_heroism : public SpellScriptLoader
                 return true;
             }
 
-            void RemoveInvalidTargets(std::list<Unit*>& targets)
+            void RemoveInvalidTargets(std::list<WorldObject*>& targets)
             {
-                targets.remove_if (Trinity::UnitAuraCheck(true, SHAMAN_SPELL_EXHAUSTION));
+                targets.remove_if(Trinity::UnitAuraCheck(true, SHAMAN_SPELL_EXHAUSTION));
+                targets.remove_if(Trinity::UnitAuraCheck(true, SHAMAN_SPELL_SATED));
             }
 
             void ApplyDebuff()
@@ -300,9 +373,9 @@ class spell_sha_heroism : public SpellScriptLoader
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_sha_heroism_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_sha_heroism_SpellScript::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_CASTER_AREA_RAID);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_sha_heroism_SpellScript::RemoveInvalidTargets, EFFECT_2, TARGET_UNIT_CASTER_AREA_RAID);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sha_heroism_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sha_heroism_SpellScript::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_CASTER_AREA_RAID);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sha_heroism_SpellScript::RemoveInvalidTargets, EFFECT_2, TARGET_UNIT_CASTER_AREA_RAID);
                 AfterHit += SpellHitFn(spell_sha_heroism_SpellScript::ApplyDebuff);
             }
         };
@@ -426,7 +499,7 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
                         if (Unit* owner = caster->GetOwner())
                         {
                             if (triggeringSpell)
-                                damage = int32(owner->SpellHealingBonus(target, triggeringSpell, damage, HEAL));
+                                damage = int32(owner->SpellHealingBonusDone(target, triggeringSpell, damage, HEAL));
 
                             // Restorative Totems
                             if (AuraEffect* dummy = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, ICON_ID_RESTORATIVE_TOTEMS, 1))
@@ -435,6 +508,8 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
                             // Glyph of Healing Stream Totem
                             if (AuraEffect const* aurEff = owner->GetAuraEffect(SPELL_GLYPH_OF_HEALING_STREAM_TOTEM, EFFECT_0))
                                 AddPctN(damage, aurEff->GetAmount());
+
+                            damage = int32(target->SpellHealingBonusTaken(owner, triggeringSpell, damage, HEAL));
                         }
                         caster->CastCustomSpell(target, SPELL_HEALING_STREAM_TOTEM_HEAL, &damage, 0, 0, true, 0, 0, GetOriginalCaster()->GetGUID());
                     }
@@ -538,6 +613,143 @@ class spell_sha_lava_lash : public SpellScriptLoader
         }
 };
 
+// 1064 Chain Heal
+class spell_sha_chain_heal : public SpellScriptLoader
+{
+    public:
+        spell_sha_chain_heal() : SpellScriptLoader("spell_sha_chain_heal") { }
+
+        class spell_sha_chain_heal_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_sha_chain_heal_SpellScript);
+
+            bool Load()
+            {
+                firstHeal = true;
+                riptide = false;
+                return true;
+            }
+
+            void HandleHeal(SpellEffIndex /*effIndex*/)
+            {
+                if (firstHeal)
+                {
+                    // Check if the target has Riptide
+                    if (AuraEffect* aurEff = GetHitUnit()->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, 0, 0, 0x10, GetCaster()->GetGUID()))
+                    {
+                        riptide = true;
+                        // Consume it
+                        GetHitUnit()->RemoveAura(aurEff->GetBase());
+                    }
+                    firstHeal = false;
+                }
+                // Riptide increases the Chain Heal effect by 25%
+                if (riptide)
+                    SetHitHeal(GetHitHeal() * 1.25f);
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_sha_chain_heal_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+            }
+
+            bool firstHeal;
+            bool riptide;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_sha_chain_heal_SpellScript();
+        }
+};
+
+class spell_sha_flame_shock : public SpellScriptLoader
+{
+    public:
+        spell_sha_flame_shock() : SpellScriptLoader("spell_sha_flame_shock") { }
+
+        class spell_sha_flame_shock_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_sha_flame_shock_AuraScript);
+
+            bool Validate(SpellInfo const* /*spell*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SHAMAN_LAVA_FLOWS_R1))
+                    return false;
+                if (!sSpellMgr->GetSpellInfo(SHAMAN_LAVA_FLOWS_TRIGGERED_R1))
+                    return false;
+                return true;
+            }
+
+            void HandleDispel(DispelInfo* /*dispelInfo*/)
+            {
+                if (Unit* caster = GetCaster())
+                    // Lava Flows
+                    if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, ICON_ID_SHAMAN_LAVA_FLOW, EFFECT_0))
+                    {
+                        if (sSpellMgr->GetFirstSpellInChain(SHAMAN_LAVA_FLOWS_R1) != sSpellMgr->GetFirstSpellInChain(aurEff->GetId()))
+                            return;
+
+                        uint8 rank = sSpellMgr->GetSpellRank(aurEff->GetId());
+                        caster->CastSpell(caster, sSpellMgr->GetSpellWithRank(SHAMAN_LAVA_FLOWS_TRIGGERED_R1, rank), true);
+                    }
+            }
+
+            void Register()
+            {
+                AfterDispel += AuraDispelFn(spell_sha_flame_shock_AuraScript::HandleDispel);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_sha_flame_shock_AuraScript();
+        }
+};
+
+class spell_sha_sentry_totem : public SpellScriptLoader
+{
+    public:
+        spell_sha_sentry_totem() : SpellScriptLoader("spell_sha_sentry_totem") { }
+
+        class spell_sha_sentry_totem_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_sha_sentry_totem_AuraScript);
+
+            bool Validate(SpellInfo const* /*spell*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SHAMAN_BIND_SIGHT))
+                    return false;
+                return true;
+            }
+
+            void AfterApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                    if (Creature* totem = caster->GetMap()->GetCreature(caster->m_SummonSlot[4]))
+                        if (totem->isTotem())
+                            caster->CastSpell(totem, SHAMAN_BIND_SIGHT, true);
+            }
+
+            void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->ToPlayer()->StopCastingBindSight();
+            }
+
+            void Register()
+            {
+                 AfterEffectApply += AuraEffectApplyFn(spell_sha_sentry_totem_AuraScript::AfterApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                 AfterEffectRemove += AuraEffectRemoveFn(spell_sha_sentry_totem_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_sha_sentry_totem_AuraScript();
+        }
+};
 
 void AddSC_shaman_spell_scripts()
 {
@@ -545,6 +757,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_fire_nova();
     new spell_sha_mana_tide_totem();
     new spell_sha_earthbind_totem();
+    new spell_sha_earthen_power();
     new spell_sha_bloodlust();
     new spell_sha_heroism();
     new spell_sha_ancestral_awakening_proc();
@@ -552,4 +765,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_healing_stream_totem();
     new spell_sha_mana_spring_totem();
     new spell_sha_lava_lash();
+    new spell_sha_chain_heal();
+    new spell_sha_flame_shock();
+    new spell_sha_sentry_totem();
 }

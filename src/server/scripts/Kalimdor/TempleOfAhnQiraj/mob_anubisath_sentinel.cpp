@@ -23,7 +23,8 @@ SDComment: Shadow storm is not properly implemented in core it should only targe
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "WorldPacket.h"
 
 #include "Item.h"
@@ -86,7 +87,7 @@ public:
             }
         }
 
-        aqsentinelAI(Creature* c) : ScriptedAI(c)
+        aqsentinelAI(Creature* creature) : ScriptedAI(creature)
         {
             ClearBuddyList();
             abselected = 0;                                     // just initialization of variable
@@ -242,7 +243,7 @@ public:
             DoZoneInCombat();
         }
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit* /*killer*/)
         {
             for (int ni=0; ni<3; ++ni)
             {

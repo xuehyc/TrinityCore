@@ -23,7 +23,10 @@ SDComment:
 SDCategory: Zul'Aman
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
 #include "zulaman.h"
 
 #define YELL_AGGRO              "Da shadow gonna fall on you... "
@@ -47,54 +50,58 @@ EndScriptData */
 
 //Defines for various powers he uses after using soul drain
 
-//Druid
-#define SPELL_DR_LIFEBLOOM      43421
-#define SPELL_DR_THORNS         43420
-#define SPELL_DR_MOONFIRE       43545
+enum Spells
+{
+    // Druid
+    SPELL_DR_THORNS                 = 43420,
+    SPELL_DR_LIFEBLOOM              = 43421,
+    SPELL_DR_MOONFIRE               = 43545,
 
-//Hunter
-#define SPELL_HU_EXPLOSIVE_TRAP 43444
-#define SPELL_HU_FREEZING_TRAP  43447
-#define SPELL_HU_SNAKE_TRAP     43449
+    // Hunter
+    SPELL_HU_EXPLOSIVE_TRAP         = 43444,
+    SPELL_HU_FREEZING_TRAP          = 43447,
+    SPELL_HU_SNAKE_TRAP             = 43449,
 
-//Mage
-#define SPELL_MG_FIREBALL       41383
-#define SPELL_MG_FROSTBOLT      43428
-#define SPELL_MG_FROST_NOVA     43426
-#define SPELL_MG_ICE_LANCE      43427
+    // Mage
+    SPELL_MG_FIREBALL               = 41383,
+    SPELL_MG_FROST_NOVA             = 43426,
+    SPELL_MG_ICE_LANCE              = 43427,
+    SPELL_MG_FROSTBOLT              = 43428,
 
-//Paladin
-#define SPELL_PA_CONSECRATION   43429
-#define SPELL_PA_HOLY_LIGHT     43451
-#define SPELL_PA_AVENGING_WRATH 43430
+    // Paladin
+    SPELL_PA_CONSECRATION           = 43429,
+    SPELL_PA_AVENGING_WRATH         = 43430,
+    SPELL_PA_HOLY_LIGHT             = 43451,
 
-//Priest
-#define SPELL_PR_HEAL           41372
-#define SPELL_PR_MIND_CONTROL   43550
-#define SPELL_PR_MIND_BLAST     41374
-#define SPELL_PR_SW_DEATH       41375
-#define SPELL_PR_PSYCHIC_SCREAM 43432
-#define SPELL_PR_PAIN_SUPP      44416
+    // Priest
+    SPELL_PR_HEAL                   = 41372,
+    SPELL_PR_MIND_BLAST             = 41374,
+    SPELL_PR_SW_DEATH               = 41375,
+    SPELL_PR_PSYCHIC_SCREAM         = 43432,
+    SPELL_PR_MIND_CONTROL           = 43550,
+    SPELL_PR_PAIN_SUPP              = 44416,
 
-//Rogue
-#define SPELL_RO_BLIND          43433
-#define SPELL_RO_SLICE_DICE     43457
-#define SPELL_RO_WOUND_POISON   39665
+    // Rogue
+    SPELL_RO_BLIND                  = 43433,
+    SPELL_RO_SLICE_DICE             = 43457,
+    SPELL_RO_WOUND_POISON           = 43461,
 
-//Shaman
-#define SPELL_SH_FIRE_NOVA      43436
-#define SPELL_SH_HEALING_WAVE   43548
-#define SPELL_SH_CHAIN_LIGHT    43435
+    // Shaman
+    SPELL_SH_CHAIN_LIGHT            = 43435,
+    SPELL_SH_FIRE_NOVA              = 43436,
+    SPELL_SH_HEALING_WAVE           = 43548,
 
-//Warlock
-#define SPELL_WL_CURSE_OF_DOOM  43439
-#define SPELL_WL_RAIN_OF_FIRE   43440
-#define SPELL_WL_UNSTABLE_AFFL  35183
+    // Warlock
+    SPELL_WL_CURSE_OF_DOOM          = 43439,
+    SPELL_WL_RAIN_OF_FIRE           = 43440,
+    SPELL_WL_UNSTABLE_AFFL          = 43522,
+    SPELL_WL_UNSTABLE_AFFL_DISPEL   = 43523,
 
-//Warrior
-#define SPELL_WR_SPELL_REFLECT  43443
-#define SPELL_WR_WHIRLWIND      43442
-#define SPELL_WR_MORTAL_STRIKE  43441
+    // Warrior
+    SPELL_WR_MORTAL_STRIKE          = 43441,
+    SPELL_WR_WHIRLWIND              = 43442,
+    SPELL_WR_SPELL_REFLECT          = 43443
+};
 
 #define ORIENT                  1.5696f
 #define POS_Y                   921.2795f
@@ -179,14 +186,17 @@ struct boss_hexlord_addAI : public ScriptedAI
 {
     InstanceScript* instance;
 
-    boss_hexlord_addAI(Creature* c) : ScriptedAI(c)
+    boss_hexlord_addAI(Creature* creature) : ScriptedAI(creature)
     {
-        instance = c->GetInstanceScript();
+        instance = creature->GetInstanceScript();
     }
 
     void Reset() {}
 
-    void EnterCombat(Unit* /*who*/) {DoZoneInCombat();}
+    void EnterCombat(Unit* /*who*/)
+    {
+        DoZoneInCombat();
+    }
 
     void UpdateAI(const uint32 /*diff*/)
     {
@@ -211,9 +221,9 @@ class boss_hexlord_malacrass : public CreatureScript
 
         struct boss_hex_lord_malacrassAI : public ScriptedAI
         {
-            boss_hex_lord_malacrassAI(Creature* c) : ScriptedAI(c)
+            boss_hex_lord_malacrassAI(Creature* creature) : ScriptedAI(creature)
             {
-                instance = c->GetInstanceScript();
+                instance = creature->GetInstanceScript();
                 SelectAddEntry();
                 for (uint8 i = 0; i < 4; ++i)
                     AddGUID[i] = 0;
@@ -264,7 +274,7 @@ class boss_hexlord_malacrass : public CreatureScript
 
                 for (uint8 i = 0; i < 4; ++i)
                 {
-                    Unit* Temp = Unit::GetUnit((*me), AddGUID[i]);
+                    Unit* Temp = Unit::GetUnit(*me, AddGUID[i]);
                     if (Temp && Temp->isAlive())
                         CAST_CRE(Temp)->AI()->AttackStart(me->getVictim());
                     else
@@ -290,7 +300,7 @@ class boss_hexlord_malacrass : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*victim*/)
+            void JustDied(Unit* /*killer*/)
             {
                 if (instance)
                     instance->SetData(DATA_HEXLORDEVENT, DONE);
@@ -298,9 +308,9 @@ class boss_hexlord_malacrass : public CreatureScript
                 me->MonsterYell(YELL_DEATH, LANG_UNIVERSAL, 0);
                 DoPlaySoundToSet(me, SOUND_YELL_DEATH);
 
-                for (uint8 i = 0; i < 4 ; ++i)
+                for (uint8 i = 0; i < 4; ++i)
                 {
-                    Unit* Temp = Unit::GetUnit((*me), AddGUID[i]);
+                    Unit* Temp = Unit::GetUnit(*me, AddGUID[i]);
                     if (Temp && Temp->isAlive())
                         Temp->DealDamage(Temp, Temp->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                 }
@@ -488,7 +498,7 @@ class boss_thurg : public CreatureScript
         struct boss_thurgAI : public boss_hexlord_addAI
         {
 
-            boss_thurgAI(Creature* c) : boss_hexlord_addAI(c) {}
+            boss_thurgAI(Creature* creature) : boss_hexlord_addAI(creature) {}
 
             uint32 bloodlust_timer;
             uint32 cleave_timer;
@@ -548,7 +558,7 @@ class boss_alyson_antille : public CreatureScript
         struct boss_alyson_antilleAI : public boss_hexlord_addAI
         {
             //Holy Priest
-            boss_alyson_antilleAI(Creature* c) : boss_hexlord_addAI(c) {}
+            boss_alyson_antilleAI(Creature* creature) : boss_hexlord_addAI(creature) {}
 
             uint32 flashheal_timer;
             uint32 dispelmagic_timer;
@@ -637,7 +647,7 @@ class boss_alyson_antille : public CreatureScript
 
 struct boss_gazakrothAI : public boss_hexlord_addAI
 {
-    boss_gazakrothAI(Creature* c) : boss_hexlord_addAI(c)  {}
+    boss_gazakrothAI(Creature* creature) : boss_hexlord_addAI(creature)  {}
 
     uint32 firebolt_timer;
 
@@ -691,7 +701,7 @@ class boss_lord_raadan : public CreatureScript
 
         struct boss_lord_raadanAI : public boss_hexlord_addAI
         {
-            boss_lord_raadanAI(Creature* c) : boss_hexlord_addAI(c)  {}
+            boss_lord_raadanAI(Creature* creature) : boss_hexlord_addAI(creature)  {}
 
             uint32 flamebreath_timer;
             uint32 thunderclap_timer;
@@ -744,7 +754,7 @@ class boss_darkheart : public CreatureScript
 
         struct boss_darkheartAI : public boss_hexlord_addAI
         {
-            boss_darkheartAI(Creature* c) : boss_hexlord_addAI(c)  {}
+            boss_darkheartAI(Creature* creature) : boss_hexlord_addAI(creature)  {}
 
             uint32 psychicwail_timer;
 
@@ -787,7 +797,7 @@ class boss_slither : public CreatureScript
 
         struct boss_slitherAI : public boss_hexlord_addAI
         {
-            boss_slitherAI(Creature* c) : boss_hexlord_addAI(c) {}
+            boss_slitherAI(Creature* creature) : boss_hexlord_addAI(creature) {}
 
             uint32 venomspit_timer;
 
@@ -847,7 +857,7 @@ class boss_fenstalker : public CreatureScript
 
         struct boss_fenstalkerAI : public boss_hexlord_addAI
         {
-            boss_fenstalkerAI(Creature* c) : boss_hexlord_addAI(c) {}
+            boss_fenstalkerAI(Creature* creature) : boss_hexlord_addAI(creature) {}
 
             uint32 volatileinf_timer;
 
@@ -894,7 +904,7 @@ class boss_koragg : public CreatureScript
 
         struct boss_koraggAI : public boss_hexlord_addAI
         {
-            boss_koraggAI(Creature* c) : boss_hexlord_addAI(c) {}
+            boss_koraggAI(Creature* creature) : boss_hexlord_addAI(creature) {}
 
             uint32 coldstare_timer;
             uint32 mightyblow_timer;
@@ -933,6 +943,40 @@ class boss_koragg : public CreatureScript
         }
 };
 
+class spell_hexlord_unstable_affliction : public SpellScriptLoader
+{
+    public:
+        spell_hexlord_unstable_affliction() : SpellScriptLoader("spell_hexlord_unstable_affliction") { }
+
+        class spell_hexlord_unstable_affliction_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hexlord_unstable_affliction_AuraScript);
+
+            bool Validate(SpellInfo const* /*spell*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_WL_UNSTABLE_AFFL_DISPEL))
+                    return false;
+                return true;
+            }
+
+            void HandleDispel(DispelInfo* dispelInfo)
+            {
+                if (Unit* caster = GetCaster())
+                    caster->CastSpell(dispelInfo->GetDispeller(), SPELL_WL_UNSTABLE_AFFL_DISPEL, true, NULL, GetEffect(EFFECT_0));
+            }
+
+            void Register()
+            {
+                AfterDispel += AuraDispelFn(spell_hexlord_unstable_affliction_AuraScript::HandleDispel);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_hexlord_unstable_affliction_AuraScript();
+        }
+};
+
 void AddSC_boss_hex_lord_malacrass()
 {
     new boss_hexlord_malacrass();
@@ -944,5 +988,6 @@ void AddSC_boss_hex_lord_malacrass()
     new boss_fenstalker();
     new boss_koragg();
     new boss_alyson_antille();
+    new spell_hexlord_unstable_affliction();
 }
 

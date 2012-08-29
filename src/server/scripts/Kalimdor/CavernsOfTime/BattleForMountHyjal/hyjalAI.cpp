@@ -23,17 +23,22 @@ SDComment:
 SDCategory: Caverns of Time, Mount Hyjal
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedEscortAI.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "Cell.h"
+#include "CellImpl.h"
 #include "hyjalAI.h"
 #include "hyjal_trash.h"
-#include "MapManager.h"
-#include "Language.h"
-#include "Chat.h"
-#include "Object.h"
 
-#define SPAWN_GARG_GATE 0
-#define SPAWN_WYRM_GATE 1
-#define SPAWN_NEAR_TOWER 2
+enum Spawns
+{
+    SPAWN_GARG_GATE     = 0,
+    SPAWN_WYRM_GATE     = 1,
+    SPAWN_NEAR_TOWER    = 2,
+};
 
 #define YELL_HURRY  "Hurry, we don't have much time"
 
@@ -310,9 +315,9 @@ float HordeFirePos[65][8]=//spawn points for the fire visuals (GO) in the horde 
     {5545.43f,    -2647.82f,    1483.05f,    5.38848f,    0,    0,    0.432578f,    -0.901596f}
 };
 
-hyjalAI::hyjalAI(Creature* c) : npc_escortAI(c), Summons(me)
+hyjalAI::hyjalAI(Creature* creature) : npc_escortAI(creature), Summons(me)
 {
-    instance = c->GetInstanceScript();
+    instance = creature->GetInstanceScript();
     VeinsSpawned[0] = false;
     VeinsSpawned[1] = false;
     for (uint8 i=0; i<14; ++i)
@@ -402,7 +407,7 @@ void hyjalAI::Reset()
             instance->DoUpdateWorldState(WORLD_STATE_ENEMYCOUNT, 0);
             instance->SetData(DATA_RESET_TRASH_COUNT, 0);
         }
-    } else sLog->outError(ERROR_INST_DATA);
+    } else sLog->outError(LOG_FILTER_TSCR, ERROR_INST_DATA);
 
     //Visibility
     DoHide = true;
@@ -492,7 +497,7 @@ void hyjalAI::SummonCreature(uint32 entry, float Base[4][3])
         // Increment Enemy Count to be used in World States and instance script
         ++EnemyCount;
 
-        creature->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+        creature->SetWalk(false);
         creature->setActive(true);
         switch (entry)
         {
@@ -535,7 +540,7 @@ void hyjalAI::SummonNextWave(const Wave wave[18], uint32 Count, float Base[4][3]
 
     if (!instance)
     {
-        sLog->outError(ERROR_INST_DATA);
+        sLog->outError(LOG_FILTER_TSCR, ERROR_INST_DATA);
         return;
     }
     InfernalCount = 0;//reset infernal count every new wave
@@ -565,7 +570,7 @@ void hyjalAI::SummonNextWave(const Wave wave[18], uint32 Count, float Base[4][3]
         else
         {
             NextWaveTimer = 15000;
-            sLog->outDebug(LOG_FILTER_TSCR, "TSCR: HyjalAI: debug mode is enabled. Next Wave in 15 seconds");
+            sLog->outDebug(LOG_FILTER_TSCR, "HyjalAI: debug mode is enabled. Next Wave in 15 seconds");
         }
     }
     else
@@ -609,7 +614,7 @@ uint32 hyjalAI::GetInstanceData(uint32 Event)
 {
     if (instance)
         return instance->GetData(Event);
-    else sLog->outError(ERROR_INST_DATA);
+    else sLog->outError(LOG_FILTER_TSCR, ERROR_INST_DATA);
 
     return 0;
 }
@@ -855,7 +860,7 @@ void hyjalAI::UpdateAI(const uint32 diff)
         {
             if (BossGUID[i])
             {
-                Unit* unit = Unit::GetUnit((*me), BossGUID[i]);
+                Unit* unit = Unit::GetUnit(*me, BossGUID[i]);
                 if (unit && (!unit->isAlive()))
                 {
                     if (BossGUID[i] == BossGUID[0])
@@ -896,9 +901,17 @@ void hyjalAI::UpdateAI(const uint32 diff)
 
                 switch (Spells[i].TargetType)
                 {
-                    case TARGETTYPE_SELF: target = me; break;
-                    case TARGETTYPE_RANDOM: target = SelectTarget(SELECT_TARGET_RANDOM, 0); break;
-                    case TARGETTYPE_VICTIM: target = me->getVictim(); break;
+                    case TARGETTYPE_SELF:
+                        target = me;
+                        break;
+
+                    case TARGETTYPE_RANDOM:
+                        target = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                        break;
+
+                    case TARGETTYPE_VICTIM:
+                        target = me->getVictim();
+                        break;
                 }
 
                 if (target && target->isAlive())
@@ -972,9 +985,9 @@ void hyjalAI::RespawnNearPos(float x, float y)
     cell.Visit(p, obj_worker, *me->GetMap(), *me, me->GetGridActivationRange());
 }
 
-void hyjalAI::WaypointReached(uint32 i)
+void hyjalAI::WaypointReached(uint32 waypointId)
 {
-    if (i == 1 || (i == 0 && me->GetEntry() == THRALL))
+    if (waypointId == 1 || (waypointId == 0 && me->GetEntry() == THRALL))
     {
         me->MonsterYell(YELL_HURRY, 0, 0);
         WaitForTeleport = true;
@@ -983,7 +996,7 @@ void hyjalAI::WaypointReached(uint32 i)
             DoCast(me, SPELL_MASS_TELEPORT, false);
         if (me->GetEntry() == THRALL && DummyGuid)
         {
-            Unit* Dummy = Unit::GetUnit((*me), DummyGuid);
+            Unit* Dummy = Unit::GetUnit(*me, DummyGuid);
             if (Dummy)
             {
                 CAST_AI(hyjalAI, CAST_CRE(Dummy)->AI())->DoMassTeleport = true;
@@ -1014,7 +1027,7 @@ void hyjalAI::WaypointReached(uint32 i)
                 if ((*itr) && (*itr)->isAlive() && (*itr) != me && (*itr)->GetEntry() != JAINA)
                 {
                     if (!(*itr)->IsWithinDist(me, 60))
-                        (*itr)->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                        (*itr)->SetWalk(false);
                     float x, y, z;
                     (*itr)->SetDefaultMovementType(IDLE_MOTION_TYPE);
                     (*itr)->GetMotionMaster()->Initialize();

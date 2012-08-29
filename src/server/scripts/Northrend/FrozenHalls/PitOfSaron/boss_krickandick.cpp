@@ -15,7 +15,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
 #include "pit_of_saron.h"
 #include "Vehicle.h"
 
@@ -354,7 +357,7 @@ class boss_krick : public CreatureScript
                     else
                         tyrannusPtr = me->SummonCreature(NPC_TYRANNUS_EVENTS, outroPos[1], TEMPSUMMON_MANUAL_DESPAWN);
 
-                    tyrannusPtr->SetFlying(true);
+                    tyrannusPtr->SetCanFly(true);
                     me->GetMotionMaster()->MovePoint(POINT_KRICK_INTRO, outroPos[0].GetPositionX(), outroPos[0].GetPositionY(), outroPos[0].GetPositionZ());
                     tyrannusPtr->SetFacingToObject(me);
                 }
@@ -446,6 +449,7 @@ class boss_krick : public CreatureScript
                             _events.ScheduleEvent(EVENT_OUTRO_8, 5000);
                             break;
                         case EVENT_OUTRO_8:
+                            //! HACK: Creature's can't have MOVEMENTFLAG_FLYING
                             me->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
                             me->GetMotionMaster()->MovePoint(0, outroPos[5]);
                             DoCast(me, SPELL_STRANGULATING);
@@ -460,8 +464,9 @@ class boss_krick : public CreatureScript
                             _events.ScheduleEvent(EVENT_OUTRO_10, 1000);
                             break;
                         case EVENT_OUTRO_10:
+                            //! HACK: Creature's can't have MOVEMENTFLAG_FLYING
                             me->RemoveUnitMovementFlag(MOVEMENTFLAG_FLYING);
-                            me->AddUnitMovementFlag(MOVEMENTFLAG_FALLING);
+                            me->AddUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR);
                             me->GetMotionMaster()->MovePoint(0, outroPos[6]);
                             _events.ScheduleEvent(EVENT_OUTRO_11, 2000);
                             break;

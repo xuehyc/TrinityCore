@@ -15,7 +15,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "PassiveAI.h"
 
 /*####
 ## npc_valkyr_battle_maiden
@@ -35,7 +37,7 @@ public:
 
     struct npc_valkyr_battle_maidenAI : public PassiveAI
     {
-        npc_valkyr_battle_maidenAI(Creature* c) : PassiveAI(c) {}
+        npc_valkyr_battle_maidenAI(Creature* creature) : PassiveAI(creature) {}
 
         uint32 FlyBackTimer;
         float x, y, z;
@@ -46,7 +48,7 @@ public:
             me->setActive(true);
             me->SetVisible(false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->SetFlying(true);
+            me->SetCanFly(true);
             FlyBackTimer = 500;
             phase = 0;
 
@@ -74,7 +76,7 @@ public:
                 switch (phase)
                 {
                     case 0:
-                        me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                        me->SetWalk(false);
                         me->HandleEmoteCommand(EMOTE_STATE_FLYGRABCLOSED);
                         FlyBackTimer = 500;
                         break;

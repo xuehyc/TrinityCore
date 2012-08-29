@@ -23,56 +23,57 @@ SDComment: Doomfires not completely offlike due to core limitations for random m
 SDCategory: Caverns of Time, Mount Hyjal
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "hyjal.h"
 #include "SpellAuras.h"
 #include "hyjal_trash.h"
 
-//text id -1534018 are the text used when previous events complete. Not part of this script.
-#define SAY_AGGRO                   -1534019
-#define SAY_DOOMFIRE1               -1534020
-#define SAY_DOOMFIRE2               -1534021
-#define SAY_AIR_BURST1              -1534022
-#define SAY_AIR_BURST2              -1534023
-#define SAY_SLAY1                   -1534024
-#define SAY_SLAY2                   -1534025
-#define SAY_SLAY3                   -1534026
-#define SAY_ENRAGE                  -1534027
-#define SAY_DEATH                   -1534028
-#define SAY_SOUL_CHARGE1            -1534029
-#define SAY_SOUL_CHARGE2            -1534030
+enum Texts
+{
+    SAY_AGGRO       = 1,
+    SAY_DOOMFIRE    = 2,
+    SAY_AIR_BURST   = 3,
+    SAY_SLAY        = 4,
+    SAY_ENRAGE      = 5,
+    SAY_DEATH       = 6,
+    SAY_SOUL_CHARGE = 7,
+};
 
-#define SPELL_DENOUEMENT_WISP       32124
-#define SPELL_ANCIENT_SPARK         39349
-#define SPELL_PROTECTION_OF_ELUNE   38528
+enum Spells
+{
+    SPELL_DENOUEMENT_WISP       = 32124,
+    SPELL_ANCIENT_SPARK         = 39349,
+    SPELL_PROTECTION_OF_ELUNE   = 38528,
 
-#define SPELL_DRAIN_WORLD_TREE      39140
-#define SPELL_DRAIN_WORLD_TREE_2    39141
+    SPELL_DRAIN_WORLD_TREE      = 39140,
+    SPELL_DRAIN_WORLD_TREE_2    = 39141,
 
-#define SPELL_FINGER_OF_DEATH       31984
-#define SPELL_HAND_OF_DEATH         35354
-#define SPELL_AIR_BURST             32014
-#define SPELL_GRIP_OF_THE_LEGION    31972
-#define SPELL_DOOMFIRE_STRIKE       31903                   //summons two creatures
-#define SPELL_DOOMFIRE_SPAWN        32074
-#define SPELL_DOOMFIRE              31945
-#define SPELL_SOUL_CHARGE_YELLOW    32045
-#define SPELL_SOUL_CHARGE_GREEN     32051
-#define SPELL_SOUL_CHARGE_RED       32052
-#define SPELL_UNLEASH_SOUL_YELLOW   32054
-#define SPELL_UNLEASH_SOUL_GREEN    32057
-#define SPELL_UNLEASH_SOUL_RED      32053
-#define SPELL_FEAR                  31970
+    SPELL_FINGER_OF_DEATH       = 31984,
+    SPELL_HAND_OF_DEATH         = 35354,
+    SPELL_AIR_BURST             = 32014,
+    SPELL_GRIP_OF_THE_LEGION    = 31972,
+    SPELL_DOOMFIRE_STRIKE       = 31903,    //summons two creatures
+    SPELL_DOOMFIRE_SPAWN        = 32074,
+    SPELL_DOOMFIRE              = 31945,
+    SPELL_SOUL_CHARGE_YELLOW    = 32045,
+    SPELL_SOUL_CHARGE_GREEN     = 32051,
+    SPELL_SOUL_CHARGE_RED       = 32052,
+    SPELL_UNLEASH_SOUL_YELLOW   = 32054,
+    SPELL_UNLEASH_SOUL_GREEN    = 32057,
+    SPELL_UNLEASH_SOUL_RED      = 32053,
+    SPELL_FEAR                  = 31970,
+};
 
-#define CREATURE_ARCHIMONDE             17968
-#define CREATURE_DOOMFIRE               18095
-#define CREATURE_DOOMFIRE_SPIRIT        18104
-#define CREATURE_ANCIENT_WISP           17946
-#define CREATURE_CHANNEL_TARGET         22418
+enum Summons
+{
+    CREATURE_DOOMFIRE               = 18095,
+    CREATURE_DOOMFIRE_SPIRIT        = 18104,
+    CREATURE_ANCIENT_WISP           = 17946,
+    CREATURE_CHANNEL_TARGET         = 22418,
+};
 
-#define NORDRASSIL_X        5503.713f
-#define NORDRASSIL_Y       -3523.436f
-#define NORDRASSIL_Z        1608.781f
+Position const NordrassilLoc = {5503.713f, -3523.436f, 1608.781f, 0.0f};
 
 class mob_ancient_wisp : public CreatureScript
 {
@@ -86,9 +87,9 @@ public:
 
     struct mob_ancient_wispAI : public ScriptedAI
     {
-        mob_ancient_wispAI(Creature* c) : ScriptedAI(c)
+        mob_ancient_wispAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             ArchimondeGUID = 0;
         }
 
@@ -108,13 +109,16 @@ public:
 
         void EnterCombat(Unit* /*who*/) {}
 
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage) { damage = 0; }
+        void DamageTaken(Unit* /*done_by*/, uint32 &damage)
+        {
+            damage = 0;
+        }
 
         void UpdateAI(const uint32 diff)
         {
             if (CheckTimer <= diff)
             {
-                if (Unit* Archimonde = Unit::GetUnit((*me), ArchimondeGUID))
+                if (Unit* Archimonde = Unit::GetUnit(*me, ArchimondeGUID))
                 {
                     if (Archimonde->HealthBelowPct(2) || !Archimonde->isAlive())
                         DoCast(me, SPELL_DENOUEMENT_WISP);
@@ -142,15 +146,18 @@ public:
 
     struct mob_doomfireAI : public ScriptedAI
     {
-        mob_doomfireAI(Creature* c) : ScriptedAI(c) {}
+        mob_doomfireAI(Creature* creature) : ScriptedAI(creature) {}
 
         void Reset() { }
 
         void MoveInLineOfSight(Unit* /*who*/) {}
         void EnterCombat(Unit* /*who*/) {}
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage) { damage = 0; }
-    };
 
+        void DamageTaken(Unit* /*done_by*/, uint32 &damage)
+        {
+            damage = 0;
+        }
+    };
 };
 
 /* This is the script for the Doomfire Spirit Mob. This mob simply follow players or
@@ -167,7 +174,7 @@ public:
 
     struct mob_doomfire_targettingAI : public ScriptedAI
     {
-        mob_doomfire_targettingAI(Creature* c) : ScriptedAI(c) {}
+        mob_doomfire_targettingAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint64 TargetGUID;
         uint32 ChangeTargetTimer;
@@ -188,7 +195,10 @@ public:
 
         void EnterCombat(Unit* /*who*/) {}
 
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage) { damage = 0; }
+        void DamageTaken(Unit* /*done_by*/, uint32 &damage)
+        {
+            damage = 0;
+        }
 
         void UpdateAI(const uint32 diff)
         {
@@ -233,9 +243,9 @@ public:
 
     struct boss_archimondeAI : public hyjal_trashAI
     {
-        boss_archimondeAI(Creature* c) : hyjal_trashAI(c)
+        boss_archimondeAI(Creature* creature) : hyjal_trashAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -249,11 +259,11 @@ public:
         uint32 GripOfTheLegionTimer;
         uint32 DoomfireTimer;
         uint32 SoulChargeTimer;
-        uint32 SoulChargeCount;
+        uint8 SoulChargeCount;
         uint32 MeleeRangeCheckTimer;
         uint32 HandOfDeathTimer;
         uint32 SummonWispTimer;
-        uint32 WispCount;
+        uint8 WispCount;
         uint32 EnrageTimer;
         uint32 CheckDistanceTimer;
 
@@ -294,7 +304,7 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             me->InterruptSpell(CURRENT_CHANNELED_SPELL);
-            DoScriptText(SAY_AGGRO, me);
+            Talk(SAY_AGGRO);
             DoZoneInCombat();
 
             if (instance)
@@ -303,7 +313,7 @@ public:
 
         void KilledUnit(Unit* victim)
         {
-            DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3), me);
+            Talk(SAY_SLAY);
 
             if (victim && (victim->GetTypeId() == TYPEID_PLAYER))
                 GainSoulCharge(CAST_PLR(victim));
@@ -334,10 +344,10 @@ public:
             ++SoulChargeCount;
         }
 
-        void JustDied(Unit* victim)
+        void JustDied(Unit* killer)
         {
-            hyjal_trashAI::JustDied(victim);
-            DoScriptText(SAY_DEATH, me);
+            hyjal_trashAI::JustDied(killer);
+            Talk(SAY_DEATH);
 
             if (instance)
                 instance->SetData(DATA_ARCHIMONDEEVENT, DONE);
@@ -358,7 +368,7 @@ public:
             std::list<HostileReference*>::const_iterator itr = m_threatlist.begin();
             for (; itr != m_threatlist.end(); ++itr)
             {
-                Unit* unit = Unit::GetUnit((*me), (*itr)->getUnitGuid());
+                Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid());
                 if (unit && unit->isAlive())
                     targets.push_back(unit);
             }
@@ -479,7 +489,7 @@ public:
                 {
                     if (!IsChanneling)
                     {
-                        Creature* temp = me->SummonCreature(CREATURE_CHANNEL_TARGET, NORDRASSIL_X, NORDRASSIL_Y, NORDRASSIL_Z, 0, TEMPSUMMON_TIMED_DESPAWN, 1200000);
+                        Creature* temp = me->SummonCreature(CREATURE_CHANNEL_TARGET, NordrassilLoc, TEMPSUMMON_TIMED_DESPAWN, 1200000);
 
                         if (temp)
                             WorldTreeGUID = temp->GetGUID();
@@ -516,14 +526,14 @@ public:
                         me->GetMotionMaster()->Clear(false);
                         me->GetMotionMaster()->MoveIdle();
                         Enraged = true;
-                        DoScriptText(SAY_ENRAGE, me);
+                        Talk(SAY_ENRAGE);
                     }
                 } else EnrageTimer -= diff;
 
                 if (CheckDistanceTimer <= diff)
                 {
                     // To simplify the check, we simply summon a Creature in the location and then check how far we are from the creature
-                    Creature* Check = me->SummonCreature(CREATURE_CHANNEL_TARGET, NORDRASSIL_X, NORDRASSIL_Y, NORDRASSIL_Z, 0, TEMPSUMMON_TIMED_DESPAWN, 2000);
+                    Creature* Check = me->SummonCreature(CREATURE_CHANNEL_TARGET, NordrassilLoc, TEMPSUMMON_TIMED_DESPAWN, 2000);
                     if (Check)
                     {
                         Check->SetVisible(false);
@@ -533,7 +543,7 @@ public:
                             me->GetMotionMaster()->Clear(false);
                             me->GetMotionMaster()->MoveIdle();
                             Enraged = true;
-                            DoScriptText(SAY_ENRAGE, me);
+                            Talk(SAY_ENRAGE);
                         }
                     }
                     CheckDistanceTimer = 5000;
@@ -593,11 +603,7 @@ public:
 
             if (AirBurstTimer <= diff)
             {
-                if (urand(0, 1))
-                    DoScriptText(SAY_AIR_BURST1, me);
-                else
-                    DoScriptText(SAY_AIR_BURST2, me);
-
+                Talk(SAY_AIR_BURST);
                 DoCast(SelectTarget(SELECT_TARGET_RANDOM, 1), SPELL_AIR_BURST);//not on tank
                 AirBurstTimer = urand(25000, 40000);
             } else AirBurstTimer -= diff;
@@ -610,11 +616,7 @@ public:
 
             if (DoomfireTimer <= diff)
             {
-                if (urand(0, 1))
-                    DoScriptText(SAY_DOOMFIRE1, me);
-                else
-                    DoScriptText(SAY_DOOMFIRE2, me);
-
+                Talk(SAY_DOOMFIRE);
                 Unit* temp = SelectTarget(SELECT_TARGET_RANDOM, 1);
                 if (!temp)
                     temp = me->getVictim();
@@ -639,7 +641,11 @@ public:
 
             DoMeleeAttackIfReady();
         }
-        void WaypointReached(uint32 /*i*/){}
+
+        void WaypointReached(uint32 /*waypointId*/)
+        {
+
+        }
     };
 
 };

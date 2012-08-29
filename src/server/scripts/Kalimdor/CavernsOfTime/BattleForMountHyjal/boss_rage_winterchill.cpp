@@ -15,36 +15,27 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "hyjal.h"
 #include "hyjal_trash.h"
 
-#define SPELL_FROST_ARMOR 31256
-#define SPELL_DEATH_AND_DECAY 31258
+enum Spells
+{
+    SPELL_FROST_ARMOR           = 31256,
+    SPELL_DEATH_AND_DECAY       = 31258,
+    SPELL_FROST_NOVA            = 31250,
+    SPELL_ICEBOLT               = 31249,
+};
 
-#define SPELL_FROST_NOVA 31250
-#define SPELL_ICEBOLT 31249
-
-#define SAY_ONDEATH "You have won this battle, but not... the... war"
-#define SOUND_ONDEATH 11026
-
-#define SAY_ONSLAY1 "All life must perish!"
-#define SAY_ONSLAY2 "Victory to the Legion!"
-#define SOUND_ONSLAY1 11025
-#define SOUND_ONSLAY2 11057
-
-#define SAY_DECAY1 "Crumble and rot!"
-#define SAY_DECAY2 "Ashes to ashes, dust to dust"
-#define SOUND_DECAY1 11023
-#define SOUND_DECAY2 11055
-
-#define SAY_NOVA1 "Succumb to the icy chill... of death!"
-#define SAY_NOVA2 "It will be much colder in your grave"
-#define SOUND_NOVA1 11024
-#define SOUND_NOVA2 11058
-
-#define SAY_ONAGGRO "The Legion's final conquest has begun! Once again the subjugation of this world is within our grasp. Let none survive!"
-#define SOUND_ONAGGRO 11022
+enum Texts
+{
+    SAY_ONDEATH         = 0,
+    SAY_ONSLAY          = 1,
+    SAY_DECAY           = 2,
+    SAY_NOVA            = 3,
+    SAY_ONAGGRO         = 4,
+};
 
 class boss_rage_winterchill : public CreatureScript
 {
@@ -58,11 +49,10 @@ public:
 
     struct boss_rage_winterchillAI : public hyjal_trashAI
     {
-        boss_rage_winterchillAI(Creature* c) : hyjal_trashAI(c)
+        boss_rage_winterchillAI(Creature* creature) : hyjal_trashAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             go = false;
-            pos = 0;
         }
 
         uint32 FrostArmorTimer;
@@ -70,7 +60,6 @@ public:
         uint32 NovaTimer;
         uint32 IceboltTimer;
         bool go;
-        uint32 pos;
 
         void Reset()
         {
@@ -88,43 +77,30 @@ public:
         {
             if (instance && IsEvent)
                 instance->SetData(DATA_RAGEWINTERCHILLEVENT, IN_PROGRESS);
-            DoPlaySoundToSet(me, SOUND_ONAGGRO);
-            me->MonsterYell(SAY_ONAGGRO, LANG_UNIVERSAL, 0);
+            Talk(SAY_ONAGGRO);
         }
 
         void KilledUnit(Unit* /*victim*/)
         {
-            switch (urand(0, 1))
-            {
-                case 0:
-                    DoPlaySoundToSet(me, SOUND_ONSLAY1);
-                    me->MonsterYell(SAY_ONSLAY1, LANG_UNIVERSAL, 0);
-                    break;
-                case 1:
-                    DoPlaySoundToSet(me, SOUND_ONSLAY2);
-                    me->MonsterYell(SAY_ONSLAY2, LANG_UNIVERSAL, 0);
-                    break;
-            }
+            Talk(SAY_ONSLAY);
         }
 
-        void WaypointReached(uint32 i)
+        void WaypointReached(uint32 waypointId)
         {
-            pos = i;
-            if (i == 7 && instance)
+            if (waypointId == 7 && instance)
             {
-                Unit* target = Unit::GetUnit((*me), instance->GetData64(DATA_JAINAPROUDMOORE));
+                Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
                 if (target && target->isAlive())
                     me->AddThreat(target, 0.0f);
             }
         }
 
-        void JustDied(Unit* victim)
+        void JustDied(Unit* killer)
         {
-            hyjal_trashAI::JustDied(victim);
+            hyjal_trashAI::JustDied(killer);
             if (instance && IsEvent)
                 instance->SetData(DATA_RAGEWINTERCHILLEVENT, DONE);
-            DoPlaySoundToSet(me, SOUND_ONDEATH);
-            me->MonsterYell(SAY_ONDEATH, LANG_UNIVERSAL, 0);
+            Talk(SAY_ONDEATH);
         }
 
         void UpdateAI(const uint32 diff)
@@ -165,33 +141,13 @@ public:
             {
                 DoCast(me->getVictim(), SPELL_DEATH_AND_DECAY);
                 DecayTimer = 60000+rand()%20000;
-                switch (urand(0, 1))
-                {
-                    case 0:
-                        DoPlaySoundToSet(me, SOUND_DECAY1);
-                        me->MonsterYell(SAY_DECAY1, LANG_UNIVERSAL, 0);
-                        break;
-                    case 1:
-                        DoPlaySoundToSet(me, SOUND_DECAY2);
-                        me->MonsterYell(SAY_DECAY2, LANG_UNIVERSAL, 0);
-                        break;
-                }
+                Talk(SAY_DECAY);
             } else DecayTimer -= diff;
             if (NovaTimer <= diff)
             {
                 DoCast(me->getVictim(), SPELL_FROST_NOVA);
                 NovaTimer = 30000+rand()%15000;
-                switch (urand(0, 1))
-                {
-                    case 0:
-                        DoPlaySoundToSet(me, SOUND_NOVA1);
-                        me->MonsterYell(SAY_NOVA1, LANG_UNIVERSAL, 0);
-                        break;
-                    case 1:
-                        DoPlaySoundToSet(me, SOUND_NOVA2);
-                        me->MonsterYell(SAY_NOVA2, LANG_UNIVERSAL, 0);
-                        break;
-                }
+                Talk(SAY_NOVA);
             } else NovaTimer -= diff;
             if (IceboltTimer <= diff)
             {

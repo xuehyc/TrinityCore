@@ -24,14 +24,14 @@
 #include "Weather.h"
 #include "Log.h"
 #include "ObjectMgr.h"
-#include <ace/Refcounted_Auto_Ptr.h>
+#include "AutoPtr.h"
 
 namespace WeatherMgr
 {
 
 namespace
 {
-    typedef UNORDERED_MAP<uint32, ACE_Refcounted_Auto_Ptr<Weather, ACE_Null_Mutex> > WeatherMap;
+    typedef UNORDERED_MAP<uint32, Trinity::AutoPtr<Weather, ACE_Null_Mutex> > WeatherMap;
     typedef UNORDERED_MAP<uint32, WeatherData> WeatherZoneMap;
 
     WeatherMap m_weathers;
@@ -93,8 +93,8 @@ void LoadWeatherData()
 
     if (!result)
     {
-        sLog->outErrorDb(">> Loaded 0 weather definitions. DB table `game_weather` is empty.");
-        sLog->outString();
+        sLog->outError(LOG_FILTER_SQL, ">> Loaded 0 weather definitions. DB table `game_weather` is empty.");
+
         return;
     }
 
@@ -108,26 +108,26 @@ void LoadWeatherData()
 
         for (uint8 season = 0; season < WEATHER_SEASONS; ++season)
         {
-            wzc.data[season].rainChance  = fields[season * (MAX_WEATHER_TYPE-1) + 1].GetUInt32();
-            wzc.data[season].snowChance  = fields[season * (MAX_WEATHER_TYPE-1) + 2].GetUInt32();
-            wzc.data[season].stormChance = fields[season * (MAX_WEATHER_TYPE-1) + 3].GetUInt32();
+            wzc.data[season].rainChance  = fields[season * (MAX_WEATHER_TYPE-1) + 1].GetUInt8();
+            wzc.data[season].snowChance  = fields[season * (MAX_WEATHER_TYPE-1) + 2].GetUInt8();
+            wzc.data[season].stormChance = fields[season * (MAX_WEATHER_TYPE-1) + 3].GetUInt8();
 
             if (wzc.data[season].rainChance > 100)
             {
                 wzc.data[season].rainChance = 25;
-                sLog->outErrorDb("Weather for zone %u season %u has wrong rain chance > 100%%", zone_id, season);
+                sLog->outError(LOG_FILTER_SQL, "Weather for zone %u season %u has wrong rain chance > 100%%", zone_id, season);
             }
 
             if (wzc.data[season].snowChance > 100)
             {
                 wzc.data[season].snowChance = 25;
-                sLog->outErrorDb("Weather for zone %u season %u has wrong snow chance > 100%%", zone_id, season);
+                sLog->outError(LOG_FILTER_SQL, "Weather for zone %u season %u has wrong snow chance > 100%%", zone_id, season);
             }
 
             if (wzc.data[season].stormChance > 100)
             {
                 wzc.data[season].stormChance = 25;
-                sLog->outErrorDb("Weather for zone %u season %u has wrong storm chance > 100%%", zone_id, season);
+                sLog->outError(LOG_FILTER_SQL, "Weather for zone %u season %u has wrong storm chance > 100%%", zone_id, season);
             }
         }
 
@@ -137,8 +137,8 @@ void LoadWeatherData()
     }
     while (result->NextRow());
 
-    sLog->outString(">> Loaded %u weather definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    sLog->outString();
+    sLog->outInfo(LOG_FILTER_GENERAL, ">> Loaded %u weather definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
 }
 
 void SendFineWeatherUpdateToPlayer(Player* player)

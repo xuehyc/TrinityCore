@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "azjol_nerub.h"
 
 enum Spells
@@ -286,7 +287,7 @@ public:
                         }
                     } else DatterTimer -= diff;
 
-                    if(me->HasAura(SPELL_LEECHING_SWARM))
+                    if (me->HasAura(SPELL_LEECHING_SWARM))
                         me->RemoveAurasDueToSpell(SPELL_LEECHING_SWARM);
                 }
 

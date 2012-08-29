@@ -15,7 +15,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "halls_of_reflection.h"
 #include "ScriptedEscortAI.h"
 
@@ -215,10 +217,10 @@ class npc_jaina_or_sylvanas_hor : public CreatureScript
 public:
     npc_jaina_or_sylvanas_hor(const char* name) : CreatureScript(name) { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        switch (uiAction)
+        switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF+1:
                 player->CLOSE_GOSSIP_MENU();
@@ -308,7 +310,7 @@ public:
             switch (events.ExecuteEvent())
             {
                 case EVENT_START_PREINTRO:
-                    me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                    me->SetWalk(false);
                     me->GetMotionMaster()->MovePoint(0, MoveDoorPos);
 
                     if (instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
@@ -328,9 +330,9 @@ public:
                     break;
 
                 case EVENT_START_INTRO:
-                    me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                    me->SetWalk(false);
                     me->GetMotionMaster()->MovePoint(0, MoveThronePos);
-                    // Begining of intro is differents between factions as the speech sequence and timers are differents.
+                    // Begining of intro is differents between fActions as the speech sequence and timers are differents.
                     if (instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
                         events.ScheduleEvent(EVENT_INTRO_A2_1, 0);
                     else
@@ -359,8 +361,8 @@ public:
                         pUther->GetMotionMaster()->MoveIdle();
                         pUther->SetReactState(REACT_PASSIVE); // be sure he will not aggro arthas
                         uiUther = pUther->GetGUID();
-                        me->SetUInt64Value(UNIT_FIELD_TARGET, uiUther);
-                        pUther->SetUInt64Value(UNIT_FIELD_TARGET, me->GetGUID());
+                        me->SetTarget(uiUther);
+                        pUther->SetTarget(me->GetGUID());
                     }
                     events.ScheduleEvent(EVENT_INTRO_A2_5, 2000);
                     break;
@@ -459,8 +461,8 @@ public:
                         pUther->GetMotionMaster()->MoveIdle();
                         pUther->SetReactState(REACT_PASSIVE); // be sure he will not aggro arthas
                         uiUther = pUther->GetGUID();
-                        me->SetUInt64Value(UNIT_FIELD_TARGET, uiUther);
-                        pUther->SetUInt64Value(UNIT_FIELD_TARGET, me->GetGUID());
+                        me->SetTarget(uiUther);
+                        pUther->SetTarget(me->GetGUID());
                     }
                     events.ScheduleEvent(EVENT_INTRO_H2_5, 2000);
                     break;
@@ -531,8 +533,8 @@ public:
                         if (GameObject* gate = instance->instance->GetGameObject(instance->GetData64(DATA_FROSTWORN_DOOR)))
                             gate->SetGoState(GO_STATE_ACTIVE);
 
-                        me->SetUInt64Value(UNIT_FIELD_TARGET, uiLichKing);
-                        pLichKing->SetUInt64Value(UNIT_FIELD_TARGET, me->GetGUID());
+                        me->SetTarget(uiLichKing);
+                        pLichKing->SetTarget(me->GetGUID());
                     }
 
                     if (Creature* pUther = me->GetCreature(*me, uiUther))
@@ -647,7 +649,7 @@ public:
 
                     if (Creature* pLichKing = me->GetCreature(*me, uiLichKing))
                     {
-                        pLichKing->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                        pLichKing->SetWalk(false);
                         pLichKing->GetMotionMaster()->MovePoint(0, LichKingMoveAwayPos);
                     }
 
@@ -689,8 +691,8 @@ public:
                         pLichKing->GetMotionMaster()->MovePoint(0, LichKingMoveThronePos);
                         pLichKing->SetReactState(REACT_PASSIVE);
                         uiLichKing = pLichKing->GetGUID();
-                        me->SetUInt64Value(UNIT_FIELD_TARGET, uiLichKing);
-                        pLichKing->SetUInt64Value(UNIT_FIELD_TARGET, me->GetGUID());
+                        me->SetTarget(uiLichKing);
+                        pLichKing->SetTarget(me->GetGUID());
                     }
 
                     if (Creature* pFalric = me->GetCreature(*me, instance->GetData64(DATA_FALRIC)))
@@ -808,7 +810,7 @@ public:
 
     struct npc_ghostly_priestAI: public ScriptedAI
     {
-        npc_ghostly_priestAI(Creature* c) : ScriptedAI(c)
+        npc_ghostly_priestAI(Creature* creature) : ScriptedAI(creature)
         {
         }
 
@@ -890,7 +892,7 @@ public:
 
     struct npc_phantom_mageAI: public ScriptedAI
     {
-        npc_phantom_mageAI(Creature* c) : ScriptedAI(c)
+        npc_phantom_mageAI(Creature* creature) : ScriptedAI(creature)
         {
         }
 
@@ -967,11 +969,11 @@ public:
 
     struct npc_phantom_hallucinationAI : public npc_phantom_mage::npc_phantom_mageAI
     {
-        npc_phantom_hallucinationAI(Creature* c) : npc_phantom_mage::npc_phantom_mageAI(c)
+        npc_phantom_hallucinationAI(Creature* creature) : npc_phantom_mage::npc_phantom_mageAI(creature)
         {
         }
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoCast(SPELL_HALLUCINATION_2);
         }
@@ -991,7 +993,7 @@ public:
 
     struct npc_shadowy_mercenaryAI: public ScriptedAI
     {
-        npc_shadowy_mercenaryAI(Creature* c) : ScriptedAI(c)
+        npc_shadowy_mercenaryAI(Creature* creature) : ScriptedAI(creature)
         {
         }
 
@@ -1062,7 +1064,7 @@ public:
 
     struct npc_spectral_footmanAI: public ScriptedAI
     {
-        npc_spectral_footmanAI(Creature* c) : ScriptedAI(c)
+        npc_spectral_footmanAI(Creature* creature) : ScriptedAI(creature)
         {
         }
 
@@ -1127,7 +1129,7 @@ public:
 
     struct npc_tortured_riflemanAI  : public ScriptedAI
     {
-        npc_tortured_riflemanAI(Creature* c) : ScriptedAI(c)
+        npc_tortured_riflemanAI(Creature* creature) : ScriptedAI(creature)
         {
         }
 
@@ -1465,7 +1467,7 @@ public:
                 ((npc_jaina_and_sylvana_hor_part2AI*)creature->AI())->Start(false,true);
                 creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                 creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                creature->SetUInt64Value(UNIT_FIELD_TARGET, 0);
+                creature->SetTarget(0);
 
                 if (instance)
                 {
@@ -1627,7 +1629,7 @@ public:
                 {
                     if (wallTarget->isAlive())
                     {
-                        wallTarget->ForcedDespawn();
+                        wallTarget->DespawnOrUnsummon();
                         wallTargetGUID = 0;
                     }
                 }
@@ -1662,7 +1664,7 @@ public:
                 {
                     if (wallTarget->isAlive())
                     {
-                        wallTarget->ForcedDespawn();
+                        wallTarget->DespawnOrUnsummon();
                         wallTargetGUID = 0;
                     }
                 }
@@ -1697,7 +1699,7 @@ public:
                 {
                     if (wallTarget->isAlive())
                     {
-                        wallTarget->ForcedDespawn();
+                        wallTarget->DespawnOrUnsummon();
                         wallTargetGUID = 0;
                     }
                 }
@@ -1733,7 +1735,7 @@ public:
                 {
                     if (wallTarget->isAlive())
                     {
-                        wallTarget->ForcedDespawn();
+                        wallTarget->DespawnOrUnsummon();
                         wallTargetGUID = 0;
                     }
                 }
@@ -1802,9 +1804,9 @@ public:
             switch (subStep)
             {
             case 0:
-                me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                me->SetWalk(false);
                 encounterTime = 0;
-                me->SetUInt64Value(UNIT_FIELD_TARGET, uiLichKing->GetGUID());
+                me->SetTarget(uiLichKing->GetGUID());
                 JumpNextStep(100);
                 break;
             case 1:
@@ -1895,7 +1897,7 @@ public:
                 if (uiLichKing && !uiLichKing->HasAura(SPELL_ICE_PRISON_VISUAL))
                 {
                     uiLichKing->AddAura(me->GetEntry() == NPC_JAINA_PART2 ? SPELL_ICE_PRISON_VISUAL : SPELL_DARK_ARROW, uiLichKing);
-                    me->SetUInt64Value(UNIT_FIELD_TARGET, uiLichKing->GetGUID());
+                    me->SetTarget(uiLichKing->GetGUID());
                 }
                 JumpNextStep(10000);
                 break;
@@ -1903,7 +1905,7 @@ public:
                 if (uiLichKing && (!uiLichKing->HasAura(SPELL_ICE_PRISON_VISUAL) || !uiLichKing->HasAura(SPELL_DARK_ARROW)))
                 {
                     uiLichKing->AddAura(me->GetEntry() == NPC_JAINA_PART2 ? SPELL_ICE_PRISON_VISUAL : SPELL_DARK_ARROW, uiLichKing);
-                    me->SetUInt64Value(UNIT_FIELD_TARGET, uiLichKing->GetGUID());
+                    me->SetTarget(uiLichKing->GetGUID());
                 }
                 me->RemoveAllAuras();
                 me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);

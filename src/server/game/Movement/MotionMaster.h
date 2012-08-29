@@ -90,7 +90,6 @@ class MotionMaster //: private std::stack<MovementGenerator *>
             while (!top())
                 --_top;
         }
-
         void push(_Ty _Val) { ++_top; Impl[_top] = _Val; }
 
         bool needInitTop() const { return _needInit[_top]; }
@@ -158,8 +157,8 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         void MovePoint(uint32 id, float x, float y, float z);
 
         // These two movement types should only be used with creatures having landing/takeoff animations
-        void MoveLand(uint32 id, Position const& pos, float speed);
-        void MoveTakeoff(uint32 id, Position const& pos, float speed);
+        void MoveLand(uint32 id, Position const& pos);
+        void MoveTakeoff(uint32 id, Position const& pos);
 
         void MoveCharge(float x, float y, float z, float speed = SPEED_CHARGE, uint32 id = EVENT_CHARGE);
         void MoveKnockbackFrom(float srcX, float srcY, float speedXY, float speedZ);

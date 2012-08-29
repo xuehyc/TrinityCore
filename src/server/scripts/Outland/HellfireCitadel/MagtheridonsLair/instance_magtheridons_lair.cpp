@@ -23,7 +23,9 @@ SDComment:
 SDCategory: Hellfire Citadel, Magtheridon's lair
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "InstanceScript.h"
 #include "magtheridons_lair.h"
 
 enum Creatures
@@ -45,10 +47,10 @@ enum GameObjects
     GO_MAGTHERIDON_COLUMN_1     = 184639,
 };
 
-enum Spells
+enum eSpells
 {
-    SPELL_SOUL_TRANSFER         = 30531, // core bug, does not support target 7
-    SPELL_BLAZE_TARGET          = 30541, // core bug, does not support target 7
+    SPELL_SOUL_TRANSFER        = 30531, // core bug, does not support target 7
+    SPELL_BLAZE_TARGET         = 30541, // core bug, does not support target 7
 };
 
 #define CHAMBER_CENTER_X            -15.14
@@ -63,7 +65,9 @@ class instance_magtheridons_lair : public InstanceMapScript
 {
     public:
         instance_magtheridons_lair()
-            : InstanceMapScript("instance_magtheridons_lair", 544) {}
+            : InstanceMapScript("instance_magtheridons_lair", 544)
+        {
+        }
 
         struct instance_magtheridons_lair_InstanceMapScript : public InstanceScript
         {
@@ -71,7 +75,7 @@ class instance_magtheridons_lair : public InstanceMapScript
             {
             }
 
-            uint32 Encounter[MAX_ENCOUNTER];
+            uint32 m_auiEncounter[MAX_ENCOUNTER];
 
             uint64 MagtheridonGUID;
             std::set<uint64> ChannelerGUID;
@@ -83,7 +87,7 @@ class instance_magtheridons_lair : public InstanceMapScript
 
             void Initialize()
             {
-                memset(&Encounter, 0, sizeof(Encounter));
+                memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
                 MagtheridonGUID = 0;
                 ChannelerGUID.clear();
@@ -97,7 +101,9 @@ class instance_magtheridons_lair : public InstanceMapScript
             bool IsEncounterInProgress() const
             {
                 for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                    if (Encounter[i] == IN_PROGRESS) return true;
+                    if (m_auiEncounter[i] == IN_PROGRESS)
+                        return true;
+
                 return false;
             }
 
@@ -151,7 +157,7 @@ class instance_magtheridons_lair : public InstanceMapScript
                 switch (type)
                 {
                 case DATA_MAGTHERIDON_EVENT:
-                    Encounter[0] = data;
+                    m_auiEncounter[0] = data;
                     if (data == NOT_STARTED)
                         RespawnTimer = 10000;
                     if (data != IN_PROGRESS)
@@ -161,9 +167,9 @@ class instance_magtheridons_lair : public InstanceMapScript
                     switch (data)
                     {
                     case NOT_STARTED: // Reset all channelers once one is reset.
-                        if (Encounter[1] != NOT_STARTED)
+                        if (m_auiEncounter[1] != NOT_STARTED)
                         {
-                            Encounter[1] = NOT_STARTED;
+                            m_auiEncounter[1] = NOT_STARTED;
                             for (std::set<uint64>::const_iterator i = ChannelerGUID.begin(); i != ChannelerGUID.end(); ++i)
                             {
                                 if (Creature* Channeler = instance->GetCreature(*i))
@@ -179,9 +185,9 @@ class instance_magtheridons_lair : public InstanceMapScript
                         }
                         break;
                     case IN_PROGRESS: // Event start.
-                        if (Encounter[1] != IN_PROGRESS)
+                        if (m_auiEncounter[1] != IN_PROGRESS)
                         {
-                            Encounter[1] = IN_PROGRESS;
+                            m_auiEncounter[1] = IN_PROGRESS;
                             // Let all five channelers aggro.
                             for (std::set<uint64>::const_iterator i = ChannelerGUID.begin(); i != ChannelerGUID.end(); ++i)
                             {
@@ -213,7 +219,7 @@ class instance_magtheridons_lair : public InstanceMapScript
                         }
                         break;
                     }
-                    Encounter[1] = data;
+                    m_auiEncounter[1] = data;
                     break;
                 case DATA_COLLAPSE:
                     // true - collapse / false - reset
@@ -228,7 +234,7 @@ class instance_magtheridons_lair : public InstanceMapScript
             uint32 GetData(uint32 type)
             {
                 if (type == DATA_MAGTHERIDON_EVENT)
-                    return Encounter[0];
+                    return m_auiEncounter[0];
                 return 0;
             }
 

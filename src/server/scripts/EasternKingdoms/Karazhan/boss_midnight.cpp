@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Karazhan
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SAY_MIDNIGHT_KILL           -1532000
 #define SAY_APPEAR1                 -1532001
@@ -58,7 +59,7 @@ public:
 
     struct boss_attumenAI : public ScriptedAI
     {
-        boss_attumenAI(Creature* c) : ScriptedAI(c)
+        boss_attumenAI(Creature* creature) : ScriptedAI(creature)
         {
             Phase = 1;
 
@@ -79,6 +80,12 @@ public:
 
         void Reset()
         {
+            ResetTimer = 0;
+        }
+
+        void EnterEvadeMode()
+        {
+            ScriptedAI::EnterEvadeMode();
             ResetTimer = 2000;
         }
 
@@ -89,7 +96,7 @@ public:
             DoScriptText(RAND(SAY_KILL1, SAY_KILL2), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
             if (Unit* pMidnight = Unit::GetUnit(*me, Midnight))
@@ -119,7 +126,7 @@ public:
 
     struct boss_midnightAI : public ScriptedAI
     {
-        boss_midnightAI(Creature* c) : ScriptedAI(c) {}
+        boss_midnightAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint64 Attumen;
         uint8 Phase;
@@ -185,7 +192,7 @@ public:
                                 pAttumen->GetMotionMaster()->MoveChase(pAttumen->getVictim());
                                 pAttumen->SetTarget(pAttumen->getVictim()->GetGUID());
                             }
-                            pAttumen->SetFloatValue(OBJECT_FIELD_SCALE_X, 1);
+                            pAttumen->SetObjectScale(1);
                         }
                     } else Mount_Timer -= diff;
                 }
@@ -203,16 +210,16 @@ public:
             pAttumen->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             float angle = me->GetAngle(pAttumen);
             float distance = me->GetDistance2d(pAttumen);
-            float newX = me->GetPositionX() + cos(angle)*(distance/2) ;
-            float newY = me->GetPositionY() + sin(angle)*(distance/2) ;
+            float newX = me->GetPositionX() + cos(angle)*(distance/2);
+            float newY = me->GetPositionY() + sin(angle)*(distance/2);
             float newZ = 50;
             //me->Relocate(newX, newY, newZ, angle);
             //me->SendMonsterMove(newX, newY, newZ, 0, true, 1000);
             me->GetMotionMaster()->Clear();
             me->GetMotionMaster()->MovePoint(0, newX, newY, newZ);
             distance += 10;
-            newX = me->GetPositionX() + cos(angle)*(distance/2) ;
-            newY = me->GetPositionY() + sin(angle)*(distance/2) ;
+            newX = me->GetPositionX() + cos(angle)*(distance/2);
+            newY = me->GetPositionY() + sin(angle)*(distance/2);
             pAttumen->GetMotionMaster()->Clear();
             pAttumen->GetMotionMaster()->MovePoint(0, newX, newY, newZ);
             //pAttumen->Relocate(newX, newY, newZ, -angle);
@@ -244,8 +251,8 @@ void boss_attumen::boss_attumenAI::UpdateAI(const uint32 diff)
             Midnight = 0;
             me->SetVisible(false);
             me->Kill(me);
-        }
-    } else ResetTimer -= diff;
+        } else ResetTimer -= diff;
+    }
 
     //Return since we have no target
     if (!UpdateVictim())

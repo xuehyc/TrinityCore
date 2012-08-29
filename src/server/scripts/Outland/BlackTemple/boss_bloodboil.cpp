@@ -23,7 +23,8 @@ SDComment: Bloodboil not working correctly, missing enrage
 SDCategory: Black Temple
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "black_temple.h"
 
 //Speech'n'Sound
@@ -67,9 +68,9 @@ public:
 
     struct boss_gurtogg_bloodboilAI : public ScriptedAI
     {
-        boss_gurtogg_bloodboilAI(Creature* c) : ScriptedAI(c)
+        boss_gurtogg_bloodboilAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -130,7 +131,7 @@ public:
             DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (instance)
                 instance->SetData(DATA_GURTOGGBLOODBOILEVENT, DONE);
@@ -186,7 +187,7 @@ public:
         void RevertThreatOnTarget(uint64 guid)
         {
             Unit* unit = NULL;
-            unit = Unit::GetUnit((*me), guid);
+            unit = Unit::GetUnit(*me, guid);
             if (unit)
             {
                 if (DoGetThreat(unit))

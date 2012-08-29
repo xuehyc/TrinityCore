@@ -23,7 +23,8 @@ SDComment: Instance Data Scripts and functions to acquire mobs and set encounter
 SDCategory: Coilfang Resevoir, Serpent Shrine Cavern
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "serpent_shrine.h"
 
 #define MAX_ENCOUNTER 6
@@ -153,7 +154,7 @@ class instance_serpent_shrine : public InstanceMapScript
                                         if (Creature* frenzy = player->SummonCreature(MOB_COILFANG_FRENZY, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 2000))
                                         {
                                             frenzy->Attack(player, false);
-                                            frenzy->AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_LEVITATING);
+                                            frenzy->AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_DISABLE_GRAVITY);
                                         }
                                         DoSpawnFrenzy = false;
                                     }

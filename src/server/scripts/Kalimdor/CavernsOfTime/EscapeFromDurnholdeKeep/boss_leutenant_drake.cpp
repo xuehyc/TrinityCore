@@ -23,7 +23,8 @@ SDComment: Missing proper code for patrolling area after being spawned. Script f
 SDCategory: Caverns of Time, Old Hillsbrad Foothills
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "old_hillsbrad.h"
 #include "ScriptedEscortAI.h"
 
@@ -36,9 +37,9 @@ class go_barrel_old_hillsbrad : public GameObjectScript
 public:
     go_barrel_old_hillsbrad() : GameObjectScript("go_barrel_old_hillsbrad") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* pGO)
+    bool OnGossipHello(Player* /*player*/, GameObject* go)
     {
-        if (InstanceScript* instance = pGO->GetInstanceScript())
+        if (InstanceScript* instance = go->GetInstanceScript())
         {
             if (instance->GetData(TYPE_BARREL_DIVERSION) == DONE)
                 return false;
@@ -111,7 +112,7 @@ public:
 
     struct boss_lieutenant_drakeAI : public ScriptedAI
     {
-        boss_lieutenant_drakeAI(Creature* c) : ScriptedAI(c) {}
+        boss_lieutenant_drakeAI(Creature* creature) : ScriptedAI(creature) {}
 
         bool CanPatrol;
         uint32 wpId;
@@ -142,7 +143,7 @@ public:
             DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
         }

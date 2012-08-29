@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "gundrak.h"
 
 enum Spells
@@ -49,98 +50,97 @@ public:
 
     struct boss_eckAI : public ScriptedAI
     {
+        boss_eckAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
 
         EventMap events;
-        bool IsBerserk;
-        InstanceScript* instanceRef;
+        bool bBerserk;
 
-        boss_eckAI(Creature* c) : ScriptedAI(c), IsBerserk(false)
-        {            
-            this->instanceRef = c->GetInstanceScript();
-        }        
+        InstanceScript* instance;
 
         void Reset()
         {
-            this->events.Reset();
-            this->IsBerserk = false;
+            events.Reset();
+            bBerserk = false;
 
-            if (this->instanceRef)
-                this->instanceRef->SetData(DATA_ECK_THE_FEROCIOUS_EVENT, NOT_STARTED);
+            if (instance)
+                instance->SetData(DATA_ECK_THE_FEROCIOUS_EVENT, NOT_STARTED);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-            if (this->instanceRef)
-                this->instanceRef->SetData(DATA_ECK_THE_FEROCIOUS_EVENT, IN_PROGRESS);
+            if (instance)
+                instance->SetData(DATA_ECK_THE_FEROCIOUS_EVENT, IN_PROGRESS);
 
-            this->events.ScheduleEvent(EVENT_ECK_BITE, 5*IN_MILLISECONDS);
-            this->events.ScheduleEvent(EVENT_ECK_SPRING, 8*IN_MILLISECONDS);
-            this->events.ScheduleEvent(EVENT_ECK_SPIT, 10*IN_MILLISECONDS);
-            this->events.ScheduleEvent(EVENT_ECK_BERSERK, urand(60*IN_MILLISECONDS, 90*IN_MILLISECONDS)); //60-90 secs according to wowwiki
+            events.ScheduleEvent(EVENT_ECK_BITE, 5*IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_ECK_SPRING, 8*IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_ECK_SPIT, 10*IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_ECK_BERSERK, urand(60*IN_MILLISECONDS, 90*IN_MILLISECONDS)); //60-90 secs according to wowwiki
         }
 
         void UpdateAI(const uint32 diff)
         {
             //Return since we have no target
-            if (!this->UpdateVictim())
+            if (!UpdateVictim())
                 return;
-            this->events.Update(diff);            
 
-            while(uint32 event = this->events.ExecuteEvent()) 
+            events.Update(diff);            
+
+            while(uint32 event = events.ExecuteEvent()) 
             {
                 switch(event)
                 {
-                case EVENT_ECK_BITE:
+                    case EVENT_ECK_BITE:
+                        DoCast(me->getVictim(), SPELL_ECK_BITE);
+                        events.ScheduleEvent(EVENT_ECK_BITE, urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS));
+                        break;
+                    case EVENT_ECK_SPIT:
+                        DoCast(me->getVictim(), SPELL_ECK_SPIT);
+                        events.ScheduleEvent(EVENT_ECK_SPIT, urand(6*IN_MILLISECONDS, 14*IN_MILLISECONDS));
+                        break;
+                    case EVENT_ECK_SPRING:
                     {
-                        this->DoCast(me->getVictim(), SPELL_ECK_BITE);
-                        this->events.ScheduleEvent(EVENT_ECK_BITE, urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS));
-                    }
-                    break;
-                case EVENT_ECK_SPIT:
-                    {
-                        this->DoCast(me->getVictim(), SPELL_ECK_SPIT);
-                        this->events.ScheduleEvent(EVENT_ECK_SPIT, urand(6*IN_MILLISECONDS, 14*IN_MILLISECONDS));
-                    }
-                    break;
-                case EVENT_ECK_SPRING:
-                    {
-                        if(Unit* target = this->SelectTarget(SELECT_TARGET_RANDOM, 1))
+                        if(Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                         {
                             if (target->GetTypeId() == TYPEID_PLAYER)
                             {
-                                this->DoCast(target, RAND(SPELL_ECK_SPRING_1, SPELL_ECK_SPRING_2));
-                                this->events.ScheduleEvent(EVENT_ECK_SPRING, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                                DoCast(target, RAND(SPELL_ECK_SPRING_1, SPELL_ECK_SPRING_2));
+                                events.ScheduleEvent(EVENT_ECK_SPRING, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
                             }
                         }
+
+                        break;
                     }
-                    break;
-                case EVENT_ECK_BERSERK:
+                    case EVENT_ECK_BERSERK:
                     {
-                        if(!IsBerserk)
+                        if(!bBerserk)
                         {
-                            this->DoCast(me, SPELL_ECK_BERSERK);
-                            this->IsBerserk = true;
+                            DoCast(me, SPELL_ECK_BERSERK);
+                            bBerserk = true;
                         }
+                        break;
                     }
-                    break;
                 }
             }
 
-            if(this->HealthBelowPct(20))    // Automatically go into berserk once we have less than 20% of maximum health.
+            if(HealthBelowPct(20))    // Automatically go into berserk once we have less than 20% of maximum health.
             {
-                this->DoCast(me, SPELL_ECK_BERSERK);
-                this->events.CancelEvent(EVENT_ECK_BERSERK); // If it's still in there; just to avoid its usage later on.
-                this->IsBerserk = true;
+                DoCast(me, SPELL_ECK_BERSERK);
+                events.CancelEvent(EVENT_ECK_BERSERK); // If it's still in there; just to avoid its usage later on.
+                bBerserk = true;
             }
             DoMeleeAttackIfReady();
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            if (instanceRef)
-                instanceRef->SetData(DATA_ECK_THE_FEROCIOUS_EVENT, DONE);
+            if (instance)
+                instance->SetData(DATA_ECK_THE_FEROCIOUS_EVENT, DONE);
         }
     };
+
 };
 
 class npc_ruins_dweller : public CreatureScript
@@ -155,14 +155,14 @@ public:
 
     struct npc_ruins_dwellerAI : public ScriptedAI
     {
-        npc_ruins_dwellerAI(Creature* c) : ScriptedAI(c)
+        npc_ruins_dwellerAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (instance)
             {

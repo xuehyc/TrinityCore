@@ -84,7 +84,10 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
 
     // restrict invite to GMs
     if (!sWorld->getBoolConfig(CONFIG_ALLOW_GM_GROUP) && !GetPlayer()->isGameMaster() && player->isGameMaster())
+    {
+        SendPartyResult(PARTY_OP_INVITE, membername, ERR_BAD_PLAYER_NAME_S);
         return;
+    }
 
     // can't group with
     if (!GetPlayer()->isGameMaster() && !sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && GetPlayer()->GetTeam() != player->GetTeam())
@@ -207,7 +210,7 @@ void WorldSession::HandleGroupAcceptOpcode(WorldPacket& recv_data)
 
     if (group->GetLeaderGUID() == GetPlayer()->GetGUID())
     {
-        sLog->outError("HandleGroupAcceptOpcode: player %s(%d) tried to accept an invite to his own group", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
+        sLog->outError(LOG_FILTER_NETWORKIO, "HandleGroupAcceptOpcode: player %s(%d) tried to accept an invite to his own group", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
         return;
     }
 
@@ -248,8 +251,9 @@ void WorldSession::HandleGroupDeclineOpcode(WorldPacket & /*recv_data*/)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_GROUP_DECLINE");
 
-    Group  *group  = GetPlayer()->GetGroupInvite();
-    if (!group) return;
+    Group* group = GetPlayer()->GetGroupInvite();
+    if (!group)
+        return;
 
     // Remember leader if online (group pointer will be invalid if group gets disbanded)
     Player* leader = ObjectAccessor::FindPlayer(group->GetLeaderGUID());
@@ -279,7 +283,7 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
     //can't uninvite yourself
     if (guid == GetPlayer()->GetGUID())
     {
-        sLog->outError("WorldSession::HandleGroupUninviteGuidOpcode: leader %s(%d) tried to uninvite himself from the group.", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
+        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSession::HandleGroupUninviteGuidOpcode: leader %s(%d) tried to uninvite himself from the group.", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
         return;
     }
 
@@ -329,7 +333,7 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket & recv_data)
     // can't uninvite yourself
     if (GetPlayer()->GetName() == membername)
     {
-        sLog->outError("WorldSession::HandleGroupUninviteOpcode: leader %s(%d) tried to uninvite himself from the group.", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
+        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSession::HandleGroupUninviteOpcode: leader %s(%d) tried to uninvite himself from the group.", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
         return;
     }
 
@@ -428,29 +432,20 @@ void WorldSession::HandleLootMethodOpcode(WorldPacket & recv_data)
     group->SendUpdate();
 }
 
-void WorldSession::HandleLootRoll(WorldPacket &recv_data)
+void WorldSession::HandleLootRoll(WorldPacket& recvData)
 {
-    if (!GetPlayer()->GetGroup())
-    {
-        recv_data.rfinish();
-        return;
-    }
-
-    uint64 Guid;
-    uint32 NumberOfPlayers;
+    uint64 guid;
+    uint32 itemSlot;
     uint8  rollType;
-    recv_data >> Guid;                                      //guid of the item rolled
-    recv_data >> NumberOfPlayers;
-    recv_data >> rollType;                                    //0: pass, 1: need, 2: greed
-
-    //sLog->outDebug("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, Choise:%u", (uint32)Guid, NumberOfPlayers, Choise);
+    recvData >> guid;                  // guid of the item rolled
+    recvData >> itemSlot;
+    recvData >> rollType;              // 0: pass, 1: need, 2: greed
 
     Group* group = GetPlayer()->GetGroup();
     if (!group)
         return;
 
-    // everything's fine, do it
-    group->CountRollVote(GetPlayer()->GetGUID(), Guid, NumberOfPlayers, rollType);
+    group->CountRollVote(GetPlayer()->GetGUID(), guid, rollType);
 
     switch (rollType)
     {
@@ -988,7 +983,7 @@ void WorldSession::HandleOptOutOfLootOpcode(WorldPacket & recv_data)
     if (!GetPlayer())                                        // needed because STATUS_AUTHED
     {
         if (passOnLoot != 0)
-            sLog->outError("CMSG_OPT_OUT_OF_LOOT value<>0 for not-loaded character!");
+            sLog->outError(LOG_FILTER_NETWORKIO, "CMSG_OPT_OUT_OF_LOOT value<>0 for not-loaded character!");
         return;
     }
 

@@ -23,7 +23,8 @@ SDComment: Chromatic Mutation disabled due to lack of core support
 SDCategory: Blackwing Lair
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum Emotes
 {
@@ -245,7 +246,7 @@ public:
                     Unit* unit;
                     if ((*i) && (*i)->getSource())
                     {
-                        unit = Unit::GetUnit((*me), (*i)->getUnitGuid());
+                        unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                         if (unit)
                         {
                             //Cast affliction

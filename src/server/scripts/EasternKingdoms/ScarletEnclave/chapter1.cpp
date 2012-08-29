@@ -15,10 +15,14 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "Vehicle.h"
 #include "ObjectMgr.h"
 #include "ScriptedEscortAI.h"
+#include "CombatAI.h"
+#include "PassiveAI.h"
 
 /*######
 ##Quest 12848
@@ -102,13 +106,13 @@ public:
 
     struct npc_unworthy_initiateAI : public ScriptedAI
     {
-        npc_unworthy_initiateAI(Creature* c) : ScriptedAI(c)
+        npc_unworthy_initiateAI(Creature* creature) : ScriptedAI(creature)
         {
             me->SetReactState(REACT_PASSIVE);
             if (!me->GetEquipmentId())
                 if (const CreatureTemplate* info = sObjectMgr->GetCreatureTemplate(28406))
                     if (info->equipmentId)
-                        const_cast<CreatureTemplate*>(me->GetCreatureInfo())->equipmentId = info->equipmentId;
+                        const_cast<CreatureTemplate*>(me->GetCreatureTemplate())->equipmentId = info->equipmentId;
         }
 
         uint64 playerGUID;
@@ -185,7 +189,7 @@ public:
                         anchorGUID = anchor->GetGUID();
                     }
                     else
-                        sLog->outError("npc_unworthy_initiateAI: unable to find anchor!");
+                        sLog->outError(LOG_FILTER_TSCR, "npc_unworthy_initiateAI: unable to find anchor!");
 
                     float dist = 99.0f;
                     GameObject* prison = NULL;
@@ -205,7 +209,7 @@ public:
                     if (prison)
                         prison->ResetDoorOrButton();
                     else
-                        sLog->outError("npc_unworthy_initiateAI: unable to find prison!");
+                        sLog->outError(LOG_FILTER_TSCR, "npc_unworthy_initiateAI: unable to find prison!");
                 }
                 break;
             case PHASE_TO_EQUIP:
@@ -293,7 +297,7 @@ public:
 
     struct npc_unworthy_initiate_anchorAI : public PassiveAI
     {
-        npc_unworthy_initiate_anchorAI(Creature* c) : PassiveAI(c), prisonerGUID(0) {}
+        npc_unworthy_initiate_anchorAI(Creature* creature) : PassiveAI(creature), prisonerGUID(0) {}
 
         uint64 prisonerGUID;
 
@@ -303,9 +307,11 @@ public:
                 prisonerGUID = guid;
         }
 
-        uint64 GetGUID(int32 /*id*/) { return prisonerGUID; }
+        uint64 GetGUID(int32 /*id*/)
+        {
+            return prisonerGUID;
+        }
     };
-
 };
 
 class go_acherus_soul_prison : public GameObjectScript
@@ -362,10 +368,10 @@ class npc_death_knight_initiate : public CreatureScript
 public:
     npc_death_knight_initiate() : CreatureScript("npc_death_knight_initiate") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF)
+        if (action == GOSSIP_ACTION_INFO_DEF)
         {
             player->CLOSE_GOSSIP_MENU();
 
@@ -531,7 +537,7 @@ public:
 
     struct npc_dark_rider_of_acherusAI : public ScriptedAI
     {
-        npc_dark_rider_of_acherusAI(Creature* c) : ScriptedAI(c) {}
+        npc_dark_rider_of_acherusAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint32 PhaseTimer;
         uint32 Phase;
@@ -587,7 +593,7 @@ public:
                 return;
 
             TargetGUID = who->GetGUID();
-            me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            me->SetWalk(true);
             me->SetSpeed(MOVE_RUN, 0.4f);
             me->GetMotionMaster()->MoveChase(who);
             me->SetTarget(TargetGUID);
@@ -623,7 +629,7 @@ public:
 
     struct npc_salanar_the_horsemanAI : public ScriptedAI
     {
-        npc_salanar_the_horsemanAI(Creature* c) : ScriptedAI(c) {}
+        npc_salanar_the_horsemanAI(Creature* creature) : ScriptedAI(creature) {}
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
         {
@@ -662,7 +668,7 @@ public:
                         {
                             CAST_PLR(charmer)->GroupEventHappens(12687, me);
                             charmer->RemoveAurasDueToSpell(SPELL_EFFECT_OVERTAKE);
-                            CAST_CRE(who)->ForcedDespawn();
+                            CAST_CRE(who)->DespawnOrUnsummon();
                             //CAST_CRE(who)->Respawn(true);
                         }
 
@@ -692,7 +698,7 @@ public:
 
     struct npc_ros_dark_riderAI : public ScriptedAI
     {
-        npc_ros_dark_riderAI(Creature* c) : ScriptedAI(c) {}
+        npc_ros_dark_riderAI(Creature* creature) : ScriptedAI(creature) {}
 
         void EnterCombat(Unit* /*who*/)
         {
@@ -702,7 +708,9 @@ public:
         void Reset()
         {
             Creature* deathcharger = me->FindNearestCreature(28782, 30);
-            if (!deathcharger) return;
+            if (!deathcharger)
+                return;
+
             deathcharger->RestoreFaction();
             deathcharger->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             deathcharger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -713,7 +721,9 @@ public:
         void JustDied(Unit* killer)
         {
             Creature* deathcharger = me->FindNearestCreature(28782, 30);
-            if (!deathcharger) return;
+            if (!deathcharger)
+                return;
+
             if (killer->GetTypeId() == TYPEID_PLAYER && deathcharger->GetTypeId() == TYPEID_UNIT && deathcharger->IsVehicle())
             {
                 deathcharger->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
@@ -743,7 +753,7 @@ public:
 
     struct npc_dkc1_gothikAI : public ScriptedAI
     {
-        npc_dkc1_gothikAI(Creature* c) : ScriptedAI(c) {}
+        npc_dkc1_gothikAI(Creature* creature) : ScriptedAI(creature) {}
 
         void MoveInLineOfSight(Unit* who)
         {
@@ -761,7 +771,7 @@ public:
                         //Todo: Creatures must not be removed, but, must instead
                         //      stand next to Gothik and be commanded into the pit
                         //      and dig into the ground.
-                        CAST_CRE(who)->ForcedDespawn();
+                        CAST_CRE(who)->DespawnOrUnsummon();
 
                         if (CAST_PLR(owner)->GetQuestStatus(12698) == QUEST_STATUS_COMPLETE)
                             owner->RemoveAllMinionsByEntry(GHOULS);
@@ -785,7 +795,7 @@ public:
 
     struct npc_scarlet_ghoulAI : public ScriptedAI
     {
-        npc_scarlet_ghoulAI(Creature* c) : ScriptedAI(c)
+        npc_scarlet_ghoulAI(Creature* creature) : ScriptedAI(creature)
         {
             // Ghouls should display their Birth Animation
             // Crawling out of the ground
@@ -803,11 +813,11 @@ public:
             {
                 for (std::list<Creature*>::const_iterator itr = MinionList.begin(); itr != MinionList.end(); ++itr)
                 {
-                    if (CAST_CRE(*itr)->GetOwner()->GetGUID() == me->GetOwner()->GetGUID())
+                    if ((*itr)->GetOwner()->GetGUID() == me->GetOwner()->GetGUID())
                     {
-                        if (CAST_CRE(*itr)->isInCombat() && CAST_CRE(*itr)->getAttackerForHelper())
+                        if ((*itr)->isInCombat() && (*itr)->getAttackerForHelper())
                         {
-                            AttackStart(CAST_CRE(*itr)->getAttackerForHelper());
+                            AttackStart((*itr)->getAttackerForHelper());
                         }
                     }
                 }
@@ -820,16 +830,13 @@ public:
             {
                 if (Unit* owner = me->GetOwner())
                 {
-                    if (owner->GetTypeId() == TYPEID_PLAYER && CAST_PLR(owner)->isInCombat())
+                    Player* plrOwner = owner->ToPlayer();
+                    if (plrOwner && plrOwner->isInCombat())
                     {
-                        if (CAST_PLR(owner)->getAttackerForHelper() && CAST_PLR(owner)->getAttackerForHelper()->GetEntry() == GHOSTS)
-                        {
-                            AttackStart(CAST_PLR(owner)->getAttackerForHelper());
-                        }
+                        if (plrOwner->getAttackerForHelper() && plrOwner->getAttackerForHelper()->GetEntry() == GHOSTS)
+                            AttackStart(plrOwner->getAttackerForHelper());
                         else
-                        {
                             FindMinions(owner);
-                        }
                     }
                 }
             }
@@ -868,17 +875,17 @@ class npc_scarlet_miner_cart : public CreatureScript
 public:
     npc_scarlet_miner_cart() : CreatureScript("npc_scarlet_miner_cart") { }
 
-    CreatureAI* GetAI(Creature* _Creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_scarlet_miner_cartAI(_Creature);
+        return new npc_scarlet_miner_cartAI(creature);
     }
 
     struct npc_scarlet_miner_cartAI : public PassiveAI
     {
-        npc_scarlet_miner_cartAI(Creature* c) : PassiveAI(c), minerGUID(0)
+        npc_scarlet_miner_cartAI(Creature* creature) : PassiveAI(creature), minerGUID(0)
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-            me->SetDisplayId(me->GetCreatureInfo()->Modelid1); // Modelid2 is a horse.
+            me->SetDisplayId(me->GetCreatureTemplate()->Modelid1); // Modelid2 is a horse.
         }
 
         uint64 minerGUID;
@@ -892,7 +899,7 @@ public:
         {
             if (Creature* miner = Unit::GetCreature(*me, minerGUID))
             {
-                me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                me->SetWalk(false);
 
                 //Not 100% correct, but movement is smooth. Sometimes miner walks faster
                 //than normal, this speed is fast enough to keep up at those times.
@@ -924,14 +931,14 @@ class npc_scarlet_miner : public CreatureScript
 public:
     npc_scarlet_miner() : CreatureScript("npc_scarlet_miner") { }
 
-    CreatureAI* GetAI(Creature* _Creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_scarlet_minerAI(_Creature);
+        return new npc_scarlet_minerAI(creature);
     }
 
     struct npc_scarlet_minerAI : public npc_escortAI
     {
-        npc_scarlet_minerAI(Creature* c) : npc_escortAI(c)
+        npc_scarlet_minerAI(Creature* creature) : npc_escortAI(creature)
         {
             me->SetReactState(REACT_PASSIVE);
         }
@@ -988,9 +995,9 @@ public:
             SetDespawnAtFar(false);
         }
 
-        void WaypointReached(uint32 i)
+        void WaypointReached(uint32 waypointId)
         {
-            switch (i)
+            switch (waypointId)
             {
                 case 1:
                     if (Unit* car = Unit::GetCreature(*me, carGUID))
@@ -1057,7 +1064,7 @@ class go_inconspicuous_mine_car : public GameObjectScript
 public:
     go_inconspicuous_mine_car() : GameObjectScript("go_inconspicuous_mine_car") { }
 
-    bool OnGossipHello(Player* player, GameObject* /*pGO*/)
+    bool OnGossipHello(Player* player, GameObject* /*go*/)
     {
         if (player->GetQuestStatus(12701) == QUEST_STATUS_INCOMPLETE)
         {
@@ -1071,9 +1078,9 @@ public:
                     {
                         car->AI()->SetGUID(miner->GetGUID());
                         CAST_AI(npc_scarlet_miner::npc_scarlet_minerAI, miner->AI())->InitCartQuest(player);
-                    } else sLog->outError("TSCR: OnGossipHello vehicle entry is not correct.");
-                } else sLog->outError("TSCR: OnGossipHello player is not on the vehicle.");
-            } else sLog->outError("TSCR: OnGossipHello Scarlet Miner cant be found by script.");
+                    } else sLog->outError(LOG_FILTER_TSCR, "OnGossipHello vehicle entry is not correct.");
+                } else sLog->outError(LOG_FILTER_TSCR, "OnGossipHello player is not on the vehicle.");
+            } else sLog->outError(LOG_FILTER_TSCR, "OnGossipHello Scarlet Miner cant be found by script.");
         }
         return true;
     }

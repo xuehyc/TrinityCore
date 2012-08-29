@@ -23,7 +23,8 @@ SDComment:
 SDCategory: Scarlet Monastery
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "scarlet_monastery.h"
 
 enum Says
@@ -78,12 +79,12 @@ public:
             DoScriptText(SAY_KILL, me);
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (!instance)
                 return;
 
-            //Any other actions to do with vorrel? setStandState?
+            //Any other Actions to do with vorrel? setStandState?
             if (Unit* vorrel = Unit::GetUnit(*me, instance->GetData64(DATA_VORREL)))
                 DoScriptText(SAY_TRIGGER_VORREL, vorrel);
         }
