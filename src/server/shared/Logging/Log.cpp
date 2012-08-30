@@ -109,14 +109,11 @@ void Log::CreateAppenderFromConfig(const char* name)
 
     if (++iter != tokens.end())
         flags = AppenderFlags(atoi(*iter));
-        
+
     switch (type)
     {
         case APPENDER_CONSOLE:
         {
-            if (flags == APPENDER_FLAGS_NONE)
-                flags = AppenderFlags(APPENDER_FLAGS_PREFIX_LOGLEVEL | APPENDER_FLAGS_PREFIX_LOGFILTERTYPE);
-
             AppenderConsole* appender = new AppenderConsole(NextAppenderId(), name, level, flags);
             appenders[appender->getId()] = appender;
             if (++iter != tokens.end())
@@ -134,9 +131,6 @@ void Log::CreateAppenderFromConfig(const char* name)
                 fprintf(stdout, "Log::CreateAppenderFromConfig: Missing file name for appender %s\n", name);
                 return;
             }
-
-            if (flags == APPENDER_FLAGS_NONE)
-                flags = AppenderFlags(APPENDER_FLAGS_PREFIX_LOGLEVEL | APPENDER_FLAGS_PREFIX_LOGFILTERTYPE | APPENDER_FLAGS_PREFIX_TIMESTAMP);
 
             filename = *iter;
 
@@ -181,12 +175,18 @@ void Log::CreateLoggerFromConfig(const char* name)
     options.append(name);
     options = ConfigMgr::GetStringDefault(options.c_str(), "");
 
+    if (options.empty())
+    {
+        fprintf(stderr, "Log::CreateLoggerFromConfig: Missing config option Logger.%s\n", name);
+        return;
+    }
+
     Tokens tokens(options, ',');
     Tokens::iterator iter = tokens.begin();
 
     if (tokens.size() != 3)
     {
-        fprintf(stdout, "Log::CreateLoggerFromConfig: Wrong configuration for logger %s. Config line: %s\n", name, options.c_str());
+        fprintf(stderr, "Log::CreateLoggerFromConfig: Wrong config option Logger.%s=%s\n", name, options.c_str());
         return;
     }
 
@@ -443,6 +443,23 @@ void Log::outFatal(LogFilterType filter, const char * str, ...)
     va_end(ap);
 }
 
+void Log::outCharDump(const char* param, const char * str, ...)
+{
+    if (!str || !ShouldLog(LOG_FILTER_PLAYER_DUMP, LOG_LEVEL_INFO))
+        return;
+
+    va_list ap;
+    va_start(ap, str);
+    char text[MAX_QUERY_LEN];
+    vsnprintf(text, MAX_QUERY_LEN, str, ap);
+    va_end(ap);
+
+    LogMessage* msg = new LogMessage(LOG_LEVEL_INFO, LOG_FILTER_PLAYER_DUMP, text);
+    msg->param1 = param;
+
+    write(msg);
+}
+
 void Log::outCommand(uint32 account, const char * str, ...)
 {
     if (!str || !ShouldLog(LOG_FILTER_GMCOMMAND, LOG_LEVEL_INFO))
@@ -455,7 +472,10 @@ void Log::outCommand(uint32 account, const char * str, ...)
     va_end(ap);
 
     LogMessage* msg = new LogMessage(LOG_LEVEL_INFO, LOG_FILTER_GMCOMMAND, text);
-    msg->param1 = account;
+
+    std::ostringstream ss;
+    ss << account;
+    msg->param1 = ss.str();
 
     write(msg);
 }
@@ -467,15 +487,15 @@ void Log::SetRealmID(uint32 id)
 
 void Log::Close()
 {
+    delete worker;
+    worker = NULL;
+    loggers.clear();
     for (AppenderMap::iterator it = appenders.begin(); it != appenders.end(); ++it)
     {
         delete it->second;
         it->second = NULL;
     }
     appenders.clear();
-    loggers.clear();
-    delete worker;
-    worker = NULL;
 }
 
 void Log::LoadFromConfig()

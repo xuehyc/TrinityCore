@@ -24,10 +24,10 @@ AppenderFile::AppenderFile(uint8 id, std::string const& name, LogLevel level, co
     , logDir(_logDir)
     , mode(_mode)
 {
-    dynamicName = std::string::npos != filename.find("%u");
+    dynamicName = std::string::npos != filename.find("%s");
     backup = _flags & APPENDER_FLAGS_MAKE_FILE_BACKUP;
-    if (!dynamicName)
-        logfile = OpenFile(_filename, _mode, backup);
+
+    logfile = !dynamicName ? OpenFile(_filename, _mode, backup) : NULL;
 }
 
 AppenderFile::~AppenderFile()
@@ -44,7 +44,7 @@ void AppenderFile::_write(LogMessage& message)
     if (dynamicName)
     {
         char namebuf[TRINITY_PATH_MAX];
-        snprintf(namebuf, TRINITY_PATH_MAX, filename.c_str(), message.param1);
+        snprintf(namebuf, TRINITY_PATH_MAX, filename.c_str(), message.param1.c_str());
         logfile = OpenFile(namebuf, mode, backup);
     }
 
@@ -54,7 +54,10 @@ void AppenderFile::_write(LogMessage& message)
         fflush(logfile);
 
         if (dynamicName)
+        {
             fclose(logfile);
+            logfile = NULL;
+        }
     }
 }
 

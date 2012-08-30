@@ -53,6 +53,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
             uint64 BarrentGUID;
             uint64 TirionGUID;
+            uint64 TirionFordringGUID;
             uint64 FizzlebangGUID;
             uint64 GarroshGUID;
             uint64 VarianGUID;
@@ -95,6 +96,8 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
                 TrialCounter = 50;
                 EventStage = 0;
+
+                TirionFordringGUID = 0;
 
                 TributeChestGUID = 0;
                 DataDamageTwin = 0;
@@ -163,6 +166,9 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                         break;
                     case NPC_TIRION:
                         TirionGUID = creature->GetGUID();
+                        break;
+                    case NPC_TIRION_FORDRING:
+                        TirionFordringGUID = creature->GetGUID();
                         break;
                     case NPC_FIZZLEBANG:
                         FizzlebangGUID = creature->GetGUID();
@@ -491,6 +497,8 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                         return BarrentGUID;
                     case NPC_TIRION:
                         return TirionGUID;
+                    case NPC_TIRION_FORDRING:
+                        return TirionFordringGUID;
                     case NPC_FIZZLEBANG:
                         return FizzlebangGUID;
                     case NPC_GARROSH:

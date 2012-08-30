@@ -78,17 +78,15 @@ void HandleAuraOnRaidTwinValkyr(Unit* caller, uint32 spellId, bool remove, bool 
 
 enum Yells
 {
-    SAY_AGGRO           = -1649040,
-    SAY_DEATH           = -1649041,
-    SAY_BERSERK         = -1649042,
-    EMOTE_SHIELD        = -1649043,
-    SAY_SHIELD          = -1649044,
-    SAY_KILL1           = -1649045,
-    SAY_KILL2           = -1649046,
-    EMOTE_LIGHT_VORTEX  = -1649047,
-    SAY_LIGHT_VORTEX    = -1649048,
-    EMOTE_DARK_VORTEX   = -1649049,
-    SAY_DARK_VORTEX     = -1649050,
+    SAY_AGGRO               = 0,
+    SAY_NIGHT               = 1,
+    SAY_LIGHT               = 2,
+    EMOTE_VORTEX            = 3,
+    EMOTE_TWINK_PACT        = 4,
+    SAY_TWINK_PACT          = 5,
+    SAY_KILL_PLAYER         = 6,
+    SAY_BERSERK             = 7,
+    SAY_DEATH               = 8,
 };
 
 enum Equipment
@@ -179,7 +177,6 @@ struct boss_twin_baseAI : public ScriptedAI
     uint32 m_uiTouchTimer;
     uint32 m_uiBerserkTimer;
 
-    int32 m_uiVortexSay;
     int32 m_uiVortexEmote;
     uint32 m_uiSisterNpcId;
     uint32 m_uiColorballNpcId;
@@ -305,7 +302,7 @@ struct boss_twin_baseAI : public ScriptedAI
         if (who->HasAura(SPELL_LIGHT_ESSENCE))
             who->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE);
 
-        DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, me);
+        Talk(SAY_KILL_PLAYER);
         if (instance)
             instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
     }
@@ -488,8 +485,7 @@ struct boss_twin_baseAI : public ScriptedAI
 
             if (urand(0, 1))
             {
-                DoScriptText(m_uiVortexEmote, me);
-                DoScriptText(m_uiVortexSay, me);
+                Talk(m_uiVortexEmote);
                 DoCastAOE(m_uiVortexSpellId);
 
                 std::list<Unit*> targetList;
@@ -526,8 +522,8 @@ struct boss_twin_baseAI : public ScriptedAI
             }
             else
             {
-                DoScriptText(EMOTE_SHIELD, me);
-                DoScriptText(SAY_SHIELD, me);
+                Talk(EMOTE_TWINK_PACT);
+                Talk(SAY_TWINK_PACT);
 
                 if (Creature* Sister = GetSister())
                     Sister->CastSpell(Sister, SPELL_TWIN_POWER, true);
@@ -617,8 +613,7 @@ public:
             boss_twin_baseAI::Reset();
             SetEquipmentSlots(false, EQUIP_MAIN_1, EQUIP_OFFHAND_1, EQUIP_RANGED_1);
             m_uiSpecialAbilityTimer = 40000;
-            m_uiVortexEmote = EMOTE_LIGHT_VORTEX;
-            m_uiVortexSay = SAY_LIGHT_VORTEX;
+            m_uiVortexEmote = EMOTE_VORTEX;
             m_uiSisterNpcId = NPC_DARKBANE;
             m_uiColorballNpcId = NPC_UNLEASHED_LIGHT;
             m_uiEssenceNpcId = NPC_LIGHT_ESSENCE;
@@ -689,8 +684,7 @@ public:
             boss_twin_baseAI::Reset();
             SetEquipmentSlots(false, EQUIP_MAIN_2, EQUIP_OFFHAND_2, EQUIP_RANGED_2);
             m_uiSpecialAbilityTimer = 80000;
-            m_uiVortexEmote = EMOTE_DARK_VORTEX;
-            m_uiVortexSay = SAY_DARK_VORTEX;
+            m_uiVortexEmote = EMOTE_VORTEX;
             m_uiSisterNpcId = NPC_LIGHTBANE;
             m_uiColorballNpcId = NPC_UNLEASHED_DARK;
             m_uiEssenceNpcId = NPC_DARK_ESSENCE;
