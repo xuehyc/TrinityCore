@@ -187,7 +187,7 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             DespawnAdds();
-            DoScriptText(SAY_DEATH, me);
+            Talk(SAY_DEATH);
             if (instance)
                 instance->SetData(TYPE_JARAXXUS, DONE);
         }
@@ -198,7 +198,7 @@ public:
 
             if (instance)
                 instance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
-            DoScriptText(SAY_AGGRO, me);
+            Talk(SAY_AGGRO);
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -208,8 +208,8 @@ public:
 
             if (m_uiSummonInfernalEruptionTimer <= uiDiff)
             {
-                DoScriptText(EMOTE_INFERNAL_ERUPTION, me);
-                DoScriptText(SAY_INFERNAL_ERUPTION, me);
+                Talk(EMOTE_INFERNAL_ERUPTION);
+                Talk(SAY_INFERNAL_ERUPTION);
                 uint8 i = urand(2, 3);
                 me->SummonCreature(NPC_INFERNAL_VOLCANO, JaraxxusLoc[i].GetPositionX(), JaraxxusLoc[i].GetPositionY(), JaraxxusLoc[i].GetPositionZ(), TEMPSUMMON_MANUAL_DESPAWN);
                 m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
@@ -243,8 +243,8 @@ public:
                 {
                     if (me->IsValidAttackTarget(target) && target->isAlive())
                     {
-                        DoScriptText(EMOTE_INCINERATE, me, target);
-                        DoScriptText(SAY_INCINERATE, me);
+                        Talk(EMOTE_INCINERATE, target->GetGUID());
+                        Talk(SAY_INCINERATE);
                         me->AddAura(RAID_MODE(SPELL_INCINERATE_FLESH_0, SPELL_INCINERATE_FLESH_1, SPELL_INCINERATE_FLESH_2, SPELL_INCINERATE_FLESH_3), target);
                         m_uiIncinerateFleshTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
                     }
@@ -281,7 +281,7 @@ public:
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true))
                 {
-                    DoScriptText(EMOTE_LEGION_FLAME, me, target);
+                    Talk(EMOTE_LEGION_FLAME, target->GetGUID());
                     DoCast(target, SPELL_LEGION_FLAME);
                 }
                 m_uiLegionFlameTimer = urand(20*IN_MILLISECONDS, 30*IN_MILLISECONDS);

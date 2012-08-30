@@ -2651,7 +2651,7 @@ Appender.GM=2,2,0,GM.log
 Appender.DBErrors=2,2,0,DBErrors.log
 Appender.Char=2,2,0,Char.log,w
 Appender.RA=2,2,0,RA.log
-Appender.Warden=2,2,0,Warden.log
+Appender.Warden=2,4,0,Warden.log
 Appender.Chat=2,2,0,Chat.log
 Appender.CharDump=2,2,0,%s.log
 Appender.Arenas=2,2,0,Arena.log
@@ -2735,7 +2735,7 @@ Logger.Chat=22,3,Chat
 Logger.DBErrors=26,5,Console Server DBErrors
 Logger.GM=27,3,Console Server GM
 Logger.RA=28,3,RA
-Logger.Warden=29,3,Warden
+Logger.Warden=29,4,Warden
 Logger.WorldServer=31,3,Console Server
 Logger.Character=34,3,Char
 Logger.Arenas=35,3,Arenas
@@ -2743,6 +2743,7 @@ Logger.SQLDriver=36,5,SQLDriver
 Logger.SQLDev=37,3,SQLDev
 Logger.CharDump=38,3,CharDump
 Logger.Load=40,3,Console Server
+Logger.Opcodes=41,6,Console Server
 
 #
 #    Loggers
@@ -2750,7 +2751,7 @@ Logger.Load=40,3,Console Server
 #                     (Using spaces as separator).
 #        Default:     "Root Chat DBErrors GM RA Warden Character Load"
 
-Loggers=Root Chat DBErrors GM RA Warden Character Load WorldServer
+Loggers=Root Chat DBErrors GM RA Warden Character Load WorldServer Opcodes
 
 ###################################################################################################
 # Custom config section START

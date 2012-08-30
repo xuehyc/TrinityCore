@@ -68,6 +68,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
             uint64 LightbaneGUID;
             uint64 AnubarakGUID;
 
+            uint64 CrusadersCacheGUID;
             uint64 FloorGUID;
 
             uint64 TributeChestGUID;
@@ -99,6 +100,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
                 TirionFordringGUID = 0;
 
+                CrusadersCacheGUID = 0;
                 TributeChestGUID = 0;
                 DataDamageTwin = 0;
 
@@ -278,10 +280,18 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                             secondBossAlreadySpawned = false;
                         break;
                     case TYPE_JARAXXUS:
+                        // Cleanup Icehowl
+                        if (Creature* icehowl = instance->GetCreature(IcehowlGUID))
+                            icehowl->DespawnOrUnsummon();
                         if (data == DONE)
                             EventStage = 2000;
                         break;
                     case TYPE_CRUSADERS:
+                        // Cleanup Jaraxxus
+                        if (Creature* jaraxxus = instance->GetCreature(JaraxxusGUID))
+                            jaraxxus->DespawnOrUnsummon();
+                        if (Creature* fizzlebang = instance->GetCreature(FizzlebangGUID))
+                            fizzlebang->DespawnOrUnsummon();
                         switch (data)
                         {
                             case IN_PROGRESS:
@@ -307,15 +317,26 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                                 }
 
                                 if (entry)
+                                {
                                     if (Creature* tirion =  instance->GetCreature(TirionGUID))
+                                    {
                                         if (GameObject* chest = tirion->SummonGameObject(entry, 563.673f, 139.571f, 393.837f, 4.7106f, 0, 0, 0, 0, 90000000))
+                                        {
                                             chest->SetRespawnTime(chest->GetRespawnDelay());
+                                            CrusadersCacheGUID = chest->GetGUID();
+                                        }
+                                    }
+                                }
 
                                 EventStage = 3100;
                                 break;
                         }
                         break;
                     case TYPE_VALKIRIES:
+                        // Cleanup chest
+                        if (CrusadersCacheGUID)
+                            if (GameObject* cache = instance->GetGameObject(CrusadersCacheGUID))
+                                cache->Delete();
                         switch (data)
                         {
                             case FAIL:

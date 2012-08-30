@@ -409,7 +409,7 @@ struct boss_twin_baseAI : public ScriptedAI
 
     void JustDied(Unit* /*killer*/)
     {
-        DoScriptText(SAY_DEATH, me);
+        Talk(SAY_DEATH);
 
         HandleAuraOnRaidTwinValkyr(me, SPELL_POWER_UP, true, false, 0);
         HandleAuraOnRaidTwinValkyr(me, SPELL_LIGHT_ESSENCE, true, false, 0);
@@ -459,7 +459,7 @@ struct boss_twin_baseAI : public ScriptedAI
             DoZoneInCombat(Sister);
         }
 
-        DoScriptText(SAY_AGGRO, me);
+        Talk(SAY_AGGRO);
         DoCast(me, m_uiSurgeSpellId);
     }
 
@@ -577,7 +577,7 @@ struct boss_twin_baseAI : public ScriptedAI
             if (!m_bIsBerserk)
             {
                 DoCast(me, SPELL_BERSERK);
-                DoScriptText(SAY_BERSERK, me);
+                Talk(SAY_BERSERK);
                 m_bIsBerserk = true;
             }
         } else m_uiBerserkTimer -= uiDiff;
