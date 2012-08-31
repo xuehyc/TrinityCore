@@ -21,6 +21,8 @@
 #include "ulduar.h"
 #include "InstanceScript.h"
 
+#include <limits>
+
 /* SQL
 -- UPDATE `creature_template` SET `AIName`='', `ScriptName`= WHERE `entry`=;
 
@@ -46,7 +48,28 @@ UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_enslaved_fire_elem
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_guardian' WHERE `entry`=33822;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_slayer' WHERE `entry`=33823;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_shadowblade' WHERE `entry`=33824;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_molten_colossus' WHERE `entry`=34069;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_molten_colossus' WHERE `entry`=34069;   
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_forge_construct' WHERE `entry`=34085;  
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_magma_rager' WHERE `entry`=34086; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_champion_of_hodir' WHERE `entry`=34133; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_winter_revenant' WHERE `entry`=34134; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_winter_rumbler' WHERE `entry`=34135;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_winter_jormungar' WHERE `entry`=34137;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_mechagnome_battletank' WHERE `entry`=34164;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_arachnopod_destroyer' WHERE `entry`=34183;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_clockwork_mechanic' WHERE `entry`=34184;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_ice_turret' WHERE `entry`=34224;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_hardened_iron_golem' WHERE `entry`=34190; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_clockwork_sapper' WHERE `entry`=34193; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_rune_etched_forged_sentry' WHERE `entry` IN (34196, 34234); 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_chamber_overseer' WHERE `entry`=34197; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_iron_mender' WHERE `entry`=34198; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_lightning_charged_iron_dwarf' WHERE `entry`=34199; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_parts_recovery_technician' WHERE `entry`=34267; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XR949_salvagebot' WHERE `entry`=34269; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_salvagebot_sawblade' WHERE `entry`=34288;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XD175_compactobot' WHERE `entry`=34271; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XB488_disposalbot' WHERE `entry`=34273; 
 
 DELETE FROM `spell_script_names` WHERE `spell_id`=63059;
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63059, 'spell_pollinate');
@@ -56,7 +79,7 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 
 
 */
-
+// helper template - basic script stuff
 // class npc_ : public CreatureScript
 // {
 // private:
@@ -112,7 +135,7 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 /*                       Predicates                                     */
 /************************************************************************/
 
-struct RangeCheck
+struct RangeCheck : public std::unary_function<Unit*, bool>
 {
     RangeCheck(Unit* base, float min, float max) : __base(base), __mindist(min), __maxdist(max) {}
 
@@ -132,7 +155,7 @@ struct RangeCheck
 
 // Note: This predicate also works in SelectTarget(...), while Trinity::UnitAuraCheck does not (due to missing const-specifier)
 template<bool IsApplied>
-struct AuraAppliedCheck
+struct AuraAppliedCheck : public std::unary_function<Unit*, bool>    	
 {
     AuraAppliedCheck(uint32 spellId) : __spellId(spellId) {}
     bool operator()(Unit* const target) const
@@ -362,10 +385,840 @@ class npc_molten_colossus : public CreatureScript
         }
 };
 
+class npc_forge_construct : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_CHARGE            = 1,
+            EVENT_FLAME_EMISSION,
+        };
+        enum Spells
+        {
+            SPELL_CHARGE            = 64719,
+            SPELL_FLAME_EMISSION_10 = 64720,
+            SPELL_FLAME_EMISSION_25 = 64721,
+        };
+    public:
+        npc_forge_construct () : CreatureScript("npc_forge_construct") {}
+
+        struct npc_forge_constructAI: public ScriptedAI
+        {
+            npc_forge_constructAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_CHARGE, urand(8, 10)*IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_FLAME_EMISSION, urand(4, 6)*IN_MILLISECONDS);
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_CHARGE:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, RangeCheck(me, 5.0f, 100.0f)))
+                                DoCast(target, SPELL_CHARGE);
+                            events.ScheduleEvent(EVENT_CHARGE, urand(8*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                            break;
+                        case EVENT_FLAME_EMISSION:
+                            DoCast(RAID_MODE(SPELL_FLAME_EMISSION_10, SPELL_FLAME_EMISSION_25));
+                            events.ScheduleEvent(EVENT_FLAME_EMISSION, urand(4*IN_MILLISECONDS, 6*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_forge_constructAI(creature);
+        }
+};
+
+class npc_magma_rager : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {   
+            EVENT_FIREBLAST         = 1,
+            EVENT_SUPERHEATED_WINDS,
+        };
+        enum Spells
+        {
+            SPELL_FIREBLAST         = 64773,
+            SPELL_SUPERHEATED_WINDS = 64746,
+        };
+    public:
+        npc_magma_rager () : CreatureScript("npc_magma_rager") {}
+
+        struct npc_magma_ragerAI: public ScriptedAI
+        {
+            npc_magma_ragerAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_FIREBLAST, urand(4*IN_MILLISECONDS,6*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_SUPERHEATED_WINDS, 3*IN_MILLISECONDS);
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_FIREBLAST:
+                            DoCastVictim(SPELL_FIREBLAST);
+                            events.ScheduleEvent(EVENT_FIREBLAST, urand(4*IN_MILLISECONDS,6*IN_MILLISECONDS));
+                            break;
+                        case EVENT_SUPERHEATED_WINDS:
+                            DoCast(SPELL_SUPERHEATED_WINDS);
+                            events.ScheduleEvent(EVENT_SUPERHEATED_WINDS, 12*IN_MILLISECONDS);
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_magma_ragerAI(creature);
+        }
+};
+
+class npc_mechagnome_battletank : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_FLAME_CANNON = 1,
+            EVENT_JUMP_ATTACK,
+        };
+        enum Spells
+        {
+            SPELL_FLAME_CANNON = 64692,
+            SPELL_JUMP_ATTACK = 64953,
+        };
+    public:
+        npc_mechagnome_battletank () : CreatureScript("npc_mechagnome_battletank") {}
+
+        struct npc_mechagnome_battletankAI: public ScriptedAI
+        {
+            npc_mechagnome_battletankAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_FLAME_CANNON, urand(2*IN_MILLISECONDS, 3*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_JUMP_ATTACK, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_FLAME_CANNON:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, RangeCheck(me, 30.0f, 200.0f)))
+                                DoCast(target, SPELL_FLAME_CANNON);
+                            events.ScheduleEvent(EVENT_FLAME_CANNON, urand(2*IN_MILLISECONDS, 3*IN_MILLISECONDS));
+                            break;
+                        case EVENT_JUMP_ATTACK:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, RangeCheck(me, 5.0f, 35.0f)))
+                                DoCast(target, SPELL_JUMP_ATTACK); // TODO: check if the jump effect works correctly
+                            events.ScheduleEvent(EVENT_JUMP_ATTACK, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_mechagnome_battletankAI(creature);
+        }
+};
+
+class npc_parts_recovery_technician : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_MECHANO_KICK = 1,
+        };
+        enum Spells
+        {
+            SPELL_DEFENSE_MATRIX = 65070,
+            SPELL_MECHANO_KICK = 65071,
+        };
+    public:
+        npc_parts_recovery_technician () : CreatureScript("npc_parts_recovery_technician") {}
+
+        struct npc_parts_recovery_technicianAI: public ScriptedAI
+        {
+            npc_parts_recovery_technicianAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_MECHANO_KICK, urand(5*IN_MILLISECONDS, 6*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (!me->HasAura(SPELL_DEFENSE_MATRIX))
+                    DoCast(SPELL_DEFENSE_MATRIX);
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_MECHANO_KICK:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                                DoCast(target, SPELL_MECHANO_KICK); // Possibly triggered=true? Damage appeared strange during test
+                            events.ScheduleEvent(EVENT_MECHANO_KICK, urand(5*IN_MILLISECONDS, 6*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_parts_recovery_technicianAI(creature);
+        }
+};
+
+class npc_XR949_salvagebot : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_DEPLOY_SALVAGE_SAWs = 1,
+        };
+        enum Spells
+        {
+            SPELL_DEPLOY_SALVAGE_SAWS = 65099,
+        };
+    public:
+        npc_XR949_salvagebot () : CreatureScript("npc_XR949_salvagebot") {}
+
+        struct npc_XR949_salvagebotAI: public ScriptedAI
+        {
+            npc_XR949_salvagebotAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_DEPLOY_SALVAGE_SAWs, urand(5*IN_MILLISECONDS,10*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_DEPLOY_SALVAGE_SAWs:
+                            DoCast(SPELL_DEPLOY_SALVAGE_SAWS);
+                            events.ScheduleEvent(EVENT_DEPLOY_SALVAGE_SAWs, urand(5*IN_MILLISECONDS,10*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_XR949_salvagebotAI(creature);
+        }
+};
+
+class npc_salvagebot_sawblade : public CreatureScript
+{
+    private:
+        enum Spells
+        {
+            SPELL_SAWBLADES_10 = 65089,
+            SPELL_SAWBLADES_25 = 65102,
+        };
+    public:
+        npc_salvagebot_sawblade () : CreatureScript("npc_salvagebot_sawblade") {}
+
+        struct npc_salvagebot_sawbladeAI: public Scripted_NoMovementAI
+        {
+            npc_salvagebot_sawbladeAI(Creature* creature) : Scripted_NoMovementAI(creature) {}
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+                
+                DoSpellAttackIfReady(RAID_MODE(SPELL_SAWBLADES_10, SPELL_SAWBLADES_25)); // Hope this works, otherwise, we need to cast manually...
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_salvagebot_sawbladeAI(creature);
+        }
+};
+
+class npc_XD175_compactobot : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_COMPACTED = 1,
+            EVENT_TRASH_COMPACTOR, 
+        };
+        enum Spells
+        {
+            SPELL_COMPACTED_10          = 65078,
+            SPELL_COMPACTED_25          = 65105,
+            SPELL_TRASH_COMPACTOR_10    = 65073,
+            SPELL_TRASh_COMPACTOR_25    = 65106,
+        };
+    public:
+        npc_XD175_compactobot () : CreatureScript("npc_XD175_compactobot") {}
+
+        struct npc_XD175_compactobotAI: public ScriptedAI
+        {
+            npc_XD175_compactobotAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_COMPACTED, urand(5*IN_MILLISECONDS, 7*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_TRASH_COMPACTOR, urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_COMPACTED:
+                            DoCast(RAID_MODE(SPELL_COMPACTED_10, SPELL_COMPACTED_25));
+                            events.ScheduleEvent(EVENT_COMPACTED, urand(5*IN_MILLISECONDS, 7*IN_MILLISECONDS));
+                            break;
+                        case EVENT_TRASH_COMPACTOR:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, RangeCheck(me, 10.0f, 40.0f)))
+                            {
+                                DoResetThreat();
+                                DoCast(target, RAID_MODE(SPELL_TRASH_COMPACTOR_10, SPELL_TRASh_COMPACTOR_25));
+                                me->AddThreat(target, 2000.0f);
+                            }
+                            events.ScheduleEvent(EVENT_TRASH_COMPACTOR, urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_XD175_compactobotAI(creature);
+        }
+};
+
+class npc_XB488_disposalbot : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_CUT_SCRAP_METAL = 1,
+        };
+        enum Spells
+        {
+            SPELL_CUT_SCRAP_METAL_10 = 65080,
+            SPELL_CUT_SCRAP_METAL_25 = 65104,
+            SPELL_SELF_DESTRCUT = 65084,
+        };
+    public:
+        npc_XB488_disposalbot () : CreatureScript("npc_XB488_disposalbot") {}
+
+        struct npc_XB488_disposalbotAI: public ScriptedAI
+        {
+            npc_XB488_disposalbotAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                gotDest = false;
+                events.Reset();
+                events.ScheduleEvent(EVENT_CUT_SCRAP_METAL, urand(1*IN_MILLISECONDS, 2*IN_MILLISECONDS));
+            }
+
+            void DamageTaken(Unit* /*damager*/, uint32& damage)
+            {
+                if (damage >= me->GetHealth())
+                {
+                    if (gotDest)
+                        return;
+                    gotDest = true;
+                    DoCast(SPELL_SELF_DESTRCUT);
+                }
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_CUT_SCRAP_METAL:
+                            DoCastVictim(RAID_MODE(SPELL_CUT_SCRAP_METAL_10, SPELL_CUT_SCRAP_METAL_25));
+                            events.ScheduleEvent(EVENT_CUT_SCRAP_METAL, urand(4*IN_MILLISECONDS, 5*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+                bool gotDest;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_XB488_disposalbotAI(creature);
+        }
+};
+
 /************************************************************************/
 /*                          Outer Sanctuary                             */
 /************************************************************************/
 
+class npc_hardened_iron_golem : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_HARDEN_FISTS = 1,
+            EVENT_RUNE_PUNCH,
+        };
+        enum Spells
+        {
+            SPELL_HARDEN_FIST   = 64877,
+            SPELL_RUNE_PUNCH_10 = 64874,
+            SPELL_RUNE_PUNCH_25 = 64967,
+        };
+    public:
+        npc_hardened_iron_golem () : CreatureScript("npc_hardened_iron_golem") {}
+
+        struct npc_hardened_iron_golemAI: public ScriptedAI
+        {
+            npc_hardened_iron_golemAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_HARDEN_FISTS, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_RUNE_PUNCH, urand(6*IN_MILLISECONDS, 12*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_HARDEN_FISTS:
+                            DoCast(SPELL_HARDEN_FIST);
+                            if (me->GetHealthPct() > 50.0f)
+                                events.ScheduleEvent(EVENT_HARDEN_FISTS, urand(15*IN_MILLISECONDS, 20*IN_MILLISECONDS));
+                            else
+                                events.ScheduleEvent(EVENT_HARDEN_FISTS, urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS));
+                            break;
+                        case EVENT_RUNE_PUNCH:
+                            DoCastVictim(RAID_MODE(SPELL_RUNE_PUNCH_10, SPELL_RUNE_PUNCH_25));
+                            events.ScheduleEvent(EVENT_RUNE_PUNCH, urand(6*IN_MILLISECONDS, 12*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_hardened_iron_golemAI(creature);
+        }
+};
+
+class npc_rune_etched_forged_sentry : public CreatureScript // For NPC_RUNE_ETCHED_SENTRY (outer sanctuary) and NPC_RUNE_FORGED_SENTRY (grand approach)
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_FLAMING_RUNE = 1,
+            EVENT_LAVABURST,
+            EVENT_RUNED_FLAME_JETS,
+        };
+        enum Spells
+        {
+            SPELL_FLAMING_RUNE          = 64852,
+            SPELL_LAVA_BURST_10         = 64870,
+            SPELL_LAVA_BURST_25         = 64991,
+            SPELL_RUNED_FLAME_JETS_10   = 64847,
+            SPELL_RUNED_FLAME_JETS_25   = 64988,
+        };
+    public:
+        npc_rune_etched_forged_sentry () : CreatureScript("npc_rune_etched_forged_sentry") {}
+
+        struct npc_rune_etched_forged_sentryAI: public ScriptedAI
+        {
+            npc_rune_etched_forged_sentryAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_FLAMING_RUNE, urand(3*IN_MILLISECONDS, 5*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_LAVABURST, urand(7*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_RUNED_FLAME_JETS, urand(4*IN_MILLISECONDS, 6*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_FLAMING_RUNE:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                                DoCast(target, SPELL_FLAMING_RUNE);
+                            events.ScheduleEvent(EVENT_FLAMING_RUNE, urand(3*IN_MILLISECONDS, 5*IN_MILLISECONDS));
+                            break;
+                        case EVENT_LAVABURST:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                                DoCast(target, RAID_MODE(SPELL_LAVA_BURST_10, SPELL_LAVA_BURST_25));
+                            events.ScheduleEvent(EVENT_LAVABURST, urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS));
+                            break;
+                        case EVENT_RUNED_FLAME_JETS:
+                            DoCastVictim(RAID_MODE(SPELL_RUNED_FLAME_JETS_10, SPELL_RUNED_FLAME_JETS_25));
+                            events.ScheduleEvent(EVENT_RUNED_FLAME_JETS, urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_rune_etched_forged_sentryAI(creature);
+        }
+};
+
+class npc_chamber_overseer : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_STAGGERING_ROAR = 1,
+            EVENT_DEVASTATING_LEAP,
+        };
+        enum Spells
+        {
+            SPELL_DEVASTATING_LEAP_10   = 64820,
+            SPELL_DEVASTATING_LEAP_25   = 64943,
+            SPELL_STAGGERING_ROAR_10    = 64825,
+            SPELL_STAGGERING_ROAR_25    = 64944,
+            // SPELL_DISPLACEMENT_DEVICE = 64783, // Sense of this spell ? The summoned npc does not do anything
+        };
+    public:
+        npc_chamber_overseer () : CreatureScript("npc_chamber_overseer") {}
+
+        struct npc_chamber_overseerAI: public ScriptedAI
+        {
+            npc_chamber_overseerAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_STAGGERING_ROAR, urand(4*IN_MILLISECONDS, 8*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_STAGGERING_ROAR:
+                            DoCastVictim(RAID_MODE(SPELL_STAGGERING_ROAR_10, SPELL_STAGGERING_ROAR_25));
+                            events.ScheduleEvent(EVENT_STAGGERING_ROAR, urand(4*IN_MILLISECONDS, 8*IN_MILLISECONDS));
+                            break;
+                        case EVENT_DEVASTATING_LEAP:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, RangeCheck(me, 10.0f, 80.0f)))
+                            {
+                                DoResetThreat();
+                                DoCast(target, RAID_MODE(SPELL_DEVASTATING_LEAP_10, SPELL_DEVASTATING_LEAP_25));
+                                me->AddThreat(target, 2000.0f);
+                            }
+                            events.ScheduleEvent(EVENT_DEVASTATING_LEAP, urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_chamber_overseerAI(creature);
+        }
+};
+
+class npc_iron_mender : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_FUSE_LIGHTNING = 1,
+            EVENT_FUSE_METAL,
+            EVENT_CHANGE_TARGET,
+        };
+        enum Spells
+        {
+            SPELL_ELECTRO_SHOCK_10  = 64918,
+            SPELL_ELECTRO_SHOCK_25  = 64971,
+            SPELL_FUSE_LIGHTNING_10 = 64903,
+            SPELL_FUSE_LIGHTNING_25 = 64970,
+            SPELL_FUSE_METAL_10     = 64897,
+            SPELL_FUSE_METAL_25     = 64968,
+        };
+    public:
+        npc_iron_mender () : CreatureScript("npc_iron_mender") {}
+
+        struct npc_iron_menderAI: public ScriptedAI
+        {
+            npc_iron_menderAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();                
+                events.ScheduleEvent(EVENT_CHANGE_TARGET, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS)); // Change target periodically, target gets auto-casted
+                events.ScheduleEvent(EVENT_FUSE_LIGHTNING, urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_FUSE_METAL, urand(1500, 2500));
+            }
+
+            void AttackStart(Unit* target)
+            {
+                AttackStartCaster(target, 50.0f);
+            }
+
+            void EnterCombat(Unit* target)
+            {
+                if (Unit* newtarget = SelectTarget(SELECT_TARGET_RANDOM))
+                {
+                    me->AddThreat(newtarget, std::numeric_limits<float>::max());
+                    ScriptedAI::EnterCombat(newtarget);
+                }
+                else
+                    ScriptedAI::EnterCombat(target);                
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_CHANGE_TARGET:
+                            DoResetThreat();
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                                me->AddThreat(target, std::numeric_limits<float>::max());
+                            events.ScheduleEvent(EVENT_CHANGE_TARGET, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                            break;
+                        case EVENT_FUSE_LIGHTNING:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                                DoCast(target, RAID_MODE(SPELL_FUSE_LIGHTNING_10, SPELL_FUSE_LIGHTNING_25));
+                            events.ScheduleEvent(EVENT_FUSE_LIGHTNING, urand(8*IN_MILLISECONDS, 12*IN_MILLISECONDS));
+                            break;
+                        case EVENT_FUSE_METAL:
+                            {
+                                std::list<Unit*> allies;
+                                Trinity::AnyFriendlyUnitInObjectRangeCheck checker(me, me, 30.0f);
+                                Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, allies, checker);
+                                me->VisitNearbyObject(30.0f, searcher);
+                                allies.sort(Trinity::HealthPctOrderPred());
+                                DoCast((*allies.begin()), RAID_MODE(SPELL_FUSE_METAL_10, SPELL_FUSE_METAL_25));
+                            }
+                            events.ScheduleEvent(EVENT_FUSE_METAL, urand(1500, 2500));
+                            break;
+                    }
+                }
+
+                DoSpellAttackIfReady(RAID_MODE(SPELL_ELECTRO_SHOCK_10, SPELL_ELECTRO_SHOCK_25));
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_iron_menderAI(creature);
+        }
+};
+
+class npc_lightning_charged_iron_dwarf : public CreatureScript
+{
+    private:
+        enum Spells
+        {
+            SPELL_LIGHTNING_CHARGED_10 = 64889,
+            SPELL_LIGHTNING_CHARGED_25 = 64975,
+        };
+    public:
+        npc_lightning_charged_iron_dwarf () : CreatureScript("npc_lightning_charged_iron_dwarf") {}
+
+        struct npc_lightning_charged_iron_dwarfAI: public ScriptedAI
+        {
+            npc_lightning_charged_iron_dwarfAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (!me->HasAura(RAID_MODE(SPELL_LIGHTNING_CHARGED_10, SPELL_LIGHTNING_CHARGED_25)))
+                    DoCast(RAID_MODE(SPELL_LIGHTNING_CHARGED_10, SPELL_LIGHTNING_CHARGED_25));
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_lightning_charged_iron_dwarfAI(creature);
+        }
+};
 
 /************************************************************************/
 /*                          Inner Sanctuary                             */
@@ -548,6 +1401,284 @@ class npc_charged_sphere : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return new npc_charged_sphereAI(creature);
+        }
+};
+
+/************************************************************************/
+/*                      Inner Sanctuary - Hodir                         */
+/************************************************************************/
+
+class npc_champion_of_hodir : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_FREEZING_BREATH = 1,
+            EVENT_STOMP,
+        };
+        enum Spells
+        {
+            SPELL_FREEZING_BREATH   = 64649,
+            SPELL_STOMP_10          = 64652,
+            SPELL_STOMP_25          = 64639,
+        };
+    public:
+        npc_champion_of_hodir () : CreatureScript("npc_champion_of_hodir") {}
+
+        struct npc_champion_of_hodirAI: public ScriptedAI
+        {
+            npc_champion_of_hodirAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_STOMP, 5*IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_FREEZING_BREATH, urand(5, 8)*IN_MILLISECONDS);
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                    case EVENT_FREEZING_BREATH:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                        {
+                            me->SetFacingToObject(target);
+                            DoCastVictim(SPELL_FREEZING_BREATH);
+                        }
+                        events.ScheduleEvent(EVENT_FREEZING_BREATH, urand(5*IN_MILLISECONDS, 8*IN_MILLISECONDS));
+                        break;
+                    case EVENT_STOMP:
+                        DoCastAOE(RAID_MODE(SPELL_STOMP_10, SPELL_STOMP_25));
+                        events.ScheduleEvent(EVENT_STOMP, 5*IN_MILLISECONDS);
+                        break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_champion_of_hodirAI(creature);
+        }
+};
+
+class npc_winter_revenant : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_BLIZZARD = 1,
+            EVENT_WHIRLING_STRIKE,
+            EVENT_SHIELD,
+        };
+        enum Spells
+        {
+            SPELL_BLIZZARD_10                   = 64642,
+            SPELL_BLIZZARD_25                   = 64653,
+            SPELL_WHIRLING_STRIKE               = 64643,
+            SPELL_SHIELD_OF_THE_WINTER_REVENANT = 64644,
+        };
+    public:
+        npc_winter_revenant () : CreatureScript("npc_winter_revenant") {}
+
+        struct npc_winter_revenantAI: public ScriptedAI
+        {
+            npc_winter_revenantAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                DoCast(SPELL_SHIELD_OF_THE_WINTER_REVENANT);
+                events.Reset();
+                events.ScheduleEvent(EVENT_WHIRLING_STRIKE, urand(5,8)*IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_BLIZZARD, 3*IN_MILLISECONDS);
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_BLIZZARD:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                                DoCast(target, RAID_MODE(SPELL_BLIZZARD_10, SPELL_BLIZZARD_25));
+                            events.ScheduleEvent(EVENT_BLIZZARD, 6*IN_MILLISECONDS);
+                            break;
+                        case EVENT_WHIRLING_STRIKE:
+                            DoCastAOE(SPELL_WHIRLING_STRIKE);
+                            events.ScheduleEvent(EVENT_WHIRLING_STRIKE, urand(5*IN_MILLISECONDS,8*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_winter_revenantAI(creature);
+        }
+};
+
+class npc_winter_rumbler : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_CONE_OF_COLD = 1,
+            EVENT_SNOW_BLINDNESS,
+        };
+        enum Spells
+        {
+            SPELL_CONE_OF_COLD_10 = 64645,
+            SPELL_CONE_OF_COLD_25 = 64655,
+            SPELL_SNOW_BLINDNESS_10 = 64647,
+            SPELL_SNOW_BLINDNESS_25 = 64654,
+        };
+    public:
+        npc_winter_rumbler () : CreatureScript("npc_winter_rumbler") {}
+
+        struct npc_winter_rumblerAI: public ScriptedAI
+        {
+            npc_winter_rumblerAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_CONE_OF_COLD, 8*IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_SNOW_BLINDNESS, urand(2*IN_MILLISECONDS,3*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_CONE_OF_COLD:
+                            DoCastVictim(RAID_MODE(SPELL_CONE_OF_COLD_10, SPELL_CONE_OF_COLD_25));
+                            events.ScheduleEvent(EVENT_CONE_OF_COLD, 8*IN_MILLISECONDS);
+                            break;
+                        case EVENT_SNOW_BLINDNESS:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                                DoCast(target, RAID_MODE(SPELL_SNOW_BLINDNESS_10, SPELL_SNOW_BLINDNESS_25));
+                            events.ScheduleEvent(EVENT_SNOW_BLINDNESS, urand(2*IN_MILLISECONDS,3*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_winter_rumblerAI(creature);
+        }
+};
+
+class npc_winter_jormungar : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_ACIDIC_BITE = 1
+        };
+        enum Spells
+        {
+            SPELL_ACIDIC_BITE = 64638,
+        };
+    public:
+        npc_winter_jormungar () : CreatureScript("npc_winter_jormungar") {}
+
+        struct npc_winter_jormungarAI: public ScriptedAI
+        {
+            npc_winter_jormungarAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
+                events.Reset();
+                events.ScheduleEvent(EVENT_ACIDIC_BITE, urand(2*IN_MILLISECONDS, 3*IN_MILLISECONDS));
+            }
+
+            void EnterCombat(Unit* target)
+            {
+                me->SetStandState(UNIT_STAND_STATE_STAND);
+                ScriptedAI::EnterCombat(target);
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_ACIDIC_BITE:
+                            if (Aura* acidic = me->getVictim()->GetAura(SPELL_ACIDIC_BITE))
+                                if (acidic->GetStackAmount() >= 5)
+                                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                                    {
+                                        DoCast(target, SPELL_ACIDIC_BITE);
+                                        return;
+                                    }
+                            DoCastVictim(SPELL_ACIDIC_BITE); // Fallthrough
+                            events.ScheduleEvent(EVENT_ACIDIC_BITE, urand(2*IN_MILLISECONDS, 3*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_winter_jormungarAI(creature);
         }
 };
 
@@ -1184,6 +2315,289 @@ class npc_guardian_of_life : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return new npc_guardian_of_lifeAI(creature);
+        }
+};
+
+/************************************************************************/
+/*                      Inner Sanctuary - Mimiron                       */
+/************************************************************************/
+
+class npc_arachnopod_destroyer : public CreatureScript // TODO: Add mind-ctrl-handling, once mind-ctrl works fine :D
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_CHARGED_LEAP = 1,
+            EVENT_FLAME_SPRAY,
+            EVENT_MACHINE_GUN,
+        };
+        enum Spells
+        {
+            SPELL_CHARGED_LEAP      = 64779,
+            // SPELL_CHARGED_LEAP_DMG  = 64781, // Gets triggered by the spell above
+            SPELL_FLAME_SPRAY       = 64717,
+            SPELL_MACHINE_GUN       = 64776,
+        };
+    public:
+        npc_arachnopod_destroyer () : CreatureScript("npc_arachnopod_destroyer") {}
+
+        struct npc_arachnopod_destroyerAI: public ScriptedAI
+        {
+            npc_arachnopod_destroyerAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_CHARGED_LEAP, urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_FLAME_SPRAY, urand(6*IN_MILLISECONDS, 8*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_CHARGED_LEAP:                            
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, RangeCheck(me, 10.0f, 40.0f)))
+                            {
+                                DoResetThreat();
+                                DoCast(target, SPELL_CHARGED_LEAP);
+                            }
+                            events.ScheduleEvent(EVENT_CHARGED_LEAP, urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS));
+                            break;
+                        case EVENT_FLAME_SPRAY:
+                            DoCastVictim(SPELL_FLAME_SPRAY);
+                            events.ScheduleEvent(EVENT_FLAME_SPRAY, urand(6*IN_MILLISECONDS, 8*IN_MILLISECONDS));
+                            break;
+                        case EVENT_MACHINE_GUN:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                                DoCast(target, SPELL_MACHINE_GUN);
+                            events.ScheduleEvent(EVENT_MACHINE_GUN, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_arachnopod_destroyerAI(creature);
+        }
+};
+
+class npc_clockwork_mechanic : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_ICE_TURRET = 1,
+        };
+        enum Spells
+        {
+            SPELL_ICE_TURRET = 64966,
+        };
+    public:
+        npc_clockwork_mechanic () : CreatureScript("npc_clockwork_mechanic") {}
+
+        struct npc_clockwork_mechanicAI: public ScriptedAI
+        {
+            npc_clockwork_mechanicAI(Creature* creature) : ScriptedAI(creature), summons(me) {}
+
+            void Reset()
+            {
+                gotDowned = false;
+                summons.DespawnAll();
+                events.Reset();
+                events.ScheduleEvent(EVENT_ICE_TURRET, urand(7*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+            }
+
+            void DamageTaken(Unit* damager, uint32& damage)
+            {
+                if (damage >= me->GetHealth())
+                {
+                    if (gotDowned)
+                        return;
+                    gotDowned = true;
+                    DoCastAOE(SPELL_ICE_TURRET, true); // Instantly spawn one before dying
+                }
+            }
+
+            void JustSummoned(Creature* summon)
+            {
+                summons.Summon(summon);
+                if (summons.size() >= RAID_MODE(4, 8)) // Limit adds
+                    events.CancelEvent(EVENT_ICE_TURRET);
+            }
+
+            void SummonedCreatureDies(Creature* summon, Unit* /*killer*/)
+            {
+                summons.Despawn(summon);
+                if (summons.size() <= RAID_MODE(4, 8)) // if limit is not fulfilled, scheduled again
+                    events.RescheduleEvent(EVENT_ICE_TURRET, urand(7*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_ICE_TURRET:
+                            DoCastAOE(SPELL_ICE_TURRET);
+                            events.ScheduleEvent(EVENT_ICE_TURRET, urand(7*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+                SummonList summons;
+                bool gotDowned;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_clockwork_mechanicAI(creature);
+        }
+};
+
+class npc_ice_turret: public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_FROST_NOVA = 1
+        };
+        enum Spells
+        {
+            SPELL_ICE_NOVA_10 = 66346,
+            SPELL_ICE_NOVA_25 = 64919,
+        };
+    public:
+        npc_ice_turret () : CreatureScript("npc_ice_turret") {}
+
+        struct npc_ice_turretAI: public Scripted_NoMovementAI
+        {
+            npc_ice_turretAI(Creature* creature) : Scripted_NoMovementAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_FROST_NOVA, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_FROST_NOVA:
+                            DoCastAOE(RAID_MODE(SPELL_ICE_NOVA_10, SPELL_ICE_NOVA_25));
+                            events.ScheduleEvent(EVENT_FROST_NOVA, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                // Does not melee
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_ice_turretAI(creature);
+        }
+};
+
+class npc_clockwork_sapper : public CreatureScript
+{
+    private:
+        enum MyEvents
+        {
+            EVENT_ENERGY_SAP = 1
+        };
+        enum Spells
+        {
+            SPELL_ENERGY_SAP = 64740,
+        };
+    public:
+        npc_clockwork_sapper () : CreatureScript("npc_clockwork_sapper") {}
+
+        struct npc_clockwork_sapperAI: public ScriptedAI
+        {
+            npc_clockwork_sapperAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void Reset()
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_ENERGY_SAP, urand(1*IN_MILLISECONDS, 2*IN_MILLISECONDS));
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 event = events.ExecuteEvent())
+                {
+                    switch (event)
+                    {
+                        case EVENT_ENERGY_SAP:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                                DoCast(target, SPELL_ENERGY_SAP);
+                            events.ScheduleEvent(EVENT_ENERGY_SAP, urand(6*IN_MILLISECONDS, 8*IN_MILLISECONDS));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_clockwork_sapperAI(creature);
         }
 };
 
@@ -1922,12 +3336,31 @@ void AddSC_ulduar_trash()
     new npc_steelforged_defender();
     new npc_ironwork_cannon();
     new npc_molten_colossus();
+    new npc_forge_construct();
+    new npc_magma_rager();
+    new npc_mechagnome_battletank();
+    new npc_parts_recovery_technician();
+    new npc_XR949_salvagebot();
+    new npc_salvagebot_sawblade();
+    new npc_XD175_compactobot();
+    new npc_XB488_disposalbot();
 
     // OS
-
+    new npc_hardened_iron_golem();
+    new npc_rune_etched_forged_sentry();
+    new npc_chamber_overseer();
+    new npc_iron_mender();
+    new npc_lightning_charged_iron_dwarf();
+    
     // IS
     new npc_storm_tempered_keeper();
     new npc_charged_sphere();
+
+    // IS - Hodir
+    new npc_champion_of_hodir();
+    new npc_winter_revenant();
+    new npc_winter_rumbler();
+    new npc_winter_jormungar();
 
     // IS - Thorim
     new npc_dark_rune_thunderer();
@@ -1952,6 +3385,12 @@ void AddSC_ulduar_trash()
     new npc_ironroot_lasher();
     new npc_natures_blade();
     new npc_guardian_of_life();
+
+    // IS - Mimiron
+    new npc_arachnopod_destroyer();
+    new npc_clockwork_mechanic();
+    new npc_ice_turret();
+    new npc_clockwork_sapper();
 
     new spell_pollinate();
 }

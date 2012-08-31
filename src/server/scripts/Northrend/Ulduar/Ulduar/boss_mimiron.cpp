@@ -2405,3 +2405,7 @@ void AddSC_boss_mimiron()
     //new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets");
     //new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets_25");
 }
+
+#undef SPELL_NAPALM_SHELL
+#undef SPELL_HEAT_WAVE
+#undef SPELL_HAND_PULSE

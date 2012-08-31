@@ -565,7 +565,7 @@ bool IsPlayerInBrainRoom(const Player* player)
     return player->GetPositionZ() < 300.0f;
 }
 
-class DontLooksDirectlyInGazeCheck
+class DontLooksDirectlyInGazeCheck : public std::unary_function<WorldObject*, bool>
 {
     public:
         DontLooksDirectlyInGazeCheck(Unit* caster) : __caster(caster) {}
@@ -581,7 +581,7 @@ class DontLooksDirectlyInGazeCheck
         Unit* __caster;
 };
 
-class NotIsWeakenedImmortalCheck
+class NotIsWeakenedImmortalCheck : public std::unary_function<WorldObject*, bool>
 {
     public:
         NotIsWeakenedImmortalCheck() {}
@@ -595,7 +595,7 @@ class NotIsWeakenedImmortalCheck
         }
 };
 
-class BrainLinkTargetSelector
+class BrainLinkTargetSelector : public std::unary_function<WorldObject*, bool>
 {
     public:
         bool operator() (WorldObject* target)
@@ -604,7 +604,7 @@ class BrainLinkTargetSelector
         }
 };
 
-class DistancePredicate
+class DistancePredicate : public std::binary_function<Player*, Player*, bool>
 {
     public:
         DistancePredicate(Unit* base, bool descending, bool dim3) : __base(base), __descending(descending), __dim3(dim3) {}   // descending = absteigend
@@ -631,7 +631,7 @@ class DistancePredicate
         bool __dim3;
 };
 
-class GetNearestPlayers
+class GetNearestPlayers 
 {
     public:
         GetNearestPlayers(float distance, uint32 cap) : __distance(distance), __cap(cap) {}
@@ -666,7 +666,7 @@ class GetNearestPlayers
         float __distance;
 };
 
-struct InsaneCandidatePredicate
+struct InsaneCandidatePredicate : public std::unary_function<Player*, bool>
 {
     bool operator()(Player* p)
     {

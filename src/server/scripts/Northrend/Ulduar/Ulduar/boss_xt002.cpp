@@ -1294,3 +1294,9 @@ void AddSC_boss_xt002()
     new achievement_heartbreaker();
     new achievement_nerf_gravity_bombs();
 }
+
+#undef SPELL_SEARING_LIGHT
+#undef SPELL_GRAVITY_BOMB
+#undef SPELL_HEARTBREAK
+#undef SPELL_CONSUMPTION
+#undef SPELL_STATIC_CHARGED

@@ -1377,3 +1377,21 @@ void AddSC_boss_assembly_of_iron()
     new achievement_cant_do_that_while_stunned("achievement_cant_do_that_while_stunned");
     new achievement_cant_do_that_while_stunned("achievement_cant_do_that_while_stunned_25");
 }
+
+// Steelbreaker
+#undef SPELL_HIGH_VOLTAGE 
+#undef SPELL_FUSION_PUNCH 
+#undef SPELL_STATIC_DISRUPTION 
+#undef SPELL_OVERWHELMING_POWER 
+
+// Molgeim
+#undef SPELL_SHIELD_OF_RUNES 
+#undef SPELL_SHIELD_OF_RUNES_BUFF 
+#undef SPELL_LIGHTNING_BLAST 
+
+// Brundir
+#undef SPELL_CHAIN_LIGHTNING
+#undef SPELL_OVERLOAD 
+#undef SPELL_LIGHTNING_WHIRL 
+#undef SPELL_LIGHTNING_WHIRL_DMG 
+#undef SPELL_LIGHTNING_TENDRILS 

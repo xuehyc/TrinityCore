@@ -559,20 +559,22 @@ class spell_ulduar_rubble_summon : public SpellScriptLoader
 };
 
 // predicate function to select non main tank target
-class StoneGripTargetSelector
+class StoneGripTargetSelector : public std::unary_function<WorldObject*, bool>
 {
     public:
         StoneGripTargetSelector(Creature* me, Unit const* victim) : _me(me), _victim(victim) {}
 
-        bool operator() (WorldObject* target)
+        bool operator() (WorldObject* what)
         {
-            if (target == _victim && _me->getThreatManager().getThreatList().size() > 1)
-                return true;
+            if (Unit* target = what->ToUnit())
+            {
+                if (target == _victim && _me->getThreatManager().getThreatList().size() > 1)
+                    return true;
 
-            if (target->GetTypeId() != TYPEID_PLAYER)
-                return true;
-
-            return false;
+                if (target->GetTypeId() != TYPEID_PLAYER)
+                    return true;
+            }         
+            return true;
         }
 
         Creature* _me;
@@ -951,3 +953,13 @@ void AddSC_boss_kologarn()
     new achievement_with_open_arms("achievement_with_open_arms");
     new achievement_with_open_arms("achievement_with_open_arms_25");
 }
+
+#undef SPELL_ARM_DEAD_DAMAGE           
+#undef SPELL_TWO_ARM_SMASH             
+#undef SPELL_ONE_ARM_SMASH             
+#undef SPELL_ARM_SWEEP                 
+#undef SPELL_STONE_SHOUT               
+#undef SPELL_PETRIFY_BREATH            
+#undef SPELL_STONE_GRIP                
+#undef SPELL_FOCUSED_EYEBEAM_PERIODIC
+#undef SPELL_STONE_GRIP_DOT     

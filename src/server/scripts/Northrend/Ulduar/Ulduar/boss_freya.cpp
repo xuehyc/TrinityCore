@@ -2234,3 +2234,23 @@ void AddSC_boss_freya()
     new achievement_knock_knock_knock_on_wood("achievement_knock_knock_knock_on_wood");     // 10m 3179 [10449]
     new achievement_knock_knock_knock_on_wood("achievement_knock_knock_knock_on_wood_25");  // 25m 3187 [10461]
 }
+
+#undef SPELL_TOUCH_OF_EONAR 
+#undef SPELL_SUNBEAM 
+#undef SPELL_FREYA_UNSTABLE_ENERGY 
+#undef SPELL_IRON_ROOTS 
+#undef SPELL_FREYA_GROUND_TREMOR 
+#undef SPELL_LIFEBINDERS_GIFT 
+#undef SPELL_DETONATE 
+#undef SPELL_TIDAL_WAVE 
+#undef SPELL_LIGHTNING_LASH 
+#undef SPELL_STORMBOLT 
+#undef SPELL_HARDENED_BARK 
+#undef SPELL_NATURES_FURY 
+#undef SPELL_SOLAR_FLARE 
+#undef SPELL_UNSTABLE_ENERGY 
+#undef SPELL_IMPALE 
+#undef SPELL_THORN_SWARM 
+#undef SPELL_ROOTS_FREYA 
+#undef SPELL_GROUND_TREMOR 
+#undef SPELL_PETRIFIED_BARK

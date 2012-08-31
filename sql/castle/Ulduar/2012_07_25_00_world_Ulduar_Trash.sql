@@ -20,13 +20,31 @@ UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_enslaved_fire_elem
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_guardian' WHERE `entry`=33822;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_slayer' WHERE `entry`=33823;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_twilight_shadowblade' WHERE `entry`=33824;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_molten_colossus' WHERE `entry`=34069;  
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_molten_colossus' WHERE `entry`=34069;   
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_forge_construct' WHERE `entry`=34085;  
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_magma_rager' WHERE `entry`=34086; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_champion_of_hodir' WHERE `entry`=34133; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_winter_revenant' WHERE `entry`=34134; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_winter_rumbler' WHERE `entry`=34135;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_winter_jormungar' WHERE `entry`=34137;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_mechagnome_battletank' WHERE `entry`=34164;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_arachnopod_destroyer' WHERE `entry`=34183;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_clockwork_mechanic' WHERE `entry`=34184;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_ice_turret' WHERE `entry`=34224;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_hardened_iron_golem' WHERE `entry`=34190; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_clockwork_sapper' WHERE `entry`=34193; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_rune_etched_forged_sentry' WHERE `entry` IN (34196, 34234); 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_chamber_overseer' WHERE `entry`=34197; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_iron_mender' WHERE `entry`=34198; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_lightning_charged_iron_dwarf' WHERE `entry`=34199; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_parts_recovery_technician' WHERE `entry`=34267; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XR949_salvagebot' WHERE `entry`=34269; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_salvagebot_sawblade' WHERE `entry`=34288;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XD175_compactobot' WHERE `entry`=34271; 
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_XB488_disposalbot' WHERE `entry`=34273; 
 
 DELETE FROM `spell_script_names` WHERE `spell_id`=63059;
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63059, 'spell_pollinate');
 
-DELETE FROM `spell_linked_spell` WHERE  `spell_trigger`=62317 AND `spell_effect`=57807 AND `type`=1;
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger`=62317 AND `spell_effect`=57807 AND `type`=1;
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (62317, 57807, 1, 'Twilight Guardian - Link Devastate to Sunder Armor');
-
--- Other stuff
-UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~(33554432|262144) WHERE `entry`=34184;

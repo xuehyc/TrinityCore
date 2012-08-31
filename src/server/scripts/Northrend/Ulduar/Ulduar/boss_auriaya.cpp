@@ -614,3 +614,14 @@ void AddSC_boss_auriaya()
     new achievement_nine_lives();
     new achievement_crazy_cat_lady();
 }
+
+#undef SPELL_SENTINEL_BLAST 
+#undef SPELL_SONIC_SCREECH 
+
+#undef SPELL_FERAL_RUSH 
+#undef SPELL_FERAL_POUNCE 
+
+#undef SPELL_SEEPING_FERAL_ESSENCE 
+
+#undef SPELL_SAVAGE_POUNCE 
+#undef SPELL_RIP_FLESH

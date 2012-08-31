@@ -1572,3 +1572,6 @@ void AddSC_boss_thorim()
     new npc_sif();
     new spell_stormhammer_targeting();
 }
+
+#undef SPELL_CHAIN_LIGHTNING
+#undef SPELL_RUNIC_MENDING

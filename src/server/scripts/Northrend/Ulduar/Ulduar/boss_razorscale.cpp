@@ -1140,3 +1140,8 @@ void AddSC_boss_razorscale()
     new achievement_iron_dwarf_medium_rare();
     new achievement_quick_shave();
 }
+
+#undef SPELL_FIREBALL
+#undef SPELL_FLAMEBREATH
+#undef SPELL_BATTLE_SHOUT
+

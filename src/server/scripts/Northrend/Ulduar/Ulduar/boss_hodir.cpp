@@ -1073,3 +1073,7 @@ void AddSC_boss_hodir()
     new achievement_staying_buffed_all_winter("achievement_staying_buffed_all_winter");
     new achievement_staying_buffed_all_winter("achievement_staying_buffed_all_winter_25");
 }
+
+#undef SPELL_FROZEN_BLOWS
+#undef SPELL_STORM_CLOUD
+#undef SPELL_STORM_POWER

@@ -617,3 +617,7 @@ void AddSC_boss_ignis()
     new spell_ignis_flame_jets();
     new achievement_ignis_shattered();
 }
+
+#undef SPELL_FLAME_JETS
+#undef SPELL_SCORCH
+#undef SPELL_BRITTLE 

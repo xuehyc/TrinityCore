@@ -1,9 +1,10 @@
 -- Register spell-scripts
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (62692, 63276, 63278);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (62692, 63276, 63278, 63322, 63323);
 INSERT INTO `spell_script_names` VALUES 
 (62692,'spell_aura_of_despair_aura'),
 (63276,'spell_mark_of_the_faceless_aura'),
-(63278,'spell_mark_of_the_faceless_drain');
+(63278,'spell_mark_of_the_faceless_drain'),
+(63323,'spell_saronite_vapors');
 
 -- Update saronite animus entry. TODO: Check if its health-modifier is ok.
 UPDATE `creature_template` SET `minlevel`=83, `maxlevel`=83, `mindmg`=480, `maxdmg`=700, `flags_extra`=1 WHERE `entry`=33524;

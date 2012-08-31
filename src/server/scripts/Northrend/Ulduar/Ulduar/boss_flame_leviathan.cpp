@@ -1130,6 +1130,7 @@ class npc_pool_of_tar : public CreatureScript
 
             void Reset()
             {
+                me->SetVisible(false);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE); // Check if this also prevents SpellHit
                 me->CastSpell(me, SPELL_TAR_PASSIVE, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
@@ -1216,8 +1217,7 @@ class npc_thorims_hammer : public CreatureScript
         EVENT_LIGHTNING_SKYBEAM,        // urand(2, 10) *IN_MILLISECONDS
         EVENT_SUMMON_THORIMS_BEACON,    // 4*IN_MILLISECONDS after previous event
         EVENT_DROP_AURAS_AND_WAIT,      // same
-        // 30 seconds of waiting
-        EVENT_IDLE
+        EVENT_IDLE_END                  // reserves idling time
     };
 
     public:
@@ -1241,7 +1241,7 @@ class npc_thorims_hammer : public CreatureScript
 
                 if (who->GetTypeId() == TYPEID_PLAYER && who->IsVehicle() && me->IsInRange(who, 0, 10, false))
                 {
-                    if (events.GetNextEventTime(EVENT_IDLE) > 0)    // Idle time not yet completed.
+                    if (events.GetNextEventTime(EVENT_IDLE_END) > 0)    // Idle time not yet completed.
                         return;
 
                     events.ScheduleEvent(EVENT_LIGHTNING_SKYBEAM, urand(2, 10) *IN_MILLISECONDS);
@@ -1278,9 +1278,9 @@ class npc_thorims_hammer : public CreatureScript
                             break;
                         case EVENT_DROP_AURAS_AND_WAIT:
                             me->RemoveAllAuras();
-                            events.ScheduleEvent(EVENT_IDLE, 30*IN_MILLISECONDS);
-                        case EVENT_IDLE:
-                            // Do nothing :D Just a control dummy
+                            events.ScheduleEvent(EVENT_IDLE_END, 30*IN_MILLISECONDS);
+                            break;
+                        case EVENT_IDLE_END:
                             break;
                     }
                 }
