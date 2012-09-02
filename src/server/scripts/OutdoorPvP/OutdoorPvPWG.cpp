@@ -596,7 +596,10 @@ void OutdoorPvPWG::ProcessEvent(WorldObject* object, uint32 eventId)
                                 {
                                     Creature* creature = (*itr);
                                     if (GetCreatureType(creature->GetEntry()) == CREATURE_TURRET && creature->GetAreaId() == towerAreaCredit)
+                                    {
+                                        creature->GetVehicleKit()->RemoveAllPassengers();
                                         creature->SetVisible(false);
+                                    }
                                 }
                             }
 
