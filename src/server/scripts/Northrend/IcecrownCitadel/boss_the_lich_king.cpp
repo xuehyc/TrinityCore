@@ -611,10 +611,52 @@ class boss_the_lich_king : public CreatureScript
                 events.ScheduleEvent(EVENT_NECROTIC_PLAGUE, urand(30000, 33000), 0, PHASE_ONE);
                 events.ScheduleEvent(EVENT_BERSERK, 900000, EVENT_GROUP_BERSERK);
                 events.ScheduleEvent(EVENT_REMOVE_INSTANCE_BUFF, 10000);
-                instance->DoRemoveAurasDueToSpellOnPlayers(73818); // Horde
-                instance->DoRemoveAurasDueToSpellOnPlayers(73824); // Alliance
+                HandleAuraBuffOnAllPlayers();
                 if (IsHeroic())
                     events.ScheduleEvent(EVENT_SHADOW_TRAP, 15500, 0, PHASE_ONE);
+            }
+
+            void HandleAuraBuffOnAllPlayers()
+            {
+                Map* map = me->GetMap();
+
+                if (!map)
+                    return;
+
+                if (!map->IsDungeon())
+                    return;
+
+                Map::PlayerList const &PlayerList = map->GetPlayers();
+
+                if (PlayerList.isEmpty())
+                    return;
+
+                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                {
+                    if (i->getSource())
+                    {
+                         if (i->getSource()->GetTeamId() == TEAM_ALLIANCE)
+                         {
+                             // Remove old aura
+                             if (i->getSource()->HasAura(73824))
+                                 i->getSource()->RemoveAurasDueToSpell(73824);
+
+                             // Add new aura
+                             if (i->getSource()->isAlive() && !i->getSource()->HasAura(73762))
+                                 i->getSource()->CastSpell(i->getSource(), 73762, true);
+                         }
+                         else
+                         {
+                             // Remove old aura
+                             if (i->getSource()->HasAura(73818))
+                                 i->getSource()->RemoveAurasDueToSpell(73818);
+
+                             // Add new aura
+                             if (i->getSource()->isAlive() && !i->getSource()->HasAura(73816))
+                                 i->getSource()->CastSpell(i->getSource(), 73816, true);
+                         }
+                    }
+                }
             }
 
             void JustReachedHome()
@@ -1118,8 +1160,7 @@ class boss_the_lich_king : public CreatureScript
                             }
                             break;
                         case EVENT_REMOVE_INSTANCE_BUFF:
-                            instance->DoRemoveAurasDueToSpellOnPlayers(73818); // Horde
-                            instance->DoRemoveAurasDueToSpellOnPlayers(73824); // Alliance
+                            HandleAuraBuffOnAllPlayers();
                             events.ScheduleEvent(EVENT_REMOVE_INSTANCE_BUFF, 10000);
                             break;
                         case EVENT_OUTRO_TALK_1:
