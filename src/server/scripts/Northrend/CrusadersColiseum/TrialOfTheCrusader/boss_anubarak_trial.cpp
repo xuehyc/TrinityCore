@@ -158,6 +158,9 @@ public:
         uint32 m_uiSummonNerubianTimer;
         uint32 m_uiNerubianShadowStrikeTimer;
         uint32 m_uiSubmergeTimer;
+        float m_posPursuingSpikePositionX;
+        float m_posPursuingSpikePositionY;
+        float m_posPursuingSpikePositionZ;
         uint32 m_uiPursuingSpikeTimer;
         uint32 m_uiSummonScarabTimer;
         uint32 m_uiSummonFrostSphereTimer;
@@ -176,6 +179,9 @@ public:
             m_uiSummonNerubianTimer = 10*IN_MILLISECONDS;
             m_uiSubmergeTimer = 80*IN_MILLISECONDS;
 
+            m_posPursuingSpikePositionX = 0.0f;
+            m_posPursuingSpikePositionY = 0.0f;
+            m_posPursuingSpikePositionZ = 0.0f;
             m_uiPursuingSpikeTimer = 2*IN_MILLISECONDS;
 
             m_uiSummonFrostSphereTimer = urand(20, 30)*1000;
@@ -254,6 +260,9 @@ public:
             switch (summoned->GetEntry())
             {
                 case NPC_SPIKE:
+                    m_posPursuingSpikePositionX = summoned->GetPositionX();
+                    m_posPursuingSpikePositionY = summoned->GetPositionY();
+                    m_posPursuingSpikePositionZ = summoned->GetPositionZ();
                     m_uiPursuingSpikeTimer = 2*IN_MILLISECONDS;
                     break;
             }
@@ -369,7 +378,12 @@ public:
                 case 2:
                     if (m_uiPursuingSpikeTimer <= uiDiff)
                     {
-                        DoCast(SPELL_SPIKE_CALL);
+                        // replace spell with manual spawning so we can restart the spike where it left off.
+                        //DoCast(SPELL_SPIKE_CALL);
+                        if (m_posPursuingSpikePositionX == 0.0f || m_posPursuingSpikePositionY == 0.0f || m_posPursuingSpikePositionZ == 0.0f)
+                            me->SummonCreature(NPC_SPIKE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+                        else
+                            me->SummonCreature(NPC_SPIKE, m_posPursuingSpikePositionX, m_posPursuingSpikePositionY, m_posPursuingSpikePositionZ);
                         // Just to make sure it won't happen again in this phase
                         m_uiPursuingSpikeTimer = 90*IN_MILLISECONDS;
                     } else m_uiPursuingSpikeTimer -= uiDiff;
@@ -433,6 +447,9 @@ public:
                 case 3:
                     m_uiStage = 0;
                     Summons.DespawnEntry(NPC_SPIKE);
+                    m_posPursuingSpikePositionX = 0.0f;
+                    m_posPursuingSpikePositionY = 0.0f;
+                    m_posPursuingSpikePositionZ = 0.0f;
                     me->RemoveAurasDueToSpell(SPELL_SUBMERGE_ANUBARAK);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                     DoCast(me, SPELL_EMERGE_ANUBARAK);
@@ -891,21 +908,11 @@ public:
             if (m_uiTargetGUID)
             {
                 Unit* target = Unit::GetUnit((*me), m_uiTargetGUID);
-                const SpellInfo* ImpaleSpellInfo = sSpellMgr->GetSpellInfo(SPELL_IMPALE);
 
                 if (!target || !target->isAlive())
                 {
                     me->DisappearAndDie();
                     return;
-                }
-
-                if (ImpaleSpellInfo)
-                {
-                    if (target->IsImmunedToSpell(ImpaleSpellInfo))
-                    {
-                        me->DisappearAndDie();
-                        return;
-                    }
                 }
 
                 if (target)
