@@ -2258,7 +2258,7 @@ public:
 #define GOSSIP_ENGINEERING5   "Storm Peaks"
 #define GOSSIP_ENGINEERING6   "Underground..."
 
-enum WormholeSpells
+enum eWormhole
 {
     SPELL_BOREAN_TUNDRA         = 67834,
     SPELL_SHOLAZAR_BASIN        = 67835,
@@ -3030,9 +3030,16 @@ public:
 # npc_lvl60
 #####*/
 
-#define VOTEPOINTS_PRICE_LEVEL_40       70
-#define VOTEPOINTS_PRICE_LEVEL_50       70
-#define VOTEPOINTS_PRICE_LEVEL_60       70
+#define VOTEPOINTS_LVLUP_COST_SCALING   0.15
+#define VOTEPOINTS_LVLUP_MAX_LEVEL      60
+
+enum lvl60gossip
+{
+    LEVELUP_1       = GOSSIP_ACTION_INFO_DEF + 1,
+    LEVELUP_3       = GOSSIP_ACTION_INFO_DEF + 2,
+    LEVELUP_5       = GOSSIP_ACTION_INFO_DEF + 3,
+    LEVELUP_10      = GOSSIP_ACTION_INFO_DEF + 4,
+};
 
 class npc_lvl60 : public CreatureScript
 {
@@ -3056,7 +3063,7 @@ public:
         QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `voteshop`.`voting_points` WHERE `id` = %u AND `lock` = 0 LIMIT 1", playerAccountId);
         if (!result)
         {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Es ist ein Fehler in der Abfrage fuer deine Votepunkte aufgetreten!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Es ist ein Fehler bei der Abfrage deiner Votepunkte aufgetreten!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
             player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
             return true;
         }
@@ -3064,7 +3071,7 @@ public:
         // Skip if no result found
         if (result->GetRowCount() == 0)
         {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Es wurde kein Wert fuer deine Votepunkte gefunden! Hast du noch nicht gevoted?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Auf diesem Konto sind keine Votepunkte vorhanden.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
             player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
             return true;
         }
@@ -3074,52 +3081,40 @@ public:
         playerVotepoints = fields[0].GetUInt32();
 
         // Everything seems to be correct here, generate gossip menu matching to level
-        if (playerLevel >= 30 && playerLevel < 40)
+        uint32 levelup_cost_1 = (playerLevel + 1) * VOTEPOINTS_LVLUP_COST_SCALING;
+        if (playerVotepoints >= levelup_cost_1)
         {
-            if (playerVotepoints >= VOTEPOINTS_PRICE_LEVEL_40)
-            {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bitte setze mich auf Level 40! (70 Votepunkte)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-                player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
-                return true;
-            }
-            else
-            {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Du hast nicht genuegend Votepunkte, um dich auf Level 40 setzen zu lassen!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
-                player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
-                return true;
-            }
+            char buffer[40];
+            sprintf(buffer, "1 Level kaufen - %d Punkte", levelup_cost_1);
+            std::string message = buffer;
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, message, GOSSIP_SENDER_MAIN, LEVELUP_1);
         }
 
-        if (playerLevel >= 40 && playerLevel < 50)
+        uint32 levelup_cost_3 = ((playerLevel * 3 + 6) / 3) * VOTEPOINTS_LVLUP_COST_SCALING * 3;
+        if (playerVotepoints >= levelup_cost_3 && playerLevel <= 57)
         {
-            if (playerVotepoints >= VOTEPOINTS_PRICE_LEVEL_50)
-            {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bitte setze mich auf Level 50! (70 Votepunkte)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-                player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
-                return true;
-            }
-            else
-            {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Du hast nicht genuegend Votepunkte, um dich auf Level 50 setzen zu lassen!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
-                player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
-                return true;
-            }
+            char buffer[40];
+            sprintf(buffer, "3 Level kaufen - %d Punkte", levelup_cost_3);
+            std::string message = buffer;
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, message, GOSSIP_SENDER_MAIN, LEVELUP_3);
         }
 
-        if (playerLevel >= 50 && playerLevel < 60)
+        uint32 levelup_cost_5 = ((playerLevel * 5 + 15) / 5) * VOTEPOINTS_LVLUP_COST_SCALING * 3;
+        if (playerVotepoints >= levelup_cost_5 && playerLevel <= 55)
         {
-            if (playerVotepoints >= VOTEPOINTS_PRICE_LEVEL_60)
-            {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bitte setze mich auf Level 60! (70 Votepunkte)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
-                player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
-                return true;
-            }
-            else
-            {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Du hast nicht genuegend Votepunkte, um dich auf Level 60 setzen zu lassen!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+10);
-                player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
-                return true;
-            }
+            char buffer[40];
+            sprintf(buffer, "5 Level kaufen - %d Punkte", levelup_cost_5);
+            std::string message = buffer;
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, message, GOSSIP_SENDER_MAIN, LEVELUP_5);
+        }
+
+        uint32 levelup_cost_10 = ((playerLevel * 10 + 55) / 10) * VOTEPOINTS_LVLUP_COST_SCALING * 3;
+        if (playerVotepoints >= levelup_cost_10 && playerLevel <= 50)
+        {
+            char buffer[40];
+            sprintf(buffer, "10 Level kaufen - %d Punkte", levelup_cost_10);
+            std::string message = buffer;
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, message, GOSSIP_SENDER_MAIN, LEVELUP_10);
         }
 
         player->SEND_GOSSIP_MENU(50006, creature->GetGUID());
@@ -3157,48 +3152,50 @@ public:
         Field* fields = result->Fetch();
         playerVotepoints = fields[0].GetUInt32();
         uint32 skill_increase = 0;
+        uint32 cost;
 
         switch (uiAction)
         {
-            case GOSSIP_ACTION_INFO_DEF+1:
-                if (playerLevel >= 30 && playerLevel < 40)
+            case LEVELUP_1:
+                cost = (playerLevel + 1) * VOTEPOINTS_LVLUP_COST_SCALING;
+                if (playerVotepoints >= cost)
                 {
-                    if (playerVotepoints >= VOTEPOINTS_PRICE_LEVEL_40)
-                    {
-                        QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", VOTEPOINTS_PRICE_LEVEL_40, playerAccountId);
-                        sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s set to level 40 for %u voteshop points.", player->GetName(), VOTEPOINTS_PRICE_LEVEL_40);
-                        skill_increase = (40 - playerLevel) * 5;
-                        player->GiveLevel(40);
-                    }
+                    QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", cost, playerAccountId);
+                    sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s set level from %d to %d for %u voteshop points.", player->GetName(), playerLevel, playerLevel + 1, cost);
+                    skill_increase = 5;
+                    player->GiveLevel(playerLevel + 1);
                 }
                 break;
-
-            case GOSSIP_ACTION_INFO_DEF+2:
-                if (playerLevel >= 40 && playerLevel < 50)
+            case LEVELUP_3:
+                cost = ((playerLevel * 3 + 6) / 3) * VOTEPOINTS_LVLUP_COST_SCALING * 3;
+                if (playerVotepoints >= cost)
                 {
-                    if (playerVotepoints >= VOTEPOINTS_PRICE_LEVEL_50)
-                    {
-                        QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", VOTEPOINTS_PRICE_LEVEL_50, playerAccountId);
-                        sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s set to level 50 for %u voteshop points.", player->GetName(), VOTEPOINTS_PRICE_LEVEL_50);
-                        skill_increase = (50 - playerLevel) * 5;
-                        player->GiveLevel(50);
-                    }
+                    QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", cost, playerAccountId);
+                    sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s set level from %d to %d for %u voteshop points.", player->GetName(), playerLevel, playerLevel + 3, cost);
+                    skill_increase = 15;
+                    player->GiveLevel(playerLevel + 3);
                 }
                 break;
-
-            case GOSSIP_ACTION_INFO_DEF+3:
-                if (playerLevel >= 50 && playerLevel < 60)
+            case LEVELUP_5:
+                cost = ((playerLevel * 5 + 15) / 5) * VOTEPOINTS_LVLUP_COST_SCALING * 3;
+                if (playerVotepoints >= cost)
                 {
-                    if (playerVotepoints >= VOTEPOINTS_PRICE_LEVEL_60)
-                    {
-                        QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id`= %u AND `lock` = 0 LIMIT 1", VOTEPOINTS_PRICE_LEVEL_60, playerAccountId);
-                        sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s set to level 60 for %u voteshop points.", player->GetName(), VOTEPOINTS_PRICE_LEVEL_60);
-                        skill_increase = (60 - playerLevel) * 5;
-                        player->GiveLevel(60);
-                    }
+                    QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", cost, playerAccountId);
+                    sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s set level from %d to %d for %u voteshop points.", player->GetName(), playerLevel, playerLevel + 5, cost);
+                    skill_increase = 25;
+                    player->GiveLevel(playerLevel + 5);
                 }
                 break;
-
+            case LEVELUP_10:
+                cost = ((playerLevel * 10 + 55) / 10) * VOTEPOINTS_LVLUP_COST_SCALING * 3;
+                if (playerVotepoints >= cost)
+                {
+                    QueryResult result = CharacterDatabase.PQuery("UPDATE `voteshop`.`voting_points` SET `points` = `points` - %u WHERE `id` = %u AND `lock` = 0 LIMIT 1", cost, playerAccountId);
+                    sLog->outInfo(LOG_FILTER_TSCR, "WOW-CASTLE SCHWEIN: Player %s set level from %d to %d for %u voteshop points.", player->GetName(), playerLevel, playerLevel + 10, cost);
+                    skill_increase = 50;
+                    player->GiveLevel(playerLevel + 10);
+                }
+                break;
             default:
                 break;
         }
