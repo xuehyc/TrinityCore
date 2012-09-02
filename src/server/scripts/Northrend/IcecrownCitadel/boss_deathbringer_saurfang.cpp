@@ -319,28 +319,7 @@ class boss_deathbringer_saurfang : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-                _JustDied();
-                DoCast(me, SPELL_ACHIEVEMENT, true);
-                Talk(SAY_DEATH);
 
-                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
-                if (Creature* creature = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SAURFANG_EVENT_NPC)))
-                    creature->AI()->DoAction(ACTION_START_OUTRO);
-
-                // HACK! complete lower citadel achievement; gunship battle is missing
-                switch (GetDifficulty())
-                {
-                    case RAID_DIFFICULTY_10MAN_HEROIC:
-                        instance->DoCompleteAchievement(4628);
-                    case RAID_DIFFICULTY_10MAN_NORMAL:
-                        instance->DoCompleteAchievement(4531);
-                        break;
-                    case RAID_DIFFICULTY_25MAN_HEROIC:
-                        instance->DoCompleteAchievement(4632);
-                    case RAID_DIFFICULTY_25MAN_NORMAL:
-                        instance->DoCompleteAchievement(4604);
-                        break;
-                }
             }
 
             void AttackStart(Unit* victim)
@@ -412,6 +391,21 @@ class boss_deathbringer_saurfang : public CreatureScript
                     DoCastAOE(SPELL_REMOVE_MARKS_OF_THE_FALLEN_CHAMPION);
                     DoCast(me, SPELL_ACHIEVEMENT, true);
                     Talk(SAY_DEATH);
+
+                    // HACK! complete lower citadel achievement; gunship battle is missing
+                    switch (GetDifficulty())
+                    {
+                        case RAID_DIFFICULTY_10MAN_HEROIC:
+                            instance->DoCompleteAchievement(4628);
+                        case RAID_DIFFICULTY_10MAN_NORMAL:
+                            instance->DoCompleteAchievement(4531);
+                            break;
+                        case RAID_DIFFICULTY_25MAN_HEROIC:
+                            instance->DoCompleteAchievement(4632);
+                        case RAID_DIFFICULTY_25MAN_NORMAL:
+                            instance->DoCompleteAchievement(4604);
+                            break;
+                    }
 
                     //instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
                     DoCast(me, SPELL_PERMANENT_FEIGN_DEATH);
