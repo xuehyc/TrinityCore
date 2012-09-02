@@ -119,8 +119,8 @@ enum SummonActions
 
 const Position SphereSpawn[6] =
 {
-    { 786.6439f, 108.2498f, 155.6701f, 0 },
-    { 806.8429f, 150.5902f, 155.6701f, 0 },
+    { 776.8380f, 125.6795f, 155.6701f, 0 },
+    { 786.4426f, 145.5566f, 155.6701f, 0 },
     { 759.1386f, 163.9654f, 155.6701f, 0 },
     { 744.3701f, 119.5211f, 155.6701f, 0 },
     { 710.0211f, 120.8152f, 155.6701f, 0 },
@@ -448,11 +448,11 @@ public:
                 {
                     uint8 frostSpheresWithAuraCount = 0;
                     for(std::list<uint64>::const_iterator itr = Summons.begin(); itr != Summons.end(); ++itr)
-                        {
+                    {
                         if (Creature* temp = Unit::GetCreature(*me,* itr))
-                            {
+                        {
                             if (temp)
-                                {
+                            {
                                 if (temp->GetEntry() == NPC_FROST_SPHERE)
                                 {
                                     if (temp->HasAura(SPELL_FROST_SPHERE))
@@ -737,7 +737,7 @@ class mob_frost_sphere : public CreatureScript
                 me->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                 //! end
                 me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
-                me->SetSpeed(MOVE_RUN, 0.5f, false);
+                me->SetSpeed(MOVE_FLIGHT, 0.5f, false);
                 me->GetMotionMaster()->MoveRandom(20.0f);
                 DoCast(SPELL_FROST_SPHERE);
             }
@@ -754,6 +754,26 @@ class mob_frost_sphere : public CreatureScript
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         //At hit the ground
                         me->HandleEmoteCommand(EMOTE_ONESHOT_FLYDEATH);
+
+                        // In this case MoveFall might fail, but we are close to ground, so create permafrost now
+                        float tz = me->GetMap()->GetHeight(me->GetPhaseMask(), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), true, MAX_FALL_DISTANCE);
+                        if (tz > INVALID_HEIGHT)
+                        {
+                            if (fabs(me->GetPositionZ() - tz) < 0.1f)
+                            {
+                                DoTeleportTo(me->GetPositionX(), me->GetPositionY(), tz);
+                                me->StopMoving();
+                                me->GetMotionMaster()->Clear();
+                                me->GetMotionMaster()->MoveIdle();
+                                me->RemoveAurasDueToSpell(SPELL_FROST_SPHERE);
+                                me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
+                                DoCast(SPELL_PERMAFROST_VISUAL);
+                                DoCast(SPELL_PERMAFROST);
+                                me->SetObjectScale(2.0f);
+                                return;
+                            }
+                        }
+
                         me->GetMotionMaster()->MoveFall(POINT_FALL_GROUND);
                     }
                 }
@@ -768,12 +788,21 @@ class mob_frost_sphere : public CreatureScript
                 {
                     case POINT_FALL_GROUND:
                         me->RemoveAurasDueToSpell(SPELL_FROST_SPHERE);
-                        me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
+                        me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
                         DoCast(SPELL_PERMAFROST_VISUAL);
                         DoCast(SPELL_PERMAFROST);
                         me->SetObjectScale(2.0f);
                         break;
                 }
+            }
+
+            // Empty EnterEvadeMode and UpdateAI, so it will not reset if victim died, will be despawned by Anub'Arak anyways
+            void EnterEvadeMode()
+            {
+            }
+
+            void UpdateAI(const uint32 /*diff*/)
+            {
             }
 
         private:
