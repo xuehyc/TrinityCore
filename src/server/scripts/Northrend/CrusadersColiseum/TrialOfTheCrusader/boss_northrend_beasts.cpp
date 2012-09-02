@@ -377,9 +377,9 @@ public:
 
         void Reset()
         {
-            m_uiFireBombTimer = 7000;
+            m_uiFireBombTimer = 15000;
             m_uiBatterTimer = 5000;
-            m_uiHeadCrackTimer = 2000;
+            m_uiHeadCrackTimer = 25000;
 
             fireBombHitTarget = false;
 
@@ -467,7 +467,7 @@ public:
                     fireBombHitTarget = false;
                     DoCast(target, SPELL_FIRE_BOMB);
                 }
-                m_uiFireBombTimer = urand(9000, 13000);
+                m_uiFireBombTimer = 20000;
             }
             else m_uiFireBombTimer -= diff;
 
@@ -475,7 +475,7 @@ public:
             {
                 if (Unit* target = Unit::GetUnit(*me, m_uiTargetGUID))
                     DoCast(target, SPELL_BATTER);
-                m_uiBatterTimer = urand(5000, 9000);
+                m_uiBatterTimer = 10000;
             }
             else m_uiBatterTimer -= diff;
 
@@ -483,7 +483,7 @@ public:
             {
                 if (Unit* target = Unit::GetUnit(*me, m_uiTargetGUID))
                     me->AddAura(SPELL_HEAD_CRACK, target);
-                m_uiHeadCrackTimer = urand(3000, 6000);
+                m_uiHeadCrackTimer = 35000;
             }
             else m_uiHeadCrackTimer -= diff;
 
