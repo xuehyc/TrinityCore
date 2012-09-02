@@ -227,10 +227,9 @@ public:
 
         void SpellHit(Unit* caster, SpellInfo const* spell)
         {
-            if (IsHeroic() && !bDone)
-                if (caster->GetTypeId() == TYPEID_PLAYER)
-                    if (spell->Id == SPELL_HAMMER_THROWBACK_DMG && me->GetHealth() <= uint32(spell->Effects[0].BasePoints))
-                        DoCast(caster, SPELL_EADRIC_ACHIEVEMENT);
+            if (IsHeroic())
+                if (spell->Id == SPELL_HAMMER_THROWBACK_DMG && me->GetHealth() <= uint32(spell->Effects[0].BasePoints))
+                    DoCast(caster, SPELL_EADRIC_ACHIEVEMENT);
         }
 
         void UpdateAI(const uint32 uiDiff)

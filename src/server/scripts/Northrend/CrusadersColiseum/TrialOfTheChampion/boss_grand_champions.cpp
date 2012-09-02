@@ -1233,7 +1233,7 @@ class achievement_toc5_grand_champions : public AchievementCriteriaScript
                 return false;
 
             if (Creature* creature = target->ToCreature())
-                if (creature->GetOriginalEntry() == creature_entry)
+                if (creature->GetEntry() == creature_entry)
                     return true;
 
             return false;
