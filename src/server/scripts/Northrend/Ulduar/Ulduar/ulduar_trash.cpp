@@ -26,6 +26,8 @@
 /* SQL
 -- UPDATE `creature_template` SET `AIName`='', `ScriptName`= WHERE `entry`=;
 
+-- TODO: 34194
+
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_steelforged_defender' WHERE `entry`=33236;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_ironwork_cannon' WHERE `entry`=33264;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_corrupted_servitor' WHERE `entry`=33354;
@@ -2439,14 +2441,14 @@ class npc_clockwork_mechanic : public CreatureScript
             void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
-                if (summons.size() >= RAID_MODE(4, 8)) // Limit adds
+                if (summons.size() >= RAID_MODE<SummonList::size_type>(4, 8)) // Limit adds
                     events.CancelEvent(EVENT_ICE_TURRET);
             }
 
             void SummonedCreatureDies(Creature* summon, Unit* /*killer*/)
             {
                 summons.Despawn(summon);
-                if (summons.size() <= RAID_MODE(4, 8)) // if limit is not fulfilled, scheduled again
+                if (summons.size() <= RAID_MODE<SummonList::size_type>(4, 8)) // if limit is not fulfilled, scheduled again
                     events.RescheduleEvent(EVENT_ICE_TURRET, urand(7*IN_MILLISECONDS, 10*IN_MILLISECONDS));
             }
 

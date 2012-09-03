@@ -272,18 +272,33 @@ void ResetEncounter(InstanceScript* instance, Creature* me)
 
     if (me->GetGUID() != steelbreaker)
         if (Creature* boss = ObjectAccessor::GetCreature(*me, steelbreaker))
-            if (boss->isAlive() && boss->AI())
+            if (boss->isAlive() && boss->AI() && boss->isInCombat())
                 boss->AI()->EnterEvadeMode();
+            else
+            {
+                boss->Respawn();
+                boss->GetMotionMaster()->MoveTargetedHome();
+            }
 
     if (me->GetGUID() != brundir)
         if (Creature* boss = ObjectAccessor::GetCreature(*me, brundir))
-            if (boss->isAlive() && boss->AI())
+            if (boss->isAlive() && boss->AI() && boss->isInCombat())
                 boss->AI()->EnterEvadeMode();
+            else
+            {
+                boss->Respawn();
+                boss->GetMotionMaster()->MoveTargetedHome();
+            }
 
     if (me->GetGUID() != molgeim)
         if (Creature* boss = ObjectAccessor::GetCreature(*me, molgeim))
-            if (boss->isAlive() && boss->AI())
+            if (boss->isAlive() && boss->AI() && boss->isInCombat())
                 boss->AI()->EnterEvadeMode();
+            else
+            {
+                boss->Respawn();
+                boss->GetMotionMaster()->MoveTargetedHome();
+            }
 
     instance->HandleGameObject(instance->GetData64(GO_KOLOGARN_DOOR), false);
 }
@@ -337,8 +352,7 @@ class boss_steelbreaker : public CreatureScript
                 superChargedCnt = 0;
                 me->RemoveAllAuras();
                 me->RemoveLootMode(LOOT_MODE_DEFAULT);
-                ResetEncounter(instance, me);
-                RespawnEncounter(instance, me);
+                ResetEncounter(instance, me);                
             }
 
             void EnterCombat(Unit* who)
@@ -629,7 +643,6 @@ class boss_runemaster_molgeim : public CreatureScript
                 me->RemoveAllAuras();
                 me->RemoveLootMode(LOOT_MODE_DEFAULT);
                 ResetEncounter(instance, me);
-                RespawnEncounter(instance, me);
             }
 
             void EnterCombat(Unit* who)
@@ -920,7 +933,6 @@ class boss_stormcaller_brundir : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);  // Should be interruptible unless overridden by spell (Overload)
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, false);       // Reset immunity, Brundir can be stunned by default
                 ResetEncounter(instance, me);
-                RespawnEncounter(instance, me);
             }
 
             void EnterCombat(Unit* who)
