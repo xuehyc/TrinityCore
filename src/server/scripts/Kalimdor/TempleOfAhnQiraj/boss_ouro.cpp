@@ -69,6 +69,10 @@ public:
 
             Enrage = false;
             Submerged = false;
+
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->setFaction(14);
+            me->SetReactState(REACT_AGGRESSIVE);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -82,56 +86,63 @@ public:
             if (!UpdateVictim())
                 return;
 
-            //Sweep_Timer
-            if (!Submerged && Sweep_Timer <= diff)
+            if (!Submerged)
             {
-                DoCast(me->getVictim(), SPELL_SWEEP);
-                Sweep_Timer = urand(15000, 30000);
-            } else Sweep_Timer -= diff;
+                //Sweep_Timer
+                if (Sweep_Timer <= diff)
+                {
+                    DoCast(me->getVictim(), SPELL_SWEEP);
+                    Sweep_Timer = urand(15000, 30000);
+                } else Sweep_Timer -= diff;
 
-            //SandBlast_Timer
-            if (!Submerged && SandBlast_Timer <= diff)
+                //SandBlast_Timer
+                if (SandBlast_Timer <= diff)
+                {
+                    DoCast(me->getVictim(), SPELL_SANDBLAST);
+                    SandBlast_Timer = urand(20000, 35000);
+                } else SandBlast_Timer -= diff;
+
+                //Submerge_Timer
+                if (Submerge_Timer <= diff)
+                {
+                    //Cast
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
+                    me->SetReactState(REACT_PASSIVE);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    me->setFaction(35);
+                    DoCast(me, SPELL_DIRTMOUND_PASSIVE);
+
+                    Submerged = true;
+                    Back_Timer = urand(30000, 45000);
+                } else Submerge_Timer -= diff;
+            }
+            else
             {
-                DoCast(me->getVictim(), SPELL_SANDBLAST);
-                SandBlast_Timer = urand(20000, 35000);
-            } else SandBlast_Timer -= diff;
+                //ChangeTarget_Timer
+                if (ChangeTarget_Timer <= diff)
+                {
+                    Unit* target = NULL;
+                    target = SelectTarget(SELECT_TARGET_RANDOM, 0);
 
-            //Submerge_Timer
-            if (!Submerged && Submerge_Timer <= diff)
-            {
-                //Cast
-                me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                me->setFaction(35);
-                DoCast(me, SPELL_DIRTMOUND_PASSIVE);
+                    if (target)
+                        DoTeleportTo(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
 
-                Submerged = true;
-                Back_Timer = urand(30000, 45000);
-            } else Submerge_Timer -= diff;
+                    ChangeTarget_Timer = urand(10000, 20000);
+                } else ChangeTarget_Timer -= diff;
 
-            //ChangeTarget_Timer
-            if (Submerged && ChangeTarget_Timer <= diff)
-            {
-                Unit* target = NULL;
-                target = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                //Back_Timer
+                if (Back_Timer <= diff)
+                {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    me->setFaction(14);
+                    me->SetReactState(REACT_AGGRESSIVE);
 
-                if (target)
-                    DoTeleportTo(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
+                    DoCast(me->getVictim(), SPELL_GROUND_RUPTURE);
 
-                ChangeTarget_Timer = urand(10000, 20000);
-            } else ChangeTarget_Timer -= diff;
-
-            //Back_Timer
-            if (Submerged && Back_Timer <= diff)
-            {
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                me->setFaction(14);
-
-                DoCast(me->getVictim(), SPELL_GROUND_RUPTURE);
-
-                Submerged = false;
-                Submerge_Timer = urand(60000, 120000);
-            } else Back_Timer -= diff;
+                    Submerged = false;
+                    Submerge_Timer = urand(60000, 120000);
+                } else Back_Timer -= diff;
+            }
 
             DoMeleeAttackIfReady();
         }
