@@ -263,39 +263,6 @@ public:
                 DoCast(me, SPELL_DEFEND, true);
         }
 
-        void SpellHit(Unit* source, const SpellInfo* spell)
-        {
-
-            uint32 defendAuraStackAmount = 0;
-
-            if (me->HasAura(SPELL_DEFEND))
-                if (Aura* defendAura = me->GetAura(SPELL_DEFEND))
-                    defendAuraStackAmount = defendAura->GetStackAmount();
-
-            // Shield-Break by player vehicle
-            if (spell->Id == 62575)
-            {
-                source->DealDamage(me, uint32(2000 * (1 - 0.3f * defendAuraStackAmount)));
-                source->SendSpellNonMeleeDamageLog(me, 62575, uint32(2000 * (1 - 0.3f * defendAuraStackAmount)), SPELL_SCHOOL_MASK_NORMAL, 0, 0, true, 0, false);
-
-                if (me->HasAura(SPELL_DEFEND))
-                    me->RemoveAuraFromStack(SPELL_DEFEND);
-            }
-    
-            // Charge by player vehicle
-            if (spell->Id == 68282)
-            {
-                source->DealDamage(me, uint32(20000 * (1 - 0.3f * defendAuraStackAmount)));
-                source->SendSpellNonMeleeDamageLog(me, 68282, uint32(20000 * (1 - 0.3f * defendAuraStackAmount)), SPELL_SCHOOL_MASK_NORMAL, 0, 0, true, 0, false);
-
-                if (source->GetMotionMaster())
-                    source->GetMotionMaster()->MoveCharge(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
-
-                if (me->HasAura(SPELL_DEFEND))
-                    me->RemoveAuraFromStack(SPELL_DEFEND);
-            }
-        }
-
         bool StayInCombatAndCleanup(bool combat, bool cleanup)
         {
             if (me->GetMap())
@@ -388,18 +355,12 @@ public:
                     if (target->GetTypeId() == TYPEID_PLAYER && me->GetDistance(target) > 10.0f && me->GetDistance(target) < 30.0f)
                     {
                         if (target->GetVehicle())
-                        {
                             if (Unit* vehTarget = target->GetVehicle()->GetBase())
-                            {
                                 DoCast(vehTarget, SPELL_SHIELD_BREAKER);
-                                vehTarget->RemoveAuraFromStack(SPELL_DEFEND);
-                            }
-                        }
                     }
                     else if (target->GetTypeId() == TYPEID_UNIT && me->GetDistance(target) > 8.0f && me->GetDistance(target) < 25.0f)
                     {
                         DoCast(target, SPELL_SHIELD_BREAKER);
-                        target->RemoveAuraFromStack(SPELL_DEFEND);
                     }
                 }
 
@@ -413,22 +374,12 @@ public:
                     if (target->GetTypeId() == TYPEID_PLAYER && me->GetDistance(target) > 8.0f && me->GetDistance(target) < 25.0f)
                     {
                         if (target->GetVehicle())
-                        {
                             if (Unit* vehTarget = target->GetVehicle()->GetBase())
-                            {
                                 DoCast(vehTarget, SPELL_CHARGE);
-
-                                if (vehTarget->HasAura(SPELL_DEFEND))
-                                    vehTarget->RemoveAuraFromStack(SPELL_DEFEND);
-                            }
-                        }
                     }
                     else if (target->GetTypeId() == TYPEID_UNIT && me->GetDistance(target) > 8.0f && me->GetDistance(target) < 25.0f)
                     {
                         DoCast(target, SPELL_CHARGE);
-
-                        if (target->HasAura(SPELL_DEFEND))
-                            target->RemoveAuraFromStack(SPELL_DEFEND);
                     }
                 }
 
