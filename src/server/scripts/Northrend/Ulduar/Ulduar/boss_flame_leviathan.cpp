@@ -1225,7 +1225,7 @@ class npc_thorims_hammer : public CreatureScript
 
         struct npc_thorims_hammerAI : public Scripted_NoMovementAI
         {
-            npc_thorims_hammerAI(Creature* creature) : Scripted_NoMovementAI(creature) {}
+            npc_thorims_hammerAI(Creature* creature) : Scripted_NoMovementAI(creature), summons(me) {}
 
             void Reset()
             {
@@ -1264,6 +1264,9 @@ class npc_thorims_hammer : public CreatureScript
                             events.ScheduleEvent(EVENT_SUMMON_THORIMS_BEACON, 3*IN_MILLISECONDS);
                             break;
                         case EVENT_SUMMON_THORIMS_BEACON:
+                            if (summons.size() > 0)
+                                summons.DespawnAll();
+
                             if (Creature* trigger = DoSummonFlyer(NPC_THORIM_TARGET_BEACON, me, 50.0f, 0, 3*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN))
                             {
                                 // TODO: Check if this kind of target selection is correct. The spell does nothing by cast on self or on others, only
@@ -1288,9 +1291,25 @@ class npc_thorims_hammer : public CreatureScript
                 UpdateVictim();
             }
 
+            void JustSummoned(Creature* creature)
+            {
+                summons.Summon(creature);    
+            }
+
+            void SummonedCreatureDespawn(Creature* creature)
+            {
+                summons.Despawn(creature);
+            }
+
+            void SummonedCreatureDies(Unit* /*killer*/, Creature* creature)
+            {
+                SummonedCreatureDespawn(creature);
+            }
+
             private:
                 uint64 dedicatedTarget;
                 EventMap events;
+                SummonList summons;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1306,7 +1325,7 @@ class npc_mimirons_inferno : public CreatureScript
 
         struct npc_mimirons_infernoAI : public npc_escortAI
         {
-            npc_mimirons_infernoAI(Creature* creature) : npc_escortAI(creature) {}
+            npc_mimirons_infernoAI(Creature* creature) : npc_escortAI(creature), summons(me) {}
 
             void Reset()
             {
@@ -1328,6 +1347,9 @@ class npc_mimirons_inferno : public CreatureScript
                 {
                     if (infernoTimer <= diff)
                     {
+                        if (summons.size() > 0)
+                            summons.DespawnAll();
+
                         if (Creature* trigger = DoSummonFlyer(NPC_MIMIRON_TARGET_BEACON, me, 30.0f, 0, 2*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN))
                         {
                             // TODO: Check if this works properly, the spell's target selection is somehow curious oÔ
@@ -1343,8 +1365,25 @@ class npc_mimirons_inferno : public CreatureScript
                         me->CastSpell(me, AURA_DUMMY_YELLOW, true);
                 }
             }
-        private:
-            uint32 infernoTimer;
+
+            void JustSummoned(Creature* creature)
+            {
+                summons.Summon(creature);    
+            }
+
+            void SummonedCreatureDespawn(Creature* creature)
+            {
+                summons.Despawn(creature);
+            }
+
+            void SummonedCreatureDies(Unit* /*killer*/, Creature* creature)
+            {
+                SummonedCreatureDespawn(creature);
+            }
+
+            private:
+                uint32 infernoTimer;
+                SummonList summons;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1367,7 +1406,7 @@ class npc_hodirs_fury : public CreatureScript
 
         struct npc_hodirs_furyAI : public ScriptedAI
         {
-            npc_hodirs_furyAI(Creature* creature) : ScriptedAI(creature) {}
+            npc_hodirs_furyAI(Creature* creature) : ScriptedAI(creature), summons(me) {}
 
             void Reset()
             {
@@ -1422,6 +1461,8 @@ class npc_hodirs_fury : public CreatureScript
                         case EVENT_SUMMON_HODIRS_BEACON:
                             if (Unit* target = ObjectAccessor::GetUnit(*me, dedicatedTarget))
                             {
+                                if (summons.size() > 0)
+                                    summons.DespawnAll();
                                 // TODO: Once again, crazy target selection check that again.
                                 if (Creature* trigger = DoSummonFlyer(NPC_HODIR_TARGET_BEACON, me, 30.0f, 0, 1000, TEMPSUMMON_TIMED_DESPAWN))
                                     trigger->CastSpell(target, SPELL_HODIRS_FURY, true);
@@ -1439,10 +1480,26 @@ class npc_hodirs_fury : public CreatureScript
                 }
                 UpdateVictim();
             }
+            
+            void JustSummoned(Creature* creature)
+            {
+                summons.Summon(creature);    
+            }
+
+            void SummonedCreatureDespawn(Creature* creature)
+            {
+                summons.Despawn(creature);
+            }
+
+            void SummonedCreatureDies(Unit* /*killer*/, Creature* creature)
+            {
+                SummonedCreatureDespawn(creature);
+            }
 
             private:
                 uint64 dedicatedTarget;
                 EventMap events;
+                SummonList summons;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1458,7 +1515,7 @@ class npc_freyas_ward : public CreatureScript
 
         struct npc_freyas_wardAI : public Scripted_NoMovementAI
         {
-            npc_freyas_wardAI(Creature* creature) : Scripted_NoMovementAI(creature) {}
+            npc_freyas_wardAI(Creature* creature) : Scripted_NoMovementAI(creature), summons(me) {}
 
             void Reset()
             {
@@ -1473,6 +1530,9 @@ class npc_freyas_ward : public CreatureScript
             {
                 if (summonTimer <= diff)
                 {
+                    if (summons.size() > 0)
+                        summons.DespawnAll();
+
                     if (Creature* trigger = DoSummonFlyer(NPC_FREYA_BEACON, me, 50.0f, 0, 10*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN))
                     {
                         // TODO: Check if this is the correct spell, only the triggered one does something :o
@@ -1492,8 +1552,24 @@ class npc_freyas_ward : public CreatureScript
                 UpdateVictim();
             }
 
+            void JustSummoned(Creature* creature)
+            {
+                summons.Summon(creature);    
+            }
+
+            void SummonedCreatureDespawn(Creature* creature)
+            {
+                summons.Despawn(creature);
+            }
+
+            void SummonedCreatureDies(Unit* /*killer*/, Creature* creature)
+            {
+                SummonedCreatureDespawn(creature);
+            }
+
             private:
                 uint32 summonTimer;
+                SummonList summons;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1526,7 +1602,7 @@ class npc_freya_ward_of_life : public CreatureScript
                 if (lashTimer <= diff)
                 {
                     DoCast(SPELL_LASH);
-                    lashTimer = urand(8, 12) *IN_MILLISECONDS;;
+                    lashTimer = urand(8, 12) *IN_MILLISECONDS;
                 }
                 else
                     lashTimer -= diff;
