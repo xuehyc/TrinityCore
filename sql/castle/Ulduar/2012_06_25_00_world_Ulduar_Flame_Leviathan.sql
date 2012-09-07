@@ -2,6 +2,7 @@
 -- Scripts update/register for NPCs, areatriggers and spells.
 
 -- Part 1: Creatures. I've renamed them, since they are no bosses, as named before.
+UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~33554432 WHERE `entry`=33067;
 UPDATE `creature_template` SET `ScriptName`='npc_flame_leviathan_seat' WHERE `entry`=33114;
 UPDATE `creature_template` SET `ScriptName`='npc_flame_leviathan_defense_turret' WHERE `entry`=33142;
 UPDATE `creature_template` SET `ScriptName`='npc_flame_leviathan_defense_cannon' WHERE `entry`=33139;

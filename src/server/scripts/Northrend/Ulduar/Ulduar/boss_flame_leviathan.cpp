@@ -26,6 +26,10 @@
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
 #include "ScriptedEscortAI.h"
+#include "Cell.h"
+#include "CellImpl.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "CombatAI.h"
 #include "PassiveAI.h"
 #include "ObjectMgr.h"
@@ -305,7 +309,6 @@ class boss_flame_leviathan : public CreatureScript
                 events.ScheduleEvent(EVENT_PURSUE, 1);
                 events.ScheduleEvent(EVENT_MISSILE, urand(1500, 4*IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_VENT, 20*IN_MILLISECONDS);
-                events.ScheduleEvent(EVENT_SHUTDOWN, 150*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SPEED, 15*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SUMMON, 1*IN_MILLISECONDS);
                 PerformTowerCheck();
@@ -468,9 +471,6 @@ class boss_flame_leviathan : public CreatureScript
                     case SPELL_ELECTROSHOCK:
                         me->InterruptSpell(CURRENT_CHANNELED_SPELL);
                         break;
-                    case SPELL_OVERLOAD_CIRCUIT:
-                        ++Shutdown;
-                        break;
                 }
             }
 
@@ -502,16 +502,6 @@ class boss_flame_leviathan : public CreatureScript
                     return;
 
                 events.Update(diff);
-
-                // Check for shutdown initialization
-                if (Shutdown == RAID_MODE(TWO_SEATS, FOUR_SEATS))
-                {
-                    Shutdown = 0;
-                    events.ScheduleEvent(EVENT_SHUTDOWN, 4000);
-                    me->RemoveAurasDueToSpell(SPELL_OVERLOAD_CIRCUIT);
-                    me->InterruptNonMeleeSpells(true);
-                    return;
-                }
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -557,7 +547,16 @@ class boss_flame_leviathan : public CreatureScript
                         case EVENT_REPAIR:
                             me->MonsterTextEmote(EMOTE_REPAIR, 0, true);
                             me->ClearUnitState(UNIT_STATE_STUNNED | UNIT_STATE_ROOT);
-                            events.ScheduleEvent(EVENT_SHUTDOWN, 150*IN_MILLISECONDS);
+                            // Defense turrets broke down, so...
+                            for (uint8 i = RAID_MODE(2, 0); i < 4; ++i)
+                            {
+                                if (Creature* seat = me->SummonCreature(NPC_SEAT, *me))
+                                {
+                                    if (Creature* turret = me->SummonCreature(NPC_DEFENSE_TURRET, *me))
+                                        turret->EnterVehicle(seat, SEAT_TURRET);
+                                    seat->EnterVehicle(me, i);
+                                }
+                            }
                             break;
                         case EVENT_THORIMS_HAMMER: // Tower of Storms
                             for (uint8 i = 0; i < RAID_MODE(7, 15); i++)
@@ -2090,7 +2089,7 @@ class spell_anti_air_rocket : public SpellScriptLoader
         }
 };
 
-struct FlameLeviathanPursuedTargetSelector
+struct FlameLeviathanPursuedTargetSelector : std::unary_function<WorldObject*, bool>
 {
     bool operator() (WorldObject* target)
     {
@@ -2502,21 +2501,25 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
                             for (std::list<WorldObject*>::iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
                             {
                                 if (Unit* unit = (*itr)->ToUnit())
-                                    if (Vehicle* seat = unit->GetVehicleKit())
-                                        if (!seat->GetPassenger(0))
-                                            if (Unit* device = seat->GetPassenger(2))
-                                                if (!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-                                                {
-                                                    float dist = unit->GetExactDistSq(targets.GetDstPos());
-                                                    if (dist < minDist)
+                                    if (unit->GetEntry() == NPC_SEAT)
+                                        if (Vehicle* seat = unit->GetVehicleKit())
+                                            if (!seat->GetPassenger(0))
+                                                if (Unit* device = seat->GetPassenger(2))
+                                                    if (!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
                                                     {
-                                                        minDist = dist;
-                                                        target = unit;
+                                                        float dist = unit->GetExactDistSq(targets.GetDstPos());
+                                                        if (dist < minDist)
+                                                        {
+                                                            minDist = dist;
+                                                            target = unit;
+                                                        }
                                                     }
-                                                }
                             }
                             if (target && target->IsWithinDist2d(targets.GetDstPos(), GetSpellInfo()->Effects[effIndex].CalcRadius() * 2)) // now we use *2 because the location of the seat is not correct
+                            {
                                 passenger->EnterVehicle(target, 0);
+                                passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
+                            }
                             else
                             {
                                 passenger->ExitVehicle();
@@ -2591,7 +2594,7 @@ class spell_freyas_ward_summon : public SpellScriptLoader
         }
 };
 
-struct FlameVentsTargetSelector
+struct FlameVentsTargetSelector : std::unary_function<WorldObject*, bool>
 {
     bool operator() (WorldObject* target)
     {
