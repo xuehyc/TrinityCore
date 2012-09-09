@@ -838,19 +838,10 @@ public:
                     return 1500;
                     break;
                 case 16:
-                    if (player)
-                    {
-                        Illi->CastSpell(player, SPELL_TWO, true);
-                        player->RemoveAurasDueToSpell(SPELL_THREE);
-                        player->RemoveAurasDueToSpell(SPELL_FOUR);
-                        return 5000;
-                    }
-                    else
-                    {
-                        player->FailQuest(QUEST_LORD_ILLIDAN_STORMRAGE);
-                        Step = 30;
-                        return 100;
-                    }
+                    Illi->CastSpell(player, SPELL_TWO, true);
+                    player->RemoveAurasDueToSpell(SPELL_THREE);
+                    player->RemoveAurasDueToSpell(SPELL_FOUR);
+                    return 5000;
                     break;
                 case 17:
                     DoScriptText(LORD_ILLIDAN_SAY_5, Illi);
