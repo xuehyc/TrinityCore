@@ -719,6 +719,14 @@ class npc_risen_archmage : public CreatureScript
             {
             }
 
+            void InitializeAI()
+            {
+                if (me->GetDBTableGUIDLow() && !me->isAlive())
+                    if (_instance)
+                        if (_instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != DONE)
+                            me->Respawn(true);
+            }
+
             bool CanAIAttack(Unit const* target) const
             {
                 return !me->GetDBTableGUIDLow() || target->GetEntry() != NPC_VALITHRIA_DREAMWALKER;
