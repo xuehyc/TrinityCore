@@ -2227,6 +2227,16 @@ class npc_sindragosas_ward : public CreatureScript
                 events.ScheduleEvent(EVENT_UPDATE_CHECK, 5000);
             }
 
+            void JustDied(Unit* /*killer*/)
+            {
+                _JustDied();
+
+                // Open this door only once, it should be closed, when Sindragosa npcs get infight
+                // Server crashes can be ignored in this case, since teleporter to Sindragosa is active now
+                if (GameObject* sindragosaDoor = instance->instance->GetGameObject(instance->GetData64(GO_SINDRAGOSA_ENTRANCE_DOOR)))
+                    instance->HandleGameObject(instance->GetData64(GO_SINDRAGOSA_ENTRANCE_DOOR), true, sindragosaDoor);
+            }
+
             void DoSummonWave(uint8 number)
             {
                 switch (number)

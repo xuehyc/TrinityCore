@@ -255,12 +255,21 @@ class boss_sindragosa : public CreatureScript
                 Talk(SAY_AGGRO);
             }
 
+            bool CanAIAttack(Unit const* target) const
+            {
+                if (target->GetPositionZ() >= 211.0f && !me->IsWithinLOS(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
+                    return false;
+
+                return true;
+            }
+
             void JustReachedHome()
             {
                 BossAI::JustReachedHome();
                 instance->SetBossState(DATA_SINDRAGOSA, FAIL);
                 me->SetCanFly(false);
                 me->SetDisableGravity(false);
+                me->DespawnOrUnsummon(); // Will be respawned on areatrigger usage
             }
 
             void KilledUnit(Unit* victim)
@@ -321,6 +330,10 @@ class boss_sindragosa : public CreatureScript
 
                         // Sindragosa enters combat as soon as she lands
                         DoZoneInCombat(me, 100.0f);
+
+                        // Sindragosa should be in combat here, otherwise EnterEvadeMode and despawn
+                        if (!me->isInCombat())
+                            EnterEvadeMode();
                         break;
                     case POINT_TAKEOFF:
                         events.ScheduleEvent(EVENT_AIR_MOVEMENT, 1);
@@ -374,7 +387,7 @@ class boss_sindragosa : public CreatureScript
                 if (summon->GetEntry() == NPC_ICE_TOMB && _isThirdPhase)
                     summon->AI()->SetData(DATA_ENABLE_ASPHYXIATION, 0);
 
-                if (summon->GetEntry() == NPC_FROST_BOMB && summon->GetDisplayId() != 11686)
+                if (summon->GetEntry() == NPC_FROST_BOMB)
                 {
                     summon->CastSpell(summon, SPELL_FROST_BOMB_VISUAL, true);
                     summon->CastSpell(summon, SPELL_BIRTH_NO_VISUAL, true);
@@ -554,12 +567,7 @@ class boss_sindragosa : public CreatureScript
                             destY = float(rand_norm()) * 75.0f + 2450.0f;
                             destZ = 205.0f; // random number close to ground, get exact in next call
                             me->UpdateGroundPositionZ(destX, destY, destZ);
-
-                            if (Creature* frostBombTarget = me->SummonCreature(NPC_FROST_BOMB, destX, destY, destZ, 0, TEMPSUMMON_TIMED_DESPAWN, 30000))
-                            {
-                                frostBombTarget->SetDisplayId(11686); // This is our indicator for target creature
-                                DoCast(frostBombTarget, SPELL_FROST_BOMB_TRIGGER, false);
-                            }
+                            me->CastSpell(destX, destY, destZ, SPELL_FROST_BOMB_TRIGGER, false);
 
                             _frostBombCounter++;
                             if (_frostBombCounter < 4) // Avoid casting Frost Bomb more than 4 times
@@ -765,6 +773,14 @@ class npc_spinestalker : public CreatureScript
                 }
             }
 
+            void EnterCombat(Unit* /*victim*/)
+            {
+                // Close this door when Rimefang or Spinestalker get infight
+                // Server crashes can be ignored in this case, since teleporter to Sindragosa is active
+                if (GameObject* sindragosaDoor = _instance->instance->GetGameObject(_instance->GetData64(GO_SINDRAGOSA_ENTRANCE_DOOR)))
+                    _instance->HandleGameObject(_instance->GetData64(GO_SINDRAGOSA_ENTRANCE_DOOR), false, sindragosaDoor);
+            }
+
             void JustRespawned()
             {
                 ScriptedAI::JustRespawned();
@@ -948,6 +964,11 @@ class npc_rimefang : public CreatureScript
             void EnterCombat(Unit* /*victim*/)
             {
                 DoCast(me, SPELL_FROST_AURA_RIMEFANG, true);
+
+                // Close this door when Rimefang or Spinestalker get infight
+                // Server crashes can be ignored in this case, since teleporter to Sindragosa is active
+                if (GameObject* sindragosaDoor = _instance->instance->GetGameObject(_instance->GetData64(GO_SINDRAGOSA_ENTRANCE_DOOR)))
+                    _instance->HandleGameObject(_instance->GetData64(GO_SINDRAGOSA_ENTRANCE_DOOR), false, sindragosaDoor);
             }
 
             void UpdateAI(uint32 const diff)

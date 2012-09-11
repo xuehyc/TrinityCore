@@ -60,8 +60,8 @@ DoorData const doorData[] =
     {GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_02,  DATA_VALITHRIA_DREAMWALKER, DOOR_TYPE_SPAWN_HOLE, BOUNDARY_S   },
     {GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_03,  DATA_VALITHRIA_DREAMWALKER, DOOR_TYPE_SPAWN_HOLE, BOUNDARY_N   },
     {GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_04,  DATA_VALITHRIA_DREAMWALKER, DOOR_TYPE_SPAWN_HOLE, BOUNDARY_S   },
-    {GO_SINDRAGOSA_ENTRANCE_DOOR,            DATA_SINDRAGOSA_GAUNTLET,   DOOR_TYPE_PASSAGE,    BOUNDARY_N   },
-    {GO_SINDRAGOSA_ENTRANCE_DOOR,            DATA_SINDRAGOSA,            DOOR_TYPE_ROOM,       BOUNDARY_S   },
+    // {GO_SINDRAGOSA_ENTRANCE_DOOR,            DATA_SINDRAGOSA_GAUNTLET,   DOOR_TYPE_PASSAGE,    BOUNDARY_N   },
+    // {GO_SINDRAGOSA_ENTRANCE_DOOR,            DATA_SINDRAGOSA,            DOOR_TYPE_ROOM,       BOUNDARY_S   },
     {GO_SINDRAGOSA_SHORTCUT_ENTRANCE_DOOR,   DATA_SINDRAGOSA,            DOOR_TYPE_PASSAGE,    BOUNDARY_E   },
     {GO_SINDRAGOSA_SHORTCUT_EXIT_DOOR,       DATA_SINDRAGOSA,            DOOR_TYPE_PASSAGE,    BOUNDARY_NONE},
     {GO_ICE_WALL,                            DATA_SINDRAGOSA,            DOOR_TYPE_ROOM,       BOUNDARY_SE  },
@@ -129,6 +129,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 ValithriaLichKingGUID = 0;
                 ValithriaTriggerGUID = 0;
                 SindragosaGUID = 0;
+                SindragosaDoorGUID = 0;
                 SpinestalkerGUID = 0;
                 RimefangGUID = 0;
                 TheLichKingTeleportGUID = 0;
@@ -427,7 +428,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_GREEN_DRAGON_BOSS_EXIT:
                     case GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_02:
                     case GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_03:
-                    case GO_SINDRAGOSA_ENTRANCE_DOOR:
+                    // case GO_SINDRAGOSA_ENTRANCE_DOOR:
                     case GO_SINDRAGOSA_SHORTCUT_ENTRANCE_DOOR:
                     case GO_SINDRAGOSA_SHORTCUT_EXIT_DOOR:
                     case GO_ICE_WALL:
@@ -515,6 +516,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                             go->SetLootRecipient(valithria->GetLootRecipient());
                         go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED | GO_FLAG_NOT_SELECTABLE | GO_FLAG_NODESPAWN);
                         break;
+                    case GO_SINDRAGOSA_ENTRANCE_DOOR:
+                        SindragosaDoorGUID = go->GetGUID();
+                        break;
                     case GO_SCOURGE_TRANSPORTER_LK:
                         TheLichKingTeleportGUID = go->GetGUID();
                         if (GetBossState(DATA_PROFESSOR_PUTRICIDE) == DONE && GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) == DONE && GetBossState(DATA_SINDRAGOSA) == DONE)
@@ -582,7 +586,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_02:
                     case GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_03:
                     case GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_04:
-                    case GO_SINDRAGOSA_ENTRANCE_DOOR:
+                    // case GO_SINDRAGOSA_ENTRANCE_DOOR:
                     case GO_SINDRAGOSA_SHORTCUT_ENTRANCE_DOOR:
                     case GO_SINDRAGOSA_SHORTCUT_EXIT_DOOR:
                     case GO_ICE_WALL:
@@ -679,6 +683,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         return TerenasMenethilGUID;
                     case DATA_SINDRAGOSA_GAUNTLET:
                         return SindragosasWardGUID;
+                    case GO_SINDRAGOSA_ENTRANCE_DOOR:
+                        return SindragosaDoorGUID;
                     default:
                         break;
                 }
@@ -1292,6 +1298,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint64 ValithriaLichKingGUID;
             uint64 ValithriaTriggerGUID;
             uint64 SindragosaGUID;
+            uint64 SindragosaDoorGUID;
             uint64 SpinestalkerGUID;
             uint64 RimefangGUID;
             uint64 TheLichKingTeleportGUID;

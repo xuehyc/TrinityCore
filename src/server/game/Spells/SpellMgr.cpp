@@ -3392,6 +3392,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71415: // Orange Ooze Summon (Professor Putricide)
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
                 break;
+            case 70530: // Volatile Ooze Beam Protection (Professor Putricide)
+                spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AURA; // for an unknown reason this was SPELL_EFFECT_APPLY_AREA_AURA_RAID
+                break;
             case 71159: // Awaken Plagued Zombies
                 spellInfo->DurationIndex = 21;
                 break;

@@ -105,6 +105,7 @@ class boss_rotface : public CreatureScript
                 infectionStage = 0;
                 infectionCooldown = 14000;
                 aimOrientation = 0.0f;
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
             }
 
             void EnterCombat(Unit* who)
@@ -152,10 +153,13 @@ class boss_rotface : public CreatureScript
                     professor->AI()->EnterEvadeMode();
             }
 
-            void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
+            void SpellHitTarget(Unit* target, SpellInfo const* spell)
             {
                 if (spell->Id == SPELL_SLIME_SPRAY)
+                {
                     Talk(SAY_SLIME_SPRAY);
+                    aimOrientation = me->GetAngle(target);
+                }
             }
 
             void MoveInLineOfSight(Unit* /*who*/)
@@ -166,8 +170,13 @@ class boss_rotface : public CreatureScript
             void SummonedCreatureDespawn(Creature* summon)
             {
                 if (summon)
+                {
                     if (summon->GetEntry() == NPC_OOZE_SPRAY_STALKER)
+                    {
                         aimOrientation = 0.0f;
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+                    }
+                }
             }
 
             void UpdateAI(const uint32 diff)
@@ -175,10 +184,15 @@ class boss_rotface : public CreatureScript
                 if (!UpdateVictim() || !CheckInRoom())
                     return;
 
-                if (aimOrientation != 0.0f)
-                    me->SetOrientation(aimOrientation);
-
                 events.Update(diff);
+
+                if (aimOrientation != 0.0f)
+                {
+                    me->SetOrientation(aimOrientation);
+                    me->SendMovementFlagUpdate();
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+                    return;
+                }
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -193,7 +207,6 @@ class boss_rotface : public CreatureScript
                                 if (Creature* orientationTarget = DoSummon(NPC_OOZE_SPRAY_STALKER, *target, 8000, TEMPSUMMON_TIMED_DESPAWN))
                                 {
                                     Talk(EMOTE_SLIME_SPRAY);
-                                    aimOrientation = me->GetAngle(orientationTarget);
                                     DoCast(me, SPELL_SLIME_SPRAY);
                                 }
                             }
@@ -244,7 +257,7 @@ class npc_little_ooze : public CreatureScript
 
         struct npc_little_oozeAI : public ScriptedAI
         {
-            npc_little_oozeAI(Creature* creature) : ScriptedAI(creature)
+            npc_little_oozeAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript())
             {
             }
 
@@ -270,7 +283,8 @@ class npc_little_ooze : public CreatureScript
 
                 if (events.ExecuteEvent() == EVENT_STICKY_OOZE)
                 {
-                    DoCastVictim(SPELL_STICKY_OOZE);
+                    // Set Rotface to original caster for this, no effect of sticky ooze will be triggered if ooze gets despawned
+                    me->CastSpell(me->getVictim(), SPELL_STICKY_OOZE, false, 0, 0, instance->GetData64(DATA_ROTFACE));
                     events.ScheduleEvent(EVENT_STICKY_OOZE, 15000);
                 }
 
@@ -279,6 +293,7 @@ class npc_little_ooze : public CreatureScript
 
         private:
             EventMap events;
+            InstanceScript* instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -336,7 +351,8 @@ class npc_big_ooze : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_STICKY_OOZE:
-                            DoCastVictim(SPELL_STICKY_OOZE);
+                            // Set Rotface to original caster for this, no effect of sticky ooze will be triggered if ooze gets despawned
+                            me->CastSpell(me->getVictim(), SPELL_STICKY_OOZE, false, 0, 0, instance->GetData64(DATA_ROTFACE));
                             events.ScheduleEvent(EVENT_STICKY_OOZE, 15000);
                         default:
                             break;
@@ -477,8 +493,8 @@ class spell_rotface_ooze_flood : public SpellScriptLoader
                 targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
 
                 // .resize() runs pop_back();
-                if (targets.size() > 4)
-                    targets.resize(4);
+                if (targets.size() > 5)
+                    targets.resize(5);
 
                 while (targets.size() > 2)
                     targets.pop_front();
