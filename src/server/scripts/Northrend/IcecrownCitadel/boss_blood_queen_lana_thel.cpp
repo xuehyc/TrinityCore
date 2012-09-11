@@ -505,10 +505,12 @@ class boss_blood_queen_lana_thel : public CreatureScript
                             me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
                             me->SetCanFly(true);
                             me->SendMovementFlagUpdate();
-                            me->GetMotionMaster()->MovePoint(POINT_AIR, airPos);
+                            me->GetMotionMaster()->MoveTakeoff(POINT_AIR, airPos);
+                            //me->GetMotionMaster()->MovePoint(POINT_AIR, airPos);
                             break;
                         case EVENT_AIR_FLY_DOWN:
-                            me->GetMotionMaster()->MovePoint(POINT_GROUND, centerPos);
+                            me->GetMotionMaster()->MoveLand(POINT_GROUND, centerPos);
+                            //me->GetMotionMaster()->MovePoint(POINT_GROUND, centerPos);
                             break;
                         default:
                             break;
