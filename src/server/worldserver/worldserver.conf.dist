@@ -3174,13 +3174,13 @@ irc.online.result = 30
 #
 #     USING CORE DEFAULTS! DISABLED FOLLOWING OPTIONS!
 #
-#chat.wow_irc = "\003<WoW>[\002$Name($Level)\002\003] $Msg"
-#chat.irc_wow = "\003<IRC>[$Name]: $Msg"
-#chat.join_wow = "\00312>>\00304 $GM$Name\003 Joined The $Channel Channel!"
-#chat.join_irc = "\003[$Name]: Has Joined IRC!"
-#chat.leave_wow = "\00312<<\00304 $GM$Name\003 Left The $Channel Channel!"
-#chat.leave_irc = "\003[$Name]: Has Left IRC!"
-#chat.change_nick = "\003<> $Name Is Now Known As $NewName!"
+chat.wow_irc = "$GUID [\003$Level|\002$Name\002\003]: $Msg"
+chat.irc_wow = "[$Name]: $Msg"
+chat.join_wow = "\00312>>\00304 $Name \003Joined The Channel!"
+chat.join_irc = "[$Name]: Has Joined IRC!"
+chat.leave_wow = "\00312<<\00304 $Name \003Left The Channel!"
+chat.leave_irc = "[$Name]: Has Left IRC!"
+chat.change_nick = "<> $Name Is Now Known As $NewName!"
 
 #
 # Botmask
