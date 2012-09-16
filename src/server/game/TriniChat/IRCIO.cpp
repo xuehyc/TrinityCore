@@ -422,7 +422,7 @@ void IRCClient::Send_WoW_Channel(const char *channel, std::string chat)
                     data << (uint64)0;
                     data << (uint32) (strlen(chat.c_str()) + 1);
                     data << IRCcol2WoW(chat.c_str());
-                    data << (uint8)0;
+                    data << (uint8)0x04;
                     itr->second->GetSession()->SendPacket(&data);
                 }
             }
