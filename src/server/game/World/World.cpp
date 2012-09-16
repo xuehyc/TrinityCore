@@ -1288,8 +1288,8 @@ void World::LoadConfigSettings(bool reload)
     sIRC.RstMsg  = ConfigMgr::GetStringDefault("irc.rstmsg", "TriniChat Is Restarting, I Will Be Right Back!");
     sIRC.kikmsg = ConfigMgr::GetStringDefault("irc.kickmsg", "Do Not Kick Me Again, Severe Actions Will Be Taken!");
     // IRC LINES
-    sIRC.ILINES[WOW_IRC] = ConfigMgr::GetStringDefault("chat.wow_irc", "$GUID [\003$Level|\002$Name\002\003]: $Msg");
-    sIRC.ILINES[IRC_WOW] = ConfigMgr::GetStringDefault("chat.irc_wow", "\003<IRC>[$Name]: $Msg");
+    sIRC.ILINES[WOW_IRC] = ConfigMgr::GetStringDefault("chat.wow_irc", "$GUID [$Level|\003\002$Name\002\003]: $Msg");
+    sIRC.ILINES[IRC_WOW] = ConfigMgr::GetStringDefault("chat.irc_wow", "\003[$Name]: $Msg");
     sIRC.ILINES[JOIN_WOW] = ConfigMgr::GetStringDefault("chat.join_wow", "\00312>>\00304 $Name \003Joined The Channel!");
     sIRC.ILINES[JOIN_IRC] = ConfigMgr::GetStringDefault("chat.join_irc", "\003[$Name]: Has Joined IRC!");
     sIRC.ILINES[LEAVE_WOW] = ConfigMgr::GetStringDefault("chat.leave_wow", "\00312<<\00304 $Name \003Left The Channel!");
