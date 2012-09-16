@@ -708,7 +708,7 @@ class instance_ulduar : public InstanceMapScript
                     case GO_XT_002_DOOR:
                         AddDoor(gameObject, true);
                         XT002DoorGUID = gameObject->GetGUID();
-                        HandleGameObject(0, GetBossState(BOSS_LEVIATHAN) == DONE, gameObject);
+                        HandleGameObject(0, false, gameObject); // TODO: Maybe change this handling!
                         break;
 
                     // Iron-Council related
@@ -732,7 +732,7 @@ class instance_ulduar : public InstanceMapScript
                         break;
                     case GO_KOLOGARN_DOOR:
                         KologarnDoorGUID = gameObject->GetGUID();
-                        HandleGameObject(KologarnDoorGUID, GetBossState(BOSS_ASSEMBLY_OF_IRON)==DONE);
+                        HandleGameObject(0, GetBossState(BOSS_ASSEMBLY_OF_IRON)==DONE, gameObject);
                         break;
 
                     // Thorim related
@@ -765,12 +765,12 @@ class instance_ulduar : public InstanceMapScript
                     case GO_HODIR_OUT_DOOR_ICE:
                         HodirIceDoorGUID = gameObject->GetGUID();
                         if (GetBossState(BOSS_HODIR) == DONE)
-                            HandleGameObject(HodirIceDoorGUID, true);
+                            HandleGameObject(0, true, gameObject);
                         break;
                     case GO_HODIR_OUT_DOOR_STONE:
                         HodirStoneDoorGUID = gameObject->GetGUID();
                         if (GetBossState(BOSS_HODIR) == DONE)
-                            HandleGameObject(HodirIceDoorGUID, true);
+                            HandleGameObject(0, true, gameObject);
                         break;
 
                     // Freya related
@@ -812,46 +812,46 @@ class instance_ulduar : public InstanceMapScript
                     // Yogg-Saron related
                     case GO_YOGGSARON_DOOR:
                         YoggSaronDoorGUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, true, gameObject);
+                        HandleGameObject(0, true, gameObject);
                         break;
                     case GO_YOGGBRAIN_DOOR_1:
                         YoggSaronBrainDoor1GUID = gameObject->GetGUID();
                         break;
                     case GO_YOGGBRAIN_DOOR_2:
                         YoggSaronBrainDoor2GUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, false, gameObject);
+                        HandleGameObject(0, false, gameObject);
                     case GO_YOGGBRAIN_DOOR_3:
                         YoggSaronBrainDoor3GUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, false, gameObject);
+                        HandleGameObject(0, false, gameObject);
                         break;
 
                     // Algalon related
                     case GO_ALGALON_PLATFORM:
-                        HandleGameObject(NULL, false, gameObject);
+                        HandleGameObject(0, false, gameObject);
                         break;
                     case GO_ALGALON_BRIDGE:
                         AlgalonBridgeGUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, false, gameObject);
+                        HandleGameObject(0, false, gameObject);
                         break;
                     case GO_ALGALON_B_VISUAL:
                         AlgalonBridgeVisualGUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, false, gameObject);
+                        HandleGameObject(0, false, gameObject);
                         break;
                     case GO_ALGALON_B_DOOR:
                         AlgalonBridgeDoorGUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, true, gameObject);
+                        HandleGameObject(0, true, gameObject);
                         break;
                     case GO_ALGALON_GLOBE:
                         AlgalonGlobeGUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, false, gameObject);
+                        HandleGameObject(0, false, gameObject);
                         break;
                     case GO_ALGALON_DOOR_1:
                         AlgalonDoor1GUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, AlgalonCountdown < 62 ? true : false, gameObject);
+                        HandleGameObject(0, AlgalonCountdown < 62 ? true : false, gameObject);
                         break;
                     case GO_ALGALON_DOOR_2:
                         AlgalonDoor2GUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, AlgalonCountdown < 62 ? true : false, gameObject);
+                        HandleGameObject(0, AlgalonCountdown < 62 ? true : false, gameObject);
                         break;
                     case GO_ALGALON_ACCESS:
                         AlgalonAccessGUID = gameObject->GetGUID();
@@ -903,7 +903,7 @@ class instance_ulduar : public InstanceMapScript
 
             bool SetBossState(uint32 type, EncounterState state)
             {
-                if (!InstanceScript::SetBossState(type, state))
+                if (!InstanceScript::SetBossState(type, state)) // TODO: Duplicated code, anyhow ?
                     return false;
 
                 if (UlduarBosses(type) <= BOSS_ALGALON)
@@ -923,25 +923,23 @@ class instance_ulduar : public InstanceMapScript
                         }
 
                         if (state == DONE)
-                        {
                             if (GameObject* gameObject = instance->GetGameObject(leviathanChestGUID))
                                 gameObject->SetRespawnTime(gameObject->GetRespawnDelay());
-
-                            HandleGameObject(XT002DoorGUID, true);
-                        }
                         break;
+                    // Door to XT002 Deconstructor should be opened once Ignis and Razorscale are finished.
                     case BOSS_IGNIS:
                     case BOSS_RAZORSCALE:
+                        HandleGameObject(XT002DoorGUID, (GetBossState(BOSS_RAZORSCALE)==DONE && GetBossState(BOSS_IGNIS)==DONE));
+                        break;
                     case BOSS_XT002:
-                        // Door should closed during these fights :o
+                        // Door should be closed during these fights :o
                         HandleGameObject(XT002DoorGUID, state != IN_PROGRESS);
                         break;
                     case BOSS_ASSEMBLY_OF_IRON:
                         // Prevent fleeing :o
                         HandleGameObject(IronCouncilEntranceGUID, state != IN_PROGRESS);
-                        if (state == DONE)
-                            HandleGameObject(ArchivumDoorGUID, true);
-                        break;
+                        HandleGameObject(ArchivumDoorGUID, state == DONE);
+                        HandleGameObject(KologarnDoorGUID, state == DONE);
                         break;
                     case BOSS_AURIAYA:
                     case BOSS_FREYA:
@@ -958,10 +956,7 @@ class instance_ulduar : public InstanceMapScript
                             HandleGameObject(VezaxDoorGUID, true);
                         break;
                     case BOSS_YOGGSARON:
-                        if (state == IN_PROGRESS)
-                            HandleGameObject(YoggSaronDoorGUID, false);
-                        else
-                            HandleGameObject(YoggSaronDoorGUID, true);
+                        HandleGameObject(YoggSaronDoorGUID, state != IN_PROGRESS);
                         break;
                     case BOSS_KOLOGARN:
                         if (state == DONE)
