@@ -388,24 +388,12 @@ class boss_deathbringer_saurfang : public CreatureScript
                     _EnterEvadeMode();
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
 
+                    // complete gunship criteria as long as the event is not working.
+                    DoCast(me, 72959, true);
+
                     DoCastAOE(SPELL_REMOVE_MARKS_OF_THE_FALLEN_CHAMPION);
                     DoCast(me, SPELL_ACHIEVEMENT, true);
                     Talk(SAY_DEATH);
-
-                    // HACK! complete lower citadel achievement; gunship battle is missing
-                    switch (GetDifficulty())
-                    {
-                        case RAID_DIFFICULTY_10MAN_HEROIC:
-                            instance->DoCompleteAchievement(4628);
-                        case RAID_DIFFICULTY_10MAN_NORMAL:
-                            instance->DoCompleteAchievement(4531);
-                            break;
-                        case RAID_DIFFICULTY_25MAN_HEROIC:
-                            instance->DoCompleteAchievement(4632);
-                        case RAID_DIFFICULTY_25MAN_NORMAL:
-                            instance->DoCompleteAchievement(4604);
-                            break;
-                    }
 
                     //instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
                     DoCast(me, SPELL_PERMANENT_FEIGN_DEATH);
