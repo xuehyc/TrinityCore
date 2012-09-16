@@ -194,7 +194,7 @@ class boss_lord_marrowgar : public CreatureScript
                         case EVENT_BONE_STORM_MOVE:
                         {
                             events.ScheduleEvent(EVENT_BONE_STORM_MOVE, _boneStormDuration/3);
-                            Unit* unit = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me));
+                            Unit* unit = SelectTarget(SELECT_TARGET_FARTHEST, 0);
                             if (!unit)
                                 unit = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
                             if (unit)
