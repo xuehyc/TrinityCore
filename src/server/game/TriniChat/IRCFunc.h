@@ -189,6 +189,7 @@ std::string MakeMsgP(int CLINE, std::string Msg, Player *plr)
         sMsg = sIRC.MakeMsg(sMsg, "$Tag", "<DND>");
     else
         sMsg = sIRC.MakeMsg(sMsg, "$Tag", "");
+    sMsg = sIRC.MakeMsg(sMsg, "$GUID", MakeMsgA("%d", plr->GetGUIDLow()));
     sMsg = sIRC.MakeMsg(sMsg, "$Level", MakeMsgA("%d", plr->getLevel()));
     sMsg = Delink(sMsg);
     sMsg = WoWcol2IRC(sMsg);
