@@ -211,8 +211,8 @@ void PostEncounterStuff(InstanceScript* inst)
             p->CombatStop(true);
     }
 
-    // Open door to Kologarn
-    inst->HandleGameObject(inst->GetData64(GO_KOLOGARN_DOOR), true);
+    // Open door to Kologarn - 2012/09/14 moved to instance script
+    // inst->HandleGameObject(inst->GetData64(GO_KOLOGARN_DOOR), true);
 }
 
 bool IsEncounterComplete(InstanceScript* instance, Creature* me)
@@ -348,7 +348,8 @@ class boss_steelbreaker : public CreatureScript
             void Reset()
             {
                 _Reset();
-                phase = 0;
+                phase = 1;
+                events.SetPhase(phase);
                 superChargedCnt = 0;
                 me->RemoveAllAuras();
                 me->RemoveLootMode(LOOT_MODE_DEFAULT);
@@ -364,7 +365,6 @@ class boss_steelbreaker : public CreatureScript
                 DoCast(me, SPELL_HIGH_VOLTAGE);
                 events.ScheduleEvent(EVENT_ENRAGE, 900000);
                 events.ScheduleEvent(EVENT_FUSION_PUNCH, 15000);
-                DoAction(ACTION_UPDATEPHASE);
             }
 
             uint32 GetData(uint32 type)
@@ -638,7 +638,8 @@ class boss_runemaster_molgeim : public CreatureScript
             void Reset()
             {
                 _Reset();
-                phase = 0;
+                phase = 1;
+                events.SetPhase(phase);
                 superChargedCnt = 0;
                 me->RemoveAllAuras();
                 me->RemoveLootMode(LOOT_MODE_DEFAULT);
@@ -654,7 +655,6 @@ class boss_runemaster_molgeim : public CreatureScript
                 events.ScheduleEvent(EVENT_ENRAGE, 900000);
                 events.ScheduleEvent(EVENT_SHIELD_OF_RUNES, 30000);
                 events.ScheduleEvent(EVENT_RUNE_OF_POWER, 20000);
-                DoAction(ACTION_UPDATEPHASE);
             }
 
             uint32 GetData(uint32 type)
@@ -919,7 +919,8 @@ class boss_stormcaller_brundir : public CreatureScript
             void Reset()
             {
                 _Reset();
-                phase = 0;
+                phase = 1;
+                events.SetPhase(phase);
                 superChargedCnt = 0;
                 tendrilTarget = 0;
                 forceLand = false;
@@ -946,7 +947,6 @@ class boss_stormcaller_brundir : public CreatureScript
                 events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 4000);
                 events.ScheduleEvent(EVENT_OVERLOAD, urand(60000, 120000));
                 events.ScheduleEvent(EVENT_THREAT_WIPE, 10000);
-                DoAction(ACTION_UPDATEPHASE);
             }
 
             uint32 GetData(uint32 type)

@@ -139,7 +139,7 @@ enum Yells
     SAY_SUMMON                                  = -1603308,
 };
 
-#define HEART_VEHICLE_SEAT 0
+//#define HEART_VEHICLE_SEAT 0
 #define EMOTE_TYMPANIC "XT-002 Deconstructor begins to cause the earth to quake."
 #define EMOTE_HEART    "XT-002 Deconstructor's heart is exposed and leaking energy."
 #define EMOTE_REPAIR   "XT-002 Deconstructor consumes a scrap bot to repair himself!"
@@ -389,7 +389,7 @@ class boss_xt002 : public CreatureScript
                     - Bots get him repaired above the last limit (say, if he got down to <75%, they heal him up to >75%)
                     - Does the XT schedule another step at the last limit (in the example mentioned above: at 75%) or will he fall through ?
                     The code below assumes the first option.
-                    I know that this will be a rather rare scenario, but it need to be covered by our code ;)
+                    I know that this will be a rather rare scenario, but it needs to be covered by our code ;)
                 */
                 float healthPct = me->GetHealthPct();
                 if (healthPct > 75)
@@ -400,6 +400,19 @@ class boss_xt002 : public CreatureScript
                     heartPhase = PHASE_ABOVE_25_PERCT;
                 else
                     heartPhase = PHASE_ABOVE_0_PERCT;
+            }
+
+            // Helper function, there seems to be a problem with a fixed seat... due to the log, the seat is fixed, due to database, it is, but... 
+            // retrieving the heart fomr the passenger-seat did not work, so...
+            Unit* FindHeart()
+            {
+                Unit* heart = 0;
+                if (!me->GetVehicleKit())
+                    return heart;
+                for (uint8 i = 0; i < me->GetVehicleKit()->GetAvailableSeatCount(); i++)
+                    if (heart = me->GetVehicleKit()->GetPassenger(i))
+                        return heart;
+                return heart;
             }
 
             void ExposeHeart()
@@ -413,8 +426,8 @@ class boss_xt002 : public CreatureScript
 
                 me->AttackStop();
                 me->SetReactState(REACT_PASSIVE);
-
-                Unit* heart = me->GetVehicleKit() ? me->GetVehicleKit()->GetPassenger(HEART_VEHICLE_SEAT) : NULL;
+                
+                Unit* heart = FindHeart();
                 if (heart)
                 {
                     heart->ClearUnitState(UNIT_STATE_ONVEHICLE);
@@ -458,7 +471,7 @@ class boss_xt002 : public CreatureScript
                 events.RescheduleEvent(EVENT_GRAVITY_BOMB, TIMER_GRAVITY_BOMB, 0, PHASE_ONE);
                 events.RescheduleEvent(EVENT_TYMPANIC_TANTRUM, urand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX)*2, 0, PHASE_ONE);
 
-                Unit* heart = me->GetVehicleKit() ? me->GetVehicleKit()->GetPassenger(HEART_VEHICLE_SEAT) : NULL;
+                Unit* heart = FindHeart();
                 if (!heart)
                     return;
 
@@ -475,6 +488,7 @@ class boss_xt002 : public CreatureScript
                         }
 
                     // Note: if the heart did not go down enough or the players sucked too much (heal through bots), we may have jumped back in heart-phase
+                    // Otherwise, damage to the heart got mirrored to the XT002, thus one or more of the heart-phases can be excluded.  
                     RecalcHeartPhase();
                 }
             }

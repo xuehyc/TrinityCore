@@ -1363,7 +1363,7 @@ class boss_vx_001 : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* /*who*/, uint32 &damage)
+            void DamageTaken(Unit* /*who*/, uint32& damage)
             {
                 if (damage >= me->GetHealth())
                 {
@@ -1452,6 +1452,7 @@ class boss_vx_001 : public CreatureScript
                         }
                         else
                             me->SetFacingTo(orient);
+                        me->SendMovementFlagUpdate(); // Hope this will work...
 
                         float x, y;
                         me->GetNearPoint2D(x, y, 10.0f, me->GetOrientation());

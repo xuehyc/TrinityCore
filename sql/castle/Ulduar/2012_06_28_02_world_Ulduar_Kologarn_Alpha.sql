@@ -2,6 +2,8 @@
 UPDATE `creature_template` SET `ScriptName`='npc_kologarn_arm' WHERE `entry` IN (32933,32934);
 -- Prevent NPC_ARM_SWEEP_STALKER from attacking players.
 UPDATE `creature_template` SET `unit_flags`=33554432|256 WHERE `entry`=33661;
+-- Update inhabit-type.
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry` IN (32930,33909);
 -- Add achievement scripts to corresponding criterias
 DELETE FROM `achievement_criteria_data` WHERE `criteria_id` IN (10284, 10722, 10285, 10095, 10290, 10133);
 INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value2`, `ScriptName`) VALUES 

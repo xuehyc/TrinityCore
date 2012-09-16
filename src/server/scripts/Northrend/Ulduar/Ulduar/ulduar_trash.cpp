@@ -197,7 +197,6 @@ class npc_steelforged_defender : public CreatureScript
             void Reset()
             {
                 events.Reset();
-
                 events.ScheduleEvent(EVENT_HAMSTRING, 10*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_LIGHTNING_BOLT, urand(9*IN_MILLISECONDS, 12*IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_SUNDER_ARMOR, 2*IN_MILLISECONDS);
@@ -586,6 +585,7 @@ class npc_parts_recovery_technician : public CreatureScript
         enum MyEvents
         {
             EVENT_MECHANO_KICK = 1,
+            EVENT_DEFENSE_MATRIX = 2
         };
         enum Spells
         {
@@ -602,7 +602,8 @@ class npc_parts_recovery_technician : public CreatureScript
             void Reset()
             {
                 events.Reset();
-                events.ScheduleEvent(EVENT_MECHANO_KICK, urand(5*IN_MILLISECONDS, 6*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_MECHANO_KICK, urand(3*IN_MILLISECONDS, 4*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_DEFENSE_MATRIX, urand(5*IN_MILLISECONDS, 6*IN_MILLISECONDS));
             }
 
             void UpdateAI(uint32 const diff)
@@ -612,8 +613,8 @@ class npc_parts_recovery_technician : public CreatureScript
 
                 events.Update(diff);
 
-                if (!me->HasAura(SPELL_DEFENSE_MATRIX))
-                    DoCast(SPELL_DEFENSE_MATRIX);
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;                
 
                 while (uint32 event = events.ExecuteEvent())
                 {
@@ -622,8 +623,13 @@ class npc_parts_recovery_technician : public CreatureScript
                         case EVENT_MECHANO_KICK:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                                 DoCast(target, SPELL_MECHANO_KICK); // Possibly triggered=true? Damage appeared strange during test
-                            events.ScheduleEvent(EVENT_MECHANO_KICK, urand(5*IN_MILLISECONDS, 6*IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_MECHANO_KICK, urand(3*IN_MILLISECONDS, 4*IN_MILLISECONDS));
                             break;
+                        case EVENT_DEFENSE_MATRIX:
+                            if (!me->HasAura(SPELL_DEFENSE_MATRIX))
+                                DoCast(SPELL_DEFENSE_MATRIX);
+                            events.ScheduleEvent(EVENT_DEFENSE_MATRIX, urand(5*IN_MILLISECONDS, 6*IN_MILLISECONDS));
+                            break;                            
                     }
                 }
 
