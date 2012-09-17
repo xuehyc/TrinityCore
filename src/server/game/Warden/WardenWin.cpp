@@ -502,11 +502,11 @@ void WardenWin::HandleData(ByteBuffer &buff)
         // TriniChat Extension
         if (Player* player = _session->GetPlayer())
         {
-            char buff[1024];
-            sprintf(buff, "PRIVMSG ChanServ :TOPIC #wowteam \x002\x0034[Warden]\x003\x002 (%d) \x002%s\x002 (GUID: %d, Account: %d) \x0034-\x003 \x002Failed Check %u\x002 \x0034-\x003 \x002Position:\x002 %f %f %f %d",
-                    player->getLevel(), _session->GetPlayerName(false).c_str(), player->GetGUIDLow(), _session->GetAccountId(), checkFailed, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId());
-            std::string msg = buff;
-            sIRC.SendIRC(msg);
+            std::ostringstream string;
+            string << "PRIVMSG ChanServ :TOPIC #wowteam \x02\x03" << "4[Warden]\x03 (" << player->getLevel() << ") " << player->GetName() << "\x02 (GUID: " << player->GetGUIDLow() << ", Account: " << _session->GetAccountId() << ")";
+            string << " \x03" << "4-\x03 \x02" << "Failed Check " << checkFailed << "\x02";
+            string << " \x03" << "4-\x03 \x02" << "Position:\x02 " << player->GetPositionX() << " " << player->GetPositionY() << " " << player->GetPositionZ() << " " << player->GetMapId();
+            sIRC.SendIRC(string.str());
         }
         // TriniChat Extension END
     }

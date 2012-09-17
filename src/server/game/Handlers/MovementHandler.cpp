@@ -113,11 +113,13 @@ bool WorldSession::Anti__ReportCheat(const char* reason,float speed,const char* 
         time_t t = time(NULL);
         tm* aTm = localtime(&t);
 
-        char buff[1024];
-        sprintf(buff, "PRIVMSG ChanServ :TOPIC #wowteam \x002\x0034[AntiCheat]\x003\x002 (%d) \x002%s\x002 (GUID: %d, Account: %d) \x0034-\x003 \x002%s\x002 \x0034-\x003 \x002Position:\x002 %f %f %f %d",
-                player->getLevel(), player->GetName(), player->GetGUIDLow(), accountId, reason, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), mapId);
-        std::string msg = buff;
-        sIRC.SendIRC(msg);
+        // TriniChat Extension
+        std::ostringstream string;
+        string << "PRIVMSG ChanServ :TOPIC #wowteam \x02\x03" << "4[AntiCheat]\x03 (" << player->getLevel() << ") " << player->GetName() << "\x02 (GUID: " << player->GetGUIDLow() << ", Account: " << accountId << ")";
+        string << " \x03" << "4-\x03 \x02" << reason << "\x02";
+        string << " \x03" << "4-\x03 \x02" << "Position:\x02 " << player->GetPositionX() << " " << player->GetPositionY() << " " << player->GetPositionZ() << " " << mapId;
+        sIRC.SendIRC(string.str());
+        // TriniChat Extension END
     }
 
     // penalty stuff
