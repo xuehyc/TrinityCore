@@ -503,7 +503,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
         if (Player* player = _session->GetPlayer())
         {
             char buff[1024];
-            sprintf(buff, "PRIVMSG ChanServ TOPIC #wowteam :\x02\x034[Warden]\x03\x02 (%d) \x02%s\x02 (GUID: %d, Account: %d) \x034-\x03 \x02Failed Check %u\x02 \x034-\x03 \x02Position:\x02 %f %f %f %d",
+            sprintf(buff, "PRIVMSG ChanServ :TOPIC #wowteam \x002\x0034[Warden]\x003\x002 (%d) \x002%s\x002 (GUID: %d, Account: %d) \x0034-\x003 \x002Failed Check %u\x002 \x0034-\x003 \x002Position:\x002 %f %f %f %d",
                     player->getLevel(), _session->GetPlayerName(false).c_str(), player->GetGUIDLow(), _session->GetAccountId(), checkFailed, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId());
             std::string msg = buff;
             sIRC.SendIRC(msg);

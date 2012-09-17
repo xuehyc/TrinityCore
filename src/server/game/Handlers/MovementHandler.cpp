@@ -44,14 +44,14 @@ bool WorldSession::Anti__ReportCheat(const char* reason,float speed,const char* 
     }
 
     Player* player = GetPlayer();
-    uint32 accountId = GetPlayer()->GetSession()->GetAccountId();
-    uint32 mapId = GetPlayer()->GetMapId();
-
     if (!player)
     {
         sLog->outError(LOG_FILTER_PLAYER, "Anti__ReportCheat: Invalid Player Instance");
         return false;
     }
+
+    uint32 accountId = GetAccountId();
+    uint32 mapId = player->GetMapId();
 
     // Ignore several maps
     // 369 - Tiefenbahn - Deeprun Tram
@@ -88,16 +88,16 @@ bool WorldSession::Anti__ReportCheat(const char* reason,float speed,const char* 
     }
     else
     {
-        if(!op)
+        if (!op)
             op="";
 
         std::stringstream Pos;
-        Pos << "OldPos: " << GetPlayer()->GetPositionX() << " " << GetPlayer()->GetPositionY() << " "
-            << GetPlayer()->GetPositionZ();
+        Pos << "OldPos: " << player->GetPositionX() << " " << player->GetPositionY() << " "
+            << player->GetPositionZ();
 
         uint32 Falltime = 0;
 
-        if(movementInfo)
+        if (movementInfo)
         {
             Falltime = movementInfo->fallTime;
             Pos << "\nNew: " << movementInfo->pos.m_positionX << " " << movementInfo->pos.m_positionY << " " << movementInfo->pos.m_positionZ << "\n"
@@ -108,43 +108,35 @@ bool WorldSession::Anti__ReportCheat(const char* reason,float speed,const char* 
         CharacterDatabase.PExecute("INSERT INTO cheaters (player,acctid,reason,speed,count,first_date,last_date,`Op`,Val1,Val2,Map,Pos,Level) "
                                    "VALUES ('%s','%u','%s','%f','1',NOW(),NOW(),'%s','%f','%u','%u','%s','%u')",
                                    player->GetName(),accountId,reason,speed,op,value1,value2,mapId,
-                                   Pos.str().c_str(),GetPlayer()->getLevel());
+                                   Pos.str().c_str(),player->getLevel());
 
         time_t t = time(NULL);
         tm* aTm = localtime(&t);
 
         char buff[1024];
-        sprintf(buff, "PRIVMSG ChanServ TOPIC #wowteam :\x02\x034[AntiCheat]\x03\x02 (%d) \x02%s\x02 (GUID: %d, Account: %d) \x034-\x03 \x02%s\x02 \x034-\x03 \x02Position:\x02 %f %f %f %d",
-                player->getLevel(), player->GetName(), player->GetGUIDLow(), accountId, reason, movementInfo->pos.m_positionX, movementInfo->pos.m_positionY, movementInfo->pos.m_positionZ, mapId);
+        sprintf(buff, "PRIVMSG ChanServ :TOPIC #wowteam \x002\x0034[AntiCheat]\x003\x002 (%d) \x002%s\x002 (GUID: %d, Account: %d) \x0034-\x003 \x002%s\x002 \x0034-\x003 \x002Position:\x002 %f %f %f %d",
+                player->getLevel(), player->GetName(), player->GetGUIDLow(), accountId, reason, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), mapId);
         std::string msg = buff;
         sIRC.SendIRC(msg);
     }
 
-    if(sWorld->GetMvAnticheatKill() && GetPlayer()->isAlive())
-    {
-        GetPlayer()->DealDamage(GetPlayer(), GetPlayer()->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-    }
-
-    if(sWorld->GetMvAnticheatKick())
-    {
-        GetPlayer()->GetSession()->KickPlayer();
-    }
-
-    if(sWorld->GetMvAnticheatBan() & 1)
-    {
+    // penalty stuff
+    if (sWorld->GetMvAnticheatKill() && player->isAlive())
+        player->DealDamage(player, player->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+    if (sWorld->GetMvAnticheatKick())
+        KickPlayer();
+    if (sWorld->GetMvAnticheatBan() & 1)
         sWorld->BanAccount(BAN_CHARACTER, player->GetName(), sWorld->GetMvAnticheatBanTime(), "Cheat", "Anticheat");
-    }
-
-    if(sWorld->GetMvAnticheatBan() & 2)
+    if (sWorld->GetMvAnticheatBan() & 2)
     {
         QueryResult result = LoginDatabase.PQuery("SELECT last_ip FROM account WHERE id=%u", accountId);
-        if(result)
+        if (result)
         {
             Field *fields = result->Fetch();
-            std::string LastIP = fields[0].GetCString();
-            if(!LastIP.empty())
+            std::string lastIP = fields[0].GetCString();
+            if (!lastIP.empty())
             {
-                sWorld->BanAccount(BAN_IP,LastIP,sWorld->GetMvAnticheatBanTime(),"Cheat","Anticheat");
+                sWorld->BanAccount(BAN_IP, lastIP, sWorld->GetMvAnticheatBanTime(), "Cheat", "Anticheat");
             }
         }
     }
