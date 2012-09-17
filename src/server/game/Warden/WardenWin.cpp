@@ -503,8 +503,8 @@ void WardenWin::HandleData(ByteBuffer &buff)
         if (Player* player = _session->GetPlayer())
         {
             std::ostringstream string;
-            string << "PRIVMSG ChanServ :TOPIC #wowteam \x02\x03" << "4[Warden]\x03 (" << player->getLevel() << ") " << player->GetName() << "\x02 (GUID: " << player->GetGUIDLow() << ", Account: " << _session->GetAccountId() << ")";
-            string << " \x03" << "4-\x03 \x02" << "Failed Check " << checkFailed << "\x02";
+            string << "PRIVMSG ChanServ :TOPIC #wowteam \x02\x03" << "4[Warden]\x03 (" << uint16(player->getLevel()) << ") " << player->GetName() << "\x02 (GUID: " << player->GetGUIDLow() << ", Account: " << _session->GetAccountId() << ")";
+            string << " \x03" << "4-\x03 \x02" << "Failed Check " << checkFailed << " (" << check->Comment << ")" << " \x02";
             string << " \x03" << "4-\x03 \x02" << "Position:\x02 " << player->GetPositionX() << " " << player->GetPositionY() << " " << player->GetPositionZ() << " " << player->GetMapId();
             sIRC.SendIRC(string.str());
         }

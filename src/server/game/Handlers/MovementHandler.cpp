@@ -115,7 +115,7 @@ bool WorldSession::Anti__ReportCheat(const char* reason,float speed,const char* 
 
         // TriniChat Extension
         std::ostringstream string;
-        string << "PRIVMSG ChanServ :TOPIC #wowteam \x02\x03" << "4[AntiCheat]\x03 (" << player->getLevel() << ") " << player->GetName() << "\x02 (GUID: " << player->GetGUIDLow() << ", Account: " << accountId << ")";
+        string << "PRIVMSG ChanServ :TOPIC #wowteam \x02\x03" << "4[AntiCheat]\x03 (" << uint16(player->getLevel()) << ") " << player->GetName() << "\x02 (GUID: " << player->GetGUIDLow() << ", Account: " << accountId << ")";
         string << " \x03" << "4-\x03 \x02" << reason << "\x02";
         string << " \x03" << "4-\x03 \x02" << "Position:\x02 " << player->GetPositionX() << " " << player->GetPositionY() << " " << player->GetPositionZ() << " " << mapId;
         sIRC.SendIRC(string.str());

@@ -119,7 +119,7 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
     std::ostringstream ticketstatusmsg;
     uint32 countOpen = sTicketMgr->GetOpenTicketCount();
 
-    ticketstatusmsg << "PRIVMSG ChanServ :TOPIC #wowticket \x03" << "4 ";
+    ticketstatusmsg << "PRIVMSG ChanServ :TOPIC #wowticket \x03" << "4";
 
     if (countOpen > 1)
         ticketstatusmsg << countOpen << " Tickets sind noch offen!";
