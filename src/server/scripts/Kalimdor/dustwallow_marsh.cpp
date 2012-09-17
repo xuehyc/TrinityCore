@@ -232,6 +232,11 @@ public:
             }
             else
                 YellTimer -= Diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
         }
     };
 };
