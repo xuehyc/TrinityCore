@@ -54,6 +54,11 @@ bool OnGossipHello(Player* pPlayer, Creature* pCreature)
 bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
     pPlayer->CLOSE_GOSSIP_MENU();
+
+    // Just a bit ugly, but works the fast way, summoned vehicle will be in drivable place
+    if (Creature* targetTrigger = pCreature->FindNearestCreature(23472, 20.0f, true))
+        pPlayer->TeleportTo(571, targetTrigger->GetPositionX(), targetTrigger->GetPositionY(), targetTrigger->GetPositionZ() + 0.1f, targetTrigger->GetOrientation());
+
     if(pPlayer->isGameMaster() || pCreature->GetZoneScript() && pCreature->GetZoneScript()->GetData(pCreature->GetDBTableGUIDLow()))
     {
         switch(uiAction - GOSSIP_ACTION_INFO_DEF)
