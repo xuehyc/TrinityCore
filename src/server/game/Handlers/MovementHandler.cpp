@@ -35,21 +35,21 @@
 #include "TriniChat/IRCClient.h"
 #include "Chat.h"
 
-bool WorldSession::Anti__ReportCheat(const char* Reason,float Speed,const char* Op,float Val1,uint32 Val2,MovementInfo* MvInfo)
+bool WorldSession::Anti__ReportCheat(const char* reason,float speed,const char* op,float value1,uint32 value2,MovementInfo* movementInfo)
 {
-    if(!Reason)
+    if (!reason)
     {
         sLog->outError(LOG_FILTER_PLAYER, "Anti__ReportCheat: Missing Reason parameter!");
         return false;
     }
 
-    const char* Player=GetPlayer()->GetName();
-    uint32 Acc=GetPlayer()->GetSession()->GetAccountId();
-    uint32 Map=GetPlayer()->GetMapId();
+    Player* player = GetPlayer();
+    uint32 accountId = GetPlayer()->GetSession()->GetAccountId();
+    uint32 mapId = GetPlayer()->GetMapId();
 
-    if(!Player)
+    if (!player)
     {
-        sLog->outError(LOG_FILTER_PLAYER, "Anti__ReportCheat: Player with no name?!?");
+        sLog->outError(LOG_FILTER_PLAYER, "Anti__ReportCheat: Invalid Player Instance");
         return false;
     }
 
@@ -57,39 +57,39 @@ bool WorldSession::Anti__ReportCheat(const char* Reason,float Speed,const char* 
     // 369 - Tiefenbahn - Deeprun Tram
     // 607 - Strand der Uralten - Strand of the Ancients
     // 616 - Auge der Ewigkeit - Eye of Eternity - Malygos
-    if (Map == 369 || Map == 607 || Map == 616)
+    if (mapId == 369 || mapId == 607 || mapId == 616)
         return false;
 
-    QueryResult Res = CharacterDatabase.PQuery("SELECT speed,Val1 FROM cheaters WHERE player='%s' AND reason LIKE '%s' AND Map='%u' AND last_date >= NOW()-300",Player,Reason,Map);
-    if(Res)
+    QueryResult result = CharacterDatabase.PQuery("SELECT speed,Val1 FROM cheaters WHERE player='%s' AND reason LIKE '%s' AND Map='%u' AND last_date >= NOW()-300",player->GetName(),reason,mapId);
+    if (result)
     {
-        Field* Fields = Res->Fetch();
+        Field* Fields = result->Fetch();
 
         std::stringstream Query;
         Query << "UPDATE cheaters SET count=count+1,last_date=NOW()";
         Query.precision(5);
-        if(Speed>0.0f && Speed > Fields[0].GetFloat())
+        if(speed>0.0f && speed > Fields[0].GetFloat())
         {
             Query << ",speed='";
-            Query << std::fixed << Speed;
+            Query << std::fixed << speed;
             Query << "'";
         }
 
-        if(Val1>0.0f && Val1 > Fields[1].GetFloat())
+        if(value1>0.0f && value1 > Fields[1].GetFloat())
         {
             Query << ",Val1='";
-            Query << std::fixed << Val1;
+            Query << std::fixed << value1;
             Query << "'";
         }
 
-        Query << " WHERE player='" << Player << "' AND reason='" << Reason << "' AND Map='" << Map << "' AND last_date >= NOW()-300 ORDER BY entry DESC LIMIT 1";
+        Query << " WHERE player='" << player << "' AND reason='" << reason << "' AND Map='" << mapId << "' AND last_date >= NOW()-300 ORDER BY entry DESC LIMIT 1";
 
         CharacterDatabase.Execute(Query.str().c_str());
     }
     else
     {
-        if(!Op)
-            Op="";
+        if(!op)
+            op="";
 
         std::stringstream Pos;
         Pos << "OldPos: " << GetPlayer()->GetPositionX() << " " << GetPlayer()->GetPositionY() << " "
@@ -97,62 +97,26 @@ bool WorldSession::Anti__ReportCheat(const char* Reason,float Speed,const char* 
 
         uint32 Falltime = 0;
 
-        if(MvInfo)
+        if(movementInfo)
         {
-            Falltime = MvInfo->fallTime;
-            Pos << "\nNew: " << MvInfo->pos.m_positionX << " " << MvInfo->pos.m_positionY << " " << MvInfo->pos.m_positionZ << "\n"
-                << "Flags: " << MvInfo->flags << "\n"
-                << "t_guid: " << MvInfo->t_guid << " falltime: " << MvInfo->fallTime;
+            Falltime = movementInfo->fallTime;
+            Pos << "\nNew: " << movementInfo->pos.m_positionX << " " << movementInfo->pos.m_positionY << " " << movementInfo->pos.m_positionZ << "\n"
+                << "Flags: " << movementInfo->flags << "\n"
+                << "t_guid: " << movementInfo->t_guid << " falltime: " << movementInfo->fallTime;
         }
 
         CharacterDatabase.PExecute("INSERT INTO cheaters (player,acctid,reason,speed,count,first_date,last_date,`Op`,Val1,Val2,Map,Pos,Level) "
                                    "VALUES ('%s','%u','%s','%f','1',NOW(),NOW(),'%s','%f','%u','%u','%s','%u')",
-                                   Player,Acc,Reason,Speed,Op,Val1,Val2,Map,
+                                   player->GetName(),accountId,reason,speed,op,value1,value2,mapId,
                                    Pos.str().c_str(),GetPlayer()->getLevel());
 
         time_t t = time(NULL);
         tm* aTm = localtime(&t);
 
-        std::string msg;
-        char dest[10];
-
-        msg += "PRIVMSG ChanServ TOPIC #wowteam ";
-        msg += "\x03";
-        msg += "4Player ";
-        msg += Player;
-        msg += " (Level: ";
-        sprintf(dest, "%d", GetPlayer()->getLevel());
-        msg += dest;
-        msg += "; Acc: ";
-        sprintf(dest, "%d", Acc);
-        msg += dest;
-        msg += "); Cheat: ";
-        msg += Reason;
-        msg += ";";
-        msg += "\x03";
-        msg += "1Date: ";
-        sprintf(dest, "%d", aTm->tm_year+1900);
-        msg += dest;
-        msg += "-";
-        sprintf(dest, "%d", aTm->tm_mon+1);
-        msg += dest;
-        msg += "-";
-        sprintf(dest, "%d", aTm->tm_mday);
-        msg += dest;
-        msg += " ";
-        sprintf(dest, "%d", aTm->tm_hour);
-        msg += dest;
-        msg += ":";
-        sprintf(dest, "%d", aTm->tm_min);
-        msg += dest;
-        msg += ":";
-        sprintf(dest, "%d", aTm->tm_sec);
-        msg += dest;
-        msg += "; Map: ";
-        sprintf(dest, "%d", Map);
-        msg += dest;
-        msg += "; Position: ";
-        msg += Pos.str().c_str();
+        char buff[1024];
+        sprintf(buff, "PRIVMSG ChanServ TOPIC #wowteam :\x02\x034[AntiCheat]\x03\x02 (%d) \x02%s\x02 (GUID: %d, Account: %d) \x034-\x03 \x02%s\x02 \x034-\x03 \x02Position:\x02 %f %f %f %d",
+                player->getLevel(), player->GetName(), player->GetGUIDLow(), accountId, reason, movementInfo->pos.m_positionX, movementInfo->pos.m_positionY, movementInfo->pos.m_positionZ, mapId);
+        std::string msg = buff;
         sIRC.SendIRC(msg);
     }
 
@@ -168,12 +132,12 @@ bool WorldSession::Anti__ReportCheat(const char* Reason,float Speed,const char* 
 
     if(sWorld->GetMvAnticheatBan() & 1)
     {
-        sWorld->BanAccount(BAN_CHARACTER,Player,sWorld->GetMvAnticheatBanTime(),"Cheat","Anticheat");
+        sWorld->BanAccount(BAN_CHARACTER, player->GetName(), sWorld->GetMvAnticheatBanTime(), "Cheat", "Anticheat");
     }
 
     if(sWorld->GetMvAnticheatBan() & 2)
     {
-        QueryResult result = LoginDatabase.PQuery("SELECT last_ip FROM account WHERE id=%u", Acc);
+        QueryResult result = LoginDatabase.PQuery("SELECT last_ip FROM account WHERE id=%u", accountId);
         if(result)
         {
             Field *fields = result->Fetch();

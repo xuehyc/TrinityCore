@@ -34,6 +34,8 @@
 #include "WardenCheckMgr.h"
 #include "AccountMgr.h"
 
+#include "TriniChat/IRCClient.h"
+
 WardenWin::WardenWin() : Warden()
 {
 }
@@ -496,6 +498,17 @@ void WardenWin::HandleData(ByteBuffer &buff)
         WardenCheck* check = sWardenCheckMgr->GetWardenDataById(checkFailed);
 
         sLog->outWarn(LOG_FILTER_WARDEN, "%s failed Warden check %u. Action: %s", _session->GetPlayerName(false).c_str(), checkFailed, Penalty(check).c_str());
+
+        // TriniChat Extension
+        if (Player* player = _session->GetPlayer())
+        {
+            char buff[1024];
+            sprintf(buff, "PRIVMSG ChanServ TOPIC #wowteam :\x02\x034[Warden]\x03\x02 (%d) \x02%s\x02 (GUID: %d, Account: %d) \x034-\x03 \x02Failed Check %u\x02 \x034-\x03 \x02Position:\x02 %f %f %f %d",
+                    player->getLevel(), _session->GetPlayerName(false).c_str(), player->GetGUIDLow(), _session->GetAccountId(), checkFailed, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId());
+            std::string msg = buff;
+            sIRC.SendIRC(msg);
+        }
+        // TriniChat Extension END
     }
 
     // Set hold off timer, minimum timer should at least be 1 second
