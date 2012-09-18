@@ -649,6 +649,29 @@ enum VarianWrynn
     EVENT_HEROIC_LEAP   = 1,
     EVENT_WHIRLWIND     = 2,
     EVENT_SUMMON_GUARDS = 3,
+
+    QUEST_DEFENDING_ALLIANCE = 60000,
+
+    NOTIFY_COOLDOWN    = 600000,
+
+    SCALING_5          = 73762,
+    SCALING_10         = 73824,
+    SCALING_15         = 73825,
+    SCALING_20         = 73826,
+    SCALING_25         = 73827,
+    SCALING_30         = 73828,
+};
+
+Position const SummonPositions[8] =
+{
+    {-8420.907227, 345.702606, 120.885880, 3.857443},
+    {-8416.868164, 328.449921, 120.885880, 3.044561},
+    {-8416.940430, 302.447968, 120.885880, 2.255229}, // Battlemaster Room Entrance
+    {-8442.036133, 308.068848, 120.885880, 1.461977},
+    {-8457.666016, 316.497223, 120.885880, 0.673437},
+    {-8476.543945, 335.009003, 120.885880, 6.256822}, // Room Right
+    {-8435.253906, 369.447723, 120.885880, 4.598405}, // Room Left
+    {-8492.133789, 396.724426, 108.385780, 5.356319}, // Ramp
 };
 
 class npc_varian_wrynn : public CreatureScript
@@ -663,8 +686,21 @@ public:
         EventMap events;
         SummonList Summons;
 
+        bool defenderCredit;
+        uint32 appliedScaling;
+        uint32 rescaleTimer;
+        uint32 notifyCooldown;
+
         void Reset()
         {
+            defenderCredit = false;
+            appliedScaling = 0;
+            rescaleTimer = 5000;
+            notifyCooldown = 0;
+
+            me->m_CombatDistance = 100.0f; // he is often tanked in the rooms around him and as such should not reset too early.
+
+            events.Reset();
             events.ScheduleEvent(EVENT_WHIRLWIND, urand(6000, 9000));
             events.ScheduleEvent(EVENT_HEROIC_LEAP, urand(15000, 25000));
             events.ScheduleEvent(EVENT_SUMMON_GUARDS, urand(30000, 45000));
@@ -672,29 +708,116 @@ public:
             Summons.DespawnAll();
         }
 
-        void EnterCombat(Unit* /*who*/) {}
-
-        void MovementInform(uint32 type, uint32 id)
+        void EnterEvadeMode()
         {
-            if (type != EFFECT_MOTION_TYPE)
-                return;
-
-            switch (id)
+            if (defenderCredit)
             {
-                case 1:
-                    if (me->getVictim())
+                std::list<Player*> playerList;
+                Trinity::AnyPlayerInObjectRangeCheck checker(me, me->GetMap()->GetVisibilityRange(), false);
+                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, playerList, checker);
+                me->VisitNearbyWorldObject(me->GetMap()->GetVisibilityRange(), searcher);
+                sLog->outInfo(LOG_FILTER_TSCR, "PvP Boss %s (%d) was protected and Players in Range for Defender Credit are:", me->GetName(), me->GetEntry());
+                for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                {
+                    Player* player = (*itr);
+                    if (player->GetTeamId() != TEAM_ALLIANCE)
+                        continue; // only same faction
+
+                    if (!player->IsPvP())
                     {
-                        me->GetMotionMaster()->Clear();
-                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (not flagged for PvP)", player->GetName());
+                        continue; // Do not reward players who are not flagged for pvp ("no pain, no gain")
                     }
-                    break;
+
+                    if (player->GetQuestStatus(QUEST_DEFENDING_ALLIANCE) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        sLog->outInfo(LOG_FILTER_TSCR, "[x] %s (rewarded)", player->GetName());
+                        player->CompleteQuest(QUEST_DEFENDING_ALLIANCE);
+                    } else
+                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (did not have quest %d at evade)", player->GetName(), QUEST_DEFENDING_ALLIANCE);
+                }
+            } else
+                sLog->outInfo(LOG_FILTER_TSCR, "PvP Boss %s (%d) was protected but did not qualify for Defender Credit (Anti-Farm Rule)", me->GetName(), me->GetEntry());
+
+            if (appliedScaling)
+                if (me->HasAura(appliedScaling))
+                    me->RemoveAura(appliedScaling);
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (notifyCooldown == 0)
+            {
+                sWorld->SendWorldText(11002, "|TInterface\\Icons\\achievement_leader_king_varian_wrynn.blp:24|t König Varian Wrynn: Sturmwind wird angegriffen!", 0, 0);
+                notifyCooldown = NOTIFY_COOLDOWN;
+            }
+            Talk(0);
+            me->CallForHelp(40.0f); // only throne room
+        }
+
+        void HandleScaling()
+        {
+            // make the fight more attractive and less grinding when more players are around
+            uint32 enemyCount = 0;
+            std::list<HostileReference*>& threatList = me->getThreatManager().getThreatList();
+            std::list<HostileReference*>::iterator itr;
+            for (itr = threatList.begin(); itr != threatList.end(); ++itr)
+            {
+                Unit* unit = (*itr)->getTarget();
+                if (unit && unit->ToPlayer())
+                    enemyCount++;
+            }
+
+            uint32 newScaling = 0;
+            if (enemyCount >= 17)
+                newScaling = SCALING_30;
+            else if (enemyCount >= 15)
+                newScaling = SCALING_25;
+            else if (enemyCount >= 13)
+                newScaling = SCALING_20;
+            else if (enemyCount >= 10)
+                newScaling = SCALING_15;
+            else if (enemyCount >= 7)
+                newScaling = SCALING_10;
+            else if (enemyCount >= 5)
+                newScaling = SCALING_5;
+
+            if (newScaling == appliedScaling)
+                return; // if current scaling equals new scaling stop here
+            else
+            {
+                if (appliedScaling > 0 && me->HasAura(appliedScaling))
+                    me->RemoveAura(appliedScaling);
+                if (newScaling > 0)
+                    me->AddAura(newScaling, me);
+                appliedScaling = newScaling;
             }
         }
 
         void UpdateAI(const uint32 diff)
         {
+            // World Notify Cooldown
+            if (notifyCooldown >= diff)
+                notifyCooldown -= diff;
+            else
+                notifyCooldown = 0;
+
             if (!UpdateVictim())
                 return;
+
+            // Defender Quest Credit
+            if (!defenderCredit)
+                if (me->getThreatManager().getThreatList().size() >= 5 && me->GetHealthPct() < 90.f) // Anti-Farming Conditions
+                    defenderCredit = true;
+
+            // Boss rescaling
+            if (rescaleTimer <= diff)
+            {
+                HandleScaling();
+                rescaleTimer = 10000;
+            } else rescaleTimer -= diff;
 
             events.Update(diff);
 
@@ -706,37 +829,21 @@ public:
                 switch (eventId)
                 {
                     case EVENT_WHIRLWIND:
-                    {
                         DoCastVictim(SPELL_WHIRLWIND);
                         events.ScheduleEvent(EVENT_WHIRLWIND, urand(10000, 15000));
-                    }
-                    break;
+                        break;
                     case EVENT_HEROIC_LEAP:
-                    {
                         if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 25.0f, true))
-                        {
-                            me->GetMotionMaster()->MoveJump(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), SPEED_CHARGE, SPEED_CHARGE, 1);
                             DoCast(target, SPELL_HEROIC_LEAP);
-                        }
-                        events.ScheduleEvent(EVENT_HEROIC_LEAP, urand(40000, 50000));
-                    }
-                    break;
+                        events.ScheduleEvent(EVENT_HEROIC_LEAP, urand(32000, 42000));
+                        break;
                     case EVENT_SUMMON_GUARDS:
-                    {
-                        // this feels a bit custom, but sources say he summons guards...so lets summon guards!
-                        uint32 guardCount = urand(1,2);
+                        // this feels a bit custom, but sources say he (or the throne room) summons guards...so lets summon some guards
+                        uint32 guardCount = 3;
                         for (uint32 iter = 0; iter < guardCount; ++iter)
-                        {
-                            Creature* summon = me->SummonCreature(NPC_GUARD, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f, true))
-                            {
-                                summon->Attack(target, true);
-                                summon->GetMotionMaster()->MoveChase(summon->getVictim());
-                            }
-                        }
+                            Creature* summon = me->SummonCreature(NPC_GUARD, SummonPositions[urand(0,7)], TEMPSUMMON_CORPSE_DESPAWN);
                         events.ScheduleEvent(EVENT_SUMMON_GUARDS, urand(30000, 45000));
-                    }
-                    break;
+                        break;
                 }
             }
 
@@ -746,6 +853,13 @@ public:
         void JustSummoned(Creature* summon)
         {
             Summons.Summon(summon);
+
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f, true))
+            {
+                summon->GetMotionMaster()->MoveChase(target);
+                summon->SetSpeed(MOVE_RUN, 1.2f);
+                summon->Attack(target, true);
+            }
         }
 
         void SummonedCreateDespawn(Creature* summon)

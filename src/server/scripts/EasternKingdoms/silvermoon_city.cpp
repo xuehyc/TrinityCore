@@ -103,7 +103,217 @@ public:
     };
 };
 
+/*#####
+# npc_lorthemar_theron
+######*/
+
+enum LorthemarTheron
+{
+    SPELL_ARCANE_SHOCK      = 59715,
+    SPELL_CLEAVE_LORTHEMAR  = 15284,
+    SPELL_MANA_BURN         = 33385,
+    SPELL_MASS_CHARM        = 33384,
+
+    QUEST_DEFENDING_HORDE       = 60001,
+
+    NOTIFY_COOLDOWN             = 600000,
+
+    SCALING_5                   = 73816,
+    SCALING_10                  = 73818,
+    SCALING_15                  = 73819,
+    SCALING_20                  = 73820,
+    SCALING_25                  = 73821,
+    SCALING_30                  = 73822,
+};
+
+class npc_lorthemar_theron : public CreatureScript
+{
+public:
+        npc_lorthemar_theron() : CreatureScript("npc_lorthemar_theron") { }
+
+    struct npc_lorthemar_theronAI : public ScriptedAI
+    {
+        npc_lorthemar_theronAI(Creature* creature) : ScriptedAI(creature) { }
+
+        EventMap events;
+
+        bool defenderCredit;
+        uint32 appliedScaling;
+        uint32 rescaleTimer;
+        uint32 notifyCooldown;
+
+        void Reset()
+        {
+            defenderCredit = false;
+            appliedScaling = 0;
+            rescaleTimer = 5000;
+            notifyCooldown = 0;
+
+            events.Reset();
+            events.ScheduleEvent(SPELL_ARCANE_SHOCK, 9000);
+            events.ScheduleEvent(SPELL_CLEAVE_LORTHEMAR, 5000);
+            events.ScheduleEvent(SPELL_MANA_BURN, 12000);
+            // events.ScheduleEvent(SPELL_MASS_CHARM, 16000);
+        }
+
+        void EnterEvadeMode()
+        {
+            if (defenderCredit)
+            {
+                std::list<Player*> playerList;
+                Trinity::AnyPlayerInObjectRangeCheck checker(me, me->GetMap()->GetVisibilityRange(), false);
+                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, playerList, checker);
+                me->VisitNearbyWorldObject(me->GetMap()->GetVisibilityRange(), searcher);
+                sLog->outInfo(LOG_FILTER_TSCR, "PvP Boss %s (%d) was protected and Players in Range for Defender Credit are:", me->GetName(), me->GetEntry());
+                for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                {
+                    Player* player = (*itr);
+                    if (player->GetTeamId() != TEAM_HORDE)
+                        continue; // only same faction
+
+                    if (!player->IsPvP())
+                    {
+                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (not flagged for PvP)", player->GetName());
+                        continue; // Do not reward players who are not flagged for pvp ("no pain, no gain")
+                    }
+
+                    if (player->GetQuestStatus(QUEST_DEFENDING_HORDE) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        sLog->outInfo(LOG_FILTER_TSCR, "[x] %s (rewarded)", player->GetName());
+                        player->CompleteQuest(QUEST_DEFENDING_HORDE);
+                    } else
+                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (did not have quest %d at evade)", player->GetName(), QUEST_DEFENDING_HORDE);
+                }
+            } else
+                sLog->outInfo(LOG_FILTER_TSCR, "PvP Boss %s (%d) was protected but did not qualify for Defender Credit (Anti-Farm Rule)", me->GetName(), me->GetEntry());
+
+            if (appliedScaling)
+                if (me->HasAura(appliedScaling))
+                    me->RemoveAura(appliedScaling);
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void EnterCombat(Unit* /*who*/) {
+            if (notifyCooldown == 0)
+            {
+                sWorld->SendWorldText(11002, "|TInterface\\Icons\\achievement_leader_lorthemar_theron-.blp:24|t Lor'themar Theron: Sie fallen in Quel'Thalas ein!", 0, 0);
+                notifyCooldown = NOTIFY_COOLDOWN;
+            }
+            me->CallForHelp(100.0f);
+        }
+
+        void KilledUnit(Unit* /*victim*/)
+        {
+            Talk(0);
+        }
+
+        void HandleScaling()
+        {
+            // make the fight more attractive and less grinding when more players are around
+            uint32 enemyCount = 0;
+            std::list<HostileReference*>& threatList = me->getThreatManager().getThreatList();
+            std::list<HostileReference*>::iterator itr;
+            for (itr = threatList.begin(); itr != threatList.end(); ++itr)
+            {
+                Unit* unit = (*itr)->getTarget();
+                if (unit && unit->ToPlayer())
+                    enemyCount++;
+            }
+
+            uint32 newScaling = 0;
+            if (enemyCount >= 17)
+                newScaling = SCALING_30;
+            else if (enemyCount >= 15)
+                newScaling = SCALING_25;
+            else if (enemyCount >= 13)
+                newScaling = SCALING_20;
+            else if (enemyCount >= 10)
+                newScaling = SCALING_15;
+            else if (enemyCount >= 7)
+                newScaling = SCALING_10;
+            else if (enemyCount >= 5)
+                newScaling = SCALING_5;
+
+            if (newScaling == appliedScaling)
+                return; // if current scaling equals new scaling stop here
+            else
+            {
+                if (appliedScaling > 0 && me->HasAura(appliedScaling))
+                    me->RemoveAura(appliedScaling);
+                if (newScaling > 0)
+                    me->AddAura(newScaling, me);
+                appliedScaling = newScaling;
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            // World Notify Cooldown
+            if (notifyCooldown >= diff)
+                notifyCooldown -= diff;
+            else
+                notifyCooldown = 0;
+
+            if (!UpdateVictim())
+                return;
+
+            // Defender Quest Credit
+            if (!defenderCredit)
+                if (me->getThreatManager().getThreatList().size() >= 5 && me->GetHealthPct() < 90.f) // Anti-Farming Conditions
+                    defenderCredit = true;
+
+            // Boss rescaling
+            if (rescaleTimer <= diff)
+            {
+                HandleScaling();
+                rescaleTimer = 10000;
+            } else rescaleTimer -= diff;
+
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case SPELL_ARCANE_SHOCK:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 60.0f, true))
+                            DoCast(target, SPELL_ARCANE_SHOCK);
+                        events.ScheduleEvent(SPELL_ARCANE_SHOCK, urand(9000, 11000));
+                        break;
+                    case SPELL_CLEAVE_LORTHEMAR:
+                        DoCastVictim(SPELL_CLEAVE_LORTHEMAR, true);
+                        events.ScheduleEvent(SPELL_CLEAVE_LORTHEMAR, urand(5000, 7000));
+                        break;
+                    case SPELL_MANA_BURN:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true))
+                            DoCast(target, SPELL_MANA_BURN);
+                        events.ScheduleEvent(SPELL_MANA_BURN, urand(12000, 15000));
+                        break;
+                    case SPELL_MASS_CHARM: // currently increases worldserver load by a massive amount until kernel kills it through out of memory
+                        // DoCast(me, SPELL_MASS_CHARM);
+                        // Results in: WorldSocket::SendPacket enqueue_tail failed
+                        events.ScheduleEvent(SPELL_MASS_CHARM, urand(16000, 20000));
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_lorthemar_theronAI(creature);
+    }
+
+};
+
 void AddSC_silvermoon_city()
 {
     new npc_blood_knight_stillblade();
+    new npc_lorthemar_theron();
 }

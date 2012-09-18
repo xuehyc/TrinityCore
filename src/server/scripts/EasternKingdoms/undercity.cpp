@@ -46,18 +46,30 @@ enum Sylvanas
     SOUND_CREDIT                = 10896,
     ENTRY_HIGHBORNE_LAMENTER    = 21628,
     ENTRY_HIGHBORNE_BUNNY       = 21641,
+    ENTRY_SKELETON              = 6412,
 
     SPELL_HIGHBORNE_AURA        = 37090,
     SPELL_SYLVANAS_CAST         = 36568,
-    SPELL_RIBBON_OF_SOULS       = 34432, // the real one to use might be 37099
+    SPELL_RIBBON_OF_SOULS       = 34432,                   //the real one to use might be 37099
 
     // Combat spells
     SPELL_BLACK_ARROW           = 59712,
     SPELL_FADE                  = 20672,
     SPELL_FADE_BLINK            = 29211,
     SPELL_MULTI_SHOT            = 59713,
-    SPELL_SHOT                  = 59710,
-    SPELL_SUMMON_SKELETON       = 59711
+    SPELL_SHOOT_SYLVANAS        = 59710,
+    SPELL_SUMMON_SKELETON       = 59711,
+
+    QUEST_DEFENDING_HORDE       = 60001,
+
+    NOTIFY_COOLDOWN             = 600000,
+
+    SCALING_5                   = 73816,
+    SCALING_10                  = 73818,
+    SCALING_15                  = 73819,
+    SCALING_20                  = 73820,
+    SCALING_25                  = 73821,
+    SCALING_30                  = 73822,
 };
 
 float HighborneLoc[4][3]=
@@ -98,32 +110,128 @@ public:
 
     struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
     {
-        npc_lady_sylvanas_windrunnerAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_lady_sylvanas_windrunnerAI(Creature* creature) : ScriptedAI(creature), Summons(me) {}
 
         uint32 LamentEventTimer;
         bool LamentEvent;
         uint64 targetGUID;
 
-        uint32 FadeTimer;
-        uint32 SummonSkeletonTimer;
-        uint32 BlackArrowTimer;
-        uint32 ShotTimer;
-        uint32 MultiShotTimer;
+        EventMap events;
+        SummonList Summons;
+
+        bool defenderCredit;
+        uint32 appliedScaling;
+        uint32 rescaleTimer;
+        uint32 notifyCooldown;
 
         void Reset()
         {
+            defenderCredit = false;
+            appliedScaling = 0;
+            rescaleTimer = 5000;
+            notifyCooldown = 0;
+
             LamentEventTimer = 5000;
             LamentEvent = false;
             targetGUID = 0;
 
-            FadeTimer = 30000;
-            SummonSkeletonTimer = 20000;
-            BlackArrowTimer = 15000;
-            ShotTimer = 8000;
-            MultiShotTimer = 10000;
+            events.Reset();
+            events.ScheduleEvent(SPELL_BLACK_ARROW, 15000);
+            events.ScheduleEvent(SPELL_FADE, 15000);
+            events.ScheduleEvent(SPELL_MULTI_SHOT, 11000);
+            events.ScheduleEvent(SPELL_SHOOT_SYLVANAS, 5000);
+            events.ScheduleEvent(SPELL_SUMMON_SKELETON, 17000);
+
+            Summons.DespawnAll();
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterEvadeMode()
+        {
+            if (defenderCredit)
+            {
+                std::list<Player*> playerList;
+                Trinity::AnyPlayerInObjectRangeCheck checker(me, me->GetMap()->GetVisibilityRange(), false);
+                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, playerList, checker);
+                me->VisitNearbyWorldObject(me->GetMap()->GetVisibilityRange(), searcher);
+                sLog->outInfo(LOG_FILTER_TSCR, "PvP Boss %s (%d) was protected and Players in Range for Defender Credit are:", me->GetName(), me->GetEntry());
+                for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                {
+                    Player* player = (*itr);
+                    if (player->GetTeamId() != TEAM_HORDE)
+                        continue; // only same faction
+
+                    if (!player->IsPvP())
+                    {
+                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (not flagged for PvP)", player->GetName());
+                        continue; // Do not reward players who are not flagged for pvp ("no pain, no gain")
+                    }
+
+                    if (player->GetQuestStatus(QUEST_DEFENDING_HORDE) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        sLog->outInfo(LOG_FILTER_TSCR, "[x] %s (rewarded)", player->GetName());
+                        player->CompleteQuest(QUEST_DEFENDING_HORDE);
+                    } else
+                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (did not have quest %d at evade)", player->GetName(), QUEST_DEFENDING_HORDE);
+                }
+            } else
+                sLog->outInfo(LOG_FILTER_TSCR, "PvP Boss %s (%d) was protected but did not qualify for Defender Credit (Anti-Farm Rule)", me->GetName(), me->GetEntry());
+
+            if (appliedScaling)
+                if (me->HasAura(appliedScaling))
+                    me->RemoveAura(appliedScaling);
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (notifyCooldown == 0)
+            {
+                sWorld->SendWorldText(11002, "|TInterface\\Icons\\achievement_leader_sylvanas.blp:24|t Lady Sylvanas Windläufer: Lasst niemanden am Leben!", 0, 0);
+                notifyCooldown = NOTIFY_COOLDOWN;
+            }
+            Talk(0);
+            me->CallForHelp(100.0f);
+        }
+
+        void HandleScaling()
+        {
+            // make the fight more attractive and less grinding when more players are around
+            uint32 enemyCount = 0;
+            std::list<HostileReference*>& threatList = me->getThreatManager().getThreatList();
+            std::list<HostileReference*>::iterator itr;
+            for (itr = threatList.begin(); itr != threatList.end(); ++itr)
+            {
+                Unit* unit = (*itr)->getTarget();
+                if (unit && unit->ToPlayer())
+                    enemyCount++;
+            }
+
+            uint32 newScaling = 0;
+            if (enemyCount >= 17)
+                newScaling = SCALING_30;
+            else if (enemyCount >= 15)
+                newScaling = SCALING_25;
+            else if (enemyCount >= 13)
+                newScaling = SCALING_20;
+            else if (enemyCount >= 10)
+                newScaling = SCALING_15;
+            else if (enemyCount >= 7)
+                newScaling = SCALING_10;
+            else if (enemyCount >= 5)
+                newScaling = SCALING_5;
+
+            if (newScaling == appliedScaling)
+                return; // if current scaling equals new scaling stop here
+            else
+            {
+                if (appliedScaling > 0 && me->HasAura(appliedScaling))
+                    me->RemoveAura(appliedScaling);
+                if (newScaling > 0)
+                    me->AddAura(newScaling, me);
+                appliedScaling = newScaling;
+            }
+        }
 
         void JustSummoned(Creature* summoned)
         {
@@ -138,6 +246,14 @@ public:
 
                 summoned->SetDisableGravity(true);
                 targetGUID = summoned->GetGUID();
+            }
+
+            if (summoned->GetEntry() == ENTRY_SKELETON)
+            {
+                if (Unit* randomTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
+                    summoned->Attack(randomTarget, true);
+                else if (me->getVictim())
+                    summoned->Attack(me->getVictim(), true);
             }
         }
 
@@ -159,57 +275,68 @@ public:
                 } else LamentEventTimer -= diff;
             }
 
+            // World Notify Cooldown
+            if (notifyCooldown >= diff)
+                notifyCooldown -= diff;
+            else
+                notifyCooldown = 0;
+
             if (!UpdateVictim())
                 return;
 
-            // Combat spells
+            // Defender Quest Credit
+            if (!defenderCredit)
+                if (me->getThreatManager().getThreatList().size() >= 5 && me->GetHealthPct() < 90.f) // Anti-Farming Conditions
+                    defenderCredit = true;
 
-            if (FadeTimer <= diff)
+            // Boss rescaling
+            if (rescaleTimer <= diff)
             {
-                DoCast(me, SPELL_FADE);
-                // add a blink to simulate a stealthed movement and reappearing elsewhere
-                DoCast(me, SPELL_FADE_BLINK);
-                FadeTimer = 30000 + rand()%5000;
-                // if the victim is out of melee range she cast multi shot
-                if (Unit* victim = me->getVictim())
-                    if (me->GetDistance(victim) > 10.0f)
-                        DoCast(victim, SPELL_MULTI_SHOT);
-            } else FadeTimer -= diff;
+                HandleScaling();
+                rescaleTimer = 10000;
+            } else rescaleTimer -= diff;
 
-            if (SummonSkeletonTimer <= diff)
-            {
-                DoCast(me, SPELL_SUMMON_SKELETON);
-                SummonSkeletonTimer = 20000 + rand()%10000;
-            } else SummonSkeletonTimer -= diff;
+            events.Update(diff);
 
-            if (BlackArrowTimer <= diff)
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                if (Unit* victim = me->getVictim())
+                switch (eventId)
                 {
-                    DoCast(victim, SPELL_BLACK_ARROW);
-                    BlackArrowTimer = 15000 + rand()%5000;
+                    case SPELL_BLACK_ARROW:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f, true))
+                            DoCast(target, SPELL_BLACK_ARROW);
+                        events.ScheduleEvent(SPELL_BLACK_ARROW, urand(15000, 25000));
+                        break;
+                    case SPELL_FADE:
+                        DoCast(me, SPELL_FADE);
+                        events.ScheduleEvent(SPELL_FADE, urand(25000, 35000));
+                        break;
+                    case SPELL_MULTI_SHOT:
+                        DoCastVictim(SPELL_MULTI_SHOT);
+                        events.ScheduleEvent(SPELL_MULTI_SHOT, urand(11000, 14000));
+                        break;
+                    case SPELL_SHOOT_SYLVANAS:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true))
+                            if (me->GetDistance(target) > 5.0f)
+                                DoCast(target, SPELL_SHOOT_SYLVANAS);
+                        events.ScheduleEvent(SPELL_SHOOT_SYLVANAS, urand(6000, 9000));
+                        break;
+                    case SPELL_SUMMON_SKELETON:
+                        DoCast(me, SPELL_SUMMON_SKELETON);
+                        events.ScheduleEvent(SPELL_SUMMON_SKELETON, urand(17000, 23000));
+                        break;
                 }
-            } else BlackArrowTimer -= diff;
-
-            if (ShotTimer <= diff)
-            {
-                if (Unit* victim = me->getVictim())
-                {
-                    DoCast(victim, SPELL_SHOT);
-                    ShotTimer = 8000 + rand()%2000;
-                }
-            } else ShotTimer -= diff;
-
-            if (MultiShotTimer <= diff)
-            {
-                if (Unit* victim = me->getVictim())
-                {
-                    DoCast(victim, SPELL_MULTI_SHOT);
-                    MultiShotTimer = 10000 + rand()%3000;
-                }
-            } else MultiShotTimer -= diff;
+            }
 
             DoMeleeAttackIfReady();
+        }
+
+        void SummonedCreateDespawn(Creature* summon)
+        {
+            Summons.Despawn(summon);
         }
     };
 };

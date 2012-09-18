@@ -137,7 +137,18 @@ enum ThrallWarchief
     QUEST_6566              = 6566,
 
     SPELL_CHAIN_LIGHTNING   = 16033,
-    SPELL_SHOCK             = 16034
+    SPELL_SHOCK             = 16034,
+
+    QUEST_DEFENDING_HORDE       = 60001,
+
+    NOTIFY_COOLDOWN             = 600000,
+
+    SCALING_5                   = 73816,
+    SCALING_10                  = 73818,
+    SCALING_15                  = 73819,
+    SCALING_20                  = 73820,
+    SCALING_25                  = 73821,
+    SCALING_30                  = 73822,
 };
 
 #define GOSSIP_HTW "Please share your wisdom with me, Warchief."
@@ -212,33 +223,155 @@ public:
     {
         npc_thrall_warchiefAI(Creature* creature) : ScriptedAI(creature) {}
 
-        uint32 ChainLightningTimer;
-        uint32 ShockTimer;
+        EventMap events;
+
+        bool defenderCredit;
+        uint32 appliedScaling;
+        uint32 rescaleTimer;
+        uint32 notifyCooldown;
 
         void Reset()
         {
-            ChainLightningTimer = 2000;
-            ShockTimer = 8000;
+            defenderCredit = false;
+            appliedScaling = 0;
+            rescaleTimer = 5000;
+            notifyCooldown = 0;
+
+            events.Reset();
+            events.ScheduleEvent(SPELL_CHAIN_LIGHTNING, 2000);
+            events.ScheduleEvent(SPELL_SHOCK, 8000);
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterEvadeMode()
+        {
+            if (defenderCredit)
+            {
+                std::list<Player*> playerList;
+                Trinity::AnyPlayerInObjectRangeCheck checker(me, me->GetMap()->GetVisibilityRange(), false);
+                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, playerList, checker);
+                me->VisitNearbyWorldObject(me->GetMap()->GetVisibilityRange(), searcher);
+                sLog->outInfo(LOG_FILTER_TSCR, "PvP Boss %s (%d) was protected and Players in Range for Defender Credit are:", me->GetName(), me->GetEntry());
+                for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                {
+                    Player* player = (*itr);
+                    if (player->GetTeamId() != TEAM_HORDE)
+                        continue; // only same faction
+
+                    if (!player->IsPvP())
+                    {
+                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (not flagged for PvP)", player->GetName());
+                        continue; // Do not reward players who are not flagged for pvp ("no pain, no gain")
+                    }
+
+                    if (player->GetQuestStatus(QUEST_DEFENDING_HORDE) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        sLog->outInfo(LOG_FILTER_TSCR, "[x] %s (rewarded)", player->GetName());
+                        player->CompleteQuest(QUEST_DEFENDING_HORDE);
+                    } else
+                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (did not have quest %d at evade)", player->GetName(), QUEST_DEFENDING_HORDE);
+                }
+            } else
+                sLog->outInfo(LOG_FILTER_TSCR, "PvP Boss %s (%d) was protected but did not qualify for Defender Credit (Anti-Farm Rule)", me->GetName(), me->GetEntry());
+
+            if (appliedScaling)
+                if (me->HasAura(appliedScaling))
+                    me->RemoveAura(appliedScaling);
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (notifyCooldown == 0)
+            {
+                sWorld->SendWorldText(11002, "|TInterface\\Icons\\achievement_character_orc_male.blp:24|t Kriegshäuptling Thrall: Lok'thar Ogar!", 0, 0);
+                notifyCooldown = NOTIFY_COOLDOWN;
+            }
+            Talk(0);
+            me->CallForHelp(100.0f);
+        }
+
+        void HandleScaling()
+        {
+            // make the fight more attractive and less grinding when more players are around
+            uint32 enemyCount = 0;
+            std::list<HostileReference*>& threatList = me->getThreatManager().getThreatList();
+            std::list<HostileReference*>::iterator itr;
+            for (itr = threatList.begin(); itr != threatList.end(); ++itr)
+            {
+                Unit* unit = (*itr)->getTarget();
+                if (unit && unit->ToPlayer())
+                    enemyCount++;
+            }
+
+            uint32 newScaling = 0;
+            if (enemyCount >= 17)
+                newScaling = SCALING_30;
+            else if (enemyCount >= 15)
+                newScaling = SCALING_25;
+            else if (enemyCount >= 13)
+                newScaling = SCALING_20;
+            else if (enemyCount >= 10)
+                newScaling = SCALING_15;
+            else if (enemyCount >= 7)
+                newScaling = SCALING_10;
+            else if (enemyCount >= 5)
+                newScaling = SCALING_5;
+
+            if (newScaling == appliedScaling)
+                return; // if current scaling equals new scaling stop here
+            else
+            {
+                if (appliedScaling > 0 && me->HasAura(appliedScaling))
+                    me->RemoveAura(appliedScaling);
+                if (newScaling > 0)
+                    me->AddAura(newScaling, me);
+                appliedScaling = newScaling;
+            }
+        }
 
         void UpdateAI(const uint32 diff)
         {
+            // World Notify Cooldown
+            if (notifyCooldown >= diff)
+                notifyCooldown -= diff;
+            else
+                notifyCooldown = 0;
+
             if (!UpdateVictim())
                 return;
 
-            if (ChainLightningTimer <= diff)
-            {
-                DoCast(me->getVictim(), SPELL_CHAIN_LIGHTNING);
-                ChainLightningTimer = 9000;
-            } else ChainLightningTimer -= diff;
+            // Defender Quest Credit
+            if (!defenderCredit)
+                if (me->getThreatManager().getThreatList().size() >= 5 && me->GetHealthPct() < 90.f) // Anti-Farming Conditions
+                    defenderCredit = true;
 
-            if (ShockTimer <= diff)
+            // Boss rescaling
+            if (rescaleTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SHOCK);
-                ShockTimer = 15000;
-            } else ShockTimer -= diff;
+                HandleScaling();
+                rescaleTimer = 10000;
+            } else rescaleTimer -= diff;
+
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case SPELL_CHAIN_LIGHTNING:
+                        DoCastVictim(SPELL_CHAIN_LIGHTNING);
+                        events.ScheduleEvent(SPELL_CHAIN_LIGHTNING, urand(5500, 10500));
+                        break;
+                    case SPELL_SHOCK:
+                        DoCastVictim(SPELL_SHOCK);
+                        events.ScheduleEvent(SPELL_SHOCK, urand(8000, 13000));
+                        break;
+                }
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -246,8 +379,208 @@ public:
 
 };
 
+/*######
+## npc_voljin
+######*/
+
+enum Voljin
+{
+    SPELL_HEX               = 16097,
+    SPELL_SHADOW_SHOCK      = 17289,
+    SPELL_SHADOW_WORD_PAIN  = 17146,
+    SPELL_SHOOT_VOLJIN      = 20463,
+    SPELL_VEIL_OF_SHADOW    = 17820,
+};
+
+class npc_voljin : public CreatureScript
+{
+public:
+    npc_voljin() : CreatureScript("npc_voljin") { }
+
+    struct npc_voljinAI : public ScriptedAI
+    {
+        npc_voljinAI(Creature* creature) : ScriptedAI(creature) { }
+
+        EventMap events;
+
+        bool defenderCredit;
+        uint32 appliedScaling;
+        uint32 rescaleTimer;
+        uint32 notifyCooldown;
+
+        void Reset()
+        {
+            defenderCredit = false;
+            appliedScaling = 0;
+            rescaleTimer = 5000;
+            notifyCooldown = 0;
+
+            events.Reset();
+            events.ScheduleEvent(SPELL_HEX, 20000);
+            events.ScheduleEvent(SPELL_SHADOW_SHOCK, 12000);
+            events.ScheduleEvent(SPELL_SHADOW_WORD_PAIN, 8000);
+            events.ScheduleEvent(SPELL_SHOOT_VOLJIN, 6000);
+            events.ScheduleEvent(SPELL_VEIL_OF_SHADOW, 15000);
+        }
+
+        void EnterEvadeMode()
+        {
+            if (defenderCredit)
+            {
+                std::list<Player*> playerList;
+                Trinity::AnyPlayerInObjectRangeCheck checker(me, me->GetMap()->GetVisibilityRange(), false);
+                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, playerList, checker);
+                me->VisitNearbyWorldObject(me->GetMap()->GetVisibilityRange(), searcher);
+                sLog->outInfo(LOG_FILTER_TSCR, "PvP Boss %s (%d) was protected and Players in Range for Defender Credit are:", me->GetName(), me->GetEntry());
+                for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                {
+                    Player* player = (*itr);
+                    if (player->GetTeamId() != TEAM_HORDE)
+                        continue; // only same faction
+
+                    if (!player->IsPvP())
+                    {
+                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (not flagged for PvP)", player->GetName());
+                        continue; // Do not reward players who are not flagged for pvp ("no pain, no gain")
+                    }
+
+                    if (player->GetQuestStatus(QUEST_DEFENDING_HORDE) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        sLog->outInfo(LOG_FILTER_TSCR, "[x] %s (rewarded)", player->GetName());
+                        player->CompleteQuest(QUEST_DEFENDING_HORDE);
+                    } else
+                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (did not have quest %d at evade)", player->GetName(), QUEST_DEFENDING_HORDE);
+                }
+            } else
+                sLog->outInfo(LOG_FILTER_TSCR, "PvP Boss %s (%d) was protected but did not qualify for Defender Credit (Anti-Farm Rule)", me->GetName(), me->GetEntry());
+
+            if (appliedScaling)
+                if (me->HasAura(appliedScaling))
+                    me->RemoveAura(appliedScaling);
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (notifyCooldown == 0)
+            {
+                sWorld->SendWorldText(11002, "|TInterface\\Icons\\inv_misc_head_troll_01.blp:24|t Vol'jin: Spürt den Voodoo!", 0, 0);
+                notifyCooldown = NOTIFY_COOLDOWN;
+            }
+            Talk(0);
+        }
+
+        void HandleScaling()
+        {
+            // make the fight more attractive and less grinding when more players are around
+            uint32 enemyCount = 0;
+            std::list<HostileReference*>& threatList = me->getThreatManager().getThreatList();
+            std::list<HostileReference*>::iterator itr;
+            for (itr = threatList.begin(); itr != threatList.end(); ++itr)
+            {
+                Unit* unit = (*itr)->getTarget();
+                if (unit && unit->ToPlayer())
+                    enemyCount++;
+            }
+
+            uint32 newScaling = 0;
+            if (enemyCount >= 17)
+                newScaling = SCALING_30;
+            else if (enemyCount >= 15)
+                newScaling = SCALING_25;
+            else if (enemyCount >= 13)
+                newScaling = SCALING_20;
+            else if (enemyCount >= 10)
+                newScaling = SCALING_15;
+            else if (enemyCount >= 7)
+                newScaling = SCALING_10;
+            else if (enemyCount >= 5)
+                newScaling = SCALING_5;
+
+            if (newScaling == appliedScaling)
+                return; // if current scaling equals new scaling stop here
+            else
+            {
+                if (appliedScaling > 0 && me->HasAura(appliedScaling))
+                    me->RemoveAura(appliedScaling);
+                if (newScaling > 0)
+                    me->AddAura(newScaling, me);
+                appliedScaling = newScaling;
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            // World Notify Cooldown
+            if (notifyCooldown >= diff)
+                notifyCooldown -= diff;
+            else
+                notifyCooldown = 0;
+
+            if (!UpdateVictim())
+                return;
+
+            // Defender Quest Credit
+            if (!defenderCredit)
+                if (me->getThreatManager().getThreatList().size() >= 5 && me->GetHealthPct() < 90.f) // Anti-Farming Conditions
+                    defenderCredit = true;
+
+            // Boss rescaling
+            if (rescaleTimer <= diff)
+            {
+                HandleScaling();
+                rescaleTimer = 10000;
+            } else rescaleTimer -= diff;
+
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case SPELL_HEX:
+                        DoCastVictim(SPELL_HEX);
+                        events.ScheduleEvent(SPELL_HEX, urand(15000, 20000));
+                        break;
+
+                    case SPELL_SHADOW_SHOCK:
+                        DoCastVictim(SPELL_SHADOW_SHOCK);
+                        events.ScheduleEvent(SPELL_SHADOW_SHOCK, urand(11000, 14000));
+                        break;
+                    case SPELL_SHADOW_WORD_PAIN:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
+                            DoCast(target, SPELL_SHADOW_WORD_PAIN);
+                        events.ScheduleEvent(SPELL_SHADOW_WORD_PAIN, 8000);
+                        break;
+                    case SPELL_SHOOT_VOLJIN:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
+                            DoCast(target, SPELL_SHOOT_VOLJIN);
+                        events.ScheduleEvent(SPELL_SHOOT_VOLJIN, urand(6000, 9000));
+                        break;
+                    case SPELL_VEIL_OF_SHADOW:
+                        DoCastVictim(SPELL_VEIL_OF_SHADOW);
+                        events.ScheduleEvent(SPELL_VEIL_OF_SHADOW, urand(15000, 17000));
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_voljinAI(creature);
+    }
+};
+
 void AddSC_orgrimmar()
 {
     new npc_shenthul();
     new npc_thrall_warchief();
+    new npc_voljin();
 }

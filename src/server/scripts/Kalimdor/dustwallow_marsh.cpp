@@ -248,7 +248,24 @@ public:
 enum LadyJaina
 {
     QUEST_JAINAS_AUTOGRAPH = 558,
-    SPELL_JAINAS_AUTOGRAPH = 23122
+    SPELL_JAINAS_AUTOGRAPH = 23122,
+
+    SPELL_BLIZZARD              = 20680,
+    SPELL_FIRE_BLAST            = 20679,
+    SPELL_FIREBALL              = 20692,
+    SPELL_SUMMON_WATER_ELEMENT  = 20681,
+    SPELL_TELEPORT              = 20682,
+
+    QUEST_DEFENDING_ALLIANCE = 60000,
+
+    NOTIFY_COOLDOWN    = 600000,
+
+    SCALING_5          = 73762,
+    SCALING_10         = 73824,
+    SCALING_15         = 73825,
+    SCALING_20         = 73826,
+    SCALING_25         = 73827,
+    SCALING_30         = 73828,
 };
 
 #define GOSSIP_ITEM_JAINA "I know this is rather silly but i have a young ward who is a bit shy and would like your autograph."
@@ -280,6 +297,204 @@ public:
         player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
 
         return true;
+    }
+
+    struct npc_lady_jaina_proudmooreAI : public ScriptedAI
+    {
+        npc_lady_jaina_proudmooreAI(Creature* creature) : ScriptedAI(creature), Summons(me) { }
+
+        EventMap events;
+        SummonList Summons;
+
+        bool defenderCredit;
+        uint32 appliedScaling;
+        uint32 rescaleTimer;
+        uint32 notifyCooldown;
+
+        void Reset()
+        {
+            defenderCredit = false;
+            appliedScaling = 0;
+            rescaleTimer = 5000;
+            notifyCooldown = 0;
+
+            events.Reset();
+            events.ScheduleEvent(SPELL_BLIZZARD, 15000);
+            events.ScheduleEvent(SPELL_FIRE_BLAST, 5000);
+            events.ScheduleEvent(SPELL_FIREBALL, 7000);
+            events.ScheduleEvent(SPELL_SUMMON_WATER_ELEMENT, 20000);
+            events.ScheduleEvent(SPELL_TELEPORT, 17000);
+
+            Summons.DespawnAll();
+        }
+
+        void EnterEvadeMode()
+        {
+            if (defenderCredit)
+            {
+                std::list<Player*> playerList;
+                Trinity::AnyPlayerInObjectRangeCheck checker(me, me->GetMap()->GetVisibilityRange(), false);
+                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, playerList, checker);
+                me->VisitNearbyWorldObject(me->GetMap()->GetVisibilityRange(), searcher);
+                sLog->outInfo(LOG_FILTER_TSCR, "PvP Boss %s (%d) was protected and Players in Range for Defender Credit are:", me->GetName(), me->GetEntry());
+                for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                {
+                    Player* player = (*itr);
+                    if (player->GetTeamId() != TEAM_ALLIANCE)
+                        continue; // only same faction
+
+                    if (!player->IsPvP())
+                    {
+                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (not flagged for PvP)", player->GetName());
+                        continue; // Do not reward players who are not flagged for pvp ("no pain, no gain")
+                    }
+
+                    if (player->GetQuestStatus(QUEST_DEFENDING_ALLIANCE) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        sLog->outInfo(LOG_FILTER_TSCR, "[x] %s (rewarded)", player->GetName());
+                        player->CompleteQuest(QUEST_DEFENDING_ALLIANCE);
+                    } else
+                        sLog->outInfo(LOG_FILTER_TSCR, "[ ] %s (did not have quest %d at evade)", player->GetName(), QUEST_DEFENDING_ALLIANCE);
+                }
+            } else
+                sLog->outInfo(LOG_FILTER_TSCR, "PvP Boss %s (%d) was protected but did not qualify for Defender Credit (Anti-Farm Rule)", me->GetName(), me->GetEntry());
+
+            if (appliedScaling)
+                if (me->HasAura(appliedScaling))
+                    me->RemoveAura(appliedScaling);
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (notifyCooldown == 0)
+            {
+                sWorld->SendWorldText(11002, "|TInterface\\Icons\\spell_arcane_teleporttheramore.blp:24|t Lady Jaina Prachtmeer: Theramore wird nicht fallen!", 0, 0);
+                notifyCooldown = NOTIFY_COOLDOWN;
+            }
+            Talk(0);
+            me->CallForHelp(100.0f);
+        }
+
+        void HandleScaling()
+        {
+            // make the fight more attractive and less grinding when more players are around
+            uint32 enemyCount = 0;
+            std::list<HostileReference*>& threatList = me->getThreatManager().getThreatList();
+            std::list<HostileReference*>::iterator itr;
+            for (itr = threatList.begin(); itr != threatList.end(); ++itr)
+            {
+                Unit* unit = (*itr)->getTarget();
+                if (unit && unit->ToPlayer())
+                    enemyCount++;
+            }
+
+            uint32 newScaling = 0;
+            if (enemyCount >= 17)
+                newScaling = SCALING_30;
+            else if (enemyCount >= 15)
+                newScaling = SCALING_25;
+            else if (enemyCount >= 13)
+                newScaling = SCALING_20;
+            else if (enemyCount >= 10)
+                newScaling = SCALING_15;
+            else if (enemyCount >= 7)
+                newScaling = SCALING_10;
+            else if (enemyCount >= 5)
+                newScaling = SCALING_5;
+
+            if (newScaling == appliedScaling)
+                return; // if current scaling equals new scaling stop here
+            else
+            {
+                if (appliedScaling > 0 && me->HasAura(appliedScaling))
+                    me->RemoveAura(appliedScaling);
+                if (newScaling > 0)
+                    me->AddAura(newScaling, me);
+                appliedScaling = newScaling;
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            // World Notify Cooldown
+            if (notifyCooldown >= diff)
+                notifyCooldown -= diff;
+            else
+                notifyCooldown = 0;
+
+            if (!UpdateVictim())
+                return;
+
+            // Defender Quest Credit
+            if (!defenderCredit)
+                if (me->getThreatManager().getThreatList().size() >= 5 && me->GetHealthPct() < 90.f) // Anti-Farming Conditions
+                    defenderCredit = true;
+
+            // Boss rescaling
+            if (rescaleTimer <= diff)
+            {
+                HandleScaling();
+                rescaleTimer = 10000;
+            } else rescaleTimer -= diff;
+
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case SPELL_BLIZZARD:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true))
+                            DoCast(target, SPELL_BLIZZARD);
+                        events.ScheduleEvent(SPELL_BLIZZARD, urand(15000, 18000));
+                        break;
+                    case SPELL_FIRE_BLAST:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f, true))
+                            DoCast(target, SPELL_FIRE_BLAST);
+                        events.ScheduleEvent(SPELL_FIRE_BLAST, urand(5000, 8000));
+                        break;
+                    case SPELL_FIREBALL:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
+                            DoCast(target, SPELL_FIREBALL);
+                        events.ScheduleEvent(SPELL_FIREBALL, urand(7000, 10000));
+                        break;
+                    case SPELL_SUMMON_WATER_ELEMENT:
+                        DoCast(me, SPELL_SUMMON_WATER_ELEMENT);
+                        events.ScheduleEvent(SPELL_SUMMON_WATER_ELEMENT, urand(20000, 30000));
+                        break;
+                    case SPELL_TELEPORT:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
+                        {
+                            DoModifyThreatPercent(target, 100); // Delete Target from Threat List
+                            DoCast(target, SPELL_TELEPORT);
+                        }
+                        events.ScheduleEvent(SPELL_TELEPORT, urand(37000, 52000));
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            Summons.Summon(summon);
+        }
+
+        void SummonedCreateDespawn(Creature* summon)
+        {
+            Summons.Despawn(summon);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_lady_jaina_proudmooreAI(creature);
     }
 
 };
