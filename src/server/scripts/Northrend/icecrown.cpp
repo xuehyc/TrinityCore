@@ -197,7 +197,6 @@ public:
                         {
                             owner->ToPlayer()->KilledMonsterCredit(NPC_GEIST_RETURN_BUNNY_KC, 0);
                             who->ToCreature()->DisappearAndDie();
-
                     }
                 }
             }
@@ -207,6 +206,58 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_vereth_the_cunningAI(creature);
+    }
+};
+
+/*######
+* npc_q13145
+#######*/
+enum q13145
+{
+    NPC_ALTAR_OF_SACRIFICE  = 31065,
+    NPC_BLOOD_FORGE         = 31068,
+    NPC_ICY_LOOKOUT         = 31064,
+    NPC_RUNEWORKS           = 31066,
+
+    SPELL_ALTAR_OF_SACRIFICE_PULSE  = 58196,
+    SPELL_BLOOD_FORGE_PULSE         = 58198,
+    SPELL_ICY_LOOKOUT_PULSE         = 58195,
+    SPELL_RUNEWORKS_PULSE           = 58197,
+};
+
+class npc_q13145 : public CreatureScript
+{
+public:
+    npc_q13145() : CreatureScript("npc_q13145") { }
+
+    struct npc_q13145AI : public ScriptedAI
+    {
+        npc_q13145AI(Creature* creature) : ScriptedAI(creature) {}
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 60.0f))
+                switch (me->GetEntry())
+                {
+                    case NPC_ALTAR_OF_SACRIFICE:
+                        DoCast(SPELL_ALTAR_OF_SACRIFICE_PULSE);
+                        break;
+                    case NPC_BLOOD_FORGE:
+                        DoCast(SPELL_BLOOD_FORGE_PULSE);
+                        break;
+                    case NPC_ICY_LOOKOUT:
+                        DoCast(SPELL_ICY_LOOKOUT_PULSE);
+                        break;
+                    case NPC_RUNEWORKS:
+                        DoCast(SPELL_RUNEWORKS_PULSE);
+                        break;
+                }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_q13145AI(creature);
     }
 };
 
@@ -1113,5 +1164,6 @@ void AddSC_icecrown()
     new npc_argent_faction_rider;
     new npc_guardian_pavilion;
     new npc_vereth_the_cunning;
+    new npc_q13145;
     new npc_tournament_training_dummy;
 }
