@@ -126,10 +126,21 @@ enum LorthemarTheron
     SCALING_30                  = 73822,
 };
 
+// predicate function to select valid targets for mana burn
+struct ManaBurnTargetSelector : public std::unary_function<Unit*, bool>
+{
+    ManaBurnTargetSelector() {}
+
+    bool operator()(Unit const* target) const
+    {
+        return target->getPowerType() == POWER_MANA;
+    }
+};
+
 class npc_lorthemar_theron : public CreatureScript
 {
 public:
-        npc_lorthemar_theron() : CreatureScript("npc_lorthemar_theron") { }
+    npc_lorthemar_theron() : CreatureScript("npc_lorthemar_theron") { }
 
     struct npc_lorthemar_theronAI : public ScriptedAI
     {
@@ -289,7 +300,7 @@ public:
                         events.ScheduleEvent(SPELL_CLEAVE_LORTHEMAR, urand(5000, 7000));
                         break;
                     case SPELL_MANA_BURN:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, ManaBurnTargetSelector()))
                             DoCast(target, SPELL_MANA_BURN);
                         events.ScheduleEvent(SPELL_MANA_BURN, urand(12000, 15000));
                         break;
