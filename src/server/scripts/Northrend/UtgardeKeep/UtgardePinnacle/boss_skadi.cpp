@@ -338,9 +338,23 @@ public:
                 return;
 
             if (id == DATA_SKADI_MOVE_JUMP_FINISHED)
+            {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                {
                     if (me->GetMotionMaster())
+                    {
                         me->GetMotionMaster()->MoveChase(target);
+                        me->SetFullHealth();
+                    }
+                }
+            }
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32 &damage)
+        {
+            // Disable any damage until we land
+            if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
+                damage = 0;
         }
 
         void UpdateAI(const uint32 diff)
