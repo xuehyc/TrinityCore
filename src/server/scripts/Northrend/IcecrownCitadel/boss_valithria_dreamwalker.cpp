@@ -148,6 +148,8 @@ enum Actions
     ACTION_ENTER_COMBAT = 1,
     MISSED_PORTALS      = 2,
     ACTION_DEATH        = 3,
+    ACTION_START_ENCOUNTER = 4,
+    ACTION_EVADE        = 5,
 };
 
 Position const ValithriaSpawnPos = {4210.813f, 2484.443f, 364.9558f, 0.01745329f};
@@ -224,6 +226,7 @@ class ValithriaDespawner : public BasicEvent
 
         bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
         {
+            _creature->AI()->DoAction(ACTION_EVADE);
             Trinity::CreatureWorker<ValithriaDespawner> worker(_creature, *this);
             _creature->VisitNearbyGridObject(333.0f, worker);
             return true;
@@ -239,8 +242,12 @@ class ValithriaDespawner : public BasicEvent
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, creature);
 
                         if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == NOT_STARTED)
+                        {
                             if (!creature->isAlive())
                                 creature->Respawn();
+
+                            creature->RemoveAllAuras();
+                        }
                     }
                     break;
                 case NPC_BLAZING_SKELETON:
@@ -330,15 +337,32 @@ class boss_valithria_dreamwalker : public CreatureScript
 
             void DoAction(int32 const action)
             {
-                if (action != ACTION_ENTER_COMBAT)
-                    return;
+                if (action == ACTION_ENTER_COMBAT)
+                {
+                    DoCast(me, SPELL_COPY_DAMAGE);
+                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                    _events.ScheduleEvent(EVENT_INTRO_TALK, 15000);
+                    _events.ScheduleEvent(EVENT_DREAM_PORTAL, urand(45000, 48000));
+                    if (IsHeroic())
+                        _events.ScheduleEvent(EVENT_BERSERK, 420000);
+                }
+                else if (action == ACTION_START_ENCOUNTER)
+                {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
-                DoCast(me, SPELL_COPY_DAMAGE);
-                _instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                _events.ScheduleEvent(EVENT_INTRO_TALK, 15000);
-                _events.ScheduleEvent(EVENT_DREAM_PORTAL, urand(45000, 48000));
-                if (IsHeroic())
-                    _events.ScheduleEvent(EVENT_BERSERK, 420000);
+                    if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
+                        lichKing->AI()->DoZoneInCombat();
+
+                    if (Creature* trigger = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_TRIGGER)))
+                        trigger->AI()->DoZoneInCombat();
+
+                    std::list<Creature*> archmages;
+                    RisenArchmageCheck check;
+                    Trinity::CreatureListSearcher<RisenArchmageCheck> searcher(me, archmages, check);
+                    me->VisitNearbyGridObject(100.0f, searcher);
+                    for (std::list<Creature*>::iterator itr = archmages.begin(); itr != archmages.end(); ++itr)
+                        (*itr)->AI()->DoZoneInCombat((*itr), 150.0f);
+                }
             }
 
             void HealReceived(Unit* healer, uint32& heal)
@@ -381,8 +405,7 @@ class boss_valithria_dreamwalker : public CreatureScript
                     Talk(SAY_VALITHRIA_75_PERCENT);
                 }
                 else if (_instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == NOT_STARTED)
-                    if (Creature* archmage = me->FindNearestCreature(NPC_RISEN_ARCHMAGE, 30.0f))
-                        archmage->AI()->DoZoneInCombat();   // call EnterCombat on one of them, that will make it all start
+                    DoAction(ACTION_START_ENCOUNTER);
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage)
@@ -526,6 +549,7 @@ class npc_green_dragon_combat_trigger : public CreatureScript
             void Reset()
             {
                 _Reset();
+                _isEvading = false;
                 me->SetReactState(REACT_PASSIVE);
             }
 
@@ -556,28 +580,27 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                 return target->GetTypeId() == TYPEID_PLAYER;
             }
 
-            void JustReachedHome()
+            void EnterEvadeMode()
             {
-                _JustReachedHome();
-                DoAction(ACTION_DEATH);
+                // Stop spawning creatures etc
+                if (Creature* lichKing = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALITHRIA_LICH_KING)))
+                    lichKing->AI()->EnterEvadeMode();
+
+                me->m_Events.AddEvent(new ValithriaDespawner(me), me->m_Events.CalculateTime(5000));
+                _isEvading = true;
             }
 
             void DoAction(int32 const action)
             {
                 if (action == ACTION_DEATH)
-                {
-                    // Stop spawning creatures etc
-                    if (Creature* lichKing = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALITHRIA_LICH_KING)))
-                        lichKing->AI()->EnterEvadeMode();
-
-                    instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, NOT_STARTED);
-                    me->m_Events.AddEvent(new ValithriaDespawner(me), me->m_Events.CalculateTime(5000));
-                }
+                    EnterEvadeMode();
+                else if (action == ACTION_EVADE)
+                    BossAI::EnterEvadeMode();
             }
 
             void UpdateAI(uint32 const /*diff*/)
             {
-                if (!me->isInCombat())
+                if (!me->isInCombat() || _isEvading)
                     return;
 
                 std::list<HostileReference*> const& threatList = me->getThreatManager().getThreatList();
@@ -604,6 +627,7 @@ class npc_green_dragon_combat_trigger : public CreatureScript
 
         private:
             bool _evadeCheck;
+            bool _isEvading;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -725,6 +749,8 @@ class npc_risen_archmage : public CreatureScript
                     if (_instance)
                         if (_instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != DONE)
                             me->Respawn(true);
+
+                Reset();
             }
 
             bool CanAIAttack(Unit const* target) const
@@ -742,40 +768,15 @@ class npc_risen_archmage : public CreatureScript
                 _events.ScheduleEvent(EVENT_FROSTBOLT_VOLLEY, urand(5000, 15000));
                 _events.ScheduleEvent(EVENT_MANA_VOID, urand(20000, 25000));
                 _events.ScheduleEvent(EVENT_COLUMN_OF_FROST, urand(10000, 20000));
-                _canCallEnterCombat = true;
             }
 
             void EnterCombat(Unit* /*target*/)
             {
                 me->FinishSpell(CURRENT_CHANNELED_SPELL, false);
-                if (me->GetDBTableGUIDLow() && _canCallEnterCombat)
-                {
-                    std::list<Creature*> archmages;
-                    RisenArchmageCheck check;
-                    Trinity::CreatureListSearcher<RisenArchmageCheck> searcher(me, archmages, check);
-                    me->VisitNearbyGridObject(100.0f, searcher);
-                    for (std::list<Creature*>::iterator itr = archmages.begin(); itr != archmages.end(); ++itr)
-                        (*itr)->AI()->DoAction(ACTION_ENTER_COMBAT);
 
+                if (_instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == NOT_STARTED)
                     if (Creature* valithria = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_DREAMWALKER)))
-                        valithria->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-                    if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
-                        lichKing->AI()->DoZoneInCombat();
-
-                    if (Creature* trigger = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_TRIGGER)))
-                        trigger->AI()->DoZoneInCombat();
-                }
-            }
-
-            void DoAction(int32 const action)
-            {
-                if (action != ACTION_ENTER_COMBAT)
-                    return;
-
-                _canCallEnterCombat = false;
-                DoZoneInCombat();
-                _canCallEnterCombat = true;
+                        valithria->AI()->DoAction(ACTION_START_ENCOUNTER);
             }
 
             void JustSummoned(Creature* summon)
@@ -830,7 +831,6 @@ class npc_risen_archmage : public CreatureScript
         private:
             EventMap _events;
             InstanceScript* _instance;
-            bool _canCallEnterCombat;
         };
 
         CreatureAI* GetAI(Creature* creature) const
