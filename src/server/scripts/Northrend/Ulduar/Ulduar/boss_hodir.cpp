@@ -333,6 +333,7 @@ class boss_hodir : public CreatureScript
                 events.ScheduleEvent(EVENT_FLASH_FREEZE, 45000);
                 events.ScheduleEvent(EVENT_RARE_CACHE, 180000);
                 events.ScheduleEvent(EVENT_BERSERK, 480000);
+                me->SetReactState(REACT_AGGRESSIVE);
             }
 
             void KilledUnit(Unit* /*who*/)
