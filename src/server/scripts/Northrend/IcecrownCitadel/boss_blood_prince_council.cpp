@@ -396,7 +396,7 @@ class boss_prince_keleseth_icc : public CreatureScript
             void AttackStart(Unit* who)
             {
                 // Enable ranged movement instead
-                AttackStartCaster(who, 30.0f);
+                AttackStartCaster(who, 25.0f);
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -456,9 +456,8 @@ class boss_prince_keleseth_icc : public CreatureScript
                 float maxRange = me->GetDistance2d(summon);
                 float angle = me->GetAngle(summon);
                 me->MovePositionToFirstCollision(pos, maxRange, angle);
-                me->Relocate(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
-                float speed = me->GetDistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()) / ((float)0.001f);
-                me->MonsterMoveWithSpeed(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), speed);
+                summon->Relocate(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+                summon->SendMovementFlagUpdate();
                 summon->ToTempSummon()->SetTempSummonType(TEMPSUMMON_CORPSE_DESPAWN);
             }
 
@@ -576,8 +575,13 @@ class boss_prince_keleseth_icc : public CreatureScript
                             break;
                         case EVENT_SHADOW_LANCE:
                             if (me->getVictim())
+                            {
                                 if (!me->IsWithinLOS(me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ()) && me->GetDistance(me->getVictim()) < 150.0f)
-                                    DoTeleportTo(me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ());
+                                {
+                                    me->Relocate(me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ());
+                                    me->SendMovementFlagUpdate();
+                                }
+                            }
 
                             if (_isEmpowered)
                                 DoCastVictim(SPELL_EMPOWERED_SHADOW_LANCE);
