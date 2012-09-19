@@ -250,6 +250,7 @@ public:
 
             if (summoned->GetEntry() == ENTRY_SKELETON)
             {
+                Summons.Summon(summoned);
                 if (Unit* randomTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
                     summoned->Attack(randomTarget, true);
                 else if (me->getVictim())
@@ -325,7 +326,8 @@ public:
                         events.ScheduleEvent(SPELL_SHOOT_SYLVANAS, urand(6000, 9000));
                         break;
                     case SPELL_SUMMON_SKELETON:
-                        DoCast(me, SPELL_SUMMON_SKELETON);
+                        if (Summons.size() < 7)
+                            DoCast(me, SPELL_SUMMON_SKELETON);
                         events.ScheduleEvent(SPELL_SUMMON_SKELETON, urand(17000, 23000));
                         break;
                 }
