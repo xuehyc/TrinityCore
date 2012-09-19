@@ -841,6 +841,7 @@ class boss_leviathan_mk : public CreatureScript
                 instance = me->GetInstanceScript();
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                Reset();
             }
 
             void Reset()
@@ -1050,6 +1051,7 @@ class boss_leviathan_mk_turret : public CreatureScript
             {
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
+                Reset();
             }
 
             void Reset()
@@ -1129,6 +1131,7 @@ class npc_proximity_mine : public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
                 uiBoomTimer = 35000;
                 boomLocked = false;
+                Reset();
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -1281,6 +1284,7 @@ class boss_vx_001 : public CreatureScript
                 instance = me->GetInstanceScript();
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                Reset();
             }
 
             void Reset()
@@ -1565,6 +1569,7 @@ class npc_rocket_strike : public CreatureScript
             void InitializeAI()
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+                Reset();
             }
 
             void Reset()
@@ -1668,6 +1673,7 @@ class boss_aerial_unit : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetUnitMovementFlags(MOVEMENTFLAG_FLYING);
+                Reset();
             }
 
             void Reset()
@@ -1993,6 +1999,7 @@ class npc_emergency_bot : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
                 me->SetReactState(REACT_PASSIVE);
+                Reset();
             }
 
             void Reset()
@@ -2037,6 +2044,7 @@ class npc_mimiron_bomb_bot : public CreatureScript
             {
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+                Reset();
             }
 
             Unit* SelectPlayerTargetInRange(float range)
@@ -2141,6 +2149,7 @@ class npc_mimiron_flame_trigger : public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+                Reset();
             }
 
             void Reset()
@@ -2224,6 +2233,7 @@ class npc_mimiron_flame_spread : public CreatureScript
                 instance = me->GetInstanceScript();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED | UNIT_FLAG_DISABLE_MOVE);
                 me->SetReactState(REACT_PASSIVE);
+                Reset();
             }
 
             void Reset()
@@ -2278,6 +2288,7 @@ class npc_frost_bomb : public CreatureScript
             {
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+                Reset();
             }
 
             void Reset()

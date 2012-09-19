@@ -289,6 +289,7 @@ class boss_flame_leviathan : public CreatureScript
                 checkUnbrokenOnReset = false;
                 DoCast(SPELL_INVIS_AND_STEALTH_DETECT);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
+                Reset();
             }
 
             void Reset()
@@ -912,6 +913,7 @@ class npc_flame_leviathan_overload_device : public CreatureScript
             void InitializeAI()
             {
                 me->setActive(true);
+                Reset();
             }
 
             void OnSpellClick(Unit* /*clicker*/)

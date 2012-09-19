@@ -168,6 +168,32 @@ struct AuraAppliedCheck : public std::unary_function<Unit*, bool>
         uint32 __spellId;
 };
 
+struct IsEqualWO : public std::unary_function<WorldObject*, bool>
+{
+    IsEqualWO (const WorldObject* base) : __baseGUID(base->GetGUID()) {}
+    bool operator()(const WorldObject* target) const
+    {
+        if (!target)
+            return false;
+        return (target->GetGUID() == __baseGUID);
+    }
+    private:
+        uint64 __baseGUID;
+};
+
+struct DeathStateCheck : public std::unary_function<Unit*, bool>
+{
+    DeathStateCheck(bool shouldBeDead) : __shouldBeDead(shouldBeDead) {}
+    bool operator()(const Unit* target) const
+    {
+        if (!target)
+            return false;
+        return (!target->isAlive() == __shouldBeDead);
+    }
+    private:
+        bool __shouldBeDead;
+};
+
 /************************************************************************/
 /*                       The Grand Approach                             */
 /************************************************************************/
@@ -1271,6 +1297,20 @@ class npc_storm_tempered_keeper : public CreatureScript
                 events.ScheduleEvent(EVENT_SUMMONS_CHARGED_SPHERE, 10*IN_MILLISECONDS);
             }
 
+            void EnterCombat(Unit* target)
+            {
+                ScriptedAI::AttackStart(target);
+                std::list<Creature*> targets;
+                GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_1, 30.0f);
+                GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_2, 30.0f);
+                for (std::list<Creature*>::iterator it = targets.begin(); it != targets.end(); ++it)
+                {
+                    if (Creature* c = (*it))
+                        if (c->IsAIEnabled && !c->isInCombat())
+                            c->AI()->EnterCombat(target);
+                }
+            }
+            
             void DoAction(int32 const action)
             {
                 switch (action)
@@ -1286,24 +1326,31 @@ class npc_storm_tempered_keeper : public CreatureScript
                 std::list<Creature*> targets;
                 GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_1, 30.0f);
                 GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_2, 30.0f);
+                targets.remove_if(DeathStateCheck(true));
                 for (std::list<Creature*>::iterator it = targets.begin(); it != targets.end(); ++it)
-                {
-                    if (Creature* c = (*it))
-                        if (c->IsAIEnabled)
-                            c->AI()->DoAction(ACTION_VENGEFUL_SURGE);
-                }
+                    if ((*it)->IsAIEnabled)
+                        (*it)->AI()->DoAction(ACTION_VENGEFUL_SURGE);
             }
 
             void DoSeparationCheck()
             {
                 if (me->HasAura(SPELL_SEPARATION_ANXIETY))
                     return;
+                    
+                /*
+                    Note: The code below is a horrible hack, but it does not work in another way.
+                    The main problem is that we are searching for a creature that may have the same
+                    entry as we do. Thus, me->FindNearestCreature(...) returns a pointer to ourself.
+                    Retrieving the list of creatures for both bounded ally-types, drop ourself from
+                    the list and remove dead foes seems to be the only usable option. 
+                */
                 std::list<Creature*> targets;
-                GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_1, 30.0f);
-                GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_2, 30.0f);
-                targets.sort(Trinity::ObjectDistanceOrderPred(me));
-                if ( !me->IsInRange( (*targets.begin()), 0.0f, 15.0f) )
-                    DoCast(SPELL_SEPARATION_ANXIETY);
+                GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_1, 15.0f);
+                GetCreatureListWithEntryInGrid(targets, me, NPC_STORM_TEMPERED_KEEPER_2, 15.0f);
+                targets.remove_if(IsEqualWO(me));
+                targets.remove_if(DeathStateCheck(true));
+                if (targets.empty())
+                    DoCast(me, SPELL_SEPARATION_ANXIETY);              
             }
 
             void UpdateAI(uint32 const diff)

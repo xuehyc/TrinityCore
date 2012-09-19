@@ -311,6 +311,7 @@ class npc_iron_roots : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
                 me->setFaction(FACTION_HOSTILE);
                 me->SetReactState(REACT_PASSIVE);
+                Reset();
             }
 
             void Reset()
@@ -1279,6 +1280,7 @@ class npc_detonating_lasher : public CreatureScript
             void InitializeAI()
             {
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                Reset();
             }
 
             void Reset()
@@ -1355,6 +1357,7 @@ class npc_ancient_water_spirit : public CreatureScript
                 if (InstanceScript* instance = me->GetInstanceScript())
                     if (Creature* Freya = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_FREYA)))
                         waveCount = Freya->AI()->GetData(DATA_TRIO_WAVE_COUNT);
+                Reset();
             }
 
             void Reset()
@@ -1426,6 +1429,7 @@ class npc_storm_lasher : public CreatureScript
                 if (InstanceScript* instance = me->GetInstanceScript())
                     if (Creature* Freya = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_FREYA)))
                         waveCount = Freya->AI()->GetData(DATA_TRIO_WAVE_COUNT);
+                Reset();
             }
 
             void Reset()
@@ -1502,6 +1506,7 @@ class npc_snaplasher : public CreatureScript
                 if (InstanceScript* instance = me->GetInstanceScript())
                     if (Creature* Freya = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_FREYA)))
                         waveCount = Freya->AI()->GetData(DATA_TRIO_WAVE_COUNT);
+                Reset();
             }
 
             void Reset()
@@ -1642,6 +1647,7 @@ class npc_sun_beam : public CreatureScript
             {
                 me->SetReactState(REACT_PASSIVE);
                 DoCast(SPELL_FREYA_UNSTABLE_ENERGY);
+                Reset();
             }
 
             void Reset()

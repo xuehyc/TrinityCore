@@ -322,6 +322,7 @@ class boss_saronite_animus : public CreatureScript
             void InitializeAI()
             {
                 instance = me->GetInstanceScript();
+                Reset();
             }
 
             void Reset()
@@ -392,6 +393,7 @@ class npc_saronite_vapors : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
                 me->SetReactState(REACT_PASSIVE);
                 isPassive = false;
+                Reset();
             }
 
             void Reset()
