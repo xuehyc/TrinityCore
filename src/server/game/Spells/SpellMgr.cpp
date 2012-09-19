@@ -3589,6 +3589,21 @@ void SpellMgr::LoadDbcDataCorrections()
             case 51422: // Wintergrasp Tower Cannon: Fire Blast shouldn't scale with player gear.
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
                 break;
+            case 22741: // High Tinker Mekkatorque - Goblin Dragon Gun
+                spellInfo->EffectBasePoints[EFFECT_0] = 4200;
+                break;
+            case 20688: // Tyrande Whisperwind - Searing Arrow
+                spellInfo->EffectBasePoints[EFFECT_0] = 18000;
+                break;
+            case 59713: // Lady Sylvanas Windrunner - Multi-Shot
+                spellInfo->EffectBasePoints[EFFECT_0] = 13000;
+                break;
+            case 59710: // Lady Sylvanas Windrunner - Shoot
+                spellInfo->EffectBasePoints[EFFECT_0] = 18000;
+                break;
+            case 33385: // Lorthemar'Theron - Mana Burn
+                spellInfo->EffectValueMultiplier[EFFECT_0] = 7.0f;
+                break;
             default:
                 break;
         }

@@ -464,7 +464,8 @@ public:
                         events.ScheduleEvent(SPELL_FIREBALL, urand(7000, 10000));
                         break;
                     case SPELL_SUMMON_WATER_ELEMENT:
-                        DoCast(me, SPELL_SUMMON_WATER_ELEMENT);
+                        if (Summons.size() < 4)
+                            DoCast(me, SPELL_SUMMON_WATER_ELEMENT);
                         events.ScheduleEvent(SPELL_SUMMON_WATER_ELEMENT, urand(20000, 30000));
                         break;
                     case SPELL_TELEPORT:
@@ -484,6 +485,13 @@ public:
         void JustSummoned(Creature* summon)
         {
             Summons.Summon(summon);
+
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f, true))
+            {
+                summon->GetMotionMaster()->MoveChase(target);
+                summon->SetSpeed(MOVE_RUN, 1.2f);
+                summon->Attack(target, true);
+            }
         }
 
         void SummonedCreateDespawn(Creature* summon)

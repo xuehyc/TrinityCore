@@ -497,7 +497,8 @@ public:
                         events.ScheduleEvent(SPELL_REJUVENATION, urand(15000, 20000));
                         break;
                     case SPELL_SUMMON_TREANTS:
-                        DoCast(me, SPELL_SUMMON_TREANTS);
+                        if (Summons.size() < 4)
+                            DoCast(me, SPELL_SUMMON_TREANTS);
                         events.ScheduleEvent(SPELL_SUMMON_TREANTS, urand(25000, 30000));
                         break;
                     case SPELL_WRATH:
@@ -514,6 +515,23 @@ public:
             }
 
             DoMeleeAttackIfReady();
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            Summons.Summon(summon);
+
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 12.0f, true))
+            {
+                summon->GetMotionMaster()->MoveChase(target);
+                summon->SetSpeed(MOVE_RUN, 1.2f);
+                summon->Attack(target, true);
+            }
+        }
+
+        void SummonedCreateDespawn(Creature* summon)
+        {
+            Summons.Despawn(summon);
         }
     };
 

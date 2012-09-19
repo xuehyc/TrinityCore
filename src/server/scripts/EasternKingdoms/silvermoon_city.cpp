@@ -208,7 +208,7 @@ public:
         void EnterCombat(Unit* /*who*/) {
             if (notifyCooldown == 0)
             {
-                sWorld->SendWorldText(11002, "|TInterface\\Icons\\achievement_leader_lorthemar_theron-.blp:24|t Lor'themar Theron: Sie fallen in Quel'Thalas ein!", 0, 0);
+                sWorld->SendWorldText(11002, "|TInterface\\Icons\\achievement_leader_lorthemar_theron.blp:24|t Lor'themar Theron: Sie fallen in Quel'Thalas ein!", 0, 0);
                 notifyCooldown = NOTIFY_COOLDOWN;
             }
             me->CallForHelp(100.0f);
