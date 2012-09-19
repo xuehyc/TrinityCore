@@ -115,3 +115,8 @@ INSERT INTO spell_bonus_data (entry, direct_bonus, dot_bonus, ap_bonus, ap_dot_b
 (17289, 0, 0, 15, 0, 'Vol''jin - Shadow Shock'),
 (16033, 0, 0, 15, 0, 'Thrall - Chain Lightning'),
 (16034, 0, 0, 18, 0, 'Thrall - Shock');
+
+-- trinity string for world announce
+DELETE FROM trinity_string WHERE entry = 11002;
+INSERT INTO trinity_string (entry, content_default, content_loc1, content_loc2, content_loc3, content_loc4, content_loc5, content_loc6, content_loc7, content_loc8) VALUES
+(11002, '%s', NULL, NULL, '%s', NULL, NULL, NULL, NULL, NULL);
