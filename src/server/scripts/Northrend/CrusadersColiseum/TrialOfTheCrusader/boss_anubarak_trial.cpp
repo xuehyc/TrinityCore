@@ -560,7 +560,7 @@ public:
             {
                 m_uiAcidMandibleTimer = 3500;
 
-                if (!me->getVictim())
+                if (!me->getVictim() || !instance)
                     return;
 
                 //If we are within range melee the target
@@ -571,19 +571,16 @@ public:
                         if (Aura* aur = me->getVictim()->GetAura(RAID_MODE(SPELL_TRIGGERED_ACID_MANDIBLE_0, SPELL_TRIGGERED_ACID_MANDIBLE_1, SPELL_TRIGGERED_ACID_MANDIBLE_2, SPELL_TRIGGERED_ACID_MANDIBLE_3)))
                         {
                             if (aur->GetStackAmount() < 40)
-                            {
                                 aur->SetStackAmount(aur->GetStackAmount() + 1);
-                            }
 
                             if (aur->GetStackAmount() == 40)
-                            {
                                 aur->SetStackAmount(40);
-                            }
                         }
                     }
                     else
                     {
-                        me->getVictim()->AddAura(RAID_MODE(SPELL_TRIGGERED_ACID_MANDIBLE_0, SPELL_TRIGGERED_ACID_MANDIBLE_1, SPELL_TRIGGERED_ACID_MANDIBLE_2, SPELL_TRIGGERED_ACID_MANDIBLE_3), me->getVictim());
+                        if (Creature* anubarak = Unit::GetCreature(*me, instance->GetData64(NPC_ANUBARAK)))
+                            me->CastSpell(me->getVictim(), RAID_MODE(SPELL_TRIGGERED_ACID_MANDIBLE_0, SPELL_TRIGGERED_ACID_MANDIBLE_1, SPELL_TRIGGERED_ACID_MANDIBLE_2, SPELL_TRIGGERED_ACID_MANDIBLE_3), true, 0, 0, instance->GetData64(NPC_ANUBARAK));
                     }
                 }
             } else m_uiAcidMandibleTimer -= uiDiff;
