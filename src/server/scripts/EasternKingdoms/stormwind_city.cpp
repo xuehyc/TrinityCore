@@ -700,6 +700,8 @@ public:
 
             me->m_CombatDistance = 100.0f; // he is often tanked in the rooms around him and as such should not reset too early.
 
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ATTACK_POWER, true);
+
             events.Reset();
             events.ScheduleEvent(EVENT_WHIRLWIND, urand(6000, 9000));
             events.ScheduleEvent(EVENT_HEROIC_LEAP, urand(15000, 25000));
@@ -862,7 +864,7 @@ public:
             }
         }
 
-        void SummonedCreateDespawn(Creature* summon)
+        void SummonedCreatureDespawn(Creature* summon)
         {
             Summons.Despawn(summon);
         }

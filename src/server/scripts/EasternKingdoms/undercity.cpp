@@ -135,6 +135,8 @@ public:
             LamentEvent = false;
             targetGUID = 0;
 
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ATTACK_POWER, true);
+
             events.Reset();
             events.ScheduleEvent(SPELL_BLACK_ARROW, 15000);
             events.ScheduleEvent(SPELL_FADE, 15000);
@@ -336,7 +338,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void SummonedCreateDespawn(Creature* summon)
+        void SummonedCreatureDespawn(Creature* summon)
         {
             Summons.Despawn(summon);
         }

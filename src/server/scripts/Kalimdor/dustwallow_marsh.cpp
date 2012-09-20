@@ -318,6 +318,8 @@ public:
             rescaleTimer = 5000;
             notifyCooldown = 0;
 
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ATTACK_POWER, true);
+
             events.Reset();
             events.ScheduleEvent(SPELL_BLIZZARD, 15000);
             events.ScheduleEvent(SPELL_FIRE_BLAST, 5000);
@@ -494,7 +496,7 @@ public:
             }
         }
 
-        void SummonedCreateDespawn(Creature* summon)
+        void SummonedCreatureDespawn(Creature* summon)
         {
             Summons.Despawn(summon);
         }

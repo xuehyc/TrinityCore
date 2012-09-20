@@ -160,6 +160,8 @@ public:
             rescaleTimer = 5000;
             notifyCooldown = 0;
 
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ATTACK_POWER, true);
+
             events.Reset();
             events.ScheduleEvent(SPELL_ARCANE_SHOCK, 9000);
             events.ScheduleEvent(SPELL_CLEAVE_LORTHEMAR, 5000);

@@ -153,6 +153,8 @@ public:
             rescaleTimer = 5000;
             notifyCooldown = 0;
 
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ATTACK_POWER, true);
+
             events.Reset();
             events.ScheduleEvent(SPELL_CLEAVE_TYRANDE, 5000);
             events.ScheduleEvent(SPELL_SEARING_ARROW, 8000);
@@ -354,6 +356,8 @@ public:
             notifyCooldown = 0;
             hurricaneTarget = 0;
 
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ATTACK_POWER, true);
+
             events.Reset();
             events.ScheduleEvent(SPELL_ENTANGLING_ROOTS, 7000);
             events.ScheduleEvent(SPELL_REJUVENATION, urand(15000, 20000));
@@ -529,7 +533,7 @@ public:
             }
         }
 
-        void SummonedCreateDespawn(Creature* summon)
+        void SummonedCreatureDespawn(Creature* summon)
         {
             Summons.Despawn(summon);
         }

@@ -97,7 +97,7 @@ public:
             summon10 = false;
         }
 
-        void SummonedCreateDespawn(Creature* summon)
+        void SummonedCreatureDespawn(Creature* summon)
         {
             Summons.Despawn(summon);
         }

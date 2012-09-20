@@ -108,7 +108,7 @@ public:
             Summons.Summon(summon);
         }
 
-        void SummonedCreateDespawn(Creature* summon)
+        void SummonedCreatureDespawn(Creature* summon)
         {
             Summons.Despawn(summon);
         }

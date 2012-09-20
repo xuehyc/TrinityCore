@@ -107,6 +107,8 @@ public:
 
             me->m_CombatDistance = 100.0f;
 
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ATTACK_POWER, true);
+
             events.ScheduleEvent(SPELL_BERSERKER_CHARGE, 30000);
             events.ScheduleEvent(SPELL_CLEAVE, 5000);
             events.ScheduleEvent(SPELL_MORTAL_STRIKE, 10000);
