@@ -500,6 +500,51 @@ class AreaTrigger_at_area_52_entrance : public AreaTriggerScript
         std::map<uint32, time_t> _triggerTimes;
 };
 
+/*######
+## at_voltarus_teleporter
+######*/
+
+enum Voltarus
+{
+    AT_VOLTARUS_MIDDLE  = 5079, // level where drakkuru resides
+    AT_VOLTARUS_UPPER   = 5080, // accessible during q12710
+
+    QUEST_DISCLOURE     = 12710,
+
+    NPC_DRAKURU_SECRET  = 28929, // KC for Sabotage
+};
+
+class AreaTrigger_at_voltarus : public AreaTriggerScript
+{
+    public:
+
+        AreaTrigger_at_voltarus()
+            : AreaTriggerScript("at_voltarus") {}
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            switch (trigger->id)
+            {
+                case AT_VOLTARUS_MIDDLE:
+                    if (player->GetQuestStatus(QUEST_DISCLOURE) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        player->TeleportTo(571, 6257.07f, -1962.47f, 484.78f, 3.748721f);
+                        player->KilledMonsterCredit(NPC_DRAKURU_SECRET, 0); // just imagine the rest of the quest! *_*
+                    }
+                    else
+                        player->TeleportTo(571, 6175.6f, -2008.78f, 245.255f, 1.49857f);
+
+                    break;
+
+                case AT_VOLTARUS_UPPER:
+                    player->TeleportTo(571, 6159.16f, -2028.6f, 408.168f, 3.74088f);
+                    break;
+            }
+
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -512,4 +557,5 @@ void AddSC_areatrigger_scripts()
     new AreaTrigger_at_bring_your_orphan_to();
     new AreaTrigger_at_brewfest();
     new AreaTrigger_at_area_52_entrance();
+    new AreaTrigger_at_voltarus();
 }
