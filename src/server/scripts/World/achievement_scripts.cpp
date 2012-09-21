@@ -364,6 +364,61 @@ class achievement_not_even_a_scratch : public AchievementCriteriaScript
         }
 };
 
+class achievement_brew_of_the_month_club : public AchievementCriteriaScript
+{
+    public:
+        achievement_brew_of_the_month_club(char const* name, uint32 quest) : AchievementCriteriaScript(name),
+            _questEntry(quest)
+        {
+        }
+
+        bool OnCheck(Player* player, Unit* target)
+        {
+            if (!player)
+                return false;
+
+            // this is a duplicated criteria check but we need it since we are not
+            // really doing any check here but just use this as a hook to send out
+            // the achievement related mails.
+            if (!player->GetQuestRewardStatus(_questEntry))
+                return false;
+
+            // if we are here we need to create the mail for the stupid brew of the year club
+            uint32 brew_of_the_month_beers[12] = {37496, 37497, 37498, 37499, 37488, 37489, 37490, 37491, 37492, 37493, 37494, 37495}; // sep-aug
+            uint32 delay = 0;
+            for (uint8 iter = 0; iter < 12; ++iter)
+            {
+                Item* item = brew_of_the_month_beers[iter] ? Item::CreateItem(brew_of_the_month_beers[iter], 1, player) : NULL;
+
+                // subject and text
+                std::string subject = "Bräu des Monats!";
+                std::string text = "Deine monatliche Bier-Lieferung befindet sich im Anhang.$B$BProst!";
+
+                MailDraft draft(subject, text);
+
+                SQLTransaction trans = CharacterDatabase.BeginTransaction();
+                if (item)
+                {
+                    // save new item before send
+                    item->SaveToDB(trans); // save for prevent lost at next mail load, if send fail then item will deleted
+
+                    // item
+                    draft.AddItem(item);
+                }
+
+                draft.SendMailTo(trans, player, MailSender(MAIL_CREATURE, 28329), MAIL_CHECK_MASK_HAS_BODY, delay);
+                CharacterDatabase.CommitTransaction(trans);
+
+                // TODO calculate correct send times
+                delay += 30*86400;
+            }
+            sLog->outInfo(LOG_FILTER_TSCR, "Player %s achieved Brew of the Month Club and has 12 mails added with beer over the next 12 month.", player->GetName());
+            return true;
+        }
+    private:
+        uint32 const _questEntry;
+};
+
 void AddSC_achievement_scripts()
 {
     new achievement_resilient_victory();
@@ -384,4 +439,8 @@ void AddSC_achievement_scripts()
     new achievement_tilted();
     new achievement_not_even_a_scratch();
     new achievement_wg_vehicular_gnomeslaughter();
+    new achievement_brew_of_the_month_club("achievement_brew_of_the_month_q12420", 12420);
+    new achievement_brew_of_the_month_club("achievement_brew_of_the_month_q12421", 12421);
+    new achievement_brew_of_the_month_club("achievement_brew_of_the_month_q12278", 12278);
+    new achievement_brew_of_the_month_club("achievement_brew_of_the_month_q12306", 12306);
 }
