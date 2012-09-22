@@ -119,27 +119,39 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
     std::ostringstream ticketstatusmsg;
     uint32 countOpen = sTicketMgr->GetOpenTicketCount();
 
-    ticketstatusmsg << "PRIVMSG ChanServ :TOPIC #wowticket \x03" << "4 ";
+    ticketstatusmsg << "PRIVMSG ChanServ :TOPIC #wowticket \x03";
 
     if (countOpen > 1)
-        ticketstatusmsg << countOpen << " Tickets sind noch offen!";
+        ticketstatusmsg  << "4 " << countOpen << " Tickets sind noch offen.";
     else if (countOpen == 1)
-        ticketstatusmsg << "1 Ticket ist noch offen!";
+        ticketstatusmsg  << "7 " << "1 Ticket ist noch offen.";
     else if (countOpen == 0)
-        ticketstatusmsg << "Es sind keine Tickets mehr offen!";
-
+        ticketstatusmsg  << "3 " << "Es sind keine Tickets mehr offen.";
     sIRC.SendIRC(ticketstatusmsg.str());
 
     std::ostringstream infomsg;
+    infomsg << "PRIVMSG #wowticket :\x02\x03" << "4Ticket" << "\x03" << " #" << _id;
+    infomsg << "\x02 von " << _playerName << " (" << GUID_LOPART(_playerGuid) << ") ";
 
     if (GUID_LOPART(_closedBy))
     {
-        infomsg << "PRIVMSG #wowticket :\x03" << "4Ticket mit ID " << _id << " von Player " << _playerName << " (GUID: " << GUID_LOPART(_playerGuid) << ") wurde von Player-GUID: " << GUID_LOPART(_closedBy) << " geschlossen!";
+        infomsg << "wurde ";
+        if (_playerGuid != _closedBy)
+            infomsg << "von " << sWorld->GetCharacterNameData(GUID_LOPART(_closedBy))->m_name << " (" << GUID_LOPART(_closedBy) << ") ";
+        infomsg << "geschlossen.";
         sIRC.SendIRC(infomsg.str());
     }
     else
     {
-        infomsg << "PRIVMSG #wowticket :" << "\x03" << "4Player: " << _playerName << ", Player GUID: " << GUID_LOPART(_playerGuid) << ", Ticket GUID: " << _id << ";\x03 Map: " << _mapId << "; X: " << _posX << "; Y: " << _posY << "; Z: " << _posZ << "; GM GUID: " << GUID_LOPART(_assignedTo) << "; CLOSED: " << GUID_LOPART(_closedBy);
+        if (GUID_LOPART(_assignedTo) > 0)
+            infomsg << "ist in Bearbeitung durch " << sWorld->GetCharacterNameData(GUID_LOPART(_assignedTo))->m_name << ".";
+        else
+        {
+            if (_createTime != _lastModifiedTime)
+                infomsg << "wurde aktualisiert.";
+            else
+                infomsg << "wurde erstellt.";
+        }
         sIRC.SendIRC(infomsg.str());
 
         if (_message.length() > 220)
