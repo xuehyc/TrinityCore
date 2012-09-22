@@ -513,6 +513,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
                 string << "PRIVMSG ChanServ :TOPIC #wowteam \x02\x03" << "4[Warden]\x03 (" << uint16(player->getLevel()) << ") " << player->GetName() << "\x02 (GUID: " << player->GetGUIDLow() << ", Account: " << _session->GetAccountId() << ")";
                 string << " \x03" << "4-\x03 \x02" << "Failed Check " << checkFailed << " (" << check->Comment << ")" << " \x02";
                 string << " \x03" << "4-\x03 \x02" << "Position:\x02 " << player->GetPositionX() << " " << player->GetPositionY() << " " << player->GetPositionZ() << " " << player->GetMapId();
+                string << " \x03" << "4-\x03 \x02" << "Latency:\x02 " << _session->GetLatency() << " ms";
                 sIRC.SendIRC(string.str());
             }
         }
