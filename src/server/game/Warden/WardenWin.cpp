@@ -502,11 +502,19 @@ void WardenWin::HandleData(ByteBuffer &buff)
         // TriniChat Extension
         if (Player* player = _session->GetPlayer())
         {
-            std::ostringstream string;
-            string << "PRIVMSG ChanServ :TOPIC #wowteam \x02\x03" << "4[Warden]\x03 (" << uint16(player->getLevel()) << ") " << player->GetName() << "\x02 (GUID: " << player->GetGUIDLow() << ", Account: " << _session->GetAccountId() << ")";
-            string << " \x03" << "4-\x03 \x02" << "Failed Check " << checkFailed << " (" << check->Comment << ")" << " \x02";
-            string << " \x03" << "4-\x03 \x02" << "Position:\x02 " << player->GetPositionX() << " " << player->GetPositionY() << " " << player->GetPositionZ() << " " << player->GetMapId();
-            sIRC.SendIRC(string.str());
+            // Make sure to keep the signal/noise ratio in tact by ignoring checks that are not necessarily cheats
+            if (checkFailed != 88               // Undocumented Check
+                    && checkFailed != 134       // Undocumented Check
+                    && checkFailed != 261       // Undocumented Check
+                    && checkFailed != 437       // Login State - (May be false positive)
+                    && checkFailed != 777)      // Undocumented Check
+            {
+                std::ostringstream string;
+                string << "PRIVMSG ChanServ :TOPIC #wowteam \x02\x03" << "4[Warden]\x03 (" << uint16(player->getLevel()) << ") " << player->GetName() << "\x02 (GUID: " << player->GetGUIDLow() << ", Account: " << _session->GetAccountId() << ")";
+                string << " \x03" << "4-\x03 \x02" << "Failed Check " << checkFailed << " (" << check->Comment << ")" << " \x02";
+                string << " \x03" << "4-\x03 \x02" << "Position:\x02 " << player->GetPositionX() << " " << player->GetPositionY() << " " << player->GetPositionZ() << " " << player->GetMapId();
+                sIRC.SendIRC(string.str());
+            }
         }
         // TriniChat Extension END
     }
