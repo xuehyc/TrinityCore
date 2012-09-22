@@ -190,7 +190,10 @@ std::string MakeMsgP(int CLINE, std::string Msg, Player *plr)
     else
         sMsg = sIRC.MakeMsg(sMsg, "$Tag", "");
     sMsg = sIRC.MakeMsg(sMsg, "$GUID", MakeMsgA("%d", plr->GetGUIDLow()));
-    sMsg = sIRC.MakeMsg(sMsg, "$Level", MakeMsgA("%d", plr->getLevel()));
+    if (plr->GetSession()->GetSecurity() == 0) // IsPlayerAccount(...)
+        sMsg = sIRC.MakeMsg(sMsg, "$Level", MakeMsgA("%d", plr->getLevel()));
+    else
+        sMsg = sIRC.MakeMsg(sMsg, "$Level", "GM");
     sMsg = Delink(sMsg);
     sMsg = WoWcol2IRC(sMsg);
     return sMsg;
