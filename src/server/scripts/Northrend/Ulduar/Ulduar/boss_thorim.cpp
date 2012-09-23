@@ -37,7 +37,8 @@ enum Spells
     SPELL_LIGHTNING_PILLAR      = 62976,
     SPELL_UNBALANCING_STRIKE    = 62130,
     SPELL_BERSERK_PHASE_1       = 62560,
-    SPELL_BERSERK_PHASE_2       = 26662
+    SPELL_BERSERK_PHASE_2       = 26662,
+    SPELL_ACHIEVEMENT_CHECK     = 64985
 };
 
 #define SPELL_CHAIN_LIGHTNING RAID_MODE(SPELL_CHAIN_LIGHTNING_10, SPELL_CHAIN_LIGHTNING_25)
@@ -429,8 +430,7 @@ class boss_thorim : public CreatureScript
                 if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_THORIM_CTRL)))
                     ctrl->DespawnOrUnsummon();
 
-                // Kill credit
-                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 64985);
+                DoCast(me, SPELL_ACHIEVEMENT_CHECK, true); // For kill credit, due to wowhead
                 // Lose Your Illusion
                 if (HardMode)
                 {

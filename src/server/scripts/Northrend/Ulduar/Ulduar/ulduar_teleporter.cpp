@@ -109,9 +109,14 @@ class ulduar_teleporter : public GameObjectScript
                 if (instance->GetBossState(BOSS_KOLOGARN) == DONE)
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Shattered Walkway", GOSSIP_SENDER_MAIN, WALKWAY);
                 if (instance->GetBossState(BOSS_AURIAYA) == DONE)
+                {
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Conservatory of Life", GOSSIP_SENDER_MAIN, CONSERVATORY);
-                if (instance->GetBossState(BOSS_FREYA) == DONE)
+                    // @DorianGrey 2012/09/21 Workaround for the tram-bug (players are ejected at reaching the endpoint since the tram disappears immediately, without having
+                    // a chance to leave using the stairway): Teleporter to Mimiron is active just after killing Auriaya.
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Spark of Imagination", GOSSIP_SENDER_MAIN, SPARK);
+                }
+                //if (instance->GetBossState(BOSS_MIMIRON) == DONE)
+                //    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Spark of Imagination", GOSSIP_SENDER_MAIN, SPARK);
                 if (instance->GetBossState(BOSS_VEZAX) == DONE)
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to Descent into Madness", GOSSIP_SENDER_MAIN, MADNESS);
             }
