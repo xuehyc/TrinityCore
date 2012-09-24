@@ -22,6 +22,7 @@ UPDATE `creature_template` SET `mechanic_immune_mask`=650854235, `ScriptName`='b
 -- Leviathan MKII
 UPDATE `creature_template` SET `vehicleid`=370, `mechanic_immune_mask`=650854235, `ScriptName`='boss_leviathan_mk' WHERE `entry`=33432;
 UPDATE `creature_template` SET `mechanic_immune_mask`=650854235, `flags_extra`=1 WHERE `entry`=34106;
+UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~256 WHERE `entry`=34362; -- 2012/09/21 Mines should be able to get involved infight...
 -- Leviathan MKII Turret
 UPDATE `creature_template` SET `mechanic_immune_mask`=650854235, `ScriptName`='boss_leviathan_mk_turret' WHERE `entry`=34071;
 DELETE FROM `vehicle_template_accessory` WHERE entry = 33432;

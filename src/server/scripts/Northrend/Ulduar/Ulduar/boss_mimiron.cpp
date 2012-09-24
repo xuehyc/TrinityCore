@@ -353,7 +353,6 @@ class boss_mimiron : public CreatureScript
                         EncounterPostProgress();
                     }
                 }
-
             }
 
             void EncounterPostProgress()
@@ -961,6 +960,7 @@ class boss_leviathan_mk : public CreatureScript
                         break;
                     case DO_LEVIATHAN_ASSEMBLED:                            // Assemble and self-repair share some stuff, so the fallthrough is intended!
                         me->SetHealth( (me->GetMaxHealth() >> 1) );
+                        isInPhaseChangeHook = false;
                     case DO_LEVIATHAN_SELF_REPAIR_END:
                         if (gotMimironHardMode)
                             if (!me->HasAura(SPELL_EMERGENCY_MODE))
@@ -1347,6 +1347,7 @@ class boss_vx_001 : public CreatureScript
                         break;
                     case DO_VX001_ASSEMBLED:                                // Reassemble and heal share some stuff, fallthrough is intended
                         me->SetHealth( (me->GetMaxHealth() >> 1) );
+                        isInPhaseChangeHook = false;
                     case DO_VX001_SELF_REPAIR_END:
                         if (MimironHardMode)
                             if (!me->HasAura(SPELL_EMERGENCY_MODE))
@@ -1766,6 +1767,7 @@ class boss_aerial_unit : public CreatureScript
                         break;
                     case DO_AERIAL_ASSEMBLED:
                         me->SetHealth( (me->GetMaxHealth() >> 1) );               // Once again, re-assemble and repairing share some stuff, so the fallthrough is intended!
+                        isInPhaseChangeHook = false;
                     case DO_AERIAL_SELF_REPAIR_END:
                         if (gotMimironHardMode)
                             if (!me->HasAura(SPELL_EMERGENCY_MODE))

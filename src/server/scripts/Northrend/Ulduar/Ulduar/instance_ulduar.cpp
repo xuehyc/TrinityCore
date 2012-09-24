@@ -708,7 +708,7 @@ class instance_ulduar : public InstanceMapScript
                     case GO_XT_002_DOOR:
                         AddDoor(gameObject, true);
                         XT002DoorGUID = gameObject->GetGUID();
-                        HandleGameObject(0, false, gameObject); // TODO: Maybe change this handling!
+                        HandleGameObject(0, (GetBossState(BOSS_RAZORSCALE)==DONE && GetBossState(BOSS_IGNIS)==DONE), gameObject);
                         break;
 
                     // Iron-Council related
@@ -717,7 +717,7 @@ class instance_ulduar : public InstanceMapScript
                         break;
                     case GO_ARCHIVUM_DOOR:
                         ArchivumDoorGUID = gameObject->GetGUID();
-                        HandleGameObject(0, GetBossState(BOSS_ASSEMBLY_OF_IRON) == DONE, gameObject);
+                        HandleGameObject(0, GetBossState(BOSS_ASSEMBLY_OF_IRON)==DONE, gameObject);
                         break;
 
                     // Kologarn related
@@ -727,8 +727,7 @@ class instance_ulduar : public InstanceMapScript
                         break;
                     case GO_KOLOGARN_BRIDGE:
                         KologarnBridgeGUID = gameObject->GetGUID();
-                        if (GetBossState(BOSS_KOLOGARN) == DONE)
-                            HandleGameObject(0, false, gameObject);
+                        HandleGameObject(0, !(GetBossState(BOSS_KOLOGARN) == DONE), gameObject);
                         break;
                     case GO_KOLOGARN_DOOR:
                         KologarnDoorGUID = gameObject->GetGUID();
@@ -764,13 +763,11 @@ class instance_ulduar : public InstanceMapScript
                         break;
                     case GO_HODIR_OUT_DOOR_ICE:
                         HodirIceDoorGUID = gameObject->GetGUID();
-                        if (GetBossState(BOSS_HODIR) == DONE)
-                            HandleGameObject(0, true, gameObject);
+                        HandleGameObject(0, GetBossState(BOSS_HODIR)==DONE, gameObject);
                         break;
                     case GO_HODIR_OUT_DOOR_STONE:
                         HodirStoneDoorGUID = gameObject->GetGUID();
-                        if (GetBossState(BOSS_HODIR) == DONE)
-                            HandleGameObject(0, true, gameObject);
+                        HandleGameObject(0, GetBossState(BOSS_HODIR)==DONE, gameObject);
                         break;
 
                     // Freya related
@@ -806,7 +803,7 @@ class instance_ulduar : public InstanceMapScript
                         break;
                     case GO_VEZAX_DOOR:
                         VezaxDoorGUID = gameObject->GetGUID();
-                        HandleGameObject(0, false, gameObject);
+                        HandleGameObject(0, GetBossState(BOSS_VEZAX)==DONE, gameObject);
                         break;
 
                     // Yogg-Saron related
@@ -952,11 +949,10 @@ class instance_ulduar : public InstanceMapScript
                         }
                         break;
                     case BOSS_VEZAX:
-                        if (state == DONE)
-                            HandleGameObject(VezaxDoorGUID, true);
+                        HandleGameObject(VezaxDoorGUID, state==DONE);
                         break;
                     case BOSS_YOGGSARON:
-                        HandleGameObject(YoggSaronDoorGUID, state != IN_PROGRESS);
+                        HandleGameObject(YoggSaronDoorGUID, state!=IN_PROGRESS);
                         break;
                     case BOSS_KOLOGARN:
                         if (state == DONE)
