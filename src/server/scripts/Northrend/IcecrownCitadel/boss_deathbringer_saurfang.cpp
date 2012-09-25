@@ -117,6 +117,7 @@ enum Spells
     SPELL_BLOOD_LINK_BEAST              = 72176,
     SPELL_RESISTANT_SKIN                = 72723,
     SPELL_SCENT_OF_BLOOD                = 72769, // Heroic only
+    SPELL_SCENT_OF_BLOOD_TRIGGERED      = 72771, // Damage + Visual on Blood Beasts
 
     SPELL_RIDE_VEHICLE                  = 70640, // Outro
     SPELL_ACHIEVEMENT                   = 72928,
@@ -524,6 +525,12 @@ class boss_deathbringer_saurfang : public CreatureScript
                             {
                                 Talk(EMOTE_SCENT_OF_BLOOD);
                                 DoCastAOE(SPELL_SCENT_OF_BLOOD);
+
+                                // hack: ensure dmg buff on blood beasts
+                                for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
+                                    if (Unit* unit = ObjectAccessor::GetUnit(*me, *itr))
+                                        if (unit->isAlive() && unit->GetEntry() == NPC_BLOOD_BEAST)
+                                            unit->AddAura(SPELL_SCENT_OF_BLOOD_TRIGGERED, unit);
                             }
                             break;
                         default:
