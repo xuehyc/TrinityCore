@@ -121,8 +121,10 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
 
     ticketstatusmsg << "PRIVMSG ChanServ :TOPIC #wowticket \x03";
 
-    if (countOpen > 1)
+    if (countOpen > 5)
         ticketstatusmsg  << "4 " << countOpen << " Tickets sind noch offen.";
+    else if (countOpen > 1)
+        ticketstatusmsg  << "7 " << countOpen << " Tickets sind noch offen.";
     else if (countOpen == 1)
         ticketstatusmsg  << "7 " << "1 Ticket ist noch offen.";
     else if (countOpen == 0)
@@ -130,7 +132,8 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
     sIRC.SendIRC(ticketstatusmsg.str());
 
     std::ostringstream infomsg;
-    infomsg << "PRIVMSG #wowticket :\x02\x03" << "4Ticket" << "\x03" << " #" << _id;
+    uint32 ticketColor = _id % 16;
+    infomsg << "PRIVMSG #wowticket :\x02\x03" << "4Ticket" << "\x03\x03" << ticketColor << " #" << _id << "\x03";
     infomsg << "\x02 von " << _playerName << " (" << GUID_LOPART(_playerGuid) << ") ";
 
     if (GUID_LOPART(_closedBy))
@@ -156,31 +159,37 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
 
         if (_message.length() > 220)
         {
-            std::string msgpart1;
-            std::string msg1;
-            msgpart1.insert(0, _message, 0, 220);
-            msg1 += "PRIVMSG #wowticket :";
-            msg1 += msgpart1;
-            std::replace( msg1.begin(), msg1.end(), '\n', ' ');
-            sIRC.SendIRC(msg1);
+            std::string ticketText = _message.substr(0, 220);
+            std::replace(ticketText.begin(), ticketText.end(), '\n', ' ');
 
-            std::string msgpart2;
-            std::string msg2;
-            msgpart2.insert(0, _message, 220, _message.length() - 220);
-            msg2 += "PRIVMSG #wowticket :";
-            msg2 += msgpart2;
-            std::replace( msg2.begin(), msg2.end(), '\n', ' ');
-            sIRC.SendIRC(msg2);
+            std::ostringstream ticketIRCMessage;
+            ticketIRCMessage << "PRIVMSG #wowticket :\x03" << ticketColor << "| " << "\x03";
+            ticketIRCMessage << ticketText;
+
+            sIRC.SendIRC(ticketIRCMessage.str());
+
+            ticketText = _message.substr(220, _message.length() - 220);
+            std::replace(ticketText.begin(), ticketText.end(), '\n', ' ');
+
+            ticketIRCMessage.str(std::string()); // truncate data in ostringstream
+            ticketIRCMessage.clear();
+
+            ticketIRCMessage << "PRIVMSG #wowticket :\x03" << ticketColor << "| " << "\x03";
+            ticketIRCMessage << ticketText;
+
+            sIRC.SendIRC(ticketIRCMessage.str());
+
         }
         else
         {
-            std::string msgpart1;
-            std::string msg1;
-            msgpart1.insert(0, _message, 0, _message.length());
-            msg1 += "PRIVMSG #wowticket :";
-            msg1 += msgpart1;
-            std::replace( msg1.begin(), msg1.end(), '\n', ' ');
-            sIRC.SendIRC(msg1);
+            std::string ticketText = _message.substr(0, _message.length());
+            std::replace(ticketText.begin(), ticketText.end(), '\n', ' ');
+
+            std::ostringstream ticketIRCMessage;
+            ticketIRCMessage << "PRIVMSG #wowticket :\x03" << ticketColor << "| " << "\x03";
+            ticketIRCMessage << ticketText;
+
+            sIRC.SendIRC(ticketIRCMessage.str());
         }
     }
     // TriniChat Extension END
