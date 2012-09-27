@@ -1,5 +1,5 @@
 -- Register spell-scripts
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (62692, 63276, 63278, 63322, 63323);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (62692, 63276, 63278, 63323);
 INSERT INTO `spell_script_names` VALUES 
 (62692,'spell_aura_of_despair_aura'),
 (63276,'spell_mark_of_the_faceless_aura'),

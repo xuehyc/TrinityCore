@@ -903,9 +903,11 @@ class instance_ulduar : public InstanceMapScript
                 if (!InstanceScript::SetBossState(type, state)) // TODO: Duplicated code, anyhow ?
                     return false;
 
+                /*
                 if (UlduarBosses(type) <= BOSS_ALGALON)
                     if (GetBossState(UlduarBosses(type)) != DONE)
                         InstanceScript::SetBossState(UlduarBosses(type), state);
+                */
 
                 if (state == DONE)
                     SaveToDB();
