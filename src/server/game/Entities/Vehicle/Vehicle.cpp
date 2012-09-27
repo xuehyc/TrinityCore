@@ -181,6 +181,10 @@ void Vehicle::ApplyAllImmunities()
             // why we need to apply this? we can simple add immunities to slow mechanic in DB
             _me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
             break;
+        // Ulduar - Salvaged Siege Engine, need to remove this immunity for vehicle abilities
+        case 336:
+            _me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_SCHOOL_ABSORB, false);
+            break;
         // Wintergrasp Siege Engine -- need to remove general knockback immunity here
         case 117:
         case 324:
