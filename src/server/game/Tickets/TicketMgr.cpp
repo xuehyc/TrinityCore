@@ -116,50 +116,62 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
     stmt->setBool  (++index, _viewed);
 
     // TriniChat Extension
-    std::ostringstream ticketstatusmsg;
+    std::ostringstream topicUpdate;
     uint32 countOpen = sTicketMgr->GetOpenTicketCount();
 
-    ticketstatusmsg << "PRIVMSG ChanServ :TOPIC #wowticket \x03";
-
+    // Color Coded Topic, 0 = green, 1-4 = orange, > 5 = red
+    topicUpdate << "PRIVMSG ChanServ :TOPIC #wowticket \x03"; // needs NickServ authentification, could be done directly through TOPIC command if op/halfop
     if (countOpen > 5)
-        ticketstatusmsg  << "4 " << countOpen << " Tickets sind noch offen.";
+        topicUpdate  << "4 " << countOpen << " Tickets sind noch offen.";
     else if (countOpen > 1)
-        ticketstatusmsg  << "7 " << countOpen << " Tickets sind noch offen.";
+        topicUpdate  << "7 " << countOpen << " Tickets sind noch offen.";
     else if (countOpen == 1)
-        ticketstatusmsg  << "7 " << "1 Ticket ist noch offen.";
+        topicUpdate  << "7 " << "1 Ticket ist noch offen.";
     else if (countOpen == 0)
-        ticketstatusmsg  << "3 " << "Es sind keine Tickets mehr offen.";
-    sIRC.SendIRC(ticketstatusmsg.str());
+        topicUpdate  << "3 " << "Es sind keine Tickets mehr offen.";
+    sIRC.SendIRC(topicUpdate.str());
 
-    std::ostringstream infomsg;
+    // Actual Ticket Data (ID, Player, GUID, Text) as PRIVMSG to #wowticket
+    std::ostringstream ticketMsg;
     uint32 ticketColor = _id % 16;
-    infomsg << "PRIVMSG #wowticket :\x02\x03" << "4Ticket" << "\x03\x03" << ticketColor << " #" << _id << "\x03";
-    infomsg << "\x02 von " << _playerName << " (" << GUID_LOPART(_playerGuid) << ") ";
+    ticketMsg << "PRIVMSG #wowticket :\x02\x03" << "4Ticket" << "\x03\x03" << ticketColor << " #" << _id << "\x03";
+    ticketMsg << "\x02 von " << _playerName << " (" << GUID_LOPART(_playerGuid) << ") ";
 
+    // Ticket was closed, leave out the message
     if (GUID_LOPART(_closedBy))
     {
-        infomsg << "wurde ";
+        ticketMsg << "wurde ";
         if (_playerGuid != _closedBy)
-            infomsg << "von " << sWorld->GetCharacterNameData(GUID_LOPART(_closedBy))->m_name << " (" << GUID_LOPART(_closedBy) << ") ";
-        infomsg << "geschlossen.";
-        sIRC.SendIRC(infomsg.str());
+            ticketMsg << "von " << sWorld->GetCharacterNameData(GUID_LOPART(_closedBy))->m_name << " (" << GUID_LOPART(_closedBy) << ") ";
+        ticketMsg << "geschlossen.";
+        sIRC.SendIRC(ticketMsg.str());
     }
+    // Ticket opened or updated
     else
     {
-        if (GUID_LOPART(_assignedTo) > 0)
-            infomsg << "ist in Bearbeitung durch " << sWorld->GetCharacterNameData(GUID_LOPART(_assignedTo))->m_name << ".";
+        if (GUID_LOPART(_assignedTo) > 0) // assigned
+            ticketMsg << "ist in Bearbeitung durch " << sWorld->GetCharacterNameData(GUID_LOPART(_assignedTo))->m_name << ".";
         else
         {
-            if (_createTime != _lastModifiedTime)
-                infomsg << "wurde aktualisiert.";
+            if (_createTime != _lastModifiedTime) // updated
+                ticketMsg << "wurde aktualisiert.";
             else
-                infomsg << "wurde erstellt.";
+                ticketMsg << "wurde erstellt."; // created
         }
-        sIRC.SendIRC(infomsg.str());
+        sIRC.SendIRC(ticketMsg.str());
 
-        if (_message.length() > 220)
+        // send ticket message in parts of maxLineLength to IRC
+        uint32 itr = 0;
+        uint32 maxLineLength = 150;
+        do
         {
-            std::string ticketText = _message.substr(0, 220);
+            // determine substr end pos
+            uint32 lineEndPos = itr + maxLineLength;
+            if (lineEndPos > _message.length())
+                lineEndPos = _message.length();
+
+            // extract ticket message replaced newline to prevent interference with irc commands
+            std::string ticketText = _message.substr(itr, lineEndPos);
             std::replace(ticketText.begin(), ticketText.end(), '\n', ' ');
 
             std::ostringstream ticketIRCMessage;
@@ -168,29 +180,8 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
 
             sIRC.SendIRC(ticketIRCMessage.str());
 
-            ticketText = _message.substr(220, _message.length() - 220);
-            std::replace(ticketText.begin(), ticketText.end(), '\n', ' ');
-
-            ticketIRCMessage.str(std::string()); // truncate data in ostringstream
-            ticketIRCMessage.clear();
-
-            ticketIRCMessage << "PRIVMSG #wowticket :\x03" << ticketColor << "| " << "\x03";
-            ticketIRCMessage << ticketText;
-
-            sIRC.SendIRC(ticketIRCMessage.str());
-
-        }
-        else
-        {
-            std::string ticketText = _message.substr(0, _message.length());
-            std::replace(ticketText.begin(), ticketText.end(), '\n', ' ');
-
-            std::ostringstream ticketIRCMessage;
-            ticketIRCMessage << "PRIVMSG #wowticket :\x03" << ticketColor << "| " << "\x03";
-            ticketIRCMessage << ticketText;
-
-            sIRC.SendIRC(ticketIRCMessage.str());
-        }
+            itr += lineEndPos;
+        } while (itr < _message.length());
     }
     // TriniChat Extension END
 
