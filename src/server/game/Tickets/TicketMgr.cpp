@@ -116,21 +116,6 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
     stmt->setBool  (++index, _viewed);
 
     // TriniChat Extension
-    std::ostringstream topicUpdate;
-    uint32 countOpen = sTicketMgr->GetOpenTicketCount();
-
-    // Color Coded Topic, 0 = green, 1-4 = orange, > 5 = red
-    topicUpdate << "PRIVMSG ChanServ :TOPIC #wowticket \x03"; // needs NickServ authentification, could be done directly through TOPIC command if op/halfop
-    if (countOpen > 5)
-        topicUpdate  << "4 " << countOpen << " Tickets sind noch offen.";
-    else if (countOpen > 1)
-        topicUpdate  << "7 " << countOpen << " Tickets sind noch offen.";
-    else if (countOpen == 1)
-        topicUpdate  << "7 " << "1 Ticket ist noch offen.";
-    else if (countOpen == 0)
-        topicUpdate  << "3 " << "Es sind keine Tickets mehr offen.";
-    sIRC.SendIRC(topicUpdate.str());
-
     // Actual Ticket Data (ID, Player, GUID, Text) as PRIVMSG to #wowticket
     std::ostringstream ticketMsg;
     uint32 ticketColor = _id % 16;
@@ -165,10 +150,10 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
         uint32 maxLineLength = 150;
         do
         {
-            // determine substr end pos
-            uint32 lineEndPos = itr + maxLineLength;
-            if (lineEndPos > _message.length())
-                lineEndPos = _message.length();
+            // assume max line length, check with remaining ticket text length
+            uint32 lineEndPos = maxLineLength;
+            if ((itr + lineEndPos) > _message.length())
+                lineEndPos = _message.length() - itr;
 
             // extract ticket message replaced newline to prevent interference with irc commands
             std::string ticketText = _message.substr(itr, lineEndPos);
@@ -183,6 +168,22 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
             itr += lineEndPos;
         } while (itr < _message.length());
     }
+
+    // Do TOPIC Update last because it will then not interfere with Ticket Text when done through ChanServ
+    std::ostringstream topicUpdate;
+    uint32 countOpen = sTicketMgr->GetOpenTicketCount();
+
+    // Color Coded Topic, 0 = green, 1-4 = orange, > 5 = red
+    topicUpdate << "PRIVMSG ChanServ :TOPIC #wowticket \x03"; // needs NickServ authentification, could be done directly through TOPIC command if op/halfop
+    if (countOpen > 5)
+        topicUpdate  << "4 " << countOpen << " Tickets sind noch offen.";
+    else if (countOpen > 1)
+        topicUpdate  << "7 " << countOpen << " Tickets sind noch offen.";
+    else if (countOpen == 1)
+        topicUpdate  << "7 " << "1 Ticket ist noch offen.";
+    else if (countOpen == 0)
+        topicUpdate  << "3 " << "Es sind keine Tickets mehr offen.";
+    sIRC.SendIRC(topicUpdate.str());
     // TriniChat Extension END
 
     CharacterDatabase.ExecuteOrAppend(trans, stmt);
