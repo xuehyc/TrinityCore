@@ -24,6 +24,7 @@
 #include "WorldSession.h"
 #include "Chat.h"
 #include "World.h"
+#include "Group.h"
 
 #include "TriniChat/IRCClient.h"
 
@@ -118,7 +119,7 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
     // TriniChat Extension
     // Actual Ticket Data (ID, Player, GUID, Text) as PRIVMSG to #wowticket
     std::ostringstream ticketMsg;
-    uint32 ticketColor = _id % 16;
+    uint32 ticketColor = _id % 14 + 2; // exclude: [0] white, [1] black
     ticketMsg << "PRIVMSG #wowticket :\x02\x03" << "4Ticket" << "\x03\x03" << ticketColor << " #" << _id << "\x03";
     ticketMsg << "\x02 von " << _playerName << " (" << GUID_LOPART(_playerGuid) << ") ";
 
@@ -143,6 +144,31 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
             else
                 ticketMsg << "wurde erstellt."; // created
         }
+
+        // some flags representing the players current status
+        if (Player* player = ObjectAccessor::FindPlayer(_playerGuid))
+        {
+            ticketMsg << " ";
+            if (WorldSession* session = player->GetSession()) // old account expansion
+                switch (session->Expansion())
+                {
+                    case 0:
+                        ticketMsg << "\x03" << "13[CLASSIC]" << "\x03";
+                        break;
+                    case 1:
+                        ticketMsg << "\x03" << "13[BC]" << "\x03";
+                        break;
+                    case 2: // wotlk
+                    case 3: // cata
+                    default:
+                        break;
+                }
+
+            if (Group* group = player->GetGroup()) // relevant for quest credits
+                if (group->isRaidGroup())
+                    ticketMsg << "\x03" << "12[RAID]" << "\x03";
+        }
+
         sIRC.SendIRC(ticketMsg.str());
 
         // send ticket message in parts of maxLineLength to IRC
