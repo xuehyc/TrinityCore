@@ -117,15 +117,17 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
     stmt->setBool  (++index, _viewed);
 
     // TriniChat Extension
+    bool updateTopic = false;
     // Actual Ticket Data (ID, Player, GUID, Text) as PRIVMSG to #wowticket
     std::ostringstream ticketMsg;
     uint32 ticketColor = _id % 14 + 2; // exclude: [0] white, [1] black
-    ticketMsg << "PRIVMSG #wowticket :\x02\x03" << "4Ticket" << "\x03\x03" << ticketColor << " #" << _id << "\x03";
+    ticketMsg << "PRIVMSG #wowticket :\x02\x03" << "4Ticket" << "\x03 \x03" << ticketColor << "#" << _id << "\x03";
     ticketMsg << "\x02 von " << _playerName << " (" << GUID_LOPART(_playerGuid) << ") ";
 
     // Ticket was closed, leave out the message
     if (GUID_LOPART(_closedBy))
     {
+        updateTopic = true;
         ticketMsg << "wurde ";
         if (_playerGuid != _closedBy)
             ticketMsg << "von " << sWorld->GetCharacterNameData(GUID_LOPART(_closedBy))->m_name << " (" << GUID_LOPART(_closedBy) << ") ";
@@ -142,13 +144,16 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
             if (_createTime != _lastModifiedTime) // updated
                 ticketMsg << "wurde aktualisiert.";
             else
+            {
                 ticketMsg << "wurde erstellt."; // created
+                updateTopic = true;
+            }
         }
 
         // some flags representing the players current status
         if (Player* player = ObjectAccessor::FindPlayer(_playerGuid))
         {
-            ticketMsg << " ";
+            ticketMsg << " \x03" << "9[ONLINE]" << "\x03";
             if (WorldSession* session = player->GetSession()) // old account expansion
                 switch (session->Expansion())
                 {
@@ -167,7 +172,8 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
             if (Group* group = player->GetGroup()) // relevant for quest credits
                 if (group->isRaidGroup())
                     ticketMsg << "\x03" << "12[RAID]" << "\x03";
-        }
+        } else
+            ticketMsg << " \x03" << "4[OFFLINE]" << "\x03";
 
         sIRC.SendIRC(ticketMsg.str());
 
@@ -195,21 +201,24 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
         } while (itr < _message.length());
     }
 
-    // Do TOPIC Update last because it will then not interfere with Ticket Text when done through ChanServ
-    std::ostringstream topicUpdate;
-    uint32 countOpen = sTicketMgr->GetOpenTicketCount();
+    if (updateTopic)
+    {
+        // Do TOPIC Update last because it will then not interfere with Ticket Text when done through ChanServ
+        std::ostringstream topicUpdate;
+        uint32 countOpen = sTicketMgr->GetOpenTicketCount();
 
-    // Color Coded Topic, 0 = green, 1-4 = orange, > 5 = red
-    topicUpdate << "PRIVMSG ChanServ :TOPIC #wowticket \x03"; // needs NickServ authentification, could be done directly through TOPIC command if op/halfop
-    if (countOpen > 5)
-        topicUpdate  << "4 " << countOpen << " Tickets sind noch offen.";
-    else if (countOpen > 1)
-        topicUpdate  << "7 " << countOpen << " Tickets sind noch offen.";
-    else if (countOpen == 1)
-        topicUpdate  << "7 " << "1 Ticket ist noch offen.";
-    else if (countOpen == 0)
-        topicUpdate  << "3 " << "Es sind keine Tickets mehr offen.";
-    sIRC.SendIRC(topicUpdate.str());
+        // Color Coded Topic, 0 = green, 1-4 = orange, > 5 = red
+        topicUpdate << "PRIVMSG ChanServ :TOPIC #wowticket \x03"; // needs NickServ authentification, could be done directly through TOPIC command if op/halfop
+        if (countOpen > 5)
+            topicUpdate  << "4 " << countOpen << " Tickets sind noch offen.";
+        else if (countOpen > 1)
+            topicUpdate  << "7 " << countOpen << " Tickets sind noch offen.";
+        else if (countOpen == 1)
+            topicUpdate  << "7 " << "1 Ticket ist noch offen.";
+        else if (countOpen == 0)
+            topicUpdate  << "3 " << "Es sind keine Tickets mehr offen.";
+        sIRC.SendIRC(topicUpdate.str());
+    }
     // TriniChat Extension END
 
     CharacterDatabase.ExecuteOrAppend(trans, stmt);
