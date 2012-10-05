@@ -6,6 +6,10 @@ INSERT INTO `spell_script_names` VALUES
 (63278,'spell_mark_of_the_faceless_drain'),
 (63323,'spell_saronite_vapors');
 
+-- Hit check.
+DELETE FROM `conditions` WHERE `SourceEntry`=63322;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+(13, 1, 63322, 0, 0, 32, 0, 16, 0, 0, 0, 0, '', 'Saronite Vapors - Should only hit players');
 -- Update saronite animus entry. TODO: Check if its health-modifier is ok.
 UPDATE `creature_template` SET `minlevel`=83, `maxlevel`=83, `mindmg`=480, `maxdmg`=700, `flags_extra`=1 WHERE `entry`=33524;
 

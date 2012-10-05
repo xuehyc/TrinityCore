@@ -406,6 +406,9 @@ class npc_saronite_vapors : public CreatureScript
             {
                 if (instance->GetBossState(BOSS_VEZAX) != IN_PROGRESS)
                     me->DisappearAndDie();
+                
+                if (isPassive)
+                    return;
 
                 events.Update(diff);
 
@@ -433,6 +436,7 @@ class npc_saronite_vapors : public CreatureScript
                     if (isPassive)
                         return;
                     isPassive = true;
+                    me->setFaction(35);
                     me->SetReactState(REACT_PASSIVE);
                     me->GetMotionMaster()->Clear(false);
                     me->GetMotionMaster()->MoveIdle();
@@ -589,23 +593,31 @@ class spell_saronite_vapors : public SpellScriptLoader  // Spell 63323
         {
             PrepareAuraScript(spell_saronite_vapors_AuraScript);
 
-            void HandleUpdatePeriodic(AuraEffect const* aurEff)
-            {                
-                if (Unit* target = GetTarget())
-                    if (Player* player = target->ToPlayer())
+            void HandleUpdatePeriodic(AuraEffect const* /*aurEff*/)
+            {   
+                if (Unit* caster = ObjectAccessor::FindUnit(_caster))
+                {                    
+                    std::list<Player*> players;
+                    Trinity::AnyPlayerInObjectRangeCheck u_check(caster, 150.0f, true);
+                    Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(caster, players, u_check);
+                    caster->VisitNearbyObject(30.0f, searcher);
+                    players.sort(Trinity::ObjectDistanceOrderPred(caster));
+                    for (std::list<Player*>::iterator it = players.begin(); it != players.end(); ++it)
                     {
-                        if (player->GetDistance(basePos) > 8.0f) // Max. range: 8 yards
+                        if (Player* player = *it)
                         {
-                            player->RemoveAurasDueToSpell(SPELL_SARONITE_VAPOR_AURA);
-                            return;
-                        }                        
+                            if (player->GetDistance(basePos) > 8.0f) // Max. range: 8 yards
+                            {
+                                player->RemoveAurasDueToSpell(SPELL_SARONITE_VAPOR_AURA);
+                                return;
+                            }                        
 
-                        uint8 stackCount = 0;
-                        if (Aura* vaporaura = player->GetAura(SPELL_SARONITE_VAPOR_AURA))                        
-                            stackCount = vaporaura->GetStackAmount() + 1; // #old stacks +1 (which will be applied now)
-                        else
-                            stackCount = 1; // On first apply.
-                        /* Due to Hordeguides, the first 8 stacks lead to mana-gain as mentioned below:
+                            uint8 stackCount = 0;
+                            if (Aura* vaporaura = player->GetAura(SPELL_SARONITE_VAPOR_AURA))
+                                stackCount = vaporaura->GetStackAmount() + 1; // #old stacks +1 (which will be applied now)
+                            else
+                                stackCount = 1; // On first apply.
+                            /* Due to Hordeguides, the first 8 stacks lead to mana-gain as mentioned below:
                             1 -> 100        2^0
                             2 -> 200        2^1
                             3 -> 400        2^2
@@ -617,33 +629,37 @@ class spell_saronite_vapors : public SpellScriptLoader  // Spell 63323
                             [...]
                             Thus, formula for mana-gain is 100 * (2^(stackAmount-1)),
                             which results in 2*100*(2^(stackAmount-1)) for health damage.
-                            
+
                             Since I don't like pow(), we will use a left-shift for that, which results in:
                             managain:       100 << (stackAmount-1)
                             healthdamage:   2*managain
-                        */
-                        int32 manaGain = std::max( 100 << (stackCount-1), 0 ); // just for the case...
-                        uint32 healthDamage = 2*manaGain; 
-                            
-                        // Possibly, the modifications below could be done by spells (63338, 63337), but they don't work yet. CastCustomSpell(...) would be an option.
-                        // Emulates shadow damage by spell, which is missing - due to wowhead, this should be reducible shadow-damage.
-                        player->DealDamage(player, healthDamage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW); // Emulates 63338                        
-                        player->ModifyPower(POWER_MANA, manaGain); // Emulates 63337                  
-                        /*
+                            */
+                            int32 manaGain = std::max( 100 << (stackCount-1), 0 ); // just for the case...
+                            uint32 healthDamage = 2*manaGain; 
+
+                            // Possibly, the modifications below could be done by spells (63338, 63337), but they don't work yet. CastCustomSpell(...) would be an option.
+                            // Emulates shadow damage by spell, which is missing - due to wowhead, this should be reducible shadow-damage.
+                            player->DealDamage(player, healthDamage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW); // Emulates 63338
+                            player->ModifyPower(POWER_MANA, manaGain); // Emulates 63337
+                            /*
                             S.th. like 
                             player->CastCustomSpell(63338, SPELLVALUE_BASE_POINT0, healthDamage, player, true);
                             player->CastCustomSpell(63337, SPELLVALUE_BASE_POINT0, manaGain, player, true);
                             doesn't work yet, dunno why
-                        */
-                        return; // Avoid prevention mentioned below.
+                            */
+                            return; // Avoid prevention mentioned below.
+                        }
                     }
-                PreventDefaultAction(); // Do nothing in case there's no target or the target is not a player                         
+                }
             }
 
             void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
+                {
                     caster->GetPosition(&basePos);
+                    _caster = caster->GetGUID();
+                }
             }
 
             void Register()
@@ -654,6 +670,7 @@ class spell_saronite_vapors : public SpellScriptLoader  // Spell 63323
 
             private:
                 Position basePos;
+                uint64 _caster;
         };
 
         AuraScript* GetAuraScript() const
