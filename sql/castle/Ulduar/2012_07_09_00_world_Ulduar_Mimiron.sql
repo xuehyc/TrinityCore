@@ -34,9 +34,9 @@ INSERT INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`,
 (28831, 0.5, 7, 2, 0);
 -- Some stuff for VX001 "riding" MKII
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (33432,33651);
-INSERT INTO `npc_spellclick_spells` (`npc_entry`,`spell_id`,`quest_start`,`quest_start_active`,`quest_end`,`cast_flags`,`aura_required`,`aura_forbidden`,`user_type`) VALUES
-(33432,46598,0,0,0,1,0,0,0), -- Leviatan MKII - Ride Vehicle Hardcoded
-(33651,46598,0,0,0,1,0,0,0); -- VX 001 - Ride Vehicle Hardcoded
+INSERT INTO `npc_spellclick_spells` (`npc_entry`,`spell_id`,`cast_flags`,`user_type`) VALUES
+(33432,46598,1,0), -- Leviatan MKII - Ride Vehicle Hardcoded
+(33651,46598,1,0); -- VX 001 - Ride Vehicle Hardcoded
 
 -- VX-001
 UPDATE `creature_template` SET `mechanic_immune_mask`=650854235, `flags_extra`=1, `vehicleid`=371, `ScriptName`='boss_vx_001' WHERE `entry`=33651;
