@@ -62,6 +62,18 @@ const Position WaypointPositions[12] =
     {2517.8f, -2896.6f, 241.28f, 2.315f},
 };
 
+const Position HomePositions[4] =
+{
+    // Thane waypoints
+    {2520.5f, -2955.38f, 245.635f, 5.58505f},
+    // Lady waypoints
+    {2517.62f, -2959.38f, 245.636f, 5.72468f},
+    // Baron waypoints
+    {2524.32f, -2951.28f, 245.633f, 5.42797f},
+    // Sir waypoints
+    {2528.79f, -2948.58f, 245.633f, 5.2709f},
+};
+
 const uint32 MOB_HORSEMEN[]     =   {16064, 16065, 30549, 16063};
 const uint32 SPELL_MARK[]       =   {28832, 28833, 28834, 28835};
 #define SPELL_PRIMARY(i)            RAID_MODE(SPELL_PRIMARY_N[i], SPELL_PRIMARY_H[i])
@@ -231,6 +243,23 @@ public:
             if (id == 2 || id == 5 || id == 8 || id == 11)
             {
                 movementCompleted = true;
+
+                switch (id)
+                {
+                    case 2:
+                        me->SetHomePosition(HomePositions[0]);
+                        break;
+                    case 5:
+                        me->SetHomePosition(HomePositions[1]);
+                        break;
+                    case 8:
+                        me->SetHomePosition(HomePositions[2]);
+                        break;
+                    case 11:
+                        me->SetHomePosition(HomePositions[3]);
+                        break;
+                }
+
                 me->SetReactState(REACT_AGGRESSIVE);
 
                 Unit* eventStarter = Unit::GetUnit(*me, uiEventStarterGUID);
