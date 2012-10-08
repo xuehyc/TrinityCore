@@ -150,7 +150,7 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
     m_announce_10_done = false;
     m_workshopCount[TEAM_ALLIANCE] = 0;
     m_workshopCount[TEAM_HORDE] = 0;
-    m_tenacityStack = 0;
+    tenacityStackCount = 0;
     m_gate = NULL;
 
     std::list<uint32> engineers;
@@ -803,10 +803,10 @@ void OutdoorPvPWG::HandleCreatureSpawning(Creature *creature, bool add)
                     }
                 }
 
-                if (m_tenacityStack > 0 && team == TEAM_ALLIANCE)
-                    creature->SetAuraStack(SPELL_TENACITY_VEHICLE, creature, m_tenacityStack);
-                else if (m_tenacityStack < 0 && team == TEAM_HORDE)
-                    creature->SetAuraStack(SPELL_TENACITY_VEHICLE, creature, -m_tenacityStack);
+                if (tenacityStackCount > 0 && team == TEAM_ALLIANCE)
+                    creature->SetAuraStack(SPELL_TENACITY_VEHICLE, creature, tenacityStackCount);
+                else if (tenacityStackCount < 0 && team == TEAM_HORDE)
+                    creature->SetAuraStack(SPELL_TENACITY_VEHICLE, creature, -tenacityStackCount);
             }
             else // the faction may be changed in uncharm
             {
@@ -1241,13 +1241,13 @@ void OutdoorPvPWG::HandlePlayerResurrects(Player * player, uint32 zone)
         if (player->getLevel() >= WG_MIN_LEVEL)
         {
             // Tenacity
-            if ((player->GetTeamId() == TEAM_ALLIANCE && m_tenacityStack > 0) ||
-                (player->GetTeamId() == TEAM_HORDE && m_tenacityStack < 0))
+            if ((player->GetTeamId() == TEAM_ALLIANCE && tenacityStackCount > 0) ||
+                (player->GetTeamId() == TEAM_HORDE && tenacityStackCount < 0))
             {
                 if (player->HasAura(SPELL_TENACITY))
                     player->RemoveAurasDueToSpell(SPELL_TENACITY);
 
-                int32 newStack = m_tenacityStack < 0 ? -m_tenacityStack : m_tenacityStack;
+                int32 newStack = tenacityStackCount < 0 ? -tenacityStackCount : tenacityStackCount;
                 if (newStack > 20)
                     newStack = 20;
                 player->SetAuraStack(SPELL_TENACITY, player, newStack);
@@ -1382,32 +1382,38 @@ void OutdoorPvPWG::UpdateTenacityStack()
     int32 newStack = 0;
 
     for (PlayerSet::iterator itr = m_players[TEAM_ALLIANCE].begin(); itr != m_players[TEAM_ALLIANCE].end(); ++itr)
-        if ((*itr)->getLevel() >= WG_MIN_LEVEL && !(*itr)->isGameMaster() &&
-                !(*itr)->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && (*itr)->GetPositionZ() < 500.0)
+    {
+        Player* player = (*itr);
+        if (player->getLevel() >= WG_MIN_LEVEL && !player->isGameMaster() &&
+                !player->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && !player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_TAXI_FLIGHT))
             ++allianceNum;
+    }
 
     for (PlayerSet::iterator itr = m_players[TEAM_HORDE].begin(); itr != m_players[TEAM_HORDE].end(); ++itr)
-        if ((*itr)->getLevel() >= WG_MIN_LEVEL && !(*itr)->isGameMaster() &&
-                !(*itr)->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && (*itr)->GetPositionZ() < 500.0)
+    {
+        Player* player = (*itr);
+        if (player->getLevel() >= WG_MIN_LEVEL && !player->isGameMaster() &&
+                !player->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && !player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_TAXI_FLIGHT))
             ++hordeNum;
+    }
 
     if (allianceNum && hordeNum)
     {
         if (allianceNum < hordeNum)
-            newStack = int32((float(hordeNum) / float(allianceNum) - 1)*4); // positive, should cast on alliance
+            newStack = int32((float(hordeNum) / float(allianceNum) - 1) * 4); // ((A/H)-1)*4 - positive, should cast on alliance
         else if (allianceNum > hordeNum)
-            newStack = int32((1 - float(allianceNum) / float(hordeNum))*4); // negative, should cast on horde
+            newStack = int32((1 - float(allianceNum) / float(hordeNum)) * 4); // (1-(A/H))*4 - negative, should cast on horde
     }
 
-    if (newStack == m_tenacityStack)
+    if (newStack == tenacityStackCount)
         return;
 
-    if (m_tenacityStack > 0 && newStack <= 0) // old buff was on alliance
+    if (tenacityStackCount > 0 && newStack <= 0) // old buff was on alliance
         team = TEAM_ALLIANCE;
-    else if (m_tenacityStack < 0 && newStack >= 0) // old buff was on horde
+    else if (tenacityStackCount < 0 && newStack >= 0) // old buff was on horde
         team = TEAM_HORDE;
 
-    m_tenacityStack = newStack;
+    tenacityStackCount = newStack;
 
     // Remove old buff
     if (team != TEAM_NEUTRAL)
