@@ -351,7 +351,7 @@ class OutdoorPvPWG : public OutdoorPvP
         // BG end
 
         TeamId m_defender;
-        int32 m_tenacityStack;
+        int32 tenacityStackCount;
 
         BuildingStateMap m_buildingStates;
         BuildingState *m_gate;
