@@ -169,6 +169,9 @@ void GmTicket::SaveToDB(SQLTransaction& trans) const
                         break;
                 }
 
+            if (!player->isAlive())
+                ticketMsg << "\x03" << "4[DEAD]" << "\x03";
+
             if (Group* group = player->GetGroup()) // relevant for quest credits
                 if (group->isRaidGroup())
                     ticketMsg << "\x03" << "12[RAID]" << "\x03";
