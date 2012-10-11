@@ -961,7 +961,7 @@ void Battleground::EndBattleground(uint32 winner)
             if (team == winner)
             {
                 // update achievement BEFORE personal rating update
-                uint32 rating = player->GetArenaPersonalRating(winnerArenaTeam->GetSlot());
+                uint32 rating = player->GetArenaPersonalRating(winner_arena_team->GetSlot());
                 player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, rating ? rating : 1);
                 player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA, GetMapId());
                 winner_arena_team->MemberWon(player, loser_matchmaker_rating, winner_matchmaker_change);
