@@ -3219,19 +3219,19 @@ std::string World::GetBattlegroundAbbreviation(BattlegroundTypeId type)
     switch (type)
     {
         case BATTLEGROUND_WS:
-            return "WS";
+            return "|TInterface\\Icons\\inv_misc_rune_07.blp:14|t WS";
         case BATTLEGROUND_AB:
-            return "AB";
+            return "|TInterface\\Icons\\inv_jewelry_amulet_07.blp:14|t AB";
         case BATTLEGROUND_AV:
-            return "AV";
+            return "|TInterface\\Icons\\inv_jewelry_necklace_21:14|t AV";
         case BATTLEGROUND_EY:
-            return "EOS";
+            return "|TInterface\\Icons\\spell_nature_eyeofthestorm.blp:14|t EOS";
         case BATTLEGROUND_SA:
-            return "SOTA";
+            return "|TInterface\\Icons\\inv_jewelry_amulet_01.blp:14|t SOTA";
         case BATTLEGROUND_IC:
-            return "IOC";
+            return "|TInterface\\Icons\\inv_jewelry_necklace_27.blp:14|t IOC";
         case BATTLEGROUND_RB:
-            return "RBG";
+            return "|TInterface\\Icons\\achievement_pvp_a_15.blp:14|t RBG";
         default:
             return "??";
     }
@@ -3289,7 +3289,7 @@ void World::SendCustomPvpInformationUpdate()
                 if (!overallQueueFound)
                 {
                     overallQueueFound = true;
-                    SendMessageToAllPlayersInChannel("pvp", "=== Offene Warteschlangen ===");
+                    SendMessageToAllPlayersInChannel("pvp", "PvP auf Castle - Meldet jetzt an!");
                 }
 
                 if (!singleQueueFound)
@@ -3401,7 +3401,7 @@ void World::SendCustomPvpInformationUpdate()
             if (!activeGameFound)
             {
                 activeGameFound = true;
-                SendMessageToAllPlayersInChannel("pvp", "=== Aktive Schlachten ===");
+                SendMessageToAllPlayersInChannel("pvp", "Hier wird bereits gespielt:");
             }
 
             if (BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(i))
