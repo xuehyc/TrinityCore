@@ -5584,7 +5584,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 case 70871:
                 {
                     basepoints0 = CalculatePctN(int32(damage), triggerAmount);
-                    CastCustomSpell(70872, SPELLVALUE_BASE_POINT0, basepoints0, this);
+                    CastCustomSpell(70872, SPELLVALUE_BASE_POINT0, basepoints0, this, true);
                     return true;
                 }
                 case 65032: // Boom aura (321 Boombot)
