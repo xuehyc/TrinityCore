@@ -120,7 +120,8 @@ class boss_rotface : public CreatureScript
                 me->setActive(true);
                 Talk(SAY_AGGRO);
                 if (Creature* professor = Unit::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
-                    professor->AI()->DoAction(ACTION_ROTFACE_COMBAT);
+                    if (professor->isAlive())
+                        professor->AI()->DoAction(ACTION_ROTFACE_COMBAT);
                 DoZoneInCombat();
             }
 
@@ -129,8 +130,10 @@ class boss_rotface : public CreatureScript
                 _JustDied();
                 Talk(SAY_DEATH);
                 instance->DoRemoveAurasDueToSpellOnPlayers(MUTATED_INFECTION);
+
                 if (Creature* professor = Unit::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
-                    professor->AI()->DoAction(ACTION_ROTFACE_DEATH);
+                    if (professor->isAlive())
+                        professor->AI()->DoAction(ACTION_ROTFACE_DEATH);
             }
 
             void JustReachedHome()

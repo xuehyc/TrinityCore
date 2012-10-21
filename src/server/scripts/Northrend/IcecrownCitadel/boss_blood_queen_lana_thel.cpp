@@ -171,6 +171,13 @@ class boss_blood_queen_lana_thel : public CreatureScript
                     return;
                 }
 
+                // Despawn on heroic, if no heroic attempts are left
+                if (IsHeroic() && !instance->GetData(DATA_HEROIC_ATTEMPTS))
+                {
+                    me->DespawnOrUnsummon();
+                    return;
+                }
+
                 me->setActive(true);
                 DoZoneInCombat();
                 Talk(SAY_AGGRO);
@@ -652,9 +659,13 @@ class spell_blood_queen_vampiric_bite : public SpellScriptLoader
                 uint32 spellId = sSpellMgr->GetSpellIdForDifficulty(SPELL_FRENZIED_BLOODTHIRST, GetCaster());
                 GetCaster()->RemoveAura(spellId, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
                 GetCaster()->CastSpell(GetCaster(), SPELL_ESSENCE_OF_THE_BLOOD_QUEEN_PLR, true);
-                // Presence of the Darkfallen buff on Blood-Queen
+
+                // Presence of the Darkfallen buff on Blood-Queen in heroic
                 if (GetCaster()->GetMap()->IsHeroic())
-                    GetCaster()->CastSpell(GetCaster(), SPELL_PRESENCE_OF_THE_DARKFALLEN, true);
+                    if (InstanceScript* instance = GetCaster()->GetInstanceScript())
+                        if (Creature* bloodQueen = ObjectAccessor::GetCreature(*GetCaster(), instance->GetData64(DATA_BLOOD_QUEEN_LANA_THEL)))
+                            GetCaster()->CastSpell(GetCaster(), SPELL_PRESENCE_OF_THE_DARKFALLEN_2, true, 0, 0, bloodQueen->GetGUID());
+
                 // Shadowmourne questline
                 if (GetCaster()->ToPlayer()->GetQuestStatus(QUEST_BLOOD_INFUSION) == QUEST_STATUS_INCOMPLETE)
                 {
@@ -1036,5 +1047,4 @@ void AddSC_boss_blood_queen_lana_thel()
     new achievement_once_bitten_twice_shy_n25();
     new achievement_once_bitten_twice_shy_v25();
     new spell_blood_queen_uncontrollable_frenzy();
-    new spell_trigger_spell_from_caster("spell_blood_queen_presence_of_the_darkfallen", SPELL_PRESENCE_OF_THE_DARKFALLEN_2);
 }

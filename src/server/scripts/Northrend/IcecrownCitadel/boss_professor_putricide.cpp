@@ -269,6 +269,13 @@ class boss_professor_putricide : public CreatureScript
                     return;
                 }
 
+                // Despawn on heroic, if no heroic attempts are left
+                if (IsHeroic() && !instance->GetData(DATA_HEROIC_ATTEMPTS))
+                {
+                    me->DespawnOrUnsummon();
+                    return;
+                }
+
                 me->setActive(true);
                 events.Reset();
                 events.ScheduleEvent(EVENT_BERSERK, 600000);

@@ -1,4 +1,4 @@
-﻿-- Damage stuff
+-- Damage stuff
 -- 10 NH => 10 HC bzw. 25 NH: 10NH / 10HC = 0.65
 -- 10 HC bzw. 25 NH => 25 HC: 25NH / 25HC = 0.75
 -- Melee damage modifications
@@ -110,10 +110,6 @@ UPDATE `creature_template` SET `dmg_multiplier` = 7.5, `mechanic_immune_mask` = 
 UPDATE `creature_template` SET `baseattacktime` = 2000, `rangeattacktime` = 2000, `rangedattackpower` = 135 WHERE `entry` IN (37970, 38401, 38784, 38785);
 
 -- Blood Queen Lana'Thel
--- Add spell script for heroic ability Presence of the Darkfallen
-DELETE FROM `spell_script_names` WHERE `spell_id` = 71952;
-INSERT INTO `spell_script_names` (spell_id, ScriptName) VALUES
-(71952, 'spell_blood_queen_presence_of_the_darkfallen');
 UPDATE `creature_template` SET `rangeattacktime` = 0, `rangedattackpower` = 135 WHERE `entry` IN (37955, 38434, 38435, 38436);
 
 -- Valithria
@@ -131,6 +127,7 @@ UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83 WHERE `entry` = 
 DELETE FROM `creature` WHERE `id` = 38995;
 INSERT INTO `creature` (guid, id, map, spawnMask, phaseMask, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, dynamicflags) VALUES
 (150212, 38995, 631, 15, 1, 0, 0, 505.212, -2124.35, 840.94, 0, 3600, 0, 0, 0, 0, 0, 0, 0, 0);
+UPDATE `creature` SET `spawntimesecs` = 604800 WHERE `id` = 38995;
 
 -- Drudge Ghoul
 UPDATE `creature_template` SET `dynamicflags` = 8 WHERE `entry` IN (37695, 39309, 39310, 39311);

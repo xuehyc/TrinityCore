@@ -304,6 +304,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         // Remove corpse as soon as it dies (and respawn 10 seconds later)
                         creature->SetCorpseDelay(0);
                         creature->SetReactState(REACT_PASSIVE);
+                        break;
                     case NPC_SINDRAGOSAS_WARD:
                         SindragosasWardGUID = creature->GetGUID();
                         break;
@@ -948,6 +949,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             void DoFailAttemptOnHeroic()
             {
                 --HeroicAttempts;
+                DoUpdateWorldState(WORLDSTATE_SHOW_ATTEMPTS, 1);
                 DoUpdateWorldState(WORLDSTATE_ATTEMPTS_REMAINING, HeroicAttempts);
                 DoUpdateWorldState(WORLDSTATE_ATTEMPTS_MAX, MaxHeroicAttempts);
 

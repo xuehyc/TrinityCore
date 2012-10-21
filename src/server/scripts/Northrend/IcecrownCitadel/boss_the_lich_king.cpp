@@ -647,12 +647,12 @@ class boss_the_lich_king : public CreatureScript
                 // Always teleport victim to center if not in line of sight, on whole platform
                 if (me->getVictim())
                     if (me->getVictim()->ToPlayer())
-                        if (!me->getVictim()->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) && me->getVictim()->GetPositionZ() >= 835.0f && me->getVictim()->GetPositionZ() <= 870.0f && !me->IsWithinLOS(me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ()))
+                        if (!me->getVictim()->GetVehicle() && !me->getVictim()->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) && me->getVictim()->GetPositionZ() >= 835.0f && me->getVictim()->GetPositionZ() <= 870.0f && !me->IsWithinLOS(me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ()))
                             me->getVictim()->ToPlayer()->TeleportTo(631, 503.6282f, -2124.655f, 841.0f, 0.0f);
 
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     if (i->getSource()) // Teleport player to center position if on throne and not in line of sight and not falling
-                        if (!i->getSource()->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) && i->getSource()->GetPositionZ() >= 842.0f && i->getSource()->GetPositionZ() <= 870.0f && !me->IsWithinLOS(i->getSource()->GetPositionX(), i->getSource()->GetPositionY(), i->getSource()->GetPositionZ()))
+                        if (!i->getSource()->GetVehicle() && !i->getSource()->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) && i->getSource()->GetPositionZ() >= 842.0f && i->getSource()->GetPositionZ() <= 870.0f && !me->IsWithinLOS(i->getSource()->GetPositionX(), i->getSource()->GetPositionY(), i->getSource()->GetPositionZ()))
                             i->getSource()->TeleportTo(631, 503.6282f, -2124.655f, 841.0f, 0.0f);
             }
 
@@ -1050,7 +1050,7 @@ class boss_the_lich_king : public CreatureScript
                         case EVENT_SHADOW_TRAP:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
                                 DoCast(target, SPELL_SHADOW_TRAP);
-                            events.ScheduleEvent(EVENT_SHADOW_TRAP, 15500, 0, PHASE_ONE);
+                            events.ScheduleEvent(EVENT_SHADOW_TRAP, 25000, 0, PHASE_ONE);
                             break;
                         case EVENT_SOUL_REAPER:
                             DoCastVictim(SPELL_SOUL_REAPER);
@@ -1336,6 +1336,13 @@ class npc_tirion_fordring_tft : public CreatureScript
 
             void sGossipSelect(Player* /*player*/, uint32 sender, uint32 action)
             {
+                // Despawn on heroic, if no heroic attempts are left
+                if (IsHeroic() && !_instance->GetData(DATA_HEROIC_ATTEMPTS))
+                {
+                    me->DespawnOrUnsummon();
+                    return;
+                }
+
                 if (me->GetCreatureTemplate()->GossipMenuId == sender && !action)
                 {
                     _events.SetPhase(PHASE_INTRO);
@@ -1618,6 +1625,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                 if (me->HealthBelowPctDamaged(50, damage))
                 {
                     _events.Reset();
+                    damage = 0;
                     DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
                     me->GetMotionMaster()->MoveTargetedHome();
                     me->ClearUnitState(UNIT_STATE_EVADE);
