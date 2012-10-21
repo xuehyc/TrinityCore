@@ -86,6 +86,7 @@ enum Spells
 
     // Blistering Zombie
     SPELL_ACID_BURST                    = 70744,
+    SPELL_CORROSION                     = 70749,
 
     // Gluttonous Abomination
     SPELL_GUT_SPRAY                     = 70633,
@@ -971,13 +972,18 @@ class npc_blistering_zombie : public CreatureScript
 
         struct npc_blistering_zombieAI : public ScriptedAI
         {
-            npc_blistering_zombieAI(Creature* creature) : ScriptedAI(creature)
+            npc_blistering_zombieAI(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
             {
+            }
+
+            void Reset()
+            {
+                DoCast(me, SPELL_CORROSION);
             }
 
             void JustDied(Unit* /*killer*/)
             {
-                DoCast(me, SPELL_ACID_BURST, true);
+                me->CastSpell(me, SPELL_ACID_BURST, true, 0, 0, _instance->GetData64(DATA_VALITHRIA_LICH_KING));
             }
 
             void UpdateAI(uint32 const /*diff*/)
@@ -987,6 +993,9 @@ class npc_blistering_zombie : public CreatureScript
 
                 DoMeleeAttackIfReady();
             }
+
+        private:
+            InstanceScript* _instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const

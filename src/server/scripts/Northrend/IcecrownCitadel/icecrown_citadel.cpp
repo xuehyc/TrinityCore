@@ -112,6 +112,8 @@ enum Spells
     SPELL_ARCTIC_BREATH             = 72848,
     SPELL_WHITEOUT                  = 72034,
     SPELL_WHITEOUT_H                = 72096,
+    SPELL_BLIZZARD                  = 41482,
+    SPELL_FRENZY                    = 55285,
 
     // Frost Freeze Trap
     SPELL_COLDFLAME_JETS            = 70460,
@@ -264,6 +266,10 @@ enum EventTypes
     EVENT_SUB_WAVE_1                    = 56,
     EVENT_SUB_WAVE_2                    = 57,
     EVENT_UPDATE_CHECK                  = 58,
+
+    // Rotting Frost Giant extended
+    EVENT_FROST_GIANT_BLIZZARD          = 59,
+    EVENT_FROST_GIANT_FRENZY            = 60,
 };
 
 enum DataTypesICC
@@ -621,7 +627,7 @@ class npc_rotting_frost_giant : public CreatureScript
 
         struct npc_rotting_frost_giantAI : public ScriptedAI
         {
-            npc_rotting_frost_giantAI(Creature* creature) : ScriptedAI(creature)
+            npc_rotting_frost_giantAI(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
             {
             }
 
@@ -629,13 +635,25 @@ class npc_rotting_frost_giant : public CreatureScript
             {
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_CHECK_POSITION, 5000);
-                _events.ScheduleEvent(EVENT_STOMP, urand(3000, 6000));
-                _events.ScheduleEvent(EVENT_WHITEOUT, 10000);
+                _events.ScheduleEvent(EVENT_STOMP, urand(10000, 15000));
+                _events.ScheduleEvent(EVENT_WHITEOUT, 15000);
+                _events.ScheduleEvent(EVENT_FROST_GIANT_BLIZZARD, urand(4000, 8000));
+                _events.ScheduleEvent(EVENT_FROST_GIANT_FRENZY, urand(5000, 15000));
             }
 
             void JustDied(Unit* /*killer*/)
             {
                 _events.Reset();
+
+                // complete gunship criteria as long as the event is not working
+                DoCast(me, 72959, true);
+
+                // activate gunship battle chest
+                if (GameObject* chest = _instance->instance->GetGameObject(_instance->GetData64(DATA_GUNSHIP_EVENT)))
+                {
+                    chest->SetLootRecipient(me->GetLootRecipient());
+                    chest->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED | GO_FLAG_NOT_SELECTABLE | GO_FLAG_NODESPAWN);
+                }
             }
 
             void UpdateAI(uint32 const diff)
@@ -666,11 +684,20 @@ class npc_rotting_frost_giant : public CreatureScript
                             break;
                         case EVENT_STOMP:
                             DoCastVictim(RAID_MODE(SPELL_STOMP, SPELL_STOMP_H, SPELL_STOMP, SPELL_STOMP_H), true);
-                            _events.ScheduleEvent(EVENT_STOMP, urand(6000, 9000));
+                            _events.ScheduleEvent(EVENT_STOMP, (IsHeroic() ? urand(10000, 15000) : urand(12000, 17000)));
                             break;
                         case EVENT_WHITEOUT:
                             DoCastVictim(RAID_MODE(SPELL_WHITEOUT, SPELL_WHITEOUT_H, SPELL_WHITEOUT, SPELL_WHITEOUT_H), true);
-                            _events.ScheduleEvent(EVENT_WHITEOUT, 30000);
+                            _events.ScheduleEvent(EVENT_WHITEOUT, (IsHeroic() ? 25000 : 30000));
+                            break;
+                        case EVENT_FROST_GIANT_BLIZZARD:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                                DoCast(target, SPELL_BLIZZARD, true);
+                            _events.ScheduleEvent(EVENT_FROST_GIANT_BLIZZARD, IsHeroic() ? urand(8000, 12000) : urand(10000, 14000));
+                            break;
+                        case EVENT_FROST_GIANT_FRENZY:
+                            DoCast(SPELL_FRENZY);
+                            _events.ScheduleEvent(EVENT_FROST_GIANT_FRENZY, IsHeroic() ? 28000 : 33000);
                             break;
                         default:
                             break;
@@ -682,6 +709,7 @@ class npc_rotting_frost_giant : public CreatureScript
 
         private:
             EventMap _events;
+            InstanceScript* _instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const

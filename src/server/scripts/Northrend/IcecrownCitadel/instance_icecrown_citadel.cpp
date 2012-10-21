@@ -104,6 +104,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 TeamInInstance = 0;
                 HeroicAttempts = MaxHeroicAttempts;
                 LadyDeathwisperElevatorGUID = 0;
+                GunshipBattleCacheGUID = 0;
                 DeathbringerSaurfangGUID = 0;
                 DeathbringerSaurfangDoorGUID = 0;
                 DeathbringerSaurfangEventGUID = 0;
@@ -452,6 +453,16 @@ class instance_icecrown_citadel : public InstanceMapScript
                         DeathbringerSaurfangDoorGUID = go->GetGUID();
                         AddDoor(go, true);
                         break;
+                    case GO_GUNSHIP_BATTLE_CACHE_A_10N:
+                    case GO_GUNSHIP_BATTLE_CACHE_A_25N:
+                    case GO_GUNSHIP_BATTLE_CACHE_A_10H:
+                    case GO_GUNSHIP_BATTLE_CACHE_A_25H:
+                    case GO_GUNSHIP_BATTLE_CACHE_H_10N:
+                    case GO_GUNSHIP_BATTLE_CACHE_H_25N:
+                    case GO_GUNSHIP_BATTLE_CACHE_H_10H:
+                    case GO_GUNSHIP_BATTLE_CACHE_H_25H:
+                        GunshipBattleCacheGUID = go->GetGUID();
+                        break;
                     case GO_DEATHBRINGER_S_CACHE_10N:
                     case GO_DEATHBRINGER_S_CACHE_25N:
                     case GO_DEATHBRINGER_S_CACHE_10H:
@@ -685,6 +696,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         return SindragosasWardGUID;
                     case GO_SINDRAGOSA_ENTRANCE_DOOR:
                         return SindragosaDoorGUID;
+                    case DATA_GUNSHIP_EVENT:
+                        return GunshipBattleCacheGUID;
                     default:
                         break;
                 }
@@ -769,32 +782,16 @@ class instance_icecrown_citadel : public InstanceMapScript
                         if (state == DONE)
                             CheckLichKingAvailability();
                         if (instance->IsHeroic())
-                        {
                             if (state == FAIL && HeroicAttempts)
-                            {
-                                --HeroicAttempts;
-                                DoUpdateWorldState(WORLDSTATE_ATTEMPTS_REMAINING, HeroicAttempts);
-                                if (!HeroicAttempts)
-                                    if (Creature* putricide = instance->GetCreature(ProfessorPutricideGUID))
-                                        putricide->DespawnOrUnsummon();
-                            }
-                        }
+                                DoFailAttemptOnHeroic();
                         break;
                     case DATA_BLOOD_QUEEN_LANA_THEL:
                         HandleGameObject(BloodwingSigilGUID, state != DONE);
                         if (state == DONE)
                             CheckLichKingAvailability();
                         if (instance->IsHeroic())
-                        {
                             if (state == FAIL && HeroicAttempts)
-                            {
-                                --HeroicAttempts;
-                                DoUpdateWorldState(WORLDSTATE_ATTEMPTS_REMAINING, HeroicAttempts);
-                                if (!HeroicAttempts)
-                                    if (Creature* bq = instance->GetCreature(BloodQueenLanaThelGUID))
-                                        bq->DespawnOrUnsummon();
-                            }
-                        }
+                                DoFailAttemptOnHeroic();
                         break;
                     case DATA_VALITHRIA_DREAMWALKER:
                         /*if (state == DONE && sPoolMgr->IsSpawnedObject<Quest>(WeeklyQuestData[8].questId[instance->GetSpawnMode() & 1]))
@@ -805,16 +802,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         if (state == DONE)
                             CheckLichKingAvailability();
                         if (instance->IsHeroic())
-                        {
                             if (state == FAIL && HeroicAttempts)
-                            {
-                                --HeroicAttempts;
-                                DoUpdateWorldState(WORLDSTATE_ATTEMPTS_REMAINING, HeroicAttempts);
-                                if (!HeroicAttempts)
-                                    if (Creature* sindra = instance->GetCreature(SindragosaGUID))
-                                        sindra->DespawnOrUnsummon();
-                            }
-                        }
+                                DoFailAttemptOnHeroic();
                         break;
                     case DATA_THE_LICH_KING:
                     {
@@ -826,16 +815,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                             platform->setActive(state == IN_PROGRESS);
 
                         if (instance->IsHeroic())
-                        {
                             if (state == FAIL && HeroicAttempts)
-                            {
-                                --HeroicAttempts;
-                                DoUpdateWorldState(WORLDSTATE_ATTEMPTS_REMAINING, HeroicAttempts);
-                                if (!HeroicAttempts)
-                                    if (Creature* theLichKing = instance->GetCreature(TheLichKingGUID))
-                                        theLichKing->DespawnOrUnsummon();
-                            }
-                        }
+                                DoFailAttemptOnHeroic();
 
                         if (state == FAIL)
                             Events.CancelEvent(EVENT_QUAKE_SHATTER);
@@ -962,6 +943,29 @@ class instance_icecrown_citadel : public InstanceMapScript
                 }
 
                 return false;
+            }
+
+            void DoFailAttemptOnHeroic()
+            {
+                --HeroicAttempts;
+                DoUpdateWorldState(WORLDSTATE_ATTEMPTS_REMAINING, HeroicAttempts);
+                DoUpdateWorldState(WORLDSTATE_ATTEMPTS_MAX, MaxHeroicAttempts);
+
+                // Despawn all wing bosses if no attempts left
+                if (!HeroicAttempts)
+                {
+                    if (Creature* putricide = instance->GetCreature(ProfessorPutricideGUID))
+                        putricide->DespawnOrUnsummon();
+
+                    if (Creature* bq = instance->GetCreature(BloodQueenLanaThelGUID))
+                        bq->DespawnOrUnsummon();
+
+                    if (Creature* sindra = instance->GetCreature(SindragosaGUID))
+                        sindra->DespawnOrUnsummon();
+
+                    if (Creature* theLichKing = instance->GetCreature(TheLichKingGUID))
+                        theLichKing->DespawnOrUnsummon();
+                }
             }
 
             bool CheckRequiredBosses(uint32 bossId, Player const* player = NULL) const
@@ -1273,6 +1277,7 @@ class instance_icecrown_citadel : public InstanceMapScript
         protected:
             EventMap Events;
             uint64 LadyDeathwisperElevatorGUID;
+            uint64 GunshipBattleCacheGUID;
             uint64 DeathbringerSaurfangGUID;
             uint64 DeathbringerSaurfangDoorGUID;
             uint64 DeathbringerSaurfangEventGUID;   // Muradin Bronzebeard or High Overlord Saurfang

@@ -267,7 +267,6 @@ class boss_deathbringer_saurfang : public CreatureScript
                 me->SetReactState(REACT_DEFENSIVE);
                 events.SetPhase(PHASE_COMBAT);
                 _frenzied = false;
-                _dead = false;
                 me->SetPower(POWER_ENERGY, 0);
                 DoCast(me, SPELL_ZERO_POWER, true);
                 DoCast(me, SPELL_BLOOD_LINK, true);
@@ -280,9 +279,6 @@ class boss_deathbringer_saurfang : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-                if (_dead)
-                    return;
-
                 if (!instance->CheckRequiredBosses(DATA_DEATHBRINGER_SAURFANG, who->ToPlayer()))
                 {
                     EnterEvadeMode();
@@ -320,7 +316,14 @@ class boss_deathbringer_saurfang : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
+                _JustDied();
+                DoCastAOE(SPELL_REMOVE_MARKS_OF_THE_FALLEN_CHAMPION);
+                DoCast(me, SPELL_ACHIEVEMENT, true);
+                Talk(SAY_DEATH);
 
+                //instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
+                if (Creature* creature = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SAURFANG_EVENT_NPC)))
+                    creature->AI()->DoAction(ACTION_START_OUTRO);
             }
 
             void AttackStart(Unit* victim)
@@ -370,36 +373,13 @@ class boss_deathbringer_saurfang : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& damage)
+            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
             {
-                if (damage >= me->GetHealth())
-                    damage = me->GetHealth() - 1;
-
                 if (!_frenzied && HealthBelowPct(31)) // AT 30%, not below
                 {
                     _frenzied = true;
                     DoCast(me, SPELL_FRENZY);
                     Talk(SAY_FRENZY);
-                }
-
-                if (!_dead && me->GetHealth() < FightWonValue)
-                {
-                    _dead = true;
-                    _JustDied();
-                    _EnterEvadeMode();
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
-
-                    // complete gunship criteria as long as the event is not working.
-                    DoCast(me, 72959, true);
-
-                    DoCastAOE(SPELL_REMOVE_MARKS_OF_THE_FALLEN_CHAMPION);
-                    DoCast(me, SPELL_ACHIEVEMENT, true);
-                    Talk(SAY_DEATH);
-
-                    //instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
-                    DoCast(me, SPELL_PERMANENT_FEIGN_DEATH);
-                    if (Creature* creature = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SAURFANG_EVENT_NPC)))
-                        creature->AI()->DoAction(ACTION_START_OUTRO);
                 }
             }
 
@@ -607,13 +587,10 @@ class boss_deathbringer_saurfang : public CreatureScript
                 }
             }
 
-            static uint32 const FightWonValue;
-
         private:
             uint32 _fallenChampionCastCount;
             bool _introDone;
             bool _frenzied;   // faster than iterating all auras to find Frenzy
-            bool _dead;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -621,8 +598,6 @@ class boss_deathbringer_saurfang : public CreatureScript
             return GetIcecrownCitadelAI<boss_deathbringer_saurfangAI>(creature);
         }
 };
-
-uint32 const boss_deathbringer_saurfang::boss_deathbringer_saurfangAI::FightWonValue = 100000;
 
 class npc_high_overlord_saurfang_icc : public CreatureScript
 {

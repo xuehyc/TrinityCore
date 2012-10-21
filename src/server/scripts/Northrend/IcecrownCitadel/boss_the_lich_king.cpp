@@ -263,11 +263,11 @@ enum Events
     EVENT_MOVE_TO_LICH_KING         = 62,
     EVENT_DESPAWN_SELF              = 63,
 
-    // Vile Spirits
-    EVENT_VILE_SPIRIT_START_ATTACK  = 64,
+    // Spirits
+    EVENT_SPIRIT_START_ATTACK       = 64,
 
-    // Hack - Remove instance buff
-    EVENT_REMOVE_INSTANCE_BUFF      = 65,
+    // Hack - Check player positions
+    EVENT_CHECK_PLAYER_POSITIONS    = 65,
 };
 
 enum EventGroups
@@ -343,8 +343,6 @@ enum EncounterActions
     ACTION_SUMMON_TERENAS       = 6,
     ACTION_FINISH_OUTRO         = 7,
     ACTION_TELEPORT_BACK        = 8,
-    ACTION_START_ATTACK_1       = 9,
-    ACTION_START_ATTACK_2       = 10,
 };
 
 enum MiscData
@@ -367,6 +365,7 @@ enum MiscData
 
 #define DATA_PLAGUE_STACK 70337
 #define DATA_VILE 45814622
+#define DATA_SPIRIT_START_ATTACK 23985
 
 class NecroticPlagueTargetCheck : public std::unary_function<Unit*, bool>
 {
@@ -560,6 +559,20 @@ class HeightFilterValkyrTargetSelection
         }
 };
 
+class ShadowTrapTargetFilter
+{
+    public:
+        ShadowTrapTargetFilter() { }
+
+        bool operator()(WorldObject* target) const
+        {
+            if (Player* player = target->ToPlayer())
+                return player->HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
+
+            return true;
+        }
+};
+
 class boss_the_lich_king : public CreatureScript
 {
     public:
@@ -610,13 +623,13 @@ class boss_the_lich_king : public CreatureScript
                 events.ScheduleEvent(EVENT_INFEST, 5000, 0, PHASE_ONE);
                 events.ScheduleEvent(EVENT_NECROTIC_PLAGUE, urand(30000, 33000), 0, PHASE_ONE);
                 events.ScheduleEvent(EVENT_BERSERK, 900000, EVENT_GROUP_BERSERK);
-                events.ScheduleEvent(EVENT_REMOVE_INSTANCE_BUFF, 10000);
-                HandleAuraBuffOnAllPlayers();
+                events.ScheduleEvent(EVENT_CHECK_PLAYER_POSITIONS, 5000);
+
                 if (IsHeroic())
                     events.ScheduleEvent(EVENT_SHADOW_TRAP, 15500, 0, PHASE_ONE);
             }
 
-            void HandleAuraBuffOnAllPlayers()
+            void CheckPlayerPositions()
             {
                 Map* map = me->GetMap();
 
@@ -631,32 +644,16 @@ class boss_the_lich_king : public CreatureScript
                 if (PlayerList.isEmpty())
                     return;
 
+                // Always teleport victim to center if not in line of sight, on whole platform
+                if (me->getVictim())
+                    if (me->getVictim()->ToPlayer())
+                        if (!me->getVictim()->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) && me->getVictim()->GetPositionZ() >= 835.0f && me->getVictim()->GetPositionZ() <= 870.0f && !me->IsWithinLOS(me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ()))
+                            me->getVictim()->ToPlayer()->TeleportTo(631, 503.6282f, -2124.655f, 841.0f, 0.0f);
+
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                {
-                    if (i->getSource())
-                    {
-                         if (i->getSource()->GetTeamId() == TEAM_ALLIANCE)
-                         {
-                             // Remove old aura
-                             if (i->getSource()->HasAura(73824))
-                                 i->getSource()->RemoveAurasDueToSpell(73824);
-
-                             // Add new aura
-                             if (i->getSource()->isAlive() && !i->getSource()->HasAura(73762))
-                                 i->getSource()->CastSpell(i->getSource(), 73762, true);
-                         }
-                         else
-                         {
-                             // Remove old aura
-                             if (i->getSource()->HasAura(73818))
-                                 i->getSource()->RemoveAurasDueToSpell(73818);
-
-                             // Add new aura
-                             if (i->getSource()->isAlive() && !i->getSource()->HasAura(73816))
-                                 i->getSource()->CastSpell(i->getSource(), 73816, true);
-                         }
-                    }
-                }
+                    if (i->getSource()) // Teleport player to center position if on throne and not in line of sight and not falling
+                        if (!i->getSource()->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) && i->getSource()->GetPositionZ() >= 842.0f && i->getSource()->GetPositionZ() <= 870.0f && !me->IsWithinLOS(i->getSource()->GetPositionX(), i->getSource()->GetPositionY(), i->getSource()->GetPositionZ()))
+                            i->getSource()->TeleportTo(631, 503.6282f, -2124.655f, 841.0f, 0.0f);
             }
 
             void JustReachedHome()
@@ -860,11 +857,10 @@ class boss_the_lich_king : public CreatureScript
                     case NPC_VILE_SPIRIT:
                     {
                         summons.Summon(summon);
-                        summon->SetReactState(REACT_PASSIVE);
                         summon->SetSpeed(MOVE_FLIGHT, 0.5f);
                         summon->GetMotionMaster()->MoveRandom(10.0f);
                         if (!(events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE))
-                            summon->AI()->DoAction(ACTION_START_ATTACK_1);
+                            summon->AI()->SetData(DATA_SPIRIT_START_ATTACK, 15000);
                         return;
                     }
                     case NPC_STRANGULATE_VEHICLE:
@@ -1151,17 +1147,16 @@ class boss_the_lich_king : public CreatureScript
                                     Creature* summon = ObjectAccessor::GetCreature(*me, *i);
                                     if (summon && summon->GetEntry() == NPC_VILE_SPIRIT)
                                     {
-                                        summon->m_Events.KillAllEvents(true);
-                                        summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(50000));
+                                        summon->AI()->EnterEvadeMode();
+                                        summon->AI()->SetData(DATA_SPIRIT_START_ATTACK, 50000);
                                         summon->GetMotionMaster()->MoveRandom(10.0f);
-                                        summon->SetReactState(REACT_PASSIVE);
                                     }
                                 }
                             }
                             break;
-                        case EVENT_REMOVE_INSTANCE_BUFF:
-                            HandleAuraBuffOnAllPlayers();
-                            events.ScheduleEvent(EVENT_REMOVE_INSTANCE_BUFF, 10000);
+                        case EVENT_CHECK_PLAYER_POSITIONS:
+                            CheckPlayerPositions();
+                            events.ScheduleEvent(EVENT_CHECK_PLAYER_POSITIONS, 5000);
                             break;
                         case EVENT_OUTRO_TALK_1:
                             Talk(SAY_LK_OUTRO_1);
@@ -1791,6 +1786,23 @@ class npc_strangulate_vehicle : public CreatureScript
                             // Teleport to main tank location, otherwise we might land under the map or inside defile
                             if (Unit* victim = lichKing->getVictim())
                                 summoner->NearTeleportTo(victim->GetPositionX(), victim->GetPositionY(), victim->GetPositionZ() + 1.0f, victim->GetOrientation());
+                            else // In heroic, all players are inside frostmourne, teleport to our own location
+                            {
+                                float x, y, z;
+                                x = me->GetPositionX();
+                                y = me->GetPositionY();
+                                z = me->GetPositionZ() + 1.0f;
+
+                                // If one coordinate is out of bounds, use default center position
+                                if (z < 840.0f || y < -2174.0f || y > -2075.0f || x < 458.0f || x > 552.0f)
+                                {
+                                    x = 503.6282f;
+                                    y = -2124.655f;
+                                    z = 841.0f;
+                                }
+
+                                summoner->NearTeleportTo(x, y, z, me->GetOrientation());
+                            }
                         }
                     }
                 }
@@ -2194,42 +2206,41 @@ class npc_broken_frostmourne : public CreatureScript
         }
 };
 
-class npc_vile_spirit : public CreatureScript
+class npc_lich_king_spirit : public CreatureScript
 {
     public:
-        npc_vile_spirit() : CreatureScript("npc_vile_spirit") { }
+        npc_lich_king_spirit() : CreatureScript("npc_lich_king_spirit") { }
 
-        struct npc_vile_spiritAI : public ScriptedAI
+        struct npc_lich_king_spiritAI : public ScriptedAI
         {
-            npc_vile_spiritAI(Creature* creature) : ScriptedAI(creature)
+            npc_lich_king_spiritAI(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
             {
             }
 
             void Reset()
             {
-                _attackStarted = false;
                 _events.Reset();
+                _attackStarted = false;
+
+                // Flag is set on explosion, but since Wicked Spirits just respawn, we need to remove it for next run
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                me->SetReactState(REACT_PASSIVE);
             }
 
             bool CanAIAttack(Unit const* target) const
             {
-                // Must only select non falling players, who are not in frostmourne zone in non heroic, or who are in frostmourne zone in heroic
-                return target->GetTypeId() == TYPEID_PLAYER && target->GetPositionZ() > 830.0f && ((!IsHeroic() && !target->HasAura(SPELL_IN_FROSTMOURNE_ROOM)) || (IsHeroic() && target->HasAura(SPELL_IN_FROSTMOURNE_ROOM)));
+                // Target selection:
+                // - Do not select falling targets
+                // - In non heroic, Vile Spirits only select targets not in Frostmourne
+                // - In heroic, Vile Spirits only select targets not in Frostmourne
+                // - In heroic, Wicked Spirits only select targets in Frostmourne
+                return target->GetTypeId() == TYPEID_PLAYER && target->GetPositionZ() > 830.0f && ((!IsHeroic() && !target->HasAura(SPELL_IN_FROSTMOURNE_ROOM)) || (IsHeroic() && ((target->HasAura(SPELL_IN_FROSTMOURNE_ROOM) && me->GetEntry() == NPC_WICKED_SPIRIT) || (!target->HasAura(SPELL_IN_FROSTMOURNE_ROOM) && me->GetEntry() == NPC_VILE_SPIRIT))));
             }
 
-            void DoAction(int32 const action)
+            void SetData(uint32 type, uint32 value)
             {
-                switch (action)
-                {
-                    case ACTION_START_ATTACK_1:
-                        if (!_attackStarted)
-                            _events.RescheduleEvent(EVENT_VILE_SPIRIT_START_ATTACK, 15000);
-                        break;
-                    case ACTION_START_ATTACK_2:
-                        if (!_attackStarted)
-                            _events.RescheduleEvent(EVENT_VILE_SPIRIT_START_ATTACK, 1000);
-                        break;
-                }
+                if (type == DATA_SPIRIT_START_ATTACK)
+                    _events.RescheduleEvent(EVENT_SPIRIT_START_ATTACK, value);
             }
 
             void UpdateAI(uint32 const diff)
@@ -2243,18 +2254,16 @@ class npc_vile_spirit : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case EVENT_VILE_SPIRIT_START_ATTACK:
+                        case EVENT_SPIRIT_START_ATTACK:
                             _attackStarted = true;
 
                             // We need this for threat management later
-                            if (TempSummon* summon = me->ToTempSummon())
-                                if (Unit* summoner = summon->GetSummoner())
-                                    if (Creature* summonerCreature = summoner->ToCreature())
-                                        if (summonerCreature->isInCombat() && summonerCreature->AI())
-                                            summonerCreature->AI()->DoZoneInCombat(me);
+                            if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
+                                lichKing->AI()->DoZoneInCombat(me);
 
                             me->SetReactState(REACT_AGGRESSIVE);
                             me->CastSpell(me, SPELL_VILE_SPIRIT_MOVE_SEARCH, true);
+                            me->CastSpell(me, SPELL_VILE_SPIRIT_DAMAGE_SEARCH, true);
                             break;
                     }
                 }
@@ -2265,11 +2274,12 @@ class npc_vile_spirit : public CreatureScript
         private:
             bool _attackStarted;
             EventMap _events;
+            InstanceScript* _instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return GetIcecrownCitadelAI<npc_vile_spiritAI>(creature);
+            return GetIcecrownCitadelAI<npc_lich_king_spiritAI>(creature);
         }
 };
 
@@ -2513,6 +2523,8 @@ class spell_the_lich_king_shadow_trap_periodic : public SpellScriptLoader
 
             void CheckTargetCount(std::list<WorldObject*>& targets)
             {
+                targets.remove_if(ShadowTrapTargetFilter());
+
                 if (targets.empty())
                     return;
 
@@ -3064,8 +3076,9 @@ class spell_the_lich_king_vile_spirit_damage_target_search : public SpellScriptL
                 // this spell has SPELL_AURA_BLOCK_SPELL_FAMILY so every next cast of this
                 // searcher spell will be blocked
                 if (TempSummon* summon = GetCaster()->ToTempSummon())
-                    if (Unit* summoner = summon->GetSummoner())
-                        summoner->GetAI()->SetData(DATA_VILE, 1);
+                    if (summon->GetEntry() == NPC_VILE_SPIRIT)
+                        if (Unit* summoner = summon->GetSummoner())
+                            summoner->GetAI()->SetData(DATA_VILE, 1);
                 GetCaster()->CastSpell((Unit*)NULL, SPELL_SPIRIT_BURST, true);
                 GetCaster()->ToCreature()->DespawnOrUnsummon(3000);
                 GetCaster()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -3209,11 +3222,7 @@ class spell_the_lich_king_restore_soul : public SpellScriptLoader
                 std::list<Creature*> spirits;
                 GetCaster()->GetCreatureListWithEntryInGrid(spirits, NPC_WICKED_SPIRIT, 200.0f);
                 for (std::list<Creature*>::iterator itr = spirits.begin(); itr != spirits.end(); ++itr)
-                {
-                    (*itr)->m_Events.KillAllEvents(true);
-                    (*itr)->SetReactState(REACT_PASSIVE);
                     (*itr)->AI()->EnterEvadeMode();
-                }
             }
 
             void RemoveAura()
@@ -3312,7 +3321,7 @@ class spell_the_lich_king_trigger_vile_spirit : public SpellScriptLoader
                 if (!target)
                     return;
 
-                VileSpiritActivateEvent(target).Execute(0, 0);
+                target->AI()->SetData(DATA_SPIRIT_START_ATTACK, 0);
             }
 
             void Register()
@@ -3486,7 +3495,7 @@ void AddSC_boss_the_lich_king()
     new npc_spirit_warden();
     new npc_spirit_bomb();
     new npc_broken_frostmourne();
-    new npc_vile_spirit();
+    new npc_lich_king_spirit();
     new spell_the_lich_king_infest();
     new spell_the_lich_king_necrotic_plague();
     new spell_the_lich_king_necrotic_plague_jump();

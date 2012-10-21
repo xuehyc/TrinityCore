@@ -301,9 +301,11 @@ class boss_professor_putricide : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-                // Remove Mutated Plague on all players
-                if (instance)
-                    instance->DoRemoveAurasDueToSpellOnPlayers(RAID_MODE(72451, 72463, 72671, 72672));
+                // Remove several nasty debuffs from players on death
+                instance->DoRemoveAurasDueToSpellOnPlayers(RAID_MODE(72451, 72463, 72671, 72672)); // Mutated Plague
+                instance->DoRemoveAurasDueToSpellOnPlayers(RAID_MODE(70911, 72854, 72855, 72856)); // Unbound Plague
+                instance->DoRemoveAurasDueToSpellOnPlayers(RAID_MODE(70953, 73117, 70953, 73117)); // Plague Sickness
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_UNBOUND_PLAGUE_SEARCHER); // Unbound Plague Search Periodic
 
                 _JustDied();
                 Talk(SAY_DEATH);

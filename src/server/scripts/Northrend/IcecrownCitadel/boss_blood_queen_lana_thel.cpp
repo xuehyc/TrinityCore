@@ -51,6 +51,7 @@ enum Spells
     SPELL_UNCONTROLLABLE_FRENZY_1           = 70924,
     SPELL_UNCONTROLLABLE_FRENZY_2           = 73015,
     SPELL_PRESENCE_OF_THE_DARKFALLEN        = 71952,
+    SPELL_PRESENCE_OF_THE_DARKFALLEN_2      = 70995,
     SPELL_BLOOD_MIRROR_DAMAGE               = 70821,
     SPELL_BLOOD_MIRROR_VISUAL               = 71510,
     SPELL_BLOOD_MIRROR_DUMMY                = 70838,
@@ -1035,4 +1036,5 @@ void AddSC_boss_blood_queen_lana_thel()
     new achievement_once_bitten_twice_shy_n25();
     new achievement_once_bitten_twice_shy_v25();
     new spell_blood_queen_uncontrollable_frenzy();
+    new spell_trigger_spell_from_caster("spell_blood_queen_presence_of_the_darkfallen", SPELL_PRESENCE_OF_THE_DARKFALLEN_2);
 }
