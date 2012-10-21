@@ -1,4 +1,4 @@
--- Damage stuff
+﻿-- Damage stuff
 -- 10 NH => 10 HC bzw. 25 NH: 10NH / 10HC = 0.65
 -- 10 HC bzw. 25 NH => 25 HC: 25NH / 25HC = 0.75
 -- Melee damage modifications
@@ -95,10 +95,10 @@ UPDATE `creature_template` SET `speed_walk` = 0.888888, `speed_run` = 1.5873 WHE
 UPDATE `creature_template` SET `speed_walk` = 1.2, `speed_run` = 1.71429, `baseattacktime` = 1500, `rangeattacktime` = 0, `unit_flags` = 33554688, `VehicleId` = 587, `rank` = 3 WHERE `entry` IN (36678, 38431, 38585, 38586);
 
 -- Volatile Ooze
-UPDATE `creature_Template` SET `mechanic_immune_mask` = 650854271 WHERE `entry` IN (37697, 38604, 38758, 38759);
+UPDATE `creature_template` SET `mechanic_immune_mask` = 650854271 WHERE `entry` IN (37697, 38604, 38758, 38759);
 
 -- Gas Cloud
-UPDATE `creature_Template` SET `mechanic_immune_mask` = 650854271 WHERE `entry` IN (37562, 38602, 38760, 38761);
+UPDATE `creature_template` SET `mechanic_immune_mask` = 650854271 WHERE `entry` IN (37562, 38602, 38760, 38761);
 
 -- Blood Orb Controller
 UPDATE `creature_template` SET `mindmg` = 509, `maxdmg` = 683, `attackpower` = 805, `dmg_multiplier` = 35, `unit_flags` = 33554434, `dynamicflags` = 8, `minrangedmg` = 371, `maxrangedmg` = 535, `rangedattackpower` = 135 WHERE `entry` IN (38008, 38641, 38773, 38774);
