@@ -116,6 +116,9 @@ UPDATE `creature_template` SET `rangeattacktime` = 0, `rangedattackpower` = 135 
 -- DB/Npcs: Fix heroic template references for 10/25 man for npc Blazing Skeleton 36791
 UPDATE `creature_template` SET `difficulty_entry_2` = 38721, `difficulty_entry_3` = 38722 WHERE `entry` = 36791;
 
+-- Valithria Dreamwalker, visual fix for Valithria being invisible in dream phase (just visuals, not really important)
+UPDATE `creature_template` SET `modelid2` = 30318 WHERE `entry` = 37950;
+
 -- The Lich King (Trigger Valithria)
 UPDATE `creature_template` SET `minlevel` = 83, `maxlevel` = 83 WHERE `entry` = 16980;
 
