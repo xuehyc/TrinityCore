@@ -394,9 +394,11 @@ void IRCClient::Send_WoW_Player(Player *plr, string sMsg)
 // if so construct a packet and send it.
 void IRCClient::Send_WoW_Channel(const char *channel, std::string chat)
 {
+    sLog->outError(LOG_FILTER_GENERAL, "DEBUG IRC: Channel: %s - String: %s", channel, chat.c_str());
+    sLog->outError(LOG_FILTER_GENERAL, "DEBUG IRC: Point 1");
     if(!(strlen(channel) > 0))
         return;
-
+    sLog->outError(LOG_FILTER_GENERAL, "DEBUG IRC: Point 2");
     #ifdef USE_UTF8
         std::string chat2 = chat;
         if(ConvertUTF8(chat2.c_str(), chat2))
@@ -406,12 +408,16 @@ void IRCClient::Send_WoW_Channel(const char *channel, std::string chat)
     HashMapHolder<Player>::MapType const &m = sObjectAccessor->GetPlayers();
     for(HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
     {
+        sLog->outError(LOG_FILTER_GENERAL, "DEBUG IRC: Point 3");
         if (itr->second && itr->second->GetSession()->GetPlayer() && itr->second->GetSession()->GetPlayer()->IsInWorld())
         {
+            sLog->outError(LOG_FILTER_GENERAL, "DEBUG IRC: Point 4");
             if(ChannelMgr* cMgr = channelMgr(itr->second->GetSession()->GetPlayer()->GetTeam()))
             {
+                sLog->outError(LOG_FILTER_GENERAL, "DEBUG IRC: Point 5");
                 if(Channel *chn = cMgr->GetChannel(channel, itr->second->GetSession()->GetPlayer()))
                 {
+                    sLog->outError(LOG_FILTER_GENERAL, "DEBUG IRC: Point 6");
                     WorldPacket data;
                     data.Initialize(SMSG_MESSAGECHAT);
                     data << (uint8)CHAT_MSG_CHANNEL;
