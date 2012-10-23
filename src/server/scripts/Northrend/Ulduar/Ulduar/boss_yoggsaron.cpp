@@ -120,16 +120,6 @@ enum Achievments
 
 enum Entrys
 {
-    // TODO: Those need to be spawned
-    NPC_HELP_KEEPER_FREYA                       = 33241,
-    NPC_HELP_KEEPER_MIMIRON                     = 33244,
-    NPC_HELP_KEEPER_THORIM                      = 33242,
-    NPC_HELP_KEEPER_HODIR                       = 33213,
-    // All Phases
-    NPC_KEEPER_FREYA                            = 33410,
-    NPC_KEEPER_HODIR                            = 33411,
-    NPC_KEEPER_MIMIRON                          = 33412,
-    NPC_KEEPER_THORIM                           = 33413,
     NPC_BUNNY_SANITY_WELL                       = 33991,
     // Phase 1
     // NPC_SARA                                    = 33134,
@@ -993,6 +983,15 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
             {
                 if (!UpdateVictim())
                     return;
+                
+                // Horrible hack... LoS seems to be bugged somehow, it works fine for players, but the corresponding function is not called for NPCs ... wtf?
+                Player* player = 0;
+                Trinity::AnyPlayerInObjectRangeCheck u_check(me, 30.0f, true);
+                Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, player, u_check);
+                me->VisitNearbyObject(30.0f, searcher);
+                if (player)
+                    if (!player->isGameMaster())
+                        MoveInLineOfSight(player);
 
                 events.Update(diff);
 

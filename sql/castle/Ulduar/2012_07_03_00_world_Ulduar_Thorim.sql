@@ -16,12 +16,13 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 (62042, 62470, 1, 'Stormhammer => Deafening Thunder');
 
 -- Register spell-script for target-selection.
-DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_stormhammer_targeting';
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (62042, 'spell_stormhammer_targeting');
-
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (62042);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES 
+(62042, 'spell_stormhammer_targeting');
+-- 
 -- Charge Orb - implicit targeting only a special npc.
 DELETE FROM `conditions` WHERE SourceEntry = 62016;
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES (13, 0, 62016, 0, 0, 18, 0, 33378, 0, 0, 0, 0, '', NULL);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES (13, 1, 62016, 0, 0, 31, 0, 3, 33378, 0, 0, 0, '', NULL);
 UPDATE `creature_template` SET `unit_flags`=33685508 WHERE `entry`=33378;
 
 -- Pre-phase adds: Register scripts.

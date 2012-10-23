@@ -106,6 +106,7 @@ enum Events
     EVENT_SWEEP,
     EVENT_STONE_SHOUT,
     EVENT_STONE_GRIP,
+    EVENT_PETRIFY_BREATH,
     EVENT_FOCUSED_EYEBEAM,
     EVENT_RESPAWN_LEFT_ARM,
     EVENT_RESPAWN_RIGHT_ARM,
@@ -163,6 +164,16 @@ class boss_kologarn : public CreatureScript
                 me->SetReactState(REACT_DEFENSIVE);
                 summons.DespawnAll();
 
+                for (uint8 i = 0; i < 2; ++i)
+                    if (Unit* arm = vehicle->GetPassenger(i))
+                    {
+                        arm->ExitVehicle();
+                        if (Creature* c = arm->ToCreature())
+                            c->DisappearAndDie();
+                    }
+                RespawnArm(NPC_LEFT_ARM);
+                RespawnArm(NPC_RIGHT_ARM);
+
                 if (instance)
                     instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_DISARMED_START_EVENT);
             }
@@ -171,7 +182,8 @@ class boss_kologarn : public CreatureScript
             {
                 DoScriptText(SAY_AGGRO, me);
 
-                events.ScheduleEvent(EVENT_MELEE_CHECK, 6000);
+                events.ScheduleEvent(EVENT_MELEE_CHECK, 4000);
+                events.ScheduleEvent(EVENT_PETRIFY_BREATH, urand(8000, 12000));
                 events.ScheduleEvent(EVENT_SMASH, 5000);
                 events.ScheduleEvent(EVENT_SWEEP, 19000);
                 events.ScheduleEvent(EVENT_STONE_GRIP, 25000);
@@ -190,7 +202,7 @@ class boss_kologarn : public CreatureScript
             void JustDied(Unit* /*victim*/)
             {
                 DoScriptText(SAY_DEATH, me);
-                DoCast(me, SPELL_KOLOGARN_PACIFY);  // TODO: Check if this works, since... yeah, we're dead.
+                DoCast(me, SPELL_KOLOGARN_PACIFY, true);  // TODO: Check if this works, since... yeah, we're dead.
                 me->GetMotionMaster()->MoveTargetedHome();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetCorpseDelay(604800); // Prevent corpse from despawning - it's the bridge to inner Ulduar.
@@ -198,8 +210,6 @@ class boss_kologarn : public CreatureScript
                 for (uint8 i = 0; i < 2; ++i)
                     if (Unit* arm = vehicle->GetPassenger(i))
                         arm->ExitVehicle();
-
-                summons.DespawnAll();
 
                 while (Creature* rubbleStalker = me->FindNearestCreature(NPC_RUBBLE_STALKER, 100.0f, true))
                     rubbleStalker->DisappearAndDie();
@@ -396,9 +406,15 @@ class boss_kologarn : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_MELEE_CHECK:
+                            // Note: We have to further investigate if this works as intended. Kologarn will spam this to the raid if the check fails,
+                            // which is intended - but it is extremely important that the correct ranges are used here.
                             if (!me->IsWithinMeleeRange(me->getVictim()))
-                                DoCast(SPELL_PETRIFY_BREATH);
-                            events.ScheduleEvent(EVENT_MELEE_CHECK, 1 * IN_MILLISECONDS);
+                                DoCastVictim(SPELL_PETRIFY_BREATH);
+                            events.ScheduleEvent(EVENT_MELEE_CHECK, 4 * IN_MILLISECONDS);
+                            break;
+                        case EVENT_PETRIFY_BREATH:
+                            DoCastVictim(SPELL_PETRIFY_BREATH);
+                            events.ScheduleEvent(EVENT_PETRIFY_BREATH, urand(8000, 12000));
                             break;
                         case EVENT_SWEEP:           // Cast for left arm
                             if (haveLeftArm)

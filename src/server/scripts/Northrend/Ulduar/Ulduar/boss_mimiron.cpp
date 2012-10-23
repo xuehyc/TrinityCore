@@ -939,7 +939,7 @@ class boss_leviathan_mk : public CreatureScript
 
                 events.ScheduleEvent(EVENT_SHOCK_BLAST, 30000, 0, PHASE_LEVIATHAN_SOLO__GLOBAL_1);
                 events.ScheduleEvent(EVENT_PROXIMITY_MINE, 1000, 0, PHASE_LEVIATHAN_SOLO__GLOBAL_1);
-                events.ScheduleEvent(EVENT_PLASMA_BLAST, 10000, 0, PHASE_LEVIATHAN_SOLO__GLOBAL_1);
+                events.ScheduleEvent(EVENT_PLASMA_BLAST, 4000, 0, PHASE_LEVIATHAN_SOLO__GLOBAL_1);
                 if (gotMimironHardMode)
                 {
                     DoCast(me, SPELL_EMERGENCY_MODE, true);

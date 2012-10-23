@@ -134,7 +134,18 @@ enum UlduarBossDeadFlags
 };
 
 enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-NPCs
-{
+{   
+    // Keepers that can be asked to support against Yogg-Saron.
+    NPC_HELP_KEEPER_FREYA       = 33241,
+    NPC_HELP_KEEPER_MIMIRON     = 33244,
+    NPC_HELP_KEEPER_THORIM      = 33242,
+    NPC_HELP_KEEPER_HODIR       = 33213,
+    // Real keeper helpers during the fight.
+    NPC_KEEPER_FREYA            = 33410,
+    NPC_KEEPER_HODIR            = 33411,
+    NPC_KEEPER_MIMIRON          = 33412,
+    NPC_KEEPER_THORIM           = 33413,
+
     NPC_LEVIATHAN               = 33113,
     NPC_SALVAGED_DEMOLISHER     = 33109,
     NPC_SALVAGED_SIEGE_ENGINE   = 33060,

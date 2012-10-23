@@ -20,14 +20,14 @@ UPDATE `creature_template` SET `modelid1`=16946, `modelid2`=16946, `ScriptName`=
 UPDATE `creature_template` SET `modelid1`=17612, `modelid2`=17612, `ScriptName`='npc_death_ray' WHERE `entry`=33881;
 UPDATE `creature_template` SET `minlevel`=80, `maxlevel`=80, `ScriptName`='npc_laughting_skull' WHERE entry=33990;
 UPDATE `creature_template` SET `modelid1`=15880, `modelid2`=15880 WHERE `entry`=33990;
--- Keeper helpers
+-- Keeper helpers - the spawns are related to the one you can talk to, though.
 UPDATE `creature_template` SET `npcflag`=`npcflag`|1, `ScriptName`='npc_keeper_help' WHERE `entry` IN (33241,33244,33242,33213);
 DELETE FROM `creature` WHERE `id` IN (33213,33241,33242,33244);
 INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(33213, 603, 2, 1, 0, 0, 1939.94, -90.49, 338.46, 1.04118, 300, 0, 0, 14433076, 0, 0, 0, 0, 0),
-(33241, 603, 2, 1, 0, 0, 2037.31, 25.6417, 338.415, 3.90552, 300, 0, 0, 14433076, 0, 0, 0, 0, 0),
-(33242, 603, 2, 1, 0, 0, 2037.27, -73.9782, 338.415, 2.45097, 300, 0, 0, 14433076, 0, 0, 0, 0, 0),
-(33244, 603, 2, 1, 0, 0, 1938.16, 43.9725, 338.46, 5.30923, 300, 0, 0, 14433076, 0, 0, 0, 0, 0);
+(33213, 603, 2, 1, 0, 0, 1939.94, -90.49, 411.3562, 1.04118, 300, 0, 0, 14433076, 0, 0, 0, 0, 0),
+(33241, 603, 2, 1, 0, 0, 2037.31, 25.6417, 411.3562, 3.90552, 300, 0, 0, 14433076, 0, 0, 0, 0, 0),
+(33242, 603, 2, 1, 0, 0, 2037.27, -73.9782, 411.3562, 2.45097, 300, 0, 0, 14433076, 0, 0, 0, 0, 0),
+(33244, 603, 2, 1, 0, 0, 1938.16, 43.9725, 411.3562, 5.30923, 300, 0, 0, 14433076, 0, 0, 0, 0, 0);
 
 UPDATE `creature_template` SET `minlevel`=80, `maxlevel`=80 WHERE `entry`=33943;
 UPDATE `gameobject_template` SET `ScriptName`='go_flee_to_surface' WHERE `entry`=194625;

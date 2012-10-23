@@ -15,7 +15,6 @@ UPDATE `creature_template` SET `mechanic_immune_mask`=650853247, `flags_extra`=1
 33651,   -- VX-001
 33670,   -- Aerial Unit
 32865,   -- Thorim
-33271,   -- General Vezax
 33524,   -- Saronite Animus
 33288,   -- Yogg-Saron
 33134,   -- Sara
@@ -23,6 +22,7 @@ UPDATE `creature_template` SET `mechanic_immune_mask`=650853247, `flags_extra`=1
 );
 
 -- Auriaya should be interruptible, due to Sentinel Blast
-UPDATE `creature_template` SET `mechanic_immune_mask`=617298815 WHERE `entry` IN (33515);
+-- General Vezax should be interruptible, due to Searing Flames
+UPDATE `creature_template` SET `mechanic_immune_mask`=617298815 WHERE `entry` IN (33515, 33271);
 -- Stormcaller Brundir, immunities to stun and interrupt are gained infight.
 UPDATE `creature_template` SET `mechanic_immune_mask`=617296767, `flags_extra`=1 WHERE `entry` IN (32857);   

@@ -104,6 +104,8 @@ class instance_ulduar : public InstanceMapScript
 
             // Hodir
             uint64 HodirGUID;
+            uint64 HodirKeeperGUID;
+            uint64 HodirKeeperHelperGUID;
             uint64 HodirIceDoorGUID;
             uint64 HodirStoneDoorGUID;
             uint64 HodirEntranceDoorGUID;
@@ -113,6 +115,8 @@ class instance_ulduar : public InstanceMapScript
             // Mimiron
             uint64 MimironTrainGUID;
             uint64 MimironGUID;
+            uint64 MimironKeeperGUID;
+            uint64 MimironKeeperHelperGUID;
             uint64 LeviathanMKIIGUID;
             uint64 VX001GUID;
             uint64 AerialUnitGUID;
@@ -122,6 +126,8 @@ class instance_ulduar : public InstanceMapScript
             // Thorim
             uint64 ThorimCtrlGUID;
             uint64 ThorimGUID;
+            uint64 ThorimKeeperGUID;
+            uint64 ThorimKeeperHelperGUID;
             uint64 ThorimLightningFieldGUID;
             uint64 RunicColossusGUID;
             uint64 RuneGiantGUID;
@@ -132,6 +138,8 @@ class instance_ulduar : public InstanceMapScript
 
             // Freya
             uint64 FreyaGUID;
+            uint64 FreyaKeeperGUID;
+            uint64 FreyaKeeperHelperGUID;
             uint64 ElderBrightleafGUID;
             uint64 ElderIronbranchGUID;
             uint64 ElderStonebarkGUID;
@@ -224,6 +232,8 @@ class instance_ulduar : public InstanceMapScript
 
                 // Hodir
                 HodirGUID               = 0;
+                HodirKeeperHelperGUID   = 0;
+                HodirKeeperGUID         = 0;
                 HodirIceDoorGUID        = 0;
                 HodirStoneDoorGUID      = 0;
                 HodirEntranceDoorGUID   = 0;
@@ -231,16 +241,20 @@ class instance_ulduar : public InstanceMapScript
                 HodirRareCacheGUID      = 0;
 
                 // Mimiron
-                MimironTrainGUID    = 0;
-                MimironGUID         = 0;
-                LeviathanMKIIGUID   = 0;
-                VX001GUID           = 0;
-                AerialUnitGUID      = 0;
-                MimironElevatorGUID = 0;
+                MimironTrainGUID        = 0;
+                MimironKeeperGUID       = 0;
+                MimironKeeperHelperGUID = 0;
+                MimironGUID             = 0;
+                LeviathanMKIIGUID       = 0;
+                VX001GUID               = 0;
+                AerialUnitGUID          = 0;
+                MimironElevatorGUID     = 0;
 
                 // Thorim
                 ThorimCtrlGUID               = 0;
                 ThorimGUID                   = 0;
+                ThorimKeeperHelperGUID       = 0;
+                ThorimKeeperGUID             = 0;
                 ThorimLightningFieldGUID     = 0;
                 RunicColossusGUID            = 0;
                 RuneGiantGUID                = 0;
@@ -250,11 +264,13 @@ class instance_ulduar : public InstanceMapScript
                 ThorimDarkIronPortCullisGUID = 0;
 
                 // Freya
-                FreyaGUID           = 0;
-                ElderBrightleafGUID = 0;
-                ElderIronbranchGUID = 0;
-                ElderStonebarkGUID  = 0;
-                FreyaChestGUID      = 0;
+                FreyaGUID             = 0;
+                FreyaKeeperGUID       = 0;
+                FreyaKeeperHelperGUID = 0;
+                ElderBrightleafGUID   = 0;
+                ElderIronbranchGUID   = 0;
+                ElderStonebarkGUID    = 0;
+                FreyaChestGUID        = 0;
 
                 // Vezax
                 WayToYoggGUID   = 0;
@@ -553,6 +569,13 @@ class instance_ulduar : public InstanceMapScript
                     case NPC_MIMIRON:
                         MimironGUID = creature->GetGUID();
                         break;
+                    case NPC_KEEPER_MIMIRON:
+                        MimironKeeperGUID = creature->GetGUID();
+                        break;
+                    case NPC_HELP_KEEPER_MIMIRON:
+                        MimironKeeperHelperGUID = creature->GetGUID();
+                        creature->SetVisible(false);
+                        break;
                     case NPC_LEVIATHAN_MKII:
                         LeviathanMKIIGUID = creature->GetGUID();
                         break;
@@ -566,6 +589,13 @@ class instance_ulduar : public InstanceMapScript
                     // Hodir
                     case NPC_HODIR:
                         HodirGUID = creature->GetGUID();
+                        break;
+                    case NPC_KEEPER_HODIR:
+                        HodirKeeperGUID = creature->GetGUID();
+                        break;
+                    case NPC_HELP_KEEPER_HODIR:
+                        HodirKeeperHelperGUID = creature->GetGUID();
+                        creature->SetVisible(false);
                         break;
                         // Hodir's Helper NPCs
                     case NPC_EIVI_NIGHTFEATHER:
@@ -605,6 +635,13 @@ class instance_ulduar : public InstanceMapScript
                     case NPC_THORIM:
                         ThorimGUID = creature->GetGUID();
                         break;
+                    case NPC_KEEPER_THORIM:
+                        ThorimKeeperGUID = creature->GetGUID();
+                        break;
+                    case NPC_HELP_KEEPER_THORIM:
+                        ThorimKeeperHelperGUID = creature->GetGUID();
+                        creature->SetVisible(false);
+                        break;
                     case NPC_THORIM_CTRL:
                         ThorimCtrlGUID = creature->GetGUID();
                         break;
@@ -616,9 +653,17 @@ class instance_ulduar : public InstanceMapScript
                         if (TeamInInstance == ALLIANCE)
                             creature->UpdateEntry(NPC_MERCENARY_SOLDIER_H, 1692);
                         break;
+
                     // Freya
                     case NPC_FREYA:
                         FreyaGUID = creature->GetGUID();
+                        break;
+                    case NPC_KEEPER_FREYA:
+                        FreyaKeeperGUID = creature->GetGUID();
+                        break;
+                    case NPC_HELP_KEEPER_FREYA:
+                        FreyaKeeperHelperGUID = creature->GetGUID();
+                        creature->SetVisible(false);
                         break;
                         // Freya's Keeper
                     case NPC_IRONBRANCH:
@@ -652,7 +697,6 @@ class instance_ulduar : public InstanceMapScript
                     case NPC_YOGGSARON_CTRL:
                         YoggSaronCtrlGUID = creature->GetGUID();
                         break;
-
                     // Algalon
                     case NPC_ALGALON:
                         AlgalonGUID = creature->GetGUID();
@@ -941,7 +985,11 @@ class instance_ulduar : public InstanceMapScript
                         HandleGameObject(KologarnDoorGUID, state == DONE);
                         break;
                     case BOSS_AURIAYA:
+                        break;
                     case BOSS_FREYA:
+                        if (state == DONE)
+                            if (Creature* freyahelper = instance->GetCreature(FreyaKeeperHelperGUID))
+                                freyahelper->SetVisible(true);
                         break;
                     case BOSS_MIMIRON:
                         for (std::list<uint64>::iterator i = MimironDoorGUIDList.begin(); i != MimironDoorGUIDList.end(); ++i)
@@ -949,6 +997,10 @@ class instance_ulduar : public InstanceMapScript
                             if (GameObject* gameobject = instance->GetGameObject(*i))
                                 gameobject->SetGoState(state == IN_PROGRESS ? GO_STATE_READY : GO_STATE_ACTIVE);
                         }
+
+                        if (state == DONE)
+                            if (Creature* mimironhelper = instance->GetCreature(MimironKeeperHelperGUID))
+                                mimironhelper->SetVisible(true);
                         break;
                     case BOSS_VEZAX:
                         HandleGameObject(VezaxDoorGUID, state==DONE);
@@ -983,6 +1035,8 @@ class instance_ulduar : public InstanceMapScript
                                     HodirRareCache->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                             if (GameObject* HodirChest = instance->GetGameObject(HodirChestGUID))
                                 HodirChest->SetRespawnTime(HodirChest->GetRespawnDelay());
+                            if (Creature* hodirhelper = instance->GetCreature(HodirKeeperHelperGUID))
+                                hodirhelper->SetVisible(true);
                         }
                         HandleGameObject(HodirEntranceDoorGUID, state != IN_PROGRESS);
                         break;
@@ -993,6 +1047,8 @@ class instance_ulduar : public InstanceMapScript
                                 gameObject->SetRespawnTime(gameObject->GetRespawnDelay());
                             if (GameObject* gameObject = instance->GetGameObject(ThorimLightningFieldGUID))
                                 gameObject->SetGoState(state == IN_PROGRESS ? GO_STATE_READY : GO_STATE_ACTIVE);
+                            if (Creature* thorimhelper = instance->GetCreature(ThorimKeeperHelperGUID))
+                                thorimhelper->SetVisible(true);
                         }
                         break;
                     case BOSS_ALGALON:

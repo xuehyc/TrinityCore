@@ -53,3 +53,6 @@ INSERT INTO `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `
 (194261, 603, 3, 1, 138.516, 56.1078, 409.804, 2.87979, 0, 0, 0, 1, 180, 255, 1),
 (194262, 603, 3, 1, 131.895, -128.264, 409.804, 0, 0, 0, 0, 1, 180, 255, 1),
 (194262, 603, 3, 1, 139.857, 55.9064, 409.804, 0, 0, 0, 0, 1, 180, 255, 1);
+
+-- Part 6: The salvaged vehicles should not regenerate health.
+UPDATE `creature_template` SET `RegenHealth`=0 WHERE `entry` IN (33060, 33062, 34045, 33109);
