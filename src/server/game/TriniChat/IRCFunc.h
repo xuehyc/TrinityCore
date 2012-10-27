@@ -229,7 +229,7 @@ std::string GetWoWChannel(std::string Channel)
 {
     for(int i=1;i < sIRC._chan_count + 1;i++)
     {
-        if("#" + sIRC._irc_chan[i] == Channel)
+        if (nocase_cmp("#" + sIRC._irc_chan[i], Channel) == 0)
             return sIRC._wow_chan[i];
     }
     return "";
@@ -239,7 +239,7 @@ std::string GetIRCChannel(std::string Channel)
 {
     for(int i=1;i < sIRC._chan_count + 1;i++)
     {
-        if(sIRC._wow_chan[i] == Channel)
+        if (nocase_cmp(sIRC._wow_chan[i], Channel) == 0)
             return sIRC._irc_chan[i];
     }
     return "";
