@@ -109,8 +109,15 @@ class boss_lord_marrowgar : public CreatureScript
                 _boneSlice = false;
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* who)
             {
+                if (!instance->CheckRequiredBosses(DATA_LORD_MARROWGAR, who->ToPlayer()))
+                {
+                    EnterEvadeMode();
+                    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
+                    return;
+                }
+
                 Talk(SAY_AGGRO);
 
                 me->setActive(true);

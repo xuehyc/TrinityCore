@@ -184,3 +184,6 @@ INSERT INTO `spell_area` (spell, area, quest_start, quest_start_active, quest_en
 -- (73826, 4812, 0, 0, 0, 0, 1101, 2, 1), -- Alliance, 20
 -- (73827, 4812, 0, 0, 0, 0, 1101, 2, 1), -- Alliance, 25
 -- (73828, 4812, 0, 0, 0, 0, 1101, 2, 1); -- Alliance, 30
+
+-- Check for achievement should only apply to group leader, will be done in core (Source: Shauren, TC scripter for ICC, thanks!)
+UPDATE `access_requirement` SET `completed_achievement` = 0 WHERE `mapId` = 631;

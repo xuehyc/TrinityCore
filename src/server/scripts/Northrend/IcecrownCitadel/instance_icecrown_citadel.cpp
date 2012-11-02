@@ -24,6 +24,8 @@
 #include "AccountMgr.h"
 #include "icecrown_citadel.h"
 
+#include "Group.h"
+
 enum EventIds
 {
     EVENT_QUAKE                     = 23437,
@@ -975,6 +977,41 @@ class instance_icecrown_citadel : public InstanceMapScript
                 if (player && AccountMgr::IsGMAccount(player->GetSession()->GetSecurity()))
                     return true;
 
+                // In heroic mode, leader must have NH Lich King achievement
+                bool heroicCheckFailed = true;
+                if (instance->IsHeroic())
+                {
+                    if (!player && instance->GetPlayersCountExceptGMs() > 0)
+                    {
+                        Map::PlayerList const& playerList = instance->GetPlayers();
+
+                        if (!playerList.isEmpty())
+                        {
+                            for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                            {
+                                if (i->getSource())
+                                {
+                                    if (!i->getSource()->isGameMaster())
+                                    {
+                                        player = i->getSource();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (player)
+                        if (const Group* group = player->GetGroup())
+                            if (group->GetLeaderGUID() && group->isRaidGroup())
+                                if (Player* leader = ObjectAccessor::GetPlayer(*player, group->GetLeaderGUID()))
+                                    if (leader->GetInstanceId() == instance->GetInstanceId())
+                                        if (leader->GetAchievementMgr().HasAchieved(instance->Is25ManRaid() ? 4597 : 4530))
+                                            heroicCheckFailed = false;
+                }
+                else
+                    heroicCheckFailed = false;
+
                 switch (bossId)
                 {
                     case DATA_THE_LICH_KING:
@@ -1008,7 +1045,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 if (!CheckLowerSpire(bossId))
                     return false;
 
-                return true;
+                return !heroicCheckFailed;
             }
 
             bool CheckPlagueworks(uint32 bossId) const
