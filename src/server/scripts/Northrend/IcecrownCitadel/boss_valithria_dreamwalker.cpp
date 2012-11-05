@@ -1196,7 +1196,7 @@ class npc_dream_cloud : public CreatureScript
                         case EVENT_EXPLODE:
                             me->GetMotionMaster()->MoveIdle();
                             // must use originalCaster the same for all clouds to allow stacking
-                            me->CastSpell(me, EMERALD_VIGOR, false, NULL, NULL, _instance->GetData64(DATA_VALITHRIA_DREAMWALKER));
+                            me->CastSpell(me, EMERALD_VIGOR, false, NULL, NULL, _instance->GetData64(DATA_VALITHRIA_LICH_KING));
                             me->DespawnOrUnsummon(100);
                             break;
                         default:
@@ -1544,7 +1544,7 @@ class spell_dreamwalker_twisted_nightmares : public SpellScriptLoader
                 //    return;
 
                 if (InstanceScript* instance = GetHitUnit()->GetInstanceScript())
-                    GetHitUnit()->CastSpell((Unit*)NULL, GetSpellInfo()->Effects[effIndex].TriggerSpell, true, NULL, NULL, instance->GetData64(DATA_VALITHRIA_DREAMWALKER));
+                    GetHitUnit()->CastSpell((Unit*)NULL, GetSpellInfo()->Effects[effIndex].TriggerSpell, true, NULL, NULL, instance->GetData64(DATA_VALITHRIA_LICH_KING));
             }
 
             void Register()
