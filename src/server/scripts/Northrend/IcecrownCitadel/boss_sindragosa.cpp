@@ -1228,7 +1228,7 @@ class UnchainedMagicTargetSelector
         bool operator()(WorldObject* object) const
         {
             if (Unit* unit = object->ToUnit())
-                return unit->getPowerType() != POWER_MANA;
+                return unit->getPowerType() != POWER_MANA || (unit->getPowerType() == POWER_MANA && unit->GetMaxPower(POWER_MANA) <= 18000);
             return true;
         }
 };
