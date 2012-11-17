@@ -24,6 +24,9 @@
 #include "BattlegroundAV.h"
 #include "Vehicle.h"
 
+#include "OutdoorPvPWG.h"
+#include "OutdoorPvPMgr.h"
+
 class achievement_resilient_victory : public AchievementCriteriaScript
 {
     public:
@@ -289,6 +292,21 @@ public:
     }
 };
 
+class achievement_wg_within_our_grasp : public AchievementCriteriaScript
+{
+public:
+    achievement_wg_within_our_grasp() : AchievementCriteriaScript("achievement_wg_within_our_grasp") { }
+
+    bool OnCheck(Player* /*source*/, Unit* /*target*/)
+    {
+        if (OutdoorPvPWG *wg = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
+            if (wg->GetTimer() >= 20 * MINUTE)
+                return true;
+
+        return false;
+    }
+};
+
 class achievement_bg_sa_defense_of_ancients : public AchievementCriteriaScript
 {
     public:
@@ -439,6 +457,7 @@ void AddSC_achievement_scripts()
     new achievement_tilted();
     new achievement_not_even_a_scratch();
     new achievement_wg_vehicular_gnomeslaughter();
+    new achievement_wg_within_our_grasp();
     new achievement_brew_of_the_month_club("achievement_brew_of_the_month_q12420", 12420);
     new achievement_brew_of_the_month_club("achievement_brew_of_the_month_q12421", 12421);
     new achievement_brew_of_the_month_club("achievement_brew_of_the_month_q12278", 12278);
