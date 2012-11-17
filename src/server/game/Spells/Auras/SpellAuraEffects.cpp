@@ -3704,7 +3704,8 @@ void AuraEffect::HandleAuraModSchoolImmunity(AuraApplication const* aurApp, uint
         {
             SpellInfo const* spell = iter->second->GetBase()->GetSpellInfo();
             if ((spell->GetSchoolMask() & school_mask)//Check for school mask
-                && GetSpellInfo()->CanDispelAura(spell)
+                && !(spell->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY) // Check for spell flags
+                && !(spell->AttributesEx & SPELL_ATTR1_UNAFFECTED_BY_SCHOOL_IMMUNE)
                 && !iter->second->IsPositive()          //Don't remove positive spells
                 && spell->Id != GetId())               //Don't remove self
             {
