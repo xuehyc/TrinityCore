@@ -116,12 +116,12 @@ DELETE FROM `petition_sign` WHERE `petitionguid` NOT IN (SELECT `petitionguid` F
 DELETE FROM `item_refund_instance` WHERE `item_guid` NOT IN (SELECT `guid` FROM `item_instance`);
 
 -- CUSTOM - ARMORY
--- DELETE FROM `armory_character_stats` WHERE guid NOT IN (SELECT `guid` FROM `characters`);
--- DELETE FROM `armory_game_chart` WHERE guid NOT IN (SELECT `guid` FROM `characters`);
--- DELETE FROM `character_feed_log` WHERE guid NOT IN (SELECT `guid` FROM `characters`);
+-- DELETE FROM `armory_character_stats` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
+-- DELETE FROM `armory_game_chart` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
+-- DELETE FROM `character_feed_log` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
 
 -- CUSTOM - LOG
--- DELETE FROM `castle_log` WHERE player_guid NOT IN (SELECT `guid` FROM `characters`);
+-- DELETE FROM `castle_log` WHERE `player_guid` NOT IN (SELECT `guid` FROM `characters`);
 
 -- CUSTOM - ANTI-CHEAT BACKLOG
 -- DELETE FROM `cheaters` WHERE UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(`last_date`) >= 60 * 60 * 24 * 7 * 4;
