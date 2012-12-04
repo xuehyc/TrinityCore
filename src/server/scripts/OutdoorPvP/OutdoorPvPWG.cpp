@@ -1069,6 +1069,7 @@ bool OutdoorPvPWG::UpdateCreatureInfo(Creature *creature)
                     creature->setFaction(WintergraspFaction[getAttackerTeam()]);
                 else // fortress cannons
                     creature->setFaction(WintergraspFaction[getDefenderTeam()]);
+                creature->SetHealth(creature->GetMaxHealth());
                 creature->SetVisible(true);
             }
             else
