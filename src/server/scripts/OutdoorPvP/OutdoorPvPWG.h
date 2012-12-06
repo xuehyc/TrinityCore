@@ -337,6 +337,9 @@ class OutdoorPvPWG : public OutdoorPvP
 
         // Sound Handler
         void PlayTeamSound(TeamId team, uint32 sound);
+
+        // Achievement Handling
+        bool WithinOurGraspEligible() { return m_within_our_grasp_eligible; }
     protected:
         // Temporal BG specific till 3.2
         std::vector<uint64> m_ResurrectQueue;               // Player GUID
@@ -368,6 +371,8 @@ class OutdoorPvPWG : public OutdoorPvP
         bool m_changeDefender;
         bool m_announce_30_done;
         bool m_announce_10_done;
+        bool m_announce_5_done;
+        bool m_within_our_grasp_eligible;
         uint32 m_clock[2];
         uint32 m_workshopCount[2];
         uint32 m_towerDestroyedCount[2];
