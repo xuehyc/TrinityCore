@@ -685,6 +685,14 @@ class npc_ice_tomb : public CreatureScript
                     player->RemoveAurasDueToSpell(SPELL_ICE_TOMB_UNTARGETABLE);
                     player->RemoveAurasDueToSpell(SPELL_ICE_TOMB_DAMAGE);
                     player->RemoveAurasDueToSpell(SPELL_ASPHYXIATION);
+
+                    // set back in combat with sindragosa
+                    if (InstanceScript* instance = player->GetInstanceScript())
+                        if (Creature* sindragosa = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_SINDRAGOSA)))
+                        {
+                            sindragosa->SetInCombatWith(player);
+                            player->SetInCombatWith(sindragosa);
+                        }
                 }
             }
 
