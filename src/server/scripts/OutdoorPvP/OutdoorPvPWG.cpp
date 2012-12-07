@@ -148,6 +148,8 @@ bool OutdoorPvPWG::SetupOutdoorPvP()
     m_changeDefender = false;
     m_announce_30_done = false;
     m_announce_10_done = false;
+    m_announce_5_done = false;
+    m_within_our_grasp_eligible = false;
     m_workshopCount[TEAM_ALLIANCE] = 0;
     m_workshopCount[TEAM_HORDE] = 0;
     tenacityStackCount = 0;
@@ -459,6 +461,9 @@ void OutdoorPvPWG::ProcessEvent(WorldObject* object, uint32 eventId)
     {
         if (gameObject->GetGOInfo()->goober.eventId == eventId && isWarTime() && m_gate && m_gate->damageState == DAMAGE_DESTROYED)
         {
+            // Determine whether this round was eligible for the max 10-Minute timed attack run
+            m_within_our_grasp_eligible = m_timer >= 20 * MINUTE * IN_MILLISECONDS;
+
             m_changeDefender = true;
             m_timer = 0;
         }
@@ -650,9 +655,9 @@ void OutdoorPvPWG::ProcessEvent(WorldObject* object, uint32 eventId)
 
 void OutdoorPvPWG::RemoveOfflinePlayerWGAuras()
 {
-    // if server crashed while in battle there could be players with rank or tenacity
-    CharacterDatabase.PExecute("DELETE FROM character_aura WHERE spell IN (%u, %u, %u, %u, %u)",
-        SPELL_RECRUIT, SPELL_CORPORAL, SPELL_LIEUTENANT, SPELL_TENACITY, SPELL_TOWER_CONTROL);
+    // if server crashed while in battle there could be players with rank or tenacity or eternal immunity
+    CharacterDatabase.PExecute("DELETE FROM character_aura WHERE spell IN (%u, %u, %u, %u, %u, %u)",
+        SPELL_RECRUIT, SPELL_CORPORAL, SPELL_LIEUTENANT, SPELL_TENACITY, SPELL_TOWER_CONTROL, SPELL_SPIRITUAL_IMMUNITY);
 }
 
 void OutdoorPvPWG::ModifyWorkshopCount(TeamId team, bool add)
@@ -1290,42 +1295,46 @@ void OutdoorPvPWG::HandlePlayerLeaveZone(Player * plr, uint32 zone)
     UpdateTenacityStack();
 }
 
-void OutdoorPvPWG::PromotePlayer(Player *killer, bool wasPlayerKill) const
+void OutdoorPvPWG::PromotePlayer(Player* killer, bool wasPlayerKill) const
 {
     /* require player kills for promotion? */
     //if (!wasPlayerKill)
     //    return;
 
-    // player eligible for insta-promote balancing?
-    bool instaPromote = false;
+    // player eligible for promote rebalancing?
+    uint32 promoteBalance = 1; // default: 1 kill -> 1 charge
+
+    // buff the attacking team on defender winstreak
     uint32 winStreak = getDefenderTeam() == TEAM_ALLIANCE ? allianceWinStreak : hordeWinStreak;
-    if (winStreak > 1)
-        if (killer->GetTeamId() == getAttackerTeam())
-            instaPromote = true;
+    if (killer->GetTeamId() == getAttackerTeam())
+        promoteBalance = winStreak > 5 ? 5 : winStreak;
 
-    Aura * aura;
+    for (uint32 i = 0; i < promoteBalance; ++i)
+    {
+        Aura * aura;
 
-    if (aura = killer->GetAura(SPELL_RECRUIT))
-    {
-        if (aura->GetStackAmount() >= 5 || instaPromote)
+        if (aura = killer->GetAura(SPELL_RECRUIT)) // basic rank, when you join wg
         {
-            killer->RemoveAura(SPELL_RECRUIT);
-            killer->CastSpell(killer, SPELL_CORPORAL, true);
-            ChatHandler(killer).PSendSysMessage(LANG_BG_WG_RANK1);
+            if (aura->GetStackAmount() >= 5)
+            {
+                killer->RemoveAura(SPELL_RECRUIT);
+                killer->CastSpell(killer, SPELL_CORPORAL, true);
+                ChatHandler(killer).PSendSysMessage(LANG_BG_WG_RANK1);
+            }
+            else
+                killer->CastSpell(killer, SPELL_RECRUIT, true);
         }
-        else
-            killer->CastSpell(killer, SPELL_RECRUIT, true);
-    }
-    else if (aura = killer->GetAura(SPELL_CORPORAL))
-    {
-        if (aura->GetStackAmount() >= 5 || instaPromote)
+        else if (aura = killer->GetAura(SPELL_CORPORAL)) // first rank, can build lower level siege engines
         {
-            killer->RemoveAura(SPELL_CORPORAL);
-            killer->CastSpell(killer, SPELL_LIEUTENANT, true);
-            ChatHandler(killer).PSendSysMessage(LANG_BG_WG_RANK2);
+            if (aura->GetStackAmount() >= 5)
+            {
+                killer->RemoveAura(SPELL_CORPORAL);
+                killer->CastSpell(killer, SPELL_LIEUTENANT, true); // second rank, can build high level siege engine
+                ChatHandler(killer).PSendSysMessage(LANG_BG_WG_RANK2);
+            }
+            else
+                killer->CastSpell(killer, SPELL_CORPORAL, true);
         }
-        else
-            killer->CastSpell(killer, SPELL_CORPORAL, true);
     }
 }
 
@@ -1469,14 +1478,22 @@ void OutdoorPvPWG::UpdateClock()
      if ((m_timer < 1800000) && (m_announce_30_done == false) && (m_wartime == false))
      {
          m_announce_30_done = true;
-         sWorld->SendWorldText(LANG_BG_WG_WORLD_ANNOUNCE_30);
+         sWorld->SendMessageToAllPlayersInChannel("pvp", "|TInterface\\Icons\\spell_arcane_teleporttheramore.blp:14|t Die Schlacht um Tausendwinter beginnt in 30 Minuten.");
+         // sWorld->SendWorldText(LANG_BG_WG_WORLD_ANNOUNCE_30);
      }
 
      // Announce 10 minutes left
      if ((m_timer < 600000) && (m_announce_10_done == false) && (m_wartime == false))
      {
          m_announce_10_done = true;
-         sWorld->SendWorldText(LANG_BG_WG_WORLD_ANNOUNCE_10);
+         sWorld->SendMessageToAllPlayersInChannel("pvp", "|TInterface\\Icons\\spell_arcane_teleporttheramore.blp:14|t Die Schlacht um Tausendwinter beginnt in 10 Minuten.");
+         // sWorld->SendWorldText(LANG_BG_WG_WORLD_ANNOUNCE_10);
+     }
+
+     if ((m_timer < 300000) && (m_announce_5_done == false) && (m_wartime == false))
+     {
+         m_announce_5_done = true;
+         sWorld->SendMessageToAllPlayersInChannel("pvp", "|TInterface\\Icons\\spell_arcane_teleporttheramore.blp:14|t Die Schlacht um Tausendwinter beginnt in 5 Minuten. Der Teleport von Dalaran aus ist nun verfügbar.");
      }
 }
 
@@ -1568,6 +1585,7 @@ bool OutdoorPvPWG::Update(uint32 diff)
         {
             if (m_timer != 1) // 1 = forceStopBattle
                 sWorld->SendZoneText(ZONE_WINTERGRASP, fmtstring(sObjectMgr->GetTrinityStringForDBCLocale(entry), sObjectMgr->GetTrinityStringForDBCLocale(getDefenderTeam() == TEAM_ALLIANCE ? LANG_BG_AB_ALLY : LANG_BG_AB_HORDE)));
+            m_within_our_grasp_eligible = false; // if we are here the battle ended normaly, titan relic was never clicked
             EndBattle();
         }
         else
@@ -1643,6 +1661,7 @@ void OutdoorPvPWG::StartBattle()
     m_wartime = true;
     m_announce_30_done = false;
     m_announce_10_done = false;
+    m_announce_5_done = false;
     m_timer = sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_BATTLE_TIME) * MINUTE * IN_MILLISECONDS;
 
     for (PlayerSet::iterator itr = m_players[getDefenderTeam()].begin(); itr != m_players[getDefenderTeam()].end(); ++itr)
@@ -1886,7 +1905,7 @@ void OutdoorPvPWG::EndBattle()
                 player->RewardHonor(NULL, 1, honor);
                 RewardMarkOfHonor(*itr, marks);
 
-                // update achievement counter for wintergrasp veteran
+                // update achievements for all spells triggered by wintergrasp victory / loss spell
                 player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, spellRewardId);
             }
             else

@@ -3586,9 +3586,10 @@ void SpellMgr::LoadDbcDataCorrections()
             case 48950: // Redemption
                 spellInfo->SpellFamilyName = SPELLFAMILY_PALADIN;
                 break;
-            case 51678: // Wintergrasp Siege Engine: Set Non-Siege Ram Range to 5 yd.
-                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS; // SPELL_EFFECT_KNOCK_BACK
-                spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_5_YARDS; // SPELL_EFFECT_SCHOOL_DAMAGE
+            case 51678: // Wintergrasp Siege Engine: Set Non-Siege Ram Range to 8 yd., Siege-Ram Range to 8 yd.
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_8_YARDS; // SPELL_EFFECT_KNOCK_BACK
+                spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_8_YARDS; // SPELL_EFFECT_SCHOOL_DAMAGE
+                spellInfo->EffectRadiusIndex[2] = EFFECT_RADIUS_8_YARDS; // SPELL_EFFECT_SIEGE_DAMAGE
                 break;
             case 51422: // Wintergrasp Tower Cannon: Fire Blast shouldn't scale with player gear.
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;

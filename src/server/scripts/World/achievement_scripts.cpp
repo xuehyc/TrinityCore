@@ -300,7 +300,7 @@ public:
     bool OnCheck(Player* /*source*/, Unit* /*target*/)
     {
         if (OutdoorPvPWG *wg = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
-            if (wg->GetTimer() >= 20 * MINUTE)
+            if (wg->WithinOurGraspEligible())
                 return true;
 
         return false;
