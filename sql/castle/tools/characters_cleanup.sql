@@ -125,3 +125,6 @@ DELETE FROM `item_refund_instance` WHERE `item_guid` NOT IN (SELECT `guid` FROM 
 
 -- CUSTOM - ANTI-CHEAT BACKLOG
 -- DELETE FROM `cheaters` WHERE UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(`last_date`) >= 60 * 60 * 24 * 7 * 4;
+
+-- CUSTOM - TRINICHAT AUTOINVITE
+-- DELETE FROM `world`.`irc_inchan` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`);
