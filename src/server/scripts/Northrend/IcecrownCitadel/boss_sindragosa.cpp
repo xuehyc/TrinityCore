@@ -1228,15 +1228,72 @@ class spell_sindragosa_s_fury : public SpellScriptLoader
         }
 };
 
+// Note: Unchainged magic should _only_ hit caster and healers
 class UnchainedMagicTargetSelector
-{
+{   
+    enum CriticalSpells
+    {
+        // Paladin spells that identify a specc
+        SPELL_PALADIN_DIVINE_STORM = 53385,
+        SPELL_PALADIN_HAMMER_OF_THE_RIGHTEOUS = 53595,
+        // Shaman spell that identifies an enhancer
+        SPELL_SHAMAN_SHAMANISTIC_RAGE = 30823,
+        // Druid spell that identifies a feral (cat or bear)
+        SPELL_DRUID_BERSERK = 50334
+    };
+
     public:
         UnchainedMagicTargetSelector() { }
 
         bool operator()(WorldObject* object) const
         {
             if (Unit* unit = object->ToUnit())
-                return unit->getPowerType() != POWER_MANA || (unit->getPowerType() == POWER_MANA && unit->GetMaxPower(POWER_MANA) <= 18000);
+            {
+                if (Player* player = unit->ToPlayer()) 
+                {
+                    // Classes that don't have mana cannot be caster or healer (atm.)
+                    if (player->getPowerType() != POWER_MANA) 
+                        return true;
+                    else // If a class has mana, it depends on their specc if they should potentially be affected or not.
+                    {
+                        switch (player->getClass())
+                        {
+                            case CLASS_HUNTER:
+                                return true; // Has mana, but is no caster.
+                            case CLASS_PALADIN: // Only holy paladins should be affected.
+                                {
+                                    const PlayerSpellMap& m = player->GetSpellMap();
+                                    PlayerSpellMap::const_iterator it_ret = m.find(SPELL_PALADIN_DIVINE_STORM); // Basic retribution paladin spell
+                                    PlayerSpellMap::const_iterator it_prot = m.find(SPELL_PALADIN_HAMMER_OF_THE_RIGHTEOUS); // Basic protection paladin spell
+                                    if (it_ret == m.end() && it_prot == m.end()) // If it's neither a ret nor a prot, it must be a holy
+                                        return false;
+                                    else
+                                        return true;
+                                }
+                            case CLASS_SHAMAN: // Enhancer should not be affected.
+                                {
+                                    const PlayerSpellMap& m = player->GetSpellMap();
+                                    PlayerSpellMap::const_iterator it_shr = m.find(SPELL_SHAMAN_SHAMANISTIC_RAGE);
+                                    if (it_shr == m.end())  // If it's not an enhancer, it has to be an elemental or restoration shaman - caster/healer ok
+                                        return false;
+                                    else
+                                        return true;
+                                }
+                            case CLASS_DRUID: // Feral druids should be excluded, disregarding their current state.
+                                {
+                                    const PlayerSpellMap& m = player->GetSpellMap();
+                                    PlayerSpellMap::const_iterator it_ber = m.find(SPELL_DRUID_BERSERK);
+                                    if (it_ber == m.end())  // If it's not a feral, it's a moonkin or tree - caster/healer ok
+                                        return false;
+                                    else
+                                        return true;
+                                }
+                            default:
+                                return false;
+                        }
+                    }
+                }
+            }
             return true;
         }
 };
