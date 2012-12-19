@@ -3420,6 +3420,19 @@ void SpellMgr::LoadDbcDataCorrections()
             case 72856: // Unbound Plague (Professor Putricide) (needs target selection script)
                 spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_TARGET_ENEMY;
                 break;
+            // Mutated Transformation - crit does not seems to inflict additional damage, but it occurs wrong in combat-log.
+            case 70405:
+            case 72508:
+            case 72509:
+            case 72510:
+            // SPELL_MALLEABLE_GOO missiles - Spell-id's are picked from spellwork_cs 
+            // They can crit with base crit chance since they are not casted directly by Professor Prutricide, thus not ignoring it
+            case 70853:
+            case 72458:
+            case 72873:
+            case 72874:
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
+                break;
             case 71518: // Unholy Infusion Quest Credit (Professor Putricide)
             case 72934: // Blood Infusion Quest Credit (Blood-Queen Lana'thel)
             case 72289: // Frost Infusion Quest Credit (Sindragosa)
