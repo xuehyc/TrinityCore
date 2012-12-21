@@ -51,6 +51,20 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 
     player->SendDuelCountdown(3000);
     plTarget->SendDuelCountdown(3000);
+
+    // Reset Cooldowns, Health- and Manapool in specific Dueling Areas
+    if (player->GetAreaId() == 4570) // Circle of Wills (Dalaran PvP Area)
+    {
+        // duel requester
+        player->RemoveArenaSpellCooldowns(true);
+        player->SetHealth(player->GetMaxHealth());
+        player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
+
+        // duel target
+        plTarget->RemoveArenaSpellCooldowns(true);
+        plTarget->SetHealth(plTarget->GetMaxHealth());
+        plTarget->SetPower(POWER_MANA, plTarget->GetMaxPower(POWER_MANA));
+    }
 }
 
 void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
