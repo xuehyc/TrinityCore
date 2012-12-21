@@ -300,9 +300,7 @@ public:
     bool OnCheck(Player* /*source*/, Unit* /*target*/)
     {
         if (OutdoorPvPWG *wg = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
-            if (wg->WithinOurGraspEligible())
-                return true;
-
+            return wg->WithinOurGraspEligible();
         return false;
     }
 };

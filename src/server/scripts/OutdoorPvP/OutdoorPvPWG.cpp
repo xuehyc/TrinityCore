@@ -1585,7 +1585,6 @@ bool OutdoorPvPWG::Update(uint32 diff)
         {
             if (m_timer != 1) // 1 = forceStopBattle
                 sWorld->SendZoneText(ZONE_WINTERGRASP, fmtstring(sObjectMgr->GetTrinityStringForDBCLocale(entry), sObjectMgr->GetTrinityStringForDBCLocale(getDefenderTeam() == TEAM_ALLIANCE ? LANG_BG_AB_ALLY : LANG_BG_AB_HORDE)));
-            m_within_our_grasp_eligible = false; // if we are here the battle ended normaly, titan relic was never clicked
             EndBattle();
         }
         else
@@ -1663,6 +1662,7 @@ void OutdoorPvPWG::StartBattle()
     m_announce_10_done = false;
     m_announce_5_done = false;
     m_timer = sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_BATTLE_TIME) * MINUTE * IN_MILLISECONDS;
+    m_within_our_grasp_eligible = false; // will be determined on goober click
 
     for (PlayerSet::iterator itr = m_players[getDefenderTeam()].begin(); itr != m_players[getDefenderTeam()].end(); ++itr)
     {
