@@ -1143,6 +1143,8 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
                 return false;
             if (!player->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && !player->HasAuraType(SPELL_AURA_FLY))
                 return false;
+            if (player->HasAura(59831) && (player->GetAreaId() == 4560 || player->GetAreaId() == 4570)) // Underbelly Elixir - Flying Wasp (only Underbelly & Circle of Wills)
+                return false;
             break;
         }
         case 68719: // Oil Refinery - Isle of Conquest.
