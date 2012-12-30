@@ -3281,6 +3281,10 @@ void SpellMgr::LoadDbcDataCorrections()
             case 70650: // Death Knight T10 Tank 2P Bonus
                 spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_PCT_MODIFIER;
                 break;
+            case 66670: // Burning Breath (Koralon-10)
+            case 67329: // Burning Breath (Koralon-25)
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS; // reduce range from 50.000 yards to 100 yards
+                break;
             // ULDUAR SPELLS
             //
             case 62374: // Pursued (Flame Leviathan)
