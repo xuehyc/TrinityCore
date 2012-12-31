@@ -1306,7 +1306,7 @@ void OutdoorPvPWG::PromotePlayer(Player* killer, bool wasPlayerKill) const
 
     // buff the attacking team on defender winstreak
     uint32 winStreak = getDefenderTeam() == TEAM_ALLIANCE ? allianceWinStreak : hordeWinStreak;
-    if (killer->GetTeamId() == getAttackerTeam())
+    if (winStreak > 0 && killer->GetTeamId() == getAttackerTeam())
         promoteBalance = winStreak > 5 ? 5 : winStreak;
 
     for (uint32 i = 0; i < promoteBalance; ++i)
