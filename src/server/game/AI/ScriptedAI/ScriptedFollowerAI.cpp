@@ -122,7 +122,7 @@ void FollowerAI::JustDied(Unit* /*killer*/)
     if (!HasFollowState(STATE_FOLLOW_INPROGRESS) || !m_uiLeaderGUID || !m_pQuestForFollow)
         return;
 
-    //TODO: need a better check for quests with time limit.
+    /// @todo need a better check for quests with time limit.
     if (Player* player = GetLeaderForFollower())
     {
         if (Group* group = player->GetGroup())
@@ -184,7 +184,7 @@ void FollowerAI::EnterEvadeMode()
     Reset();
 }
 
-void FollowerAI::UpdateAI(const uint32 uiDiff)
+void FollowerAI::UpdateAI(uint32 uiDiff)
 {
     if (HasFollowState(STATE_FOLLOW_INPROGRESS) && !me->getVictim())
     {
@@ -246,7 +246,7 @@ void FollowerAI::UpdateAI(const uint32 uiDiff)
     UpdateFollowerAI(uiDiff);
 }
 
-void FollowerAI::UpdateFollowerAI(const uint32 /*uiDiff*/)
+void FollowerAI::UpdateFollowerAI(uint32 /*uiDiff*/)
 {
     if (!UpdateVictim())
         return;

@@ -277,7 +277,7 @@ public:
 
             if (titleInfo && target->HasTitle(titleInfo))
             {
-                std::string name = titleInfo->name[loc];
+                std::string name = titleInfo->name;
                 if (name.empty())
                     continue;
 
@@ -443,7 +443,7 @@ public:
         stmt->setUInt16(0, uint16(AT_LOGIN_CHANGE_RACE));
         if (target)
         {
-            // TODO : add text into database
+            /// @todo add text into database
             handler->PSendSysMessage(LANG_CUSTOMIZE_PLAYER, handler->GetNameLink(target).c_str());
             target->SetAtLoginFlag(AT_LOGIN_CHANGE_RACE);
             stmt->setUInt32(1, target->GetGUIDLow());
@@ -451,7 +451,7 @@ public:
         else
         {
             std::string oldNameLink = handler->playerLink(targetName);
-            // TODO : add text into database
+            /// @todo add text into database
             handler->PSendSysMessage(LANG_CUSTOMIZE_PLAYER_GUID, oldNameLink.c_str(), GUID_LOPART(targetGuid));
             stmt->setUInt32(1, GUID_LOPART(targetGuid));
         }
@@ -473,7 +473,7 @@ public:
         {
             FactionState const& faction = itr->second;
             FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction.ID);
-            char const* factionName = factionEntry ? factionEntry->name[loc] : "#Not found#";
+            char const* factionName = factionEntry ? factionEntry->name : "#Not found#";
             ReputationRank rank = target->GetReputationMgr().GetRank(factionEntry);
             std::string rankName = handler->GetTrinityString(ReputationRankStrIndex[rank]);
             std::ostringstream ss;

@@ -205,7 +205,7 @@ bool npc_escortAI::IsPlayerOrGroupInRange()
     return false;
 }
 
-void npc_escortAI::UpdateAI(uint32 const diff)
+void npc_escortAI::UpdateAI(uint32 diff)
 {
     //Waypoint Updating
     if (HasEscortState(STATE_ESCORT_ESCORTING) && !me->getVictim() && m_uiWPWaitTimer && !HasEscortState(STATE_ESCORT_RETURNING))
@@ -293,7 +293,7 @@ void npc_escortAI::UpdateAI(uint32 const diff)
     UpdateEscortAI(diff);
 }
 
-void npc_escortAI::UpdateEscortAI(uint32 const /*diff*/)
+void npc_escortAI::UpdateEscortAI(uint32 /*diff*/)
 {
     if (!UpdateVictim())
         return;
@@ -415,7 +415,7 @@ void npc_escortAI::SetRun(bool on)
     m_bIsRunning = on;
 }
 
-//TODO: get rid of this many variables passed in function.
+/// @todo get rid of this many variables passed in function.
 void npc_escortAI::Start(bool isActiveAttacker /* = true*/, bool run /* = false */, uint64 playerGUID /* = 0 */, Quest const* quest /* = NULL */, bool instantRespawn /* = false */, bool canLoopPath /* = false */, bool resetWaypoints /* = true */)
 {
     if (me->getVictim())

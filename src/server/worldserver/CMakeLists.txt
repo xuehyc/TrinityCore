@@ -29,11 +29,18 @@ set(worldserver_SRCS
 )
 
 if( WIN32 )
-  set(worldserver_SRCS
-    ${worldserver_SRCS}
-    ${sources_Debugging}
-    worldserver.rc
-  )
+  if ( MSVC )
+    set(worldserver_SRCS
+      ${worldserver_SRCS}
+      ${sources_Debugging}
+      worldserver.rc
+    )
+  else ( )
+    set(worldserver_SRCS
+      ${worldserver_SRCS}
+      ${sources_Debugging}
+    )
+  endif ()
 endif()
 
 include_directories(
@@ -65,7 +72,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/Addons
   ${CMAKE_SOURCE_DIR}/src/server/game/AI
   ${CMAKE_SOURCE_DIR}/src/server/game/AI/CoreAI
-  ${CMAKE_SOURCE_DIR}/src/server/game/AI/EventAI
   ${CMAKE_SOURCE_DIR}/src/server/game/AI/ScriptedAI
   ${CMAKE_SOURCE_DIR}/src/server/game/AI/SmartScripts
   ${CMAKE_SOURCE_DIR}/src/server/game/AuctionHouse
@@ -175,10 +181,17 @@ target_link_libraries(worldserver
 )
 
 if( WIN32 )
-  add_custom_command(TARGET worldserver
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/worldserver.conf.dist ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/
-  )
+  if ( MSVC )
+    add_custom_command(TARGET worldserver
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/worldserver.conf.dist ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/
+    )
+  elseif ( MINGW )
+    add_custom_command(TARGET worldserver
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/worldserver.conf.dist ${CMAKE_BINARY_DIR}/bin/
+    )
+  endif()
 endif()
 
 if( UNIX )

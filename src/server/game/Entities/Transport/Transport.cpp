@@ -170,7 +170,7 @@ void MapManager::LoadTransportNPCs()
 Transport::Transport(uint32 period, uint32 script) : GameObject(), m_pathTime(0), m_timer(0),
 currenttguid(0), m_period(period), ScriptId(script), m_nextNodeTime(0)
 {
-    m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_LOWGUID | UPDATEFLAG_STATIONARY_POSITION | UPDATEFLAG_ROTATION);
+    m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_STATIONARY_POSITION | UPDATEFLAG_ROTATION);
 }
 
 Transport::~Transport()
@@ -180,11 +180,6 @@ Transport::~Transport()
         (*itr)->SetTransport(NULL);
         GetMap()->AddObjectToRemoveList(*itr);
     }
-
-    m_NPCPassengerSet.clear();
-
-    m_WayPoints.clear();
-    m_passengers.clear();
 }
 
 bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags)
@@ -553,7 +548,7 @@ void Transport::Update(uint32 p_diff)
         else
         {
             Relocate(m_curr->second.x, m_curr->second.y, m_curr->second.z, GetAngle(m_next->second.x, m_next->second.y) + float(M_PI));
-            UpdateNPCPositions(); // COME BACK MARKER
+            UpdatePassengerPositions(); // COME BACK MARKER
         }
 
         sScriptMgr->OnRelocate(this, m_curr->first, m_curr->second.mapid, m_curr->second.x, m_curr->second.y, m_curr->second.z);
@@ -581,7 +576,7 @@ void Transport::UpdateForMap(Map const* targetMap)
         {
             if (this != itr->getSource()->GetTransport())
             {
-                UpdateData transData;
+                UpdateData transData(GetMapId());
                 BuildCreateUpdateBlockForPlayer(&transData, itr->getSource());
                 WorldPacket packet;
                 transData.BuildPacket(&packet);
@@ -591,7 +586,7 @@ void Transport::UpdateForMap(Map const* targetMap)
     }
     else
     {
-        UpdateData transData;
+        UpdateData transData(targetMap->GetId());
         BuildOutOfRangeUpdateBlock(&transData);
         WorldPacket out_packet;
         transData.BuildPacket(&out_packet);
@@ -639,8 +634,7 @@ uint32 Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float y, 
     }
 
     creature->SetTransport(this);
-    creature->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
-    creature->m_movementInfo.guid = GetGUID();
+    creature->m_movementInfo.t_guid = GetGUID();
     creature->m_movementInfo.t_pos.Relocate(x, y, z, o);
 
     if (anim)
@@ -680,16 +674,16 @@ uint32 Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float y, 
 
 void Transport::UpdatePosition(MovementInfo* mi)
 {
-    float transport_o = mi->pos.m_orientation - mi->t_pos.m_orientation;
-    float transport_x = mi->pos.m_positionX - (mi->t_pos.m_positionX * std::cos(transport_o) - mi->t_pos.m_positionY* std::sin(transport_o));
-    float transport_y = mi->pos.m_positionY - (mi->t_pos.m_positionY * std::cos(transport_o) + mi->t_pos.m_positionX* std::sin(transport_o));
+    float transport_o = mi->pos.GetOrientation() - mi->t_pos.GetOrientation();
+    float transport_x = mi->pos.m_positionX - (mi->t_pos.m_positionX * std::cos(transport_o) - mi->t_pos.m_positionY * std::sin(transport_o));
+    float transport_y = mi->pos.m_positionY - (mi->t_pos.m_positionY * std::cos(transport_o) + mi->t_pos.m_positionX * std::sin(transport_o));
     float transport_z = mi->pos.m_positionZ - mi->t_pos.m_positionZ;
 
     Relocate(transport_x, transport_y, transport_z, transport_o);
-    UpdateNPCPositions();
+    UpdatePassengerPositions();
 }
 
-void Transport::UpdateNPCPositions()
+void Transport::UpdatePassengerPositions()
 {
     for (CreatureSet::iterator itr = m_NPCPassengerSet.begin(); itr != m_NPCPassengerSet.end(); ++itr)
     {
@@ -705,7 +699,7 @@ void Transport::UpdateNPCPositions()
     }
 }
 
-void Transport::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
+void Transport::CalculatePassengerPosition(float& x, float& y, float& z, float& o) const
 {
     float inx = x, iny = y, inz = z, ino = o;
     o = GetOrientation() + ino;
@@ -714,7 +708,7 @@ void Transport::CalculatePassengerPosition(float& x, float& y, float& z, float& 
     z = GetPositionZ() + inz;
 }
 
-void Transport::CalculatePassengerOffset(float& x, float& y, float& z, float& o)
+void Transport::CalculatePassengerOffset(float& x, float& y, float& z, float& o) const
 {
     o -= GetOrientation();
     z -= GetPositionZ();

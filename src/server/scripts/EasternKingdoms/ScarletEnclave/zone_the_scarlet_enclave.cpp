@@ -69,15 +69,14 @@ public:
             me->SetPosition(x, y, z, 0.0f);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (FlyBackTimer <= diff)
             {
                 Player* player = NULL;
                 if (me->isSummon())
                     if (Unit* summoner = me->ToTempSummon()->GetSummoner())
-                        if (summoner->GetTypeId() == TYPEID_PLAYER)
-                            player = CAST_PLR(summoner);
+                        player = summoner->ToPlayer();
 
                 if (!player)
                     phase = 3;
@@ -100,7 +99,7 @@ public:
                         FlyBackTimer = 4500;
                         break;
                     case 2:
-                        if (!player->isRessurectRequested())
+                        if (!player->IsRessurectRequested())
                         {
                             me->HandleEmoteCommand(EMOTE_ONESHOT_CUSTOM_SPELL_01);
                             DoCast(player, SPELL_REVIVE, true);

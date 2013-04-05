@@ -204,7 +204,7 @@ public:
                 DoCast(who, SPELL_SQUASH_SOUL);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (delay)
             {
@@ -325,7 +325,7 @@ public:
         }
 
         void Disappear();
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (!withbody)
             {
@@ -443,7 +443,7 @@ public:
         {
             me->SetVisible(false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT | MOVEMENTFLAG_DISABLE_GRAVITY);
+            me->AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
             me->SetSpeed(MOVE_WALK, 5.0f, true);
             wp_reached = false;
             count = 0;
@@ -476,7 +476,7 @@ public:
                         instance->SetData(GAMEOBJECT_PUMPKIN_SHRINE, 0);   //hide gameobject
                     break;
                 case 19:
-                    me->RemoveUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT | MOVEMENTFLAG_DISABLE_GRAVITY);
+                    me->RemoveUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
                     break;
                 case 20:
                 {
@@ -639,7 +639,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (withhead)
             {
@@ -858,7 +858,7 @@ public:
                 DoStartMovement(who);
         }
 
-        void UpdateAI(const uint32 /*diff*/)
+        void UpdateAI(uint32 /*diff*/)
         {
             if (sprouted && UpdateVictim())
                 DoMeleeAttackIfReady();

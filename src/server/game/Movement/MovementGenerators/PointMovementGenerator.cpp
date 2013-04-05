@@ -34,7 +34,7 @@ void PointMovementGenerator<T>::DoInitialize(T* unit)
 
     unit->AddUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
 
-    if (id == EVENT_CHARGE)
+    if (id == EVENT_CHARGE_PREPATH)
         return;
 
     Movement::MoveSplineInit init(unit);
@@ -58,7 +58,7 @@ bool PointMovementGenerator<T>::DoUpdate(T* unit, uint32 /*diff*/)
 
     unit->AddUnitState(UNIT_STATE_ROAMING_MOVE);
 
-    if (id != EVENT_CHARGE && i_recalculateSpeed && !unit->movespline->Finalized())
+    if (id != EVENT_CHARGE_PREPATH && i_recalculateSpeed && !unit->movespline->Finalized())
     {
         i_recalculateSpeed = false;
         Movement::MoveSplineInit init(unit);
@@ -128,8 +128,6 @@ void EffectMovementGenerator::Finalize(Unit* unit)
     if (unit->GetTypeId() != TYPEID_UNIT)
         return;
 
-    if (unit->ToCreature()->AI())
-        unit->ToCreature()->AI()->MovementInform(EFFECT_MOTION_TYPE, m_Id);
     // Need restore previous movement since we have no proper states system
     if (unit->isAlive() && !unit->HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_FLEEING))
     {
@@ -138,4 +136,7 @@ void EffectMovementGenerator::Finalize(Unit* unit)
         else
             unit->GetMotionMaster()->Initialize();
     }
+
+    if (unit->ToCreature()->AI())
+        unit->ToCreature()->AI()->MovementInform(EFFECT_MOTION_TYPE, m_Id);
 }

@@ -19,18 +19,14 @@
 /* ScriptData
 SDName: Tanaris
 SD%Complete: 80
-SDComment: Quest support: 648, 1560, 2954, 4005, 10277, 10279(Special flight path). Noggenfogger vendor
+SDComment: Quest support: 648, 10277, 10279(Special flight path).
 SDCategory: Tanaris
 EndScriptData */
 
 /* ContentData
-mob_aquementas
 npc_custodian_of_time
-npc_marin_noggenfogger
 npc_steward_of_time
-npc_stone_watcher_of_norgannon
 npc_OOX17
-npc_tooga
 EndContentData */
 
 #include "ScriptMgr.h"
@@ -87,15 +83,17 @@ public:
 
         void SendItem(Unit* receiver)
         {
-            if (CAST_PLR(receiver)->HasItemCount(11169, 1, false) &&
-                CAST_PLR(receiver)->HasItemCount(11172, 11, false) &&
-                CAST_PLR(receiver)->HasItemCount(11173, 1, false) &&
-                !CAST_PLR(receiver)->HasItemCount(11522, 1, true))
+            Player* player = receiver->ToPlayer();
+
+            if (player && player->HasItemCount(11169, 1, false) &&
+                player->HasItemCount(11172, 11, false) &&
+                player->HasItemCount(11173, 1, false) &&
+                !player->HasItemCount(11522, 1, true))
             {
                 ItemPosCountVec dest;
-                uint8 msg = CAST_PLR(receiver)->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 11522, 1, NULL);
+                uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 11522, 1, NULL);
                 if (msg == EQUIP_ERR_OK)
-                    CAST_PLR(receiver)->StoreNewItem(dest, 11522, 1, true);
+                    player->StoreNewItem(dest, 11522, 1, true);
             }
         }
 
@@ -104,7 +102,7 @@ public:
             Talk(AGGRO_YELL_AQUE, who->GetGUID());
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (isFriendly)
             {
@@ -254,9 +252,9 @@ public:
             if (HasEscortState(STATE_ESCORT_ESCORTING))
                 return;
 
-            if (who->GetTypeId() == TYPEID_PLAYER)
+            if (Player* player = who->ToPlayer())
             {
-                if (who->HasAura(34877) && CAST_PLR(who)->GetQuestStatus(10277) == QUEST_STATUS_INCOMPLETE)
+                if (who->HasAura(34877) && player->GetQuestStatus(10277) == QUEST_STATUS_INCOMPLETE)
                 {
                     float Radius = 10.0f;
                     if (me->IsWithinDistInMap(who, Radius))
@@ -270,44 +268,11 @@ public:
         void EnterCombat(Unit* /*who*/) {}
         void Reset() {}
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             npc_escortAI::UpdateAI(diff);
         }
     };
-
-};
-
-/*######
-## npc_marin_noggenfogger
-######*/
-
-class npc_marin_noggenfogger : public CreatureScript
-{
-public:
-    npc_marin_noggenfogger() : CreatureScript("npc_marin_noggenfogger") { }
-
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
-    {
-        player->PlayerTalkClass->ClearMenus();
-        if (action == GOSSIP_ACTION_TRADE)
-            player->GetSession()->SendListInventory(creature->GetGUID());
-
-        return true;
-    }
-
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        if (creature->isQuestGiver())
-            player->PrepareQuestMenu(creature->GetGUID());
-
-        if (creature->isVendor() && player->GetQuestRewardStatus(2662))
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
-
-        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-
-        return true;
-    }
 
 };
 
@@ -351,70 +316,6 @@ public:
         }
         else
             player->SEND_GOSSIP_MENU(9977, creature->GetGUID());
-
-        return true;
-    }
-
-};
-
-/*######
-## npc_stone_watcher_of_norgannon
-######*/
-
-#define GOSSIP_ITEM_NORGANNON_1     "What function do you serve?"
-#define GOSSIP_ITEM_NORGANNON_2     "What are the Plates of Uldum?"
-#define GOSSIP_ITEM_NORGANNON_3     "Where are the Plates of Uldum?"
-#define GOSSIP_ITEM_NORGANNON_4     "Excuse me? We've been \"reschedueled for visitations\"? What does that mean?!"
-#define GOSSIP_ITEM_NORGANNON_5     "So, what's inside Uldum?"
-#define GOSSIP_ITEM_NORGANNON_6     "I will return when i have the Plates of Uldum."
-
-class npc_stone_watcher_of_norgannon : public CreatureScript
-{
-public:
-    npc_stone_watcher_of_norgannon() : CreatureScript("npc_stone_watcher_of_norgannon") { }
-
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
-    {
-        player->PlayerTalkClass->ClearMenus();
-        switch (action)
-        {
-            case GOSSIP_ACTION_INFO_DEF:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-                player->SEND_GOSSIP_MENU(1675, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+1:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-                player->SEND_GOSSIP_MENU(1676, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+2:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
-                player->SEND_GOSSIP_MENU(1677, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+3:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_5, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
-                player->SEND_GOSSIP_MENU(1678, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+4:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_6, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5);
-                player->SEND_GOSSIP_MENU(1679, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+5:
-                player->CLOSE_GOSSIP_MENU();
-                player->AreaExploredOrEventHappens(2954);
-                break;
-        }
-        return true;
-    }
-
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        if (creature->isQuestGiver())
-            player->PrepareQuestMenu(creature->GetGUID());
-
-        if (player->GetQuestStatus(2954) == QUEST_STATUS_INCOMPLETE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NORGANNON_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-
-        player->SEND_GOSSIP_MENU(1674, creature->GetGUID());
 
         return true;
     }
@@ -603,7 +504,7 @@ public:
                 SetFollowComplete();
         }
 
-        void UpdateFollowerAI(const uint32 Diff)
+        void UpdateFollowerAI(uint32 Diff)
         {
             if (!UpdateVictim())
             {
@@ -675,11 +576,7 @@ public:
 
 void AddSC_tanaris()
 {
-    new mob_aquementas();
     new npc_custodian_of_time();
-    new npc_marin_noggenfogger();
     new npc_steward_of_time();
-    new npc_stone_watcher_of_norgannon();
     new npc_OOX17();
-    new npc_tooga();
 }

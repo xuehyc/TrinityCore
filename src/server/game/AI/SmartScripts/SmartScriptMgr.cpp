@@ -101,8 +101,6 @@ SmartWaypointMgr::~SmartWaypointMgr()
 
         delete itr->second;
     }
-
-    waypoint_map.clear();
 }
 
 void SmartAIMgr::LoadSmartAIFromDB()
@@ -676,7 +674,7 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
         case SMART_ACTION_CALL_GROUPEVENTHAPPENS:
             if (Quest const* qid = sObjectMgr->GetQuestTemplate(e.action.quest.quest))
             {
-                if (!qid->HasFlag(QUEST_TRINITY_FLAGS_EXPLORATION_OR_EVENT))
+                if (!qid->HasSpecialFlag(QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT))
                 {
                     sLog->outError(LOG_FILTER_SQL, "SmartAIMgr: Entry %d SourceType %u Event %u Action %u SpecialFlags for Quest entry %u does not include FLAGS_EXPLORATION_OR_EVENT(2), skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.quest.quest);
                     return false;
@@ -906,6 +904,11 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
         case SMART_ACTION_SEND_TARGET_TO_TARGET:
         case SMART_ACTION_SET_HOME_POS:
         case SMART_ACTION_SET_HEALTH_REGEN:
+        case SMART_ACTION_SET_ROOT:
+        case SMART_ACTION_SET_GO_FLAG:
+        case SMART_ACTION_ADD_GO_FLAG:
+        case SMART_ACTION_REMOVE_GO_FLAG:
+        case SMART_ACTION_SUMMON_CREATURE_GROUP:
             break;
         default:
             sLog->outError(LOG_FILTER_SQL, "SmartAIMgr: Not handled action_type(%u), event_type(%u), Entry %d SourceType %u Event %u, skipped.", e.GetActionType(), e.GetEventType(), e.entryOrGuid, e.GetScriptType(), e.event_id);

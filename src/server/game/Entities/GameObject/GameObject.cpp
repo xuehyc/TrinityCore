@@ -29,7 +29,7 @@
 #include "ScriptMgr.h"
 #include "CreatureAISelector.h"
 #include "Group.h"
-
+#include "MapManager.h"
 #include "GameObjectModel.h"
 #include "DynamicTree.h"
 
@@ -38,7 +38,7 @@ GameObject::GameObject(): WorldObject(false), m_model(NULL), m_goValue(), m_AI(N
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
 
-    m_updateFlag = (UPDATEFLAG_LOWGUID | UPDATEFLAG_STATIONARY_POSITION | UPDATEFLAG_POSITION | UPDATEFLAG_ROTATION);
+    m_updateFlag = (UPDATEFLAG_STATIONARY_POSITION | UPDATEFLAG_ROTATION);
 
     m_valuesCount = GAMEOBJECT_END;
     m_respawnTime = 0;
@@ -224,10 +224,15 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
 
     switch (goinfo->type)
     {
+        case GAMEOBJECT_TYPE_FISHINGHOLE:
+            SetGoAnimProgress(animprogress);
+            m_goValue.FishingHole.MaxOpens = urand(GetGOInfo()->fishinghole.minSuccessOpens, GetGOInfo()->fishinghole.maxSuccessOpens);
+            break;
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
             m_goValue.Building.Health = goinfo->building.intactNumHits + goinfo->building.damagedNumHits;
             m_goValue.Building.MaxHealth = m_goValue.Building.Health;
             SetGoAnimProgress(255);
+            SetUInt32Value(GAMEOBJECT_PARENTROTATION, m_goInfo->building.destructibleData);
             break;
         case GAMEOBJECT_TYPE_TRANSPORT:
             SetUInt32Value(GAMEOBJECT_LEVEL, goinfo->transport.pause);
@@ -257,6 +262,10 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     }
     LastUsedScriptID = GetGOInfo()->ScriptId;
     AIM_Initialize();
+
+    // Initialize loot duplicate count depending on raid difficulty
+    if (map->Is25ManRaid())
+        loot.maxDuplicates = 3;
 
     return true;
 }
@@ -309,7 +318,7 @@ void GameObject::Update(uint32 diff)
                             SetGoState(GO_STATE_ACTIVE);
                             SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN);
 
-                            UpdateData udata;
+                            UpdateData udata(caster->GetMapId());
                             WorldPacket packet;
                             BuildValuesUpdateBlockForPlayer(&udata, caster->ToPlayer());
                             udata.BuildPacket(&packet);
@@ -373,22 +382,27 @@ void GameObject::Update(uint32 diff)
                             //we need to open doors if they are closed (add there another condition if this code breaks some usage, but it need to be here for battlegrounds)
                             if (GetGoState() != GO_STATE_READY)
                                 ResetDoorOrButton();
-                            //flags in AB are type_button and we need to add them here so no break!
+                            break;
+                        case GAMEOBJECT_TYPE_FISHINGHOLE:
+                            // Initialize a new max fish count on respawn
+                            m_goValue.FishingHole.MaxOpens = urand(GetGOInfo()->fishinghole.minSuccessOpens, GetGOInfo()->fishinghole.maxSuccessOpens);
+                            break;
                         default:
-                            if (!m_spawnedByDefault)        // despawn timer
-                            {
-                                                            // can be despawned or destroyed
-                                SetLootState(GO_JUST_DEACTIVATED);
-                                return;
-                            }
-                                                            // respawn timer
-                            uint32 poolid = GetDBTableGUIDLow() ? sPoolMgr->IsPartOfAPool<GameObject>(GetDBTableGUIDLow()) : 0;
-                            if (poolid)
-                                sPoolMgr->UpdatePool<GameObject>(poolid, GetDBTableGUIDLow());
-                            else
-                                GetMap()->AddToMap(this);
                             break;
                     }
+
+                    if (!m_spawnedByDefault)        // despawn timer
+                    {
+                                                    // can be despawned or destroyed
+                        SetLootState(GO_JUST_DEACTIVATED);
+                        return;
+                    }
+                                                    // respawn timer
+                    uint32 poolid = GetDBTableGUIDLow() ? sPoolMgr->IsPartOfAPool<GameObject>(GetDBTableGUIDLow()) : 0;
+                    if (poolid)
+                        sPoolMgr->UpdatePool<GameObject>(poolid, GetDBTableGUIDLow());
+                    else
+                        GetMap()->AddToMap(this);
                 }
             }
 
@@ -415,8 +429,8 @@ void GameObject::Update(uint32 diff)
 
                     bool IsBattlegroundTrap = false;
                     //FIXME: this is activation radius (in different casting radius that must be selected from spell data)
-                    //TODO: move activated state code (cast itself) to GO_ACTIVATED, in this place only check activating and set state
-                    float radius = (float)(goInfo->trap.radius)/3*2; // TODO rename radius to diameter (goInfo->trap.radius) should be (goInfo->trap.diameter)
+                    /// @todo move activated state code (cast itself) to GO_ACTIVATED, in this place only check activating and set state
+                    float radius = (float)(goInfo->trap.radius)/3*2; /// @todo rename radius to diameter (goInfo->trap.radius) should be (goInfo->trap.diameter)
                     if (!radius)
                     {
                         if (goInfo->trap.cooldown != 3)            // cast in other case (at some triggering/linked go/etc explicit call)
@@ -932,7 +946,7 @@ bool GameObject::ActivateToQuest(Player* target) const
         {
             if (LootTemplates_Gameobject.HaveQuestLootForPlayer(GetGOInfo()->GetLootId(), target))
             {
-                //TODO: fix this hack
+                /// @todo fix this hack
                 //look for battlegroundAV for some objects which are only activated after mine gots captured by own team
                 if (GetEntry() == BG_AV_OBJECTID_MINE_N || GetEntry() == BG_AV_OBJECTID_MINE_S)
                     if (Battleground* bg = target->GetBattleground())
@@ -1340,12 +1354,12 @@ void GameObject::Use(Unit* user)
                     {
                         player->UpdateFishingSkill();
 
-                        //TODO: I do not understand this hack. Need some explanation.
+                        /// @todo I do not understand this hack. Need some explanation.
                         // prevent removing GO at spell cancel
                         RemoveFromOwner();
                         SetOwnerGUID(player->GetGUID());
 
-                        //TODO: find reasonable value for fishing hole search
+                        /// @todo find reasonable value for fishing hole search
                         GameObject* ok = LookupFishingHoleAround(20.0f + CONTACT_DISTANCE);
                         if (ok)
                         {
@@ -1355,7 +1369,7 @@ void GameObject::Use(Unit* user)
                         else
                             player->SendLoot(GetGUID(), LOOT_FISHING);
                     }
-                    // TODO: else: junk
+                    /// @todo else: junk
                     else
                         m_respawnTime = time(NULL);
 
@@ -1818,7 +1832,7 @@ void GameObject::ModifyHealth(int32 change, Unit* attackerOrHealer /*= NULL*/, u
     Player* player = attackerOrHealer->GetCharmerOrOwnerPlayerOrPlayerItself();
 
     // dealing damage, send packet
-    // TODO: is there any packet for healing?
+    /// @todo is there any packet for healing?
     if (change < 0 && player)
     {
         WorldPacket data(SMSG_DESTRUCTIBLE_BUILDING_DAMAGE, 8 + 8 + 8 + 4 + 4);

@@ -24,26 +24,28 @@ struct TSpellSummary
 
 void SummonList::DoZoneInCombat(uint32 entry)
 {
-    for (iterator i = begin(); i != end();)
+    for (StorageType::iterator i = storage_.begin(); i != storage_.end();)
     {
         Creature* summon = Unit::GetCreature(*me, *i);
         ++i;
         if (summon && summon->IsAIEnabled
-            && (!entry || summon->GetEntry() == entry))
+                && (!entry || summon->GetEntry() == entry))
+        {
             summon->AI()->DoZoneInCombat();
+        }
     }
 }
 
 void SummonList::DespawnEntry(uint32 entry)
 {
-    for (iterator i = begin(); i != end();)
+    for (StorageType::iterator i = storage_.begin(); i != storage_.end();)
     {
         Creature* summon = Unit::GetCreature(*me, *i);
         if (!summon)
-            erase(i++);
+            i = storage_.erase(i);
         else if (summon->GetEntry() == entry)
         {
-            erase(i++);
+            i = storage_.erase(i);
             summon->DespawnOrUnsummon();
         }
         else
@@ -53,33 +55,29 @@ void SummonList::DespawnEntry(uint32 entry)
 
 void SummonList::DespawnAll()
 {
-    while (!empty())
+    while (!storage_.empty())
     {
-        Creature* summon = Unit::GetCreature(*me, *begin());
-        if (!summon)
-            erase(begin());
-        else
-        {
-            erase(begin());
+        Creature* summon = Unit::GetCreature(*me, storage_.front());
+        storage_.pop_front();
+        if (summon)
             summon->DespawnOrUnsummon();
-        }
     }
 }
 
 void SummonList::RemoveNotExisting()
 {
-    for (iterator i = begin(); i != end();)
+    for (StorageType::iterator i = storage_.begin(); i != storage_.end();)
     {
         if (Unit::GetCreature(*me, *i))
             ++i;
         else
-            erase(i++);
+            i = storage_.erase(i);
     }
 }
 
 bool SummonList::HasEntry(uint32 entry) const
 {
-    for (const_iterator i = begin(); i != end(); ++i)
+    for (StorageType::const_iterator i = storage_.begin(); i != storage_.end(); ++i)
     {
         Creature* summon = Unit::GetCreature(*me, *i);
         if (summon && summon->GetEntry() == entry)
@@ -104,11 +102,19 @@ void ScriptedAI::AttackStartNoMove(Unit* who)
     if (!who)
         return;
 
-    if (me->Attack(who, false))
+    if (me->Attack(who, true))
         DoStartNoMovement(who);
 }
 
-void ScriptedAI::UpdateAI(uint32 const /*diff*/)
+void ScriptedAI::AttackStart(Unit* who)
+{
+    if (IsCombatMovementAllowed())
+        CreatureAI::AttackStart(who);
+    else
+        AttackStartNoMove(who);
+}
+
+void ScriptedAI::UpdateAI(uint32 /*diff*/)
 {
     //Check if we have a current target
     if (!UpdateVictim())
@@ -217,7 +223,7 @@ SpellInfo const* ScriptedAI::SelectSpell(Unit* target, uint32 school, uint32 mec
             continue;
 
         //Continue if we don't have the mana to actually cast this spell
-        if (tempSpell->ManaCost > me->GetPower(Powers(tempSpell->PowerType)))
+        if (tempSpell->ManaCost > (uint32)me->GetPower(Powers(tempSpell->PowerType)))
             continue;
 
         //Check if the spell meets our range requirements
@@ -362,9 +368,7 @@ void ScriptedAI::SetEquipmentSlots(bool loadDefault, int32 mainHand /*= EQUIP_NO
 {
     if (loadDefault)
     {
-        if (CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(me->GetEntry()))
-            me->LoadEquipment(creatureInfo->equipmentId, true);
-
+        me->LoadEquipment(me->GetOriginalEquipmentId(), true);
         return;
     }
 
@@ -439,15 +443,6 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(uint32 const diff)
     return true;
 }
 
-void Scripted_NoMovementAI::AttackStart(Unit* target)
-{
-    if (!target)
-        return;
-
-    if (me->Attack(target, true))
-        DoStartNoMovement(target);
-}
-
 // BossAI - for instanced bosses
 BossAI::BossAI(Creature* creature, uint32 bossId) : ScriptedAI(creature),
     instance(creature->GetInstanceScript()),
@@ -518,35 +513,35 @@ bool BossAI::CheckBoundary(Unit* who)
         switch (itr->first)
         {
             case BOUNDARY_N:
-                if (me->GetPositionX() > itr->second)
+                if (who->GetPositionX() > itr->second)
                     return false;
                 break;
             case BOUNDARY_S:
-                if (me->GetPositionX() < itr->second)
+                if (who->GetPositionX() < itr->second)
                     return false;
                 break;
             case BOUNDARY_E:
-                if (me->GetPositionY() < itr->second)
+                if (who->GetPositionY() < itr->second)
                     return false;
                 break;
             case BOUNDARY_W:
-                if (me->GetPositionY() > itr->second)
+                if (who->GetPositionY() > itr->second)
                     return false;
                 break;
             case BOUNDARY_NW:
-                if (me->GetPositionX() + me->GetPositionY() > itr->second)
+                if (who->GetPositionX() + who->GetPositionY() > itr->second)
                     return false;
                 break;
             case BOUNDARY_SE:
-                if (me->GetPositionX() + me->GetPositionY() < itr->second)
+                if (who->GetPositionX() + who->GetPositionY() < itr->second)
                     return false;
                 break;
             case BOUNDARY_NE:
-                if (me->GetPositionX() - me->GetPositionY() > itr->second)
+                if (who->GetPositionX() - who->GetPositionY() > itr->second)
                     return false;
                 break;
             case BOUNDARY_SW:
-                if (me->GetPositionX() - me->GetPositionY() < itr->second)
+                if (who->GetPositionX() - who->GetPositionY() < itr->second)
                     return false;
                 break;
             default:
@@ -569,7 +564,7 @@ void BossAI::SummonedCreatureDespawn(Creature* summon)
     summons.Despawn(summon);
 }
 
-void BossAI::UpdateAI(uint32 const diff)
+void BossAI::UpdateAI(uint32 diff)
 {
     if (!UpdateVictim())
         return;
@@ -583,6 +578,20 @@ void BossAI::UpdateAI(uint32 const diff)
         ExecuteEvent(eventId);
 
     DoMeleeAttackIfReady();
+}
+
+void BossAI::_DespawnAtEvade()
+{
+    uint32 corpseDelay = me->GetCorpseDelay();
+    uint32 respawnDelay = me->GetRespawnDelay();
+
+    me->SetCorpseDelay(1);
+    me->SetRespawnDelay(29);
+
+    me->DespawnOrUnsummon();
+
+    me->SetCorpseDelay(corpseDelay);
+    me->SetRespawnDelay(respawnDelay);
 }
 
 // WorldBossAI - for non-instanced bosses
@@ -628,7 +637,7 @@ void WorldBossAI::SummonedCreatureDespawn(Creature* summon)
     summons.Despawn(summon);
 }
 
-void WorldBossAI::UpdateAI(uint32 const diff)
+void WorldBossAI::UpdateAI(uint32 diff)
 {
     if (!UpdateVictim())
         return;

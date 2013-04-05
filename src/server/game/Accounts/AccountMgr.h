@@ -19,8 +19,7 @@
 #ifndef _ACCMGR_H
 #define _ACCMGR_H
 
-#include "Define.h"
-#include <string>
+#include "RBAC.h"
 #include <ace/Singleton.h>
 
 enum AccountOpResult
@@ -35,15 +34,21 @@ enum AccountOpResult
 
 #define MAX_ACCOUNT_STR 16
 
+typedef std::map<uint32, RBACPermission*> RBACPermissionsContainer;
+typedef std::map<uint32, RBACRole*> RBACRolesContainer;
+typedef std::map<uint32, RBACGroup*> RBACGroupsContainer;
+typedef std::map<uint32, RBACGroupContainer> RBACDefaultSecurityGroupContainer;
+
 class AccountMgr
 {
     friend class ACE_Singleton<AccountMgr, ACE_Null_Mutex>;
 
     private:
         AccountMgr();
+        ~AccountMgr();
 
     public:
-        static AccountOpResult CreateAccount(std::string username, std::string password);
+        AccountOpResult CreateAccount(std::string username, std::string password);
         static AccountOpResult DeleteAccount(uint32 accountId);
         static AccountOpResult ChangeUsername(uint32 accountId, std::string newUsername, std::string newPassword);
         static AccountOpResult ChangePassword(uint32 accountId, std::string newPassword);
@@ -58,10 +63,29 @@ class AccountMgr
         static std::string CalculateShaPassHash(std::string const& name, std::string const& password);
         static bool normalizeString(std::string& utf8String);
         static bool IsPlayerAccount(uint32 gmlevel);
-        static bool IsModeratorAccount(uint32 gmlevel);
-        static bool IsGMAccount(uint32 gmlevel);
         static bool IsAdminAccount(uint32 gmlevel);
         static bool IsConsoleAccount(uint32 gmlevel);
+        static bool HasPermission(uint32 accountId, uint32 permission, uint32 realmId);
+
+        void UpdateAccountAccess(RBACData* rbac, uint32 accountId, uint8 securityLevel, int32 realmId);
+
+        void LoadRBAC();
+        RBACGroup const* GetRBACGroup(uint32 group) const;
+        RBACRole const* GetRBACRole(uint32 role) const;
+        RBACPermission const* GetRBACPermission(uint32 permission) const;
+
+        RBACGroupsContainer const& GetRBACGroupList() const { return _groups; }
+        RBACRolesContainer const& GetRBACRoleList() const { return _roles; }
+        RBACPermissionsContainer const& GetRBACPermissionList() const { return _permissions; }
+        RBACGroupContainer const& GetRBACDefaultGroups() const { return _defaultGroups; }
+
+    private:
+        void ClearRBAC();
+        RBACPermissionsContainer _permissions;
+        RBACRolesContainer _roles;
+        RBACGroupsContainer _groups;
+        RBACDefaultSecurityGroupContainer _defaultSecGroups;
+        RBACGroupContainer _defaultGroups;
 };
 
 #define sAccountMgr ACE_Singleton<AccountMgr, ACE_Null_Mutex>::instance()

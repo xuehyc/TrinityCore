@@ -86,7 +86,40 @@ enum TrinityStrings
     LANG_CONNECTED_PLAYERS              = 60,
     LANG_ACCOUNT_ADDON                  = 61,
     LANG_IMPROPER_VALUE                 = 62,
-    // Room for more level 0              63-99 not used
+    LANG_RBAC_WRONG_PARAMETER_ID        = 63,
+    LANG_RBAC_WRONG_PARAMETER_REALM     = 64,
+    LANG_RBAC_GROUP_IN_LIST             = 65,
+    LANG_RBAC_GROUP_NOT_IN_LIST         = 66,
+    LANG_RBAC_GROUP_ADDED               = 67,
+    LANG_RBAC_GROUP_REMOVED             = 68,
+    LANG_RBAC_GROUP_LIST_HEADER         = 69,
+    LANG_RBAC_LIST_EMPTY                = 70,
+    LANG_RBAC_LIST_ELEMENT              = 71,
+    LANG_RBAC_ROLE_GRANTED_IN_LIST      = 72,
+    LANG_RBAC_ROLE_GRANTED_IN_DENIED_LIST = 73,
+    LANG_RBAC_ROLE_GRANTED              = 74,
+    LANG_RBAC_ROLE_DENIED_IN_LIST       = 75,
+    LANG_RBAC_ROLE_DENIED_IN_GRANTED_LIST = 76,
+    LANG_RBAC_ROLE_DENIED               = 77,
+    LANG_RBAC_ROLE_REVOKED              = 78,
+    LANG_RBAC_ROLE_REVOKED_NOT_IN_LIST  = 79,
+    LANG_RBAC_ROLE_LIST_HEADER_GRANTED  = 80,
+    LANG_RBAC_ROLE_LIST_HEADER_DENIED   = 81,
+    LANG_RBAC_PERM_GRANTED_IN_LIST      = 82,
+    LANG_RBAC_PERM_GRANTED_IN_DENIED_LIST = 83,
+    LANG_RBAC_PERM_GRANTED              = 84,
+    LANG_RBAC_PERM_DENIED_IN_LIST       = 85,
+    LANG_RBAC_PERM_DENIED_IN_GRANTED_LIST = 86,
+    LANG_RBAC_PERM_DENIED               = 87,
+    LANG_RBAC_PERM_REVOKED              = 88,
+    LANG_RBAC_PERM_REVOKED_NOT_IN_LIST  = 89,
+    LANG_RBAC_PERM_LIST_HEADER_GRANTED  = 90,
+    LANG_RBAC_PERM_LIST_HEADER_DENIED   = 91,
+    LANG_RBAC_PERM_LIST_GLOBAL          = 92,
+    LANG_RBAC_LIST_GROUPS_HEADER        = 93,
+    LANG_RBAC_LIST_ROLES_HEADER         = 94,
+    LANG_RBAC_LIST_PERMISSIONS_HEADER   = 95,
+    // Room for more level 0            96-99 not used
 
     // level 1 chat
     LANG_GLOBAL_NOTIFY                  = 100,
@@ -173,7 +206,15 @@ enum TrinityStrings
     LANG_YOU_CHANGE_RUNIC_POWER         = 173,
     LANG_YOURS_RUNIC_POWER_CHANGED      = 174,
     LANG_LIQUID_STATUS                  = 175,
-    // Room for more level 1              176-199 not used
+
+    LANG_PHASING_REPORT_STATUS          = 176,
+    LANG_PHASING_NO_DEFINITIONS         = 177,              // Phasing
+    LANG_PHASING_SUCCESS                = 178,
+    LANG_PHASING_FAILED                 = 179,
+    LANG_PHASING_LAST_PHASE             = 180,
+    LANG_PHASING_LIST                   = 181,
+    LANG_PHASING_PHASEMASK              = 182,
+    // Room for more level 1              183-199 not used
 
     // level 2 chat
     LANG_NO_SELECTION                   = 200,
@@ -343,7 +384,8 @@ enum TrinityStrings
     LANG_COMMAND_CHEAT_CD               = 360,
     LANG_COMMAND_CHEAT_POWER            = 361,
     LANG_COMMAND_CHEAT_WW               = 362,
-    // Room for more level 2              363-399 not used
+    LANG_COMMAND_WHISPEROFFPLAYER       = 363,
+    // Room for more level 2              364-399 not used
 
     // level 3 chat
     LANG_SCRIPTS_RELOADED               = 400,
@@ -522,6 +564,7 @@ enum TrinityStrings
     LANG_PINFO_BAN                      = 453,
     LANG_PINFO_MAP_ONLINE               = 714,
     LANG_PINFO_MAP_OFFLINE              = 716,
+    LANG_PINFO_GUILD_INFO               = 749,
 
     LANG_YOU_SET_EXPLORE_ALL            = 551,
     LANG_YOU_SET_EXPLORE_NOTHING        = 552,
@@ -698,12 +741,12 @@ enum TrinityStrings
     LANG_DEBUG_ARENA_OFF                = 738,
     LANG_DEBUG_BG_ON                    = 739,
     LANG_DEBUG_BG_OFF                   = 740,
-    LANG_DIST_ARENA_POINTS_START        = 741,
-    LANG_DIST_ARENA_POINTS_ONLINE_START = 742,
-    LANG_DIST_ARENA_POINTS_ONLINE_END   = 743,
-    LANG_DIST_ARENA_POINTS_TEAM_START   = 744,
-    LANG_DIST_ARENA_POINTS_TEAM_END     = 745,
-    LANG_DIST_ARENA_POINTS_END          = 746,
+//  LANG_DIST_ARENA_POINTS_START        = 741,
+//  LANG_DIST_ARENA_POINTS_ONLINE_START = 742,
+//  LANG_DIST_ARENA_POINTS_ONLINE_END   = 743,
+//  LANG_DIST_ARENA_POINTS_TEAM_START   = 744,
+//  LANG_DIST_ARENA_POINTS_TEAM_END     = 745,
+//  LANG_DIST_ARENA_POINTS_END          = 746,
     LANG_BG_DISABLED                    = 747,
     LANG_ARENA_DISABLED                 = 748,
 //                                      = 749, not used
@@ -851,7 +894,15 @@ enum TrinityStrings
     LANG_GROUP_PLAYER_JOINED            = 1146,
     LANG_GROUP_NOT_IN_GROUP             = 1147,
     LANG_GROUP_FULL                     = 1148,
-    // Room for more level 3              1149-1199 not used
+    LANG_GROUP_TYPE                     = 1149,
+    LANG_GROUP_PLAYER_NAME_GUID         = 1150,
+    LANG_LIST_MAIL_HEADER               = 1151,
+    LANG_LIST_MAIL_INFO_1               = 1152,
+    LANG_LIST_MAIL_INFO_2               = 1153,
+    LANG_LIST_MAIL_INFO_3               = 1154,
+    LANG_LIST_MAIL_INFO_ITEM            = 1155,
+    LANG_LIST_MAIL_NOT_FOUND            = 1156,
+    // Room for more level 3              1157-1199 not used
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
@@ -997,7 +1048,8 @@ enum TrinityStrings
     LANG_COMMAND_NO_ACHIEVEMENT_CRITERIA_FOUND = 5033,
     LANG_COMMAND_NO_OUTDOOR_PVP_FORUND  = 5034,
     LANG_CALL_FOR_HELP                  = 5035,
-    // Room for more Trinity strings      5036-9999
+    LANG_NPCINFO_EQUIPMENT              = 5036,
+    // Room for more Trinity strings      5037-9999
 
     // Level requirement notifications
     LANG_SAY_REQ                        = 6604,

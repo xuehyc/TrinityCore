@@ -31,8 +31,8 @@
 #include "QueryHolder.h"
 #include "AdhocStatement.h"
 
-#define MIN_MYSQL_SERVER_VERSION 51000u
-#define MIN_MYSQL_CLIENT_VERSION 51000u
+#define MIN_MYSQL_SERVER_VERSION 50100u
+#define MIN_MYSQL_CLIENT_VERSION 50100u
 
 class PingOperation : public SQLOperation
 {
@@ -55,8 +55,8 @@ class DatabaseWorkerPool
             memset(_connectionCount, 0, sizeof(_connectionCount));
             _connections.resize(IDX_SIZE);
 
-            WPFatal (mysql_thread_safe(), "Used MySQL library isn't thread-safe.");
-            WPFatal (mysql_get_client_version() >= MIN_MYSQL_CLIENT_VERSION, "TrinityCore does not support MySQL versions below 5.1");
+            WPFatal(mysql_thread_safe(), "Used MySQL library isn't thread-safe.");
+            WPFatal(mysql_get_client_version() >= MIN_MYSQL_CLIENT_VERSION, "TrinityCore does not support MySQL versions below 5.1");
         }
 
         ~DatabaseWorkerPool()
@@ -77,7 +77,8 @@ class DatabaseWorkerPool
             {
                 T* t = new T(_queue, _connectionInfo);
                 res &= t->Open();
-                WPFatal (mysql_get_server_version(t->GetHandle()) >= MIN_MYSQL_SERVER_VERSION, "TrinityCore does not support MySQL versions below 5.1");
+                if (res) // only check mysql version if connection is valid
+                    WPFatal(mysql_get_server_version(t->GetHandle()) >= MIN_MYSQL_SERVER_VERSION, "TrinityCore does not support MySQL versions below 5.1");
                 _connections[IDX_ASYNC][i] = t;
                 ++_connectionCount[IDX_ASYNC];
             }
@@ -221,7 +222,7 @@ class DatabaseWorkerPool
 
         //! Directly executes an SQL query in string format that will block the calling thread until finished.
         //! Returns reference counted auto pointer, no need for manual memory management in upper level code.
-        QueryResult Query(const char* sql, MySQLConnection* conn = NULL)
+        QueryResult Query(const char* sql, T* conn = NULL)
         {
             if (!conn)
                 conn = GetFreeConnection();
@@ -240,7 +241,7 @@ class DatabaseWorkerPool
 
         //! Directly executes an SQL query in string format -with variable args- that will block the calling thread until finished.
         //! Returns reference counted auto pointer, no need for manual memory management in upper level code.
-        QueryResult PQuery(const char* sql, MySQLConnection* conn, ...)
+        QueryResult PQuery(const char* sql, T* conn, ...)
         {
             if (!sql)
                 return QueryResult(NULL);
@@ -379,7 +380,7 @@ class DatabaseWorkerPool
         //! were appended to the transaction will be respected during execution.
         void DirectCommitTransaction(SQLTransaction& transaction)
         {
-            MySQLConnection* con = GetFreeConnection();
+            T* con = GetFreeConnection();
             if (con->ExecuteTransaction(transaction))
             {
                 con->Unlock();      // OK, operation succesful
@@ -387,7 +388,7 @@ class DatabaseWorkerPool
             }
 
             //! Handle MySQL Errno 1213 without extending deadlock to the core itself
-            //! TODO: More elegant way
+            /// @todo More elegant way
             if (con->GetLastError() == 1213)
             {
                 uint8 loopBreaker = 5;
@@ -489,17 +490,17 @@ class DatabaseWorkerPool
         {
             uint8 i = 0;
             size_t num_cons = _connectionCount[IDX_SYNCH];
+            T* t = NULL;
             //! Block forever until a connection is free
             for (;;)
             {
-                T* t = _connections[IDX_SYNCH][++i % num_cons];
+                t = _connections[IDX_SYNCH][++i % num_cons];
                 //! Must be matched with t->Unlock() or you will get deadlocks
                 if (t->LockIfReady())
-                    return t;
+                    break;
             }
 
-            //! This will be called when Celine Dion learns to sing
-            return NULL;
+            return t;
         }
 
         char const* GetDatabaseName() const

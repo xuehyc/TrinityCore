@@ -32,7 +32,7 @@ int AggressorAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-void AggressorAI::UpdateAI(const uint32 /*diff*/)
+void AggressorAI::UpdateAI(uint32 /*diff*/)
 {
     if (!UpdateVictim())
         return;
@@ -93,7 +93,7 @@ void CombatAI::EnterCombat(Unit* who)
     }
 }
 
-void CombatAI::UpdateAI(const uint32 diff)
+void CombatAI::UpdateAI(uint32 diff)
 {
     if (!UpdateVictim())
         return;
@@ -157,7 +157,7 @@ void CasterAI::EnterCombat(Unit* who)
     }
 }
 
-void CasterAI::UpdateAI(const uint32 diff)
+void CasterAI::UpdateAI(uint32 diff)
 {
     if (!UpdateVictim())
         return;
@@ -219,7 +219,7 @@ void ArcherAI::AttackStart(Unit* who)
         me->GetMotionMaster()->MoveIdle();
 }
 
-void ArcherAI::UpdateAI(const uint32 /*diff*/)
+void ArcherAI::UpdateAI(uint32 /*diff*/)
 {
     if (!UpdateVictim())
         return;
@@ -247,7 +247,7 @@ TurretAI::TurretAI(Creature* c) : CreatureAI(c)
 
 bool TurretAI::CanAIAttack(const Unit* /*who*/) const
 {
-    // TODO: use one function to replace it
+    /// @todo use one function to replace it
     if (!me->IsWithinCombatRange(me->getVictim(), me->m_CombatDistance)
         || (m_minRange && me->IsWithinCombatRange(me->getVictim(), m_minRange)))
         return false;
@@ -260,7 +260,7 @@ void TurretAI::AttackStart(Unit* who)
         me->Attack(who, false);
 }
 
-void TurretAI::UpdateAI(const uint32 /*diff*/)
+void TurretAI::UpdateAI(uint32 /*diff*/)
 {
     if (!UpdateVictim())
         return;
@@ -280,7 +280,7 @@ VehicleAI::VehicleAI(Creature* c) : CreatureAI(c), m_vehicle(c->GetVehicleKit())
 }
 
 //NOTE: VehicleAI::UpdateAI runs even while the vehicle is mounted
-void VehicleAI::UpdateAI(const uint32 diff)
+void VehicleAI::UpdateAI(uint32 diff)
 {
     CheckConditions(diff);
 

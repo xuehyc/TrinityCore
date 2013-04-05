@@ -20,7 +20,7 @@
 #define TRINITYCORE_COMMON_H
 
 // config.h needs to be included 1st
-// TODO this thingy looks like hack, but its not, need to
+/// @todo this thingy looks like hack, but its not, need to
 // make separate header however, because It makes mess here.
 #ifdef HAVE_CONFIG_H
 // Remove Some things that we will define
@@ -116,7 +116,7 @@
 #define I32FMT "%08I32X"
 #define I64FMT "%016I64X"
 #define snprintf _snprintf
-#define atoll __atoi64
+#define atoll _atoi64
 #define vsnprintf _vsnprintf
 #define finite(X) _finite(X)
 #define llabs _abs64
@@ -170,7 +170,7 @@ enum LocaleConstant
 };
 
 const uint8 TOTAL_LOCALES = 9;
-const LocaleConstant DEFAULT_LOCALE = LOCALE_enUS;
+#define DEFAULT_LOCALE LOCALE_enUS
 
 #define MAX_LOCALES 8
 #define MAX_ACCOUNT_TUTORIAL_VALUES 8
@@ -180,6 +180,23 @@ extern char const* localeNames[TOTAL_LOCALES];
 LocaleConstant GetLocaleByName(const std::string& name);
 
 typedef std::vector<std::string> StringVector;
+
+#if defined(__GNUC__)
+#pragma pack(1)
+#else
+#pragma pack(push, 1)
+#endif
+
+struct LocalizedString
+{
+    char const* Str[TOTAL_LOCALES];
+};
+
+#if defined(__GNUC__)
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
 
 // we always use stdlibc++ std::max/std::min, undefine some not C++ standard defines (Win API and some other platforms)
 #ifdef max

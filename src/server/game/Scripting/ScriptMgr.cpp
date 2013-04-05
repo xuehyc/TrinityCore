@@ -489,14 +489,14 @@ void ScriptMgr::OnGroupRateCalculation(float& rate, uint32 count, bool isRaid)
 }
 
 #define SCR_MAP_BGN(M, V, I, E, C, T) \
-    if (V->GetEntry()->T()) \
+    if (V->GetEntry() && V->GetEntry()->T()) \
     { \
         FOR_SCRIPTS(M, I, E) \
         { \
             MapEntry const* C = I->second->GetEntry(); \
             if (!C) \
                 continue; \
-            if (entry->MapID == V->GetId()) \
+            if (C->MapID == V->GetId()) \
             {
 
 #define SCR_MAP_END \
@@ -579,6 +579,8 @@ void ScriptMgr::OnPlayerEnterMap(Map* map, Player* player)
 {
     ASSERT(map);
     ASSERT(player);
+
+    FOREACH_SCRIPT(PlayerScript)->OnMapChanged(player);
 
     SCR_MAP_BGN(WorldMapScript, map, itr, end, entry, IsWorldMap);
         itr->second->OnPlayerEnter(map, player);
@@ -764,7 +766,7 @@ uint32 ScriptMgr::GetDialogStatus(Player* player, Creature* creature)
     ASSERT(player);
     ASSERT(creature);
 
-    // TODO: 100 is a funny magic number to have hanging around here...
+    /// @todo 100 is a funny magic number to have hanging around here...
     GET_SCRIPT_RET(CreatureScript, creature->GetScriptId(), tmpscript, 100);
     player->PlayerTalkClass->ClearMenus();
     return tmpscript->GetDialogStatus(player, creature);
@@ -850,7 +852,7 @@ uint32 ScriptMgr::GetDialogStatus(Player* player, GameObject* go)
     ASSERT(player);
     ASSERT(go);
 
-    // TODO: 100 is a funny magic number to have hanging around here...
+    /// @todo 100 is a funny magic number to have hanging around here...
     GET_SCRIPT_RET(GameObjectScript, go->GetScriptId(), tmpscript, 100);
     player->PlayerTalkClass->ClearMenus();
     return tmpscript->GetDialogStatus(player, go);
@@ -916,7 +918,7 @@ bool ScriptMgr::OnAreaTrigger(Player* player, AreaTriggerEntry const* trigger)
 
 Battleground* ScriptMgr::CreateBattleground(BattlegroundTypeId /*typeId*/)
 {
-    // TODO: Implement script-side battlegrounds.
+    /// @todo Implement script-side battlegrounds.
     ASSERT(false);
     return NULL;
 }
@@ -1151,7 +1153,7 @@ void ScriptMgr::OnPlayerTalentsReset(Player* player, bool noCost)
     FOREACH_SCRIPT(PlayerScript)->OnTalentsReset(player, noCost);
 }
 
-void ScriptMgr::OnPlayerMoneyChanged(Player* player, int32& amount)
+void ScriptMgr::OnPlayerMoneyChanged(Player* player, int64& amount)
 {
     FOREACH_SCRIPT(PlayerScript)->OnMoneyChanged(player, amount);
 }
@@ -1287,12 +1289,12 @@ void ScriptMgr::OnGuildDisband(Guild* guild)
     FOREACH_SCRIPT(GuildScript)->OnDisband(guild);
 }
 
-void ScriptMgr::OnGuildMemberWitdrawMoney(Guild* guild, Player* player, uint32 &amount, bool isRepair)
+void ScriptMgr::OnGuildMemberWitdrawMoney(Guild* guild, Player* player, uint64 &amount, bool isRepair)
 {
     FOREACH_SCRIPT(GuildScript)->OnMemberWitdrawMoney(guild, player, amount, isRepair);
 }
 
-void ScriptMgr::OnGuildMemberDepositMoney(Guild* guild, Player* player, uint32 &amount)
+void ScriptMgr::OnGuildMemberDepositMoney(Guild* guild, Player* player, uint64 &amount)
 {
     FOREACH_SCRIPT(GuildScript)->OnMemberDepositMoney(guild, player, amount);
 }

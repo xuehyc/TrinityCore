@@ -18,17 +18,13 @@
 
 /* ScriptData
 SDName: Moonglade
-SD%Complete: 100
-SDComment: Quest support: 30, 272, 5929, 5930, 10965. Special Flight Paths for Druid class.
+SD%Complete: 0
+SDComment: Quest support:
 SDCategory: Moonglade
 EndScriptData */
 
 /* ContentData
-npc_bunthen_plainswind
-npc_great_bear_spirit
-npc_silva_filnaveth
-npc_clintar_spirit
-npc_clintar_dreamwalker
+npc_omen
 EndContentData */
 
 #include "ScriptMgr.h"
@@ -37,9 +33,10 @@ EndContentData */
 #include "ScriptedGossip.h"
 #include "Player.h"
 #include "SpellInfo.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "Cell.h"
 #include "CellImpl.h"
-#include "GridNotifiers.h"
 
 /*######
 ## npc_bunthen_plainswind
@@ -383,7 +380,7 @@ public:
             return;
         }
 
-        void UpdateAI(uint32 const diff)
+        void UpdateAI(uint32 diff)
         {
             npc_escortAI::UpdateAI(diff);
 
@@ -630,7 +627,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
                 return;
@@ -677,7 +674,7 @@ public:
             events.ScheduleEvent(EVENT_DESPAWN, 5*MINUTE*IN_MILLISECONDS);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             events.Update(diff);
 

@@ -22,9 +22,15 @@
 // For static or at-server-startup loaded spell data
 
 #include <ace/Singleton.h>
-#include "Common.h"
+
+#include "DBCStructure.h"
 #include "SharedDefines.h"
-#include "Unit.h"
+#include "UnorderedMap.h"
+#include "Util.h"
+
+#include <map>
+#include <set>
+#include <vector>
 
 class SpellInfo;
 class Player;
@@ -84,7 +90,7 @@ enum SpellFamilyFlag
     SPELLFAMILYFLAG_DK_DEATH_STRIKE         = 0x00000010,
     SPELLFAMILYFLAG_DK_DEATH_COIL           = 0x00002000,
 
-    // TODO: Figure out a more accurate name for the following familyflag(s)
+    /// @todo Figure out a more accurate name for the following familyflag(s)
     SPELLFAMILYFLAG_SHAMAN_TOTEM_EFFECTS    = 0x04000000  // Seems to be linked to most totems and some totem effects
 };
 
@@ -442,10 +448,7 @@ class PetAura
         typedef UNORDERED_MAP<uint32, uint32> PetAuraMap;
 
     public:
-        PetAura() : removeOnChangePet(false), damage(0)
-        {
-            auras.clear();
-        }
+        PetAura() : removeOnChangePet(false), damage(0) { }
 
         PetAura(uint32 petEntry, uint32 aura, bool _removeOnChangePet, int _damage) :
         removeOnChangePet(_removeOnChangePet), damage(_damage)
@@ -578,6 +581,8 @@ typedef std::map<int32, std::vector<int32> > SpellLinkedMap;
 
 bool IsPrimaryProfessionSkill(uint32 skill);
 
+bool IsWeaponSkill(uint32 skill);
+
 inline bool IsProfessionSkill(uint32 skill)
 {
     return  IsPrimaryProfessionSkill(skill) || skill == SKILL_FISHING || skill == SKILL_COOKING || skill == SKILL_FIRST_AID;
@@ -630,8 +635,6 @@ class SpellMgr
         SpellRequiredMapBounds GetSpellsRequiredForSpellBounds(uint32 spell_id) const;
         SpellsRequiringSpellMapBounds GetSpellsRequiringSpellBounds(uint32 spell_id) const;
         bool IsSpellRequiringSpell(uint32 spellid, uint32 req_spellid) const;
-        const SpellsRequiringSpellMap GetSpellsRequiringSpell();
-        uint32 GetSpellRequired(uint32 spell_id) const;
 
         // Spell learning
         SpellLearnSkillNode const* GetSpellLearnSkill(uint32 spell_id) const;
@@ -656,11 +659,11 @@ class SpellMgr
 
         // Spell proc event table
         SpellProcEventEntry const* GetSpellProcEvent(uint32 spellId) const;
-        bool IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellProcEvent, uint32 EventProcFlag, SpellInfo const* procSpell, uint32 procFlags, uint32 procExtra, bool active);
+        bool IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellProcEvent, uint32 EventProcFlag, SpellInfo const* procSpell, uint32 procFlags, uint32 procExtra, bool active) const;
 
         // Spell proc table
         SpellProcEntry const* GetSpellProcEntry(uint32 spellId) const;
-        bool CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcEventInfo& eventInfo);
+        bool CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcEventInfo& eventInfo) const;
 
         // Spell bonus data table
         SpellBonusEntry const* GetSpellBonusData(uint32 spellId) const;
@@ -670,7 +673,7 @@ class SpellMgr
 
         SkillLineAbilityMapBounds GetSkillLineAbilityMapBounds(uint32 spell_id) const;
 
-        PetAura const* GetPetAura(uint32 spell_id, uint8 eff);
+        PetAura const* GetPetAura(uint32 spell_id, uint8 eff) const;
 
         SpellEnchantProcEntry const* GetSpellEnchantProcEvent(uint32 enchId) const;
         bool IsArenaAllowedEnchancment(uint32 ench_id) const;
@@ -718,7 +721,7 @@ class SpellMgr
         void UnloadSpellInfoStore();
         void UnloadSpellInfoImplicitTargetConditionLists();
         void LoadSpellCustomAttr();
-        void LoadDbcDataCorrections();
+        void LoadSpellInfoCorrections();
 
     private:
         SpellDifficultySearcherMap mSpellDifficultySearcherMap;

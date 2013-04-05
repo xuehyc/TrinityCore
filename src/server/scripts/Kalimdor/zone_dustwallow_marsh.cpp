@@ -19,16 +19,13 @@
 /* ScriptData
 SDName: Dustwallow_Marsh
 SD%Complete: 95
-SDComment: Quest support: 11180, 558, 11126, 11142, 11174, Vendor Nat Pagle
+SDComment: Quest support: 1270, 1222, 27245
 SDCategory: Dustwallow Marsh
 EndScriptData */
 
 /* ContentData
-mobs_risen_husk_spirit
-npc_lady_jaina_proudmoore
-npc_nat_pagle
-npc_private_hendel
-npc_cassa_crimsonwing - handled by npc_taxi
+npc_stinky
+go_blackhoof_cage
 EndContentData */
 
 #include "ScriptMgr.h"
@@ -95,7 +92,7 @@ class mobs_risen_husk_spirit : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -204,7 +201,7 @@ public:
             Step = 0;
         }
 
-        void UpdateAI(const uint32 Diff)
+        void UpdateAI(uint32 Diff)
         {
             if (!me->HasAura(SPELL_PROPAGANDIZED))
                 me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -336,7 +333,7 @@ enum Hendel
     NPC_TERVOSH                 = 4967
 };
 
-//TODO: develop this further, end event not created
+/// @todo develop this further, end event not created
 class npc_private_hendel : public CreatureScript
 {
 public:
@@ -458,7 +455,7 @@ public:
             Talk(SAY_ZELFRAX2);
         }
 
-        void UpdateAI(uint32 const /*Diff*/)
+        void UpdateAI(uint32 /*Diff*/)
         {
             if (!UpdateVictim())
                 return;
@@ -583,7 +580,7 @@ public:
             }
         }
 
-       void UpdateAI(const uint32 uiDiff)
+       void UpdateAI(uint32 uiDiff)
         {
             npc_escortAI::UpdateAI(uiDiff);
 
@@ -766,13 +763,7 @@ public:
 
 void AddSC_dustwallow_marsh()
 {
-    new mobs_risen_husk_spirit();
-    new npc_lady_jaina_proudmoore();
-    new npc_nat_pagle();
-    new npc_private_hendel();
-    new npc_zelfrax();
     new npc_stinky();
-    new npc_theramore_guard();
     new spell_ooze_zap();
     new spell_ooze_zap_channel_end();
     new spell_energize_aoe();

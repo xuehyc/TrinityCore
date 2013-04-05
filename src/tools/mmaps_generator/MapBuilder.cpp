@@ -166,8 +166,8 @@ namespace MMAP
     void MapBuilder::buildAllMaps(int threads)
     {
         std::vector<BuilderThread*> _threads;
-                
-        BuilderThreadPool* pool = new BuilderThreadPool();
+
+        BuilderThreadPool* pool = threads > 0 ? new BuilderThreadPool() : NULL;
 
         for (TileList::iterator it = m_tiles.begin(); it != m_tiles.end(); ++it)
         {
@@ -175,13 +175,13 @@ namespace MMAP
             if (!shouldSkipMap(mapID))
             {
                 if (threads > 0)
-                    pool->Enqueue(new BuildAMapPlz(mapID)); 
+                    pool->Enqueue(new MapBuildRequest(mapID));
                 else
                     buildMap(mapID);
             }
         }
 
-       for (int i = 0; i < threads; ++i)
+        for (int i = 0; i < threads; ++i)
             _threads.push_back(new BuilderThread(this, pool->Queue()));
 
         // Free memory
@@ -957,7 +957,7 @@ namespace MMAP
         if (count != 1)
             return false;
 
-        if (header.mmapMagic != MMAP_MAGIC || header.dtVersion != DT_NAVMESH_VERSION)
+        if (header.mmapMagic != MMAP_MAGIC || header.dtVersion != uint32(DT_NAVMESH_VERSION))
             return false;
 
         if (header.mmapVersion != MMAP_VERSION)

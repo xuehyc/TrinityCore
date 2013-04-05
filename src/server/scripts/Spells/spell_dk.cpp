@@ -48,12 +48,12 @@ enum DeathKnightSpells
     SPELL_DK_UNHOLY_PRESENCE                    = 48265,
     SPELL_DK_IMPROVED_UNHOLY_PRESENCE_TRIGGERED = 63622,
     SPELL_DK_ITEM_SIGIL_VENGEFUL_HEART          = 64962,
-    SPELL_DK_ITEM_T8_MELEE_4P_BONUS             = 64736,
+    SPELL_DK_ITEM_T8_MELEE_4P_BONUS             = 64736
 };
 
 enum DeathKnightSpellIcons
 {
-    DK_ICON_ID_IMPROVED_DEATH_STRIKE            = 2751,
+    DK_ICON_ID_IMPROVED_DEATH_STRIKE            = 2751
 };
 
 // 50462 - Anti-Magic Shell (on raid member)
@@ -76,7 +76,7 @@ class spell_dk_anti_magic_shell_raid : public SpellScriptLoader
 
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
-                // TODO: this should absorb limited amount of damage, but no info on calculation formula
+                /// @todo this should absorb limited amount of damage, but no info on calculation formula
                 amount = -1;
             }
 

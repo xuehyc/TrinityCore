@@ -124,8 +124,9 @@ bool MySQLConnection::Open()
         {
             sLog->outInfo(LOG_FILTER_SQL, "MySQL client library: %s", mysql_get_client_info());
             sLog->outInfo(LOG_FILTER_SQL, "MySQL server ver: %s ", mysql_get_server_info(m_Mysql));
-            if (mysql_get_server_version(m_Mysql) != mysql_get_client_version())
-                sLog->outInfo(LOG_FILTER_SQL, "[WARNING] MySQL client/server version mismatch; may conflict with behaviour of prepared statements.");
+            // MySQL version above 5.1 IS required in both client and server and there is no known issue with different versions above 5.1
+            // if (mysql_get_server_version(m_Mysql) != mysql_get_client_version())
+            //     sLog->outInfo(LOG_FILTER_SQL, "[WARNING] MySQL client/server version mismatch; may conflict with behaviour of prepared statements.");
         }
 
         sLog->outInfo(LOG_FILTER_SQL, "Connected to MySQL database at %s", m_connectionInfo.host.c_str());
@@ -187,7 +188,7 @@ bool MySQLConnection::Execute(PreparedStatement* stmt)
         MySQLPreparedStatement* m_mStmt = GetPreparedStatement(index);
         ASSERT(m_mStmt);            // Can only be null if preparation failed, server side error or bad query
         m_mStmt->m_stmt = stmt;     // Cross reference them for debug output
-        stmt->m_stmt = m_mStmt;     // TODO: Cleaner way
+        stmt->m_stmt = m_mStmt;     /// @todo Cleaner way
 
         stmt->BindParameters();
 
@@ -237,7 +238,7 @@ bool MySQLConnection::_Query(PreparedStatement* stmt, MYSQL_RES **pResult, uint6
         MySQLPreparedStatement* m_mStmt = GetPreparedStatement(index);
         ASSERT(m_mStmt);            // Can only be null if preparation failed, server side error or bad query
         m_mStmt->m_stmt = stmt;     // Cross reference them for debug output
-        stmt->m_stmt = m_mStmt;     // TODO: Cleaner way
+        stmt->m_stmt = m_mStmt;     /// @todo Cleaner way
 
         stmt->BindParameters();
 

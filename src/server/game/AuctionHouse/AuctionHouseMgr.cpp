@@ -52,13 +52,13 @@ AuctionHouseObject* AuctionHouseMgr::GetAuctionsMap(uint32 factionTemplateId)
     if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
         return &mNeutralAuctions;
 
-    // team have linked auction houses
-    FactionTemplateEntry const* u_entry = sFactionTemplateStore.LookupEntry(factionTemplateId);
-    if (!u_entry)
+    // teams have linked auction houses
+    FactionTemplateEntry const* uEntry = sFactionTemplateStore.LookupEntry(factionTemplateId);
+    if (!uEntry)
         return &mNeutralAuctions;
-    else if (u_entry->ourMask & FACTION_MASK_ALLIANCE)
+    else if (uEntry->ourMask & FACTION_MASK_ALLIANCE)
         return &mAllianceAuctions;
-    else if (u_entry->ourMask & FACTION_MASK_HORDE)
+    else if (uEntry->ourMask & FACTION_MASK_HORDE)
         return &mHordeAuctions;
     else
         return &mNeutralAuctions;
@@ -93,46 +93,42 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction, SQLTransaction& 
     if (!pItem)
         return;
 
-    uint32 bidder_accId = 0;
-    uint64 bidder_guid = MAKE_NEW_GUID(auction->bidder, 0, HIGHGUID_PLAYER);
-    Player* bidder = ObjectAccessor::FindPlayer(bidder_guid);
+    uint32 bidderAccId = 0;
+    uint64 bidderGuid = MAKE_NEW_GUID(auction->bidder, 0, HIGHGUID_PLAYER);
+    Player* bidder = ObjectAccessor::FindPlayer(bidderGuid);
     // data for gm.log
-    if (sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
+    std::string bidderName;
+    bool logGmTrade = false;
+
+    if (bidder)
     {
-        uint32 bidder_security = 0;
-        std::string bidder_name;
-        if (bidder)
-        {
-            bidder_accId = bidder->GetSession()->GetAccountId();
-            bidder_security = bidder->GetSession()->GetSecurity();
-            bidder_name = bidder->GetName();
-        }
-        else
-        {
-            bidder_accId = sObjectMgr->GetPlayerAccountIdByGUID(bidder_guid);
-            bidder_security = AccountMgr::GetSecurity(bidder_accId, realmID);
+        bidderAccId = bidder->GetSession()->GetAccountId();
+        bidderName = bidder->GetName();
+        logGmTrade = bidder->GetSession()->HasPermission(RBAC_PERM_LOG_GM_TRADE);
+    }
+    else
+    {
+        bidderAccId = sObjectMgr->GetPlayerAccountIdByGUID(bidderGuid);
+        logGmTrade = AccountMgr::HasPermission(bidderAccId, RBAC_PERM_LOG_GM_TRADE, realmID);
 
-            if (!AccountMgr::IsPlayerAccount(bidder_security)) // not do redundant DB requests
-            {
-                if (!sObjectMgr->GetPlayerNameByGUID(bidder_guid, bidder_name))
-                    bidder_name = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
-            }
-        }
-        if (!AccountMgr::IsPlayerAccount(bidder_security))
-        {
-            std::string owner_name;
-            if (!sObjectMgr->GetPlayerNameByGUID(auction->owner, owner_name))
-                owner_name = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
+        if (logGmTrade && !sObjectMgr->GetPlayerNameByGUID(bidderGuid, bidderName))
+            bidderName = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
+    }
 
-            uint32 owner_accid = sObjectMgr->GetPlayerAccountIdByGUID(auction->owner);
+    if (logGmTrade)
+    {
+        std::string ownerName;
+        if (!sObjectMgr->GetPlayerNameByGUID(auction->owner, ownerName))
+            ownerName = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
 
-            sLog->outCommand(bidder_accId, "GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: %u. Original owner %s (Account: %u)",
-                bidder_name.c_str(), bidder_accId, pItem->GetTemplate()->Name1.c_str(), pItem->GetEntry(), pItem->GetCount(), auction->bid, owner_name.c_str(), owner_accid);
-        }
+        uint32 ownerAccId = sObjectMgr->GetPlayerAccountIdByGUID(auction->owner);
+
+        sLog->outCommand(bidderAccId, "GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: %u. Original owner %s (Account: %u)",
+            bidderName.c_str(), bidderAccId, pItem->GetTemplate()->Name1.c_str(), pItem->GetEntry(), pItem->GetCount(), auction->bid, ownerName.c_str(), ownerAccId);
     }
 
     // receiver exist
-    if (bidder || bidder_accId)
+    if (bidder || bidderAccId)
     {
         // set owner to bidder (to prevent delete item with sender char deleting)
         // owner in `data` will set at mail receive and item extracting
@@ -143,7 +139,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction, SQLTransaction& 
 
         if (bidder)
         {
-            bidder->GetSession()->SendAuctionBidderNotification(auction->GetHouseId(), auction->Id, bidder_guid, 0, 0, auction->itemEntry);
+            bidder->GetSession()->SendAuctionBidderNotification(auction->GetHouseId(), auction->Id, bidderGuid, 0, 0, auction->itemEntry);
             // FIXME: for offline player need also
             bidder->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WON_AUCTIONS, 1);
         }
@@ -237,7 +233,7 @@ void AuctionHouseMgr::SendAuctionOutbiddedMail(AuctionEntry* auction, uint32 new
 }
 
 //this function sends mail, when auction is cancelled to old bidder
-void AuctionHouseMgr::SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQLTransaction& trans)
+void AuctionHouseMgr::SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQLTransaction& trans, Item* item)
 {
     uint64 bidder_guid = MAKE_NEW_GUID(auction->bidder, 0, HIGHGUID_PLAYER);
     Player* bidder = ObjectAccessor::FindPlayer(bidder_guid);
@@ -245,6 +241,9 @@ void AuctionHouseMgr::SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQ
     uint32 bidder_accId = 0;
     if (!bidder)
         bidder_accId = sObjectMgr->GetPlayerAccountIdByGUID(bidder_guid);
+
+    if (bidder)
+        bidder->GetSession()->SendAuctionRemovedNotification(auction->Id, auction->itemEntry, item->GetItemRandomPropertyId());
 
     // bidder exist
     if (bidder || bidder_accId)
@@ -330,7 +329,7 @@ void AuctionHouseMgr::LoadAuctions()
         }
 
         GetAuctionsMap(aItem->factionTemplateId)->AddAuction(aItem);
-        count++;
+        ++count;
     } while (result->NextRow());
 
     CharacterDatabase.CommitTransaction(trans);
@@ -369,7 +368,7 @@ AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntry(uint32 factionTem
 
     if (!sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
     {
-        //FIXME: found way for proper auctionhouse selection by another way
+        // FIXME: found way for proper auctionhouse selection by another way
         // AuctionHouse.dbc have faction field with _player_ factions associated with auction house races.
         // but no easy way convert creature faction to player race faction for specific city
         switch (factionTemplateId)
@@ -571,7 +570,7 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
 
                 if (itemRandProp)
                 {
-                    char* const* temp = itemRandProp->nameSuffix;
+                    char* temp = itemRandProp->nameSuffix;
 
                     // dbc local name
                     if (temp)
@@ -611,7 +610,7 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket& data) const
     data << uint32(Id);
     data << uint32(item->GetEntry());
 
-    for (uint8 i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; ++i)
+    for (uint8 i = 0; i < PROP_ENCHANTMENT_SLOT_0; ++i) // PROP_ENCHANTMENT_SLOT_0 = 10
     {
         data << uint32(item->GetEnchantmentId(EnchantmentSlot(i)));
         data << uint32(item->GetEnchantmentDuration(EnchantmentSlot(i)));
@@ -624,13 +623,13 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket& data) const
     data << uint32(item->GetSpellCharges());                        // item->charge FFFFFFF
     data << uint32(0);                                              // Unknown
     data << uint64(owner);                                          // Auction->owner
-    data << uint32(startbid);                                       // Auction->startbid (not sure if useful)
-    data << uint32(bid ? GetAuctionOutBid() : 0);
+    data << uint64(startbid);                                       // Auction->startbid (not sure if useful)
+    data << uint64(bid ? GetAuctionOutBid() : 0);
     // Minimal outbid
-    data << uint32(buyout);                                         // Auction->buyout
+    data << uint64(buyout);                                         // Auction->buyout
     data << uint32((expire_time - time(NULL)) * IN_MILLISECONDS);   // time left
     data << uint64(bidder);                                         // auction->bidder current
-    data << uint32(bid);                                            // current bid
+    data << uint64(bid);                                            // current bid
     return true;
 }
 
@@ -781,7 +780,8 @@ void AuctionHouseMgr::DeleteExpiredAuctionsAtStartup()
         delete auction;
         ++expirecount;
 
-    } while (expAuctions->NextRow());
+    }
+    while (expAuctions->NextRow());
 
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Deleted %u expired auctions in %u ms", expirecount, GetMSTimeDiffToNow(oldMSTime));
 

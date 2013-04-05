@@ -25,7 +25,7 @@ SMSG_CALENDAR_EVENT_INVITE_NOTES_ALERT  [ uint64(inviteId), string(Text) ]
 SMSG_CALENDAR_EVENT_INVITE_STATUS_ALERT [ uint64(eventId), uint32(eventTime), uint32(unkFlag), uint8(deletePending) ]
 SMSG_CALENDAR_RAID_LOCKOUT_UPDATED      SendCalendarRaidLockoutUpdated(InstanceSave const* save)
 
------ TODO -----
+@todo
 
 Finish complains' handling - what to do with received complains and how to respond?
 Find out what to do with all "not used yet" opcodes
@@ -57,9 +57,9 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recvData*/)
 
     WorldPacket data(SMSG_CALENDAR_SEND_CALENDAR, 1000); // Average size if no instance
 
-    std::vector<CalendarInvite*> invites = sCalendarMgr->GetPlayerInvites(guid);
+    CalendarInviteStore invites = sCalendarMgr->GetPlayerInvites(guid);
     data << uint32(invites.size());
-    for (std::vector<CalendarInvite*>::const_iterator itr = invites.begin(); itr != invites.end(); ++itr)
+    for (CalendarInviteStore::const_iterator itr = invites.begin(); itr != invites.end(); ++itr)
     {
         data << uint64((*itr)->GetEventId());
         data << uint64((*itr)->GetInviteId());
@@ -90,6 +90,10 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recvData*/)
         data.AppendPackedTime(calendarEvent->GetEventTime());
         data << uint32(calendarEvent->GetFlags());
         data << int32(calendarEvent->GetDungeonId());
+
+        Guild* guild = sGuildMgr->GetGuildById(calendarEvent->GetGuildId());
+        data << uint64(guild ? guild->GetGUID() : 0);
+
         data.appendPackGUID(calendarEvent->GetCreatorGUID());
     }
 
@@ -147,7 +151,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recvData*/)
     data << uint32(boundCounter);
     data.append(dataBuffer);
 
-    // TODO: Fix this, how we do know how many and what holidays to send?
+    /// @todo Fix this, how we do know how many and what holidays to send?
     uint32 holidayCount = 0;
     data << uint32(holidayCount);
     for (uint32 i = 0; i < holidayCount; ++i)
@@ -347,9 +351,9 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recvData)
         newEvent->SetEventTime(time_t(time));
         sCalendarMgr->AddEvent(newEvent, CALENDAR_SENDTYPE_COPY);
 
-        std::vector<CalendarInvite*> invites = sCalendarMgr->GetEventInvites(eventId);
+        CalendarInviteStore invites = sCalendarMgr->GetEventInvites(eventId);
 
-        for (std::vector<CalendarInvite*>::const_iterator itr = invites.begin(); itr != invites.end(); ++itr)
+        for (CalendarInviteStore::const_iterator itr = invites.begin(); itr != invites.end(); ++itr)
             sCalendarMgr->AddInvite(newEvent, new CalendarInvite(**itr, sCalendarMgr->GetFreeInviteId(), newEvent->GetEventId()));
 
         // should we change owner when somebody makes a copy of event owned by another person?
@@ -613,10 +617,11 @@ void WorldSession::HandleCalendarComplain(WorldPacket& recvData)
     uint64 guid = _player->GetGUID();
     uint64 eventId;
     uint64 complainGUID;
+    uint64 inviteId;
 
-    recvData >> eventId >> complainGUID;
+    recvData >> complainGUID >> eventId >> inviteId;
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_COMPLAIN [" UI64FMTD "] EventId ["
-        UI64FMTD "] guid [" UI64FMTD "]", guid, eventId, complainGUID);
+        UI64FMTD "] guid [" UI64FMTD "] InviteId [" UI64FMTD "]", guid, eventId, complainGUID, inviteId);
 
     // what to do with complains?
 }

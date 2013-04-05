@@ -102,10 +102,8 @@ public:
         npc_unworthy_initiateAI(Creature* creature) : ScriptedAI(creature)
         {
             me->SetReactState(REACT_PASSIVE);
-            if (!me->GetEquipmentId())
-                if (const CreatureTemplate* info = sObjectMgr->GetCreatureTemplate(28406))
-                    if (info->equipmentId)
-                        const_cast<CreatureTemplate*>(me->GetCreatureTemplate())->equipmentId = info->equipmentId;
+            if (!me->GetCurrentEquipmentId())
+                me->SetCurrentEquipmentId(me->GetOriginalEquipmentId());
         }
 
         uint64 playerGUID;
@@ -168,7 +166,7 @@ public:
             Talk(SAY_EVENT_START);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             switch (phase)
             {
@@ -459,7 +457,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 uiDiff)
+        void UpdateAI(uint32 uiDiff)
         {
             if (!UpdateVictim())
             {
@@ -495,7 +493,7 @@ public:
                 }
             }
 
-            // TODO: spells
+            /// @todo spells
 
             CombatAI::UpdateAI(uiDiff);
         }
@@ -544,7 +542,7 @@ public:
             TargetGUID = 0;
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (!Intro || !TargetGUID)
                 return;
@@ -653,19 +651,22 @@ public:
             {
                 if (Unit* charmer = who->GetCharmer())
                 {
-                    if (charmer->GetTypeId() == TYPEID_PLAYER)
+                    if (Player* player = charmer->ToPlayer())
                     {
                         // for quest Into the Realm of Shadows(12687)
-                        if (me->GetEntry() == 28788 && CAST_PLR(charmer)->GetQuestStatus(12687) == QUEST_STATUS_INCOMPLETE)
+                        if (me->GetEntry() == 28788 && player->GetQuestStatus(12687) == QUEST_STATUS_INCOMPLETE)
                         {
-                            CAST_PLR(charmer)->GroupEventHappens(12687, me);
+                            player->GroupEventHappens(12687, me);
                             charmer->RemoveAurasDueToSpell(SPELL_EFFECT_OVERTAKE);
-                            CAST_CRE(who)->DespawnOrUnsummon();
-                            //CAST_CRE(who)->Respawn(true);
+                            if (Creature* creature = who->ToCreature())
+                            {
+                                creature->DespawnOrUnsummon();
+                                //creature->Respawn(true);
+                            }
                         }
 
-                        if (CAST_PLR(charmer)->HasAura(SPELL_REALM_OF_SHADOWS))
-                            charmer->RemoveAurasDueToSpell(SPELL_REALM_OF_SHADOWS);
+                        if (player->HasAura(SPELL_REALM_OF_SHADOWS))
+                            player->RemoveAurasDueToSpell(SPELL_REALM_OF_SHADOWS);
                     }
                 }
             }
@@ -755,17 +756,18 @@ public:
             {
                 if (Unit* owner = who->GetOwner())
                 {
-                    if (owner->GetTypeId() == TYPEID_PLAYER)
+                    if (Player* player = owner->ToPlayer())
                     {
-                        if (CAST_PLR(owner)->GetQuestStatus(12698) == QUEST_STATUS_INCOMPLETE)
-                            CAST_CRE(who)->CastSpell(owner, 52517, true);
+                        Creature* creature = who->ToCreature();
+                        if (player->GetQuestStatus(12698) == QUEST_STATUS_INCOMPLETE)
+                            creature->CastSpell(owner, 52517, true);
 
-                        //Todo: Creatures must not be removed, but, must instead
+                        /// @todo Creatures must not be removed, but, must instead
                         //      stand next to Gothik and be commanded into the pit
                         //      and dig into the ground.
-                        CAST_CRE(who)->DespawnOrUnsummon();
+                        creature->DespawnOrUnsummon();
 
-                        if (CAST_PLR(owner)->GetQuestStatus(12698) == QUEST_STATUS_COMPLETE)
+                        if (player->GetQuestStatus(12698) == QUEST_STATUS_COMPLETE)
                             owner->RemoveAllMinionsByEntry(NPC_GHOSTS);
                     }
                 }
@@ -816,7 +818,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 /*diff*/)
+        void UpdateAI(uint32 /*diff*/)
         {
             if (!me->isInCombat())
             {
@@ -890,7 +892,7 @@ public:
             minerGUID = guid;
         }
 
-        void DoAction(const int32 /*param*/)
+        void DoAction(int32 /*param*/)
         {
             if (Creature* miner = Unit::GetCreature(*me, minerGUID))
             {
@@ -1024,7 +1026,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (IntroPhase)
             {

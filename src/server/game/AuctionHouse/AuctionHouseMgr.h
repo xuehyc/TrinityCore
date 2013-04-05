@@ -35,10 +35,14 @@ class WorldPacket;
 enum AuctionError
 {
     ERR_AUCTION_OK                  = 0,
+    ERR_AUCTION_INVENTORY           = 1,
     ERR_AUCTION_DATABASE_ERROR      = 2,
     ERR_AUCTION_NOT_ENOUGHT_MONEY   = 3,
     ERR_AUCTION_ITEM_NOT_FOUND      = 4,
-    ERR_AUCTION_BID_OWN             = 10
+    ERR_AUCTION_HIGHER_BID          = 5,
+    ERR_AUCTION_BID_INCREMENT       = 7,
+    ERR_AUCTION_BID_OWN             = 10,
+    ERR_RESTRICTED_ACCOUNT          = 13,
 };
 
 enum AuctionAction
@@ -95,8 +99,6 @@ struct AuctionEntry
 class AuctionHouseObject
 {
   public:
-    // Initialize storage
-    AuctionHouseObject() { next = AuctionsMap.begin(); }
     ~AuctionHouseObject()
     {
         for (AuctionEntryMap::iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
@@ -131,9 +133,6 @@ class AuctionHouseObject
 
   private:
     AuctionEntryMap AuctionsMap;
-
-    // storage for "next" auction item for next Update()
-    AuctionEntryMap::const_iterator next;
 };
 
 class AuctionHouseMgr
@@ -166,7 +165,7 @@ class AuctionHouseMgr
         void SendAuctionSuccessfulMail(AuctionEntry* auction, SQLTransaction& trans);
         void SendAuctionExpiredMail(AuctionEntry* auction, SQLTransaction& trans);
         void SendAuctionOutbiddedMail(AuctionEntry* auction, uint32 newPrice, Player* newBidder, SQLTransaction& trans);
-        void SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQLTransaction& trans);
+        void SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQLTransaction& trans, Item* item);
 
         static uint32 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item* pItem, uint32 count);
         static AuctionHouseEntry const* GetAuctionHouseEntry(uint32 factionTemplateId);

@@ -30,7 +30,7 @@
 #include "Spell.h"
 
 // Checks if object meets the condition
-// Can have CONDITION_SOURCE_TYPE_NONE && !mReferenceId if called from a special event (ie: eventAI)
+// Can have CONDITION_SOURCE_TYPE_NONE && !mReferenceId if called from a special event (ie: SmartAI)
 bool Condition::Meets(ConditionSourceInfo& sourceInfo)
 {
     ASSERT(ConditionTarget < MAX_CONDITION_TARGETS);
@@ -431,6 +431,7 @@ uint32 Condition::GetSearcherTypeMaskForCondition()
                 default:
                     break;
             }
+            break;
         case CONDITION_TYPE_MASK:
             if (ConditionValue1 & TYPEMASK_UNIT)
                 mask |= GRID_MAP_TYPE_MASK_CREATURE | GRID_MAP_TYPE_MASK_PLAYER;
@@ -650,6 +651,7 @@ bool ConditionMgr::CanHaveSourceGroupSet(ConditionSourceType sourceType) const
             sourceType == CONDITION_SOURCE_TYPE_SPELL_IMPLICIT_TARGET ||
             sourceType == CONDITION_SOURCE_TYPE_SPELL_CLICK_EVENT ||
             sourceType == CONDITION_SOURCE_TYPE_SMART_EVENT ||
+            sourceType == CONDITION_SOURCE_TYPE_PHASE_DEFINITION ||
             sourceType == CONDITION_SOURCE_TYPE_NPC_VENDOR);
 }
 
@@ -725,6 +727,22 @@ ConditionList ConditionMgr::GetConditionsForSmartEvent(int32 entryOrGuid, uint32
     return cond;
 }
 
+ConditionList ConditionMgr::GetConditionsForPhaseDefinition(uint32 zone, uint32 entry)
+{
+    ConditionList cond;
+    PhaseDefinitionConditionContainer::const_iterator itr = PhaseDefinitionsConditionStore.find(zone);
+    if (itr != PhaseDefinitionsConditionStore.end())
+    {
+        ConditionTypeContainer::const_iterator i = (*itr).second.find(entry);
+        if (i != (*itr).second.end())
+        {
+            cond = (*i).second;
+            sLog->outDebug(LOG_FILTER_CONDITIONSYS, "GetConditionsForPhaseDefinition: found conditions for zone %u entry %u", zone, entry);
+        }
+    }
+    return cond;
+}
+
 ConditionList ConditionMgr::GetConditionsForNpcVendorEvent(uint32 creatureId, uint32 itemId)
 {
     ConditionList cond;
@@ -777,7 +795,7 @@ void ConditionMgr::LoadConditions(bool isReload)
 
     if (!result)
     {
-        sLog->outError(LOG_FILTER_SQL, ">> Loaded 0 conditions. DB table `conditions` is empty!");
+        sLog->outError(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 conditions. DB table `conditions` is empty!");
         return;
     }
 
@@ -960,6 +978,13 @@ void ConditionMgr::LoadConditions(bool isReload)
                     //! TODO: PAIR_32 ?
                     std::pair<int32, uint32> key = std::make_pair(cond->SourceEntry, cond->SourceId);
                     SmartEventConditionStore[key][cond->SourceGroup].push_back(cond);
+                    valid = true;
+                    ++count;
+                    continue;
+                }
+                case CONDITION_SOURCE_TYPE_PHASE_DEFINITION:
+                {
+                    PhaseDefinitionsConditionStore[cond->SourceGroup][cond->SourceEntry].push_back(cond);
                     valid = true;
                     ++count;
                     continue;
@@ -1460,6 +1485,13 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
             if (!sSpellMgr->GetSpellInfo(cond->SourceEntry))
             {
                 sLog->outError(LOG_FILTER_SQL, "SourceEntry %u in `condition` table, does not exist in `spell.dbc`, ignoring.", cond->SourceEntry);
+                return false;
+            }
+            break;
+        case CONDITION_SOURCE_TYPE_PHASE_DEFINITION:
+            if (!PhaseMgr::IsConditionTypeSupported(cond->ConditionType))
+            {
+                sLog->outError(LOG_FILTER_SQL, "Condition source type `CONDITION_SOURCE_TYPE_PHASE_DEFINITION` does not support condition type %u, ignoring.", cond->ConditionType);
                 return false;
             }
             break;
@@ -2046,6 +2078,19 @@ void ConditionMgr::Clean()
     }
 
     SpellClickEventConditionStore.clear();
+
+    for (PhaseDefinitionConditionContainer::iterator itr = PhaseDefinitionsConditionStore.begin(); itr != PhaseDefinitionsConditionStore.end(); ++itr)
+    {
+        for (ConditionTypeContainer::iterator it = itr->second.begin(); it != itr->second.end(); ++it)
+        {
+            for (ConditionList::const_iterator i = it->second.begin(); i != it->second.end(); ++i)
+                delete *i;
+            it->second.clear();
+        }
+        itr->second.clear();
+    }
+
+    PhaseDefinitionsConditionStore.clear();
 
     for (NpcVendorConditionContainer::iterator itr = NpcVendorConditionContainerStore.begin(); itr != NpcVendorConditionContainerStore.end(); ++itr)
     {

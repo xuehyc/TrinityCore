@@ -19,7 +19,7 @@
 /* ScriptData
 SDName: Azuremyst_Isle
 SD%Complete: 75
-SDComment: Quest support: 9283, 9537, 9582, 9554, 9531, ? (special flight path, proper model for mount missing). Injured Draenei cosmetic only, 9582.
+SDComment: Quest support: 9283, 9537, 9582, 9554, ? (special flight path, proper model for mount missing). Injured Draenei cosmetic only, 9582.
 SDCategory: Azuremyst Isle
 EndScriptData */
 
@@ -28,7 +28,6 @@ npc_draenei_survivor
 npc_engineer_spark_overgrind
 npc_injured_draenei
 npc_magwin
-npc_geezle
 go_ravager_cage
 npc_death_ravager
 EndContentData */
@@ -39,6 +38,7 @@ EndContentData */
 #include "ScriptedGossip.h"
 #include "Cell.h"
 #include "CellImpl.h"
+#include "GridNotifiersImpl.h"
 #include "GridNotifiers.h"
 
 /*######
@@ -124,7 +124,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (SayThanksTimer)
             {
@@ -254,7 +254,7 @@ public:
             Talk(ATTACK_YELL, who->GetGUID());
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (!me->isInCombat() && !IsTreeEvent)
             {
@@ -321,7 +321,7 @@ public:
 
         void MoveInLineOfSight(Unit* /*who*/) {}
 
-        void UpdateAI(const uint32 /*diff*/) {}
+        void UpdateAI(uint32 /*diff*/) {}
     };
 
 };
@@ -555,7 +555,7 @@ public:
                 sLog->outError(LOG_FILTER_TSCR, "SD2 ERROR: FlagList is empty!");
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (SayTimer <= diff)
             {
@@ -626,7 +626,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
                 return;
@@ -712,7 +712,7 @@ class npc_stillpine_capitive : public CreatureScript
                 _events.ScheduleEvent(EVENT_DESPAWN, 3500);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 diff)
             {
                 if (!_movementComplete)
                     return;
@@ -762,7 +762,6 @@ void AddSC_azuremyst_isle()
     new npc_engineer_spark_overgrind();
     new npc_injured_draenei();
     new npc_magwin();
-    new npc_geezle();
     new npc_death_ravager();
     new go_ravager_cage();
     new npc_stillpine_capitive();

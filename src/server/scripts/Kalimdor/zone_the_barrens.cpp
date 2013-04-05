@@ -19,16 +19,11 @@
 /* ScriptData
 SDName: The_Barrens
 SD%Complete: 90
-SDComment: Quest support: 863, 898, 1719, 2458, 4921, 6981,
+SDComment: Quest support: 863
 SDCategory: Barrens
 EndScriptData */
 
 /* ContentData
-npc_beaten_corpse
-npc_gilthares
-npc_sputtervalve
-npc_taskmaster_fizzule
-npc_twiggy_flathead
 npc_wizzlecrank_shredder
 EndContentData */
 
@@ -278,7 +273,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) {}
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (IsFriend)
             {
@@ -385,19 +380,21 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (!who || (!who->isAlive()))
+            if (!who || !who->isAlive() || EventInProgress)
                 return;
 
-            if (me->IsWithinDistInMap(who, 10.0f) && (who->GetTypeId() == TYPEID_PLAYER) && CAST_PLR(who)->GetQuestStatus(1719) == QUEST_STATUS_INCOMPLETE && !EventInProgress)
-            {
-                PlayerGUID = who->GetGUID();
-                EventInProgress = true;
-            }
+            if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 10.0f))
+                if (Player* player = who->ToPlayer())
+                    if (player->GetQuestStatus(1719) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        PlayerGUID = who->GetGUID();
+                        EventInProgress = true;
+                    }
         }
 
         void KilledUnit(Unit* /*victim*/) { }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (EventInProgress) {
                 Player* pWarrior = NULL;
@@ -686,10 +683,5 @@ public:
 
 void AddSC_the_barrens()
 {
-    new npc_beaten_corpse();
-    new npc_gilthares();
-    new npc_sputtervalve();
-    new npc_taskmaster_fizzule();
-    new npc_twiggy_flathead();
     new npc_wizzlecrank_shredder();
 }

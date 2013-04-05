@@ -22,6 +22,7 @@
 #include "Creature.h"
 #include "GameObject.h"
 #include "Group.h"
+#include "GuildMgr.h"
 #include "LootMgr.h"
 #include "ObjectAccessor.h"
 #include "Object.h"
@@ -99,7 +100,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
         player->GetSession()->DoLootRelease(lguid);
 }
 
-void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recvData*/)
+void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_LOOT_MONEY");
 
@@ -186,9 +187,13 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recvData*/)
                 (*i)->ModifyMoney(goldPerPlayer);
                 (*i)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, goldPerPlayer);
 
+                if (Guild* guild = sGuildMgr->GetGuildById((*i)->GetGuildId()))
+                    if (uint32 guildGold = CalculatePct(goldPerPlayer, (*i)->GetTotalAuraModifier(SPELL_AURA_DEPOSIT_BONUS_MONEY_IN_GUILD_BANK_ON_LOOT)))
+                        guild->HandleMemberDepositMoney(this, guildGold, true);
+
                 WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
                 data << uint32(goldPerPlayer);
-                data << uint8(playersNear.size() > 1 ? 0 : 1);     // Controls the text displayed in chat. 0 is "Your share is..." and 1 is "You loot..."
+                data << uint8(playersNear.size() <= 1); // Controls the text displayed in chat. 0 is "Your share is..." and 1 is "You loot..."
                 (*i)->GetSession()->SendPacket(&data);
             }
         }
@@ -196,6 +201,10 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recvData*/)
         {
             player->ModifyMoney(loot->gold);
             player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, loot->gold);
+
+            if (Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId()))
+                if (uint32 guildGold = CalculatePct(loot->gold, player->GetTotalAuraModifier(SPELL_AURA_DEPOSIT_BONUS_MONEY_IN_GUILD_BANK_ON_LOOT)))
+                    guild->HandleMemberDepositMoney(this, guildGold, true);
 
             WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
             data << uint32(loot->gold);
@@ -277,61 +286,15 @@ void WorldSession::DoLootRelease(uint64 lguid)
         }
         else if (loot->isLooted() || go->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE)
         {
-            // GO is mineral vein? so it is not removed after its looted
-            if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
-            {
-                uint32 go_min = go->GetGOInfo()->chest.minSuccessOpens;
-                uint32 go_max = go->GetGOInfo()->chest.maxSuccessOpens;
-
-                // only vein pass this check
-                if (go_min != 0 && go_max > go_min)
-                {
-                    float amount_rate = sWorld->getRate(RATE_MINING_AMOUNT);
-                    float min_amount = go_min*amount_rate;
-                    float max_amount = go_max*amount_rate;
-
-                    go->AddUse();
-                    float uses = float(go->GetUseCount());
-
-                    if (uses < max_amount)
-                    {
-                        if (uses >= min_amount)
-                        {
-                            float chance_rate = sWorld->getRate(RATE_MINING_NEXT);
-
-                            int32 ReqValue = 175;
-                            LockEntry const* lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->chest.lockId);
-                            if (lockInfo)
-                                ReqValue = lockInfo->Skill[0];
-                            float skill = float(player->GetSkillValue(SKILL_MINING))/(ReqValue+25);
-                            double chance = pow(0.8*chance_rate, 4*(1/double(max_amount))*double(uses));
-                            if (roll_chance_f((float)(100*chance+skill)))
-                            {
-                                go->SetLootState(GO_READY);
-                            }
-                            else                            // not have more uses
-                                go->SetLootState(GO_JUST_DEACTIVATED);
-                        }
-                        else                                // 100% chance until min uses
-                            go->SetLootState(GO_READY);
-                    }
-                    else                                    // max uses already
-                        go->SetLootState(GO_JUST_DEACTIVATED);
-                }
-                else                                        // not vein
-                    go->SetLootState(GO_JUST_DEACTIVATED);
-            }
-            else if (go->GetGoType() == GAMEOBJECT_TYPE_FISHINGHOLE)
+            if (go->GetGoType() == GAMEOBJECT_TYPE_FISHINGHOLE)
             {                                               // The fishing hole used once more
                 go->AddUse();                               // if the max usage is reached, will be despawned in next tick
-                if (go->GetUseCount() >= urand(go->GetGOInfo()->fishinghole.minSuccessOpens, go->GetGOInfo()->fishinghole.maxSuccessOpens))
-                {
+                if (go->GetUseCount() >= go->GetGOValue()->FishingHole.MaxOpens)
                     go->SetLootState(GO_JUST_DEACTIVATED);
-                }
                 else
                     go->SetLootState(GO_READY);
             }
-            else // not chest (or vein/herb/etc)
+            else
                 go->SetLootState(GO_JUST_DEACTIVATED);
 
             loot->clear();
@@ -499,7 +462,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     ItemPosCountVec dest;
     InventoryResult msg = target->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item.itemid, item.count);
     if (item.follow_loot_rules && !item.AllowedForPlayer(target))
-        msg = EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
+        msg = EQUIP_ERR_CANT_EQUIP_EVER;
     if (msg != EQUIP_ERR_OK)
     {
         target->SendEquipError(msg, NULL, NULL, item.itemid);
@@ -515,7 +478,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     Item* newitem = target->StoreNewItem(dest, item.itemid, true, item.randomPropertyId, looters);
     target->SendNewItem(newitem, uint32(item.count), false, false, true);
     target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item.itemid, item.count);
-    target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, loot->loot_type, item.count);
+    target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, item.itemid, item.count, loot->loot_type);
     target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item.itemid, item.count);
 
     // mark as looted
