@@ -1,5 +1,9 @@
 /*
+ *
+ * Copyright (C) 2011-2013 ArkCORE <http://www.arkania.net/>
+ *
  * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ *
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -430,6 +434,7 @@ void ThreatManager::doAddThreat(Unit* victim, float threat)
     }
 
     _addThreat(victim, threat);
+
 }
 
 void ThreatManager::_addThreat(Unit* victim, float threat)

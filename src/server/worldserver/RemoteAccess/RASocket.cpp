@@ -1,5 +1,9 @@
 /*
+ *
+ * Copyright (C) 2011-2013 ArkCORE <http://www.arkania.net/>
+ *
  * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ *
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -373,7 +377,7 @@ int RASocket::svc(void)
     for (;;)
     {
         // show prompt
-        if (send("TC> ") == -1)
+        if (send("ArkCORE> ") == -1)
             return -1;
 
         std::string line;

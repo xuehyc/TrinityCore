@@ -1,5 +1,9 @@
 /*
+ *
+ * Copyright (C) 2011-2013 ArkCORE <http://www.arkania.net/>
+ *
  * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ *
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -103,8 +107,18 @@ extern int main(int argc, char **argv)
         return 1;
     }
 
-    sLog->outInfo(LOG_FILTER_AUTHSERVER, "%s (authserver)", _FULLVERSION);
-    sLog->outInfo(LOG_FILTER_AUTHSERVER, "<Ctrl-C> to stop.\n");
+	sLog->outInfo(LOG_FILTER_WORLDSERVER, "%s (authserver)", _FULLVERSION);
+	sLog->outInfo(LOG_FILTER_WORLDSERVER, " ");
+	sLog->outInfo(LOG_FILTER_WORLDSERVER, " A World of Warcraft: Cataclysm Core Emulator	");
+	sLog->outInfo(LOG_FILTER_WORLDSERVER, "       _/_/              _/          _/_/_/    _/_/    _/_/_/    _/_/_/_/  ");
+	sLog->outInfo(LOG_FILTER_WORLDSERVER, "    _/    _/  _/  _/_/  _/  _/    _/        _/    _/  _/    _/  _/         ");
+	sLog->outInfo(LOG_FILTER_WORLDSERVER, "   _/_/_/_/  _/_/      _/_/      _/        _/    _/  _/_/_/    _/_/_/      ");
+	sLog->outInfo(LOG_FILTER_WORLDSERVER, "  _/    _/  _/        _/  _/    _/        _/    _/  _/    _/  _/           ");
+	sLog->outInfo(LOG_FILTER_WORLDSERVER, " _/    _/  _/        _/    _/    _/_/_/    _/_/    _/    _/  _/_/_/_/  	");
+	sLog->outInfo(LOG_FILTER_WORLDSERVER, " Arkania Community (c) 2013");
+	sLog->outInfo(LOG_FILTER_WORLDSERVER, "      <http://arkania.net/>");
+	sLog->outInfo(LOG_FILTER_WORLDSERVER, " ");
+	sLog->outInfo(LOG_FILTER_WORLDSERVER, "<Ctrl-C> to stop.\n");	
     sLog->outInfo(LOG_FILTER_AUTHSERVER, "Using configuration file %s.", cfg_file);
 
     sLog->outWarn(LOG_FILTER_AUTHSERVER, "%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
