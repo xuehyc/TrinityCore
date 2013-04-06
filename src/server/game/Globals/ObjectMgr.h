@@ -493,17 +493,23 @@ struct RepRewardRate
     float spellRate;
 };
 
-struct ReputationOnKillEntry
+struct RewardOnKillEntry
 {
-    uint32 RepFaction1;
-    uint32 RepFaction2;
-    uint32 ReputationMaxCap1;
-    int32 RepValue1;
-    uint32 ReputationMaxCap2;
-    int32 RepValue2;
-    bool IsTeamAward1;
-    bool IsTeamAward2;
-    bool TeamDependent;
+    uint32 repfaction1;
+    uint32 repfaction2;
+    bool is_teamaward1;
+    uint32 reputation_max_cap1;
+    int32 repvalue1;
+    bool is_teamaward2;
+    uint32 reputation_max_cap2;
+    int32 repvalue2;
+    bool team_dependent;
+    uint32 currencyid1;
+    uint32 currencyid2;
+    uint32 currencyid3;
+    int32 currencycount1;
+    int32 currencycount2;
+    int32 currencycount3;
 };
 
 struct RepSpilloverTemplate
@@ -675,7 +681,7 @@ class ObjectMgr
         typedef UNORDERED_MAP<uint32, AccessRequirement*> AccessRequirementContainer;
 
         typedef UNORDERED_MAP<uint32, RepRewardRate > RepRewardRateContainer;
-        typedef UNORDERED_MAP<uint32, ReputationOnKillEntry> RepOnKillContainer;
+        typedef UNORDERED_MAP<uint32, RewardOnKillEntry> RewOnKillMap;
         typedef UNORDERED_MAP<uint32, RepSpilloverTemplate> RepSpilloverTemplateContainer;
 
         typedef UNORDERED_MAP<uint32, PointOfInterest> PointOfInterestContainer;
@@ -791,10 +797,10 @@ class ObjectMgr
             return NULL;
         }
 
-        ReputationOnKillEntry const* GetReputationOnKilEntry(uint32 id) const
+        RewardOnKillEntry const* GetRewardOnKillEntry(uint32 id) const
         {
-            RepOnKillContainer::const_iterator itr = _repOnKillStore.find(id);
-            if (itr != _repOnKillStore.end())
+            RewOnKillMap::const_iterator itr = _RewOnKill.find(id);
+            if (itr != _RewOnKill.end())
                 return &itr->second;
             return NULL;
         }
@@ -944,7 +950,7 @@ class ObjectMgr
         void LoadFishingBaseSkillLevel();
 
         void LoadReputationRewardRate();
-        void LoadReputationOnKill();
+        void LoadRewardOnKill();
         void LoadReputationSpilloverTemplate();
 
         void LoadPointsOfInterest();
@@ -1283,7 +1289,7 @@ class ObjectMgr
         DungeonEncounterContainer _dungeonEncounterStore;
 
         RepRewardRateContainer _repRewardRateStore;
-        RepOnKillContainer _repOnKillStore;
+        RewOnKillMap        _RewOnKill;
         RepSpilloverTemplateContainer _repSpilloverTemplateStore;
 
         GossipMenusContainer _gossipMenusStore;

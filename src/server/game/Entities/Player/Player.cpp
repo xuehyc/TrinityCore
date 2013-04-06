@@ -528,11 +528,11 @@ inline void KillRewarder::_RewardXP(Player* player, float rate)
     }
 }
 
-inline void KillRewarder::_RewardReputation(Player* player, float rate)
+inline void KillRewarder::_RewardOnKill(Player* player, float rate)
 {
-    // 4.3. Give reputation (player must not be on BG).
+    // 4.3. Give reputation and currency (player must not be on BG).
     // Even dead players and corpses are rewarded.
-    player->RewardReputation(_victim, rate);
+    player->RewardOnKill(_victim, rate);
 }
 
 inline void KillRewarder::_RewardKillCredit(Player* player)
@@ -567,7 +567,7 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
         if (!_isBattleGround)
         {
             // If killer is in dungeon then all members receive full reputation at kill.
-            _RewardReputation(player, isDungeon ? 1.0f : rate);
+            _RewardOnKill(player, isDungeon ? 1.0f : rate);
             _RewardKillCredit(player);
         }
     }
@@ -6939,8 +6939,8 @@ int32 Player::CalculateReputationGain(ReputationSource source, uint32 creatureOr
     return CalculatePct(rep, percent);
 }
 
-// Calculates how many reputation points player gains in victim's enemy factions
-void Player::RewardReputation(Unit* victim, float rate)
+//Calculates how many reputation points player gains in victim's enemy factions
+void Player::RewardOnKill (Unit *victim, float rate)
 {
     if (!victim || victim->GetTypeId() == TYPEID_PLAYER)
         return;
@@ -6948,8 +6948,9 @@ void Player::RewardReputation(Unit* victim, float rate)
     if (victim->ToCreature()->IsReputationGainDisabled())
         return;
 
-    ReputationOnKillEntry const* Rep = sObjectMgr->GetReputationOnKilEntry(victim->ToCreature()->GetCreatureTemplate()->Entry);
-    if (!Rep)
+    RewardOnKillEntry const* Rew = sObjectMgr->GetRewardOnKillEntry(victim->ToCreature()->GetCreatureTemplate()->Entry);
+
+    if (!Rew)
         return;
 
     uint32 ChampioningFaction = 0;
@@ -6958,37 +6959,96 @@ void Player::RewardReputation(Unit* victim, float rate)
     {
         // support for: Championing - http://www.wowwiki.com/Championing
 
-        Map const* map = GetMap();
-        if (map && map->IsNonRaidDungeon())
+        // Note:
+
+        // "All reputation gains while in dungeons will be applied to your standing with them."
+        //   Alliance and Horde factions championing is allowed in all dungeons
+
+        // "All reputation gains while in level 80 dungeons will be applied to your standing with them."
+        //   Wrath of the Lich King factions championing is allowed in WLK heroic dungeons (level 80) and Cataclysm dungeons (level 80 - 84)
+
+        // "All reputation gains while in level 85 Cataclysm dungeons will be applied to your standing with them."
+        //   Cataclysm factions championing is allowed in Cataclysm heroic dungeons only (level 85)
+
+        Map const *map = GetMap();
+        if (map && map->IsDungeon())
         {
-            if (AccessRequirement const* accessRequirement = sObjectMgr->GetAccessRequirement(map->GetId(), map->GetDifficulty()))
-                if (accessRequirement->levelMin == 80)
-                    ChampioningFaction = GetChampioningFaction();
+            uint32 dungeonLevel = GetChampioningFactionDungeonLevel();
+            if (dungeonLevel)
+            {
+                InstanceTemplate const *instance = sObjectMgr->GetInstanceTemplate(map->GetId());
+                if (instance)
+                {
+                    AccessRequirement const *accessRequirement = sObjectMgr->GetAccessRequirement(map->GetId(), ((InstanceMap*) map)->GetDifficulty());
+                    if (accessRequirement)
+                    {
+                        if (!map->IsRaid() && accessRequirement->levelMin >= dungeonLevel)
+                            ChampioningFaction = GetChampioningFaction();
+                    }
+                }
+            }
+            else
+                ChampioningFaction = GetChampioningFaction();
         }
     }
 
+    // Favored reputation increase START
+    uint32 zone = GetZoneId();
     uint32 team = GetTeam();
+    float favored_rep_mult = 0;
 
-    if (Rep->RepFaction1 && (!Rep->TeamDependent || team == ALLIANCE))
+    if ((HasAura(32096) || HasAura(32098)) && (zone == 3483 || zone == 3562 || zone == 3836 || zone == 3713 || zone == 3714))
+        favored_rep_mult = 0.25;          // Thrallmar's Favor and Honor Hold's Favor
+    else if (HasAura(30754) && (Rew->repfaction1 == 609 || Rew->repfaction2 == 609) && !ChampioningFaction)
+        favored_rep_mult = 0.25;          // Cenarion Favor
+
+    if (favored_rep_mult > 0)
+        favored_rep_mult *= 2;          // Multiplied by 2 because the reputation is divided by 2 for some reason (See "donerep1 / 2" and "donerep2 / 2") -- if you know why this is done, please update/explain :)
+    // Favored reputation increase END
+
+    bool recruitAFriend = GetsRecruitAFriendBonus(false);
+
+    if (Rew->repfaction1 && (!Rew->team_dependent || team == ALLIANCE))
     {
-        int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rep->RepValue1, ChampioningFaction ? ChampioningFaction : Rep->RepFaction1);
-        donerep1 = int32(donerep1 * rate);
+        int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, Rew->repvalue1, ChampioningFaction ? ChampioningFaction : Rew->repfaction1, false);
+        donerep1 = int32(donerep1 * (rate + favored_rep_mult));
 
-        FactionEntry const* factionEntry1 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rep->RepFaction1);
+        if (recruitAFriend)
+            donerep1 = int32(donerep1 * (1 + sWorld->getRate(RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS)));
+
+        FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rew->repfaction1);
         uint32 current_reputation_rank1 = GetReputationMgr().GetRank(factionEntry1);
-        if (factionEntry1 && current_reputation_rank1 <= Rep->ReputationMaxCap1)
+        if (factionEntry1 && current_reputation_rank1 <= Rew->reputation_max_cap1)
             GetReputationMgr().ModifyReputation(factionEntry1, donerep1);
     }
 
-    if (Rep->RepFaction2 && (!Rep->TeamDependent || team == HORDE))
+    if (Rew->repfaction2 && (!Rew->team_dependent || team == HORDE))
     {
-        int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rep->RepValue2, ChampioningFaction ? ChampioningFaction : Rep->RepFaction2);
-        donerep2 = int32(donerep2 * rate);
+        int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, Rew->repvalue2, ChampioningFaction ? ChampioningFaction : Rew->repfaction2, false);
+        donerep2 = int32(donerep2 * (rate + favored_rep_mult));
 
-        FactionEntry const* factionEntry2 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rep->RepFaction2);
+        if (recruitAFriend)
+            donerep2 = int32(donerep2 * (1 + sWorld->getRate(RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS)));
+
+        FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rew->repfaction2);
         uint32 current_reputation_rank2 = GetReputationMgr().GetRank(factionEntry2);
-        if (factionEntry2 && current_reputation_rank2 <= Rep->ReputationMaxCap2)
+        if (factionEntry2 && current_reputation_rank2 <= Rew->reputation_max_cap2)
             GetReputationMgr().ModifyReputation(factionEntry2, donerep2);
+    }
+
+    if (Rew->currencyid1 && Rew->currencycount1)
+    {
+        ModifyCurrency(Rew->currencyid1, Rew->currencycount1);
+    }
+
+    if (Rew->currencyid2 && Rew->currencycount2)
+    {
+        ModifyCurrency(Rew->currencyid2, Rew->currencycount2);
+    }
+
+    if (Rew->currencyid3 && Rew->currencycount3)
+    {
+        ModifyCurrency(Rew->currencyid3, Rew->currencycount3);
     }
 }
 
