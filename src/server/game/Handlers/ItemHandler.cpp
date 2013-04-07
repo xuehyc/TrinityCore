@@ -27,6 +27,8 @@
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "Guild.h"
+#include "GuildMgr.h"
 #include "Item.h"
 #include "UpdateData.h"
 #include "ObjectAccessor.h"
@@ -622,6 +624,26 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             }
 
             int32 price = vendorItem->IsGoldRequired(itemTemplate) ? uint32(floor(itemTemplate->BuyPrice * discountMod)) : 0;
+			
+                // If the item is a guild reward, dont display it if the player does not fit the requirements
+                // ToDo: Theese items must have a flag, find it
+                if (QueryResult res = WorldDatabase.PQuery("SELECT achievement, standing FROM guild_rewards WHERE entry = %u", vendorItem->item))
+                {
+                    Guild* guild = sGuildMgr->GetGuildById(_player->GetGuildId());
+                    if (!guild)
+                        continue;
+                    Field *fields = res->Fetch();
+
+                    // Check for achievement
+                    if (!guild->GetAchievementMgr().HasAchieved(fields[0].GetUInt32()))
+                        continue;
+
+                    // Check for standing
+                    uint32 repReq = fields[1].GetUInt32();
+                    if (repReq)
+                        if (ReputationRank(repReq) > _player->GetReputationRank(1168)) // Does not have enough reputation
+                            continue;
+                }
 
             if (int32 priceMod = _player->GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_ITEMS_PRICES))
                 price -= CalculatePct(price, priceMod);
