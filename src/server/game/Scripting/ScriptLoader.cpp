@@ -101,6 +101,7 @@ void AddSC_boss_drekthar();
 void AddSC_boss_galvangar();
 void AddSC_boss_vanndar();
 void AddSC_boss_alizabal();                  //Baradin Hold
+void AddSC_boss_argaloth();
 void AddSC_instance_baradin_hold();
 void AddSC_blackrock_depths();               //Blackrock Depths
 void AddSC_boss_ambassador_flamelash();
@@ -740,6 +741,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_galvangar();
     AddSC_boss_vanndar();
     AddSC_boss_alizabal();                  //Baradin Hold
+	AddSC_boss_argaloth();
     AddSC_instance_baradin_hold();
     AddSC_blackrock_depths();               //Blackrock Depths
     AddSC_boss_ambassador_flamelash();
