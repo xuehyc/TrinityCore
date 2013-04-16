@@ -255,6 +255,11 @@ void AddSC_boss_eredar_twins();
 void AddSC_boss_muru();
 void AddSC_boss_kiljaeden();
 void AddSC_sunwell_plateau();
+void AddSC_boss_lady_nazjar();              //Throne of the Tides
+void AddSC_boss_commander_ulthok();
+void AddSC_boss_erunak_stonespeaker();
+void AddSC_neptulon();
+void AddSC_instance_throne_of_the_tides();
 void AddSC_boss_archaedas();                 //Uldaman
 void AddSC_boss_ironaya();
 void AddSC_uldaman();
@@ -925,6 +930,11 @@ void AddEasternKingdomsScripts()
     AddSC_boss_muru();
     AddSC_boss_kiljaeden();
     AddSC_sunwell_plateau();
+    AddSC_boss_lady_nazjar();              //Throne of the Tides
+    AddSC_boss_commander_ulthok();
+    AddSC_boss_erunak_stonespeaker();
+    AddSC_neptulon();
+    AddSC_instance_throne_of_the_tides();	
     AddSC_boss_archaedas();                 //Uldaman
     AddSC_boss_ironaya();
     AddSC_uldaman();
