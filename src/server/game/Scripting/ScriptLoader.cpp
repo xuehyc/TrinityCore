@@ -109,6 +109,12 @@ void AddSC_boss_sinestra();
 void AddSC_boss_halfus_wyrmbreaker();
 void AddSC_boss_chogall();
 void AddSC_boss_assembly_of_ascendents();
+void AddSC_instance_blackrock_caverns();     //Blackrock Caverns
+void AddSC_boss_romogg_bonecrusher();
+void AddSC_boss_karsh_steelbender();
+void AddSC_boss_corla_herald_of_twilight();
+void AddSC_boss_beauty();
+void AddSC_boss_ascendant_lord_obsidius();
 void AddSC_blackrock_depths();               //Blackrock Depths
 void AddSC_boss_ambassador_flamelash();
 void AddSC_boss_anubshiah();
@@ -754,7 +760,13 @@ void AddEasternKingdomsScripts()
     AddSC_boss_sinestra();
     AddSC_boss_halfus_wyrmbreaker();
     AddSC_boss_chogall();
-    AddSC_boss_assembly_of_ascendents();	
+    AddSC_boss_assembly_of_ascendents();
+    AddSC_instance_blackrock_caverns();     //Blackrock Caverns
+    AddSC_boss_romogg_bonecrusher();
+    AddSC_boss_karsh_steelbender();
+    AddSC_boss_corla_herald_of_twilight();
+    AddSC_boss_beauty();
+    AddSC_boss_ascendant_lord_obsidius();	
     AddSC_blackrock_depths();               //Blackrock Depths
     AddSC_boss_ambassador_flamelash();
     AddSC_boss_anubshiah();
