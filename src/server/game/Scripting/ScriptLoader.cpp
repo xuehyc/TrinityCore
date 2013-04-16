@@ -103,6 +103,12 @@ void AddSC_boss_vanndar();
 void AddSC_boss_alizabal();                  //Baradin Hold
 void AddSC_boss_argaloth();
 void AddSC_instance_baradin_hold();
+void AddSC_instance_bastion_of_twilight();   //BastionOfTwilight
+void AddSC_boss_theralion_and_valiona();
+void AddSC_boss_sinestra();
+void AddSC_boss_halfus_wyrmbreaker();
+void AddSC_boss_chogall();
+void AddSC_boss_assembly_of_ascendents();
 void AddSC_blackrock_depths();               //Blackrock Depths
 void AddSC_boss_ambassador_flamelash();
 void AddSC_boss_anubshiah();
@@ -743,6 +749,12 @@ void AddEasternKingdomsScripts()
     AddSC_boss_alizabal();                  //Baradin Hold
 	AddSC_boss_argaloth();
     AddSC_instance_baradin_hold();
+    AddSC_instance_bastion_of_twilight();   //BastionOfTwilight
+    AddSC_boss_theralion_and_valiona();
+    AddSC_boss_sinestra();
+    AddSC_boss_halfus_wyrmbreaker();
+    AddSC_boss_chogall();
+    AddSC_boss_assembly_of_ascendents();	
     AddSC_blackrock_depths();               //Blackrock Depths
     AddSC_boss_ambassador_flamelash();
     AddSC_boss_anubshiah();
