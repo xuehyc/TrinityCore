@@ -405,6 +405,12 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage += int32(CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), pct));
                     break;
                 }
+				if(m_spellInfo->Id == 52174) // heroic leap
+			    {
+				    float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+				    damage = int32(1 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f);
+				    break;
+			    } 
                 break;
             }
             case SPELLFAMILY_WARLOCK:

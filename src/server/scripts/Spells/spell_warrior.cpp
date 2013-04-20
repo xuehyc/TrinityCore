@@ -55,6 +55,7 @@ enum WarriorSpells
     SPELL_PALADIN_GREATER_BLESSING_OF_SANCTUARY     = 25899,
     SPELL_PRIEST_RENEWED_HOPE                       = 63944,
     SPELL_GEN_DAMAGE_REDUCTION_AURA                 = 68066,
+	SPELL_WARRIOR_SPELL_HEROIC_LEAP                 = 6544,
 };
 
 enum WarriorSpellIcons
@@ -724,6 +725,81 @@ class spell_warr_vigilance_trigger : public SpellScriptLoader
         }
 };
 
+// 78 Heroic Strike
+class spell_warr_heroic_strike : public SpellScriptLoader
+{
+ public:
+        spell_warr_heroic_strike() : SpellScriptLoader("spell_warr_heroic_strike") { }
+
+        class spell_warr_heroic_strike_SpellScript : public SpellScript
+        {
+                PrepareSpellScript(spell_warr_heroic_strike_SpellScript);
+
+        void CalculateDamage(SpellEffIndex /*effect*/)
+        {
+        // Formula: 8 + AttackPower * 60 / 100
+                if (Unit* caster = GetCaster())
+                        SetHitDamage(int32(8 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 60 / 100));
+        }
+
+        void Register()
+        {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_heroic_strike::spell_warr_heroic_strike_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+		};
+
+        SpellScript* GetSpellScript() const
+        {
+                return new spell_warr_heroic_strike_SpellScript();
+        }
+};
+
+// Heroic leap 6544
+class spell_warr_heroic_leap : public SpellScriptLoader
+{
+    public:
+        spell_warr_heroic_leap() : SpellScriptLoader("spell_warr_heroic_leap") { }
+
+        class spell_warr_heroic_leap_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_heroic_leap_SpellScript)
+
+            bool Validate(SpellInfo const * /*spellEntry*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SPELL_HEROIC_LEAP))
+                    return false;
+                return true;
+            }
+
+            bool Load()
+            {
+                if (!GetCaster())
+                    return false;
+
+                return true;
+            }
+            SpellCastResult CheckElevation()
+            {
+                                Unit* caster = GetCaster();
+                                WorldLocation const* const dest = GetExplTargetDest();
+
+                if (dest->GetPositionZ() > caster->GetPositionZ() + 5.0f) // Cant jump to higher ground
+                    return SPELL_FAILED_NOPATH;
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_warr_heroic_leap_SpellScript::CheckElevation);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_warr_heroic_leap_SpellScript();
+        }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -742,4 +818,6 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_sweeping_strikes();
     new spell_warr_vigilance();
     new spell_warr_vigilance_trigger();
+	new spell_warr_heroic_strike();
+	new spell_warr_heroic_leap();
 }
