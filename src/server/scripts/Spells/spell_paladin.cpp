@@ -56,6 +56,9 @@ enum PaladinSpells
     SPELL_PALADIN_DIVINE_SACRIFICE               = 64205,
 
     SPELL_PALADIN_DIVINE_PURPOSE_PROC            = 90174,
+	SPELL_PALADIN_SEAL_OF_JUSTICE                = 20164,
+	SPELL_PALADIN_SEAL_OF_INSIGHT                = 20165,
+	SPELL_PALADIN_JUDGEMENT_DAMAGE               = 54158,
 
     SPELL_PALADIN_GLYPH_OF_SALVATION             = 63225,
 
@@ -957,6 +960,68 @@ class spell_pal_seal_of_righteousness : public SpellScriptLoader
         }
 };
 
+/// Updated 4.3.4
+class spell_pal_judgements : public SpellScriptLoader
+{
+    public:
+        spell_pal_judgements() : SpellScriptLoader("spell_pal_judgements") { }
+
+        class spell_pal_judgements_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pal_judgements_SpellScript);
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                if (Unit* target = GetHitUnit())
+                  {
+                int32 regen = 0;
+
+                   if (caster->HasAura(89901)) // Jugements of the bold
+                 {
+                    regen = int32(caster->GetCreateMana() * 0.025);
+                    caster->CastCustomSpell(caster, 89906, &regen, 0, 0, true);
+                   }
+                   if (caster->HasAura(31878)) // Judgements of the Wise
+                 {
+                    regen = int32(caster->GetCreateMana() * 0.030);
+                    caster->CastCustomSpell(caster, 31930, &regen, 0, 0, true);
+                   }
+
+                   if (caster->HasAura(87168)) // Long arm of Lawl Rank 1
+                    if (roll_chance_i(50.0f))
+                        if (caster->GetDistance(target) > 15.0f || !caster->IsWithinDistInMap(target, 15.0f)) 
+                                caster->CastSpell(caster, 87173, true);
+                   if (caster->HasAura(87172)) // Long arm of Lawl Rank 2
+                        if (caster->GetDistance(target) > 15.0f || !caster->IsWithinDistInMap(target, 15.0f)) 
+                                caster->CastSpell(caster, 87173, true);
+
+                   if (caster->HasAura(53671)) // Judgements of the Pure
+                                caster->CastSpell(caster, 53655, true);
+                   if (caster->HasAura(53673)) 
+                                caster->CastSpell(caster, 53656, true);
+                   if (caster->HasAura(54151)) 
+                                caster->CastSpell(caster, 53657, true);
+
+                   if (caster->HasAura(53556)) // Enlightened Judgements
+                                caster->CastSpell(caster, 87188 , true);
+                   if (caster->HasAura(53557)) 
+                                caster->CastSpell(caster, 87189, true);
+                 }
+            } 
+
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pal_judgements_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pal_judgements_SpellScript();
+        }
+};
 
 void AddSC_paladin_spell_scripts()
 {
@@ -978,4 +1043,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_sacred_shield();
     new spell_pal_templar_s_verdict();
     new spell_pal_seal_of_righteousness();
+	new spell_pal_judgements();
 }
