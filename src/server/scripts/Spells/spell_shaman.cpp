@@ -49,7 +49,9 @@ enum ShamanSpells
     SPELL_SHAMAN_TOTEM_EARTHBIND_EARTHGRAB      = 64695,
     SPELL_SHAMAN_TOTEM_EARTHBIND_TOTEM          = 6474,
     SPELL_SHAMAN_TOTEM_EARTHEN_POWER            = 59566,
-    SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL      = 52042
+    SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL      = 52042,
+	SPELL_SHAMAN_TOTEM_TOTEMIC_WRATH            = 77746,
+    SPELL_SHAMAN_TOTEM_TOTEMIC_WRATH_AURA       = 77747,
 };
 
 enum ShamanSpellIcons
@@ -645,6 +647,46 @@ class spell_sha_thunderstorm : public SpellScriptLoader
         }
 };
 
+// 77746 - Totemic Wrath
+class spell_sha_totemic_wrath : public SpellScriptLoader
+{
+public:
+    spell_sha_totemic_wrath() : SpellScriptLoader("spell_sha_totemic_wrath") { }
+
+    class spell_sha_totemic_wrath_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_sha_totemic_wrath_AuraScript); 
+
+        bool Validate(SpellInfo const* /*spellEntry*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_TOTEM_TOTEMIC_WRATH)) 
+                return false;
+            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_TOTEM_TOTEMIC_WRATH_AURA))
+                return false;
+            return true;
+        }
+
+        void HandleEffectApply(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        {
+
+            // applied by a totem - cast the real aura if owner has the talent
+            if (Unit *caster = aurEff->GetBase()->GetCaster())
+                if (caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 2019, 0))
+                    caster->CastSpell(caster, SPELL_SHAMAN_TOTEM_TOTEMIC_WRATH_AURA, true, NULL, aurEff);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_sha_totemic_wrath_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_sha_totemic_wrath_AuraScript();
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_ancestral_awakening_proc();
@@ -660,4 +702,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_lava_lash();
     new spell_sha_mana_tide_totem();
     new spell_sha_thunderstorm();
+	new spell_sha_totemic_wrath();
 }
