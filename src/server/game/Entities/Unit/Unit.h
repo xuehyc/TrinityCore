@@ -1340,6 +1340,8 @@ class Unit : public WorldObject
         void SendMeleeAttackStop(Unit* victim = NULL);
         void SendMeleeAttackStart(Unit* victim);
 
+        bool IsVisionObscured(Unit* victim);
+
         void AddUnitState(uint32 f) { m_state |= f; }
         bool HasUnitState(const uint32 f) const { return (m_state & f); }
         void ClearUnitState(uint32 f) { m_state &= ~f; }
