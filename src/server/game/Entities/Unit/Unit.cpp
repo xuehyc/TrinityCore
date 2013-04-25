@@ -11871,7 +11871,7 @@ bool Unit::IsInDisallowedMountForm() const
 {
     ShapeshiftForm form = GetShapeshiftForm();
     return form != FORM_NONE && form != FORM_BATTLESTANCE && form != FORM_BERSERKERSTANCE && form != FORM_DEFENSIVESTANCE &&
-        form != FORM_SHADOW && form != FORM_STEALTH && form != FORM_UNDEAD;
+        form != FORM_SHADOW && form != FORM_STEALTH && form != FORM_UNDEAD && form != FORM_SHADOW_DANCE;
 }
 
 /*#######################################
