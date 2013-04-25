@@ -5008,6 +5008,24 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         {
             switch (dummySpell->Id)
             {
+                // Flame Imbued
+                case 82663:
+                    if (procSpell->Id == 82662)
+                    {
+                        basepoints0 = triggerAmount;
+                        //if (victim->ToCreature() && victim->GetEntry() == 43687)
+                        CastCustomSpell(victim, 82813, &basepoints0, NULL, NULL, true);
+                    }
+                    break;
+                // Frost Imbued
+                case 82666:
+                    if (procSpell->Id == 82667)
+                    {
+                        basepoints0 = triggerAmount;
+                        //if (victim->ToCreature() && victim->GetEntry() == 43687)
+                        CastCustomSpell(victim, 82817, &basepoints0, NULL, NULL, true);
+                    }
+                    break;
                 // Unstable Power
                 case 24658:
                 {
