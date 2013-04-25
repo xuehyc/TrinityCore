@@ -5013,7 +5013,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (procSpell->Id == 82662)
                     {
                         basepoints0 = triggerAmount;
-                        //if (victim->ToCreature() && victim->GetEntry() == 43687)
                         CastCustomSpell(victim, 82813, &basepoints0, NULL, NULL, true);
                     }
                     break;
@@ -5022,7 +5021,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (procSpell->Id == 82667)
                     {
                         basepoints0 = triggerAmount;
-                        //if (victim->ToCreature() && victim->GetEntry() == 43687)
                         CastCustomSpell(victim, 82817, &basepoints0, NULL, NULL, true);
                     }
                     break;
