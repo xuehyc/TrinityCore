@@ -38,9 +38,6 @@
 #include "BattlefieldMgr.h"
 #include "Player.h"
 
-#include "Battleground.h"
-#include "SpellAuraEffects.h"
-
 bool IsPrimaryProfessionSkill(uint32 skill)
 {
     SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
