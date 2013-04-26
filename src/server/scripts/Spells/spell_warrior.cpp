@@ -28,6 +28,7 @@
 
 enum WarriorSpells
 {
+	SPELL_WARRIOR_RALLING_CRY_TRIGGERED             = 97463,
     SPELL_WARRIOR_BLOODTHIRST                       = 23885,
     SPELL_WARRIOR_BLOODTHIRST_DAMAGE                = 23881,
     SPELL_WARRIOR_CHARGE                            = 34846,
@@ -800,6 +801,45 @@ class spell_warr_heroic_leap : public SpellScriptLoader
         }
 };
 
+class spell_warr_ralling_cry : public SpellScriptLoader
+{
+        public:
+			spell_warr_ralling_cry() : SpellScriptLoader("spell_warr_ralling_cry") { }
+			class spell_warr_ralling_cry_SpellScript : public SpellScript
+			{
+				PrepareSpellScript(spell_warr_ralling_cry_SpellScript);
+				bool Validate(SpellInfo const* /*spellEntry*/)
+				{
+					if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_RALLING_CRY_TRIGGERED))
+						return false;
+					return true;
+				}
+				void HandleDummy(SpellEffIndex /*effIndex*/)
+				{
+					if (Unit* caster = GetCaster())
+					{
+						int32 bp = 0;
+						std::list<Unit*> PartyMembers;
+						caster->GetPartyMembers(PartyMembers);
+						for (std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr) // If caster is in party with a player
+							if (caster->GetDistance((*itr)) <= 30.0f)
+							{
+								bp = (*itr)->CountPctFromMaxHealth(20);
+								caster->CastCustomSpell((*itr), SPELL_WARRIOR_RALLING_CRY_TRIGGERED, &bp, NULL, NULL, true, NULL);
+							}
+					}
+				}
+				void Register()
+				{
+					OnEffectHit += SpellEffectFn(spell_warr_ralling_cry_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+				}
+			};
+			SpellScript* GetSpellScript() const
+			{
+				return new spell_warr_ralling_cry_SpellScript();
+			}
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -820,4 +860,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_vigilance_trigger();
 	new spell_warr_heroic_strike();
 	new spell_warr_heroic_leap();
+	new spell_warr_ralling_cry();
 }
