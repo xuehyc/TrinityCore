@@ -38,6 +38,9 @@
 #include "BattlefieldMgr.h"
 #include "Player.h"
 
+#include "Battleground.h"
+#include "SpellAuraEffects.h"
+
 bool IsPrimaryProfessionSkill(uint32 skill)
 {
     SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
@@ -3043,7 +3046,20 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 13813: // Explosive Trap
             case 82939: // Explosive Trap  - Trap Launcher
             case 34600: // Snake Trap
+            case 82945: // Fire - Trap Launcher 1
+            case 77769: // Trap Launcher
+            case 82948: // Nature - Trap Launcher
+            case 136:   // Mend Pet
+            case 82661: // Aspect of the Fox
+            case 5118:  // Aspect of the Cheetah
+            case 13159: // Aspect of the Pack
+            case 20043: // Aspect of the Wild
+            case 19263: // Deterrence
             // Dont Remove Stealth From Camouflage
+                spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
+                break;
+            case 13165: // Aspect of the Hawk
+                //spellInfo->Multiplier[0] = 4.515f; // This will be activated soon, we need more improvements in Spell Coefficients
                 spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
                 break;
             case 8494: // Mana Shield (rank 2)
