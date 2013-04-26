@@ -919,6 +919,60 @@ public:
     }
 };
 
+// Shockwave
+/// Updated 4.3.4
+class spell_warr_shockwave : public SpellScriptLoader
+{
+public:
+	spell_warr_shockwave() : SpellScriptLoader("spell_warr_shockwave") { }
+	class spell_warr_shockwave_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_warr_shockwave_SpellScript);
+		void CalculateDamage(SpellEffIndex /*effect*/)
+		{
+			// Formula: [Effect2BasePoints] / 100 * AttackPower
+			if (Unit* caster = GetCaster())
+			{
+				int32 bp2 = caster->CalculateSpellDamage(GetHitUnit(), GetSpellInfo(), EFFECT_2);
+				SetHitDamage(int32(bp2 / 100 * caster->GetTotalAttackPowerValue(BASE_ATTACK)));
+			}
+		}
+		void Register()
+		{
+			OnEffectHitTarget += SpellEffectFn(spell_warr_shockwave::spell_warr_shockwave_SpellScript::CalculateDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+		}
+	};
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_warr_shockwave_SpellScript();
+	}
+};
+// Cleave
+/// Updated 4.3.4
+class spell_warr_cleave : public SpellScriptLoader
+{
+public:
+	spell_warr_cleave() : SpellScriptLoader("spell_warr_cleave") { }
+	class spell_warr_cleave_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_warr_cleave_SpellScript);
+		void CalculateDamage(SpellEffIndex /*effect*/)
+		{
+			// Formula: 6 + AttackPower * 0.45
+			if (Unit* caster = GetCaster())
+				SetHitDamage(int32(6 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f));
+		}
+		void Register()
+		{
+			OnEffectHitTarget += SpellEffectFn(spell_warr_cleave::spell_warr_cleave_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+		}
+	};
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_warr_cleave_SpellScript();
+
+	}
+};
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -941,4 +995,6 @@ void AddSC_warrior_spell_scripts()
 	new spell_warr_heroic_leap();
 	new spell_warr_ralling_cry();
 	new spell_warr_thunderclap();
+	new spell_warr_shockwave();
+    new spell_warr_cleave();
 }
