@@ -218,7 +218,10 @@ enum TrinityStrings
     LANG_PHASING_LAST_PHASE             = 180,
     LANG_PHASING_LIST                   = 181,
     LANG_PHASING_PHASEMASK              = 182,
-    // Room for more level 1              183-199 not used
+    LANG_YOU_CHANGE_FOCUS               = 183,
+    LANG_YOURS_FOCUS_CHANGED            = 184,
+    LANG_CURRENT_FOCUS                  = 185,
+    // Room for more level 1              186-199 not used
 
     // level 2 chat
     LANG_NO_SELECTION                   = 200,

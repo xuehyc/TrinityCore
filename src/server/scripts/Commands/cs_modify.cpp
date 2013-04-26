@@ -56,6 +56,7 @@ public:
             { "rage",           SEC_MODERATOR,      false, &HandleModifyRageCommand,          "", NULL },
             { "runicpower",     SEC_MODERATOR,      false, &HandleModifyRunicPowerCommand,    "", NULL },
             { "energy",         SEC_MODERATOR,      false, &HandleModifyEnergyCommand,        "", NULL },
+            { "focus",          SEC_MODERATOR,      false, &HandleModifyFocusCommand,         "", NULL },
             { "money",          SEC_MODERATOR,      false, &HandleModifyMoneyCommand,         "", NULL },
             { "scale",          SEC_MODERATOR,      false, &HandleModifyScaleCommand,         "", NULL },
             { "bit",            SEC_MODERATOR,      false, &HandleModifyBitCommand,           "", NULL },
@@ -208,6 +209,45 @@ public:
 
         return true;
     }
+
+     //Edit Player Focus
+     static bool HandleModifyFocusCommand(ChatHandler* handler, const char* args)
+     {
+         if (!*args)
+             return false;
+
+         int32 focus = atoi((char*)args)*10;
+         int32 focusm = atoi((char*)args)*10;
+
+         if (focus <= 0 || focusm <= 0 || focusm < focus)
+         {
+             handler->SendSysMessage(LANG_BAD_VALUE);
+             handler->SetSentErrorMessage(true);
+             return false;
+         }
+
+         Player* target = handler->getSelectedPlayer();
+         if (!target)
+         {
+             handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+             handler->SetSentErrorMessage(true);
+             return false;
+         }
+
+         if (handler->HasLowerSecurity(target, 0))
+             return false;
+
+         handler->PSendSysMessage(LANG_YOU_CHANGE_FOCUS, handler->GetNameLink(target).c_str(), focus/10, focusm/10);
+          if (handler->needReportToTarget(target))
+             ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOURS_FOCUS_CHANGED, handler->GetNameLink().c_str(), focus/10, focusm/10);
+
+         target->SetMaxPower(POWER_FOCUS, focusm);
+         target->SetPower(POWER_FOCUS, focus);
+
+         sLog->outInfo(LOG_FILTER_GENERAL, handler->GetTrinityString(LANG_CURRENT_FOCUS), target->GetMaxPower(POWER_FOCUS));
+
+         return true;
+     }
 
     //Edit Player Rage
     static bool HandleModifyRageCommand(ChatHandler* handler, const char* args)
