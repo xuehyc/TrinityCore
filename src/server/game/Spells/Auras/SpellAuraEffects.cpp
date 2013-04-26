@@ -415,7 +415,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //350 SPELL_AURA_MOD_GATHERING_ITEMS_GAINED_PERCENT
     &AuraEffect::HandleNULL,                                      //351 SPELL_AURA_351
     &AuraEffect::HandleNULL,                                      //352 SPELL_AURA_352
-    &AuraEffect::HandleNULL,                                      //353 SPELL_AURA_MOD_CAMOUFLAGE
+    &AuraEffect::HandleModCamouflage,                             //353 SPELL_AURA_MOD_CAMOUFLAGE
     &AuraEffect::HandleNULL,                                      //354 SPELL_AURA_354
     &AuraEffect::HandleUnused,                                    //355 unused (4.3.4)
     &AuraEffect::HandleNULL,                                      //356 SPELL_AURA_356
@@ -1474,6 +1474,34 @@ void AuraEffect::HandleModInvisibility(AuraApplication const* aurApp, uint8 mode
         target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
     }
     target->UpdateObjectVisibility();
+}
+
+void AuraEffect::HandleModCamouflage(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK))
+        return;
+
+    Unit *target = aurApp->GetTarget();
+
+    switch (GetId())
+    {
+        // Hunter's Camouflage
+        case 51755:
+        {
+            if (apply)
+                target->CastSpell(target,80326,true);
+            else
+            {
+                if (Unit* owner = target->GetCharmerOrOwner())
+                    owner->RemoveAura(51755);
+                target->RemoveAura(80326);
+                target->RemoveAura(80325);
+            }
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 void AuraEffect::HandleModStealthDetect(AuraApplication const* aurApp, uint8 mode, bool apply) const

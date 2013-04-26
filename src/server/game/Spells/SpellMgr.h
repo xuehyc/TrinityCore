@@ -109,6 +109,42 @@ enum SpellLinkedType
     SPELL_LINK_REMOVE   = 0
 };
 
+inline bool isSpellBreakCamouflage(SpellEntry const* spellInfo)
+{
+    // This is bad but I dont't see another way
+    // I cannot check spells using any mask
+    // Use it only for hunter camouflage
+    if (!spellInfo)
+        return true;
+    switch (spellInfo->Id)
+    {
+        case 1462:  // Beast Lore
+        case 13165: // Aspect of the Hawk
+        case 5118:  // Aspect of the Cheetah
+        case 6197:  // Eagle Eye
+        case 13795: // Immolation Trap
+        case 82935: // Immplation Trap launcher
+        case 1499:  // Frost Trap
+        case 60192: // Frost Trap launcher
+        case 5384:  // Feign Death
+        case 13813: // Explosive Trap
+        case 82939: // Explosive Trap launcher
+        case 1543:  // Flare
+        case 13809: // Ice Trap
+        case 82941: // Ice Trap launcher
+        case 77769: // Trap Launcher
+        case 13159: // Aspect of the Pack
+        case 20043: // Aspect of the Wild
+        case 34600: // Snake Trap
+        case 82948: // Snake Trap launcher
+        case 53271: // Master's Call
+        case 34477: // Misdirection
+        case 19263: // Deterence
+        case 82661: // Aspect of the Fox
+            return false;
+    }
+    return true;
+};
 
 // Spell proc event related declarations (accessed using SpellMgr functions)
 enum ProcFlags

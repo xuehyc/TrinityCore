@@ -3035,6 +3035,17 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 59372: // Energize Cores
                 spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
                 break;
+            case 13795: // Immolation Trap
+            case 13809: // Ice Trap
+            case 82941: // Ice Trap        - Trap Launcher
+            case 1499:  // Freezing Trap
+            case 60192: // Freezing Trap   - Trap Launcher
+            case 13813: // Explosive Trap
+            case 82939: // Explosive Trap  - Trap Launcher
+            case 34600: // Snake Trap
+            // Dont Remove Stealth From Camouflage
+                spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
+                break;
             case 8494: // Mana Shield (rank 2)
                 // because of bug in dbc
                 spellInfo->ProcChance = 0;

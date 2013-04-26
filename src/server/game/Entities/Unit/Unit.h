@@ -2011,6 +2011,7 @@ class Unit : public WorldObject
         float m_TempSpeed;
 
         bool isHover() const { return HasAuraType(SPELL_AURA_HOVER); }
+        bool isCamouflaged() const { return HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE); }
 
         float ApplyEffectModifiers(SpellInfo const* spellProto, uint8 effect_index, float value) const;
         int32 CalculateSpellDamage(Unit const* target, SpellInfo const* spellProto, uint8 effect_index, int32 const* basePoints = NULL) const;
