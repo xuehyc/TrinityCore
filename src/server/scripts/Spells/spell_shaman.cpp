@@ -716,46 +716,38 @@ public:
     }
 };
 
-// 77478 - Earthquake
+// 61882 - Earthquake
 class spell_sha_earthquake : public SpellScriptLoader
 {
 public:
     spell_sha_earthquake() : SpellScriptLoader("spell_sha_earthquake") { }
 
-    class spell_sha_earthquake_SpellScript : public SpellScript
+    class spell_sha_earthquake_AuraScript : public AuraScript
     {
-        PrepareSpellScript(spell_sha_earthquake_SpellScript);
+        PrepareAuraScript(spell_sha_earthquake_AuraScript);
 
-        int32 chance;
-
-        bool Validate(SpellInfo const* /*spellEntry*/)
+        void earthquake(AuraEffect const* /*aurEff*/)
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_EARTHQUAKE_KNOCKDOWN))
-                return false;
-            return true;
-        }
+            if (!GetCaster())
+                 return;
 
-        bool Load()
-        {
-            chance = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
-            return true;
-        }
-
-        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
-        {
-            if (roll_chance_i(chance))
-                GetCaster()->CastSpell(GetHitUnit(), SPELL_SHAMAN_EARTHQUAKE_KNOCKDOWN, true);
+            if (DynamicObject* dynObj = GetCaster()->GetDynObject(61882))
+            {
+                GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 77478, true);
+            if (roll_chance_i(10))
+                GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 77505, true);
+            }
         }
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_sha_earthquake_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_sha_earthquake_AuraScript::earthquake, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
         }
     };
 
-    SpellScript* GetSpellScript() const
+    AuraScript* GetAuraScript() const
     {
-        return new spell_sha_earthquake_SpellScript();
+        return new spell_sha_earthquake_AuraScript();
     }
 };
 
@@ -774,7 +766,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_lava_lash();
     new spell_sha_mana_tide_totem();
     new spell_sha_thunderstorm();
-	new spell_sha_totemic_wrath();
-	new spell_sha_healing_rain();
-	new spell_sha_earthquake();
+    new spell_sha_totemic_wrath();
+    new spell_sha_healing_rain();
+    new spell_sha_earthquake();
 }
