@@ -52,6 +52,7 @@ enum ShamanSpells
     SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL      = 52042,
 	SPELL_SHAMAN_TOTEM_TOTEMIC_WRATH            = 77746,
     SPELL_SHAMAN_TOTEM_TOTEMIC_WRATH_AURA       = 77747,
+	SPELL_SHAMAN_EARTHQUAKE_KNOCKDOWN           = 77505,
 };
 
 enum ShamanSpellIcons
@@ -715,6 +716,49 @@ public:
     }
 };
 
+// 77478 - Earthquake
+class spell_sha_earthquake : public SpellScriptLoader
+{
+public:
+    spell_sha_earthquake() : SpellScriptLoader("spell_sha_earthquake") { }
+
+    class spell_sha_earthquake_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_earthquake_SpellScript);
+
+        int32 chance;
+
+        bool Validate(SpellInfo const* /*spellEntry*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_EARTHQUAKE_KNOCKDOWN))
+                return false;
+            return true;
+        }
+
+        bool Load()
+        {
+            chance = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
+            return true;
+        }
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (roll_chance_i(chance))
+                GetCaster()->CastSpell(GetHitUnit(), SPELL_SHAMAN_EARTHQUAKE_KNOCKDOWN, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_sha_earthquake_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_sha_earthquake_SpellScript();
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_ancestral_awakening_proc();
@@ -732,4 +776,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_thunderstorm();
 	new spell_sha_totemic_wrath();
 	new spell_sha_healing_rain();
+	new spell_sha_earthquake();
 }
