@@ -36,6 +36,7 @@ enum ShamanSpells
     SPELL_SHAMAN_BIND_SIGHT                     = 6277,
     SPELL_SHAMAN_EARTH_SHIELD_HEAL              = 379,
     SPELL_SHAMAN_EXHAUSTION                     = 57723,
+	SPELL_SHAMAN_FIRE_NOVA_R1                   = 1535,
     SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1         = 8349,
     SPELL_SHAMAN_FLAME_SHOCK                    = 8050,
     SPELL_SHAMAN_GLYPH_OF_EARTH_SHIELD          = 63279,
@@ -364,39 +365,63 @@ class spell_sha_earthen_power : public SpellScriptLoader
 };
 
 // 1535 Fire Nova
-/// Updated 4.3.4
 class spell_sha_fire_nova : public SpellScriptLoader
 {
-    public:
-        spell_sha_fire_nova() : SpellScriptLoader("spell_sha_fire_nova") { }
+public:
+    spell_sha_fire_nova() : SpellScriptLoader("spell_sha_fire_nova") { }
 
-        class spell_sha_fire_nova_SpellScript : public SpellScript
+    class spell_sha_fire_nova_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_fire_nova_SpellScript);
+
+        bool Validate(SpellInfo const* spellInfo)
         {
-            PrepareSpellScript(spell_sha_fire_nova_SpellScript);
+            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_FIRE_NOVA_R1))
+                return false;
+            if (sSpellMgr->GetFirstSpellInChain(SPELL_SHAMAN_FIRE_NOVA_R1) != sSpellMgr->GetFirstSpellInChain(spellInfo->Id))
+                return false;
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                Unit* caster = GetCaster();
-                if (Unit* target = GetHitUnit())
-                {
-                    if (target->HasAura(SPELL_SHAMAN_FLAME_SHOCK))
-                    {
-                        caster->CastSpell(target, SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, true);
-                        target->RemoveAurasDueToSpell(SPELL_SHAMAN_FLAME_SHOCK);
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_sha_fire_nova_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_sha_fire_nova_SpellScript();
+            uint8 rank = sSpellMgr->GetSpellRank(spellInfo->Id);
+            if (!sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, rank, true))
+                return false;
+            return true;
         }
+
+        SpellCastResult CheckFireTotem()
+        {
+            // fire totem
+            if (!GetCaster()->m_SummonSlot[1])
+            {
+                SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_MUST_HAVE_FIRE_TOTEM);
+                return SPELL_FAILED_CUSTOM_ERROR;
+            }
+
+            return SPELL_CAST_OK;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            uint8 rank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
+            if (uint32 spellId = sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, rank))
+            {
+                Creature* totem = caster->GetMap()->GetCreature(caster->m_SummonSlot[1]);
+                if (totem && totem->isTotem())
+                    totem->CastSpell(totem, spellId, true);
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_sha_fire_nova_SpellScript::CheckFireTotem);
+            OnEffectHitTarget += SpellEffectFn(spell_sha_fire_nova_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_sha_fire_nova_SpellScript();
+    }
 };
 
 // 8050 -Flame Shock
