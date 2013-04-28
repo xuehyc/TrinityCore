@@ -4662,6 +4662,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             }
             switch (GetId())
             {
+			    case 52437:
+					if (caster && caster->ToPlayer()->HasSpellCooldown(86346))
+						caster->ToPlayer()->RemoveSpellCooldown(86346, true);
+					break;
                 case 1515:                                      // Tame beast
                     // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
                     if (caster && target->CanHaveThreatList())
