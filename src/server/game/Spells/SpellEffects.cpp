@@ -459,6 +459,145 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     // 25 energy = 100% more damage
                     AddPct(damage, energy * 4);
                 }
+				// Wrath
+                else if (m_spellInfo->Id == 5176)
+                {
+                    // Improved Insect Swarm
+                    if (AuraEffect const * aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 1771, 0))
+                        if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00200000, 0, 0))
+                            AddPct(damage, aurEff->GetAmount());
+
+                    if (m_caster->HasAura(16913))
+                    {
+                        int eclipse = -13;
+                        int mana = 0;
+                        if (m_caster->HasAura(81061) && roll_chance_i(12) || m_caster->HasAura(81062) && roll_chance_i(24)) // Euphoria
+                        {
+                            if (!m_caster->HasAura(48518) && !m_caster->HasAura(48517))
+                                eclipse = -26;
+                            else
+                                eclipse = -13;
+
+                            m_caster->CastCustomSpell(m_caster, 89265, &eclipse, 0, 0, true);
+                        }
+                        else
+                            m_caster->CastCustomSpell(m_caster, 89265, &eclipse, 0, 0, true); // Normal Eclipse gain
+
+                        if (m_caster->GetPower(POWER_ECLIPSE) == 0)
+                        {
+                            if (m_caster->HasAura(81061)) // Euphoria Rank 1
+                            {
+                                mana = 8;
+                                m_caster->CastCustomSpell(m_caster, 81070, &mana, 0, 0, true);
+                            }
+                            if (m_caster->HasAura(81062)) // Euphoria Rank 2
+                            {
+                                mana = 16;
+                                m_caster->CastCustomSpell(m_caster, 81070, &mana, 0, 0, true);
+                            }
+
+                            m_caster->CastSpell(m_caster, 48518, true, 0); // Cast Eclipse
+                        }
+                        /// ECLIPSE REMOVE
+                        if (m_caster->GetPower(POWER_ECLIPSE) > 99)
+                        {
+                            m_caster->RemoveAurasDueToSpell(93432); // Nature's Grace CD remove.
+                            m_caster->RemoveAurasDueToSpell(48518);
+                        }
+                        if (m_caster->GetPower(POWER_ECLIPSE) < 101)
+                        {
+                            m_caster->RemoveAurasDueToSpell(93432); // Nature's Grace CD remove.
+                            m_caster->RemoveAurasDueToSpell(48517);
+                            m_caster->RemoveAurasDueToSpell(94338);
+                        }
+                    }
+                }
+                // Starfire
+                else if (m_spellInfo->Id == 2912)
+                {
+                    if (m_caster->HasAura(16913))
+                    {
+                        int eclipse = 20;
+                        int mana = 0;
+                        if (m_caster->HasAura(81061) && roll_chance_i(12) || m_caster->HasAura(81062) && roll_chance_i(24)) // Euphoria
+                        {
+                            if (!m_caster->HasAura(48518) && !m_caster->HasAura(48517))
+                                eclipse = 40;
+                            else
+                                eclipse = 20;
+
+                            m_caster->CastCustomSpell(m_caster, 89265, &eclipse, 0, 0, true);
+                        }
+                        else
+                            m_caster->CastCustomSpell(m_caster, 89265, &eclipse, 0, 0, true); // Normal Eclipse gain
+
+
+                        if (m_caster->GetPower(POWER_ECLIPSE) == 200)
+                        {
+                            if (m_caster->HasAura(81061)) // Euphoria Rank 1
+                            {
+                                mana = 8;
+                                m_caster->CastCustomSpell(m_caster, 81070, &mana, 0, 0, true);
+                            }
+                            if (m_caster->HasAura(81062)) // Euphoria Rank 2
+                            {
+                                mana = 16;
+                                m_caster->CastCustomSpell(m_caster, 81070, &mana, 0, 0, true);
+                            }
+                            if (m_caster->HasAura(93401))
+                                m_caster->CastSpell(m_caster, 94338, true, 0);
+
+                            m_caster->CastSpell(m_caster, 48517, true, 0); // Cast Eclipse
+                        }
+                        /// ECLIPSE REMOVE
+                        if (m_caster->GetPower(POWER_ECLIPSE) > 99)
+                        {
+                            m_caster->RemoveAurasDueToSpell(93432); // Nature's Grace CD remove.
+                            m_caster->RemoveAurasDueToSpell(48518);
+                        }
+                        if (m_caster->GetPower(POWER_ECLIPSE) < 101)
+                        {
+                            m_caster->RemoveAurasDueToSpell(93432); // Nature's Grace CD remove.
+                            m_caster->RemoveAurasDueToSpell(48517);
+                            m_caster->RemoveAurasDueToSpell(94338);
+                        }
+                    }
+                }
+                // Starsurge
+                else if (m_spellInfo->Id == 78674)
+                {
+                    if (m_caster->HasAura(16913))
+                    {
+                        int eclipse = 0;
+                        if (m_caster->GetPower(POWER_ECLIPSE) < 100)
+                            eclipse = -15;
+                        else
+                            eclipse = 15;
+
+                        m_caster->CastCustomSpell(m_caster, 86605, &eclipse, 0, 0, true);
+
+                        if (m_caster->GetPower(POWER_ECLIPSE) == 200)
+                        {
+                            if (m_caster->HasAura(93401))
+                                m_caster->CastSpell(m_caster, 94338, true, 0);
+
+                            m_caster->CastSpell(m_caster, 48517, true, 0);
+                        }
+                        if (m_caster->GetPower(POWER_ECLIPSE) == 0)
+                            m_caster->CastSpell(m_caster, 48518, true, 0);
+                        if (m_caster->GetPower(POWER_ECLIPSE) > 99)
+                        {
+                            m_caster->RemoveAurasDueToSpell(93432); // Nature's Grace CD remove.
+                            m_caster->RemoveAurasDueToSpell(48518);
+                        }
+                        if (m_caster->GetPower(POWER_ECLIPSE) < 101)
+                        {
+                            m_caster->RemoveAurasDueToSpell(93432); // Nature's Grace CD remove.
+                            m_caster->RemoveAurasDueToSpell(48517);
+                            m_caster->RemoveAurasDueToSpell(94338);
+                        }
+                    }
+                }
                 break;
             }
             case SPELLFAMILY_ROGUE:
