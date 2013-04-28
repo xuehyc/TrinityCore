@@ -7049,6 +7049,18 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
             }
             break;
         }
+		case SPELLFAMILY_ROGUE:
+			switch(dummySpell->Id)
+			{
+			// Gouge
+			case 1776:
+				*handled = true;
+				if(procSpell && procSpell->Id == 1776)
+					return false;
+				return true;
+				break;
+			}
+			break;
         case SPELLFAMILY_WARRIOR:
         {
             switch (dummySpell->Id)
