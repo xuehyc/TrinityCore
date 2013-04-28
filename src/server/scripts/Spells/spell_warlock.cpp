@@ -60,7 +60,8 @@ enum WarlockSpells
     SPELL_WARLOCK_SIPHON_LIFE_HEAL                  = 63106,
     SPELL_WARLOCK_SOULSHATTER                       = 32835,
     SPELL_WARLOCK_UNSTABLE_AFFLICTION               = 30108,
-    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117
+    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117,
+	SPELL_WARLOCK_DRAIN_LIFE                      	= 89653,
 };
 
 enum WarlockSpellIcons
@@ -1017,6 +1018,36 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
         }
 };
 
+class spell_warl_drain_life : public SpellScriptLoader
+{
+public:
+	spell_warl_drain_life() : SpellScriptLoader("spell_warl_drain_life") { }
+
+	class spell_warl_drain_life_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_warl_drain_life_AuraScript);
+
+		void OnPeriodic(AuraEffect const* /*aurEff*/)
+		{
+			int32 getPctHealth = 2; // 2% Restore
+			// Check for Death's Embrace
+			if(AuraEffect const* aurEff = GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 3223, 0))
+				if(GetCaster()->HealthBelowPct(25))
+					getPctHealth += int32(aurEff->GetAmount());
+			GetCaster()->CastCustomSpell(GetCaster(), SPELL_WARLOCK_DRAIN_LIFE, &getPctHealth, NULL, NULL, true);
+		}
+
+		void Register()
+		{
+			OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_drain_life_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+		}
+	};
+
+	AuraScript* GetAuraScript() const
+	{
+		return new spell_warl_drain_life_AuraScript();
+	}
+};
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_bane_of_doom();
@@ -1039,4 +1070,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_siphon_life();
     new spell_warl_soulshatter();
     new spell_warl_unstable_affliction();
+	new spell_warl_drain_life();
 }
