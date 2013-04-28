@@ -51,6 +51,8 @@ enum HunterSpells
     SPELL_HUNTER_SNIPER_TRAINING_R1                 = 53302,
     SPELL_HUNTER_SNIPER_TRAINING_BUFF_R1            = 64418,
     SPELL_DRAENEI_GIFT_OF_THE_NAARU                 = 59543,
+	SPELL_HUNTER_KILL_COMMAND                   	= 34026,
+	SPELL_HUNTER_KILL_COMMAND_TRIGGER               = 83381,
 };
 
 // 13161 - Aspect of the Beast
@@ -802,6 +804,63 @@ class spell_hun_target_only_pet_and_owner : public SpellScriptLoader
         }
 };
 
+// 34026 Kill comamnd
+class spell_hun_kill_command : public SpellScriptLoader
+{	
+public:
+    spell_hun_kill_command() : SpellScriptLoader("spell_hun_kill_command") { }
+
+    class spell_hun_kill_command_SpellScript : public SpellScript
+    {
+       PrepareSpellScript(spell_hun_kill_command_SpellScript)
+        bool Validate(SpellInfo const* /*spellEntry*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_KILL_COMMAND))
+                return false;	
+            return true;
+        }	
+
+        SpellCastResult CheckCastMeet()
+        {
+            Unit* pet = GetCaster()->GetGuardianPet();
+            Unit* petTarget = pet->getVictim();
+            if (!pet)
+                return SPELL_FAILED_NO_PET;
+
+            // Make sure pet has a target and target is within 5 yards	
+            if (!petTarget || !pet->IsWithinDist(petTarget, 5.0f, true))
+            {
+                SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_TARGET_TOO_FAR);
+                return SPELL_FAILED_CUSTOM_ERROR;
+            }
+
+            return SPELL_CAST_OK;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+          Unit* pet = GetCaster()->GetGuardianPet();
+
+            if (!pet)
+                return;
+
+            pet->CastSpell(pet->getVictim(), SPELL_HUNTER_KILL_COMMAND_TRIGGER, true);
+        }
+        
+       
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_hun_kill_command_SpellScript::CheckCastMeet);
+            OnEffectHit += SpellEffectFn(spell_hun_kill_command_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hun_kill_command_SpellScript();
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -820,4 +879,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_sniper_training();
     new spell_hun_tame_beast();
     new spell_hun_target_only_pet_and_owner();
+	new spell_hun_kill_command();
 }
