@@ -3063,6 +3063,22 @@ void SpellMgr::LoadSpellInfoCorrections()
                 // because of bug in dbc
                 spellInfo->ProcChance = 0;
                 break;
+			// Heroism
+            case 32182:
+				spellInfo->ExcludeCasterAuraSpell = 57723; // Exhaustion
+				break;
+			// Bloodlust
+            case 2825:
+				spellInfo->ExcludeCasterAuraSpell = 57724; // Sated
+				break;
+			// Time Warp
+			case 80353:
+				spellInfo->ExcludeCasterAuraSpell = 80354; // Temporal Displacement
+				break;
+			// Ancient Hysteria
+			case 90355:
+				spellInfo->ExcludeCasterAuraSpell = 95809; // Insanity
+				break;
             case 20335: // Heart of the Crusader
             case 20336:
             case 20337:

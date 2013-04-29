@@ -4900,6 +4900,17 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     target->SetEntry(apply ? 17654 : 17326);
                     break;
                 }
+				case 57723: // Exhaustion
+                case 57724: // Sated
+                case 80354: // Temporal Displacement
+                case 95809: // Insanity
+				{
+					target->ApplySpellImmune(GetId(), IMMUNITY_ID, 32182, apply);  // Heroism
+                    target->ApplySpellImmune(GetId(), IMMUNITY_ID, 2825, apply);   // Bloodlust
+                    target->ApplySpellImmune(GetId(), IMMUNITY_ID, 80353, apply);  // Time Warp
+                    target->ApplySpellImmune(GetId(), IMMUNITY_ID, 90355, apply);  // Ancient Hysteria
+					break;
+				}
                 case 57819: // Argent Champion
                 case 57820: // Ebon Champion
                 case 57821: // Champion of the Kirin Tor
