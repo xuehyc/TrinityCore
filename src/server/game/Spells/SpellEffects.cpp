@@ -1865,6 +1865,12 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
     int level_diff = 0;
     switch (m_spellInfo->Id)
     {
+		case 82726:                                         // Fervor
+			{
+                if (Unit* pet = m_caster->GetGuardianPet())
+                    pet->CastSpell(pet, 82726, true); // Also give +50 focus to pet
+                break;
+            }
         case 9512:                                          // Restore Energy
             level_diff = m_caster->getLevel() - 40;
             level_multiplier = 2;
