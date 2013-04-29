@@ -707,6 +707,34 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
         }
 
+		if(unitTarget->HasAura(93099) || unitTarget->HasAura(84839) || unitTarget->HasAura(93098)) //Vengeance
+        {
+            int32 atkpwr = damage * 0.05f;
+            if(AuraEffect* vng = unitTarget->GetAuraEffect(76691,0)) // If already have Vengeance buff
+                atkpwr += vng->GetAmount();
+
+            if(atkpwr > int32(unitTarget->CountPctFromMaxHealth(10)))
+                atkpwr = int32(unitTarget->CountPctFromMaxHealth(10));
+            unitTarget->CastCustomSpell(unitTarget, 76691, &atkpwr, &atkpwr, NULL, true);
+        }
+
+        if(unitTarget->HasAura(84840) && unitTarget->HasAura(5487)) // Vengeance Feral
+        {
+            if(unitTarget->GetShapeshiftForm() == FORM_DIREBEAR || unitTarget->GetShapeshiftForm() == FORM_BEAR)
+            {
+                int32 atkpwr = damage * 0.05f;
+
+                if(AuraEffect* vng = unitTarget->GetAuraEffect(76691,0)) // If already have Vengeance buff
+                    atkpwr += vng->GetAmount();
+
+                if(atkpwr > int32(unitTarget->CountPctFromMaxHealth(10)))
+                    atkpwr = int32(unitTarget->CountPctFromMaxHealth(10));
+                unitTarget->CastCustomSpell(unitTarget, 76691, &atkpwr, &atkpwr, NULL, true);
+            }
+            else
+                unitTarget->RemoveAurasDueToSpell(76691);
+        }
+
         m_damage += damage;
     }
 }
