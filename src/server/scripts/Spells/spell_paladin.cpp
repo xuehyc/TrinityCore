@@ -1144,6 +1144,56 @@ public:
         return new spell_pal_consecration_AuraScript();
     }
 };
+
+// Selfes healer
+class spell_pal_selfless_healer : public SpellScriptLoader
+{
+public:
+        spell_pal_selfless_healer() : SpellScriptLoader("spell_pal_selfless_healer") { }
+        class spell_pal_selfless_healer_SpellScript : public SpellScript
+        {
+			PrepareSpellScript(spell_pal_selfless_healer_SpellScript)
+				uint8 holyStack;
+                bool Load()
+                {
+					if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+						return false;
+					holyStack = 0;
+					return GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3924, 0);
+                }
+                void HandleBeforeCast()
+                {
+					if (Unit* caster = GetCaster())
+						holyStack = caster->GetPower(POWER_HOLY_POWER);
+                }
+                void HandleAfterHit()
+                {
+                        if (Unit* caster = GetCaster())
+                        {
+							int32 baseAmount = 0;
+							int32 amount = 0;
+							if (AuraEffect const* pAurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3924, 1))
+								baseAmount = pAurEff->GetAmount();
+							if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
+								amount = baseAmount * 3;
+							else
+								amount = baseAmount * holyStack;
+							if (amount != 0)
+								caster->CastCustomSpell(caster, 90811, &amount, NULL, NULL, true);
+                        }
+                }
+                void Register()
+                {
+					BeforeCast += SpellCastFn(spell_pal_selfless_healer_SpellScript::HandleBeforeCast);
+					AfterHit += SpellHitFn(spell_pal_selfless_healer_SpellScript::HandleAfterHit);
+                }
+        };
+        SpellScript* GetSpellScript() const
+        {
+                return new spell_pal_selfless_healer_SpellScript();
+        }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     //new spell_pal_ardent_defender();
@@ -1167,4 +1217,5 @@ void AddSC_paladin_spell_scripts()
 	new spell_pal_judgements();
 	new spell_pal_guardian_ancient_kings();
 	new spell_pal_consecration();
+	new spell_pal_selfless_healer();
 }
