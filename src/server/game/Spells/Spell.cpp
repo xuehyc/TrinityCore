@@ -3572,7 +3572,7 @@ void Spell::update(uint32 difftime)
         !m_caster->HasAuraTypeWithAffectMask(SPELL_AURA_CAST_WHILE_WALKING, m_spellInfo))
     {
         // don't cancel for melee, autorepeat, triggered and instant spells
-        if (!IsNextMeleeSwingSpell() && !IsAutoRepeat() && !IsTriggered())
+        if (!IsNextMeleeSwingSpell() && !IsAutoRepeat() && !IsTriggered() && !m_caster->HasAuraTypeWithAffectMask(SPELL_AURA_CAST_WHILE_WALKING, m_spellInfo))
             cancel();
     }
 
