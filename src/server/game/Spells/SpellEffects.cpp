@@ -800,6 +800,108 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 }
             }
             break;
+		case SPELLFAMILY_MAGE:
+			{
+                switch (m_spellInfo->Id)
+                {
+		        case 120:  //Cone of Cold
+               	 {
+                   	 if (m_caster->HasAura(11190)) // Improved Cone of Cold Rank 1
+                      	  m_caster->CastCustomSpell(unitTarget, 83301, &bp, NULL, NULL, true, 0);
+
+                 	   if (m_caster->HasAura(12489)) // Improved Cone of Cold Rank 2
+                 	       m_caster->CastCustomSpell(unitTarget, 83302, &bp, NULL, NULL, true, 0);
+				 }
+				case 30455: // Ice lance
+					if (Aura* fof = m_caster->GetAura(44544))
+						AddPct(damage, 25*fof->GetCharges()); 
+					m_caster->RemoveAurasDueToSpell(44544); 
+					break;
+				case 82731: // Flame Orb
+                    {
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)                         
+                           		 m_caster->CastSpell(m_caster, 84765, true); // Summon Flame Orb
+                        break;
+                    }
+				case 92283: // Frostfire Orb
+                    {
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)                         
+                           		 m_caster->CastSpell(m_caster, 84714, true); // Summon Frostfire Orb
+                        break;
+                    }
+				case 1459: // Arcane Brilliance
+                    {
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            std::list<Unit*> PartyMembers;
+                            m_caster->GetPartyMembers(PartyMembers);
+
+                            if (PartyMembers.size() >= 1)
+                                m_caster->CastSpell(unitTarget, 79058, true); // Arcane Brilliance (For all)
+                            else
+                                m_caster->CastSpell(unitTarget, 79057, true); // Arcane Brilliance (Only for caster)
+                        }
+                        break;
+                    }
+				case 61316: // Dalaran Brilliance
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> PartyMembers;
+                        m_caster->GetPartyMembers(PartyMembers);
+                        if(PartyMembers.size() > 1)
+                            m_caster->CastSpell(unitTarget, 79039, true); // Dalaran Brilliance (For all)
+                        else
+                            m_caster->CastSpell(unitTarget, 79038, true); // Dalaran Brilliance (Only for caster)
+                    }
+                    break;
+                }
+                case 42955: // Conjure Refreshment
+                    {
+                        if (m_caster->getLevel() > 33 && m_caster->getLevel() < 44)
+                            m_caster->CastSpell(m_caster, 92739, true);
+
+                        if (m_caster->getLevel() > 43 && m_caster->getLevel() < 54)
+                            m_caster->CastSpell(m_caster, 92799, true);
+
+                        if (m_caster->getLevel() > 53 && m_caster->getLevel() < 65)
+                            m_caster->CastSpell(m_caster, 92802, true);
+
+                        if (m_caster->getLevel() > 64 && m_caster->getLevel() < 74)
+                            m_caster->CastSpell(m_caster, 92805, true);
+
+                        if (m_caster->getLevel() > 73 && m_caster->getLevel() < 80)
+                            m_caster->CastSpell(m_caster, 74625, true);
+
+                        if (m_caster->getLevel() > 79 && m_caster->getLevel() < 85)
+                            m_caster->CastSpell(m_caster, 92822, true);
+
+                        if (m_caster->getLevel() == 85)
+                            m_caster->CastSpell(m_caster, 92727, true);
+						break;
+					}
+				case 43987: // Ritual of Refreshment
+                    {
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            m_caster->ToPlayer()->RemoveSpellCooldown(74650, true); // Rank 1
+                            m_caster->ToPlayer()->RemoveSpellCooldown(92824, true); // Rank 2
+                            m_caster->ToPlayer()->RemoveSpellCooldown(92827, true); // Rank 3
+
+                            if (m_caster->getLevel() > 75 && m_caster->getLevel() < 80)
+                                m_caster->CastSpell(m_caster, 74650, true);
+
+                            if (m_caster->getLevel() > 80 && m_caster->getLevel() < 85)
+                                m_caster->CastSpell(m_caster, 92824, true);
+
+                            if (m_caster->getLevel() == 85)
+                                m_caster->CastSpell(m_caster, 92827, true);
+                        }
+                     break;
+                   }
+                }
+				break;
+	     }
         case SPELLFAMILY_HUNTER:
             if (m_spellInfo->SpellFamilyFlags[2] & 0x20)
             {
