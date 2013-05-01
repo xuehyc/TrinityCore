@@ -902,6 +902,7 @@ public:
 
 				caster->RemoveAura(87095); // Remove Thunderstruck buff rank1
 				caster->RemoveAura(87096); // Remove Thunderstruck buff rank2
+			}
 		}
 		void Register()
 		{
