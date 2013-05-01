@@ -704,7 +704,7 @@ class spell_rog_backstab : public SpellScriptLoader
 
            void Register()
            {
-               OnEffectHitTarget += SpellEffectFn(spell_rog_backstab_SpellScript::ChangeDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+               OnEffectHitTarget += SpellEffectFn(spell_rog_backstab_SpellScript::ChangeDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
            }
        };
 
