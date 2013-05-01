@@ -1367,6 +1367,12 @@ void Player::HandleDrowning(uint32 time_diff)
     // In water
     if (m_MirrorTimerFlags & UNDERWATER_INWATER)
     {
+        if (m_zoneUpdateId == 5144) return;
+        if (m_zoneUpdateId == 5145) return;
+        if (m_zoneUpdateId == 4815) return;
+        if (m_zoneUpdateId == 4816) return;
+        if (m_zoneUpdateId == 5042) return;
+
         // Breath timer not activated - activate it
         if (m_MirrorTimer[BREATH_TIMER] == DISABLED_MIRROR_TIMER)
         {
@@ -1403,6 +1409,12 @@ void Player::HandleDrowning(uint32 time_diff)
     // In dark water
     if ((m_MirrorTimerFlags & UNDERWARER_INDARKWATER) && !disableFatigue)
     {
+        if (m_zoneUpdateId == 5144) return;
+        if (m_zoneUpdateId == 5145) return;
+        if (m_zoneUpdateId == 4815) return;
+        if (m_zoneUpdateId == 4816) return;
+        if (m_zoneUpdateId == 5042) return;
+
         // Fatigue timer not activated - activate it
         if (m_MirrorTimer[FATIGUE_TIMER] == DISABLED_MIRROR_TIMER)
         {
