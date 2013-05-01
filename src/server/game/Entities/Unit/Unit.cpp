@@ -9663,6 +9663,13 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     if (spellProto->SpellFamilyName == SPELLFAMILY_POTION)
         return healamount;
 
+	// and Warlock's Healthstones
+    if (spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && (spellProto->SpellFamilyFlags[0] & 0x10000))
+    {
+        healamount = 0.45 * (GetMaxHealth() - 10 * (STAT_STAMINA - 180));
+        return healamount;
+    }
+
     float DoneTotalMod = 1.0f;
     int32 DoneTotal = 0;
 
