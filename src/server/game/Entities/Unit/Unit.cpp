@@ -7645,6 +7645,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+		// Bloodthirst (($m/100)% of max health)
+        case 23880:
+        {			
+			basepoints0 = int32(CountPctFromMaxHealth(5))/10;
+			break;
+        }
         case 46916:  // Slam! (Bloodsurge proc)
         case 52437:  // Sudden Death
         {
