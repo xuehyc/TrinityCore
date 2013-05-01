@@ -35,6 +35,7 @@ enum RogueSpells
     SPELL_ROGUE_SHIV_TRIGGERED                   = 5940,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST    = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC         = 59628,
+	SPELL_ROGUE_BACKSTAB                         = 53,
 };
 
 enum RogueSpellIcons
@@ -679,6 +680,39 @@ class spell_rog_redirect : public SpellScriptLoader
             return new spell_rog_redirect_SpellScript();
         }
 };
+
+// 53 - backstab
+/// Updated 4.3.4
+class spell_rog_backstab : public SpellScriptLoader
+{
+   public:
+       spell_rog_backstab() : SpellScriptLoader("spell_rog_backstab") { }
+
+       class spell_rog_backstab_SpellScript : public SpellScript
+       {
+           PrepareSpellScript(spell_rog_backstab_SpellScript);
+
+		   void ChangeDamage(SpellEffIndex /*effIndex*/)
+           {
+                   if (AuraEffect* aurEff = GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, SPELL_ROGUE_BACKSTAB, EFFECT_0))
+                   {
+                       int32 damage = GetHitDamage();
+                       AddPct(damage, aurEff->GetAmount());
+                       SetHitDamage(damage);
+                   }
+           }
+
+           void Register()
+           {
+               OnEffectHitTarget += SpellEffectFn(spell_rog_backstab_SpellScript::ChangeDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+           }
+       };
+
+       SpellScript* GetSpellScript() const
+       {
+           return new spell_rog_backstab_SpellScript();
+       }
+};
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -693,4 +727,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_tricks_of_the_trade();
     new spell_rog_tricks_of_the_trade_proc();
 	new spell_rog_redirect();
+	new spell_rog_backstab();
 }
