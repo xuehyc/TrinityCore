@@ -170,8 +170,6 @@ class spell_warl_create_healthstone : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warl_create_healthstone_SpellScript);
 
-            static uint32 const iTypes[8][3];
-
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_HEALTHSTONE_CREATE) || !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_HEALTHSTONE_HEAL))
@@ -185,7 +183,7 @@ class spell_warl_create_healthstone : public SpellScriptLoader
                 {
                     uint8 spellRank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
                     ItemPosCountVec dest;
-                    InventoryResult msg = caster->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, iTypes[spellRank - 1][0], 1, NULL);
+                    InventoryResult msg = caster->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 1, NULL);
                     if (msg != EQUIP_ERR_OK)
                         return SPELL_FAILED_TOO_MANY_OF_ITEM;
                 }
