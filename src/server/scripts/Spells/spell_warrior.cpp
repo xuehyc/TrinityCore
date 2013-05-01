@@ -64,37 +64,31 @@ enum WarriorSpellIcons
 
 // Bloodthirst
 // Spell Id: 23881
- class spell_warr_bloodthirst : public SpellScriptLoader
- {
-    public:
-        spell_warr_bloodthirst() : SpellScriptLoader("spell_warr_bloodthirst") { }
- 
-         class spell_warr_bloodthirst_SpellScript : public SpellScript
-         {
-            PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
- 
-            void CalculateDamage(SpellEffIndex /*effect*/)
-            {
-                // Formula: AttackPower * BasePoints / 100
-                if (Unit* caster = GetCaster())
-                {
-                    int32 dmg = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 80 / 100);
-                    SetHitDamage(dmg);
-                    caster->CastCustomSpell(caster, 23885, &dmg, NULL, NULL, true);
-                }
-            }
+class spell_warr_bloodthirst_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
 
-            void Register()
+        void CalculateDamage(SpellEffIndex /*effect*/)
+        {
+            // Formula: AttackPower * BasePoints / 100
+            if (Unit* caster = GetCaster())
             {
-                OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst::spell_warr_bloodthirst_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                int32 dmg = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 80 / 100); // <-- here is my fix
+                SetHitDamage(dmg);
+                caster->CastCustomSpell(caster, 23885, &dmg, NULL, NULL, true);
             }
-        };
+        }
 
-         SpellScript* GetSpellScript() const
-         {
-            return new spell_warr_bloodthirst_SpellScript();
-         }
-};
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst::spell_warr_bloodthirst_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warr_bloodthirst_SpellScript();
+    }
 
 /// Updated 4.3.4
 class spell_warr_charge : public SpellScriptLoader
