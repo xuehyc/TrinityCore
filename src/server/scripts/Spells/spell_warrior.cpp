@@ -892,11 +892,16 @@ public:
 		void CalculateDamage(SpellEffIndex /*effect*/)
 		{
 			// Formula: [Effect2BasePoints] / 100 * AttackPower
-			if (Unit* caster = GetCaster())
-			{
-				int32 bp2 = caster->CalculateSpellDamage(GetHitUnit(), GetSpellInfo(), EFFECT_2);
-				SetHitDamage(int32(bp2 / 100 * caster->GetTotalAttackPowerValue(BASE_ATTACK)));
-			}
+            if (Unit* caster = GetCaster())
+            {
+				int32 rank1 = caster->GetAuraCount(87095);
+				int32 rank2 = caster->GetAuraCount(87096);
+				int32 modify = rank1*5 + rank2*10 + 100;
+				//int32 bp2 = caster->CalculateSpellDamage(GetHitUnit(), GetSpellInfo(), EFFECT_2);
+				SetHitDamage((caster->GetTotalAttackPowerValue(BASE_ATTACK)*75/100) * modify / 100);
+
+				caster->RemoveAura(87095); // Remove Thunderstruck buff rank1
+				caster->RemoveAura(87096); // Remove Thunderstruck buff rank2
 		}
 		void Register()
 		{
