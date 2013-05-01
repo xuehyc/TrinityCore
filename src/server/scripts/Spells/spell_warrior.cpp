@@ -934,6 +934,43 @@ public:
 
 	}
 };
+
+// Victory Rush
+// Spell Id: 34428
+class spell_warr_victory_rush : public SpellScriptLoader
+{
+public:
+    spell_warr_victory_rush() : SpellScriptLoader("spell_warr_victory_rush") { }
+
+    class spell_warr_victory_rush_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_victory_rush_SpellScript);
+
+        void CalculateDamage(SpellEffIndex /*effect*/)
+        {
+            // Formula: AttackPower * BasePoints / 100
+            if (Unit* caster = GetCaster())
+                SetHitDamage(int32(GetHitDamage() * caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100));
+        }
+
+        void HandleAfterHit()
+        {
+            if (Unit* caster = GetCaster())
+                caster->RemoveAurasDueToSpell(32216); // Remove Victorious aura
+        }
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(spell_warr_victory_rush::spell_warr_victory_rush_SpellScript::HandleAfterHit);
+            OnEffectHitTarget += SpellEffectFn(spell_warr_victory_rush::spell_warr_victory_rush_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warr_victory_rush_SpellScript();
+    }
+};
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -957,4 +994,5 @@ void AddSC_warrior_spell_scripts()
 	new spell_warr_thunderclap();
 	new spell_warr_shockwave();
     new spell_warr_cleave();
+	new spell_warr_victory_rush();
 }
