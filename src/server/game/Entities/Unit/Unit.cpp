@@ -7126,6 +7126,11 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             case SPELLFAMILY_GENERIC:
                 switch (auraSpellInfo->Id)
                 {
+					case 23880:
+                    {
+						basepoints0 = int32(CountPctFromMaxHealth(5))/10;
+						break;
+					}
                     case 23780:             // Aegis of Preservation (Aegis of Preservation trinket)
                         trigger_spell_id = 23781;
                         break;
