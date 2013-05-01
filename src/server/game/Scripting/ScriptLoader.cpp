@@ -103,6 +103,7 @@ void AddSC_boss_vanndar();
 void AddSC_boss_alizabal();                  //Baradin Hold
 void AddSC_boss_argaloth();
 void AddSC_instance_baradin_hold();
+void AddSC_boss_occuthar();
 void AddSC_instance_bastion_of_twilight();   //BastionOfTwilight
 void AddSC_boss_theralion_and_valiona();
 void AddSC_boss_sinestra();
@@ -779,6 +780,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_alizabal();                  //Baradin Hold
 	AddSC_boss_argaloth();
     AddSC_instance_baradin_hold();
+	AddSC_boss_occuthar();
     AddSC_instance_bastion_of_twilight();   //BastionOfTwilight
     AddSC_boss_theralion_and_valiona();
     AddSC_boss_sinestra();

@@ -29,6 +29,7 @@ enum Creatures
     NPC_EYE_OF_OCCUTHAR     = 52389,
     NPC_FOCUS_FIRE_DUMMY    = 52369,
     NPC_OCCUTHAR_EYE        = 52368,
+    NPC_Focused_Fire_Dummy  = 62455,	
 };
 
 enum Objects
@@ -42,6 +43,8 @@ enum Data
     DATA_ARGALOTH   = 1,
     DATA_OCCUTHAR   = 2,
     DATA_ALIZABAL   = 3,
+	DATA_Eye_of_Occuthar,
+	DATA_Focused_Fire_Dummy,
 };
 
 #endif
