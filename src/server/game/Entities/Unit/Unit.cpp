@@ -5645,6 +5645,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             }
             switch (dummySpell->Id)
             {
+				case 79437: // Soulburn: Healthstone
+				{
+					basepoints0 = CalculatePct(GetCreateHealth(), triggerAmount);
+					break;
+				}
                 // Glyph of Shadowflame
                 case 63310:
                 {

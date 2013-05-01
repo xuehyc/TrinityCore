@@ -412,6 +412,12 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_WARLOCK:
             {
+				// Soulburn Healthstone
+				if (m_spellInfo->Id == 6262)
+				{
+					if (m_caster->HasAura(74434))
+						m_caster->CastSpell(m_caster, 79437, true); // Soulburn: Healthstone
+				}
                 // Incinerate Rank 1 & 2
                 if ((m_spellInfo->SpellFamilyFlags[1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
                 {
