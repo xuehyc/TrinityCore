@@ -49,8 +49,8 @@ enum WarlockSpells
     SPELL_WARLOCK_HAUNT                             = 48181,
     SPELL_WARLOCK_HAUNT_HEAL                        = 48210,
     SPELL_WARLOCK_IMMOLATE                          = 348,
-    SPELL_WARLOCK_HEALTHSTONE_CREATE                = 34130,
-    SPELL_WARLOCK_HEALTHSTONE_HEAL                  = 6262,
+    //SPELL_WARLOCK_HEALTHSTONE_CREATE                = 34130,
+    //SPELL_WARLOCK_HEALTHSTONE_HEAL                  = 6262,
     SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_BUFF_R1    = 60955,
     SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_BUFF_R2    = 60956,
     SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_R1         = 18703,
@@ -160,54 +160,32 @@ class spell_warl_conflagrate : public SpellScriptLoader
         }
 };
 
-// 6201 - Create Healthstone
+// 6201 Create Healthstone (and ranks)
 class spell_warl_create_healthstone : public SpellScriptLoader
 {
-    public:
-        spell_warl_create_healthstone() : SpellScriptLoader("spell_warl_create_healthstone") { }
+public:
+    spell_warl_create_healthstone() : SpellScriptLoader("spell_warl_create_healthstone") { }
 
-        class spell_warl_create_healthstone_SpellScript : public SpellScript
+    class spell_warl_create_healthstone_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_create_healthstone_SpellScript)
+
+        void HandleScriptEffect(SpellEffIndex effIndex)
         {
-            PrepareSpellScript(spell_warl_create_healthstone_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_HEALTHSTONE_CREATE) || !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_HEALTHSTONE_HEAL))
-                    return false;
-                return true;
-            }
-
-            SpellCastResult CheckCast()
-            {
-                if (Player* caster = GetCaster()->ToPlayer())
-                {
-                    uint8 spellRank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
-                    ItemPosCountVec dest;
-                    InventoryResult msg = caster->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 1, NULL);
-                    if (msg != EQUIP_ERR_OK)
-                        return SPELL_FAILED_TOO_MANY_OF_ITEM;
-                }
-                return SPELL_CAST_OK;
-            }
-
-            void HandleScriptEffect(SpellEffIndex /*effIndex*/)
-            {
-                Unit* caster = GetCaster();
-                if (caster)
-                    caster->CastSpell(caster,SPELL_WARLOCK_HEALTHSTONE_CREATE,false);
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_warl_create_healthstone_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-                OnCheckCast += SpellCheckCastFn(spell_warl_create_healthstone_SpellScript::CheckCast);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warl_create_healthstone_SpellScript();
+            if (Unit* unitTarget = GetHitUnit())
+                CreateItem(effIndex, 5512);
         }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_warl_create_healthstone_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_create_healthstone_SpellScript();
+    }
 };
 
 // 603 - Bane of Doom
