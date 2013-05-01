@@ -64,14 +64,15 @@ enum WarriorSpellIcons
 
 // Bloodthirst
 // Spell Id: 23881
-class spell_warr_bloodthirst : public SpellScriptLoader
-{
+ class spell_warr_bloodthirst : public SpellScriptLoader
+ {
     public:
         spell_warr_bloodthirst() : SpellScriptLoader("spell_warr_bloodthirst") { }
-
-        class spell_warr_bloodthirst_SpellScript : public SpellScript
-        {
+ 
+         class spell_warr_bloodthirst_SpellScript : public SpellScript
+         {
             PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
+ 
             void CalculateDamage(SpellEffIndex /*effect*/)
             {
                 // Formula: AttackPower * BasePoints / 100
@@ -79,7 +80,7 @@ class spell_warr_bloodthirst : public SpellScriptLoader
                 {
                     int32 dmg = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 80 / 100);
                     SetHitDamage(dmg);
-                    caster->CastSpell(caster, 23885, true);
+                    caster->CastCustomSpell(caster, 23885, &dmg, NULL, NULL, true);
                 }
             }
 
@@ -89,10 +90,10 @@ class spell_warr_bloodthirst : public SpellScriptLoader
             }
         };
 
-        SpellScript* GetSpellScript() const
-        {
-              return new spell_warr_bloodthirst_SpellScript();
-        }
+         SpellScript* GetSpellScript() const
+         {
+            return new spell_warr_bloodthirst_SpellScript();
+         }
 };
 
 /// Updated 4.3.4
