@@ -64,31 +64,36 @@ enum WarriorSpellIcons
 
 // Bloodthirst
 // Spell Id: 23881
-class spell_warr_bloodthirst_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
+class spell_warr_bloodthirst : public SpellScriptLoader
+{
+    public:
+        spell_warr_bloodthirst() : SpellScriptLoader("spell_warr_bloodthirst") { }
 
-        void CalculateDamage(SpellEffIndex /*effect*/)
+        class spell_warr_bloodthirst_SpellScript : public SpellScript
         {
-            // Formula: AttackPower * BasePoints / 100
-            if (Unit* caster = GetCaster())
+            PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
+            void CalculateDamage(SpellEffIndex /*effect*/)
             {
-                int32 dmg = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 80 / 100); // <-- here is my fix
-                SetHitDamage(dmg);
-                caster->CastCustomSpell(caster, 23885, &dmg, NULL, NULL, true);
+                // Formula: AttackPower * BasePoints / 100
+                if (Unit* caster = GetCaster())
+                {
+                    int32 dmg = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 80 / 100);
+                    SetHitDamage(dmg);
+                    caster->CastSpell(caster, 23885, true);
+                }
             }
-        }
 
-        void Register()
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst::spell_warr_bloodthirst_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
         {
-            OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst::spell_warr_bloodthirst_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+              return new spell_warr_bloodthirst_SpellScript();
         }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_warr_bloodthirst_SpellScript();
-    }
+};
 
 /// Updated 4.3.4
 class spell_warr_charge : public SpellScriptLoader
