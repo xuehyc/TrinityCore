@@ -372,10 +372,16 @@ void AddSC_wailing_caverns();                //Wailing caverns
 void AddSC_instance_wailing_caverns();
 void AddSC_zulfarrak();                     //Zul'Farrak generic
 void AddSC_instance_zulfarrak();            //Zul'Farrak instance script
-void AddSC_instance_halls_of_origination();
-void AddSC_boss_temple_guardian_anhuur();
-void AddSC_boss_earthrager_ptah();
+void AddSC_instance_halls_of_origination();		// Dungeon Halls of Origination
+void AddSC_boss_ammunae();
 void AddSC_boss_anraphet();
+void AddSC_boss_temple_guardian_anhuur();
+void AddSC_boss_isiset();
+void AddSC_boss_ptah();
+void AddSC_boss_rajh();
+void AddSC_boss_setesh();
+void AddSC_elementaires_sdo();
+void AddSC_mob_trash_sdo();
 void AddSC_instance_firelands();
 void AddSC_boss_alysrazor();
 
@@ -1078,10 +1084,16 @@ void AddKalimdorScripts()
     AddSC_ungoro_crater();
     AddSC_winterspring();
 
-    AddSC_instance_halls_of_origination();
-    AddSC_boss_temple_guardian_anhuur();
-    AddSC_boss_earthrager_ptah();
-    AddSC_boss_anraphet();
+	AddSC_instance_halls_of_origination();		// Dungeon Halls of Origination
+    AddSC_boss_ammunae();
+	AddSC_boss_anraphet();
+	AddSC_boss_temple_guardian_anhuur();
+	AddSC_boss_isiset();
+	AddSC_boss_ptah();
+	AddSC_boss_rajh();
+	AddSC_boss_setesh();
+	AddSC_elementaires_sdo();
+	AddSC_mob_trash_sdo();
 
     AddSC_instance_firelands();
     AddSC_boss_alysrazor();
