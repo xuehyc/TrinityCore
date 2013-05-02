@@ -372,6 +372,13 @@ void AddSC_wailing_caverns();                //Wailing caverns
 void AddSC_instance_wailing_caverns();
 void AddSC_zulfarrak();                     //Zul'Farrak generic
 void AddSC_instance_zulfarrak();            //Zul'Farrak instance script
+void AddSC_instance_the_stonecore();			// Dungeon The Stonecore
+void AddSC_the_stonecore();
+void AddSC_boss_azil();
+void AddSC_boss_corborus();
+void AddSC_boss_ozruk();
+void AddSC_boss_slabhide();
+void AddSC_mob_trash_coeur_de_pierre();
 void AddSC_instance_halls_of_origination();		// Dungeon Halls of Origination
 void AddSC_boss_ammunae();
 void AddSC_boss_anraphet();
@@ -1083,6 +1090,14 @@ void AddKalimdorScripts()
     AddSC_thunder_bluff();
     AddSC_ungoro_crater();
     AddSC_winterspring();
+
+	AddSC_instance_the_stonecore();			// Dungeon The Stonecore
+	AddSC_the_stonecore();
+	AddSC_boss_azil();
+	AddSC_boss_corborus();
+	AddSC_boss_ozruk();
+	AddSC_boss_slabhide();
+	AddSC_mob_trash_coeur_de_pierre();
 
 	AddSC_instance_halls_of_origination();		// Dungeon Halls of Origination
     AddSC_boss_ammunae();
