@@ -3181,6 +3181,72 @@ public:
     }
 };
 
+class npc_shadowy_apparition: public CreatureScript
+{
+public:
+    npc_shadowy_apparition () : CreatureScript("npc_shadowy_apparition")
+    {
+    }
+
+    struct npc_shadowy_apparitionAI: public ScriptedAI
+    {
+        npc_shadowy_apparitionAI (Creature* c) : ScriptedAI(c) {}
+
+        uint64 targetGuid;
+
+        void Reset ()
+        {
+            Unit* owner = me->GetOwner();
+            if (!owner)
+                return;
+            
+            me->SetWalk(true);
+            owner->CastSpell(me, 87213, false);
+            me->CastSpell(me, 87427, true);
+
+            if (me->GetCharmInfo())
+            {
+                me->GetCharmInfo()->SetIsAtStay(true);
+                me->GetCharmInfo()->SetIsFollowing(false);
+                me->GetCharmInfo()->SetIsReturning(false);
+            }
+        }
+
+        void MoveInLineOfSight (Unit* who)
+        {
+            if (who->GetGUID() == targetGuid && me->GetDistance(who) <= 1.0f)
+            {
+                me->CastCustomSpell(who, 87532, NULL, NULL, NULL, true, 0, 0, me->GetOwnerGUID());
+                me->CastSpell(me, 87529, true);
+                me->DisappearAndDie();
+            }
+        }
+
+        void UpdateAI (uint32 diff)
+        {
+            if (!UpdateVictim())
+            {
+                Unit* owner = me->GetOwner();
+
+                if (!owner)
+                    return;
+
+                if (Unit* target = owner->getAttackerForHelper())
+                {
+                    me->Attack(target, false);
+                    me->AddThreat(target, 100.0f);
+                    me->GetMotionMaster()->MoveChase(target, 0.0f, 0.0f);
+                    targetGuid = target->GetGUID();
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI (Creature* creature) const
+    {
+        return new npc_shadowy_apparitionAI(creature);
+    }
+};
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -3214,4 +3280,5 @@ void AddSC_npcs_special()
     new npc_spring_rabbit();
 	new npc_flame_orb();
     new npc_frostfire_orb();
+	new npc_shadowy_apparition();
 }
