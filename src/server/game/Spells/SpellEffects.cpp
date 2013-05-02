@@ -450,6 +450,174 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         }
                     }
                 }
+				// Smite
+                if (m_spellInfo->Id == 585)
+                {
+                    // Train of Thought Rank 2
+                    if(m_caster->HasAura(92297))
+                    {
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(92297,0))
+                        {
+                            // 100% to reduce cooldown of Penance by 0.5 secs
+                            if(m_caster->ToPlayer()->HasSpellCooldown(47540))
+                            {
+                                int32 cooldown = -500;
+                                uint32 newCooldownDelay = m_caster->ToPlayer()->GetSpellCooldownDelay(47540);
+
+                                if (newCooldownDelay < uint32(cooldown / -1000) + 1)
+                                    newCooldownDelay = 0;
+                                else
+                                    newCooldownDelay += cooldown / 1000;
+
+                                m_caster->ToPlayer()->AddSpellCooldown(47540,0, uint32(time(NULL) + newCooldownDelay));
+
+                                WorldPacket data(SMSG_MODIFY_COOLDOWN, 4+8+4);
+                                data << uint32(47540);                  // Spell ID
+                                data << uint64(m_caster->GetGUID());              // Player GUID
+                                data << int32(-500);                // Cooldown mod in milliseconds
+                                m_caster->ToPlayer()->GetSession()->SendPacket(&data);
+                            }
+                        }
+                    }
+                    // Train of Thought Rank 1
+                    else if(m_caster->HasAura(92295))
+                    {
+                       if (AuraEffect* aurEff = m_caster->GetAuraEffect(92295,0))
+                       {
+                            // 50% to reduce cooldown of Penance by 0.5 secs
+                            if(roll_chance_i(50))
+                            {
+                                if(m_caster->ToPlayer()->HasSpellCooldown(47540))
+                                {
+                                    int32 cooldown = -500;
+                                    uint32 newCooldownDelay = m_caster->ToPlayer()->GetSpellCooldownDelay(47540);
+
+                                    if (newCooldownDelay < uint32(cooldown / -1000) + 1)
+                                        newCooldownDelay = 0;
+                                    else
+                                        newCooldownDelay += cooldown / 1000;
+
+                                    m_caster->ToPlayer()->AddSpellCooldown(47540,0, uint32(time(NULL) + newCooldownDelay));
+
+                                    WorldPacket data(SMSG_MODIFY_COOLDOWN, 4+8+4);
+                                    data << uint32(47540);                  // Spell ID
+                                    data << uint64(m_caster->GetGUID());              // Player GUID
+                                    data << int32(-500);                // Cooldown mod in milliseconds
+                                    m_caster->ToPlayer()->GetSession()->SendPacket(&data);
+                                }
+                            }
+                       }
+                    }
+
+                    // Evangelism: Rank 1
+                    if (Aura* evan1 = m_caster->GetAura(81659))
+                    {
+                        m_caster->CastSpell(m_caster, 81660, true);
+                        //Trigger to activate archangel
+                        m_caster->CastSpell(m_caster,87154,true);
+                        m_caster->RemoveAurasDueToSpell(87118);
+                        m_caster->RemoveAurasDueToSpell(87117);
+                    }
+                    // Evangelism: Rank 2
+                    if (Aura* evan2 = m_caster->GetAura(81662))
+                    {
+                        m_caster->CastSpell(m_caster, 81661, true);
+                        //Trigger to activate archangel
+                        m_caster->CastSpell(m_caster,87154,true);
+                        m_caster->RemoveAurasDueToSpell(87118);
+                        m_caster->RemoveAurasDueToSpell(87117);
+                    }
+                    if(m_caster->HasAura(14751)) // Chakra
+                    {
+                        m_caster->CastSpell(m_caster,81209,true);
+                        m_caster->RemoveAurasDueToSpell(14751);
+                    }
+                    if(m_caster->HasAura(81749)) // Atonement rank 2
+                    {
+                        int32 bp = damage;
+                        m_caster->CastCustomSpell(unitTarget,81751,&bp,NULL,NULL,true);
+                    }
+                    if(m_caster->HasAura(14523)) // Atonement rank 1
+                    {
+                        int32 bp = damage /2;
+                        m_caster->CastCustomSpell(unitTarget,81751,&bp,NULL,NULL,true);
+                    }
+                }
+                // Shadow Word: Death - deals damage equal to damage done to caster
+                if ((m_spellInfo->Id == 32379))
+                {
+                    int32 back_damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
+                    // Pain and Suffering reduces damage
+                    if (AuraEffect * aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2874, 0))
+                        AddPct(back_damage, -aurEff->GetAmount());
+
+                    if (back_damage < int32(unitTarget->GetHealth()))
+                        m_caster->CastCustomSpell(m_caster, 32409, &back_damage, 0, 0, true);
+
+                    if (unitTarget->HealthBelowPct(25))
+                        damage *= 3;
+                    if(m_caster->HasAura(33371)) // Mind melt rank 2
+                    {
+                        if(unitTarget->HealthBelowPct(25))
+                            AddPct(damage,30);
+                    }
+                    if(m_caster->HasAura(14910)) // Mind melt rank 1
+                    {
+                        if(unitTarget->HealthBelowPct(25))
+                            AddPct(damage,15);
+                    }
+                }
+                // Mind Blast - applies Mind Trauma if:
+                else if (m_spellInfo->Id == 8092)
+                {
+                    // We are in Shadow Form
+                    if (m_caster->GetShapeshiftForm() == FORM_SHADOW)
+                        // We have Improved Mind Blast
+                        if (AuraEffect * aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST,95,0))
+                            // Chance has been successfully rolled
+                            if (roll_chance_i(aurEff->GetAmount()))
+                                m_caster->CastSpell(unitTarget, 48301, true);
+
+                    // Shadow Orb
+                    if(Aura* shadowOrb = m_caster->GetAura(77487))
+                    {
+                        float incr = 0.10f;
+                        if(m_caster->HasAura(77486)) // Shadow Orb Mastery
+                        {
+                            float mastery = m_caster->ToPlayer()->GetFloatValue(PLAYER_MASTERY);
+                            incr += 0.0145*mastery;
+                        }
+                        damage += incr * shadowOrb->GetStackAmount();
+                        m_caster->CastSpell(m_caster,95799,true);
+                        m_caster->RemoveAurasDueToSpell(77487);
+                    }
+                    
+                    //Remove Mind Melt
+                    m_caster->RemoveAurasDueToSpell(87160);
+                    m_caster->RemoveAurasDueToSpell(81292);
+                }
+                // Mind Spike
+                if(m_spellInfo->Id == 73510)
+                {
+                    // Shadow Orb
+                    if(Aura* shadowOrb = m_caster->GetAura(77487))
+                    {
+                        float incr = 0.10f;
+                        if(m_caster->HasAura(77486)) // Shadow Orb Mastery
+                        {
+                            float mastery = m_caster->ToPlayer()->GetFloatValue(PLAYER_MASTERY);
+                            incr += 0.0145*mastery;
+                        }
+                        damage += incr * shadowOrb->GetStackAmount();
+                        m_caster->CastSpell(m_caster,95799,true);
+                        m_caster->RemoveAurasDueToSpell(77487);
+                    }
+                    if(m_caster->HasAura(14751)) // Chakra
+                    {
+                        m_caster->CastSpell(m_caster,81209,true);
+                        m_caster->RemoveAurasDueToSpell(14751);
+                    }
+                }
                 break;
             }
             case SPELLFAMILY_DRUID:
@@ -1610,6 +1778,11 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
             return;
 
         int32 addhealth = damage;
+
+		if (m_spellInfo->Id == 81751 && unitTarget->GetGUID() == caster->GetGUID()) // Atonement
+        {
+            addhealth = int32(addhealth /2); // Reduce heal if caster == target
+        }
 
         // Vessel of the Naaru (Vial of the Sunwell trinket)
         if (m_spellInfo->Id == 45064)
