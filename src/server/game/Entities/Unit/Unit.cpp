@@ -5839,6 +5839,31 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     RemoveMovementImpairingAuras();
                     break;
                 }
+				 // Glyph of Prayer of Healing
+                case 55680:
+                {
+                    triggered_spell_id = 56161;
+
+                    SpellInfo const* GoPoH = sSpellMgr->GetSpellInfo(triggered_spell_id);
+                    if (!GoPoH)
+                        return false;
+
+                    int EffIndex = 0;
+                    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+                    {
+                        if (GoPoH->Effects[i].Effect == SPELL_EFFECT_APPLY_AURA)
+                        {
+                            EffIndex = i;
+                            break;
+                        }
+                    }
+                    int32 tickcount = GoPoH->GetMaxDuration() / GoPoH->Effects[EffIndex].Amplitude;
+                    if (!tickcount)
+                        return false;
+
+                    basepoints0 = CalculatePct(int32(damage), triggerAmount) / tickcount;
+                    break;
+                }
                 // Glyph of Dispel Magic
                 case 55677:
                 {
