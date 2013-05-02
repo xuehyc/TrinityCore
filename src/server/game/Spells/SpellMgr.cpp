@@ -2851,6 +2851,10 @@ void SpellMgr::LoadSpellCustomAttr()
             case 73790: // Pain and Suffering
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
                 break;
+			case 81913: // Die by the Sword
+			case 81914: // Die by the Sword
+				spellInfo->Effects[0].TriggerSpell = 86624;
+				break;
             case 24340: // Meteor
             case 26558: // Meteor
             case 28884: // Meteor
