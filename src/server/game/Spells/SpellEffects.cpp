@@ -1784,6 +1784,122 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
             addhealth = int32(addhealth /2); // Reduce heal if caster == target
         }
 
+		switch (m_spellInfo->Id)
+        {
+            case 139: // Renew
+            {
+                if (caster->HasAura(81206)) // Chakra: Sanctuary
+                    addhealth += addhealth * 0.15f;
+                break;
+            }
+            case 2050: // Heal
+            case 32546: // Binding Heal
+            case 2061: // Flash Heal
+            {
+                if(caster->HasAura(14751)) // Chakra
+                {
+                    caster->CastSpell(caster,81208,true); // Chakra: Serenity
+                    caster->RemoveAurasDueToSpell(14751);
+                }
+                else if (caster->HasAura(81208))
+                    if (unitTarget->GetAura(139))
+                        unitTarget->GetAura(139)->RefreshDuration();
+                break;
+            }
+            case 2060: // Greater Heal
+            {
+                addhealth += int32(addhealth * 0.937f);
+                if(caster->HasAura(14751)) // Chakra
+                {
+                    caster->CastSpell(caster,81208,true); // Chakra: Serenity
+                    caster->RemoveAurasDueToSpell(14751);
+                }
+                else if (caster->HasAura(81208))
+                    if (unitTarget->GetAura(139))
+                        unitTarget->GetAura(139)->RefreshDuration();
+
+                // Train of Thought Rank 2
+                if(caster->HasAura(92297))
+                {
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(92297,0))
+                    {
+                        // 100% to reduce cooldown of Inner Focus by 5 secs
+                        if(caster->ToPlayer()->HasSpellCooldown(89485))
+                        {
+                                int32 cooldown = -5000;
+                                uint32 newCooldownDelay = caster->ToPlayer()->GetSpellCooldownDelay(89485);
+
+                                if (newCooldownDelay < uint32(cooldown / -1000) + 1)
+                                    newCooldownDelay = 0;
+                                else
+                                    newCooldownDelay += cooldown / 1000;
+
+                                caster->ToPlayer()->AddSpellCooldown(89485,0, uint32(time(NULL) + newCooldownDelay));
+
+                                WorldPacket data(SMSG_MODIFY_COOLDOWN, 4+8+4);
+                                data << uint32(89485);                  // Spell ID
+                                data << uint64(caster->GetGUID());              // Player GUID
+                                data << int32(-5000);                // Cooldown mod in milliseconds
+                                caster->ToPlayer()->GetSession()->SendPacket(&data);
+                        }
+                   }
+                }
+                // Train of Thought Rank 1
+                else if(caster->HasAura(92295))
+                {
+                   if (AuraEffect* aurEff = caster->GetAuraEffect(92295,0))
+                   {
+                        // 50% to reduce cooldown of Inner Focus by 5 secs
+                        if(roll_chance_i(50))
+                        {
+                            if(caster->ToPlayer()->HasSpellCooldown(89485))
+                            {
+                                int32 cooldown = -5000;
+                                uint32 newCooldownDelay = caster->ToPlayer()->GetSpellCooldownDelay(89485);
+
+                                if (newCooldownDelay < uint32(cooldown / -1000) + 1)
+                                    newCooldownDelay = 0;
+                                else
+                                    newCooldownDelay += cooldown / 1000;
+
+                                caster->ToPlayer()->AddSpellCooldown(89485,0, uint32(time(NULL) + newCooldownDelay));
+
+                                WorldPacket data(SMSG_MODIFY_COOLDOWN, 4+8+4);
+                                data << uint32(89485);                  // Spell ID
+                                data << uint64(caster->GetGUID());              // Player GUID
+                                data << int32(-5000);                // Cooldown mod in milliseconds
+                                caster->ToPlayer()->GetSession()->SendPacket(&data);
+                            }
+                        }
+                   }
+                }
+                break;
+            }
+            case 596: // Prayer of Healing
+            {
+                if(caster->HasAura(14751)) // If chakra is up
+                {
+                    caster->CastSpell(caster,81206,true); // Chakra: Sanctuary
+                    caster->RemoveAurasDueToSpell(14751);
+                }
+                if(caster->HasAura(47509)) // Divine Aegis rank 1
+                {
+                    int32 bp = addhealth * 0.1f;
+                    caster->CastCustomSpell(caster,47753,&bp,NULL,NULL,true);
+                }
+                if(caster->HasAura(47511)) // Divine Aegis rank 2
+                {
+                    int32 bp = addhealth * 0.2f;
+                    caster->CastCustomSpell(caster,47753,&bp,NULL,NULL,true);
+                }
+                if(caster->HasAura(47515)) // Divine Aegis rank 3
+                {
+                    int32 bp = addhealth * 0.3f;
+                    caster->CastCustomSpell(caster,47753,&bp,NULL,NULL,true);
+                }
+                break;
+            }
+        }
         // Vessel of the Naaru (Vial of the Sunwell trinket)
         if (m_spellInfo->Id == 45064)
         {

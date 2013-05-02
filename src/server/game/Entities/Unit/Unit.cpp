@@ -5743,6 +5743,63 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 target = this;
                 break;
             }
+			// Shadow Word: PAIN
+            if(dummySpell->Id == 589)
+            {
+                uint32 chance = 10;
+                //Harnessed Shadows increase chance of creating a shadow orb by 4 and 8%
+                //Rank 1
+                if(AuraEffect const *auraEff = GetAuraEffect(33191, 0))
+                {
+                    chance += 4;
+                }
+                //Rank 2
+                else if(AuraEffect const *auraEff = GetAuraEffect(78228, 0))
+                {
+                    chance += 8;
+                }
+                //Proc shadow orb
+                if(roll_chance_i(chance))
+                {
+                    CastSpell(this,77487,true);
+                }
+            }
+			// Mind Flay
+            if(dummySpell->Id == 15407)
+            {
+                uint32 chance = 10;
+                //Harnessed Shadows increase chance of creating a shadow orb by 4 and 8%
+                //Rank 1
+                if(AuraEffect const *auraEff = GetAuraEffect(33191, 0))
+                {
+                    chance += 4;
+                }
+                //Rank 2
+                else if(AuraEffect const *auraEff = GetAuraEffect(78228, 0))
+                {
+                    chance += 8;
+                }
+                //Proc shadow orb
+                if(roll_chance_i(chance))
+                {
+                    CastSpell(this,77487,true);
+                }
+            }
+			// Divine Aegis
+            if (dummySpell->SpellIconID == 2820)
+            {
+                // Multiple effects stack, so let's try to find this aura.
+                int32 bonus = 0;
+                if (AuraEffect *aurEff = target->GetAuraEffect(47753, 0))
+                    bonus = aurEff->GetAmount();
+
+                basepoints0 = CalculatePct(int32(damage), triggerAmount) + bonus;
+                if (basepoints0 > target->getLevel() * 125)
+                    basepoints0 = target->getLevel() * 125;
+
+                triggered_spell_id = 47753;
+                break;
+            }
             switch (dummySpell->Id)
             {
                 // Vampiric Embrace
