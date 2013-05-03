@@ -16524,6 +16524,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
         hasFallData = mover->m_movementInfo.bits.hasFallData;
         hasFallDirection = mover->m_movementInfo.bits.hasFallDirection;
         hasSplineElevation = mover->m_movementInfo.bits.hasSplineElevation;
+		hasSpline = !mover->IsSplineFinalized();
     }
     else
     {
@@ -17303,6 +17304,11 @@ void Unit::SendMovementSwimming()
 bool Unit::IsSplineEnabled() const
 {
     return movespline->Initialized();
+}
+
+bool Unit::IsSplineFinalized() const
+{
+    return movespline->Finalized();
 }
 
 void Unit::SetTarget(uint64 guid)
