@@ -587,6 +587,16 @@ enum SpecialSurprise
     SAY_EXEC_TIME_10            = 51,
     SAY_EXEC_WAITING            = 52,
     EMOTE_DIES                  = 53,
+	//Cataclysm
+	SAY_EXEC_START_4            = 54, //-1609079, // Cataclysm: Goblin
+	SAY_EXEC_PROG_8             = 55, //-1609180, // Cataclysm: Goblin
+    SAY_EXEC_NOREM_10           = 56, //-1609181, // Cataclysm: Goblin
+    SAY_EXEC_NOREM_11           = 57, //-1609182, // Cataclysm: Worgen	
+    SAY_EXEC_THINK_11           = 58, //-1609183, // Cataclysm: Goblin
+    SAY_EXEC_THINK_12           = 59, //-1609184, // Cataclysm: Worgen
+    SAY_EXEC_LISTEN_5           = 60, //-1609185, // Cataclysm: Goblin
+    SAY_EXEC_TIME_11            = 61, //-1609186, // Cataclysm: Goblin	
+	SAY_EXEC_TIME_12            = 62, //-1609087, // Cataclysm: Worgen
 
     NPC_PLAGUEFIST              = 29053
 };
@@ -662,6 +672,14 @@ public:
                     if (player->GetQuestStatus(12746) == QUEST_STATUS_INCOMPLETE)
                         return true;
                     break;
+                case 49355:                                    // Lord Harford
+                    if (player->GetQuestStatus(28649) == QUEST_STATUS_INCOMPLETE)
+                    return true;
+                break;
+                case 49356:                                   // Gally Lumpstain
+                    if (player->GetQuestStatus(28650) == QUEST_STATUS_INCOMPLETE)
+                    return true;
+                break;					
             }
 
             return false;
@@ -994,6 +1012,80 @@ public:
                                     return;
                             }
                             break;
+                    case RACE_WORGEN:
+                        switch (ExecuteSpeech_Counter) {
+                        case 0:
+                            Talk(SAY_EXEC_START_1, player->GetGUID()); break;
+                        case 1:
+                            me->SetStandState(UNIT_STAND_STATE_STAND);
+                            break;
+                        case 2:
+                            Talk(SAY_EXEC_PROG_1, player->GetGUID()); break;
+                        case 3:
+                            Talk(SAY_EXEC_NAME_1, player->GetGUID()); break;
+                        case 4:
+                            Talk(SAY_EXEC_RECOG_1, player->GetGUID()); break;
+                        case 5:
+                            Talk(SAY_EXEC_NOREM_11, player->GetGUID()); break; // SQL Part Implemented in Cataclysm
+                        case 6:
+                            Talk(SAY_EXEC_THINK_12, player->GetGUID()); break; // SQL Part Implemented in Cataclysm
+                        case 7:
+                            Talk(SAY_EXEC_LISTEN_1, player->GetGUID()); break;
+                        case 8:
+                            if (Creature* Plaguefist = GetClosestCreatureWithEntry(me, NPC_PLAGUEFIST, 85.0f))
+                                Plaguefist->AI()->Talk(SAY_PLAGUEFIST, player->GetGUID());
+                            break;
+                        case 9:
+                            Talk(SAY_EXEC_TIME_12, player->GetGUID());
+                            me->SetStandState(UNIT_STAND_STATE_KNEEL);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                            break;
+                        case 10:
+                            Talk(SAY_EXEC_WAITING, player->GetGUID()); break;
+                        case 11:
+                            Talk(EMOTE_DIES);
+                            me->setDeathState(JUST_DIED);
+                            me->SetHealth(0);
+                            return;
+                        }
+                        break;
+                    case RACE_GOBLIN:
+                        switch (ExecuteSpeech_Counter) {
+                        case 0:
+                            Talk(SAY_EXEC_START_4, player->GetGUID()); break; // SQL Part Implemented in Cataclysm
+                        case 1:
+                            me->SetStandState(UNIT_STAND_STATE_STAND);
+                            break;
+                        case 2:
+                            Talk(SAY_EXEC_PROG_8, player->GetGUID()); break; // SQL Part Implemented in Cataclysm
+                        case 3:
+                            Talk(SAY_EXEC_NAME_1, player->GetGUID()); break; // SQL Part Implemented in Cataclysm
+                        case 4:
+                            Talk(SAY_EXEC_RECOG_1, player->GetGUID()); break;
+                        case 5:
+                            Talk(SAY_EXEC_NOREM_11, player->GetGUID()); break; // SQL Part Implemented in Cataclysm
+                        case 6:
+                            Talk(SAY_EXEC_THINK_11, player->GetGUID()); break; // SQL Part Implemented in Cataclysm
+                        case 7:
+                            Talk(SAY_EXEC_LISTEN_5, player->GetGUID()); break; // SQL Part Implemented in Cataclysm
+                        case 8:
+                            if (Creature* Plaguefist = GetClosestCreatureWithEntry(me, NPC_PLAGUEFIST, 85.0f))
+                                Plaguefist->AI()->Talk(SAY_PLAGUEFIST, player->GetGUID());
+                            break;
+                        case 9:
+                            Talk(SAY_EXEC_TIME_11, player->GetGUID());
+                            me->SetStandState(UNIT_STAND_STATE_KNEEL);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                            break;
+                        case 10:
+                            Talk(SAY_EXEC_WAITING, player->GetGUID()); break;
+                        case 11:
+                            Talk(EMOTE_DIES);
+                            me->setDeathState(JUST_DIED);
+                            me->SetHealth(0);
+                            return;
+                        }
+                        break;							
                     }
 
                     if (ExecuteSpeech_Counter >= 9)
