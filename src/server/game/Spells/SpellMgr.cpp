@@ -2762,6 +2762,9 @@ void SpellMgr::LoadSpellCustomAttr()
 
         switch (spellInfo->Id)
         {
+            case 76691: // Vengeance
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(18);
+                break;		
             case 60256:
                 //Crashes client on pressing ESC (Maybe because of ReqSpellFocus and GameObject)
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
