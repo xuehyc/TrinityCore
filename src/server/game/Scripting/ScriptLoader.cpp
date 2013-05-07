@@ -230,10 +230,11 @@ void AddSC_shadowfang_keep();                //Shadowfang keep
 void AddSC_instance_shadowfang_keep();
 void AddSC_the_stonecore();                  //The Stonecore
 void AddSC_instance_the_stonecore();
-void AddSC_boss_priestess_azil();
 void AddSC_boss_ozruk();
 void AddSC_boss_slabhide();
 void AddSC_boss_corborus();
+void AddSC_boss_azil();
+void AddSC_mob_trash_coeur_de_pierre();
 void AddSC_boss_magistrate_barthilas();      //Stratholme
 void AddSC_boss_maleki_the_pallid();
 void AddSC_boss_nerubenkan();
@@ -372,13 +373,6 @@ void AddSC_wailing_caverns();                //Wailing caverns
 void AddSC_instance_wailing_caverns();
 void AddSC_zulfarrak();                     //Zul'Farrak generic
 void AddSC_instance_zulfarrak();            //Zul'Farrak instance script
-void AddSC_instance_the_stonecore();			// Dungeon The Stonecore
-void AddSC_the_stonecore();
-void AddSC_boss_azil();
-void AddSC_boss_corborus();
-void AddSC_boss_ozruk();
-void AddSC_boss_slabhide();
-void AddSC_mob_trash_coeur_de_pierre();
 void AddSC_instance_halls_of_origination();		// Dungeon Halls of Origination
 void AddSC_boss_ammunae();
 void AddSC_boss_anraphet();
@@ -920,10 +914,11 @@ void AddEasternKingdomsScripts()
     AddSC_instance_shadowfang_keep();
     AddSC_the_stonecore();                  //The Stonecore
     AddSC_instance_the_stonecore();
-    AddSC_boss_priestess_azil();
     AddSC_boss_ozruk();
     AddSC_boss_slabhide();
-    AddSC_boss_corborus();	
+    AddSC_boss_corborus();
+	AddSC_boss_azil();
+	AddSC_mob_trash_coeur_de_pierre();	
     AddSC_boss_magistrate_barthilas();      //Stratholme
     AddSC_boss_maleki_the_pallid();
     AddSC_boss_nerubenkan();
@@ -1090,15 +1085,6 @@ void AddKalimdorScripts()
     AddSC_thunder_bluff();
     AddSC_ungoro_crater();
     AddSC_winterspring();
-
-	AddSC_instance_the_stonecore();			// Dungeon The Stonecore
-	AddSC_the_stonecore();
-	AddSC_boss_azil();
-	AddSC_boss_corborus();
-	AddSC_boss_ozruk();
-	AddSC_boss_slabhide();
-	AddSC_mob_trash_coeur_de_pierre();
-
 	AddSC_instance_halls_of_origination();		// Dungeon Halls of Origination
     AddSC_boss_ammunae();
 	AddSC_boss_anraphet();
