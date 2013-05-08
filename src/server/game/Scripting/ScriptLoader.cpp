@@ -385,6 +385,7 @@ void AddSC_elementaires_sdo();
 void AddSC_mob_trash_sdo();
 void AddSC_instance_firelands();
 void AddSC_boss_alysrazor();
+void AddSC_boss_ragnaros_cata();
 
 void AddSC_ashenvale();
 void AddSC_azshara();
@@ -1098,6 +1099,7 @@ void AddKalimdorScripts()
 
     AddSC_instance_firelands();
     AddSC_boss_alysrazor();
+	AddSC_boss_ragnaros_cata();
 #endif
 }
 
