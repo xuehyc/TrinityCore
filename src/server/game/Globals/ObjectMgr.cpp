@@ -7630,7 +7630,7 @@ const char *ObjectMgr::GetTrinityString(int32 entry, LocaleConstant locale_idx) 
     }
 
     if (entry > 0)
-        sLog->outError(LOG_FILTER_SQL, "Entry %i not found in `trinity_string` table.", entry);
+        sLog->outError(LOG_FILTER_SQL, "Entry %i not found in `arkcore_string` table.", entry);
     else
         sLog->outError(LOG_FILTER_SQL, "Trinity string entry %i not found in DB.", entry);
     return "<error>";
