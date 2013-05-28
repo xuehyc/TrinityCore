@@ -175,7 +175,7 @@ public:
                me->SummonCreature(entry, RAND(spawns[0], spawns[1]), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (!InProgress)
                 return;
@@ -317,7 +317,7 @@ public:
             Finished = false;
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if(me->HealthBelowPct(5) && Finished == false)
             {
