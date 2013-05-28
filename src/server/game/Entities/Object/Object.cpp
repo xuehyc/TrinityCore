@@ -64,6 +64,7 @@ uint32 GuidHigh2TypeId(uint32 guid_hi)
         case HIGHGUID_GAMEOBJECT:   return TYPEID_GAMEOBJECT;
         case HIGHGUID_DYNAMICOBJECT:return TYPEID_DYNAMICOBJECT;
         case HIGHGUID_CORPSE:       return TYPEID_CORPSE;
+        case HIGHGUID_AREATRIGGER:  return TYPEID_AREATRIGGER;
         case HIGHGUID_MO_TRANSPORT: return TYPEID_GAMEOBJECT;
         case HIGHGUID_VEHICLE:      return TYPEID_UNIT;
     }
@@ -92,7 +93,7 @@ WorldObject::~WorldObject()
     {
         if (GetTypeId() == TYPEID_CORPSE)
         {
-            sLog->outFatal(LOG_FILTER_GENERAL, "Object::~Object Corpse guid="UI64FMTD", type=%d, entry=%u deleted but still in map!!",
+            TC_LOG_FATAL(LOG_FILTER_GENERAL, "Object::~Object Corpse guid="UI64FMTD", type=%d, entry=%u deleted but still in map!!",
                 GetGUID(), ((Corpse*)this)->GetType(), GetEntry());
             ASSERT(false);
         }
@@ -104,16 +105,16 @@ Object::~Object()
 {
     if (IsInWorld())
     {
-        sLog->outFatal(LOG_FILTER_GENERAL, "Object::~Object - guid="UI64FMTD", typeid=%d, entry=%u deleted but still in world!!", GetGUID(), GetTypeId(), GetEntry());
+        TC_LOG_FATAL(LOG_FILTER_GENERAL, "Object::~Object - guid="UI64FMTD", typeid=%d, entry=%u deleted but still in world!!", GetGUID(), GetTypeId(), GetEntry());
         if (isType(TYPEMASK_ITEM))
-            sLog->outFatal(LOG_FILTER_GENERAL, "Item slot %u", ((Item*)this)->GetSlot());
+            TC_LOG_FATAL(LOG_FILTER_GENERAL, "Item slot %u", ((Item*)this)->GetSlot());
         ASSERT(false);
         RemoveFromWorld();
     }
 
     if (m_objectUpdated)
     {
-        sLog->outFatal(LOG_FILTER_GENERAL, "Object::~Object - guid="UI64FMTD", typeid=%d, entry=%u deleted but still in update list!!", GetGUID(), GetTypeId(), GetEntry());
+        TC_LOG_FATAL(LOG_FILTER_GENERAL, "Object::~Object - guid="UI64FMTD", typeid=%d, entry=%u deleted but still in update list!!", GetGUID(), GetTypeId(), GetEntry());
         ASSERT(false);
         sObjectAccessor->RemoveUpdateObject(this);
     }
@@ -197,6 +198,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         case HIGHGUID_PET:
         case HIGHGUID_CORPSE:
         case HIGHGUID_DYNAMICOBJECT:
+        case HIGHGUID_AREATRIGGER:
             updateType = UPDATETYPE_CREATE_OBJECT2;
             break;
         case HIGHGUID_UNIT:
@@ -1046,6 +1048,9 @@ uint32 Object::GetUpdateFieldData(Player const* target, uint32*& flags) const
             if (ToCorpse()->GetOwnerGUID() == target->GetGUID())
                 visibleFlag |= UF_FLAG_OWNER;
             break;
+        case TYPEID_AREATRIGGER:
+            flags = AreaTriggerUpdateFieldFlags;
+            break;
         case TYPEID_OBJECT:
             break;
     }
@@ -1224,7 +1229,7 @@ void Object::SetByteValue(uint16 index, uint8 offset, uint8 value)
 
     if (offset > 4)
     {
-        sLog->outError(LOG_FILTER_GENERAL, "Object::SetByteValue: wrong offset %u", offset);
+        TC_LOG_ERROR(LOG_FILTER_GENERAL, "Object::SetByteValue: wrong offset %u", offset);
         return;
     }
 
@@ -1248,7 +1253,7 @@ void Object::SetUInt16Value(uint16 index, uint8 offset, uint16 value)
 
     if (offset > 2)
     {
-        sLog->outError(LOG_FILTER_GENERAL, "Object::SetUInt16Value: wrong offset %u", offset);
+        TC_LOG_ERROR(LOG_FILTER_GENERAL, "Object::SetUInt16Value: wrong offset %u", offset);
         return;
     }
 
@@ -1388,7 +1393,7 @@ void Object::SetByteFlag(uint16 index, uint8 offset, uint8 newFlag)
 
     if (offset > 4)
     {
-        sLog->outError(LOG_FILTER_GENERAL, "Object::SetByteFlag: wrong offset %u", offset);
+        TC_LOG_ERROR(LOG_FILTER_GENERAL, "Object::SetByteFlag: wrong offset %u", offset);
         return;
     }
 
@@ -1411,7 +1416,7 @@ void Object::RemoveByteFlag(uint16 index, uint8 offset, uint8 oldFlag)
 
     if (offset > 4)
     {
-        sLog->outError(LOG_FILTER_GENERAL, "Object::RemoveByteFlag: wrong offset %u", offset);
+        TC_LOG_ERROR(LOG_FILTER_GENERAL, "Object::RemoveByteFlag: wrong offset %u", offset);
         return;
     }
 
@@ -1478,7 +1483,7 @@ void Object::ApplyModFlag64(uint16 index, uint64 flag, bool apply)
 
 bool Object::PrintIndexError(uint32 index, bool set) const
 {
-    sLog->outError(LOG_FILTER_GENERAL, "Attempt %s non-existed value field: %u (count: %u) for object typeid: %u type mask: %u", (set ? "set value to" : "get value from"), index, m_valuesCount, GetTypeId(), m_objectType);
+    TC_LOG_ERROR(LOG_FILTER_GENERAL, "Attempt %s non-existed value field: %u (count: %u) for object typeid: %u type mask: %u", (set ? "set value to" : "get value from"), index, m_valuesCount, GetTypeId(), m_objectType);
 
     // ASSERT must fail after function call
     return false;
@@ -1541,37 +1546,37 @@ ByteBuffer& operator<<(ByteBuffer& buf, Position::PositionXYZOStreamer const& st
 
 void MovementInfo::OutDebug()
 {
-    sLog->outInfo(LOG_FILTER_GENERAL, "MOVEMENT INFO");
-    sLog->outInfo(LOG_FILTER_GENERAL, "guid " UI64FMTD, guid);
-    sLog->outInfo(LOG_FILTER_GENERAL, "flags %s (%u)", Movement::MovementFlags_ToString(flags).c_str(), flags);
-    sLog->outInfo(LOG_FILTER_GENERAL, "flags2 %s (%u)", Movement::MovementFlagsExtra_ToString(flags2).c_str(), flags2);
-    sLog->outInfo(LOG_FILTER_GENERAL, "time %u current time %u", time, getMSTime());
-    sLog->outInfo(LOG_FILTER_GENERAL, "position: `%s`", pos.ToString().c_str());
+    TC_LOG_INFO(LOG_FILTER_GENERAL, "MOVEMENT INFO");
+    TC_LOG_INFO(LOG_FILTER_GENERAL, "guid " UI64FMTD, guid);
+    TC_LOG_INFO(LOG_FILTER_GENERAL, "flags %s (%u)", Movement::MovementFlags_ToString(flags).c_str(), flags);
+    TC_LOG_INFO(LOG_FILTER_GENERAL, "flags2 %s (%u)", Movement::MovementFlagsExtra_ToString(flags2).c_str(), flags2);
+    TC_LOG_INFO(LOG_FILTER_GENERAL, "time %u current time %u", time, getMSTime());
+    TC_LOG_INFO(LOG_FILTER_GENERAL, "position: `%s`", pos.ToString().c_str());
     if (t_guid)
     {
-        sLog->outInfo(LOG_FILTER_GENERAL, "TRANSPORT:");
-        sLog->outInfo(LOG_FILTER_GENERAL, "guid: " UI64FMTD, t_guid);
-        sLog->outInfo(LOG_FILTER_GENERAL, "position: `%s`", t_pos.ToString().c_str());
-        sLog->outInfo(LOG_FILTER_GENERAL, "seat: %i", t_seat);
-        sLog->outInfo(LOG_FILTER_GENERAL, "time: %u", t_time);
+        TC_LOG_INFO(LOG_FILTER_GENERAL, "TRANSPORT:");
+        TC_LOG_INFO(LOG_FILTER_GENERAL, "guid: " UI64FMTD, t_guid);
+        TC_LOG_INFO(LOG_FILTER_GENERAL, "position: `%s`", t_pos.ToString().c_str());
+        TC_LOG_INFO(LOG_FILTER_GENERAL, "seat: %i", t_seat);
+        TC_LOG_INFO(LOG_FILTER_GENERAL, "time: %u", t_time);
         if (flags2 & MOVEMENTFLAG2_INTERPOLATED_MOVEMENT)
-            sLog->outInfo(LOG_FILTER_GENERAL, "time2: %u", t_time2);
+            TC_LOG_INFO(LOG_FILTER_GENERAL, "time2: %u", t_time2);
         if (bits.hasTransportTime3)
-            sLog->outInfo(LOG_FILTER_GENERAL, "time3: %u", t_time3);
+            TC_LOG_INFO(LOG_FILTER_GENERAL, "time3: %u", t_time3);
     }
 
     if ((flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || (flags2 & MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING))
-        sLog->outInfo(LOG_FILTER_GENERAL, "pitch: %f", pitch);
+        TC_LOG_INFO(LOG_FILTER_GENERAL, "pitch: %f", pitch);
 
     if (flags & MOVEMENTFLAG_FALLING || bits.hasFallData)
     {
-        sLog->outInfo(LOG_FILTER_GENERAL, "fallTime: %u j_zspeed: %f", fallTime, j_zspeed);
+        TC_LOG_INFO(LOG_FILTER_GENERAL, "fallTime: %u j_zspeed: %f", fallTime, j_zspeed);
         if (flags & MOVEMENTFLAG_FALLING)
-            sLog->outInfo(LOG_FILTER_GENERAL, "j_sinAngle: %f j_cosAngle: %f j_xyspeed: %f", j_sinAngle, j_cosAngle, j_xyspeed);
+            TC_LOG_INFO(LOG_FILTER_GENERAL, "j_sinAngle: %f j_cosAngle: %f j_xyspeed: %f", j_sinAngle, j_cosAngle, j_xyspeed);
     }
 
     if (flags & MOVEMENTFLAG_SPLINE_ELEVATION)
-        sLog->outInfo(LOG_FILTER_GENERAL, "splineElevation: %f", splineElevation);
+        TC_LOG_INFO(LOG_FILTER_GENERAL, "splineElevation: %f", splineElevation);
 }
 
 WorldObject::WorldObject(bool isWorldObject): WorldLocation(),
@@ -2579,7 +2584,7 @@ void WorldObject::SetMap(Map* map)
         return;
     if (m_currMap)
     {
-        sLog->outFatal(LOG_FILTER_GENERAL, "WorldObject::SetMap: obj %u new map %u %u, old map %u %u", (uint32)GetTypeId(), map->GetId(), map->GetInstanceId(), m_currMap->GetId(), m_currMap->GetInstanceId());
+        TC_LOG_FATAL(LOG_FILTER_GENERAL, "WorldObject::SetMap: obj %u new map %u %u, old map %u %u", (uint32)GetTypeId(), map->GetId(), map->GetInstanceId(), m_currMap->GetId(), m_currMap->GetInstanceId());
         ASSERT(false);
     }
     m_currMap = map;
@@ -2614,7 +2619,7 @@ void WorldObject::AddObjectToRemoveList()
     Map* map = FindMap();
     if (!map)
     {
-        sLog->outError(LOG_FILTER_GENERAL, "Object (TypeId: %u Entry: %u GUID: %u) at attempt add to move list not have valid map (Id: %u).", GetTypeId(), GetEntry(), GetGUIDLow(), GetMapId());
+        TC_LOG_ERROR(LOG_FILTER_GENERAL, "Object (TypeId: %u Entry: %u GUID: %u) at attempt add to move list not have valid map (Id: %u).", GetTypeId(), GetEntry(), GetGUIDLow(), GetMapId());
         return;
     }
 
@@ -2790,7 +2795,7 @@ GameObject* WorldObject::SummonGameObject(uint32 entry, float x, float y, float 
     GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(entry);
     if (!goinfo)
     {
-        sLog->outError(LOG_FILTER_SQL, "Gameobject template %u not found in database!", entry);
+        TC_LOG_ERROR(LOG_FILTER_SQL, "Gameobject template %u not found in database!", entry);
         return NULL;
     }
 
@@ -3168,7 +3173,7 @@ void WorldObject::MovePosition(Position &pos, float dist, float angle)
     // Prevent invalid coordinates here, position is unchanged
     if (!Trinity::IsValidMapCoord(destx, desty, pos.m_positionZ))
     {
-        sLog->outFatal(LOG_FILTER_GENERAL, "WorldObject::MovePosition invalid coordinates X: %f and Y: %f were passed!", destx, desty);
+        TC_LOG_FATAL(LOG_FILTER_GENERAL, "WorldObject::MovePosition invalid coordinates X: %f and Y: %f were passed!", destx, desty);
         return;
     }
 
@@ -3214,7 +3219,7 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
     // Prevent invalid coordinates here, position is unchanged
     if (!Trinity::IsValidMapCoord(destx, desty))
     {
-        sLog->outFatal(LOG_FILTER_GENERAL, "WorldObject::MovePositionToFirstCollision invalid coordinates X: %f and Y: %f were passed!", destx, desty);
+        TC_LOG_FATAL(LOG_FILTER_GENERAL, "WorldObject::MovePositionToFirstCollision invalid coordinates X: %f and Y: %f were passed!", destx, desty);
         return;
     }
 

@@ -60,14 +60,14 @@ template<class T> T* ObjectAccessor::GetObjectInWorld(uint32 mapid, float x, flo
     CellCoord p = Trinity::ComputeCellCoord(x, y);
     if (!p.IsCoordValid())
     {
-        sLog->outError(LOG_FILTER_GENERAL, "ObjectAccessor::GetObjectInWorld: invalid coordinates supplied X:%f Y:%f grid cell [%u:%u]", x, y, p.x_coord, p.y_coord);
+        TC_LOG_ERROR(LOG_FILTER_GENERAL, "ObjectAccessor::GetObjectInWorld: invalid coordinates supplied X:%f Y:%f grid cell [%u:%u]", x, y, p.x_coord, p.y_coord);
         return NULL;
     }
 
     CellCoord q = Trinity::ComputeCellCoord(obj->GetPositionX(), obj->GetPositionY());
     if (!q.IsCoordValid())
     {
-        sLog->outError(LOG_FILTER_GENERAL, "ObjectAccessor::GetObjecInWorld: object (GUID: %u TypeId: %u) has invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUIDLow(), obj->GetTypeId(), obj->GetPositionX(), obj->GetPositionY(), q.x_coord, q.y_coord);
+        TC_LOG_ERROR(LOG_FILTER_GENERAL, "ObjectAccessor::GetObjecInWorld: object (GUID: %u TypeId: %u) has invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUIDLow(), obj->GetTypeId(), obj->GetPositionX(), obj->GetPositionY(), q.x_coord, q.y_coord);
         return NULL;
     }
 
@@ -98,6 +98,7 @@ WorldObject* ObjectAccessor::GetWorldObject(WorldObject const& p, uint64 guid)
         case HIGHGUID_UNIT:          return GetCreature(p, guid);
         case HIGHGUID_PET:           return GetPet(p, guid);
         case HIGHGUID_DYNAMICOBJECT: return GetDynamicObject(p, guid);
+        case HIGHGUID_AREATRIGGER:   return GetAreaTrigger(p, guid);
         case HIGHGUID_CORPSE:        return GetCorpse(p, guid);
         default:                     return NULL;
     }
@@ -134,6 +135,9 @@ Object* ObjectAccessor::GetObjectByTypeMask(WorldObject const& p, uint64 guid, u
             if (typemask & TYPEMASK_DYNAMICOBJECT)
                 return GetDynamicObject(p, guid);
             break;
+        case HIGHGUID_AREATRIGGER:
+            if (typemask & TYPEMASK_AREATRIGGER)
+                return GetAreaTrigger(p, guid);
         case HIGHGUID_CORPSE:
             break;
     }
@@ -154,6 +158,11 @@ GameObject* ObjectAccessor::GetGameObject(WorldObject const& u, uint64 guid)
 DynamicObject* ObjectAccessor::GetDynamicObject(WorldObject const& u, uint64 guid)
 {
     return GetObjectInMap(guid, u.GetMap(), (DynamicObject*)NULL);
+}
+
+AreaTrigger* ObjectAccessor::GetAreaTrigger(WorldObject const& u, uint64 guid)
+{
+    return GetObjectInMap(guid, u.GetMap(), (AreaTrigger*)NULL);
 }
 
 Unit* ObjectAccessor::GetUnit(WorldObject const& u, uint64 guid)
@@ -329,7 +338,7 @@ Corpse* ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid, bool insignia
         return NULL;
     }
 
-    sLog->outDebug(LOG_FILTER_GENERAL, "Deleting Corpse and spawned bones.");
+    TC_LOG_DEBUG(LOG_FILTER_GENERAL, "Deleting Corpse and spawned bones.");
 
     // Map can be NULL
     Map* map = corpse->FindMap();

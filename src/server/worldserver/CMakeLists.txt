@@ -86,6 +86,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/DataStores
   ${CMAKE_SOURCE_DIR}/src/server/game/DungeonFinding
   ${CMAKE_SOURCE_DIR}/src/server/game/Entities
+  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/AreaTrigger
   ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Creature
   ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Corpse
   ${CMAKE_SOURCE_DIR}/src/server/game/Entities/DynamicObject
@@ -178,6 +179,7 @@ target_link_libraries(worldserver
   ${MYSQL_LIBRARY}
   ${OPENSSL_LIBRARIES}
   ${ZLIB_LIBRARIES}
+  ${CMAKE_THREAD_LIBS_INIT}
 )
 
 if( WIN32 )
@@ -196,7 +198,7 @@ endif()
 
 if( UNIX )
   install(TARGETS worldserver DESTINATION bin)
-  install(FILES worldserver.conf.dist DESTINATION etc)
+  install(FILES worldserver.conf.dist DESTINATION ${CONF_DIR})
 elseif( WIN32 )
   install(TARGETS worldserver DESTINATION "${CMAKE_INSTALL_PREFIX}")
   install(FILES worldserver.conf.dist DESTINATION "${CMAKE_INSTALL_PREFIX}")

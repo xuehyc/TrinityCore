@@ -76,7 +76,7 @@ public:
                 break;
              case GOSSIP_ACTION_INFO_DEF:
                 ai->Debug = !ai->Debug;
-                sLog->outDebug(LOG_FILTER_TSCR, "HyjalAI - Debug mode has been toggled");
+                TC_LOG_DEBUG(LOG_FILTER_TSCR, "HyjalAI - Debug mode has been toggled");
                 break;
         }
         return true;
@@ -153,7 +153,7 @@ public:
                 break;
             case GOSSIP_ACTION_INFO_DEF:
                 ai->Debug = !ai->Debug;
-                sLog->outDebug(LOG_FILTER_TSCR, "HyjalAI - Debug mode has been toggled");
+                TC_LOG_DEBUG(LOG_FILTER_TSCR, "HyjalAI - Debug mode has been toggled");
                 break;
         }
         return true;

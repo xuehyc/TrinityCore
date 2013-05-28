@@ -248,7 +248,10 @@ void GmTicket::SetChatLog(std::list<uint32> time, std::string const& log)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Ticket manager
-TicketMgr::TicketMgr() : _status(true), _lastTicketId(0), _lastSurveyId(0), _openTicketCount(0), _lastChange(time(NULL)) { }
+TicketMgr::TicketMgr() : _status(true), _lastTicketId(0), _lastSurveyId(0), _openTicketCount(0),
+    _lastChange(time(NULL))
+{
+}
 
 TicketMgr::~TicketMgr()
 {
@@ -256,7 +259,10 @@ TicketMgr::~TicketMgr()
         delete itr->second;
 }
 
-void TicketMgr::Initialize() { SetStatus(sWorld->getBoolConfig(CONFIG_ALLOW_TICKETS)); }
+void TicketMgr::Initialize()
+{
+    SetStatus(sWorld->getBoolConfig(CONFIG_ALLOW_TICKETS));
+}
 
 void TicketMgr::ResetTickets()
 {
@@ -286,7 +292,7 @@ void TicketMgr::LoadTickets()
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
     if (!result)
     {
-        sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 GM tickets. DB table `gm_tickets` is empty!");
+        TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 GM tickets. DB table `gm_tickets` is empty!");
 
         return;
     }
@@ -313,7 +319,7 @@ void TicketMgr::LoadTickets()
         ++count;
     } while (result->NextRow());
 
-    sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded %u GM tickets in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded %u GM tickets in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 
 }
 
@@ -326,7 +332,7 @@ void TicketMgr::LoadSurveys()
     if (QueryResult result = CharacterDatabase.Query("SELECT MAX(surveyId) FROM gm_surveys"))
         _lastSurveyId = (*result)[0].GetUInt32();
 
-    sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded GM Survey count from database in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded GM Survey count from database in %u ms", GetMSTimeDiffToNow(oldMSTime));
 
 }
 

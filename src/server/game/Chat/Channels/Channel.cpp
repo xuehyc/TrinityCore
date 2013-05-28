@@ -87,7 +87,7 @@ Channel::Channel(std::string const& name, uint32 channelId, uint32 team):
                         uint64 banned_guid = atol(*i);
                         if (banned_guid)
                         {
-                            sLog->outDebug(LOG_FILTER_CHATSYS, "Channel(%s) loaded bannedStore guid:" UI64FMTD "", name.c_str(), banned_guid);
+                            TC_LOG_DEBUG(LOG_FILTER_CHATSYS, "Channel(%s) loaded bannedStore guid:" UI64FMTD "", name.c_str(), banned_guid);
                             bannedStore.insert(banned_guid);
                         }
                     }
@@ -99,7 +99,7 @@ Channel::Channel(std::string const& name, uint32 channelId, uint32 team):
                 stmt->setString(0, name);
                 stmt->setUInt32(1, _Team);
                 CharacterDatabase.Execute(stmt);
-                sLog->outDebug(LOG_FILTER_CHATSYS, "Channel(%s) saved in database", name.c_str());
+                TC_LOG_DEBUG(LOG_FILTER_CHATSYS, "Channel(%s) saved in database", name.c_str());
             }
 
             _IsSaved = true;
@@ -127,7 +127,7 @@ void Channel::UpdateChannelInDB() const
         stmt->setUInt32(5, _Team);
         CharacterDatabase.Execute(stmt);
 
-        sLog->outDebug(LOG_FILTER_CHATSYS, "Channel(%s) updated in database", _name.c_str());
+        TC_LOG_DEBUG(LOG_FILTER_CHATSYS, "Channel(%s) updated in database", _name.c_str());
     }
 }
 
@@ -147,7 +147,7 @@ void Channel::CleanOldChannelsInDB()
         stmt->setUInt32(0, sWorld->getIntConfig(CONFIG_PRESERVE_CUSTOM_CHANNEL_DURATION) * DAY);
         CharacterDatabase.Execute(stmt);
 
-        sLog->outDebug(LOG_FILTER_CHATSYS, "Cleaned out unused custom chat channels.");
+        TC_LOG_DEBUG(LOG_FILTER_CHATSYS, "Cleaned out unused custom chat channels.");
     }
 }
 
@@ -531,7 +531,7 @@ void Channel::List(Player const* player)
         return;
     }
 
-    sLog->outDebug(LOG_FILTER_CHATSYS, "SMSG_CHANNEL_LIST %s Channel: %s",
+    TC_LOG_DEBUG(LOG_FILTER_CHATSYS, "SMSG_CHANNEL_LIST %s Channel: %s",
         player->GetSession()->GetPlayerInfo().c_str(), GetName().c_str());
 
     WorldPacket data(SMSG_CHANNEL_LIST, 1+(GetName().size()+1)+1+4+playersStore.size()*(8+1));

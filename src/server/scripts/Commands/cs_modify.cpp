@@ -205,7 +205,7 @@ public:
         target->SetMaxPower(POWER_ENERGY, energym);
         target->SetPower(POWER_ENERGY, energy);
 
-        sLog->outDebug(LOG_FILTER_GENERAL, handler->GetTrinityString(LANG_CURRENT_ENERGY), target->GetMaxPower(POWER_ENERGY));
+        TC_LOG_DEBUG(LOG_FILTER_GENERAL, handler->GetTrinityString(LANG_CURRENT_ENERGY), target->GetMaxPower(POWER_ENERGY));
 
         return true;
     }
@@ -350,22 +350,12 @@ public:
 
         if (!pfactionid)
         {
-            if (target)
-            {
-                uint32 factionid = target->getFaction();
-                uint32 flag      = target->GetUInt32Value(UNIT_FIELD_FLAGS);
-                uint32 npcflag   = target->GetUInt32Value(UNIT_NPC_FLAGS);
-                uint32 dyflag    = target->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
-                handler->PSendSysMessage(LANG_CURRENT_FACTION, target->GetGUIDLow(), factionid, flag, npcflag, dyflag);
-            }
+            uint32 factionid = target->getFaction();
+            uint32 flag      = target->GetUInt32Value(UNIT_FIELD_FLAGS);
+            uint32 npcflag   = target->GetUInt32Value(UNIT_NPC_FLAGS);
+            uint32 dyflag    = target->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
+            handler->PSendSysMessage(LANG_CURRENT_FACTION, target->GetGUIDLow(), factionid, flag, npcflag, dyflag);
             return true;
-        }
-
-        if (!target)
-        {
-            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
-            handler->SetSentErrorMessage(true);
-            return false;
         }
 
         uint32 factionid = atoi(pfactionid);
@@ -381,7 +371,7 @@ public:
 
         uint32 npcflag;
         if (!pnpcflag)
-            npcflag   = target->GetUInt32Value(UNIT_NPC_FLAGS);
+            npcflag = target->GetUInt32Value(UNIT_NPC_FLAGS);
         else
             npcflag = atoi(pnpcflag);
 
@@ -389,7 +379,7 @@ public:
 
         uint32  dyflag;
         if (!pdyflag)
-            dyflag   = target->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
+            dyflag = target->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
         else
             dyflag = atoi(pdyflag);
 
@@ -1060,7 +1050,7 @@ public:
         {
             int64 newmoney = int64(targetMoney) + moneyToAdd;
 
-            sLog->outDebug(LOG_FILTER_GENERAL, handler->GetTrinityString(LANG_CURRENT_MONEY), uint32(targetMoney), int32(moneyToAdd), uint32(newmoney));
+            TC_LOG_DEBUG(LOG_FILTER_GENERAL, handler->GetTrinityString(LANG_CURRENT_MONEY), uint32(targetMoney), int32(moneyToAdd), uint32(newmoney));
             if (newmoney <= 0)
             {
                 handler->PSendSysMessage(LANG_YOU_TAKE_ALL_MONEY, handler->GetNameLink(target).c_str());
@@ -1096,7 +1086,7 @@ public:
             target->ModifyMoney(moneyToAdd);
         }
 
-        sLog->outDebug(LOG_FILTER_GENERAL, handler->GetTrinityString(LANG_NEW_MONEY), uint32(targetMoney), int32(moneyToAdd), uint32(target->GetMoney()));
+        TC_LOG_DEBUG(LOG_FILTER_GENERAL, handler->GetTrinityString(LANG_NEW_MONEY), uint32(targetMoney), int32(moneyToAdd), uint32(target->GetMoney()));
 
         return true;
     }

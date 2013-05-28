@@ -58,6 +58,5 @@ class BattlegroundRL : public Battleground
         void HandleAreaTrigger(Player* Source, uint32 Trigger);
         bool SetupBattleground();
         void HandleKillPlayer(Player* player, Player* killer);
-        bool HandlePlayerUnderMap(Player* player);
 };
 #endif

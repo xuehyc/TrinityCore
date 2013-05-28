@@ -49,8 +49,8 @@ enum WarlockSpells
     SPELL_WARLOCK_HAUNT                             = 48181,
     SPELL_WARLOCK_HAUNT_HEAL                        = 48210,
     SPELL_WARLOCK_IMMOLATE                          = 348,
-    SPELL_WARLOCK_HEALTHSTONE_CREATE                = 34130,
-    SPELL_WARLOCK_HEALTHSTONE_HEAL                  = 6262,
+    SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R1           = 18692,
+    SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R2           = 18693,
     SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_BUFF_R1    = 60955,
     SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_BUFF_R2    = 60956,
     SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_R1         = 18703,
@@ -60,8 +60,8 @@ enum WarlockSpells
     SPELL_WARLOCK_SIPHON_LIFE_HEAL                  = 63106,
     SPELL_WARLOCK_SOULSHATTER                       = 32835,
     SPELL_WARLOCK_UNSTABLE_AFFLICTION               = 30108,
-    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117,
 	SPELL_WARLOCK_DRAIN_LIFE                      	= 89653,
+    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117
 };
 
 enum WarlockSpellIcons
@@ -170,23 +170,59 @@ class spell_warl_create_healthstone : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warl_create_healthstone_SpellScript);
 
+            static uint32 const iTypes[8][3];
 
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_HEALTHSTONE_CREATE) || !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_HEALTHSTONE_HEAL))
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R1) || !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R2))
                     return false;
                 return true;
             }
-            void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+
+            SpellCastResult CheckCast()
             {
-                Unit* caster = GetCaster();
-                if (caster)
-                    caster->CastSpell(caster,SPELL_WARLOCK_HEALTHSTONE_CREATE,false);
+                if (Player* caster = GetCaster()->ToPlayer())
+                {
+                    uint8 spellRank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
+                    ItemPosCountVec dest;
+                    InventoryResult msg = caster->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, iTypes[spellRank - 1][0], 1, NULL);
+                    if (msg != EQUIP_ERR_OK)
+                        return SPELL_FAILED_TOO_MANY_OF_ITEM;
+                }
+                return SPELL_CAST_OK;
+            }
+
+            void HandleScriptEffect(SpellEffIndex effIndex)
+            {
+                if (Unit* unitTarget = GetHitUnit())
+                {
+                    uint32 rank = 0;
+                    // Improved Healthstone
+                    if (AuraEffect const* aurEff = unitTarget->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 284, 0))
+                    {
+                        switch (aurEff->GetId())
+                        {
+                            case SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R1:
+                                rank = 1;
+                                break;
+                            case SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R2:
+                                rank = 2;
+                                break;
+                            default:
+                                TC_LOG_ERROR(LOG_FILTER_SPELLS_AURAS, "Unknown rank of Improved Healthstone id: %d", aurEff->GetId());
+                                break;
+                        }
+                    }
+                    uint8 spellRank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
+                    if (spellRank > 0 && spellRank <= 8)
+                        CreateItem(effIndex, iTypes[spellRank - 1][rank]);
+                }
             }
 
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warl_create_healthstone_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnCheckCast += SpellCheckCastFn(spell_warl_create_healthstone_SpellScript::CheckCast);
             }
         };
 
@@ -194,6 +230,18 @@ class spell_warl_create_healthstone : public SpellScriptLoader
         {
             return new spell_warl_create_healthstone_SpellScript();
         }
+};
+
+uint32 const spell_warl_create_healthstone::spell_warl_create_healthstone_SpellScript::iTypes[8][3] =
+{
+    { 5512, 19004, 19005},              // Minor Healthstone
+    { 5511, 19006, 19007},              // Lesser Healthstone
+    { 5509, 19008, 19009},              // Healthstone
+    { 5510, 19010, 19011},              // Greater Healthstone
+    { 9421, 19012, 19013},              // Major Healthstone
+    {22103, 22104, 22105},              // Master Healthstone
+    {36889, 36890, 36891},              // Demonic Healthstone
+    {36892, 36893, 36894}               // Fel Healthstone
 };
 
 // 603 - Bane of Doom
@@ -950,7 +998,7 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
             void HandleDispel(DispelInfo* dispelInfo)
             {
                 if (Unit* caster = GetCaster())
-                    if (AuraEffect const* aurEff = GetEffect(EFFECT_0))
+                    if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
                     {
                         int32 damage = aurEff->GetAmount() * 9;
                         // backfire damage and silence
@@ -1000,6 +1048,7 @@ public:
 		return new spell_warl_drain_life_AuraScript();
 	}
 };
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_bane_of_doom();

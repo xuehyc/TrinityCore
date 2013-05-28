@@ -28,6 +28,7 @@
 #include "GameObject.h"
 #include "DynamicObject.h"
 #include "Corpse.h"
+#include "AreaTrigger.h"
 #include "World.h"
 #include "CellImpl.h"
 #include "CreatureAI.h"
@@ -98,7 +99,7 @@ void LoadHelper(CellGuidSet const& guid_set, CellCoord &cell, GridRefManager<T> 
     {
         T* obj = new T;
         uint32 guid = *i_guid;
-        //sLog->outInfo(LOG_FILTER_GENERAL, "DEBUG: LoadHelper from table: %s for (guid: %u) Loading", table, guid);
+        //TC_LOG_INFO(LOG_FILTER_GENERAL, "DEBUG: LoadHelper from table: %s for (guid: %u) Loading", table, guid);
         if (!obj->LoadFromDB(guid, map))
         {
             delete obj;
@@ -189,7 +190,7 @@ void ObjectGridLoader::LoadN(void)
             }
         }
     }
-    sLog->outDebug(LOG_FILTER_MAPS, "%u GameObjects, %u Creatures, and %u Corpses/Bones loaded for grid %u on map %u", i_gameObjects, i_creatures, i_corpses, i_grid.GetGridId(), i_map->GetId());
+    TC_LOG_DEBUG(LOG_FILTER_MAPS, "%u GameObjects, %u Creatures, and %u Corpses/Bones loaded for grid %u on map %u", i_gameObjects, i_creatures, i_corpses, i_grid.GetGridId(), i_map->GetId());
 }
 
 template<class T>
@@ -238,7 +239,9 @@ template void ObjectGridUnloader::Visit(CreatureMapType &);
 template void ObjectGridUnloader::Visit(GameObjectMapType &);
 template void ObjectGridUnloader::Visit(DynamicObjectMapType &);
 template void ObjectGridUnloader::Visit(CorpseMapType &);
+template void ObjectGridUnloader::Visit(AreaTriggerMapType &);
 template void ObjectGridCleaner::Visit(CreatureMapType &);
 template void ObjectGridCleaner::Visit<GameObject>(GameObjectMapType &);
 template void ObjectGridCleaner::Visit<DynamicObject>(DynamicObjectMapType &);
 template void ObjectGridCleaner::Visit<Corpse>(CorpseMapType &);
+template void ObjectGridCleaner::Visit<AreaTrigger>(AreaTriggerMapType &);

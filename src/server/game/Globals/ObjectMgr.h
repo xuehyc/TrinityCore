@@ -406,7 +406,7 @@ struct SpellClickInfo
 typedef std::multimap<uint32, SpellClickInfo> SpellClickInfoContainer;
 typedef std::pair<SpellClickInfoContainer::const_iterator, SpellClickInfoContainer::const_iterator> SpellClickInfoMapBounds;
 
-struct AreaTrigger
+struct AreaTriggerStruct
 {
     uint32 target_mapId;
     float  target_X;
@@ -674,7 +674,7 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, Quest*> QuestMap;
 
-        typedef UNORDERED_MAP<uint32, AreaTrigger> AreaTriggerContainer;
+        typedef UNORDERED_MAP<uint32, AreaTriggerStruct> AreaTriggerContainer;
 
         typedef UNORDERED_MAP<uint32, uint32> AreaTriggerScriptContainer;
 
@@ -766,7 +766,7 @@ class ObjectMgr
         void LoadGraveyardZones();
         GraveYardData const* FindGraveYardData(uint32 id, uint32 zone);
 
-        AreaTrigger const* GetAreaTrigger(uint32 trigger) const
+        AreaTriggerStruct const* GetAreaTrigger(uint32 trigger) const
         {
             AreaTriggerContainer::const_iterator itr = _areaTriggerStore.find(trigger);
             if (itr != _areaTriggerStore.end())
@@ -782,8 +782,8 @@ class ObjectMgr
             return NULL;
         }
 
-        AreaTrigger const* GetGoBackTrigger(uint32 Map) const;
-        AreaTrigger const* GetMapEntranceTrigger(uint32 Map) const;
+        AreaTriggerStruct const* GetGoBackTrigger(uint32 Map) const;
+        AreaTriggerStruct const* GetMapEntranceTrigger(uint32 Map) const;
 
         uint32 GetAreaTriggerScriptId(uint32 trigger_id);
         SpellScriptsBounds GetSpellScriptsBounds(uint32 spellId);
@@ -845,13 +845,13 @@ class ObjectMgr
         void LoadQuests();
         void LoadQuestRelations()
         {
-            sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading GO Start Quest Data...");
+            TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading GO Start Quest Data...");
             LoadGameobjectQuestRelations();
-            sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading GO End Quest Data...");
+            TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading GO End Quest Data...");
             LoadGameobjectInvolvedRelations();
-            sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Creature Start Quest Data...");
+            TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Creature Start Quest Data...");
             LoadCreatureQuestRelations();
-            sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Creature End Quest Data...");
+            TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, "Loading Creature End Quest Data...");
             LoadCreatureInvolvedRelations();
         }
         void LoadGameobjectQuestRelations();
@@ -1270,6 +1270,7 @@ class ObjectMgr
         uint32 _hiGoGuid;
         uint32 _hiDoGuid;
         uint32 _hiCorpseGuid;
+        uint32 _hiAreaTriggerGuid;
         uint32 _hiMoTransGuid;
 
         QuestMap _questTemplates;
