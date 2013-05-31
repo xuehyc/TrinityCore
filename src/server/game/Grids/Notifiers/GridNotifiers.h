@@ -1318,6 +1318,23 @@ namespace Trinity
             uint32 m_uiEntry;
             float m_fRange;
     };
+	
+    class AllCreaturesOfEntryInGrid
+    {
+    public:
+        AllCreaturesOfEntryInGrid (const WorldObject* pObject, uint32 uiEntry) : m_pObject(pObject), m_uiEntry(uiEntry)
+        {
+        }
+        bool operator() (Unit* pUnit)
+        {
+            if (pUnit->GetEntry() == m_uiEntry)
+                return true;
+            return false;
+        }
+    private:
+        const WorldObject* m_pObject;
+        uint32 m_uiEntry;
+    };	
 
     class PlayerAtMinimumRangeAway
     {
