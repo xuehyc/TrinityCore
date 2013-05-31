@@ -15,7 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 #include "throne_of_the_tides.h"
 
 #define GOSSIP_READY "We are ready!"

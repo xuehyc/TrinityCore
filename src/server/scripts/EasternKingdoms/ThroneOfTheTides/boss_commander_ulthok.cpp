@@ -23,7 +23,7 @@ SDComment: need to do flying part with squeeze - hack added.
 SDCategory: Throne of the Tides
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 #include "throne_of_the_tides.h"
 
 #define SPELL_DARK_FISSURE          DUNGEON_MODE(76047,96311)

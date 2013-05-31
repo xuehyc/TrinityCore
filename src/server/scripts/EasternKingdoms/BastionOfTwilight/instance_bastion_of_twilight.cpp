@@ -18,7 +18,7 @@
  */
 
 #include "bastion_of_twilight.h"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 
 class instance_bastion_of_twilight : public InstanceMapScript
 {

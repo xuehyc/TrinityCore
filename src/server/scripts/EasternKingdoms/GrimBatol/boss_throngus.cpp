@@ -3,7 +3,7 @@
 * Copyright (C) 2011-2012 https://github.com/Asardial
 */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 #include "grimbatol.h"
 
 #define SAY_AGGRO "You not get through defenses!"

@@ -4,7 +4,7 @@
 * by Shee Shen
 */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 #include "the_stonecore.h"
 
 #define SAY_AGGRO          "None may pass into the World's Heart!"

@@ -16,7 +16,7 @@
  */
 
 #include "blackwing_descent.h"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 
 class instance_blackwing_descent : public InstanceMapScript
 {

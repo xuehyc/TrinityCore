@@ -4,7 +4,7 @@
 * by Shee Shen
 */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 

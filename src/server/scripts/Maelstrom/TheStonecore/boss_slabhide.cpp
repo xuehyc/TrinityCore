@@ -4,7 +4,7 @@
 * by Shee Shen
 */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 #include "ScriptMgr.h"
 
 #define NPC_STALACTITE_TRIGGER 43159

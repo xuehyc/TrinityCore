@@ -4,7 +4,7 @@
 * by Shee Shen
 */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 #include "the_stonecore.h"
 
 #define SAY_AGGRO "For my death, countless more will fall. The burden is now yours to bear."

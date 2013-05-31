@@ -3,7 +3,7 @@
 * By JeanClaude
 */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 
 /************************
 **Gardien de la Nuée Azur

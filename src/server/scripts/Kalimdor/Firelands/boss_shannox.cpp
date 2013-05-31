@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 #include "firelands.h"
 
 enum Shannox_Yells

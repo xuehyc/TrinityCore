@@ -23,7 +23,7 @@ SDComment: sometimes Mindbender attacks while somebody is enslaved.
 SDCategory: Throne of the Tides
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 #include "throne_of_the_tides.h"
 
 Creature* erunak;

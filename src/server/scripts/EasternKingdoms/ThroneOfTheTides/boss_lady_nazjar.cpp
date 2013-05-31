@@ -23,7 +23,7 @@ SDComment:
 SDCategory: Throne of the Tides
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 #include "throne_of_the_tides.h"
 
 #define SPELL_WATERSPOUT_SUMMON DUNGEON_MODE(90495,90497) // summons tornado every 7/3 secs.

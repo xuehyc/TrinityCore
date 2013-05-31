@@ -3,7 +3,7 @@
 * By Asardial
 */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 #include "grimbatol.h"
 
 #define ENCOUNTERS 4

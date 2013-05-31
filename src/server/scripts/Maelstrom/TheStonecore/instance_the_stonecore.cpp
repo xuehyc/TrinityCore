@@ -4,7 +4,7 @@
 * by Shee Shen
 */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 #include "the_stonecore.h"
 
 #define MAX_ENCOUNTER     4
