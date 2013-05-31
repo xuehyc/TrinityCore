@@ -942,7 +942,18 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
         case SPELLFAMILY_PALADIN:
             switch (m_spellInfo->Id)
             {
-                case 31789:                                 // Righteous Defense (step 1)
+             // Guardian of Ancient Kings
+            case 86150:
+            {
+            if (m_caster->ToPlayer()->HasSpell(20473))          // Holy Shock
+                m_caster->CastSpell(m_caster, 86669, true);
+            if (m_caster->ToPlayer()->HasSpell(85256))          // Templar's Verdict
+                m_caster->CastSpell(m_caster, 86698, true);
+            if (m_caster->ToPlayer()->HasSpell(31935))          // Avenger's shield
+                m_caster->CastSpell(m_caster, 86659, true);
+            return;
+            }	
+			case 31789:                                 // Righteous Defense (step 1)
                 {
                     // Clear targets for eff 1
                     for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
