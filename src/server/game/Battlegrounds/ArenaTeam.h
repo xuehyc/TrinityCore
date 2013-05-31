@@ -122,6 +122,7 @@ class ArenaTeam
                                       uint32 backgroundColor, uint8 emblemStyle, uint32 emblemColor,
                                       uint8 borderStyle, uint32 borderColor);
         void Disband(WorldSession* session);
+        void Disband();
 
         typedef std::list<ArenaTeamMember> MemberList;
 
@@ -138,11 +139,14 @@ class ArenaTeam
         uint32 GetAverageMMR(Group* group) const;
 
         void SetCaptain(uint64 guid);
+        bool SetName(std::string const& name);
         bool AddMember(uint64 PlayerGuid);
         void DelMember(uint64 guid, bool cleanDb);
 
         size_t GetMembersSize() const         { return Members.size(); }
         bool   Empty() const                  { return Members.empty(); }
+        MemberList::iterator m_membersBegin() { return Members.begin(); }
+        MemberList::iterator m_membersEnd()   { return Members.end(); }
         bool IsMember(uint64 guid) const;
 
         ArenaTeamMember* GetMember(uint64 guid);

@@ -1254,6 +1254,7 @@ enum Opcodes
     SMSG_SHOWTAXINODES                                = 0x2A36,
     SMSG_SHOW_BANK                                    = 0x2627,
     SMSG_SHOW_RATINGS                                 = 0x11B4,
+    SMSG_SOCKET_GEMS_RESULT                           = 0x6014,
     SMSG_SOR_START_EXPERIENCE_INCOMPLETE              = 0x7CA7,
     SMSG_SPELLBREAKLOG                                = 0x6B17,
     SMSG_SPELLDAMAGESHIELD                            = 0x2927,
@@ -1352,7 +1353,6 @@ enum Opcodes
     SMSG_UPDATE_DUNGEON_ENCOUNTER_FOR_LOOT            = 0x3CB5,
     SMSG_UPDATE_INSTANCE_ENCOUNTER_UNIT               = 0x4007,
     SMSG_UPDATE_INSTANCE_OWNERSHIP                    = 0x4915,
-    SMSG_UPDATE_ITEM_ENCHANTMENTS                     = 0x6014,
     SMSG_UPDATE_LAST_INSTANCE                         = 0x0437,
     SMSG_UPDATE_OBJECT                                = 0x4715,
     SMSG_UPDATE_SERVER_PLAYER_POSITION                = 0x74A3,
@@ -1416,12 +1416,12 @@ struct OpcodeHandler
 {
     OpcodeHandler() {}
     OpcodeHandler(char const* _name, SessionStatus _status, PacketProcessing _processing, pOpcodeHandler _handler)
-        : Name(_name), Status(_status), ProcessingPlace(_processing), Handler(_handler) {}
+        : Handler(_handler), Name(_name), Status(_status), ProcessingPlace(_processing) {}
 
+    pOpcodeHandler Handler;
     char const* Name;
     SessionStatus Status;
     PacketProcessing ProcessingPlace;
-    pOpcodeHandler Handler;
 };
 
 class OpcodeTable
