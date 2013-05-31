@@ -7618,7 +7618,7 @@ bool ObjectMgr::LoadTrinityStrings(const char* table, int32 min_value, int32 max
     } while (result->NextRow());
 
     if (min_value == MIN_TRINITY_STRING_ID)
-        TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded %u Trinity strings from table %s in %u ms", count, table, GetMSTimeDiffToNow(oldMSTime));
+        TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded %u Arkcore strings from table %s in %u ms", count, table, GetMSTimeDiffToNow(oldMSTime));
     else
         TC_LOG_INFO(LOG_FILTER_SERVER_LOADING, ">> Loaded %u string templates from %s in %u ms", count, table, GetMSTimeDiffToNow(oldMSTime));
 
