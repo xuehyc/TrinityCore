@@ -2538,6 +2538,15 @@ PlayerDump.DisallowPaths = 1
 PlayerDump.DisallowOverwrite = 1
 
 #
+#   DuelResetCooldown
+#   Description: Reseting cooldown and restore health when duel finished in the follow zones:
+#   Elwyn Forest, Durotar, Tirisfal, Tendrasil, Dun Morogh, Gurubashi Arena, Exodar, Mulgore
+#   Default: 1
+#
+
+DuelResetCooldown = 1
+
+#
 #     UI.ShowQuestLevelsInDialogs
 #        Description: Show quest levels next to quest titles in UI dialogs
 #        Example: [13] Westfall Stew
