@@ -23,6 +23,9 @@ DELETE FROM `item_instance` WHERE `itemEntry` IN (
 43307  -- Old Arena Points 
 );
 
+-- Clean Talents table
+TRUNCATE TABLE `character_talent`;
+
 -- character_glyphs
 ALTER TABLE `character_glyphs` 
 	ADD COLUMN `glyph7` smallint(5) unsigned   NULL DEFAULT 0 after `glyph6`, 
