@@ -25,6 +25,7 @@ DELETE FROM `item_instance` WHERE `itemEntry` IN (
 
 -- Clean Talents table
 TRUNCATE TABLE `character_talent`;
+UPDATE `characters` SET `speccount` = '1' ,`activespec` = '0';
 
 -- character_glyphs
 ALTER TABLE `character_glyphs` 
