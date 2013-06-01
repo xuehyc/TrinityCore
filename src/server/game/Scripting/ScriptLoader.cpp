@@ -44,6 +44,7 @@ void AddSC_holiday_spell_scripts();
 void AddSC_SmartSCripts();
 
 //Commands
+void AddSC_credits_commandscript ();
 void AddSC_account_commandscript();
 void AddSC_achievement_commandscript();
 void AddSC_arena_commandscript();
@@ -725,6 +726,7 @@ void AddSpellScripts()
 
 void AddCommandScripts()
 {
+	AddSC_credits_commandscript();
     AddSC_account_commandscript();
     AddSC_achievement_commandscript();
     AddSC_arena_commandscript();
