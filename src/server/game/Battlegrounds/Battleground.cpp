@@ -347,12 +347,12 @@ inline void Battleground::_ProcessOfflineQueue()
         BattlegroundPlayerMap::iterator itr = m_Players.find(*(m_OfflineQueue.begin()));
         if (itr != m_Players.end())
         {
-            if (itr->second.OfflineRemoveTime <= sWorld->GetGameTime())
-            {
+            // if (itr->second.OfflineRemoveTime <= sWorld->GetGameTime())
+            // {
                 RemovePlayerAtLeave(itr->first, true, true);// remove player from BG
                 m_OfflineQueue.pop_front();                 // remove from offline queue
                 //do not use itr for anything, because it is erased in RemovePlayerAtLeave()
-            }
+            //}
         }
     }
 }
