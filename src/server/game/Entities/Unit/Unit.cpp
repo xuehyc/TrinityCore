@@ -15500,10 +15500,12 @@ float Unit::GetCombatRatingReduction(CombatRating cr) const
     return 0.0f;
 }
 
-uint32 Unit::GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint32 damage) const
+uint32 Unit::GetCombatRatingDamageReduction (CombatRating cr, float rate, float cap, uint32 damage) const
 {
-    float percent = std::min(GetCombatRatingReduction(cr) * rate, cap);
-    return CalculatePct(damage, percent);
+    float percent = GetCombatRatingReduction(cr) * rate;
+    if (percent > cap)
+        percent = cap;
+    return uint32(percent * damage / 100.0f);
 }
 
 uint32 Unit::GetModelForForm(ShapeshiftForm form) const
