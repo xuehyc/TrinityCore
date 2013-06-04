@@ -25528,6 +25528,12 @@ bool Player::LearnTalent(uint32 talentId, uint32 talentRank)
     AddTalent(spellid, GetActiveSpec(), true);
 
     TC_LOG_INFO(LOG_FILTER_GENERAL, "TalentID: %u Rank: %u Spell: %u Spec: %u\n", talentId, talentRank, spellid, GetActiveSpec());
+	
+    // Save Talents
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    _SaveTalents(trans);
+    _SaveSpells(trans);
+    CharacterDatabase.CommitTransaction(trans);
 
     // set talent tree for player
     if (!GetPrimaryTalentTree(GetActiveSpec()))
@@ -25547,7 +25553,8 @@ bool Player::LearnTalent(uint32 talentId, uint32 talentRank)
 
     // update free talent points
     SetFreeTalentPoints(CurTalentPoints - (talentRank - curtalent_maxrank + 1));
-    return true;
+    
+	return true;
 }
 
 void Player::LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank)
