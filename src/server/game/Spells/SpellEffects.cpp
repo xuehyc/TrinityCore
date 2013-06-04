@@ -3737,6 +3737,15 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 if (AuraEffect const* rendAndTear = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2859, 0))
                     AddPct(totalDamagePercentMod, rendAndTear->GetAmount());
             }
+            if (m_spellInfo->Id == 80313) // Pulverize
+            {
+                if (Aura* lacer = unitTarget->GetAura(33745)) // Lacerate
+                {
+                    int32 bp = ((m_spellInfo->Effects[2].BasePoints * m_spellInfo->Effects[0].BasePoints / 100) * lacer->GetStackAmount()) / 100;
+                    m_caster->CastCustomSpell(unitTarget, 31756, &bp, NULL, NULL, true);
+                    unitTarget->RemoveAurasDueToSpell(33745);
+                }
+            }
             break;
         }
         case SPELLFAMILY_HUNTER:
