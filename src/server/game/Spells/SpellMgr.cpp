@@ -2913,30 +2913,63 @@ void SpellMgr::LoadSpellCustomAttr()
 			case 81914: // Die by the Sword
 				spellInfo->Effects[0].TriggerSpell = 86624;
 				break;
-            case 24340: // Meteor
-            case 26558: // Meteor
-            case 28884: // Meteor
-            case 36837: // Meteor
-            case 38903: // Meteor
-            case 41276: // Meteor
-            case 57467: // Meteor
-            case 26789: // Shard of the Fallen Star
-            case 31436: // Malevolent Cleave
-            case 35181: // Dive Bomb
-            case 40810: // Saber Lash
-            case 43267: // Saber Lash
-            case 43268: // Saber Lash
-            case 42384: // Brutal Swipe
-            case 45150: // Meteor Slash
-            case 64688: // Sonic Screech
-            case 72373: // Shared Suffering
-            case 71904: // Chaos Bane
-            case 70492: // Ooze Eruption
-            case 72505: // Ooze Eruption
-            case 72624: // Ooze Eruption
-            case 72625: // Ooze Eruption
+			case 24340:
+			case 26558:
+			case 28884:          // Meteor
+			case 36837:
+			case 38903:
+			case 41276:          // Meteor
+			case 57467:          // Meteor
+			case 26789:          // Shard of the Fallen Star
+			case 31436:          // Malevolent Cleave
+			case 35181:          // Dive Bomb
+			case 40810:
+			case 43267:
+			case 43268:          // Saber Lash
+			case 42384:          // Brutal Swipe
+			case 45150:
+			case 95172:
+			case 88942:          // Meteor Slash
+			case 64422:
+			case 64688:          // Sonic Screech
+			case 72373:          // Shared Suffering
+			case 71904:          // Chaos Bane
+			case 70492:
+			case 72505:          // Ooze Eruption
+			case 72624:
+			case 72625:          // Ooze Eruption
+			case 89348:
+			case 95178:          // Demon Repellent Ray
+			case 86704:          // Ancient Fury
                 // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+                break;
+            case 86674: // Ancient Healer
+                spellInfo->ProcCharges = 5;
+                break;
+            case 31687: // Summon Water Elemental
+                // 322-330 switch - effect changed to dummy, target entry not changed in client:(
+                spellInfo->Effects[0].TargetA = TARGET_UNIT_CASTER;
+                break;
+            case 12051: // Evocation - now we can interrupt this
+                spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
+                break;
+            case 26573: // Consecration
+                spellInfo->Effects[2].TriggerSpell = 82366;
+                break;
+            case 25771: // Forbearance - wrong mechanic immunity in DBC since 3.0.x
+                spellInfo->Effects[0].MiscValue = MECHANIC_IMMUNE_SHIELD;
+                break;
+            case 88954: // Consuming Darkness
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(12); // (100)
+                spellInfo->MaxAffectedTargets = 3;
+                break;
+            case 95173: // Consuming Darkness (H)
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(12); // (100)
+                spellInfo->MaxAffectedTargets = 8;
+                break;
+            case 89000: case 95177: // Fel Firestorm
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(15); // (3)
                 break;
             case 18500: // Wing Buffet
             case 33086: // Wild Bite
@@ -2977,12 +3010,14 @@ void SpellMgr::LoadSpellCustomAttr()
             case 72446: // Mark of the Fallen Champion (Deathbringer Saurfang)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 break;
-            case 64422: // Sonic Screech (Auriaya)
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
-                break;
             case 72293: // Mark of the Fallen Champion (Deathbringer Saurfang)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
+                break;
+            case 74522: // Skinning (Grandmaster)
+                // 4.06 dbc issue which was fixed in 4.20 (or 4.10?)
+                spellInfo->Effects[1].BasePoints = 7;
+            case 49206: // Summon Gargoyle
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(587);
                 break;
             default:
                 break;
