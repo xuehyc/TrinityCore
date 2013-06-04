@@ -2741,6 +2741,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case SPELL_AURA_POWER_BURN:
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_NO_INITIAL_THREAT;
                     break;
+                case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS:
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_SCALABLE; // Meh i dont think this is a proper name..
+                    break;					
             }
 
             switch (spellInfo->Effects[j].Effect)
@@ -3031,13 +3034,46 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
                 break;
             case SPELLFAMILY_DRUID:
+                // Starfall Target Selection
+                if (spellInfo->SpellFamilyFlags[2] & 0x100)
+                    spellInfo->MaxAffectedTargets = 2;
                 // Roar
-                if (spellInfo->SpellFamilyFlags[0] & 0x8)
+                else if (spellInfo->SpellFamilyFlags[0] & 0x8)
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
+                break;
+            case SPELLFAMILY_PALADIN:
+                // Seals of the Pure should affect Seal of Righteousness
+                if (spellInfo->SpellIconID == 25 && spellInfo->Attributes & SPELL_ATTR0_PASSIVE)
+                    spellInfo->Effects[0].SpellClassMask[1] |= 0x20000000;
+                break;
+            case SPELLFAMILY_DEATHKNIGHT:
+                // Icy Touch - extend FamilyFlags (unused value) for Sigil of the Frozen Conscience to use
+                if (spellInfo->SpellIconID == 2721 && spellInfo->SpellFamilyFlags[0] & 0x2)
+                    spellInfo->SpellFamilyFlags[0] |= 0x40;
                 break;
             default:
                 break;
         }
+    }
+
+    SummonPropertiesEntry* properties = const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(121));
+    properties->Type = SUMMON_TYPE_TOTEM;
+    properties = const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(647)); // 52893
+    properties->Type = SUMMON_TYPE_TOTEM;
+
+    for (uint32 i = 0; i < sTalentTabStore.GetNumRows(); ++i)
+    {
+        TalentTabEntry const* talentTab = sTalentTabStore.LookupEntry(i);
+        if (!talentTab)
+            continue;
+
+        spellInfo = mSpellInfoMap[talentTab->MasterySpellId[0]];
+        if (spellInfo)
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_SCALABLE;
+
+        spellInfo = mSpellInfoMap[talentTab->MasterySpellId[1]];
+        if (spellInfo)
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_SCALABLE;
     }
 
     CreatureAI::FillAISpellInfo();
