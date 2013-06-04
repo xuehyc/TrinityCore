@@ -3757,6 +3757,14 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
+            // Plague Strike
+            if (m_spellInfo->SpellFamilyFlags[0] & 0x1)
+            {
+                // Glyph of Plague Strike
+                if (AuraEffect const* aurEff = m_caster->GetAuraEffect(58657, EFFECT_0))
+                    AddPct(totalDamagePercentMod, aurEff->GetAmount());
+                break;
+            }		
             // Blood Strike
             if (m_spellInfo->SpellFamilyFlags[0] & 0x400000)
             {
