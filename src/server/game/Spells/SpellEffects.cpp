@@ -3667,6 +3667,54 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Seal of Command - Increase damage by 36% on every swing
+            if (m_spellInfo->SpellFamilyFlags[0] & 0x2000000)
+            {
+                totalDamagePercentMod *= 1.36f;   // 136% damage
+            }
+
+            // Templar's Verdict
+            if (m_spellInfo->Id == 85256)
+            {
+                if (m_caster->HasAura(90174)) // Divine Purpose Proc
+                {
+                    totalDamagePercentMod += 6.5f;
+                    break;
+                }
+
+                switch (m_caster->GetPower(POWER_HOLY_POWER))
+                {
+                    case 1: // 1 Holy Power
+                        totalDamagePercentMod *= 1.30f; // 130%
+                        (m_caster->HasAura(31866 || 31867 || 31868)) ? totalDamagePercentMod += 0.3f : 0; // Crusade Rank 1,2,3 - 133%
+                    break;
+                    case 2: // 2 Holy Power
+                        totalDamagePercentMod *= 1.30f; // 130%
+                        (m_caster->HasAura(31866 || 31867 || 31868)) ? totalDamagePercentMod += 0.3f : 0; // Crusade Rank 1,2,3 - 133%
+                    break;
+                    case 3: // 3 Holy Power
+                        totalDamagePercentMod *= 1.90f; // 190%
+                        (m_caster->HasAura(31866 || 31867 || 31868)) ? totalDamagePercentMod += 0.9f : 0; // Crusade Rank 1,2,3  - 199%
+                    break;
+                }
+                (m_caster->HasAura(63220)) ? totalDamagePercentMod *= 1.15f : 0 ; // Glyph of Templar's Verdict
+                m_caster->SetPower(POWER_HOLY_POWER, 0);
+            }
+
+            // Word of Glory
+            if (m_spellInfo->Id == 85673)
+            {
+                m_caster->SetPower(POWER_HOLY_POWER, 0); // WoG consumes all holy power.
+            }
+            else if (m_spellInfo->Id == 20424)  // Seal of Command Unleashed
+            {
+                spell_bonus += int32(0.08f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
+                spell_bonus += int32(0.13f * m_caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY));
+            }
+            break;
+        }
         case SPELLFAMILY_SHAMAN:
         {
             // Skyshatter Harness item set bonus
