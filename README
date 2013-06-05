@@ -1,6 +1,6 @@
-= TrinityCore -- General information =
+= ArkCORE -- General information =
 
-Copyright (C) TrinityCore (http://www.trinitycore.org)
+Copyright (C) ArkCORE (http://www.ArkCORE.org)
 
   Trinity Core is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -26,30 +26,30 @@ Copyright (C) TrinityCore (http://www.trinitycore.org)
   file, but you are not obligated to do so.  If you do not wish to do
   so, delete this exception statement from your version.
 
-TrinityCore is a MMORPG Framework based mostly on C++. It is completely 
+ArkCORE is a MMORPG Framework based mostly on C++. It is completely 
 open source, and is community supported. It is derived
 from MaNGOS, the Massive Network Game Object Server, and is based on the
 code of that project with extensive changes over time to optimize, improve
 and cleanup the codebase at the same time as improving the ingame mechanics
 and functionality. If you wish to contribute ideas or code please visit 
 our site linked below or make pull requests to our github repo at 
-https://github.com/TrinityCore/TrinityCore
+https://github.com/Arkania
 
-For further information on the TrinityCore project, please visit our
-project website at http://www.TrinityCore.org
+For further information on the ArkCORE project, please visit our
+project website at http://www.arkania.net
 
 Documentation including installation instructions can be found inside
 the doc directory.
 
 SQL files to create the database can be found in the sql/create and sql/base directory.
-You need to download world database from http://www.trinitycore.org/f/files/ be sure you get the higher numbered database.
+You need to download world database from http://files.arkania.net be sure you get the higher numbered database.
 When installing a core the 1st time you need to import also the files at sql/updates/world directory.
 To save time importing multiple files, you can use copy *.sql world_updates.sql under Windows or cat *.sql > world_updates under Linux.
 You need to update your core (recompile and overwrite binaries) when updating your database, usually you can't use one older core with a newer database or a newer core with a older database.
 When updating your core you also need to import the files at sql/updates/auth and sql/updates/characters along with sql/updates/world files.
 You can't merge all the sql files on sql/updates into a single file, because they belong to 3 different databases and they don't use database name.
 
-TrinityCore Requirements
+ArkCORE Requirements
 Platform: Linux, Windows or Mac
 Processor with SSE2 support
 ACE ≥ 5.8.3
