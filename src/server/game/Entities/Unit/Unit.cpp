@@ -16242,14 +16242,13 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        hasTimestamp = mover->m_movementInfo.time != 0;
-        hasTransportTime2 = mover->m_movementInfo.bits.hasTransportTime2;
-        hasTransportTime3 = mover->m_movementInfo.bits.hasTransportTime3;
-        hasPitch = mover->m_movementInfo.bits.hasPitch;
-        hasFallData = mover->m_movementInfo.bits.hasFallData;
-        hasFallDirection = mover->m_movementInfo.bits.hasFallDirection;
-        hasSplineElevation = mover->m_movementInfo.bits.hasSplineElevation;
-		hasSpline = !mover->IsSplineFinalized();
+        hasTimestamp = m_movementInfo.time != 0;
+        hasTransportTime2 = m_movementInfo.bits.hasTransportTime2;
+        hasTransportTime3 = m_movementInfo.bits.hasTransportTime3;
+        hasPitch = m_movementInfo.bits.hasPitch;
+        hasFallData = m_movementInfo.bits.hasFallData;
+        hasFallDirection = m_movementInfo.bits.hasFallDirection;
+        hasSplineElevation = m_movementInfo.bits.hasSplineElevation;
     }
     else
     {
