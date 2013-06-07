@@ -10521,8 +10521,7 @@ void Unit::Mount(uint32 mount, uint32 VehicleId, uint32 creatureEntry)
                 data << uint32(VehicleId);
                 SendMessageToSet(&data, true);
 
-                data.Initialize(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA, 0);
-                player->GetSession()->SendPacket(&data);
+                player->SendOnCancelExpectedVehicleRideAura();
 
                 // mounts can also have accessories
                 GetVehicleKit()->InstallAllAccessories(false);
@@ -16225,18 +16224,14 @@ void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool cas
 
 void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusElement* extras /*= NULL*/)
 {
-    Unit const* mover = GetCharmerGUID() ? GetCharmer() : this;
-    if (Player const* player = ToPlayer())
-        mover = player->m_mover;
+    MovementInfo const& mi = m_movementInfo;
 
-    MovementInfo const& mi = mover->m_movementInfo;
-
-    bool hasMovementFlags = mover->GetUnitMovementFlags() != 0;
-    bool hasMovementFlags2 = mover->GetExtraUnitMovementFlags() != 0;
+    bool hasMovementFlags = GetUnitMovementFlags() != 0;
+    bool hasMovementFlags2 = GetExtraUnitMovementFlags() != 0;
     bool hasTimestamp = true;
-    bool hasOrientation = !G3D::fuzzyEq(mover->GetOrientation(), 0.0f);
+    bool hasOrientation = !G3D::fuzzyEq(GetOrientation(), 0.0f);
     bool hasTransportData = GetTransGUID() != 0;
-    bool hasSpline = mover->IsSplineEnabled();
+    bool hasSpline = IsSplineEnabled();
 
     bool hasTransportTime2;
     bool hasTransportTime3;
@@ -16258,14 +16253,14 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
     }
     else
     {
-        hasTransportTime2 = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
+        hasTransportTime2 = HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
         hasTransportTime3 = false;
-        hasPitch = mover->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
-        hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
+        hasPitch = HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
+        hasFallDirection = HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
         hasFallData = hasFallDirection; // FallDirection implies that FallData is set as well
                                         // the only case when hasFallData = 1 && hasFallDirection = 0
                                         // is for MSG_MOVE_LAND, which is handled above, in player case
-        hasSplineElevation = mover->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
+        hasSplineElevation = HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
     }
 
     MovementStatusElements const* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
@@ -16275,7 +16270,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
         return;
     }
 
-    ObjectGuid guid = mover->GetGUID();
+    ObjectGuid guid = GetGUID();
     ObjectGuid tguid = hasTransportData ? GetTransGUID() : 0;
 
     for (; *sequence != MSEEnd; ++sequence)
@@ -16367,52 +16362,52 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
             break;
         case MSEMovementFlags:
             if (hasMovementFlags)
-                data.WriteBits(mover->GetUnitMovementFlags(), 30);
+                data.WriteBits(GetUnitMovementFlags(), 30);
             break;
         case MSEMovementFlags2:
             if (hasMovementFlags2)
-                data.WriteBits(mover->GetExtraUnitMovementFlags(), 12);
+                data.WriteBits(GetExtraUnitMovementFlags(), 12);
             break;
         case MSETimestamp:
             if (hasTimestamp)
                 data << getMSTime();
             break;
         case MSEPositionX:
-            data << mover->GetPositionX();
+            data << GetPositionX();
             break;
         case MSEPositionY:
-            data << mover->GetPositionY();
+            data << GetPositionY();
             break;
         case MSEPositionZ:
-            data << mover->GetPositionZ();
+            data << GetPositionZ();
             break;
         case MSEOrientation:
             if (hasOrientation)
-                data << mover->GetOrientation();
+                data << GetOrientation();
             break;
         case MSETransportPositionX:
             if (hasTransportData)
-                data << mover->GetTransOffsetX();
+                data << GetTransOffsetX();
             break;
         case MSETransportPositionY:
             if (hasTransportData)
-                data << mover->GetTransOffsetY();
+                data << GetTransOffsetY();
             break;
         case MSETransportPositionZ:
             if (hasTransportData)
-                data << mover->GetTransOffsetZ();
+                data << GetTransOffsetZ();
             break;
         case MSETransportOrientation:
             if (hasTransportData)
-                data << mover->GetTransOffsetO();
+                data << GetTransOffsetO();
             break;
         case MSETransportSeat:
             if (hasTransportData)
-                data << mover->GetTransSeat();
+                data << GetTransSeat();
             break;
         case MSETransportTime:
             if (hasTransportData)
-                data << mover->GetTransTime();
+                data << GetTransTime();
             break;
         case MSETransportTime2:
             if (hasTransportData && hasTransportTime2)
@@ -17079,7 +17074,7 @@ void Unit::SendMovementSetSplineAnim(Movement::AnimType anim)
 
 bool Unit::IsSplineEnabled() const
 {
-    return movespline->Initialized();
+    return movespline->Initialized() && !movespline->Finalized();
 }
 
 bool Unit::IsSplineFinalized() const
