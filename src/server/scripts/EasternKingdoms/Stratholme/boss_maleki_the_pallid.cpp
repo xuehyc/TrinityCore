@@ -86,7 +86,7 @@ public:
             if (Frostbolt_Timer <= diff)
             {
                  if (rand()%100 < 90)
-                    DoCast(me->getVictim(), SPELL_FROSTBOLT);
+                    DoCast(me->GetVictim(), SPELL_FROSTBOLT);
                 Frostbolt_Timer = 3500;
             } else Frostbolt_Timer -= diff;
 
@@ -94,7 +94,7 @@ public:
             if (IceTomb_Timer <= diff)
             {
                 if (rand()%100 < 65)
-                    DoCast(me->getVictim(), SPELL_ICETOMB);
+                    DoCast(me->GetVictim(), SPELL_ICETOMB);
                 IceTomb_Timer = 28000;
             } else IceTomb_Timer -= diff;
 
@@ -102,7 +102,7 @@ public:
             if (DrainLife_Timer <= diff)
             {
                   if (rand()%100 < 55)
-                    DoCast(me->getVictim(), SPELL_DRAINLIFE);
+                    DoCast(me->GetVictim(), SPELL_DRAINLIFE);
                 DrainLife_Timer = 31000;
             } else DrainLife_Timer -= diff;
 

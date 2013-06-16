@@ -605,7 +605,7 @@ public:
                     {
                         for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
                         {
-                            if (Player* pPlr = itr->getSource())
+                            if (Player* pPlr = itr->GetSource())
                                 pPlr->PlayDirectSound(RANDOM_SOUND_WHISPER, pPlr);
                         }
                     }
@@ -1041,7 +1041,7 @@ public:
                 return;
 
             //EvadeTimer
-            if (!me->IsWithinMeleeRange(me->getVictim()))
+            if (!me->IsWithinMeleeRange(me->GetVictim()))
             {
                 if (EvadeTimer <= diff)
                 {
@@ -1080,14 +1080,14 @@ public:
             //GroundRuptureTimer
             if (GroundRuptureTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_GROUND_RUPTURE);
+                DoCast(me->GetVictim(), SPELL_GROUND_RUPTURE);
                 GroundRuptureTimer = 30000;
             } else GroundRuptureTimer -= diff;
 
             //HamstringTimer
             if (HamstringTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_HAMSTRING);
+                DoCast(me->GetVictim(), SPELL_HAMSTRING);
                 HamstringTimer = 5000;
             } else HamstringTimer -= diff;
 
@@ -1153,7 +1153,7 @@ public:
                 return;
 
             //EvadeTimer
-            if (!me->IsWithinMeleeRange(me->getVictim()))
+            if (!me->IsWithinMeleeRange(me->GetVictim()))
             {
                 if (EvadeTimer <= diff)
                 {
@@ -1192,21 +1192,21 @@ public:
             //GroundRuptureTimer
             if (GroundRuptureTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_GROUND_RUPTURE);
+                DoCast(me->GetVictim(), SPELL_GROUND_RUPTURE);
                 GroundRuptureTimer = 30000;
             } else GroundRuptureTimer -= diff;
 
             //ThrashTimer
             if (ThrashTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_THRASH);
+                DoCast(me->GetVictim(), SPELL_THRASH);
                 ThrashTimer = 10000;
             } else ThrashTimer -= diff;
 
             //HamstringTimer
             if (HamstringTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_HAMSTRING);
+                DoCast(me->GetVictim(), SPELL_HAMSTRING);
                 HamstringTimer = 10000;
             } else HamstringTimer -= diff;
 

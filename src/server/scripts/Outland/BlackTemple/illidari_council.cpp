@@ -258,7 +258,7 @@ public:
                 if (!pMember)
                     continue;
 
-                if (!pMember->isAlive())
+                if (!pMember->IsAlive())
                 {
                     pMember->RemoveCorpse();
                     pMember->Respawn();
@@ -289,7 +289,7 @@ public:
             if (!instance)
                 return;
 
-            if (target && target->isAlive())
+            if (target && target->IsAlive())
             {
                 Council[0] = instance->GetData64(DATA_GATHIOSTHESHATTERER);
                 Council[1] = instance->GetData64(DATA_HIGHNETHERMANCERZEREVOR);
@@ -308,7 +308,7 @@ public:
                     if (Council[i])
                     {
                         Unit* member = Unit::GetUnit(*me, Council[i]);
-                        if (member && member->isAlive())
+                        if (member && member->IsAlive())
                             member->ToCreature()->AI()->AttackStart(target);
                     }
                 }
@@ -342,7 +342,7 @@ public:
                     }
 
                     Creature* pMember = (Unit::GetCreature(*me, Council[DeathCount]));
-                    if (pMember && pMember->isAlive())
+                    if (pMember && pMember->IsAlive())
                         pMember->DealDamage(pMember, pMember->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     ++DeathCount;
                     EndEventTimer = 1500;
@@ -361,9 +361,9 @@ public:
                             if (Creature* Member = (Unit::GetCreature((*me), Council[i])))
                             {
                                 // This is the evade/death check.
-                                if (Member->isAlive() && !Member->getVictim())
+                                if (Member->IsAlive() && !Member->GetVictim())
                                     ++EvadeCheck;                   //If all members evade, we reset so that players can properly reset the event
-                                else if (!Member->isAlive())         // If even one member dies, kill the rest, set instance data, and kill self.
+                                else if (!Member->IsAlive())         // If even one member dies, kill the rest, set instance data, and kill self.
                                 {
                                     EndEventTimer = 1000;
                                     CheckTimer = 0;
@@ -429,9 +429,9 @@ struct boss_illidari_councilAI : public ScriptedAI
         for (uint8 i = 0; i < 4; ++i)
         {
             if (Unit* unit = Unit::GetUnit(*me, Council[i]))
-                if (unit != me && unit->getVictim())
+                if (unit != me && unit->GetVictim())
                 {
-                    AttackStart(unit->getVictim());
+                    AttackStart(unit->GetVictim());
                     return;
                 }
         }
@@ -670,14 +670,14 @@ public:
 
             if (ArcaneExplosionTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_ARCANE_EXPLOSION);
+                DoCast(me->GetVictim(), SPELL_ARCANE_EXPLOSION);
                 Cooldown = 1000;
                 ArcaneExplosionTimer = 14000;
             } else ArcaneExplosionTimer -= diff;
 
             if (ArcaneBoltTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_ARCANE_BOLT);
+                DoCast(me->GetVictim(), SPELL_ARCANE_BOLT);
                 ArcaneBoltTimer = 3000;
                 Cooldown = 2000;
             } else ArcaneBoltTimer -= diff;
@@ -840,13 +840,13 @@ public:
             {
                 if (DeadlyPoisonTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_DEADLY_POISON);
+                    DoCast(me->GetVictim(), SPELL_DEADLY_POISON);
                     DeadlyPoisonTimer = urand(15, 46) * 1000;
                 } else DeadlyPoisonTimer -= diff;
 
                 if (AppearEnvenomTimer <= diff)                   // Cast Envenom. This is cast 4 seconds after Vanish is over
                 {
-                    DoCast(me->getVictim(), SPELL_ENVENOM);
+                    DoCast(me->GetVictim(), SPELL_ENVENOM);
                     AppearEnvenomTimer = 90000;
                 } else AppearEnvenomTimer -= diff;
 
@@ -872,7 +872,7 @@ public:
             {
                 if (VanishTimer <= diff)                          // Become attackable and poison current target
                 {
-                    Unit* target = me->getVictim();
+                    Unit* target = me->GetVictim();
                     DoCast(target, SPELL_DEADLY_POISON);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     DoResetThreat();
@@ -886,7 +886,7 @@ public:
                 if (AppearEnvenomTimer <= diff)                   // Appear 2 seconds before becoming attackable (Shifting out of vanish)
                 {
                     me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
                     me->SetVisible(true);
                     AppearEnvenomTimer = 6000;
                 } else AppearEnvenomTimer -= diff;

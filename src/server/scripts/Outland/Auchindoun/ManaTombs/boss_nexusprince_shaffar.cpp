@@ -170,13 +170,13 @@ public:
 
             if (Frostbolt_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FROSTBOLT);
+                DoCast(me->GetVictim(), SPELL_FROSTBOLT);
                 Frostbolt_Timer = urand(4500, 6000);
             } else Frostbolt_Timer -= diff;
 
             if (FireBall_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FIREBALL);
+                DoCast(me->GetVictim(), SPELL_FIREBALL);
                 FireBall_Timer = urand(4500, 6000);
             } else FireBall_Timer -= diff;
 
@@ -264,13 +264,13 @@ public:
                 KillSelf();
                 return;
             }
-            if (!Shaffar->isInCombat())
+            if (!Shaffar->IsInCombat())
                 Shaffar->AI()->AttackStart(who);
         }
 
         void JustSummoned(Creature* summoned)
         {
-            summoned->AI()->AttackStart(me->getVictim());
+            summoned->AI()->AttackStart(me->GetVictim());
         }
 
         void UpdateAI(uint32 diff)
@@ -281,7 +281,7 @@ public:
             if (Check_Timer <= diff)
             {
                 Creature* Shaffar = me->FindNearestCreature(NPC_SHAFFAR, 100);
-                if (!Shaffar || Shaffar->isDead() || !Shaffar->isInCombat())
+                if (!Shaffar || Shaffar->isDead() || !Shaffar->IsInCombat())
                 {
                     KillSelf();
                     return;
@@ -291,7 +291,7 @@ public:
 
             if (ArcaneBolt_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_ARCANE_BOLT);
+                DoCast(me->GetVictim(), SPELL_ARCANE_BOLT);
                 ArcaneBolt_Timer = urand(2000, 4500);
             } else ArcaneBolt_Timer -= diff;
 
@@ -348,10 +348,10 @@ public:
             {
                 if (isFireboltTurn)
                 {
-                    DoCast(me->getVictim(), SPELL_ETHEREAL_APPRENTICE_FIREBOLT, true);
+                    DoCast(me->GetVictim(), SPELL_ETHEREAL_APPRENTICE_FIREBOLT, true);
                     isFireboltTurn = false;
                 }else{
-                    DoCast(me->getVictim(), SPELL_ETHEREAL_APPRENTICE_FROSTBOLT, true);
+                    DoCast(me->GetVictim(), SPELL_ETHEREAL_APPRENTICE_FROSTBOLT, true);
                     isFireboltTurn = true;
                 }
                 Cast_Timer = 3000;

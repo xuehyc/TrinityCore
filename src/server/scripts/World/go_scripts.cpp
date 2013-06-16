@@ -321,7 +321,7 @@ public:
         {
             if (!creature->IsHostileTo(player))
             {
-                if (FactionTemplateEntry const* pFaction = creature->getFactionTemplateEntry())
+                if (FactionTemplateEntry const* pFaction = creature->GetFactionTemplateEntry())
                 {
                     uint32 Spell = 0;
 
@@ -829,7 +829,7 @@ public:
                     pPrisoner = go->FindNearestCreature(NPC_EBON_BLADE_PRISONER_NE, 5.0f, true);
             }
         }
-        if (!pPrisoner || !pPrisoner->isAlive())
+        if (!pPrisoner || !pPrisoner->IsAlive())
             return false;
 
         pPrisoner->DisappearAndDie();
@@ -1043,7 +1043,7 @@ public:
             }
         }
 
-        if (!pPrisoner || !pPrisoner->isAlive())
+        if (!pPrisoner || !pPrisoner->IsAlive())
             return true;
 
         Quest const* qInfo = sObjectMgr->GetQuestTemplate(QUEST_PRISONERS_OF_WYRMSKULL);

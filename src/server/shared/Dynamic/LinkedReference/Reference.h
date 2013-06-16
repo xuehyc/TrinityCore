@@ -97,7 +97,7 @@ template <class TO, class FROM> class Reference : public LinkedListElement
         TO* operator ->() const { return iRefTo; }
         TO* getTarget() const { return iRefTo; }
 
-        FROM* getSource() const { return iRefFrom; }
+        FROM* GetSource() const { return iRefFrom; }
 };
 
 //=====================================================

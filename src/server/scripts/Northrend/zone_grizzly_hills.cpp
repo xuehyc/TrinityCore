@@ -79,7 +79,7 @@ public:
             if (Creature* Mrfloppy = GetClosestCreatureWithEntry(me, NPC_MRFLOPPY, 50.0f))
                 summoned->AI()->AttackStart(Mrfloppy);
             else
-                summoned->AI()->AttackStart(me->getVictim());
+                summoned->AI()->AttackStart(me->GetVictim());
         }
 
         void WaypointReached(uint32 waypointId)
@@ -668,7 +668,7 @@ class npc_venture_co_straggler : public CreatureScript
 
                 if (uiChopTimer <= uiDiff)
                 {
-                    DoCast(me->getVictim(), SPELL_CHOP);
+                    DoCast(me->GetVictim(), SPELL_CHOP);
                     uiChopTimer = urand(10000, 12000);
                 }
                 else
@@ -696,6 +696,144 @@ class npc_venture_co_straggler : public CreatureScript
         }
 };
 
+/*######
+## Quest A Blade Fit For A Champion
+######*/
+
+enum LakeFrog
+{
+    // Spells
+    SPELL_WARTSBGONE_LIP_BALM              = 62574,
+    SPELL_FROG_LOVE                        = 62537, // for 1 minute !
+    SPELL_WARTS                            = 62581,
+    SPELL_MAIDEN_OF_ASHWOOD_LAKE_TRANSFORM = 62550,
+    SPELL_SUMMON_ASHWOOD_BRAND             = 62554,
+
+    // Items
+    ITEM_WARTS_B_GONE_LIP_BALM             = 44986,
+
+    // Creature
+    NPC_LAKE_FROG                          = 33211,
+    NPC_LAKE_FROG_QUEST                    = 33224,
+    NPC_MAIDEN_OF_ASHWOOD_LAKE             = 33220,
+
+    // Text
+    SAY_MAIDEN_0                           = 0,
+    SAY_MAIDEN_1                           = 1
+};
+
+enum LakeFrogEvents
+{
+    EVENT_SCRIPT_1                         = 1,
+    EVENT_SCRIPT_2                         = 2,
+    EVENT_SCRIPT_3                         = 3,
+    EVENT_SCRIPT_4                         = 4,
+    EVENT_SCRIPT_5                         = 5
+};
+
+class npc_lake_frog : public CreatureScript
+{
+    public:
+        npc_lake_frog() : CreatureScript("npc_lake_frog") { }
+
+        struct npc_lake_frogAI : public ScriptedAI
+        {
+            npc_lake_frogAI(Creature* creature) : ScriptedAI(creature) { }
+
+            void Reset()
+            {
+                _following = false;
+                _runningScript = false;
+                if (me->GetEntry() == NPC_LAKE_FROG_QUEST)
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                if (_following)
+                    if (!me->HasAura(SPELL_FROG_LOVE))
+                        me->DespawnOrUnsummon(1000);
+
+                _events.Update(diff);
+
+                while (uint32 eventId = _events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_SCRIPT_1:
+                            DoCast(me, SPELL_MAIDEN_OF_ASHWOOD_LAKE_TRANSFORM);
+                            me->SetEntry(NPC_MAIDEN_OF_ASHWOOD_LAKE);
+                            _events.ScheduleEvent(EVENT_SCRIPT_2, 2000);
+                            break;
+                        case EVENT_SCRIPT_2:
+                            Talk(SAY_MAIDEN_0);
+                            _events.ScheduleEvent(EVENT_SCRIPT_3, 3000);
+                            break;
+                        case EVENT_SCRIPT_3:
+                            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            _events.ScheduleEvent(EVENT_SCRIPT_4, 25000);
+                            break;
+                        case EVENT_SCRIPT_4:
+                            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            _events.ScheduleEvent(EVENT_SCRIPT_5, 2000);
+                            break;
+                        case EVENT_SCRIPT_5:
+                            Talk(SAY_MAIDEN_1);
+                            me->DespawnOrUnsummon(4000);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            void ReceiveEmote(Player* player, uint32 emote)
+            {
+                if (_following || _runningScript)
+                    return;
+
+                if (emote == TEXT_EMOTE_KISS && me->IsWithinDistInMap(player, 30.0f) && player->HasItemCount(ITEM_WARTS_B_GONE_LIP_BALM, 1, false))
+                {
+                    if (!player->HasAura(SPELL_WARTSBGONE_LIP_BALM))
+                        player->AddAura(SPELL_WARTS, player);
+                    else
+                    {
+                        player->RemoveAura(SPELL_WARTSBGONE_LIP_BALM);
+
+                        if (me->GetEntry() == NPC_LAKE_FROG)
+                        {
+                            me->AddAura(SPELL_FROG_LOVE, me);
+                            me->GetMotionMaster()->MoveFollow(player, 0.3f, frand(M_PI/2, M_PI + (M_PI/2)));
+                            _following = true;
+                        }
+                        else if (me->GetEntry() == NPC_LAKE_FROG_QUEST)
+                        {
+                            me->GetMotionMaster()->MoveIdle();
+                            me->SetFacingToObject(player);
+                            _runningScript = true;
+                            _events.ScheduleEvent(EVENT_SCRIPT_1, 2000);
+                        }
+                    }
+                }
+            }
+
+            void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/)
+            {
+                DoCast(player, SPELL_SUMMON_ASHWOOD_BRAND);
+            }
+
+        private:
+            EventMap _events;
+            bool   _following;
+            bool   _runningScript;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_lake_frogAI(creature);
+        }
+};
+
 void AddSC_grizzly_hills()
 {
     new npc_emily();
@@ -706,4 +844,5 @@ void AddSC_grizzly_hills()
     new npc_wounded_skirmisher();
     new npc_lightning_sentry();
     new npc_venture_co_straggler();
+    new npc_lake_frog();
 }

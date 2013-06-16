@@ -106,12 +106,12 @@ void AggroAllPlayers(Creature* temp)
 
     for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
     {
-        if (Player* player = i->getSource())
+        if (Player* player = i->GetSource())
         {
-            if (player->isGameMaster())
+            if (player->IsGameMaster())
                 continue;
 
-            if (player->isAlive())
+            if (player->IsAlive())
             {
                 temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
                 temp->SetReactState(REACT_AGGRESSIVE);
@@ -259,8 +259,8 @@ public:
                 {
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                     {
-                        Player* player = itr->getSource();
-                        if (player && !player->isGameMaster() && me->IsInRange(player, 8.0f, 25.0f, false))
+                        Player* player = itr->GetSource();
+                        if (player && !player->IsGameMaster() && me->IsInRange(player, 8.0f, 25.0f, false))
                         {
                             DoResetThreat();
                             me->AddThreat(player, 1.0f);
@@ -286,8 +286,8 @@ public:
                     {
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                         {
-                            Player* player = itr->getSource();
-                            if (player && !player->isGameMaster() && me->IsInRange(player, 10.0f, 30.0f, false))
+                            Player* player = itr->GetSource();
+                            if (player && !player->IsGameMaster() && me->IsInRange(player, 10.0f, 30.0f, false))
                             {
                                 pPassenger->CastSpell(player, SPELL_SHIELD_BREAKER, true);
                                 break;
@@ -400,8 +400,8 @@ public:
                 {
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                     {
-                        Player* player = itr->getSource();
-                        if (player && !player->isGameMaster() && me->IsInRange(player, 8.0f, 25.0f, false))
+                        Player* player = itr->GetSource();
+                        if (player && !player->IsGameMaster() && me->IsInRange(player, 8.0f, 25.0f, false))
                         {
                             DoResetThreat();
                             me->AddThreat(player, 5.0f);
@@ -529,7 +529,7 @@ public:
 
             if (uiFireBallTimer <= uiDiff)
             {
-                if (me->getVictim())
+                if (me->GetVictim())
                     DoCastVictim(SPELL_FIREBALL);
                 uiFireBallTimer = 5000;
             } else uiFireBallTimer -= uiDiff;
@@ -855,8 +855,8 @@ public:
                     {
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                         {
-                            Player* player = itr->getSource();
-                            if (player && !player->isGameMaster() && me->IsInRange(player, 5.0f, 30.0f, false))
+                            Player* player = itr->GetSource();
+                            if (player && !player->IsGameMaster() && me->IsInRange(player, 5.0f, 30.0f, false))
                             {
                                 DoCast(player, SPELL_MULTI_SHOT);
                                 break;
@@ -971,7 +971,7 @@ public:
 
             if (uiEviscerateTimer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_EVISCERATE);
+                DoCast(me->GetVictim(), SPELL_EVISCERATE);
                 uiEviscerateTimer = 8000;
             } else uiEviscerateTimer -= uiDiff;
 
