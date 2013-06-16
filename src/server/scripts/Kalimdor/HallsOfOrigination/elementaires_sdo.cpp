@@ -132,7 +132,7 @@ public:
 
 				if (empaler<= diff)
 				{
-					DoCast(me->getVictim(), spell_empaler);
+					DoCast(me->GetVictim(), spell_empaler);
 					empaler = 12000;
 				} else empaler -= diff;
 

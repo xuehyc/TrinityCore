@@ -37,13 +37,13 @@ public:
  
  if (impregnation_des_arcanes<= diff)
  {
- DoCast(me->getVictim(), spell_impregnation_des_arcanes);
+ DoCast(me->GetVictim(), spell_impregnation_des_arcanes);
  impregnation_des_arcanes = 15000;
  } else impregnation_des_arcanes-= diff;
  
  if (malediction_de_la_nuee_azur<= diff)
  {
- DoCast(me->getVictim(), spell_malediction_de_la_nuee_azur);
+ DoCast(me->GetVictim(), spell_malediction_de_la_nuee_azur);
  malediction_de_la_nuee_azur = 25000;
  } else malediction_de_la_nuee_azur-= diff;
  
@@ -152,7 +152,7 @@ public:
    
    if (flamme_corrompue<= diff)
    {
-   DoCast(me->getVictim(), spell_flamme_corrompue);
+   DoCast(me->GetVictim(), spell_flamme_corrompue);
    flamme_corrompue = 10000;
    } else flamme_corrompue-= diff;
    
@@ -209,7 +209,7 @@ public:
 	
 	if (crepuscule_deforme<= diff)
 	{
-	DoCast(me->getVictim(), spell_crepuscule_deforme);
+	DoCast(me->GetVictim(), spell_crepuscule_deforme);
 	crepuscule_deforme = 25000;
 	} else crepuscule_deforme-= diff;
 	
@@ -374,13 +374,13 @@ public:
 	   
 	   if (deluge_de_coups<= diff)
 	   {
-	   DoCast(me->getVictim(), spell_deluge_de_coups);
+	   DoCast(me->GetVictim(), spell_deluge_de_coups);
 	   deluge_de_coups = 20000;
 	   } else deluge_de_coups-= diff;
 	   
 	   if (frappe_mortelle<= diff)
 	   {
-	   DoCast(me->getVictim(), spell_frappe_mortelle);
+	   DoCast(me->GetVictim(), spell_frappe_mortelle);
 	   frappe_mortelle = 15000;
 	   } else frappe_mortelle-= diff;
 	   
@@ -693,7 +693,7 @@ public:
   
   if (tisse_ombre<= diff)
   {
-  DoCast(me->getVictim(), spell_tisse_ombre);
+  DoCast(me->GetVictim(), spell_tisse_ombre);
   tisse_ombre = 15000;
   } else tisse_ombre-= diff;
   
@@ -801,7 +801,7 @@ mob_seigneur_de_guerre_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
  
  if (brasier_desarmant<= diff)
  {
- DoCast(me->getVictim(), spell_brasier_desarmant);
+ DoCast(me->GetVictim(), spell_brasier_desarmant);
  brasier_desarmant = 15000;
  } else brasier_desarmant-= diff;
  
@@ -912,7 +912,7 @@ void UpdateAI(uint32 diff)
  
  if (broie_armure<= diff)
  {
- DoCast(me->getVictim(), spell_broie_armure);
+ DoCast(me->GetVictim(), spell_broie_armure);
  broie_armure = 20000;
  } else broie_armure-= diff;
  
@@ -1179,7 +1179,7 @@ if (!UpdateVictim())
  
 if (geyser_focalise<= diff)
 {
-DoCast(me->getVictim(), spell_geyser_focalise);
+DoCast(me->GetVictim(), spell_geyser_focalise);
 geyser_focalise = 30000;
 } else geyser_focalise-= diff;
 
@@ -1242,7 +1242,7 @@ if (!UpdateVictim())
  
 if (blessure_brulante<= diff)
 {
-DoCast(me->getVictim(), spell_blessure_brulante);
+DoCast(me->GetVictim(), spell_blessure_brulante);
 blessure_brulante = 15000;
 } else blessure_brulante-= diff;
 
@@ -1352,7 +1352,7 @@ flammes_du_crepuscule = 25000;
 
 if (souffle_crepusculaire<= diff)
 {
-DoCast(me->getVictim(), spell_souffle_crepusculaire);
+DoCast(me->GetVictim(), spell_souffle_crepusculaire);
 souffle_crepusculaire = 25000;
 } else souffle_crepusculaire-= diff;
 
@@ -1452,7 +1452,7 @@ void UpdateAI(uint32 diff)
  
  if (griffes_transpercantes<= diff)
  {
- DoCast(me->getVictim(), spell_griffes_transpercantes);
+ DoCast(me->GetVictim(), spell_griffes_transpercantes);
  griffes_transpercantes = 5000;
  } else griffes_transpercantes-= diff;
  

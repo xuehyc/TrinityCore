@@ -181,7 +181,7 @@ public:
 
             if (SmashTimer <= diff && Phase == PHASE_NORMAL)
             {
-                DoCast(me->getVictim(), SPELL_RAGING_SMASH);
+                DoCast(me->GetVictim(), SPELL_RAGING_SMASH);
                 SmashTimer = urand(4000, 10000);
             } else SmashTimer -= diff;
 

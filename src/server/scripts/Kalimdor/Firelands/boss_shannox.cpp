@@ -240,7 +240,7 @@ public:
 			summons.Summon(summon);
 			summon->setActive(true);
 
-			if(me->isInCombat())
+			if(me->IsInCombat())
 				summon->AI()->DoZoneInCombat();
 		}
 
@@ -308,9 +308,9 @@ public:
 
 		void UpdateAI(const uint32 diff)
 		{
-			if (!me->getVictim()) {}
+			if (!me->GetVictim()) {}
 
-			if( (!introSpeechDone) && (!me->isInCombat()) )
+			if( (!introSpeechDone) && (!me->IsInCombat()) )
 			{
 				introSpeechDone = true;
 				DoScriptText(SAY_INTRO_SPECH_PART_ONE,me);
@@ -424,7 +424,7 @@ public:
 				softEnrage = true;
 			}
 
-			if(((pRiplimb->GetDistance2d(me) >= maxDistanceBetweenShannoxAndDogs && pRiplimb->isAlive()) || (pRageface->GetDistance2d(me) >= maxDistanceBetweenShannoxAndDogs) && pRageface ->isAlive()) && (!me->HasAura(SPELL_SEPERATION_ANXIETY)))
+			if(((pRiplimb->GetDistance2d(me) >= maxDistanceBetweenShannoxAndDogs && pRiplimb->IsAlive()) || (pRageface->GetDistance2d(me) >= maxDistanceBetweenShannoxAndDogs) && pRageface ->IsAlive()) && (!me->HasAura(SPELL_SEPERATION_ANXIETY)))
 				DoCast(me, SPELL_SEPERATION_ANXIETY);
 
 			if (instance->GetData(DATA_CURRENT_ENCOUNTER_PHASE) == PHASE_RIPLIMB_BRINGS_SPEER && pRiplimb -> GetDistance(me) <= 1)
@@ -488,7 +488,7 @@ public:
 			DoZoneInCombat();
 			me->CallForHelp(50);
 
-			me->GetMotionMaster()->MoveChase(me->getVictim());
+			me->GetMotionMaster()->MoveChase(me->GetVictim());
 
 			// ## Deactivated ##
 			//events.ScheduleEvent(EVENT_FACE_RAGE, 31000);
@@ -509,10 +509,10 @@ public:
 			if (damage >= damageNeededThatRagefaceChangesTarget && me->HasAura(BUFF_FACE_RAGE))
 			{	
 			me->RemoveAura(SPELL_FACE_RAGE);
-			if(me->getVictim() != NULL)
+			if(me->GetVictim() != NULL)
 			{
-			me->getVictim()->ClearUnitState(UNIT_STAT_STUNNED);
-			me->getVictim()->RemoveAurasDueToSpell(SPELL_FACE_RAGE);
+			me->GetVictim()->ClearUnitState(UNIT_STAT_STUNNED);
+			me->GetVictim()->RemoveAurasDueToSpell(SPELL_FACE_RAGE);
 			}				
 			SelectNewTarget();
 			}
@@ -521,10 +521,10 @@ public:
 
 		void UpdateAI(const uint32 diff)
 		{
-			if (me->getVictim() != NULL)
+			if (me->GetVictim() != NULL)
 			{
-				if(!me->HasAura(SPELL_FACE_RAGE) && me->getVictim()->HasAura(SPELL_FACE_RAGE))
-					me->getVictim()->RemoveAurasDueToSpell(SPELL_FACE_RAGE);
+				if(!me->HasAura(SPELL_FACE_RAGE) && me->GetVictim()->HasAura(SPELL_FACE_RAGE))
+					me->GetVictim()->RemoveAurasDueToSpell(SPELL_FACE_RAGE);
 			}
 
 			events.Update(diff);
@@ -538,8 +538,8 @@ public:
 					events.ScheduleEvent(EVENT_FACE_RAGE, 31000);
 
 					// Is this neeeded?
-					//me->getVictim()->SetFlag(UNIT_FIELD_FLAGS,  UNIT_STAT_STUNNED);
-					//me->getVictim()->AddUnitState(UNIT_STAT_STUNNED);
+					//me->GetVictim()->SetFlag(UNIT_FIELD_FLAGS,  UNIT_STAT_STUNNED);
+					//me->GetVictim()->AddUnitState(UNIT_STAT_STUNNED);
 
 					break;
 				default:
@@ -642,14 +642,14 @@ public:
 			inTakingSpearPhase = false;
 			movementResetNeeded = false;
 
-			me->GetMotionMaster()->MoveChase(me->getVictim());
+			me->GetMotionMaster()->MoveChase(me->GetVictim());
 
 			events.ScheduleEvent(EVENT_LIMB_RIP, 12000); //TODO Find out the correct Time
 		}
 
 		void UpdateAI(const uint32 diff)
 		{
-			if (!me->getVictim()) {}
+			if (!me->GetVictim()) {}
 
 			events.Update(diff);
 
@@ -692,7 +692,7 @@ public:
 				}
 
 				// still experimental
-				if(instance->GetData(DATA_CURRENT_ENCOUNTER_PHASE) == PHASE_RIPLIMB_BRINGS_SPEER && me->isInCombat())
+				if(instance->GetData(DATA_CURRENT_ENCOUNTER_PHASE) == PHASE_RIPLIMB_BRINGS_SPEER && me->IsInCombat())
 				{
 					me->GetMotionMaster()->MoveIdle();
 					me->GetMotionMaster()->MovePoint(0,GetShannox()->GetPositionX(),GetShannox()->GetPositionY(),GetShannox()->GetPositionZ());
@@ -737,7 +737,7 @@ public:
 							GetSpear()->ExitVehicle();
 							movementResetNeeded = false;
 							me->setActive(true);
-							me->Attack(me->getVictim(),true);
+							me->Attack(me->GetVictim(),true);
 
 						}
 					}
@@ -910,7 +910,7 @@ public:
 					if(GetRiplimb() != NULL)
 					{
 						if(GetRiplimb()->GetDistance(me) <= 1 && (!GetRiplimb()->
-							HasAura(SPELL_WARY_10N)) && GetRiplimb()->isAlive()
+							HasAura(SPELL_WARY_10N)) && GetRiplimb()->IsAlive()
 							&& instance->GetData(DATA_CURRENT_ENCOUNTER_PHASE) == PHASE_SHANNOX_HAS_SPEER)
 						{
 							tempTarget = GetRiplimb();

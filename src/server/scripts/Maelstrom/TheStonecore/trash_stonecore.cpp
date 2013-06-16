@@ -35,7 +35,7 @@ class mob_unbound_earth_rager : public CreatureScript
 		
 		if (fracture<= diff)
         {
-            DoCast(me->getVictim(), spell_fracture);
+            DoCast(me->GetVictim(), spell_fracture);
             fracture = urand(1000, 3000);
         } else fracture-= diff;
 		
@@ -85,7 +85,7 @@ class mob_stonecore_rift_conjurer : public CreatureScript
 		
 		if (shadow_bolt<= diff)
         {
-            DoCast(me->getVictim(), spell_shadow_bolt);
+            DoCast(me->GetVictim(), spell_shadow_bolt);
             shadow_bolt = 2500;
         } else shadow_bolt-= diff;
 		
@@ -145,7 +145,7 @@ class mob_stonecore_berserker : public CreatureScript
 			   
 			   if (spinning_slash<= diff)
                {
-                  DoCast(me->getVictim(), spell_spinning_slash);
+                  DoCast(me->GetVictim(), spell_spinning_slash);
                   spinning_slash = 10000;
                } else spinning_slash-= diff;
 			   
@@ -197,7 +197,7 @@ class mob_stonecore_bruiser : public CreatureScript
 			   
 			   if (beat_down<= diff)
                {
-                  DoCast(me->getVictim(), spell_beat_down);
+                  DoCast(me->GetVictim(), spell_beat_down);
                   beat_down = urand(5000, 8000);
                } else beat_down-= diff;
 			   
@@ -303,7 +303,7 @@ class mob_stonecore_warbringer : public CreatureScript
 			   
 			   if (cleave<= diff)
 			   {
-			      DoCast(me->getVictim(), spell_cleave);
+			      DoCast(me->GetVictim(), spell_cleave);
                   cleave = urand(5000, 8000);
                } else cleave-= diff;
 			   
@@ -381,7 +381,7 @@ class mob_stonecore_earthshaper : public CreatureScript
 			      
 			   if (lava_burst<= diff)
 			   {
-			      DoCast(me->getVictim(), spell_lava_burst);
+			      DoCast(me->GetVictim(), spell_lava_burst);
                   lava_burst = urand(8000, 9000);
                } else lava_burst -= diff;
 			   
@@ -429,7 +429,7 @@ class mob_stonecore_magmalord : public CreatureScript
 			   
 			   if (ignite<= diff)
 			   {
-			      DoCast(me->getVictim(), spell_ignite);
+			      DoCast(me->GetVictim(), spell_ignite);
                   ignite = urand(5000, 8000);
                } else ignite-= diff;
 			   

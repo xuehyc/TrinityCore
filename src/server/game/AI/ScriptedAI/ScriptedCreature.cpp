@@ -491,7 +491,7 @@ void BossAI::_JustDied()
         {
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
             {
-                if (Player* player = i->getSource())
+                if (Player* player = i->GetSource())
                 {
                     if (map->GetEntry()->Expansion() == 1 && map->GetEntry()->IsRaid())
                         player->ModifyCurrency(395, 1000);

@@ -86,7 +86,7 @@ public:
            
             if (nemesis <= diff)
             {
-                DoCast(me->getVictim(), DUNGEON_MODE(SPELL_NEMESIS_STRIKE,H_SPELL_NEMESIS_STRIKE));
+                DoCast(me->GetVictim(), DUNGEON_MODE(SPELL_NEMESIS_STRIKE,H_SPELL_NEMESIS_STRIKE));
                 nemesis = 12000;
             } else nemesis -= diff;
 				

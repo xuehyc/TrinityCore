@@ -5712,7 +5712,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             // Shadowy Apparition
             if (dummySpell->SpellIconID == 4879)
             {
-                if (!victim || !victim->isAlive())
+                if (!victim || !victim->IsAlive())
                     return false;
 
                 if (effIndex != 0)

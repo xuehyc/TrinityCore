@@ -410,7 +410,7 @@ public:
             if (uint32 spellId = sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, rank))
             {
                 Creature* totem = caster->GetMap()->GetCreature(caster->m_SummonSlot[1]);
-                if (totem && totem->isTotem())
+                if (totem && totem->IsTotem())
                     totem->CastSpell(totem, spellId, true);
             }
         }

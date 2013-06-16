@@ -110,7 +110,7 @@ public:
 			summons.Summon(summon);
 			summon->setActive(true);
 
-			if(me->isInCombat())
+			if(me->IsInCombat())
 				DoZoneInCombat();
 		}
 
@@ -261,7 +261,7 @@ public:
 
 
 			// Cast Searing Seeds after Majordoma has switched the 3. time in the Druid Form
-			if(me->isInCombat())
+			if(me->IsInCombat())
 			{
 				DruidPhaseCounterForSearingSeeds++;
 
@@ -317,7 +317,7 @@ public:
 			if (Unit* tempTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 500, true))
 			{
 				me->GetMotionMaster()->MoveJump(tempTarget->GetPositionX(),tempTarget->GetPositionY(),tempTarget->GetPositionZ(),1.0f,1.0f);
-				me->AddThreat(pMajordomus->getVictim(), 100.0f);
+				me->AddThreat(pMajordomus->GetVictim(), 100.0f);
 
 				Position tempPosition = {tempTarget->GetPositionX(),tempTarget->GetPositionY(),tempTarget->GetPositionZ(), 0};
 
@@ -332,7 +332,7 @@ public:
 			if(canDropLeapingFlames && me->GetDistance(leapingFlamesPosition) == 0)
 			{
 				me->MonsterSay("Was here!",0,0);
-				me->GetMotionMaster()->MoveChase(me->getVictim());
+				me->GetMotionMaster()->MoveChase(me->GetVictim());
 			}
 
 			DoMeleeAttackIfReady();

@@ -78,7 +78,7 @@ class instance_blackwing_descent : public InstanceMapScript
                     return;
 
                 for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
-                    if (Player* player = i->getSource())
+                    if (Player* player = i->GetSource())
                         player->ModifyCurrency(396, 7000);
             }
 

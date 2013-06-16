@@ -93,7 +93,7 @@ public:
 				
             if (vide <= diff)
             {
-                DoCast(me->getVictim(), spell_vide);
+                DoCast(me->GetVictim(), spell_vide);
                 vide = 10000;
             } else vide -= diff;
 				

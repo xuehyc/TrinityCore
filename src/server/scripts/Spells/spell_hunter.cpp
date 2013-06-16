@@ -823,7 +823,7 @@ public:
         SpellCastResult CheckCastMeet()
         {
             Unit* pet = GetCaster()->GetGuardianPet();
-            Unit* petTarget = pet->getVictim();
+            Unit* petTarget = pet->GetVictim();
             if (!pet)
                 return SPELL_FAILED_NO_PET;
 
@@ -844,7 +844,7 @@ public:
             if (!pet)
                 return;
 
-            pet->CastSpell(pet->getVictim(), SPELL_HUNTER_KILL_COMMAND_TRIGGER, true);
+            pet->CastSpell(pet->GetVictim(), SPELL_HUNTER_KILL_COMMAND_TRIGGER, true);
         }
         
        

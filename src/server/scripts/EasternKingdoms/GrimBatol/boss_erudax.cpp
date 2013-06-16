@@ -102,7 +102,7 @@ public:
 			// Fixes wrong behaviour of Erudax if the boss was respawned
 			me->SetReactState(REACT_AGGRESSIVE);
 			me->GetMotionMaster()->Clear();
-			me->GetMotionMaster()->MoveChase(me->getVictim());
+			me->GetMotionMaster()->MoveChase(me->GetVictim());
 
 			events.ScheduleEvent(EVENT_ENFEEBLING_BLOW, 4000);
 
@@ -131,7 +131,7 @@ public:
 
 				me->SetReactState(REACT_AGGRESSIVE);
 				me->GetMotionMaster()->Clear();
-				me->GetMotionMaster()->MoveChase(me->getVictim());
+				me->GetMotionMaster()->MoveChase(me->GetVictim());
 
 				if ((rand()%2))
 					me->MonsterYell(SAY_SUMMON, LANG_UNIVERSAL, NULL);
@@ -287,7 +287,7 @@ public:
 			if (!PlayerList.isEmpty())
 			{
 				for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-						i->getSource()->RemoveAura(SPELL_SHADOW_GALE_DEBUFF);
+						i->GetSource()->RemoveAura(SPELL_SHADOW_GALE_DEBUFF);
 			}
 		}
 	};
@@ -400,7 +400,7 @@ public:
 
 		void JustDied(Unit* killer)
 		{	// Removes the Dot of the Egg if the Faceless dies
-			if(isAtAnEgg && pTarget->isAlive())
+			if(isAtAnEgg && pTarget->IsAlive())
 				pTarget->RemoveAllAuras();
 		}
 
@@ -518,13 +518,13 @@ public:
 						if (!PlayerList.isEmpty())
 						{
 							for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-								if(me->GetDistance(i->getSource()) >= 3)
+								if(me->GetDistance(i->GetSource()) >= 3)
 								{
 									// ToDo Add Debuff and Deal damage
-									if(!i->getSource()->HasAura(SPELL_SHADOW_GALE_DEBUFF))
-										me->CastSpell(i->getSource(), SPELL_SHADOW_GALE_DEBUFF, true);
+									if(!i->GetSource()->HasAura(SPELL_SHADOW_GALE_DEBUFF))
+										me->CastSpell(i->GetSource(), SPELL_SHADOW_GALE_DEBUFF, true);
 								}else
-									i->getSource()->RemoveAura(SPELL_SHADOW_GALE_DEBUFF);
+									i->GetSource()->RemoveAura(SPELL_SHADOW_GALE_DEBUFF);
 						}
 
 						events.ScheduleEvent(EVENT_TRIGGER_GALE_CHECK_PLAYERS, 1000);

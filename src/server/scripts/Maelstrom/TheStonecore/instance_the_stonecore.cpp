@@ -56,7 +56,7 @@ public:
 
             if (!players.isEmpty())
             {
-                if (Player* pPlayer = players.begin()->getSource())
+                if (Player* pPlayer = players.begin()->GetSource())
                     uiTeamInInstance = pPlayer->GetTeam();
             }
 

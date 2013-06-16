@@ -91,7 +91,7 @@ class instance_throne_of_the_tides : public InstanceMapScript
 
                 if (!players.isEmpty())
                 {
-                    if (Player* player = players.begin()->getSource())
+                    if (Player* player = players.begin()->GetSource())
                         TeamInInstance = player->GetTeam();
                 }
                 switch (creature->GetEntry())

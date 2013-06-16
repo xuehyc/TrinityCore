@@ -215,7 +215,7 @@ public:
 				return;
 
 			if(me->GetMap()->IsHeroic() && damage > 0)
-				me->CastSpell(me->getVictim(), SPELL_BURNING_FLAMES, true);
+				me->CastSpell(me->GetVictim(), SPELL_BURNING_FLAMES, true);
 		}
 
 	private:

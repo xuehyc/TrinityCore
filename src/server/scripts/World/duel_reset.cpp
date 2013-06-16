@@ -83,7 +83,7 @@ public:
         {
             player->CLOSE_GOSSIP_MENU();
 
-            if (player->isInCombat() || creature->isInCombat())
+            if (player->IsInCombat() || creature->IsInCombat())
                 return true;
 
             if (npc_duel_challengerAI* pInitiateAI = CAST_AI(npc_duel_challenger::npc_duel_challengerAI, creature->AI()))
@@ -110,7 +110,7 @@ public:
             if (player->HealthBelowPct(10))
                 return true;
 
-            if (player->isInCombat() || creature->isInCombat())
+            if (player->IsInCombat() || creature->IsInCombat())
                 return true;
 
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ACCEPT_DUEL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
@@ -208,10 +208,10 @@ public:
                         EnterEvadeMode();
                     return;
                 }
-                else if (me->getVictim()->GetTypeId() == TYPEID_PLAYER && me->getVictim()->HealthBelowPct(10))
+                else if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER && me->GetVictim()->HealthBelowPct(10))
                 {
-                    me->getVictim()->CastSpell(me->getVictim(), 7267, true); // beg
-                    me->getVictim()->RemoveGameObject(SPELL_DUEL_FLAG, true);
+                    me->GetVictim()->CastSpell(me->GetVictim(), 7267, true); // beg
+                    me->GetVictim()->RemoveGameObject(SPELL_DUEL_FLAG, true);
                     EnterEvadeMode();
                     return;
                 }

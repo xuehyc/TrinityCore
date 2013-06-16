@@ -69,7 +69,7 @@ public:
 
             if (ShadowflameBreathTimer <= Diff)
             {
-                me->CastSpell(me->getVictim(), SPELL_SHADOWFLAME_BREATH, true);
+                me->CastSpell(me->GetVictim(), SPELL_SHADOWFLAME_BREATH, true);
 
                 ShadowflameBreathTimer = urand(10*IN_MILLISECONDS, 12*IN_MILLISECONDS);
             } else ShadowflameBreathTimer -= Diff;

@@ -227,7 +227,7 @@ class boss_isiset : public CreatureScript
                 if (SupernovaTimer <= diff && Phased == false)
                 {
                     Talk(SAY_SUPERNOVA);
-                    DoCast(me->getVictim(), SPELL_SUPERNOVA);
+                    DoCast(me->GetVictim(), SPELL_SUPERNOVA);
                     SupernovaTimer = 15000+rand()%5000;
                 } else SupernovaTimer -= diff;
 

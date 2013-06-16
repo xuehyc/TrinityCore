@@ -165,7 +165,7 @@ public:
 
 		void UpdateAI(const uint32 diff)
 		{
-			if (!me->getVictim()) {}
+			if (!me->GetVictim()) {}
 
 			events.Update(diff);
 

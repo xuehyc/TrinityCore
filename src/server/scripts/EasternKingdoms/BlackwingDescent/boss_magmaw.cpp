@@ -149,11 +149,11 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->IsWithinDistInMap(me->getVictim(), 2.0f))
+            if (me->IsWithinDistInMap(me->GetVictim(), 2.0f))
             {
                 if (CheckDistanceTimer <= Diff)
                 {
-                    me->CastSpell(me->getVictim(), 94679 , true);
+                    me->CastSpell(me->GetVictim(), 94679 , true);
 
                     CheckDistanceTimer = 86400*IN_MILLISECONDS;
                 } else CheckDistanceTimer -= Diff;

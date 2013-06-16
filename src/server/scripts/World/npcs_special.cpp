@@ -1854,8 +1854,8 @@ public:
             events.Update(diff);
 
             bool hasCC = false;
-            if (me->GetCharmerOrOwnerGUID() && me->getVictim())
-                hasCC = me->getVictim()->HasAuraType(SPELL_AURA_MOD_CONFUSE);
+            if (me->GetCharmerOrOwnerGUID() && me->GetVictim())
+                hasCC = me->GetVictim()->HasAuraType(SPELL_AURA_MOD_CONFUSE);
 
             if (hasCC)
             {
@@ -3061,7 +3061,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!me->isInCombat() && CombatCheck == false)
+            if (!me->IsInCombat() && CombatCheck == false)
             {
                 me->SetSpeed(MOVE_RUN, 2, true);
                 me->SetSpeed(MOVE_FLIGHT, 2, true);
@@ -3149,7 +3149,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!me->isInCombat() && CombatCheck == false)
+            if (!me->IsInCombat() && CombatCheck == false)
             {
                 me->SetSpeed(MOVE_RUN, 2, true);
                 me->SetSpeed(MOVE_FLIGHT, 2, true);
@@ -3312,7 +3312,7 @@ public:
 
         void CheckIfMoveInRing (Unit *who)
         {
-            if (who->isAlive() && me->IsInRange(who, 2.0f, 4.7f) && !who->HasAura(82691)/*<= target already frozen*/
+            if (who->IsAlive() && me->IsInRange(who, 2.0f, 4.7f) && !who->HasAura(82691)/*<= target already frozen*/
             && !who->HasAura(91264)/*<= target is immune*/
             && me->IsWithinLOSInMap(who) && Isready)
                 me->CastSpell(who, 82691, true);
@@ -3384,12 +3384,12 @@ class npc_power_word_barrier : public CreatureScript
 
         void BarrierChecker(Unit* who)
         {
-            if (who->isAlive() && !who->HasAura(81782))
+            if (who->IsAlive() && !who->HasAura(81782))
             {
                 me->CastSpell(who, 81782, true);
             }
 
-            if (who->isAlive() && who->HasAura(81782))
+            if (who->IsAlive() && who->HasAura(81782))
             {
                 if (AuraEffect const* aur = who->GetAuraEffect(81782, 0))
                     aur->GetBase()->SetDuration(aur->GetSpellInfo()->GetMaxDuration(), true);

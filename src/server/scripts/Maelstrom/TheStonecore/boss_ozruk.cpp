@@ -103,7 +103,7 @@ public:
 
 		    if (GroundSlamTimer <= diff)
 			{
-			  if(me->getVictim())
+			  if(me->GetVictim())
                            DoCastVictim(SPELL_GROUND_SLAM);
 			  GroundSlamTimer = 30000;
 			  }else

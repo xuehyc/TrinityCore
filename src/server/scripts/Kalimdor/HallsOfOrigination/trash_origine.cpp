@@ -103,7 +103,7 @@ public:
 			
 			if (tir<= diff)
 			{
-			DoCast(me->getVictim(), spell_tir);
+			DoCast(me->GetVictim(), spell_tir);
 			tir = 2500;
 			} else tir -= diff;
 			
@@ -156,7 +156,7 @@ public:
 			
 			if (enchainement_runique<= diff)
 			{
-			DoCast(me->getVictim(), spell_enchainement_runique);
+			DoCast(me->GetVictim(), spell_enchainement_runique);
 			enchainement_runique = 10000;
 			} else enchainement_runique -= diff;
 			
@@ -220,7 +220,7 @@ public:
 			
 			if (boule_de_feu<= diff)
 			{
-			DoCast(me->getVictim(), spell_boule_de_feu);
+			DoCast(me->GetVictim(), spell_boule_de_feu);
 			boule_de_feu = 4000;
 			} else boule_de_feu -= diff;
 			
@@ -280,7 +280,7 @@ public:
 			
 			if (attaque_a_la_lame_dentelee<= diff)
 			{
-			DoCast(me->getVictim(), spell_attaque_a_la_lame_dentelee);
+			DoCast(me->GetVictim(), spell_attaque_a_la_lame_dentelee);
 			attaque_a_la_lame_dentelee = 15000;
 			} else attaque_a_la_lame_dentelee -= diff;
 			
@@ -340,7 +340,7 @@ public:
 			
 			if (toxine<= diff)
 			{
-			DoCast(me->getVictim(), spell_toxine);
+			DoCast(me->GetVictim(), spell_toxine);
 			toxine = 10000;
 			} else toxine -= diff;
 			
@@ -384,7 +384,7 @@ public:
 			
 			if (choc<= diff)
 			{
-			DoCast(me->getVictim(), spell_choc);
+			DoCast(me->GetVictim(), spell_choc);
 			choc = 5000;
 			} else choc -= diff;
 			
@@ -431,7 +431,7 @@ public:
 			
 			if (trait_de_lombre<= diff)
 			{
-			DoCast(me->getVictim(), spell_trait_de_lombre);
+			DoCast(me->GetVictim(), spell_trait_de_lombre);
 			trait_de_lombre = 6000;
 			} else trait_de_lombre -= diff;
 			
@@ -863,7 +863,7 @@ public:
 			
 			if (pietinement_reverberant<= diff)
 			{
-			DoCast(me->getVictim(), spell_pietinement_reverberant);
+			DoCast(me->GetVictim(), spell_pietinement_reverberant);
 			pietinement_reverberant = 25000;
 			} else pietinement_reverberant -= diff;
 			
@@ -919,7 +919,7 @@ public :
 			 
 			 if (tir<= diff)
 			 {
-			 DoCast(me->getVictim(), spell_tir);
+			 DoCast(me->GetVictim(), spell_tir);
 			 tir = 4000;
 			 } else tir -= diff;
 			 

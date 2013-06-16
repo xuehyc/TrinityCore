@@ -126,7 +126,7 @@ public:
             me->MonsterYell(SAY_AGGRO, LANG_UNIVERSAL, NULL);
 
             me->GetMotionMaster()->Clear();
-            me->GetMotionMaster()->MoveChase(me->getVictim());
+            me->GetMotionMaster()->MoveChase(me->GetVictim());
 
             events.ScheduleEvent(EVENT_BURNING_SHADOWBOLT, 4000);
             events.ScheduleEvent(EVENT_SUMMON_INVOKED_FLAME_SPIRIT, 10000);
@@ -228,7 +228,7 @@ public:
 
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->GetMotionMaster()->Clear();
-                me->GetMotionMaster()->MoveChase(me->getVictim());
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
 
 				me->RemoveAllAuras();
 				
@@ -349,7 +349,7 @@ public:
                 summon->GetAI()->DoCast(SPELL_SEEPING_TWILIGHT);
             }
 
-            if(me->isInCombat())
+            if(me->IsInCombat())
                 summon->AI()->DoZoneInCombat();
         }
 
@@ -377,7 +377,7 @@ public:
 
                 case EVENT_SHREDDING_SWIPE:
 
-                    if(me->getVictim())
+                    if(me->GetVictim())
                         DoCastVictim(SPELL_SHREDDING_SWIPE);
 
                     events.RepeatEvent(urand(21000,30000));
@@ -458,7 +458,7 @@ public:
                 me->SetReactState(REACT_AGGRESSIVE);
 
                 me->GetMotionMaster()->Clear();
-                me->GetMotionMaster()->MoveChase(me->getVictim());
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
 
                 events.ScheduleEvent(EVENT_VALIONAS_FLAME, urand(4000,7000));
                 events.ScheduleEvent(EVENT_SHREDDING_SWIPE, urand(10000,13000));
@@ -525,7 +525,7 @@ public:
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
             {
             if(i == p)
-            pTarget = i->getSource();
+            pTarget = i->GetSource();
             }
             }*/
 
@@ -539,7 +539,7 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if(me->GetDistance(me->getVictim()) < 1.0f )
+            if(me->GetDistance(me->GetVictim()) < 1.0f )
             {
                 DoCastVictim(RAID_MODE(SPELL_SUPERNOVA,	SPELL_SUPERNOVA_H));
                 me -> DespawnOrUnsummon();

@@ -610,7 +610,7 @@ public:
                         break;
                     case EVENT_ATTACK:
                         me->SetReactState(REACT_AGGRESSIVE);
-                        me->Attack(me->getVictim(), false);
+                        me->Attack(me->GetVictim(), false);
                         me->AddAura(SPELL_BASE_VISUAL, me);
                         me->AddAura(SPELL_BURNING_WOUNDS_AURA, me);
                         break;

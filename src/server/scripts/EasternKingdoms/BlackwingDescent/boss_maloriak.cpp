@@ -99,7 +99,7 @@ public:
 
             if (ScorchingBlast <= Diff)
             {
-                me->CastSpell(me->getVictim(), SPELL_SCORCHING_BLAST, true);
+                me->CastSpell(me->GetVictim(), SPELL_SCORCHING_BLAST, true);
 
                 ScorchingBlast = urand(120*IN_MILLISECONDS, 130*IN_MILLISECONDS);
             } else ScorchingBlast -= Diff;
