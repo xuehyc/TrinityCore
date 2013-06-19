@@ -136,9 +136,9 @@ bool GrandChampionsOutVehicle(Creature* me)
 
     if (pGrandChampion1 && pGrandChampion2 && pGrandChampion3)
     {
-        if (!pGrandChampion1->m_movementInfo.t_guid &&
-            !pGrandChampion2->m_movementInfo.t_guid &&
-            !pGrandChampion3->m_movementInfo.t_guid)
+        if (!pGrandChampion1->m_movementInfo.transport.guid &&
+            !pGrandChampion2->m_movementInfo.transport.guid &&
+            !pGrandChampion3->m_movementInfo.transport.guid)
             return true;
     }
 
@@ -390,7 +390,7 @@ public:
                 }
             }else uiPhaseTimer -= uiDiff;
 
-            if (!UpdateVictim() || me->m_movementInfo.t_guid)
+            if (!UpdateVictim() || me->m_movementInfo.transport.guid)
                 return;
 
             if (uiInterceptTimer <= uiDiff)
@@ -534,7 +534,7 @@ public:
                 uiFireBallTimer = 5000;
             } else uiFireBallTimer -= uiDiff;
 
-            if (!UpdateVictim() || me->m_movementInfo.t_guid)
+            if (!UpdateVictim() || me->m_movementInfo.transport.guid)
                 return;
 
             if (uiFireBallTimer <= uiDiff)
@@ -672,7 +672,7 @@ public:
                 }
             }else uiPhaseTimer -= uiDiff;
 
-            if (!UpdateVictim() || me->m_movementInfo.t_guid)
+            if (!UpdateVictim() || me->m_movementInfo.transport.guid)
                 return;
 
             if (uiChainLightningTimer <= uiDiff)
@@ -818,7 +818,7 @@ public:
                 }
             }else uiPhaseTimer -= uiDiff;
 
-            if (!UpdateVictim() || me->m_movementInfo.t_guid)
+            if (!UpdateVictim() || me->m_movementInfo.transport.guid)
                 return;
 
             if (uiLightningArrowsTimer <= uiDiff)
@@ -966,7 +966,7 @@ public:
                 }
             } else uiPhaseTimer -= uiDiff;
 
-            if (!UpdateVictim() || me->m_movementInfo.t_guid)
+            if (!UpdateVictim() || me->m_movementInfo.transport.guid)
                 return;
 
             if (uiEviscerateTimer <= uiDiff)

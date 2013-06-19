@@ -628,6 +628,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         explicit GameObject();
         ~GameObject();
 
+        void BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, Player* target) const;
+
         void AddToWorld();
         void RemoveFromWorld();
         void CleanupsBeforeDelete(bool finalCleanup = true);
