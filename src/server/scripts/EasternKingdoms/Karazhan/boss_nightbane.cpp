@@ -319,13 +319,13 @@ public:
 
                 if (BellowingRoarTimer <= diff)
                 {
-                    DoCast(me->GetVictim(), SPELL_BELLOWING_ROAR);
+                    DoCastVictim(SPELL_BELLOWING_ROAR);
                     BellowingRoarTimer = urand(30000, 40000);
                 } else BellowingRoarTimer -= diff;
 
                 if (SmolderingBreathTimer <= diff)
                 {
-                    DoCast(me->GetVictim(), SPELL_SMOLDERING_BREATH);
+                    DoCastVictim(SPELL_SMOLDERING_BREATH);
                     SmolderingBreathTimer = 20000;
                 } else SmolderingBreathTimer -= diff;
 
@@ -374,14 +374,14 @@ public:
                     {
                         for (uint8 i = 0; i <= 3; ++i)
                         {
-                            DoCast(me->GetVictim(), SPELL_SUMMON_SKELETON);
+                            DoCastVictim(SPELL_SUMMON_SKELETON);
                             Skeletons = true;
                         }
                     }
 
                     if (RainofBonesTimer < diff && !RainBones) // only once at the beginning of phase 2
                     {
-                        DoCast(me->GetVictim(), SPELL_RAIN_OF_BONES);
+                        DoCastVictim(SPELL_RAIN_OF_BONES);
                         RainBones = true;
                         SmokingBlastTimer = 20000;
                     } else RainofBonesTimer -= diff;
@@ -398,7 +398,7 @@ public:
                 {
                     if (SmokingBlastTimer <= diff)
                      {
-                        DoCast(me->GetVictim(), SPELL_SMOKING_BLAST);
+                        DoCastVictim(SPELL_SMOKING_BLAST);
                         SmokingBlastTimer = 1500; //timer wrong
                      } else SmokingBlastTimer -= diff;
                 }

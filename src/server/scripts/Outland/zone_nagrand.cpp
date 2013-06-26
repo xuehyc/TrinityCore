@@ -286,7 +286,7 @@ public:
 
             if (m_uiChainLightningTimer <= uiDiff)
             {
-                DoCast(me->GetVictim(), SPELL_CHAIN_LIGHTNING);
+                DoCastVictim(SPELL_CHAIN_LIGHTNING);
                 m_uiChainLightningTimer = urand(7000, 14000);
             }
             else
@@ -305,7 +305,7 @@ public:
 
             if (m_uiFrostShockTimer <= uiDiff)
             {
-                DoCast(me->GetVictim(), SPELL_FROST_SHOCK);
+                DoCastVictim(SPELL_FROST_SHOCK);
                 m_uiFrostShockTimer = urand(7500, 15000);
             }
             else
@@ -640,7 +640,7 @@ public:
 
             if (ChainLightningTimer <= diff)
             {
-                DoCast(me->GetVictim(), SPELL_KUR_CHAIN_LIGHTNING);
+                DoCastVictim(SPELL_KUR_CHAIN_LIGHTNING);
                 ChainLightningTimer = urand(7000, 14000);
             } else ChainLightningTimer -= diff;
 
@@ -655,7 +655,7 @@ public:
 
             if (FrostShockTimer <= diff)
             {
-                DoCast(me->GetVictim(), SPELL_KUR_FROST_SHOCK);
+                DoCastVictim(SPELL_KUR_FROST_SHOCK);
                 FrostShockTimer = urand(7500, 15000);
             } else FrostShockTimer -= diff;
 

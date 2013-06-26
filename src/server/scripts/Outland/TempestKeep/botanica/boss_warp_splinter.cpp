@@ -202,7 +202,7 @@ class boss_warp_splinter : public CreatureScript
                 //Check for War Stomp
                 if (War_Stomp_Timer <= diff)
                 {
-                    DoCast(me->GetVictim(), WAR_STOMP);
+                    DoCastVictim(WAR_STOMP);
                     War_Stomp_Timer = urand(25000, 40000);
                 }
                 else
@@ -211,7 +211,7 @@ class boss_warp_splinter : public CreatureScript
                 //Check for Arcane Volley
                 if (Arcane_Volley_Timer <= diff)
                 {
-                    DoCast(me->GetVictim(), DUNGEON_MODE(ARCANE_VOLLEY, ARCANE_VOLLEY_H));
+                    DoCastVictim(DUNGEON_MODE(ARCANE_VOLLEY, ARCANE_VOLLEY_H));
                     Arcane_Volley_Timer = urand(20000, 35000);
                 }
                 else

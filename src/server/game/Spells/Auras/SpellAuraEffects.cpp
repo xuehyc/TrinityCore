@@ -1818,39 +1818,21 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
             if (target->getPowerType() != PowerType)
                 target->setPowerType(PowerType);
 
-            switch (form)
+            if (form == FORM_CAT || form == FORM_BEAR)
             {
-                case FORM_CAT:
-                case FORM_BEAR:
-                {
-                    // get furor proc chance
-                    int32 FurorChance = 0;
-                    if (AuraEffect const* dummy = target->GetDummyAuraEffect(SPELLFAMILY_DRUID, 238, 0))
-                        FurorChance = std::max(dummy->GetAmount(), 0);
+                // get furor proc chance
+                int32 FurorChance = 0;
+                if (AuraEffect const* dummy = target->GetDummyAuraEffect(SPELLFAMILY_DRUID, 238, 0))
+                    FurorChance = std::max(dummy->GetAmount(), 0);
 
-                    switch (GetMiscValue())
-                    {
-                        case FORM_CAT:
-                        {
-                            int32 basePoints = std::min<int32>(oldPower, FurorChance);
-                            target->SetPower(POWER_ENERGY, 0);
-                            target->CastCustomSpell(target, 17099, &basePoints, NULL, NULL, true, NULL, this);
-                            break;
-                        }
-                        case FORM_BEAR:
-                        if (urand(0, 99) < FurorChance)
-                            target->CastSpell(target, 17057, true);
-                        default:
-                        {
-                            int32 newEnergy = std::min(target->GetPower(POWER_ENERGY), FurorChance);
-                            target->SetPower(POWER_ENERGY, newEnergy);
-                            break;
-                        }
-                    }
-                    break;
+                if (form == FORM_CAT)
+                {
+                    int32 basePoints = std::min<int32>(oldPower, FurorChance);
+                    target->SetPower(POWER_ENERGY, 0);
+                    target->CastCustomSpell(target, 17099, &basePoints, NULL, NULL, true, NULL, this);
                 }
-                default:
-                    break;
+                else if (roll_chance_i(FurorChance))
+                    target->CastSpell(target, 17057, true);
             }
         }
         // stop handling the effect if it was removed by linked event
@@ -2662,8 +2644,9 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
         target->Mount(displayId, vehicleId, creatureEntry);
 
         // cast speed aura
-        if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAmount()))
-            target->CastSpell(target, mountCapability->SpeedModSpell, true);
+        if (mode & AURA_EFFECT_HANDLE_REAL)
+            if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAmount()))
+                target->CastSpell(target, mountCapability->SpeedModSpell, true);
     }
     else
     {
@@ -2696,17 +2679,9 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const* aurApp, uint8 mode
             return;
     }
 
-    //! Not entirely sure if this should be sent for creatures as well, but I don't think so.
-    if (!apply)
-    {
-        target->m_movementInfo.SetFallTime(0);
-        target->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING_FLY);
-        target->AddUnitMovementFlag(MOVEMENTFLAG_FALLING);
-    }
-
     target->SetCanFly(apply);
 
-    if (target->GetTypeId() == TYPEID_UNIT)
+    if (!apply && target->GetTypeId() == TYPEID_UNIT && !target->IsLevitating())
         target->GetMotionMaster()->MoveFall();
 }
 
@@ -3093,16 +3068,9 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const* aurApp,
         // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
         if (mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK && (apply || (!target->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && !target->HasAuraType(SPELL_AURA_FLY))))
         {
-            if (!apply)
-            {
-                target->m_movementInfo.SetFallTime(0);
-                target->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING_FLY);
-                target->AddUnitMovementFlag(MOVEMENTFLAG_FALLING);
-            }
-
             target->SetCanFly(apply);
 
-            if (target->GetTypeId() == TYPEID_UNIT)
+            if (!apply && target->GetTypeId() == TYPEID_UNIT && !target->IsLevitating())
                 target->GetMotionMaster()->MoveFall();
         }
 

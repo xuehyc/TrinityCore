@@ -1134,7 +1134,7 @@ public:
 
             if (me->isAttackReady())
             {
-                DoCast(me->GetVictim(), SPELL_DEATHTOUCH, true);
+                DoCastVictim(SPELL_DEATHTOUCH, true);
                 me->resetAttackTimer();
             }
         }
@@ -1678,7 +1678,7 @@ public:
                         else
                             spell = SPELL_CRIPPLING_POISON;
 
-                        DoCast(me->GetVictim(), spell);
+                        DoCastVictim(spell);
                     }
 
                     SpellTimer = VIPER_TIMER;
@@ -1686,7 +1686,7 @@ public:
                 else //Venomous Snake
                 {
                     if (urand(0, 2) == 0) //33% chance to cast
-                        DoCast(me->GetVictim(), SPELL_DEADLY_POISON);
+                        DoCastVictim(SPELL_DEADLY_POISON);
                     SpellTimer = VENOMOUS_SNAKE_TIMER + (rand() % 5) * 100;
                 }
             }
@@ -2175,7 +2175,7 @@ public:
 
             if (FireShield_Timer <= diff)
             {
-                DoCast(me->GetVictim(), SPELL_FIRESHIELD);
+                DoCastVictim(SPELL_FIRESHIELD);
                 FireShield_Timer = 2 * IN_MILLISECONDS;
             }
             else
@@ -2183,7 +2183,7 @@ public:
 
             if (FireBlast_Timer <= diff)
             {
-                DoCast(me->GetVictim(), SPELL_FIREBLAST);
+                DoCastVictim(SPELL_FIREBLAST);
                 FireBlast_Timer = 5000 + rand() % 15000; // 5-20 sec cd
             }
             else
@@ -2191,7 +2191,7 @@ public:
 
             if (FireNova_Timer <= diff)
             {
-                DoCast(me->GetVictim(), SPELL_FIRENOVA);
+                DoCastVictim(SPELL_FIRENOVA);
                 FireNova_Timer = 5000 + rand() % 15000; // 5-20 sec cd
             }
             else
@@ -2236,7 +2236,7 @@ public:
 
             if (AngeredEarth_Timer <= diff)
             {
-                DoCast(me->GetVictim(), SPELL_ANGEREDEARTH);
+                DoCastVictim(SPELL_ANGEREDEARTH);
                 AngeredEarth_Timer = 5000 + rand() % 15000; // 5-20 sec cd
             }
             else

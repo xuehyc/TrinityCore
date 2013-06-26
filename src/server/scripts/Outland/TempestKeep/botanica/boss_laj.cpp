@@ -190,7 +190,7 @@ class boss_laj : public CreatureScript
 
                 if (Allergic_Timer <= diff)
                 {
-                    DoCast(me->GetVictim(), SPELL_ALLERGIC_REACTION);
+                    DoCastVictim(SPELL_ALLERGIC_REACTION);
                     Allergic_Timer = 25000+rand()%15000;
                 }
                 else

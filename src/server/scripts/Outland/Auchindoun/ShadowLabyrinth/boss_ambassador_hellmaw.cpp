@@ -183,7 +183,7 @@ public:
 
             if (CorrosiveAcid_Timer <= diff)
             {
-                DoCast(me->GetVictim(), SPELL_CORROSIVE_ACID);
+                DoCastVictim(SPELL_CORROSIVE_ACID);
                 CorrosiveAcid_Timer = urand(15000, 25000);
             } else CorrosiveAcid_Timer -= diff;
 

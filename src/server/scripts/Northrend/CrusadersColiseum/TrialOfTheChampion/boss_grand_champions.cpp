@@ -971,7 +971,7 @@ public:
 
             if (uiEviscerateTimer <= uiDiff)
             {
-                DoCast(me->GetVictim(), SPELL_EVISCERATE);
+                DoCastVictim(SPELL_EVISCERATE);
                 uiEviscerateTimer = 8000;
             } else uiEviscerateTimer -= uiDiff;
 

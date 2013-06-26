@@ -37,7 +37,6 @@ enum ShamanSpells
     SPELL_SHAMAN_EARTH_SHIELD_HEAL              = 379,
     SPELL_SHAMAN_ELEMENTAL_MASTERY              = 16166,
     SPELL_SHAMAN_EXHAUSTION                     = 57723,
-	SPELL_SHAMAN_FIRE_NOVA_R1                   = 1535,
     SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1         = 8349,
     SPELL_SHAMAN_FLAME_SHOCK                    = 8050,
     SPELL_SHAMAN_GLYPH_OF_EARTH_SHIELD          = 63279,
@@ -54,13 +53,7 @@ enum ShamanSpells
     SPELL_SHAMAN_TOTEM_EARTHBIND_TOTEM          = 6474,
     SPELL_SHAMAN_TOTEM_EARTHEN_POWER            = 59566,
     SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL      = 52042,
-	SPELL_SHAMAN_TOTEM_TOTEMIC_WRATH            = 77746,
-    SPELL_SHAMAN_TOTEM_TOTEMIC_WRATH_AURA       = 77747,
-	SPELL_SHAMAN_EARTHQUAKE_KNOCKDOWN           = 77505,
-	SPELL_SHAMAN_FULMINATION                    = 88766,
-    SPELL_SHAMAN_FULMINATION_TRIGGERED          = 88767,
-    SPELL_SHAMAN_FULMINATION_INFO               = 95774,
-	SPELL_SHAMAN_LIGHTNING_SHIELD_PROC          = 26364,
+    SPELL_SHAMAN_TIDAL_WAVES                    = 53390
 };
 
 enum ShamanSpellIcons
@@ -408,63 +401,39 @@ class spell_sha_feedback : public SpellScriptLoader
 };
 
 // 1535 Fire Nova
+/// Updated 4.3.4
 class spell_sha_fire_nova : public SpellScriptLoader
 {
-public:
-    spell_sha_fire_nova() : SpellScriptLoader("spell_sha_fire_nova") { }
+    public:
+        spell_sha_fire_nova() : SpellScriptLoader("spell_sha_fire_nova") { }
 
-    class spell_sha_fire_nova_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_sha_fire_nova_SpellScript);
-
-        bool Validate(SpellInfo const* spellInfo)
+        class spell_sha_fire_nova_SpellScript : public SpellScript
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_FIRE_NOVA_R1))
-                return false;
-            if (sSpellMgr->GetFirstSpellInChain(SPELL_SHAMAN_FIRE_NOVA_R1) != sSpellMgr->GetFirstSpellInChain(spellInfo->Id))
-                return false;
+            PrepareSpellScript(spell_sha_fire_nova_SpellScript);
 
-            uint8 rank = sSpellMgr->GetSpellRank(spellInfo->Id);
-            if (!sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, rank, true))
-                return false;
-            return true;
-        }
-
-        SpellCastResult CheckFireTotem()
-        {
-            // fire totem
-            if (!GetCaster()->m_SummonSlot[1])
+            void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_MUST_HAVE_FIRE_TOTEM);
-                return SPELL_FAILED_CUSTOM_ERROR;
+                Unit* caster = GetCaster();
+                if (Unit* target = GetHitUnit())
+                {
+                    if (target->HasAura(SPELL_SHAMAN_FLAME_SHOCK))
+                    {
+                        caster->CastSpell(target, SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, true);
+                        target->RemoveAurasDueToSpell(SPELL_SHAMAN_FLAME_SHOCK);
+                    }
+                }
             }
 
-            return SPELL_CAST_OK;
-        }
-
-        void HandleDummy(SpellEffIndex /*effIndex*/)
-        {
-            Unit* caster = GetCaster();
-            uint8 rank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
-            if (uint32 spellId = sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, rank))
+            void Register()
             {
-                Creature* totem = caster->GetMap()->GetCreature(caster->m_SummonSlot[1]);
-                if (totem && totem->IsTotem())
-                    totem->CastSpell(totem, spellId, true);
+                OnEffectHitTarget += SpellEffectFn(spell_sha_fire_nova_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
-        }
+        };
 
-        void Register()
+        SpellScript* GetSpellScript() const
         {
-            OnCheckCast += SpellCheckCastFn(spell_sha_fire_nova_SpellScript::CheckFireTotem);
-            OnEffectHitTarget += SpellEffectFn(spell_sha_fire_nova_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            return new spell_sha_fire_nova_SpellScript();
         }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_sha_fire_nova_SpellScript();
-    }
 };
 
 // 8050 -Flame Shock
@@ -674,8 +643,7 @@ class spell_sha_lava_surge : public SpellScriptLoader
 
             void HandleEffectProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
             {
-                PreventDefaultAction(); // will prevent default effect execution
-
+                PreventDefaultAction();
                 GetTarget()->CastSpell(GetTarget(), SPELL_SHAMAN_LAVA_SURGE, true);
             }
 
@@ -761,7 +729,7 @@ class spell_sha_mana_tide_totem : public SpellScriptLoader
         }
 };
 
-// -51490 - Thunderstorm
+// 51490 - Thunderstorm
 class spell_sha_thunderstorm : public SpellScriptLoader
 {
     public:
@@ -790,160 +758,42 @@ class spell_sha_thunderstorm : public SpellScriptLoader
         }
 };
 
-// 77746 - Totemic Wrath
-class spell_sha_totemic_wrath : public SpellScriptLoader
+// 51562 - Tidal Waves
+class spell_sha_tidal_waves : public SpellScriptLoader
 {
-public:
-    spell_sha_totemic_wrath() : SpellScriptLoader("spell_sha_totemic_wrath") { }
+    public:
+        spell_sha_tidal_waves() : SpellScriptLoader("spell_sha_tidal_waves") { }
 
-    class spell_sha_totemic_wrath_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_sha_totemic_wrath_AuraScript); 
-
-        bool Validate(SpellInfo const* /*spellEntry*/)
+        class spell_sha_tidal_waves_AuraScript : public AuraScript
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_TOTEM_TOTEMIC_WRATH)) 
-                return false;
-            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_TOTEM_TOTEMIC_WRATH_AURA))
-                return false;
-            return true;
-        }
+            PrepareAuraScript(spell_sha_tidal_waves_AuraScript);
 
-        void HandleEffectApply(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
-        {
-
-            // applied by a totem - cast the real aura if owner has the talent
-            if (Unit *caster = aurEff->GetBase()->GetCaster())
-                if (caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 2019, 0))
-                    caster->CastSpell(caster, SPELL_SHAMAN_TOTEM_TOTEMIC_WRATH_AURA, true, NULL, aurEff);
-        }
-
-        void Register()
-        {
-            OnEffectApply += AuraEffectApplyFn(spell_sha_totemic_wrath_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_sha_totemic_wrath_AuraScript();
-    }
-};
-
-// 73920 - Healing Rain
-class spell_sha_healing_rain : public SpellScriptLoader
-{
-public:
-    spell_sha_healing_rain() : SpellScriptLoader("spell_sha_healing_rain") { }
-
-    class spell_sha_healing_rain_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_sha_healing_rain_AuraScript);
-
-        void OnTick(AuraEffect const* /*aurEff*/)
-        {
-            if (DynamicObject* dynObj = GetCaster()->GetDynObject(73920))
-                GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 73921, true);
-        }
-
-        void Register()
-        {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_sha_healing_rain_AuraScript::OnTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_sha_healing_rain_AuraScript();
-    }
-};
-
-// 61882 - Earthquake
-class spell_sha_earthquake : public SpellScriptLoader
-{
-public:
-    spell_sha_earthquake() : SpellScriptLoader("spell_sha_earthquake") { }
-
-    class spell_sha_earthquake_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_sha_earthquake_AuraScript);
-
-        void earthquake(AuraEffect const* /*aurEff*/)
-        {
-            if (!GetCaster())
-                 return;
-
-            if (DynamicObject* dynObj = GetCaster()->GetDynObject(61882))
+            bool Validate(SpellInfo const* /*spellInfo*/)
             {
-                GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 77478, true);
-            if (roll_chance_i(10))
-                GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 77505, true);
+                if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_TIDAL_WAVES))
+                    return false;
+                return true;
             }
-        }
 
-        void Register()
+            void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                int32 basePoints0 = -aurEff->GetAmount();
+                int32 basePoints1 = aurEff->GetAmount();
+
+                GetTarget()->CastCustomSpell(GetTarget(), SPELL_SHAMAN_TIDAL_WAVES, &basePoints0, &basePoints1, NULL, true, NULL, aurEff);
+            }
+
+            void Register()
+            {
+                OnEffectProc += AuraEffectProcFn(spell_sha_tidal_waves_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
         {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_sha_earthquake_AuraScript::earthquake, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+            return new spell_sha_tidal_waves_AuraScript();
         }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_sha_earthquake_AuraScript();
-    }
-};
-
-//88766 Fulmination handled in 8042 Earth Shock
-class spell_sha_fulmination: public SpellScriptLoader 
-{
-public:
-    spell_sha_fulmination() : SpellScriptLoader ("spell_sha_fulmination") {}
-
-    class spell_sha_fulmination_SpellScript: public SpellScript 
-	{
-        PrepareSpellScript(spell_sha_fulmination_SpellScript)
-
-        void HandleFulmination(SpellEffIndex effIndex) 
-        {
-            //make caster cast a spell on a unit target of effect
-            Unit *target = GetHitUnit();
-            Unit *caster = GetCaster();
-                if (!target || !caster)
-                    return;
-
-            AuraEffect *fulminationAura = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2010, 0);
-                if (!caster->HasAura(88766))
-                    return; 
-
-            Aura * lightningShield = caster->GetAura(324);
-                if (!lightningShield)
-                    return;
-
-            uint32 IsCharges = lightningShield->GetCharges();
-                if (IsCharges <= 3)
-                    return;
-
-            uint8 usedCharges = IsCharges - 3;
-
-            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_SHAMAN_LIGHTNING_SHIELD_PROC);
-
-            int32 basePoints = (caster->CalculateSpellDamage(target, spellInfo, 0) * 1.2f);
-            int32 damage = usedCharges * (caster->SpellDamageBonusDone(target, spellInfo, basePoints, SPELL_DIRECT_DAMAGE,effIndex));
-
-            caster->CastCustomSpell(target, SPELL_SHAMAN_FULMINATION_TRIGGERED, &damage, NULL, NULL, true, NULL, fulminationAura);
-            lightningShield->SetCharges(IsCharges - usedCharges);
-        }
-
-        void Register() 
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_sha_fulmination_SpellScript::HandleFulmination,EFFECT_FIRST_FOUND, SPELL_EFFECT_ANY);
-        }
-    };
-
-    SpellScript *GetSpellScript() const 
-	{
-        return new spell_sha_fulmination_SpellScript();
-    }
 };
 
 void AddSC_shaman_spell_scripts()
@@ -964,8 +814,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_lava_surge_proc();
     new spell_sha_mana_tide_totem();
     new spell_sha_thunderstorm();
-    new spell_sha_totemic_wrath();
-    new spell_sha_healing_rain();
-    new spell_sha_earthquake();
-	new spell_sha_fulmination();
+    new spell_sha_tidal_waves();
 }

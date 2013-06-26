@@ -264,7 +264,7 @@ public:
                                 break;
                         }
 
-                        DoCast(me->GetVictim(), mark_spell);
+                        DoCastVictim(mark_spell);
 
                         if (MarkOfCorruption_Count < 5)
                             ++MarkOfCorruption_Count;
@@ -347,7 +347,7 @@ public:
                                 break;
                         }
 
-                        DoCast(me->GetVictim(), mark_spell);
+                        DoCastVictim(mark_spell);
 
                         if (MarkOfHydross_Count < 5)
                             ++MarkOfHydross_Count;

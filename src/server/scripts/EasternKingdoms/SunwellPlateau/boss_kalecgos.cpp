@@ -532,7 +532,7 @@ public:
 
             if (HeroicStrikeTimer <= diff)
             {
-                DoCast(me->GetVictim(), SPELL_HEROIC_STRIKE);
+                DoCastVictim(SPELL_HEROIC_STRIKE);
                 HeroicStrikeTimer = 2000;
             } else HeroicStrikeTimer -= diff;
 
@@ -793,7 +793,7 @@ public:
             if (CorruptionStrikeTimer <= diff)
             {
                 if (!(rand()%5))Talk(SAY_SATH_SPELL2);
-                DoCast(me->GetVictim(), SPELL_CORRUPTION_STRIKE);
+                DoCastVictim(SPELL_CORRUPTION_STRIKE);
                 CorruptionStrikeTimer = 13000;
             } else CorruptionStrikeTimer -= diff;
 

@@ -207,7 +207,7 @@ class npc_millhouse_manastorm : public CreatureScript
 
                     Talk(SAY_PYRO);
 
-                    DoCast(me->GetVictim(), SPELL_PYROBLAST);
+                    DoCastVictim(SPELL_PYROBLAST);
                     Pyroblast_Timer = 40000;
                 }
                 else
@@ -215,7 +215,7 @@ class npc_millhouse_manastorm : public CreatureScript
 
                 if (Fireball_Timer <= diff)
                 {
-                    DoCast(me->GetVictim(), SPELL_FIREBALL);
+                    DoCastVictim(SPELL_FIREBALL);
                     Fireball_Timer = 4000;
                 }
                 else

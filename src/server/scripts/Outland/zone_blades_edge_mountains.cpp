@@ -242,7 +242,7 @@ public:
 
             if (IntangiblePresence_Timer <= diff)
             {
-                DoCast(me->GetVictim(), SPELL_INTANGIBLE_PRESENCE);
+                DoCastVictim(SPELL_INTANGIBLE_PRESENCE);
                 IntangiblePresence_Timer = 15000+rand()%15000;
             } else IntangiblePresence_Timer -= diff;
 
@@ -256,7 +256,7 @@ public:
 
             if (ArcaneBlast_Timer <= diff)
             {
-                DoCast(me->GetVictim(), SPELL_ARCANE_BLAST);
+                DoCastVictim(SPELL_ARCANE_BLAST);
                 ArcaneBlast_Timer = 2500+rand()%5000;
             } else ArcaneBlast_Timer -= diff;
 

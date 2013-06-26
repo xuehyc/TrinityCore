@@ -460,7 +460,7 @@ public:
             if (me->HasAura(chargeSpell))
             {
                 me->RemoveAuraFromStack(chargeSpell);
-                DoCast(me->GetVictim(), unleashSpell);
+                DoCastVictim(unleashSpell);
                 HasCast = true;
                 SoulChargeCount--;
             }
@@ -581,7 +581,7 @@ public:
             {
                 if (HandOfDeathTimer <= diff)
                 {
-                    DoCast(me->GetVictim(), SPELL_HAND_OF_DEATH);
+                    DoCastVictim(SPELL_HAND_OF_DEATH);
                     HandOfDeathTimer = 2000;
                 } else HandOfDeathTimer -= diff;
                 return;                                         // Don't do anything after this point.
@@ -609,7 +609,7 @@ public:
 
             if (FearTimer <= diff)
             {
-                DoCast(me->GetVictim(), SPELL_FEAR);
+                DoCastVictim(SPELL_FEAR);
                 FearTimer = 42000;
             } else FearTimer -= diff;
 

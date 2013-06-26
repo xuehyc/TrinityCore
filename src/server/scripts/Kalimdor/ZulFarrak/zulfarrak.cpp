@@ -169,7 +169,7 @@ public:
 
             if (ShieldBash_Timer <= diff)
             {
-                DoCast(me->GetVictim(), SPELL_SHIELD_BASH);
+                DoCastVictim(SPELL_SHIELD_BASH);
                 ShieldBash_Timer = 15000;
             }
             else
@@ -177,7 +177,7 @@ public:
 
             if (Revenge_Timer <= diff)
             {
-                DoCast(me->GetVictim(), SPELL_REVENGE);
+                DoCastVictim(SPELL_REVENGE);
                 Revenge_Timer = 10000;
             }
             else
@@ -342,7 +342,7 @@ public:
 
             if (Bomb_Timer < diff)
             {
-                DoCast(me->GetVictim(), SPELL_BOMB);
+                DoCastVictim(SPELL_BOMB);
                 Bomb_Timer = 10000;
             }
             else
@@ -350,7 +350,7 @@ public:
 
             if (me->isAttackReady() && !me->IsWithinMeleeRange(me->GetVictim()))
             {
-                DoCast(me->GetVictim(), SPELL_SHOOT);
+                DoCastVictim(SPELL_SHOOT);
                 me->SetSheath(SHEATH_STATE_RANGED);
             }
             else

@@ -299,7 +299,7 @@ public:
 
                     if (m_uiPummel_Timer <= uiDiff)
                     {
-                        DoCast(me->GetVictim(), SPELL_PUMMEL);
+                        DoCastVictim(SPELL_PUMMEL);
                         m_uiPummel_Timer = urand(10000, 11000);
                     }
                     else
@@ -320,7 +320,7 @@ public:
                     if (m_uiIntercept_Timer <= uiDiff)
                     {
                         //not much point is this, better random target and more often?
-                        DoCast(me->GetVictim(), SPELL_INTERCEPT);
+                        DoCastVictim(SPELL_INTERCEPT);
                         m_uiIntercept_Timer = urand(45000, 46000);
                     }
                     else
@@ -336,7 +336,7 @@ public:
 
                     if (m_uiCleave_Timer <= uiDiff)
                     {
-                        DoCast(me->GetVictim(), SPELL_CLEAVE);
+                        DoCastVictim(SPELL_CLEAVE);
                         m_uiCleave_Timer = urand(8000, 9000);
                     }
                     else
@@ -348,7 +348,7 @@ public:
                 {
                     if (m_uiMortalStrike_Timer <= uiDiff)
                     {
-                        DoCast(me->GetVictim(), SPELL_MORTAL_STRIKE);
+                        DoCastVictim(SPELL_MORTAL_STRIKE);
                         m_uiMortalStrike_Timer = urand(20000, 21000);
                     }
                     else
@@ -356,7 +356,7 @@ public:
 
                     if (m_uiSlam_Timer <= uiDiff)
                     {
-                        DoCast(me->GetVictim(), SPELL_SLAM);
+                        DoCastVictim(SPELL_SLAM);
                         m_uiSlam_Timer = urand(15000, 16000);
                     }
                     else
@@ -424,7 +424,7 @@ public:
 
             if (m_uiArcWeld_Timer <= uiDiff)
             {
-                DoCast(me->GetVictim(), SPELL_ARC_WELD);
+                DoCastVictim(SPELL_ARC_WELD);
                 m_uiArcWeld_Timer = urand(20000, 21000);
             }
             else

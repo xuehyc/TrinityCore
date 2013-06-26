@@ -189,7 +189,7 @@ public:
             {
                 if (OverloadTimer <= diff)
                 {
-                    DoCast(me->GetVictim(), SPELL_OVERLOAD);
+                    DoCastVictim(SPELL_OVERLOAD);
 
                     OverloadTimer = 2000;
                 } else OverloadTimer -= diff;

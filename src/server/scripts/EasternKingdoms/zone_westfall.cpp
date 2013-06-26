@@ -192,7 +192,7 @@ public:
                 uiShootTimer = 1500;
 
                 if (!me->IsWithinDist(me->GetVictim(), ATTACK_DISTANCE))
-                    DoCast(me->GetVictim(), SPELL_SHOOT);
+                    DoCastVictim(SPELL_SHOOT);
             } else uiShootTimer -= diff;
         }
     };
