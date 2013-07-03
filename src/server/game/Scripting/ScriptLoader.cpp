@@ -151,7 +151,6 @@ void AddSC_boss_ebonroc();
 void AddSC_boss_flamegor();
 void AddSC_boss_chromaggus();
 void AddSC_boss_nefarian();
-void AddSC_boss_mr_smite();
 void AddSC_instance_blackwing_lair();
 void AddSC_boss_omnotron_defense_system();   //Blackwing Descent
 void AddSC_boss_bd_nefarian();
@@ -841,7 +840,6 @@ void AddEasternKingdomsScripts()
     AddSC_boss_flamegor();
     AddSC_boss_chromaggus();
     AddSC_boss_nefarian();
-    AddSC_boss_mr_smite();
 	AddSC_instance_blackwing_lair();
     AddSC_boss_omnotron_defense_system(); //Blackwing Descent
     AddSC_boss_bd_nefarian();

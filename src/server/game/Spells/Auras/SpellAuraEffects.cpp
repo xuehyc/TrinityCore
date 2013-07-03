@@ -5428,13 +5428,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     break;
             }
             break;
-        case SPELLFAMILY_PALADIN:
-        {
-            // Consecration
-            if (GetId() == 26573)
-            target->CastSpell(target, 81297, true);
-            break;
-        }
         case SPELLFAMILY_MAGE:
         {
             // Mirror Image
