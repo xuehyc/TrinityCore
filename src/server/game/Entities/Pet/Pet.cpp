@@ -439,6 +439,9 @@ void Pet::SavePetToDB(PetSaveMode mode)
             trans->Append(stmt);
         }
 
+		// HACK Remove duplicate ghouls (dks can only have 1 ghoul at the same time)
+        trans->PAppend("DELETE FROM character_pet WHERE owner = '%u' AND `owner` IN (SELECT `guid` FROM `characters` WHERE `class`=6);", owner);
+		
         // save pet
         std::ostringstream ss;
         ss  << "INSERT INTO character_pet (id, entry,  owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType) "
