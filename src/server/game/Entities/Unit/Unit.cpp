@@ -6254,13 +6254,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 basepoints0 = (int32)GetAttackTime(BASE_ATTACK) * int32(ap * 0.011f + 0.022f * holy) / 1000;
                 break;
             }
-            // Judgements of the Wise
-            if (dummySpell->SpellIconID == 3017)
-            {
-                target = this;
-                triggered_spell_id = 31930;
-                break;
-            }
             // Righteous Vengeance
             if (dummySpell->SpellIconID == 3025)
             {
@@ -6270,24 +6263,112 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Add remaining ticks to damage done
                 basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
                 break;
-            }			
+            }
+            // Sheath of Light
+            if (dummySpell->SpellIconID == 3030)
+            {
+                // 4 healing tick
+                basepoints0 = triggerAmount * damage / 400;
+                triggered_spell_id = 54203;
+                break;
+            }
+            // Sacred Shield
+            if (dummySpell->SpellFamilyFlags[1] & 0x80000)
+            {
+                if (procFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS)
+                {
+                    if (procSpell->SpellFamilyName == SPELLFAMILY_PALADIN && (procSpell->SpellFamilyFlags[0] & 0x40000000))
+                    {
+                        basepoints0 = damage / 12;
+
+                        if (basepoints0)
+                            CastCustomSpell(this, 66922, &basepoints0, NULL, NULL, true, 0, triggeredByAura, victim->GetGUID());
+
+                        return true;
+                    }
+                    else
+                        return false;
+                }
+                else if (damage > 0)
+                    triggered_spell_id = 58597;
+
+                // Item - Paladin T8 Holy 4P Bonus
+                if (Unit* caster = triggeredByAura->GetCaster())
+                    if (AuraEffect const* aurEff = caster->GetAuraEffect(64895, 0))
+                        cooldown = aurEff->GetAmount();
+
+                target = this;
+                break;
+            }
             switch (dummySpell->Id)
             {
-                // Sacred Shield
-                case 53601:
+                // Judgements of the Bold
+                case 89901:
                 {
-                    if (procFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS)
+                    target = this;
+                    triggered_spell_id = 89906;
+                    break;
+                }
+                // Judgements of the Wise
+                case 31878:
+                {
+                    target = this;
+                    triggered_spell_id = 31930;
+                    break;
+                }
+                // Selfless Healer
+                case 85803:
+                case 85804:
+                {
+                    if (victim == this)
                         return false;
 
-                    if (damage > 0)
-                        triggered_spell_id = 58597;
+                    break;
+                }
+                // Ancient Healer
+                case 86674:
+                {
+                    int32 bp0 = damage;
+                    int32 bp1 = ((bp0 * 10) / 100);
 
-                    // Item - Paladin T8 Holy 4P Bonus
-                    if (Unit* caster = triggeredByAura->GetCaster())
-                        if (AuraEffect const* aurEff = caster->GetAuraEffect(64895, 0))
-                            cooldown = aurEff->GetAmount();
+                    if (!bp0 || !bp1)
+                        return false;
 
+                    if (victim && victim->IsFriendlyTo(this))
+                        CastCustomSpell(victim, 86678,&bp0,&bp1, 0, true, NULL, triggeredByAura, 0);
+                    else
+                        CastCustomSpell(this, 86678,&bp0,&bp1, 0, true, NULL, triggeredByAura, 0);
+                    return true;
+                }
+                // Ancient Crusader - Player
+                case 86701:
+                {
                     target = this;
+                    triggered_spell_id = 86700;
+                    break;
+                }
+                // Long Arm of The law
+                case 87168:
+                case 87172:
+                {
+                    if (roll_chance_f(triggerAmount) && !this->IsWithinDistInMap(victim, 15.0f))
+                    {
+                        target = this;
+                        triggered_spell_id = 87173;
+                        break;
+                    }
+                    break;
+                }
+                // Divine purpose
+                case 85117:
+                case 86172:
+                {
+                    if (roll_chance_i(triggerAmount))
+                    {
+                        target = this;
+                        triggered_spell_id = 90174;
+                        break;
+                    }
                     break;
                 }
                 // Holy Power (Redemption Armor set)
