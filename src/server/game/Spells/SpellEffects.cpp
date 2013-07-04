@@ -4578,26 +4578,15 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_PALADIN:
         {
-            // Judgement (seal trigger)
+            // Judgment (seal trigger)
             if (m_spellInfo->Category == SPELLCATEGORY_JUDGEMENT)
             {
                 if (!unitTarget || !unitTarget->IsAlive())
                     return;
-                uint32 spellId1 = 0;
-                uint32 spellId2 = 0;
 
-                // Judgement self add switch
-                switch (m_spellInfo->Id)
-                {
-                    case 53407: spellId1 = 20184; break;    // Judgement of Justice
-                    case 20271:                             // Judgement of Light
-                    case 57774: spellId1 = 20185; break;    // Judgement of Light
-                    case 53408: spellId1 = 20186; break;    // Judgement of Wisdom
-                    default:
-                        TC_LOG_ERROR(LOG_FILTER_SPELLS_AURAS, "Unsupported Judgement (seal trigger) spell (Id: %u) in Spell::EffectScriptEffect", m_spellInfo->Id);
-                        return;
-                }
-                // all seals have aura dummy in 2 effect
+                uint32 spellId = 0;
+
+                // Seal of Truth and Seal of Righteousness have a dummy aura on effect 2
                 Unit::AuraApplicationMap & sealAuras = m_caster->GetAppliedAuras();
                 for (Unit::AuraApplicationMap::iterator iter = sealAuras.begin(); iter != sealAuras.end();)
                 {
@@ -4608,18 +4597,17 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                             if (aureff->GetAuraType() == SPELL_AURA_DUMMY)
                             {
                                 if (sSpellMgr->GetSpellInfo(aureff->GetAmount()))
-                                    spellId2 = aureff->GetAmount();
+                                    spellId = aureff->GetAmount();
                                 break;
                             }
-                        if (!spellId2)
+                        if (!spellId)
                         {
                             switch (iter->first)
                             {
-                                // Seal of light, Seal of wisdom, Seal of justice
+                                // Seal of Insigth, Seal of Justice
                                 case 20165:
-                                case 20166:
                                 case 20164:
-                                    spellId2 = 54158;
+                                    spellId = 54158;
                             }
                         }
                         break;
@@ -4627,10 +4615,25 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     else
                         ++iter;
                 }
-                if (spellId1)
-                    m_caster->CastSpell(unitTarget, spellId1, true);
-                if (spellId2)
-                    m_caster->CastSpell(unitTarget, spellId2, true);
+                // Cast Judgement
+                if (spellId)
+                    m_caster->CastSpell(unitTarget, spellId, true);
+
+                // Check for Judgement dependent auras
+                Unit::AuraApplicationMap & talentauras = m_caster->GetAppliedAuras();
+                for (Unit::AuraApplicationMap::iterator iter = talentauras.begin(); iter != talentauras.end();)
+                {
+                    Aura * aura = iter->second->GetBase();
+                    switch (aura->GetId())
+                    {
+                        case 31876:
+                        {
+                            m_caster->CastSpell((Unit*)NULL, 57669, true);
+                            break;
+                        }
+                    }
+                    ++iter;
+                }
                 return;
             }
         }
