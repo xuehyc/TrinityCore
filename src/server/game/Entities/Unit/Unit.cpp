@@ -11923,6 +11923,26 @@ void Unit::ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell
         castTime = int32(float(castTime) * m_modAttackSpeedPct[RANGED_ATTACK]);
     else if (spellProto->SpellVisual[0] == 3881 && HasAura(67556)) // cooking with Chef Hat.
         castTime = 500;
+		
+    // Aimed shot! Instant (Master Marksman)
+    if (spellProto->Id == 82928 && HasAura(82926))
+        castTime = -1000;
+
+    // Tree of life
+    if (spellProto->Id == 5176 && HasAura(33891)) // Wrath
+        castTime = castTime / 2;
+    if (spellProto->Id == 8936 && HasAura(33891)) // Regrowth
+        castTime = -1000;
+    if (spellProto->Id == 339 && HasAura(33891)) // Entangling Roots
+        castTime = -1000;
+
+    // Imp's firebolt
+    if (spellProto->Id == 3110 && HasAura(18694)) // Dark arts (Rank 1)
+        castTime = 1500;
+    if (spellProto->Id == 3110 && HasAura(85283)) // Dark arts (Rank 2)
+        castTime = 1250;
+    if (spellProto->Id == 3110 && HasAura(85284)) // Dark arts (Rank 3)
+        castTime = 1000;		
 }
 
 DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
