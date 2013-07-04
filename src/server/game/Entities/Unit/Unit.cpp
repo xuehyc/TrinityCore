@@ -6261,6 +6261,16 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 triggered_spell_id = 31930;
                 break;
             }
+            // Righteous Vengeance
+            if (dummySpell->SpellIconID == 3025)
+            {
+                // 4 damage tick
+                basepoints0 = triggerAmount * damage / 400;
+                triggered_spell_id = 61840;
+                // Add remaining ticks to damage done
+                basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+                break;
+            }			
             switch (dummySpell->Id)
             {
                 // Sacred Shield
