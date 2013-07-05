@@ -921,52 +921,6 @@ class spell_pal_templar_s_verdict : public SpellScriptLoader
         }
 };
 
-// 20154, 21084 - Seal of Righteousness - melee proc dummy (addition ${$MWS*(0.022*$AP+0.044*$SPH)} damage)
-class spell_pal_seal_of_righteousness : public SpellScriptLoader
-{
-    public:
-        spell_pal_seal_of_righteousness() : SpellScriptLoader("spell_pal_seal_of_righteousness") { }
-
-        class spell_pal_seal_of_righteousness_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pal_seal_of_righteousness_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS))
-                    return false;
-                return true;
-            }
-
-            bool CheckProc(ProcEventInfo& eventInfo)
-            {
-                return eventInfo.GetProcTarget();
-            }
-
-            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-            {
-                PreventDefaultAction();
-
-                float ap = GetTarget()->GetTotalAttackPowerValue(BASE_ATTACK);
-                int32 holy = GetTarget()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY);
-                holy += eventInfo.GetProcTarget()->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
-                int32 bp = int32((ap * 0.022f + 0.044f * holy) * GetTarget()->GetAttackTime(BASE_ATTACK) / 1000);
-                GetTarget()->CastCustomSpell(SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS, SPELLVALUE_BASE_POINT0, bp, eventInfo.GetProcTarget(), true, NULL, aurEff);
-            }
-
-            void Register()
-            {
-                DoCheckProc += AuraCheckProcFn(spell_pal_seal_of_righteousness_AuraScript::CheckProc);
-                OnEffectProc += AuraEffectProcFn(spell_pal_seal_of_righteousness_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_pal_seal_of_righteousness_AuraScript();
-        }
-};
-
 /// Updated 4.3.4
 class spell_pal_judgements : public SpellScriptLoader
 {
@@ -1243,6 +1197,76 @@ class spell_pal_shield_of_the_righteous : public SpellScriptLoader
         }
 };
 
+class spell_pal_judgements_of_the_wise : public SpellScriptLoader
+{
+    public:
+        spell_pal_judgements_of_the_wise() : SpellScriptLoader("spell_pal_judgements_of_the_wise") { }
+
+        class spell_pal_judgements_of_the_wise_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pal_judgements_of_the_wise_AuraScript);
+
+            void CalculateMana(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    canBeRecalculated = true;
+                    int32 basemana = caster->ToPlayer()->GetCreateMana();
+                    amount = (3 * basemana) / 100;
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pal_judgements_of_the_wise_AuraScript::CalculateMana, EFFECT_0, SPELL_AURA_PERIODIC_ENERGIZE);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pal_judgements_of_the_wise_AuraScript();
+        }
+};
+
+class spell_pal_judgements_of_the_bold : public SpellScriptLoader
+{
+public:
+    spell_pal_judgements_of_the_bold() : SpellScriptLoader("spell_pal_judgements_of_the_bold") { }
+
+    class spell_pal_judgements_of_the_bold_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pal_judgements_of_the_bold_AuraScript);
+
+        bool Load()
+        {
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+            return true;
+        }
+
+        void CalculateMana(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                canBeRecalculated = true;
+                int32 basemana = caster->ToPlayer()->GetCreateMana();
+                amount = (amount * basemana) / 1000;
+            }
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pal_judgements_of_the_bold_AuraScript::CalculateMana, EFFECT_0, SPELL_AURA_PERIODIC_ENERGIZE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_pal_judgements_of_the_bold_AuraScript();
+    }
+};
+
+
 void AddSC_paladin_spell_scripts()
 {
     //new spell_pal_ardent_defender();
@@ -1262,10 +1286,11 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_righteous_defense();
     new spell_pal_sacred_shield();
     new spell_pal_templar_s_verdict();
-    new spell_pal_seal_of_righteousness();
 	new spell_pal_judgements();
 	new spell_pal_guardian_ancient_kings();
 	new spell_pal_consecration();
 	new spell_pal_selfless_healer();
 	new spell_pal_shield_of_the_righteous();
+	new spell_pal_judgements_of_the_bold();
+	new spell_pal_judgements_of_the_wise();
 }
