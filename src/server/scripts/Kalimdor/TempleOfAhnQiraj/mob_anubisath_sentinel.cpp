@@ -21,7 +21,7 @@
  */
 
 /* ScriptData
-SDName: mob_anubisath_sentinel
+SDName: npc_anubisath_sentinel
 SD%Complete: 95
 SDComment: Shadow storm is not properly implemented in core it should only target ppl outside of melee range.
 SDCategory: Temple of Ahn'Qiraj
@@ -60,10 +60,10 @@ EndScriptData */
 #define SPELL_STORM_BUFF        2148
 #define SPELL_STORM             26546
 
-class mob_anubisath_sentinel : public CreatureScript
+class npc_anubisath_sentinel : public CreatureScript
 {
 public:
-    mob_anubisath_sentinel() : CreatureScript("mob_anubisath_sentinel") { }
+    npc_anubisath_sentinel() : CreatureScript("npc_anubisath_sentinel") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
@@ -263,7 +263,7 @@ public:
     };
 };
 
-void AddSC_mob_anubisath_sentinel()
+void AddSC_npc_anubisath_sentinel()
 {
-    new mob_anubisath_sentinel();
+    new npc_anubisath_sentinel();
 }

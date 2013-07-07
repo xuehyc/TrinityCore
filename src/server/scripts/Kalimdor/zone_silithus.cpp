@@ -291,7 +291,7 @@ enum EternalBoard
 
 /* ContentData
 A Pawn on the Eternal Board - creatures, gameobjects and defines
-mob_qiraj_war_spawn : Adds that are summoned in the Qiraj gates battle.
+npc_qiraj_war_spawn : Adds that are summoned in the Qiraj gates battle.
 npc_anachronos_the_ancient : Creature that controls the event.
 npc_anachronos_quest_trigger: controls the spawning of the BG War mobs.
 go_crystalline_tear : GameObject that begins the event and hands out quest
@@ -813,22 +813,22 @@ public:
 };
 
 /*######
-# mob_qiraj_war_spawn
+# npc_qiraj_war_spawn
 ######*/
 
-class mob_qiraj_war_spawn : public CreatureScript
+class npc_qiraj_war_spawn : public CreatureScript
 {
 public:
-    mob_qiraj_war_spawn() : CreatureScript("mob_qiraj_war_spawn") { }
+    npc_qiraj_war_spawn() : CreatureScript("npc_qiraj_war_spawn") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_qiraj_war_spawnAI(creature);
+        return new npc_qiraj_war_spawnAI(creature);
     }
 
-    struct mob_qiraj_war_spawnAI : public ScriptedAI
+    struct npc_qiraj_war_spawnAI : public ScriptedAI
     {
-        mob_qiraj_war_spawnAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_qiraj_war_spawnAI(Creature* creature) : ScriptedAI(creature) {}
 
         uint64 MobGUID;
         uint64 PlayerGUID;
@@ -991,7 +991,7 @@ public:
 
                     if (WaveCount < 5) //1-4 Wave
                     {
-                        if (mob_qiraj_war_spawn::mob_qiraj_war_spawnAI* spawnAI = CAST_AI(mob_qiraj_war_spawn::mob_qiraj_war_spawnAI, spawn->AI()))
+                        if (npc_qiraj_war_spawn::npc_qiraj_war_spawnAI* spawnAI = CAST_AI(npc_qiraj_war_spawn::npc_qiraj_war_spawnAI, spawn->AI()))
                         {
                             spawnAI->MobGUID = me->GetGUID();
                             spawnAI->PlayerGUID = PlayerGUID;
@@ -1074,7 +1074,7 @@ public:
 
 };
 
-void mob_qiraj_war_spawn::mob_qiraj_war_spawnAI::JustDied(Unit* /*slayer*/)
+void npc_qiraj_war_spawn::npc_qiraj_war_spawnAI::JustDied(Unit* /*slayer*/)
 {
     me->RemoveCorpse();
 
