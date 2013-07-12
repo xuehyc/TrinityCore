@@ -45,6 +45,8 @@ enum PaladinSpells
     SPELL_PALADIN_DIVINE_STORM                   = 53385,
     SPELL_PALADIN_DIVINE_STORM_DUMMY             = 54171,
     SPELL_PALADIN_DIVINE_STORM_HEAL              = 54172,
+	
+	SPELL_PALADIN_AVENGER_S_SHIELD 				 = 31935,
 
     SPELL_PALADIN_EYE_FOR_AN_EYE_RANK_1          = 9799,
     SPELL_PALADIN_EYE_FOR_AN_EYE_DAMAGE          = 25997,
@@ -1094,7 +1096,7 @@ public:
             return true;
         }
 
-        void HandlePeriodicDummy(AuraEffect const* aurEff)
+        void HandlePeriodicDummy(AuraEffect const* /*aurEff*/)
         {
             uint64 consecrationNpcGUID = GetCaster()->m_SummonSlot[1];
 
@@ -1289,6 +1291,102 @@ public:
     }
 };
 
+// Grand Crusader 4.3.4
+class spell_pal_grand_crusader: public SpellScriptLoader
+{
+public:
+    spell_pal_grand_crusader () :
+            SpellScriptLoader("spell_pal_grand_crusader")
+    {
+    }
+
+    class spell_pal_grand_crusader_AuraScript: public AuraScript
+    {
+        PrepareAuraScript (spell_pal_grand_crusader_AuraScript);
+
+        bool Validate (SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_AVENGER_S_SHIELD))
+                return false;
+            return true;
+        }
+
+        void HandleApply (AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+                caster->ToPlayer()->RemoveSpellCooldown(SPELL_PALADIN_AVENGER_S_SHIELD, true);
+        }
+
+        void Register ()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_pal_grand_crusader_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript () const
+    {
+        return new spell_pal_grand_crusader_AuraScript();
+    }
+};
+
+class spell_pal_zealotry : public SpellScriptLoader
+{
+    public:
+        spell_pal_zealotry() : SpellScriptLoader("spell_pal_zealotry") { }
+
+        class spell_pal_zealotry_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pal_zealotry_SpellScript);
+
+            void HandleAfterCast()
+            {
+                if (Unit* caster = GetCaster())
+                    caster->SetPower(POWER_HOLY_POWER,3);
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_pal_zealotry_SpellScript::HandleAfterCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pal_zealotry_SpellScript();
+        }
+};
+
+
+class spell_pal_acts_of_sacrifice : public SpellScriptLoader
+{
+    public:
+        spell_pal_acts_of_sacrifice() : SpellScriptLoader("spell_pal_acts_of_sacrifice") { }
+
+        class spell_pal_acts_of_sacrifice_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pal_acts_of_sacrifice_SpellScript);
+
+            void HandleHitTarget(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                    if (Unit* target = GetHitUnit())
+                        if (caster->HasAura(85446) || caster->HasAura(85795))
+                             if (target->GetGUID() == caster->GetGUID())
+                                caster->RemoveAurasWithMechanic((1<<MECHANIC_SNARE)|(1<<MECHANIC_ROOT), AURA_REMOVE_BY_DEFAULT, NULL);
+            }
+
+            void Register()
+            {
+                 OnEffectHitTarget += SpellEffectFn(spell_pal_acts_of_sacrifice_SpellScript::HandleHitTarget, EFFECT_0, SPELL_EFFECT_DISPEL);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pal_acts_of_sacrifice_SpellScript();
+        }
+};
+
 
 void AddSC_paladin_spell_scripts()
 {
@@ -1316,4 +1414,7 @@ void AddSC_paladin_spell_scripts()
 	new spell_pal_shield_of_the_righteous();
 	new spell_pal_judgements_of_the_bold();
 	new spell_pal_judgements_of_the_wise();
+	new spell_pal_grand_crusader();
+	new spell_pal_zealotry();
+	new spell_pal_acts_of_sacrifice();
 }
