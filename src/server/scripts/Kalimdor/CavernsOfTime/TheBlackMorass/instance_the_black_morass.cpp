@@ -77,7 +77,7 @@ class instance_the_black_morass : public InstanceMapScript
 public:
     instance_the_black_morass() : InstanceMapScript("instance_the_black_morass", 269) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_the_black_morass_InstanceMapScript(map);
     }
@@ -169,7 +169,7 @@ public:
             }
         }
 
-        void SetData(uint32 type, uint32 data)
+        void SetData(uint32 type, uint32 data) OVERRIDE
         {
             switch (type)
             {
@@ -240,7 +240,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 type) const
+        uint32 GetData(uint32 type) const OVERRIDE
         {
             switch (type)
             {
@@ -256,7 +256,7 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 data) const
+        uint64 GetData64(uint32 data) const OVERRIDE
         {
             if (data == DATA_MEDIVH)
                 return _medivhGUID;

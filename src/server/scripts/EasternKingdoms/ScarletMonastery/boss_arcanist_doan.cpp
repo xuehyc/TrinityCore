@@ -30,16 +30,19 @@ EndScriptData */
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 
-enum eEnums
+enum Yells
 {
     SAY_AGGRO                   = 0,
-    SAY_SPECIALAE               = 1,
+    SAY_SPECIALAE               = 1
+};
 
+enum Spells
+{
     SPELL_POLYMORPH             = 13323,
     SPELL_AOESILENCE            = 8988,
     SPELL_ARCANEEXPLOSION       = 9433,
     SPELL_FIREAOE               = 9435,
-    SPELL_ARCANEBUBBLE          = 9438,
+    SPELL_ARCANEBUBBLE          = 9438
 };
 
 class boss_arcanist_doan : public CreatureScript
@@ -47,9 +50,9 @@ class boss_arcanist_doan : public CreatureScript
 public:
     boss_arcanist_doan() : CreatureScript("boss_arcanist_doan") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_arcanist_doanAI (creature);
+        return new boss_arcanist_doanAI(creature);
     }
 
     struct boss_arcanist_doanAI : public ScriptedAI
@@ -62,7 +65,7 @@ public:
         bool bCanDetonate;
         bool bShielded;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             Polymorph_Timer = 20000;
             AoESilence_Timer = 15000;
@@ -71,12 +74,12 @@ public:
             bShielded = false;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

@@ -56,7 +56,7 @@ class npc_highlord_demitrian : public CreatureScript
 public:
     npc_highlord_demitrian() : CreatureScript("npc_highlord_demitrian") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
     {
         player->PlayerTalkClass->ClearMenus();
         switch (action)
@@ -97,7 +97,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature)
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
     {
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -143,7 +143,7 @@ class npcs_rutgar_and_frankal : public CreatureScript
 public:
     npcs_rutgar_and_frankal() : CreatureScript("npcs_rutgar_and_frankal") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
     {
         player->PlayerTalkClass->ClearMenus();
         switch (action)
@@ -207,7 +207,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature)
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
     {
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -493,7 +493,7 @@ class npc_anachronos_the_ancient : public CreatureScript
 public:
     npc_anachronos_the_ancient() : CreatureScript("npc_anachronos_the_ancient") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_anachronos_the_ancientAI(creature);
     }
@@ -513,7 +513,7 @@ public:
         uint64 PlayerGUID;
         bool eventEnd;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             AnimationTimer = 1500;
             AnimationCount = 0;
@@ -795,7 +795,7 @@ public:
             }
             ++AnimationCount;
         }
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (AnimationTimer)
             {
@@ -821,7 +821,7 @@ class npc_qiraj_war_spawn : public CreatureScript
 public:
     npc_qiraj_war_spawn() : CreatureScript("npc_qiraj_war_spawn") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_qiraj_war_spawnAI(creature);
     }
@@ -836,7 +836,7 @@ public:
         bool Timers;
         bool hasTarget;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             MobGUID = 0;
             PlayerGUID = 0;
@@ -844,10 +844,10 @@ public:
             hasTarget = false;
         }
 
-        void EnterCombat(Unit* /*who*/) {}
-        void JustDied(Unit* /*slayer*/);
+        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void JustDied(Unit* /*slayer*/) OVERRIDE;
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!Timers)
             {
@@ -934,7 +934,7 @@ class npc_anachronos_quest_trigger : public CreatureScript
 public:
     npc_anachronos_quest_trigger() : CreatureScript("npc_anachronos_quest_trigger") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_anachronos_quest_triggerAI(creature);
     }
@@ -955,7 +955,7 @@ public:
         bool Announced;
         bool Failed;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             PlayerGUID = 0;
 
@@ -1049,7 +1049,7 @@ public:
                 Announced = false;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!PlayerGUID || !EventStarted)
                 return;
@@ -1096,7 +1096,7 @@ class go_crystalline_tear : public GameObjectScript
 public:
     go_crystalline_tear() : GameObjectScript("go_crystalline_tear") { }
 
-    bool OnQuestAccept(Player* player, GameObject* go, Quest const* quest)
+    bool OnQuestAccept(Player* player, GameObject* go, Quest const* quest) OVERRIDE
     {
         if (quest->GetQuestId() == QUEST_A_PAWN_ON_THE_ETERNAL_BOARD)
         {
@@ -1367,7 +1367,7 @@ class go_wind_stone : public GameObjectScript
         }
 
     public:
-        bool OnGossipHello(Player* player, GameObject* go)
+        bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
         {
             uint8 rank = GetPlayerRank(player);
 
@@ -1445,7 +1445,7 @@ class go_wind_stone : public GameObjectScript
             return true;
         }
 
-        bool OnGossipSelect(Player* player, GameObject* go, uint32 /*sender*/, uint32 action)
+        bool OnGossipSelect(Player* player, GameObject* go, uint32 /*sender*/, uint32 action) OVERRIDE
         {
             player->PlayerTalkClass->ClearMenus();
             player->PlayerTalkClass->SendCloseGossip();

@@ -38,8 +38,11 @@ enum TerestianIllhoof
     SAY_DEATH                   = 2,
     SAY_AGGRO                   = 3,
     SAY_SACRIFICE               = 4,
-    SAY_SUMMON                  = 5,
+    SAY_SUMMON                  = 5
+};
 
+enum Spells
+{
     SPELL_SUMMON_DEMONCHAINS    = 30120,               // Summons demonic chains that maintain the ritual of sacrifice.
     SPELL_DEMON_CHAINS          = 30206,                   // Instant - Visual Effect
     SPELL_ENRAGE                = 23537,                   // Increases the caster's attack speed by 50% and the Physical damage it deals by 219 to 281 for 10 min.
@@ -55,22 +58,24 @@ enum TerestianIllhoof
     SPELL_FIREBOLT              = 30050,                   // Blasts a target for 150 Fire damage.
     SPELL_BROKEN_PACT           = 30065,                   // All damage taken increased by 25%.
     SPELL_AMPLIFY_FLAMES        = 30053,                   // Increases the Fire damage taken by an enemy by 500 for 25 sec.
-
-    CREATURE_DEMONCHAINS        = 17248,
-    CREATURE_FIENDISHIMP        = 17267,
-    CREATURE_PORTAL             = 17265,
-    CREATURE_KILREK             = 17229,
 };
 
+enum Creatures
+{
+    NPC_DEMONCHAINS             = 17248,
+    NPC_FIENDISHIMP             = 17267,
+    NPC_PORTAL                  = 17265,
+    NPC_KILREK                  = 17229
+};
 
 class npc_kilrek : public CreatureScript
 {
 public:
     npc_kilrek() : CreatureScript("npc_kilrek") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_kilrekAI (creature);
+        return new npc_kilrekAI(creature);
     }
 
     struct npc_kilrekAI : public ScriptedAI
@@ -86,13 +91,13 @@ public:
 
         uint32 AmplifyTimer;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             TerestianGUID = 0;
             AmplifyTimer = 2000;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             if (!instance)
             {
@@ -101,7 +106,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
             {
@@ -115,7 +120,7 @@ public:
             } else ERROR_INST_DATA(me);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -139,7 +144,7 @@ class npc_demon_chain : public CreatureScript
 public:
     npc_demon_chain() : CreatureScript("npc_demon_chain") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_demon_chainAI(creature);
     }
@@ -150,16 +155,17 @@ public:
 
         uint64 SacrificeGUID;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             SacrificeGUID = 0;
         }
 
-        void EnterCombat(Unit* /*who*/) {}
-        void AttackStart(Unit* /*who*/) {}
-        void MoveInLineOfSight(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void AttackStart(Unit* /*who*/) OVERRIDE {}
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE {}
 
-        void JustDied(Unit* /*killer*/)
+
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (SacrificeGUID)
             {
@@ -176,9 +182,9 @@ class npc_fiendish_portal : public CreatureScript
 public:
     npc_fiendish_portal() : CreatureScript("npc_fiendish_portal") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_fiendish_portalAI (creature);
+        return new npc_fiendish_portalAI(creature);
     }
 
     struct npc_fiendish_portalAI : public PassiveAI
@@ -187,12 +193,12 @@ public:
 
         SummonList summons;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             DespawnAllImp();
         }
 
-        void JustSummoned(Creature* summon)
+        void JustSummoned(Creature* summon) OVERRIDE
         {
             summons.Summon(summon);
             DoZoneInCombat(summon);
@@ -205,16 +211,14 @@ public:
     };
 };
 
-#define SPELL_FIREBOLT  30050   // Blasts a target for 181-209 Fire damage.
-
 class npc_fiendish_imp : public CreatureScript
 {
 public:
     npc_fiendish_imp() : CreatureScript("npc_fiendish_imp") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_fiendish_impAI (creature);
+        return new npc_fiendish_impAI(creature);
     }
 
     struct npc_fiendish_impAI : public ScriptedAI
@@ -223,16 +227,16 @@ public:
 
         uint32 FireboltTimer;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             FireboltTimer = 2000;
 
             me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE {}
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -254,9 +258,9 @@ class boss_terestian_illhoof : public CreatureScript
 public:
     boss_terestian_illhoof() : CreatureScript("boss_terestian_illhoof") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_terestianAI (creature);
+        return new boss_terestianAI(creature);
     }
 
     struct boss_terestianAI : public ScriptedAI
@@ -281,7 +285,7 @@ public:
         bool SummonedPortals;
         bool Berserk;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             for (uint8 i = 0; i < 2; ++i)
             {
@@ -322,14 +326,14 @@ public:
             else DoCast(me, SPELL_SUMMON_IMP, true);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
         }
 
-        void JustSummoned(Creature* summoned)
+        void JustSummoned(Creature* summoned) OVERRIDE
         {
-            if (summoned->GetEntry() == CREATURE_PORTAL)
+            if (summoned->GetEntry() == NPC_PORTAL)
             {
                 PortalGUID[PortalsCount] = summoned->GetGUID();
                 ++PortalsCount;
@@ -342,12 +346,12 @@ public:
             }
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             for (uint8 i = 0; i < 2; ++i)
             {
@@ -366,7 +370,7 @@ public:
                 instance->SetData(TYPE_TERESTIAN, DONE);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -379,7 +383,7 @@ public:
                     DoCast(target, SPELL_SACRIFICE, true);
                     DoCast(target, SPELL_SUMMON_DEMONCHAINS, true);
 
-                    if (Creature* Chains = me->FindNearestCreature(CREATURE_DEMONCHAINS, 5000))
+                    if (Creature* Chains = me->FindNearestCreature(NPC_DEMONCHAINS, 5000))
                     {
                         CAST_AI(npc_demon_chain::npc_demon_chainAI, Chains->AI())->SacrificeGUID = target->GetGUID();
                         Chains->CastSpell(Chains, SPELL_DEMON_CHAINS, true);

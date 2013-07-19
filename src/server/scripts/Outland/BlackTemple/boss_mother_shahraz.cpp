@@ -86,9 +86,9 @@ class boss_mother_shahraz : public CreatureScript
 public:
     boss_mother_shahraz() : CreatureScript("boss_mother_shahraz") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_shahrazAI (creature);
+        return new boss_shahrazAI(creature);
     }
 
     struct boss_shahrazAI : public ScriptedAI
@@ -115,7 +115,7 @@ public:
 
         bool Enraged;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             if (instance)
                 instance->SetData(DATA_MOTHERSHAHRAZEVENT, NOT_STARTED);
@@ -138,7 +138,7 @@ public:
             Enraged = false;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(DATA_MOTHERSHAHRAZEVENT, IN_PROGRESS);
@@ -147,12 +147,12 @@ public:
             Talk(SAY_AGGRO);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(DATA_MOTHERSHAHRAZEVENT, DONE);
@@ -178,7 +178,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

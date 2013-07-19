@@ -38,7 +38,7 @@ class instance_wailing_caverns : public InstanceMapScript
 public:
     instance_wailing_caverns() : InstanceMapScript("instance_wailing_caverns", 43) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_wailing_caverns_InstanceMapScript(map);
     }
@@ -66,7 +66,7 @@ public:
                 NaralexGUID = creature->GetGUID();
         }
 
-        void SetData(uint32 type, uint32 data)
+        void SetData(uint32 type, uint32 data) OVERRIDE
         {
             switch (type)
             {
@@ -84,7 +84,7 @@ public:
             if (data == DONE)SaveToDB();
         }
 
-        uint32 GetData(uint32 type) const
+        uint32 GetData(uint32 type) const OVERRIDE
         {
             switch (type)
             {
@@ -102,7 +102,7 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 data) const
+        uint64 GetData64(uint32 data) const OVERRIDE
         {
             if (data == DATA_NARALEX)return NaralexGUID;
             return 0;

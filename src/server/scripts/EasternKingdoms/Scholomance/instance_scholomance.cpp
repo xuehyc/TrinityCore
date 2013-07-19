@@ -35,7 +35,7 @@ class instance_scholomance : public InstanceMapScript
     public:
         instance_scholomance() : InstanceMapScript("instance_scholomance", 289) { }
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const
+        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
         {
             return new instance_scholomance_InstanceMapScript(map);
         }
@@ -114,7 +114,7 @@ class instance_scholomance : public InstanceMapScript
                 return true;
             }
 
-            uint64 GetData64(uint32 type) const
+            uint64 GetData64(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {

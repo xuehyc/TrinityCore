@@ -217,7 +217,7 @@ class instance_stratholme : public InstanceMapScript
                 }
             }
 
-            void SetData(uint32 type, uint32 data)
+            void SetData(uint32 type, uint32 data) OVERRIDE
             {
                 switch (type)
                 {
@@ -250,23 +250,29 @@ class instance_stratholme : public InstanceMapScript
                     case TYPE_BARONESS:
                         EncounterState[1] = data;
                         if (data == IN_PROGRESS)
+                        {
                             HandleGameObject(ziggurat1GUID, true);
-                        if (data == IN_PROGRESS)                    //change to DONE when crystals implemented
+                            //change to DONE when crystals implemented
                             StartSlaugtherSquare();
+                        }
                         break;
                     case TYPE_NERUB:
                         EncounterState[2] = data;
                         if (data == IN_PROGRESS)
+                        {
                             HandleGameObject(ziggurat2GUID, true);
-                        if (data == IN_PROGRESS)                    //change to DONE when crystals implemented
+                            //change to DONE when crystals implemented
                             StartSlaugtherSquare();
+                        }
                         break;
                     case TYPE_PALLID:
                         EncounterState[3] = data;
                         if (data == IN_PROGRESS)
+                        {
                             HandleGameObject(ziggurat3GUID, true);
-                        if (data == IN_PROGRESS)                    //change to DONE when crystals implemented
+                            //change to DONE when crystals implemented
                             StartSlaugtherSquare();
+                        }
                         break;
                     case TYPE_RAMSTEIN:
                         if (data == IN_PROGRESS)
@@ -388,7 +394,7 @@ class instance_stratholme : public InstanceMapScript
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
 
-            uint32 GetData(uint32 type) const
+            uint32 GetData(uint32 type) const OVERRIDE
             {
                   switch (type)
                   {
@@ -412,7 +418,7 @@ class instance_stratholme : public InstanceMapScript
                   return 0;
             }
 
-            uint64 GetData64(uint32 data) const
+            uint64 GetData64(uint32 data) const OVERRIDE
             {
                 switch (data)
                 {
@@ -455,7 +461,7 @@ class instance_stratholme : public InstanceMapScript
             }
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const
+        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
         {
             return new instance_stratholme_InstanceMapScript(map);
         }

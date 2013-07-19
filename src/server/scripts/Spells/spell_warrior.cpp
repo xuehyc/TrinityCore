@@ -28,6 +28,8 @@
 
 enum WarriorSpells
 {
+    SPELL_WARRIOR_BLOODTHIRST                       = 23885,
+    SPELL_WARRIOR_BLOODTHIRST_DAMAGE                = 23881,
 	SPELL_WARRIOR_RALLING_CRY_TRIGGERED             = 97463,
     SPELL_WARRIOR_CHARGE                            = 34846,
     SPELL_WARRIOR_DEEP_WOUNDS_RANK_1                = 12162,
@@ -41,6 +43,10 @@ enum WarriorSpells
     SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT      = 64976,
     SPELL_WARRIOR_LAST_STAND_TRIGGERED              = 12976,
     SPELL_WARRIOR_RALLYING_CRY                      = 97463,
+    SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_1          = 29834,
+    SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_2          = 29838,
+    SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_1       = 29841,
+    SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_2       = 29842,
     SPELL_WARRIOR_SLAM                              = 50782,
     SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK     = 26654,
     SPELL_WARRIOR_TAUNT                             = 355,
@@ -63,38 +69,74 @@ enum WarriorSpellIcons
     WARRIOR_ICON_ID_SUDDEN_DEATH                    = 1989,
 };
 
-// Bloodthirst
-// Spell Id: 23881
- class spell_warr_bloodthirst : public SpellScriptLoader
- {
+/// Updated 4.3.4
+class spell_warr_bloodthirst : public SpellScriptLoader
+{
     public:
         spell_warr_bloodthirst() : SpellScriptLoader("spell_warr_bloodthirst") { }
- 
-         class spell_warr_bloodthirst_SpellScript : public SpellScript
-         {
+
+        class spell_warr_bloodthirst_SpellScript : public SpellScript
+        {
             PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
- 
-            void CalculateDamage(SpellEffIndex /*effect*/)
+
+            void HandleDamage(SpellEffIndex /*effIndex*/)
             {
-                // Formula: AttackPower * BasePoints / 100
-                if (Unit* caster = GetCaster())
+                int32 damage = GetEffectValue();
+                ApplyPct(damage, GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK));
+
+                if (Unit* target = GetHitUnit())
                 {
-                    int32 dmg = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 80 / 100);
-                    SetHitDamage(dmg);
-                    caster->CastCustomSpell(caster, 23885, &dmg, NULL, NULL, true);
+                    damage = GetCaster()->SpellDamageBonusDone(target, GetSpellInfo(), uint32(damage), SPELL_DIRECT_DAMAGE);
+                    damage = target->SpellDamageBonusTaken(GetCaster(), GetSpellInfo(), uint32(damage), SPELL_DIRECT_DAMAGE);
                 }
+                SetHitDamage(damage);
             }
 
-            void Register()
+            void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst::spell_warr_bloodthirst_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                int32 damage = GetEffectValue();
+                GetCaster()->CastCustomSpell(GetCaster(), SPELL_WARRIOR_BLOODTHIRST, &damage, NULL, NULL, true, NULL);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                OnEffectHit += SpellEffectFn(spell_warr_bloodthirst_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
             }
         };
 
-         SpellScript* GetSpellScript() const
-         {
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
             return new spell_warr_bloodthirst_SpellScript();
-         }
+        }
+};
+
+/// Updated 4.3.4
+class spell_warr_bloodthirst_heal : public SpellScriptLoader
+{
+    public:
+        spell_warr_bloodthirst_heal() : SpellScriptLoader("spell_warr_bloodthirst_heal") { }
+
+        class spell_warr_bloodthirst_heal_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_bloodthirst_heal_SpellScript);
+
+            void HandleHeal(SpellEffIndex /*effIndex*/)
+            {
+                if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_WARRIOR_BLOODTHIRST_DAMAGE))
+                    SetHitHeal(GetCaster()->CountPctFromMaxHealth(spellInfo->Effects[EFFECT_1].CalcValue(GetCaster())) / 100);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst_heal_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_warr_bloodthirst_heal_SpellScript();
+        }
 };
 
 /// Updated 4.3.4
@@ -107,7 +149,7 @@ class spell_warr_charge : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_charge_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_BUFF) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_CHARGE))
                     return false;
@@ -125,13 +167,13 @@ class spell_warr_charge : public SpellScriptLoader
                     caster->CastSpell(caster, SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_BUFF, true);
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warr_charge_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_warr_charge_SpellScript();
         }
@@ -152,13 +194,13 @@ class spell_warr_concussion_blow : public SpellScriptLoader
                 SetHitDamage(CalculatePct(GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK), GetEffectValue()));
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warr_concussion_blow_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_warr_concussion_blow_SpellScript();
         }
@@ -174,7 +216,7 @@ class spell_warr_deep_wounds : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_deep_wounds_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DEEP_WOUNDS_RANK_1) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DEEP_WOUNDS_RANK_2) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DEEP_WOUNDS_RANK_3))
                     return false;
@@ -207,13 +249,13 @@ class spell_warr_deep_wounds : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warr_deep_wounds_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_warr_deep_wounds_SpellScript();
         }
@@ -255,13 +297,13 @@ class spell_warr_execute : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warr_execute_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_warr_execute_SpellScript();
         }
@@ -283,13 +325,13 @@ class spell_warr_improved_spell_reflection : public SpellScriptLoader
                     unitList.remove(GetCaster());
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_improved_spell_reflection_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_PARTY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_warr_improved_spell_reflection_SpellScript();
         }
@@ -310,14 +352,14 @@ class spell_warr_intimidating_shout : public SpellScriptLoader
                 unitList.remove(GetExplTargetWorldObject());
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_intimidating_shout_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_intimidating_shout_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_warr_intimidating_shout_SpellScript();
         }
@@ -333,7 +375,7 @@ class spell_warr_last_stand : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_last_stand_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_LAST_STAND_TRIGGERED))
                     return false;
@@ -349,14 +391,14 @@ class spell_warr_last_stand : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 // add dummy effect spell handler to Last Stand
                 OnEffectHit += SpellEffectFn(spell_warr_last_stand_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_warr_last_stand_SpellScript();
         }
@@ -388,13 +430,13 @@ class spell_warr_overpower : public SpellScriptLoader
                         target->CastSpell(target, spellId, true);
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warr_overpower_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_ANY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_warr_overpower_SpellScript();
         }
@@ -410,14 +452,14 @@ class spell_warr_rallying_cry : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_rallying_cry_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_RALLYING_CRY))
                     return false;
                 return true;
             }
 
-            bool Load()
+            bool Load() OVERRIDE
             {
                 return GetCaster()->GetTypeId() ==  TYPEID_PLAYER;
             }
@@ -429,13 +471,13 @@ class spell_warr_rallying_cry : public SpellScriptLoader
                 GetCaster()->CastCustomSpell(GetHitUnit(), SPELL_WARRIOR_RALLYING_CRY, &basePoints0, NULL, NULL, true);
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warr_rallying_cry_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_warr_rallying_cry_SpellScript();
         }
@@ -475,13 +517,13 @@ class spell_warr_rend : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                  DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warr_rend_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
             }
         };
 
-        AuraScript* GetAuraScript() const
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_warr_rend_AuraScript();
         }
@@ -506,13 +548,13 @@ class spell_warr_shattering_throw : public SpellScriptLoader
                     target->RemoveAurasWithMechanic(1 << MECHANIC_IMMUNE_SHIELD, AURA_REMOVE_BY_ENEMY_SPELL);
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warr_shattering_throw_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_warr_shattering_throw_SpellScript();
         }
@@ -528,7 +570,7 @@ class spell_warr_slam : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_slam_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SLAM))
                     return false;
@@ -542,15 +584,99 @@ class spell_warr_slam : public SpellScriptLoader
                     GetCaster()->CastCustomSpell(GetHitUnit(), SPELL_WARRIOR_SLAM, &bp0, NULL, NULL, true, 0);
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warr_slam_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_warr_slam_SpellScript();
+        }
+};
+
+class spell_warr_second_wind_proc : public SpellScriptLoader
+{
+    public:
+        spell_warr_second_wind_proc() : SpellScriptLoader("spell_warr_second_wind_proc") { }
+
+        class spell_warr_second_wind_proc_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warr_second_wind_proc_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_1) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_2) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_1) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_2))
+                    return false;
+                return true;
+            }
+
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                if (eventInfo.GetProcTarget() == GetTarget())
+                    return false;
+                if (!(eventInfo.GetDamageInfo() || eventInfo.GetDamageInfo()->GetSpellInfo()->GetAllEffectsMechanicMask() & ((1 << MECHANIC_ROOT) | (1 << MECHANIC_STUN))))
+                    return false;
+                return true;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                uint32 spellId = 0;
+
+                if (GetSpellInfo()->Id == SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_1)
+                    spellId = SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_1;
+                else if (GetSpellInfo()->Id == SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_2)
+                    spellId = SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_2;
+                if (!spellId)
+                    return;
+
+                GetTarget()->CastSpell(GetTarget(), spellId, true, NULL, aurEff);
+
+            }
+
+            void Register() OVERRIDE
+            {
+                DoCheckProc += AuraCheckProcFn(spell_warr_second_wind_proc_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_warr_second_wind_proc_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_warr_second_wind_proc_AuraScript();
+        }
+};
+
+class spell_warr_second_wind_trigger : public SpellScriptLoader
+{
+    public:
+        spell_warr_second_wind_trigger() : SpellScriptLoader("spell_warr_second_wind_trigger") { }
+
+        class spell_warr_second_wind_trigger_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warr_second_wind_trigger_AuraScript);
+
+            void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                amount = int32(GetUnitOwner()->CountPctFromMaxHealth(amount));
+            }
+
+            void Register() OVERRIDE
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warr_second_wind_trigger_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_PERIODIC_HEAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_warr_second_wind_trigger_AuraScript();
         }
 };
 
@@ -564,14 +690,14 @@ class spell_warr_sweeping_strikes : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warr_sweeping_strikes_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK))
                     return false;
                 return true;
             }
 
-            bool Load()
+            bool Load() OVERRIDE
             {
                 _procTarget = NULL;
                 return true;
@@ -589,7 +715,7 @@ class spell_warr_sweeping_strikes : public SpellScriptLoader
                 GetTarget()->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, true, NULL, aurEff);
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 DoCheckProc += AuraCheckProcFn(spell_warr_sweeping_strikes_AuraScript::CheckProc);
                 OnEffectProc += AuraEffectProcFn(spell_warr_sweeping_strikes_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
@@ -599,7 +725,7 @@ class spell_warr_sweeping_strikes : public SpellScriptLoader
             Unit* _procTarget;
         };
 
-        AuraScript* GetAuraScript() const
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_warr_sweeping_strikes_AuraScript();
         }
@@ -615,7 +741,7 @@ class spell_warr_vigilance : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warr_vigilance_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_GLYPH_OF_VIGILANCE))
                     return false;
@@ -628,7 +754,7 @@ class spell_warr_vigilance : public SpellScriptLoader
                 return true;
             }
 
-            bool Load()
+            bool Load() OVERRIDE
             {
                 _procTarget = NULL;
                 return true;
@@ -680,7 +806,7 @@ class spell_warr_vigilance : public SpellScriptLoader
                 GetTarget()->CastSpell(_procTarget, SPELL_WARRIOR_VIGILANCE_PROC, true, NULL, aurEff);
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectApply += AuraEffectApplyFn(spell_warr_vigilance_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
                 AfterEffectApply += AuraEffectApplyFn(spell_warr_vigilance_AuraScript::HandleAfterApply, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
@@ -693,7 +819,7 @@ class spell_warr_vigilance : public SpellScriptLoader
             Unit* _procTarget;
         };
 
-        AuraScript* GetAuraScript() const
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_warr_vigilance_AuraScript();
         }
@@ -718,13 +844,13 @@ class spell_warr_vigilance_trigger : public SpellScriptLoader
                     target->RemoveSpellCooldown(SPELL_WARRIOR_TAUNT, true);
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warr_vigilance_trigger_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_warr_vigilance_trigger_SpellScript();
         }
@@ -753,7 +879,7 @@ class spell_warr_heroic_strike : public SpellScriptLoader
         }
 		};
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
                 return new spell_warr_heroic_strike_SpellScript();
         }
@@ -839,7 +965,7 @@ class spell_warr_ralling_cry : public SpellScriptLoader
 					OnEffectHit += SpellEffectFn(spell_warr_ralling_cry_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
 				}
 			};
-			SpellScript* GetSpellScript() const
+			SpellScript* GetSpellScript() const OVERRIDE
 			{
 				return new spell_warr_ralling_cry_SpellScript();
 			}
@@ -917,7 +1043,7 @@ public:
         }
     };
 
-    SpellScript* GetSpellScript() const
+    SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_warr_thunderclap_SpellScript();
     }
@@ -952,7 +1078,7 @@ public:
 			OnEffectHitTarget += SpellEffectFn(spell_warr_shockwave::spell_warr_shockwave_SpellScript::CalculateDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
 		}
 	};
-	SpellScript* GetSpellScript() const
+	SpellScript* GetSpellScript() const OVERRIDE
 	{
 		return new spell_warr_shockwave_SpellScript();
 	}
@@ -977,7 +1103,7 @@ public:
 			OnEffectHitTarget += SpellEffectFn(spell_warr_cleave::spell_warr_cleave_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
 		}
 	};
-	SpellScript* GetSpellScript() const
+	SpellScript* GetSpellScript() const OVERRIDE
 	{
 		return new spell_warr_cleave_SpellScript();
 
@@ -1015,7 +1141,7 @@ public:
         }
     };
 
-    SpellScript* GetSpellScript() const
+    SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_warr_victory_rush_SpellScript();
     }
@@ -1033,6 +1159,8 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_overpower();
     new spell_warr_rallying_cry();
     new spell_warr_rend();
+    new spell_warr_second_wind_proc();
+    new spell_warr_second_wind_trigger();
     new spell_warr_shattering_throw();
     new spell_warr_slam();
     new spell_warr_sweeping_strikes();

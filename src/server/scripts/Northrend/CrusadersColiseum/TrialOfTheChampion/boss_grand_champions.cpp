@@ -34,7 +34,7 @@ EndScriptData */
 #include "trial_of_the_champion.h"
 #include "Player.h"
 
-enum eSpells
+enum Spells
 {
     //Vehicle
     SPELL_CHARGE                    = 63010,
@@ -79,7 +79,7 @@ enum eSpells
     SPELL_POISON_BOTTLE             = 67701
 };
 
-enum eSeat
+enum Seats
 {
     SEAT_ID_0                       = 0
 };
@@ -173,14 +173,14 @@ public:
 
         uint32 uiWaypointPath;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             uiChargeTimer = 5000;
             uiShieldBreakerTimer = 8000;
             uiBuffTimer = urand(30000, 60000);
         }
 
-        void SetData(uint32 uiType, uint32 /*uiData*/)
+        void SetData(uint32 uiType, uint32 /*uiData*/) OVERRIDE
         {
             switch (uiType)
             {
@@ -209,7 +209,7 @@ public:
                 Start(false, true, 0, NULL);
         }
 
-        void WaypointReached(uint32 waypointId)
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
             if (!instance)
                 return;
@@ -226,7 +226,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             DoCastSpellShield();
         }
@@ -237,7 +237,7 @@ public:
                 DoCast(me, SPELL_SHIELD, true);
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 uiDiff) OVERRIDE
         {
             npc_escortAI::UpdateAI(uiDiff);
 
@@ -302,7 +302,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new generic_vehicleAI_toc5AI(creature);
     }
@@ -344,14 +344,14 @@ public:
         bool bDone;
         bool bHome;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             uiBladeStormTimer = urand(15000, 20000);
             uiInterceptTimer  = 7000;
             uiMortalStrikeTimer = urand(8000, 12000);
         }
 
-        void JustReachedHome()
+        void JustReachedHome() OVERRIDE
         {
             ScriptedAI::JustReachedHome();
 
@@ -364,7 +364,7 @@ public:
             bHome = false;
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 uiDiff) OVERRIDE
         {
             if (!bDone && GrandChampionsOutVehicle(me))
             {
@@ -428,14 +428,14 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_warrior_toc5AI(creature);
     }
@@ -477,7 +477,7 @@ public:
         bool bDone;
         bool bHome;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             uiFireBallTimer = 5000;
             uiPolymorphTimer  = 8000;
@@ -485,7 +485,7 @@ public:
             uiHasteTimer = 22000;
         }
 
-        void JustReachedHome()
+        void JustReachedHome() OVERRIDE
         {
             ScriptedAI::JustReachedHome();
 
@@ -498,7 +498,7 @@ public:
             bHome = false;
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 uiDiff) OVERRIDE
         {
             if (!bDone && GrandChampionsOutVehicle(me))
             {
@@ -567,14 +567,14 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_mage_toc5AI(creature);
     }
@@ -616,7 +616,7 @@ public:
         bool bDone;
         bool bHome;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             uiChainLightningTimer = 16000;
             uiHealingWaveTimer = 12000;
@@ -624,13 +624,13 @@ public:
             uiHexMendingTimer = urand(20000, 25000);
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit* who) OVERRIDE
         {
             DoCast(me, SPELL_EARTH_SHIELD);
             DoCast(who, SPELL_HEX_OF_MENDING);
         };
 
-        void JustReachedHome()
+        void JustReachedHome() OVERRIDE
         {
             ScriptedAI::JustReachedHome();
 
@@ -643,7 +643,7 @@ public:
             bHome = false;
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 uiDiff) OVERRIDE
         {
             if (!bDone && GrandChampionsOutVehicle(me))
             {
@@ -714,14 +714,14 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_shaman_toc5AI(creature);
     }
@@ -765,7 +765,7 @@ public:
         bool bDone;
         bool bHome;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             uiShootTimer = 12000;
             uiMultiShotTimer = 0;
@@ -776,7 +776,7 @@ public:
             bShoot = false;
         }
 
-        void JustReachedHome()
+        void JustReachedHome() OVERRIDE
         {
             ScriptedAI::JustReachedHome();
 
@@ -789,7 +789,7 @@ public:
             bHome = false;
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 uiDiff) OVERRIDE
         {
             if (!bDone && GrandChampionsOutVehicle(me))
             {
@@ -870,14 +870,14 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_hunter_toc5AI(creature);
     }
@@ -917,14 +917,14 @@ public:
         bool bDone;
         bool bHome;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             uiEviscerateTimer = 8000;
             uiFanKivesTimer   = 14000;
             uiPosionBottleTimer = 19000;
         }
 
-        void JustReachedHome()
+        void JustReachedHome() OVERRIDE
         {
             ScriptedAI::JustReachedHome();
 
@@ -937,7 +937,7 @@ public:
             bHome = false;
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 uiDiff) OVERRIDE
         {
             if (!bDone && GrandChampionsOutVehicle(me))
             {
@@ -991,14 +991,14 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_rouge_toc5AI(creature);
     }

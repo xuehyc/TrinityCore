@@ -33,66 +33,45 @@ EndContentData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "shattered_halls.h"
 
-enum eSays
+enum Says
 {
     SAY_AGGRO                      = 0,
     SAY_SLAY                       = 1,
     SAY_DEATH                      = 2
 };
 
-enum eSpells
+enum Spells
 {
-     SPELL_BLADE_DANCE              = 30739,
-     H_SPELL_CHARGE                 = 25821,
+     SPELL_BLADE_DANCE             = 30739,
+     H_SPELL_CHARGE                = 25821
 };
 
-enum eCreatures
+enum Creatures
 {
     NPC_SHATTERED_ASSASSIN         = 17695,
     NPC_HEARTHEN_GUARD             = 17621,
     NPC_SHARPSHOOTER_GUARD         = 17622,
-    NPC_REAVER_GUARD               = 17623,
+    NPC_REAVER_GUARD               = 17623
 };
 
-#define TARGET_NUM                      5
+#define TARGET_NUM                   5
 
-float AssassEntrance[3] = {275.136f, -84.29f, 2.3f}; // y -8
-float AssassExit[3] = {184.233f, -84.29f, 2.3f}; // y -8
-float AddsEntrance[3] = {306.036f, -84.29f, 1.93f};
+float AssassEntrance[3] = { 275.136f, -84.29f, 2.3f  }; // y -8
+float AssassExit[3]     = { 184.233f, -84.29f, 2.3f  }; // y -8
+float AddsEntrance[3]   = { 306.036f, -84.29f, 1.93f };
 
 class boss_warchief_kargath_bladefist : public CreatureScript
 {
     public:
+        boss_warchief_kargath_bladefist() : CreatureScript("boss_warchief_kargath_bladefist") { }
 
-        boss_warchief_kargath_bladefist()
-            : CreatureScript("boss_warchief_kargath_bladefist")
+        struct boss_warchief_kargath_bladefistAI : public BossAI
         {
-        }
+            boss_warchief_kargath_bladefistAI(Creature* creature) : BossAI(creature, DATA_KARGATH) { }
 
-        struct boss_warchief_kargath_bladefistAI : public ScriptedAI
-        {
-            boss_warchief_kargath_bladefistAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
-
-            std::vector<uint64> adds;
-            std::vector<uint64> assassins;
-
-            uint32 Charge_timer;
-            uint32 Blade_Dance_Timer;
-            uint32 Summon_Assistant_Timer;
-            uint32 resetcheck_timer;
-            uint32 Wait_Timer;
-
-            uint32 Assassins_Timer;
-
-            uint32 summoned;
-            bool InBlade;
-
-            uint32 target_num;
-
-            void Reset()
+            void Reset() OVERRIDE
             {
                 removeAdds();
 
@@ -110,12 +89,21 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                 resetcheck_timer = 5000;
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void JustDied(Unit* /*killer*/) OVERRIDE
+            {
+                Talk(SAY_DEATH);
+                removeAdds();
+
+                if (instance)
+                    instance->SetBossState(DATA_KARGATH, DONE);
+            }
+
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 Talk(SAY_AGGRO);
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* summoned) OVERRIDE
             {
                 switch (summoned->GetEntry())
                 {
@@ -131,7 +119,7 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                 }
             }
 
-            void KilledUnit(Unit* victim)
+            void KilledUnit(Unit* victim) OVERRIDE
             {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
                 {
@@ -139,13 +127,7 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*killer*/)
-            {
-                Talk(SAY_DEATH);
-                removeAdds();
-            }
-
-            void MovementInform(uint32 type, uint32 id)
+            void MovementInform(uint32 type, uint32 id) OVERRIDE
             {
                 if (InBlade)
                 {
@@ -198,7 +180,7 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                 me->SummonCreature(NPC_SHATTERED_ASSASSIN, AssassExit[0], AssassExit[1]-8, AssassExit[2], 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 //Return since we have no target
                 if (!UpdateVictim())
@@ -316,9 +298,22 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                 else
                     resetcheck_timer -= diff;
             }
+
+            private:
+                std::vector<uint64> adds;
+                std::vector<uint64> assassins;
+                uint32 Charge_timer;
+                uint32 Blade_Dance_Timer;
+                uint32 Summon_Assistant_Timer;
+                uint32 resetcheck_timer;
+                uint32 Wait_Timer;
+                uint32 Assassins_Timer;
+                uint32 summoned;
+                uint32 target_num;
+                bool InBlade;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_warchief_kargath_bladefistAI(creature);
         }
@@ -328,4 +323,3 @@ void AddSC_boss_warchief_kargath_bladefist()
 {
     new boss_warchief_kargath_bladefist();
 }
-

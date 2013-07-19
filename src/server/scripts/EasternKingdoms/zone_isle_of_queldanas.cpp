@@ -48,15 +48,14 @@ enum ConvertedSentry
     SPELL_CONVERT_CREDIT    = 45009
 };
 
-
 class npc_converted_sentry : public CreatureScript
 {
 public:
     npc_converted_sentry() : CreatureScript("npc_converted_sentry") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_converted_sentryAI (creature);
+        return new npc_converted_sentryAI(creature);
     }
 
     struct npc_converted_sentryAI : public ScriptedAI
@@ -66,16 +65,17 @@ public:
         bool Credit;
         uint32 Timer;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             Credit = false;
             Timer = 2500;
         }
 
-        void MoveInLineOfSight(Unit* /*who*/) {}
-        void EnterCombat(Unit* /*who*/) {}
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE {}
 
-        void UpdateAI(uint32 diff)
+        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!Credit)
             {
@@ -107,7 +107,7 @@ class npc_greengill_slave : public CreatureScript
 public:
     npc_greengill_slave() : CreatureScript("npc_greengill_slave") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_greengill_slaveAI(creature);
     }
@@ -118,14 +118,14 @@ public:
 
         uint64 PlayerGUID;
 
-        void EnterCombat(Unit* /*who*/){}
+        void EnterCombat(Unit* /*who*/)OVERRIDE {}
 
-        void Reset()
+        void Reset() OVERRIDE
         {
         PlayerGUID = 0;
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell)
+        void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
         {
             if (!caster)
                 return;
@@ -149,7 +149,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 /*diff*/)
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
         {
             DoMeleeAttackIfReady();
         }

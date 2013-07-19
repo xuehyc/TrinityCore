@@ -53,19 +53,34 @@ static Speech PlayerDeath[]=
     {9},
 };
 
-enum eEnums
+enum Yells
 {
     SAY_AGGRO               = 0,
     SAY_DEATH               = 10,
+};
 
-    SPELL_DISPEL_MAGIC      = 27609,
-    SPELL_FLASH_HEAL        = 17843,
-    SPELL_SW_PAIN_NORMAL    = 14032,
-    SPELL_SW_PAIN_HEROIC    = 15654,
-    SPELL_SHIELD            = 44291,
-    SPELL_RENEW_NORMAL      = 44174,
-    SPELL_RENEW_HEROIC      = 46192,
+enum Spells
+{
+    SPELL_DISPEL_MAGIC          = 27609,
+    SPELL_FLASH_HEAL            = 17843,
+    SPELL_SW_PAIN_NORMAL        = 14032,
+    SPELL_SW_PAIN_HEROIC        = 15654,
+    SPELL_SHIELD                = 44291,
+    SPELL_RENEW_NORMAL          = 44174,
+    SPELL_RENEW_HEROIC          = 46192,
 
+    // Apoko
+    SPELL_WINDFURY_TOTEM        = 27621,
+    SPELL_WAR_STOMP             = 46026,
+    SPELL_PURGE                 = 27626,
+    SPELL_LESSER_HEALING_WAVE   = 44256,
+    SPELL_FROST_SHOCK           = 21401,
+    SPELL_FIRE_NOVA_TOTEM       = 44257,
+    SPELL_EARTHBIND_TOTEM       = 15786
+};
+
+enum Misc
+{
     MAX_ACTIVE_LACKEY       = 4
 };
 
@@ -97,7 +112,7 @@ class boss_priestess_delrissa : public CreatureScript
 public:
     boss_priestess_delrissa() : CreatureScript("boss_priestess_delrissa") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_priestess_delrissaAI(creature);
     }
@@ -125,7 +140,7 @@ public:
         uint32 DispelTimer;
         uint32 ResetTimer;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             PlayersKilled = 0;
 
@@ -140,13 +155,13 @@ public:
         }
 
         //this mean she at some point evaded
-        void JustReachedHome()
+        void JustReachedHome() OVERRIDE
         {
             if (instance)
                  instance->SetData(DATA_DELRISSA_EVENT, FAIL);
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit* who) OVERRIDE
         {
             Talk(SAY_AGGRO);
 
@@ -215,7 +230,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit* victim)
+        void KilledUnit(Unit* victim) OVERRIDE
         {
             if (victim->GetTypeId() != TYPEID_PLAYER)
                 return;
@@ -226,7 +241,7 @@ public:
                 ++PlayersKilled;
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
@@ -242,7 +257,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -337,7 +352,7 @@ public:
     };
 };
 
-enum eHealingPotion
+enum HealingPotion
 {
     SPELL_HEALING_POTION    = 15503
 };
@@ -359,7 +374,7 @@ struct boss_priestess_lackey_commonAI : public ScriptedAI
 
     bool UsedPotion;
 
-    void Reset()
+    void Reset() OVERRIDE
     {
         UsedPotion = false;
 
@@ -377,7 +392,7 @@ struct boss_priestess_lackey_commonAI : public ScriptedAI
         }
     }
 
-    void EnterCombat(Unit* who)
+    void EnterCombat(Unit* who) OVERRIDE
     {
         if (!who)
             return;
@@ -407,7 +422,7 @@ struct boss_priestess_lackey_commonAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* /*killer*/)
+    void JustDied(Unit* /*killer*/) OVERRIDE
     {
         if (!instance)
             return;
@@ -439,7 +454,7 @@ struct boss_priestess_lackey_commonAI : public ScriptedAI
         }
     }
 
-    void KilledUnit(Unit* victim)
+    void KilledUnit(Unit* victim) OVERRIDE
     {
         if (!instance)
             return;
@@ -460,7 +475,7 @@ struct boss_priestess_lackey_commonAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(uint32 diff)
+    void UpdateAI(uint32 diff) OVERRIDE
     {
         if (!UsedPotion && HealthBelowPct(25))
         {
@@ -476,7 +491,7 @@ struct boss_priestess_lackey_commonAI : public ScriptedAI
     }
 };
 
-enum eRogueSpells
+enum RogueSpells
 {
     SPELL_KIDNEY_SHOT       = 27615,
     SPELL_GOUGE             = 12540,
@@ -491,7 +506,7 @@ class boss_kagani_nightstrike : public CreatureScript
 public:
     boss_kagani_nightstrike() : CreatureScript("boss_kagani_nightstrike") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_kagani_nightstrikeAI(creature);
     }
@@ -508,7 +523,7 @@ public:
         uint32 Wait_Timer;
         bool InVanish;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             Gouge_Timer = 5500;
             Kick_Timer = 7000;
@@ -521,7 +536,7 @@ public:
             boss_priestess_lackey_commonAI::Reset();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -579,7 +594,7 @@ public:
     };
 };
 
-enum eWarlockSpells
+enum WarlockSpells
 {
     SPELL_IMMOLATE              = 44267,
     SPELL_SHADOW_BOLT           = 12471,
@@ -595,7 +610,7 @@ class boss_ellris_duskhallow : public CreatureScript
 public:
     boss_ellris_duskhallow() : CreatureScript("boss_ellris_duskhallow") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_ellris_duskhallowAI(creature);
     }
@@ -611,7 +626,7 @@ public:
         uint32 Curse_of_Agony_Timer;
         uint32 Fear_Timer;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             Immolate_Timer = 6000;
             Shadow_Bolt_Timer = 3000;
@@ -622,12 +637,12 @@ public:
             boss_priestess_lackey_commonAI::Reset();
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             DoCast(me, SPELL_SUMMON_IMP);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -675,7 +690,7 @@ public:
     };
 };
 
-enum eKickDown
+enum KickDown
 {
     SPELL_KNOCKDOWN     = 11428,
     SPELL_SNAP_KICK     = 46182
@@ -686,7 +701,7 @@ class boss_eramas_brightblaze : public CreatureScript
 public:
     boss_eramas_brightblaze() : CreatureScript("boss_eramas_brightblaze") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_eramas_brightblazeAI(creature);
     }
@@ -699,7 +714,7 @@ public:
         uint32 Knockdown_Timer;
         uint32 Snap_Kick_Timer;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             Knockdown_Timer = 6000;
             Snap_Kick_Timer = 4500;
@@ -707,7 +722,7 @@ public:
             boss_priestess_lackey_commonAI::Reset();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -731,7 +746,7 @@ public:
     };
 };
 
-enum eMageSpells
+enum MageSpells
 {
     SPELL_POLYMORPH         = 13323,
     SPELL_ICE_BLOCK         = 27619,
@@ -747,7 +762,7 @@ class boss_yazzai : public CreatureScript
 public:
     boss_yazzai() : CreatureScript("boss_yazzai") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_yazzaiAI(creature);
     }
@@ -768,7 +783,7 @@ public:
         uint32 Frostbolt_Timer;
         uint32 Blink_Timer;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             HasIceBlocked = false;
 
@@ -784,7 +799,7 @@ public:
             boss_priestess_lackey_commonAI::Reset();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -861,7 +876,7 @@ public:
     };
 };
 
-enum eWarriorSpells
+enum WarriorSpells
 {
     SPELL_INTERCEPT_STUN        = 27577,
     SPELL_DISARM                = 27581,
@@ -877,7 +892,7 @@ class boss_warlord_salaris : public CreatureScript
 public:
     boss_warlord_salaris() : CreatureScript("boss_warlord_salaris") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_warlord_salarisAI(creature);
     }
@@ -894,7 +909,7 @@ public:
         uint32 Hamstring_Timer;
         uint32 Mortal_Strike_Timer;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             Intercept_Stun_Timer = 500;
             Disarm_Timer = 6000;
@@ -906,12 +921,12 @@ public:
             boss_priestess_lackey_commonAI::Reset();
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             DoCast(me, SPELL_BATTLE_SHOUT);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -980,7 +995,7 @@ public:
     };
 };
 
-enum eHunterSpells
+enum HunterSpells
 {
     SPELL_AIMED_SHOT            = 44271,
     SPELL_SHOOT                 = 15620,
@@ -997,7 +1012,7 @@ class boss_garaxxas : public CreatureScript
 public:
     boss_garaxxas() : CreatureScript("boss_garaxxas") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_garaxxasAI(creature);
     }
@@ -1019,7 +1034,7 @@ public:
         uint32 Wing_Clip_Timer;
         uint32 Freezing_Trap_Timer;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             Aimed_Shot_Timer = 6000;
             Shoot_Timer = 2500;
@@ -1035,12 +1050,12 @@ public:
             boss_priestess_lackey_commonAI::Reset();
         }
 
-        void JustSummoned(Creature* summoned)
+        void JustSummoned(Creature* summoned) OVERRIDE
         {
             m_uiPetGUID = summoned->GetGUID();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -1103,23 +1118,12 @@ public:
     };
 };
 
-enum Spells
-{
-    SPELL_WINDFURY_TOTEM        = 27621,
-    SPELL_WAR_STOMP             = 46026,
-    SPELL_PURGE                 = 27626,
-    SPELL_LESSER_HEALING_WAVE   = 44256,
-    SPELL_FROST_SHOCK           = 21401,
-    SPELL_FIRE_NOVA_TOTEM       = 44257,
-    SPELL_EARTHBIND_TOTEM       = 15786
-};
-
 class boss_apoko : public CreatureScript
 {
 public:
     boss_apoko() : CreatureScript("boss_apoko") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_apokoAI(creature);
     }
@@ -1136,7 +1140,7 @@ public:
         uint32 Healing_Wave_Timer;
         uint32 Frost_Shock_Timer;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             Totem_Timer = 2000;
             Totem_Amount = 1;
@@ -1148,7 +1152,7 @@ public:
             boss_priestess_lackey_commonAI::Reset();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -1202,7 +1206,7 @@ public:
     };
 };
 
-enum eEngineerSpells
+enum EngineerSpells
 {
     SPELL_GOBLIN_DRAGON_GUN     = 44272,
     SPELL_ROCKET_LAUNCH         = 44137,
@@ -1217,7 +1221,7 @@ class boss_zelfan : public CreatureScript
 public:
     boss_zelfan() : CreatureScript("boss_zelfan") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_zelfanAI(creature);
     }
@@ -1233,7 +1237,7 @@ public:
         uint32 High_Explosive_Sheep_Timer;
         uint32 Fel_Iron_Bomb_Timer;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             Goblin_Dragon_Gun_Timer = 20000;
             Rocket_Launch_Timer = 7000;
@@ -1244,7 +1248,7 @@ public:
             boss_priestess_lackey_commonAI::Reset();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -1302,9 +1306,9 @@ class npc_high_explosive_sheep : public CreatureScript
 public:
     npc_high_explosive_sheep() : CreatureScript("npc_high_explosive_sheep") { }
 
-    //CreatureAI* GetAI(Creature* creature) const
+    //CreatureAI* GetAI(Creature* creature) const OVERRIDE
     //{
-    //    return new npc_high_explosive_sheepAI (creature);
+    //    return new npc_high_explosive_sheepAI(creature);
     //};
 };
 */

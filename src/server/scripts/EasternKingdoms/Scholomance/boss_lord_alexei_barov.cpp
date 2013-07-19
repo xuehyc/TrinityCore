@@ -54,20 +54,20 @@ class boss_lord_alexei_barov : public CreatureScript
         {
             boss_lordalexeibarovAI(Creature* creature) : BossAI(creature, DATA_LORDALEXEIBAROV) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 _Reset();
                 me->LoadCreaturesAddon();
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 _EnterCombat();
                 events.ScheduleEvent(EVENT_IMMOLATE, 7000);
                 events.ScheduleEvent(EVENT_VEILOFSHADOW, 15000);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -98,9 +98,9 @@ class boss_lord_alexei_barov : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new boss_lordalexeibarovAI (creature);
+            return new boss_lordalexeibarovAI(creature);
         }
 };
 

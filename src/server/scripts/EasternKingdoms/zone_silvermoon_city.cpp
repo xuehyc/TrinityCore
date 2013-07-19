@@ -39,7 +39,7 @@ EndContentData */
 /*#######
 # npc_blood_knight_stillblade
 #######*/
-enum eStillbladeData
+enum StillbladeData
 {
     SAY_HEAL                    = 0,
 
@@ -53,9 +53,9 @@ class npc_blood_knight_stillblade : public CreatureScript
 public:
     npc_blood_knight_stillblade() : CreatureScript("npc_blood_knight_stillblade") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_blood_knight_stillbladeAI (creature);
+        return new npc_blood_knight_stillbladeAI(creature);
     }
 
     struct npc_blood_knight_stillbladeAI : public ScriptedAI
@@ -65,7 +65,7 @@ public:
         uint32 lifeTimer;
         bool spellHit;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             lifeTimer = 120000;
             me->SetStandState(UNIT_STAND_STATE_DEAD);
@@ -73,15 +73,16 @@ public:
             spellHit = false;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
         }
 
-        void MoveInLineOfSight(Unit* /*who*/)
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE
+
         {
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (me->IsStandState())
             {
@@ -92,7 +93,7 @@ public:
             }
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* Spellkind)
+        void SpellHit(Unit* caster, const SpellInfo* Spellkind) OVERRIDE
         {
             if (Spellkind->Id != SPELL_SHIMMERING_VESSEL || spellHit)
                 return;

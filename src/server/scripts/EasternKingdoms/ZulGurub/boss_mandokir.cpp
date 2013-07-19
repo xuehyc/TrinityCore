@@ -113,7 +113,7 @@ class boss_mandokir : public CreatureScript
         {
             boss_mandokirAI(Creature* creature) : BossAI(creature, DATA_MANDOKIR) { }
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 DoCastAOE(SPELL_SPIRIT_VENGEANCE_CANCEL);
 
@@ -125,7 +125,7 @@ class boss_mandokir : public CreatureScript
                 _reviveGUID = 0;
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
@@ -148,14 +148,14 @@ class boss_mandokir : public CreatureScript
                 events.ScheduleEvent(EVENT_DEVASTATING_SLAM, 25000);
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 DoCastAOE(SPELL_SPIRIT_VENGEANCE_CANCEL);
                 _JustDied();
                 Talk(SAY_DEATH);
             }
 
-            void KilledUnit(Unit* victim)
+            void KilledUnit(Unit* victim) OVERRIDE
             {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
                 {
@@ -166,7 +166,7 @@ class boss_mandokir : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& damage)
+            void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
             {
                 if (me->HealthBelowPctDamaged(20, damage) && !me->HasAura(SPELL_FRENZY))
                 {
@@ -176,7 +176,7 @@ class boss_mandokir : public CreatureScript
                 }
             }
 
-            void DoAction(int32 action)
+            void DoAction(int32 action) OVERRIDE
             {
                 switch (action)
                 {
@@ -211,7 +211,7 @@ class boss_mandokir : public CreatureScript
                 }
             }
 
-            uint32 GetData(uint32 type) const
+            uint32 GetData(uint32 type) const OVERRIDE
             {
                 if (type == DATA_OHGANOT_SO_FAST)
                     return _ohganotSoFast;
@@ -219,12 +219,12 @@ class boss_mandokir : public CreatureScript
                 return 0;
             }
 
-            void SetGUID(uint64 guid, int32 /*type = 0 */)
+            void SetGUID(uint64 guid, int32 /*type = 0 */) OVERRIDE
             {
                 _reviveGUID = guid;
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -287,7 +287,7 @@ class boss_mandokir : public CreatureScript
             uint64 _reviveGUID;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return GetZulGurubAI<boss_mandokirAI>(creature);
         }
@@ -305,12 +305,12 @@ class npc_ohgan : public CreatureScript
                 _instance = me->GetInstanceScript();
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 DoCastAOE(SPELL_OHGAN_ORDERS, true);
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& damage)
+            void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
             {
                 if (damage >= me->GetHealth())
                 {
@@ -326,7 +326,7 @@ class npc_ohgan : public CreatureScript
                 }
             }
 
-            void KilledUnit(Unit* victim)
+            void KilledUnit(Unit* victim) OVERRIDE
             {
                 if (Creature* creature = victim->ToCreature())
                 {
@@ -335,7 +335,7 @@ class npc_ohgan : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 /*diff*/)
+            void UpdateAI(uint32 /*diff*/) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -347,7 +347,7 @@ class npc_ohgan : public CreatureScript
             InstanceScript* _instance;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return GetZulGurubAI<npc_ohganAI>(creature);
         }
@@ -367,17 +367,17 @@ class npc_chained_spirit : public CreatureScript
                 me->SetReactState(REACT_PASSIVE); // correct?
             }
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 _revivePlayerGUID = 0;
             }
 
-            void SetGUID(uint64 guid, int32 /*type = 0 */)
+            void SetGUID(uint64 guid, int32 /*type = 0 */) OVERRIDE
             {
                 _revivePlayerGUID = guid;
             }
 
-            void DoAction(int32 action)
+            void DoAction(int32 action) OVERRIDE
             {
                 if (action == ACTION_REVIVE)
                 {
@@ -390,7 +390,7 @@ class npc_chained_spirit : public CreatureScript
                 }
             }
 
-            void MovementInform(uint32 type, uint32 pointId)
+            void MovementInform(uint32 type, uint32 pointId) OVERRIDE
             {
                 if (type != POINT_MOTION_TYPE || !_revivePlayerGUID)
                     return;
@@ -404,7 +404,7 @@ class npc_chained_spirit : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 Player* target = ObjectAccessor::GetPlayer(*me, _revivePlayerGUID);
                 if (!target || target->IsAlive())
@@ -419,14 +419,14 @@ class npc_chained_spirit : public CreatureScript
                 me->DespawnOrUnsummon();
             }
 
-            void UpdateAI(uint32 /*diff*/) { }
+            void UpdateAI(uint32 /*diff*/) OVERRIDE { }
 
         private:
             InstanceScript* _instance;
             uint64 _revivePlayerGUID;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return GetZulGurubAI<npc_chained_spiritAI>(creature);
         }
@@ -458,14 +458,14 @@ class spell_mandokir_decapitate : public SpellScriptLoader
                     caster->CastSpell(target, uint32(GetEffectValue()), true);
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mandokir_decapitate_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnEffectHitTarget += SpellEffectFn(spell_mandokir_decapitate_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_mandokir_decapitate_SpellScript();
         }
@@ -480,7 +480,7 @@ class spell_mandokir_bloodletting : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mandokir_bloodletting_AuraScript);
 
-            bool Validate(SpellInfo const* /*spell*/)
+            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_BLOODLETTING_DAMAGE))
                     return false;
@@ -502,13 +502,13 @@ class spell_mandokir_bloodletting : public SpellScriptLoader
                 target->CastCustomSpell(caster, SPELL_BLOODLETTING_HEAL, &damage, 0, 0, true);
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_mandokir_bloodletting_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
             }
         };
 
-        AuraScript* GetAuraScript() const
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_mandokir_bloodletting_AuraScript();
         }
@@ -529,14 +529,14 @@ class spell_mandokir_spirit_vengeance_cancel : public SpellScriptLoader
                     target->RemoveAura(uint32(GetEffectValue()));
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_mandokir_spirit_vengeance_cancel_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
                 OnEffectHitTarget += SpellEffectFn(spell_mandokir_spirit_vengeance_cancel_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_mandokir_spirit_vengeance_cancel_SpellScript();
         }
@@ -607,14 +607,14 @@ class spell_mandokir_devastating_slam : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mandokir_devastating_slam_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnEffectHitTarget += SpellEffectFn(spell_mandokir_devastating_slam_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_mandokir_devastating_slam_SpellScript();
         }
@@ -646,14 +646,14 @@ class spell_mandokir_ohgan_orders : public SpellScriptLoader
                     caster->CastSpell(target, uint32(GetEffectValue()), true);
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mandokir_ohgan_orders_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
                 OnEffectHitTarget += SpellEffectFn(spell_mandokir_ohgan_orders_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_mandokir_ohgan_orders_SpellScript();
         }
@@ -682,13 +682,13 @@ class spell_mandokir_ohgan_orders_trigger : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 AfterEffectApply += AuraEffectApplyFn(spell_mandokir_ohgan_orders_trigger_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
-        AuraScript* GetAuraScript() const
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_mandokir_ohgan_orders_trigger_AuraScript();
         }
@@ -713,13 +713,13 @@ class spell_mandokir_reanimate_ohgan : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_mandokir_reanimate_ohgan_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_mandokir_reanimate_ohgan_SpellScript();
         }
@@ -740,13 +740,13 @@ class spell_clear_all : public SpellScriptLoader
                 caster->RemoveAllAurasOnDeath();
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_clear_all_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_clear_all_SpellScript();
         }

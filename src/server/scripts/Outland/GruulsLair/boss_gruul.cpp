@@ -32,7 +32,7 @@ EndScriptData */
 #include "SpellScript.h"
 #include "gruuls_lair.h"
 
-enum eEnums
+enum Yells
 {
     SAY_AGGRO                   = 0,
     SAY_SLAM                    = 1,
@@ -40,8 +40,11 @@ enum eEnums
     SAY_SLAY                    = 3,
     SAY_DEATH                   = 4,
 
-    EMOTE_GROW                  = 5,
+    EMOTE_GROW                  = 5
+};
 
+enum Spells
+{
     SPELL_GROWTH                = 36300,
     SPELL_CAVE_IN               = 36240,
     SPELL_GROUND_SLAM           = 33525,                    //AoE Ground Slam applying Ground Slam to everyone with a script effect (most likely the knock back, we can code it to a set knockback)
@@ -61,9 +64,9 @@ class boss_gruul : public CreatureScript
 public:
     boss_gruul() : CreatureScript("boss_gruul") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_gruulAI (creature);
+        return new boss_gruulAI(creature);
     }
 
     struct boss_gruulAI : public ScriptedAI
@@ -84,7 +87,7 @@ public:
 
         bool m_bPerformingGroundSlam;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             m_uiGrowth_Timer= 30000;
             m_uiCaveIn_Timer= 27000;
@@ -98,7 +101,7 @@ public:
                 instance->SetData(DATA_GRUULEVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
 
@@ -106,12 +109,12 @@ public:
                 instance->SetData(DATA_GRUULEVENT, IN_PROGRESS);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
@@ -122,7 +125,7 @@ public:
             }
         }
 
-        void SpellHitTarget(Unit* target, const SpellInfo* pSpell)
+        void SpellHitTarget(Unit* target, const SpellInfo* pSpell) OVERRIDE
         {
             //This to emulate effect1 (77) of SPELL_GROUND_SLAM, knock back to any direction
             //It's initially wrong, since this will cause fall damage, which is by comments, not intended.
@@ -162,7 +165,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 uiDiff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -264,7 +267,7 @@ class spell_gruul_shatter : public SpellScriptLoader
         {
             PrepareSpellScript(spell_gruul_shatter_SpellScript);
 
-            bool Validate(SpellInfo const* /*spell*/)
+            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_STONED))
                     return false;
@@ -282,13 +285,13 @@ class spell_gruul_shatter : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_gruul_shatter_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_gruul_shatter_SpellScript();
         }
@@ -317,13 +320,13 @@ class spell_gruul_shatter_effect : public SpellScriptLoader
                     SetHitDamage(int32(GetHitDamage() * ((radius - distance) / radius)));
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnHit += SpellHitFn(spell_gruul_shatter_effect_SpellScript::CalculateDamage);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_gruul_shatter_effect_SpellScript();
         }

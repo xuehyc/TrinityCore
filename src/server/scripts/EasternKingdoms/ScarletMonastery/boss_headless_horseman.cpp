@@ -150,9 +150,9 @@ class npc_wisp_invis : public CreatureScript
 public:
     npc_wisp_invis() : CreatureScript("npc_wisp_invis") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_wisp_invisAI (creature);
+        return new npc_wisp_invisAI(creature);
     }
 
     struct npc_wisp_invisAI : public ScriptedAI
@@ -166,8 +166,8 @@ public:
         uint32 delay;
         uint32 spell;
         uint32 spell2;
-        void Reset() {}
-        void EnterCombat(Unit* /*who*/) {}
+        void Reset() OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE {}
         void SetType(uint32 _type)
         {
             switch (Creaturetype = _type)
@@ -193,13 +193,14 @@ public:
                 DoCast(me, spell);
         }
 
-        void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) OVERRIDE
         {
             if (spell->Id == SPELL_WISP_FLIGHT_PORT && Creaturetype == 4)
                 me->SetDisplayId(2027);
         }
 
-        void MoveInLineOfSight(Unit* who)
+        void MoveInLineOfSight(Unit* who) OVERRIDE
+
         {
             if (!who || Creaturetype != 1 || !who->isTargetableForAttack())
                 return;
@@ -208,7 +209,7 @@ public:
                 DoCast(who, SPELL_SQUASH_SOUL);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (delay)
             {
@@ -229,9 +230,9 @@ class npc_head : public CreatureScript
 public:
     npc_head() : CreatureScript("npc_head") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_headAI (creature);
+        return new npc_headAI(creature);
     }
 
     struct npc_headAI : public ScriptedAI
@@ -247,7 +248,7 @@ public:
         bool withbody;
         bool die;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             Phase = 0;
             bodyGUID = 0;
@@ -257,7 +258,7 @@ public:
             laugh = urand(15000, 30000);
         }
 
-        void EnterCombat(Unit* /*who*/) { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE {}
 
         void SaySound(uint8 textEntry, Unit* target = 0)
         {
@@ -272,7 +273,7 @@ public:
             laugh += 3000;
         }
 
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage)
+        void DamageTaken(Unit* /*done_by*/, uint32 &damage) OVERRIDE
         {
             if (withbody)
                 return;
@@ -303,7 +304,7 @@ public:
             }
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell)
+        void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
         {
             if (!withbody)
                 return;
@@ -329,7 +330,7 @@ public:
         }
 
         void Disappear();
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!withbody)
             {
@@ -378,9 +379,9 @@ class boss_headless_horseman : public CreatureScript
 public:
     boss_headless_horseman() : CreatureScript("boss_headless_horseman") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_headless_horsemanAI (creature);
+        return new boss_headless_horsemanAI(creature);
     }
 
     struct boss_headless_horsemanAI : public ScriptedAI
@@ -414,7 +415,7 @@ public:
         bool wp_reached;
         bool burned;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             Phase = 1;
             conflagrate = 15000;
@@ -457,7 +458,7 @@ public:
             Phase = 0;
         }
 
-        void MovementInform(uint32 type, uint32 i)
+        void MovementInform(uint32 type, uint32 i) OVERRIDE
         {
             if (type != POINT_MOTION_TYPE || !IsFlying || i != id)
                 return;
@@ -498,25 +499,26 @@ public:
             ++id;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(DATA_HORSEMAN_EVENT, IN_PROGRESS);
             DoZoneInCombat();
         }
 
-        void AttackStart(Unit* who)
+        void AttackStart(Unit* who) OVERRIDE
         {
             ScriptedAI::AttackStart(who);
         }
 
-        void MoveInLineOfSight(Unit* who)
+        void MoveInLineOfSight(Unit* who) OVERRIDE
+
         {
             if (withhead && Phase != 0)
                 ScriptedAI::MoveInLineOfSight(who);
         }
 
-        void KilledUnit(Unit* player)
+        void KilledUnit(Unit* player) OVERRIDE
         {
             if (player->GetTypeId() == TYPEID_PLAYER)
             {
@@ -562,13 +564,13 @@ public:
             return NULL;
         }
 
-        void SpellHitTarget(Unit* unit, const SpellInfo* spell)
+        void SpellHitTarget(Unit* unit, const SpellInfo* spell) OVERRIDE
         {
             if (spell->Id == SPELL_CONFLAGRATION && unit->HasAura(SPELL_CONFLAGRATION))
                 SaySound(SAY_CONFLAGRATION, unit);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             me->StopMoving();
             //me->GetMotionMaster()->MoveIdle();
@@ -585,7 +587,7 @@ public:
                 sLFGMgr->FinishDungeon(players.begin()->GetSource()->GetGroup()->GetGUID(), 285);
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell)
+        void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
         {
             if (withhead)
                 return;
@@ -615,7 +617,7 @@ public:
             }
         }
 
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage)
+        void DamageTaken(Unit* /*done_by*/, uint32 &damage) OVERRIDE
         {
             if (damage >= me->GetHealth() && withhead)
             {
@@ -644,7 +646,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (withhead)
             {
@@ -787,9 +789,9 @@ class npc_pulsing_pumpkin : public CreatureScript
 public:
     npc_pulsing_pumpkin() : CreatureScript("npc_pulsing_pumpkin") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_pulsing_pumpkinAI (creature);
+        return new npc_pulsing_pumpkinAI(creature);
     }
 
     struct npc_pulsing_pumpkinAI : public ScriptedAI
@@ -799,7 +801,7 @@ public:
         bool sprouted;
         uint64 debuffGUID;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             float x, y, z;
             me->GetPosition(x, y, z);   //this visual aura some under ground
@@ -819,9 +821,9 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE {}
 
-        void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) OVERRIDE
         {
             if (spell->Id == SPELL_SPROUTING)
             {
@@ -847,13 +849,14 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (!sprouted)
                 Despawn();
         }
 
-        void MoveInLineOfSight(Unit* who)
+        void MoveInLineOfSight(Unit* who) OVERRIDE
+
         {
             if (!who || !me->IsValidAttackTarget(who) || me->GetVictim())
                 return;
@@ -863,7 +866,7 @@ public:
                 DoStartMovement(who);
         }
 
-        void UpdateAI(uint32 /*diff*/)
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
         {
             if (sprouted && UpdateVictim())
                 DoMeleeAttackIfReady();
@@ -876,7 +879,7 @@ class go_loosely_turned_soil : public GameObjectScript
 public:
     go_loosely_turned_soil() : GameObjectScript("go_loosely_turned_soil") { }
 
-    bool OnGossipHello(Player* player, GameObject* soil)
+    bool OnGossipHello(Player* player, GameObject* soil) OVERRIDE
     {
         InstanceScript* instance = player->GetInstanceScript();
         if (instance)

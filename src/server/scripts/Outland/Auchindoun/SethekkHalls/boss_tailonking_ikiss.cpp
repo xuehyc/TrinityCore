@@ -57,9 +57,9 @@ class boss_talon_king_ikiss : public CreatureScript
 public:
     boss_talon_king_ikiss() : CreatureScript("boss_talon_king_ikiss") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_talon_king_ikissAI (creature);
+        return new boss_talon_king_ikissAI(creature);
     }
 
     struct boss_talon_king_ikissAI : public ScriptedAI
@@ -80,7 +80,7 @@ public:
         bool Blink;
         bool Intro;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             ArcaneVolley_Timer = 5000;
             Sheep_Timer = 8000;
@@ -91,7 +91,8 @@ public:
             ManaShield = false;
         }
 
-        void MoveInLineOfSight(Unit* who)
+        void MoveInLineOfSight(Unit* who) OVERRIDE
+
         {
             if (!me->GetVictim() && me->CanCreatureAttack(who))
             {
@@ -113,12 +114,12 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
@@ -126,12 +127,12 @@ public:
                 instance->SetData(DATA_IKISSDOOREVENT, DONE);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

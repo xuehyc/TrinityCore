@@ -31,10 +31,14 @@ EndScriptData */
 #include "InstanceScript.h"
 #include "sethekk_halls.h"
 
-enum eEnums
+enum Creatures
 {
-    NPC_ANZU   = 23035,
-    IKISS_DOOR = 177203,
+    NPC_ANZU   = 23035
+};
+
+enum GameObjects
+{
+    GO_IKISS_DOOR = 177203
 };
 
 class instance_sethekk_halls : public InstanceMapScript
@@ -42,7 +46,7 @@ class instance_sethekk_halls : public InstanceMapScript
 public:
     instance_sethekk_halls() : InstanceMapScript("instance_sethekk_halls", 556) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_sethekk_halls_InstanceMapScript(map);
     }
@@ -73,11 +77,11 @@ public:
 
         void OnGameObjectCreate(GameObject* go)
         {
-             if (go->GetEntry() == IKISS_DOOR)
+             if (go->GetEntry() == GO_IKISS_DOOR)
                 m_uiIkissDoorGUID = go->GetGUID();
         }
 
-        void SetData(uint32 type, uint32 data)
+        void SetData(uint32 type, uint32 data) OVERRIDE
         {
             switch (type)
             {

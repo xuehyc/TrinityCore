@@ -94,7 +94,7 @@ class npc_kyle_frenzied : public CreatureScript
 public:
     npc_kyle_frenzied() : CreatureScript("npc_kyle_frenzied") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_kyle_frenziedAI (creature);
     }
@@ -109,7 +109,7 @@ public:
         uint32 EventTimer;
         uint8 EventPhase;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             EventActive = false;
             IsMovingToLunch = false;
@@ -141,16 +141,16 @@ public:
             }
         }
 
-        void MovementInform(uint32 Type, uint32 PointId)
+        void MovementInform(uint32 type, uint32 pointId) OVERRIDE
         {
-            if (Type != POINT_MOTION_TYPE || !EventActive)
+            if (type != POINT_MOTION_TYPE || !EventActive)
                 return;
 
-            if (PointId == POINT_ID)
+            if (pointId == POINT_ID)
                 IsMovingToLunch = false;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (EventActive)
             {

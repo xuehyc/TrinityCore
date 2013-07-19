@@ -67,16 +67,16 @@ class molten_flame : public CreatureScript
 public:
     molten_flame() : CreatureScript("molten_flame") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new molten_flameAI (creature);
+        return new molten_flameAI(creature);
     }
 
     struct molten_flameAI : public NullCreatureAI
     {
         molten_flameAI(Creature* creature) : NullCreatureAI(creature) {}
 
-        void InitializeAI()
+        void InitializeAI() OVERRIDE
         {
             float x, y, z;
             me->GetNearPoint(me, x, y, z, 1, 100, float(M_PI*2*rand_norm()));
@@ -92,9 +92,9 @@ class boss_supremus : public CreatureScript
 public:
     boss_supremus() : CreatureScript("boss_supremus") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_supremusAI (creature);
+        return new boss_supremusAI(creature);
     }
 
     struct boss_supremusAI : public ScriptedAI
@@ -109,7 +109,7 @@ public:
         SummonList summons;
         uint32 phase;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             if (instance)
             {
@@ -127,7 +127,7 @@ public:
             summons.DespawnAll();
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(DATA_SUPREMUSEVENT, IN_PROGRESS);
@@ -164,7 +164,7 @@ public:
             events.ScheduleEvent(EVENT_SWITCH_PHASE, 60000, GCD_CAST);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
             {
@@ -174,12 +174,12 @@ public:
             summons.DespawnAll();
         }
 
-        void JustSummoned(Creature* summon)
+        void JustSummoned(Creature* summon) OVERRIDE
         {
             summons.Summon(summon);
         }
 
-        void SummonedCreatureDespawn(Creature* summon)
+        void SummonedCreatureDespawn(Creature* summon) OVERRIDE
         {
             summons.Despawn(summon);
         }
@@ -207,7 +207,7 @@ public:
             return target;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -271,9 +271,9 @@ class npc_volcano : public CreatureScript
 public:
     npc_volcano() : CreatureScript("npc_volcano") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_volcanoAI (creature);
+        return new npc_volcanoAI(creature);
     }
 
     struct npc_volcanoAI : public ScriptedAI
@@ -283,7 +283,7 @@ public:
             SetCombatMovement(false);
         }
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -293,16 +293,17 @@ public:
         }
         uint32 wait;
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE {}
 
-        void MoveInLineOfSight(Unit* /*who*/) {}
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE {}
 
-        void DoAction(int32 /*info*/)
+
+        void DoAction(int32 /*info*/) OVERRIDE
         {
             me->RemoveAura(SPELL_VOLCANIC_ERUPTION);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (wait <= diff)//wait 3secs before casting
             {

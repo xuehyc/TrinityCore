@@ -21,6 +21,11 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 
+enum Spells
+{
+    SPELL_UK_SECOUND_WIND_TRIGGER    = 42771
+};
+
 uint32 entry_search[3] =
 {
     186609,
@@ -33,7 +38,7 @@ class npc_dragonflayer_forge_master : public CreatureScript
 public:
     npc_dragonflayer_forge_master() : CreatureScript("npc_dragonflayer_forge_master") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_dragonflayer_forge_masterAI(creature);
     }
@@ -49,7 +54,7 @@ public:
         InstanceScript* instance;
         uint8 fm_Type;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             if (fm_Type == 0)
                 fm_Type = GetForgeMasterType();
@@ -78,7 +83,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (fm_Type == 0)
                 fm_Type = GetForgeMasterType();
@@ -102,7 +107,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             if (fm_Type == 0)
                 fm_Type = GetForgeMasterType();
@@ -146,7 +151,7 @@ public:
             return near_f > 0 && near_f < 4 ? near_f : 0;
         }
 
-        void UpdateAI(uint32 /* diff */)
+        void UpdateAI(uint32 /* diff */) OVERRIDE
         {
             if (fm_Type == 0)
                 fm_Type = GetForgeMasterType();
@@ -172,7 +177,7 @@ class spell_ticking_time_bomb : public SpellScriptLoader
         {
             PrepareAuraScript(spell_ticking_time_bomb_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/) OVERRIDE
             {
                 return (bool) sSpellMgr->GetSpellInfo(SPELL_TICKING_TIME_BOMB_EXPLODE);
             }
@@ -185,13 +190,13 @@ class spell_ticking_time_bomb : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectRemove += AuraEffectRemoveFn(spell_ticking_time_bomb_AuraScript::HandleOnEffectRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
-        AuraScript* GetAuraScript() const
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_ticking_time_bomb_AuraScript();
         }
@@ -210,7 +215,7 @@ class spell_fixate : public SpellScriptLoader
         {
             PrepareSpellScript(spell_fixate_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/) OVERRIDE
             {
                 return (bool) sSpellMgr->GetSpellInfo(SPELL_FIXATE_TRIGGER);
             }
@@ -221,13 +226,13 @@ class spell_fixate : public SpellScriptLoader
                 GetCaster()->CastSpell(GetCaster(), SPELL_FIXATE_TRIGGER, true, 0, 0, GetHitUnit()->GetGUID());
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_fixate_SpellScript::HandleScriptEffect, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_fixate_SpellScript();
         }
@@ -265,7 +270,7 @@ public:
             _setData = false;
         }
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             _events.Reset();
             _events.ScheduleEvent(EVENT_REND, urand(2000, 3000));
@@ -273,7 +278,7 @@ public:
             _events.ScheduleEvent(EVENT_KNOCKAWAY, urand(3500, 6000));
         }
 
-        void MovementInform(uint32 type, uint32 id)
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
         {
             if (type == WAYPOINT_MOTION_TYPE && id == POINT_LAST)
             {
@@ -281,7 +286,7 @@ public:
             }
         }
 
-        void SetData(uint32 type, uint32 data)
+        void SetData(uint32 type, uint32 data) OVERRIDE
         {
             if (type == TYPE_PROTODRAKE_AT && data == DATA_PROTODRAKE_MOVE && !_setData && me->GetDistance(protodrakeCheckPos) < 5.0f)
             {
@@ -291,7 +296,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -331,10 +336,55 @@ public:
 
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_enslaved_proto_drakeAI(creature);
     }
+};
+
+class spell_uk_second_wind_proc : public SpellScriptLoader
+{
+    public:
+        spell_uk_second_wind_proc() : SpellScriptLoader("spell_uk_second_wind_proc") { }
+
+        class spell_uk_second_wind_proc_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_uk_second_wind_proc_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_UK_SECOUND_WIND_TRIGGER))
+                    return false;
+                return true;
+            }
+
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                if (eventInfo.GetProcTarget() == GetTarget())
+                    return false;
+                if (!(eventInfo.GetDamageInfo() || eventInfo.GetDamageInfo()->GetSpellInfo()->GetAllEffectsMechanicMask() & ((1 << MECHANIC_ROOT) | (1 << MECHANIC_STUN))))
+                    return false;
+                return true;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                GetTarget()->CastCustomSpell(SPELL_UK_SECOUND_WIND_TRIGGER, SPELLVALUE_BASE_POINT0, 5, GetTarget(), true, NULL, aurEff);
+            }
+
+            void Register() OVERRIDE
+            {
+                DoCheckProc += AuraCheckProcFn(spell_uk_second_wind_proc_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_uk_second_wind_proc_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_uk_second_wind_proc_AuraScript();
+        }
 };
 
 void AddSC_utgarde_keep()
@@ -343,4 +393,5 @@ void AddSC_utgarde_keep()
     new npc_enslaved_proto_drake();
     new spell_ticking_time_bomb();
     new spell_fixate();
+    new spell_uk_second_wind_proc();
 }

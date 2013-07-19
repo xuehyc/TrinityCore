@@ -31,7 +31,7 @@ EndScriptData */
 #include "ScriptedCreature.h"
 #include "serpent_shrine.h"
 
-enum eEnums
+enum Yells
 {
     // Yell
     SAY_AGGRO                       = 0,
@@ -42,8 +42,11 @@ enum eEnums
     // Emotes
     EMOTE_WATERY_GRAVE              = 5,
     EMOTE_EARTHQUAKE                = 6,
-    EMOTE_WATERY_GLOBULES           = 7,
-    // Spells
+    EMOTE_WATERY_GLOBULES           = 7
+};
+
+enum Spells
+{
     SPELL_TIDAL_WAVE                = 37730,
     SPELL_WATERY_GRAVE              = 38049,
     SPELL_EARTHQUAKE                = 37764,
@@ -58,6 +61,13 @@ enum eEnums
     SPELL_SUMMON_WATER_GLOBULE_2    = 37858,
     SPELL_SUMMON_WATER_GLOBULE_3    = 37860,
     SPELL_SUMMON_WATER_GLOBULE_4    = 37861,
+
+    // Water Globule
+    SPELL_GLOBULE_EXPLOSION         = 37871
+};
+
+enum Creatures
+{
     // Creatures
     NPC_WATER_GLOBULE               = 21913,
     NPC_TIDEWALKER_LURKER           = 21920
@@ -83,9 +93,9 @@ class boss_morogrim_tidewalker : public CreatureScript
 public:
     boss_morogrim_tidewalker() : CreatureScript("boss_morogrim_tidewalker") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_morogrim_tidewalkerAI (creature);
+        return new boss_morogrim_tidewalkerAI(creature);
     }
 
     struct boss_morogrim_tidewalkerAI : public ScriptedAI
@@ -110,7 +120,7 @@ public:
         bool Earthquake;
         bool Phase2;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             TidalWave_Timer = 10000;
             WateryGrave_Timer = 30000;
@@ -136,12 +146,12 @@ public:
                 instance->SetData(DATA_MOROGRIMTIDEWALKEREVENT, IN_PROGRESS);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
@@ -149,7 +159,7 @@ public:
                 instance->SetData(DATA_MOROGRIMTIDEWALKEREVENT, DONE);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             PlayerList = &me->GetMap()->GetPlayers();
             Playercount = PlayerList->getSize();
@@ -167,7 +177,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -281,17 +291,14 @@ public:
 
 };
 
-//Water Globule AI
-#define SPELL_GLOBULE_EXPLOSION 37871
-
 class npc_water_globule : public CreatureScript
 {
 public:
     npc_water_globule() : CreatureScript("npc_water_globule") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_water_globuleAI (creature);
+        return new npc_water_globuleAI(creature);
     }
 
     struct npc_water_globuleAI : public ScriptedAI
@@ -300,7 +307,7 @@ public:
 
         uint32 Check_Timer;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             Check_Timer = 1000;
 
@@ -309,9 +316,10 @@ public:
             me->setFaction(14);
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE {}
 
-        void MoveInLineOfSight(Unit* who)
+        void MoveInLineOfSight(Unit* who) OVERRIDE
+
         {
             if (!who || me->GetVictim())
                 return;
@@ -324,7 +332,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())

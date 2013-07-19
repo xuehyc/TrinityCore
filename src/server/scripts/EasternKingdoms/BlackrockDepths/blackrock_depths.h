@@ -23,11 +23,14 @@
 #ifndef DEF_BRD_H
 #define DEF_BRD_H
 
-#define FACTION_NEUTRAL             734
-#define FACTION_HOSTILE             754
-#define FACTION_FRIEND              35
+enum FactionIds
+{
+    FACTION_NEUTRAL            = 734,
+    FACTION_HOSTILE            = 754,
+    FACTION_FRIEND             = 35
+};
 
-enum eTypes
+enum DataTypes
 {
     TYPE_RING_OF_LAW        = 1,
     TYPE_VAULT              = 2,
@@ -61,4 +64,5 @@ enum eTypes
     DATA_SF_BRAZIER_S       = 26,
     DATA_MOIRA              = 27,
 };
+
 #endif

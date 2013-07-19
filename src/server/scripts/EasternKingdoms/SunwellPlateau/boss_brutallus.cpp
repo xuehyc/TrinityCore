@@ -72,9 +72,9 @@ class boss_brutallus : public CreatureScript
 public:
     boss_brutallus() : CreatureScript("boss_brutallus") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_brutallusAI (creature);
+        return new boss_brutallusAI(creature);
     }
 
     struct boss_brutallusAI : public ScriptedAI
@@ -100,7 +100,7 @@ public:
         bool IsIntro;
         bool Enraged;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             SlashTimer = 11000;
             StompTimer = 30000;
@@ -120,7 +120,7 @@ public:
                 instance->SetData(DATA_BRUTALLUS_EVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(YELL_AGGRO);
 
@@ -128,12 +128,12 @@ public:
                 instance->SetData(DATA_BRUTALLUS_EVENT, IN_PROGRESS);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(YELL_KILL);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(YELL_DEATH);
 
@@ -146,7 +146,7 @@ public:
             }
         }
 
-        void EnterEvadeMode()
+        void EnterEvadeMode() OVERRIDE
         {
             if (!Intro)
                 ScriptedAI::EnterEvadeMode();
@@ -183,7 +183,7 @@ public:
             IsIntro = false;
         }
 
-        void AttackStart(Unit* who)
+        void AttackStart(Unit* who) OVERRIDE
         {
             if (!who || Intro || IsIntro)
                 return;
@@ -268,7 +268,8 @@ public:
             }
         }
 
-        void MoveInLineOfSight(Unit* who)
+        void MoveInLineOfSight(Unit* who) OVERRIDE
+
         {
             if (!me->IsValidAttackTarget(who))
                 return;
@@ -281,7 +282,7 @@ public:
                 ScriptedAI::MoveInLineOfSight(who);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (IsIntro)
             {

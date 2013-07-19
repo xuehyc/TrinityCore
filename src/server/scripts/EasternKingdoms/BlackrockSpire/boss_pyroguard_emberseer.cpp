@@ -82,7 +82,7 @@ public:
     {
         boss_pyroguard_emberseerAI(Creature* creature) : BossAI(creature, DATA_PYROGAURD_EMBERSEER) {}
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             if (instance)
             {
@@ -103,7 +103,7 @@ public:
             }
         }
 
-        void SetData(uint32 /*type*/, uint32 data)
+        void SetData(uint32 /*type*/, uint32 data) OVERRIDE
         {
             switch (data)
             {
@@ -127,7 +127,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             // ### TODO Check combat timing ###
             events.ScheduleEvent(EVENT_FIRENOVA,    6000);
@@ -135,7 +135,7 @@ public:
             events.ScheduleEvent(EVENT_PYROBLAST,  14000);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
             {
@@ -148,7 +148,7 @@ public:
             }
         }
 
-        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell) OVERRIDE
         {
             if (spell->Id == SPELL_ENCAGE_EMBERSEER)
             {
@@ -210,7 +210,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
             {
@@ -319,7 +319,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_pyroguard_emberseerAI(creature);
     }
@@ -347,19 +347,19 @@ public:
     {
         npc_blackhand_incarceratorAI(Creature* creature) : ScriptedAI(creature) {}
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC);
             if (Creature* Emberseer = me->FindNearestCreature(NPC_PYROGAURD_EMBERSEER, 30.0f, true))
                 Emberseer->AI()->SetData(1, 3);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             me->DespawnOrUnsummon(10000);
         }
 
-        void SetData(uint32 data, uint32 value)
+        void SetData(uint32 data, uint32 value) OVERRIDE
         {
             if (data == 1 && value == 1)
             {
@@ -374,7 +374,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             // Used to close doors
             if (Creature* Emberseer = me->FindNearestCreature(NPC_PYROGAURD_EMBERSEER, 30.0f, true))
@@ -393,7 +393,7 @@ public:
             _events.ScheduleEvent(EVENT_ENCAGE, urand(10000, 20000));
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
 
 
@@ -406,11 +406,14 @@ public:
                     switch (eventId)
                     {
                         case EVENT_ENCAGED_EMBERSEER:
-                            if(me->GetPositionX() == me->GetHomePosition().GetPositionX())
-                                if(!me->HasAura(SPELL_ENCAGE_EMBERSEER))
+                        {
+                            if (me->GetPositionX() == me->GetHomePosition().GetPositionX())
+                                if (!me->HasAura(SPELL_ENCAGE_EMBERSEER))
                                     if (Creature* Emberseer = me->FindNearestCreature(NPC_PYROGAURD_EMBERSEER, 30.0f, true))
                                         DoCast(Emberseer, SPELL_ENCAGE_EMBERSEER);
                             break;
+
+                        }
                     }
                 }
                 return;
@@ -434,6 +437,7 @@ public:
                         break;
                 }
             }
+
             DoMeleeAttackIfReady();
         }
 
@@ -441,7 +445,7 @@ public:
             EventMap _events;
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_blackhand_incarceratorAI(creature);
     }

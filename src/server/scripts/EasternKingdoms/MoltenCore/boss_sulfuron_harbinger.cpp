@@ -71,7 +71,7 @@ class boss_sulfuron : public CreatureScript
             {
             }
 
-            void EnterCombat(Unit* victim)
+            void EnterCombat(Unit* victim) OVERRIDE
             {
                 BossAI::EnterCombat(victim);
                 events.ScheduleEvent(EVENT_DARK_STRIKE, 10000);
@@ -81,7 +81,7 @@ class boss_sulfuron : public CreatureScript
                 events.ScheduleEvent(EVENT_FLAMESPEAR, 2000);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -131,7 +131,7 @@ class boss_sulfuron : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_sulfuronAI(creature);
         }
@@ -148,17 +148,17 @@ class npc_flamewaker_priest : public CreatureScript
             {
             }
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 events.Reset();
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 events.Reset();
             }
 
-            void EnterCombat(Unit* victim)
+            void EnterCombat(Unit* victim) OVERRIDE
             {
                 ScriptedAI::EnterCombat(victim);
                 events.ScheduleEvent(EVENT_HEAL, urand(15000, 30000));
@@ -166,7 +166,7 @@ class npc_flamewaker_priest : public CreatureScript
                 events.ScheduleEvent(EVENT_IMMOLATE, 8000);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -207,7 +207,7 @@ class npc_flamewaker_priest : public CreatureScript
             EventMap events;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_flamewaker_priestAI(creature);
         }

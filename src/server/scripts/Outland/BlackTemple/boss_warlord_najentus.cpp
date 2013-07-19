@@ -33,32 +33,44 @@ EndScriptData */
 #include "Player.h"
 #include "SpellInfo.h"
 
-enum eEnums
+enum Yells
 {
     SAY_AGGRO                       = 0,
     SAY_NEEDLE                      = 1,
     SAY_SLAY                        = 2,
     SAY_SPECIAL                     = 3,
     SAY_ENRAGE                      = 4,
-    SAY_DEATH                       = 5,
+    SAY_DEATH                       = 5
+};
 
-    //Spells
+enum Spells
+{
     SPELL_NEEDLE_SPINE              = 39992,
     SPELL_TIDAL_BURST               = 39878,
     SPELL_TIDAL_SHIELD              = 39872,
     SPELL_IMPALING_SPINE            = 39837,
     SPELL_CREATE_NAJENTUS_SPINE     = 39956,
     SPELL_HURL_SPINE                = 39948,
-    SPELL_BERSERK                   = 26662,
+    SPELL_BERSERK                   = 26662
 
-    GOBJECT_SPINE                   = 185584,
+};
 
+enum GameObjects
+{
+    GOBJECT_SPINE                   = 185584
+};
+
+enum Events
+{
     EVENT_BERSERK                   = 1,
     EVENT_YELL                      = 2,
     EVENT_NEEDLE                    = 3,
     EVENT_SPINE                     = 4,
-    EVENT_SHIELD                    = 5,
+    EVENT_SHIELD                    = 5
+};
 
+enum Misc
+{
     GCD_CAST                        = 1,
     GCD_YELL                        = 2
 };
@@ -68,9 +80,9 @@ class boss_najentus : public CreatureScript
 public:
     boss_najentus() : CreatureScript("boss_najentus") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_najentusAI (creature);
+        return new boss_najentusAI(creature);
     }
 
     struct boss_najentusAI : public ScriptedAI
@@ -85,7 +97,7 @@ public:
 
         uint64 SpineTargetGUID;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             events.Reset();
 
@@ -95,13 +107,13 @@ public:
                 instance->SetData(DATA_HIGHWARLORDNAJENTUSEVENT, NOT_STARTED);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
             events.DelayEvents(5000, GCD_YELL);
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(DATA_HIGHWARLORDNAJENTUSEVENT, DONE);
@@ -109,7 +121,7 @@ public:
             Talk(SAY_DEATH);
         }
 
-        void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) OVERRIDE
         {
             if (spell->Id == SPELL_HURL_SPINE && me->HasAura(SPELL_TIDAL_SHIELD))
             {
@@ -119,7 +131,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(DATA_HIGHWARLORDNAJENTUSEVENT, IN_PROGRESS);
@@ -150,7 +162,7 @@ public:
             events.RescheduleEvent(EVENT_SHIELD, 60000 + inc);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -217,7 +229,7 @@ class go_najentus_spine : public GameObjectScript
 public:
     go_najentus_spine() : GameObjectScript("go_najentus_spine") { }
 
-    bool OnGossipHello(Player* player, GameObject* go)
+    bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
     {
         if (InstanceScript* instance = go->GetInstanceScript())
             if (Creature* Najentus = Unit::GetCreature(*go, instance->GetData64(DATA_HIGHWARLORDNAJENTUS)))

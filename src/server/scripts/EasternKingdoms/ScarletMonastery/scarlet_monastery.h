@@ -20,10 +20,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DEF_SCARLET_M
-#define DEF_SCARLET_M
+#ifndef SCARLET_M_
+#define SCARLET_M_
 
-enum eEnums
+enum DataTypes
 {
     TYPE_MOGRAINE_AND_WHITE_EVENT   = 1,
 
@@ -36,4 +36,5 @@ enum eEnums
 
     DATA_VORREL                     = 7
 };
-#endif
+
+#endif // SCARLET_M_

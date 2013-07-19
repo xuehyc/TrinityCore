@@ -20,10 +20,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DEF_BLACK_TEMPLE_H
-#define DEF_BLACK_TEMPLE_H
+#ifndef BLACK_TEMPLE_H_
+#define BLACK_TEMPLE_H_
 
-enum eTypes
+uint32 const EncounterCount         = 9;
+
+enum DataTypes
 {
     DATA_AKAMA                      = 1,
     DATA_AKAMA_SHADE                = 2,
@@ -54,4 +56,3 @@ enum eTypes
 };
 
 #endif
-

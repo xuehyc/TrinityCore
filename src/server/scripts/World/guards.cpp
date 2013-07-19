@@ -60,13 +60,13 @@ public:
     {
         guard_genericAI(Creature* creature) : GuardAI(creature) {}
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             globalCooldown = 0;
             buffTimer = 0;
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit* who) OVERRIDE
         {
             if (me->GetEntry() == NPC_CENARION_HOLD_INFANTRY)
                 Talk(SAY_GUARD_SIL_AGGRO, who->GetGUID());
@@ -74,7 +74,7 @@ public:
                 DoCast(who, spell->Id);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
              //Always decrease our global cooldown first
             if (globalCooldown > diff)
@@ -223,7 +223,7 @@ public:
             }
         }
 
-        void ReceiveEmote(Player* player, uint32 textEmote)
+        void ReceiveEmote(Player* player, uint32 textEmote) OVERRIDE
         {
             switch (me->GetEntry())
             {
@@ -246,7 +246,7 @@ public:
         uint32 buffTimer;
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
        return new guard_genericAI(creature);
     }
@@ -269,7 +269,7 @@ public:
     {
         guard_shattrath_scryerAI(Creature* creature) : GuardAI(creature) {}
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             banishTimer = 5000;
             exileTimer = 8500;
@@ -277,7 +277,7 @@ public:
             canTeleport = false;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -319,7 +319,7 @@ public:
         bool canTeleport;
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new guard_shattrath_scryerAI(creature);
     }
@@ -334,7 +334,7 @@ public:
     {
         guard_shattrath_aldorAI(Creature* creature) : GuardAI(creature) {}
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             banishTimer = 5000;
             exileTimer = 8500;
@@ -342,7 +342,7 @@ public:
             canTeleport = false;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -383,7 +383,7 @@ public:
         bool canTeleport;
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new guard_shattrath_aldorAI(creature);
     }

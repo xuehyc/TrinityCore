@@ -49,7 +49,7 @@ class npc_rivern_frostwind : public CreatureScript
 public:
     npc_rivern_frostwind() : CreatureScript("npc_rivern_frostwind") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
     {
         player->PlayerTalkClass->ClearMenus();
         if (action == GOSSIP_ACTION_TRADE)
@@ -58,7 +58,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature)
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
     {
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -298,7 +298,7 @@ class npc_ranshalla : public CreatureScript
 {
 public:
     npc_ranshalla() : CreatureScript("npc_ranshalla") { }
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
     {
         if (quest->GetQuestId() == QUEST_GUARDIANS_ALTAR)
         {
@@ -313,7 +313,7 @@ public:
 
         return false;
     }
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_ranshallaAI(creature);
     }
@@ -334,7 +334,7 @@ public:
         uint64 _voiceEluneGUID;
         uint64 _altarGUID;
 
-        void Reset()
+        void Reset() OVERRIDE
         {
             _delayTimer = 0;
         }
@@ -400,7 +400,7 @@ public:
             StartNextDialogueText(SAY_PRIESTESS_ALTAR_3);
         }
 
-        void WaypointReached(uint32 pointId)
+        void WaypointReached(uint32 pointId) OVERRIDE
         {
             switch (pointId)
             {
@@ -569,7 +569,7 @@ public:
 
         }
 
-        void UpdateEscortAI(const uint32 diff)
+        void UpdateEscortAI(const uint32 diff) OVERRIDE
         {
             DialogueUpdate(diff);
 
@@ -602,7 +602,7 @@ class go_elune_fire : public GameObjectScript
 {
 public:
     go_elune_fire() : GameObjectScript("go_elune_fire") { }
-    bool OnGossipHello(Player* /*player*/, GameObject* go)
+    bool OnGossipHello(Player* /*player*/, GameObject* go) OVERRIDE
     {
         // Check if we are using the torches or the altar
         bool isAltar = false;

@@ -43,7 +43,7 @@ class instance_halls_of_lightning : public InstanceMapScript
 public:
     instance_halls_of_lightning() : InstanceMapScript("instance_halls_of_lightning", 602) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_halls_of_lightning_InstanceMapScript(map);
     }
@@ -138,7 +138,7 @@ public:
             }
         }
 
-        void SetData(uint32 uiType, uint32 uiData)
+        void SetData(uint32 uiType, uint32 uiData) OVERRIDE
         {
             switch (uiType)
             {
@@ -178,7 +178,7 @@ public:
                 SaveToDB();
         }
 
-        uint32 GetData(uint32 uiType) const
+        uint32 GetData(uint32 uiType) const OVERRIDE
         {
             switch (uiType)
             {
@@ -194,7 +194,7 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 uiData) const
+        uint64 GetData64(uint32 uiData) const OVERRIDE
         {
             switch (uiData)
             {

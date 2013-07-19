@@ -41,7 +41,7 @@ enum AIs
     AI_PET      = 3
 };
 
-enum eSpells
+enum Spells
 {
     // generic
     SPELL_ANTI_AOE                  = 68595,
@@ -355,7 +355,7 @@ class boss_toc_champion_controller : public CreatureScript
                 _instance = creature->GetInstanceScript();
             }
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 _championsNotStarted = 0;
                 _championsFailed = 0;
@@ -473,7 +473,7 @@ class boss_toc_champion_controller : public CreatureScript
                 }
             }
 
-            void SetData(uint32 uiType, uint32 uiData)
+            void SetData(uint32 uiType, uint32 uiData) OVERRIDE
             {
                 switch (uiType)
                 {
@@ -541,9 +541,9 @@ class boss_toc_champion_controller : public CreatureScript
                 bool   _inProgress;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new boss_toc_champion_controllerAI (creature);
+            return new boss_toc_champion_controllerAI(creature);
         }
 };
 
@@ -554,14 +554,14 @@ struct boss_faction_championsAI : public BossAI
         _aiType = aitype;
     }
 
-    void Reset()
+    void Reset() OVERRIDE
     {
         _events.ScheduleEvent(EVENT_THREAT, 5*IN_MILLISECONDS);
         if (IsHeroic() && (_aiType != AI_PET))
             _events.ScheduleEvent(EVENT_REMOVE_CC, 5*IN_MILLISECONDS);
     }
 
-    void JustReachedHome()
+    void JustReachedHome() OVERRIDE
     {
         if (instance)
             if (Creature* pChampionController = Unit::GetCreature((*me), instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
@@ -611,7 +611,7 @@ struct boss_faction_championsAI : public BossAI
         //DoCast(me, SPELL_PVP_TRINKET);
     }
 
-    void JustDied(Unit* /*killer*/)
+    void JustDied(Unit* /*killer*/) OVERRIDE
     {
         if (_aiType != AI_PET)
             if (instance)
@@ -619,7 +619,7 @@ struct boss_faction_championsAI : public BossAI
                     pChampionController->AI()->SetData(2, DONE);
     }
 
-    void EnterCombat(Unit* /*who*/)
+    void EnterCombat(Unit* /*who*/) OVERRIDE
     {
         DoCast(me, SPELL_ANTI_AOE, true);
         _EnterCombat();
@@ -628,7 +628,7 @@ struct boss_faction_championsAI : public BossAI
                 pChampionController->AI()->SetData(2, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* who)
+    void KilledUnit(Unit* who) OVERRIDE
     {
         if (who->GetTypeId() == TYPEID_PLAYER)
         {
@@ -695,7 +695,7 @@ struct boss_faction_championsAI : public BossAI
         return count;
     }
 
-    void AttackStart(Unit* who)
+    void AttackStart(Unit* who) OVERRIDE
     {
         if (!who)
             return;
@@ -714,7 +714,7 @@ struct boss_faction_championsAI : public BossAI
         }
     }
 
-    void UpdateAI(uint32 diff)
+    void UpdateAI(uint32 diff) OVERRIDE
     {
         _events.Update(diff);
 
@@ -763,7 +763,7 @@ class npc_toc_druid : public CreatureScript
         {
             npc_toc_druidAI(Creature* creature) : boss_faction_championsAI(creature, AI_HEALER) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_LIFEBLOOM, urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS));
@@ -777,7 +777,7 @@ class npc_toc_druid : public CreatureScript
                 SetEquipmentSlots(false, 51799, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -841,9 +841,9 @@ class npc_toc_druid : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_druidAI (creature);
+            return new npc_toc_druidAI(creature);
         }
 };
 
@@ -856,7 +856,7 @@ class npc_toc_shaman : public CreatureScript
         {
             npc_toc_shamanAI(Creature* creature) : boss_faction_championsAI(creature, AI_HEALER) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_HEALING_WAVE, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
@@ -869,7 +869,7 @@ class npc_toc_shaman : public CreatureScript
                 SetEquipmentSlots(false, 49992, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -934,9 +934,9 @@ class npc_toc_shaman : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_shamanAI (creature);
+            return new npc_toc_shamanAI(creature);
         }
 };
 
@@ -949,7 +949,7 @@ class npc_toc_paladin : public CreatureScript
         {
             npc_toc_paladinAI(Creature* creature) : boss_faction_championsAI(creature, AI_HEALER) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_HAND_OF_FREEDOM, urand(10*IN_MILLISECONDS, 20*IN_MILLISECONDS));
@@ -963,7 +963,7 @@ class npc_toc_paladin : public CreatureScript
                 SetEquipmentSlots(false, 50771, 47079, EQUIP_NO_CHANGE);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -1038,9 +1038,9 @@ class npc_toc_paladin : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_paladinAI (creature);
+            return new npc_toc_paladinAI(creature);
         }
 };
 
@@ -1053,7 +1053,7 @@ class npc_toc_priest : public CreatureScript
         {
             npc_toc_priestAI(Creature* creature) : boss_faction_championsAI(creature, AI_HEALER) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_RENEW, urand(3*IN_MILLISECONDS, 10*IN_MILLISECONDS));
@@ -1066,7 +1066,7 @@ class npc_toc_priest : public CreatureScript
                 SetEquipmentSlots(false, 49992, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -1123,9 +1123,9 @@ class npc_toc_priest : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_priestAI (creature);
+            return new npc_toc_priestAI(creature);
         }
 };
 
@@ -1141,7 +1141,7 @@ class npc_toc_shadow_priest : public CreatureScript
         {
             npc_toc_shadow_priestAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_SILENCE, urand(10*IN_MILLISECONDS, 25*IN_MILLISECONDS));
@@ -1156,7 +1156,7 @@ class npc_toc_shadow_priest : public CreatureScript
                 DoCast(me, SPELL_SHADOWFORM);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -1221,9 +1221,9 @@ class npc_toc_shadow_priest : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_shadow_priestAI (creature);
+            return new npc_toc_shadow_priestAI(creature);
         }
 };
 
@@ -1236,7 +1236,7 @@ class npc_toc_warlock : public CreatureScript
         {
             npc_toc_warlockAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_HELLFIRE, urand(10*IN_MILLISECONDS, 30*IN_MILLISECONDS));
@@ -1249,13 +1249,13 @@ class npc_toc_warlock : public CreatureScript
                 SetEquipmentSlots(false, 49992, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) OVERRIDE
             {
                 boss_faction_championsAI::EnterCombat(who);
                 DoCast(SPELL_SUMMON_FELHUNTER);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -1312,9 +1312,9 @@ class npc_toc_warlock : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_warlockAI (creature);
+            return new npc_toc_warlockAI(creature);
         }
 };
 
@@ -1327,7 +1327,7 @@ class npc_toc_mage : public CreatureScript
         {
             npc_toc_mageAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(1*IN_MILLISECONDS, 5*IN_MILLISECONDS));
@@ -1341,7 +1341,7 @@ class npc_toc_mage : public CreatureScript
                 SetEquipmentSlots(false, 47524, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -1406,9 +1406,9 @@ class npc_toc_mage : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_mageAI (creature);
+            return new npc_toc_mageAI(creature);
         }
 };
 
@@ -1421,7 +1421,7 @@ class npc_toc_hunter : public CreatureScript
         {
             npc_toc_hunterAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_AIMED_SHOT, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
@@ -1435,13 +1435,13 @@ class npc_toc_hunter : public CreatureScript
                 SetEquipmentSlots(false, 47156, EQUIP_NO_CHANGE, 48711);
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) OVERRIDE
             {
                 boss_faction_championsAI::EnterCombat(who);
                 DoCast(SPELL_CALL_PET);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -1508,9 +1508,9 @@ class npc_toc_hunter : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_hunterAI (creature);
+            return new npc_toc_hunterAI(creature);
         }
 };
 
@@ -1523,7 +1523,7 @@ class npc_toc_boomkin : public CreatureScript
         {
             npc_toc_boomkinAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_CYCLONE, urand(10*IN_MILLISECONDS, 20*IN_MILLISECONDS));
@@ -1538,7 +1538,7 @@ class npc_toc_boomkin : public CreatureScript
                 SetEquipmentSlots(false, 50966, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -1600,9 +1600,9 @@ class npc_toc_boomkin : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_boomkinAI (creature);
+            return new npc_toc_boomkinAI(creature);
         }
 };
 
@@ -1618,7 +1618,7 @@ class npc_toc_warrior : public CreatureScript
         {
             npc_toc_warriorAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_BLADESTORM, urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS));
@@ -1633,7 +1633,7 @@ class npc_toc_warrior : public CreatureScript
                 SetEquipmentSlots(false, 47427, 46964, EQUIP_NO_CHANGE);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -1704,9 +1704,9 @@ class npc_toc_warrior : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_warriorAI (creature);
+            return new npc_toc_warriorAI(creature);
         }
 };
 
@@ -1719,7 +1719,7 @@ class npc_toc_dk : public CreatureScript
         {
             npc_toc_dkAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_CHAINS_OF_ICE, urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS));
@@ -1732,7 +1732,7 @@ class npc_toc_dk : public CreatureScript
                 SetEquipmentSlots(false, 47518, 51021, EQUIP_NO_CHANGE);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -1800,9 +1800,9 @@ class npc_toc_dk : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_dkAI (creature);
+            return new npc_toc_dkAI(creature);
         }
 };
 
@@ -1815,7 +1815,7 @@ class npc_toc_rogue : public CreatureScript
         {
             npc_toc_rogueAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_FAN_OF_KNIVES, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
@@ -1831,7 +1831,7 @@ class npc_toc_rogue : public CreatureScript
                 me->SetMaxPower(POWER_ENERGY, 100);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -1905,9 +1905,9 @@ class npc_toc_rogue : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_rogueAI (creature);
+            return new npc_toc_rogueAI(creature);
         }
 };
 
@@ -1920,7 +1920,7 @@ class npc_toc_enh_shaman : public CreatureScript
         {
             npc_toc_enh_shamanAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_DPS_EARTH_SHOCK, urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS));
@@ -1937,12 +1937,12 @@ class npc_toc_enh_shaman : public CreatureScript
                 summons.DespawnAll();
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* summoned) OVERRIDE
             {
                 summons.Summon(summoned);
             }
 
-            void SummonedCreatureDespawn(Creature* /*pSummoned*/)
+            void SummonedCreatureDespawn(Creature* /*pSummoned*/) OVERRIDE
             {
                 --_totemCount;
             }
@@ -1965,13 +1965,13 @@ class npc_toc_enh_shaman : public CreatureScript
                 */
             }
 
-            void JustDied(Unit* killer)
+            void JustDied(Unit* killer) OVERRIDE
             {
                 boss_faction_championsAI::JustDied(killer);
                 summons.DespawnAll();
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -2031,9 +2031,9 @@ class npc_toc_enh_shaman : public CreatureScript
                 float  _totemOldCenterX, _totemOldCenterY;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_enh_shamanAI (creature);
+            return new npc_toc_enh_shamanAI(creature);
         }
 };
 
@@ -2046,7 +2046,7 @@ class npc_toc_retro_paladin : public CreatureScript
         {
             npc_toc_retro_paladinAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_AVENGING_WRATH, urand(25*IN_MILLISECONDS, 35*IN_MILLISECONDS));
@@ -2060,13 +2060,13 @@ class npc_toc_retro_paladin : public CreatureScript
                 SetEquipmentSlots(false, 47519, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) OVERRIDE
             {
                 boss_faction_championsAI::EnterCombat(who);
                 DoCast(SPELL_SEAL_OF_COMMAND);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -2137,9 +2137,9 @@ class npc_toc_retro_paladin : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_retro_paladinAI (creature);
+            return new npc_toc_retro_paladinAI(creature);
         }
 };
 
@@ -2152,14 +2152,14 @@ class npc_toc_pet_warlock : public CreatureScript
         {
             npc_toc_pet_warlockAI(Creature* creature) : boss_faction_championsAI(creature, AI_PET) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 events.ScheduleEvent(EVENT_DEVOUR_MAGIC, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_SPELL_LOCK, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS));
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -2189,9 +2189,9 @@ class npc_toc_pet_warlock : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_pet_warlockAI (creature);
+            return new npc_toc_pet_warlockAI(creature);
         }
 };
 
@@ -2204,13 +2204,13 @@ class npc_toc_pet_hunter : public CreatureScript
         {
             npc_toc_pet_hunterAI(Creature* creature) : boss_faction_championsAI(creature, AI_PET) {}
 
-            void Reset()
+            void Reset() OVERRIDE
             {
                 boss_faction_championsAI::Reset();
                 _clawTimer = urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -2229,9 +2229,9 @@ class npc_toc_pet_hunter : public CreatureScript
                 uint32 _clawTimer;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_pet_hunterAI (creature);
+            return new npc_toc_pet_hunterAI(creature);
         }
 };
 
@@ -2244,7 +2244,7 @@ class spell_faction_champion_warl_unstable_affliction : public SpellScriptLoader
         {
             PrepareAuraScript(spell_faction_champion_warl_unstable_affliction_AuraScript);
 
-            bool Validate(SpellInfo const* /*spell*/)
+            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_UNSTABLE_AFFLICTION_DISPEL))
                     return false;
@@ -2257,13 +2257,13 @@ class spell_faction_champion_warl_unstable_affliction : public SpellScriptLoader
                     caster->CastSpell(dispelInfo->GetDispeller(), SPELL_UNSTABLE_AFFLICTION_DISPEL, true, NULL, GetEffect(EFFECT_0));
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 AfterDispel += AuraDispelFn(spell_faction_champion_warl_unstable_affliction_AuraScript::HandleDispel);
             }
         };
 
-        AuraScript* GetAuraScript() const
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_faction_champion_warl_unstable_affliction_AuraScript();
         }
@@ -2278,7 +2278,7 @@ class spell_faction_champion_death_grip : public SpellScriptLoader
         {
             PrepareSpellScript(spell_faction_champion_death_grip_SpellScript);
 
-            bool Validate(SpellInfo const* /*spell*/)
+            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_DEATH_GRIP_PULL))
                     return false;
@@ -2294,14 +2294,14 @@ class spell_faction_champion_death_grip : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_faction_champion_death_grip_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
 
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_faction_champion_death_grip_SpellScript();
         }
@@ -2316,7 +2316,7 @@ class spell_toc_bloodlust : public SpellScriptLoader
         {
             PrepareSpellScript(spell_toc_bloodlust_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(AURA_SATED))
                     return false;
@@ -2334,7 +2334,7 @@ class spell_toc_bloodlust : public SpellScriptLoader
                     target->CastSpell(target, AURA_SATED, true);
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_toc_bloodlust_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_toc_bloodlust_SpellScript::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ALLY);
@@ -2342,7 +2342,7 @@ class spell_toc_bloodlust : public SpellScriptLoader
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_toc_bloodlust_SpellScript();
         }
@@ -2357,7 +2357,7 @@ class spell_toc_heroism : public SpellScriptLoader
         {
             PrepareSpellScript(spell_toc_heroism_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(AURA_EXHAUSTION))
                     return false;
@@ -2375,7 +2375,7 @@ class spell_toc_heroism : public SpellScriptLoader
                     target->CastSpell(target, AURA_EXHAUSTION, true);
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_toc_heroism_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_toc_heroism_SpellScript::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ALLY);
@@ -2383,7 +2383,7 @@ class spell_toc_heroism : public SpellScriptLoader
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_toc_heroism_SpellScript();
         }

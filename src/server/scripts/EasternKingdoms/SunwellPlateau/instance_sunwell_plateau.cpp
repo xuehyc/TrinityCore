@@ -48,7 +48,7 @@ class instance_sunwell_plateau : public InstanceMapScript
 public:
     instance_sunwell_plateau() : InstanceMapScript("instance_sunwell_plateau", 580) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_sunwell_plateau_InstanceMapScript(map);
     }
@@ -186,7 +186,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 id) const
+        uint32 GetData(uint32 id) const OVERRIDE
         {
             switch (id)
             {
@@ -200,7 +200,7 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 id) const
+        uint64 GetData64(uint32 id) const OVERRIDE
         {
             switch (id)
             {
@@ -225,7 +225,7 @@ public:
             return 0;
         }
 
-        void SetData(uint32 id, uint32 data)
+        void SetData(uint32 id, uint32 data) OVERRIDE
         {
             switch (id)
             {
