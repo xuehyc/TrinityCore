@@ -20,16 +20,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* ScriptData
-SDName: Ironforge
-SD%Complete: 0
-SDComment:
-SDCategory: Ironforge
-EndScriptData */
-
-/* ContentData
-EndContentData */
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
