@@ -6664,6 +6664,27 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 64695;
                 break;
             }
+            // Focused Insight
+            if (dummySpell->SpellIconID == 4674)
+            {
+               if (!procSpell) return false;
+                // Los shocks cuestan % de mana, calculamos la cantidad de mana
+                int32 rawManaCost = procSpell->ManaCostPercentage * GetCreateMana() / 100;
+                // ManaCost relativo al shock
+                int32 manaReduction = -(rawManaCost * dummySpell->Effects[EFFECT_0].BasePoints) / 100;
+                int32 healBoost = dummySpell->Effects[EFFECT_1].BasePoints;
+
+                CastCustomSpell(victim, 77800, &manaReduction, &healBoost, &healBoost, true, 0, 0, GetGUID());
+                return true;
+            }
+            // Ancestral Awakening
+            if (dummySpell->SpellIconID == 3065)
+            {
+                triggered_spell_id = 52759;
+                basepoints0 = CalculatePct(int32(damage), triggerAmount);
+                target = this;
+                break;
+            }			
             // Frozen Power
             if (dummySpell->SpellIconID == 3780)
             {
