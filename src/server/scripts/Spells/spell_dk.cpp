@@ -33,6 +33,7 @@ enum DeathKnightSpells
     SPELL_DK_BLOOD_BOIL_TRIGGERED               = 65658,
     SPELL_DK_BLOOD_GORGED_HEAL                  = 50454,
     SPELL_DK_BLOOD_PRESENCE                     = 48266,
+    SPELL_DK_BUTCHERY                           = 50163,
     SPELL_DK_CORPSE_EXPLOSION_TRIGGERED         = 43999,
     SPELL_DK_CORPSE_EXPLOSION_VISUAL            = 51270,
     SPELL_DK_DEATH_COIL_DAMAGE                  = 47632,
@@ -298,6 +299,41 @@ class spell_dk_blood_gorged : public SpellScriptLoader
 
         private:
             Unit* _procTarget;
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_dk_blood_gorged_AuraScript();
+        }
+};
+
+// -48979 - Butchery
+class spell_dk_butchery : public SpellScriptLoader
+{
+    public:
+        spell_dk_butchery() : SpellScriptLoader("spell_dk_butchery") { }
+
+        class spell_dk_blood_gorged_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dk_blood_gorged_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_DK_BUTCHERY))
+                    return false;
+                return true;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                GetTarget()->CastCustomSpell(SPELL_DK_BUTCHERY, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), GetTarget(), true, NULL, aurEff);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectProc += AuraEffectProcFn(spell_dk_blood_gorged_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
         };
 
         AuraScript* GetAuraScript() const OVERRIDE
@@ -825,7 +861,7 @@ class spell_dk_scent_of_blood : public SpellScriptLoader
                 return true;
             }
 
-            void OnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            void OnProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
             {
                 PreventDefaultAction();
                 GetTarget()->CastSpell(GetTarget(), SPELL_DK_SCENT_OF_BLOOD, true, NULL, aurEff);
@@ -1049,6 +1085,7 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_anti_magic_zone();
     new spell_dk_blood_boil();
     new spell_dk_blood_gorged();
+    new spell_dk_butchery();
     new spell_dk_corpse_explosion();
     new spell_dk_death_coil();
     new spell_dk_death_gate();
