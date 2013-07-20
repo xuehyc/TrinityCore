@@ -40,6 +40,7 @@ enum HunterSpells
     SPELL_HUNTER_CHIMERA_SHOT_SCORPID               = 53359,
     SPELL_HUNTER_GLYPH_OF_ASPECT_OF_THE_VIPER       = 56851,
     SPELL_HUNTER_INVIGORATION_TRIGGERED             = 53398,
+    SPELL_HUNTER_LOCK_AND_LOAD                      = 56453,
     SPELL_HUNTER_MASTERS_CALL_TRIGGERED             = 62305,
     SPELL_HUNTER_MISDIRECTION_PROC                  = 35079,
     SPELL_HUNTER_PET_LAST_STAND_TRIGGERED           = 53479,
@@ -949,6 +950,46 @@ class spell_hun_thrill_of_the_hunt : public SpellScriptLoader
         }
 };
 
+// -56333 - T.N.T.
+class spell_hun_tnt : public SpellScriptLoader
+{
+    public:
+        spell_hun_tnt() : SpellScriptLoader("spell_hun_tnt") { }
+
+        class spell_hun_tnt_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hun_tnt_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_LOCK_AND_LOAD))
+                    return false;
+                return true;
+            }
+
+            bool CheckProc(ProcEventInfo& /*eventInfo*/)
+            {
+                return roll_chance_i(GetEffect(EFFECT_0)->GetAmount());
+            }
+
+            void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                GetTarget()->CastSpell(GetTarget(), SPELL_HUNTER_LOCK_AND_LOAD, true, NULL, aurEff);
+            }
+
+            void Register() OVERRIDE
+            {
+                DoCheckProc += AuraCheckProcFn(spell_hun_tnt_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_hun_tnt_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_hun_tnt_AuraScript();
+        }
+};
 
 void AddSC_hunter_spell_scripts()
 {
@@ -971,4 +1012,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_target_only_pet_and_owner();
 	new spell_hun_kill_command();
     new spell_hun_thrill_of_the_hunt();
+    new spell_hun_tnt();
 }
