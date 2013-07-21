@@ -44,6 +44,7 @@ enum MageSpells
     SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED    = 44413,
     SPELL_MAGE_IGNITE                            = 12654,
     SPELL_MAGE_MASTER_OF_ELEMENTS_ENERGIZE       = 29077,
+    SPELL_MAGE_PERMAFROST                        = 91394,
     SPELL_MAGE_SLOW                              = 31589,
     SPELL_MAGE_SQUIRREL_FORM                     = 32813,
     SPELL_MAGE_GIRAFFE_FORM                      = 32816,
@@ -87,6 +88,11 @@ enum MageIcons
     ICON_MAGE_IMPROVED_FREEZE                    = 94,
     ICON_MAGE_INCANTER_S_ABSORPTION              = 2941,
     ICON_MAGE_IMPROVED_MANA_GEM                  = 1036
+};
+
+enum MiscSpells
+{
+    SPELL_PRIEST_SHADOW_WORD_DEATH                  = 32409
 };
 
 // -31571 - Arcane Potency
@@ -689,6 +695,75 @@ class spell_mage_glyph_of_ice_block : public SpellScriptLoader
         }
 };
 
+// 56374 - Glyph of Icy Veins
+class spell_mage_glyph_of_icy_veins : public SpellScriptLoader
+{
+    public:
+        spell_mage_glyph_of_icy_veins() : SpellScriptLoader("spell_mage_glyph_of_icy_veins") { }
+
+        class spell_mage_glyph_of_icy_veins_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_mage_glyph_of_icy_veins_AuraScript);
+
+            void HandleEffectProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+
+                GetTarget()->RemoveAurasByType(SPELL_AURA_HASTE_SPELLS, 0, 0, true, false);
+                GetTarget()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectProc += AuraEffectProcFn(spell_mage_glyph_of_icy_veins_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_mage_glyph_of_icy_veins_AuraScript();
+        }
+};
+
+// 56375 - Glyph of Polymorph
+class spell_mage_glyph_of_polymorph : public SpellScriptLoader
+{
+    public:
+        spell_mage_glyph_of_polymorph() : SpellScriptLoader("spell_mage_glyph_of_polymorph") { }
+
+        class spell_mage_glyph_of_polymorph_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_mage_glyph_of_polymorph_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_SHADOW_WORD_DEATH))
+                    return false;
+                return true;
+            }
+
+            void HandleEffectProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+                Unit* target = eventInfo.GetProcTarget();
+
+                target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(SPELL_PRIEST_SHADOW_WORD_DEATH)); // SW:D shall not be removed.
+                target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectProc += AuraEffectProcFn(spell_mage_glyph_of_polymorph_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_mage_glyph_of_polymorph_AuraScript();
+        }
+};
+
 // -44457 - Living Bomb
 class spell_mage_living_bomb : public SpellScriptLoader
 {
@@ -968,6 +1043,49 @@ class spell_mage_nether_vortex : public SpellScriptLoader
         AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_mage_nether_vortex_AuraScript();
+        }
+};
+
+// -11175 - Permafrost
+class spell_mage_permafrost : public SpellScriptLoader
+{
+    public:
+        spell_mage_permafrost() : SpellScriptLoader("spell_mage_permafrost") { }
+
+        class spell_mage_permafrost_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_mage_permafrost_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_PERMAFROST))
+                    return false;
+               return true;
+            }
+
+            bool DoCheck(ProcEventInfo& eventInfo)
+            {
+                return GetTarget()->GetGuardianPet() && eventInfo.GetDamageInfo()->GetDamage();
+            }
+
+            void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+
+                int32 heal = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount()));
+                GetTarget()->CastCustomSpell(SPELL_MAGE_PERMAFROST, SPELLVALUE_BASE_POINT0, heal, (Unit*)NULL, true, NULL, aurEff);
+            }
+
+            void Register() OVERRIDE
+            {
+                DoCheckProc += AuraCheckProcFn(spell_mage_permafrost_AuraScript::DoCheck);
+                OnEffectProc += AuraEffectProcFn(spell_mage_permafrost_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_mage_permafrost_AuraScript();
         }
 };
 
@@ -1333,11 +1451,14 @@ void AddSC_mage_spell_scripts()
     new spell_mage_ice_barrier();
     new spell_mage_ignite();
     new spell_mage_glyph_of_ice_block();
+    new spell_mage_glyph_of_icy_veins();
+    new spell_mage_glyph_of_polymorph();
     new spell_mage_living_bomb();
     new spell_mage_mage_ward();
     new spell_mage_mana_shield();
     new spell_mage_master_of_elements();
     new spell_mage_nether_vortex();
+    new spell_mage_permafrost();
     new spell_mage_polymorph_cast_visual();
     new spell_mage_replenish_mana();
     new spell_mage_ring_of_frost();
