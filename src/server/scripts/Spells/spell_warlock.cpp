@@ -29,8 +29,9 @@
 
 enum WarlockSpells
 {
-    SPELL_WARLOCK_AFTERMATH_STUN                         = 85387,
+    SPELL_WARLOCK_AFTERMATH_STUN                    = 85387,
     SPELL_WARLOCK_BANE_OF_DOOM_EFFECT               = 18662,
+    SPELL_WARLOCK_CREATE_HEALTHSTONE                = 34130,
     SPELL_WARLOCK_CURSE_OF_DOOM_EFFECT              = 18662,
     SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST         = 62388,
     SPELL_WARLOCK_DEMONIC_CIRCLE_SUMMON             = 48018,
@@ -48,22 +49,30 @@ enum WarlockSpells
     SPELL_WARLOCK_FEL_SYNERGY_HEAL                  = 54181,
     SPELL_WARLOCK_GLYPH_OF_SHADOWFLAME              = 63311,
     SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE              = 63106,
+    SPELL_WARLOCK_GLYPH_OF_SOUL_SWAP                = 56226,
     SPELL_WARLOCK_GLYPH_OF_SUCCUBUS                 = 56250,
     SPELL_WARLOCK_HAUNT                             = 48181,
     SPELL_WARLOCK_HAUNT_HEAL                        = 48210,
     SPELL_WARLOCK_IMMOLATE                          = 348,
-    SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R1           = 18692,
-    SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R2           = 18693,
     SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_BUFF_R1    = 60955,
     SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_BUFF_R2    = 60956,
     SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_R1         = 18703,
     SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_R2         = 18704,
+    SPELL_WARLOCK_IMPROVED_SOUL_FIRE_PCT            = 85383,
+    SPELL_WARLOCK_IMPROVED_SOUL_FIRE_STATE          = 85385,
     SPELL_WARLOCK_LIFE_TAP_ENERGIZE                 = 31818,
     SPELL_WARLOCK_LIFE_TAP_ENERGIZE_2               = 32553,
+    SPELL_WARLOCK_NETHER_WARD                       = 91711,
+    SPELL_WARLOCK_NETHER_TALENT                     = 91713,
     SPELL_WARLOCK_RAIN_OF_FIRE                      = 42223,
     SPELL_WARLOCK_SHADOW_TRANCE                     = 17941,
     SPELL_WARLOCK_SIPHON_LIFE_HEAL                  = 63106,
+    SPELL_WARLOCK_SHADOW_WARD                       = 6229,
     SPELL_WARLOCK_SOULSHATTER                       = 32835,
+    SPELL_WARLOCK_SOUL_SWAP_CD_MARKER               = 94229,
+    SPELL_WARLOCK_SOUL_SWAP_OVERRIDE                = 86211,
+    SPELL_WARLOCK_SOUL_SWAP_MOD_COST                = 92794,
+    SPELL_WARLOCK_SOUL_SWAP_DOT_MARKER              = 92795,
     SPELL_WARLOCK_UNSTABLE_AFFLICTION               = 30108,
 	SPELL_WARLOCK_DRAIN_LIFE                      	= 89653,
     SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117
@@ -122,7 +131,6 @@ class spell_warl_aftermath : public SpellScriptLoader
 };
 
 // 710 - Banish
-/// Updated 4.3.4
 class spell_warl_banish : public SpellScriptLoader
 {
     public:
@@ -221,59 +229,26 @@ class spell_warl_create_healthstone : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warl_create_healthstone_SpellScript);
 
-            static uint32 const iTypes[8][3];
-
             bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R1) || !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R2))
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_CREATE_HEALTHSTONE))
                     return false;
                 return true;
             }
 
-            SpellCastResult CheckCast()
+            bool Load() OVERRIDE
             {
-                if (Player* caster = GetCaster()->ToPlayer())
-                {
-                    uint8 spellRank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
-                    ItemPosCountVec dest;
-                    InventoryResult msg = caster->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, iTypes[spellRank - 1][0], 1, NULL);
-                    if (msg != EQUIP_ERR_OK)
-                        return SPELL_FAILED_TOO_MANY_OF_ITEM;
-                }
-                return SPELL_CAST_OK;
+                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
             }
 
-            void HandleScriptEffect(SpellEffIndex effIndex)
+            void HandleScriptEffect(SpellEffIndex /*effIndex*/)
             {
-                if (Unit* unitTarget = GetHitUnit())
-                {
-                    uint32 rank = 0;
-                    // Improved Healthstone
-                    if (AuraEffect const* aurEff = unitTarget->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 284, 0))
-                    {
-                        switch (aurEff->GetId())
-                        {
-                            case SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R1:
-                                rank = 1;
-                                break;
-                            case SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R2:
-                                rank = 2;
-                                break;
-                            default:
-                                TC_LOG_ERROR(LOG_FILTER_SPELLS_AURAS, "Unknown rank of Improved Healthstone id: %d", aurEff->GetId());
-                                break;
-                        }
-                    }
-                    uint8 spellRank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
-                    if (spellRank > 0 && spellRank <= 8)
-                        CreateItem(effIndex, iTypes[spellRank - 1][rank]);
-                }
+                GetCaster()->CastSpell(GetCaster(), SPELL_WARLOCK_CREATE_HEALTHSTONE, true);
             }
 
             void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warl_create_healthstone_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-                OnCheckCast += SpellCheckCastFn(spell_warl_create_healthstone_SpellScript::CheckCast);
             }
         };
 
@@ -281,18 +256,6 @@ class spell_warl_create_healthstone : public SpellScriptLoader
         {
             return new spell_warl_create_healthstone_SpellScript();
         }
-};
-
-uint32 const spell_warl_create_healthstone::spell_warl_create_healthstone_SpellScript::iTypes[8][3] =
-{
-    { 5512, 19004, 19005},              // Minor Healthstone
-    { 5511, 19006, 19007},              // Lesser Healthstone
-    { 5509, 19008, 19009},              // Healthstone
-    { 5510, 19010, 19011},              // Greater Healthstone
-    { 9421, 19012, 19013},              // Major Healthstone
-    {22103, 22104, 22105},              // Master Healthstone
-    {36889, 36890, 36891},              // Demonic Healthstone
-    {36892, 36893, 36894}               // Fel Healthstone
 };
 
 // 603 - Bane of Doom
@@ -576,8 +539,8 @@ class spell_warl_everlasting_affliction : public SpellScriptLoader
             {
                 if (Unit* unitTarget = GetHitUnit())
                     // Refresh corruption on target
-                    if (AuraEffect* aur = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x2, 0, 0, GetCaster()->GetGUID()))
-                        aur->GetBase()->RefreshDuration();
+                    if (AuraEffect* aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x2, 0, 0, GetCaster()->GetGUID()))
+                        aurEff->GetBase()->RefreshDuration();
             }
 
             void Register() OVERRIDE
@@ -799,16 +762,99 @@ class spell_warl_health_funnel : public SpellScriptLoader
                 target->RemoveAurasDueToSpell(SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_BUFF_R2);
             }
 
+            void OnPeriodic(AuraEffect const* aurEff)
+            {
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+                //! HACK for self damage, is not blizz :/
+                uint32 damage = caster->CountPctFromMaxHealth(aurEff->GetBaseAmount());
+
+                if (Player* modOwner = caster->GetSpellModOwner())
+                    modOwner->ApplySpellMod(GetId(), SPELLMOD_COST, damage);
+
+                SpellNonMeleeDamage damageInfo(caster, caster, GetSpellInfo()->Id, GetSpellInfo()->SchoolMask);
+                damageInfo.damage = damage;
+                caster->SendSpellNonMeleeDamageLog(&damageInfo);
+                caster->DealSpellDamage(&damageInfo, false);
+            }
+
             void Register() OVERRIDE
             {
-                OnEffectRemove += AuraEffectRemoveFn(spell_warl_health_funnel_AuraScript::RemoveEffect, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL);
-                OnEffectApply += AuraEffectApplyFn(spell_warl_health_funnel_AuraScript::ApplyEffect, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL);
+                OnEffectApply += AuraEffectApplyFn(spell_warl_health_funnel_AuraScript::ApplyEffect, EFFECT_0, SPELL_AURA_OBS_MOD_HEALTH, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_warl_health_funnel_AuraScript::RemoveEffect, EFFECT_0, SPELL_AURA_OBS_MOD_HEALTH, AURA_EFFECT_HANDLE_REAL);
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_health_funnel_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_OBS_MOD_HEALTH);
             }
         };
 
         AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_warl_health_funnel_AuraScript();
+        }
+};
+
+// 6262 - Healthstone
+class spell_warl_healthstone_heal : public SpellScriptLoader
+{
+    public:
+        spell_warl_healthstone_heal() : SpellScriptLoader("spell_warl_healthstone_heal") { }
+
+        class spell_warl_healthstone_heal_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_healthstone_heal_SpellScript);
+
+            void HandleOnHit()
+            {
+                int32 heal = int32(CalculatePct(GetCaster()->GetCreateHealth(), GetHitHeal()));
+                SetHitHeal(heal);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnHit += SpellHitFn(spell_warl_healthstone_heal_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_warl_healthstone_heal_SpellScript();
+        }
+};
+
+// -18119 - Improved Soul Fire
+class spell_warl_improved_soul_fire : public SpellScriptLoader
+{
+    public:
+        spell_warl_improved_soul_fire() : SpellScriptLoader("spell_warl_improved_soul_fire") { }
+
+        class spell_warl_improved_soul_fire_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warl_improved_soul_fire_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_IMPROVED_SOUL_FIRE_PCT) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_IMPROVED_SOUL_FIRE_STATE))
+                    return false;
+                return true;
+            }
+
+            void OnProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                GetTarget()->CastCustomSpell(SPELL_WARLOCK_IMPROVED_SOUL_FIRE_PCT, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), GetTarget(), true, NULL, aurEff);
+                GetTarget()->CastSpell(GetTarget(), SPELL_WARLOCK_IMPROVED_SOUL_FIRE_STATE, true, NULL, aurEff);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectProc += AuraEffectProcFn(spell_warl_improved_soul_fire_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_warl_improved_soul_fire_AuraScript();
         }
 };
 
@@ -830,7 +876,8 @@ class spell_warl_life_tap : public SpellScriptLoader
 
              bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_LIFE_TAP_ENERGIZE) || !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_LIFE_TAP_ENERGIZE_2))
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_LIFE_TAP_ENERGIZE) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_LIFE_TAP_ENERGIZE_2))
                     return false;
                 return true;
             }
@@ -882,31 +929,43 @@ class spell_warl_life_tap : public SpellScriptLoader
         }
 };
 
-// 18541 - Ritual of Doom Effect
-class spell_warl_ritual_of_doom_effect : public SpellScriptLoader
+// 687 - Demon Armor
+// 28176 - Fel Armor
+class spell_warl_nether_ward_overrride : public SpellScriptLoader
 {
     public:
-        spell_warl_ritual_of_doom_effect() : SpellScriptLoader("spell_warl_ritual_of_doom_effect") { }
+        spell_warl_nether_ward_overrride() : SpellScriptLoader("spell_warl_nether_ward_overrride") { }
 
-        class spell_warl_ritual_of_doom_effect_SpellScript : public SpellScript
+        class spell_warl_nether_ward_overrride_AuraScript : public AuraScript
         {
-            PrepareSpellScript(spell_warl_ritual_of_doom_effect_SpellScript);
+            PrepareAuraScript(spell_warl_nether_ward_overrride_AuraScript);
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
-                Unit* caster = GetCaster();
-                caster->CastSpell(caster, GetEffectValue(), true);
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_NETHER_TALENT) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_NETHER_WARD) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SHADOW_WARD))
+                    return false;
+                return true;
+            }
+
+            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (GetUnitOwner()->HasAura(SPELL_WARLOCK_NETHER_TALENT))
+                    amount = SPELL_WARLOCK_NETHER_WARD;
+                else
+                    amount = SPELL_WARLOCK_SHADOW_WARD;
             }
 
             void Register() OVERRIDE
             {
-                OnEffectHit += SpellEffectFn(spell_warl_ritual_of_doom_effect_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_nether_ward_overrride_AuraScript::CalculateAmount, EFFECT_2, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
             }
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        AuraScript* GetAuraScript() const OVERRIDE
         {
-            return new spell_warl_ritual_of_doom_effect_SpellScript();
+            return new spell_warl_nether_ward_overrride_AuraScript();
         }
 };
 
@@ -1056,55 +1115,6 @@ class spell_warl_shadow_ward : public SpellScriptLoader
         }
 };
 
-// 63108 - Siphon Life
-class spell_warl_siphon_life : public SpellScriptLoader
-{
-    public:
-        spell_warl_siphon_life() : SpellScriptLoader("spell_warl_siphon_life") { }
-
-        class spell_warl_siphon_life_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_warl_siphon_life_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SIPHON_LIFE_HEAL))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE))
-                    return false;
-                return true;
-            }
-
-            bool CheckProc(ProcEventInfo& eventInfo)
-            {
-                return eventInfo.GetDamageInfo()->GetDamage();
-            }
-
-            void OnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-            {
-                PreventDefaultAction();
-
-                int32 amount = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount()));
-                // Glyph of Siphon Life
-                if (AuraEffect const* glyph = GetTarget()->GetAuraEffect(SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE, EFFECT_0))
-                    AddPct(amount, glyph->GetAmount());
-
-                GetTarget()->CastCustomSpell(SPELL_WARLOCK_SIPHON_LIFE_HEAL, SPELLVALUE_BASE_POINT0, amount, GetTarget(), true, NULL, aurEff);
-            }
-
-            void Register() OVERRIDE
-            {
-                DoCheckProc += AuraCheckProcFn(spell_warl_siphon_life_AuraScript::CheckProc);
-                OnEffectProc += AuraEffectProcFn(spell_warl_siphon_life_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const OVERRIDE
-        {
-            return new spell_warl_siphon_life_AuraScript();
-        }
-};
-
 // -30293 - Soul Leech
 class spell_warl_soul_leech : public SpellScriptLoader
 {
@@ -1137,6 +1147,209 @@ class spell_warl_soul_leech : public SpellScriptLoader
         {
             return new spell_warl_soul_leech_AuraScript();
         }
+};
+
+// 86121 - Soul Swap
+class spell_warl_soul_swap : public SpellScriptLoader
+{
+    public:
+        spell_warl_soul_swap() : SpellScriptLoader("spell_warl_soul_swap") { }
+
+        class spell_warl_soul_swap_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_soul_swap_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_GLYPH_OF_SOUL_SWAP) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_CD_MARKER) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE))
+                    return false;
+                return true;
+            }
+
+            void HandleHit(SpellEffIndex /*effIndex*/)
+            {
+                GetCaster()->CastSpell(GetCaster(), SPELL_WARLOCK_SOUL_SWAP_OVERRIDE, true);
+                GetHitUnit()->CastSpell(GetCaster(), SPELL_WARLOCK_SOUL_SWAP_DOT_MARKER, true);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_warl_soul_swap_SpellScript();
+        }
+};
+
+// 86211 - Soul Swap Override - Also acts as a dot container
+class spell_warl_soul_swap_override : public SpellScriptLoader
+{
+    public:
+        spell_warl_soul_swap_override() : SpellScriptLoader("spell_warl_soul_swap_override") { }
+
+        class spell_warl_soul_swap_override_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warl_soul_swap_override_AuraScript);
+
+            bool Load() OVERRIDE
+            {
+                _swapCaster = NULL;
+                return true;
+            }
+
+            //! Forced to, pure virtual functions must have a body when linking
+            void Register() OVERRIDE { }
+
+        public:
+            void AddDot(uint32 id)                          { _dotList.push_back(id); }
+            std::list<uint32> const GetDotList() const      { return _dotList; }
+            Unit* GetOriginalSwapSource() const             { return _swapCaster; }
+            void SetOriginalSwapSource(Unit* victim)        { _swapCaster = victim; }
+
+        private:
+            std::list<uint32> _dotList;
+            Unit* _swapCaster;
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_warl_soul_swap_override_AuraScript();
+        }
+};
+
+typedef spell_warl_soul_swap_override::spell_warl_soul_swap_override_AuraScript SoulSwapOverrideAuraScript;
+
+//! Soul Swap Copy Spells - 92795 - Simply copies spell IDs.
+class spell_warl_soul_swap_dot_marker : public SpellScriptLoader
+{
+    public:
+        spell_warl_soul_swap_dot_marker() : SpellScriptLoader("spell_warl_soul_swap_dot_marker") { }
+
+        class spell_warl_soul_swap_dot_marker_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_soul_swap_dot_marker_SpellScript);
+
+            void HandleHit(SpellEffIndex effIndex)
+            {
+                Unit* swapVictim = GetCaster();
+                Unit* warlock    = GetHitUnit();
+                if (!warlock || !swapVictim)
+                    return;
+
+                flag96 classMask = GetSpellInfo()->Effects[effIndex].SpellClassMask;
+
+                Unit::AuraApplicationMap const& appliedAuras = swapVictim->GetAppliedAuras();
+                SoulSwapOverrideAuraScript* swapSpellScript = NULL;
+                if (Aura* swapOverrideAura = warlock->GetAura(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE))
+                    swapSpellScript = dynamic_cast<SoulSwapOverrideAuraScript*>(swapOverrideAura->GetScriptByName("spell_warlock_soul_swap_override"));
+
+                if (swapSpellScript == NULL)
+                    return;
+
+                for (Unit::AuraApplicationMap::const_iterator itr = appliedAuras.begin(); itr != appliedAuras.end(); ++itr)
+                {
+                    SpellInfo const* spellProto = itr->second->GetBase()->GetSpellInfo();
+                    if (itr->second->GetBase()->GetCaster() == warlock)
+                        if (spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && (spellProto->SpellFamilyFlags & classMask))
+                            swapSpellScript->AddDot(itr->first);
+                }
+
+                swapSpellScript->SetOriginalSwapSource(swapVictim);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_dot_marker_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_warl_soul_swap_dot_marker_SpellScript();
+        }
+};
+
+// 86213 - Soul Swap Exhale
+class spell_warl_soul_swap_exhale : public SpellScriptLoader
+{
+public:
+    spell_warl_soul_swap_exhale() : SpellScriptLoader("spell_warl_soul_swap_exhale") { }
+
+    class spell_warl_soul_swap_exhale_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_soul_swap_exhale_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_MOD_COST) || !sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE))
+                return false;
+            return true;
+        }
+
+        SpellCastResult CheckCast()
+        {
+            Unit* currentTarget = GetExplTargetUnit();
+            Unit* swapTarget = NULL;
+            if (Aura const* swapOverride = GetCaster()->GetAura(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE))
+                if (SoulSwapOverrideAuraScript* swapScript = dynamic_cast<SoulSwapOverrideAuraScript*>(swapOverride->GetScriptByName("spell_warlock_soul_swap_override")))
+                    swapTarget = swapScript->GetOriginalSwapSource();
+
+            // Soul Swap Exhale can't be cast on the same target than Soul Swap
+            if (swapTarget && currentTarget && swapTarget == currentTarget)
+                return SPELL_FAILED_BAD_TARGETS;
+
+            return SPELL_CAST_OK;
+        }
+
+        void OnEffectHit(SpellEffIndex /*effIndex*/)
+        {
+            GetCaster()->CastSpell(GetCaster(), SPELL_WARLOCK_SOUL_SWAP_MOD_COST, true);
+            bool hasGlyph = GetCaster()->HasAura(SPELL_WARLOCK_GLYPH_OF_SOUL_SWAP);
+
+            std::list<uint32> dotList;
+            Unit* swapSource = NULL;
+            if (Aura const* swapOverride = GetCaster()->GetAura(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE))
+            {
+                SoulSwapOverrideAuraScript* swapScript = dynamic_cast<SoulSwapOverrideAuraScript*>(swapOverride->GetScriptByName("spell_warlock_soul_swap_override"));
+                if (!swapScript)
+                    return;
+                dotList = swapScript->GetDotList();
+                swapSource = swapScript->GetOriginalSwapSource();
+            }
+
+            if (dotList.empty())
+                return;
+
+            for (std::list<uint32>::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
+            {
+                GetCaster()->AddAura(*itr, GetHitUnit());
+                if (!hasGlyph && swapSource)
+                    swapSource->RemoveAurasDueToSpell(*itr);
+            }
+
+            // Remove Soul Swap Exhale buff
+            GetCaster()->RemoveAurasDueToSpell(SPELL_WARLOCK_SOUL_SWAP_OVERRIDE);
+
+            if (hasGlyph) // Add a cooldown on Soul Swap if caster has the glyph
+                GetCaster()->CastSpell(GetCaster(), SPELL_WARLOCK_SOUL_SWAP_CD_MARKER, false);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnCheckCast += SpellCheckCastFn(spell_warl_soul_swap_exhale_SpellScript::CheckCast);
+            OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_exhale_SpellScript::OnEffectHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_warl_soul_swap_exhale_SpellScript();
+    }
 };
 
 // 29858 - Soulshatter
@@ -1266,14 +1479,19 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_glyph_of_shadowflame();
     new spell_warl_haunt();
     new spell_warl_health_funnel();
+    new spell_warl_healthstone_heal();
+    new spell_warl_improved_soul_fire();
     new spell_warl_life_tap();
-    new spell_warl_ritual_of_doom_effect();
+    new spell_warl_nether_ward_overrride();
     new spell_warl_seduction();
     new spell_warl_seed_of_corruption();
     new spell_warl_shadow_trance_proc();
     new spell_warl_shadow_ward();
-    new spell_warl_siphon_life();
     new spell_warl_soul_leech();
+    new spell_warl_soul_swap();
+    new spell_warl_soul_swap_dot_marker();
+    new spell_warl_soul_swap_exhale();
+    new spell_warl_soul_swap_override();
     new spell_warl_soulshatter();
     new spell_warl_unstable_affliction();
 	new spell_warl_drain_life();

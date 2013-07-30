@@ -888,6 +888,10 @@ enum SoulWellData
     SPELL_CREATE_FEL_HEALTH_STONE       = 34130,
 };
 
+
+/*######
+## go_soulwell
+######*/
 class go_soulwell : public GameObjectScript
 {
     public:

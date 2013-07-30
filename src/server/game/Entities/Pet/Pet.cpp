@@ -375,7 +375,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
     if (!IS_PLAYER_GUID(GetOwnerGUID()))
         return;
 
-    Player* owner = (Player*)GetOwner();
+    Player* owner = GetOwner();
     if (!owner)
         return;
 
@@ -1108,7 +1108,7 @@ void Pet::_LoadSpellCooldowns()
         while (result->NextRow());
 
         if (!m_CreatureSpellCooldowns.empty() && GetOwner())
-            ((Player*)GetOwner())->GetSession()->SendPacket(&data);
+            GetOwner()->GetSession()->SendPacket(&data);
     }
 }
 

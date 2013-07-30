@@ -761,7 +761,7 @@ bool Item::HasEnchantRequiredSkill(const Player* player) const
     // Check all enchants for required skill
     for (uint32 enchant_slot = PERM_ENCHANTMENT_SLOT; enchant_slot < MAX_ENCHANTMENT_SLOT; ++enchant_slot)
     {
-        if (enchant_slot > PRISMATIC_ENCHANTMENT_SLOT || enchant_slot < PROP_ENCHANTMENT_SLOT_0)    // not holding enchantment id
+        if (enchant_slot > PRISMATIC_ENCHANTMENT_SLOT && enchant_slot < PROP_ENCHANTMENT_SLOT_0)    // not holding enchantment id
             continue;
 
         if (uint32 enchant_id = GetEnchantmentId(EnchantmentSlot(enchant_slot)))
@@ -780,7 +780,7 @@ uint32 Item::GetEnchantRequiredLevel() const
     // Check all enchants for required level
     for (uint32 enchant_slot = PERM_ENCHANTMENT_SLOT; enchant_slot < MAX_ENCHANTMENT_SLOT; ++enchant_slot)
     {
-        if (enchant_slot > PRISMATIC_ENCHANTMENT_SLOT || enchant_slot < PROP_ENCHANTMENT_SLOT_0)    // not holding enchantment id
+        if (enchant_slot > PRISMATIC_ENCHANTMENT_SLOT && enchant_slot < PROP_ENCHANTMENT_SLOT_0)    // not holding enchantment id
             continue;
 
         if (uint32 enchant_id = GetEnchantmentId(EnchantmentSlot(enchant_slot)))
@@ -797,7 +797,7 @@ bool Item::IsBoundByEnchant() const
     // Check all enchants for soulbound
     for (uint32 enchant_slot = PERM_ENCHANTMENT_SLOT; enchant_slot < MAX_ENCHANTMENT_SLOT; ++enchant_slot)
     {
-        if (enchant_slot > PRISMATIC_ENCHANTMENT_SLOT || enchant_slot < PROP_ENCHANTMENT_SLOT_0)    // not holding enchantment id
+        if (enchant_slot > PRISMATIC_ENCHANTMENT_SLOT && enchant_slot < PROP_ENCHANTMENT_SLOT_0)    // not holding enchantment id
             continue;
 
         if (uint32 enchant_id = GetEnchantmentId(EnchantmentSlot(enchant_slot)))
