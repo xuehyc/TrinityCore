@@ -3224,6 +3224,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 42835: // Spout, remove damage effect, only anim is needed
                 spellInfo->Effects[EFFECT_0].Effect = 0;
                 break;
+            case 85117: // Divine Purpose (Rank 1)
+            case 86172: // Divine Purpose (Rank 2)
+                spellInfo->AttributesEx3 = 0; 
+                break;
+            case 90174: // Divine Purpose Proc
+                spellInfo->ProcCharges = 1;
+                break;				
             case 30657: // Quake
                 spellInfo->Effects[EFFECT_0].TriggerSpell = 30571;
                 break;
