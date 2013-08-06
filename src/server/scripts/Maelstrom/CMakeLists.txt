@@ -28,3 +28,7 @@ set(scripts_STAT_SRCS
 )
 
 message("  -> Prepared: Maelstrom")
+  Maelstrom/kezan.cpp
+)
+
+message("  -> Prepared: The Maelstrom")

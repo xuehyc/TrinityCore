@@ -62,6 +62,8 @@ enum ShamanSpells
     SPELL_SHAMAN_TOTEM_EARTHBIND_TOTEM          = 6474,
     SPELL_SHAMAN_TOTEM_EARTHEN_POWER            = 59566,
     SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL      = 52042,
+	SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN           = 77505,
+	SHAMAN_SPELL_UNLEASH_ELEMENTS               = 73680,
     SPELL_SHAMAN_TIDAL_WAVES                    = 53390
 };
 
@@ -1165,6 +1167,136 @@ class spell_sha_tidal_waves : public SpellScriptLoader
         }
 };
 
+// 77478 - Earthquake
+class spell_sha_earthquake : public SpellScriptLoader
+{
+public:
+    spell_sha_earthquake() : SpellScriptLoader("spell_sha_earthquake") { }
+
+    class spell_sha_earthquake_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_earthquake_SpellScript);
+
+        int32 chance;
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellStore.LookupEntry(SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN))
+                return false;
+            return true;
+        }
+
+        bool Load() OVERRIDE
+        {
+            chance = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
+            return true;
+        }
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (roll_chance_i(chance))
+                GetCaster()->CastSpell(GetHitUnit(), SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_sha_earthquake_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_sha_earthquake_SpellScript();
+    }
+};
+
+// 73680 Unleash Elements
+class spell_sha_unleash_elements : public SpellScriptLoader
+{
+public:
+    spell_sha_unleash_elements() : SpellScriptLoader("spell_sha_unleash_elements") { }
+
+    class spell_sha_unleash_elements_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_unleash_elements_SpellScript)
+
+        bool Validate(SpellInfo const * /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellStore.LookupEntry(SHAMAN_SPELL_UNLEASH_ELEMENTS))
+                return false;
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            if(!caster)
+                return;
+            Player* plr = caster->ToPlayer();
+            if(!plr)
+                return;
+
+            if(!GetExplTargetUnit())
+                return;
+
+            Item *weapons[2];
+            weapons[0] = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+            weapons[1] = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+            for(int i = 0; i < 2; i++)
+            {
+                if(!weapons[i])
+                    continue;
+
+                uint32 unleashSpell = 0;
+                Unit *target = GetExplTargetUnit();
+                bool hostileTarget = plr->IsHostileTo(target);
+                bool hostileSpell = true;
+
+                switch (weapons[i]->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
+                {
+                    case 3345: // Earthliving Weapon
+                        unleashSpell = 73685; //Unleash Life
+                        hostileSpell = false;
+                        break;
+                    case 5: // Flametongue Weapon
+                        unleashSpell = 73683; // Unleash Flame
+                        break;
+                    case 2: // Frostbrand Weapon
+                        unleashSpell = 73682; // Unleash Frost
+                        break;
+                    case 3021: // Rockbiter Weapon
+                        unleashSpell = 73684; // Unleash Earth
+                        break;
+                    case 283: // Windfury Weapon
+                        unleashSpell = 73681; // Unleash Wind
+                        break;
+                }
+                if(hostileSpell && !hostileTarget)
+                    return; // don't allow to attack non-hostile targets. TODO: check this before cast
+
+                if(!hostileSpell && hostileTarget)
+                    target = plr;   // heal ourselves instead of the enemy
+
+                if(unleashSpell)
+                {
+                    plr->CastSpell(target, unleashSpell, true);
+                }
+            }
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_sha_unleash_elements_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_sha_unleash_elements_SpellScript();
+    }
+};
+
+
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_ancestral_awakening();
@@ -1193,4 +1325,6 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_telluric_currents();
     new spell_sha_thunderstorm();
     new spell_sha_tidal_waves();
+	new spell_sha_earthquake();
+	new spell_sha_unleash_elements();
 }
