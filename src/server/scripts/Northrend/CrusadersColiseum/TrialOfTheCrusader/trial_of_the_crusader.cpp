@@ -103,7 +103,7 @@ static _Messages _GossipMessage[]=
     {MSG_ANUBARAK, GOSSIP_ACTION_INFO_DEF + 6, true, BOSS_ANUBARAK}
 };
 
-enum
+enum Messages
 {
     NUM_MESSAGES = 6
 };

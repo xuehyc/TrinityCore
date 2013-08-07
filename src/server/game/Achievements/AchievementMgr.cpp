@@ -23,7 +23,6 @@
 #include "AchievementMgr.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
-#include "BattlegroundAB.h"
 #include "Battleground.h"
 #include "CellImpl.h"
 #include "Common.h"
