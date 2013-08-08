@@ -2316,7 +2316,7 @@ class spell_toc_bloodlust : public SpellScriptLoader
         {
             PrepareSpellScript(spell_toc_bloodlust_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellEntry*/) OVERRIDE
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(AURA_SATED))
                     return false;
@@ -2357,7 +2357,7 @@ class spell_toc_heroism : public SpellScriptLoader
         {
             PrepareSpellScript(spell_toc_heroism_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellEntry*/) OVERRIDE
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(AURA_EXHAUSTION))
                     return false;
