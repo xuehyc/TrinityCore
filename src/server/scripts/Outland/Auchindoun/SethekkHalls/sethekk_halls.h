@@ -23,10 +23,24 @@
 #ifndef DEF_SETHEKK_HALLS_H
 #define DEF_SETHEKK_HALLS_H
 
+uint32 const EncounterCount             = 3;
+
 enum DataTypes
 {
-    DATA_IKISSDOOREVENT = 1,
-    TYPE_ANZU_ENCOUNTER = 2,
+    DATA_DARKWEAVER_SYTH                = 0,
+    DATA_TALON_KING_IKISS               = 1,
+    DATA_ANZU                           = 2
 };
-#endif
 
+enum CreatureIds
+{
+    NPC_ANZU                            = 23035,
+    NPC_BROOD_OF_ANZU                   = 23132
+};
+
+enum GameObjectIds
+{
+    GO_IKISS_DOOR                       = 177203
+};
+
+#endif
