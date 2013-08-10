@@ -53,9 +53,7 @@ EndContentData */
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "World.h"
-#include "PetAI.h"
 #include "PassiveAI.h"
-#include "CombatAI.h"
 #include "GameEventMgr.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
@@ -1600,124 +1598,6 @@ public:
 };
 
 
-/*####
-## npc_snake_trap_serpents
-####*/
-
-enum SnakeTrapSerpents
-{
-    SPELL_MIND_NUMBING_POISON       = 25810,   // Viper
-    SPELL_DEADLY_POISON             = 34655,   // Venomous Snake
-    SPELL_CRIPPLING_POISON          = 30981,   // Viper
-
-    NPC_VIPER                       = 19921
-};
-
-class npc_snake_trap : public CreatureScript
-{
-public:
-    npc_snake_trap() : CreatureScript("npc_snake_trap_serpents") { }
-
-    struct npc_snake_trap_serpentsAI : public ScriptedAI
-    {
-        npc_snake_trap_serpentsAI(Creature* creature) : ScriptedAI(creature) {}
-
-        uint32 SpellTimer;
-        bool IsViper;
-
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
-
-        void Reset() OVERRIDE
-        {
-            SpellTimer = 0;
-
-            CreatureTemplate const* Info = me->GetCreatureTemplate();
-
-            IsViper = Info->Entry == NPC_VIPER ? true : false;
-
-            me->SetMaxHealth(uint32(107 * (me->getLevel() - 40) * 0.025f));
-            //Add delta to make them not all hit the same time
-            uint32 delta = (rand() % 7) * 100;
-            me->SetStatFloatValue(UNIT_FIELD_BASEATTACKTIME, float(Info->baseattacktime + delta));
-            me->SetStatFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER, float(Info->attackpower));
-
-            // Start attacking attacker of owner on first ai update after spawn - move in line of sight may choose better target
-            if (!me->GetVictim() && me->IsSummon())
-                if (Unit* Owner = me->ToTempSummon()->GetSummoner())
-                    if (Owner->getAttackerForHelper())
-                        AttackStart(Owner->getAttackerForHelper());
-        }
-
-        //Redefined for random target selection:
-        void MoveInLineOfSight(Unit* who) OVERRIDE
-
-        {
-            if (!me->GetVictim() && me->CanCreatureAttack(who))
-            {
-                if (me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
-                    return;
-
-                float attackRadius = me->GetAttackDistance(who);
-                if (me->IsWithinDistInMap(who, attackRadius) && me->IsWithinLOSInMap(who))
-                {
-                    if (!(rand() % 5))
-                    {
-                        me->setAttackTimer(BASE_ATTACK, (rand() % 10) * 100);
-                        SpellTimer = (rand() % 10) * 100;
-                        AttackStart(who);
-                    }
-                }
-            }
-        }
-
-        void UpdateAI(uint32 diff) OVERRIDE
-        {
-            if (!UpdateVictim())
-                return;
-
-            if (me->GetVictim()->HasBreakableByDamageCrowdControlAura(me))
-            {
-                me->InterruptNonMeleeSpells(false);
-                return;
-            }
-
-            if (SpellTimer <= diff)
-            {
-                if (IsViper) //Viper
-                {
-                    if (urand(0, 2) == 0) //33% chance to cast
-                    {
-                        uint32 spell;
-                        if (urand(0, 1) == 0)
-                            spell = SPELL_MIND_NUMBING_POISON;
-                        else
-                            spell = SPELL_CRIPPLING_POISON;
-
-                        DoCastVictim(spell);
-                    }
-
-                    SpellTimer = 3000;
-                }
-                else //Venomous Snake
-                {
-                    if (urand(0, 2) == 0) //33% chance to cast
-                        DoCastVictim(SPELL_DEADLY_POISON);
-                    SpellTimer = 1500 + (rand() % 5) * 100;
-                }
-            }
-            else
-                SpellTimer -= diff;
-
-            DoMeleeAttackIfReady();
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_snake_trap_serpentsAI(creature);
-    }
-};
-
 #define SAY_RANDOM_MOJO0    "Now that's what I call froggy-style!"
 #define SAY_RANDOM_MOJO1    "Your lily pad or mine?"
 #define SAY_RANDOM_MOJO2    "This won't take long, did it?"
@@ -2120,159 +2000,6 @@ public:
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_training_dummyAI(creature);
-    }
-};
-
-/*######
-# npc_shadowfiend
-######*/
-#define GLYPH_OF_SHADOWFIEND_MANA         58227
-#define GLYPH_OF_SHADOWFIEND              58228
-
-class npc_shadowfiend : public CreatureScript
-{
-    public:
-        npc_shadowfiend() : CreatureScript("npc_shadowfiend") { }
-
-        struct npc_shadowfiendAI : public PetAI
-        {
-            npc_shadowfiendAI(Creature* creature) : PetAI(creature) {}
-
-            void JustDied(Unit* /*killer*/) OVERRIDE
-            {
-                if (me->IsSummon())
-                    if (Unit* owner = me->ToTempSummon()->GetSummoner())
-                        if (owner->HasAura(GLYPH_OF_SHADOWFIEND))
-                            owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new npc_shadowfiendAI(creature);
-        }
-};
-
-/*######
-# npc_fire_elemental
-######*/
-
-enum FireElemental
-{
-    SPELL_FIRENOVA              = 12470,
-    SPELL_FIRESHIELD            = 13376,
-    SPELL_FIREBLAST             = 57984
-};
-
-class npc_fire_elemental : public CreatureScript
-{
-public:
-    npc_fire_elemental() : CreatureScript("npc_fire_elemental") { }
-
-    struct npc_fire_elementalAI : public ScriptedAI
-    {
-        npc_fire_elementalAI(Creature* creature) : ScriptedAI(creature) {}
-
-        uint32 FireNova_Timer;
-        uint32 FireShield_Timer;
-        uint32 FireBlast_Timer;
-
-        void Reset() OVERRIDE
-        {
-            FireNova_Timer = 5000 + rand() % 15000; // 5-20 sec cd
-            FireBlast_Timer = 5000 + rand() % 15000; // 5-20 sec cd
-            FireShield_Timer = 0;
-            me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
-        }
-
-        void UpdateAI(uint32 diff) OVERRIDE
-        {
-            if (!UpdateVictim())
-                return;
-
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            if (FireShield_Timer <= diff)
-            {
-                DoCastVictim(SPELL_FIRESHIELD);
-                FireShield_Timer = 2 * IN_MILLISECONDS;
-            }
-            else
-                FireShield_Timer -= diff;
-
-            if (FireBlast_Timer <= diff)
-            {
-                DoCastVictim(SPELL_FIREBLAST);
-                FireBlast_Timer = 5000 + rand() % 15000; // 5-20 sec cd
-            }
-            else
-                FireBlast_Timer -= diff;
-
-            if (FireNova_Timer <= diff)
-            {
-                DoCastVictim(SPELL_FIRENOVA);
-                FireNova_Timer = 5000 + rand() % 15000; // 5-20 sec cd
-            }
-            else
-                FireNova_Timer -= diff;
-
-            DoMeleeAttackIfReady();
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_fire_elementalAI(creature);
-    }
-};
-
-/*######
-# npc_earth_elemental
-######*/
-
-enum EarthElemental
-{
-    SPELL_ANGEREDEARTH          = 36213
-};
-
-class npc_earth_elemental : public CreatureScript
-{
-public:
-    npc_earth_elemental() : CreatureScript("npc_earth_elemental") { }
-
-    struct npc_earth_elementalAI : public ScriptedAI
-    {
-        npc_earth_elementalAI(Creature* creature) : ScriptedAI(creature) {}
-
-        uint32 AngeredEarth_Timer;
-
-        void Reset() OVERRIDE
-        {
-            AngeredEarth_Timer = 0;
-            me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, true);
-        }
-
-        void UpdateAI(uint32 diff) OVERRIDE
-        {
-            if (!UpdateVictim())
-                return;
-
-            if (AngeredEarth_Timer <= diff)
-            {
-                DoCastVictim(SPELL_ANGEREDEARTH);
-                AngeredEarth_Timer = 5000 + rand() % 15000; // 5-20 sec cd
-            }
-            else
-                AngeredEarth_Timer -= diff;
-
-            DoMeleeAttackIfReady();
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_earth_elementalAI(creature);
     }
 };
 
@@ -3467,19 +3194,12 @@ void AddSC_npcs_special()
     new npc_steam_tonk();
     new npc_tonk_mine();
     new npc_brewfest_reveler();
-    new npc_snake_trap();
-    new npc_mirror_image();
-    new npc_ebon_gargoyle();
-    new npc_lightwell();
     new npc_mojo();
     new npc_training_dummy();
-    new npc_shadowfiend();
     new npc_wormhole();
     new npc_pet_trainer();
     new npc_locksmith();
     new npc_experience();
-    new npc_fire_elemental();
-    new npc_earth_elemental();
     new npc_firework();
     new npc_spring_rabbit();
 	new npc_ring_of_frost();

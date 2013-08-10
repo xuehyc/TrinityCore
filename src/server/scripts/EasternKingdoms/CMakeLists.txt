@@ -120,19 +120,6 @@ set(scripts_STAT_SRCS
   EasternKingdoms/GrimBatol/instance_grim_batol.cpp
   EasternKingdoms/GrimBatol/mob_trash_grimbatol.cpp
   EasternKingdoms/zone_redridge_mountains.cpp
-  EasternKingdoms/BlackrockDepths/boss_high_interrogator_gerstahn.cpp
-  EasternKingdoms/BlackrockDepths/boss_gorosh_the_dervish.cpp
-  EasternKingdoms/BlackrockDepths/blackrock_depths.cpp
-  EasternKingdoms/BlackrockDepths/boss_anubshiah.cpp
-  EasternKingdoms/BlackrockDepths/boss_tomb_of_seven.cpp
-  EasternKingdoms/BlackrockDepths/boss_general_angerforge.cpp
-  EasternKingdoms/BlackrockDepths/boss_grizzle.cpp
-  EasternKingdoms/BlackrockDepths/boss_ambassador_flamelash.cpp
-  EasternKingdoms/BlackrockDepths/instance_blackrock_depths.cpp
-  EasternKingdoms/BlackrockDepths/boss_moira_bronzebeard.cpp
-  EasternKingdoms/BlackrockDepths/blackrock_depths.h
-  EasternKingdoms/BlackrockDepths/boss_emperor_dagran_thaurissan.cpp
-  EasternKingdoms/BlackrockDepths/boss_magmus.cpp
   EasternKingdoms/BastionOfTwilight/instance_bastion_of_twilight.cpp
   EasternKingdoms/BastionOfTwilight/boss_assembly_of_ascendents.cpp
   EasternKingdoms/BastionOfTwilight/boss_halfus_wyrmbreaker.cpp
