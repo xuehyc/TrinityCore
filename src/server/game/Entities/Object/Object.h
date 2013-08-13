@@ -496,7 +496,6 @@ struct MovementInfo
     // swimming/flying
     float pitch;
 
-
     // jumping
     struct JumpInfo
     {

@@ -1063,12 +1063,12 @@ public:
             }
         }
 
-        void Register ()
+        void Register () OVERRIDE
         {
             OnEffectHitTarget += SpellEffectFn(spell_pal_judgements_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
-    SpellScript* GetSpellScript () const
+    SpellScript* GetSpellScript () const OVERRIDE
     {
         return new spell_pal_judgements_SpellScript();
     }
@@ -1152,7 +1152,7 @@ public:
             return true;
          }
 
-        bool Validate (SpellInfo const* /*spellEntry*/) OVERRIDE
+        bool Validate (SpellInfo const* /*SpellInfo*/) OVERRIDE
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_CONSECRATION_DAMAGE) ||
                 !sSpellMgr->GetSpellInfo(SPELL_PALADIN_CONSECRATION_SUMMON))
@@ -1177,7 +1177,7 @@ public:
             consecrationNpc->CastSpell(x,y,z,SPELL_PALADIN_CONSECRATION_DAMAGE,true,NULL,NULL,GetCaster()->GetGUID());  
         }
 
-        void Register()
+        void Register() OVERRIDE
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_pal_consecration_AuraScript::HandlePeriodicDummy,EFFECT_1,SPELL_AURA_PERIODIC_DUMMY);
         }

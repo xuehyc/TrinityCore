@@ -104,6 +104,7 @@ void AddSC_boss_galvangar();
 void AddSC_boss_vanndar();
 void AddSC_boss_alizabal();                  //Baradin Hold
 void AddSC_boss_argaloth();
+void AddSC_boss_pit_lord_argaloth();
 void AddSC_instance_baradin_hold();
 void AddSC_boss_occuthar();
 void AddSC_instance_bastion_of_twilight();   //BastionOfTwilight
@@ -376,10 +377,12 @@ void AddSC_npc_anubisath_sentinel();
 void AddSC_instance_temple_of_ahnqiraj();
 void AddSC_wailing_caverns();                //Wailing caverns
 void AddSC_instance_wailing_caverns();
-void AddSC_zulfarrak();                     //Zul'Farrak generic
-void AddSC_instance_zulfarrak();            //Zul'Farrak instance script
-void AddSC_instance_halls_of_origination();		// Dungeon Halls of Origination
 void AddSC_boss_ammunae();
+void AddSC_boss_zum_rah();                   //Zul'Farrak
+void AddSC_zulfarrak();
+void AddSC_instance_zulfarrak();
+void AddSC_instance_halls_of_origination(); // Dungeon Halls of Origination
+void AddSC_boss_earthrager_ptah();
 void AddSC_boss_anraphet();
 void AddSC_boss_temple_guardian_anhuur();
 void AddSC_boss_isiset();
@@ -388,7 +391,7 @@ void AddSC_boss_rajh();
 void AddSC_boss_setesh();
 void AddSC_elementaires_sdo();
 void AddSC_mob_trash_sdo();
-void AddSC_instance_firelands();
+void AddSC_instance_firelands(); // Firelands
 void AddSC_boss_alysrazor();
 void AddSC_boss_ragnaros_cata();
 
@@ -809,6 +812,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_vanndar();
     AddSC_boss_alizabal();                  //Baradin Hold
 	AddSC_boss_argaloth();
+    AddSC_boss_pit_lord_argaloth();
     AddSC_instance_baradin_hold();
 	AddSC_boss_occuthar();
     AddSC_instance_bastion_of_twilight();   //BastionOfTwilight
@@ -1086,8 +1090,9 @@ void AddKalimdorScripts()
     AddSC_instance_temple_of_ahnqiraj();
     AddSC_wailing_caverns();                //Wailing caverns
     AddSC_instance_wailing_caverns();
-    AddSC_zulfarrak();                      //Zul'Farrak generic
-    AddSC_instance_zulfarrak();             //Zul'Farrak instance script
+    AddSC_boss_zum_rah();                   //Zul'Farrak
+    AddSC_zulfarrak();
+    AddSC_instance_zulfarrak();
 
     AddSC_ashenvale();
     AddSC_azshara();

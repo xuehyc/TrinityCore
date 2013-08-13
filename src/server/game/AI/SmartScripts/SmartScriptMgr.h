@@ -398,7 +398,7 @@ enum SMART_ACTION
     SMART_ACTION_THREAT_SINGLE_PCT                  = 13,     // Threat%
     SMART_ACTION_THREAT_ALL_PCT                     = 14,     // Threat%
     SMART_ACTION_CALL_AREAEXPLOREDOREVENTHAPPENS    = 15,     // QuestID
-    SMART_ACTION_SEND_CASTCREATUREORGO              = 16,     // QuestID, SpellId
+    SMART_ACTION_UNUSED_16                          = 16,     // UNUSED
     SMART_ACTION_SET_EMOTE_STATE                    = 17,     // emoteID
     SMART_ACTION_SET_UNIT_FLAG                      = 18,     // Flags (may be more than one field OR'd together), Target
     SMART_ACTION_REMOVE_UNIT_FLAG                   = 19,     // Flags (may be more than one field OR'd together), Target
@@ -490,8 +490,11 @@ enum SMART_ACTION
     SMART_ACTION_ADD_GO_FLAG                        = 105,    // Flags
     SMART_ACTION_REMOVE_GO_FLAG                     = 106,    // Flags
     SMART_ACTION_SUMMON_CREATURE_GROUP              = 107,    // Group, attackInvoker
+    SMART_ACTION_SET_POWER                          = 108,    // PowerType, newPower
+    SMART_ACTION_ADD_POWER                          = 109,    // PowerType, newPower
+    SMART_ACTION_REMOVE_POWER                       = 110,    // PowerType, newPower
 
-    SMART_ACTION_END                                = 108
+    SMART_ACTION_END                                = 111
 };
 
 struct SmartAction
@@ -575,12 +578,6 @@ struct SmartAction
 
         struct
         {
-            uint32 quest;
-            uint32 spell;
-        } castCreatureOrGO;
-
-        struct
-        {
             uint32 flag1;
             uint32 flag2;
             uint32 flag3;
@@ -624,7 +621,7 @@ struct SmartAction
         {
             uint32 creature;
             uint32 spell;
-        } castedCreatureOrGO;
+        } callCastedCreatureOrGO;
 
         struct
         {
@@ -944,6 +941,12 @@ struct SmartAction
             uint32 group;
             uint32 attackInvoker;
         } creatureGroup;
+
+        struct
+        {
+            uint32 powerType;
+            uint32 newPower;
+        } power;
 
         //! Note for any new future actions
         //! All parameters must have type uint32
