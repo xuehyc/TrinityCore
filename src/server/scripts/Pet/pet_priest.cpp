@@ -61,32 +61,59 @@ class npc_pet_pri_lightwell : public CreatureScript
         }
 };
 
-class npc_pet_pri_shadowfiend : public CreatureScript
+/*######
+# npc_shadowfiend
+######*/
+
+enum Shadowfiend
 {
-    public:
-        npc_pet_pri_shadowfiend() : CreatureScript("npc_pet_pri_shadowfiend") { }
+    MANA_LEECH                       = 28305,
+    GLYPH_OF_SHADOWFIEND_MANA        = 58227,
+    GLYPH_OF_SHADOWFIEND             = 58228
+};
 
-        struct npc_pet_pri_shadowfiendAI : public PetAI
+class npc_shadowfiend : public CreatureScript
+{
+public:
+    npc_shadowfiend() : CreatureScript("npc_shadowfiend") { }
+
+    struct npc_shadowfiendAI : public ScriptedAI
+    {
+        npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset() OVERRIDE
         {
-            npc_pet_pri_shadowfiendAI(Creature* creature) : PetAI(creature) { }
-
-            void JustDied(Unit* /*killer*/) OVERRIDE
-            {
-                if (me->IsSummon())
-                    if (Unit* owner = me->ToTempSummon()->GetSummoner())
-                        if (owner->HasAura(SPELL_PRIEST_GLYPH_OF_SHADOWFIEND))
-                            owner->CastSpell(owner, SPELL_PRIEST_GLYPH_OF_SHADOWFIEND_MANA, true);
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
-        {
-            return new npc_pet_pri_shadowfiendAI(creature);
+            if (me->IsSummon())
+                if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                    if (Unit* pet = owner->GetGuardianPet())
+                        pet->CastSpell(pet, MANA_LEECH, true);
         }
+ 
+        void DamageTaken(Unit* /*killer*/, uint32& damage) OVERRIDE
+        {
+            if (me->IsSummon())
+                if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                    if (owner->HasAura(GLYPH_OF_SHADOWFIEND) && damage >= me->GetHealth())
+                        owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
+        }
+
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_shadowfiendAI(creature);
+    }
 };
 
 void AddSC_priest_pet_scripts()
 {
     new npc_pet_pri_lightwell();
-    new npc_pet_pri_shadowfiend();
+	new npc_shadowfiend();
 }

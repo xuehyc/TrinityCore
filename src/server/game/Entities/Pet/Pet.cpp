@@ -800,6 +800,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     {
         if (GetOwner()->getClass() == CLASS_WARLOCK
                 || GetOwner()->getClass() == CLASS_SHAMAN        // Fire Elemental
+				|| GetOwner()->getClass() == CLASS_PRIEST        // Shadowfiend
                 || GetOwner()->getClass() == CLASS_DEATH_KNIGHT) // Risen Ghoul
         {
             petType = SUMMON_PET;
@@ -915,8 +916,14 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 case 510: // mage Water Elemental
                 {
                     SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
+					SetCreateHealth(GetOwner()->GetMaxHealth() * 0.5f);
                     break;
                 }
+                case 10467: // Mana Tide Totem
+                {
+                    SetCreateHealth(GetOwner()->GetMaxHealth() * 0.1f);
+                    break;
+                }				
                 case 1964: //force of nature
                 {
                     if (!pInfo)

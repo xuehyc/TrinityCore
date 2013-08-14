@@ -1764,6 +1764,36 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 }
                 return;
             }
+            // Priest Shadowfiend (34433) need apply mana gain trigger aura on pet
+            case 41967:
+            {
+                if (Unit* pet = unitTarget->GetGuardianPet())
+                    pet->CastSpell(pet, 28305, true);
+                return;
+            }
+            // Faerie Fire
+            case 91565:
+            {
+                // Feral Agression
+                if (AuraEffect const * aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 960, EFFECT_0))
+                {
+                    uint8 count = uint8(aurEff->GetAmount() - 1);
+                    while(count)
+                    {
+                        m_caster->CastSpell(unitTarget, 91565, true);
+                        count--;
+                    }
+                }
+            }
+            // Stampede (Cat form)
+            case 49376:
+            {
+                if (m_caster->HasAura(78892))
+                    m_caster->CastSpell(m_caster, 81021, false);
+                else if (m_caster->HasAura(78893))
+                    m_caster->CastSpell(m_caster, 81022, false);
+                break;
+            }			
         }
     }
 
