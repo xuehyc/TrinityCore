@@ -2098,8 +2098,9 @@ bool Aura::CallScriptPrepareProcHandlers(AuraApplication const* aurApp, ProcEven
     return prepare;
 }
 
-void Aura::CallScriptProcHandlers(AuraApplication const* aurApp, ProcEventInfo& eventInfo)
+bool Aura::CallScriptProcHandlers(AuraApplication const* aurApp, ProcEventInfo& eventInfo)
 {
+    bool handled = false;
     for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
     {
         (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_PROC, aurApp);
@@ -2107,8 +2108,11 @@ void Aura::CallScriptProcHandlers(AuraApplication const* aurApp, ProcEventInfo& 
         for (; hookItr != hookItrEnd; ++hookItr)
             hookItr->Call(*scritr, eventInfo);
 
+        handled |= (*scritr)->_IsDefaultActionPrevented();
         (*scritr)->_FinishScriptCall();
     }
+
+    return handled;
 }
 
 void Aura::CallScriptAfterProcHandlers(AuraApplication const* aurApp, ProcEventInfo& eventInfo)

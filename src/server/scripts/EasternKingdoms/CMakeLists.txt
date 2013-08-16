@@ -18,7 +18,11 @@ set(scripts_STAT_SRCS
   EasternKingdoms/AlteracValley/boss_vanndar.cpp
   EasternKingdoms/AlteracValley/alterac_valley.cpp
   EasternKingdoms/BaradinHold/boss_alizabal.cpp
+<<<<<<< HEAD
   EasternKingdoms/BaradinHold/boss_argaloth.cpp
+=======
+  EasternKingdoms/BaradinHold/boss_occuthar.cpp
+>>>>>>> 01178f595809dc6f7d043e6cc5c7e7975c466e09
   EasternKingdoms/BaradinHold/boss_pit_lord_argaloth.cpp
   EasternKingdoms/BaradinHold/instance_baradin_hold.cpp
   EasternKingdoms/BaradinHold/boss_occuthar.cpp
