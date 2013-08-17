@@ -1185,6 +1185,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_GENERIC:
                 switch (GetId())
                 {
+                    case 91836: //Forged Fury
+                        target->RemoveAura(91832);
+                    break;				
                     case 32474: // Buffeting Winds of Susurrus
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             target->ToPlayer()->ActivateTaxiPathTo(506, GetId());
@@ -1206,6 +1209,114 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_DRUID:
                 if (!caster)
                     break;
+
+                switch (GetId())
+                {
+                    case 81021: // Stampede (Cat Form) Rank 1
+                    case 81022: // Stampede (Cat Form) Rank 2
+                    {
+                        if (apply)
+                            caster->CastSpell(caster, 89140, true); // Ravage! Caster Aura Spell 
+                        else
+                            caster->RemoveAurasDueToSpell(89140);
+                    
+                        break;
+                    }
+                    case 5229: // Enrage (Druid)
+                    {
+                        if (apply)
+                        {
+                            if (caster->GetShapeshiftForm() == FORM_BEAR)
+                            {
+                                if (caster->HasAura(48492)) // King of the jungle (Rank 1)
+                                {
+                                    int32 bp0;
+                                    bp0 = 5;
+                                    caster->CastCustomSpell(caster, 51185, &bp0, NULL, NULL, true);
+                                }
+                                else if (caster->HasAura(48494)) // King of the jungle (Rank 2)
+                                {
+                                    int32 bp0;
+                                    bp0 = 10;
+                                    caster->CastCustomSpell(caster, 51185, &bp0, NULL, NULL, true);
+                                }
+                                else if (caster->HasAura(48495)) // King of the jungle (Rank 3)
+                                {
+                                    int32 bp0;
+                                    bp0 = 15;
+                                    caster->CastCustomSpell(caster, 51185, &bp0, NULL, NULL, true);
+                                }
+                            }
+                        }
+                        else
+                            caster->RemoveAurasDueToSpell(51185);
+                        
+                        break;
+                    }
+                    case 5217: // Tiger's fury
+                    {
+                        if (apply)
+                        {
+                            if (caster->GetShapeshiftForm() == FORM_CAT)
+                            {
+                                if (caster->HasAura(48492)) // King of the jungle (Rank 1)
+                                {
+                                    int32 bp0;
+                                    bp0 = 20;
+                                    caster->CastCustomSpell(caster, 51178, &bp0, NULL, NULL, true);
+                                }
+                                else if (caster->HasAura(48494)) // King of the jungle (Rank 2)
+                                {
+                                    int32 bp0;
+                                    bp0 = 40;
+                                    caster->CastCustomSpell(caster, 51178, &bp0, NULL, NULL, true);
+                                }
+                                else if (caster->HasAura(48495)) // King of the jungle (Rank 3)
+                                {
+                                    int32 bp0;
+                                    bp0 = 60;
+                                    caster->CastCustomSpell(caster, 51178, &bp0, NULL, NULL, true);
+                                }
+                                
+                                if (caster->HasAura(80316)) // Primal madness (Rank 1)
+                                    caster->CastSpell(caster, 80879, false);
+                                else if (caster->HasAura(80317)) // Primal madness (Rank 2)
+                                    caster->CastSpell(caster, 80886, false);
+                            }
+                        }
+                        break;
+                    }
+                    case 50334: // Berserk (Druid)
+                    {
+                        if (apply)
+                        {
+                            if (caster->GetShapeshiftForm() == FORM_CAT)
+                            {
+                                if (caster->HasAura(80316))
+                                    caster->CastSpell(caster, 80879, false); // Primal madness (Rank 1)
+                                else if (caster->HasAura(80317))
+                                    caster->CastSpell(caster, 80886, false); // Primal madness (Rank 2)
+                            }
+                            else if (caster->GetShapeshiftForm() == FORM_BEAR)
+                            {
+                                if (caster->HasAura(80316))
+                                {
+                                    int32 basepoints0 = 60;
+                                    caster->CastCustomSpell(caster, 17080, &basepoints0, NULL, NULL, true);
+                                }
+                                else if (caster->HasAura(80317))
+                                {
+                                    int32 basepoints0 = 120;
+                                    caster->CastCustomSpell(caster, 17080, &basepoints0, NULL, NULL, true);
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    break;
+                }
+                break;
+                
                 // Rejuvenation
                 if (GetSpellInfo()->SpellFamilyFlags[0] & 0x10 && GetEffect(EFFECT_0))
                 {
@@ -1214,6 +1325,45 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     {
                         int32 heal = GetEffect(EFFECT_0)->GetAmount();
                         caster->CastCustomSpell(target, 64801, &heal, NULL, NULL, true, NULL, GetEffect(EFFECT_0));
+                    }
+                }
+                // Enrage
+                if (GetSpellInfo()->SpellFamilyFlags[0] & 0x80000)
+                {
+                    //King of the Jungle
+                    if (apply)
+                    {
+                        if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2850, 0))
+                        {
+                            int32 basepoints0 = aurEff->GetAmount();
+                            target->CastCustomSpell(target, 51185, &basepoints0, NULL, NULL, true, NULL, NULL, target->GetGUID());
+                        }
+                    }
+                    
+                    if (target->HasAura(70726))          // Druid T10 Feral 4P Bonus
+                    {
+                        if (apply)
+                            target->CastSpell(target, 70725, true);
+                    }
+                    else          // armor reduction implemented here
+                    {
+                        if (AuraEffect * auraEff = target->GetAuraEffectOfRankedSpell(1178, 0))
+                        {
+                            int32 value = auraEff->GetAmount();
+                            int32 mod;
+                            switch (auraEff->GetId())
+                            {
+                                case 1178:
+                                    mod = 27;
+                                    break;
+                                case 9635:
+                                    mod = 16;
+                                    break;
+                            }
+                            mod = value / 100 * mod;
+                            value = value + (apply ? -mod : mod);
+                            auraEff->ChangeAmount(value);
+                        }
                     }
                 }
                 break;

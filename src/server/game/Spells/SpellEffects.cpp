@@ -1591,6 +1591,56 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 if (Unit* pet = m_caster->GetGuardianPet())
                     pet->CastSpell(pet, 51753, true);
         }
+        case SPELLFAMILY_DRUID:
+        {
+            // Starfall
+            if (m_spellInfo->SpellFamilyFlags[2] & SPELLFAMILYFLAG2_DRUID_STARFALL)
+            {
+                // Shapeshifting into an animal form or mounting cancels the effect.
+                if (m_caster->GetCreatureType() == CREATURE_TYPE_BEAST || m_caster->IsMounted())
+                {
+                    if (m_triggeredByAuraSpell)
+                        m_caster->RemoveAurasDueToSpell(m_triggeredByAuraSpell->Id);
+                    return;
+                }
+
+                // Any effect which causes you to lose control of your character will supress the starfall effect.
+                if (m_caster->HasUnitState(UNIT_STATE_STUNNED | UNIT_STATE_FLEEING | UNIT_STATE_ROOT | UNIT_STATE_CONFUSED))
+                    return;
+
+                m_caster->CastSpell(unitTarget, damage, true);
+                return;
+            }
+            switch (m_spellInfo->Id)
+            {
+                case 80964: // Skull Bash (Bear Form)
+                case 80965: // Skull Bash (Cat Form)
+                {
+                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
+                    {
+                        switch(aurEff->GetId())
+                        {
+                            case 16940: // Brutal Impact (Rank 1)
+                            {
+                                m_caster->CastSpell(unitTarget, 82364 ,true);
+                                break;
+                            }
+                            case 16941: // Brutal Impact (Rank 2)
+                            {
+                                m_caster->CastSpell(unitTarget, 82365 ,true);
+                                break;
+                            }
+                        }
+                    }
+
+                    // Skull Bash
+                    m_caster->CastSpell(unitTarget, 93983 ,true);
+                    m_caster->CastSpell(unitTarget, 93985 ,true);
+                    break;
+                }
+            }
+            break;
+        }		
         case SPELLFAMILY_DEATHKNIGHT:
             switch (m_spellInfo->Id)
             {
@@ -1677,6 +1727,24 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         // special cases
         switch (triggered_spell_id)
         {
+            // Stampede (Cat form)
+            case 50259:
+            {
+                if (m_caster->HasAura(78892))
+                    m_caster->CastSpell(m_caster, 81021, false);
+                else if (m_caster->HasAura(78893))
+                    m_caster->CastSpell(m_caster, 81022, false);
+                break;
+            }
+            // Mirror Image
+            case 58832:
+            {
+                // Glyph of Mirror Image
+                if (m_caster->HasAura(63093))
+                   m_caster->CastSpell(m_caster, 65047, true); // Mirror Image
+
+                break;
+            }		
             // Vanish (not exist)
             case 18461:
             {
@@ -4279,6 +4347,9 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                     int32 bp = ((m_spellInfo->Effects[2].BasePoints * m_spellInfo->Effects[0].BasePoints / 100) * lacer->GetStackAmount()) / 100;
                     m_caster->CastCustomSpell(unitTarget, 31756, &bp, NULL, NULL, true);
                     unitTarget->RemoveAurasDueToSpell(33745);
+
+                    int32 basePoints0 = lacer->GetStackAmount() * 3;
+                    m_caster->CastCustomSpell(m_caster, 80951, &basePoints0, NULL, NULL, true);
                 }
             }
             break;
