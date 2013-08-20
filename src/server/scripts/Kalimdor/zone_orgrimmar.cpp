@@ -3,8 +3,11 @@
  * Copyright (C) 2011-2013 ArkCORE <http://www.arkania.net/>
  *
  * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+<<<<<<< HEAD
  *
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+=======
+>>>>>>> 34cd8e808eb7ae2915a970213a37eb2c615fd7fe
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,16 +22,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-/* ScriptData
-SDName: Orgrimmar
-SD%Complete: 0
-SDComment: Quest support:
-SDCategory: Orgrimmar
-EndScriptData */
-
-/* ContentData
-EndContentData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"

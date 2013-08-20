@@ -1961,6 +1961,7 @@ class Player : public Unit, public GridObject<Player>
 
         bool UpdateStats(Stats stat);
         bool UpdateAllStats();
+        void ApplySpellPenetrationBonus(int32 amount, bool apply);
         void UpdateResistances(uint32 school);
         void UpdateArmor();
         void UpdateMaxHealth();
