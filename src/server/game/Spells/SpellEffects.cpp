@@ -2405,6 +2405,10 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
                     caster->CastSpell(caster,81208,true); // Chakra: Serenity
                     caster->RemoveAurasDueToSpell(14751);
                 }
+                if(caster->HasAura(89485)) // Inner Focus
+                {
+                    caster->RemoveAurasDueToSpell(89485);
+                }				
                 else if (caster->HasAura(81208))
                     if (unitTarget->GetAura(139))
                         unitTarget->GetAura(139)->RefreshDuration();
@@ -2477,6 +2481,10 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
                         }
                    }
                 }
+                if(caster->HasAura(89485)) // Inner Focus
+                {
+                    caster->RemoveAurasDueToSpell(89485);
+                }				
                 break;
             }
             case 596: // Prayer of Healing
@@ -2500,6 +2508,10 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
                 {
                     int32 bp = addhealth * 0.3f;
                     caster->CastCustomSpell(caster,47753,&bp,NULL,NULL,true);
+                }
+                if(caster->HasAura(89485)) // Inner Focus
+                {
+                    caster->RemoveAurasDueToSpell(89485);
                 }
                 break;
             }
@@ -4279,7 +4291,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             }
 
             // Templar's Verdict
-            if (m_spellInfo->Id == 85256)
+          /*   if (m_spellInfo->Id == 85256)
             {
                 if (m_caster->HasAura(90174)) // Divine Purpose Proc
                 {
@@ -4304,7 +4316,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 }
                 (m_caster->HasAura(63220)) ? totalDamagePercentMod *= 1.15f : 0 ; // Glyph of Templar's Verdict
                 m_caster->SetPower(POWER_HOLY_POWER, 0);
-            }
+            } */
 
             // Word of Glory
             if (m_spellInfo->Id == 85673)
