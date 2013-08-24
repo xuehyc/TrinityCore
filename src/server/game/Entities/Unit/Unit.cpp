@@ -5756,6 +5756,75 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             }
             switch (dummySpell->Id)
             {
+                // Sin and Punishment
+                case 87100:
+                case 87099:
+                {
+                    if (Player* caster = triggeredByAura->GetCaster()->ToPlayer())
+                    {
+                        if (caster->HasSpellCooldown(34433))
+                        {
+                            uint32 seconds = triggeredByAura->GetSpellInfo()->Effects[triggeredByAura->GetEffIndex()].CalcValue();
+                            caster->ReduceSpellCooldown(34433, seconds);
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                // Train of Thought
+                case 92295:
+                case 92297:
+                {
+                    // Greater Heal
+                    if (procSpell->Id == 2060)
+                    {
+                        if (Player* caster = triggeredByAura->GetCaster()->ToPlayer())
+                        {
+                            if (caster->HasSpellCooldown(89485))
+                            {
+                                uint32 seconds = triggeredByAura->GetSpellInfo()->Effects[triggeredByAura->GetEffIndex()].CalcValue();
+                                caster->ReduceSpellCooldown(89485, seconds);
+                                return true;
+                            }
+                        }
+                    }
+
+                    // Penance
+                    if (procSpell->Id == 585)
+                    {
+                        if (Player* caster = triggeredByAura->GetCaster()->ToPlayer())
+                        {
+                            if (caster->HasSpellCooldown(47540))
+                            {
+                                uint32 seconds = triggeredByAura->GetSpellInfo()->Effects[triggeredByAura->GetEffIndex()].CalcValue();
+                                caster->ReduceSpellCooldown(47540, uint32(seconds / 10));
+                                return true;
+                            }
+                        }
+                    }
+                }
+                // Vampiric Embrace
+                case 15286:
+                {
+                    if (!victim || !victim->IsAlive() || procSpell->SpellFamilyFlags[1] & 0x80000)
+                        return false;
+
+                    // heal amount
+                    int32 total = CalculatePct(int32(damage), triggerAmount);
+                    int32 team = total / 5;
+                    int32 self = total - team;
+                    CastCustomSpell(this, 15290, &team, &self, NULL, true, castItem, triggeredByAura);
+                    return true;                                // no hidden cooldown
+                }
+                // Mind Melt
+                case 87160:
+                case 81292:
+                {
+                    if (procSpell->Id != 73510)
+                        return false;
+
+                    break;
+                }			
                 // Priest Tier 6 Trinket (Ashtongue Talisman of Acumen)
                 case 40438:
                 {
