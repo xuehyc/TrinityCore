@@ -4628,7 +4628,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     break;
                 }
                 // Guardian of Ancient Kings - Retribution
-            case 86698:
+            case 86659:
             {
                 caster->CastSpell(caster, 86701, true);
                 break;
@@ -4804,7 +4804,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 }
                 }
             }
-					}
+		  }
         }
     }
 
