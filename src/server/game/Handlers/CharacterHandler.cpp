@@ -1006,9 +1006,18 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
         // send server info
         if (sWorld->getIntConfig(CONFIG_ENABLE_SINFO_LOGIN) == 1)
-            chH.PSendSysMessage(_FULLVERSION);
+        {
+            uint32 playersNum = sWorld->GetPlayerCount();
+            uint32 maxPlayersNum = sWorld->GetMaxPlayerCount();
+            std::string uptime = secsToTimeString(sWorld->GetUptime());
 
-        TC_LOG_DEBUG(LOG_FILTER_NETWORKIO, "WORLD: Sent server info");
+            chH.PSendSysMessage(_CLIENT_BUILD_REVISION,	_FULLVERSION);
+            chH.PSendSysMessage(LANG_CONNECTED_PLAYERS, playersNum, maxPlayersNum);
+            chH.PSendSysMessage(LANG_UPTIME, uptime.c_str());
+
+            TC_LOG_DEBUG(LOG_FILTER_NETWORKIO, "WORLD: Sent server info");
+        }
+
     }
 
     //QueryResult* result = CharacterDatabase.PQuery("SELECT guildid, rank FROM guild_member WHERE guid = '%u'", pCurrChar->GetGUIDLow());

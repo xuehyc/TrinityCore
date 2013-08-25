@@ -6110,6 +6110,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                 if (triggered_spell_id && beaconTarget)
                 {
+					Player* caster = ToPlayer();
                     int32 percent = 0;
                     switch (procSpell->Id)
                     {
