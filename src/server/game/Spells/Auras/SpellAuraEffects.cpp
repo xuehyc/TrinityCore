@@ -3018,7 +3018,7 @@ void AuraEffect::HandleAuraControlVehicle(AuraApplication const* aurApp, uint8 m
 /*********************************************************/
 void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const
 {
-    if (!(mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK))
+    if (!(mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_SEND_FOR_CLIENT_MASK))
         return;
 
     Unit* target = aurApp->GetTarget();
@@ -3037,7 +3037,7 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const* aurApp,
         return;
 
     Unit* target = aurApp->GetTarget();
-    if (mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK)
+    if (mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_SEND_FOR_CLIENT_MASK)
         target->UpdateSpeed(MOVE_FLIGHT, true);
 
     //! Update ability to fly
