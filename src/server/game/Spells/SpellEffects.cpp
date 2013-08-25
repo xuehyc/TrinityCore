@@ -4317,6 +4317,20 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 (m_caster->HasAura(63220)) ? totalDamagePercentMod *= 1.15f : 0 ; // Glyph of Templar's Verdict
                 m_caster->SetPower(POWER_HOLY_POWER, 0);
             } */
+			
+            // Remove Infusion of Light When cast Flash of Light
+            if (m_spellInfo->Id == 19750)
+            {
+	    		if(m_caster->HasAura(54149)) // Infusion of Light
+					m_caster->RemoveAura(54149);
+            }
+			
+			// Remove Infusion of Light When cast Divine Radiance
+            if (m_spellInfo->Id == 82326)
+            {
+	    		if(m_caster->HasAura(54149)) // Infusion of Light
+					m_caster->RemoveAura(54149);
+            }		
 
             // Word of Glory
             if (m_spellInfo->Id == 85673)
