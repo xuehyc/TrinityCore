@@ -444,7 +444,7 @@ void BattlegroundBFG::EventPlayerClickedOnFlag(Player* source, GameObject* /*tar
 
     if (node == GILNEAS_BG_DYNAMIC_NODES_COUNT)
     {
-        TC_LOG_ERROR(LOG_FILTER_SQL,"Player %s (GUID: %u) in Battle for Gilneas initiated EventPlayerClickedOnFlag() but is not near of any flag", source->GetName(), source->GetGUIDLow());
+        TC_LOG_ERROR(LOG_FILTER_SQL,"Player %s (GUID: %u) in Battle for Gilneas initiated EventPlayerClickedOnFlag() but is not near of any flag", source->GetName().c_str(), source->GetGUIDLow());
         // this means our player isn't close to any of banners - maybe cheater ??
         return;
     }
