@@ -118,7 +118,7 @@ public:
         void Reset() OVERRIDE
         {
             if (instance)
-                instance->SetData(DATA_MOTHERSHAHRAZEVENT, NOT_STARTED);
+                instance->SetBossState(DATA_MOTHER_SHAHRAZ, NOT_STARTED);
 
             for (uint8 i = 0; i<3; ++i)
                 TargetGUID[i] = 0;
@@ -141,7 +141,7 @@ public:
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             if (instance)
-                instance->SetData(DATA_MOTHERSHAHRAZEVENT, IN_PROGRESS);
+                instance->SetBossState(DATA_MOTHER_SHAHRAZ, IN_PROGRESS);
 
             DoZoneInCombat();
             Talk(SAY_AGGRO);
@@ -155,7 +155,7 @@ public:
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
-                instance->SetData(DATA_MOTHERSHAHRAZEVENT, DONE);
+                instance->SetBossState(DATA_MOTHER_SHAHRAZ, DONE);
 
             Talk(SAY_DEATH);
         }

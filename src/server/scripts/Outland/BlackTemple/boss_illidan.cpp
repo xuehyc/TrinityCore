@@ -547,9 +547,9 @@ public:
             if (!instance)
                 return;
 
-            instance->SetData(DATA_ILLIDANSTORMRAGEEVENT, DONE); // Completed
+            instance->SetBossState(DATA_ILLIDAN_STORMRAGE, DONE);
 
-            for (uint8 i = DATA_GAMEOBJECT_ILLIDAN_DOOR_R; i < DATA_GAMEOBJECT_ILLIDAN_DOOR_L + 1; ++i)
+            for (uint8 i = DATA_GO_ILLIDAN_DOOR_R; i < DATA_GO_ILLIDAN_DOOR_L + 1; ++i)
                 instance->HandleGameObject(instance->GetData64(i), true);
         }
 
@@ -1373,12 +1373,12 @@ public:
             WalkCount = 0;
             if (instance)
             {
-                instance->SetData(DATA_ILLIDANSTORMRAGEEVENT, NOT_STARTED);
+                instance->SetBossState(DATA_ILLIDAN_STORMRAGE, NOT_STARTED);
 
-                IllidanGUID = instance->GetData64(DATA_ILLIDANSTORMRAGE);
-                GateGUID = instance->GetData64(DATA_GAMEOBJECT_ILLIDAN_GATE);
-                DoorGUID[0] = instance->GetData64(DATA_GAMEOBJECT_ILLIDAN_DOOR_R);
-                DoorGUID[1] = instance->GetData64(DATA_GAMEOBJECT_ILLIDAN_DOOR_L);
+                IllidanGUID = instance->GetData64(DATA_ILLIDAN_STORMRAGE);
+                GateGUID = instance->GetData64(DATA_GO_ILLIDAN_GATE);
+                DoorGUID[0] = instance->GetData64(DATA_GO_ILLIDAN_DOOR_R);
+                DoorGUID[1] = instance->GetData64(DATA_GO_ILLIDAN_DOOR_L);
 
                 if (JustCreated) // close all doors at create
                 {
@@ -1467,7 +1467,7 @@ public:
             if (!instance)
                 return;
 
-            instance->SetData(DATA_ILLIDANSTORMRAGEEVENT, IN_PROGRESS);
+            instance->SetBossState(DATA_ILLIDAN_STORMRAGE, IN_PROGRESS);
             for (uint8 i = 0; i < 2; ++i)
                 instance->HandleGameObject(DoorGUID[i], false);
             if (Creature* illidan = ObjectAccessor::GetCreature(*me, IllidanGUID))
@@ -1695,7 +1695,7 @@ public:
             {
                 if (Check_Timer <= diff)
                 {
-                    if (instance && instance->GetData(DATA_ILLIDARICOUNCILEVENT) == DONE)
+                    if (instance && instance->GetBossState(DATA_ILLIDARI_COUNCIL) == DONE)
                         me->SetVisible(true);
 
                     Check_Timer = 5000;
@@ -1804,18 +1804,14 @@ public:
 void boss_illidan_stormrage::boss_illidan_stormrageAI::Reset()
 {
     if (instance)
-        instance->SetData(DATA_ILLIDANSTORMRAGEEVENT, NOT_STARTED);
+        instance->SetBossState(DATA_ILLIDAN_STORMRAGE, NOT_STARTED);
 
-    if (AkamaGUID)
+    if (Creature* akama = ObjectAccessor::GetCreature(*me, AkamaGUID))
     {
-        if (Creature* akama = ObjectAccessor::GetCreature(*me, AkamaGUID))
-        {
-            if (!akama->IsAlive())
-                akama->Respawn();
-            else
-                akama->AI()->EnterEvadeMode();
-        }
-        AkamaGUID = 0;
+        if (!akama->IsAlive())
+            akama->Respawn();
+        else
+            akama->AI()->EnterEvadeMode();
     }
 
     MaievGUID = 0;
@@ -2168,7 +2164,7 @@ public:
         void Reset() OVERRIDE
         {
             if (instance)
-                IllidanGUID = instance->GetData64(DATA_ILLIDANSTORMRAGE);
+                IllidanGUID = instance->GetData64(DATA_ILLIDAN_STORMRAGE);
             else
                 IllidanGUID = 0;
 
