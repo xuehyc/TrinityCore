@@ -348,6 +348,80 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
         {
             case SPELLFAMILY_GENERIC:
             {
+			
+                // Twilight Extinction (Sinestra)
+                if (m_spellInfo->Id == 87945)
+                {
+                    if (unitTarget->HasAura(87231))
+                        damage = damage * 0.01;
+                }
+                // Flaming Destruction (Cho'gall 10 heroic)
+                if (m_spellInfo->Id == 93227)
+                {
+                    if (Aura * aura = m_caster->GetAura(93265))
+                        damage = damage * aura->GetStackAmount();
+                }
+                // Empowered Shadows (Cho'gall 10 heroic)
+                if (m_spellInfo->Id == 93222)
+                {
+                    if (Aura * aura = m_caster->GetAura(93219))
+                        damage = damage * aura->GetStackAmount();
+                }
+                // Corruption of the Old God (Cho'gall)
+                if (m_spellInfo->Id == 82363)
+                {
+                    damage = damage + damage * (unitTarget->GetPower(POWER_ALTERNATE_POWER) * 0.03);
+                }
+                // Devouring Flames (Valiona) (Custom)
+                if (m_spellInfo->Id == 86844 || m_spellInfo->Id == 92872 || m_spellInfo->Id == 92873 || m_spellInfo->Id == 92874)
+                {
+                    damage = damage * 0.1;
+                }
+                // Twilight Zone (Valiona) (Custom)
+                if (m_spellInfo->Id == 86214)
+                {
+                    damage = damage * 0.1;
+                }
+                // Sonic Breath (Atramedes)
+                if (m_spellInfo->Id == 78100)
+                {
+                    unitTarget->SetPower(POWER_ALTERNATE_POWER, unitTarget->GetPower(POWER_ALTERNATE_POWER) + 5);
+                }
+                // Flame Torrent (Ignacious)
+                if (m_spellInfo->Id == 88558 || m_spellInfo->Id == 92516 || m_spellInfo->Id == 92517 || m_spellInfo->Id == 92518)
+                {
+                    damage = damage * 0.5;
+                }
+                // Hydro Lanze (Feludius) (HACK TEMPORAL)
+                if (m_spellInfo->Id == 82752 || m_spellInfo->Id == 92509 || m_spellInfo->Id == 92510 || m_spellInfo->Id == 92511)
+                {
+                    damage = damage * 0.3;
+                }
+                // Lightning Blast (Arion) (HACK TEMPORAL)
+                if (m_spellInfo->Id == 83070 || m_spellInfo->Id == 92454 || m_spellInfo->Id == 92455 || m_spellInfo->Id == 92456)
+                {
+                    damage = damage * 0.1;
+                }
+                // Thundershock (Arion)
+                if (m_spellInfo->Id == 83067 || m_spellInfo->Id == 92469 || m_spellInfo->Id == 92470 || m_spellInfo->Id == 92471)
+                {
+                    if (unitTarget->HasAura(83581))
+                        damage = damage * 0.3;
+                }
+                // Quake (Terrastra)
+                if (m_spellInfo->Id == 83565 || m_spellInfo->Id == 92544 || m_spellInfo->Id == 92545 || m_spellInfo->Id == 92546)
+                {
+                    damage = damage * 2;
+
+                    if (unitTarget->HasAura(83500))
+                        damage = damage * 0;
+                }
+                // Glaciate (Feludius)
+                if (m_spellInfo->Id == 82746 || m_spellInfo->Id == 92506 || m_spellInfo->Id == 92507 || m_spellInfo->Id == 92508)
+                {
+                    damage = damage * 0.3;
+                }
+				
                 // Meteor like spells (divided damage to targets)
                 if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_SHARE_DAMAGE)
                 {
@@ -361,10 +435,67 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 
                 switch (m_spellInfo->Id)                     // better way to check unknown
                 {
+                    case 92508: // Feludius - Glaciate
+                        if (unitTarget->HasAura(82665))
+                            unitTarget->AddAura(82772, unitTarget);
+                        break;
+                    case 86150: // Guardian of Ancient Kings
+                        if (unitTarget)
+                        m_caster->CastSpell(m_caster, 86698, false, NULL);
+                    return;
+                    // Positive/Negative Charge
+                    case 28062:
+                    case 28085:
+                    case 39090:
+                    case 39093:
+                        if (!m_triggeredByAuraSpell)
+                            break;
+                        if (unitTarget == m_caster)
+                        {
+                            uint8 count = 0;
+                            for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                                if (ihit->targetGUID != m_caster->GetGUID())
+                                    if (Player* target = ObjectAccessor::GetPlayer(*m_caster, ihit->targetGUID))
+                                        if (target->HasAura(m_triggeredByAuraSpell->Id))
+                                            ++count;
+                            if (count)
+                            {
+                                uint32 spellId = 0;
+                                switch (m_spellInfo->Id)
+                                {
+                                    case 28062: spellId = 29659; break;
+                                    case 28085: spellId = 29660; break;
+                                    case 39090: spellId = 39089; break;
+                                    case 39093: spellId = 39092; break;
+                                }
+                                m_caster->SetAuraStack(spellId, m_caster, count);
+                            }
+                        }
+
+                        if (unitTarget->HasAura(m_triggeredByAuraSpell->Id))
+                            damage = 0;
+                        break;
                     // Consumption
                     case 28865:
                         damage = (((InstanceMap*)m_caster->GetMap())->GetDifficulty() == REGULAR_DIFFICULTY ? 2750 : 4250);
                         break;
+                    case 51673: // Rocket Blast
+                    {
+                        float distance = m_caster->GetDistance2d(unitTarget);
+                        damage *= exp(-distance/15.0f);
+                        break;
+                    }
+                    // Ancient Fury
+                    case 86704:
+                    {
+                        Aura* ancientpower = m_caster->GetAura(86700);
+
+                        if (!ancientpower)
+                            return;
+
+                        damage = (damage * ancientpower->GetStackAmount()) ;
+                        break;
+                    }
                     // percent from health with min
                     case 25599:                             // Thundercrash
                     {
@@ -381,11 +512,79 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             return;
                         break;
                     }
+                    case 33671: // gruul's shatter
+                    case 50811: // krystallus shatter ( Normal )
+                    case 61547: // krystallus shatter ( Heroic )
+                    {
+                        // don't damage self and only players
+                        if (unitTarget->GetGUID() == m_caster->GetGUID() || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                            return;
+
+                        float radius = m_spellInfo->Effects[EFFECT_0].CalcRadius(m_caster);
+                        if (!radius)
+                            return;
+                        float distance = m_caster->GetDistance2d(unitTarget);
+                        damage = (distance > radius) ? 0 : int32(m_spellInfo->Effects[EFFECT_0].CalcValue(m_caster) * ((radius - distance)/radius));
+                        break;
+                    }
+                    // Loken Pulsing Shockwave
+                    case 59837:
+                    case 52942:
+                    {
+                        // don't damage self and only players
+                        if (unitTarget->GetGUID() == m_caster->GetGUID() || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                            return;
+
+                        float radius = m_spellInfo->Effects[EFFECT_0].CalcRadius(m_caster);
+                        if (!radius)
+                            return;
+                        float distance = m_caster->GetDistance2d(unitTarget);
+                        damage = (distance > radius) ? 0 : int32(m_spellInfo->Effects[EFFECT_0].CalcValue(m_caster) * distance);
+                        break;
+                    }
+                    // TODO: add spell specific target requirement hook for spells
+                    // Shadowbolts only affects targets with Shadow Mark (Gothik)
+                    case 27831:
+                    case 55638:
+                        if (!unitTarget->HasAura(27825))
+                            return;
+                        break;
+                    // Cataclysmic Bolt
+                    case 38441:
+                    {
+                        damage = unitTarget->CountPctFromMaxHealth(50);
+                        break;
+                    }
+                    case 29142: // Eyesore Blaster
+                    case 35139: // Throw Boom's Doom
+                    case 46198: // Cold Slap
+                    case 46588: // Ice Spear
+                    case 42393: // Brewfest - Attack Keg
+                    case 55269: // Deathly Stare
+                    case 56578: // Rapid-Fire Harpoon
+                    case 62775: // Tympanic Tantrum
+                    {
+                        damage = unitTarget->CountPctFromMaxHealth(damage);
+                        break;
+                    }
+                    // Crystalspawn Giant - Quake
+                    case 81008:
+                    case 92631:
+                    {
+                        // avoid damage when players jumps
+                        if (unitTarget->GetUnitMovementFlags() == MOVEMENTFLAG_FALLING_FAR || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                            return;
+                        break;
+                    }
                     // Gargoyle Strike
                     case 51963:
                     {
-                        // about +4 base spell dmg per level
-                        damage = (m_caster->getLevel() - 60) * 4 + 60;
+                        damage = 35 + m_caster->GetOwner()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f ;
+                        break;
+                    }
+                    case 85455: // Bane of Havoc
+                    {
+                        apply_direct_bonus = false;
                         break;
                     }
                 }
