@@ -2387,6 +2387,27 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
         {
             addhealth = int32(addhealth /2); // Reduce heal if caster == target
         }
+		
+        // Nature's Blessing
+        if (AuraEffect* naturesBlessing = m_caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2012, 0))
+        {
+            if (unitTarget->HasAura(974)) // Earth Shield
+                AddPct(addhealth, naturesBlessing->GetAmount());
+        }
+        // Soothing Rains
+        if (m_spellInfo->Id == 52042) // Healing Stream Totem
+        {
+            if (AuraEffect* soothingRains = m_caster->GetOwner()->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2011, 0))
+                AddPct(addhealth, soothingRains->GetAmount());
+        }
+        // Empowered Touch
+        if (AuraEffect const * empTouch = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2251, 1))
+        {
+            if ((empTouch->GetSpellInfo()->Effects[0].SpellClassMask & m_spellInfo->SpellFamilyFlags) || (empTouch->GetSpellInfo()->Effects[1].SpellClassMask & m_spellInfo->SpellFamilyFlags))
+                if (Aura * lifebloom = unitTarget->GetAura(33763))
+                    if (roll_chance_i(empTouch->GetAmount()))
+                        lifebloom->RefreshDuration();
+        }		
 
 		switch (m_spellInfo->Id)
         {
