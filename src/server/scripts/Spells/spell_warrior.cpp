@@ -1347,6 +1347,48 @@ public:
         return new spell_warr_victory_rush_SpellScript();
     }
 };
+
+// 86346 Colossus Smash
+class spell_warr_colossus_smash : public SpellScriptLoader
+{
+public:
+    spell_warr_colossus_smash() : SpellScriptLoader("spell_warr_colossus_smash") { }
+
+    class spell_warr_colossus_smash_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warr_colossus_smash_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellEntry*/)
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_WARRIOR_COLOSSUS_SMASH);
+        }
+
+        bool Load() OVERRIDE
+        {
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+
+            return true;
+        }
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+        {
+            // This is 4.3.4, in 406a was 100%
+            amount = 50;
+        }
+
+        void Register() OVERRIDE
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warr_colossus_smash_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_BYPASS_ARMOR_FOR_CASTER);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warr_colossus_smash_AuraScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1380,4 +1422,5 @@ void AddSC_warrior_spell_scripts()
 	new spell_warr_shockwave();
     new spell_warr_cleave();
 	new spell_warr_victory_rush();
+	new spell_warr_colossus_smash();
 }
