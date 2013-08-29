@@ -44,7 +44,9 @@ enum RogueSpells
     SPELL_ROGUE_SHIV_TRIGGERED                      = 5940,
     SPELL_ROGUE_SILCE_AND_DICE                      = 5171,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
-    SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628
+    SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628,
+    SPELL_ROGUE_VENOMOUS_WOUNDS_DAMAGE              = 79136,
+    SPELL_ROGUE_VENOMOUS_WOUNDS_ENERGIZE            = 51637
 };
 
 enum RogueSpellIcons
@@ -879,13 +881,13 @@ class spell_rog_redirect : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_rog_redirect_SpellScript::HandleRedirect, EFFECT_0, SPELL_EFFECT_ADD_COMBO_POINTS);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_rog_redirect_SpellScript();
         }
@@ -912,17 +914,66 @@ class spell_rog_backstab : public SpellScriptLoader
                    }
            }
 
-           void Register()
+           void Register() OVERRIDE
            {
                OnEffectHitTarget += SpellEffectFn(spell_rog_backstab_SpellScript::ChangeDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
            }
        };
 
-       SpellScript* GetSpellScript() const
+       SpellScript* GetSpellScript() const OVERRIDE
        {
            return new spell_rog_backstab_SpellScript();
        }
 };
+
+class spell_rog_venomous_wounds : public SpellScriptLoader
+{
+public:
+    spell_rog_venomous_wounds() : SpellScriptLoader("spell_rog_venomous_wounds") { }
+
+    class spell_rog_venomous_wounds_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_venomous_wounds_AuraScript);
+        /*void OnProc(AuraEffect const* aurEff, Unit* caster, Unit* target, uint32 damage, SpellInfo const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, int32 cooldown)*/
+
+		void OnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            if (!GetCaster() ||!aurEff || !GetTarget())
+                return;
+
+            bool IsPoisoned = false;
+
+		    Unit::AuraApplicationMap const& auras = GetTarget()->GetAppliedAuras();
+            for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+            {
+                if (itr->second->GetBase()->GetSpellInfo()->Dispel == DISPEL_POISON)
+                {
+                    IsPoisoned = true;
+                    break;
+                }
+            }
+
+            if(IsPoisoned)
+            {
+                GetCaster()->CastSpell(GetTarget(), SPELL_ROGUE_VENOMOUS_WOUNDS_DAMAGE, true, NULL, aurEff);
+                int32 energy = aurEff->GetAmount();
+                GetCaster()->CastCustomSpell(GetCaster(), SPELL_ROGUE_VENOMOUS_WOUNDS_ENERGIZE, &energy, NULL, NULL, true);
+            }
+         
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectProc += AuraEffectProcFn(spell_rog_venomous_wounds_AuraScript::OnProc, EFFECT_1, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_venomous_wounds_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -943,4 +994,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_tricks_of_the_trade_proc();
 	new spell_rog_redirect();
 	new spell_rog_backstab();
+	new spell_rog_venomous_wounds();
 }
