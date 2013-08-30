@@ -147,7 +147,7 @@ public:
             { "spell_target_position",        RBAC_PERM_ADMINISTRATOR_COMMANDS, true,  &HandleReloadSpellTargetPositionCommand,        "", NULL },
             { "spell_threats",                RBAC_PERM_ADMINISTRATOR_COMMANDS, true,  &HandleReloadSpellThreatsCommand,               "", NULL },
             { "spell_group_stack_rules",      RBAC_PERM_ADMINISTRATOR_COMMANDS, true,  &HandleReloadSpellGroupStackRulesCommand,       "", NULL },
-            { "trinity_string",               RBAC_PERM_ADMINISTRATOR_COMMANDS, true,  &HandleReloadTrinityStringCommand,              "", NULL },
+            { "arkcore_string",               RBAC_PERM_ADMINISTRATOR_COMMANDS, true,  &HandleReloadTrinityStringCommand,              "", NULL },
             { "warden_action",                RBAC_PERM_ADMINISTRATOR_COMMANDS, true,  &HandleReloadWardenactionCommand,               "", NULL },
             { "waypoint_scripts",             RBAC_PERM_ADMINISTRATOR_COMMANDS, true,  &HandleReloadWpScriptsCommand,                  "", NULL },
             { "waypoint_data",                RBAC_PERM_ADMINISTRATOR_COMMANDS, true,  &HandleReloadWpCommand,                         "", NULL },
