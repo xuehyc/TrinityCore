@@ -3722,8 +3722,6 @@ void AddSC_generic_spell_scripts()
     new spell_gen_two_forms();
     new spell_gen_darkflight();
 	new spell_gen_shadowmeld();
-    new spell_gen_orc_disguise();
-    new spell_gen_whisper_gulch_yogg_saron_whisper();
     new spell_gen_seaforium_blast();
     new spell_gen_spectator_cheer_trigger();
     new spell_gen_spirit_healer_res();
