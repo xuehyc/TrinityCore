@@ -22,9 +22,9 @@
 
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
-#include "ulduar.h"
 #include "InstanceScript.h"
 #include "Player.h"
+#include "ulduar.h"
 
 /*
 The teleporter appears to be active and stable.

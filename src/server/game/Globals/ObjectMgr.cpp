@@ -590,6 +590,10 @@ void ObjectMgr::LoadCreatureTemplateAddons()
                 TC_LOG_ERROR(LOG_FILTER_SQL, "Creature (Entry: %u) has wrong spell %u defined in `auras` field in `creature_template_addon`.", entry, uint32(atol(*itr)));
                 continue;
             }
+
+            if (AdditionalSpellInfo->HasAura(SPELL_AURA_CONTROL_VEHICLE))
+                TC_LOG_ERROR(LOG_FILTER_SQL, "Creature (Entry: %u) has SPELL_AURA_CONTROL_VEHICLE aura %u defined in `auras` field in `creature_template_addon`.", entry, uint32(atol(*itr)));
+
             creatureAddon.auras[i++] = uint32(atol(*itr));
         }
 
@@ -604,7 +608,7 @@ void ObjectMgr::LoadCreatureTemplateAddons()
 
         if (!sEmotesStore.LookupEntry(creatureAddon.emote))
         {
-            TC_LOG_ERROR(LOG_FILTER_SQL, "Creature (Entry: %u) has invalid emote (%u) defined in `creature_addon`.", entry, creatureAddon.emote);
+            TC_LOG_ERROR(LOG_FILTER_SQL, "Creature (Entry: %u) has invalid emote (%u) defined in `creature_template_addon`.", entry, creatureAddon.emote);
             creatureAddon.emote = 0;
         }
 
@@ -963,6 +967,10 @@ void ObjectMgr::LoadCreatureAddons()
                 TC_LOG_ERROR(LOG_FILTER_SQL, "Creature (GUID: %u) has wrong spell %u defined in `auras` field in `creature_addon`.", guid, uint32(atol(*itr)));
                 continue;
             }
+
+            if (AdditionalSpellInfo->HasAura(SPELL_AURA_CONTROL_VEHICLE))
+                TC_LOG_ERROR(LOG_FILTER_SQL, "Creature (GUID: %u) has SPELL_AURA_CONTROL_VEHICLE aura %u defined in `auras` field in `creature_addon`.", guid, uint32(atol(*itr)));
+
             creatureAddon.auras[i++] = uint32(atol(*itr));
         }
 
