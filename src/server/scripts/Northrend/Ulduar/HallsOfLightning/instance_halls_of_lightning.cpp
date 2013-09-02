@@ -26,7 +26,6 @@
 
 DoorData const doorData[] =
 {
-    { GO_BJARNGRIM_DOOR,    DATA_BJARNGRIM, DOOR_TYPE_PASSAGE,  BOUNDARY_NONE },
     { GO_VOLKHAN_DOOR,      DATA_VOLKHAN,   DOOR_TYPE_PASSAGE,  BOUNDARY_NONE },
     { GO_IONAR_DOOR,        DATA_IONAR,     DOOR_TYPE_PASSAGE,  BOUNDARY_NONE },
     { GO_LOKEN_DOOR,        DATA_LOKEN,     DOOR_TYPE_PASSAGE,  BOUNDARY_NONE },
@@ -78,7 +77,6 @@ class instance_halls_of_lightning : public InstanceMapScript
             {
                 switch (go->GetEntry())
                 {
-                    case GO_BJARNGRIM_DOOR:
                     case GO_VOLKHAN_DOOR:
                     case GO_IONAR_DOOR:
                     case GO_LOKEN_DOOR:
@@ -96,7 +94,6 @@ class instance_halls_of_lightning : public InstanceMapScript
             {
                 switch (go->GetEntry())
                 {
-                    case GO_BJARNGRIM_DOOR:
                     case GO_VOLKHAN_DOOR:
                     case GO_IONAR_DOOR:
                     case GO_LOKEN_DOOR:
