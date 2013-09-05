@@ -153,7 +153,7 @@ void CliRunnable::run()
 
     ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it
     while (!World::IsStopped())
-    {
+{
         fflush(stdout);
 
         char *command_str ;             // = fgets(commandbuf, sizeof(commandbuf), stdin);
@@ -179,6 +179,8 @@ void CliRunnable::run()
             {
 #if PLATFORM == PLATFORM_WINDOWS
                 printf("ArkCORE>");
+#else
+                free(command_str);
 #endif
                 continue;
             }
@@ -188,6 +190,8 @@ void CliRunnable::run()
             {
 #if PLATFORM == PLATFORM_WINDOWS
                 printf("ArkCORE>");
+#else
+                free(command_str);
 #endif
                 continue;
             }
@@ -196,6 +200,7 @@ void CliRunnable::run()
             sWorld->QueueCliCommand(new CliCommandHolder(NULL, command.c_str(), &utf8print, &commandFinished));
 #if PLATFORM != PLATFORM_WINDOWS
             add_history(command.c_str());
+            free(command_str);
 #endif
         }
         else if (feof(stdin))
