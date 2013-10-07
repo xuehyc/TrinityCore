@@ -64,11 +64,6 @@ class instance_magisters_terrace : public InstanceMapScript
 public:
     instance_magisters_terrace() : InstanceMapScript("instance_magisters_terrace", 585) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const
-    {
-        return new instance_magisters_terrace_InstanceMapScript(map);
-    }
-
     struct instance_magisters_terrace_InstanceMapScript : public InstanceScript
     {
         instance_magisters_terrace_InstanceMapScript(Map* map) : InstanceScript(map) {}
@@ -315,6 +310,11 @@ public:
                 felCristalIndex = value;
         }
     };
+
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+    {
+        return new instance_magisters_terrace_InstanceMapScript(map);
+    }
 };
 
 void AddSC_instance_magisters_terrace()

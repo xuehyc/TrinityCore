@@ -1,10 +1,5 @@
 /*
- *
- * Copyright (C) 2011-2013 ArkCORE <http://www.arkania.net/>
- *
  * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
- *
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,18 +14,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-/* ScriptData
-SDName: Boss_Hydromancer_Thespia
-SD%Complete: 80
-SDComment: Needs additional adjustments (when instance script is adjusted)
-SDCategory: Coilfang Resevoir, The Steamvault
-EndScriptData */
-
-/* ContentData
-boss_hydromancer_thespia
-npc_coilfang_waterelemental
-EndContentData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -81,7 +64,7 @@ public:
             EnvelopingWinds_Timer = 9000;
 
             if (instance)
-                instance->SetData(TYPE_HYDROMANCER_THESPIA, NOT_STARTED);
+                instance->SetBossState(DATA_HYDROMANCER_THESPIA, NOT_STARTED);
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
@@ -89,7 +72,7 @@ public:
             Talk(SAY_DEAD);
 
             if (instance)
-                instance->SetData(TYPE_HYDROMANCER_THESPIA, DONE);
+                instance->SetBossState(DATA_HYDROMANCER_THESPIA, DONE);
         }
 
         void KilledUnit(Unit* /*victim*/) OVERRIDE
@@ -102,7 +85,7 @@ public:
             Talk(SAY_AGGRO);
 
             if (instance)
-                instance->SetData(TYPE_HYDROMANCER_THESPIA, IN_PROGRESS);
+                instance->SetBossState(DATA_HYDROMANCER_THESPIA, IN_PROGRESS);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
