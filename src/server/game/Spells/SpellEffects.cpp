@@ -1694,6 +1694,39 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 }
             }
             break;
+        case SPELLFAMILY_PRIEST:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 73325: // Leap of faith
+                {
+                    unitTarget->CastSpell(m_caster, 92832, false);
+                    break;
+                }
+                case 21562: // Power Word : Fortitude
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> PartyMembers;
+                        m_caster->GetPartyMembers(PartyMembers);
+                        bool Continue = false;
+                        uint32 player = 0;
+                        for(std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr) // If caster is in party with a player
+                        {
+                            ++player;
+                            if (Continue == false && player > 1)
+                                Continue = true;
+                        }
+                        if (Continue == true)
+                            m_caster->CastSpell(unitTarget, 79105, true); // Power Word : Fortitude (Raid)
+                        else
+                            m_caster->CastSpell(unitTarget, 79104, true); // Power Word : Fortitude (Caster)
+                    }
+                    break;
+                }
+            }
+            break;
+        }			
 		case SPELLFAMILY_MAGE:
 			{
                 switch (m_spellInfo->Id)
@@ -1706,6 +1739,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                  	   if (m_caster->HasAura(12489)) // Improved Cone of Cold Rank 2
                  	       m_caster->CastCustomSpell(unitTarget, 83302, &bp, NULL, NULL, true, 0);
 				 }
+                case 92315: // Pyroblast!
+                    m_caster->RemoveAurasDueToSpell(48108); // Remove hot streak
+                    break;				 
 				case 30455: // Ice lance
 					if (Aura* fof = m_caster->GetAura(44544))
 						AddPct(damage, 25*fof->GetCharges()); 
@@ -1797,12 +1833,40 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 				break;
 	     }
         case SPELLFAMILY_HUNTER:
+        {
             if (m_spellInfo->SpellFamilyFlags[2] & 0x20)
             {
                 m_caster->CastSpell(m_caster, 51755, true);
                 if (Unit* pet = m_caster->GetGuardianPet())
                     pet->CastSpell(pet, 51753, true);
+			}
+            // steady shot focus effect (it has its own skill for this)
+            if (m_spellInfo->SpellFamilyFlags[1] & 0x1)
+                m_caster->CastSpell(m_caster, 77443, true);
+
+            if (m_spellInfo->SpellFamilyFlags[2] & 0x20)
+                m_caster->CastSpell(m_caster, 51755, true);
+            break;
         }
+        case SPELLFAMILY_WARRIOR:
+            // Concussion Blow
+            if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_WARRIOR_CONCUSSION_BLOW)
+            {
+                m_damage += CalculatePct(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
+                return;
+            }
+            switch (m_spellInfo->Id)
+            {
+                // Intercept
+                case 20252:
+                {
+                    // Juggernaut CD part
+                    if (m_caster->HasAura(64976))
+                        m_caster->ToPlayer()->AddSpellCooldown(100, 0, time(NULL) + 13); // 15 - 2 from Juggernaut
+                    return;
+                }
+            }
+            break;
         case SPELLFAMILY_DRUID:
         {
             // Starfall
@@ -1823,6 +1887,48 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 m_caster->CastSpell(unitTarget, damage, true);
                 return;
             }
+			
+            // Wild mushroom: detonate (prepare this to move to scripting).
+            // summoned npc may need further scripting.
+            if (m_spellInfo->Id == 88751)
+            {
+                std::list<Creature*> templist;
+
+                CellCoord pair(Trinity::ComputeCellCoord(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                Cell cell(pair);
+                cell.SetNoCreate();
+
+                Trinity::AllFriendlyCreaturesInGrid check(m_caster);
+                Trinity::CreatureListSearcher<Trinity::AllFriendlyCreaturesInGrid> searcher(m_caster, templist, check);
+
+                TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllFriendlyCreaturesInGrid>, GridTypeMapContainer> cSearcher(searcher);
+
+                cell.Visit(pair, cSearcher, *(m_caster->GetMap()), *m_caster, m_caster->GetGridActivationRange());
+
+                if (!templist.empty())
+                    for (std::list<Creature*>::const_iterator itr = templist.begin(); itr != templist.end(); ++itr)
+                    {
+                        // You cannot detonate other people's mushrooms
+                        if ((*itr)->GetOwner() != m_caster)
+                            continue;
+
+                        // Range check to find all enemies nearby
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check((*itr), (*itr), 6.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher((*itr), targets, u_check);
+                        (*itr)->VisitNearbyObject(6.0f, searcher);
+                        for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
+                        {
+                            // Damage spell
+                            (*itr)->CastSpell((*iter), 88747, true);
+                            // Suicide spell
+                            (*itr)->CastSpell((*itr), 92853, true);
+                            (*itr)->DisappearAndDie();
+                        }
+                    }
+                    templist.clear();
+            }
+			
             switch (m_spellInfo->Id)
             {
                 case 80964: // Skull Bash (Bear Form)
