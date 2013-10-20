@@ -1051,6 +1051,19 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_DEATHKNIGHT:
             {
+                // Ebon Plaguebringer
+                if (m_caster->HasAura(51099)) // Rank 1
+                {
+                    if (m_spellInfo->Id == 45462 || m_spellInfo->Id == 45477 || m_spellInfo->Id == 45524)
+                    m_caster->CastSpell(unitTarget, 65142, true);
+                }
+                else
+                if (m_caster->HasAura(51160)) // Rank 2
+                {
+                    if (m_spellInfo->Id == 45462 || m_spellInfo->Id == 45477 || m_spellInfo->Id == 45524)
+                    m_caster->CastSpell(unitTarget, 65142, true);
+                }
+
                 // Blood Boil - bonus for diseased targets
                 if (m_spellInfo->SpellFamilyFlags[0] & 0x00040000)
                 {
