@@ -179,7 +179,7 @@ public:
 
     struct npc_khunok_the_behemothAI : public ScriptedAI
     {
-        npc_khunok_the_behemothAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_khunok_the_behemothAI(Creature* creature) : ScriptedAI(creature) { }
 
         void MoveInLineOfSight(Unit* who) OVERRIDE
 
@@ -359,7 +359,7 @@ public:
 
     struct npc_nerubar_victimAI : public ScriptedAI
     {
-        npc_nerubar_victimAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_nerubar_victimAI(Creature* creature) : ScriptedAI(creature) { }
 
         void Reset() OVERRIDE {}
         void EnterCombat(Unit* /*who*/) OVERRIDE {}
@@ -415,7 +415,7 @@ public:
 
     struct npc_jennyAI : public ScriptedAI
     {
-        npc_jennyAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_jennyAI(Creature* creature) : ScriptedAI(creature) { }
 
         bool setCrateNumber;
 
@@ -476,7 +476,7 @@ public:
 
     struct npc_fezzix_geartwistAI : public ScriptedAI
     {
-        npc_fezzix_geartwistAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_fezzix_geartwistAI(Creature* creature) : ScriptedAI(creature) { }
 
         void MoveInLineOfSight(Unit* who) OVERRIDE
 
@@ -963,7 +963,7 @@ public:
 
     struct npc_thassarianAI : public npc_escortAI
     {
-        npc_thassarianAI(Creature* creature) : npc_escortAI(creature) {}
+        npc_thassarianAI(Creature* creature) : npc_escortAI(creature) { }
 
         uint64 arthasGUID;
         uint64 talbotGUID;
@@ -1267,7 +1267,7 @@ public:
 
     struct npc_image_lich_kingAI : public ScriptedAI
     {
-        npc_image_lich_kingAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_image_lich_kingAI(Creature* creature) : ScriptedAI(creature) { }
 
         void Reset() OVERRIDE
         {
@@ -1302,7 +1302,7 @@ public:
 
     struct npc_general_arlosAI : public ScriptedAI
     {
-        npc_general_arlosAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_general_arlosAI(Creature* creature) : ScriptedAI(creature) { }
 
         void MovementInform(uint32 uiType, uint32 /*uiId*/) OVERRIDE
         {
@@ -1591,7 +1591,7 @@ public:
 
     struct npc_beryl_sorcererAI : public FollowerAI
     {
-        npc_beryl_sorcererAI(Creature* creature) : FollowerAI(creature) {}
+        npc_beryl_sorcererAI(Creature* creature) : FollowerAI(creature) { }
 
         bool bEnslaved;
 
@@ -1676,7 +1676,7 @@ public:
 
     struct npc_imprisoned_beryl_sorcererAI : public ScriptedAI
     {
-        npc_imprisoned_beryl_sorcererAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_imprisoned_beryl_sorcererAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 rebuff;
 
@@ -1803,7 +1803,7 @@ public:
 
     struct npc_mootoo_the_youngerAI : public npc_escortAI
     {
-        npc_mootoo_the_youngerAI(Creature* creature) : npc_escortAI(creature) {}
+        npc_mootoo_the_youngerAI(Creature* creature) : npc_escortAI(creature) { }
 
         void Reset() OVERRIDE
         {
@@ -1884,7 +1884,7 @@ public:
 
     struct npc_bonker_togglevoltAI : public npc_escortAI
     {
-        npc_bonker_togglevoltAI(Creature* creature) : npc_escortAI(creature) {}
+        npc_bonker_togglevoltAI(Creature* creature) : npc_escortAI(creature) { }
         uint32 Bonker_agro;
 
         void Reset() OVERRIDE
@@ -1982,7 +1982,7 @@ public:
 
     struct npc_trapped_mammoth_calfAI : public ScriptedAI
     {
-        npc_trapped_mammoth_calfAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_trapped_mammoth_calfAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 uiTimer;
         bool bStarted;
@@ -2071,7 +2071,7 @@ public:
 
     struct npc_magmoth_crusherAI : public ScriptedAI
     {
-        npc_magmoth_crusherAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_magmoth_crusherAI(Creature* creature) : ScriptedAI(creature) { }
 
         void JustDied(Unit* killer) OVERRIDE
         {
@@ -2172,7 +2172,7 @@ public:
 
     struct npc_valiance_keep_cannoneerAI : public ScriptedAI
     {
-        npc_valiance_keep_cannoneerAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_valiance_keep_cannoneerAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 uiTimer;
 
@@ -2230,7 +2230,7 @@ public:
 
     struct npc_warmage_coldarraAI : public ScriptedAI
     {
-        npc_warmage_coldarraAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_warmage_coldarraAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 m_uiTimer;                 //Timer until recast
 

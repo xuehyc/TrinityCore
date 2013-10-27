@@ -166,7 +166,7 @@ public:
 
     struct npc_salsalabimAI : public ScriptedAI
     {
-        npc_salsalabimAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_salsalabimAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 MagneticPull_Timer;
 
@@ -335,7 +335,7 @@ public:
     struct npc_kservantAI : public npc_escortAI
     {
     public:
-        npc_kservantAI(Creature* creature) : npc_escortAI(creature) {}
+        npc_kservantAI(Creature* creature) : npc_escortAI(creature) { }
 
         void WaypointReached(uint32 waypointId) OVERRIDE
         {

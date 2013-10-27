@@ -65,7 +65,7 @@ public:
 
     struct npc_stolen_soulAI : public ScriptedAI
     {
-        npc_stolen_soulAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_stolen_soulAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint8 myClass;
         uint32 Class_Timer;
@@ -318,7 +318,7 @@ public:
 
     struct npc_avatar_of_martyredAI : public ScriptedAI
     {
-        npc_avatar_of_martyredAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_avatar_of_martyredAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 Mortal_Strike_timer;
 

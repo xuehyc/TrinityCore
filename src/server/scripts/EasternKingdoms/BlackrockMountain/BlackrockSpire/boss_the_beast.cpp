@@ -50,7 +50,7 @@ public:
 
     struct boss_thebeastAI : public BossAI
     {
-        boss_thebeastAI(Creature* creature) : BossAI(creature, DATA_THE_BEAST) {}
+        boss_thebeastAI(Creature* creature) : BossAI(creature, DATA_THE_BEAST) { }
 
         void Reset() OVERRIDE
         {

@@ -24,6 +24,7 @@
 #include "Log.h"
 #include "SharedDefines.h"
 #include "SpellMgr.h"
+#include "TransportMgr.h"
 #include "DBCfmt.h"
 #include "ItemPrototype.h"
 #include "Timer.h"
@@ -187,7 +188,7 @@ DBCStorage <SoundEntriesEntry> sSoundEntriesStore(SoundEntriesfmt);
 DBCStorage <SpellItemEnchantmentEntry> sSpellItemEnchantmentStore(SpellItemEnchantmentfmt);
 DBCStorage <SpellItemEnchantmentConditionEntry> sSpellItemEnchantmentConditionStore(SpellItemEnchantmentConditionfmt);
 DBCStorage <SpellEntry> sSpellStore(SpellEntryfmt);
-SpellCategoryStore sSpellCategoryStore;
+SpellCategoryStore sSpellsByCategoryStore;
 PetFamilySpellsStore sPetFamilySpellsStore;
 
 
@@ -206,6 +207,7 @@ DBCStorage <SpellAuraRestrictionsEntry> sSpellAuraRestrictionsStore(SpellAuraRes
 DBCStorage <SpellCastingRequirementsEntry> sSpellCastingRequirementsStore(SpellCastingRequirementsEntryfmt);
 DBCStorage <SpellCastTimesEntry> sSpellCastTimesStore(SpellCastTimefmt);
 DBCStorage <SpellCategoriesEntry> sSpellCategoriesStore(SpellCategoriesEntryfmt);
+DBCStorage <SpellCategoryEntry> sSpellCategoryStore(SpellCategoryfmt);
 DBCStorage <SpellEffectEntry> sSpellEffectStore(SpellEffectEntryfmt);
 DBCStorage <SpellDifficultyEntry> sSpellDifficultyStore(SpellDifficultyfmt);
 DBCStorage <SpellDurationEntry> sSpellDurationStore(SpellDurationfmt);
@@ -243,6 +245,8 @@ TaxiPathNodesByPath sTaxiPathNodesByPath;
 static DBCStorage <TaxiPathNodeEntry> sTaxiPathNodeStore(TaxiPathNodeEntryfmt);
 
 DBCStorage <TotemCategoryEntry> sTotemCategoryStore(TotemCategoryEntryfmt);
+DBCStorage <TransportAnimationEntry> sTransportAnimationStore(TransportAnimationfmt);
+DBCStorage <TransportRotationEntry> sTransportRotationStore(TransportRotationfmt);
 DBCStorage <UnitPowerBarEntry> sUnitPowerBarStore(UnitPowerBarfmt);
 DBCStorage <VehicleEntry> sVehicleStore(VehicleEntryfmt);
 DBCStorage <VehicleSeatEntry> sVehicleSeatStore(VehicleSeatEntryfmt);
@@ -507,6 +511,8 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sSkillLineAbilityStore,       dbcPath, "SkillLineAbility.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSoundEntriesStore,           dbcPath, "SoundEntries.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellStore,                  dbcPath, "Spell.dbc", &CustomSpellEntryfmt, &CustomSpellEntryIndex);//
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCategoriesStore,        dbcPath,"SpellCategories.dbc");//15595
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCategoryStore,          dbcPath, "SpellCategory.dbc");
     for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
     {
         SpellEntry const* spell = sSpellStore.LookupEntry(i);
@@ -514,7 +520,7 @@ void LoadDBCStores(const std::string& dataPath)
             continue;
 
         if (SpellCategoriesEntry const* category = sSpellCategoriesStore.LookupEntry(spell->SpellCategoriesId))
-            sSpellCategoryStore[category->Category].insert(i);
+            sSpellsByCategoryStore[category->Category].insert(i);
     }
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellReagentsStore,          dbcPath,"SpellReagents.dbc");//15595
@@ -530,7 +536,6 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellAuraOptionsStore,       dbcPath,"SpellAuraOptions.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellAuraRestrictionsStore,  dbcPath,"SpellAuraRestrictions.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCastingRequirementsStore, dbcPath,"SpellCastingRequirements.dbc");//15595
-    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCategoriesStore,        dbcPath,"SpellCategories.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellEffectStore,            dbcPath,"SpellEffect.dbc", &CustomSpellEffectEntryfmt, &CustomSpellEffectEntryIndex);//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCastTimesStore,         dbcPath, "SpellCastTimes.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellDifficultyStore,        dbcPath, "SpellDifficulty.dbc", &CustomSpellDifficultyfmt, &CustomSpellDifficultyIndex);//15595
@@ -739,6 +744,25 @@ void LoadDBCStores(const std::string& dataPath)
 
     //LoadDBC(availableDbcLocales, bad_dbc_files, sTeamContributionPointsStore, dbcPath, "TeamContributionPoints.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sTotemCategoryStore,          dbcPath, "TotemCategory.dbc");//15595
+    LoadDBC(availableDbcLocales, bad_dbc_files, sTransportAnimationStore,     dbcPath, "TransportAnimation.dbc");
+    for (uint32 i = 0; i < sTransportAnimationStore.GetNumRows(); ++i)
+    {
+        TransportAnimationEntry const* anim = sTransportAnimationStore.LookupEntry(i);
+        if (!anim)
+            continue;
+
+        sTransportMgr->AddPathNodeToTransport(anim->TransportEntry, anim->TimeSeg, anim);
+    }
+
+    LoadDBC(availableDbcLocales, bad_dbc_files, sTransportRotationStore,     dbcPath, "TransportRotation.dbc");
+    for (uint32 i = 0; i < sTransportRotationStore.GetNumRows(); ++i)
+    {
+        TransportRotationEntry const* rot = sTransportRotationStore.LookupEntry(i);
+        if (!rot)
+            continue;
+
+        sTransportMgr->AddPathRotationToTransport(rot->TransportEntry, rot->TimeSeg, rot);
+    }
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sUnitPowerBarStore,           dbcPath, "UnitPowerBar.dbc");//15595
 

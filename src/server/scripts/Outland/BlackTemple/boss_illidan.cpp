@@ -381,7 +381,7 @@ public:
 
     struct flame_of_azzinothAI : public ScriptedAI
     {
-        flame_of_azzinothAI(Creature* creature) : ScriptedAI(creature) {}
+        flame_of_azzinothAI(Creature* creature) : ScriptedAI(creature) { }
 
         void Reset() OVERRIDE
         {
@@ -1144,7 +1144,7 @@ public:
 
     struct boss_maievAI : public ScriptedAI
     {
-        boss_maievAI(Creature* creature) : ScriptedAI(creature) {};
+        boss_maievAI(Creature* creature) : ScriptedAI(creature) { };
 
         void Reset() OVERRIDE
         {
@@ -1980,7 +1980,7 @@ public:
 
     struct cage_trap_triggerAI : public ScriptedAI
     {
-        cage_trap_triggerAI(Creature* creature) : ScriptedAI(creature) {}
+        cage_trap_triggerAI(Creature* creature) : ScriptedAI(creature) { }
 
         void Reset() OVERRIDE
         {
@@ -2078,7 +2078,7 @@ public:
 
     struct shadow_demonAI : public ScriptedAI
     {
-        shadow_demonAI(Creature* creature) : ScriptedAI(creature) {}
+        shadow_demonAI(Creature* creature) : ScriptedAI(creature) { }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
@@ -2134,7 +2134,7 @@ public:
 
     struct blade_of_azzinothAI : public NullCreatureAI
     {
-        blade_of_azzinothAI(Creature* creature) : NullCreatureAI(creature) {}
+        blade_of_azzinothAI(Creature* creature) : NullCreatureAI(creature) { }
 
         void SpellHit(Unit* /*caster*/, const SpellInfo* spell) OVERRIDE
         {

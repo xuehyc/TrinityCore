@@ -115,7 +115,7 @@ public:
 
     struct npc_enslaved_soulAI : public ScriptedAI
     {
-        npc_enslaved_soulAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_enslaved_soulAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint64 ReliquaryGUID;
 
@@ -397,7 +397,7 @@ public:
 
     struct boss_essence_of_sufferingAI : public ScriptedAI
     {
-        boss_essence_of_sufferingAI(Creature* creature) : ScriptedAI(creature) {}
+        boss_essence_of_sufferingAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint64 StatAuraGUID;
 
@@ -520,7 +520,7 @@ public:
 
     struct boss_essence_of_desireAI : public ScriptedAI
     {
-        boss_essence_of_desireAI(Creature* creature) : ScriptedAI(creature) {}
+        boss_essence_of_desireAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 RuneShieldTimer;
         uint32 DeadenTimer;
@@ -623,7 +623,7 @@ public:
 
     struct boss_essence_of_angerAI : public ScriptedAI
     {
-        boss_essence_of_angerAI(Creature* creature) : ScriptedAI(creature) {}
+        boss_essence_of_angerAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint64 AggroTargetGUID;
 

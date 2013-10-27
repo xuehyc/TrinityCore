@@ -150,7 +150,7 @@ public:
 
     struct npc_doomfireAI : public ScriptedAI
     {
-        npc_doomfireAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_doomfireAI(Creature* creature) : ScriptedAI(creature) { }
 
         void Reset() OVERRIDE {}
 
@@ -179,7 +179,7 @@ public:
 
     struct npc_doomfire_targettingAI : public ScriptedAI
     {
-        npc_doomfire_targettingAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_doomfire_targettingAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint64 TargetGUID;
         uint32 ChangeTargetTimer;

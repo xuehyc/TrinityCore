@@ -500,7 +500,7 @@ public:
 
     struct npc_anachronos_the_ancientAI : public ScriptedAI
     {
-        npc_anachronos_the_ancientAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_anachronos_the_ancientAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 AnimationTimer;
         uint8 AnimationCount;
@@ -828,7 +828,7 @@ public:
 
     struct npc_qiraj_war_spawnAI : public ScriptedAI
     {
-        npc_qiraj_war_spawnAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_qiraj_war_spawnAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint64 MobGUID;
         uint64 PlayerGUID;
@@ -941,7 +941,7 @@ public:
 
     struct npc_anachronos_quest_triggerAI : public ScriptedAI
     {
-        npc_anachronos_quest_triggerAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_anachronos_quest_triggerAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint64 PlayerGUID;
 
@@ -1018,7 +1018,7 @@ public:
                 uint8 DeadMemberCount = 0;
                 uint8 FailedMemberCount = 0;
 
-                Group::MemberSlotList const members = EventGroup->GetMemberSlots();
+                Group::MemberSlotList const& members = EventGroup->GetMemberSlots();
 
                 for (Group::member_citerator itr = members.begin(); itr!= members.end(); ++itr)
                 {

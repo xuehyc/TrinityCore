@@ -71,7 +71,7 @@ public:
 
     struct npc_draenei_survivorAI : public ScriptedAI
     {
-        npc_draenei_survivorAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_draenei_survivorAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint64 pCaster;
 
@@ -304,7 +304,7 @@ public:
 
     struct npc_injured_draeneiAI : public ScriptedAI
     {
-        npc_injured_draeneiAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_injured_draeneiAI(Creature* creature) : ScriptedAI(creature) { }
 
         void Reset() OVERRIDE
         {
@@ -371,7 +371,7 @@ public:
 
     struct npc_magwinAI : public npc_escortAI
     {
-        npc_magwinAI(Creature* creature) : npc_escortAI(creature) {}
+        npc_magwinAI(Creature* creature) : npc_escortAI(creature) { }
 
         void WaypointReached(uint32 waypointId) OVERRIDE
         {
@@ -445,7 +445,7 @@ public:
 
     struct npc_geezleAI : public ScriptedAI
     {
-        npc_geezleAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_geezleAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint64 SparkGUID;
 
@@ -680,7 +680,7 @@ class npc_stillpine_capitive : public CreatureScript
 
         struct npc_stillpine_capitiveAI : public ScriptedAI
         {
-            npc_stillpine_capitiveAI(Creature* creature) : ScriptedAI(creature) {}
+            npc_stillpine_capitiveAI(Creature* creature) : ScriptedAI(creature) { }
 
             void Reset() OVERRIDE
             {

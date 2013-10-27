@@ -103,7 +103,7 @@ public:
 
     struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
     {
-        npc_lady_sylvanas_windrunnerAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_lady_sylvanas_windrunnerAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 LamentEventTimer;
         bool LamentEvent;
@@ -235,7 +235,7 @@ public:
 
     struct npc_highborne_lamenterAI : public ScriptedAI
     {
-        npc_highborne_lamenterAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_highborne_lamenterAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 EventMoveTimer;
         uint32 EventCastTimer;

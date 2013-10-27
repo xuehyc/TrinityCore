@@ -58,7 +58,7 @@ public:
 
     struct guard_genericAI : public GuardAI
     {
-        guard_genericAI(Creature* creature) : GuardAI(creature) {}
+        guard_genericAI(Creature* creature) : GuardAI(creature) { }
 
         void Reset() OVERRIDE
         {
@@ -267,7 +267,7 @@ public:
 
     struct guard_shattrath_scryerAI : public GuardAI
     {
-        guard_shattrath_scryerAI(Creature* creature) : GuardAI(creature) {}
+        guard_shattrath_scryerAI(Creature* creature) : GuardAI(creature) { }
 
         void Reset() OVERRIDE
         {
@@ -332,7 +332,7 @@ public:
 
     struct guard_shattrath_aldorAI : public GuardAI
     {
-        guard_shattrath_aldorAI(Creature* creature) : GuardAI(creature) {}
+        guard_shattrath_aldorAI(Creature* creature) : GuardAI(creature) { }
 
         void Reset() OVERRIDE
         {

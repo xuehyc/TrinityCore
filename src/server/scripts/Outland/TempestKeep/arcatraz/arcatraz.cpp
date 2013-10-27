@@ -543,7 +543,7 @@ class npc_zerekethvoidzone : public CreatureScript
         }
         struct npc_zerekethvoidzoneAI : public ScriptedAI
         {
-            npc_zerekethvoidzoneAI(Creature* creature) : ScriptedAI(creature) {}
+            npc_zerekethvoidzoneAI(Creature* creature) : ScriptedAI(creature) { }
 
             void Reset() OVERRIDE
             {

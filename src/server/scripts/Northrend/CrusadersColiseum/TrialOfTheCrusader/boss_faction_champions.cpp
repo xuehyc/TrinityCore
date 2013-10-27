@@ -761,7 +761,7 @@ class npc_toc_druid : public CreatureScript
 
         struct npc_toc_druidAI : public boss_faction_championsAI
         {
-            npc_toc_druidAI(Creature* creature) : boss_faction_championsAI(creature, AI_HEALER) {}
+            npc_toc_druidAI(Creature* creature) : boss_faction_championsAI(creature, AI_HEALER) { }
 
             void Reset() OVERRIDE
             {
@@ -854,7 +854,7 @@ class npc_toc_shaman : public CreatureScript
 
         struct npc_toc_shamanAI : public boss_faction_championsAI
         {
-            npc_toc_shamanAI(Creature* creature) : boss_faction_championsAI(creature, AI_HEALER) {}
+            npc_toc_shamanAI(Creature* creature) : boss_faction_championsAI(creature, AI_HEALER) { }
 
             void Reset() OVERRIDE
             {
@@ -947,7 +947,7 @@ class npc_toc_paladin : public CreatureScript
 
         struct npc_toc_paladinAI : public boss_faction_championsAI
         {
-            npc_toc_paladinAI(Creature* creature) : boss_faction_championsAI(creature, AI_HEALER) {}
+            npc_toc_paladinAI(Creature* creature) : boss_faction_championsAI(creature, AI_HEALER) { }
 
             void Reset() OVERRIDE
             {
@@ -1051,7 +1051,7 @@ class npc_toc_priest : public CreatureScript
 
         struct npc_toc_priestAI : public boss_faction_championsAI
         {
-            npc_toc_priestAI(Creature* creature) : boss_faction_championsAI(creature, AI_HEALER) {}
+            npc_toc_priestAI(Creature* creature) : boss_faction_championsAI(creature, AI_HEALER) { }
 
             void Reset() OVERRIDE
             {
@@ -1139,7 +1139,7 @@ class npc_toc_shadow_priest : public CreatureScript
 
         struct npc_toc_shadow_priestAI : public boss_faction_championsAI
         {
-            npc_toc_shadow_priestAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) {}
+            npc_toc_shadow_priestAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) { }
 
             void Reset() OVERRIDE
             {
@@ -1234,7 +1234,7 @@ class npc_toc_warlock : public CreatureScript
 
         struct npc_toc_warlockAI : public boss_faction_championsAI
         {
-            npc_toc_warlockAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) {}
+            npc_toc_warlockAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) { }
 
             void Reset() OVERRIDE
             {
@@ -1325,7 +1325,7 @@ class npc_toc_mage : public CreatureScript
 
         struct npc_toc_mageAI : public boss_faction_championsAI
         {
-            npc_toc_mageAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) {}
+            npc_toc_mageAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) { }
 
             void Reset() OVERRIDE
             {
@@ -1419,7 +1419,7 @@ class npc_toc_hunter : public CreatureScript
 
         struct npc_toc_hunterAI : public boss_faction_championsAI
         {
-            npc_toc_hunterAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) {}
+            npc_toc_hunterAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) { }
 
             void Reset() OVERRIDE
             {
@@ -1521,7 +1521,7 @@ class npc_toc_boomkin : public CreatureScript
 
         struct npc_toc_boomkinAI : public boss_faction_championsAI
         {
-            npc_toc_boomkinAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) {}
+            npc_toc_boomkinAI(Creature* creature) : boss_faction_championsAI(creature, AI_RANGED) { }
 
             void Reset() OVERRIDE
             {
@@ -1616,7 +1616,7 @@ class npc_toc_warrior : public CreatureScript
 
         struct npc_toc_warriorAI : public boss_faction_championsAI
         {
-            npc_toc_warriorAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) {}
+            npc_toc_warriorAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) { }
 
             void Reset() OVERRIDE
             {
@@ -1717,7 +1717,7 @@ class npc_toc_dk : public CreatureScript
 
         struct npc_toc_dkAI : public boss_faction_championsAI
         {
-            npc_toc_dkAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) {}
+            npc_toc_dkAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) { }
 
             void Reset() OVERRIDE
             {
@@ -1813,7 +1813,7 @@ class npc_toc_rogue : public CreatureScript
 
         struct npc_toc_rogueAI : public boss_faction_championsAI
         {
-            npc_toc_rogueAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) {}
+            npc_toc_rogueAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) { }
 
             void Reset() OVERRIDE
             {
@@ -1918,7 +1918,7 @@ class npc_toc_enh_shaman : public CreatureScript
 
         struct npc_toc_enh_shamanAI : public boss_faction_championsAI
         {
-            npc_toc_enh_shamanAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) {}
+            npc_toc_enh_shamanAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) { }
 
             void Reset() OVERRIDE
             {
@@ -2044,7 +2044,7 @@ class npc_toc_retro_paladin : public CreatureScript
 
         struct npc_toc_retro_paladinAI : public boss_faction_championsAI
         {
-            npc_toc_retro_paladinAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) {}
+            npc_toc_retro_paladinAI(Creature* creature) : boss_faction_championsAI(creature, AI_MELEE) { }
 
             void Reset() OVERRIDE
             {
@@ -2150,7 +2150,7 @@ class npc_toc_pet_warlock : public CreatureScript
 
         struct npc_toc_pet_warlockAI : public boss_faction_championsAI
         {
-            npc_toc_pet_warlockAI(Creature* creature) : boss_faction_championsAI(creature, AI_PET) {}
+            npc_toc_pet_warlockAI(Creature* creature) : boss_faction_championsAI(creature, AI_PET) { }
 
             void Reset() OVERRIDE
             {
@@ -2202,7 +2202,7 @@ class npc_toc_pet_hunter : public CreatureScript
 
         struct npc_toc_pet_hunterAI : public boss_faction_championsAI
         {
-            npc_toc_pet_hunterAI(Creature* creature) : boss_faction_championsAI(creature, AI_PET) {}
+            npc_toc_pet_hunterAI(Creature* creature) : boss_faction_championsAI(creature, AI_PET) { }
 
             void Reset() OVERRIDE
             {

@@ -59,7 +59,7 @@ public:
 
     struct npc_cairne_bloodhoofAI : public ScriptedAI
     {
-        npc_cairne_bloodhoofAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_cairne_bloodhoofAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 BerserkerChargeTimer;
         uint32 CleaveTimer;
