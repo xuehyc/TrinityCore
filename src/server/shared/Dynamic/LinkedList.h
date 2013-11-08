@@ -37,7 +37,7 @@ class LinkedListElement
         LinkedListElement* iNext;
         LinkedListElement* iPrev;
     public:
-        LinkedListElement(): iNext(NULL), iPrev(NULL) {}
+        LinkedListElement(): iNext(NULL), iPrev(NULL) { }
         ~LinkedListElement() { delink(); }
 
         bool hasNext() const { return(iNext && iNext->iNext != NULL); }

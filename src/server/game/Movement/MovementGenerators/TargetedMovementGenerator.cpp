@@ -220,9 +220,7 @@ void ChaseMovementGenerator<T>::DoReset(T* owner)
 }
 
 template<class T>
-void ChaseMovementGenerator<T>::MovementInform(T* /*unit*/)
-{
-}
+void ChaseMovementGenerator<T>::MovementInform(T* /*unit*/) { }
 
 template<>
 void ChaseMovementGenerator<Creature>::MovementInform(Creature* unit)
@@ -294,9 +292,7 @@ void FollowMovementGenerator<T>::DoReset(T* owner)
 }
 
 template<class T>
-void FollowMovementGenerator<T>::MovementInform(T* /*unit*/)
-{
-}
+void FollowMovementGenerator<T>::MovementInform(T* /*unit*/) { }
 
 template<>
 void FollowMovementGenerator<Creature>::MovementInform(Creature* unit)

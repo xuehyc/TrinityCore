@@ -49,7 +49,7 @@ class GridReference : public Reference<GridRefManager<OBJECT>, OBJECT>
             this->getTarget()->decSize();
         }
     public:
-        GridReference() : Reference<GridRefManager<OBJECT>, OBJECT>() {}
+        GridReference() : Reference<GridRefManager<OBJECT>, OBJECT>() { }
         ~GridReference() { this->unlink(); }
         GridReference* next() { return (GridReference*)Reference<GridRefManager<OBJECT>, OBJECT>::next(); }
 };

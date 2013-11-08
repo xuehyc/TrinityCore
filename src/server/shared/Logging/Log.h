@@ -32,11 +32,13 @@
 #include <string>
 #include <ace/Singleton.h>
 
+#define LOGGER_ROOT "root"
+
 class Log
 {
     friend class ACE_Singleton<Log, ACE_Thread_Mutex>;
 
-    typedef UNORDERED_MAP<uint8, Logger> LoggerMap;
+    typedef UNORDERED_MAP<std::string, Logger> LoggerMap;
 
     private:
         Log();
@@ -45,15 +47,15 @@ class Log
     public:
         void LoadFromConfig();
         void Close();
-        bool ShouldLog(LogFilterType type, LogLevel level) const;
+        bool ShouldLog(std::string const& type, LogLevel level) const;
         bool SetLogLevel(std::string const& name, char const* level, bool isLogger = true);
 
-        void outTrace(LogFilterType f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outDebug(LogFilterType f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outInfo(LogFilterType f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outWarn(LogFilterType f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outError(LogFilterType f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outFatal(LogFilterType f, char const* str, ...) ATTR_PRINTF(3, 4);
+        void outTrace(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
+        void outDebug(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
+        void outInfo(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
+        void outWarn(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
+        void outError(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
+        void outFatal(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
 
         void outCommand(uint32 account, const char * str, ...) ATTR_PRINTF(3, 4);
         void outCharDump(char const* str, uint32 account_id, uint32 guid, char const* name);
@@ -62,14 +64,14 @@ class Log
         void SetRealmId(uint32 id);
 
     private:
-        void vlog(LogFilterType f, LogLevel level, char const* str, va_list argptr);
-        void write(LogMessage* msg);
+        void vlog(std::string const& f, LogLevel level, char const* str, va_list argptr);
+        void write(LogMessage* msg) const;
 
-        Logger* GetLoggerByType(LogFilterType filter);
+        Logger const* GetLoggerByType(std::string const& type) const;
         Appender* GetAppenderByName(std::string const& name);
         uint8 NextAppenderId();
-        void CreateAppenderFromConfig(const char* name);
-        void CreateLoggerFromConfig(const char* name);
+        void CreateAppenderFromConfig(std::string const& name);
+        void CreateLoggerFromConfig(std::string const& name);
         void ReadAppendersFromConfig();
         void ReadLoggersFromConfig();
 
@@ -83,19 +85,35 @@ class Log
         LogWorker* worker;
 };
 
-inline bool Log::ShouldLog(LogFilterType type, LogLevel level) const
+inline Logger const* Log::GetLoggerByType(std::string const& type) const
 {
-    LoggerMap::const_iterator it = loggers.find(uint8(type));
+    LoggerMap::const_iterator it = loggers.find(type);
     if (it != loggers.end())
-    {
-        LogLevel logLevel = it->second.getLogLevel();
-        return logLevel != LOG_LEVEL_DISABLED && logLevel <= level;
-    }
+        return &(it->second);
 
-    if (type != LOG_FILTER_GENERAL)
-        return ShouldLog(LOG_FILTER_GENERAL, level);
-    else
+    if (type == LOGGER_ROOT)
+        return NULL;
+
+    std::string parentLogger = LOGGER_ROOT;
+    size_t found = type.find_last_of(".");
+    if (found != std::string::npos)
+        parentLogger = type.substr(0,found);
+
+    return GetLoggerByType(parentLogger);
+}
+
+inline bool Log::ShouldLog(std::string const& type, LogLevel level) const
+{
+    // TODO: Use cache to store "Type.sub1.sub2": "Type" equivalence, should
+    // Speed up in cases where requesting "Type.sub1.sub2" but only configured
+    // Logger "Type"
+
+    Logger const* logger = GetLoggerByType(type);
+    if (!logger)
         return false;
+
+    LogLevel logLevel = logger->getLogLevel();
+    return logLevel != LOG_LEVEL_DISABLED && logLevel <= level;
 }
 
 #define sLog ACE_Singleton<Log, ACE_Thread_Mutex>::instance()

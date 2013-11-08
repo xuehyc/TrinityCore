@@ -261,7 +261,7 @@ class Object
 
         virtual bool hasQuest(uint32 /* quest_id */) const { return false; }
         virtual bool hasInvolvedQuest(uint32 /* quest_id */) const { return false; }
-        virtual void BuildUpdate(UpdateDataMapType&) {}
+        virtual void BuildUpdate(UpdateDataMapType&) { }
         void BuildFieldsUpdate(Player*, UpdateDataMapType &) const;
 
         void SetFieldNotifyFlag(uint16 flag) { _fieldNotifyFlags |= flag; }
@@ -339,13 +339,13 @@ struct Position
 {
     struct PositionXYZStreamer
     {
-        explicit PositionXYZStreamer(Position& pos) : m_pos(&pos) {}
+        explicit PositionXYZStreamer(Position& pos) : m_pos(&pos) { }
         Position* m_pos;
     };
 
     struct PositionXYZOStreamer
     {
-        explicit PositionXYZOStreamer(Position& pos) : m_pos(&pos) {}
+        explicit PositionXYZOStreamer(Position& pos) : m_pos(&pos) { }
         Position* m_pos;
     };
 
@@ -614,7 +614,7 @@ class MapObject
         friend class ObjectGridLoader; //grid loader for loading creatures
 
     protected:
-        MapObject() : _moveState(MAP_OBJECT_CELL_MOVE_NONE) {}
+        MapObject() : _moveState(MAP_OBJECT_CELL_MOVE_NONE) { }
 
     private:
         Cell _currentCell;
@@ -728,7 +728,7 @@ class WorldObject : public Object, public WorldLocation
 
         void SendObjectDeSpawnAnim(uint64 guid);
 
-        virtual void SaveRespawnTime() {}
+        virtual void SaveRespawnTime() { }
         void AddObjectToRemoveList();
 
         float GetGridActivationRange() const;
@@ -869,7 +869,7 @@ namespace Trinity
     class ObjectDistanceOrderPred
     {
         public:
-            ObjectDistanceOrderPred(WorldObject const* pRefObj, bool ascending = true) : m_refObj(pRefObj), m_ascending(ascending) {}
+            ObjectDistanceOrderPred(WorldObject const* pRefObj, bool ascending = true) : m_refObj(pRefObj), m_ascending(ascending) { }
             bool operator()(WorldObject const* pLeft, WorldObject const* pRight) const
             {
                 return m_ascending ? m_refObj->GetDistanceOrder(pLeft, pRight) : !m_refObj->GetDistanceOrder(pLeft, pRight);

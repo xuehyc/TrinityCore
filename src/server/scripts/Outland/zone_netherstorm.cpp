@@ -106,7 +106,7 @@ public:
             add = NULL;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         /*void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
         {
@@ -430,7 +430,7 @@ public:
             isEvent = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void JustSummoned(Creature* summoned) OVERRIDE
         {
@@ -506,7 +506,7 @@ public:
                 return true;
             }
 
-            TC_LOG_DEBUG(LOG_FILTER_TSCR, "npc_commander_dawnforge event already in progress, need to wait.");
+            TC_LOG_DEBUG("scripts", "npc_commander_dawnforge event already in progress, need to wait.");
             return false;
         }
 

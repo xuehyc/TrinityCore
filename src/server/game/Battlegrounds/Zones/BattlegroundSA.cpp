@@ -48,9 +48,7 @@ BattlegroundSA::BattlegroundSA()
     memset(&GraveyardStatus, 0, sizeof(GraveyardStatus));
 }
 
-BattlegroundSA::~BattlegroundSA()
-{
-}
+BattlegroundSA::~BattlegroundSA() { }
 
 void BattlegroundSA::Reset()
 {
@@ -169,7 +167,7 @@ bool BattlegroundSA::ResetObjs()
 
         if (!sg)
         {
-            TC_LOG_ERROR(LOG_FILTER_BATTLEGROUND, "SOTA: Can't find GY entry %u", BG_SA_GYEntries[i]);
+            TC_LOG_ERROR("bg.battleground", "SOTA: Can't find GY entry %u", BG_SA_GYEntries[i]);
             return false;
         }
 
@@ -182,7 +180,7 @@ bool BattlegroundSA::ResetObjs()
         {
             GraveyardStatus[i] = ((Attackers == TEAM_HORDE)? TEAM_ALLIANCE : TEAM_HORDE);
             if (!AddSpiritGuide(i + BG_SA_MAXNPC, sg->x, sg->y, sg->z, BG_SA_GYOrientation[i], ((Attackers == TEAM_HORDE)? ALLIANCE : HORDE)))
-                TC_LOG_ERROR(LOG_FILTER_BATTLEGROUND, "SOTA: couldn't spawn GY: %u", i);
+                TC_LOG_ERROR("bg.battleground", "SOTA: couldn't spawn GY: %u", i);
         }
     }
 
@@ -396,13 +394,9 @@ void BattlegroundSA::PostUpdateImpl(uint32 diff)
     }
 }
 
-void BattlegroundSA::StartingEventCloseDoors()
-{
-}
+void BattlegroundSA::StartingEventCloseDoors() { }
 
-void BattlegroundSA::StartingEventOpenDoors()
-{
-}
+void BattlegroundSA::StartingEventOpenDoors() { }
 
 void BattlegroundSA::FillInitialWorldStates(WorldPacket& data)
 {
@@ -476,9 +470,7 @@ void BattlegroundSA::AddPlayer(Player* player)
     PlayerScores[player->GetGUID()] = sc;
 }
 
-void BattlegroundSA::RemovePlayer(Player* /*player*/, uint64 /*guid*/, uint32 /*team*/)
-{
-}
+void BattlegroundSA::RemovePlayer(Player* /*player*/, uint64 /*guid*/, uint32 /*team*/) { }
 
 void BattlegroundSA::HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/)
 {
@@ -738,7 +730,7 @@ void BattlegroundSA::CaptureGraveyard(BG_SA_Graveyards i, Player* Source)
     WorldSafeLocsEntry const* sg = sWorldSafeLocsStore.LookupEntry(BG_SA_GYEntries[i]);
     if (!sg)
     {
-        TC_LOG_ERROR(LOG_FILTER_BATTLEGROUND, "BattlegroundSA::CaptureGraveyard: non-existant GY entry: %u", BG_SA_GYEntries[i]);
+        TC_LOG_ERROR("bg.battleground", "BattlegroundSA::CaptureGraveyard: non-existant GY entry: %u", BG_SA_GYEntries[i]);
         return;
     }
 

@@ -69,7 +69,7 @@ class ObjectWorldLoader
     public:
         explicit ObjectWorldLoader(ObjectGridLoader& gloader)
             : i_cell(gloader.i_cell), i_map(gloader.i_map), i_corpses (0)
-            {}
+            { }
 
         void Visit(CorpseMapType &m);
 
@@ -82,9 +82,7 @@ class ObjectWorldLoader
         uint32 i_corpses;
 };
 
-template<class T> void ObjectGridLoader::SetObjectCell(T* /*obj*/, CellCoord const& /*cellCoord*/)
-{
-}
+template<class T> void ObjectGridLoader::SetObjectCell(T* /*obj*/, CellCoord const& /*cellCoord*/) { }
 
 template<> void ObjectGridLoader::SetObjectCell(Creature* obj, CellCoord const& cellCoord)
 {
@@ -126,7 +124,7 @@ void LoadHelper(CellGuidSet const& guid_set, CellCoord &cell, GridRefManager<T> 
     {
         T* obj = new T;
         uint32 guid = *i_guid;
-        //TC_LOG_INFO(LOG_FILTER_GENERAL, "DEBUG: LoadHelper from table: %s for (guid: %u) Loading", table, guid);
+        //TC_LOG_INFO("misc", "DEBUG: LoadHelper from table: %s for (guid: %u) Loading", table, guid);
         if (!obj->LoadFromDB(guid, map))
         {
             delete obj;
@@ -217,7 +215,7 @@ void ObjectGridLoader::LoadN(void)
             }
         }
     }
-    TC_LOG_DEBUG(LOG_FILTER_MAPS, "%u GameObjects, %u Creatures, and %u Corpses/Bones loaded for grid %u on map %u", i_gameObjects, i_creatures, i_corpses, i_grid.GetGridId(), i_map->GetId());
+    TC_LOG_DEBUG("maps", "%u GameObjects, %u Creatures, and %u Corpses/Bones loaded for grid %u on map %u", i_gameObjects, i_creatures, i_corpses, i_grid.GetGridId(), i_map->GetId());
 }
 
 template<class T>

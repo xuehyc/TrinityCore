@@ -192,7 +192,7 @@ void CasterAI::UpdateAI(uint32 diff)
 ArcherAI::ArcherAI(Creature* c) : CreatureAI(c)
 {
     if (!me->m_spells[0])
-        TC_LOG_ERROR(LOG_FILTER_GENERAL, "ArcherAI set for creature (entry = %u) with spell1=0. AI will do nothing", me->GetEntry());
+        TC_LOG_ERROR("misc", "ArcherAI set for creature (entry = %u) with spell1=0. AI will do nothing", me->GetEntry());
 
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(me->m_spells[0]);
     m_minRange = spellInfo ? spellInfo->GetMinRange(false) : 0;
@@ -241,7 +241,7 @@ void ArcherAI::UpdateAI(uint32 /*diff*/)
 TurretAI::TurretAI(Creature* c) : CreatureAI(c)
 {
     if (!me->m_spells[0])
-        TC_LOG_ERROR(LOG_FILTER_GENERAL, "TurretAI set for creature (entry = %u) with spell1=0. AI will do nothing", me->GetEntry());
+        TC_LOG_ERROR("misc", "TurretAI set for creature (entry = %u) with spell1=0. AI will do nothing", me->GetEntry());
 
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(me->m_spells[0]);
     m_minRange = spellInfo ? spellInfo->GetMinRange(false) : 0;
@@ -276,7 +276,7 @@ void TurretAI::UpdateAI(uint32 /*diff*/)
 //VehicleAI
 //////////////
 
-VehicleAI::VehicleAI(Creature* c) : CreatureAI(c), m_vehicle(c->GetVehicleKit()), m_IsVehicleInUse(false), m_ConditionsTimer(VEHICLE_CONDITION_CHECK_TIME)
+VehicleAI::VehicleAI(Creature* c) : CreatureAI(c), m_IsVehicleInUse(false), m_ConditionsTimer(VEHICLE_CONDITION_CHECK_TIME)
 {
     LoadConditions();
     m_DoDismiss = false;
@@ -295,7 +295,9 @@ void VehicleAI::UpdateAI(uint32 diff)
             m_DoDismiss = false;
             me->SetVisible(false);
             me->DespawnOrUnsummon();
-        }else m_DismissTimer -= diff;
+        }
+        else
+            m_DismissTimer -= diff;
     }
 }
 
@@ -314,6 +316,7 @@ void VehicleAI::OnCharmed(bool apply)
     }
     else if (apply)
         m_DoDismiss = false;//in use again
+
     m_DismissTimer = VEHICLE_DISMISS_TIME;//reset timer
     m_IsVehicleInUse = apply;
 }
@@ -322,7 +325,7 @@ void VehicleAI::LoadConditions()
 {
     conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_CREATURE_TEMPLATE_VEHICLE, me->GetEntry());
     if (!conditions.empty())
-        TC_LOG_DEBUG(LOG_FILTER_CONDITIONSYS, "VehicleAI::LoadConditions: loaded %u conditions", uint32(conditions.size()));
+        TC_LOG_DEBUG("condition", "VehicleAI::LoadConditions: loaded %u conditions", uint32(conditions.size()));
 }
 
 void VehicleAI::CheckConditions(const uint32 diff)
@@ -331,19 +334,22 @@ void VehicleAI::CheckConditions(const uint32 diff)
     {
         if (!conditions.empty())
         {
-            for (SeatMap::iterator itr = m_vehicle->Seats.begin(); itr != m_vehicle->Seats.end(); ++itr)
-                if (Unit* passenger = ObjectAccessor::GetUnit(*m_vehicle->GetBase(), itr->second.Passenger.Guid))
-                {
-                    if (Player* player = passenger->ToPlayer())
+            if( Vehicle* vehicleKit = me->GetVehicleKit())
+                for (SeatMap::iterator itr = vehicleKit->Seats.begin(); itr != vehicleKit->Seats.end(); ++itr)
+                    if (Unit* passenger = ObjectAccessor::GetUnit(*me, itr->second.Passenger.Guid))
                     {
-                        if (!sConditionMgr->IsObjectMeetToConditions(player, me, conditions))
+                        if (Player* player = passenger->ToPlayer())
                         {
-                            player->ExitVehicle();
-                            return;//check other pessanger in next tick
+                            if (!sConditionMgr->IsObjectMeetToConditions(player, me, conditions))
+                            {
+                                player->ExitVehicle();
+                                return;//check other pessanger in next tick
+                            }
                         }
                     }
-                }
         }
         m_ConditionsTimer = VEHICLE_CONDITION_CHECK_TIME;
-    } else m_ConditionsTimer -= diff;
+    }
+    else
+        m_ConditionsTimer -= diff;
 }

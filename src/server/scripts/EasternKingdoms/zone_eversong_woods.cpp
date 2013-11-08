@@ -85,7 +85,7 @@ public:
             Summon = false;
         }
 
-        void EnterCombat(Unit* /*who*/)OVERRIDE {}
+        void EnterCombat(Unit* /*who*/)OVERRIDE { }
 
         void JustSummoned(Creature* summoned) OVERRIDE
         {

@@ -211,7 +211,7 @@ public:
                     {
                         instance->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, NPC_GRIMSTONE, me);
                         instance->SetData(TYPE_RING_OF_LAW, DONE);
-                        TC_LOG_DEBUG(LOG_FILTER_TSCR, "npc_grimstone: event reached end and set complete.");
+                        TC_LOG_DEBUG("scripts", "npc_grimstone: event reached end and set complete.");
                     }
                     break;
             }
@@ -634,8 +634,8 @@ public:
             }
         }
 
-        void EnterCombat(Unit* who) OVERRIDE {}
-        void Reset() OVERRIDE {}
+        void EnterCombat(Unit* who) OVERRIDE { }
+        void Reset() OVERRIDE { }
 
         void JustDied(Unit* killer) OVERRIDE
         {
@@ -804,7 +804,7 @@ public:
             }
         }
 
-        void Reset() OVERRIDE {}
+        void Reset() OVERRIDE { }
 
         void JustDied(Unit* slayer) OVERRIDE
         {
@@ -1019,7 +1019,7 @@ public:
                     break;
             }
         }
-        void Reset() OVERRIDE {}
+        void Reset() OVERRIDE { }
 
         void JustDied(Unit* slayer) OVERRIDE
         {
@@ -1127,8 +1127,8 @@ public:
     {
         npc_tobias_seecherAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void EnterCombat(Unit* who) OVERRIDE {}
-        void Reset() OVERRIDE {}
+        void EnterCombat(Unit* who) OVERRIDE { }
+        void Reset() OVERRIDE { }
 
         void JustDied(Unit* killer) OVERRIDE
         {

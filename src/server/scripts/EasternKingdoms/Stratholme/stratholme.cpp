@@ -111,7 +111,7 @@ public:
             Talk(SAY_ZAPPED);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
     };
 
 };
@@ -159,7 +159,7 @@ public:
             Tagged = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
         {
@@ -239,7 +239,7 @@ public:
             Tagged = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void SpellHit(Unit* /*caster*/, const SpellInfo* spell) OVERRIDE
         {

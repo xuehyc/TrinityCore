@@ -84,7 +84,7 @@ public:
             Striders.clear();
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void JustSummoned(Creature* summon) OVERRIDE
         {

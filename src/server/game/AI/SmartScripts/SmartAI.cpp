@@ -107,7 +107,7 @@ WayPoint* SmartAI::GetNextWayPoint()
         mLastWP = (*itr).second;
         if (mLastWP->id != mCurrentWPID)
         {
-            TC_LOG_ERROR(LOG_FILTER_GENERAL, "SmartAI::GetNextWayPoint: Got not expected waypoint id %u, expected %u", mLastWP->id, mCurrentWPID);
+            TC_LOG_ERROR("misc", "SmartAI::GetNextWayPoint: Got not expected waypoint id %u, expected %u", mLastWP->id, mCurrentWPID);
         }
         return (*itr).second;
     }
@@ -118,7 +118,7 @@ void SmartAI::StartPath(bool run, uint32 path, bool repeat, Unit* /*invoker*/)
 {
     if (me->IsInCombat())// no wp movement in combat
     {
-        TC_LOG_ERROR(LOG_FILTER_GENERAL, "SmartAI::StartPath: Creature entry %u wanted to start waypoint movement while in combat, ignoring.", me->GetEntry());
+        TC_LOG_ERROR("misc", "SmartAI::StartPath: Creature entry %u wanted to start waypoint movement while in combat, ignoring.", me->GetEntry());
         return;
     }
     if (HasEscortState(SMART_ESCORT_ESCORTING))
@@ -162,7 +162,7 @@ void SmartAI::PausePath(uint32 delay, bool forced)
         return;
     if (HasEscortState(SMART_ESCORT_PAUSED))
     {
-        TC_LOG_ERROR(LOG_FILTER_GENERAL, "SmartAI::StartPath: Creature entry %u wanted to pause waypoint movement while already paused, ignoring.", me->GetEntry());
+        TC_LOG_ERROR("misc", "SmartAI::StartPath: Creature entry %u wanted to pause waypoint movement while already paused, ignoring.", me->GetEntry());
         return;
     }
     mForcedPaused = forced;
@@ -674,9 +674,7 @@ void SmartAI::SummonedCreatureDespawn(Creature* unit)
     GetScript()->ProcessEventsFor(SMART_EVENT_SUMMON_DESPAWNED, unit);
 }
 
-void SmartAI::UpdateAIWhileCharmed(const uint32 /*diff*/)
-{
-}
+void SmartAI::UpdateAIWhileCharmed(const uint32 /*diff*/) { }
 
 void SmartAI::CorpseRemoved(uint32& respawnDelay)
 {
@@ -720,9 +718,7 @@ void SmartAI::SetData(uint32 id, uint32 value)
     GetScript()->ProcessEventsFor(SMART_EVENT_DATA_SET, NULL, id, value);
 }
 
-void SmartAI::SetGUID(uint64 /*guid*/, int32 /*id*/)
-{
-}
+void SmartAI::SetGUID(uint64 /*guid*/, int32 /*id*/) { }
 
 uint64 SmartAI::GetGUID(int32 /*id*/) const
 {
@@ -755,9 +751,7 @@ void SmartAI::sGossipSelect(Player* player, uint32 sender, uint32 action)
     GetScript()->ProcessEventsFor(SMART_EVENT_GOSSIP_SELECT, player, sender, action);
 }
 
-void SmartAI::sGossipSelectCode(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/, const char* /*code*/)
-{
-}
+void SmartAI::sGossipSelectCode(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/, const char* /*code*/) { }
 
 void SmartAI::sQuestAccept(Player* player, Quest const* quest)
 {
@@ -861,7 +855,7 @@ void SmartGameObjectAI::Reset()
 // Called when a player opens a gossip dialog with the gameobject.
 bool SmartGameObjectAI::GossipHello(Player* player)
 {
-    TC_LOG_DEBUG(LOG_FILTER_DATABASE_AI, "SmartGameObjectAI::GossipHello");
+    TC_LOG_DEBUG("scripts.ai", "SmartGameObjectAI::GossipHello");
     GetScript()->ProcessEventsFor(SMART_EVENT_GOSSIP_HELLO, player, 0, 0, false, NULL, go);
     return false;
 }
@@ -933,14 +927,14 @@ class SmartTrigger : public AreaTriggerScript
 {
     public:
 
-        SmartTrigger() : AreaTriggerScript("SmartTrigger") {}
+        SmartTrigger() : AreaTriggerScript("SmartTrigger") { }
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
         {
             if (!player->IsAlive())
                 return false;
 
-            TC_LOG_DEBUG(LOG_FILTER_DATABASE_AI, "AreaTrigger %u is using SmartTrigger script", trigger->id);
+            TC_LOG_DEBUG("scripts.ai", "AreaTrigger %u is using SmartTrigger script", trigger->id);
             SmartScript script;
             script.OnInitialize(NULL, trigger);
             script.ProcessEventsFor(SMART_EVENT_AREATRIGGER_ONTRIGGER, player, trigger->id);

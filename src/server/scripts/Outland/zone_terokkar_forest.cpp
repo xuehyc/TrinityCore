@@ -87,7 +87,7 @@ public:
             me->setFaction(FACTION_HOSTILE);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void DoNice()
         {
@@ -181,8 +181,8 @@ public:
     {
         npc_infested_root_walkerAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE {}
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void Reset() OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void DamageTaken(Unit* done_by, uint32 &damage) OVERRIDE
         {
@@ -227,7 +227,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void MoveInLineOfSight(Unit* who) OVERRIDE
 
@@ -241,7 +241,7 @@ public:
                     Start(false, false, who->GetGUID());
         }
 
-        void Reset() OVERRIDE {}
+        void Reset() OVERRIDE { }
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
@@ -268,8 +268,8 @@ public:
     {
         npc_rotting_forest_ragerAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE {}
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void Reset() OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void DamageTaken(Unit* done_by, uint32 &damage) OVERRIDE
         {
@@ -311,9 +311,9 @@ public:
     {
         npc_netherweb_victimAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE {}
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE {}
+        void Reset() OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
 
 
         void JustDied(Unit* killer) OVERRIDE
@@ -418,7 +418,7 @@ public:
                 me->setFaction(m_uiNormFaction);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void UpdateAI(uint32 diff) OVERRIDE
         {

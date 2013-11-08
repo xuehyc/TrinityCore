@@ -432,7 +432,7 @@ public:
             }
         }
 
-        void Reset() OVERRIDE {}
+        void Reset() OVERRIDE { }
     };
 };
 

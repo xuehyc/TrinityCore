@@ -79,7 +79,7 @@ class HashMapHolder
 
     private:
         //Non instanceable only static
-        HashMapHolder() {}
+        HashMapHolder() { }
 
         static LockType i_lock;
         static MapType m_objectMap;

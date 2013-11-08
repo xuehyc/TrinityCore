@@ -273,7 +273,7 @@ public:
             Talk(SAY_AGGRO, who->GetGUID());
         }
 
-        void Reset() OVERRIDE {}
+        void Reset() OVERRIDE { }
     };
 };
 

@@ -155,7 +155,7 @@ public:
             //ScriptedAI::AttackStart(who);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void SpellHit(Unit* /*caster*/, const SpellInfo* spell) OVERRIDE
         {
@@ -307,7 +307,7 @@ public:
             else mWaveId = 1;
 
         }
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void DoSummonAtRift(uint32 creature_entry)
         {
@@ -340,7 +340,7 @@ public:
             uint32 entry = 0;
 
             entry = PortalWaves[mWaveId].PortalMob[mRiftWaveCount];
-            TC_LOG_DEBUG(LOG_FILTER_TSCR, "npc_time_rift: summoning wave Creature (Wave %u, Entry %u).", mRiftWaveCount, entry);
+            TC_LOG_DEBUG("scripts", "npc_time_rift: summoning wave Creature (Wave %u, Entry %u).", mRiftWaveCount, entry);
 
             ++mRiftWaveCount;
 
@@ -365,7 +365,7 @@ public:
             if (me->IsNonMeleeSpellCasted(false))
                 return;
 
-            TC_LOG_DEBUG(LOG_FILTER_TSCR, "npc_time_rift: not casting anylonger, i need to die.");
+            TC_LOG_DEBUG("scripts", "npc_time_rift: not casting anylonger, i need to die.");
             me->setDeathState(JUST_DIED);
 
             if (instance->GetData(TYPE_RIFT) == IN_PROGRESS)

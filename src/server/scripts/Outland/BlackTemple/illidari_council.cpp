@@ -165,13 +165,13 @@ public:
                 Council[1] = instance->GetData64(DATA_VERAS_DARKSHADOW);
                 Council[2] = instance->GetData64(DATA_LADY_MALANDE);
                 Council[3] = instance->GetData64(DATA_HIGH_NETHERMANCER_ZEREVOR);
-            } else TC_LOG_ERROR(LOG_FILTER_TSCR, ERROR_INST_DATA);
+            } else TC_LOG_ERROR("scripts", ERROR_INST_DATA);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void AttackStart(Unit* /*who*/) OVERRIDE {}
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE {}
+        void AttackStart(Unit* /*who*/) OVERRIDE { }
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
 
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -281,9 +281,9 @@ public:
             me->SetDisplayId(11686);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
-        void AttackStart(Unit* /*who*/) OVERRIDE {}
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void AttackStart(Unit* /*who*/) OVERRIDE { }
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
 
 
         void StartEvent(Unit* target)
@@ -412,7 +412,7 @@ struct boss_illidari_councilAI : public ScriptedAI
         }
         else
         {
-            TC_LOG_ERROR(LOG_FILTER_TSCR, ERROR_INST_DATA);
+            TC_LOG_ERROR("scripts", ERROR_INST_DATA);
             EnterEvadeMode();
             return;
         }
@@ -460,7 +460,7 @@ struct boss_illidari_councilAI : public ScriptedAI
     {
         if (!instance)
         {
-            TC_LOG_ERROR(LOG_FILTER_TSCR, ERROR_INST_DATA);
+            TC_LOG_ERROR("scripts", ERROR_INST_DATA);
             return;
         }
 

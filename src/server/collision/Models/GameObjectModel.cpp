@@ -41,7 +41,7 @@ using G3D::AABox;
 struct GameobjectModelData
 {
     GameobjectModelData(const std::string& name_, const AABox& box) :
-        bound(box), name(name_) {}
+        bound(box), name(name_) { }
 
     AABox bound;
     std::string name;
@@ -59,7 +59,7 @@ void LoadGameObjectModelList()
     FILE* model_list_file = fopen((sWorld->GetDataPath() + "vmaps/" + VMAP::GAMEOBJECT_MODELS).c_str(), "rb");
     if (!model_list_file)
     {
-        VMAP_ERROR_LOG(LOG_FILTER_GENERAL, "Unable to open '%s' file.", VMAP::GAMEOBJECT_MODELS);
+        VMAP_ERROR_LOG("misc", "Unable to open '%s' file.", VMAP::GAMEOBJECT_MODELS);
         return;
     }
 
@@ -78,7 +78,7 @@ void LoadGameObjectModelList()
             || fread(&v1, sizeof(Vector3), 1, model_list_file) != 1
             || fread(&v2, sizeof(Vector3), 1, model_list_file) != 1)
         {
-            VMAP_ERROR_LOG(LOG_FILTER_GENERAL, "File '%s' seems to be corrupted!", VMAP::GAMEOBJECT_MODELS);
+            VMAP_ERROR_LOG("misc", "File '%s' seems to be corrupted!", VMAP::GAMEOBJECT_MODELS);
             break;
         }
 
@@ -89,7 +89,7 @@ void LoadGameObjectModelList()
     }
 
     fclose(model_list_file);
-    VMAP_INFO_LOG(LOG_FILTER_SERVER_LOADING, ">> Loaded %u GameObject models in %u ms", uint32(model_list.size()), GetMSTimeDiffToNow(oldMSTime));
+    VMAP_INFO_LOG("server.loading", ">> Loaded %u GameObject models in %u ms", uint32(model_list.size()), GetMSTimeDiffToNow(oldMSTime));
 }
 
 GameObjectModel::~GameObjectModel()
@@ -108,7 +108,7 @@ bool GameObjectModel::initialize(const GameObject& go, const GameObjectDisplayIn
     // ignore models with no bounds
     if (mdl_box == G3D::AABox::zero())
     {
-        VMAP_ERROR_LOG(LOG_FILTER_GENERAL, "GameObject model %s has zero bounds, loading skipped", it->second.name.c_str());
+        VMAP_ERROR_LOG("misc", "GameObject model %s has zero bounds, loading skipped", it->second.name.c_str());
         return false;
     }
 

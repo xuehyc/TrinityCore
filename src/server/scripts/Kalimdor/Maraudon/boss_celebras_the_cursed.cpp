@@ -62,7 +62,7 @@ public:
             CorruptForcesTimer = 30000;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {

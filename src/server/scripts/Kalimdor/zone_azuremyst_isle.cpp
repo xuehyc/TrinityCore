@@ -99,7 +99,7 @@ public:
             me->SetStandState(UNIT_STAND_STATE_SLEEP);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void MoveInLineOfSight(Unit* who) OVERRIDE
 
@@ -322,12 +322,12 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE {}
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE {}
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
 
 
-        void UpdateAI(uint32 /*diff*/) OVERRIDE {}
+        void UpdateAI(uint32 /*diff*/) OVERRIDE { }
     };
 
 };
@@ -402,7 +402,7 @@ public:
             Talk(SAY_AGGRO, who->GetGUID());
         }
 
-        void Reset() OVERRIDE {}
+        void Reset() OVERRIDE { }
     };
 
 };
@@ -461,7 +461,7 @@ public:
             StartEvent();
         }
 
-        void EnterCombat(Unit* /*who*/)OVERRIDE {}
+        void EnterCombat(Unit* /*who*/)OVERRIDE { }
 
         void StartEvent()
         {
@@ -558,7 +558,7 @@ public:
                 }
             }
             else
-                TC_LOG_ERROR(LOG_FILTER_TSCR, "SD2 ERROR: FlagList is empty!");
+                TC_LOG_ERROR("scripts", "SD2 ERROR: FlagList is empty!");
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -618,7 +618,7 @@ public:
 
     struct npc_death_ravagerAI : public ScriptedAI
     {
-        npc_death_ravagerAI(Creature* creature) : ScriptedAI(creature){}
+        npc_death_ravagerAI(Creature* creature) : ScriptedAI(creature){ }
 
         uint32 RendTimer;
         uint32 EnragingBiteTimer;
