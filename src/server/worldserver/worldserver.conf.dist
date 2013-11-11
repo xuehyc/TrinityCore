@@ -1036,7 +1036,7 @@ ClientCacheVersion = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-Event.Announce = 0
+Event.Announce = 1
 
 #
 #    BeepAtStart
@@ -1053,7 +1053,7 @@ BeepAtStart = 1
 #        Example:     "Welcome to John\'s Server@This server runs on ArkCORE."
 #        Default:     "Welcome to a ArkCORE server."
 
-Motd = "Welcome to a ArkCORE server."
+Motd = "Welcome to a ArkCORE server.@Please type .serv info por more information"
 
 #
 #    Server.LoginInfo
@@ -2049,7 +2049,7 @@ Battleground.CastDeserter = 1
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-Battleground.QueueAnnouncer.Enable = 0
+Battleground.QueueAnnouncer.Enable = 1
 
 #
 #    Battleground.QueueAnnouncer.PlayerOnly
@@ -2093,7 +2093,7 @@ BattleGround.PremadeGroupWaitForMatch = 1800000
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-Battleground.GiveXPForKills = 0
+Battleground.GiveXPForKills = 1
 
 #
 #    Battleground.Random.ResetHour
@@ -2119,12 +2119,12 @@ Battleground.Random.ResetHour = 6
 #                     5  - Battleground.RewardLoserHonorLast
 #
 
-Battleground.RewardWinnerHonorFirst     = 27000
-Battleground.RewardWinnerConquestFirst  = 10000
-Battleground.RewardWinnerHonorLast      = 13500
-Battleground.RewardWinnerConquestLast   = 5000
-Battleground.RewardLoserHonorFirst      = 4500
-Battleground.RewardLoserHonorLast       = 3500
+Battleground.RewardWinnerHonorFirst     = 30
+Battleground.RewardWinnerConquestFirst  = 25
+Battleground.RewardWinnerHonorLast      = 15
+Battleground.RewardWinnerConquestLast   = 0
+Battleground.RewardLoserHonorFirst      = 5
+Battleground.RewardLoserHonorLast       = 5
 
 #
 ###################################################################################################
@@ -2149,9 +2149,9 @@ Wintergrasp.PlayerMax = 100
 #
 #     Wintergrasp.PlayerMin
 #         Description: Minimum number of players required for Wintergrasp.
-#         Default:     0
+#         Default:     2
 
-Wintergrasp.PlayerMin = 0
+Wintergrasp.PlayerMin = 2
 
 #
 #     Wintergrasp.PlayerMinLvl
@@ -2233,7 +2233,7 @@ Arena.AutoDistributeInterval = 7
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-Arena.QueueAnnouncer.Enable = 0
+Arena.QueueAnnouncer.Enable = 1
 
 #
 #    Arena.ArenaSeason.ID
@@ -2857,10 +2857,10 @@ Currency.StartHonorPoints = 0
 #
 #    Currency.MaxHonorPoints
 #        Amount honor points a player can have
-#        Default: 4000
+#        Default: 7000
 #
 
-Currency.MaxHonorPoints = 4000
+Currency.MaxHonorPoints = 7000
 
 #
 #    Currency.StartJusticePoints
@@ -2873,10 +2873,10 @@ Currency.StartJusticePoints = 0
 #
 #    Currency.MaxJusticePoints
 #        Amount justice points a player can have
-#        Default: 4000
+#        Default: 7000
 #
 
-Currency.MaxJusticePoints = 4000
+Currency.MaxJusticePoints = 7000
 
 #
 #    Currency.StartConquestPoints
