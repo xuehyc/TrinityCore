@@ -1059,7 +1059,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 // Ebon Plaguebringer
                 if (m_caster->HasAura(51099)) // Rank 1
                 {
-                    if (m_spellInfo->Id == 45462 || m_spellInfo->Id == 45477 || m_spellInfo->Id == 45524)
+                    if (m_spellInfo->Id == 45462 || m_spellInfo->Id == 45477 || m_spellInfo->Id == 45524 || m_spellInfo->Id == 77575)
                     m_caster->CastSpell(unitTarget, 65142, true);
                 }
                 else
