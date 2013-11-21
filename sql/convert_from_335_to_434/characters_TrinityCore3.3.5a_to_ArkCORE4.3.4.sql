@@ -1,6 +1,6 @@
 -- Use on TrinityCORE 3.3.5a characters database
--- both cores updates to 30/05/2013
--- STATUS: 80%
+-- both cores updates to 20/11/2013
+-- STATUS: 90%
 
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 
@@ -27,11 +27,48 @@ DELETE FROM `item_instance` WHERE `itemEntry` IN (
 TRUNCATE TABLE `character_talent`;
 UPDATE `characters` SET `speccount` = '1' ,`activespec` = '0';
 
+-- character_achievement_progress
+ALTER TABLE `character_achievement_progress` 
+	CHANGE `counter` `counter` bigint(20) unsigned   NOT NULL after `criteria`;
+
+
+-- character_cuf_profiles
+CREATE TABLE `character_cuf_profiles`(
+	`guid` int(10) unsigned NOT NULL  COMMENT 'Character Guid' , 
+	`id` tinyint(3) unsigned NOT NULL  COMMENT 'Profile Id (0-4)' , 
+	`name` varchar(12) COLLATE utf8_general_ci NOT NULL  COMMENT 'Profile Name' , 
+	`frameHeight` smallint(5) unsigned NOT NULL  DEFAULT 0 COMMENT 'Profile Frame Height' , 
+	`frameWidth` smallint(5) unsigned NOT NULL  DEFAULT 0 COMMENT 'Profile Frame Width' , 
+	`sortBy` tinyint(3) unsigned NOT NULL  DEFAULT 0 COMMENT 'Frame Sort By' , 
+	`healthText` tinyint(3) unsigned NOT NULL  DEFAULT 0 COMMENT 'Frame Health Text' , 
+	`boolOptions` int(10) unsigned NOT NULL  DEFAULT 0 COMMENT 'Many Configurable Bool Options' , 
+	`unk146` tinyint(3) unsigned NOT NULL  DEFAULT 0 COMMENT 'Profile Unk Int8' , 
+	`unk147` tinyint(3) unsigned NOT NULL  DEFAULT 0 COMMENT 'Profile Unk Int8' , 
+	`unk148` tinyint(3) unsigned NOT NULL  DEFAULT 0 COMMENT 'Profile Unk Int8' , 
+	`unk150` smallint(5) unsigned NOT NULL  DEFAULT 0 COMMENT 'Profile Unk Int16' , 
+	`unk152` smallint(5) unsigned NOT NULL  DEFAULT 0 COMMENT 'Profile Unk Int16' , 
+	`unk154` smallint(5) unsigned NOT NULL  DEFAULT 0 COMMENT 'Profile Unk Int16' , 
+	PRIMARY KEY (`guid`,`id`) , 
+	KEY `index`(`id`) 
+) ENGINE=InnoDB DEFAULT CHARSET='utf8';
+
+
+-- character_currency
+CREATE TABLE `character_currency`(
+	`guid` int(10) unsigned NOT NULL  , 
+	`currency` smallint(5) unsigned NOT NULL  , 
+	`total_count` int(10) unsigned NOT NULL  , 
+	`week_count` int(10) unsigned NOT NULL  , 
+	PRIMARY KEY (`guid`,`currency`) 
+) ENGINE=InnoDB DEFAULT CHARSET='utf8';
+
+
 -- character_glyphs
 ALTER TABLE `character_glyphs` 
 	ADD COLUMN `glyph7` smallint(5) unsigned   NULL DEFAULT 0 after `glyph6`, 
 	ADD COLUMN `glyph8` smallint(5) unsigned   NULL DEFAULT 0 after `glyph7`, 
 	ADD COLUMN `glyph9` smallint(5) unsigned   NULL DEFAULT 0 after `glyph8`;
+
 
 -- character_pet
 ALTER TABLE `character_pet` 
@@ -39,35 +76,6 @@ ALTER TABLE `character_pet`
 	CHANGE `abdata` `abdata` text  COLLATE utf8_general_ci NULL after `savetime`, 
 	DROP COLUMN `curhappiness`;
 
--- character_queststatus_rewarded
-ALTER TABLE `character_queststatus_rewarded` 
-	CHANGE `active` `active` tinyint(3) unsigned   NOT NULL DEFAULT 1 after `quest`;
-
--- character_research_digsites
-CREATE TABLE `character_research_digsites`(
-	`guid` int(11) unsigned NOT NULL  COMMENT 'ID del personaje' , 
-	`digsiteId` int(11) unsigned NOT NULL  COMMENT 'ID del digsite' , 
-	`point_x` float NOT NULL  DEFAULT 0 COMMENT 'Coordenada \"x\" aleatoria' , 
-	`point_y` float NOT NULL  DEFAULT 0 COMMENT 'Coordenada \"y\" aleatoria' , 
-	`count` int(1) unsigned NOT NULL  DEFAULT 0 COMMENT 'Veces explorado el digsite' , 
-	PRIMARY KEY (`guid`,`digsiteId`) 
-) ENGINE=InnoDB DEFAULT CHARSET='latin1';
-
--- character_research_history
-CREATE TABLE `character_research_history`(
-	`guid` int(10) unsigned NOT NULL  COMMENT 'GUID del Player' , 
-	`time` int(10) unsigned NOT NULL  DEFAULT 0 COMMENT 'Primera vez resuelto el artefacto' , 
-	`projectId` smallint(5) unsigned NOT NULL  COMMENT 'Id del proyecto' , 
-	`count` smallint(5) unsigned NOT NULL  DEFAULT 0 COMMENT 'Veces completado' , 
-	PRIMARY KEY (`guid`,`projectId`) 
-) ENGINE=InnoDB DEFAULT CHARSET='latin1';
-
--- character_research_projects
-CREATE TABLE `character_research_projects`(
-	`guid` int(10) NOT NULL  COMMENT 'GUID del player' , 
-	`projectId` int(10) NOT NULL  COMMENT 'Id del proyecto' , 
-	PRIMARY KEY (`guid`,`projectId`) 
-) ENGINE=InnoDB DEFAULT CHARSET='latin1';
 
 -- character_stats
 ALTER TABLE `character_stats` 
@@ -95,6 +103,22 @@ ALTER TABLE `character_stats`
 	CHANGE `resilience` `resilience` int(10) unsigned   NOT NULL DEFAULT 0 after `spellPower`, 
 	DROP COLUMN `maxpower6`, 
 	DROP COLUMN `maxpower7`;
+
+
+-- character_void_storage
+CREATE TABLE `character_void_storage`(
+	`itemId` bigint(20) unsigned NOT NULL  , 
+	`playerGuid` int(10) unsigned NOT NULL  , 
+	`itemEntry` mediumint(8) unsigned NOT NULL  , 
+	`slot` tinyint(3) unsigned NOT NULL  , 
+	`creatorGuid` int(10) unsigned NOT NULL  DEFAULT 0 , 
+	`randomProperty` int(10) unsigned NOT NULL  DEFAULT 0 , 
+	`suffixFactor` int(10) unsigned NOT NULL  DEFAULT 0 , 
+	PRIMARY KEY (`itemId`) , 
+	UNIQUE KEY `idx_player_slot`(`playerGuid`,`slot`) , 
+	KEY `idx_player`(`playerGuid`) 
+) ENGINE=InnoDB DEFAULT CHARSET='utf8';
+
 
 -- characters
 ALTER TABLE `characters` 
@@ -157,8 +181,7 @@ ALTER TABLE `characters`
 	CHANGE `knownTitles` `knownTitles` longtext  COLLATE utf8_general_ci NULL after `equipmentCache`, 
 	CHANGE `actionBars` `actionBars` tinyint(3) unsigned   NOT NULL DEFAULT 0 after `knownTitles`, 
 	CHANGE `grantableLevels` `grantableLevels` tinyint(3) unsigned   NOT NULL DEFAULT 0 after `actionBars`, 
-	ADD COLUMN `guildId` int(10) unsigned   NOT NULL DEFAULT 0 after `grantableLevels`, 
-	CHANGE `deleteInfos_Account` `deleteInfos_Account` int(10) unsigned   NULL after `guildId`, 
+	CHANGE `deleteInfos_Account` `deleteInfos_Account` int(10) unsigned   NULL after `grantableLevels`, 
 	CHANGE `deleteInfos_Name` `deleteInfos_Name` varchar(12)  COLLATE utf8_general_ci NULL after `deleteInfos_Account`, 
 	CHANGE `deleteDate` `deleteDate` int(10) unsigned   NULL after `deleteInfos_Name`, 
 	DROP COLUMN `arenaPoints`, 
@@ -170,6 +193,7 @@ ALTER TABLE `characters`
 	DROP COLUMN `power7`, 
 	DROP COLUMN `ammoId`;
 
+
 -- corpse
 ALTER TABLE `corpse` 
 	CHANGE `flags` `flags` tinyint(3) unsigned   NOT NULL DEFAULT 0 after `bytes2`, 
@@ -179,17 +203,83 @@ ALTER TABLE `corpse`
 	CHANGE `instanceId` `instanceId` int(10) unsigned   NOT NULL DEFAULT 0 COMMENT 'Instance Identifier' after `corpseType`, 
 	DROP COLUMN `guildId`;
 
+
 -- guild
 ALTER TABLE `guild` 
 	ADD COLUMN `level` int(10) unsigned   NULL DEFAULT 1 after `BankMoney`, 
 	ADD COLUMN `experience` bigint(20) unsigned   NULL DEFAULT 0 after `level`, 
 	ADD COLUMN `todayExperience` bigint(20) unsigned   NULL DEFAULT 0 after `experience`;
 
+
+-- guild_achievement
+CREATE TABLE `guild_achievement`(
+	`guildId` int(10) unsigned NOT NULL  , 
+	`achievement` smallint(5) unsigned NOT NULL  , 
+	`date` int(10) unsigned NOT NULL  DEFAULT 0 , 
+	`guids` text COLLATE utf8_general_ci NOT NULL  , 
+	PRIMARY KEY (`guildId`,`achievement`) 
+) ENGINE=InnoDB DEFAULT CHARSET='utf8';
+
+
+-- guild_achievement_progress
+CREATE TABLE `guild_achievement_progress`(
+	`guildId` int(10) unsigned NOT NULL  , 
+	`criteria` smallint(5) unsigned NOT NULL  , 
+	`counter` bigint(20) unsigned NOT NULL  , 
+	`date` int(10) unsigned NOT NULL  DEFAULT 0 , 
+	`completedGuid` int(10) unsigned NOT NULL  DEFAULT 0 , 
+	PRIMARY KEY (`guildId`,`criteria`) 
+) ENGINE=InnoDB DEFAULT CHARSET='utf8';
+
+
+-- guild_finder_applicant
+CREATE TABLE `guild_finder_applicant`(
+	`guildId` int(10) unsigned NULL  , 
+	`playerGuid` int(10) unsigned NULL  , 
+	`availability` tinyint(3) unsigned NULL  DEFAULT 0 , 
+	`classRole` tinyint(3) unsigned NULL  DEFAULT 0 , 
+	`interests` tinyint(3) unsigned NULL  DEFAULT 0 , 
+	`comment` varchar(255) COLLATE latin1_swedish_ci NULL  , 
+	`submitTime` int(10) unsigned NULL  , 
+	UNIQUE KEY `guildId`(`guildId`,`playerGuid`) 
+) ENGINE=InnoDB DEFAULT CHARSET='latin1';
+
+
+-- guild_finder_guild_settings
+CREATE TABLE `guild_finder_guild_settings`(
+	`guildId` int(10) unsigned NOT NULL  , 
+	`availability` tinyint(3) unsigned NOT NULL  DEFAULT 0 , 
+	`classRoles` tinyint(3) unsigned NOT NULL  DEFAULT 0 , 
+	`interests` tinyint(3) unsigned NOT NULL  DEFAULT 0 , 
+	`level` tinyint(3) unsigned NOT NULL  DEFAULT 1 , 
+	`listed` tinyint(3) unsigned NOT NULL  DEFAULT 0 , 
+	`comment` varchar(255) COLLATE latin1_swedish_ci NULL  , 
+	PRIMARY KEY (`guildId`) 
+) ENGINE=InnoDB DEFAULT CHARSET='latin1';
+
+
 -- guild_member_withdraw
 ALTER TABLE `guild_member_withdraw` 
 	ADD COLUMN `tab6` int(10) unsigned   NOT NULL DEFAULT 0 after `tab5`, 
 	ADD COLUMN `tab7` int(10) unsigned   NOT NULL DEFAULT 0 after `tab6`, 
 	CHANGE `money` `money` int(10) unsigned   NOT NULL DEFAULT 0 after `tab7`;
+
+
+-- guild_newslog
+CREATE TABLE `guild_newslog`(
+	`guildid` int(10) unsigned NOT NULL  DEFAULT 0 COMMENT 'Guild Identificator' , 
+	`LogGuid` int(10) unsigned NOT NULL  DEFAULT 0 COMMENT 'Log record identificator - auxiliary column' , 
+	`EventType` tinyint(3) unsigned NOT NULL  DEFAULT 0 COMMENT 'Event type' , 
+	`PlayerGuid` int(10) unsigned NOT NULL  DEFAULT 0 , 
+	`Flags` int(10) unsigned NOT NULL  DEFAULT 0 , 
+	`Value` int(10) unsigned NOT NULL  DEFAULT 0 , 
+	`TimeStamp` int(10) unsigned NOT NULL  DEFAULT 0 COMMENT 'Event UNIX time' , 
+	PRIMARY KEY (`guildid`,`LogGuid`) , 
+	KEY `guildid_key`(`guildid`) , 
+	KEY `Idx_PlayerGuid`(`PlayerGuid`) , 
+	KEY `Idx_LogGuid`(`LogGuid`) 
+) ENGINE=InnoDB DEFAULT CHARSET='utf8';
+
 
 -- mail
 ALTER TABLE `mail` 
