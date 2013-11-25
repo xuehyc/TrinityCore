@@ -974,6 +974,56 @@ public:
     }
 };
 
+// Murderous Intent
+class spell_rog_murderous_Intent: public SpellScriptLoader
+{
+public:
+    spell_rog_murderous_Intent () : SpellScriptLoader("spell_rog_murderous_Intent") { }
+
+
+    class spell_rog_murderous_Intent_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_rog_murderous_Intent_SpellScript)
+
+        bool addEnergy;
+
+        void HandleBeforeHit()
+        {
+            if (GetHitUnit()->GetHealthPct()<35)
+                addEnergy = true;
+            else
+                addEnergy = false;
+        }
+
+        void HandleAfterHit()
+        {
+            if (!addEnergy)
+                return;
+
+            Player * player = GetCaster()->ToPlayer();
+            int32 energy = 0;
+
+            if (player->GetAura(14158))
+                energy=15;
+           if (player->GetAura(14159))
+                energy=30;
+
+            player->CastCustomSpell(player, 79132, &energy, NULL, NULL, true, NULL, NULL, player->GetGUID());
+        }
+
+        void Register() OVERRIDE
+        {
+            BeforeHit += SpellHitFn(spell_rog_murderous_Intent_SpellScript::HandleBeforeHit);
+            AfterHit += SpellHitFn(spell_rog_murderous_Intent_SpellScript::HandleAfterHit);
+        }
+    };
+
+    SpellScript * GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_murderous_Intent_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -995,4 +1045,5 @@ void AddSC_rogue_spell_scripts()
 	new spell_rog_redirect();
 	new spell_rog_backstab();
 	new spell_rog_venomous_wounds();
+	new spell_rog_murderous_Intent();
 }
