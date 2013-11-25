@@ -1478,7 +1478,7 @@ public:
         void HandleBeforeCast()
         {
             if (Unit* caster = GetCaster())
-		holyStack = caster->GetPower(POWER_HOLY_POWER);
+                holyStack = caster->GetPower(POWER_HOLY_POWER);
         }
 
         void ChangeHeal(SpellEffIndex /*effIndex*/)
@@ -1492,25 +1492,25 @@ public:
             if (!target)
                 return;
 
-            // ((TotalHeal/2)+0.198*AP) * HolyPower
-	    totalheal = ((GetHitHeal() / 2) + ap) * hp;
+            // ((Heal/2)+0.198*AP) * HolyPower
+            totalheal = ((GetHitHeal() / 2) + ap) * hp;
 	    
-	    if (caster->HasAura(54936)) // Glyph of Word of Glory
+            if (caster->HasAura(54936)) // Glyph of Word of Glory
                 totalheal = AddPct(totalheal, 10);
 				
             SetHitHeal(totalheal);
         }
 
         void HandleAfterCast()
-	{
+        {
             // Eternal Glory
             if (Unit* caster = GetCaster())
-		if (AuraEffect const* pAurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2944, 0))
-		    if (roll_chance_i(pAurEff->GetAmount()))
-			caster->CastCustomSpell(caster, 88676, &holyStack, NULL, NULL, true);
+                if (AuraEffect const* pAurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2944, 0))
+                    if (roll_chance_i(pAurEff->GetAmount()))
+                        caster->CastCustomSpell(caster, 88676, &holyStack, NULL, NULL, true);
 	}
 		
-	void HandlePeriodic()
+        void HandlePeriodic()
         {
             // Glyph of Long Word
             if (!GetCaster()->HasAura(93466))
