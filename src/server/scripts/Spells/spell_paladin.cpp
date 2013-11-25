@@ -1444,6 +1444,114 @@ class spell_pal_acts_of_sacrifice : public SpellScriptLoader
         }
 };
 
+class spell_pal_word_of_glory : public SpellScriptLoader
+{
+public:
+    spell_pal_word_of_glory() : SpellScriptLoader("spell_pal_word_of_glory") { }
+
+    class spell_pal_word_of_glory_heal_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_word_of_glory_heal_SpellScript)
+
+        int32 totalheal;
+		int32 holyStack;
+
+        bool Load() OVERRIDE
+        {
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+
+			holyStack = 0;
+
+            return true;
+        }
+
+        void HandleBeforeCast()
+        {
+			if (Unit* caster = GetCaster())
+				holyStack = caster->GetPower(POWER_HOLY_POWER);
+        }
+
+        void ChangeHeal(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+			int32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.198;
+			int32 sp = caster->ToPlayer()->GetBaseSpellPowerBonus() * 0.209;
+			int32 stack = caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC) ? 3 : caster->GetPower(POWER_HOLY_POWER);
+
+            if (!target)
+                return;
+
+
+			totalheal = (GetHitHeal() + ap + sp) * stack;
+				
+            SetHitHeal(totalheal);
+        }
+
+		void HandleAfterCast()
+		{
+			// Eternal Glory
+			if (Unit* caster = GetCaster())
+				if (AuraEffect const* pAurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2944, 0))
+					if (roll_chance_i(pAurEff->GetAmount()))
+						caster->CastCustomSpell(caster,88676, &holyStack, NULL,NULL,true);
+		}
+		
+		void HandlePeriodic()
+        {
+            // Glyph of Long Word
+            if (!GetCaster()->HasAura(93466))
+                PreventHitAura();
+        }
+
+        void Register() OVERRIDE
+        {
+			BeforeCast += SpellCastFn(spell_pal_word_of_glory_heal_SpellScript::HandleBeforeCast);
+            OnEffectHitTarget += SpellEffectFn(spell_pal_word_of_glory_heal_SpellScript::ChangeHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+			AfterHit += SpellHitFn(spell_pal_word_of_glory_heal_SpellScript::HandlePeriodic);
+			AfterCast += SpellCastFn(spell_pal_word_of_glory_heal_SpellScript::HandleAfterCast);
+        }
+    };
+
+    class spell_pal_word_of_glory_heal_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pal_word_of_glory_heal_AuraScript)
+
+        bool Load() OVERRIDE
+        {
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+            return true;
+        }
+
+        void CalculateOvertime(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
+        {
+            if (AuraEffect const* longWord = GetCaster()->GetDummyAuraEffect(SPELLFAMILY_PALADIN, 4127, 1))
+            {
+                canBeRecalculated = true;
+                amount = ((GetSpellInfo()->Effects[EFFECT_0].CalcValue() * longWord->GetAmount()) / 100) / 3;
+            }
+        }
+
+        void Register() OVERRIDE
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pal_word_of_glory_heal_AuraScript::CalculateOvertime, EFFECT_1, SPELL_AURA_PERIODIC_HEAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_pal_word_of_glory_heal_AuraScript();
+    }
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_pal_word_of_glory_heal_SpellScript();
+    }
+};
+
 
 void AddSC_paladin_spell_scripts()
 {
@@ -1477,4 +1585,5 @@ void AddSC_paladin_spell_scripts()
 	new spell_pal_judgements_of_the_wise();
 	new spell_pal_zealotry();
 	new spell_pal_acts_of_sacrifice();
+	new spell_pal_word_of_glory();
 }
