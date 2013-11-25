@@ -928,72 +928,61 @@ class spell_pal_sacred_shield : public SpellScriptLoader
         }
 };
 
-// 85256 - Templar's Verdict
-/// Updated 4.3.4
-class spell_pal_templar_s_verdict : public SpellScriptLoader
+// Templar's Verdict
+// Spell Id: 85256
+class spell_pal_templar_verdict : public SpellScriptLoader
 {
-    public:
-        spell_pal_templar_s_verdict() : SpellScriptLoader("spell_pal_templar_s_verdict") { }
+public:
+    spell_pal_templar_verdict() : SpellScriptLoader("spell_pal_templar_verdict") { }
 
-        class spell_pal_templar_s_verdict_SpellScript : public SpellScript
+    class spell_pal_templar_verdict_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_templar_verdict_SpellScript)
+
+        bool Load() OVERRIDE
         {
-            PrepareSpellScript(spell_pal_templar_s_verdict_SpellScript);
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+            return true;
+        }
 
-            bool Validate (SpellInfo const* /*spellEntry*/) OVERRIDE
+        void CalculateDamage(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
-                    return false;
-
-                return true;
-            }
-
-            bool Load() OVERRIDE
-            {
-                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
-                    return false;
-
-                if (GetCaster()->ToPlayer()->getClass() != CLASS_PALADIN)
-                    return false;
-
-                return true;
-            }
-
-            void ChangeDamage(SpellEffIndex /*effIndex*/)
-            {
-                Unit* caster = GetCaster();
                 int32 damage = GetHitDamage();
+                int32 power = caster->GetPower(POWER_HOLY_POWER);
 
-                if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
-                    damage *= 7.5;  // 7.5*30% = 225%
-                else
-                {
-                    switch (caster->GetPower(POWER_HOLY_POWER))
-                    {
-                        case 0: // 1 Holy Power
-                            damage = damage;
-                            break;
-                        case 1: // 2 Holy Power
-                            damage *= 3;    // 3*30 = 90%
-                            break;
-                        case 2: // 3 Holy Power
-                            damage *= 7.5;  // 7.5*30% = 225%
-                            break;
-                    }
-                }
+				if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
+					damage = int32(damage * 7.83f);
+				else
+					switch (power)
+					{
+						case 1:
+							damage = int32(damage); // normal 30% wd.
+							break;
+						case 2:
+							damage = int32(damage * 3.0f); // 90% wd.
+							break;
+						case 3:
+							damage = int32(damage * 7.83f); // 235% wd.
+							break;
+					}
 
                 SetHitDamage(damage);
             }
-
-            void Register() OVERRIDE
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_pal_templar_s_verdict_SpellScript::ChangeDamage, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_pal_templar_s_verdict_SpellScript();
         }
+
+        void Register() OVERRIDE
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pal_templar_verdict_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_pal_templar_verdict_SpellScript();
+    }
 };
 
 /// Updated 4.3.4
@@ -1478,7 +1467,7 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_lay_on_hands();
     new spell_pal_righteous_defense();
     new spell_pal_sacred_shield();
-    new spell_pal_templar_s_verdict();
+    new spell_pal_templar_verdict();
 	new spell_pal_judgements();
 	new spell_pal_guardian_ancient_kings();
 	new spell_pal_consecration();
