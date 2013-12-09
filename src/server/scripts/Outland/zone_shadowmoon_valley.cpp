@@ -1290,7 +1290,7 @@ public:
             me->SetTarget(0);
         }
 
-        void EnterCombat(Unit* /*who*/)OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void HandleAnimation()
         {
@@ -1822,7 +1822,7 @@ public:
 
         void Reset() OVERRIDE { }
 
-        void EnterCombat(Unit* /*who*/)OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {

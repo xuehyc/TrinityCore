@@ -193,7 +193,6 @@ public:
         }
 
         void MoveInLineOfSight(Unit* who) OVERRIDE
-
         {
             if (!who)
                 return;
@@ -397,7 +396,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
          void JustDied(Unit* /*killer*/) OVERRIDE
         {

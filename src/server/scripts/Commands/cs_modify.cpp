@@ -244,7 +244,7 @@ public:
          target->SetMaxPower(POWER_FOCUS, focusm);
          target->SetPower(POWER_FOCUS, focus);
 
-         sLog->outInfo("misc", handler->GetTrinityString(LANG_CURRENT_FOCUS), target->GetMaxPower(POWER_FOCUS));
+         TC_LOG_DEBUG("misc", handler->GetTrinityString(LANG_CURRENT_FOCUS), target->GetMaxPower(POWER_FOCUS));
 
          return true;
      }

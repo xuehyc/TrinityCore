@@ -462,7 +462,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void ReceiveEmote(Player* player, uint32 emote) OVERRIDE
         {
@@ -757,7 +757,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void SpellHit(Unit* caster, SpellInfo const* spell) OVERRIDE
         {
