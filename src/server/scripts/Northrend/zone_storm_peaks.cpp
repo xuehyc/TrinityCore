@@ -552,7 +552,6 @@ public:
                         break;
                     case EVENT_SCRIPT_11:
                         me->SetOrientation(2.932153f);
-                        me->SendMovementFlagUpdate(true);
                         Talk(SAY_BRANN_3, playerGUID);
                         for (uint8 i = 0; i < 5; ++i)
                         {
