@@ -1736,7 +1736,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 			{
                 switch (m_spellInfo->Id)
                 {
-				case 116   // Early Frost
+				case 116:   // Early Frost
                 if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_MAGE, 189, 0))
                 {
                     uint32 spellId = 0;

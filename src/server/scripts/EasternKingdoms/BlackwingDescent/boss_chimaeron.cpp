@@ -43,6 +43,7 @@ public:
 
         void JustDied(Unit* /*Killer*/)
         {
+			if (instance)
             instance->SetData(DATA_CHIMAERON, DONE);
         }
 

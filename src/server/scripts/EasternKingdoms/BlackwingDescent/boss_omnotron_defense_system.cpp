@@ -126,7 +126,8 @@ public:
 
         void Reset()
         {
-            instance->SetData(DATA_OMNOTRON_DEFENSE_SYSTEM, NOT_STARTED);
+            if (instance)
+			instance->SetData(DATA_OMNOTRON_DEFENSE_SYSTEM, NOT_STARTED);
 
             ArcaneAnnihilatorTimer = 5*IN_MILLISECONDS;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
@@ -135,17 +136,20 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            instance->SetData(DATA_OMNOTRON_DEFENSE_SYSTEM, IN_PROGRESS);
+            if (instance)
+			instance->SetData(DATA_OMNOTRON_DEFENSE_SYSTEM, IN_PROGRESS);
         }
 
         void JustReachedHome()
         {
-            instance->SetData(DATA_OMNOTRON_DEFENSE_SYSTEM, FAIL);
+            if (instance)
+			instance->SetData(DATA_OMNOTRON_DEFENSE_SYSTEM, FAIL);
         }
 
         void JustDied(Unit* /*Killer*/)
         {
-            instance->SetData(DATA_OMNOTRON_DEFENSE_SYSTEM, DONE);
+            if (instance)
+			instance->SetData(DATA_OMNOTRON_DEFENSE_SYSTEM, DONE);
         }
 
         void UpdateAI( uint32 Diff)

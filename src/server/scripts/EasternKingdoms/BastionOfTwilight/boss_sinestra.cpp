@@ -41,16 +41,19 @@ public:
 
         void Reset()
         {
+			if (instance)
             instance->SetData(DATA_SINESTRA, NOT_STARTED);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
+			if (instance)
             instance->SetData(DATA_SINESTRA, IN_PROGRESS);
         }
 
         void JustDied(Unit* /*Killer*/)
         {
+			if (instance)
             instance->SetData(DATA_SINESTRA, DONE);
         }
 

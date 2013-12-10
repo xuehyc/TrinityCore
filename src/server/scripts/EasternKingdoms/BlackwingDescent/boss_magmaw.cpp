@@ -49,6 +49,7 @@ public:
 
         void Reset()
         {
+			if (instance)
             instance->SetData(DATA_MAGMAW, NOT_STARTED);
 
             LavaSpewTimer = 10*IN_MILLISECONDS;
@@ -61,16 +62,19 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+			if (instance)
             instance->SetData(DATA_MAGMAW, IN_PROGRESS);
         }
 
         void JustReachedHome()
         {
+			if (instance)
             instance->SetData(DATA_MAGMAW, FAIL);
         }
 
         void JustDied(Unit* /*Killer*/)
         {
+			if (instance)
             instance->SetData(DATA_MAGMAW, DONE);
         }
 

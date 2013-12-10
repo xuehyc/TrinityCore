@@ -53,13 +53,15 @@ public:
         }
 
         void EnterCombat(Unit* /*who*/)
-        {
+        {	
+			if (instance)
             instance->SetData(DATA_NEFARIAN, IN_PROGRESS);
         }
 
         void JustDied(Unit* /*Killer*/)
         {
-            instance->SetData(DATA_NEFARIAN, DONE);
+            if (instance)
+			instance->SetData(DATA_NEFARIAN, DONE);
         }
 
         void UpdateAI(uint32 Diff)

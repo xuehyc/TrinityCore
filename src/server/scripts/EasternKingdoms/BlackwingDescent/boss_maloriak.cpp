@@ -53,6 +53,7 @@ public:
 
         void Reset()
         {
+			if (instance)
             instance->SetData(DATA_MALORIAK, NOT_STARTED);
 
             ConsumingFlames = 5*IN_MILLISECONDS;
@@ -63,17 +64,20 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            instance->SetData(DATA_MALORIAK, IN_PROGRESS);
+            if (instance)
+			instance->SetData(DATA_MALORIAK, IN_PROGRESS);
         }
 
         void JustReachedHome()
         {
-            instance->SetData(DATA_MALORIAK, FAIL);
+            if (instance)
+			instance->SetData(DATA_MALORIAK, FAIL);
         }
 
         void JustDied(Unit* /*Killer*/)
         {
-            instance->SetData(DATA_MALORIAK, DONE);
+            if (instance)
+			instance->SetData(DATA_MALORIAK, DONE);
         }
 
         void UpdateAI( uint32 Diff)
