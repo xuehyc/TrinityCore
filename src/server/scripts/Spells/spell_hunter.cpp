@@ -56,6 +56,7 @@ enum HunterSpells
     SPELL_DRAENEI_GIFT_OF_THE_NAARU                 = 59543,
 	SPELL_HUNTER_KILL_COMMAND                   	= 34026,
 	SPELL_HUNTER_KILL_COMMAND_TRIGGER               = 83381,
+	SPELL_HUNTER_IMPROVED_STEADY_SHOT            	= 53220,
 };
 
 // 53209 - Chimera Shot
@@ -826,43 +827,97 @@ class spell_hun_sniper_training : public SpellScriptLoader
         }
 };
 
-// 56641 - Steady Shot
+// 56641 Steady Shot
 class spell_hun_steady_shot : public SpellScriptLoader
 {
-    public:
-        spell_hun_steady_shot() : SpellScriptLoader("spell_hun_steady_shot") { }
+public:
+    spell_hun_steady_shot() : SpellScriptLoader("spell_hun_steady_shot") { }
 
-        class spell_hun_steady_shot_SpellScript : public SpellScript
+    class spell_hun_steady_shot_SpellScript : public SpellScript
+    {
+         PrepareSpellScript(spell_hun_steady_shot_SpellScript)
+
+        bool Validate(SpellInfo const* /*spellEntry*/)
         {
-            PrepareSpellScript(spell_hun_steady_shot_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_STEADY_SHOT_FOCUS))
-                    return false;
-                return true;
-            }
-
-            bool Load() OVERRIDE
-            {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
-            }
-
-            void HandleOnHit()
-            {
-                GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_FOCUS, true);
-            }
-
-            void Register() OVERRIDE
-            {
-                OnHit += SpellHitFn(spell_hun_steady_shot_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_hun_steady_shot_SpellScript();
+            if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_STEADY_SHOT_FOCUS) || !sSpellMgr->GetSpellInfo(SPELL_HUNTER_GENERIC_ENERGIZE_FOCUS))
+                return false;
+            return true;
         }
+
+        int8 castCount;
+
+        void HandleDummy (SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            castCount++;
+
+            if(!caster || !target || caster->GetTypeId() != TYPEID_PLAYER)
+                return ;
+
+            caster->CastSpell(caster, SPELL_HUNTER_STEADY_SHOT_FOCUS, true);
+
+            // Termination
+            if (AuraEffect const* Termination = caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2008, 0))
+            {
+                //if (target->HealthBelowPct(25))
+                    caster->CastSpell(caster, SPELL_HUNTER_GENERIC_ENERGIZE_FOCUS, true);
+            }
+
+            caster->ToPlayer()->KilledMonsterCredit(44175, 0);
+        }
+
+        void HandleOnHit()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+            if(!caster || !target || caster->GetTypeId() != TYPEID_PLAYER)
+                return ;
+
+            // Improved Steady Shot Rank 1
+            if (caster->HasAura(53221))
+            {
+                if (castCount >= 2)
+                {
+                    int32 basepoints = 5;
+                    caster->CastCustomSpell(caster, SPELL_HUNTER_IMPROVED_STEADY_SHOT, &basepoints, NULL, NULL, true);
+                    castCount = 0;
+                }
+            }
+            // Improved Steady Shot Rank 2
+            else if (caster->HasAura(53222))
+            {
+                if (castCount >= 2)
+                {
+                    int32 basepoints = 10;
+                    caster->CastCustomSpell(caster, SPELL_HUNTER_IMPROVED_STEADY_SHOT, &basepoints, NULL, NULL, true);
+                    castCount = 0;
+                }
+            }
+            // Improved Steady Shot Rank 3
+            else if (caster->HasAura(53224))
+            {
+                if (castCount >= 2)
+                {
+                    int32 basepoints = 15;
+                    caster->CastCustomSpell(caster, SPELL_HUNTER_IMPROVED_STEADY_SHOT, &basepoints, NULL, NULL, true);
+                    castCount = 0;
+                }
+            }
+        }
+
+        void Register ()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+            OnHit += SpellHitFn(spell_hun_steady_shot_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript () const
+    {
+        return new spell_hun_steady_shot_SpellScript();
+    }
 };
 
 // 1515 - Tame Beast
