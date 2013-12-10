@@ -926,6 +926,7 @@ public:
     {
         eye_tentacleAI(Creature* creature) : ScriptedAI(creature)
         {
+            Portal = 0;
             if (Creature* pPortal = me->SummonCreature(NPC_SMALL_PORTAL, *me, TEMPSUMMON_CORPSE_DESPAWN))
             {
                 pPortal->SetReactState(REACT_PASSIVE);
@@ -1003,6 +1004,7 @@ public:
         {
             SetCombatMovement(false);
 
+            Portal = 0;
             if (Creature* pPortal = me->SummonCreature(NPC_SMALL_PORTAL, *me, TEMPSUMMON_CORPSE_DESPAWN))
             {
                 pPortal->SetReactState(REACT_PASSIVE);
@@ -1113,6 +1115,7 @@ public:
         {
             SetCombatMovement(false);
 
+            Portal = 0;
             if (Creature* pPortal = me->SummonCreature(NPC_GIANT_PORTAL, *me, TEMPSUMMON_CORPSE_DESPAWN))
             {
                 pPortal->SetReactState(REACT_PASSIVE);
@@ -1232,6 +1235,7 @@ public:
         {
             SetCombatMovement(false);
 
+            Portal = 0;
             if (Creature* pPortal = me->SummonCreature(NPC_GIANT_PORTAL, *me, TEMPSUMMON_CORPSE_DESPAWN))
             {
                 pPortal->SetReactState(REACT_PASSIVE);
