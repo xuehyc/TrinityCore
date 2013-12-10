@@ -1736,6 +1736,23 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 			{
                 switch (m_spellInfo->Id)
                 {
+				case 116   // Early Frost
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_MAGE, 189, 0))
+                {
+                    uint32 spellId = 0;
+                    switch (aurEff->GetId())
+                    {
+                    case 83049:
+                        spellId = 83162;
+                        break;
+                    case 83050:
+                        spellId = 83239;
+                        break;
+                    }
+ 
+                    if (spellId && !m_caster->HasAura(spellId))
+                        m_caster->CastSpell(m_caster, spellId, true);
+                }			
 		        case 120:  //Cone of Cold
                	 {
                    	 if (m_caster->HasAura(11190)) // Improved Cone of Cold Rank 1
