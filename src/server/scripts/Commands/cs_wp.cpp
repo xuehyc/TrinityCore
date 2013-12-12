@@ -693,7 +693,7 @@ public:
                         wpCreature->AddObjectToRemoveList();
                     }
                     // re-create
-                    Creature* wpCreature2 = new Creature;
+                    Creature* wpCreature2 = new Creature();
                     if (!wpCreature2->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMgr().GetPhaseMaskForSpawn(), VISUAL_WAYPOINT, 0, 0, chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), chr->GetOrientation()))
                     {
                         handler->PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
@@ -917,7 +917,7 @@ public:
                 Map* map = chr->GetMap();
                 float o = chr->GetOrientation();
 
-                Creature* wpCreature = new Creature;
+                Creature* wpCreature = new Creature();
                 if (!wpCreature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMgr().GetPhaseMaskForSpawn(), id, 0, 0, x, y, z, o))
                 {
                     handler->PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
@@ -981,7 +981,7 @@ public:
             float o = chr->GetOrientation();
             Map* map = chr->GetMap();
 
-            Creature* creature = new Creature;
+            Creature* creature = new Creature();
             if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMgr().GetPhaseMaskForSpawn(), id, 0, 0, x, y, z, o))
             {
                 handler->PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
@@ -1030,7 +1030,7 @@ public:
             Player* chr = handler->GetSession()->GetPlayer();
             Map* map = chr->GetMap();
 
-            Creature* creature = new Creature;
+            Creature* creature = new Creature();
             if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMgr().GetPhaseMaskForSpawn(), id, 0, 0, x, y, z, o))
             {
                 handler->PSendSysMessage(LANG_WAYPOINT_NOTCREATED, id);
