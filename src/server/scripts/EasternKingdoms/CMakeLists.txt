@@ -11,6 +11,7 @@
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
   EasternKingdoms/zone_ghostlands.cpp
+  EasternKingdoms/zone_gilneas.cpp
   EasternKingdoms/zone_eversong_woods.cpp
   EasternKingdoms/AlteracValley/boss_galvangar.cpp
   EasternKingdoms/AlteracValley/boss_balinda.cpp

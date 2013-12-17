@@ -318,6 +318,8 @@ void AddSC_undercity();
 void AddSC_western_plaguelands();
 void AddSC_westfall();
 void AddSC_wetlands();
+void AddSC_gilneas();
+
 
 //kalimdor
 void AddSC_blackfathom_deeps();              //Blackfathom Depths
