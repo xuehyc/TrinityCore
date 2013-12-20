@@ -72,12 +72,8 @@ Map::~Map()
         Transport* transport = *itr;
         ++itr;
 
-        // Destroy local transports
-        if (transport->GetTransportTemplate()->inInstance)
-        {
-            transport->RemoveFromWorld();
-            delete transport;
-        }
+        transport->RemoveFromWorld();
+        delete transport;
     }
 
     if (!m_scriptSchedule.empty())

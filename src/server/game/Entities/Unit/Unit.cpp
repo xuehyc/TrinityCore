@@ -12472,6 +12472,9 @@ void CharmInfo::InitPossessCreateSpells()
         switch (_unit->GetEntry())
         {
             case 23575: // Mindless Abomination
+            case 24783: // Trained Rock Falcon
+            case 27664: // Crashin' Thrashin' Racer
+            case 40281: // Crashin' Thrashin' Racer
                 break;
             default:
                 InitEmptyActionBar();
@@ -14739,7 +14742,6 @@ void Unit::RemoveCharmedBy(Unit* charmer)
                     }
                 }
                 break;
-            default:
             case CHARM_TYPE_CONVERT:
                 break;
         }
