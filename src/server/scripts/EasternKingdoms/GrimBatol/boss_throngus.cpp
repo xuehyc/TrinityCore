@@ -101,8 +101,13 @@ public:
 
 	struct boss_forgemaster_throngusAI : public ScriptedAI
 	{
-		boss_forgemaster_throngusAI(Creature *c) : ScriptedAI(c) {}
+		boss_forgemaster_throngusAI(Creature *c) : ScriptedAI(c)
+        {
+            instance = c->GetInstanceScript();
+        }
 
+        InstanceScript* instance;
+		
 		EventMap events;
 
 		uint32 currentWaepon;
@@ -110,6 +115,7 @@ public:
 
 		void EnterCombat(Unit* /*who*/) 
 		{
+			if (instance)
 			me->MonsterYell(SAY_AGGRO, LANG_UNIVERSAL, NULL);
 
 			phases[0] = 0;
@@ -119,6 +125,7 @@ public:
 
 		void JustDied(Unit* /*killer*/)
 		{
+			if (instance)
 			me->MonsterYell(SAY_DIED, LANG_UNIVERSAL, NULL);
 			DespawnCreatures(NPC_FIRE_PATCH);
 			DespawnCreatures(NPC_TWILIGHT_ARCHER);
@@ -126,6 +133,7 @@ public:
 
 		void Reset()
 		{
+			if (instance)
 			currentWaepon = WEAPON_NON;
 			DespawnCreatures(NPC_FIRE_PATCH);
 			DespawnCreatures(NPC_TWILIGHT_ARCHER);

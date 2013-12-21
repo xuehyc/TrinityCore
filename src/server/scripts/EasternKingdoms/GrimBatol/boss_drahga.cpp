@@ -96,10 +96,10 @@ public:
     {
         boss_drahga_shadowburnerAI(Creature* creature) : ScriptedAI(creature), summons(creature), pValiona(NULL)
         {
-            //pInstance = creature->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
-        //InstanceScript* pInstance;
+        InstanceScript* instance;
         Phase phase;
         EventMap events;
         SummonList summons;
@@ -108,6 +108,7 @@ public:
 
         void Reset()
         {
+			if (instance)
             //me->GetMotionMaster()->Clear();
 
             pValiona = NULL;
@@ -119,6 +120,7 @@ public:
 
         void EnterCombat(Unit* /*pWho*/)
         {
+			if (instance)if (instance)
             phase = PHASE_CASTER_PHASE;
 
             me->SetReactState(REACT_AGGRESSIVE);
@@ -146,6 +148,7 @@ public:
 
         void JustDied(Unit * /*victim*/)
         {
+			if (instance)
             events.Reset();
 
             me->MonsterYell(SAY_DEAD, LANG_UNIVERSAL, NULL);
@@ -311,12 +314,12 @@ public:
     {
         mob_valiona_gbAI(Creature* creature) : ScriptedAI(creature), summons(creature)//, vehicle(creature->GetVehicleKit())
         {
-            //pInstance = creature->GetInstanceScript();
+            //instance = creature->GetInstanceScript();
 
             //ASSERT(vehicle);
         }
 
-        //InstanceScript* pInstance;
+        //InstanceScript* instance;
         EventMap events;
         uint8 currentWaypoint;
         SummonList summons;

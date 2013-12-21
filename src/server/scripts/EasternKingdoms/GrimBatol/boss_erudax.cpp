@@ -74,19 +74,20 @@ public:
 	{
 		boss_erudaxAI(Creature* pCreature) : ScriptedAI(pCreature), ShouldSummonAdds(false)
 		{
-			pInstance = pCreature->GetInstanceScript();
+			instance = pCreature->GetInstanceScript();
 		}
 
 		Unit* FacelessPortalStalker;
 		Unit* ShadowGaleTrigger;
 
-		InstanceScript* pInstance;
+		InstanceScript* instance;
 		EventMap events;
 
 		bool ShouldSummonAdds;
 
 		void Reset()
 		{
+			if (instance)
 			me->GetMotionMaster()->MoveTargetedHome();
 
 			events.Reset();
@@ -97,6 +98,7 @@ public:
 
 		void EnterCombat(Unit* /*who*/) 
 		{
+			if (instance)
 			ShouldSummonAdds = false;
 
 			// Fixes wrong behaviour of Erudax if the boss was respawned

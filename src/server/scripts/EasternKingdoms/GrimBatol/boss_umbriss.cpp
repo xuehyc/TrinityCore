@@ -71,7 +71,7 @@ class boss_general_umbriss : public CreatureScript
         {
             boss_general_umbrissAI(Creature *c) : ScriptedAI(c)
             {
-                pInstance = c->GetInstanceScript();
+                instance = c->GetInstanceScript();
             }
 
             uint32 blitzTimer;
@@ -81,10 +81,11 @@ class boss_general_umbriss : public CreatureScript
             bool isMalignantSpawn;
             bool enrage;
 
-            InstanceScript* pInstance;
+            InstanceScript* instance;
 
             void Reset()
             {
+				if (instance)
                 woundTimer = 15000;
                 groundTimer = 30000;
                 blitzTimer = 25000;
@@ -97,17 +98,18 @@ class boss_general_umbriss : public CreatureScript
 
             void EnterCombat(Unit* pWho)
             {
+				if (instance)
                 me->MonsterYell(SAY_AGGRO, 0, 0);
             }
 
             void JustDied(Unit* pKiller)
             {
 				me->MonsterYell(SAY_DIED, 0, 0);
-                if (pInstance)
+                if (instance)
                 {
-                    pInstance->SetData(DATA_GENERAL_UMBRISS_EVENT, DONE);
+                    instance->SetData(DATA_GENERAL_UMBRISS_EVENT, DONE);
 //                    if (IsHeroic() && me->HasAura(MODGUD_MALICE_H))
-//                        pInstance->DoCompleteAchievement(ACHIEV_UMBRAGE_FOR_UMBRISS);
+//                        instance->DoCompleteAchievement(ACHIEV_UMBRAGE_FOR_UMBRISS);
                 }
             }
 
