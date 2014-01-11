@@ -174,11 +174,12 @@ public:
 
         void Reset() OVERRIDE
         {
+            SpawnedAdds = 0;
+
             if (me->GetMapId() == 469)
             {
                 if (!me->FindNearestCreature(NPC_NEFARIAN, 1000.0f, true))
                     _Reset();
-                SpawnedAdds = 0;
 
                 me->SetVisible(true);
                 me->SetPhaseMask(1, true);
@@ -380,7 +381,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_victor_nefariusAI(creature);
+        return GetInstanceAI<boss_victor_nefariusAI>(creature);
     }
 };
 
@@ -427,7 +428,7 @@ public:
             if (rand()%5)
                 return;
 
-            Talk(SAY_SLAY, victim->GetGUID());
+            Talk(SAY_SLAY, victim);
         }
 
         void MovementInform(uint32 type, uint32 id) OVERRIDE
@@ -447,8 +448,7 @@ public:
         {
             if (canDespawn && DespawnTimer <= diff)
             {
-                if (instance)
-                    instance->SetBossState(BOSS_NEFARIAN, FAIL);
+                instance->SetBossState(BOSS_NEFARIAN, FAIL);
 
                 std::list<Creature*> constructList;
                 me->GetCreatureListWithEntryInGrid(constructList, NPC_BONE_CONSTRUCT, 500.0f);
@@ -576,7 +576,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_nefarianAI(creature);
+        return GetInstanceAI<boss_nefarianAI>(creature);
     }
 };
 

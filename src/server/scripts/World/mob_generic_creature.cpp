@@ -97,7 +97,7 @@ public:
             if (me->IsWithinMeleeRange(me->GetVictim()))
             {
                 //Make sure our attack is ready and we arn't currently casting
-                if (me->isAttackReady() && !me->IsNonMeleeSpellCasted(false))
+                if (me->isAttackReady() && !me->IsNonMeleeSpellCast(false))
                 {
                     bool Healing = false;
                     SpellInfo const* info = NULL;
@@ -128,7 +128,7 @@ public:
             else
             {
                 //Only run this code if we arn't already casting
-                if (!me->IsNonMeleeSpellCasted(false))
+                if (!me->IsNonMeleeSpellCast(false))
                 {
                     bool Healing = false;
                     SpellInfo const* info = NULL;

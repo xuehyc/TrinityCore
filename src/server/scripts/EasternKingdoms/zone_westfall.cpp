@@ -232,7 +232,7 @@ public:
             if (npc_escortAI* pEscortAI = CAST_AI(npc_defias_traitor::npc_defias_traitorAI, creature->AI()))
                 pEscortAI->Start(true, true, player->GetGUID());
 
-            creature->AI()->Talk(SAY_START, player->GetGUID());
+            creature->AI()->Talk(SAY_START, player);
         }
 
         return true;
@@ -259,10 +259,10 @@ public:
                     SetRun(false);
                     break;
                 case 36:
-                    Talk(SAY_PROGRESS, player->GetGUID());
+                    Talk(SAY_PROGRESS, player);
                     break;
                 case 44:
-                    Talk(SAY_END, player->GetGUID());
+                    Talk(SAY_END, player);
                     player->GroupEventHappens(QUEST_DEFIAS_BROTHERHOOD, me);
                     break;
             }
@@ -270,7 +270,7 @@ public:
 
         void EnterCombat(Unit* who) OVERRIDE
         {
-            Talk(SAY_AGGRO, who->GetGUID());
+            Talk(SAY_AGGRO, who);
         }
 
         void Reset() OVERRIDE { }

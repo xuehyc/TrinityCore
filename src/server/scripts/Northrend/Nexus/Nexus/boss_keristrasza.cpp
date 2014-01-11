@@ -48,7 +48,8 @@ enum Yells
     SAY_SLAY                                      = 1,
     SAY_ENRAGE                                    = 2,
     SAY_DEATH                                     = 3,
-    SAY_CRYSTAL_NOVA                              = 4
+    SAY_CRYSTAL_NOVA                              = 4,
+    SAY_FRENZY                                    = 5
 };
 
 enum Misc
@@ -64,7 +65,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_keristraszaAI(creature);
+        return GetInstanceAI<boss_keristraszaAI>(creature);
     }
 
     struct boss_keristraszaAI : public ScriptedAI
@@ -98,8 +99,7 @@ public:
 
             RemovePrison(CheckContainmentSpheres());
 
-            if (instance)
-                instance->SetData(DATA_KERISTRASZA_EVENT, NOT_STARTED);
+            instance->SetData(DATA_KERISTRASZA_EVENT, NOT_STARTED);
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
@@ -107,28 +107,24 @@ public:
             Talk(SAY_AGGRO);
             DoCastAOE(SPELL_INTENSE_COLD);
 
-            if (instance)
-                instance->SetData(DATA_KERISTRASZA_EVENT, IN_PROGRESS);
+            instance->SetData(DATA_KERISTRASZA_EVENT, IN_PROGRESS);
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
-            if (instance)
-                instance->SetData(DATA_KERISTRASZA_EVENT, DONE);
+            instance->SetData(DATA_KERISTRASZA_EVENT, DONE);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* who) OVERRIDE
         {
-            Talk(SAY_SLAY);
+            if (who->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_SLAY);
         }
 
         bool CheckContainmentSpheres(bool remove_prison = false)
         {
-            if (!instance)
-                return false;
-
             auiContainmentSphereGUIDs[0] = instance->GetData64(ANOMALUS_CONTAINMET_SPHERE);
             auiContainmentSphereGUIDs[1] = instance->GetData64(ORMOROKS_CONTAINMET_SPHERE);
             auiContainmentSphereGUIDs[2] = instance->GetData64(TELESTRAS_CONTAINMET_SPHERE);
@@ -179,6 +175,7 @@ public:
             if (!bEnrage && HealthBelowPct(25))
             {
                 Talk(SAY_ENRAGE);
+                Talk(SAY_FRENZY);
                 DoCast(me, SPELL_ENRAGE);
                 bEnrage = true;
             }

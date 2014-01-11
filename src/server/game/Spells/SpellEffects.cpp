@@ -5251,7 +5251,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     if (m_caster->getGender() > 0)
                         gender = "her";
                     sprintf(buf, "%s rubs %s [Decahedral Dwarven Dice] between %s hands and rolls. One %u and one %u.", m_caster->GetName().c_str(), gender, gender, urand(1, 10), urand(1, 10));
-                    m_caster->MonsterTextEmote(buf, 0);
+                    m_caster->MonsterTextEmote(buf, NULL);
                     break;
                 }
                 // Roll 'dem Bones - Worn Troll Dice
@@ -5262,7 +5262,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     if (m_caster->getGender() > 0)
                         gender = "her";
                     sprintf(buf, "%s causually tosses %s [Worn Troll Dice]. One %u and one %u.", m_caster->GetName().c_str(), gender, urand(1, 6), urand(1, 6));
-                    m_caster->MonsterTextEmote(buf, 0);
+                    m_caster->MonsterTextEmote(buf, NULL);
                     break;
                 }
                 // Death Knight Initiate Visual
@@ -6403,8 +6403,8 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
     if (unitTarget->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
         return;
 
-    // Instantly interrupt non melee spells being casted
-    if (unitTarget->IsNonMeleeSpellCasted(true))
+    // Instantly interrupt non melee spells being cast
+    if (unitTarget->IsNonMeleeSpellCast(true))
         unitTarget->InterruptNonMeleeSpells(true);
 
     float ratio = 0.1f;
@@ -6505,8 +6505,6 @@ void Spell::EffectPullTowards(SpellEffIndex effIndex)
     if (!unitTarget)
         return;
 
-    float speedZ = (float)(m_spellInfo->Effects[effIndex].CalcValue() / 10);
-    float speedXY = (float)(m_spellInfo->Effects[effIndex].MiscValue/10);
     Position pos;
     if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_PULL_TOWARDS_DEST)
     {
@@ -6519,6 +6517,9 @@ void Spell::EffectPullTowards(SpellEffIndex effIndex)
     {
         pos.Relocate(m_caster);
     }
+
+    float speedXY = float(m_spellInfo->Effects[effIndex].MiscValue) * 0.1f;
+    float speedZ = unitTarget->GetDistance(pos) / speedXY * 0.5f * Movement::gravity;
 
     unitTarget->GetMotionMaster()->MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), speedXY, speedZ);
 }

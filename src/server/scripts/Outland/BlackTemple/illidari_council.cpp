@@ -222,7 +222,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_illidari_councilAI(creature);
+        return GetInstanceAI<npc_illidari_councilAI>(creature);
     }
 
     struct npc_illidari_councilAI : public ScriptedAI
@@ -267,12 +267,9 @@ public:
                 pMember->AI()->EnterEvadeMode();
             }
 
-            if (instance)
-            {
-                instance->SetBossState(DATA_ILLIDARI_COUNCIL, NOT_STARTED);
-                if (Creature* VoiceTrigger = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_ELF_COUNCIL_VOICE)))
-                    VoiceTrigger->AI()->EnterEvadeMode();
-            }
+            instance->SetBossState(DATA_ILLIDARI_COUNCIL, NOT_STARTED);
+            if (Creature* VoiceTrigger = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_ELF_COUNCIL_VOICE)))
+                VoiceTrigger->AI()->EnterEvadeMode();
 
             EventBegun = false;
 
@@ -288,9 +285,6 @@ public:
 
         void StartEvent(Unit* target)
         {
-            if (!instance)
-                return;
-
             if (target && target->IsAlive())
             {
                 Council[0] = instance->GetData64(DATA_GATHIOS_THE_SHATTERER);
@@ -332,13 +326,10 @@ public:
                 {
                     if (DeathCount > 3)
                     {
-                        if (instance)
-                        {
-                            if (Creature* VoiceTrigger = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_ELF_COUNCIL_VOICE)))
-                                VoiceTrigger->DealDamage(VoiceTrigger, VoiceTrigger->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                            instance->SetBossState(DATA_ILLIDARI_COUNCIL, DONE);
-                            //me->SummonCreature(AKAMAID, 746.466980f, 304.394989f, 311.90208f, 6.272870f, TEMPSUMMON_DEAD_DESPAWN, 0);
-                        }
+                        if (Creature* VoiceTrigger = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_ELF_COUNCIL_VOICE)))
+                            VoiceTrigger->DealDamage(VoiceTrigger, VoiceTrigger->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        instance->SetBossState(DATA_ILLIDARI_COUNCIL, DONE);
+                        //me->SummonCreature(AKAMAID, 746.466980f, 304.394989f, 311.90208f, 6.272870f, TEMPSUMMON_DEAD_DESPAWN, 0);
                         me->DealDamage(me, me->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                         return;
                     }
@@ -405,17 +396,8 @@ struct boss_illidari_councilAI : public ScriptedAI
 
     void EnterCombat(Unit* who) OVERRIDE
     {
-        if (instance)
-        {
-            if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ILLIDARI_COUNCIL)))
-                CAST_AI(npc_illidari_council::npc_illidari_councilAI, controller->AI())->StartEvent(who);
-        }
-        else
-        {
-            TC_LOG_ERROR("scripts", ERROR_INST_DATA);
-            EnterEvadeMode();
-            return;
-        }
+        if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ILLIDARI_COUNCIL)))
+            CAST_AI(npc_illidari_council::npc_illidari_councilAI, controller->AI())->StartEvent(who);
         DoZoneInCombat();
         // Load GUIDs on first aggro because the Creature guids are only set as the creatures are created in world-
         // this means that for each creature, it will attempt to LoadGUIDs even though some of the other creatures are
@@ -458,12 +440,6 @@ struct boss_illidari_councilAI : public ScriptedAI
 
     void LoadGUIDs()
     {
-        if (!instance)
-        {
-            TC_LOG_ERROR("scripts", ERROR_INST_DATA);
-            return;
-        }
-
         Council[0] = instance->GetData64(DATA_LADY_MALANDE);
         Council[1] = instance->GetData64(DATA_HIGH_NETHERMANCER_ZEREVOR);
         Council[2] = instance->GetData64(DATA_GATHIOS_THE_SHATTERER);
@@ -480,7 +456,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_gathios_the_shattererAI(creature);
+        return GetInstanceAI<boss_gathios_the_shattererAI>(creature);
     }
 
     struct boss_gathios_the_shattererAI : public boss_illidari_councilAI
@@ -612,7 +588,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_high_nethermancer_zerevorAI(creature);
+        return GetInstanceAI<boss_high_nethermancer_zerevorAI>(creature);
     }
 
     struct boss_high_nethermancer_zerevorAI : public boss_illidari_councilAI
@@ -716,7 +692,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_lady_malandeAI(creature);
+        return GetInstanceAI<boss_lady_malandeAI>(creature);
     }
 
     struct boss_lady_malandeAI : public boss_illidari_councilAI
@@ -794,7 +770,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_veras_darkshadowAI(creature);
+        return GetInstanceAI<boss_veras_darkshadowAI>(creature);
     }
 
     struct boss_veras_darkshadowAI : public boss_illidari_councilAI

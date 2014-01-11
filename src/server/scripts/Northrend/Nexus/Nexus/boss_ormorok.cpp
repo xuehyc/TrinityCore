@@ -40,6 +40,7 @@ enum Yells
     SAY_REFLECT                                 = 3,
     SAY_CRYSTAL_SPIKES                          = 4,
     SAY_KILL                                    = 5,
+    SAY_FRENZY                                  = 6
 };
 
 enum Events
@@ -73,6 +74,12 @@ public:
     {
         boss_ormorokAI(Creature* creature) : BossAI(creature, DATA_ORMOROK_EVENT) { }
 
+        void Reset()
+        {
+            BossAI::Reset();
+            frenzy = false;
+        }
+
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
@@ -85,14 +92,14 @@ public:
 
             Talk(SAY_AGGRO);
 
-            if (instance)
-                instance->SetData(DATA_ORMOROK_EVENT, IN_PROGRESS);
+            instance->SetData(DATA_ORMOROK_EVENT, IN_PROGRESS);
         }
 
         void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
         {
             if (!frenzy && HealthBelowPct(25))
             {
+                Talk(SAY_FRENZY);
                 DoCast(me, SPELL_FRENZY);
                 frenzy = true;
             }
@@ -104,13 +111,13 @@ public:
 
             Talk(SAY_DEATH);
 
-            if (instance)
-                instance->SetData(DATA_ORMOROK_EVENT, DONE);
+            instance->SetData(DATA_ORMOROK_EVENT, DONE);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* who) OVERRIDE
         {
-            Talk(SAY_KILL);
+            if (who->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_KILL);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -161,7 +168,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_ormorokAI(creature);
+        return GetInstanceAI<boss_ormorokAI>(creature);
     }
 };
 
@@ -192,7 +199,11 @@ public:
 
     struct npc_crystal_spike_triggerAI : public ScriptedAI
     {
-        npc_crystal_spike_triggerAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_crystal_spike_triggerAI(Creature* creature) : ScriptedAI(creature) 
+        { 
+            _count = 0;
+            _despawntimer = 0;
+        }
 
         void IsSummonedBy(Unit* owner) OVERRIDE
         {

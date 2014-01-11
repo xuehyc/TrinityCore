@@ -26,6 +26,7 @@
 #include "Define.h"
 #include <list>
 #include "Object.h"
+#include "QuestDef.h"
 #include "GameObject.h"
 #include "CreatureAI.h"
 
@@ -55,7 +56,7 @@ class GameObjectAI
         virtual bool GossipSelectCode(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/, char const* /*code*/) { return false; }
         virtual bool QuestAccept(Player* /*player*/, Quest const* /*quest*/) { return false; }
         virtual bool QuestReward(Player* /*player*/, Quest const* /*quest*/, uint32 /*opt*/) { return false; }
-        virtual uint32 GetDialogStatus(Player* /*player*/) { return 100; }
+        virtual uint32 GetDialogStatus(Player* /*player*/) { return DIALOG_STATUS_SCRIPTED_NO_STATUS; }
         virtual void Destroyed(Player* /*player*/, uint32 /*eventId*/) { }
         virtual uint32 GetData(uint32 /*id*/) const { return 0; }
         virtual void SetData64(uint32 /*id*/, uint64 /*value*/) { }

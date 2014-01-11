@@ -103,7 +103,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_bjarngrimAI(creature);
+        return GetInstanceAI<boss_bjarngrimAI>(creature);
     }
 
     struct boss_bjarngrimAI : public ScriptedAI
@@ -184,8 +184,7 @@ public:
 
             SetEquipmentSlots(false, EQUIP_SWORD, EQUIP_SHIELD, EQUIP_NO_CHANGE);
 
-            if (instance)
-                instance->SetBossState(DATA_BJARNGRIM, NOT_STARTED);
+            instance->SetBossState(DATA_BJARNGRIM, NOT_STARTED);
         }
 
         void EnterEvadeMode() OVERRIDE
@@ -205,8 +204,7 @@ public:
             //must get both lieutenants here and make sure they are with him
             me->CallForHelp(30.0f);
 
-            if (instance)
-                instance->SetBossState(DATA_BJARNGRIM, IN_PROGRESS);
+            instance->SetBossState(DATA_BJARNGRIM, IN_PROGRESS);
         }
 
         void KilledUnit(Unit* /*victim*/) OVERRIDE
@@ -218,8 +216,7 @@ public:
         {
             Talk(SAY_DEATH);
 
-            if (instance)
-                instance->SetBossState(DATA_BJARNGRIM, DONE);
+            instance->SetBossState(DATA_BJARNGRIM, DONE);
         }
 
         /// @todo remove when removal is done by the core
@@ -249,7 +246,7 @@ public:
             if (m_uiChangeStance_Timer <= uiDiff)
             {
                 //wait for current spell to finish before change stance
-                if (me->IsNonMeleeSpellCasted(false))
+                if (me->IsNonMeleeSpellCast(false))
                     return;
 
                 DoRemoveStanceAura(m_uiStance);
@@ -395,7 +392,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_stormforged_lieutenantAI(creature);
+        return GetInstanceAI<npc_stormforged_lieutenantAI>(creature);
     }
 
     struct npc_stormforged_lieutenantAI : public ScriptedAI
@@ -418,13 +415,10 @@ public:
 
         void EnterCombat(Unit* who) OVERRIDE
         {
-            if (instance)
+            if (Creature* pBjarngrim = instance->instance->GetCreature(instance->GetData64(DATA_BJARNGRIM)))
             {
-                if (Creature* pBjarngrim = instance->instance->GetCreature(instance->GetData64(DATA_BJARNGRIM)))
-                {
-                    if (pBjarngrim->IsAlive() && !pBjarngrim->GetVictim())
-                        pBjarngrim->AI()->AttackStart(who);
-                }
+                if (pBjarngrim->IsAlive() && !pBjarngrim->GetVictim())
+                    pBjarngrim->AI()->AttackStart(who);
             }
         }
 
@@ -444,13 +438,10 @@ public:
 
             if (m_uiRenewSteel_Timer <= uiDiff)
             {
-                if (instance)
+                if (Creature* pBjarngrim = instance->instance->GetCreature(instance->GetData64(DATA_BJARNGRIM)))
                 {
-                    if (Creature* pBjarngrim = instance->instance->GetCreature(instance->GetData64(DATA_BJARNGRIM)))
-                    {
-                        if (pBjarngrim->IsAlive())
-                            DoCast(pBjarngrim, SPELL_RENEW_STEEL_N);
-                    }
+                    if (pBjarngrim->IsAlive())
+                        DoCast(pBjarngrim, SPELL_RENEW_STEEL_N);
                 }
                 m_uiRenewSteel_Timer = urand(10000, 14000);
             }

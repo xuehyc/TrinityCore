@@ -74,7 +74,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_medivh_bmAI(creature);
+        return GetInstanceAI<npc_medivh_bmAI>(creature);
     }
 
     struct npc_medivh_bmAI : public ScriptedAI
@@ -101,9 +101,6 @@ public:
             Life50 = true;
             Life25 = true;
 
-            if (!instance)
-                return;
-
             if (instance->GetData(TYPE_MEDIVH) == IN_PROGRESS)
                 DoCast(me, SPELL_CHANNEL, true);
             else if (me->HasAura(SPELL_CHANNEL))
@@ -113,11 +110,7 @@ public:
         }
 
         void MoveInLineOfSight(Unit* who) OVERRIDE
-
         {
-            if (!instance)
-                return;
-
             if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 10.0f))
             {
                 if (instance->GetData(TYPE_MEDIVH) == IN_PROGRESS || instance->GetData(TYPE_MEDIVH) == DONE)
@@ -179,9 +172,6 @@ public:
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
-            if (!instance)
-                return;
-
             if (SpellCorrupt_Timer)
             {
                 if (SpellCorrupt_Timer <= diff)
@@ -272,7 +262,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_time_riftAI(creature);
+        return GetInstanceAI<npc_time_riftAI>(creature);
     }
 
     struct npc_time_riftAI : public ScriptedAI
@@ -294,9 +284,6 @@ public:
 
             TimeRiftWave_Timer = 15000;
             mRiftWaveCount = 0;
-
-            if (!instance)
-                return;
 
             mPortalCount = instance->GetData(DATA_PORTAL_COUNT);
 
@@ -353,16 +340,13 @@ public:
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
-            if (!instance)
-                return;
-
             if (TimeRiftWave_Timer <= diff)
             {
                 DoSelectSummon();
                 TimeRiftWave_Timer = 15000;
             } else TimeRiftWave_Timer -= diff;
 
-            if (me->IsNonMeleeSpellCasted(false))
+            if (me->IsNonMeleeSpellCast(false))
                 return;
 
             TC_LOG_DEBUG("scripts", "npc_time_rift: not casting anylonger, i need to die.");

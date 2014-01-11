@@ -79,7 +79,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_volkhanAI(creature);
+        return GetInstanceAI<boss_volkhanAI>(creature);
     }
 
     struct boss_volkhanAI : public ScriptedAI
@@ -124,16 +124,14 @@ public:
             DespawnGolem();
             m_lGolemGUIDList.clear();
 
-            if (instance)
-                instance->SetBossState(DATA_VOLKHAN, NOT_STARTED);
+            instance->SetBossState(DATA_VOLKHAN, NOT_STARTED);
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
 
-            if (instance)
-                instance->SetBossState(DATA_VOLKHAN, IN_PROGRESS);
+            instance->SetBossState(DATA_VOLKHAN, IN_PROGRESS);
         }
 
         void AttackStart(Unit* who) OVERRIDE
@@ -154,13 +152,13 @@ public:
             Talk(SAY_DEATH);
             DespawnGolem();
 
-            if (instance)
-                instance->SetBossState(DATA_VOLKHAN, DONE);
+            instance->SetBossState(DATA_VOLKHAN, DONE);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* who) OVERRIDE
         {
-            Talk(SAY_SLAY);
+            if (who->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_SLAY);
         }
 
         void DespawnGolem()
@@ -290,7 +288,7 @@ public:
             {
                 ++m_uiHealthAmountModifier;
 
-                if (me->IsNonMeleeSpellCasted(false))
+                if (me->IsNonMeleeSpellCast(false))
                     me->InterruptNonMeleeSpells(false);
 
                 Talk(SAY_FORGE);
@@ -415,7 +413,7 @@ public:
                 me->AttackStop();
                 // me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);  //Set in DB
                 // me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); //Set in DB
-                if (me->IsNonMeleeSpellCasted(false))
+                if (me->IsNonMeleeSpellCast(false))
                     me->InterruptNonMeleeSpells(false);
                 if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
                     me->GetMotionMaster()->MovementExpired();

@@ -29,9 +29,9 @@ enum Spells
     SPELL_SPARK                                   = 47751,
     H_SPELL_SPARK                                 = 57062,
     SPELL_RIFT_SHIELD                             = 47748,
-    SPELL_CHARGE_RIFT                             = 47747, //Works wrong (affect players, not rifts)
-    SPELL_CREATE_RIFT                             = 47743, //Don't work, using WA
-    SPELL_ARCANE_ATTRACTION                       = 57063, //No idea, when it's used
+    SPELL_CHARGE_RIFT                             = 47747, // Works wrong (affect players, not rifts)
+    SPELL_CREATE_RIFT                             = 47743, // Don't work, using WA
+    SPELL_ARCANE_ATTRACTION                       = 57063, // No idea, when it's used
 };
 
 enum Adds
@@ -45,14 +45,16 @@ enum Yells
     SAY_AGGRO                                     = 0,
     SAY_DEATH                                     = 1,
     SAY_RIFT                                      = 2,
-    SAY_SHIELD                                    = 3
+    SAY_SHIELD                                    = 3,
+    SAY_RIFT_EMOTE                                = 4, // Needs to be added to script
+    SAY_SHIELD_EMOTE                              = 5  // Needs to be added to script
 };
 
 enum RiftSpells
 {
     SPELL_CHAOTIC_ENERGY_BURST                    = 47688,
     SPELL_CHARGED_CHAOTIC_ENERGY_BURST            = 47737,
-    SPELL_ARCANEFORM                              = 48019, //Chaotic Rift visual
+    SPELL_ARCANEFORM                              = 48019, // Chaotic Rift visual
 };
 
 Position const RiftLocation[6] =
@@ -97,24 +99,21 @@ class boss_anomalus : public CreatureScript
                 uiChaoticRiftGUID = 0;
                 chaosTheory = true;
 
-                if (instance)
-                    instance->SetData(DATA_ANOMALUS_EVENT, NOT_STARTED);
+                instance->SetData(DATA_ANOMALUS_EVENT, NOT_STARTED);
             }
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 Talk(SAY_AGGRO);
 
-                if (instance)
-                    instance->SetData(DATA_ANOMALUS_EVENT, IN_PROGRESS);
+                instance->SetData(DATA_ANOMALUS_EVENT, IN_PROGRESS);
             }
 
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 Talk(SAY_DEATH);
 
-                if (instance)
-                    instance->SetData(DATA_ANOMALUS_EVENT, DONE);
+                instance->SetData(DATA_ANOMALUS_EVENT, DONE);
             }
 
             uint32 GetData(uint32 type) const OVERRIDE
@@ -189,7 +188,7 @@ class boss_anomalus : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new boss_anomalusAI(creature);
+            return GetInstanceAI<boss_anomalusAI>(creature);
         }
 };
 
@@ -257,7 +256,7 @@ class npc_chaotic_rift : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_chaotic_riftAI(creature);
+            return GetInstanceAI<npc_chaotic_riftAI>(creature);
         }
 };
 

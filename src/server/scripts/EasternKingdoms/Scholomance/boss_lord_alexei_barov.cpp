@@ -36,8 +36,9 @@ EndScriptData */
 
 enum Spells
 {
-    SPELL_IMMOLATE                  = 20294, // Old ID  was 15570
-    SPELL_VEILOFSHADOW              = 17820
+    SPELL_IMMOLATE                  = 20294,
+    SPELL_VEILOFSHADOW              = 17820,
+    SPELL_UNHOLY_AURA               = 17467
 };
 
 enum Events
@@ -57,7 +58,9 @@ class boss_lord_alexei_barov : public CreatureScript
             void Reset() OVERRIDE
             {
                 _Reset();
-                me->LoadCreaturesAddon();
+
+                if (!me->HasAura(SPELL_UNHOLY_AURA))
+                    DoCast(me, SPELL_UNHOLY_AURA);
             }
 
             void EnterCombat(Unit* /*who*/) OVERRIDE

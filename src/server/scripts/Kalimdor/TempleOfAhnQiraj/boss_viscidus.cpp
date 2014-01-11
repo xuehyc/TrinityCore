@@ -267,8 +267,6 @@ class npc_glob_of_viscidus : public CreatureScript
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 InstanceScript* Instance = me->GetInstanceScript();
-                if (!Instance)
-                    return;
 
                 if (Creature* Viscidus = me->GetMap()->GetCreature(Instance->GetData64(DATA_VISCIDUS)))
                 {
@@ -293,14 +291,15 @@ class npc_glob_of_viscidus : public CreatureScript
                 if (id == ROOM_CENTER)
                 {
                     DoCast(me, SPELL_REJOIN_VISCIDUS);
-                    ((TempSummon*)me)->UnSummon();
+                    if (TempSummon* summon = me->ToTempSummon())
+                        summon->UnSummon();
                 }
             }
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_glob_of_viscidusAI(creature);
+            return GetInstanceAI<npc_glob_of_viscidusAI>(creature);
         }
 };
 

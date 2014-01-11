@@ -174,7 +174,7 @@ public:
 
             if (FrostNova_Timer <= diff)
             {
-                if (me->IsNonMeleeSpellCasted(false))
+                if (me->IsNonMeleeSpellCast(false))
                     me->InterruptNonMeleeSpells(true);
 
                 DoCast(me, SPELL_FROSTNOVA);
@@ -198,7 +198,7 @@ public:
             {
                 if (Blink_Timer <= diff)
                 {
-                    if (me->IsNonMeleeSpellCasted(false))
+                    if (me->IsNonMeleeSpellCast(false))
                         me->InterruptNonMeleeSpells(true);
 
                     //expire movement, will prevent from running right back to victim after cast
@@ -214,7 +214,7 @@ public:
 
             if (Beacon_Timer <= diff)
             {
-                if (me->IsNonMeleeSpellCasted(false))
+                if (me->IsNonMeleeSpellCast(false))
                     me->InterruptNonMeleeSpells(true);
 
                 if (!urand(0, 3))
@@ -305,7 +305,7 @@ public:
 
             if (Apprentice_Timer <= diff)
             {
-                if (me->IsNonMeleeSpellCasted(false))
+                if (me->IsNonMeleeSpellCast(false))
                     me->InterruptNonMeleeSpells(true);
 
                 DoCast(me, SPELL_ETHEREAL_APPRENTICE, true);

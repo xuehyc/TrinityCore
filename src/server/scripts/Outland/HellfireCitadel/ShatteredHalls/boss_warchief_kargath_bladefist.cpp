@@ -94,8 +94,7 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                 Talk(SAY_DEATH);
                 removeAdds();
 
-                if (instance)
-                    instance->SetBossState(DATA_KARGATH, DONE);
+                instance->SetBossState(DATA_KARGATH, DONE);
             }
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
@@ -315,7 +314,7 @@ class boss_warchief_kargath_bladefist : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new boss_warchief_kargath_bladefistAI(creature);
+            return GetInstanceAI<boss_warchief_kargath_bladefistAI>(creature);
         }
 };
 

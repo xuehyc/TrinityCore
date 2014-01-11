@@ -211,9 +211,6 @@ public:
 
         void WaypointReached(uint32 waypointId) OVERRIDE
         {
-            if (!instance)
-                return;
-
             switch (waypointId)
             {
                 case 2:
@@ -304,7 +301,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new generic_vehicleAI_toc5AI(creature);
+        return GetInstanceAI<generic_vehicleAI_toc5AI>(creature);
     }
 };
 
@@ -430,14 +427,13 @@ public:
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            if (instance)
-                instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
+            instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_warrior_toc5AI(creature);
+        return GetInstanceAI<boss_warrior_toc5AI>(creature);
     }
 };
 
@@ -511,8 +507,7 @@ public:
                 else if (instance && me->GetGUID() == instance->GetData64(DATA_GRAND_CHAMPION_3))
                     me->SetHomePosition(754.34f, 660.70f, 412.39f, 4.79f);
 
-                if (instance)
-                    instance->SetData(BOSS_GRAND_CHAMPIONS, IN_PROGRESS);
+                instance->SetData(BOSS_GRAND_CHAMPIONS, IN_PROGRESS);
 
                 EnterEvadeMode();
                 bHome = true;
@@ -569,14 +564,13 @@ public:
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            if (instance)
-                instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
+            instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_mage_toc5AI(creature);
+        return GetInstanceAI<boss_mage_toc5AI>(creature);
     }
 };
 
@@ -656,8 +650,7 @@ public:
                 else if (instance && me->GetGUID() == instance->GetData64(DATA_GRAND_CHAMPION_3))
                     me->SetHomePosition(754.34f, 660.70f, 412.39f, 4.79f);
 
-                if (instance)
-                    instance->SetData(BOSS_GRAND_CHAMPIONS, IN_PROGRESS);
+                instance->SetData(BOSS_GRAND_CHAMPIONS, IN_PROGRESS);
 
                 EnterEvadeMode();
                 bHome = true;
@@ -716,14 +709,13 @@ public:
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            if (instance)
-                instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
+            instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_shaman_toc5AI(creature);
+        return GetInstanceAI<boss_shaman_toc5AI>(creature);
     }
 };
 
@@ -802,8 +794,7 @@ public:
                 else if (instance && me->GetGUID() == instance->GetData64(DATA_GRAND_CHAMPION_3))
                     me->SetHomePosition(754.34f, 660.70f, 412.39f, 4.79f);
 
-                if (instance)
-                    instance->SetData(BOSS_GRAND_CHAMPIONS, IN_PROGRESS);
+                instance->SetData(BOSS_GRAND_CHAMPIONS, IN_PROGRESS);
 
                 EnterEvadeMode();
                 bHome = true;
@@ -872,14 +863,13 @@ public:
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            if (instance)
-                instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
+            instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_hunter_toc5AI(creature);
+        return GetInstanceAI<boss_hunter_toc5AI>(creature);
     }
 };
 
@@ -950,8 +940,7 @@ public:
                 else if (instance && me->GetGUID() == instance->GetData64(DATA_GRAND_CHAMPION_3))
                     me->SetHomePosition(754.34f, 660.70f, 412.39f, 4.79f);
 
-                if (instance)
-                    instance->SetData(BOSS_GRAND_CHAMPIONS, IN_PROGRESS);
+                instance->SetData(BOSS_GRAND_CHAMPIONS, IN_PROGRESS);
 
                 EnterEvadeMode();
                 bHome = true;
@@ -993,14 +982,13 @@ public:
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            if (instance)
-                instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
+            instance->SetData(BOSS_GRAND_CHAMPIONS, DONE);
         }
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_rouge_toc5AI(creature);
+        return GetInstanceAI<boss_rouge_toc5AI>(creature);
     }
 };
 

@@ -442,7 +442,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_rend_blackhandAI(creature);
+        return GetInstanceAI<boss_rend_blackhandAI>(creature);
     }
 };
 

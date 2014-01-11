@@ -314,8 +314,7 @@ public:
 
             FindGameObjects();
 
-            if (instance)
-                instance->SetData(DATA_ABOMINATION_KILLED, 0);
+            instance->SetData(DATA_ABOMINATION_KILLED, 0);
 
             if (GameObject* pKTTrigger = me->GetMap()->GetGameObject(KTTriggerGUID))
             {
@@ -653,7 +652,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_kelthuzadAI(creature);
+        return GetInstanceAI<boss_kelthuzadAI>(creature);
     }
 };
 
@@ -773,7 +772,7 @@ class npc_kelthuzad_abomination : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_kelthuzad_abominationAI(creature);
+            return GetInstanceAI<npc_kelthuzad_abominationAI>(creature);
         }
 };
 

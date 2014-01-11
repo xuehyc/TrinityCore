@@ -228,7 +228,7 @@ class boss_omor_the_unscarred : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new boss_omor_the_unscarredAI(creature);
+            return GetInstanceAI<boss_omor_the_unscarredAI>(creature);
         }
 };
 

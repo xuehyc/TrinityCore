@@ -119,7 +119,7 @@ public:
         {
             Talk(SAY_SUMMON);
 
-            if (me->IsNonMeleeSpellCasted(false))
+            if (me->IsNonMeleeSpellCast(false))
                 me->InterruptNonMeleeSpells(false);
 
             DoCast(me, SPELL_SUMMON_SYTH_ARCANE, true);   //front

@@ -543,7 +543,7 @@ class boss_toc_champion_controller : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new boss_toc_champion_controllerAI(creature);
+            return GetInstanceAI<boss_toc_champion_controllerAI>(creature);
         }
 };
 
@@ -563,9 +563,8 @@ struct boss_faction_championsAI : public BossAI
 
     void JustReachedHome() OVERRIDE
     {
-        if (instance)
-            if (Creature* pChampionController = Unit::GetCreature((*me), instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
-                pChampionController->AI()->SetData(2, FAIL);
+        if (Creature* pChampionController = Unit::GetCreature((*me), instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
+            pChampionController->AI()->SetData(2, FAIL);
         me->DespawnOrUnsummon();
     }
 
@@ -614,18 +613,16 @@ struct boss_faction_championsAI : public BossAI
     void JustDied(Unit* /*killer*/) OVERRIDE
     {
         if (_aiType != AI_PET)
-            if (instance)
-                if (Creature* pChampionController = Unit::GetCreature((*me), instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
-                    pChampionController->AI()->SetData(2, DONE);
+            if (Creature* pChampionController = Unit::GetCreature((*me), instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
+                pChampionController->AI()->SetData(2, DONE);
     }
 
     void EnterCombat(Unit* /*who*/) OVERRIDE
     {
         DoCast(me, SPELL_ANTI_AOE, true);
         _EnterCombat();
-        if (instance)
-            if (Creature* pChampionController = Unit::GetCreature((*me), instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
-                pChampionController->AI()->SetData(2, IN_PROGRESS);
+        if (Creature* pChampionController = Unit::GetCreature((*me), instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
+            pChampionController->AI()->SetData(2, IN_PROGRESS);
     }
 
     void KilledUnit(Unit* who) OVERRIDE
@@ -639,20 +636,17 @@ struct boss_faction_championsAI : public BossAI
                 if (Player* player = players.begin()->GetSource())
                     TeamInInstance = player->GetTeam();
 
-            if (instance)
+            if (TeamInInstance == ALLIANCE)
             {
-                if (TeamInInstance == ALLIANCE)
-                {
-                    if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_VARIAN)))
-                        temp->AI()->Talk(SAY_KILL_PLAYER);
-                }
-                else
-                    if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_GARROSH)))
-                        temp->AI()->Talk(SAY_KILL_PLAYER);
-
-
-                instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
+                if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_VARIAN)))
+                    temp->AI()->Talk(SAY_KILL_PLAYER);
             }
+            else
+                if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_GARROSH)))
+                    temp->AI()->Talk(SAY_KILL_PLAYER);
+
+
+            instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
         }
     }
 
@@ -843,7 +837,7 @@ class npc_toc_druid : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_druidAI(creature);
+            return GetInstanceAI<npc_toc_druidAI>(creature);
         }
 };
 
@@ -936,7 +930,7 @@ class npc_toc_shaman : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_shamanAI(creature);
+            return GetInstanceAI<npc_toc_shamanAI>(creature);
         }
 };
 
@@ -1040,7 +1034,7 @@ class npc_toc_paladin : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_paladinAI(creature);
+            return GetInstanceAI<npc_toc_paladinAI>(creature);
         }
 };
 
@@ -1125,7 +1119,7 @@ class npc_toc_priest : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_priestAI(creature);
+            return GetInstanceAI<npc_toc_priestAI>(creature);
         }
 };
 
@@ -1223,7 +1217,7 @@ class npc_toc_shadow_priest : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_shadow_priestAI(creature);
+            return GetInstanceAI<npc_toc_shadow_priestAI>(creature);
         }
 };
 
@@ -1314,7 +1308,7 @@ class npc_toc_warlock : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_warlockAI(creature);
+            return GetInstanceAI<npc_toc_warlockAI>(creature);
         }
 };
 
@@ -1408,7 +1402,7 @@ class npc_toc_mage : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_mageAI(creature);
+            return GetInstanceAI<npc_toc_mageAI>(creature);
         }
 };
 
@@ -1510,7 +1504,7 @@ class npc_toc_hunter : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_hunterAI(creature);
+            return GetInstanceAI<npc_toc_hunterAI>(creature);
         }
 };
 
@@ -1602,7 +1596,7 @@ class npc_toc_boomkin : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_boomkinAI(creature);
+            return GetInstanceAI<npc_toc_boomkinAI>(creature);
         }
 };
 
@@ -1706,7 +1700,7 @@ class npc_toc_warrior : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_warriorAI(creature);
+            return GetInstanceAI<npc_toc_warriorAI>(creature);
         }
 };
 
@@ -1802,7 +1796,7 @@ class npc_toc_dk : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_dkAI(creature);
+            return GetInstanceAI<npc_toc_dkAI>(creature);
         }
 };
 
@@ -1907,7 +1901,7 @@ class npc_toc_rogue : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_rogueAI(creature);
+            return GetInstanceAI<npc_toc_rogueAI>(creature);
         }
 };
 
@@ -2033,7 +2027,7 @@ class npc_toc_enh_shaman : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_enh_shamanAI(creature);
+            return GetInstanceAI<npc_toc_enh_shamanAI>(creature);
         }
 };
 
@@ -2139,7 +2133,7 @@ class npc_toc_retro_paladin : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_retro_paladinAI(creature);
+            return GetInstanceAI<npc_toc_retro_paladinAI>(creature);
         }
 };
 
@@ -2191,7 +2185,7 @@ class npc_toc_pet_warlock : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_pet_warlockAI(creature);
+            return GetInstanceAI<npc_toc_pet_warlockAI>(creature);
         }
 };
 
@@ -2231,7 +2225,7 @@ class npc_toc_pet_hunter : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_toc_pet_hunterAI(creature);
+            return GetInstanceAI<npc_toc_pet_hunterAI>(creature);
         }
 };
 

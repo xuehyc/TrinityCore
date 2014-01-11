@@ -75,7 +75,7 @@ enum Spells
     SPELL_SHADOW_CAGE          = 30168,
     SPELL_SHADOW_GRASP         = 30410,
     SPELL_SHADOW_GRASP_VISUAL  = 30166,
-    SPELL_MIND_EXHAUSTION      = 44032, //Casted by the cubes when channeling ends
+    SPELL_MIND_EXHAUSTION      = 44032, //Cast by the cubes when channeling ends
     SPELL_SHADOW_CAGE_C        = 30205,
     SPELL_SHADOW_GRASP_C       = 30207,
     SPELL_SHADOW_BOLT_VOLLEY   = 30510,
@@ -253,11 +253,8 @@ class boss_magtheridon : public CreatureScript
 
             void JustReachedHome() OVERRIDE
             {
-                if (instance)
-                {
-                    instance->SetData(DATA_MAGTHERIDON_EVENT, NOT_STARTED);
-                    instance->SetData(DATA_COLLAPSE, false);
-                }
+                instance->SetData(DATA_MAGTHERIDON_EVENT, NOT_STARTED);
+                instance->SetData(DATA_COLLAPSE, false);
             }
 
             void SetClicker(uint64 cubeGUID, uint64 clickerGUID)
@@ -318,8 +315,7 @@ class boss_magtheridon : public CreatureScript
 
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
-                if (instance)
-                    instance->SetData(DATA_MAGTHERIDON_EVENT, DONE);
+                instance->SetData(DATA_MAGTHERIDON_EVENT, DONE);
 
                 Talk(SAY_DEATH);
             }
@@ -335,8 +331,7 @@ class boss_magtheridon : public CreatureScript
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
             {
-                if (instance)
-                    instance->SetData(DATA_MAGTHERIDON_EVENT, IN_PROGRESS);
+                instance->SetData(DATA_MAGTHERIDON_EVENT, IN_PROGRESS);
                 DoZoneInCombat();
 
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -396,7 +391,7 @@ class boss_magtheridon : public CreatureScript
                 if (Quake_Timer <= diff)
                 {
                     // to avoid blastnova interruption
-                    if (!me->IsNonMeleeSpellCasted(false))
+                    if (!me->IsNonMeleeSpellCast(false))
                     {
                         DoCast(me, SPELL_QUAKE_TRIGGER, true);
                         Quake_Timer = 50000;
@@ -425,7 +420,7 @@ class boss_magtheridon : public CreatureScript
                     Blaze_Timer -= diff;
 
                 if (!Phase3 && HealthBelowPct(30)
-                    && !me->IsNonMeleeSpellCasted(false) // blast nova
+                    && !me->IsNonMeleeSpellCast(false) // blast nova
                     && !me->HasUnitState(UNIT_STATE_STUNNED)) // shadow cage and earthquake
                 {
                     Phase3 = true;
@@ -433,8 +428,7 @@ class boss_magtheridon : public CreatureScript
                     DoCast(me, SPELL_CAMERA_SHAKE, true);
                     DoCast(me, SPELL_DEBRIS_KNOCKDOWN, true);
 
-                    if (instance)
-                        instance->SetData(DATA_COLLAPSE, true);
+                    instance->SetData(DATA_COLLAPSE, true);
                 }
 
                 if (Phase3)
@@ -461,7 +455,7 @@ class boss_magtheridon : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new boss_magtheridonAI(creature);
+            return GetInstanceAI<boss_magtheridonAI>(creature);
         }
 };
 
@@ -502,8 +496,7 @@ class npc_hellfire_channeler : public CreatureScript
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
             {
-                if (instance)
-                    instance->SetData(DATA_CHANNELER_EVENT, IN_PROGRESS);
+                instance->SetData(DATA_CHANNELER_EVENT, IN_PROGRESS);
 
                 me->InterruptNonMeleeSpells(false);
                 DoZoneInCombat();
@@ -511,8 +504,7 @@ class npc_hellfire_channeler : public CreatureScript
 
             void JustReachedHome() OVERRIDE
             {
-                if (instance)
-                    instance->SetData(DATA_CHANNELER_EVENT, NOT_STARTED);
+                instance->SetData(DATA_CHANNELER_EVENT, NOT_STARTED);
 
                 DoCast(me, SPELL_SHADOW_GRASP_C, false);
             }
@@ -530,8 +522,7 @@ class npc_hellfire_channeler : public CreatureScript
 
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
-                if (instance)
-                    instance->SetData(DATA_CHANNELER_EVENT, DONE);
+                instance->SetData(DATA_CHANNELER_EVENT, DONE);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -580,7 +571,7 @@ class npc_hellfire_channeler : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_hellfire_channelerAI(creature);
+            return GetInstanceAI<npc_hellfire_channelerAI>(creature);
         }
 };
 

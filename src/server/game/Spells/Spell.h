@@ -213,7 +213,7 @@ enum SpellEffectHandleMode
 
 class Spell
 {
-    friend void Unit::SetCurrentCastedSpell(Spell* pSpell);
+    friend void Unit::SetCurrentCastSpell(Spell* pSpell);
     friend class SpellScript;
     public:
 

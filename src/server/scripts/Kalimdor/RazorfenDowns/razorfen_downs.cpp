@@ -182,14 +182,14 @@ public:
         {
             if (channeling)
             {
-                Talk(SAY_WATCH_OUT, who->GetGUID());
+                Talk(SAY_WATCH_OUT, who);
             }
             else
             {
                 events.ScheduleEvent(EVENT_FIREBALL, 1000);
                 events.ScheduleEvent(EVENT_FROST_NOVA, urand(8000, 12000));
                 if (urand(0, 100) > 40)
-                    Talk(SAY_AGGRO, who->GetGUID());
+                    Talk(SAY_AGGRO, who);
             }
         }
 
@@ -325,7 +325,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_belnistraszAI(creature);
+        return GetInstanceAI<npc_belnistraszAI>(creature);
     }
 };
 
@@ -345,9 +345,6 @@ public:
 
         void SetData(uint32 /*type*/, uint32 data) OVERRIDE
         {
-            if (!instance)
-                return;
-
             if (data < 7)
             {
                 me->SummonCreature(NPC_WITHERED_BATTLE_BOAR, me->GetPositionX(),  me->GetPositionY(),  me->GetPositionZ(),  me->GetOrientation());
@@ -366,7 +363,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_idol_room_spawnerAI(creature);
+        return GetInstanceAI<npc_idol_room_spawnerAI>(creature);
     }
 };
 
@@ -401,8 +398,7 @@ public:
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            if (instance)
-                instance->SetData(DATA_WAVE, me->GetEntry());
+            instance->SetData(DATA_WAVE, me->GetEntry());
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
@@ -437,7 +433,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_tomb_creatureAI(creature);
+        return GetInstanceAI<npc_tomb_creatureAI>(creature);
     }
 };
 

@@ -106,6 +106,9 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
+        if (!creature->GetInstanceScript())
+            return NULL;
+
         hyjalAI* ai = new hyjalAI(creature);
 
         ai->Reset();
@@ -188,6 +191,9 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
+        if (!creature->GetInstanceScript())
+            return NULL;
+
         hyjalAI* ai = new hyjalAI(creature);
 
         ai->Reset();
@@ -213,6 +219,9 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
+        if (!creature->GetInstanceScript())
+            return NULL;
+
         hyjalAI* ai = new hyjalAI(creature);
         ai->Reset();
         ai->EnterEvadeMode();

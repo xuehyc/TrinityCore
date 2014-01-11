@@ -79,13 +79,13 @@ public:
             switch (waypointId)
             {
                 case 1:
-                    Talk(SAY_START, player->GetGUID());
+                    Talk(SAY_START, player);
                     break;
                 case 10:
                     Talk(SAY_PROGRESS);
                     break;
                 case 13:
-                    Talk(SAY_LAST, player->GetGUID());
+                    Talk(SAY_LAST, player);
                     player->GroupEventHappens(QUEST_ESCORTING, me);
                     break;
                 case 15:
@@ -115,7 +115,7 @@ public:
 
         void EnterCombat(Unit* who)
         {
-            Talk(SAY_AGGRO, who->GetGUID());
+            Talk(SAY_AGGRO, who);
         }
     };
 
@@ -123,7 +123,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_ESCORTING)
         {
-            creature->AI()->Talk(SAY_QUESTACCEPT, player->GetGUID());
+            creature->AI()->Talk(SAY_QUESTACCEPT, player);
 
             if (npc_escortAI* pEscortAI = CAST_AI(npc_deathstalker_erland::npc_deathstalker_erlandAI, creature->AI()))
                 pEscortAI->Start(true, false, player->GetGUID());

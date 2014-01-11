@@ -474,11 +474,11 @@ public:
                 switch (AnimationCount)
                 {
                     case 0:
-                        Talk(ANACHRONOS_SAY_1, Fandral->GetGUID());
+                        Talk(ANACHRONOS_SAY_1, Fandral);
                         break;
                     case 1:
                         Fandral->SetTarget(me->GetGUID());
-                        Fandral->AI()->Talk(FANDRAL_SAY_1, me->GetGUID());
+                        Fandral->AI()->Talk(FANDRAL_SAY_1, me);
                         break;
                     case 2:
                         Fandral->SetTarget(0);
@@ -548,7 +548,7 @@ public:
                     case 21:
                         break;
                     case 22:
-                        Caelestrasz->AI()->Talk(CAELESTRASZ_SAY_2, Fandral->GetGUID());
+                        Caelestrasz->AI()->Talk(CAELESTRASZ_SAY_2, Fandral);
                         break;
                     case 23:
                         Caelestrasz->GetMotionMaster()->MoveCharge(-8065, 1530, 2.61f, 10);
@@ -570,7 +570,7 @@ public:
                         Caelestrasz->CastSpell(Caelestrasz, 54293, false);
                         break;
                     case 28:
-                        Talk(ANACHRONOS_SAY_2, Fandral->GetGUID());
+                        Talk(ANACHRONOS_SAY_2, Fandral);
                         break;
                     case 29:
                         Caelestrasz->GetMotionMaster()->MoveCharge(-8095, 1530, 50, 42);
@@ -579,7 +579,7 @@ public:
                     case 30:
                         break;
                     case 31:
-                        Talk(ANACHRONOS_SAY_3, Fandral->GetGUID());
+                        Talk(ANACHRONOS_SAY_3, Fandral);
                         break;
                     case 32:
                         Caelestrasz->SetVisible(false);
@@ -608,7 +608,7 @@ public:
                         me->SummonGameObject(GO_GLYPH_OF_AHN_QIRAJ, -8130, 1525, 17.5f, 0, 0, 0, 0, 0, 0);
                         break;
                     case 39:
-                        Talk(ANACHRONOS_SAY_5, Fandral->GetGUID());
+                        Talk(ANACHRONOS_SAY_5, Fandral);
                         break;
                     case 40:
                         Fandral->CastSpell(me, 25167, true);
@@ -638,10 +638,10 @@ public:
                         Talk(ANACHRONOS_EMOTE_1);
                         break;
                     case 48:
-                        Fandral->AI()->Talk(FANDRAL_SAY_4, me->GetGUID());
+                        Fandral->AI()->Talk(FANDRAL_SAY_4, me);
                         break;
                     case 49:
-                        Fandral->AI()->Talk(FANDRAL_SAY_5, me->GetGUID());
+                        Fandral->AI()->Talk(FANDRAL_SAY_5, me);
                         break;
                     case 50:
                         Fandral->AI()->Talk(FANDRAL_EMOTE_2);
@@ -664,7 +664,7 @@ public:
                     }
                     case 52:
                         Fandral->GetMotionMaster()->MoveCharge(-8028.75f, 1538.795f, 2.61f, 4);
-                        Fandral->AI()->Talk(ANACHRONOS_SAY_9, me->GetGUID());
+                        Fandral->AI()->Talk(ANACHRONOS_SAY_9, me);
                         break;
                     case 53:
                         Fandral->AI()->Talk(FANDRAL_SAY_6);
@@ -690,7 +690,7 @@ public:
                         break;
                     case 60:
                         if (player)
-                            Talk(ANACHRONOS_SAY_10, player->GetGUID());
+                            Talk(ANACHRONOS_SAY_10, player);
                         me->GetMotionMaster()->MoveCharge(-8113.46f, 1524.16f, 2.89f, 4);
                         break;
                     case 61:

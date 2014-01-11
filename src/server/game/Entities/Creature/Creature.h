@@ -179,6 +179,7 @@ struct CreatureTemplate
 // Benchmarked: Faster than std::map (insert/find)
 typedef UNORDERED_MAP<uint32, CreatureTemplate> CreatureTemplateContainer;
 
+#define MAX_CREATURE_BASE_DAMAGE 3
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push, N), also any gcc version not support it at some platform
 #if defined(__GNUC__)
 #pragma pack(1)
@@ -186,12 +187,15 @@ typedef UNORDERED_MAP<uint32, CreatureTemplate> CreatureTemplateContainer;
 #pragma pack(push, 1)
 #endif
 
-// Defines base stats for creatures (used to calculate HP/mana/armor).
+// Defines base stats for creatures (used to calculate HP/mana/armor/attackpower/rangedattackpower/all damage).
 struct CreatureBaseStats
 {
     uint32 BaseHealth[MAX_CREATURE_BASE_HP];
     uint32 BaseMana;
     uint32 BaseArmor;
+    uint32 AttackPower;
+    uint32 RangedAttackPower;
+    float BaseDamage[MAX_CREATURE_BASE_DAMAGE];
 
     // Helpers
 
@@ -212,6 +216,11 @@ struct CreatureBaseStats
     uint32 GenerateArmor(CreatureTemplate const* info) const
     {
         return uint32(ceil(BaseArmor * info->ModArmor));
+    }
+
+    float GenerateBaseDamage(CreatureTemplate const* info) const
+    {
+        return BaseDamage[info->expansion];
     }
 
     static CreatureBaseStats const* GetBaseStats(uint8 level, uint8 unitClass);
@@ -526,12 +535,6 @@ class Creature : public Unit, public GridObject<Creature>, public MapObject
         std::string GetAIName() const;
         std::string GetScriptName() const;
         uint32 GetScriptId() const;
-
-        void Say(int32 textId, uint32 language, uint64 TargetGuid) { MonsterSay(textId, language, TargetGuid); }
-        void Yell(int32 textId, uint32 language, uint64 TargetGuid) { MonsterYell(textId, language, TargetGuid); }
-        void TextEmote(int32 textId, uint64 TargetGuid, bool IsBossEmote = false) { MonsterTextEmote(textId, TargetGuid, IsBossEmote); }
-        void Whisper(int32 textId, uint64 receiver, bool IsBossWhisper = false) { MonsterWhisper(textId, receiver, IsBossWhisper); }
-        void YellToZone(int32 textId, uint32 language, uint64 TargetGuid) { MonsterYellToZone(textId, language, TargetGuid); }
 
         // override WorldObject function for proper name localization
         std::string const& GetNameForLocaleIdx(LocaleConstant locale_idx) const;

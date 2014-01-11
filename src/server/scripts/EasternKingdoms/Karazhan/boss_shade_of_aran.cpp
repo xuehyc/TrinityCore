@@ -90,7 +90,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_aranAI(creature);
+        return GetInstanceAI<boss_aranAI>(creature);
     }
 
     struct boss_aranAI : public ScriptedAI
@@ -151,12 +151,9 @@ public:
             Drinking = false;
             DrinkInturrupted = false;
 
-            if (instance)
-            {
-                // Not in progress
-                instance->SetData(TYPE_ARAN, NOT_STARTED);
-                instance->HandleGameObject(instance->GetData64(DATA_GO_LIBRARY_DOOR), true);
-            }
+            // Not in progress
+            instance->SetData(TYPE_ARAN, NOT_STARTED);
+            instance->HandleGameObject(instance->GetData64(DATA_GO_LIBRARY_DOOR), true);
         }
 
         void KilledUnit(Unit* /*victim*/) OVERRIDE
@@ -168,22 +165,16 @@ public:
         {
             Talk(SAY_DEATH);
 
-            if (instance)
-            {
-                instance->SetData(TYPE_ARAN, DONE);
-                instance->HandleGameObject(instance->GetData64(DATA_GO_LIBRARY_DOOR), true);
-            }
+            instance->SetData(TYPE_ARAN, DONE);
+            instance->HandleGameObject(instance->GetData64(DATA_GO_LIBRARY_DOOR), true);
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
 
-            if (instance)
-            {
-                instance->SetData(TYPE_ARAN, IN_PROGRESS);
-                instance->HandleGameObject(instance->GetData64(DATA_GO_LIBRARY_DOOR), false);
-            }
+            instance->SetData(TYPE_ARAN, IN_PROGRESS);
+            instance->HandleGameObject(instance->GetData64(DATA_GO_LIBRARY_DOOR), false);
         }
 
         void FlameWreathEffect()
@@ -230,11 +221,8 @@ public:
             {
                 if (CloseDoorTimer <= diff)
                 {
-                    if (instance)
-                    {
-                        instance->HandleGameObject(instance->GetData64(DATA_GO_LIBRARY_DOOR), false);
-                        CloseDoorTimer = 0;
-                    }
+                    instance->HandleGameObject(instance->GetData64(DATA_GO_LIBRARY_DOOR), false);
+                    CloseDoorTimer = 0;
                 } else CloseDoorTimer -= diff;
             }
 
@@ -309,7 +297,7 @@ public:
             //Normal casts
             if (NormalCastTimer <= diff)
             {
-                if (!me->IsNonMeleeSpellCasted(false))
+                if (!me->IsNonMeleeSpellCast(false))
                 {
                     Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
                     if (!target)
@@ -490,10 +478,10 @@ public:
 
         void SpellHit(Unit* /*pAttacker*/, const SpellInfo* Spell) OVERRIDE
         {
-            //We only care about interrupt effects and only if they are durring a spell currently being casted
+            //We only care about interrupt effects and only if they are durring a spell currently being cast
             if ((Spell->Effects[0].Effect != SPELL_EFFECT_INTERRUPT_CAST &&
                 Spell->Effects[1].Effect != SPELL_EFFECT_INTERRUPT_CAST &&
-                Spell->Effects[2].Effect != SPELL_EFFECT_INTERRUPT_CAST) || !me->IsNonMeleeSpellCasted(false))
+                Spell->Effects[2].Effect != SPELL_EFFECT_INTERRUPT_CAST) || !me->IsNonMeleeSpellCast(false))
                 return;
 
             //Interrupt effect

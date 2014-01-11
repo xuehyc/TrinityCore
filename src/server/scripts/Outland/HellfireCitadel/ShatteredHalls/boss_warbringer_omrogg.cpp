@@ -171,8 +171,7 @@ class boss_warbringer_omrogg : public CreatureScript
                 ThunderClap_Timer = 15000;
                 ResetThreat_Timer = 30000;
 
-                if (instance)
-                    instance->SetData(DATA_OMROGG, NOT_STARTED);   //End boss can use this later. O'mrogg must be defeated(DONE) or he will come to aid.
+                instance->SetData(DATA_OMROGG, NOT_STARTED);   //End boss can use this later. O'mrogg must be defeated(DONE) or he will come to aid.
             }
 
             void DoYellForThreat()
@@ -208,8 +207,7 @@ class boss_warbringer_omrogg : public CreatureScript
                     AggroYell = true;
                 }
 
-                if (instance)
-                    instance->SetBossState(DATA_OMROGG, IN_PROGRESS);
+                instance->SetBossState(DATA_OMROGG, IN_PROGRESS);
             }
 
             void JustSummoned(Creature* summoned) OVERRIDE
@@ -263,8 +261,7 @@ class boss_warbringer_omrogg : public CreatureScript
 
                 RightHead->AI()->SetData(SETDATA_DATA, SETDATA_YELL);
 
-                if (instance)
-                    instance->SetBossState(DATA_OMROGG, DONE);
+                instance->SetBossState(DATA_OMROGG, DONE);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -392,7 +389,7 @@ class boss_warbringer_omrogg : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new boss_warbringer_omroggAI(creature);
+            return GetInstanceAI<boss_warbringer_omroggAI>(creature);
         }
 };
 
@@ -442,7 +439,7 @@ class npc_omrogg_heads : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
-            return new npc_omrogg_headsAI(creature);
+            return GetInstanceAI<npc_omrogg_headsAI>(creature);
         }
 };
 

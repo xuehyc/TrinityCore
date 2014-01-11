@@ -144,7 +144,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_lady_vashjAI(creature);
+        return GetInstanceAI<boss_lady_vashjAI>(creature);
     }
 
     struct boss_lady_vashjAI : public ScriptedAI
@@ -219,8 +219,7 @@ public:
                 }
             }
 
-            if (instance)
-                instance->SetData(DATA_LADYVASHJEVENT, NOT_STARTED);
+            instance->SetData(DATA_LADYVASHJEVENT, NOT_STARTED);
 
             me->SetCorpseDelay(1000*60*60);
         }
@@ -241,8 +240,7 @@ public:
         {
             Talk(SAY_DEATH);
 
-            if (instance)
-                instance->SetData(DATA_LADYVASHJEVENT, DONE);
+            instance->SetData(DATA_LADYVASHJEVENT, DONE);
         }
 
         void StartEvent()
@@ -251,21 +249,17 @@ public:
 
             Phase = 1;
 
-            if (instance)
-                instance->SetData(DATA_LADYVASHJEVENT, IN_PROGRESS);
+            instance->SetData(DATA_LADYVASHJEVENT, IN_PROGRESS);
         }
 
         void EnterCombat(Unit* who) OVERRIDE
         {
-            if (instance)
-            {
-                // remove old tainted cores to prevent cheating in phase 2
-                Map* map = me->GetMap();
-                Map::PlayerList const &PlayerList = map->GetPlayers();
-                for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
-                    if (Player* player = itr->GetSource())
-                        player->DestroyItemCount(31088, 1, true);
-            }
+            // remove old tainted cores to prevent cheating in phase 2
+            Map* map = me->GetMap();
+            Map::PlayerList const &PlayerList = map->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+                if (Player* player = itr->GetSource())
+                    player->DestroyItemCount(31088, 1, true);
             StartEvent(); // this is EnterCombat(), so were are 100% in combat, start the event
 
             if (Phase != 2)
@@ -560,7 +554,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_enchanted_elementalAI(creature);
+        return GetInstanceAI<npc_enchanted_elementalAI>(creature);
     }
 
     struct npc_enchanted_elementalAI : public ScriptedAI
@@ -584,8 +578,6 @@ public:
             Move = 0;
             Phase = 1;
 
-            VashjGUID = 0;
-
             X = ElementWPPos[0][0];
             Y = ElementWPPos[0][1];
             Z = ElementWPPos[0][2];
@@ -601,8 +593,7 @@ public:
                 }
             }
 
-            if (instance)
-                VashjGUID = instance->GetData64(DATA_LADYVASHJ);
+            VashjGUID = instance->GetData64(DATA_LADYVASHJ);
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE { }
@@ -612,9 +603,6 @@ public:
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
-            if (!instance)
-                return;
-
             if (!VashjGUID)
                 return;
 
@@ -655,7 +643,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_tainted_elementalAI(creature);
+        return GetInstanceAI<npc_tainted_elementalAI>(creature);
     }
 
     struct npc_tainted_elementalAI : public ScriptedAI
@@ -678,9 +666,8 @@ public:
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            if (instance)
-                if (Creature* vashj = Unit::GetCreature((*me), instance->GetData64(DATA_LADYVASHJ)))
-                    CAST_AI(boss_lady_vashj::boss_lady_vashjAI, vashj->AI())->EventTaintedElementalDeath();
+            if (Creature* vashj = Unit::GetCreature((*me), instance->GetData64(DATA_LADYVASHJ)))
+                CAST_AI(boss_lady_vashj::boss_lady_vashjAI, vashj->AI())->EventTaintedElementalDeath();
         }
 
         void EnterCombat(Unit* who) OVERRIDE
@@ -724,7 +711,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_toxic_sporebatAI(creature);
+        return GetInstanceAI<npc_toxic_sporebatAI>(creature);
     }
 
     struct npc_toxic_sporebatAI : public ScriptedAI
@@ -794,17 +781,14 @@ public:
             // CheckTimer
             if (CheckTimer <= diff)
             {
-                if (instance)
+                // check if vashj is death
+                Unit* Vashj = Unit::GetUnit(*me, instance->GetData64(DATA_LADYVASHJ));
+                if (!Vashj || !Vashj->IsAlive() || CAST_AI(boss_lady_vashj::boss_lady_vashjAI, Vashj->ToCreature()->AI())->Phase != 3)
                 {
-                    // check if vashj is death
-                    Unit* Vashj = Unit::GetUnit(*me, instance->GetData64(DATA_LADYVASHJ));
-                    if (!Vashj || !Vashj->IsAlive() || CAST_AI(boss_lady_vashj::boss_lady_vashjAI, Vashj->ToCreature()->AI())->Phase != 3)
-                    {
-                        // remove
-                        me->setDeathState(DEAD);
-                        me->RemoveCorpse();
-                        me->setFaction(35);
-                    }
+                    // remove
+                    me->setDeathState(DEAD);
+                    me->RemoveCorpse();
+                    me->setFaction(35);
                 }
 
                 CheckTimer = 1000;
@@ -823,7 +807,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_shield_generator_channelAI(creature);
+        return GetInstanceAI<npc_shield_generator_channelAI>(creature);
     }
 
     struct npc_shield_generator_channelAI : public ScriptedAI
@@ -835,12 +819,12 @@ public:
 
         InstanceScript* instance;
         uint32 CheckTimer;
-        bool Casted;
+        bool Cast;
 
         void Reset() OVERRIDE
         {
             CheckTimer = 0;
-            Casted = false;
+            Cast = false;
             me->SetDisplayId(11686); // invisible
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -851,9 +835,6 @@ public:
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
-            if (!instance)
-                return;
-
             if (CheckTimer <= diff)
             {
                 Unit* vashj = Unit::GetUnit(*me, instance->GetData64(DATA_LADYVASHJ));
@@ -861,10 +842,10 @@ public:
                 if (vashj && vashj->IsAlive())
                 {
                     // start visual channel
-                    if (!Casted || !vashj->HasAura(SPELL_MAGIC_BARRIER))
+                    if (!Cast || !vashj->HasAura(SPELL_MAGIC_BARRIER))
                     {
                         DoCast(vashj, SPELL_MAGIC_BARRIER, true);
-                        Casted = true;
+                        Cast = true;
                     }
                 }
                 CheckTimer = 1000;

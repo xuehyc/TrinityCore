@@ -254,7 +254,7 @@ public:
 
             if (!Avatar_summoned && HealthBelowPct(25))
             {
-                if (me->IsNonMeleeSpellCasted(false))
+                if (me->IsNonMeleeSpellCast(false))
                     me->InterruptNonMeleeSpells(true);
 
                 Talk(SAY_SUMMON);
@@ -270,7 +270,7 @@ public:
                 {
                     if (target->GetTypeId() == TYPEID_PLAYER)
                     {
-                        if (me->IsNonMeleeSpellCasted(false))
+                        if (me->IsNonMeleeSpellCast(false))
                             me->InterruptNonMeleeSpells(true);
 
                         Talk(SAY_ROAR);

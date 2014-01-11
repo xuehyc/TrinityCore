@@ -114,7 +114,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_priestess_delrissaAI(creature);
+        return GetInstanceAI<boss_priestess_delrissaAI>(creature);
     }
 
     struct boss_priestess_delrissaAI : public ScriptedAI
@@ -157,8 +157,7 @@ public:
         //this mean she at some point evaded
         void JustReachedHome() OVERRIDE
         {
-            if (instance)
-                 instance->SetData(DATA_DELRISSA_EVENT, FAIL);
+            instance->SetData(DATA_DELRISSA_EVENT, FAIL);
         }
 
         void EnterCombat(Unit* who) OVERRIDE
@@ -177,8 +176,7 @@ public:
                 }
             }
 
-            if (instance)
-                instance->SetData(DATA_DELRISSA_EVENT, IN_PROGRESS);
+            instance->SetData(DATA_DELRISSA_EVENT, IN_PROGRESS);
         }
 
         void InitializeLackeys()
@@ -244,9 +242,6 @@ public:
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
-
-            if (!instance)
-                return;
 
             if (instance->GetData(DATA_DELRISSA_DEATH_COUNT) == MAX_ACTIVE_LACKEY)
                 instance->SetData(DATA_DELRISSA_EVENT, DONE);
@@ -397,36 +392,30 @@ struct boss_priestess_lackey_commonAI : public ScriptedAI
         if (!who)
             return;
 
-        if (instance)
+        for (uint8 i = 0; i < MAX_ACTIVE_LACKEY; ++i)
         {
-            for (uint8 i = 0; i < MAX_ACTIVE_LACKEY; ++i)
+            if (Unit* pAdd = Unit::GetUnit(*me, m_auiLackeyGUIDs[i]))
             {
-                if (Unit* pAdd = Unit::GetUnit(*me, m_auiLackeyGUIDs[i]))
+                if (!pAdd->GetVictim() && pAdd != me)
                 {
-                    if (!pAdd->GetVictim() && pAdd != me)
-                    {
-                        who->SetInCombatWith(pAdd);
-                        pAdd->AddThreat(who, 0.0f);
-                    }
+                    who->SetInCombatWith(pAdd);
+                    pAdd->AddThreat(who, 0.0f);
                 }
             }
+        }
 
-            if (Creature* pDelrissa = Unit::GetCreature(*me, instance->GetData64(DATA_DELRISSA)))
+        if (Creature* pDelrissa = Unit::GetCreature(*me, instance->GetData64(DATA_DELRISSA)))
+        {
+            if (pDelrissa->IsAlive() && !pDelrissa->GetVictim())
             {
-                if (pDelrissa->IsAlive() && !pDelrissa->GetVictim())
-                {
-                    who->SetInCombatWith(pDelrissa);
-                    pDelrissa->AddThreat(who, 0.0f);
-                }
+                who->SetInCombatWith(pDelrissa);
+                pDelrissa->AddThreat(who, 0.0f);
             }
         }
     }
 
     void JustDied(Unit* /*killer*/) OVERRIDE
     {
-        if (!instance)
-            return;
-
         Creature* pDelrissa = Unit::GetCreature(*me, instance->GetData64(DATA_DELRISSA));
         uint32 uiLackeyDeathCount = instance->GetData(DATA_DELRISSA_DEATH_COUNT);
 
@@ -456,18 +445,12 @@ struct boss_priestess_lackey_commonAI : public ScriptedAI
 
     void KilledUnit(Unit* victim) OVERRIDE
     {
-        if (!instance)
-            return;
-
         if (Creature* Delrissa = Unit::GetCreature(*me, instance->GetData64(DATA_DELRISSA)))
             Delrissa->AI()->KilledUnit(victim);
     }
 
     void AcquireGUIDs()
     {
-        if (!instance)
-            return;
-
         if (Creature* Delrissa = (Unit::GetCreature(*me, instance->GetData64(DATA_DELRISSA))))
         {
             for (uint8 i = 0; i < MAX_ACTIVE_LACKEY; ++i)
@@ -508,7 +491,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_kagani_nightstrikeAI(creature);
+        return GetInstanceAI<boss_kagani_nightstrikeAI>(creature);
     }
 
     struct boss_kagani_nightstrikeAI : public boss_priestess_lackey_commonAI
@@ -612,7 +595,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_ellris_duskhallowAI(creature);
+        return GetInstanceAI<boss_ellris_duskhallowAI>(creature);
     }
 
     struct boss_ellris_duskhallowAI : public boss_priestess_lackey_commonAI
@@ -703,7 +686,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_eramas_brightblazeAI(creature);
+        return GetInstanceAI<boss_eramas_brightblazeAI>(creature);
     }
 
     struct boss_eramas_brightblazeAI : public boss_priestess_lackey_commonAI
@@ -764,7 +747,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_yazzaiAI(creature);
+        return GetInstanceAI<boss_yazzaiAI>(creature);
     }
 
     struct boss_yazzaiAI : public boss_priestess_lackey_commonAI
@@ -894,7 +877,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_warlord_salarisAI(creature);
+        return GetInstanceAI<boss_warlord_salarisAI>(creature);
     }
 
     struct boss_warlord_salarisAI : public boss_priestess_lackey_commonAI
@@ -1014,7 +997,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_garaxxasAI(creature);
+        return GetInstanceAI<boss_garaxxasAI>(creature);
     }
 
     struct boss_garaxxasAI : public boss_priestess_lackey_commonAI
@@ -1072,7 +1055,7 @@ public:
 
                 if (Freezing_Trap_Timer <= diff)
                 {
-                    //attempt find go summoned from spell (casted by me)
+                    //attempt find go summoned from spell (cast by me)
                     GameObject* go = me->GetGameObject(SPELL_FREEZING_TRAP);
 
                     //if we have a go, we need to wait (only one trap at a time)
@@ -1125,7 +1108,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_apokoAI(creature);
+        return GetInstanceAI<boss_apokoAI>(creature);
     }
 
     struct boss_apokoAI : public boss_priestess_lackey_commonAI
@@ -1223,7 +1206,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_zelfanAI(creature);
+        return GetInstanceAI<boss_zelfanAI>(creature);
     }
 
     struct boss_zelfanAI : public boss_priestess_lackey_commonAI

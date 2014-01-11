@@ -47,7 +47,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new boss_maleki_the_pallidAI(creature);
+        return GetInstanceAI<boss_maleki_the_pallidAI>(creature);
     }
 
     struct boss_maleki_the_pallidAI : public ScriptedAI
@@ -76,8 +76,7 @@ public:
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            if (instance)
-                instance->SetData(TYPE_PALLID, IN_PROGRESS);
+            instance->SetData(TYPE_PALLID, IN_PROGRESS);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE

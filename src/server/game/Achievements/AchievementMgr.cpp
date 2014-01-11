@@ -25,6 +25,7 @@
 #include "ArenaTeamMgr.h"
 #include "Battleground.h"
 #include "CellImpl.h"
+#include "Chat.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "DBCEnums.h"
@@ -53,19 +54,11 @@ namespace Trinity
         public:
             AchievementChatBuilder(Player const& player, ChatMsg msgtype, int32 textId, uint32 ach_id)
                 : i_player(player), i_msgtype(msgtype), i_textId(textId), i_achievementId(ach_id) { }
+
             void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
-                char const* text = sObjectMgr->GetTrinityString(i_textId, loc_idx);
-
-                data << uint8(i_msgtype);
-                data << uint32(LANG_UNIVERSAL);
-                data << uint64(i_player.GetGUID());
-                data << uint32(5);
-                data << uint64(i_player.GetGUID());
-                data << uint32(strlen(text)+1);
-                data << text;
-                data << uint8(0);
-                data << uint32(i_achievementId);
+                std::string text = sObjectMgr->GetTrinityString(i_textId, loc_idx);
+                ChatHandler::BuildChatPacket(data, i_msgtype, LANG_UNIVERSAL, &i_player, &i_player, text, i_achievementId);
             }
 
         private:
@@ -1160,7 +1153,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_SOLD: /* FIXME: for online player only currently */
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HIT_DEALT:
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HIT_RECEIVED:
-            case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEAL_CASTED:
+            case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEAL_CAST:
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALING_RECEIVED:
                 SetCriteriaProgress(achievementCriteria, miscValue1, referencePlayer, PROGRESS_HIGHEST);
                 break;
