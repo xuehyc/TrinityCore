@@ -2,8 +2,6 @@
  *
  * Copyright (C) 2011-2014 ArkCORE <http://www.arkania.net/>
  *
-=======
->>>>>>> a73e8511f923812cd0059cbd66848e7e85cd8441
  * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
