@@ -148,7 +148,7 @@ class boss_general_umbriss : public CreatureScript
                 {
                     if(Unit* unit = SelectTarget(SELECT_TARGET_RANDOM, 1))
                     {
-                        Talk(EMOTE_BLITZ, unit->GetGUID());
+                        Talk(EMOTE_BLITZ);
                         DoCast(unit, DUNGEON_MODE(BLITZ,BLITZ_H));
                     }
                     blitzTimer = 25000;

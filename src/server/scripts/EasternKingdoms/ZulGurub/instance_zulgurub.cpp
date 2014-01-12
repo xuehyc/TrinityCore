@@ -2,6 +2,8 @@
  *
  * Copyright (C) 2011-2014 ArkCORE <http://www.arkania.net/>
  *
+=======
+>>>>>>> a73e8511f923812cd0059cbd66848e7e85cd8441
  * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
@@ -116,11 +118,7 @@ class instance_zulgurub : public InstanceMapScript
             {
                 switch (go->GetEntry())
                 {
-                    case GO_VENOXIS_COIL:
-                    case GO_ARENA_DOOR_1:
                     case GO_FORCEFIELD:
-                    case GO_ZANZIL_DOOR:
-                    case GO_THE_CACHE_OF_MADNESS_DOOR:
                         AddDoor(go, false);
                         break;
                     default:
@@ -144,8 +142,6 @@ class instance_zulgurub : public InstanceMapScript
                     case DATA_RENATAKI:
                     case DATA_WUSHOOLAY:
                     case DATA_GRILEK:
-                        break;
-                    default:
                         break;
                 }
 
