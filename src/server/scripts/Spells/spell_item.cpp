@@ -353,8 +353,8 @@ class spell_item_deviate_fish : public SpellScriptLoader
 // 67019 Flask of the North
 enum FlaskOfTheNorthSpells
 {
-    SPELL_FLASK_OF_THE_NORTH_SP = 67016,
-    SPELL_FLASK_OF_THE_NORTH_AP = 67017,
+    SPELL_FLASK_OF_THE_NORTH_INT = 67016,
+    SPELL_FLASK_OF_THE_NORTH_AGI = 67017,
     SPELL_FLASK_OF_THE_NORTH_STR = 67018,
 };
 
@@ -369,42 +369,60 @@ class spell_item_flask_of_the_north : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_FLASK_OF_THE_NORTH_SP) || !sSpellMgr->GetSpellInfo(SPELL_FLASK_OF_THE_NORTH_AP) || !sSpellMgr->GetSpellInfo(SPELL_FLASK_OF_THE_NORTH_STR))
+                if (!sSpellMgr->GetSpellInfo(SPELL_FLASK_OF_THE_NORTH_INT) || !sSpellMgr->GetSpellInfo(SPELL_FLASK_OF_THE_NORTH_AGI) || !sSpellMgr->GetSpellInfo(SPELL_FLASK_OF_THE_NORTH_STR))
                     return false;
                 return true;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                Unit* caster = GetCaster();
-                std::vector<uint32> possibleSpells;
+                Player* caster = GetCaster()->ToPlayer();
+                uint32 flask_spell_id, spec_id;
+                uint8 spec;
                 switch (caster->getClass())
                 {
                     case CLASS_WARLOCK:
                     case CLASS_MAGE:
                     case CLASS_PRIEST:
-                        possibleSpells.push_back(SPELL_FLASK_OF_THE_NORTH_SP);
+                        flask_spell_id = SPELL_FLASK_OF_THE_NORTH_INT;
                         break;
                     case CLASS_DEATH_KNIGHT:
                     case CLASS_WARRIOR:
-                        possibleSpells.push_back(SPELL_FLASK_OF_THE_NORTH_STR);
+                        flask_spell_id = SPELL_FLASK_OF_THE_NORTH_STR;
                         break;
                     case CLASS_ROGUE:
                     case CLASS_HUNTER:
-                        possibleSpells.push_back(SPELL_FLASK_OF_THE_NORTH_AP);
+                        flask_spell_id = SPELL_FLASK_OF_THE_NORTH_AGI;
                         break;
                     case CLASS_DRUID:
-                    case CLASS_PALADIN:
-                        possibleSpells.push_back(SPELL_FLASK_OF_THE_NORTH_SP);
-                        possibleSpells.push_back(SPELL_FLASK_OF_THE_NORTH_STR);
-                        break;
                     case CLASS_SHAMAN:
-                        possibleSpells.push_back(SPELL_FLASK_OF_THE_NORTH_SP);
-                        possibleSpells.push_back(SPELL_FLASK_OF_THE_NORTH_AP);
+                        flask_spell_id = SPELL_FLASK_OF_THE_NORTH_AGI;
+                        // check all specs, as per user descriptions, since an inactive spec was said to still cause INT to be buffed
+                        for (spec = 0; spec < caster->GetSpecsCount(); spec++)
+                        {
+                            spec_id = caster->GetPrimaryTalentTree(spec);
+                            switch (spec_id)
+                            {
+                            case TALENT_TREE_DRUID_BALANCE:
+                            case TALENT_TREE_DRUID_RESTORATION:
+                            case TALENT_TREE_SHAMAN_ELEMENTAL:
+                            case TALENT_TREE_SHAMAN_RESTORATION:
+                                flask_spell_id = SPELL_FLASK_OF_THE_NORTH_INT;
+                                break;
+                            }
+                        }
+                        break;
+                    case CLASS_PALADIN:
+                        flask_spell_id = SPELL_FLASK_OF_THE_NORTH_STR;
+                        for (spec = 0; spec < caster->GetSpecsCount(); spec++)
+                        {
+                            spec_id = caster->GetPrimaryTalentTree(spec);
+                            if (spec_id == TALENT_TREE_PALADIN_HOLY) flask_spell_id = SPELL_FLASK_OF_THE_NORTH_INT;
+                        }
                         break;
                 }
 
-                caster->CastSpell(caster, possibleSpells[irand(0, (possibleSpells.size() - 1))], true, NULL);
+                caster->CastSpell(caster, flask_spell_id, true);
             }
 
             void Register() OVERRIDE
@@ -418,6 +436,70 @@ class spell_item_flask_of_the_north : public SpellScriptLoader
             return new spell_item_flask_of_the_north_SpellScript();
         }
 };
+
+// http://www.wowhead.com/item=58149 Flask of Enhancement
+// 79637 Flask of Enhancement
+enum FlaskOfEnhancementSpells
+{
+    SPELL_ENHANCED_STR = 79638,
+    SPELL_ENHANCED_AGI = 79639,
+    SPELL_ENHANCED_INT = 79640,
+};
+
+class spell_item_flask_of_enhancement : public SpellScriptLoader
+{
+    public:
+        spell_item_flask_of_enhancement() : SpellScriptLoader("spell_item_flask_of_enhancement") { }
+
+        class spell_item_flask_of_enhancement_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_item_flask_of_enhancement_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_ENHANCED_INT) || !sSpellMgr->GetSpellInfo(SPELL_ENHANCED_AGI) || !sSpellMgr->GetSpellInfo(SPELL_ENHANCED_STR))
+                    return false;
+                return true;
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                float stat = 0.0f;
+                uint32 flask_spell_id;
+                // Enhanced Strength
+                if (caster->GetStat(STAT_STRENGTH) > stat)
+                {
+                    flask_spell_id = SPELL_ENHANCED_STR;
+                    stat = caster->GetStat(STAT_STRENGTH);
+                }
+                // Enhanced Agility
+                if (caster->GetStat(STAT_AGILITY)  > stat)
+                {
+                    flask_spell_id = SPELL_ENHANCED_AGI;
+                    stat = caster->GetStat(STAT_AGILITY);
+                }
+                // Enhanced Intellect
+                if (caster->GetStat(STAT_INTELLECT)> stat)
+                {
+                    flask_spell_id = SPELL_ENHANCED_INT;
+                    stat = caster->GetStat(STAT_INTELLECT);
+                }
+                caster->CastSpell(caster, flask_spell_id, true, NULL);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHit += SpellEffectFn(spell_item_flask_of_enhancement_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_item_flask_of_enhancement_SpellScript();
+        }
+};
+
 
 // http://www.wowhead.com/item=10645 Gnomish Death Ray
 // 13280 Gnomish Death Ray
@@ -2527,6 +2609,7 @@ void AddSC_item_spell_scripts()
     new spell_item_desperate_defense();
     new spell_item_deviate_fish();
     new spell_item_flask_of_the_north();
+	new spell_item_flask_of_enhancement();
     new spell_item_gnomish_death_ray();
     new spell_item_make_a_wish();
     new spell_item_mingos_fortune_generator();
