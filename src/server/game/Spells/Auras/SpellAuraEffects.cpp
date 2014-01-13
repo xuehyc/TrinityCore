@@ -379,7 +379,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandlePreventResurrection,                       //314 SPELL_AURA_PREVENT_RESURRECTION todo
     &AuraEffect::HandleNoImmediateEffect,                         //315 SPELL_AURA_UNDERWATER_WALKING todo
     &AuraEffect::HandleNoImmediateEffect,                         //316 unused (4.3.4) old SPELL_AURA_PERIODIC_HASTE
-    &AuraEffect::HandleNULL,                                      //317 SPELL_AURA_MOD_SPELL_POWER_PCT
+    &AuraEffect::HandleModSpellPowerPct,                          //317 SPELL_AURA_MOD_SPELL_POWER_PCT
     &AuraEffect::HandleMastery,                                   //318 SPELL_AURA_MASTERY
     &AuraEffect::HandleModMeleeSpeedPct,                          //319 SPELL_AURA_MOD_MELEE_HASTE_3
     &AuraEffect::HandleAuraModRangedHaste,                        //320 SPELL_AURA_MOD_RANGED_HASTE_2
@@ -4448,6 +4448,28 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
     {
         // done in Player::_ApplyWeaponDependentAuraMods for SPELL_SCHOOL_MASK_NORMAL && EquippedItemClass != -1 and also for wand case
     }
+}
+
+void AuraEffect::HandleModSpellPowerPct(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+    BaseModType modType = PCT_MOD;
+
+    if (target && target->GetTypeId() == TYPEID_PLAYER)
+        if(Player* tPlayer = target->ToPlayer())
+        {
+            if (apply)
+                tPlayer->ApplySpellPowerBonus(int32(CalculatePct(target->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC), GetAmount())), apply);
+            else
+            {
+                int32 ld = target->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC);
+                ld /= 1.0 + (GetAmount() / 100.0);
+                tPlayer->ApplySpellPowerBonus(int32(CalculatePct(ld, GetAmount())), apply);
+            }
+        }
 }
 
 void AuraEffect::HandleModOffhandDamagePercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
