@@ -32,9 +32,9 @@
 class BasicEvent
 {
     public:
-        BasicEvent() 
-        { 
-            to_Abort = false; 
+        BasicEvent()
+        {
+            to_Abort = false;
             m_addTime = 0;
             m_execTime = 0;
         }
