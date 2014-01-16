@@ -28,7 +28,8 @@
 
 enum RogueSpells
 {
-	SPELL_ROGUE_BACKSTAB                         = 53,
+	SPELL_ROGUE_EVISCERATE							=2098,
+	SPELL_ROGUE_BACKSTAB							= 53,
     SPELL_ROGUE_BLADE_FLURRY                        = 13877,
     SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK           = 22482,
     SPELL_ROGUE_CHEAT_DEATH_COOLDOWN                = 31231,
@@ -1024,6 +1025,44 @@ public:
     }
 };
 
+// 2098 new inserted on 4.3.4
+class spell_rog_eviscerate : public SpellScriptLoader
+{
+   public:
+       spell_rog_eviscerate() : SpellScriptLoader("spell_rog_eviscerate") { }
+
+       class spell_rog_eviscerate_SpellScript : public SpellScript
+       {
+           PrepareSpellScript(spell_rog_eviscerate_SpellScript);		   	  
+
+		    void HandleDummy(SpellEffIndex /*effIndex*/) OVERRIDE
+            {                
+                Unit* caster = GetCaster();
+				Unit* target = GetHitUnit();
+				bool isTrainingDummy;
+
+				if(!caster || !target || caster->GetTypeId() != TYPEID_PLAYER || target->GetCreatureType() != CREATURE_TYPE_MECHANICAL)
+					return ;				
+
+				if (target->GetEntry() == 44875) isTrainingDummy=true;
+				
+				if (isTrainingDummy) caster->ToPlayer()->KilledMonsterCredit(44175, 0);				
+			}		  
+
+           void Register() OVERRIDE
+           {
+               OnEffectHitTarget += SpellEffectFn(spell_rog_eviscerate_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);			  
+           }
+       };
+
+       SpellScript* GetSpellScript() const OVERRIDE
+       {
+           return new spell_rog_eviscerate_SpellScript();
+       }
+};
+
+
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -1046,4 +1085,5 @@ void AddSC_rogue_spell_scripts()
 	new spell_rog_backstab();
 	new spell_rog_venomous_wounds();
 	new spell_rog_murderous_Intent();
+	new spell_rog_eviscerate();
 }

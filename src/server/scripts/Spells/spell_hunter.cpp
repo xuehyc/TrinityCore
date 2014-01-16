@@ -835,7 +835,7 @@ public:
 
     class spell_hun_steady_shot_SpellScript : public SpellScript
     {
-         PrepareSpellScript(spell_hun_steady_shot_SpellScript)
+        PrepareSpellScript(spell_hun_steady_shot_SpellScript)
 
         bool Validate(SpellInfo const* /*spellEntry*/)
         {
@@ -862,9 +862,7 @@ public:
             {
                 //if (target->HealthBelowPct(25))
                     caster->CastSpell(caster, SPELL_HUNTER_GENERIC_ENERGIZE_FOCUS, true);
-            }
-
-            caster->ToPlayer()->KilledMonsterCredit(44175, 0);
+            }          
         }
 
         void HandleOnHit()
@@ -874,6 +872,8 @@ public:
 
             if(!caster || !target || caster->GetTypeId() != TYPEID_PLAYER)
                 return ;
+
+			caster->ToPlayer()->KilledMonsterCredit(44175, 0);
 
             // Improved Steady Shot Rank 1
             if (caster->HasAura(53221))
@@ -909,7 +909,7 @@ public:
 
         void Register ()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+            OnEffectHitTarget += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
             OnHit += SpellHitFn(spell_hun_steady_shot_SpellScript::HandleOnHit);
         }
     };
