@@ -15,15 +15,16 @@
 * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "baradin_hold.h"
-#include "InstanceScript.h"
 #include "ScriptMgr.h"
+#include "InstanceScript.h"
+#include "baradin_hold.h"
 
 DoorData const doorData[] =
 {
-    { GO_ARGALOTH_DOOR,  DATA_ARGALOTH, DOOR_TYPE_ROOM,  BOUNDARY_NONE },
-    { GO_OCCUTHAR_DOOR,  DATA_OCCUTHAR, DOOR_TYPE_ROOM,  BOUNDARY_NONE },
-    { GO_ALIZABAL_DOOR,       DATA_ALIZABAL, DOOR_TYPE_ROOM,  BOUNDARY_NONE },
+    { GO_ARGALOTH_DOOR,  DATA_ARGALOTH, DOOR_TYPE_ROOM, BOUNDARY_NONE },
+    { GO_OCCUTHAR_DOOR,  DATA_OCCUTHAR, DOOR_TYPE_ROOM, BOUNDARY_NONE },
+    { GO_ALIZABAL_DOOR,  DATA_ALIZABAL, DOOR_TYPE_ROOM, BOUNDARY_NONE },
+    { 0,                 0,             DOOR_TYPE_ROOM, BOUNDARY_NONE }  // END
 };
 
 class instance_baradin_hold: public InstanceMapScript
