@@ -37,6 +37,7 @@ EndScriptData */
 	npc_blackrock_invader
 	npc_goblin_assassin
 	npc_injured_soldier
+	npc_injured_soldier_dummy
 EndContentData */
 
 #include "ScriptMgr.h"
@@ -78,6 +79,7 @@ enum Northshire
     SPELL_SNEAKING            = 93046,
     SPELL_SPYGLASS            = 80676,
 	SPELL_RENEWEDLIFE         = 93097,
+	SPELL_CONVERSATIONS_TRIGGER_01 = 84076,
 };
 
 /*######
@@ -114,55 +116,16 @@ public:
 					}
 					else Attack1HTimer -= diff;
 				}
-			}         
+			} else
+			{
+				DoMeleeAttackIfReady();
+			}
         }
     };
 
 	   CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
     {
         return new npc_blackrock_battle_worgAI (pCreature);
-    }
-};
-
-/*######
-## npc_brother_paxton
-######*/
-
-class npc_brother_paxton : public CreatureScript
-{
-public:
-    npc_brother_paxton() : CreatureScript("npc_brother_paxton") { }
-
-    struct npc_brother_paxtonAI : public ScriptedAI
-    {
-        npc_brother_paxtonAI(Creature *c) : ScriptedAI(c)
-        {
-            me->GetMotionMaster()->MovePath(951, true);
-			if (!me->HasAura(SPELL_REVIVE))
-                DoCast(me, SPELL_REVIVE);
-		}
-
-		void MoveInLineOfSight(Unit* who) OVERRIDE
-        {
-            if (!who)
-                return;
-
-           
-
-		 }
-
-		void UpdateAI(uint32 diff) OVERRIDE
-		{
-			if (!UpdateVictim()) // OOC
-			{
-		
-			}
-		}		
-    };
-
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
-    {
-        return new npc_brother_paxtonAI (pCreature);
     }
 };
 
@@ -206,13 +169,13 @@ public:
 						}
 						else Attack1HTimer -= diff;		
 
-						if (paxton = me->FindNearestCreature (NPC_BROTHER_PAXTON,30.0f))
+						if (paxton = me->FindNearestCreature (NPC_BROTHER_PAXTON,25.0f))
 						{
 						
 							if (uiSayTimer <= diff)
 							{
 								Talk(SAY_INFANTRY_COMBAT,paxton->GetGUID());
-
+								DoCast(paxton,SPELL_CONVERSATIONS_TRIGGER_01);
 								uiSayTimer = urand(30000, 120000);
 							}else uiSayTimer -= diff;
 
@@ -238,6 +201,7 @@ public:
 /*######
 ## npc_blackrock_spy
 ######*/
+
 class npc_blackrock_spy : public CreatureScript
 {
 public:
@@ -261,11 +225,20 @@ public:
 		}
 
 		void UpdateAI(uint32 diff) OVERRIDE
-        {           
-            if (Timer <= diff)           
-               CreateNewPhase();             
-            else
-               Timer -= diff;            
+        {      
+			if (!UpdateVictim())
+			{					
+				if (Timer <= diff)           
+					CreateNewPhase();             
+				else
+					Timer -= diff;            
+			} else
+			{
+				if (me->HasAura(SPELL_SPYGLASS)) me->RemoveAurasDueToSpell(SPELL_SPYGLASS);
+				if (me->HasAura(SPELL_SNEAKING)) me->RemoveAurasDueToSpell(SPELL_SNEAKING);
+				if (me->HasAura(SPELL_SPYING)) me->RemoveAurasDueToSpell(SPELL_SPYING);
+				DoMeleeAttackIfReady();
+			}
         }
 
 		void CreateNewPhase()
@@ -278,24 +251,24 @@ public:
 			{				
                 case 0: // stand 2H
 					me->GetMotionMaster()->MoveRandom(0.0f);
-					me->RemoveAurasDueToSpell(SPELL_SPYGLASS);
-					me->RemoveAurasDueToSpell(SPELL_SNEAKING);
-					me->RemoveAurasDueToSpell(SPELL_SPYING);
+					if (me->HasAura(SPELL_SPYGLASS)) me->RemoveAurasDueToSpell(SPELL_SPYGLASS);
+					if (me->HasAura(SPELL_SNEAKING)) me->RemoveAurasDueToSpell(SPELL_SNEAKING);
+					if (me->HasAura(SPELL_SPYING)) me->RemoveAurasDueToSpell(SPELL_SPYING);
                     me->HandleEmoteCommand(EMOTE_STATE_READY2H);
 					break;
 				case 1: // sneaking and spying
-					me->HandleEmoteCommand(EMOTE_STATE_NONE);
-					me->RemoveAurasDueToSpell(SPELL_SPYGLASS);
-					DoCast(me, SPELL_SNEAKING);
-					DoCast(me, SPELL_SPYING);
+					me->HandleEmoteCommand(EMOTE_STATE_NONE);					
+					if (me->HasAura(SPELL_SPYGLASS)) me->RemoveAurasDueToSpell(SPELL_SPYGLASS);
+					if (!me->HasAura(SPELL_SNEAKING)) DoCast(me, SPELL_SNEAKING);
+					if (!me->HasAura(SPELL_SPYING)) DoCast(me, SPELL_SPYING);
 					me->GetMotionMaster()->MoveRandom(4.0f);
 					break;
 				case 2: // spyglass
 					me->GetMotionMaster()->MoveRandom(0.0f);					
 					me->HandleEmoteCommand(EMOTE_STATE_NONE);
-					me->RemoveAurasDueToSpell(SPELL_SNEAKING);
-					me->RemoveAurasDueToSpell(SPELL_SPYING);
-                    DoCast(me, SPELL_SPYGLASS);
+					if (me->HasAura(SPELL_SNEAKING)) me->RemoveAurasDueToSpell(SPELL_SNEAKING);
+					if (me->HasAura(SPELL_SPYING)) me->RemoveAurasDueToSpell(SPELL_SPYING);
+                    if (!me->HasAura(SPELL_SPYGLASS)) DoCast(me, SPELL_SPYGLASS);
 					break;				
 			 } 
 		}
@@ -361,7 +334,7 @@ public:
 				return true;
 
         if (IsHealingQuestActiv(player))
-        {  
+        {  			
 			creature->CastSpell(creature, SPELL_RENEWEDLIFE, false);
 			player->KilledMonsterCredit(creature->GetEntry(), NULL);
         }
@@ -389,7 +362,10 @@ public:
 
     struct npc_injured_soldierAI : public ScriptedAI
     {
-		npc_injured_soldierAI(Creature *creature) : ScriptedAI(creature) {} 
+		npc_injured_soldierAI(Creature *creature) : ScriptedAI(creature) 
+		{
+			isHealed=false; phase=3;
+		} 
 		
 		bool isHealed;
 		uint32 phase;
@@ -423,7 +399,7 @@ public:
 				switch (phase)
 				{
 				case 1:
-					{										
+					{							
 						me->SummonCreature(NPC_INJURED_SOLDIER_DUMMY, me->GetPositionX() ,me->GetPositionY() ,me->GetPositionZ() + .5F , 0.0f, TEMPSUMMON_TIMED_DESPAWN, 10000);		
 						break;
 					}
@@ -512,20 +488,68 @@ public:
     }
 };
 
+/*######
+## npc_brother_paxton
+######*/
 
+class npc_brother_paxton : public CreatureScript
+{
+public:
+    npc_brother_paxton() : CreatureScript("npc_brother_paxton") { }
 
+    struct npc_brother_paxtonAI : public ScriptedAI
+    {
+        npc_brother_paxtonAI(Creature *c) : ScriptedAI(c)
+        {
+            me->GetMotionMaster()->MovePath(951, true);
+			// if (!me->HasAura(SPELL_REVIVE)) DoCast(me, SPELL_REVIVE);
+		}
+	
+		bool isHealingNow;
+		uint32 timer;
 
+		void SpellHit(Unit * Hitter, SpellInfo const* spell) OVERRIDE
+        {					
+            if (!Hitter || isHealingNow) return;
+			if (Hitter->GetEntry() != NPC_STORMWIND_INFANTRY || spell->Id != SPELL_CONVERSATIONS_TRIGGER_01) return;				
+								
+			me->CastSpell(Hitter,SPELL_PRAYER_OF_HEALING);
+			me->SetFacingTo (me->GetAngle(Hitter));
+			timer=3000;
+			isHealingNow=true;
+        }
 
+		void UpdateAI(uint32 diff) OVERRIDE
+		{			
+			if (isHealingNow)
+			{
+				if (timer <= diff)	
+				{
+					// me->GetMotionMaster()->MovePath (951,true);		
+					isHealingNow=false;
+				}
+				else 
+					timer -= diff;			
+			}
+			
+            if (!UpdateVictim())
+			   return;
+				
+			DoMeleeAttackIfReady();
+		}		
+    };
 
-
-
-
-
-
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_brother_paxtonAI (pCreature);
+    }
+};
 
 
 
 // ToDo
+
+
 
 /*######
 ## npc_henze_faulk
