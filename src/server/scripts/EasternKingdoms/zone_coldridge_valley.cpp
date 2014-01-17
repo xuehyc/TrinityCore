@@ -49,7 +49,6 @@ enum zone_coldridge_valley
 	NPC_TROLLUNG_FOR_INFORMATION_KILL_CREDIT_BUNNY_SW	= 37110,
 	NPC_TROLLUNG_FOR_INFORMATION_KILL_CREDIT_BUNNY_W	= 37111,
 
-
 	SPELL_HEAL_WOUNDED_MOUNTAINEER						= 69855,
 
 	QUEST_AID_FOR_THE_WOUNDED							= 24471,
@@ -258,7 +257,7 @@ public:
                     if (player->GetQuestStatus(QUEST_TROLLUNG_FOR_INFORMATION) == QUEST_STATUS_INCOMPLETE)
                     {                   
                         TalkSequenceIsStarted = true;
-						timer = 2000;
+						timer = 2000; phase++;
                     }
 				}
 			}                
@@ -275,28 +274,23 @@ public:
 						timer=0; phase=0; TalkSequenceIsStarted=false;
 						return;
 					}
-
 					if (timer<=diff)
-					{
-						phase++;
+					{						
 						switch (phase)
 						{
 						case 1:
 							{ 
-								Talk(0);
-								timer=5000;
+								Talk(0); timer=5000; phase++;
 								break;
 							}
 						case 2:
 							{ 
-								Talk(1);
-								timer=5000;
+								Talk(1); timer=5000; phase++;
 								break;
 							}
 						case 3:
 							{ 
-								Talk(2);
-								timer=5000;
+								Talk(2); timer=5000; phase++;
 								break;
 							}
 						case 4:
@@ -362,14 +356,14 @@ public:
                 return;
 
             if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 10.0f))
-			{
+			{				
 				player = who->ToPlayer();
 				if (player)
 				{
                     if (player->GetQuestStatus(QUEST_TROLLUNG_FOR_INFORMATION) == QUEST_STATUS_INCOMPLETE)
                     {                       
                         TalkSequenceIsStarted = true;
-						timer = 2000;
+						timer = 2000; phase++;
                     }
 				}
 			}                
@@ -380,13 +374,12 @@ public:
             if (!UpdateVictim())
 			{
 				if (TalkSequenceIsStarted)
-				{
+				{					
 					if (!player)
 					{
 						timer=0; phase=0; TalkSequenceIsStarted=false;
 						return;
 					}
-
 					if (timer<=diff)
 					{						
 						switch (phase)
@@ -476,8 +469,7 @@ public:
                     if (player->GetQuestStatus(QUEST_TROLLUNG_FOR_INFORMATION) == QUEST_STATUS_INCOMPLETE)
                     {                        
                         TalkSequenceIsStarted = true;
-						timer = 2000;
-						phase++;
+						timer = 2000; phase++;
                     }
 				}
 			}                
@@ -494,7 +486,6 @@ public:
 						timer=0; phase=0; TalkSequenceIsStarted=false;
 						return;
 					}
-
 					if (timer<=diff)
 					{						
 						switch (phase)
