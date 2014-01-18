@@ -29,7 +29,7 @@
 
 enum PaladinSpells
 {
-    SPELL_PALADIN_AVENGERS_SHIELD               = 31935,
+    SPELL_PALADIN_AVENGERS_SHIELD                = 31935,
     SPELL_PALADIN_AURA_MASTERY_IMMUNE            = 64364,
     SPELL_PALADIN_BEACON_OF_LIGHT_MARKER         = 53563,
     SPELL_PALADIN_BEACON_OF_LIGHT_HEAL           = 53652,
@@ -52,6 +52,7 @@ enum PaladinSpells
     SPELL_PALADIN_GLYPH_OF_SALVATION             = 63225,
     SPELL_PALADIN_HAND_OF_SACRIFICE              = 6940,
 
+	SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS          = 20154,
 	SPELL_PALADIN_SEAL_OF_JUSTICE                = 20164,
 	SPELL_PALADIN_SEAL_OF_INSIGHT                = 20165,
 	SPELL_PALADIN_JUDGEMENT_DAMAGE               = 54158,
@@ -67,7 +68,6 @@ enum PaladinSpells
     SPELL_PALADIN_RIGHTEOUS_DEFENSE_TAUNT        = 31790,
     SPELL_PALADIN_SANCTIFIED_RETRIBUTION_AURA    = 63531,
     SPELL_PALADIN_SANCTIFIED_RETRIBUTION_R1      = 31869,
-    SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS          = 25742,
     SPELL_PALADIN_SWIFT_RETRIBUTION_R1           = 53379
 };
 
@@ -89,11 +89,18 @@ enum MiscSpells
 	SPELL_JUDGEMENT_BOLD 						= 89906,
 	SPELL_JUDGEMENT_PURE 						= 53655,
 	SPELL_JUDGEMENT_ENLIGHTENED 				= 87188,
+
+	SPELL_LEARN_JUDGEMENT_CREDIT				= 44420,
 };
 
 enum PaladinSpellIcons
 {
     PALADIN_ICON_ID_RETRIBUTION_AURA             = 555
+};
+
+enum PaladinQuest
+{
+	QUEST_PALADIN_THE_POWER_OF_THE_LIGHT		= 24528,
 };
 
 /*
@@ -1565,6 +1572,43 @@ public:
     }
 };
 
+class spell_pal_seal_of_righteousness : public SpellScriptLoader
+{
+    public:
+        spell_pal_seal_of_righteousness() : SpellScriptLoader("spell_pal_seal_of_righteousness") { }
+
+        class spell_pal_seal_of_righteousness_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pal_seal_of_righteousness_SpellScript);
+			
+			void HandleBeforeCast()
+            {
+				Unit* caster = GetCaster();				
+				if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+					Player* player = caster->ToPlayer();
+					if (player)
+					{
+						if (player->GetQuestStatus(QUEST_PALADIN_THE_POWER_OF_THE_LIGHT) == QUEST_STATUS_INCOMPLETE)
+						{  
+							player->KilledMonsterCredit(SPELL_LEARN_JUDGEMENT_CREDIT, NULL);	
+						}
+					}					
+				}				
+			}
+
+            void Register() OVERRIDE
+            {                 
+				 BeforeCast += SpellCastFn(spell_pal_seal_of_righteousness_SpellScript::HandleBeforeCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_pal_seal_of_righteousness_SpellScript();
+        }
+};
+
 
 void AddSC_paladin_spell_scripts()
 {
@@ -1599,4 +1643,5 @@ void AddSC_paladin_spell_scripts()
 	new spell_pal_zealotry();
 	new spell_pal_acts_of_sacrifice();
 	new spell_pal_word_of_glory();
+	new spell_pal_seal_of_righteousness();
 }
