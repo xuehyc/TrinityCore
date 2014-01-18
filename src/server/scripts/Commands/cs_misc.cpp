@@ -186,7 +186,7 @@ public:
 
         uint32 haveMap = Map::ExistMap(mapId, gridX, gridY) ? 1 : 0;
         uint32 haveVMap = Map::ExistVMap(mapId, gridX, gridY) ? 1 : 0;
-        uint32 haveMMap = (MMAP::MMapFactory::IsPathfindingEnabled(mapId) && MMAP::MMapFactory::CreateOrGetMMapManager()->GetNavMesh(handler->GetSession()->GetPlayer()->GetMapId())) ? 1 : 0;
+        uint32 haveMMap = (MMAP::MMapFactory::IsPathfindingEnabled(mapId) && MMAP::MMapFactory::createOrGetMMapManager()->GetNavMesh(handler->GetSession()->GetPlayer()->GetMapId())) ? 1 : 0;
 
         if (haveVMap)
         {
@@ -807,12 +807,16 @@ public:
         if (handler->HasLowerSecurity(target, 0))
             return false;
 
-        if (sWorld->getBoolConfig(CONFIG_SHOW_KICK_IN_WORLD))
-            sWorld->SendWorldText(LANG_COMMAND_KICKMESSAGE, playerName.c_str());
-        else
-            handler->PSendSysMessage(LANG_COMMAND_KICKMESSAGE, playerName.c_str());
+        char const* kickReason = strtok(NULL, "\r");
+        std::string kickReasonStr = "No reason";
+        if (kickReason != NULL)
+            kickReasonStr = kickReason;
 
-        target->GetSession()->KickPlayer();
+            if (sWorld->getBoolConfig(CONFIG_SHOW_KICK_IN_WORLD))
+                sWorld->SendWorldText(LANG_COMMAND_KICKMESSAGE_WORLD, (handler->GetSession() ? handler->GetSession()->GetPlayerName().c_str() : "Server"), playerName.c_str(), kickReasonStr.c_str());
+            else
+                handler->PSendSysMessage(LANG_COMMAND_KICKMESSAGE, playerName.c_str());
+                target->GetSession()->KickPlayer();
 
         return true;
     }
@@ -1332,23 +1336,20 @@ public:
             return false;
         }
 
-        std::string tNameLink = handler->GetNameLink(target);
+        bool targetHasSkill = target->GetSkillValue(skill);
 
-        if (!target->GetSkillValue(skill))
-        {
-            handler->PSendSysMessage(LANG_SET_SKILL_ERROR, tNameLink.c_str(), skill, skillLine->name);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        uint16 max = maxPureSkill ? atol (maxPureSkill) : target->GetPureMaxSkillValue(skill);
+        // If our target does not yet have the skill they are trying to add to them, the chosen level also becomes
+        // the max level of the new profession.
+        uint16 max = maxPureSkill ? atol(maxPureSkill) : targetHasSkill ? target->GetPureMaxSkillValue(skill) : uint16(level);
 
         if (level <= 0 || level > max || max <= 0)
             return false;
 
-        target->SetSkill(skill, target->GetSkillStep(skill), level, max);
-        handler->PSendSysMessage(LANG_SET_SKILL, skill, skillLine->name, tNameLink.c_str(), level, max);
-
+        // If the player has the skill, we get the current skill step. If they don't have the skill, we
+        // add the skill to the player's book with step 1 (which is the first rank, in most cases something
+        // like 'Apprentice <skill>'.
+        target->SetSkill(skill, targetHasSkill ? target->GetSkillStep(skill) : 1, level, max);
+        handler->PSendSysMessage(LANG_SET_SKILL, skill, skillLine->name, handler->GetNameLink(target).c_str(), level, max);
         return true;
     }
 
@@ -1834,7 +1835,17 @@ public:
             int64 muteTime = time(NULL) + notSpeakTime * MINUTE;
             target->GetSession()->m_muteTime = muteTime;
             stmt->setInt64(0, muteTime);
-            ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOUR_CHAT_DISABLED, notSpeakTime, muteBy.c_str(), muteReasonStr.c_str());
+            std::string nameLink = handler->playerLink(targetName);
+
+            if (sWorld->getBoolConfig(CONFIG_SHOW_MUTE_IN_WORLD))
+            {
+                sWorld->SendWorldText(LANG_COMMAND_MUTEMESSAGE_WORLD, (handler->GetSession() ? handler->GetSession()->GetPlayerName().c_str() : "Server"), nameLink.c_str(), notSpeakTime, muteReasonStr.c_str());
+                ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOUR_CHAT_DISABLED, notSpeakTime, muteBy.c_str(), muteReasonStr.c_str());
+            }
+            else
+            {
+                ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOUR_CHAT_DISABLED, notSpeakTime, muteBy.c_str(), muteReasonStr.c_str());
+            }
         }
         else
         {
@@ -1849,8 +1860,10 @@ public:
         LoginDatabase.Execute(stmt);
         std::string nameLink = handler->playerLink(targetName);
 
-        handler->PSendSysMessage(target ? LANG_YOU_DISABLE_CHAT : LANG_COMMAND_DISABLE_CHAT_DELAYED, nameLink.c_str(), notSpeakTime, muteReasonStr.c_str());
-
+            if (sWorld->getBoolConfig(CONFIG_SHOW_MUTE_IN_WORLD) && !target)
+                sWorld->SendWorldText(LANG_COMMAND_MUTEMESSAGE_WORLD, handler->GetSession()->GetPlayerName().c_str(), nameLink.c_str(), notSpeakTime, muteReasonStr.c_str());
+            else
+                handler->PSendSysMessage(target ? LANG_YOU_DISABLE_CHAT : LANG_COMMAND_DISABLE_CHAT_DELAYED, nameLink.c_str(), notSpeakTime, muteReasonStr.c_str());
         return true;
     }
 

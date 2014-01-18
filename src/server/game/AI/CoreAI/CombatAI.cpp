@@ -27,6 +27,10 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 
+/////////////////
+// AggressorAI
+/////////////////
+
 int AggressorAI::Permissible(const Creature* creature)
 {
     // have some hostile factions, it will be selected by IsHostileTo check at MoveInLineOfSight
@@ -44,26 +48,9 @@ void AggressorAI::UpdateAI(uint32 /*diff*/)
     DoMeleeAttackIfReady();
 }
 
-// some day we will delete these useless things
-int CombatAI::Permissible(const Creature* /*creature*/)
-{
-    return PERMIT_BASE_NO;
-}
-
-int ArcherAI::Permissible(const Creature* /*creature*/)
-{
-    return PERMIT_BASE_NO;
-}
-
-int TurretAI::Permissible(const Creature* /*creature*/)
-{
-    return PERMIT_BASE_NO;
-}
-
-int VehicleAI::Permissible(const Creature* /*creature*/)
-{
-    return PERMIT_BASE_NO;
-}
+/////////////////
+// CombatAI
+/////////////////
 
 void CombatAI::InitializeAI()
 {
@@ -122,7 +109,7 @@ void CombatAI::SpellInterrupted(uint32 spellId, uint32 unTimeMs)
 }
 
 /////////////////
-//CasterAI
+// CasterAI
 /////////////////
 
 void CasterAI::InitializeAI()
@@ -186,7 +173,7 @@ void CasterAI::UpdateAI(uint32 diff)
 }
 
 //////////////
-//ArcherAI
+// ArcherAI
 //////////////
 
 ArcherAI::ArcherAI(Creature* c) : CreatureAI(c)
@@ -235,7 +222,7 @@ void ArcherAI::UpdateAI(uint32 /*diff*/)
 }
 
 //////////////
-//TurretAI
+// TurretAI
 //////////////
 
 TurretAI::TurretAI(Creature* c) : CreatureAI(c)
@@ -273,17 +260,17 @@ void TurretAI::UpdateAI(uint32 /*diff*/)
 }
 
 //////////////
-//VehicleAI
+// VehicleAI
 //////////////
 
-VehicleAI::VehicleAI(Creature* c) : CreatureAI(c), m_IsVehicleInUse(false), m_ConditionsTimer(VEHICLE_CONDITION_CHECK_TIME)
+VehicleAI::VehicleAI(Creature* creature) : CreatureAI(creature), m_ConditionsTimer(VEHICLE_CONDITION_CHECK_TIME)
 {
     LoadConditions();
     m_DoDismiss = false;
     m_DismissTimer = VEHICLE_DISMISS_TIME;
 }
 
-//NOTE: VehicleAI::UpdateAI runs even while the vehicle is mounted
+// NOTE: VehicleAI::UpdateAI runs even while the vehicle is mounted
 void VehicleAI::UpdateAI(uint32 diff)
 {
     CheckConditions(diff);
@@ -293,7 +280,6 @@ void VehicleAI::UpdateAI(uint32 diff)
         if (m_DismissTimer < diff)
         {
             m_DoDismiss = false;
-            me->SetVisible(false);
             me->DespawnOrUnsummon();
         }
         else
@@ -301,24 +287,16 @@ void VehicleAI::UpdateAI(uint32 diff)
     }
 }
 
-void VehicleAI::Reset()
-{
-    me->SetVisible(true);
-}
-
 void VehicleAI::OnCharmed(bool apply)
 {
-    if (m_IsVehicleInUse && !apply && !conditions.empty())//was used and has conditions
+    if (!me->GetVehicleKit()->IsVehicleInUse() && !apply && !conditions.empty()) // was used and has conditions
     {
-        m_DoDismiss = true;//needs reset
-        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
-        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+        m_DoDismiss = true; // needs reset
     }
     else if (apply)
-        m_DoDismiss = false;//in use again
+        m_DoDismiss = false; // in use again
 
-    m_DismissTimer = VEHICLE_DISMISS_TIME;//reset timer
-    m_IsVehicleInUse = apply;
+    m_DismissTimer = VEHICLE_DISMISS_TIME; // reset timer
 }
 
 void VehicleAI::LoadConditions()
@@ -328,7 +306,7 @@ void VehicleAI::LoadConditions()
         TC_LOG_DEBUG("condition", "VehicleAI::LoadConditions: loaded %u conditions", uint32(conditions.size()));
 }
 
-void VehicleAI::CheckConditions(const uint32 diff)
+void VehicleAI::CheckConditions(uint32 diff)
 {
     if (m_ConditionsTimer < diff)
     {
@@ -343,7 +321,7 @@ void VehicleAI::CheckConditions(const uint32 diff)
                             if (!sConditionMgr->IsObjectMeetToConditions(player, me, conditions))
                             {
                                 player->ExitVehicle();
-                                return;//check other pessanger in next tick
+                                return; // check other pessanger in next tick
                             }
                         }
                     }
