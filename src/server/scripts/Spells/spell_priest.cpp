@@ -1253,10 +1253,15 @@ class spell_pri_flash_heal : public SpellScriptLoader
 				Unit* caster = GetCaster();
 				Unit* target = GetHitUnit();								
 
-				if(!caster || !target || caster->GetTypeId() != TYPEID_PLAYER || target->GetEntry() != 44564)
-					return ;				
+				if(!caster || !target || caster->GetTypeId() != TYPEID_PLAYER)
+					return ;
+				
+				bool DoHeal=false;
+				if (target->GetEntry() == 44564) DoHeal=true; // priest human
+				if (target->GetEntry() == 44405) DoHeal=true; // priest dwarf
 
-				caster->ToPlayer()->KilledMonsterCredit(44175, 0);	
+				if (DoHeal) 
+					caster->ToPlayer()->KilledMonsterCredit(44175, 0);	
             }
 
             void Register() OVERRIDE

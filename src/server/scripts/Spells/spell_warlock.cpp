@@ -75,7 +75,8 @@ enum WarlockSpells
     SPELL_WARLOCK_SOUL_SWAP_DOT_MARKER              = 92795,
     SPELL_WARLOCK_UNSTABLE_AFFLICTION               = 30108,
 	SPELL_WARLOCK_DRAIN_LIFE                      	= 89653,
-    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117
+    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117,
+	SPELL_IMMOLATE									= 118297,
 };
 
 enum WarlockSpellIcons
@@ -1464,38 +1465,78 @@ public:
 };
 
 // 348 - Immolate    new insered 4.3.4
-class spell_warl_immolate : public SpellScriptLoader
+class spell_warl_immolate_348 : public SpellScriptLoader
 {
     public:
-        spell_warl_immolate() : SpellScriptLoader("spell_warl_immolate") { }
+        spell_warl_immolate_348() : SpellScriptLoader("spell_warl_immolate_348") { }
 
-        class spell_warl_immolate_SpellScript : public SpellScript
+        class spell_warl_immolate_348_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_warl_immolate_SpellScript);
+            PrepareSpellScript(spell_warl_immolate_348_SpellScript);
 
             void HandleDummy()
             {
 				Unit* caster = GetCaster();
 				Unit* target = GetHitUnit();					
 
-				if (!caster || !target || 
-					caster->GetTypeId() != TYPEID_PLAYER || 
-					target->GetCreatureType() != CREATURE_TYPE_MECHANICAL ||
-					target->GetEntry() != 44548)
-						return ;	
+				if (!caster || !target || caster->GetTypeId() != TYPEID_PLAYER) 
+					return;
 
-				caster->ToPlayer()->KilledMonsterCredit(44175, 0);			
+				bool GiveCredit=false;
+
+				if (target->GetEntry() != 44548) GiveCredit=true;	
+												
+				if(GiveCredit)
+					caster->ToPlayer()->KilledMonsterCredit(44175, 0);			
             }
 
             void Register() OVERRIDE
             {
-				OnHit += SpellHitFn(spell_warl_immolate_SpellScript::HandleDummy);               
+				OnHit += SpellHitFn(spell_warl_immolate_348_SpellScript::HandleDummy);               
             }
         };
 
         SpellScript* GetSpellScript() const OVERRIDE
         {
-            return new spell_warl_immolate_SpellScript();
+            return new spell_warl_immolate_348_SpellScript();
+        }
+};
+
+// 118297 - Immolate    new insered 4.3.4
+class spell_warl_immolate_118297 : public SpellScriptLoader
+{
+    public:
+        spell_warl_immolate_118297() : SpellScriptLoader("spell_warl_immolate_118297") { }
+
+        class spell_warl_immolate_118297_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_immolate_118297_SpellScript);
+
+            void HandleDummy()
+            {
+				Unit* caster = GetCaster();
+				Unit* target = GetHitUnit();					
+
+				if (!caster || !target || caster->GetTypeId() != TYPEID_PLAYER) 
+					return;
+
+				bool GiveCredit=false;
+
+				if (target->GetEntry() != 44389) GiveCredit=true;	
+												
+				if(GiveCredit)
+					caster->ToPlayer()->KilledMonsterCredit(44175, 0);			
+            }
+
+            void Register() OVERRIDE
+            {
+				OnHit += SpellHitFn(spell_warl_immolate_118297_SpellScript::HandleDummy);               
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_warl_immolate_118297_SpellScript();
         }
 };
 
@@ -1533,5 +1574,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soulshatter();
     new spell_warl_unstable_affliction();
 	new spell_warl_drain_life();
-	new spell_warl_immolate();
+	new spell_warl_immolate_348();
+	new spell_warl_immolate_118297();
 }

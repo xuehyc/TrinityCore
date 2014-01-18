@@ -64,7 +64,11 @@ enum ShamanSpells
     SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL      = 52042,
 	SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN           = 77505,
 	SHAMAN_SPELL_UNLEASH_ELEMENTS               = 73680,
-    SPELL_SHAMAN_TIDAL_WAVES                    = 53390
+    SPELL_SHAMAN_TIDAL_WAVES                    = 53390,
+	SPELL_SHAMAN_PRIMAL_STRIKE					= 73899,
+
+	NPC_DWARF_TARGET_DUMMY						= 44389,
+
 };
 
 enum ShamanSpellIcons
@@ -1295,6 +1299,50 @@ public:
     }
 };
 
+// 73899 Primal Strike
+class spell_sha_primal_strike : public SpellScriptLoader
+{
+public:
+    spell_sha_primal_strike() : SpellScriptLoader("spell_sha_primal_strike") { }
+
+    class spell_sha_primal_strike_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_primal_strike_SpellScript)
+		
+		void HandleOnHit()
+        {
+			Unit* caster = GetCaster();
+			Unit* target = GetHitUnit();
+
+			if (!caster || !target) return;
+
+			Player* player=caster->ToPlayer ();
+			if (!player || player->GetTypeId()!= TYPEID_PLAYER) return;
+
+			uint32 level = player->getLevel();
+			uint32 extraDamage = (uint32)((float)level * 8.155555F + 2.0F);
+			uint32 hitDamage = GetHitDamage() + extraDamage;
+			
+			SetHitDamage(hitDamage);
+
+			bool GivKillCredit=false;
+			if (target->GetEntry() == NPC_DWARF_TARGET_DUMMY) GivKillCredit=true; 
+
+			if (GivKillCredit) 
+				caster->ToPlayer()->KilledMonsterCredit(44175, 0);	
+		}
+
+        void Register() OVERRIDE
+        {            			
+			OnHit += SpellHitFn(spell_sha_primal_strike_SpellScript::HandleOnHit);
+        }
+    };
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_sha_primal_strike_SpellScript();
+    }
+};
+
 
 
 void AddSC_shaman_spell_scripts()
@@ -1327,4 +1375,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_tidal_waves();
 	new spell_sha_earthquake();
 	new spell_sha_unleash_elements();
+	new spell_sha_primal_strike();
 }
