@@ -188,7 +188,8 @@ public:
 			phase=0;
 			timer=1000;
 		}
-			
+		
+		// ToDo
 	    void SpellHit(Unit * Hitter, SpellInfo const* spell) OVERRIDE
         {
 			printf("zauber ist eingetroffen %d \n", spell->Id );
