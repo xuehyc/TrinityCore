@@ -37,12 +37,12 @@ insert into spell_script_names values (@ENTRY,"spell_sha_primal_strike");
 -- double name 
 set @ENTRY=348;
 delete from spell_script_names where spell_id=@ENTRY;
-insert into spell_script_names values (@ENTRY,"spell_warl_immolate_348");
+insert into spell_script_names values (@ENTRY,"spell_warl_immolate");
 
 -- fix spell immolate 
 set @ENTRY=118297;
 delete from spell_script_names where spell_id=@ENTRY;
-insert into spell_script_names values (@ENTRY,"spell_warl_immolate_118297");
+insert into spell_script_names values (@ENTRY,"spell_warl_immolate");
 
 -- wrong queststarter
 delete from creature_queststarter where id=37514 and quest=218;

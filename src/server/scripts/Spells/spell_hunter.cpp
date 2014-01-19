@@ -876,8 +876,19 @@ public:
 			Player* player=caster->ToPlayer ();
 			if (!player) return;
 
-			if (target->GetEntry() == 44389)
-				player->KilledMonsterCredit(44175, 0);
+			bool GiveTrainigsDummyCredit=false;
+
+			if (target->GetEntry() == 38038) GiveTrainigsDummyCredit=true; // troll
+			if (target->GetEntry() == 44389) GiveTrainigsDummyCredit=true; // human, dwarf
+			if (target->GetEntry() == 44548) GiveTrainigsDummyCredit=true; // goblin
+			if (target->GetEntry() == 44614) GiveTrainigsDummyCredit=true; // night elf
+			if (target->GetEntry() == 44703) GiveTrainigsDummyCredit=true; // draenei
+			if (target->GetEntry() == 44794) GiveTrainigsDummyCredit=true; // undeath
+			if (target->GetEntry() == 44820) GiveTrainigsDummyCredit=true; // orc
+			if (target->GetEntry() == 44848) GiveTrainigsDummyCredit=true; // taur
+			if (target->GetEntry() == 44937) GiveTrainigsDummyCredit=true; // bluelf
+
+			if (GiveTrainigsDummyCredit) player->KilledMonsterCredit(44175, 0);
 			
             player->CastSpell(caster, SPELL_HUNTER_STEADY_SHOT_FOCUS, true);
 
@@ -1164,7 +1175,7 @@ public:
 			Player* player=caster->ToPlayer ();
 			if (!player) return;
 
-			player->SetPower(POWER_FOCUS,14);
+			player->SetPower(POWER_FOCUS,14); // always 14?? can't be ok
 			
 		}
 
@@ -1199,7 +1210,7 @@ public:
 			Player* player=caster->ToPlayer ();
 			if (!player) return;
 
-			player->SetPower(POWER_FOCUS,14);
+			player->SetPower(POWER_FOCUS,14); // always 14?? can't be ok
 			
 		}
 
