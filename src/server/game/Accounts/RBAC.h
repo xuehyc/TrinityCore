@@ -681,6 +681,7 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_MODIFY_CURRENCY                        = 775, // only 4.3.4
     RBAC_PERM_COMMAND_DEBUG_PHASE                            = 776, // only 4.3.4
     RBAC_PERM_COMMAND_MAILBOX                                = 777,
+	RBAC_PERM_COMMAND_MODIFY_FOCUS                           = 778,
 
     // custom permissions 1000+
     RBAC_PERM_MAX
