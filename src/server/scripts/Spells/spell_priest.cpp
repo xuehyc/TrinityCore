@@ -29,6 +29,7 @@
 
 enum PriestSpells
 {
+	SPELL_PRIEST_FLASH_HEAL							= 2061,
     SPELL_PRIEST_ABSOLUTION                         = 33167,
     SPELL_PRIEST_BODY_AND_SOUL_DISPEL               = 64136,
     SPELL_PRIEST_BODY_AND_SOUL_SPEED                = 65081,
@@ -1236,6 +1237,46 @@ public:
     }
 };
 
+// 2061 heal -- new inserted on 4.3.4 
+class spell_pri_flash_heal : public SpellScriptLoader
+{
+    public:
+        spell_pri_flash_heal() : SpellScriptLoader("spell_pri_flash_heal") { }
+
+        class spell_pri_flash_heal_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_flash_heal_SpellScript);
+
+            void HandleWoundedTrainee() //SpellEffIndex /*effIndex*/
+            {
+             
+				Unit* caster = GetCaster();
+				Unit* target = GetHitUnit();								
+
+				if(!caster || !target || caster->GetTypeId() != TYPEID_PLAYER)
+					return ;
+				
+				bool DoHeal=false;
+				if (target->GetEntry() == 44564) DoHeal=true; // priest human
+				if (target->GetEntry() == 44405) DoHeal=true; // priest dwarf
+
+				if (DoHeal) 
+					caster->ToPlayer()->KilledMonsterCredit(44175, 0);	
+            }
+
+            void Register() OVERRIDE
+            {
+				  OnHit += SpellHitFn(spell_pri_flash_heal_SpellScript::HandleWoundedTrainee);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_pri_flash_heal_SpellScript();
+        }
+};
+
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_body_and_soul();
@@ -1264,4 +1305,5 @@ void AddSC_priest_spell_scripts()
 	new spell_pri_chakra_swap_supressor();
     new spell_pri_chakra_serenity_proc();
     new spell_pri_chakra_sanctuary_heal();
+	new spell_pri_flash_heal();
 }

@@ -75,7 +75,8 @@ enum WarlockSpells
     SPELL_WARLOCK_SOUL_SWAP_DOT_MARKER              = 92795,
     SPELL_WARLOCK_UNSTABLE_AFFLICTION               = 30108,
 	SPELL_WARLOCK_DRAIN_LIFE                      	= 89653,
-    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117
+    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117,
+	SPELL_IMMOLATE									= 118297,
 };
 
 enum WarlockSpellIcons
@@ -1463,6 +1464,45 @@ public:
 	}
 };
 
+// 348 118297 - Immolate    new insered 4.3.4
+class spell_warl_immolate : public SpellScriptLoader
+{
+    public:
+        spell_warl_immolate() : SpellScriptLoader("spell_warl_immolate") { }
+
+        class spell_warl_immolate_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_immolate_SpellScript);
+
+            void HandleDummy()
+            {
+				Unit* caster = GetCaster();
+				Unit* target = GetHitUnit();					
+
+				if (!caster || !target || caster->GetTypeId() != TYPEID_PLAYER) 
+					return;
+
+				bool GiveCredit=false;
+
+				if (target->GetEntry() != 44548) GiveCredit=true;	
+				if (target->GetEntry() != 44389) GiveCredit=true;	
+
+				if(GiveCredit)
+					caster->ToPlayer()->KilledMonsterCredit(44175, 0);			
+            }
+
+            void Register() OVERRIDE
+            {
+				OnHit += SpellHitFn(spell_warl_immolate_SpellScript::HandleDummy);               
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_warl_immolate_SpellScript();
+        }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_aftermath();
@@ -1496,4 +1536,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soulshatter();
     new spell_warl_unstable_affliction();
 	new spell_warl_drain_life();
+	new spell_warl_immolate();	
 }

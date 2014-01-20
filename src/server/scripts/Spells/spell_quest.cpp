@@ -1078,6 +1078,7 @@ enum RedSnapperVeryTasty
     SPELL_CAST_NET          = 29866,
     ITEM_RED_SNAPPER        = 23614,
     SPELL_NEW_SUMMON_TEST   = 49214,
+	NPC_ANGRY_MURLOC		= 17102,
 };
 
 class spell_q9452_cast_net: public SpellScriptLoader
@@ -1100,7 +1101,8 @@ class spell_q9452_cast_net: public SpellScriptLoader
                 if (roll_chance_i(66))
                     caster->AddItem(ITEM_RED_SNAPPER, 1);
                 else
-                    caster->CastSpell(caster, SPELL_NEW_SUMMON_TEST, true);
+					// caster->CastSpell(caster, SPELL_NEW_SUMMON_TEST, true);
+					caster->SummonCreature(NPC_ANGRY_MURLOC, caster->GetPositionX()+5.0f ,caster->GetPositionY()+5.0f ,caster->GetPositionZ() , 0.0f, TEMPSUMMON_TIMED_DESPAWN, 10000);						
             }
 
             void Register() OVERRIDE

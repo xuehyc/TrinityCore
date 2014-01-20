@@ -155,7 +155,7 @@ class spell_warr_charge : public SpellScriptLoader
             PrepareSpellScript(spell_warr_charge_SpellScript);
 
             bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-            {
+            {				
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT) ||
                     !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_BUFF) ||
                     !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_CHARGE))
@@ -167,16 +167,19 @@ class spell_warr_charge : public SpellScriptLoader
             {
                 int32 chargeBasePoints0 = GetEffectValue();
                 Unit* caster = GetCaster();
-                caster->CastCustomSpell(caster, SPELL_WARRIOR_CHARGE, &chargeBasePoints0, NULL, NULL, true);
+				Unit* target = GetHitUnit();
 
+                caster->CastCustomSpell(caster, SPELL_WARRIOR_CHARGE, &chargeBasePoints0, NULL, NULL, true);				
                 // Juggernaut crit bonus
                 if (caster->HasAura(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT))
                     caster->CastSpell(caster, SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_BUFF, true);
-            }
 
+				caster->ToPlayer()->KilledMonsterCredit(44175, 0);				
+            }
+						
             void Register() OVERRIDE
             {
-                OnEffectHitTarget += SpellEffectFn(spell_warr_charge_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_warr_charge_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);						
             }
         };
 

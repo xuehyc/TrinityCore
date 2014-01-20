@@ -51,7 +51,7 @@ enum HunterSpells
     SPELL_HUNTER_SERPENT_STING                      = 1978,
     SPELL_HUNTER_SNIPER_TRAINING_R1                 = 53302,
     SPELL_HUNTER_SNIPER_TRAINING_BUFF_R1            = 64418,
-    SPELL_HUNTER_STEADY_SHOT_FOCUS                  = 77443,
+    SPELL_HUNTER_STEADY_SHOT_FOCUS                  = 77443, //
     SPELL_HUNTER_THRILL_OF_THE_HUNT                 = 34720,
     SPELL_DRAENEI_GIFT_OF_THE_NAARU                 = 59543,
 	SPELL_HUNTER_KILL_COMMAND                   	= 34026,
@@ -835,7 +835,7 @@ public:
 
     class spell_hun_steady_shot_SpellScript : public SpellScript
     {
-         PrepareSpellScript(spell_hun_steady_shot_SpellScript)
+        PrepareSpellScript(spell_hun_steady_shot_SpellScript)
 
         bool Validate(SpellInfo const* /*spellEntry*/)
         {
@@ -846,7 +846,7 @@ public:
 
         int8 castCount;
 
-        void HandleDummy (SpellEffIndex /*effIndex*/)
+        void HandleDummy (SpellEffIndex /*effIndex*/)  // ToDo: this is never called 
         {
             Unit* caster = GetCaster();
             Unit* target = GetHitUnit();
@@ -854,17 +854,15 @@ public:
 
             if(!caster || !target || caster->GetTypeId() != TYPEID_PLAYER)
                 return ;
-
+			
             caster->CastSpell(caster, SPELL_HUNTER_STEADY_SHOT_FOCUS, true);
 
             // Termination
             if (AuraEffect const* Termination = caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2008, 0))
             {
                 //if (target->HealthBelowPct(25))
-                    caster->CastSpell(caster, SPELL_HUNTER_GENERIC_ENERGIZE_FOCUS, true);
-            }
-
-            caster->ToPlayer()->KilledMonsterCredit(44175, 0);
+                    caster->CastSpell(caster, SPELL_HUNTER_GENERIC_ENERGIZE_FOCUS, true);					
+            }          
         }
 
         void HandleOnHit()
@@ -874,6 +872,25 @@ public:
 
             if(!caster || !target || caster->GetTypeId() != TYPEID_PLAYER)
                 return ;
+			
+			Player* player=caster->ToPlayer ();
+			if (!player) return;
+
+			bool GiveTrainigsDummyCredit=false;
+
+			if (target->GetEntry() == 38038) GiveTrainigsDummyCredit=true; // troll
+			if (target->GetEntry() == 44389) GiveTrainigsDummyCredit=true; // human, dwarf
+			if (target->GetEntry() == 44548) GiveTrainigsDummyCredit=true; // goblin
+			if (target->GetEntry() == 44614) GiveTrainigsDummyCredit=true; // night elf
+			if (target->GetEntry() == 44703) GiveTrainigsDummyCredit=true; // draenei
+			if (target->GetEntry() == 44794) GiveTrainigsDummyCredit=true; // undeath
+			if (target->GetEntry() == 44820) GiveTrainigsDummyCredit=true; // orc
+			if (target->GetEntry() == 44848) GiveTrainigsDummyCredit=true; // taur
+			if (target->GetEntry() == 44937) GiveTrainigsDummyCredit=true; // bluelf
+
+			if (GiveTrainigsDummyCredit) player->KilledMonsterCredit(44175, 0);
+			
+            player->CastSpell(caster, SPELL_HUNTER_STEADY_SHOT_FOCUS, true);
 
             // Improved Steady Shot Rank 1
             if (caster->HasAura(53221))
@@ -909,7 +926,7 @@ public:
 
         void Register ()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+            OnEffectHitTarget += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
             OnHit += SpellHitFn(spell_hun_steady_shot_SpellScript::HandleOnHit);
         }
     };
@@ -1139,6 +1156,77 @@ class spell_hun_tnt : public SpellScriptLoader
         }
 };
 
+// 77443 Focus gained through use of Steady Shot.
+class spell_hun_steady_shot_focus : public SpellScriptLoader
+{	
+public:
+    spell_hun_steady_shot_focus() : SpellScriptLoader("spell_hun_steady_shot_focus") { }
+
+    class spell_hun_steady_shot_focus_SpellScript : public SpellScript
+    {
+       PrepareSpellScript(spell_hun_steady_shot_focus_SpellScript)
+        
+	    void HandleOnHit()
+        {
+			
+			Unit* caster = GetCaster();
+			if (!caster || caster->GetTypeId() != TYPEID_PLAYER) return;
+
+			Player* player=caster->ToPlayer ();
+			if (!player) return;
+
+			player->SetPower(POWER_FOCUS,14); // always 14?? can't be ok
+			
+		}
+
+        void Register()
+        {           		 	
+		    OnHit += SpellHitFn(spell_hun_steady_shot_focus_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_hun_steady_shot_focus_SpellScript();
+    }
+};
+
+// 91954 Focus gained through use of Cobra Shot. 
+class spell_hun_generic_energize_focus : public SpellScriptLoader
+{	
+public:
+    spell_hun_generic_energize_focus() : SpellScriptLoader("spell_hun_generic_energize_focus") { }
+
+    class spell_hun_generic_energize_focus_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hun_generic_energize_focus_SpellScript)
+        	  
+          
+	    void HandleOnHit()
+        {
+			Unit* caster = GetCaster();
+			if (!caster || caster->GetTypeId() != TYPEID_PLAYER) return;
+
+			Player* player=caster->ToPlayer ();
+			if (!player) return;
+
+			player->SetPower(POWER_FOCUS,14); // always 14?? can't be ok
+			
+		}
+
+        void Register()
+        {           		 	
+		    OnHit += SpellHitFn(spell_hun_generic_energize_focus_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_hun_generic_energize_focus_SpellScript();
+    }
+};
+
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_chimera_shot();
@@ -1165,4 +1253,6 @@ void AddSC_hunter_spell_scripts()
 	new spell_hun_kill_command();
     new spell_hun_thrill_of_the_hunt();
     new spell_hun_tnt();
+	new spell_hun_steady_shot_focus();
+	new spell_hun_generic_energize_focus();
 }

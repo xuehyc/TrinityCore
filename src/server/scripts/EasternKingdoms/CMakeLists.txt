@@ -243,6 +243,8 @@ set(scripts_STAT_SRCS
   EasternKingdoms/Karazhan/boss_terestian_illhoof.cpp
   EasternKingdoms/Karazhan/karazhan.h
   EasternKingdoms/TheStockade/instance_the_stockade.cpp
+  EasternKingdoms/zone_elwynn_forest.cpp
+  EasternKingdoms/zone_coldridge_valley.cpp  
 )
 
 message("  -> Prepared: Eastern Kingdoms")

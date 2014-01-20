@@ -59,6 +59,7 @@ enum MageSpells
     SPELL_MAGE_SUMMON_WATER_ELEMENTAL_PERMANENT  = 70908,
     SPELL_MAGE_SUMMON_WATER_ELEMENTAL_TEMPORARY  = 70907,
     SPELL_MAGE_GLYPH_OF_BLAST_WAVE               = 62126,
+	SPELL_MAGE_ARCANE_MISSILES					 = 109901,	
 
     SPELL_MAGE_FLAMESTRIKE                       = 2120,
 
@@ -1476,6 +1477,44 @@ public:
     }
 };
 
+// 5143  arcane missiles  new inserted on 4.3.4
+class spell_mage_arcane_missiles : public SpellScriptLoader
+{
+    public:
+        spell_mage_arcane_missiles() : SpellScriptLoader("spell_mage_arcane_missiles") { }
+
+        class spell_mage_arcane_missiles_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_arcane_missiles_SpellScript);
+			           
+            void HandleDummy()  // SpellEffIndex /*effIndex*/
+            {
+				Unit* caster = GetCaster();
+				Unit* target = GetHitUnit();					
+
+				if (!caster || !target || 
+					caster->GetTypeId() != TYPEID_PLAYER || 
+					target->GetCreatureType() != CREATURE_TYPE_MECHANICAL ||
+					target->GetEntry() != 44548)
+						return ;	
+
+				caster->ToPlayer()->KilledMonsterCredit(44175, 0);				
+            }
+
+            void Register() OVERRIDE
+            {               
+				 OnHit += SpellHitFn(spell_mage_arcane_missiles_SpellScript::HandleDummy);
+				 //AfterCast += SpellCastFn(spell_mage_arcane_missiles_SpellScript::HandleDummy); AfterCast
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_mage_arcane_missiles_SpellScript();
+        }
+};
+
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_arcane_potency();
@@ -1508,4 +1547,5 @@ void AddSC_mage_spell_scripts()
 	new spell_mage_fingers_of_frost();
 	new spell_mage_incanters_absorbtion_absorb();
 	new spell_mage_incanters_absorbtion_manashield();
+	new spell_mage_arcane_missiles();
 }
