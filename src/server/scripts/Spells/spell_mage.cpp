@@ -1492,20 +1492,31 @@ class spell_mage_arcane_missiles : public SpellScriptLoader
 				Unit* caster = GetCaster();
 				Unit* target = GetHitUnit();					
 
-				if (!caster || !target || 
-					caster->GetTypeId() != TYPEID_PLAYER || 
-					target->GetCreatureType() != CREATURE_TYPE_MECHANICAL ||
-					target->GetEntry() != 44548)
-						return ;	
+				if (!caster || !target || caster->GetTypeId() != TYPEID_PLAYER || target->GetCreatureType() != CREATURE_TYPE_MECHANICAL)
+					return ;	
 
-				caster->ToPlayer()->KilledMonsterCredit(44175, 0);				
+				bool GiveTrainigsDummyCredit=false;
+
+				if (target->GetEntry() == 38038) GiveTrainigsDummyCredit=true; // troll
+				if (target->GetEntry() == 44389) GiveTrainigsDummyCredit=true; // human, dwarf
+				if (target->GetEntry() == 44548) GiveTrainigsDummyCredit=true; // goblin
+				if (target->GetEntry() == 44614) GiveTrainigsDummyCredit=true; // night elf
+				if (target->GetEntry() == 44703) GiveTrainigsDummyCredit=true; // draenei
+				if (target->GetEntry() == 44794) GiveTrainigsDummyCredit=true; // undeath
+				if (target->GetEntry() == 44820) GiveTrainigsDummyCredit=true; // orc
+				if (target->GetEntry() == 44848) GiveTrainigsDummyCredit=true; // taur
+				if (target->GetEntry() == 44937) GiveTrainigsDummyCredit=true; // bluelf
+
+
+				if (GiveTrainigsDummyCredit) 
+					caster->ToPlayer()->KilledMonsterCredit(44175, 0);				
             }
 
             void Register() OVERRIDE
             {               
 				 OnHit += SpellHitFn(spell_mage_arcane_missiles_SpellScript::HandleDummy);
-				 //AfterCast += SpellCastFn(spell_mage_arcane_missiles_SpellScript::HandleDummy); AfterCast
-            }
+				 // AfterCast += SpellCastFn(spell_mage_arcane_missiles_SpellScript::HandleDummy); // is bether, but no trigger???
+			}
         };
 
         SpellScript* GetSpellScript() const OVERRIDE
