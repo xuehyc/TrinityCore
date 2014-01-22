@@ -162,6 +162,7 @@ public:
         {
             instance = creature->GetInstanceScript();
             eventInProgress = false;
+            spawnerCount = 0;
         }
 
         void Reset() OVERRIDE
@@ -181,9 +182,7 @@ public:
         void EnterCombat(Unit* who) OVERRIDE
         {
             if (channeling)
-            {
                 Talk(SAY_WATCH_OUT, who);
-            }
             else
             {
                 events.ScheduleEvent(EVENT_FIREBALL, 1000);
