@@ -174,7 +174,7 @@ public:
 						
 							if (uiSayTimer <= diff)
 							{
-								Talk(SAY_INFANTRY_COMBAT,paxton->GetGUID());
+								Talk(SAY_INFANTRY_COMBAT);
 								DoCast(paxton,SPELL_CONVERSATIONS_TRIGGER_01);
 								uiSayTimer = urand(30000, 120000);
 							}else uiSayTimer -= diff;
