@@ -178,7 +178,7 @@ void AddSC_boss_erudax();
 void AddSC_boss_throngus();
 void AddSC_boss_general_umbriss();
 void AddSC_instance_grim_batol();
-void AddSC_mob_trash_grim_batol();
+void AddSC_npc_trash_grim_batol();
 void AddSC_boss_attumen();                   //Karazhan
 void AddSC_boss_curator();
 void AddSC_boss_maiden_of_virtue();
@@ -246,7 +246,7 @@ void AddSC_boss_ozruk();
 void AddSC_boss_slabhide();
 void AddSC_boss_corborus();
 void AddSC_boss_azil();
-void AddSC_mob_trash_coeur_de_pierre();
+void AddSC_npc_trash_coeur_de_pierre();
 void AddSC_boss_magistrate_barthilas();      //Stratholme
 void AddSC_boss_maleki_the_pallid();
 void AddSC_boss_nerubenkan();
@@ -403,7 +403,7 @@ void AddSC_boss_ptah();
 void AddSC_boss_rajh();
 void AddSC_boss_setesh();
 void AddSC_elementaires_sdo();
-void AddSC_mob_trash_sdo();
+void AddSC_npc_trash_sdo();
 void AddSC_instance_firelands(); // Firelands
 void AddSC_boss_alysrazor();
 void AddSC_boss_ragnaros_cata();
@@ -946,7 +946,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_throngus();
     AddSC_boss_general_umbriss();
     AddSC_instance_grim_batol();
-    AddSC_mob_trash_grim_batol();
+    AddSC_npc_trash_grim_batol();
     AddSC_boss_attumen();                   //Karazhan
     AddSC_boss_curator();
     AddSC_boss_maiden_of_virtue();
@@ -1014,7 +1014,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_slabhide();
     AddSC_boss_corborus();
 	AddSC_boss_azil();
-	AddSC_mob_trash_coeur_de_pierre();	
+	AddSC_npc_trash_coeur_de_pierre();	
     AddSC_boss_magistrate_barthilas();      //Stratholme
     AddSC_boss_maleki_the_pallid();
     AddSC_boss_nerubenkan();
@@ -1196,7 +1196,7 @@ void AddKalimdorScripts()
 	AddSC_boss_rajh();
 	AddSC_boss_setesh();
 	AddSC_elementaires_sdo();
-	AddSC_mob_trash_sdo();
+	AddSC_npc_trash_sdo();
 
     AddSC_instance_firelands();
     AddSC_boss_alysrazor();

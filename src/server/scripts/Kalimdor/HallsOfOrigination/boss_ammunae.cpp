@@ -152,14 +152,14 @@ public:
 /**********
 ** Bourgeon
 ***********/
-class mob_flore: public CreatureScript
+class npc_flore: public CreatureScript
 {
     public:
-        mob_flore() : CreatureScript("mob_flore") { }
+        npc_flore() : CreatureScript("npc_flore") { }
 
-        struct mob_floreAI : public ScriptedAI
+        struct npc_floreAI : public ScriptedAI
         {
-			mob_floreAI(Creature * pCreature) : ScriptedAI(pCreature) {}
+			npc_floreAI(Creature * pCreature) : ScriptedAI(pCreature) {}
 			
 			uint32 event;
 						
@@ -185,12 +185,12 @@ class mob_flore: public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new mob_floreAI(creature);
+            return new npc_floreAI(creature);
         }
 };
 
 void AddSC_boss_ammunae()
 {
     new boss_ammunae();
-	new mob_flore();
+	new npc_flore();
 }

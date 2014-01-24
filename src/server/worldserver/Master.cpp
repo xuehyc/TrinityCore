@@ -134,13 +134,13 @@ int Master::Run()
 
     TC_LOG_INFO("server.worldserver", "%s (worldserver-daemon)", _FULLVERSION);
 	TC_LOG_INFO("server.worldserver", " ");
-	TC_LOG_INFO("server.worldserver", " A World of Warcraft: Cataclysm Core Emulator	");
+	TC_LOG_INFO("server.worldserver", " A World of Warcraft Cataclsym 4.3.4 Emulator	");
 	TC_LOG_INFO("server.worldserver", "       _/_/              _/          _/_/_/    _/_/    _/_/_/    _/_/_/_/  ");
 	TC_LOG_INFO("server.worldserver", "    _/    _/  _/  _/_/  _/  _/    _/        _/    _/  _/    _/  _/         ");
 	TC_LOG_INFO("server.worldserver", "   _/_/_/_/  _/_/      _/_/      _/        _/    _/  _/_/_/    _/_/_/      ");
 	TC_LOG_INFO("server.worldserver", "  _/    _/  _/        _/  _/    _/        _/    _/  _/    _/  _/           ");
 	TC_LOG_INFO("server.worldserver", " _/    _/  _/        _/    _/    _/_/_/    _/_/    _/    _/  _/_/_/_/  	");
-	TC_LOG_INFO("server.worldserver", " Arkania Community (c) 2013");
+	TC_LOG_INFO("server.worldserver", " Arkania Community (c) 2014!");
 	TC_LOG_INFO("server.worldserver", "      <http://arkania.net/>");
 	TC_LOG_INFO("server.worldserver", " ");
 	TC_LOG_INFO("server.worldserver", "<Ctrl-C> to stop.\n");

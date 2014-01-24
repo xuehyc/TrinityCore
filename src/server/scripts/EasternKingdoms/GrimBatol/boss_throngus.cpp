@@ -351,19 +351,19 @@ public:
 	};
 };
 
-class mob_twilight_archer : public CreatureScript
+class npc_twilight_archer : public CreatureScript
 {
 public:
-	mob_twilight_archer() : CreatureScript("mob_twilight_archer") { }
+	npc_twilight_archer() : CreatureScript("npc_twilight_archer") { }
 
 	CreatureAI* GetAI(Creature* creature) const
 	{
-		return new mob_twilight_archerAI (creature);
+		return new npc_twilight_archerAI (creature);
 	}
 
-	struct mob_twilight_archerAI : public ScriptedAI
+	struct npc_twilight_archerAI : public ScriptedAI
 	{
-		mob_twilight_archerAI(Creature* creature) : ScriptedAI(creature)
+		npc_twilight_archerAI(Creature* creature) : ScriptedAI(creature)
 		{
 			creature->SetReactState(REACT_PASSIVE);
 		}
@@ -404,5 +404,5 @@ public:
 void AddSC_boss_throngus() 
 {
 	new boss_forgemaster_throngus();
-	new mob_twilight_archer();
+	new npc_twilight_archer();
 }

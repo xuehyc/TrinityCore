@@ -295,19 +295,19 @@ public:
 	};
 };
 
-class mob_faceless : public CreatureScript
+class npc_faceless : public CreatureScript
 {
 public:
-	mob_faceless() : CreatureScript("mob_faceless") { }
+	npc_faceless() : CreatureScript("npc_faceless") { }
 
 	CreatureAI* GetAI(Creature* creature) const
 	{
-		return new mob_facelessAI (creature);
+		return new npc_facelessAI (creature);
 	}
 
-	struct mob_facelessAI : public ScriptedAI
+	struct npc_facelessAI : public ScriptedAI
 	{
-		mob_facelessAI(Creature* creature) : ScriptedAI(creature), pTarget(NULL), isAtAnEgg(false), isCastingUmbraMending (false) {}
+		npc_facelessAI(Creature* creature) : ScriptedAI(creature), pTarget(NULL), isAtAnEgg(false), isCastingUmbraMending (false) {}
 
 		Creature* pTarget;
 		Unit* pErudax;
@@ -439,19 +439,19 @@ public:
 	};
 };
 
-class mob_alexstraszas_eggs : public CreatureScript
+class npc_alexstraszas_eggs : public CreatureScript
 {
 public:
-	mob_alexstraszas_eggs() : CreatureScript("mob_alexstraszas_eggs") { }
+	npc_alexstraszas_eggs() : CreatureScript("npc_alexstraszas_eggs") { }
 
 	CreatureAI* GetAI(Creature* creature) const
 	{
-		return new mob_alexstraszas_eggsAI (creature);
+		return new npc_alexstraszas_eggsAI (creature);
 	}
 
-	struct mob_alexstraszas_eggsAI : public ScriptedAI
+	struct npc_alexstraszas_eggsAI : public ScriptedAI
 	{
-		mob_alexstraszas_eggsAI(Creature* creature) : ScriptedAI(creature)
+		npc_alexstraszas_eggsAI(Creature* creature) : ScriptedAI(creature)
 		{
 			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
 
@@ -478,19 +478,19 @@ public:
 	};
 };
 
-class mob_shadow_gale_stalker : public CreatureScript
+class npc_shadow_gale_stalker : public CreatureScript
 {
 public:
-	mob_shadow_gale_stalker() : CreatureScript("mob_shadow_gale_stalker") { }
+	npc_shadow_gale_stalker() : CreatureScript("npc_shadow_gale_stalker") { }
 
 	CreatureAI* GetAI(Creature* creature) const
 	{
-		return new mob_shadow_gale_stalkerAI (creature);
+		return new npc_shadow_gale_stalkerAI (creature);
 	}
 
-	struct mob_shadow_gale_stalkerAI : public ScriptedAI
+	struct npc_shadow_gale_stalkerAI : public ScriptedAI
 	{
-		mob_shadow_gale_stalkerAI(Creature* creature) : ScriptedAI(creature), VisualEffectCasted(false) {}
+		npc_shadow_gale_stalkerAI(Creature* creature) : ScriptedAI(creature), VisualEffectCasted(false) {}
 
 		Unit* pErudax;
 		EventMap events;
@@ -550,7 +550,7 @@ public:
 void AddSC_boss_erudax() 
 {
 	new boss_erudax();
-	new mob_faceless();
-	new mob_alexstraszas_eggs();
-	new mob_shadow_gale_stalker();
+	new npc_faceless();
+	new npc_alexstraszas_eggs();
+	new npc_shadow_gale_stalker();
 }

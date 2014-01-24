@@ -137,19 +137,19 @@ public:
 /***************
 ** vent Solaire
 ***************/
-class mob_solar_wind : public CreatureScript
+class npc_solar_wind : public CreatureScript
 {
 public:
-    mob_solar_wind() : CreatureScript("mob_solar_wind") { }
+    npc_solar_wind() : CreatureScript("npc_solar_wind") { }
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mob_solar_windAI(pCreature);
+        return new npc_solar_windAI(pCreature);
     }
 
-    struct mob_solar_windAI : public ScriptedAI
+    struct npc_solar_windAI : public ScriptedAI
     {
-        mob_solar_windAI(Creature* c) : ScriptedAI(c)
+        npc_solar_windAI(Creature* c) : ScriptedAI(c)
         {
 			
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -168,5 +168,5 @@ public:
 void AddSC_boss_rajh()
 {
     new boss_rajh();
-	new mob_solar_wind();
+	new npc_solar_wind();
 }

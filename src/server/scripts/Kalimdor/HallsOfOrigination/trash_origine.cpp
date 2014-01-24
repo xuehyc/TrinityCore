@@ -16,14 +16,14 @@
 #define spell_lance_de_lombre 89555 // Lance_de_L'ombre
 #define spell_pacte_des_tenebres 89560 // Pacte_des_Ténèbres
 
-class mob_lancelombre_du_temple : public CreatureScript
+class npc_lancelombre_du_temple : public CreatureScript
 {
 public:
-       mob_lancelombre_du_temple() : CreatureScript("mob_lancelombre_du_temple") {}
+       npc_lancelombre_du_temple() : CreatureScript("npc_lancelombre_du_temple") {}
 	   
-	   struct mob_lancelombre_du_templeAI : public ScriptedAI
+	   struct npc_lancelombre_du_templeAI : public ScriptedAI
 	   {
-	      mob_lancelombre_du_templeAI(Creature *c) : ScriptedAI(c) {}
+	      npc_lancelombre_du_templeAI(Creature *c) : ScriptedAI(c) {}
 		  
 		  uint32 lance_de_lombre;
 		  uint32 pacte_des_tenebres;
@@ -57,7 +57,7 @@ public:
 	   
 	  CreatureAI* GetAI(Creature* pCreature) const
       {
-           return new mob_lancelombre_du_templeAI(pCreature);
+           return new npc_lancelombre_du_templeAI(pCreature);
 	  }
 };
 
@@ -69,14 +69,14 @@ public:
 #define spell_tir 83877 // Tir
 #define spell_tir_charge 94791 // Tir_Chargé
 
-class mob_traqueur_veloce_du_temple : public CreatureScript
+class npc_traqueur_veloce_du_temple : public CreatureScript
 {
 public:
-      mob_traqueur_veloce_du_temple() : CreatureScript("mob_traqueur_veloce_du_temple") {}
+      npc_traqueur_veloce_du_temple() : CreatureScript("npc_traqueur_veloce_du_temple") {}
 	  
-	  struct mob_traqueur_veloce_du_templeAI : public ScriptedAI
+	  struct npc_traqueur_veloce_du_templeAI : public ScriptedAI
       {
-         mob_traqueur_veloce_du_templeAI(Creature *c) : ScriptedAI(c) {}
+         npc_traqueur_veloce_du_templeAI(Creature *c) : ScriptedAI(c) {}
 
 		 uint32 fleches_multiples;
 		 uint32 tir;
@@ -120,7 +120,7 @@ public:
 	  
 	  CreatureAI* GetAI(Creature* pCreature) const
       {
-           return new mob_traqueur_veloce_du_templeAI(pCreature);
+           return new npc_traqueur_veloce_du_templeAI(pCreature);
 	  }	   
 };	  
 
@@ -131,14 +131,14 @@ public:
 #define spell_enchainement_runique 91806 // Enchainement_Runique
 #define spell_malediction_du_lanceur_de_runes 95181 // Malédiction_du_Lanceur_de_Runes
 
-class mob_lanceur_de_runes_du_temple : public CreatureScript
+class npc_lanceur_de_runes_du_temple : public CreatureScript
 {
 public:
-      mob_lanceur_de_runes_du_temple() : CreatureScript("mob_lanceur_de_runes_du_temple") {}
+      npc_lanceur_de_runes_du_temple() : CreatureScript("npc_lanceur_de_runes_du_temple") {}
 	  
-	  struct mob_lanceur_de_runes_du_templeAI : public ScriptedAI
+	  struct npc_lanceur_de_runes_du_templeAI : public ScriptedAI
 	  {
-	     mob_lanceur_de_runes_du_templeAI(Creature *c) : ScriptedAI(c) {}
+	     npc_lanceur_de_runes_du_templeAI(Creature *c) : ScriptedAI(c) {}
 		 
 		 uint32 enchainement_runique;
 		 uint32 malediction_du_lanceur_de_runes;
@@ -172,7 +172,7 @@ public:
 	  
 	  CreatureAI* GetAI(Creature* pCreature) const
       {
-           return new mob_lanceur_de_runes_du_templeAI(pCreature);
+           return new npc_lanceur_de_runes_du_templeAI(pCreature);
 	  }
 };
 
@@ -185,14 +185,14 @@ public:
 #define spell_eruption_flamboyante 89547 // Eruption_Flamboyante
 #define spell_meteore 90023 // Météore
 
-class mob_sculptefeu_du_temple : public CreatureScript
+class npc_sculptefeu_du_temple : public CreatureScript
 {
 public:
-      mob_sculptefeu_du_temple() : CreatureScript("mob_sculptefeu_du_temple") {}
+      npc_sculptefeu_du_temple() : CreatureScript("npc_sculptefeu_du_temple") {}
 	  
-	  struct mob_sculptefeu_du_templeAI : public ScriptedAI
+	  struct npc_sculptefeu_du_templeAI : public ScriptedAI
 	  {
-	     mob_sculptefeu_du_templeAI(Creature *c) : ScriptedAI(c) {}
+	     npc_sculptefeu_du_templeAI(Creature *c) : ScriptedAI(c) {}
 		 
 		 uint32 barriere_de_la_fournaise;
 		 uint32 boule_de_feu;
@@ -243,7 +243,7 @@ public:
 	
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-           return new mob_sculptefeu_du_templeAI(pCreature);
+           return new npc_sculptefeu_du_templeAI(pCreature);
     }
 	
 };
@@ -255,14 +255,14 @@ public:
 #define spell_attaque_a_la_lame_dentelee 74542 // Attaque_a_la_Lame_Dentelée
 #define spell_projection_corrosive 89857 // Projection_Corrosive
 
-class mob_scarabee_caustique : public CreatureScript
+class npc_scarabee_caustique : public CreatureScript
 {
 public:
-      mob_scarabee_caustique() : CreatureScript("mob_scarabee_caustique") {}
+      npc_scarabee_caustique() : CreatureScript("npc_scarabee_caustique") {}
 	  
-	  struct mob_scarabee_caustiqueAI : public ScriptedAI
+	  struct npc_scarabee_caustiqueAI : public ScriptedAI
 	  {
-	     mob_scarabee_caustiqueAI(Creature *c) : ScriptedAI(c) {}
+	     npc_scarabee_caustiqueAI(Creature *c) : ScriptedAI(c) {}
 		 
 		 uint32 attaque_a_la_lame_dentelee;
 		 uint32 projection_corrosive;
@@ -296,7 +296,7 @@ public:
 	
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-            return new mob_scarabee_caustiqueAI(pCreature);
+            return new npc_scarabee_caustiqueAI(pCreature);
 	}
 	
 };
@@ -308,14 +308,14 @@ public:
 #define spell_afflux 75158 // Afflux
 #define spell_toxine RAND(89859,89856) // Toxine
 
-class mob_glisseur_venimeux : public CreatureScript
+class npc_glisseur_venimeux : public CreatureScript
 {
 public:
-      mob_glisseur_venimeux() : CreatureScript("mob_glisseur_venimeux") {}
+      npc_glisseur_venimeux() : CreatureScript("npc_glisseur_venimeux") {}
 	  
-	  struct mob_glisseur_venimeuxAI : public ScriptedAI
+	  struct npc_glisseur_venimeuxAI : public ScriptedAI
 	  {
-	     mob_glisseur_venimeuxAI(Creature *c) : ScriptedAI(c) {}
+	     npc_glisseur_venimeuxAI(Creature *c) : ScriptedAI(c) {}
 		 
 		 uint32 afflux;
 		 uint32 toxine;
@@ -350,7 +350,7 @@ public:
 	  
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-           return new mob_glisseur_venimeuxAI(pCreature);
+           return new npc_glisseur_venimeuxAI(pCreature);
     }
 	
 };
@@ -361,14 +361,14 @@ public:
 
 #define spell_choc 75453 // Choc
 
-class mob_horreur_os_poussiere : public CreatureScript
+class npc_horreur_os_poussiere : public CreatureScript
 {
 public:
-      mob_horreur_os_poussiere() : CreatureScript("mob_horreur_os_poussiere") {}
+      npc_horreur_os_poussiere() : CreatureScript("npc_horreur_os_poussiere") {}
 	  
-	  struct mob_horreur_os_poussiereAI : public ScriptedAI
+	  struct npc_horreur_os_poussiereAI : public ScriptedAI
 	  {
-	     mob_horreur_os_poussiereAI(Creature *c) : ScriptedAI(c) {}
+	     npc_horreur_os_poussiereAI(Creature *c) : ScriptedAI(c) {}
 		 
 		 uint32 choc;
 		 
@@ -394,7 +394,7 @@ public:
 	
     CreatureAI* GetAI(Creature* pCreature) const
     {
-            return new mob_horreur_os_poussiereAI(pCreature);
+            return new npc_horreur_os_poussiereAI(pCreature);
     }
 
 };
@@ -406,14 +406,14 @@ public:
 #define spell_trait_de_lombre 89855 // Trait_de_Lombre
 #define spell_malediction_depuisement 90006 // Malédiction_d'Epuisement
 
-class mob_tourmenteur_os_poussiere : public CreatureScript
+class npc_tourmenteur_os_poussiere : public CreatureScript
 {
 public:
-      mob_tourmenteur_os_poussiere() : CreatureScript("mob_tourmenteur_os_poussiere") {}
+      npc_tourmenteur_os_poussiere() : CreatureScript("npc_tourmenteur_os_poussiere") {}
 	  
-	  struct mob_tourmenteur_os_poussiereAI : public ScriptedAI
+	  struct npc_tourmenteur_os_poussiereAI : public ScriptedAI
 	  {
-	     mob_tourmenteur_os_poussiereAI(Creature *c) : ScriptedAI(c) {}
+	     npc_tourmenteur_os_poussiereAI(Creature *c) : ScriptedAI(c) {}
 		 
 		 uint32 trait_de_lombre;
 		 uint32 malediction_depuisement;
@@ -448,7 +448,7 @@ public:
 	  
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-           return new mob_tourmenteur_os_poussiereAI(pCreature);
+           return new npc_tourmenteur_os_poussiereAI(pCreature);
 	}
 	
 };
@@ -460,14 +460,14 @@ public:
 #define spell_prison_anti_magie 76903 // Prison_Anti_Magie
 #define spell_salve_de_traits_de_lombre 89846 // Salve_de_Traits_de_l'Ombre
 
-class mob_chercheur_du_vide : public CreatureScript
+class npc_chercheur_du_vide : public CreatureScript
 {
 public: 
-     mob_chercheur_du_vide() : CreatureScript("mob_chercheur_du_vide") {}
+     npc_chercheur_du_vide() : CreatureScript("npc_chercheur_du_vide") {}
 	 
-	 struct mob_chercheur_du_videAI : public ScriptedAI
+	 struct npc_chercheur_du_videAI : public ScriptedAI
 	 {
-	    mob_chercheur_du_videAI(Creature *c) : ScriptedAI(c) {}
+	    npc_chercheur_du_videAI(Creature *c) : ScriptedAI(c) {}
 		
 		uint32 prison_anti_magie;
 		uint32 salve_de_traits_de_lombre;
@@ -501,7 +501,7 @@ public:
 	
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-          return new mob_chercheur_du_videAI(pCreature);
+          return new npc_chercheur_du_videAI(pCreature);
 	}
 	
 };
@@ -514,14 +514,14 @@ public:
 #define spell_salve_de_traits_de_lombre 89846 // Salve_de_Traits_de_l'Ombre
 #define spell_infusion_de_vide 77470 // A mettre en place prochainement
 
-class mob_seigneur_du_vide : public CreatureScript
+class npc_seigneur_du_vide : public CreatureScript
 {
 public:
-      mob_seigneur_du_vide() : CreatureScript("mob_seigneur_du_vide") {}
+      npc_seigneur_du_vide() : CreatureScript("npc_seigneur_du_vide") {}
 	  
-	  struct mob_seigneur_du_videAI : public ScriptedAI
+	  struct npc_seigneur_du_videAI : public ScriptedAI
 	  {
-	     mob_seigneur_du_videAI(Creature *c) : ScriptedAI(c) {}
+	     npc_seigneur_du_videAI(Creature *c) : ScriptedAI(c) {}
 		 
 		 uint32 explosion_de_vide;
 		 uint32 salve_de_traits_de_lombre;
@@ -555,7 +555,7 @@ public:
 			
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-           return new mob_seigneur_du_videAI(pCreature);
+           return new npc_seigneur_du_videAI(pCreature);
 	}
 	
 };
@@ -566,14 +566,14 @@ public:
 
 #define spell_jaillissement_des_arcanes 89862 // Jaillissement_des_Arcanes
 
-class mob_anomalie_spatiale : public CreatureScript
+class npc_anomalie_spatiale : public CreatureScript
 {
 public:
-     mob_anomalie_spatiale() : CreatureScript("mob_anomalie_spatiale") {}
+     npc_anomalie_spatiale() : CreatureScript("npc_anomalie_spatiale") {}
 	 
-	 struct mob_anomalie_spatialeAI : public ScriptedAI
+	 struct npc_anomalie_spatialeAI : public ScriptedAI
 	 {
-	    mob_anomalie_spatialeAI(Creature *c) : ScriptedAI(c) {}
+	    npc_anomalie_spatialeAI(Creature *c) : ScriptedAI(c) {}
 		
 		uint32 jaillissement_des_arcanes;
 		
@@ -599,7 +599,7 @@ public:
 	
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-            return new mob_anomalie_spatialeAI(pCreature);
+            return new npc_anomalie_spatialeAI(pCreature);
 	}
 		
 };
@@ -610,14 +610,14 @@ public:
 
 #define spell_barrage_des_arcanes 89863 // Barrage_des_Arcanes
 
-class mob_animateur_de_flux : public CreatureScript
+class npc_animateur_de_flux : public CreatureScript
 {
 public:
-     mob_animateur_de_flux() : CreatureScript("mob_animateur_de_flux") {}
+     npc_animateur_de_flux() : CreatureScript("npc_animateur_de_flux") {}
 	 
-	 struct mob_animateur_de_fluxAI : public ScriptedAI
+	 struct npc_animateur_de_fluxAI : public ScriptedAI
 	 {
-	    mob_animateur_de_fluxAI(Creature *c) : ScriptedAI(c) {}
+	    npc_animateur_de_fluxAI(Creature *c) : ScriptedAI(c) {}
 		
 		uint32 barrage_des_arcanes;
 		
@@ -644,7 +644,7 @@ public:
 	 
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-          return new mob_animateur_de_fluxAI(pCreature);
+          return new npc_animateur_de_fluxAI(pCreature);
     }
 	
 };
@@ -657,14 +657,14 @@ public:
 #define spell_dispersion_des_flammes 89852 // Dispersion_des_Flammes
 #define spell_flammes_incendiaires 89849 // Flammes_Incendiaires
 
-class mob_serviteur_solegrace : public CreatureScript
+class npc_serviteur_solegrace : public CreatureScript
 {
 public :
-    mob_serviteur_solegrace() : CreatureScript("mob_serviteur_solegrace") {}
+    npc_serviteur_solegrace() : CreatureScript("npc_serviteur_solegrace") {}
 	  
-	struct mob_serviteur_solegraceAI : public ScriptedAI
+	struct npc_serviteur_solegraceAI : public ScriptedAI
 	{
-	    mob_serviteur_solegraceAI(Creature *c) : ScriptedAI(c) {}
+	    npc_serviteur_solegraceAI(Creature *c) : ScriptedAI(c) {}
 		  
 		uint32 dispersion_des_flammes;
 		uint32 flammes_incendiaires;
@@ -699,7 +699,7 @@ public :
 	  
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mob_serviteur_solegraceAI(pCreature);
+        return new npc_serviteur_solegraceAI(pCreature);
 	}
 	
 };
@@ -713,14 +713,14 @@ public :
 #define spell_dispersion_des_flammes 89852 // Dispersion_des_Flammes
 #define spell_flammes_incendiaires 89849 // Flammes_Incendiaires
 
-class mob_fee_solegrace : public CreatureScript
+class npc_fee_solegrace : public CreatureScript
 {
 public :
-    mob_fee_solegrace() : CreatureScript("mob_fee_solegrace") {}
+    npc_fee_solegrace() : CreatureScript("npc_fee_solegrace") {}
 	  
-	struct mob_fee_solegraceAI : public ScriptedAI
+	struct npc_fee_solegraceAI : public ScriptedAI
 	{
-	    mob_fee_solegraceAI(Creature *c) : ScriptedAI(c) {}
+	    npc_fee_solegraceAI(Creature *c) : ScriptedAI(c) {}
 		 
 		uint32 pyrogenie;
 		uint32 dispersion_des_flammes;
@@ -763,7 +763,7 @@ public :
 	 		
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mob_fee_solegraceAI(pCreature);
+        return new npc_fee_solegraceAI(pCreature);
     }			
 	
 };
@@ -776,14 +776,14 @@ public :
 #define spell_dispersion_des_flammes 89852 // Dispersion_des_Flammes
 #define spell_flammes_incendiaires 89849 // Flammes_Incendiaires
 
-class mob_petite_fee_solegrace : public CreatureScript
+class npc_petite_fee_solegrace : public CreatureScript
 {
 public :
-    mob_petite_fee_solegrace() : CreatureScript("mob_petite_fee_solegrace") {}
+    npc_petite_fee_solegrace() : CreatureScript("npc_petite_fee_solegrace") {}
 
-	struct mob_petite_fee_solegraceAI : public ScriptedAI
+	struct npc_petite_fee_solegraceAI : public ScriptedAI
 	{
-	    mob_petite_fee_solegraceAI(Creature *c) : ScriptedAI(c) {}
+	    npc_petite_fee_solegraceAI(Creature *c) : ScriptedAI(c) {}
 
 		uint32 pyrogenie;
 		uint32 dispersion_des_flammes;
@@ -826,7 +826,7 @@ public :
 
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mob_petite_fee_solegraceAI(pCreature);
+        return new npc_petite_fee_solegraceAI(pCreature);
     }
 
 };
@@ -838,14 +838,14 @@ public :
 #define spell_pietinement_reverberant 89851 // Piétinement_Réverbérant
 #define spell_tempete_de_feu 73861 // Tempête_de_Feu
 
-class mob_porte_parole_solegrace : public CreatureScript
+class npc_porte_parole_solegrace : public CreatureScript
 {
 public:
-      mob_porte_parole_solegrace() : CreatureScript("mob_porte_parole_solegrace") {}
+      npc_porte_parole_solegrace() : CreatureScript("npc_porte_parole_solegrace") {}
 	  
-	  struct mob_porte_parole_solegraceAI : public ScriptedAI
+	  struct npc_porte_parole_solegraceAI : public ScriptedAI
 	  {
-	     mob_porte_parole_solegraceAI(Creature *c) : ScriptedAI(c) {}
+	     npc_porte_parole_solegraceAI(Creature *c) : ScriptedAI(c) {}
 		 
 		 uint32 pietinement_reverberant;
 		 uint32 tempete_de_feu;
@@ -879,7 +879,7 @@ public:
     
     CreatureAI* GetAI(Creature* pCreature) const
     {
-            return new mob_porte_parole_solegraceAI(pCreature);
+            return new npc_porte_parole_solegraceAI(pCreature);
 	}
 	
 };
@@ -892,14 +892,14 @@ public:
 #define spell_tir_enchevetrant 89865 // Tir_Enchevetrant
 #define spell_tranquillite 75940 // Tranquillité
 
-class mob_nymphe_gardienne : public CreatureScript
+class npc_nymphe_gardienne : public CreatureScript
 {
 public :
-      mob_nymphe_gardienne() : CreatureScript("mob_nymphe_gardienne") {}
+      npc_nymphe_gardienne() : CreatureScript("npc_nymphe_gardienne") {}
 	  
-	  struct mob_nymphe_gardienneAI : public ScriptedAI
+	  struct npc_nymphe_gardienneAI : public ScriptedAI
 	  {
-	      mob_nymphe_gardienneAI(Creature *c) : ScriptedAI(c) {}
+	      npc_nymphe_gardienneAI(Creature *c) : ScriptedAI(c) {}
 		  
 		  uint32 tir;
 		  uint32 tir_enchevetrant;
@@ -942,7 +942,7 @@ public :
 	  
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-            return new mob_nymphe_gardienneAI(pCreature);
+            return new npc_nymphe_gardienneAI(pCreature);
 	}
 	
 };
@@ -953,14 +953,14 @@ public :
 
 #define spell_souffle_de_spores 89864 // Souffle_de_Spores
 
-class mob_liane_vivante : public CreatureScript
+class npc_liane_vivante : public CreatureScript
 {
 public :
-      mob_liane_vivante() : CreatureScript("mob_liane_vivante") {}
+      npc_liane_vivante() : CreatureScript("npc_liane_vivante") {}
 	  
-	  struct mob_liane_vivanteAI : public ScriptedAI
+	  struct npc_liane_vivanteAI : public ScriptedAI
 	  {
-	     mob_liane_vivanteAI(Creature *c) : ScriptedAI(c) {}
+	     npc_liane_vivanteAI(Creature *c) : ScriptedAI(c) {}
 		 
 		 uint32 souffle_de_spores;
 		 
@@ -987,7 +987,7 @@ public :
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mob_liane_vivanteAI(pCreature);
+        return new npc_liane_vivanteAI(pCreature);
     }		   
 
 };
@@ -999,14 +999,14 @@ public :
 #define spell_nuage_de_spores 75701 // Nuage_de_Spores
 #define spell_spores_nauseabondes 89889 // Spores_Nauséabondes
 
-class mob_spore_en_bourgeon : public CreatureScript
+class npc_spore_en_bourgeon : public CreatureScript
 {
 public :
-    mob_spore_en_bourgeon() : CreatureScript("mob_spore_en_bourgeon") {}
+    npc_spore_en_bourgeon() : CreatureScript("npc_spore_en_bourgeon") {}
 	  
-	struct mob_spore_en_bourgeonAI : public ScriptedAI
+	struct npc_spore_en_bourgeonAI : public ScriptedAI
 	{
-	    mob_spore_en_bourgeonAI(Creature *c) : ScriptedAI(c) {}
+	    npc_spore_en_bourgeonAI(Creature *c) : ScriptedAI(c) {}
 
 		uint32 nuage_de_spores;
 		uint32 spores_nauseabondes;
@@ -1040,30 +1040,30 @@ public :
 		
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mob_spore_en_bourgeonAI(pCreature);
+        return new npc_spore_en_bourgeonAI(pCreature);
     }		   
 
 };
 
-void AddSC_mob_trash_sdo()
+void AddSC_npc_trash_sdo()
 {
-    new mob_lancelombre_du_temple();
-    new mob_traqueur_veloce_du_temple();
-	new mob_lanceur_de_runes_du_temple();
-	new mob_sculptefeu_du_temple();
-	new mob_scarabee_caustique();
-	new mob_glisseur_venimeux();
-	new mob_horreur_os_poussiere();
-	new mob_tourmenteur_os_poussiere();
-	new mob_chercheur_du_vide();
-	new mob_seigneur_du_vide();
-	new mob_anomalie_spatiale();
-	new mob_animateur_de_flux();
-	new mob_serviteur_solegrace();
-	new mob_fee_solegrace();
-	new mob_petite_fee_solegrace();
-	new mob_porte_parole_solegrace();
-	new mob_nymphe_gardienne();
-	new mob_liane_vivante();
-	new mob_spore_en_bourgeon();
+    new npc_lancelombre_du_temple();
+    new npc_traqueur_veloce_du_temple();
+	new npc_lanceur_de_runes_du_temple();
+	new npc_sculptefeu_du_temple();
+	new npc_scarabee_caustique();
+	new npc_glisseur_venimeux();
+	new npc_horreur_os_poussiere();
+	new npc_tourmenteur_os_poussiere();
+	new npc_chercheur_du_vide();
+	new npc_seigneur_du_vide();
+	new npc_anomalie_spatiale();
+	new npc_animateur_de_flux();
+	new npc_serviteur_solegrace();
+	new npc_fee_solegrace();
+	new npc_petite_fee_solegrace();
+	new npc_porte_parole_solegrace();
+	new npc_nymphe_gardienne();
+	new npc_liane_vivante();
+	new npc_spore_en_bourgeon();
 }

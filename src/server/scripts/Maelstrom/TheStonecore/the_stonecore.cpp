@@ -103,19 +103,19 @@ enum eEvents
 };
 
 // Crystalspawn Giant AI
-class mob_crystalspawn_giant : public CreatureScript
+class npc_crystalspawn_giant : public CreatureScript
 {
 public:
-    mob_crystalspawn_giant() : CreatureScript("mob_crystalspawn_giant") { }
+    npc_crystalspawn_giant() : CreatureScript("npc_crystalspawn_giant") { }
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mob_crystalspawn_giantAI(pCreature);
+        return new npc_crystalspawn_giantAI(pCreature);
     }
 
-    struct mob_crystalspawn_giantAI : public ScriptedAI
+    struct npc_crystalspawn_giantAI : public ScriptedAI
     {
-        mob_crystalspawn_giantAI(Creature *c) : ScriptedAI(c)
+        npc_crystalspawn_giantAI(Creature *c) : ScriptedAI(c)
         {
         }
 
@@ -158,19 +158,19 @@ public:
 };
 
 // Imp AI
-class mob_impp : public CreatureScript
+class npc_impp : public CreatureScript
 {
 public:
-    mob_impp() : CreatureScript("mob_impp") { }
+    npc_impp() : CreatureScript("npc_impp") { }
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mob_imppAI(pCreature);
+        return new npc_imppAI(pCreature);
     }
 
-    struct mob_imppAI : public ScriptedAI
+    struct npc_imppAI : public ScriptedAI
     {
-        mob_imppAI(Creature *c) : ScriptedAI(c)
+        npc_imppAI(Creature *c) : ScriptedAI(c)
         {
         }
 
@@ -214,19 +214,19 @@ public:
 };
 
 // Rock Borer AI
-class mob_rock_borer : public CreatureScript
+class npc_rock_borer : public CreatureScript
 {
 public:
-    mob_rock_borer() : CreatureScript("mob_rock_borer") { }
+    npc_rock_borer() : CreatureScript("npc_rock_borer") { }
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mob_rock_borerAI(pCreature);
+        return new npc_rock_borerAI(pCreature);
     }
 
-    struct mob_rock_borerAI : public ScriptedAI
+    struct npc_rock_borerAI : public ScriptedAI
     {
-        mob_rock_borerAI(Creature *c) : ScriptedAI(c)
+        npc_rock_borerAI(Creature *c) : ScriptedAI(c)
         {
         }
 
@@ -270,19 +270,19 @@ public:
 };
 
 // Millhouse Manastorm AI
-class mob_millhouse_manastorm : public CreatureScript
+class npc_millhouse_manastorm : public CreatureScript
 {
 public:
-    mob_millhouse_manastorm() : CreatureScript("mob_millhouse_manastorm") { }
+    npc_millhouse_manastorm() : CreatureScript("npc_millhouse_manastorm") { }
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mob_millhouse_manastormAI(pCreature);
+        return new npc_millhouse_manastormAI(pCreature);
     }
 
-    struct mob_millhouse_manastormAI : public ScriptedAI
+    struct npc_millhouse_manastormAI : public ScriptedAI
     {
-        mob_millhouse_manastormAI(Creature *c) : ScriptedAI(c)
+        npc_millhouse_manastormAI(Creature *c) : ScriptedAI(c)
         {
         }
 
@@ -350,8 +350,8 @@ public:
 
 void AddSC_the_stonecore()
 {
-    new mob_crystalspawn_giant();
-    new mob_impp();
-    new mob_millhouse_manastorm();
-    new mob_rock_borer;
+    new npc_crystalspawn_giant();
+    new npc_impp();
+    new npc_millhouse_manastorm();
+    new npc_rock_borer;
 }

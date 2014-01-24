@@ -14,14 +14,14 @@
 
 #define spell_cisaille_de_vent 91164 // Cisaille_de_Vent
 
-class mob_gardien_dair: public CreatureScript
+class npc_gardien_dair: public CreatureScript
 {
 public:
-       mob_gardien_dair() : CreatureScript("mob_gardien_dair") {}
+       npc_gardien_dair() : CreatureScript("npc_gardien_dair") {}
  
-       struct mob_gardien_dairAI : public ScriptedAI
+       struct npc_gardien_dairAI : public ScriptedAI
        {
-            mob_gardien_dairAI(Creature * pCreature) : ScriptedAI(pCreature) {}
+            npc_gardien_dairAI(Creature * pCreature) : ScriptedAI(pCreature) {}
 			
 			uint32 cisaille_de_vent;
 			
@@ -48,7 +48,7 @@ public:
 	   
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-         return new mob_gardien_dairAI(pCreature);
+         return new npc_gardien_dairAI(pCreature);
     }
  
 };
@@ -60,14 +60,14 @@ public:
 #define spell_eruption_de_lave 91161 // Eruption_de_Lave
 #define spell_inferno_dechaine 91160 // Inferno_Déchaîné
 
-class mob_gardien_de_flammes: public CreatureScript
+class npc_gardien_de_flammes: public CreatureScript
 {
 public:
-       mob_gardien_de_flammes() : CreatureScript("mob_gardien_de_flammes") {}
+       npc_gardien_de_flammes() : CreatureScript("npc_gardien_de_flammes") {}
 	   
-	   struct mob_gardien_de_flammesAI : public ScriptedAI
+	   struct npc_gardien_de_flammesAI : public ScriptedAI
 	   {
-	          mob_gardien_de_flammesAI(Creature * pCreature) : ScriptedAI(pCreature) {}
+	          npc_gardien_de_flammesAI(Creature * pCreature) : ScriptedAI(pCreature) {}
 			  
 			  uint32 eruption_de_lave;
 			  uint32 inferno_dechaine;
@@ -95,7 +95,7 @@ public:
 		
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mob_gardien_de_flammesAI(pCreature);
+        return new npc_gardien_de_flammesAI(pCreature);
 	}	  
 
 };
@@ -107,14 +107,14 @@ public:
 #define spell_empaler 91163 // Empaler
 #define spell_vague_de_roche 77234// Vague_de_Roche
 
-class mob_gardien_de_terre: public CreatureScript
+class npc_gardien_de_terre: public CreatureScript
 {
 public:
-    mob_gardien_de_terre() : CreatureScript("mob_gardien_de_terre") {}
+    npc_gardien_de_terre() : CreatureScript("npc_gardien_de_terre") {}
 
-		struct mob_gardien_de_terreAI : public ScriptedAI
+		struct npc_gardien_de_terreAI : public ScriptedAI
 	    {    
-         mob_gardien_de_terreAI(Creature * pCreature) : ScriptedAI(pCreature) {}
+         npc_gardien_de_terreAI(Creature * pCreature) : ScriptedAI(pCreature) {}
 
 			uint32 empaler;
 			uint32 vague_de_roche;
@@ -149,14 +149,14 @@ public:
 
 	CreatureAI* GetAI(Creature* pCreature) const
     {
-		return new mob_gardien_de_terreAI(pCreature);
+		return new npc_gardien_de_terreAI(pCreature);
     }
 
 };
 
 void AddSC_elementaires_sdo()
 {
-	new mob_gardien_dair();
-	new mob_gardien_de_flammes();
-	new mob_gardien_de_terre();
+	new npc_gardien_dair();
+	new npc_gardien_de_flammes();
+	new npc_gardien_de_terre();
 }

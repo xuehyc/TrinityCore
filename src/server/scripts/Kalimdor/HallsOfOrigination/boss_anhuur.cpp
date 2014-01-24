@@ -243,14 +243,14 @@ class boss_temple_guardian_anhuur : public CreatureScript
 ** Vipère de la Fosse
 *********************/
 #define spell_crochet 74538
-class mob_viper: public CreatureScript
+class npc_viper: public CreatureScript
 {
 public: 
- mob_viper() : CreatureScript("mob_viper") { } 
+ npc_viper() : CreatureScript("npc_viper") { } 
 
- struct mob_viperAI : public ScriptedAI
+ struct npc_viperAI : public ScriptedAI
     {
-        mob_viperAI(Creature *c) : ScriptedAI(c) {}
+        npc_viperAI(Creature *c) : ScriptedAI(c) {}
 
 		uint32 crochet;
 		
@@ -277,7 +277,7 @@ public:
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mob_viperAI (pCreature);
+        return new npc_viperAI (pCreature);
     }
 
 };
@@ -305,5 +305,5 @@ void AddSC_boss_temple_guardian_anhuur()
 {
     new boss_temple_guardian_anhuur();
     new go_beacon_of_light();
-    new mob_viper();
+    new npc_viper();
 }

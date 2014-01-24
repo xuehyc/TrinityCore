@@ -123,19 +123,19 @@ public:
     };
 };
 
-class mobs_lava_parasite : public CreatureScript
+class npc_lava_parasite : public CreatureScript
 {
 public:
-    mobs_lava_parasite() : CreatureScript("mobs_lava_parasite") { }
+    npc_lava_parasite() : CreatureScript("npc_lava_parasite") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new mobs_lava_parasiteAI (creature);
+        return new npc_lava_parasiteAI (creature);
     }
 
-    struct mobs_lava_parasiteAI : public ScriptedAI
+    struct npc_lava_parasiteAI : public ScriptedAI
     {
-        mobs_lava_parasiteAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_lava_parasiteAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 CheckDistanceTimer;
 
@@ -207,6 +207,6 @@ class spell_parasitic_infection : public SpellScriptLoader
 void AddSC_boss_magmaw()
 {
     new boss_magmaw();
-    new mobs_lava_parasite();
+    new npc_lava_parasite();
     new spell_parasitic_infection();
 }

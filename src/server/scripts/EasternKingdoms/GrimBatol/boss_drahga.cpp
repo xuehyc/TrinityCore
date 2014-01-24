@@ -300,19 +300,19 @@ public:
     };
 };
 
-class mob_valiona_gb : public CreatureScript
+class npc_valiona_gb : public CreatureScript
 {
 public:
-    mob_valiona_gb() : CreatureScript("mob_valiona_gb") { }
+    npc_valiona_gb() : CreatureScript("npc_valiona_gb") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_valiona_gbAI (creature);
+        return new npc_valiona_gbAI (creature);
     }
 
-    struct mob_valiona_gbAI : public ScriptedAI
+    struct npc_valiona_gbAI : public ScriptedAI
     {
-        mob_valiona_gbAI(Creature* creature) : ScriptedAI(creature), summons(creature)//, vehicle(creature->GetVehicleKit())
+        npc_valiona_gbAI(Creature* creature) : ScriptedAI(creature), summons(creature)//, vehicle(creature->GetVehicleKit())
         {
             //instance = creature->GetInstanceScript();
 
@@ -499,19 +499,19 @@ public:
     };
 };
 
-class mob_invoked_flame_spirit : public CreatureScript
+class npc_invoked_flame_spirit : public CreatureScript
 {
 public:
-    mob_invoked_flame_spirit() : CreatureScript("mob_invoked_flame_spirit") { }
+    npc_invoked_flame_spirit() : CreatureScript("npc_invoked_flame_spirit") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_invoked_flame_spiritAI (creature);
+        return new npc_invoked_flame_spiritAI (creature);
     }
 
-    struct mob_invoked_flame_spiritAI : public ScriptedAI
+    struct npc_invoked_flame_spiritAI : public ScriptedAI
     {
-        mob_invoked_flame_spiritAI(Creature* creature) : ScriptedAI(creature), pTarget(NULL) {}
+        npc_invoked_flame_spiritAI(Creature* creature) : ScriptedAI(creature), pTarget(NULL) {}
 
         Unit* pTarget;
 
@@ -554,6 +554,6 @@ public:
 void AddSC_boss_drahga_shadowburner()
 {
     new boss_drahga_shadowburner();
-    new mob_valiona_gb();
-    new mob_invoked_flame_spirit();
+    new npc_valiona_gb();
+    new npc_invoked_flame_spirit();
 }

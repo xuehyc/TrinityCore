@@ -12,14 +12,14 @@
 
 #define spell_fracture 87711 // Fracture
 
-class mob_unbound_earth_rager : public CreatureScript
+class npc_unbound_earth_rager : public CreatureScript
 {
  public:
-      mob_unbound_earth_rager() : CreatureScript("mob_unbound_earth_rager") {}
+      npc_unbound_earth_rager() : CreatureScript("npc_unbound_earth_rager") {}
 	  
-	  struct mob_unbound_earth_ragerAI : public ScriptedAI
+	  struct npc_unbound_earth_ragerAI : public ScriptedAI
 	  {
-	    mob_unbound_earth_ragerAI(Creature * pCreature) : ScriptedAI(pCreature) {}
+	    npc_unbound_earth_ragerAI(Creature * pCreature) : ScriptedAI(pCreature) {}
 		
 		uint32 fracture;
 		
@@ -46,7 +46,7 @@ class mob_unbound_earth_rager : public CreatureScript
 
 CreatureAI* GetAI(Creature* pCreature) const
 {
-        return new mob_unbound_earth_ragerAI(pCreature);
+        return new npc_unbound_earth_ragerAI(pCreature);
 }
  
 };
@@ -60,14 +60,14 @@ CreatureAI* GetAI(Creature* pCreature) const
 #define spell_demon_portal 80308 // Portail Démoniaque
 #define spell_shadow_bolt 92637 // Trait de l'Ombre
 
-class mob_stonecore_rift_conjurer : public CreatureScript
+class npc_stonecore_rift_conjurer : public CreatureScript
 {
  public:
-      mob_stonecore_rift_conjurer() : CreatureScript("mob_stonecore_rift_conjurer") {}
+      npc_stonecore_rift_conjurer() : CreatureScript("npc_stonecore_rift_conjurer") {}
 	  
-	  struct mob_stonecore_rift_conjurerAI : public ScriptedAI
+	  struct npc_stonecore_rift_conjurerAI : public ScriptedAI
 	  {
-	    mob_stonecore_rift_conjurerAI(Creature * pCreature) : ScriptedAI(pCreature) {}
+	    npc_stonecore_rift_conjurerAI(Creature * pCreature) : ScriptedAI(pCreature) {}
 		
 		uint32 demon_portal;
         uint32 shadow_bolt;
@@ -101,7 +101,7 @@ class mob_stonecore_rift_conjurer : public CreatureScript
 		
 CreatureAI* GetAI(Creature* pCreature) const
 {
-        return new mob_stonecore_rift_conjurerAI(pCreature);
+        return new npc_stonecore_rift_conjurerAI(pCreature);
 }
  
 };
@@ -113,14 +113,14 @@ CreatureAI* GetAI(Creature* pCreature) const
 #define spell_charge 81574 // Charge
 #define spell_spinning_slash 92623 
 
-class mob_stonecore_berserker : public CreatureScript
+class npc_stonecore_berserker : public CreatureScript
 {
  public:
-      mob_stonecore_berserker() : CreatureScript("mob_stonecore_berserker") {}
+      npc_stonecore_berserker() : CreatureScript("npc_stonecore_berserker") {}
 	  
-	  struct mob_stonecore_berserkerAI : public ScriptedAI
+	  struct npc_stonecore_berserkerAI : public ScriptedAI
 	  {
-	    mob_stonecore_berserkerAI(Creature * pCreature) : ScriptedAI(pCreature) {}
+	    npc_stonecore_berserkerAI(Creature * pCreature) : ScriptedAI(pCreature) {}
 		
 		uint32 charge;
         uint32 spinning_slash;
@@ -157,7 +157,7 @@ class mob_stonecore_berserker : public CreatureScript
 
 CreatureAI* GetAI(Creature* pCreature) const
 {
-        return new mob_stonecore_berserkerAI(pCreature);
+        return new npc_stonecore_berserkerAI(pCreature);
 }
  
 };
@@ -170,14 +170,14 @@ CreatureAI* GetAI(Creature* pCreature) const
 #define spell_body_slam 80180
 #define spell_shockwave 92640
 
-class mob_stonecore_bruiser : public CreatureScript
+class npc_stonecore_bruiser : public CreatureScript
 {
  public:
-      mob_stonecore_bruiser() : CreatureScript("mob_stonecore_bruiser") {}
+      npc_stonecore_bruiser() : CreatureScript("npc_stonecore_bruiser") {}
 	  
-	  struct mob_stonecore_bruiserAI : public ScriptedAI
+	  struct npc_stonecore_bruiserAI : public ScriptedAI
 	  {
-	    mob_stonecore_bruiserAI(Creature * pCreature) : ScriptedAI(pCreature) {}
+	    npc_stonecore_bruiserAI(Creature * pCreature) : ScriptedAI(pCreature) {}
 		
 		uint32 beat_down;
         uint32 body_slam;
@@ -221,7 +221,7 @@ class mob_stonecore_bruiser : public CreatureScript
 
 CreatureAI* GetAI(Creature* pCreature) const
 {
-        return new mob_stonecore_bruiserAI(pCreature);
+        return new npc_stonecore_bruiserAI(pCreature);
 }
  
 };
@@ -232,14 +232,14 @@ CreatureAI* GetAI(Creature* pCreature) const
 
 #define spell_flay 79922
 
-class mob_stonecore_flayer : public CreatureScript
+class npc_stonecore_flayer : public CreatureScript
 {
  public:
-      mob_stonecore_flayer() : CreatureScript("mob_stonecore_flayer") {}
+      npc_stonecore_flayer() : CreatureScript("npc_stonecore_flayer") {}
 	  
-	  struct mob_stonecore_flayerAI : public ScriptedAI
+	  struct npc_stonecore_flayerAI : public ScriptedAI
 	  {
-	    mob_stonecore_flayerAI(Creature * pCreature) : ScriptedAI(pCreature) {}
+	    npc_stonecore_flayerAI(Creature * pCreature) : ScriptedAI(pCreature) {}
 		
 		uint32 flay;
         
@@ -266,7 +266,7 @@ class mob_stonecore_flayer : public CreatureScript
 
 CreatureAI* GetAI(Creature* pCreature) const
 {
-        return new mob_stonecore_flayerAI(pCreature);
+        return new npc_stonecore_flayerAI(pCreature);
 }
  
 };
@@ -278,14 +278,14 @@ CreatureAI* GetAI(Creature* pCreature) const
 #define spell_cleave 15496
 #define spell_rage 80158
 
-class mob_stonecore_warbringer : public CreatureScript
+class npc_stonecore_warbringer : public CreatureScript
 {
  public:
-      mob_stonecore_warbringer() : CreatureScript("mob_stonecore_warbringer") {}
+      npc_stonecore_warbringer() : CreatureScript("npc_stonecore_warbringer") {}
 	  
-	  struct mob_stonecore_warbringerAI : public ScriptedAI
+	  struct npc_stonecore_warbringerAI : public ScriptedAI
 	  {
-	    mob_stonecore_warbringerAI(Creature * pCreature) : ScriptedAI(pCreature) {}
+	    npc_stonecore_warbringerAI(Creature * pCreature) : ScriptedAI(pCreature) {}
 		
 		uint32 cleave;
 		uint32 rage;
@@ -320,7 +320,7 @@ class mob_stonecore_warbringer : public CreatureScript
 
 CreatureAI* GetAI(Creature* pCreature) const
 {
-        return new mob_stonecore_warbringerAI(pCreature);
+        return new npc_stonecore_warbringerAI(pCreature);
 }
  
 };
@@ -334,14 +334,14 @@ CreatureAI* GetAI(Creature* pCreature) const
 #define spell_ground_shock 92628
 #define spell_lava_burst 92626
 
-class mob_stonecore_earthshaper : public CreatureScript
+class npc_stonecore_earthshaper : public CreatureScript
 {
  public:
-      mob_stonecore_earthshaper() : CreatureScript("mob_stonecore_earthshaper") {}
+      npc_stonecore_earthshaper() : CreatureScript("npc_stonecore_earthshaper") {}
 	  
-	  struct mob_stonecore_earthshaperAI : public ScriptedAI
+	  struct npc_stonecore_earthshaperAI : public ScriptedAI
 	  {
-	    mob_stonecore_earthshaperAI(Creature * pCreature) : ScriptedAI(pCreature) {}
+	    npc_stonecore_earthshaperAI(Creature * pCreature) : ScriptedAI(pCreature) {}
 		
 		uint32 dust_storm;
 		uint32 force_of_earth;
@@ -392,7 +392,7 @@ class mob_stonecore_earthshaper : public CreatureScript
 
 CreatureAI* GetAI(Creature* pCreature) const
 {
-        return new mob_stonecore_earthshaperAI(pCreature);
+        return new npc_stonecore_earthshaperAI(pCreature);
 }
  
 };
@@ -404,14 +404,14 @@ CreatureAI* GetAI(Creature* pCreature) const
 #define spell_ignite 92636
 #define spell_magma_eruption 80038
 
-class mob_stonecore_magmalord : public CreatureScript
+class npc_stonecore_magmalord : public CreatureScript
 {
  public:
-      mob_stonecore_magmalord() : CreatureScript("mob_stonecore_magmalord") {}
+      npc_stonecore_magmalord() : CreatureScript("npc_stonecore_magmalord") {}
 	  
-	  struct mob_stonecore_magmalordAI : public ScriptedAI
+	  struct npc_stonecore_magmalordAI : public ScriptedAI
 	  {
-	    mob_stonecore_magmalordAI(Creature * pCreature) : ScriptedAI(pCreature) {}
+	    npc_stonecore_magmalordAI(Creature * pCreature) : ScriptedAI(pCreature) {}
 		
 		uint32 ignite;
 		uint32 magma_eruption;
@@ -446,19 +446,19 @@ class mob_stonecore_magmalord : public CreatureScript
 
 CreatureAI* GetAI(Creature* pCreature) const
 {
-        return new mob_stonecore_magmalordAI(pCreature);
+        return new npc_stonecore_magmalordAI(pCreature);
 }
  
 };
 
-void AddSC_mob_trash_coeur_de_pierre()
+void AddSC_npc_trash_coeur_de_pierre()
 {
-    new mob_unbound_earth_rager();
-	new mob_stonecore_rift_conjurer();
-	new mob_stonecore_berserker();
-	new mob_stonecore_bruiser();
-	new mob_stonecore_flayer();
-	new mob_stonecore_warbringer();
-	new mob_stonecore_earthshaper();
-	new mob_stonecore_magmalord();
+    new npc_unbound_earth_rager();
+	new npc_stonecore_rift_conjurer();
+	new npc_stonecore_berserker();
+	new npc_stonecore_bruiser();
+	new npc_stonecore_flayer();
+	new npc_stonecore_warbringer();
+	new npc_stonecore_earthshaper();
+	new npc_stonecore_magmalord();
 }

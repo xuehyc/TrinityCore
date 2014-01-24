@@ -12,14 +12,14 @@
 #define spell_impregnation_des_arcanes 76378 // Impregnation_des_Arcanes
 #define spell_malediction_de_la_nuee_azur 90659 // Malediction_de_la_Nuee_Azur
 
-class mob_gardien_de_la_nuee_azur: public CreatureScript
+class npc_gardien_de_la_nuee_azur: public CreatureScript
 {
 public:
- mob_gardien_de_la_nuee_azur() : CreatureScript("mob_gardien_de_la_nuee_azur") {}
+ npc_gardien_de_la_nuee_azur() : CreatureScript("npc_gardien_de_la_nuee_azur") {}
  
- struct mob_gardien_de_la_nuee_azurAI : public ScriptedAI
+ struct npc_gardien_de_la_nuee_azurAI : public ScriptedAI
  {
- mob_gardien_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
+ npc_gardien_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
  
  uint32 impregnation_des_arcanes;
  uint32 malediction_de_la_nuee_azur;
@@ -54,7 +54,7 @@ public:
  
  CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_gardien_de_la_nuee_azurAI(pCreature);
+ return new npc_gardien_de_la_nuee_azurAI(pCreature);
  }
  
  };
@@ -66,14 +66,14 @@ public:
  #define spell_charge_cramoisie 76404 // Charge_Cramoisie
  #define spell_onde_de_choc_cramoisie 76409 // Onde_de_Choc_Cramoisie
  
-class mob_gardien_de_la_nuee_cramoisie: public CreatureScript
+class npc_gardien_de_la_nuee_cramoisie: public CreatureScript
 {
 public: 
- mob_gardien_de_la_nuee_cramoisie() : CreatureScript("mob_gardien_de_la_nuee_cramoisie") { } 
+ npc_gardien_de_la_nuee_cramoisie() : CreatureScript("npc_gardien_de_la_nuee_cramoisie") { } 
 
- struct mob_gardien_de_la_nuee_cramoisieAI : public ScriptedAI
+ struct npc_gardien_de_la_nuee_cramoisieAI : public ScriptedAI
 {
-    mob_gardien_de_la_nuee_cramoisieAI(Creature *c) : ScriptedAI(c) {}
+    npc_gardien_de_la_nuee_cramoisieAI(Creature *c) : ScriptedAI(c) {}
 
   uint32 charge_cramoisie;
   uint32 onde_de_choc_cramoisie;
@@ -109,7 +109,7 @@ public:
   
   CreatureAI* GetAI(Creature* pCreature) const
   {
-  return new mob_gardien_de_la_nuee_cramoisieAI(pCreature);
+  return new npc_gardien_de_la_nuee_cramoisieAI(pCreature);
   }
   
   };
@@ -121,14 +121,14 @@ public:
   #define spell_bouclier_du_crepuscule_flamboyant 90308 // Bouclier_du_Crepuscule_Flamboyant
   #define spell_flamme_corrompue 90653 // Flamme_Corrompue
   
-  class mob_prophete_de_la_nuee_cramoisie: public CreatureScript
+  class npc_prophete_de_la_nuee_cramoisie: public CreatureScript
   {
   public:
-   mob_prophete_de_la_nuee_cramoisie() : CreatureScript("mob_prophete_de_la_nuee_cramoisie") {}
+   npc_prophete_de_la_nuee_cramoisie() : CreatureScript("npc_prophete_de_la_nuee_cramoisie") {}
    
-   struct mob_prophete_de_la_nuee_cramoisieAI : public ScriptedAI
+   struct npc_prophete_de_la_nuee_cramoisieAI : public ScriptedAI
    {
-   mob_prophete_de_la_nuee_cramoisieAI(Creature *c) : ScriptedAI(c) {}
+   npc_prophete_de_la_nuee_cramoisieAI(Creature *c) : ScriptedAI(c) {}
    
    uint32 bouclier_du_crepuscule_flamboyant;
    uint32 flamme_corrompue;
@@ -163,7 +163,7 @@ public:
    
    CreatureAI* GetAI(Creature* pCreature) const
    {
-   return new mob_prophete_de_la_nuee_cramoisieAI(pCreature);
+   return new npc_prophete_de_la_nuee_cramoisieAI(pCreature);
    }
    
    };
@@ -176,14 +176,14 @@ public:
    #define spell_crepuscule_deforme 90300 // Crépuscule_Déformé
    #define spell_eclair_crepusculaire 90303 // Eclair_Crépusculaire
    
-   class mob_prophete_de_la_nuee_azur: public CreatureScript
+   class npc_prophete_de_la_nuee_azur: public CreatureScript
    {
    public:
-    mob_prophete_de_la_nuee_azur() : CreatureScript("mob_prophete_de_la_nuee_azur") {}
+    npc_prophete_de_la_nuee_azur() : CreatureScript("npc_prophete_de_la_nuee_azur") {}
 	
-	struct mob_prophete_de_la_nuee_azurAI : public ScriptedAI
+	struct npc_prophete_de_la_nuee_azurAI : public ScriptedAI
 	{
-	mob_prophete_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
+	npc_prophete_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
 	
 	uint32 arcanes_distordues;
 	uint32 crepuscule_deforme;
@@ -227,7 +227,7 @@ public:
 	
 	CreatureAI* GetAI(Creature* pCreature) const
 	{
-	return new mob_prophete_de_la_nuee_azurAI(pCreature);
+	return new npc_prophete_de_la_nuee_azurAI(pCreature);
 	}
 	
 	};
@@ -240,14 +240,14 @@ public:
 	#define spell_invocation_dun_esprit_de_leau 74561 // Invocation_d'un_Esprit_de_l'Eau
 	#define spell_trait_deau 90491 // Trait_d'Eau
 	
-	class mob_brise_tempete_du_crepuscule: public CreatureScript
+	class npc_brise_tempete_du_crepuscule: public CreatureScript
 	{
 	public:
-	 mob_brise_tempete_du_crepuscule() : CreatureScript("mob_brise_tempete_du_crepuscule") {}
+	 npc_brise_tempete_du_crepuscule() : CreatureScript("npc_brise_tempete_du_crepuscule") {}
 	 
-	 struct mob_brise_tempete_du_crepusculeAI : public ScriptedAI
+	 struct npc_brise_tempete_du_crepusculeAI : public ScriptedAI
 	 {
-	 mob_brise_tempete_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
+	 npc_brise_tempete_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
 	 
 	 uint32 carapace_deau;
 	 uint32 invocation_dun_esprit_de_leau;
@@ -291,7 +291,7 @@ public:
 	 
 	 CreatureAI* GetAI(Creature* pCreature) const
 	 {
-	 return new mob_brise_tempete_du_crepusculeAI(pCreature);
+	 return new npc_brise_tempete_du_crepusculeAI(pCreature);
 	 }
 	 
 	 };
@@ -302,14 +302,14 @@ public:
 	 
 	 #define spell_trait_deau 90490 // Trait_d'Eau
 	 
-	 class  mob_esprit_de_leau_asservi: public CreatureScript
+	 class  npc_esprit_de_leau_asservi: public CreatureScript
 	 {
 	 public:
-	  mob_esprit_de_leau_asservi() : CreatureScript("mob_esprit_de_leau_asservi") {}
+	  npc_esprit_de_leau_asservi() : CreatureScript("npc_esprit_de_leau_asservi") {}
 	  
-	  struct mob_esprit_de_leau_asserviAI : public ScriptedAI
+	  struct npc_esprit_de_leau_asserviAI : public ScriptedAI
 	  {
-	  mob_esprit_de_leau_asserviAI(Creature *c) : ScriptedAI(c) {}
+	  npc_esprit_de_leau_asserviAI(Creature *c) : ScriptedAI(c) {}
 	  
 	  uint32 trait_deau;
 	  
@@ -337,7 +337,7 @@ public:
 	  
 	  CreatureAI* GetAI(Creature* pCreature) const
 	  {
-	  return new mob_esprit_de_leau_asserviAI(pCreature);
+	  return new npc_esprit_de_leau_asserviAI(pCreature);
 	  }
 	  
 	  };
@@ -349,14 +349,14 @@ public:
 	  #define spell_deluge_de_coups 76729 // Déluge_de_Coups
 	  #define spell_frappe_mortelle 90526 // Frappe_Mortelle
 	  
-	  class mob_maitre_darmes_du_crepuscule: public CreatureScript
+	  class npc_maitre_darmes_du_crepuscule: public CreatureScript
 	  {
 	  public:
-	   mob_maitre_darmes_du_crepuscule() : CreatureScript("mob_maitre_darmes_du_crepuscule") {}
+	   npc_maitre_darmes_du_crepuscule() : CreatureScript("npc_maitre_darmes_du_crepuscule") {}
 	   
-	   struct mob_maitre_darmes_du_crepusculeAI : public ScriptedAI
+	   struct npc_maitre_darmes_du_crepusculeAI : public ScriptedAI
 	   {
-	   mob_maitre_darmes_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
+	   npc_maitre_darmes_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
 	   
 	   uint32 deluge_de_coups;
 	   uint32 frappe_mortelle;
@@ -391,7 +391,7 @@ public:
 	   
 	   CreatureAI* GetAI(Creature* pCreature) const
 	   {
-	   return new mob_maitre_darmes_du_crepusculeAI(pCreature);
+	   return new npc_maitre_darmes_du_crepusculeAI(pCreature);
 	   }
 	   
 	   };
@@ -402,14 +402,14 @@ public:
 	   
 	   #define spell_bouclier_rocheux_dentele 76014 // Bouclier_Rocheux_Dentele
 	   
-	   class mob_elementaire_de_roche_asservi: public CreatureScript
+	   class npc_elementaire_de_roche_asservi: public CreatureScript
 	   {
 	   public:
-	    mob_elementaire_de_roche_asservi() : CreatureScript("mob_elementaire_de_roche_asservi") {}
+	    npc_elementaire_de_roche_asservi() : CreatureScript("npc_elementaire_de_roche_asservi") {}
 		
-	   struct mob_elementaire_de_roche_asserviAI : public ScriptedAI
+	   struct npc_elementaire_de_roche_asserviAI : public ScriptedAI
 	   {
-	   mob_elementaire_de_roche_asserviAI(Creature *c) : ScriptedAI(c) {}
+	   npc_elementaire_de_roche_asserviAI(Creature *c) : ScriptedAI(c) {}
 	   
 	   uint32 bouclier_rocheux_dentele;
 	   
@@ -436,7 +436,7 @@ public:
 	   
 	   CreatureAI* GetAI(Creature* pCreature) const
 	   {
-	   return new mob_elementaire_de_roche_asserviAI(pCreature);
+	   return new npc_elementaire_de_roche_asserviAI(pCreature);
 	   }
 	   
 	   };
@@ -449,14 +449,14 @@ public:
 	   #define spell_peau_de_pierre 90486 // Peau_de_Pierre
 	   #define spell_pointe_de_terre 90487 // Pointe_de_Terre
 	   
-	   class mob_sculpte_terre_du_crepuscule: public CreatureScript
+	   class npc_sculpte_terre_du_crepuscule: public CreatureScript
 	   {
 	   public:
-	    mob_sculpte_terre_du_crepuscule() : CreatureScript("mob_sculpte_terre_du_crepuscule") {}
+	    npc_sculpte_terre_du_crepuscule() : CreatureScript("npc_sculpte_terre_du_crepuscule") {}
 		
-		struct mob_sculpte_terre_du_crepusculeAI : public ScriptedAI
+		struct npc_sculpte_terre_du_crepusculeAI : public ScriptedAI
 		{
-		mob_sculpte_terre_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
+		npc_sculpte_terre_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
 		
 		uint32 invocation_dun_elementaire_de_roche;
 		uint32 peau_de_pierre;
@@ -499,7 +499,7 @@ public:
      
         CreatureAI* GetAI(Creature* pCreature) const
 		{
-		return new mob_sculpte_terre_du_crepusculeAI(pCreature);
+		return new npc_sculpte_terre_du_crepusculeAI(pCreature);
 		}
 		
 		};
@@ -511,14 +511,14 @@ public:
 		#define spell_broyeur_a_viande 90665 // Broyeur_a_Viande
 		#define spell_pris_de_vertige 90666 // Pris_de_Vertige
 		
-		class mob_massacreur_du_crepuscule: public CreatureScript
+		class npc_massacreur_du_crepuscule: public CreatureScript
 		{
 		public:
-		 mob_massacreur_du_crepuscule() : CreatureScript("mob_massacreur_du_crepuscule") {}
+		 npc_massacreur_du_crepuscule() : CreatureScript("npc_massacreur_du_crepuscule") {}
 		 
-		 struct mob_massacreur_du_crepusculeAI : public ScriptedAI
+		 struct npc_massacreur_du_crepusculeAI : public ScriptedAI
 		 {
-		 mob_massacreur_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
+		 npc_massacreur_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
 		 
 		 uint32 broyeur_a_viande;
 		 uint32 pris_de_vertige;
@@ -547,7 +547,7 @@ public:
 		 
 		 CreatureAI* GetAI(Creature* pCreature) const
 		 {
-		 return new mob_massacreur_du_crepusculeAI(pCreature);
+		 return new npc_massacreur_du_crepusculeAI(pCreature);
 		 }
 		 
 		 };
@@ -559,14 +559,14 @@ public:
 		 #define spell_feu_eruptif 90693 // Feu_Eruptif
 		 #define spell_flammes_deconcertantes 76514 // Flammes_Déconcertantes
 		 
-		 class mob_chercheflamme_rehausse: public CreatureScript
+		 class npc_chercheflamme_rehausse: public CreatureScript
 		 {
 		 public:
-		  mob_chercheflamme_rehausse() : CreatureScript("mob_chercheflamme_rehausse") {}
+		  npc_chercheflamme_rehausse() : CreatureScript("npc_chercheflamme_rehausse") {}
 		  
-		  struct mob_chercheflamme_rehausseAI : public ScriptedAI
+		  struct npc_chercheflamme_rehausseAI : public ScriptedAI
 		  {
-		  mob_chercheflamme_rehausseAI(Creature *c) : ScriptedAI(c) {}
+		  npc_chercheflamme_rehausseAI(Creature *c) : ScriptedAI(c) {}
 		  
 		  uint32 feu_eruptif;
 		  uint32 flammes_deconcertantes;
@@ -602,7 +602,7 @@ public:
 		  
 		  CreatureAI* GetAI(Creature* pCreature) const
           {
-          return new mob_chercheflamme_rehausseAI(pCreature);
+          return new npc_chercheflamme_rehausseAI(pCreature);
 		  }
 		  
 		  };
@@ -613,14 +613,14 @@ public:
 
 #define spell_marche_vent 76557 // Marche_Vent
 
-class mob_marche_vent_rehausse: public CreatureScript
+class npc_marche_vent_rehausse: public CreatureScript
 {
 public:
- mob_marche_vent_rehausse() : CreatureScript("mob_marche_vent_rehausse") {}
+ npc_marche_vent_rehausse() : CreatureScript("npc_marche_vent_rehausse") {}
  
- struct mob_marche_vent_rehausseAI : public ScriptedAI
+ struct npc_marche_vent_rehausseAI : public ScriptedAI
  {
- mob_marche_vent_rehausseAI(Creature *c) : ScriptedAI(c) {}
+ npc_marche_vent_rehausseAI(Creature *c) : ScriptedAI(c) {}
  
  uint32 marche_vent;
  
@@ -647,7 +647,7 @@ public:
  
  CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_marche_vent_rehausseAI(pCreature);
+ return new npc_marche_vent_rehausseAI(pCreature);
  }
  
  };
@@ -660,14 +660,14 @@ public:
  #define spell_tisse_ombre 90673 // Tisse_Ombre
  #define spell_trait_de_lombre 90668 // Trait_de_l'Ombre
  
- class mob_tisseur_dombre_du_crepuscule: public CreatureScript
+ class npc_tisseur_dombre_du_crepuscule: public CreatureScript
  {
  public:
-  mob_tisseur_dombre_du_crepuscule() : CreatureScript("mob_tisseur_dombre_du_crepuscule") {}
+  npc_tisseur_dombre_du_crepuscule() : CreatureScript("npc_tisseur_dombre_du_crepuscule") {}
   
-  struct mob_tisseur_dombre_du_crepusculeAI : public ScriptedAI
+  struct npc_tisseur_dombre_du_crepusculeAI : public ScriptedAI
   {
-  mob_tisseur_dombre_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
+  npc_tisseur_dombre_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
   
   uint32 invocation_dun_chasseur_corrompu;
   uint32 tisse_ombre;
@@ -710,7 +710,7 @@ public:
   
   CreatureAI* GetAI(Creature* pCreature) const
   {
-  return new mob_tisseur_dombre_du_crepusculeAI(pCreature);
+  return new npc_tisseur_dombre_du_crepusculeAI(pCreature);
   }
   
   };
@@ -722,14 +722,14 @@ public:
 #define spell_deflagration_azur 90697 // Déflagration_Azur
 #define spell_invocation_dun_visage_tordu 90695 // Invocation_d'un_Visage_Tordu
 
-class mob_seigneur_de_guerre_de_la_nuee_azur: public CreatureScript
+class npc_seigneur_de_guerre_de_la_nuee_azur: public CreatureScript
 {
 public:
- mob_seigneur_de_guerre_de_la_nuee_azur() : CreatureScript("mob_seigneur_de_guerre_de_la_nuee_azur") {}
+ npc_seigneur_de_guerre_de_la_nuee_azur() : CreatureScript("npc_seigneur_de_guerre_de_la_nuee_azur") {}
  
- struct mob_seigneur_de_guerre_de_la_nuee_azurAI : public ScriptedAI
+ struct npc_seigneur_de_guerre_de_la_nuee_azurAI : public ScriptedAI
  {
-mob_seigneur_de_guerre_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
+npc_seigneur_de_guerre_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
  
  uint32 deflagration_azur;
  uint32 invocation_dun_visage_tordu;
@@ -764,7 +764,7 @@ mob_seigneur_de_guerre_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
  
  CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_seigneur_de_guerre_de_la_nuee_azurAI(pCreature);
+ return new npc_seigneur_de_guerre_de_la_nuee_azurAI(pCreature);
  }
  
  };
@@ -776,14 +776,14 @@ mob_seigneur_de_guerre_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
  #define spell_brasier_desarmant 90705 // Brasier_Desarmant
  #define spell_renforcement_du_crepuscule 90704 // Renforcement_du_Crepuscule
  
- class mob_seigneur_de_guerre_de_la_nuee_cramoisie: public CreatureScript
+ class npc_seigneur_de_guerre_de_la_nuee_cramoisie: public CreatureScript
  {
  public:
-  mob_seigneur_de_guerre_de_la_nuee_cramoisie() : CreatureScript("mob_seigneur_de_guerre_de_la_nuee_cramoisie") {}
+  npc_seigneur_de_guerre_de_la_nuee_cramoisie() : CreatureScript("npc_seigneur_de_guerre_de_la_nuee_cramoisie") {}
   
- struct mob_seigneur_de_guerre_de_la_nuee_cramoisieAI : public ScriptedAI
+ struct npc_seigneur_de_guerre_de_la_nuee_cramoisieAI : public ScriptedAI
  {
- mob_seigneur_de_guerre_de_la_nuee_cramoisieAI(Creature *c) : ScriptedAI(c) {}
+ npc_seigneur_de_guerre_de_la_nuee_cramoisieAI(Creature *c) : ScriptedAI(c) {}
  
  uint32 brasier_desarmant;
  uint32 renforcement_du_crepuscule;
@@ -817,7 +817,7 @@ mob_seigneur_de_guerre_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
  
  CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_seigneur_de_guerre_de_la_nuee_cramoisieAI(pCreature);
+ return new npc_seigneur_de_guerre_de_la_nuee_cramoisieAI(pCreature);
  }
  };
 
@@ -829,14 +829,14 @@ mob_seigneur_de_guerre_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
  #define spell_esprit_enchaine 90715 // Esprit_Enchainé
  #define spell_explosion_trompeuse 90712 // Explosion_Trompeuse
  
- class mob_imposteur_du_crepuscule: public CreatureScript
+ class npc_imposteur_du_crepuscule: public CreatureScript
  {
  public:
-  mob_imposteur_du_crepuscule() : CreatureScript("mob_imposteur_du_crepuscule") {}
+  npc_imposteur_du_crepuscule() : CreatureScript("npc_imposteur_du_crepuscule") {}
   
- struct mob_imposteur_du_crepusculeAI : public ScriptedAI
+ struct npc_imposteur_du_crepusculeAI : public ScriptedAI
  {
- mob_imposteur_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
+ npc_imposteur_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
  
  uint32 duperie;
  uint32 esprit_enchaine;
@@ -878,7 +878,7 @@ mob_seigneur_de_guerre_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
  
  CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_imposteur_du_crepusculeAI(pCreature);
+ return new npc_imposteur_du_crepusculeAI(pCreature);
  }
  
  };
@@ -886,17 +886,18 @@ mob_seigneur_de_guerre_de_la_nuee_azurAI(Creature *c) : ScriptedAI(c) {}
  /*********************
  **Brute Gronn Asservie
  **********************/
+ //MOB_BRUTE_gronn_asservie
  
  #define spell_broie_armure 90710 // Broie_Armure
  
- class mob_brute_gronn_asservie: public CreatureScript
+ class npc_brute_gronn_asservie: public CreatureScript
  {
  public:
-  mob_brute_gronn_asservie() : CreatureScript("mob_brute_gronn_asservie") {}
+  npc_brute_gronn_asservie() : CreatureScript("npc_brute_gronn_asservie") {}
   
- struct mob_brute_gronn_asservieAI : public ScriptedAI
+ struct npc_brute_gronn_asservieAI : public ScriptedAI
  {
- mob_brute_gronn_asservieAI(Creature *c) : ScriptedAI(c) {}
+ npc_brute_gronn_asservieAI(Creature *c) : ScriptedAI(c) {}
 
  uint32 broie_armure;
 
@@ -922,7 +923,7 @@ void UpdateAI(uint32 diff)
  
  CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_brute_gronn_asservieAI(pCreature);
+ return new npc_brute_gronn_asservieAI(pCreature);
  }
  
  };
@@ -933,14 +934,14 @@ void UpdateAI(uint32 diff)
  
  #define spell_appel_declair 90852 // Appel_d'Eclair
  
- class mob_esprit_du_tonnerre_asservie: public CreatureScript
+ class npc_esprit_du_tonnerre_asservie: public CreatureScript
  {
  public:
-  mob_esprit_du_tonnerre_asservie() : CreatureScript("mob_esprit_du_tonnerre_asservie") {}
+  npc_esprit_du_tonnerre_asservie() : CreatureScript("npc_esprit_du_tonnerre_asservie") {}
   
- struct mob_esprit_du_tonnerre_asservieAI : public ScriptedAI
+ struct npc_esprit_du_tonnerre_asservieAI : public ScriptedAI
  {
- mob_esprit_du_tonnerre_asservieAI(Creature *c) : ScriptedAI(c) {}
+ npc_esprit_du_tonnerre_asservieAI(Creature *c) : ScriptedAI(c) {}
  
  uint32 appel_declair;
  
@@ -967,7 +968,7 @@ void UpdateAI(uint32 diff)
  
  CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_esprit_du_tonnerre_asservieAI(pCreature);
+ return new npc_esprit_du_tonnerre_asservieAI(pCreature);
  }
  
  };
@@ -980,14 +981,14 @@ void UpdateAI(uint32 diff)
  #define spell_invocation_dun_esprit_du_tonnerre 75096 // Invocation_d'un_Esprit_du_Tonnerre
  #define spell_surcharger 90858 // Surcharger
  
- class mob_mande_tonnerre_du_crepuscule: public CreatureScript
+ class npc_mande_tonnerre_du_crepuscule: public CreatureScript
  {
  public:
-  mob_mande_tonnerre_du_crepuscule() : CreatureScript("mob_mande_tonnerre_du_crepuscule") {}
+  npc_mande_tonnerre_du_crepuscule() : CreatureScript("npc_mande_tonnerre_du_crepuscule") {}
   
- struct mob_mande_tonnerre_du_crepusculeAI : public ScriptedAI
+ struct npc_mande_tonnerre_du_crepusculeAI : public ScriptedAI
  {
- mob_mande_tonnerre_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
+ npc_mande_tonnerre_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
  
  uint32 chaine_declairs;
  uint32 invocation_dun_esprit_du_tonnerre;
@@ -1030,7 +1031,7 @@ if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 10.0f, true))
  
  CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_mande_tonnerre_du_crepusculeAI(pCreature);
+ return new npc_mande_tonnerre_du_crepusculeAI(pCreature);
  }
  
  };
@@ -1043,14 +1044,14 @@ if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 10.0f, true))
 #define spell_eclair_de_lave 90849 // Eclair_de_Lave
 #define spell_invocation_de_braise_ardente 74551 // Invocation_de_Braise_Ardente
 
-class mob_grippe_feu_du_crepuscule: public CreatureScript
+class npc_grippe_feu_du_crepuscule: public CreatureScript
 {
 public:
- mob_grippe_feu_du_crepuscule() : CreatureScript("mob_grippe_feu_du_crepuscule") {}
+ npc_grippe_feu_du_crepuscule() : CreatureScript("npc_grippe_feu_du_crepuscule") {}
  
-struct mob_grippe_feu_du_crepusculeAI : public ScriptedAI
+struct npc_grippe_feu_du_crepusculeAI : public ScriptedAI
 {
-mob_grippe_feu_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
+npc_grippe_feu_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
 
 uint32 conduit_de_flammes;
 uint32 eclair_de_lave;
@@ -1094,7 +1095,7 @@ DoMeleeAttackIfReady();
  
  CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_grippe_feu_du_crepusculeAI(pCreature);
+ return new npc_grippe_feu_du_crepusculeAI(pCreature);
  }
  
  };
@@ -1105,14 +1106,14 @@ DoMeleeAttackIfReady();
 
 #define spell_horion_de_flammes 90846 // Horion_de_Flammes
 
-class mob_braise_ardente_asservie: public CreatureScript
+class npc_braise_ardente_asservie: public CreatureScript
 {
 public:
- mob_braise_ardente_asservie() : CreatureScript("mob_braise_ardente_asservie") {}
+ npc_braise_ardente_asservie() : CreatureScript("npc_braise_ardente_asservie") {}
 
-struct mob_braise_ardente_asservieAI : public ScriptedAI
+struct npc_braise_ardente_asservieAI : public ScriptedAI
 {
-mob_braise_ardente_asservieAI(Creature *c) : ScriptedAI(c) {}
+npc_braise_ardente_asservieAI(Creature *c) : ScriptedAI(c) {}
 
 uint32 horion_de_flammes;
 
@@ -1139,7 +1140,7 @@ DoMeleeAttackIfReady();
  
 CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_braise_ardente_asservieAI(pCreature);
+ return new npc_braise_ardente_asservieAI(pCreature);
  }
  
  };
@@ -1152,14 +1153,14 @@ CreatureAI* GetAI(Creature* pCreature) const
 #define spell_jet_deau 90868 // Jet_d'Eau
 #define spell_nuage_declairs 76097 // Nuage_d'Eclairs
 
-class mob_flagellant_aquatique_rehausse: public CreatureScript
+class npc_flagellant_aquatique_rehausse: public CreatureScript
 {
 public:
- mob_flagellant_aquatique_rehausse() : CreatureScript("mob_flagellant_aquatique_rehausse") {}
+ npc_flagellant_aquatique_rehausse() : CreatureScript("npc_flagellant_aquatique_rehausse") {}
  
-struct mob_flagellant_aquatique_rehausseAI : public ScriptedAI
+struct npc_flagellant_aquatique_rehausseAI : public ScriptedAI
 {
-mob_flagellant_aquatique_rehausseAI(Creature *c) : ScriptedAI(c) {}
+npc_flagellant_aquatique_rehausseAI(Creature *c) : ScriptedAI(c) {}
 
 uint32 geyser_focalise;
 uint32 jet_deau;
@@ -1202,7 +1203,7 @@ DoMeleeAttackIfReady();
  
 CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_flagellant_aquatique_rehausseAI(pCreature);
+ return new npc_flagellant_aquatique_rehausseAI(pCreature);
  }
  
  };
@@ -1215,14 +1216,14 @@ CreatureAI* GetAI(Creature* pCreature) const
 #define spell_choc_de_pierre 90866 // Choc_de_Pierre
 #define spell_poings_ardents 76086 // Poings_Ardents
 
-class mob_brise_roche_rehausse: public CreatureScript
+class npc_brise_roche_rehausse: public CreatureScript
 {
 public:
- mob_brise_roche_rehausse() : CreatureScript("mob_brise_roche_rehausse") {}
+ npc_brise_roche_rehausse() : CreatureScript("npc_brise_roche_rehausse") {}
  
-struct mob_brise_roche_rehausseAI : ScriptedAI
+struct npc_brise_roche_rehausseAI : ScriptedAI
 {
-mob_brise_roche_rehausseAI(Creature *c) : ScriptedAI(c) {}
+npc_brise_roche_rehausseAI(Creature *c) : ScriptedAI(c) {}
 
 uint32 blessure_brulante;
 uint32 choc_de_pierre;
@@ -1265,7 +1266,7 @@ DoMeleeAttackIfReady();
  
 CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_brise_roche_rehausseAI(pCreature);
+ return new npc_brise_roche_rehausseAI(pCreature);
  }
  
  };
@@ -1276,14 +1277,14 @@ CreatureAI* GetAI(Creature* pCreature) const
 
 #define spell_nourrir_le_familier 90872 // Nourrir_le_Familier
 
-class mob_mande_wyrm_du_crepuscule: public CreatureScript
+class npc_mande_wyrm_du_crepuscule: public CreatureScript
 {
 public:
- mob_mande_wyrm_du_crepuscule() : CreatureScript("mob_mande_wyrm_du_crepuscule") {}
+ npc_mande_wyrm_du_crepuscule() : CreatureScript("npc_mande_wyrm_du_crepuscule") {}
  
-struct mob_mande_wyrm_du_crepusculeAI : public ScriptedAI
+struct npc_mande_wyrm_du_crepusculeAI : public ScriptedAI
 {
-mob_mande_wyrm_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
+npc_mande_wyrm_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
 
 uint32 nourrir_le_familier;
 
@@ -1309,7 +1310,7 @@ DoMeleeAttackIfReady();
  
 CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_mande_wyrm_du_crepusculeAI(pCreature);
+ return new npc_mande_wyrm_du_crepusculeAI(pCreature);
  }
  
  };
@@ -1321,14 +1322,14 @@ CreatureAI* GetAI(Creature* pCreature) const
 #define spell_flammes_du_crepuscule 75931 // Flammes_du_Crépuscule
 #define spell_souffle_crepusculaire 90875 // Souffle_Crepusculaire
 
-class mob_drake_du_crepuscule: public CreatureScript
+class npc_drake_du_crepuscule: public CreatureScript
 {
 public:
- mob_drake_du_crepuscule() : CreatureScript("mob_drake_du_crepuscule") {}
+ npc_drake_du_crepuscule() : CreatureScript("npc_drake_du_crepuscule") {}
  
-struct mob_drake_du_crepusculeAI : public ScriptedAI
+struct npc_drake_du_crepusculeAI : public ScriptedAI
 {
-mob_drake_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
+npc_drake_du_crepusculeAI(Creature *c) : ScriptedAI(c) {}
 
 uint32 flammes_du_crepuscule;
 uint32 souffle_crepusculaire;
@@ -1364,7 +1365,7 @@ DoMeleeAttackIfReady();
  
 CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_drake_du_crepusculeAI(pCreature);
+ return new npc_drake_du_crepusculeAI(pCreature);
  }
  
  };
@@ -1376,14 +1377,14 @@ CreatureAI* GetAI(Creature* pCreature) const
 #define spell_guerison_umbrale 91040 // Guerison_Umbrale
 #define spell_siphon_dessence 91028 // Siphon_d'Essence
 
-class mob_corrupteur_sans_visage: public CreatureScript
+class npc_corrupteur_sans_visage: public CreatureScript
 {
 public:
- mob_corrupteur_sans_visage() : CreatureScript("mob_corrupteur_sans_visage") {}
+ npc_corrupteur_sans_visage() : CreatureScript("npc_corrupteur_sans_visage") {}
  
-struct mob_corrupteur_sans_visageAI : public ScriptedAI
+struct npc_corrupteur_sans_visageAI : public ScriptedAI
 {
-mob_corrupteur_sans_visageAI(Creature *c) : ScriptedAI(c) {}
+npc_corrupteur_sans_visageAI(Creature *c) : ScriptedAI(c) {}
 
 uint32 guerison_umbrale;
 uint32 siphon_dessence;
@@ -1418,7 +1419,7 @@ DoCast(pTarget, spell_siphon_dessence);
  
  CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_corrupteur_sans_visageAI(pCreature);
+ return new npc_corrupteur_sans_visageAI(pCreature);
  }
  
  };
@@ -1429,14 +1430,14 @@ DoCast(pTarget, spell_siphon_dessence);
  
  #define spell_griffes_transpercantes 90212 // Griffes_Transpercantes
 
-class mob_habitant_trogg: public CreatureScript
+class npc_habitant_trogg: public CreatureScript
 {
 public:
- mob_habitant_trogg() : CreatureScript("mob_habitant_trogg") {}
+ npc_habitant_trogg() : CreatureScript("npc_habitant_trogg") {}
  
-struct mob_habitant_troggAI : public ScriptedAI
+struct npc_habitant_troggAI : public ScriptedAI
 {
-mob_habitant_troggAI(Creature *c) : ScriptedAI(c) {}
+npc_habitant_troggAI(Creature *c) : ScriptedAI(c) {}
 
 uint32 griffes_transpercantes;
 
@@ -1462,37 +1463,37 @@ DoMeleeAttackIfReady();
   
 CreatureAI* GetAI(Creature* pCreature) const
  {
- return new mob_habitant_troggAI(pCreature);
+ return new npc_habitant_troggAI(pCreature);
  }
  
  };
  
- void AddSC_mob_trash_grim_batol()
+ void AddSC_npc_trash_grim_batol()
  {
- new mob_gardien_de_la_nuee_azur();
- new mob_gardien_de_la_nuee_cramoisie();
- new mob_prophete_de_la_nuee_azur();
- new mob_brise_tempete_du_crepuscule();
- new mob_esprit_de_leau_asservi();
- new mob_maitre_darmes_du_crepuscule();
- new mob_elementaire_de_roche_asservi();
- new mob_sculpte_terre_du_crepuscule();
- new mob_massacreur_du_crepuscule();
- new mob_chercheflamme_rehausse();
- new mob_marche_vent_rehausse();
- new mob_tisseur_dombre_du_crepuscule();
- new mob_seigneur_de_guerre_de_la_nuee_azur();
- new mob_seigneur_de_guerre_de_la_nuee_cramoisie();
- new mob_imposteur_du_crepuscule();
- new mob_brute_gronn_asservie();
- new mob_esprit_du_tonnerre_asservie();
- new mob_mande_tonnerre_du_crepuscule();
- new mob_grippe_feu_du_crepuscule();
- new mob_braise_ardente_asservie();
- new mob_flagellant_aquatique_rehausse();
- new mob_brise_roche_rehausse();
- new mob_mande_wyrm_du_crepuscule();
- new mob_drake_du_crepuscule();
- new mob_corrupteur_sans_visage();
- new mob_habitant_trogg();
+ new npc_gardien_de_la_nuee_azur();
+ new npc_gardien_de_la_nuee_cramoisie();
+ new npc_prophete_de_la_nuee_azur();
+ new npc_brise_tempete_du_crepuscule();
+ new npc_esprit_de_leau_asservi();
+ new npc_maitre_darmes_du_crepuscule();
+ new npc_elementaire_de_roche_asservi();
+ new npc_sculpte_terre_du_crepuscule();
+ new npc_massacreur_du_crepuscule();
+ new npc_chercheflamme_rehausse();
+ new npc_marche_vent_rehausse();
+ new npc_tisseur_dombre_du_crepuscule();
+ new npc_seigneur_de_guerre_de_la_nuee_azur();
+ new npc_seigneur_de_guerre_de_la_nuee_cramoisie();
+ new npc_imposteur_du_crepuscule();
+ new npc_brute_gronn_asservie();
+ new npc_esprit_du_tonnerre_asservie();
+ new npc_mande_tonnerre_du_crepuscule();
+ new npc_grippe_feu_du_crepuscule();
+ new npc_braise_ardente_asservie();
+ new npc_flagellant_aquatique_rehausse();
+ new npc_brise_roche_rehausse();
+ new npc_mande_wyrm_du_crepuscule();
+ new npc_drake_du_crepuscule();
+ new npc_corrupteur_sans_visage();
+ new npc_habitant_trogg();
  }
