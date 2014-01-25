@@ -186,7 +186,7 @@ struct advisorbase_ai : public ScriptedAI
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
         //reset encounter
-        if (instance && (instance->GetData(DATA_KAELTHASEVENT) == 1 || instance->GetData(DATA_KAELTHASEVENT) == 3))
+        if (instance->GetData(DATA_KAELTHASEVENT) == 1 || instance->GetData(DATA_KAELTHASEVENT) == 3)
             if (Creature* Kaelthas = Unit::GetCreature(*me, instance->GetData64(DATA_KAELTHAS)))
                 Kaelthas->AI()->EnterEvadeMode();
     }
@@ -227,14 +227,14 @@ struct advisorbase_ai : public ScriptedAI
             return;
 
         //Prevent glitch if in fake death
-        if (FakeDeath && instance && instance->GetData(DATA_KAELTHASEVENT) != 0)
+        if (FakeDeath && instance->GetData(DATA_KAELTHASEVENT) != 0)
         {
             damage = 0;
             return;
         }
 
         //Don't really die in phase 1 & 3, only die after that
-        if (instance && instance->GetData(DATA_KAELTHASEVENT) != 0)
+        if (instance->GetData(DATA_KAELTHASEVENT) != 0)
         {
             //prevent death
             damage = 0;
@@ -421,7 +421,7 @@ class boss_kaelthas : public CreatureScript
                         }
                         else if (me->GetMap()->IsDungeon())
                         {
-                            if (instance && !instance->GetData(DATA_KAELTHASEVENT) && !Phase)
+                            if (!instance->GetData(DATA_KAELTHASEVENT) && !Phase)
                                 StartEvent();
 
                             who->SetInCombatWith(me);
@@ -433,7 +433,7 @@ class boss_kaelthas : public CreatureScript
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
             {
-                if (instance && !instance->GetData(DATA_KAELTHASEVENT) && !Phase)
+                if (!instance->GetData(DATA_KAELTHASEVENT) && !Phase)
                     StartEvent();
             }
 
@@ -1050,7 +1050,7 @@ class boss_thaladred_the_darkener : public CreatureScript
 
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
-                if (instance && instance->GetData(DATA_KAELTHASEVENT) == 3)
+                if (instance->GetData(DATA_KAELTHASEVENT) == 3)
                     Talk(SAY_THALADRED_DEATH);
             }
 
@@ -1142,7 +1142,7 @@ class boss_lord_sanguinar : public CreatureScript
 
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
-                if (instance && instance->GetData(DATA_KAELTHASEVENT) == 3)
+                if (instance->GetData(DATA_KAELTHASEVENT) == 3)
                     Talk(SAY_SANGUINAR_DEATH);
             }
 
@@ -1207,7 +1207,7 @@ class boss_grand_astromancer_capernian : public CreatureScript
 
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
-                if (instance && instance->GetData(DATA_KAELTHASEVENT) == 3)
+                if (instance->GetData(DATA_KAELTHASEVENT) == 3)
                     Talk(SAY_CAPERNIAN_DEATH);
             }
 
@@ -1346,7 +1346,7 @@ class boss_master_engineer_telonicus : public CreatureScript
 
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
-                if (instance && instance->GetData(DATA_KAELTHASEVENT) == 3)
+                if (instance->GetData(DATA_KAELTHASEVENT) == 3)
                     Talk(SAY_TELONICUS_DEATH);
             }
 

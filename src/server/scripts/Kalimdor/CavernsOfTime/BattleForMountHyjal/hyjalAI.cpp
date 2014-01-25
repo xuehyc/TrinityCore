@@ -709,7 +709,7 @@ void hyjalAI::UpdateAI(uint32 diff)
         switch (me->GetEntry())
         {
             case JAINA:
-                if (instance && instance->GetData(DATA_ALLIANCE_RETREAT))
+                if (instance->GetData(DATA_ALLIANCE_RETREAT))
                 {
                     me->SetVisible(false);
                     HideNearPos(me->GetPositionX(), me->GetPositionY());
@@ -721,7 +721,7 @@ void hyjalAI::UpdateAI(uint32 diff)
                 else me->SetVisible(true);
                 break;
             case THRALL: //thrall
-                if (instance && instance->GetData(DATA_HORDE_RETREAT))
+                if (instance->GetData(DATA_HORDE_RETREAT))
                 {
                     me->SetVisible(false);
                     HideNearPos(me->GetPositionX(), me->GetPositionY());
@@ -785,7 +785,7 @@ void hyjalAI::UpdateAI(uint32 diff)
 
     if (Summon)
     {
-        if (instance && EnemyCount)
+        if (EnemyCount)
         {
             EnemyCount = instance->GetData(DATA_TRASH);
             if (!EnemyCount)

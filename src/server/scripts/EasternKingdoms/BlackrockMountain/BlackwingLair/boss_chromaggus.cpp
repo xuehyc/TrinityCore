@@ -187,7 +187,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
-            if (instance && instance->GetBossState(BOSS_FLAMEGOR) != DONE)
+            if (instance->GetBossState(BOSS_FLAMEGOR) != DONE)
             {
                 EnterEvadeMode();
                 return;

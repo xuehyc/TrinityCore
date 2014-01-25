@@ -142,8 +142,8 @@ public:
 
         void AttackStart(Unit* /*who*/) OVERRIDE
         {
-            //if (instance && instance->GetData(TYPE_MEDIVH) == IN_PROGRESS)
-            //return;
+            //if (instance->GetData(TYPE_MEDIVH) == IN_PROGRESS)
+            //    return;
 
             //ScriptedAI::AttackStart(who);
         }
@@ -301,7 +301,7 @@ public:
             if (!creature_entry)
                 return;
 
-            if (instance && instance->GetData(TYPE_MEDIVH) != IN_PROGRESS)
+            if (instance->GetData(TYPE_MEDIVH) != IN_PROGRESS)
             {
                 me->InterruptNonMeleeSpells(true);
                 me->RemoveAllAuras();
