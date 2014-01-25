@@ -1174,8 +1174,8 @@ public:
 
 			Player* player=caster->ToPlayer ();
 			if (!player) return;
-
-			player->SetPower(POWER_FOCUS,14); // always 14?? can't be ok
+			
+			player->SetPower(POWER_FOCUS,player->GetPower(POWER_FOCUS) + 14); 
 			
 		}
 
@@ -1210,7 +1210,7 @@ public:
 			Player* player=caster->ToPlayer ();
 			if (!player) return;
 
-			player->SetPower(POWER_FOCUS,14); // always 14?? can't be ok
+			player->SetPower(POWER_FOCUS,player->GetPower(POWER_FOCUS) + 14); 
 			
 		}
 
