@@ -46,7 +46,11 @@ enum Mist
     EMOTE_AT_HOME           = 1,
     QUEST_MIST              = 938,
     NPC_ARYNIA              = 3519,
-    FACTION_DARNASSUS       = 79
+    FACTION_DARNASSUS       = 79,
+
+	SPELL_NATURES_FURY					= 65455,
+	NPC_FELL_ROCK_GRELLKIN_KILL_CREDIT	= 34440,
+	QUEST_NATURES_REPRISAL				= 13946,
 };
 
 class npc_mist : public CreatureScript
@@ -113,7 +117,83 @@ public:
 
 };
 
+/*####
+# npc_shadow_sprite
+####*/
+
+class npc_shadow_sprite : public CreatureScript
+{
+    public:
+        npc_shadow_sprite() : CreatureScript("npc_shadow_sprite") { }
+
+		struct npc_shadow_spriteAI : public ScriptedAI
+        {
+            npc_shadow_spriteAI(Creature* creature) : ScriptedAI(creature) {}
+	  
+			uint32 phase;
+			uint32 timer;
+			Player* player;
+
+			void Reset()  OVERRIDE
+			{
+				timer=0; phase=0;       			
+			}
+
+			void SpellHit(Unit * Hitter, SpellInfo const* spell) OVERRIDE
+			{		
+				player = Hitter->ToPlayer();
+
+				if (!player)
+					return;				
+
+				if (spell->Id != SPELL_NATURES_FURY || player->GetQuestStatus(QUEST_NATURES_REPRISAL) != QUEST_STATUS_INCOMPLETE) 
+					return;					
+				
+				phase=1; timer=1000;				
+			}  
+
+			void UpdateAI(uint32 diff) OVERRIDE
+			{						
+				if (!UpdateVictim())
+					DoMeleeAttackIfReady();
+
+				if (timer<=diff)
+				{						
+					switch (phase)
+					{
+					case 1:
+						{ 
+							// here we must insert the spell for crounshing the grellkin
+							// DoCast(me,
+							timer=3000; phase=2;
+							break;
+						}
+						case 2:
+						{ 							
+							if (player) player->KilledMonsterCredit(NPC_FELL_ROCK_GRELLKIN_KILL_CREDIT, NULL);		
+							me->DespawnOrUnsummon ();
+							timer=0; phase=0;
+							break;
+						}
+					}				
+				}
+				else
+					timer-=diff;									
+			} 
+
+
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_shadow_spriteAI(creature);
+        }
+};
+
+
+
 void AddSC_teldrassil()
 {
     new npc_mist();
+	new npc_shadow_sprite();
 }

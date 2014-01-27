@@ -45,14 +45,14 @@ enum zone_coldridge_valley
 	NPC_SOOTHSAYER_SHIKALA								= 37108,
 	NPC_SOOTHSAYER_RIKKARI  							= 37173,
 	NPC_SOOTHSAYER_MIRIMKOA								= 37174,
-	NPC_TROLLUNG_FOR_INFORMATION_KILL_CREDIT_BUNNY_SE	= 37109,
-	NPC_TROLLUNG_FOR_INFORMATION_KILL_CREDIT_BUNNY_SW	= 37110,
-	NPC_TROLLUNG_FOR_INFORMATION_KILL_CREDIT_BUNNY_W	= 37111,
+	NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_SE	= 37109,
+	NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_SW	= 37110,
+	NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_W	= 37111,
 
 	SPELL_HEAL_WOUNDED_MOUNTAINEER						= 69855,
 
 	QUEST_AID_FOR_THE_WOUNDED							= 24471,
-	QUEST_TROLLUNG_FOR_INFORMATION						= 24489,
+	QUEST_TROLLING_FOR_INFORMATION						= 24489,
 };
 
 /*######
@@ -255,7 +255,7 @@ public:
 				player = who->ToPlayer();
 				if (player)
 				{
-                    if (player->GetQuestStatus(QUEST_TROLLUNG_FOR_INFORMATION) == QUEST_STATUS_INCOMPLETE)
+                    if (player->GetQuestStatus(QUEST_TROLLING_FOR_INFORMATION) == QUEST_STATUS_INCOMPLETE)
                     {                   
                         TalkSequenceIsStarted = true;
 						timer = 2000; phase++;
@@ -296,7 +296,7 @@ public:
 							}
 						case 4:
 							{																																						
-								player->KilledMonsterCredit(NPC_TROLLUNG_FOR_INFORMATION_KILL_CREDIT_BUNNY_SE, NULL);	
+								player->KilledMonsterCredit(NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_SE, NULL);	
 								timer=120000; phase++; // cooldown
 								break;
 							}
@@ -361,7 +361,7 @@ public:
 				player = who->ToPlayer();
 				if (player)
 				{
-                    if (player->GetQuestStatus(QUEST_TROLLUNG_FOR_INFORMATION) == QUEST_STATUS_INCOMPLETE)
+                    if (player->GetQuestStatus(QUEST_TROLLING_FOR_INFORMATION) == QUEST_STATUS_INCOMPLETE)
                     {                       
                         TalkSequenceIsStarted = true;
 						timer = 2000; phase++;
@@ -402,7 +402,7 @@ public:
 							}
 						case 4:
 							{																																								
-								player->KilledMonsterCredit(NPC_TROLLUNG_FOR_INFORMATION_KILL_CREDIT_BUNNY_SW, NULL);	
+								player->KilledMonsterCredit(NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_SW, NULL);	
 								timer=120000; phase++; // cooldown																		  								
 								break;
 							}
@@ -467,7 +467,7 @@ public:
 				player = who->ToPlayer();
 				if (player)
 				{
-                    if (player->GetQuestStatus(QUEST_TROLLUNG_FOR_INFORMATION) == QUEST_STATUS_INCOMPLETE)
+                    if (player->GetQuestStatus(QUEST_TROLLING_FOR_INFORMATION) == QUEST_STATUS_INCOMPLETE)
                     {                        
                         TalkSequenceIsStarted = true;
 						timer = 2000; phase++;
@@ -508,7 +508,7 @@ public:
 							}
 						case 4:
 							{																																										
-								player->KilledMonsterCredit(NPC_TROLLUNG_FOR_INFORMATION_KILL_CREDIT_BUNNY_W, NULL);	
+								player->KilledMonsterCredit(NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_W, NULL);	
 								timer=120000; phase++; // cooldown													  								
 								break;
 							}
