@@ -33,6 +33,32 @@ enum DarkShore
 	ITEM_FOUL_BEAR_CARCASS_SAMPLE			= 44911,
 	SPELL_FORCE_FOUL_BEAR_CARCASS_SAMPLE	= 62113,
 
+	QUEST_POWER_OVER_THE_TIDES				= 13523,
+	NPC_TRANQUIL_TIDAL_SPIRIT				= 32937,
+	NPC_ENRAGED_TIDAL_SPIRIT				= 32890,
+	SPELL_SHADOW_BOLT						= 9613,
+
+	QUEST_TWICE_REMOVED						= 13565,
+	NPC_WITHERED_ENT						= 34009,
+	NPC_LADY_JANIRA							= 33207,
+	NPC_DARKSCALE_SCOUT						= 33206,
+	NPC_DARKSCALE_SCOUT_KILL_CREDIT			= 34010,
+	SPELL_WITHERED_TOUCH					= 11442,
+
+	QUEST_THE_RITUAL_BOND					= 13569,
+	QUEST_SPIRIT_OF_THE_STAG				= 13567,
+	QUEST_SPIRIT_OF_THE_MOONSTALKER			= 13568,
+	QUEST_SPIRIT_OF_THE_THISTLE_BEAR		= 13597,
+	NPC_GREAT_STAG_SPIRIT					= 33133,
+	NPC_GREAT_THISTLE_BEAR_SPIRIT			= 33132,
+	NPC_GREAT_MOONSTALKER_SPIRIT			= 33131,
+	SPELL_BLESSING_OF_THE_STAG				= 64341,
+	SPELL_BLESSING_OF_THE_MOONSTALKER		= 64340,
+	SPELL_BLESSING_OF_THE_THISTLE_BEAR		= 64329,
+	SPELL_RITUAL_BOND_QUEST_COMPLETE		= 62803,
+	GO_GROVEKEEPERS_INCENSE					= 194771,
+	SPELL_GROVEKEEPERS_TRANCE				= 64198,
+
 };
 
 
@@ -402,6 +428,189 @@ class npc_decomposing_thistle_bear : public CreatureScript
 		}
 };
 
+/*####
+# npc_withered_ent
+#
+# ToDo: Core BUG: the core sends on every movement a reset(), so the npc can not walk or attack
+# ToDo: Core BUG: by click on item 45911, cast a spell 64306. This spell summon a withered_ent. Now this does always, but shold only if a dead scout is near.   
+#
+####*/
+
+class npc_withered_ent : public CreatureScript
+{
+    public: npc_withered_ent() : CreatureScript("npc_withered_ent") {}
+		
+        struct npc_withered_entAI : public ScriptedAI
+        {
+            npc_withered_entAI(Creature* creature) : ScriptedAI(creature) { }			
+        
+			Player* m_player;
+
+			void IsSummonedBy(Unit* summoner) OVERRIDE
+			{			
+				m_player = summoner->ToPlayer();
+				if (m_player) m_player->KilledMonsterCredit(NPC_DARKSCALE_SCOUT_KILL_CREDIT, NULL);	
+			}
+
+			void AttackStart(Unit* who) OVERRIDE
+			{
+				if (!who)
+					return;				
+
+				if (me->Attack(who, true) && who->IsAlive())
+				{										
+					me->AddThreat(who, 0.0f);
+					me->SetInCombatWith(who);
+					who->SetInCombatWith(me);
+					DoStartMovement(who);
+				}               				
+			}		
+
+			void MoveInLineOfSight(Unit* who) OVERRIDE 
+			{ 				
+				if (!me->IsInCombat())				
+				{
+                    if (who->GetEntry() != NPC_DARKSCALE_SCOUT)
+                        return;
+					if (!me->IsWithinLOSInMap(who))
+						return;					   					 										
+					if (who->GetDistance (who) > 20.0f && !who->IsAlive())
+						return;
+					
+					SetCombatMovement(true);
+					AttackStart(who);										
+				} 				
+			}            
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+				if (!UpdateVictim())
+					return;
+              
+				DoMeleeAttackIfReady();
+            }           
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_withered_entAI(creature);
+        }
+};
+
+/*####
+# npc_great_thistle_bear_spirit
+####*/
+
+class npc_great_thistle_bear_spirit : public CreatureScript
+{
+    public:
+        npc_great_thistle_bear_spirit() : CreatureScript("npc_great_thistle_bear_spirit") { }
+
+		bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE 
+		{					
+			if (quest->GetQuestId() == QUEST_SPIRIT_OF_THE_THISTLE_BEAR)
+			{						
+				creature->AI()->DoCast(player, SPELL_BLESSING_OF_THE_THISTLE_BEAR);				
+			}
+			return true;
+		}
+
+		bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt) 
+		{ 			
+			if (quest->GetQuestId() == QUEST_SPIRIT_OF_THE_THISTLE_BEAR)
+			{					
+				creature->AI()->DoCast(player, SPELL_RITUAL_BOND_QUEST_COMPLETE);
+				player->RemoveAuraFromStack(SPELL_GROVEKEEPERS_TRANCE);
+				player->SetPhaseMask(1, true);				
+			}
+
+			return true; 
+		}
+};
+
+/*####
+# npc_great_moonstalker_spirit
+####*/
+
+class npc_great_moonstalker_spirit : public CreatureScript
+{
+    public:
+        npc_great_moonstalker_spirit() : CreatureScript("npc_great_moonstalker_spirit") { }
+
+		bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE 
+		{			
+			if (quest->GetQuestId() == QUEST_SPIRIT_OF_THE_MOONSTALKER)
+			{						
+				creature->AI()->DoCast(player, SPELL_BLESSING_OF_THE_MOONSTALKER);
+				creature->AI()->DoCast(player, SPELL_RITUAL_BOND_QUEST_COMPLETE);
+			}
+			return true;
+		}
+
+		bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt) 
+		{ 			
+			if (quest->GetQuestId() == QUEST_SPIRIT_OF_THE_MOONSTALKER)
+			{					
+				creature->AI()->DoCast(player, SPELL_RITUAL_BOND_QUEST_COMPLETE);
+				player->RemoveAuraFromStack(SPELL_GROVEKEEPERS_TRANCE);
+				player->SetPhaseMask(1, true);				
+			}
+
+			return true; 
+		}
+};
+
+/*####
+# npc_great_stag_spirit
+####*/
+
+class npc_great_stag_spirit : public CreatureScript
+{
+    public:
+        npc_great_stag_spirit() : CreatureScript("npc_great_stag_spirit") { }
+
+		bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE 
+		{			
+			if (quest->GetQuestId() == QUEST_SPIRIT_OF_THE_STAG)
+			{												
+				creature->AI()->DoCast(player, SPELL_BLESSING_OF_THE_STAG);
+				creature->AI()->DoCast(player, SPELL_RITUAL_BOND_QUEST_COMPLETE);
+			}
+			return true;
+		}
+
+		bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt) 
+		{ 			
+			if (quest->GetQuestId() == QUEST_SPIRIT_OF_THE_STAG)
+			{					
+				creature->AI()->DoCast(player, SPELL_RITUAL_BOND_QUEST_COMPLETE);
+				player->RemoveAuraFromStack(SPELL_GROVEKEEPERS_TRANCE);
+				player->SetPhaseMask(1, true);				
+			}
+
+			return true; 
+		}
+};
+
+/*####
+# go_grovekeepers_incense
+####*/
+
+class go_grovekeepers_incense : public GameObjectScript
+{
+public:
+    go_grovekeepers_incense() : GameObjectScript("go_grovekeepers_incense") { }
+
+    bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+    {
+		if (player->GetQuestStatus(QUEST_THE_RITUAL_BOND) == QUEST_STATUS_INCOMPLETE)				
+		{
+			go->CastSpell(player, SPELL_GROVEKEEPERS_TRANCE);			
+		}
+        return true;
+    }
+};
+
 
 
 void AddSC_darkshore()
@@ -410,5 +619,11 @@ void AddSC_darkshore()
 	new npc_volcor();
 	new npc_shaldyn();
 	new npc_gershala_nightwhisper();
-	new npc_decomposing_thistle_bear();    
+	new npc_decomposing_thistle_bear();	
+	new npc_withered_ent();	
+	new npc_great_thistle_bear_spirit();
+	new npc_great_moonstalker_spirit();
+	new npc_great_stag_spirit();
+	new go_grovekeepers_incense();
+
 }
