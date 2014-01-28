@@ -28,6 +28,11 @@ enum DarkShore
 	NPC_SHALDYN								= 33095,
 	NPC_GERSHALA_NIGHTWHISPER				= 32911,
 	
+	QUEST_NO_ACCOUNTING_FOR_TASTE			= 13527,
+	NPC_DECOMPOSING_THISTLE_BEAR			= 32975,
+	ITEM_FOUL_BEAR_CARCASS_SAMPLE			= 44911,
+	SPELL_FORCE_FOUL_BEAR_CARCASS_SAMPLE	= 62113,
+
 };
 
 
@@ -371,6 +376,32 @@ class npc_gershala_nightwhisper : public CreatureScript
         }
 };
 
+/*####
+# npc_decomposing_thistle_bear
+####*/
+
+class npc_decomposing_thistle_bear : public CreatureScript
+{
+    public:
+        npc_decomposing_thistle_bear() : CreatureScript("npc_decomposing_thistle_bear") { }
+
+		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		{
+			if (!player) return true;
+
+			player->PlayerTalkClass->SendCloseGossip();	
+
+			if (!creature) return true;
+					
+			if (player->GetQuestStatus(QUEST_NO_ACCOUNTING_FOR_TASTE) == QUEST_STATUS_INCOMPLETE)				
+			{			
+				player->CastSpell (creature, SPELL_FORCE_FOUL_BEAR_CARCASS_SAMPLE);
+				creature->DespawnOrUnsummon(500);
+			}
+			return true;
+		}
+};
+
 
 
 void AddSC_darkshore()
@@ -379,5 +410,5 @@ void AddSC_darkshore()
 	new npc_volcor();
 	new npc_shaldyn();
 	new npc_gershala_nightwhisper();
-	    
+	new npc_decomposing_thistle_bear();    
 }
