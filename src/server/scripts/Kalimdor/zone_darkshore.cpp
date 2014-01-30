@@ -81,6 +81,12 @@ enum DarkShore
 	ITEM_SEED_OF_EARTH						= 46354,
 	ITEM_SEED_OF_THE_SKY					= 46355,
 
+	QUEST_WAR_SUPPLIES						= 13509,
+	NPC_SHATTERSPEAR_SUPPLIES_CREDIT_BUNNY	= 33056,
+	ITEM_SENTINEL_TORCH						= 44999,
+	GO_SHATTERSPEAR_SUPPLIES_1				= 194103,
+	GO_SHATTERSPEAR_SUPPLIES_2				= 194104,
+	SPELL_TORCH_SHATTERSPEAR_SUPPLIES		= 62624,
 };
 
 /*####
@@ -954,6 +960,55 @@ class npc_darkshore_wisp : public CreatureScript
 		}
 };
 
+/*####
+# spell_torch_shatterspear_supplies
+####*/
+
+class spell_torch_shatterspear_supplies : public SpellScriptLoader
+{
+    public:
+        spell_torch_shatterspear_supplies() : SpellScriptLoader("spell_torch_shatterspear_supplies") { }
+
+        class spell_torch_shatterspear_supplies_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_torch_shatterspear_supplies_SpellScript);
+			
+            void HandleOnHit()
+            {
+				Player* player = GetCaster()->ToPlayer();
+				if (!player) return;
+
+				// ToDo: wrong in core: caster docast on self
+				// GameObject* go = GetExplTargetGObj();
+				GameObject* go=NULL;
+				go = player->FindNearestGameObject(GO_SHATTERSPEAR_SUPPLIES_1, 5.0f); //  workaround 
+				if (!go) go = player->FindNearestGameObject(GO_SHATTERSPEAR_SUPPLIES_2, 5.0f); //  workaround 
+				if (!go) return;
+
+				if (go->GetEntry() != GO_SHATTERSPEAR_SUPPLIES_1 && go->GetEntry() != GO_SHATTERSPEAR_SUPPLIES_2) return;
+
+				if (player->GetQuestStatus(QUEST_WAR_SUPPLIES) == QUEST_STATUS_INCOMPLETE)				
+				{								
+					player->KilledMonsterCredit(NPC_SHATTERSPEAR_SUPPLIES_CREDIT_BUNNY, NULL);	
+					go->Delete();
+					//go->DestroyForNearbyPlayers();					
+				}
+            }
+
+			void Register() OVERRIDE
+            {                
+				OnHit += SpellHitFn(spell_torch_shatterspear_supplies_SpellScript::HandleOnHit);
+            }
+
+
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_torch_shatterspear_supplies_SpellScript();
+        }
+};
+
 
 
 void AddSC_darkshore()
@@ -974,5 +1029,5 @@ void AddSC_darkshore()
 	new npc_thalya_the_voidcaller();
 	new npc_onu();
 	new npc_darkshore_wisp();
-
+	new spell_torch_shatterspear_supplies();
 }
