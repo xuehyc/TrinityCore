@@ -87,6 +87,27 @@ enum DarkShore
 	GO_SHATTERSPEAR_SUPPLIES_1				= 194103,
 	GO_SHATTERSPEAR_SUPPLIES_2				= 194104,
 	SPELL_TORCH_SHATTERSPEAR_SUPPLIES		= 62624,
+
+	QUEST_ENDING_THE_THREAD					= 13515,
+	NPC_JORKIL_THE_SOULRIPPER				= 32862,
+	NPC_HUNTRESS_SANDRA_MOONFALL			= 33178,
+	SPELL_AEGIS_OF_THE_SHATTERSPEER			= 64549,
+
+	QUEST_A_NEW_HOME						= 13910,
+	GO_NEW_HOME_BUILDING_SITE				= 195043,
+	GO_BUILDING_SIDE						= 195045,
+	GO_BULDING_CENTER						= 195044,
+	GO_BUILDING_CENTER_HUT					= 195055,
+	NPC_GREYMIST_HOVEL_BUILD_QUEST_MARKER	= 34349,
+	NPC_HUNTRESS_SANDRYA_MOONFALL			= 33178,
+
+	QUEST_CLEANSING_THE_AFFLICTED			= 13545,
+	NPC_CORRUPTED_BLACKWOOD					= 33044,
+	SPELL_BLESSED_HERB_BUNDLE				= 62092, 
+
+	QUEST_THE_DARKSCALE_WARLOAD				= 13899,
+	SPELL_PERMANENT_FEIGN_DEATH				= 29266,
+	NPC_WARLOAD_WRATHSPINE					= 34423,
 };
 
 /*####
@@ -944,8 +965,7 @@ class npc_darkshore_wisp : public CreatureScript
 		{
 			if (!player) return true;
 
-			player->PlayerTalkClass->SendCloseGossip();	
-
+			player->PlayerTalkClass->SendCloseGossip();			
 			if (!creature) return true;
 					
 			if (player->GetQuestStatus(QUEST_THE_SEEDS_OF_LIFE) == QUEST_STATUS_INCOMPLETE)				
@@ -1009,6 +1029,349 @@ class spell_torch_shatterspear_supplies : public SpellScriptLoader
         }
 };
 
+/*####
+# npc_huntress_sandrya_moonfall
+####*/
+
+class npc_huntress_sandrya_moonfall : public CreatureScript
+{
+    public:
+        npc_huntress_sandrya_moonfall() : CreatureScript("npc_huntress_sandrya_moonfall") { }				
+
+		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		{
+			if (!player || !creature) return true;			
+
+			if (player->GetQuestStatus(QUEST_ENDING_THE_THREAD) == QUEST_STATUS_COMPLETE) return false;
+			if (player->GetQuestStatus(QUEST_ENDING_THE_THREAD) == QUEST_STATUS_REWARDED) return false;	
+
+			Creature* jorkil=creature->FindNearestCreature (NPC_JORKIL_THE_SOULRIPPER,100.0f,true);
+			
+			if (jorkil)
+			{							
+				if (jorkil->HasAura(SPELL_AEGIS_OF_THE_SHATTERSPEER))					
+				{
+					player->PrepareGossipMenu(creature,50786,true);	
+					player->SendPreparedGossip(creature);
+					return true;
+				}
+
+				return false;
+			} 
+			else
+			{
+				player->PrepareGossipMenu(creature,50787,true);
+				player->SendPreparedGossip(creature);				
+			}
+			
+			return true;
+		}
+
+		bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) OVERRIDE 
+		{		
+			Creature* jorkil=creature->FindNearestCreature (NPC_JORKIL_THE_SOULRIPPER,100.0f,true);
+			if (jorkil)
+			{	
+				CAST_AI(npc_huntress_sandrya_moonfallAI, creature->AI())->StartAnim(player,jorkil);	
+				player->PlayerTalkClass->SendCloseGossip();
+			}
+			return true;
+		}
+		
+		struct npc_huntress_sandrya_moonfallAI : public ScriptedAI
+        {
+            npc_huntress_sandrya_moonfallAI(Creature* creature) : ScriptedAI(creature) {}
+	  			
+			uint32    _timer;
+			Player*   _player;
+			Creature* _jorkil;					
+			uint32    _talkTimer;
+			uint32    _phase;
+			
+			void Reset() OVERRIDE 
+			{ 
+				_timer=0; _talkTimer=0;  _phase=0; _player=NULL; _jorkil=NULL;
+			}
+
+			void StartAnim(Player* player, Creature* jorkil) 
+			{
+				_player=player; _jorkil=jorkil; _phase=1;
+			}    
+			
+			void EnterCombat(Unit* who) OVERRIDE 
+			{ 
+				if (who->GetEntry() == uint32(NPC_JORKIL_THE_SOULRIPPER))
+					Talk(2);
+			}
+
+	        void MoveInLineOfSight(Unit* who) OVERRIDE 
+			{ 				
+				Player* player=who->ToPlayer();
+				if (!player) return;
+			
+				if (player->GetQuestStatus(QUEST_ENDING_THE_THREAD) != QUEST_STATUS_INCOMPLETE)	return;
+
+				if (me->GetDistance2d(player)<10.0f && _talkTimer==0 && _phase==0 && !me->IsInCombat())
+				{
+					Talk(1); _talkTimer=45000; 
+				}					
+			}
+			
+			void UpdateAI(uint32 diff) OVERRIDE
+			{	
+				if (_talkTimer<=diff)				
+						_talkTimer=0;
+					else
+						_talkTimer-=diff;	
+
+				if (!UpdateVictim())						
+					if (_timer<=diff)				
+					{
+						DoWork();
+					}
+					else
+						_timer-=diff;										
+
+					DoMeleeAttackIfReady();
+			} 
+
+			void DoWork()
+			{
+				switch (_phase)
+				{
+					case 1:
+					{
+						_jorkil->RemoveAuraFromStack(SPELL_AEGIS_OF_THE_SHATTERSPEER);
+						Talk(0);						
+						_timer=120000; _phase=2;
+						break;
+					}
+					case 2:
+					{
+						_timer=0; _phase=0;
+						break;
+					}					
+				}
+			}
+		};
+		
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_huntress_sandrya_moonfallAI(creature);
+        }
+};
+
+/*####
+# spell_constructing
+####*/
+
+class spell_constructing : public SpellScriptLoader
+{
+    public:
+        spell_constructing() : SpellScriptLoader("spell_constructing") { }
+
+        class spell_constructing_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_constructing_SpellScript);
+			
+            void HandleOnHit()
+            {
+				Player* player = GetCaster()->ToPlayer();
+				if (!player) return;
+				
+				if (player->GetQuestStatus(QUEST_A_NEW_HOME) == QUEST_STATUS_INCOMPLETE)				
+				{
+					GameObject* go = player->FindNearestGameObject (GO_NEW_HOME_BUILDING_SITE,3.0f);
+					if (go)
+					{
+						player->SummonGameObject(GO_BULDING_CENTER,4690.67f,695.279f,1.15692f,3.927f,0,0,-0.923879f,0.382686f,200);
+						player->SummonGameObject(GO_BUILDING_SIDE,4692.65f,693.8f,1.13805f,1.11701f,0,0,0.529919f,0.848048f,200);
+						player->SummonGameObject(GO_BUILDING_SIDE,4688.91f,696.616f,1.19471f,3.87463f,0,0,-0.93358f,0.358368f,200);	
+						player->SummonGameObject(GO_BUILDING_CENTER_HUT,4682.55f,690.984f,2.00314f,2.68202f,0,0,0.973715f,0.227768f,200);	
+						player->KilledMonsterCredit(NPC_GREYMIST_HOVEL_BUILD_QUEST_MARKER, NULL);	
+					}
+				}				
+            }
+
+			void Register() OVERRIDE
+            {                
+				OnHit += SpellHitFn(spell_constructing_SpellScript::HandleOnHit);
+            }
+
+
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_constructing_SpellScript();
+        }
+};
+
+/*######
+## npc_corrupted_blackwood
+######*/
+
+class npc_corrupted_blackwood : public CreatureScript
+{
+public:
+    npc_corrupted_blackwood() : CreatureScript("npc_corrupted_blackwood") { }
+
+    struct npc_corrupted_blackwoodAI : public ScriptedAI
+    {
+        npc_corrupted_blackwoodAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32    _timer;  
+		uint32    _phase;				
+		
+        void Reset()  OVERRIDE
+        {
+              _timer=0; _phase=0;       			
+        }
+
+		void DamageTaken(Unit* pDone_by, uint32& uiDamage) OVERRIDE  
+		{ 
+			if (me->GetHealthPct() < 15)
+			{
+				Talk(0);
+				me->GetMotionMaster()->MoveFleeing (pDone_by);
+			}		
+		}
+
+		void SpellHit(Unit* Hitter, SpellInfo const* spell) OVERRIDE  
+		{ 
+			if (spell->Id==SPELL_BLESSED_HERB_BUNDLE && Hitter->GetTypeId()==TYPEID_PLAYER)
+				_phase=1;
+		}
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {				
+			if (_timer<=diff)				
+				DoWork();
+			else
+				_timer-=diff;		
+
+            if (!UpdateVictim())
+				return;
+			else 
+				DoMeleeAttackIfReady();			
+        }
+
+		void DoWork()
+		{					
+			switch (_phase)
+			{				
+				case 1:
+				{ 							
+					me->CombatStop (true);						
+					me->setFaction(35);					
+					Talk(1);
+					_timer=120000; _phase=2;
+					break;
+				}
+				case 2:
+				{ 	
+					me->setFaction(82);										
+					me->SetReactState(REACT_AGGRESSIVE);					
+					_timer=0; _phase=0;
+					break;
+				}			
+			}
+		}
+    };
+
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_corrupted_blackwoodAI (pCreature);
+    }
+};
+
+/*######
+## npc_corrupted_blackwood
+######*/
+
+class npc_warlord_wrathspine : public CreatureScript
+{
+public:
+    npc_warlord_wrathspine() : CreatureScript("npc_warlord_wrathspine") { }
+
+    struct npc_warlord_wrathspineAI : public ScriptedAI
+    {
+        npc_warlord_wrathspineAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32    _timer;  
+		uint32    _phase;
+		Player*	  _player;
+		
+        void Reset()  OVERRIDE
+        {
+              _timer=0; _phase=0;       			
+        }
+
+		void DamageTaken(Unit* pDone_by, uint32& uiDamage) OVERRIDE  
+		{ 
+			float onepct = (float)me->GetMaxHealth()/100;
+			float dmgpct = (float)uiDamage/onepct;
+			
+			if ((me->GetHealthPct()-dmgpct) < 20)
+			{									
+				if (_player = pDone_by->ToPlayer())
+				{
+					if (_player->GetQuestStatus(QUEST_THE_DARKSCALE_WARLOAD) == QUEST_STATUS_INCOMPLETE)
+					{
+						_phase=1;
+						uiDamage=0;
+					}
+				}				
+			}		
+		}
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {				
+			if (_timer<=diff)				
+				DoWork();
+			else
+				_timer-=diff;		
+
+            if (!UpdateVictim())
+				return;
+			else 
+				DoMeleeAttackIfReady();			
+        }
+
+		void DoWork()
+		{					
+			switch (_phase)
+			{				
+				case 1:
+				{ 						
+					me->CombatStop (true);						
+					me->setFaction(35);		
+					Talk(0);
+					me->SetHealth(me->GetMaxHealth()/100);
+					DoCast(SPELL_PERMANENT_FEIGN_DEATH);
+					if (_player) _player->KilledMonsterCredit(NPC_WARLOAD_WRATHSPINE, NULL);
+					_timer=120000; _phase=2;
+					break;
+				}
+				case 2:
+				{ 	
+					me->setFaction(72);	
+					me->RemoveAllAuras();
+					me->RemoveAuraFromStack(SPELL_PERMANENT_FEIGN_DEATH);
+					me->DespawnOrUnsummon();				
+					_timer=0; _phase=0;
+					break;
+				}			
+			}
+		}
+    };
+
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_warlord_wrathspineAI (pCreature);
+    }
+};
+
 
 
 void AddSC_darkshore()
@@ -1030,4 +1393,8 @@ void AddSC_darkshore()
 	new npc_onu();
 	new npc_darkshore_wisp();
 	new spell_torch_shatterspear_supplies();
+	new npc_huntress_sandrya_moonfall();
+	new spell_constructing();
+	new npc_corrupted_blackwood();
+	new npc_warlord_wrathspine();
 }
