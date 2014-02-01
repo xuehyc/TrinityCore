@@ -20,6 +20,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ObjectMgr.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "Spell.h"
+#include "SpellAuraEffects.h"
+#include "GridNotifiers.h"
+
 enum DarkShore
 {	
 	QUEST_THE_LAST_WAVE_OF_SURVIVORS		= 13518,
@@ -108,6 +115,13 @@ enum DarkShore
 	QUEST_THE_DARKSCALE_WARLOAD				= 13899,
 	SPELL_PERMANENT_FEIGN_DEATH				= 29266,
 	NPC_WARLOAD_WRATHSPINE					= 34423,
+
+	QUEST_THE_OFFERING_TO_AZSHARA			= 13900,
+	NPC_QUEEN_AZSHARA						= 34416,
+	NPC_MALFURION_STORMRAGE					= 34422,
+	NPC_AZSHARA_EVENT_CREDIT				= 51314,
+	NPC_DARKSCALE_PRIESTESS					= 34415,
+
 };
 
 /*####
@@ -1372,6 +1386,236 @@ public:
     }
 };
 
+/*######
+## npc_queen_azshara
+######*/
+
+class npc_queen_azshara : public CreatureScript
+{
+public:
+    npc_queen_azshara() : CreatureScript("npc_queen_azshara") { }
+
+    struct npc_queen_azsharaAI : public ScriptedAI
+    {
+        npc_queen_azsharaAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32    _timer;  
+		uint32    _phase;
+		Player*	  _player;
+		
+        void StartAnim(Player* player) 
+        {
+              _timer=0; _phase=0; _player=player;      			
+        }
+		
+        void UpdateAI(uint32 diff) OVERRIDE
+        {	
+			if (_timer<=diff)				
+				DoWork();
+			else
+				_timer-=diff;		
+
+            if (!UpdateVictim())
+				return;
+			else 
+				DoMeleeAttackIfReady();			
+        }	
+
+		void DoWork()
+		{
+			if (!_player) return;
+
+			switch (_phase)
+			{
+			case 0:
+				{
+					_timer=2000; _phase=1; // first delay
+					break;
+				}
+			case 1:
+				{
+					Talk(1);
+					_timer=16000; _phase=2; // pause for me and answer
+					break;
+				}
+			case 2:
+				{
+					Talk(2);
+					_timer=8000; _phase=3; 
+					break;
+				}
+			case 3:
+				{
+					Talk(3);
+					_timer=18000; _phase=4; // wait for me and answer
+					break;
+				}			
+			case 4:
+				{
+					_player->KilledMonsterCredit(NPC_AZSHARA_EVENT_CREDIT, NULL);	
+					me->DespawnOrUnsummon();
+					break;
+				}
+			}
+		
+		}
+
+    };
+
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_queen_azsharaAI (pCreature);
+    }
+};
+
+/*######
+## npc_malfurion_stormrage
+######*/
+
+class npc_malfurion_stormrage : public CreatureScript
+{
+public:
+    npc_malfurion_stormrage() : CreatureScript("npc_malfurion_stormrage") { }
+
+    struct npc_malfurion_stormrageAI : public ScriptedAI
+    {
+        npc_malfurion_stormrageAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32    _timer;  
+		uint32    _phase;
+		Player*	  _player;
+		
+        void StartAnim(Player* player) 
+        {
+              _timer=0; _phase=0; _player=player;      			
+        }
+		
+        void UpdateAI(uint32 diff) OVERRIDE
+        {	
+			if (_timer<=diff)				
+				DoWork();
+			else
+				_timer-=diff;		
+
+            if (!UpdateVictim())
+				return;
+			else 
+				DoMeleeAttackIfReady();			
+        }	
+
+		void DoWork()
+		{
+			if (!_player) return;
+
+			switch (_phase)
+			{
+			case 0:
+				{
+					_timer=10000; _phase=1; // first delay and waiting on talk queen
+					break;
+				}
+			case 1:
+				{
+					Talk(1);
+					_timer=24000; _phase=2; // wait for me and 2 talk from queen
+					break;
+				}
+			case 2:
+				{
+					me->SetFacingTo (me->GetAngle(_player));
+					Talk(2);
+					_timer=8000; _phase=3; 
+					break;
+				}
+			case 3:
+				{
+					Talk(3);
+					// chanche to take new quest???
+					_timer=180000; _phase=4; // talk help and wait for quest taker
+					break;
+				}
+			case 4:
+				{		
+					me->DespawnOrUnsummon();
+					_timer=0; _phase=0; 
+					break;
+				}		
+			}		
+		}
+    };
+
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_malfurion_stormrageAI (pCreature);
+    }
+};
+
+/*######
+## npc_darkscale_priestess
+######*/
+
+class npc_darkscale_priestess : public CreatureScript
+{
+public:
+    npc_darkscale_priestess() : CreatureScript("npc_darkscale_priestess") { }
+
+    struct npc_darkscale_priestessAI : public ScriptedAI
+    {
+        npc_darkscale_priestessAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32    _timer;  
+		uint32    _phase;
+		Player*   _player;
+		Creature* _queen;
+		Creature* _malfurion;
+		
+        void Reset()  OVERRIDE
+        {
+              _timer=0; _phase=0; _player=NULL; _queen=NULL; _malfurion=NULL;     			
+        }
+		
+		void JustDied(Unit* killer) OVERRIDE 
+		{ 	
+			_player=killer->ToPlayer();
+			if (!_player) 
+			{
+				printf("Killed by Pet \n");
+				_player=me->FindNearestPlayer (10.0f);
+				if (!_player) return;
+			}
+
+			Creature* priestess = me->FindNearestCreature (NPC_DARKSCALE_PRIESTESS,50.0f);
+			if (!priestess) // and only if she is the last, spawns the queen..
+			{
+				if (_player->GetQuestStatus(QUEST_THE_OFFERING_TO_AZSHARA) == QUEST_STATUS_INCOMPLETE)
+				{
+					me->SummonCreature (NPC_QUEEN_AZSHARA, 4607.107f, 884.2894f, 37.89753f, 2.423f);
+					me->SummonCreature (NPC_MALFURION_STORMRAGE, 4595.326172f, 905.159851f, 42.118744f, 5.327f);
+					
+					if (_queen = me->FindNearestCreature (NPC_QUEEN_AZSHARA, 100.0f))											
+						CAST_AI(npc_queen_azshara::npc_queen_azsharaAI, _queen->AI())->StartAnim(_player);	
+					
+					if (_malfurion= me->FindNearestCreature (NPC_MALFURION_STORMRAGE, 100.0))											
+						CAST_AI(npc_malfurion_stormrage::npc_malfurion_stormrageAI, _malfurion->AI())->StartAnim(_player);	
+				}
+			}
+					
+		} 
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {							
+            if (!UpdateVictim())
+				return;
+			else 
+				DoMeleeAttackIfReady();			
+        }	
+    };
+
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_darkscale_priestessAI (pCreature);
+    }
+};
 
 
 void AddSC_darkshore()
@@ -1397,4 +1641,7 @@ void AddSC_darkshore()
 	new spell_constructing();
 	new npc_corrupted_blackwood();
 	new npc_warlord_wrathspine();
+	new npc_darkscale_priestess();
+	new npc_queen_azshara();
+	new npc_malfurion_stormrage();
 }
