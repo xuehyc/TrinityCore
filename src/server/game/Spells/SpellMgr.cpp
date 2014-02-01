@@ -2801,8 +2801,39 @@ void SpellMgr::UnloadSpellInfoImplicitTargetConditionLists()
 void SpellMgr::LoadSpellInfoCustomAttributes()
 {
     uint32 oldMSTime = getMSTime();
-
+    uint32 oldMSTime2 = oldMSTime;
     SpellInfo* spellInfo = NULL;
+
+    QueryResult result = WorldDatabase.Query("SELECT entry, attributes FROM spell_custom_attr");
+
+    if (!result)
+        TC_LOG_INFO("server.loading", ">> Loaded 0 spell custom attributes from DB. DB table `spell_custom_attr` is empty.");
+    else
+    {
+        uint32 count = 0;
+        do
+        {
+            Field* fields = result->Fetch();
+
+            uint32 spellId = fields[0].GetUInt32();
+            uint32 attributes = fields[1].GetUInt32();
+
+            spellInfo = mSpellInfoMap[spellId];
+            if (!spellInfo)
+            {
+                TC_LOG_ERROR("sql.sql", "Table `spell_custom_attr` has wrong spell (entry: %u), ignored.", spellId);
+                continue;
+            }
+
+            // TODO: validate attributes
+
+            spellInfo->AttributesCu |= attributes;
+            ++count;
+        } while (result->NextRow());
+
+        TC_LOG_INFO("server.loading", ">> Loaded %u spell custom attributes from DB in %u ms", count, GetMSTimeDiffToNow(oldMSTime2));
+    }
+
     for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)
     {
         spellInfo = mSpellInfoMap[i];
@@ -2833,9 +2864,6 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
                 case SPELL_AURA_POWER_BURN:
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_NO_INITIAL_THREAT;
                     break;
-                case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS:
-                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_SCALABLE; // Meh i dont think this is a proper name..
-                    break;					
             }
 
             switch (spellInfo->Effects[j].Effect)
@@ -2916,223 +2944,6 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
         if (spellInfo->SpellVisual[0] == 3879)
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
 
-        switch (spellInfo->Id)
-        {
-            case 76691: // Vengeance
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(18);
-                break;		
-            case 60256:
-                //Crashes client on pressing ESC (Maybe because of ReqSpellFocus and GameObject)
-                spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
-                break;
-            case 1776: // Gouge
-            case 1777:
-            case 8629:
-            case 11285:
-            case 11286:
-            case 12540:
-            case 13579:
-            case 24698:
-            case 28456:
-            case 29425:
-            case 34940:
-            case 36862:
-            case 38764:
-            case 38863:
-            case 52743: // Head Smack
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
-                break;
-            case 53: // Backstab
-            case 2589:
-            case 2590:
-            case 2591:
-            case 7159:
-            case 8627:
-            case 8721:
-            case 11279:
-            case 11280:
-            case 11281:
-            case 15582:
-            case 15657:
-            case 22416:
-            case 25300:
-            case 26863:
-            case 37685:
-            case 48656:
-            case 48657:
-            case 703: // Garrote
-            case 8631:
-            case 8632:
-            case 8633:
-            case 11289:
-            case 11290:
-            case 26839:
-            case 26884:
-            case 48675:
-            case 48676:
-            case 5221: // Shred
-            case 6800:
-            case 8992:
-            case 9829:
-            case 9830:
-            case 27001:
-            case 27002:
-            case 48571:
-            case 48572:
-            case 8676: // Ambush
-            case 8724:
-            case 8725:
-            case 11267:
-            case 11268:
-            case 11269:
-            case 27441:
-            case 48689:
-            case 48690:
-            case 48691:
-            case 6785: // Ravage
-            case 6787:
-            case 9866:
-            case 9867:
-            case 27005:
-            case 48578:
-            case 48579:
-            case 21987: // Lash of Pain
-            case 23959: // Test Stab R50
-            case 24825: // Test Backstab
-            case 58563: // Assassinate Restless Lookout
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET;
-                break;
-            case 26029: // Dark Glare
-            case 37433: // Spout
-            case 43140: // Flame Breath
-            case 43215: // Flame Breath
-            case 70461: // Coldflame Trap
-            case 72133: // Pain and Suffering
-            case 73788: // Pain and Suffering
-            case 73789: // Pain and Suffering
-            case 73790: // Pain and Suffering
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
-                break;
-			case 81913: // Die by the Sword
-			case 81914: // Die by the Sword
-				spellInfo->Effects[0].TriggerSpell = 86624;
-				break;
-			case 24340:
-			case 26558:
-			case 28884:          // Meteor
-			case 36837:
-			case 38903:
-			case 41276:          // Meteor
-			case 57467:          // Meteor
-			case 26789:          // Shard of the Fallen Star
-			case 31436:          // Malevolent Cleave
-			case 35181:          // Dive Bomb
-			case 40810:
-			case 43267:
-			case 43268:          // Saber Lash
-			case 42384:          // Brutal Swipe
-			case 45150:
-			case 95172:
-			case 88942:          // Meteor Slash
-			case 64422:
-			case 64688:          // Sonic Screech
-			case 72373:          // Shared Suffering
-			case 71904:          // Chaos Bane
-			case 70492:
-			case 72505:          // Ooze Eruption
-			case 72624:
-			case 72625:          // Ooze Eruption
-			case 89348:
-			case 95178:          // Demon Repellent Ray
-			case 86704:          // Ancient Fury
-                // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
-                break;
-            case 86674: // Ancient Healer
-                spellInfo->ProcCharges = 5;
-                break;
-            case 31687: // Summon Water Elemental
-                // 322-330 switch - effect changed to dummy, target entry not changed in client:(
-                spellInfo->Effects[0].TargetA = TARGET_UNIT_CASTER;
-                break;
-            case 12051: // Evocation - now we can interrupt this
-                spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
-                break;
-            case 26573: // Consecration
-                spellInfo->Effects[2].TriggerSpell = 82366;
-                break;
-            case 25771: // Forbearance - wrong mechanic immunity in DBC since 3.0.x
-                spellInfo->Effects[0].MiscValue = MECHANIC_IMMUNE_SHIELD;
-                break;
-            case 88954: // Consuming Darkness
-                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(12); // (100)
-                spellInfo->MaxAffectedTargets = 3;
-                break;
-            case 95173: // Consuming Darkness (H)
-                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(12); // (100)
-                spellInfo->MaxAffectedTargets = 8;
-                break;
-            case 89000: case 95177: // Fel Firestorm
-                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(15); // (3)
-                break;
-            case 18500: // Wing Buffet
-            case 33086: // Wild Bite
-            case 49749: // Piercing Blow
-            case 52890: // Penetrating Strike
-            case 53454: // Impale
-            case 59446: // Impale
-            case 62383: // Shatter
-            case 64777: // Machine Gun
-            case 65239: // Machine Gun
-            case 65919: // Impale
-            case 67858: // Impale
-            case 67859: // Impale
-            case 67860: // Impale
-            case 69293: // Wing Buffet
-            case 74439: // Machine Gun
-            case 63278: // Mark of the Faceless (General Vezax)
-            case 62544: // Thrust (Argent Tournament)
-            case 64588: // Thrust (Argent Tournament)
-            case 66479: // Thrust (Argent Tournament)
-            case 68505: // Thrust (Argent Tournament)
-            case 62709: // Counterattack! (Argent Tournament)
-            case 62626: // Break-Shield (Argent Tournament, Player)
-            case 64590: // Break-Shield (Argent Tournament, Player)
-            case 64342: // Break-Shield (Argent Tournament, NPC)
-            case 64686: // Break-Shield (Argent Tournament, NPC)
-            case 65147: // Break-Shield (Argent Tournament, NPC)
-            case 68504: // Break-Shield (Argent Tournament, NPC)
-            case 62874: // Charge (Argent Tournament, Player)
-            case 68498: // Charge (Argent Tournament, Player)
-            case 64591: // Charge (Argent Tournament, Player)
-            case 63003: // Charge (Argent Tournament, NPC)
-            case 63010: // Charge (Argent Tournament, NPC)
-            case 68321: // Charge (Argent Tournament, NPC)
-            case 72255: // Mark of the Fallen Champion (Deathbringer Saurfang)
-            case 72444: // Mark of the Fallen Champion (Deathbringer Saurfang)
-            case 72445: // Mark of the Fallen Champion (Deathbringer Saurfang)
-            case 72446: // Mark of the Fallen Champion (Deathbringer Saurfang)
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
-                break;
-            case 72293: // Mark of the Fallen Champion (Deathbringer Saurfang)
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
-                break;
-            case 38729:  // Rod of Purification
-            case 51858:  // Siphon of Acherus
-            case 96946:  // Gaze of Occu'thar
-            case 101005: // Gaze of Occu'thar
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_TRIGGERED_BY_CASTER;
-                break;
-            case 74522: // Skinning (Grandmaster)
-                // 4.06 dbc issue which was fixed in 4.20 (or 4.10?)
-                spellInfo->Effects[1].BasePoints = 7;
-            case 49206: // Summon Gargoyle
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(587);
-                break;
-            default:
-                break;
-        }
-
         switch (spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_WARRIOR:
@@ -3141,11 +2952,8 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
                 break;
             case SPELLFAMILY_DRUID:
-                // Starfall Target Selection
-                if (spellInfo->SpellFamilyFlags[2] & 0x100)
-                    spellInfo->MaxAffectedTargets = 2;
                 // Roar
-                else if (spellInfo->SpellFamilyFlags[0] & 0x8)
+                if (spellInfo->SpellFamilyFlags[0] & 0x8)
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
                 break;
             default:
