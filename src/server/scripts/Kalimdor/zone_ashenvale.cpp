@@ -37,6 +37,23 @@ EndContentData */
 #include "ScriptedEscortAI.h"
 #include "Player.h"
 
+enum ashenvale
+{
+	QUEST_OF_THEIR_OWN_DESIGN						= 13595,
+	NPC_BATHRANS_CORPSE								= 33183,
+
+	QUEST_BATHED_IN_LIGHT							= 13642,
+	GO_LIGHT_OF_ELUNE_AT_LAKE_FALATHIM				= 194651,
+	ITEM_UNBATHED_CONCOCTION						= 45065,
+	ITEM_BATHED_CONCOCTION							= 45066,
+
+	QUEST_RESPECT_FOR_THE_FALLEN					= 13626,
+	SPELL_CREATE_FEEROS_HOLY_HAMMER_COVER			= 62837,
+	ITEM_FEEROS_HOLY_HAMMER							= 45042,
+	SPELL_CREATE_THE_PURIFIERS_PRAYER_BOOK_COVER	= 62839,
+	ITEM_PURIFIERS_PRAYER_BOOK						= 45043,
+};
+
 /*####
 # npc_torek
 ####*/
@@ -458,10 +475,158 @@ class go_naga_brazier : public GameObjectScript
         }
 };
 
+/*####
+# spell_potion_of_wildfire
+####*/
+
+class spell_potion_of_wildfire : public SpellScriptLoader
+{
+    public:
+        spell_potion_of_wildfire() : SpellScriptLoader("spell_potion_of_wildfire") { }
+
+        class spell_potion_of_wildfire_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_potion_of_wildfire_SpellScript);
+			
+			void HandleOnHit()
+            {
+				Player* player = GetCaster()->ToPlayer();
+				if (!player) return;
+				
+				if (player->GetQuestStatus(QUEST_OF_THEIR_OWN_DESIGN) == QUEST_STATUS_INCOMPLETE)				
+				{							
+					if (Creature* creature = player->FindNearestCreature(NPC_BATHRANS_CORPSE, 10.0f, true))					
+					{						
+						player->KilledMonsterCredit(NPC_BATHRANS_CORPSE, NULL);	
+					}
+				}				
+            }
+
+			void Register() OVERRIDE
+            {                
+				OnHit += SpellHitFn(spell_potion_of_wildfire_SpellScript::HandleOnHit);				
+            }
+
+
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_potion_of_wildfire_SpellScript();
+        }
+};
+
+/*####
+# spell_unbathed_concoction
+####*/
+
+class spell_unbathed_concoction : public SpellScriptLoader
+{
+    public:
+        spell_unbathed_concoction() : SpellScriptLoader("spell_unbathed_concoction") { }
+
+        class spell_unbathed_concoction_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_unbathed_concoction_SpellScript);
+			
+			
+            void Unload() OVERRIDE
+            {				
+				Player* player = GetCaster()->ToPlayer();
+				if (!player) return;
+				
+				if (player->GetQuestStatus(QUEST_BATHED_IN_LIGHT) == QUEST_STATUS_INCOMPLETE)				
+				{							
+					if (GameObject* go = player->FindNearestGameObject(GO_LIGHT_OF_ELUNE_AT_LAKE_FALATHIM, 10.0f))					
+					{						
+						if (player->HasItemCount(ITEM_UNBATHED_CONCOCTION,1))
+						{
+							player->DestroyItemCount (ITEM_UNBATHED_CONCOCTION,1,true);
+							player->AddItem(ITEM_BATHED_CONCOCTION,1);
+						}						
+					}
+				}				
+            }
+
+			
+			void Register() OVERRIDE {}
+
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_unbathed_concoction_SpellScript();
+        }
+};
+
+/*####
+# npc_feero_ironhand
+####*/
+
+class npc_feero_ironhand : public CreatureScript
+{
+    public:
+        npc_feero_ironhand() : CreatureScript("npc_feero_ironhand") { }
+
+		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		{
+			if (!player) return true;
+
+			player->PlayerTalkClass->SendCloseGossip();	
+
+			if (!creature) return true;
+					
+			if (player->GetQuestStatus(QUEST_RESPECT_FOR_THE_FALLEN) == QUEST_STATUS_INCOMPLETE)				
+			{			
+				if (!player->HasItemCount(ITEM_FEEROS_HOLY_HAMMER,1))
+				{							
+					player->CastSpell (creature, SPELL_CREATE_FEEROS_HOLY_HAMMER_COVER);	
+					player->AddItem(ITEM_FEEROS_HOLY_HAMMER,1);					
+				}						
+			}
+			return true;
+		}
+};
+
+/*####
+# npc_delgren_the_purifier
+####*/
+
+class npc_delgren_the_purifier : public CreatureScript
+{
+    public:
+        npc_delgren_the_purifier() : CreatureScript("npc_delgren_the_purifier") { }
+
+		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		{
+			if (!player) return true;
+
+			player->PlayerTalkClass->SendCloseGossip();	
+
+			if (!creature) return true;
+					
+			if (player->GetQuestStatus(QUEST_RESPECT_FOR_THE_FALLEN) == QUEST_STATUS_INCOMPLETE)				
+			{			
+				if (!player->HasItemCount(ITEM_PURIFIERS_PRAYER_BOOK,1))
+				{							
+					player->CastSpell (creature, SPELL_CREATE_THE_PURIFIERS_PRAYER_BOOK_COVER);						
+					player->AddItem(ITEM_PURIFIERS_PRAYER_BOOK,1);
+				}						
+			}
+			return true;
+		}
+};
+
+
 void AddSC_ashenvale()
 {
     new npc_torek();
     new npc_ruul_snowhoof();
     new npc_muglash();
     new go_naga_brazier();
+	new spell_potion_of_wildfire();
+	new spell_unbathed_concoction();
+	new npc_feero_ironhand();
+	new npc_delgren_the_purifier();
+
 }
