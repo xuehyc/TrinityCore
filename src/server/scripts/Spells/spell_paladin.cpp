@@ -935,62 +935,6 @@ class spell_pal_sacred_shield : public SpellScriptLoader
         }
 };
 
-// Templar's Verdict
-// Spell Id: 85256
-class spell_pal_templar_verdict : public SpellScriptLoader
-{
-public:
-    spell_pal_templar_verdict() : SpellScriptLoader("spell_pal_templar_verdict") { }
-
-    class spell_pal_templar_verdict_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_pal_templar_verdict_SpellScript)
-
-        bool Load() OVERRIDE
-        {
-            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
-                return false;
-            return true;
-        }
-
-        void CalculateDamage(SpellEffIndex /*effIndex*/)
-        {
-            if (Unit* caster = GetCaster())
-            {
-                int32 damage = GetHitDamage();
-                int32 power = caster->GetPower(POWER_HOLY_POWER);
-
-				if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
-					damage = int32(damage * 7.83f);
-				else
-					switch (power)
-					{
-						case 0: // 1 Holy Power
-							damage = int32(damage); // normal 30% wd.
-							break;
-						case 1: // 2 Holy Power
-							damage = int32(damage * 3.0f); // 90% wd.
-							break;
-						case 2: // 3 Holy Power
-							damage = int32(damage * 7.83f); // 235% wd.
-							break;
-					}
-
-                SetHitDamage(damage);
-            }
-        }
-
-        void Register() OVERRIDE
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_pal_templar_verdict_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
-        }
-    };
-
-    SpellScript* GetSpellScript() const OVERRIDE
-    {
-        return new spell_pal_templar_verdict_SpellScript();
-    }
-};
 
 /// Updated 4.3.4
 class spell_pal_judgements: public SpellScriptLoader
@@ -1609,6 +1553,107 @@ class spell_pal_seal_of_righteousness : public SpellScriptLoader
         }
 };
 
+// 54968 - Glyph of Holy Light
+class spell_pal_glyph_of_holy_light : public SpellScriptLoader
+{
+    public:
+        spell_pal_glyph_of_holy_light() : SpellScriptLoader("spell_pal_glyph_of_holy_light") { }
+
+        class spell_pal_glyph_of_holy_light_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pal_glyph_of_holy_light_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& targets)
+            {
+                uint32 const maxTargets = GetSpellInfo()->MaxAffectedTargets;
+
+                if (targets.size() > maxTargets)
+                {
+                    targets.sort(Trinity::HealthPctOrderPred());
+                    targets.resize(maxTargets);
+                }
+            }
+
+            void Register() OVERRIDE
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_glyph_of_holy_light_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_pal_glyph_of_holy_light_SpellScript();
+        }
+};
+
+// 85256 - Templar's Verdict
+/// Updated 4.3.4
+class spell_pal_templar_verdict : public SpellScriptLoader
+{
+    public:
+        spell_pal_templar_verdict() : SpellScriptLoader("spell_pal_templar_verdict") { }
+
+        class spell_pal_templar_verdict_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pal_templar_verdict_SpellScript);
+
+            bool Validate (SpellInfo const* /*spellEntry*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
+                    return false;
+
+                return true;
+            }
+
+            bool Load() OVERRIDE
+            {
+                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                    return false;
+
+                if (GetCaster()->ToPlayer()->getClass() != CLASS_PALADIN)
+                    return false;
+
+                return true;
+            }
+
+            void ChangeDamage(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                int32 damage = GetHitDamage();
+
+                if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
+                    damage *= 7.5;  // 7.5*30% = 225%
+                else
+                {
+                    switch (caster->GetPower(POWER_HOLY_POWER))
+                    {
+                        case 0: // 1 Holy Power
+                            damage = damage;
+                            break;
+                        case 1: // 2 Holy Power
+                            damage *= 3;    // 3*30 = 90%
+                            break;
+                        case 2: // 3 Holy Power
+                            damage *= 7.5;  // 7.5*30% = 225%
+                            break;
+                    }
+                }
+
+                SetHitDamage(damage);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pal_templar_verdict_SpellScript::ChangeDamage, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_pal_templar_verdict_SpellScript();
+        }
+};
+
 
 void AddSC_paladin_spell_scripts()
 {
@@ -1632,7 +1677,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_lay_on_hands();
     new spell_pal_righteous_defense();
     new spell_pal_sacred_shield();
-    new spell_pal_templar_verdict();
 	new spell_pal_judgements();
 	new spell_pal_guardian_ancient_kings();
 	new spell_pal_consecration();
@@ -1644,4 +1688,6 @@ void AddSC_paladin_spell_scripts()
 	new spell_pal_acts_of_sacrifice();
 	new spell_pal_word_of_glory();
 	new spell_pal_seal_of_righteousness();
+	new spell_pal_glyph_of_holy_light();
+	new spell_pal_templar_verdict();
 }

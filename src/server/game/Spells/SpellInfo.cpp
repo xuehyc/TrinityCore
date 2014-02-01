@@ -508,19 +508,6 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
         value = caster->ApplyEffectModifiers(_spellInfo, _effIndex, value);
 
         // amount multiplication based on caster's level
-/* REVIEW - MERGE <<<<<<< HEAD
-        if (!_spellInfo->GetSpellScaling() && !basePointsPerLevel && (_spellInfo->Attributes & SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION && _spellInfo->SpellLevel) &&
-                Effect != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
-                Effect != SPELL_EFFECT_KNOCK_BACK &&
-                Effect != SPELL_EFFECT_ADD_EXTRA_ATTACKS &&
-                ApplyAuraName != SPELL_AURA_MOD_SPEED_ALWAYS &&
-                ApplyAuraName != SPELL_AURA_MOD_SPEED_NOT_STACK &&
-                ApplyAuraName != SPELL_AURA_MOD_INCREASE_SPEED &&
-                ApplyAuraName != SPELL_AURA_MOD_DECREASE_SPEED)
-                //there are many more: slow speed, -healing pct
-            value *= 0.25f * exp(caster->getLevel() * (70 - _spellInfo->SpellLevel) / 1000.0f);
-            //value = int32(value * (int32)getLevel() / (int32)(_spellInfo->spellLevel ? _spellInfo->spellLevel : 1));
-======= */
         if (!caster->IsControlledByPlayer() &&
             _spellInfo->SpellLevel && _spellInfo->SpellLevel != caster->getLevel() &&
             !basePointsPerLevel && (_spellInfo->Attributes & SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION))
@@ -2182,6 +2169,28 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
 
             break;
         }
+/*
+// from remote
+        case SPELLFAMILY_PALADIN:
+        {
+            // Collection of all the seal family flags. No other paladin spell has any of those.
+            if (SpellFamilyFlags[1] & 0xA2000800)
+                return SPELL_SPECIFIC_SEAL;
+
+            if (SpellFamilyFlags[0] & 0x00002190)
+                return SPELL_SPECIFIC_HAND;
+
+            // Judgement
+            if (Id == 20271)
+                return SPELL_SPECIFIC_JUDGEMENT;
+
+            // only paladin auras have this (for palaldin class family)
+            if (SpellFamilyFlags[2] & 0x00000020)
+                return SPELL_SPECIFIC_AURA;
+
+            break;
+        }
+*/		
         case SPELLFAMILY_SHAMAN:
         {
             // family flags 10 (Lightning), 42 (Earth), 37 (Water), proc shield from T2 8 pieces bonus
