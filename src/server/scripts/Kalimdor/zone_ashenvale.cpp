@@ -32,8 +32,12 @@ npc_torek
 npc_ruul_snowhoof
 EndContentData */
 
+#include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "Spell.h"
+#include "SpellAuraEffects.h"
+#include "GridNotifiers.h"
 #include "ScriptedEscortAI.h"
 #include "Player.h"
 
@@ -52,6 +56,24 @@ enum ashenvale
 	ITEM_FEEROS_HOLY_HAMMER							= 45042,
 	SPELL_CREATE_THE_PURIFIERS_PRAYER_BOOK_COVER	= 62839,
 	ITEM_PURIFIERS_PRAYER_BOOK						= 45043,
+
+	QUEST_TREE_FRIENDS_OF_THE_FOREST				= 13976,
+	QUEST_IN_A_BIND									= 13982,
+	SPELL_BOLYUN_SEE_INVISIBILITY_1					= 65714,
+	SPELL_BOLYUN_SEE_INVISIBILITY_2					= 65715,
+
+	QUEST_CLEAR_THE_SHRINE							= 13985,
+	QUEST_THE_LAST_STAND							= 13987,
+	NPC_DEMONIC_INVADER								= 34609,
+	NPC_BIG_BAOBOB									= 34604,
+	
+	QUEST_ASTRANAARS_BURNING						= 13849,
+	NPC_ASTRANAARS_BURNING_FIRE_BUNNY				= 34123,
+	SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_01		= 64572,
+	SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_02		= 64574,
+	SPELL_ASTRANAARS_BURNING_SMOKE					= 64565,
+	SPELL_THROW_BUCKET_OF_WATER						= 64558,
+	SPELL_BATHRANS_CORPSE_FIRE						= 62511,
 };
 
 /*####
@@ -617,6 +639,369 @@ class npc_delgren_the_purifier : public CreatureScript
 		}
 };
 
+/*######
+## quest 13976 Three Friends of the Forest
+######*/
+
+/*######
+## npc_bolyun_1
+######*/
+
+class npc_bolyun_1 : public CreatureScript
+{
+public:
+    npc_bolyun_1() : CreatureScript("npc_bolyun_1") { }
+
+    struct npc_bolyun_1AI : public ScriptedAI
+    {
+        npc_bolyun_1AI(Creature *c) : ScriptedAI(c) {}
+
+		uint32 VisibleStatus; // 0=unknown 1=visible 2=invisible
+
+		void ShowCreature(Player* player)
+		{			
+			if (VisibleStatus!=1) 
+			{		
+				me->AddAura (SPELL_BOLYUN_SEE_INVISIBILITY_1,player);				
+				VisibleStatus=1;
+			}			
+		}
+
+		void HideCreature(Player* player)
+		{
+			if (VisibleStatus!=2) 
+			{				
+				player->RemoveAura (SPELL_BOLYUN_SEE_INVISIBILITY_1);
+				player->RemoveAuraFromStack (SPELL_BOLYUN_SEE_INVISIBILITY_1);
+				VisibleStatus=2;
+			}						
+		}
+
+		void Reset() OVERRIDE
+		{
+			VisibleStatus=0;
+		}
+
+		void MoveInLineOfSight(Unit* who) OVERRIDE 
+		{ 			
+			if (Player* player = who->ToPlayer())
+			{	
+				if (player->GetQuestStatus(QUEST_IN_A_BIND) != QUEST_STATUS_REWARDED) 				
+				{
+					ShowCreature(player);
+					return;
+				}
+				HideCreature(player); 
+			}		
+		} 
+
+		bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt) 
+		{
+			if (quest->GetQuestId()  == QUEST_IN_A_BIND)
+				HideCreature(player);			
+			return true; 
+		}
+
+    };
+
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_bolyun_1AI (pCreature);
+    }
+};
+
+/*######
+## npc_bolyun_2
+######*/
+
+class npc_bolyun_2 : public CreatureScript
+{
+public:
+    npc_bolyun_2() : CreatureScript("npc_bolyun_2") { }
+
+	 struct npc_bolyun_2AI : public ScriptedAI
+    {
+        npc_bolyun_2AI(Creature *c) : ScriptedAI(c) {}
+
+		uint32 VisibleStatus; // 0=unknown 1=visible 2=invisible
+
+		void ShowCreature(Player* player)
+		{
+			if (VisibleStatus!=1)
+			{				
+				me->AddAura (SPELL_BOLYUN_SEE_INVISIBILITY_2,player);	
+				VisibleStatus=1;
+			}
+		}
+
+		void HideCreature(Player* player)
+		{
+			if (VisibleStatus!=2) 
+			{				
+				player->RemoveAura (SPELL_BOLYUN_SEE_INVISIBILITY_2);
+				player->RemoveAuraFromStack (SPELL_BOLYUN_SEE_INVISIBILITY_2);
+				VisibleStatus=2;
+			}						
+		}
+
+		void Reset() OVERRIDE
+		{
+			VisibleStatus=0;
+		}
+
+		void MoveInLineOfSight(Unit* who) OVERRIDE 
+		{ 
+			if (Player* player = who->ToPlayer())
+			{
+				if (player->GetQuestStatus(QUEST_IN_A_BIND) == QUEST_STATUS_REWARDED) 				
+					ShowCreature(player);
+				else				
+					HideCreature(player);			
+			}		
+		} 
+
+		bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt) 
+		{
+			if (quest->GetQuestId()  == QUEST_IN_A_BIND)
+				ShowCreature(player);			
+			return true; 
+		}
+
+    };
+
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_bolyun_2AI (pCreature);
+    }
+};
+
+/*######
+## npc_big_baobob
+######*/
+
+class npc_big_baobob : public CreatureScript
+{
+public:
+    npc_big_baobob() : CreatureScript("npc_big_baobob") { }
+
+    struct npc_big_baobobAI : public ScriptedAI
+    {
+        npc_big_baobobAI(Creature *c) : ScriptedAI(c) {}		
+
+		uint32	_timer_check_for_player;
+		uint32	_timer_for_spawn_invaders;
+		bool	_IsPlayerNear;
+
+		void Reset() OVERRIDE
+		{
+			_timer_check_for_player=2000; _timer_for_spawn_invaders=0; _IsPlayerNear=false;
+		}
+
+		void UpdateAI(uint32 diff) OVERRIDE
+        {	
+			if (_timer_check_for_player<=diff)				
+			{
+				_IsPlayerNear=DoCheckForPlayer();
+				_timer_check_for_player=10000;
+				if (_IsPlayerNear) 
+					_timer_for_spawn_invaders=1000;								
+			}
+			else
+				_timer_check_for_player-=diff;	
+			
+			if (_IsPlayerNear)
+			{
+				if (_timer_for_spawn_invaders<=diff)
+				{
+					DoSpawnInvaders();
+					_timer_for_spawn_invaders=1000;
+				}
+				else
+					_timer_for_spawn_invaders-=diff;	
+
+			}
+
+            if (!UpdateVictim())			
+				return;								
+			else 
+				DoMeleeAttackIfReady();			
+        }
+
+		bool DoCheckForPlayer()
+		{			
+			std::list<Player*> PlayerList; 
+			Trinity::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
+			Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, PlayerList, checker);
+			me->VisitNearbyWorldObject(50.0, searcher);
+			if (PlayerList.empty()) return false;			
+			for (std::list<Player*>::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+            {
+				if (Player* player = *itr)
+                {	
+					if (!player->GetQuestRewardStatus(QUEST_THE_LAST_STAND))
+					{
+						if (player->GetQuestStatus(QUEST_CLEAR_THE_SHRINE)==QUEST_STATUS_INCOMPLETE) return true;
+						if (player->GetQuestStatus(QUEST_THE_LAST_STAND)==QUEST_STATUS_INCOMPLETE) return true;
+						if (player->GetQuestRewardStatus(QUEST_CLEAR_THE_SHRINE)) return true;					
+					}
+				}
+			}
+
+			return false;
+		}
+
+		void DoSpawnInvaders()
+		{			
+			if (GetCountOfLivingInvaders() >= 4) return;
+			Position pos;
+			me->GetPosition(&pos);			
+			me->GetRandomNearPosition(pos, 30.0f);
+			if (Creature* creature = me->SummonCreature(NPC_DEMONIC_INVADER, pos))
+			{
+				creature->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() , true);
+			}
+		}
+
+		uint32 GetCountOfLivingInvaders()
+		{
+			uint32 count=0;
+			std::list<Creature*> InvadersList;
+            me->GetCreatureListWithEntryInGrid(InvadersList, NPC_DEMONIC_INVADER, 30.0f);
+			if (!InvadersList.empty())
+            {
+                for (std::list<Creature*>::const_iterator itr = InvadersList.begin(); itr != InvadersList.end(); ++itr)
+                {
+                    if (Creature* invader = *itr)
+                    {
+                       if (invader->IsAlive()) count++;
+                    }
+                }
+            }
+			return count;
+		}
+    };
+
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_big_baobobAI (pCreature);
+    }
+};
+
+/*######
+## npc_astranaar_burning_fire_bunny
+######*/
+
+class npc_astranaar_burning_fire_bunny : public CreatureScript
+{
+public:
+    npc_astranaar_burning_fire_bunny() : CreatureScript("npc_astranaar_burning_fire_bunny") { }
+
+    struct npc_astranaar_burning_fire_bunnyAI : public ScriptedAI
+    {
+        npc_astranaar_burning_fire_bunnyAI(Creature *c) : ScriptedAI(c) {}		
+
+		uint32	_timer_check_for_player;
+		uint32  _timer;
+		uint32	_phase;
+		Player*	_player;
+
+		void Reset() OVERRIDE
+		{
+			_timer_check_for_player=2000; _phase=0; _timer=0;
+			me->AddAura(SPELL_BATHRANS_CORPSE_FIRE,me);
+		}
+
+		void SpellHit(Unit* Hitter, SpellInfo const* spell) OVERRIDE  
+		{ 
+			_phase=1; _player= Hitter->ToPlayer();
+		}
+
+		void UpdateAI(uint32 diff) OVERRIDE
+        {	
+			if (_timer_check_for_player<=diff)				
+			{
+				DoCheckForNearPlayerWithQuest();
+				_timer_check_for_player=10000;												
+			}
+			else
+				_timer_check_for_player-=diff;	
+			
+			if (_timer<=diff)				
+					DoWork();
+				else
+					_timer-=diff;	
+
+            if (!UpdateVictim())			
+				return;						
+			else 
+				DoMeleeAttackIfReady();			
+        }
+
+		void DoCheckForNearPlayerWithQuest()
+		{			
+			std::list<Player*> PlayerList; 
+			Trinity::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
+			Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, PlayerList, checker);
+			me->VisitNearbyWorldObject(50.0, searcher);
+			if (PlayerList.empty()) return;					
+			for (std::list<Player*>::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+            {
+				if (Player* player = *itr)
+                {	
+					switch (player->GetQuestStatus(QUEST_ASTRANAARS_BURNING))
+					{
+					case QUEST_STATUS_INCOMPLETE:
+						{							
+							if (!player->HasAura (SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_01))
+							{
+								player->AddAura(SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_01, player);
+							}
+							break;
+						}
+					case QUEST_STATUS_COMPLETE:
+						{
+						if (player->HasAura (SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_01))
+							{
+								player->RemoveAura(SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_01);
+								player->RemoveAuraFromStack(SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_01, player->GetGUID());
+							}
+							break;
+						}
+					}
+				}
+			}
+		}	
+
+		void DoWork()
+		{
+			switch (_phase)
+			{
+			case 1:
+				{
+					me->RemoveAura(SPELL_BATHRANS_CORPSE_FIRE);
+					me->AddAura(SPELL_ASTRANAARS_BURNING_SMOKE, me);
+					if (_player) _player->KilledMonsterCredit(NPC_ASTRANAARS_BURNING_FIRE_BUNNY, NULL);	
+					_timer=60000; _phase=2;
+					break;
+				}
+			case 2:
+				{
+					me->DespawnOrUnsummon();
+					_timer=0; _phase=0;
+					break;
+				}
+			}
+		}
+    };
+
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_astranaar_burning_fire_bunnyAI (pCreature);
+    }
+};
+
+
+
 
 void AddSC_ashenvale()
 {
@@ -628,5 +1013,8 @@ void AddSC_ashenvale()
 	new spell_unbathed_concoction();
 	new npc_feero_ironhand();
 	new npc_delgren_the_purifier();
-
+	new npc_bolyun_1();
+	new npc_bolyun_2();
+	new npc_big_baobob();
+	new npc_astranaar_burning_fire_bunny();
 }
