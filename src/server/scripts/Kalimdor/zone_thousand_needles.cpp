@@ -27,6 +27,12 @@ enum ThousandNeedles
 	SPELL_HOOK_DEAD_EMPLOYEE				= 88478,
 	SPELL_TOW_HOOK							= 88479,
 
+	QUEST_FREE_THE_PRIDELINGS				= 28086,
+	NPC_HIGHPERCH_PRIDELING_IN_CAGE			= 47481,
+	NPC_HIGHPERCH_PRIDELING_FREE			= 47483,
+	SPELL_SUMMON_HIGHPERCH_PRIDELING_FREE	= 88532,
+	SPELL_FREE_THE_PRIDELINGS_LOOT_FX		= 88554,
+	SPELL_PRIDELING_DIVING_HELM_VISUAL		= 88567,
 
 
 };
@@ -117,9 +123,38 @@ class npc_dead_employee : public CreatureScript
         }
 };
 
+/*####
+# npc_highperch_prideling
+####*/
+
+class npc_highperch_prideling : public CreatureScript
+{
+    public:
+        npc_highperch_prideling() : CreatureScript("npc_highperch_prideling") { }
+	
+		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		{
+			if (!player) return true;
+
+			player->PlayerTalkClass->SendCloseGossip();	
+
+			if (!creature) return true;
+					
+			if (player->GetQuestStatus(QUEST_FREE_THE_PRIDELINGS) == QUEST_STATUS_INCOMPLETE)				
+			{	
+				player->CastSpell(creature,SPELL_SUMMON_HIGHPERCH_PRIDELING_FREE);
+				creature->DespawnOrUnsummon();
+				player->KilledMonsterCredit(NPC_HIGHPERCH_PRIDELING_IN_CAGE, NULL);	
+			}
+			return true;
+		}
+};
+
 
 
 void AddSC_thousand_needles()
 {
 	new npc_dead_employee();
+	new npc_highperch_prideling();
+
 }
