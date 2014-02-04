@@ -34,6 +34,9 @@ enum ThousandNeedles
 	SPELL_FREE_THE_PRIDELINGS_LOOT_FX		= 88554,
 	SPELL_PRIDELING_DIVING_HELM_VISUAL		= 88567,
 
+	QUEST_RELEASE_HEARTRAZOR				= 28088,
+	NPC_TWILIGHT_SUBDUER					= 47487,
+	NPC_Heartrazor							= 47486,
 
 };
 
@@ -150,11 +153,52 @@ class npc_highperch_prideling : public CreatureScript
 		}
 };
 
+/*####
+# npc_twilight_subduer
+# ToDo: Heartrazor is bond from npc_twilight_subduer, the aura is unknown.. so visual is not to see you free Heartrazor by killing the last npc_twilight_subduer..
+####*/
+
+class npc_twilight_subduer : public CreatureScript
+{
+    public:
+        npc_twilight_subduer() : CreatureScript("npc_twilight_subduer") { }
+
+		struct npc_twilight_subduerAI : public ScriptedAI
+        {
+            npc_twilight_subduerAI(Creature* creature) : ScriptedAI(creature) {}
+	  
+			void JustDied(Unit* killer) OVERRIDE 
+			{ 
+				if (Player* player = killer->ToPlayer())
+				{
+					if (!me->FindNearestCreature (me->GetEntry(),50.0, true))
+					{
+						player->KilledMonsterCredit(NPC_Heartrazor, NULL);						 
+					}				
+				}						
+			} 
+
+			void UpdateAI(uint32 diff) OVERRIDE
+			{						
+				if (!UpdateVictim())						
+					return;							
+				else								
+					DoMeleeAttackIfReady();
+			} 			
+        };
+		
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_twilight_subduerAI(creature);
+        }
+};
+
 
 
 void AddSC_thousand_needles()
 {
 	new npc_dead_employee();
 	new npc_highperch_prideling();
+	new npc_twilight_subduer();
 
 }
