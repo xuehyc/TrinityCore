@@ -36,8 +36,19 @@ enum ThousandNeedles
 
 	QUEST_RELEASE_HEARTRAZOR				= 28088,
 	NPC_TWILIGHT_SUBDUER					= 47487,
-	NPC_Heartrazor							= 47486,
+	NPC_HEARTRAZOR							= 47486,
 
+	QUEST_THE_TWILIGHT_SKYMASTER			= 28098,
+	NPC_HEARTRAZOR_2B						= 47508,
+	NPC_HEARTRAZOR_1B						= 47503,
+	SPELL_SUMMON_HEARTRAZOR_1B				= 88591, // Kill 47504, Summon 47503
+	SPELL_SUMMON_HEARTRAZOR_2B				= 88592, // Summon 47508
+	SPELL_SUMMON_AERIE_GUNNER_WIND_RIDER	= 88624, // Summon NPC_CAPTURED_WIND_RIDER
+	NPC_CAPTURED_WIND_RIDER					= 47527,
+	SPELL_COWER_ANIM_SET					= 88598, // Dummy 127
+	SPELL_RICHTOFENS_DISARM					= 88602, // Disarm
+	SPELL_SUMMON_RICHTOFENS_WIND_RIDER		= 88601,
+	NPC_RICHTOFENS_WIND_RIDER				= 47509,
 };
 
 
@@ -171,9 +182,9 @@ class npc_twilight_subduer : public CreatureScript
 			{ 
 				if (Player* player = killer->ToPlayer())
 				{
-					if (!me->FindNearestCreature (me->GetEntry(),50.0, true))
+					if (!me->FindNearestCreature (NPC_TWILIGHT_SUBDUER,50.0, true))
 					{
-						player->KilledMonsterCredit(NPC_Heartrazor, NULL);						 
+						player->KilledMonsterCredit(NPC_HEARTRAZOR, NULL);						 
 					}				
 				}						
 			} 
@@ -193,6 +204,202 @@ class npc_twilight_subduer : public CreatureScript
         }
 };
 
+/*####
+# npc_paoka_swiftmountain
+####*/
+
+class npc_paoka_swiftmountain : public CreatureScript
+{
+    public:
+        npc_paoka_swiftmountain() : CreatureScript("npc_paoka_swiftmountain") { }
+
+		bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) 
+		{ 			
+			creature->CastSpell(player,SPELL_SUMMON_HEARTRAZOR_2B);
+			return true; 
+		}
+
+
+		struct npc_paoka_swiftmountainAI : public ScriptedAI
+        {
+            npc_paoka_swiftmountainAI(Creature* creature) : ScriptedAI(creature) {}	  		
+
+			void UpdateAI(uint32 diff) OVERRIDE
+			{						
+				if (!UpdateVictim())						
+					return;							
+				else								
+					DoMeleeAttackIfReady();
+			} 			
+        };
+		
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_paoka_swiftmountainAI(creature);
+        }
+};
+
+/*####
+# npc_heartrazor_2b
+####*/
+
+class npc_heartrazor_2b : public CreatureScript
+{
+    public:
+        npc_heartrazor_2b() : CreatureScript("npc_heartrazor_2b") { }
+
+		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		{
+			if (!player) return true;
+
+			player->PlayerTalkClass->SendCloseGossip();	
+					
+			if (player->GetQuestStatus(QUEST_THE_TWILIGHT_SKYMASTER) == QUEST_STATUS_INCOMPLETE)				
+			{			
+				// ToDo: the monsterkill should first be givig after riding the mount
+				player->KilledMonsterCredit(NPC_HEARTRAZOR_1B, NULL);										
+			}
+			return true;
+		}		
+};
+
+/*####
+# npc_twilight_skymaster_richtofen
+####*/
+
+class npc_twilight_skymaster_richtofen : public CreatureScript
+{
+    public:
+        npc_twilight_skymaster_richtofen() : CreatureScript("npc_twilight_skymaster_richtofen") { }		
+
+		struct npc_twilight_skymaster_richtofenAI : public ScriptedAI
+        {
+            npc_twilight_skymaster_richtofenAI(Creature* creature) : ScriptedAI(creature) {}	  		
+
+			Player* _player;
+			uint32	_timer;
+			
+			void Reset() OVERRIDE 
+			{ 
+				_player=NULL; _timer=2000;
+			}
+
+			void DamageTaken(Unit* pDone_by, uint32& uiDamage) OVERRIDE  
+			{ 
+				if (Player* player = pDone_by->ToPlayer())
+				{
+					_player=player;					
+				}				
+			}
+
+			void EnterCombat(Unit* who) OVERRIDE 
+			{
+				me->CastSpell (me,SPELL_SUMMON_RICHTOFENS_WIND_RIDER);
+				Talk(0);
+			}
+
+			void UpdateAI(uint32 diff) OVERRIDE
+			{	
+				if (me->IsInCombat())
+				{
+					if (_timer <= diff)				
+					{
+						DoWork();
+						_timer=10000;
+					}
+					else 
+						_timer -= diff;				
+				}
+
+				if (!UpdateVictim())						
+					return;							
+				else								
+					DoMeleeAttackIfReady();
+			} 
+
+			void DoWork()
+			{
+				if (me->GetHealthPct()<30)
+				{
+					DoCast(80003);
+					return;
+				}				
+				if (me->GetDistance (_player)>=25)
+				{
+					DoCast(6660);
+					return;
+				}
+				Talk(0);				
+			}
+
+        };
+		
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_twilight_skymaster_richtofenAI(creature);
+        }
+};
+
+/*####
+# npc_richtofens_wind_rider
+####*/
+
+class npc_richtofens_wind_rider : public CreatureScript
+{
+    public:
+        npc_richtofens_wind_rider() : CreatureScript("npc_richtofens_wind_rider") { }		
+
+		struct npc_richtofens_wind_riderAI : public ScriptedAI
+        {
+            npc_richtofens_wind_riderAI(Creature* creature) : ScriptedAI(creature) {}	  		
+
+			uint32	_timer;
+			uint32	_phase;			
+
+			void Reset() OVERRIDE 
+			{ 
+				_timer=2000; _phase=0;
+			}
+
+			void UpdateAI(uint32 diff) OVERRIDE
+			{															
+				if (_timer <= diff)				
+					DoWork();				
+				else 
+					_timer -= diff;						
+			
+			} 
+
+			void DoWork()
+			{
+				switch (_phase)
+				{
+				case 0:
+					{
+						Position pos = {-5282.0f,-1324.0f,120.0f,0};						
+						me->GetMotionMaster()->MoveTakeoff(0,pos);
+						_timer=15000; _phase=1;
+						break;
+					}
+				case 1:
+					{
+						me->DespawnOrUnsummon();
+						_timer=0; _phase=0;					
+						break;
+					}
+				
+				}
+			
+			}
+
+        };
+		
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_richtofens_wind_riderAI(creature);
+        }
+};
+
 
 
 void AddSC_thousand_needles()
@@ -200,5 +407,9 @@ void AddSC_thousand_needles()
 	new npc_dead_employee();
 	new npc_highperch_prideling();
 	new npc_twilight_subduer();
+	new npc_paoka_swiftmountain();
+	new npc_heartrazor_2b();
+	new npc_twilight_skymaster_richtofen();
+	new npc_richtofens_wind_rider();
 
 }
