@@ -1140,7 +1140,7 @@ class spell_rog_eviscerate : public SpellScriptLoader
        {
            PrepareSpellScript(spell_rog_eviscerate_SpellScript);		   	  
 
-		    void HandleDummy(SpellEffIndex /*effIndex*/) OVERRIDE
+		    void HandleDummy(SpellEffIndex /*effIndex*/)
             {                
                 Unit* caster = GetCaster();
 				Unit* target = GetHitUnit();
