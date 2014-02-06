@@ -56,6 +56,18 @@ enum ThousandNeedles
 	SPELL_SHUHALO_ARTIFACTS					= 84925,
 	NPC_ARIKARA								= 45447,
 	GO_ARIKARAS_CIRCLE						= 301076,
+
+	QUEST_BAR_FIGHT_A						= 25517,
+	NPC_GOBLIN_BAR_PATRON_1					= 40494,
+	NPC_GOBLIN_BAR_PATRON_2					= 40530,
+
+	QUEST_BAR_FIGHT_H						= 25518,
+	NPC_GNOME_BAR_PATRON_1					= 40483,
+	NPC_GNOME_BAR_PATRON_2					= 40529,
+	SPELL_THROW_BOTTLE_OF_GROG				= 75631, 
+	SPELL_BOTTLE_OF_GROG_GOBLIN				= 75541,
+	SPELL_BOTTLE_OF_GROG_GNOME				= 75542,
+
 };
 
 
@@ -451,6 +463,238 @@ class spell_shuhalo_artifacts : public SpellScriptLoader
         }
 };
 
+/*####
+# npc_goblin_bar_patron
+####*/
+
+class npc_goblin_bar_patron : public CreatureScript
+{
+    public:
+        npc_goblin_bar_patron() : CreatureScript("npc_goblin_bar_patron") { }		
+
+		struct npc_goblin_bar_patronAI : public ScriptedAI
+        {
+            npc_goblin_bar_patronAI(Creature* creature) : ScriptedAI(creature) {}	  		
+
+			uint32	_timer;
+			uint32	_phase;
+			uint32	_counter;
+			std::list<Creature*> _barPatronList;
+
+			void Reset() OVERRIDE 
+			{ 
+				_timer=0; _phase=0; _counter=0;
+			}
+
+			void SpellHit(Unit* Hitter, SpellInfo const* spell) OVERRIDE  
+			{ 					
+				if (CheckSpellBottleOfGrog(spell)) 
+				{
+					if (_phase==0) 
+					{
+						_phase=1; _timer=500; 
+					}	
+				}
+			}
+
+			void UpdateAI(uint32 diff) OVERRIDE
+			{	
+				if (_timer <= diff)				
+					DoWork();				
+				else 
+					_timer -= diff;	
+
+				if (!UpdateVictim())						
+					return;							
+				else								
+					DoMeleeAttackIfReady();
+			} 		
+        
+			void DoWork()
+			{
+				switch (_phase)
+				{
+				case 1:
+					{
+						FindRandomCreature();
+						DoCastToRandomBarPatron();
+						_counter++;
+						_phase=2; _timer=1000;
+						break;
+					}
+				case 2:
+					{
+						_counter++;
+						DoCastToRandomBarPatron();
+						if (_counter>7) _phase=3;
+						_timer=1000;
+						break;
+					}
+				case 3:
+					{
+						_timer=60000; _phase=4; 
+						break;
+					}				
+				case 4:
+					{
+						_phase=0; _counter=0; 
+						break;
+					}					
+				}				
+			}
+
+			void DoCastToRandomBarPatron()
+			{
+				if (!_barPatronList.empty())
+				{
+					if (Creature* creature = Trinity::Containers::SelectRandomContainerElement(_barPatronList))
+					{						
+						creature->CastSpell(me,SPELL_THROW_BOTTLE_OF_GROG);
+					}
+				}
+			}
+
+			void FindRandomCreature()
+			{				
+				GetCreatureListWithEntryInGrid(_barPatronList, me, NPC_GOBLIN_BAR_PATRON_1, 5.0f);
+				GetCreatureListWithEntryInGrid(_barPatronList, me, NPC_GOBLIN_BAR_PATRON_2, 5.0f);
+				GetCreatureListWithEntryInGrid(_barPatronList, me, NPC_GNOME_BAR_PATRON_1, 5.0f);
+				GetCreatureListWithEntryInGrid(_barPatronList, me, NPC_GNOME_BAR_PATRON_2, 5.0f);
+			}
+
+			bool CheckSpellBottleOfGrog(SpellInfo const* spell)
+			{
+				if (spell->Id==SPELL_THROW_BOTTLE_OF_GROG) return true;
+				if (spell->Id==SPELL_BOTTLE_OF_GROG_GOBLIN) return true;
+				if (spell->Id==SPELL_BOTTLE_OF_GROG_GNOME) return true;
+				printf("Trigger goblin %d \n",spell->Id);
+				return false;
+			}
+
+		};
+		
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_goblin_bar_patronAI(creature);
+        }
+};
+
+/*####
+# npc_gnome_bar_patron
+####*/
+
+class npc_gnome_bar_patron : public CreatureScript
+{
+    public:
+        npc_gnome_bar_patron() : CreatureScript("npc_gnome_bar_patron") { }		
+
+		struct npc_gnome_bar_patronAI : public ScriptedAI
+        {
+            npc_gnome_bar_patronAI(Creature* creature) : ScriptedAI(creature) {}	  		
+
+			uint32	_timer;
+			uint32	_phase;
+			uint32	_counter;
+			std::list<Creature*> _barPatronList;
+
+			void Reset() OVERRIDE 
+			{ 
+				_timer=0; _phase=0; _counter=0;
+			}
+
+			void SpellHit(Unit* Hitter, SpellInfo const* spell) OVERRIDE  
+			{ 	
+				if (CheckSpellBottleOfGrog(spell)) 
+				{
+					if (_phase==0) 
+					{
+						_phase=1; _timer=500; 
+					}
+				}
+			}
+
+			void UpdateAI(uint32 diff) OVERRIDE
+			{	
+				if (_timer <= diff)				
+					DoWork();				
+				else 
+					_timer -= diff;	
+
+				if (!UpdateVictim())						
+					return;							
+				else								
+					DoMeleeAttackIfReady();
+			} 		
+        
+			void DoWork()
+			{
+				switch (_phase)
+				{
+				case 1:
+					{
+						FindRandomCreature();
+						DoCastToRandomBarPatron();
+						_counter++;
+						_phase=2; _timer=1000;
+						break;
+					}
+				case 2:
+					{
+						_counter++;
+						DoCastToRandomBarPatron();
+						if (_counter>7) _phase=3;
+						_timer=1000;
+						break;
+					}
+				case 3:
+					{
+						_timer=60000; _phase=4; 
+						break;
+					}				
+				case 4:
+					{
+						_phase=0; _counter=0; 
+						break;
+					}				
+				}				
+			}
+
+			void DoCastToRandomBarPatron()
+			{
+				if (!_barPatronList.empty())
+				{					
+					if (Creature* creature = Trinity::Containers::SelectRandomContainerElement(_barPatronList))
+					{						
+						creature->CastSpell(me,SPELL_THROW_BOTTLE_OF_GROG);						
+					}
+				}
+			}
+
+			void FindRandomCreature()
+			{				
+				GetCreatureListWithEntryInGrid(_barPatronList, me, NPC_GOBLIN_BAR_PATRON_1, 5.0f);
+				GetCreatureListWithEntryInGrid(_barPatronList, me, NPC_GOBLIN_BAR_PATRON_2, 5.0f);
+				GetCreatureListWithEntryInGrid(_barPatronList, me, NPC_GNOME_BAR_PATRON_1, 5.0f);
+				GetCreatureListWithEntryInGrid(_barPatronList, me, NPC_GNOME_BAR_PATRON_2, 5.0f);					
+			}
+
+			bool CheckSpellBottleOfGrog(SpellInfo const* spell)
+			{
+				if (spell->Id==SPELL_THROW_BOTTLE_OF_GROG) return true;
+				if (spell->Id==SPELL_BOTTLE_OF_GROG_GOBLIN) return true;
+				if (spell->Id==SPELL_BOTTLE_OF_GROG_GNOME) return true;
+				printf("Trigger goblin %d \n",spell->Id);
+				return false;
+			}
+
+        };
+		
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_gnome_bar_patronAI(creature);
+        }
+};
+
 
 void AddSC_thousand_needles()
 {
@@ -462,4 +706,7 @@ void AddSC_thousand_needles()
 	new npc_twilight_skymaster_richtofen();
 	new npc_richtofens_wind_rider();
 	new spell_shuhalo_artifacts();
+	new npc_goblin_bar_patron();
+	new npc_gnome_bar_patron();
+
 }
