@@ -49,6 +49,13 @@ enum ThousandNeedles
 	SPELL_RICHTOFENS_DISARM					= 88602, // Disarm
 	SPELL_SUMMON_RICHTOFENS_WIND_RIDER		= 88601,
 	NPC_RICHTOFENS_WIND_RIDER				= 47509,
+
+	QUEST_INVOKING_THE_SERPENT_A			= 27329,
+	QUEST_INVOKING_THE_SERPENT_H			= 27330,
+	ITEM_SHUHALO_ARTIFACTS					= 61043,
+	SPELL_SHUHALO_ARTIFACTS					= 84925,
+	NPC_ARIKARA								= 45447,
+	GO_ARIKARAS_CIRCLE						= 301076,
 };
 
 
@@ -400,6 +407,49 @@ class npc_richtofens_wind_rider : public CreatureScript
         }
 };
 
+/*####
+# spell_shuhalo_artifacts
+####*/
+
+class spell_shuhalo_artifacts : public SpellScriptLoader
+{
+    public:
+        spell_shuhalo_artifacts() : SpellScriptLoader("spell_shuhalo_artifacts") { }
+
+        class spell_shuhalo_artifacts_SpellScript : public SpellScript
+        {          
+            PrepareSpellScript(spell_shuhalo_artifacts_SpellScript);
+
+         
+            void HandleOnHit()
+            {
+				if (Player* player = GetCaster()->ToPlayer())
+				{
+					if (player->GetQuestStatus(QUEST_INVOKING_THE_SERPENT_H) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_INVOKING_THE_SERPENT_A) == QUEST_STATUS_INCOMPLETE)				
+					{	
+						if (GameObject* go = player->FindNearestGameObject (GO_ARIKARAS_CIRCLE,10.0f))
+						{
+							Creature* creature = player->FindNearestCreature (NPC_ARIKARA,20.0f);
+							if (!creature)
+							{
+								player->SummonCreature(NPC_ARIKARA,go->GetPositionX(),go->GetPositionY(),go->GetPositionZ()+5.0f);								
+							}
+						}						
+					}					
+				}
+            }
+          
+            void Register() OVERRIDE
+            {               
+                OnHit += SpellHitFn(spell_shuhalo_artifacts_SpellScript::HandleOnHit);                
+            }
+        };
+        
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_shuhalo_artifacts_SpellScript();
+        }
+};
 
 
 void AddSC_thousand_needles()
@@ -411,5 +461,5 @@ void AddSC_thousand_needles()
 	new npc_heartrazor_2b();
 	new npc_twilight_skymaster_richtofen();
 	new npc_richtofens_wind_rider();
-
+	new spell_shuhalo_artifacts();
 }
