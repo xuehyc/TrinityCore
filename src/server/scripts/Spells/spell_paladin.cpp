@@ -1000,9 +1000,7 @@ public:
                 if (caster->HasAura(53556))          // Enlightened Judgements
                     caster->CastSpell(caster, SPELL_JUDGEMENT_ENLIGHTENED, true);
                 if (caster->HasAura(53557))
-                    caster->CastSpell(caster, SPELL_JUDGEMENT_ENLIGHTENED + 1, true);
-				if (caster->HasAura (20154))
-					caster->ToPlayer()->KilledMonsterCredit(44175, 0);
+                    caster->CastSpell(caster, SPELL_JUDGEMENT_ENLIGHTENED + 1, true);				
             }
         }
 

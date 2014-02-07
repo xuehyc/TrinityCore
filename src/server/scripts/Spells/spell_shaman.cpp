@@ -1344,13 +1344,7 @@ public:
 			uint32 extraDamage = (uint32)((float)level * 8.155555F + 2.0F);
 			uint32 hitDamage = GetHitDamage() + extraDamage;
 			
-			SetHitDamage(hitDamage);
-
-			bool GivKillCredit=false;
-			if (target->GetEntry() == NPC_DWARF_TARGET_DUMMY) GivKillCredit=true; 
-
-			if (GivKillCredit) 
-				caster->ToPlayer()->KilledMonsterCredit(44175, 0);	
+			SetHitDamage(hitDamage);			
 		}
 
         void Register() OVERRIDE

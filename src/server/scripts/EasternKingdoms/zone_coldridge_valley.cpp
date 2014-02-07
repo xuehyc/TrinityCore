@@ -53,6 +53,8 @@ enum zone_coldridge_valley
 
 	QUEST_AID_FOR_THE_WOUNDED							= 24471,
 	QUEST_TROLLING_FOR_INFORMATION						= 24489,
+
+
 };
 
 /*######
@@ -540,6 +542,92 @@ public:
     }
 };
 
+/*######
+## npc_trainigs_dummy_coldridge_valley
+######*/
+
+class npc_trainigs_dummy_coldridge_valley : public CreatureScript
+{
+public:
+    npc_trainigs_dummy_coldridge_valley() : CreatureScript("npc_trainigs_dummy_coldridge_valley") { }
+	
+    struct npc_trainigs_dummy_coldridge_valleyAI : public ScriptedAI
+    {
+		npc_trainigs_dummy_coldridge_valleyAI(Creature *creature) : ScriptedAI(creature) { } 
+					
+	    void SpellHit(Unit * Hitter, SpellInfo const* spell) OVERRIDE
+        {
+			Player* player = Hitter->ToPlayer();
+			if (!player) return;	
+
+			switch (player->getClass())
+			{			
+			case CLASS_WARRIOR:
+				{
+					if (spell->Id==100) player->KilledMonsterCredit(44175);
+					break;
+				}
+			case CLASS_PALADIN:
+				{
+					if (player->HasAura(20154))
+						if (spell->Id==20271)
+							player->KilledMonsterCredit(44175);					
+					break;
+				}
+			case CLASS_HUNTER:
+				{
+					if (spell->Id==56641) player->KilledMonsterCredit(44175);
+					break;
+				}
+			case CLASS_ROGUE:
+				{
+					if (spell->Id==2098) player->KilledMonsterCredit(44175);
+					break;
+				}
+			case CLASS_PRIEST:
+				{
+					if (spell->Id==589) player->KilledMonsterCredit(44175);
+					break;
+				}
+			case CLASS_DEATH_KNIGHT:
+				{
+					// not used
+					break;
+				}
+			case CLASS_SHAMAN:
+				{
+					if (spell->Id==73899) player->KilledMonsterCredit(44175); 
+					break;
+				}
+			case CLASS_MAGE:
+				{
+					if (spell->Id==122) player->KilledMonsterCredit(44175);
+					break;
+				}
+			case CLASS_WARLOCK:
+				{
+					if (spell->Id==172) player->KilledMonsterCredit(44175);
+					break;
+				}
+			case CLASS_DRUID:
+				{
+					// not used
+					break;
+				}
+
+			}
+
+        }
+    };
+	 
+	CreatureAI* GetAI(Creature* creature) const  OVERRIDE
+    {
+        return new npc_trainigs_dummy_coldridge_valleyAI (creature);
+    }
+};
+
+
+
 
 /*######
 ## AddSC
@@ -553,5 +641,7 @@ void AddSC_coldridge_valley()
 	new npc_soothsayer_shikala();
 	new npc_soothsayer_rikkari();
 	new npc_soothsayer_mirimkoa();
+	new npc_trainigs_dummy_coldridge_valley();
+
 }
 

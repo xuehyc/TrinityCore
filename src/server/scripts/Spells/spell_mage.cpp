@@ -1529,54 +1529,6 @@ public:
     }
 };
 
-// 5143  arcane missiles  new inserted on 4.3.4
-class spell_mage_arcane_missiles : public SpellScriptLoader
-{
-    public:
-        spell_mage_arcane_missiles() : SpellScriptLoader("spell_mage_arcane_missiles") { }
-
-        class spell_mage_arcane_missiles_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_mage_arcane_missiles_SpellScript);
-			           
-            void HandleDummy()  // SpellEffIndex /*effIndex*/
-            {
-				Unit* caster = GetCaster();
-				Unit* target = GetHitUnit();					
-
-				if (!caster || !target || caster->GetTypeId() != TYPEID_PLAYER || target->GetCreatureType() != CREATURE_TYPE_MECHANICAL)
-					return ;	
-
-				bool GiveTrainigsDummyCredit=false;
-
-				if (target->GetEntry() == 38038) GiveTrainigsDummyCredit=true; // troll
-				if (target->GetEntry() == 44389) GiveTrainigsDummyCredit=true; // human, dwarf
-				if (target->GetEntry() == 44548) GiveTrainigsDummyCredit=true; // goblin
-				if (target->GetEntry() == 44614) GiveTrainigsDummyCredit=true; // night elf
-				if (target->GetEntry() == 44703) GiveTrainigsDummyCredit=true; // draenei
-				if (target->GetEntry() == 44794) GiveTrainigsDummyCredit=true; // undeath
-				if (target->GetEntry() == 44820) GiveTrainigsDummyCredit=true; // orc
-				if (target->GetEntry() == 44848) GiveTrainigsDummyCredit=true; // taur
-				if (target->GetEntry() == 44937) GiveTrainigsDummyCredit=true; // bluelf
-
-
-				if (GiveTrainigsDummyCredit) 
-					caster->ToPlayer()->KilledMonsterCredit(44175, 0);				
-            }
-
-            void Register() OVERRIDE
-            {               
-				 OnHit += SpellHitFn(spell_mage_arcane_missiles_SpellScript::HandleDummy);
-				 // AfterCast += SpellCastFn(spell_mage_arcane_missiles_SpellScript::HandleDummy); // is bether, but no trigger???
-			}
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_mage_arcane_missiles_SpellScript();
-        }
-};
-
 
 void AddSC_mage_spell_scripts()
 {
@@ -1610,6 +1562,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_water_elemental_freeze();
 	new spell_mage_fingers_of_frost();
 	new spell_mage_incanters_absorbtion_absorb();
-	new spell_mage_incanters_absorbtion_manashield();
-	new spell_mage_arcane_missiles();
+	new spell_mage_incanters_absorbtion_manashield();	
 }

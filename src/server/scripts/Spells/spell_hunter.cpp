@@ -901,22 +901,20 @@ public:
 
         int8 castCount;
 
-        void HandleDummy (SpellEffIndex /*effIndex*/)  // ToDo: this is never called 
+        void HandleDummy(SpellEffIndex effIndex)
         {
             Unit* caster = GetCaster();
             Unit* target = GetHitUnit();
             castCount++;
 
             if(!caster || !target || caster->GetTypeId() != TYPEID_PLAYER)
-                return ;
-			
-            caster->CastSpell(caster, SPELL_HUNTER_STEADY_SHOT_FOCUS, true);
-
+                return ;						
+            
             // Termination
             if (AuraEffect const* Termination = caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2008, 0))
             {
-                //if (target->HealthBelowPct(25))
-                    caster->CastSpell(caster, SPELL_HUNTER_GENERIC_ENERGIZE_FOCUS, true);					
+                // if (target->HealthBelowPct(25))
+                caster->CastSpell(caster, SPELL_HUNTER_GENERIC_ENERGIZE_FOCUS, true);					
             }          
         }
 
@@ -927,25 +925,12 @@ public:
 
             if(!caster || !target || caster->GetTypeId() != TYPEID_PLAYER)
                 return ;
-			
-			Player* player=caster->ToPlayer ();
-			if (!player) return;
-
-			bool GiveTrainigsDummyCredit=false;
-
-			if (target->GetEntry() == 38038) GiveTrainigsDummyCredit=true; // troll
-			if (target->GetEntry() == 44389) GiveTrainigsDummyCredit=true; // human, dwarf
-			if (target->GetEntry() == 44548) GiveTrainigsDummyCredit=true; // goblin
-			if (target->GetEntry() == 44614) GiveTrainigsDummyCredit=true; // night elf
-			if (target->GetEntry() == 44703) GiveTrainigsDummyCredit=true; // draenei
-			if (target->GetEntry() == 44794) GiveTrainigsDummyCredit=true; // undeath
-			if (target->GetEntry() == 44820) GiveTrainigsDummyCredit=true; // orc
-			if (target->GetEntry() == 44848) GiveTrainigsDummyCredit=true; // taur
-			if (target->GetEntry() == 44937) GiveTrainigsDummyCredit=true; // bluelf
-
-			if (GiveTrainigsDummyCredit) player->KilledMonsterCredit(44175, 0);
-			
-            player->CastSpell(caster, SPELL_HUNTER_STEADY_SHOT_FOCUS, true);
+						
+			if (Player* player = caster->ToPlayer())
+			{
+				// player->SetPower(POWER_FOCUS,player->GetPower(POWER_FOCUS) + 14); 	
+				player->CastSpell(caster, SPELL_HUNTER_STEADY_SHOT_FOCUS, true);
+			}            
 
             // Improved Steady Shot Rank 1
             if (caster->HasAura(53221))
@@ -981,7 +966,7 @@ public:
 
         void Register ()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+			OnEffectHitTarget += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);          
             OnHit += SpellHitFn(spell_hun_steady_shot_SpellScript::HandleOnHit);
         }
     };
