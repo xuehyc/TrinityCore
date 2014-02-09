@@ -204,8 +204,44 @@ public:
 
 };
 
+/*#####
+# npc_wounded_brave
+######*/
+
+class npc_wounded_brave : public CreatureScript
+{
+public:
+    npc_wounded_brave() : CreatureScript("npc_wounded_brave") { }
+ 
+    struct npc_wounded_braveAI : public ScriptedAI
+    {
+        npc_wounded_braveAI(Creature* creature) : ScriptedAI(creature) { }
+     
+        void SpellHit(Unit* Hitter, SpellInfo const* spell)
+        {           	
+			printf("Trigger Spell  %d \n", spell->Id);
+
+			if (Player* player = Hitter->ToPlayer())
+			{
+				if (spell->Id==2061) player->KilledMonsterCredit (44175);
+			}      
+        }
+    };
+
+	CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_wounded_braveAI (creature);
+    }
+
+};
+
+
+
+
 void AddSC_mulgore()
 {
     new npc_skorn_whitecloud();
     new npc_kyle_frenzied();
+	new npc_wounded_brave();
+
 }
