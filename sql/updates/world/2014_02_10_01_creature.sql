@@ -6,5 +6,5 @@ UPDATE `creature` SET `phaseMask`=2 WHERE `id`=52982;
 
 -- If you want to undoing this remove this "--" in front of the following lines.
 
---UPDATE `creature` SET `phaseMask`=1 WHERE `id`=52982;
---UPDATE `creature` SET `phaseMask`=1 WHERE `id`=52224;
+-- UPDATE `creature` SET `phaseMask`=1 WHERE `id`=52982;
+-- UPDATE `creature` SET `phaseMask`=1 WHERE `id`=52224;
