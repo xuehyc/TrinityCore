@@ -38,6 +38,13 @@ EndContentData */
 #include "Player.h"
 #include "SpellInfo.h"
 
+enum Mulgore
+{
+	NPC_FLEDGLING_BRAVE						= 36942,
+	NPC_BRISTLEBACK_INVADER					= 36943,
+
+};
+
 /*######
 # npc_skorn_whitecloud
 ######*/
@@ -235,6 +242,99 @@ public:
 
 };
 
+/*######
+## npc_fledgling_brave
+######*/
+
+class npc_fledgling_brave : public CreatureScript
+{
+public:
+    npc_fledgling_brave() : CreatureScript("npc_fledgling_brave") { }
+
+    struct npc_fledgling_braveAI : public ScriptedAI
+    {
+        npc_fledgling_braveAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 _timer;        	
+
+        void Reset()  OVERRIDE
+        {
+            _timer = urand(1800,2200);           			
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {						
+            if (!UpdateVictim())
+			{
+				if (Creature* invader = me->FindNearestCreature (NPC_BRISTLEBACK_INVADER, 3.0f)) 
+				{
+					if (_timer <= diff)
+					{
+						me->SetFacingTo (me->GetAngle(invader));
+						me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
+						_timer = urand(1800,2200);
+					}
+					else _timer -= diff;
+				}
+			} else 
+				DoMeleeAttackIfReady();
+			
+        }
+    };
+
+	   CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_fledgling_braveAI (pCreature);
+    }
+};
+
+/*######
+## npc_bristleback_invader
+######*/
+
+class npc_bristleback_invader : public CreatureScript
+{
+public:
+    npc_bristleback_invader() : CreatureScript("npc_bristleback_invader") { }
+
+    struct npc_bristleback_invaderAI : public ScriptedAI
+    {
+        npc_bristleback_invaderAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 _timer;        	
+
+        void Reset()  OVERRIDE
+        {
+            _timer = urand(1800,2200);           			
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {						
+            if (!UpdateVictim())
+			{
+				if (Creature* brave = me->FindNearestCreature (NPC_FLEDGLING_BRAVE, 3.0f)) 
+				{
+					if (_timer <= diff)
+					{
+						me->SetFacingTo (me->GetAngle(brave));
+						me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
+						_timer = urand(1800,2200);
+					}
+					else _timer -= diff;
+				}
+			} else 
+				DoMeleeAttackIfReady();
+			
+        }
+    };
+
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_bristleback_invaderAI (pCreature);
+    }
+};
+
+
 
 
 
@@ -243,5 +343,7 @@ void AddSC_mulgore()
     new npc_skorn_whitecloud();
     new npc_kyle_frenzied();
 	new npc_wounded_brave();
+	new npc_fledgling_brave();
+	new npc_bristleback_invader();
 
 }

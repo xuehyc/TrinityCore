@@ -11,8 +11,8 @@ UPDATE `gameobject_template` SET `displayid`=0 WHERE entry=19260;
 -- them on your world-database!
 
 
---DELETE FROM `gameobject_template`
---WHERE `entry`=19260;
+-- DELETE FROM `gameobject_template`
+-- WHERE `entry`=19260;
 
 
 
