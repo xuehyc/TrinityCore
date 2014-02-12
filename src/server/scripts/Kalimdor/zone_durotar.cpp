@@ -20,6 +20,18 @@
 #include "SpellScript.h"
 #include "Player.h"
 
+enum Durotar
+{
+	QUEST_TERRITORIAL_FETISCH				= 24813,
+	NPC_ECHO_ISLES_QUEST_BUNNY				= 38003,
+	NPC_SPITESCALE_FLAG_BUNNY				= 38560,
+	ITEM_TERRITORIAL_FETISCH				= 52065,
+	SPELL_PLACE_TERRITORIAL_FETISCH			= 72070,
+	SPELL_TERRITORIAL_FETISCH				= 72072,
+
+};
+
+
 /*######
 ## Quest 25134: Lazy Peons
 ## npc_lazy_peon
@@ -154,8 +166,53 @@ class spell_voodoo : public SpellScriptLoader
         }
 };
 
+/*######
+## npc_echo_isles_quest_bunny
+######*/
+
+class npc_echo_isles_quest_bunny : public CreatureScript
+{
+public:
+    npc_echo_isles_quest_bunny() : CreatureScript("npc_echo_isles_quest_bunny") { }
+	
+    struct npc_echo_isles_quest_bunnyAI : public ScriptedAI
+    {
+        npc_echo_isles_quest_bunnyAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32    _timer;  		
+		Player*	  _player;
+		
+		void Reset()  OVERRIDE
+        {
+              _timer=0; _player=NULL;     			
+        }
+	
+		void SpellHit(Unit* Hitter, SpellInfo const* spell) OVERRIDE  
+		{ 
+			if (Player* player = Hitter->ToPlayer())
+			{
+				if (player->GetQuestStatus(QUEST_TERRITORIAL_FETISCH) == QUEST_STATUS_INCOMPLETE)
+				{
+					if (spell->Id!=SPELL_TERRITORIAL_FETISCH) 
+						me->CastSpell(me,SPELL_TERRITORIAL_FETISCH,false);
+				}			
+			}							
+		}
+  
+    };
+
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_echo_isles_quest_bunnyAI (pCreature);
+    }
+};
+
+
+
+
 void AddSC_durotar()
 {
     new npc_lazy_peon();
     new spell_voodoo();
+	new npc_echo_isles_quest_bunny();
 }
