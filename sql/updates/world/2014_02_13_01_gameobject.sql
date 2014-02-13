@@ -1,5 +1,6 @@
 -- Removes all old Pyrite Deposits first...
 DELETE FROM `gameobject` WHERE `id`=202737;
+DELETE FROM `gameobject` WHERE `id`=202740;
 --
 -- This places over 400 new ore-spawns in Twilight Highlands...
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (404987, 202737, 0, 1, 1, -3982.16, -5545.77, 29.2279, 4.16216, 0, 0, 0.872606, -0.488425, 300, 0, 1);
@@ -439,5 +440,14 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (405715, 202737, 1, 1, 1, -10161.9, -102.197, 114.811, 5.00007, 0, 0, 0.598443, -0.801166, 300, 0, 1);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (405714, 202737, 1, 1, 1, -10459.5, -85.6223, 280.794, 2.73439, 0, 0, 0.979345, 0.202195, 300, 0, 1);
 --
+-- This places the new ore-spawns in Tol Barad (carbonite cords)
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (407954, 202740, 732, 1, 1, -1290.78, 1368.59, 130.545, 1.78301, 0, 0, 0.778019, 0.628241, 300, 0, 1);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (407953, 202740, 732, 1, 1, -1235.01, 1429.86, 126.529, 1.53132, 0, 0, 0.693014, 0.720924, 300, 0, 1);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (407952, 202740, 732, 1, 1, -1079.36, 1431.76, 158.283, 1.50278, 0, 0, 0.682654, 0.730741, 300, 0, 1);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (407951, 202740, 732, 1, 1, -966.129, 1393.52, 179.086, 3.88253, 0, 0, 0.932157, -0.362055, 300, 0, 1);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (407899, 202740, 732, 1, 1, 13.5745, 1655.74, 28.9606, 1.75676, 0, 0, 0.769706, 0.638399, 300, 0, 1);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (407853, 202740, 732, 1, 1, -378.348, 1754.58, 22.9708, 3.73205, 0, 0, 0.956736, -0.290957, 300, 0, 1);
+--
 -- Now an Pyrite Deposit spawns every 1 Hour and 30 Minutes.
 UPDATE `gameobject` SET `spawntimesecs`=5400 WHERE `id`=202737;
+UPDATE `gameobject` SET `spawntimesecs`=5400 WHERE `id`=202740;
