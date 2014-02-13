@@ -6048,7 +6048,7 @@ void Spell::EffectFeedPet(SpellEffIndex effIndex)
         return;
 
     int32 benefit = pet->GetCurrentFoodBenefitLevel(foodItem->GetTemplate()->ItemLevel);
-    if (benefit <= 0)
+	if (benefit <= 0)
         return;
 
     ExecuteLogEffectDestroyItem(effIndex, foodItem->GetEntry());
@@ -6057,7 +6057,7 @@ void Spell::EffectFeedPet(SpellEffIndex effIndex)
     player->DestroyItemCount(foodItem, count, true);
     /// @todo fix crash when a spell has two effects, both pointed at the same item target
 
-    m_caster->CastCustomSpell(pet, m_spellInfo->Effects[effIndex].TriggerSpell, &benefit, NULL, NULL, true);
+	m_caster->CastCustomSpell(pet, m_spellInfo->Effects[effIndex].TriggerSpell, &benefit, NULL, NULL, true);
 }
 
 void Spell::EffectDismissPet(SpellEffIndex effIndex)
