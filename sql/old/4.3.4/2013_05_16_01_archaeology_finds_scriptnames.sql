@@ -1,0 +1,9 @@
+UPDATE `gameobject_template` SET `ScriptName` = 'go_archaeology_find' WHERE `entry` = 202655;
+UPDATE `gameobject_template` SET `ScriptName` = 'go_archaeology_find' WHERE `entry` = 203071;
+UPDATE `gameobject_template` SET `ScriptName` = 'go_archaeology_find' WHERE `entry` = 203078;
+UPDATE `gameobject_template` SET `ScriptName` = 'go_archaeology_find' WHERE `entry` = 204282;
+UPDATE `gameobject_template` SET `ScriptName` = 'go_archaeology_find' WHERE `entry` = 206836;
+UPDATE `gameobject_template` SET `ScriptName` = 'go_archaeology_find' WHERE `entry` = 207187;
+UPDATE `gameobject_template` SET `ScriptName` = 'go_archaeology_find' WHERE `entry` = 207188;
+UPDATE `gameobject_template` SET `ScriptName` = 'go_archaeology_find' WHERE `entry` = 207189;
+UPDATE `gameobject_template` SET `ScriptName` = 'go_archaeology_find' WHERE `entry` = 207190;

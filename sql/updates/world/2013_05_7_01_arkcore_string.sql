@@ -1,1 +1,0 @@
-RENAME TABLE `trinity_string` TO `arkcore_string`; 
