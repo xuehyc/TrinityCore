@@ -51,6 +51,7 @@ enum Mist
 	SPELL_NATURES_FURY					= 65455,
 	NPC_FELL_ROCK_GRELLKIN_KILL_CREDIT	= 34440,
 	QUEST_NATURES_REPRISAL				= 13946,
+	SPELL_SHADOW_BOLT					= 9613,
 };
 
 class npc_mist : public CreatureScript
@@ -137,6 +138,14 @@ class npc_shadow_sprite : public CreatureScript
 			void Reset()  OVERRIDE
 			{
 				timer=0; phase=0;       			
+			}
+
+			void EnterCombat(Unit* who) OVERRIDE 
+			{ 
+				if (Player* player = who->ToPlayer())
+				{
+					DoCast(player,SPELL_SHADOW_BOLT);
+				}
 			}
 
 			void SpellHit(Unit * Hitter, SpellInfo const* spell) OVERRIDE
