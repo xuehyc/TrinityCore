@@ -40,6 +40,13 @@ enum UnGoroCrater
 	NPC_UNGORO_PIT_BUNNY						= 38354,
 	NPC_DINOSAUR_TAUNT_CREDIT					= 38355,
 	NPC_DIEMETRADON								= 9163,
+
+	QUEST_DAMSELS_WHERE_MADE_TO_BE_SAVED		= 24705,
+	NPC_DAMSEL_BY_THE_SHORE						= 38238,
+	NPC_DAMSEL_IN_THE_CLIFFS					= 38239,
+	NPC_DAMSEL_BY_THE_NORTH						= 38240,
+
+
 };
 
 /*####
@@ -139,9 +146,172 @@ class npc_ungoro_pit_bunny : public CreatureScript
         }
 };
 
+/*####
+# npc_damsel_by_the_shore
+####*/
+
+class npc_damsel_by_the_shore : public CreatureScript
+{
+public:
+	npc_damsel_by_the_shore() : CreatureScript("npc_damsel_by_the_shore") { }
+
+	bool OnGossipHello(Player* player, Creature* creature) OVERRIDE 
+	{
+		if (!player) return true;
+		player->PlayerTalkClass->SendCloseGossip();	
+		if (player->GetQuestStatus(QUEST_DAMSELS_WHERE_MADE_TO_BE_SAVED) == QUEST_STATUS_INCOMPLETE)
+		{		
+			CAST_AI(npc_damsel_by_the_shoreAI,creature->AI())->StartAnim(player);						
+		}
+		return true;
+	}
+
+	struct npc_damsel_by_the_shoreAI : public ScriptedAI
+    {
+        npc_damsel_by_the_shoreAI(Creature *c) : ScriptedAI(c) {}
+       
+		uint32	_phase;
+		uint32	_timer;
+		Player* _player;
+
+		void StartAnim(Player* player)
+		{
+			_phase=1; _timer=1000; _player=player;		
+		}
+
+		void Reset() OVERRIDE 
+		{ 			
+			_phase=0; _timer=0;
+		}
+
+		void UpdateAI(uint32 diff) OVERRIDE
+        {   			
+			if (_timer <= diff)	
+			{
+				switch (_phase)
+				{
+					case 1:
+					{
+						Talk(0);
+						_phase=2; _timer=3000;
+						break;
+					}
+					case 2:
+					{
+						_player->KilledMonsterCredit(NPC_DAMSEL_BY_THE_SHORE);
+						_phase=0; _timer=0;
+						break;
+					}
+				}
+			}	
+			else 
+				_timer -= diff;														
+		}
+    };
+
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_damsel_by_the_shoreAI (pCreature);
+    }
+};
+
+/*####
+# npc_damsel_in_the_cliffs
+####*/
+
+class npc_damsel_in_the_cliffs : public CreatureScript
+{
+public:
+	npc_damsel_in_the_cliffs() : CreatureScript("npc_damsel_in_the_cliffs") { }
+
+	bool OnGossipHello(Player* player, Creature* creature) OVERRIDE 
+	{
+		if (!player) return true;
+		player->PlayerTalkClass->SendCloseGossip();					
+		if (player->GetQuestStatus(QUEST_DAMSELS_WHERE_MADE_TO_BE_SAVED) == QUEST_STATUS_INCOMPLETE)
+		{			
+			player->KilledMonsterCredit(NPC_DAMSEL_IN_THE_CLIFFS);
+		}
+		return true;
+	}
+};
+
+/*####
+# npc_damsel_by_the_north
+####*/
+
+class npc_damsel_by_the_north : public CreatureScript
+{
+public:
+	npc_damsel_by_the_north() : CreatureScript("npc_damsel_by_the_north") { }
+
+	bool OnGossipHello(Player* player, Creature* creature) OVERRIDE 
+	{
+		if (!player) return true;
+		player->PlayerTalkClass->SendCloseGossip();					
+		if (player->GetQuestStatus(QUEST_DAMSELS_WHERE_MADE_TO_BE_SAVED) == QUEST_STATUS_INCOMPLETE)
+		{
+			CAST_AI(npc_damsel_by_the_northAI,creature->AI())->StartAnim(player);	
+			player->KilledMonsterCredit(NPC_DAMSEL_BY_THE_NORTH);
+		}
+		return true;
+	}
+
+	struct npc_damsel_by_the_northAI : public ScriptedAI
+    {
+        npc_damsel_by_the_northAI(Creature *c) : ScriptedAI(c) {}
+       
+		uint32	_phase;
+		uint32	_timer;
+		Player* _player;
+
+		void StartAnim(Player* player)
+		{
+			_phase=1; _timer=1000; _player=player;		
+		}
+
+		void Reset() OVERRIDE 
+		{ 			
+			_phase=0; _timer=0;
+		}
+
+		void UpdateAI(uint32 diff) OVERRIDE
+        {   
+			if (_timer <= diff)	
+			{
+				switch (_phase)
+				{
+				case 1:
+					{
+						Talk(0);
+						_phase=2; _timer=3000;
+						break;
+					}
+					case 2:
+					{
+						_player->KilledMonsterCredit(NPC_DAMSEL_BY_THE_NORTH);
+						_phase=0; _timer=0;
+						break;
+					}
+										}
+				}	
+			else 
+				_timer -= diff;																	
+		}	
+    };
+
+	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    {
+        return new npc_damsel_by_the_northAI (pCreature);
+    }
+
+};
 
 void AddSC_ungoro_crater()
 {
 	new go_northern_crystal_pylon();
 	new npc_ungoro_pit_bunny();
+	new npc_damsel_by_the_shore();
+	new npc_damsel_in_the_cliffs();
+	new npc_damsel_by_the_north();
 }
