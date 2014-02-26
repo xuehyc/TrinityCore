@@ -59,6 +59,7 @@ enum UnGoroCrater
 	NPC_PIMENTO_MAXIMILLIANS_STEED				= 38373,
 
 	QUEST_THE_BALLAD_OF_MAXIMILLIAN				= 24707,
+	NPC_DEVILSAUR_QUEEN							= 38346,
 
 };
 
@@ -211,6 +212,7 @@ public:
 			TalkWithDamselCliffs(diff);
 			TalkWithDamselNorth(diff);
 			TalkWithSpirits(diff);
+			HelpPlayerOnFightWithDragonQueen(diff);
 
             if (!UpdateVictim())
                 return;
@@ -224,15 +226,14 @@ public:
 			if (!_player->IsInCombat()) return; 				
 			if (me->IsInCombat()) return;
 
-			return;
+			// core bug.. core allways rise a reset if AttackStart is calling, so this script is not executed
 
-			if (_targetOfPlayer==0) 
-				if (_targetOfPlayer = _player->GetMap()->GetCreature(_player->GetTarget()))
-				{
-					me->SetReactState(REACT_AGGRESSIVE);
-					AttackStart(_targetOfPlayer); 
-					printf("Trigger AttackStart \n");
-				}						
+			if (Unit* playerTarget  = _player->GetSelectedUnit())
+			{		
+				// now he help allways.. bether is to select only dragons.. ToDo: if core is fixed  
+				me->SetReactState(REACT_AGGRESSIVE);
+				AttackStart(playerTarget); 				
+			}									
 		}
 
 		void TalkWithDamselShore(uint32 diff)
@@ -533,6 +534,26 @@ public:
 			}		
 		}
 
+		void HelpPlayerOnFightWithDragonQueen(uint32 diff)
+		{
+			if (!_player) return;			
+			if (!_player->IsInCombat()) return;
+			if (me->IsInCombat()) return;
+
+			// core bug.. core allways rise a reset if AttackStart is calling, so this script is not executed
+
+			if (Unit* playerTarget  = _player->GetSelectedUnit())
+			{
+				if (playerTarget->GetEntry() == NPC_DEVILSAUR_QUEEN)
+				{
+					if (_player->GetQuestStatus(QUEST_THE_BALLAD_OF_MAXIMILLIAN) == QUEST_STATUS_INCOMPLETE)
+					{
+						me->SetReactState(REACT_AGGRESSIVE);
+						AttackStart(playerTarget); 
+					}
+				}
+			}			
+		}
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -559,13 +580,15 @@ public:
 		Creature* max = creature->FindNearestCreature(NPC_MAXIMILLIAN_OF_NORDSHIRE_2, 10.0f, true);
 		if (!max)		
 		{
-			bool b=false; 
-			if (player->GetQuestStatus(QUEST_THE_EVIL_DRAGONS_OF_UNGORO_CRATER) == QUEST_STATUS_INCOMPLETE) b=true;
-			if (player->GetQuestStatus(QUEST_DAMSELS_WHERE_MADE_TO_BE_SAVED) == QUEST_STATUS_INCOMPLETE) b=true;
-			if (player->GetQuestStatus(QUEST_THE_SPIRITS_OF_GOLAKKA_HOT_SPRINGS) == QUEST_STATUS_INCOMPLETE) b=true;
-			if (player->GetQuestStatus(QUEST_THE_BALLAD_OF_MAXIMILLIAN) == QUEST_STATUS_INCOMPLETE) b=true;
-			if (player->GetQuestStatus(QUEST_AN_IMPORTANT_LESSION) != QUEST_STATUS_COMPLETE) b=false;
-			if(b) SummonMaximillian(player,creature);
+			if (player->GetQuestStatus(QUEST_AN_IMPORTANT_LESSION) == QUEST_STATUS_REWARDED)
+			{
+				bool b=false; 
+				if (player->GetQuestStatus(QUEST_THE_EVIL_DRAGONS_OF_UNGORO_CRATER) == QUEST_STATUS_INCOMPLETE) b=true;
+				if (player->GetQuestStatus(QUEST_DAMSELS_WHERE_MADE_TO_BE_SAVED) == QUEST_STATUS_INCOMPLETE) b=true;
+				if (player->GetQuestStatus(QUEST_THE_SPIRITS_OF_GOLAKKA_HOT_SPRINGS) == QUEST_STATUS_INCOMPLETE) b=true;
+				if (player->GetQuestStatus(QUEST_THE_BALLAD_OF_MAXIMILLIAN) == QUEST_STATUS_INCOMPLETE) b=true;								
+				if(b) SummonMaximillian(player,creature);
+			}
 		}
 		
 		if (player->GetQuestStatus(QUEST_AN_IMPORTANT_LESSION) == QUEST_STATUS_COMPLETE)
