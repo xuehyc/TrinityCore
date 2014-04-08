@@ -723,7 +723,26 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             victim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, damage);
 
         victim->ModifyHealth(-(int32)damage);
+		
+        // Vengeance (Tested and Working)
+        if (victim->HasAura(93098) || victim->HasAura(84839) || victim->HasAura(84840) || victim->HasAura(93099))
+        {
+            if(this != victim && this->GetTypeId() != TYPEID_PLAYER)
+            {
+                int32 value = ApplyPct(damage, 33);
+                if(uint32(value) > victim->CountPctFromMaxHealth(10))
+                    value = victim->CountPctFromMaxHealth(10);
 
+                if(victim->HasAura(76691))
+                {
+                    value += victim->GetAuraEffect(76691, EFFECT_0)->GetAmount();
+
+                    if(uint32(value) > victim->CountPctFromMaxHealth(10))
+                        value = victim->CountPctFromMaxHealth(10);
+                }
+                victim->CastCustomSpell(victim, 76691, &value, &value, NULL, true);
+            }
+        }
         if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
         {
             victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto ? spellProto->Id : 0);
@@ -5069,6 +5088,20 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         CastCustomSpell(victim, 82817, &basepoints0, NULL, NULL, true);
                     }
                     break;
+                case 76691: // Vengeance
+                    if(!target->IsInCombat())
+                    {
+                        // Remove partially if is not in combat @Todo change this numbers for more precisition
+                        int32 value = target->GetAuraEffect(76691, EFFECT_0)->GetAmount();
+                        value = ApplyPct(value, 80);
+                        if(uint32(value) < target->CountPctFromMaxHealth(1))
+                            target->RemoveAura(76691);
+                        else
+                            target->CastCustomSpell(target, 76691, &value, &value, NULL, true);
+                    }
+                    if(target->getClass() == CLASS_DRUID && target->GetShapeshiftForm() == FORM_CAT)
+                          target->RemoveAura(76691);
+                    break;					
                 // Unstable Power
                 case 24658:
                 {
