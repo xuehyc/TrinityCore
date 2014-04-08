@@ -5087,21 +5087,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         basepoints0 = triggerAmount;
                         CastCustomSpell(victim, 82817, &basepoints0, NULL, NULL, true);
                     }
-                    break;
-                case 76691: // Vengeance
-                    if(!target->IsInCombat())
-                    {
-                        // Remove partially if is not in combat @Todo change this numbers for more precisition
-                        int32 value = target->GetAuraEffect(76691, EFFECT_0)->GetAmount();
-                        value = ApplyPct(value, 80);
-                        if(uint32(value) < target->CountPctFromMaxHealth(1))
-                            target->RemoveAura(76691);
-                        else
-                            target->CastCustomSpell(target, 76691, &value, &value, NULL, true);
-                    }
-                    if(target->getClass() == CLASS_DRUID && target->GetShapeshiftForm() == FORM_CAT)
-                          target->RemoveAura(76691);
-                    break;					
+                    break;				
                 // Unstable Power
                 case 24658:
                 {
