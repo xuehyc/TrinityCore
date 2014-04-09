@@ -4255,10 +4255,13 @@ uint32 Unit::GetDoTsByCaster(uint64 casterGUID) const
 
 int32 Unit::GetTotalAuraModifier(AuraType auratype) const
 {
+    AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
+    if (mTotalAuraList.empty())
+        return 0;
+
     std::map<SpellGroup, int32> SameEffectSpellGroup;
     int32 modifier = 0;
 
-    AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
     for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
         if (!sSpellMgr->AddSameEffectStackRuleSpellGroups((*i)->GetSpellInfo(), (*i)->GetAmount(), SameEffectSpellGroup))
             modifier += (*i)->GetAmount();
@@ -7814,7 +7817,7 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
     Player const* targetPlayerOwner = target->GetAffectingPlayer();
 
     // check forced reputation to support SPELL_AURA_FORCE_REACTION
-    if (selfPlayerOwner) 
+    if (selfPlayerOwner)
     {
         if (FactionTemplateEntry const* targetFactionTemplateEntry = target->GetFactionTemplateEntry())
             if (ReputationRank const* repRank = selfPlayerOwner->GetReputationMgr().GetForcedRankIfAny(targetFactionTemplateEntry))
@@ -11808,6 +11811,8 @@ float Unit::GetSpellMaxRangeForTarget(Unit const* target, SpellInfo const* spell
         return 0;
     if (spellInfo->RangeEntry->maxRangeFriend == spellInfo->RangeEntry->maxRangeHostile)
         return spellInfo->GetMaxRange();
+    if (target == NULL)
+        return spellInfo->GetMaxRange(true);
     return spellInfo->GetMaxRange(!IsHostileTo(target));
 }
 
@@ -14060,8 +14065,10 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
         data << uint64(victim->GetGUID()); // victim
 
         Player* looter = player;
+        Group* group = player->GetGroup();
+        bool hasLooterGuid = false;
 
-        if (Group* group = player->GetGroup())
+        if (group)
         {
             group->BroadcastPacket(&data, group->GetMemberGroup(player->GetGUID()));
 
@@ -14073,16 +14080,10 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
                     looter = ObjectAccessor::FindPlayer(group->GetLooterGuid());
                     if (looter)
                     {
+                        hasLooterGuid = true;
                         creature->SetLootRecipient(looter);   // update creature loot recipient to the allowed looter.
-                        group->SendLooter(creature, looter);
                     }
-                    else
-                        group->SendLooter(creature, NULL);
                 }
-                else
-                    group->SendLooter(creature, NULL);
-
-                group->UpdateLooterGuid(creature);
             }
         }
         else
@@ -14099,6 +14100,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
             }
         }
 
+        // Generate loot before updating looter
         if (creature)
         {
             Loot* loot = &creature->loot;
@@ -14110,6 +14112,18 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
                 loot->FillLoot(lootid, LootTemplates_Creature, looter, false, false, creature->GetLootMode());
 
             loot->generateMoneyLoot(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold);
+
+            if (group)
+            {
+                if (hasLooterGuid)
+                    group->SendLooter(creature, looter);
+                else
+                    group->SendLooter(creature, NULL);
+
+                // Update round robin looter only if the creature had loot
+                if (!creature->loot.empty())
+                    group->UpdateLooterGuid(creature);
+            }
         }
 
         player->RewardPlayerAndGroupAtKill(victim, false);
@@ -16560,7 +16574,12 @@ bool CharmInfo::IsCommandFollow()
 void CharmInfo::SaveStayPosition()
 {
     //! At this point a new spline destination is enabled because of Unit::StopMoving()
-    G3D::Vector3 const stayPos = _unit->movespline->FinalDestination();
+    G3D::Vector3 stayPos = _unit->movespline->FinalDestination();
+
+    if (_unit->movespline->onTransport)
+        if (TransportBase* transport = _unit->GetDirectTransport())
+            transport->CalculatePassengerPosition(stayPos.x, stayPos.y, stayPos.z);
+
     _stayX = stayPos.x;
     _stayY = stayPos.y;
     _stayZ = stayPos.z;
@@ -17033,4 +17052,25 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
     *data << uint8(updateMask.GetBlockCount());
     updateMask.AppendToPacket(data);
     data->append(fieldBuffer);
+}
+
+void Unit::BuildCooldownPacket(WorldPacket& data, uint8 flags, uint32 spellId, uint32 cooldown)
+{
+    data.Initialize(SMSG_SPELL_COOLDOWN, 8 + 1 + 4 + 4);
+    data << uint64(GetGUID());
+    data << uint8(flags);
+    data << uint32(spellId);
+    data << uint32(cooldown);
+}
+
+void Unit::BuildCooldownPacket(WorldPacket& data, uint8 flags, PacketCooldowns const& cooldowns)
+{
+    data.Initialize(SMSG_SPELL_COOLDOWN, 8 + 1 + (4 + 4) * cooldowns.size());
+    data << uint64(GetGUID());
+    data << uint8(flags);
+    for (UNORDERED_MAP<uint32, uint32>::const_iterator itr = cooldowns.begin(); itr != cooldowns.end(); ++itr)
+    {
+        data << uint32(itr->first);
+        data << uint32(itr->second);
+    }
 }

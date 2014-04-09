@@ -4,7 +4,7 @@
 #if PLATFORM == PLATFORM_WINDOWS && !defined(__MINGW32__)
 
 #include <dbghelp.h>
-
+#include <set>
 #if _MSC_VER < 1400
 #   define countof(array)   (sizeof(array) / sizeof(array[0]))
 #else
@@ -31,7 +31,10 @@ enum BasicType                                              // Stolen from CVCON
     btComplex = 28,
     btBit = 29,
     btBSTR = 30,
-    btHresult = 31
+    btHresult = 31,
+
+    // Custom types
+    btStdString = 101
 };
 
 const char* const rgBaseType[] =
@@ -69,6 +72,25 @@ const char* const rgBaseType[] =
     " BSTR ",                                               // btBSTR = 30,
     " HRESULT "                                             // btHresult = 31
 };
+
+struct SymbolPair
+{
+    SymbolPair(DWORD type, DWORD_PTR offset)
+    {
+        _type = type;
+        _offset = offset;
+    }
+
+    bool operator<(const SymbolPair& other) const
+    {
+        return _offset < other._offset || 
+              (_offset == other._offset && _type < other._type);
+    }
+
+    DWORD _type;
+    DWORD_PTR _offset;
+};
+typedef std::set<SymbolPair> SymbolPairs;
 
 class WheatyExceptionReport
 {
@@ -108,6 +130,9 @@ class WheatyExceptionReport
 
         static int __cdecl _tprintf(const TCHAR * format, ...);
 
+        static bool StoreSymbol(DWORD type , DWORD_PTR offset);
+        static void ClearSymbols();
+
         // Variables used by the class
         static TCHAR m_szLogFileName[MAX_PATH];
         static TCHAR m_szDumpFileName[MAX_PATH];
@@ -115,6 +140,7 @@ class WheatyExceptionReport
         static HANDLE m_hReportFile;
         static HANDLE m_hDumpFile;
         static HANDLE m_hProcess;
+        static SymbolPairs symbols;
 };
 
 extern WheatyExceptionReport g_WheatyExceptionReport;       //  global instance of class

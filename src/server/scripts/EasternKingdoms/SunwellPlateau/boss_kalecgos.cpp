@@ -238,7 +238,7 @@ public:
                 {
                     if (me->GetDistance(CENTER_X, CENTER_Y, DRAGON_REALM_Z) >= 75)
                     {
-                        me->AI()->EnterEvadeMode();
+                        EnterEvadeMode();
                         return;
                     }
                     if (HealthBelowPct(10) && !isEnraged)
@@ -737,7 +737,7 @@ public:
                 Creature* Kalecgos = ObjectAccessor::GetCreature(*me, KalecgosGUID);
                 if (Kalecgos && !Kalecgos->IsInCombat())
                 {
-                    me->AI()->EnterEvadeMode();
+                    EnterEvadeMode();
                     return;
                 }
 
