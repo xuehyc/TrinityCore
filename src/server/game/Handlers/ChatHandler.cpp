@@ -160,20 +160,12 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 case CHAT_MSG_GUILD:
                 case CHAT_MSG_BATTLEGROUND:
                 case CHAT_MSG_WHISPER:
-                    if (sWorld->getBoolConfig(CONFIG_CHATLOG_ADDON))
-                    {
-                        std::string msg = "";
-                        recvData >> msg;
-
-                        if (msg.empty())
-                            return;
-
-                        sScriptMgr->OnPlayerChat(sender, uint32(CHAT_MSG_ADDON), lang, msg);
-                    }
-
-                    // Disabled addon channel?
+                    // check if addon messages are disabled
                     if (!sWorld->getBoolConfig(CONFIG_ADDON_CHANNEL))
+                    {
+                        recvData.rfinish();
                         return;
+                    }
                     break;
                 default:
                     TC_LOG_ERROR("network", "Player %s (GUID: %u) sent a chatmessage with an invalid language/message type combination",
@@ -620,19 +612,12 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
     if (prefix.empty() || prefix.length() > 16)
         return;
 
-    // Logging enabled?
-    if (sWorld->getBoolConfig(CONFIG_CHATLOG_ADDON))
-    {
-        if (message.empty())
-            return;
-
-        // Weird way to log stuff...
-        sScriptMgr->OnPlayerChat(sender, uint32(CHAT_MSG_ADDON), uint32(LANG_ADDON), message);
-    }
-
     // Disabled addon channel?
     if (!sWorld->getBoolConfig(CONFIG_ADDON_CHANNEL))
+    {
+        recvData.rfinish();
         return;
+    }
 
     switch (type)
     {
