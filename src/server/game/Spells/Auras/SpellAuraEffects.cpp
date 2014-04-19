@@ -5456,6 +5456,20 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                              veh->CastSpell(target, 62475, true);
                     }
                     break;
+                case 76691: // Vengeance
+                    if(!target->IsInCombat())
+                    {
+                        // Remove partially if is not in combat @Todo change this numbers for more precisition
+                        int32 value = target->GetAuraEffect(76691, EFFECT_0)->GetAmount();
+                        value = ApplyPct(value, 80);
+                        if(uint32(value) < target->CountPctFromMaxHealth(1))
+                            target->RemoveAura(76691);
+                        else
+                            target->CastCustomSpell(target, 76691, &value, &value, NULL, true);
+                    }
+                    if(target->getClass() == CLASS_DRUID && target->GetShapeshiftForm() == FORM_CAT)
+                          target->RemoveAura(76691);
+                    break;						
                 case 64821: // Fuse Armor (Razorscale)
                     if (GetBase()->GetStackAmount() == GetSpellInfo()->StackAmount)
                     {
