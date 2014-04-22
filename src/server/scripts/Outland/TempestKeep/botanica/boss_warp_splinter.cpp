@@ -97,7 +97,7 @@ class npc_warp_splinter_treant : public CreatureScript
 
             void UpdateAI(uint32 diff) OVERRIDE
             {
-                if (!UpdateVictim())
+                if (!UpdateVictim() || !me->GetVictim())
                 {
                     if (WarpGuid && check_Timer <= diff)
                     {
@@ -119,7 +119,7 @@ class npc_warp_splinter_treant : public CreatureScript
                     return;
                 }
 
-                if (me->GetVictim()->GetGUID() !=  WarpGuid)
+                if (me->EnsureVictim()->GetGUID() != WarpGuid)
                     DoMeleeAttackIfReady();
             }
         };
