@@ -331,8 +331,8 @@ class Object
 
         // for output helpfull error messages from asserts
         bool PrintIndexError(uint32 index, bool set) const;
-        Object(const Object&);                              // prevent generation copy constructor
-        Object& operator=(Object const&);                   // prevent generation assigment operator
+        Object(Object const& right) DELETE_MEMBER;
+        Object& operator=(Object const& right) DELETE_MEMBER;
 };
 
 struct Position
@@ -575,6 +575,8 @@ template<class T>
 class GridObject
 {
     public:
+        virtual ~GridObject() { }
+
         bool IsInGrid() const { return _gridRef.isValid(); }
         void AddToGrid(GridRefManager<T>& m) { ASSERT(!IsInGrid()); _gridRef.link(&m, (T*)this); }
         void RemoveFromGrid() { ASSERT(IsInGrid()); _gridRef.unlink(); }
