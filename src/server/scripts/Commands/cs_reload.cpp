@@ -50,115 +50,116 @@ public:
     {
         static ChatCommand reloadAllCommandTable[] =
         {
-            { "achievement", rbac::RBAC_PERM_COMMAND_RELOAD_ALL_ACHIEVEMENT, true,  &HandleReloadAllAchievementCommand, "", NULL },
-            { "area",        rbac::RBAC_PERM_COMMAND_RELOAD_ALL_AREA,        true,  &HandleReloadAllAreaCommand,       "", NULL },
-            { "gossips",     rbac::RBAC_PERM_COMMAND_RELOAD_ALL_GOSSIP,      true,  &HandleReloadAllGossipsCommand,    "", NULL },
-            { "item",        rbac::RBAC_PERM_COMMAND_RELOAD_ALL_ITEM,        true,  &HandleReloadAllItemCommand,       "", NULL },
-            { "locales",     rbac::RBAC_PERM_COMMAND_RELOAD_ALL_LOCALES,     true,  &HandleReloadAllLocalesCommand,    "", NULL },
-            { "loot",        rbac::RBAC_PERM_COMMAND_RELOAD_ALL_LOOT,        true,  &HandleReloadAllLootCommand,       "", NULL },
-            { "npc",         rbac::RBAC_PERM_COMMAND_RELOAD_ALL_NPC,         true,  &HandleReloadAllNpcCommand,        "", NULL },
-            { "quest",       rbac::RBAC_PERM_COMMAND_RELOAD_ALL_QUEST,       true,  &HandleReloadAllQuestCommand,      "", NULL },
-            { "scripts",     rbac::RBAC_PERM_COMMAND_RELOAD_ALL_SCRIPTS,     true,  &HandleReloadAllScriptsCommand,    "", NULL },
-            { "spell",       rbac::RBAC_PERM_COMMAND_RELOAD_ALL_SPELL,       true,  &HandleReloadAllSpellCommand,      "", NULL },
-            { "",            rbac::RBAC_PERM_COMMAND_RELOAD_ALL,             true,  &HandleReloadAllCommand,           "", NULL },
-            { NULL,          0,                  false, NULL,                              "", NULL }
+            { "achievement",                   rbac::RBAC_PERM_COMMAND_RELOAD_ALL_ACHIEVEMENT,                  true,  &HandleReloadAllAchievementCommand,              "", NULL },
+            { "area",                          rbac::RBAC_PERM_COMMAND_RELOAD_ALL_AREA,                         true,  &HandleReloadAllAreaCommand,                     "", NULL },
+            { "gossips",                       rbac::RBAC_PERM_COMMAND_RELOAD_ALL_GOSSIP,                       true,  &HandleReloadAllGossipsCommand,                  "", NULL },
+            { "item",                          rbac::RBAC_PERM_COMMAND_RELOAD_ALL_ITEM,                         true,  &HandleReloadAllItemCommand,                     "", NULL },
+            { "locales",                       rbac::RBAC_PERM_COMMAND_RELOAD_ALL_LOCALES,                      true,  &HandleReloadAllLocalesCommand,                  "", NULL },
+            { "loot",                          rbac::RBAC_PERM_COMMAND_RELOAD_ALL_LOOT,                         true,  &HandleReloadAllLootCommand,                     "", NULL },
+            { "npc",                           rbac::RBAC_PERM_COMMAND_RELOAD_ALL_NPC,                          true,  &HandleReloadAllNpcCommand,                      "", NULL },
+            { "quest",                         rbac::RBAC_PERM_COMMAND_RELOAD_ALL_QUEST,                        true,  &HandleReloadAllQuestCommand,                    "", NULL },
+            { "scripts",                       rbac::RBAC_PERM_COMMAND_RELOAD_ALL_SCRIPTS,                      true,  &HandleReloadAllScriptsCommand,                  "", NULL },
+            { "spell",                         rbac::RBAC_PERM_COMMAND_RELOAD_ALL_SPELL,                        true,  &HandleReloadAllSpellCommand,                    "", NULL },
+            { "",                              rbac::RBAC_PERM_COMMAND_RELOAD_ALL,                              true,  &HandleReloadAllCommand,                         "", NULL },
+            { NULL,                            0,                                                               false, NULL,                                            "", NULL }
         };
         static ChatCommand reloadCommandTable[] =
         {
-            { "auctions",                      rbac::RBAC_PERM_COMMAND_RELOAD_AUCTIONS, true,  &HandleReloadAuctionsCommand,                   "", NULL },
-            { "access_requirement",            rbac::RBAC_PERM_COMMAND_RELOAD_ACCESS_REQUIREMENT, true,  &HandleReloadAccessRequirementCommand,          "", NULL },
-            { "achievement_criteria_data",     rbac::RBAC_PERM_COMMAND_RELOAD_ACHIEVEMENT_CRITERIA_DATA, true,  &HandleReloadAchievementCriteriaDataCommand,    "", NULL },
-            { "achievement_reward",            rbac::RBAC_PERM_COMMAND_RELOAD_ACHIEVEMENT_REWARD, true,  &HandleReloadAchievementRewardCommand,          "", NULL },
-            { "all",                           rbac::RBAC_PERM_COMMAND_RELOAD_ALL, true,  NULL,                          "", reloadAllCommandTable },
-            { "areatrigger_involvedrelation",  rbac::RBAC_PERM_COMMAND_RELOAD_AREATRIGGER_INVOLVEDRELATION, true,  &HandleReloadQuestAreaTriggersCommand,          "", NULL },
-            { "areatrigger_tavern",            rbac::RBAC_PERM_COMMAND_RELOAD_AREATRIGGER_TAVERN, true,  &HandleReloadAreaTriggerTavernCommand,          "", NULL },
-            { "areatrigger_teleport",          rbac::RBAC_PERM_COMMAND_RELOAD_AREATRIGGER_TELEPORT, true,  &HandleReloadAreaTriggerTeleportCommand,        "", NULL },
-            { "autobroadcast",                 rbac::RBAC_PERM_COMMAND_RELOAD_AUTOBROADCAST, true,  &HandleReloadAutobroadcastCommand,              "", NULL },
-            { "command",                       rbac::RBAC_PERM_COMMAND_RELOAD_COMMAND, true,  &HandleReloadCommandCommand,                    "", NULL },
-            { "conditions",                    rbac::RBAC_PERM_COMMAND_RELOAD_CONDITIONS, true,  &HandleReloadConditions,                        "", NULL },
-            { "config",                        rbac::RBAC_PERM_COMMAND_RELOAD_CONFIG, true,  &HandleReloadConfigCommand,                     "", NULL },
-            { "creature_text",                 rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_TEXT, true,  &HandleReloadCreatureText,                      "", NULL },
-            { "creature_questender",           rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_QUESTENDER, true,  &HandleReloadCreatureQuestEnderCommand,  "", NULL },
-            { "creature_linked_respawn",       rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_LINKED_RESPAWN,    true,  &HandleReloadLinkedRespawnCommand,              "", NULL },
-            { "creature_loot_template",        rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesCreatureCommand,      "", NULL },
-            { "creature_onkill_reward",    	   rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_ONKILL_REPUTATION, true,  &HandleReloadOnKillRewardCommand,           "", NULL },
-            { "creature_queststarter",         rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_QUESTSTARTER, true,  &HandleReloadCreatureQuestStarterCommand,     "", NULL },
-            { "creature_summon_groups",        rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_SUMMON_GROUPS, true,  &HandleReloadCreatureSummonGroupsCommand,       "", NULL },
-            { "creature_template",             rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_TEMPLATE, true,  &HandleReloadCreatureTemplateCommand,           "", NULL },
-            //{ "db_script_string",              rbac::RBAC_PERM_COMMAND_RELOAD_, true,  &HandleReloadDbScriptStringCommand,            "", NULL },
-            { "disables",                      rbac::RBAC_PERM_COMMAND_RELOAD_DISABLES, true,  &HandleReloadDisablesCommand,                   "", NULL },
-            { "disenchant_loot_template",      rbac::RBAC_PERM_COMMAND_RELOAD_DISENCHANT_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesDisenchantCommand,    "", NULL },
-            { "event_scripts",                 rbac::RBAC_PERM_COMMAND_RELOAD_EVENT_SCRIPTS, true,  &HandleReloadEventScriptsCommand,               "", NULL },
-            { "fishing_loot_template",         rbac::RBAC_PERM_COMMAND_RELOAD_FISHING_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesFishingCommand,       "", NULL },
-            { "game_graveyard_zone",           rbac::RBAC_PERM_COMMAND_RELOAD_GAME_GRAVEYARD_ZONE, true,  &HandleReloadGameGraveyardZoneCommand,          "", NULL },
-            { "game_tele",                     rbac::RBAC_PERM_COMMAND_RELOAD_GAME_TELE, true,  &HandleReloadGameTeleCommand,                   "", NULL },
-            { "gameobject_questender",         rbac::RBAC_PERM_COMMAND_RELOAD_GAMEOBJECT_QUESTENDER, true,  &HandleReloadGOQuestEnderCommand,        "", NULL },
-            { "gameobject_loot_template",      rbac::RBAC_PERM_COMMAND_RELOAD_GAMEOBJECT_QUEST_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesGameobjectCommand,    "", NULL },
-            { "gameobject_queststarter",       rbac::RBAC_PERM_COMMAND_RELOAD_GAMEOBJECT_QUESTSTARTER, true,  &HandleReloadGOQuestStarterCommand,           "", NULL },
-            { "gm_tickets",                    rbac::RBAC_PERM_COMMAND_RELOAD_GM_TICKETS, true,  &HandleReloadGMTicketsCommand,                  "", NULL },
-            { "gossip_menu",                   rbac::RBAC_PERM_COMMAND_RELOAD_GOSSIP_MENU, true,  &HandleReloadGossipMenuCommand,                 "", NULL },
-            { "gossip_menu_option",            rbac::RBAC_PERM_COMMAND_RELOAD_GOSSIP_MENU_OPTION, true,  &HandleReloadGossipMenuOptionCommand,           "", NULL },
-            { "item_enchantment_template",     rbac::RBAC_PERM_COMMAND_RELOAD_ITEM_ENCHANTMENT_TEMPLATE, true,  &HandleReloadItemEnchantementsCommand,          "", NULL },
-            { "item_loot_template",            rbac::RBAC_PERM_COMMAND_RELOAD_ITEM_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesItemCommand,          "", NULL },
-            { "lfg_dungeon_rewards",           rbac::RBAC_PERM_COMMAND_RELOAD_LFG_DUNGEON_REWARDS, true,  &HandleReloadLfgRewardsCommand,                 "", NULL },
-            { "locales_achievement_reward",    rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_ACHIEVEMENT_REWARD, true,  &HandleReloadLocalesAchievementRewardCommand,   "", NULL },
-            { "locales_creature",              rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_CRETURE, true,  &HandleReloadLocalesCreatureCommand,            "", NULL },
-            { "locales_creature_text",         rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_CRETURE_TEXT, true,  &HandleReloadLocalesCreatureTextCommand,        "", NULL },
-            { "locales_gameobject",            rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_GAMEOBJECT, true,  &HandleReloadLocalesGameobjectCommand,          "", NULL },
-            { "locales_gossip_menu_option",    rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_GOSSIP_MENU_OPTION, true,  &HandleReloadLocalesGossipMenuOptionCommand,    "", NULL },
-            { "locales_item",                  rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_ITEM, true,  &HandleReloadLocalesItemCommand,                "", NULL },
-            { "locales_npc_text",              rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_NPC_TEXT, true,  &HandleReloadLocalesNpcTextCommand,             "", NULL },
-            { "locales_page_text",             rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_PAGE_TEXT, true,  &HandleReloadLocalesPageTextCommand,            "", NULL },
-            { "locales_points_of_interest",    rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_POINTS_OF_INTEREST, true,  &HandleReloadLocalesPointsOfInterestCommand,    "", NULL },
-            { "locales_quest",                 rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_QUEST, true,  &HandleReloadLocalesQuestCommand,               "", NULL },
-            { "mail_level_reward",             rbac::RBAC_PERM_COMMAND_RELOAD_MAIL_LEVEL_REWARD, true,  &HandleReloadMailLevelRewardCommand,            "", NULL },
-            { "mail_loot_template",            rbac::RBAC_PERM_COMMAND_RELOAD_MAIL_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesMailCommand,          "", NULL },
-            { "milling_loot_template",         rbac::RBAC_PERM_COMMAND_RELOAD_MILLING_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesMillingCommand,       "", NULL },
-            { "npc_spellclick_spells",         rbac::RBAC_PERM_COMMAND_RELOAD_NPC_SPELLCLICK_SPELLS, true,  &HandleReloadSpellClickSpellsCommand,           "", NULL},
-            { "npc_trainer",                   rbac::RBAC_PERM_COMMAND_RELOAD_NPC_TRAINER, true,  &HandleReloadNpcTrainerCommand,                 "", NULL },
-            { "npc_vendor",                    rbac::RBAC_PERM_COMMAND_RELOAD_NPC_VENDOR, true,  &HandleReloadNpcVendorCommand,                  "", NULL },
-            { "page_text",                     rbac::RBAC_PERM_COMMAND_RELOAD_PAGE_TEXT, true,  &HandleReloadPageTextsCommand,                  "", NULL },
-            { "pickpocketing_loot_template",   rbac::RBAC_PERM_COMMAND_RELOAD_PICKPOCKETING_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesPickpocketingCommand, "", NULL},
-            { "points_of_interest",            rbac::RBAC_PERM_COMMAND_RELOAD_POINTS_OF_INTEREST, true,  &HandleReloadPointsOfInterestCommand,           "", NULL },
-            { "prospecting_loot_template",     rbac::RBAC_PERM_COMMAND_RELOAD_PROSPECTING_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesProspectingCommand,   "", NULL },
-            { "quest_poi",                     rbac::RBAC_PERM_COMMAND_RELOAD_QUEST_POI, true,  &HandleReloadQuestPOICommand,                   "", NULL },
-            { "quest_template",                rbac::RBAC_PERM_COMMAND_RELOAD_QUEST_TEMPLATE, true,  &HandleReloadQuestTemplateCommand,              "", NULL },
-            { "rbac",                          rbac::RBAC_PERM_COMMAND_RELOAD_RBAC, true,  &HandleReloadRBACCommand,                       "", NULL },
-            { "reference_loot_template",       rbac::RBAC_PERM_COMMAND_RELOAD_REFERENCE_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesReferenceCommand,     "", NULL },
-            { "reserved_name",                 rbac::RBAC_PERM_COMMAND_RELOAD_RESERVED_NAME, true,  &HandleReloadReservedNameCommand,               "", NULL },
-            { "reputation_reward_rate",        rbac::RBAC_PERM_COMMAND_RELOAD_REPUTATION_REWARD_RATE, true,  &HandleReloadReputationRewardRateCommand,       "", NULL },
-            { "reputation_spillover_template", rbac::RBAC_PERM_COMMAND_RELOAD_SPILLOVER_TEMPLATE, true,  &HandleReloadReputationRewardRateCommand,       "", NULL },
-            { "skill_discovery_template",      rbac::RBAC_PERM_COMMAND_RELOAD_SKILL_DISCOVERY_TEMPLATE, true,  &HandleReloadSkillDiscoveryTemplateCommand,     "", NULL },
-            { "skill_extra_item_template",     rbac::RBAC_PERM_COMMAND_RELOAD_SKILL_EXTRA_ITEM_TEMPLATE, true,  &HandleReloadSkillExtraItemTemplateCommand,     "", NULL },
-            { "skill_fishing_base_level",      rbac::RBAC_PERM_COMMAND_RELOAD_SKILL_FISHING_BASE_LEVEL, true,  &HandleReloadSkillFishingBaseLevelCommand,      "", NULL },
-            { "skinning_loot_template",        rbac::RBAC_PERM_COMMAND_RELOAD_SKINNING_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesSkinningCommand,      "", NULL },
-            { "smart_scripts",                 rbac::RBAC_PERM_COMMAND_RELOAD_SMART_SCRIPTS, true,  &HandleReloadSmartScripts,                      "", NULL },
-            { "spell_required",                rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_REQUIRED, true,  &HandleReloadSpellRequiredCommand,              "", NULL },
-            { "spell_area",                    rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_AREA, true,  &HandleReloadSpellAreaCommand,                  "", NULL },
-            { "spell_bonus_data",              rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_BONUS_DATA, true,  &HandleReloadSpellBonusesCommand,               "", NULL },
-            { "spell_group",                   rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_GROUP, true,  &HandleReloadSpellGroupsCommand,                "", NULL },
-            { "spell_learn_spell",             rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_LEARN_SPELL, true,  &HandleReloadSpellLearnSpellCommand,            "", NULL },
-            { "spell_loot_template",           rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_LOOT_TEMPLATE, true,  &HandleReloadLootTemplatesSpellCommand,         "", NULL },
-            { "spell_linked_spell",            rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_LINKED_SPELL, true,  &HandleReloadSpellLinkedSpellCommand,           "", NULL },
-            { "spell_pet_auras",               rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_PET_AURAS, true,  &HandleReloadSpellPetAurasCommand,              "", NULL },
-            { "spell_proc_event",              rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_PROC_EVENT, true,  &HandleReloadSpellProcEventCommand,             "", NULL },
-            { "spell_proc",                    rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_PROC, true,  &HandleReloadSpellProcsCommand,                 "", NULL },
-            { "spell_scripts",                 rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_SCRIPTS, true,  &HandleReloadSpellScriptsCommand,               "", NULL },
-            { "spell_target_position",         rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_TARGET_POSITION, true,  &HandleReloadSpellTargetPositionCommand,        "", NULL },
-            { "spell_threats",                 rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_THREATS, true,  &HandleReloadSpellThreatsCommand,               "", NULL },
-            { "spell_group_stack_rules",       rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_GROUP_STACK_RULES, true,  &HandleReloadSpellGroupStackRulesCommand,       "", NULL },
-            { "trinity_string",                rbac::RBAC_PERM_COMMAND_RELOAD_TRINITY_STRING, true,  &HandleReloadTrinityStringCommand,              "", NULL },
-            { "warden_action",                 rbac::RBAC_PERM_COMMAND_RELOAD_WARDEN_ACTION, true,  &HandleReloadWardenactionCommand,               "", NULL },
-            { "waypoint_scripts",              rbac::RBAC_PERM_COMMAND_RELOAD_WAYPOINT_SCRIPTS, true,  &HandleReloadWpScriptsCommand,                  "", NULL },
-            { "waypoint_data",                 rbac::RBAC_PERM_COMMAND_RELOAD_WAYPOINT_DATA, true,  &HandleReloadWpCommand,                         "", NULL },
-            { "vehicle_accessory",             rbac::RBAC_PERM_COMMAND_RELOAD_VEHICLE_ACCESORY, true,  &HandleReloadVehicleAccessoryCommand,           "", NULL },
-            { "vehicle_template_accessory",    rbac::RBAC_PERM_COMMAND_RELOAD_VEHICLE_TEMPLATE_ACCESSORY, true,  &HandleReloadVehicleTemplateAccessoryCommand,   "", NULL },
-            { NULL,                            0,                          false, NULL,                                           "", NULL }
+            { "auctions",                      rbac::RBAC_PERM_COMMAND_RELOAD_AUCTIONS,                         true,  &HandleReloadAuctionsCommand,                   "", NULL },
+            { "access_requirement",            rbac::RBAC_PERM_COMMAND_RELOAD_ACCESS_REQUIREMENT,               true,  &HandleReloadAccessRequirementCommand,          "", NULL },
+            { "achievement_criteria_data",     rbac::RBAC_PERM_COMMAND_RELOAD_ACHIEVEMENT_CRITERIA_DATA,        true,  &HandleReloadAchievementCriteriaDataCommand,    "", NULL },
+            { "achievement_reward",            rbac::RBAC_PERM_COMMAND_RELOAD_ACHIEVEMENT_REWARD,               true,  &HandleReloadAchievementRewardCommand,          "", NULL },
+            { "all",                           rbac::RBAC_PERM_COMMAND_RELOAD_ALL,                              true,  NULL,                                           "", reloadAllCommandTable },
+            { "areatrigger_involvedrelation",  rbac::RBAC_PERM_COMMAND_RELOAD_AREATRIGGER_INVOLVEDRELATION,     true,  &HandleReloadQuestAreaTriggersCommand,          "", NULL },
+            { "areatrigger_tavern",            rbac::RBAC_PERM_COMMAND_RELOAD_AREATRIGGER_TAVERN,               true,  &HandleReloadAreaTriggerTavernCommand,          "", NULL },
+            { "areatrigger_teleport",          rbac::RBAC_PERM_COMMAND_RELOAD_AREATRIGGER_TELEPORT,             true,  &HandleReloadAreaTriggerTeleportCommand,        "", NULL },
+            { "autobroadcast",                 rbac::RBAC_PERM_COMMAND_RELOAD_AUTOBROADCAST,                    true,  &HandleReloadAutobroadcastCommand,              "", NULL },
+            { "broadcast_text",                rbac::RBAC_PERM_COMMAND_RELOAD_BROADCAST_TEXT,                   true,  &HandleReloadBroadcastTextCommand,              "", NULL },
+            { "command",                       rbac::RBAC_PERM_COMMAND_RELOAD_COMMAND,                          true,  &HandleReloadCommandCommand,                    "", NULL },
+            { "conditions",                    rbac::RBAC_PERM_COMMAND_RELOAD_CONDITIONS,                       true,  &HandleReloadConditions,                        "", NULL },
+            { "config",                        rbac::RBAC_PERM_COMMAND_RELOAD_CONFIG,                           true,  &HandleReloadConfigCommand,                     "", NULL },
+            { "creature_text",                 rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_TEXT,                    true,  &HandleReloadCreatureText,                      "", NULL },
+            { "creature_questender",           rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_QUESTENDER,              true,  &HandleReloadCreatureQuestEnderCommand,         "", NULL },
+            { "creature_linked_respawn",       rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_LINKED_RESPAWN,          true,  &HandleReloadLinkedRespawnCommand,              "", NULL },
+            { "creature_loot_template",        rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_LOOT_TEMPLATE,           true,  &HandleReloadLootTemplatesCreatureCommand,      "", NULL },
+            { "creature_onkill_reward",        rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_ONKILL_REPUTATION,       true,  &HandleReloadOnKillRewardCommand,               "", NULL },
+            { "creature_queststarter",         rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_QUESTSTARTER,            true,  &HandleReloadCreatureQuestStarterCommand,       "", NULL },
+            { "creature_summon_groups",        rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_SUMMON_GROUPS,           true,  &HandleReloadCreatureSummonGroupsCommand,       "", NULL },
+            { "creature_template",             rbac::RBAC_PERM_COMMAND_RELOAD_CREATURE_TEMPLATE,                true,  &HandleReloadCreatureTemplateCommand,           "", NULL },
+            //{ "db_script_string",              rbac::RBAC_PERM_COMMAND_RELOAD_,                                 true,  &HandleReloadDbScriptStringCommand,             "", NULL },
+            { "disables",                      rbac::RBAC_PERM_COMMAND_RELOAD_DISABLES,                         true,  &HandleReloadDisablesCommand,                   "", NULL },
+            { "disenchant_loot_template",      rbac::RBAC_PERM_COMMAND_RELOAD_DISENCHANT_LOOT_TEMPLATE,         true,  &HandleReloadLootTemplatesDisenchantCommand,    "", NULL },
+            { "event_scripts",                 rbac::RBAC_PERM_COMMAND_RELOAD_EVENT_SCRIPTS,                    true,  &HandleReloadEventScriptsCommand,               "", NULL },
+            { "fishing_loot_template",         rbac::RBAC_PERM_COMMAND_RELOAD_FISHING_LOOT_TEMPLATE,            true,  &HandleReloadLootTemplatesFishingCommand,       "", NULL },
+            { "game_graveyard_zone",           rbac::RBAC_PERM_COMMAND_RELOAD_GAME_GRAVEYARD_ZONE,              true,  &HandleReloadGameGraveyardZoneCommand,          "", NULL },
+            { "game_tele",                     rbac::RBAC_PERM_COMMAND_RELOAD_GAME_TELE,                        true,  &HandleReloadGameTeleCommand,                   "", NULL },
+            { "gameobject_questender",         rbac::RBAC_PERM_COMMAND_RELOAD_GAMEOBJECT_QUESTENDER,            true,  &HandleReloadGOQuestEnderCommand,               "", NULL },
+            { "gameobject_loot_template",      rbac::RBAC_PERM_COMMAND_RELOAD_GAMEOBJECT_QUEST_LOOT_TEMPLATE,   true,  &HandleReloadLootTemplatesGameobjectCommand,    "", NULL },
+            { "gameobject_queststarter",       rbac::RBAC_PERM_COMMAND_RELOAD_GAMEOBJECT_QUESTSTARTER,          true,  &HandleReloadGOQuestStarterCommand,             "", NULL },
+            { "gm_tickets",                    rbac::RBAC_PERM_COMMAND_RELOAD_GM_TICKETS,                       true,  &HandleReloadGMTicketsCommand,                  "", NULL },
+            { "gossip_menu",                   rbac::RBAC_PERM_COMMAND_RELOAD_GOSSIP_MENU,                      true,  &HandleReloadGossipMenuCommand,                 "", NULL },
+            { "gossip_menu_option",            rbac::RBAC_PERM_COMMAND_RELOAD_GOSSIP_MENU_OPTION,               true,  &HandleReloadGossipMenuOptionCommand,           "", NULL },
+            { "item_enchantment_template",     rbac::RBAC_PERM_COMMAND_RELOAD_ITEM_ENCHANTMENT_TEMPLATE,        true,  &HandleReloadItemEnchantementsCommand,          "", NULL },
+            { "item_loot_template",            rbac::RBAC_PERM_COMMAND_RELOAD_ITEM_LOOT_TEMPLATE,               true,  &HandleReloadLootTemplatesItemCommand,          "", NULL },
+            { "lfg_dungeon_rewards",           rbac::RBAC_PERM_COMMAND_RELOAD_LFG_DUNGEON_REWARDS,              true,  &HandleReloadLfgRewardsCommand,                 "", NULL },
+            { "locales_achievement_reward",    rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_ACHIEVEMENT_REWARD,       true,  &HandleReloadLocalesAchievementRewardCommand,   "", NULL },
+            { "locales_creature",              rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_CRETURE,                  true,  &HandleReloadLocalesCreatureCommand,            "", NULL },
+            { "locales_creature_text",         rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_CRETURE_TEXT,             true,  &HandleReloadLocalesCreatureTextCommand,        "", NULL },
+            { "locales_gameobject",            rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_GAMEOBJECT,               true,  &HandleReloadLocalesGameobjectCommand,          "", NULL },
+            { "locales_gossip_menu_option",    rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_GOSSIP_MENU_OPTION,       true,  &HandleReloadLocalesGossipMenuOptionCommand,    "", NULL },
+            { "locales_item",                  rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_ITEM,                     true,  &HandleReloadLocalesItemCommand,                "", NULL },
+            { "locales_npc_text",              rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_NPC_TEXT,                 true,  &HandleReloadLocalesNpcTextCommand,             "", NULL },
+            { "locales_page_text",             rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_PAGE_TEXT,                true,  &HandleReloadLocalesPageTextCommand,            "", NULL },
+            { "locales_points_of_interest",    rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_POINTS_OF_INTEREST,       true,  &HandleReloadLocalesPointsOfInterestCommand,    "", NULL },
+            { "locales_quest",                 rbac::RBAC_PERM_COMMAND_RELOAD_LOCALES_QUEST,                    true,  &HandleReloadLocalesQuestCommand,               "", NULL },
+            { "mail_level_reward",             rbac::RBAC_PERM_COMMAND_RELOAD_MAIL_LEVEL_REWARD,                true,  &HandleReloadMailLevelRewardCommand,            "", NULL },
+            { "mail_loot_template",            rbac::RBAC_PERM_COMMAND_RELOAD_MAIL_LOOT_TEMPLATE,               true,  &HandleReloadLootTemplatesMailCommand,          "", NULL },
+            { "milling_loot_template",         rbac::RBAC_PERM_COMMAND_RELOAD_MILLING_LOOT_TEMPLATE,            true,  &HandleReloadLootTemplatesMillingCommand,       "", NULL },
+            { "npc_spellclick_spells",         rbac::RBAC_PERM_COMMAND_RELOAD_NPC_SPELLCLICK_SPELLS,            true,  &HandleReloadSpellClickSpellsCommand,           "", NULL },
+            { "npc_trainer",                   rbac::RBAC_PERM_COMMAND_RELOAD_NPC_TRAINER,                      true,  &HandleReloadNpcTrainerCommand,                 "", NULL },
+            { "npc_vendor",                    rbac::RBAC_PERM_COMMAND_RELOAD_NPC_VENDOR,                       true,  &HandleReloadNpcVendorCommand,                  "", NULL },
+            { "page_text",                     rbac::RBAC_PERM_COMMAND_RELOAD_PAGE_TEXT,                        true,  &HandleReloadPageTextsCommand,                  "", NULL },
+            { "pickpocketing_loot_template",   rbac::RBAC_PERM_COMMAND_RELOAD_PICKPOCKETING_LOOT_TEMPLATE,      true,  &HandleReloadLootTemplatesPickpocketingCommand, "", NULL },
+            { "points_of_interest",            rbac::RBAC_PERM_COMMAND_RELOAD_POINTS_OF_INTEREST,               true,  &HandleReloadPointsOfInterestCommand,           "", NULL },
+            { "prospecting_loot_template",     rbac::RBAC_PERM_COMMAND_RELOAD_PROSPECTING_LOOT_TEMPLATE,        true,  &HandleReloadLootTemplatesProspectingCommand,   "", NULL },
+            { "quest_poi",                     rbac::RBAC_PERM_COMMAND_RELOAD_QUEST_POI,                        true,  &HandleReloadQuestPOICommand,                   "", NULL },
+            { "quest_template",                rbac::RBAC_PERM_COMMAND_RELOAD_QUEST_TEMPLATE,                   true,  &HandleReloadQuestTemplateCommand,              "", NULL },
+            { "rbac",                          rbac::RBAC_PERM_COMMAND_RELOAD_RBAC,                             true,  &HandleReloadRBACCommand,                       "", NULL },
+            { "reference_loot_template",       rbac::RBAC_PERM_COMMAND_RELOAD_REFERENCE_LOOT_TEMPLATE,          true,  &HandleReloadLootTemplatesReferenceCommand,     "", NULL },
+            { "reserved_name",                 rbac::RBAC_PERM_COMMAND_RELOAD_RESERVED_NAME,                    true,  &HandleReloadReservedNameCommand,               "", NULL },
+            { "reputation_reward_rate",        rbac::RBAC_PERM_COMMAND_RELOAD_REPUTATION_REWARD_RATE,           true,  &HandleReloadReputationRewardRateCommand,       "", NULL },
+            { "reputation_spillover_template", rbac::RBAC_PERM_COMMAND_RELOAD_SPILLOVER_TEMPLATE,               true,  &HandleReloadReputationRewardRateCommand,       "", NULL },
+            { "skill_discovery_template",      rbac::RBAC_PERM_COMMAND_RELOAD_SKILL_DISCOVERY_TEMPLATE,         true,  &HandleReloadSkillDiscoveryTemplateCommand,     "", NULL },
+            { "skill_extra_item_template",     rbac::RBAC_PERM_COMMAND_RELOAD_SKILL_EXTRA_ITEM_TEMPLATE,        true,  &HandleReloadSkillExtraItemTemplateCommand,     "", NULL },
+            { "skill_fishing_base_level",      rbac::RBAC_PERM_COMMAND_RELOAD_SKILL_FISHING_BASE_LEVEL,         true,  &HandleReloadSkillFishingBaseLevelCommand,      "", NULL },
+            { "skinning_loot_template",        rbac::RBAC_PERM_COMMAND_RELOAD_SKINNING_LOOT_TEMPLATE,           true,  &HandleReloadLootTemplatesSkinningCommand,      "", NULL },
+            { "smart_scripts",                 rbac::RBAC_PERM_COMMAND_RELOAD_SMART_SCRIPTS,                    true,  &HandleReloadSmartScripts,                      "", NULL },
+            { "spell_required",                rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_REQUIRED,                   true,  &HandleReloadSpellRequiredCommand,              "", NULL },
+            { "spell_area",                    rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_AREA,                       true,  &HandleReloadSpellAreaCommand,                  "", NULL },
+            { "spell_bonus_data",              rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_BONUS_DATA,                 true,  &HandleReloadSpellBonusesCommand,               "", NULL },
+            { "spell_group",                   rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_GROUP,                      true,  &HandleReloadSpellGroupsCommand,                "", NULL },
+            { "spell_learn_spell",             rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_LEARN_SPELL,                true,  &HandleReloadSpellLearnSpellCommand,            "", NULL },
+            { "spell_loot_template",           rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_LOOT_TEMPLATE,              true,  &HandleReloadLootTemplatesSpellCommand,         "", NULL },
+            { "spell_linked_spell",            rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_LINKED_SPELL,               true,  &HandleReloadSpellLinkedSpellCommand,           "", NULL },
+            { "spell_pet_auras",               rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_PET_AURAS,                  true,  &HandleReloadSpellPetAurasCommand,              "", NULL },
+            { "spell_proc_event",              rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_PROC_EVENT,                 true,  &HandleReloadSpellProcEventCommand,             "", NULL },
+            { "spell_proc",                    rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_PROC,                       true,  &HandleReloadSpellProcsCommand,                 "", NULL },
+            { "spell_scripts",                 rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_SCRIPTS,                    true,  &HandleReloadSpellScriptsCommand,               "", NULL },
+            { "spell_target_position",         rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_TARGET_POSITION,            true,  &HandleReloadSpellTargetPositionCommand,        "", NULL },
+            { "spell_threats",                 rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_THREATS,                    true,  &HandleReloadSpellThreatsCommand,               "", NULL },
+            { "spell_group_stack_rules",       rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_GROUP_STACK_RULES,          true,  &HandleReloadSpellGroupStackRulesCommand,       "", NULL },
+            { "trinity_string",                rbac::RBAC_PERM_COMMAND_RELOAD_TRINITY_STRING,                   true,  &HandleReloadTrinityStringCommand,              "", NULL },
+            { "warden_action",                 rbac::RBAC_PERM_COMMAND_RELOAD_WARDEN_ACTION,                    true,  &HandleReloadWardenactionCommand,               "", NULL },
+            { "waypoint_scripts",              rbac::RBAC_PERM_COMMAND_RELOAD_WAYPOINT_SCRIPTS,                 true,  &HandleReloadWpScriptsCommand,                  "", NULL },
+            { "waypoint_data",                 rbac::RBAC_PERM_COMMAND_RELOAD_WAYPOINT_DATA,                    true,  &HandleReloadWpCommand,                         "", NULL },
+            { "vehicle_accessory",             rbac::RBAC_PERM_COMMAND_RELOAD_VEHICLE_ACCESORY,                 true,  &HandleReloadVehicleAccessoryCommand,           "", NULL },
+            { "vehicle_template_accessory",    rbac::RBAC_PERM_COMMAND_RELOAD_VEHICLE_TEMPLATE_ACCESSORY,       true,  &HandleReloadVehicleTemplateAccessoryCommand,   "", NULL },
+            { NULL,                            0,                                                               false, NULL,                                           "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "reload", rbac::RBAC_PERM_COMMAND_RELOAD,  true, NULL, "", reloadCommandTable },
-            { NULL,     0,                         false, NULL,               "", NULL }
+            { "reload",                        rbac::RBAC_PERM_COMMAND_RELOAD,                                  true,  NULL,                                           "", reloadCommandTable },
+            { NULL,                            0,                                                               false, NULL,                                           "", NULL }
         };
         return commandTable;
     }
@@ -373,6 +374,15 @@ public:
         return true;
     }
 
+    static bool HandleReloadBroadcastTextCommand(ChatHandler* handler, const char* /*args*/)
+    {
+        TC_LOG_INFO("misc", "Re-Loading Broadcast texts...");
+        sObjectMgr->LoadBroadcastTexts();
+        sObjectMgr->LoadBroadcastTextLocales();
+        handler->SendGlobalGMSysMessage("DB table `broadcast_text` reloaded.");
+        return true;
+    }
+
     static bool HandleReloadCommandCommand(ChatHandler* handler, const char* /*args*/)
     {
         handler->SetLoadCommandTable(true);
@@ -446,66 +456,65 @@ public:
             cInfo->maxlevel           = fields[14].GetUInt8();
             cInfo->expansion          = fields[15].GetUInt16();
             cInfo->expansionUnknown   = fields[16].GetUInt16();
-            cInfo->faction_A          = fields[17].GetUInt16();
-            cInfo->faction_H          = fields[18].GetUInt16();
-            cInfo->npcflag            = fields[19].GetUInt32();
-            cInfo->speed_walk         = fields[20].GetFloat();
-            cInfo->speed_run          = fields[21].GetFloat();
-            cInfo->scale              = fields[22].GetFloat();
-            cInfo->rank               = fields[23].GetUInt8();
-            cInfo->mindmg             = fields[24].GetFloat();
-            cInfo->maxdmg             = fields[25].GetFloat();
-            cInfo->dmgschool          = fields[26].GetUInt8();
-            cInfo->attackpower        = fields[27].GetUInt32();
-            cInfo->dmg_multiplier     = fields[28].GetFloat();
-            cInfo->baseattacktime     = fields[29].GetUInt32();
-            cInfo->rangeattacktime    = fields[30].GetUInt32();
-            cInfo->unit_class         = fields[31].GetUInt8();
-            cInfo->unit_flags         = fields[32].GetUInt32();
-            cInfo->unit_flags2        = fields[33].GetUInt32();
-            cInfo->dynamicflags       = fields[34].GetUInt32();
-            cInfo->family             = fields[35].GetUInt8();
-            cInfo->trainer_type       = fields[36].GetUInt8();
-            cInfo->trainer_class      = fields[37].GetUInt8();
-            cInfo->trainer_race       = fields[38].GetUInt8();
-            cInfo->minrangedmg        = fields[39].GetFloat();
-            cInfo->maxrangedmg        = fields[40].GetFloat();
-            cInfo->rangedattackpower  = fields[41].GetUInt16();
-            cInfo->type               = fields[42].GetUInt8();
-            cInfo->type_flags         = fields[43].GetUInt32();
-            cInfo->type_flags2        = fields[44].GetUInt32();
-            cInfo->lootid             = fields[45].GetUInt32();
-            cInfo->pickpocketLootId   = fields[46].GetUInt32();
-            cInfo->SkinLootId         = fields[47].GetUInt32();
+            cInfo->faction            = fields[17].GetUInt16();
+            cInfo->npcflag            = fields[18].GetUInt32();
+            cInfo->speed_walk         = fields[19].GetFloat();
+            cInfo->speed_run          = fields[20].GetFloat();
+            cInfo->scale              = fields[21].GetFloat();
+            cInfo->rank               = fields[22].GetUInt8();
+            cInfo->mindmg             = fields[23].GetFloat();
+            cInfo->maxdmg             = fields[24].GetFloat();
+            cInfo->dmgschool          = fields[25].GetUInt8();
+            cInfo->attackpower        = fields[26].GetUInt32();
+            cInfo->dmg_multiplier     = fields[27].GetFloat();
+            cInfo->baseattacktime     = fields[28].GetUInt32();
+            cInfo->rangeattacktime    = fields[29].GetUInt32();
+            cInfo->unit_class         = fields[30].GetUInt8();
+            cInfo->unit_flags         = fields[31].GetUInt32();
+            cInfo->unit_flags2        = fields[32].GetUInt32();
+            cInfo->dynamicflags       = fields[33].GetUInt32();
+            cInfo->family             = fields[34].GetUInt8();
+            cInfo->trainer_type       = fields[35].GetUInt8();
+            cInfo->trainer_class      = fields[36].GetUInt8();
+            cInfo->trainer_race       = fields[37].GetUInt8();
+            cInfo->minrangedmg        = fields[38].GetFloat();
+            cInfo->maxrangedmg        = fields[39].GetFloat();
+            cInfo->rangedattackpower  = fields[40].GetUInt16();
+            cInfo->type               = fields[41].GetUInt8();
+            cInfo->type_flags         = fields[42].GetUInt32();
+            cInfo->type_flags2        = fields[43].GetUInt32();
+            cInfo->lootid             = fields[44].GetUInt32();
+            cInfo->pickpocketLootId   = fields[45].GetUInt32();
+            cInfo->SkinLootId         = fields[46].GetUInt32();
 
             for (uint8 i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-                cInfo->resistance[i] = fields[48 + i -1].GetUInt16();
+                cInfo->resistance[i] = fields[47 + i -1].GetUInt16();
 
             for (uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
-                cInfo->spells[i] = fields[54 + i].GetUInt32();
+                cInfo->spells[i] = fields[53 + i].GetUInt32();
 
-            cInfo->PetSpellDataId     = fields[62].GetUInt32();
-            cInfo->VehicleId          = fields[63].GetUInt32();
-            cInfo->mingold            = fields[64].GetUInt32();
-            cInfo->maxgold            = fields[65].GetUInt32();
-            cInfo->AIName             = fields[66].GetString();
-            cInfo->MovementType       = fields[67].GetUInt8();
-            cInfo->InhabitType        = fields[68].GetUInt8();
-            cInfo->HoverHeight        = fields[69].GetFloat();
-            cInfo->ModHealth          = fields[70].GetFloat();
-            cInfo->ModMana            = fields[71].GetFloat();
-            cInfo->ModManaExtra       = fields[72].GetFloat();
-            cInfo->ModArmor           = fields[73].GetFloat();
-            cInfo->RacialLeader       = fields[74].GetBool();
+            cInfo->PetSpellDataId     = fields[61].GetUInt32();
+            cInfo->VehicleId          = fields[62].GetUInt32();
+            cInfo->mingold            = fields[63].GetUInt32();
+            cInfo->maxgold            = fields[64].GetUInt32();
+            cInfo->AIName             = fields[65].GetString();
+            cInfo->MovementType       = fields[66].GetUInt8();
+            cInfo->InhabitType        = fields[67].GetUInt8();
+            cInfo->HoverHeight        = fields[68].GetFloat();
+            cInfo->ModHealth          = fields[69].GetFloat();
+            cInfo->ModMana            = fields[70].GetFloat();
+            cInfo->ModManaExtra       = fields[71].GetFloat();
+            cInfo->ModArmor           = fields[72].GetFloat();
+            cInfo->RacialLeader       = fields[73].GetBool();
 
             for (uint8 i = 0; i < MAX_CREATURE_QUEST_ITEMS; ++i)
-                cInfo->questItems[i] = fields[75 + i].GetUInt32();
+                cInfo->questItems[i] = fields[74 + i].GetUInt32();
 
-            cInfo->movementId         = fields[81].GetUInt32();
-            cInfo->RegenHealth        = fields[82].GetBool();
-            cInfo->MechanicImmuneMask = fields[83].GetUInt32();
-            cInfo->flags_extra        = fields[84].GetUInt32();
-            cInfo->ScriptID           = sObjectMgr->GetScriptId(fields[85].GetCString());
+            cInfo->movementId         = fields[80].GetUInt32();
+            cInfo->RegenHealth        = fields[81].GetBool();
+            cInfo->MechanicImmuneMask = fields[82].GetUInt32();
+            cInfo->flags_extra        = fields[83].GetUInt32();
+            cInfo->ScriptID           = sObjectMgr->GetScriptId(fields[84].GetCString());
 
             sObjectMgr->CheckCreatureTemplate(cInfo);
         }

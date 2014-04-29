@@ -14844,10 +14844,7 @@ void Unit::RestoreFaction()
         }
 
         if (CreatureTemplate const* cinfo = ToCreature()->GetCreatureTemplate())  // normal creature
-        {
-            FactionTemplateEntry const* faction = GetFactionTemplateEntry();
-            setFaction((faction && faction->friendlyMask & 0x004) ? cinfo->faction_H : cinfo->faction_A);
-        }
+            setFaction(cinfo->faction);
     }
 }
 
@@ -15945,7 +15942,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 
     Position pos;
     if (!exitPosition)                          // Exit position not specified
-        vehicle->GetBase()->GetPosition(&pos);  // This should use passenger's current position, leaving it as it is now
+        pos = vehicle->GetBase()->GetPosition();  // This should use passenger's current position, leaving it as it is now
                                                 // because we calculate positions incorrect (sometimes under map)
     else
         pos = *exitPosition;

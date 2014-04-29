@@ -57,12 +57,9 @@ namespace Trinity
 
             void operator()(WorldPacket& data, LocaleConstant locale)
             {
-                std::string text = "";
                 BroadcastText const* bct = sObjectMgr->GetBroadcastText(_textId);
-                if (bct)
-                    ObjectMgr::GetLocaleString(_player->getGender() == GENDER_MALE ? bct->MaleText : bct->FemaleText, locale, text);
 
-                ChatHandler::BuildChatPacket(data, _msgType, LANG_UNIVERSAL, _player, _player, text, _achievementId);
+                ChatHandler::BuildChatPacket(data, _msgType, bct ? Language(bct->Language) : LANG_UNIVERSAL, _player, _player, bct ? bct->GetText(locale, _player->getGender()) : "", _achievementId);
             }
 
         private:
@@ -71,7 +68,7 @@ namespace Trinity
             int32 _textId;
             uint32 _achievementId;
     };
-}                                                           // namespace Trinity
+} // namespace Trinity
 
 bool AchievementCriteriaData::IsValid(AchievementCriteriaEntry const* criteria)
 {
@@ -121,7 +118,6 @@ bool AchievementCriteriaData::IsValid(AchievementCriteriaEntry const* criteria)
     {
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_NONE:
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_INSTANCE_SCRIPT:
-        case ACHIEVEMENT_CRITERIA_DATA_TYPE_NTH_BIRTHDAY:
             return true;
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_T_CREATURE:
             if (!creature.id || !sObjectMgr->GetCreatureTemplate(creature.id))
@@ -247,6 +243,17 @@ bool AchievementCriteriaData::IsValid(AchievementCriteriaEntry const* criteria)
                 return false;
             }
             return true;
+        case ACHIEVEMENT_CRITERIA_DATA_TYPE_GAME_EVENT:
+        {
+            GameEventMgr::GameEventDataMap const& events = sGameEventMgr->GetEventMap();
+            if (game_event.id < 1 || game_event.id >= events.size())
+            {
+                TC_LOG_ERROR("sql.sql", "Table `achievement_criteria_data` (Entry: %u Type: %u) for data type ACHIEVEMENT_CRITERIA_DATA_TYPE_GAME_EVENT (%u) has unknown game_event in value1 (%u), ignored.",
+                    criteria->ID, criteria->type, dataType, game_event.id);
+                return false;
+            }
+            return true;
+        }
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_BG_LOSS_TEAM_SCORE:
             return true;                                    // not check correctness node indexes
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_S_EQUIPED_ITEM:
@@ -347,6 +354,8 @@ bool AchievementCriteriaData::Meets(uint32 criteria_id, Player const* source, Un
             return Player::GetDrunkenstateByValue(source->GetDrunkValue()) >= DrunkenState(drunk.state);
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_HOLIDAY:
             return IsHolidayActive(HolidayIds(holiday.id));
+        case ACHIEVEMENT_CRITERIA_DATA_TYPE_GAME_EVENT:
+            return IsEventActive(game_event.id);
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_BG_LOSS_TEAM_SCORE:
         {
             Battleground* bg = source->GetBattleground();
@@ -382,20 +391,6 @@ bool AchievementCriteriaData::Meets(uint32 criteria_id, Player const* source, Un
             if (!pProto)
                 return false;
             return pProto->ItemLevel >= equipped_item.item_level && pProto->Quality >= equipped_item.item_quality;
-        }
-        case ACHIEVEMENT_CRITERIA_DATA_TYPE_NTH_BIRTHDAY:
-        {
-            time_t birthday_start = time_t(sWorld->getIntConfig(CONFIG_BIRTHDAY_TIME));
-
-            tm birthday_tm;
-            ACE_OS::localtime_r(&birthday_start, &birthday_tm);
-
-            // exactly N birthday
-            birthday_tm.tm_year += birthday_login.nth_birthday;
-
-            time_t birthday = mktime(&birthday_tm);
-            time_t now = sWorld->GetGameTime();
-            return now <= birthday + DAY && now >= birthday;
         }
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_S_KNOWN_TITLE:
         {
