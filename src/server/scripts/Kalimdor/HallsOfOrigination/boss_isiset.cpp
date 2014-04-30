@@ -159,7 +159,7 @@ class boss_isiset : public CreatureScript
                     Phase = 1;
                     Phased = true;
                     Position pos;
-                    me->GetPosition(&pos);
+                    me->GetPosition();
                     me->SummonCreature(39720, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
                     me->SummonCreature(39721, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
                     me->SummonCreature(39722, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
@@ -170,7 +170,7 @@ class boss_isiset : public CreatureScript
                     Phase = 2;
                     Phased = true;
                     Position pos;
-                    me->GetPosition(&pos);
+                    me->GetPosition();
                     if (AstralRain == true)
                         me->SummonCreature(39720, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
                     if (CelestialCall == true)

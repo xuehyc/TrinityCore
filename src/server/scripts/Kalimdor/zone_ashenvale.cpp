@@ -854,8 +854,8 @@ public:
 		{			
 			if (GetCountOfLivingInvaders() >= 4) return;
 			Position pos;
-			me->GetPosition(&pos);			
-			me->GetRandomNearPosition(pos, 30.0f);
+			me->GetPosition();			
+			me->GetRandomNearPosition(30.0f);
 			if (Creature* creature = me->SummonCreature(NPC_DEMONIC_INVADER, pos))
 			{
 				creature->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() , true);

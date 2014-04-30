@@ -163,7 +163,7 @@ public:
                 me->AddAura(SPELL_VORTEX_DUST, me);
                 me->AddAura(SPELL_DUST_MOVE, me);
                 Position pos;
-                me->GetPosition(&pos);
+                me->GetPosition();
                 me->SummonCreature(MOB_SCARAB, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000);
                 me->SummonCreature(MOB_SCARAB, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000);
 				me->SummonCreature(MOB_SCARAB, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000);

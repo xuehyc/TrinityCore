@@ -203,7 +203,7 @@ public:
                 DoCast(me, SPELL_WATERSPOUT);
                 me->AddAura(SPELL_WATERSPOUT_SUMMON, me);
                 Position pos;
-                me->GetPosition(&pos);
+                me->GetPosition();
                 me->SummonCreature(NPC_SUMMONED_WITCH, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000);
                 me->SummonCreature(NPC_SUMMONED_WITCH, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000);
                 me->SummonCreature(NPC_SUMMONED_GUARD, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000);
@@ -222,7 +222,7 @@ public:
                 DoCast(me, SPELL_WATERSPOUT);
                 me->AddAura(SPELL_WATERSPOUT_SUMMON, me);
                 Position pos;
-                me->GetPosition(&pos);
+                me->GetPosition();
                 me->SummonCreature(NPC_SUMMONED_WITCH, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000);
                 me->SummonCreature(NPC_SUMMONED_WITCH, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000);
                 me->SummonCreature(NPC_SUMMONED_GUARD, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000);

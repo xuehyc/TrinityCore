@@ -177,7 +177,7 @@ public:
                 me->HandleEmoteCommand(68);
                 //DoScriptText(SAY_PHASE_1_END_ERUNAK, me);
                 Position pos;
-                me->GetPosition(&pos);
+                me->GetPosition();
                 me->SummonCreature(BOSS_MINDBENDER_GHURSHA, pos, TEMPSUMMON_MANUAL_DESPAWN);
                 phased = true;
             }

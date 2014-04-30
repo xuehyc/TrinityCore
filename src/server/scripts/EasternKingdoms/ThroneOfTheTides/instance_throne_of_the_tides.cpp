@@ -120,7 +120,7 @@ class instance_throne_of_the_tides : public InstanceMapScript
                             creature->setFaction(FACTION_FRIENDLY);
 
                         if (TeamInInstance == ALLIANCE)
-                            creature->UpdateEntry(50270, ALLIANCE);
+                            creature->UpdateEntry(ALLIANCE);
                         break;
                     }
                 }

@@ -676,7 +676,7 @@ public:
 			return true;		
 
 		Position pos;
-		creature->GetNearPosition(pos,2.5f,1.0f);
+		creature->GetNearPosition(2.5f, 1.0f);
 		Creature* max = creature->FindNearestCreature(NPC_MAXIMILLIAN_OF_NORDSHIRE_2, 5.0f, true);
 		if (!max)
 			SummonMaximillian(player,creature);						
@@ -694,7 +694,7 @@ public:
 	void SummonMaximillian(Player* player, Creature* creature)
 	{
 		Position pos;
-		creature->GetNearPosition(pos,2.5f,1.0f);		
+		creature->GetNearPosition(2.5f,1.0f);		
 		Creature* max = creature->SummonCreature(NPC_MAXIMILLIAN_OF_NORDSHIRE_2, pos);
 		max->Mount(31072,0,NPC_PIMENTO_MAXIMILLIANS_STEED);
 		CAST_AI(npc_maximillian_of_northshire_2::npc_maximillian_of_northshire_2AI,max->AI())->StartAnim(player);
