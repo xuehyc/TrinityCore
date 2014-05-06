@@ -362,9 +362,9 @@ void BattlegroundBFG::_SendNodeUpdate(uint8 node)
 
 void BattlegroundBFG::_NodeOccupied(uint8 node, Team team)
 {
-    if (!AddSpiritGuide(node, GILNEAS_BG_SpiritGuidePos[node][0], GILNEAS_BG_SpiritGuidePos[node][1], GILNEAS_BG_SpiritGuidePos[node][2], GILNEAS_BG_SpiritGuidePos[node][3], team))
+    /*if (!AddSpiritGuide(node, GILNEAS_BG_SpiritGuidePos[node][0], GILNEAS_BG_SpiritGuidePos[node][1], GILNEAS_BG_SpiritGuidePos[node][2], GILNEAS_BG_SpiritGuidePos[node][3], team))
         TC_LOG_ERROR("bg.battleground","Failed to spawn spirit guide! point: %u, team: %u, ", node, team);
-
+		*/
     uint8 capturedNodes = 0;
     for (uint8 i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
     {
@@ -381,10 +381,10 @@ void BattlegroundBFG::_NodeOccupied(uint8 node, Team team)
         return;
 
     Creature* trigger = GetBGCreature(node+7); // 0-6 spirit guides
-
+	/*
     if (!trigger)
        trigger = AddCreature(WORLD_TRIGGER, node+7, team, GILNEAS_BG_NodePositions[node][0], GILNEAS_BG_NodePositions[node][1], GILNEAS_BG_NodePositions[node][2], GILNEAS_BG_NodePositions[node][3]);
-
+	*/
     // Add bonus honor aura trigger creature when node is occupied
     // Cast bonus aura (+50% honor in 25yards)
     // aura should only apply to players who have occupied the node, set correct faction for trigger
