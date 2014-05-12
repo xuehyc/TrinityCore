@@ -1411,13 +1411,13 @@ class spell_pri_flash_heal : public SpellScriptLoader
 					caster->ToPlayer()->KilledMonsterCredit(44175, 0);	
             }
 
-            void Register() OVERRIDE
+			void Register() override
             {
 				  OnHit += SpellHitFn(spell_pri_flash_heal_SpellScript::HandleWoundedTrainee);
             }
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+		SpellScript* GetSpellScript() const override
         {
             return new spell_pri_flash_heal_SpellScript();
         }

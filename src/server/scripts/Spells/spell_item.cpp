@@ -489,7 +489,7 @@ class spell_item_flask_of_enhancement : public SpellScriptLoader
         {
             PrepareSpellScript(spell_item_flask_of_enhancement_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+            bool Validate(SpellInfo const* /*spellInfo*/) override
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_ENHANCED_INT) || !sSpellMgr->GetSpellInfo(SPELL_ENHANCED_AGI) || !sSpellMgr->GetSpellInfo(SPELL_ENHANCED_STR))
                     return false;
@@ -522,13 +522,13 @@ class spell_item_flask_of_enhancement : public SpellScriptLoader
                 caster->CastSpell(caster, flask_spell_id, true, NULL);
             }
 
-            void Register() OVERRIDE
+            void Register() override
             {
                 OnEffectHit += SpellEffectFn(spell_item_flask_of_enhancement_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_item_flask_of_enhancement_SpellScript();
         }

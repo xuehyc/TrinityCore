@@ -31,12 +31,12 @@ public:
 		bool	_spell_is_on_work;
 		uint32	_timer;
 
-		void Reset() OVERRIDE 
+		void Reset() override 
 		{ 
 			_spell_is_on_work=false; _timer=0;
 		}
 
-		void SpellHit(Unit * Hitter, SpellInfo const* spell) OVERRIDE
+		void SpellHit(Unit * Hitter, SpellInfo const* spell) override
         {				
 			if (Player* player = Hitter->ToPlayer())
 			{
@@ -121,7 +121,7 @@ public:
 			}
         }
 
-		 void UpdateAI(uint32 diff) OVERRIDE
+		 void UpdateAI(uint32 diff) override
          {
 			if (_spell_is_on_work)
 			{
@@ -134,7 +134,7 @@ public:
     };
 
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_trainings_dummyAI (pCreature);
     }

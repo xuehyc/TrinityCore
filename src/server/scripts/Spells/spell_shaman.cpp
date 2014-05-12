@@ -1204,14 +1204,14 @@ public:
 
         int32 chance;
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
             if (!sSpellStore.LookupEntry(SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN))
                 return false;
             return true;
         }
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             chance = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
             return true;
@@ -1223,7 +1223,7 @@ public:
                 GetCaster()->CastSpell(GetHitUnit(), SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN, true);
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_sha_earthquake_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
         }
@@ -1245,7 +1245,7 @@ public:
     {
         PrepareSpellScript(spell_sha_unleash_elements_SpellScript)
 
-        bool Validate(SpellInfo const * /*spellInfo*/) OVERRIDE
+        bool Validate(SpellInfo const * /*spellInfo*/) override
         {
             if (!sSpellStore.LookupEntry(SHAMAN_SPELL_UNLEASH_ELEMENTS))
                 return false;
@@ -1309,7 +1309,7 @@ public:
             }
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_sha_unleash_elements_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
@@ -1347,7 +1347,7 @@ public:
 			SetHitDamage(hitDamage);			
 		}
 
-        void Register() OVERRIDE
+        void Register() override
         {            			
 			OnHit += SpellHitFn(spell_sha_primal_strike_SpellScript::HandleOnHit);
         }

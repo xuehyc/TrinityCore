@@ -54,7 +54,7 @@ class npc_scarlet_corpse : public CreatureScript
 public:
     npc_scarlet_corpse() : CreatureScript("npc_scarlet_corpse") { }
 	
-	bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+	bool OnGossipHello(Player* player, Creature* creature) override
     {
 		if (!player) return true;
         player->PlayerTalkClass->SendCloseGossip();		
@@ -85,7 +85,7 @@ public:
 	
 	uint32 count;
 
-	bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+	bool OnGossipHello(Player* player, Creature* creature) override
     {		
 		switch (creature->GetEntry())
 		{
@@ -109,7 +109,7 @@ public:
         return true;
     }
 
-	bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) OVERRIDE
+	bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
     {      
 		if (!player) return true;        
 		if (!creature) return true;
@@ -150,7 +150,7 @@ public:
 		uint32 timer;
 		Player* player;		
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
 			// phase   1-3 for NPC_LILIAN_VOSS_1
 			// phase 11-13 for NPC_LILIAN_VOSS_2
@@ -158,7 +158,7 @@ public:
 			timer=0;			
         }
 	   
-		void UpdateAI(uint32 Diff) OVERRIDE
+		void UpdateAI(uint32 Diff) override
 		{
 			if (!UpdateVictim())
 			{
@@ -223,7 +223,7 @@ public:
 		}
 	};
 
-	CreatureAI* GetAI(Creature* creature) const OVERRIDE
+	CreatureAI* GetAI(Creature* creature) const override
     {
 		return new npc_lilian_vossAI(creature);
     }
@@ -241,7 +241,7 @@ public:
 	
 	uint32 count;
 
-	bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+	bool OnGossipHello(Player* player, Creature* creature) override
     {
 		if (creature->GetEntry() == NPC_MARSHAL_REDPATH_1 && player->GetQuestStatus(QUEST_THE_WAKENING) == QUEST_STATUS_INCOMPLETE) 
 		{			
@@ -250,7 +250,7 @@ public:
         return true;		
     }
 
-	bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) OVERRIDE
+	bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
     {      
 		if (!player) return true;        
 		if (!creature) return true;			
@@ -275,13 +275,13 @@ public:
 		uint32 timer;
 		Player* player;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {			
             phase=0; 
 			timer=0;
         }
 	   
-		void EnterCombat(Unit* who) OVERRIDE
+		void EnterCombat(Unit* who) override
 		{
             if (who->GetEntry() == NPC_MARSHAL_REDPATH_2)  
 			{
@@ -289,7 +289,7 @@ public:
 			}
         }
 
-		void UpdateAI(uint32 Diff) OVERRIDE
+		void UpdateAI(uint32 Diff) override
 		{
 			if (!UpdateVictim())
 			{
@@ -330,7 +330,7 @@ public:
 		} 							
 	};
 
-	CreatureAI* GetAI(Creature* creature) const OVERRIDE
+	CreatureAI* GetAI(Creature* creature) const override
     {
 		return new npc_marshal_redpathAI(creature);
     }
@@ -348,7 +348,7 @@ public:
 	
 	uint32 count;
 
-	bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+	bool OnGossipHello(Player* player, Creature* creature) override
     {
 		if (creature->GetEntry() == NPC_VALDRED_MORAY && player->GetQuestStatus(QUEST_THE_WAKENING) == QUEST_STATUS_INCOMPLETE) 
 		{			
@@ -357,7 +357,7 @@ public:
         return true;		
     }
 
-	bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) OVERRIDE
+	bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
     {      
 		if (!player) return true;        
 		if (!creature) return true;			
@@ -382,13 +382,13 @@ public:
 		uint32 timer;
 		Player* player;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {			
             phase=0; 
 			timer=0;
         }
 	   
-		void UpdateAI(uint32 Diff) OVERRIDE
+		void UpdateAI(uint32 Diff) override
 		{
 			if (!UpdateVictim())
 			{
@@ -429,7 +429,7 @@ public:
 		}
 	};
 
-	CreatureAI* GetAI(Creature* creature) const OVERRIDE
+	CreatureAI* GetAI(Creature* creature) const override
     {
 		return new npc_valdred_morayAI(creature);
     }
@@ -451,12 +451,12 @@ public:
 
 		uint32 timer;
 
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
             timer=urand(20000,45000);           			
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -474,7 +474,7 @@ public:
         }
     };
 
-	   CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	   CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_aradneAI (pCreature);
     }
@@ -498,13 +498,13 @@ public:
 		uint32 phase;
 		uint32 WishToBeDead;
 
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
             timer=100;
 			phase=0;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -573,7 +573,7 @@ public:
         }
     };
 
-	   CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	   CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_risen_deadAI (pCreature);
     }
@@ -595,17 +595,17 @@ public:
 		
 		uint32 timer;
 
-		void Reset()  OVERRIDE
+		void Reset()  override
         {
            timer=0;
         }
 
-		void EnterCombat(Unit* who) OVERRIDE
+		void EnterCombat(Unit* who) override
 		{            			
 			Talk(0);			
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -624,7 +624,7 @@ public:
         }
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_rotbrain_berserkerAI (pCreature);
     }
@@ -645,17 +645,17 @@ public:
         npc_rotbrain_magusAI(Creature *c) : ScriptedAI(c) {}
 		uint32 timer;
 
-		void Reset()  OVERRIDE
+		void Reset()  override
         {
            timer=0;
         }
 
-		void EnterCombat(Unit* who) OVERRIDE
+		void EnterCombat(Unit* who) override
 		{          
 			Talk(0);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -674,7 +674,7 @@ public:
         }
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_rotbrain_magusAI (pCreature);
     }
@@ -696,12 +696,12 @@ public:
 		
 		uint32 timer;
 
-		void Reset()  OVERRIDE
+		void Reset()  override
         {
            timer=0;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -726,7 +726,7 @@ public:
         }
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_deathguard_protectorAI (pCreature);
     }

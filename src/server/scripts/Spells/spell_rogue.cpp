@@ -987,13 +987,13 @@ class spell_rog_redirect : public SpellScriptLoader
                 }
             }
 
-            void Register() OVERRIDE
+            void Register() override
             {
                 OnEffectHitTarget += SpellEffectFn(spell_rog_redirect_SpellScript::HandleRedirect, EFFECT_0, SPELL_EFFECT_ADD_COMBO_POINTS);
             }
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_rog_redirect_SpellScript();
         }
@@ -1020,13 +1020,13 @@ class spell_rog_backstab : public SpellScriptLoader
                    }
            }
 
-           void Register() OVERRIDE
+           void Register() override
            {
                OnEffectHitTarget += SpellEffectFn(spell_rog_backstab_SpellScript::ChangeDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
            }
        };
 
-       SpellScript* GetSpellScript() const OVERRIDE
+       SpellScript* GetSpellScript() const override
        {
            return new spell_rog_backstab_SpellScript();
        }
@@ -1068,13 +1068,13 @@ public:
          
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             OnEffectProc += AuraEffectProcFn(spell_rog_venomous_wounds_AuraScript::OnProc, EFFECT_1, SPELL_AURA_DUMMY);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_rog_venomous_wounds_AuraScript();
     }
@@ -1117,14 +1117,14 @@ public:
             player->CastCustomSpell(player, 79132, &energy, NULL, NULL, true, NULL, NULL, player->GetGUID());
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             BeforeHit += SpellHitFn(spell_rog_murderous_Intent_SpellScript::HandleBeforeHit);
             AfterHit += SpellHitFn(spell_rog_murderous_Intent_SpellScript::HandleAfterHit);
         }
     };
 
-    SpellScript * GetSpellScript() const OVERRIDE
+    SpellScript * GetSpellScript() const override
     {
         return new spell_rog_murderous_Intent_SpellScript();
     }

@@ -182,12 +182,12 @@ public:
         uint32    _timer;  		
 		Player*	  _player;
 		
-		void Reset()  OVERRIDE
+		void Reset()  override
         {
               _timer=0; _player=NULL;     			
         }
 	
-		void SpellHit(Unit* Hitter, SpellInfo const* spell) OVERRIDE  
+		void SpellHit(Unit* Hitter, SpellInfo const* spell) override  
 		{ 
 			if (Player* player = Hitter->ToPlayer())
 			{
@@ -201,7 +201,7 @@ public:
   
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_echo_isles_quest_bunnyAI (pCreature);
     }

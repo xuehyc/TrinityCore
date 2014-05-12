@@ -1495,13 +1495,13 @@ public:
     {
         PrepareAuraScript(spell_mage_incanters_absorbtion_absorb_AuraScript);
 
-        void Register() OVERRIDE
+        void Register() override
         {
              AfterEffectAbsorb += AuraEffectAbsorbFn(spell_mage_incanters_absorbtion_absorb_AuraScript::Trigger, EFFECT_0);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_mage_incanters_absorbtion_absorb_AuraScript();
     }
@@ -1517,13 +1517,13 @@ public:
     {
         PrepareAuraScript(spell_mage_incanters_absorbtion_manashield_AuraScript);
 
-        void Register() OVERRIDE
+        void Register() override
         {
              AfterEffectManaShield += AuraEffectManaShieldFn(spell_mage_incanters_absorbtion_manashield_AuraScript::Trigger, EFFECT_0);
         }
     };
 
-    AuraScript* GetAuraScript() const OVERRIDE
+    AuraScript* GetAuraScript() const override
     {
         return new spell_mage_incanters_absorbtion_manashield_AuraScript();
     }

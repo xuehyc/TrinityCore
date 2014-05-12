@@ -81,7 +81,7 @@ public:
     {
         npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature) {}
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             if (me->IsSummon())
                 if (Unit* owner = me->ToTempSummon()->GetSummoner())
@@ -89,7 +89,7 @@ public:
                         pet->CastSpell(pet, MANA_LEECH, true);
         }
  
-        void DamageTaken(Unit* /*killer*/, uint32& damage) OVERRIDE
+        void DamageTaken(Unit* /*killer*/, uint32& damage) override
         {
             if (me->IsSummon())
                 if (Unit* owner = me->ToTempSummon()->GetSummoner())
@@ -97,7 +97,7 @@ public:
                         owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
         }
 
-        void UpdateAI(uint32 /*diff*/) OVERRIDE
+        void UpdateAI(uint32 /*diff*/) override
         {
             if (!UpdateVictim())
                 return;
@@ -106,7 +106,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_shadowfiendAI(creature);
     }

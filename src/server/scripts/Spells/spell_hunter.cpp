@@ -1112,7 +1112,7 @@ public:
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_hun_kill_command_SpellScript();
     }
@@ -1226,7 +1226,7 @@ public:
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_hun_steady_shot_focus_SpellScript();
     }
@@ -1261,7 +1261,7 @@ public:
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_hun_generic_energize_focus_SpellScript();
     }

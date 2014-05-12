@@ -524,7 +524,7 @@ class spell_potion_of_wildfire : public SpellScriptLoader
 				}				
             }
 
-			void Register() OVERRIDE
+			void Register() override
             {                
 				OnHit += SpellHitFn(spell_potion_of_wildfire_SpellScript::HandleOnHit);				
             }
@@ -532,7 +532,7 @@ class spell_potion_of_wildfire : public SpellScriptLoader
 
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_potion_of_wildfire_SpellScript();
         }
@@ -552,7 +552,7 @@ class spell_unbathed_concoction : public SpellScriptLoader
             PrepareSpellScript(spell_unbathed_concoction_SpellScript);
 			
 			
-            void Unload() OVERRIDE
+            void Unload() override
             {				
 				Player* player = GetCaster()->ToPlayer();
 				if (!player) return;
@@ -571,11 +571,11 @@ class spell_unbathed_concoction : public SpellScriptLoader
             }
 
 			
-			void Register() OVERRIDE {}
+			void Register() override {}
 
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_unbathed_concoction_SpellScript();
         }
@@ -590,7 +590,7 @@ class npc_feero_ironhand : public CreatureScript
     public:
         npc_feero_ironhand() : CreatureScript("npc_feero_ironhand") { }
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -619,7 +619,7 @@ class npc_delgren_the_purifier : public CreatureScript
     public:
         npc_delgren_the_purifier() : CreatureScript("npc_delgren_the_purifier") { }
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -677,12 +677,12 @@ public:
 			}						
 		}
 
-		void Reset() OVERRIDE
+		void Reset() override
 		{
 			VisibleStatus=0;
 		}
 
-		void MoveInLineOfSight(Unit* who) OVERRIDE 
+		void MoveInLineOfSight(Unit* who) override 
 		{ 			
 			if (Player* player = who->ToPlayer())
 			{	
@@ -704,7 +704,7 @@ public:
 
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_bolyun_1AI (pCreature);
     }
@@ -744,12 +744,12 @@ public:
 			}						
 		}
 
-		void Reset() OVERRIDE
+		void Reset() override
 		{
 			VisibleStatus=0;
 		}
 
-		void MoveInLineOfSight(Unit* who) OVERRIDE 
+		void MoveInLineOfSight(Unit* who) override 
 		{ 
 			if (Player* player = who->ToPlayer())
 			{
@@ -769,7 +769,7 @@ public:
 
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_bolyun_2AI (pCreature);
     }
@@ -792,12 +792,12 @@ public:
 		uint32	_timer_for_spawn_invaders;
 		bool	_IsPlayerNear;
 
-		void Reset() OVERRIDE
+		void Reset() override
 		{
 			_timer_check_for_player=2000; _timer_for_spawn_invaders=0; _IsPlayerNear=false;
 		}
 
-		void UpdateAI(uint32 diff) OVERRIDE
+		void UpdateAI(uint32 diff) override
         {	
 			if (_timer_check_for_player<=diff)				
 			{
@@ -881,7 +881,7 @@ public:
 		}
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_big_baobobAI (pCreature);
     }
@@ -905,18 +905,18 @@ public:
 		uint32	_phase;
 		Player*	_player;
 
-		void Reset() OVERRIDE
+		void Reset() override
 		{
 			_timer_check_for_player=2000; _phase=0; _timer=0;
 			me->AddAura(SPELL_BATHRANS_CORPSE_FIRE,me);
 		}
 
-		void SpellHit(Unit* Hitter, SpellInfo const* spell) OVERRIDE  
+		void SpellHit(Unit* Hitter, SpellInfo const* spell) override  
 		{ 
 			_phase=1; _player= Hitter->ToPlayer();
 		}
 
-		void UpdateAI(uint32 diff) OVERRIDE
+		void UpdateAI(uint32 diff) override
         {	
 			if (_timer_check_for_player<=diff)				
 			{
@@ -994,7 +994,7 @@ public:
 		}
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_astranaar_burning_fire_bunnyAI (pCreature);
     }

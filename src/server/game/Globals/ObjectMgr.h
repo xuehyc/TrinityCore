@@ -728,6 +728,7 @@ class ObjectMgr
         typedef std::unordered_map<uint32, RewardOnKillEntry> RepOnKillContainer;
         typedef std::unordered_map<uint32, RepSpilloverTemplate> RepSpilloverTemplateContainer;
 
+
         typedef std::unordered_map<uint32, PointOfInterest> PointOfInterestContainer;
 
         typedef std::vector<std::string> ScriptNameContainer;
@@ -857,7 +858,7 @@ class ObjectMgr
 
         RewardOnKillEntry const* GetRewardOnKillEntry(uint32 id) const
         {
-            RewOnKillMap::const_iterator itr = _RewOnKill.find(id);
+            RepOnKillContainer::const_iterator itr = _RewOnKill.find(id);
             if (itr != _RewOnKill.end())
                 return &itr->second;
             return NULL;
@@ -1364,7 +1365,7 @@ class ObjectMgr
         DungeonEncounterContainer _dungeonEncounterStore;
 
         RepRewardRateContainer _repRewardRateStore;
-        RewOnKillMap        _RewOnKill;
+        RepOnKillContainer        _RewOnKill;
         RepSpilloverTemplateContainer _repSpilloverTemplateStore;
 
         GossipMenusContainer _gossipMenusStore;

@@ -133,7 +133,7 @@ class npc_cerellean_whiteclaw : public CreatureScript
     public:
         npc_cerellean_whiteclaw() : CreatureScript("npc_cerellean_whiteclaw") { }
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -163,7 +163,7 @@ class npc_cerellean_whiteclaw : public CreatureScript
 				_player=player;				
 			}
 			
-			void UpdateAI(uint32 diff) OVERRIDE
+			void UpdateAI(uint32 diff) override
 			{						
 				if (!UpdateVictim())						
 					DoTimerWork_OOC(diff);								
@@ -203,7 +203,7 @@ class npc_cerellean_whiteclaw : public CreatureScript
 			}
         };
 		
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_cerellean_whiteclawAI(creature);
         }
@@ -218,7 +218,7 @@ class npc_volcor : public CreatureScript
     public:
         npc_volcor() : CreatureScript("npc_volcor") { }
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -248,7 +248,7 @@ class npc_volcor : public CreatureScript
 				_player=player;
 			}
 			
-			void UpdateAI(uint32 diff) OVERRIDE
+			void UpdateAI(uint32 diff) override
 			{						
 				if (!UpdateVictim())						
 					DoTimerWork_OOC(diff);								
@@ -288,7 +288,7 @@ class npc_volcor : public CreatureScript
 			}
         };
 		
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_volcorAI(creature);
         }
@@ -303,7 +303,7 @@ class npc_shaldyn : public CreatureScript
     public:
         npc_shaldyn() : CreatureScript("npc_shaldyn") { }
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -333,7 +333,7 @@ class npc_shaldyn : public CreatureScript
 				_player=player;
 			}
 			
-			void UpdateAI(uint32 diff) OVERRIDE
+			void UpdateAI(uint32 diff) override
 			{						
 				if (!UpdateVictim())						
 					DoTimerWork_OOC(diff);								
@@ -373,7 +373,7 @@ class npc_shaldyn : public CreatureScript
 			}
         };
 		
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_shaldynAI(creature);
         }
@@ -388,7 +388,7 @@ class npc_gershala_nightwhisper : public CreatureScript
     public:
         npc_gershala_nightwhisper() : CreatureScript("npc_gershala_nightwhisper") { }
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -418,7 +418,7 @@ class npc_gershala_nightwhisper : public CreatureScript
 				_player=player;					
 			}
 			
-			void UpdateAI(uint32 diff) OVERRIDE
+			void UpdateAI(uint32 diff) override
 			{						
 				if (!UpdateVictim())						
 					DoTimerWork_OOC(diff);								
@@ -458,7 +458,7 @@ class npc_gershala_nightwhisper : public CreatureScript
 			}
         };
 		
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_gershala_nightwhisperAI(creature);
         }
@@ -473,7 +473,7 @@ class npc_decomposing_thistle_bear : public CreatureScript
     public:
         npc_decomposing_thistle_bear() : CreatureScript("npc_decomposing_thistle_bear") { }
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -508,13 +508,13 @@ class npc_withered_ent : public CreatureScript
         
 			Player* m_player;
 
-			void IsSummonedBy(Unit* summoner) OVERRIDE
+			void IsSummonedBy(Unit* summoner) override
 			{			
 				m_player = summoner->ToPlayer();
 				if (m_player) m_player->KilledMonsterCredit(NPC_DARKSCALE_SCOUT_KILL_CREDIT, NULL);	
 			}
 
-			void AttackStart(Unit* who) OVERRIDE
+			void AttackStart(Unit* who) override
 			{
 				if (!who)
 					return;				
@@ -528,7 +528,7 @@ class npc_withered_ent : public CreatureScript
 				}               				
 			}		
 
-			void MoveInLineOfSight(Unit* who) OVERRIDE 
+			void MoveInLineOfSight(Unit* who) override 
 			{ 				
 				if (!me->IsInCombat())				
 				{
@@ -544,7 +544,7 @@ class npc_withered_ent : public CreatureScript
 				} 				
 			}            
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
 				if (!UpdateVictim())
 					return;
@@ -553,7 +553,7 @@ class npc_withered_ent : public CreatureScript
             }           
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_withered_entAI(creature);
         }
@@ -568,7 +568,7 @@ class npc_great_thistle_bear_spirit : public CreatureScript
     public:
         npc_great_thistle_bear_spirit() : CreatureScript("npc_great_thistle_bear_spirit") { }
 
-		bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE 
+		bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override 
 		{					
 			if (quest->GetQuestId() == QUEST_SPIRIT_OF_THE_THISTLE_BEAR)
 			{						
@@ -599,7 +599,7 @@ class npc_great_moonstalker_spirit : public CreatureScript
     public:
         npc_great_moonstalker_spirit() : CreatureScript("npc_great_moonstalker_spirit") { }
 
-		bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE 
+		bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override 
 		{			
 			if (quest->GetQuestId() == QUEST_SPIRIT_OF_THE_MOONSTALKER)
 			{						
@@ -631,7 +631,7 @@ class npc_great_stag_spirit : public CreatureScript
     public:
         npc_great_stag_spirit() : CreatureScript("npc_great_stag_spirit") { }
 
-		bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE 
+		bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override 
 		{			
 			if (quest->GetQuestId() == QUEST_SPIRIT_OF_THE_STAG)
 			{												
@@ -663,7 +663,7 @@ class go_grovekeepers_incense : public GameObjectScript
 public:
     go_grovekeepers_incense() : GameObjectScript("go_grovekeepers_incense") { }
 
-    bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+    bool OnGossipHello(Player* player, GameObject* go) override
     {
 		if (player->GetQuestStatus(QUEST_THE_RITUAL_BOND) == QUEST_STATUS_INCOMPLETE)				
 		{
@@ -683,7 +683,7 @@ class item_frenzied_cyclone_bracers : public ItemScript
 public:
     item_frenzied_cyclone_bracers() : ItemScript("item_frenzied_cyclone_bracers") { }
 
-    bool OnExpire(Player* player, ItemTemplate const* pItemProto) OVERRIDE
+    bool OnExpire(Player* player, ItemTemplate const* pItemProto) override
     {
 		printf("Trigger item_frenzied_cyclone_bracers::OnExpire \n");
 		if (player->GetQuestStatus(QUEST_AGAINST_THE_WIND) == QUEST_STATUS_INCOMPLETE)				
@@ -716,12 +716,12 @@ public:
 		Creature* _forman;
 		float	  _oldOrientation;
 		
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
               _timer=0; _phase=0; _oldOrientation=0; _forman=NULL;      			
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -768,7 +768,7 @@ public:
 		}
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_twilight_workerAI (pCreature);
     }
@@ -792,12 +792,12 @@ public:
 		Player*   _player;
 		Creature* _worker;
 		
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
               _timer=0; _phase=0; _player=NULL; _worker=NULL;      			
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -858,7 +858,7 @@ public:
 		}
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_foreman_balsothAI (pCreature);
     }
@@ -881,12 +881,12 @@ public:
 		uint32    _phase;
 		Player*   _player;		
 		
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
               _timer=0; _phase=0; _player=NULL;       			
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -931,7 +931,7 @@ public:
 		}
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_thalya_the_voidcallerAI (pCreature);
     }
@@ -946,7 +946,7 @@ class npc_onu : public CreatureScript
     public:
         npc_onu() : CreatureScript("npc_onu") { }
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -975,7 +975,7 @@ class npc_darkshore_wisp : public CreatureScript
     public:
         npc_darkshore_wisp() : CreatureScript("npc_darkshore_wisp") { }
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -1029,7 +1029,7 @@ class spell_torch_shatterspear_supplies : public SpellScriptLoader
 				}
             }
 
-			void Register() OVERRIDE
+			void Register() override
             {                
 				OnHit += SpellHitFn(spell_torch_shatterspear_supplies_SpellScript::HandleOnHit);
             }
@@ -1037,7 +1037,7 @@ class spell_torch_shatterspear_supplies : public SpellScriptLoader
 
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_torch_shatterspear_supplies_SpellScript();
         }
@@ -1052,7 +1052,7 @@ class npc_huntress_sandrya_moonfall : public CreatureScript
     public:
         npc_huntress_sandrya_moonfall() : CreatureScript("npc_huntress_sandrya_moonfall") { }				
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player || !creature) return true;			
 
@@ -1081,7 +1081,7 @@ class npc_huntress_sandrya_moonfall : public CreatureScript
 			return true;
 		}
 
-		bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) OVERRIDE 
+		bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override 
 		{		
 			Creature* jorkil=creature->FindNearestCreature (NPC_JORKIL_THE_SOULRIPPER,100.0f,true);
 			if (jorkil)
@@ -1102,7 +1102,7 @@ class npc_huntress_sandrya_moonfall : public CreatureScript
 			uint32    _talkTimer;
 			uint32    _phase;
 			
-			void Reset() OVERRIDE 
+			void Reset() override 
 			{ 
 				_timer=0; _talkTimer=0;  _phase=0; _player=NULL; _jorkil=NULL;
 			}
@@ -1112,13 +1112,13 @@ class npc_huntress_sandrya_moonfall : public CreatureScript
 				_player=player; _jorkil=jorkil; _phase=1;
 			}    
 			
-			void EnterCombat(Unit* who) OVERRIDE 
+			void EnterCombat(Unit* who) override 
 			{ 
 				if (who->GetEntry() == uint32(NPC_JORKIL_THE_SOULRIPPER))
 					Talk(2);
 			}
 
-	        void MoveInLineOfSight(Unit* who) OVERRIDE 
+	        void MoveInLineOfSight(Unit* who) override 
 			{ 				
 				Player* player=who->ToPlayer();
 				if (!player) return;
@@ -1131,7 +1131,7 @@ class npc_huntress_sandrya_moonfall : public CreatureScript
 				}					
 			}
 			
-			void UpdateAI(uint32 diff) OVERRIDE
+			void UpdateAI(uint32 diff) override
 			{	
 				if (_talkTimer<=diff)				
 						_talkTimer=0;
@@ -1169,7 +1169,7 @@ class npc_huntress_sandrya_moonfall : public CreatureScript
 			}
 		};
 		
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_huntress_sandrya_moonfallAI(creature);
         }
@@ -1207,7 +1207,7 @@ class spell_constructing : public SpellScriptLoader
 				}				
             }
 
-			void Register() OVERRIDE
+			void Register() override
             {                
 				OnHit += SpellHitFn(spell_constructing_SpellScript::HandleOnHit);
             }
@@ -1215,7 +1215,7 @@ class spell_constructing : public SpellScriptLoader
 
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_constructing_SpellScript();
         }
@@ -1237,12 +1237,12 @@ public:
         uint32    _timer;  
 		uint32    _phase;				
 		
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
               _timer=0; _phase=0;       			
         }
 
-		void DamageTaken(Unit* pDone_by, uint32& uiDamage) OVERRIDE  
+		void DamageTaken(Unit* pDone_by, uint32& uiDamage) override  
 		{ 
 			if (me->GetHealthPct() < 15)
 			{
@@ -1251,13 +1251,13 @@ public:
 			}		
 		}
 
-		void SpellHit(Unit* Hitter, SpellInfo const* spell) OVERRIDE  
+		void SpellHit(Unit* Hitter, SpellInfo const* spell) override  
 		{ 
 			if (spell->Id==SPELL_BLESSED_HERB_BUNDLE && Hitter->GetTypeId()==TYPEID_PLAYER)
 				_phase=1;
 		}
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {				
 			if (_timer<=diff)				
 				DoWork();
@@ -1293,7 +1293,7 @@ public:
 		}
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_corrupted_blackwoodAI (pCreature);
     }
@@ -1316,12 +1316,12 @@ public:
 		uint32    _phase;
 		Player*	  _player;
 		
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
               _timer=0; _phase=0;       			
         }
 
-		void DamageTaken(Unit* pDone_by, uint32& uiDamage) OVERRIDE  
+		void DamageTaken(Unit* pDone_by, uint32& uiDamage) override  
 		{ 
 			float onepct = (float)me->GetMaxHealth()/100;
 			float dmgpct = (float)uiDamage/onepct;
@@ -1339,7 +1339,7 @@ public:
 			}		
 		}
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {				
 			if (_timer<=diff)				
 				DoWork();
@@ -1380,7 +1380,7 @@ public:
 		}
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_warlord_wrathspineAI (pCreature);
     }
@@ -1408,7 +1408,7 @@ public:
               _timer=0; _phase=0; _player=player;      			
         }
 		
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {	
 			if (_timer<=diff)				
 				DoWork();
@@ -1462,7 +1462,7 @@ public:
 
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_queen_azsharaAI (pCreature);
     }
@@ -1490,7 +1490,7 @@ public:
               _timer=0; _phase=0; _player=player;      			
         }
 		
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {	
 			if (_timer<=diff)				
 				DoWork();
@@ -1544,7 +1544,7 @@ public:
 		}
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_malfurion_stormrageAI (pCreature);
     }
@@ -1569,12 +1569,12 @@ public:
 		Creature* _queen;
 		Creature* _malfurion;
 		
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
               _timer=0; _phase=0; _player=NULL; _queen=NULL; _malfurion=NULL;     			
         }
 		
-		void JustDied(Unit* killer) OVERRIDE 
+		void JustDied(Unit* killer) override 
 		{ 	
 			_player=killer->ToPlayer();
 			if (!_player) 
@@ -1602,7 +1602,7 @@ public:
 					
 		} 
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {							
             if (!UpdateVictim())
 				return;
@@ -1611,7 +1611,7 @@ public:
         }	
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_darkscale_priestessAI (pCreature);
     }

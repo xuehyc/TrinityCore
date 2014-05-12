@@ -1527,7 +1527,7 @@ public:
     {
         npc_mirror_imageAI(Creature* creature) : CasterAI(creature) {}
 
-        void InitializeAI() OVERRIDE
+        void InitializeAI() override
         {
             CasterAI::InitializeAI();
             Unit* owner = me->GetOwner();
@@ -1597,7 +1597,7 @@ public:
     }
 
         // Do not reload Creature templates on evade mode enter - prevent visual lost
-        void EnterEvadeMode() OVERRIDE
+        void EnterEvadeMode() override
         {
             if (me->IsInEvadeMode() || !me->IsAlive())
                 return;
@@ -1613,7 +1613,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_mirror_imageAI(creature);
     }
@@ -1630,7 +1630,7 @@ public:
 
         uint32 despawnTimer;
 
-        void InitializeAI() OVERRIDE
+        void InitializeAI() override
         {
             CasterAI::InitializeAI();
             uint64 ownerGuid = me->GetOwnerGUID();
@@ -1651,7 +1651,7 @@ public:
                 }
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             // Stop Feeding Gargoyle when it dies
             if (Unit* owner = me->GetOwner())
@@ -1659,7 +1659,7 @@ public:
         }
 
         // Fly away when dismissed
-        void SpellHit(Unit* source, SpellInfo const* spell) OVERRIDE
+        void SpellHit(Unit* source, SpellInfo const* spell) override
         {
             if (spell->Id != 50515 || !me->IsAlive())
                 return;
@@ -1690,7 +1690,7 @@ public:
             despawnTimer = 4 * IN_MILLISECONDS;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (despawnTimer > 0)
             {
@@ -1704,7 +1704,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_ebon_gargoyleAI(creature);
     }
@@ -1722,7 +1722,7 @@ class npc_lightwell : public CreatureScript
                 DoCast(me, 59907, false);
             }
 
-            void EnterEvadeMode() OVERRIDE
+            void EnterEvadeMode() override
             {
                 if (!me->IsAlive())
                     return;
@@ -1733,7 +1733,7 @@ class npc_lightwell : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_lightwellAI(creature);
         }

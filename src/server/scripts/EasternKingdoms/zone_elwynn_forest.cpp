@@ -97,12 +97,12 @@ public:
 
         uint32 Attack1HTimer;        	
 
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
             Attack1HTimer = urand(1800,2200);           			
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -123,7 +123,7 @@ public:
         }
     };
 
-	   CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	   CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_blackrock_battle_worgAI (pCreature);
     }
@@ -145,13 +145,13 @@ public:
         uint32 uiSayTimer;
         uint32 Attack1HTimer;
 
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
             uiSayTimer = urand(	10000, 300000);
             Attack1HTimer = urand(1800,2200);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
 			if (!UpdateVictim())
 			{
@@ -192,7 +192,7 @@ public:
 		}
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_stormwind_infantryAI (pCreature);
     }
@@ -216,15 +216,15 @@ public:
 		uint32 Aura;
 		uint32 Timer;
 		
-		void Reset()  OVERRIDE
+		void Reset()  override
 			{ CreateNewPhase(); }    
        
-		void EnterCombat(Unit* /*who*/) OVERRIDE 
+		void EnterCombat(Unit* /*who*/) override 
 		{ 
 			Talk(0);
 		}
 
-		void UpdateAI(uint32 diff) OVERRIDE
+		void UpdateAI(uint32 diff) override
         {      
 			if (!UpdateVictim())
 			{					
@@ -274,7 +274,7 @@ public:
 		}
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_blackrock_spyAI (pCreature);
     }
@@ -297,12 +297,12 @@ public:
                 DoCast(SPELL_SNEAKING);
 		}
 
-        void EnterCombat(Unit * who)  OVERRIDE
+        void EnterCombat(Unit * who)  override
         {
             Talk(0);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -311,7 +311,7 @@ public:
         }
     };
 
-	 CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	 CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_goblin_assassinAI (pCreature);
     }
@@ -326,7 +326,7 @@ class npc_injured_soldier : public CreatureScript
 public:
     npc_injured_soldier() : CreatureScript("npc_injured_soldier") { }
 	
-	bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+	bool OnGossipHello(Player* player, Creature* creature) override
     {
         player->PlayerTalkClass->SendCloseGossip();		
 
@@ -371,14 +371,14 @@ public:
 		uint32 phase;
 		uint32 timer;
 				
-		void Reset() OVERRIDE 
+		void Reset() override 
 		{ 
 			isHealed=false;
 			phase=0;
 			timer=1000;
 		}
 			
-	    void SpellHit(Unit * Hitter, SpellInfo const* spell) OVERRIDE
+	    void SpellHit(Unit * Hitter, SpellInfo const* spell) override
         {
             if (spell->Id == SPELL_RENEWEDLIFE )
             {
@@ -386,7 +386,7 @@ public:
             }
         }
 		
-		void UpdateAI(uint32 diff) OVERRIDE
+		void UpdateAI(uint32 diff) override
         {   
 
 			if (!isHealed) return;
@@ -416,7 +416,7 @@ public:
 		}
     };
 	 
-	CreatureAI* GetAI(Creature* creature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* creature) const  override
     {
         return new npc_injured_soldierAI (creature);
     }
@@ -438,13 +438,13 @@ public:
 		uint32 phase;
 		uint32 timer;
 
-		void Reset() OVERRIDE
+		void Reset() override
         {
             phase=0;
 			timer=1000;
         }
 			       
-		void UpdateAI(uint32 diff) OVERRIDE
+		void UpdateAI(uint32 diff) override
         {
 			if (!me->IsAlive()) return;
 			
@@ -482,7 +482,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_injured_soldier_dummyAI (pCreature);
     }
@@ -508,7 +508,7 @@ public:
 		bool isHealingNow;
 		uint32 timer;
 
-		void SpellHit(Unit * Hitter, SpellInfo const* spell) OVERRIDE
+		void SpellHit(Unit * Hitter, SpellInfo const* spell) override
         {					
             if (!Hitter || isHealingNow) return;
 			if (Hitter->GetEntry() != NPC_STORMWIND_INFANTRY || spell->Id != SPELL_CONVERSATIONS_TRIGGER_01) return;				
@@ -519,7 +519,7 @@ public:
 			isHealingNow=true;
         }
 
-		void UpdateAI(uint32 diff) OVERRIDE
+		void UpdateAI(uint32 diff) override
 		{			
 			if (isHealingNow)
 			{
@@ -539,7 +539,7 @@ public:
 		}		
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_brother_paxtonAI (pCreature);
     }
@@ -559,7 +559,7 @@ class npc_henze_faulk : public CreatureScript
 public:
     npc_henze_faulk() : CreatureScript("npc_henze_faulk") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+    CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_henze_faulkAI (pCreature);
     }
@@ -571,7 +571,7 @@ public:
 
         npc_henze_faulkAI(Creature *c) : ScriptedAI(c) {}
 
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
             lifeTimer = 120000;
             me->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
@@ -579,15 +579,15 @@ public:
             spellHit = false;
         }
 
-        void EnterCombat(Unit * /*who*/)  OVERRIDE
+        void EnterCombat(Unit * /*who*/)  override
         {
         }
 
-        void MoveInLineOfSight(Unit * /*who*/)  OVERRIDE
+        void MoveInLineOfSight(Unit * /*who*/)  override
         {
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (me->IsStandState())
             {
@@ -601,7 +601,7 @@ public:
             }
         }
 
-        void SpellHit(Unit * /*Hitter*/, SpellInfo const* spell) OVERRIDE
+        void SpellHit(Unit * /*Hitter*/, SpellInfo const* spell) override
         {
             if (spell->Id == 8593 && !spellHit)
             {

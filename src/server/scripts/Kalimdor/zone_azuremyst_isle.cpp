@@ -753,7 +753,7 @@ class npc_nestlewood_owlkin : public CreatureScript
         {
             npc_nestlewood_owlkinAI(Creature* creature) : ScriptedAI(creature) { }
 
-			void SpellHit(Unit * Hitter, SpellInfo const* spell) OVERRIDE
+			void SpellHit(Unit * Hitter, SpellInfo const* spell) override
 			{		
 				Player* player = Hitter->ToPlayer();
 
@@ -771,7 +771,7 @@ class npc_nestlewood_owlkin : public CreatureScript
 			}                               
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_nestlewood_owlkinAI(creature);
         }

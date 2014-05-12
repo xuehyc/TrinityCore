@@ -1080,7 +1080,7 @@ class spell_warr_heroic_strike : public SpellScriptLoader
         }
 		};
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
                 return new spell_warr_heroic_strike_SpellScript();
         }
@@ -1166,7 +1166,7 @@ class spell_warr_ralling_cry : public SpellScriptLoader
 					OnEffectHit += SpellEffectFn(spell_warr_ralling_cry_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
 				}
 			};
-			SpellScript* GetSpellScript() const OVERRIDE
+			SpellScript* GetSpellScript() const override
 			{
 				return new spell_warr_ralling_cry_SpellScript();
 			}
@@ -1244,7 +1244,7 @@ public:
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_warr_thunderclap_SpellScript();
     }
@@ -1279,7 +1279,7 @@ public:
 			OnEffectHitTarget += SpellEffectFn(spell_warr_shockwave::spell_warr_shockwave_SpellScript::CalculateDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
 		}
 	};
-	SpellScript* GetSpellScript() const OVERRIDE
+	SpellScript* GetSpellScript() const override
 	{
 		return new spell_warr_shockwave_SpellScript();
 	}
@@ -1304,7 +1304,7 @@ public:
 			OnEffectHitTarget += SpellEffectFn(spell_warr_cleave::spell_warr_cleave_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
 		}
 	};
-	SpellScript* GetSpellScript() const OVERRIDE
+	SpellScript* GetSpellScript() const override
 	{
 		return new spell_warr_cleave_SpellScript();
 
@@ -1342,7 +1342,7 @@ public:
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    SpellScript* GetSpellScript() const override
     {
         return new spell_warr_victory_rush_SpellScript();
     }
@@ -1363,7 +1363,7 @@ public:
             return sSpellMgr->GetSpellInfo(SPELL_WARRIOR_COLOSSUS_SMASH);
         }
 
-        bool Load() OVERRIDE
+        bool Load() override
         {
             if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
                 return false;
@@ -1377,7 +1377,7 @@ public:
             amount = 50;
         }
 
-        void Register() OVERRIDE
+        void Register() override
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warr_colossus_smash_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_BYPASS_ARMOR_FOR_CASTER);
         }
