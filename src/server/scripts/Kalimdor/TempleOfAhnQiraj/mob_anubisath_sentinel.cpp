@@ -68,7 +68,7 @@ class npc_anubisath_sentinel : public CreatureScript
 public:
     npc_anubisath_sentinel() : CreatureScript("npc_anubisath_sentinel") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new aqsentinelAI(creature);
     }
@@ -217,7 +217,7 @@ public:
 
         bool gatherOthersWhenAggro;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             if (!me->isDead())
             {
@@ -241,7 +241,7 @@ public:
             me->AddAura(id, me);
         }
 
-        void EnterCombat(Unit* who) OVERRIDE
+        void EnterCombat(Unit* who) override
         {
             if (gatherOthersWhenAggro)
                 GetOtherSentinels(who);
@@ -250,7 +250,7 @@ public:
             DoZoneInCombat();
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             for (int ni=0; ni<3; ++ni)
             {

@@ -175,7 +175,7 @@ public:
             portcullisGUID = 0;
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             _Reset();
             gythEvent = false;
@@ -183,7 +183,7 @@ public:
             portcullisGUID = 0;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             _EnterCombat();
             events.ScheduleEvent(EVENT_WHIRLWIND,     urand(13000, 15000));
@@ -191,14 +191,14 @@ public:
             events.ScheduleEvent(EVENT_MORTAL_STRIKE, urand(17000, 19000));
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             _JustDied();
             if (Creature* victor = me->FindNearestCreature(NPC_LORD_VICTOR_NEFARIUS, 75.0f, true))
                 victor->AI()->SetData(1, 2);
         }
 
-        void SetData(uint32 type, uint32 data) OVERRIDE
+        void SetData(uint32 type, uint32 data) override
         {
             if (type == AREATRIGGER && data == AREATRIGGER_BLACKROCK_STADIUM)
             {
@@ -218,7 +218,7 @@ public:
             }
         }
 
-        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        void MovementInform(uint32 type, uint32 id) override
         {
             if (type == WAYPOINT_MOTION_TYPE)
             {
@@ -236,7 +236,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (gythEvent)
             {
@@ -445,7 +445,7 @@ public:
             uint64 portcullisGUID;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<boss_rend_blackhandAI>(creature);
     }

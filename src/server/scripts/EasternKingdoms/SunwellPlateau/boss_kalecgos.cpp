@@ -138,7 +138,7 @@ public:
         uint64 SathGUID;
         uint64 DoorGUID;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             SathGUID = instance->GetData64(DATA_SATHROVARR);
             instance->SetBossState(DATA_KALECGOS, NOT_STARTED);
@@ -170,7 +170,7 @@ public:
             isBanished = false;
         }
 
-        void EnterEvadeMode() OVERRIDE
+        void EnterEvadeMode() override
         {
             bJustReset = true;
             me->SetVisible(false);
@@ -178,7 +178,7 @@ public:
             ScriptedAI::EnterEvadeMode();
         }
 
-        void DoAction(int32 param) OVERRIDE
+        void DoAction(int32 param) override
         {
             switch (param)
             {
@@ -193,7 +193,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (TalkTimer)
             {
@@ -328,7 +328,7 @@ public:
             }
         }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
         {
             if (bJustReset)//boss is invisible, don't attack
                 return;
@@ -341,13 +341,13 @@ public:
             }
         }
 
-        void DamageTaken(Unit* done_by, uint32 &damage) OVERRIDE
+        void DamageTaken(Unit* done_by, uint32 &damage) override
         {
             if (damage >= me->GetHealth() && done_by != me)
                 damage = 0;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             me->SetStandState(UNIT_STAND_STATE_STAND);
             Talk(SAY_EVIL_AGGRO);
@@ -356,12 +356,12 @@ public:
             instance->SetBossState(DATA_KALECGOS, IN_PROGRESS);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             Talk(SAY_EVIL_SLAY);
         }
 
-        void MovementInform(uint32 type, uint32 /*id*/) OVERRIDE
+        void MovementInform(uint32 type, uint32 /*id*/) override
         {
             if (type != POINT_MOTION_TYPE)
                 return;
@@ -432,7 +432,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetSunwellPlateauAI<boss_kalecgosAI>(creature);
     }
@@ -443,7 +443,7 @@ class boss_kalec : public CreatureScript
 public:
     boss_kalec() : CreatureScript("boss_kalec") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<boss_kalecAI>(creature);
     }
@@ -466,7 +466,7 @@ public:
             instance = creature->GetInstanceScript();
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             SathGUID = instance->GetData64(DATA_SATHROVARR);
 
@@ -478,7 +478,7 @@ public:
             isEnraged = false;
         }
 
-        void DamageTaken(Unit* done_by, uint32 &damage) OVERRIDE
+        void DamageTaken(Unit* done_by, uint32 &damage) override
         {
             if (done_by->GetGUID() != SathGUID)
                 damage = 0;
@@ -486,7 +486,7 @@ public:
                 damage *= 3;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!me->HasAura(AURA_SPECTRAL_INVISIBILITY))
                 me->CastSpell(me, AURA_SPECTRAL_INVISIBILITY, true);
@@ -544,7 +544,7 @@ class kalecgos_teleporter : public GameObjectScript
 public:
     kalecgos_teleporter() : GameObjectScript("kalecgos_teleporter") { }
 
-    bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+    bool OnGossipHello(Player* player, GameObject* go) override
     {
         Map* map = go->GetMap();
         if (!map->IsDungeon())
@@ -576,7 +576,7 @@ class boss_sathrovarr : public CreatureScript
 public:
     boss_sathrovarr() : CreatureScript("boss_sathrovarr") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<boss_sathrovarrAI>(creature);
     }
@@ -604,7 +604,7 @@ public:
         bool isEnraged;
         bool isBanished;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             me->SetFullHealth();//dunno why it does not resets health at evade..
             me->setActive(true);
@@ -629,7 +629,7 @@ public:
             TeleportAllPlayersBack();
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             if (Creature* Kalec = me->SummonCreature(NPC_KALEC, me->GetPositionX() + 10, me->GetPositionY() + 5, me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 0))
             {
@@ -641,13 +641,13 @@ public:
             Talk(SAY_SATH_AGGRO);
         }
 
-        void DamageTaken(Unit* done_by, uint32 &damage) OVERRIDE
+        void DamageTaken(Unit* done_by, uint32 &damage) override
         {
             if (damage >= me->GetHealth() && done_by != me)
                 damage = 0;
         }
 
-        void KilledUnit(Unit* target) OVERRIDE
+        void KilledUnit(Unit* target) override
         {
             if (target->GetGUID() == KalecGUID)
             {
@@ -663,7 +663,7 @@ public:
             Talk(SAY_SATH_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             Talk(SAY_SATH_DEATH);
             me->SetPosition(me->GetPositionX(), me->GetPositionY(), DRAGON_REALM_Z, me->GetOrientation());
@@ -694,7 +694,7 @@ public:
             }
         }
 
-        void DoAction(int32 param) OVERRIDE
+        void DoAction(int32 param) override
         {
             switch (param)
             {
@@ -709,7 +709,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!me->HasAura(AURA_SPECTRAL_INVISIBILITY))
                 me->CastSpell(me, AURA_SPECTRAL_INVISIBILITY, true);

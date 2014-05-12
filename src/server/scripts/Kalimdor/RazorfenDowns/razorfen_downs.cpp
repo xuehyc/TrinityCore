@@ -68,7 +68,7 @@ public:
     {
         npc_henry_sternAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 action) OVERRIDE
+        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 action) override
         {
             if (action == 0)
             {
@@ -102,7 +102,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_henry_sternAI(creature);
     }
@@ -167,7 +167,7 @@ public:
             spawnerCount = 0;
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             if (!eventInProgress)
             {
@@ -181,7 +181,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* who) OVERRIDE
+        void EnterCombat(Unit* who) override
         {
             if (channeling)
                 Talk(SAY_WATCH_OUT, who);
@@ -194,13 +194,13 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             instance->SetBossState(DATA_EXTINGUISHING_THE_IDOL, DONE);
             me->DespawnOrUnsummon(5000);
         }
 
-        void sQuestAccept(Player* /*player*/, Quest const* quest) OVERRIDE
+        void sQuestAccept(Player* /*player*/, Quest const* quest) override
         {
             if (quest->GetQuestId() == QUEST_EXTINGUISHING_THE_IDOL)
             {
@@ -212,7 +212,7 @@ public:
             }
         }
 
-        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        void MovementInform(uint32 type, uint32 id) override
         {
             if (type == WAYPOINT_MOTION_TYPE && id == POINT_REACH_IDOL)
             {
@@ -221,7 +221,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!eventInProgress)
                 return;
@@ -324,7 +324,7 @@ public:
         uint8 spawnerCount;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_belnistraszAI>(creature);
     }
@@ -342,9 +342,9 @@ public:
             instance = creature->GetInstanceScript();
         }
 
-        void Reset() OVERRIDE { }
+        void Reset() override { }
 
-        void SetData(uint32 /*type*/, uint32 data) OVERRIDE
+        void SetData(uint32 /*type*/, uint32 data) override
         {
             if (data < 7)
             {
@@ -362,7 +362,7 @@ public:
         InstanceScript* instance;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_idol_room_spawnerAI>(creature);
     }
@@ -388,7 +388,7 @@ public:
             instance = creature->GetInstanceScript();
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             if (!me->HasAura(SPELL_POISON_PROC) && me->GetEntry() == NPC_TOMB_FIEND)
                 DoCast(me, SPELL_POISON_PROC);
@@ -397,17 +397,17 @@ public:
                 DoCast(me, SPELL_VIRULENT_POISON_PROC);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             instance->SetData(DATA_WAVE, me->GetEntry());
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             events.ScheduleEvent(EVENT_WEB, urand(5000, 8000));
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -432,7 +432,7 @@ public:
         EventMap events;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_tomb_creatureAI>(creature);
     }
@@ -447,7 +447,7 @@ class go_gong : public GameObjectScript
 public:
     go_gong() : GameObjectScript("go_gong") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* go) OVERRIDE
+    bool OnGossipHello(Player* /*player*/, GameObject* go) override
     {
         InstanceScript* instance = go->GetInstanceScript();
 

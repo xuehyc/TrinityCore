@@ -20,8 +20,8 @@
 #define _MAPTREE_H
 
 #include "Define.h"
-#include "Dynamic/UnorderedMap.h"
 #include "BoundingIntervalHierarchy.h"
+#include <unordered_map>
 
 namespace VMAP
 {
@@ -39,8 +39,8 @@ namespace VMAP
 
     class StaticMapTree
     {
-        typedef UNORDERED_MAP<uint32, bool> loadedTileMap;
-        typedef UNORDERED_MAP<uint32, uint32> loadedSpawnMap;
+        typedef std::unordered_map<uint32, bool> loadedTileMap;
+        typedef std::unordered_map<uint32, uint32> loadedSpawnMap;
         private:
             uint32 iMapID;
             bool iIsTiled;
@@ -83,8 +83,8 @@ namespace VMAP
             void getModelInstances(ModelInstance* &models, uint32 &count);
 
         private:
-            StaticMapTree(StaticMapTree const& right) DELETE_MEMBER;
-            StaticMapTree& operator=(StaticMapTree const& right) DELETE_MEMBER;
+            StaticMapTree(StaticMapTree const& right) = delete;
+            StaticMapTree& operator=(StaticMapTree const& right) = delete;
     };
 
     struct AreaInfo

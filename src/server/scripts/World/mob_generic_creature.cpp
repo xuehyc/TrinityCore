@@ -46,20 +46,20 @@ public:
         uint32 BuffTimer;           //This variable keeps track of buffs
         bool IsSelfRooted;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             GlobalCooldown = 0;
             BuffTimer = 0;          //Rebuff as soon as we can
             IsSelfRooted = false;
         }
 
-        void EnterCombat(Unit* who) OVERRIDE
+        void EnterCombat(Unit* who) override
         {
             if (!me->IsWithinMeleeRange(who))
                 IsSelfRooted = true;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Always decrease our global cooldown first
             if (GlobalCooldown > diff)
@@ -167,7 +167,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new generic_creatureAI(creature);
     }
@@ -190,7 +190,7 @@ public:
         uint32 timer, interval;
         const SpellInfo* spell;
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (timer <= diff)
             {
@@ -203,7 +203,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new trigger_periodicAI(creature);
     }
@@ -217,14 +217,14 @@ public:
     struct trigger_deathAI : public NullCreatureAI
     {
         trigger_deathAI(Creature* creature) : NullCreatureAI(creature) { }
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             if (me->m_spells[0])
                 me->CastSpell(killer, me->m_spells[0], true);
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new trigger_deathAI(creature);
     }

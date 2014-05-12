@@ -79,15 +79,15 @@ public:
 
         uint64 OgreGUID;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             OgreGUID = 0;
         }
 
-        void UpdateAI(uint32 /*diff*/) OVERRIDE { }
+        void UpdateAI(uint32 /*diff*/) override { }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_bloodmaul_brutebaneAI(creature);
     }
@@ -123,13 +123,13 @@ public:
             hp30 = false;
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             PlayerGUID = 0;
             hp30 = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             if (urand (0, 100) < 35)
                 Talk(SAY_AGGRO);
@@ -138,14 +138,14 @@ public:
             events.ScheduleEvent(EVENT_DEBILITATING_STRIKE, 15000);
         }
 
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             if (killer->GetTypeId() == TYPEID_PLAYER)
                 if (killer->ToPlayer()->GetQuestRewardStatus(QUEST_INTO_THE_SOULGRINDER))
                     Talk(SAY_DEATH);
         }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
         {
             if (!who || (!who->IsAlive()))
                 return;
@@ -159,7 +159,7 @@ public:
             }
         }
 
-        void MovementInform(uint32 /*type*/, uint32 id) OVERRIDE
+        void MovementInform(uint32 /*type*/, uint32 id) override
         {
             if (id == 1)
             {
@@ -177,7 +177,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -215,7 +215,7 @@ public:
             bool hp30;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_bloodmaul_bruteAI(creature);
     }
@@ -264,7 +264,7 @@ public:
         uint32 ManaBurn_Timer;
         uint32 IntangiblePresence_Timer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             IsNihil = false;
             NihilSpeech_Timer = 3000;
@@ -275,9 +275,9 @@ public:
             IntangiblePresence_Timer = 15000;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
 
         {
             if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
@@ -287,7 +287,7 @@ public:
         }
 
         //in case Creature was not summoned (not expected)
-        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        void MovementInform(uint32 type, uint32 id) override
         {
             if (type != POINT_MOTION_TYPE)
                 return;
@@ -300,7 +300,7 @@ public:
             }
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
+        void SpellHit(Unit* caster, const SpellInfo* spell) override
         {
             if (spell->Id == SPELL_T_PHASE_MODULATOR && caster->GetTypeId() == TYPEID_PLAYER)
             {
@@ -331,7 +331,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (IsNihil)
             {
@@ -396,7 +396,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_nether_drakeAI(creature);
     }
@@ -422,11 +422,11 @@ public:
     {
         npc_daranelleAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE { }
+        void Reset() override { }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
 
         {
             if (who->GetTypeId() == TYPEID_PLAYER)
@@ -443,7 +443,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_daranelleAI(creature);
     }
@@ -472,7 +472,7 @@ class go_legion_obelisk : public GameObjectScript
 public:
     go_legion_obelisk() : GameObjectScript("go_legion_obelisk") { }
 
-    bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+    bool OnGossipHello(Player* player, GameObject* go) override
     {
         if (player->GetQuestStatus(QUEST_YOURE_FIRED) == QUEST_STATUS_INCOMPLETE)
         {
@@ -526,7 +526,7 @@ class go_thunderspike : public GameObjectScript
     public:
         go_thunderspike() : GameObjectScript("go_thunderspike") { }
 
-        bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+        bool OnGossipHello(Player* player, GameObject* go) override
         {
             if (player->GetQuestStatus(QUEST_THUNDERSPIKE) == QUEST_STATUS_INCOMPLETE && !go->FindNearestCreature(NPC_GOR_GRIMGUT, 25.0f, true))
                 if (Creature* gorGrimgut = go->SummonCreature(NPC_GOR_GRIMGUT, -2413.4f, 6914.48f, 25.01f, 3.67f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 300000))
@@ -628,7 +628,7 @@ class npc_simon_bunny : public CreatureScript
             EventMap _events;
             std::list<uint8> colorSequence, playableSequence, playerSequence;
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 _events.Update(diff);
 
@@ -682,7 +682,7 @@ class npc_simon_bunny : public CreatureScript
                 }
             }
 
-            void DoAction(int32 action) OVERRIDE
+            void DoAction(int32 action) override
             {
                 switch (action)
                 {
@@ -708,7 +708,7 @@ class npc_simon_bunny : public CreatureScript
             }
 
             // Called by color clusters script (go_simon_cluster) and used for knowing the button pressed by player
-            void SetData(uint32 type, uint32 /*data*/) OVERRIDE
+            void SetData(uint32 type, uint32 /*data*/) override
             {
                 if (!listening)
                     return;
@@ -731,7 +731,7 @@ class npc_simon_bunny : public CreatureScript
             }
 
             // Used for getting involved player guid. Parameter id is used for defining if is a large(Monument) or small(Relic) node
-            void SetGUID(uint64 guid, int32 id) OVERRIDE
+            void SetGUID(uint64 guid, int32 id) override
             {
                 me->SetCanFly(true);
 
@@ -1021,7 +1021,7 @@ class npc_simon_bunny : public CreatureScript
                 }
             }
 
-            void SpellHitTarget(Unit* target, const SpellInfo* spell) OVERRIDE
+            void SpellHitTarget(Unit* target, const SpellInfo* spell) override
             {
                 // Cast SPELL_BAD_PRESS_DAMAGE with scaled basepoints when the visual hits the target.
                 // Need Fix: When SPELL_BAD_PRESS_TRIGGER hits target it triggers spell SPELL_BAD_PRESS_DAMAGE by itself
@@ -1053,7 +1053,7 @@ class npc_simon_bunny : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_simon_bunnyAI(creature);
         }
@@ -1064,7 +1064,7 @@ class go_simon_cluster : public GameObjectScript
     public:
         go_simon_cluster() : GameObjectScript("go_simon_cluster") { }
 
-        bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+        bool OnGossipHello(Player* player, GameObject* go) override
         {
             if (Creature* bunny = go->FindNearestCreature(NPC_SIMON_BUNNY, 12.0f, true))
                 bunny->AI()->SetData(go->GetEntry(), 0);
@@ -1090,14 +1090,14 @@ class go_apexis_relic : public GameObjectScript
     public:
         go_apexis_relic() : GameObjectScript("go_apexis_relic") { }
 
-        bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+        bool OnGossipHello(Player* player, GameObject* go) override
         {
             player->PrepareGossipMenu(go, go->GetGOInfo()->questgiver.gossipID);
             player->SendPreparedGossip(go);
             return true;
         }
 
-        bool OnGossipSelect(Player* player, GameObject* go, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
+        bool OnGossipSelect(Player* player, GameObject* go, uint32 /*sender*/, uint32 /*action*/) override
         {
             player->CLOSE_GOSSIP_MENU();
 
@@ -1139,7 +1139,7 @@ public:
             timer = 500;
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             if (GetClosestCreatureWithEntry(me, NPC_OSCILLATING_FREQUENCY_SCANNER_TOP_BUNNY, 25.0f))
                 me->DespawnOrUnsummon();
@@ -1154,13 +1154,13 @@ public:
             timer = 500;
         }
 
-        void IsSummonedBy(Unit* summoner) OVERRIDE
+        void IsSummonedBy(Unit* summoner) override
         {
             if (summoner->isType(TYPEMASK_PLAYER))
                 playerGuid = summoner->GetGUID();
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (timer <= diff)
             {
@@ -1178,7 +1178,7 @@ public:
             uint32 timer;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_oscillating_frequency_scanner_master_bunnyAI(creature);
     }
@@ -1200,13 +1200,13 @@ class spell_oscillating_field : public SpellScriptLoader
                         player->CompleteQuest(QUEST_GAUGING_THE_RESONANT_FREQUENCY);
             }
 
-            void Register() OVERRIDE
+            void Register() override
             {
                 OnEffectHitTarget += SpellEffectFn(spell_oscillating_field_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
             }
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_oscillating_field_SpellScript();
         }

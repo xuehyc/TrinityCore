@@ -60,7 +60,7 @@ class boss_shazzrah : public CreatureScript
             {
             }
 
-            void EnterCombat(Unit* target) OVERRIDE
+            void EnterCombat(Unit* target) override
             {
                 BossAI::EnterCombat(target);
                 events.ScheduleEvent(EVENT_ARCANE_EXPLOSION, 6000);
@@ -70,7 +70,7 @@ class boss_shazzrah : public CreatureScript
                 events.ScheduleEvent(EVENT_BLINK, 30000);
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -121,7 +121,7 @@ class boss_shazzrah : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new boss_shazzrahAI(creature);
         }

@@ -86,7 +86,7 @@ public:
             SetBossNumber(EncounterCount);
         }
 
-        void Initialize() OVERRIDE
+        void Initialize() override
         {
             // Razorgore
             EggCount = 0;
@@ -113,7 +113,7 @@ public:
             NefarianGUID = 0;
         }
 
-        void OnCreatureCreate(Creature* creature) OVERRIDE
+        void OnCreatureCreate(Creature* creature) override
         {
             switch (creature->GetEntry())
             {
@@ -154,7 +154,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go) OVERRIDE
+        void OnGameObjectCreate(GameObject* go) override
         {
             switch (go->GetEntry())
             {
@@ -187,13 +187,13 @@ public:
             }
         }
 
-        void OnGameObjectRemove(GameObject* go) OVERRIDE
+        void OnGameObjectRemove(GameObject* go) override
         {
             if (go->GetEntry() == 177807) // Egg
                 EggList.remove(go->GetGUID());
         }
 
-        bool SetBossState(uint32 type, EncounterState state) OVERRIDE
+        bool SetBossState(uint32 type, EncounterState state) override
         {
             if (!InstanceScript::SetBossState(type, state))
                 return false;
@@ -243,7 +243,7 @@ public:
             return true;
         }
 
-        uint64 GetData64(uint32 id) const OVERRIDE
+        uint64 GetData64(uint32 id) const override
         {
             switch (id)
             {
@@ -261,7 +261,7 @@ public:
             return 0;
         }
 
-        void SetData(uint32 type, uint32 data) OVERRIDE
+        void SetData(uint32 type, uint32 data) override
         {
             if (type == DATA_EGG_EVENT)
             {
@@ -296,14 +296,14 @@ public:
             }
         }
 
-        void OnUnitDeath(Unit* unit) OVERRIDE
+        void OnUnitDeath(Unit* unit) override
         {
             //! HACK, needed because of buggy CreatureAI after charm
             if (unit->GetEntry() == NPC_RAZORGORE && GetBossState(BOSS_RAZORGORE) != DONE)
                 SetBossState(BOSS_RAZORGORE, DONE);
         }
 
-        void Update(uint32 diff) OVERRIDE
+        void Update(uint32 diff) override
         {
             if (_events.Empty())
                 return;
@@ -371,7 +371,7 @@ public:
         uint64 NefarianGUID;
     };
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
+    InstanceScript* GetInstanceScript(InstanceMap* map) const override
     {
         return new instance_blackwing_lair_InstanceMapScript(map);
     }

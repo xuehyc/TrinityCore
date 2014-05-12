@@ -522,11 +522,11 @@ struct CliCommandHolder
     ~CliCommandHolder() { free(m_command); }
 
 private:
-    CliCommandHolder(CliCommandHolder const& right) DELETE_MEMBER;
-    CliCommandHolder& operator=(CliCommandHolder const& right) DELETE_MEMBER;
+    CliCommandHolder(CliCommandHolder const& right) = delete;
+    CliCommandHolder& operator=(CliCommandHolder const& right) = delete;
 };
 
-typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
+typedef std::unordered_map<uint32, WorldSession*> SessionMap;
 
 struct CharacterNameData
 {
@@ -801,7 +801,7 @@ class World
         uint32 m_currentTime;
 
         SessionMap m_sessions;
-        typedef UNORDERED_MAP<uint32, time_t> DisconnectMap;
+        typedef std::unordered_map<uint32, time_t> DisconnectMap;
         DisconnectMap m_disconnects;
         uint32 m_maxActiveSessionCount;
         uint32 m_maxQueuedSessionCount;
