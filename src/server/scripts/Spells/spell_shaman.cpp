@@ -1243,7 +1243,7 @@ public:
 
     class spell_sha_unleash_elements_SpellScript : public SpellScript
     {
-        PrepareSpellScript(spell_sha_unleash_elements_SpellScript)
+		PrepareSpellScript(spell_sha_unleash_elements_SpellScript);
 
         bool Validate(SpellInfo const * /*spellInfo*/) override
         {
@@ -1328,7 +1328,7 @@ public:
 
     class spell_sha_primal_strike_SpellScript : public SpellScript
     {
-        PrepareSpellScript(spell_sha_primal_strike_SpellScript)
+		PrepareSpellScript(spell_sha_primal_strike_SpellScript);
 		
 		void HandleOnHit()
         {

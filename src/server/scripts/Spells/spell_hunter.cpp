@@ -891,7 +891,7 @@ public:
 
     class spell_hun_steady_shot_SpellScript : public SpellScript
     {
-        PrepareSpellScript(spell_hun_steady_shot_SpellScript)
+		PrepareSpellScript(spell_hun_steady_shot_SpellScript);
 
         bool Validate(SpellInfo const* /*spellEntry*/)
         {
@@ -1065,11 +1065,12 @@ class spell_hun_target_only_pet_and_owner : public SpellScriptLoader
 class spell_hun_kill_command : public SpellScriptLoader
 {	
 public:
-    spell_hun_kill_command() : SpellScriptLoader("spell_hun_kill_command") { }
+	spell_hun_kill_command() : SpellScriptLoader("spell_hun_kill_command") { }
 
-    class spell_hun_kill_command_SpellScript : public SpellScript
-    {
-       PrepareSpellScript(spell_hun_kill_command_SpellScript)
+	class spell_hun_kill_command_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_hun_kill_command_SpellScript);
+	
         bool Validate(SpellInfo const* /*spellEntry*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_KILL_COMMAND))
@@ -1205,7 +1206,7 @@ public:
 
     class spell_hun_steady_shot_focus_SpellScript : public SpellScript
     {
-       PrepareSpellScript(spell_hun_steady_shot_focus_SpellScript)
+		PrepareSpellScript(spell_hun_steady_shot_focus_SpellScript);
         
 	    void HandleOnHit()
         {
@@ -1240,9 +1241,8 @@ public:
 
     class spell_hun_generic_energize_focus_SpellScript : public SpellScript
     {
-        PrepareSpellScript(spell_hun_generic_energize_focus_SpellScript)
-        	  
-          
+		PrepareSpellScript(spell_hun_generic_energize_focus_SpellScript);
+        	            
 	    void HandleOnHit()
         {
 			Unit* caster = GetCaster();

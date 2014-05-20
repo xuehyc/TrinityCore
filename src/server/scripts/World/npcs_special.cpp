@@ -1200,11 +1200,6 @@ public:
                     player->SEND_GOSSIP_MENU(5842, creature->GetGUID());
                 else canBuy = true;
                 break;
-			case 48510:                                          //Kall Worthaton
-                if (player->GetReputationRank(1133) != REP_EXALTED && race != RACE_GOBLIN)
-                    player->SEND_GOSSIP_MENU(5840, creature->GetGUID());
-                else canBuy = true;
-                break;  				
             case 7955:                                          //Milli Featherwhistle
                 if (player->GetReputationRank(54) != REP_EXALTED && race != RACE_GNOME)
                     player->SEND_GOSSIP_MENU(5857, creature->GetGUID());
@@ -1225,6 +1220,12 @@ public:
                     player->SEND_GOSSIP_MENU(17494, creature->GetGUID());
                 else canBuy = true;
                 break;
+			case 485100:                                          //Kall Worthaton double case 48510  but different from above..
+				if (player->GetReputationRank(1133) != REP_EXALTED && race != RACE_GOBLIN)
+					player->SEND_GOSSIP_MENU(5840, creature->GetGUID());
+				else canBuy = true;
+				break;
+
         }
 
         if (canBuy)

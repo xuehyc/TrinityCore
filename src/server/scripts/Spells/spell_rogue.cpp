@@ -973,7 +973,7 @@ class spell_rog_redirect : public SpellScriptLoader
 
         class spell_rog_redirect_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_rog_redirect_SpellScript)
+			PrepareSpellScript(spell_rog_redirect_SpellScript);
 
             void HandleRedirect(SpellEffIndex /*effIndex*/)
             {
@@ -1089,7 +1089,7 @@ public:
 
     class spell_rog_murderous_Intent_SpellScript: public SpellScript
     {
-        PrepareSpellScript(spell_rog_murderous_Intent_SpellScript)
+		PrepareSpellScript(spell_rog_murderous_Intent_SpellScript);
 
         bool addEnergy;
 

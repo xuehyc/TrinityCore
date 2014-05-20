@@ -1094,7 +1094,7 @@ class spell_warr_heroic_leap : public SpellScriptLoader
 
         class spell_warr_heroic_leap_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_warr_heroic_leap_SpellScript)
+			PrepareSpellScript(spell_warr_heroic_leap_SpellScript);
 
             bool Validate(SpellInfo const * /*spellEntry*/)
             {
@@ -1140,6 +1140,7 @@ class spell_warr_ralling_cry : public SpellScriptLoader
 			class spell_warr_ralling_cry_SpellScript : public SpellScript
 			{
 				PrepareSpellScript(spell_warr_ralling_cry_SpellScript);
+
 				bool Validate(SpellInfo const* /*spellEntry*/)
 				{
 					if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_RALLING_CRY_TRIGGERED))
