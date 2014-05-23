@@ -146,13 +146,13 @@ class boss_warbringer_omrogg : public CreatureScript
 
             void Reset() override
             {
-                if (Unit* LeftHead  = Unit::GetUnit(*me, LeftHeadGUID))
+                if (Unit* LeftHead  = ObjectAccessor::GetUnit(*me, LeftHeadGUID))
                 {
                     LeftHead->setDeathState(JUST_DIED);
                     LeftHeadGUID = 0;
                 }
 
-                if (Unit* RightHead  = Unit::GetUnit(*me, RightHeadGUID))
+                if (Unit* RightHead  = ObjectAccessor::GetUnit(*me, RightHeadGUID))
                 {
                     RightHead->setDeathState(JUST_DIED);
                     RightHeadGUID = 0;
@@ -176,8 +176,8 @@ class boss_warbringer_omrogg : public CreatureScript
 
             void DoYellForThreat()
             {
-                Creature* LeftHead  = Creature::GetCreature(*me, LeftHeadGUID);
-                Creature* RightHead = Unit::GetCreature(*me, RightHeadGUID);
+                Creature* LeftHead  = ObjectAccessor::GetCreature(*me, LeftHeadGUID);
+                Creature* RightHead = ObjectAccessor::GetCreature(*me, RightHeadGUID);
 
                 if (!LeftHead || !RightHead)
                     return;
@@ -197,7 +197,7 @@ class boss_warbringer_omrogg : public CreatureScript
                 me->SummonCreature(NPC_LEFT_HEAD, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
                 me->SummonCreature(NPC_RIGHT_HEAD, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
 
-                if (Creature* LeftHead = Creature::GetCreature(*me, LeftHeadGUID))
+                if (Creature* LeftHead = ObjectAccessor::GetCreature(*me, LeftHeadGUID))
                 {
                     iaggro = rand()%3;
 
@@ -225,8 +225,8 @@ class boss_warbringer_omrogg : public CreatureScript
 
             void KilledUnit(Unit* /*victim*/) override
             {
-                Creature* LeftHead  = Creature::GetCreature(*me, LeftHeadGUID);
-                Creature* RightHead = Creature::GetCreature(*me, RightHeadGUID);
+                Creature* LeftHead  = ObjectAccessor::GetCreature(*me, LeftHeadGUID);
+                Creature* RightHead = ObjectAccessor::GetCreature(*me, RightHeadGUID);
 
                 if (!LeftHead || !RightHead)
                     return;
@@ -251,8 +251,8 @@ class boss_warbringer_omrogg : public CreatureScript
 
             void JustDied(Unit* /*killer*/) override
             {
-                Creature* LeftHead  = Creature::GetCreature(*me, LeftHeadGUID);
-                Creature* RightHead = Creature::GetCreature(*me, RightHeadGUID);
+                Creature* LeftHead  = ObjectAccessor::GetCreature(*me, LeftHeadGUID);
+                Creature* RightHead = ObjectAccessor::GetCreature(*me, RightHeadGUID);
 
                 if (!LeftHead || !RightHead)
                     return;
@@ -270,8 +270,8 @@ class boss_warbringer_omrogg : public CreatureScript
                 {
                     Delay_Timer = 3500;
 
-                    Creature* LeftHead  = Creature::GetCreature(*me, LeftHeadGUID);
-                    Creature* RightHead = Creature::GetCreature(*me, RightHeadGUID);
+                    Creature* LeftHead  = ObjectAccessor::GetCreature(*me, LeftHeadGUID);
+                    Creature* RightHead = ObjectAccessor::GetCreature(*me, RightHeadGUID);
 
                     if (!LeftHead || !RightHead)
                         return;

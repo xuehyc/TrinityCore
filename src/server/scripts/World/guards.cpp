@@ -286,7 +286,7 @@ public:
             {
                 if (exileTimer <= diff)
                 {
-                    if (Unit* temp = Unit::GetUnit(*me, playerGUID))
+                    if (Unit* temp = ObjectAccessor::GetUnit(*me, playerGUID))
                     {
                         temp->CastSpell(temp, SPELL_EXILE, true);
                         temp->CastSpell(temp, SPELL_BANISH_TELEPORT, true);
@@ -351,7 +351,7 @@ public:
             {
                 if (exileTimer <= diff)
                 {
-                    if (Unit* temp = Unit::GetUnit(*me, playerGUID))
+                    if (Unit* temp = ObjectAccessor::GetUnit(*me, playerGUID))
                     {
                         temp->CastSpell(temp, SPELL_EXILE, true);
                         temp->CastSpell(temp, SPELL_BANISH_TELEPORT, true);

@@ -187,7 +187,7 @@ struct advisorbase_ai : public ScriptedAI
 
         //reset encounter
         if (instance->GetData(DATA_KAELTHASEVENT) == 1 || instance->GetData(DATA_KAELTHASEVENT) == 3)
-            if (Creature* Kaelthas = Unit::GetCreature(*me, instance->GetData64(DATA_KAELTHAS)))
+            if (Creature* Kaelthas = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_KAELTHAS)))
                 Kaelthas->AI()->EnterEvadeMode();
     }
 
@@ -266,7 +266,7 @@ struct advisorbase_ai : public ScriptedAI
                 DelayRes_Timer = 0;
                 FakeDeath = false;
 
-                Unit* Target = Unit::GetUnit(*me, DelayRes_Target);
+                Unit* Target = ObjectAccessor::GetUnit(*me, DelayRes_Target);
                 if (!Target)
                     Target = me->GetVictim();
 
@@ -355,7 +355,7 @@ class boss_kaelthas : public CreatureScript
             {
                 for (uint8 i = 0; i < MAX_ADVISORS; ++i)
                 {
-                    if (Creature* creature = Unit::GetCreature(*me, m_auiAdvisorGuid[i]))
+                    if (Creature* creature = ObjectAccessor::GetCreature(*me, m_auiAdvisorGuid[i]))
                     {
                         creature->Respawn();
                         creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -472,7 +472,7 @@ class boss_kaelthas : public CreatureScript
 
                 for (uint8 i = 0; i < MAX_ADVISORS; ++i)
                 {
-                    if (Unit* pAdvisor = Unit::GetUnit(*me, m_auiAdvisorGuid[i]))
+                    if (Unit* pAdvisor = ObjectAccessor::GetUnit(*me, m_auiAdvisorGuid[i]))
                         pAdvisor->Kill(pAdvisor);
                 }
             }
@@ -506,7 +506,7 @@ class boss_kaelthas : public CreatureScript
                             case 1:
                                 if (Phase_Timer <= diff)
                                 {
-                                    Advisor = (Unit::GetCreature(*me, m_auiAdvisorGuid[0]));
+                                    Advisor = (ObjectAccessor::GetCreature(*me, m_auiAdvisorGuid[0]));
 
                                     if (Advisor)
                                     {
@@ -524,7 +524,7 @@ class boss_kaelthas : public CreatureScript
 
                             //Subphase 2 - Start
                             case 2:
-                                Advisor = (Unit::GetCreature(*me, m_auiAdvisorGuid[0]));
+                                Advisor = (ObjectAccessor::GetCreature(*me, m_auiAdvisorGuid[0]));
 
                                 if (Advisor && (Advisor->getStandState() == UNIT_STAND_STATE_DEAD))
                                 {
@@ -540,7 +540,7 @@ class boss_kaelthas : public CreatureScript
                             case 3:
                                 if (Phase_Timer <= diff)
                                 {
-                                    Advisor = (Unit::GetCreature(*me, m_auiAdvisorGuid[1]));
+                                    Advisor = (ObjectAccessor::GetCreature(*me, m_auiAdvisorGuid[1]));
 
                                     if (Advisor)
                                     {
@@ -558,7 +558,7 @@ class boss_kaelthas : public CreatureScript
 
                             //Subphase 3 - Start
                             case 4:
-                                Advisor = (Unit::GetCreature(*me, m_auiAdvisorGuid[1]));
+                                Advisor = (ObjectAccessor::GetCreature(*me, m_auiAdvisorGuid[1]));
 
                                 if (Advisor && (Advisor->getStandState() == UNIT_STAND_STATE_DEAD))
                                 {
@@ -574,7 +574,7 @@ class boss_kaelthas : public CreatureScript
                             case 5:
                                 if (Phase_Timer <= diff)
                                 {
-                                    Advisor = (Unit::GetCreature(*me, m_auiAdvisorGuid[2]));
+                                    Advisor = (ObjectAccessor::GetCreature(*me, m_auiAdvisorGuid[2]));
 
                                     if (Advisor)
                                     {
@@ -592,7 +592,7 @@ class boss_kaelthas : public CreatureScript
 
                             //Subphase 4 - Start
                             case 6:
-                                Advisor = (Unit::GetCreature(*me, m_auiAdvisorGuid[2]));
+                                Advisor = (ObjectAccessor::GetCreature(*me, m_auiAdvisorGuid[2]));
 
                                 if (Advisor && (Advisor->getStandState() == UNIT_STAND_STATE_DEAD))
                                 {
@@ -608,7 +608,7 @@ class boss_kaelthas : public CreatureScript
                             case 7:
                                 if (Phase_Timer <= diff)
                                 {
-                                    Advisor = (Unit::GetCreature(*me, m_auiAdvisorGuid[3]));
+                                    Advisor = (ObjectAccessor::GetCreature(*me, m_auiAdvisorGuid[3]));
 
                                     if (Advisor)
                                     {
@@ -627,7 +627,7 @@ class boss_kaelthas : public CreatureScript
 
                             //End of phase 1
                             case 8:
-                                Advisor = (Unit::GetCreature(*me, m_auiAdvisorGuid[3]));
+                                Advisor = (ObjectAccessor::GetCreature(*me, m_auiAdvisorGuid[3]));
 
                                 if (Advisor && (Advisor->getStandState() == UNIT_STAND_STATE_DEAD))
                                 {
@@ -696,7 +696,7 @@ class boss_kaelthas : public CreatureScript
                             Creature* Advisor;
                             for (uint8 i = 0; i < MAX_ADVISORS; ++i)
                             {
-                                Advisor = Unit::GetCreature(*me, m_auiAdvisorGuid[i]);
+                                Advisor = ObjectAccessor::GetCreature(*me, m_auiAdvisorGuid[i]);
 
                                 if (!Advisor)
                                     TC_LOG_ERROR("scripts", "SD2: Kael'Thas Advisor %u does not exist. Possibly despawned? Incorrectly Killed?", i);
@@ -900,7 +900,7 @@ class boss_kaelthas : public CreatureScript
                                         // 1) Kael'thas will portal the whole raid right into his body
                                         for (i = threatlist.begin(); i != threatlist.end(); ++i)
                                         {
-                                            Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
+                                            Unit* unit = ObjectAccessor::GetUnit(*me, (*i)->getUnitGuid());
                                             if (unit && (unit->GetTypeId() == TYPEID_PLAYER))
                                             {
                                                 //Use work around packet to prevent player from being dropped from combat
@@ -921,7 +921,7 @@ class boss_kaelthas : public CreatureScript
                                         // 2) At that point he will put a Gravity Lapse debuff on everyone
                                         for (i = threatlist.begin(); i != threatlist.end(); ++i)
                                         {
-                                            if (Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid()))
+                                            if (Unit* unit = ObjectAccessor::GetUnit(*me, (*i)->getUnitGuid()))
                                             {
                                                 DoCast(unit, SPELL_KNOCKBACK, true);
                                                 //Gravity lapse - needs an exception in Spell system to work
@@ -953,7 +953,7 @@ class boss_kaelthas : public CreatureScript
                                         //Remove flight
                                         for (i = threatlist.begin(); i != threatlist.end(); ++i)
                                         {
-                                            if (Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid()))
+                                            if (Unit* unit = ObjectAccessor::GetUnit(*me, (*i)->getUnitGuid()))
                                             {
                                                 //Using packet workaround
                                                 WorldPacket data(SMSG_MOVE_UNSET_CAN_FLY, 12);
@@ -1292,7 +1292,7 @@ class boss_grand_astromancer_capernian : public CreatureScript
                     ThreatContainer::StorageType const &threatlist = me->getThreatManager().getThreatList();
                     for (ThreatContainer::StorageType::const_iterator i = threatlist.begin(); i!= threatlist.end(); ++i)
                     {
-                        Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
+                        Unit* unit = ObjectAccessor::GetUnit(*me, (*i)->getUnitGuid());
                                                                     //if in melee range
                         if (unit && unit->IsWithinDistInMap(me, 5))
                         {

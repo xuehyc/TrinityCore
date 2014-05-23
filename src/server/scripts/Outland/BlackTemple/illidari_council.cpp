@@ -186,7 +186,7 @@ public:
             {
                 if (AggroYellTimer <= diff)
             {
-                if (Creature* pMember = Creature::GetCreature(*me, Council[YellCounter]))
+                if (Creature* pMember = ObjectAccessor::GetCreature(*me, Council[YellCounter]))
                 {
                     pMember->AI()->Talk(CouncilAggro[YellCounter].entry);
                     AggroYellTimer = CouncilAggro[YellCounter].timer;
@@ -201,7 +201,7 @@ public:
             {
                 if (EnrageTimer <= diff)
             {
-                if (Creature* pMember = Creature::GetCreature(*me, Council[YellCounter]))
+                if (Creature* pMember = ObjectAccessor::GetCreature(*me, Council[YellCounter]))
                 {
                     pMember->CastSpell(pMember, SPELL_BERSERK, true);
                     pMember->AI()->Talk(CouncilEnrage[YellCounter].entry);
@@ -255,7 +255,7 @@ public:
             Creature* pMember = NULL;
             for (uint8 i = 0; i < 4; ++i)
             {
-                pMember = Unit::GetCreature((*me), Council[i]);
+                pMember = ObjectAccessor::GetCreature((*me), Council[i]);
                 if (!pMember)
                     continue;
 
@@ -334,7 +334,7 @@ public:
                         return;
                     }
 
-                    Creature* pMember = (Unit::GetCreature(*me, Council[DeathCount]));
+                    Creature* pMember = (ObjectAccessor::GetCreature(*me, Council[DeathCount]));
                     if (pMember && pMember->IsAlive())
                         pMember->DealDamage(pMember, pMember->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     ++DeathCount;
@@ -351,7 +351,7 @@ public:
                     {
                         if (Council[i])
                         {
-                            if (Creature* Member = (Unit::GetCreature((*me), Council[i])))
+                            if (Creature* Member = (ObjectAccessor::GetCreature((*me), Council[i])))
                             {
                                 // This is the evade/death check.
                                 if (Member->IsAlive() && !Member->GetVictim())
@@ -411,7 +411,7 @@ struct boss_illidari_councilAI : public ScriptedAI
     {
         for (uint8 i = 0; i < 4; ++i)
         {
-            if (Unit* unit = Unit::GetUnit(*me, Council[i]))
+            if (Unit* unit = ObjectAccessor::GetUnit(*me, Council[i]))
                 if (unit != me && unit->GetVictim())
                 {
                     AttackStart(unit->GetVictim());
@@ -429,7 +429,7 @@ struct boss_illidari_councilAI : public ScriptedAI
         damage /= 4;
         for (uint8 i = 0; i < 4; ++i)
         {
-            if (Creature* unit = Unit::GetCreature(*me, Council[i]))
+            if (Creature* unit = ObjectAccessor::GetCreature(*me, Council[i]))
                 if (unit != me && damage < unit->GetHealth())
                 {
                     unit->ModifyHealth(-int32(damage));
@@ -497,7 +497,7 @@ public:
                 member = urand(1, 3);
 
             if (member != 2)                                     // No need to create another pointer to us using Unit::GetUnit
-                unit = Unit::GetUnit(*me, Council[member]);
+                unit = ObjectAccessor::GetUnit(*me, Council[member]);
             return unit;
         }
 
@@ -511,7 +511,7 @@ public:
             }
             for (uint8 i = 0; i < 4; ++i)
             {
-                Unit* unit = Unit::GetUnit(*me, Council[i]);
+                Unit* unit = ObjectAccessor::GetUnit(*me, Council[i]);
                 if (unit)
                     unit->CastSpell(unit, spellid, true, 0, 0, me->GetGUID());
             }

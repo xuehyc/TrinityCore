@@ -549,7 +549,7 @@ public:
             while (i != Stomach_Map.end())
             {
                 //Check for valid player
-                Unit* unit = Unit::GetUnit(*me, i->first);
+                Unit* unit = ObjectAccessor::GetUnit(*me, i->first);
 
                 //Only units out of stomach
                 if (unit && i->second == false)
@@ -644,7 +644,7 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
 
                         //Emerging phase
-                        //AttackStart(Unit::GetUnit(*me, HoldpPlayer));
+                        //AttackStart(ObjectAccessor::GetUnit(*me, HoldpPlayer));
                         DoZoneInCombat();
 
                         //Place all units in threat list on outside of stomach
@@ -690,7 +690,7 @@ public:
                         while (i != Stomach_Map.end())
                         {
                             //Check for valid player
-                            Unit* unit = Unit::GetUnit(*me, i->first);
+                            Unit* unit = ObjectAccessor::GetUnit(*me, i->first);
 
                             //Only move units in stomach
                             if (unit && i->second == true)
@@ -721,7 +721,7 @@ public:
                         while (i != Stomach_Map.end())
                         {
                             //Check for valid player
-                            Unit* unit = Unit::GetUnit(*me, i->first);
+                            Unit* unit = ObjectAccessor::GetUnit(*me, i->first);
 
                             //Only apply to units in stomach
                             if (unit && i->second == true)
@@ -771,7 +771,7 @@ public:
                         if (StomachEnterVisTimer <= diff)
                         {
                             //Check for valid player
-                            Unit* unit = Unit::GetUnit(*me, StomachEnterTarget);
+                            Unit* unit = ObjectAccessor::GetUnit(*me, StomachEnterTarget);
 
                             if (unit)
                             {
@@ -921,7 +921,7 @@ public:
 
         void JustDied(Unit* /*killer*/) override
         {
-            if (Unit* p = Unit::GetUnit(*me, Portal))
+            if (Unit* p = ObjectAccessor::GetUnit(*me, Portal))
                 p->Kill(p);
         }
 
@@ -1002,7 +1002,7 @@ public:
 
         void JustDied(Unit* /*killer*/) override
         {
-            if (Unit* p = Unit::GetUnit(*me, Portal))
+            if (Unit* p = ObjectAccessor::GetUnit(*me, Portal))
                 p->Kill(p);
         }
 
@@ -1030,7 +1030,7 @@ public:
             {
                 if (EvadeTimer <= diff)
                 {
-                    if (Unit* p = Unit::GetUnit(*me, Portal))
+                    if (Unit* p = ObjectAccessor::GetUnit(*me, Portal))
                         p->Kill(p);
 
                     //Dissapear and reappear at new position
@@ -1119,7 +1119,7 @@ public:
 
         void JustDied(Unit* /*killer*/) override
         {
-            if (Unit* p = Unit::GetUnit(*me, Portal))
+            if (Unit* p = ObjectAccessor::GetUnit(*me, Portal))
                 p->Kill(p);
         }
 
@@ -1148,7 +1148,7 @@ public:
             {
                 if (EvadeTimer <= diff)
                 {
-                    if (Unit* p = Unit::GetUnit(*me, Portal))
+                    if (Unit* p = ObjectAccessor::GetUnit(*me, Portal))
                         p->Kill(p);
 
                     //Dissapear and reappear at new position
@@ -1238,7 +1238,7 @@ public:
 
         void JustDied(Unit* /*killer*/) override
         {
-            if (Unit* p = Unit::GetUnit(*me, Portal))
+            if (Unit* p = ObjectAccessor::GetUnit(*me, Portal))
                 p->Kill(p);
         }
 

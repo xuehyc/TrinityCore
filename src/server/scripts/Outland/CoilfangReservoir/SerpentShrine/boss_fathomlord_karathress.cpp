@@ -220,7 +220,7 @@ public:
             //Only if not incombat check if the event is started
             if (!me->IsInCombat() && instance->GetData(DATA_KARATHRESSEVENT))
             {
-                if (Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_KARATHRESSEVENT_STARTER)))
+                if (Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_KARATHRESSEVENT_STARTER)))
                 {
                     AttackStart(target);
                     GetAdvisors();
@@ -361,7 +361,7 @@ public:
             //Only if not incombat check if the event is started
             if (!me->IsInCombat() && instance->GetData(DATA_KARATHRESSEVENT))
             {
-                if (Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_KARATHRESSEVENT_STARTER)))
+                if (Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_KARATHRESSEVENT_STARTER)))
                     AttackStart(target);
             }
 
@@ -488,7 +488,7 @@ public:
             //Only if not incombat check if the event is started
             if (!me->IsInCombat() && instance->GetData(DATA_KARATHRESSEVENT))
             {
-                if (Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_KARATHRESSEVENT_STARTER)))
+                if (Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_KARATHRESSEVENT_STARTER)))
                     AttackStart(target);
             }
 
@@ -519,7 +519,7 @@ public:
             if (Spitfire_Timer <= diff)
             {
                 DoCast(me, SPELL_SPITFIRE_TOTEM);
-                if (Unit* SpitfireTotem = Unit::GetUnit(*me, CREATURE_SPITFIRE_TOTEM))
+                if (Unit* SpitfireTotem = ObjectAccessor::GetUnit(*me, CREATURE_SPITFIRE_TOTEM))
                     SpitfireTotem->ToCreature()->AI()->AttackStart(me->GetVictim());
 
                 Spitfire_Timer = 60000;
@@ -603,7 +603,7 @@ public:
             //Only if not incombat check if the event is started
             if (!me->IsInCombat() && instance->GetData(DATA_KARATHRESSEVENT))
             {
-                if (Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_KARATHRESSEVENT_STARTER)))
+                if (Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_KARATHRESSEVENT_STARTER)))
                     AttackStart(target);
             }
 
@@ -679,13 +679,13 @@ public:
             switch (rand()%4)
             {
             case 0:
-                unit = Unit::GetUnit(*me, instance->GetData64(DATA_KARATHRESS));
+                unit = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_KARATHRESS));
                 break;
             case 1:
-                unit = Unit::GetUnit(*me, instance->GetData64(DATA_SHARKKIS));
+                unit = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_SHARKKIS));
                 break;
             case 2:
-                unit = Unit::GetUnit(*me, instance->GetData64(DATA_TIDALVESS));
+                unit = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_TIDALVESS));
                 break;
             case 3:
                 unit = me;
