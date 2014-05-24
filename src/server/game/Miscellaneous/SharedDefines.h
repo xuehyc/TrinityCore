@@ -3588,4 +3588,25 @@ enum DiminishingLevels
     DIMINISHING_LEVEL_TAUNT_IMMUNE  = 4
 };
 
+/* CUSTOM SERVER DEFINITIONS */
+
+// Enum with IDs for each of the zones that can be controlled by player guilds.
+enum GuildZones
+{
+    GUILD_ZONE_NONE                      = 0,
+    GUILD_ZONE_WINTERSPRING_NORTH        = 1,
+    GUILD_ZONE_WINTERSPRING_SOUTH        = 2,
+    GUILD_ZONE_FELWOOD_NORTH             = 3,
+    GUILD_ZONE_FELWOOD_CENTER            = 4,
+    GUILD_ZONE_FELWOOD_SOUTH             = 5,
+    GUILD_ZONE_STONETALON_MOUNTAINS_EAST = 6,
+    GUILD_ZONE_STONETALON_MOUNTAINS_WEST = 7,
+    GUILD_ZONE_DESOLACE_NORTH            = 8,
+    GUILD_ZONE_DESOLACE_SOUTH            = 9,
+    // This is a temporary distribution for Dustwallow Marsh, I don't know what to do with Theramore yet.
+    GUILD_ZONE_DUSTWALLOW_MARSH_EAST     = 10,
+    GUILD_ZONE_DUSTWALLOW_MARSH_NORTH    = 11,
+    GUILD_ZONE_DUSTWALLOW_MARSH_SOUTH    = 12
+};
+
 #endif

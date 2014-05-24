@@ -271,12 +271,13 @@ struct PlayerInfo
 
 struct PvPInfo
 {
-    PvPInfo() : IsHostile(false), IsInHostileArea(false), IsInNoPvPArea(false), IsInFFAPvPArea(false), EndTimer(0) { }
+    PvPInfo() : IsHostile(false), IsInHostileArea(false), IsInNoPvPArea(false), IsInFFAPvPArea(false), IsInHighSecZone(false), EndTimer(0) { }
 
     bool IsHostile;
     bool IsInHostileArea;               ///> Marks if player is in an area which forces PvP flag
     bool IsInNoPvPArea;                 ///> Marks if player is in a sanctuary or friendly capital city
     bool IsInFFAPvPArea;                ///> Marks if player is in an FFAPvP area (such as Gurubashi Arena)
+    bool IsInHighSecZone;               ///> (Custom) Marks if the player is in a High Sec territory, owned by his faction.
     time_t EndTimer;                    ///> Time when player unflags himself for PvP (flag removed after 5 minutes)
 };
 
@@ -2301,6 +2302,12 @@ class Player : public Unit, public GridObject<Player>
         std::string GetMapAreaAndZoneString();
         std::string GetCoordsMapAreaAndZoneString();
 
+        // Custom
+        bool IsInGuildZone() { return m_isInGuildZone; };
+        void InGuildZone(bool isInGuildZone) { m_isInGuildZone = isInGuildZone; }
+        uint32 GetGuildZoneId() { return m_guildZoneId; };
+        void SetGuildZoneId(uint32 guildZoneId) { m_guildZoneId = guildZoneId; };
+
     protected:
         // Gamemaster whisper whitelist
         WhisperListContainer WhisperList;
@@ -2627,6 +2634,10 @@ class Player : public Unit, public GridObject<Player>
         uint32 _pendingBindTimer;
 
         uint32 _activeCheats;
+
+        // Custom
+        bool m_isInGuildZone;
+        uint32 m_guildZoneId;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

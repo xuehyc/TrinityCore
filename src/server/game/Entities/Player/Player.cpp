@@ -894,6 +894,10 @@ Player::Player(WorldSession* session): Unit(true)
     _activeCheats = CHEAT_NONE;
     m_achievementMgr = new AchievementMgr(this);
     m_reputationMgr = new ReputationMgr(this);
+
+    /////////////////// Custom /////////////////////
+    m_isInGuildZone = false;
+    m_guildZoneId = GUILD_ZONE_NONE;
 }
 
 Player::~Player()
@@ -7484,7 +7488,9 @@ void Player::UpdateArea(uint32 newArea)
 
 void Player::UpdateZone(uint32 newZone, uint32 newArea)
 {
-    if (m_zoneUpdateId != newZone)
+    bool areaOnly = (m_zoneUpdateId == newZone);
+
+    if (!areaOnly)
     {
         sOutdoorPvPMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
         sOutdoorPvPMgr->HandlePlayerEnterZone(this, newZone);
@@ -7494,6 +7500,8 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         if (Guild* guild = GetGuild())
             guild->UpdateMemberData(this, GUILD_MEMBER_DATA_ZONEID, newZone);
     }
+
+    sScriptMgr->OnPlayerUpdateZone(this, newZone, newArea, areaOnly);
 
     // group update
     if (GetGroup())
@@ -7517,8 +7525,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
             // send fine weather packet to remove old zone's weather
             WeatherMgr::SendFineWeatherUpdateToPlayer(this);
     }
-
-    sScriptMgr->OnPlayerUpdateZone(this, newZone, newArea);
 
     // in PvP, any not controlled zone (except zone->team == 6, default case)
     // in PvE, only opposition team capital
@@ -21850,7 +21856,7 @@ void Player::UpdatePvPState(bool onlyFFA)
 {
     /// @todo should we always synchronize UNIT_FIELD_BYTES_2, 1 of controller and controlled?
     // no, we shouldn't, those are checked for affecting player by client
-    if (!pvpInfo.IsInNoPvPArea && !IsGameMaster()
+    if (!pvpInfo.IsInNoPvPArea && !pvpInfo.IsInHighSecZone && !IsGameMaster()
         && (pvpInfo.IsInFFAPvPArea || sWorld->IsFFAPvPRealm()))
     {
         if (!IsFFAPvP())

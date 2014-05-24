@@ -697,6 +697,9 @@ void AddSC_outdoorpvp_zm();
 // player
 void AddSC_chat_log();
 
+// Custom
+void AddSC_custom_player();
+
 #endif
 
 void AddScripts()
@@ -805,6 +808,7 @@ void AddWorldScripts()
     AddSC_npc_taxi();
     AddSC_achievement_scripts();
     AddSC_chat_log();
+    AddSC_custom_player();
 #endif
 }
 
