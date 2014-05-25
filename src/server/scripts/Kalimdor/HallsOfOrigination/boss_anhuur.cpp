@@ -118,7 +118,7 @@ class boss_temple_guardian_anhuur : public CreatureScript
 
                 for (std::list<uint64>::const_iterator itr = SummonList.begin(); itr != SummonList.end(); ++itr)
                 {
-                    if (Creature* pTemp = Unit::GetCreature(*me, *itr))
+                    if (Creature* pTemp = ObjectAccessor::GetCreature(*me, *itr))
                         if (pTemp)
                             pTemp->DisappearAndDie();
                 }

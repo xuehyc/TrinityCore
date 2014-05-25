@@ -205,7 +205,7 @@ public:
         void JustDied(Unit* /*Killer*/)
         {
             if (instance)
-                if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
+                if (Creature* halfus = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
                     if (Aura* aura = halfus->GetAura(87683))
                         aura->SetStackAmount(aura->GetStackAmount() + 1);
                     else
@@ -220,7 +220,7 @@ public:
                     {
                         if (!instance)
                             return;
-                        Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS));
+                        Creature* halfus = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALFUS));
                         if (!halfus)
                             return;
                         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -252,7 +252,7 @@ public:
                     if (StoneTouchTimer <= diff)
                     {
                         StoneTouchTimer = 35000;
-                        if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
+                        if (Creature* halfus = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
                         {
                             me->AddAura(SPELL_STONE_TOUCH, halfus);
                             if (Aura* stone = halfus->GetAura(SPELL_STONE_TOUCH))
