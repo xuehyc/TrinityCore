@@ -21,17 +21,20 @@
 
 #include <ace/Singleton.h>
 
-#define MAX_NULLSEC_ZONES 12
+#define MAX_NULLSEC_ZONES 11
 #define NO_OWNER NULL
+#define NO_GUILD_ZONE NULL
 
 class Player;
 class ZoneScript;
 class Guild;
 
-struct NullSecZoneData
+struct NullSecGuildZoneData
 {
+    uint32 GuildZoneId;
+    std::string GuildZoneName;
     uint32 ZoneId;
-    std::string ZoneName;
+    std::vector<uint32> Areas;
     Guild* Owner;
 };
 
@@ -45,16 +48,21 @@ private:
 
 public:
     void InitNullSecMgr();
-    Guild* GetNullSecZoneOwner(uint32 zoneId);
-    void SetNullSecZoneOwner(uint32 zoneId, Guild* guild);
-    void SetNullSecZoneOwner(uint32 zoneId, uint32 guildId);
-    void OnPlayerEnterNullSecZone(Player* player, uint32 zoneId);
-    void OnPlayerLeaveNullSecZone(Player* player);
+    Guild* GetNullSecZoneOwner(uint32 guildZoneId);
+    void SetNullSecZoneOwner(uint32 guildZoneId, Guild* guild);
+    void SetNullSecZoneOwner(uint32 guildZoneId, uint32 guildId);
+    bool IsNullSecZone(uint32 zoneId);
+    uint32 GetNullSecGuildZone(uint32 zoneId, uint32 areaId);
+    void OnPlayerEnterNullSecZone(Player* player);
+    void OnPlayerEnterNullSecGuildZone(Player* player);
+    void OnPlayerLeaveNullSecGuildZone(Player* player);
 
 private:
-    typedef std::map<uint32, NullSecZoneData> NullSecZoneDataMap;
+    typedef std::map<uint32, NullSecGuildZoneData> NullSecGuildZoneDataMap;
 
-    NullSecZoneDataMap m_nullSecZones;
+    // Stores data about each of the conquerable zones
+    NullSecGuildZoneDataMap m_guildZones;
+    std::vector<uint32> m_nullSecZones;
 };
 
 #define sNullSecMgr ACE_Singleton<NullSecMgr, ACE_Null_Mutex>::instance()

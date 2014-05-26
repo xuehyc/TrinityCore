@@ -60,6 +60,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "NullSecMgr.h"
 
 #include <math.h>
 
@@ -17687,4 +17688,27 @@ void Unit::BuildCooldownPacket(WorldPacket& data, uint8 flags, PacketCooldowns c
         data << uint32(itr->first);
         data << uint32(itr->second);
     }
+}
+
+/* Custom functions for Null Sec PvP system */
+
+bool Unit::IsInNullSecZone()
+{
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        // If the unit is a player, he can be in null sec if the zone is owned by the opposite faction
+        const AreaTableEntry* atEntry = GetAreaEntryByAreaID(GetAreaId());
+        if (atEntry)
+        {
+            if ((ToPlayer()->GetTeam() == TEAM_ALLIANCE && atEntry->team == TEAM_HORDE)
+                || (ToPlayer()->GetTeam() == TEAM_HORDE && atEntry->team == TEAM_ALLIANCE)
+                // Exclude Low Sec zones  // TODO: Create IsInLowSecZone() or at least use constants or DB values?
+                && (atEntry->zone != 148) // Darkshore
+                && (atEntry->zone != 331) // Ashenvale
+                && (atEntry->zone != 16)  // Azshara
+                && (atEntry->zone != 17)) // The Barrens
+                return true;
+        }
+    }
+    return sNullSecMgr->IsNullSecZone(GetZoneId());
 }
