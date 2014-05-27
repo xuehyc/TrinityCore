@@ -152,7 +152,8 @@ REPLACE INTO `custom_nullsec_areas` VALUES
 (11, 15, 4049),
 (11, 15, 4046);
 
-REPLACE INTO trinity_string (entry, content_default, content_loc6, content_loc7) VALUES
+REPLACE INTO `command` (`name`, `permission`, `help`) VALUES ("reclamar", 736, "Utiliza un Estandarte de Conquista para intentar reclamar un territorio para tu hermandad.");
+REPLACE INTO `trinity_string` (`entry`, `content_default`, `content_loc6`, `content_loc7`) VALUES
 (12000, "You have entered a safe zone.", "Has entrado en una zona segura.", "Has entrado en una zona segura."),
 (12001, "ATTENTION: You have entered an Alliance territory, the security for you here is NULL.", "ADVERTENCIA: Has entrado en un territorio de la Alianza, donde la seguridad para ti es NULA.", "ADVERTENCIA: Has entrado en un territorio de la Alianza, donde la seguridad para ti es NULA."),
 (12002, "ATTENTION: You have entered a Horde territory, the security for you here is NULL.", "ADVERTENCIA: Has entrado en un territorio de la Horda, donde la seguridad para ti es NULA.", "ADVERTENCIA: Has entrado en un territorio de la Horda, donde la seguridad para ti es NULA."),
@@ -164,4 +165,15 @@ REPLACE INTO trinity_string (entry, content_default, content_loc6, content_loc7)
 (12008, "ATTENTION: You have entered in %s, a territory owned by the guild %s.", "ADVERTENCIA: Has entrado en %s, un territorio que pertenece a la Hermandad %s.", "ADVERTENCIA: Has entrado en %s, un territorio que pertenece a la Hermandad %s."),
 (12009, "You have entered in %s, a territory owned by your guild.", "Has entrado en %s, un territorio que pertenece a tu Hermandad.", "Has entrado %s, un territorio que pertenece a tu Hermandad."),
 (12010, "You have left %s.", "Has salido de %s.", "Has salido de %s."),
-(12011, "You have entered in a very dangerous territory! Your character has been moved to a safe place.", "¡Has entrado en un territorio demasiado peligroso! Tu personaje ha sido devuelto a un lugar seguro.", "¡Has entrado en un territorio demasiado peligroso! Tu personaje ha sido devuelto a un lugar seguro.");
+(12011, "ATTENTION: Intruders have been detected in %s!", "¡ATENCIÓN: Se han detectado intrusos en %s!", "¡ATENCIÓN: Se han detectado intrusos en %s!"),
+(12012, "You have entered in a very dangerous territory! Your character has been moved to a safe place.", "¡Has entrado en un territorio demasiado peligroso! Tu personaje ha sido devuelto a un lugar seguro.", "¡Has entrado en un territorio demasiado peligroso! Tu personaje ha sido devuelto a un lugar seguro."),
+(12013, "%s is being claimed!", "¡El territorio %s está siendo atacado!", "¡El territorio %s está siendo atacado!"),
+(12014, "You have to have a Standard of Conquest in your inventory to be able to claim a zone.", "Necesitas tener un Estandarte de Conquista en el inventario para poder reclamar una zona.", "Necesitas tener un Estandarte de Conquista en el inventario para poder reclamar una zona."),
+(12015, "Only a Guild can claim a territory.", "Sólo las Hermandades pueden reclamar territorios.", "Sólo las Hermandades pueden reclamar territorios."),
+(12016, "You must be in a NULL security conquerable zone to be able to do that.", "Tienes que estar en una zona conquistable de seguridad NULA para poder hacer eso.", "Tienes que estar en una zona conquistable de seguridad NULA para poder hacer eso."),
+(12017, "You need to be in %s to be able to claim this zone!", "¡Tienes que estar en %s para poder reclamar este territorio!", "¡Tienes que estar en %s para poder reclamar este territorio!"),
+(12018, "The territory is conquered by another Guild! Destroy their Standard of Conquest in %s to be able to put yours!", "¡El territorio a reclamar no puede estar conquistada por otra Hermandad! ¡Destruye su Estandarte de Conquista situado en %s para poder arrebatar el territorio!", "¡El territorio a reclamar no puede estar conquistada por otra Hermandad! ¡Destruye su Estandarte de Conquista situado en %s para poder arrebatar el territorio!"),
+(12019, "This zone is already being cnoquered by another Guild! Destroy their Standard of Conquest to be able to put yours!", "¡Esta zona ya está siendo atacada por otra Hermandad! ¡Destruye su Estandarte de Conquista para poder poner el tuyo!", "¡Esta zona ya está siendo atacada por otra Hermandad! ¡Destruye su Estandarte de Conquista para poder poner el vuestro!"),
+(12020, "You have started the conquest of %s, defend the Standard of Conquest during 30 minutes!", "¡Ha comenzado la conquista de %s, defiende el Estandarte de Conquista durante 30 minutos!", "¡Ha comenzado la conquista de %s, defiende el Estandarte de Conquista durante 30 minutos!");
+REPLACE INTO `command` (`name`, `permission`, `help`) VALUES 
+("reclamar", 736, "Utiliza un Estandarte de Conquista para intentar reclamar un territorio para tu hermandad.");

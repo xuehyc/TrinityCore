@@ -35,8 +35,8 @@ void NullSecMgr::InitNullSecMgr()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                                   0                1                  2        3          4
-    QueryResult result = CharacterDatabase.Query("SELECT a.guild_zone_id, a.guild_zone_name, a.owner, b.zone_id, b.area_id FROM custom_nullsec_guild_zones AS a, custom_nullsec_guild_areas AS b WHERE a.guild_zone_id = b.guild_zone_id ORDER BY a.guild_zone_id");
+    //                                                   0                1                  2                3             4             5             6             7        8          9
+    QueryResult result = CharacterDatabase.Query("SELECT a.guild_zone_id, a.guild_zone_name, a.vital_area_id, a.standard_x, a.standard_y, a.standard_z, a.standard_o, a.owner, b.zone_id, b.area_id FROM custom_nullsec_guild_zones AS a, custom_nullsec_guild_areas AS b WHERE a.guild_zone_id = b.guild_zone_id ORDER BY a.guild_zone_id");
 
     if (!result)
     {
@@ -55,7 +55,7 @@ void NullSecMgr::InitNullSecMgr()
         // Load only an area...
         if (fields[0].GetUInt32() == guildZoneId)
         {
-            m_guildZones[guildZoneId].Areas.push_back(fields[4].GetUInt16());
+            m_guildZones[guildZoneId].Areas.push_back(fields[9].GetUInt16());
             ++countAreas;
         }
         // ... or zone and area
@@ -72,12 +72,17 @@ void NullSecMgr::InitNullSecMgr()
             NullSecGuildZoneData nullSecGuildZoneData;
             nullSecGuildZoneData.GuildZoneId = guildZoneId;
             nullSecGuildZoneData.GuildZoneName = fields[1].GetString();
-            nullSecGuildZoneData.ZoneId = fields[3].GetUInt16();
+            nullSecGuildZoneData.ZoneId = fields[8].GetUInt16();
+            nullSecGuildZoneData.VitalArea = fields[2].GetUInt32();
+            Position standardPosition {fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat(), fields[6].GetFloat()};
+            nullSecGuildZoneData.StandardPosition = standardPosition;
             if (!fields[2].GetUInt32())
                 nullSecGuildZoneData.Owner = NO_OWNER;
             else
-                nullSecGuildZoneData.Owner = sGuildMgr->GetGuildById(fields[2].GetUInt32());
-
+                nullSecGuildZoneData.Owner = sGuildMgr->GetGuildById(fields[7].GetUInt32());
+            nullSecGuildZoneData.Attacker = NULL;
+            nullSecGuildZoneData.IsUnderAttack = false;
+            nullSecGuildZoneData.IntrudersCount = 0;
             m_guildZones[guildZoneId] = nullSecGuildZoneData;
             ++countZones;
             ++countAreas;
@@ -120,23 +125,14 @@ Guild* NullSecMgr::GetNullSecZoneOwner(uint32 guildZoneId)
 
 void NullSecMgr::SetNullSecZoneOwner(uint32 guildZoneId, Guild* guild)
 {
-    if (guildZoneId > MAX_NULLSEC_ZONES)
+    if (guildZoneId > MAX_NULLSEC_ZONES || !guild)
         return;
 
-    // 1st case: The zone owner lost the territory.
-    if (guild == NO_OWNER || !guild)
-    {
-        m_guildZones[guildZoneId].Owner = NO_OWNER;
-        CharacterDatabase.DirectPExecute("UPDATE custom_nullsec_zones SET owner = NULL WHERE zone_id = %u", guildZoneId);
-        sWorld->SendWorldText(LANG_NULLSEC_ZONE_LOST, m_guildZones[guildZoneId].Owner->GetName(), m_guildZones[guildZoneId].GuildZoneName.c_str());
-    }
-    // 2nd case: The zone has been conquered by a new guild.
-    else
-    {
-        m_guildZones[guildZoneId].Owner = guild;
-        CharacterDatabase.DirectPExecute("UPDATE custom_nullsec_zones SET owner = %u WHERE zone_id = %u", guild->GetId(), guildZoneId);
-        sWorld->SendWorldText(LANG_NULLSEC_ZONE_TAKEN, guild->GetName(), m_guildZones[guildZoneId].GuildZoneName.c_str());
-    }
+    m_guildZones[guildZoneId].Owner = guild;
+    CharacterDatabase.DirectPExecute("UPDATE custom_nullsec_guild_zones SET owner = %u WHERE guild_zone_id = %u", guild->GetId(), guildZoneId);
+    
+    // Inform all players that the zone has been conquered
+    sWorld->SendWorldText(LANG_NULLSEC_ZONE_TAKEN, guild->GetName().c_str(), m_guildZones[guildZoneId].GuildZoneName.c_str());
 }
 
 void NullSecMgr::SetNullSecZoneOwner(uint32 guildZoneId, uint32 guildId)
@@ -147,6 +143,18 @@ void NullSecMgr::SetNullSecZoneOwner(uint32 guildZoneId, uint32 guildId)
     Guild* guild = sGuildMgr->GetGuildById(guildId);
     if (guild)
         SetNullSecZoneOwner(guildZoneId, guild);
+}
+
+void NullSecMgr::RemoveGuildZoneOwner(uint32 guildZoneId)
+{
+    if (guildZoneId > MAX_NULLSEC_ZONES)
+        return;
+
+    m_guildZones[guildZoneId].Owner = NO_OWNER;
+    CharacterDatabase.DirectPExecute("UPDATE custom_nullsec_guild_zones SET owner = NULL WHERE guild_zone_id = %u", guildZoneId);
+    
+    // Inform all players that a new territory is available
+    sWorld->SendWorldText(LANG_NULLSEC_ZONE_LOST, m_guildZones[guildZoneId].Owner->GetName().c_str(), m_guildZones[guildZoneId].GuildZoneName.c_str());
 }
 
 void NullSecMgr::OnPlayerEnterNullSecGuildZone(Player* player)
@@ -182,7 +190,22 @@ void NullSecMgr::OnPlayerEnterNullSecGuildZone(Player* player)
         else
         {
             ChatHandler(player->GetSession()).PSendSysMessage(LANG_NULLSEC_HOSTILE_ENTER, m_guildZones[guildZoneId].GuildZoneName.c_str(), m_guildZones[guildZoneId].Owner->GetName().c_str());
-            // TODO: Send message to the online players that own the zone.
+            m_guildZones[guildZoneId].IntrudersCount += 1;
+            // Inform all online players of the guild that owns the territory that an intruder has just entered
+            // only if there were no more intruders previously so we can prevent chat spam.
+            // TODO: Inform that there's intruders in his guild's territory to a player that has just logged in.
+            if (m_guildZones[guildZoneId].IntrudersCount == 1)
+            {
+                const SessionMap worldSessions = sWorld->GetAllSessions();
+                for (SessionMap::const_iterator itr = worldSessions.begin(); itr != worldSessions.end(); ++itr)
+                {
+                    if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld() || !itr->second->GetPlayer()->GetGuild())
+                        continue;
+
+                    if (itr->second->GetPlayer()->GetGuild() == m_guildZones[guildZoneId].Owner)
+                        ChatHandler(itr->second).PSendSysMessage(LANG_NULLSEC_INTRUDER, m_guildZones[guildZoneId].GuildZoneName.c_str());
+                }
+            }
         }
     }
     // Update the player, he is now in a guild owned zone.
@@ -192,10 +215,14 @@ void NullSecMgr::OnPlayerEnterNullSecGuildZone(Player* player)
 
 void NullSecMgr::OnPlayerLeaveNullSecGuildZone(Player* player)
 {
-    if (!player->GetGuildZoneId() || player->GetGuildZoneId() > MAX_NULLSEC_ZONES)
+    uint32 guildZoneId = player->GetGuildZoneId();
+    if (!guildZoneId || guildZoneId > MAX_NULLSEC_ZONES)
         return;
 
-    ChatHandler(player->GetSession()).PSendSysMessage(LANG_NULLSEC_LEAVE, m_guildZones[player->GetGuildZoneId()].GuildZoneName.c_str());
+    ChatHandler(player->GetSession()).PSendSysMessage(LANG_NULLSEC_LEAVE, m_guildZones[guildZoneId].GuildZoneName.c_str());
+    if (m_guildZones[guildZoneId].Owner != player->GetGuild())
+        m_guildZones[guildZoneId].IntrudersCount -= 1;
+    // TODO: May be inform the members of the guild that owns the zone that it's clear (intruders == 0)?
     player->InGuildZone(false);
     player->SetGuildZoneId(GUILD_ZONE_NONE);
 }
@@ -228,4 +255,77 @@ uint32 NullSecMgr::GetNullSecGuildZone(uint32 zoneId, uint32 areaId)
     }
 
     return GUILD_ZONE_NONE;
+}
+
+uint32 NullSecMgr::GetVitalAreaByGuildZoneId(uint32 guildZoneId)
+{
+    if (guildZoneId > MAX_NULLSEC_ZONES || guildZoneId == GUILD_ZONE_NONE)
+        return NULL;
+
+    return m_guildZones[guildZoneId].VitalArea;
+}
+
+Position NullSecMgr::GetStandardPositionByGuildZoneId(uint32 guildZoneId)
+{
+    if (guildZoneId > MAX_NULLSEC_ZONES || guildZoneId == GUILD_ZONE_NONE)
+        return NULL;
+
+    return m_guildZones[guildZoneId].StandardPosition;
+}
+
+bool NullSecMgr::IsGuildZoneUnderAttack(uint32 guildZoneId)
+{
+    if (guildZoneId > MAX_NULLSEC_ZONES || guildZoneId == GUILD_ZONE_NONE)
+        return false;
+
+    return m_guildZones[guildZoneId].IsUnderAttack;
+}
+
+void NullSecMgr::SetGuildZoneUnderAttack(uint32 guildZoneId, bool underAttack, Guild* attacker)
+{
+    if (guildZoneId > MAX_NULLSEC_ZONES || guildZoneId == GUILD_ZONE_NONE)
+        return;
+
+    if (underAttack && !attacker)
+        return;
+
+    m_guildZones[guildZoneId].IsUnderAttack = underAttack;
+
+    if (underAttack)
+    {
+        m_guildZones[guildZoneId].Attacker = attacker;
+        if (!m_guildZones[guildZoneId].Owner)
+            sWorld->SendWorldText(LANG_NULLSEC_UNDER_ATTACK, m_guildZones[guildZoneId].GuildZoneName.c_str());
+        else
+        {
+            // Inform only the owners of the zone
+            const SessionMap worldSessions = sWorld->GetAllSessions();
+            for (SessionMap::const_iterator itr = worldSessions.begin(); itr != worldSessions.end(); ++itr)
+            {
+                if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld() || !itr->second->GetPlayer()->GetGuild())
+                    continue;
+
+                if (itr->second->GetPlayer()->GetGuild() == m_guildZones[guildZoneId].Owner)
+                    ChatHandler(itr->second).PSendSysMessage(LANG_NULLSEC_UNDER_ATTACK, m_guildZones[guildZoneId].GuildZoneName.c_str());
+            }
+        }
+    }
+    else
+        m_guildZones[guildZoneId].Attacker = NULL;
+}
+
+Guild* NullSecMgr::GetGuildZoneAttacker(uint32 guildZoneId)
+{
+    if (guildZoneId > MAX_NULLSEC_ZONES || guildZoneId == GUILD_ZONE_NONE)
+        return NULL;
+
+    return m_guildZones[guildZoneId].Attacker;
+}
+
+std::string NullSecMgr::GetGuildZoneName(uint32 guildZoneId)
+{
+    if (guildZoneId > MAX_NULLSEC_ZONES || guildZoneId == GUILD_ZONE_NONE)
+        return NULL;
+
+    return m_guildZones[guildZoneId].GuildZoneName;
 }

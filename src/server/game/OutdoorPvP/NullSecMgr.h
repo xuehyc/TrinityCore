@@ -24,6 +24,8 @@
 #define MAX_NULLSEC_ZONES 11
 #define NO_OWNER NULL
 #define NO_GUILD_ZONE NULL
+#define ITEM_STANDARD_OF_CONQUEST 25555
+#define NPC_STANDARD_OF_CONQUEST 50000
 
 class Player;
 class ZoneScript;
@@ -35,7 +37,12 @@ struct NullSecGuildZoneData
     std::string GuildZoneName;
     uint32 ZoneId;
     std::vector<uint32> Areas;
+    uint32 VitalArea;
+    Position StandardPosition;
     Guild* Owner;
+    Guild* Attacker;
+    bool IsUnderAttack;
+    uint32 IntrudersCount;
 };
 
 class NullSecMgr
@@ -51,8 +58,15 @@ public:
     Guild* GetNullSecZoneOwner(uint32 guildZoneId);
     void SetNullSecZoneOwner(uint32 guildZoneId, Guild* guild);
     void SetNullSecZoneOwner(uint32 guildZoneId, uint32 guildId);
+    void RemoveGuildZoneOwner(uint32 guildZoneId);
     bool IsNullSecZone(uint32 zoneId);
     uint32 GetNullSecGuildZone(uint32 zoneId, uint32 areaId);
+    uint32 GetVitalAreaByGuildZoneId(uint32 guildZoneId);
+    Position GetStandardPositionByGuildZoneId(uint32 guildZoneId);
+    bool IsGuildZoneUnderAttack(uint32 guildZoneId);
+    void SetGuildZoneUnderAttack(uint32 guildZoneId, bool underAttack, Guild* attacker = NULL);
+    Guild* GetGuildZoneAttacker(uint32 guildZoneId);
+    std::string GetGuildZoneName(uint32 guildZone);
     void OnPlayerEnterNullSecZone(Player* player);
     void OnPlayerEnterNullSecGuildZone(Player* player);
     void OnPlayerLeaveNullSecGuildZone(Player* player);

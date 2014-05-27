@@ -699,6 +699,8 @@ void AddSC_chat_log();
 
 // Custom
 void AddSC_custom_player();
+void AddSC_npc_standard_of_conquest();
+void AddSC_custom_commandscript();
 
 #endif
 
@@ -791,6 +793,7 @@ void AddCommandScripts()
     AddSC_ticket_commandscript();
     AddSC_titles_commandscript();
     AddSC_wp_commandscript();
+    AddSC_custom_commandscript();
 }
 
 void AddWorldScripts()
@@ -809,6 +812,7 @@ void AddWorldScripts()
     AddSC_achievement_scripts();
     AddSC_chat_log();
     AddSC_custom_player();
+    AddSC_npc_standard_of_conquest();
 #endif
 }
 

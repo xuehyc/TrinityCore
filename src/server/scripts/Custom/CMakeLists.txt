@@ -11,6 +11,8 @@
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
   Custom/custom_player.cpp
+  Custom/custom_standard_of_conquest.cpp
+  Custom/cs_custom.cpp
 )
 
 message("  -> Prepared: Custom")
