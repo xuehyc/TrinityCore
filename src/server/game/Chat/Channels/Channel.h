@@ -29,7 +29,7 @@
 
 #include "Common.h"
 
-#include "Opcodes.h"
+#include "WorldSession.h"
 #include "WorldPacket.h"
 
 class Player;

@@ -1412,10 +1412,17 @@ enum PacketProcessing
     PROCESS_THREADSAFE                                      //packet is thread-safe - process it in Map::Update()
 };
 
+class WorldSession;
 class WorldPacket;
 class WorldSession;
 
 typedef void(WorldSession::*pOpcodeHandler)(WorldPacket& recvPacket);
+
+#if defined(__GNUC__)
+#pragma pack(1)
+#else
+#pragma pack(push, 1)
+#endif
 
 struct OpcodeHandler
 {
@@ -1462,6 +1469,12 @@ class OpcodeTable
 };
 
 extern OpcodeTable opcodeTable;
+
+#if defined(__GNUC__)
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
 
 void InitOpcodes();
 
