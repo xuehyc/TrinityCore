@@ -1,8 +1,13 @@
 CREATE TABLE `custom_nullsec_guild_zones` (
 	`guild_zone_id` INT(10) UNSIGNED NOT NULL COMMENT 'Zone ID (As defined in SharedDefines.h)',
 	`guild_zone_name` VARCHAR(255) NOT NULL COMMENT 'Zone name',
+	`vital_area_id` INT(10) UNSIGNED NOT NULL COMMENT 'Area where the player must be to use .reclamar command and claim the conquerable zone.',
+	`standard_x` FLOAT NOT NULL COMMENT 'X coord where the Standard of Conquest will be placed.',
+	`standard_y` FLOAT NOT NULL COMMENT 'Y coord where the Standard of Conquest will be placed.',
+	`standard_z` FLOAT NOT NULL COMMENT 'Z coord where the Standard of Conquest will be placed.',
+	`standard_o` FLOAT NOT NULL COMMENT 'Orientation of the Standard of Conquest.',
 	`owner` INT(10) UNSIGNED NULL DEFAULT NULL COMMENT 'The owner\'s ID (Guild)',
-	PRIMARY KEY (`zone_id`),
+	PRIMARY KEY (`guild_zone_id`),
 	INDEX `FK_ZONE_GUILD_GUID` (`owner`),
 	CONSTRAINT `FK_ZONE_GUILD_GUID` FOREIGN KEY (`owner`) REFERENCES `guild` (`guildid`)
 )

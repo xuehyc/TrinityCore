@@ -260,7 +260,7 @@ uint32 NullSecMgr::GetNullSecGuildZone(uint32 zoneId, uint32 areaId)
 uint32 NullSecMgr::GetVitalAreaByGuildZoneId(uint32 guildZoneId)
 {
     if (guildZoneId > MAX_NULLSEC_ZONES || guildZoneId == GUILD_ZONE_NONE)
-        return NULL;
+        return 0;
 
     return m_guildZones[guildZoneId].VitalArea;
 }
