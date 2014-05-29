@@ -116,7 +116,7 @@ public:
                 ChatHandler(player->GetSession()).SendSysMessage(LANG_FRONTIER_ZONE_ENTER);
                 break;
             case RESTRICTED_ZONE_DUSKWOOD:
-                player->TeleportTo(MAPID_EASTERN_KINGDOMS, GraveyardsPositions[GRAVEYARD_FERALAS].GetPositionX(),
+                player->TeleportTo(MAPID_EASTERN_KINGDOMS, GraveyardsPositions[GRAVEYARD_DUSKWOOD].GetPositionX(),
                     GraveyardsPositions[GRAVEYARD_DUSKWOOD].GetPositionY(),
                     GraveyardsPositions[GRAVEYARD_DUSKWOOD].GetPositionZ(),
                     GraveyardsPositions[GRAVEYARD_DUSKWOOD].GetOrientation());
