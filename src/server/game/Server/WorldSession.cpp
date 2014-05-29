@@ -1303,26 +1303,27 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
     uint32 maxPacketCounterAllowed;
     switch (opcode)
     {
+        // These opcodes are spammed by few addons so a very high limit is required
+        case CMSG_QUEST_QUERY:
         case CMSG_MESSAGECHAT:
+        case CMSG_ITEM_QUERY_SINGLE:
+        case CMSG_ITEM_NAME_QUERY:
+        case CMSG_GAMEOBJECT_QUERY:
+        case CMSG_NAME_QUERY:
+        case CMSG_PET_NAME_QUERY:
+        case CMSG_CREATURE_QUERY:
+        case CMSG_NPC_TEXT_QUERY:
         {
-            maxPacketCounterAllowed = 500;
+            maxPacketCounterAllowed = 5000;
             break;
         }
 
         case CMSG_ATTACKSTOP:
-        case CMSG_ITEM_QUERY_SINGLE:
-        case CMSG_ITEM_NAME_QUERY:
         case CMSG_GUILD_QUERY:
-        case CMSG_NAME_QUERY:
-        case CMSG_PET_NAME_QUERY:
-        case CMSG_GAMEOBJECT_QUERY:
-        case CMSG_CREATURE_QUERY:
-        case CMSG_NPC_TEXT_QUERY:
         case CMSG_ARENA_TEAM_QUERY:
         case CMSG_TAXINODE_STATUS_QUERY:
         case CMSG_TAXIQUERYAVAILABLENODES:
         case CMSG_QUESTGIVER_QUERY_QUEST:
-        case CMSG_QUEST_QUERY:
         case CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY:
         case CMSG_QUERY_QUESTS_COMPLETED:
         case CMSG_QUEST_POI_QUERY:
@@ -1340,28 +1341,33 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case MSG_QUERY_NEXT_MAIL_TIME:
         case MSG_GUILD_EVENT_LOG_QUERY:
         case MSG_MOVE_SET_FACING:
+        case CMSG_INSPECT:
         {
-            maxPacketCounterAllowed = 200;
+            maxPacketCounterAllowed = 500;
             break;
         }
 
         case CMSG_REQUEST_PARTY_MEMBER_STATS:
         case CMSG_WHO:
+        case CMSG_SETSHEATHED:
+        case CMSG_CONTACT_LIST:
+        case CMSG_GUILD_SET_PUBLIC_NOTE:
+        case CMSG_GUILD_SET_OFFICER_NOTE:
         {
             maxPacketCounterAllowed = 50;
             break;
         }
 
-        case CMSG_SETSHEATHED:
-        case CMSG_CONTACT_LIST:
+        case CMSG_SPELLCLICK:
+        case CMSG_GAMEOBJ_USE:
+        case CMSG_GAMEOBJ_REPORT_USE:
+        case MSG_RAID_TARGET_UPDATE:
+        case CMSG_QUESTGIVER_COMPLETE_QUEST:
         {
-            maxPacketCounterAllowed = 10;
+            maxPacketCounterAllowed = 20;
             break;
         }
 
-        case CMSG_GAMEOBJ_USE:
-        case CMSG_GAMEOBJ_REPORT_USE:
-        case CMSG_SPELLCLICK:
         case CMSG_PLAYER_LOGOUT:
         case CMSG_LOGOUT_REQUEST:
         case CMSG_LOGOUT_CANCEL:
@@ -1416,7 +1422,6 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_QUESTGIVER_CANCEL:
         case CMSG_QUESTLOG_REMOVE_QUEST:
         case CMSG_QUEST_CONFIRM_ACCEPT:
-        case CMSG_QUESTGIVER_COMPLETE_QUEST:
         case CMSG_DISMISS_CRITTER:
         case CMSG_REPOP_REQUEST:
         case CMSG_PETITION_BUY:
@@ -1468,8 +1473,6 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_GUILD_DISBAND:
         case CMSG_GUILD_LEADER:
         case CMSG_GUILD_MOTD:
-        case CMSG_GUILD_SET_PUBLIC_NOTE:
-        case CMSG_GUILD_SET_OFFICER_NOTE:
         case CMSG_GUILD_RANK:
         case CMSG_GUILD_ADD_RANK:
         case CMSG_GUILD_DEL_RANK:
@@ -1486,7 +1489,6 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case MSG_SET_DUNGEON_DIFFICULTY:
         case MSG_SET_RAID_DIFFICULTY:
         case MSG_RANDOM_ROLL:
-        case MSG_RAID_TARGET_UPDATE:
         case MSG_PARTY_ASSIGNMENT:
         case MSG_RAID_READY_CHECK:
         {
