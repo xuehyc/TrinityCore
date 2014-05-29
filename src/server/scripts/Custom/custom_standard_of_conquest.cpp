@@ -176,4 +176,3 @@ void AddSC_npc_standard_of_conquest()
 {
     new npc_standard_of_conquest();
 }
-

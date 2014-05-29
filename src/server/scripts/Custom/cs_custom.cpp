@@ -80,7 +80,7 @@ public:
         }
 
         // Check if the zone is not conquered by other guild
-        if (sNullSecMgr->GetNullSecZoneOwner(guildZoneId) != NO_OWNER)
+        if (sNullSecMgr->GetNullSecZoneOwner(guildZoneId) != NULL)
         {
             handler->PSendSysMessage(LANG_RECLAMAR_HAS_OWNER, atEntry->area_name[handler->GetSessionDbcLocale()]);
             return true;

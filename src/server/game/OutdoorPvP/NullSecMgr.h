@@ -22,7 +22,6 @@
 #include <ace/Singleton.h>
 
 #define MAX_NULLSEC_ZONES 11
-#define NO_OWNER NULL
 #define NO_GUILD_ZONE NULL
 #define ITEM_STANDARD_OF_CONQUEST 25555
 #define NPC_STANDARD_OF_CONQUEST 50000

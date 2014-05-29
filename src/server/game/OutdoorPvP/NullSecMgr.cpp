@@ -55,7 +55,7 @@ void NullSecMgr::InitNullSecMgr()
         // Load only an area...
         if (fields[0].GetUInt32() == guildZoneId)
         {
-            m_guildZones[guildZoneId].Areas.push_back(fields[9].GetUInt16());
+            m_guildZones[guildZoneId].Areas.push_back(fields[9].GetUInt32());
             ++countAreas;
         }
         // ... or zone and area
@@ -72,12 +72,12 @@ void NullSecMgr::InitNullSecMgr()
             NullSecGuildZoneData nullSecGuildZoneData;
             nullSecGuildZoneData.GuildZoneId = guildZoneId;
             nullSecGuildZoneData.GuildZoneName = fields[1].GetString();
-            nullSecGuildZoneData.ZoneId = fields[8].GetUInt16();
+            nullSecGuildZoneData.ZoneId = fields[8].GetUInt32();
             nullSecGuildZoneData.VitalArea = fields[2].GetUInt32();
             Position standardPosition {fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat(), fields[6].GetFloat()};
             nullSecGuildZoneData.StandardPosition = standardPosition;
             if (!fields[2].GetUInt32())
-                nullSecGuildZoneData.Owner = NO_OWNER;
+                nullSecGuildZoneData.Owner = NULL;
             else
                 nullSecGuildZoneData.Owner = sGuildMgr->GetGuildById(fields[7].GetUInt32());
             nullSecGuildZoneData.Attacker = NULL;
@@ -108,17 +108,15 @@ void NullSecMgr::InitNullSecMgr()
     {
         Field* fields = result->Fetch();
         // Add new zone to the null sec list.
-        m_nullSecZones.push_back(fields[0].GetUInt16());
+        m_nullSecZones.push_back(fields[0].GetUInt32());
         ++countZones;
     } while (result->NextRow());
-
-    TC_LOG_INFO("server.loading", ">> Loaded %u custom Null Sec Zones in %u ms.", countZones, GetMSTimeDiffToNow(oldMSTime));
 }
 
 Guild* NullSecMgr::GetNullSecZoneOwner(uint32 guildZoneId)
 {
-    if (guildZoneId > MAX_NULLSEC_ZONES)
-        return NO_OWNER;
+    if (guildZoneId > MAX_NULLSEC_ZONES || !guildZoneId)
+        return NULL;
 
     return m_guildZones[guildZoneId].Owner;
 }
@@ -150,7 +148,7 @@ void NullSecMgr::RemoveGuildZoneOwner(uint32 guildZoneId)
     if (guildZoneId > MAX_NULLSEC_ZONES)
         return;
 
-    m_guildZones[guildZoneId].Owner = NO_OWNER;
+    m_guildZones[guildZoneId].Owner = NULL;
     CharacterDatabase.DirectPExecute("UPDATE custom_nullsec_guild_zones SET owner = NULL WHERE guild_zone_id = %u", guildZoneId);
     
     // Inform all players that a new territory is available
@@ -163,7 +161,6 @@ void NullSecMgr::OnPlayerEnterNullSecGuildZone(Player* player)
 
     player->GetZoneAndAreaId(zoneId, areaId);
     guildZoneId = GetNullSecGuildZone(zoneId, areaId);
-
     // This should never happen anyway...
     if (guildZoneId > MAX_NULLSEC_ZONES)
         return;
@@ -171,7 +168,7 @@ void NullSecMgr::OnPlayerEnterNullSecGuildZone(Player* player)
     // OnPlayerEnterNullSecGuildZone() will be called only when entering an area 
     // inside null sec, but there are areas like seas that can't have owner, so 
     // update the player as if he has left the guild zone.
-    if (guildZoneId == GUILD_ZONE_NONE)
+    if (!guildZoneId)
     {
         OnPlayerLeaveNullSecGuildZone(player);
         return;
@@ -181,10 +178,10 @@ void NullSecMgr::OnPlayerEnterNullSecGuildZone(Player* player)
     if (player->GetGuildZoneId() != guildZoneId)
     {
         // Zone is controlled by the player's guild.
-        if (player->GetGuild() != NULL && player->GetGuild() == m_guildZones[guildZoneId].Owner)
+        if (player->GetGuild() && player->GetGuild() == m_guildZones[guildZoneId].Owner)
             ChatHandler(player->GetSession()).PSendSysMessage(LANG_NULLSEC_FRIENDLY_ENTER, m_guildZones[guildZoneId].GuildZoneName.c_str(), m_guildZones[guildZoneId].Owner->GetName().c_str());
         // Zone is neutral.
-        else if (m_guildZones[guildZoneId].Owner == NO_OWNER)
+        else if (m_guildZones[guildZoneId].Owner == NULL)
             ChatHandler(player->GetSession()).PSendSysMessage(LANG_NULLSEC_NEUTRAL_ENTER, m_guildZones[guildZoneId].GuildZoneName.c_str());
         // Zone is controlled by other guild.
         else
@@ -216,6 +213,7 @@ void NullSecMgr::OnPlayerEnterNullSecGuildZone(Player* player)
 void NullSecMgr::OnPlayerLeaveNullSecGuildZone(Player* player)
 {
     uint32 guildZoneId = player->GetGuildZoneId();
+
     if (!guildZoneId || guildZoneId > MAX_NULLSEC_ZONES)
         return;
 
@@ -259,7 +257,7 @@ uint32 NullSecMgr::GetNullSecGuildZone(uint32 zoneId, uint32 areaId)
 
 uint32 NullSecMgr::GetVitalAreaByGuildZoneId(uint32 guildZoneId)
 {
-    if (guildZoneId > MAX_NULLSEC_ZONES || guildZoneId == GUILD_ZONE_NONE)
+    if (guildZoneId > MAX_NULLSEC_ZONES || !guildZoneId)
         return 0;
 
     return m_guildZones[guildZoneId].VitalArea;
@@ -267,7 +265,7 @@ uint32 NullSecMgr::GetVitalAreaByGuildZoneId(uint32 guildZoneId)
 
 Position NullSecMgr::GetStandardPositionByGuildZoneId(uint32 guildZoneId)
 {
-    if (guildZoneId > MAX_NULLSEC_ZONES || guildZoneId == GUILD_ZONE_NONE)
+    if (guildZoneId > MAX_NULLSEC_ZONES || !guildZoneId)
         return NULL;
 
     return m_guildZones[guildZoneId].StandardPosition;
@@ -275,7 +273,7 @@ Position NullSecMgr::GetStandardPositionByGuildZoneId(uint32 guildZoneId)
 
 bool NullSecMgr::IsGuildZoneUnderAttack(uint32 guildZoneId)
 {
-    if (guildZoneId > MAX_NULLSEC_ZONES || guildZoneId == GUILD_ZONE_NONE)
+    if (guildZoneId > MAX_NULLSEC_ZONES || !guildZoneId)
         return false;
 
     return m_guildZones[guildZoneId].IsUnderAttack;
@@ -283,7 +281,7 @@ bool NullSecMgr::IsGuildZoneUnderAttack(uint32 guildZoneId)
 
 void NullSecMgr::SetGuildZoneUnderAttack(uint32 guildZoneId, bool underAttack, Guild* attacker)
 {
-    if (guildZoneId > MAX_NULLSEC_ZONES || guildZoneId == GUILD_ZONE_NONE)
+    if (guildZoneId > MAX_NULLSEC_ZONES || !guildZoneId)
         return;
 
     if (underAttack && !attacker)
@@ -316,7 +314,7 @@ void NullSecMgr::SetGuildZoneUnderAttack(uint32 guildZoneId, bool underAttack, G
 
 Guild* NullSecMgr::GetGuildZoneAttacker(uint32 guildZoneId)
 {
-    if (guildZoneId > MAX_NULLSEC_ZONES || guildZoneId == GUILD_ZONE_NONE)
+    if (guildZoneId > MAX_NULLSEC_ZONES || !guildZoneId)
         return NULL;
 
     return m_guildZones[guildZoneId].Attacker;
@@ -324,7 +322,7 @@ Guild* NullSecMgr::GetGuildZoneAttacker(uint32 guildZoneId)
 
 std::string NullSecMgr::GetGuildZoneName(uint32 guildZoneId)
 {
-    if (guildZoneId > MAX_NULLSEC_ZONES || guildZoneId == GUILD_ZONE_NONE)
+    if (guildZoneId > MAX_NULLSEC_ZONES || !guildZoneId)
         return NULL;
 
     return m_guildZones[guildZoneId].GuildZoneName;
