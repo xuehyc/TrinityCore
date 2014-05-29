@@ -17700,8 +17700,8 @@ bool Unit::IsInNullSecZone()
         const AreaTableEntry* atEntry = GetAreaEntryByAreaID(GetAreaId());
         if (atEntry)
         {
-            if ((ToPlayer()->GetTeam() == TEAM_ALLIANCE && atEntry->team == TEAM_HORDE)
-                || (ToPlayer()->GetTeam() == TEAM_HORDE && atEntry->team == TEAM_ALLIANCE)
+            if (((ToPlayer()->GetTeam() == TEAM_ALLIANCE && atEntry->team == TEAM_HORDE)
+                || (ToPlayer()->GetTeam() == TEAM_HORDE && atEntry->team == TEAM_ALLIANCE))
                 // Exclude Low Sec zones  // TODO: Create IsInLowSecZone() or at least use constants or DB values?
                 && (atEntry->zone != 148) // Darkshore
                 && (atEntry->zone != 331) // Ashenvale
