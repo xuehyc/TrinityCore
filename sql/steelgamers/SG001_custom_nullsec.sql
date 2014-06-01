@@ -157,7 +157,6 @@ REPLACE INTO `custom_nullsec_areas` VALUES
 (11, 15, 4049),
 (11, 15, 4046);
 
-REPLACE INTO `command` (`name`, `permission`, `help`) VALUES ("reclamar", 736, "Utiliza un Estandarte de Conquista para intentar reclamar un territorio para tu hermandad.");
 REPLACE INTO `trinity_string` (`entry`, `content_default`, `content_loc6`, `content_loc7`) VALUES
 (12000, "You have entered a safe zone.", "Has entrado en una zona segura.", "Has entrado en una zona segura."),
 (12001, "ATTENTION: You have entered an Alliance territory, the security for you here is NULL.", "ADVERTENCIA: Has entrado en un territorio de la Alianza, donde la seguridad para ti es NULA.", "ADVERTENCIA: Has entrado en un territorio de la Alianza, donde la seguridad para ti es NULA."),

@@ -237,6 +237,7 @@ public:
         }
 
         map->AddToMap(object);
+        object->loot.FillLoot(PLAYER_REMAINS_LOOT_ENTRY, LootTemplates_Gameobject, lootOwner, false);
 
         // Give the killer his money
         uint32 money = player->GetMoney();
