@@ -22,49 +22,15 @@
 #include "Group.h"
 #include "Language.h"
 #include "NullSecMgr.h"
+#include "LootMgr.h"
 
 #define MAPID_EASTERN_KINGDOMS 0
 #define MAPID_KALIMDOR 1
 
-enum RestrictedZones
-{
-    RESTRICTED_ZONE_FERALAS            = 357,
-    RESTRICTED_ZONE_THOUSAND_NEEDLES   = 400,
-    RESTRICTED_ZONE_REDRIDGE_MOUNTAINS = 44,
-    RESTRICTED_ZONE_DUSKWOOD           = 10,
-    RESTRICTED_ZONE_WESTFALL           = 40
-};
+#define PLAYER_REMAINS_ENTRY 177806
+#define PLAYER_REMAINS_LOOT_ENTRY 200000
 
-enum HighSecZones
-{
-    HIGHSEC_ZONE_STORMWIND     = 1519,
-    HIGHSEC_ZONE_ORGRIMMAR     = 1637,
-    HIGHSEC_ZONE_DARNASSUS     = 1657,
-    HIGHSEC_ZONE_THUNDERBLUFF  = 1638,
-    HIGHSEC_ZONE_ELWYNN_FOREST = 12,
-    HIGHSEC_ZONE_DUROTAR       = 14,
-    HIGHSEC_ZONE_TELDRASSIL    = 141,
-    HIGHSEC_ZONE_MULGORE       = 215
-};
-
-enum LowSecZones
-{
-    LOWSEC_ZONE_DARKSHORE   = 148,
-    LOWSEC_ZONE_ASHENVALE   = 331,
-    LOWSEC_ZONE_AZSHARA     = 16,
-    LOWSEC_ZONE_THE_BARRENS = 17,
-};
-
-enum NullSecZones
-{
-    NULLSEC_ZONE_DESOLACE             = 405,
-    NULLSEC_ZONE_WINTERSPRING         = 618,
-    NULLSEC_ZONE_DUSTWALLOW_MARSH     = 15,
-    NULLSEC_ZONE_STONETALON_MOUNTAINS = 406,
-    NULLSEC_ZONE_FELWOOD              = 361
-};
-
-enum RestrictedGraveyards
+enum TeleportGraveyards
 {
     GRAVEYARD_FERALAS            = 0,
     GRAVEYARD_THOUSAND_NEEDLES   = 1,
@@ -181,7 +147,7 @@ public:
                 if (!areaOnly)
                     ChatHandler(player->GetSession()).SendSysMessage(LANG_NULLSEC_GENERAL_ENTER);
 
-                // If zone = area (for example, roads) the area is not in a guild zone.
+                // If zone = area (for example, must roads) the area is not in a guild zone.
                 // Other exceptions like seas are handled in OnPlayerEnterNullSecGuildZone().
                 if (newZone == newArea && player->GetGuildZoneId() != GUILD_ZONE_NONE)
                     sNullSecMgr->OnPlayerLeaveNullSecGuildZone(player);
@@ -191,6 +157,98 @@ public:
                 break;
             default:
                 break;
+        }
+    }
+
+    void OnPVPKill(Player* killer, Player* killed) override
+    {
+        SpawnPlayerLoot(killed, killer);
+    }
+
+    void SpawnPlayerLoot(Player* player, Player* lootOwner)
+    {
+        // player should loot his/her items only if he is in null sec.
+        ZoneSecurityLevels zoneSec = player->GetZoneSecurityLevel();
+        if (zoneSec == ZONE_SECURITY_LEVEL_HIGH || zoneSec == ZONE_SECURITY_LEVEL_UNK)
+            return;
+
+        std::vector<LootStoreItem> storeItems;
+
+        // Fill the gameobject's loot with the player's items, and destroy them.
+        // The bags itselfs are not dropped.
+        for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+        {
+            if (Item* pItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            {
+                uint32 count = pItem->GetCount();
+                LootStoreItem lootItem(pItem->GetEntry(), 100.0f, 1, 0, count, count);
+                storeItems.push_back(lootItem);
+                player->DestroyItemCount(pItem, count, true);
+            }
+        }
+
+        for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+        {
+            if (Bag* pBag = player->GetBagByPos(i))
+            {
+                for (uint32 j = 0; j < pBag->GetBagSize(); j++)
+                {
+                    if (Item* pItem = player->GetItemByPos(i, j))
+                    {
+                        uint32 count = pItem->GetCount();
+                        LootStoreItem lootItem(pItem->GetEntry(), 100.0f, 1, 0, count, count);
+                        storeItems.push_back(lootItem);
+                        player->DestroyItemCount(pItem, count, true);
+                    }
+                }
+            }
+        }
+        // If player is in Null Sec, drop also his/her equipped items, but with a chance.
+        if (zoneSec == ZONE_SECURITY_LEVEL_NULL)
+        {
+            for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
+            {
+                if (Item* pItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                {
+                    uint32 count = 1;
+                    LootStoreItem lootItem(pItem->GetEntry(), 20.0f, 1, 0, count, count);
+                    storeItems.push_back(lootItem);
+                    player->DestroyItemCount(pItem, count, true);
+                }
+            }
+        }
+        // Add items to the loot store
+        LootTemplates_Gameobject.LoadDynamicLootTemplate(storeItems, PLAYER_REMAINS_LOOT_ENTRY);
+
+        // Spawn the lootable player remains
+        float x = float(player->GetPositionX());
+        float y = float(player->GetPositionY());
+        float z = float(player->GetPositionZ());
+        float o = float(player->GetOrientation());
+        Map* map = player->GetMap();
+
+        GameObject* object = new GameObject;
+        uint32 guidLow = sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT);
+
+        if (!object->Create(guidLow, PLAYER_REMAINS_ENTRY, map, player->GetPhaseMaskForSpawn(), x, y, z, o, 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
+        {
+            delete object;
+            return;
+        }
+
+        map->AddToMap(object);
+
+        // Give the killer his money
+        uint32 money = player->GetMoney();
+        if (money > 0)
+        {
+            player->ModifyMoney(money * -1, false);
+            uint32 golds = uint32(money / 10000);
+            uint32 silvers = uint32((money - (golds * 10000)) / 100);
+            uint32 coppers = uint32(money - (golds * 10000) - (silvers * 100));
+            ChatHandler(player->GetSession()).PSendSysMessage(LANG_PVP_MONEY_LOST, lootOwner->GetName().c_str(), golds, silvers, coppers);
+            lootOwner->ModifyMoney(money);
+            ChatHandler(lootOwner->GetSession()).PSendSysMessage(LANG_PVP_MONEY_WON, golds, silvers, coppers, player->GetName().c_str());
         }
     }
 };

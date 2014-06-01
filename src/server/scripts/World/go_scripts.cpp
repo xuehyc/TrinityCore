@@ -45,6 +45,7 @@ go_hive_pod
 go_gjalerbron_cage
 go_large_gjalerbron_cage
 go_veil_skith_cage
+go_player_remains
 EndContentData */
 
 #include "ScriptMgr.h"
@@ -1306,6 +1307,25 @@ public:
     }
 };
 
+/*######
+## go_player_remains
+######*/
+
+class go_player_remains : public GameObjectScript
+{
+public:
+    go_player_remains() : GameObjectScript("go_player_remains") { }
+
+    void OnLootStateChanged(GameObject* go, uint32 state, Unit* unit) override
+    {
+        if (state == GO_JUST_DEACTIVATED)
+        {
+            go->SetRespawnTime(0);                                 // not save respawn time
+            go->Delete();
+        }
+    }
+};
+
 void AddSC_go_scripts()
 {
     new go_cat_figurine();
@@ -1345,4 +1365,5 @@ void AddSC_go_scripts()
     new go_veil_skith_cage();
     new go_frostblade_shrine();
     new go_midsummer_bonfire();
+    new go_player_remains();
 }

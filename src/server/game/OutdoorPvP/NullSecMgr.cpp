@@ -327,3 +327,16 @@ std::string NullSecMgr::GetGuildZoneName(uint32 guildZoneId)
 
     return m_guildZones[guildZoneId].GuildZoneName;
 }
+
+void NullSecMgr::OnGuildDisband(Guild* guild)
+{
+    if (!guild)
+        return;
+
+    // Remove the guild's conquested territories if any.
+    for (std::map<uint32, NullSecGuildZoneData>::iterator itr = m_guildZones.begin(); itr != m_guildZones.end(); ++itr)
+    {
+        if (itr->second.Owner == guild)
+            RemoveGuildZoneOwner(itr->second.GuildZoneId);
+    }
+}

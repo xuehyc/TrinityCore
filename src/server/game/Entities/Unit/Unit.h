@@ -2153,7 +2153,7 @@ class Unit : public WorldObject
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }
 
         // Custom
-        bool IsInNullSecZone();
+        ZoneSecurityLevels GetZoneSecurityLevel();
 
     protected:
         explicit Unit (bool isWorldObject);

@@ -275,6 +275,35 @@ void LootStore::ReportNotExistedId(uint32 id) const
     TC_LOG_ERROR("sql.sql", "Table '%s' entry %d (%s) does not exist but used as loot id in DB.", GetName(), id, GetEntryName());
 }
 
+/* 
+* Custom functions
+*
+* This function overrides a loot template of the given entry on runtime.
+* Be careful when using it! 
+*/
+void LootStore::LoadDynamicLootTemplate(std::vector<LootStoreItem> items, uint32 lootId)
+{
+    LootTemplateMap::const_iterator tab = m_LootTemplates.find(lootId);
+    if (tab != m_LootTemplates.end())
+        m_LootTemplates.erase(m_LootTemplates.find(lootId));
+
+    for (std::vector<LootStoreItem>::iterator itr = items.begin(); itr < items.end(); ++itr)
+    {
+        LootStoreItem* storeitem = new LootStoreItem(itr->itemid, itr->chance, itr->lootmode, itr->group, itr->mincountOrRef, itr->maxcount);
+
+        if (!itr->IsValid(*this, lootId))            // Validity checks
+            continue;
+
+        std::pair< LootTemplateMap::iterator, bool > pr = m_LootTemplates.insert(LootTemplateMap::value_type(lootId, new LootTemplate()));
+        tab = pr.first;
+        // else is empty - template Id and iter are the same
+        // finally iter refers to already existed or just created <entry, LootTemplate>
+
+        // Adds current row to the template
+        tab->second->AddEntry(storeitem);
+    }
+}
+
 //
 // --------- LootStoreItem ---------
 //

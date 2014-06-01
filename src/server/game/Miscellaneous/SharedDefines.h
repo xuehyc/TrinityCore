@@ -3590,6 +3590,15 @@ enum DiminishingLevels
 
 /* CUSTOM SERVER DEFINITIONS */
 
+// A zone can have 1 of 4 custom security levels.
+enum ZoneSecurityLevels
+{
+    ZONE_SECURITY_LEVEL_UNK  = 0, // Instanced zones (Dungeons, battlegrounds, etc)
+    ZONE_SECURITY_LEVEL_HIGH = 1,
+    ZONE_SECURITY_LEVEL_LOW  = 2,
+    ZONE_SECURITY_LEVEL_NULL = 3
+};
+
 // Enum with IDs for each of the zones that can be controlled by player guilds.
 enum GuildZones
 {
@@ -3607,6 +3616,46 @@ enum GuildZones
     GUILD_ZONE_DUSTWALLOW_MARSH_EAST     = 10,
     GUILD_ZONE_DUSTWALLOW_MARSH_NORTH    = 11,
     GUILD_ZONE_DUSTWALLOW_MARSH_SOUTH    = 12
+};
+
+// This zones must be defined here as, obviously, there's no flag in AreaTableEntry
+// or something like that. May be later they'll be moved to the DB.
+enum RestrictedZones
+{
+    RESTRICTED_ZONE_FERALAS = 357,
+    RESTRICTED_ZONE_THOUSAND_NEEDLES = 400,
+    RESTRICTED_ZONE_REDRIDGE_MOUNTAINS = 44,
+    RESTRICTED_ZONE_DUSKWOOD = 10,
+    RESTRICTED_ZONE_WESTFALL = 40
+};
+
+enum HighSecZones
+{
+    HIGHSEC_ZONE_STORMWIND = 1519,
+    HIGHSEC_ZONE_ORGRIMMAR = 1637,
+    HIGHSEC_ZONE_DARNASSUS = 1657,
+    HIGHSEC_ZONE_THUNDERBLUFF = 1638,
+    HIGHSEC_ZONE_ELWYNN_FOREST = 12,
+    HIGHSEC_ZONE_DUROTAR = 14,
+    HIGHSEC_ZONE_TELDRASSIL = 141,
+    HIGHSEC_ZONE_MULGORE = 215
+};
+
+enum LowSecZones
+{
+    LOWSEC_ZONE_DARKSHORE = 148,
+    LOWSEC_ZONE_ASHENVALE = 331,
+    LOWSEC_ZONE_AZSHARA = 16,
+    LOWSEC_ZONE_THE_BARRENS = 17,
+};
+
+enum NullSecZones
+{
+    NULLSEC_ZONE_DESOLACE = 405,
+    NULLSEC_ZONE_WINTERSPRING = 618,
+    NULLSEC_ZONE_DUSTWALLOW_MARSH = 15,
+    NULLSEC_ZONE_STONETALON_MOUNTAINS = 406,
+    NULLSEC_ZONE_FELWOOD = 361
 };
 
 #endif

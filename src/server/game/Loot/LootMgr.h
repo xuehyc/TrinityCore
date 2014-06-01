@@ -208,6 +208,9 @@ class LootStore
         char const* GetName() const { return m_name; }
         char const* GetEntryName() const { return m_entryName; }
         bool IsRatesAllowed() const { return m_ratesAllowed; }
+        // Custom
+        void LoadDynamicLootTemplate(std::vector<LootStoreItem> items, uint32 lootId);
+
     protected:
         uint32 LoadLootTable();
         void Clear();

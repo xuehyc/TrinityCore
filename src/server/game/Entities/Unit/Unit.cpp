@@ -17692,23 +17692,50 @@ void Unit::BuildCooldownPacket(WorldPacket& data, uint8 flags, PacketCooldowns c
 
 /* Custom functions for Null Sec PvP system */
 
-bool Unit::IsInNullSecZone()
+ZoneSecurityLevels Unit::GetZoneSecurityLevel()
 {
-    if (GetTypeId() == TYPEID_PLAYER)
+    const AreaTableEntry* atEntry = GetAreaEntryByAreaID(GetAreaId());
+    if (atEntry)
     {
+        // Player is in Null Sec
         // If the unit is a player, he can be in null sec if the zone is owned by the opposite faction
-        const AreaTableEntry* atEntry = GetAreaEntryByAreaID(GetAreaId());
-        if (atEntry)
+        if (GetTypeId() == TYPEID_PLAYER)
         {
             if (((ToPlayer()->GetTeam() == TEAM_ALLIANCE && atEntry->team == TEAM_HORDE)
                 || (ToPlayer()->GetTeam() == TEAM_HORDE && atEntry->team == TEAM_ALLIANCE))
-                // Exclude Low Sec zones  // TODO: Create IsInLowSecZone() or at least use constants or DB values?
-                && (atEntry->zone != 148) // Darkshore
-                && (atEntry->zone != 331) // Ashenvale
-                && (atEntry->zone != 16)  // Azshara
-                && (atEntry->zone != 17)) // The Barrens
-                return true;
+                // Exclude Low Sec zones
+                || (sNullSecMgr->IsNullSecZone(GetZoneId())))
+                return ZONE_SECURITY_LEVEL_NULL;
+        }
+        else
+        {
+            if (sNullSecMgr->IsNullSecZone(GetZoneId()))
+                return ZONE_SECURITY_LEVEL_NULL;
+        }
+        
+        switch (atEntry->zone)
+        {
+            // Unit is in High Sec. Bear in mind that if the unit was
+            // of the opposite faction, Null Sec was returned previously.
+            case HIGHSEC_ZONE_MULGORE:
+            case HIGHSEC_ZONE_DUROTAR:
+            case HIGHSEC_ZONE_ORGRIMMAR:
+            case HIGHSEC_ZONE_THUNDERBLUFF:
+            case HIGHSEC_ZONE_TELDRASSIL:
+            case HIGHSEC_ZONE_ELWYNN_FOREST:
+            case HIGHSEC_ZONE_STORMWIND:
+            case HIGHSEC_ZONE_DARNASSUS:
+                return ZONE_SECURITY_LEVEL_HIGH;
+            // Player is in Low Sec zone
+            case LOWSEC_ZONE_DARKSHORE:
+            case LOWSEC_ZONE_ASHENVALE:
+            case LOWSEC_ZONE_AZSHARA:
+            case LOWSEC_ZONE_THE_BARRENS:
+                return ZONE_SECURITY_LEVEL_LOW;
+            default:
+                break;
         }
     }
-    return sNullSecMgr->IsNullSecZone(GetZoneId());
+    // Player is in instanced/out of the map territoy.
+    return ZONE_SECURITY_LEVEL_UNK;
 }

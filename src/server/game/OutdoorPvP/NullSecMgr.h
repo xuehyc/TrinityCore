@@ -69,6 +69,7 @@ public:
     void OnPlayerEnterNullSecZone(Player* player);
     void OnPlayerEnterNullSecGuildZone(Player* player);
     void OnPlayerLeaveNullSecGuildZone(Player* player);
+    void OnGuildDisband(Guild* guild);
 
 private:
     typedef std::map<uint32, NullSecGuildZoneData> NullSecGuildZoneDataMap;

@@ -699,7 +699,7 @@ void AddSC_chat_log();
 
 // Custom
 void AddSC_custom_player();
-void AddSC_npc_standard_of_conquest();
+void AddSC_custom_npcs();
 void AddSC_custom_commandscript();
 
 #endif
@@ -812,7 +812,7 @@ void AddWorldScripts()
     AddSC_achievement_scripts();
     AddSC_chat_log();
     AddSC_custom_player();
-    AddSC_npc_standard_of_conquest();
+    AddSC_custom_npcs();
 #endif
 }
 
