@@ -172,6 +172,11 @@ public:
         if (zoneSec == ZONE_SECURITY_LEVEL_HIGH || zoneSec == ZONE_SECURITY_LEVEL_UNK)
             return;
 
+        // Get next free dynamic lootId
+        uint32 freeLootId = LootTemplates_Gameobject.GetFreeDynamicLootId();
+        if (!freeLootId) // There's too many dynamic loot entries in use
+            return;
+
         std::vector<LootStoreItem> storeItems;
 
         // Fill the gameobject's loot with the player's items, and destroy them.
@@ -218,7 +223,7 @@ public:
             }
         }
         // Add items to the loot store
-        LootTemplates_Gameobject.LoadDynamicLootTemplate(storeItems, PLAYER_REMAINS_LOOT_ENTRY);
+        LootTemplates_Gameobject.LoadDynamicLootTemplate(storeItems, freeLootId);
 
         // Spawn the lootable player remains
         float x = float(player->GetPositionX());
@@ -237,7 +242,7 @@ public:
         }
 
         map->AddToMap(object);
-        object->loot.FillLoot(PLAYER_REMAINS_LOOT_ENTRY, LootTemplates_Gameobject, lootOwner, false);
+        object->SetDynamicLootId(freeLootId);
 
         // Give the killer his money
         uint32 money = player->GetMoney();

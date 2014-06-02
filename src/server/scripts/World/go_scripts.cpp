@@ -1321,6 +1321,7 @@ public:
         if (state == GO_JUST_DEACTIVATED)
         {
             go->SetRespawnTime(0);                                 // not save respawn time
+            go->CleanupsBeforeDelete();
             go->Delete();
         }
     }

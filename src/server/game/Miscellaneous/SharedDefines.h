@@ -3656,4 +3656,7 @@ enum NullSecZones
     NULLSEC_ZONE_FELWOOD = 361
 };
 
+#define MIN_DYNAMIC_LOOT_ID 200000
+#define MAX_DYNAMIC_LOOT_ID 300000 // 100000 Dynamic Loot Templates loaded at the same time (should be more than enought).
+
 #endif

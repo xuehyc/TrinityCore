@@ -210,6 +210,8 @@ class LootStore
         bool IsRatesAllowed() const { return m_ratesAllowed; }
         // Custom
         void LoadDynamicLootTemplate(std::vector<LootStoreItem> items, uint32 lootId);
+        void UnloadDynamicLootTemplate(uint32 lootId);
+        uint32 GetFreeDynamicLootId();
 
     protected:
         uint32 LoadLootTable();

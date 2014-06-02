@@ -64,8 +64,12 @@ GameObject::GameObject() : WorldObject(false), MapObject(),
     m_groupLootTimer = 0;
     lootingGroupLowGUID = 0;
 
+
     ResetLootMode(); // restore default loot mode
     m_stationaryPosition.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
+    
+    // Custom
+    m_dynamicLootId = 0;
 }
 
 GameObject::~GameObject()
@@ -105,6 +109,9 @@ void GameObject::CleanupsBeforeDelete(bool /*finalCleanup*/)
 
     if (m_uint32Values)                                      // field array can be not exist if GameOBject not loaded
         RemoveFromOwner();
+
+    if (m_dynamicLootId)
+        LootTemplates_Gameobject.UnloadDynamicLootTemplate(m_dynamicLootId);
 
     if (GetTransport() && !ToTransport())
     {
@@ -1006,7 +1013,7 @@ bool GameObject::ActivateToQuest(Player* target) const
         case GAMEOBJECT_TYPE_CHEST:
         {
             // scan GO chest with loot including quest items
-            if (LootTemplates_Gameobject.HaveQuestLootForPlayer(GetGOInfo()->GetLootId(), target))
+            if (LootTemplates_Gameobject.HaveQuestLootForPlayer(GetLootId(), target))
             {
                 if (Battleground const* bg = target->GetBattleground())
                     return bg->CanActivateGO(GetEntry(), target->GetTeam());
@@ -2263,4 +2270,13 @@ void GameObject::UpdateModelPosition()
         m_model->Relocate(*this);
         GetMap()->InsertGameObjectModel(*m_model);
     }
+}
+
+uint32 GameObject::GetLootId() const
+{
+    if (GetGoType() == GAMEOBJECT_TYPE_CHEST)
+        if (m_dynamicLootId)
+            return m_dynamicLootId;
+    
+    return GetGOInfo()->GetLootId();
 }

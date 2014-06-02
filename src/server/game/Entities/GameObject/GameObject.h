@@ -834,6 +834,10 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
 
         void UpdateModelPosition();
 
+        // Custom
+        uint32 GetLootId() const;
+        void SetDynamicLootId(uint32 dynamicLootId) { m_dynamicLootId = dynamicLootId; };
+
     protected:
         bool AIM_Initialize();
         void UpdateModel();                                 // updates model in case displayId were changed
@@ -865,6 +869,9 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         uint64 m_lootRecipient;
         uint32 m_lootRecipientGroup;
         uint16 m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
+        // Custom
+        uint32 m_dynamicLootId;
+
     private:
         void RemoveFromOwner();
         void SwitchDoorOrButton(bool activate, bool alternative = false);
