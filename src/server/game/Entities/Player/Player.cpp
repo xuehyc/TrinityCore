@@ -17168,8 +17168,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     //"resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, instance_mode_mask, "
     // 39           40                41                 42                    43          44          45              46           47               48              49
     //"arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk, "
-    // 50      51      52      53      54      55      56      57      58           59         60          61             62              63      64           65          66
-    //"health, power1, power2, power3, power4, power5, power6, power7, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels FROM characters WHERE guid = '%u'", guid);
+    // 50      51      52      53      54      55      56      57      58           59         60          61             62              63      64           65          66               67
+    //"health, power1, power2, power3, power4, power5, power6, power7, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels, customBankMoney FROM characters WHERE guid = '%u'", guid);
     PreparedQueryResult result = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_FROM);
     if (!result)
     {
@@ -17827,6 +17827,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     m_achievementMgr->CheckAllAchievementCriteria();
 
     _LoadEquipmentSets(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_EQUIPMENT_SETS));
+
+    // Custom
+    m_bankMoney = fields[67].GetUInt32();
 
     return true;
 }
@@ -19302,6 +19305,8 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setString(index++, ss.str());
         stmt->setUInt8(index++, GetByteValue(PLAYER_FIELD_BYTES, 2));
         stmt->setUInt32(index++, m_grantableLevels);
+        // Custom gold bank system
+        stmt->setUInt32(index++, m_bankMoney);
     }
     else
     {
@@ -19424,6 +19429,8 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setUInt32(index++, m_grantableLevels);
 
         stmt->setUInt8(index++, IsInWorld() && !GetSession()->PlayerLogout() ? 1 : 0);
+        //Custom gold bank system
+        stmt->setUInt32(index++, m_bankMoney);
         // Index
         stmt->setUInt32(index++, GetGUIDLow());
     }
@@ -22694,6 +22701,18 @@ bool Player::ModifyMoney(int32 amount, bool sendError /*= true*/)
     }
 
     return true;
+}
+
+// Custom gold bank system
+void Player::ModifyBankMoney(int32 amount)
+{
+    if (!amount)
+        return;
+
+    if (amount < 0)
+        m_bankMoney = (m_bankMoney > uint32(-amount) ? m_bankMoney + amount : 0);
+    else
+        m_bankMoney += amount;
 }
 
 bool Player::HasEnoughMoney(int32 amount) const

@@ -2305,10 +2305,14 @@ class Player : public Unit, public GridObject<Player>
         std::string GetCoordsMapAreaAndZoneString();
 
         // Custom
+        // Null sec/Conquerable zones functions
         bool IsInGuildZone() { return m_isInGuildZone; };
         void InGuildZone(bool isInGuildZone) { m_isInGuildZone = isInGuildZone; }
         uint32 GetGuildZoneId() { return m_guildZoneId; };
         void SetGuildZoneId(uint32 guildZoneId) { m_guildZoneId = guildZoneId; };
+        // Gold bank system
+        uint32 GetBankMoney() { return m_bankMoney; };
+        void ModifyBankMoney(int32 amount);
 
     protected:
         // Gamemaster whisper whitelist
@@ -2569,6 +2573,10 @@ class Player : public Unit, public GridObject<Player>
         bool IsAlwaysDetectableFor(WorldObject const* seer) const;
 
         uint8 m_grantableLevels;
+
+        // Custom
+        // Gold bank system
+        uint32 m_bankMoney;
 
     private:
         // internal common parts for CanStore/StoreItem functions

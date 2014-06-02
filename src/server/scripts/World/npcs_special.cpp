@@ -2353,6 +2353,158 @@ public:
     };
 };
 
+/*######
+## npc_gold_banker
+######*/
+
+#define GOSSIP_TEXT_BANKER          20000
+#define GOSSIP_TEXT_MANIPULATE_GOLD 20001
+#define GOSSIP_SAVE_MONEY           "Ingresar"
+#define GOSSIP_WITHDRAW_MONEY       "Retirar"
+#define GOSSIP_ACCOUNT_BALANCE      "Ver dinero disponible"
+#define GOSSIP_ITEM_1_COPPER        "1 Cobre"
+#define GOSSIP_ITEM_10_COPPER       "10 Cobres"
+#define GOSSIP_ITEM_1_SILVER        "1 Plata"
+#define GOSSIP_ITEM_10_SILVER       "10 Platas"
+#define GOSSIP_ITEM_1_GOLD          "1 Oro"
+#define GOSSIP_ITEM_10_GOLD         "10 Oros"
+#define GOSSIP_ITEM_100_GOLD        "100 Oros"
+#define GOSSIP_ITEM_1000_GOLD       "1000 Oros"
+#define GOSSIP_ITEM_ALL             "Todo mi dinero"
+
+enum PossibleBankerActions
+{
+    BANKER_ACTION_UNK            = 0,
+    BANKER_ACTION_SHOW_BALANCE   = 1,
+    BANKER_ACTION_SAVE_MONEY     = 2,
+    BANKER_ACTION_WITHDRAW_MONEY = 3
+};
+
+class npc_gold_banker : public CreatureScript
+{
+public:
+    npc_gold_banker() : CreatureScript("npc_gold_banker") { }
+
+    uint8 bankerAction;
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        bankerAction = BANKER_ACTION_UNK;
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SAVE_MONEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_WITHDRAW_MONEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ACCOUNT_BALANCE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+        player->PlayerTalkClass->SendGossipMenu(GOSSIP_TEXT_BANKER, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
+    {
+        uint32 totalMoney = 0;
+        bool goBack = false;
+
+        player->PlayerTalkClass->ClearMenus();
+
+        switch (action)
+        {
+            case GOSSIP_ACTION_INFO_DEF + 1: // Save money
+                bankerAction = BANKER_ACTION_SAVE_MONEY;
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 2: // Withdraw money
+                bankerAction = BANKER_ACTION_WITHDRAW_MONEY;
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 3: // View account balance
+                bankerAction = BANKER_ACTION_SHOW_BALANCE;
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 4:
+                totalMoney = 1;
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 5:
+                totalMoney = 10;
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 6:
+                totalMoney = 100;
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 7:
+                totalMoney = 1000;
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 8:
+                totalMoney = 10000;
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 9:
+                totalMoney = 100000;
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 10:
+                totalMoney = 1000000;
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 11:
+                if (bankerAction == BANKER_ACTION_SAVE_MONEY)
+                    totalMoney = player->GetMoney();
+                else if (bankerAction == BANKER_ACTION_WITHDRAW_MONEY)
+                    totalMoney = player->GetBankMoney();
+                break;
+        }
+        // To inform the player later
+        uint32 golds = uint32(totalMoney / 10000);
+        uint32 silvers = uint32((totalMoney - (golds * 10000)) / 100);
+        uint32 coppers = uint32(totalMoney - (golds * 10000) - (silvers * 100));
+
+        if ((bankerAction == BANKER_ACTION_SAVE_MONEY || bankerAction == BANKER_ACTION_WITHDRAW_MONEY)
+            && (action == GOSSIP_ACTION_INFO_DEF + 1 || action == GOSSIP_ACTION_INFO_DEF + 2))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_1_COPPER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_10_COPPER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_1_SILVER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_10_SILVER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_1_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_10_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 9);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_100_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 10);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_1000_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 11);
+            player->PlayerTalkClass->SendGossipMenu(GOSSIP_TEXT_MANIPULATE_GOLD, creature->GetGUID());
+        }
+        else if (bankerAction == BANKER_ACTION_SAVE_MONEY)
+        {
+            if (player->GetMoney() >= totalMoney)
+            {
+                player->ModifyBankMoney(totalMoney);
+                player->ModifyMoney(totalMoney * -1);
+                ChatHandler(player->GetSession()).PSendSysMessage("Has guardado %u Oros, %u Platas y %u Cobres en el banco.", golds, silvers, coppers);
+            }
+            else
+                ChatHandler(player->GetSession()).PSendSysMessage("No tienes suficiente dinero.");
+            goBack = true;
+        }
+        else if (bankerAction == BANKER_ACTION_WITHDRAW_MONEY)
+        {
+            if (player->GetBankMoney() >= totalMoney)
+            {
+                player->ModifyBankMoney(totalMoney * -1);
+                player->ModifyMoney(totalMoney);
+                ChatHandler(player->GetSession()).PSendSysMessage("Has retirado %u Oros, %u Platas y %u Cobres en el banco.", golds, silvers, coppers);
+            }
+            else
+                ChatHandler(player->GetSession()).PSendSysMessage("No tienes suficiente dinero en el banco.");
+            goBack = true;
+        }
+        else if (bankerAction == BANKER_ACTION_SHOW_BALANCE)
+        {
+            totalMoney = player->GetBankMoney();
+            uint32 golds = uint32(totalMoney / 10000);
+            uint32 silvers = uint32((totalMoney - (golds * 10000)) / 100);
+            uint32 coppers = uint32(totalMoney - (golds * 10000) - (silvers * 100));
+            ChatHandler(player->GetSession()).PSendSysMessage("Tienes %u Oros, %u Platas y %u Cobres a buen recaudo.", golds, silvers, coppers);
+            goBack = true;
+        }
+
+        if (goBack)
+        {
+            player->PlayerTalkClass->ClearMenus();
+            this->OnGossipHello(player, creature);
+        }
+
+        return true;
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -2375,4 +2527,5 @@ void AddSC_npcs_special()
     new npc_experience();
     new npc_firework();
     new npc_spring_rabbit();
+    new npc_gold_banker();
 }
