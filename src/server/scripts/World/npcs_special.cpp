@@ -2437,6 +2437,9 @@ public:
                 totalMoney = 1000000;
                 break;
             case GOSSIP_ACTION_INFO_DEF + 11:
+                totalMoney = 10000000;
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 12:
                 if (bankerAction == BANKER_ACTION_SAVE_MONEY)
                     totalMoney = player->GetMoney();
                 else if (bankerAction == BANKER_ACTION_WITHDRAW_MONEY)
@@ -2459,6 +2462,7 @@ public:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_10_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 9);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_100_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 10);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_1000_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 11);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_ALL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 12);
             player->PlayerTalkClass->SendGossipMenu(GOSSIP_TEXT_MANIPULATE_GOLD, creature->GetGUID());
         }
         else if (bankerAction == BANKER_ACTION_SAVE_MONEY)
