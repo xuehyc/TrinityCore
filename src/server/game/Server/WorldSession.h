@@ -37,6 +37,7 @@
 #include "Cryptography/BigNumber.h"
 #include "Opcodes.h"
 #include "AccountMgr.h"
+#include <unordered_set>
 
 class Creature;
 class GameObject;
