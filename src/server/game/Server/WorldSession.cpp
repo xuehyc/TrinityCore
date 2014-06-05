@@ -121,7 +121,9 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     m_TutorialsChanged(false),
     recruiterId(recruiter),
     isRecruiter(isARecruiter),
-    _RBACData(NULL)
+    _RBACData(NULL),
+    expireTime(60000), // 1 min after socket loss, session is deleted
+    forceExit(false)
 {
     memset(m_Tutorials, 0, sizeof(m_Tutorials));
 
@@ -419,8 +421,12 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         ///- Cleanup socket pointer if need
         if (m_Socket && m_Socket->IsClosed())
         {
-            m_Socket->RemoveReference();
-            m_Socket = NULL;
+            expireTime -= expireTime > diff ? diff : expireTime;
+            if (expireTime < diff || forceExit)
+            {
+                m_Socket->RemoveReference();
+                m_Socket = NULL;
+            }
         }
 
         if (!m_Socket)
@@ -446,7 +452,6 @@ void WorldSession::LogoutPlayer(bool save)
             DoLootRelease(lguid);
 
         ///- If the player just died before logging out, make him appear as a ghost
-        //FIXME: logout must be delayed in case lost connection with client in time of combat
         if (_player->GetDeathTimer())
         {
             _player->getHostileRefManager().deleteReferences();
@@ -569,7 +574,6 @@ void WorldSession::LogoutPlayer(bool save)
     m_playerLogout = false;
     m_playerSave = false;
     m_playerRecentlyLogout = true;
-    AntiDOS.AllowOpcode(CMSG_CHAR_ENUM, true);
     LogoutRequest(0);
 }
 
@@ -577,7 +581,10 @@ void WorldSession::LogoutPlayer(bool save)
 void WorldSession::KickPlayer()
 {
     if (m_Socket)
+    {
         m_Socket->CloseSocket();
+        forceExit = true;
+    }
 }
 
 void WorldSession::SendNotification(const char *format, ...)
@@ -1252,8 +1259,9 @@ bool WorldSession::DosProtection::EvaluateOpcode(WorldPacket& p, time_t time) co
     if (++packetCounter.amountCounter > maxPacketCounterAllowed)
     {
         dosTriggered = true;
-        TC_LOG_WARN("network", "AntiDOS: Account %u, IP: %s, flooding packet (opc: %s (0x%X), count: %u)",
-            Session->GetAccountId(), Session->GetRemoteAddress().c_str(), opcodeTable[p.GetOpcode()].name, p.GetOpcode(), packetCounter.amountCounter);
+        TC_LOG_WARN("network", "AntiDOS: Account %u, IP: %s, Character: %s, flooding packet (opc: %s (0x%X), count: %u)",
+            Session->GetAccountId(), Session->GetRemoteAddress().c_str(), Session->GetPlayerName().c_str(),
+            opcodeTable[p.GetOpcode()].name, p.GetOpcode(), packetCounter.amountCounter);
     }
     
     // Then check if player is sending packets not allowed
@@ -1313,6 +1321,7 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_PET_NAME_QUERY:
         case CMSG_CREATURE_QUERY:
         case CMSG_NPC_TEXT_QUERY:
+        case CMSG_QUESTGIVER_STATUS_QUERY:
         {
             maxPacketCounterAllowed = 5000;
             break;
@@ -1363,6 +1372,8 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_GAMEOBJ_REPORT_USE:
         case MSG_RAID_TARGET_UPDATE:
         case CMSG_QUESTGIVER_COMPLETE_QUEST:
+        case CMSG_PLAYER_VEHICLE_ENTER:
+        case CMSG_PETITION_SIGN:
         {
             maxPacketCounterAllowed = 20;
             break;
@@ -1410,7 +1421,6 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_REQUEST_VEHICLE_EXIT:
         case CMSG_LEARN_PREVIEW_TALENTS:
         case CMSG_LEARN_PREVIEW_TALENTS_PET:
-        case CMSG_PLAYER_VEHICLE_ENTER:
         case CMSG_CONTROLLER_EJECT_PASSENGER:
         case CMSG_EQUIPMENT_SET_SAVE:
         case CMSG_DELETEEQUIPMENT_SET:
@@ -1425,7 +1435,6 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_DISMISS_CRITTER:
         case CMSG_REPOP_REQUEST:
         case CMSG_PETITION_BUY:
-        case CMSG_PETITION_SIGN:
         case CMSG_TURN_IN_PETITION:
         case CMSG_COMPLETE_CINEMATIC:
         case CMSG_ITEM_REFUND:
