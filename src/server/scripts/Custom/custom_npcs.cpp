@@ -277,8 +277,6 @@ const Position ThuulWP[7] = {
     { 1860.29f, -4513.38f, 23.87f, 3.64982f }
 };
 
-#define MESSAGE_YOU_ARE_TOO_FAR "Te has alejado demasiado de la imagen de Thuul! No puedes perderla de vista!"
-
 const float ThuulTeleportPos[4] = { -610.07f, -4253.52f, 39.04f, 3.28122f };
 
 class npc_thuul_image : public CreatureScript
@@ -375,6 +373,7 @@ public:
                         me->GetMotionMaster()->MovePoint(1, ThuulWP[WP_BANK_2]);
                         phase = PHASE_MOVING_BANK_2;
                     }
+                    break;
                 case PHASE_MOVING_BANK_2:
                     if (me->GetDistance(ThuulWP[WP_BANK_2]) < 1.0f)
                     {
