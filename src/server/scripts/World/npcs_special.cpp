@@ -2401,8 +2401,6 @@ public:
         uint8 bankerAction = BANKER_ACTION_UNK;
         bool goBack = false;
 
-        player->PlayerTalkClass->ClearMenus();
-
         if (action >= GOSSIP_ACTION_INFO_DEF + 4 && action <= GOSSIP_ACTION_INFO_DEF + 12)
             bankerAction = BANKER_ACTION_SAVE_MONEY;
         else if (action >= GOSSIP_ACTION_INFO_DEF + 13 && action <= GOSSIP_ACTION_INFO_DEF + 21)
