@@ -500,9 +500,10 @@ void WorldSession::HandleZoneUpdateOpcode(WorldPacket& recvData)
 
     TC_LOG_DEBUG("network", "WORLD: Recvd ZONE_UPDATE: %u", newZone);
 
-    // use server side data, but only after update the player position. See Player::UpdatePosition().
-    GetPlayer()->SetNeedsZoneUpdate(true);
-
+    // use server size data
+    uint32 newzone, newarea;
+    GetPlayer()->GetZoneAndAreaId(newzone, newarea);
+    GetPlayer()->UpdateZone(newzone, newarea);
     //GetPlayer()->SendInitWorldStates(true, newZone);
 }
 

@@ -6757,15 +6757,6 @@ bool Player::UpdatePosition(float x, float y, float z, float orientation, bool t
     //    mover->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TURNING);
     //AURA_INTERRUPT_FLAG_JUMP not sure
 
-    // Update player zone if needed
-    if (m_needsZoneUpdate)
-    {
-        uint32 newZone, newArea;
-        GetZoneAndAreaId(newZone, newArea);
-        UpdateZone(newZone, newArea);
-        m_needsZoneUpdate = false;
-    }
-
     // group update
     if (GetGroup())
         SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POSITION);
