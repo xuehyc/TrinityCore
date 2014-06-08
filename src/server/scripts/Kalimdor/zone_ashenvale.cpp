@@ -106,16 +106,16 @@ public:
     {
         npc_torekAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             rend_Timer        = 5000;
             thunderclap_Timer = 8000;
             _completed        = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void JustSummoned(Creature* summoned) OVERRIDE
+        void JustSummoned(Creature* summoned) override
         {
             summoned->AI()->AttackStart(me);
         }
@@ -131,7 +131,7 @@ public:
             }
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             if (Player* player = GetPlayerForEscort())
             {
@@ -161,7 +161,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             npc_escortAI::UpdateAI(diff);
 
@@ -188,7 +188,7 @@ public:
 
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_torekAI(creature);
     }
@@ -226,15 +226,15 @@ public:
     {
         npc_ruul_snowhoofAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             if (GameObject* Cage = me->FindNearestGameObject(GO_CAGE, 20))
                 Cage->SetGoState(GO_STATE_READY);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void JustSummoned(Creature* summoned) OVERRIDE
+        void JustSummoned(Creature* summoned) override
         {
             summoned->AI()->AttackStart(me);
         }
@@ -248,7 +248,7 @@ public:
             }
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             Player* player = GetPlayerForEscort();
             if (!player)
@@ -277,13 +277,13 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             npc_escortAI::UpdateAI(diff);
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_ruul_snowhoofAI(creature);
     }
@@ -343,14 +343,14 @@ public:
     {
         npc_muglashAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             eventTimer = 10000;
             waveId = 0;
             _isBrazierExtinguished = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             if (Player* player = GetPlayerForEscort())
                 if (HasEscortState(STATE_ESCORT_PAUSED))
@@ -361,14 +361,14 @@ public:
                 }
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             if (HasEscortState(STATE_ESCORT_ESCORTING))
                 if (Player* player = GetPlayerForEscort())
                     player->FailQuest(QUEST_VORSHA);
         }
 
-        void JustSummoned(Creature* summoned) OVERRIDE
+        void JustSummoned(Creature* summoned) override
         {
             summoned->AI()->AttackStart(me);
         }
@@ -383,7 +383,7 @@ public:
             }
         }
 
-            void WaypointReached(uint32 waypointId) OVERRIDE
+            void WaypointReached(uint32 waypointId) override
             {
                 if (Player* player = GetPlayerForEscort())
                 {
@@ -439,7 +439,7 @@ public:
                 }
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 npc_escortAI::UpdateAI(diff);
 
@@ -469,7 +469,7 @@ public:
 
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_muglashAI(creature);
     }
@@ -480,7 +480,7 @@ class go_naga_brazier : public GameObjectScript
     public:
         go_naga_brazier() : GameObjectScript("go_naga_brazier") { }
 
-        bool OnGossipHello(Player* /*player*/, GameObject* go) OVERRIDE
+        bool OnGossipHello(Player* /*player*/, GameObject* go) override
         {
             if (Creature* creature = GetClosestCreatureWithEntry(go, NPC_MUGLASH, INTERACTION_DISTANCE*2))
             {
@@ -524,7 +524,7 @@ class spell_potion_of_wildfire : public SpellScriptLoader
 				}				
             }
 
-			void Register() OVERRIDE
+			void Register() override
             {                
 				OnHit += SpellHitFn(spell_potion_of_wildfire_SpellScript::HandleOnHit);				
             }
@@ -532,7 +532,7 @@ class spell_potion_of_wildfire : public SpellScriptLoader
 
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_potion_of_wildfire_SpellScript();
         }
@@ -552,7 +552,7 @@ class spell_unbathed_concoction : public SpellScriptLoader
             PrepareSpellScript(spell_unbathed_concoction_SpellScript);
 			
 			
-            void Unload() OVERRIDE
+            void Unload() override
             {				
 				Player* player = GetCaster()->ToPlayer();
 				if (!player) return;
@@ -571,11 +571,11 @@ class spell_unbathed_concoction : public SpellScriptLoader
             }
 
 			
-			void Register() OVERRIDE {}
+			void Register() override {}
 
         };
 
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_unbathed_concoction_SpellScript();
         }
@@ -590,7 +590,7 @@ class npc_feero_ironhand : public CreatureScript
     public:
         npc_feero_ironhand() : CreatureScript("npc_feero_ironhand") { }
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -619,7 +619,7 @@ class npc_delgren_the_purifier : public CreatureScript
     public:
         npc_delgren_the_purifier() : CreatureScript("npc_delgren_the_purifier") { }
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -677,12 +677,12 @@ public:
 			}						
 		}
 
-		void Reset() OVERRIDE
+		void Reset() override
 		{
 			VisibleStatus=0;
 		}
 
-		void MoveInLineOfSight(Unit* who) OVERRIDE 
+		void MoveInLineOfSight(Unit* who) override 
 		{ 			
 			if (Player* player = who->ToPlayer())
 			{	
@@ -704,7 +704,7 @@ public:
 
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_bolyun_1AI (pCreature);
     }
@@ -744,12 +744,12 @@ public:
 			}						
 		}
 
-		void Reset() OVERRIDE
+		void Reset() override
 		{
 			VisibleStatus=0;
 		}
 
-		void MoveInLineOfSight(Unit* who) OVERRIDE 
+		void MoveInLineOfSight(Unit* who) override 
 		{ 
 			if (Player* player = who->ToPlayer())
 			{
@@ -769,7 +769,7 @@ public:
 
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_bolyun_2AI (pCreature);
     }
@@ -792,12 +792,12 @@ public:
 		uint32	_timer_for_spawn_invaders;
 		bool	_IsPlayerNear;
 
-		void Reset() OVERRIDE
+		void Reset() override
 		{
 			_timer_check_for_player=2000; _timer_for_spawn_invaders=0; _IsPlayerNear=false;
 		}
 
-		void UpdateAI(uint32 diff) OVERRIDE
+		void UpdateAI(uint32 diff) override
         {	
 			if (_timer_check_for_player<=diff)				
 			{
@@ -881,7 +881,7 @@ public:
 		}
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_big_baobobAI (pCreature);
     }
@@ -905,18 +905,18 @@ public:
 		uint32	_phase;
 		Player*	_player;
 
-		void Reset() OVERRIDE
+		void Reset() override
 		{
 			_timer_check_for_player=2000; _phase=0; _timer=0;
 			me->AddAura(SPELL_BATHRANS_CORPSE_FIRE,me);
 		}
 
-		void SpellHit(Unit* Hitter, SpellInfo const* spell) OVERRIDE  
+		void SpellHit(Unit* Hitter, SpellInfo const* spell) override  
 		{ 
 			_phase=1; _player= Hitter->ToPlayer();
 		}
 
-		void UpdateAI(uint32 diff) OVERRIDE
+		void UpdateAI(uint32 diff) override
         {	
 			if (_timer_check_for_player<=diff)				
 			{
@@ -994,7 +994,7 @@ public:
 		}
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_astranaar_burning_fire_bunnyAI (pCreature);
     }

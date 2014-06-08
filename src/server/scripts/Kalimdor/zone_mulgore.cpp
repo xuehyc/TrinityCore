@@ -101,7 +101,7 @@ class npc_kyle_frenzied : public CreatureScript
 public:
     npc_kyle_frenzied() : CreatureScript("npc_kyle_frenzied") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_kyle_frenziedAI (creature);
     }
@@ -116,7 +116,7 @@ public:
         uint32 EventTimer;
         uint8 EventPhase;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             EventActive = false;
             IsMovingToLunch = false;
@@ -148,7 +148,7 @@ public:
             }
         }
 
-        void MovementInform(uint32 type, uint32 pointId) OVERRIDE
+        void MovementInform(uint32 type, uint32 pointId) override
         {
             if (type != POINT_MOTION_TYPE || !EventActive)
                 return;
@@ -157,7 +157,7 @@ public:
                 IsMovingToLunch = false;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (EventActive)
             {
@@ -235,7 +235,7 @@ public:
         }
     };
 
-	CreatureAI* GetAI(Creature* creature) const OVERRIDE
+	CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_wounded_braveAI (creature);
     }
@@ -257,12 +257,12 @@ public:
 
         uint32 _timer;        	
 
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
             _timer = urand(1800,2200);           			
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -282,7 +282,7 @@ public:
         }
     };
 
-	   CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	   CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_fledgling_braveAI (pCreature);
     }
@@ -303,12 +303,12 @@ public:
 
         uint32 _timer;        	
 
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
             _timer = urand(1800,2200);           			
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -328,7 +328,7 @@ public:
         }
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_bristleback_invaderAI (pCreature);
     }

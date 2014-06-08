@@ -65,7 +65,7 @@ public:
     {
         npc_spirit_of_olumAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 action) OVERRIDE
+        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 action) override
         {
             if (action == 1)
             {
@@ -76,7 +76,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_spirit_of_olumAI(creature);
     }
@@ -98,22 +98,22 @@ public:
             instance = creature->GetInstanceScript();
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             events.ScheduleEvent(EVENT_GET_CHANNELERS, 3000);
             enteredCombat = false;
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE { }
+        void JustDied(Unit* /*killer*/) override { }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             events.ScheduleEvent(EVENT_CLEAVE, 5000);
             events.ScheduleEvent(EVENT_IGNORED, 7000);
             enteredCombat = true;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
 
             if (!enteredCombat)
@@ -155,11 +155,11 @@ public:
                         case EVENT_SET_CHANNELERS:
                         {
                             for (std::list<uint64>::const_iterator itr = bloodmage.begin(); itr != bloodmage.end(); ++itr)
-                                if (Creature* bloodmage = (Unit::GetCreature(*me, *itr)))
+                                if (Creature* bloodmage = (ObjectAccessor::GetCreature(*me, *itr)))
                                     bloodmage->CastSpell((Unit*)NULL, SPELL_SUMMON_CHANNEL);
 
                             for (std::list<uint64>::const_iterator itr = deathshaper.begin(); itr != deathshaper.end(); ++itr)
-                                if (Creature* deathshaper = (Unit::GetCreature(*me, *itr)))
+                                if (Creature* deathshaper = (ObjectAccessor::GetCreature(*me, *itr)))
                                     deathshaper->CastSpell((Unit*)NULL, SPELL_SUMMON_CHANNEL);
 
                             events.ScheduleEvent(EVENT_SET_CHANNELERS, 12000);
@@ -205,7 +205,7 @@ public:
             bool enteredCombat;
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_wrathbone_flayerAI>(creature);
     }

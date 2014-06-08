@@ -1476,6 +1476,13 @@ struct PhaseEntry
     uint32    flag;                                         // 2
 };
 
+struct PhaseGroupEntry
+{
+    uint32 ID;
+    uint32 PhaseId;
+    uint32 GroupId;
+};
+
 struct MailTemplateEntry
 {
     uint32      ID;                                         // 0
@@ -1597,6 +1604,16 @@ struct OverrideSpellDataEntry
     uint32      spellId[MAX_OVERRIDE_SPELL];                // 1-10
     //uint32      unk0;                                     // 11
     //char*     SpellBarName;                               // 12
+};
+
+struct PowerDisplayEntry
+{
+    uint32 Id;                                              // 0
+    uint32 PowerType;                                       // 1
+    //char*  Name;                                          // 2
+    //uint32 R;                                             // 3
+    //uint32 G;                                             // 4
+    //uint32 B;                                             // 5
 };
 
 struct PvPDifficultyEntry
@@ -2285,7 +2302,7 @@ struct VehicleEntry
     uint32  m_uiLocomotionType;                             // 34
     float   m_msslTrgtImpactTexRadius;                      // 35
     uint32  m_uiSeatIndicatorType;                          // 36
-    uint32  m_powerType;                                    // 37, new in 3.1
+    uint32  m_powerDisplayId;                               // 37, new in 3.1
                                                             // 38, new in 3.1
                                                             // 39, new in 3.1
 };
@@ -2509,4 +2526,6 @@ typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
 
 #define TaxiMaskSize 114
 typedef uint8 TaxiMask[TaxiMaskSize];
+
+typedef std::unordered_map<uint32, std::set<uint32>> PhaseGroupContainer;
 #endif

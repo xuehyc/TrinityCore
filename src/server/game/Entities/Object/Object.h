@@ -122,7 +122,7 @@ class WorldObject;
 class WorldPacket;
 class ZoneScript;
 
-typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
+typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 
 //! Structure to ease conversions from single 64 bit integer guid into individual bytes, for packet sending purposes
 //! Nuke this out when porting ObjectGuid from MaNGOS, but preserve the per-byte storage
@@ -333,8 +333,8 @@ class Object
 
         // for output helpfull error messages from asserts
         bool PrintIndexError(uint32 index, bool set) const;
-        Object(Object const& right) DELETE_MEMBER;
-        Object& operator=(Object const& right) DELETE_MEMBER;
+        Object(Object const& right) = delete;
+        Object& operator=(Object const& right) = delete;
 };
 
 struct Position

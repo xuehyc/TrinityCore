@@ -57,7 +57,7 @@ class boss_shirrak_the_dead_watcher : public CreatureScript
 public:
     boss_shirrak_the_dead_watcher() : CreatureScript("boss_shirrak_the_dead_watcher") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new boss_shirrak_the_dead_watcherAI(creature);
     }
@@ -75,7 +75,7 @@ public:
 
         uint64 FocusedTargetGUID;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             Inhibitmagic_Timer = 0;
             Attractmagic_Timer = 28000;
@@ -84,10 +84,10 @@ public:
             FocusedTargetGUID = 0;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         { }
 
-        void JustSummoned(Creature* summoned) OVERRIDE
+        void JustSummoned(Creature* summoned) override
         {
             if (summoned && summoned->GetEntry() == NPC_FOCUS_FIRE)
             {
@@ -96,12 +96,12 @@ public:
                 summoned->SetLevel(me->getLevel());
                 summoned->AddUnitState(UNIT_STATE_ROOT);
 
-                if (Unit* pFocusedTarget = Unit::GetUnit(*me, FocusedTargetGUID))
+                if (Unit* pFocusedTarget = ObjectAccessor::GetUnit(*me, FocusedTargetGUID))
                     summoned->AI()->AttackStart(pFocusedTarget);
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Inhibitmagic_Timer
             if (Inhibitmagic_Timer <= diff)
@@ -169,7 +169,7 @@ class npc_focus_fire : public CreatureScript
 public:
     npc_focus_fire() : CreatureScript("npc_focus_fire") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_focus_fireAI(creature);
     }
@@ -183,16 +183,16 @@ public:
         uint32 FieryBlast_Timer;
         bool fiery1, fiery2;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             FieryBlast_Timer = 3000+(rand()%1000);
             fiery1 = fiery2 = true;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         { }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Return since we have no target
             if (!UpdateVictim())

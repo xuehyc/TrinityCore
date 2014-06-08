@@ -110,15 +110,15 @@ public:
         void DespawnSummons()
         {
             for(std::list<uint64>::iterator itr = sumMurlocs.begin(); itr != sumMurlocs.end(); ++itr)
-                if(Creature* creature = Unit::GetCreature(*me, (*itr)))
+                if(Creature* creature = ObjectAccessor::GetCreature(*me, (*itr)))
                     creature->DisappearAndDie();
 
             for(std::list<uint64>::iterator itr = sumMindlasher.begin(); itr != sumMindlasher.end(); ++itr)
-                if(Creature* creature = Unit::GetCreature(*me, (*itr)))
+                if(Creature* creature = ObjectAccessor::GetCreature(*me, (*itr)))
                     creature->DisappearAndDie();
 
             for(std::list<uint64>::iterator itr = sumSapper.begin(); itr != sumSapper.end(); ++itr)
-                if(Creature* creature = Unit::GetCreature(*me, (*itr)))
+                if(Creature* creature = ObjectAccessor::GetCreature(*me, (*itr)))
                     creature->DisappearAndDie();
 
             Ozumat->DisappearAndDie();

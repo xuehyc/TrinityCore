@@ -150,7 +150,7 @@ class npc_wisp_invis : public CreatureScript
 public:
     npc_wisp_invis() : CreatureScript("npc_wisp_invis") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_wisp_invisAI(creature);
     }
@@ -166,8 +166,8 @@ public:
         uint32 delay;
         uint32 spell;
         uint32 spell2;
-        void Reset() OVERRIDE { }
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void Reset() override { }
+        void EnterCombat(Unit* /*who*/) override { }
         void SetType(uint32 _type)
         {
             switch (Creaturetype = _type)
@@ -193,13 +193,13 @@ public:
                 DoCast(me, spell);
         }
 
-        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) OVERRIDE
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) override
         {
             if (spell->Id == SPELL_WISP_FLIGHT_PORT && Creaturetype == 4)
                 me->SetDisplayId(2027);
         }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
 
         {
             if (!who || Creaturetype != 1 || !who->isTargetableForAttack())
@@ -209,7 +209,7 @@ public:
                 DoCast(who, SPELL_SQUASH_SOUL);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (delay)
             {
@@ -230,7 +230,7 @@ class npc_head : public CreatureScript
 public:
     npc_head() : CreatureScript("npc_head") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_headAI(creature);
     }
@@ -248,7 +248,7 @@ public:
         bool withbody;
         bool die;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             Phase = 0;
             bodyGUID = 0;
@@ -258,7 +258,7 @@ public:
             laugh = urand(15000, 30000);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
         void SaySound(uint8 textEntry, Unit* target = 0)
         {
@@ -270,7 +270,7 @@ public:
             laugh += 3000;
         }
 
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage) OVERRIDE
+        void DamageTaken(Unit* /*done_by*/, uint32 &damage) override
         {
             if (withbody)
                 return;
@@ -301,7 +301,7 @@ public:
             }
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
+        void SpellHit(Unit* caster, const SpellInfo* spell) override
         {
             if (!withbody)
                 return;
@@ -327,7 +327,7 @@ public:
         }
 
         void Disappear();
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!withbody)
             {
@@ -360,7 +360,7 @@ public:
                     if (wait <= diff)
                     {
                         die = false;
-                        if (Unit* body = Unit::GetUnit(*me, bodyGUID))
+                        if (Unit* body = ObjectAccessor::GetUnit(*me, bodyGUID))
                             body->Kill(body);
                         me->Kill(me);
                     }
@@ -376,7 +376,7 @@ class boss_headless_horseman : public CreatureScript
 public:
     boss_headless_horseman() : CreatureScript("boss_headless_horseman") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<boss_headless_horsemanAI>(creature);
     }
@@ -413,7 +413,7 @@ public:
         bool wp_reached;
         bool burned;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             Phase = 1;
             conflagrate = 15000;
@@ -432,7 +432,7 @@ public:
             DoCast(me, SPELL_HEAD);
             if (headGUID)
             {
-                if (Creature* Head = Unit::GetCreature((*me), headGUID))
+                if (Creature* Head = ObjectAccessor::GetCreature((*me), headGUID))
                     Head->DisappearAndDie();
 
                 headGUID = 0;
@@ -455,7 +455,7 @@ public:
             Phase = 0;
         }
 
-        void MovementInform(uint32 type, uint32 i) OVERRIDE
+        void MovementInform(uint32 type, uint32 i) override
         {
             if (type != POINT_MOTION_TYPE || !IsFlying || i != id)
                 return;
@@ -487,7 +487,7 @@ public:
                     wp_reached = false;
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     SaySound(SAY_ENTRANCE);
-                    if (Unit* player = Unit::GetUnit(*me, PlayerGUID))
+                    if (Unit* player = ObjectAccessor::GetUnit(*me, PlayerGUID))
                         DoStartMovement(player);
                     break;
                 }
@@ -495,32 +495,32 @@ public:
             ++id;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             instance->SetData(DATA_HORSEMAN_EVENT, IN_PROGRESS);
             DoZoneInCombat();
         }
 
-        void AttackStart(Unit* who) OVERRIDE
+        void AttackStart(Unit* who) override
         {
             ScriptedAI::AttackStart(who);
         }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
 
         {
             if (withhead && Phase != 0)
                 ScriptedAI::MoveInLineOfSight(who);
         }
 
-        void KilledUnit(Unit* player) OVERRIDE
+        void KilledUnit(Unit* player) override
         {
             if (player->GetTypeId() == TYPEID_PLAYER)
             {
                 if (withhead)
                     SaySound(SAY_PLAYER_DEATH);
                 //maybe possible when player dies from conflagration
-                else if (Creature* Head = Unit::GetCreature((*me), headGUID))
+                else if (Creature* Head = ObjectAccessor::GetCreature((*me), headGUID))
                     CAST_AI(npc_head::npc_headAI, Head->AI())->SaySound(SAY_PLAYER_DEATH);
             }
         }
@@ -556,13 +556,13 @@ public:
             return NULL;
         }
 
-        void SpellHitTarget(Unit* unit, const SpellInfo* spell) OVERRIDE
+        void SpellHitTarget(Unit* unit, const SpellInfo* spell) override
         {
             if (spell->Id == SPELL_CONFLAGRATION && unit->HasAura(SPELL_CONFLAGRATION))
                 SaySound(SAY_CONFLAGRATION, unit);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             me->StopMoving();
             //me->GetMotionMaster()->MoveIdle();
@@ -582,7 +582,7 @@ public:
             }
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
+        void SpellHit(Unit* caster, const SpellInfo* spell) override
         {
             if (withhead)
                 return;
@@ -605,14 +605,14 @@ public:
                 ThreatContainer::StorageType threatlist = caster->getThreatManager().getThreatList();
                 for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
                 {
-                    Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid());
+                    Unit* unit = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid());
                     if (unit && unit->IsAlive() && unit != caster)
                         me->AddThreat(unit, caster->getThreatManager().getThreat(unit));
                 }
             }
         }
 
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage) OVERRIDE
+        void DamageTaken(Unit* /*done_by*/, uint32 &damage) override
         {
             if (damage >= me->GetHealth() && withhead)
             {
@@ -625,7 +625,7 @@ public:
                 if (!headGUID)
                     headGUID = DoSpawnCreature(HEAD, float(rand()%6), float(rand()%6), 0, 0, TEMPSUMMON_DEAD_DESPAWN, 0)->GetGUID();
 
-                Unit* Head = Unit::GetUnit(*me, headGUID);
+                Unit* Head = ObjectAccessor::GetUnit(*me, headGUID);
                 if (Head && Head->IsAlive())
                 {
                     Head->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -641,7 +641,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (withhead)
             {
@@ -750,7 +750,7 @@ public:
                             --Phase;
                         else
                             Phase = 1;
-                        Creature* Head = Unit::GetCreature((*me), headGUID);
+                        Creature* Head = ObjectAccessor::GetCreature((*me), headGUID);
                         if (Head && Head->IsAlive())
                         {
                             CAST_AI(npc_head::npc_headAI, Head->AI())->Phase = Phase;
@@ -784,7 +784,7 @@ class npc_pulsing_pumpkin : public CreatureScript
 public:
     npc_pulsing_pumpkin() : CreatureScript("npc_pulsing_pumpkin") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_pulsing_pumpkinAI(creature);
     }
@@ -800,7 +800,7 @@ public:
         bool sprouted;
         uint64 debuffGUID;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             float x, y, z;
             me->GetPosition(x, y, z);   //this visual aura some under ground
@@ -821,9 +821,9 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) OVERRIDE
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) override
         {
             if (spell->Id == SPELL_SPROUTING)
             {
@@ -841,7 +841,7 @@ public:
             if (!debuffGUID)
                 return;
 
-            Unit* debuff = Unit::GetUnit(*me, debuffGUID);
+            Unit* debuff = ObjectAccessor::GetUnit(*me, debuffGUID);
             if (debuff)
             {
                 debuff->SetVisible(false);
@@ -849,13 +849,13 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             if (!sprouted)
                 Despawn();
         }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
 
         {
             if (!who || !me->IsValidAttackTarget(who) || me->GetVictim())
@@ -866,7 +866,7 @@ public:
                 DoStartMovement(who);
         }
 
-        void UpdateAI(uint32 /*diff*/) OVERRIDE
+        void UpdateAI(uint32 /*diff*/) override
         {
             if (sprouted && UpdateVictim())
                 DoMeleeAttackIfReady();
@@ -879,7 +879,7 @@ class go_loosely_turned_soil : public GameObjectScript
 public:
     go_loosely_turned_soil() : GameObjectScript("go_loosely_turned_soil") { }
 
-    bool OnGossipHello(Player* player, GameObject* soil) OVERRIDE
+    bool OnGossipHello(Player* player, GameObject* soil) override
     {
         InstanceScript* instance = player->GetInstanceScript();
         if (instance)
@@ -913,7 +913,7 @@ void npc_head::npc_headAI::Disappear()
 
     if (bodyGUID)
     {
-        Creature* body = Unit::GetCreature((*me), bodyGUID);
+        Creature* body = ObjectAccessor::GetCreature((*me), bodyGUID);
         if (body && body->IsAlive())
         {
             withbody = true;

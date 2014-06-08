@@ -69,7 +69,7 @@ class npcs_rutgar_and_frankal : public CreatureScript
 public:
     npcs_rutgar_and_frankal() : CreatureScript("npcs_rutgar_and_frankal") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
         switch (action)
@@ -133,7 +133,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -419,7 +419,7 @@ class npc_anachronos_the_ancient : public CreatureScript
 public:
     npc_anachronos_the_ancient() : CreatureScript("npc_anachronos_the_ancient") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_anachronos_the_ancientAI(creature);
     }
@@ -439,7 +439,7 @@ public:
         uint64 PlayerGUID;
         bool eventEnd;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             AnimationTimer = 1500;
             AnimationCount = 0;
@@ -710,7 +710,7 @@ public:
                         break;
                     case 65:
                         me->SetVisible(false);
-                        if (Creature* AnachronosQuestTrigger = (Unit::GetCreature(*me, AnachronosQuestTriggerGUID)))
+                        if (Creature* AnachronosQuestTrigger = (ObjectAccessor::GetCreature(*me, AnachronosQuestTriggerGUID)))
                         {
                             Talk(ARYGOS_YELL_1);
                             AnachronosQuestTrigger->AI()->EnterEvadeMode();
@@ -721,7 +721,7 @@ public:
             }
             ++AnimationCount;
         }
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (AnimationTimer)
             {
@@ -747,7 +747,7 @@ class npc_qiraj_war_spawn : public CreatureScript
 public:
     npc_qiraj_war_spawn() : CreatureScript("npc_qiraj_war_spawn") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_qiraj_war_spawnAI(creature);
     }
@@ -762,7 +762,7 @@ public:
         bool Timers;
         bool hasTarget;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             MobGUID = 0;
             PlayerGUID = 0;
@@ -770,10 +770,10 @@ public:
             hasTarget = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
-        void JustDied(Unit* /*slayer*/) OVERRIDE;
+        void EnterCombat(Unit* /*who*/) override { }
+        void JustDied(Unit* /*slayer*/) override;
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!Timers)
             {
@@ -860,7 +860,7 @@ class npc_anachronos_quest_trigger : public CreatureScript
 public:
     npc_anachronos_quest_trigger() : CreatureScript("npc_anachronos_quest_trigger") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_anachronos_quest_triggerAI(creature);
     }
@@ -881,7 +881,7 @@ public:
         bool Announced;
         bool Failed;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             PlayerGUID = 0;
 
@@ -974,7 +974,7 @@ public:
                 Announced = false;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!PlayerGUID || !EventStarted)
                 return;
@@ -1006,11 +1006,11 @@ void npc_qiraj_war_spawn::npc_qiraj_war_spawnAI::JustDied(Unit* /*slayer*/)
     if (!MobGUID)
         return;
 
-    if (Creature* mob = Unit::GetCreature(*me, MobGUID))
+    if (Creature* mob = ObjectAccessor::GetCreature(*me, MobGUID))
         if (npc_anachronos_quest_trigger::npc_anachronos_quest_triggerAI* triggerAI = CAST_AI(npc_anachronos_quest_trigger::npc_anachronos_quest_triggerAI, mob->AI()))
             triggerAI->LiveCounter();
 
-};
+}
 
 /*#####
 # go_crystalline_tear
@@ -1021,7 +1021,7 @@ class go_crystalline_tear : public GameObjectScript
 public:
     go_crystalline_tear() : GameObjectScript("go_crystalline_tear") { }
 
-    bool OnQuestAccept(Player* player, GameObject* go, Quest const* quest) OVERRIDE
+    bool OnQuestAccept(Player* player, GameObject* go, Quest const* quest) override
     {
         if (quest->GetQuestId() == QUEST_A_PAWN_ON_THE_ETERNAL_BOARD)
         {
@@ -1292,7 +1292,7 @@ class go_wind_stone : public GameObjectScript
         }
 
     public:
-        bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
+        bool OnGossipHello(Player* player, GameObject* go) override
         {
             uint8 rank = GetPlayerRank(player);
 
@@ -1370,7 +1370,7 @@ class go_wind_stone : public GameObjectScript
             return true;
         }
 
-        bool OnGossipSelect(Player* player, GameObject* go, uint32 /*sender*/, uint32 action) OVERRIDE
+        bool OnGossipSelect(Player* player, GameObject* go, uint32 /*sender*/, uint32 action) override
         {
             player->PlayerTalkClass->ClearMenus();
             player->PlayerTalkClass->SendCloseGossip();

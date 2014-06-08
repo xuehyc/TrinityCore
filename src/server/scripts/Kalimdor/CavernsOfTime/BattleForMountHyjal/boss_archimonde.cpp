@@ -85,7 +85,7 @@ class npc_ancient_wisp : public CreatureScript
 public:
     npc_ancient_wisp() : CreatureScript("npc_ancient_wisp") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_ancient_wispAI>(creature);
     }
@@ -102,7 +102,7 @@ public:
         uint64 ArchimondeGUID;
         uint32 CheckTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             CheckTimer = 1000;
 
@@ -111,18 +111,18 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage) OVERRIDE
+        void DamageTaken(Unit* /*done_by*/, uint32 &damage) override
         {
             damage = 0;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (CheckTimer <= diff)
             {
-                if (Unit* Archimonde = Unit::GetUnit(*me, ArchimondeGUID))
+                if (Unit* Archimonde = ObjectAccessor::GetUnit(*me, ArchimondeGUID))
                 {
                     if (Archimonde->HealthBelowPct(2) || !Archimonde->IsAlive())
                         DoCast(me, SPELL_DENOUEMENT_WISP);
@@ -142,7 +142,7 @@ class npc_doomfire : public CreatureScript
 public:
     npc_doomfire() : CreatureScript("npc_doomfire") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_doomfireAI(creature);
     }
@@ -151,13 +151,13 @@ public:
     {
         npc_doomfireAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() OVERRIDE { }
+        void Reset() override { }
 
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
+        void MoveInLineOfSight(Unit* /*who*/) override { }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage) OVERRIDE
+        void DamageTaken(Unit* /*done_by*/, uint32 &damage) override
         {
             damage = 0;
         }
@@ -171,7 +171,7 @@ class npc_doomfire_targetting : public CreatureScript
 public:
     npc_doomfire_targetting() : CreatureScript("npc_doomfire_targetting") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_doomfire_targettingAI(creature);
     }
@@ -183,13 +183,13 @@ public:
         uint64 TargetGUID;
         uint32 ChangeTargetTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             TargetGUID = 0;
             ChangeTargetTimer = 5000;
         }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
 
         {
             //will update once TargetGUID is 0. In case noone actually moves(not likely) and this is 0
@@ -198,18 +198,18 @@ public:
                 TargetGUID = who->GetGUID();
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage) OVERRIDE
+        void DamageTaken(Unit* /*done_by*/, uint32 &damage) override
         {
             damage = 0;
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (ChangeTargetTimer <= diff)
             {
-                if (Unit* temp = Unit::GetUnit(*me, TargetGUID))
+                if (Unit* temp = ObjectAccessor::GetUnit(*me, TargetGUID))
                 {
                     me->GetMotionMaster()->MoveFollow(temp, 0.0f, 0.0f);
                     TargetGUID = 0;
@@ -239,7 +239,7 @@ class boss_archimonde : public CreatureScript
 public:
     boss_archimonde() : CreatureScript("boss_archimonde") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<boss_archimondeAI>(creature);
     }
@@ -275,7 +275,7 @@ public:
         bool HasProtected;
         bool IsChanneling;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             instance->SetData(DATA_ARCHIMONDEEVENT, NOT_STARTED);
 
@@ -303,7 +303,7 @@ public:
             IsChanneling = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             me->InterruptSpell(CURRENT_CHANNELED_SPELL);
             Talk(SAY_AGGRO);
@@ -312,7 +312,7 @@ public:
             instance->SetData(DATA_ARCHIMONDEEVENT, IN_PROGRESS);
         }
 
-        void KilledUnit(Unit* victim) OVERRIDE
+        void KilledUnit(Unit* victim) override
         {
             Talk(SAY_SLAY);
 
@@ -345,7 +345,7 @@ public:
             ++SoulChargeCount;
         }
 
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             hyjal_trashAI::JustDied(killer);
             Talk(SAY_DEATH);
@@ -368,7 +368,7 @@ public:
             ThreatContainer::StorageType::const_iterator itr = threatlist.begin();
             for (; itr != threatlist.end(); ++itr)
             {
-                Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid());
+                Unit* unit = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid());
                 if (unit && unit->IsAlive())
                     targets.push_back(unit);
             }
@@ -389,7 +389,7 @@ public:
             return false;
         }
 
-        void JustSummoned(Creature* summoned) OVERRIDE
+        void JustSummoned(Creature* summoned) override
         {
             if (summoned->GetEntry() == CREATURE_ANCIENT_WISP)
                 summoned->AI()->AttackStart(me);
@@ -410,7 +410,7 @@ public:
                 summoned->CastSpell(summoned, SPELL_DOOMFIRE_SPAWN, false);
                 summoned->CastSpell(summoned, SPELL_DOOMFIRE, true, 0, 0, me->GetGUID());
 
-                if (Unit* DoomfireSpirit = Unit::GetUnit(*me, DoomfireSpiritGUID))
+                if (Unit* DoomfireSpirit = ObjectAccessor::GetUnit(*me, DoomfireSpiritGUID))
                 {
                     summoned->GetMotionMaster()->MoveFollow(DoomfireSpirit, 0.0f, 0.0f);
                     DoomfireSpiritGUID = 0;
@@ -466,7 +466,7 @@ public:
                 SoulChargeTimer = urand(2000, 30000);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!me->IsInCombat())
             {
@@ -491,7 +491,7 @@ public:
                         if (temp)
                             WorldTreeGUID = temp->GetGUID();
 
-                        if (Unit* Nordrassil = Unit::GetUnit(*me, WorldTreeGUID))
+                        if (Unit* Nordrassil = ObjectAccessor::GetUnit(*me, WorldTreeGUID))
                         {
                             Nordrassil->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             Nordrassil->SetDisplayId(11686);
@@ -500,7 +500,7 @@ public:
                         }
                     }
 
-                    if (Unit* Nordrassil = Unit::GetUnit(*me, WorldTreeGUID))
+                    if (Unit* Nordrassil = ObjectAccessor::GetUnit(*me, WorldTreeGUID))
                     {
                         Nordrassil->CastSpell(me, SPELL_DRAIN_WORLD_TREE_2, true);
                         DrainNordrassilTimer = 1000;
@@ -634,7 +634,7 @@ public:
 
             DoMeleeAttackIfReady();
         }
-        void WaypointReached(uint32 /*waypointId*/) OVERRIDE { }
+        void WaypointReached(uint32 /*waypointId*/) override { }
     };
 };
 

@@ -60,7 +60,7 @@ class boss_the_maker : public CreatureScript
             uint32 Domination_Timer;
             uint32 Knockdown_Timer;
 
-            void Reset() OVERRIDE
+            void Reset() override
             {
                 _Reset();
                 AcidSpray_Timer = 15000;
@@ -69,25 +69,25 @@ class boss_the_maker : public CreatureScript
                 Knockdown_Timer = 10000;
             }
 
-            void EnterCombat(Unit* /*who*/) OVERRIDE
+            void EnterCombat(Unit* /*who*/) override
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
             }
 
-            void KilledUnit(Unit* who) OVERRIDE
+            void KilledUnit(Unit* who) override
             {
                 if (who->GetTypeId() == TYPEID_PLAYER)
                     Talk(SAY_KILL);
             }
 
-            void JustDied(Unit* /*killer*/) OVERRIDE
+            void JustDied(Unit* /*killer*/) override
             {
                 _JustDied();
                 Talk(SAY_DIE);
             }
 
-            void UpdateAI(uint32 diff) OVERRIDE
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -133,7 +133,7 @@ class boss_the_maker : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return GetBloodFurnaceAI<boss_the_makerAI>(creature);
         }

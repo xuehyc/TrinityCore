@@ -432,29 +432,29 @@ public:
         uint32 FlameBuffetTimer;
         bool imol;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             spawnTimer = 2000;
             FlameBuffetTimer= 2000;
             imol = false;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             if (waypointId == 0 && !IsOverrun)
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (Delay <= diff)
             {
@@ -486,7 +486,7 @@ public:
                     CanMove = true;
                     if (instance->GetData(DATA_ALLIANCE_RETREAT) && !instance->GetData(DATA_HORDE_RETREAT))
                     {
-                        Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                        Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
                         if (target && target->IsAlive())
                             me->AddThreat(target, 0.0f);
                     } else if (instance->GetData(DATA_ALLIANCE_RETREAT) && instance->GetData(DATA_HORDE_RETREAT)){
@@ -525,7 +525,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_giant_infernalAI>(creature);
     }
@@ -536,7 +536,7 @@ class npc_abomination : public CreatureScript
 public:
     npc_abomination() : CreatureScript("npc_abomination") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_abominationAI>(creature);
     }
@@ -552,24 +552,24 @@ public:
 
         bool go;
         uint32 KnockDownTimer;
-        void Reset() OVERRIDE
+        void Reset() override
         {
             KnockDownTimer = 10000;
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             if (waypointId == 7 && !IsOverrun)
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
-                    Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
@@ -584,9 +584,9 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             hyjal_trashAI::UpdateAI(diff);
             if (IsEvent || IsOverrun)
@@ -631,7 +631,7 @@ class npc_ghoul : public CreatureScript
 public:
     npc_ghoul() : CreatureScript("npc_ghoul") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_ghoulAI>(creature);
     }
@@ -649,26 +649,26 @@ public:
         uint32 FrenzyTimer;
         uint32 MoveTimer;
         bool RandomMove;
-        void Reset() OVERRIDE
+        void Reset() override
         {
             FrenzyTimer = 5000+rand()%5000;
             MoveTimer = 2000;
             RandomMove = false;
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             if (waypointId == 7 && !IsOverrun)
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
-                    Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
@@ -684,9 +684,9 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             hyjal_trashAI::UpdateAI(diff);
             if (IsEvent || IsOverrun)
@@ -730,7 +730,7 @@ class npc_necromancer : public CreatureScript
 public:
     npc_necromancer() : CreatureScript("npc_necromancer") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_necromancerAI>(creature);
     }
@@ -748,13 +748,13 @@ public:
         bool go;
         uint32 ShadowBoltTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             ShadowBoltTimer = 1000+rand()%5000;
             summons.DespawnAll();
         }
 
-        void JustSummoned(Creature* summon) OVERRIDE
+        void JustSummoned(Creature* summon) override
         {
             Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30, true);
             if (target)
@@ -762,31 +762,31 @@ public:
             summons.Summon(summon);
         }
 
-        void SummonedCreatureDespawn(Creature* summon) OVERRIDE
+        void SummonedCreatureDespawn(Creature* summon) override
         {
             summons.Despawn(summon);
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             if (waypointId == 7 && !IsOverrun)
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
-                    Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
             }
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             switch (urand(0, 2))
             {
@@ -804,9 +804,9 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             hyjal_trashAI::UpdateAI(diff);
 
@@ -854,7 +854,7 @@ class npc_banshee : public CreatureScript
 public:
     npc_banshee() : CreatureScript("npc_banshee") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_bansheeAI>(creature);
     }
@@ -873,35 +873,35 @@ public:
         uint32 WailTimer;
         uint32 ShellTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             CourseTimer = 20000+rand()%5000;
             WailTimer = 15000+rand()%5000;
             ShellTimer = 50000+rand()%10000;
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             if (waypointId == 7 && !IsOverrun)
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
-                    Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             hyjal_trashAI::UpdateAI(diff);
             if (IsEvent || IsOverrun)
@@ -954,7 +954,7 @@ class npc_crypt_fiend : public CreatureScript
 public:
     npc_crypt_fiend() : CreatureScript("npc_crypt_fiend") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_crypt_fiendAI>(creature);
     }
@@ -971,33 +971,33 @@ public:
         bool go;
         uint32 WebTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             WebTimer = 20000+rand()%5000;
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             if (waypointId == 7 && !IsOverrun)
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
-                    Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             hyjal_trashAI::UpdateAI(diff);
             if (IsEvent || IsOverrun)
@@ -1040,7 +1040,7 @@ class npc_fel_stalker : public CreatureScript
 public:
     npc_fel_stalker() : CreatureScript("npc_fel_stalker") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_fel_stalkerAI>(creature);
     }
@@ -1057,33 +1057,33 @@ public:
         bool go;
         uint32 ManaBurnTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             ManaBurnTimer = 9000+rand()%5000;
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             if (waypointId == 7 && !IsOverrun)
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
-                    Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             hyjal_trashAI::UpdateAI(diff);
             if (IsEvent || IsOverrun)
@@ -1126,7 +1126,7 @@ class npc_frost_wyrm : public CreatureScript
 public:
     npc_frost_wyrm() : CreatureScript("npc_frost_wyrm") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_frost_wyrmAI>(creature);
     }
@@ -1144,18 +1144,18 @@ public:
         uint32 FrostBreathTimer;
         uint32 MoveTimer;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             FrostBreathTimer = 5000;
             MoveTimer = 0;
             me->SetDisableGravity(true);
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             if (waypointId == 2 && !IsOverrun)
             {
-                Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
                 if (target && target->IsAlive())
                 {
                     me->AddThreat(target, 0.0f);
@@ -1164,7 +1164,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             if (IsEvent)
                 instance->SetData(DATA_TRASH, 0);//signal trash is dead
@@ -1176,9 +1176,9 @@ public:
             me->SetPosition(x, y, z, 0);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) override { }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             hyjal_trashAI::UpdateAI(diff);
 
@@ -1241,7 +1241,7 @@ class npc_gargoyle : public CreatureScript
 public:
     npc_gargoyle() : CreatureScript("npc_gargoyle") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<npc_gargoyleAI>(creature);
     }
@@ -1263,7 +1263,7 @@ public:
         float Zpos;
         bool forcemove;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             forcemove = true;
             Zpos = 10.0f;
@@ -1272,11 +1272,11 @@ public:
             me->SetDisableGravity(true);
         }
 
-        void WaypointReached(uint32 waypointId) OVERRIDE
+        void WaypointReached(uint32 waypointId) override
         {
             if (waypointId == 2 && !IsOverrun)
             {
-                Unit* target = Unit::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
                 if (target && target->IsAlive())
                 {
                     me->AddThreat(target, 0.0f);
@@ -1285,7 +1285,7 @@ public:
             }
         }
 
-        void JustDied(Unit* killer) OVERRIDE
+        void JustDied(Unit* killer) override
         {
             float x, y, z;
             me->GetPosition(x, y, z);
@@ -1295,7 +1295,7 @@ public:
             hyjal_trashAI::JustDied(killer);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             hyjal_trashAI::UpdateAI(diff);
 
@@ -1379,7 +1379,7 @@ class alliance_rifleman : public CreatureScript
 public:
     alliance_rifleman() : CreatureScript("alliance_rifleman") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new alliance_riflemanAI(creature);
     }
@@ -1393,16 +1393,16 @@ public:
 
         uint32 ExplodeTimer;
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             ExplodeTimer = 5000+rand()%5000;
         }
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
 
         {
             if (!who || me->GetVictim())
@@ -1416,11 +1416,11 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             //Check if we have a target
             if (!UpdateVictim())

@@ -191,7 +191,7 @@ public:
                     {
                         me->setFaction(FACTION_HOSTILE);
 
-                        if (Unit* unit = Unit::GetUnit(*me, m_uiDuelerGUID))
+                        if (Unit* unit = ObjectAccessor::GetUnit(*me, m_uiDuelerGUID))
                             AttackStart(unit);
                     }
                     else

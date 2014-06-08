@@ -90,6 +90,7 @@ enum Opcodes
     CMSG_BATTLEFIELD_REQUEST_SCORE_DATA               = 0x0000,
     CMSG_BATTLEFIELD_STATUS                           = 0x2500,
     CMSG_BATTLEGROUND_PLAYER_POSITIONS                = 0x3902,
+    CMSG_BATTLEMASTER_HELLO                           = 0x0234,
     CMSG_BATTLEMASTER_JOIN                            = 0x7902,
     CMSG_BATTLEMASTER_JOIN_ARENA                      = 0x701C,
     CMSG_BATTLEMASTER_JOIN_RATED                      = 0x3B18,
@@ -122,7 +123,7 @@ enum Opcodes
     CMSG_CANCEL_AUTO_REPEAT_SPELL                     = 0x6C35,
     CMSG_CANCEL_CAST                                  = 0x0115,
     CMSG_CANCEL_CHANNELLING                           = 0x6C25,
-    CMSG_CANCEL_GROWTH_AURA                           = 0x0000,
+    CMSG_CANCEL_GROWTH_AURA                           = 0x0237,
     CMSG_CANCEL_MOUNT_AURA                            = 0x0635,
     CMSG_CANCEL_QUEUED_SPELL                          = 0x7B1C,
     CMSG_CANCEL_TEMP_ENCHANTMENT                      = 0x6C37,
@@ -186,10 +187,12 @@ enum Opcodes
     CMSG_DEL_IGNORE                                   = 0x6D26,
     CMSG_DEL_VOICE_IGNORE                             = 0x0024,
     CMSG_DESTROY_ITEM                                 = 0x4A27,
+    CMSG_DESTROY_ITEMS                                = 0x0000,
     CMSG_DISMISS_CONTROLLED_VEHICLE                   = 0x3218,
     CMSG_DISMISS_CRITTER                              = 0x4227,
     CMSG_DUEL_ACCEPTED                                = 0x2136,
     CMSG_DUEL_CANCELLED                               = 0x6624,
+	
     CMSG_EJECT_PASSENGER                              = 0x6927,
     CMSG_EMOTE                                        = 0x4C26,
     CMSG_ENABLETAXI                                   = 0x0C16,
@@ -253,6 +256,7 @@ enum Opcodes
     CMSG_GUILD_BANK_UPDATE_TAB                        = 0x0106,
     CMSG_GUILD_BANK_WITHDRAW_MONEY                    = 0x0037,
     CMSG_GUILD_CHANGE_NAME_REQUEST                    = 0x1232,
+    CMSG_GUILD_CREATE                                 = 0x0000,
     CMSG_GUILD_DECLINE                                = 0x3231,
     CMSG_GUILD_DEL_RANK                               = 0x3234,
     CMSG_GUILD_DEMOTE                                 = 0x1020,
@@ -296,6 +300,7 @@ enum Opcodes
     CMSG_LEARN_PREVIEW_TALENTS_PET                    = 0x6E24,
     CMSG_LEARN_TALENT                                 = 0x0306,
     CMSG_LEAVE_CHANNEL                                = 0x2D56,
+    CMSG_LFG_GET_PLAYER_INFO                          = 0x0000,
     CMSG_LFG_GET_STATUS                               = 0x2581,
     CMSG_LFG_JOIN                                     = 0x2430,
     CMSG_LFG_LEAVE                                    = 0x2433,
@@ -381,6 +386,7 @@ enum Opcodes
     CMSG_MOVE_SET_RELATIVE_POSITION                   = 0x0000,
     CMSG_MOVE_SET_VEHICLE_REC_ID_ACK                  = 0x0000,
     CMSG_MOVE_SPLINE_DONE                             = 0x790E,
+    
     CMSG_MOVE_TIME_SKIPPED                            = 0x7A0A,
     CMSG_MOVE_TOGGLE_COLLISION_ACK                    = 0x0000,
     CMSG_MOVE_WATER_WALK_ACK                          = 0x3B00,
@@ -423,6 +429,7 @@ enum Opcodes
     CMSG_PUSHQUESTTOPARTY                             = 0x4B14,
     CMSG_PVP_LOG_DATA                                 = 0x7308,
     CMSG_QUERY_BATTLEFIELD_STATE                      = 0x7202,
+
     CMSG_QUERY_GUILD_MEMBERS_FOR_RECIPE               = 0x1036,
     CMSG_QUERY_GUILD_MEMBER_RECIPES                   = 0x1037,
     CMSG_QUERY_GUILD_RECIPES                          = 0x3033,
@@ -782,6 +789,7 @@ enum Opcodes
     SMSG_CHAT_PLAYER_NOT_FOUND                        = 0x2526,
     SMSG_CHAT_RESTRICTED                              = 0x6536,
     SMSG_CHAT_SERVER_DISCONNECTED                     = 0x6D34,
+    SMSG_CHAT_SERVER_DISCONNECTED_2                   = 0x4627,
     SMSG_CHAT_SERVER_RECONNECTED                      = 0x6905,
     SMSG_CHAT_WRONG_FACTION                           = 0x6724,
     SMSG_CHECK_FOR_BOTS                               = 0x0000,
@@ -1404,10 +1412,17 @@ enum PacketProcessing
     PROCESS_THREADSAFE                                      //packet is thread-safe - process it in Map::Update()
 };
 
+class WorldSession;
 class WorldPacket;
 class WorldSession;
 
 typedef void(WorldSession::*pOpcodeHandler)(WorldPacket& recvPacket);
+
+#if defined(__GNUC__)
+#pragma pack(1)
+#else
+#pragma pack(push, 1)
+#endif
 
 struct OpcodeHandler
 {
@@ -1454,6 +1469,12 @@ class OpcodeTable
 };
 
 extern OpcodeTable opcodeTable;
+
+#if defined(__GNUC__)
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
 
 void InitOpcodes();
 

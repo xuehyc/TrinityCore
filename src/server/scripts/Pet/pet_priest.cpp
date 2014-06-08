@@ -44,7 +44,7 @@ class npc_pet_pri_lightwell : public CreatureScript
                 DoCast(me, SPELL_PRIEST_LIGHTWELL_CHARGES, false);
             }
 
-            void EnterEvadeMode() OVERRIDE
+            void EnterEvadeMode() override
             {
                 if (!me->IsAlive())
                     return;
@@ -55,7 +55,7 @@ class npc_pet_pri_lightwell : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_pet_pri_lightwellAI(creature);
         }
@@ -81,7 +81,7 @@ public:
     {
         npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature) {}
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             if (me->IsSummon())
                 if (Unit* owner = me->ToTempSummon()->GetSummoner())
@@ -89,7 +89,7 @@ public:
                         pet->CastSpell(pet, MANA_LEECH, true);
         }
  
-        void DamageTaken(Unit* /*killer*/, uint32& damage) OVERRIDE
+        void DamageTaken(Unit* /*killer*/, uint32& damage) override
         {
             if (me->IsSummon())
                 if (Unit* owner = me->ToTempSummon()->GetSummoner())
@@ -97,7 +97,7 @@ public:
                         owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
         }
 
-        void UpdateAI(uint32 /*diff*/) OVERRIDE
+        void UpdateAI(uint32 /*diff*/) override
         {
             if (!UpdateVictim())
                 return;
@@ -106,14 +106,39 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_shadowfiendAI(creature);
     }
+};
+
+class npc_pet_pri_shadowfiend : public CreatureScript
+{
+    public:
+        npc_pet_pri_shadowfiend() : CreatureScript("npc_pet_pri_shadowfiend") { }
+
+        struct npc_pet_pri_shadowfiendAI : public PetAI
+        {
+            npc_pet_pri_shadowfiendAI(Creature* creature) : PetAI(creature) { }
+
+            void JustDied(Unit* /*killer*/) override
+            {
+                if (me->IsSummon())
+                    if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                        if (owner->HasAura(SPELL_PRIEST_GLYPH_OF_SHADOWFIEND))
+                            owner->CastSpell(owner, SPELL_PRIEST_GLYPH_OF_SHADOWFIEND_MANA, true);
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const override
+        {
+            return new npc_pet_pri_shadowfiendAI(creature);
+        }
 };
 
 void AddSC_priest_pet_scripts()
 {
     new npc_pet_pri_lightwell();
 	new npc_shadowfiend();
+	new npc_pet_pri_shadowfiend();
 }

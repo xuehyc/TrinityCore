@@ -309,8 +309,8 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
             BroadcastText const* bct = sObjectMgr->GetBroadcastText(gossip->Options[i].BroadcastTextID);
             if (bct)
             {
-                ObjectMgr::GetLocaleString(bct->MaleText, locale, text0[i]);
-                ObjectMgr::GetLocaleString(bct->FemaleText, locale, text1[i]);
+                text0[i] = bct->GetText(locale, GENDER_MALE, true);
+                text1[i] = bct->GetText(locale, GENDER_FEMALE, true);
             }
             else
             {
@@ -415,19 +415,23 @@ void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
     uint32 count;
     recvData >> count; // quest count, max=25
 
-    if (count >= MAX_QUEST_LOG_SIZE)
+    if (count > MAX_QUEST_LOG_SIZE)
     {
         recvData.rfinish();
         return;
     }
 
-    WorldPacket data(SMSG_QUEST_POI_QUERY_RESPONSE, 4+(4+4)*count);
-    data << uint32(count); // count
-
+    // Read quest ids and add the in a unordered_set so we don't send POIs for the same quest multiple times
+    std::unordered_set<uint32> questIds;
     for (uint32 i = 0; i < count; ++i)
+        questIds.insert(recvData.read<uint32>()); // quest id
+
+    WorldPacket data(SMSG_QUEST_POI_QUERY_RESPONSE, 4 + (4 + 4)*questIds.size());
+    data << uint32(questIds.size()); // count
+
+    for (auto itr = questIds.begin(); itr != questIds.end(); ++itr)
     {
-        uint32 questId;
-        recvData >> questId; // quest id
+        uint32 questId = *itr;
 
         bool questOk = false;
 

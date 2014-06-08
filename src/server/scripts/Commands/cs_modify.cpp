@@ -37,7 +37,7 @@ class modify_commandscript : public CommandScript
 public:
     modify_commandscript() : CommandScript("modify_commandscript") { }
 
-    ChatCommand* GetCommands() const OVERRIDE
+    ChatCommand* GetCommands() const override
     {
         static ChatCommand modifyspeedCommandTable[] =
         {
@@ -1061,8 +1061,8 @@ public:
             }
             else
             {
-                uint32 moneyToAddMsg = moneyToAdd * -1;
-                if (newmoney > int64(MAX_MONEY_AMOUNT))
+                uint64 moneyToAddMsg = moneyToAdd * -1;
+                if (newmoney > static_cast<int64>(MAX_MONEY_AMOUNT))
                     newmoney = MAX_MONEY_AMOUNT;
 
                 handler->PSendSysMessage(LANG_YOU_TAKE_MONEY, moneyToAddMsg, handler->GetNameLink(target).c_str());

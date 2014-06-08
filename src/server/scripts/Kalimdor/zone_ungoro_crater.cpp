@@ -105,7 +105,7 @@ class go_northern_crystal_pylon : public GameObjectScript
 		
         };
 
-        GameObjectAI* GetAI(GameObject* go) const OVERRIDE
+        GameObjectAI* GetAI(GameObject* go) const override
         {
             return new go_northern_crystal_pylonAI(go);
         }       
@@ -126,12 +126,12 @@ class npc_ungoro_pit_bunny : public CreatureScript
 	  
 			uint32 _timer;
 
-			void Reset()  OVERRIDE
+			void Reset()  override
 			{
 				_timer=1000; 
 			}
 
-			void UpdateAI(uint32 diff) OVERRIDE
+			void UpdateAI(uint32 diff) override
 			{										
 				if (_timer<=diff)
 				{	
@@ -154,7 +154,7 @@ class npc_ungoro_pit_bunny : public CreatureScript
 
         };
 
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_ungoro_pit_bunnyAI(creature);
         }
@@ -200,12 +200,12 @@ public:
 			_phase=1; _timer=1000; _player=player; 		
 		}
 				             
-        void MoveInLineOfSight(Unit* who) OVERRIDE
+        void MoveInLineOfSight(Unit* who) override
         {
             FollowerAI::MoveInLineOfSight(who);
         }
 
-		void UpdateFollowerAI(uint32 diff) OVERRIDE
+		void UpdateFollowerAI(uint32 diff) override
         {
 			HelpPlayerOnFightWithDragons(diff);
 			TalkWithDamselShore(diff);
@@ -556,7 +556,7 @@ public:
 		}
     };
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_maximillian_of_northshire_2AI(creature);
     }
@@ -575,7 +575,7 @@ public:
 	
 	uint32 _ask;
 
-	bool OnGossipHello(Player* player, Creature* creature) OVERRIDE 
+	bool OnGossipHello(Player* player, Creature* creature) override 
 	{
 		Creature* max = creature->FindNearestCreature(NPC_MAXIMILLIAN_OF_NORDSHIRE_2, 10.0f, true);
 		if (!max)		
@@ -608,7 +608,7 @@ public:
 		return false;
 	}
 	
-	bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) OVERRIDE
+	bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
     {
 		player->PlayerTalkClass->ClearMenus();
 		switch(action)
@@ -670,7 +670,7 @@ public:
 		return true;
 	}
 
-	bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE 
+	bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override 
 	{
 		if (quest->GetQuestId() == QUEST_AN_IMPORTANT_LESSION) 
 			return true;		
@@ -719,12 +719,12 @@ public:
 		uint32 _phase;
 		Player* _player;
 
-		void Reset()  OVERRIDE
+		void Reset()  override
 		{
 			_timer=0; _phase=0;
 		}
 		
-		void JustDied(Unit* killer) OVERRIDE 
+		void JustDied(Unit* killer) override 
 		{ 
 			Player* player = killer->ToPlayer();
 			
@@ -738,7 +738,7 @@ public:
 		} 
 	};
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_steaming_furyAI(creature);
     }

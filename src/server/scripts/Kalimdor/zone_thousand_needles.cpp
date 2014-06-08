@@ -80,7 +80,7 @@ class npc_dead_employee : public CreatureScript
     public:
         npc_dead_employee() : CreatureScript("npc_dead_employee") { }
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -110,7 +110,7 @@ class npc_dead_employee : public CreatureScript
 				_player=player;
 			}
 			
-			void UpdateAI(uint32 diff) OVERRIDE
+			void UpdateAI(uint32 diff) override
 			{						
 				if (!UpdateVictim())						
 					DoTimerWork_OOC(diff);								
@@ -150,7 +150,7 @@ class npc_dead_employee : public CreatureScript
 			}
         };
 		
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_dead_employeeAI(creature);
         }
@@ -165,7 +165,7 @@ class npc_highperch_prideling : public CreatureScript
     public:
         npc_highperch_prideling() : CreatureScript("npc_highperch_prideling") { }
 	
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -197,7 +197,7 @@ class npc_twilight_subduer : public CreatureScript
         {
             npc_twilight_subduerAI(Creature* creature) : ScriptedAI(creature) {}
 	  
-			void JustDied(Unit* killer) OVERRIDE 
+			void JustDied(Unit* killer) override 
 			{ 
 				if (Player* player = killer->ToPlayer())
 				{
@@ -208,7 +208,7 @@ class npc_twilight_subduer : public CreatureScript
 				}						
 			} 
 
-			void UpdateAI(uint32 diff) OVERRIDE
+			void UpdateAI(uint32 diff) override
 			{						
 				if (!UpdateVictim())						
 					return;							
@@ -217,7 +217,7 @@ class npc_twilight_subduer : public CreatureScript
 			} 			
         };
 		
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_twilight_subduerAI(creature);
         }
@@ -243,7 +243,7 @@ class npc_paoka_swiftmountain : public CreatureScript
         {
             npc_paoka_swiftmountainAI(Creature* creature) : ScriptedAI(creature) {}	  		
 
-			void UpdateAI(uint32 diff) OVERRIDE
+			void UpdateAI(uint32 diff) override
 			{						
 				if (!UpdateVictim())						
 					return;							
@@ -252,7 +252,7 @@ class npc_paoka_swiftmountain : public CreatureScript
 			} 			
         };
 		
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_paoka_swiftmountainAI(creature);
         }
@@ -267,7 +267,7 @@ class npc_heartrazor_2b : public CreatureScript
     public:
         npc_heartrazor_2b() : CreatureScript("npc_heartrazor_2b") { }
 
-		bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+		bool OnGossipHello(Player* player, Creature* creature) override
 		{
 			if (!player) return true;
 
@@ -298,12 +298,12 @@ class npc_twilight_skymaster_richtofen : public CreatureScript
 			Player* _player;
 			uint32	_timer;
 			
-			void Reset() OVERRIDE 
+			void Reset() override 
 			{ 
 				_player=NULL; _timer=2000;
 			}
 
-			void DamageTaken(Unit* pDone_by, uint32& uiDamage) OVERRIDE  
+			void DamageTaken(Unit* pDone_by, uint32& uiDamage) override  
 			{ 
 				if (Player* player = pDone_by->ToPlayer())
 				{
@@ -311,13 +311,13 @@ class npc_twilight_skymaster_richtofen : public CreatureScript
 				}				
 			}
 
-			void EnterCombat(Unit* who) OVERRIDE 
+			void EnterCombat(Unit* who) override 
 			{
 				me->CastSpell (me,SPELL_SUMMON_RICHTOFENS_WIND_RIDER);
 				Talk(0);
 			}
 
-			void UpdateAI(uint32 diff) OVERRIDE
+			void UpdateAI(uint32 diff) override
 			{	
 				if (me->IsInCombat())
 				{
@@ -353,7 +353,7 @@ class npc_twilight_skymaster_richtofen : public CreatureScript
 
         };
 		
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_twilight_skymaster_richtofenAI(creature);
         }
@@ -375,12 +375,12 @@ class npc_richtofens_wind_rider : public CreatureScript
 			uint32	_timer;
 			uint32	_phase;			
 
-			void Reset() OVERRIDE 
+			void Reset() override 
 			{ 
 				_timer=2000; _phase=0;
 			}
 
-			void UpdateAI(uint32 diff) OVERRIDE
+			void UpdateAI(uint32 diff) override
 			{															
 				if (_timer <= diff)				
 					DoWork();				
@@ -413,7 +413,7 @@ class npc_richtofens_wind_rider : public CreatureScript
 
         };
 		
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_richtofens_wind_riderAI(creature);
         }
@@ -451,13 +451,13 @@ class spell_shuhalo_artifacts : public SpellScriptLoader
 				}
             }
           
-            void Register() OVERRIDE
+            void Register() override
             {               
                 OnHit += SpellHitFn(spell_shuhalo_artifacts_SpellScript::HandleOnHit);                
             }
         };
         
-        SpellScript* GetSpellScript() const OVERRIDE
+        SpellScript* GetSpellScript() const override
         {
             return new spell_shuhalo_artifacts_SpellScript();
         }
@@ -481,12 +481,12 @@ class npc_goblin_bar_patron : public CreatureScript
 			uint32	_counter;
 			std::list<Creature*> _barPatronList;
 
-			void Reset() OVERRIDE 
+			void Reset() override 
 			{ 
 				_timer=0; _phase=0; _counter=0;
 			}
 
-			void SpellHit(Unit* Hitter, SpellInfo const* spell) OVERRIDE  
+			void SpellHit(Unit* Hitter, SpellInfo const* spell) override  
 			{ 					
 				if (CheckSpellBottleOfGrog(spell)) 
 				{
@@ -497,7 +497,7 @@ class npc_goblin_bar_patron : public CreatureScript
 				}
 			}
 
-			void UpdateAI(uint32 diff) OVERRIDE
+			void UpdateAI(uint32 diff) override
 			{	
 				if (_timer <= diff)				
 					DoWork();				
@@ -573,7 +573,7 @@ class npc_goblin_bar_patron : public CreatureScript
 
 		};
 		
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_goblin_bar_patronAI(creature);
         }
@@ -597,12 +597,12 @@ class npc_gnome_bar_patron : public CreatureScript
 			uint32	_counter;
 			std::list<Creature*> _barPatronList;
 
-			void Reset() OVERRIDE 
+			void Reset() override 
 			{ 
 				_timer=0; _phase=0; _counter=0;
 			}
 
-			void SpellHit(Unit* Hitter, SpellInfo const* spell) OVERRIDE  
+			void SpellHit(Unit* Hitter, SpellInfo const* spell) override  
 			{ 	
 				if (CheckSpellBottleOfGrog(spell)) 
 				{
@@ -613,7 +613,7 @@ class npc_gnome_bar_patron : public CreatureScript
 				}
 			}
 
-			void UpdateAI(uint32 diff) OVERRIDE
+			void UpdateAI(uint32 diff) override
 			{	
 				if (_timer <= diff)				
 					DoWork();				
@@ -689,7 +689,7 @@ class npc_gnome_bar_patron : public CreatureScript
 
         };
 		
-        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_gnome_bar_patronAI(creature);
         }

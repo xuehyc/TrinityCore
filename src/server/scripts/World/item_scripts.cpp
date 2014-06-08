@@ -53,7 +53,7 @@ class item_only_for_flight : public ItemScript
 public:
     item_only_for_flight() : ItemScript("item_only_for_flight") { }
 
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/) OVERRIDE
+    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/) override
     {
         uint32 itemId = item->GetEntry();
         bool disabled = false;
@@ -94,7 +94,7 @@ class item_nether_wraith_beacon : public ItemScript
 public:
     item_nether_wraith_beacon() : ItemScript("item_nether_wraith_beacon") { }
 
-    bool OnUse(Player* player, Item* /*item*/, SpellCastTargets const& /*targets*/) OVERRIDE
+    bool OnUse(Player* player, Item* /*item*/, SpellCastTargets const& /*targets*/) override
     {
         if (player->GetQuestStatus(10832) == QUEST_STATUS_INCOMPLETE)
         {
@@ -117,7 +117,7 @@ class item_gor_dreks_ointment : public ItemScript
 public:
     item_gor_dreks_ointment() : ItemScript("item_gor_dreks_ointment") { }
 
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& targets) OVERRIDE
+    bool OnUse(Player* player, Item* item, SpellCastTargets const& targets) override
     {
         if (targets.GetUnitTarget() && targets.GetUnitTarget()->GetTypeId() == TYPEID_UNIT &&
             targets.GetUnitTarget()->GetEntry() == 20748 && !targets.GetUnitTarget()->HasAura(32578))
@@ -137,7 +137,7 @@ class item_incendiary_explosives : public ItemScript
 public:
     item_incendiary_explosives() : ItemScript("item_incendiary_explosives") { }
 
-    bool OnUse(Player* player, Item* item, SpellCastTargets const & /*targets*/) OVERRIDE
+    bool OnUse(Player* player, Item* item, SpellCastTargets const & /*targets*/) override
     {
         if (player->FindNearestCreature(26248, 15) || player->FindNearestCreature(26249, 15))
             return false;
@@ -158,7 +158,7 @@ class item_mysterious_egg : public ItemScript
 public:
     item_mysterious_egg() : ItemScript("item_mysterious_egg") { }
 
-    bool OnExpire(Player* player, ItemTemplate const* /*pItemProto*/) OVERRIDE
+    bool OnExpire(Player* player, ItemTemplate const* /*pItemProto*/) override
     {
         ItemPosCountVec dest;
         uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 39883, 1); // Cracked Egg
@@ -178,7 +178,7 @@ class item_disgusting_jar : public ItemScript
 public:
     item_disgusting_jar() : ItemScript("item_disgusting_jar") { }
 
-    bool OnExpire(Player* player, ItemTemplate const* /*pItemProto*/) OVERRIDE
+    bool OnExpire(Player* player, ItemTemplate const* /*pItemProto*/) override
     {
         ItemPosCountVec dest;
         uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 44718, 1); // Ripe Disgusting Jar
@@ -227,7 +227,7 @@ class item_pile_fake_furs : public ItemScript
 public:
     item_pile_fake_furs() : ItemScript("item_pile_fake_furs") { }
 
-    bool OnUse(Player* player, Item* /*item*/, SpellCastTargets const & /*targets*/) OVERRIDE
+    bool OnUse(Player* player, Item* /*item*/, SpellCastTargets const & /*targets*/) override
     {
         GameObject* go = NULL;
         for (uint8 i = 0; i < CaribouTrapsNum; ++i)
@@ -272,7 +272,7 @@ class item_petrov_cluster_bombs : public ItemScript
 public:
     item_petrov_cluster_bombs() : ItemScript("item_petrov_cluster_bombs") { }
 
-    bool OnUse(Player* player, Item* /*item*/, const SpellCastTargets & /*targets*/) OVERRIDE
+    bool OnUse(Player* player, Item* /*item*/, const SpellCastTargets & /*targets*/) override
     {
         if (player->GetZoneId() != ZONE_ID_HOWLING)
             return false;
@@ -336,7 +336,7 @@ class item_dehta_trap_smasher : public ItemScript
 public:
     item_dehta_trap_smasher() : ItemScript("item_dehta_trap_smasher") { }
 
-    bool OnUse(Player* player, Item* /*item*/, const SpellCastTargets & /*targets*/) OVERRIDE
+    bool OnUse(Player* player, Item* /*item*/, const SpellCastTargets & /*targets*/) override
     {
         if (player->GetQuestStatus(QUEST_CANNOT_HELP_THEMSELVES) != QUEST_STATUS_INCOMPLETE)
             return false;
@@ -372,7 +372,7 @@ class item_trident_of_nazjan : public ItemScript
 public:
     item_trident_of_nazjan() : ItemScript("item_Trident_of_Nazjan") { }
 
-    bool OnUse(Player* player, Item* item, const SpellCastTargets & /*targets*/) OVERRIDE
+    bool OnUse(Player* player, Item* item, const SpellCastTargets & /*targets*/) override
     {
         if (player->GetQuestStatus(QUEST_THE_EMISSARY) == QUEST_STATUS_INCOMPLETE)
         {
@@ -399,7 +399,7 @@ class item_captured_frog : public ItemScript
 public:
     item_captured_frog() : ItemScript("item_captured_frog") { }
 
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/) OVERRIDE
+    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/) override
     {
         if (player->GetQuestStatus(QUEST_THE_PERFECT_SPIES) == QUEST_STATUS_INCOMPLETE)
         {

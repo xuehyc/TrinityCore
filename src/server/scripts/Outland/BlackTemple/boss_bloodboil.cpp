@@ -66,7 +66,7 @@ class boss_gurtogg_bloodboil : public CreatureScript
 public:
     boss_gurtogg_bloodboil() : CreatureScript("boss_gurtogg_bloodboil") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<boss_gurtogg_bloodboilAI>(creature);
     }
@@ -97,7 +97,7 @@ public:
 
         bool Phase1;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             instance->SetBossState(DATA_GURTOGG_BLOODBOIL, NOT_STARTED);
 
@@ -122,19 +122,19 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             DoZoneInCombat();
             Talk(SAY_AGGRO);
             instance->SetBossState(DATA_GURTOGG_BLOODBOIL, IN_PROGRESS);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             instance->SetBossState(DATA_GURTOGG_BLOODBOIL, DONE);
 
@@ -154,7 +154,7 @@ public:
             std::list<HostileReference*>::const_iterator itr = m_threatlist.begin();
             for (; itr!= m_threatlist.end(); ++itr)             //store the threat list in a different container
             {
-                Unit* target = Unit::GetUnit(*me, (*itr)->getUnitGuid());
+                Unit* target = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid());
                                                                 //only on alive players
                 if (target && target->IsAlive() && target->GetTypeId() == TYPEID_PLAYER)
                     targets.push_back(target);
@@ -188,7 +188,7 @@ public:
 
         void RevertThreatOnTarget(uint64 guid)
         {
-            if (Unit* unit = Unit::GetUnit(*me, guid))
+            if (Unit* unit = ObjectAccessor::GetUnit(*me, guid))
             {
                 if (DoGetThreat(unit))
                     DoModifyThreatPercent(unit, -100);
@@ -197,7 +197,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;

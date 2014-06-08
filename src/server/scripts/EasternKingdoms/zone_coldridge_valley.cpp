@@ -72,12 +72,12 @@ public:
 
         uint32 Attack1HTimer;        	
 
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
             Attack1HTimer = urand(1800,2200);           			
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -97,7 +97,7 @@ public:
         }
     };
 
-	   CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	   CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_rockjaw_invaderAI (pCreature);
     }
@@ -118,12 +118,12 @@ public:
 
         uint32 Attack1HTimer;        	
 
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
             Attack1HTimer = urand(1800,2200);           			
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -143,7 +143,7 @@ public:
         }
     };
 
-	   CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	   CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_coldridge_defenderAI (pCreature);
     }
@@ -158,7 +158,7 @@ class npc_wounded_coldridge_mountaineer : public CreatureScript
 public:
     npc_wounded_coldridge_mountaineer() : CreatureScript("npc_wounded_coldridge_mountaineer") { }
 	
-	bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+	bool OnGossipHello(Player* player, Creature* creature) override
     {
         player->PlayerTalkClass->SendCloseGossip();		
 
@@ -184,7 +184,7 @@ public:
 		uint32 phase;
 		uint32 timer;
 				
-		void Reset() OVERRIDE 
+		void Reset() override 
 		{ 
 			isHealed=false;
 			phase=0;
@@ -192,7 +192,7 @@ public:
 		}
 		
 		// ToDo
-	    void SpellHit(Unit * Hitter, SpellInfo const* spell) OVERRIDE
+	    void SpellHit(Unit * Hitter, SpellInfo const* spell) override
         {
 			printf("zauber ist eingetroffen %d \n", spell->Id );
             if (spell->Id == SPELL_HEAL_WOUNDED_MOUNTAINEER )
@@ -203,7 +203,7 @@ public:
             }
         }
 		
-		void UpdateAI(uint32 diff) OVERRIDE
+		void UpdateAI(uint32 diff) override
         {   
 
 			if (!isHealed) return;
@@ -218,7 +218,7 @@ public:
 		}
     };
 	 
-	CreatureAI* GetAI(Creature* creature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* creature) const  override
     {
         return new npc_wounded_coldridge_mountaineerAI (creature);
     }
@@ -242,12 +242,12 @@ public:
 		bool TalkSequenceIsStarted;
 		Player* player;
 		
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
               timer=0; TalkSequenceIsStarted=false; phase=0;       			
         }
 
-		void MoveInLineOfSight(Unit* who) OVERRIDE
+		void MoveInLineOfSight(Unit* who) override
         {
             if (!who || !who->IsAlive() || TalkSequenceIsStarted)
                 return;
@@ -266,7 +266,7 @@ public:
 			}                
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -324,7 +324,7 @@ public:
         }
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_soothsayer_shikalaAI (pCreature);
     }
@@ -348,12 +348,12 @@ public:
 		bool TalkSequenceIsStarted;
 		Player* player;
 		
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
               timer=0; TalkSequenceIsStarted=false; phase=0;       			
         }
 
-		void MoveInLineOfSight(Unit* who) OVERRIDE
+		void MoveInLineOfSight(Unit* who) override
         {
             if (!who || !who->IsAlive() || TalkSequenceIsStarted)
                 return;
@@ -372,7 +372,7 @@ public:
 			}                
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -430,7 +430,7 @@ public:
         }
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_soothsayer_rikkariAI (pCreature);
     }
@@ -454,12 +454,12 @@ public:
 		bool TalkSequenceIsStarted;
 		Player* player;
 		
-        void Reset()  OVERRIDE
+        void Reset()  override
         {
               timer=0; TalkSequenceIsStarted=false; phase=0;       			
         }
 
-		void MoveInLineOfSight(Unit* who) OVERRIDE
+		void MoveInLineOfSight(Unit* who) override
         {
             if (!who || !who->IsAlive() || TalkSequenceIsStarted)
                 return;
@@ -478,7 +478,7 @@ public:
 			}                
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {						
             if (!UpdateVictim())
 			{
@@ -536,7 +536,7 @@ public:
         }
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  OVERRIDE
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_soothsayer_mirimkoaAI (pCreature);
     }

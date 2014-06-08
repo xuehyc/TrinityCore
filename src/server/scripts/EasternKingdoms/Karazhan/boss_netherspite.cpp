@@ -73,7 +73,7 @@ class boss_netherspite : public CreatureScript
 public:
     boss_netherspite() : CreatureScript("boss_netherspite") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<boss_netherspiteAI>(creature);
     }
@@ -131,7 +131,7 @@ public:
             return sqrt((xa-xb)*(xa-xb) + (ya-yb)*(ya-yb));
         }
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             Berserk = false;
             NetherInfusionTimer = 540000;
@@ -162,9 +162,9 @@ public:
         {
             for (int i=0; i<3; ++i)
             {
-                if (Creature* portal = Unit::GetCreature(*me, PortalGUID[i]))
+                if (Creature* portal = ObjectAccessor::GetCreature(*me, PortalGUID[i]))
                     portal->DisappearAndDie();
-                if (Creature* portal = Unit::GetCreature(*me, BeamerGUID[i]))
+                if (Creature* portal = ObjectAccessor::GetCreature(*me, BeamerGUID[i]))
                     portal->DisappearAndDie();
                 PortalGUID[i] = 0;
                 BeamTarget[i] = 0;
@@ -174,10 +174,10 @@ public:
         void UpdatePortals() // Here we handle the beams' behavior
         {
             for (int j=0; j<3; ++j) // j = color
-                if (Creature* portal = Unit::GetCreature(*me, PortalGUID[j]))
+                if (Creature* portal = ObjectAccessor::GetCreature(*me, PortalGUID[j]))
                 {
                     // the one who's been cast upon before
-                    Unit* current = Unit::GetUnit(*portal, BeamTarget[j]);
+                    Unit* current = ObjectAccessor::GetUnit(*portal, BeamTarget[j]);
                     // temporary store for the best suitable beam reciever
                     Unit* target = me;
 
@@ -209,7 +209,7 @@ public:
                     {
                         BeamTarget[j] = target->GetGUID();
                         // remove currently beaming portal
-                        if (Creature* beamer = Unit::GetCreature(*portal, BeamerGUID[j]))
+                        if (Creature* beamer = ObjectAccessor::GetCreature(*portal, BeamerGUID[j]))
                         {
                             beamer->CastSpell(target, PortalBeam[j], false);
                             beamer->DisappearAndDie();
@@ -261,19 +261,19 @@ public:
                 Door->SetGoState(open ? GO_STATE_ACTIVE : GO_STATE_READY);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             HandleDoors(false);
             SwitchToPortalPhase();
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             HandleDoors(true);
             DestroyPortals();
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;

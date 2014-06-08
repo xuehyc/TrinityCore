@@ -106,7 +106,7 @@ class netherspite_infernal : public CreatureScript
 public:
     netherspite_infernal() : CreatureScript("netherspite_infernal") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return new netherspite_infernalAI(creature);
     }
@@ -121,12 +121,12 @@ public:
         uint64 malchezaar;
         InfernalPoint *point;
 
-        void Reset() OVERRIDE { }
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
-        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
+        void Reset() override { }
+        void EnterCombat(Unit* /*who*/) override { }
+        void MoveInLineOfSight(Unit* /*who*/) override { }
 
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (HellfireTimer)
             {
@@ -148,14 +148,14 @@ public:
             }
         }
 
-        void KilledUnit(Unit* who) OVERRIDE
+        void KilledUnit(Unit* who) override
         {
-            if (Unit* unit = Unit::GetUnit(*me, malchezaar))
+            if (Unit* unit = ObjectAccessor::GetUnit(*me, malchezaar))
                 if (Creature* creature = unit->ToCreature())
                     creature->AI()->KilledUnit(who);
         }
 
-        void SpellHit(Unit* /*who*/, const SpellInfo* spell) OVERRIDE
+        void SpellHit(Unit* /*who*/, const SpellInfo* spell) override
         {
             if (spell->Id == SPELL_INFERNAL_RELAY)
             {
@@ -166,7 +166,7 @@ public:
             }
         }
 
-        void DamageTaken(Unit* done_by, uint32 &damage) OVERRIDE
+        void DamageTaken(Unit* done_by, uint32 &damage) override
         {
             if (done_by->GetGUID() != malchezaar)
                 damage = 0;
@@ -181,7 +181,7 @@ class boss_malchezaar : public CreatureScript
 public:
     boss_malchezaar() : CreatureScript("boss_malchezaar") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    CreatureAI* GetAI(Creature* creature) const override
     {
         return GetInstanceAI<boss_malchezaarAI>(creature);
     }
@@ -215,7 +215,7 @@ public:
 
         uint32 phase;
 
-        void Reset() OVERRIDE
+        void Reset() override
         {
             AxesCleanup();
             ClearWeapons();
@@ -246,12 +246,12 @@ public:
             instance->HandleGameObject(instance->GetData64(DATA_GO_NETHER_DOOR), true);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* /*victim*/) override
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) OVERRIDE
+        void JustDied(Unit* /*killer*/) override
         {
             Talk(SAY_DEATH);
 
@@ -266,7 +266,7 @@ public:
             instance->HandleGameObject(instance->GetData64(DATA_GO_NETHER_DOOR), true);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
+        void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_AGGRO);
 
@@ -277,7 +277,7 @@ public:
         {
             //Infernal Cleanup
             for (std::vector<uint64>::const_iterator itr = infernals.begin(); itr != infernals.end(); ++itr)
-                if (Unit* pInfernal = Unit::GetUnit(*me, *itr))
+                if (Unit* pInfernal = ObjectAccessor::GetUnit(*me, *itr))
                     if (pInfernal->IsAlive())
                     {
                         pInfernal->SetVisible(false);
@@ -291,7 +291,7 @@ public:
         {
             for (uint8 i = 0; i < 2; ++i)
             {
-                Unit* axe = Unit::GetUnit(*me, axes[i]);
+                Unit* axe = ObjectAccessor::GetUnit(*me, axes[i]);
                 if (axe && axe->IsAlive())
                     axe->Kill(axe);
                 axes[i] = 0;
@@ -320,7 +320,7 @@ public:
             ThreatContainer::StorageType::const_iterator itr = t_list.begin();
             std::advance(itr, 1);
             for (; itr != t_list.end(); ++itr) //store the threat list in a different container
-                if (Unit* target = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
+                if (Unit* target = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid()))
                     if (target->IsAlive() && target->GetTypeId() == TYPEID_PLAYER)
                         targets.push_back(target);
 
@@ -344,7 +344,7 @@ public:
         {
             for (uint8 i = 0; i < 5; ++i)
             {
-                Unit* target = Unit::GetUnit(*me, enfeeble_targets[i]);
+                Unit* target = ObjectAccessor::GetUnit(*me, enfeeble_targets[i]);
                 if (target && target->IsAlive())
                     target->SetHealth(enfeeble_health[i]);
                 enfeeble_targets[i] = 0;
@@ -381,7 +381,7 @@ public:
             Talk(SAY_SUMMON);
         }
 
-        void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -484,7 +484,7 @@ public:
                     {
                         for (uint8 i = 0; i < 2; ++i)
                         {
-                            if (Unit* axe = Unit::GetUnit(*me, axes[i]))
+                            if (Unit* axe = ObjectAccessor::GetUnit(*me, axes[i]))
                             {
                                 if (axe->GetVictim())
                                     DoModifyThreatPercent(axe->GetVictim(), -100);
@@ -587,7 +587,7 @@ public:
 
 void netherspite_infernal::netherspite_infernalAI::Cleanup()
 {
-    Creature* pMalchezaar = Unit::GetCreature(*me, malchezaar);
+    Creature* pMalchezaar = ObjectAccessor::GetCreature(*me, malchezaar);
 
     if (pMalchezaar && pMalchezaar->IsAlive())
         CAST_AI(boss_malchezaar::boss_malchezaarAI, pMalchezaar->AI())->Cleanup(me, point);
