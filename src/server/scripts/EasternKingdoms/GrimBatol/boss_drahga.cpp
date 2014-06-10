@@ -368,14 +368,14 @@ public:
 
             events.Update(diff);
 
-            while (uint32 eventId = events.GetEvent())
+            while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                 case EVENT_VALIONAS_FLAME:
                     if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(pTarget, SPELL_VALIONAS_FLAME);
-                    events.RepeatEvent(urand(15000,25000));
+					events.Repeat(urand(15000, 25000));
                     break;
 
                 case EVENT_SHREDDING_SWIPE:
@@ -383,16 +383,16 @@ public:
                     if(me->GetVictim())
                         DoCastVictim(SPELL_SHREDDING_SWIPE);
 
-                    events.RepeatEvent(urand(21000,30000));
+					events.Repeat(urand(21000, 30000));
                     break;
 
                 case EVENT_DEVOURING_FLAMES:
                     DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0), SPELL_DEVOURING_FLAMES_H);
-                    events.RepeatEvent(urand(30000,35000));
+					events.Repeat(urand(30000, 35000));
                     break;
 
                 default:
-                    events.PopEvent();
+                    //events.PopEvent();
                     break;
                 }
             }

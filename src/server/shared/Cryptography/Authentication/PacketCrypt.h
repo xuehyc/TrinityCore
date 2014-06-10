@@ -20,42 +20,29 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "HMACSHA1.h"
-#include "BigNumber.h"
-#include "Common.h"
+#ifndef _PACKETCRYPT_H
+#define _PACKETCRYPT_H
 
-HmacHash::HmacHash(uint32 len, uint8 *seed)
-{
-    HMAC_CTX_init(&m_ctx);
-    HMAC_Init_ex(&m_ctx, seed, len, EVP_sha1(), NULL);
-    memset(m_digest, 0, sizeof(m_digest));
-}
+#include "Cryptography/ARC4.h"
 
-HmacHash::~HmacHash()
-{
-    HMAC_CTX_cleanup(&m_ctx);
-}
+class BigNumber;
 
-void HmacHash::UpdateData(const std::string &str)
+class PacketCrypt
 {
-    HMAC_Update(&m_ctx, (uint8 const*)str.c_str(), str.length());
-}
+    public:
+        PacketCrypt(uint32 rc4InitSize);
+        virtual ~PacketCrypt() { }
 
-void HmacHash::UpdateData(const uint8* data, size_t len)
-{
-    HMAC_Update(&m_ctx, data, len);
-}
+        virtual void Init(BigNumber* K) = 0;
+        void DecryptRecv(uint8* data, size_t length);
+        void EncryptSend(uint8* data, size_t length);
 
-void HmacHash::Finalize()
-{
-    uint32 length = 0;
-    HMAC_Final(&m_ctx, (uint8*)m_digest, &length);
-    ASSERT(length == SHA_DIGEST_LENGTH);
-}
+        bool IsInitialized() const { return _initialized; }
 
-uint8 *HmacHash::ComputeHash(BigNumber* bn)
-{
-    HMAC_Update(&m_ctx, bn->AsByteArray().get(), bn->GetNumBytes());
-    Finalize();
-    return (uint8*)m_digest;
-}
+    protected:
+        ARC4 _clientDecrypt;
+        ARC4 _serverEncrypt;
+        bool _initialized;
+};
+
+#endif // _PACKETCRYPT_H

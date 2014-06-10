@@ -20,27 +20,38 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _AUTHCRYPT_H
-#define _AUTHCRYPT_H
+#ifndef _AUTH_HMAC_H
+#define _AUTH_HMAC_H
 
-#include "Cryptography/ARC4.h"
+#include "Define.h"
+#include <string>
+#include <openssl/hmac.h>
+#include <openssl/sha.h>
 
 class BigNumber;
 
-class AuthCrypt
+#define SEED_KEY_SIZE 16
+
+typedef EVP_MD const* (*HashCreateFn)();
+
+template<HashCreateFn HashCreator, uint32 DigestLength>
+class HmacHash
 {
     public:
-        AuthCrypt();
-
-        void Init(BigNumber* K);
-        void DecryptRecv(uint8 *, size_t);
-        void EncryptSend(uint8 *, size_t);
-
-        bool IsInitialized() const { return _initialized; }
-
+        HmacHash(uint32 len, uint8 *seed);
+        ~HmacHash();
+        void UpdateData(std::string const& str);
+        void UpdateData(uint8 const* data, size_t len);
+        void Finalize();
+        uint8* ComputeHash(BigNumber* bn);
+        uint8* GetDigest() { return _digest; }
+        uint32 GetLength() const { return DigestLength; }
     private:
-        ARC4 _clientDecrypt;
-        ARC4 _serverEncrypt;
-        bool _initialized;
+        HMAC_CTX _ctx;
+        uint8 _digest[DigestLength];
 };
+
+typedef HmacHash<EVP_sha1, SHA_DIGEST_LENGTH> HmacSha1;
+typedef HmacHash<EVP_sha256, SHA256_DIGEST_LENGTH> HmacSha256;
+
 #endif

@@ -1,10 +1,5 @@
 /*
- *
- * Copyright (C) 2011-2014 ArkCORE <http://www.arkania.net/>
- *
  * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
- *
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,32 +15,30 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _AUTH_HMAC_H
-#define _AUTH_HMAC_H
+#ifndef BattlenetAccountMgr_h__
+#define BattlenetAccountMgr_h__
 
 #include "Define.h"
 #include <string>
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
+#include <ace/Singleton.h>
 
-class BigNumber;
+enum class AccountOpResult : uint8;
 
-#define SEED_KEY_SIZE 16
+#define MAX_BNET_EMAIL_STR 320
 
-class HmacHash
+namespace Battlenet
 {
-    public:
-        HmacHash(uint32 len, uint8 *seed);
-        ~HmacHash();
-        void UpdateData(const std::string &str);
-        void UpdateData(const uint8* data, size_t len);
-        void Finalize();
-        uint8 *ComputeHash(BigNumber* bn);
-        uint8 *GetDigest() { return (uint8*)m_digest; }
-        int GetLength() const { return SHA_DIGEST_LENGTH; }
-    private:
-        HMAC_CTX m_ctx;
-        uint8 m_digest[SHA_DIGEST_LENGTH];
-};
-#endif
+    namespace AccountMgr
+    {
+        AccountOpResult CreateBattlenetAccount(std::string email, std::string password);
+        AccountOpResult ChangePassword(uint32 accountId, std::string newPassword);
+        bool CheckPassword(uint32 accountId, std::string password);
 
+        uint32 GetId(std::string const& username);
+        bool GetName(uint32 accountId, std::string& name);
+
+        std::string CalculateShaPassHash(std::string const& name, std::string const& password);
+    }
+}
+
+#endif // BattlenetAccountMgr_h__
