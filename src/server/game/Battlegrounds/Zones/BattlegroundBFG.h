@@ -153,7 +153,7 @@ enum GILNEAS_BG_Objectives
 #define GILNEAS_BG_BGWeekendRepTicks        150
 
 // x, y, z, o
-const float GILNEAS_BG_NodePositions[GILNEAS_BG_DYNAMIC_NODES_COUNT][4] =
+Position const GILNEAS_BG_NodePositions[GILNEAS_BG_DYNAMIC_NODES_COUNT] =
 {
     { 1057.856934f, 1278.269165f, 2.91f, 1.903034f },   // Lighthouse
     { 980.1835f, 947.8692f, 13.998f, 5.9015f },         // Waterwork
@@ -182,7 +182,7 @@ const float GILNEAS_BG_BuffPositions[GILNEAS_BG_DYNAMIC_NODES_COUNT][4] =
     { 1193.09f, 1017.46f, 7.98f, 0.24f },        // Mine
 };
 
-const float GILNEAS_BG_SpiritGuidePos[GILNEAS_BG_ALL_NODES_COUNT][4] =
+Position const GILNEAS_BG_SpiritGuidePos[GILNEAS_BG_ALL_NODES_COUNT] =
 {
     { 1034.82f, 1335.58f, 12.0095f, 5.15f },     // Lighthouse
     { 887.578f, 937.337f, 23.7737f, 0.45f },     // Waterworks

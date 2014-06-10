@@ -362,9 +362,9 @@ void BattlegroundBFG::_SendNodeUpdate(uint8 node)
 
 void BattlegroundBFG::_NodeOccupied(uint8 node, Team team)
 {
-    /*if (!AddSpiritGuide(node, GILNEAS_BG_SpiritGuidePos[node][0], GILNEAS_BG_SpiritGuidePos[node][1], GILNEAS_BG_SpiritGuidePos[node][2], GILNEAS_BG_SpiritGuidePos[node][3], team))
+    if (!AddSpiritGuide(node, GILNEAS_BG_SpiritGuidePos[node], GetTeamIndexByTeamId(team)))
         TC_LOG_ERROR("bg.battleground","Failed to spawn spirit guide! point: %u, team: %u, ", node, team);
-		*/
+
     uint8 capturedNodes = 0;
     for (uint8 i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
     {
@@ -381,10 +381,10 @@ void BattlegroundBFG::_NodeOccupied(uint8 node, Team team)
         return;
 
     Creature* trigger = GetBGCreature(node+7); // 0-6 spirit guides
-	/*
+
     if (!trigger)
-       trigger = AddCreature(WORLD_TRIGGER, node+7, team, GILNEAS_BG_NodePositions[node][0], GILNEAS_BG_NodePositions[node][1], GILNEAS_BG_NodePositions[node][2], GILNEAS_BG_NodePositions[node][3]);
-	*/
+        trigger = AddCreature(WORLD_TRIGGER, node+7, GILNEAS_BG_NodePositions[node], GetTeamIndexByTeamId(team));
+
     // Add bonus honor aura trigger creature when node is occupied
     // Cast bonus aura (+50% honor in 25yards)
     // aura should only apply to players who have occupied the node, set correct faction for trigger
@@ -570,14 +570,14 @@ bool BattlegroundBFG::SetupBattleground()
 {
     for (int i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
     {
-        if (!AddObject(GILNEAS_BG_OBJECT_BANNER_NEUTRAL + 8*i, GILNEAS_BG_OBJECTID_NODE_BANNER_0 + i, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3]/2), cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_BANNER_CONT_A + 8*i, GILNEAS_BG_OBJECTID_BANNER_CONT_A, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3]/2), cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_BANNER_CONT_H + 8*i, GILNEAS_BG_OBJECTID_BANNER_CONT_H, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3]/2), cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_BANNER_ALLY + 8*i, GILNEAS_BG_OBJECTID_BANNER_A, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3]/2), cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_BANNER_HORDE + 8*i, GILNEAS_BG_OBJECTID_BANNER_H, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3]/2), cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_AURA_ALLY + 8*i, GILNEAS_BG_OBJECTID_AURA_A, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3]/2), cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_AURA_HORDE + 8*i, GILNEAS_BG_OBJECTID_AURA_H, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3]/2), cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_AURA_CONTESTED + 8*i, GILNEAS_BG_OBJECTID_AURA_C, GILNEAS_BG_NodePositions[i][0], GILNEAS_BG_NodePositions[i][1], GILNEAS_BG_NodePositions[i][2], GILNEAS_BG_NodePositions[i][3], 0, 0, sin(GILNEAS_BG_NodePositions[i][3]/2), cos(GILNEAS_BG_NodePositions[i][3]/2), RESPAWN_ONE_DAY))
+        if (!AddObject(GILNEAS_BG_OBJECT_BANNER_NEUTRAL + 8*i, GILNEAS_BG_OBJECTID_NODE_BANNER_0 + i, GILNEAS_BG_NodePositions[i], 0, 0, std::sin(GILNEAS_BG_NodePositions[i].GetOrientation()/2), std::cos(GILNEAS_BG_NodePositions[i].GetOrientation()/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_BANNER_CONT_A + 8*i, GILNEAS_BG_OBJECTID_BANNER_CONT_A, GILNEAS_BG_NodePositions[i], 0, 0, std::sin(GILNEAS_BG_NodePositions[i].GetOrientation()/2), std::cos(GILNEAS_BG_NodePositions[i].GetOrientation()/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_BANNER_CONT_H + 8*i, GILNEAS_BG_OBJECTID_BANNER_CONT_H, GILNEAS_BG_NodePositions[i], 0, 0, std::sin(GILNEAS_BG_NodePositions[i].GetOrientation()/2), std::cos(GILNEAS_BG_NodePositions[i].GetOrientation()/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_BANNER_ALLY + 8*i, GILNEAS_BG_OBJECTID_BANNER_A, GILNEAS_BG_NodePositions[i], 0, 0, std::sin(GILNEAS_BG_NodePositions[i].GetOrientation()/2), std::cos(GILNEAS_BG_NodePositions[i].GetOrientation()/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_BANNER_HORDE + 8*i, GILNEAS_BG_OBJECTID_BANNER_H, GILNEAS_BG_NodePositions[i], 0, 0, std::sin(GILNEAS_BG_NodePositions[i].GetOrientation()/2), std::cos(GILNEAS_BG_NodePositions[i].GetOrientation()/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_AURA_ALLY + 8*i, GILNEAS_BG_OBJECTID_AURA_A, GILNEAS_BG_NodePositions[i], 0, 0, std::sin(GILNEAS_BG_NodePositions[i].GetOrientation()/2), std::cos(GILNEAS_BG_NodePositions[i].GetOrientation()/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_AURA_HORDE + 8*i, GILNEAS_BG_OBJECTID_AURA_H, GILNEAS_BG_NodePositions[i], 0, 0, std::sin(GILNEAS_BG_NodePositions[i].GetOrientation()/2), std::cos(GILNEAS_BG_NodePositions[i].GetOrientation()/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_AURA_CONTESTED + 8*i, GILNEAS_BG_OBJECTID_AURA_C, GILNEAS_BG_NodePositions[i], 0, 0, std::sin(GILNEAS_BG_NodePositions[i].GetOrientation()/2), std::cos(GILNEAS_BG_NodePositions[i].GetOrientation()/2), RESPAWN_ONE_DAY))
         {
             TC_LOG_ERROR("bg.battleground","BattleForGilneas: Failed to spawn some object Battleground not created!");
             return false;
@@ -594,9 +594,9 @@ bool BattlegroundBFG::SetupBattleground()
     // Buffs
     for (int i = 0; i < GILNEAS_BG_DYNAMIC_NODES_COUNT; ++i)
     {
-        if (!AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i, Buff_Entries[0], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, sin(GILNEAS_BG_BuffPositions[i][3]/2), cos(GILNEAS_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 1, Buff_Entries[1], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, sin(GILNEAS_BG_BuffPositions[i][3]/2), cos(GILNEAS_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
-            || !AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 2, Buff_Entries[2], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, sin(GILNEAS_BG_BuffPositions[i][3]/2), cos(GILNEAS_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY))
+        if (!AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i, Buff_Entries[0], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, std::sin(GILNEAS_BG_BuffPositions[i][3]/2), std::cos(GILNEAS_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 1, Buff_Entries[1], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, std::sin(GILNEAS_BG_BuffPositions[i][3]/2), std::cos(GILNEAS_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
+            || !AddObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 2, Buff_Entries[2], GILNEAS_BG_BuffPositions[i][0], GILNEAS_BG_BuffPositions[i][1], GILNEAS_BG_BuffPositions[i][2], GILNEAS_BG_BuffPositions[i][3], 0, 0, std::sin(GILNEAS_BG_BuffPositions[i][3]/2), std::cos(GILNEAS_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY))
             TC_LOG_ERROR("bg.battleground","BattleForGilneas: Failed to spawn buff object!");
     }
 
