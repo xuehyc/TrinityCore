@@ -168,11 +168,9 @@ public:
 
             for (uint8 i = 0; i < 2; ++i)
             {
-                if (Creature* pStormforgedLieutenant = (ObjectAccessor::GetCreature((*me), m_auiStormforgedLieutenantGUID[i])))
-                {
+                if (Creature* pStormforgedLieutenant = ObjectAccessor::GetCreature(*me, m_auiStormforgedLieutenantGUID[i]))
                     if (!pStormforgedLieutenant->IsAlive())
                         pStormforgedLieutenant->Respawn();
-                }
             }
 
             if (m_uiStance != STANCE_DEFENSIVE)
@@ -415,7 +413,7 @@ public:
 
         void EnterCombat(Unit* who) override
         {
-            if (Creature* pBjarngrim = instance->instance->GetCreature(instance->GetData64(DATA_BJARNGRIM)))
+            if (Creature* pBjarngrim = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BJARNGRIM)))
             {
                 if (pBjarngrim->IsAlive() && !pBjarngrim->GetVictim())
                     pBjarngrim->AI()->AttackStart(who);
@@ -438,7 +436,7 @@ public:
 
             if (m_uiRenewSteel_Timer <= uiDiff)
             {
-                if (Creature* pBjarngrim = instance->instance->GetCreature(instance->GetData64(DATA_BJARNGRIM)))
+                if (Creature* pBjarngrim = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BJARNGRIM)))
                 {
                     if (pBjarngrim->IsAlive())
                         DoCast(pBjarngrim, SPELL_RENEW_STEEL_N);

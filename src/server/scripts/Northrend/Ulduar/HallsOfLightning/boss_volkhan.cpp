@@ -166,13 +166,11 @@ public:
             if (m_lGolemGUIDList.empty())
                 return;
 
-            for (std::list<uint64>::const_iterator itr = m_lGolemGUIDList.begin(); itr != m_lGolemGUIDList.end(); ++itr)
+            for (uint64 guid : m_lGolemGUIDList)
             {
-                if (Creature* temp = ObjectAccessor::GetCreature(*me, *itr))
-                {
+                if (Creature* temp = ObjectAccessor::GetCreature(*me, guid))
                     if (temp->IsAlive())
                         temp->DespawnOrUnsummon();
-                }
             }
 
             m_lGolemGUIDList.clear();
@@ -183,9 +181,9 @@ public:
             if (m_lGolemGUIDList.empty())
                 return;
 
-            for (std::list<uint64>::const_iterator itr = m_lGolemGUIDList.begin(); itr != m_lGolemGUIDList.end(); ++itr)
+            for (uint64 guid : m_lGolemGUIDList)
             {
-                if (Creature* temp = ObjectAccessor::GetCreature(*me, *itr))
+                if (Creature* temp = ObjectAccessor::GetCreature(*me, guid))
                 {
                     // Only shatter brittle golems
                     if (temp->IsAlive() && temp->GetEntry() == NPC_BRITTLE_GOLEM)
