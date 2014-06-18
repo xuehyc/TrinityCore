@@ -250,7 +250,7 @@ class WorldSession
 
         AccountTypes GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
-        uint32 GetBattlenetAccountId() const { return _accountId; }
+        uint32 GetBattlenetAccountId() const { return _battlenetAccountId; }
         Player* GetPlayer() const { return _player; }
         std::string const& GetPlayerName() const;
         std::string GetPlayerInfo() const;
@@ -307,7 +307,7 @@ class WorldSession
 
         void SendBattleGroundList(uint64 guid, BattlegroundTypeId bgTypeId = BATTLEGROUND_RB);
 
-        void SendTradeStatus(TradeStatus status);
+        void SendTradeStatus(TradeStatus status, int8 clearSlot = 0);
         void SendUpdateTrade(bool trader_data = true);
         void SendCancelTrade();
 
