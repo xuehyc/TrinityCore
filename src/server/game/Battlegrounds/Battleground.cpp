@@ -1543,6 +1543,7 @@ bool Battleground::AddObject(uint32 type, uint32 entry, float x, float y, float 
         delete go;
         return false;
     }
+
 /*
     uint32 guid = go->GetGUIDLow();
 

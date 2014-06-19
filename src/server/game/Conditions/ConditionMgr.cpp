@@ -299,9 +299,9 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
             condMeets = ConditionValue2 == sWorld->getWorldState(ConditionValue1);
             break;
         }
-        case CONDITION_PHASEMASK:
+        case CONDITION_PHASEID:
         {
-            condMeets = object->GetPhaseMask() & ConditionValue1;
+            condMeets = object->IsInPhase(ConditionValue1);
             break;
         }
         case CONDITION_TITLE:
@@ -478,7 +478,7 @@ uint32 Condition::GetSearcherTypeMaskForCondition()
         case CONDITION_WORLD_STATE:
             mask |= GRID_MAP_TYPE_MASK_ALL;
             break;
-        case CONDITION_PHASEMASK:
+        case CONDITION_PHASEID:
             mask |= GRID_MAP_TYPE_MASK_ALL;
             break;
         case CONDITION_TITLE:
@@ -1516,11 +1516,11 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
             }
             break;
         case CONDITION_SOURCE_TYPE_PHASE_DEFINITION:
-            if (!PhaseMgr::IsConditionTypeSupported(cond->ConditionType))
+            /*if (!PhaseMgr::IsConditionTypeSupported(cond->ConditionType))
             {
                 TC_LOG_ERROR("sql.sql", "Condition source type `CONDITION_SOURCE_TYPE_PHASE_DEFINITION` does not support condition type %u, ignoring.", cond->ConditionType);
                 return false;
-            }
+            }*/
             break;
         case CONDITION_SOURCE_TYPE_NPC_VENDOR:
         {
@@ -1999,12 +1999,17 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
                 TC_LOG_ERROR("sql.sql", "World state condition has useless data in value3 (%u)!", cond->ConditionValue3);
             break;
         }
-        case CONDITION_PHASEMASK:
+        case CONDITION_PHASEID:
         {
+            if (!sPhaseStore.LookupEntry(cond->ConditionValue1))
+            {
+                TC_LOG_ERROR("sql.sql", "Phase condition has nonexistent phaseid in value1 (%u), skipped", cond->ConditionValue1);
+                return false;
+            }
             if (cond->ConditionValue2)
-                TC_LOG_ERROR("sql.sql", "Phasemask condition has useless data in value2 (%u)!", cond->ConditionValue2);
+                TC_LOG_ERROR("sql.sql", "Phase condition has useless data in value2 (%u)!", cond->ConditionValue2);
             if (cond->ConditionValue3)
-                TC_LOG_ERROR("sql.sql", "Phasemask condition has useless data in value3 (%u)!", cond->ConditionValue3);
+                TC_LOG_ERROR("sql.sql", "Phase condition has useless data in value3 (%u)!", cond->ConditionValue3);
             break;
         }
         case CONDITION_TITLE:
