@@ -238,7 +238,7 @@ public:
 	
 	#define spell_carapace_deau 90522 // Carapace_D'eau
 	#define spell_invocation_dun_esprit_de_leau 74561 // Invocation_d'un_Esprit_de_l'Eau
-	#define spell_trait_deau 90491 // Trait_d'Eau
+	#define spell_trait_deau 90490 // 90491 // Trait_d'Eau // wowhead says: the spell 90491 not exist 
 	
 	class npc_brise_tempete_du_crepuscule: public CreatureScript
 	{
@@ -300,7 +300,7 @@ public:
 	 **Esprit de l'Eau Asservi
 	 *************************/
 	 
-	 #define spell_trait_deau 90490 // Trait_d'Eau
+	 // #define spell_trait_deau 90490 // Trait_d'Eau // is defined earlyer
 	 
 	 class  npc_esprit_de_leau_asservi: public CreatureScript
 	 {

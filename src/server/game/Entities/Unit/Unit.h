@@ -2180,6 +2180,8 @@ class Unit : public WorldObject
         int32 GetHighestExclusiveSameEffectSpellGroupValue(AuraEffect const* aurEff, AuraType auraType, bool checkMiscValue = false, int32 miscValue = 0) const;
         bool IsHighestExclusiveAura(Aura const* aura, bool removeOtherAuraApplications = false);
 
+        Vehicle* m_vehicleKit;
+
     protected:
         explicit Unit (bool isWorldObject);
 
@@ -2247,7 +2249,7 @@ class Unit : public WorldObject
         ThreatManager m_ThreatManager;
 
         Vehicle* m_vehicle;
-        Vehicle* m_vehicleKit;
+        // Vehicle* m_vehicleKit;
 
         uint32 m_unitTypeMask;
         LiquidTypeEntry const* _lastLiquid;

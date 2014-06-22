@@ -501,6 +501,9 @@ class Spell
         void CleanupTargetList();
 
         void SetSpellValue(SpellValueMod mod, int32 value);
+
+        Spell** m_selfContainer;                            // pointer to our spell container (if applicable)
+
     protected:
         bool HasGlobalCooldown() const;
         void TriggerGlobalCooldown();
@@ -516,7 +519,7 @@ class Spell
                                                             // e.g. damage around area spell trigered by victim aura and damage enemies of aura caster
         Unit* m_originalCaster;                             // cached pointer for m_originalCaster, updated at Spell::UpdatePointers()
 
-        Spell** m_selfContainer;                            // pointer to our spell container (if applicable)
+        // Spell** m_selfContainer;                            // pointer to our spell container (if applicable)
 
         //Spell data
         SpellSchoolMask m_spellSchoolMask;                  // Spell school (can be overwrite for some spells (wand shoot for example)
