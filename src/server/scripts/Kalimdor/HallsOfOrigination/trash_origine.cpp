@@ -66,7 +66,7 @@ public:
 ***************************/
 
 #define spell_fleches_multiples 84836 // Flèches_Multiples
-#define spell_tir 83877 // Tir
+#define spell_tir_83877 83877 // Tir
 #define spell_tir_charge 94791 // Tir_Chargé
 
 class npc_traqueur_veloce_du_temple : public CreatureScript
@@ -103,7 +103,7 @@ public:
 			
 			if (tir<= diff)
 			{
-			DoCast(me->GetVictim(), spell_tir);
+                DoCast(me->GetVictim(), spell_tir_83877);
 			tir = 2500;
 			} else tir -= diff;
 			
@@ -888,7 +888,7 @@ public:
 **Nymphe Gardienne de la Vie
 ****************************/
 
-#define spell_tir 75958 // Tir
+#define spell_tir_75958 75958 // Tir
 #define spell_tir_enchevetrant 89865 // Tir_Enchevetrant
 #define spell_tranquillite 75940 // Tranquillité
 
@@ -919,8 +919,8 @@ public :
 			 
 			 if (tir<= diff)
 			 {
-			 DoCast(me->GetVictim(), spell_tir);
-			 tir = 4000;
+                 DoCast(me->GetVictim(), spell_tir_75958);
+			     tir = 4000;
 			 } else tir -= diff;
 			 
 			 if (tir_enchevetrant<= diff)
