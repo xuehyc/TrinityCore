@@ -690,7 +690,7 @@ class spell_warl_haunt : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warl_haunt_SpellScript);
 
-            void HandleOnHit()
+            void HandleAfterHit()
             {
                 if (Aura* aura = GetHitAura())
                     if (AuraEffect* aurEff = aura->GetEffect(EFFECT_1))
@@ -699,7 +699,7 @@ class spell_warl_haunt : public SpellScriptLoader
 
             void Register() override
             {
-                OnHit += SpellHitFn(spell_warl_haunt_SpellScript::HandleOnHit);
+                AfterHit += SpellHitFn(spell_warl_haunt_SpellScript::HandleAfterHit);
             }
         };
 
