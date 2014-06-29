@@ -20,6 +20,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ArenaScore.h"
 #include "BattlegroundNA.h"
 #include "Language.h"
 #include "Object.h"
@@ -65,7 +66,7 @@ void BattlegroundNA::StartingEventOpenDoors()
 void BattlegroundNA::AddPlayer(Player* player)
 {
     Battleground::AddPlayer(player);
-    PlayerScores[player->GetGUID()] = new BattlegroundScore;
+    PlayerScores[player->GetGUIDLow()] = new ArenaScore(player->GetGUID(), player->GetBGTeam());
     UpdateArenaWorldState();
 }
 

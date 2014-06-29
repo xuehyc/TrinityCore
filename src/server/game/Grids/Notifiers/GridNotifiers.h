@@ -178,13 +178,13 @@ namespace Trinity
     template<class Check>
     struct WorldObjectSearcher
     {
-        uint32 i_mapTypeMask;
-        WorldObject*& i_object;
         WorldObject const* _searcher;
+        WorldObject*& i_object;
+        uint32 i_mapTypeMask;
         Check &i_check;
 
         WorldObjectSearcher(WorldObject const* searcher, WorldObject* & result, Check& check, uint32 mapTypeMask = GRID_MAP_TYPE_MASK_ALL)
-            : i_mapTypeMask(mapTypeMask), _searcher(searcher), i_object(result), i_check(check) { }
+            : _searcher(searcher), i_object(result), i_check(check), i_mapTypeMask(mapTypeMask) { }
 
         void Visit(GameObjectMapType &m);
         void Visit(PlayerMapType &m);
@@ -199,13 +199,13 @@ namespace Trinity
     template<class Check>
     struct WorldObjectLastSearcher
     {
-        uint32 i_mapTypeMask;
-        WorldObject* &i_object;
         WorldObject const* _searcher;
+        WorldObject* &i_object;
         Check &i_check;
+        uint32 i_mapTypeMask;
 
         WorldObjectLastSearcher(WorldObject const* searcher, WorldObject* & result, Check& check, uint32 mapTypeMask = GRID_MAP_TYPE_MASK_ALL)
-            :  i_mapTypeMask(mapTypeMask), _searcher(searcher), i_object(result), i_check(check) { }
+            : _searcher(searcher), i_object(result), i_check(check), i_mapTypeMask(mapTypeMask) { }
 
         void Visit(GameObjectMapType &m);
         void Visit(PlayerMapType &m);

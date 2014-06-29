@@ -24,6 +24,7 @@
 #define __BATTLEGROUNDIC_H
 
 #include "Battleground.h"
+#include "BattlegroundScore.h"
 #include "Language.h"
 #include "Object.h"
 
@@ -851,12 +852,38 @@ enum HonorRewards
     WINNER_HONOR_AMOUNT = 500
 };
 
-struct BattlegroundICScore : public BattlegroundScore
+struct BattlegroundICScore final : public BattlegroundScore
 {
-    BattlegroundICScore() : BasesAssaulted(0), BasesDefended(0) { }
-    ~BattlegroundICScore() { }
-    uint32 BasesAssaulted;
-    uint32 BasesDefended;
+    friend class BattlegroundIC;
+
+    protected:
+        BattlegroundICScore(uint64 playerGuid, uint32 team) : BattlegroundScore(playerGuid, team), BasesAssaulted(0), BasesDefended(0) { }
+
+        void UpdateScore(uint32 type, uint32 value) override
+        {
+            switch (type)
+            {
+                case SCORE_BASES_ASSAULTED:
+                    BasesAssaulted += value;
+                    break;
+                case SCORE_BASES_DEFENDED:
+                    BasesDefended += value;
+                    break;
+                default:
+                    BattlegroundScore::UpdateScore(type, value);
+                    break;
+            }
+        }
+
+        void BuildObjectivesBlock(WorldPacket& data, ByteBuffer& content) final
+        {
+            data.WriteBits(2, 24); // Objectives Count
+            content << uint32(BasesAssaulted);
+            content << uint32(BasesDefended);
+        }
+
+        uint32 BasesAssaulted;
+        uint32 BasesDefended;
 };
 
 class BattlegroundIC : public Battleground
@@ -885,8 +912,6 @@ class BattlegroundIC : public Battleground
         WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
 
         /* Scorekeeping */
-        void UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor = true);
-
         void FillInitialWorldStates(WorldPacket& data);
 
         void DoAction(uint32 action, uint64 var);
@@ -898,6 +923,7 @@ class BattlegroundIC : public Battleground
         bool IsAllNodesControlledByTeam(uint32 team) const;
 
         bool IsSpellAllowed(uint32 spellId, Player const* player) const;
+
     private:
         uint32 closeFortressDoorsTimer;
         bool doorsClosed;
