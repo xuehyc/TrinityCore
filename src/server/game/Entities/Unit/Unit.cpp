@@ -8072,6 +8072,7 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
                     SendMeleeAttackStart(victim);
                     return true;
                 }
+                return true;
             }
             else if (HasUnitState(UNIT_STATE_MELEE_ATTACKING))
             {
@@ -11653,6 +11654,11 @@ Unit* Creature::SelectVictim()
         }
         return NULL;
     }
+
+    // ToDo: some areas need's showfight against npc's with faction 7 or 14
+    if (target = GetVictim())
+        if (IsInCombat() && target->IsAlive())
+            return target;
 
     // enter in evade mode in other case
     AI()->EnterEvadeMode();
