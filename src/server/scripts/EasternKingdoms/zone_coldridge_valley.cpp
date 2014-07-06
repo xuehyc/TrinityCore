@@ -21,45 +21,30 @@
  */
 
 /* ScriptData
-SDName: Duskwood
+SDName: Coldridge_Valley
 SD%Complete: 0
 SDComment: Quest Support:
 SDCategory: Coldridge Valley
 EndScriptData */
 
-/* ContentData
-
-EndContentData */
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "ScriptedEscortAI.h"
 #include "ScriptedGossip.h"
 #include "Player.h"
 
-enum zone_coldridge_valley
-{
-	NPC_ROCKSAW_INVADER									= 37070,
-	NPC_WOUNDED_COLDRIDGE_MOUNTAINEER_KILL_CREDIT		= 37079,
-	NPC_WOUNDED_COLDRIDGE_MOUNTAINEER					= 37080,
-	NPC_COLDRIDGE_DEFENDER								= 37177,
-	NPC_SOOTHSAYER_SHIKALA								= 37108,
-	NPC_SOOTHSAYER_RIKKARI  							= 37173,
-	NPC_SOOTHSAYER_MIRIMKOA								= 37174,
-	NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_SE	= 37109,
-	NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_SW	= 37110,
-	NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_W	= 37111,
-
-	SPELL_HEAL_WOUNDED_MOUNTAINEER						= 69855,
-
-	QUEST_AID_FOR_THE_WOUNDED							= 24471,
-	QUEST_TROLLING_FOR_INFORMATION						= 24489,
-
-
-};
+// ######################## showfight between npc_rockjaw_invader and npc_coldridge_defender
 
 /*######
 ## npc_rockjaw_invader
 ######*/
+
+enum eShowfight
+{
+    NPC_ROCKJAW_INVADER = 37070,
+    NPC_COLDRIDGE_DEFENDER = 37177,
+    NPC_JOREN_IRONSTOCK = 37081,
+};
 
 class npc_rockjaw_invader : public CreatureScript
 {
@@ -68,38 +53,49 @@ public:
 
     struct npc_rockjaw_invaderAI : public ScriptedAI
     {
-        npc_rockjaw_invaderAI(Creature *c) : ScriptedAI(c) {}
+        npc_rockjaw_invaderAI(Creature *c) : ScriptedAI(c) { }
 
-        uint32 Attack1HTimer;        	
+        uint32 _health;
 
-        void Reset()  override
+        void Reset() override
         {
-            Attack1HTimer = urand(1800,2200);           			
+            _health = urand(55, 90);
+        }
+
+        void EnterCombat(Unit* unit)
+        {
+            AttackStart(unit);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (attacker->GetEntry() == NPC_COLDRIDGE_DEFENDER && me->GetHealthPct() < _health)
+                damage = 0;
         }
 
         void UpdateAI(uint32 diff) override
-        {						
+        {
             if (!UpdateVictim())
-			{
-				if (Creature* infantry = me->FindNearestCreature (NPC_COLDRIDGE_DEFENDER, 3.0f)) 
-				{
-					if (Attack1HTimer <= diff)
-					{
-						me->SetFacingTo (me->GetAngle(infantry));
-						me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
-						Attack1HTimer = urand(1800,2200);
-					}
-					else Attack1HTimer -= diff;
-				}
-			} else 
-				DoMeleeAttackIfReady();
-			
+                DoWork();
+            else
+                DoMeleeAttackIfReady();
+        }
+
+        void DoWork()
+        {
+            if (!me->IsInCombat())
+            {
+                if (Creature* joren = me->FindNearestCreature(NPC_JOREN_IRONSTOCK, 10.0f))
+                {
+                    AttackStart(joren);
+                }
+            }
         }
     };
 
-	   CreatureAI* GetAI(Creature* pCreature) const  override
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_rockjaw_invaderAI (pCreature);
+        return new npc_rockjaw_invaderAI(creature);
     }
 };
 
@@ -114,114 +110,253 @@ public:
 
     struct npc_coldridge_defenderAI : public ScriptedAI
     {
-        npc_coldridge_defenderAI(Creature *c) : ScriptedAI(c) {}
+        npc_coldridge_defenderAI(Creature *c) : ScriptedAI(c) { }
 
-        uint32 Attack1HTimer;        	
+        uint32 _health;
 
-        void Reset()  override
+        void Reset() override
         {
-            Attack1HTimer = urand(1800,2200);           			
+            _health = urand(55, 90);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (attacker->GetEntry() == NPC_ROCKJAW_INVADER && me->GetHealthPct() < _health)
+                damage = 0;
         }
 
         void UpdateAI(uint32 diff) override
-        {						
+        {
             if (!UpdateVictim())
-			{
-				if (Creature* infantry = me->FindNearestCreature (NPC_ROCKSAW_INVADER, 3.0f)) 
-				{
-					if (Attack1HTimer <= diff)
-					{
-						me->SetFacingTo (me->GetAngle(infantry));
-						me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
-						Attack1HTimer = urand(1800,2200);
-					}
-					else Attack1HTimer -= diff;
-				}
-			} else 
-				DoMeleeAttackIfReady();
-			
+            {
+                if (!me->IsInCombat())
+                if (Creature* invader = me->FindNearestCreature(NPC_ROCKJAW_INVADER, 10.0f))
+                    AttackStart(invader);
+            }
+            else
+                DoMeleeAttackIfReady();
+
         }
     };
 
-	   CreatureAI* GetAI(Creature* pCreature) const  override
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_coldridge_defenderAI (pCreature);
+        return new npc_coldridge_defenderAI(creature);
     }
 };
 
+// ######################## fight between npc_rockjaw_invader and npc_joren_ironstock
+
 /*######
-## npc_wounded_coldridge_mountaineer
+## npc_joren_ironstock
 ######*/
+
+class npc_joren_ironstock : public CreatureScript
+{
+public:
+    npc_joren_ironstock() : CreatureScript("npc_joren_ironstock") { }
+
+    struct npc_joren_ironstockAI : public ScriptedAI
+    {
+        npc_joren_ironstockAI(Creature *c) : ScriptedAI(c) { }
+
+        void Reset() override
+        {
+            me->GetMotionMaster()->MoveIdle();
+        }
+
+        void AttackStart(Unit* who) override
+        {
+            AttackStartNoMove(who);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (attacker->GetEntry() == NPC_ROCKJAW_INVADER)
+            {
+                if (!me->IsInCombat())
+                    AttackStartNoMove(attacker);
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_joren_ironstockAI(creature);
+    }
+};
+
+// ######################## quest 24471: Heal Woundet Mountaineer
+
+enum eQuestHealWoundetMountaineer
+{
+    NPC_WOUNDED_COLDRIDGE_MOUNTAINEER_KILL_CREDIT = 37079,
+    NPC_WOUNDED_COLDRIDGE_MOUNTAINEER = 37080,
+
+    SPELL_HEAL_WOUNDED_MOUNTAINEER = 69855,
+
+    QUEST_AID_FOR_THE_WOUNDED = 24471,
+};
 
 class npc_wounded_coldridge_mountaineer : public CreatureScript
 {
 public:
     npc_wounded_coldridge_mountaineer() : CreatureScript("npc_wounded_coldridge_mountaineer") { }
-	
-	bool OnGossipHello(Player* player, Creature* creature) override
-    {
-        player->PlayerTalkClass->SendCloseGossip();		
-
-		if (player->HasUnitState(UNIT_STATE_CASTING)) 
-				return true;
-		
-        if (player->GetQuestStatus(QUEST_AID_FOR_THE_WOUNDED) == QUEST_STATUS_INCOMPLETE)
-        {  			
-			creature->CastSpell(creature, SPELL_HEAL_WOUNDED_MOUNTAINEER, false);
-			player->KilledMonsterCredit(NPC_WOUNDED_COLDRIDGE_MOUNTAINEER_KILL_CREDIT, NULL);
-        }
-        return true;
-    }
 
     struct npc_wounded_coldridge_mountaineerAI : public ScriptedAI
     {
-		npc_wounded_coldridge_mountaineerAI(Creature *creature) : ScriptedAI(creature) 
-		{
-			isHealed=false; phase=3;
-		} 
-		
-		bool isHealed;
-		uint32 phase;
-		uint32 timer;
-				
-		void Reset() override 
-		{ 
-			isHealed=false;
-			phase=0;
-			timer=1000;
-		}
-		
-		// ToDo
-	    void SpellHit(Unit * Hitter, SpellInfo const* spell) override
+        npc_wounded_coldridge_mountaineerAI(Creature *creature) : ScriptedAI(creature) { }
+
+        uint32 _phase;
+        uint32 _timer;
+
+        void Reset() override
         {
-			printf("zauber ist eingetroffen %d \n", spell->Id );
-            if (spell->Id == SPELL_HEAL_WOUNDED_MOUNTAINEER )
-            {
-				isHealed=true;
-				DoCast(Hitter, NPC_WOUNDED_COLDRIDGE_MOUNTAINEER_KILL_CREDIT);
-				printf("Jo, ich wurde geheilt \n");
-            }
+            _phase = 0;
+            _timer = 1000;
         }
-		
-		void UpdateAI(uint32 diff) override
-        {   
 
-			if (!isHealed) return;
+        // ToDo: spell is wrong implemented in core and function SpellHit is not called
+        void SpellHit(Unit * Hitter, SpellInfo const* spell) override
+        {
+            if (Player* player = Hitter->ToPlayer())
+                if (player->GetQuestStatus(QUEST_AID_FOR_THE_WOUNDED) == QUEST_STATUS_INCOMPLETE)
+                    if (me->GetDistance(player) < 5.0f)
+                        if (spell->Id == SPELL_HEAL_WOUNDED_MOUNTAINEER)
+                        {
+                            _phase = 1;
+                            _timer = 1000;
+                            DoCast(Hitter, NPC_WOUNDED_COLDRIDGE_MOUNTAINEER_KILL_CREDIT);
+                        }
+        }
 
-			if (timer <= diff)	
-			{
-			
-
-			}	
-			else 
-				timer -= diff;	
-		}
+        void UpdateAI(uint32 diff) override
+        {
+            if (_timer <= diff)
+            {
+                switch (_phase)
+                {
+                case 1:
+                    Talk(0);
+                    _timer = 5000;
+                    _phase = 2;
+                    break;
+                case 2:
+                    me->GetMotionMaster()->MovePoint(0, me->GetNearPosition(25.0f, me->GetFollowAngle()));
+                    _timer = 10000;
+                    _phase = 3;
+                    break;
+                case 3:
+                    me->DisappearAndDie();
+                    _phase = 0;
+                    break;
+                }
+            }
+            else
+                _timer -= diff;
+        }
     };
-	 
-	CreatureAI* GetAI(Creature* creature) const  override
+
+    CreatureAI* GetAI(Creature* creature) const  override
     {
-        return new npc_wounded_coldridge_mountaineerAI (creature);
+        return new npc_wounded_coldridge_mountaineerAI(creature);
     }
+};
+
+// ######################## quest 24486 : QUEST_MAKE_HAY_WHILE_THE_SUN_SHINES
+
+/*######
+## npc_rockjaw_scavenger
+######*/
+
+enum eQuest24486
+{
+    SPELL_THROW_PRICELESS_ARTIFACT = 69897,
+    NPC_ROCKJAW_SCAVENGER = 37105,
+    ITEM_PRICELESS_ROCKJAW_ARTIFACT = 49751,
+    QUEST_MAKE_HAY_WHILE_THE_SUN_SHINES = 24486,
+};
+
+class npc_rockjaw_scavenger : public CreatureScript
+{
+public:
+    npc_rockjaw_scavenger() : CreatureScript("npc_rockjaw_scavenger") { }
+
+    struct npc_rockjaw_scavengerAI : public ScriptedAI
+    {
+        npc_rockjaw_scavengerAI(Creature *creature) : ScriptedAI(creature) { }
+
+        uint32  _phase;
+        uint32  _timer;
+        Player* _player;
+
+        void Reset() override
+        {
+            _phase = 0; _timer = 0; _player = NULL;
+        }
+
+        void DamageTaken(Unit* Hitter, uint32& Damage) override
+        {
+            if (Player* player = Hitter->ToPlayer())
+                if (player->GetQuestStatus(QUEST_MAKE_HAY_WHILE_THE_SUN_SHINES) == QUEST_STATUS_INCOMPLETE && _phase == 0)
+                    if (me->GetDistance(player) > 4.5f && me->GetDistance(player) < 15.5f)
+                    {                        
+                        _phase = 1; _timer = 1000; _player = player;
+                    }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (_timer <= diff)
+                DoWork();            
+            else
+                _timer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+        void DoWork()
+        {
+            if (_phase == 1)
+                if (_player)
+                {
+                    me->CastSpell(_player, SPELL_THROW_PRICELESS_ARTIFACT, true);
+                    _player->AddItem(ITEM_PRICELESS_ROCKJAW_ARTIFACT, 1);
+                    _phase = 2;
+                }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_rockjaw_scavengerAI(creature);
+    }
+};
+
+// ######################## quest 24489 : QUEST_TROLLING_FOR_INFORMATION
+
+enum eQuest24489
+{
+    NPC_SOOTHSAYER_SHIKALA = 37108,
+    NPC_SOOTHSAYER_RIKKARI = 37173,
+    NPC_SOOTHSAYER_MIRIMKOA = 37174,
+    NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_SE = 37109,
+    NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_SW = 37110,
+    NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_W = 37111,
+
+    QUEST_TROLLING_FOR_INFORMATION = 24489,
 };
 
 /*######
@@ -542,6 +677,137 @@ public:
     }
 };
 
+// ################################################ Quest: Follow that Gyro-Copter! 24491
+
+enum eQuest24491
+{
+    QUEST_FOLLOW_THAT_GYRO_COPTER = 24491,
+
+    NPC_HANDS_SPRINGSPROCKET = 6782,
+
+    SPELL_SEE_COLDRIGE_TUNNEL_ROCKS_SEE_QUEST_INVIS_1 = 70042,
+    SPELL_SEE_MILO_GEARTWINGE_SEE_QUEST_INVIS_2 = 70044,
+    SPELL_MILO_GEARTWINGE_INVISIBILITY_QUEST_INVIS_2 = 70045,
+};
+
+class npc_hands_springsprocket : public CreatureScript
+{
+public:
+    npc_hands_springsprocket() : CreatureScript("npc_hands_springsprocket") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_FOLLOW_THAT_GYRO_COPTER)
+        if (!player->HasAura(SPELL_SEE_MILO_GEARTWINGE_SEE_QUEST_INVIS_2))
+        {
+            player->CastSpell(player, SPELL_SEE_COLDRIGE_TUNNEL_ROCKS_SEE_QUEST_INVIS_1, true);
+            player->CastSpell(player, SPELL_SEE_MILO_GEARTWINGE_SEE_QUEST_INVIS_2, true);
+        }
+
+        return true;
+    }
+};
+
+// ################################################ Quest: Pack Your Bags 24492
+
+enum eQuest24492
+{
+    QUEST_PACK_YOUR_BAGS = 24492,
+
+    NPC_MILO_GEARTWINGE = 37113,
+    NPC_MILO_GEARTWINGE_SPAWNED = 37518,
+    NPC_MILOS_GYRO = 37169,
+    NPC_MILOS_GYRO_SPAWNED = 37198,
+
+    SPELL_SUMMON_MILOS_GYROCOPTER = 70035,
+    SPELL_RIDING_MILOS_GYRO = 70036,
+};
+
+class npc_milos_gyro_spawned : public CreatureScript
+{
+public:
+    npc_milos_gyro_spawned() : CreatureScript("npc_milos_gyro_spawned") { }
+
+    struct npc_milos_gyro_spawnedAI : public npc_escortAI
+    {
+        npc_milos_gyro_spawnedAI(Creature* creature) : npc_escortAI(creature)
+        {
+            AddWaypoint(1, -6220.035645f, 296.816772f, 409.775787f);
+            AddWaypoint(2, -6180.738281f, 271.849091f, 435.231506f);
+            AddWaypoint(3, -6167.073730f, 213.735809f, 470.028137f);
+            AddWaypoint(4, -6134.929688f, 124.723755f, 507.195953f);
+            AddWaypoint(5, -6075.491699f, 73.982384f, 510.407410f);
+            AddWaypoint(6, -5984.715820f, -9.166074f, 470.231415f);
+            AddWaypoint(7, -5908.320313f, -225.218124f, 490.649323f);
+            AddWaypoint(8, -5727.785156f, -416.732208f, 466.876831f);
+            AddWaypoint(9, -5647.638672f, -482.040649f, 399.289917f);
+            AddWaypoint(10, -5629.615234f, -484.758545f, 396.980530f);
+            AddWaypoint(11, -5618.415527f, -484.724670f, 396.980530f);
+
+            SetDespawnAtEnd(true);
+            //me->EnableAI(); //Only for NG
+            _phase = 0;
+        }
+
+        uint32 _phase;
+
+        void PassengerBoarded(Unit* who, int8 seatId, bool apply) override
+        {
+            if (!apply)
+                return;
+
+            if (seatId == 0)
+            {
+                me->SetSpeed(MOVE_RUN, 2.0f, true);
+                me->SetSpeed(MOVE_FLIGHT, 2.0f, true);
+                Start(true, true);
+            }
+        }
+
+        void WaypointReached(uint32 point) override
+        {
+            _phase++;
+            switch (_phase)
+            {
+            case 1:
+                Talk(0);
+                break;
+            case 3:
+                Talk(1);
+                break;
+            case 4:
+                Talk(2);
+                break;
+            case 5:
+                Talk(3);
+                break;
+            case 6:
+                Talk(4);
+                break;
+            case 7:
+                Talk(5);
+                break;
+            case 8:
+                Talk(6);
+                me->RemoveAura(SPELL_SEE_COLDRIGE_TUNNEL_ROCKS_SEE_QUEST_INVIS_1);
+                me->RemoveAura(SPELL_SEE_MILO_GEARTWINGE_SEE_QUEST_INVIS_2);
+                break;
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            npc_escortAI::UpdateAI(diff);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_milos_gyro_spawnedAI(creature);
+    }
+
+};
+
 /*######
 ## AddSC
 ######*/
@@ -550,10 +816,13 @@ void AddSC_coldridge_valley()
 {
     new npc_rockjaw_invader();
 	new npc_coldridge_defender();
+    new npc_joren_ironstock();
 	new npc_wounded_coldridge_mountaineer();
 	new npc_soothsayer_shikala(); 
 	new npc_soothsayer_rikkari();
 	new npc_soothsayer_mirimkoa();
-
+    new npc_rockjaw_scavenger();
+    new npc_hands_springsprocket();
+    new npc_milos_gyro_spawned();
 }
 
