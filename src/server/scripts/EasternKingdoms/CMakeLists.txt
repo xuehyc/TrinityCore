@@ -244,7 +244,8 @@ set(scripts_STAT_SRCS
   EasternKingdoms/Karazhan/karazhan.h
   EasternKingdoms/TheStockade/instance_the_stockade.cpp
   EasternKingdoms/zone_elwynn_forest.cpp
-  EasternKingdoms/zone_coldridge_valley.cpp  
+  EasternKingdoms/zone_coldridge_valley.cpp
+  EasternKingdoms/zone_dun_morogh.cpp
 )
 
 message("  -> Prepared: Eastern Kingdoms")
