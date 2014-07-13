@@ -193,10 +193,10 @@ void BattlegroundBFG::StartingEventCloseDoors()
         SpawnBGObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + i, RESPAWN_ONE_DAY);
 
     // Starting doors
-    DoorClose(GILNEAS_BG_OBJECT_GATE_A);
-    DoorClose(GILNEAS_BG_OBJECT_GATE_H);
-    SpawnBGObject(GILNEAS_BG_OBJECT_GATE_A, RESPAWN_IMMEDIATELY);
-    SpawnBGObject(GILNEAS_BG_OBJECT_GATE_H, RESPAWN_IMMEDIATELY);
+    DoorClose(GILNEAS_BG_OBJECT_GATE_A_2);
+    DoorClose(GILNEAS_BG_OBJECT_GATE_H_1);
+    SpawnBGObject(GILNEAS_BG_OBJECT_GATE_A_2, RESPAWN_IMMEDIATELY);
+    SpawnBGObject(GILNEAS_BG_OBJECT_GATE_H_1, RESPAWN_IMMEDIATELY);
 
     // Starting base spirit guides
     _NodeOccupied(GILNEAS_BG_SPIRIT_ALIANCE, ALLIANCE);
@@ -214,17 +214,16 @@ void BattlegroundBFG::StartingEventOpenDoors()
         uint8 buff = urand(0, 2);
         SpawnBGObject(GILNEAS_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + buff + i * 3, RESPAWN_IMMEDIATELY);
     }
-    DoorOpen(GILNEAS_BG_OBJECT_GATE_A);
-    DoorOpen(GILNEAS_BG_OBJECT_GATE_H);
+    DoorOpen(GILNEAS_BG_OBJECT_GATE_A_2);
+    DoorOpen(GILNEAS_BG_OBJECT_GATE_H_1);
 }
 
 void BattlegroundBFG::AddPlayer(Player* player)
 {
     Battleground::AddPlayer(player);
     // Create score and add it to map, default values are set in constructor
-    BattlegroundBFGScore* score = new BattlegroundBFGScore;
-
-    PlayerScores[player->GetGUID()] = score;
+   
+    PlayerScores[player->GetGUIDLow()] = new BattlegroundBFGScore(player->GetGUID(), player->GetBGTeam());
 }
 
 void BattlegroundBFG::RemovePlayer(Player* /*player*/, uint64 /*guid*/, uint32 /*team*/) {}
@@ -584,8 +583,8 @@ bool BattlegroundBFG::SetupBattleground()
         }
     }
 
-    if (!AddObject(GILNEAS_BG_OBJECT_GATE_A, GILNEAS_BG_OBJECTID_GATE_A, GILNEAS_BG_DoorPositions[0][0], GILNEAS_BG_DoorPositions[0][1], GILNEAS_BG_DoorPositions[0][2], GILNEAS_BG_DoorPositions[0][3], GILNEAS_BG_DoorPositions[0][4], GILNEAS_BG_DoorPositions[0][5], GILNEAS_BG_DoorPositions[0][6], GILNEAS_BG_DoorPositions[0][7], RESPAWN_IMMEDIATELY)
-        || !AddObject(GILNEAS_BG_OBJECT_GATE_H, GILNEAS_BG_OBJECTID_GATE_H, GILNEAS_BG_DoorPositions[1][0], GILNEAS_BG_DoorPositions[1][1], GILNEAS_BG_DoorPositions[1][2], GILNEAS_BG_DoorPositions[1][3], GILNEAS_BG_DoorPositions[1][4], GILNEAS_BG_DoorPositions[1][5], GILNEAS_BG_DoorPositions[1][6], GILNEAS_BG_DoorPositions[1][7], RESPAWN_IMMEDIATELY))
+    if (!AddObject(GILNEAS_BG_OBJECT_GATE_A_2, GILNEAS_BG_OBJECTID_GATE_A_2, GILNEAS_BG_DoorPositions[0][0], GILNEAS_BG_DoorPositions[0][1], GILNEAS_BG_DoorPositions[0][2], GILNEAS_BG_DoorPositions[0][3], GILNEAS_BG_DoorPositions[0][4], GILNEAS_BG_DoorPositions[0][5], GILNEAS_BG_DoorPositions[0][6], GILNEAS_BG_DoorPositions[0][7], RESPAWN_IMMEDIATELY)
+        || !AddObject(GILNEAS_BG_OBJECT_GATE_H_1, GILNEAS_BG_OBJECTID_GATE_H_1, GILNEAS_BG_DoorPositions[1][0], GILNEAS_BG_DoorPositions[1][1], GILNEAS_BG_DoorPositions[1][2], GILNEAS_BG_DoorPositions[1][3], GILNEAS_BG_DoorPositions[1][4], GILNEAS_BG_DoorPositions[1][5], GILNEAS_BG_DoorPositions[1][6], GILNEAS_BG_DoorPositions[1][7], RESPAWN_IMMEDIATELY))
     {
         TC_LOG_ERROR("bg.battleground","BattleForGilneas: Failed to spawn door object Battleground not created!");
         return false;
@@ -696,12 +695,12 @@ WorldSafeLocsEntry const* BattlegroundBFG::GetClosestGraveYard(Player* player)
     return good_entry;
 }
 
-void BattlegroundBFG::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor)
+bool BattlegroundBFG::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor)
 {
     BattlegroundScoreMap::iterator itr = PlayerScores.find(Source->GetGUID());
 
     if (itr == PlayerScores.end())      // player was not found...
-        return;
+        return false;
 
     switch (type)
     {
@@ -717,6 +716,7 @@ void BattlegroundBFG::UpdatePlayerScore(Player* Source, uint32 type, uint32 valu
         Battleground::UpdatePlayerScore(Source, type, value, doAddHonor);
         break;
     }
+    return true;
 }
 
 bool BattlegroundBFG::IsAllNodesConrolledByTeam(uint32 team) const
