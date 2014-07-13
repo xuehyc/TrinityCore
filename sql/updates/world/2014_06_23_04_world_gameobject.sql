@@ -1,5 +1,5 @@
 --
-SET @GUID1 := 5380; -- Set by TDB team
+SET @GUID1 := 404294; -- Set by ArkDB team
 
 DELETE FROM `gameobject` WHERE (`guid`=@GUID1);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
