@@ -1,6 +1,6 @@
 --
-SET @GRICKSBONESAW     :=43286;
-SET @DERANGEDEXPLORER  :=23967;
+SET @GRICKSBONESAW     :=43286;  -- is spell -- http://www.wowhead.com/item=33554
+SET @DERANGEDEXPLORER  :=23967;  -- is entry -- http://www.wowhead.com/item=33558
 
 DELETE FROM `conditions` WHERE `SourceEntry`=@GRICKSBONESAW AND `SourceTypeOrReferenceId`=17;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
