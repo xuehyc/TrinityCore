@@ -1,4 +1,3 @@
-SET @GUID := 68282; -- Needs 3
 
 -- Add Ahn'kahar Watcher's Corpse to heroic loot for Ahn'kahar Watcher
 DELETE FROM `creature_loot_template` WHERE `entry`=31449 AND `item`=43494;
@@ -10,12 +9,12 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=1 AND `SourceGroup`=314
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
 (1, 31449, 43494, 0, 1, 9, 0, 13190, 0, 0, 0, 0, 0, '', 'Ahn kahar Watchers Corpse drops if player has taken (13190) All Things in Good Time');
 
+-- changed for ArkDB
 -- Add Ahn'kahet Brazier KC Bunny and Ahn'Kahar Watchers
-DELETE FROM `creature` WHERE `guid`  BETWEEN @GUID AND @GUID+2;
+DELETE FROM `creature` WHERE `guid`  BETWEEN 282861 AND 282862;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(@GUID, 31105, 619, 3, 173, 520.7055, -352.9016, 47.92243, 2.234021, 7200, 0, 0), -- 31105 (Area: 4627)
-(@GUID+1, 31104, 619, 3, 1, 454.1534, -1024.992, 30.43521, 5.218534, 7200, 5, 1), -- 31104 (Area: 4623) (possible waypoints or random movement)
-(@GUID+2, 31104, 619, 3, 1, 460.0319, -1034.93, 30.33384, 1.972222, 7200, 5, 1); -- 31104 (Area: 4623) (possible waypoints or random movement)
+(282861, 31104, 619, 3, 1, 454.1534, -1024.992, 30.43521, 5.218534, 7200, 5, 1), -- 31104 (Area: 4623) (possible waypoints or random movement)
+(282862, 31104, 619, 3, 1, 460.0319, -1034.93, 30.33384, 1.972222, 7200, 5, 1); -- 31104 (Area: 4623) (possible waypoints or random movement)
 
 UPDATE `creature_template` SET `flags_extra`=130 WHERE  `entry`=31105;
 DELETE FROM `creature_template_addon` WHERE `entry` =31104;
