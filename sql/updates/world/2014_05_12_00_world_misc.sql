@@ -24,20 +24,6 @@ UPDATE `creature_template` SET `gossip_menu_id`=10421 WHERE  `entry`=33553;
 UPDATE `creature_template` SET `gossip_menu_id`=10419 WHERE  `entry`=33556;
 UPDATE `creature_template` SET `gossip_menu_id`=10425 WHERE  `entry`=33554;
 
--- Conditions for argent tournament vendors so they will not allow player to use vendor until they are a champion of that faction
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=15 AND `SourceGroup` IN(10417,10418,10422,10423,10424);
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(15, 10419, 0, 0, 0, 17, 0, 2786, 0, 0, 0, 0, 0, '', 'Only allow champions of Thunderbluff to access vendor'),
-(15, 10420, 0, 0, 0, 17, 0, 2787, 0, 0, 0, 0, 0, '', 'Only allow champions of Undercity to access vendor'),
-(15, 10421, 0, 0, 0, 17, 0, 2783, 0, 0, 0, 0, 0, '', 'Only allow champions of Ogrimmar to access vendor'),
-(15, 10425, 0, 0, 0, 17, 0, 2784, 0, 0, 0, 0, 0, '', 'Only allow champions of Sen Jin to access vendor'),
-(15, 10426, 0, 0, 0, 17, 0, 2785, 0, 0, 0, 0, 0, '', 'Only allow champions of Silvermoon to access vendor'),
-(15, 10417, 0, 0, 0, 17, 0, 2781, 0, 0, 0, 0, 0, '', 'Only allow champions of Stowmwind to access vendor'),
-(15, 10418, 0, 0, 0, 17, 0, 2780, 0, 0, 0, 0, 0, '', 'Only allow champions of Ironforge to access vendor'),
-(15, 10422, 0, 0, 0, 17, 0, 2778, 0, 0, 0, 0, 0, '', 'Only allow champions of Exodar to access vendor'),
-(15, 10423, 0, 0, 0, 17, 0, 2779, 0, 0, 0, 0, 0, '', 'Only allow champions of Gnomeregan to access vendor'),
-(15, 10424, 0, 0, 0, 17, 0, 2777, 0, 0, 0, 0, 0, '', 'Only allow champions of Darnassus to access vendor');
-
 -- Add missing versions of mounts for 5 champions seals and 500g to vendors, the versions which require rep to buy which are intended for player who is not member of that faction
 DELETE FROM `npc_vendor` WHERE `item` IN(46758,46756,46759,46762,46763,46761,46764,46755,46760,46757);
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
