@@ -1,11 +1,11 @@
 --
-SET @CGuid     := 71997;
+SET @CGuid     := 151116;
 
 UPDATE `gameobject_template` SET `AIName`='SmartGameObjectAI', `ScriptName`='' WHERE  `entry`=164911;
 UPDATE `creature_template` SET `AIName`= 'SmartAI',`unit_flags`=0 WHERE `entry` IN(9537,9541);
 
 DELETE FROM `smart_scripts` WHERE `source_type`=1 AND `entryorguid`=164911;
-DELETE FROM `smart_scripts` WHERE `source_type`=0 AND `entryorguid`IN(9537,-@CGuid,-@CGuid-1,-@CGuid-2);
+DELETE FROM `smart_scripts` WHERE `source_type`=0 AND `entryorguid`IN(9537,-@CGuid,-@CGuid+1,-@CGuid+2);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (164911, 1, 0 ,0, 70, 0, 100, 0, 2, 0, 0,0,45,1,1,0,0,0,0,13,164911,0,200,0,0,0,0, 'Thunderbrew Lager Keg - On State Changed - Set Data'),
 (164911, 1, 1 ,0, 70, 2, 100, 0, 2, 0, 0,0,45,1,1,0,0,0,0,9,9537,0,200,0,0,0,0, 'Thunderbrew Lager Keg - On State Changed - Set Data'),
@@ -43,33 +43,33 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (-@CGuid, 0, 12 ,0, 61, 0, 100, 0, 0, 0, 0,0,49,0,0,0,0,0,0,7,0,0,0,0,0,0,0, 'Hurley Blackbreath - Linked with Previous Event - Attack'),
 (-@CGuid, 0, 13 ,0, 38, 0, 100, 0, 1, 2, 0,0,49,0,0,0,0,0,0,21,200,0,0,0,0,0,0, 'Hurley Blackbreath - On Data Set - Attack'),
 --
-(-@CGuid-1, 0, 0 ,1, 11, 0, 100, 0, 0, 0, 0,0,18,320,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - On Spawn - Set Unit Flags'),
-(-@CGuid-1, 0, 1 ,0, 61, 0, 100, 0, 0, 0, 0,0,47,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Set Invisible'),
-(-@CGuid-1, 0, 2 ,4, 38, 0, 100, 0, 1, 1, 0,0,47,1,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - On Data Set - Set visible'),
-(-@CGuid-1, 0, 4 ,0, 61, 0, 100, 0, 0, 0, 0,0,53,0,9541000,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Start WP'),
-(-@CGuid-1, 0, 5 ,6, 40, 0, 100, 0, 3, 0, 0,0,101,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - On Reached WP 5 - Set Home Position'),
-(-@CGuid-1, 0, 6 ,7, 61, 0, 100, 0, 0, 0, 0,0,19,320,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Set Unit Flags'),
-(-@CGuid-1, 0, 7 ,0, 61, 0, 100, 0, 0, 0, 0,0,89,3,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Set Random Movement'),
-(-@CGuid-1, 0, 8, 0, 0,  0, 100, 0, 1000, 3000, 4000, 7000, 11, 15581, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Blackbreath Crony - IC - Cast Sinister Strike'),
-(-@CGuid-1, 0, 9, 0, 0,  0, 100, 0, 2000, 2000, 11000, 12000, 11, 15583, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Blackbreath Crony - IC - Cast Rupture'),
-(-@CGuid-1, 0, 10 ,11, 4, 0, 100, 0, 0, 0, 0,0,45,1,2,0,0,0,0,9,9541,0,200,0,0,0,0, 'Blackbreath Crony - On Agro - Set Set Data'),
-(-@CGuid-1, 0, 11 ,12,61, 0, 100, 0, 0, 0, 0,0,45,1,2,0,0,0,0,9,9537,0,200,0,0,0,0, 'Blackbreath Crony - On Agro - Set Set Data'),
-(-@CGuid-1, 0, 12 ,0, 61, 0, 100, 0, 0, 0, 0,0,49,0,0,0,0,0,0,7,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Attack'),
-(-@CGuid-1, 0, 13 ,0, 38, 0, 100, 0, 1, 2, 0,0,49,0,0,0,0,0,0,21,200,0,0,0,0,0,0, 'Blackbreath Crony - On Data Set - Attack'),
+(-@CGuid+1, 0, 0 ,1, 11, 0, 100, 0, 0, 0, 0,0,18,320,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - On Spawn - Set Unit Flags'),
+(-@CGuid+1, 0, 1 ,0, 61, 0, 100, 0, 0, 0, 0,0,47,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Set Invisible'),
+(-@CGuid+1, 0, 2 ,4, 38, 0, 100, 0, 1, 1, 0,0,47,1,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - On Data Set - Set visible'),
+(-@CGuid+1, 0, 4 ,0, 61, 0, 100, 0, 0, 0, 0,0,53,0,9541000,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Start WP'),
+(-@CGuid+1, 0, 5 ,6, 40, 0, 100, 0, 3, 0, 0,0,101,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - On Reached WP 5 - Set Home Position'),
+(-@CGuid+1, 0, 6 ,7, 61, 0, 100, 0, 0, 0, 0,0,19,320,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Set Unit Flags'),
+(-@CGuid+1, 0, 7 ,0, 61, 0, 100, 0, 0, 0, 0,0,89,3,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Set Random Movement'),
+(-@CGuid+1, 0, 8, 0, 0,  0, 100, 0, 1000, 3000, 4000, 7000, 11, 15581, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Blackbreath Crony - IC - Cast Sinister Strike'),
+(-@CGuid+1, 0, 9, 0, 0,  0, 100, 0, 2000, 2000, 11000, 12000, 11, 15583, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Blackbreath Crony - IC - Cast Rupture'),
+(-@CGuid+1, 0, 10 ,11, 4, 0, 100, 0, 0, 0, 0,0,45,1,2,0,0,0,0,9,9541,0,200,0,0,0,0, 'Blackbreath Crony - On Agro - Set Set Data'),
+(-@CGuid+1, 0, 11 ,12,61, 0, 100, 0, 0, 0, 0,0,45,1,2,0,0,0,0,9,9537,0,200,0,0,0,0, 'Blackbreath Crony - On Agro - Set Set Data'),
+(-@CGuid+1, 0, 12 ,0, 61, 0, 100, 0, 0, 0, 0,0,49,0,0,0,0,0,0,7,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Attack'),
+(-@CGuid+1, 0, 13 ,0, 38, 0, 100, 0, 1, 2, 0,0,49,0,0,0,0,0,0,21,200,0,0,0,0,0,0, 'Blackbreath Crony - On Data Set - Attack'),
 --
-(-@CGuid-2, 0, 0 ,1, 11, 0, 100, 0, 0, 0, 0,0,18,320,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - On Spawn - Set Unit Flags'),
-(-@CGuid-2, 0, 1 ,0, 61, 0, 100, 0, 0, 0, 0,0,47,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Set Invisible'),
-(-@CGuid-2, 0, 2 ,4, 38, 0, 100, 0, 1, 1, 0,0,47,1,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - On Data Set - Set visible'),
-(-@CGuid-2, 0, 4 ,0, 61, 0, 100, 0, 0, 0, 0,0,53,0,9541001,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Start WP'),
-(-@CGuid-2, 0, 5 ,6, 40, 0, 100, 0, 3, 0, 0,0,101,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - On Reached WP 5 - Set Home Position'),
-(-@CGuid-2, 0, 6 ,7, 61, 0, 100, 0, 0, 0, 0,0,19,320,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Set Unit Flags'),
-(-@CGuid-2, 0, 7 ,0, 61, 0, 100, 0, 0, 0, 0,0,89,3,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Set Random Movement'),
-(-@CGuid-2, 0, 8, 0, 0,  0, 100, 0, 2000, 2000, 11000, 12000, 11, 15581, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Blackbreath Crony - IC - Cast Sinister Strike'),
-(-@CGuid-2, 0, 9, 0, 0,  0, 100, 0, 3000, 5000, 15000, 20000, 11, 15583, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Blackbreath Crony - IC - Cast Rupture'),
-(-@CGuid-2, 0, 10 ,11, 4, 0, 100, 0, 0, 0, 0,0,45,1,2,0,0,0,0,9,9541,0,200,0,0,0,0, 'Blackbreath Crony - On Agro - Set Set Data'),
-(-@CGuid-2, 0, 11 ,12,61, 0, 100, 0, 0, 0, 0,0,45,1,2,0,0,0,0,9,9537,0,200,0,0,0,0, 'Blackbreath Crony - On Agro - Set Set Data'),
-(-@CGuid-2, 0, 12 ,0, 61, 0, 100, 0, 0, 0, 0,0,49,0,0,0,0,0,0,7,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Attack'),
-(-@CGuid-2, 0, 13 ,0, 38, 0, 100, 0, 1, 2, 0,0,49,0,0,0,0,0,0,21,200,0,0,0,0,0,0, 'Blackbreath Crony - On Data Set - Attack');
+(-@CGuid+2, 0, 0 ,1, 11, 0, 100, 0, 0, 0, 0,0,18,320,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - On Spawn - Set Unit Flags'),
+(-@CGuid+2, 0, 1 ,0, 61, 0, 100, 0, 0, 0, 0,0,47,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Set Invisible'),
+(-@CGuid+2, 0, 2 ,4, 38, 0, 100, 0, 1, 1, 0,0,47,1,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - On Data Set - Set visible'),
+(-@CGuid+2, 0, 4 ,0, 61, 0, 100, 0, 0, 0, 0,0,53,0,9541001,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Start WP'),
+(-@CGuid+2, 0, 5 ,6, 40, 0, 100, 0, 3, 0, 0,0,101,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - On Reached WP 5 - Set Home Position'),
+(-@CGuid+2, 0, 6 ,7, 61, 0, 100, 0, 0, 0, 0,0,19,320,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Set Unit Flags'),
+(-@CGuid+2, 0, 7 ,0, 61, 0, 100, 0, 0, 0, 0,0,89,3,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Set Random Movement'),
+(-@CGuid+2, 0, 8, 0, 0,  0, 100, 0, 2000, 2000, 11000, 12000, 11, 15581, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Blackbreath Crony - IC - Cast Sinister Strike'),
+(-@CGuid+2, 0, 9, 0, 0,  0, 100, 0, 3000, 5000, 15000, 20000, 11, 15583, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Blackbreath Crony - IC - Cast Rupture'),
+(-@CGuid+2, 0, 10 ,11, 4, 0, 100, 0, 0, 0, 0,0,45,1,2,0,0,0,0,9,9541,0,200,0,0,0,0, 'Blackbreath Crony - On Agro - Set Set Data'),
+(-@CGuid+2, 0, 11 ,12,61, 0, 100, 0, 0, 0, 0,0,45,1,2,0,0,0,0,9,9537,0,200,0,0,0,0, 'Blackbreath Crony - On Agro - Set Set Data'),
+(-@CGuid+2, 0, 12 ,0, 61, 0, 100, 0, 0, 0, 0,0,49,0,0,0,0,0,0,7,0,0,0,0,0,0,0, 'Blackbreath Crony - Linked with Previous Event - Attack'),
+(-@CGuid+2, 0, 13 ,0, 38, 0, 100, 0, 1, 2, 0,0,49,0,0,0,0,0,0,21,200,0,0,0,0,0,0, 'Blackbreath Crony - On Data Set - Attack');
 
 DELETE FROM `creature_text` WHERE `entry` =9537;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`, `BroadcastTextID`) VALUES 
@@ -91,9 +91,9 @@ INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `positi
 (9541001, 2, 899.913330,-133.534821,-49.747944, 'Blackbreath Crony'),
 (9541001, 3, 901.009399,-139.603699,-49.755054, 'Blackbreath Crony');
 
-DELETE FROM `creature` WHERE `id` IN(9537,9541);
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@CGuid, 9541, 230, 1, 1, 0, 1, 879.018, -155.273, -49.7591, 0.57177, 300, 0, 0, 7359, 0, 0, 0, 0, 0),
-(@CGuid+1, 9541, 230, 1, 1, 0, 1, 876.961, -151.796, -49.7591, 0.499513, 300, 0, 0, 7359, 0, 0, 0, 0, 0),
-(@CGuid+2, 9541, 230, 1, 1, 0, 1, 876.535, -154.334, -49.7586, 0.339292, 300, 0, 0, 7359, 0, 0, 0, 0, 0),
-(@CGuid+3, 9537, 230, 1, 1, 0, 1, 878.121, -153.074, -49.76, 0.527783, 300, 0, 0, 13070, 0, 0, 0, 0, 0);
+-- DELETE FROM `creature` WHERE `id` IN(9537,9541);
+-- INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+-- (@CGuid, 9541, 230, 1, 1, 0, 1, 879.018, -155.273, -49.7591, 0.57177, 300, 0, 0, 7359, 0, 0, 0, 0, 0),
+-- (@CGuid+1, 9541, 230, 1, 1, 0, 1, 876.961, -151.796, -49.7591, 0.499513, 300, 0, 0, 7359, 0, 0, 0, 0, 0),
+-- (@CGuid+2, 9541, 230, 1, 1, 0, 1, 876.535, -154.334, -49.7586, 0.339292, 300, 0, 0, 7359, 0, 0, 0, 0, 0),
+ -- (@CGuid+3, 9537, 230, 1, 1, 0, 1, 878.121, -153.074, -49.76, 0.527783, 300, 0, 0, 13070, 0, 0, 0, 0, 0);
