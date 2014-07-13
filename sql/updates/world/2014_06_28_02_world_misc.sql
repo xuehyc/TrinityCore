@@ -1,5 +1,5 @@
 --
-SET @CGUID:= 78207; -- needs 8
+SET @CGUID:= 282897; -- from team ArkDB
 
 DELETE FROM `vehicle_template_accessory` WHERE `entry` IN (31406,32513);
 INSERT INTO `vehicle_template_accessory` (`entry`,`accessory_entry`,`seat_id`,`minion`,`description`,`summontype`,`summontimer`) VALUES
@@ -71,13 +71,12 @@ UPDATE creature_template SET `npcflag`=16777216, `minlevel`=80, `maxlevel`=80 WH
 
 UPDATE creature_template SET `InhabitType`=4 WHERE `entry` IN (32513,31406);
 
-DELETE FROM `creature` WHERE `id` IN (31648,32523,32524,32526,32525,31839,32529,32528);
+DELETE FROM `creature` WHERE `id` IN (32526,32525,31839,32528);
 INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`) VALUES
-(@CGUID+0, 31648, 571, 1, 1, 0, 7624.19, 2059.96, 600.26, 3.18997,300),
-(@CGUID+1, 32523, 571, 1, 1, 1, 7637.56, 2057.34, 600.26, 2.9082,300),
-(@CGUID+2, 32524, 571, 1, 1, 1, 7632.78, 2052.75, 600.26, 2.07206,300),
-(@CGUID+3, 32526, 571, 1, 1, 0, 7626.84, 2069.71, 600.26, 2.85573,300),
-(@CGUID+4, 32525, 571, 1, 1, 0, 7622.21, 2071.61, 600.26, 2.01916,300),
-(@CGUID+5, 31839, 571, 1, 1, 0, 7891.96, 2057.73, 600.26, 6.10727,300),
-(@CGUID+6, 32529, 571, 1, 1, 0, 7888.79, 2066.53, 600.26, 0.333032,300),
-(@CGUID+7, 32528, 571, 1, 1, 0, 7893.77, 2067.97, 600.26, 1.02339,300);
+(@CGUID+0, 32526, 571, 1, 1, 0, 7626.84, 2069.71, 600.26, 2.85573,300),
+(@CGUID+1, 32525, 571, 1, 1, 0, 7622.21, 2071.61, 600.26, 2.01916,300),
+(@CGUID+2, 31839, 571, 1, 1, 0, 7891.96, 2057.73, 600.26, 6.10727,300),
+(@CGUID+3, 32528, 571, 1, 1, 0, 7893.77, 2067.97, 600.26, 1.02339,300);
+
+
+
