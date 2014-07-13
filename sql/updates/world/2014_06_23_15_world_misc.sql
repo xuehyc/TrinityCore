@@ -154,6 +154,11 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (2785701, 9, 2, 0, 0, 0, 100, 0, 7000, 7000, 0, 0, 41, 0, 0, 0, 0, 0, 0, 19, 27858, 0, 0, 0, 0, 0, 0, 'Legion Commander Yorik - Script 2 - Despawn'),
 (2785701, 9, 3, 0, 0, 0, 100, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Legion Commander Yorik - Script 2 - Despawn');
 
+delete from creature_text where entry=27383 and groupid between 0 and 7 and id=0;
+delete from creature_text where entry=27713 and groupid=0 and id between 0 and 7;
+delete from creature_text where entry=27713 and groupid=1 and id=0;
+delete from creature_text where entry=27857 and groupid between 0 and 2 and id=0;
+delete from creature_text where entry=27858 and groupid between 0 and 5 and id=0;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`, `BroadcastTextID`) VALUES 
 (27383, 0, 0, 'I was... once like you. Mortal. Soft. Only flesh and bone. WEAK AND TIMID!', 14, 0, 100, 0, 0, 0, 'Thel zan the Duskbringer', 27157),
 (27383, 1, 0, 'Our lord, Arthas saw in me the frailty of man.', 14, 0, 100, 0, 0, 0, 'Thel zan the Duskbringer', 27159),
