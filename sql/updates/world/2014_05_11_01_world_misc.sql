@@ -2,7 +2,7 @@ ALTER TABLE `broadcast_text` CHANGE COLUMN `WDBVerified` `VerifiedBuild` SMALLIN
 ALTER TABLE `creature_equip_template` CHANGE COLUMN `WDBVerified` `VerifiedBuild` SMALLINT(5) DEFAULT '0';
 ALTER TABLE `creature_template` CHANGE COLUMN `WDBVerified` `VerifiedBuild` SMALLINT(5) DEFAULT '0';
 ALTER TABLE `gameobject_template` CHANGE COLUMN `WDBVerified` `VerifiedBuild` SMALLINT(5) DEFAULT '0';
-ALTER TABLE `item_set_names` CHANGE COLUMN `WDBVerified` `VerifiedBuild` SMALLINT(5) DEFAULT '0';
+-- ALTER TABLE `item_set_names` CHANGE COLUMN `WDBVerified` `VerifiedBuild` SMALLINT(5) DEFAULT '0';
 ALTER TABLE `item_template` CHANGE COLUMN `WDBVerified` `VerifiedBuild` SMALLINT(5) DEFAULT '0';
 ALTER TABLE `npc_text` CHANGE COLUMN `WDBVerified` `VerifiedBuild` SMALLINT(5) DEFAULT '0';
 ALTER TABLE `page_text` CHANGE COLUMN `WDBVerified` `VerifiedBuild` SMALLINT(5) DEFAULT '0';
@@ -15,7 +15,7 @@ ALTER TABLE `locales_broadcast_text` ADD `VerifiedBuild` SMALLINT(5) DEFAULT '0'
 ALTER TABLE `locales_creature` ADD `VerifiedBuild` SMALLINT(5) DEFAULT '0';
 ALTER TABLE `locales_gameobject` ADD `VerifiedBuild` SMALLINT(5) DEFAULT '0';
 ALTER TABLE `locales_item` ADD `VerifiedBuild` SMALLINT(5) DEFAULT '0';
-ALTER TABLE `locales_item_set_names` ADD `VerifiedBuild` SMALLINT(5) DEFAULT '0';
+-- ALTER TABLE `locales_item_set_names` ADD `VerifiedBuild` SMALLINT(5) DEFAULT '0';
 ALTER TABLE `locales_quest` ADD `VerifiedBuild` SMALLINT(5) DEFAULT '0';
 ALTER TABLE `npc_vendor` ADD `VerifiedBuild` SMALLINT(5) DEFAULT '0';
 ALTER TABLE `quest_poi_points` ADD `VerifiedBuild` SMALLINT(5) DEFAULT '0';
@@ -25,12 +25,12 @@ UPDATE `locales_broadcast_text` SET `VerifiedBuild`=18019;
 UPDATE `locales_creature` SET `VerifiedBuild`=18019;
 UPDATE `locales_gameobject` SET `VerifiedBuild`=18019;
 UPDATE `locales_item` SET `VerifiedBuild`=15050;
-UPDATE `locales_item_set_names` SET `VerifiedBuild`=15050;
+-- UPDATE `locales_item_set_names` SET `VerifiedBuild`=15050;
 UPDATE `locales_quest` SET `VerifiedBuild`=18019;
 
 UPDATE `creature_template` SET `VerifiedBuild`=0 WHERE `VerifiedBuild`=1;
 UPDATE `gameobject_template` SET `VerifiedBuild`=0 WHERE `VerifiedBuild`=1;
-UPDATE `item_set_names` SET `VerifiedBuild`=0 WHERE `VerifiedBuild`=1;
+-- UPDATE `item_set_names` SET `VerifiedBuild`=0 WHERE `VerifiedBuild`=1;
 UPDATE `item_template` SET `VerifiedBuild`=0 WHERE `VerifiedBuild`=1;
 UPDATE `npc_text` SET `VerifiedBuild`=0 WHERE `VerifiedBuild`=1;
 UPDATE `page_text` SET `VerifiedBuild`=0 WHERE `VerifiedBuild`=1;
