@@ -1,16 +1,15 @@
 --
-SET @CGUID := 76305;
 
 UPDATE `creature_template` SET `AIName`= 'SmartAI',`flags_extra`=`flags_extra`|128,`unit_flags`=33554432 WHERE `entry`  IN(23040,23081);
 
-DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+5;
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES 
-(@CGUID,   23040, 530, 1, 1, 0, 0, 3261.86, 4625.63, 216.751, 0.680678, 120, 0, 0, 1, 0, 0, 0, 0, 0, 0),
-(@CGUID+1, 23040, 530, 1, 1, 0, 0, 3257.33, 4653.79, 216.73,  5.75959,  120, 0, 0, 1, 0, 0, 0, 0, 0, 0),
-(@CGUID+2, 23040, 530, 1, 1, 0, 0, 3304.42, 4643.83, 217.281, 3.28122,  120, 0, 0, 1, 0, 0, 0, 0, 0, 0),
-(@CGUID+3, 23040, 530, 1, 1, 0, 0, 3279.39, 4664.33, 216.778, 4.76475,  120, 0, 0, 1, 0, 0, 0, 0, 0, 0),
-(@CGUID+4, 23040, 530, 1, 1, 0, 0, 3292.61, 4619.95, 217.272, 2.1293,   120, 0, 0, 1, 0, 0, 0, 0, 0, 0),
-(@CGUID+5, 23081, 530, 1, 1, 0, 0, 3279.73, 4640.09, 216.526, 4.08274,  120, 0, 0, 1, 0, 0, 0, 0, 0, 0);
+-- DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+5;
+-- INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES 
+-- (@CGUID,   23040, 530, 1, 1, 0, 0, 3261.86, 4625.63, 216.751, 0.680678, 120, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+-- (@CGUID+1, 23040, 530, 1, 1, 0, 0, 3257.33, 4653.79, 216.73,  5.75959,  120, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+-- (@CGUID+2, 23040, 530, 1, 1, 0, 0, 3304.42, 4643.83, 217.281, 3.28122,  120, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+-- (@CGUID+3, 23040, 530, 1, 1, 0, 0, 3279.39, 4664.33, 216.778, 4.76475,  120, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+-- (@CGUID+4, 23040, 530, 1, 1, 0, 0, 3292.61, 4619.95, 217.272, 2.1293,   120, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+-- (@CGUID+5, 23081, 530, 1, 1, 0, 0, 3279.73, 4640.09, 216.526, 4.08274,  120, 0, 0, 1, 0, 0, 0, 0, 0, 0);
 
 UPDATE `creature_template` SET `AIName`='SmartAI', `flags_extra`=130 WHERE  `entry`=23081;
 
