@@ -1,8 +1,9 @@
 -- A lot of missing spawns. Objects and creatures
-SET @CGUID := 134649; -- 34 needed
-SET @OGUID := 59171; -- 21 needed
+SET @CGUID := 282863; -- 34 needed -- from team ArkDB
+SET @OGUID := 404295; -- 21 needed -- from team ArkDB
 SET @EVENT := 24;
 -- Berfest Reveler
+
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+33;
 INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
 -- Barleybrew Apprentice <Barleybrew Brew Vendor>
