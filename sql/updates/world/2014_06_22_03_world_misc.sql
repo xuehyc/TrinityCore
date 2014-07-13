@@ -1,14 +1,14 @@
 -- QUEST The Plains of Nasam
 SET @GUID := 76299; -- set the guid for spawning 6 are required
-DELETE FROM `creature` WHERE id =25334;
+-- DELETE FROM `creature` WHERE id =25334;
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(@GUID, 25334, 571, 1, 1, 2792.044, 6738.573, 7.797749, 4.34587, 120, 0, 0), -- 25334 (Area: 4130)
-(@GUID+1, 25334, 571, 1, 1, 2798.961, 6735.21, 7.625851, 4.276057, 120, 0, 0), -- 25334 (Area: 4130)
-(@GUID+2, 25334, 571, 1, 1, 2784.335, 6742.207, 7.92973, 4.29351, 120, 0, 0), -- 25334 (Area: 4130)
-(@GUID+3, 25334, 571, 1, 1, 2766.58, 6751.198, 7.29528, 4.258604, 120, 0, 0), -- 25334 (Area: 4130)
-(@GUID+4, 25334, 571, 1, 1, 2777.034, 6745.713, 7.899116, 4.29351, 120, 0, 0), -- 25334 (Area: 4130)
-(@GUID+5, 25334, 571, 1, 1, 2807.21, 6730.922, 7.841674, 4.433136, 120, 0, 0); -- 25334 (Area: 4130)
+-- INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
+-- (@GUID, 25334, 571, 1, 1, 2792.044, 6738.573, 7.797749, 4.34587, 120, 0, 0), -- 25334 (Area: 4130)
+-- (@GUID+1, 25334, 571, 1, 1, 2798.961, 6735.21, 7.625851, 4.276057, 120, 0, 0), -- 25334 (Area: 4130)
+-- (@GUID+2, 25334, 571, 1, 1, 2784.335, 6742.207, 7.92973, 4.29351, 120, 0, 0), -- 25334 (Area: 4130)
+-- (@GUID+3, 25334, 571, 1, 1, 2766.58, 6751.198, 7.29528, 4.258604, 120, 0, 0), -- 25334 (Area: 4130)
+-- (@GUID+4, 25334, 571, 1, 1, 2777.034, 6745.713, 7.899116, 4.29351, 120, 0, 0), -- 25334 (Area: 4130)
+-- (@GUID+5, 25334, 571, 1, 1, 2807.21, 6730.922, 7.841674, 4.433136, 120, 0, 0); -- 25334 (Area: 4130)
 
 UPDATE `creature_template` SET `faction`=1981, `unit_flags`=4096, `dynamicflags`=0,`speed_walk`=1.2, `speed_run`=2 WHERE `entry`=25334;
 
