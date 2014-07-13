@@ -5,7 +5,7 @@ SET @Ride :=         46598;
 SET @Wind :=         30474;
 SET @DropHorn :=     56892;
 SET @Stun :=         62794;
-SET @Guid :=         40509; -- Set by TDB
+SET @Guid :=         198908; -- Set by ArkDB
 
 -- Add spawn in phase 256 for The Wind of North
 DELETE FROM `creature` WHERE `guid`=@Guid;
