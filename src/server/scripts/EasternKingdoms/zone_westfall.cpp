@@ -205,7 +205,207 @@ public:
     };
 };
 
+// #############################################  quest 26209: Murder Was The Case That They Gave Me
+
+enum eQuest26209
+{
+    NPC_INVESTIGATOR_42559 = 42559,
+    NPC_INVESTIGATOR_42309 = 42309,
+    NPC_HORATIO_LANE = 42308,
+    NPC_WEST_PLAINS_DRIFTERS = 42391,
+    NPC_HOMELESS_STORMWIND_CITZEN = 42386,
+    NPC_TRANSIENT = 42383,
+    NPC_RAGMUFFIN = 42413,
+    QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME = 26209,
+};
+
+class npc_investigator42559 : public CreatureScript
+{
+public:
+    npc_investigator42559() : CreatureScript("npc_investigator42559") { }
+
+    struct npc_investigator42559AI : public ScriptedAI
+    {
+        npc_investigator42559AI(Creature *c) : ScriptedAI(c) { }
+
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_investigator42559AI(creature);
+    }
+};
+
+class npc_investigator42309 : public CreatureScript
+{
+public:
+    npc_investigator42309() : CreatureScript("npc_investigator42309") { }
+
+    struct npc_investigator42309AI : public ScriptedAI
+    {
+        npc_investigator42309AI(Creature *c) : ScriptedAI(c) { }
+
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_investigator42309AI(creature);
+    }
+};
+
+class npc_horatio_lane : public CreatureScript
+{
+public:
+    npc_horatio_lane() : CreatureScript("npc_horatio_lane") { }
+
+    struct npc_horatio_laneAI : public ScriptedAI
+    {
+        npc_horatio_laneAI(Creature* creature) : ScriptedAI(creature)
+        {
+            m_homePosition = Position(-9850.017578f, 916.479980f, 30.302572f, 0.0f);
+            m_investigationPosition = Position(-9852.655273f, 910.777222f, 29.948130f, 0.0f);
+        }
+
+        uint32  m_timer;
+        uint32  m_phase;
+        uint32  m_cooldown;
+        Position m_homePosition, m_investigationPosition;
+
+        void Reset() override
+        {
+            m_timer = 1000; m_phase = 0; m_cooldown = 0;
+            me->RemoveAllAuras();
+            me->HandleEmoteCommand(EMOTE_STATE_STAND);
+            me->SetWalk(true);
+            me->GetMotionMaster()->MovePoint(0, m_homePosition);
+            me->SetFacingTo(3.95f);
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (Player* m_player = who->ToPlayer())
+            if (me->GetDistance2d(m_player) < 5 && m_phase == 0)
+            {
+                m_phase = 1; m_timer = 2000; m_cooldown = 300000;
+            }
+        }
+
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (m_timer <= diff)
+            {
+                m_timer = 1000;
+                DoWork();
+            }
+            else
+                m_timer -= diff;
+
+            if (m_cooldown > 0)
+            {
+                if (m_cooldown <= diff)
+                {
+                    m_phase = 8; m_timer = 1000;
+                }
+                else
+                    m_cooldown -= diff;
+            }
+
+            if (!UpdateVictim())
+                return;
+            else
+                DoMeleeAttackIfReady();
+        }
+
+        void DoWork()
+        {
+            switch (m_phase)
+            {
+            case 1:
+                if (Creature* invest = me->FindNearestCreature(NPC_INVESTIGATOR_42309, 15.0f))
+                    invest->AI()->Talk(5);
+
+                m_phase = 2; m_timer = 5000;
+                break;
+            case 2:
+                if (Creature* invest = me->FindNearestCreature(NPC_INVESTIGATOR_42309, 15.0f))
+                    invest->AI()->Talk(0);
+
+                m_phase = 3; m_timer = 5000;
+                break;
+            case 3:
+                if (Creature* invest = me->FindNearestCreature(NPC_INVESTIGATOR_42559, 15.0f))
+                    invest->AI()->Talk(urand(0, 3));
+
+                m_phase = 4; m_timer = 4000;
+                break;
+            case 4:
+                Talk(0);
+                me->GetMotionMaster()->MovePoint(0, m_investigationPosition);
+                m_phase = 5; m_timer = 5000;
+                break;
+            case 5:
+                Talk(1);
+                me->SetFacingTo(5.083f);
+                me->HandleEmoteCommand(EMOTE_ONESHOT_KNEEL);
+                m_phase = 6; m_timer = 5000;
+                break;
+            case 6:
+                Talk(2);
+                m_phase = 7; m_timer = 5000;
+                break;
+            case 7:
+                m_phase = 8; m_timer = 5000;
+                break;
+            case 8:
+                me->GetMotionMaster()->MovePoint(0, m_homePosition);
+                m_phase = 9; m_timer = 3000;
+                break;
+            case 9:
+                me->HandleEmoteCommand(EMOTE_STATE_STAND);
+                me->SetFacingTo(3.95f);
+                m_phase = 10; m_timer = 60000;
+                break;
+            case 10:
+                m_phase = 0; m_timer = 0; m_cooldown = 0;
+                break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_horatio_laneAI(creature);
+    }
+};
+
+
+
 void AddSC_westfall()
 {
     new npc_daphne_stilwell();
+    new npc_investigator42559();
+    new npc_investigator42309();
+    new npc_horatio_lane();
+    // new npc_west_plains_drifters();
+    // new npc_homeless_stormwind_citizen();
+    // new npc_transient();
+    // new npc_ragamuffin();
+
 }
