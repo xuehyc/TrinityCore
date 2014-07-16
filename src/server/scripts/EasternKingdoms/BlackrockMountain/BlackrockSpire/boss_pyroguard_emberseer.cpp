@@ -217,13 +217,12 @@ public:
                             std::list<Creature*> creatureList;
                             GetCreatureListWithEntryInGrid(creatureList, me, NPC_BLACKHAND_INCARCERATOR, 35.0f);
                             for (std::list<Creature*>::iterator itr = creatureList.begin(); itr != creatureList.end(); ++itr)
-                                if (Creature* creatureList = *itr)
+                                if (Creature* creature = *itr)
                                 {
-                                    if (!creatureList->IsAlive())
-                                    {
-                                        creatureList->Respawn();
-                                    }
-                                    creatureList->AI()->SetData(1, 1);
+                                    if (!creature->IsAlive())
+                                        creature->Respawn();
+
+                                    creature->AI()->SetData(1, 1);
                                 }
                             me->AddAura(SPELL_ENCAGED_EMBERSEER, me);
                             instance->SetBossState(DATA_PYROGAURD_EMBERSEER, NOT_STARTED);
@@ -236,8 +235,8 @@ public:
                             GetCreatureListWithEntryInGrid(creatureList, me, NPC_BLACKHAND_INCARCERATOR, 35.0f);
                             for (std::list<Creature*>::iterator itr = creatureList.begin(); itr != creatureList.end(); ++itr)
                             {
-                                if (Creature* creatureList = *itr)
-                                    creatureList->AI()->SetData(1, 1);
+                                if (Creature* creature = *itr)
+                                    creature->AI()->SetData(1, 1);
                             }
                             events.ScheduleEvent(EVENT_PRE_FIGHT_2, 32000);
                             break;
@@ -360,9 +359,7 @@ public:
             }
 
             if (data == 1 && value == 2)
-            {
                 _events.ScheduleEvent(EVENT_ENCAGED_EMBERSEER, 1000);
-            }
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -376,8 +373,8 @@ public:
             GetCreatureListWithEntryInGrid(creatureList, me, NPC_BLACKHAND_INCARCERATOR, 60.0f);
             for (std::list<Creature*>::iterator itr = creatureList.begin(); itr != creatureList.end(); ++itr)
             {
-                if (Creature* creatureList = *itr)
-                creatureList->SetInCombatWithZone();    // AI()->AttackStart(me->GetVictim());
+                if (Creature* creature = *itr)
+                    creature->SetInCombatWithZone();    // AI()->AttackStart(me->GetVictim());
             }
 
             _events.ScheduleEvent(EVENT_STRIKE, urand(8000, 16000));

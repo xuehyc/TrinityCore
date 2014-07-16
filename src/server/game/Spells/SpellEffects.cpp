@@ -1080,14 +1080,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 }
                 break;
             }
-            case SPELLFAMILY_MAGE:
-            {
-                // Deep Freeze should deal damage to permanently stun-immune targets.
-                if (m_spellInfo->Id == 71757)
-                    if (unitTarget->GetTypeId() != TYPEID_UNIT || !(unitTarget->IsImmunedToSpellEffect(sSpellMgr->GetSpellInfo(44572), 0)))
-                        return;
-                break;
-            }
         }
 
         if (m_originalCaster && damage > 0 && apply_direct_bonus)
@@ -2202,7 +2194,10 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         if (spellInfo->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION)
             targets.SetDst(m_targets);
 
-        targets.SetUnitTarget(m_caster);
+        if (Unit* target = m_targets.GetUnitTarget())
+            targets.SetUnitTarget(target);
+        else
+            targets.SetUnitTarget(m_caster);
     }
 
     CustomSpellValues values;
@@ -2563,7 +2558,7 @@ void Spell::EffectUnlearnSpecialization(SpellEffIndex effIndex)
     Player* player = unitTarget->ToPlayer();
     uint32 spellToUnlearn = m_spellInfo->Effects[effIndex].TriggerSpell;
 
-    player->removeSpell(spellToUnlearn);
+    player->RemoveSpell(spellToUnlearn);
 
     TC_LOG_DEBUG("spells", "Spell: Player %u has unlearned spell %u from NpcGUID: %u", player->GetGUIDLow(), spellToUnlearn, m_caster->GetGUIDLow());
 }
@@ -3842,7 +3837,7 @@ void Spell::EffectLearnSpell(SpellEffIndex effIndex)
     Player* player = unitTarget->ToPlayer();
 
     uint32 spellToLearn = (m_spellInfo->Id == 483 || m_spellInfo->Id == 55884) ? damage : m_spellInfo->Effects[effIndex].TriggerSpell;
-    player->learnSpell(spellToLearn, false);
+    player->LearnSpell(spellToLearn, false);
 
     TC_LOG_DEBUG("spells", "Spell: Player %u has learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow());
 }
@@ -6250,7 +6245,7 @@ void Spell::EffectLeap(SpellEffIndex /*effIndex*/)
         return;
 
     Position pos = destTarget->GetPosition();
-    pos = unitTarget->GetFirstCollisionPosition(unitTarget->GetDistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 2.0f), 0.0f);
+    pos = unitTarget->GetFirstCollisionPosition(unitTarget->GetDistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()), 0.0f);
     unitTarget->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), unitTarget == m_caster);
 }
 

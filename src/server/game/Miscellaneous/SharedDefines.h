@@ -1355,8 +1355,34 @@ enum InvisibilityType
     INVISIBILITY_UNK9        =  9,
     INVISIBILITY_UNK10       = 10,
     INVISIBILITY_UNK11       = 11,
+    INVISIBILITY_UNK12       = 12,
+    INVISIBILITY_TRA13       = 13,
+    INVISIBILITY_UNK14       = 14,
+    INVISIBILITY_UNK15       = 15,
+    INVISIBILITY_UNK16       = 16,
+    INVISIBILITY_UNK17       = 17,
+    INVISIBILITY_UNK18       = 18,
+    INVISIBILITY_UNK19       = 19,
+    INVISIBILITY_UNK20       = 20,
+    INVISIBILITY_UNK21       = 21,
+    INVISIBILITY_UNK22       = 22,
+    INVISIBILITY_TRA23       = 23,
+    INVISIBILITY_UNK24       = 24,
+    INVISIBILITY_UNK25       = 25,
+    INVISIBILITY_UNK26       = 26,
+    INVISIBILITY_UNK27       = 27,
+    INVISIBILITY_UNK28       = 28,
+    INVISIBILITY_UNK29       = 29,
+    INVISIBILITY_UNK30       = 30,
+    INVISIBILITY_UNK31       = 31,
+    INVISIBILITY_UNK32       = 32,
+    INVISIBILITY_UNK33       = 33,
+    INVISIBILITY_UNK34       = 34,
+    INVISIBILITY_UNK35       = 35,
+    INVISIBILITY_UNK36       = 36,
+    INVISIBILITY_UNK37       = 37,
 
-    TOTAL_INVISIBILITY_TYPES = 12
+    TOTAL_INVISIBILITY_TYPES = 38
 };
 
 enum ServerSideVisibilityType
@@ -3774,6 +3800,15 @@ enum BanReturn
     BAN_NOTFOUND
 };
 
+enum BattlegroundTeamId
+{
+    BG_TEAM_HORDE       = 0, // Battleground: Horde,    Arena: Green
+    BG_TEAM_ALLIANCE    = 1, // Battleground: Alliance, Arena: Gold
+    BG_TEAM_NEUTRAL     = 2  // Battleground: Neutral,  Arena: None
+};
+
+#define BG_TEAMS_COUNT  2
+
 // indexes of BattlemasterList.dbc
 enum BattlegroundTypeId
 {
@@ -3936,6 +3971,7 @@ enum DuelCompleteType
     DUEL_WON         = 1,
     DUEL_FLED        = 2
 };
+
 // handle the queue types and bg types separately to enable joining queue for different sized arenas at the same time
 enum BattlegroundQueueTypeId
 {

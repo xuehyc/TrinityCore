@@ -605,7 +605,7 @@ void LoadDBCStores(const std::string& dataPath)
                 if (skillLine->skillId != cFamily->skillLine[0] && skillLine->skillId != cFamily->skillLine[1])
                     continue;
 
-                if (skillLine->learnOnGetSkill != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
+                if (skillLine->AutolearnType != SKILL_LINE_ABILITY_LEARNED_ON_SKILL_LEARN)
                     continue;
 
                 sPetFamilySpellsStore[i].insert(spellInfo->Id);
@@ -1339,7 +1339,7 @@ SkillRaceClassInfoEntry const* GetSkillRaceClassInfo(uint32 skill, uint8 race, u
 
     return NULL;
 }
- 
+
 std::set<uint32> const& GetPhasesForGroup(uint32 group)
 {
     return sPhasesByGroup[group];

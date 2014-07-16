@@ -785,6 +785,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
 
         void TriggeringLinkedGameObject(uint32 trapEntry, Unit* target);
 
+        bool IsNeverVisible() const override;
+
         bool IsAlwaysVisibleFor(WorldObject const* seer) const;
         bool IsInvisibleDueToDespawn() const;
 
@@ -883,7 +885,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
             //! Following check does check 3d distance
             return IsInRange(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), dist2compare);
         }
-        
+
         GameObjectAI* m_AI;
 };
 #endif

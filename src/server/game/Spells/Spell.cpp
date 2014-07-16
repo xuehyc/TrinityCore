@@ -1302,6 +1302,7 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
 
 void Spell::SelectImplicitTargetDestTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
 {
+    ASSERT(m_targets.GetObjectTarget() && "Spell::SelectImplicitTargetDestTargets - no explicit object target available!");
     WorldObject* target = m_targets.GetObjectTarget();
 
     SpellDestination dest(*target);
@@ -2275,7 +2276,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     m_spellAura = NULL; // Set aura to null for every target-make sure that pointer is not used for unit without aura applied
 
                             //Spells with this flag cannot trigger if effect is cast on self
-    bool canEffectTrigger = !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_CANT_TRIGGER_PROC) && unitTarget->CanProc() && CanExecuteTriggersOnHit(mask);
+    bool canEffectTrigger = !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_CANT_TRIGGER_PROC) && unitTarget->CanProc() && (CanExecuteTriggersOnHit(mask) || missInfo == SPELL_MISS_IMMUNE || missInfo == SPELL_MISS_IMMUNE2);
     Unit* spellHitTarget = NULL;
 
     if (missInfo == SPELL_MISS_NONE)                          // In case spell hit target, do all effect on that target
@@ -2321,15 +2322,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         if (m_damage > 0)
             positive = false;
         else if (!m_healing)
-        {
-            for (uint8 i = 0; i< MAX_SPELL_EFFECTS; ++i)
-                // If at least one effect negative spell is negative hit
-                if (mask & (1<<i) && !m_spellInfo->IsPositiveEffect(i))
-                {
-                    positive = false;
-                    break;
-                }
-        }
+            positive = m_spellInfo->IsPositive();
+
         switch (m_spellInfo->DmgClass)
         {
             case SPELL_DAMAGE_CLASS_MAGIC:
@@ -2531,9 +2525,14 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         }
     }
 
+    uint8 aura_effmask = 0;
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (effectMask & (1 << i) && m_spellInfo->Effects[i].IsUnitOwnedAuraEffect())
+            aura_effmask |= 1 << i;
+
     // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
     m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell);
-    if (m_diminishGroup)
+    if (m_diminishGroup && aura_effmask)
     {
         m_diminishLevel = unit->GetDiminishing(m_diminishGroup);
         DiminishingReturnsType type = GetDiminishingReturnsGroupType(m_diminishGroup);
@@ -2543,11 +2542,6 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
             type == DRTYPE_ALL)
             unit->IncrDiminishing(m_diminishGroup);
     }
-
-    uint8 aura_effmask = 0;
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-        if (effectMask & (1 << i) && m_spellInfo->Effects[i].IsUnitOwnedAuraEffect())
-            aura_effmask |= 1 << i;
 
     if (aura_effmask)
     {
@@ -5129,15 +5123,24 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!target)
                         return SPELL_FAILED_DONT_REPORT;
 
-                    //target->GetContactPoint(m_caster, pos.m_positionX, pos.m_positionY, pos.m_positionZ);
-                    Position pos = target->GetFirstCollisionPosition(CONTACT_DISTANCE, target->GetRelativeAngle(m_caster));
+                    float objSize = target->GetObjectSize();
+                    float range = m_spellInfo->GetMaxRange(true, m_caster, this) * 1.5f + objSize; // can't be overly strict
 
-                    m_preGeneratedPath.SetPathLengthLimit(m_spellInfo->GetMaxRange(true) * 1.5f);
-                    bool result = m_preGeneratedPath.CalculatePath(pos.m_positionX, pos.m_positionY, pos.m_positionZ + target->GetObjectSize(), false, true);
+                    m_preGeneratedPath.SetPathLengthLimit(range);
+                    // first try with raycast, if it fails fall back to normal path
+                    bool result = m_preGeneratedPath.CalculatePath(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() + target->GetObjectSize(), false, true);
                     if (m_preGeneratedPath.GetPathType() & PATHFIND_SHORT)
                         return SPELL_FAILED_OUT_OF_RANGE;
                     else if (!result || m_preGeneratedPath.GetPathType() & PATHFIND_NOPATH)
-                        return SPELL_FAILED_NOPATH;
+                    {
+                        result = m_preGeneratedPath.CalculatePath(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() + target->GetObjectSize(), false, false);
+                        if (m_preGeneratedPath.GetPathType() & PATHFIND_SHORT)
+                            return SPELL_FAILED_OUT_OF_RANGE;
+                        else if (!result || m_preGeneratedPath.GetPathType() & PATHFIND_NOPATH)
+                            return SPELL_FAILED_NOPATH;
+                    }
+
+                    m_preGeneratedPath.ReducePathLenghtByDist(objSize); // move back
                 }
                 break;
             }

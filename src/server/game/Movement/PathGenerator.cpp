@@ -76,6 +76,7 @@ bool PathGenerator::CalculatePath(float destX, float destY, float destZ, bool fo
     // make sure navMesh works - we can run on map w/o mmap
     // check if the start and end point have a .mmtile loaded (can we pass via not loaded tile on the way?)
     if (!_navMesh || !_navMeshQuery || _sourceUnit->HasUnitState(UNIT_STATE_IGNORE_PATHFINDING) ||
+        (_sourceUnit->GetTypeId() == TYPEID_UNIT && _sourceUnit->ToCreature()->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING) ||
         !HaveTile(start) || !HaveTile(dest))
     {
         BuildShortcut();
@@ -478,11 +479,29 @@ void PathGenerator::BuildPointPath(const float *startPoint, const float *endPoin
     dtStatus dtResult = DT_FAILURE;
     if (_straightLine)
     {
-        // if the path is a straight line then start and end position are enough
         dtResult = DT_SUCCESS;
-        pointCount = 2;
-        memcpy(&pathPoints[0], startPoint, sizeof(float)* 3);
-        memcpy(&pathPoints[3], endPoint, sizeof(float)* 3);
+        pointCount = 1;
+        memcpy(&pathPoints[VERTEX_SIZE * 0], startPoint, sizeof(float)* 3); // first point
+
+        // path has to be split into polygons with dist SMOOTH_PATH_STEP_SIZE between them
+        G3D::Vector3 startVec = G3D::Vector3(startPoint[0], startPoint[1], startPoint[2]);
+        G3D::Vector3 endVec = G3D::Vector3(endPoint[0], endPoint[1], endPoint[2]);
+        G3D::Vector3 diffVec = (endVec - startVec);
+        G3D::Vector3 prevVec = startVec;
+        float len = diffVec.length();
+        diffVec *= SMOOTH_PATH_STEP_SIZE / len;
+        while (len > SMOOTH_PATH_STEP_SIZE)
+        {
+            len -= SMOOTH_PATH_STEP_SIZE;
+            prevVec += diffVec;
+            pathPoints[VERTEX_SIZE * pointCount + 0] = prevVec.x;
+            pathPoints[VERTEX_SIZE * pointCount + 1] = prevVec.y;
+            pathPoints[VERTEX_SIZE * pointCount + 2] = prevVec.z;
+            ++pointCount;
+        }
+
+        memcpy(&pathPoints[VERTEX_SIZE * pointCount], endPoint, sizeof(float)* 3); // last point
+        ++pointCount;
     }
     else if (_useStraightPath)
     {
@@ -882,4 +901,42 @@ bool PathGenerator::InRange(G3D::Vector3 const& p1, G3D::Vector3 const& p2, floa
 float PathGenerator::Dist3DSqr(G3D::Vector3 const& p1, G3D::Vector3 const& p2) const
 {
     return (p1 - p2).squaredLength();
+}
+
+void PathGenerator::ReducePathLenghtByDist(float dist)
+{
+    if (GetPathType() == PATHFIND_BLANK)
+    {
+        TC_LOG_ERROR("maps", "PathGenerator::ReducePathLenghtByDist called before path was built");
+        return;
+    }
+
+    if (_pathPoints.size() < 2) // path building failure
+        return;
+
+    uint32 i = _pathPoints.size();
+    G3D::Vector3 nextVec = _pathPoints[--i];
+    while (i > 0)
+    {
+        G3D::Vector3 currVec = _pathPoints[--i];
+        G3D::Vector3 diffVec = (nextVec - currVec);
+        float len = diffVec.length();
+        if (len > dist)
+        {
+            float step = dist / len;
+            // same as nextVec
+            _pathPoints[i + 1] -= diffVec * step;
+            _pathPoints.resize(i + 2);
+            break;
+        }
+        else if (i == 0) // at second point
+        {
+            _pathPoints[1] = _pathPoints[0];
+            _pathPoints.resize(2);
+            break;
+        }
+
+        dist -= len;
+        nextVec = currVec; // we're going backwards
+    }
 }

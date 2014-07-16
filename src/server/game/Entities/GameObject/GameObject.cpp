@@ -836,7 +836,7 @@ bool GameObject::LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap)
 
     if (data->phaseid)
         SetInPhase(data->phaseid, false, true);
-    
+
     if (data->phaseGroup)
     {
         // Set the gameobject in all the phases of the phasegroup
@@ -969,6 +969,17 @@ void GameObject::SaveRespawnTime()
 {
     if (m_goData && m_goData->dbData && m_respawnTime > time(NULL) && m_spawnedByDefault)
         GetMap()->SaveGORespawnTime(m_DBTableGuid, m_respawnTime);
+}
+
+bool GameObject::IsNeverVisible() const
+{
+    if (WorldObject::IsNeverVisible())
+        return true;
+
+    if (GetGoType() == GAMEOBJECT_TYPE_SPELL_FOCUS && GetGOInfo()->spellFocus.serverOnly == 1)
+        return true;
+
+    return false;
 }
 
 bool GameObject::IsAlwaysVisibleFor(WorldObject const* seer) const

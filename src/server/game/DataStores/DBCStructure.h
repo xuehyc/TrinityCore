@@ -659,7 +659,7 @@ struct BattlemasterListEntry
 {
     uint32  id;                                             // 0
     int32   mapid[8];                                       // 1-8 mapid
-    uint32  type;                                           // 9 (3 - BG, 4 - arena)
+    uint32  type;                                           // 9 map type (3 - BG, 4 - arena)
     //uint32 canJoinAsGroup;                                // 10 (0 or 1)
     char* name;                                             // 11
     uint32 maxGroupSize;                                    // 12 maxGroupSize, used for checking if queue as group
@@ -1708,7 +1708,7 @@ struct SkillLineAbilityEntry
     //uint32    classmaskNot;                               // 6        m_excludeClass
     uint32    req_skill_value;                              // 7        m_minSkillLineRank
     uint32    forward_spellid;                              // 8        m_supercededBySpell
-    uint32    learnOnGetSkill;                              // 9        m_acquireMethod
+    uint32    AutolearnType;                                // 9        m_acquireMethod
     uint32    max_value;                                    // 10       m_trivialSkillLineRankHigh
     uint32    min_value;                                    // 11       m_trivialSkillLineRankLow
     uint32    character_points[2];                          // 12-13    m_characterPoints
@@ -1721,10 +1721,10 @@ struct SkillRaceClassInfoEntry
     uint32 RaceMask;                                        // 2      m_raceMask
     uint32 ClassMask;                                       // 3      m_classMask
     uint32 Flags;                                           // 4      m_flags
-    //uint32 MinLevel;                                      // 5      m_minLevel
-    uint32 SkillTier;                                       // 6      m_skillTierID
-    //uint32 SkillCostType;                                 // 7      m_skillCostIndex
-    //uint32 Unk;                                           // 8      m_unk
+    //uint32 Unk;                                           // 5      m_unk
+    //uint32 MinLevel;                                      // 6      m_minLevel
+    uint32 SkillTier;                                       // 7      m_skillTierID
+    //uint32 SkillCostType;                                 // 8      m_skillCostIndex
 };
 
 #define MAX_SKILL_STEP 16
