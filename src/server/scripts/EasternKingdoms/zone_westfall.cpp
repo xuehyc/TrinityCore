@@ -216,6 +216,11 @@ enum eQuest26209
     NPC_HOMELESS_STORMWIND_CITZEN = 42386,
     NPC_TRANSIENT = 42383,
     NPC_RAGMUFFIN = 42413,
+    NPC_WESTFALL_STEW_PROXY = 42625,
+    NPC_FURLBROW_MURDER_INFO_001 = 42414,
+    NPC_FURLBROW_MURDER_INFO_002 = 42415,
+    NPC_FURLBROW_MURDER_INFO_003 = 42416,
+    NPC_FURLBROW_MURDER_INFO_004 = 42417,
     QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME = 26209,
 };
 
@@ -395,6 +400,238 @@ public:
     }
 };
 
+class npc_west_plains_drifters : public CreatureScript
+{
+public:
+    npc_west_plains_drifters() : CreatureScript("npc_west_plains_drifters") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (player->GetQuestStatus(QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME) == QUEST_STATUS_INCOMPLETE)
+        {
+            creature->GetMotionMaster()->MoveIdle();
+            creature->GetMotionMaster()->Clear();
+            player->ADD_GOSSIP_ITEM_DB(87, 0, GOSSIP_SENDER_MAIN, 1001);
+            player->ADD_GOSSIP_ITEM_DB(87, 1, GOSSIP_SENDER_MAIN, 1002);
+            player->SEND_GOSSIP_MENU(urand(70, 71), creature->GetGUID());
+        }
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
+    {         
+        switch (action)
+        {
+        case 1001:
+            player->CLOSE_GOSSIP_MENU();
+            creature->AI()->AttackStart(player);
+            creature->AI()->Talk(0);
+            break;
+        case 1002:
+            if (urand(0, 1) == 0)
+            {
+                player->CLOSE_GOSSIP_MENU();
+                creature->AI()->AttackStart(player);
+                creature->AI()->Talk(0);
+                break;
+            }
+            uint32 a1 = player->GetReqKillOrCastCurrentCount(QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME, 42414);
+            uint32 a2 = player->GetReqKillOrCastCurrentCount(QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME, 42415);
+            uint32 a3 = player->GetReqKillOrCastCurrentCount(QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME, 42416);
+            uint32 a4 = player->GetReqKillOrCastCurrentCount(QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME, 42417);
+            if (a1 == 0)
+            {
+                player->KilledMonsterCredit(42414);
+                creature->AI()->Talk(1);
+            }
+            else if (a2 == 0)
+            {
+                player->KilledMonsterCredit(42415);
+                creature->AI()->Talk(2);
+            }
+            else if (a3 == 0)
+            {
+                player->KilledMonsterCredit(42416);
+                creature->AI()->Talk(3);
+            }
+            else if (a4 == 0)
+            {
+                player->KilledMonsterCredit(42417);
+                creature->AI()->Talk(4);
+            }
+            creature->GetMotionMaster()->MoveRandom(10);
+            break;
+        }
+
+        return true; 
+    }
+   
+    struct npc_west_plains_driftersAI : public ScriptedAI
+    {
+        npc_west_plains_driftersAI(Creature *c) : ScriptedAI(c) { }
+
+        void JustDied(Unit* killer) override
+        { 
+            Position pos = me->GetNearPosition(1.5f, 0);
+            me->SummonCreature(NPC_RAGMUFFIN, pos, TEMPSUMMON_TIMED_DESPAWN, 15000);
+            pos = me->GetNearPosition(1.5f, 2);
+            me->SummonCreature(NPC_RAGMUFFIN, pos, TEMPSUMMON_TIMED_DESPAWN, 15000);
+            pos = me->GetNearPosition(1.5f, 4);
+            me->SummonCreature(NPC_RAGMUFFIN, pos, TEMPSUMMON_TIMED_DESPAWN, 15000);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_west_plains_driftersAI(creature);
+    }
+};
+
+class npc_transient : public CreatureScript
+{
+public:
+    npc_transient() : CreatureScript("npc_transient") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (player->GetQuestStatus(QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME) == QUEST_STATUS_INCOMPLETE)
+        {
+            creature->GetMotionMaster()->MoveIdle();
+            creature->GetMotionMaster()->Clear();
+            player->ADD_GOSSIP_ITEM_DB(87, 0, GOSSIP_SENDER_MAIN, 1001);
+            player->ADD_GOSSIP_ITEM_DB(87, 1, GOSSIP_SENDER_MAIN, 1002);
+            player->SEND_GOSSIP_MENU(urand(70, 71), creature->GetGUID());
+        }
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
+    {
+        switch (action)
+        {
+        case 1001:
+            player->CLOSE_GOSSIP_MENU();
+            creature->AI()->AttackStart(player);
+            creature->AI()->Talk(0);
+            break;
+        case 1002:
+            if (urand(0, 1) == 0)
+            {
+                player->CLOSE_GOSSIP_MENU();
+                creature->AI()->AttackStart(player);
+                creature->AI()->Talk(0);
+                break;
+            }
+            uint32 a1 = player->GetReqKillOrCastCurrentCount(QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME, 42414);
+            uint32 a2 = player->GetReqKillOrCastCurrentCount(QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME, 42415);
+            uint32 a3 = player->GetReqKillOrCastCurrentCount(QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME, 42416);
+            uint32 a4 = player->GetReqKillOrCastCurrentCount(QUEST_MURDER_WAS_THE_CASE_THAT_THEY_GAVE_ME, 42417);
+            if (a1 == 0)
+            {
+                player->KilledMonsterCredit(42414);
+                creature->AI()->Talk(1);
+            }
+            else if (a2 == 0)
+            {
+                player->KilledMonsterCredit(42415);
+                creature->AI()->Talk(2);
+            }
+            else if (a3 == 0)
+            {
+                player->KilledMonsterCredit(42416);
+                creature->AI()->Talk(3);
+            }
+            else if (a4 == 0)
+            {
+                player->KilledMonsterCredit(42417);
+                creature->AI()->Talk(4);
+            }
+            creature->GetMotionMaster()->MoveRandom(10);
+            break;
+        }
+
+        return true;
+    }
+
+    struct npc_transientAI : public ScriptedAI
+    {
+        npc_transientAI(Creature *c) : ScriptedAI(c) { }
+
+        void JustDied(Unit* killer) override
+        {
+            Position pos = me->GetNearPosition(1.5f, 0);
+            me->SummonCreature(NPC_RAGMUFFIN, pos, TEMPSUMMON_TIMED_DESPAWN, 15000);
+            pos = me->GetNearPosition(1.5f, 2);
+            me->SummonCreature(NPC_RAGMUFFIN, pos, TEMPSUMMON_TIMED_DESPAWN, 15000);
+            pos = me->GetNearPosition(1.5f, 4);
+            me->SummonCreature(NPC_RAGMUFFIN, pos, TEMPSUMMON_TIMED_DESPAWN, 15000);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_transientAI(creature);
+    }
+};
+
+class npc_ragamuffin : public CreatureScript
+{
+public:
+    npc_ragamuffin() : CreatureScript("npc_ragamuffin") { }
+
+    struct npc_ragamuffinAI : public ScriptedAI
+    {
+        npc_ragamuffinAI(Creature *c) : ScriptedAI(c) { }
+
+        uint32 m_timer;
+        uint32 m_phase;
+
+        void Reset() override
+        {
+            me->GetMotionMaster()->MoveRandom(2.0f);
+            m_timer = 1000; m_phase = 0;
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (m_timer <= diff)
+            {
+                m_phase++;
+                m_timer = 1000;
+                if (m_phase == 2)
+                    me->AI()->Talk(0);
+            }
+            else
+                m_timer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ragamuffinAI(creature);
+    }
+};
 
 
 void AddSC_westfall()
@@ -403,9 +640,10 @@ void AddSC_westfall()
     new npc_investigator42559();
     new npc_investigator42309();
     new npc_horatio_lane();
-    // new npc_west_plains_drifters();
+    new npc_west_plains_drifters();
+    new npc_transient();
+    new npc_ragamuffin();
+
     // new npc_homeless_stormwind_citizen();
-    // new npc_transient();
-    // new npc_ragamuffin();
 
 }
