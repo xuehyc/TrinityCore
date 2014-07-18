@@ -64,21 +64,6 @@ update creature set spawndist=10, MovementType=1 where id=42391;
 -- npc_ragamuffin are spawned from script..
 delete from creature where id=@npc_ragamuffin;
 
--- quest 26209 want correct killkredit..  the part KillCredit1=42625 is from 5.4.2 and not necessary yet..
-UPDATE creature_template SET KillCredit1=42414,KillCredit2=42625 WHERE entry=42391;  
-UPDATE creature_template SET KillCredit1=42414,KillCredit2=42625 WHERE entry=42383;
-UPDATE creature_template SET KillCredit1=42414,KillCredit2=42625 WHERE entry=42386;
-UPDATE creature_template SET KillCredit1=42415 WHERE entry=42414;
-UPDATE creature_template SET KillCredit1=42416 WHERE entry=42415;
-UPDATE creature_template SET KillCredit1=42417 WHERE entry=42416;
-UPDATE creature_template SET KillCredit1=42414 WHERE entry=42417;
-
--- missing gossip menu
-UPDATE creature_template SET npcflag=1, gossip_menu_id=11635 WHERE entry in (42391,42383,42386);
-delete from gossip_menu where entry=11635;
-insert into gossip_menu values(11635,11635);
-
-
 
 
 
