@@ -289,7 +289,7 @@ class spell_dk_blood_gorged : public SpellScriptLoader
             bool CheckProc(ProcEventInfo& /*eventInfo*/)
             {
                 _procTarget = GetTarget()->GetOwner();
-                return _procTarget;
+                return _procTarget != nullptr;
             }
 
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
@@ -619,7 +619,7 @@ class spell_dk_death_strike_enabler : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
-                return eventInfo.GetDamageInfo();
+                return eventInfo.GetDamageInfo() != nullptr;
             }
 
             void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)

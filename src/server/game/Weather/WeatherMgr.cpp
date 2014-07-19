@@ -28,7 +28,6 @@
 #include "Weather.h"
 #include "Log.h"
 #include "ObjectMgr.h"
-#include "AutoPtr.h"
 #include "Player.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -39,7 +38,7 @@ namespace WeatherMgr
 
 namespace
 {
-    typedef std::unordered_map<uint32, Trinity::AutoPtr<Weather, ACE_Null_Mutex> > WeatherMap;
+    typedef std::unordered_map<uint32, std::shared_ptr<Weather> > WeatherMap;
     typedef std::unordered_map<uint32, WeatherData> WeatherZoneMap;
 
     WeatherMap m_weathers;

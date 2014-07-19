@@ -1710,13 +1710,7 @@ class spell_pal_templar_verdict : public SpellScriptLoader
 
             bool Load() override
             {
-                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
-                    return false;
-
-                if (GetCaster()->ToPlayer()->getClass() != CLASS_PALADIN)
-                    return false;
-
-                return true;
+                return eventInfo.GetProcTarget() != nullptr;
             }
 
             void ChangeDamage(SpellEffIndex /*effIndex*/)

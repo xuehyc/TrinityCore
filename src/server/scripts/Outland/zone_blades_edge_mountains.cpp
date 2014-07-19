@@ -735,7 +735,7 @@ class npc_simon_bunny : public CreatureScript
             {
                 me->SetCanFly(true);
 
-                large = (bool)id;
+                large = id != 0;
                 playerGUID = guid;
                 StartGame();
             }
