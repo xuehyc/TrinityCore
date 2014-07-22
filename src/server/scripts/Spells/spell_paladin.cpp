@@ -1349,15 +1349,18 @@ class spell_pal_shield_of_the_righteous : public SpellScriptLoader
                 // 3 HolyPower: (damage * 6) - 6
                 switch (power)
                 {
-                    case 0: // 1 Holy Power
-                        damage = int32(damage - 1.0f);
-                        break;
-                    case 1: // 2 Holy Power
-                        damage = int32((damage * 3.0f) - 3.0f);
-                        break;
-                    case 2: // 3 Holy Power
-                        damage = int32((damage * 6.0f) - 6.0f);
-                        break;
+                    switch (caster->GetPower(POWER_HOLY_POWER))
+                    {
+                        case 0: // 1 Holy Power
+                            // same damage
+                            break;
+                        case 1: // 2 Holy Power
+                            damage *= 3;    // 3*30 = 90%
+                            break;
+                        case 2: // 3 Holy Power
+                            damage *= 7.5;  // 7.5*30% = 225%
+                            break;
+                    }
                 }
 
                 SetHitDamage(damage);

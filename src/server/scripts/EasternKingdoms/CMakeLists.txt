@@ -226,8 +226,6 @@ set(scripts_STAT_SRCS
   EasternKingdoms/ZulAman/zulaman.h
   EasternKingdoms/zone_hinterlands.cpp
   EasternKingdoms/zone_western_plaguelands.cpp
-  EasternKingdoms/zone_alterac_mountains.cpp
-  EasternKingdoms/zone_westfall.cpp
   EasternKingdoms/zone_silverpine_forest.cpp
   EasternKingdoms/Karazhan/instance_karazhan.cpp
   EasternKingdoms/Karazhan/boss_nightbane.cpp
