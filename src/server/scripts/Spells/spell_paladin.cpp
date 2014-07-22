@@ -1343,6 +1343,7 @@ class spell_pal_shield_of_the_righteous : public SpellScriptLoader
             {
                 int32 damage = GetHitDamage();
                 int32 power = GetCaster()->GetPower(POWER_HOLY_POWER);
+                Unit* caster = GetCaster();  // create the caster as standart.. again.. bad copy and past.. 
 
                 // 1 HolyPower: damage - 1
                 // 2 HolyPower: (damage * 3) - 3 
@@ -1713,7 +1714,8 @@ class spell_pal_templar_verdict : public SpellScriptLoader
 
             bool Load() override
             {
-                return eventInfo.GetProcTarget() != nullptr;
+                // return eventInfo.GetProcTarget() != nullptr;     // where come the eventInfo from ?? bad copy and past...
+                return true;                                        // the function must give a value back. 
             }
 
             void ChangeDamage(SpellEffIndex /*effIndex*/)
