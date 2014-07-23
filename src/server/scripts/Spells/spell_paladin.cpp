@@ -1343,14 +1343,13 @@ class spell_pal_shield_of_the_righteous : public SpellScriptLoader
             {
                 int32 damage = GetHitDamage();
                 int32 power = GetCaster()->GetPower(POWER_HOLY_POWER);
-                Unit* caster = GetCaster();  // create the caster as standart.. again.. bad copy and past.. 
 
                 // 1 HolyPower: damage - 1
                 // 2 HolyPower: (damage * 3) - 3 
                 // 3 HolyPower: (damage * 6) - 6
                 switch (power)
                 {
-                    switch (caster->GetPower(POWER_HOLY_POWER))
+                    switch (GetCaster()->GetPower(POWER_HOLY_POWER))
                     {
                         case 0: // 1 Holy Power
                             // same damage
