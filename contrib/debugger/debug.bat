@@ -1,1 +1,0 @@
-gdb -x crashreport.gdb <executable file>
