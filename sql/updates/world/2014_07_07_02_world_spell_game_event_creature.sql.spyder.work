@@ -1,5 +1,5 @@
 --
-SET @CGUID := 127340;
+SET @CGUID := 127340;  -- trinity guid
 DELETE FROM `game_event_creature` WHERE `guid` BETWEEN @CGUID+00 AND @CGUID+29;
 INSERT INTO `game_event_creature` (`eventEntry`, `guid`) VALUES
 (1, @CGUID+00),

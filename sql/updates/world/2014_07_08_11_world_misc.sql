@@ -15,12 +15,11 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (@SOULEATER, 0, 1, 0, 0, 0, 100, 0, 6000, 12000, 30000, 30000, 11, 36786, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Eredar Soul Eater - In Combat - Cast Soul Chill");
 
 -- Creature location for Eredar Soul Eater
-DELETE FROM `linked_respawn` WHERE `guid` = 86053;
-DELETE FROM `creature` WHERE `guid` IN (@GUID, @GUID+1) OR id = @SOULEATER;
+DELETE FROM `linked_respawn` WHERE `guid` = 192752;  -- Guid by ArkDB
+DELETE FROM `creature` WHERE guid in (192752,282903) and id = @SOULEATER; -- Guid by ArkDB
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(@GUID, @SOULEATER, 552, 3, 1, 19950, 0, 280.787, 145.315, 22.22593, 0.005122, 7200, 0, 0, 39123, 12620, 0, 0, 0, 8),
-(@GUID+1, @SOULEATER, 552, 3, 1, 19950, 0, 307.477, 150.934, 24.85841, 3.959065, 7200, 0, 0, 39123, 12620, 0, 0, 0, 8);
-
+(192752, @SOULEATER, 552, 3, 1, 19950, 0, 280.787, 145.315, 22.22593, 0.005122, 7200, 0, 0, 39123, 12620, 0, 0, 0, 8),
+(282903, @SOULEATER, 552, 3, 1, 19950, 0, 307.477, 150.934, 24.85841, 3.959065, 7200, 0, 0, 39123, 12620, 0, 0, 0, 8);
 
 -- Creature Loot for Eredar Soul Eater
 DELETE FROM `creature_loot_template` WHERE `entry`=@SOULEATER;
