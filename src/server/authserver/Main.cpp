@@ -79,7 +79,7 @@ int main(int argc, char** argv)
 
     TC_LOG_INFO("server.authserver", "%s (authserver)", _FULLVERSION);
 	TC_LOG_INFO("server.authserver", " ");
-	TC_LOG_INFO("server.worldserver", " A World of Warcraft Cataclsym 4.3.4 Emulator	");
+	TC_LOG_INFO("server.worldserver", " A World of Warcraft Cataclysm 4.3.4 Emulator	");
 	TC_LOG_INFO("server.authserver", "       _/_/              _/          _/_/_/    _/_/    _/_/_/    _/_/_/_/  ");
 	TC_LOG_INFO("server.authserver", "    _/    _/  _/  _/_/  _/  _/    _/        _/    _/  _/    _/  _/         ");
 	TC_LOG_INFO("server.authserver", "   _/_/_/_/  _/_/      _/_/      _/        _/    _/  _/_/_/    _/_/_/      ");

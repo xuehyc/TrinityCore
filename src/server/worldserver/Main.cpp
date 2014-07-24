@@ -127,7 +127,7 @@ extern int main(int argc, char** argv)
 
     TC_LOG_INFO("server.worldserver", "%s (worldserver-daemon)", _FULLVERSION);
 	TC_LOG_INFO("server.worldserver", " ");
-	TC_LOG_INFO("server.worldserver", " A World of Warcraft Cataclsym 4.3.4 Emulator	");
+	TC_LOG_INFO("server.worldserver", " A World of Warcraft Cataclysm 4.3.4 Emulator	");
 	TC_LOG_INFO("server.worldserver", "       _/_/              _/          _/_/_/    _/_/    _/_/_/    _/_/_/_/  ");
 	TC_LOG_INFO("server.worldserver", "    _/    _/  _/  _/_/  _/  _/    _/        _/    _/  _/    _/  _/         ");
 	TC_LOG_INFO("server.worldserver", "   _/_/_/_/  _/_/      _/_/      _/        _/    _/  _/_/_/    _/_/_/      ");
