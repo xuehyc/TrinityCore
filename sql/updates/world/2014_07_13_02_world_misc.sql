@@ -1,5 +1,5 @@
 --
-SET @GHOST := 85732;
+SET @GHOST := 282904;  -- Guid by ArkDB
 
 UPDATE `creature_template` SET  `AIName`='SmartAI' WHERE `entry`=6492;
 

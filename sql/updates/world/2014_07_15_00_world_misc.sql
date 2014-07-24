@@ -1,4 +1,4 @@
-SET @CGuid := 76311; -- Needs 3 for the 3 permament spawns of living poison which never activate or move but are used to spawn the 
+SET @CGuid := 282912; -- Guid from ArkDB  Needs 3 for the 3 permament spawns of living poison which never activate or move but are used to spawn the 
 
 -- Living poison sets immune to pc on spawn and moves forward, if any player comes within 1 yard range it will then remove immune to pc flags
 -- and cast explosion spell, it must allow pc at this point otherwise the spell only kills the living poison
