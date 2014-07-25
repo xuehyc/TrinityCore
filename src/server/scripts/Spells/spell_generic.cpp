@@ -762,7 +762,8 @@ class spell_gen_chaos_blast : public SpellScriptLoader
 
 enum Clone
 {
-    SPELL_NIGHTMARE_FIGMENT_MIRROR_IMAGE        = 57528
+    SPELL_NIGHTMARE_FIGMENT_MIRROR_IMAGE        = 57528,
+    SPELL_CLONE_ME = 45204,
 };
 
 class spell_gen_clone : public SpellScriptLoader
@@ -780,12 +781,23 @@ class spell_gen_clone : public SpellScriptLoader
                 GetHitUnit()->CastSpell(GetCaster(), uint32(GetEffectValue()), true);
             }
 
+            void HandleEffect(SpellEffIndex effIndex)
+            {
+                PreventHitDefaultEffect(effIndex);
+                GetHitUnit()->CastSpell(GetHitUnit(), SPELL_AURA_INITIALIZE_IMAGES, true);
+            }
+
             void Register() override
             {
                 if (m_scriptSpellId == SPELL_NIGHTMARE_FIGMENT_MIRROR_IMAGE)
                 {
                     OnEffectHitTarget += SpellEffectFn(spell_gen_clone_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_DUMMY);
                     OnEffectHitTarget += SpellEffectFn(spell_gen_clone_SpellScript::HandleScriptEffect, EFFECT_2, SPELL_EFFECT_DUMMY);
+                }
+                else if (m_scriptSpellId == SPELL_CLONE_ME)
+                {
+                    OnEffectHitTarget += SpellEffectFn(spell_gen_clone_SpellScript::HandleEffect, EFFECT_1, SPELL_EFFECT_APPLY_AURA);
+                    OnEffectHitTarget += SpellEffectFn(spell_gen_clone_SpellScript::HandleScriptEffect, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
                 }
                 else
                 {

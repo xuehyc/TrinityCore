@@ -64,7 +64,8 @@ enum DeathKnightSpells
     SPELL_DK_SCENT_OF_BLOOD                     = 50422,
     SPELL_DK_SCOURGE_STRIKE_TRIGGERED           = 70890,
     SPELL_DK_UNHOLY_PRESENCE                    = 48265,
-    SPELL_DK_WILL_OF_THE_NECROPOLIS             = 96171
+    SPELL_DK_WILL_OF_THE_NECROPOLIS             = 96171,
+    SPELL_DK_PESTILENCE                         = 50842,
 };
 
 // 50462 - Anti-Magic Shell (on raid member)
@@ -951,9 +952,7 @@ class spell_dk_pestilence : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DK_GLYPH_OF_DISEASE)
-                    || !sSpellMgr->GetSpellInfo(SPELL_DK_BLOOD_PLAGUE)
-                    || !sSpellMgr->GetSpellInfo(SPELL_DK_FROST_FEVER))
+                if (!sSpellMgr->GetSpellInfo(SPELL_DK_PESTILENCE))
                     return false;
                 return true;
             }
@@ -1157,8 +1156,8 @@ class spell_dk_raise_dead : public SpellScriptLoader
 
             bool Validate(SpellInfo const* spellInfo) override
             {
-                if (!sSpellMgr->GetSpellInfo(spellInfo->Effects[EFFECT_1].CalcValue())
-                    || !sSpellMgr->GetSpellInfo(spellInfo->Effects[EFFECT_2].CalcValue())
+                if (!sSpellMgr->GetSpellInfo(spellInfo->Effects[EFFECT_0].CalcValue())
+                    || !sSpellMgr->GetSpellInfo(spellInfo->Effects[EFFECT_1].CalcValue())
                     || !sSpellMgr->GetSpellInfo(SPELL_DK_RAISE_DEAD_USE_REAGENT)
                     || !sSpellMgr->GetSpellInfo(SPELL_DK_MASTER_OF_GHOULS))
                     return false;
@@ -1242,10 +1241,10 @@ class spell_dk_raise_dead : public SpellScriptLoader
                 // Do we have talent Master of Ghouls?
                 if (GetCaster()->HasAura(SPELL_DK_MASTER_OF_GHOULS))
                     // summon as pet
-                    return GetSpellInfo()->Effects[EFFECT_2].CalcValue();
+                    return GetSpellInfo()->Effects[EFFECT_1].CalcValue();
 
                 // or guardian
-                return GetSpellInfo()->Effects[EFFECT_1].CalcValue();
+                return GetSpellInfo()->Effects[EFFECT_0].CalcValue();
             }
 
             void HandleRaiseDead(SpellEffIndex /*effIndex*/)
@@ -1260,11 +1259,12 @@ class spell_dk_raise_dead : public SpellScriptLoader
             void Register() override
             {
                 OnCheckCast += SpellCheckCastFn(spell_dk_raise_dead_SpellScript::CheckCast);
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dk_raise_dead_SpellScript::CheckTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENTRY);
-                OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_dk_raise_dead_SpellScript::CheckTarget, EFFECT_2, TARGET_UNIT_CASTER);
+                //OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dk_raise_dead_SpellScript::CheckTargets, EFFECT_0, TARGET_UNIT_CASTER);
+                OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_dk_raise_dead_SpellScript::CheckTarget, EFFECT_0, TARGET_UNIT_CASTER);
+                OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_dk_raise_dead_SpellScript::CheckTarget, EFFECT_1, TARGET_UNIT_CASTER);
                 OnCast += SpellCastFn(spell_dk_raise_dead_SpellScript::ConsumeReagents);
-                OnEffectHitTarget += SpellEffectFn(spell_dk_raise_dead_SpellScript::HandleRaiseDead, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
-                OnEffectHitTarget += SpellEffectFn(spell_dk_raise_dead_SpellScript::HandleRaiseDead, EFFECT_2, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_dk_raise_dead_SpellScript::HandleRaiseDead, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_dk_raise_dead_SpellScript::HandleRaiseDead, EFFECT_1, SPELL_EFFECT_DUMMY);
             }
 
         private:

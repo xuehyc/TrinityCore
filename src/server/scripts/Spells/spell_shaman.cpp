@@ -1228,7 +1228,7 @@ class spell_sha_tidal_waves : public SpellScriptLoader
         }
 };
 
-// 77478 - Earthquake
+// 77478 61882 - Earthquake
 class spell_sha_earthquake : public SpellScriptLoader
 {
 public:
