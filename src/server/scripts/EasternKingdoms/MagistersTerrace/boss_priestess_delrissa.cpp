@@ -199,7 +199,7 @@ public:
 
                 //remove random entries
                 while (LackeyEntryList.size() > MAX_ACTIVE_LACKEY)
-                    LackeyEntryList.erase(LackeyEntryList.begin() + rand()%LackeyEntryList.size());
+                    LackeyEntryList.erase(LackeyEntryList.begin() + rand32() % LackeyEntryList.size());
 
                 //summon all the remaining in vector
                 for (std::vector<uint32>::const_iterator itr = LackeyEntryList.begin(); itr != LackeyEntryList.end(); ++itr)
@@ -291,7 +291,7 @@ public:
                 Unit* target = me;
 
                 if (urand(0, 1))
-                    if (Unit* pAdd = ObjectAccessor::GetUnit(*me, m_auiLackeyGUID[rand()%MAX_ACTIVE_LACKEY]))
+                    if (Unit* pAdd = ObjectAccessor::GetUnit(*me, m_auiLackeyGUID[rand32() % MAX_ACTIVE_LACKEY]))
                         if (pAdd->IsAlive())
                             target = pAdd;
 
@@ -304,7 +304,7 @@ public:
                 Unit* target = me;
 
                 if (urand(0, 1))
-                    if (Unit* pAdd = ObjectAccessor::GetUnit(*me, m_auiLackeyGUID[rand()%MAX_ACTIVE_LACKEY]))
+                    if (Unit* pAdd = ObjectAccessor::GetUnit(*me, m_auiLackeyGUID[rand32() % MAX_ACTIVE_LACKEY]))
                         if (pAdd->IsAlive() && !pAdd->HasAura(SPELL_SHIELD))
                             target = pAdd;
 
@@ -323,7 +323,7 @@ public:
                     if (urand(0, 1))
                         target = me;
                     else
-                        if (Unit* pAdd = ObjectAccessor::GetUnit(*me, m_auiLackeyGUID[rand()%MAX_ACTIVE_LACKEY]))
+                        if (Unit* pAdd = ObjectAccessor::GetUnit(*me, m_auiLackeyGUID[rand32() % MAX_ACTIVE_LACKEY]))
                             if (pAdd->IsAlive())
                                 target = pAdd;
                 }
@@ -1171,17 +1171,8 @@ public:
 
             if (Healing_Wave_Timer <= diff)
             {
-                // std::vector<Add*>::const_iterator itr = Group.begin() + rand()%Group.size();
-                // uint64 guid = (*itr)->guid;
-                // if (guid)
-                // {
-                //   Unit* pAdd = ObjectAccessor::GetUnit(*me, (*itr)->guid);
-                //   if (pAdd && pAdd->IsAlive())
-                //   {
                 DoCast(me, SPELL_LESSER_HEALING_WAVE);
                 Healing_Wave_Timer = 5000;
-                //    }
-                // }
             } else Healing_Wave_Timer -= diff;
 
             DoMeleeAttackIfReady();

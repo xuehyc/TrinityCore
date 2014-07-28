@@ -92,7 +92,7 @@ class boss_omor_the_unscarred : public CreatureScript
 
             void KilledUnit(Unit* /*victim*/) override
             {
-                if (rand()%2)
+                if (rand32() % 2)
                     return;
 
                 Talk(SAY_KILL_1);
@@ -126,7 +126,7 @@ class boss_omor_the_unscarred : public CreatureScript
                     {
                         me->InterruptNonMeleeSpells(false);
                         DoCast(me, SPELL_SUMMON_FIENDISH_HOUND);
-                        Summon_Timer = 15000+rand()%15000;
+                        Summon_Timer = 15000 + rand32() % 15000;
                     }
                     else
                         Summon_Timer -= diff;
@@ -163,7 +163,7 @@ class boss_omor_the_unscarred : public CreatureScript
                         if (temp && temp->GetTypeId() == TYPEID_PLAYER)
                         {
                             DoCast(temp, SPELL_ORBITAL_STRIKE);
-                            OrbitalStrike_Timer = 14000+rand()%2000;
+                            OrbitalStrike_Timer = 14000 + rand32() % 2000;
                             PlayerGUID = temp->GetGUID();
 
                             if (PlayerGUID)
@@ -191,7 +191,7 @@ class boss_omor_the_unscarred : public CreatureScript
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     {
                         DoCast(target, SPELL_TREACHEROUS_AURA);
-                        Aura_Timer = 8000+rand()%8000;
+                        Aura_Timer = 8000 + rand32() % 8000;
                     }
                 }
                 else
@@ -205,7 +205,7 @@ class boss_omor_the_unscarred : public CreatureScript
                             target = me->GetVictim();
 
                         DoCast(target, SPELL_SHADOW_BOLT);
-                        Shadowbolt_Timer = 4000+rand()%2500;
+                        Shadowbolt_Timer = 4000 + rand32() % 2500;
                     }
                 }
                 else

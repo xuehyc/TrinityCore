@@ -281,7 +281,7 @@ public:
         {
             if (spell->Id == SPELL_CHAIN_LIGHTNING)
             {
-                if (rand()%10)
+                if (rand32() % 10)
                     return;
 
                 Talk(SAY_MAG_LIGHTNING);
@@ -631,7 +631,7 @@ public:
         {
             if (spell->Id == SPELL_KUR_CHAIN_LIGHTNING)
             {
-                if (rand()%30)
+                if (rand32() % 30)
                     return;
 
                 Talk(SAY_KUR_LIGHTNING);
@@ -639,7 +639,7 @@ public:
 
             if (spell->Id == SPELL_KUR_FROST_SHOCK)
             {
-                if (rand()%30)
+                if (rand32() % 30)
                     return;
 
                 Talk(SAY_KUR_SHOCK);

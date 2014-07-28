@@ -156,7 +156,7 @@ public:
             switch (creature->GetEntry())
             {
                 case ENTRY_BNAAR_C_CONSOLE:
-                    if (rand()%2)
+                    if (rand32() % 2)
                     {
                         add = me->SummonCreature(ENTRY_SUNFURY_TECH, 2933.68f, 4162.55f, 164.00f, 1.60f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
                         if (add) add->GetMotionMaster()->MovePoint(0, 2927.36f, 4212.97f, 164.00f);
@@ -183,7 +183,7 @@ public:
                     Wave_Timer = 15000;
                     break;
                 case ENTRY_ARA_C_CONSOLE:
-                    if (rand()%2)
+                    if (rand32() % 2)
                     {
                         add = me->SummonCreature(ENTRY_ARA_TECH, 4035.11f, 4038.97f, 194.27f, 2.57f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
                         if (add) add->GetMotionMaster()->MovePoint(0, 4003.42f, 4040.19f, 193.49f);
@@ -756,11 +756,11 @@ public:
             Weak = false;
             Materialize = false;
             Drained = false;
-            WeakPercent = 25 + (rand() % 16); // 25-40
+            WeakPercent = 25 + (rand32() % 16); // 25-40
 
             PlayerGUID = 0;
 
-            ManaBurnTimer = 5000 + (rand() % 3 * 1000); // 5-8 sec cd
+            ManaBurnTimer = 5000 + (rand32() % 3 * 1000); // 5-8 sec cd
 
             if (me->GetEntry() == NPC_DRAINED_PHASE_HUNTER_ENTRY)
                 me->UpdateEntry(NPC_PHASE_HUNTER_ENTRY);
@@ -808,7 +808,7 @@ public:
                 if (!UnitsWithMana.empty())
                 {
                     DoCast(Trinity::Containers::SelectRandomContainerElement(UnitsWithMana), SPELL_MANA_BURN);
-                    ManaBurnTimer = 8000 + (rand() % 10 * 1000); // 8-18 sec cd
+                    ManaBurnTimer = 8000 + (rand32() % 10 * 1000); // 8-18 sec cd
                 }
                 else
                     ManaBurnTimer = 3500;

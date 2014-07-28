@@ -550,7 +550,7 @@ public:
             if (!temp.empty())
             {
                 std::list<Player*>::const_iterator j = temp.begin();
-                advance(j, rand()%temp.size());
+                advance(j, rand32() % temp.size());
                 return (*j);
             }
             return NULL;
@@ -623,7 +623,7 @@ public:
                 me->SetName("Headless Horseman, Unhorsed");
 
                 if (!headGUID)
-                    headGUID = DoSpawnCreature(HEAD, float(rand()%6), float(rand()%6), 0, 0, TEMPSUMMON_DEAD_DESPAWN, 0)->GetGUID();
+                    headGUID = DoSpawnCreature(HEAD, float(rand32() % 6), float(rand32() % 6), 0, 0, TEMPSUMMON_DEAD_DESPAWN, 0)->GetGUID();
 
                 Unit* Head = ObjectAccessor::GetUnit(*me, headGUID);
                 if (Head && Head->IsAlive())
@@ -724,7 +724,7 @@ public:
                 {
                     laugh = urand(11000, 22000);
                     me->MonsterTextEmote(EMOTE_LAUGHS, NULL);
-                    DoPlaySoundToSet(me, RandomLaugh[rand()%3]);
+                    DoPlaySoundToSet(me, RandomLaugh[rand32() % 3]);
                 }
                 else laugh -= diff;
 

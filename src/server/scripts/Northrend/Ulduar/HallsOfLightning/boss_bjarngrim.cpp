@@ -249,7 +249,7 @@ public:
 
                 DoRemoveStanceAura(m_uiStance);
 
-                int uiTempStance = rand()%(3-1);
+                int uiTempStance = rand32() % (3 - 1);
 
                 if (uiTempStance >= m_uiStance)
                     ++uiTempStance;

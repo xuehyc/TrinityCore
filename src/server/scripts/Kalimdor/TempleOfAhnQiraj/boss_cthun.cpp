@@ -565,7 +565,7 @@ public:
 
             //Get random but only if we have more than one unit on threat list
             if (temp.size() > 1)
-                advance (j, rand() % (temp.size() - 1));
+                advance(j, rand32() % (temp.size() - 1));
 
             return (*j);
         }
@@ -696,7 +696,7 @@ public:
                             if (unit && i->second == true)
                             {
                                 //Teleport each player out
-                                DoTeleportPlayer(unit, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+10, float(rand()%6));
+                                DoTeleportPlayer(unit, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 10, float(rand32() % 6));
 
                                 //Cast knockback on them
                                 DoCast(unit, SPELL_EXIT_STOMACH_KNOCKBACK, true);
@@ -733,7 +733,7 @@ public:
                                 if (unit->IsWithinDist3d(&KickPos, 15.0f))
                                 {
                                     //Teleport each player out
-                                    DoTeleportPlayer(unit, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+10, float(rand()%6));
+                                    DoTeleportPlayer(unit, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 10, float(rand32() % 6));
 
                                     //Cast knockback on them
                                     DoCast(unit, SPELL_EXIT_STOMACH_KNOCKBACK, true);

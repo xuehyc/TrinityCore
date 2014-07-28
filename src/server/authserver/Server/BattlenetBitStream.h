@@ -218,6 +218,7 @@ namespace Battlenet
         bool IsRead() const { return _readPos >= _numBits; }
 
         uint8* GetBuffer() { return _buffer.data(); }
+        uint8 const* GetBuffer() const { return _buffer.data(); }
 
         size_t GetSize() const { return _buffer.size(); }
 
