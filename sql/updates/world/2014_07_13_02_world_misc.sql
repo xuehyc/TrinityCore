@@ -59,7 +59,7 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=17 AND `SourceEntry`=90
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
 (17, 0, 9082, 0, 0, 29, 0, 6492, 10, 0, 0, 0, 0, '', 'Create Containment Coffer can only be cast if there is rift spawn near');
 
-DELETE FROM `creature` WHERE `id`=6492 AND `guid` BETWEEN @GHOST AND @GHOST+7;
+DELETE FROM `creature` WHERE `id`=6492 AND `guid` BETWEEN @GHOST AND @GHOST+7; -- guid by ArkDB
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 -- Undercity
 (@GHOST, 6492, 0, 1, 1, 0, 0, 1414.51, 365.095, -66.0066, 4.99293, 300, 0, 0, 386, 0, 0, 0, 0, 0),

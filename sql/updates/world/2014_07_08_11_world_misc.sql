@@ -2,7 +2,7 @@
 
 SET @SOULEATER   := 20879;
 SET @SOULEATERHC := 21595;
-SET @GUID        := 52355; -- TC Unused GUID search tool
+-- SET @GUID        := 192752 and 282903; -- guid by ArkDB
 SET @POOL        := 368;
 
 UPDATE `creature_template` SET `spell1` = 0, `spell2` = 0, `spell3` = 0, `AIName` = 'SmartAI' WHERE `entry` = @SOULEATER;
@@ -46,7 +46,7 @@ INSERT INTO `pool_template` (`entry`, `max_limit`, `description`) VALUES
 (@POOL, 2, 'Eredar Soul-Eater');
 
 -- Pool_creature for Eredar Soul Eater Spawns
-DELETE FROM `pool_creature` WHERE guid IN (@GUID, @GUID+1);
+DELETE FROM `pool_creature` WHERE guid IN (192752, 282903);
 INSERT INTO `pool_creature` (`guid`, `pool_entry`, `chance`, `description`) VALUES
-(@GUID, @POOL, 0, 'Eredar Soul-Eater - Spawn 1'),
-(@GUID+1, @POOL, 0, 'Eredar Soul-Eater - Spawn 2');
+(192752, @POOL, 0, 'Eredar Soul-Eater - Spawn 1'),
+(282903, @POOL, 0, 'Eredar Soul-Eater - Spawn 2');

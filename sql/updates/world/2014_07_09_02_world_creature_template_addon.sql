@@ -1,4 +1,5 @@
-DELETE FROM `creature_addon` WHERE `guid` IN (SELECT guid FROM `creature` WHERE `id` = 684);
+
+DELETE FROM `creature_addon` WHERE `guid` IN (SELECT guid FROM `creature` WHERE `id` = 684); -- guid self created by db
 DELETE FROM `creature_template_addon` WHERE `entry` IN (21337,636,684);
 
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES

@@ -278,6 +278,7 @@ INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `positi
 (5662, 4,  1693.69, 418.24, -62.2982, 'Sergeant Houser');
 
 -- Delete Sergeant Housers waypoints from waypoint_data as these moved to waypoints table so WP can be paused by SAI
-DELETE FROM `waypoint_data` WHERE `id`=384350;
-UPDATE `creature` SET `MovementType`=0 WHERE `guid`=38435;
-UPDATE `creature_addon` SET `path_id`=0 WHERE `guid`=38435;
+DELETE FROM `waypoint_data` WHERE `id`=10000180; -- guid by ArkDB
+UPDATE `creature` SET `MovementType`=0 WHERE `guid`=5338; -- guid by ArkDB
+UPDATE `creature_addon` SET `path_id`=0 WHERE `guid`=5338; -- guid by ArkDB
+
