@@ -6,11 +6,14 @@
 -- http://www.wowhead.com/npc=42309  Stormwind Investigator
 -- http://www.wowhead.com/npc=42311  Crime Scene Alarm-o-Bot
 
-delete from creature_template_addon where entry in (42308,42309,42311);
+delete from creature_template_addon where entry in (42308,42309,42311,237,238,582);
 insert into creature_template_addon (entry,bytes1,bytes2,emote,auras) values
 (42308,65636,1,0,79488),
 (42309,65636,1,0,79488),
-(42311,65636,1,0,79488);
+(42311,65636,1,0,79488),
+(237,65636,1,0,79488),
+(238,65636,1,0,79488),
+(582,7,0,65,79488);
 
 delete from creature where guid in (13619,42397,43299); -- guid by ArkDB
 insert into creature (guid,id,map,modelid,position_x,position_y,position_z,orientation,spawntimesecs) values
@@ -23,7 +26,6 @@ insert into creature_addon (guid,bytes1,bytes2,emote,auras) values
 (42397,8,0,0,79488);
 
 -- http://www.wowhead.com/npc=42405  Two-Shoed Lou (alive)
-
 delete from creature_template_addon where entry in (42405);
 insert into creature_template_addon (entry,bytes1,bytes2,auras) values
 (42405,65636,1,78284);
@@ -32,12 +34,17 @@ insert into creature_template_addon (entry,bytes1,bytes2,auras) values
 -- http://www.wowhead.com/npc=42559  Stormwind Investigator (13615,13616)
 -- http://www.wowhead.com/npc=42560  Two-Shoed Lou (dead) (13618)
 -- http://www.wowhead.com/npc=42384  Homeless Stormwind Citizen (13614,13622)
-
 delete from creature_template_addon where entry in (42558,42559,42560);
 insert into creature_template_addon (entry,bytes1,bytes2,emote,auras) values
 (42558,8,0,0,79343),
 (42559,65636,1,0,79343),
 (42560,7,0,65,79343);
+
+-- insert quest http://www.wowhead.com/quest=26229 "I TAKE Candle!"
+delete from creature_queststarter where id=42498 and quest=26229;
+insert into creature_queststarter values (42498,26229);
+delete from creature_questender where id=42498 and quest=26229;
+insert into creature_questender values (42498,26229);
 
 delete from creature where guid in (13615,13616); -- guid by ArkDB
 insert into creature (guid,id,map,modelid,position_x,position_y,position_z,orientation,spawntimesecs) values
@@ -101,8 +108,8 @@ delete from quest_poi where questId in (26378,28562) and objIndex=-1;
 UPDATE quest_template SET NextQuestId=26209,ExclusiveGroup=26378,NextQuestIdChain=26209 WHERE Id=26378;
 UPDATE quest_template SET NextQuestId=26209,ExclusiveGroup=26378,NextQuestIdChain=26209 WHERE Id=28562;
 UPDATE quest_template SET PrevQuestId=0,NextQuestId=0,ExclusiveGroup=0,NextQuestIdChain=0 WHERE Id=26209;
-UPDATE quest_template SET PrevQuestId=26209,NextQuestId=26215,ExclusiveGroup=26213 WHERE Id=26213;
-UPDATE quest_template SET PrevQuestId=26209,NextQuestId=26215,ExclusiveGroup=26213 WHERE Id=26214;
+UPDATE quest_template SET PrevQuestId=0,NextQuestId=26215,ExclusiveGroup=-26213,NextQuestIdChain=26215 WHERE Id=26213;
+UPDATE quest_template SET PrevQuestId=0,NextQuestId=26215,ExclusiveGroup=-26213,NextQuestIdChain=26215 WHERE Id=26214;
 
 delete from creature_text where entry=42308 and groupid between 3 and 7;
 delete from creature_text where entry=42558 and groupid between 0 and 4;
