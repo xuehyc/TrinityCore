@@ -58,8 +58,7 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (13, 1, 31902, 0, 0, 31, 0, 3, 19656, 0, 0, 0, 0, '', 'Purple Beam Targets Invisible Location Trigger');
 
 -- Add Missing Kil'sorrow Spellbinder & Cultist Spawns
-SET @CGUID := 213225;  -- GUID by ArkDB
-DELETE FROM `creature` WHERE `guid` in (178316,178317,178318,178319,178320,178303,178304;178305,178306,178307);
+DELETE FROM `creature` WHERE `guid` in (178316,178317,178318,178319,178320,178303,178304,178305,178306,178307); -- GUID by ArkDB
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
 (178303, 17147, 530, 1, 1, 1, -2966.403, 6452.863, 84.96134, 6.021386, 120, 0, 0),
 (178316, 17146, 530, 1, 1, 1, -2966.403, 6450.863, 84.96134, 6.021386, 120, 0, 0),

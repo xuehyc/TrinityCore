@@ -2,4 +2,4 @@
 --
 --
 -- fixes startup error loading creature_template (this table has currently no data)
-ALTER TABLE creature_template ADD femaleName CHAR(100) not null AFTER name;
+-- ALTER TABLE creature_template ADD femaleName CHAR(100) not null AFTER name;  -- already done in 7.6.0

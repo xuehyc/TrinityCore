@@ -103,4 +103,3 @@ INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `positi
 (27951,25, 2733.86, -356.3831, 141.4667,'Admiral Barean Westwind'),
 (27951,26, 2736.61, -355.8831, 141.4667,'Admiral Barean Westwind');
 
-UPDATE `creature` SET `spawndist`=5 WHERE  `guid`=143217;

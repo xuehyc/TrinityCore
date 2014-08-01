@@ -12,7 +12,7 @@ INSERT INTO `creature_formations` (`leaderGUID`,`memberGUID`,`dist`,`angle`,`gro
 DELETE FROM `creature_addon` WHERE `guid`=@NPC1;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC1,@PATH,1,0, ''); -- GUID by ArkDB
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
 (@PATH,1,-1954.978,4752.3,-2.763442,0,0,0,0,100,0),
 (@PATH,2,-1957.74,4762.069,-2.1277,0,0,0,0,100,0),
 (@PATH,3,-1958.931,4774.595,-1.305666,0,0,0,0,100,0),

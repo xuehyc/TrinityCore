@@ -5,7 +5,7 @@ SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1842.622,`position_y`=5313.065,`position_z`=-12.42815 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;  -- GUID by ArkDB
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
-DELETE FROM `waypoint_scripts` WHERE `id` BETWEEN 10 AND 14;
+DELETE FROM `waypoint_scripts` WHERE `guid` BETWEEN 10 AND 15;
 INSERT INTO `waypoint_scripts` (`id`,`delay`,`command`,`datalong`,`guid`) VALUES
 (10,0,1,5,10),
 (11,0,1,18,11),
@@ -14,7 +14,7 @@ INSERT INTO `waypoint_scripts` (`id`,`delay`,`command`,`datalong`,`guid`) VALUES
 (14,0,1,22,14),
 (14,0,16,9739,15);
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
 (@PATH,1,-1842.622,5313.065,-12.42815,0,2000,0,0,100,0),
 (@PATH,2,-1842.622,5313.065,-12.42815,2.478368,4000,0,50,100,0), -- OneShotPoint (25)
 (@PATH,3,-1842.622,5313.065,-12.42815,0,4000,0,1006,100,0), -- OneShotQuestion (6)
@@ -80,7 +80,7 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1966.495,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,17063, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
 (@PATH,1,-1966.495,5121.907,10.32379,0,0,0,0,100,0),  -- GUID by ArkDB
 (@PATH,2,-1951.699,5166.294,17.25317,0,0,0,0,100,0),
 (@PATH,3,-1938.637,5205.161,15.87822,0,0,0,0,100,0),
@@ -101,7 +101,7 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1668.65,`posi
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
 (@PATH,1,-1668.65,5531.648,2.084388,0,0,0,0,100,0),  -- GUID by ArkDB
 (@PATH,2,-1675.535,5539.932,4.808745,0,0,0,0,100,0),
 (@PATH,3,-1669.465,5544.53,5.413347,0,0,0,0,100,0),
@@ -148,7 +148,7 @@ UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1622.079,`pos
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
 (@PATH,1,-1622.079,5473.997,-4.175363,0,0,0,0,100,0),  -- GUID by ArkDB
 (@PATH,2,-1624.692,5470.754,-4.14517,0,0,0,0,100,0),
 (@PATH,3,-1624.417,5467.651,-4.055672,0,0,0,0,100,0),
