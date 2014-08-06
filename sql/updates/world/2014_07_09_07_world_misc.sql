@@ -7,7 +7,7 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry`=43
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (13, 1, 43546, 0, 0, 31, 0, 3, 24336, 0, 0, 0, 0, '', 'Runed Orb Targets Orb Target');
 
-UPDATE `creature` SET `MovementType`=0 WHERE  `guid` IN (97715,97748);
+UPDATE `creature` SET `MovementType`=0 WHERE  `guid` IN (204158,204126); -- Guid by ArkDB
 
 UPDATE `creature_template` SET AIName='SmartAI' WHERE `entry`=24335;
 DELETE FROM `smart_scripts` WHERE (`entryorguid`=24335 AND `source_type`=0);

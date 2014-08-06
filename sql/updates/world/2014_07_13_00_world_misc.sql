@@ -1,5 +1,5 @@
 --
-SET @OGUID := 5414;
+SET @OGUID := 183132; -- Guid by ArkDB
 
 DELETE FROM `gameobject` WHERE `guid` = @OGUID;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES

@@ -1,5 +1,5 @@
 --
-SET @CGUID := 43502;
+SET @CGUID := 282902;  -- guid by ArkDB
 DELETE FROM `creature` WHERE `id`=14494;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@CGUID, 14494, 0, 1, 1, 0, 0, 3325.180420 , -2997.122803, 164.205444, 5.663, 300, 0, 0, 3052, 0, 0, 0, 0, 0);

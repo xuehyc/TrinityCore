@@ -1,27 +1,13 @@
-SET @Guid := 79263;
 
 -- Script Undercity NPC's 
 
 -- Sniffs used Undercity_full.bin (3.3.5) for spawns, etc   2014-07-17_11-12-35_19FAA762.pkt (5.4.8) for texts, emotes etc
 
 -- Set Spawntime of Caged Human Male to 120 seconds as is in sniff of this creature not 300 seconds
-UPDATE `creature` SET `spawntimesecs`=120 WHERE `guid`=45218;
+UPDATE `creature` SET `spawntimesecs`=120 WHERE id=5736;
 
 -- Delete the incorrectly spawned human male captive, human female captive, captive ghoul, zombie and abomination as these are spawned as part of event
 DELETE FROM `creature` WHERE  `id` IN (5680,5681,5685,5686,5687);
-
--- Delete the incorrectly spawned Caged Squirrel
-DELETE FROM `creature` WHERE `guid`=45216;
-DELETE FROM `creature_addon` WHERE `guid`=45216; -- Caged Squirrel
-
--- Spawn overseer Kraggosh and the 4 Kor'kron overseers which are missing from the Apothacarium
-DELETE FROM `creature` WHERE `guid` IN (@Guid,@Guid+1,@Guid+2,@Guid+3,@Guid+4);
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(@Guid, 36217, 0, 1, 1, 1438.026, 403.8299, -85.26257, 3.124139, 120, 0, 0), -- 36217 (Area: 0)
-(@Guid+1, 36213, 0, 1, 1, 1388.434, 421.5955, -77.15382, 6.091199, 120, 0, 0), -- 36213 (Area: 0)
-(@Guid+2, 36213, 0, 1, 1, 1446.222, 415.6059, -84.90555, 3.857178, 120, 0, 0), -- 36213 (Area: 0)
-(@Guid+3, 36213, 0, 1, 1, 1414.677, 448.1597, -77.15431, 4.677482, 120, 0, 0), -- 36213 (Area: 0)
-(@Guid+4, 36213, 0, 1, 1, 1419.076, 389.0208, -84.98041, 0.6981317, 120, 0, 0); -- 36213 (Area: 0)
 
 -- Set NPC Flags on Overseer Kraggosh and Apothacary Farnell, gossip is already in db and linked to creature but flag is not set
 UPDATE `creature_template` SET `npcflag`=1 WHERE  `entry`=36217;
@@ -292,6 +278,7 @@ INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `positi
 (5662, 4,  1693.69, 418.24, -62.2982, 'Sergeant Houser');
 
 -- Delete Sergeant Housers waypoints from waypoint_data as these moved to waypoints table so WP can be paused by SAI
-DELETE FROM `waypoint_data` WHERE `id`=384350;
-UPDATE `creature` SET `MovementType`=0 WHERE `guid`=38435;
-UPDATE `creature_addon` SET `path_id`=0 WHERE `guid`=38435;
+DELETE FROM `waypoint_data` WHERE `id`=10000180; -- guid by ArkDB
+UPDATE `creature` SET `MovementType`=0 WHERE `guid`=5338; -- guid by ArkDB
+UPDATE `creature_addon` SET `path_id`=0 WHERE `guid`=5338; -- guid by ArkDB
+

@@ -168,6 +168,7 @@ public:
     };
 };
 
+// 78941
 class spell_parasitic_infection : public SpellScriptLoader
 {
     public:
@@ -194,7 +195,7 @@ class spell_parasitic_infection : public SpellScriptLoader
 
             void Register()
             {
-                OnEffectRemove += AuraEffectRemoveFn(spell_parasitic_infection_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_parasitic_infection_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_DEFAULT);
             }
         };
 

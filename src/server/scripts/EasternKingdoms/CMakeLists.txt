@@ -243,6 +243,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/zone_elwynn_forest.cpp
   EasternKingdoms/zone_coldridge_valley.cpp
   EasternKingdoms/zone_dun_morogh.cpp
+  EasternKingdoms/zone_westfall.cpp
 )
 
 message("  -> Prepared: Eastern Kingdoms")

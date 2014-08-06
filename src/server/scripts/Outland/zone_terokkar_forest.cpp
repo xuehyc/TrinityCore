@@ -704,6 +704,54 @@ public:
     };
 };
 
+enum eQuest10929
+{
+    NPC_MATURE_BONE_SIFTER = 22482,
+    NPC_SAND_GNOME = 22483,
+    NPC_HAISHULUD = 22038,
+    QUEST_FUMPING = 10929,
+    ITEM_MATURE_BONE_SIFTER_CARCASS = 31814,
+    ITEM_FUMPER = 31810,
+    SPELL_FUMPING = 39238,
+};
+
+// spell 39238
+class spell_fumping : public SpellScriptLoader
+{
+public:
+    spell_fumping() : SpellScriptLoader("spell_fumping") { }
+
+    class spell_fumping_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_fumping_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Player* player = GetCaster()->ToPlayer())
+            {
+                Position pos = player->GetNearPosition(3.0f, player->GetAngle(&player->GetPosition()));
+                uint32 pct = urand(0, 100);
+                if (pct < 70)
+                    player->SummonCreature(NPC_MATURE_BONE_SIFTER, pos, TEMPSUMMON_DEAD_DESPAWN, 5000);
+                else
+                    player->SummonCreature(NPC_SAND_GNOME, pos, TEMPSUMMON_DEAD_DESPAWN, 5000);
+            } 
+        }
+
+        void Register()
+        {
+            OnEffectHit += SpellEffectFn(spell_fumping_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_fumping_SpellScript();
+    }
+};
+
+
+
 void AddSC_terokkar_forest()
 {
     new npc_unkor_the_ruthless();
@@ -716,4 +764,6 @@ void AddSC_terokkar_forest()
     new npc_skywing();
     new npc_slim();
     new npc_akuno();
+    new spell_fumping();
+
 }

@@ -1,5 +1,5 @@
 SET @ENTRY_MINIGOB = 32838;
-SET @GUID_MINIGOB  = 44457;
+SET @GUID_MINIGOB  = 199025; -- Guid by ArkDB
 SET @EVENT_ID      = 33;
 
 -- mail loot

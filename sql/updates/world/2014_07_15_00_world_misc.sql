@@ -1,4 +1,4 @@
-SET @CGuid := 76311; -- Needs 3 for the 3 permament spawns of living poison which never activate or move but are used to spawn the 
+SET @CGuid := 282912; -- Guid from ArkDB  Needs 3 for the 3 permament spawns of living poison which never activate or move but are used to spawn the 
 
 -- Living poison sets immune to pc on spawn and moves forward, if any player comes within 1 yard range it will then remove immune to pc flags
 -- and cast explosion spell, it must allow pc at this point otherwise the spell only kills the living poison
@@ -25,13 +25,13 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 -- Creature Data taken from 15354_2012-03-16_10-04-38_raids.pkt
 
-DELETE FROM `creature` WHERE `guid` IN (@CGuid, @CGuid+1, @CGuid+2) AND `id`=16027;
+DELETE FROM `creature` WHERE `guid` IN (@CGuid, @CGuid+1, @CGuid+2) AND `id`=16027; -- guid by ArkDB
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
 (@CGUID,   16027, 533, 3, 1, 3128.499, -3131.24,  294.0653, 4.725505, 7200, 0, 0),
 (@CGUID+1, 16027, 533, 3, 1, 3151.244, -3137.117, 294.0628, 4.456693, 7200, 0, 0),
 (@CGUID+2, 16027, 533, 3, 1, 3169.886, -3145.452, 294.0555, 4.244928, 7200, 0, 0);
 
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN(-@CGuid,-@CGuid-1,-@CGuid-2) AND `source_type`=0;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN(-@CGuid,-@CGuid-1,-@CGuid-2) AND `source_type`=0; -- guid by ArkDB
 
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (-@CGuid, 0, 0, 0, 1, 0, 100, 0, 0, 0, 3333, 3333, 12, 16027, 1, 8000, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Living Poison - OOC - Spawn Living Poison'),
