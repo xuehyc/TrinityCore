@@ -1,11 +1,12 @@
+
 -- Misc fixes Shadowmoon Vally
-UPDATE `waypoint_data` SET `move_type`=1 WHERE `id` BETWEEN 755410 AND 755580;
-UPDATE `waypoint_data` SET `move_type`=1 WHERE `id` IN (861030,756540);
+-- UPDATE `waypoint_data` SET `move_type`=1 WHERE `id` BETWEEN 755410 AND 755580;
+-- UPDATE `waypoint_data` SET `move_type`=1 WHERE `id` IN (861030,756540);
 UPDATE `creature` SET `spawndist`=0,`MovementType`=0 WHERE `id`=20431;
 UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=20431;
 
 -- Pathing for Eclipsion Bloodwarder Entry: 19806
-SET @NPC := 70924;
+SET @NPC := 182721; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-4360.784,`position_y`=1629.075,`position_z`=155.2385 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -30,7 +31,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,-4353.151,1625.602,154.0825,0,0,0,0,100,0);
 
 -- Pathing for Eclipsion Bloodwarder Entry: 19806
-SET @NPC := 70923;
+SET @NPC := 182723; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-4217.18,`position_y`=1521.898,`position_z`=121.213 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -67,7 +68,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,28,-4208.12,1518.035,119.0382,0,0,0,0,100,0);
 
 -- Pathing for Eclipsion Centurion Entry: 19792
-SET @NPC := 70813;
+SET @NPC := 182812; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-4172.616,`position_y`=1491.763,`position_z`=115.0119 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -82,7 +83,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,6,-4203.639,1494.258,121.3947,0,0,0,0,100,0);
 
 -- Pathing for Eclipsion Centurion Entry: 19792
-SET @NPC := 70819;
+SET @NPC := 182815; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-4215.104,`position_y`=1564.346,`position_z`=118.4787 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -99,7 +100,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,8,-4180.447,1555.489,110.1809,0,0,0,0,100,0);
 
 -- Pathing for Eclipsion Centurion Entry: 19792
-SET @NPC := 70818;
+SET @NPC := 1821807; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-4234.924,`position_y`=1547.492,`position_z`=126.5343 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -116,7 +117,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,8,-4265.908,1569.376,133.2798,0,0,0,0,100,0);
 
 -- Pathing for Eclipsion Centurion Entry: 19792
-SET @NPC := 45146;
+SET @NPC := 182808; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 DELETE FROM `creature` WHERE `guid`=@NPC;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES

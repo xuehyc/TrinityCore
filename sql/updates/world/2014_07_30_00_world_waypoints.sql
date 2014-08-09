@@ -1,8 +1,9 @@
+
 -- Fix speed for Marsh Walker
 UPDATE `creature_template` SET `speed_walk`=0.714285 WHERE `entry`=18135;
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64827;
+SET @NPC := 173882; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-301.1938,`position_y`=8503.301,`position_z`=18.08551 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -27,7 +28,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,-274.4911,8481.536,17.49909,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64825;
+SET @NPC := 173883; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=874.0325,`position_y`=8117.328,`position_z`=17.64004 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -48,7 +49,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,869.3058,8088.53,17.37932,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64836;
+SET @NPC := 173884; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-170.0164,`position_y`=8324.316,`position_z`=17.49908 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -75,7 +76,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,-151.9314,8340.622,17.4991,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64830;
+SET @NPC := 173885; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=447.8367,`position_y`=8068.624,`position_z`=17.57124 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -98,7 +99,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,466.6456,8034.254,17.49908,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64823;
+SET @NPC := 173886; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=1118.289,`position_y`=8010.705,`position_z`=17.82893 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -121,7 +122,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,1087.97,8006.682,17.62409,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64839;
+SET @NPC := 173887; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-114.5583,`position_y`=8460.023,`position_z`=18.7491 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -146,7 +147,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,-122.5003,8425.968,17.49909,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64829;
+SET @NPC := 173888; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=578.0402,`position_y`=7958.319,`position_z`=17.49801 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -167,7 +168,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,555.1559,7936.427,17.49322,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64820;
+SET @NPC := 173889; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=781.5635,`position_y`=7542.347,`position_z`=17.736 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -188,7 +189,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,762.9514,7551.243,17.6321,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64821;
+SET @NPC := 173890; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=644.4886,`position_y`=7622.633,`position_z`=17.49904 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -211,7 +212,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,623.101,7642.905,17.48726,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64834;
+SET @NPC := 173891; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=86.54546,`position_y`=8255.574,`position_z`=18.9558 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -244,7 +245,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,24,94.9808,8216.692,18.18986,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64824;
+SET @NPC := 173892; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=961.119,`position_y`=8084.976,`position_z`=17.46151 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -265,7 +266,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,965.8881,8057.272,17.07878,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64835;
+SET @NPC := 173893; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-50.38683,`position_y`=8411.523,`position_z`=17.47196 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -288,7 +289,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,-96.01302,8420.427,17.54388,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64833;
+SET @NPC := 173894; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=87.91873,`position_y`=8158.213,`position_z`=17.85594 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -315,7 +316,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,119.1228,8142.663,17.80609,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64840;
+SET @NPC := 173895; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-347.4796,`position_y`=8533.388,`position_z`=17.49909 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -334,7 +335,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,10,-368.0536,8508.598,17.49909,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64838;
+SET @NPC := 173896; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=184.0078,`position_y`=8977,`position_z`=17.39463 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -357,7 +358,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,148.9398,8971.519,19.89098,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64832;
+SET @NPC := 173897; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=785.5858,`position_y`=8579.806,`position_z`=17.56527 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -382,7 +383,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,825.7322,8589.715,17.49902,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64822;
+SET @NPC := 173898; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=291.873,`position_y`=7703.415,`position_z`=17.88411 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -409,34 +410,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,314.779,7703.312,17.58478,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64832;
-SET @PATH := @NPC * 10;
-UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=716.7272,`position_y`=8601.276,`position_z`=17.4991 WHERE `guid`=@NPC;
-DELETE FROM `creature_addon` WHERE `guid`=@NPC;
-INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
-DELETE FROM `waypoint_data` WHERE `id`=@PATH;
-INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,716.7272,8601.276,17.4991,0,0,0,0,100,0),
-(@PATH,2,752.174,8584.586,17.4991,0,0,0,0,100,0),
-(@PATH,3,795.9551,8585.222,17.49673,0,0,0,0,100,0),
-(@PATH,4,827.15,8586.998,17.49902,0,0,0,0,100,0),
-(@PATH,5,856.6465,8574.583,17.49829,0,0,0,0,100,0),
-(@PATH,6,886.3231,8559.085,17.39889,0,0,0,0,100,0),
-(@PATH,7,912.6191,8540.341,17.49909,0,0,0,0,100,0),
-(@PATH,8,939.4836,8513.34,17.45282,0,0,0,0,100,0),
-(@PATH,9,954.2996,8474.65,17.49907,0,0,0,0,100,0),
-(@PATH,10,984.855,8453.599,17.39467,0,0,0,0,100,0),
-(@PATH,11,954.2996,8474.65,17.49907,0,0,0,0,100,0),
-(@PATH,12,939.4836,8513.34,17.45282,0,0,0,0,100,0),
-(@PATH,13,912.6191,8540.341,17.49909,0,0,0,0,100,0),
-(@PATH,14,886.3231,8559.085,17.39889,0,0,0,0,100,0),
-(@PATH,15,856.6465,8574.583,17.49829,0,0,0,0,100,0),
-(@PATH,16,827.15,8586.998,17.49902,0,0,0,0,100,0),
-(@PATH,17,795.9551,8585.222,17.49673,0,0,0,0,100,0),
-(@PATH,18,752.174,8584.586,17.4991,0,0,0,0,100,0);
-
--- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64828;
+SET @NPC := 173899; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=924.0667,`position_y`=8305.966,`position_z`=17.67109 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -459,7 +433,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,947.1714,8327.824,17.4991,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64819;
+SET @NPC := 173900; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-390.1439,`position_y`=8253.518,`position_z`=16.09562 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -488,7 +462,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,20,-424.5453,8234.055,17.90831,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64831;
+SET @NPC := 173901; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=883.9965,`position_y`=8521.639,`position_z`=17.83781 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -511,7 +485,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,858.9237,8483.394,17.51669,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64826;
+SET @NPC := 173902; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=974.1456,`position_y`=8151.406,`position_z`=17.49909 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -536,7 +510,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,1005.321,8156.346,17.49909,0,0,0,0,100,0);
 
 -- Pathing for Marsh Walker Entry: 18135
-SET @NPC := 64837;
+SET @NPC := 173903; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=82.27843,`position_y`=8509.213,`position_z`=17.49909 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -565,7 +539,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,20,47.22873,8506.513,17.49909,0,0,0,0,100,0);
 
 -- Pathing for Ango'rosh Shaman Entry: 18118
-SET @NPC := 64200;
+SET @NPC := 174525; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=644.8542,`position_y`=7864.837,`position_z`=22.3112 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -599,7 +573,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,25,637.0594,7876.642,21.9847,0,0,0,0,100,0);
 
 -- Pathing for Ango'rosh Shaman Entry: 18118
-SET @NPC := 64199;
+SET @NPC := 174509; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=770.1323,`position_y`=7774.846,`position_z`=22.67318 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -649,14 +623,8 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,41,761.437,7784.407,22.66974,0,0,0,0,100,0),
 (@PATH,42,765.7609,7779.539,22.77408,0,0,0,0,100,0);
 
-UPDATE `creature` SET `id`=18118 WHERE `guid`=64195;
-UPDATE `creature` SET `spawndist`=5,`MovementType`=1 WHERE `guid` IN (64191,64195,64159,64196,64186,64170,64163,64158);
-DELETE FROM `creature_addon` WHERE `guid` IN (64191,64195,64159,64196,64186,64170,64163,64158);
-INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`emote`,`auras`) VALUES 
-(64159,0,1,0, ''),(64196,0,1,0, ''),(64191,0,1,0, ''),(64186,0,1,0, ''),(64170,0,1,0, ''),(64163,0,1,0, ''),(64158,0,1,0, '');
-
 -- Pathing for Ango'rosh Sentry Entry: 20443
-SET @NPC := 72411;
+SET @NPC := 181269; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=1280.438,`position_y`=8627.676,`position_z`=20.92095 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -673,7 +641,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,8,1281.377,8600.357,18.18194,0,0,0,0,100,0);
 
 -- Pathing for Ango'rosh Sentry Entry: 20443
-SET @NPC := 72420;
+SET @NPC := 181260; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=970.3631,`position_y`=8553.178,`position_z`=21.38559 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -692,7 +660,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,10,969.0519,8528.513,20.06933,0,0,0,0,100,0);
 
 -- Pathing for Ango'rosh Sentry Entry: 20443
-SET @NPC := 72413;
+SET @NPC := 181265; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=1173.638,`position_y`=8413.106,`position_z`=47.84419 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -721,7 +689,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,20,1178.014,8414.137,50.07702,0,0,0,0,100,0);
 
 -- Pathing for Ango'rosh Sentry Entry: 20443
-SET @NPC := 72421;
+SET @NPC := 181259; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=1072.604,`position_y`=8637.91,`position_z`=22.98809 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -734,7 +702,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,4,1094.035,8644.675,23.35613,0,0,0,0,100,0);
 
 -- Pathing for Ango'rosh Sentry Entry: 20443
-SET @NPC := 72410;
+SET @NPC := 181270; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=1257.143,`position_y`=8512.616,`position_z`=22.73383 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -763,7 +731,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,20,1264.564,8540.619,18.63026,0,0,0,0,100,0);
 
 -- Pathing for Ango'rosh Sentry Entry: 20443
-SET @NPC := 72418;
+SET @NPC := 181263; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=1050.08,`position_y`=8471.225,`position_z`=55.79852 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;

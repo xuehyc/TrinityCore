@@ -45,7 +45,7 @@ UPDATE creature SET `spawndist`=0,`MovementType`=0 WHERE `id` IN (18117);
 UPDATE creature_template_addon SET `emote`=234 WHERE `entry` IN (18117);
 
 -- Pathing for Voidshrieker Entry: 18870
-SET @NPC := 67511;
+SET @NPC := 185950; -- GUID by ARKDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=4103.666,`position_y`=2008.716,`position_z`=230.7258 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -72,7 +72,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,4080.718,2041.648,241.5903,0,0,0,0,100,0);
 
 -- Pathing for Voidshrieker Entry: 18870
-SET @NPC := 67509;
+SET @NPC := 185955; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=3798.831,`position_y`=1750.282,`position_z`=178.7591 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;

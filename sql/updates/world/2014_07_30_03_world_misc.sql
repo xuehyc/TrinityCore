@@ -1,8 +1,9 @@
+
 -- Fix and remove some Ango'rosh Souleater & Mauler spawns
 DELETE FROM `creature_addon` WHERE `guid` IN (SELECT guid FROM creature WHERE id=18121);
 UPDATE `creature_template_addon` SET `auras`= '35194' WHERE `entry`=18121;
-DELETE FROM creature WHERE guid IN (64230,64242,64259,64229,64240);
-UPDATE `creature` SET `spawndist`=5,`MovementType`=1,`position_x`=1819.455,`position_y`=8405.807,`position_z`=-8.42151 WHERE `guid`=64261;
+-- DELETE FROM creature WHERE guid IN (64230,64242,64259,64229,64240); -- not compatible with ArkDB
+-- UPDATE `creature` SET `spawndist`=5,`MovementType`=1,`position_x`=1819.455,`position_y`=8405.807,`position_z`=-8.42151 WHERE `guid`=64261; -- alredy done in ArkDB
 
 -- Ango'rosh Shadowmage SAI
 SET @ENTRY := 20444;
@@ -13,7 +14,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,0,1,0,0,0,100,0,3000,5000,15000,19000,11,9657,1,0,0,0,0,1,0,0,0,0,0,0,0,"Ango'rosh Shadowmage - In Combat - Cast 'Shadow Shell'");
 
 -- Pathing for Ango'rosh Souleater Entry: 18121
-SET @NPC := 64246;
+SET @NPC := 174476; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=1483.504,`position_y`=8615.958,`position_z`=-23.3291 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -28,7 +29,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,6,1502.414,8615.582,-27.77901,0,0,0,0,100,0);
 
 -- Pathing for Ango'rosh Mauler Entry: 18120
-SET @NPC := 64228;
+SET @NPC := 174487; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=1764.775,`position_y`=8621.494,`position_z`=3.295652 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -77,7 +78,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,40,1770.793,8609.967,0.8600597,0,0,0,0,100,0);
 
 -- Pathing for Ango'rosh Mauler Entry: 18120
-SET @NPC := 64223;
+SET @NPC := 174499; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=1394.517,`position_y`=8623.379,`position_z`=9.483105 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -106,7 +107,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,20,1409.568,8618.852,5.867712,0,0,0,0,100,0);
 
 -- Pathing for Ango'rosh Mauler Entry: 18120
-SET @NPC := 64232;
+SET @NPC := 174480; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=1608.688,`position_y`=8551.909,`position_z`=-15.61611 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -141,7 +142,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,26,1611.307,8535.476,-8.693747,0,0,0,0,100,0);
 
 -- Pathing for Ango'rosh Mauler Entry: 18120
-SET @NPC := 64239;
+SET @NPC := 174490; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=1643.826,`position_y`=8612.983,`position_z`=-31.12585 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -170,7 +171,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,20,1653.174,8612.425,-33.30415,0,0,0,0,100,0);
 
 -- Pathing for Ango'rosh Mauler Entry: 18120
-SET @NPC := 64241;
+SET @NPC := 174496; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=1654.654,`position_y`=8521.531,`position_z`=-53.58351 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;

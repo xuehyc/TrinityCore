@@ -1,5 +1,5 @@
 -- Pathing for Darkcrest Sentry Entry: 20079
-SET @NPC := 71525;
+SET @NPC := 182116; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-811.9146,`position_y`=5769.104,`position_z`=17.18619 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -42,7 +42,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,34,-803.7941,5777.138,19.5491,0,0,0,0,100,0);
 
 -- Pathing for Darkcrest Sentry Entry: 20079
-SET @NPC := 71526;
+SET @NPC := 182117; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-410.8705,`position_y`=6309.836,`position_z`=17.62405 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -69,7 +69,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,-412.0008,6326.139,17.70071,0,0,0,0,100,0);
 
 -- Pathing for Darkcrest Sentry Entry: 20079
-SET @NPC := 71527;
+SET @NPC := 182118; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-355.7398,`position_y`=6439.344,`position_z`=17.67068 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -88,7 +88,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,10,-375.4502,6416.951,17.63828,0,0,0,0,100,0);
 
 -- Pathing for Darkcrest Sentry Entry: 20079
-SET @NPC := 71528;
+SET @NPC := 182119; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-320.0476,`position_y`=6163.984,`position_z`=17.62409 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -113,7 +113,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,-314.4604,6181.93,17.56598,0,0,0,0,100,0);
 
 -- Pathing for Darkcrest Sentry Entry: 20079
-SET @NPC := 71529;
+SET @NPC := 182120; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-410.5085,`position_y`=6255.543,`position_z`=17.44794 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -140,7 +140,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,-421.0254,6231.694,17.49909,0,0,0,0,100,0);
 
 -- Pathing for Darkcrest Sentry Entry: 20079
-SET @NPC := 71530;
+SET @NPC := 182121; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-523.4554,`position_y`=5876.645,`position_z`=17.92353 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -161,7 +161,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,-540.7239,5876.821,17.94059,0,0,0,0,100,0);
 
 -- Pathing for Darkcrest Sentry Entry: 20079
-SET @NPC := 71531;
+SET @NPC := 182122; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-685.4247,`position_y`=5744.201,`position_z`=14.45076 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -185,7 +185,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,15,-676.3831,5758.203,15.53962,0,0,0,0,100,0);
 
 -- Pathing for Darkcrest Sentry Entry: 20079
-SET @NPC := 71532;
+SET @NPC := 182123; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-636.8377,`position_y`=5918.188,`position_z`=17.91747 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -206,7 +206,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,-619.8817,5917.089,17.98915,0,0,0,0,100,0);
 
 -- Pathing for Darkcrest Sentry Entry: 20079
-SET @NPC := 71533;
+SET @NPC := 182124; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-745.6512,`position_y`=5946.403,`position_z`=17.49909 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;

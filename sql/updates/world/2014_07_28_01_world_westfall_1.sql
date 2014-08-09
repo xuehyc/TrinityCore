@@ -58,8 +58,8 @@ insert into creature_addon (guid,bytes1,bytes2,emote,auras) values
 
 -- http://www.wowhead.com/quest=28562  Hero's Call: Westfall!
 -- http://www.wowhead.com/quest=26378  Hero's Call: Westfall!
--- http://www.wowhead.com/spell=79488  Apply Quest Invis Zone 0
-UPDATE quest_template SET SourceSpellId=79488 WHERE Id in (26378,28562);
+-- http://www.wowhead.com/spell=79489  SEE Quest Invis Zone 0
+UPDATE quest_template SET SourceSpellId=79489 WHERE Id in (26378,28562);
 
 -- http://www.wowhead.com/quest=26215  Meet Two-Shoed Lou
 -- http://www.wowhead.com/spell=78284  Apply Quest Invis Zone 1

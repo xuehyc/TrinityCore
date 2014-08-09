@@ -1,5 +1,5 @@
 -- Pathing for Bloodscale Sentry Entry: 20090
-SET @NPC := 71581;
+SET @NPC := 182059; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=759.4943,`position_y`=6306.357,`position_z`=17.4089 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -34,7 +34,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,26,777.3499,6314.912,17.43856,0,0,0,0,100,0);
 
 -- Pathing for Bloodscale Sentry Entry: 20090
-SET @NPC := 71582;
+SET @NPC := 182060;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=598.7636,`position_y`=8083.793,`position_z`=17.6241 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -71,7 +71,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,28,588.2853,8104.152,17.4111,0,0,0,0,100,0);
 
 -- Pathing for Bloodscale Sentry Entry: 20090
-SET @NPC := 71583;
+SET @NPC := 182061;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=583.2789,`position_y`=6151.631,`position_z`=17.56806 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -98,7 +98,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,588.7063,6121.675,17.49909,0,0,0,0,100,0);
 
 -- Pathing for Bloodscale Sentry Entry: 20090
-SET @NPC := 71584;
+SET @NPC := 182062;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=484.8557,`position_y`=6147.238,`position_z`=17.39692 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -123,7 +123,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,479.6094,6168.237,17.3991,0,0,0,0,100,0);
 
 -- Pathing for Bloodscale Sentry Entry: 20090
-SET @NPC := 71585;
+SET @NPC := 182063;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=714.0928,`position_y`=6330.395,`position_z`=17.28641 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -150,7 +150,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,707.5536,6305.207,17.44607,0,0,0,0,100,0);
 
 -- Pathing for Bloodscale Sentry Entry: 20090
-SET @NPC := 71586;
+SET @NPC := 182064;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=456.8788,`position_y`=6370.086,`position_z`=17.94312 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -171,7 +171,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,454.0548,6347.622,17.85618,0,0,0,0,100,0);
 
 -- Pathing for Bloodscale Sentry Entry: 20090
-SET @NPC := 71587;
+SET @NPC := 182065;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=473.7206,`position_y`=8024.335,`position_z`=17.56001 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -198,7 +198,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,458.5915,8058.235,17.49908,0,0,0,0,100,0);
 
 -- Pathing for Bloodscale Sentry Entry: 20090
-SET @NPC := 71588;
+SET @NPC := 182066;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=763.2474,`position_y`=8077.369,`position_z`=17.49908 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -221,7 +221,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,753.71,8050.239,17.49907,0,0,0,0,100,0);
 
 -- Pathing for Bloodscale Sentry Entry: 20090
-SET @NPC := 71589;
+SET @NPC := 182067;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=590.5538,`position_y`=6385.54,`position_z`=19.41796 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -244,7 +244,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,603.5302,6383.618,19.05107,0,0,0,0,100,0);
 
 -- Pathing for Bloodscale Sentry Entry: 20090
-SET @NPC := 71590;
+SET @NPC := 182068;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=384.1659,`position_y`=8112.826,`position_z`=17.53038 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;

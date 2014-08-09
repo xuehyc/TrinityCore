@@ -1,11 +1,9 @@
+
 -- Fix InhabitType for Unending Voidwraith Entry: 19568
 UPDATE creature_template SET `InhabitType`=4 WHERE entry=19568;
 
--- Remove overspawns
-DELETE FROM `creature` WHERE `guid` IN (70004,69971,69972,69974,69975,69979,69983,69983,69984,69985);
-
 -- Pathing for Unending Voidwraith Entry: 19568
-SET @NPC := 69987;
+SET @NPC := 183592; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=3915.081,`position_y`=2111.545,`position_z`=274.4216 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -18,7 +16,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,4,3897.602,2202.157,270.2776,0,1000,0,80,100,0);
 
 -- Pathing for Unending Voidwraith Entry: 19568
-SET @NPC := 69988;
+SET @NPC := 183594; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=3887.315,`position_y`=2258.425,`position_z`=214.2984 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -29,7 +27,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,2,3880.079,2289.422,171.0624,0,1000,0,81,100,0);
 
 -- Pathing for Unending Voidwraith Entry: 19568
-SET @NPC := 69989;
+SET @NPC := 183597; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=3726.479,`position_y`=1961.26,`position_z`=249.9123 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -41,7 +39,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,3,3726.594,1962.199,171.9171,0,1000,0,82,100,0);
 
 -- Pathing for Unending Voidwraith Entry: 19568
-SET @NPC := 69991;
+SET @NPC := 183583; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=4044.87,`position_y`=2025.382,`position_z`=267.5442 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -53,7 +51,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,3,4114.268,2037.787,271.1436,0,1000,0,83,100,0);
 
 -- Pathing for Unending Voidwraith Entry: 19568
-SET @NPC := 69993;
+SET @NPC := 183585; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=4148.985,`position_y`=2042.905,`position_z`=164.7122 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -65,7 +63,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,3,4149.163,2042.004,249.0274,0,1000,0,84,100,0);
 
 -- Pathing for Unending Voidwraith Entry: 19568
-SET @NPC := 69994;
+SET @NPC := 183587; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=3827.957,`position_y`=1979.826,`position_z`=275.0208 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -78,7 +76,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,4,3759.935,1969.464,271.9074,0,1000,0,85,100,0);
 
 -- Pathing for Unending Voidwraith Entry: 19568
-SET @NPC := 69998;
+SET @NPC := 183606; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=4151.247,`position_y`=2042.391,`position_z`=245.5923 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -90,7 +88,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,3,4150.337,2041.994,173.4543,0,1000,0,86,100,0);
 
 -- Pathing for Unending Voidwraith Entry: 19568
-SET @NPC := 69999;
+SET @NPC := 183586; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=3957.735,`position_y`=1894.359,`position_z`=269.9256 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -106,7 +104,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,7,3988.208,1743.379,272.2765,0,1000,0,87,100,0);
 
 -- Pathing for Unending Voidwraith Entry: 19568
-SET @NPC := 69978;
+SET @NPC := 183604; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=3990.148,`position_y`=1735.373,`position_z`=270.1769 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -121,7 +119,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,6,3965.208,1873.519,274.3181,0,1000,0,88,100,0);
 
 -- Pathing for Unending Voidwraith Entry: 19568
-SET @NPC := 69980;
+SET @NPC := 183603; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=4001.008,`position_y`=1683.551,`position_z`=137.2256 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -133,7 +131,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,3,4000.325,1683.686,228.1769,0,1000,0,89,100,0);
 
 -- Pathing for Unending Voidwraith Entry: 19568
-SET @NPC := 69982;
+SET @NPC := 183598; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=3696.551,`position_y`=1954.486,`position_z`=134.3766 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -146,16 +144,3 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,4,3570.341,1931.432,128.7372,0,0,0,0,100,0),
 (@PATH,5,3552.659,1931.052,126.8722,0,1000,0,90,100,0);
 
-DELETE FROM `waypoint_scripts` WHERE `id` IN (80,81,82,83,84,85,86,87,88,89,90);
-INSERT INTO `waypoint_scripts` (`id`,`delay`,`command`,`datalong`,`datalong2`,`dataint`,`x`,`y`,`z`,`o`,`guid`) VALUES 
-(80,0,6,530,1,0,3915.081,2111.545,274.4216,0,880),
-(81,0,6,530,1,0,3887.315,2258.425,214.2984,0,881),
-(82,0,6,530,1,0,3726.479,1961.26,249.9123,0,882),
-(83,0,6,530,1,0,4044.87,2025.382,267.5442,0,883),
-(84,0,6,530,1,0,4148.985,2042.905,164.7122,0,884),
-(85,0,6,530,1,0,3827.957,1979.826,275.0208,0,885),
-(86,0,6,530,1,0,4151.247,2042.391,245.5923,0,886),
-(87,0,6,530,1,0,3957.735,1894.359,269.9256,0,887),
-(88,0,6,530,1,0,3990.148,1735.373,270.1769,0,888),
-(89,0,6,530,1,0,4001.008,1683.551,137.2256,0,889),
-(90,0,6,530,1,0,3696.551,1954.486,134.3766,0,890);

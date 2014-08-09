@@ -1,5 +1,5 @@
 -- Pathing for Swamprat Guard Entry: 18910
-SET @NPC := 67906;
+SET @NPC := 185560; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=75.29373,`position_y`=5261.419,`position_z`=23.08392 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -20,7 +20,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,75.86388,5247.502,23.12924,0,0,0,0,100,0);
 
 -- Pathing for Swamprat Guard Entry: 18910
-SET @NPC := 67907;
+SET @NPC := 185561; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=75.29373,`position_y`=5261.419,`position_z`=23.08392 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -41,12 +41,13 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,75.86388,5247.502,23.12924,0,0,0,0,100,0);
 
 -- Add Swamprat Guard formation
-DELETE FROM `creature_formations` WHERE `leaderGUID`=67907;
+DELETE FROM `creature_formations` WHERE `leaderGUID`=185561; -- GUID by ArkDB
 INSERT INTO `creature_formations` (`leaderGUID`,`memberGUID`,`dist`,`angle`,`groupAI`)VALUES
-(67907,67907,0,0,2),(67907,67906,3,0,2);
+(185561,185561,0,0,2), -- GUID by ArkDB
+(185561,185560,3,0,2); -- GUID by ArkDB
 
 -- Pathing for Swamprat Guard Entry: 18910
-SET @NPC := 67910;
+SET @NPC := 185557; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=104.3016,`position_y`=5221.673,`position_z`=22.33099 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
