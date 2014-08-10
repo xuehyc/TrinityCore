@@ -1,16 +1,18 @@
+
 -- Pathing for Garadar Wolf Rider Entry: 19068
-SET @NPC := 68369;
+SET @NPC := 185101;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1306.285,`position_y`=6952.27,`position_z`=31.80549 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,4097,18509, '');
-UPDATE `creature` SET `position_x`=-1312.285,`position_y`=6940.27,`position_z`=31.40549,`orientation`=1.049322 WHERE `guid`=68368;
-DELETE FROM `creature_formations` WHERE `leaderGUID`=68369;
+UPDATE `creature` SET `position_x`=-1312.285,`position_y`=6940.27,`position_z`=31.40549,`orientation`=1.049322 WHERE `guid`=185101;
+DELETE FROM `creature_formations` WHERE `leaderGUID`=185102;
 INSERT INTO `creature_formations` (`leaderGUID`,`memberGUID`,`dist`,`angle`,`groupAI`)VALUES
-(68369,68369,0,0,2),(68369,68368,10,180,2);
+(185102,185102,0,0,2), -- GUID by ArkDB
+(185102,185101,10,180,2);
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1306.285,6952.27,31.80549,0,0,1,0,100,0),
+(@PATH,1,-1306.285,6952.27,31.80549,0,0,1,0,100,0),  -- GUID by ArkDB
 (@PATH,2,-1297.114,6970.51,32.55774,0,0,1,0,100,0),
 (@PATH,3,-1286.846,6984.002,32.94885,0,0,1,0,100,0),
 (@PATH,4,-1294.647,6996.062,32.38757,0,0,1,0,100,0),
@@ -80,18 +82,19 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,68,-1318.743,6930.187,31.66993,0,0,1,0,100,0);
 
 -- Pathing for Garadar Wolf Rider Entry: 19068
-SET @NPC := 68371;
+SET @NPC := 185103; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1211.921,`position_y`=7410.358,`position_z`=27.81794 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,4097,18509, '');
-UPDATE `creature` SET `position_x`=-1212.921,`position_y`=7400.358,`position_z`=28.68889,`orientation`=2.005122 WHERE `guid`=68370;
-DELETE FROM `creature_formations` WHERE `leaderGUID`=68371;
+UPDATE `creature` SET `position_x`=-1212.921,`position_y`=7400.358,`position_z`=28.68889,`orientation`=2.005122 WHERE `guid`=185103;
+DELETE FROM `creature_formations` WHERE `leaderGUID`=185104;  -- GUID by ArkDB
 INSERT INTO `creature_formations` (`leaderGUID`,`memberGUID`,`dist`,`angle`,`groupAI`)VALUES
-(68371,68371,0,0,2),(68371,68370,10,180,2);
+(185104,185104,0,0,2),  -- GUID by ArkDB
+(185104,185103,10,180,2);
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1211.921,7410.358,27.81794,0,0,1,0,100,0),
+(@PATH,1,-1211.921,7410.358,27.81794,0,0,1,0,100,0),  -- GUID by ArkDB
 (@PATH,2,-1214.586,7425.123,25.99836,0,0,1,0,100,0),
 (@PATH,3,-1222.165,7481.616,21.67305,0,0,1,0,100,0),
 (@PATH,4,-1220.974,7497.774,20.48409,0,0,1,0,100,0),

@@ -48,7 +48,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,0,0,0,0,0,85,0,4500,4500,7000,11000,11,32000,0,0,0,0,0,2,0,0,0,0,0,0,0,"Kil'sorrow Cultist - In Combat - Cast 'Mind Sear'");
 
 -- Kil'sorrow Cultist fix up addons
-DELETE FROM `creature_addon` WHERE `guid` IN (28654,28655,28656,28657,60213,60215,60221);
+DELETE FROM `creature_addon` WHERE `guid` IN (161720,161719,161721,161959,178306,178308,178314); -- GUID by ArkDB
 DELETE FROM `creature_template_addon` WHERE `entry`=17147;
 INSERT INTO `creature_template_addon` (`entry`,`path_id`,`mount`,`bytes1`,`bytes2`,`emote`,`auras`)VALUES (17147,0,0,0,1,0, '16592');
 
@@ -58,31 +58,31 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (13, 1, 31902, 0, 0, 31, 0, 3, 19656, 0, 0, 0, 0, '', 'Purple Beam Targets Invisible Location Trigger');
 
 -- Add Missing Kil'sorrow Spellbinder & Cultist Spawns
-SET @CGUID := 213225;
-DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+9;
+SET @CGUID := 213225;  -- GUID by ArkDB
+DELETE FROM `creature` WHERE `guid` in (178316,178317,178318,178319,178320,178303,178304;178305,178306,178307);
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(@CGUID+0, 17147, 530, 1, 1, 1, -2966.403, 6452.863, 84.96134, 6.021386, 120, 0, 0),
-(@CGUID+1, 17146, 530, 1, 1, 1, -2966.403, 6450.863, 84.96134, 6.021386, 120, 0, 0),
-(@CGUID+2, 17147, 530, 1, 1, 1, -2884.375, 6580.407, 49.82686, 4.698485, 120, 0, 0),
-(@CGUID+3, 17146, 530, 1, 1, 1, -2886.375, 6580.407, 49.82686, 4.698485, 120, 0, 0),
-(@CGUID+4, 17147, 530, 1, 1, 1, -2794.054, 6424.335, 62.25868, 4.572828, 120, 0, 0),
-(@CGUID+5, 17146, 530, 1, 1, 1, -2796.054, 6424.335, 62.25868, 4.572828, 120, 0, 0),
-(@CGUID+6, 17147, 530, 1, 1, 1, -2857.618, 6466.858, 82.75233, 4.788821, 120, 0, 0),
-(@CGUID+7, 17146, 530, 1, 1, 1, -2858.218, 6466.858, 82.75233, 4.788821, 120, 0, 0),
-(@CGUID+8, 17147, 530, 1, 1, 1, -2934.352, 6331.253, 88.43297, 1.203481, 120, 0, 0),
-(@CGUID+9, 17146, 530, 1, 1, 1, -2932.352, 6330.253, 88.43297, 1.203481, 120, 0, 0);
+(178303, 17147, 530, 1, 1, 1, -2966.403, 6452.863, 84.96134, 6.021386, 120, 0, 0),
+(178316, 17146, 530, 1, 1, 1, -2966.403, 6450.863, 84.96134, 6.021386, 120, 0, 0),
+(178304, 17147, 530, 1, 1, 1, -2884.375, 6580.407, 49.82686, 4.698485, 120, 0, 0),
+(178317, 17146, 530, 1, 1, 1, -2886.375, 6580.407, 49.82686, 4.698485, 120, 0, 0),
+(178305, 17147, 530, 1, 1, 1, -2794.054, 6424.335, 62.25868, 4.572828, 120, 0, 0),
+(178318, 17146, 530, 1, 1, 1, -2796.054, 6424.335, 62.25868, 4.572828, 120, 0, 0),
+(178306, 17147, 530, 1, 1, 1, -2857.618, 6466.858, 82.75233, 4.788821, 120, 0, 0),
+(178319, 17146, 530, 1, 1, 1, -2858.218, 6466.858, 82.75233, 4.788821, 120, 0, 0),
+(178307, 17147, 530, 1, 1, 1, -2934.352, 6331.253, 88.43297, 1.203481, 120, 0, 0),
+(178320, 17146, 530, 1, 1, 1, -2932.352, 6330.253, 88.43297, 1.203481, 120, 0, 0);
 
 -- Kil'sorrow Spellbinder / Cultist Formations
-DELETE FROM `creature_formations` WHERE `leaderGUID` IN (213226,213228,213230,213232,213234);
+DELETE FROM `creature_formations` WHERE `leaderGUID` IN (178316,178317,178318,178319,178320);  -- GUID by ArkDB
 INSERT INTO `creature_formations` (`leaderGUID`,`memberGUID`,`dist`,`angle`,`groupAI`)VALUES
-(213226,213226,0,0,2),(213226,213225,2,270,2),
-(213228,213228,0,0,2),(213228,213227,2,270,2),
-(213230,213230,0,0,2),(213230,213229,2,270,2),
-(213232,213232,0,0,2),(213232,213231,2,270,2),
-(213234,213234,0,0,2),(213234,213233,2,270,2);
+(178316,178316,0,0,2),(178316,178303,2,270,2),
+(178317,178317,0,0,2),(178317,178304,2,270,2),
+(178318,178318,0,0,2),(178318,178305,2,270,2),
+(178319,178319,0,0,2),(178319,178306,2,270,2),
+(178320,178320,0,0,2),(178320,178307,2,270,2);
 
 -- Pathing for Kil'sorrow Spellbinder Entry: 17146
-SET @NPC := 213226;
+SET @NPC := 178316;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2966.403,`position_y`=6450.863,`position_z`=84.96134 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -111,7 +111,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,20,-2951.366,6451.252,84.06266,0,0,0,0,100,0);
 
 -- Pathing for Kil'sorrow Spellbinder Entry: 17146
-SET @NPC := 213228;
+SET @NPC := 178317; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2886.375,`position_y`=6580.407,`position_z`=49.82686 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -138,7 +138,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,-2889.303,6558.567,52.30542,0,0,0,0,100,0);
 
 -- Pathing for Kil'sorrow Spellbinder Entry: 17146
-SET @NPC := 213230;
+SET @NPC := 178318; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2796.054,`position_y`=6424.335,`position_z`=62.25868 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -165,7 +165,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,-2800.321,6399.666,62.34266,0,0,0,0,100,0);
 
 -- Pathing for Kil'sorrow Spellbinder Entry: 17146
-SET @NPC := 213232;
+SET @NPC := 178319; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2858.218,`position_y`=6466.858,`position_z`=82.75233 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -202,7 +202,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,28,-2857.816,6444.058,82.75547,0,0,0,0,100,0);
 
 -- Pathing for Kil'sorrow Spellbinder Entry: 17146
-SET @NPC := 213234;
+SET @NPC := 178320; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2932.352,`position_y`=6330.253,`position_z`=88.43297 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -233,7 +233,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,22,-2923.53,6348.927,88.30698,0,0,0,0,100,0);
 
 -- Pathing for Kil'sorrow Spellbinder Entry: 17146
-SET @NPC := 60206;
+SET @NPC := 178308; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2937.746,`position_y`=6326.745,`position_z`=89.08513 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;

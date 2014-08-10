@@ -1,4 +1,6 @@
-SET @Guid := 84989;
+
+-- http://www.wowhead.com/npc=16516
+SET @Guid := 164170; -- 84989;
 
 UPDATE `creature_template` SET `ainame`='SmartAI', `scriptname`='' WHERE `entry` IN(16514,16516, 17071);
 

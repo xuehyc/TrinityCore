@@ -1,6 +1,8 @@
-SET @OGUID := 100499;
 
-DELETE FROM `gameobject` WHERE `guid` BETWEEN @OGUID+0 AND @OGUID+7;
+
+SET @OGUID := 404317;  -- GUID by ArkDB
+
+DELETE FROM `gameobject` WHERE `guid` BETWEEN @OGUID+0 AND @OGUID+7; -- GUID by ArkDB
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@OGUID+0, 195624, 0, 1, 1, 1483.641, 187.9667, -62.29154, -1.178734, 0, 0, -0.004363404, 0.9999905, 120, 255, 1), -- 195624 (Area: 0)
 (@OGUID+1, 195626, 0, 1, 1, 1547.33, 276.8282, -62.28028, -1.626545, 0, 0, -0.004363404, 0.9999905, 120, 255, 1), -- 195626 (Area: 0)

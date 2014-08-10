@@ -1,12 +1,18 @@
+
 -- Pathing for Captain Dranarus Entry: 25138
-SET @NPC := 96619;
+SET @NPC := 184974; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1842.622,`position_y`=5313.065,`position_z`=-12.42815 WHERE `guid`=@NPC;
-DELETE FROM `creature_addon` WHERE `guid`=@NPC;
+DELETE FROM `creature_addon` WHERE `guid`=@NPC;  -- GUID by ArkDB
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_scripts` WHERE `id` BETWEEN 10 AND 14;
 INSERT INTO `waypoint_scripts` (`id`,`delay`,`command`,`datalong`,`guid`) VALUES
-(10,0,1,5,10),(11,0,1,18,11),(12,0,1,21,12),(13,0,1,273,13),(14,0,1,22,14),(14,0,16,9739,15);
+(10,0,1,5,10),
+(11,0,1,18,11),
+(12,0,1,21,12),
+(13,0,1,273,13),
+(14,0,1,22,14),
+(14,0,16,9739,15);
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
 (@PATH,1,-1842.622,5313.065,-12.42815,0,2000,0,0,100,0),
@@ -46,36 +52,36 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,35,-1835.244,5316.951,-12.42815,3.141593,10000,0,14,100,0), -- OneShotShot (22) -- play sound 9739
 (@PATH,36,-1840.227,5311.866,-12.42815,0,0,0,0,100,0);
 
--- Shattered Sun Trainee SAI "Emotes 36 and 54 missing sounds 134, 147, 149, 1002, 7080 core issue"
+-- Shattered Sun Trainee SAI "Emotes 36 and 54 missing sounds 134, 147, 149, 1002, 7080 core issue"   -- GUID by ArkDB
 UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry` IN (25134,25135,25136,25137);
-DELETE FROM `smart_scripts` WHERE `source_type`=0 AND `entryorguid` IN (-96595,-96596,-96600,-96603,-96604,-96610,-96611,-96612);
+DELETE FROM `smart_scripts` WHERE `source_type`=0 AND `entryorguid` IN (-157464,-157467,-184585,-184582,-184969,-184967,-184968,-184580);  -- GUID by ArkDB
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(-96595,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
-(-96596,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
-(-96600,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
-(-96603,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
-(-96604,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
-(-96610,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
-(-96611,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
-(-96612,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield");
+(-157464,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
+(-157467,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
+(-184585,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
+(-184582,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
+(-184969,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
+(-184967,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
+(-184968,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield"),
+(-184580,0,0,0,1,0,100,0,0,3000,3000,3000,10,36,43,54,0,0,0,1,0,0,0,0,0,0,0,"Shattered Sun Trainee - Out of Combat - Emote OneShotAttack1H or OneShotParryShield");
 
 -- Skyguard Neather Ray Should not be moving
-UPDATE `creature` SET `spawndist`=0, `MovementType`=0 WHERE guid=79011;
+UPDATE `creature` SET `spawndist`=0, `MovementType`=0 WHERE guid=167598;  -- GUID by ArkDB
 
--- Add missing Shattrath City Peacekeeper
-DELETE FROM `creature` WHERE `guid`=45075;
+-- Add missing Shattrath City Peacekeeper  19687
+DELETE FROM `creature` WHERE `guid`=183366;  -- GUID by ArkDB
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(45075, 19687, 530, 1, 1, -1976.909, 5112.424, 7.589328, 4.276057, 120, 0, 0);
+(183366, 19687, 530, 1, 1, -1976.909, 5112.424, 7.589328, 4.276057, 120, 0, 0);
 
 -- Pathing for Shattrath City Peacekeeper Entry: 19687
-SET @NPC := 70228;
+SET @NPC := 183363;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1966.495,`position_y`=5121.907,`position_z`=10.32379 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,17063, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1966.495,5121.907,10.32379,0,0,0,0,100,0),
+(@PATH,1,-1966.495,5121.907,10.32379,0,0,0,0,100,0),  -- GUID by ArkDB
 (@PATH,2,-1951.699,5166.294,17.25317,0,0,0,0,100,0),
 (@PATH,3,-1938.637,5205.161,15.87822,0,0,0,0,100,0),
 (@PATH,4,-1931.686,5226.178,13.69076,0,0,0,0,100,0),
@@ -89,14 +95,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,-1951.699,5166.294,17.25317,0,0,0,0,100,0);
 
 -- Pathing for Vekax Entry: 22429
-SET @NPC := 78783;
+SET @NPC := 167815;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1668.65,`position_y`=5531.648,`position_z`=2.084388 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1668.65,5531.648,2.084388,0,0,0,0,100,0),
+(@PATH,1,-1668.65,5531.648,2.084388,0,0,0,0,100,0),  -- GUID by ArkDB
 (@PATH,2,-1675.535,5539.932,4.808745,0,0,0,0,100,0),
 (@PATH,3,-1669.465,5544.53,5.413347,0,0,0,0,100,0),
 (@PATH,4,-1656.403,5534.61,6.1091,0,0,0,0,100,0),
@@ -136,14 +142,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,38,-1648.668,5528.287,-5.18554,0,0,0,0,100,0);
 
 -- Pathing for Skettis Outcast Entry: 19075
-SET @NPC := 68385;
+SET @NPC := 185095;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1622.079,`position_y`=5473.997,`position_z`=-4.175363 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1622.079,5473.997,-4.175363,0,0,0,0,100,0),
+(@PATH,1,-1622.079,5473.997,-4.175363,0,0,0,0,100,0),  -- GUID by ArkDB
 (@PATH,2,-1624.692,5470.754,-4.14517,0,0,0,0,100,0),
 (@PATH,3,-1624.417,5467.651,-4.055672,0,0,0,0,100,0),
 (@PATH,4,-1622.095,5464.667,-4.021505,0,0,0,0,100,0),

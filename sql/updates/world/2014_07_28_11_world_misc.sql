@@ -1,18 +1,16 @@
 -- Twilight Ridge, Nagrand Update
-SET @OGUID := 5479;
-SET @CGUID := 77840;
 
-DELETE FROM `gameobject` WHERE `guid`=@OGUID;
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
-(@OGUID+0, 186177, 530, 1, 1, -1537.953, 9728.839, 202.396, 3.141593, 0, 0, 0, 1, 120, 255, 1);
+UPDATE gameobject SET spawntimesecs=120 where guid= 103105; -- GUID by ArkDB
 
+SET @CGUID := 282927;  -- GUID by ArkDB
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+2;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(@CGUID+0, 22341, 530, 1, 1, -1442.521, 9847.013, 200.6711, 6.021386, 300, 0, 0),
+(@CGUID+0, 22341, 530, 1, 1, -1442.521, 9847.013, 200.6711, 6.021386, 300, 0, 0),  -- GUID by ArkDB
 (@CGUID+1, 22341, 530, 1, 1, -1455.099, 9854.964, 200.7248, 2.513274, 300, 0, 0),
 (@CGUID+2, 22342, 530, 1, 1, -1452.337, 9837.591, 200.6221, 1.815142, 300, 0, 0);
 
-DELETE FROM creature WHERE id IN (22362);
+-- http://www.wowhead.com/npc=22362 -- not to delete.. By ArkDB
+-- DELETE FROM creature WHERE id IN (22362); 
 
 -- Deathshadow Overlord SAI
 SET @ENTRY := 22393;
@@ -83,20 +81,23 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,0,1,2,2,0,100,1,0,20,0,0,11,8599,0,0,0,0,0,1,0,0,0,0,0,0,0,"Deathshadow Archon - Between 0-20% Health - Cast 'Enrage' (No Repeat)"),
 (@ENTRY,0,2,0,61,0,100,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Deathshadow Archon - Between 0-20% Health - Say Line 0 (No Repeat)");
 
--- Twilight Ridge Target
-UPDATE `creature` SET `spawndist`=0,`MovementType`=0 WHERE `guid` IN (78732,78733,78734);
-UPDATE `creature` SET `spawndist`=5,`MovementType`=1 WHERE `id`=23026;
+-- Twilight Ridge Target http://www.wowhead.com/npc=22400
+UPDATE `creature` SET `spawndist`=0,`MovementType`=0 WHERE `guid` IN (167860,167861,167862); -- GUID by ArkDB
 UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=22400;
 
+-- http://www.wowhead.com/npc=23026
+UPDATE `creature` SET `spawndist`=5,`MovementType`=1 WHERE `id`=23026;
+
+
 -- Pathing for Reth'hedron the Subduer Entry: 22357
-SET @NPC := 86754;
+SET @NPC := 161893; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1470.79,`position_y`=9695.277,`position_z`=201.9155 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1470.79,9695.277,201.9155,0,0,0,0,100,0),
+(@PATH,1,-1470.79,9695.277,201.9155,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1463.57,9667.397,201.1194,0,0,0,0,100,0),
 (@PATH,3,-1435.975,9657.146,201.4469,0,0,0,0,100,0),
 (@PATH,4,-1413.262,9667.886,200.9825,0,0,0,0,100,0),
@@ -113,14 +114,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,15,-1479.92,9715.552,200.603,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Overlord Entry: 22393
-SET @NPC := 78720;
+SET @NPC := 167870; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1472.134,`position_y`=9677.515,`position_z`=200.7376 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1472.134,9677.515,200.7376,0,0,0,0,100,0),
+(@PATH,1,-1472.134,9677.515,200.7376,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1491.902,9675.239,200.4876,0,0,0,0,100,0),
 (@PATH,3,-1513.64,9685.378,199.8625,0,0,0,0,100,0),
 (@PATH,4,-1520.162,9704.591,199.7671,0,0,0,0,100,0),
@@ -134,14 +135,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,-1491.902,9675.239,200.4876,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Overlord Entry: 22393
-SET @NPC := 78721;
+SET @NPC := 167871; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1612.896,`position_y`=9760.403,`position_z`=201.8589 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1612.896,9760.403,201.8589,0,0,0,0,100,0),
+(@PATH,1,-1612.896,9760.403,201.8589,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1607.772,9783.831,203.7104,0,0,0,0,100,0),
 (@PATH,3,-1612.043,9799.692,204.3501,0,0,0,0,100,0),
 (@PATH,4,-1619.067,9821.793,203.2391,0,0,0,0,100,0),
@@ -161,14 +162,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,-1607.772,9783.831,203.7104,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Overlord Entry: 22393
-SET @NPC := 78722;
+SET @NPC := 167872; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1403.312,`position_y`=9723.152,`position_z`=202.818 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1403.312,9723.152,202.818,0,0,0,0,100,0),
+(@PATH,1,-1403.312,9723.152,202.818,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1401.001,9745.885,201.6062,0,0,0,0,100,0),
 (@PATH,3,-1406.874,9760.674,203.3052,0,0,0,0,100,0),
 (@PATH,4,-1421.809,9777.302,201.2571,0,0,0,0,100,0),
@@ -186,14 +187,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,-1401.001,9745.885,201.6062,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Overlord Entry: 22393
-SET @NPC := 78723;
+SET @NPC := 167873; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1453.536,`position_y`=9636.821,`position_z`=201.6882 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1453.536,9636.821,201.6882,0,0,0,0,100,0),
+(@PATH,1,-1453.536,9636.821,201.6882,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1432.65,9646.109,201.1936,0,0,0,0,100,0),
 (@PATH,3,-1405.079,9634.173,200.4417,0,0,0,0,100,0),
 (@PATH,4,-1376.064,9616.104,201.409,0,0,0,0,100,0),
@@ -209,14 +210,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,-1432.65,9646.109,201.1936,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Overlord Entry: 22393
-SET @NPC := 78724;
+SET @NPC := 167874; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1402.76,`position_y`=9588.803,`position_z`=204.4954 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1402.76,9588.803,204.4954,0,0,0,0,100,0),
+(@PATH,1,-1402.76,9588.803,204.4954,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1419.219,9590.156,203.1769,0,0,0,0,100,0),
 (@PATH,3,-1438.877,9599.831,202.1304,0,0,0,0,100,0),
 (@PATH,4,-1453.35,9623.946,201.2587,0,0,0,0,100,0),
@@ -226,23 +227,23 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,8,-1419.219,9590.156,203.1769,0,0,0,0,100,0);
 
 -- Deathshadow Archon / Hound Formations
-DELETE FROM `creature_formations` WHERE `leaderGUID` IN (78605,78607,78608,78609,78611);
+DELETE FROM `creature_formations` WHERE `leaderGUID` IN (167983,167984,167985,167986,167987);  -- GUID by ArkDB
 INSERT INTO `creature_formations` (`leaderGUID`,`memberGUID`,`dist`,`angle`,`groupAI`)VALUES
-(78605,78605,0,0,2),(78605,78725,3,90,2),
-(78607,78607,0,0,2),(78607,78726,3,90,2),
-(78608,78608,0,0,2),(78608,78727,3,90,2),
-(78609,78609,0,0,2),(78609,78728,3,90,2),
-(78611,78611,0,0,2),(78611,78729,3,90,2);
+(167983,167983,0,0,2),(167983,78725,3,90,2),  -- GUID by ArkDB
+(167984,167984,0,0,2),(167984,78726,3,90,2),
+(167985,167985,0,0,2),(167985,78727,3,90,2),
+(167986,167986,0,0,2),(167986,78728,3,90,2),
+(167987,167987,0,0,2),(167987,78729,3,90,2);
 
 -- Pathing for Deathshadow Archon Entry: 22343
-SET @NPC := 78605;
+SET @NPC := 167983;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1534.346,`position_y`=9692.919,`position_z`=201.5745 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1534.346,9692.919,201.5745,0,0,0,0,100,0),
+(@PATH,1,-1534.346,9692.919,201.5745,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1528.828,9701.563,200.6345,0,0,0,0,100,0),
 (@PATH,3,-1524.337,9711.724,200.1727,0,0,0,0,100,0),
 (@PATH,4,-1523.669,9722.655,200.5154,0,0,0,0,100,0),
@@ -262,14 +263,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,-1528.828,9701.563,200.6345,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Archon Entry: 22343
-SET @NPC := 78607;
+SET @NPC := 167984; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1440.525,`position_y`=9826.043,`position_z`=200.2045 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1440.525,9826.043,200.2045,0,0,0,0,100,0),
+(@PATH,1,-1440.525,9826.043,200.2045,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1450.976,9827.416,199.9427,0,0,0,0,100,0),
 (@PATH,3,-1462.63,9831.848,200.9427,0,0,0,0,100,0),
 (@PATH,4,-1473.203,9842.879,199.9138,0,0,0,0,100,0),
@@ -282,14 +283,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,11,-1425.271,9844.913,200.1369,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Archon Entry: 22343
-SET @NPC := 78608;
+SET @NPC := 167985; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1380.653,`position_y`=9741.172,`position_z`=204.1218 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1380.653,9741.172,204.1218,0,0,0,0,100,0),
+(@PATH,1,-1380.653,9741.172,204.1218,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1366.514,9729.669,205.0716,0,0,0,0,100,0),
 (@PATH,3,-1358.867,9717.195,205.8663,0,0,0,0,100,0),
 (@PATH,4,-1359.007,9702.771,204.7408,0,0,0,0,100,0),
@@ -302,14 +303,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,11,-1391.65,9744.087,202.7115,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Archon Entry: 22343
-SET @NPC := 78609;
+SET @NPC := 167986; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1319.207,`position_y`=9624.372,`position_z`=202.1915 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1319.207,9624.372,202.1915,0,0,0,0,100,0),
+(@PATH,1,-1319.207,9624.372,202.1915,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1313.734,9614.496,202.0793,0,0,0,0,100,0),
 (@PATH,3,-1307.775,9608.104,203.4543,0,0,0,0,100,0),
 (@PATH,4,-1296.253,9600.599,204.4624,0,0,0,0,100,0),
@@ -325,14 +326,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,-1313.734,9614.496,202.0793,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Archon Entry: 22343
-SET @NPC := 78611;
+SET @NPC := 167987; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1404.827,`position_y`=9588.393,`position_z`=204.2825 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1404.827,9588.393,204.2825,0,0,0,0,100,0),
+(@PATH,1,-1404.827,9588.393,204.2825,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1394.6,9596.54,203.1423,0,0,0,0,100,0),
 (@PATH,3,-1383.312,9601.47,202.3112,0,0,0,0,100,0),
 (@PATH,4,-1368.525,9602.146,202.7189,0,0,0,0,100,0),
@@ -344,14 +345,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,10,-1394.6,9596.54,203.1423,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Hound Entry: 22394
-SET @NPC := 78725;
+SET @NPC := 167865; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1534.346,`position_y`=9692.919,`position_z`=201.5745 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1534.346,9692.919,201.5745,0,0,0,0,100,0),
+(@PATH,1,-1534.346,9692.919,201.5745,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1528.828,9701.563,200.6345,0,0,0,0,100,0),
 (@PATH,3,-1524.337,9711.724,200.1727,0,0,0,0,100,0),
 (@PATH,4,-1523.669,9722.655,200.5154,0,0,0,0,100,0),
@@ -371,14 +372,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,-1528.828,9701.563,200.6345,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Hound Entry: 22394
-SET @NPC := 78726;
+SET @NPC := 167866; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1440.525,`position_y`=9826.043,`position_z`=200.2045 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1440.525,9826.043,200.2045,0,0,0,0,100,0),
+(@PATH,1,-1440.525,9826.043,200.2045,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1450.976,9827.416,199.9427,0,0,0,0,100,0),
 (@PATH,3,-1462.63,9831.848,200.9427,0,0,0,0,100,0),
 (@PATH,4,-1473.203,9842.879,199.9138,0,0,0,0,100,0),
@@ -391,14 +392,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,11,-1425.271,9844.913,200.1369,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Hound Entry: 22394
-SET @NPC := 78727;
+SET @NPC := 167867; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1380.653,`position_y`=9741.172,`position_z`=204.1218 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1380.653,9741.172,204.1218,0,0,0,0,100,0),
+(@PATH,1,-1380.653,9741.172,204.1218,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1366.514,9729.669,205.0716,0,0,0,0,100,0),
 (@PATH,3,-1358.867,9717.195,205.8663,0,0,0,0,100,0),
 (@PATH,4,-1359.007,9702.771,204.7408,0,0,0,0,100,0),
@@ -411,14 +412,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,11,-1391.65,9744.087,202.7115,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Hound Entry: 22394
-SET @NPC := 78728;
+SET @NPC := 167868; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1319.207,`position_y`=9624.372,`position_z`=202.1915 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1319.207,9624.372,202.1915,0,0,0,0,100,0),
+(@PATH,1,-1319.207,9624.372,202.1915,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1313.734,9614.496,202.0793,0,0,0,0,100,0),
 (@PATH,3,-1307.775,9608.104,203.4543,0,0,0,0,100,0),
 (@PATH,4,-1296.253,9600.599,204.4624,0,0,0,0,100,0),
@@ -434,14 +435,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,-1313.734,9614.496,202.0793,0,0,0,0,100,0);
 
 -- Pathing for Deathshadow Hound Entry: 22394
-SET @NPC := 78729;
+SET @NPC := 167869; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1404.827,`position_y`=9588.393,`position_z`=204.2825 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-1404.827,9588.393,204.2825,0,0,0,0,100,0),
+(@PATH,1,-1404.827,9588.393,204.2825,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-1394.6,9596.54,203.1423,0,0,0,0,100,0),
 (@PATH,3,-1383.312,9601.47,202.3112,0,0,0,0,100,0),
 (@PATH,4,-1368.525,9602.146,202.7189,0,0,0,0,100,0),

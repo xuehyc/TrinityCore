@@ -1,4 +1,4 @@
-SET @Guid := 45211;
+
 
 -- SAI
 UPDATE `creature_template` SET `ainame`='SmartAI', `scriptname`='' WHERE `entry` BETWEEN 18899 and 18903;
@@ -162,7 +162,9 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (22, 1, 18955, 0, 0, 23, 1, 3557, 0, 0, 0, 0, 0, '', 'Camera Shaker - 30-90 seconds - Only run SAI in the Exodar'),
 (22, 2, 18955, 0, 0, 23, 1, 3557, 0, 0, 0, 0, 0, '', 'Camera Shaker - 30-90 seconds - Only run SAI in the Exodar');
 
--- Spawn the missing Exodar Holographic Emitter, only 6 are spawned there should be 10 one at each statue
+SET @Guid := 282931;  GUID by ArkDB -- tc say should be 10 
+
+-- Spawn the missing Exodar Holographic Emitter, only 6 are spawned there should be 10 one at each statue -- 
 DELETE FROM `creature` WHERE `guid` BETWEEN @Guid+0 AND @Guid+3;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
 (@Guid+0, 18896, 530, 1, 1,  -4119.59, -11467.84, -129.1829, 6.056293, 120, 0, 0), -- 18896 (Area: 3557)

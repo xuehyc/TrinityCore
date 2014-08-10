@@ -2,7 +2,7 @@
 UPDATE `creature_template` SET `speed_walk`=0.714285 WHERE `entry`=18134;
 
 -- Pathing for Fen Strider Entry: 18134 "Missing Spawn"
-SET @NPC := 45099;
+SET @NPC := 173904;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 DELETE FROM `creature` WHERE `guid`=@NPC;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
@@ -31,7 +31,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,-247.987,7522.858,17.70378,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64767;
+SET @NPC := 173905;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=223.5615,`position_y`=6374.221,`position_z`=17.49909 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -58,7 +58,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,182.964,6388.439,17.49308,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64768;
+SET @NPC := 173906;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-843.6936,`position_y`=5124.897,`position_z`=17.93274 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -83,7 +83,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,-882.0682,5139.952,17.88305,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64769;
+SET @NPC := 173907;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-740.3218,`position_y`=5196.946,`position_z`=17.88305 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -98,7 +98,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,6,-711.1509,5226.004,17.73018,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64770;
+SET @NPC := 173908;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-577.9679,`position_y`=5352.116,`position_z`=17.68461 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -119,7 +119,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,-548.3535,5342.372,17.76349,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64771;
+SET @NPC := 173909;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-403.375,`position_y`=5415.424,`position_z`=17.86433 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -139,7 +139,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,11,-441.607,5418.342,17.76424,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64772;
+SET @NPC := 173910;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1017.966,`position_y`=5538.429,`position_z`=17.10202 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -158,7 +158,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,10,-996.6628,5519.937,17.5215,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64773;
+SET @NPC := 173911;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-987.5788,`position_y`=5744.341,`position_z`=17.49909 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -175,7 +175,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,8,-1007.783,5784.594,17.51414,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64774;
+SET @NPC := 173912;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-457.9,`position_y`=5947.151,`position_z`=17.48606 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -202,7 +202,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,-444.5015,5918.243,17.4935,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64775;
+SET @NPC := 173913;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-384.029,`position_y`=5946.546,`position_z`=17.48655 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -233,7 +233,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,22,-350.0803,5951.836,17.49909,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64776;
+SET @NPC := 173914;   -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-190.5273,`position_y`=6160.305,`position_z`=17.38075 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -256,7 +256,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,-217.2867,6168.313,17.4991,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64777;
+SET @NPC := 173915;   -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=51.84581,`position_y`=5928.761,`position_z`=17.4091 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -285,7 +285,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,20,29.06456,5946.927,17.4991,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64778;
+SET @NPC := 173916;   -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=46.72515,`position_y`=5911.564,`position_z`=17.4091 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -304,7 +304,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,10,16.72081,5907.729,17.48191,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64779;
+SET @NPC := 173917;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-48.9668,`position_y`=5785.517,`position_z`=17.49908 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -329,7 +329,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,-31.21408,5790.6,17.80244,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64780;
+SET @NPC := 173918;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-907.9193,`position_y`=5554.827,`position_z`=17.49909 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -356,7 +356,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,-889.6183,5537.365,17.49909,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64781;
+SET @NPC := 173919;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-825.1914,`position_y`=5546.16,`position_z`=17.49905 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -381,7 +381,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,-826.8116,5506.765,17.49908,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64782;
+SET @NPC := 173920;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-131.7958,`position_y`=5398.479,`position_z`=17.76864 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -401,7 +401,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,11,-131.7958,5398.479,17.76864,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64783;
+SET @NPC := 173921;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=0.041775,`position_y`=5430.892,`position_z`=17.49905 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -424,7 +424,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,12.50011,5406.847,17.48977,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64784;
+SET @NPC := 173922;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=115.1097,`position_y`=5414.181,`position_z`=17.49907 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -445,7 +445,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,110.2024,5368.683,17.47716,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64785;
+SET @NPC := 173923;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=264.2738,`position_y`=5531.262,`position_z`=17.92775 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -468,7 +468,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,299.4445,5544.412,17.37348,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64786;
+SET @NPC := 173924;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=735.855,`position_y`=5712.859,`position_z`=17.57299 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -498,7 +498,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,21,711.5545,5729.475,17.49909,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64787;
+SET @NPC := 173925;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=166.1176,`position_y`=5583.089,`position_z`=17.4991 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -521,7 +521,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,199.9682,5558.708,17.60653,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64788;
+SET @NPC := 173926;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=37.02224,`position_y`=5578.584,`position_z`=17.49907 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -540,7 +540,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,10,72.50792,5567.374,17.49907,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64789;
+SET @NPC := 173927;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=90.24013,`position_y`=5621.603,`position_z`=17.49909 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -567,7 +567,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,138.8866,5615.225,17.46576,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64790;
+SET @NPC := 173928;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=455.8582,`position_y`=5653.635,`position_z`=17.49909 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -594,7 +594,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,435.5963,5689.513,17.40821,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64791;
+SET @NPC := 173929;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=352.3516,`position_y`=5677.601,`position_z`=17.49909 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -611,7 +611,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,8,373.3804,5720.132,17.53165,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64792;
+SET @NPC := 173930;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=737.8778,`position_y`=5839.425,`position_z`=17.60259 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -638,7 +638,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,736.2857,5811.721,18.36215,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64793;
+SET @NPC := 173931;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=578.2181,`position_y`=5920.502,`position_z`=17.49912 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -653,7 +653,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,6,589.2954,5958.26,17.4991,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64794;
+SET @NPC := 173932;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=336.6295,`position_y`=6207.977,`position_z`=17.40447 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -678,7 +678,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,300.3756,6220.479,17.40025,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64795;
+SET @NPC := 173933;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=319.1818,`position_y`=6152.123,`position_z`=17.49453 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -705,7 +705,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,284.0559,6158.702,17.4991,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64796;
+SET @NPC := 173934;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-32.07671,`position_y`=6208.437,`position_z`=17.49905 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -726,7 +726,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,7.392795,6180.204,17.49813,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64797;
+SET @NPC := 173935;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-118.2504,`position_y`=6237.651,`position_z`=17.49905 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -749,7 +749,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,-87.31641,6255.852,17.49905,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64798;
+SET @NPC := 173936;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-467.0757,`position_y`=6111.034,`position_z`=17.89768 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -774,7 +774,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,-504.0656,6103.058,17.57066,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64799;
+SET @NPC := 173937;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-582.1886,`position_y`=6080.161,`position_z`=17.77252 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -794,7 +794,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,11,-609.8489,6106.838,17.56293,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64800;
+SET @NPC := 173938;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-523.5103,`position_y`=6283.41,`position_z`=17.46291 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -815,7 +815,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,-525.4007,6319.861,17.4709,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64801;
+SET @NPC := 173939;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-440.8055,`position_y`=6356.273,`position_z`=17.97383 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -836,7 +836,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,-445.8972,6402.299,17.7183,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64802;
+SET @NPC := 173940;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=156.8943,`position_y`=6555.767,`position_z`=17.81371 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -865,7 +865,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,20,117.1081,6537.705,17.8617,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64803;
+SET @NPC := 173941;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=288.2079,`position_y`=6287.81,`position_z`=17.47691 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -888,7 +888,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,265.3102,6326.917,17.4991,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64804;
+SET @NPC := 173942;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=159.9863,`position_y`=6623.709,`position_z`=18.07342 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -913,7 +913,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,111.707,6625.484,17.49905,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64805;
+SET @NPC := 173943;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-164.5482,`position_y`=6934.413,`position_z`=18.18033 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -935,7 +935,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,13,-164.5482,6934.413,18.18033,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64806;
+SET @NPC := 173944;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-110.7676,`position_y`=6852.486,`position_z`=17.62408 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -952,7 +952,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,8,-103.8334,6871.367,17.72661,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64807;
+SET @NPC := 173945;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=131.712,`position_y`=7306.268,`position_z`=17.80821 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -973,7 +973,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,168.7971,7288.949,17.76567,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64808;
+SET @NPC := 173946;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-69.97092,`position_y`=7225.815,`position_z`=17.65932 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -996,7 +996,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,-51.22146,7254.379,17.96319,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64809;
+SET @NPC := 173947;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-50.82888,`position_y`=7284.149,`position_z`=17.71222 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -1019,7 +1019,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,-71.93815,7307.375,17.60395,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64810;
+SET @NPC := 173948;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-70.2844,`position_y`=7559.799,`position_z`=17.62407 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -1040,7 +1040,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,-105.9493,7532.406,17.49907,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64811;
+SET @NPC := 173949;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-89.50771,`position_y`=7475.422,`position_z`=17.46522 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -1067,7 +1067,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,-102.3241,7505.399,17.49907,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64812;
+SET @NPC := 173950;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-51.63726,`position_y`=7580.237,`position_z`=17.4934 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -1090,7 +1090,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,-20.41309,7579.509,17.49661,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64813;
+SET @NPC := 173951;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-51.65668,`position_y`=7653.138,`position_z`=17.86285 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -1111,7 +1111,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,-21.17806,7639.248,17.49908,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64814;
+SET @NPC := 173952;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=722.5497,`position_y`=6282.599,`position_z`=17.3627 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -1134,7 +1134,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,14,703.7663,6252.408,17.49536,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64815;
+SET @NPC := 173953;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=312.5683,`position_y`=6641.804,`position_z`=17.5959 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -1159,7 +1159,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,16,337.7431,6654.514,17.49312,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64816;
+SET @NPC := 173954;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=155.9221,`position_y`=6855.781,`position_z`=17.84563 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -1180,7 +1180,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,117.3765,6856.435,18.00443,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64817;
+SET @NPC := 173955;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=183.1641,`position_y`=7564.119,`position_z`=17.49908 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
@@ -1207,7 +1207,7 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,18,172.0435,7526.779,17.80572,0,0,0,0,100,0);
 
 -- Pathing for Fen Strider Entry: 18134
-SET @NPC := 64818;
+SET @NPC := 282930;  -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=154.9363,`position_y`=7579.639,`position_z`=17.49909 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;

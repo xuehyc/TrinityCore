@@ -1,14 +1,17 @@
+
 -- Pathing for Murkblood Invader Entry: 18238
-SET @NPC := 65511;
+SET @NPC :=  187661; -- 65509 65510 65511;
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-975.0311,`position_y`=8003.268,`position_z`=24.70724 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,17891, '');
-UPDATE `creature` SET `position_x`=-967.0311,`position_y`=8010.268,`position_z`=25.46785,`orientation`=3.095328 WHERE `guid`=65510;
-UPDATE `creature` SET `position_x`=-959.0311,`position_y`=8016.268,`position_z`=26.73114,`orientation`=3.095328 WHERE `guid`=65509;
-DELETE FROM `creature_formations` WHERE `leaderGUID`=65511;
-INSERT INTO `creature_formations` (`leaderGUID`,`memberGUID`,`dist`,`angle`,`groupAI`)VALUES
-(65511,65511,0,0,2),(65511,65510,10,0,2),(65511,65509,20,0,2);
+UPDATE `creature` SET `position_x`=-967.0311,`position_y`=8010.268,`position_z`=25.46785,`orientation`=3.095328 WHERE `guid`=@NPC+1;
+UPDATE `creature` SET `position_x`=-959.0311,`position_y`=8016.268,`position_z`=26.73114,`orientation`=3.095328 WHERE `guid`=@NPC+2;
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @NPC;
+INSERT INTO `creature_formations` (`leaderGUID`,`memberGUID`,`dist`,`angle`,`groupAI`) VALUES
+(@NPC,@NPC,0,0,2),
+(@NPC,@NPC+1,10,0,2),
+(@NPC,@NPC+2,20,0,2);
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
 (@PATH,1,-975.0311,8003.268,24.70724,0,0,0,0,100,0),

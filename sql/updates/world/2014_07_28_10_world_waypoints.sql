@@ -1,5 +1,5 @@
 -- Pathing for Stronglimb Deeproot Entry: 21023
-SET @NPC := 73833;
+SET @NPC := 73833; -- Veryfied by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=1650.715,`position_y`=6811.52,`position_z`=132.5538 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;

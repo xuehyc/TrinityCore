@@ -1,4 +1,3 @@
-SET @NPC := 45211;
 
 -- SAI for Ulfang/Sage Mistwalker/Watcher Moonleaf
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry`=24261;
@@ -36,6 +35,7 @@ INSERT INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`,
 (8908, 0, 0, 'I have misplaced my worg disguise.', 23068, 1, 1, 0, 0, 0, 0, '', 0);
 
 -- Pathing for Garwal Entry: 24277
+SET @NPC := 198699; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 
 UPDATE `creature_template` SET `faction`=1971 WHERE `entry`=24277;
@@ -46,7 +46,7 @@ INSERT INTO `creature_template_addon` (`entry`, `path_id`, `bytes1`, `bytes2`, `
 
 DELETE FROM `creature` WHERE `guid` = @NPC;
 INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`MovementType`) VALUES
-(@NPC, 24277,571,1,1,2724.867,-2996.879,91.80984,6.232399,120,0,2);
+(@NPC, 24277,571,1,1,2724.867,-2996.879,91.80984,6.232399,120,0,2);  -- GUID by ArkDB
 
 -- NPC talk text insert from sniff
 DELETE FROM `creature_text` WHERE `entry`=24277;

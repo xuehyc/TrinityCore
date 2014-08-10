@@ -1,13 +1,16 @@
--- Pathing for Empoor Entry: 18482 and Formation for his bodyguard
-SET @NPC := 66605;
-SET @PATH := @NPC * 10;
-UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1954.978,`position_y`=4752.3,`position_z`=-2.763442 WHERE `guid`=@NPC;
-UPDATE `creature` SET `position_x`=-1956.585, `position_y`=4751.758, `position_z`=-2.86066, `orientation`=2.005122 WHERE `guid`=66606;
-DELETE FROM `creature_formations` WHERE `leaderGUID`=66605;
+
+-- Pathing for Empoor Entry: 18482 and Formation for his bodyguard 18483
+SET @NPC1 := 186609; -- GUID by ArkDB
+SET @NPC2 := 186608; -- GUID by ArkDB
+SET @PATH := @NPC1 * 10;
+UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-1954.978,`position_y`=4752.3,`position_z`=-2.763442 WHERE `guid`=@NPC1;
+UPDATE `creature` SET `position_x`=-1956.585, `position_y`=4751.758, `position_z`=-2.86066, `orientation`=2.005122 WHERE `guid`=@NPC2;
+DELETE FROM `creature_formations` WHERE `leaderGUID`=@NPC1;
 INSERT INTO `creature_formations` (`leaderGUID`,`memberGUID`,`dist`,`angle`,`groupAI`)VALUES
-(66605,66605,0,0,2),(66605,66606,2,270,2);
-DELETE FROM `creature_addon` WHERE `guid`=@NPC;
-INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
+(@NPC1,@NPC1,0,0,2), -- GUID by ArkDB
+(@NPC1,@NPC2,2,270,2);
+DELETE FROM `creature_addon` WHERE `guid`=@NPC1;
+INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC1,@PATH,1,0, ''); -- GUID by ArkDB
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
 (@PATH,1,-1954.978,4752.3,-2.763442,0,0,0,0,100,0),

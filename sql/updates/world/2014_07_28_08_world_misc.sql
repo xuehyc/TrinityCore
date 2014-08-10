@@ -1,12 +1,12 @@
 -- Pathing for Sparik Entry: 19012
-SET @NPC := 68323;
+SET @NPC := 185148; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `equipment_id`=1,`spawndist`=0,`MovementType`=2,`position_x`=-2539.584,`position_y`=7356.25,`position_z`=7.047175 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`,`emote`) VALUES (@NPC,@PATH,257,0, '', 233);
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2539.584,7356.25,7.047175,0,0,0,0,100,0),
+(@PATH,1,-2539.584,7356.25,7.047175,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-2542.437,7364.194,7.077205,0,0,0,0,100,0),
 (@PATH,3,-2541.9,7364.772,7.012752,0,45000,0,0,100,0),
 (@PATH,4,-2539.584,7356.25,7.047175,0,0,0,0,100,0),
@@ -24,15 +24,18 @@ INSERT INTO `creature_equip_template` (`entry`,`id`,`itemEntry1`,`itemEntry2`,`i
 (17134,6,5491,0,0,18414),
 (17134,7,17942,0,0,18414);
 
--- Pathing for Boulderfist Crusher Entry: 17134
-SET @NPC := 60060;
+-- first set all to random movement 17134
+UPDATE `creature` SET `spawndist`=5,`MovementType`=1 WHERE `id` =17134;
+ 
+-- then Pathing for Boulderfist Crusher Entry: 17134
+SET @NPC := 178465; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2257.554,`position_y`=6220.683,`position_z`=44.19547 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2257.554,6220.683,44.19547,0,0,0,0,100,0),
+(@PATH,1,-2257.554,6220.683,44.19547,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-2269.54,6185.135,50.54529,0,0,0,0,100,0),
 (@PATH,3,-2300.504,6160.397,57.35026,0,0,0,0,100,0),
 (@PATH,4,-2333.537,6174.551,51.46076,0,0,0,0,100,0),
@@ -46,14 +49,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,12,-2269.54,6185.135,50.54529,0,0,0,0,100,0);
 
 -- Pathing for Boulderfist Crusher Entry: 17134
-SET @NPC := 60059;
+SET @NPC := 178470; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2399.844,`position_y`=6147.982,`position_z`=71.06328 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2399.844,6147.982,71.06328,0,0,0,0,100,0),
+(@PATH,1,-2399.844,6147.982,71.06328,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-2432.956,6121.422,83.23274,0,0,0,0,100,0),
 (@PATH,3,-2466.083,6121.511,88.61314,0,0,0,0,100,0),
 (@PATH,4,-2481.856,6120.785,91.89808,0,0,0,0,100,0),
@@ -98,14 +101,14 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,43,-2367.009,6154.886,59.9362,0,0,0,0,100,0);
 
 -- Pathing for Boulderfist Crusher Entry: 17134
-SET @NPC := 60064;
+SET @NPC := 178476; -- GUID by ArkDB
 SET @PATH := @NPC * 10;
 UPDATE `creature` SET `spawndist`=0,`MovementType`=2,`position_x`=-2241.646,`position_y`=6073.002,`position_z`=73.11702 WHERE `guid`=@NPC;
 DELETE FROM `creature_addon` WHERE `guid`=@NPC;
 INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@NPC,@PATH,1,0, '');
 DELETE FROM `waypoint_data` WHERE `id`=@PATH;
 INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_type`,`action`,`action_chance`,`wpguid`) VALUES
-(@PATH,1,-2241.646,6073.002,73.11702,0,0,0,0,100,0),
+(@PATH,1,-2241.646,6073.002,73.11702,0,0,0,0,100,0), -- GUID by ArkDB
 (@PATH,2,-2251.782,6080.446,76.50385,0,0,0,0,100,0),
 (@PATH,3,-2257.793,6097.254,77.32147,0,0,0,0,100,0),
 (@PATH,4,-2269.76,6109.586,74.90349,0,0,0,0,100,0),
@@ -135,11 +138,6 @@ INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`
 (@PATH,28,-2207.289,6076.843,72.2662,0,0,0,0,100,0),
 (@PATH,29,-2189.263,6094.723,72.98553,0,0,0,0,100,0),
 (@PATH,30,-2219.709,6071.23,71.80058,0,0,0,0,100,0);
-
-UPDATE `creature` SET `spawndist`=5,`MovementType`=1 WHERE `guid` IN (60048,60049,60061,60089,60073);
-UPDATE `creature` SET `position_x`=-2254.501,`position_y`=6228.208,`position_z`=43.00068,`orientation`=4.066617 WHERE `guid`=60070;
-UPDATE `creature` SET `position_x`=-2258.156,`position_y`=6223.644,`position_z`=43.70845,`orientation`=0.8377581 WHERE `guid`=60071;
-UPDATE `creature` SET `id`=17135,`position_x`=-2353.576,`position_y`=6196.409,`position_z`=49.09693,`orientation`=0 WHERE `guid`=60069;
 
 -- Boulderfist Crusher SAI
 SET @ENTRY := 17134;
