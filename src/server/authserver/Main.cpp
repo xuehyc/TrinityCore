@@ -116,6 +116,7 @@ int main(int argc, char** argv)
     if (sRealmList->size() == 0)
     {
         TC_LOG_ERROR("server.authserver", "No valid realms specified.");
+        StopDB();
         return 1;
     }
 
@@ -124,6 +125,7 @@ int main(int argc, char** argv)
     if (port < 0 || port > 0xFFFF)
     {
         TC_LOG_ERROR("server.authserver", "Specified port out of allowed range (1-65535)");
+        StopDB();
         return 1;
     }
 

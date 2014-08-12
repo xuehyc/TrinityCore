@@ -60,7 +60,7 @@ public:
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
-        hyjalAI* ai = CAST_AI(hyjalAI, creature->AI());
+        hyjalAI* ai = ENSURE_AI(hyjalAI, creature->AI());
         switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF + 1:
@@ -84,7 +84,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
-        hyjalAI* ai = CAST_AI(hyjalAI, creature->AI());
+        hyjalAI* ai = ENSURE_AI(hyjalAI, creature->AI());
         if (ai->EventBegun)
             return false;
 
@@ -139,7 +139,7 @@ public:
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
-        hyjalAI* ai = CAST_AI(hyjalAI, creature->AI());
+        hyjalAI* ai = ENSURE_AI(hyjalAI, creature->AI());
         ai->DeSpawnVeins();//despawn the alliance veins
         switch (action)
         {
@@ -164,7 +164,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
-        hyjalAI* ai = CAST_AI(hyjalAI, creature->AI());
+        hyjalAI* ai = ENSURE_AI(hyjalAI, creature->AI());
         if (ai->EventBegun)
             return false;
 
@@ -246,7 +246,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
-        hyjalAI* ai = CAST_AI(hyjalAI, creature->AI());
+        hyjalAI* ai = ENSURE_AI(hyjalAI, creature->AI());
         uint32 AzgalorEvent = ai->GetInstanceData(DATA_AZGALOREVENT);
 
         // Only let them get item if Azgalor is dead.

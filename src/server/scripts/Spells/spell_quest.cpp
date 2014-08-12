@@ -1775,7 +1775,7 @@ class spell_q12847_summon_soul_moveto_bunny : public SpellScriptLoader
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const override
         {
             return new spell_q12847_summon_soul_moveto_bunny_SpellScript();
         }
