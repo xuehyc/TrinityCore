@@ -1,5 +1,7 @@
+
 DROP TABLE IF EXISTS `lfg_entrances`;
-ALTER TABLE `access_requirement` DROP `item_level`;
+
+-- ALTER TABLE `access_requirement` DROP `item_level`;  ArkDB is already done in 7.6.0
 
 DROP TABLE IF EXISTS `lfg_dungeon_template`;
 CREATE TABLE IF NOT EXISTS `lfg_dungeon_template` (
