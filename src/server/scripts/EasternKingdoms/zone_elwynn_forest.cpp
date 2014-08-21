@@ -28,18 +28,6 @@ SDComment: Quest support: 1786
 SDCategory: Elwynn Forest
 EndScriptData */
 
-/* ContentData
-	npc_henze_faulk entry=6172
-	npc_stormwind_infantry
-	npc_brother_paxton
-	npc_blackrock_battle_worg
-	npc_blackrock_spy
-	npc_blackrock_invader
-	npc_goblin_assassin
-	npc_injured_soldier
-	npc_injured_soldier_dummy
-EndContentData */
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -51,40 +39,30 @@ EndContentData */
 
 enum Northshire
 {
-    NPC_BROTHER_PAXTON          = 951,
-	NPC_BLACKROCK_SPY           = 49874,
     NPC_BLACKROCK_INVADER       = 42937,
-    NPC_STORMWIND_INFANTRY      = 49869,
-    NPC_BLACKROCK_BATTLE_WORG   = 49871,
-	NPC_GOBLIN_ASSASSIN			= 50039,
-    NPC_INJURED_SOLDIER         = 50047,
-    NPC_INJURED_SOLDIER_DUMMY   = 50378,
-	NPC_MARSHAL_MC_BRIDE		= 197,
-
-    SAY_INFANTRY_NORMAL			= 0,
-    SAY_INFANTRY_COMBAT			= 1,
-    SAY_PAXTON_NORMAL			= 0,
-    SAY_BLACKROCK_COMBAT		= 0,
-    SAY_ASSASSIN_COMBAT			= 0,
+    SAY_BLACKROCK_COMBAT		= 0,   
 	SAY_INJURED_SOLDIER			= 0,
-	SAY_HEAL					= 0,
-   
-	SPELL_REVIVE			  = 93799, 
-    SPELL_RENEW               = 93094,  
-    SPELL_PRAYER_OF_HEALING   = 93091,  
-    SPELL_FORTITUDE           = 13864, 
-    SPELL_PENANCE             = 47750,  
-    SPELL_FLASH_HEAL          = 17843,  
-    SPELL_SPYING              = 92857,
-    SPELL_SNEAKING            = 93046,
-    SPELL_SPYGLASS            = 80676,
-	SPELL_RENEWEDLIFE         = 93097,
-	SPELL_CONVERSATIONS_TRIGGER_01 = 84076,
+   	SPELL_REVIVE			    = 93799, 
 };
 
-/*######
-## npc_blackrock_battle_worg
-######*/
+/*############################################ showfight battle worg vs stormwind infanty 
+############################################## */
+
+enum eQuestShowfight
+{
+    NPC_BROTHER_PAXTON = 951,
+    NPC_STORMWIND_INFANTRY = 49869,
+    NPC_BLACKROCK_BATTLE_WORG = 49871,
+    SAY_INFANTRY_NORMAL = 0,
+    SAY_INFANTRY_COMBAT = 1,
+    SAY_PAXTON_NORMAL = 0,
+    SPELL_CONVERSATIONS_TRIGGER_01 = 84076,
+    SPELL_RENEW = 93094,
+    SPELL_PRAYER_OF_HEALING = 93091,
+    SPELL_FORTITUDE = 13864,
+    SPELL_PENANCE = 47750,
+    SPELL_FLASH_HEAL = 17843,
+};
 
 class npc_blackrock_battle_worg : public CreatureScript
 {
@@ -93,45 +71,43 @@ public:
 
     struct npc_blackrock_battle_worgAI : public ScriptedAI
     {
-        npc_blackrock_battle_worgAI(Creature *c) : ScriptedAI(c) {}
+        npc_blackrock_battle_worgAI(Creature *c) : ScriptedAI(c) { }
 
-        uint32 Attack1HTimer;        	
-
-        void Reset()  override
+        void DamageTaken(Unit* attacker, uint32& damage) override
         {
-            Attack1HTimer = urand(1800,2200);           			
+            if (Creature* infantry = attacker->ToCreature())
+                if (infantry->GetEntry() == NPC_STORMWIND_INFANTRY)
+                    damage = 0;
         }
 
         void UpdateAI(uint32 diff) override
-        {						
+        {	
             if (!UpdateVictim())
-			{
-				if (Creature* infantry = me->FindNearestCreature (NPC_STORMWIND_INFANTRY, 3.0f)) 
-				{
-					if (Attack1HTimer <= diff)
-					{
-						me->SetFacingTo (me->GetAngle(infantry));
-						me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
-						Attack1HTimer = urand(1800,2200);
-					}
-					else Attack1HTimer -= diff;
-				}
-			} else
-			{
-				DoMeleeAttackIfReady();
-			}
+                DoWork();
+            else
+                DoMeleeAttackIfReady();
+        }
+
+        void DoWork()
+        {
+            if (Creature* infantry = me->FindNearestCreature(NPC_STORMWIND_INFANTRY, 5.0f))
+            if (!infantry->IsInCombat())
+            {
+                me->SetReactState(REACT_AGGRESSIVE);
+                infantry->SetReactState(REACT_AGGRESSIVE);
+                me->Attack(infantry, true);
+                if (!infantry->IsInCombat())
+                    infantry->Attack(me, true);
+                me->GetMotionMaster()->MoveChase(infantry);
+            }
         }
     };
 
-	   CreatureAI* GetAI(Creature* pCreature) const  override
+	CreatureAI* GetAI(Creature* pCreature) const  override
     {
         return new npc_blackrock_battle_worgAI (pCreature);
     }
 };
-
-/*######
-## npc_stormwind_infantry
-######*/
 
 class npc_stormwind_infantry : public CreatureScript
 {
@@ -140,56 +116,67 @@ public:
 
     struct npc_stormwind_infantryAI : public ScriptedAI
     {
-        npc_stormwind_infantryAI(Creature *c) : ScriptedAI(c) {}
+        npc_stormwind_infantryAI(Creature *c) : ScriptedAI(c) { }
 
-        uint32 uiSayTimer;
-        uint32 Attack1HTimer;
+        uint32 m_SayToWorgTimer;
+        uint32 m_SayToPaxtonCooldown;
+
 
         void Reset()  override
         {
-            uiSayTimer = urand(	10000, 300000);
-            Attack1HTimer = urand(1800,2200);
+            m_SayToWorgTimer = urand(10000, 300000);
+            m_SayToPaxtonCooldown = 0;
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (Creature* paxton = me->FindNearestCreature(NPC_BROTHER_PAXTON, 15.0f, true))
+            {
+                if (me->GetHealthPct() < 65 && m_SayToPaxtonCooldown == 0)
+                {
+                    Talk(SAY_INFANTRY_COMBAT, paxton);
+                    me->CastSpell(paxton, SPELL_CONVERSATIONS_TRIGGER_01);
+                    m_SayToPaxtonCooldown = urand(3000, 10000);
+                }
+
+                if (me->GetHealthPct() < 40)
+                    damage = 0;
+            }
+            else
+            {
+                if (attacker->GetEntry() == NPC_BLACKROCK_BATTLE_WORG)
+                    damage = 0;
+            }
+
         }
 
         void UpdateAI(uint32 diff) override
         {
-			if (!UpdateVictim())
-			{
-				Creature* worg; 
-				Creature* paxton; 
-				if ( worg = me->FindNearestCreature (NPC_BLACKROCK_BATTLE_WORG, 3.0f) )
-				{
-					me->SetFacingTo (me->GetAngle(worg));
-					if (!worg->isAttackingPlayer()) 
-					{
-						if (Attack1HTimer <= diff)
-						{						
-							me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
-							Attack1HTimer = urand(1800,2200);
-						}
-						else Attack1HTimer -= diff;		
+            if (m_SayToWorgTimer <= diff)
+            {                
+                if (me->FindNearestPlayer(10.0f, true))
+                    Talk(SAY_INFANTRY_NORMAL);
 
-						if (paxton = me->FindNearestCreature (NPC_BROTHER_PAXTON,25.0f))
-						{
-						
-							if (uiSayTimer <= diff)
-							{
-								Talk(SAY_INFANTRY_COMBAT);
-								DoCast(paxton,SPELL_CONVERSATIONS_TRIGGER_01);
-								uiSayTimer = urand(30000, 120000);
-							}else uiSayTimer -= diff;
+                m_SayToWorgTimer = urand(60000, 300000);
+            }
+            else
+                m_SayToWorgTimer -= diff;
 
-							return;
-						}
-					}
-					if (uiSayTimer <= diff)
-					{
-						Talk(SAY_INFANTRY_NORMAL);
-						uiSayTimer = urand(45000, 300000);
-					}else uiSayTimer -= diff;
-				} 
-			}
+            if (m_SayToPaxtonCooldown <= diff)
+                m_SayToPaxtonCooldown = 0;
+            else
+                m_SayToPaxtonCooldown -= diff;
+
+            if (!UpdateVictim())
+                DoWork();
+            else
+                DoMeleeAttackIfReady();
 		}
+
+        void DoWork()
+        {
+
+        }
     };
 
 	CreatureAI* GetAI(Creature* pCreature) const  override
@@ -198,9 +185,82 @@ public:
     }
 };
 
-/*######
-## npc_blackrock_spy
-######*/
+class npc_brother_paxton : public CreatureScript
+{
+public:
+    npc_brother_paxton() : CreatureScript("npc_brother_paxton") { }
+
+    struct npc_brother_paxtonAI : public ScriptedAI
+    {
+        npc_brother_paxtonAI(Creature *c) : ScriptedAI(c) { }
+
+        uint32 m_timer;
+
+        void Reset()
+        {
+            me->GetMotionMaster()->MovePath(951, true);
+            m_timer = 0;
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell) override
+        {
+            if (Creature* infantry = caster->ToCreature())
+            if (infantry->GetEntry() == NPC_STORMWIND_INFANTRY && spell->Id == SPELL_CONVERSATIONS_TRIGGER_01 && m_timer == 0)
+            {
+                uint32 heal = urand(0, 4);
+                switch (heal)
+                {
+                    case 0:
+                        me->CastSpell(infantry, SPELL_RENEW);
+                        break;
+                    case 1:
+                        me->CastSpell(infantry, SPELL_PRAYER_OF_HEALING);
+                        break;
+                    case 2:
+                        me->CastSpell(infantry, SPELL_FORTITUDE);
+                        break;
+                    case 3:
+                        me->CastSpell(infantry, SPELL_PENANCE);
+                        break;
+                    case 4:
+                        me->CastSpell(infantry, SPELL_FLASH_HEAL);
+                        break;
+                }
+                // me->SetFacingTo(me->GetAngle(infantry));
+                m_timer = 3000;
+                Talk(SAY_PAXTON_NORMAL);
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (m_timer <= diff)
+                m_timer = 0;
+            else
+                m_timer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const  override
+    {
+        return new npc_brother_paxtonAI(pCreature);
+    }
+};
+
+// ########################################## class quest Lions for Lambs
+
+enum eQuest28759
+{
+    NPC_BLACKROCK_SPY = 49874,
+    SPELL_SPYING = 92857,
+    SPELL_SNEAKING = 93046,
+    SPELL_SPYGLASS = 80676,
+};
 
 class npc_blackrock_spy : public CreatureScript
 {
@@ -280,9 +340,13 @@ public:
     }
 };
 
-/*######
-## npc_goblin_assassin
-######*/
+// ########################################## class quest They Sent Assassins
+
+enum eQuest28791
+{
+    NPC_GOBLIN_ASSASSIN = 50039,
+    SAY_ASSASSIN_COMBAT = 0,
+};
 
 class npc_goblin_assassin : public CreatureScript
 {
@@ -299,7 +363,7 @@ public:
 
         void EnterCombat(Unit * who)  override
         {
-            Talk(0);
+            Talk(SAY_ASSASSIN_COMBAT);
         }
 
         void UpdateAI(uint32 diff) override
@@ -317,9 +381,15 @@ public:
     }
 };
 
-/*######
-## npc_injured_soldier
-######*/
+// ########################################## class quest Fear No Evil
+
+enum eQuest28806
+{
+    NPC_INJURED_SOLDIER = 50047,
+    NPC_INJURED_SOLDIER_DUMMY = 50378,
+    NPC_MARSHAL_MC_BRIDE = 197,
+    SPELL_RENEWEDLIFE = 93097,
+};
 
 class npc_injured_soldier : public CreatureScript
 {
@@ -422,10 +492,6 @@ public:
     }
 };
 
-/*######
-## npc_injured_soldier_dummy
-######*/
-
 class npc_injured_soldier_dummy : public CreatureScript
 {
 public:
@@ -470,7 +536,7 @@ public:
 					case 3:
 					{
 						Creature* McBride = me->FindNearestCreature (NPC_MARSHAL_MC_BRIDE,300.0f,true);		
-						me->GetMotionMaster()->MovePoint(0, McBride->GetPositionX(), McBride->GetPositionY(), McBride->GetPositionZ() );
+                        me->GetMotionMaster()->MoveCharge(McBride->GetPositionX(), McBride->GetPositionY(), McBride->GetPositionZ()); //  MovePoint(0, McBride->GetPositionX(), McBride->GetPositionY(), McBride->GetPositionZ());
 						timer=10000;					
 						break;
 					}				
@@ -488,72 +554,20 @@ public:
     }
 };
 
-/*######
-## npc_brother_paxton
-######*/
-
-class npc_brother_paxton : public CreatureScript
-{
-public:
-    npc_brother_paxton() : CreatureScript("npc_brother_paxton") { }
-
-    struct npc_brother_paxtonAI : public ScriptedAI
-    {
-        npc_brother_paxtonAI(Creature *c) : ScriptedAI(c)
-        {
-            me->GetMotionMaster()->MovePath(951, true);
-			// if (!me->HasAura(SPELL_REVIVE)) DoCast(me, SPELL_REVIVE);
-		}
-	
-		bool isHealingNow;
-		uint32 timer;
-
-		void SpellHit(Unit * Hitter, SpellInfo const* spell) override
-        {					
-            if (!Hitter || isHealingNow) return;
-			if (Hitter->GetEntry() != NPC_STORMWIND_INFANTRY || spell->Id != SPELL_CONVERSATIONS_TRIGGER_01) return;				
-								
-			me->CastSpell(Hitter,SPELL_PRAYER_OF_HEALING);
-			me->SetFacingTo (me->GetAngle(Hitter));
-			timer=3000;
-			isHealingNow=true;
-        }
-
-		void UpdateAI(uint32 diff) override
-		{			
-			if (isHealingNow)
-			{
-				if (timer <= diff)	
-				{
-					// me->GetMotionMaster()->MovePath (951,true);		
-					isHealingNow=false;
-				}
-				else 
-					timer -= diff;			
-			}
-			
-            if (!UpdateVictim())
-			   return;
-				
-			DoMeleeAttackIfReady();
-		}		
-    };
-
-	CreatureAI* GetAI(Creature* pCreature) const  override
-    {
-        return new npc_brother_paxtonAI (pCreature);
-    }
-};
-
+// ########################################## '
 
 
 // ToDo
 
-
-
 /*######
 ## npc_henze_faulk
 ######*/
+
+enum eHenze
+{
+    SAY_HEAL = 0,
+};
+
 class npc_henze_faulk : public CreatureScript
 {
 public:
