@@ -578,9 +578,118 @@ public:
 
 };
 
+
+// ##########################################  quest 25072
+
+enum eQuest25072
+{
+    NPC_CAPTURED_GOBLIN_BUGHUNTER = 39082,
+    NPC_ZEKE_BOOTSCUFF = 38706,
+    QUEST_A_FEW_GOOD_GOBLINS = 25072,
+};
+
+class npc_hazzali_cocoon : public CreatureScript
+{
+public:
+    npc_hazzali_cocoon() : CreatureScript("npc_hazzali_cocoon") { }
+
+    struct npc_hazzali_cocoonAI : public ScriptedAI
+    {
+        npc_hazzali_cocoonAI(Creature *pCreature) : ScriptedAI(pCreature) { }
+
+        void JustDied(Unit* killer) override 
+        { 
+            if (Player* player = killer->ToPlayer())
+                if (player->GetQuestStatus(QUEST_A_FEW_GOOD_GOBLINS) == QUEST_STATUS_INCOMPLETE)
+                {
+                    Position pos = me->GetNearPosition(0.0f, 0.0f);
+                    me->SummonCreature(NPC_CAPTURED_GOBLIN_BUGHUNTER, pos, TEMPSUMMON_TIMED_DESPAWN, 10000);
+                }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const  override
+    {
+        return new npc_hazzali_cocoonAI(pCreature);
+    }
+};
+
+class npc_captured_goblin_bughunter : public CreatureScript
+{
+public:
+    npc_captured_goblin_bughunter() : CreatureScript("npc_captured_goblin_bughunter") { }
+
+    struct npc_captured_goblin_bughunterAI : public ScriptedAI
+    {
+        npc_captured_goblin_bughunterAI(Creature *pCreature) : ScriptedAI(pCreature) { }
+
+        uint32 m_timer;
+        uint32 m_phase;
+
+        void Reset() override
+        {
+            m_timer = 1000;
+            m_phase = 0;
+        }
+             
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (m_timer <= diff)
+            {
+                m_phase++;
+                m_timer = 1000;
+                DoWork();
+            }
+            else
+                m_timer -= diff;
+
+            if (!UpdateVictim())
+                return;
+            
+            DoMeleeAttackIfReady();
+        }
+
+        void DoWork()
+        {
+            switch (m_phase)
+            {
+            case 1:
+                Talk(0);
+                m_timer = 3000;
+                break;
+            case 2:
+                me->GetMotionMaster()->MovePoint(0, 8733.0f, -4316.0f, 15.8f);
+                m_timer = 4000;
+                break;
+            case 3:
+                me->DespawnOrUnsummon();
+                break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const  override
+    {
+        return new npc_captured_goblin_bughunterAI(pCreature);
+    }
+};
+
+// ##########################################
+
 void AddSC_tanaris()
 {
     new npc_custodian_of_time();
     new npc_steward_of_time();
     new npc_OOX17();
+    new npc_hazzali_cocoon();
+    new npc_captured_goblin_bughunter();
 }
