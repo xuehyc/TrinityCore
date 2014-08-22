@@ -579,7 +579,7 @@ public:
 };
 
 
-// ##########################################  quest 25072
+// ##########################################  quest 25072 A_FEW_GOOD_GOBLINS
 
 enum eQuest25072
 {
@@ -683,7 +683,95 @@ public:
     }
 };
 
-// ##########################################
+// ########################################## Quest 24951 A_GREAT_IDEA
+
+enum eQuest24951
+{
+    QUEST_A_GREAT_IDEA = 24951,
+    NPC_HAZZALI_SWARMER = 5451,
+    NPC_WRANGLED_SWARMER = 38739,
+    NPC_WRANGLED_BUG_CREDIT_BUNNY = 38742,
+    NPC_SILITHID_BAIT_MEATY = 38718,
+    ITEM_BOOTLEGGER_BUG_BAIT = 52031,
+    SPELL_THROW_HYENA_CHUNK = 72659,
+    SPELL_SUMMON_WRANGLED_SILITHID = 72677,
+    SPELL_WRANGLING_A_SILITHID = 72681,
+};
+
+class npc_silithid_bait_meaty : public CreatureScript
+{
+public:
+    npc_silithid_bait_meaty() : CreatureScript("npc_silithid_bait_meaty") { }
+
+    struct npc_silithid_bait_meatyAI : public ScriptedAI
+    {
+        npc_silithid_bait_meatyAI(Creature *pCreature) : ScriptedAI(pCreature) { }
+
+        uint32 m_timer;
+        uint32 m_phase;
+        Creature* m_bug;
+
+        void Reset() override
+        {
+            m_timer = 1000;
+            m_phase = 0;
+            m_bug = 0;
+        }
+
+        void JustSummoned(Creature* summon) override 
+        {       
+            if (Player* player = me->FindNearestPlayer(10.0, true))
+            {
+                m_bug = summon;
+                summon->CastSpell(player, SPELL_WRANGLING_A_SILITHID);
+                player->KilledMonsterCredit(NPC_WRANGLED_BUG_CREDIT_BUNNY);
+            }
+             
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (m_timer <= diff)
+            {
+                m_phase++;
+                m_timer = urand(2000, 5000);
+                DoWork();
+            }
+            else
+                m_timer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+        void DoWork()
+        {
+            switch (m_phase)
+            {
+            case 1:
+                me->CastSpell(me, SPELL_SUMMON_WRANGLED_SILITHID);
+                m_timer = 2000;
+                break;
+            case 2:
+                m_timer = 6000;
+                break;
+            case 3:
+                if (m_bug)
+                    m_bug->DespawnOrUnsummon();
+
+                break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const  override
+    {
+        return new npc_silithid_bait_meatyAI(pCreature);
+    }
+};
+
 
 void AddSC_tanaris()
 {
@@ -692,4 +780,5 @@ void AddSC_tanaris()
     new npc_OOX17();
     new npc_hazzali_cocoon();
     new npc_captured_goblin_bughunter();
+    new npc_silithid_bait_meaty();
 }
