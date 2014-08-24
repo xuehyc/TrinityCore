@@ -1366,67 +1366,6 @@ public:
     }
 };
 
-// 53600 - Shield of the Righteous
-/// Updated 4.3.4
-class spell_pal_shield_of_the_righteous : public SpellScriptLoader
-{
-    public:
-        spell_pal_shield_of_the_righteous() : SpellScriptLoader("spell_pal_shield_of_the_righteous") { }
-
-        class spell_pal_shield_of_the_righteous_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pal_shield_of_the_righteous_SpellScript);
-
-            bool Load() override
-            {
-                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
-                    return false;
-
-                if (GetCaster()->ToPlayer()->getClass() != CLASS_PALADIN)
-                    return false;
-
-                return true;
-            }
-
-            void ChangeDamage(SpellEffIndex /*effIndex*/)
-            {
-                int32 damage = GetHitDamage();
-                int32 power = GetCaster()->GetPower(POWER_HOLY_POWER);
-
-                // 1 HolyPower: damage - 1
-                // 2 HolyPower: (damage * 3) - 3 
-                // 3 HolyPower: (damage * 6) - 6
-                switch (power)
-                {
-                    switch (GetCaster()->GetPower(POWER_HOLY_POWER))
-                    {
-                    case 0: // 1 Holy Power
-                        // same damage
-                        break;
-                    case 1: // 2 Holy Power
-                        damage *= 3;    // 3*30 = 90%
-                        break;
-                    case 2: // 3 Holy Power
-                        damage *= 7.5;  // 7.5*30% = 225%
-                        break;
-                    }
-                }
-
-                SetHitDamage(damage);
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_pal_shield_of_the_righteous_SpellScript::ChangeDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-            }
-        };
-
-        SpellScript* GetSpellScript() const override
-        {
-            return new spell_pal_shield_of_the_righteous_SpellScript();
-        }
-};
-
 class spell_pal_judgements_of_the_wise : public SpellScriptLoader
 {
     public:
