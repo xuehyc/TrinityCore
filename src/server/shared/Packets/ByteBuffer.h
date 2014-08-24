@@ -35,7 +35,7 @@
 #include <vector>
 #include <cstring>
 #include <time.h>
-#include <math.h>
+#include <cmath>
 #include <boost/asio/buffer.hpp>
 
 class MessageBuffer;
@@ -74,15 +74,16 @@ public:
 class ByteBuffer
 {
     public:
-        const static size_t DEFAULT_SIZE = 0x1000;
+        static size_t const DEFAULT_SIZE = 0x1000;
+        static uint8 const InitialBitPos = 8;
 
         // constructor
-        ByteBuffer() : _rpos(0), _wpos(0), _bitpos(8), _curbitval(0)
+        ByteBuffer() : _rpos(0), _wpos(0), _bitpos(InitialBitPos), _curbitval(0)
         {
             _storage.reserve(DEFAULT_SIZE);
         }
 
-        ByteBuffer(size_t reserve) : _rpos(0), _wpos(0), _bitpos(8), _curbitval(0)
+        ByteBuffer(size_t reserve) : _rpos(0), _wpos(0), _bitpos(InitialBitPos), _curbitval(0)
         {
             _storage.reserve(reserve);
         }

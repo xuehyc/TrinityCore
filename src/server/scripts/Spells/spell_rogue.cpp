@@ -53,6 +53,8 @@ enum RogueSpells
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628,
     SPELL_ROGUE_VENOMOUS_WOUNDS_DAMAGE              = 79136,
     SPELL_ROGUE_VENOMOUS_WOUNDS_ENERGIZE            = 51637
+    SPELL_ROGUE_SERRATED_BLADES_R1                  = 14171,
+    SPELL_ROGUE_RUPTURE                             = 1943,
 };
 
 enum RogueSpellIcons
@@ -1131,6 +1133,40 @@ public:
 };
 
 
+class spell_rog_serrated_blades : public SpellScriptLoader
+{
+public:
+    spell_rog_serrated_blades() : SpellScriptLoader("spell_rog_serrated_blades") { }
+
+    class spell_rog_serrated_blades_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_serrated_blades_SpellScript);
+
+        void HandleHit()
+        {
+            if (AuraEffect* blade = GetCaster()->GetAuraEffectOfRankedSpell(SPELL_ROGUE_SERRATED_BLADES_R1, EFFECT_0))
+            {
+                uint8 combo = GetCaster()->ToPlayer()->GetComboPoints();
+
+                if (roll_chance_i(blade->GetAmount() * combo))
+                    if (Aura* dot = GetHitUnit()->GetAura(SPELL_ROGUE_RUPTURE, GetCaster()->GetGUID()))
+                        dot->RefreshDuration();
+
+            }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_rog_serrated_blades_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_rog_serrated_blades_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -1154,4 +1190,5 @@ void AddSC_rogue_spell_scripts()
 	new spell_rog_backstab();
 	new spell_rog_venomous_wounds();
 	new spell_rog_murderous_Intent();
+    new spell_rog_serrated_blades();
 }

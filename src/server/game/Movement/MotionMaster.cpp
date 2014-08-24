@@ -349,7 +349,7 @@ void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, floa
     float dist = 2 * moveTimeHalf * speedXY;
     float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -speedZ);
 
-    _owner->GetNearPoint(_owner, x, y, z, _owner->GetObjectSize(), dist, _owner->GetAngle(srcX, srcY) + M_PI);
+    _owner->GetNearPoint(_owner, x, y, z, _owner->GetObjectSize(), dist, _owner->GetAngle(srcX, srcY) + float(M_PI));
 
     Movement::MoveSplineInit init(_owner);
     init.MoveTo(x, y, z);
@@ -403,7 +403,7 @@ void MotionMaster::MoveFall(uint32 id /*=0*/)
     }
 
     // Abort too if the ground is very near
-    if (fabs(_owner->GetPositionZ() - tz) < 0.1f)
+    if (std::fabs(_owner->GetPositionZ() - tz) < 0.1f)
         return;
 
     if (_owner->GetTypeId() == TYPEID_PLAYER)

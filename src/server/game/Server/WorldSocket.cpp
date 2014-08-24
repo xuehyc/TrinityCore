@@ -32,21 +32,23 @@
 
 using boost::asio::ip::tcp;
 
-WorldSocket::WorldSocket(tcp::socket&& socket)
-    : Socket(std::move(socket), sizeof(ClientPktHeader)), _authSeed(rand32()), _OverSpeedPings(0), _worldSession(nullptr)
+std::string const WorldSocket::ServerConnectionInitialize("WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT");
+
+std::string const WorldSocket::ClientConnectionInitialize("WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER");
+
+WorldSocket::WorldSocket(tcp::socket&& socket) : Socket(std::move(socket), sizeof(ClientPktHeader)),
+    _authSeed(rand32()), _OverSpeedPings(0), _worldSession(nullptr), _initialized(false)
 {
 }
 
 void WorldSocket::Start()
 {
     sScriptMgr->OnSocketOpen(shared_from_this());
-    AsyncReadHeader();
 
-    // not an opcode. this packet sends raw string WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT"
-    // because of our implementation of WorldPacket sending, bytes "WO" become the opcode
-    WorldPacket packet(MSG_VERIFY_CONNECTIVITY);
-    packet << "RLD OF WARCRAFT CONNECTION - SERVER TO CLIENT";
-    AsyncWrite(packet);
+    AsyncReadData(ClientConnectionInitialize.length() + 2 /*sizeof(ClientPktHeader::size)*/ + 1 /*null terminator*/);
+
+    _writeQueue.emplace(ServerConnectionInitialize);
+    AsyncWrite(_writeQueue.front());
 }
 
 void WorldSocket::HandleSendAuthSession()
@@ -94,84 +96,84 @@ void WorldSocket::ReadHeaderHandler()
 
 void WorldSocket::ReadDataHandler()
 {
-    ClientPktHeader* header = reinterpret_cast<ClientPktHeader*>(GetHeaderBuffer());
+    if (_initialized)
+    {
+        ClientPktHeader* header = reinterpret_cast<ClientPktHeader*>(GetHeaderBuffer());
 
         Opcodes opcode = PacketFilter::DropHighBytes(Opcodes(header->cmd));
 
-    std::string opcodeName = GetOpcodeNameForLogging(opcode);
+        std::string opcodeName = GetOpcodeNameForLogging(opcode);
 
-    WorldPacket packet(opcode, MoveData());
+        WorldPacket packet(opcode, MoveData());
 
-    if (sPacketLog->CanLogPacket())
-        sPacketLog->LogPacket(packet, CLIENT_TO_SERVER, GetRemoteIpAddress(), GetRemotePort());
+        if (sPacketLog->CanLogPacket())
+            sPacketLog->LogPacket(packet, CLIENT_TO_SERVER, GetRemoteIpAddress(), GetRemotePort());
 
-    TC_LOG_TRACE("network.opcode", "C->S: %s %s", (_worldSession ? _worldSession->GetPlayerInfo() : GetRemoteIpAddress().to_string()).c_str(), opcodeName.c_str());
+        TC_LOG_TRACE("network.opcode", "C->S: %s %s", (_worldSession ? _worldSession->GetPlayerInfo() : GetRemoteIpAddress().to_string()).c_str(), opcodeName.c_str());
 
-    switch (opcode)
-    {
-        case CMSG_PING:
-            HandlePing(packet);
-            break;
-        case CMSG_AUTH_SESSION:
-            if (_worldSession)
-            {
-                TC_LOG_ERROR("network", "WorldSocket::ProcessIncoming: received duplicate CMSG_AUTH_SESSION from %s", _worldSession->GetPlayerInfo().c_str());
+        switch (opcode)
+        {
+            case CMSG_PING:
+                HandlePing(packet);
                 break;
-            }
+            case CMSG_AUTH_SESSION:
+                if (_worldSession)
+                {
+                    TC_LOG_ERROR("network", "WorldSocket::ProcessIncoming: received duplicate CMSG_AUTH_SESSION from %s", _worldSession->GetPlayerInfo().c_str());
+                    break;
+                }
 
-            HandleAuthSession(packet);
-            break;
-        case CMSG_KEEP_ALIVE:
-            TC_LOG_DEBUG("network", "%s", opcodeName.c_str());
-            sScriptMgr->OnPacketReceive(_worldSession, packet);
-            break;
-        case CMSG_LOG_DISCONNECT:
-            packet.rfinish();   // contains uint32 disconnectReason;
-            TC_LOG_DEBUG("network", "%s", opcodeName.c_str());
-            sScriptMgr->OnPacketReceive(_worldSession, packet);
-            return;
-            // not an opcode, client sends string "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER" without opcode
-            // first 4 bytes become the opcode (2 dropped)
-        case MSG_VERIFY_CONNECTIVITY:
-        {
-            TC_LOG_DEBUG("network", "%s", opcodeName.c_str());
-            sScriptMgr->OnPacketReceive(_worldSession, packet);
-            std::string str;
-            packet >> str;
-            if (str != "D OF WARCRAFT CONNECTION - CLIENT TO SERVER")
-            {
-                CloseSocket();
+                HandleAuthSession(packet);
                 break;
-            }
-
-            HandleSendAuthSession();
-            break;
-        }
-        case CMSG_ENABLE_NAGLE:
-        {
-            TC_LOG_DEBUG("network", "%s", opcodeName.c_str());
-            sScriptMgr->OnPacketReceive(_worldSession, packet);
-            if (_worldSession)
-                _worldSession->HandleEnableNagleAlgorithm();
-            break;
-        }
-        default:
-        {
-            if (!_worldSession)
-            {
-                TC_LOG_ERROR("network.opcode", "ProcessIncoming: Client not authed opcode = %u", uint32(opcode));
-                CloseSocket();
+            case CMSG_KEEP_ALIVE:
+                TC_LOG_DEBUG("network", "%s", opcodeName.c_str());
+                sScriptMgr->OnPacketReceive(_worldSession, packet);
+                break;
+            case CMSG_LOG_DISCONNECT:
+                packet.rfinish();   // contains uint32 disconnectReason;
+                TC_LOG_DEBUG("network", "%s", opcodeName.c_str());
+                sScriptMgr->OnPacketReceive(_worldSession, packet);
                 return;
+            case CMSG_ENABLE_NAGLE:
+            {
+                TC_LOG_DEBUG("network", "%s", opcodeName.c_str());
+                sScriptMgr->OnPacketReceive(_worldSession, packet);
+                if (_worldSession)
+                    _worldSession->HandleEnableNagleAlgorithm();
+                break;
             }
+            default:
+            {
+                if (!_worldSession)
+                {
+                    TC_LOG_ERROR("network.opcode", "ProcessIncoming: Client not authed opcode = %u", uint32(opcode));
+                    CloseSocket();
+                    return;
+                }
 
-            // Our Idle timer will reset on any non PING opcodes.
-            // Catches people idling on the login screen and any lingering ingame connections.
-            _worldSession->ResetTimeOutTime();
+                // Our Idle timer will reset on any non PING opcodes.
+                // Catches people idling on the login screen and any lingering ingame connections.
+                _worldSession->ResetTimeOutTime();
 
-            // Copy the packet to the heap before enqueuing
-            _worldSession->QueuePacket(new WorldPacket(std::move(packet)));
-            break;
+                // Copy the packet to the heap before enqueuing
+                _worldSession->QueuePacket(new WorldPacket(std::move(packet)));
+                break;
+            }
         }
+    }
+    else
+    {
+        ClientPktHeader* header = reinterpret_cast<ClientPktHeader*>(GetDataBuffer());
+
+        std::string initializer(reinterpret_cast<char const*>(header) + sizeof(header->size));
+        if (initializer != ClientConnectionInitialize)
+        {
+            CloseSocket();
+            return;
+        }
+
+        _initialized = true;
+        HandleSendAuthSession();
     }
 
     AsyncReadHeader();
@@ -263,31 +265,10 @@ void WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     account = recvPacket.ReadString(accountNameLength);
 
     // Get the account information from the auth database
-    //         0           1        2       3          4         5       6          7   8
-    // SELECT id, sessionkey, last_ip, locked, expansion, mutetime, locale, recruiter, os FROM account WHERE username = ?
-    PreparedStatement* stmt;
-    uint32 battlenetAccountId = 0;
-    uint8 battlenetAccountIndex = 0;
-    if (loginServerType == 1)
-    {
-        if (!Battlenet::AccountMgr::GetAccountIdAndIndex(account, &battlenetAccountId, &battlenetAccountIndex))
-        {
-            // We can not log here, as we do not know the account. Thus, no accountId.
-            SendAuthResponseError(AUTH_UNKNOWN_ACCOUNT);
-            TC_LOG_ERROR("network", "WorldSocket::HandleAuthSession: Sent Auth Response (unknown account).");
-            DelayedCloseSocket();
-            return;
-        }
-
-        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_BNET);
-        stmt->setUInt32(0, battlenetAccountId);
-        stmt->setUInt8(1, battlenetAccountIndex);
-    }
-    else
-    {
-        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_NAME);
-        stmt->setString(0, account);
-    }
+    //         0           1        2       3          4         5       6          7   8                  9
+    // SELECT id, sessionkey, last_ip, locked, expansion, mutetime, locale, recruiter, os, battlenet_account FROM account WHERE username = ?
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_NAME);
+    stmt->setString(0, account);
 
     PreparedQueryResult result = LoginDatabase.Query(stmt);
 
@@ -394,7 +375,7 @@ void WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     {
         mutetime = time(NULL) + llabs(mutetime);
 
-        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME_LOGIN);
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME_LOGIN);
 
         stmt->setInt64(0, mutetime);
         stmt->setUInt32(1, id);
@@ -407,6 +388,11 @@ void WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         locale = LOCALE_enUS;
 
     uint32 recruiter = fields[7].GetUInt32();
+
+    uint32 battlenetAccountId = 0;
+    if (loginServerType == 1)
+        battlenetAccountId = fields[9].GetUInt32();
+
     // Checks gmlevel per Realm
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_GMLEVEL_BY_REALMID);
 
