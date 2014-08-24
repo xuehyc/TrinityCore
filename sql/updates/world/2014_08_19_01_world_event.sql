@@ -1,10 +1,9 @@
+
 SET @EventEntry :=    34;
-SET @CGuid :=    127312;
 
 -- Add game events to gameevent table (one per month so different brew vendor spawns each month which sells a different brew
 
 DELETE FROM `game_event` WHERE `eventEntry` BETWEEN @EventEntry AND @EventEntry+11;
-
 INSERT INTO `game_event` (`eventEntry`, `start_time`, `end_time`, `occurence`, `length`, `holiday`, `description`, `world_event`, `announce`) VALUES
 (@EventEntry, '2012-10-01 00:01:00', '2020-12-31 06:00:00', 525600, 44640, 0, 'Brew of the Month October', 0, 2),
 (@EventEntry+1, '2012-11-01 00:01:00', '2020-12-31 06:00:00', 525600, 43200, 0, 'Brew of the Month November', 0, 2),
@@ -24,7 +23,6 @@ UPDATE `creature_template` SET `minlevel`=50, `maxlevel`=50, `npcflag`=129,`goss
 -- Add brewfest brews to vendors some of these are already in db but all are here just in case)
 
 DELETE FROM `npc_vendor` WHERE `entry` IN (27806,27810,27811,27812,27813,27814,27815,27816,27817,27818,27819,27820);
-
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
 (27806, 0, 37488, 0, 0, 0), -- Wild Winter Pilsner (January)
 (27810, 0, 37899, 0, 0, 0), -- Izzard's Ever Flavor (February)
@@ -43,33 +41,32 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 UPDATE `item_template` SET `BuyCount`=6, `flagsCustom`=1 WHERE  `entry` IN(37488,37899,37490,37491,37492,37493,37494,37495,37496,37497,37498,37499,37496);
 
 -- Link brew vendors to monthly events
-DELETE FROM `game_event_creature` WHERE `guid` BETWEEN @CGuid AND @CGuid+23;
-
-INSERT INTO `game_event_creature` (`eventEntry`, `guid`) VALUES
-(@EventEntry+3, @CGuid),
-(@EventEntry+3, @CGuid+1),
-(@EventEntry+4, @CGuid+2),
-(@EventEntry+4, @CGuid+3),
-(@EventEntry+5, @CGuid+4),
-(@EventEntry+5, @CGuid+5),
-(@EventEntry+6, @CGuid+6),
-(@EventEntry+6, @CGuid+7),
-(@EventEntry+7, @CGuid+8),
-(@EventEntry+7, @CGuid+9),
-(@EventEntry+8, @CGuid+10),
-(@EventEntry+8, @CGuid+11),
-(@EventEntry+9, @CGuid+12),
-(@EventEntry+9, @CGuid+13),
-(@EventEntry+10, @CGuid+14),
-(@EventEntry+10, @CGuid+15),
-(@EventEntry+11, @CGuid+16),
-(@EventEntry+11, @CGuid+17),
-(@EventEntry, @CGuid+18),
-(@EventEntry, @CGuid+19),
-(@EventEntry+1, @CGuid+20),
-(@EventEntry+1, @CGuid+21),
-(@EventEntry+2, @CGuid+22),
-(@EventEntry+2, @CGuid+23);
+DELETE FROM `game_event_creature` WHERE `guid` in (57619,86314,10851,278492,57771,132591,52756,118857,780,132588,16896,132586,57770,132592,6445,132589,57620,132587,57618,132585,6446,132590,40253,278493);
+INSERT INTO `game_event_creature` (`eventEntry`, `guid`) VALUES -- GUID from ArkDB
+(@EventEntry+3, 57619),
+(@EventEntry+3, 86314),
+(@EventEntry+4, 10851),
+(@EventEntry+4, 278492),
+(@EventEntry+5, 57771),
+(@EventEntry+5, 132591),
+(@EventEntry+6, 52756),
+(@EventEntry+6, 118857),
+(@EventEntry+7, 780),
+(@EventEntry+7, 132588),
+(@EventEntry+8, 16896),
+(@EventEntry+8, 132586),
+(@EventEntry+9, 57770),
+(@EventEntry+9, 132592),
+(@EventEntry+10, 6445),
+(@EventEntry+10, 132589),
+(@EventEntry+11, 57620),
+(@EventEntry+11, 132587),
+(@EventEntry, 57618),
+(@EventEntry, 132585),
+(@EventEntry+1, 6446),
+(@EventEntry+1, 132590),
+(@EventEntry+2, 40253),
+(@EventEntry+2, 278493);
 
 
 -- Add some missing gossips and conditions for these which are needed so only players who completed brew of the month quest can access vendors
@@ -90,43 +87,40 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=15 AND `SourceGroup`IN(
 
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (15, 9548, 0, 0, 0, 2, 0, 37829, 1, 0, 0, 0, 0, '', 'Only show gossip menu if player has at least 1 brewfest prize token'),
-
 (15, 9549, 0, 0, 0, 8, 0, 12421, 0, 0, 0, 0, 0, '', 'Only allow players who have completed brew of the month quest to access vendor'),
 (15, 9549, 0, 0, 2, 8, 0, 12420, 0, 0, 0, 0, 0, '', 'Only allow players who have completed brew of the month quest to access vendor');
 
-DELETE FROM `creature` WHERE `id` IN (27806,27810,27811,27812,27813,27814,27815,27816,27817,27818,27819,27820);
-
+DELETE FROM `creature` WHERE `id` IN (27806,27810,27811,27812,27813,27814,27815,27816,27817,27818,27819,27820);  -- GUID from ArkDB
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@CGuid, 27806, 0, 1, 1, 24979, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+1, 27806, 1, 1, 1, 24979, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+2, 27810, 0, 1, 1, 24980, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+3, 27810, 1, 1, 1, 24980, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+4, 27811, 0, 1, 1, 24981, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+5, 27811, 1, 1, 1, 24981, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+6, 27812, 0, 1, 1, 24982, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+7, 27812, 1, 1, 1, 24982, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+8, 27813, 0, 1, 1, 24983, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+9, 27813, 1, 1, 1, 24983, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+10, 27814, 0, 1, 1, 24984, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+11, 27814, 1, 1, 1, 24984, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+12, 27815, 0, 1, 1, 24985, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+13, 27815, 1, 1, 1, 24985, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+14, 27816, 0, 1, 1, 24986, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+15, 27816, 1, 1, 1, 24986, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+16, 27817, 0, 1, 1, 24987, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+17, 27817, 1, 1, 1, 24987, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+18, 27818, 0, 1, 1, 24988, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+19, 27818, 1, 1, 1, 24988, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+20, 27819, 0, 1, 1, 24989, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+21, 27819, 1, 1, 1, 24989, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+22, 27820, 0, 1, 1, 24990, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
-(@CGuid+23, 27820, 1, 1, 1, 24990, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0);
+(57619, 27806, 0, 1, 1, 24979, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),  -- GUID from ArkDB
+(86314, 27806, 1, 1, 1, 24979, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(10851, 27810, 0, 1, 1, 24980, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(278492, 27810, 1, 1, 1, 24980, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(57771, 27811, 0, 1, 1, 24981, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(132591, 27811, 1, 1, 1, 24981, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(52756, 27812, 0, 1, 1, 24982, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(118857, 27812, 1, 1, 1, 24982, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(780, 27813, 0, 1, 1, 24983, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(132588, 27813, 1, 1, 1, 24983, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(16896, 27814, 0, 1, 1, 24984, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(132586, 27814, 1, 1, 1, 24984, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(57770, 27815, 0, 1, 1, 24985, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(132592, 27815, 1, 1, 1, 24985, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(6445, 27816, 0, 1, 1, 24986, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(132589, 27816, 1, 1, 1, 24986, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(57620, 27817, 0, 1, 1, 24987, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(132587, 27817, 1, 1, 1, 24987, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(57618, 27818, 0, 1, 1, 24988, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(132585, 27818, 1, 1, 1, 24988, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(6446, 27819, 0, 1, 1, 24989, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(132590, 27819, 1, 1, 1, 24989, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(40253, 27820, 0, 1, 1, 24990, 1, -4845.949, -861.9443, 501.9972, 4.485496, 120, 0, 0, 2215, 0, 0, 0, 0, 0),
+(278493, 27820, 1, 1, 1, 24990, 1, 1475.8, -4210.233, 43.2693, 4.014257, 120, 0, 0, 2215, 0, 0, 0, 0, 0);
 
 -- Spawn Larkin Thunderbrew <Brew of the Month Club> who is needed so alliance can turn quest to unlock vendors
-DELETE FROM `creature` WHERE `guid`=@CGuid+24;
-
+DELETE FROM `creature` WHERE `guid`=45568; -- GUID BY ArkDB
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@CGuid+24, 27478, 0, 1, 1, 22396, 0, -4849.41, -862.255, 501.997, 4.85202, 300, 0, 0, 2215, 0, 0, 0, 0, 0);
+(45568, 27478, 0, 1, 1, 22396, 0, -4849.41, -862.255, 501.997, 4.85202, 300, 0, 0, 2215, 0, 0, 0, 0, 0);
 
 -- Smart scripts to dynamically change faction on brew vendors depending on location
 -- 774 = Alliance only alliance can access vendor, vendor still appears neutral to horde but wont allow interaction

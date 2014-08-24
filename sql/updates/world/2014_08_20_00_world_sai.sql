@@ -1,4 +1,6 @@
-SET @CGUID := 74528;
+
+
+SET @CGUID := 197263; -- GUID by ArkDB
 
 DELETE FROM `creature` WHERE  `guid` BETWEEN @CGUID AND @CGUID+10;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES

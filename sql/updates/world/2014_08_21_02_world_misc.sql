@@ -1,4 +1,3 @@
-SET @CGuid :=    29974;
 
 -- These two gossip menus on Injured rainspeaker oracle are not meant to be linked, they are two
 -- seperate gossips the first one for Just Following Orders to help the injured rainspeaker oracle and start event
@@ -7,13 +6,13 @@ SET @CGuid :=    29974;
 UPDATE `gossip_menu_option` SET `action_menu_id`=0 WHERE  `menu_id`=9677 AND `id`=0;
 
 -- Delete Ravenous Mangal Crocolisk as this is not meant to be spawned, it is summoned from spell
-DELETE FROM `creature` WHERE  `guid`=111427;
+DELETE FROM `creature` WHERE  `guid`=229546; -- GUID by ArkDB
  
 -- Spawn Shaman Jakjek and Lightningcaller Soo-met
-DELETE FROM `creature` WHERE `id` IN(28106,28107);
+DELETE FROM `creature` WHERE `id` IN(28106,28107); -- GUID by ArkDB 
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(@CGUID+0, 28106, 571, 1, 1,  4869.281, 5912.271, -40.38539, 5.166174, 120, 0, 0), -- 28106 (Area: 3711)
-(@CGUID+1, 28107, 571, 1, 1,  5116.647, 5469.729, -91.70967, 1.605703, 120, 0, 0); -- 28107 (Area: 3711)
+(199018, 28106, 571, 1, 1,  4869.281, 5912.271, -40.38539, 5.166174, 120, 0, 0), -- 28106 (Area: 3711)
+(197944, 28107, 571, 1, 1,  5116.647, 5469.729, -91.70967, 1.605703, 120, 0, 0); -- 28107 (Area: 3711)
 
 DELETE FROM `creature_template_addon` WHERE `entry` IN(28106,28107);
 INSERT INTO `creature_template_addon` (`entry`, `mount`, `bytes1`, `bytes2`, `auras`) VALUES
