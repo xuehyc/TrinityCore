@@ -772,6 +772,276 @@ public:
     }
 };
 
+// ########################################## Quest 25112 Butcherbot, 25111 Scavengers Scavenged, 25115 Blisterpaw Butchery
+
+enum eQuest25112
+{
+    QUEST_BUTCHERBOT = 25112,
+    ITEM_BUTCHERBOT_CONTROL_GIZMO = 52712,
+    NPC_BUTCHERBOT_SPAWNED_BY_74176 = 39696,
+    NPC_BUTCHERBOT = 40508,
+    NPC_GLASSHIDE_BASILISK = 5419,
+    NPC_TANARIS_BASILISK_KILL_CREDIT_BUNNY = 39702,
+    SPELL_DEPLOY_BUTCHERBOT = 74175,
+    SPELL_SUMMON_BUTCHERBOT_TO_CORPSE = 74176,
+    SPELL_CREATE_BUTCHERBOT_ITEM = 74227,
+    SPELL_BUTCHERBOT_BUTCHERING = 74168,
+    SPELL_FORCE_PLAYER_TO_CREATE_BUTCHERBOT = 74228,
+};
+
+class npc_glasshide_basilisk : public CreatureScript
+{
+public:
+    npc_glasshide_basilisk() : CreatureScript("npc_glasshide_basilisk") { }
+
+    struct npc_glasshide_basiliskAI : public ScriptedAI
+    {
+        npc_glasshide_basiliskAI(Creature *pCreature) : ScriptedAI(pCreature) { }
+
+        uint32 m_timer;
+        uint32 m_phase;
+        Creature* bot;
+
+        void Reset() override
+        {
+            m_timer = 1000;
+            m_phase = 0;
+            Creature* bot = NULL;
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell) override 
+        { 
+            bot = me->FindNearestCreature(NPC_BUTCHERBOT_SPAWNED_BY_74176, 10.0f);
+            if (Player* player = caster->ToPlayer())
+                if (player->GetQuestStatus(QUEST_BUTCHERBOT) == QUEST_STATUS_INCOMPLETE)
+                    if (spell->Id == SPELL_DEPLOY_BUTCHERBOT)
+                        if (me->isDead() && !bot)
+                        {
+                            player->CastSpell(me, SPELL_SUMMON_BUTCHERBOT_TO_CORPSE);
+                        }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const  override
+    {
+        return new npc_glasshide_basiliskAI(pCreature);
+    }
+};
+
+enum eQuest25111
+{
+    QUEST_SCAVENGERS_SCAVENDED = 25111,
+    NPC_FIRE_ROCK = 5429,
+    NPC_TANARIS_FIRE_ROCK_KILL_CREDIT_BUNNY = 40507,
+};
+
+class npc_fire_rock : public CreatureScript
+{
+public:
+    npc_fire_rock() : CreatureScript("npc_fire_rock") { }
+
+    struct npc_fire_rockAI : public ScriptedAI
+    {
+        npc_fire_rockAI(Creature *pCreature) : ScriptedAI(pCreature) { }
+
+        uint32 m_timer;
+        uint32 m_phase;
+        Creature* bot;
+
+        void Reset() override
+        {
+            m_timer = 1000;
+            m_phase = 0;
+            Creature* bot = NULL;
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell) override
+        {
+            bot = me->FindNearestCreature(NPC_BUTCHERBOT_SPAWNED_BY_74176, 10.0f);
+            if (Player* player = caster->ToPlayer())
+                if (player->GetQuestStatus(QUEST_SCAVENGERS_SCAVENDED) == QUEST_STATUS_INCOMPLETE)
+                    if (spell->Id == SPELL_DEPLOY_BUTCHERBOT)
+                        if (me->isDead() && !bot)
+                        {
+                            player->CastSpell(me, SPELL_SUMMON_BUTCHERBOT_TO_CORPSE);
+                        }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const  override
+    {
+        return new npc_fire_rockAI(pCreature);
+    }
+};
+
+enum eQuest25115
+{
+    QUEST_BLISTERPAW_BUTCHERY = 25115,
+    NPC_BLISTERPAW_HYENA = 5426,
+    NPC_HYENA_BLISTERPAW_KILL_CREDIT_BUNNY = 40509,
+};
+
+class npc_blisterpaw_hyena : public CreatureScript
+{
+public:
+    npc_blisterpaw_hyena() : CreatureScript("npc_blisterpaw_hyena") { }
+
+    struct npc_blisterpaw_hyenaAI : public ScriptedAI
+    {
+        npc_blisterpaw_hyenaAI(Creature *pCreature) : ScriptedAI(pCreature) { }
+
+        uint32 m_timer;
+        uint32 m_phase;
+        Creature* bot;
+
+        void Reset() override
+        {
+            m_timer = 1000;
+            m_phase = 0;
+            Creature* bot = NULL;
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell) override
+        {
+            bot = me->FindNearestCreature(NPC_BUTCHERBOT_SPAWNED_BY_74176, 10.0f);
+            if (Player* player = caster->ToPlayer())
+                if (player->GetQuestStatus(QUEST_BLISTERPAW_BUTCHERY) == QUEST_STATUS_INCOMPLETE)
+                    if (spell->Id == SPELL_DEPLOY_BUTCHERBOT)
+                        if (me->isDead() && !bot)
+                        {
+                            player->CastSpell(me, SPELL_SUMMON_BUTCHERBOT_TO_CORPSE);
+                        }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const  override
+    {
+        return new npc_blisterpaw_hyenaAI(pCreature);
+    }
+};
+
+class npc_butcherbot_spawned : public CreatureScript
+{
+public:
+    npc_butcherbot_spawned() : CreatureScript("npc_butcherbot_spawned") { }
+
+    struct npc_butcherbot_spawnedAI : public ScriptedAI
+    {
+        npc_butcherbot_spawnedAI(Creature *pCreature) : ScriptedAI(pCreature) { }
+
+        uint32      m_timer;
+        uint32      m_phase;
+        Creature*   m_basi;
+        Player*     m_player;
+
+
+        void Reset() override
+        {
+            m_timer = 1000;
+            m_phase = 0;
+            m_basi = me->FindNearestCreature(NPC_GLASSHIDE_BASILISK, 10.0f, false);
+            if (!m_basi)
+                m_basi = me->FindNearestCreature(NPC_FIRE_ROCK, 10.0f, false);
+            if (!m_basi)
+                m_basi = me->FindNearestCreature(NPC_BLISTERPAW_HYENA, 10.0f, false);
+
+            m_player = me->FindNearestPlayer(10.0f);
+        }
+
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (m_timer <= diff)
+            {
+                m_phase++;
+                m_timer = 1000;
+                DoWork();
+            }
+            else
+                m_timer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+        void DoWork()
+        {
+            switch (m_phase)
+            {
+            case 1:
+                if (m_basi)
+                    me->GetMotionMaster()->MoveChase(m_basi, 3.0f);
+                break;
+            case 2:
+                if (m_basi)
+                    me->CastSpell(m_basi, SPELL_BUTCHERBOT_BUTCHERING);
+                Talk(0);
+                m_timer = 1500;
+                break;
+            case 3:
+                if (m_basi)
+                    me->CastSpell(m_basi, SPELL_BUTCHERBOT_BUTCHERING);
+                m_timer = 1500;
+                break;
+            case 4:
+                if (m_basi)
+                    me->CastSpell(m_basi, SPELL_BUTCHERBOT_BUTCHERING);
+                m_timer = 1500;
+                break;
+            case 5:
+                if (m_player)
+                    if (m_player->GetQuestStatus(QUEST_BUTCHERBOT) == QUEST_STATUS_INCOMPLETE)
+                        m_player->KilledMonsterCredit(NPC_TANARIS_BASILISK_KILL_CREDIT_BUNNY);
+                    else if (m_player->GetQuestStatus(QUEST_SCAVENGERS_SCAVENDED) == QUEST_STATUS_INCOMPLETE)
+                        m_player->KilledMonsterCredit(NPC_TANARIS_FIRE_ROCK_KILL_CREDIT_BUNNY);
+                    else if (m_player->GetQuestStatus(QUEST_BLISTERPAW_BUTCHERY) == QUEST_STATUS_INCOMPLETE)
+                        m_player->KilledMonsterCredit(NPC_HYENA_BLISTERPAW_KILL_CREDIT_BUNNY);
+
+                break;
+            case 6:
+                me->DespawnOrUnsummon();
+                break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const  override
+    {
+        return new npc_butcherbot_spawnedAI(pCreature);
+    }
+};
+
+// ########################################## Quest
+
 
 void AddSC_tanaris()
 {
@@ -781,4 +1051,8 @@ void AddSC_tanaris()
     new npc_hazzali_cocoon();
     new npc_captured_goblin_bughunter();
     new npc_silithid_bait_meaty();
+    new npc_glasshide_basilisk();
+    new npc_butcherbot_spawned();
+    new npc_fire_rock();
+    new npc_blisterpaw_hyena();
 }
