@@ -30,6 +30,8 @@
 
 #include "World.h"
 
+#define MAX_CHANNEL_PASS_STR 31
+
 class ChannelMgr
 {
     typedef std::map<std::wstring, Channel*> ChannelMap;
