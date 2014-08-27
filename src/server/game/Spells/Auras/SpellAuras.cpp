@@ -348,7 +348,7 @@ m_spellInfo(spellproto), m_casterGuid(casterGUID ? casterGUID : caster->GetGUID(
 m_castItemGuid(castItem ? castItem->GetGUID() : 0), m_applyTime(time(NULL)),
 m_owner(owner), m_timeCla(0), m_updateTargetMapInterval(0),
 m_casterLevel(caster ? caster->getLevel() : m_spellInfo->SpellLevel), m_procCharges(0), m_stackAmount(1),
-m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false)
+m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false), m_dropEvent(nullptr)
 {
     if (m_spellInfo->ManaPerSecond)
         m_timeCla = 1 * IN_MILLISECONDS;
@@ -479,6 +479,12 @@ void Aura::_Remove(AuraRemoveMode removeMode)
         Unit* target = aurApp->GetTarget();
         target->_UnapplyAura(aurApp, removeMode);
         appItr = m_applications.begin();
+    }
+
+    if (m_dropEvent)
+    {
+        m_dropEvent->to_Abort = true;
+        m_dropEvent = nullptr;
     }
 }
 
@@ -843,6 +849,26 @@ bool Aura::ModCharges(int32 num, AuraRemoveMode removeMode)
     }
 
     return false;
+}
+
+void Aura::ModChargesDelayed(int32 num, AuraRemoveMode removeMode)
+{
+    m_dropEvent = nullptr;
+    ModCharges(num, removeMode);
+}
+
+void Aura::DropChargeDelayed(uint32 delay, AuraRemoveMode removeMode)
+{
+    // aura is already during delayed charge drop
+    if (m_dropEvent)
+        return;
+    // only units have events
+    Unit* owner = m_owner->ToUnit();
+    if (!owner)
+        return;
+
+    m_dropEvent = new ChargeDropEvent(this, removeMode);
+    owner->m_Events.AddEvent(m_dropEvent, owner->m_Events.CalculateTime(delay));
 }
 
 void Aura::SetStackAmount(uint8 stackAmount)
@@ -2476,6 +2502,13 @@ DynObjAura::DynObjAura(SpellInfo const* spellproto, uint8 effMask, WorldObject* 
     ASSERT(GetDynobjOwner()->GetMap() == caster->GetMap());
     _InitEffects(effMask, caster, baseAmount);
     GetDynobjOwner()->SetAura(this);
+}
+
+bool ChargeDropEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
+{
+    // _base is always valid (look in Aura::_Remove())
+    _base->ModChargesDelayed(-1, _mode);
+    return true;
 }
 
 void DynObjAura::Remove(AuraRemoveMode removeMode)
