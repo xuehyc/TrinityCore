@@ -1042,6 +1042,114 @@ public:
 
 // ########################################## Quest
 
+enum eShowfigt
+{
+    NPC_RELIQUARY_DIGGER = 38997,
+    NPC_EXPLORERS_LEAGUE_DIGGER = 38998,
+};
+
+class npc_reliquary_digger : public CreatureScript
+{
+public:
+    npc_reliquary_digger() : CreatureScript("npc_reliquary_digger") { }
+
+    struct npc_reliquary_diggerAI : public ScriptedAI
+    {
+        npc_reliquary_diggerAI(Creature *c) : ScriptedAI(c) { }
+
+        uint32 m_health;
+
+        void Reset() override
+        {
+            m_health = urand(55, 90);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (attacker->GetEntry() == NPC_EXPLORERS_LEAGUE_DIGGER && me->GetHealthPct() < m_health)
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                DoWork();
+            else
+                DoMeleeAttackIfReady();
+        }
+
+        void DoWork()
+        {
+            if (!me->IsInCombat())
+                if (Creature* victim = me->FindNearestCreature(NPC_EXPLORERS_LEAGUE_DIGGER, 10.0f))
+                {
+                    me->Attack(victim, false);
+                    if (!victim->IsInCombat())
+                        {
+                            victim->Attack(me, true);
+                        }
+                }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_reliquary_diggerAI(creature);
+    }
+};
+
+class npc_explorers_league_digger : public CreatureScript
+{
+public:
+    npc_explorers_league_digger() : CreatureScript("npc_explorers_league_digger") { }
+
+    struct npc_explorers_league_diggerAI : public ScriptedAI
+    {
+        npc_explorers_league_diggerAI(Creature *c) : ScriptedAI(c) { }
+
+        uint32 m_health;
+
+        void Reset() override
+        {
+            m_health = urand(55, 90);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (attacker->GetEntry() == NPC_RELIQUARY_DIGGER && me->GetHealthPct() < m_health)
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                DoWork();
+            else
+                DoMeleeAttackIfReady();
+        }
+
+        void DoWork()
+        {
+            if (!me->IsInCombat())
+                if (Creature* victim = me->FindNearestCreature(NPC_RELIQUARY_DIGGER, 10.0f))
+                {
+                    me->Attack(victim, false);
+                    if (!victim->IsInCombat())
+                    {
+                        victim->Attack(me, true);
+                    }
+                }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_explorers_league_diggerAI(creature);
+    }
+};
+
+
+// ########################################## 
 
 void AddSC_tanaris()
 {
@@ -1055,4 +1163,6 @@ void AddSC_tanaris()
     new npc_butcherbot_spawned();
     new npc_fire_rock();
     new npc_blisterpaw_hyena();
+    new npc_reliquary_digger();
+    new npc_explorers_league_digger();
 }
