@@ -1,5 +1,5 @@
-SET @OGUID :=    75529;
 
+SET @OGUID := 404366; -- GUID by ArkDB
 
 UPDATE `creature_template` SET `AIName`='SmartAi' WHERE  `entry`=29525;
 
