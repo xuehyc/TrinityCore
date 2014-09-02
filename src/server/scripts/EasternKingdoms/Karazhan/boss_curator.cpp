@@ -64,7 +64,19 @@ public:
 
     struct boss_curatorAI : public ScriptedAI
     {
-        boss_curatorAI(Creature* creature) : ScriptedAI(creature) { }
+        boss_curatorAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            AddTimer = 10000;
+            HatefulBoltTimer = 15000;                           //This time may be wrong
+            BerserkTimer = 720000;                              //12 minutes
+            Enraged = false;
+            Evocating = false;
+        }
 
         uint32 AddTimer;
         uint32 HatefulBoltTimer;
@@ -75,11 +87,7 @@ public:
 
         void Reset() override
         {
-            AddTimer = 10000;
-            HatefulBoltTimer = 15000;                           //This time may be wrong
-            BerserkTimer = 720000;                              //12 minutes
-            Enraged = false;
-            Evocating = false;
+            Initialize();
 
             me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ARCANE, true);
         }

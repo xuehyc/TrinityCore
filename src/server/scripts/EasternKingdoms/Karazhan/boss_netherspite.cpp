@@ -82,6 +82,7 @@ public:
     {
         boss_netherspiteAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
 
             for (int i=0; i<3; ++i)
@@ -90,6 +91,19 @@ public:
                 BeamTarget[i] = 0;
                 BeamerGUID[i] = 0;
             }
+
+            PortalPhase = false;
+            PhaseTimer = 0;
+            EmpowermentTimer = 0;
+            PortalTimer = 0;
+        }
+
+        void Initialize()
+        {
+            Berserk = false;
+            NetherInfusionTimer = 540000;
+            VoidZoneTimer = 15000;
+            NetherbreathTimer = 3000;
         }
 
         InstanceScript* instance;
@@ -133,10 +147,7 @@ public:
 
         void Reset() override
         {
-            Berserk = false;
-            NetherInfusionTimer = 540000;
-            VoidZoneTimer = 15000;
-            NetherbreathTimer = 3000;
+            Initialize();
 
             HandleDoors(true);
             DestroyPortals();

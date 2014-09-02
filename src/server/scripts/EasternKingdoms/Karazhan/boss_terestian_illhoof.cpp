@@ -82,7 +82,13 @@ public:
     {
         npc_kilrekAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            AmplifyTimer = 2000;
         }
 
         InstanceScript* instance;
@@ -91,7 +97,7 @@ public:
 
         void Reset() override
         {
-            AmplifyTimer = 2000;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }
@@ -134,13 +140,21 @@ public:
 
     struct npc_demon_chainAI : public ScriptedAI
     {
-        npc_demon_chainAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_demon_chainAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            SacrificeGUID = 0;
+        }
 
         uint64 SacrificeGUID;
 
         void Reset() override
         {
-            SacrificeGUID = 0;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }
@@ -206,13 +220,21 @@ public:
 
     struct npc_fiendish_impAI : public ScriptedAI
     {
-        npc_fiendish_impAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_fiendish_impAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            FireboltTimer = 2000;
+        }
 
         uint32 FireboltTimer;
 
         void Reset() override
         {
-            FireboltTimer = 2000;
+            Initialize();
 
             me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
         }
@@ -250,9 +272,22 @@ public:
     {
         boss_terestianAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             for (uint8 i = 0; i < 2; ++i)
                 PortalGUID[i] = 0;
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            PortalsCount = 0;
+            SacrificeTimer = 30000;
+            ShadowboltTimer = 5000;
+            SummonTimer = 10000;
+            BerserkTimer = 600000;
+
+            SummonedPortals = false;
+            Berserk = false;
         }
 
         InstanceScript* instance;
@@ -284,14 +319,7 @@ public:
                 }
             }
 
-            PortalsCount        =     0;
-            SacrificeTimer      = 30000;
-            ShadowboltTimer     =  5000;
-            SummonTimer         = 10000;
-            BerserkTimer        = 600000;
-
-            SummonedPortals     = false;
-            Berserk             = false;
+            Initialize();
 
             instance->SetData(TYPE_TERESTIAN, NOT_STARTED);
 

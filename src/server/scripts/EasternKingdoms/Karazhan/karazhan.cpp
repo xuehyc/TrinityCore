@@ -135,9 +135,21 @@ public:
     {
         npc_barnesAI(Creature* creature) : npc_escortAI(creature)
         {
+            Initialize();
             RaidWiped = false;
             m_uiEventId = 0;
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            m_uiSpotlightGUID = 0;
+
+            TalkCount = 0;
+            TalkTimer = 2000;
+            WipeTimer = 5000;
+
+            PerformanceReady = false;
         }
 
         InstanceScript* instance;
@@ -154,13 +166,7 @@ public:
 
         void Reset() override
         {
-            m_uiSpotlightGUID = 0;
-
-            TalkCount = 0;
-            TalkTimer = 2000;
-            WipeTimer = 5000;
-
-            PerformanceReady = false;
+            Initialize();
 
             m_uiEventId = instance->GetData(DATA_OPERA_PERFORMANCE);
         }
@@ -480,7 +486,18 @@ public:
     {
         npc_image_of_medivhAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
+            Step = 0;
+            FireArcanagosTimer = 0;
+            FireMedivhTimer = 0;
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            ArcanagosGUID = 0;
+            EventStarted = false;
+            YellTimer = 0;
         }
 
         InstanceScript* instance;
@@ -496,9 +513,7 @@ public:
 
         void Reset() override
         {
-            ArcanagosGUID = 0;
-            EventStarted = false;
-            YellTimer = 0;
+            Initialize();
 
             if (instance->GetData64(DATA_IMAGE_OF_MEDIVH) == 0)
             {
