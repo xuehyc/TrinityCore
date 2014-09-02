@@ -11,4 +11,5 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (30211, 0, 0, 0, 8, 0, 100, 0, 56275, 0, 0, 0, 33, 30211, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Central Lightning Forge - On Spellhit "Bouldercrags Bomb" - Give Kill Credit'),
 (30212, 0, 0, 0, 8, 0, 100, 0, 56275, 0, 0, 0, 33, 30212, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'South Lightning Forge - On Spellhit "Bouldercrags Bomb" - Give Kill Credit');
 
-UPDATE `creature` SET `spawndist`=0, `MovementType`=0 WHERE `guid` IN(95645,96491,96864);
+UPDATE `creature` SET `spawndist`=0, `MovementType`=0 WHERE `guid` IN(204987,204785,204757); -- GUID by ArkDB
+
