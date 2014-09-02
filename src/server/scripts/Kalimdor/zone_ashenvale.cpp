@@ -40,6 +40,7 @@ EndContentData */
 #include "GridNotifiers.h"
 #include "ScriptedEscortAI.h"
 #include "Player.h"
+#include "Vehicle.h"
 
 enum ashenvale
 {
@@ -67,13 +68,6 @@ enum ashenvale
 	NPC_DEMONIC_INVADER								= 34609,
 	NPC_BIG_BAOBOB									= 34604,
 	
-	QUEST_ASTRANAARS_BURNING						= 13849,
-	NPC_ASTRANAARS_BURNING_FIRE_BUNNY				= 34123,
-	SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_01		= 64572,
-	SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_02		= 64574,
-	SPELL_ASTRANAARS_BURNING_SMOKE					= 64565,
-	SPELL_THROW_BUCKET_OF_WATER						= 64558,
-	SPELL_BATHRANS_CORPSE_FIRE						= 62511,
 };
 
 /*####
@@ -887,9 +881,277 @@ public:
     }
 };
 
-/*######
-## npc_astranaar_burning_fire_bunny
-######*/
+//############################################  Quest 13624 A Squad of Your Own
+
+enum eQuest13624
+{
+    QUEST_A_SQUAD_OF_YOU_OWN = 13624,
+    NPC_SENTINEL_ONAEYA = 11806,
+    NPC_MAESTRAS_POST_SENTINEL = 33338,
+    SELL_SUMMON_SENTINELS = 62830,
+    SPELL_DRINK_HEALING_POTION = 62822,
+    SPELL_SHOOT = 62818,
+};
+
+class npc_maestras_post_sentinel : public CreatureScript
+{
+public:
+    npc_maestras_post_sentinel() : CreatureScript("npc_maestras_post_sentinel") { }
+
+    struct npc_maestras_post_sentinelAI : public npc_escortAI
+    {
+        npc_maestras_post_sentinelAI(Creature* creature) : npc_escortAI(creature) { }
+
+        uint32  m_timer;
+        Player* m_player;
+
+        void Reset() override
+        {
+            m_timer = 1000;
+            if (m_player = me->FindNearestPlayer(10.0f, true))
+            {
+                npc_escortAI::Start(false, false, m_player->GetGUID());
+            }
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (me->GetHealthPct() < 25)
+                me->CastSpell(me, SPELL_DRINK_HEALING_POTION);
+        }
+
+        void WaypointReached(uint32 waypointId) override {}
+
+        void UpdateAI(uint32 diff) override
+        {
+            npc_escortAI::UpdateAI(diff);
+
+            if (m_timer <= diff)
+            {
+                m_timer = 1000;
+                if (m_player)
+                    if (m_player->GetQuestStatus(QUEST_A_SQUAD_OF_YOU_OWN) == QUEST_STATUS_REWARDED)
+                        me->DespawnOrUnsummon();
+            }
+            else
+                m_timer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new  npc_maestras_post_sentinelAI(creature);
+    }
+};
+
+// maybe someone can make a bether squad
+class npc_sentinel_onaeya : public CreatureScript
+{
+public:
+    npc_sentinel_onaeya() : CreatureScript("npc_sentinel_onaeya") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_A_SQUAD_OF_YOU_OWN)
+        {
+            for (uint8 i = 0; i < 5; ++i)
+            {
+                std::list<Creature*> sentinels;
+                creature->GetCreatureListWithEntryInGrid(sentinels, NPC_MAESTRAS_POST_SENTINEL, 30.0f);
+                if (sentinels.size() < 5)
+                    player->CastSpell(player, SELL_SUMMON_SENTINELS);
+            }
+        }
+        return true;
+    }
+};
+
+//############################################ 2 accept quest give aura "astranaar burning: see invis 01"
+
+enum eNpc3847
+{
+    QUEST_TO_RAENE_WOLFRUNNER = 13645,
+    QUEST_ORENDILS_CURE = 26474,
+    NPC_ORLENDIL_BROADLEAF = 3847,
+    SPELL_ASTRANAARS_BURNING_SEE_INVISIBILITY_01 = 64572,
+};
+
+class npc_orendil_broadleaf : public CreatureScript
+{
+public:
+    npc_orendil_broadleaf() : CreatureScript("npc_orendil_broadleaf") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_TO_RAENE_WOLFRUNNER || quest->GetQuestId() == QUEST_ORENDILS_CURE)
+        {
+            player->AddAura(SPELL_ASTRANAARS_BURNING_SEE_INVISIBILITY_01, player);
+        }
+        return true;
+    }
+};
+
+enum eNpc33452
+{
+    NPC_AVANAS_NIGHTSABER = 33452,
+    SPELL_RIDING_NIGHTSABER_TO_ASTRANAAR = 63021,
+};
+
+// we need the correct vehicle id for avanas_nightsaber
+class npc_avanas_nightsaber : public CreatureScript
+{
+public:
+    npc_avanas_nightsaber() : CreatureScript("npc_avanas_nightsaber") { }
+
+    struct npc_avanas_nightsaberAI : public ScriptedAI
+    {
+        npc_avanas_nightsaberAI(Creature *c) : ScriptedAI(c) {}
+
+        void Reset() override
+        {
+            if (Player* player = me->FindNearestPlayer(10.0f, true))
+            {
+                me->SetSpeed(MOVE_RUN, 3.0f, true);
+                me->SetWalk(false);
+                me->CastSpell(player, SPELL_RIDING_NIGHTSABER_TO_ASTRANAAR);
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+            else
+                DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const  override
+    {
+        return new npc_avanas_nightsaberAI(pCreature);
+    }
+
+};
+
+enum eNpc33445
+{
+    QUEST_ASTRANAAR_BOUND = 13646,
+    NPC_SENTINEL_AVANA = 33445,
+    // SPELL_ASTRANAARS_BURNING_SEE_INVISIBILITY_01 = 64572,
+    SPELL_CHARACTER_FORCE_CAST_FROM_GOSSIP = 63020,
+    SPELL_SUMMON_AVANAS_NIGHTSABER = 63022,
+    GOSSIP_MENU_OPTION_AVANA = 10339,
+    GOSSIP_MENU_NPC_AVANA = 14347,
+};
+
+// we need the correct vehicle id for avanas_nightsaber
+class npc_sentinel_avana : public CreatureScript
+{
+public:
+    npc_sentinel_avana() : CreatureScript("npc_sentinel_avana") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) 
+    { 
+        player->PrepareQuestMenu(creature->GetGUID());
+        if (player->GetQuestStatus(QUEST_ASTRANAAR_BOUND) > QUEST_STATUS_NONE || player->GetQuestStatus(QUEST_TO_RAENE_WOLFRUNNER) > QUEST_STATUS_NONE)
+        {
+            player->ADD_GOSSIP_ITEM_DB(GOSSIP_MENU_OPTION_AVANA, 0, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+        player->SEND_GOSSIP_MENU(GOSSIP_MENU_NPC_AVANA, creature->GetGUID());
+        return true; 
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) 
+    { 
+        if (action == 1001)
+        {
+            creature->CastSpell(player, SPELL_CHARACTER_FORCE_CAST_FROM_GOSSIP, true);
+        }
+        return true; 
+    }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_ASTRANAAR_BOUND)
+        {
+            player->AddAura(SPELL_ASTRANAARS_BURNING_SEE_INVISIBILITY_01, player);
+        }
+        return true;
+    }
+
+    struct npc_sentinel_avanaAI : public ScriptedAI
+    {
+        npc_sentinel_avanaAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32  m_timer;
+        uint32	m_phase;
+
+        void Reset() override
+        {
+            m_timer = 0;
+            m_phase = 0;
+        }
+
+        void StartAnim()
+        {
+            m_timer = 2000;
+            m_phase = 1;
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (m_timer <= diff)
+            {
+                m_timer = 1000;
+                DoWork();
+            }
+            else
+                m_timer -= diff;
+
+            if (!UpdateVictim())
+                return;
+            else
+                DoMeleeAttackIfReady();
+        }
+
+        void DoWork()
+        {
+            switch (m_phase)
+            {
+            case 1:
+                Talk(0);
+                m_phase = 2;
+                m_timer = 60000;
+                break;
+            case 2:
+                Reset();
+                break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const  override
+    {
+        return new npc_sentinel_avanaAI(pCreature);
+    }
+
+};
+
+//############################################  Quest 13849 astranaar_burning_fire
+
+enum eQuest13849
+{
+    QUEST_ASTRANAARS_BURNING = 13849,
+    NPC_ASTRANAARS_BURNING_FIRE_BUNNY = 34123,
+    SPELL_ASTRANAARS_BURNING_SMOKE = 64565,
+    SPELL_THROW_BUCKET_OF_WATER = 64558,
+    SPELL_BATHRANS_CORPSE_FIRE = 62511,
+};
 
 class npc_astranaar_burning_fire_bunny : public CreatureScript
 {
@@ -900,36 +1162,36 @@ public:
     {
         npc_astranaar_burning_fire_bunnyAI(Creature *c) : ScriptedAI(c) {}		
 
-		uint32	_timer_check_for_player;
-		uint32  _timer;
-		uint32	_phase;
-		Player*	_player;
+		uint32  m_timer;
+		uint32	m_phase;
+		Player*	m_player;
 
 		void Reset() override
 		{
-			_timer_check_for_player=2000; _phase=0; _timer=0;
-			me->AddAura(SPELL_BATHRANS_CORPSE_FIRE,me);
+			m_phase=0; 
+            m_timer=0;
+            if (me->HasAura(SPELL_ASTRANAARS_BURNING_SMOKE))
+                me->RemoveAura(SPELL_ASTRANAARS_BURNING_SMOKE);
 		}
 
 		void SpellHit(Unit* Hitter, SpellInfo const* spell) override  
 		{ 
-			_phase=1; _player= Hitter->ToPlayer();
+            if (m_player = Hitter->ToPlayer())
+            {
+                m_phase = 1;
+                m_timer = 1000;
+            }
 		}
 
 		void UpdateAI(uint32 diff) override
-        {	
-			if (_timer_check_for_player<=diff)				
-			{
-				DoCheckForNearPlayerWithQuest();
-				_timer_check_for_player=10000;												
-			}
-			else
-				_timer_check_for_player-=diff;	
-			
-			if (_timer<=diff)				
-					DoWork();
-				else
-					_timer-=diff;	
+        {
+            if (m_timer <= diff)
+            {
+                m_timer = 1000;
+                DoWork();
+            }
+            else
+                m_timer -= diff;
 
             if (!UpdateVictim())			
 				return;						
@@ -937,57 +1199,24 @@ public:
 				DoMeleeAttackIfReady();			
         }
 
-		void DoCheckForNearPlayerWithQuest()
-		{			
-			std::list<Player*> PlayerList; 
-			Trinity::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
-			Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, PlayerList, checker);
-			me->VisitNearbyWorldObject(50.0, searcher);
-			if (PlayerList.empty()) return;					
-			for (std::list<Player*>::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
-            {
-				if (Player* player = *itr)
-                {	
-					switch (player->GetQuestStatus(QUEST_ASTRANAARS_BURNING))
-					{
-					case QUEST_STATUS_INCOMPLETE:
-						{							
-							if (!player->HasAura (SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_01))
-							{
-								player->AddAura(SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_01, player);
-							}
-							break;
-						}
-					case QUEST_STATUS_COMPLETE:
-						{
-						if (player->HasAura (SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_01))
-							{
-								player->RemoveAura(SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_01);
-								player->RemoveAuraFromStack(SPELL_ASTRANAARS_BURNING_SEE_INVISIBLE_01, player->GetGUID());
-							}
-							break;
-						}
-					}
-				}
-			}
-		}	
-
 		void DoWork()
 		{
-			switch (_phase)
+			switch (m_phase)
 			{
 			case 1:
 				{
-					me->RemoveAura(SPELL_BATHRANS_CORPSE_FIRE);
 					me->AddAura(SPELL_ASTRANAARS_BURNING_SMOKE, me);
-					if (_player) _player->KilledMonsterCredit(NPC_ASTRANAARS_BURNING_FIRE_BUNNY, NULL);	
-					_timer=60000; _phase=2;
+					if (m_player) 
+                        m_player->KilledMonsterCredit(NPC_ASTRANAARS_BURNING_FIRE_BUNNY, NULL);	
+					m_timer=600;
+                    m_phase=2;
 					break;
 				}
 			case 2:
 				{
 					me->DespawnOrUnsummon();
-					_timer=0; _phase=0;
+					m_timer=0;
+                    m_phase=0;
 					break;
 				}
 			}
@@ -1000,7 +1229,100 @@ public:
     }
 };
 
+//############################################  Quest 13853 Return Fire    
 
+enum eQuest13853
+{
+    QUEST_RETURN_FIRE = 13853,
+    NPC_ASTRANAAR_THROWER = 34132,
+    NPC_WATCH_WIND_RIDER = 34160,
+    NPC_HELLSCREAMS_HELLION = 34163,
+    NPC_RETURN_FIRE_KILL_CREDIT_BUNNY = 34176,
+    SPELL_ASTRANAAR_THROWER = 68388,
+    SPELL_RETURN_TO_ASTRANAAR = 64750,
+    SPELL_LAUNCH_GLAIVE = 77744,   // 66289, 66900, 70735, 70736, 70738, 77741, 77742, 77743, 77744, 77749, 84875, 84876, all wrong
+};
+
+// we missing the correct spell for glaive shoot
+class npc_astranaar_thrower : public CreatureScript
+{
+public:
+    npc_astranaar_thrower() : CreatureScript("npc_astranaar_thrower") { }
+
+    struct npc_astranaar_throwerAI : public VehicleAI
+    {
+        npc_astranaar_throwerAI(Creature* creature) : VehicleAI(creature) { }
+
+        void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) override
+        {
+            // as long the glaive spell is unknown, we set the quest to complete
+            if (Player* player = passenger->ToPlayer())
+                if (player->GetQuestStatus(QUEST_RETURN_FIRE) == QUEST_STATUS_INCOMPLETE)
+                    player->CompleteQuest(QUEST_RETURN_FIRE);
+            
+            // there are dead sentinels on the seat.. i remove them..
+            if (passenger->ToCreature()) 
+                passenger->ExitVehicle();
+        }
+
+        void UpdateAI(uint32 /*diff*/) override 
+        { 
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_astranaar_throwerAI(creature);
+    }
+};
+
+// we missing the correct spell for glaive shoot
+class npc_watch_wind_rider : public CreatureScript
+{
+public:
+    npc_watch_wind_rider() : CreatureScript("npc_watch_wind_rider") { }
+
+    struct npc_watch_wind_riderAI : public VehicleAI
+    {
+        npc_watch_wind_riderAI(Creature *c) : VehicleAI(c) {}
+
+        void SpellHit(Unit* Hitter, SpellInfo const* spell) override
+        {
+            
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+            
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const  override
+    {
+        return new npc_watch_wind_riderAI(pCreature);
+    }
+};
+
+class npc_sentinel_thenysil : public CreatureScript
+{
+public:
+    npc_sentinel_thenysil() : CreatureScript("npc_sentinel_thenysil") { }
+
+    bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/) 
+    { 
+        if (player && quest->GetQuestId() == QUEST_RETURN_FIRE)
+            player->RemoveAura(SPELL_ASTRANAARS_BURNING_SEE_INVISIBILITY_01);
+
+        return true; 
+    }
+};
 
 
 void AddSC_ashenvale()
@@ -1016,5 +1338,13 @@ void AddSC_ashenvale()
 	new npc_bolyun_1();
 	new npc_bolyun_2();
 	new npc_big_baobob();
+    new npc_orendil_broadleaf();
+    new npc_sentinel_avana();
 	new npc_astranaar_burning_fire_bunny();
+    new npc_sentinel_onaeya();
+    new npc_maestras_post_sentinel();
+    new npc_avanas_nightsaber();
+    new npc_astranaar_thrower();
+    new npc_watch_wind_rider();
+    new npc_sentinel_thenysil();
 }

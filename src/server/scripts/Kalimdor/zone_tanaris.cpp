@@ -1042,7 +1042,7 @@ public:
 
 // ########################################## Quest
 
-enum eShowfigt
+enum eShowfight
 {
     NPC_RELIQUARY_DIGGER = 38997,
     NPC_EXPLORERS_LEAGUE_DIGGER = 38998,
