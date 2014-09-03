@@ -537,8 +537,8 @@ void WorldSession::HandleRequestCemeteryList(WorldPacket& /*recvPacket*/)
     data.WriteBit(0); // Is MicroDungeon (WorldMapFrame.lua)
 
     data.WriteBits(graveyardIds.size(), 24);
-    for (int i = 0; i < graveyardIds.size(); ++i)
-        data << uint32(graveyardIds[i]);
+    for (uint32 id : graveyardIds)
+        data << id;
 
     SendPacket(&data);
 }

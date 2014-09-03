@@ -1022,7 +1022,7 @@ void AchievementMgr<Guild>::SendCriteriaUpdate(AchievementCriteriaEntry const* e
     data.WriteByteSeq(counter[2]);
     data.WriteByteSeq(guid[0]);
 
-    SendPacket(&data);
+    GetOwner()->BroadcastPacketIfTrackingAchievement(&data, entry->ID);
 }
 
 /**
@@ -2038,8 +2038,13 @@ template<>
 void AchievementMgr<Guild>::SendAllAchievementData(Player* receiver) const
 {
     VisibleAchievementPred isVisible;
-    WorldPacket data(SMSG_GUILD_ACHIEVEMENT_DATA, m_completedAchievements.size() * (4 + 4) + 3);
-    data.WriteBits(std::count_if(m_completedAchievements.begin(), m_completedAchievements.end(), isVisible), 23);
+
+    auto count = std::count_if(m_completedAchievements.begin(), m_completedAchievements.end(), isVisible);
+
+    WorldPacket data(SMSG_GUILD_ACHIEVEMENT_DATA, count * (4 + 4) + 3);
+    data.WriteBits(count, 23);
+    data.FlushBits();
+
     for (CompletedAchievementMap::const_iterator itr = m_completedAchievements.begin(); itr != m_completedAchievements.end(); ++itr)
     {
         if (!isVisible(*itr))
@@ -2152,6 +2157,7 @@ void AchievementMgr<Guild>::SendAchievementInfo(Player* receiver, uint32 achieve
         // send empty packet
         WorldPacket data(SMSG_GUILD_CRITERIA_DATA, 3);
         data.WriteBits(0, 21);
+        data.FlushBits();
         receiver->GetSession()->SendPacket(&data);
         return;
     }

@@ -1566,6 +1566,12 @@ void Guild::SendGuildRankInfo(WorldSession* session) const
     TC_LOG_DEBUG("guild", "SMSG_GUILD_RANK [%s]", session->GetPlayerInfo().c_str());
 }
 
+void Guild::HandleSetAchievementTracking(WorldSession* session, std::set<uint32> const& criteriaIds)
+{
+    if (Member* member = GetMember(session->GetPlayer()->GetGUID()))
+        member->SetTrackedCriteriaIds(criteriaIds);
+}
+
 void Guild::HandleSetMOTD(WorldSession* session, std::string const& motd)
 {
     if (m_motd == motd)
@@ -2160,6 +2166,28 @@ void Guild::HandleGuildPartyRequest(WorldSession* session)
     TC_LOG_DEBUG("guild", "SMSG_GUILD_PARTY_STATE_RESPONSE [%s]", session->GetPlayerInfo().c_str());
 }
 
+void Guild::HandleGuildRequestChallengeUpdate(WorldSession* session)
+{
+    WorldPacket data(SMSG_GUILD_CHALLENGE_UPDATED, 4 * GUILD_CHALLENGES_TYPES * 5);
+
+    for (int i = 0; i < GUILD_CHALLENGES_TYPES; ++i)
+        data << uint32(GuildChallengeXPReward[i]);
+
+    for (int i = 0; i < GUILD_CHALLENGES_TYPES; ++i)
+        data << uint32(GuildChallengeGoldReward[i]);
+
+    for (int i = 0; i < GUILD_CHALLENGES_TYPES; ++i)
+        data << uint32(GuildChallengesPerWeek[i]);
+
+    for (int i = 0; i < GUILD_CHALLENGES_TYPES; ++i)
+        data << uint32(GuildChallengeMaxLevelGoldReward[i]);
+
+    for (int i = 0; i < GUILD_CHALLENGES_TYPES; ++i)
+        data << uint32(0); /// @todo current count
+
+    session->SendPacket(&data);
+}
+
 void Guild::SendEventLog(WorldSession* session) const
 {
     WorldPacket data(SMSG_GUILD_EVENT_LOG_QUERY_RESULT, 1 + m_eventLog->GetSize() * (1 + 8 + 4));
@@ -2605,6 +2633,14 @@ void Guild::BroadcastPacket(WorldPacket* packet) const
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         if (Player* player = itr->second->FindPlayer())
             player->GetSession()->SendPacket(packet);
+}
+
+void Guild::BroadcastPacketIfTrackingAchievement(WorldPacket* packet, uint32 criteriaId) const
+{
+    for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        if (itr->second->IsTrackingCriteriaId(criteriaId))
+            if (Player* player = itr->second->FindPlayer())
+                player->GetSession()->SendPacket(packet);
 }
 
 void Guild::MassInviteToEvent(WorldSession* session, uint32 minLevel, uint32 maxLevel, uint32 minRank)

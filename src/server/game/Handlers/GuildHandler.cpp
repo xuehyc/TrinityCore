@@ -713,6 +713,12 @@ void WorldSession::HandleGuildRequestPartyState(WorldPacket& recvPacket)
         guild->HandleGuildPartyRequest(this);
 }
 
+void WorldSession::HandleGuildRequestChallengeUpdate(WorldPacket& /*recvPacket*/)
+{
+    if (Guild* guild = _player->GetGuild())
+        guild->HandleGuildRequestChallengeUpdate(this);
+}
+
 void WorldSession::HandleGuildRequestMaxDailyXP(WorldPacket& recvPacket)
 {
     ObjectGuid guid;
@@ -826,4 +832,20 @@ void WorldSession::HandleGuildSetGuildMaster(WorldPacket& recvPacket)
     std::string playerName = recvPacket.ReadString(nameLength);
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleSetNewGuildMaster(this, playerName);
+}
+
+void WorldSession::HandleGuildSetAchievementTracking(WorldPacket& recvPacket)
+{
+    uint32 count = recvPacket.ReadBits(24);
+    std::set<uint32> criteriaIds;
+
+    for (int i = 0; i < count; ++i)
+    {
+        uint32 criteriaId;
+        recvPacket >> criteriaId;
+        criteriaIds.insert(criteriaId);
+    }
+
+    if (Guild* guild = GetPlayer()->GetGuild())
+        guild->HandleSetAchievementTracking(this, criteriaIds);
 }
