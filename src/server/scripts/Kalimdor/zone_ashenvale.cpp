@@ -58,16 +58,6 @@ enum ashenvale
 	SPELL_CREATE_THE_PURIFIERS_PRAYER_BOOK_COVER	= 62839,
 	ITEM_PURIFIERS_PRAYER_BOOK						= 45043,
 
-	QUEST_TREE_FRIENDS_OF_THE_FOREST				= 13976,
-	QUEST_IN_A_BIND									= 13982,
-	SPELL_BOLYUN_SEE_INVISIBILITY_1					= 65714,
-	SPELL_BOLYUN_SEE_INVISIBILITY_2					= 65715,
-
-	QUEST_CLEAR_THE_SHRINE							= 13985,
-	QUEST_THE_LAST_STAND							= 13987,
-	NPC_DEMONIC_INVADER								= 34609,
-	NPC_BIG_BAOBOB									= 34604,
-	
 };
 
 /*####
@@ -633,251 +623,215 @@ class npc_delgren_the_purifier : public CreatureScript
 		}
 };
 
-/*######
-## quest 13976 Three Friends of the Forest
-######*/
+//############################################  Quest 13976 Three Friends of the Forest
 
-/*######
-## npc_bolyun_1
-######*/
+enum eQuest13976
+{
+    QUEST_TREE_FRIENDS_OF_THE_FOREST = 13976,
+    QUEST_IN_A_BIND = 13982,
+    SPELL_BOLYUNS_CAMP_INVISIBILITY_01 = 65709,
+    SPELL_BOLYUNS_CAMP_INVISIBILITY_02 = 65710,
+    SPELL_BOLYUN_SEE_INVISIBILITY_1 = 65714,
+    SPELL_BOLYUN_SEE_INVISIBILITY_2 = 65715,
+    SPELL_IN_A_BIND_SEE_INVISIBILITY_SWITCH_1 = 65716, // (trigger 65717)
+    SPELL_IN_A_BIND_SEE_INVISIBILITY_SWITCH_2 = 65717,
+};
 
 class npc_bolyun_1 : public CreatureScript
 {
 public:
     npc_bolyun_1() : CreatureScript("npc_bolyun_1") { }
 
-    struct npc_bolyun_1AI : public ScriptedAI
-    {
-        npc_bolyun_1AI(Creature *c) : ScriptedAI(c) {}
-
-		uint32 VisibleStatus; // 0=unknown 1=visible 2=invisible
-
-		void ShowCreature(Player* player)
-		{			
-			if (VisibleStatus!=1) 
-			{		
-				me->AddAura (SPELL_BOLYUN_SEE_INVISIBILITY_1,player);				
-				VisibleStatus=1;
-			}			
-		}
-
-		void HideCreature(Player* player)
-		{
-			if (VisibleStatus!=2) 
-			{				
-				player->RemoveAura (SPELL_BOLYUN_SEE_INVISIBILITY_1);
-				player->RemoveAuraFromStack (SPELL_BOLYUN_SEE_INVISIBILITY_1);
-				VisibleStatus=2;
-			}						
-		}
-
-		void Reset() override
-		{
-			VisibleStatus=0;
-		}
-
-		void MoveInLineOfSight(Unit* who) override 
-		{ 			
-			if (Player* player = who->ToPlayer())
-			{	
-				if (player->GetQuestStatus(QUEST_IN_A_BIND) != QUEST_STATUS_REWARDED) 				
-				{
-					ShowCreature(player);
-					return;
-				}
-				HideCreature(player); 
-			}		
-		} 
-
-		bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt) 
-		{
-			if (quest->GetQuestId()  == QUEST_IN_A_BIND)
-				HideCreature(player);			
-			return true; 
-		}
-
-    };
-
-	CreatureAI* GetAI(Creature* pCreature) const  override
-    {
-        return new npc_bolyun_1AI (pCreature);
+    bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/) 
+    { 
+        if (quest->GetQuestId() == QUEST_IN_A_BIND)
+        {
+            player->RemoveAura(SPELL_BOLYUN_SEE_INVISIBILITY_1);
+            player->AddAura(SPELL_BOLYUN_SEE_INVISIBILITY_2, player);
+        }
+        return true; 
     }
+ 
 };
 
-/*######
-## npc_bolyun_2
-######*/
+//############################################  Quest 13987 The last stand
 
-class npc_bolyun_2 : public CreatureScript
+enum eQuest13987
+{
+    QUEST_CLEAR_THE_SHRINE = 13985,
+    QUEST_THE_LAST_STAND = 13987,
+    NPC_BIG_BAOBOB_1 = 34608,
+    NPC_BIF_BAOBOB_2 = 34604,
+    NPC_DEMONIC_INVADER = 34609,
+};
+
+//npc_demonic_invaders
+
+class npc_demonic_invaders : public CreatureScript
 {
 public:
-    npc_bolyun_2() : CreatureScript("npc_bolyun_2") { }
+    npc_demonic_invaders() : CreatureScript("npc_demonic_invaders") { }
 
-	 struct npc_bolyun_2AI : public ScriptedAI
+    struct npc_demonic_invadersAI : public ScriptedAI
     {
-        npc_bolyun_2AI(Creature *c) : ScriptedAI(c) {}
+        npc_demonic_invadersAI(Creature *c) : ScriptedAI(c) {}
 
-		uint32 VisibleStatus; // 0=unknown 1=visible 2=invisible
+        uint32  m_timer;
+        uint32	m_phase;
+        Player*	m_player;
 
-		void ShowCreature(Player* player)
-		{
-			if (VisibleStatus!=1)
-			{				
-				me->AddAura (SPELL_BOLYUN_SEE_INVISIBILITY_2,player);	
-				VisibleStatus=1;
-			}
-		}
+        void Reset() override
+        {
+            m_phase = 0;
+            m_timer = 0;
+            m_player = NULL;
+        }
 
-		void HideCreature(Player* player)
-		{
-			if (VisibleStatus!=2) 
-			{				
-				player->RemoveAura (SPELL_BOLYUN_SEE_INVISIBILITY_2);
-				player->RemoveAuraFromStack (SPELL_BOLYUN_SEE_INVISIBILITY_2);
-				VisibleStatus=2;
-			}						
-		}
+        void JustDied(Unit* killer) override
+        {
+            if (m_player)
+                if (Creature* bob = killer->ToCreature())
+                    if (m_player->GetQuestStatus(QUEST_THE_LAST_STAND) == QUEST_STATUS_INCOMPLETE)
+                        m_player->KilledMonsterCredit(NPC_DEMONIC_INVADER);
+        }
 
-		void Reset() override
-		{
-			VisibleStatus=0;
-		}
+        void StartAnim(Player* player)
+        {
+            m_player = player;
+        }
 
-		void MoveInLineOfSight(Unit* who) override 
-		{ 
-			if (Player* player = who->ToPlayer())
-			{
-				if (player->GetQuestStatus(QUEST_IN_A_BIND) == QUEST_STATUS_REWARDED) 				
-					ShowCreature(player);
-				else				
-					HideCreature(player);			
-			}		
-		} 
-
-		bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt) 
-		{
-			if (quest->GetQuestId()  == QUEST_IN_A_BIND)
-				ShowCreature(player);			
-			return true; 
-		}
-
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+            else
+                DoMeleeAttackIfReady();
+        }
     };
 
-	CreatureAI* GetAI(Creature* pCreature) const  override
+    CreatureAI* GetAI(Creature* creature) const  override
     {
-        return new npc_bolyun_2AI (pCreature);
+        return new npc_demonic_invadersAI(creature);
     }
 };
-
-/*######
-## npc_big_baobob
-######*/
 
 class npc_big_baobob : public CreatureScript
 {
 public:
     npc_big_baobob() : CreatureScript("npc_big_baobob") { }
 
+    bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/)
+    {
+        if (quest->GetQuestId() == QUEST_CLEAR_THE_SHRINE)
+        {
+            player->RemoveAura(SPELL_BOLYUNS_CAMP_INVISIBILITY_02);
+        }
+        return true;
+    }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_THE_LAST_STAND)
+        {
+            if (npc_big_baobob::npc_big_baobobAI* baobobAI = CAST_AI(npc_big_baobob::npc_big_baobobAI, creature->AI()))
+            {
+                baobobAI->StartAnim(player);
+            }
+        }
+        return true;
+    }
+
     struct npc_big_baobobAI : public ScriptedAI
     {
-        npc_big_baobobAI(Creature *c) : ScriptedAI(c) {}		
+        npc_big_baobobAI(Creature *creature) : ScriptedAI(creature) {}
 
-		uint32	_timer_check_for_player;
-		uint32	_timer_for_spawn_invaders;
-		bool	_IsPlayerNear;
+        uint32  m_timer;
+        uint32  m_phase;
+        uint32  m_cooldown;
+        Player* m_player;
 
 		void Reset() override
 		{
-			_timer_check_for_player=2000; _timer_for_spawn_invaders=0; _IsPlayerNear=false;
+            m_timer = 0;
+            m_phase = 0;
+            m_cooldown = 0;
+            m_player = NULL;
 		}
+
+        void AttackStart(Unit* who) override
+        {
+            AttackStartNoMove(who);
+        }
+
+        void StartAnim(Player* player)
+        {
+            if (m_phase == 0)
+            {
+                m_player = player;
+                m_timer = 1000;
+                m_phase = 1;
+            }
+        }
 
 		void UpdateAI(uint32 diff) override
         {	
-			if (_timer_check_for_player<=diff)				
-			{
-				_IsPlayerNear=DoCheckForPlayer();
-				_timer_check_for_player=10000;
-				if (_IsPlayerNear) 
-					_timer_for_spawn_invaders=1000;								
-			}
-			else
-				_timer_check_for_player-=diff;	
-			
-			if (_IsPlayerNear)
-			{
-				if (_timer_for_spawn_invaders<=diff)
-				{
-					DoSpawnInvaders();
-					_timer_for_spawn_invaders=1000;
-				}
-				else
-					_timer_for_spawn_invaders-=diff;	
-
-			}
+            if (m_timer <= diff)
+            {
+                m_timer = 1000;
+                DoWork();
+            }
+            else
+                m_timer -= diff;
 
             if (!UpdateVictim())			
 				return;								
-			else 
-				DoMeleeAttackIfReady();			
+			 
+			DoMeleeAttackIfReady();			
         }
 
-		bool DoCheckForPlayer()
-		{			
-			std::list<Player*> PlayerList; 
-			Trinity::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
-			Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, PlayerList, checker);
-			me->VisitNearbyWorldObject(50.0, searcher);
-			if (PlayerList.empty()) return false;			
-			for (std::list<Player*>::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
-            {
-				if (Player* player = *itr)
-                {	
-					if (!player->GetQuestRewardStatus(QUEST_THE_LAST_STAND))
-					{
-						if (player->GetQuestStatus(QUEST_CLEAR_THE_SHRINE)==QUEST_STATUS_INCOMPLETE) return true;
-						if (player->GetQuestStatus(QUEST_THE_LAST_STAND)==QUEST_STATUS_INCOMPLETE) return true;
-						if (player->GetQuestRewardStatus(QUEST_CLEAR_THE_SHRINE)) return true;					
-					}
-				}
-			}
+        void DoWork()
+        {
+            m_cooldown++;
+            if (m_cooldown > 600)
+                Reset();
 
-			return false;
-		}
-
-		void DoSpawnInvaders()
-		{			
-			if (GetCountOfLivingInvaders() >= 4) return;
-			Position pos;
-			me->GetPosition();			
-			me->GetRandomNearPosition(30.0f);
-			if (Creature* creature = me->SummonCreature(NPC_DEMONIC_INVADER, pos))
-			{
-				creature->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() , true);
-			}
-		}
-
-		uint32 GetCountOfLivingInvaders()
-		{
-			uint32 count=0;
-			std::list<Creature*> InvadersList;
-            me->GetCreatureListWithEntryInGrid(InvadersList, NPC_DEMONIC_INVADER, 30.0f);
-			if (!InvadersList.empty())
-            {
-                for (std::list<Creature*>::const_iterator itr = InvadersList.begin(); itr != InvadersList.end(); ++itr)
+            if (m_player)
+                if (m_player->GetQuestStatus(QUEST_THE_LAST_STAND) == QUEST_STATUS_INCOMPLETE)
                 {
-                    if (Creature* invader = *itr)
+                    Creature* demonic = me->FindNearestCreature(NPC_DEMONIC_INVADER, 40.0f, true);
+                    if (!demonic)
                     {
-                       if (invader->IsAlive()) count++;
-                    }
-                }
-            }
-			return count;
-		}
-    };
+                        Position pos = me->GetRandomNearPosition(40.0f);
+                        if (Creature* invader = me->SummonCreature(NPC_DEMONIC_INVADER, pos))
+                            if (npc_demonic_invaders::npc_demonic_invadersAI* invaderAI = CAST_AI(npc_demonic_invaders::npc_demonic_invadersAI, invader->AI()))
+                            {
+                                invaderAI->StartAnim(m_player);
+                                invader->Attack(me, true);
+                            }
 
-	CreatureAI* GetAI(Creature* pCreature) const  override
+                        if (!m_player->IsInCombat())
+                        {
+                            pos = me->GetRandomNearPosition(40.0f);
+                            if (Creature* invader = me->SummonCreature(NPC_DEMONIC_INVADER, pos))
+                                if (npc_demonic_invaders::npc_demonic_invadersAI* invaderAI = CAST_AI(npc_demonic_invaders::npc_demonic_invadersAI, invader->AI()))
+                                {
+                                    invaderAI->StartAnim(m_player);
+                                    invader->Attack(m_player, true);
+                                }
+                        }
+                    }
+                    else
+                        demonic->Attack(me, true);
+
+                }
+                else
+                    Reset();
+        }
+   };
+
+	CreatureAI* GetAI(Creature* creature) const  override
     {
-        return new npc_big_baobobAI (pCreature);
+        return new npc_big_baobobAI (creature);
     }
 };
 
@@ -1324,6 +1278,104 @@ public:
     }
 };
 
+class npc_benjari_edune : public CreatureScript
+{
+public:
+    npc_benjari_edune() : CreatureScript("npc_benjari_edune") { }
+
+    struct npc_benjari_eduneAI : public ScriptedAI
+    {
+        npc_benjari_eduneAI(Creature *c) : ScriptedAI(c) {}
+
+        uint32 m_timer;
+        uint32 m_phase;
+
+        void Reset() override
+        {
+            m_timer = 0;
+            m_phase = 0;
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (m_phase == 0)
+                if (Player* player = who->ToPlayer())
+                    if (player->GetDistance2d(me) < 10.0f)
+                    {
+                        m_phase = urand(1, 5);
+                        m_timer = 5000;
+                    }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (m_timer <= diff)
+            {
+                m_timer = 5000;
+                DoWork();
+            }
+            else
+                m_timer -= diff;
+
+            if (!UpdateVictim())
+                return;
+            else
+                DoMeleeAttackIfReady();
+        }
+
+        void DoWork()
+        {
+            switch (m_phase)
+            {
+            case 1:
+                Talk(10); m_phase = 6;
+                break;
+            case 2:
+                Talk(1); m_phase = 7;
+                break;
+            case 3:
+                Talk(7); m_phase = 8;
+                break;
+            case 4:
+                Talk(8); m_phase = 9;
+                break;
+            case 5:
+                m_timer = 8000;
+                Talk(9); m_phase = 10;
+                break;
+            case 6:
+                Talk(5); m_phase = 11;
+                break;
+            case 7:
+                Talk(2); m_phase = 11;
+                break;
+            case 8:
+                Talk(6); m_phase = 11;
+                break;
+            case 9:
+                Talk(4); m_phase = 11;
+                break;
+            case 10:
+                Talk(3); m_phase = 11;
+                break;
+            case 11:
+                m_timer = 60000;
+                m_phase = 12;
+                break;
+            case 12:
+                Reset();
+                break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const  override
+    {
+        return new npc_benjari_eduneAI(pCreature);
+    }
+
+};
+
 
 void AddSC_ashenvale()
 {
@@ -1336,8 +1388,8 @@ void AddSC_ashenvale()
 	new npc_feero_ironhand();
 	new npc_delgren_the_purifier();
 	new npc_bolyun_1();
-	new npc_bolyun_2();
 	new npc_big_baobob();
+    new npc_demonic_invaders();
     new npc_orendil_broadleaf();
     new npc_sentinel_avana();
 	new npc_astranaar_burning_fire_bunny();
@@ -1347,4 +1399,5 @@ void AddSC_ashenvale()
     new npc_astranaar_thrower();
     new npc_watch_wind_rider();
     new npc_sentinel_thenysil();
+    new npc_benjari_edune();
 }
