@@ -51,7 +51,18 @@ public:
 
     struct boss_jandicebarovAI : public ScriptedAI
     {
-        boss_jandicebarovAI(Creature* creature) : ScriptedAI(creature) { }
+        boss_jandicebarovAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            CurseOfBlood_Timer = 15000;
+            Illusion_Timer = 30000;
+            Invisible_Timer = 3000;                             //Too much too low?
+            Invisible = false;
+        }
 
         uint32 CurseOfBlood_Timer;
         uint32 Illusion_Timer;
@@ -61,10 +72,7 @@ public:
 
         void Reset() override
         {
-            CurseOfBlood_Timer = 15000;
-            Illusion_Timer = 30000;
-            Invisible_Timer = 3000;                             //Too much too low?
-            Invisible = false;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -173,13 +181,21 @@ public:
 
     struct npc_illusionofjandicebarovAI : public ScriptedAI
     {
-        npc_illusionofjandicebarovAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_illusionofjandicebarovAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            Cleave_Timer = urand(2000, 8000);
+        }
 
         uint32 Cleave_Timer;
 
         void Reset() override
         {
-            Cleave_Timer = urand(2000, 8000);
+            Initialize();
             me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
         }
 

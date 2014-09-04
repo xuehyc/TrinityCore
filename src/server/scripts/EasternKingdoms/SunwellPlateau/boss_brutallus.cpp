@@ -74,8 +74,24 @@ public:
     {
         boss_brutallusAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
             Intro = true;
+        }
+
+        void Initialize()
+        {
+            SlashTimer = 11000;
+            StompTimer = 30000;
+            BurnTimer = 60000;
+            BerserkTimer = 360000;
+
+            IntroPhase = 0;
+            IntroPhaseTimer = 0;
+            IntroFrostBoltTimer = 0;
+
+            IsIntro = false;
+            Enraged = false;
         }
 
         InstanceScript* instance;
@@ -95,17 +111,7 @@ public:
 
         void Reset() override
         {
-            SlashTimer = 11000;
-            StompTimer = 30000;
-            BurnTimer = 60000;
-            BerserkTimer = 360000;
-
-            IntroPhase = 0;
-            IntroPhaseTimer = 0;
-            IntroFrostBoltTimer = 0;
-
-            IsIntro = false;
-            Enraged = false;
+            Initialize();
 
             DoCast(me, SPELL_DUAL_WIELD, true);
 

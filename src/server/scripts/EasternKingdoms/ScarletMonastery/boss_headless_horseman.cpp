@@ -236,7 +236,20 @@ public:
 
     struct npc_headAI : public ScriptedAI
     {
-        npc_headAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_headAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            Phase = 0;
+            bodyGUID = 0;
+            die = false;
+            withbody = true;
+            wait = 1000;
+            laugh = urand(15000, 30000);
+        }
 
         uint64 bodyGUID;
 
@@ -249,12 +262,7 @@ public:
 
         void Reset() override
         {
-            Phase = 0;
-            bodyGUID = 0;
-            die = false;
-            withbody = true;
-            wait = 1000;
-            laugh = urand(15000, 30000);
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }
@@ -384,8 +392,27 @@ public:
     {
         boss_headless_horsemanAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
             headGUID = 0;
+        }
+
+        void Initialize()
+        {
+            Phase = 1;
+            conflagrate = 15000;
+            summonadds = 15000;
+            laugh = urand(16000, 20000);
+            cleave = 2000;
+            regen = 1000;
+            burn = 6000;
+            count = 0;
+            say_timer = 3000;
+
+            withhead = true;
+            returned = true;
+            burned = false;
+            IsFlying = false;
         }
 
         InstanceScript* instance;
@@ -414,20 +441,7 @@ public:
 
         void Reset() override
         {
-            Phase = 1;
-            conflagrate = 15000;
-            summonadds = 15000;
-            laugh = urand(16000, 20000);
-            cleave = 2000;
-            regen = 1000;
-            burn = 6000;
-            count = 0;
-            say_timer = 3000;
-
-            withhead = true;
-            returned = true;
-            burned = false;
-            IsFlying = false;
+            Initialize();
             DoCast(me, SPELL_HEAD);
             if (headGUID)
             {

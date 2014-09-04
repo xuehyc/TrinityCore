@@ -49,7 +49,17 @@ class boss_ironaya : public CreatureScript
 
         struct boss_ironayaAI : public ScriptedAI
         {
-            boss_ironayaAI(Creature* creature) : ScriptedAI(creature) { }
+            boss_ironayaAI(Creature* creature) : ScriptedAI(creature)
+            {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                uiArcingTimer = 3000;
+                bHasCastKnockaway = false;
+                bHasCastWstomp = false;
+            }
 
             uint32 uiArcingTimer;
             bool bHasCastWstomp;
@@ -57,9 +67,7 @@ class boss_ironaya : public CreatureScript
 
             void Reset() override
             {
-                uiArcingTimer = 3000;
-                bHasCastKnockaway = false;
-                bHasCastWstomp = false;
+                Initialize();
             }
 
             void EnterCombat(Unit* /*who*/) override

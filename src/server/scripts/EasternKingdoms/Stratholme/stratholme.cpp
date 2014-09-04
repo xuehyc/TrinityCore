@@ -146,7 +146,17 @@ public:
 
     struct npc_restless_soulAI : public ScriptedAI
     {
-        npc_restless_soulAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_restless_soulAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            Tagger = 0;
+            Die_Timer = 5000;
+            Tagged = false;
+        }
 
         uint64 Tagger;
         uint32 Die_Timer;
@@ -154,9 +164,7 @@ public:
 
         void Reset() override
         {
-            Tagger = 0;
-            Die_Timer = 5000;
-            Tagged = false;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }
@@ -228,15 +236,23 @@ public:
 
     struct npc_spectral_ghostly_citizenAI : public ScriptedAI
     {
-        npc_spectral_ghostly_citizenAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_spectral_ghostly_citizenAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            Die_Timer = 5000;
+            Tagged = false;
+        }
 
         uint32 Die_Timer;
         bool Tagged;
 
         void Reset() override
         {
-            Die_Timer = 5000;
-            Tagged = false;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }

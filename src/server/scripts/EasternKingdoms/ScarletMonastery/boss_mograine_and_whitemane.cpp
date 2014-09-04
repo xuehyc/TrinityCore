@@ -76,7 +76,17 @@ public:
     {
         boss_scarlet_commander_mograineAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            CrusaderStrike_Timer = 10000;
+            HammerOfJustice_Timer = 10000;
+            _bHasDied = false;
+            _bHeal = false;
+            _bFakeDeath = false;
         }
 
         InstanceScript* instance;
@@ -90,8 +100,7 @@ public:
 
         void Reset() override
         {
-            CrusaderStrike_Timer = 10000;
-            HammerOfJustice_Timer = 10000;
+            Initialize();
 
             //Incase wipe during phase that mograine fake death
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -100,10 +109,6 @@ public:
 
             if (me->IsAlive())
                 instance->SetBossState(DATA_MOGRAINE_AND_WHITE_EVENT, NOT_STARTED);
-
-            _bHasDied = false;
-            _bHeal = false;
-            _bFakeDeath = false;
         }
 
         void JustReachedHome() override
@@ -234,7 +239,19 @@ public:
     {
         boss_high_inquisitor_whitemaneAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            Wait_Timer = 7000;
+            Heal_Timer = 10000;
+            PowerWordShield_Timer = 15000;
+            HolySmite_Timer = 6000;
+
+            _bCanResurrectCheck = false;
+            _bCanResurrect = false;
         }
 
         InstanceScript* instance;
@@ -249,13 +266,7 @@ public:
 
         void Reset() override
         {
-            Wait_Timer = 7000;
-            Heal_Timer = 10000;
-            PowerWordShield_Timer = 15000;
-            HolySmite_Timer = 6000;
-
-            _bCanResurrectCheck = false;
-            _bCanResurrect = false;
+            Initialize();
 
             if (me->IsAlive())
                 instance->SetBossState(DATA_MOGRAINE_AND_WHITE_EVENT, NOT_STARTED);

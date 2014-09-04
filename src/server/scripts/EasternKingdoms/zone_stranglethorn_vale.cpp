@@ -54,7 +54,13 @@ public:
     {
         npc_yennikuAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             bReset = false;
+        }
+
+        void Initialize()
+        {
+            Reset_Timer = 0;
         }
 
         uint32 Reset_Timer;
@@ -62,7 +68,7 @@ public:
 
         void Reset() override
         {
-            Reset_Timer = 0;
+            Initialize();
             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
         }
 
