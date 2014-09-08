@@ -22,6 +22,7 @@
 
 uint32 const EncounterCount = 6;
 #define ZulAmanScriptName "instance_zulaman"
+#define DataHeader "ZA"
 
 enum DataTypes
 {

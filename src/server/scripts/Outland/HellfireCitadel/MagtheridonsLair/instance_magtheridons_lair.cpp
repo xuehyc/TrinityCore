@@ -72,6 +72,7 @@ class instance_magtheridons_lair : public InstanceMapScript
 
             void Initialize() override
             {
+                SetHeaders(DataHeader);
                 memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
                 MagtheridonGUID = 0;

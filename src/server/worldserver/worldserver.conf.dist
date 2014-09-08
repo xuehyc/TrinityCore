@@ -2400,6 +2400,20 @@ CharDelete.KeepDays = 30
 ###################################################################################################
 # CUSTOM SERVER OPTIONS
 #
+#     AllowTrackBothResources
+#        Description: Allows players to track herbs and minerals at the same time (if they have the skills)
+#        Default: 0 (do not allow)
+#                 1 (allow)
+#
+#        Note: The following are client limitations and cannot be coded for:
+#           * The minimap tracking icon will display whichever skill is activated second
+#           * The minimap tracking list will only show a check mark next to the last skill activated (sometimes this
+#              bugs out and doesn't switch the check mark. It has no effect on the actual tracking though).
+#           * The minimap dots are yellow for both resources
+
+AllowTrackBothResources = 0
+
+#
 #    PlayerStart.AllReputation
 #        Description: Players will start with most of the high level reputations that are needed
 #                     for items, mounts etc.
@@ -2607,11 +2621,7 @@ UI.ShowQuestLevelsInDialogs = 0
 #
 ###################################################################################################
 
-###################################
-# Auction House Bot Configuration #
-###################################
-
-###################################################################################################################
+###################################################################################################
 # AUCTION HOUSE BOT SETTINGS
 #
 #    AuctionHouseBot.Update.Interval
@@ -2834,7 +2844,10 @@ AuctionHouseBot.Class.Key = 1
 AuctionHouseBot.Class.Misc = 5
 AuctionHouseBot.Class.Glyph = 3
 
-###################################################################################################################
+#
+###################################################################################################
+
+###################################################################################################
 #
 # AHBot ITEM FINE TUNING
 #    The following are usefull for limiting what character levels can
@@ -2906,9 +2919,9 @@ AuctionHouseBot.forceIncludeItems = ""
 AuctionHouseBot.forceExcludeItems = ""
 
 #
-###################################################################################################################
+###################################################################################################
 
-###################################################################################################################
+###################################################################################################
 #    AHBot Buyer config
 #
 #    AuctionHouseBot.Buyer.Enabled
@@ -2956,7 +2969,7 @@ AuctionHouseBot.Buyer.Horde.Chance.Ratio = 3
 AuctionHouseBot.Buyer.Neutral.Chance.Ratio = 3
 
 #
-###################################################################################################################
+###################################################################################################
 
 ###################################################################################################
 #  LOGGING SYSTEM SETTINGS
@@ -3112,6 +3125,7 @@ Log.Async.Enable = 0
 #                     1 - (Enabled)
 
 Allow.IP.Based.Action.Logging = 0
+
 #
 ###################################################################################################
 

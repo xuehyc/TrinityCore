@@ -96,8 +96,15 @@ public:
 
         aqsentinelAI(Creature* creature) : ScriptedAI(creature)
         {
-            ClearBuddyList();
+            Initialize();
             abselected = 0;                                     // just initialization of variable
+            ability = 0;
+        }
+
+        void Initialize()
+        {
+            ClearBuddyList();
+            gatherOthersWhenAggro = true;
         }
 
         uint64 NearbyGUID[3];
@@ -187,8 +194,8 @@ public:
 
         void GetOtherSentinels(Unit* who)
         {
-            bool *chosenAbilities = new bool[9];
-            memset(chosenAbilities, 0, 9*sizeof(bool));
+            bool chosenAbilities[9];
+            memset(chosenAbilities, 0, sizeof(chosenAbilities));
             selectAbility(pickAbilityRandom(chosenAbilities));
 
             ClearBuddyList();
@@ -211,8 +218,6 @@ public:
                 DoYell("I dont have enough buddies.", LANG_NEUTRAL, 0);*/
             SendMyListToBuddies();
             CallBuddiesToAttack(who);
-
-            delete[] chosenAbilities;
         }
 
         bool gatherOthersWhenAggro;
@@ -232,8 +237,7 @@ public:
                     }
                 }
             }
-            ClearBuddyList();
-            gatherOthersWhenAggro = true;
+            Initialize();
         }
 
         void GainSentinelAbility(uint32 id)

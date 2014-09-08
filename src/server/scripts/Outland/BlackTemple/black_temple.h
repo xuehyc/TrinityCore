@@ -24,6 +24,7 @@
 #define BLACK_TEMPLE_H_
 
 #define BTScriptName "instance_black_temple"
+#define DataHeader   "BT"
 
 uint32 const EncounterCount         = 9;
 

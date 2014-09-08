@@ -91,6 +91,7 @@ class instance_serpent_shrine : public InstanceMapScript
         {
             instance_serpentshrine_cavern_InstanceMapScript(Map* map) : InstanceScript(map)
             {
+                SetHeaders(DataHeader);
             }
 
             void Initialize() override

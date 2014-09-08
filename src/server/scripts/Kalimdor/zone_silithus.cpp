@@ -426,7 +426,23 @@ public:
 
     struct npc_anachronos_the_ancientAI : public ScriptedAI
     {
-        npc_anachronos_the_ancientAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_anachronos_the_ancientAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            AnimationTimer = 1500;
+            AnimationCount = 0;
+            AnachronosQuestTriggerGUID = 0;
+            MerithraGUID = 0;
+            ArygosGUID = 0;
+            CaelestraszGUID = 0;
+            FandralGUID = 0;
+            PlayerGUID = 0;
+            eventEnd = false;
+        }
 
         uint32 AnimationTimer;
         uint8 AnimationCount;
@@ -441,15 +457,7 @@ public:
 
         void Reset() override
         {
-            AnimationTimer = 1500;
-            AnimationCount = 0;
-            AnachronosQuestTriggerGUID = 0;
-            MerithraGUID = 0;
-            ArygosGUID = 0;
-            CaelestraszGUID = 0;
-            FandralGUID = 0;
-            PlayerGUID = 0;
-            eventEnd = false;
+            Initialize();
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
@@ -754,7 +762,22 @@ public:
 
     struct npc_qiraj_war_spawnAI : public ScriptedAI
     {
-        npc_qiraj_war_spawnAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_qiraj_war_spawnAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+            SpellTimer1 = 0;
+            SpellTimer2 = 0;
+            SpellTimer3 = 0;
+            SpellTimer4 = 0;
+        }
+
+        void Initialize()
+        {
+            MobGUID = 0;
+            PlayerGUID = 0;
+            Timers = false;
+            hasTarget = false;
+        }
 
         uint64 MobGUID;
         uint64 PlayerGUID;
@@ -764,10 +787,7 @@ public:
 
         void Reset() override
         {
-            MobGUID = 0;
-            PlayerGUID = 0;
-            Timers = false;
-            hasTarget = false;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }
@@ -867,7 +887,24 @@ public:
 
     struct npc_anachronos_quest_triggerAI : public ScriptedAI
     {
-        npc_anachronos_quest_triggerAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_anachronos_quest_triggerAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            PlayerGUID = 0;
+
+            WaveTimer = 2000;
+            AnnounceTimer = 1000;
+            LiveCount = 0;
+            WaveCount = 0;
+
+            EventStarted = false;
+            Announced = false;
+            Failed = false;
+        }
 
         uint64 PlayerGUID;
 
@@ -883,16 +920,7 @@ public:
 
         void Reset() override
         {
-            PlayerGUID = 0;
-
-            WaveTimer = 2000;
-            AnnounceTimer = 1000;
-            LiveCount = 0;
-            WaveCount = 0;
-
-            EventStarted = false;
-            Announced = false;
-            Failed = false;
+            Initialize();
 
             me->SetVisible(false);
         }

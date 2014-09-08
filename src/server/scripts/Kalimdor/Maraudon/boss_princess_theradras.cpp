@@ -51,7 +51,18 @@ public:
 
     struct boss_ptheradrasAI : public ScriptedAI
     {
-        boss_ptheradrasAI(Creature* creature) : ScriptedAI(creature) { }
+        boss_ptheradrasAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            DustfieldTimer = 8000;
+            BoulderTimer = 2000;
+            ThrashTimer = 5000;
+            RepulsiveGazeTimer = 23000;
+        }
 
         uint32 DustfieldTimer;
         uint32 BoulderTimer;
@@ -60,10 +71,7 @@ public:
 
         void Reset() override
         {
-            DustfieldTimer = 8000;
-            BoulderTimer = 2000;
-            ThrashTimer = 5000;
-            RepulsiveGazeTimer = 23000;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }

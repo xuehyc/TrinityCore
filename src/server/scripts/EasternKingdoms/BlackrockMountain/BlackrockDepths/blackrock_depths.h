@@ -23,6 +23,8 @@
 #ifndef DEF_BRD_H
 #define DEF_BRD_H
 
+#define DataHeader "BRD"
+
 enum FactionIds
 {
     FACTION_NEUTRAL            = 734,

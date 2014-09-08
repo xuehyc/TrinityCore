@@ -159,10 +159,18 @@ public:
     {
         generic_vehicleAI_toc5AI(Creature* creature) : npc_escortAI(creature)
         {
+            Initialize();
             SetDespawnAtEnd(false);
             uiWaypointPath = 0;
 
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            uiChargeTimer = 5000;
+            uiShieldBreakerTimer = 8000;
+            uiBuffTimer = urand(30000, 60000);
         }
 
         InstanceScript* instance;
@@ -175,9 +183,7 @@ public:
 
         void Reset() override
         {
-            uiChargeTimer = 5000;
-            uiShieldBreakerTimer = 8000;
-            uiBuffTimer = urand(30000, 60000);
+            Initialize();
         }
 
         void SetData(uint32 uiType, uint32 /*uiData*/) override
@@ -315,6 +321,7 @@ public:
     {
         boss_warrior_toc5AI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
 
             bDone = false;
@@ -326,6 +333,13 @@ public:
             me->SetReactState(REACT_PASSIVE);
             // THIS IS A HACK, SHOULD BE REMOVED WHEN THE EVENT IS FULL SCRIPTED
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void Initialize()
+        {
+            uiBladeStormTimer = urand(15000, 20000);
+            uiInterceptTimer = 7000;
+            uiMortalStrikeTimer = urand(8000, 12000);
         }
 
         InstanceScript* instance;
@@ -343,9 +357,7 @@ public:
 
         void Reset() override
         {
-            uiBladeStormTimer = urand(15000, 20000);
-            uiInterceptTimer  = 7000;
-            uiMortalStrikeTimer = urand(8000, 12000);
+            Initialize();
         }
 
         void JustReachedHome() override
@@ -447,6 +459,7 @@ public:
     {
         boss_mage_toc5AI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
 
             bDone = false;
@@ -458,6 +471,14 @@ public:
             me->SetReactState(REACT_PASSIVE);
             // THIS IS A HACK, SHOULD BE REMOVED WHEN THE EVENT IS FULL SCRIPTED
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void Initialize()
+        {
+            uiFireBallTimer = 5000;
+            uiPolymorphTimer = 8000;
+            uiBlastWaveTimer = 12000;
+            uiHasteTimer = 22000;
         }
 
         InstanceScript* instance;
@@ -475,10 +496,7 @@ public:
 
         void Reset() override
         {
-            uiFireBallTimer = 5000;
-            uiPolymorphTimer  = 8000;
-            uiBlastWaveTimer = 12000;
-            uiHasteTimer = 22000;
+            Initialize();
         }
 
         void JustReachedHome() override
@@ -584,6 +602,7 @@ public:
     {
         boss_shaman_toc5AI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
 
             bDone = false;
@@ -595,6 +614,14 @@ public:
             me->SetReactState(REACT_PASSIVE);
             // THIS IS A HACK, SHOULD BE REMOVED WHEN THE EVENT IS FULL SCRIPTED
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void Initialize()
+        {
+            uiChainLightningTimer = 16000;
+            uiHealingWaveTimer = 12000;
+            uiEartShieldTimer = urand(30000, 35000);
+            uiHexMendingTimer = urand(20000, 25000);
         }
 
         InstanceScript* instance;
@@ -612,10 +639,7 @@ public:
 
         void Reset() override
         {
-            uiChainLightningTimer = 16000;
-            uiHealingWaveTimer = 12000;
-            uiEartShieldTimer = urand(30000, 35000);
-            uiHexMendingTimer = urand(20000, 25000);
+            Initialize();
         }
 
         void EnterCombat(Unit* who) override
@@ -729,6 +753,7 @@ public:
     {
         boss_hunter_toc5AI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
 
             bDone = false;
@@ -740,6 +765,17 @@ public:
             me->SetReactState(REACT_PASSIVE);
             // THIS IS A HACK, SHOULD BE REMOVED WHEN THE EVENT IS FULL SCRIPTED
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void Initialize()
+        {
+            uiShootTimer = 12000;
+            uiMultiShotTimer = 0;
+            uiLightningArrowsTimer = 7000;
+
+            uiTargetGUID = 0;
+
+            bShoot = false;
         }
 
         InstanceScript* instance;
@@ -759,13 +795,7 @@ public:
 
         void Reset() override
         {
-            uiShootTimer = 12000;
-            uiMultiShotTimer = 0;
-            uiLightningArrowsTimer = 7000;
-
-            uiTargetGUID = 0;
-
-            bShoot = false;
+            Initialize();
         }
 
         void JustReachedHome() override
@@ -883,6 +913,7 @@ public:
     {
         boss_rouge_toc5AI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
 
             bDone = false;
@@ -894,6 +925,13 @@ public:
             me->SetReactState(REACT_PASSIVE);
             // THIS IS A HACK, SHOULD BE REMOVED WHEN THE EVENT IS FULL SCRIPTED
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void Initialize()
+        {
+            uiEviscerateTimer = 8000;
+            uiFanKivesTimer = 14000;
+            uiPosionBottleTimer = 19000;
         }
 
         InstanceScript* instance;
@@ -909,9 +947,7 @@ public:
 
         void Reset() override
         {
-            uiEviscerateTimer = 8000;
-            uiFanKivesTimer   = 14000;
-            uiPosionBottleTimer = 19000;
+            Initialize();
         }
 
         void JustReachedHome() override

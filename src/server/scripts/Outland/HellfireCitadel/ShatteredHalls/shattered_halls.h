@@ -23,6 +23,8 @@
 #ifndef DEF_SHATTERED_H
 #define DEF_SHATTERED_H
 
+#define DataHeader "SH"
+
 uint32 const EncounterCount          = 3;
 
 enum DataTypes

@@ -59,7 +59,18 @@ public:
     {
         boss_kriAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            Cleave_Timer = urand(4000, 8000);
+            ToxicVolley_Timer = urand(6000, 12000);
+            Check_Timer = 2000;
+
+            VemDead = false;
+            Death = false;
         }
 
         InstanceScript* instance;
@@ -73,12 +84,7 @@ public:
 
         void Reset() override
         {
-            Cleave_Timer = urand(4000, 8000);
-            ToxicVolley_Timer = urand(6000, 12000);
-            Check_Timer = 2000;
-
-            VemDead = false;
-            Death = false;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -152,7 +158,17 @@ public:
     {
         boss_vemAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            Charge_Timer = urand(15000, 27000);
+            KnockBack_Timer = urand(8000, 20000);
+            Enrage_Timer = 120000;
+
+            Enraged = false;
         }
 
         InstanceScript* instance;
@@ -165,11 +181,7 @@ public:
 
         void Reset() override
         {
-            Charge_Timer = urand(15000, 27000);
-            KnockBack_Timer = urand(8000, 20000);
-            Enrage_Timer = 120000;
-
-            Enraged = false;
+            Initialize();
         }
 
         void JustDied(Unit* /*killer*/) override
@@ -241,7 +253,17 @@ public:
     {
         boss_yaujAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            Heal_Timer = urand(25000, 40000);
+            Fear_Timer = urand(12000, 24000);
+            Check_Timer = 2000;
+
+            VemDead = false;
         }
 
         InstanceScript* instance;
@@ -254,11 +276,7 @@ public:
 
         void Reset() override
         {
-            Heal_Timer = urand(25000, 40000);
-            Fear_Timer = urand(12000, 24000);
-            Check_Timer = 2000;
-
-            VemDead = false;
+            Initialize();
         }
 
         void JustDied(Unit* /*killer*/) override

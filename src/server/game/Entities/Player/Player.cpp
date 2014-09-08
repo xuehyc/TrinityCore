@@ -5860,22 +5860,24 @@ float Player::OCTRegenMPPerSpirit()
     return regen;
 }
 
-void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
+void Player::ApplyRatingMod(CombatRating combatRating, int32 value, bool apply)
 {
-    m_baseRatingValue[cr] += (apply ? value : -value);
+    float oldRating = m_baseRatingValue[combatRating];
+    m_baseRatingValue[combatRating] += (apply ? value : -value);
 
     // explicit affected values
-    float const mult = GetRatingMultiplier(cr);
-    float const oldVal = m_baseRatingValue[cr] * mult;
-    float const newVal = m_baseRatingValue[cr] * mult;
-
-    switch (cr)
+    float const multiplier = GetRatingMultiplier(combatRating);
+    float const oldVal = oldRating * multiplier;
+    float const newVal = m_baseRatingValue[combatRating] * multiplier;
+    switch (combatRating)
     {
         case CR_HASTE_MELEE:
             ApplyAttackTimePercentMod(BASE_ATTACK, oldVal, false);
             ApplyAttackTimePercentMod(OFF_ATTACK, oldVal, false);
             ApplyAttackTimePercentMod(BASE_ATTACK, newVal, true);
             ApplyAttackTimePercentMod(OFF_ATTACK, newVal, true);
+                if (getClass() == CLASS_DEATH_KNIGHT)		
+                    UpdateAllRunesRegen();
             break;
         case CR_HASTE_RANGED:
             ApplyAttackTimePercentMod(RANGED_ATTACK, oldVal, false);
@@ -5885,11 +5887,11 @@ void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
             ApplyCastTimePercentMod(oldVal, false);
             ApplyCastTimePercentMod(newVal, true);
             break;
-        default: // shut up compiler warnings
+        default:
             break;
     }
 
-    UpdateRating(cr);
+    UpdateRating(combatRating);
 }
 
 void Player::UpdateRating(CombatRating cr)
@@ -27347,13 +27349,13 @@ void Player::SendItemRetrievalMail(uint32 itemEntry, uint32 count)
     MailSender sender(MAIL_CREATURE, 34337 /* The Postmaster */);
     MailDraft draft("Recovered Item", "We recovered a lost item in the twisting nether and noted that it was yours.$B$BPlease find said object enclosed."); // This is the text used in Cataclysm, it probably wasn't changed.
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
-    
+
     if (Item* item = Item::CreateItem(itemEntry, count, 0))
     {
         item->SaveToDB(trans);
         draft.AddItem(item);
     }
-    
+
     draft.SendMailTo(trans, MailReceiver(this, GetGUIDLow()), sender);
     CharacterDatabase.CommitTransaction(trans);
 }

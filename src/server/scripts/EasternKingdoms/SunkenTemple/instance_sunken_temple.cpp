@@ -64,6 +64,7 @@ public:
     {
         instance_sunken_temple_InstanceMapScript(Map* map) : InstanceScript(map)
         {
+            SetHeaders(DataHeader);
         }
 
         uint64 GOAtalaiStatue1;

@@ -21,7 +21,8 @@
 #include "Map.h"
 #include "CreatureAI.h"
 
-#define MAX_ENCOUNTERS 7
+#define DataHeader "FL"
+#define FirelandsScriptName "instance_firelands"
 
 enum Datas
 {

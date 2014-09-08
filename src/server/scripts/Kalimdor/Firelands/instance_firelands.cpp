@@ -51,33 +51,8 @@ public:
         {
             switch (creature->GetEntry())
             {
-                case BOSS_RAGNAROS:
-                    _ragnarosGUID = creature->GetGUID();
-                    break;
-                case NPC_SMOULDERING_HATCHLING:
-                    // Cannot directly start attacking here as the creature is not yet on map
-                    creature->m_Events.AddEvent(new DelayedAttackStartEvent(creature), creature->m_Events.CalculateTime(500));
-                    break;
-            }
-        }
-
-        void OnGameObjectCreate(GameObject* go)
-        {
-            switch (go->GetEntry())
-            {
-                case GO_RAGNAROS_DOOR:
-                    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                    AddDoor(go, true);
-                    break;
-                case GO_CACHE_OF_THE_FIRELORD:
-                    go->SetPhaseMask(2, true);
-                    _cacheOfTheFirelordGUID = go->GetGUID();
-                    break;
-                case GO_CACHE_OF_THE_FIRELORD_HC:
-                    go->SetPhaseMask(2, true);
-                    break;
-                default:
-                    break;
+                SetHeaders(DataHeader);
+                SetBossNumber(EncounterCount);
             }
         }
 

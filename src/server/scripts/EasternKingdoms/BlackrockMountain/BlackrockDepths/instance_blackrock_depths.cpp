@@ -121,6 +121,7 @@ public:
 
         void Initialize() override
         {
+            SetHeaders(DataHeader);
             memset(&encounter, 0, sizeof(encounter));
 
             EmperorGUID = 0;

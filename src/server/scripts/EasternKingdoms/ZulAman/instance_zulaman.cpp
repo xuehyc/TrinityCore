@@ -31,6 +31,7 @@ class instance_zulaman : public InstanceMapScript
         {
             instance_zulaman_InstanceScript(InstanceMap* map) : InstanceScript(map)
             {
+                SetHeaders(DataHeader);
                 SetBossNumber(EncounterCount);
 
                 AkilzonGUID             = 0;
@@ -268,60 +269,25 @@ class instance_zulaman : public InstanceMapScript
                 }
             }
 
-            std::string GetSaveData() override
+            void WriteSaveDataMore(std::ostringstream& data) override
             {
-                OUT_SAVE_INST_DATA;
-
-                std::ostringstream saveStream;
-                saveStream << "Z A " << GetBossSaveData() << ZulAmanState
-                    << ' ' << SpeedRunTimer << ' ' << ZulAmanBossCount;
-
-                OUT_SAVE_INST_DATA_COMPLETE;
-                return saveStream.str();
+                data << ZulAmanState  << ' '
+                     << SpeedRunTimer << ' '
+                     << ZulAmanBossCount;
             }
 
-            void Load(char const* str) override
+            void ReadSaveDataMore(std::istringstream& data) override
             {
-                if (!str)
+                data >> ZulAmanState;
+                data >> SpeedRunTimer;
+                data >> ZulAmanBossCount;
+
+                if (ZulAmanState == IN_PROGRESS && SpeedRunTimer && SpeedRunTimer <= 15)
                 {
-                    OUT_LOAD_INST_DATA_FAIL;
-                    return;
+                    events.ScheduleEvent(EVENT_UPDATE_ZULAMAN_TIMER, 60000);
+                    DoUpdateWorldState(WORLD_STATE_ZULAMAN_TIMER_ENABLED, 1);
+                    DoUpdateWorldState(WORLD_STATE_ZULAMAN_TIMER, SpeedRunTimer);
                 }
-
-                OUT_LOAD_INST_DATA(str);
-
-                char dataHead1, dataHead2;
-
-                std::istringstream loadStream(str);
-                loadStream >> dataHead1 >> dataHead2;
-
-                if (dataHead1 == 'Z' && dataHead2 == 'A')
-                {
-                    for (uint8 i = 0; i < EncounterCount; ++i)
-                    {
-                        uint32 tmpState;
-                        loadStream >> tmpState;
-                        if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
-                            tmpState = NOT_STARTED;
-
-                        SetBossState(i, EncounterState(tmpState));
-                    }
-
-                    loadStream >> ZulAmanState;
-                    loadStream >> SpeedRunTimer;
-                    loadStream >> ZulAmanBossCount;
-
-                    if (ZulAmanState == IN_PROGRESS && SpeedRunTimer && SpeedRunTimer <= 15)
-                    {
-                        events.ScheduleEvent(EVENT_UPDATE_ZULAMAN_TIMER, 60000);
-                        DoUpdateWorldState(WORLD_STATE_ZULAMAN_TIMER_ENABLED, 1);
-                        DoUpdateWorldState(WORLD_STATE_ZULAMAN_TIMER, SpeedRunTimer);
-                    }
-                }
-                else
-                    OUT_LOAD_INST_DATA_FAIL;
-
-                OUT_LOAD_INST_DATA_COMPLETE;
             }
 
         protected:

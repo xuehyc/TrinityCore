@@ -85,6 +85,7 @@ public:
 
         void Initialize() override
         {
+            SetHeaders(DataHeader);
             memset(&encounter, 0, sizeof(encounter));
 
             twilightLordKelrisGUID = 0;
