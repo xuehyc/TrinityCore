@@ -1,47 +1,39 @@
-SET @CGUID :=    74506;
 
 UPDATE `creature_template` SET `faction`=1813, `unit_flags`=32768,`flags_extra`=2 WHERE  `entry` IN(21416,21709,21710,21711);
 UPDATE `creature_template` SET `gossip_menu_id`=8350, `npcflag`=0, `speed_walk`=1, `speed_run`=1.142857, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=33280, `unit_flags2`=0, `AIName`='SmartAI' WHERE  `entry`=21685;
 UPDATE `creature_template` SET `InhabitType`=4 WHERE  `entry`=21052;
-
 UPDATE `creature_template` SET `ainame`='SmartAI', `scriptname`='' WHERE `entry` IN(21703,21704,21705,21420);
+
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN(21703,21704,21705,21420) AND `source_type`=0;
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN(-75734,-75735,-75736,-75737,-75738,-75739,-75104,-75105,-75106,-@CGUID, -@CGUID-1,-@CGUID-2) AND `source_type`=0;
 
-DELETE FROM `smart_scripts` WHERE `entryorguid` =2847900 AND `source_type`=9;
+-- GUID by ArkDB
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(-75104, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 36817, 0, 0, 0, 0, 0, 1, 21416, 0, 0, 0, 0, 0, 0, 'Corrupt Water Totem - OOC - Cast Channel Water shield'), 
-(-75104, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 36826, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Water Totem - On Agro - Cast Summon Corrupt Water Elemental'), 
-(-75105, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38105, 0, 0, 0, 0, 0, 1, 21416, 0, 0, 0, 0, 0, 0, 'Corrupt Water Totem - OOC - Cast Channel Water shield'), 
-(-75105, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 36826, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Water Totem - On Agro - Cast Summon Corrupt Water Elemental'), 
-(-75106, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38106, 0, 0, 0, 0, 0, 1, 21416, 0, 0, 0, 0, 0, 0, 'Corrupt Water Totem - OOC - Cast Channel Water shield'), 
-(-75106, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 36826, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Water Totem - On Agro - Cast Summon Corrupt Water Elemental'), 
-(-75734, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 37204, 0, 0, 0, 0, 0, 1, 21709, 0, 0, 0, 0, 0, 0, 'Corrupt Earth Totem - OOC - Cast Channel Earth shield'), 
-(-75734, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37203, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Earth Totem - On Agro - Cast Summon Corrupt Earth Elemental'), 
-(-75735, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38101, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Earth Totem - OOC - Cast Channel Earth shield'), 
-(-75735, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37203, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Earth Totem - On Agro - Cast Summon Corrupt Earth Elemental'), 
-(-75736, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38102, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Earth Totem - OOC - Cast Channel Earth shield'), 
-(-75736, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37203, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Earth Totem - On Agro - Cast Summon Corrupt Earth Elemental'), 
-(-75737, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 37205, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Air Totem - OOC - Cast Channel Air shield'), 
-(-75737, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37202, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Air Totem - On Agro - Cast Summon Corrupt Air Elemental'), 
-(-75738, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38099, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Air Totem - OOC - Cast Channel Air shield'), 
-(-75738, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37202, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Air Totem - On Agro - Cast Summon Corrupt Air Elemental'), 
-(-75739, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38100, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Air Totem - OOC - Cast Channel Air shield'), 
-(-75739, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37202, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Air Totem - On Agro - Cast Summon Corrupt Air Elemental'), 
-(-@CGUID, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 37206, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Fire Totem - OOC - Cast Channel Fire shield'), 
-(-@CGUID, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37201, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Fire Totem - On Agro - Cast Summon Corrupt Fire Elemental'), 
-(-@CGUID-1, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38103, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Fire Totem - OOC - Cast Channel Fire shield'), 
-(-@CGUID-1, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37201, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Fire Totem - On Agro - Cast Summon Corrupt Fire Elemental'), 
-(-@CGUID-2, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38104, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Fire Totem - OOC - Cast Channel Fire shield'), 
-(-@CGUID-2, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37201, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Fire Totem - On Agro - Cast Summon Corrupt Fire Elemental');
+(-171397, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 36817, 0, 0, 0, 0, 0, 1, 21416, 0, 0, 0, 0, 0, 0, 'Corrupt Water Totem - OOC - Cast Channel Water shield'), 
+(-171397, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 36826, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Water Totem - On Agro - Cast Summon Corrupt Water Elemental'), 
+(-171398, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38105, 0, 0, 0, 0, 0, 1, 21416, 0, 0, 0, 0, 0, 0, 'Corrupt Water Totem - OOC - Cast Channel Water shield'), 
+(-171398, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 36826, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Water Totem - On Agro - Cast Summon Corrupt Water Elemental'), 
+(-171399, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38106, 0, 0, 0, 0, 0, 1, 21416, 0, 0, 0, 0, 0, 0, 'Corrupt Water Totem - OOC - Cast Channel Water shield'), 
+(-171399, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 36826, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Water Totem - On Agro - Cast Summon Corrupt Water Elemental'), 
+(-170778, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 37204, 0, 0, 0, 0, 0, 1, 21709, 0, 0, 0, 0, 0, 0, 'Corrupt Earth Totem - OOC - Cast Channel Earth shield'), 
+(-170778, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37203, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Earth Totem - On Agro - Cast Summon Corrupt Earth Elemental'), 
+(-170779, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38101, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Earth Totem - OOC - Cast Channel Earth shield'), 
+(-170779, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37203, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Earth Totem - On Agro - Cast Summon Corrupt Earth Elemental'), 
+(-170780, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38102, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Earth Totem - OOC - Cast Channel Earth shield'), 
+(-170780, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37203, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Earth Totem - On Agro - Cast Summon Corrupt Earth Elemental'), 
+(-170775, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 37205, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Air Totem - OOC - Cast Channel Air shield'), 
+(-170775, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37202, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Air Totem - On Agro - Cast Summon Corrupt Air Elemental'), 
+(-170776, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38099, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Air Totem - OOC - Cast Channel Air shield'), 
+(-170776, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37202, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Air Totem - On Agro - Cast Summon Corrupt Air Elemental'), 
+(-170777, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38100, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Air Totem - OOC - Cast Channel Air shield'), 
+(-170777, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37202, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Air Totem - On Agro - Cast Summon Corrupt Air Elemental'), 
+(-159669, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 37206, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Fire Totem - OOC - Cast Channel Fire shield'), 
+(-159669, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37201, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Fire Totem - On Agro - Cast Summon Corrupt Fire Elemental'), 
+(-159670, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38103, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Fire Totem - OOC - Cast Channel Fire shield'), 
+(-159670, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37201, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Fire Totem - On Agro - Cast Summon Corrupt Fire Elemental'), 
+(-159671, 0, 0, 0, 1, 0, 100, 0, 0, 0, 15000, 15000, 11, 38104, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Fire Totem - OOC - Cast Channel Fire shield'), 
+(-159671, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 11, 37201, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Corrupt Fire Totem - On Agro - Cast Summon Corrupt Fire Elemental');
 
-UPDATE `creature` SET `position_x`=-3396.211, `position_y`=1568.679, `position_z`=47.82401, `orientation`=6.110603 WHERE  `guid`=86485;
-
-DELETE FROM `creature` WHERE `id`IN(21703,21706,21707,21708,21428);
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(@CGUID+0, 21703, 530, 1, 1,  -3392.402, 1566.671, 47.97179, 0.2094395, 120, 0, 0), -- 21703 (Area: 3520)
-(@CGUID+1, 21703, 530, 1, 1,  -3404.077, 1566.567, 47.88474, 4.782202, 120, 0, 0), -- 21703 (Area: 3520)
-(@CGUID+2, 21703, 530, 1, 1,  -3397.854, 1576.284, 47.14587, 5.532694, 120, 0, 0); -- 21703 (Area: 3520)
+UPDATE `creature` SET `position_x`=-3396.211, `position_y`=1568.679, `position_z`=47.82401, `orientation`=6.110603 WHERE  `guid`=162043 and id=21710;
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `ConditionTypeOrReference`=31 AND `ConditionValue1`=3 AND `ConditionValue2` IN(21416,21709,21710,21711);
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry`=38722;

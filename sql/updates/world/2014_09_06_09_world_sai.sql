@@ -1,23 +1,21 @@
 
-SET @CGUID :=  269421; -- GUID by ArkDB  74509;
-
 UPDATE `creature_template` SET `InhabitType`=4 WHERE  `entry`=21210;
 UPDATE `creature_template_addon` SET `auras`='' WHERE  `entry`=21210;
 
 
 UPDATE `creature_template` SET `ainame`='SmartAI', `scriptname`='' WHERE `entry` IN(21210,21207,21735);
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN(21210,-84857,-84854,-84855,-84856,-84858,21207,21735) AND `source_type`=0;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN(21210,21207,21735) AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
-(-84857, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 36393, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster (Guid 84857) - On Spawn - Cast Deathforge Summon Visual'),
-(-84857, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster  - On Data Set 1 1 - Despawn'),
-(-84854, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 36384, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster (Guid 84854) - On Spawn - Cast Skartax Purple Beam'),
-(-84854, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster  - On Data Set 1 1 - Despawn'),
-(-84855, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 36384, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster (Guid 84854) - On Spawn - Cast Skartax Purple Beam'),
-(-84855, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster  - On Data Set 1 1 - Despawn'),
-(-84856, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 36384, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster (Guid 84854) - On Spawn - Cast Skartax Purple Beam'),
-(-84856, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster  - On Data Set 1 1 - Despawn'),
-(-84858, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 36384, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster (Guid 84854) - On Spawn - Cast Skartax Purple Beam'),
-(-84858, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster  - On Data Set 1 1 - Despawn'),
+(-162436, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 36393, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster (Guid ) - On Spawn - Cast Deathforge Summon Visual'),
+(-162436, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster  - On Data Set 1 1 - Despawn'),
+(-162439, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 36384, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster (Guid ) - On Spawn - Cast Skartax Purple Beam'),
+(-162439, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster  - On Data Set 1 1 - Despawn'),
+(-162438, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 36384, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster (Guid ) - On Spawn - Cast Skartax Purple Beam'),
+(-162438, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster  - On Data Set 1 1 - Despawn'),
+(-162437, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 36384, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster (Guid ) - On Spawn - Cast Skartax Purple Beam'),
+(-162437, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster  - On Data Set 1 1 - Despawn'),
+(-162435, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 36384, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster (Guid ) - On Spawn - Cast Skartax Purple Beam'),
+(-162435, 0, 1, 0, 38, 0, 100, 0, 1, 1, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invis Deathforge Caster  - On Data Set 1 1 - Despawn'),
 (21207, 0, 0, 1, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 36382, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Summoner Skartax - On Spawn - Cast Skartax Self Aura I'),
 (21207, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 11, 36431, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Summoner Skartax - On Spawn - Cast Test Channel'),
 (21207, 0, 2, 0, 0, 0, 100, 0, 0, 0, 3000, 5000, 11, 12471, 64, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Summoner Skartax - IC - Cast Shadowbolt'),
@@ -37,15 +35,15 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (13, 1, 37281, 0, 0, 31, 0, 3, 21207, 0, 0, 0, 0, '', 'Infernal Oversouls Wrath targets Summoner Skartax'),
 (13, 1, 37281, 0, 1, 31, 0, 3, 20872, 0, 0, 0, 0, '', 'Infernal Oversouls Wrath targets Deathforge Summoner');
 
-DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID AND @CGUID+2 AND `id`=20872;
+DELETE FROM `creature` WHERE `guid` BETWEEN 269875 AND 269877 AND `id`=20872;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`,  `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(@CGUID+0, 20872, 530, 1, 1,  -3335.892, 2133.704, -2.183001, 2.513274, 120, 0, 0), -- 20872 (Area: 3520)
-(@CGUID+1, 20872, 530, 1, 1,  -3335.601, 2151.807, -1.211325, 3.001966, 120, 0, 0), -- 20872 (Area: 3520)
-(@CGUID+2, 20872, 530, 1, 1,  -3341.744, 2168.385, 2.227986, 3.996804, 120, 0, 0); -- 20872 (Area: 3520)
+(269875, 20872, 530, 1, 1,  -3335.892, 2133.704, -2.183001, 2.513274, 120, 0, 0), -- 20872 (Area: 3520)
+(269876, 20872, 530, 1, 1,  -3335.601, 2151.807, -1.211325, 3.001966, 120, 0, 0), -- 20872 (Area: 3520)
+(269877, 20872, 530, 1, 1,  -3341.744, 2168.385, 2.227986, 3.996804, 120, 0, 0); -- 20872 (Area: 3520)
 
 DELETE FROM `gameobject` WHERE `id`=184820;  -- GUID by ArkDB
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
-(49559, 184820, 530, 1, 1, 1506.37, 6367.81, 0.62336, 4.5204, 0, 0, 0, 1, 120, 255, 1), 
+(49559, 184820, 530, 1, 1, 1506.37, 6367.81, 0.62336, 4.5204, 0, 0, 0, 1, 120, 255, 1),  -- GUID by ArkDB
 (49560, 184820, 530, 1, 1, 1544.21, 6321.05, 2.36069, 0.593412, 0, 0, 0, 1, 120, 255, 1), 
 (49561, 184820, 530, 1, 1, 1589.61, 6294.26, 2.97764, 1.27409, 0, 0, 0, 1, 120, 255, 1), 
 (49562, 184820, 530, 1, 1, 1718.04, 6303.09, -0.245553, 4.24115, 0, 0, 0, 1, 120, 255, 1), 
@@ -55,13 +53,13 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (49566, 184820, 530, 1, 1, 2381.57, 6742.27, 16.7087, 4.90438, 0, 0, 0, 1, 120, 255, 1), 
 (49567, 184820, 530, 1, 1, 2494.49, 6713.98, 4.47157, 4.29351, 0, 0, 0, 1, 120, 255, 1), 
 (404292, 184820, 530, 1, 1, 2700.36, 6601.66, 22.8472, 3.40339, 0, 0, 0, 1, 120, 255, 1), 
-(404293, 184820, 530, 1, 1, 2706.19, 6673.73, 21.6303, 2.47837, 0, 0, 0, 1, 120, 255, 1), 
+(404293, 184820, 530, 1, 1, 2706.19, 6673.73, 21.6303, 2.47837, 0, 0, 0, 1, 120, 255, 1),  -- GUID by ArkDB
 (404294, 184820, 530, 1, 1, 2700.19, 6514.47, 2.13838, 2.11185, 0, 0, 0, 1, 120, 255, 1), 
 (404295, 184820, 530, 1, 1, 2597.69, 6505.88, 1.66538, 1.09956, 0, 0, 0, 1, 120, 255, 1), 
 (404296, 184820, 530, 1, 1, 2635.83, 6463.89, 1.86259, 1.85005, 0, 0, 0, 1, 120, 255, 1), 
 (404297, 184820, 530, 1, 1, 2462.47, 6544.21, 1.93072, 0.541052, 0, 0, 0, 1, 120, 255, 1), 
 (404298, 184820, 530, 1, 1, 2382.94, 6498.44, 3.00535, 1.98968, 0, 0, 0, 1, 120, 255, 1), 
-(404299, 184820, 530, 1, 1, 2332.92, 6567.22, 3.77855, 0.453786, 0, 0, 0, 1, 120, 255, 1);
+(404299, 184820, 530, 1, 1, 2332.92, 6567.22, 3.77855, 0.453786, 0, 0, 0, 1, 120, 255, 1);  -- GUID by ArkDB
 
 UPDATE `creature_template` SET `ainame`='SmartAI', `scriptname`='' WHERE `entry` IN(21352,21498,21456,21351);
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN(21352,21498,21456,21351) AND `source_type`=0;
