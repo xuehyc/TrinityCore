@@ -1,5 +1,7 @@
+
 UPDATE `gameobject_template` SET `flags`=0 WHERE  `entry`=184383;
-DELETE FROM `creature` WHERE  `guid`=72505;
+-- delete creature, spawned by script
+DELETE FROM `creature` WHERE  `guid`=181176 and id=20482; -- GUID by ArkDB
 
 DELETE FROM `gossip_menu` WHERE `entry`=8062;
 INSERT INTO `gossip_menu` (`entry`, `text_id`) VALUES

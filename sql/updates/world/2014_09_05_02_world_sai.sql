@@ -1,5 +1,5 @@
-UPDATE `creature_template` SET `InhabitType`=4 WHERE  `entry`=23282;
 
+UPDATE `creature_template` SET `InhabitType`=4 WHERE  `entry`=23282;
 
 DELETE FROM `smart_scripts` WHERE `entryorguid`=185932 AND `source_type`=1;
 
