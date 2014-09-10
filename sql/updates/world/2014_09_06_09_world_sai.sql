@@ -1,7 +1,7 @@
 
+-- GUID by ArkDB
 UPDATE `creature_template` SET `InhabitType`=4 WHERE  `entry`=21210;
 UPDATE `creature_template_addon` SET `auras`='' WHERE  `entry`=21210;
-
 
 UPDATE `creature_template` SET `ainame`='SmartAI', `scriptname`='' WHERE `entry` IN(21210,21207,21735);
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN(21210,21207,21735) AND `source_type`=0;

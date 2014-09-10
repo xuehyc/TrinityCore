@@ -1,5 +1,7 @@
 
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN(19546,19579,19545,19580,19543,19544,-70107,-70108,-70109,-70110,-70111) AND `source_type`=0;
+-- GUID by ArkDB
+
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN(19546,19579,19545,19580,19543,19544,-183484,-183485,-183486,-183487,-183488) AND `source_type`=0; -- GUID by ArkDB   
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN(1954600,1954500,1954400,1954300) AND `source_type`=9;
 
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
@@ -36,11 +38,11 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (19543, 0, 5, 0, 40, 0, 100, 0, 5, 19543, 0, 0, 80, 1954300, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Battle-Mage Dathric - On Reached WP5 - Run Script'),
 (19543, 0, 6, 0, 0, 0, 100, 0, 0, 3000, 3000, 8000, 11, 36104, 64, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Battle-Mage Dathric - In Combat - Cast \'Torrent of Flames\''),
 (19543, 0, 7, 0, 0, 0, 100, 0, 0, 2500, 8500, 12000, 11, 17273, 64, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Battle-Mage Dathric - In Combat - Cast \'Pyroblast\''),
-(-70109, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 34212, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invisible Location Trigger - OOC - Cast Blue beam'),
-(-70107, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 34211, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invisible Location Trigger - OOC - Cast Blue beam'),
-(-70110, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 34209, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invisible Location Trigger - OOC - Cast Blue beam'),
-(-70108, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 34212, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invisible Location Trigger - OOC - Cast Blue beam'),
-(-70111, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 34211, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invisible Location Trigger - OOC - Cast Blue beam'),
+(-183486, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 34212, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invisible Location Trigger - OOC - Cast Blue beam'),
+(-183488, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 34211, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invisible Location Trigger - OOC - Cast Blue beam'),
+(-183485, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 34209, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invisible Location Trigger - OOC - Cast Blue beam'),
+(-183487, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 34212, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invisible Location Trigger - OOC - Cast Blue beam'),
+(-183484, 0, 0, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 11, 34211, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Invisible Location Trigger - OOC - Cast Blue beam'),
 (1954600, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 66, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 4.014257, 'Abjurist Belmara - Script - Set Orientation'),
 (1954600, 9, 1, 0, 0, 0, 100, 0, 3000, 3000, 0, 0, 5, 69, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Abjurist Belmara - Script - Play Emote Use_standing'),
 (1954600, 9, 2, 0, 0, 0, 100, 0, 3000, 3000, 0, 0, 5, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Abjurist Belmara - Script - Play Emote none'),
