@@ -131,6 +131,7 @@ struct CreatureTemplate
     uint32  InhabitType;
     float   HoverHeight;
     float   ModHealth;
+    float   ModHealthExtra;
     float   ModMana;
     float   ModManaExtra;                                   // Added in 4.x, this value is usually 2 for a small group of creatures with double mana
     float   ModArmor;
@@ -198,7 +199,7 @@ struct CreatureBaseStats
 
     uint32 GenerateHealth(CreatureTemplate const* info) const
     {
-        return uint32(ceil(BaseHealth[info->expansion] * info->ModHealth));
+        return uint32(ceil(BaseHealth[info->expansion] * info->ModHealth * info->ModHealthExtra));
     }
 
     uint32 GenerateMana(CreatureTemplate const* info) const
