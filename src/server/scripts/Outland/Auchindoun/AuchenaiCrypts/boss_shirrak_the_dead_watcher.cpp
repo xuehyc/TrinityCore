@@ -66,6 +66,16 @@ public:
     {
         boss_shirrak_the_dead_watcherAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            Inhibitmagic_Timer = 0;
+            Attractmagic_Timer = 28000;
+            Carnivorousbite_Timer = 10000;
+            FocusFire_Timer = 17000;
+            FocusedTargetGUID.Clear();
         }
 
         uint32 Inhibitmagic_Timer;
@@ -73,15 +83,11 @@ public:
         uint32 Carnivorousbite_Timer;
         uint32 FocusFire_Timer;
 
-        uint64 FocusedTargetGUID;
+        ObjectGuid FocusedTargetGUID;
 
         void Reset() override
         {
-            Inhibitmagic_Timer = 0;
-            Attractmagic_Timer = 28000;
-            Carnivorousbite_Timer = 10000;
-            FocusFire_Timer = 17000;
-            FocusedTargetGUID = 0;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -178,6 +184,13 @@ public:
     {
         npc_focus_fireAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            FieryBlast_Timer = 3000 + (rand32() % 1000);
+            fiery1 = fiery2 = true;
         }
 
         uint32 FieryBlast_Timer;
@@ -185,8 +198,7 @@ public:
 
         void Reset() override
         {
-            FieryBlast_Timer = 3000 + (rand32() % 1000);
-            fiery1 = fiery2 = true;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override

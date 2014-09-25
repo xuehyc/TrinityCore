@@ -65,14 +65,14 @@ public:
 
         void Initialize()
         {
-            WaterElementalGUID = 0;
+            WaterElementalGUID.Clear();
             HasCastIceblock = false;
         }
 
         void Reset() override
         {
             Initialize();
-
+            events.Reset();
             summons.DespawnAll();
         }
 
@@ -177,7 +177,7 @@ public:
     private:
         EventMap events;
         SummonList summons;
-        uint64 WaterElementalGUID;
+        ObjectGuid WaterElementalGUID;
         bool HasCastIceblock;
     };
 

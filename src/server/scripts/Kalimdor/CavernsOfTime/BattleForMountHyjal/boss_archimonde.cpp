@@ -101,18 +101,18 @@ public:
         void Initialize()
         {
             CheckTimer = 1000;
-            ArchimondeGUID = 0;
+            ArchimondeGUID.Clear();
         }
 
         InstanceScript* instance;
-        uint64 ArchimondeGUID;
+        ObjectGuid ArchimondeGUID;
         uint32 CheckTimer;
 
         void Reset() override
         {
             Initialize();
 
-            ArchimondeGUID = instance->GetData64(DATA_ARCHIMONDE);
+            ArchimondeGUID = instance->GetGuidData(DATA_ARCHIMONDE);
 
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
@@ -191,11 +191,11 @@ public:
 
         void Initialize()
         {
-            TargetGUID = 0;
+            TargetGUID.Clear();
             ChangeTargetTimer = 5000;
         }
 
-        uint64 TargetGUID;
+        ObjectGuid TargetGUID;
         uint32 ChangeTargetTimer;
 
         void Reset() override
@@ -226,7 +226,7 @@ public:
                 if (Unit* temp = ObjectAccessor::GetUnit(*me, TargetGUID))
                 {
                     me->GetMotionMaster()->MoveFollow(temp, 0.0f, 0.0f);
-                    TargetGUID = 0;
+                    TargetGUID.Clear();
                 }
                 else
                 {
@@ -268,9 +268,9 @@ public:
 
         void Initialize()
         {
-            DoomfireSpiritGUID = 0;
+            DoomfireSpiritGUID.Clear();
             damageTaken = 0;
-            WorldTreeGUID = 0;
+            WorldTreeGUID.Clear();
 
             DrainNordrassilTimer = 0;
             FearTimer = 42000;
@@ -294,8 +294,8 @@ public:
 
         InstanceScript* instance;
 
-        uint64 DoomfireSpiritGUID;
-        uint64 WorldTreeGUID;
+        ObjectGuid DoomfireSpiritGUID;
+        ObjectGuid WorldTreeGUID;
 
         uint32 DrainNordrassilTimer;
         uint32 FearTimer;
@@ -433,7 +433,7 @@ public:
                 if (Unit* DoomfireSpirit = ObjectAccessor::GetUnit(*me, DoomfireSpiritGUID))
                 {
                     summoned->GetMotionMaster()->MoveFollow(DoomfireSpirit, 0.0f, 0.0f);
-                    DoomfireSpiritGUID = 0;
+                    DoomfireSpiritGUID.Clear();
                 }
             }
         }

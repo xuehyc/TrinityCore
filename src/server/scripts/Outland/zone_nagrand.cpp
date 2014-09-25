@@ -303,7 +303,7 @@ public:
           {
               corki->GetMotionMaster()->MovePoint(1, go->GetPositionX()+5, go->GetPositionY(), go->GetPositionZ());
               if (player)
-                  player->KilledMonsterCredit(NPC_CORKI_CREDIT_1, 0);
+                  player->KilledMonsterCredit(NPC_CORKI_CREDIT_1);
           }
       }
 
@@ -313,7 +313,7 @@ public:
           {
               corki->GetMotionMaster()->MovePoint(1, go->GetPositionX()-5, go->GetPositionY(), go->GetPositionZ());
               if (player)
-                  player->KilledMonsterCredit(NPC_CORKI_2, 0);
+                  player->KilledMonsterCredit(NPC_CORKI_2);
           }
       }
 
@@ -323,7 +323,7 @@ public:
           {
               corki->GetMotionMaster()->MovePoint(1, go->GetPositionX()+4, go->GetPositionY(), go->GetPositionZ());
               if (player)
-                  player->KilledMonsterCredit(NPC_CORKI_CREDIT_3, 0);
+                  player->KilledMonsterCredit(NPC_CORKI_CREDIT_3);
           }
       }
       return true;
@@ -342,15 +342,23 @@ public:
 
   struct npc_corkiAI : public ScriptedAI
   {
-      npc_corkiAI(Creature* creature) : ScriptedAI(creature) { }
+      npc_corkiAI(Creature* creature) : ScriptedAI(creature)
+      {
+          Initialize();
+      }
+
+      void Initialize()
+      {
+          Say_Timer = 5000;
+          ReleasedFromCage = false;
+      }
 
       uint32 Say_Timer;
       bool ReleasedFromCage;
 
       void Reset() override
       {
-          Say_Timer = 5000;
-          ReleasedFromCage = false;
+          Initialize();
       }
 
       void UpdateAI(uint32 diff) override
@@ -445,7 +453,17 @@ public:
 
     struct npc_kurenai_captiveAI : public npc_escortAI
     {
-        npc_kurenai_captiveAI(Creature* creature) : npc_escortAI(creature) { }
+        npc_kurenai_captiveAI(Creature* creature) : npc_escortAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            ChainLightningTimer = 1000;
+            HealTimer = 0;
+            FrostShockTimer = 6000;
+        }
 
         uint32 ChainLightningTimer;
         uint32 HealTimer;
@@ -453,9 +471,7 @@ public:
 
         void Reset() override
         {
-            ChainLightningTimer = 1000;
-            HealTimer = 0;
-            FrostShockTimer = 6000;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -598,7 +614,7 @@ class go_warmaul_prison : public GameObjectScript
 
             if (Creature* prisoner = go->FindNearestCreature(NPC_MAGHAR_PRISONER, 5.0f))
             {
-                player->KilledMonsterCredit(NPC_MAGHAR_PRISONER, 0);
+                player->KilledMonsterCredit(NPC_MAGHAR_PRISONER);
 
                 prisoner->AI()->Talk(SAY_FREE, player);
                 prisoner->DespawnOrUnsummon(6000);

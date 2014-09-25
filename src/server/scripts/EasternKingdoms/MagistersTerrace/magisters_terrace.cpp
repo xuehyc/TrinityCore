@@ -169,7 +169,7 @@ public:
                 if (Player* player = i->GetSource())
                 {
                     if (spell && spell->Effects[0].MiscValue)
-                        player->KilledMonsterCredit(spell->Effects[0].MiscValue, 0);
+                        player->KilledMonsterCredit(spell->Effects[0].MiscValue);
                 }
             }
         }

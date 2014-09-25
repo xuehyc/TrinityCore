@@ -77,13 +77,6 @@ public:
            }
         }
 
-        uint64 OgreGUID;
-
-        void Reset() override
-        {
-            OgreGUID = 0;
-        }
-
         void UpdateAI(uint32 /*diff*/) override { }
     };
 
@@ -119,13 +112,12 @@ public:
     {
         npc_bloodmaul_bruteAI(Creature* creature) : ScriptedAI(creature)
         {
-            PlayerGUID = 0;
             hp30 = false;
         }
 
         void Reset() override
         {
-            PlayerGUID = 0;
+            PlayerGUID.Clear();
             hp30 = false;
         }
 
@@ -211,7 +203,7 @@ public:
 
         private:
             EventMap events;
-            uint64 PlayerGUID;
+            ObjectGuid PlayerGUID;
             bool hp30;
     };
 
@@ -254,7 +246,21 @@ public:
 
     struct npc_nether_drakeAI : public ScriptedAI
     {
-        npc_nether_drakeAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_nether_drakeAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            IsNihil = false;
+            NihilSpeech_Timer = 3000;
+            NihilSpeech_Phase = 0;
+
+            ArcaneBlast_Timer = 7500;
+            ManaBurn_Timer = 10000;
+            IntangiblePresence_Timer = 15000;
+        }
 
         bool IsNihil;
         uint32 NihilSpeech_Timer;
@@ -266,13 +272,7 @@ public:
 
         void Reset() override
         {
-            IsNihil = false;
-            NihilSpeech_Timer = 3000;
-            NihilSpeech_Phase = 0;
-
-            ArcaneBlast_Timer = 7500;
-            ManaBurn_Timer = 10000;
-            IntangiblePresence_Timer = 15000;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }
@@ -614,14 +614,24 @@ class npc_simon_bunny : public CreatureScript
 
         struct npc_simon_bunnyAI : public ScriptedAI
         {
-            npc_simon_bunnyAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_simon_bunnyAI(Creature* creature) : ScriptedAI(creature)
+            {
+                large = false;
+                listening = false;
+                gameLevel = 0;
+                fails = 0;
+                gameTicks = 0;
+                memset(clusterIds, 0, sizeof(clusterIds));
+                zCoordCorrection = 0.f;
+                searchDistance = 0.f;
+            }
 
             bool large;
             bool listening;
             uint8 gameLevel;
             uint8 fails;
             uint8 gameTicks;
-            uint64 playerGUID;
+            ObjectGuid playerGUID;
             uint32 clusterIds[SIMON_MAX_COLORS];
             float zCoordCorrection;
             float searchDistance;
@@ -731,7 +741,7 @@ class npc_simon_bunny : public CreatureScript
             }
 
             // Used for getting involved player guid. Parameter id is used for defining if is a large(Monument) or small(Relic) node
-            void SetGUID(uint64 guid, int32 id) override
+            void SetGUID(ObjectGuid guid, int32 id) override
             {
                 me->SetCanFly(true);
 
@@ -1135,7 +1145,6 @@ public:
     {
         npc_oscillating_frequency_scanner_master_bunnyAI(Creature* creature) : ScriptedAI(creature)
         {
-            playerGuid = 0;
             timer = 500;
         }
 
@@ -1174,7 +1183,7 @@ public:
         }
 
         private:
-            uint64 playerGuid;
+            ObjectGuid playerGuid;
             uint32 timer;
     };
 

@@ -122,7 +122,7 @@ class boss_mandokir : public CreatureScript
                 me->SummonCreatureGroup(SUMMON_GROUP_CHAINED_SPIRIT);
                 _ohganotSoFast = true;
                 _reanimateOhganCooldown = false;
-                _reviveGUID = 0;
+                _reviveGUID.Clear();
             }
 
             void EnterCombat(Unit* /*who*/) override
@@ -134,7 +134,7 @@ class boss_mandokir : public CreatureScript
 
                 if (!summons.empty())
                 {
-                    for (std::list<uint64>::const_iterator itr = summons.begin(); itr != summons.end(); ++itr)
+                    for (SummonList::const_iterator itr = summons.begin(); itr != summons.end(); ++itr)
                     {
                         if (Creature* chainedSpirit = ObjectAccessor::GetCreature(*me, *itr))
                             if (chainedSpirit->GetEntry() == NPC_CHAINED_SPIRIT && chainedSpirit->AI())
@@ -200,7 +200,7 @@ class boss_mandokir : public CreatureScript
                             {
                                 chainedSpirit->AI()->SetGUID(_reviveGUID);
                                 chainedSpirit->AI()->DoAction(ACTION_REVIVE);
-                                _reviveGUID = 0;
+                                _reviveGUID.Clear();
                             }
                         }
                         break;
@@ -219,7 +219,7 @@ class boss_mandokir : public CreatureScript
                 return 0;
             }
 
-            void SetGUID(uint64 guid, int32 /*type = 0 */) override
+            void SetGUID(ObjectGuid guid, int32 /*type = 0 */) override
             {
                 _reviveGUID = guid;
             }
@@ -284,7 +284,7 @@ class boss_mandokir : public CreatureScript
         private:
             bool _ohganotSoFast;
             bool _reanimateOhganCooldown;
-            uint64 _reviveGUID;
+            ObjectGuid _reviveGUID;
         };
 
         CreatureAI* GetAI(Creature* creature) const override
@@ -313,15 +313,15 @@ class npc_ohgan : public CreatureScript
             void DamageTaken(Unit* /*attacker*/, uint32& damage) override
             {
                 if (damage >= me->GetHealth())
-                {
+                 {
                     damage = 0;
                     me->AttackStop();
                     me->SetHealth(0);
-                    me->SetTarget(0);
+                    me->SetTarget(ObjectGuid::Empty);
                     DoCast(me, SPELL_CLEAR_ALL, true);
                     DoCast(me, SPELL_PERMANENT_FEIGN_DEATH);
 
-                    if (Creature* mandokir = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_MANDOKIR)))
+                    if (Creature* mandokir = ObjectAccessor::GetCreature(*me, _instance->GetGuidData(DATA_MANDOKIR)))
                         mandokir->AI()->DoAction(ACTION_OHGAN_IS_DEATH);
                 }
             }
@@ -369,10 +369,10 @@ class npc_chained_spirit : public CreatureScript
 
             void Reset() override
             {
-                _revivePlayerGUID = 0;
+                _revivePlayerGUID.Clear();
             }
 
-            void SetGUID(uint64 guid, int32 /*type = 0 */) override
+            void SetGUID(ObjectGuid guid, int32 /*type = 0 */) override
             {
                 _revivePlayerGUID = guid;
             }
@@ -410,7 +410,7 @@ class npc_chained_spirit : public CreatureScript
                 if (!target || target->IsAlive())
                     return;
 
-                if (Creature* mandokir = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_MANDOKIR)))
+                if (Creature* mandokir = ObjectAccessor::GetCreature(*me, _instance->GetGuidData(DATA_MANDOKIR)))
                 {
                     mandokir->GetAI()->SetGUID(target->GetGUID());
                     mandokir->GetAI()->DoAction(ACTION_START_REVIVE);
@@ -423,7 +423,7 @@ class npc_chained_spirit : public CreatureScript
 
         private:
             InstanceScript* _instance;
-            uint64 _revivePlayerGUID;
+            ObjectGuid _revivePlayerGUID;
         };
 
         CreatureAI* GetAI(Creature* creature) const override

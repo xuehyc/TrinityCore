@@ -95,8 +95,15 @@ public:
     {
         npc_argent_valiantAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             creature->GetMotionMaster()->MovePoint(0, 8599.258f, 963.951f, 547.553f);
             creature->setFaction(35); //wrong faction in db?
+        }
+
+        void Initialize()
+        {
+            uiChargeTimer = 7000;
+            uiShieldBreakerTimer = 10000;
         }
 
         uint32 uiChargeTimer;
@@ -104,8 +111,7 @@ public:
 
         void Reset() override
         {
-            uiChargeTimer = 7000;
-            uiShieldBreakerTimer = 10000;
+            Initialize();
         }
 
         void MovementInform(uint32 uiType, uint32 /*uiId*/) override
@@ -238,7 +244,7 @@ public:
                 {
                     if (who->HasAura(SPELL_SUBDUED_LITHE_STALKER))
                         {
-                            owner->ToPlayer()->KilledMonsterCredit(NPC_GEIST_RETURN_BUNNY_KC, 0);
+                            owner->ToPlayer()->KilledMonsterCredit(NPC_GEIST_RETURN_BUNNY_KC);
                             who->ToCreature()->DisappearAndDie();
 
                     }
@@ -289,7 +295,13 @@ class npc_tournament_training_dummy : public CreatureScript
         {
             npc_tournament_training_dummyAI(Creature* creature) : ScriptedAI(creature)
             {
+                Initialize();
                 SetCombatMovement(false);
+            }
+
+            void Initialize()
+            {
+                isVulnerable = false;
             }
 
             EventMap events;
@@ -299,7 +311,7 @@ class npc_tournament_training_dummy : public CreatureScript
             {
                 me->SetControlled(true, UNIT_STATE_STUNNED);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-                isVulnerable = false;
+                Initialize();
 
                 // Cast Defend spells to max stack size
                 switch (me->GetEntry())
@@ -509,7 +521,6 @@ public:
         {
             HalofSpawned = false;
             PhaseCount = 0;
-            Summons.DespawnAll();
 
             SetCombatMovement(false);
         }
@@ -522,10 +533,10 @@ public:
 
         SummonList Summons;
 
-        uint64 guidDalfors;
-        uint64 guidPriest[3];
-        uint64 guidMason[3];
-        uint64 guidHalof;
+        ObjectGuid guidDalfors;
+        ObjectGuid guidPriest[3];
+        ObjectGuid guidMason[3];
+        ObjectGuid guidHalof;
 
         void Reset() override
         {
@@ -916,7 +927,7 @@ class npc_margrave_dhakar : public CreatureScript
 
         struct npc_margrave_dhakarAI : public ScriptedAI
         {
-            npc_margrave_dhakarAI(Creature* creature) : ScriptedAI(creature) , _summons(me), _lichKingGuid(0) { }
+            npc_margrave_dhakarAI(Creature* creature) : ScriptedAI(creature) , _summons(me) { }
 
             void Reset() override
             {
@@ -1030,7 +1041,7 @@ class npc_margrave_dhakar : public CreatureScript
         private:
             EventMap _events;
             SummonList _summons;
-            uint64 _lichKingGuid;
+            ObjectGuid _lichKingGuid;
     };
 
     CreatureAI* GetAI(Creature* creature) const override

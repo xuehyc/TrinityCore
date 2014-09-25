@@ -29,7 +29,7 @@
 enum Spells
 {
     SPELL_CURSE_OF_BLOOD        = 24673,
-    SPELL_ILLUSION              = 17773,
+    SPELL_ILLUSION              = 17773
 };
 
 enum Events
@@ -121,7 +121,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const override
     {
-        return new boss_jandicebarovAI(creature);
+        return GetInstanceAI<boss_jandicebarovAI>(creature);
     }
 };
 

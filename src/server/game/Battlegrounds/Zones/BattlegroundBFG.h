@@ -211,7 +211,7 @@ struct BattlegroundBFGScore final : public BattlegroundScore
     friend class BattlegroundBFG;
 
     protected:
-        BattlegroundBFGScore(uint64 playerGuid, uint32 team) : BattlegroundScore(playerGuid, team), BasesAssaulted(0), BasesDefended(0) { }
+        BattlegroundBFGScore(ObjectGuid playerGuid, uint32 team) : BattlegroundScore(playerGuid, team), BasesAssaulted(0), BasesDefended(0) { }
 
         void UpdateScore(uint32 type, uint32 value) override
         {

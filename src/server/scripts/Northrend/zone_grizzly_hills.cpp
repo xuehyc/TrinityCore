@@ -120,7 +120,7 @@ public:
                 case 19:
                     if (Creature* Mrfloppy = ObjectAccessor::GetCreature(*me, _mrfloppyGUID))
                     {
-                        if (Mrfloppy->HasAura(SPELL_MRFLOPPY, 0))
+                        if (Mrfloppy->HasAura(SPELL_MRFLOPPY))
                         {
                             if (Creature* RWORG = ObjectAccessor::GetCreature(*me, _RavenousworgGUID))
                                 Mrfloppy->EnterVehicle(RWORG);
@@ -184,13 +184,13 @@ public:
 
         void Reset() override
         {
-            _mrfloppyGUID     = 0;
-            _RavenousworgGUID = 0;
+            _mrfloppyGUID.Clear();
+            _RavenousworgGUID.Clear();
         }
 
         private:
-            uint64   _RavenousworgGUID;
-            uint64   _mrfloppyGUID;
+            ObjectGuid   _RavenousworgGUID;
+            ObjectGuid   _mrfloppyGUID;
     };
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
@@ -283,12 +283,20 @@ public:
 
     struct npc_outhouse_bunnyAI : public ScriptedAI
     {
-        npc_outhouse_bunnyAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_outhouse_bunnyAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _counter = 0;
+            _gender = 0;
+        }
 
         void Reset() override
         {
-            _counter = 0;
-            _gender  = 0;
+            Initialize();
         }
 
         void SetData(uint32 Type, uint32 Data) override
@@ -345,11 +353,19 @@ public:
 
     struct npc_tallhorn_stagAI : public ScriptedAI
     {
-        npc_tallhorn_stagAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_tallhorn_stagAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _phase = 1;
+        }
 
         void Reset() override
         {
-            _phase = 1;
+            Initialize();
         }
 
         void UpdateAI(uint32 /*diff*/) override
@@ -463,12 +479,19 @@ public:
 
     struct npc_wounded_skirmisherAI : public ScriptedAI
     {
-        npc_wounded_skirmisherAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_wounded_skirmisherAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _despawnTimer = 5000;
+        }
 
         void Reset() override
         {
-            _despawnTimer = 5000;
-            _playerGUID = 0;
+            Initialize();
         }
 
         void MovementInform(uint32, uint32 id) override
@@ -502,7 +525,6 @@ public:
             DoMeleeAttackIfReady();
         }
         private:
-            uint64 _playerGUID;
             uint32 _despawnTimer;
     };
 
@@ -546,7 +568,7 @@ public:
 
         void Reset() override
         {
-            _playerGUID   = 0;
+            _playerGUID.Clear();
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
             me->SetReactState(REACT_AGGRESSIVE);
@@ -608,7 +630,7 @@ public:
 
         private:
             EventMap _events;
-            uint64 _playerGUID;
+            ObjectGuid _playerGUID;
         };
 
         CreatureAI* GetAI(Creature* creature) const override
@@ -657,12 +679,20 @@ public:
 
         struct npc_lake_frogAI : public ScriptedAI
         {
-            npc_lake_frogAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_lake_frogAI(Creature* creature) : ScriptedAI(creature)
+            {
+                Initialize();
+            }
 
-            void Reset() override
+            void Initialize()
             {
                 _following = false;
                 _runningScript = false;
+            }
+
+            void Reset() override
+            {
+                Initialize();
                 if (me->GetEntry() == NPC_LAKE_FROG_QUEST)
                     me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             }

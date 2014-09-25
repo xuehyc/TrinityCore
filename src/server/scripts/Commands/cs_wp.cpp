@@ -214,7 +214,7 @@ public:
         target->LoadPath(pathid);
         target->SetDefaultMovementType(WAYPOINT_MOTION_TYPE);
         target->GetMotionMaster()->Initialize();
-        target->MonsterSay("Path loaded.", LANG_UNIVERSAL, NULL);
+        target->Say("Path loaded.", LANG_UNIVERSAL);
 
         return true;
     }
@@ -275,7 +275,7 @@ public:
         target->SetDefaultMovementType(IDLE_MOTION_TYPE);
         target->GetMotionMaster()->MoveTargetedHome();
         target->GetMotionMaster()->Initialize();
-        target->MonsterSay("Path unloaded.", LANG_UNIVERSAL, NULL);
+        target->Say("Path unloaded.", LANG_UNIVERSAL);
         return true;
     }
 
@@ -631,7 +631,7 @@ public:
             handler->PSendSysMessage("|cff00ff00DEBUG: wp modify del, PathID: |r|cff00ffff%u|r", pathid);
 
             if (wpGuid != 0)
-                if (Creature* wpCreature = handler->GetSession()->GetPlayer()->GetMap()->GetCreature(MAKE_NEW_GUID(wpGuid, VISUAL_WAYPOINT, HIGHGUID_UNIT)))
+                if (Creature* wpCreature = handler->GetSession()->GetPlayer()->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, VISUAL_WAYPOINT, wpGuid)))
                 {
                     wpCreature->CombatStop();
                     wpCreature->DeleteFromDB();
@@ -664,7 +664,7 @@ public:
                 // Respawn the owner of the waypoints
                 if (wpGuid != 0)
                 {
-                    if (Creature* wpCreature = map->GetCreature(MAKE_NEW_GUID(wpGuid, VISUAL_WAYPOINT, HIGHGUID_UNIT)))
+                    if (Creature* wpCreature = map->GetCreature(ObjectGuid(HIGHGUID_UNIT, VISUAL_WAYPOINT, wpGuid)))
                     {
                         wpCreature->CombatStop();
                         wpCreature->DeleteFromDB();
@@ -848,7 +848,7 @@ public:
                 {
                     Field* fields = result2->Fetch();
                     uint32 wpguid = fields[0].GetUInt32();
-                    Creature* creature = handler->GetSession()->GetPlayer()->GetMap()->GetCreature(MAKE_NEW_GUID(wpguid, VISUAL_WAYPOINT, HIGHGUID_UNIT));
+                    Creature* creature = handler->GetSession()->GetPlayer()->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, VISUAL_WAYPOINT, wpguid));
 
                     if (!creature)
                     {
@@ -1053,7 +1053,7 @@ public:
             {
                 Field* fields = result->Fetch();
                 uint32 guid = fields[0].GetUInt32();
-                Creature* creature = handler->GetSession()->GetPlayer()->GetMap()->GetCreature(MAKE_NEW_GUID(guid, VISUAL_WAYPOINT, HIGHGUID_UNIT));
+                Creature* creature = handler->GetSession()->GetPlayer()->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, VISUAL_WAYPOINT, guid));
                 if (!creature)
                 {
                     handler->PSendSysMessage(LANG_WAYPOINT_NOTREMOVED, guid);

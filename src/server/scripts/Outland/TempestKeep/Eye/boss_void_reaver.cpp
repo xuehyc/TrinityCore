@@ -60,7 +60,18 @@ class boss_void_reaver : public CreatureScript
         {
             boss_void_reaverAI(Creature* creature) : ScriptedAI(creature)
             {
+                Initialize();
                 instance = creature->GetInstanceScript();
+            }
+
+            void Initialize()
+            {
+                Pounding_Timer = 15000;
+                ArcaneOrb_Timer = 3000;
+                KnockAway_Timer = 30000;
+                Berserk_Timer = 600000;
+
+                Enraged = false;
             }
 
             InstanceScript* instance;
@@ -74,12 +85,7 @@ class boss_void_reaver : public CreatureScript
 
             void Reset() override
             {
-                Pounding_Timer = 15000;
-                ArcaneOrb_Timer = 3000;
-                KnockAway_Timer = 30000;
-                Berserk_Timer = 600000;
-
-                Enraged = false;
+                Initialize();
 
                 if (me->IsAlive())
                     instance->SetData(DATA_VOIDREAVEREVENT, NOT_STARTED);
@@ -141,7 +147,7 @@ class boss_void_reaver : public CreatureScript
                         target = me->GetVictim();
 
                     if (target)
-                        me->CastSpell(target, SPELL_ARCANE_ORB, false, NULL, NULL, 0);
+                        me->CastSpell(target, SPELL_ARCANE_ORB, false, NULL, NULL);
                     ArcaneOrb_Timer = 3000;
                 }
                 else

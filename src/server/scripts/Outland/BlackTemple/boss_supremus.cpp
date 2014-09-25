@@ -226,7 +226,13 @@ public:
     {
         npc_volcanoAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             SetCombatMovement(false);
+        }
+
+        void Initialize()
+        {
+            wait = 3000;
         }
 
         void Reset() override
@@ -235,7 +241,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             //DoCast(me, SPELL_VOLCANIC_ERUPTION);
             me->SetReactState(REACT_PASSIVE);
-            wait = 3000;
+            Initialize();
         }
         uint32 wait;
 

@@ -36,6 +36,7 @@
 #include <cstring>
 #include <time.h>
 #include <cmath>
+#include <type_traits>
 #include <boost/asio/buffer.hpp>
 
 class MessageBuffer;
@@ -120,6 +121,7 @@ class ByteBuffer
 
         template <typename T> void append(T value)
         {
+            static_assert(std::is_fundamental<T>::value, "append(compound)");
             FlushBits();
             EndianConvert(value);
             append((uint8 *)&value, sizeof(value));
@@ -194,6 +196,7 @@ class ByteBuffer
 
         template <typename T> void put(size_t pos, T value)
         {
+            static_assert(std::is_fundamental<T>::value, "append(compound)");
             EndianConvert(value);
             put(pos, (uint8 *)&value, sizeof(value));
         }

@@ -35,6 +35,11 @@
 #  if !defined(_GLIBCXX_USE_NANOSLEEP)
 #    define _GLIBCXX_USE_NANOSLEEP
 #  endif
+#  if defined(HELGRIND)
+#    include <valgrind/helgrind.h>
+#    define _GLIBCXX_SYNCHRONIZATION_HAPPENS_BEFORE(A) ANNOTATE_HAPPENS_BEFORE(A)
+#    define _GLIBCXX_SYNCHRONIZATION_HAPPENS_AFTER(A)  ANNOTATE_HAPPENS_AFTER(A)
+#  endif
 #endif
 
 #include <cstddef>
@@ -91,6 +96,8 @@
 
 #define SI64FMTD "%" PRId64
 #define SI64LIT(N) INT64_C(N)
+
+#define SZFMTD "%" PRIuPTR
 
 typedef int64_t int64;
 typedef int32_t int32;

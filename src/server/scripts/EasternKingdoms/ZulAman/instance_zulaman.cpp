@@ -34,14 +34,6 @@ class instance_zulaman : public InstanceMapScript
                 SetHeaders(DataHeader);
                 SetBossNumber(EncounterCount);
 
-                AkilzonGUID             = 0;
-                NalorakkGUID            = 0;
-                JanalaiGUID             = 0;
-                HalazziGUID             = 0;
-                HexLordMalacrassGUID    = 0;
-                DaakaraGUID             = 0;
-                VoljinGUID              = 0;
-                HexLordTriggerGUID      = 0;
                 SpeedRunTimer           = 16;
                 ZulAmanState            = NOT_STARTED;
                 ZulAmanBossCount        = 0;
@@ -116,7 +108,7 @@ class instance_zulaman : public InstanceMapScript
                 }
             }
 
-            uint64 GetData64(uint32 type) const override
+            ObjectGuid GetGuidData(uint32 type) const override
             {
                 switch (type)
                 {
@@ -142,7 +134,7 @@ class instance_zulaman : public InstanceMapScript
                         break;
                 }
 
-                return 0;
+                return ObjectGuid::Empty;
             }
 
             void SetData(uint32 type, uint32 data) override
@@ -292,16 +284,16 @@ class instance_zulaman : public InstanceMapScript
 
         protected:
             EventMap events;
-            uint64 AkilzonGUID;
-            uint64 NalorakkGUID;
-            uint64 JanalaiGUID;
-            uint64 HalazziGUID;
-            uint64 HexLordMalacrassGUID;
-            uint64 DaakaraGUID;
-            uint64 VoljinGUID;
-            uint64 HexLordTriggerGUID;
-            uint64 StrangeGongGUID;
-            uint64 MasiveGateGUID;
+            ObjectGuid AkilzonGUID;
+            ObjectGuid NalorakkGUID;
+            ObjectGuid JanalaiGUID;
+            ObjectGuid HalazziGUID;
+            ObjectGuid HexLordMalacrassGUID;
+            ObjectGuid DaakaraGUID;
+            ObjectGuid VoljinGUID;
+            ObjectGuid HexLordTriggerGUID;
+            ObjectGuid StrangeGongGUID;
+            ObjectGuid MasiveGateGUID;
             uint32 SpeedRunTimer;
             uint32 ZulAmanState;
             uint32 ZulAmanBossCount;

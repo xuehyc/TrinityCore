@@ -435,8 +435,8 @@ class AreaTrigger_at_frostgrips_hollow : public AreaTriggerScript
 public:
     AreaTrigger_at_frostgrips_hollow() : AreaTriggerScript("at_frostgrips_hollow")
     {
-        stormforgedMonitorGUID = 0;
-        stormforgedEradictorGUID = 0;
+        stormforgedMonitorGUID.Clear();
+        stormforgedEradictorGUID.Clear();
     }
 
     bool OnTrigger(Player* player, AreaTriggerEntry const* /* trigger */) override
@@ -473,8 +473,8 @@ public:
     }
 
 private:
-    uint64 stormforgedMonitorGUID;
-    uint64 stormforgedEradictorGUID;
+    ObjectGuid stormforgedMonitorGUID;
+    ObjectGuid stormforgedEradictorGUID;
 };
 
 void AddSC_areatrigger_scripts()

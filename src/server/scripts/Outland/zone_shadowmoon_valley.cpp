@@ -28,6 +28,8 @@ SDCategory: Shadowmoon Valley
 EndScriptData */
 
 /* ContentData
+npc_invis_infernal_caster
+npc_infernal_attacker
 npc_mature_netherwing_drake
 npc_enslaved_netherwing_drake
 npc_drake_dealer_hurlunk
@@ -50,6 +52,144 @@ EndContentData */
 #include "SpellScript.h"
 #include "Player.h"
 #include "WorldSession.h"
+
+/*#####
+# npc_invis_infernal_caster
+#####*/
+
+enum InvisInfernalCaster
+{
+    EVENT_CAST_SUMMON_INFERNAL = 1,
+    NPC_INFERNAL_ATTACKER      = 21419,
+    MODEL_INVISIBLE            = 20577,
+    MODEL_INFERNAL             = 17312,
+    SPELL_SUMMON_INFERNAL      = 37277,
+    TYPE_INFERNAL              = 1,
+    DATA_DIED                  = 1
+};
+
+class npc_invis_infernal_caster : public CreatureScript
+{
+public:
+    npc_invis_infernal_caster() : CreatureScript("npc_invis_infernal_caster") { }
+
+    struct npc_invis_infernal_casterAI : public ScriptedAI
+    {
+        npc_invis_infernal_casterAI(Creature* creature) : ScriptedAI(creature)
+        {
+            ground = 0.f;
+        }
+
+        void Reset() override
+        {
+            ground = me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), me->GetPositionZMinusOffset());
+            SummonInfernal();
+            events.ScheduleEvent(EVENT_CAST_SUMMON_INFERNAL, urand(1000, 3000));
+        }
+
+        void SetData(uint32 id, uint32 data) override
+        {
+            if (id == TYPE_INFERNAL && data == DATA_DIED)
+                SummonInfernal();
+        }
+
+        void SummonInfernal()
+        {
+            Creature* infernal = me->SummonCreature(NPC_INFERNAL_ATTACKER, me->GetPositionX(), me->GetPositionY(), ground + 0.05f, 0.0f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000);
+            infernalGUID = infernal->GetGUID();
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_CAST_SUMMON_INFERNAL:
+                {
+                    if (Unit* infernal = ObjectAccessor::GetUnit(*me, infernalGUID))
+                        if (infernal->GetDisplayId() == MODEL_INVISIBLE)
+                            me->CastSpell(infernal, SPELL_SUMMON_INFERNAL, true);
+                    events.ScheduleEvent(EVENT_CAST_SUMMON_INFERNAL, 12000);
+                    break;
+                }
+                default:
+                    break;
+                }
+            }
+        }
+
+    private:
+        EventMap events;
+        ObjectGuid infernalGUID;
+        float ground;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_invis_infernal_casterAI(creature);
+    }
+};
+
+/*#####
+# npc_infernal_attacker
+#####*/
+
+class npc_infernal_attacker : public CreatureScript
+{
+public:
+    npc_infernal_attacker() : CreatureScript("npc_infernal_attacker") { }
+
+    struct npc_infernal_attackerAI : public ScriptedAI
+    {
+        npc_infernal_attackerAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() override
+        {
+            me->SetDisplayId(MODEL_INVISIBLE);
+            me->GetMotionMaster()->MoveRandom(5.0f);
+        }
+
+        void IsSummonedBy(Unit* summoner) override
+        {
+            if (summoner->ToCreature())
+                casterGUID = summoner->ToCreature()->GetGUID();;
+        }
+
+        void JustDied(Unit* /*killer*/) override
+        {
+            if (Creature* caster = ObjectAccessor::GetCreature(*me, casterGUID))
+                caster->AI()->SetData(TYPE_INFERNAL, DATA_DIED);
+        }
+
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) override
+        {
+            if (spell->Id == SPELL_SUMMON_INFERNAL)
+            {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED | UNIT_FLAG_NOT_SELECTABLE);
+                me->SetDisplayId(MODEL_INFERNAL);
+            }
+        }
+
+        void UpdateAI(uint32 /*diff*/) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        ObjectGuid casterGUID;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_infernal_attackerAI(creature);
+    }
+};
 
 /*#####
 # npc_mature_netherwing_drake
@@ -84,7 +224,7 @@ public:
     {
         npc_mature_netherwing_drakeAI(Creature* creature) : ScriptedAI(creature) { }
 
-        uint64 uiPlayerGUID;
+        ObjectGuid uiPlayerGUID;
 
         bool bCanEat;
         bool bIsEating;
@@ -94,7 +234,7 @@ public:
 
         void Reset() override
         {
-            uiPlayerGUID = 0;
+            uiPlayerGUID.Clear();
 
             bCanEat = false;
             bIsEating = false;
@@ -158,7 +298,7 @@ public:
 
                         if (Player* player = ObjectAccessor::GetPlayer(*me, uiPlayerGUID))
                         {
-                            player->KilledMonsterCredit(NPC_EVENT_PINGER, 0);
+                            player->KilledMonsterCredit(NPC_EVENT_PINGER);
 
                             if (GameObject* go = player->FindNearestGameObject(GO_CARCASS, 10))
                                 go->Delete();
@@ -222,12 +362,11 @@ public:
     {
         npc_enslaved_netherwing_drakeAI(Creature* creature) : ScriptedAI(creature)
         {
-            PlayerGUID = 0;
             Tapped = false;
             Reset();
         }
 
-        uint64 PlayerGUID;
+        ObjectGuid PlayerGUID;
         uint32 FlyTimer;
         bool Tapped;
 
@@ -280,7 +419,7 @@ public:
                     if (player)
                         DoCast(player, SPELL_FORCE_OF_NELTHARAKU, true);
 
-                    PlayerGUID = 0;
+                    PlayerGUID.Clear();
                 }
                 me->SetVisible(false);
                 me->SetDisableGravity(false);
@@ -353,13 +492,13 @@ public:
     {
         npc_dragonmaw_peonAI(Creature* creature) : ScriptedAI(creature) { }
 
-        uint64 PlayerGUID;
+        ObjectGuid PlayerGUID;
         bool Tapped;
         uint32 PoisonTimer;
 
         void Reset() override
         {
-            PlayerGUID = 0;
+            PlayerGUID.Clear();
             Tapped = false;
             PoisonTimer = 0;
         }
@@ -404,7 +543,7 @@ public:
                     {
                         Player* player = ObjectAccessor::GetPlayer(*me, PlayerGUID);
                         if (player && player->GetQuestStatus(11020) == QUEST_STATUS_INCOMPLETE)
-                            player->KilledMonsterCredit(23209, 0);
+                            player->KilledMonsterCredit(23209);
                     }
                     PoisonTimer = 0;
                     me->DealDamage(me, me->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -464,7 +603,7 @@ public:
             uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 30658, 1, NULL);
             if (msg == EQUIP_ERR_OK)
             {
-                player->StoreNewItem(dest, 30658, 1, true);
+                player->StoreNewItem(dest, 30658, true);
                 player->PlayerTalkClass->ClearMenus();
             }
         }
@@ -474,7 +613,7 @@ public:
             uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 30659, 1, NULL);
             if (msg == EQUIP_ERR_OK)
             {
-                player->StoreNewItem(dest, 30659, 1, true);
+                player->StoreNewItem(dest, 30659, true);
                 player->PlayerTalkClass->ClearMenus();
             }
         }
@@ -587,8 +726,8 @@ public:
     {
         npc_overlord_morghorAI(Creature* creature) : ScriptedAI(creature) { }
 
-        uint64 PlayerGUID;
-        uint64 IllidanGUID;
+        ObjectGuid PlayerGUID;
+        ObjectGuid IllidanGUID;
 
         uint32 ConversationTimer;
         uint32 Step;
@@ -597,8 +736,8 @@ public:
 
         void Reset() override
         {
-            PlayerGUID = 0;
-            IllidanGUID = 0;
+            PlayerGUID.Clear();
+            IllidanGUID.Clear();
 
             ConversationTimer = 0;
             Step = 0;
@@ -802,7 +941,7 @@ public:
                 case 30:
                     {
                         if (Creature* Yarzill = me->FindNearestCreature(C_YARZILL, 50.0f))
-                            Yarzill->SetTarget(0);
+                            Yarzill->SetTarget(ObjectGuid::Empty);
                         return 5000;
                     }
                     break;
@@ -818,7 +957,7 @@ public:
                     return 5000;
                     break;
                 case 33:
-                    me->SetTarget(0);
+                    me->SetTarget(ObjectGuid::Empty);
                     Reset();
                     return 100;
                     break;
@@ -891,13 +1030,21 @@ public:
 
     struct npc_earthmender_wildaAI : public npc_escortAI
     {
-        npc_earthmender_wildaAI(Creature* creature) : npc_escortAI(creature) { }
+        npc_earthmender_wildaAI(Creature* creature) : npc_escortAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            m_uiHealingTimer = 0;
+        }
 
         uint32 m_uiHealingTimer;
 
         void Reset() override
         {
-            m_uiHealingTimer = 0;
+            Initialize();
         }
 
         void WaypointReached(uint32 waypointId) override
@@ -1127,8 +1274,8 @@ public:
 
         uint8 AnimationCount;
 
-        uint64 LordIllidanGUID;
-        uint64 AggroTargetGUID;
+        ObjectGuid LordIllidanGUID;
+        ObjectGuid AggroTargetGUID;
 
         bool Timers;
 
@@ -1136,13 +1283,13 @@ public:
         {
             AnimationTimer = 4000;
             AnimationCount = 0;
-            LordIllidanGUID = 0;
-            AggroTargetGUID = 0;
+            LordIllidanGUID.Clear();
+            AggroTargetGUID.Clear();
             Timers = false;
 
             me->AddUnitState(UNIT_STATE_ROOT);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->SetTarget(0);
+            me->SetTarget(ObjectGuid::Empty);
         }
 
         void EnterCombat(Unit* /*who*/) override { }
@@ -1276,9 +1423,26 @@ public:
 
     struct npc_lord_illidan_stormrageAI : public ScriptedAI
     {
-        npc_lord_illidan_stormrageAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_lord_illidan_stormrageAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
 
-        uint64 PlayerGUID;
+        void Initialize()
+        {
+            PlayerGUID.Clear();
+
+            WaveTimer = 10000;
+            AnnounceTimer = 7000;
+            LiveCount = 0;
+            WaveCount = 0;
+
+            EventStarted = false;
+            Announced = false;
+            Failed = false;
+        }
+
+        ObjectGuid PlayerGUID;
 
         uint32 WaveTimer;
         uint32 AnnounceTimer;
@@ -1292,16 +1456,7 @@ public:
 
         void Reset() override
         {
-            PlayerGUID = 0;
-
-            WaveTimer = 10000;
-            AnnounceTimer = 7000;
-            LiveCount = 0;
-            WaveCount = 0;
-
-            EventStarted = false;
-            Announced = false;
-            Failed = false;
+            Initialize();
 
             me->SetVisible(false);
         }
@@ -1420,13 +1575,13 @@ public:
     {
         npc_illidari_spawnAI(Creature* creature) : ScriptedAI(creature) { }
 
-        uint64 LordIllidanGUID;
+        ObjectGuid LordIllidanGUID;
         uint32 SpellTimer1, SpellTimer2, SpellTimer3;
         bool Timers;
 
         void Reset() override
         {
-            LordIllidanGUID = 0;
+            LordIllidanGUID.Clear();
             Timers = false;
         }
 
@@ -1731,7 +1886,7 @@ public:
 
                      if (Unit* owner = totemOspirits->GetOwner())
                          if (Player* player = owner->ToPlayer())
-                             player->KilledMonsterCredit(credit, 0);
+                             player->KilledMonsterCredit(credit);
                      DoCast(totemOspirits, SPELL_SOUL_CAPTURED);
                  }
             }
@@ -1831,6 +1986,8 @@ public:
 
 void AddSC_shadowmoon_valley()
 {
+    new npc_invis_infernal_caster();
+    new npc_infernal_attacker();
     new npc_mature_netherwing_drake();
     new npc_enslaved_netherwing_drake();
     new npc_dragonmaw_peon();

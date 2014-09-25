@@ -80,7 +80,7 @@ public:
 
         void Initialize()
         {
-            pCaster = 0;
+            pCaster.Clear();
 
             SayThanksTimer = 0;
             RunAwayTimer = 0;
@@ -89,7 +89,7 @@ public:
             CanSayHelp = true;
         }
 
-        uint64 pCaster;
+        ObjectGuid pCaster;
 
         uint32 SayThanksTimer;
         uint32 RunAwayTimer;
@@ -445,13 +445,13 @@ public:
 
         void Initialize()
         {
-            SparkGUID = 0;
+            SparkGUID.Clear();
             Step = 0;
             EventStarted = false;
             SayTimer = 0;
         }
 
-        uint64 SparkGUID;
+        ObjectGuid SparkGUID;
 
         uint8 Step;
         uint32 SayTimer;
@@ -542,7 +542,7 @@ public:
 
             for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 if ((*itr)->GetQuestStatus(QUEST_TREES_COMPANY) == QUEST_STATUS_INCOMPLETE && (*itr)->HasAura(SPELL_TREE_DISGUISE))
-                    (*itr)->KilledMonsterCredit(NPC_SPARK, 0);
+                    (*itr)->KilledMonsterCredit(NPC_SPARK);
         }
 
         void DespawnNagaFlag(bool despawn)
@@ -701,7 +701,7 @@ class npc_stillpine_capitive : public CreatureScript
 
             void Initialize()
             {
-                _playerGUID = 0;
+                _playerGUID.Clear();
                 _movementComplete = false;
             }
 
@@ -751,7 +751,7 @@ class npc_stillpine_capitive : public CreatureScript
             }
 
         private:
-            uint64 _playerGUID;
+            ObjectGuid _playerGUID;
             EventMap _events;
             bool _movementComplete;
         };

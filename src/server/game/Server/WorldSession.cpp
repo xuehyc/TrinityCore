@@ -132,7 +132,7 @@ WorldSession::WorldSession(uint32 id, uint32 battlenetAccountId, std::shared_ptr
     _RBACData(NULL),
     expireTime(60000), // 1 min after socket loss, session is deleted
     forceExit(false),
-    m_currentBankerGUID(0)
+    m_currentBankerGUID()
 {
     memset(m_Tutorials, 0, sizeof(m_Tutorials));
 
@@ -196,9 +196,11 @@ std::string WorldSession::GetPlayerInfo() const
 {
     std::ostringstream ss;
 
-    ss << "[Player: " << GetPlayerName()
-       << " (Guid: " << (_player != NULL ? _player->GetGUID() : 0)
-       << ", Account: " << GetAccountId() << ")]";
+    ss << "[Player: " << GetPlayerName() << " (";
+    if (_player != NULL)
+        ss << _player->GetGUID().ToString() << ", ";
+
+    ss << "Account: " << GetAccountId() << ")]";
 
     return ss.str();
 }
@@ -272,7 +274,7 @@ void WorldSession::SendPacket(WorldPacket* packet, bool forced /*= false*/)
 
     sScriptMgr->OnPacketSend(this, *packet);
 
-    m_Socket->AsyncWrite(*packet);
+    m_Socket->SendPacket(*packet);
 }
 
 /// Add an incoming packet to the queue
@@ -480,7 +482,7 @@ void WorldSession::LogoutPlayer(bool save)
 
     if (_player)
     {
-        if (uint64 lguid = _player->GetLootGUID())
+        if (ObjectGuid lguid = _player->GetLootGUID())
             DoLootRelease(lguid);
 
         ///- If the player just died before logging out, make him appear as a ghost
@@ -547,7 +549,7 @@ void WorldSession::LogoutPlayer(bool save)
             for (int j = BUYBACK_SLOT_START; j < BUYBACK_SLOT_END; ++j)
             {
                 eslot = j - BUYBACK_SLOT_START;
-                _player->SetUInt64Value(PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + (eslot * 2), 0);
+                _player->SetGuidValue(PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + (eslot * 2), ObjectGuid::Empty);
                 _player->SetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + eslot, 0);
                 _player->SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + eslot, 0);
             }
@@ -660,7 +662,7 @@ void WorldSession::SendNotification(uint32 string_id, ...)
     }
 }
 
-const char *WorldSession::GetTrinityString(int32 entry) const
+char const* WorldSession::GetTrinityString(uint32 entry) const
 {
     return sObjectMgr->GetTrinityString(entry, GetSessionDbLocaleIndex());
 }
@@ -1093,7 +1095,7 @@ void WorldSession::ProcessQueryCallbacks()
     //- SendStabledPet
     if (_sendStabledPetCallback.IsReady())
     {
-        uint64 param = _sendStabledPetCallback.GetParam();
+        ObjectGuid param = _sendStabledPetCallback.GetParam();
         _sendStabledPetCallback.GetResult(result);
         SendStablePetCallback(result, param);
         _sendStabledPetCallback.FreeResult();

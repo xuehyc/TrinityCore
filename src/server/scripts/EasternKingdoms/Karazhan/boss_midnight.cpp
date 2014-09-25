@@ -79,10 +79,10 @@ public:
         void Initialize()
         {
             ResetTimer = 0;
-            Midnight = 0;
+            Midnight.Clear();
         }
 
-        uint64 Midnight;
+        ObjectGuid Midnight;
         uint8 Phase;
         uint32 CleaveTimer;
         uint32 CurseTimer;
@@ -145,11 +145,11 @@ public:
         void Initialize()
         {
             Phase = 1;
-            Attumen = 0;
+            Attumen.Clear();
             Mount_Timer = 0;
         }
 
-        uint64 Attumen;
+        ObjectGuid Attumen;
         uint8 Phase;
         uint32 Mount_Timer;
 
@@ -246,7 +246,7 @@ public:
             Mount_Timer = 1000;
         }
 
-        void SetMidnight(Creature* pAttumen, uint64 value)
+        void SetMidnight(Creature* pAttumen, ObjectGuid value)
         {
             ENSURE_AI(boss_attumen::boss_attumenAI, pAttumen->AI())->Midnight = value;
         }
@@ -266,7 +266,7 @@ void boss_attumen::boss_attumenAI::UpdateAI(uint32 diff)
                 pMidnight->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 pMidnight->SetVisible(true);
             }
-            Midnight = 0;
+            Midnight.Clear();
             me->SetVisible(false);
             me->Kill(me);
         } else ResetTimer -= diff;

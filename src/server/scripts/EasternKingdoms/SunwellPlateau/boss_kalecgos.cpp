@@ -119,7 +119,7 @@ public:
 
         void Initialize()
         {
-            SathGUID = 0;
+            SathGUID.Clear();
             ArcaneBuffetTimer = 8000;
             FrostBreathTimer = 15000;
             WildMagicTimer = 10000;
@@ -152,11 +152,11 @@ public:
         bool isBanished;
         bool bJustReset;
 
-        uint64 SathGUID;
+        ObjectGuid SathGUID;
 
         void Reset() override
         {
-            SathGUID = instance->GetData64(DATA_SATHROVARR);
+            SathGUID = instance->GetGuidData(DATA_SATHROVARR);
             instance->SetBossState(DATA_KALECGOS, NOT_STARTED);
 
             if (Creature* Sath = ObjectAccessor::GetCreature(*me, SathGUID))
@@ -460,7 +460,7 @@ public:
         uint32 YellTimer;
         uint32 YellSequence;
 
-        uint64 SathGUID;
+        ObjectGuid SathGUID;
 
         bool isEnraged; // if demon is enraged
 
@@ -468,7 +468,6 @@ public:
         {
             Initialize();
             instance = creature->GetInstanceScript();
-            SathGUID = 0;
         }
 
         void Initialize()
@@ -483,7 +482,7 @@ public:
 
         void Reset() override
         {
-            SathGUID = instance->GetData64(DATA_SATHROVARR);
+            SathGUID = instance->GetGuidData(DATA_SATHROVARR);
 
             Initialize();
         }
@@ -597,8 +596,6 @@ public:
         {
             Initialize();
             instance = creature->GetInstanceScript();
-            KalecGUID = 0;
-            KalecgosGUID = 0;
         }
 
         void Initialize()
@@ -620,8 +617,8 @@ public:
         uint32 CheckTimer;
         uint32 ResetThreat;
 
-        uint64 KalecGUID;
-        uint64 KalecgosGUID;
+        ObjectGuid KalecGUID;
+        ObjectGuid KalecgosGUID;
 
         bool isEnraged;
         bool isBanished;
@@ -630,13 +627,13 @@ public:
         {
             me->SetFullHealth();//dunno why it does not resets health at evade..
             me->setActive(true);
-            KalecgosGUID = instance->GetData64(DATA_KALECGOS_DRAGON);
+            KalecgosGUID = instance->GetGuidData(DATA_KALECGOS_DRAGON);
             instance->SetBossState(DATA_KALECGOS, NOT_STARTED);
             if (KalecGUID)
             {
                 if (Creature* Kalec = ObjectAccessor::GetCreature(*me, KalecGUID))
                     Kalec->setDeathState(JUST_DIED);
-                KalecGUID = 0;
+                KalecGUID.Clear();
             }
 
             Initialize();
@@ -773,7 +770,7 @@ public:
                     }
                     else
                     {
-                        me->MonsterTextEmote(EMOTE_UNABLE_TO_FIND, NULL);
+                        me->TextEmote(EMOTE_UNABLE_TO_FIND);
                         EnterEvadeMode();
                         return;
                     }

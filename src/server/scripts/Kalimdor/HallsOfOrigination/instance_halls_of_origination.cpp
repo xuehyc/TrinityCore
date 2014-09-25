@@ -58,15 +58,6 @@ class instance_halls_of_origination : public InstanceMapScript
                 SetHeaders(DataHeader);
                 SetBossNumber(EncounterCount);
                 LoadDoorData(doorData);
-                TempleGuardianAnhuurGUID = 0;
-                AnhuursBridgeGUID = 0;
-                AnhuursDoorGUID = 0;
-                AnhuurRightBeaconGUID = 0;
-                AnhuurLeftBeaconGUID = 0;
-                BrannBronzebeardGUID = 0;
-                AnraphetGUID = 0;
-                AnraphetDoorGUID = 0;
-                SunMirrorGUID = 0;
                 _deadElementals = 0;
             }
 
@@ -157,7 +148,7 @@ class instance_halls_of_origination : public InstanceMapScript
                 return 0;
             }
 
-            uint64 GetData64(uint32 index) const override
+            ObjectGuid GetGuidData(uint32 index) const override
             {
                 switch (index)
                 {
@@ -177,7 +168,7 @@ class instance_halls_of_origination : public InstanceMapScript
                         return AnraphetGUID;
                 }
 
-                return 0;
+                return ObjectGuid::Empty;
             }
 
             void IncreaseDeadElementals(uint32 inc)
@@ -227,15 +218,15 @@ class instance_halls_of_origination : public InstanceMapScript
             }
 
         protected:
-            uint64 TempleGuardianAnhuurGUID;
-            uint64 AnhuursBridgeGUID;
-            uint64 AnhuursDoorGUID;
-            uint64 AnhuurRightBeaconGUID;
-            uint64 AnhuurLeftBeaconGUID;
-            uint64 BrannBronzebeardGUID;
-            uint64 AnraphetGUID;
-            uint64 AnraphetDoorGUID;
-            uint64 SunMirrorGUID;
+            ObjectGuid TempleGuardianAnhuurGUID;
+            ObjectGuid AnhuursBridgeGUID;
+            ObjectGuid AnhuursDoorGUID;
+            ObjectGuid AnhuurRightBeaconGUID;
+            ObjectGuid AnhuurLeftBeaconGUID;
+            ObjectGuid BrannBronzebeardGUID;
+            ObjectGuid AnraphetGUID;
+            ObjectGuid AnraphetDoorGUID;
+            ObjectGuid SunMirrorGUID;
             uint32 _deadElementals;
         };
 
