@@ -41,10 +41,6 @@ class instance_ramparts : public InstanceMapScript
             instance_ramparts_InstanceMapScript(Map* map) : InstanceScript(map)
             {
                 spawned = false;
-            }
-
-            void Initialize() override
-            {
                 SetHeaders(DataHeader);
                 SetBossNumber(EncounterCount);
             }

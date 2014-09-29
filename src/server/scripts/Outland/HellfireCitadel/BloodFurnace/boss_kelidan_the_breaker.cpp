@@ -70,6 +70,7 @@ class boss_kelidan_the_breaker : public CreatureScript
             boss_kelidan_the_breakerAI(Creature* creature) : BossAI(creature, DATA_KELIDAN_THE_BREAKER)
             {
                 Initialize();
+                Firenova_Timer = 0;
             }
 
             void Initialize()

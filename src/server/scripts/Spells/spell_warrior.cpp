@@ -838,16 +838,17 @@ class spell_warr_sweeping_strikes : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warr_sweeping_strikes_AuraScript);
 
+        public:
+            spell_warr_sweeping_strikes_AuraScript()
+            {
+                _procTarget = nullptr;
+            }
+
+        private:
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_1) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_2))
                     return false;
-                return true;
-            }
-
-            bool Load() override
-            {
-                _procTarget = NULL;
                 return true;
             }
 
@@ -902,6 +903,7 @@ class spell_warr_sword_and_board : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warr_sword_and_board_AuraScript);
 
+        private:
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SHIELD_SLAM))

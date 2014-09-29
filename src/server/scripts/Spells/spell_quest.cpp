@@ -2103,6 +2103,11 @@ class spell_q12641_death_comes_from_on_high : public SpellScriptLoader
 };
 
 // 52694 - Recall Eye of Acherus
+enum Recall_Eye_of_Acherus
+{
+    THE_EYE_OF_ACHERUS = 51852
+};
+
 class spell_q12641_recall_eye_of_acherus : public SpellScriptLoader
 {
     public:
@@ -2118,6 +2123,7 @@ class spell_q12641_recall_eye_of_acherus : public SpellScriptLoader
                 {
                     player->StopCastingCharm();
                     player->StopCastingBindSight();
+                    player->RemoveAura(THE_EYE_OF_ACHERUS);
                 }
             }
 
@@ -2396,6 +2402,52 @@ class spell_q10929_fumping : SpellScriptLoader
     }
 };
 
+enum FearNoEvil
+{
+    SPELL_RENEWED_LIFE = 93097,
+    NPC_INJURED_STORMWIND_INFANTRY = 50047
+};
+
+// 93072 - Get Our Boys Back Dummy
+class spell_q28813_get_our_boys_back_dummy : public SpellScriptLoader
+{
+public:
+    spell_q28813_get_our_boys_back_dummy() : SpellScriptLoader("spell_q28813_get_our_boys_back_dummy") { }
+
+    class spell_q28813_get_our_boys_back_dummy_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q28813_get_our_boys_back_dummy_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_RENEWED_LIFE))
+                return false;
+            return true;
+        }
+
+        void HandleDummyEffect()
+        {
+            Unit* caster = GetCaster();
+            
+            if (Creature* injuredStormwindInfantry = caster->FindNearestCreature(NPC_INJURED_STORMWIND_INFANTRY, 5.0f, true))
+            {
+                injuredStormwindInfantry->SetCreatorGUID(caster->GetGUID());
+                injuredStormwindInfantry->CastSpell(injuredStormwindInfantry, SPELL_RENEWED_LIFE, true);
+            }
+        }
+
+        void Register() override
+        {
+            OnCast += SpellCastFn(spell_q28813_get_our_boys_back_dummy_SpellScript::HandleDummyEffect);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_q28813_get_our_boys_back_dummy_SpellScript();
+    }
+};
+
 void AddSC_quest_spell_scripts()
 {
     new spell_q55_sacred_cleansing();
@@ -2454,4 +2506,5 @@ void AddSC_quest_spell_scripts()
     new spell_q13400_illidan_kill_master();
     new spell_q14100_q14111_make_player_destroy_totems();
     new spell_q10929_fumping();
+    new spell_q28813_get_our_boys_back_dummy();
 }

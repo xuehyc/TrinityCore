@@ -122,7 +122,6 @@ class ByteBuffer
         template <typename T> void append(T value)
         {
             static_assert(std::is_fundamental<T>::value, "append(compound)");
-            FlushBits();
             EndianConvert(value);
             append((uint8 *)&value, sizeof(value));
         }
@@ -132,9 +131,10 @@ class ByteBuffer
             if (_bitpos == 8)
                 return;
 
+            _bitpos = 8;
+
             append((uint8 *)&_curbitval, sizeof(uint8));
             _curbitval = 0;
-            _bitpos = 8;
         }
 
         bool WriteBit(uint32 bit)
@@ -586,6 +586,8 @@ class ByteBuffer
                 throw ByteBufferSourceException(_wpos, size(), cnt);
 
             ASSERT(size() < 10000000);
+
+            FlushBits();
 
             if (_storage.size() < _wpos + cnt)
                 _storage.resize(_wpos + cnt);
