@@ -1144,11 +1144,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     if (Creature* creature = m_caster->FindNearestCreature(34967, 2.0f))
                     {
                         if (creature->HasAura(66544))
-                            m_caster->ToPlayer()->KilledMonsterCredit(34962, 0);
+                            m_caster->ToPlayer()->KilledMonsterCredit(34962);
                         else if (creature->HasAura(66601))
-                            m_caster->ToPlayer()->KilledMonsterCredit(34963, 0);
+                            m_caster->ToPlayer()->KilledMonsterCredit(34963);
                         else if (creature->HasAura(66602))
-                            m_caster->ToPlayer()->KilledMonsterCredit(34964, 0);
+                            m_caster->ToPlayer()->KilledMonsterCredit(34964);
                     }
                     break;
                 case 82174: // Guantes de ingeniería 500
@@ -1643,7 +1643,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     }
                     unitTarget->CastSpell(unitTarget, 42345, true);
                     unitTarget->CastSpell(unitTarget, 42726, true);
-                    m_caster->ToPlayer()->KilledMonsterCredit(KillCredit, NULL);
+                    m_caster->ToPlayer()->KilledMonsterCredit(KillCredit);
                 }
                 case 93072:                                 // Get Our Boys Back
                 {

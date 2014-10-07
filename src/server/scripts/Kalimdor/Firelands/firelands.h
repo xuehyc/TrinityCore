@@ -24,6 +24,9 @@
 #define DataHeader "FL"
 #define FirelandsScriptName "instance_firelands"
 
+uint32 const EncounterCount = 7;
+
+
 enum Datas
 {
     DATA_BETHILAC               = 1,
@@ -33,6 +36,7 @@ enum Datas
     DATA_BALOROC                = 5,
     DATA_MAJORDOMUS_STANGEHELM  = 6,
     DATA_RAGNAROS               = 7,
+    MAX_ENCOUNTERS              = 8,
 };
 
 enum GameObjectIds

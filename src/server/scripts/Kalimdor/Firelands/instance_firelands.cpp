@@ -17,6 +17,7 @@
 
 #include "firelands.h"
 
+
 DoorData const doorData[] =
 {
     {GO_RAGNAROS_DOOR,                  DATA_RAGNAROS,                  DOOR_TYPE_ROOM,         BOUNDARY_N      },
@@ -49,7 +50,7 @@ public:
 
         void OnCreatureCreate(Creature* creature)
         {
-            switch (creature->GetEntry())
+            if (creature->GetEntry() > 0)
             {
                 SetHeaders(DataHeader);
                 SetBossNumber(EncounterCount);
@@ -58,14 +59,8 @@ public:
 
         void OnGameObjectRemove(GameObject* go)
         {
-            switch (go->GetEntry())
-            {
-                case GO_RAGNAROS_DOOR:
-                    AddDoor(go, false);
-                    break;
-                default:
-                    break;
-            }
+            if (go->GetEntry() == GO_RAGNAROS_DOOR)
+                AddDoor(go, false);
         }
 
         bool SetBossState(uint32 data, EncounterState state)
@@ -78,13 +73,9 @@ public:
 
         uint64 GetData64(uint32 data) const
         {
-            switch (data)
-            {
-                case DATA_RAGNAROS:
-                    return _ragnarosGUID;
-                default:
-                    break;
-            }
+            if (data == DATA_RAGNAROS)
+                return _ragnarosGUID;
+           
             return 0;
         }
 

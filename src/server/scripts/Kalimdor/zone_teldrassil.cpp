@@ -179,7 +179,7 @@ class npc_shadow_sprite : public CreatureScript
 						}
 						case 2:
 						{ 							
-							if (player) player->KilledMonsterCredit(NPC_FELL_ROCK_GRELLKIN_KILL_CREDIT, NULL);		
+							if (player) player->KilledMonsterCredit(NPC_FELL_ROCK_GRELLKIN_KILL_CREDIT);		
 							me->DespawnOrUnsummon ();
 							timer=0; phase=0;
 							break;

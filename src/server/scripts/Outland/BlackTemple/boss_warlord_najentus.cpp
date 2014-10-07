@@ -215,4 +215,4 @@ void AddSC_boss_najentus()
     new boss_najentus();
     new go_najentus_spine();
 }
->>>>>>> b48ba56efd53e0430ec5d69a70fb1d141d7029c1
+// >>>>>>> b48ba56efd53e0430ec5d69a70fb1d141d7029c1

@@ -132,7 +132,7 @@ class npc_dead_employee : public CreatureScript
 						}
 					case 2:
 						{ 			
-							_player->KilledMonsterCredit(NPC_DEAD_EMPLOYEE, NULL);	
+							_player->KilledMonsterCredit(NPC_DEAD_EMPLOYEE);	
 							DoCast(me, SPELL_TOW_HOOK); // ToDo: no working animation
 							_timer=3000; _phase=3;
 							break;
@@ -177,7 +177,7 @@ class npc_highperch_prideling : public CreatureScript
 			{	
 				player->CastSpell(creature,SPELL_SUMMON_HIGHPERCH_PRIDELING_FREE);
 				creature->DespawnOrUnsummon();
-				player->KilledMonsterCredit(NPC_HIGHPERCH_PRIDELING_IN_CAGE, NULL);	
+				player->KilledMonsterCredit(NPC_HIGHPERCH_PRIDELING_IN_CAGE);	
 			}
 			return true;
 		}
@@ -203,7 +203,7 @@ class npc_twilight_subduer : public CreatureScript
 				{
 					if (!me->FindNearestCreature (NPC_TWILIGHT_SUBDUER,50.0, true))
 					{
-						player->KilledMonsterCredit(NPC_HEARTRAZOR, NULL);						 
+						player->KilledMonsterCredit(NPC_HEARTRAZOR);						 
 					}				
 				}						
 			} 
@@ -276,7 +276,7 @@ class npc_heartrazor_2b : public CreatureScript
 			if (player->GetQuestStatus(QUEST_THE_TWILIGHT_SKYMASTER) == QUEST_STATUS_INCOMPLETE)				
 			{			
 				// ToDo: the monsterkill should first be givig after riding the mount
-				player->KilledMonsterCredit(NPC_HEARTRAZOR_1B, NULL);										
+				player->KilledMonsterCredit(NPC_HEARTRAZOR_1B);										
 			}
 			return true;
 		}		

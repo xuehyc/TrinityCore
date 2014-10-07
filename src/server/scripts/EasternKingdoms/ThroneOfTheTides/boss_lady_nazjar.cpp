@@ -129,7 +129,7 @@ public:
 
             for (std::list<uint64>::const_iterator itr = SummonList.begin(); itr != SummonList.end(); ++itr)
             {
-                if (Creature* temp = ObjectAccessor::GetCreature(*me, *itr))
+                if (Creature* temp = ObjectAccessor::GetCreature(*me, ObjectGuid(*itr)))
                     if (temp)
                         temp->DisappearAndDie();
             }

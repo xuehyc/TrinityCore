@@ -234,7 +234,7 @@ public:
              return false;
          }
 
-         if (handler->HasLowerSecurity(target, 0))
+         if (handler->HasLowerSecurity(target, ObjectGuid::Empty))
              return false;
 
          handler->PSendSysMessage(LANG_YOU_CHANGE_FOCUS, handler->GetNameLink(target).c_str(), focus/10, focusm/10);

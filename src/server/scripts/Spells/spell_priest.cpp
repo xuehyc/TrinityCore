@@ -1423,7 +1423,7 @@ class spell_pri_flash_heal : public SpellScriptLoader
 				if (target->GetEntry() == 44405) DoHeal=true; // priest dwarf
 
 				if (DoHeal) 
-					caster->ToPlayer()->KilledMonsterCredit(44175, 0);	
+					caster->ToPlayer()->KilledMonsterCredit(44175);	
             }
 
 			void Register() override

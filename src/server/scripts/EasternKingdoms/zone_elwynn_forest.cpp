@@ -406,7 +406,7 @@ public:
         if (IsHealingQuestActiv(player))
         {  			
 			creature->CastSpell(creature, SPELL_RENEWEDLIFE, false);
-			player->KilledMonsterCredit(creature->GetEntry(), NULL);
+			player->KilledMonsterCredit(creature->GetEntry());
         }
         return true;
     }

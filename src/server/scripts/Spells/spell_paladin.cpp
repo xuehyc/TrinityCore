@@ -1319,7 +1319,7 @@ public:
             if (!consecrationNpcGUID)
                return;
 
-            Unit* consecrationNpc = ObjectAccessor::GetCreature(*GetCaster(),consecrationNpcGUID);
+            Unit* consecrationNpc = ObjectAccessor::GetCreature(*GetCaster(),ObjectGuid(consecrationNpcGUID));
 
             if (!consecrationNpc)
                 return;
@@ -1691,7 +1691,7 @@ class spell_pal_seal_of_righteousness : public SpellScriptLoader
 					{
 						if (player->GetQuestStatus(QUEST_PALADIN_THE_POWER_OF_THE_LIGHT) == QUEST_STATUS_INCOMPLETE)
 						{  
-							player->KilledMonsterCredit(SPELL_LEARN_JUDGEMENT_CREDIT, NULL);	
+							player->KilledMonsterCredit(SPELL_LEARN_JUDGEMENT_CREDIT);	
 						}
 					}					
 				}				

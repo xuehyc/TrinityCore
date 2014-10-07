@@ -7,11 +7,6 @@
 #include "ScriptMgr.h"
 #include "the_stonecore.h"
 
-#define SAY_AGGRO "For my death, countless more will fall. The burden is now yours to bear."
-#define SAY_P2 "Witness the power bestowed upon me by Deathwing! Feel the fury of earth!"
-#define SAY_EARTH "The world will be reborn in flames!"
-#define SAY_KILL "A sacrifice for you, master."
-
 enum Spells
 {
     // Phase 1
@@ -50,6 +45,16 @@ enum Phases
 /*********************
 ** High Priestess Azil
 *********************/
+
+enum eNpc42333
+{
+    SAY_AGGRO = 0,//  "For my death, countless more will fall. The burden is now yours to bear."
+    SAY_P2 = 1, // "Witness the power bestowed upon me by Deathwing! Feel the fury of earth!"
+    SAY_EARTH = 2, // "The world will be reborn in flames!"
+    SAY_KILL = 3, // "A sacrifice for you, master."
+    // some missing
+};
+
 class boss_azil : public CreatureScript
 {
 public:
@@ -117,7 +122,7 @@ public:
 
             for (std::list<uint64>::const_iterator itr = SummonList.begin(); itr != SummonList.end(); ++itr)
             {
-                if (Creature* pTemp = ObjectAccessor::GetCreature(*me, *itr))
+                if (Creature* pTemp = ObjectAccessor::GetCreature(*me, ObjectGuid(*itr)))
                     if (pTemp)
                         pTemp->DisappearAndDie();
             }
@@ -138,7 +143,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            me->MonsterYell(SAY_AGGRO, LANG_UNIVERSAL, NULL);
+            Talk(SAY_AGGRO);
         }
 
         void JustDied(Unit* /*pKiller*/)
@@ -148,7 +153,7 @@ public:
 		
         void KilledUnit(Unit * /*victim*/)
         {
-            me->MonsterYell(SAY_KILL, LANG_UNIVERSAL, NULL);
+            Talk(SAY_KILL);
         }
 
         void UpdateAI(uint32 diff)
@@ -172,7 +177,7 @@ public:
 
             if (me->HealthBelowPct(67) && Phase == PHASE_NORMAL && PhaseCount == 0)
             {
-                me->MonsterYell(SAY_P2, LANG_UNIVERSAL, NULL);
+                Talk(SAY_P2);
 
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                 PhaseCount++;
@@ -196,7 +201,7 @@ public:
             if (me->HealthBelowPct(34) && Phase == PHASE_NORMAL && PhaseCount == 1)
             {
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
-                me->MonsterYell(SAY_P2, LANG_UNIVERSAL, NULL);
+                Talk(SAY_P2);
 
                 PhaseCount++;
                 SetCombatMovement(false);
@@ -232,7 +237,7 @@ public:
 
             if (SummonGravityWellTimer <= diff && Phase == PHASE_NORMAL)
             {
-                me->MonsterYell(SAY_EARTH, LANG_UNIVERSAL, NULL);
+                Talk(SAY_EARTH);
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true))
                     DoCast(target, SPELL_SUMMON_GRAVITY_WELL);
                 SummonGravityWellTimer = urand(13000,16000);

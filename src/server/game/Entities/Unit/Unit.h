@@ -2266,7 +2266,7 @@ class Unit : public WorldObject
         ThreatManager m_ThreatManager;
 
         Vehicle* m_vehicle;
-        // Vehicle* m_vehicleKit;
+        Vehicle* m_vehicleKit;
 
         uint32 m_unitTypeMask;
         LiquidTypeEntry const* _lastLiquid;

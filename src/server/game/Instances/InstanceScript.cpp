@@ -406,6 +406,14 @@ void InstanceScript::HandleGameObject(ObjectGuid guid, bool open, GameObject* go
         TC_LOG_DEBUG("scripts", "InstanceScript: HandleGameObject failed");
 }
 
+std::string InstanceScript::GetBossSaveData()
+{
+    std::ostringstream saveStream;
+    for (std::vector<BossInfo>::iterator i = bosses.begin(); i != bosses.end(); ++i)
+        saveStream << (uint32)i->state << ' ';
+    return saveStream.str();
+}
+
 void InstanceScript::DoUseDoorOrButton(ObjectGuid guid, uint32 withRestoreTime /*= 0*/, bool useAlternativeState /*= false*/)
 {
     if (!guid)

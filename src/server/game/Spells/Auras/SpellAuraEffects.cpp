@@ -5114,7 +5114,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             {
                 if (apply)
                 {
-                    if (uint64 guid = caster->m_SummonSlot[4])
+                    if (ObjectGuid guid = caster->m_SummonSlot[4])
                     {
                         if (Creature* totem = caster->GetMap()->GetCreature(guid))
                             if (totem->IsTotem())

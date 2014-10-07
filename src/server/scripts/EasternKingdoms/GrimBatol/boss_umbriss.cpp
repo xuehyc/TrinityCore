@@ -10,21 +10,6 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 
-#define SAY_AGGRO "Millions more await my orders. What chance do you have?"
-#define SAY_DIED "Finally, this nightmare is over ..."
-
-enum Texts
-{
-    SAY_BOMBING_1,
-    SAY_BOMBING_2,
-    SAY_SUMMON,
-    SAY_KILL_1,
-    SAY_KILL_2,
-    EMOTE_BLITZ,
-    EMOTE_GROUND_SIEGE,
-    EMOTE_FRENZY
-};
-
 enum Creatures
 {
     NPC_UMBRISS         = 39625,
@@ -57,6 +42,20 @@ static Locations SpawnPosition[]=
 {
     {-722.15f, -442.53f, 268.77f, 0.54f},
     {-702.22f, -450.9f, 268.77f, 1.34f}
+};
+
+enum eNpc39625
+{
+    SAY_AGGRO = 0, // "Millions more await my orders. What chance do you have?"
+    SAY_DIED = 8, // "Finally, this nightmare is over ..."
+    SAY_BOMBING_1=0,
+    SAY_BOMBING_2,
+    SAY_SUMMON,
+    SAY_KILL_1,
+    SAY_KILL_2,
+    EMOTE_BLITZ,
+    EMOTE_GROUND_SIEGE,
+    EMOTE_FRENZY
 };
 
 class boss_general_umbriss : public CreatureScript
@@ -99,12 +98,12 @@ class boss_general_umbriss : public CreatureScript
             void EnterCombat(Unit* pWho)
             {
 				if (instance)
-                me->MonsterYell(SAY_AGGRO, 0, 0);
+                Talk(SAY_AGGRO);
             }
 
             void JustDied(Unit* pKiller)
             {
-				me->MonsterYell(SAY_DIED, 0, 0);
+				Talk(SAY_DIED);
                 if (instance)
                 {
                     instance->SetData(DATA_GENERAL_UMBRISS_EVENT, DONE);

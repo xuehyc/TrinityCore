@@ -1685,7 +1685,7 @@ public:
             Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
             me->VisitNearbyObject(30, searcher);
             for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
-                if ((*iter)->GetAura(49206, ownerGuid))
+                if ((*iter)->GetAura(49206, ObjectGuid(ownerGuid)))
                 {
                     me->Attack((*iter), false);
                     break;

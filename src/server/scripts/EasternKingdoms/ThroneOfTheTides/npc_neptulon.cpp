@@ -20,12 +20,6 @@
 
 #define GOSSIP_READY "We are ready!"
 
-#define SAY_1 "As I purify these waters, the servants of filth will surely be stirred. Beware!"
-#define SAY_2 "Patience guests. The waters are nearly cleansed."
-#define SAY_3 "The beast has returned! It must not pollute my waters!"
-#define SAY_DEATH "Your kind... cannot be... trusted..."
-#define SAY_CLEANSED "My waters are cleansed! Drink in their power!"
-
 Creature* Ozumat;
 Creature* Neptulon;
 
@@ -46,7 +40,16 @@ const Position spawns[] =
     {-118.400780f, 1014.799866f, 230.195724f, 4.366778f},
 };
 
-class npc_neptulon : public CreatureScript
+enum eNpc40792
+{
+    SAY_1 = 1, // "As I purify these waters, the servants of filth will surely be stirred. Beware!"
+    SAY_2 = 3, // "Patience guests. The waters are nearly cleansed."
+    SAY_3 = 4, //"The beast has returned! It must not pollute my waters!"
+    SAY_CLEANSED = 5, // "My waters are cleansed! Drink in their power!"
+    SAY_DEATH = 6, // "Your kind... cannot be... trusted..."
+};
+
+class npc_neptulon : public CreatureScript 
 {
 public:
     npc_neptulon() : CreatureScript("npc_neptulon") { }
@@ -109,18 +112,19 @@ public:
 
         void DespawnSummons()
         {
-            for(std::list<uint64>::iterator itr = sumMurlocs.begin(); itr != sumMurlocs.end(); ++itr)
-                if(Creature* creature = ObjectAccessor::GetCreature(*me, (*itr)))
+            for (std::list <uint64>::iterator itr = sumMurlocs.begin(); itr != sumMurlocs.end(); ++itr)
+                if(Creature* creature = ObjectAccessor::GetCreature(*me, ObjectGuid(*itr)))
                     creature->DisappearAndDie();
 
             for(std::list<uint64>::iterator itr = sumMindlasher.begin(); itr != sumMindlasher.end(); ++itr)
-                if(Creature* creature = ObjectAccessor::GetCreature(*me, (*itr)))
+                if (Creature* creature = ObjectAccessor::GetCreature(*me, ObjectGuid(*itr)))
                     creature->DisappearAndDie();
 
             for(std::list<uint64>::iterator itr = sumSapper.begin(); itr != sumSapper.end(); ++itr)
-                if(Creature* creature = ObjectAccessor::GetCreature(*me, (*itr)))
+                if (Creature* creature = ObjectAccessor::GetCreature(*me, ObjectGuid(*itr)))
                     creature->DisappearAndDie();
 
+            
             Ozumat->DisappearAndDie();
         }
 
@@ -151,7 +155,7 @@ public:
         void JustDied(Unit* killer)
         {
             if (killer)
-                me->MonsterSay(SAY_DEATH,LANG_UNIVERSAL, NULL);
+               // me->MonsterSay(SAY_DEATH,LANG_UNIVERSAL, NULL);
             DespawnSummons();
         }
 
@@ -184,7 +188,7 @@ public:
             {
                 me->SetOrientation(0.166467f);
                 phase = PHASE_FILTHY_INVADERS_2;
-                me->MonsterSay(SAY_1, LANG_UNIVERSAL, NULL);
+                //me->MonsterSay(SAY_1, LANG_UNIVERSAL, NULL);
             }
 
             if (summonMurlocTimer <= diff)
@@ -207,7 +211,7 @@ public:
 
                 if (sumMindlasher.size() >= 3 && !slasherphased)
                 {
-                    me->MonsterYell(SAY_2, LANG_UNIVERSAL, NULL);
+                    Talk(SAY_2);
                     phase = PHASE_NULL;
                     slasherphased = true;
                 }
@@ -233,7 +237,7 @@ public:
             if (phase2_timer <= diff && phase != PHASE_BEAST_RETURN)
             {
                 phase = PHASE_BEAST_RETURN;
-                me->MonsterYell(SAY_3, LANG_UNIVERSAL, NULL);
+                Talk(SAY_3);
             } else phase2_timer -= diff;
 
             if (phase == PHASE_BEAST_RETURN)
@@ -256,7 +260,7 @@ public:
                     Ozumat->setFaction(14);
                     if (instance)
                         instance->DoCastSpellOnPlayers(76133);
-                    me->MonsterYell(SAY_CLEANSED,LANG_UNIVERSAL, NULL);
+                    Talk(SAY_CLEANSED);
                     flagged = true;
                 }
             }

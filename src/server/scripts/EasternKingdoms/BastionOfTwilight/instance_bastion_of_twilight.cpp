@@ -37,12 +37,12 @@ class instance_bastion_of_twilight : public InstanceMapScript
         private:
             uint8  EmeraldWhelpFlag;
             uint64 Encounter[MAX_ENCOUNTER];
-            uint64 HalfusGUID;
-            uint64 EmeraldWhelp[5];
-            uint64 StormRiderGUID;
-            uint64 TimeWardenGUID;
-            uint64 SlateDragonGUID;
-            uint64 NetherScionGUID;
+            ObjectGuid HalfusGUID;
+            ObjectGuid EmeraldWhelp[5];
+            ObjectGuid StormRiderGUID;
+            ObjectGuid TimeWardenGUID;
+            ObjectGuid SlateDragonGUID;
+            ObjectGuid NetherScionGUID;
             uint32 StormRiderEvent;
             uint32 TimeWardenEvent;
             uint32 SlateDragonEvent;
@@ -54,18 +54,18 @@ class instance_bastion_of_twilight : public InstanceMapScript
                 memset(&Encounter, 0, sizeof(Encounter));
                 memset(&EmeraldWhelp, 0, sizeof(EmeraldWhelp));
                 EmeraldWhelpFlag = 0;
-                HalfusGUID = 0;
-                StormRiderGUID = 0;
-                TimeWardenGUID = 0;
-                SlateDragonGUID = 0;
-                NetherScionGUID = 0;
+                HalfusGUID = ObjectGuid::Empty;
+                StormRiderGUID = ObjectGuid::Empty;
+                TimeWardenGUID = ObjectGuid::Empty;
+                SlateDragonGUID = ObjectGuid::Empty;
+                NetherScionGUID = ObjectGuid::Empty;
                 TimeWardenEvent = 0;
                 StormRiderEvent = 1;
                 SlateDragonEvent = 1;
                 NetherScionEvent = 1;
                 EmeraldWhelpEvent = 0;
                 for (int i = 0; i < 5; ++i)
-                    EmeraldWhelp[i] = 0;
+                    EmeraldWhelp[i] = ObjectGuid::Empty;
             }
 
             bool IsEncounterInProgress() const
@@ -121,15 +121,6 @@ class instance_bastion_of_twilight : public InstanceMapScript
             }
 
             void OnGameObjectCreate(GameObject* go) {}
-
-            uint64 GetData64(uint32 type) const
-            {
-                switch (type)
-                {
-                    case DATA_HALFUS: return HalfusGUID;
-                }
-                return 0;
-            }
 
             uint32 GetData(uint32 type) const
             {

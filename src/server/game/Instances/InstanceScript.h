@@ -276,6 +276,7 @@ class InstanceScript : public ZoneScript
         void WriteSaveDataBossStates(std::ostringstream& data);
         virtual void WriteSaveDataMore(std::ostringstream& /*data*/) { }
 
+        std::string GetBossSaveData();
     private:
         static void LoadObjectData(ObjectData const* creatureData, ObjectInfoMap& objectInfo);
 

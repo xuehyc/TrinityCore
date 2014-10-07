@@ -7,11 +7,6 @@
 #include "ScriptMgr.h"
 #include "the_stonecore.h"
 
-#define SAY_AGGRO          "None may pass into the World's Heart!"
-#define SAY_DEATH          "A protector has fallen. The World's Heart lies exposed!"
-#define SAY_ELEMENTIUM     "Break yourselves upon my body. Feel the strength of the earth"
-#define SAY_ENRAGE         "The cycle is complete."
-
 #define SPELL_ELEMENTIUM_BULWARK          92659  //Spell who reflect magic skills
 #define SPELL_ENRAGE                      80467
 #define SPELL_FROST_FEVER                 55095 
@@ -19,6 +14,15 @@
 #define SPELL_PARALYZE                    92426
 #define SPELL_SHATTER                     92662
 #define SPELL_SLOW                        31589
+
+enum eNpc42188
+{
+    SAY_AGGRO = 0,  //      "None may pass into the World's Heart!"
+    SAY_DEATH = 1,  //      "A protector has fallen. The World's Heart lies exposed!"
+    SAY_ELEMENTIUM = 2, //  "Break yourselves upon my body. Feel the strength of the earth"
+    SAY_ENRAGE = 3, //      "The cycle is complete."
+
+};
 
 class boss_ozruk : public CreatureScript
 {
@@ -52,12 +56,12 @@ public:
 		
 		 void EnterCombat(Unit * /*victim*/)
         {
-            me->MonsterYell(SAY_AGGRO, LANG_UNIVERSAL, NULL);
+            Talk(SAY_AGGRO);
 		}
 		
 		 void JustDied(Unit * /*victim*/)
         {
-            me->MonsterYell(SAY_DEATH, LANG_UNIVERSAL, NULL);
+            Talk(SAY_DEATH);
 		}
 		
 		 void UpdateAI(uint32 diff)
@@ -67,7 +71,7 @@ public:
 		
 			if (!HealthAbovePct(25))
 	  		{
-                me->MonsterYell(SAY_ENRAGE, LANG_UNIVERSAL, NULL);
+                Talk(SAY_ENRAGE);
 			    DoCast(me, SPELL_ENRAGE);
             }
 			
@@ -82,7 +86,7 @@ public:
 			if (ElementiumBulwarkTimer <= diff)
 			{
 			    DoCast(me, SPELL_ELEMENTIUM_BULWARK);
-				me->MonsterYell(SAY_ELEMENTIUM, LANG_UNIVERSAL, NULL);
+				Talk(SAY_ELEMENTIUM);
 				ElementiumBulwarkTimer = 30000;
 				}else
 				   ElementiumBulwarkTimer -= diff;

@@ -7,14 +7,6 @@
 #include "grimbatol.h"
 #include "Vehicle.h"
 
-// ToDo Move this hardocoded Yells to the DB and add Sound Data to it
-#define SAY_AGGRO "I will burn you from the inside out!"
-#define SAY_SUMMON "BY FIRE BE... BURNED!"
-#define SAY_SUMMON_2 "INCINERATE THEM, MINIONS!"
-#define SAY_JUMP_DOWN "Dragon, you will do as I command! Catch me!"
-#define SAY_DEAD "Valiona, finish them! Avenge me!"
-#define SAY_VALIONA "If they do not kill you, I will do it myself!"
-
 enum Spells
 {
     // Drahgas Spells
@@ -82,7 +74,17 @@ Position const position[5] =
     {-375.742f, -519.749f, 300.663f, 0.0f}		// Valionas End Position
 };
 
-class boss_drahga_shadowburner : public CreatureScript
+enum eNpc40319
+{
+    SAY_AGGRO = 0,
+    SAY_SUMMON = 1,
+    SAY_JUMP_DOWN = 2,
+    SAY_VICTORY = 3,
+    SAY_DEAD = 4,
+    SAY_VALIONA=0, // "If they do not kill you, I will do it myself!" 
+};
+
+class boss_drahga_shadowburner : public CreatureScript // npc 40319'
 {
 public:
     boss_drahga_shadowburner() : CreatureScript("boss_drahga_shadowburner") {}
@@ -125,7 +127,7 @@ public:
 
             me->SetReactState(REACT_AGGRESSIVE);
 
-            me->MonsterYell(SAY_AGGRO, LANG_UNIVERSAL, NULL);
+            Talk(SAY_AGGRO);
 
             me->GetMotionMaster()->Clear();
             me->GetMotionMaster()->MoveChase(me->GetVictim());
@@ -151,7 +153,7 @@ public:
 			if (instance)
             events.Reset();
 
-            me->MonsterYell(SAY_DEAD, LANG_UNIVERSAL, NULL);
+            Talk(SAY_DEAD);
 
             SaveDespawnCreatures();
         }
@@ -164,7 +166,7 @@ public:
                 {
                 case POINT_DRAHGA_GO_TO_THE_LAVA:
 
-                    me->MonsterYell(SAY_JUMP_DOWN, LANG_UNIVERSAL, NULL);
+                    Talk(SAY_JUMP_DOWN);
 
                     pValiona->GetAI()->DoAction(ACTION_DRAGAH_CALLS_VALIONA_FOR_HELP);
                     me->SetSpeed(MOVE_RUN, 1.0f);
@@ -255,7 +257,7 @@ public:
                     break;
                 case EVENT_SUMMON_INVOKED_FLAME_SPIRIT:
 
-                    me->MonsterYell(SAY_SUMMON, LANG_UNIVERSAL, NULL);
+                    Talk(SAY_SUMMON);
 
                     DoCast(SPELL_INVOCATION_OF_FLAME);
 
@@ -300,7 +302,7 @@ public:
     };
 };
 
-class npc_valiona_gb : public CreatureScript
+class npc_valiona_gb : public CreatureScript // npc 40320
 {
 public:
     npc_valiona_gb() : CreatureScript("npc_valiona_gb") { }
@@ -407,7 +409,7 @@ public:
             case ACTION_DRAGAH_CALLS_VALIONA_FOR_HELP:
                 DoZoneInCombat();
 
-                me->MonsterYell(SAY_VALIONA, LANG_UNIVERSAL, NULL);
+                Talk(SAY_VALIONA);
 
                 currentWaypoint = 1;
                 me->GetMotionMaster()->MovePoint(POINT_VALIONA_FLY_IN_THE_AIR, position[1]);

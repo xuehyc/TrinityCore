@@ -180,7 +180,7 @@ class npc_cerellean_whiteclaw : public CreatureScript
 					case 1:
 						{ 	
 							// ToDo let him stand up  if not in water
-							_player->KilledMonsterCredit(NPC_CERELLEAN_WHITECLAW, NULL);
+							_player->KilledMonsterCredit(NPC_CERELLEAN_WHITECLAW);
 							_timer=1000; _phase=2;
 							break;
 						}
@@ -265,7 +265,7 @@ class npc_volcor : public CreatureScript
 					case 1:
 						{ 														
 							// ToDo  let him stand up  if not in water
-							_player->KilledMonsterCredit(NPC_VOLCOR, NULL);	
+							_player->KilledMonsterCredit(NPC_VOLCOR);	
 							_timer=1000; _phase=2;
 							break;
 						}
@@ -350,7 +350,7 @@ class npc_shaldyn : public CreatureScript
 						case 1:
 						{ 														
 							// ToDo  let him stand up  if not in water
-							_player->KilledMonsterCredit(NPC_SHALDYN, NULL);	
+							_player->KilledMonsterCredit(NPC_SHALDYN);	
 							_timer=1000; _phase=2;
 							break;
 						}
@@ -435,7 +435,7 @@ class npc_gershala_nightwhisper : public CreatureScript
 						case 1:
 						{ 														
 							// ToDo  let him stand up  if not in water
-							_player->KilledMonsterCredit(NPC_GERSHALA_NIGHTWHISPER, NULL);	
+							_player->KilledMonsterCredit(NPC_GERSHALA_NIGHTWHISPER);	
 							_timer=1000; _phase=2;
 							break;
 						}
@@ -511,7 +511,7 @@ class npc_withered_ent : public CreatureScript
 			void IsSummonedBy(Unit* summoner) override
 			{			
 				m_player = summoner->ToPlayer();
-				if (m_player) m_player->KilledMonsterCredit(NPC_DARKSCALE_SCOUT_KILL_CREDIT, NULL);	
+				if (m_player) m_player->KilledMonsterCredit(NPC_DARKSCALE_SCOUT_KILL_CREDIT);	
 			}
 
 			void AttackStart(Unit* who) override
@@ -690,7 +690,7 @@ public:
 		{
 			if (GameObject* moon = player->FindNearestGameObject (GO_MOONWELL,3.0f))
 			{
-				player->KilledMonsterCredit(NPC_FRENZIED_CYCLONE_BRACERS_KILL_CREDIT, NULL);
+				player->KilledMonsterCredit(NPC_FRENZIED_CYCLONE_BRACERS_KILL_CREDIT);
 			}
 		} 
 
@@ -844,7 +844,7 @@ public:
 				}
 				case 3:
 				{ 
-					_player->KilledMonsterCredit(NPC_DARKSHORE_INTELLIGENCE_CREDIT_1, NULL);	
+					_player->KilledMonsterCredit(NPC_DARKSHORE_INTELLIGENCE_CREDIT_1);	
 					_timer=3000; _phase=4;
 					break;
 				}
@@ -918,7 +918,7 @@ public:
 				}
 				case 1:
 				{ 
-					_player->KilledMonsterCredit(NPC_DARKSHORE_INTELLIGENCE_CREDIT_2, NULL);
+					_player->KilledMonsterCredit(NPC_DARKSHORE_INTELLIGENCE_CREDIT_2);
 					_timer=3000; _phase=2;
 					break;
 				}
@@ -1023,7 +1023,7 @@ class spell_torch_shatterspear_supplies : public SpellScriptLoader
 
 				if (player->GetQuestStatus(QUEST_WAR_SUPPLIES) == QUEST_STATUS_INCOMPLETE)				
 				{								
-					player->KilledMonsterCredit(NPC_SHATTERSPEAR_SUPPLIES_CREDIT_BUNNY, NULL);	
+					player->KilledMonsterCredit(NPC_SHATTERSPEAR_SUPPLIES_CREDIT_BUNNY);	
 					go->Delete();
 					//go->DestroyForNearbyPlayers();					
 				}
@@ -1202,7 +1202,7 @@ class spell_constructing : public SpellScriptLoader
 						player->SummonGameObject(GO_BUILDING_SIDE,4692.65f,693.8f,1.13805f,1.11701f,0,0,0.529919f,0.848048f,200);
 						player->SummonGameObject(GO_BUILDING_SIDE,4688.91f,696.616f,1.19471f,3.87463f,0,0,-0.93358f,0.358368f,200);	
 						player->SummonGameObject(GO_BUILDING_CENTER_HUT,4682.55f,690.984f,2.00314f,2.68202f,0,0,0.973715f,0.227768f,200);	
-						player->KilledMonsterCredit(NPC_GREYMIST_HOVEL_BUILD_QUEST_MARKER, NULL);	
+						player->KilledMonsterCredit(NPC_GREYMIST_HOVEL_BUILD_QUEST_MARKER);	
 					}
 				}				
             }
@@ -1363,7 +1363,7 @@ public:
 					Talk(0);
 					me->SetHealth(me->GetMaxHealth()/100);
 					DoCast(SPELL_PERMANENT_FEIGN_DEATH);
-					if (_player) _player->KilledMonsterCredit(NPC_WARLOAD_WRATHSPINE, NULL);
+					if (_player) _player->KilledMonsterCredit(NPC_WARLOAD_WRATHSPINE);
 					_timer=120000; _phase=2;
 					break;
 				}
@@ -1452,7 +1452,7 @@ public:
 				}			
 			case 4:
 				{
-					_player->KilledMonsterCredit(NPC_AZSHARA_EVENT_CREDIT, NULL);	
+					_player->KilledMonsterCredit(NPC_AZSHARA_EVENT_CREDIT);	
 					me->DespawnOrUnsummon();
 					break;
 				}

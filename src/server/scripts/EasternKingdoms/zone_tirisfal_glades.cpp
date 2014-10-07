@@ -65,7 +65,7 @@ public:
         {
 			if (player->IsWithinDistInMap(creature, 10.0f))
 			{				
-				player->KilledMonsterCredit(creature->GetEntry(), NULL);
+				player->KilledMonsterCredit(creature->GetEntry());
 				creature->DespawnOrUnsummon();
 			}
 		}        
@@ -177,7 +177,7 @@ public:
 						case 2:
 						{
 							if (player)	
-								player->KilledMonsterCredit(NPC_LILIAN_VOSS_1, NULL);
+								player->KilledMonsterCredit(NPC_LILIAN_VOSS_1);
 							me->SetSpeed(MOVE_WALK,1.3f,true);						
 							Creature* creature = me->FindNearestCreature (NPC_CARETAKER_CAICE,300.0f);						
 							if (creature) 
@@ -202,7 +202,7 @@ public:
 						}
 						case 12:
 						{
-							if (player)	player->KilledMonsterCredit(NPC_LILIAN_VOSS_2, NULL);
+							if (player)	player->KilledMonsterCredit(NPC_LILIAN_VOSS_2);
 							me->SetSpeed(MOVE_WALK, 1.4f, true);
 							me->GetMotionMaster()->MovePath(NPC_LILIAN_VOSS_2,true);						
 							timer = 12000; phase = 13;
@@ -307,7 +307,7 @@ public:
 						case 2:
 						{
 							if (player)	
-								player->KilledMonsterCredit(NPC_MARSHAL_REDPATH_1, NULL);
+								player->KilledMonsterCredit(NPC_MARSHAL_REDPATH_1);
 							me->SetSpeed(MOVE_WALK,1.3f,true);
 							Creature* creature = me->FindNearestCreature (NPC_CARETAKER_CAICE,300.0f);						
 							if (creature) 
@@ -406,7 +406,7 @@ public:
 						case 2:
 						{
 							if (player)	
-								player->KilledMonsterCredit(NPC_VALDRED_MORAY, NULL);
+								player->KilledMonsterCredit(NPC_VALDRED_MORAY);
 							me->SetSpeed(MOVE_WALK,1.3f,true);						
 							Creature* creature = me->FindNearestCreature (NPC_CARETAKER_CAICE,300.0f);						
 							if (creature) 

@@ -433,7 +433,7 @@ public:
 							}
 						case 4:
 							{																																						
-								player->KilledMonsterCredit(NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_SE, NULL);	
+								player->KilledMonsterCredit(NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_SE);	
 								timer=120000; phase++; // cooldown
 								break;
 							}
@@ -539,7 +539,7 @@ public:
 							}
 						case 4:
 							{																																								
-								player->KilledMonsterCredit(NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_SW, NULL);	
+								player->KilledMonsterCredit(NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_SW);	
 								timer=120000; phase++; // cooldown																		  								
 								break;
 							}
@@ -645,7 +645,7 @@ public:
 							}
 						case 4:
 							{																																										
-								player->KilledMonsterCredit(NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_W, NULL);	
+								player->KilledMonsterCredit(NPC_TROLLING_FOR_INFORMATION_KILL_CREDIT_BUNNY_W);	
 								timer=120000; phase++; // cooldown													  								
 								break;
 							}

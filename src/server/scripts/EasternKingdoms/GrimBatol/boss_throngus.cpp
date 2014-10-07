@@ -6,12 +6,6 @@
 #include "ScriptMgr.h"
 #include "grimbatol.h"
 
-#define SAY_AGGRO "You not get through defenses!"
-#define SAY_AGGRO1 "You not get through defenses!"
-#define SAY_AGGRO2 "Throngus use your corpse on body. Somewhere..."
-#define SAY_AGGRO3 "Oh, this gonna HURT!"
-#define SAY_DIED "Death... Good choice. Not best choice maybe, but better than fail and live."
-
 enum Spells
 {
 	// Misc
@@ -89,6 +83,12 @@ Position const TwilightArcherSummonPos[13] =
 {-485.052f, -474.621f, 296.525f, 3.92361f},
 {-481.352f, -477.21f, 280.714f, 3.72334f}};
 
+enum eNpc40177
+{
+    SAY_AGGRO = 1, // "You not get through defenses!"
+    SAY_DIED = 5, // "Death... Good choice. Not best choice maybe, but better than fail and live."
+};
+
 class boss_forgemaster_throngus: public CreatureScript
 {
 public: 
@@ -116,7 +116,7 @@ public:
 		void EnterCombat(Unit* /*who*/) 
 		{
 			if (instance)
-			me->MonsterYell(SAY_AGGRO, LANG_UNIVERSAL, NULL);
+			Talk(SAY_AGGRO);
 
 			phases[0] = 0;
 			phases[1] = 0;
@@ -126,7 +126,7 @@ public:
 		void JustDied(Unit* /*killer*/)
 		{
 			if (instance)
-			me->MonsterYell(SAY_DIED, LANG_UNIVERSAL, NULL);
+			Talk(SAY_DIED);
 			DespawnCreatures(NPC_FIRE_PATCH);
 			DespawnCreatures(NPC_TWILIGHT_ARCHER);
 		}

@@ -133,41 +133,41 @@ class instance_throne_of_the_tides : public InstanceMapScript
                     case GO_LADY_NAZJAR_DOOR:
                         LadyNazjarDoor = go->GetGUID();
                         if (encounter[0] == DONE)
-                            HandleGameObject(0, true, go);
+                            HandleGameObject(ObjectGuid::Empty, true, go);
                         if (encounter[0] == IN_PROGRESS)
-                            HandleGameObject(0, false, go);
+                            HandleGameObject(ObjectGuid::Empty, false, go);
                         break;
                     case GO_JELLYFISH_ELEVATOR:
                         JellyFishElevator = go->GetGUID();
                         if (encounter[0] == DONE)
-                            HandleGameObject(0, true, go);
+                            HandleGameObject(ObjectGuid::Empty, true, go);
                         if (encounter[0] == IN_PROGRESS)
-                            HandleGameObject(0, false, go);
+                            HandleGameObject(ObjectGuid::Empty, false, go);
                         break;
                     case GO_COMMANDER_ULTHOK_DOOR:
                         CommanderUlthokDoor = go->GetGUID();
                         if (encounter[0] == DONE)
-                            HandleGameObject(0, false, go);
+                            HandleGameObject(ObjectGuid::Empty, false, go);
                         if (encounter[1] == DONE)
-                            HandleGameObject(0, true, go);
+                            HandleGameObject(ObjectGuid::Empty, true, go);
                         break;
                     case GO_ERUNAK_STONESPEAKER_DOOR:
                         OzumatDoor = go->GetGUID();
                         if (encounter[1] == DONE)
-                            HandleGameObject(0, true, go);
+                            HandleGameObject(ObjectGuid::Empty, true, go);
                         if (encounter[2] == IN_PROGRESS)
-                            HandleGameObject(0, false, go);
+                            HandleGameObject(ObjectGuid::Empty, false, go);
                         if (encounter[2] == DONE)
-                            HandleGameObject(0, true, go);
+                            HandleGameObject(ObjectGuid::Empty, true, go);
                         break;
                     case GO_OZUMAT_DOOR:
                         ErunakStonespeakerDoor = go->GetGUID();
                         if (encounter[2] == DONE)
-                            HandleGameObject(0, true, go);
+                            HandleGameObject(ObjectGuid::Empty, true, go);
                         if (encounter[3] == IN_PROGRESS)
-                            HandleGameObject(0, false, go);
+                            HandleGameObject(ObjectGuid::Empty, false, go);
                         if (encounter[3] == DONE)
-                            HandleGameObject(0, true, go);
+                            HandleGameObject(ObjectGuid::Empty, true, go);
                         break;
                 }
             }
@@ -263,7 +263,7 @@ class instance_throne_of_the_tides : public InstanceMapScript
 
                     if(encounter[0] == DONE && encounter[1] == NOT_STARTED)
                     {
-                        if(Creature* summoner = instance->GetCreature(Neptulon))
+                        if (Creature* summoner = instance->GetCreature(ObjectGuid(Neptulon)))
                             summoner->SummonCreature(BOSS_COMMANDER_ULTHOK, 59.185f, 802.251f, 805.730f, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60480000);
                     }
                 } else OUT_LOAD_INST_DATA_FAIL;

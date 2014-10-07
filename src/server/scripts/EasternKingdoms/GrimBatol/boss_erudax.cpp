@@ -6,14 +6,6 @@
 #include "ScriptMgr.h"
 #include "grimbatol.h"
 
-// ToDo move the Yells to the DB
-#define SAY_AGGRO "The darkest days are still ahead!"
-#define SAY_DEATH "Ywaq maq oou; ywaq maq ssaggh. Yawq ma shg'fhn."
-#define SAY_SUMMON "Come, suffering... Enter, chaos!"
-#define SAY_SHADOW_GALE "F'lakh ghet! The shadow's hunger cannot be sated!"
-#define SAY_GALE "F'lakh ghet! The shadow's hunger cannot be sated!"
-#define SAY_KILL "More flesh for the offering!"
-
 enum Spells
 {
 	// Erudax
@@ -58,6 +50,17 @@ enum Points
 {
 	POINT_FACELESS_IS_AT_AN_EGG = 1,
 	POINT_ERUDAX_IS_AT_STALKER	= 2,
+};
+
+enum eNpc40484
+{
+    SAY_AGGRO = 0, // "The darkest days are still ahead!"
+    SAY_DEATH = 4, //"Ywaq maq oou; ywaq maq ssaggh. Yawq ma shg'fhn."
+    SAY_SUMMON = 2, //"Come, suffering... Enter, chaos!"
+    SAY_SHADOW_GALE = 1, //"F'lakh ghet! The shadow's hunger cannot be sated!"
+    SAY_GALE = 1, //"F'lakh ghet! The shadow's hunger cannot be sated!"
+    SAY_KILL = 3, // "More flesh for the offering!"
+
 };
 
 class boss_erudax: public CreatureScript
@@ -112,7 +115,7 @@ public:
 
 			events.ScheduleEvent(EVENT_SHADOW_GALE, 20000);
 
-			me->MonsterYell(SAY_AGGRO, LANG_UNIVERSAL, NULL);
+			Talk(SAY_AGGRO);
 
 			// The Position of the Portal Stalker is the Summon Position of the Adds
 			FacelessPortalStalker = me->SummonCreature(NPC_FACELESS_PORTAL_STALKER,-641.515f,-827.8f,235.5f,3.069f,TEMPSUMMON_MANUAL_DESPAWN);
@@ -136,7 +139,7 @@ public:
 				me->GetMotionMaster()->MoveChase(me->GetVictim());
 
 				if ((rand()%2))
-					me->MonsterYell(SAY_SUMMON, LANG_UNIVERSAL, NULL);
+					Talk(SAY_SUMMON);
 
 				//Adds a visual portal effect to the Stalker
                             if (FacelessPortalStalker)
@@ -171,7 +174,7 @@ public:
                                        ShadowGaleTrigger = me->SummonCreature(NPC_SHADOW_GALE_STALKER, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN);
                                        me->SetReactState(REACT_PASSIVE);
                                        me->GetMotionMaster()->MovePoint(POINT_ERUDAX_IS_AT_STALKER, -739.665f, -827.024f, 232.412f);
-                                       me->MonsterYell(SAY_GALE, LANG_UNIVERSAL, NULL);
+                                       Talk(SAY_GALE);
                                    }
 					break;
 
@@ -197,7 +200,7 @@ public:
 
 		void KilledUnit(Unit* victim)
 		{
-			me->MonsterYell(SAY_KILL, LANG_UNIVERSAL, NULL);
+			Talk(SAY_KILL);
 		}
 
 		virtual void JustReachedHome()
@@ -212,7 +215,7 @@ public:
 
 			RemoveShadowGaleDebuffFromPlayers();
 
-			me->MonsterYell(SAY_DEATH, LANG_UNIVERSAL, NULL);
+			Talk(SAY_DEATH);
 		}
 
 		void JustSummoned(Creature* summon)

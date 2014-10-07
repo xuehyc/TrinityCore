@@ -226,7 +226,7 @@ void BattlegroundBFG::AddPlayer(Player* player)
     PlayerScores[player->GetGUIDLow()] = new BattlegroundBFGScore(player->GetGUID(), player->GetBGTeam());
 }
 
-void BattlegroundBFG::RemovePlayer(Player* /*player*/, uint64 /*guid*/, uint32 /*team*/) {}
+void BattlegroundBFG::RemovePlayer(Player* /*player*/, ObjectGuid /*guid*/, uint32 /*team*/) {}
 
 void BattlegroundBFG::HandleAreaTrigger(Player* Source, uint32 Trigger)
 {
@@ -404,11 +404,11 @@ void BattlegroundBFG::_NodeDeOccupied(uint8 node)
         DelCreature(node+7);                    // NULL checks are in DelCreature! 0-6 spirit guides
 
     // Players waiting to resurrect at this node are sent to closest owned graveyard
-    std::vector<uint64> ghost_list = m_ReviveQueue[BgCreatures[node]];
+    GuidVector& ghost_list = m_ReviveQueue[BgCreatures[node]];  // std::vector<uint64> ghost_list = m_ReviveQueue[BgCreatures[node]];
     if (!ghost_list.empty())
     {
         WorldSafeLocsEntry const* ClosestGrave = NULL;
-        for (std::vector<uint64>::const_iterator itr = ghost_list.begin(); itr != ghost_list.end(); ++itr)
+        for (GuidVector::const_iterator itr = ghost_list.begin(); itr != ghost_list.end(); ++itr)
         {
             Player* player = ObjectAccessor::FindPlayer(*itr);
             if (!player)
