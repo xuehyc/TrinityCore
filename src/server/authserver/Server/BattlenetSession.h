@@ -59,21 +59,21 @@ namespace Battlenet
         explicit Session(tcp::socket&& socket);
         ~Session();
 
-        typedef bool(Session::*PacketHandler)(PacketHeader& socket, BitStream& packet);
+        void LogUnhandledPacket(ClientPacket const& packet);
 
-        // Auth
-        bool HandleAuthChallenge(PacketHeader& header, BitStream& packet);
-        bool HandleAuthReconnect(PacketHeader& header, BitStream& packet);
-        bool HandleAuthProofResponse(PacketHeader& header, BitStream& packet);
+        // Authentication
+        void HandleLogonRequest(Authentication::LogonRequest const& logonRequest);
+        void HandleResumeRequest(Authentication::ResumeRequest const& resumeRequest);
+        void HandleProofResponse(Authentication::ProofResponse const& proofResponse);
 
-        // Creep
-        bool HandlePing(PacketHeader& header, BitStream& packet);
-        bool HandleEnableEncryption(PacketHeader& header, BitStream& packet);
-        bool HandleDisconnect(PacketHeader& header, BitStream& packet);
+        // Connection
+        void HandlePing(Connection::Ping const& ping);
+        void HandleEnableEncryption(Connection::EnableEncryption const& enableEncryption);
+        void HandleLogoutRequest(Connection::LogoutRequest const& logoutRequest);
 
-        // WoW
-        bool HandleRealmUpdateSubscribe(PacketHeader& header, BitStream& packet);
-        bool HandleRealmJoinRequest(PacketHeader& header, BitStream& packet);
+        // WoWRealm
+        void HandleListSubscribeRequest(WoWRealm::ListSubscribeRequest const& listSubscribeRequest);
+        void HandleJoinRequestV2(WoWRealm::JoinRequestV2 const& joinRequest);
 
         void Start() override;
 

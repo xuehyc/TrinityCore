@@ -121,7 +121,7 @@ public:
 
         void Reset() override
         {
-            ReliquaryGUID.Clear(); 
+            ReliquaryGUID.Clear();
         }
 
         void EnterCombat(Unit* /*who*/) override

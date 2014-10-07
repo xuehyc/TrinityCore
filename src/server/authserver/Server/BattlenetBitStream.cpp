@@ -25,3 +25,9 @@ bool Battlenet::BitStream::Read<bool>(uint32 /*bitCount*/)
 {
     return Read<uint8>(1) != 0;
 }
+
+template<>
+void Battlenet::BitStream::Write<bool>(bool value, uint32 /*bitCount*/)
+{
+    Write<uint8>(value ? 1 : 0, 1);
+}

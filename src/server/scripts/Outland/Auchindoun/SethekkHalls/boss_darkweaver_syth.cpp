@@ -76,7 +76,7 @@ public:
     struct boss_darkweaver_sythAI : public BossAI
     {
         boss_darkweaver_sythAI(Creature* creature) : BossAI(creature, DATA_DARKWEAVER_SYTH)
-        { 
+        {
             Initialize();
         }
 
