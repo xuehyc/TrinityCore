@@ -7857,7 +7857,7 @@ bool ObjectMgr::LoadTrinityStrings()
 
     _trinityStringStore.clear(); // for reload case
 
-    QueryResult result = WorldDatabase.Query("SELECT entry, content_default, content_loc1, content_loc2, content_loc3, content_loc4, content_loc5, content_loc6, content_loc7, content_loc8 FROM trinity_string");
+    QueryResult result = WorldDatabase.Query("SELECT entry, content_default, content_loc1, content_loc2, content_loc3, content_loc4, content_loc5, content_loc6, content_loc7, content_loc8 FROM arkcore_string");
     if (!result)
     {
         TC_LOG_ERROR("server.loading", ">> Loaded 0 arkcore strings. DB table `arkcore_string` is empty.");
