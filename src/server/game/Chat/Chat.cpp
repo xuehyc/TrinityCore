@@ -360,12 +360,19 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand* table, const char* text, st
                         zoneName = zone->area_name;
                 }
 
-                sLog->outCommand(m_session->GetAccountId(), "Command: %s [Player: %s (%s) (Account: %u) X: %f Y: %f Z: %f Map: %u (%s) Area: %u (%s) Zone: %s Selected: %s (%s)]",
-                    fullcmd.c_str(), player->GetName().c_str(), player->GetGUID().ToString().c_str(),
-                    m_session->GetAccountId(), player->GetPositionX(), player->GetPositionY(),
-                    player->GetPositionZ(), player->GetOrientation(), player->GetMapId(),
+                sLog->outCommand(m_session->GetAccountId(), "Command: %s [Player: %s (%s) (Account: %u) X: %f Y: %f Z: %f O: %f Map: %u (%s) Area: %u (%s) Zone: %s Selected: %s (%s)]",
+                    fullcmd.c_str(), player->GetName().c_str(), 
+                    player->GetGUID().ToString().c_str(),
+                    m_session->GetAccountId(), 
+                    player->GetPositionX(), 
+                    player->GetPositionY(),
+                    player->GetPositionZ(), 
+                    player->GetOrientation(), 
+                    player->GetMapId(),
                     player->GetMap() ? player->GetMap()->GetMapName() : "Unknown",
-                    areaId, areaName.c_str(), zoneName.c_str(),
+                    areaId, 
+                    areaName.c_str(), 
+                    zoneName.c_str(),
                     (player->GetSelectedUnit()) ? player->GetSelectedUnit()->GetName().c_str() : "",
                     guid.ToString().c_str());
             }
