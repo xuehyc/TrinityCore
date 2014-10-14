@@ -204,7 +204,7 @@ class GridMap
 public:
     GridMap();
     ~GridMap();
-    bool loadData(char* filaname);
+    bool loadData(const char* filename);
     void unloadData();
 
     uint16 getArea(float x, float y) const;

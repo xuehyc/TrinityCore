@@ -60,7 +60,7 @@ namespace Battlenet
         explicit Session(tcp::socket&& socket);
         ~Session();
 
-        void LogUnhandledPacket(ClientPacket const& packet);
+        void LogUnhandledPacket(PacketHeader const& header);
 
         // Authentication
         void HandleLogonRequest(Authentication::LogonRequest const& logonRequest);
@@ -80,6 +80,9 @@ namespace Battlenet
 
         // Friends
         void HandleSocialNetworkCheckConnected(Friends::SocialNetworkCheckConnected const& socialNetworkCheckConnected);
+
+        // Cache
+        void HandleGetStreamItemsRequest(Cache::GetStreamItemsRequest const& getStreamItemsRequest);
 
         void Start() override;
 
