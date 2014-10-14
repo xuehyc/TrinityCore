@@ -1358,7 +1358,9 @@ public:
 
         bool Validate(SpellInfo const* /*spellEntry*/)
         {
-            return sSpellMgr->GetSpellInfo(SPELL_WARRIOR_COLOSSUS_SMASH);
+            if (sSpellMgr->GetSpellInfo(SPELL_WARRIOR_COLOSSUS_SMASH))
+                return true;
+            return false;
         }
 
         bool Load() override

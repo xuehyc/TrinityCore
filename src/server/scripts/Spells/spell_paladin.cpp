@@ -1356,7 +1356,9 @@ public:
 			if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
 				return false;
 			holyStack = 0;
-			return GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3924, 0);
+            if (GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3924, 0))
+                return true;
+            return false;
 		}
 		
         void HandleBeforeCast()
