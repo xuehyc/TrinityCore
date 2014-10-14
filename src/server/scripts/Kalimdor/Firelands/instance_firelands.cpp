@@ -84,7 +84,7 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "F L " << GetBossSaveData();
+            saveStream << "F L " << GetBossSaveData(); // its obsolete, it's saved on another place??!!
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();

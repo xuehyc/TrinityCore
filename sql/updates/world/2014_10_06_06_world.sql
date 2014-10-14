@@ -1,13 +1,14 @@
+
 DELETE FROM `gameobject_template` WHERE `entry` IN (184718,184722);
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `data0`, `data1`, `data2`, `data3`, `size`, `VerifiedBuild`) VALUES
 (184718, 6, 327, 'Cauldron Summoner', 0, 0, 0, 36549, 1, -18019),
 (184722, 6, 327, 'Cauldron Bug Summoner', 0, 0, 0, 36552, 1, -18019);
 
-DELETE FROM `gameobject` WHERE  `guid` IN(25566,25567) AND `id` IN(184721,184717,184722,184718);
+DELETE FROM `gameobject` WHERE  `guid` IN(68693,68694) AND `id` IN(184721,184717,184722,184718); -- GUID by ArkDB
 
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `VerifiedBuild`) VALUES 
-(25566, 184718, 530, 1, 1, -970.813, 2172, 15.5428, -2.33874, 0, 0, 0.920505, -0.390731, 0, 100, 1, 0),
-(25567, 184722, 530, 1, 1, -970.813, 2172, 15.5428, -2.33874, 0, 0, 0.920505, -0.390731, 0, 100, 1, 0);
+(68693, 184718, 530, 1, 1, -970.813, 2172, 15.5428, -2.33874, 0, 0, 0.920505, -0.390731, 0, 100, 1, 0),
+(68694, 184722, 530, 1, 1, -970.813, 2172, 15.5428, -2.33874, 0, 0, 0.920505, -0.390731, 0, 100, 1, 0);  -- GUID by ArkDB
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry`=36546;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 

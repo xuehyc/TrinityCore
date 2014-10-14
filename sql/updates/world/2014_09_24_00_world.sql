@@ -1,4 +1,3 @@
-SET @CGUID := 29977;
 
 DELETE FROM `conditions` WHERE  `SourceTypeOrReferenceId`=13 AND  `SourceEntry` IN(29070);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
@@ -106,6 +105,6 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (22, 20, 29840, 0, 0, 38, 1, 2, 4, 0, 0, 0, 0, '', 'Only run SAI if HP at 1% or less'),
 (22, 26, 29770, 0, 0, 1, 1, 29266, 0, 0, 1, 0, 0, '', 'Only run SAI if does not have aura Permanent Feign Death');
 
-DELETE FROM `creature` WHERE `guid`=@CGUID+0 AND `id`=29771;
+DELETE FROM `creature` WHERE `guid`=196768 AND `id`=29771; -- GUID by ArkDB
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phasemask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(@CGUID+0, 29771, 571, 1, 2,  8406.269, 2829.692, 718.509, 3.996804, 120, 0, 0); -- 29771 (Area: 210)
+(196768, 29771, 571, 1, 2,  8406.269, 2829.692, 718.509, 3.996804, 120, 0, 0); -- 29771 (Area: 210)

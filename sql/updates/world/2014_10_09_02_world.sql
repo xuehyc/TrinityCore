@@ -1,4 +1,5 @@
-SET @Guid := 74522;
+
+SET @Guid := 404292; -- GUID by ArkDB
 SET @Entry := 19610;
 
 DELETE FROM `creature_text` WHERE `entry` in(19610,19217);

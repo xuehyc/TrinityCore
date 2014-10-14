@@ -1,6 +1,7 @@
-DELETE FROM gameobject WHERE guid=99998;
+
+DELETE FROM gameobject WHERE guid=36754;  -- GUID by ArkDB
 INSERT INTO `gameobject` (guid, id, map, spawnMask, phaseMask, position_x, position_y, position_z, spawntimesecs, State) VALUES 
-(99998, 180673, 1, 1, 1, 6723.67, -5271.68, 778, 180, 1);
+(36754, 180673, 1, 1, 1, 6723.67, -5271.68, 778, 180, 1);   -- GUID by ArkDB
 
 set @Xandivious:=15623;
 

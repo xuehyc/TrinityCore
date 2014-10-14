@@ -1,4 +1,5 @@
-UPDATE `creature` SET `MovementType`=0,`spawndist`=0 WHERE  `guid` IN(121055,121049);
+
+UPDATE `creature` SET `MovementType`=0,`spawndist`=0 WHERE  `guid` IN(121055,121049); -- GUID by ArkDB
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN(58108,58118);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 

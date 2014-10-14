@@ -114,4 +114,4 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (@NPC_WYRMREST_VANQUISHER,1,0,'You must remember that I have yet to mature into an elder wyrm. I must eat to renew my strength!',12,0,100,0,0,0,'WYRMREST VANQUISHER', 27397),
 (@NPC_WYRMREST_VANQUISHER,2,0,'I have been called back to Wyrmrest, ally. Farewell!',12,0,100,0,0,0,'WYRMREST VANQUISHER', 27404);
 
-UPDATE `creature` SET `equipment_id`=0 WHERE  `guid` IN(74522,74523,74524);
+-- UPDATE `creature` SET `equipment_id`=0 WHERE  `guid` IN(74522,74523,74524);  -- ArkDB has 0 for them...
