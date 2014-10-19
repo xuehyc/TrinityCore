@@ -110,7 +110,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
         return;
     }
 
-    Player* player = sObjectAccessor->FindPlayerByName(memberName);
+    Player* player = ObjectAccessor::FindPlayerByName(memberName);
 
     // no player
     if (!player)
@@ -388,7 +388,7 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recvData)
     else
     {
         // Remember leader if online (group pointer will be invalid if group gets disbanded)
-        Player* leader = ObjectAccessor::FindPlayer(group->GetLeaderGUID());
+        Player* leader = ObjectAccessor::FindConnectedPlayer(group->GetLeaderGUID());
 
         // uninvite, group can be deleted
         GetPlayer()->UninviteFromGroup();
@@ -504,7 +504,7 @@ void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket& recvData)
     ObjectGuid guid;
     recvData >> guid;
 
-    Player* player = ObjectAccessor::FindPlayer(guid);
+    Player* player = ObjectAccessor::FindConnectedPlayer(guid);
     Group* group = GetPlayer()->GetGroup();
 
     if (!group || !player)
@@ -759,7 +759,7 @@ void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recvData)
 
         if (guid.IsPlayer())
         {
-            Player* target = ObjectAccessor::FindPlayer(guid);
+            Player* target = ObjectAccessor::FindConnectedPlayer(guid);
 
             if (!target || target->IsHostileTo(GetPlayer()))
                 return;
@@ -835,7 +835,7 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recvData)
     if (!group->HasFreeSlotSubGroup(groupNr))
         return;
 
-    Player* movedPlayer = sObjectAccessor->FindPlayerByName(name);
+    Player* movedPlayer = ObjectAccessor::FindConnectedPlayerByName(name);
     ObjectGuid guid;
 
     if (movedPlayer)
@@ -1204,7 +1204,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
     ObjectGuid Guid;
     recvData >> Guid;
 
-    Player* player = HashMapHolder<Player>::Find(Guid);
+    Player* player = ObjectAccessor::FindConnectedPlayer(Guid);
     if (!player)
     {
         WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3+4+2);
