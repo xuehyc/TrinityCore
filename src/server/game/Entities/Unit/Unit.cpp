@@ -16194,6 +16194,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
     bool hasSpline = IsSplineEnabled();
 
     bool hasTransportTime2 = hasTransportData && m_movementInfo.transport.time2 != 0;
+    bool hasTransportVehicleId = hasTransportData && m_movementInfo.transport.vehicleId != 0;
     bool hasTransportTime3 = false;
     bool hasPitch = HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
     bool hasFallDirection = HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
@@ -16350,9 +16351,9 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
             if (hasTransportData && hasTransportTime2)
                 data << mi.transport.time2;
             break;
-        case MSETransportTime3:
-            if (hasTransportData && hasTransportTime3)
-                data << mi.transport.time3;
+        case MSETransportVehicleId:
+            if (hasTransportData && hasTransportVehicleId)
+                data << mi.transport.vehicleId;
             break;
         case MSEPitch:
             if (hasPitch)
