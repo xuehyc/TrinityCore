@@ -11662,7 +11662,7 @@ Unit* Creature::SelectVictim()
 
     // ToDo: some areas need's showfight against npc's with faction 7 or 14
     if (target = GetVictim())
-        if (IsInCombat() && target->IsAlive())
+        if (IsInCombat() && target->IsAlive() && target->IsHostileToPlayers())
             return target;
 
     // enter in evade mode in other case
