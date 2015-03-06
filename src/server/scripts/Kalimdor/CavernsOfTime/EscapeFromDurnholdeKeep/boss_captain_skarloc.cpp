@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -61,7 +61,18 @@ public:
     {
         boss_captain_skarlocAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            Holy_Light_Timer = urand(20000, 30000);
+            Cleanse_Timer = 10000;
+            HammerOfJustice_Timer = urand(20000, 35000);
+            HolyShield_Timer = 240000;
+            DevotionAura_Timer = 3000;
+            Consecration_Timer = 8000;
         }
 
         InstanceScript* instance;
@@ -75,12 +86,7 @@ public:
 
         void Reset() override
         {
-            Holy_Light_Timer = urand(20000, 30000);
-            Cleanse_Timer = 10000;
-            HammerOfJustice_Timer = urand(20000, 35000);
-            HolyShield_Timer = 240000;
-            DevotionAura_Timer = 3000;
-            Consecration_Timer = 8000;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override

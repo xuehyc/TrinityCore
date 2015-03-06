@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -113,11 +113,17 @@ class npc_iceborn_protodrake : public CreatureScript
             npc_iceborn_protodrakeAI(Creature* creature) : ScriptedAI(creature), _vehicle(creature->GetVehicleKit())
             {
                 ASSERT(_vehicle);
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                _frostBreathCooldown = 5000;
             }
 
             void Reset() override
             {
-                _frostBreathCooldown = 5000;
+                Initialize();
             }
 
             void EnterCombat(Unit* /*who*/) override
@@ -161,11 +167,17 @@ class npc_geist_ambusher : public CreatureScript
         {
             npc_geist_ambusherAI(Creature* creature) : ScriptedAI(creature)
             {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                _leapingFaceMaulCooldown = 9000;
             }
 
             void Reset() override
             {
-                _leapingFaceMaulCooldown = 9000;
+                Initialize();
             }
 
             void EnterCombat(Unit* who) override
@@ -218,7 +230,7 @@ class spell_trash_npc_glacial_strike : public SpellScriptLoader
             {
                 if (GetTarget()->IsFullHealth())
                 {
-                    GetTarget()->RemoveAura(GetId(), 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
+                    GetTarget()->RemoveAura(GetId(), ObjectGuid::Empty, 0, AURA_REMOVE_BY_ENEMY_SPELL);
                     PreventDefaultAction();
                 }
             }

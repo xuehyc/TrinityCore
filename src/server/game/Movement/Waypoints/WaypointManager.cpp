@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -42,7 +42,7 @@ void WaypointMgr::Load()
     uint32 oldMSTime = getMSTime();
 
     //                                                0    1         2           3          4            5           6        7      8           9
-    QueryResult result = WorldDatabase.Query("SELECT id, point, position_x, position_y, position_z, orientation, move_flag, delay, action, action_chance FROM waypoint_data ORDER BY id, point");
+    QueryResult result = WorldDatabase.Query("SELECT id, point, position_x, position_y, position_z, orientation, move_type, delay, action, action_chance FROM waypoint_data ORDER BY id, point");
 
     if (!result)
     {
@@ -73,7 +73,15 @@ void WaypointMgr::Load()
         wp->y = y;
         wp->z = z;
         wp->orientation = o;
-        wp->run = fields[6].GetBool();
+        wp->move_type = fields[6].GetUInt32();
+
+        if (wp->move_type >= WAYPOINT_MOVE_TYPE_MAX)
+        {
+            TC_LOG_ERROR("sql.sql", "Waypoint %u in waypoint_data has invalid move_type, ignoring", wp->id);
+            delete wp;
+            continue;
+        }
+
         wp->delay = fields[7].GetUInt32();
         wp->event_id = fields[8].GetUInt32();
         wp->event_chance = fields[9].GetInt16();
@@ -126,7 +134,15 @@ void WaypointMgr::ReloadPath(uint32 id)
         wp->y = y;
         wp->z = z;
         wp->orientation = o;
-        wp->run = fields[5].GetBool();
+        wp->move_type = fields[5].GetUInt32();
+
+        if (wp->move_type >= WAYPOINT_MOVE_TYPE_MAX)
+        {
+            TC_LOG_ERROR("sql.sql", "Waypoint %u in waypoint_data has invalid move_type, ignoring", wp->id);
+            delete wp;
+            continue;
+        }
+
         wp->delay = fields[6].GetUInt32();
         wp->event_id = fields[7].GetUInt32();
         wp->event_chance = fields[8].GetUInt8();

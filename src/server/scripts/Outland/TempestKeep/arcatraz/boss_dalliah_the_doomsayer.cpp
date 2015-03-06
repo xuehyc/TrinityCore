@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -77,7 +77,7 @@ class boss_dalliah_the_doomsayer : public CreatureScript
                 _JustDied();
                 Talk(SAY_DEATH);
 
-                if (Creature* soccothrates = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SOCCOTHRATES)))
+                if (Creature* soccothrates = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_SOCCOTHRATES)))
                     if (soccothrates->IsAlive() && !soccothrates->IsInCombat())
                         soccothrates->AI()->SetData(1, 1);
             }
@@ -163,7 +163,7 @@ class boss_dalliah_the_doomsayer : public CreatureScript
                             events.ScheduleEvent(EVENT_SHADOW_WAVE, urand(11000, 16000));
                             break;
                         case EVENT_ME_FIRST:
-                            if (Creature* soccothrates = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SOCCOTHRATES)))
+                            if (Creature* soccothrates = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_SOCCOTHRATES)))
                                 if (soccothrates->IsAlive() && !soccothrates->IsInCombat())
                                     soccothrates->AI()->Talk(SAY_AGGRO_DALLIAH_FIRST);
                             break;
@@ -174,7 +174,7 @@ class boss_dalliah_the_doomsayer : public CreatureScript
 
                 if (HealthBelowPct(25) && !soccothratesTaunt)
                 {
-                    if (Creature* soccothrates = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SOCCOTHRATES)))
+                    if (Creature* soccothrates = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_SOCCOTHRATES)))
                         soccothrates->AI()->Talk(SAY_DALLIAH_25_PERCENT);
                     soccothratesTaunt = true;
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -43,15 +43,23 @@ class npc_pet_dk_ebon_gargoyle : public CreatureScript
 
         struct npc_pet_dk_ebon_gargoyleAI : CasterAI
         {
-            npc_pet_dk_ebon_gargoyleAI(Creature* creature) : CasterAI(creature) { }
+            npc_pet_dk_ebon_gargoyleAI(Creature* creature) : CasterAI(creature)
+            {
+                Initialize();
+            }
 
-            void InitializeAI() override
+            void Initialize()
             {
                 // Not needed to be despawned now
                 _despawnTimer = 0;
+            }
+
+            void InitializeAI() override
+            {
+                Initialize();
 
                 CasterAI::InitializeAI();
-                uint64 ownerGuid = me->GetOwnerGUID();
+                ObjectGuid ownerGuid = me->GetOwnerGUID();
                 if (!ownerGuid)
                     return;
 
@@ -61,7 +69,7 @@ class npc_pet_dk_ebon_gargoyle : public CreatureScript
                 Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
                 me->VisitNearbyObject(30.0f, searcher);
                 for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
-                    if ((*iter)->GetAura(SPELL_DK_SUMMON_GARGOYLE_1, ownerGuid))
+                    if ((*iter)->HasAura(SPELL_DK_SUMMON_GARGOYLE_1, ownerGuid))
                     {
                         me->Attack((*iter), false);
                         break;

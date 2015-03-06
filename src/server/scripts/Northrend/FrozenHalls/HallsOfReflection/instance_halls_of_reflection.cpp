@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -73,6 +73,8 @@ Position const SpawnPos[] =
     { 5299.250f, 2035.998f, 707.7781f, 5.026548f }
 };
 
+Position const UtherQuelDalarPos = { 5302.001f, 1988.698f, 707.7781f, 3.700098f };
+
 class instance_halls_of_reflection : public InstanceMapScript
 {
     public:
@@ -82,33 +84,14 @@ class instance_halls_of_reflection : public InstanceMapScript
         {
             instance_halls_of_reflection_InstanceMapScript(Map* map) : InstanceScript(map)
             {
+                SetHeaders(DataHeader);
                 SetBossNumber(EncounterCount);
-
-                JainaOrSylvanasIntroGUID  = 0;
-                KorelnOrLoralenGUID       = 0;
-                TheLichkingIntroGUID      = 0;
-                FalricGUID                = 0;
-                MarwynGUID                = 0;
-                FrostmourneAltarBunnyGUID = 0;
-                FrostswornGeneralGUID     = 0;
-                JainaOrSylvanasEscapeGUID = 0;
-                TheLichKingEscapeGUID     = 0;
-
-                FrostmourneGUID           = 0;
-                EntranceDoorGUID          = 0;
-                ImpenetrableDoorGUID      = 0;
-                ShadowThroneDoorGUID      = 0;
-                CaveInGUID                = 0;
-                GunshipGUID               = 0;
-                CaptainsChestGUID         = 0;
-                CaptainGUID               = 0;
-                IcewallGUID               = 0;
-                IcewallTargetGUID         = 0;
 
                 _teamInInstance           = 0;
                 _waveCount                = 0;
                 _introState               = NOT_STARTED;
                 _frostswornGeneralState   = NOT_STARTED;
+                _quelDelarState           = NOT_STARTED;
 
                 events.Reset();
             }
@@ -179,6 +162,9 @@ class instance_halls_of_reflection : public InstanceMapScript
                     case NPC_ICE_WALL_TARGET:
                         IcewallTargetGUID = creature->GetGUID();
                         break;
+                    case NPC_UTHER:
+                        UtherGUID = creature->GetGUID();
+                        break;
                     default:
                         break;
                 }
@@ -199,7 +185,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                         break;
                     }
                     case NPC_ICE_WALL_TARGET:
-                        IcewallTargetGUID = 0;
+                        IcewallTargetGUID.Clear();
                         break;
                     case NPC_WORLD_TRIGGER:
                     case NPC_GUNSHIP_CANNON_HORDE:
@@ -255,11 +241,11 @@ class instance_halls_of_reflection : public InstanceMapScript
                         break;
                     case GO_IMPENETRABLE_DOOR:
                         ImpenetrableDoorGUID = go->GetGUID();
-                        HandleGameObject(0, GetBossState(DATA_MARWYN) == DONE, go);
+                        HandleGameObject(ObjectGuid::Empty, GetBossState(DATA_MARWYN) == DONE, go);
                         break;
                     case GO_SHADOW_THRONE_DOOR:
                         ShadowThroneDoorGUID = go->GetGUID();
-                        HandleGameObject(0, GetData(DATA_FROSTSWORN_GENERAL) == DONE, go);
+                        HandleGameObject(ObjectGuid::Empty, GetData(DATA_FROSTSWORN_GENERAL) == DONE, go);
                         break;
                     case GO_CAVE_IN:
                         CaveInGUID = go->GetGUID();
@@ -281,7 +267,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                         CaptainsChestGUID = go->GetGUID();
                         break;
                     case GO_ICE_WALL:
-                        HandleGameObject(0, false, go);
+                        HandleGameObject(ObjectGuid::Empty, false, go);
                         IcewallGUID = go->GetGUID();
                         break;
                     default:
@@ -459,11 +445,35 @@ class instance_halls_of_reflection : public InstanceMapScript
                             HandleGameObject(ShadowThroneDoorGUID, true);
                         _frostswornGeneralState = data;
                         break;
+                    case DATA_QUEL_DELAR_EVENT:
+                        if (data == IN_PROGRESS)
+                        {
+                            if (_quelDelarState == NOT_STARTED)
+                            {
+                                if (Creature* bunny = instance->GetCreature(FrostmourneAltarBunnyGUID))
+                                    bunny->CastSpell((Unit*)NULL, SPELL_ESSENCE_OF_CAPTURED);
+                                events.ScheduleEvent(EVENT_QUEL_DELAR_SUMMON_UTHER, 2000);
+                            }
+                        }
+                        _quelDelarState = data;
+                        break;
                     default:
                         break;
                 }
 
                 SaveToDB();
+            }
+
+            void SetGuidData(uint32 type, ObjectGuid data) override
+            {
+                switch (type)
+                {
+                    case DATA_QUEL_DELAR_INVOKER:
+                        QuelDelarInvokerGUID = data;
+                        break;
+                    default:
+                        break;
+                }
             }
 
             // wave scheduling, checked when wave npcs die
@@ -482,7 +492,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                     case NPC_WAVE_MAGE:
                     {
                         uint32 waveId = creature->AI()->GetData(0);
-                        for (uint64 guid : waveGuidList[waveId])
+                        for (ObjectGuid guid : waveGuidList[waveId])
                         {
                             if (Creature* npc = instance->GetCreature(guid))
                                 if (npc->IsAlive())
@@ -511,6 +521,9 @@ class instance_halls_of_reflection : public InstanceMapScript
                     case EVENT_SPAWN_ESCAPE_EVENT:
                         SpawnEscapeEvent();
                         break;
+                    case EVENT_QUEL_DELAR_SUMMON_UTHER:
+                        instance->SummonCreature(NPC_UTHER, UtherQuelDalarPos);
+                        break;
                 }
             }
 
@@ -538,7 +551,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                             {
                                 tempList = possibilityList;
 
-                                uint64 bossGuid = i <= 3 ? FalricGUID : MarwynGUID;
+                                ObjectGuid bossGuid = i <= 3 ? FalricGUID : MarwynGUID;
 
                                 if (!i)
                                     Trinity::Containers::RandomResizeList(tempList, 3);
@@ -570,7 +583,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                         if (_waveCount % 5)
                         {
                             uint32 internalWaveId = _waveCount - ((_waveCount < 5) ? 1 : 2);
-                            for (uint64 guid : waveGuidList[internalWaveId])
+                            for (ObjectGuid guid : waveGuidList[internalWaveId])
                             {
                                 if (Creature* temp = instance->GetCreature(guid))
                                 {
@@ -609,7 +622,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                         // despawn wave npcs
                         for (uint8 i = 0; i < 8; ++i)
                         {
-                            for (uint64 guid : waveGuidList[i])
+                            for (ObjectGuid guid : waveGuidList[i])
                                 if (Creature* creature = instance->GetCreature(guid))
                                     creature->DespawnOrUnsummon(1);
                             waveGuidList[i].clear();
@@ -629,9 +642,9 @@ class instance_halls_of_reflection : public InstanceMapScript
                         if (Creature* captain = instance->GetCreature(CaptainGUID))
                             captain->AI()->Talk(SAY_CAPTAIN_FIRE);
 
-                        for (uint64 guid : GunshipCannonGUIDs)
+                        for (ObjectGuid guid : GunshipCannonGUIDs)
                         {
-                            uint32 entry = GUID_ENPART(guid);
+                            uint32 entry = guid.GetEntry();
                             if ((entry == NPC_WORLD_TRIGGER && _teamInInstance == ALLIANCE) || (entry == NPC_GUNSHIP_CANNON_HORDE && _teamInInstance == HORDE))
                                 if (Creature* cannon = instance->GetCreature(guid))
                                     cannon->CastSpell(cannon, SPELL_GUNSHIP_CANNON_FIRE, true);
@@ -641,7 +654,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                         if (Transport* gunship = instance->GetTransport(GunshipGUID))
                             gunship->EnableMovement(false);
 
-                        for (uint64 guid : GunshipStairGUIDs)
+                        for (ObjectGuid guid : GunshipStairGUIDs)
                             if (GameObject* stairs = instance->GetGameObject(guid))
                                 stairs->SetRespawnTime(DAY);
 
@@ -669,6 +682,8 @@ class instance_halls_of_reflection : public InstanceMapScript
                         return _introState;
                     case DATA_FROSTSWORN_GENERAL:
                         return _frostswornGeneralState;
+                    case DATA_QUEL_DELAR_EVENT:
+                        return _quelDelarState;
                     default:
                         break;
                 }
@@ -676,7 +691,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                 return 0;
             }
 
-            uint64 GetData64(uint32 type) const override
+            ObjectGuid GetGuidData(uint32 type) const override
             {
                 switch (type)
                 {
@@ -702,103 +717,82 @@ class instance_halls_of_reflection : public InstanceMapScript
                         return IcewallGUID;
                     case DATA_ICEWALL_TARGET:
                         return IcewallTargetGUID;
+                    case DATA_FROSTMOURNE_ALTAR_BUNNY:
+                        return FrostmourneAltarBunnyGUID;
+                    case DATA_UTHER_QUEL_DELAR:
+                        return UtherGUID;
+                    case DATA_QUEL_DELAR_INVOKER:
+                        return QuelDelarInvokerGUID;
                     default:
                         break;
                 }
 
-                return 0;
+                return ObjectGuid::Empty;
             }
 
-            std::string GetSaveData() override
+            void WriteSaveDataMore(std::ostringstream& data) override
             {
-                OUT_SAVE_INST_DATA;
-
-                std::ostringstream saveStream;
-                saveStream << "H R " << GetBossSaveData() << _introState << ' ' << _frostswornGeneralState;
-
-                OUT_SAVE_INST_DATA_COMPLETE;
-                return saveStream.str();
+                data << _introState << ' ' << _frostswornGeneralState << ' ' << _quelDelarState;
             }
 
-            void Load(char const* in) override
+            void ReadSaveDataMore(std::istringstream& data) override
             {
-                if (!in)
-                {
-                    OUT_LOAD_INST_DATA_FAIL;
-                    return;
-                }
-
-                OUT_LOAD_INST_DATA(in);
-
-                char dataHead1, dataHead2;
-
-                std::istringstream loadStream(in);
-                loadStream >> dataHead1 >> dataHead2;
-
-                if (dataHead1 == 'H' && dataHead2 == 'R')
-                {
-                    for (uint8 i = 0; i < EncounterCount; ++i)
-                    {
-                        uint32 tmpState;
-                        loadStream >> tmpState;
-                        if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
-                            tmpState = NOT_STARTED;
-
-                        SetBossState(i, EncounterState(tmpState));
-                    }
-
-                    uint32 temp = 0;
-                    loadStream >> temp;
-                    if (temp == DONE)
-                        SetData(DATA_INTRO_EVENT, DONE);
-                    else
-                        SetData(DATA_INTRO_EVENT, NOT_STARTED);
-
-                    loadStream >> temp;
-                    if (temp == DONE)
-                        SetData(DATA_FROSTSWORN_GENERAL, DONE);
-                    else
-                        SetData(DATA_FROSTSWORN_GENERAL, NOT_STARTED);
-                }
+                uint32 temp = 0;
+                data >> temp;
+                if (temp == DONE)
+                    SetData(DATA_INTRO_EVENT, DONE);
                 else
-                    OUT_LOAD_INST_DATA_FAIL;
+                    SetData(DATA_INTRO_EVENT, NOT_STARTED);
 
-                OUT_LOAD_INST_DATA_COMPLETE;
+                data >> temp;
+                if (temp == DONE)
+                    SetData(DATA_FROSTSWORN_GENERAL, DONE);
+                else
+                    SetData(DATA_FROSTSWORN_GENERAL, NOT_STARTED);
+
+                data >> temp;
+                if (temp == DONE)
+                    SetData(DATA_QUEL_DELAR_EVENT, DONE);
+                else
+                    SetData(DATA_QUEL_DELAR_EVENT, NOT_STARTED);
             }
 
         private:
-            uint64 JainaOrSylvanasIntroGUID; // unused
-            uint64 KorelnOrLoralenGUID;
-            uint64 TheLichkingIntroGUID; // unused
-            uint64 FalricGUID;
-            uint64 MarwynGUID;
-            uint64 FrostmourneAltarBunnyGUID;
-            uint64 FrostswornGeneralGUID;
-            uint64 JainaOrSylvanasEscapeGUID;
-            uint64 TheLichKingEscapeGUID;
+            ObjectGuid JainaOrSylvanasIntroGUID; // unused
+            ObjectGuid KorelnOrLoralenGUID;
+            ObjectGuid TheLichkingIntroGUID; // unused
+            ObjectGuid FalricGUID;
+            ObjectGuid MarwynGUID;
+            ObjectGuid FrostmourneAltarBunnyGUID;
+            ObjectGuid FrostswornGeneralGUID;
+            ObjectGuid JainaOrSylvanasEscapeGUID;
+            ObjectGuid TheLichKingEscapeGUID;
 
-            uint64 FrostmourneGUID;
-            uint64 EntranceDoorGUID;
-            uint64 ImpenetrableDoorGUID;
-            uint64 ShadowThroneDoorGUID;
-            uint64 CaveInGUID;
+            ObjectGuid FrostmourneGUID;
+            ObjectGuid EntranceDoorGUID;
+            ObjectGuid ImpenetrableDoorGUID;
+            ObjectGuid ShadowThroneDoorGUID;
+            ObjectGuid CaveInGUID;
 
             uint32 _teamInInstance;
             uint32 _waveCount;
             uint32 _introState;
             uint32 _frostswornGeneralState;
+            uint32 _quelDelarState;
 
             EventMap events;
-            std::set<uint64> waveGuidList[8];
+            GuidSet waveGuidList[8];
 
-            uint64 GunshipGUID;
-            uint64 CaptainsChestGUID;
-            uint64 CaptainGUID;
-            uint64 IcewallGUID;
-            uint64 IcewallTargetGUID;
+            ObjectGuid GunshipGUID;
+            ObjectGuid CaptainsChestGUID;
+            ObjectGuid CaptainGUID;
+            ObjectGuid IcewallGUID;
+            ObjectGuid IcewallTargetGUID;
+            ObjectGuid QuelDelarInvokerGUID;
+            ObjectGuid UtherGUID;
 
-            std::set<uint64> GunshipCannonGUIDs;
-            std::set<uint64> GunshipStairGUIDs;
+            GuidSet GunshipCannonGUIDs;
+            GuidSet GunshipStairGUIDs;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const override

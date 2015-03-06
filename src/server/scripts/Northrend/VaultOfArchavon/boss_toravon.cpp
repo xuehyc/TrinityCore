@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -185,12 +185,18 @@ public:
     {
         npc_frozen_orbAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            done = false;
+            killTimer = 60000; // if after this time there is no victim -> destroy!
         }
 
         void Reset() override
         {
-            done = false;
-            killTimer = 60000; // if after this time there is no victim -> destroy!
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -256,7 +262,7 @@ class npc_frozen_orb_stalker : public CreatureScript
                     return;
 
                 spawned = true;
-                Unit* toravon = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TORAVON));
+                Unit* toravon = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_TORAVON));
                 if (!toravon)
                     return;
 

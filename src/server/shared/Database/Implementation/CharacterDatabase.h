@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -26,10 +26,10 @@ class CharacterDatabaseConnection : public MySQLConnection
     public:
         //- Constructors for sync and async connections
         CharacterDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) { }
-        CharacterDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
+        CharacterDatabaseConnection(ProducerConsumerQueue<SQLOperation*>* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
 
         //- Loads database type specific prepared statements
-        void DoPrepareStatements();
+        void DoPrepareStatements() override;
 };
 
 typedef DatabaseWorkerPool<CharacterDatabaseConnection> CharacterDatabaseWorkerPool;
@@ -128,7 +128,6 @@ enum CharacterDatabaseStatements
     CHAR_SEL_AUCTION_ITEMS,
     CHAR_INS_AUCTION,
     CHAR_DEL_AUCTION,
-    CHAR_SEL_AUCTION_BY_TIME,
     CHAR_UPD_AUCTION_BID,
     CHAR_SEL_AUCTIONS,
     CHAR_INS_MAIL,
@@ -303,8 +302,6 @@ enum CharacterDatabaseStatements
     CHAR_INS_GM_SURVEY,
     CHAR_INS_GM_SUBSURVEY,
     CHAR_INS_LAG_REPORT,
-
-    CHAR_SEL_EXPIRED_AUCTIONS,
 
     CHAR_INS_CHARACTER,
     CHAR_UPD_CHARACTER,
@@ -533,6 +530,16 @@ enum CharacterDatabaseStatements
     CHAR_SEL_ITEMCONTAINER_MONEY,
     CHAR_DEL_ITEMCONTAINER_MONEY,
     CHAR_INS_ITEMCONTAINER_MONEY,
+
+    CHAR_SEL_PVPSTATS_MAXID,
+    CHAR_INS_PVPSTATS_BATTLEGROUND,
+    CHAR_INS_PVPSTATS_PLAYER,
+    CHAR_SEL_PVPSTATS_FACTIONS_OVERALL,
+
+    CHAR_INS_QUEST_TRACK,
+    CHAR_UPD_QUEST_TRACK_GM_COMPLETE,
+    CHAR_UPD_QUEST_TRACK_COMPLETE_TIME,
+    CHAR_UPD_QUEST_TRACK_ABANDON_TIME,
 
     MAX_CHARACTERDATABASE_STATEMENTS
 };

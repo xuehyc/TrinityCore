@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,16 @@
 #define OUTDOOR_PVP_NA_
 
 #include "OutdoorPvP.h"
+
+enum DefenseMessages
+{
+    TEXT_ALL_GUARDS_DEFEATED                = 15017, // (NYI) '|cffffff00All the guards have been defeated!|r'
+    TEXT_HALAA_TAKEN_ALLIANCE               = 15018, // '|cffffff00The Alliance has taken control of Halaa!|r'
+    TEXT_HALAA_TAKEN_HORDE                  = 15019, // '|cffffff00The Horde has taken control of Halaa!|r'
+    TEXT_HALAA_DEFENSELESS                  = 15020, // (NYI) '|cffffff00Halaa is defenseless!|r'
+    TEXT_HALAA_GAINING_CONTROL_HORDE        = 15493, // (NYI) '|cffffff00The Horde is gaining control of Halaa!|r'
+    TEXT_HALAA_GAINING_CONTROL_ALLIANCE     = 15494  // (NYI) '|cffffff00The Alliance is gaining control of Halaa!|r'
+};
 
 /// @todo "sometimes" set to neutral
 
@@ -50,10 +60,6 @@ enum OutdoorPvPNAWorldStates
     NA_UI_ALLIANCE_GUARDS_SHOW = 2502,
     NA_UI_GUARDS_MAX = 2493,
     NA_UI_GUARDS_LEFT = 2491,
-
-    NA_UI_TOWER_SLIDER_DISPLAY = 2495,
-    NA_UI_TOWER_SLIDER_POS = 2494,
-    NA_UI_TOWER_SLIDER_N = 2497,
 
     NA_MAP_WYVERN_NORTH_NEU_H = 2762,
     NA_MAP_WYVERN_NORTH_NEU_A = 2662,
@@ -253,30 +259,22 @@ class OutdoorPvPNA;
 class OPvPCapturePointNA : public OPvPCapturePoint
 {
     public:
-
         OPvPCapturePointNA(OutdoorPvP* pvp);
 
         bool Update(uint32 diff);
 
         void ChangeState();
 
-        void SendChangePhase();
-
         void FillInitialWorldStates(WorldPacket & data);
-
-        // used when player is activated/inactivated in the area
-        bool HandlePlayerEnter(Player* player);
-        void HandlePlayerLeave(Player* player);
 
         bool HandleCustomSpell(Player* player, uint32 spellId, GameObject* go);
 
-        int32 HandleOpenGo(Player* player, uint64 guid);
+        int32 HandleOpenGo(Player* player, ObjectGuid guid) override;
 
         uint32 GetAliveGuardsCount();
         uint32 GetControllingFaction() const;
 
     protected:
-
         // called when a faction takes control
         void FactionTakeOver(uint32 team);
 
@@ -290,7 +288,6 @@ class OPvPCapturePointNA : public OPvPCapturePoint
         void UpdateHalaaWorldState();
 
     private:
-
         bool m_capturable;
 
         uint32 m_GuardsAlive;
@@ -312,7 +309,6 @@ class OPvPCapturePointNA : public OPvPCapturePoint
 class OutdoorPvPNA : public OutdoorPvP
 {
     public:
-
         OutdoorPvPNA();
 
         bool SetupOutdoorPvP();
@@ -329,7 +325,6 @@ class OutdoorPvPNA : public OutdoorPvP
         void HandleKillImpl(Player* player, Unit* killed);
 
     private:
-
         OPvPCapturePointNA * m_obj;
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -65,12 +65,18 @@ class boss_rajaxx : public CreatureScript
         {
             boss_rajaxxAI(Creature* creature) : BossAI(creature, DATA_RAJAXX)
             {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                enraged = false;
             }
 
             void Reset() override
             {
                 _Reset();
-                enraged = false;
+                Initialize();
                 events.ScheduleEvent(EVENT_DISARM, 10000);
                 events.ScheduleEvent(EVENT_THUNDERCRASH, 12000);
             }

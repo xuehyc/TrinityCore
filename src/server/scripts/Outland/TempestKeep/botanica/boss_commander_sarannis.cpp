@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -50,12 +50,20 @@ class boss_commander_sarannis : public CreatureScript
 
         struct boss_commander_sarannisAI : public BossAI
         {
-            boss_commander_sarannisAI(Creature* creature) : BossAI(creature, DATA_COMMANDER_SARANNIS) { }
+            boss_commander_sarannisAI(Creature* creature) : BossAI(creature, DATA_COMMANDER_SARANNIS)
+            {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                _phase = true;
+            }
 
             void Reset() override
             {
                 _Reset();
-                _phase = true;
+                Initialize();
             }
 
             void EnterCombat(Unit* /*who*/) override

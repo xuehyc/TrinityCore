@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -131,12 +131,18 @@ class npc_core_rager : public CreatureScript
         {
             npc_core_ragerAI(Creature* creature) : ScriptedAI(creature)
             {
+                Initialize();
                 instance = creature->GetInstanceScript();
+            }
+
+            void Initialize()
+            {
+                mangleTimer = 7 * IN_MILLISECONDS;                 // These times are probably wrong
             }
 
             void Reset() override
             {
-                mangleTimer = 7*IN_MILLISECONDS;                 // These times are probably wrong
+                Initialize();
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) override
@@ -144,7 +150,7 @@ class npc_core_rager : public CreatureScript
                 if (HealthAbovePct(50) || !instance)
                     return;
 
-                if (Creature* pGolemagg = instance->instance->GetCreature(instance->GetData64(BOSS_GOLEMAGG_THE_INCINERATOR)))
+                if (Creature* pGolemagg = ObjectAccessor::GetCreature(*me, instance->GetGuidData(BOSS_GOLEMAGG_THE_INCINERATOR)))
                 {
                     if (pGolemagg->IsAlive())
                     {

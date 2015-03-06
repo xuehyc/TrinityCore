@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -46,7 +46,19 @@ public:
 
     struct npc_valkyr_battle_maidenAI : public PassiveAI
     {
-        npc_valkyr_battle_maidenAI(Creature* creature) : PassiveAI(creature) { }
+        npc_valkyr_battle_maidenAI(Creature* creature) : PassiveAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            FlyBackTimer = 500;
+            phase = 0;
+            x = 0.f;
+            y = 0.f;
+            z = 0.f;
+        }
 
         uint32 FlyBackTimer;
         float x, y, z;
@@ -58,8 +70,6 @@ public:
             me->SetVisible(false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetCanFly(true);
-            FlyBackTimer = 500;
-            phase = 0;
 
             me->GetPosition(x, y, z);
             z += 4.0f;

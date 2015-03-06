@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -54,12 +54,20 @@ public:
 
     struct guard_genericAI : public GuardAI
     {
-        guard_genericAI(Creature* creature) : GuardAI(creature) { }
+        guard_genericAI(Creature* creature) : GuardAI(creature)
+        {
+            Initialize();
+        }
 
-        void Reset() override
+        void Initialize()
         {
             globalCooldown = 0;
             buffTimer = 0;
+        }
+
+        void Reset() override
+        {
+            Initialize();
         }
 
         void EnterCombat(Unit* who) override
@@ -263,14 +271,22 @@ public:
 
     struct guard_shattrath_scryerAI : public GuardAI
     {
-        guard_shattrath_scryerAI(Creature* creature) : GuardAI(creature) { }
+        guard_shattrath_scryerAI(Creature* creature) : GuardAI(creature)
+        {
+            Initialize();
+        }
 
-        void Reset() override
+        void Initialize()
         {
             banishTimer = 5000;
             exileTimer = 8500;
-            playerGUID = 0;
+            playerGUID.Clear();
             canTeleport = false;
+        }
+
+        void Reset() override
+        {
+            Initialize();
         }
 
         void UpdateAI(uint32 diff) override
@@ -287,7 +303,7 @@ public:
                         temp->CastSpell(temp, SPELL_EXILE, true);
                         temp->CastSpell(temp, SPELL_BANISH_TELEPORT, true);
                     }
-                    playerGUID = 0;
+                    playerGUID.Clear();
                     exileTimer = 8500;
                     canTeleport = false;
                 } else exileTimer -= diff;
@@ -311,7 +327,7 @@ public:
     private:
         uint32 exileTimer;
         uint32 banishTimer;
-        uint64 playerGUID;
+        ObjectGuid playerGUID;
         bool canTeleport;
     };
 
@@ -328,14 +344,22 @@ public:
 
     struct guard_shattrath_aldorAI : public GuardAI
     {
-        guard_shattrath_aldorAI(Creature* creature) : GuardAI(creature) { }
+        guard_shattrath_aldorAI(Creature* creature) : GuardAI(creature)
+        {
+            Initialize();
+        }
 
-        void Reset() override
+        void Initialize()
         {
             banishTimer = 5000;
             exileTimer = 8500;
-            playerGUID = 0;
+            playerGUID.Clear();
             canTeleport = false;
+        }
+
+        void Reset() override
+        {
+            Initialize();
         }
 
         void UpdateAI(uint32 diff) override
@@ -352,7 +376,7 @@ public:
                         temp->CastSpell(temp, SPELL_EXILE, true);
                         temp->CastSpell(temp, SPELL_BANISH_TELEPORT, true);
                     }
-                    playerGUID = 0;
+                    playerGUID.Clear();
                     exileTimer = 8500;
                     canTeleport = false;
                 } else exileTimer -= diff;
@@ -375,7 +399,7 @@ public:
     private:
         uint32 exileTimer;
         uint32 banishTimer;
-        uint64 playerGUID;
+        ObjectGuid playerGUID;
         bool canTeleport;
     };
 
@@ -387,7 +411,7 @@ public:
 
 void AddSC_guards()
 {
-    new guard_generic;
-    new guard_shattrath_aldor;
-    new guard_shattrath_scryer;
+    new guard_generic();
+    new guard_shattrath_aldor();
+    new guard_shattrath_scryer();
 }

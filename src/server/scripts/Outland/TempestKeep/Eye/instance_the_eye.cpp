@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -46,35 +46,26 @@ class instance_the_eye : public InstanceMapScript
 
         struct instance_the_eye_InstanceMapScript : public InstanceScript
         {
-            instance_the_eye_InstanceMapScript(Map* map) : InstanceScript(map) { }
-
-            uint64 ThaladredTheDarkener;
-            uint64 LordSanguinar;
-            uint64 GrandAstromancerCapernian;
-            uint64 MasterEngineerTelonicus;
-            uint64 Kaelthas;
-            uint64 Astromancer;
-            uint64 Alar;
-            uint8 KaelthasEventPhase;
-            uint8 AlarEventPhase;
-
-            uint32 m_auiEncounter[MAX_ENCOUNTER];
-
-            void Initialize() override
+            instance_the_eye_InstanceMapScript(Map* map) : InstanceScript(map)
             {
+                SetHeaders(DataHeader);
                 memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
-
-                ThaladredTheDarkener = 0;
-                LordSanguinar = 0;
-                GrandAstromancerCapernian = 0;
-                MasterEngineerTelonicus = 0;
-                Kaelthas = 0;
-                Astromancer = 0;
-                Alar = 0;
 
                 KaelthasEventPhase = 0;
                 AlarEventPhase = 0;
             }
+
+            ObjectGuid ThaladredTheDarkener;
+            ObjectGuid LordSanguinar;
+            ObjectGuid GrandAstromancerCapernian;
+            ObjectGuid MasterEngineerTelonicus;
+            ObjectGuid Kaelthas;
+            ObjectGuid Astromancer;
+            ObjectGuid Alar;
+            uint8 KaelthasEventPhase;
+            uint8 AlarEventPhase;
+
+            uint32 m_auiEncounter[MAX_ENCOUNTER];
 
             bool IsEncounterInProgress() const override
             {
@@ -113,7 +104,7 @@ class instance_the_eye : public InstanceMapScript
                 }
             }
 
-            uint64 GetData64(uint32 identifier) const override
+            ObjectGuid GetGuidData(uint32 identifier) const override
             {
                 switch (identifier)
                 {
@@ -125,7 +116,7 @@ class instance_the_eye : public InstanceMapScript
                 case DATA_ASTROMANCER:                  return Astromancer;
                 case DATA_ALAR:                         return Alar;
                 }
-                return 0;
+                return ObjectGuid::Empty;
             }
 
             void SetData(uint32 type, uint32 data) override

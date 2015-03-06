@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -72,7 +72,21 @@ class boss_gruul : public CreatureScript
 
         struct boss_gruulAI : public BossAI
         {
-            boss_gruulAI(Creature* creature) : BossAI(creature, DATA_GRUUL) { }
+            boss_gruulAI(Creature* creature) : BossAI(creature, DATA_GRUUL)
+            {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                m_uiGrowth_Timer = 30000;
+                m_uiCaveIn_Timer = 27000;
+                m_uiCaveIn_StaticTimer = 30000;
+                m_uiGroundSlamTimer = 35000;
+                m_bPerformingGroundSlam = false;
+                m_uiHurtfulStrike_Timer = 8000;
+                m_uiReverberation_Timer = 60000 + 45000;
+            }
 
             uint32 m_uiGrowth_Timer;
             uint32 m_uiCaveIn_Timer;
@@ -86,13 +100,7 @@ class boss_gruul : public CreatureScript
             void Reset() override
             {
                 _Reset();
-                m_uiGrowth_Timer= 30000;
-                m_uiCaveIn_Timer= 27000;
-                m_uiCaveIn_StaticTimer = 30000;
-                m_uiGroundSlamTimer= 35000;
-                m_bPerformingGroundSlam= false;
-                m_uiHurtfulStrike_Timer= 8000;
-                m_uiReverberation_Timer= 60000+45000;
+                Initialize();
             }
 
             void EnterCombat(Unit* /*who*/) override

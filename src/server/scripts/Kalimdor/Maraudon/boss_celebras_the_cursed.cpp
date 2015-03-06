@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -45,7 +45,17 @@ public:
 
     struct celebras_the_cursedAI : public ScriptedAI
     {
-        celebras_the_cursedAI(Creature* creature) : ScriptedAI(creature) { }
+        celebras_the_cursedAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            WrathTimer = 8000;
+            EntanglingRootsTimer = 2000;
+            CorruptForcesTimer = 30000;
+        }
 
         uint32 WrathTimer;
         uint32 EntanglingRootsTimer;
@@ -53,9 +63,7 @@ public:
 
         void Reset() override
         {
-            WrathTimer = 8000;
-            EntanglingRootsTimer = 2000;
-            CorruptForcesTimer = 30000;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }

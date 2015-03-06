@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,6 +17,8 @@
 
 #ifndef DEF_ONYXIAS_LAIR_H
 #define DEF_ONYXIAS_LAIR_H
+
+#define DataHeader "OL"
 
 uint32 const EncounterCount     = 1;
 
@@ -49,7 +51,8 @@ enum CreatureIds
 {
     NPC_WHELP                   = 11262,
     NPC_LAIRGUARD               = 36561,
-    NPC_ONYXIA                  = 10184
+    NPC_ONYXIA                  = 10184,
+    NPC_TRIGGER                 = 14495
 };
 
 enum GameObjectIds

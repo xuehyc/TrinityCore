@@ -28,6 +28,9 @@ else()
 
   add_definitions(/arch:SSE2)
   message(STATUS "MSVC: Enabled SSE2 support")
+
+  set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /SAFESEH:NO")
+  message(STATUS "MSVC: Disabled Safe Exception Handlers for debug builds")
 endif()
 
 # Set build-directive (used in core to tell which buildtype we used)
@@ -49,8 +52,8 @@ add_definitions(-D_CRT_NONSTDC_NO_WARNINGS)
 message(STATUS "MSVC: Disabled POSIX warnings")
 
 if(NOT WITH_WARNINGS)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /wd4619")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /wd4619")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /wd4619 /wd4512")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /wd4619 /wd4512")
   message(STATUS "MSVC: Disabled generic compiletime warnings")
 endif()
 

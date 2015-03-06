@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -58,7 +58,7 @@ enum Misc
     MAX_TEMPEST_MINIONS         = 4
 };
 
-struct Position TempestMinions[MAX_TEMPEST_MINIONS] =
+Position const TempestMinions[MAX_TEMPEST_MINIONS] =
 {
     {-203.980103f, -281.287720f, 91.650223f, 1.598807f},
     {-233.489410f, -281.139282f, 91.652412f, 1.598807f},
@@ -101,7 +101,7 @@ class boss_emalon : public CreatureScript
             {
                 if (!summons.empty())
                 {
-                    for (std::list<uint64>::const_iterator itr = summons.begin(); itr != summons.end(); ++itr)
+                    for (SummonList::const_iterator itr = summons.begin(); itr != summons.end(); ++itr)
                     {
                         Creature* minion = ObjectAccessor::GetCreature(*me, *itr);
                         if (minion && minion->IsAlive() && !minion->GetVictim() && minion->AI())
@@ -184,18 +184,24 @@ class npc_tempest_minion : public CreatureScript
         {
             npc_tempest_minionAI(Creature* creature) : ScriptedAI(creature)
             {
+                Initialize();
                 instance = creature->GetInstanceScript();
+            }
+
+            void Initialize()
+            {
+                OverchargedTimer = 0;
             }
 
             void Reset() override
             {
                 events.Reset();
-                OverchargedTimer = 0;
+                Initialize();
             }
 
             void JustDied(Unit* /*killer*/) override
             {
-                if (Creature* emalon = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_EMALON)))
+                if (Creature* emalon = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_EMALON)))
                 {
                     if (emalon->IsAlive())
                     {
@@ -210,7 +216,7 @@ class npc_tempest_minion : public CreatureScript
                 DoZoneInCombat();
                 events.ScheduleEvent(EVENT_SHOCK, 20000);
 
-                if (Creature* pEmalon = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_EMALON)))
+                if (Creature* pEmalon = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_EMALON)))
                 {
                     if (!pEmalon->GetVictim() && pEmalon->AI())
                         pEmalon->AI()->AttackStart(who);

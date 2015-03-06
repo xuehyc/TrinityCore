@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,7 +19,7 @@
 /* ScriptData
 SDName: Feralas
 SD%Complete: 100
-SDComment: Quest support: 3520, 2767, Special vendor Gregan Brewspewer
+SDComment: Quest support: 2767, Special vendor Gregan Brewspewer
 SDCategory: Feralas
 EndScriptData */
 
@@ -183,26 +183,6 @@ public:
 
 };
 
-/*######
-## npc_screecher_spirit
-######*/
-
-class npc_screecher_spirit : public CreatureScript
-{
-public:
-    npc_screecher_spirit() : CreatureScript("npc_screecher_spirit") { }
-
-    bool OnGossipHello(Player* player, Creature* creature) override
-    {
-        player->SEND_GOSSIP_MENU(2039, creature->GetGUID());
-        player->TalkedToCreature(creature->GetEntry(), creature->GetGUID());
-        creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
-        return true;
-    }
-
-};
-
 enum GordunniTrap
 {
     GO_GORDUNNI_DIRT_MOUND = 144064,
@@ -247,6 +227,5 @@ void AddSC_feralas()
 {
     new npc_gregan_brewspewer();
     new npc_oox22fe();
-    new npc_screecher_spirit();
     new spell_gordunni_trap();
 }

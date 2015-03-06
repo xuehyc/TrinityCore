@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #define OCULUS_H_
 
 #define OculusScriptName "instance_oculus"
+#define DataHeader "OC"
 
 uint32 const EncounterCount = 4;
 
@@ -76,6 +77,18 @@ enum OculusSpells
 {
     SPELL_CENTRIFUGE_SHIELD     = 50053,
     SPELL_DEATH_SPELL           = 50415
+};
+
+enum InstanceTexts
+{
+    SAY_EREGOS_INTRO_TEXT = 0,
+    SAY_VAROS_INTRO_TEXT  = 4
+};
+
+enum InstanceEvents
+{
+    EVENT_VAROS_INTRO = 1,
+    EVENT_EREGOS_INTRO
 };
 
 enum Misc

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -128,34 +128,32 @@ class boss_devourer_of_souls : public CreatureScript
 
         struct boss_devourer_of_soulsAI : public BossAI
         {
-            boss_devourer_of_soulsAI(Creature* creature) : BossAI(creature, DATA_DEVOURER_EVENT)
+            boss_devourer_of_soulsAI(Creature* creature) : BossAI(creature, DATA_DEVOURER_OF_SOULS)
             {
+                Initialize();
+                beamAngle = 0.f;
+                beamAngleDiff = 0.f;
+                wailingSoulTick = 0;
             }
 
-            void InitializeAI() override
+            void Initialize()
             {
-                if (!instance || static_cast<InstanceMap*>(me->GetMap())->GetScriptId() != sObjectMgr->GetScriptId(FoSScriptName))
-                    me->IsAIEnabled = false;
-                else if (!me->isDead())
-                    Reset();
+                threeFaced = true;
             }
 
             void Reset() override
             {
+                _Reset();
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 me->SetDisplayId(DISPLAY_ANGER);
                 me->SetReactState(REACT_AGGRESSIVE);
 
-                events.Reset();
-                summons.DespawnAll();
-
-                threeFaced = true;
-
-                instance->SetData(DATA_DEVOURER_EVENT, NOT_STARTED);
+                Initialize();
             }
 
             void EnterCombat(Unit* /*who*/) override
             {
+                _EnterCombat();
                 Talk(SAY_FACE_AGGRO);
 
                 if (!me->FindNearestCreature(NPC_CRUCIBLE_OF_SOULS, 60)) // Prevent double spawn
@@ -165,8 +163,6 @@ class boss_devourer_of_souls : public CreatureScript
                 events.ScheduleEvent(EVENT_WELL_OF_SOULS, 30000);
                 events.ScheduleEvent(EVENT_UNLEASHED_SOULS, 20000);
                 events.ScheduleEvent(EVENT_WAILING_SOULS, urand(60000, 70000));
-
-                instance->SetData(DATA_DEVOURER_EVENT, IN_PROGRESS);
             }
 
             void KilledUnit(Unit* victim) override
@@ -174,7 +170,7 @@ class boss_devourer_of_souls : public CreatureScript
                 if (victim->GetTypeId() != TYPEID_PLAYER)
                     return;
 
-                int32 textId = 0;
+                uint8 textId = 0;
                 switch (me->GetDisplayId())
                 {
                     case DISPLAY_ANGER:
@@ -196,13 +192,11 @@ class boss_devourer_of_souls : public CreatureScript
 
             void JustDied(Unit* /*killer*/) override
             {
-                summons.DespawnAll();
+                _JustDied();
 
                 Position spawnPoint = {5618.139f, 2451.873f, 705.854f, 0};
 
                 Talk(SAY_FACE_DEATH);
-
-                instance->SetData(DATA_DEVOURER_EVENT, DONE);
 
                 int32 entryIndex;
                 if (instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
@@ -292,7 +286,7 @@ class boss_devourer_of_souls : public CreatureScript
 
                             beamAngle = me->GetOrientation();
 
-                            beamAngleDiff = M_PI/30.0f; // PI/2 in 15 sec = PI/30 per tick
+                            beamAngleDiff = float(M_PI)/30.0f; // PI/2 in 15 sec = PI/30 per tick
                             if (RAND(true, false))
                                 beamAngleDiff = -beamAngleDiff;
 
@@ -300,7 +294,7 @@ class boss_devourer_of_souls : public CreatureScript
                             me->SetReactState(REACT_PASSIVE);
 
                             //Remove any target
-                            me->SetTarget(0);
+                            me->SetTarget(ObjectGuid::Empty);
 
                             me->GetMotionMaster()->Clear();
                             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -345,7 +339,7 @@ class boss_devourer_of_souls : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const override
         {
-            return GetInstanceAI<boss_devourer_of_soulsAI>(creature);
+            return GetInstanceAI<boss_devourer_of_soulsAI>(creature, FoSScriptName);
         }
 };
 
@@ -398,11 +392,6 @@ class spell_devourer_of_souls_mirrored_soul_proc : public SpellScriptLoader
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_MIRRORED_SOUL_DAMAGE))
                     return false;
-                return true;
-            }
-
-            bool Load() override
-            {
                 return true;
             }
 

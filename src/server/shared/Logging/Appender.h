@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,10 +18,10 @@
 #ifndef APPENDER_H
 #define APPENDER_H
 
-#include "Define.h"
-#include <time.h>
 #include <unordered_map>
 #include <string>
+#include <time.h>
+#include "Define.h"
 
 // Values assigned have their equivalent in enum ACE_Log_Priority
 enum LogLevel

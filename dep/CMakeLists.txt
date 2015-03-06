@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -21,18 +21,18 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-  add_subdirectory(acelite)
-  if(USE_MYSQL_SOURCES)
-      add_subdirectory(mysqllite)
-  endif()
   if(TOOLS)
     add_subdirectory(bzip2)
   endif()
-  add_subdirectory(zlib)
+  if(SERVERS OR TOOLS)
+    add_subdirectory(zlib)
+  endif()
 endif()
 
-add_subdirectory(g3dlite)
-add_subdirectory(recastnavigation)
+if(SERVERS OR TOOLS)
+  add_subdirectory(g3dlite)
+  add_subdirectory(recastnavigation)
+endif()
 
 if(SERVERS)
   add_subdirectory(gsoap)

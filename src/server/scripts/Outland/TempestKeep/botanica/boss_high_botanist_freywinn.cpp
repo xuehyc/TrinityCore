@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -64,9 +64,19 @@ class boss_high_botanist_freywinn : public CreatureScript
 
         struct boss_high_botanist_freywinnAI : public BossAI
         {
-            boss_high_botanist_freywinnAI(Creature* creature) : BossAI(creature, DATA_HIGH_BOTANIST_FREYWINN) { }
+            boss_high_botanist_freywinnAI(Creature* creature) : BossAI(creature, DATA_HIGH_BOTANIST_FREYWINN)
+            {
+                Initialize();
+            }
 
-            std::list<uint64> Adds_List;
+            void Initialize()
+            {
+                SummonSeedling_Timer = 6000;
+                TreeForm_Timer = 30000;
+                MoveCheck_Timer = 1000;
+                DeadAddsCount = 0;
+                MoveFree = true;
+            }
 
             uint32 SummonSeedling_Timer;
             uint32 TreeForm_Timer;
@@ -76,13 +86,9 @@ class boss_high_botanist_freywinn : public CreatureScript
 
             void Reset() override
             {
-                Adds_List.clear();
+                summons.DespawnAll();
 
-                SummonSeedling_Timer = 6000;
-                TreeForm_Timer = 30000;
-                MoveCheck_Timer = 1000;
-                DeadAddsCount = 0;
-                MoveFree = true;
+                Initialize();
             }
 
             void EnterCombat(Unit* /*who*/) override
@@ -93,12 +99,17 @@ class boss_high_botanist_freywinn : public CreatureScript
             void JustSummoned(Creature* summoned) override
             {
                 if (summoned->GetEntry() == NPC_FRAYER)
-                    Adds_List.push_back(summoned->GetGUID());
+                    summons.Summon(summoned);
+            }
+
+            void SummonedCreatureDespawn(Creature* summon) override
+            {
+                summons.Despawn(summon);
             }
 
             void DoSummonSeedling()
             {
-                switch (rand()%4)
+                switch (rand32() % 4)
                 {
                     case 0: DoCast(me, SPELL_PLANT_WHITE); break;
                     case 1: DoCast(me, SPELL_PLANT_GREEN); break;
@@ -147,18 +158,15 @@ class boss_high_botanist_freywinn : public CreatureScript
                 {
                     if (MoveCheck_Timer <= diff)
                     {
-                        if (!Adds_List.empty())
+                        for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
                         {
-                            for (std::list<uint64>::iterator itr = Adds_List.begin(); itr != Adds_List.end(); ++itr)
+                            if (Unit* temp = ObjectAccessor::GetUnit(*me, *itr))
                             {
-                                if (Unit* temp = ObjectAccessor::GetUnit(*me, *itr))
+                                if (!temp->IsAlive())
                                 {
-                                    if (!temp->IsAlive())
-                                    {
-                                        Adds_List.erase(itr);
-                                        ++DeadAddsCount;
-                                        break;
-                                    }
+                                    summons.erase(itr);
+                                    ++DeadAddsCount;
+                                    break;
                                 }
                             }
                         }
@@ -168,7 +176,7 @@ class boss_high_botanist_freywinn : public CreatureScript
 
                         if (DeadAddsCount >= 3)
                         {
-                            Adds_List.clear();
+                            summons.DespawnAll();
                             DeadAddsCount = 0;
 
                             me->InterruptNonMeleeSpells(true);

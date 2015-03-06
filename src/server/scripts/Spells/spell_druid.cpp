@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -211,7 +211,10 @@ class spell_dru_innervate : public SpellScriptLoader
 
             void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
             {
-                amount = CalculatePct(int32(GetUnitOwner()->GetCreatePowers(POWER_MANA) / aurEff->GetTotalTicks()), amount);
+                if (Unit* caster = GetCaster())
+                    amount = int32(CalculatePct(caster->GetCreatePowers(POWER_MANA), amount) / aurEff->GetTotalTicks());
+                else
+                    amount = 0;
             }
 
             void Register() override
@@ -418,6 +421,13 @@ class spell_dru_moonkin_form_passive : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_moonkin_form_passive_AuraScript);
 
+        public:
+            spell_dru_moonkin_form_passive_AuraScript()
+            {
+                absorbPct = 0;
+            }
+
+        private:
             uint32 absorbPct;
 
             bool Load() override
@@ -518,6 +528,13 @@ class spell_dru_primal_tenacity : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_primal_tenacity_AuraScript);
 
+        public:
+            spell_dru_primal_tenacity_AuraScript()
+            {
+                absorbPct = 0;
+            }
+
+        private:
             uint32 absorbPct;
 
             bool Load() override
@@ -578,11 +595,11 @@ class spell_dru_rip : public SpellScriptLoader
                     uint8 cp = caster->ToPlayer()->GetComboPoints();
 
                     // Idol of Feral Shadows. Can't be handled as SpellMod due its dependency from CPs
-                    if (AuraEffect const* idol = caster->GetAuraEffect(SPELL_DRUID_IDOL_OF_FERAL_SHADOWS, EFFECT_0))
-                        amount += cp * idol->GetAmount();
+                    if (AuraEffect const* auraEffIdolOfFeralShadows = caster->GetAuraEffect(SPELL_DRUID_IDOL_OF_FERAL_SHADOWS, EFFECT_0))
+                        amount += cp * auraEffIdolOfFeralShadows->GetAmount();
                     // Idol of Worship. Can't be handled as SpellMod due its dependency from CPs
-                    else if (AuraEffect const* idol = caster->GetAuraEffect(SPELL_DRUID_IDOL_OF_WORSHIP, EFFECT_0))
-                        amount += cp * idol->GetAmount();
+                    else if (AuraEffect const* auraEffIdolOfWorship = caster->GetAuraEffect(SPELL_DRUID_IDOL_OF_WORSHIP, EFFECT_0))
+                        amount += cp * auraEffIdolOfWorship->GetAmount();
 
                     amount += int32(CalculatePct(caster->GetTotalAttackPowerValue(BASE_ATTACK), cp));
                 }
@@ -610,6 +627,13 @@ class spell_dru_savage_defense : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_savage_defense_AuraScript);
 
+        public:
+            spell_dru_savage_defense_AuraScript()
+            {
+                absorbPct = 0;
+            }
+
+        private:
             uint32 absorbPct;
 
             bool Load() override

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -78,8 +78,33 @@ public:
     {
         boss_nightbaneAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
             Intro = true;
+            RainBones = false;
+            Skeletons = false;
+            FlyTimer = 0;
+        }
+
+        void Initialize()
+        {
+            BellowingRoarTimer = 30000;
+            CharredEarthTimer = 15000;
+            DistractingAshTimer = 20000;
+            SmolderingBreathTimer = 10000;
+            TailSweepTimer = 12000;
+            RainofBonesTimer = 10000;
+            SmokingBlastTimer = 20000;
+            FireballBarrageTimer = 13000;
+            SearingCindersTimer = 14000;
+            WaitTimer = 1000;
+
+            Phase = 1;
+            FlyCount = 0;
+            MovePhase = 0;
+
+            Flying = false;
+            Movement = false;
         }
 
         InstanceScript* instance;
@@ -111,20 +136,7 @@ public:
 
         void Reset() override
         {
-            BellowingRoarTimer = 30000;
-            CharredEarthTimer = 15000;
-            DistractingAshTimer = 20000;
-            SmolderingBreathTimer = 10000;
-            TailSweepTimer = 12000;
-            RainofBonesTimer = 10000;
-            SmokingBlastTimer = 20000;
-            FireballBarrageTimer = 13000;
-            SearingCindersTimer = 14000;
-            WaitTimer = 1000;
-
-            Phase =1;
-            FlyCount = 0;
-            MovePhase = 0;
+            Initialize();
 
             me->SetSpeed(MOVE_RUN, 2.0f);
             me->SetDisableGravity(true);
@@ -138,9 +150,6 @@ public:
 
             HandleTerraceDoors(true);
 
-            Flying = false;
-            Movement = false;
-
             if (!Intro)
             {
                 me->SetHomePosition(IntroWay[7][0], IntroWay[7][1], IntroWay[7][2], 0);
@@ -150,8 +159,8 @@ public:
 
         void HandleTerraceDoors(bool open)
         {
-            instance->HandleGameObject(instance->GetData64(DATA_MASTERS_TERRACE_DOOR_1), open);
-            instance->HandleGameObject(instance->GetData64(DATA_MASTERS_TERRACE_DOOR_2), open);
+            instance->HandleGameObject(instance->GetGuidData(DATA_MASTERS_TERRACE_DOOR_1), open);
+            instance->HandleGameObject(instance->GetGuidData(DATA_MASTERS_TERRACE_DOOR_2), open);
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -328,7 +337,7 @@ public:
                 if (TailSweepTimer <= diff)
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                        if (!me->HasInArc(M_PI, target))
+                        if (!me->HasInArc(float(M_PI), target))
                             DoCast(target, SPELL_TAIL_SWEEP);
                     TailSweepTimer = 15000;
                 } else TailSweepTimer -= diff;

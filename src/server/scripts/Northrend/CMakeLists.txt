@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -20,7 +20,6 @@ set(scripts_STAT_SRCS
   Northrend/Ulduar/HallsOfLightning/boss_volkhan.cpp
   Northrend/Ulduar/HallsOfLightning/boss_loken.cpp
   Northrend/Ulduar/Ulduar/boss_general_vezax.cpp
-  Northrend/Ulduar/Ulduar/ulduar_teleporter.cpp
   Northrend/Ulduar/Ulduar/boss_thorim.cpp
   Northrend/Ulduar/Ulduar/boss_ignis.cpp
   Northrend/Ulduar/Ulduar/boss_algalon_the_observer.cpp

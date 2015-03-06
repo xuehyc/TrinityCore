@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -58,7 +58,10 @@ class boss_azuregos : public CreatureScript
 
         struct boss_azuregosAI : public WorldBossAI
         {
-            boss_azuregosAI(Creature* creature) : WorldBossAI(creature) { }
+            boss_azuregosAI(Creature* creature) : WorldBossAI(creature)
+            {
+                _enraged = false;
+            }
 
             void Reset() override
             {

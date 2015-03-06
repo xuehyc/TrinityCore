@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -106,10 +106,32 @@ public:
     {
         boss_bjarngrimAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
             m_uiStance = STANCE_DEFENSIVE;
-            memset(&m_auiStormforgedLieutenantGUID, 0, sizeof(m_auiStormforgedLieutenantGUID));
             canBuff = true;
+        }
+
+        void Initialize()
+        {
+            m_bIsChangingStance = false;
+
+            m_uiChargingStatus = 0;
+            m_uiCharge_Timer = 1000;
+
+            m_uiChangeStance_Timer = urand(20000, 25000);
+
+            m_uiReflection_Timer = 8000;
+            m_uiKnockAway_Timer = 20000;
+            m_uiPummel_Timer = 10000;
+            m_uiIronform_Timer = 25000;
+
+            m_uiIntercept_Timer = 5000;
+            m_uiWhirlwind_Timer = 10000;
+            m_uiCleave_Timer = 8000;
+
+            m_uiMortalStrike_Timer = 8000;
+            m_uiSlam_Timer = 10000;
         }
 
         InstanceScript* instance;
@@ -135,7 +157,7 @@ public:
         uint32 m_uiMortalStrike_Timer;
         uint32 m_uiSlam_Timer;
 
-        uint64 m_auiStormforgedLieutenantGUID[2];
+        ObjectGuid m_auiStormforgedLieutenantGUID[2];
 
         void Reset() override
         {
@@ -143,32 +165,14 @@ public:
                 if (!me->HasAura(SPELL_TEMPORARY_ELECTRICAL_CHARGE))
                     me->AddAura(SPELL_TEMPORARY_ELECTRICAL_CHARGE, me);
 
-            m_bIsChangingStance = false;
-
-            m_uiChargingStatus = 0;
-            m_uiCharge_Timer = 1000;
-
-            m_uiChangeStance_Timer = urand(20000, 25000);
-
-            m_uiReflection_Timer = 8000;
-            m_uiKnockAway_Timer = 20000;
-            m_uiPummel_Timer = 10000;
-            m_uiIronform_Timer = 25000;
-
-            m_uiIntercept_Timer = 5000;
-            m_uiWhirlwind_Timer = 10000;
-            m_uiCleave_Timer = 8000;
-
-            m_uiMortalStrike_Timer = 8000;
-            m_uiSlam_Timer = 10000;
+            Initialize();
 
             for (uint8 i = 0; i < 2; ++i)
             {
-                if (Creature* pStormforgedLieutenant = (ObjectAccessor::GetCreature((*me), m_auiStormforgedLieutenantGUID[i])))
-                {
+                // Something isn't right here - m_auiStormforgedLieutenantGUID is never assinged to
+                if (Creature* pStormforgedLieutenant = ObjectAccessor::GetCreature(*me, m_auiStormforgedLieutenantGUID[i]))
                     if (!pStormforgedLieutenant->IsAlive())
                         pStormforgedLieutenant->Respawn();
-                }
             }
 
             if (m_uiStance != STANCE_DEFENSIVE)
@@ -247,7 +251,7 @@ public:
 
                 DoRemoveStanceAura(m_uiStance);
 
-                int uiTempStance = rand()%(3-1);
+                int uiTempStance = rand32() % (3 - 1);
 
                 if (uiTempStance >= m_uiStance)
                     ++uiTempStance;
@@ -395,7 +399,14 @@ public:
     {
         npc_stormforged_lieutenantAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            m_uiArcWeld_Timer = urand(20000, 21000);
+            m_uiRenewSteel_Timer = urand(10000, 11000);
         }
 
         InstanceScript* instance;
@@ -405,13 +416,12 @@ public:
 
         void Reset() override
         {
-            m_uiArcWeld_Timer = urand(20000, 21000);
-            m_uiRenewSteel_Timer = urand(10000, 11000);
+            Initialize();
         }
 
         void EnterCombat(Unit* who) override
         {
-            if (Creature* pBjarngrim = instance->instance->GetCreature(instance->GetData64(DATA_BJARNGRIM)))
+            if (Creature* pBjarngrim = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_BJARNGRIM)))
             {
                 if (pBjarngrim->IsAlive() && !pBjarngrim->GetVictim())
                     pBjarngrim->AI()->AttackStart(who);
@@ -434,7 +444,7 @@ public:
 
             if (m_uiRenewSteel_Timer <= uiDiff)
             {
-                if (Creature* pBjarngrim = instance->instance->GetCreature(instance->GetData64(DATA_BJARNGRIM)))
+                if (Creature* pBjarngrim = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_BJARNGRIM)))
                 {
                     if (pBjarngrim->IsAlive())
                         DoCast(pBjarngrim, SPELL_RENEW_STEEL_N);

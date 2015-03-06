@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -51,8 +51,18 @@ public:
     {
         boss_rage_winterchillAI(Creature* creature) : hyjal_trashAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
             go = false;
+        }
+
+        void Initialize()
+        {
+            damageTaken = 0;
+            FrostArmorTimer = 37000;
+            DecayTimer = 45000;
+            NovaTimer = 15000;
+            IceboltTimer = 10000;
         }
 
         uint32 FrostArmorTimer;
@@ -63,11 +73,7 @@ public:
 
         void Reset() override
         {
-            damageTaken = 0;
-            FrostArmorTimer = 37000;
-            DecayTimer = 45000;
-            NovaTimer = 15000;
-            IceboltTimer = 10000;
+            Initialize();
 
             if (IsEvent)
                 instance->SetData(DATA_RAGEWINTERCHILLEVENT, NOT_STARTED);
@@ -89,7 +95,7 @@ public:
         {
             if (waypointId == 7 && instance)
             {
-                Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_JAINAPROUDMOORE));
                 if (target && target->IsAlive())
                     me->AddThreat(target, 0.0f);
             }
@@ -132,24 +138,24 @@ public:
             if (FrostArmorTimer <= diff)
             {
                 DoCast(me, SPELL_FROST_ARMOR);
-                FrostArmorTimer = 40000+rand()%20000;
+                FrostArmorTimer = 40000 + rand32() % 20000;
             } else FrostArmorTimer -= diff;
             if (DecayTimer <= diff)
             {
                 DoCastVictim(SPELL_DEATH_AND_DECAY);
-                DecayTimer = 60000+rand()%20000;
+                DecayTimer = 60000 + rand32() % 20000;
                 Talk(SAY_DECAY);
             } else DecayTimer -= diff;
             if (NovaTimer <= diff)
             {
                 DoCastVictim(SPELL_FROST_NOVA);
-                NovaTimer = 30000+rand()%15000;
+                NovaTimer = 30000 + rand32() % 15000;
                 Talk(SAY_NOVA);
             } else NovaTimer -= diff;
             if (IceboltTimer <= diff)
             {
                 DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true), SPELL_ICEBOLT);
-                IceboltTimer = 11000+rand()%20000;
+                IceboltTimer = 11000 + rand32() % 20000;
             } else IceboltTimer -= diff;
 
             DoMeleeAttackIfReady();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "GameEventMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "nexus.h"
@@ -31,7 +32,9 @@ enum Spells
 
     SPELL_FIRE_MAGUS_VISUAL                       = 47705,
     SPELL_FROST_MAGUS_VISUAL                      = 47706,
-    SPELL_ARCANE_MAGUS_VISUAL                     = 47704
+    SPELL_ARCANE_MAGUS_VISUAL                     = 47704,
+
+    SPELL_WEAR_CHRISTMAS_HAT                      = 61400
 };
 
 enum Creatures
@@ -53,7 +56,9 @@ enum Yells
 enum Misc
 {
     ACTION_MAGUS_DEAD                             = 1,
-    DATA_SPLIT_PERSONALITY                        = 2
+    DATA_SPLIT_PERSONALITY                        = 2,
+
+    GAME_EVENT_WINTER_VEIL                        = 2,
 };
 
 const Position  CenterOfRoom = {504.80f, 89.07f, -16.12f, 6.27f};
@@ -72,14 +77,39 @@ public:
     {
         boss_magus_telestraAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+            bFireMagusDead = false;
+            bFrostMagusDead = false;
+            bArcaneMagusDead = false;
+            uiIsWaitingToAppearTimer = 0;
+        }
+
+        void Initialize()
+        {
+            Phase = 0;
+            //These times are probably wrong
+            uiIceNovaTimer = 7 * IN_MILLISECONDS;
+            uiFireBombTimer = 0;
+            uiGravityWellTimer = 15 * IN_MILLISECONDS;
+            uiCooldown = 0;
+
+            uiFireMagusGUID.Clear();
+            uiFrostMagusGUID.Clear();
+            uiArcaneMagusGUID.Clear();
+
+            for (uint8 n = 0; n < 3; ++n)
+                time[n] = 0;
+
+            splitPersonality = 0;
+            bIsWaitingToAppear = false;
         }
 
         InstanceScript* instance;
 
-        uint64 uiFireMagusGUID;
-        uint64 uiFrostMagusGUID;
-        uint64 uiArcaneMagusGUID;
+        ObjectGuid uiFireMagusGUID;
+        ObjectGuid uiFrostMagusGUID;
+        ObjectGuid uiArcaneMagusGUID;
 
         bool bFireMagusDead;
         bool bFrostMagusDead;
@@ -98,41 +128,29 @@ public:
 
         void Reset() override
         {
-            Phase = 0;
-            //These times are probably wrong
-            uiIceNovaTimer =  7*IN_MILLISECONDS;
-            uiFireBombTimer =  0;
-            uiGravityWellTimer = 15*IN_MILLISECONDS;
-            uiCooldown = 0;
-
-            uiFireMagusGUID = 0;
-            uiFrostMagusGUID = 0;
-            uiArcaneMagusGUID = 0;
-
-            for (uint8 n = 0; n < 3; ++n)
-                time[n] = 0;
-
-            splitPersonality = 0;
-            bIsWaitingToAppear = false;
+            Initialize();
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetVisible(true);
 
-            instance->SetData(DATA_MAGUS_TELESTRA_EVENT, NOT_STARTED);
+            instance->SetBossState(DATA_MAGUS_TELESTRA, NOT_STARTED);
+
+            if (IsHeroic() && sGameEventMgr->IsActiveEvent(GAME_EVENT_WINTER_VEIL) && !me->HasAura(SPELL_WEAR_CHRISTMAS_HAT))
+                me->AddAura(SPELL_WEAR_CHRISTMAS_HAT, me);
         }
 
         void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_AGGRO);
 
-            instance->SetData(DATA_MAGUS_TELESTRA_EVENT, IN_PROGRESS);
+            instance->SetBossState(DATA_MAGUS_TELESTRA, IN_PROGRESS);
         }
 
         void JustDied(Unit* /*killer*/) override
         {
             Talk(SAY_DEATH);
 
-            instance->SetData(DATA_MAGUS_TELESTRA_EVENT, DONE);
+            instance->SetBossState(DATA_MAGUS_TELESTRA, DONE);
         }
 
         void KilledUnit(Unit* who) override
@@ -163,7 +181,7 @@ public:
             return 0;
         }
 
-        uint64 SplitPersonality(uint32 entry)
+        ObjectGuid SplitPersonality(uint32 entry)
         {
             if (Creature* Summoned = me->SummonCreature(entry, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1*IN_MILLISECONDS))
             {
@@ -189,7 +207,7 @@ public:
                     Summoned->AI()->AttackStart(target);
                 return Summoned->GetGUID();
             }
-            return 0;
+            return ObjectGuid::Empty;
         }
 
         void SummonedCreatureDespawn(Creature* summon) override
@@ -246,9 +264,9 @@ public:
                         Phase = 2;
                     if (Phase == 3)
                         Phase = 4;
-                    uiFireMagusGUID = 0;
-                    uiFrostMagusGUID = 0;
-                    uiArcaneMagusGUID = 0;
+                    uiFireMagusGUID.Clear();
+                    uiFrostMagusGUID.Clear();
+                    uiArcaneMagusGUID.Clear();
                     bIsWaitingToAppear = true;
                     uiIsWaitingToAppearTimer = 4*IN_MILLISECONDS;
                     Talk(SAY_MERGE);

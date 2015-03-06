@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -36,7 +36,7 @@ class ticket_commandscript : public CommandScript
 public:
     ticket_commandscript() : CommandScript("ticket_commandscript") { }
 
-    ChatCommand* GetCommands() const
+    ChatCommand* GetCommands() const override
     {
         static ChatCommand ticketResponseCommandTable[] =
         {
@@ -95,7 +95,7 @@ public:
             return true;
         }
 
-        uint64 targetGuid = sObjectMgr->GetPlayerGUIDByName(target);
+        ObjectGuid targetGuid = sObjectMgr->GetPlayerGUIDByName(target);
         uint32 accountId = sObjectMgr->GetPlayerAccountIdByGUID(targetGuid);
         // Target must exist and have administrative rights
         if (!AccountMgr::HasPermission(accountId, rbac::RBAC_PERM_COMMANDS_BE_ASSIGNED_TICKET, realmID))
@@ -126,7 +126,7 @@ public:
         ticket->SaveToDB(trans);
         sTicketMgr->UpdateLastChange();
 
-        std::string msg = ticket->FormatMessageString(*handler, NULL, target.c_str(), NULL, NULL);
+        std::string msg = ticket->FormatMessageString(*handler, NULL, target.c_str(), NULL, NULL, NULL);
         handler->SendGlobalGMSysMessage(msg.c_str());
         return true;
     }
@@ -153,21 +153,18 @@ public:
             return true;
         }
 
-        sTicketMgr->CloseTicket(ticket->GetId(), player ? player->GetGUID() : -1);
+        sTicketMgr->CloseTicket(ticket->GetId(), player ? player->GetGUID() : ObjectGuid(uint64(-1)));
         sTicketMgr->UpdateLastChange();
 
-        std::string msg = ticket->FormatMessageString(*handler, player ? player->GetName().c_str() : "Console", NULL, NULL, NULL);
+        std::string msg = ticket->FormatMessageString(*handler, player ? player->GetName().c_str() : "Console", NULL, NULL, NULL, NULL);
         handler->SendGlobalGMSysMessage(msg.c_str());
 
         // Inform player, who submitted this ticket, that it is closed
         if (Player* submitter = ticket->GetPlayer())
         {
-            if (submitter->IsInWorld())
-            {
-                WorldPacket data(SMSG_GMTICKET_DELETETICKET, 4);
-                data << uint32(GMTICKET_RESPONSE_TICKET_DELETED);
-                submitter->GetSession()->SendPacket(&data);
-            }
+            WorldPacket data(SMSG_GMTICKET_DELETETICKET, 4);
+            data << uint32(GMTICKET_RESPONSE_TICKET_DELETED);
+            submitter->GetSession()->SendPacket(&data);
         }
         return true;
     }
@@ -205,7 +202,7 @@ public:
         ticket->SaveToDB(trans);
         sTicketMgr->UpdateLastChange();
 
-        std::string msg = ticket->FormatMessageString(*handler, NULL, ticket->GetAssignedToName().c_str(), NULL, NULL);
+        std::string msg = ticket->FormatMessageString(*handler, NULL, ticket->GetAssignedToName().c_str(), NULL, NULL, NULL);
         msg += handler->PGetParseString(LANG_COMMAND_TICKETLISTADDCOMMENT, player ? player->GetName().c_str() : "Console", comment);
         handler->SendGlobalGMSysMessage(msg.c_str());
 
@@ -232,13 +229,15 @@ public:
         }
 
         if (Player* player = ticket->GetPlayer())
-            if (player->IsInWorld())
-                ticket->SendResponse(player->GetSession());
+            ticket->SendResponse(player->GetSession());
 
         SQLTransaction trans = SQLTransaction(NULL);
         ticket->SetCompleted();
         ticket->SaveToDB(trans);
 
+        std::string msg = ticket->FormatMessageString(*handler, NULL, NULL,
+            NULL, NULL, handler->GetSession() ? handler->GetSession()->GetPlayer()->GetName().c_str() : "Console");
+        handler->SendGlobalGMSysMessage(msg.c_str());
         sTicketMgr->UpdateLastChange();
         return true;
     }
@@ -262,7 +261,7 @@ public:
             return true;
         }
 
-        std::string msg = ticket->FormatMessageString(*handler, NULL, NULL, NULL, handler->GetSession() ? handler->GetSession()->GetPlayer()->GetName().c_str() : "Console");
+        std::string msg = ticket->FormatMessageString(*handler, NULL, NULL, NULL, handler->GetSession() ? handler->GetSession()->GetPlayer()->GetName().c_str() : "Console", NULL);
         handler->SendGlobalGMSysMessage(msg.c_str());
 
         sTicketMgr->RemoveTicket(ticket->GetId());
@@ -270,13 +269,10 @@ public:
 
         if (Player* player = ticket->GetPlayer())
         {
-            if (player->IsInWorld())
-            {
-                // Force abandon ticket
-                WorldPacket data(SMSG_GMTICKET_DELETETICKET, 4);
-                data << uint32(GMTICKET_RESPONSE_TICKET_DELETED);
-                player->GetSession()->SendPacket(&data);
-            }
+            // Force abandon ticket
+            WorldPacket data(SMSG_GMTICKET_DELETETICKET, 4);
+            data << uint32(GMTICKET_RESPONSE_TICKET_DELETED);
+            player->GetSession()->SendPacket(&data);
         }
 
         return true;
@@ -298,8 +294,7 @@ public:
         ticket->SetEscalatedStatus(TICKET_IN_ESCALATION_QUEUE);
 
         if (Player* player = ticket->GetPlayer())
-            if (player->IsInWorld())
-                sTicketMgr->SendTicket(player->GetSession(), ticket);
+            sTicketMgr->SendTicket(player->GetSession(), ticket);
 
         sTicketMgr->UpdateLastChange();
         return true;
@@ -369,11 +364,11 @@ public:
         // Get security level of player, whom this ticket is assigned to
         uint32 security = SEC_PLAYER;
         Player* assignedPlayer = ticket->GetAssignedPlayer();
-        if (assignedPlayer && assignedPlayer->IsInWorld())
+        if (assignedPlayer)
             security = assignedPlayer->GetSession()->GetSecurity();
         else
         {
-            uint64 guid = ticket->GetAssignedToGUID();
+            ObjectGuid guid = ticket->GetAssignedToGUID();
             uint32 accountId = sObjectMgr->GetPlayerAccountIdByGUID(guid);
             security = AccountMgr::GetSecurity(accountId, realmID);
         }
@@ -394,7 +389,7 @@ public:
         sTicketMgr->UpdateLastChange();
 
         std::string msg = ticket->FormatMessageString(*handler, NULL, assignedTo.c_str(),
-            handler->GetSession() ? handler->GetSession()->GetPlayer()->GetName().c_str() : "Console", NULL);
+            handler->GetSession() ? handler->GetSession()->GetPlayer()->GetName().c_str() : "Console", NULL, NULL);
         handler->SendGlobalGMSysMessage(msg.c_str());
 
         return true;
@@ -431,8 +426,8 @@ public:
             return false;
 
         // Detect target's GUID
-        uint64 guid = 0;
-        if (Player* player = sObjectAccessor->FindPlayerByName(name))
+        ObjectGuid guid;
+        if (Player* player = ObjectAccessor::FindPlayerByName(name))
             guid = player->GetGUID();
         else
             guid = sObjectMgr->GetPlayerGUIDByName(name);

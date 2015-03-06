@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,7 +18,6 @@
 #ifndef TRANSPORTMGR_H
 #define TRANSPORTMGR_H
 
-#include <ace/Singleton.h>
 #include <G3D/Quat.h>
 #include "Spline.h"
 #include "DBCStores.h"
@@ -84,6 +83,8 @@ typedef std::map<uint32, TransportRotationEntry const*> TransportPathRotationCon
 
 struct TransportAnimation
 {
+    TransportAnimation() : TotalTime(0) { }
+
     TransportPathContainer Path;
     TransportPathRotationContainer Rotations;
     uint32 TotalTime;
@@ -96,10 +97,15 @@ typedef std::map<uint32, TransportAnimation> TransportAnimationContainer;
 
 class TransportMgr
 {
-        friend class ACE_Singleton<TransportMgr, ACE_Thread_Mutex>;
         friend void LoadDBCStores(std::string const&);
 
     public:
+        static TransportMgr* instance()
+        {
+            static TransportMgr instance;
+            return &instance;
+        }
+
         void Unload();
 
         void LoadTransportTemplates();
@@ -155,6 +161,6 @@ class TransportMgr
         TransportAnimationContainer _transportAnimations;
 };
 
-#define sTransportMgr ACE_Singleton<TransportMgr, ACE_Thread_Mutex>::instance()
+#define sTransportMgr TransportMgr::instance()
 
 #endif // TRANSPORTMGR_H

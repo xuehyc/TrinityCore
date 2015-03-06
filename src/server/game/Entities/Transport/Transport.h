@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -31,6 +31,8 @@ class Transport : public GameObject, public TransportBase
 
         Transport();
     public:
+        typedef std::set<WorldObject*> PassengerSet;
+
         ~Transport();
 
         bool Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress);
@@ -42,7 +44,7 @@ class Transport : public GameObject, public TransportBase
 
         void AddPassenger(WorldObject* passenger);
         void RemovePassenger(WorldObject* passenger);
-        std::set<WorldObject*> const& GetPassengers() const { return _passengers; }
+        PassengerSet const& GetPassengers() const { return _passengers; }
 
         Creature* CreateNPCPassenger(uint32 guid, CreatureData const* data);
         GameObject* CreateGOPassenger(uint32 guid, GameObjectData const* data);
@@ -93,13 +95,15 @@ class Transport : public GameObject, public TransportBase
 
         void EnableMovement(bool enabled);
 
+        void SetDelayedAddModelToMap() { _delayedAddModel = true; }
+
         TransportTemplate const* GetTransportTemplate() const { return _transportInfo; }
 
     private:
         void MoveToNextWaypoint();
         float CalculateSegmentPos(float perc);
         bool TeleportTransport(uint32 newMapid, float x, float y, float z, float o);
-        void UpdatePassengerPositions(std::set<WorldObject*>& passengers);
+        void UpdatePassengerPositions(PassengerSet& passengers);
         void DoEventIfAny(KeyFrame const& node, bool departure);
 
         //! Helpers to know if stop frame was reached
@@ -118,8 +122,11 @@ class Transport : public GameObject, public TransportBase
         bool _triggeredArrivalEvent;
         bool _triggeredDepartureEvent;
 
-        std::set<WorldObject*> _passengers;
-        std::set<WorldObject*> _staticPassengers;
+        PassengerSet _passengers;
+        PassengerSet::iterator _passengerTeleportItr;
+        PassengerSet _staticPassengers;
+
+        bool _delayedAddModel;
 };
 
 #endif

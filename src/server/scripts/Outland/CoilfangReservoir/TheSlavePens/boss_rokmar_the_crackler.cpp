@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -48,12 +48,20 @@ class boss_rokmar_the_crackler : public CreatureScript
 
         struct boss_rokmar_the_cracklerAI : public BossAI
         {
-            boss_rokmar_the_cracklerAI(Creature* creature) : BossAI(creature, DATA_MENNU_THE_BETRAYER) { }
+            boss_rokmar_the_cracklerAI(Creature* creature) : BossAI(creature, DATA_MENNU_THE_BETRAYER)
+            {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                rokmarFrenzy = false;
+            }
 
             void Reset() override
             {
                 _Reset();
-                rokmarFrenzy = false;
+                Initialize();
             }
 
             void JustDied(Unit* /*killer*/) override

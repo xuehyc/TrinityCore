@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -62,7 +62,19 @@ class boss_laj : public CreatureScript
 
         struct boss_lajAI : public BossAI
         {
-            boss_lajAI(Creature* creature) : BossAI(creature, DATA_LAJ) { }
+            boss_lajAI(Creature* creature) : BossAI(creature, DATA_LAJ)
+            {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                CanSummon = false;
+                Teleport_Timer = 20000;
+                Summon_Timer = 2500;
+                Transform_Timer = 30000;
+                Allergic_Timer = 5000;
+            }
 
             bool CanSummon;
             uint32 Teleport_Timer;
@@ -79,16 +91,12 @@ class boss_laj : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
                 me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, false);
 
-                CanSummon = false;
-                Teleport_Timer = 20000;
-                Summon_Timer = 2500;
-                Transform_Timer = 30000;
-                Allergic_Timer = 5000;
+                Initialize();
             }
 
             void DoTransform()
             {
-                switch (rand()%5)
+                switch (rand32() % 5)
                 {
                     case 0:
                         me->SetDisplayId(MODEL_DEFAULT);
@@ -135,7 +143,7 @@ class boss_laj : public CreatureScript
 
             void DoSummons()
             {
-                switch (rand()%4)
+                switch (rand32() % 4)
                 {
                     case 0:
                         DoCast(me, SPELL_SUMMON_LASHER_1, true);
@@ -187,7 +195,7 @@ class boss_laj : public CreatureScript
                 if (Allergic_Timer <= diff)
                 {
                     DoCastVictim(SPELL_ALLERGIC_REACTION);
-                    Allergic_Timer = 25000+rand()%15000;
+                    Allergic_Timer = 25000 + rand32() % 15000;
                 }
                 else
                     Allergic_Timer -= diff;
@@ -195,7 +203,7 @@ class boss_laj : public CreatureScript
                 if (Teleport_Timer <= diff)
                 {
                     DoCast(me, SPELL_TELEPORT_SELF);
-                    Teleport_Timer = 30000+rand()%10000;
+                    Teleport_Timer = 30000 + rand32() % 10000;
                     CanSummon = true;
                 }
                 else
@@ -204,7 +212,7 @@ class boss_laj : public CreatureScript
                 if (Transform_Timer <= diff)
                 {
                     DoTransform();
-                    Transform_Timer = 25000+rand()%15000;
+                    Transform_Timer = 25000 + rand32() % 15000;
                 }
                 else
                     Transform_Timer -= diff;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -105,10 +105,10 @@ m_length(NULL)
         for (uint64 fIndex = 0; fIndex < m_fieldCount; ++fIndex)
         {
             if (!*m_rBind[fIndex].is_null)
-                m_rows[uint32(m_rowPosition)][fIndex].SetByteValue( m_rBind[fIndex].buffer,
+                m_rows[uint32(m_rowPosition)][fIndex].SetByteValue(m_rBind[fIndex].buffer,
                                                             m_rBind[fIndex].buffer_length,
                                                             m_rBind[fIndex].buffer_type,
-                                                           *m_rBind[fIndex].length );
+                                                           *m_rBind[fIndex].length);
             else
                 switch (m_rBind[fIndex].buffer_type)
                 {
@@ -118,16 +118,16 @@ m_length(NULL)
                     case MYSQL_TYPE_BLOB:
                     case MYSQL_TYPE_STRING:
                     case MYSQL_TYPE_VAR_STRING:
-                    m_rows[uint32(m_rowPosition)][fIndex].SetByteValue( "",
+                    m_rows[uint32(m_rowPosition)][fIndex].SetByteValue("",
                                                             m_rBind[fIndex].buffer_length,
                                                             m_rBind[fIndex].buffer_type,
-                                                           *m_rBind[fIndex].length );
+                                                           *m_rBind[fIndex].length);
                     break;
                     default:
-                    m_rows[uint32(m_rowPosition)][fIndex].SetByteValue( 0,
+                    m_rows[uint32(m_rowPosition)][fIndex].SetByteValue(nullptr,
                                                             m_rBind[fIndex].buffer_length,
                                                             m_rBind[fIndex].buffer_type,
-                                                           *m_rBind[fIndex].length );
+                                                           *m_rBind[fIndex].length);
                 }
         }
         m_rowPosition++;
@@ -186,15 +186,8 @@ bool PreparedResultSet::_NextRow()
     if (m_rowPosition >= m_rowCount)
         return false;
 
-    int retval = mysql_stmt_fetch( m_stmt );
-
-    if (!retval || retval == MYSQL_DATA_TRUNCATED)
-        retval = true;
-
-    if (retval == MYSQL_NO_DATA)
-        retval = false;
-
-    return retval;
+    int retval = mysql_stmt_fetch(m_stmt);
+    return retval == 0 || retval == MYSQL_DATA_TRUNCATED;
 }
 
 void ResultSet::CleanUp()

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2008 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -29,7 +29,7 @@
 #include <cstdio>
 #include <sstream>
 
-Log::Log() : worker(NULL)
+Log::Log() : _ioService(nullptr), _strand(nullptr)
 {
     m_logsTimestamp = "_" + GetTimestampStr();
     LoadFromConfig();
@@ -37,6 +37,7 @@ Log::Log() : worker(NULL)
 
 Log::~Log()
 {
+    delete _strand;
     Close();
 }
 
@@ -198,6 +199,9 @@ void Log::CreateLoggerFromConfig(std::string const& appenderName)
         return;
     }
 
+    if (level < lowestLogLevel)
+        lowestLogLevel = level;
+
     logger.Create(name, level);
     //fprintf(stdout, "Log::CreateLoggerFromConfig: Created Logger %s, Level %u\n", name.c_str(), level);
 
@@ -272,8 +276,13 @@ void Log::write(LogMessage* msg) const
     Logger const* logger = GetLoggerByType(msg->type);
     msg->text.append("\n");
 
-    if (worker)
-        worker->enqueue(new LogOperation(logger, msg));
+    if (_ioService)
+    {
+        auto logOperation = std::shared_ptr<LogOperation>(new LogOperation(logger, msg));
+
+        _ioService->post(_strand->wrap([logOperation](){ logOperation->call(); }));
+
+    }
     else
     {
         logger->write(*msg);
@@ -283,9 +292,11 @@ void Log::write(LogMessage* msg) const
 
 std::string Log::GetTimestampStr()
 {
-    time_t t = time(NULL);
-    tm aTm;
-    ACE_OS::localtime_r(&t, &aTm);
+    time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    std::tm aTm;
+    localtime_r(&tt, &aTm);
+
     //       YYYY   year
     //       MM     month (2 digits 01-12)
     //       DD     day (2 digits 01-31)
@@ -313,6 +324,9 @@ bool Log::SetLogLevel(std::string const& name, const char* newLevelc, bool isLog
             return false;
 
         it->second.setLogLevel(newLevel);
+
+        if (newLevel != LOG_LEVEL_DISABLED && newLevel < lowestLogLevel)
+            lowestLogLevel = newLevel;
     }
     else
     {
@@ -326,7 +340,7 @@ bool Log::SetLogLevel(std::string const& name, const char* newLevelc, bool isLog
     return true;
 }
 
-void Log::outCharDump(char const* str, uint32 accountId, uint32 guid, char const* name)
+void Log::outCharDump(char const* str, uint32 accountId, uint64 guid, char const* name)
 {
     if (!str || !ShouldLog("entities.player.dump", LOG_LEVEL_INFO))
         return;
@@ -373,8 +387,6 @@ void Log::SetRealmId(uint32 id)
 
 void Log::Close()
 {
-    delete worker;
-    worker = NULL;
     loggers.clear();
     for (AppenderMap::iterator it = appenders.begin(); it != appenders.end(); ++it)
     {
@@ -388,9 +400,7 @@ void Log::LoadFromConfig()
 {
     Close();
 
-    if (sConfigMgr->GetBoolDefault("Log.Async.Enable", false))
-        worker = new LogWorker();
-
+    lowestLogLevel = LOG_LEVEL_FATAL;
     AppenderId = 0;
     m_logsDir = sConfigMgr->GetStringDefault("LogsDir", "");
     if (!m_logsDir.empty())

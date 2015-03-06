@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -158,8 +158,12 @@ class npc_commander_eligor_dawnbringer : public CreatureScript
             void Reset() override
             {
                 talkWing = 0;
-                memset(audienceList, 0, sizeof(audienceList));
-                memset(imageList, 0, sizeof(imageList));
+                for (ObjectGuid& guid : audienceList)
+                    guid.Clear();
+
+                for (ObjectGuid& guid : imageList)
+                    guid.Clear();
+
                 _events.ScheduleEvent(EVENT_GET_TARGETS, 5000);
                 _events.ScheduleEvent(EVENT_START_RANDOM, 20000);
             }
@@ -246,13 +250,10 @@ class npc_commander_eligor_dawnbringer : public CreatureScript
                 {
                     std::list<Creature*> creatureList;
                     GetCreatureListWithEntryInGrid(creatureList, me, AudienceMobs[ii], 15.0f);
-                    for (std::list<Creature*>::iterator itr = creatureList.begin(); itr != creatureList.end(); ++itr)
+                    for (Creature* creature : creatureList)
                     {
-                        if (Creature* creatureList = *itr)
-                        {
-                            audienceList[creaturecount] = creatureList->GetGUID();
-                            ++creaturecount;
-                        }
+                        audienceList[creaturecount] = creature->GetGUID();
+                        ++creaturecount;
                     }
                 }
 
@@ -354,8 +355,8 @@ class npc_commander_eligor_dawnbringer : public CreatureScript
             }
             private:
                 EventMap _events;
-                uint64   audienceList[10];
-                uint64   imageList[5];
+                ObjectGuid audienceList[10];
+                ObjectGuid imageList[5];
                 uint8    talkWing;
         };
 
@@ -363,48 +364,6 @@ class npc_commander_eligor_dawnbringer : public CreatureScript
         {
             return new npc_commander_eligor_dawnbringerAI(creature);
         }
-};
-
-enum AlexstraszaWrGate
-{
-    // Quest
-    QUEST_RETURN_TO_AG_A    = 12499,
-    QUEST_RETURN_TO_AG_H    = 12500,
-
-    // Movie
-    MOVIE_ID_GATES          = 14
-};
-
-#define GOSSIP_ITEM_WHAT_HAPPENED   "Alexstrasza, can you show me what happened here?"
-
-class npc_alexstrasza_wr_gate : public CreatureScript
-{
-public:
-    npc_alexstrasza_wr_gate() : CreatureScript("npc_alexstrasza_wr_gate") { }
-
-    bool OnGossipHello(Player* player, Creature* creature) override
-    {
-        if (creature->IsQuestGiver())
-            player->PrepareQuestMenu(creature->GetGUID());
-
-        if (player->GetQuestRewardStatus(QUEST_RETURN_TO_AG_A) || player->GetQuestRewardStatus(QUEST_RETURN_TO_AG_H))
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_WHAT_HAPPENED, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-
-        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-        return true;
-    }
-
-    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) override
-    {
-        player->PlayerTalkClass->ClearMenus();
-        if (action == GOSSIP_ACTION_INFO_DEF+1)
-        {
-            player->CLOSE_GOSSIP_MENU();
-            player->SendMovieStart(MOVIE_ID_GATES);
-        }
-
-        return true;
-    }
 };
 
 /*######
@@ -436,7 +395,7 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            uint32 roll = rand() % 2;
+            uint32 roll = rand32() % 2;
 
             Creature* tree = GetHitCreature();
             Player* player = GetCaster()->ToPlayer();
@@ -564,7 +523,18 @@ class npc_wyrmrest_defender : public CreatureScript
 
         struct npc_wyrmrest_defenderAI : public VehicleAI
         {
-            npc_wyrmrest_defenderAI(Creature* creature) : VehicleAI(creature) { }
+            npc_wyrmrest_defenderAI(Creature* creature) : VehicleAI(creature)
+            {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                hpWarningReady = true;
+                renewRecoveryCanCheck = false;
+
+                RenewRecoveryChecker = 0;
+            }
 
             bool hpWarningReady;
             bool renewRecoveryCanCheck;
@@ -573,10 +543,7 @@ class npc_wyrmrest_defender : public CreatureScript
 
             void Reset() override
             {
-                hpWarningReady = true;
-                renewRecoveryCanCheck = false;
-
-                RenewRecoveryChecker = 0;
+                Initialize();
             }
 
             void UpdateAI(uint32 diff) override
@@ -655,13 +622,12 @@ class npc_torturer_lecraft : public CreatureScript
             npc_torturer_lecraftAI(Creature* creature) : ScriptedAI(creature)
             {
                 _textCounter = 1;
-                _playerGUID = 0;
             }
 
             void Reset() override
             {
                 _textCounter = 1;
-                _playerGUID  = 0;
+                _playerGUID.Clear();
             }
 
             void EnterCombat(Unit* who) override
@@ -689,7 +655,7 @@ class npc_torturer_lecraft : public CreatureScript
                     Talk(_textCounter, player);
 
                     if (_textCounter == 5)
-                        player->KilledMonsterCredit(NPC_TORTURER_LECRAFT, 0);
+                        player->KilledMonsterCredit(NPC_TORTURER_LECRAFT);
 
                     ++_textCounter;
 
@@ -726,7 +692,7 @@ class npc_torturer_lecraft : public CreatureScript
             private:
                 EventMap _events;
                 uint8    _textCounter;
-                uint64   _playerGUID;
+                ObjectGuid _playerGUID;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -738,7 +704,6 @@ class npc_torturer_lecraft : public CreatureScript
 void AddSC_dragonblight()
 {
     new npc_commander_eligor_dawnbringer();
-    new npc_alexstrasza_wr_gate();
     new spell_q12096_q12092_dummy();
     new spell_q12096_q12092_bark();
     new npc_wyrmrest_defender();

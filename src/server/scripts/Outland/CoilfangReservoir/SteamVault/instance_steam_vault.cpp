@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -31,19 +31,23 @@ class go_main_chambers_access_panel : public GameObjectScript
                 return false;
 
             if (go->GetEntry() == GO_ACCESS_PANEL_HYDRO && (instance->GetBossState(DATA_HYDROMANCER_THESPIA) == DONE || instance->GetBossState(DATA_HYDROMANCER_THESPIA) == SPECIAL))
-            {
                 instance->SetBossState(DATA_HYDROMANCER_THESPIA, SPECIAL);
-                go->SetGoState(GO_STATE_ACTIVE);
-            }
 
             if (go->GetEntry() == GO_ACCESS_PANEL_MEK && (instance->GetBossState(DATA_MEKGINEER_STEAMRIGGER) == DONE || instance->GetBossState(DATA_MEKGINEER_STEAMRIGGER) == SPECIAL))
-            {
                 instance->SetBossState(DATA_MEKGINEER_STEAMRIGGER, SPECIAL);
-                go->SetGoState(GO_STATE_ACTIVE);
-            }
+
+            go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+            go->SetGoState(GO_STATE_ACTIVE);
 
             return true;
         }
+};
+
+ObjectData const gameObjectData[] = 
+{
+    { GO_ACCESS_PANEL_HYDRO, DATA_ACCESS_PANEL_HYDRO },
+    { GO_ACCESS_PANEL_MEK,   DATA_ACCESS_PANEL_MEK   },
+    { 0,                     0                       } // END
 };
 
 class instance_steam_vault : public InstanceMapScript
@@ -55,13 +59,10 @@ class instance_steam_vault : public InstanceMapScript
         {
             instance_steam_vault_InstanceMapScript(Map* map) : InstanceScript(map)
             {
+                SetHeaders(DataHeader);
                 SetBossNumber(EncounterCount);
+                LoadObjectData(nullptr, gameObjectData);
 
-                ThespiaGUID          = 0;
-                MekgineerGUID        = 0;
-                KalithreshGUID       = 0;
-
-                MainChambersDoorGUID = 0;
                 DistillerState       = 0;
             }
 
@@ -93,9 +94,11 @@ class instance_steam_vault : public InstanceMapScript
                     default:
                         break;
                 }
+
+                InstanceScript::OnGameObjectCreate(go);
             }
 
-            uint64 GetData64(uint32 type) const override
+            ObjectGuid GetGuidData(uint32 type) const override
             {
                 switch (type)
                 {
@@ -108,7 +111,7 @@ class instance_steam_vault : public InstanceMapScript
                     default:
                         break;
                 }
-                return 0;
+                return ObjectGuid::Empty;
             }
 
             void SetData(uint32 type, uint32 data) override
@@ -132,6 +135,9 @@ class instance_steam_vault : public InstanceMapScript
                 switch (type)
                 {
                     case DATA_HYDROMANCER_THESPIA:
+                        if (state == DONE)
+                            if (GameObject* panel = GetGameObject(DATA_ACCESS_PANEL_HYDRO))
+                                panel->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         if (state == SPECIAL)
                         {
                             if (GetBossState(DATA_MEKGINEER_STEAMRIGGER) == SPECIAL)
@@ -141,6 +147,9 @@ class instance_steam_vault : public InstanceMapScript
                         }
                         break;
                     case DATA_MEKGINEER_STEAMRIGGER:
+                        if (state == DONE)
+                            if (GameObject* panel = GetGameObject(DATA_ACCESS_PANEL_MEK))
+                                panel->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         if (state == SPECIAL)
                         {
                             if (GetBossState(DATA_HYDROMANCER_THESPIA) == SPECIAL)
@@ -156,56 +165,13 @@ class instance_steam_vault : public InstanceMapScript
                 return true;
             }
 
-            std::string GetSaveData() override
-            {
-                OUT_SAVE_INST_DATA;
+        protected:
+            ObjectGuid ThespiaGUID;
+            ObjectGuid MekgineerGUID;
+            ObjectGuid KalithreshGUID;
 
-                std::ostringstream saveStream;
-                saveStream << "S V " << GetBossSaveData();
-
-                OUT_SAVE_INST_DATA_COMPLETE;
-                return saveStream.str();
-            }
-
-            void Load(char const* str) override
-            {
-                if (!str)
-                {
-                    OUT_LOAD_INST_DATA_FAIL;
-                    return;
-                }
-
-                OUT_LOAD_INST_DATA(str);
-
-                char dataHead1, dataHead2;
-
-                std::istringstream loadStream(str);
-                loadStream >> dataHead1 >> dataHead2;
-
-                if (dataHead1 == 'S' && dataHead2 == 'V')
-                {
-                    for (uint32 i = 0; i < EncounterCount; ++i)
-                    {
-                        uint32 tmpState;
-                        loadStream >> tmpState;
-                        if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
-                            tmpState = NOT_STARTED;
-                        SetBossState(i, EncounterState(tmpState));
-                    }
-                }
-                else
-                    OUT_LOAD_INST_DATA_FAIL;
-
-                OUT_LOAD_INST_DATA_COMPLETE;
-            }
-
-            protected:
-                uint64 ThespiaGUID;
-                uint64 MekgineerGUID;
-                uint64 KalithreshGUID;
-
-                uint64 MainChambersDoorGUID;
-                uint8 DistillerState;
+            ObjectGuid MainChambersDoorGUID;
+            uint8 DistillerState;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const override

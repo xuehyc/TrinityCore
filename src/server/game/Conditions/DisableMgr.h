@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,6 +19,7 @@
 #ifndef TRINITY_DISABLEMGR_H
 #define TRINITY_DISABLEMGR_H
 
+#include "VMapManager2.h"
 #include "Define.h"
 
 class Unit;
@@ -49,14 +50,6 @@ enum SpellDisableTypes
                                 SPELL_DISABLE_LOS)
 };
 
-enum VmapDisableTypes
-{
-    VMAP_DISABLE_AREAFLAG       = 0x1,
-    VMAP_DISABLE_HEIGHT         = 0x2,
-    VMAP_DISABLE_LOS            = 0x4,
-    VMAP_DISABLE_LIQUIDSTATUS   = 0x8
-};
-
 enum MMapDisableTypes
 {
     MMAP_DISABLE_PATHFINDING    = 0x0
@@ -67,6 +60,8 @@ namespace DisableMgr
     void LoadDisables();
     bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags = 0);
     void CheckQuestDisables();
+    bool IsVMAPDisabledFor(uint32 entry, uint8 flags);
+    bool IsPathfindingEnabled(uint32 mapId);
 }
 
 #endif //TRINITY_DISABLEMGR_H

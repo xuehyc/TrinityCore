@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -55,8 +55,8 @@ class AssistanceMovementGenerator : public PointMovementGenerator<Creature>
         AssistanceMovementGenerator(float _x, float _y, float _z) :
             PointMovementGenerator<Creature>(0, _x, _y, _z, true) { }
 
-        MovementGeneratorType GetMovementGeneratorType() { return ASSISTANCE_MOTION_TYPE; }
-        void Finalize(Unit*);
+        MovementGeneratorType GetMovementGeneratorType() override { return ASSISTANCE_MOTION_TYPE; }
+        void Finalize(Unit*) override;
 };
 
 // Does almost nothing - just doesn't allows previous movegen interrupt current effect.
@@ -64,11 +64,11 @@ class EffectMovementGenerator : public MovementGenerator
 {
     public:
         explicit EffectMovementGenerator(uint32 Id) : m_Id(Id) { }
-        void Initialize(Unit*) { }
-        void Finalize(Unit*);
-        void Reset(Unit*) { }
-        bool Update(Unit*, uint32);
-        MovementGeneratorType GetMovementGeneratorType() { return EFFECT_MOTION_TYPE; }
+        void Initialize(Unit*) override { }
+        void Finalize(Unit*) override;
+        void Reset(Unit*) override { }
+        bool Update(Unit*, uint32) override;
+        MovementGeneratorType GetMovementGeneratorType() override { return EFFECT_MOTION_TYPE; }
     private:
         uint32 m_Id;
 };

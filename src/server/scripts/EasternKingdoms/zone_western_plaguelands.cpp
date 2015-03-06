@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -143,7 +143,8 @@ public:
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (player->GetQuestStatus(QUEST_SUBTERFUGE) == QUEST_STATUS_COMPLETE &&
-            !player->GetQuestRewardStatus(QUEST_IN_DREAMS) && !player->HasAura(SPELL_SCARLET_ILLUSION))
+            player->GetQuestStatus(QUEST_IN_DREAMS) != QUEST_STATUS_COMPLETE &&
+            !player->HasAura(SPELL_SCARLET_ILLUSION))
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ILLUSION, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             player->SEND_GOSSIP_MENU(4773, creature->GetGUID());
@@ -303,10 +304,11 @@ public:
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
     {
-        npc_escortAI* pEscortAI = CAST_AI(npc_anchorite_truuen::npc_anchorite_truuenAI, creature->AI());
-
         if (quest->GetQuestId() == QUEST_TOMB_LIGHTBRINGER)
+        {
+            npc_escortAI* pEscortAI = ENSURE_AI(npc_anchorite_truuen::npc_anchorite_truuenAI, creature->AI());
             pEscortAI->Start(true, true, player->GetGUID());
+        }
         return false;
     }
 
@@ -317,19 +319,23 @@ public:
 
     struct npc_anchorite_truuenAI : public npc_escortAI
     {
-        npc_anchorite_truuenAI(Creature* creature) : npc_escortAI(creature) { }
+        npc_anchorite_truuenAI(Creature* creature) : npc_escortAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            m_uiChatTimer = 7000;
+        }
 
         uint32 m_uiChatTimer;
 
-        uint64 UghostGUID;
-        uint64 TheldanisGUID;
-
-        Creature* Ughost;
-        Creature* Theldanis;
+        ObjectGuid UghostGUID;
 
         void Reset() override
         {
-            m_uiChatTimer = 7000;
+            Initialize();
         }
 
         void JustSummoned(Creature* summoned) override
@@ -362,26 +368,25 @@ public:
                     Talk(SAY_WP_2);
                     break;
                 case 21:
-                    Theldanis = GetClosestCreatureWithEntry(me, NPC_THEL_DANIS, 150);
-                    if (Theldanis)
+                    if (Creature* Theldanis = GetClosestCreatureWithEntry(me, NPC_THEL_DANIS, 150))
                         Theldanis->AI()->Talk(SAY_WP_3);
                     break;
                 case 23:
-                    Ughost = me->SummonCreature(NPC_GHOST_UTHER, 971.86f, -1825.42f, 81.99f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-                    if (Ughost)
+                    if (Creature* Ughost = me->SummonCreature(NPC_GHOST_UTHER, 971.86f, -1825.42f, 81.99f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
                     {
+                        UghostGUID = Ughost->GetGUID();
                         Ughost->SetDisableGravity(true);
                         Ughost->AI()->Talk(SAY_WP_4, me);
                     }
                     m_uiChatTimer = 4000;
                     break;
                 case 24:
-                    if (Ughost)
+                    if (Creature* Ughost = ObjectAccessor::GetCreature(*me, UghostGUID))
                         Ughost->AI()->Talk(SAY_WP_5, me);
                     m_uiChatTimer = 4000;
                     break;
                 case 25:
-                    if (Ughost)
+                    if (Creature* Ughost = ObjectAccessor::GetCreature(*me, UghostGUID))
                         Ughost->AI()->Talk(SAY_WP_6, me);
                     m_uiChatTimer = 4000;
                     break;

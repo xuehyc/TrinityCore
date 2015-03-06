@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -69,7 +69,22 @@ struct boss_twinemperorsAI : public ScriptedAI
 {
     boss_twinemperorsAI(Creature* creature): ScriptedAI(creature)
     {
+        Initialize();
         instance = creature->GetInstanceScript();
+    }
+
+    void Initialize()
+    {
+        Heal_Timer = 0;                                     // first heal immediately when they get close together
+        Teleport_Timer = TELEPORTTIME;
+        AfterTeleport = false;
+        tspellcast = false;
+        AfterTeleportTimer = 0;
+        Abuse_Bug_Timer = urand(10000, 17000);
+        BugsTimer = 2000;
+
+        DontYellWhenDead = false;
+        EnrageTimer = 15 * 60000;
     }
 
     InstanceScript* instance;
@@ -89,21 +104,13 @@ struct boss_twinemperorsAI : public ScriptedAI
 
     void TwinReset()
     {
-        Heal_Timer = 0;                                     // first heal immediately when they get close together
-        Teleport_Timer = TELEPORTTIME;
-        AfterTeleport = false;
-        tspellcast = false;
-        AfterTeleportTimer = 0;
-        Abuse_Bug_Timer = urand(10000, 17000);
-        BugsTimer = 2000;
+        Initialize();
         me->ClearUnitState(UNIT_STATE_STUNNED);
-        DontYellWhenDead = false;
-        EnrageTimer = 15*60000;
     }
 
     Creature* GetOtherBoss()
     {
-        return ObjectAccessor::GetCreature(*me, instance->GetData64(IAmVeklor() ? DATA_VEKNILASH : DATA_VEKLOR));
+        return ObjectAccessor::GetCreature(*me, instance->GetGuidData(IAmVeklor() ? DATA_VEKNILASH : DATA_VEKLOR));
     }
 
     void DamageTaken(Unit* /*done_by*/, uint32 &damage) override
@@ -131,7 +138,7 @@ struct boss_twinemperorsAI : public ScriptedAI
             pOtherBoss->SetHealth(0);
             pOtherBoss->setDeathState(JUST_DIED);
             pOtherBoss->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-            CAST_AI(boss_twinemperorsAI, pOtherBoss->AI())->DontYellWhenDead = true;
+            ENSURE_AI(boss_twinemperorsAI, pOtherBoss->AI())->DontYellWhenDead = true;
         }
         if (!DontYellWhenDead)                              // I hope AI is not threaded
             DoPlaySoundToSet(me, IAmVeklor() ? SOUND_VL_DEATH : SOUND_VN_DEATH);
@@ -150,9 +157,9 @@ struct boss_twinemperorsAI : public ScriptedAI
         {
             /// @todo we should activate the other boss location so he can start attackning even if nobody
             // is near I dont know how to do that
-            ScriptedAI* otherAI = CAST_AI(ScriptedAI, pOtherBoss->AI());
             if (!pOtherBoss->IsInCombat())
             {
+                ScriptedAI* otherAI = ENSURE_AI(ScriptedAI, pOtherBoss->AI());
                 DoPlaySoundToSet(me, IAmVeklor() ? SOUND_VL_AGGRO : SOUND_VN_AGGRO);
                 otherAI->AttackStart(who);
                 otherAI->DoZoneInCombat();
@@ -224,7 +231,7 @@ struct boss_twinemperorsAI : public ScriptedAI
             me->SetPosition(otherPos);
 
             SetAfterTeleport();
-            CAST_AI(boss_twinemperorsAI,  pOtherBoss->AI())->SetAfterTeleport();
+            ENSURE_AI(boss_twinemperorsAI, pOtherBoss->AI())->SetAfterTeleport();
         }
     }
 
@@ -330,7 +337,7 @@ struct boss_twinemperorsAI : public ScriptedAI
                 }
                 if (c->IsWithinDistInMap(me, ABUSE_BUG_RANGE))
                 {
-                    if (!nearb || (rand()%4) == 0)
+                    if (!nearb || (rand32() % 4) == 0)
                         nearb = c;
                 }
             }
@@ -394,24 +401,26 @@ public:
     struct boss_veknilashAI : public boss_twinemperorsAI
     {
         bool IAmVeklor() {return false;}
-        boss_veknilashAI(Creature* creature) : boss_twinemperorsAI(creature) { }
+        boss_veknilashAI(Creature* creature) : boss_twinemperorsAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            UpperCut_Timer = urand(14000, 29000);
+            UnbalancingStrike_Timer = urand(8000, 18000);
+            Scarabs_Timer = urand(7000, 14000);
+        }
 
         uint32 UpperCut_Timer;
         uint32 UnbalancingStrike_Timer;
         uint32 Scarabs_Timer;
-        int Rand;
-        int RandX;
-        int RandY;
-
-        Creature* Summoned;
 
         void Reset() override
         {
             TwinReset();
-            UpperCut_Timer = urand(14000, 29000);
-            UnbalancingStrike_Timer = urand(8000, 18000);
-            Scarabs_Timer = urand(7000, 14000);
-
+            Initialize();
                                                                 //Added. Can be removed if its included in DB.
             me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
         }
@@ -437,7 +446,7 @@ public:
             if (UnbalancingStrike_Timer <= diff)
             {
                 DoCastVictim(SPELL_UNBALANCING_STRIKE);
-                UnbalancingStrike_Timer = 8000+rand()%12000;
+                UnbalancingStrike_Timer = 8000 + rand32() % 12000;
             } else UnbalancingStrike_Timer -= diff;
 
             if (UpperCut_Timer <= diff)
@@ -445,7 +454,7 @@ public:
                 Unit* randomMelee = SelectTarget(SELECT_TARGET_RANDOM, 0, NOMINAL_MELEE_RANGE, true);
                 if (randomMelee)
                     DoCast(randomMelee, SPELL_UPPERCUT);
-                UpperCut_Timer = 15000+rand()%15000;
+                UpperCut_Timer = 15000 + rand32() % 15000;
             } else UpperCut_Timer -= diff;
 
             HandleBugs(diff);
@@ -480,25 +489,28 @@ public:
     struct boss_veklorAI : public boss_twinemperorsAI
     {
         bool IAmVeklor() {return true;}
-        boss_veklorAI(Creature* creature) : boss_twinemperorsAI(creature) { }
+        boss_veklorAI(Creature* creature) : boss_twinemperorsAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            ShadowBolt_Timer = 0;
+            Blizzard_Timer = urand(15000, 20000);
+            ArcaneBurst_Timer = 1000;
+            Scorpions_Timer = urand(7000, 14000);
+        }
 
         uint32 ShadowBolt_Timer;
         uint32 Blizzard_Timer;
         uint32 ArcaneBurst_Timer;
         uint32 Scorpions_Timer;
-        int Rand;
-        int RandX;
-        int RandY;
-
-        Creature* Summoned;
 
         void Reset() override
         {
             TwinReset();
-            ShadowBolt_Timer = 0;
-            Blizzard_Timer = urand(15000, 20000);
-            ArcaneBurst_Timer = 1000;
-            Scorpions_Timer = urand(7000, 14000);
+            Initialize();
 
             //Added. Can be removed if its included in DB.
             me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
@@ -542,7 +554,7 @@ public:
                 target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45, true);
                 if (target)
                     DoCast(target, SPELL_BLIZZARD);
-                Blizzard_Timer = 15000+rand()%15000;
+                Blizzard_Timer = 15000 + rand32() % 15000;
             } else Blizzard_Timer -= diff;
 
             if (ArcaneBurst_Timer <= diff)

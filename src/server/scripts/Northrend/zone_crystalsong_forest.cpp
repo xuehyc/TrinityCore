@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -56,11 +56,11 @@ public:
             SetCombatMovement(false);
         }
 
-        uint64 targetGUID;
+        ObjectGuid targetGUID;
 
         void Reset() override
         {
-            targetGUID = 0;
+            targetGUID.Clear();
         }
 
         void UpdateAI(uint32 /*diff*/) override
@@ -76,20 +76,18 @@ public:
                     GetCreatureListWithEntryInGrid(orbList, me, NPC_TRANSITUS_SHIELD_DUMMY, 32.0f);
                     if (!orbList.empty())
                     {
-                        for (std::list<Creature*>::const_iterator itr = orbList.begin(); itr != orbList.end(); ++itr)
+                        for (Creature* orb : orbList)
                         {
-                            if (Creature* pOrb = *itr)
+                            if (orb->GetPositionY() < 1000)
                             {
-                                if (pOrb->GetPositionY() < 1000)
-                                {
-                                    targetGUID = pOrb->GetGUID();
-                                    break;
-                                }
+                                targetGUID = orb->GetGUID();
+                                break;
                             }
                         }
                     }
                 }
-            }else
+            }
+            else
             {
                 if (!targetGUID)
                     if (Creature* pOrb = GetClosestCreatureWithEntry(me, NPC_TRANSITUS_SHIELD_DUMMY, 32.0f))

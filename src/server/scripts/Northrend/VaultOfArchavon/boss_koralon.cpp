@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -225,12 +225,13 @@ class spell_koralon_meteor_fists_damage : public SpellScriptLoader
         {
             PrepareSpellScript(spell_koralon_meteor_fists_damage_SpellScript);
 
-            bool Load() override
+        public:
+            spell_koralon_meteor_fists_damage_SpellScript()
             {
                 _chainTargets = 0;
-                return true;
             }
 
+        private:
             void FilterTargets(std::list<WorldObject*>& targets)
             {
                 _chainTargets = targets.size();

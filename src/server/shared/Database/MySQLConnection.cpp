@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -33,6 +33,7 @@
 #include "DatabaseWorker.h"
 #include "Timer.h"
 #include "Log.h"
+#include "ProducerConsumerQueue.h"
 
 MySQLConnection::MySQLConnection(MySQLConnectionInfo& connInfo) :
 m_reconnecting(false),
@@ -43,7 +44,7 @@ m_Mysql(NULL),
 m_connectionInfo(connInfo),
 m_connectionFlags(CONNECTION_SYNCH) { }
 
-MySQLConnection::MySQLConnection(ACE_Activation_Queue* queue, MySQLConnectionInfo& connInfo) :
+MySQLConnection::MySQLConnection(ProducerConsumerQueue<SQLOperation*>* queue, MySQLConnectionInfo& connInfo) :
 m_reconnecting(false),
 m_prepareError(false),
 m_queue(queue),
@@ -56,12 +57,13 @@ m_connectionFlags(CONNECTION_ASYNC)
 
 MySQLConnection::~MySQLConnection()
 {
-    ASSERT (m_Mysql); /// MySQL context must be present at this point
+    delete m_worker;
 
     for (size_t i = 0; i < m_stmts.size(); ++i)
         delete m_stmts[i];
 
-    mysql_close(m_Mysql);
+    if (m_Mysql)
+        mysql_close(m_Mysql);
 }
 
 void MySQLConnection::Close()
@@ -111,7 +113,7 @@ bool MySQLConnection::Open()
     else                                                    // generic case
     {
         port = atoi(m_connectionInfo.port_or_socket.c_str());
-        unix_socket = 0;
+        unix_socket = nullptr;
     }
     #endif
 
@@ -357,11 +359,11 @@ void MySQLConnection::CommitTransaction()
     Execute("COMMIT");
 }
 
-bool MySQLConnection::ExecuteTransaction(SQLTransaction& transaction)
+int MySQLConnection::ExecuteTransaction(SQLTransaction& transaction)
 {
     std::list<SQLElementData> const& queries = transaction->m_queries;
     if (queries.empty())
-        return false;
+        return -1;
 
     BeginTransaction();
 
@@ -378,8 +380,9 @@ bool MySQLConnection::ExecuteTransaction(SQLTransaction& transaction)
                 if (!Execute(stmt))
                 {
                     TC_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32)queries.size());
+                    int errorCode = GetLastError();
                     RollbackTransaction();
-                    return false;
+                    return errorCode;
                 }
             }
             break;
@@ -390,8 +393,9 @@ bool MySQLConnection::ExecuteTransaction(SQLTransaction& transaction)
                 if (!Execute(sql))
                 {
                     TC_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32)queries.size());
+                    int errorCode = GetLastError();
                     RollbackTransaction();
-                    return false;
+                    return errorCode;
                 }
             }
             break;
@@ -404,7 +408,7 @@ bool MySQLConnection::ExecuteTransaction(SQLTransaction& transaction)
     // and not while iterating over every element.
 
     CommitTransaction();
-    return true;
+    return 0;
 }
 
 MySQLPreparedStatement* MySQLConnection::GetPreparedStatement(uint32 index)
@@ -500,8 +504,8 @@ bool MySQLConnection::_HandleMySQLErrno(uint32 errNo)
             }
 
             uint32 lErrno = mysql_errno(GetHandle());   // It's possible this attempted reconnect throws 2006 at us. To prevent crazy recursive calls, sleep here.
-            ACE_OS::sleep(3);                           // Sleep 3 seconds
-            return _HandleMySQLErrno(lErrno);           // Call self (recursive)
+            std::this_thread::sleep_for(std::chrono::seconds(3)); // Sleep 3 seconds
+            return _HandleMySQLErrno(lErrno);                     // Call self (recursive)
         }
 
         case ER_LOCK_DEADLOCK:
@@ -515,12 +519,12 @@ bool MySQLConnection::_HandleMySQLErrno(uint32 errNo)
         case ER_BAD_FIELD_ERROR:
         case ER_NO_SUCH_TABLE:
             TC_LOG_ERROR("sql.sql", "Your database structure is not up to date. Please make sure you've executed all queries in the sql/updates folders.");
-            ACE_OS::sleep(10);
+            std::this_thread::sleep_for(std::chrono::seconds(10));
             std::abort();
             return false;
         case ER_PARSE_ERROR:
             TC_LOG_ERROR("sql.sql", "Error while parsing SQL. Core fix required.");
-            ACE_OS::sleep(10);
+            std::this_thread::sleep_for(std::chrono::seconds(10));
             std::abort();
             return false;
         default:

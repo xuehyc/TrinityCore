@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,7 +19,6 @@
 #ifndef __TRINITY_SOCIALMGR_H
 #define __TRINITY_SOCIALMGR_H
 
-#include <ace/Singleton.h>
 #include "DatabaseEnv.h"
 #include "Common.h"
 
@@ -123,13 +122,17 @@ class PlayerSocial
 
 class SocialMgr
 {
-    friend class ACE_Singleton<SocialMgr, ACE_Null_Mutex>;
-
     private:
         SocialMgr();
         ~SocialMgr();
 
     public:
+        static SocialMgr* instance()
+        {
+            static SocialMgr instance;
+            return &instance;
+        }
+
         // Misc
         void RemovePlayerSocial(uint32 guid) { m_socialMap.erase(guid); }
 
@@ -144,5 +147,5 @@ class SocialMgr
         SocialMap m_socialMap;
 };
 
-#define sSocialMgr ACE_Singleton<SocialMgr, ACE_Null_Mutex>::instance()
+#define sSocialMgr SocialMgr::instance()
 #endif

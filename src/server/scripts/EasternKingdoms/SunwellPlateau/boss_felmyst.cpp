@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -116,7 +116,17 @@ public:
     {
         boss_felmystAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+            uiBreathCount = 0;
+            breathX = 0.f;
+            breathY = 0.f;
+        }
+
+        void Initialize()
+        {
+            phase = PHASE_NONE;
+            uiFlightCount = 0;
         }
 
         InstanceScript* instance;
@@ -130,11 +140,9 @@ public:
 
         void Reset() override
         {
-            phase = PHASE_NONE;
+            Initialize();
 
             events.Reset();
-
-            uiFlightCount = 0;
 
             me->SetDisableGravity(true);
             me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 10);
@@ -280,7 +288,7 @@ public:
                 {
                     Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150, true);
                     if (!target)
-                        target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_PLAYER_GUID));
+                        target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_PLAYER_GUID));
 
                     if (!target)
                     {
@@ -288,7 +296,7 @@ public:
                         return;
                     }
 
-                    if (Creature* Vapor = me->SummonCreature(NPC_VAPOR, target->GetPositionX()-5+rand()%10, target->GetPositionY()-5+rand()%10, target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 9000))
+                    if (Creature* Vapor = me->SummonCreature(NPC_VAPOR, target->GetPositionX() - 5 + rand32() % 10, target->GetPositionY() - 5 + rand32() % 10, target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 9000))
                     {
                         Vapor->AI()->AttackStart(target);
                         me->InterruptNonMeleeSpells(false);
@@ -306,7 +314,7 @@ public:
 
                     Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150, true);
                     if (!target)
-                        target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_PLAYER_GUID));
+                        target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_PLAYER_GUID));
 
                     if (!target)
                     {
@@ -315,7 +323,7 @@ public:
                     }
 
                     //target->CastSpell(target, SPELL_VAPOR_SUMMON, true); need core support
-                    if (Creature* pVapor = me->SummonCreature(NPC_VAPOR, target->GetPositionX()-5+rand()%10, target->GetPositionY()-5+rand()%10, target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 9000))
+                    if (Creature* pVapor = me->SummonCreature(NPC_VAPOR, target->GetPositionX() - 5 + rand32() % 10, target->GetPositionY() - 5 + rand32() % 10, target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 9000))
                     {
                         if (pVapor->AI())
                             pVapor->AI()->AttackStart(target);
@@ -335,7 +343,7 @@ public:
                 {
                     Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150, true);
                     if (!target)
-                        target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_PLAYER_GUID));
+                        target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_PLAYER_GUID));
 
                     if (!target)
                     {

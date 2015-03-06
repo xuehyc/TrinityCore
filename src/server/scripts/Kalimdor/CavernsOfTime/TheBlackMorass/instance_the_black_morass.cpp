@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -37,7 +37,7 @@ enum Misc
     RIFT_BOSS                         = 1
 };
 
-inline uint32 RandRiftBoss() { return ((rand()%2) ? NPC_RIFT_KEEPER : NPC_RIFT_LORD); }
+inline uint32 RandRiftBoss() { return ((rand32() % 2) ? NPC_RIFT_KEEPER : NPC_RIFT_LORD); }
 
 float PortalLocation[4][4]=
 {
@@ -80,7 +80,11 @@ public:
 
     struct instance_the_black_morass_InstanceMapScript : public InstanceScript
     {
-        instance_the_black_morass_InstanceMapScript(Map* map) : InstanceScript(map) { }
+        instance_the_black_morass_InstanceMapScript(Map* map) : InstanceScript(map)
+        {
+            SetHeaders(DataHeader);
+            Clear();
+        }
 
         uint32 m_auiEncounter[EncounterCount];
 
@@ -89,14 +93,8 @@ public:
         uint8  mRiftWaveCount;
         uint8  mRiftWaveId;
 
-        uint64 _medivhGUID;
+        ObjectGuid _medivhGUID;
         uint8  _currentRiftId;
-
-        void Initialize() override
-        {
-            _medivhGUID         = 0;
-            Clear();
-        }
 
         void Clear()
         {
@@ -252,12 +250,12 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 data) const override
+        ObjectGuid GetGuidData(uint32 data) const override
         {
             if (data == DATA_MEDIVH)
                 return _medivhGUID;
 
-            return 0;
+            return ObjectGuid::Empty;
         }
 
         Creature* SummonedPortalBoss(Creature* me)

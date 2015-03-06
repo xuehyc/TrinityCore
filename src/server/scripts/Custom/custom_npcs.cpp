@@ -180,7 +180,7 @@ public:
 #define QUEST_ID_ALLIANCE_TOUR 50002
 #define NPC_THUUL_IMAGE        50001
 #define NPC_BLA_IMAGE          0
-#define SAY_FOLLOW_THE_IMAGE   "Sigue a mi imagen, colega!"
+// #define SAY_FOLLOW_THE_IMAGE   "Sigue a mi imagen, colega!"
 
 class npc_tour_guide : public CreatureScript
 {
@@ -210,7 +210,9 @@ public:
         // Add to map
         map->AddToMap(npcImage);
 
-        creature->MonsterSay(SAY_FOLLOW_THE_IMAGE, 0, player);
+        // TODO: Dialogue to DB
+        // creature->Talk(followMe, CHAT_MSG_SAY, LANG_ORCISH, 10.0f);
+
         uint32 ficticialDamage = 0;
         npcImage->GetAI()->DamageTaken(player, ficticialDamage);
         return true;

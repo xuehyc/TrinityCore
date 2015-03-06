@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -317,20 +317,25 @@ public:
         npc_ranshallaAI(Creature* creature) : npc_escortAI(creature),
             DialogueHelper(introDialogue)
         {
-            Reset();
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _delayTimer = 0;
         }
 
         uint32 _delayTimer;
 
-        uint64 _firstPriestessGUID;
-        uint64 _secondPriestessGUID;
-        uint64 _guardEluneGUID;
-        uint64 _voiceEluneGUID;
-        uint64 _altarGUID;
+        ObjectGuid _firstPriestessGUID;
+        ObjectGuid _secondPriestessGUID;
+        ObjectGuid _guardEluneGUID;
+        ObjectGuid _voiceEluneGUID;
+        ObjectGuid _altarGUID;
 
         void Reset() override
         {
-            _delayTimer = 0;
+            Initialize();
         }
 
         // Called when the player activates the torch / altar

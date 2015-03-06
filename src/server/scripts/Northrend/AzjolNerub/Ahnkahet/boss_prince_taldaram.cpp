@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -50,7 +50,7 @@ enum Misc
 };
 
 #define DATA_SPHERE_DISTANCE                25.0f
-#define DATA_SPHERE_ANGLE_OFFSET            M_PI / 2
+#define DATA_SPHERE_ANGLE_OFFSET            float(M_PI) / 2
 #define DATA_GROUND_POSITION_Z              11.30809f
 
 enum Yells
@@ -88,16 +88,14 @@ class boss_prince_taldaram : public CreatureScript
             boss_prince_taldaramAI(Creature* creature) : BossAI(creature, DATA_PRINCE_TALDARAM)
             {
                 me->SetDisableGravity(true);
-                _flameSphereTargetGUID = 0;
-                _embraceTargetGUID = 0;
                 _embraceTakenDamage = 0;
             }
 
             void Reset() override
             {
                 _Reset();
-                _flameSphereTargetGUID = 0;
-                _embraceTargetGUID = 0;
+                _flameSphereTargetGUID.Clear();
+                _embraceTargetGUID.Clear();
                 _embraceTakenDamage = 0;
             }
 
@@ -167,6 +165,7 @@ class boss_prince_taldaram : public CreatureScript
                             {
                                 Talk(SAY_VANISH);
                                 DoCast(me, SPELL_VANISH);
+                                me->SetInCombatState(true); // Prevents the boss from resetting
                                 events.DelayEvents(500);
                                 events.ScheduleEvent(EVENT_JUST_VANISHED, 500);
                                 if (Unit* embraceTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
@@ -194,7 +193,7 @@ class boss_prince_taldaram : public CreatureScript
                             events.ScheduleEvent(EVENT_FEEDING, 20000);
                             break;
                         case EVENT_FEEDING:
-                            _embraceTargetGUID = 0;
+                            _embraceTargetGUID.Clear();
                             break;
                         default:
                             break;
@@ -213,7 +212,7 @@ class boss_prince_taldaram : public CreatureScript
                     _embraceTakenDamage += damage;
                     if (_embraceTakenDamage > DUNGEON_MODE<uint32>(DATA_EMBRACE_DMG, H_DATA_EMBRACE_DMG))
                     {
-                        _embraceTargetGUID = 0;
+                        _embraceTargetGUID.Clear();
                         me->CastStop();
                     }
                 }
@@ -231,7 +230,7 @@ class boss_prince_taldaram : public CreatureScript
                     return;
 
                 if (victim->GetGUID() == _embraceTargetGUID)
-                    _embraceTargetGUID = 0;
+                    _embraceTargetGUID.Clear();
 
                 Talk(SAY_SLAY);
             }
@@ -263,12 +262,12 @@ class boss_prince_taldaram : public CreatureScript
                 me->SetDisableGravity(false);
                 me->GetMotionMaster()->MoveLand(0, me->GetHomePosition());
                 Talk(SAY_WARNING);
-                instance->HandleGameObject(instance->GetData64(DATA_PRINCE_TALDARAM_PLATFORM), true);
+                instance->HandleGameObject(instance->GetGuidData(DATA_PRINCE_TALDARAM_PLATFORM), true);
             }
 
         private:
-            uint64 _flameSphereTargetGUID;
-            uint64 _embraceTargetGUID;
+            ObjectGuid _flameSphereTargetGUID;
+            ObjectGuid _embraceTargetGUID;
             uint32 _embraceTakenDamage;
         };
 
@@ -288,7 +287,6 @@ class npc_prince_taldaram_flame_sphere : public CreatureScript
         {
             npc_prince_taldaram_flame_sphereAI(Creature* creature) : ScriptedAI(creature)
             {
-                _flameSphereTargetGUID = 0;
             }
 
             void Reset() override
@@ -296,13 +294,13 @@ class npc_prince_taldaram_flame_sphere : public CreatureScript
                 DoCast(me, SPELL_FLAME_SPHERE_SPAWN_EFFECT, true);
                 DoCast(me, SPELL_FLAME_SPHERE_VISUAL, true);
 
-                _flameSphereTargetGUID = 0;
+                _flameSphereTargetGUID.Clear();
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_START_MOVE, 3 * IN_MILLISECONDS);
                 _events.ScheduleEvent(EVENT_DESPAWN, 13 * IN_MILLISECONDS);
             }
 
-            void SetGUID(uint64 guid, int32 /*id = 0*/) override
+            void SetGUID(ObjectGuid guid, int32 /*id = 0*/) override
             {
                 _flameSphereTargetGUID = guid;
             }
@@ -364,7 +362,7 @@ class npc_prince_taldaram_flame_sphere : public CreatureScript
 
         private:
             EventMap _events;
-            uint64 _flameSphereTargetGUID;
+            ObjectGuid _flameSphereTargetGUID;
         };
 
         CreatureAI* GetAI(Creature* creature) const override
@@ -385,7 +383,7 @@ class go_prince_taldaram_sphere : public GameObjectScript
             if (!instance)
                 return false;
 
-            Creature* PrinceTaldaram = ObjectAccessor::GetCreature(*go, instance->GetData64(DATA_PRINCE_TALDARAM));
+            Creature* PrinceTaldaram = ObjectAccessor::GetCreature(*go, instance->GetGuidData(DATA_PRINCE_TALDARAM));
             if (PrinceTaldaram && PrinceTaldaram->IsAlive())
             {
                 go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
@@ -403,7 +401,7 @@ class go_prince_taldaram_sphere : public GameObjectScript
                         break;
                 }
 
-                CAST_AI(boss_prince_taldaram::boss_prince_taldaramAI, PrinceTaldaram->AI())->CheckSpheres();
+                ENSURE_AI(boss_prince_taldaram::boss_prince_taldaramAI, PrinceTaldaram->AI())->CheckSpheres();
             }
             return true;
         }

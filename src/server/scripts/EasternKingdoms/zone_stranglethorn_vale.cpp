@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -50,7 +50,13 @@ public:
     {
         npc_yennikuAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             bReset = false;
+        }
+
+        void Initialize()
+        {
+            Reset_Timer = 0;
         }
 
         uint32 Reset_Timer;
@@ -58,7 +64,7 @@ public:
 
         void Reset() override
         {
-            Reset_Timer = 0;
+            Initialize();
             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
         }
 

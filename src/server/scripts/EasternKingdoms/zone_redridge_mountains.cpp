@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -45,14 +45,22 @@ public:
 
     struct npc_corporal_keeshanAI : public npc_escortAI
     {
-        npc_corporal_keeshanAI(Creature* creature) : npc_escortAI(creature) { }
+        npc_corporal_keeshanAI(Creature* creature) : npc_escortAI(creature)
+        {
+            Initialize();
+        }
 
-        void Reset() override
+        void Initialize()
         {
             timer = 0;
             phase = 0;
             mockingBlowTimer = 5000;
-            shieldBashTimer  = 8000;
+            shieldBashTimer = 8000;
+        }
+
+        void Reset() override
+        {
+            Initialize();
         }
 
         void sQuestAccept(Player* player, Quest const* quest)
@@ -84,7 +92,7 @@ public:
                     me->SetWalk(false);
                     break;
                 case 115:
-                    player->AreaExploredOrEventHappens(QUEST_MISSING_IN_ACTION);
+                    player->GroupEventHappens(QUEST_MISSING_IN_ACTION, me);
                     timer = 2000;
                     phase = 4;
                     break;

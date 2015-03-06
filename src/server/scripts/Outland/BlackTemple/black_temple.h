@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #define BLACK_TEMPLE_H_
 
 #define BTScriptName "instance_black_temple"
+#define DataHeader   "BT"
 
 uint32 const EncounterCount         = 9;
 
@@ -65,12 +66,15 @@ enum CreatureIds
     NPC_ILLIDARI_COUNCIL            = 23426,
     NPC_BLOOD_ELF_COUNCIL_VOICE     = 23499,
 
-    NPC_ILLIDAN_STORMRAGE           = 22917
+    NPC_ILLIDAN_STORMRAGE           = 22917,
+
+    NPC_SUPREMUS_VOLCANO            = 23085
 };
 
 enum GameObjectIds
 {
     GO_NAJENTUS_GATE                = 185483,
+    GO_NAJENTUS_SPINE               = 185584,
     GO_SUPREMUS_GATE                = 185882,
     GO_SHADE_OF_AKAMA_DOOR          = 185478,
     GO_TERON_DOOR_1                 = 185480,

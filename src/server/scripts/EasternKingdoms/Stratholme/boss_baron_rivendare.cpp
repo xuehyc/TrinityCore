@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -75,7 +75,17 @@ public:
     {
         boss_baron_rivendareAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = me->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            ShadowBolt_Timer = 5000;
+            Cleave_Timer = 8000;
+            MortalStrike_Timer = 12000;
+            //        RaiseDead_Timer = 30000;
+            SummonSkeletons_Timer = 34000;
         }
 
         InstanceScript* instance;
@@ -88,11 +98,7 @@ public:
 
         void Reset() override
         {
-            ShadowBolt_Timer = 5000;
-            Cleave_Timer = 8000;
-            MortalStrike_Timer = 12000;
-            //        RaiseDead_Timer = 30000;
-            SummonSkeletons_Timer = 34000;
+            Initialize();
             if (instance->GetData(TYPE_RAMSTEIN) == DONE)
                 instance->SetData(TYPE_BARON, NOT_STARTED);
         }
@@ -134,14 +140,14 @@ public:
             {
                 DoCastVictim(SPELL_CLEAVE);
                 //13 seconds until we should cast this again
-                Cleave_Timer = 7000 + (rand()%10000);
+                Cleave_Timer = 7000 + (rand32() % 10000);
             } else Cleave_Timer -= diff;
 
             //MortalStrike
             if (MortalStrike_Timer <= diff)
             {
                 DoCastVictim(SPELL_MORTALSTRIKE);
-                MortalStrike_Timer = 10000 + (rand()%15000);
+                MortalStrike_Timer = 10000 + (rand32() % 15000);
             } else MortalStrike_Timer -= diff;
 
             //RaiseDead

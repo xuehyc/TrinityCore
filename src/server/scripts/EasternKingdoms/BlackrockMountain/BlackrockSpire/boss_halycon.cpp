@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -45,12 +45,20 @@ public:
 
     struct boss_halyconAI : public BossAI
     {
-        boss_halyconAI(Creature* creature) : BossAI(creature, DATA_HALYCON) { }
+        boss_halyconAI(Creature* creature) : BossAI(creature, DATA_HALYCON)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            Summoned = false;
+        }
 
         void Reset() override
         {
             _Reset();
-            Summoned = false;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override

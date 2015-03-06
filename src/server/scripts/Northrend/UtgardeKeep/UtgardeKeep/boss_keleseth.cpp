@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -94,7 +94,7 @@ class npc_frost_tomb : public CreatureScript
 
             void JustDied(Unit* /*killer*/) override
             {
-                if (Creature* keleseth = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_PRINCE_KELESETH)))
+                if (Creature* keleseth = ObjectAccessor::GetCreature(*me, _instance->GetGuidData(DATA_PRINCE_KELESETH)))
                     keleseth->AI()->SetData(DATA_ON_THE_ROCKS, false);
             }
 
@@ -115,7 +115,15 @@ class boss_keleseth : public CreatureScript
 
         struct boss_kelesethAI : public BossAI
         {
-            boss_kelesethAI(Creature* creature) : BossAI(creature, DATA_PRINCE_KELESETH) { }
+            boss_kelesethAI(Creature* creature) : BossAI(creature, DATA_PRINCE_KELESETH)
+            {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                onTheRocks = true;
+            }
 
             void Reset() override
             {
@@ -124,7 +132,7 @@ class boss_keleseth : public CreatureScript
                 events.ScheduleEvent(EVENT_FROST_TOMB, urand(14, 19)*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SUMMON_SKELETONS, 6*IN_MILLISECONDS);
 
-                onTheRocks = true;
+                Initialize();
             }
 
             void EnterCombat(Unit* who) override
@@ -157,7 +165,7 @@ class boss_keleseth : public CreatureScript
             void SetData(uint32 data, uint32 value) override
             {
                 if (data == DATA_ON_THE_ROCKS)
-                    onTheRocks = value;
+                    onTheRocks = value != 0;
             }
 
             uint32 GetData(uint32 data) const override

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,8 +18,8 @@
 #ifndef _PREPAREDSTATEMENT_H
 #define _PREPAREDSTATEMENT_H
 
+#include <future>
 #include "SQLOperation.h"
-#include <ace/Future.h>
 
 #ifdef __APPLE__
 #undef TYPE_BOOL
@@ -153,21 +153,22 @@ class MySQLPreparedStatement
         MySQLPreparedStatement& operator=(MySQLPreparedStatement const& right) = delete;
 };
 
-typedef ACE_Future<PreparedQueryResult> PreparedQueryResultFuture;
+typedef std::future<PreparedQueryResult> PreparedQueryResultFuture;
+typedef std::promise<PreparedQueryResult> PreparedQueryResultPromise;
 
 //- Lower-level class, enqueuable operation
 class PreparedStatementTask : public SQLOperation
 {
     public:
-        PreparedStatementTask(PreparedStatement* stmt);
-        PreparedStatementTask(PreparedStatement* stmt, PreparedQueryResultFuture result);
+        PreparedStatementTask(PreparedStatement* stmt, bool async = false);
         ~PreparedStatementTask();
 
-        bool Execute();
+        bool Execute() override;
+        PreparedQueryResultFuture GetFuture() { return m_result->get_future(); }
 
     protected:
         PreparedStatement* m_stmt;
         bool m_has_result;
-        PreparedQueryResultFuture m_result;
+        PreparedQueryResultPromise* m_result;
 };
 #endif

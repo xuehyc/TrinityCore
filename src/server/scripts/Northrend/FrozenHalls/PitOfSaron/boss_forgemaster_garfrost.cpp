@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -82,14 +82,22 @@ class boss_garfrost : public CreatureScript
 
         struct boss_garfrostAI : public BossAI
         {
-            boss_garfrostAI(Creature* creature) : BossAI(creature, DATA_GARFROST) { }
+            boss_garfrostAI(Creature* creature) : BossAI(creature, DATA_GARFROST)
+            {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                _permafrostStack = 0;
+            }
 
             void Reset() override
             {
                 _Reset();
                 events.SetPhase(PHASE_ONE);
                 SetEquipmentSlots(true);
-                _permafrostStack = 0;
+                Initialize();
             }
 
             void EnterCombat(Unit* /*who*/) override
@@ -113,7 +121,7 @@ class boss_garfrost : public CreatureScript
                 Talk(SAY_DEATH);
                 me->RemoveAllGameObjects();
 
-                if (Creature* tyrannus = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TYRANNUS)))
+                if (Creature* tyrannus = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_TYRANNUS)))
                     tyrannus->AI()->Talk(SAY_TYRANNUS_DEATH);
             }
 
@@ -248,12 +256,13 @@ class spell_garfrost_permafrost : public SpellScriptLoader
         {
             PrepareSpellScript(spell_garfrost_permafrost_SpellScript);
 
-            bool Load() override
+        public:
+            spell_garfrost_permafrost_SpellScript()
             {
                 prevented = false;
-                return true;
             }
 
+        private:
             void PreventHitByLoS()
             {
                 if (Unit* target = GetHitUnit())

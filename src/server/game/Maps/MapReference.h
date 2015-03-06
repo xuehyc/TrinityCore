@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -25,18 +25,18 @@
 class MapReference : public Reference<Map, Player>
 {
     protected:
-        void targetObjectBuildLink()
+        void targetObjectBuildLink() override
         {
             // called from link()
             getTarget()->m_mapRefManager.insertFirst(this);
             getTarget()->m_mapRefManager.incSize();
         }
-        void targetObjectDestroyLink()
+        void targetObjectDestroyLink() override
         {
             // called from unlink()
             if (isValid()) getTarget()->m_mapRefManager.decSize();
         }
-        void sourceObjectDestroyLink()
+        void sourceObjectDestroyLink() override
         {
             // called from invalidate()
             getTarget()->m_mapRefManager.decSize();

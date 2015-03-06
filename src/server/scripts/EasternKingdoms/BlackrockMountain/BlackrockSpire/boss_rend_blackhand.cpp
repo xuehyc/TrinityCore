@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -167,16 +167,16 @@ public:
         boss_rend_blackhandAI(Creature* creature) : BossAI(creature, DATA_WARCHIEF_REND_BLACKHAND)
         {
             gythEvent = false;
-            victorGUID = 0;
-            portcullisGUID = 0;
+            victorGUID.Clear();
+            portcullisGUID.Clear();
         }
 
         void Reset() override
         {
             _Reset();
             gythEvent = false;
-            victorGUID = 0;
-            portcullisGUID = 0;
+            victorGUID.Clear();
+            portcullisGUID.Clear();
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -437,8 +437,8 @@ public:
 
         private:
             bool   gythEvent;
-            uint64 victorGUID;
-            uint64 portcullisGUID;
+            ObjectGuid victorGUID;
+            ObjectGuid portcullisGUID;
     };
 
     CreatureAI* GetAI(Creature* creature) const override

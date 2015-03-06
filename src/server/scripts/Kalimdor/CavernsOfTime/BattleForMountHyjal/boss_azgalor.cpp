@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -55,8 +55,20 @@ public:
     {
         boss_azgalorAI(Creature* creature) : hyjal_trashAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
             go = false;
+        }
+
+        void Initialize()
+        {
+            damageTaken = 0;
+            RainTimer = 20000;
+            DoomTimer = 50000;
+            HowlTimer = 30000;
+            CleaveTimer = 10000;
+            EnrageTimer = 600000;
+            enraged = false;
         }
 
         uint32 RainTimer;
@@ -70,13 +82,7 @@ public:
 
         void Reset() override
         {
-            damageTaken = 0;
-            RainTimer = 20000;
-            DoomTimer = 50000;
-            HowlTimer = 30000;
-            CleaveTimer = 10000;
-            EnrageTimer = 600000;
-            enraged = false;
+            Initialize();
 
             if (IsEvent)
                 instance->SetData(DATA_AZGALOREVENT, NOT_STARTED);
@@ -99,7 +105,7 @@ public:
         {
             if (waypointId == 7 && instance)
             {
-                Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THRALL));
                 if (target && target->IsAlive())
                     me->AddThreat(target, 0.0f);
             }
@@ -142,13 +148,13 @@ public:
             if (RainTimer <= diff)
             {
                 DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 30, true), SPELL_RAIN_OF_FIRE);
-                RainTimer = 20000+rand()%15000;
+                RainTimer = 20000 + rand32() % 15000;
             } else RainTimer -= diff;
 
             if (DoomTimer <= diff)
             {
                 DoCast(SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true), SPELL_DOOM);//never on tank
-                DoomTimer = 45000+rand()%5000;
+                DoomTimer = 45000 + rand32() % 5000;
             } else DoomTimer -= diff;
 
             if (HowlTimer <= diff)
@@ -160,7 +166,7 @@ public:
             if (CleaveTimer <= diff)
             {
                 DoCastVictim(SPELL_CLEAVE);
-                CleaveTimer = 10000+rand()%5000;
+                CleaveTimer = 10000 + rand32() % 5000;
             } else CleaveTimer -= diff;
 
             if (EnrageTimer < diff && !enraged)
@@ -195,13 +201,13 @@ public:
             WarstompTimer = 10000;
             CheckTimer = 5000;
             instance = creature->GetInstanceScript();
-            AzgalorGUID = instance->GetData64(DATA_AZGALOR);
+            AzgalorGUID = instance->GetGuidData(DATA_AZGALOR);
         }
 
         uint32 CrippleTimer;
         uint32 WarstompTimer;
         uint32 CheckTimer;
-        uint64 AzgalorGUID;
+        ObjectGuid AzgalorGUID;
         InstanceScript* instance;
 
         void Reset() override
@@ -259,13 +265,13 @@ public:
             if (WarstompTimer <= diff)
             {
                 DoCast(me, SPELL_WARSTOMP);
-                WarstompTimer = 10000+rand()%5000;
+                WarstompTimer = 10000 + rand32() % 5000;
             } else WarstompTimer -= diff;
 
             if (CrippleTimer <= diff)
             {
                 DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true), SPELL_CRIPPLE);
-                CrippleTimer = 25000+rand()%5000;
+                CrippleTimer = 25000 + rand32() % 5000;
             } else CrippleTimer -= diff;
 
             DoMeleeAttackIfReady();

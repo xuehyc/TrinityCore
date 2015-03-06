@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -83,7 +83,16 @@ class boss_thekal : public CreatureScript
 
         struct boss_thekalAI : public BossAI
         {
-            boss_thekalAI(Creature* creature) : BossAI(creature, DATA_THEKAL) { }
+            boss_thekalAI(Creature* creature) : BossAI(creature, DATA_THEKAL)
+            {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                Enraged = false;
+                WasDead = false;
+            }
 
             bool Enraged;
             bool WasDead;
@@ -93,8 +102,7 @@ class boss_thekal : public CreatureScript
                 if (events.IsInPhase(PHASE_TWO))
                     me->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT, 35.0f, false); // hack
                 _Reset();
-                Enraged = false;
-                WasDead = false;
+                Initialize();
             }
 
             void JustDied(Unit* /*killer*/) override
@@ -172,7 +180,7 @@ class boss_thekal : public CreatureScript
                                 if (instance->GetBossState(DATA_LORKHAN) == SPECIAL)
                                 {
                                     //Resurrect LorKhan
-                                    if (Unit* pLorKhan = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_LORKHAN)))
+                                    if (Unit* pLorKhan = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_LORKHAN)))
                                     {
                                         pLorKhan->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
                                         pLorKhan->setFaction(14);
@@ -185,7 +193,7 @@ class boss_thekal : public CreatureScript
                                 if (instance->GetBossState(DATA_ZATH) == SPECIAL)
                                 {
                                     //Resurrect Zath
-                                    if (Unit* pZath = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_ZATH)))
+                                    if (Unit* pZath = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_ZATH)))
                                     {
                                         pZath->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
                                         pZath->setFaction(14);
@@ -264,7 +272,19 @@ class npc_zealot_lorkhan : public CreatureScript
         {
             npc_zealot_lorkhanAI(Creature* creature) : ScriptedAI(creature)
             {
+                Initialize();
                 instance = creature->GetInstanceScript();
+            }
+
+            void Initialize()
+            {
+                Shield_Timer = 1000;
+                BloodLust_Timer = 16000;
+                GreaterHeal_Timer = 32000;
+                Disarm_Timer = 6000;
+                Check_Timer = 10000;
+
+                FakeDeath = false;
             }
 
             uint32 Shield_Timer;
@@ -279,13 +299,7 @@ class npc_zealot_lorkhan : public CreatureScript
 
             void Reset() override
             {
-                Shield_Timer = 1000;
-                BloodLust_Timer = 16000;
-                GreaterHeal_Timer = 32000;
-                Disarm_Timer = 6000;
-                Check_Timer = 10000;
-
-                FakeDeath = false;
+                Initialize();
 
                 instance->SetBossState(DATA_LORKHAN, NOT_STARTED);
 
@@ -313,14 +327,14 @@ class npc_zealot_lorkhan : public CreatureScript
                 if (BloodLust_Timer <= diff)
                 {
                     DoCast(me, SPELL_BLOODLUST);
-                    BloodLust_Timer = 20000+rand()%8000;
+                    BloodLust_Timer = 20000 + rand32() % 8000;
                 } else BloodLust_Timer -= diff;
 
                 //Casting Greaterheal to Thekal or Zath if they are in meele range.
                 if (GreaterHeal_Timer <= diff)
                 {
-                    Unit* pThekal = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THEKAL));
-                    Unit* pZath = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_ZATH));
+                    Unit* pThekal = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THEKAL));
+                    Unit* pZath = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_ZATH));
 
                     if (!pThekal || !pZath)
                         return;
@@ -337,14 +351,14 @@ class npc_zealot_lorkhan : public CreatureScript
                             break;
                     }
 
-                    GreaterHeal_Timer = 15000+rand()%5000;
+                    GreaterHeal_Timer = 15000 + rand32() % 5000;
                 } else GreaterHeal_Timer -= diff;
 
                 //Disarm_Timer
                 if (Disarm_Timer <= diff)
                 {
                     DoCastVictim(SPELL_DISARM);
-                    Disarm_Timer = 15000+rand()%10000;
+                    Disarm_Timer = 15000 + rand32() % 10000;
                 } else Disarm_Timer -= diff;
 
                 //Check_Timer for the death of LorKhan and Zath.
@@ -353,7 +367,7 @@ class npc_zealot_lorkhan : public CreatureScript
                     if (instance->GetBossState(DATA_THEKAL) == SPECIAL)
                     {
                         //Resurrect Thekal
-                        if (Unit* pThekal = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THEKAL)))
+                        if (Unit* pThekal = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THEKAL)))
                         {
                             pThekal->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
                             pThekal->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -365,7 +379,7 @@ class npc_zealot_lorkhan : public CreatureScript
                     if (instance->GetBossState(DATA_ZATH) == SPECIAL)
                     {
                         //Resurrect Zath
-                        if (Unit* pZath = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_ZATH)))
+                        if (Unit* pZath = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_ZATH)))
                         {
                             pZath->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
                             pZath->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -412,7 +426,20 @@ class npc_zealot_zath : public CreatureScript
         {
             npc_zealot_zathAI(Creature* creature) : ScriptedAI(creature)
             {
+                Initialize();
                 instance = creature->GetInstanceScript();
+            }
+
+            void Initialize()
+            {
+                SweepingStrikes_Timer = 13000;
+                SinisterStrike_Timer = 8000;
+                Gouge_Timer = 25000;
+                Kick_Timer = 18000;
+                Blind_Timer = 5000;
+                Check_Timer = 10000;
+
+                FakeDeath = false;
             }
 
             uint32 SweepingStrikes_Timer;
@@ -428,14 +455,7 @@ class npc_zealot_zath : public CreatureScript
 
             void Reset() override
             {
-                SweepingStrikes_Timer = 13000;
-                SinisterStrike_Timer = 8000;
-                Gouge_Timer = 25000;
-                Kick_Timer = 18000;
-                Blind_Timer = 5000;
-                Check_Timer = 10000;
-
-                FakeDeath = false;
+                Initialize();
 
                 instance->SetBossState(DATA_ZATH, NOT_STARTED);
 
@@ -456,14 +476,14 @@ class npc_zealot_zath : public CreatureScript
                 if (SweepingStrikes_Timer <= diff)
                 {
                     DoCastVictim(SPELL_SWEEPINGSTRIKES);
-                    SweepingStrikes_Timer = 22000+rand()%4000;
+                    SweepingStrikes_Timer = 22000 + rand32() % 4000;
                 } else SweepingStrikes_Timer -= diff;
 
                 //SinisterStrike_Timer
                 if (SinisterStrike_Timer <= diff)
                 {
                     DoCastVictim(SPELL_SINISTERSTRIKE);
-                    SinisterStrike_Timer = 8000+rand()%8000;
+                    SinisterStrike_Timer = 8000 + rand32() % 8000;
                 } else SinisterStrike_Timer -= diff;
 
                 //Gouge_Timer
@@ -474,21 +494,21 @@ class npc_zealot_zath : public CreatureScript
                     if (DoGetThreat(me->GetVictim()))
                         DoModifyThreatPercent(me->GetVictim(), -100);
 
-                    Gouge_Timer = 17000+rand()%10000;
+                    Gouge_Timer = 17000 + rand32() % 10000;
                 } else Gouge_Timer -= diff;
 
                 //Kick_Timer
                 if (Kick_Timer <= diff)
                 {
                     DoCastVictim(SPELL_KICK);
-                    Kick_Timer = 15000+rand()%10000;
+                    Kick_Timer = 15000 + rand32() % 10000;
                 } else Kick_Timer -= diff;
 
                 //Blind_Timer
                 if (Blind_Timer <= diff)
                 {
                     DoCastVictim(SPELL_BLIND);
-                    Blind_Timer = 10000+rand()%10000;
+                    Blind_Timer = 10000 + rand32() % 10000;
                 } else Blind_Timer -= diff;
 
                 //Check_Timer for the death of LorKhan and Zath.
@@ -497,7 +517,7 @@ class npc_zealot_zath : public CreatureScript
                     if (instance->GetBossState(DATA_LORKHAN) == SPECIAL)
                     {
                         //Resurrect LorKhan
-                        if (Unit* pLorKhan = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_LORKHAN)))
+                        if (Unit* pLorKhan = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_LORKHAN)))
                         {
                             pLorKhan->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
                             pLorKhan->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -509,7 +529,7 @@ class npc_zealot_zath : public CreatureScript
                     if (instance->GetBossState(DATA_THEKAL) == SPECIAL)
                     {
                         //Resurrect Thekal
-                        if (Unit* pThekal = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THEKAL)))
+                        if (Unit* pThekal = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THEKAL)))
                         {
                             pThekal->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
                             pThekal->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);

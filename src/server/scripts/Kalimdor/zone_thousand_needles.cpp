@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -324,14 +324,23 @@ public:
 
     struct npc_pluckyAI : public ScriptedAI
     {
-        npc_pluckyAI(Creature* creature) : ScriptedAI(creature) { NormFaction = creature->getFaction(); }
+        npc_pluckyAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+            NormFaction = creature->getFaction();
+        }
+
+        void Initialize()
+        {
+            ResetTimer = 120000;
+        }
 
         uint32 NormFaction;
         uint32 ResetTimer;
 
         void Reset() override
         {
-            ResetTimer = 120000;
+            Initialize();
 
             if (me->getFaction() != NormFaction)
                 me->setFaction(NormFaction);

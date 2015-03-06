@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -51,8 +51,8 @@ public:
     {
         if (quest->GetQuestId() == QUEST_SHATTERED_SALUTE)
         {
-            CAST_AI(npc_shenthul::npc_shenthulAI, creature->AI())->CanTalk = true;
-            CAST_AI(npc_shenthul::npc_shenthulAI, creature->AI())->PlayerGUID = player->GetGUID();
+            ENSURE_AI(npc_shenthul::npc_shenthulAI, creature->AI())->CanTalk = true;
+            ENSURE_AI(npc_shenthul::npc_shenthulAI, creature->AI())->PlayerGUID = player->GetGUID();
         }
         return true;
     }
@@ -64,21 +64,29 @@ public:
 
     struct npc_shenthulAI : public ScriptedAI
     {
-        npc_shenthulAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_shenthulAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
 
-        bool CanTalk;
-        bool CanEmote;
-        uint32 SaluteTimer;
-        uint32 ResetTimer;
-        uint64 PlayerGUID;
-
-        void Reset() override
+        void Initialize()
         {
             CanTalk = false;
             CanEmote = false;
             SaluteTimer = 6000;
             ResetTimer = 0;
-            PlayerGUID = 0;
+            PlayerGUID.Clear();
+        }
+
+        bool CanTalk;
+        bool CanEmote;
+        uint32 SaluteTimer;
+        uint32 ResetTimer;
+        ObjectGuid PlayerGUID;
+
+        void Reset() override
+        {
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }
@@ -211,15 +219,23 @@ public:
 
     struct npc_thrall_warchiefAI : public ScriptedAI
     {
-        npc_thrall_warchiefAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_thrall_warchiefAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            ChainLightningTimer = 2000;
+            ShockTimer = 8000;
+        }
 
         uint32 ChainLightningTimer;
         uint32 ShockTimer;
 
         void Reset() override
         {
-            ChainLightningTimer = 2000;
-            ShockTimer = 8000;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }

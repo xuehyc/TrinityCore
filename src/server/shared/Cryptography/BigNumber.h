@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,8 +19,8 @@
 #ifndef _AUTH_BIGNUMBER_H
 #define _AUTH_BIGNUMBER_H
 
+#include <memory>
 #include "Define.h"
-#include <ace/Auto_Ptr.h>
 
 struct bignum_st;
 
@@ -87,7 +87,7 @@ class BigNumber
 
         uint32 AsDword();
 
-        ACE_Auto_Array_Ptr<uint8> AsByteArray(int32 minSize = 0, bool littleEndian = true);
+        std::unique_ptr<uint8[]> AsByteArray(int32 minSize = 0, bool littleEndian = true);
 
         char * AsHexStr() const;
         char * AsDecStr() const;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,18 +19,17 @@
 /* ScriptData
 SDName: Bloodmyst_Isle
 SD%Complete: 80
-SDComment: Quest support: 9670, 9667
+SDComment: Quest support: 9670
 SDCategory: Bloodmyst Isle
 EndScriptData */
 
 /* ContentData
 npc_webbed_creature
-npc_princess_stillpine
-go_princess_stillpines_cage
 EndContentData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "PassiveAI.h"
 #include "Player.h"
 
 /*######
@@ -50,13 +49,17 @@ class npc_webbed_creature : public CreatureScript
 public:
     npc_webbed_creature() : CreatureScript("npc_webbed_creature") { }
 
-    struct npc_webbed_creatureAI : public ScriptedAI
+    struct npc_webbed_creatureAI : public NullCreatureAI
     {
-        npc_webbed_creatureAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_webbed_creatureAI(Creature* creature) : NullCreatureAI(creature) { }
 
         void Reset() override { }
 
         void EnterCombat(Unit* /*who*/) override { }
+
+        void AttackStart(Unit* /*who*/) override { }
+
+        void MoveInLineOfSight(Unit* /*who*/) override { }
 
         void JustDied(Unit* killer) override
         {
@@ -66,7 +69,7 @@ public:
             {
                 case 0:
                     if (Player* player = killer->ToPlayer())
-                        player->KilledMonsterCredit(NPC_EXPEDITION_RESEARCHER, 0);
+                        player->KilledMonsterCredit(NPC_EXPEDITION_RESEARCHER);
                     break;
                 case 1:
                 case 2:
@@ -85,64 +88,7 @@ public:
     }
 };
 
-/*######
-## Quest 9667: Saving Princess Stillpine
-######*/
-
-enum Stillpine
-{
-    QUEST_SAVING_PRINCESS_STILLPINE               = 9667,
-    NPC_PRINCESS_STILLPINE                        = 17682,
-    GO_PRINCESS_STILLPINES_CAGE                   = 181928,
-    SPELL_OPENING_PRINCESS_STILLPINE_CREDIT       = 31003,
-    SAY_DIRECTION                                 = 0
-};
-
-class go_princess_stillpines_cage : public GameObjectScript
-{
-public:
-    go_princess_stillpines_cage() : GameObjectScript("go_princess_stillpines_cage") { }
-
-    bool OnGossipHello(Player* player, GameObject* go) override
-    {
-        go->SetGoState(GO_STATE_READY);
-        if (Creature* stillpine = go->FindNearestCreature(NPC_PRINCESS_STILLPINE, 25, true))
-        {
-            stillpine->GetMotionMaster()->MovePoint(1, go->GetPositionX(), go->GetPositionY()-15, go->GetPositionZ());
-            player->KilledMonsterCredit(NPC_PRINCESS_STILLPINE, stillpine->GetGUID());
-        }
-        return true;
-    }
-};
-
-class npc_princess_stillpine : public CreatureScript
-{
-public:
-    npc_princess_stillpine() : CreatureScript("npc_princess_stillpine") { }
-
-    struct npc_princess_stillpineAI : public ScriptedAI
-    {
-        npc_princess_stillpineAI(Creature* creature) : ScriptedAI(creature) { }
-
-        void MovementInform(uint32 type, uint32 id) override
-        {
-            if (type == POINT_MOTION_TYPE && id == 1)
-            {
-                Talk(SAY_DIRECTION);
-                me->DespawnOrUnsummon();
-            }
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_princess_stillpineAI(creature);
-    }
-};
-
 void AddSC_bloodmyst_isle()
 {
     new npc_webbed_creature();
-    new npc_princess_stillpine();
-    new go_princess_stillpines_cage();
 }

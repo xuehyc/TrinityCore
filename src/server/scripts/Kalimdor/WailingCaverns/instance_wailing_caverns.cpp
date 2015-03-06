@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -41,20 +41,18 @@ public:
 
     struct instance_wailing_caverns_InstanceMapScript : public InstanceScript
     {
-        instance_wailing_caverns_InstanceMapScript(Map* map) : InstanceScript(map) { }
+        instance_wailing_caverns_InstanceMapScript(Map* map) : InstanceScript(map)
+        {
+            SetHeaders(DataHeader);
+            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
+            yelled = false;
+        }
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
 
         bool yelled;
-        uint64 NaralexGUID;
-
-        void Initialize() override
-        {
-            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
-
-            yelled = false;
-            NaralexGUID = 0;
-        }
+        ObjectGuid NaralexGUID;
 
         void OnCreatureCreate(Creature* creature) override
         {
@@ -98,10 +96,10 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 data) const override
+        ObjectGuid GetGuidData(uint32 data) const override
         {
             if (data == DATA_NARALEX)return NaralexGUID;
-            return 0;
+            return ObjectGuid::Empty;
         }
 
         std::string GetSaveData() override

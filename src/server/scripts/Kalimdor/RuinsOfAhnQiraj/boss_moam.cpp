@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -60,13 +60,19 @@ class boss_moam : public CreatureScript
         {
             boss_moamAI(Creature* creature) : BossAI(creature, DATA_MOAM)
             {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                _isStonePhase = false;
             }
 
             void Reset() override
             {
                 _Reset();
                 me->SetPower(POWER_MANA, 0);
-                _isStonePhase = false;
+                Initialize();
                 events.ScheduleEvent(EVENT_STONE_PHASE, 90000);
                 //events.ScheduleEvent(EVENT_WIDE_SLASH, 11000);
             }

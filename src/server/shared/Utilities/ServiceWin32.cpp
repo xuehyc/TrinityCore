@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -23,11 +23,6 @@
 #include <cstring>
 #include <windows.h>
 #include <winsvc.h>
-
-// stupid ACE define
-#ifdef main
-#undef main
-#endif //main
 
 #if !defined(WINADVAPI)
 #if !defined(_ADVAPI32_)
@@ -60,7 +55,7 @@ bool WinServiceInstall()
         if (GetModuleFileName( 0, path, sizeof(path)/sizeof(path[0]) ) > 0)
         {
             SC_HANDLE service;
-            std::strcat(path, " --service");
+            std::strcat(path, " --service run");
             service = CreateService(serviceControlManager,
                 serviceName,                                // name of service
                 serviceLongName,                            // service name to display
@@ -119,6 +114,8 @@ bool WinServiceInstall()
         }
         CloseServiceHandle(serviceControlManager);
     }
+
+    printf("Service installed\n");
     return true;
 }
 
@@ -143,6 +140,8 @@ bool WinServiceUninstall()
 
         CloseServiceHandle(serviceControlManager);
     }
+
+    printf("Service uninstalled\n");
     return true;
 }
 
@@ -205,7 +204,8 @@ void WINAPI ServiceMain(DWORD argc, char *argv[])
 
         GetModuleFileName(0, path, sizeof(path)/sizeof(path[0]));
 
-        for (i = 0; i < std::strlen(path); i++)
+        size_t pathLen = std::strlen(path);
+        for (i = 0; i < pathLen; i++)
         {
             if (path[i] == '\\') last_slash = i;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -57,7 +57,17 @@ public:
     {
         boss_cyanigosaAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            uiArcaneVacuumTimer = 10000;
+            uiBlizzardTimer = 15000;
+            uiManaDestructionTimer = 30000;
+            uiTailSweepTimer = 20000;
+            uiUncontrollableEnergyTimer = 25000;
         }
 
         uint32 uiArcaneVacuumTimer;
@@ -70,11 +80,7 @@ public:
 
         void Reset() override
         {
-            uiArcaneVacuumTimer = 10000;
-            uiBlizzardTimer = 15000;
-            uiManaDestructionTimer = 30000;
-            uiTailSweepTimer = 20000;
-            uiUncontrollableEnergyTimer = 25000;
+            Initialize();
             instance->SetData(DATA_CYANIGOSA_EVENT, NOT_STARTED);
         }
 

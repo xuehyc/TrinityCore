@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -445,19 +445,19 @@ std::string MySQLPreparedStatement::getQueryString(std::string const& sqlPattern
 }
 
 //- Execution
-PreparedStatementTask::PreparedStatementTask(PreparedStatement* stmt) :
-m_stmt(stmt),
-m_has_result(false) { }
-
-PreparedStatementTask::PreparedStatementTask(PreparedStatement* stmt, PreparedQueryResultFuture result) :
-m_stmt(stmt),
-m_has_result(true),
-m_result(result) { }
-
+PreparedStatementTask::PreparedStatementTask(PreparedStatement* stmt, bool async) :
+m_stmt(stmt), m_result(nullptr)
+{
+    m_has_result = async; // If it's async, then there's a result
+    if (async)
+        m_result = new PreparedQueryResultPromise();
+}
 
 PreparedStatementTask::~PreparedStatementTask()
 {
     delete m_stmt;
+    if (m_has_result && m_result != nullptr)
+        delete m_result;
 }
 
 bool PreparedStatementTask::Execute()
@@ -468,10 +468,10 @@ bool PreparedStatementTask::Execute()
         if (!result || !result->GetRowCount())
         {
             delete result;
-            m_result.set(PreparedQueryResult(NULL));
+            m_result->set_value(PreparedQueryResult(NULL));
             return false;
         }
-        m_result.set(PreparedQueryResult(result));
+        m_result->set_value(PreparedQueryResult(result));
         return true;
     }
 

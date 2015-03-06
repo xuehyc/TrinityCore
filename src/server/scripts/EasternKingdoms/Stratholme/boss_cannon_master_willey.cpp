@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -92,7 +92,18 @@ public:
 
     struct boss_cannon_master_willeyAI : public ScriptedAI
     {
-        boss_cannon_master_willeyAI(Creature* creature) : ScriptedAI(creature) { }
+        boss_cannon_master_willeyAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            Shoot_Timer = 1000;
+            Pummel_Timer = 7000;
+            KnockAway_Timer = 11000;
+            SummonRifleman_Timer = 15000;
+        }
 
         uint32 KnockAway_Timer;
         uint32 Pummel_Timer;
@@ -101,10 +112,7 @@ public:
 
         void Reset() override
         {
-            Shoot_Timer = 1000;
-            Pummel_Timer = 7000;
-            KnockAway_Timer = 11000;
-            SummonRifleman_Timer = 15000;
+            Initialize();
         }
 
         void JustDied(Unit* /*killer*/) override
@@ -132,7 +140,7 @@ public:
             if (Pummel_Timer <= diff)
             {
                 //Cast
-                if (rand()%100 < 90) //90% chance to cast
+                if (rand32() % 100 < 90) //90% chance to cast
                 {
                     DoCastVictim(SPELL_PUMMEL);
                 }
@@ -144,7 +152,7 @@ public:
             if (KnockAway_Timer <= diff)
             {
                 //Cast
-                if (rand()%100 < 80) //80% chance to cast
+                if (rand32() % 100 < 80) //80% chance to cast
                 {
                     DoCastVictim(SPELL_KNOCKAWAY);
                 }
@@ -165,7 +173,7 @@ public:
             if (SummonRifleman_Timer <= diff)
             {
                 //Cast
-                switch (rand()%9)
+                switch (rand32() % 9)
                 {
                 case 0:
                     me->SummonCreature(11054, ADD_1X, ADD_1Y, ADD_1Z, ADD_1O, TEMPSUMMON_TIMED_DESPAWN, 240000);

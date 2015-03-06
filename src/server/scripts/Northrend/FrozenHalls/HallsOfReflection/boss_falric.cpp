@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -55,12 +55,20 @@ class boss_falric : public CreatureScript
 
         struct boss_falricAI : public boss_horAI
         {
-            boss_falricAI(Creature* creature) : boss_horAI(creature, DATA_FALRIC) { }
+            boss_falricAI(Creature* creature) : boss_horAI(creature, DATA_FALRIC)
+            {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                _hopelessnessCount = 0;
+            }
 
             void Reset() override
             {
                 boss_horAI::Reset();
-                _hopelessnessCount = 0;
+                Initialize();
             }
 
             void EnterCombat(Unit* /*who*/) override

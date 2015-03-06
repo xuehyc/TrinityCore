@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -22,7 +22,6 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "Define.h"
-#include <ace/Singleton.h>
 
 #define max_ge_check_delay DAY  // 1 day in seconds
 
@@ -95,13 +94,17 @@ class Quest;
 
 class GameEventMgr
 {
-    friend class ACE_Singleton<GameEventMgr, ACE_Null_Mutex>;
-
     private:
         GameEventMgr();
         ~GameEventMgr() { };
 
     public:
+        static GameEventMgr* instance()
+        {
+            static GameEventMgr instance;
+            return &instance;
+        }
+
         typedef std::set<uint16> ActiveEvents;
         typedef std::vector<GameEventData> GameEventDataMap;
         ActiveEvents const& GetActiveEventList() const { return m_ActiveEvents; }
@@ -180,7 +183,7 @@ class GameEventMgr
         GameEventGuidMap  mGameEventGameobjectGuids;
 };
 
-#define sGameEventMgr ACE_Singleton<GameEventMgr, ACE_Null_Mutex>::instance()
+#define sGameEventMgr GameEventMgr::instance()
 
 bool IsHolidayActive(HolidayIds id);
 bool IsEventActive(uint16 event_id);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -35,7 +35,7 @@ int TotemAI::Permissible(Creature const* creature)
     return PERMIT_BASE_NO;
 }
 
-TotemAI::TotemAI(Creature* c) : CreatureAI(c), i_victimGuid(0)
+TotemAI::TotemAI(Creature* c) : CreatureAI(c), i_victimGuid()
 {
     ASSERT(c->IsTotem());
 }
@@ -90,7 +90,7 @@ void TotemAI::UpdateAI(uint32 /*diff*/)
         me->CastSpell(victim, me->ToTotem()->GetSpell(), false);
     }
     else
-        i_victimGuid = 0;
+        i_victimGuid.Clear();
 }
 
 void TotemAI::AttackStart(Unit* /*victim*/)

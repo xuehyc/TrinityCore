@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #define UTGARDE_KEEP_H_
 
 #define UKScriptName "instance_utgarde_keep"
+#define DataHeader "UK"
 
 uint32 const EncounterCount = 3;
 
@@ -75,11 +76,11 @@ enum GameObjectIds
 
 struct ForgeInfo
 {
-    ForgeInfo() : AnvilGUID(0), BellowGUID(0), FireGUID(0), Event(NOT_STARTED) { };
+    ForgeInfo() : Event(NOT_STARTED) { };
 
-    uint64 AnvilGUID;
-    uint64 BellowGUID;
-    uint64 FireGUID;
+    ObjectGuid AnvilGUID;
+    ObjectGuid BellowGUID;
+    ObjectGuid FireGUID;
 
     uint32 Event;
 };

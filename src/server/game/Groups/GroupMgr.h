@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,12 +22,17 @@
 
 class GroupMgr
 {
-    friend class ACE_Singleton<GroupMgr, ACE_Null_Mutex>;
 private:
     GroupMgr();
     ~GroupMgr();
 
 public:
+    static GroupMgr* instance()
+    {
+        static GroupMgr instance;
+        return &instance;
+    }
+
     typedef std::map<uint32, Group*> GroupContainer;
     typedef std::vector<Group*>      GroupDbContainer;
 
@@ -53,6 +58,6 @@ protected:
     GroupDbContainer GroupDbStore;
 };
 
-#define sGroupMgr ACE_Singleton<GroupMgr, ACE_Null_Mutex>::instance()
+#define sGroupMgr GroupMgr::instance()
 
 #endif

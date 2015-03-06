@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,8 +21,14 @@
 
 DoorData const doorData[] =
 {
-    { GO_IKISS_DOOR,    DATA_TALON_KING_IKISS,  DOOR_TYPE_PASSAGE,  BOUNDARY_NONE },
-    { 0,                0,                      DOOR_TYPE_ROOM,     BOUNDARY_NONE } // END
+    { GO_IKISS_DOOR, DATA_TALON_KING_IKISS, DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
+    { 0,             0,                     DOOR_TYPE_ROOM,    BOUNDARY_NONE } // END
+};
+
+ObjectData const gameObjectData[] =
+{
+    { GO_TALON_KING_COFFER, DATA_TALON_KING_COFFER },
+    { 0,                    0                      } // END
 };
 
 class instance_sethekk_halls : public InstanceMapScript
@@ -34,8 +40,10 @@ class instance_sethekk_halls : public InstanceMapScript
         {
             instance_sethekk_halls_InstanceMapScript(Map* map) : InstanceScript(map)
             {
+                SetHeaders(DataHeader);
                 SetBossNumber(EncounterCount);
                 LoadDoorData(doorData);
+                LoadObjectData(nullptr, gameObjectData);
             }
 
             void OnCreatureCreate(Creature* creature) override
@@ -49,59 +57,27 @@ class instance_sethekk_halls : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectCreate(GameObject* go) override
+            bool SetBossState(uint32 type, EncounterState state) override
             {
-                 if (go->GetEntry() == GO_IKISS_DOOR)
-                     AddDoor(go, true);
-            }
+                if (!InstanceScript::SetBossState(type, state))
+                    return false;
 
-            void OnGameObjectRemove(GameObject* go) override
-            {
-                 if (go->GetEntry() == GO_IKISS_DOOR)
-                     AddDoor(go, false);
-            }
-
-            std::string GetSaveData() override
-            {
-                OUT_SAVE_INST_DATA;
-
-                std::ostringstream saveStream;
-                saveStream << "S H " << GetBossSaveData();
-
-                OUT_SAVE_INST_DATA_COMPLETE;
-                return saveStream.str();
-            }
-
-            void Load(char const* str) override
-            {
-                if (!str)
+                switch (type)
                 {
-                    OUT_LOAD_INST_DATA_FAIL;
-                    return;
+                    case DATA_TALON_KING_IKISS:
+                        if (state == DONE)
+                        {
+                            /// @workaround: GO_FLAG_INTERACT_COND remains on the gob, but it is not handled correctly in this case
+                            ///              gameobject should have GO_DYNFLAG_LO_ACTIVATE too, which makes gobs interactable with GO_FLAG_INTERACT_COND
+                            ///              so just removed GO_FLAG_INTERACT_COND
+                            if (GameObject* coffer = GetGameObject(DATA_TALON_KING_COFFER))
+                                coffer->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND | GO_FLAG_NOT_SELECTABLE);
+                        }
+                        break;
+                    default:
+                        break;
                 }
-
-                OUT_LOAD_INST_DATA(str);
-
-                char dataHead1, dataHead2;
-
-                std::istringstream loadStream(str);
-                loadStream >> dataHead1 >> dataHead2;
-
-                if (dataHead1 == 'S' && dataHead2 == 'H')
-                {
-                    for (uint32 i = 0; i < EncounterCount; ++i)
-                    {
-                        uint32 tmpState;
-                        loadStream >> tmpState;
-                        if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
-                            tmpState = NOT_STARTED;
-                        SetBossState(i, EncounterState(tmpState));
-                    }
-                }
-                else
-                    OUT_LOAD_INST_DATA_FAIL;
-
-                OUT_LOAD_INST_DATA_COMPLETE;
+                return true;
             }
         };
 

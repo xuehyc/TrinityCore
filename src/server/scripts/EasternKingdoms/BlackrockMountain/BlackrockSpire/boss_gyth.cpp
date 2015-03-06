@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -53,13 +53,21 @@ public:
 
     struct boss_gythAI : public BossAI
     {
-        boss_gythAI(Creature* creature) : BossAI(creature, DATA_GYTH) { }
+        boss_gythAI(Creature* creature) : BossAI(creature, DATA_GYTH)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            SummonedRend = false;
+        }
 
         bool SummonedRend;
 
         void Reset() override
         {
-            SummonedRend = false;
+            Initialize();
             if (instance->GetBossState(DATA_GYTH) == IN_PROGRESS)
             {
                 instance->SetBossState(DATA_GYTH, DONE);

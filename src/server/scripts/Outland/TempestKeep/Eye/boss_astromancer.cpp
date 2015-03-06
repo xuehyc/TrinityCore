@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -101,10 +101,29 @@ class boss_high_astromancer_solarian : public CreatureScript
         {
             boss_high_astromancer_solarianAI(Creature* creature) : ScriptedAI(creature), Summons(me)
             {
+                Initialize();
                 instance = creature->GetInstanceScript();
 
                 defaultarmor = creature->GetArmor();
                 defaultsize = creature->GetObjectScale();
+                memset(Portals, 0, sizeof(Portals));
+            }
+
+            void Initialize()
+            {
+                ArcaneMissiles_Timer = 2000;
+                m_uiWrathOfTheAstromancer_Timer = 15000;
+                BlindingLight_Timer = 41000;
+                Fear_Timer = 20000;
+                VoidBolt_Timer = 10000;
+                Phase1_Timer = 50000;
+                Phase2_Timer = 10000;
+                Phase3_Timer = 15000;
+                AppearDelay_Timer = 2000;
+                BlindingLight = false;
+                AppearDelay = false;
+                Wrath_Timer = 20000 + rand32() % 5000;//twice in phase one
+                Phase = 1;
             }
 
             InstanceScript* instance;
@@ -132,19 +151,7 @@ class boss_high_astromancer_solarian : public CreatureScript
 
             void Reset() override
             {
-                ArcaneMissiles_Timer = 2000;
-                m_uiWrathOfTheAstromancer_Timer = 15000;
-                BlindingLight_Timer = 41000;
-                Fear_Timer = 20000;
-                VoidBolt_Timer = 10000;
-                Phase1_Timer = 50000;
-                Phase2_Timer = 10000;
-                Phase3_Timer = 15000;
-                AppearDelay_Timer = 2000;
-                BlindingLight = false;
-                AppearDelay = false;
-                Wrath_Timer = 20000+rand()%5000;//twice in phase one
-                Phase = 1;
+                Initialize();
 
                 instance->SetData(DATA_HIGHASTROMANCERSOLARIANEVENT, NOT_STARTED);
 
@@ -195,14 +202,14 @@ class boss_high_astromancer_solarian : public CreatureScript
                 if (urand(0, 1))
                     radius = -radius;
 
-                return radius * (float)(rand()%100)/100.0f + CENTER_X;
+                return radius * (float)(rand32() % 100) / 100.0f + CENTER_X;
             }
 
             float Portal_Y(float x, float radius)
             {
                 float z = RAND(1.0f, -1.0f);
 
-                return (z*sqrt(radius*radius - (x - CENTER_X)*(x - CENTER_X)) + CENTER_Y);
+                return (z*std::sqrt(radius*radius - (x - CENTER_X)*(x - CENTER_X)) + CENTER_Y);
             }
 
             void UpdateAI(uint32 diff) override
@@ -241,7 +248,7 @@ class boss_high_astromancer_solarian : public CreatureScript
                         me->InterruptNonMeleeSpells(false);
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true))
                             DoCast(target, SPELL_WRATH_OF_THE_ASTROMANCER, true);
-                        Wrath_Timer = 20000+rand()%5000;
+                        Wrath_Timer = 20000 + rand32() % 5000;
                     }
                     else
                         Wrath_Timer -= diff;
@@ -359,7 +366,7 @@ class boss_high_astromancer_solarian : public CreatureScript
                             {
                                 Phase = 1;
                                 //15 seconds later Solarian reappears out of one of the 3 portals. Simultaneously, 2 healers appear in the two other portals.
-                                int i = rand()%3;
+                                int i = rand32() % 3;
                                 me->GetMotionMaster()->Clear();
                                 me->SetPosition(Portals[i][0], Portals[i][1], Portals[i][2], CENTER_O);
 
@@ -433,7 +440,15 @@ class npc_solarium_priest : public CreatureScript
         {
             npc_solarium_priestAI(Creature* creature) : ScriptedAI(creature)
             {
+                Initialize();
                 instance = creature->GetInstanceScript();
+            }
+
+            void Initialize()
+            {
+                healTimer = 9000;
+                holysmiteTimer = 1;
+                aoesilenceTimer = 15000;
             }
 
             InstanceScript* instance;
@@ -444,9 +459,7 @@ class npc_solarium_priest : public CreatureScript
 
             void Reset() override
             {
-                healTimer = 9000;
-                holysmiteTimer = 1;
-                aoesilenceTimer = 15000;
+                Initialize();
             }
 
             void EnterCombat(Unit* /*who*/) override
@@ -464,7 +477,7 @@ class npc_solarium_priest : public CreatureScript
                     switch (urand(0, 1))
                     {
                         case 0:
-                            target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_ASTROMANCER));
+                            target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_ASTROMANCER));
                             break;
                         case 1:
                             target = me;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -70,7 +70,15 @@ public:
     {
         boss_xevozzAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance  = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            uiSummonEtherealSphere_Timer = urand(10000, 12000);
+            uiArcaneBarrageVolley_Timer = urand(20000, 22000);
+            uiArcaneBuffet_Timer = uiSummonEtherealSphere_Timer + urand(5000, 6000);
         }
 
         InstanceScript* instance;
@@ -86,9 +94,7 @@ public:
             else if (instance->GetData(DATA_WAVE_COUNT) == 12)
                 instance->SetData(DATA_2ND_BOSS_EVENT, NOT_STARTED);
 
-            uiSummonEtherealSphere_Timer = urand(10000, 12000);
-            uiArcaneBarrageVolley_Timer = urand(20000, 22000);
-            uiArcaneBuffet_Timer = uiSummonEtherealSphere_Timer + urand(5000, 6000);
+            Initialize();
             DespawnSphere();
         }
 
@@ -134,7 +140,7 @@ public:
         void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_AGGRO);
-            if (GameObject* pDoor = instance->instance->GetGameObject(instance->GetData64(DATA_XEVOZZ_CELL)))
+            if (GameObject* pDoor = instance->instance->GetGameObject(instance->GetGuidData(DATA_XEVOZZ_CELL)))
                 if (pDoor->GetGoState() == GO_STATE_READY)
                 {
                     EnterEvadeMode();
@@ -177,7 +183,7 @@ public:
                 Talk(SAY_SPAWN);
                 DoCast(me, SPELL_SUMMON_ETHEREAL_SPHERE_1);
                 if (IsHeroic()) // extra one for heroic
-                    me->SummonCreature(NPC_ETHEREAL_SPHERE, me->GetPositionX()-5+rand()%10, me->GetPositionY()-5+rand()%10, me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 40000);
+                    me->SummonCreature(NPC_ETHEREAL_SPHERE, me->GetPositionX() - 5 + rand32() % 10, me->GetPositionY() - 5 + rand32() % 10, me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 40000);
 
                 uiSummonEtherealSphere_Timer = urand(45000, 47000);
                 uiArcaneBuffet_Timer = urand(5000, 6000);
@@ -229,7 +235,14 @@ public:
     {
         npc_ethereal_sphereAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance   = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            uiSummonPlayers_Timer = urand(33000, 35000);
+            uiRangeCheck_Timer = 1000;
         }
 
         InstanceScript* instance;
@@ -239,8 +252,7 @@ public:
 
         void Reset() override
         {
-            uiSummonPlayers_Timer = urand(33000, 35000);
-            uiRangeCheck_Timer = 1000;
+            Initialize();
         }
 
         void UpdateAI(uint32 uiDiff) override
@@ -254,7 +266,7 @@ public:
 
             if (uiRangeCheck_Timer < uiDiff)
             {
-                if (Creature* pXevozz = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_XEVOZZ)))
+                if (Creature* pXevozz = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_XEVOZZ)))
                 {
                     float fDistance = me->GetDistance2d(pXevozz);
                     if (fDistance <= 3)

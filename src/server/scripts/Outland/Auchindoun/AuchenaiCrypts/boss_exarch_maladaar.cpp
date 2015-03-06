@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -170,11 +170,25 @@ public:
     {
         boss_exarch_maladaarAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             HasTaunted = false;
         }
 
+        void Initialize()
+        {
+            soulmodel = 0;
+            soulholder.Clear();
+            soulclass = 0;
+
+            Fear_timer = 15000 + rand32() % 5000;
+            Ribbon_of_Souls_timer = 5000;
+            StolenSoul_Timer = 25000 + rand32() % 10000;
+
+            Avatar_summoned = false;
+        }
+
         uint32 soulmodel;
-        uint64 soulholder;
+        ObjectGuid soulholder;
         uint8 soulclass;
 
         uint32 Fear_timer;
@@ -186,15 +200,7 @@ public:
 
         void Reset() override
         {
-            soulmodel = 0;
-            soulholder = 0;
-            soulclass = 0;
-
-            Fear_timer = 15000 + rand()% 5000;
-            Ribbon_of_Souls_timer = 5000;
-            StolenSoul_Timer = 25000 + rand()% 10000;
-
-            Avatar_summoned = false;
+            Initialize();
         }
 
         void MoveInLineOfSight(Unit* who) override
@@ -225,16 +231,15 @@ public:
 
                 if (Unit* target = ObjectAccessor::GetUnit(*me, soulholder))
                 {
-
-                CAST_AI(npc_stolen_soul::npc_stolen_soulAI, summoned->AI())->SetMyClass(soulclass);
-                 summoned->AI()->AttackStart(target);
+                    ENSURE_AI(npc_stolen_soul::npc_stolen_soulAI, summoned->AI())->SetMyClass(soulclass);
+                    summoned->AI()->AttackStart(target);
                 }
             }
         }
 
         void KilledUnit(Unit* /*victim*/) override
         {
-            if (rand()%2)
+            if (rand32() % 2)
                 return;
 
             Talk(SAY_SLAY);
@@ -261,7 +266,7 @@ public:
 
                 DoCast(me, SPELL_SUMMON_AVATAR);
                 Avatar_summoned = true;
-                StolenSoul_Timer = 15000 + rand()% 15000;
+                StolenSoul_Timer = 15000 + rand32() % 15000;
             }
 
             if (StolenSoul_Timer <= diff)
@@ -282,7 +287,7 @@ public:
                         DoCast(target, SPELL_STOLEN_SOUL);
                         me->SummonCreature(ENTRY_STOLEN_SOUL, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
 
-                        StolenSoul_Timer = 20000 + rand()% 10000;
+                        StolenSoul_Timer = 20000 + rand32() % 10000;
                     } else StolenSoul_Timer = 1000;
                 }
             } else StolenSoul_Timer -= diff;
@@ -292,13 +297,13 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_RIBBON_OF_SOULS);
 
-                Ribbon_of_Souls_timer = 5000 + (rand()%20 * 1000);
+                Ribbon_of_Souls_timer = 5000 + (rand32() % 20 * 1000);
             } else Ribbon_of_Souls_timer -= diff;
 
             if (Fear_timer <= diff)
             {
                 DoCast(me, SPELL_SOUL_SCREAM);
-                Fear_timer = 15000 + rand()% 15000;
+                Fear_timer = 15000 + rand32() % 15000;
             } else Fear_timer -= diff;
 
             DoMeleeAttackIfReady();
@@ -319,13 +324,21 @@ public:
 
     struct npc_avatar_of_martyredAI : public ScriptedAI
     {
-        npc_avatar_of_martyredAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_avatar_of_martyredAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            Mortal_Strike_timer = 10000;
+        }
 
         uint32 Mortal_Strike_timer;
 
         void Reset() override
         {
-            Mortal_Strike_timer = 10000;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override

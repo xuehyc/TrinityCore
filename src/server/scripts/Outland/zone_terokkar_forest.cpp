@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -68,7 +68,17 @@ public:
 
     struct npc_unkor_the_ruthlessAI : public ScriptedAI
     {
-        npc_unkor_the_ruthlessAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_unkor_the_ruthlessAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            CanDoQuest = false;
+            UnkorUnfriendly_Timer = 0;
+            Pulverize_Timer = 3000;
+        }
 
         bool CanDoQuest;
         uint32 UnkorUnfriendly_Timer;
@@ -76,9 +86,7 @@ public:
 
         void Reset() override
         {
-            CanDoQuest = false;
-            UnkorUnfriendly_Timer = 0;
-            Pulverize_Timer = 3000;
+            Initialize();
             me->SetStandState(UNIT_STAND_STATE_STAND);
             me->setFaction(FACTION_HOSTILE);
         }
@@ -184,7 +192,7 @@ public:
         {
             if (done_by && done_by->GetTypeId() == TYPEID_PLAYER)
                 if (me->GetHealth() <= damage)
-                    if (rand()%100 < 75)
+                    if (rand32() % 100 < 75)
                         //Summon Wood Mites
                         DoCast(me, 39130, true);
         }
@@ -271,7 +279,7 @@ public:
         {
             if (done_by->GetTypeId() == TYPEID_PLAYER)
                 if (me->GetHealth() <= damage)
-                    if (rand()%100 < 75)
+                    if (rand32() % 100 < 75)
                         //Summon Lots of Wood Mights
                         DoCast(me, 39134, true);
         }
@@ -320,18 +328,18 @@ public:
 
             if (player->GetQuestStatus(10873) == QUEST_STATUS_INCOMPLETE)
             {
-                if (rand()%100 < 25)
+                if (rand32() % 100 < 25)
                 {
                     me->SummonCreature(QUEST_TARGET, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
-                    player->KilledMonsterCredit(QUEST_TARGET, 0);
+                    player->KilledMonsterCredit(QUEST_TARGET);
                 }
                 else
-                    me->SummonCreature(netherwebVictims[rand()%6], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                    me->SummonCreature(netherwebVictims[rand32() % 6], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
 
-                if (rand()%100 < 75)
-                    me->SummonCreature(netherwebVictims[rand()%6], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                if (rand32() % 100 < 75)
+                    me->SummonCreature(netherwebVictims[rand32() % 6], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
 
-                me->SummonCreature(netherwebVictims[rand()%6], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                me->SummonCreature(netherwebVictims[rand32() % 6], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
             }
         }
     };
@@ -397,7 +405,15 @@ public:
     {
         npc_floonAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             m_uiNormFaction = creature->getFaction();
+        }
+
+        void Initialize()
+        {
+            Silence_Timer = 2000;
+            Frostbolt_Timer = 4000;
+            FrostNova_Timer = 9000;
         }
 
         uint32 m_uiNormFaction;
@@ -407,9 +423,7 @@ public:
 
         void Reset() override
         {
-            Silence_Timer = 2000;
-            Frostbolt_Timer = 4000;
-            FrostNova_Timer = 9000;
+            Initialize();
             if (me->getFaction() != m_uiNormFaction)
                 me->setFaction(m_uiNormFaction);
         }
@@ -529,7 +543,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_EFTW_H || quest->GetQuestId() == QUEST_EFTW_A)
         {
-            CAST_AI(npc_escortAI, (creature->AI()))->Start(true, false, player->GetGUID());
+            ENSURE_AI(npc_escortAI, (creature->AI()))->Start(true, false, player->GetGUID());
             creature->setFaction(113);
         }
         return true;

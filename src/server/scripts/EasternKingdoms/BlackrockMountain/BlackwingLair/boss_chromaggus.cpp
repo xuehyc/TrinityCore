@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -73,6 +73,11 @@ public:
     {
         boss_chromaggusAI(Creature* creature) : BossAI(creature, BOSS_CHROMAGGUS)
         {
+            Initialize();
+
+            Breath1_Spell = 0;
+            Breath2_Spell = 0;
+
             // Select the 2 breaths that we are going to use until despawned
             // 5 possiblities for the first breath, 4 for the second, 20 total possiblites
             // This way we don't end up casting 2 of the same breath
@@ -173,12 +178,17 @@ public:
             EnterEvadeMode();
         }
 
+        void Initialize()
+        {
+            CurrentVurln_Spell = 0;     // We use this to store our last vulnerabilty spell so we can remove it later
+            Enraged = false;
+        }
+
         void Reset() override
         {
             _Reset();
 
-            CurrentVurln_Spell = 0;     // We use this to store our last vulnerabilty spell so we can remove it later
-            Enraged = false;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override

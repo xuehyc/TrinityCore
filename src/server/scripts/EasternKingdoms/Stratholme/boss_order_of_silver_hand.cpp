@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -65,7 +65,14 @@ public:
     {
         boss_silver_hand_bossesAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            HolyLight_Timer = 20000;
+            DivineShield_Timer = 20000;
         }
 
         InstanceScript* instance;
@@ -75,8 +82,7 @@ public:
 
         void Reset() override
         {
-            HolyLight_Timer = 20000;
-            DivineShield_Timer = 20000;
+            Initialize();
 
             switch (me->GetEntry())
             {
@@ -126,7 +132,7 @@ public:
             if (instance->GetData(TYPE_SH_QUEST))
             {
                 if (Player* player = killer->ToPlayer())
-                    player->KilledMonsterCredit(SH_QUEST_CREDIT, 0);
+                    player->KilledMonsterCredit(SH_QUEST_CREDIT);
             }
         }
 

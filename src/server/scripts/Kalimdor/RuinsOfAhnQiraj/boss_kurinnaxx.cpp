@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -53,12 +53,18 @@ class boss_kurinnaxx : public CreatureScript
         {
             boss_kurinnaxxAI(Creature* creature) : BossAI(creature, DATA_KURINNAXX)
             {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                _enraged = false;
             }
 
             void Reset() override
             {
                 _Reset();
-                _enraged = false;
+                Initialize();
                 events.ScheduleEvent(EVENT_MORTAL_WOUND, 8000);
                 events.ScheduleEvent(EVENT_SANDTRAP, urand(5000, 15000));
                 events.ScheduleEvent(EVENT_TRASH, 1000);
@@ -77,7 +83,7 @@ class boss_kurinnaxx : public CreatureScript
             void JustDied(Unit* /*killer*/) override
             {
                 _JustDied();
-                if (Creature* Ossirian = me->GetMap()->GetCreature(instance->GetData64(DATA_OSSIRIAN)))
+                if (Creature* Ossirian = me->GetMap()->GetCreature(instance->GetGuidData(DATA_OSSIRIAN)))
                     sCreatureTextMgr->SendChat(Ossirian, SAY_KURINAXX_DEATH, NULL, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_ZONE);
             }
 

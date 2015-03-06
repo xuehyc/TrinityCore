@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -166,11 +166,19 @@ public:
 
     struct boss_victor_nefariusAI : public BossAI
     {
-        boss_victor_nefariusAI(Creature* creature) : BossAI(creature, BOSS_NEFARIAN) { }
+        boss_victor_nefariusAI(Creature* creature) : BossAI(creature, BOSS_NEFARIAN)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            SpawnedAdds = 0;
+        }
 
         void Reset() override
         {
-            SpawnedAdds = 0;
+            Initialize();
 
             if (me->GetMapId() == 469)
             {
@@ -386,13 +394,21 @@ public:
 
     struct boss_nefarianAI : public BossAI
     {
-        boss_nefarianAI(Creature* creature) : BossAI(creature, BOSS_NEFARIAN) { }
+        boss_nefarianAI(Creature* creature) : BossAI(creature, BOSS_NEFARIAN)
+        {
+            Initialize();
+        }
 
-        void Reset() override
+        void Initialize()
         {
             Phase3 = false;
             canDespawn = false;
             DespawnTimer = 30000;
+        }
+
+        void Reset() override
+        {
+            Initialize();
         }
 
         void JustReachedHome() override
@@ -419,7 +435,7 @@ public:
 
         void KilledUnit(Unit* victim) override
         {
-            if (rand()%5)
+            if (rand32() % 5)
                 return;
 
             Talk(SAY_SLAY, victim);

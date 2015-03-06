@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -52,6 +52,13 @@ class spell_rog_blade_flurry : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_blade_flurry_AuraScript);
 
+        public:
+            spell_rog_blade_flurry_AuraScript()
+            {
+                _procTarget = nullptr;
+            }
+
+        private:
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK))
@@ -59,16 +66,10 @@ class spell_rog_blade_flurry : public SpellScriptLoader
                 return true;
             }
 
-            bool Load() override
-            {
-                _procTarget = NULL;
-                return true;
-            }
-
             bool CheckProc(ProcEventInfo& eventInfo)
             {
                 _procTarget = eventInfo.GetActor()->SelectNearbyTarget(eventInfo.GetProcTarget());
-                return _procTarget;
+                return _procTarget != nullptr;
             }
 
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
@@ -107,6 +108,13 @@ class spell_rog_cheat_death : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_cheat_death_AuraScript);
 
+        public:
+            spell_rog_cheat_death_AuraScript()
+            {
+                absorbChance = 0;
+            }
+
+        private:
             uint32 absorbChance;
 
             bool Validate(SpellInfo const* /*spellInfo*/) override
@@ -119,7 +127,7 @@ class spell_rog_cheat_death : public SpellScriptLoader
             bool Load() override
             {
                 absorbChance = GetSpellInfo()->Effects[EFFECT_0].CalcValue();
-                return GetUnitOwner()->ToPlayer();
+                return GetUnitOwner()->GetTypeId() == TYPEID_PLAYER;
             }
 
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
@@ -170,9 +178,15 @@ class spell_rog_deadly_poison : public SpellScriptLoader
         {
             PrepareSpellScript(spell_rog_deadly_poison_SpellScript);
 
-            bool Load() override
+        public:
+            spell_rog_deadly_poison_SpellScript()
             {
                 _stackAmount = 0;
+            }
+
+        private:
+            bool Load() override
+            {
                 // at this point CastItem must already be initialized
                 return GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCastItem();
             }
@@ -314,7 +328,7 @@ class spell_rog_killing_spree : public SpellScriptLoader
             {
                 while (!_targets.empty())
                 {
-                    uint64 guid = Trinity::Containers::SelectRandomContainerElement(_targets);
+                    ObjectGuid guid = Trinity::Containers::SelectRandomContainerElement(_targets);
                     if (Unit* target = ObjectAccessor::GetUnit(*GetTarget(), guid))
                     {
                         GetTarget()->CastSpell(target, SPELL_ROGUE_KILLING_SPREE_TELEPORT, true);
@@ -345,7 +359,7 @@ class spell_rog_killing_spree : public SpellScriptLoader
             }
 
         private:
-            std::list<uint64> _targets;
+            GuidList _targets;
         };
 
         AuraScript* GetAuraScript() const override
@@ -364,6 +378,13 @@ class spell_rog_nerves_of_steel : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_nerves_of_steel_AuraScript);
 
+        public:
+            spell_rog_nerves_of_steel_AuraScript()
+            {
+                absorbPct = 0;
+            }
+
+        private:
             uint32 absorbPct;
 
             bool Load() override
@@ -491,7 +512,7 @@ class spell_rog_prey_on_the_weak : public SpellScriptLoader
                     if (!target->HasAura(SPELL_ROGUE_PREY_ON_THE_WEAK))
                     {
                         int32 bp = GetSpellInfo()->Effects[EFFECT_0].CalcValue();
-                        target->CastCustomSpell(target, SPELL_ROGUE_PREY_ON_THE_WEAK, &bp, 0, 0, true);
+                        target->CastCustomSpell(target, SPELL_ROGUE_PREY_ON_THE_WEAK, &bp, nullptr, nullptr, true);
                     }
                 }
                 else
@@ -613,18 +634,19 @@ class spell_rog_tricks_of_the_trade : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_tricks_of_the_trade_AuraScript);
 
+        public:
+            spell_rog_tricks_of_the_trade_AuraScript()
+            {
+                _redirectTarget = nullptr;
+            }
+
+        private:
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST))
                     return false;
                 if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC))
                     return false;
-                return true;
-            }
-
-            bool Load() override
-            {
-                _redirectTarget = NULL;
                 return true;
             }
 
@@ -637,7 +659,7 @@ class spell_rog_tricks_of_the_trade : public SpellScriptLoader
             bool CheckProc(ProcEventInfo& /*eventInfo*/)
             {
                 _redirectTarget = GetTarget()->GetRedirectThreatTarget();
-                return _redirectTarget;
+                return _redirectTarget != nullptr;
             }
 
             void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)

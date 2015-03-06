@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -73,13 +73,6 @@ public:
            }
         }
 
-        uint64 OgreGUID;
-
-        void Reset() override
-        {
-            OgreGUID = 0;
-        }
-
         void UpdateAI(uint32 /*diff*/) override { }
     };
 
@@ -115,13 +108,12 @@ public:
     {
         npc_bloodmaul_bruteAI(Creature* creature) : ScriptedAI(creature)
         {
-            PlayerGUID = 0;
             hp30 = false;
         }
 
         void Reset() override
         {
-            PlayerGUID = 0;
+            PlayerGUID.Clear();
             hp30 = false;
         }
 
@@ -207,7 +199,7 @@ public:
 
         private:
             EventMap events;
-            uint64 PlayerGUID;
+            ObjectGuid PlayerGUID;
             bool hp30;
     };
 
@@ -250,7 +242,21 @@ public:
 
     struct npc_nether_drakeAI : public ScriptedAI
     {
-        npc_nether_drakeAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_nether_drakeAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            IsNihil = false;
+            NihilSpeech_Timer = 3000;
+            NihilSpeech_Phase = 0;
+
+            ArcaneBlast_Timer = 7500;
+            ManaBurn_Timer = 10000;
+            IntangiblePresence_Timer = 15000;
+        }
 
         bool IsNihil;
         uint32 NihilSpeech_Timer;
@@ -262,13 +268,7 @@ public:
 
         void Reset() override
         {
-            IsNihil = false;
-            NihilSpeech_Timer = 3000;
-            NihilSpeech_Phase = 0;
-
-            ArcaneBlast_Timer = 7500;
-            ManaBurn_Timer = 10000;
-            IntangiblePresence_Timer = 15000;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }
@@ -301,7 +301,7 @@ public:
             if (spell->Id == SPELL_T_PHASE_MODULATOR && caster->GetTypeId() == TYPEID_PLAYER)
             {
                 const uint32 entry_list[4] = {ENTRY_PROTO, ENTRY_ADOLE, ENTRY_MATUR, ENTRY_NIHIL};
-                int cid = rand()%(4-1);
+                int cid = rand32() % (4 - 1);
 
                 if (entry_list[cid] == me->GetEntry())
                     ++cid;
@@ -371,7 +371,7 @@ public:
             if (IntangiblePresence_Timer <= diff)
             {
                 DoCastVictim(SPELL_INTANGIBLE_PRESENCE);
-                IntangiblePresence_Timer = 15000+rand()%15000;
+                IntangiblePresence_Timer = 15000 + rand32() % 15000;
             } else IntangiblePresence_Timer -= diff;
 
             if (ManaBurn_Timer <= diff)
@@ -379,13 +379,13 @@ public:
                 Unit* target = me->GetVictim();
                 if (target && target->getPowerType() == POWER_MANA)
                     DoCast(target, SPELL_MANA_BURN);
-                ManaBurn_Timer = 8000+rand()%8000;
+                ManaBurn_Timer = 8000 + rand32() % 8000;
             } else ManaBurn_Timer -= diff;
 
             if (ArcaneBlast_Timer <= diff)
             {
                 DoCastVictim(SPELL_ARCANE_BLAST);
-                ArcaneBlast_Timer = 2500+rand()%5000;
+                ArcaneBlast_Timer = 2500 + rand32() % 5000;
             } else ArcaneBlast_Timer -= diff;
 
             DoMeleeAttackIfReady();
@@ -610,14 +610,24 @@ class npc_simon_bunny : public CreatureScript
 
         struct npc_simon_bunnyAI : public ScriptedAI
         {
-            npc_simon_bunnyAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_simon_bunnyAI(Creature* creature) : ScriptedAI(creature)
+            {
+                large = false;
+                listening = false;
+                gameLevel = 0;
+                fails = 0;
+                gameTicks = 0;
+                memset(clusterIds, 0, sizeof(clusterIds));
+                zCoordCorrection = 0.f;
+                searchDistance = 0.f;
+            }
 
             bool large;
             bool listening;
             uint8 gameLevel;
             uint8 fails;
             uint8 gameTicks;
-            uint64 playerGUID;
+            ObjectGuid playerGUID;
             uint32 clusterIds[SIMON_MAX_COLORS];
             float zCoordCorrection;
             float searchDistance;
@@ -727,11 +737,11 @@ class npc_simon_bunny : public CreatureScript
             }
 
             // Used for getting involved player guid. Parameter id is used for defining if is a large(Monument) or small(Relic) node
-            void SetGUID(uint64 guid, int32 id) override
+            void SetGUID(ObjectGuid guid, int32 id) override
             {
                 me->SetCanFly(true);
 
-                large = (bool)id;
+                large = id != 0;
                 playerGUID = guid;
                 StartGame();
             }
@@ -1131,7 +1141,6 @@ public:
     {
         npc_oscillating_frequency_scanner_master_bunnyAI(Creature* creature) : ScriptedAI(creature)
         {
-            playerGuid = 0;
             timer = 500;
         }
 
@@ -1143,7 +1152,7 @@ public:
             {
                 // Spell 37392 does not exist in dbc, manually spawning
                 me->SummonCreature(NPC_OSCILLATING_FREQUENCY_SCANNER_TOP_BUNNY, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 0.5f, me->GetOrientation(), TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 50000);
-                me->SummonGameObject(GO_OSCILLATING_FREQUENCY_SCANNER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), 0, 0, 0, 0, 50000);
+                me->SummonGameObject(GO_OSCILLATING_FREQUENCY_SCANNER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), 0, 0, 0, 0, 50);
                 me->DespawnOrUnsummon(50000);
             }
 
@@ -1170,7 +1179,7 @@ public:
         }
 
         private:
-            uint64 playerGuid;
+            ObjectGuid playerGuid;
             uint32 timer;
     };
 

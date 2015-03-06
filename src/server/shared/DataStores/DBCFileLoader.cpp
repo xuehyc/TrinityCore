@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -112,11 +112,9 @@ bool DBCFileLoader::Load(const char* filename, const char* fmt)
 
 DBCFileLoader::~DBCFileLoader()
 {
-    if (data)
-        delete [] data;
+    delete[] data;
 
-    if (fieldsOffset)
-        delete [] fieldsOffset;
+    delete[] fieldsOffset;
 }
 
 DBCFileLoader::Record DBCFileLoader::getRecord(size_t id)

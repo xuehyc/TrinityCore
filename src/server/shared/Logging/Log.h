@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -22,18 +22,17 @@
 #include "Define.h"
 #include "Appender.h"
 #include "Logger.h"
-#include "LogWorker.h"
+#include <stdarg.h>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/strand.hpp>
 
 #include <unordered_map>
 #include <string>
-#include <ace/Singleton.h>
 
 #define LOGGER_ROOT "root"
 
 class Log
 {
-    friend class ACE_Singleton<Log, ACE_Thread_Mutex>;
-
     typedef std::unordered_map<std::string, Logger> LoggerMap;
 
     private:
@@ -41,6 +40,20 @@ class Log
         ~Log();
 
     public:
+
+        static Log* instance(boost::asio::io_service* ioService = nullptr)
+        {
+            static Log instance;
+
+            if (ioService != nullptr)
+            {
+                instance._ioService = ioService;
+                instance._strand = new boost::asio::strand(*ioService);
+            }
+
+            return &instance;
+        }
+
         void LoadFromConfig();
         void Close();
         bool ShouldLog(std::string const& type, LogLevel level) const;
@@ -49,7 +62,7 @@ class Log
         void outMessage(std::string const& f, LogLevel level, char const* str, ...) ATTR_PRINTF(4, 5);
 
         void outCommand(uint32 account, const char * str, ...) ATTR_PRINTF(3, 4);
-        void outCharDump(char const* str, uint32 account_id, uint32 guid, char const* name);
+        void outCharDump(char const* str, uint32 account_id, uint64 guid, char const* name);
 
         void SetRealmId(uint32 id);
 
@@ -69,11 +82,13 @@ class Log
         AppenderMap appenders;
         LoggerMap loggers;
         uint8 AppenderId;
+        LogLevel lowestLogLevel;
 
         std::string m_logsDir;
         std::string m_logsTimestamp;
 
-        LogWorker* worker;
+        boost::asio::io_service* _ioService;
+        boost::asio::strand* _strand;
 };
 
 inline Logger const* Log::GetLoggerByType(std::string const& type) const
@@ -99,6 +114,10 @@ inline bool Log::ShouldLog(std::string const& type, LogLevel level) const
     // Speed up in cases where requesting "Type.sub1.sub2" but only configured
     // Logger "Type"
 
+    // Don't even look for a logger if the LogLevel is lower than lowest log levels across all loggers
+    if (level < lowestLogLevel)
+        return false;
+
     Logger const* logger = GetLoggerByType(type);
     if (!logger)
         return false;
@@ -117,7 +136,7 @@ inline void Log::outMessage(std::string const& filter, LogLevel level, const cha
     va_end(ap);
 }
 
-#define sLog ACE_Singleton<Log, ACE_Thread_Mutex>::instance()
+#define sLog Log::instance()
 
 #if PLATFORM != PLATFORM_WINDOWS
 #define TC_LOG_MESSAGE_BODY(filterType__, level__, ...)                 \

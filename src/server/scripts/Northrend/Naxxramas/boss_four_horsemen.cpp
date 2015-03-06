@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -96,16 +96,29 @@ public:
     {
         boss_four_horsemenAI(Creature* creature) : BossAI(creature, BOSS_HORSEMEN)
         {
+            Initialize();
             id = Horsemen(0);
             for (uint8 i = 0; i < 4; ++i)
                 if (me->GetEntry() == NPC_HORSEMEN[i])
                     id = Horsemen(i);
             caster = (id == HORSEMEN_LADY || id == HORSEMEN_SIR);
+        }
+
+        void Initialize()
+        {
+            uiEventStarterGUID.Clear();
+            nextWP = 0;
+            punishTimer = 2000;
+            nextMovementStarted = false;
+            movementCompleted = false;
+            movementStarted = false;
+            encounterActionAttack = false;
             encounterActionReset = false;
+            doDelayPunish = false;
         }
 
         Horsemen id;
-        uint64 uiEventStarterGUID;
+        ObjectGuid uiEventStarterGUID;
         uint8 nextWP;
         uint32 punishTimer;
         bool caster;
@@ -124,38 +137,30 @@ public:
             instance->SetData(DATA_HORSEMEN0 + id, NOT_STARTED);
 
             me->SetReactState(REACT_AGGRESSIVE);
-            uiEventStarterGUID = 0;
-            nextWP = 0;
-            punishTimer = 2000;
-            nextMovementStarted = false;
-            movementCompleted = false;
-            movementStarted = false;
-            encounterActionAttack = false;
-            encounterActionReset = false;
-            doDelayPunish = false;
+            Initialize();
             _Reset();
         }
 
         bool DoEncounteraction(Unit* who, bool attack, bool reset, bool checkAllDead)
         {
-            Creature* Thane = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THANE));
-            Creature* Lady = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_LADY));
-            Creature* Baron = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BARON));
-            Creature* Sir = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SIR));
+            Creature* Thane = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_THANE));
+            Creature* Lady = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_LADY));
+            Creature* Baron = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_BARON));
+            Creature* Sir = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_SIR));
 
             if (Thane && Lady && Baron && Sir)
             {
                 if (attack && who)
                 {
-                    CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Thane->AI())->encounterActionAttack = true;
-                    CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Lady->AI())->encounterActionAttack = true;
-                    CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Baron->AI())->encounterActionAttack = true;
-                    CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Sir->AI())->encounterActionAttack = true;
+                    ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Thane->AI())->encounterActionAttack = true;
+                    ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Lady->AI())->encounterActionAttack = true;
+                    ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Baron->AI())->encounterActionAttack = true;
+                    ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Sir->AI())->encounterActionAttack = true;
 
-                    CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Thane->AI())->AttackStart(who);
-                    CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Lady->AI())->AttackStart(who);
-                    CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Baron->AI())->AttackStart(who);
-                    CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Sir->AI())->AttackStart(who);
+                    ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Thane->AI())->AttackStart(who);
+                    ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Lady->AI())->AttackStart(who);
+                    ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Baron->AI())->AttackStart(who);
+                    ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Sir->AI())->AttackStart(who);
                 }
 
                 if (reset)
@@ -174,15 +179,15 @@ public:
                         if (!Sir->IsAlive())
                             Sir->Respawn();
 
-                        CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Thane->AI())->encounterActionReset = true;
-                        CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Lady->AI())->encounterActionReset = true;
-                        CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Baron->AI())->encounterActionReset = true;
-                        CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Sir->AI())->encounterActionReset = true;
+                        ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Thane->AI())->encounterActionReset = true;
+                        ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Lady->AI())->encounterActionReset = true;
+                        ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Baron->AI())->encounterActionReset = true;
+                        ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Sir->AI())->encounterActionReset = true;
 
-                        CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Thane->AI())->EnterEvadeMode();
-                        CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Lady->AI())->EnterEvadeMode();
-                        CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Baron->AI())->EnterEvadeMode();
-                        CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Sir->AI())->EnterEvadeMode();
+                        ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Thane->AI())->EnterEvadeMode();
+                        ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Lady->AI())->EnterEvadeMode();
+                        ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Baron->AI())->EnterEvadeMode();
+                        ENSURE_AI(boss_four_horsemen::boss_four_horsemenAI, Sir->AI())->EnterEvadeMode();
                     }
                 }
 
@@ -288,7 +293,7 @@ public:
 
         void KilledUnit(Unit* /*victim*/) override
         {
-            if (!(rand()%5))
+            if (!(rand32() % 5))
                 Talk(SAY_SLAY);
         }
 
@@ -318,7 +323,7 @@ public:
             Talk(SAY_AGGRO);
 
             events.ScheduleEvent(EVENT_MARK, 15000);
-            events.ScheduleEvent(EVENT_CAST, 20000+rand()%5000);
+            events.ScheduleEvent(EVENT_CAST, 20000 + rand32() % 5000);
             events.ScheduleEvent(EVENT_BERSERK, 15*100*1000);
         }
 
@@ -343,18 +348,18 @@ public:
                 switch (eventId)
                 {
                     case EVENT_MARK:
-                        if (!(rand()%5))
+                        if (!(rand32() % 5))
                             Talk(SAY_SPECIAL);
                         DoCastAOE(SPELL_MARK[id]);
                         events.ScheduleEvent(EVENT_MARK, 15000);
                         break;
                     case EVENT_CAST:
-                        if (!(rand()%5))
+                        if (!(rand32() % 5))
                             Talk(SAY_TAUNT);
 
                         if (caster)
                         {
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f, true))
                                 DoCast(target, SPELL_PRIMARY(id));
                         }
                         else

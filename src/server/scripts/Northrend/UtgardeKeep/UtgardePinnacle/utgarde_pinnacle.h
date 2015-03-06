@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #define UTGARDE_PINNACLE_H_
 
 #define UPScriptName "instance_utgarde_pinnacle"
+#define DataHeader "UP"
 
 uint32 const EncounterCount = 4;
 
@@ -58,7 +59,19 @@ enum CreatureIds
     NPC_RAVENOUS_FURBOLG            = 26684,
     NPC_MASSIVE_JORMUNGAR           = 26685,
     NPC_FEROCIOUS_RHINO             = 26686,
-    NPC_PALEHOOF_ORB                = 26688
+    NPC_PALEHOOF_ORB                = 26688,
+
+    // Ymiron
+    NPC_BJORN                       = 27303,
+    NPC_BJORN_VISUAL                = 27304,
+    NPC_HALDOR                      = 27307,
+    NPC_HALDOR_VISUAL               = 27310,
+    NPC_RANULF                      = 27308,
+    NPC_RANULF_VISUAL               = 27311,
+    NPC_TORGYN                      = 27309,
+    NPC_TORGYN_VISUAL               = 27312,
+    NPC_SPIRIT_FOUNT                = 27339,
+    NPC_AVENGING_SPIRIT             = 27386
 };
 
 enum GameObjectIds

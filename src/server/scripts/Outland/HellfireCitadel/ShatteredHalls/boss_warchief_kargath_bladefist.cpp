@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -65,15 +65,14 @@ class boss_warchief_kargath_bladefist : public CreatureScript
 
         struct boss_warchief_kargath_bladefistAI : public BossAI
         {
-            boss_warchief_kargath_bladefistAI(Creature* creature) : BossAI(creature, DATA_KARGATH) { }
-
-            void Reset() override
+            boss_warchief_kargath_bladefistAI(Creature* creature) : BossAI(creature, DATA_KARGATH)
             {
-                removeAdds();
+                Initialize();
+                target_num = 0;
+            }
 
-                me->SetSpeed(MOVE_RUN, 2);
-                me->SetWalk(false);
-
+            void Initialize()
+            {
                 summoned = 2;
                 InBlade = false;
                 Wait_Timer = 0;
@@ -83,6 +82,16 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                 Summon_Assistant_Timer = 30000;
                 Assassins_Timer = 5000;
                 resetcheck_timer = 5000;
+            }
+
+            void Reset() override
+            {
+                removeAdds();
+
+                me->SetSpeed(MOVE_RUN, 2);
+                me->SetWalk(false);
+
+                Initialize();
             }
 
             void JustDied(Unit* /*killer*/) override
@@ -143,7 +152,7 @@ class boss_warchief_kargath_bladefist : public CreatureScript
 
             void removeAdds()
             {
-                for (std::vector<uint64>::const_iterator itr = adds.begin(); itr!= adds.end(); ++itr)
+                for (GuidVector::const_iterator itr = adds.begin(); itr!= adds.end(); ++itr)
                 {
                     Creature* creature = ObjectAccessor::GetCreature(*me, *itr);
                     if (creature && creature->IsAlive())
@@ -155,7 +164,7 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                 }
                 adds.clear();
 
-                for (std::vector<uint64>::const_iterator itr = assassins.begin(); itr!= assassins.end(); ++itr)
+                for (GuidVector::const_iterator itr = assassins.begin(); itr!= assassins.end(); ++itr)
                 {
                     Creature* creature = ObjectAccessor::GetCreature(*me, *itr);
                     if (creature && creature->IsAlive())
@@ -213,8 +222,8 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                             {
                                 //move in bladedance
                                 float x, y, randx, randy;
-                                randx = 0.0f + rand()%40;
-                                randy = 0.0f + rand()%40;
+                                randx = 0.0f + rand32() % 40;
+                                randy = 0.0f + rand32() % 40;
                                 x = 210+ randx;
                                 y = -60- randy;
                                 me->GetMotionMaster()->MovePoint(1, x, y, me->GetPositionZ());
@@ -295,8 +304,8 @@ class boss_warchief_kargath_bladefist : public CreatureScript
             }
 
             private:
-                std::vector<uint64> adds;
-                std::vector<uint64> assassins;
+                GuidVector adds;
+                GuidVector assassins;
                 uint32 Charge_timer;
                 uint32 Blade_Dance_Timer;
                 uint32 Summon_Assistant_Timer;

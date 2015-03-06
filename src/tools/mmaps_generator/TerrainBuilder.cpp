@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -18,13 +18,11 @@
 
 #include "TerrainBuilder.h"
 
-#include "PathCommon.h"
 #include "MapBuilder.h"
 
 #include "VMapManager2.h"
 #include "MapTree.h"
 #include "ModelInstance.h"
-#include <vector>
 
 // ******************************************
 // Map file format defines

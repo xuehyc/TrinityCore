@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -29,7 +29,7 @@ EndScriptData */
 #include "Player.h"
 #include "SpellInfo.h"
 
-enum Enums
+enum Texts
 {
     SAY_AGGRO                               = 0,
     SAY_FORGE                               = 1,
@@ -38,31 +38,48 @@ enum Enums
     SAY_DEATH                               = 4,
     EMOTE_TO_ANVIL                          = 5,
     EMOTE_SHATTER                           = 6,
+};
 
-    SPELL_HEAT_N                            = 52387,
-    SPELL_HEAT_H                            = 59528,
-    SPELL_SHATTERING_STOMP_N                = 52237,
-    SPELL_SHATTERING_STOMP_H                = 59529,
-
+enum Spells
+{
+    SPELL_HEAT                              = 52387,
+    SPELL_SHATTERING_STOMP                  = 52237,
     SPELL_TEMPER                            = 52238,
     SPELL_TEMPER_DUMMY                      = 52654,
-
     SPELL_SUMMON_MOLTEN_GOLEM               = 52405,
+    SPELL_FORGE_VISUAL                      = 52654,
 
     // Molten Golem
     SPELL_BLAST_WAVE                        = 23113,
-    SPELL_IMMOLATION_STRIKE_N               = 52433,
-    SPELL_IMMOLATION_STRIKE_H               = 59530,
-    SPELL_SHATTER_N                         = 52429,
-    SPELL_SHATTER_H                         = 59527,
+    SPELL_IMMOLATION_STRIKE                 = 52433,
+    SPELL_SHATTER                           = 52429,
+};
 
+enum Events
+{
+    EVENT_PAUSE                             = 1,
+    EVENT_SHATTERING_STOMP                  = 2,
+    EVENT_SHATTER                           = 3,
+    EVENT_FORGE_CAST                        = 4,
+
+    // Molten Golem
+    EVENT_BLAST                             = 5,
+    EVENT_IMMOLATION                        = 6
+};
+
+enum Npcs
+{
     NPC_VOLKHAN_ANVIL                       = 28823,
     NPC_MOLTEN_GOLEM                        = 28695,
     NPC_BRITTLE_GOLEM                       = 28681,
-
     MAX_GOLEM                               = 2,
-
     DATA_SHATTER_RESISTANT                  = 2042
+};
+
+enum Phases
+{
+    PHASE_INTRO                             = 1,
+    PHASE_NORMAL
 };
 
 /*######
@@ -72,62 +89,44 @@ class boss_volkhan : public CreatureScript
 {
 public:
     boss_volkhan() : CreatureScript("boss_volkhan") { }
-
-    CreatureAI* GetAI(Creature* creature) const override
+   
+    struct boss_volkhanAI : public BossAI
     {
-        return GetInstanceAI<boss_volkhanAI>(creature);
-    }
-
-    struct boss_volkhanAI : public ScriptedAI
-    {
-        boss_volkhanAI(Creature* creature) : ScriptedAI(creature)
+        boss_volkhanAI(Creature* creature) : BossAI(creature, DATA_VOLKHAN)
         {
-            instance = creature->GetInstanceScript();
+            Initialize();
         }
 
-        InstanceScript* instance;
+        void Initialize()
+        {
+            m_bIsStriking      = false;
+            m_bHasTemper       = false;
+            m_bCanShatterGolem = false;
+            m_uiDelay_Timer    = 1000;
+            m_uiSummonPhase    = 0;
+            GolemsShattered    = 0;            
 
-        std::list<uint64> m_lGolemGUIDList;
-
-        bool m_bHasTemper;
-        bool m_bIsStriking;
-        bool m_bCanShatterGolem;
-
-        uint8 GolemsShattered;
-        uint32 m_uiPause_Timer;
-        uint32 m_uiShatteringStomp_Timer;
-        uint32 m_uiShatter_Timer;
-        uint32 m_uiDelay_Timer;
-        uint32 m_uiSummonPhase;
-
-        uint32 m_uiHealthAmountModifier;
+            m_uiHealthAmountModifier = 1;
+        }
 
         void Reset() override
         {
-            m_bIsStriking = false;
-            m_bHasTemper = false;
-            m_bCanShatterGolem = false;
-
-            m_uiPause_Timer = 3500;
-            m_uiShatteringStomp_Timer = 0;
-            m_uiShatter_Timer = 5000;
-            m_uiDelay_Timer = 1000;
-            m_uiSummonPhase = 0;
-            GolemsShattered = 0;
-
-            m_uiHealthAmountModifier = 1;
-
+            Initialize();
+            _Reset();
             DespawnGolem();
             m_lGolemGUIDList.clear();
-
-            instance->SetBossState(DATA_VOLKHAN, NOT_STARTED);
+            events.SetPhase(PHASE_INTRO);
+            events.ScheduleEvent(EVENT_FORGE_CAST, 2 * IN_MILLISECONDS, 0, PHASE_INTRO);
         }
 
         void EnterCombat(Unit* /*who*/) override
         {
             Talk(SAY_AGGRO);
-
-            instance->SetBossState(DATA_VOLKHAN, IN_PROGRESS);
+            events.SetPhase(PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_PAUSE,            3.5 * IN_MILLISECONDS, 0, PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_SHATTERING_STOMP,   0 * IN_MILLISECONDS, 0, PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_SHATTER,            5 * IN_MILLISECONDS, 0, PHASE_NORMAL);
+            _EnterCombat();
         }
 
         void AttackStart(Unit* who) override
@@ -148,7 +147,7 @@ public:
             Talk(SAY_DEATH);
             DespawnGolem();
 
-            instance->SetBossState(DATA_VOLKHAN, DONE);
+            _JustDied();
         }
 
         void KilledUnit(Unit* who) override
@@ -162,13 +161,11 @@ public:
             if (m_lGolemGUIDList.empty())
                 return;
 
-            for (std::list<uint64>::const_iterator itr = m_lGolemGUIDList.begin(); itr != m_lGolemGUIDList.end(); ++itr)
+            for (ObjectGuid guid : m_lGolemGUIDList)
             {
-                if (Creature* temp = ObjectAccessor::GetCreature(*me, *itr))
-                {
+                if (Creature* temp = ObjectAccessor::GetCreature(*me, guid))
                     if (temp->IsAlive())
                         temp->DespawnOrUnsummon();
-                }
             }
 
             m_lGolemGUIDList.clear();
@@ -179,14 +176,14 @@ public:
             if (m_lGolemGUIDList.empty())
                 return;
 
-            for (std::list<uint64>::const_iterator itr = m_lGolemGUIDList.begin(); itr != m_lGolemGUIDList.end(); ++itr)
+            for (ObjectGuid guid : m_lGolemGUIDList)
             {
-                if (Creature* temp = ObjectAccessor::GetCreature(*me, *itr))
+                if (Creature* temp = ObjectAccessor::GetCreature(*me, guid))
                 {
                     // Only shatter brittle golems
                     if (temp->IsAlive() && temp->GetEntry() == NPC_BRITTLE_GOLEM)
                     {
-                        temp->CastSpell(temp, DUNGEON_MODE(SPELL_SHATTER_N, SPELL_SHATTER_H), false);
+                        temp->CastSpell(temp, SPELL_SHATTER, false);
                         GolemsShattered += 1;
                     }
                 }
@@ -203,7 +200,7 @@ public:
                     summoned->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
 
                 // Why healing when just summoned?
-                summoned->CastSpell(summoned, DUNGEON_MODE(SPELL_HEAT_N, SPELL_HEAT_H), false, NULL, NULL, me->GetGUID());
+                summoned->CastSpell(summoned, SPELL_HEAT, false, NULL, NULL, me->GetGUID());
             }
         }
 
@@ -224,59 +221,61 @@ public:
             return 0;
         }
 
-        void UpdateAI(uint32 uiDiff) override
+        void UpdateAI(uint32 diff) override
         {
-            if (!UpdateVictim())
+            // Return since we have no target and are in CombatPhase
+            if (events.IsInPhase(PHASE_NORMAL) && !UpdateVictim())
                 return;
 
-            if (m_bIsStriking)
-            {
-                if (m_uiPause_Timer <= uiDiff)
-                {
-                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
-                        if (me->GetVictim())
-                            me->GetMotionMaster()->MoveChase(me->GetVictim());
+            events.Update(diff);
 
-                    m_bHasTemper = false;
-                    m_bIsStriking = false;
-                    m_uiPause_Timer = 3500;
-                }
-                else
-                    m_uiPause_Timer -= uiDiff;
-
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-            }
 
-            // When to start shatter? After 60, 40 or 20% hp?
-            if (!m_bHasTemper && m_uiHealthAmountModifier >= 3)
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                if (m_uiShatteringStomp_Timer <= uiDiff)
+                switch (eventId)
                 {
-                    // Should he stomp even if he has no brittle golem to shatter?
-                    Talk(SAY_STOMP);
+                    case EVENT_PAUSE:
+                        if (m_bIsStriking)
+                        {
+                            if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
+                                if (me->GetVictim())
+                                    me->GetMotionMaster()->MoveChase(me->GetVictim());
 
-                    DoCast(me, SPELL_SHATTERING_STOMP_N);
+                            m_bHasTemper = false;
+                            m_bIsStriking = false;
+                            events.ScheduleEvent(EVENT_PAUSE, 3.5 * IN_MILLISECONDS, 0, PHASE_NORMAL);
+                        }
+                        break;
+                    case EVENT_SHATTERING_STOMP:
+                        if (!m_bHasTemper && m_uiHealthAmountModifier >= 3)
+                        {
+                            // Should he stomp even if he has no brittle golem to shatter?
+                            Talk(SAY_STOMP);
 
-                    Talk(EMOTE_SHATTER);
+                            DoCast(me, SPELL_SHATTERING_STOMP);
 
-                    m_uiShatteringStomp_Timer = 30000;
-                    m_bCanShatterGolem = true;
+                            Talk(EMOTE_SHATTER);
+                            events.ScheduleEvent(EVENT_SHATTERING_STOMP, 30 * IN_MILLISECONDS, 0, PHASE_NORMAL);
+                            m_bCanShatterGolem = true;
+                        }
+                        break;
+                    case EVENT_SHATTER:
+                        if (m_bCanShatterGolem)
+                        {
+                            ShatterGolem();
+                            events.ScheduleEvent(EVENT_SHATTER, 3 * IN_MILLISECONDS, 0, PHASE_NORMAL);
+                            m_bCanShatterGolem = false;
+                        }
+                        break;
+                    case EVENT_FORGE_CAST:
+                        DoCast(me, SPELL_FORGE_VISUAL);
+                        events.ScheduleEvent(EVENT_FORGE_CAST, 15 * IN_MILLISECONDS, 0, PHASE_INTRO);
+                        break;
+                    default:
+                        break;
                 }
-                else
-                    m_uiShatteringStomp_Timer -= uiDiff;
-            }
-
-            // Shatter Golems 3 seconds after Shattering Stomp
-            if (m_bCanShatterGolem)
-            {
-                if (m_uiShatter_Timer <= uiDiff)
-                {
-                    ShatterGolem();
-                    m_uiShatter_Timer = 3000;
-                    m_bCanShatterGolem = false;
-                }
-                else
-                    m_uiShatter_Timer -= uiDiff;
             }
 
             // Health check
@@ -302,12 +301,10 @@ public:
                     me->GetMotionMaster()->MoveTargetedHome();
                     m_uiSummonPhase = 2;        // Set Next Phase
                     break;
-
                 case 2:
                     // 2 - Check if reached Anvil
                     // This is handled in: void JustReachedHome() override
                     break;
-
                 case 3:
                     // 3 - Cast Temper on the Anvil
                     if (Unit* target = GetClosestCreatureWithEntry(me, NPC_VOLKHAN_ANVIL, 1000.0f, true))
@@ -319,10 +316,9 @@ public:
                     m_uiDelay_Timer = 1000;     // Delay 2 seconds before next phase can begin
                     m_uiSummonPhase = 4;        // Set Next Phase
                     break;
-
                 case 4:
                     // 4 - Wait for delay to expire
-                    if (m_uiDelay_Timer <= uiDiff)
+                    if (m_uiDelay_Timer <= diff)
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0))
                         {
@@ -333,9 +329,8 @@ public:
                         m_uiSummonPhase = 5;
                     }
                     else
-                        m_uiDelay_Timer -= uiDiff;
+                        m_uiDelay_Timer -= diff;
                     break;
-
                 case 5:
                     // 5 - Spawn the Golems
                     if (Creature* creatureTarget = GetClosestCreatureWithEntry(me, NPC_VOLKHAN_ANVIL, 1000.0f, true))
@@ -349,13 +344,30 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+        private:
+            GuidList m_lGolemGUIDList;
+            uint32 m_uiHealthAmountModifier;
+            uint8 GolemsShattered;
+            uint32 m_uiDelay_Timer;
+            uint32 m_uiSummonPhase;
+
+            bool m_bHasTemper;
+            bool m_bIsStriking;
+            bool m_bCanShatterGolem;
     };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return GetInstanceAI<boss_volkhanAI>(creature);
+    }
 
 };
 
 /*######
 ## npc_molten_golem
 ######*/
+
 class npc_molten_golem : public CreatureScript
 {
 public:
@@ -368,21 +380,23 @@ public:
 
     struct npc_molten_golemAI : public ScriptedAI
     {
-        npc_molten_golemAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_molten_golemAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            m_bIsFrozen = false;
+            events.ScheduleEvent(EVENT_BLAST,      20 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_IMMOLATION,  5 * IN_MILLISECONDS);
+        }
 
         bool m_bIsFrozen;
 
-        uint32 m_uiBlast_Timer;
-        uint32 m_uiDeathDelay_Timer;
-        uint32 m_uiImmolation_Timer;
-
         void Reset() override
         {
-            m_bIsFrozen = false;
-
-            m_uiBlast_Timer = 20000;
-            m_uiDeathDelay_Timer = 0;
-            m_uiImmolation_Timer = 5000;
+            Initialize();
         }
 
         void AttackStart(Unit* who) override
@@ -420,35 +434,44 @@ public:
         void SpellHit(Unit* /*pCaster*/, const SpellInfo* pSpell) override
         {
             // This is the dummy effect of the spells
-            if (pSpell->Id == SPELL_SHATTER_N || pSpell->Id == SPELL_SHATTER_H)
+            if (pSpell->Id == sSpellMgr->GetSpellIdForDifficulty(SPELL_SHATTER, me))
                 if (me->GetEntry() == NPC_BRITTLE_GOLEM)
                     me->DespawnOrUnsummon();
         }
 
-        void UpdateAI(uint32 uiDiff) override
+        void UpdateAI(uint32 diff) override
         {
             // Return since we have no target or if we are frozen
             if (!UpdateVictim() || m_bIsFrozen)
                 return;
 
-            if (m_uiBlast_Timer <= uiDiff)
-            {
-                DoCast(me, SPELL_BLAST_WAVE);
-                m_uiBlast_Timer = 20000;
-            }
-            else
-                m_uiBlast_Timer -= uiDiff;
+            events.Update(diff);
 
-            if (m_uiImmolation_Timer <= uiDiff)
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                DoCastVictim(SPELL_IMMOLATION_STRIKE_N);
-                m_uiImmolation_Timer = 5000;
+                switch (eventId)
+                {
+                    case EVENT_BLAST:
+                        DoCast(me, SPELL_BLAST_WAVE);
+                        events.ScheduleEvent(EVENT_BLAST, 20 * IN_MILLISECONDS);
+                        break;
+                    case EVENT_IMMOLATION:
+                        DoCastVictim(SPELL_IMMOLATION_STRIKE);
+                        events.ScheduleEvent(EVENT_BLAST, 5 * IN_MILLISECONDS);
+                        break;
+                    default:
+                        break;
+                }
             }
-            else
-                m_uiImmolation_Timer -= uiDiff;
 
             DoMeleeAttackIfReady();
         }
+
+        private:
+            EventMap events;
     };
 };
 

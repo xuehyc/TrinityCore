@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -54,13 +54,21 @@ class npc_jadespine_basilisk : public CreatureScript
 
         struct npc_jadespine_basiliskAI : public ScriptedAI
         {
-            npc_jadespine_basiliskAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_jadespine_basiliskAI(Creature* creature) : ScriptedAI(creature)
+            {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                uiCslumberTimer = 2000;
+            }
 
             uint32 uiCslumberTimer;
 
             void Reset() override
             {
-                uiCslumberTimer = 2000;
+                Initialize();
             }
 
             void EnterCombat(Unit* /*who*/) override

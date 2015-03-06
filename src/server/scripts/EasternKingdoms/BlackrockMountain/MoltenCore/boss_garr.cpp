@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -108,13 +108,21 @@ class npc_firesworn : public CreatureScript
 
         struct npc_fireswornAI : public ScriptedAI
         {
-            npc_fireswornAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_fireswornAI(Creature* creature) : ScriptedAI(creature)
+            {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                immolateTimer = 4000;                              //These times are probably wrong
+            }
 
             uint32 immolateTimer;
 
             void Reset() override
             {
-                immolateTimer = 4000;                              //These times are probably wrong
+                Initialize();
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage) override

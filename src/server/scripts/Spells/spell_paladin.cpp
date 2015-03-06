@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -99,6 +99,14 @@ class spell_pal_ardent_defender : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pal_ardent_defender_AuraScript);
 
+        public:
+            spell_pal_ardent_defender_AuraScript()
+            {
+                absorbPct = 0;
+                healPct = 0;
+            }
+
+        private:
             uint32 absorbPct, healPct;
 
             enum Spell
@@ -465,6 +473,13 @@ class spell_pal_divine_storm : public SpellScriptLoader
         {
             PrepareSpellScript(spell_pal_divine_storm_SpellScript);
 
+        public:
+            spell_pal_divine_storm_SpellScript()
+            {
+                healPct = 0;
+            }
+
+        private:
             uint32 healPct;
 
             bool Validate(SpellInfo const* /*spellInfo*/) override
@@ -508,6 +523,13 @@ class spell_pal_divine_storm_dummy : public SpellScriptLoader
         {
             PrepareSpellScript(spell_pal_divine_storm_dummy_SpellScript);
 
+        public:
+            spell_pal_divine_storm_dummy_SpellScript()
+            {
+                _targetCount = 0;
+            }
+
+        private:
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_DIVINE_STORM_HEAL))
@@ -696,6 +718,13 @@ class spell_pal_hand_of_sacrifice : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pal_hand_of_sacrifice_AuraScript);
 
+        public:
+            spell_pal_hand_of_sacrifice_AuraScript()
+            {
+                remainingAmount = 0;
+            }
+
+        private:
             int32 remainingAmount;
 
             bool Load() override
@@ -1211,11 +1240,11 @@ class spell_pal_sacred_shield : public SpellScriptLoader
                     amount += int32(bonus);
 
                     // Arena - Dampening
-                    if (AuraEffect const* dampening = caster->GetAuraEffect(SPELL_GENERIC_ARENA_DAMPENING, EFFECT_0))
-                        AddPct(amount, dampening->GetAmount());
+                    if (AuraEffect const* auraEffArenaDampening = caster->GetAuraEffect(SPELL_GENERIC_ARENA_DAMPENING, EFFECT_0))
+                        AddPct(amount, auraEffArenaDampening->GetAmount());
                     // Battleground - Dampening
-                    else if (AuraEffect const* dampening = caster->GetAuraEffect(SPELL_GENERIC_BATTLEGROUND_DAMPENING, EFFECT_0))
-                        AddPct(amount, dampening->GetAmount());
+                    else if (AuraEffect const* auraEffBattlegroudDampening = caster->GetAuraEffect(SPELL_GENERIC_BATTLEGROUND_DAMPENING, EFFECT_0))
+                        AddPct(amount, auraEffBattlegroudDampening->GetAmount());
                 }
             }
 
@@ -1250,7 +1279,7 @@ class spell_pal_seal_of_righteousness : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
-                return eventInfo.GetProcTarget();
+                return eventInfo.GetProcTarget() != nullptr;
             }
 
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -50,6 +50,14 @@ public:
     {
         boss_hungarfenAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            Root = false;
+            Mushroom_Timer = 5000;                              // 1 mushroom after 5s, then one per 10s. This should be different in heroic mode
+            AcidGeyser_Timer = 10000;
         }
 
         bool Root;
@@ -58,9 +66,7 @@ public:
 
         void Reset() override
         {
-            Root = false;
-            Mushroom_Timer = 5000;                              // 1 mushroom after 5s, then one per 10s. This should be different in heroic mode
-            AcidGeyser_Timer = 10000;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -84,9 +90,9 @@ public:
             if (Mushroom_Timer <= diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    me->SummonCreature(17990, target->GetPositionX()+(rand()%8), target->GetPositionY()+(rand()%8), target->GetPositionZ(), float(rand()%5), TEMPSUMMON_TIMED_DESPAWN, 22000);
+                    me->SummonCreature(17990, target->GetPositionX() + (rand32() % 8), target->GetPositionY() + (rand32() % 8), target->GetPositionZ(), float(rand32() % 5), TEMPSUMMON_TIMED_DESPAWN, 22000);
                 else
-                    me->SummonCreature(17990, me->GetPositionX()+(rand()%8), me->GetPositionY()+(rand()%8), me->GetPositionZ(), float(rand()%5), TEMPSUMMON_TIMED_DESPAWN, 22000);
+                    me->SummonCreature(17990, me->GetPositionX() + (rand32() % 8), me->GetPositionY() + (rand32() % 8), me->GetPositionZ(), float(rand32() % 5), TEMPSUMMON_TIMED_DESPAWN, 22000);
 
                 Mushroom_Timer = 10000;
             } else Mushroom_Timer -= diff;
@@ -95,7 +101,7 @@ public:
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_ACID_GEYSER);
-                AcidGeyser_Timer = 10000+rand()%7500;
+                AcidGeyser_Timer = 10000 + rand32() % 7500;
             } else AcidGeyser_Timer -= diff;
 
             DoMeleeAttackIfReady();
@@ -116,7 +122,17 @@ public:
 
     struct npc_underbog_mushroomAI : public ScriptedAI
     {
-        npc_underbog_mushroomAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_underbog_mushroomAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            Stop = false;
+            Grow_Timer = 0;
+            Shrink_Timer = 20000;
+        }
 
         bool Stop;
         uint32 Grow_Timer;
@@ -124,9 +140,7 @@ public:
 
         void Reset() override
         {
-            Stop = false;
-            Grow_Timer = 0;
-            Shrink_Timer = 20000;
+            Initialize();
 
             DoCast(me, SPELL_PUTRID_MUSHROOM, true);
             DoCast(me, SPELL_SPORE_CLOUD, true);

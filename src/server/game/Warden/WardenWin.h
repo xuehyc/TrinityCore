@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -76,13 +76,13 @@ class WardenWin : public Warden
         WardenWin();
         ~WardenWin();
 
-        void Init(WorldSession* session, BigNumber* K);
-        ClientWardenModule* GetModuleForClient();
-        void InitializeModule();
-        void RequestHash();
-        void HandleHashResult(ByteBuffer &buff);
-        void RequestData();
-        void HandleData(ByteBuffer &buff);
+        void Init(WorldSession* session, BigNumber* K) override;
+        ClientWardenModule* GetModuleForClient() override;
+        void InitializeModule() override;
+        void RequestHash() override;
+        void HandleHashResult(ByteBuffer &buff) override;
+        void RequestData() override;
+        void HandleData(ByteBuffer &buff) override;
 
     private:
         uint32 _serverTicks;

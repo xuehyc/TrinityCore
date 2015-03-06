@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -35,7 +35,6 @@ enum Spells
 {
     SPELL_HARVEST_SOUL          = 28679,
     SPELL_SHADOW_BOLT           = 29317,
-    H_SPELL_SHADOW_BOLT         = 56405,
     SPELL_INFORM_LIVE_TRAINEE   = 27892,
     SPELL_INFORM_LIVE_KNIGHT    = 27928,
     SPELL_INFORM_LIVE_RIDER     = 27935,
@@ -163,7 +162,18 @@ class boss_gothik : public CreatureScript
 
         struct boss_gothikAI : public BossAI
         {
-            boss_gothikAI(Creature* creature) : BossAI(creature, BOSS_GOTHIK) { }
+            boss_gothikAI(Creature* creature) : BossAI(creature, BOSS_GOTHIK)
+            {
+                Initialize();
+                waveCount = 0;
+            }
+
+            void Initialize()
+            {
+                mergedSides = false;
+                phaseTwo = false;
+                thirtyPercentReached = false;
+            }
 
             uint32 waveCount;
             typedef std::vector<Creature*> TriggerVct;
@@ -172,8 +182,8 @@ class boss_gothik : public CreatureScript
             bool phaseTwo;
             bool thirtyPercentReached;
 
-            std::vector<uint64> LiveTriggerGUID;
-            std::vector<uint64> DeadTriggerGUID;
+            GuidVector LiveTriggerGUID;
+            GuidVector DeadTriggerGUID;
 
             void Reset() override
             {
@@ -183,9 +193,7 @@ class boss_gothik : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 instance->SetData(DATA_GOTHIK_GATE, GO_STATE_ACTIVE);
                 _Reset();
-                mergedSides = false;
-                phaseTwo = false;
-                thirtyPercentReached = false;
+                Initialize();
             }
 
             void EnterCombat(Unit* /*who*/) override
@@ -236,7 +244,7 @@ class boss_gothik : public CreatureScript
 
             void KilledUnit(Unit* /*victim*/) override
             {
-                if (!(rand()%5))
+                if (!(rand32() % 5))
                     Talk(SAY_KILL);
             }
 
@@ -359,7 +367,7 @@ class boss_gothik : public CreatureScript
                 if (spellId && me->IsInCombat())
                 {
                     me->HandleEmoteCommand(EMOTE_ONESHOT_SPELL_CAST);
-                    if (Creature* pRandomDeadTrigger = ObjectAccessor::GetCreature(*me, DeadTriggerGUID[rand() % POS_DEAD]))
+                    if (Creature* pRandomDeadTrigger = ObjectAccessor::GetCreature(*me, DeadTriggerGUID[rand32() % POS_DEAD]))
                         me->CastSpell(pRandomDeadTrigger, spellId, true);
                 }
             }
@@ -459,7 +467,7 @@ class boss_gothik : public CreatureScript
                             }
                             break;
                         case EVENT_BOLT:
-                            DoCastVictim(RAID_MODE(SPELL_SHADOW_BOLT, H_SPELL_SHADOW_BOLT));
+                            DoCastVictim(SPELL_SHADOW_BOLT);
                             events.ScheduleEvent(EVENT_BOLT, 1000);
                             break;
                         case EVENT_HARVEST:
@@ -522,7 +530,7 @@ class npc_gothik_minion : public CreatureScript
 
             void DoAction(int32 param) override
             {
-                gateClose = param;
+                gateClose = param != 0;
             }
 
             void DamageTaken(Unit* attacker, uint32 &damage) override

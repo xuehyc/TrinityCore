@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -172,7 +172,18 @@ class npc_nether_wraith : public CreatureScript
 
         struct npc_nether_wraithAI : public ScriptedAI
         {
-            npc_nether_wraithAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_nether_wraithAI(Creature* creature) : ScriptedAI(creature)
+            {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                ArcaneMissiles_Timer = urand(1000, 4000);
+                Detonation_Timer = 20000;
+                Die_Timer = 2200;
+                Detonation = false;
+            }
 
             uint32 ArcaneMissiles_Timer;
             uint32 Detonation_Timer;
@@ -181,10 +192,7 @@ class npc_nether_wraith : public CreatureScript
 
             void Reset() override
             {
-                ArcaneMissiles_Timer = urand(1000, 4000);
-                Detonation_Timer = 20000;
-                Die_Timer = 2200;
-                Detonation = false;
+                Initialize();
             }
 
             void EnterCombat(Unit* /*who*/) override { }

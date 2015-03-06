@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -81,8 +81,8 @@ public:
     {
         if (_Quest->GetQuestId() == QUEST_JOURNEY_TO_UNDERCITY)
         {
-            CAST_AI(npc_lady_sylvanas_windrunner::npc_lady_sylvanas_windrunnerAI, creature->AI())->LamentEvent = true;
-            CAST_AI(npc_lady_sylvanas_windrunner::npc_lady_sylvanas_windrunnerAI, creature->AI())->DoPlaySoundToSet(creature, SOUND_CREDIT);
+            ENSURE_AI(npc_lady_sylvanas_windrunner::npc_lady_sylvanas_windrunnerAI, creature->AI())->LamentEvent = true;
+            ENSURE_AI(npc_lady_sylvanas_windrunner::npc_lady_sylvanas_windrunnerAI, creature->AI())->DoPlaySoundToSet(creature, SOUND_CREDIT);
             creature->CastSpell(creature, SPELL_SYLVANAS_CAST, false);
 
             for (uint8 i = 0; i < 4; ++i)
@@ -99,11 +99,27 @@ public:
 
     struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
     {
-        npc_lady_sylvanas_windrunnerAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_lady_sylvanas_windrunnerAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            LamentEventTimer = 5000;
+            LamentEvent = false;
+            targetGUID.Clear();
+
+            FadeTimer = 30000;
+            SummonSkeletonTimer = 20000;
+            BlackArrowTimer = 15000;
+            ShotTimer = 8000;
+            MultiShotTimer = 10000;
+        }
 
         uint32 LamentEventTimer;
         bool LamentEvent;
-        uint64 targetGUID;
+        ObjectGuid targetGUID;
 
         uint32 FadeTimer;
         uint32 SummonSkeletonTimer;
@@ -113,15 +129,7 @@ public:
 
         void Reset() override
         {
-            LamentEventTimer = 5000;
-            LamentEvent = false;
-            targetGUID = 0;
-
-            FadeTimer = 30000;
-            SummonSkeletonTimer = 20000;
-            BlackArrowTimer = 15000;
-            ShotTimer = 8000;
-            MultiShotTimer = 10000;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }
@@ -170,7 +178,7 @@ public:
                 DoCast(me, SPELL_FADE);
                 // add a blink to simulate a stealthed movement and reappearing elsewhere
                 DoCast(me, SPELL_FADE_BLINK);
-                FadeTimer = 30000 + rand()%5000;
+                FadeTimer = 30000 + rand32() % 5000;
                 // if the victim is out of melee range she cast multi shot
                 if (Unit* victim = me->GetVictim())
                     if (me->GetDistance(victim) > 10.0f)
@@ -180,7 +188,7 @@ public:
             if (SummonSkeletonTimer <= diff)
             {
                 DoCast(me, SPELL_SUMMON_SKELETON);
-                SummonSkeletonTimer = 20000 + rand()%10000;
+                SummonSkeletonTimer = 20000 + rand32() % 10000;
             } else SummonSkeletonTimer -= diff;
 
             if (BlackArrowTimer <= diff)
@@ -188,7 +196,7 @@ public:
                 if (Unit* victim = me->GetVictim())
                 {
                     DoCast(victim, SPELL_BLACK_ARROW);
-                    BlackArrowTimer = 15000 + rand()%5000;
+                    BlackArrowTimer = 15000 + rand32() % 5000;
                 }
             } else BlackArrowTimer -= diff;
 
@@ -197,7 +205,7 @@ public:
                 if (Unit* victim = me->GetVictim())
                 {
                     DoCast(victim, SPELL_SHOT);
-                    ShotTimer = 8000 + rand()%2000;
+                    ShotTimer = 8000 + rand32() % 2000;
                 }
             } else ShotTimer -= diff;
 
@@ -206,7 +214,7 @@ public:
                 if (Unit* victim = me->GetVictim())
                 {
                     DoCast(victim, SPELL_MULTI_SHOT);
-                    MultiShotTimer = 10000 + rand()%3000;
+                    MultiShotTimer = 10000 + rand32() % 3000;
                 }
             } else MultiShotTimer -= diff;
 
@@ -231,7 +239,18 @@ public:
 
     struct npc_highborne_lamenterAI : public ScriptedAI
     {
-        npc_highborne_lamenterAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_highborne_lamenterAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            EventMoveTimer = 10000;
+            EventCastTimer = 17500;
+            EventMove = true;
+            EventCast = true;
+        }
 
         uint32 EventMoveTimer;
         uint32 EventCastTimer;
@@ -240,10 +259,7 @@ public:
 
         void Reset() override
         {
-            EventMoveTimer = 10000;
-            EventCastTimer = 17500;
-            EventMove = true;
-            EventCast = true;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }

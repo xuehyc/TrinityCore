@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -20,24 +20,24 @@
 
 #include "Common.h"
 #include "Channel.h"
-#include <ace/Singleton.h>
 
 #include <map>
 #include <string>
 
 #include "World.h"
 
+#define MAX_CHANNEL_PASS_STR 31
+
 class ChannelMgr
 {
     typedef std::map<std::wstring, Channel*> ChannelMap;
 
-    public:
-        ChannelMgr() : team(0)
-        { }
-
+    protected:
+        ChannelMgr() : team(0) { }
         ~ChannelMgr();
 
-        static ChannelMgr * forTeam(uint32 team);
+    public:
+        static ChannelMgr* forTeam(uint32 team);
         void setTeam(uint32 newTeam) { team = newTeam; }
 
         Channel* GetJoinChannel(std::string const& name, uint32 channel_id);
@@ -50,8 +50,5 @@ class ChannelMgr
 
         void MakeNotOnPacket(WorldPacket* data, std::string const& name);
 };
-
-class AllianceChannelMgr : public ChannelMgr { };
-class HordeChannelMgr    : public ChannelMgr { };
 
 #endif

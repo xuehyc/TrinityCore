@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -178,6 +178,12 @@ public:
         npc_cooshcooshAI(Creature* creature) : ScriptedAI(creature)
         {
             m_uiNormFaction = creature->getFaction();
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            LightningBolt_Timer = 2000;
         }
 
         uint32 m_uiNormFaction;
@@ -185,7 +191,7 @@ public:
 
         void Reset() override
         {
-            LightningBolt_Timer = 2000;
+            Initialize();
             if (me->getFaction() != m_uiNormFaction)
                 me->setFaction(m_uiNormFaction);
         }

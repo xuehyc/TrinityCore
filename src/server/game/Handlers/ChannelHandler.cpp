@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,6 +19,8 @@
 #include "ObjectMgr.h"                                      // for normalizePlayerName
 #include "ChannelMgr.h"
 #include "Player.h"
+
+#include <cctype>
 
 void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
 {
@@ -43,6 +45,9 @@ void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
     }
 
     if (channelName.empty())
+        return;
+
+    if (isdigit(channelName[0]))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeam()))
@@ -94,6 +99,9 @@ void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
 
     TC_LOG_DEBUG("chat.system", "CMSG_CHANNEL_PASSWORD %s Channel: %s, Password: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), password.c_str());
+
+    if (password.length() > MAX_CHANNEL_PASS_STR)
+        return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeam()))
         if (Channel* channel = cMgr->GetChannel(channelName, GetPlayer()))

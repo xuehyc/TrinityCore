@@ -19,8 +19,6 @@
 #ifndef NULL_SEC_MGR_H_
 #define NULL_SEC_MGR_H_
 
-#include <ace/Singleton.h>
-
 #define MAX_NULLSEC_ZONES 11
 #define NO_GUILD_ZONE NULL
 #define ITEM_STANDARD_OF_CONQUEST 25555
@@ -46,13 +44,17 @@ struct NullSecGuildZoneData
 
 class NullSecMgr
 {
-    friend class ACE_Singleton<NullSecMgr, ACE_Null_Mutex>;
 
 private:
     NullSecMgr();
     ~NullSecMgr();
 
 public:
+    static NullSecMgr* instance()
+    {
+        static NullSecMgr instance;
+        return &instance;
+    }
     void InitNullSecMgr();
     Guild* GetNullSecZoneOwner(uint32 guildZoneId);
     void SetNullSecZoneOwner(uint32 guildZoneId, Guild* guild);
@@ -79,6 +81,6 @@ private:
     std::vector<uint32> m_nullSecZones;
 };
 
-#define sNullSecMgr ACE_Singleton<NullSecMgr, ACE_Null_Mutex>::instance()
+#define sNullSecMgr NullSecMgr::instance()
 
 #endif /* NULL_SEC_MGR_H_ */

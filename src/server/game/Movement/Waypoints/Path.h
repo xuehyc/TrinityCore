@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -63,7 +63,7 @@ class Path
                 float xd = node.x - prev.x;
                 float yd = node.y - prev.y;
                 float zd = node.z - prev.z;
-                len += sqrtf(xd*xd + yd*yd + zd*zd);
+                len += std::sqrt(xd*xd + yd*yd + zd*zd);
             }
             return len;
         }
@@ -80,7 +80,7 @@ class Path
                 float xd = x - node.x;
                 float yd = y - node.y;
                 float zd = z - node.z;
-                len += sqrtf(xd*xd + yd*yd + zd*zd);
+                len += std::sqrt(xd*xd + yd*yd + zd*zd);
             }
 
             return len;

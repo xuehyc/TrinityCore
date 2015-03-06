@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -33,9 +33,9 @@ void WorldSession::HandleInspectArenaTeamsOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "MSG_INSPECT_ARENA_TEAMS");
 
-    uint64 guid;
+    ObjectGuid guid;
     recvData >> guid;
-    TC_LOG_DEBUG("network", "Inspect Arena stats (GUID: %u TypeId: %u)", GUID_LOPART(guid), GuidHigh2TypeId(GUID_HIPART(guid)));
+    TC_LOG_DEBUG("network", "Inspect Arena stats %s", guid.ToString().c_str());
 
     Player* player = ObjectAccessor::FindPlayer(guid);
 
@@ -99,7 +99,7 @@ void WorldSession::HandleArenaTeamInviteOpcode(WorldPacket& recvData)
         if (!normalizePlayerName(invitedName))
             return;
 
-        player = sObjectAccessor->FindPlayerByName(invitedName);
+        player = ObjectAccessor::FindPlayerByName(invitedName);
     }
 
     if (!player)
@@ -312,10 +312,14 @@ void WorldSession::HandleArenaTeamRemoveOpcode(WorldPacket& recvData)
         return;
     }
 
+    // Player cannot be removed during fights
+    if (arenaTeam->IsFighting())
+        return;
+
     arenaTeam->DelMember(member->Guid, true);
 
     // Broadcast event
-    arenaTeam->BroadcastEvent(ERR_ARENA_TEAM_REMOVE_SSS, 0, 3, name, arenaTeam->GetName(), _player->GetName());
+    arenaTeam->BroadcastEvent(ERR_ARENA_TEAM_REMOVE_SSS, ObjectGuid::Empty, 3, name, arenaTeam->GetName(), _player->GetName());
 }
 
 void WorldSession::HandleArenaTeamLeaderOpcode(WorldPacket& recvData)
@@ -358,7 +362,7 @@ void WorldSession::HandleArenaTeamLeaderOpcode(WorldPacket& recvData)
     arenaTeam->SetCaptain(member->Guid);
 
     // Broadcast event
-    arenaTeam->BroadcastEvent(ERR_ARENA_TEAM_LEADER_CHANGED_SSS, 0, 3, _player->GetName(), name, arenaTeam->GetName());
+    arenaTeam->BroadcastEvent(ERR_ARENA_TEAM_LEADER_CHANGED_SSS, ObjectGuid::Empty, 3, _player->GetName(), name, arenaTeam->GetName());
 }
 
 void WorldSession::SendArenaTeamCommandResult(uint32 teamAction, const std::string& team, const std::string& player, uint32 errorId)

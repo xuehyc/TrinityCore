@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -30,7 +30,7 @@ class AggressorAI : public CreatureAI
     public:
         explicit AggressorAI(Creature* c) : CreatureAI(c) { }
 
-        void UpdateAI(uint32);
+        void UpdateAI(uint32) override;
         static int Permissible(const Creature*);
 };
 
@@ -41,12 +41,12 @@ class CombatAI : public CreatureAI
     public:
         explicit CombatAI(Creature* c) : CreatureAI(c) { }
 
-        void InitializeAI();
-        void Reset();
-        void EnterCombat(Unit* who);
-        void JustDied(Unit* killer);
-        void UpdateAI(uint32 diff);
-        void SpellInterrupted(uint32 spellId, uint32 unTimeMs);
+        void InitializeAI() override;
+        void Reset() override;
+        void EnterCombat(Unit* who) override;
+        void JustDied(Unit* killer) override;
+        void UpdateAI(uint32 diff) override;
+        void SpellInterrupted(uint32 spellId, uint32 unTimeMs) override;
 
         static int Permissible(Creature const* /*creature*/) { return PERMIT_BASE_NO; }
 
@@ -59,10 +59,10 @@ class CasterAI : public CombatAI
 {
     public:
         explicit CasterAI(Creature* c) : CombatAI(c) { m_attackDist = MELEE_RANGE; }
-        void InitializeAI();
-        void AttackStart(Unit* victim) { AttackStartCaster(victim, m_attackDist); }
-        void UpdateAI(uint32 diff);
-        void EnterCombat(Unit* /*who*/);
+        void InitializeAI() override;
+        void AttackStart(Unit* victim) override { AttackStartCaster(victim, m_attackDist); }
+        void UpdateAI(uint32 diff) override;
+        void EnterCombat(Unit* /*who*/) override;
     private:
         float m_attackDist;
 };
@@ -71,8 +71,8 @@ struct ArcherAI : public CreatureAI
 {
     public:
         explicit ArcherAI(Creature* c);
-        void AttackStart(Unit* who);
-        void UpdateAI(uint32 diff);
+        void AttackStart(Unit* who) override;
+        void UpdateAI(uint32 diff) override;
 
         static int Permissible(Creature const* /*creature*/) { return PERMIT_BASE_NO; }
 
@@ -84,9 +84,9 @@ struct TurretAI : public CreatureAI
 {
     public:
         explicit TurretAI(Creature* c);
-        bool CanAIAttack(Unit const* who) const;
-        void AttackStart(Unit* who);
-        void UpdateAI(uint32 diff);
+        bool CanAIAttack(Unit const* who) const override;
+        void AttackStart(Unit* who) override;
+        void UpdateAI(uint32 diff) override;
 
         static int Permissible(Creature const* /*creature*/) { return PERMIT_BASE_NO; }
 
@@ -102,10 +102,10 @@ struct VehicleAI : public CreatureAI
     public:
         explicit VehicleAI(Creature* creature);
 
-        void UpdateAI(uint32 diff);
-        void MoveInLineOfSight(Unit*) { }
-        void AttackStart(Unit*) { }
-        void OnCharmed(bool apply);
+        void UpdateAI(uint32 diff) override;
+        void MoveInLineOfSight(Unit*) override { }
+        void AttackStart(Unit*) override { }
+        void OnCharmed(bool apply) override;
 
         static int Permissible(Creature const* /*creature*/) { return PERMIT_BASE_NO; }
 

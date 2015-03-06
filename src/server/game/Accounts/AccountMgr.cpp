@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -21,6 +21,7 @@
 #include "DatabaseEnv.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 #include "Util.h"
 #include "SHA1.h"
 #include "WorldSession.h"
@@ -80,11 +81,10 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accountId)
     {
         do
         {
-            uint32 guidLow = (*result)[0].GetUInt32();
-            uint64 guid = MAKE_NEW_GUID(guidLow, 0, HIGHGUID_PLAYER);
+            ObjectGuid guid(HIGHGUID_PLAYER, (*result)[0].GetUInt32());
 
             // Kick if player is online
-            if (Player* p = ObjectAccessor::FindPlayer(guid))
+            if (Player* p = ObjectAccessor::FindConnectedPlayer(guid))
             {
                 WorldSession* s = p->GetSession();
                 s->KickPlayer();                            // mark session to remove at next session list update
@@ -166,10 +166,16 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accountId, std::string newPass
     std::string username;
 
     if (!GetName(accountId, username))
+    {
+        sScriptMgr->OnFailedPasswordChange(accountId);
         return AOR_NAME_NOT_EXIST;                          // account doesn't exist
+    }
 
     if (utf8length(newPassword) > MAX_ACCOUNT_STR)
+    {
+        sScriptMgr->OnFailedPasswordChange(accountId);
         return AOR_PASS_TOO_LONG;
+    }
 
     normalizeString(username);
     normalizeString(newPassword);
@@ -189,6 +195,7 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accountId, std::string newPass
 
     LoginDatabase.Execute(stmt);
 
+    sScriptMgr->OnPasswordChange(accountId);
     return AOR_OK;
 }
 
@@ -197,10 +204,16 @@ AccountOpResult AccountMgr::ChangeEmail(uint32 accountId, std::string newEmail)
     std::string username;
 
     if (!GetName(accountId, username))
+    {
+        sScriptMgr->OnFailedEmailChange(accountId);
         return AOR_NAME_NOT_EXIST;                          // account doesn't exist
+    }
 
     if (utf8length(newEmail) > MAX_EMAIL_STR)
+    {
+        sScriptMgr->OnFailedEmailChange(accountId);
         return AOR_EMAIL_TOO_LONG;
+    }
 
     normalizeString(username);
     normalizeString(newEmail);
@@ -212,6 +225,7 @@ AccountOpResult AccountMgr::ChangeEmail(uint32 accountId, std::string newEmail)
 
     LoginDatabase.Execute(stmt);
 
+    sScriptMgr->OnEmailChange(accountId);
     return AOR_OK;
 }
 
@@ -220,10 +234,16 @@ AccountOpResult AccountMgr::ChangeRegEmail(uint32 accountId, std::string newEmai
     std::string username;
 
     if (!GetName(accountId, username))
+    {
+        sScriptMgr->OnFailedEmailChange(accountId);
         return AOR_NAME_NOT_EXIST;                          // account doesn't exist
+    }
 
     if (utf8length(newEmail) > MAX_EMAIL_STR)
+    {
+        sScriptMgr->OnFailedEmailChange(accountId);
         return AOR_EMAIL_TOO_LONG;
+    }
 
     normalizeString(username);
     normalizeString(newEmail);
@@ -235,6 +255,7 @@ AccountOpResult AccountMgr::ChangeRegEmail(uint32 accountId, std::string newEmai
 
     LoginDatabase.Execute(stmt);
 
+    sScriptMgr->OnEmailChange(accountId);
     return AOR_OK;
 }
 
@@ -441,7 +462,7 @@ void AccountMgr::LoadRBAC()
     while (result->NextRow());
 
     TC_LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading default permissions");
-    result = LoginDatabase.Query("SELECT secId, permissionId FROM rbac_default_permissions ORDER BY secId ASC");
+    result = LoginDatabase.PQuery("SELECT secId, permissionId FROM rbac_default_permissions WHERE (realmId = %u OR realmId = -1) ORDER BY secId ASC", realmID);
     if (!result)
     {
         TC_LOG_INFO("server.loading", ">> Loaded 0 default permission definitions. DB table `rbac_default_permissions` is empty.");

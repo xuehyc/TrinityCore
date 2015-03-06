@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -57,6 +57,12 @@ class boss_doomwalker : public CreatureScript
         {
             boss_doomwalkerAI(Creature* creature) : ScriptedAI(creature)
             {
+                Initialize();
+            }
+
+            void Initialize()
+            {
+                _inEnrage = false;
             }
 
             void Reset() override
@@ -67,7 +73,7 @@ class boss_doomwalker : public CreatureScript
                 _events.ScheduleEvent(EVENT_CHAIN, urand(10000, 30000));
                 _events.ScheduleEvent(EVENT_QUAKE, urand(25000, 35000));
                 _events.ScheduleEvent(EVENT_OVERRUN, urand(30000, 45000));
-                _inEnrage = false;
+                Initialize();
             }
 
             void KilledUnit(Unit* victim) override
@@ -94,7 +100,7 @@ class boss_doomwalker : public CreatureScript
 
             {
                 if (who && who->GetTypeId() == TYPEID_PLAYER && me->IsValidAttackTarget(who))
-                    if (who->HasAura(SPELL_MARK_DEATH, 0))
+                    if (who->HasAura(SPELL_MARK_DEATH))
                         who->CastSpell(who, SPELL_AURA_DEATH, 1);
             }
 

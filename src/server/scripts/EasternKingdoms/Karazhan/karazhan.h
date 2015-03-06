@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -18,6 +18,8 @@
 
 #ifndef DEF_KARAZHAN_H
 #define DEF_KARAZHAN_H
+
+#define DataHeader "KZ"
 
 enum DataTypes
 {
@@ -62,5 +64,4 @@ enum OperaEvents
     EVENT_RAJ                       = 3
 };
 
-#define ERROR_INST_DATA(a)          TC_LOG_ERROR("scripts", "Instance Data for Karazhan not set properly. Encounter for Creature Entry %u may not work properly.", a->GetEntry());
 #endif

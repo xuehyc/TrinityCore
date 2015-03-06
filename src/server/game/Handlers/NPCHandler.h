@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -51,10 +51,10 @@ struct PageTextLocale
 
 struct NpcTextLocale
 {
-    NpcTextLocale() { Text_0.resize(8); Text_1.resize(8); }
+    NpcTextLocale() { }
 
-    std::vector<StringVector> Text_0;
-    std::vector<StringVector> Text_1;
+    StringVector Text_0[MAX_GOSSIP_TEXT_OPTIONS];
+    StringVector Text_1[MAX_GOSSIP_TEXT_OPTIONS];
 };
 #endif
 

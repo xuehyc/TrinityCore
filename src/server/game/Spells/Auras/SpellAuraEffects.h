@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -30,14 +30,14 @@ typedef void(AuraEffect::*pAuraEffectHandler)(AuraApplication const* aurApp, uin
 class AuraEffect
 {
     friend void Aura::_InitEffects(uint8 effMask, Unit* caster, int32 *baseAmount);
-    friend Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster, int32* baseAmount, Item* castItem, uint64 casterGUID);
+    friend Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster, int32* baseAmount, Item* castItem, ObjectGuid casterGUID);
     friend Aura::~Aura();
     private:
         ~AuraEffect();
         explicit AuraEffect(Aura* base, uint8 effIndex, int32 *baseAmount, Unit* caster);
     public:
         Unit* GetCaster() const { return GetBase()->GetCaster(); }
-        uint64 GetCasterGUID() const { return GetBase()->GetCasterGUID(); }
+        ObjectGuid GetCasterGUID() const { return GetBase()->GetCasterGUID(); }
         Aura* GetBase() const { return m_base; }
         void GetTargetList(std::list<Unit*> & targetList) const;
         void GetApplicationList(std::list<AuraApplication*> & applicationList) const;
@@ -70,6 +70,13 @@ class AuraEffect
         void HandleEffect(Unit* target, uint8 mode, bool apply);
         void ApplySpellMod(Unit* target, bool apply);
 
+        void  SetBonusAmount(int32 val) { m_bonusAmount = val; }
+        int32 GetBonusAmount() const { return m_bonusAmount; }
+        void  SetCritChance(float val) { m_critChance = val; }
+        float GetCritChance() const { return m_critChance; }
+        void  SetDonePct(float val) { m_donePct = val; }
+        float GetDonePct() const { return m_donePct; }
+
         void Update(uint32 diff, Unit* caster);
         void UpdatePeriodic(Unit* caster);
 
@@ -98,6 +105,9 @@ class AuraEffect
         int32 const m_baseAmount;
 
         int32 m_amount;
+        int32 m_bonusAmount;
+        float m_critChance;
+        float m_donePct;
 
         SpellModifier* m_spellmod;
 
@@ -109,7 +119,7 @@ class AuraEffect
         bool m_canBeRecalculated;
         bool m_isPeriodic;
     private:
-        bool IsPeriodicTickCrit(Unit* target, Unit const* caster) const;
+        bool CanPeriodicTickCrit(Unit const* caster) const;
 
     public:
         // aura effect apply/remove handlers

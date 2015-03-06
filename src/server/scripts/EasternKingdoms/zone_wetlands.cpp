@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -59,14 +59,22 @@ public:
 
     struct npc_tapoke_slim_jahnAI : public npc_escortAI
     {
-        npc_tapoke_slim_jahnAI(Creature* creature) : npc_escortAI(creature) { }
+        npc_tapoke_slim_jahnAI(Creature* creature) : npc_escortAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            IsFriendSummoned = false;
+        }
 
         bool IsFriendSummoned;
 
         void Reset() override
         {
             if (!HasEscortState(STATE_ESCORT_ESCORTING))
-                IsFriendSummoned = false;
+                Initialize();
         }
 
         void WaypointReached(uint32 waypointId) override

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -48,18 +48,6 @@ DynamicObject::~DynamicObject()
     delete _removedAura;
 }
 
-void DynamicObject::CleanupsBeforeDelete(bool finalCleanup /* = true */)
-{
-    WorldObject::CleanupsBeforeDelete(finalCleanup);
-
-    if (Transport* transport = GetTransport())
-    {
-        transport->RemovePassenger(this);
-        SetTransport(NULL);
-        m_movementInfo.transport.Reset();
-    }
-}
-
 void DynamicObject::AddToWorld()
 {
     ///- Register the dynamicObject for guid lookup and for caster
@@ -106,7 +94,7 @@ bool DynamicObject::CreateDynamicObject(uint32 guidlow, Unit* caster, uint32 spe
 
     SetEntry(spellId);
     SetObjectScale(1);
-    SetUInt64Value(DYNAMICOBJECT_CASTER, caster->GetGUID());
+    SetGuidValue(DYNAMICOBJECT_CASTER, caster->GetGUID());
 
     // The lower word of DYNAMICOBJECT_BYTES must be 0x0001. This value means that the visual radius will be overriden
     // by client for most of the "ground patch" visual effect spells and a few "skyfall" ones like Hurricane.
@@ -124,14 +112,11 @@ bool DynamicObject::CreateDynamicObject(uint32 guidlow, Unit* caster, uint32 spe
     Transport* transport = caster->GetTransport();
     if (transport)
     {
-        m_movementInfo.transport.guid = GetGUID();
-
         float x, y, z, o;
         pos.GetPosition(x, y, z, o);
         transport->CalculatePassengerOffset(x, y, z, &o);
         m_movementInfo.transport.pos.Relocate(x, y, z, o);
 
-        SetTransport(transport);
         // This object must be added to transport before adding to map for the client to properly display it
         transport->AddPassenger(this);
     }

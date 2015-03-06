@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -136,24 +136,14 @@ class boss_warbringer_omrogg : public CreatureScript
         {
             boss_warbringer_omroggAI(Creature* creature) : BossAI(creature, DATA_OMROGG)
             {
-                LeftHeadGUID  = 0;
-                RightHeadGUID = 0;
+                Initialize();
+                iaggro = 0;
+                ithreat = 0;
+                ikilling = 0;
             }
 
-            void Reset() override
+            void Initialize()
             {
-                if (Unit* LeftHead  = ObjectAccessor::GetUnit(*me, LeftHeadGUID))
-                {
-                    LeftHead->setDeathState(JUST_DIED);
-                    LeftHeadGUID = 0;
-                }
-
-                if (Unit* RightHead  = ObjectAccessor::GetUnit(*me, RightHeadGUID))
-                {
-                    RightHead->setDeathState(JUST_DIED);
-                    RightHeadGUID = 0;
-                }
-
                 AggroYell = false;
                 ThreatYell = false;
                 ThreatYell2 = false;
@@ -166,6 +156,23 @@ class boss_warbringer_omrogg : public CreatureScript
                 BurningMaul_Timer = 25000;
                 ThunderClap_Timer = 15000;
                 ResetThreat_Timer = 30000;
+            }
+
+            void Reset() override
+            {
+                if (Unit* LeftHead  = ObjectAccessor::GetUnit(*me, LeftHeadGUID))
+                {
+                    LeftHead->setDeathState(JUST_DIED);
+                    LeftHeadGUID.Clear();
+                }
+
+                if (Unit* RightHead  = ObjectAccessor::GetUnit(*me, RightHeadGUID))
+                {
+                    RightHead->setDeathState(JUST_DIED);
+                    RightHeadGUID.Clear();
+                }
+
+                Initialize();
 
                 instance->SetData(DATA_OMROGG, NOT_STARTED);   //End boss can use this later. O'mrogg must be defeated(DONE) or he will come to aid.
             }
@@ -178,7 +185,7 @@ class boss_warbringer_omrogg : public CreatureScript
                 if (!LeftHead || !RightHead)
                     return;
 
-                ithreat = rand()%4;
+                ithreat = rand32() % 4;
 
                 Creature* source = (LeftHead->GetEntry() == Threat[ithreat].creature ? LeftHead : RightHead);
 
@@ -195,7 +202,7 @@ class boss_warbringer_omrogg : public CreatureScript
 
                 if (Creature* LeftHead = ObjectAccessor::GetCreature(*me, LeftHeadGUID))
                 {
-                    iaggro = rand()%3;
+                    iaggro = rand32() % 3;
 
                     LeftHead->AI()->Talk(GoCombat[iaggro].id);
 
@@ -227,7 +234,7 @@ class boss_warbringer_omrogg : public CreatureScript
                 if (!LeftHead || !RightHead)
                     return;
 
-                ikilling = rand()%2;
+                ikilling = rand32() % 2;
 
                 Creature* source = (LeftHead->GetEntry() == Killing[ikilling].creature ? LeftHead : RightHead);
 
@@ -338,7 +345,7 @@ class boss_warbringer_omrogg : public CreatureScript
                         DoResetThreat();
                         me->AddThreat(target, 0.0f);
                     }
-                    ResetThreat_Timer = 25000+rand()%15000;
+                    ResetThreat_Timer = 25000 + rand32() % 15000;
                 }
                 else
                     ResetThreat_Timer -= diff;
@@ -346,7 +353,7 @@ class boss_warbringer_omrogg : public CreatureScript
                 if (Fear_Timer <= diff)
                 {
                     DoCast(me, SPELL_FEAR);
-                    Fear_Timer = 15000+rand()%20000;
+                    Fear_Timer = 15000 + rand32() % 20000;
                 }
                 else
                     Fear_Timer -= diff;
@@ -354,7 +361,7 @@ class boss_warbringer_omrogg : public CreatureScript
                 if (ThunderClap_Timer <= diff)
                 {
                     DoCast(me, SPELL_THUNDERCLAP);
-                    ThunderClap_Timer = 15000+rand()%15000;
+                    ThunderClap_Timer = 15000 + rand32() % 15000;
                 }
                 else
                     ThunderClap_Timer -= diff;
@@ -363,8 +370,8 @@ class boss_warbringer_omrogg : public CreatureScript
             }
 
             private:
-                uint64 LeftHeadGUID;
-                uint64 RightHeadGUID;
+                ObjectGuid LeftHeadGUID;
+                ObjectGuid RightHeadGUID;
                 int iaggro;
                 int ithreat;
                 int ikilling;

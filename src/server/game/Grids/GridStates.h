@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -34,24 +34,24 @@ class GridState
 class InvalidState : public GridState
 {
     public:
-        void Update(Map &, NGridType &, GridInfo &, uint32 t_diff) const;
+        void Update(Map &, NGridType &, GridInfo &, uint32 t_diff) const override;
 };
 
 class ActiveState : public GridState
 {
     public:
-        void Update(Map &, NGridType &, GridInfo &, uint32 t_diff) const;
+        void Update(Map &, NGridType &, GridInfo &, uint32 t_diff) const override;
 };
 
 class IdleState : public GridState
 {
     public:
-        void Update(Map &, NGridType &, GridInfo &, uint32 t_diff) const;
+        void Update(Map &, NGridType &, GridInfo &, uint32 t_diff) const override;
 };
 
 class RemovalState : public GridState
 {
     public:
-        void Update(Map &, NGridType &, GridInfo &, uint32 t_diff) const;
+        void Update(Map &, NGridType &, GridInfo &, uint32 t_diff) const override;
 };
 #endif

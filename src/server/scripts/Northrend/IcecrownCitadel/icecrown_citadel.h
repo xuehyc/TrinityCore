@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,11 +19,9 @@
 #define ICECROWN_CITADEL_H_
 
 #include "SpellScript.h"
-#include "Map.h"
-#include "Creature.h"
-#include "SpellMgr.h"
 
 #define ICCScriptName "instance_icecrown_citadel"
+#define DataHeader    "IC"
 
 uint32 const EncounterCount = 13;
 uint32 const WeeklyNPCs = 9;
@@ -116,7 +114,8 @@ enum DataTypes
     DATA_HIGHLORD_TIRION_FORDRING   = 37,
     DATA_ARTHAS_PLATFORM            = 38,
     DATA_TERENAS_MENETHIL           = 39,
-    DATA_ENEMY_GUNSHIP              = 40
+    DATA_ENEMY_GUNSHIP              = 40,
+    DATA_UPPERSPIRE_TELE_ACT        = 41,
 };
 
 enum CreaturesIds
@@ -142,6 +141,10 @@ enum CreaturesIds
     NPC_GARROSH_HELLSCREAM                      = 39372,
     NPC_KING_VARIAN_WRYNN                       = 39371,
     NPC_DEATHBOUND_WARD                         = 37007,
+    NPC_LADY_JAINA_PROUDMOORE_QUEST             = 38606,
+    NPC_MURADIN_BRONZEBEARD_QUEST               = 38607,
+    NPC_UTHER_THE_LIGHTBRINGER_QUEST            = 38608,
+    NPC_LADY_SYLVANAS_WINDRUNNER_QUEST          = 38609,
 
     // Weekly quests
     NPC_INFILTRATOR_MINCHAR                     = 38471,
@@ -318,6 +321,15 @@ enum CreaturesIds
 
 enum GameObjectsIds
 {
+    // ICC Teleporters
+    GO_SCOURGE_TRANSPORTER_LICHKING         = 202223,
+    GO_SCOURGE_TRANSPORTER_UPPERSPIRE       = 202235,
+    GO_SCOURGE_TRANSPORTER_LIGHTSHAMMER     = 202242,
+    GO_SCOURGE_TRANSPORTER_RAMPART          = 202243,
+    GO_SCOURGE_TRANSPORTER_DEATHBRINGER     = 202244,
+    GO_SCOURGE_TRANSPORTER_ORATORY          = 202245,
+    GO_SCOURGE_TRANSPORTER_SINDRAGOSA       = 202246,
+
     // Lower Spire Trash
     GO_SPIRIT_ALARM_1                       = 201814,
     GO_SPIRIT_ALARM_2                       = 201815,
@@ -355,7 +367,6 @@ enum GameObjectsIds
     GO_DEATHBRINGER_S_CACHE_25N             = 202240,
     GO_DEATHBRINGER_S_CACHE_10H             = 202238,
     GO_DEATHBRINGER_S_CACHE_25H             = 202241,
-    GO_SCOURGE_TRANSPORTER_SAURFANG         = 202244,
 
     // Professor Putricide
     GO_ORANGE_PLAGUE_MONSTER_ENTRANCE       = 201371,
@@ -400,7 +411,6 @@ enum GameObjectsIds
     GO_SIGIL_OF_THE_FROSTWING               = 202181,
 
     // The Lich King
-    GO_SCOURGE_TRANSPORTER_LK               = 202223,
     GO_ARTHAS_PLATFORM                      = 202161,
     GO_ARTHAS_PRECIPICE                     = 202078,
     GO_DOODAD_ICECROWN_THRONEFROSTYWIND01   = 202188,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -54,8 +54,18 @@ public:
     {
         boss_anetheronAI(Creature* creature) : hyjal_trashAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
             go = false;
+        }
+
+        void Initialize()
+        {
+            SwarmTimer = 45000;
+            SleepTimer = 60000;
+            AuraTimer = 5000;
+            InfernoTimer = 45000;
+            damageTaken = 0;
         }
 
         uint32 SwarmTimer;
@@ -66,11 +76,7 @@ public:
 
         void Reset() override
         {
-            damageTaken = 0;
-            SwarmTimer = 45000;
-            SleepTimer = 60000;
-            AuraTimer = 5000;
-            InfernoTimer = 45000;
+            Initialize();
 
             if (IsEvent)
                 instance->SetData(DATA_ANETHERONEVENT, NOT_STARTED);
@@ -94,7 +100,7 @@ public:
         {
             if (waypointId == 7)
             {
-                Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_JAINAPROUDMOORE));
                 if (target && target->IsAlive())
                     me->AddThreat(target, 0.0f);
             }
@@ -188,12 +194,12 @@ public:
             ImmolationTimer = 5000;
             CheckTimer = 5000;
             instance = creature->GetInstanceScript();
-            AnetheronGUID = instance->GetData64(DATA_ANETHERON);
+            AnetheronGUID = instance->GetGuidData(DATA_ANETHERON);
         }
 
         uint32 ImmolationTimer;
         uint32 CheckTimer;
-        uint64 AnetheronGUID;
+        ObjectGuid AnetheronGUID;
         InstanceScript* instance;
 
         void Reset() override

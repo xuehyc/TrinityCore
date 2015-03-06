@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -56,7 +56,18 @@ class boss_void_reaver : public CreatureScript
         {
             boss_void_reaverAI(Creature* creature) : ScriptedAI(creature)
             {
+                Initialize();
                 instance = creature->GetInstanceScript();
+            }
+
+            void Initialize()
+            {
+                Pounding_Timer = 15000;
+                ArcaneOrb_Timer = 3000;
+                KnockAway_Timer = 30000;
+                Berserk_Timer = 600000;
+
+                Enraged = false;
             }
 
             InstanceScript* instance;
@@ -70,12 +81,7 @@ class boss_void_reaver : public CreatureScript
 
             void Reset() override
             {
-                Pounding_Timer = 15000;
-                ArcaneOrb_Timer = 3000;
-                KnockAway_Timer = 30000;
-                Berserk_Timer = 600000;
-
-                Enraged = false;
+                Initialize();
 
                 if (me->IsAlive())
                     instance->SetData(DATA_VOIDREAVEREVENT, NOT_STARTED);
@@ -132,12 +138,12 @@ class boss_void_reaver : public CreatureScript
                     }
 
                     if (!target_list.empty())
-                        target = *(target_list.begin()+rand()%target_list.size());
+                        target = *(target_list.begin() + rand32() % target_list.size());
                     else
                         target = me->GetVictim();
 
                     if (target)
-                        me->CastSpell(target, SPELL_ARCANE_ORB, false, NULL, NULL, 0);
+                        me->CastSpell(target, SPELL_ARCANE_ORB, false, NULL, NULL);
                     ArcaneOrb_Timer = 3000;
                 }
                 else

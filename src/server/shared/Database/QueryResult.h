@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,9 +19,7 @@
 #ifndef QUERYRESULT_H
 #define QUERYRESULT_H
 
-#include "AutoPtr.h"
-#include <ace/Thread_Mutex.h>
-
+#include <memory>
 #include "Field.h"
 
 #ifdef _WIN32
@@ -60,7 +58,7 @@ class ResultSet
         ResultSet& operator=(ResultSet const& right) = delete;
 };
 
-typedef Trinity::AutoPtr<ResultSet, ACE_Thread_Mutex> QueryResult;
+typedef std::shared_ptr<ResultSet> QueryResult;
 
 class PreparedResultSet
 {
@@ -107,7 +105,7 @@ class PreparedResultSet
         PreparedResultSet& operator=(PreparedResultSet const& right) = delete;
 };
 
-typedef Trinity::AutoPtr<PreparedResultSet, ACE_Thread_Mutex> PreparedQueryResult;
+typedef std::shared_ptr<PreparedResultSet> PreparedQueryResult;
 
 #endif
 

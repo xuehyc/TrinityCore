@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -79,34 +79,31 @@ public:
     {
         npc_kilrekAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
         }
 
-        InstanceScript* instance;
+        void Initialize()
+        {
+            AmplifyTimer = 2000;
+        }
 
-        uint64 TerestianGUID;
+        InstanceScript* instance;
 
         uint32 AmplifyTimer;
 
         void Reset() override
         {
-            TerestianGUID = 0;
-            AmplifyTimer = 2000;
+            Initialize();
         }
 
-        void EnterCombat(Unit* /*who*/) override
-        {
-        }
+        void EnterCombat(Unit* /*who*/) override { }
 
         void JustDied(Unit* /*killer*/) override
         {
-            uint64 TerestianGUID = instance->GetData64(DATA_TERESTIAN);
-            if (TerestianGUID)
-            {
-                Unit* Terestian = ObjectAccessor::GetUnit(*me, TerestianGUID);
-                if (Terestian && Terestian->IsAlive())
-                    DoCast(Terestian, SPELL_BROKEN_PACT, true);
-            }
+            Creature* Terestian = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_TERESTIAN));
+            if (Terestian && Terestian->IsAlive())
+                DoCast(Terestian, SPELL_BROKEN_PACT, true);
         }
 
         void UpdateAI(uint32 diff) override
@@ -140,13 +137,21 @@ public:
 
     struct npc_demon_chainAI : public ScriptedAI
     {
-        npc_demon_chainAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_demon_chainAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
 
-        uint64 SacrificeGUID;
+        void Initialize()
+        {
+            SacrificeGUID.Clear();
+        }
+
+        ObjectGuid SacrificeGUID;
 
         void Reset() override
         {
-            SacrificeGUID = 0;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }
@@ -212,13 +217,21 @@ public:
 
     struct npc_fiendish_impAI : public ScriptedAI
     {
-        npc_fiendish_impAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_fiendish_impAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            FireboltTimer = 2000;
+        }
 
         uint32 FireboltTimer;
 
         void Reset() override
         {
-            FireboltTimer = 2000;
+            Initialize();
 
             me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
         }
@@ -256,14 +269,25 @@ public:
     {
         boss_terestianAI(Creature* creature) : ScriptedAI(creature)
         {
-            for (uint8 i = 0; i < 2; ++i)
-                PortalGUID[i] = 0;
             instance = creature->GetInstanceScript();
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            PortalsCount = 0;
+            SacrificeTimer = 30000;
+            ShadowboltTimer = 5000;
+            SummonTimer = 10000;
+            BerserkTimer = 600000;
+
+            SummonedPortals = false;
+            Berserk = false;
         }
 
         InstanceScript* instance;
 
-        uint64 PortalGUID[2];
+        ObjectGuid PortalGUID[2];
         uint8 PortalsCount;
 
         uint32 SacrificeTimer;
@@ -282,22 +306,15 @@ public:
                 {
                     if (Creature* pPortal = ObjectAccessor::GetCreature(*me, PortalGUID[i]))
                     {
-                        CAST_AI(npc_fiendish_portal::npc_fiendish_portalAI, pPortal->AI())->DespawnAllImp();
+                        ENSURE_AI(npc_fiendish_portal::npc_fiendish_portalAI, pPortal->AI())->DespawnAllImp();
                         pPortal->DespawnOrUnsummon();
                     }
 
-                    PortalGUID[i] = 0;
+                    PortalGUID[i].Clear();
                 }
             }
 
-            PortalsCount        =     0;
-            SacrificeTimer      = 30000;
-            ShadowboltTimer     =  5000;
-            SummonTimer         = 10000;
-            BerserkTimer        = 600000;
-
-            SummonedPortals     = false;
-            Berserk             = false;
+            Initialize();
 
             instance->SetData(TYPE_TERESTIAN, NOT_STARTED);
 
@@ -348,7 +365,7 @@ public:
                     if (Creature* pPortal = ObjectAccessor::GetCreature((*me), PortalGUID[i]))
                         pPortal->DespawnOrUnsummon();
 
-                    PortalGUID[i] = 0;
+                    PortalGUID[i].Clear();
                 }
             }
 
@@ -372,7 +389,7 @@ public:
 
                     if (Creature* Chains = me->FindNearestCreature(NPC_DEMONCHAINS, 5000))
                     {
-                        CAST_AI(npc_demon_chain::npc_demon_chainAI, Chains->AI())->SacrificeGUID = target->GetGUID();
+                        ENSURE_AI(npc_demon_chain::npc_demon_chainAI, Chains->AI())->SacrificeGUID = target->GetGUID();
                         Chains->CastSpell(Chains, SPELL_DEMON_CHAINS, true);
                         Talk(SAY_SACRIFICE);
                         SacrificeTimer = 30000;

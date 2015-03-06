@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -36,7 +36,17 @@ public:
 
     struct generic_creatureAI : public ScriptedAI
     {
-        generic_creatureAI(Creature* creature) : ScriptedAI(creature) { }
+        generic_creatureAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            GlobalCooldown = 0;
+            BuffTimer = 0;          //Rebuff as soon as we can
+            IsSelfRooted = false;
+        }
 
         uint32 GlobalCooldown;      //This variable acts like the global cooldown that players have (1.5 seconds)
         uint32 BuffTimer;           //This variable keeps track of buffs
@@ -44,9 +54,7 @@ public:
 
         void Reset() override
         {
-            GlobalCooldown = 0;
-            BuffTimer = 0;          //Rebuff as soon as we can
-            IsSelfRooted = false;
+            Initialize();
         }
 
         void EnterCombat(Unit* who) override
@@ -107,7 +115,7 @@ public:
                     else info = SelectSpell(me->GetVictim(), 0, 0, SELECT_TARGET_ANY_ENEMY, 0, 0, 0, 0, SELECT_EFFECT_DONTCARE);
 
                     //50% chance if elite or higher, 20% chance if not, to replace our white hit with a spell
-                    if (info && (rand() % (me->GetCreatureTemplate()->rank > 1 ? 2 : 5) == 0) && !GlobalCooldown)
+                    if (info && (rand32() % (me->GetCreatureTemplate()->rank > 1 ? 2 : 5) == 0) && !GlobalCooldown)
                     {
                         //Cast the spell
                         if (Healing)DoCastSpell(me, info);
@@ -130,7 +138,7 @@ public:
                     SpellInfo const* info = NULL;
 
                     //Select a healing spell if less than 30% hp ONLY 33% of the time
-                    if (HealthBelowPct(30) && rand() % 3 == 0)
+                    if (HealthBelowPct(30) && rand32() % 3 == 0)
                         info = SelectSpell(me, 0, 0, SELECT_TARGET_ANY_FRIEND, 0, 0, 0, 0, SELECT_EFFECT_HEALING);
 
                     //No healing spell available, See if we can cast a ranged spell (Range must be greater than ATTACK_DISTANCE)
@@ -229,6 +237,6 @@ public:
 void AddSC_generic_creature()
 {
     //new generic_creature;
-    new trigger_periodic;
+    new trigger_periodic();
     //new trigger_death;
 }

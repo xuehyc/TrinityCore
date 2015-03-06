@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -73,7 +73,6 @@ public:
         void AttackStart(Unit* /*who*/) override { }
 
         void MoveInLineOfSight(Unit* who) override
-
         {
             if (!who || !who->IsInWorld() || who->GetZoneId() != 4395)
                 return;
@@ -129,52 +128,118 @@ public:
     }
 };
 
-/*######
-## npc_hira_snowdawn
-######*/
-
-enum HiraSnowdawn
+enum MinigobData
 {
-    SPELL_COLD_WEATHER_FLYING              = 54197
+    ZONE_DALARAN            = 4395,
+
+    SPELL_MANABONKED        = 61834,
+    SPELL_TELEPORT_VISUAL   = 51347,
+    SPELL_IMPROVED_BLINK    = 61995,
+
+    EVENT_SELECT_TARGET     = 1,
+    EVENT_BLINK             = 2,
+    EVENT_DESPAWN_VISUAL    = 3,
+    EVENT_DESPAWN           = 4,
+
+    MAIL_MINIGOB_ENTRY      = 264,
+    MAIL_DELIVER_DELAY_MIN  = 5*MINUTE,
+    MAIL_DELIVER_DELAY_MAX  = 15*MINUTE
 };
 
-#define GOSSIP_TEXT_TRAIN_HIRA "I seek training to ride a steed."
-
-class npc_hira_snowdawn : public CreatureScript
+class npc_minigob_manabonk : public CreatureScript
 {
-public:
-    npc_hira_snowdawn() : CreatureScript("npc_hira_snowdawn") { }
+    public:
+        npc_minigob_manabonk() : CreatureScript("npc_minigob_manabonk") {}
 
-    bool OnGossipHello(Player* player, Creature* creature) override
+        struct npc_minigob_manabonkAI : public ScriptedAI
+        {
+            npc_minigob_manabonkAI(Creature* creature) : ScriptedAI(creature)
+            {
+                me->setActive(true);
+            }
+
+            void Reset() override
+            {
+                me->SetVisible(false);
+                events.ScheduleEvent(EVENT_SELECT_TARGET, IN_MILLISECONDS);
+            }
+
+            Player* SelectTargetInDalaran()
+            {
+                std::list<Player*> PlayerInDalaranList;
+                PlayerInDalaranList.clear();
+
+                Map::PlayerList const &players = me->GetMap()->GetPlayers();
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    if (Player* player = itr->GetSource()->ToPlayer())
+                        if (player->GetZoneId() == ZONE_DALARAN && !player->IsFlying() && !player->IsMounted() && !player->IsGameMaster())
+                            PlayerInDalaranList.push_back(player);
+
+                if (PlayerInDalaranList.empty())
+                    return NULL;
+                return Trinity::Containers::SelectRandomContainerElement(PlayerInDalaranList);
+            }
+
+            void SendMailToPlayer(Player* player)
+            {
+                SQLTransaction trans = CharacterDatabase.BeginTransaction();
+                int16 deliverDelay = irand(MAIL_DELIVER_DELAY_MIN, MAIL_DELIVER_DELAY_MAX);
+                MailDraft(MAIL_MINIGOB_ENTRY, true).SendMailTo(trans, MailReceiver(player), MailSender(MAIL_CREATURE, me->GetEntry()), MAIL_CHECK_MASK_NONE, deliverDelay);
+                CharacterDatabase.CommitTransaction(trans);
+            }
+
+            void UpdateAI(uint32 diff) override
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_SELECT_TARGET:
+                            me->SetVisible(true);
+                            DoCast(me, SPELL_TELEPORT_VISUAL);
+                            if (Player* player = SelectTargetInDalaran())
+                            {
+                                me->NearTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0.0f);
+                                DoCast(player, SPELL_MANABONKED);
+                                SendMailToPlayer(player);
+                            }
+                            events.ScheduleEvent(EVENT_BLINK, 3*IN_MILLISECONDS);
+                            break;
+                        case EVENT_BLINK:
+                        {
+                            DoCast(me, SPELL_IMPROVED_BLINK);
+                            Position pos = me->GetRandomNearPosition(frand(15, 40));
+                            me->GetMotionMaster()->MovePoint(0, pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+                            events.ScheduleEvent(EVENT_DESPAWN, 3 * IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_DESPAWN_VISUAL, 2.5*IN_MILLISECONDS);
+                            break;
+                        }
+                        case EVENT_DESPAWN_VISUAL:
+                            DoCast(me, SPELL_TELEPORT_VISUAL);
+                            break;
+                        case EVENT_DESPAWN:
+                            me->DespawnOrUnsummon();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+        private:
+            EventMap events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
     {
-        if (!creature->IsVendor() || !creature->IsTrainer())
-            return false;
-
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_TRAIN_HIRA, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRAIN);
-
-        if (player->getLevel() >= 80 && player->HasSpell(SPELL_COLD_WEATHER_FLYING))
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
-
-        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-
-        return true;
-    }
-
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
-    {
-        player->PlayerTalkClass->ClearMenus();
-        if (action == GOSSIP_ACTION_TRAIN)
-            player->GetSession()->SendTrainerList(creature->GetGUID());
-
-        if (action == GOSSIP_ACTION_TRADE)
-            player->GetSession()->SendListInventory(creature->GetGUID());
-
-        return true;
+        return new npc_minigob_manabonkAI(creature);
     }
 };
 
 void AddSC_dalaran()
 {
-    new npc_mageguard_dalaran;
-    new npc_hira_snowdawn;
+    new npc_mageguard_dalaran();
+    new npc_minigob_manabonk();
 }

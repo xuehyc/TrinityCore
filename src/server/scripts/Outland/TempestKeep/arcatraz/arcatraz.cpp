@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -75,7 +75,19 @@ class npc_millhouse_manastorm : public CreatureScript
         {
             npc_millhouse_manastormAI(Creature* creature) : ScriptedAI(creature)
             {
+                Initialize();
                 instance = creature->GetInstanceScript();
+            }
+
+            void Initialize()
+            {
+                EventProgress_Timer = 2000;
+                LowHp = false;
+                Init = false;
+                Phase = 1;
+
+                Pyroblast_Timer = 1000;
+                Fireball_Timer = 2500;
             }
 
             InstanceScript* instance;
@@ -90,13 +102,7 @@ class npc_millhouse_manastorm : public CreatureScript
 
             void Reset() override
             {
-                EventProgress_Timer = 2000;
-                LowHp = false;
-                Init = false;
-                Phase = 1;
-
-                Pyroblast_Timer = 1000;
-                Fireball_Timer = 2500;
+                Initialize();
 
                 if (instance->GetData(DATA_WARDEN_2) == DONE)
                     Init = true;
@@ -271,7 +277,17 @@ class npc_warden_mellichar : public CreatureScript
         {
             npc_warden_mellicharAI(Creature* creature) : ScriptedAI(creature)
             {
+                Initialize();
                 instance = creature->GetInstanceScript();
+            }
+
+            void Initialize()
+            {
+                IsRunning = false;
+                CanSpawn = false;
+
+                EventProgress_Timer = 22000;
+                Phase = 1;
             }
 
             InstanceScript* instance;
@@ -284,11 +300,7 @@ class npc_warden_mellichar : public CreatureScript
 
             void Reset() override
             {
-                IsRunning = false;
-                CanSpawn = false;
-
-                EventProgress_Timer = 22000;
-                Phase = 1;
+                Initialize();
 
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 DoCast(me, SPELL_TARGET_OMEGA);
@@ -322,8 +334,15 @@ class npc_warden_mellichar : public CreatureScript
                 DoCast(me, SPELL_BUBBLE_VISUAL);
 
                 instance->SetBossState(DATA_HARBINGER_SKYRISS, IN_PROGRESS);
-                instance->HandleGameObject(instance->GetData64(DATA_WARDENS_SHIELD), false);
+                instance->HandleGameObject(instance->GetGuidData(DATA_WARDENS_SHIELD), false);
                 IsRunning = true;
+            }
+
+            void JustSummoned(Creature* summon) override
+            {
+                DoZoneInCombat(summon);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                    summon->AI()->AttackStart(target);
             }
 
             bool CanProgress()
@@ -356,7 +375,7 @@ class npc_warden_mellichar : public CreatureScript
                     case 2:
                         DoCast(me, SPELL_TARGET_ALPHA);
                         instance->SetData(DATA_WARDEN_1, IN_PROGRESS);
-                        instance->HandleGameObject(instance->GetData64(DATA_WARDENS_SHIELD), false);
+                        instance->HandleGameObject(instance->GetGuidData(DATA_WARDENS_SHIELD), false);
                         break;
                     case 3:
                         DoCast(me, SPELL_TARGET_BETA);

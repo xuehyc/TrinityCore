@@ -186,7 +186,8 @@ public:
             if (Item* pItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             {
                 uint32 count = pItem->GetCount();
-                LootStoreItem lootItem(pItem->GetEntry(), 100.0f, 1, 0, count, count);
+                //                     ItemId, reference, chance, needsquest, lootmode, groupid, mincount, maxcount
+                LootStoreItem lootItem(pItem->GetEntry(), 0, 100.0f, 0, 1, 0, count, count);
                 storeItems.push_back(lootItem);
                 player->DestroyItemCount(pItem, count, true);
             }
@@ -201,7 +202,7 @@ public:
                     if (Item* pItem = player->GetItemByPos(i, j))
                     {
                         uint32 count = pItem->GetCount();
-                        LootStoreItem lootItem(pItem->GetEntry(), 100.0f, 1, 0, count, count);
+                        LootStoreItem lootItem(pItem->GetEntry(), 0, 100.0f, 0, 1, 0, count, count);
                         storeItems.push_back(lootItem);
                         player->DestroyItemCount(pItem, count, true);
                     }
@@ -216,7 +217,7 @@ public:
                 if (Item* pItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                 {
                     uint32 count = 1;
-                    LootStoreItem lootItem(pItem->GetEntry(), 20.0f, 1, 0, count, count);
+                    LootStoreItem lootItem(pItem->GetEntry(), 0, 20.0f, 0, 1, 0, count, count);
                     storeItems.push_back(lootItem);
                     player->DestroyItemCount(pItem, count, true);
                 }

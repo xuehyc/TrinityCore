@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -59,7 +59,16 @@ public:
     {
         boss_epoch_hunterAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            SandBreath_Timer = urand(8000, 16000);
+            ImpendingDeath_Timer = urand(25000, 30000);
+            WingBuffet_Timer = 35000;
+            Mda_Timer = 40000;
         }
 
         InstanceScript* instance;
@@ -71,10 +80,7 @@ public:
 
         void Reset() override
         {
-            SandBreath_Timer = urand(8000, 16000);
-            ImpendingDeath_Timer = urand(25000, 30000);
-            WingBuffet_Timer = 35000;
-            Mda_Timer = 40000;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -117,14 +123,14 @@ public:
             if (ImpendingDeath_Timer <= diff)
             {
                 DoCastVictim(SPELL_IMPENDING_DEATH);
-                ImpendingDeath_Timer = 25000+rand()%5000;
+                ImpendingDeath_Timer = 25000 + rand32() % 5000;
             } else ImpendingDeath_Timer -= diff;
 
             if (WingBuffet_Timer <= diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_WING_BUFFET);
-                WingBuffet_Timer = 25000+rand()%10000;
+                WingBuffet_Timer = 25000 + rand32() % 10000;
             } else WingBuffet_Timer -= diff;
 
             if (Mda_Timer <= diff)

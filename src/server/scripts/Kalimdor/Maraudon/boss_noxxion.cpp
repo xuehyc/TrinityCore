@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -44,7 +44,19 @@ public:
 
     struct boss_noxxionAI : public ScriptedAI
     {
-        boss_noxxionAI(Creature* creature) : ScriptedAI(creature) { }
+        boss_noxxionAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            ToxicVolleyTimer = 7000;
+            UppercutTimer = 16000;
+            AddsTimer = 19000;
+            InvisibleTimer = 15000;                            //Too much too low?
+            Invisible = false;
+        }
 
         uint32 ToxicVolleyTimer;
         uint32 UppercutTimer;
@@ -54,11 +66,7 @@ public:
 
         void Reset() override
         {
-            ToxicVolleyTimer = 7000;
-            UppercutTimer = 16000;
-            AddsTimer = 19000;
-            InvisibleTimer = 15000;                            //Too much too low?
-            Invisible = false;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override { }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -163,10 +163,10 @@ class boss_general_zarithrian : public CreatureScript
                     {
                         case EVENT_SUMMON_ADDS:
                         {
-                            if (Creature* stalker1 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ZARITHRIAN_SPAWN_STALKER_1)))
+                            if (Creature* stalker1 = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_ZARITHRIAN_SPAWN_STALKER_1)))
                                 stalker1->CastSpell(stalker1, SPELL_SUMMON_FLAMECALLER, false);
 
-                            if (Creature* stalker2 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ZARITHRIAN_SPAWN_STALKER_2)))
+                            if (Creature* stalker2 = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_ZARITHRIAN_SPAWN_STALKER_2)))
                                 stalker2->CastSpell(stalker2, SPELL_SUMMON_FLAMECALLER, false);
 
                             Talk(SAY_ADDS);
@@ -204,12 +204,18 @@ class npc_onyx_flamecaller : public CreatureScript
         {
             npc_onyx_flamecallerAI(Creature* creature) : npc_escortAI(creature), _instance(creature->GetInstanceScript())
             {
+                Initialize();
                 npc_escortAI::SetDespawnAtEnd(false);
+            }
+
+            void Initialize()
+            {
+                _lavaGoutCount = 0;
             }
 
             void Reset() override
             {
-                _lavaGoutCount = 0;
+                Initialize();
                 me->setActive(true);
                 AddWaypoints();
                 Start(true, true);
@@ -230,7 +236,7 @@ class npc_onyx_flamecaller : public CreatureScript
             void IsSummonedBy(Unit* /*summoner*/) override
             {
                 // Let Zarithrian count as summoner.
-                if (Creature* zarithrian = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_GENERAL_ZARITHRIAN)))
+                if (Creature* zarithrian = ObjectAccessor::GetCreature(*me, _instance->GetGuidData(DATA_GENERAL_ZARITHRIAN)))
                     zarithrian->AI()->JustSummoned(me);
             }
 

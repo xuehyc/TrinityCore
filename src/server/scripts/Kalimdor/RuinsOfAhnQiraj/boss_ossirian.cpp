@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -88,20 +88,26 @@ class boss_ossirian : public CreatureScript
         {
             boss_ossirianAI(Creature* creature) : BossAI(creature, DATA_OSSIRIAN)
             {
+                Initialize();
                 SaidIntro = false;
             }
 
-            uint64 TriggerGUID;
-            uint64 CrystalGUID;
+            void Initialize()
+            {
+                CrystalIterator = 0;
+                TriggerGUID.Clear();
+                CrystalGUID.Clear();
+            }
+
+            ObjectGuid TriggerGUID;
+            ObjectGuid CrystalGUID;
             uint8 CrystalIterator;
             bool SaidIntro;
 
             void Reset() override
             {
                 _Reset();
-                CrystalIterator = 0;
-                TriggerGUID = 0;
-                CrystalGUID = 0;
+                Initialize();
             }
 
             void SpellHit(Unit* caster, SpellInfo const* spell) override

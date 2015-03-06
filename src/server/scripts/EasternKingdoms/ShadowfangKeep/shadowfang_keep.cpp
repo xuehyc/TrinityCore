@@ -1,5 +1,5 @@
  /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -164,7 +164,13 @@ public:
     {
         npc_arugal_voidwalkerAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            uiDarkOffering = urand(200, 1000);
         }
 
         InstanceScript* instance;
@@ -173,7 +179,7 @@ public:
 
         void Reset() override
         {
-            uiDarkOffering = urand(200, 1000);
+            Initialize();
         }
 
         void UpdateAI(uint32 uiDiff) override

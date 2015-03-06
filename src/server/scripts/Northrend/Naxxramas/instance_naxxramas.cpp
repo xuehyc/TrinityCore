@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -69,6 +69,15 @@ MinionData const minionData[] =
     { 0,                        0,              }
 };
 
+ObjectData const objectData[] =
+{
+    { GO_NAXX_PORTAL_ARACHNID,  DATA_NAXX_PORTAL_ARACHNID  },
+    { GO_NAXX_PORTAL_CONSTRUCT, DATA_NAXX_PORTAL_CONSTRUCT },
+    { GO_NAXX_PORTAL_PLAGUE,    DATA_NAXX_PORTAL_PLAGUE    },
+    { GO_NAXX_PORTAL_MILITARY,  DATA_NAXX_PORTAL_MILITARY  },
+    { 0,                        0,                         }
+};
+
 float const HeiganPos[2] = { 2796.0f, -3707.0f };
 float const HeiganEruptionSlope[3] =
 {
@@ -107,28 +116,18 @@ class instance_naxxramas : public InstanceMapScript
         {
             instance_naxxramas_InstanceMapScript(Map* map) : InstanceScript(map)
             {
+                SetHeaders(DataHeader);
                 SetBossNumber(EncounterCount);
                 LoadDoorData(doorData);
                 LoadMinionData(minionData);
+                LoadObjectData(nullptr, objectData);
 
-                GothikGateGUID          = 0;
-                HorsemenChestGUID       = 0;
-                FaerlinaGUID            = 0;
-                ThaneGUID               = 0;
-                LadyGUID                = 0;
-                BaronGUID               = 0;
-                SirGUID                 = 0;
-                ThaddiusGUID            = 0;
-                HeiganGUID              = 0;
-                FeugenGUID              = 0;
-                StalaggGUID             = 0;
-                SapphironGUID           = 0;
-                KelthuzadGUID           = 0;
-                KelthuzadTriggerGUID    = 0;
+                minHorsemenDiedTime     = 0;
+                maxHorsemenDiedTime     = 0;
+                AbominationCount        = 0;
+                CurrentWingTaunt        = SAY_KELTHUZAD_FIRST_WING_TAUNT;
 
                 playerDied              = 0;
-
-                memset(PortalsGUID, 0, sizeof(PortalsGUID));
             }
 
             void OnCreatureCreate(Creature* creature) override
@@ -167,6 +166,9 @@ class instance_naxxramas : public InstanceMapScript
                         break;
                     case NPC_KEL_THUZAD:
                         KelthuzadGUID = creature->GetGUID();
+                        break;
+                    case NPC_LICH_KING:
+                        LichKingGUID = creature->GetGUID();
                         break;
                     default:
                         break;
@@ -213,11 +215,30 @@ class instance_naxxramas : public InstanceMapScript
                     case GO_KELTHUZAD_TRIGGER:
                         KelthuzadTriggerGUID = go->GetGUID();
                         break;
+                    case GO_ROOM_KELTHUZAD:
+                        KelthuzadDoorGUID = go->GetGUID();
+                        break;
+                    case GO_NAXX_PORTAL_ARACHNID:
+                        if (GetBossState(BOSS_MAEXXNA) == DONE)
+                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        break;
+                    case GO_NAXX_PORTAL_CONSTRUCT:
+                        if (GetBossState(BOSS_THADDIUS) == DONE)
+                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        break;
+                    case GO_NAXX_PORTAL_PLAGUE:
+                        if (GetBossState(BOSS_LOATHEB) == DONE)
+                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        break;
+                    case GO_NAXX_PORTAL_MILITARY:
+                        if (GetBossState(BOSS_HORSEMEN) == DONE)
+                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        break;
                     default:
                         break;
                 }
 
-                AddDoor(go, true);
+                InstanceScript::OnGameObjectCreate(go);
             }
 
             void OnGameObjectRemove(GameObject* go) override
@@ -244,7 +265,7 @@ class instance_naxxramas : public InstanceMapScript
                         break;
                 }
 
-                AddDoor(go, false);
+                InstanceScript::OnGameObjectRemove(go);
             }
 
             void OnUnitDeath(Unit* unit) override
@@ -254,6 +275,15 @@ class instance_naxxramas : public InstanceMapScript
                     playerDied = 1;
                     SaveToDB();
                 }
+
+                if (Creature* creature = unit->ToCreature())
+                    if (creature->GetEntry() == NPC_BIGGLESWORTH)
+                    {
+                        // Loads Kel'Thuzad's grid. We need this as he must be active in order for his texts to work.
+                        instance->LoadGrid(3749.67f, -5114.06f);
+                        if (Creature* kelthuzad = instance->GetCreature(KelthuzadGUID))
+                            kelthuzad->AI()->Talk(SAY_KELTHUZAD_CAT_DIED);
+                    }
             }
 
             void SetData(uint32 id, uint32 value) override
@@ -305,7 +335,7 @@ class instance_naxxramas : public InstanceMapScript
                 return 0;
             }
 
-            uint64 GetData64(uint32 id) const override
+            ObjectGuid GetGuidData(uint32 id) const override
             {
                 switch (id)
                 {
@@ -339,9 +369,11 @@ class instance_naxxramas : public InstanceMapScript
                         return PortalsGUID[3];
                     case DATA_KELTHUZAD_TRIGGER:
                         return KelthuzadTriggerGUID;
+                    case DATA_LICH_KING:
+                        return LichKingGUID;
                 }
 
-                return 0;
+                return ObjectGuid::Empty;
             }
 
             bool SetBossState(uint32 id, EncounterState state) override
@@ -349,16 +381,154 @@ class instance_naxxramas : public InstanceMapScript
                 if (!InstanceScript::SetBossState(id, state))
                     return false;
 
-                if (id == BOSS_HORSEMEN && state == DONE)
+                switch (id)
                 {
-                    if (GameObject* horsemenChest = instance->GetGameObject(HorsemenChestGUID))
-                    {
-                        horsemenChest->SetRespawnTime(horsemenChest->GetRespawnDelay());
-                        horsemenChest->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                    }
+                    case BOSS_MAEXXNA:
+                        if (state == DONE)
+                        {
+                            if (GameObject* teleporter = GetGameObject(DATA_NAXX_PORTAL_ARACHNID))
+                                teleporter->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+
+                            events.ScheduleEvent(EVENT_KELTHUZAD_WING_TAUNT, 6000);
+                        }
+                        break;
+                    case BOSS_LOATHEB:
+                        if (state == DONE)
+                        {
+                            if (GameObject* teleporter = GetGameObject(DATA_NAXX_PORTAL_PLAGUE))
+                                teleporter->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+
+                            events.ScheduleEvent(EVENT_KELTHUZAD_WING_TAUNT, 6000);
+                        }
+                        break;
+                    case BOSS_THADDIUS:
+                        if (state == DONE)
+                        {
+                            if (GameObject* teleporter = GetGameObject(DATA_NAXX_PORTAL_CONSTRUCT))
+                                teleporter->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+
+                            events.ScheduleEvent(EVENT_KELTHUZAD_WING_TAUNT, 6000);
+                        }
+                        break;
+                    case BOSS_GOTHIK:
+                        if (state == DONE)
+                            events.ScheduleEvent(EVENT_DIALOGUE_GOTHIK_KORTHAZZ, 10000);
+                        break;
+                    case BOSS_HORSEMEN:
+                        if (state == DONE)
+                        {
+                            if (GameObject* horsemenChest = instance->GetGameObject(HorsemenChestGUID))
+                            {
+                                horsemenChest->SetRespawnTime(horsemenChest->GetRespawnDelay());
+                                horsemenChest->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                            }
+
+                            if (GameObject* teleporter = GetGameObject(DATA_NAXX_PORTAL_MILITARY))
+                                teleporter->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+
+                            events.ScheduleEvent(EVENT_KELTHUZAD_WING_TAUNT, 6000);
+                        }
+                        break;
+                    case BOSS_SAPPHIRON:
+                        if (state == DONE)
+                            events.ScheduleEvent(EVENT_DIALOGUE_SAPPHIRON_KELTHUZAD, 6000);
+                        break;
+                    default:
+                        break;
                 }
 
                 return true;
+            }
+
+            void Update(uint32 diff) override
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_DIALOGUE_GOTHIK_KORTHAZZ:
+                            if (Creature* korthazz = instance->GetCreature(ThaneGUID))
+                                korthazz->AI()->Talk(SAY_DIALOGUE_GOTHIK_HORSEMAN);
+                            events.ScheduleEvent(EVENT_DIALOGUE_GOTHIK_ZELIEK, 5000);
+                            break;
+                        case EVENT_DIALOGUE_GOTHIK_ZELIEK:
+                            if (Creature* zeliek = instance->GetCreature(SirGUID))
+                                zeliek->AI()->Talk(SAY_DIALOGUE_GOTHIK_HORSEMAN);
+                            events.ScheduleEvent(EVENT_DIALOGUE_GOTHIK_BLAUMEUX, 6000);
+                            break;
+                        case EVENT_DIALOGUE_GOTHIK_BLAUMEUX:
+                            if (Creature* blaumeux = instance->GetCreature(LadyGUID))
+                                blaumeux->AI()->Talk(SAY_DIALOGUE_GOTHIK_HORSEMAN);
+                            events.ScheduleEvent(EVENT_DIALOGUE_GOTHIK_RIVENDARE, 6000);
+                            break;
+                        case EVENT_DIALOGUE_GOTHIK_RIVENDARE:
+                            if (Creature* rivendare = instance->GetCreature(BaronGUID))
+                                rivendare->AI()->Talk(SAY_DIALOGUE_GOTHIK_HORSEMAN);
+                            events.ScheduleEvent(EVENT_DIALOGUE_GOTHIK_BLAUMEUX2, 6000);
+                            break;
+                        case EVENT_DIALOGUE_GOTHIK_BLAUMEUX2:
+                            if (Creature* blaumeux = instance->GetCreature(LadyGUID))
+                                blaumeux->AI()->Talk(SAY_DIALOGUE_GOTHIK_HORSEMAN2);
+                            events.ScheduleEvent(EVENT_DIALOGUE_GOTHIK_ZELIEK2, 6000);
+                            break;
+                        case EVENT_DIALOGUE_GOTHIK_ZELIEK2:
+                            if (Creature* zeliek = instance->GetCreature(SirGUID))
+                                zeliek->AI()->Talk(SAY_DIALOGUE_GOTHIK_HORSEMAN2);
+                            events.ScheduleEvent(EVENT_DIALOGUE_GOTHIK_KORTHAZZ2, 6000);
+                            break;
+                        case EVENT_DIALOGUE_GOTHIK_KORTHAZZ2:
+                            if (Creature* korthazz = instance->GetCreature(ThaneGUID))
+                                korthazz->AI()->Talk(SAY_DIALOGUE_GOTHIK_HORSEMAN2);
+                            events.ScheduleEvent(EVENT_DIALOGUE_GOTHIK_RIVENDARE2, 6000);
+                            break;
+                        case EVENT_DIALOGUE_GOTHIK_RIVENDARE2:
+                            if (Creature* rivendare = instance->GetCreature(BaronGUID))
+                                rivendare->AI()->Talk(SAY_DIALOGUE_GOTHIK_HORSEMAN2);
+                            break;
+                        case EVENT_KELTHUZAD_WING_TAUNT:
+                            // Loads Kel'Thuzad's grid. We need this as he must be active in order for his texts to work.
+                            instance->LoadGrid(3749.67f, -5114.06f);
+                            if (Creature* kelthuzad = instance->GetCreature(KelthuzadGUID))
+                                kelthuzad->AI()->Talk(CurrentWingTaunt);
+                            ++CurrentWingTaunt;
+                            break;
+                        case EVENT_DIALOGUE_SAPPHIRON_KELTHUZAD:
+                            if (Creature* kelthuzad = instance->GetCreature(KelthuzadGUID))
+                                kelthuzad->AI()->Talk(SAY_DIALOGUE_SAPPHIRON_KELTHUZAD);
+                            HandleGameObject(KelthuzadDoorGUID, false);
+                            events.ScheduleEvent(EVENT_DIALOGUE_SAPPHIRON_LICHKING, 6000);
+                            break;
+                        case EVENT_DIALOGUE_SAPPHIRON_LICHKING:
+                            if (Creature* lichKing = instance->GetCreature(LichKingGUID))
+                                lichKing->AI()->Talk(SAY_DIALOGUE_SAPPHIRON_LICH_KING);
+                            events.ScheduleEvent(EVENT_DIALOGUE_SAPPHIRON_KELTHUZAD2, 16000);
+                            break;
+                        case EVENT_DIALOGUE_SAPPHIRON_KELTHUZAD2:
+                            if (Creature* kelthuzad = instance->GetCreature(KelthuzadGUID))
+                                kelthuzad->AI()->Talk(SAY_DIALOGUE_SAPPHIRON_KELTHUZAD2);
+                            events.ScheduleEvent(EVENT_DIALOGUE_SAPPHIRON_LICHKING2, 9000);
+                            break;
+                        case EVENT_DIALOGUE_SAPPHIRON_LICHKING2:
+                            if (Creature* lichKing = instance->GetCreature(LichKingGUID))
+                                lichKing->AI()->Talk(SAY_DIALOGUE_SAPPHIRON_LICH_KING2);
+                            events.ScheduleEvent(EVENT_DIALOGUE_SAPPHIRON_KELTHUZAD3, 12000);
+                            break;
+                        case EVENT_DIALOGUE_SAPPHIRON_KELTHUZAD3:
+                            if (Creature* kelthuzad = instance->GetCreature(KelthuzadGUID))
+                                kelthuzad->AI()->Talk(SAY_DIALOGUE_SAPPHIRON_KELTHUZAD3);
+                            events.ScheduleEvent(EVENT_DIALOGUE_SAPPHIRON_KELTHUZAD4, 6000);
+                            break;
+                        case EVENT_DIALOGUE_SAPPHIRON_KELTHUZAD4:
+                            if (Creature* kelthuzad = instance->GetCreature(KelthuzadGUID))
+                                kelthuzad->AI()->Talk(SAY_DIALOGUE_SAPPHIRON_KELTHUZAD4);
+                            HandleGameObject(KelthuzadDoorGUID, true);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
 
             void HeiganErupt(uint32 section)
@@ -368,9 +538,9 @@ class instance_naxxramas : public InstanceMapScript
                     if (i == section)
                         continue;
 
-                    for (std::set<uint64>::const_iterator itr = HeiganEruptionGUID[i].begin(); itr != HeiganEruptionGUID[i].end(); ++itr)
+                    for (ObjectGuid guid : HeiganEruptionGUID[i])
                     {
-                        if (GameObject* heiganEruption = instance->GetGameObject(*itr))
+                        if (GameObject* heiganEruption = instance->GetGameObject(guid))
                         {
                             heiganEruption->SendCustomAnim(heiganEruption->GetGoAnimProgress());
                             heiganEruption->CastSpell(NULL, SPELL_ERUPTION);
@@ -427,90 +597,50 @@ class instance_naxxramas : public InstanceMapScript
                 return false;
             }
 
-            std::string GetSaveData() override
-            {
-                OUT_SAVE_INST_DATA;
-
-                std::ostringstream saveStream;
-                saveStream << "N X " << GetBossSaveData() << playerDied;
-
-                OUT_SAVE_INST_DATA_COMPLETE;
-                return saveStream.str();
-            }
-
-            void Load(const char* strIn) override
-            {
-                if (!strIn)
-                {
-                    OUT_LOAD_INST_DATA_FAIL;
-                    return;
-                }
-
-                OUT_LOAD_INST_DATA(strIn);
-
-                char dataHead1, dataHead2;
-
-                std::istringstream loadStream(strIn);
-                loadStream >> dataHead1 >> dataHead2;
-
-                if (dataHead1 == 'N' && dataHead2 == 'X')
-                {
-                    for (uint8 i = 0; i < EncounterCount; ++i)
-                    {
-                        uint32 tmpState;
-                        loadStream >> tmpState;
-                        if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
-                            tmpState = NOT_STARTED;
-
-                        SetBossState(i, EncounterState(tmpState));
-                    }
-
-                    loadStream >> playerDied;
-                }
-
-                OUT_LOAD_INST_DATA_COMPLETE;
-            }
-
         protected:
             /* The Arachnid Quarter */
             // Grand Widow Faerlina
-            uint64 FaerlinaGUID;
+            ObjectGuid FaerlinaGUID;
 
             /* The Plague Quarter */
             // Heigan the Unclean
-            std::set<uint64> HeiganEruptionGUID[4];
-            uint64 HeiganGUID;
+            GuidSet HeiganEruptionGUID[4];
+            ObjectGuid HeiganGUID;
 
             /* The Military Quarter */
             // Gothik the Harvester
-            uint64 GothikGateGUID;
+            ObjectGuid GothikGateGUID;
             // The Four Horsemen
-            uint64 ThaneGUID;
-            uint64 LadyGUID;
-            uint64 BaronGUID;
-            uint64 SirGUID;
-            uint64 HorsemenChestGUID;
-            uint64 HorsemenTeleporterGUID;
+            ObjectGuid ThaneGUID;
+            ObjectGuid LadyGUID;
+            ObjectGuid BaronGUID;
+            ObjectGuid SirGUID;
+            ObjectGuid HorsemenChestGUID;
             time_t minHorsemenDiedTime;
             time_t maxHorsemenDiedTime;
 
             /* The Construct Quarter */
             // Thaddius
-            uint64 ThaddiusGUID;
-            uint64 FeugenGUID;
-            uint64 StalaggGUID;
+            ObjectGuid ThaddiusGUID;
+            ObjectGuid FeugenGUID;
+            ObjectGuid StalaggGUID;
 
             /* Frostwyrm Lair */
             // Sapphiron
-            uint64 SapphironGUID;
+            ObjectGuid SapphironGUID;
             // Kel'Thuzad
-            uint64 KelthuzadGUID;
-            uint64 KelthuzadTriggerGUID;
-            uint64 PortalsGUID[4];
+            ObjectGuid KelthuzadGUID;
+            ObjectGuid KelthuzadTriggerGUID;
+            ObjectGuid PortalsGUID[4];
+            ObjectGuid KelthuzadDoorGUID;
+            ObjectGuid LichKingGUID;
             uint8 AbominationCount;
+            uint8 CurrentWingTaunt;
 
             /* The Immortal / The Undying */
             uint32 playerDied;
+
+            EventMap events;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const override

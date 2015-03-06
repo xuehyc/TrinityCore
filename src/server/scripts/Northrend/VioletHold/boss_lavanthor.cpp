@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -44,7 +44,16 @@ public:
     {
         boss_lavanthorAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            uiFireboltTimer = 1000;
+            uiFlameBreathTimer = 5000;
+            uiLavaBurnTimer = 10000;
+            uiCauterizingFlamesTimer = 3000;
         }
 
         uint32 uiFireboltTimer;
@@ -56,10 +65,7 @@ public:
 
         void Reset() override
         {
-            uiFireboltTimer = 1000;
-            uiFlameBreathTimer = 5000;
-            uiLavaBurnTimer = 10000;
-            uiCauterizingFlamesTimer = 3000;
+            Initialize();
             if (instance->GetData(DATA_WAVE_COUNT) == 6)
                 instance->SetData(DATA_1ST_BOSS_EVENT, NOT_STARTED);
             else if (instance->GetData(DATA_WAVE_COUNT) == 12)
@@ -68,7 +74,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) override
         {
-            if (GameObject* pDoor = instance->instance->GetGameObject(instance->GetData64(DATA_LAVANTHOR_CELL)))
+            if (GameObject* pDoor = instance->instance->GetGameObject(instance->GetGuidData(DATA_LAVANTHOR_CELL)))
                     if (pDoor->GetGoState() == GO_STATE_READY)
                     {
                         EnterEvadeMode();

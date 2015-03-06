@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -97,9 +97,7 @@ class boss_jaraxxus : public CreatureScript
 
         struct boss_jaraxxusAI : public BossAI
         {
-            boss_jaraxxusAI(Creature* creature) : BossAI(creature, BOSS_JARAXXUS)
-            {
-            }
+            boss_jaraxxusAI(Creature* creature) : BossAI(creature, BOSS_JARAXXUS) { }
 
             void Reset() override
             {
@@ -124,21 +122,13 @@ class boss_jaraxxus : public CreatureScript
             void KilledUnit(Unit* who) override
             {
                 if (who->GetTypeId() == TYPEID_PLAYER)
-                {
                     Talk(SAY_KILL_PLAYER);
-                    instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
-                }
             }
 
             void JustDied(Unit* /*killer*/) override
             {
                 _JustDied();
                 Talk(SAY_DEATH);
-            }
-
-            void JustSummoned(Creature* summoned) override
-            {
-                summons.Summon(summoned);
             }
 
             void EnterCombat(Unit* /*who*/) override
@@ -315,12 +305,18 @@ class npc_fel_infernal : public CreatureScript
         {
             npc_fel_infernalAI(Creature* creature) : ScriptedAI(creature)
             {
+                Initialize();
                 _instance = creature->GetInstanceScript();
+            }
+
+            void Initialize()
+            {
+                _felStreakTimer = 30 * IN_MILLISECONDS;
             }
 
             void Reset() override
             {
-                _felStreakTimer = 30*IN_MILLISECONDS;
+                Initialize();
                 me->SetInCombatWithZone();
             }
 
@@ -364,9 +360,7 @@ class npc_nether_portal : public CreatureScript
 
         struct npc_nether_portalAI : public ScriptedAI
         {
-            npc_nether_portalAI(Creature* creature) : ScriptedAI(creature), _summons(me)
-            {
-            }
+            npc_nether_portalAI(Creature* creature) : ScriptedAI(creature), _summons(me) { }
 
             void Reset() override
             {

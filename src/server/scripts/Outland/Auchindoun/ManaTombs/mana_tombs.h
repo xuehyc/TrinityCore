@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #define MANA_TOMBS_H_
 
 #define MTScriptName "instance_mana_tombs"
+#define DataHeader "MT"
 
 uint32 const EncounterCount = 4;
 

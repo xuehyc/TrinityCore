@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -24,13 +24,13 @@
 #define __WORLD_H
 
 #include "Common.h"
+#include "ObjectGuid.h"
 #include "Timer.h"
-#include <ace/Singleton.h>
-#include <ace/Atomic_Op.h>
 #include "SharedDefines.h"
 #include "QueryResult.h"
 #include "Callback.h"
 
+#include <atomic>
 #include <map>
 #include <set>
 #include <list>
@@ -77,6 +77,7 @@ enum WorldTimers
     WUPDATE_AUTOBROADCAST,
     WUPDATE_MAILBOXQUEUE,
     WUPDATE_DELETECHARS,
+    WUPDATE_AHBOT,
     WUPDATE_PINGDB,
     WUPDATE_COUNT
 };
@@ -122,6 +123,7 @@ enum WorldBoolConfigs
     CONFIG_BATTLEGROUND_CAST_DESERTER,
     CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE,
     CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_PLAYERONLY,
+    CONFIG_BATTLEGROUND_STORE_STATISTICS_ENABLE,
     CONFIG_BG_XP_FOR_KILL,
     CONFIG_ARENA_AUTO_DISTRIBUTE_POINTS,
     CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE,
@@ -147,6 +149,7 @@ enum WorldBoolConfigs
     CONFIG_PDUMP_NO_OVERWRITE,
     CONFIG_QUEST_IGNORE_AUTO_ACCEPT,
     CONFIG_QUEST_IGNORE_AUTO_COMPLETE,
+    CONFIG_QUEST_ENABLE_QUEST_TRACKER,
     CONFIG_WARDEN_ENABLED,
     CONFIG_ENABLE_MMAPS,
     CONFIG_WINTERGRASP_ENABLE,
@@ -154,6 +157,10 @@ enum WorldBoolConfigs
     CONFIG_EVENT_ANNOUNCE,
     CONFIG_STATS_LIMITS_ENABLE,
     CONFIG_INSTANCES_RESET_ANNOUNCE,
+    CONFIG_IP_BASED_ACTION_LOGGING,
+    CONFIG_ALLOW_TRACK_BOTH_RESOURCES,
+    CONFIG_CALCULATE_CREATURE_ZONE_AREA_DATA,
+    CONFIG_CALCULATE_GAMEOBJECT_ZONE_AREA_DATA,
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -224,6 +231,7 @@ enum WorldIntConfigs
     CONFIG_GM_ACCEPT_TICKETS,
     CONFIG_GM_CHAT,
     CONFIG_GM_WHISPERING_TO,
+    CONFIG_GM_FREEZE_DURATION,
     CONFIG_GM_LEVEL_IN_GM_LIST,
     CONFIG_GM_LEVEL_IN_WHO_LIST,
     CONFIG_START_GM_LEVEL,
@@ -331,6 +339,14 @@ enum WorldIntConfigs
     CONFIG_BG_REWARD_LOSER_HONOR_FIRST,
     CONFIG_BG_REWARD_LOSER_HONOR_LAST,
     CONFIG_BIRTHDAY_TIME,
+    CONFIG_CREATURE_PICKPOCKET_REFILL,
+    CONFIG_AHBOT_UPDATE_INTERVAL,
+    CONFIG_CHARTER_COST_GUILD,
+    CONFIG_CHARTER_COST_ARENA_2v2,
+    CONFIG_CHARTER_COST_ARENA_3v3,
+    CONFIG_CHARTER_COST_ARENA_5v5,
+    CONFIG_NO_GRAY_AGGRO_ABOVE,
+    CONFIG_NO_GRAY_AGGRO_BELOW,
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -398,6 +414,8 @@ enum Rates
     RATE_DURABILITY_LOSS_ABSORB,
     RATE_DURABILITY_LOSS_BLOCK,
     RATE_MOVESPEED,
+    RATE_MONEY_QUEST,
+    RATE_MONEY_MAX_LEVEL_QUEST,
     MAX_RATES
 };
 
@@ -517,10 +535,13 @@ struct CharacterNameData
 class World
 {
     public:
-        static ACE_Atomic_Op<ACE_Thread_Mutex, uint32> m_worldLoopCounter;
+        static World* instance()
+        {
+            static World instance;
+            return &instance;
+        }
 
-        World();
-        ~World();
+        static std::atomic<uint32> m_worldLoopCounter;
 
         WorldSession* FindSession(uint32 id) const;
         void AddSession(WorldSession* s);
@@ -616,24 +637,24 @@ class World
         void SetInitialWorldSettings();
         void LoadConfigSettings(bool reload = false);
 
-        void SendWorldText(int32 string_id, ...);
+        void SendWorldText(uint32 string_id, ...);
         void SendGlobalText(const char* text, WorldSession* self);
-        void SendGMText(int32 string_id, ...);
-        void SendGlobalMessage(WorldPacket* packet, WorldSession* self = 0, uint32 team = 0);
-        void SendGlobalGMMessage(WorldPacket* packet, WorldSession* self = 0, uint32 team = 0);
-        bool SendZoneMessage(uint32 zone, WorldPacket* packet, WorldSession* self = 0, uint32 team = 0);
-        void SendZoneText(uint32 zone, const char *text, WorldSession* self = 0, uint32 team = 0);
+        void SendGMText(uint32 string_id, ...);
         void SendServerMessage(ServerMessageType type, const char *text = "", Player* player = NULL);
+        void SendGlobalMessage(WorldPacket* packet, WorldSession* self = nullptr, uint32 team = 0);
+        void SendGlobalGMMessage(WorldPacket* packet, WorldSession* self = nullptr, uint32 team = 0);
+        bool SendZoneMessage(uint32 zone, WorldPacket* packet, WorldSession* self = nullptr, uint32 team = 0);
+        void SendZoneText(uint32 zone, const char *text, WorldSession* self = nullptr, uint32 team = 0);
 
         /// Are we in the middle of a shutdown?
         bool IsShuttingDown() const { return m_ShutdownTimer > 0; }
         uint32 GetShutDownTimeLeft() const { return m_ShutdownTimer; }
-        void ShutdownServ(uint32 time, uint32 options, uint8 exitcode);
+        void ShutdownServ(uint32 time, uint32 options, uint8 exitcode, const std::string& reason = std::string());
         void ShutdownCancel();
-        void ShutdownMsg(bool show = false, Player* player = NULL);
+        void ShutdownMsg(bool show = false, Player* player = NULL, const std::string& reason = std::string());
         static uint8 GetExitCode() { return m_ExitCode; }
         static void StopNow(uint8 exitcode) { m_stopEvent = true; m_ExitCode = exitcode; }
-        static bool IsStopped() { return m_stopEvent.value(); }
+        static bool IsStopped() { return m_stopEvent; }
 
         void Update(uint32 diff);
 
@@ -726,12 +747,12 @@ class World
 
         void UpdateAreaDependentAuras();
 
-        CharacterNameData const* GetCharacterNameData(uint32 guid) const;
-        void AddCharacterNameData(uint32 guid, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level);
-        void UpdateCharacterNameData(uint32 guid, std::string const& name, uint8 gender = GENDER_NONE, uint8 race = RACE_NONE);
-        void UpdateCharacterNameDataLevel(uint32 guid, uint8 level);
-        void DeleteCharacterNameData(uint32 guid) { _characterNameDataMap.erase(guid); }
-        bool HasCharacterNameData(uint32 guid) { return _characterNameDataMap.find(guid) != _characterNameDataMap.end(); }
+        CharacterNameData const* GetCharacterNameData(ObjectGuid guid) const;
+        void AddCharacterNameData(ObjectGuid guid, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level);
+        void UpdateCharacterNameData(ObjectGuid guid, std::string const& name, uint8 gender = GENDER_NONE, uint8 race = RACE_NONE);
+        void UpdateCharacterNameDataLevel(ObjectGuid guid, uint8 level);
+        void DeleteCharacterNameData(ObjectGuid guid) { _characterNameDataMap.erase(guid); }
+        bool HasCharacterNameData(ObjectGuid guid) { return _characterNameDataMap.find(guid) != _characterNameDataMap.end(); }
 
         uint32 GetCleaningFlags() const { return m_CleaningFlags; }
         void   SetCleaningFlags(uint32 flags) { m_CleaningFlags = flags; }
@@ -755,7 +776,10 @@ class World
         void ResetRandomBG();
         void ResetGuildCap();
     private:
-        static ACE_Atomic_Op<ACE_Thread_Mutex, bool> m_stopEvent;
+        World();
+        ~World();
+
+        static std::atomic<bool> m_stopEvent;
         static uint8 m_ExitCode;
         uint32 m_ShutdownTimer;
         uint32 m_ShutdownMask;
@@ -808,7 +832,7 @@ class World
         static int32 m_visibility_notify_periodInBGArenas;
 
         // CLI command holder to be thread safe
-        ACE_Based::LockedQueue<CliCommandHolder*, ACE_Thread_Mutex> cliCmdQueue;
+        LockedQueue<CliCommandHolder*> cliCmdQueue;
 
         // next daily quests and random bg reset time
         time_t m_NextDailyQuestReset;
@@ -822,7 +846,7 @@ class World
 
         // sessions that are added async
         void AddSession_(WorldSession* s);
-        ACE_Based::LockedQueue<WorldSession*, ACE_Thread_Mutex> addSessQueue;
+        LockedQueue<WorldSession*> addSessQueue;
 
         // used versions
         std::string m_DBVersion;
@@ -833,15 +857,15 @@ class World
         typedef std::map<uint8, uint8> AutobroadcastsWeightMap;
         AutobroadcastsWeightMap m_AutobroadcastsWeights;
 
-        std::map<uint32, CharacterNameData> _characterNameDataMap;
+        std::map<ObjectGuid, CharacterNameData> _characterNameDataMap;
         void LoadCharacterNameData();
 
         void ProcessQueryCallbacks();
-        ACE_Future_Set<PreparedQueryResult> m_realmCharCallbacks;
+        std::deque<std::future<PreparedQueryResult>> m_realmCharCallbacks;
 };
 
 extern uint32 realmID;
 
-#define sWorld ACE_Singleton<World, ACE_Null_Mutex>::instance()
+#define sWorld World::instance()
 #endif
 /// @}

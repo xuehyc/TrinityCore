@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -48,15 +48,23 @@ public:
 
     struct boss_timmy_the_cruelAI : public ScriptedAI
     {
-        boss_timmy_the_cruelAI(Creature* creature) : ScriptedAI(creature) { }
+        boss_timmy_the_cruelAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            RavenousClaw_Timer = 10000;
+            HasYelled = false;
+        }
 
         uint32 RavenousClaw_Timer;
         bool HasYelled;
 
         void Reset() override
         {
-            RavenousClaw_Timer = 10000;
-            HasYelled = false;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override

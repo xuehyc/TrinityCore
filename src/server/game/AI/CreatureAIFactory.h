@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -34,9 +34,9 @@ struct CreatureAIFactory : public SelectableAI
 {
     CreatureAIFactory(const char* name) : SelectableAI(name) { }
 
-    CreatureAI* Create(void*) const;
+    CreatureAI* Create(void*) const override;
 
-    int Permit(const Creature* c) const { return REAL_AI::Permissible(c); }
+    int Permit(const Creature* c) const override { return REAL_AI::Permissible(c); }
 };
 
 template<class REAL_AI>
@@ -49,7 +49,6 @@ CreatureAIFactory<REAL_AI>::Create(void* data) const
 
 typedef FactoryHolder<CreatureAI> CreatureAICreator;
 typedef FactoryHolder<CreatureAI>::FactoryHolderRegistry CreatureAIRegistry;
-typedef FactoryHolder<CreatureAI>::FactoryHolderRepository CreatureAIRepository;
 
 //GO
 struct SelectableGameObjectAI : public FactoryHolder<GameObjectAI>, public Permissible<GameObject>
@@ -62,9 +61,9 @@ struct GameObjectAIFactory : public SelectableGameObjectAI
 {
     GameObjectAIFactory(const char* name) : SelectableGameObjectAI(name) { }
 
-    GameObjectAI* Create(void*) const;
+    GameObjectAI* Create(void*) const override;
 
-    int Permit(const GameObject* g) const { return REAL_GO_AI::Permissible(g); }
+    int Permit(const GameObject* g) const override { return REAL_GO_AI::Permissible(g); }
 };
 
 template<class REAL_GO_AI>
@@ -77,5 +76,4 @@ GameObjectAIFactory<REAL_GO_AI>::Create(void* data) const
 
 typedef FactoryHolder<GameObjectAI> GameObjectAICreator;
 typedef FactoryHolder<GameObjectAI>::FactoryHolderRegistry GameObjectAIRegistry;
-typedef FactoryHolder<GameObjectAI>::FactoryHolderRepository GameObjectAIRepository;
 #endif

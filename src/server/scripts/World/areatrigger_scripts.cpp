@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -51,11 +51,7 @@ enum CoilfangGOs
 class AreaTrigger_at_coilfang_waterfall : public AreaTriggerScript
 {
     public:
-
-        AreaTrigger_at_coilfang_waterfall()
-            : AreaTriggerScript("at_coilfang_waterfall")
-        {
-        }
+        AreaTrigger_at_coilfang_waterfall() : AreaTriggerScript("at_coilfang_waterfall") { }
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) override
         {
@@ -83,11 +79,7 @@ enum LegionTeleporter
 class AreaTrigger_at_legion_teleporter : public AreaTriggerScript
 {
     public:
-
-        AreaTrigger_at_legion_teleporter()
-            : AreaTriggerScript("at_legion_teleporter")
-        {
-        }
+        AreaTrigger_at_legion_teleporter() : AreaTriggerScript("at_legion_teleporter") { }
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) override
         {
@@ -125,11 +117,7 @@ enum StormwrightShelf
 class AreaTrigger_at_stormwright_shelf : public AreaTriggerScript
 {
     public:
-
-        AreaTrigger_at_stormwright_shelf()
-            : AreaTriggerScript("at_stormwright_shelf")
-        {
-        }
+        AreaTrigger_at_stormwright_shelf() : AreaTriggerScript("at_stormwright_shelf") { }
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) override
         {
@@ -153,11 +141,7 @@ enum ScentLarkorwi
 class AreaTrigger_at_scent_larkorwi : public AreaTriggerScript
 {
     public:
-
-        AreaTrigger_at_scent_larkorwi()
-            : AreaTriggerScript("at_scent_larkorwi")
-        {
-        }
+        AreaTrigger_at_scent_larkorwi() : AreaTriggerScript("at_scent_larkorwi") { }
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) override
         {
@@ -184,11 +168,7 @@ enum AtLastRites
 class AreaTrigger_at_last_rites : public AreaTriggerScript
 {
     public:
-
-        AreaTrigger_at_last_rites()
-            : AreaTriggerScript("at_last_rites")
-        {
-        }
+        AreaTrigger_at_last_rites() : AreaTriggerScript("at_last_rites") { }
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* trigger) override
         {
@@ -246,7 +226,6 @@ enum Waygate
 class AreaTrigger_at_sholazar_waygate : public AreaTriggerScript
 {
     public:
-
         AreaTrigger_at_sholazar_waygate() : AreaTriggerScript("at_sholazar_waygate") { }
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* trigger) override
@@ -257,11 +236,11 @@ class AreaTrigger_at_sholazar_waygate : public AreaTriggerScript
                 switch (trigger->id)
                 {
                     case AT_SHOLAZAR:
-                        player->CastSpell(player, SPELL_SHOLAZAR_TO_UNGORO_TELEPORT, false);
+                        player->CastSpell(player, SPELL_SHOLAZAR_TO_UNGORO_TELEPORT, true);
                         break;
 
                     case AT_UNGORO:
-                        player->CastSpell(player, SPELL_UNGORO_TO_SHOLAZAR_TELEPORT, false);
+                        player->CastSpell(player, SPELL_UNGORO_TO_SHOLAZAR_TELEPORT, true);
                         break;
                 }
             }
@@ -452,8 +431,8 @@ class AreaTrigger_at_frostgrips_hollow : public AreaTriggerScript
 public:
     AreaTrigger_at_frostgrips_hollow() : AreaTriggerScript("at_frostgrips_hollow")
     {
-        stormforgedMonitorGUID = 0;
-        stormforgedEradictorGUID = 0;
+        stormforgedMonitorGUID.Clear();
+        stormforgedEradictorGUID.Clear();
     }
 
     bool OnTrigger(Player* player, AreaTriggerEntry const* /* trigger */) override
@@ -490,8 +469,8 @@ public:
     }
 
 private:
-    uint64 stormforgedMonitorGUID;
-    uint64 stormforgedEradictorGUID;
+    ObjectGuid stormforgedMonitorGUID;
+    ObjectGuid stormforgedEradictorGUID;
 };
 
 void AddSC_areatrigger_scripts()

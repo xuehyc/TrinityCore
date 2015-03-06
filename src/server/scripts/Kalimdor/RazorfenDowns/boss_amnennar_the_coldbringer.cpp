@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -50,14 +50,22 @@ public:
 
     struct boss_amnennar_the_coldbringerAI : public BossAI
     {
-        boss_amnennar_the_coldbringerAI(Creature* creature) : BossAI(creature, DATA_AMNENNAR_THE_COLD_BRINGER) { }
+        boss_amnennar_the_coldbringerAI(Creature* creature) : BossAI(creature, DATA_AMNENNAR_THE_COLD_BRINGER)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            hp60Spectrals = false;
+            hp30Spectrals = false;
+            hp50 = false;
+        }
 
         void Reset() override
         {
             _Reset();
-            hp60Spectrals = false;
-            hp30Spectrals = false;
-            hp50          = false;
+            Initialize();
         }
 
         void EnterCombat(Unit* /*who*/) override

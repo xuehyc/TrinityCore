@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -166,10 +166,15 @@ void SQLQueryHolder::SetSize(size_t size)
     m_queries.resize(size);
 }
 
+SQLQueryHolderTask::~SQLQueryHolderTask()
+{
+    if (!m_executed)
+        delete m_holder;
+}
+
 bool SQLQueryHolderTask::Execute()
 {
-    //the result can't be ready as we are processing it right now
-    ASSERT(!m_result.ready());
+    m_executed = true;
 
     if (!m_holder)
         return false;
@@ -202,6 +207,6 @@ bool SQLQueryHolderTask::Execute()
         }
     }
 
-    m_result.set(m_holder);
+    m_result.set_value(m_holder);
     return true;
 }

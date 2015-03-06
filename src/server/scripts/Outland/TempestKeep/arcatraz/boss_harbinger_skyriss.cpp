@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -67,7 +67,21 @@ class boss_harbinger_skyriss : public CreatureScript
         {
             boss_harbinger_skyrissAI(Creature* creature) : BossAI(creature, DATA_HARBINGER_SKYRISS)
             {
+                Initialize();
                 Intro = false;
+            }
+
+            void Initialize()
+            {
+                IsImage33 = false;
+                IsImage66 = false;
+
+                Intro_Phase = 1;
+                Intro_Timer = 5000;
+                MindRend_Timer = 3000;
+                Fear_Timer = 15000;
+                Domination_Timer = 30000;
+                ManaBurn_Timer = 25000;
             }
 
             bool Intro;
@@ -86,15 +100,7 @@ class boss_harbinger_skyriss : public CreatureScript
                 if (!Intro)
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
 
-                IsImage33 = false;
-                IsImage66 = false;
-
-                Intro_Phase = 1;
-                Intro_Timer = 5000;
-                MindRend_Timer = 3000;
-                Fear_Timer = 15000;
-                Domination_Timer = 30000;
-                ManaBurn_Timer = 25000;
+                Initialize();
             }
 
             void MoveInLineOfSight(Unit* who) override
@@ -158,18 +164,18 @@ class boss_harbinger_skyriss : public CreatureScript
                         {
                         case 1:
                             Talk(SAY_INTRO);
-                            instance->HandleGameObject(instance->GetData64(DATA_WARDENS_SHIELD), true);
+                            instance->HandleGameObject(instance->GetGuidData(DATA_WARDENS_SHIELD), true);
                             ++Intro_Phase;
                             Intro_Timer = 25000;
                             break;
                         case 2:
                             Talk(SAY_AGGRO);
-                            if (Unit* mellic = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_MELLICHAR)))
+                            if (Unit* mellic = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_MELLICHAR)))
                             {
                                 //should have a better way to do this. possibly spell exist.
                                 mellic->setDeathState(JUST_DIED);
                                 mellic->SetHealth(0);
-                                instance->HandleGameObject(instance->GetData64(DATA_WARDENS_SHIELD), false);
+                                instance->HandleGameObject(instance->GetGuidData(DATA_WARDENS_SHIELD), false);
                             }
                             ++Intro_Phase;
                             Intro_Timer = 3000;
@@ -238,7 +244,7 @@ class boss_harbinger_skyriss : public CreatureScript
                     else
                         DoCastVictim(SPELL_DOMINATION);
 
-                    Domination_Timer = 16000+rand()%16000;
+                    Domination_Timer = 16000 + rand32() % 16000;
                 }
                 else
                     Domination_Timer -=diff;
@@ -253,7 +259,7 @@ class boss_harbinger_skyriss : public CreatureScript
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                             DoCast(target, H_SPELL_MANA_BURN);
 
-                        ManaBurn_Timer = 16000+rand()%16000;
+                        ManaBurn_Timer = 16000 + rand32() % 16000;
                     }
                     else
                         ManaBurn_Timer -=diff;

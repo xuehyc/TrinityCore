@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -177,7 +177,7 @@ class BIH
                 {
                     uint32 tn = tree[node];
                     uint32 axis = (tn & (3 << 30)) >> 30;
-                    bool BVH2 = tn & (1 << 29);
+                    bool BVH2 = (tn & (1 << 29)) != 0;
                     int offset = tn & ~(7 << 29);
                     if (!BVH2)
                     {
@@ -271,7 +271,7 @@ class BIH
                 {
                     uint32 tn = tree[node];
                     uint32 axis = (tn & (3 << 30)) >> 30;
-                    bool BVH2 = tn & (1 << 29);
+                    bool BVH2 = (tn & (1 << 29)) != 0;
                     int offset = tn & ~(7 << 29);
                     if (!BVH2)
                     {

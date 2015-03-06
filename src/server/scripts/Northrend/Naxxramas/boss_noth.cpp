@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -72,7 +72,11 @@ public:
 
     struct boss_nothAI : public BossAI
     {
-        boss_nothAI(Creature* creature) : BossAI(creature, BOSS_NOTH) { }
+        boss_nothAI(Creature* creature) : BossAI(creature, BOSS_NOTH)
+        {
+            balconyCount = 0;
+            waveCount = 0;
+        }
 
         void Reset() override
         {
@@ -100,7 +104,7 @@ public:
             else
             {
                 events.ScheduleEvent(EVENT_BALCONY, 110000);
-                events.ScheduleEvent(EVENT_CURSE, 10000+rand()%15000);
+                events.ScheduleEvent(EVENT_CURSE, 10000 + rand32() % 15000);
                 events.ScheduleEvent(EVENT_WARRIOR, 30000);
                 if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                     events.ScheduleEvent(EVENT_BLINK, urand(20000, 40000));
@@ -109,7 +113,7 @@ public:
 
         void KilledUnit(Unit* /*victim*/) override
         {
-            if (!(rand()%5))
+            if (!(rand32() % 5))
                 Talk(SAY_SLAY);
         }
 
@@ -129,7 +133,7 @@ public:
         void SummonUndead(uint32 entry, uint32 num)
         {
             for (uint32 i = 0; i < num; ++i)
-                me->SummonCreature(entry, SummonPos[rand()%MAX_SUMMON_POS], TEMPSUMMON_CORPSE_DESPAWN, 60000);
+                me->SummonCreature(entry, SummonPos[rand32() % MAX_SUMMON_POS], TEMPSUMMON_CORPSE_DESPAWN, 60000);
         }
 
         void UpdateAI(uint32 diff) override

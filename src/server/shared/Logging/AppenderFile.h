@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,8 +18,8 @@
 #ifndef APPENDERFILE_H
 #define APPENDERFILE_H
 
+#include <atomic>
 #include "Appender.h"
-#include "ace/Atomic_Op.h"
 
 class AppenderFile: public Appender
 {
@@ -30,7 +30,7 @@ class AppenderFile: public Appender
 
     private:
         void CloseFile();
-        void _write(LogMessage const& message);
+        void _write(LogMessage const& message) override;
         FILE* logfile;
         std::string filename;
         std::string logDir;
@@ -38,7 +38,7 @@ class AppenderFile: public Appender
         bool dynamicName;
         bool backup;
         uint64 maxFileSize;
-        ACE_Atomic_Op<ACE_Thread_Mutex, uint64> fileSize;
+        std::atomic<uint64> fileSize;
 };
 
 #endif

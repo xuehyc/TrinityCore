@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -71,12 +71,13 @@ class spell_warl_banish : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warl_banish_SpellScript);
 
-            bool Load() override
+        public:
+            spell_warl_banish_SpellScript()
             {
                 _removed = false;
-                return true;
             }
 
+        private:
             void HandleBanish()
             {
                 if (Unit* target = GetHitUnit())
@@ -405,10 +406,15 @@ class spell_warl_everlasting_affliction : public SpellScriptLoader
 
             void HandleScriptEffect(SpellEffIndex /*effIndex*/)
             {
-                if (Unit* unitTarget = GetHitUnit())
+                Unit* caster = GetCaster();
+                if (Unit* target = GetHitUnit())
                     // Refresh corruption on target
-                    if (AuraEffect* aur = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x2, 0, 0, GetCaster()->GetGUID()))
-                        aur->GetBase()->RefreshDuration();
+                    if (AuraEffect* aur = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x2, 0, 0, caster->GetGUID()))
+                    {
+                        aur->SetBonusAmount(caster->SpellDamageBonusDone(target, aur->GetSpellInfo(), 0, DOT));
+                        aur->CalculatePeriodic(caster, false, false);
+                        aur->GetBase()->RefreshDuration(true);
+                    }
             }
 
             void Register() override
@@ -511,7 +517,7 @@ class spell_warl_haunt : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warl_haunt_SpellScript);
 
-            void HandleOnHit()
+            void HandleAfterHit()
             {
                 if (Aura* aura = GetHitAura())
                     if (AuraEffect* aurEff = aura->GetEffect(EFFECT_1))
@@ -520,7 +526,7 @@ class spell_warl_haunt : public SpellScriptLoader
 
             void Register() override
             {
-                OnHit += SpellHitFn(spell_warl_haunt_SpellScript::HandleOnHit);
+                AfterHit += SpellHitFn(spell_warl_haunt_SpellScript::HandleAfterHit);
             }
         };
 

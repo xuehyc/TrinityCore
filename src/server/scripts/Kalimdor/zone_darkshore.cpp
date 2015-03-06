@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -65,13 +65,21 @@ public:
 
     struct npc_kerlonianAI : public FollowerAI
     {
-        npc_kerlonianAI(Creature* creature) : FollowerAI(creature) { }
+        npc_kerlonianAI(Creature* creature) : FollowerAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            FallAsleepTimer = urand(10000, 45000);
+        }
 
         uint32 FallAsleepTimer;
 
         void Reset() override
         {
-            FallAsleepTimer = urand(10000, 45000);
+            Initialize();
         }
 
         void MoveInLineOfSight(Unit* who) override
@@ -349,7 +357,7 @@ public:
             if (Player* pHolder = GetLeaderForFollower())
                 AttackStart(pHolder);
 
-            SetFollowComplete();
+            SetFollowComplete(true);
         }
     };
 

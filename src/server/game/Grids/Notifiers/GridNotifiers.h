@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -43,7 +43,7 @@ namespace Trinity
         Player &i_player;
         UpdateData i_data;
         std::set<Unit*> i_visibleNow;
-        Player::ClientGUIDs vis_guids;
+        GuidUnorderedSet vis_guids;
 
         VisibleNotifier(Player &player) : i_player(player), vis_guids(player.m_clientGUIDs) { }
         template<class T> void Visit(GridRefManager<T> &m);
@@ -620,7 +620,7 @@ namespace Trinity
                 if (go->GetGOInfo()->spellFocus.focusId != i_focusId)
                     return false;
 
-                float dist = (float)((go->GetGOInfo()->spellFocus.dist)/2);
+                float dist = go->GetGOInfo()->spellFocus.dist / 2.f;
 
                 return go->IsWithinDistInMap(i_unit, dist);
             }
@@ -944,13 +944,13 @@ namespace Trinity
                 if (owner)
                     check = owner;
                 i_targetForPlayer = (check->GetTypeId() == TYPEID_PLAYER);
-                if (i_obj->GetTypeId() == TYPEID_DYNAMICOBJECT)
-                    _spellInfo = sSpellMgr->GetSpellInfo(((DynamicObject*)i_obj)->GetSpellId());
+                if (DynamicObject const* dynObj = i_obj->ToDynObject())
+                    _spellInfo = sSpellMgr->GetSpellInfo(dynObj->GetSpellId());
             }
             bool operator()(Unit* u)
             {
                 // Check contains checks for: live, non-selectable, non-attackable flags, flight check and GM check, ignore totems
-                if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->IsTotem())
+                if (u->GetTypeId() == TYPEID_UNIT && u->ToCreature()->IsTotem())
                     return false;
 
                 if (i_funit->_IsValidAttackTarget(u, _spellInfo, i_obj->GetTypeId() == TYPEID_DYNAMICOBJECT ? i_obj : NULL) && i_obj->IsWithinDistInMap(u, i_range))
@@ -1354,20 +1354,20 @@ namespace Trinity
     class ObjectGUIDCheck
     {
         public:
-            ObjectGUIDCheck(uint64 GUID) : _GUID(GUID) { }
+            ObjectGUIDCheck(ObjectGuid GUID) : _GUID(GUID) { }
             bool operator()(WorldObject* object)
             {
                 return object->GetGUID() == _GUID;
             }
 
         private:
-            uint64 _GUID;
+            ObjectGuid _GUID;
     };
 
     class UnitAuraCheck
     {
         public:
-            UnitAuraCheck(bool present, uint32 spellId, uint64 casterGUID = 0) : _present(present), _spellId(spellId), _casterGUID(casterGUID) { }
+            UnitAuraCheck(bool present, uint32 spellId, ObjectGuid casterGUID = ObjectGuid::Empty) : _present(present), _spellId(spellId), _casterGUID(casterGUID) { }
             bool operator()(Unit* unit) const
             {
                 return unit->HasAura(_spellId, _casterGUID) == _present;
@@ -1381,7 +1381,7 @@ namespace Trinity
         private:
             bool _present;
             uint32 _spellId;
-            uint64 _casterGUID;
+            ObjectGuid _casterGUID;
     };
 
     // Player checks and do

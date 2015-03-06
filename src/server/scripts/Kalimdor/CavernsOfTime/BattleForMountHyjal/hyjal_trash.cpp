@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -26,7 +26,6 @@ enum Spells
     SPELL_METEOR            = 33814, //infernal visual
     SPELL_IMMOLATION        = 37059,
     SPELL_FLAME_BUFFET      = 31724,
-    NPC_TRIGGER             = 21987, //World Trigger (Tiny)
     MODEL_INVIS             = 11686, //invisible model
     SPELL_DISEASE_CLOUD     = 31607,
     SPELL_KNOCKDOWN         = 31610,
@@ -417,7 +416,7 @@ public:
             instance = creature->GetInstanceScript();
             meteor = false;//call once!
             CanMove = false;
-            Delay = rand()%30000;
+            Delay = rand32() % 30000;
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetDisplayId(MODEL_INVIS);
@@ -447,7 +446,7 @@ public:
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
@@ -465,10 +464,7 @@ public:
             }
             if (!meteor)
             {
-                float x, y, z;
-                me->GetPosition(x, y, z);
-                Creature* trigger = me->SummonCreature(NPC_TRIGGER, x+8, y+8, z+25+rand()%10, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 1000);
-                if (trigger)
+                if (Creature* trigger = me->SummonCreature(NPC_WORLD_TRIGGER_TINY, me->GetPositionWithOffset({ 8.0f, 8.0f, frand(25.0f, 35.0f), 0.0f }), TEMPSUMMON_TIMED_DESPAWN, 1000))
                 {
                     trigger->SetVisible(false);
                     trigger->setFaction(me->getFaction());
@@ -486,7 +482,7 @@ public:
                     CanMove = true;
                     if (instance->GetData(DATA_ALLIANCE_RETREAT) && !instance->GetData(DATA_HORDE_RETREAT))
                     {
-                        Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                        Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THRALL));
                         if (target && target->IsAlive())
                             me->AddThreat(target, 0.0f);
                     } else if (instance->GetData(DATA_ALLIANCE_RETREAT) && instance->GetData(DATA_HORDE_RETREAT)){
@@ -563,13 +559,13 @@ public:
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_JAINAPROUDMOORE));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
@@ -618,7 +614,7 @@ public:
             if (KnockDownTimer <= diff)
             {
                 DoCastVictim(SPELL_KNOCKDOWN);
-                KnockDownTimer = 15000+rand()%10000;
+                KnockDownTimer = 15000 + rand32() % 10000;
             } else KnockDownTimer -= diff;
             DoMeleeAttackIfReady();
         }
@@ -651,7 +647,7 @@ public:
         bool RandomMove;
         void Reset() override
         {
-            FrenzyTimer = 5000+rand()%5000;
+            FrenzyTimer = 5000 + rand32() % 5000;
             MoveTimer = 2000;
             RandomMove = false;
         }
@@ -662,13 +658,13 @@ public:
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_JAINAPROUDMOORE));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
@@ -714,7 +710,7 @@ public:
             if (FrenzyTimer <= diff)
             {
                 DoCast(me, SPELL_FRENZY);
-                FrenzyTimer = 15000+rand()%15000;
+                FrenzyTimer = 15000 + rand32() % 15000;
             } else FrenzyTimer -= diff;
             if (!UpdateVictim())
                 return;
@@ -750,7 +746,7 @@ public:
 
         void Reset() override
         {
-            ShadowBoltTimer = 1000+rand()%5000;
+            ShadowBoltTimer = 1000 + rand32() % 5000;
             summons.DespawnAll();
         }
 
@@ -773,13 +769,13 @@ public:
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_JAINAPROUDMOORE));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
@@ -840,7 +836,7 @@ public:
             if (ShadowBoltTimer <= diff)
             {
                 DoCastVictim(SPELL_SHADOW_BOLT);
-                ShadowBoltTimer = 20000+rand()%10000;
+                ShadowBoltTimer = 20000 + rand32() % 10000;
             } else ShadowBoltTimer -= diff;
 
             DoMeleeAttackIfReady();
@@ -875,9 +871,9 @@ public:
 
         void Reset() override
         {
-            CourseTimer = 20000+rand()%5000;
-            WailTimer = 15000+rand()%5000;
-            ShellTimer = 50000+rand()%10000;
+            CourseTimer = 20000 + rand32() % 5000;
+            WailTimer = 15000 + rand32() % 5000;
+            ShellTimer = 50000 + rand32() % 10000;
         }
 
         void WaypointReached(uint32 waypointId) override
@@ -886,13 +882,13 @@ public:
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_JAINAPROUDMOORE));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
@@ -931,17 +927,17 @@ public:
             if (CourseTimer <= diff)
             {
                 DoCastVictim(SPELL_BANSHEE_CURSE);
-                CourseTimer = 20000+rand()%5000;
+                CourseTimer = 20000 + rand32() % 5000;
             } else CourseTimer -= diff;
             if (WailTimer <= diff)
             {
                 DoCastVictim(SPELL_BANSHEE_WAIL);
-                WailTimer = 15000+rand()%5000;
+                WailTimer = 15000 + rand32() % 5000;
             } else WailTimer -= diff;
             if (ShellTimer <= diff)
             {
                 DoCast(me, SPELL_ANTI_MAGIC_SHELL);
-                ShellTimer = 50000+rand()%10000;
+                ShellTimer = 50000 + rand32() % 10000;
             } else ShellTimer -= diff;
             DoMeleeAttackIfReady();
         }
@@ -973,7 +969,7 @@ public:
 
         void Reset() override
         {
-            WebTimer = 20000+rand()%5000;
+            WebTimer = 20000 + rand32() % 5000;
         }
 
         void WaypointReached(uint32 waypointId) override
@@ -982,13 +978,13 @@ public:
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_JAINAPROUDMOORE));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
@@ -1027,7 +1023,7 @@ public:
             if (WebTimer <= diff)
             {
                 DoCastVictim(SPELL_WEB);
-                WebTimer = 20000+rand()%5000;
+                WebTimer = 20000 + rand32() % 5000;
             } else WebTimer -= diff;
             DoMeleeAttackIfReady();
         }
@@ -1059,7 +1055,7 @@ public:
 
         void Reset() override
         {
-            ManaBurnTimer = 9000+rand()%5000;
+            ManaBurnTimer = 9000 + rand32() % 5000;
         }
 
         void WaypointReached(uint32 waypointId) override
@@ -1068,13 +1064,13 @@ public:
             {
                 if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, attack thrall
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THRALL));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
                 else
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_JAINAPROUDMOORE));
+                    Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_JAINAPROUDMOORE));
                     if (target && target->IsAlive())
                         me->AddThreat(target, 0.0f);
                 }
@@ -1113,7 +1109,7 @@ public:
             if (ManaBurnTimer <= diff)
             {
                 DoCastVictim(SPELL_MANA_BURN);
-                ManaBurnTimer = 9000+rand()%5000;
+                ManaBurnTimer = 9000 + rand32() % 5000;
             } else ManaBurnTimer -= diff;
             DoMeleeAttackIfReady();
         }
@@ -1135,9 +1131,15 @@ public:
     {
         npc_frost_wyrmAI(Creature* creature) : hyjal_trashAI(creature)
         {
+            Initialize();
             instance = creature->GetInstanceScript();
             go = false;
-            Reset();
+        }
+
+        void Initialize()
+        {
+            FrostBreathTimer = 5000;
+            MoveTimer = 0;
         }
 
         bool go;
@@ -1146,8 +1148,7 @@ public:
 
         void Reset() override
         {
-            FrostBreathTimer = 5000;
-            MoveTimer = 0;
+            Initialize();
             me->SetDisableGravity(true);
         }
 
@@ -1155,7 +1156,7 @@ public:
         {
             if (waypointId == 2 && !IsOverrun)
             {
-                Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THRALL));
                 if (target && target->IsAlive())
                 {
                     me->AddThreat(target, 0.0f);
@@ -1184,7 +1185,7 @@ public:
 
             if (IsEvent || IsOverrun)
             {
-                CAST_AI(hyjal_trashAI, me->AI())->SetCanAttack(false);
+                ENSURE_AI(hyjal_trashAI, me->AI())->SetCanAttack(false);
                 npc_escortAI::UpdateAI(diff);
             }
 
@@ -1267,7 +1268,7 @@ public:
         {
             forcemove = true;
             Zpos = 10.0f;
-            StrikeTimer = 2000+rand()%5000;
+            StrikeTimer = 2000 + rand32() % 5000;
             MoveTimer = 0;
             me->SetDisableGravity(true);
         }
@@ -1276,7 +1277,7 @@ public:
         {
             if (waypointId == 2 && !IsOverrun)
             {
-                Unit* target = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_THRALL));
+                Unit* target = ObjectAccessor::GetUnit(*me, instance->GetGuidData(DATA_THRALL));
                 if (target && target->IsAlive())
                 {
                     me->AddThreat(target, 0.0f);
@@ -1301,7 +1302,7 @@ public:
 
             if (IsEvent || IsOverrun)
             {
-                CAST_AI(hyjal_trashAI, me->AI())->SetCanAttack(false);
+                ENSURE_AI(hyjal_trashAI, me->AI())->SetCanAttack(false);
                 npc_escortAI::UpdateAI(diff);
             }
 
@@ -1332,7 +1333,7 @@ public:
                     if (StrikeTimer <= diff)
                     {
                         me->CastSpell(DummyTarget[0], DummyTarget[1], DummyTarget[2], SPELL_GARGOYLE_STRIKE, false);
-                        StrikeTimer = 2000+rand()%1000;
+                        StrikeTimer = 2000 + rand32() % 1000;
                     } else StrikeTimer -= diff;
                     }
             }
@@ -1367,7 +1368,7 @@ public:
                     DoCastVictim(SPELL_GARGOYLE_STRIKE);
                     me->StopMoving();
                     me->GetMotionMaster()->Clear();
-                    StrikeTimer = 2000+rand()%1000;
+                    StrikeTimer = 2000 + rand32() % 1000;
                 } else StrikeTimer=0;
             } else StrikeTimer -= diff;
         }
@@ -1388,7 +1389,13 @@ public:
     {
         alliance_riflemanAI(Creature* creature) : ScriptedAI(creature)
         {
+            Initialize();
             SetCombatMovement(false);
+        }
+
+        void Initialize()
+        {
+            ExplodeTimer = 5000 + rand32() % 5000;
         }
 
         uint32 ExplodeTimer;
@@ -1399,7 +1406,7 @@ public:
 
         void Reset() override
         {
-            ExplodeTimer = 5000+rand()%5000;
+            Initialize();
         }
 
         void MoveInLineOfSight(Unit* who) override
@@ -1432,9 +1439,9 @@ public:
                     EnterEvadeMode();
                     return;
                 }
-                int dmg = 500+rand()%700;
+                int dmg = 500 + rand32() % 700;
                 me->CastCustomSpell(me->GetVictim(), SPELL_EXPLODING_SHOT, &dmg, 0, 0, false);
-                ExplodeTimer = 5000+rand()%5000;
+                ExplodeTimer = 5000 + rand32() % 5000;
             } else ExplodeTimer -= diff;
             DoMeleeAttackIfReady();
         }

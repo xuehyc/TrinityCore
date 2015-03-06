@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -31,14 +31,14 @@
 #include "CellImpl.h"
 #include "trial_of_the_crusader.h"
 
-enum Yells
+enum Texts
 {
     SAY_AGGRO               = 0,
     SAY_NIGHT               = 1,
     SAY_LIGHT               = 2,
     EMOTE_VORTEX            = 3,
-    EMOTE_TWINK_PACT        = 4,
-    SAY_TWINK_PACT          = 5,
+    EMOTE_TWIN_PACT         = 4,
+    SAY_TWIN_PACT           = 5,
     SAY_KILL_PLAYER         = 6,
     SAY_BERSERK             = 7,
     SAY_DEATH               = 8
@@ -91,6 +91,23 @@ enum BossSpells
     SPELL_SURGE_OF_SPEED        = 65828
 };
 
+enum Events
+{
+    EVENT_TWIN_SPIKE      = 1,
+    EVENT_TOUCH           = 2,
+    EVENT_SPECIAL_ABILITY = 3,
+    EVENT_BERSERK         = 4
+};
+
+enum Stages
+{
+    STAGE_DARK_VORTEX,
+    STAGE_DARK_PACT,
+    STAGE_LIGHT_VORTEX,
+    STAGE_LIGHT_PACT,
+    MAX_STAGES
+};
+
 #define SPELL_DARK_ESSENCE_HELPER RAID_MODE<uint32>(65684, 67176, 67177, 67178)
 #define SPELL_LIGHT_ESSENCE_HELPER RAID_MODE<uint32>(65686, 67222, 67223, 67224)
 
@@ -101,8 +118,8 @@ enum BossSpells
 
 enum Actions
 {
-    ACTION_VORTEX   = 0,
-    ACTION_PACT     = 1
+    ACTION_VORTEX,
+    ACTION_PACT
 };
 
 #define ESSENCE_REMOVE 0
@@ -143,6 +160,17 @@ struct boss_twin_baseAI : public BossAI
 {
     boss_twin_baseAI(Creature* creature) : BossAI(creature, BOSS_VALKIRIES)
     {
+        AuraState = AURA_STATE_NONE;
+        Weapon = 0;
+        SisterNpcId = 0;
+        MyEmphatySpellId = 0;
+        OtherEssenceSpellId = 0;
+        SurgeSpellId = 0;
+        VortexSpellId = 0;
+        ShieldSpellId = 0;
+        TwinPactSpellId = 0;
+        SpikeSpellId = 0;
+        TouchSpellId = 0;
     }
 
     void Reset() override
@@ -153,12 +181,6 @@ struct boss_twin_baseAI : public BossAI
         /* Uncomment this once that they are floating above the ground
         me->SetLevitate(true);
         me->SetFlying(true); */
-        IsBerserk = false;
-
-        SpecialAbilityTimer = 1*MINUTE*IN_MILLISECONDS;
-        SpikeTimer = 20*IN_MILLISECONDS;
-        TouchTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
-        BerserkTimer = IsHeroic() ? 6*MINUTE*IN_MILLISECONDS : 10*MINUTE*IN_MILLISECONDS;
 
         summons.DespawnAll();
     }
@@ -190,15 +212,7 @@ struct boss_twin_baseAI : public BossAI
     void KilledUnit(Unit* who) override
     {
         if (who->GetTypeId() == TYPEID_PLAYER)
-        {
             Talk(SAY_KILL_PLAYER);
-            instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELIGIBLE, 0);
-        }
-    }
-
-    void JustSummoned(Creature* summoned) override
-    {
-        summons.Summon(summoned);
     }
 
     void SummonedCreatureDespawn(Creature* summoned) override
@@ -245,7 +259,7 @@ struct boss_twin_baseAI : public BossAI
     // Called when sister pointer needed
     Creature* GetSister()
     {
-        return ObjectAccessor::GetCreature((*me), instance->GetData64(SisterNpcId));
+        return ObjectAccessor::GetCreature((*me), instance->GetGuidData(SisterNpcId));
     }
 
     void EnterCombat(Unit* /*who*/) override
@@ -260,6 +274,11 @@ struct boss_twin_baseAI : public BossAI
 
         Talk(SAY_AGGRO);
         DoCast(me, SurgeSpellId);
+
+        events.ScheduleEvent(EVENT_TWIN_SPIKE, 20 * IN_MILLISECONDS);
+        events.ScheduleEvent(EVENT_BERSERK, IsHeroic() ? 6 * MINUTE*IN_MILLISECONDS : 10 * MINUTE*IN_MILLISECONDS);
+        if (IsHeroic())
+            events.ScheduleEvent(EVENT_TOUCH, urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS));
     }
 
     void DoAction(int32 action) override
@@ -267,10 +286,16 @@ struct boss_twin_baseAI : public BossAI
         switch (action)
         {
             case ACTION_VORTEX:
-                Stage = me->GetEntry() == NPC_LIGHTBANE ? 2 : 1;
+                Talk(EMOTE_VORTEX);
+                DoCastAOE(VortexSpellId);
                 break;
             case ACTION_PACT:
-                Stage = me->GetEntry() == NPC_LIGHTBANE ? 1 : 2;
+                Talk(EMOTE_TWIN_PACT);
+                Talk(SAY_TWIN_PACT);
+                if (Creature* sister = GetSister())
+                    sister->CastSpell(sister, SPELL_POWER_TWINS, false);
+                DoCast(me, ShieldSpellId);
+                DoCast(me, TwinPactSpellId);
                 break;
             default:
                 break;
@@ -283,95 +308,31 @@ struct boss_twin_baseAI : public BossAI
         me->SetCanDualWield(mode);
     }
 
-    void UpdateAI(uint32 diff) override
+    void ExecuteEvent(uint32 eventId) override
     {
-        if (!instance || !UpdateVictim())
-            return;
-
-        if (me->HasUnitState(UNIT_STATE_CASTING))
-            return;
-
-        switch (Stage)
+        switch (eventId)
         {
-            case 0:
+            case EVENT_TWIN_SPIKE:
+                DoCastVictim(SpikeSpellId);
+                events.ScheduleEvent(EVENT_TWIN_SPIKE, 20 * IN_MILLISECONDS);
                 break;
-            case 1: // Vortex
-                if (SpecialAbilityTimer <= diff)
-                {
-                    if (Creature* pSister = GetSister())
-                        pSister->AI()->DoAction(ACTION_VORTEX);
-                    Talk(VortexEmote);
-                    DoCastAOE(VortexSpellId);
-                    Stage = 0;
-                    SpecialAbilityTimer = 1*MINUTE*IN_MILLISECONDS;
-                }
-                else
-                    SpecialAbilityTimer -= diff;
+            case EVENT_TOUCH:
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true, OtherEssenceSpellId))
+                    me->CastCustomSpell(TouchSpellId, SPELLVALUE_MAX_TARGETS, 1, target, false);
+                events.ScheduleEvent(EVENT_TOUCH, urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS));
                 break;
-            case 2: // Shield + Pact
-                if (SpecialAbilityTimer <= diff)
-                {
-                    Talk(EMOTE_TWINK_PACT);
-                    Talk(SAY_TWINK_PACT);
-                    if (Creature* pSister = GetSister())
-                    {
-                        pSister->AI()->DoAction(ACTION_PACT);
-                        pSister->CastSpell(pSister, SPELL_POWER_TWINS, false);
-                    }
-                    DoCast(me, ShieldSpellId);
-                    DoCast(me, TwinPactSpellId);
-                    Stage = 0;
-                    SpecialAbilityTimer = 1*MINUTE*IN_MILLISECONDS;
-                }
-                else
-                    SpecialAbilityTimer -= diff;
+            case EVENT_BERSERK:
+                DoCast(me, SPELL_BERSERK);
+                Talk(SAY_BERSERK);
                 break;
             default:
                 break;
         }
-
-        if (SpikeTimer <= diff)
-        {
-            DoCastVictim(SpikeSpellId);
-            SpikeTimer = 20*IN_MILLISECONDS;
-        }
-        else
-            SpikeTimer -= diff;
-
-        if (IsHeroic() && TouchTimer <= diff)
-        {
-            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true, OtherEssenceSpellId))
-                me->CastCustomSpell(TouchSpellId, SPELLVALUE_MAX_TARGETS, 1, target, false);
-            TouchTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
-        }
-        else
-            TouchTimer -= diff;
-
-        if (!IsBerserk && BerserkTimer <= diff)
-        {
-            DoCast(me, SPELL_BERSERK);
-            Talk(SAY_BERSERK);
-            IsBerserk = true;
-        }
-        else
-            BerserkTimer -= diff;
-
-        DoMeleeAttackIfReady();
     }
 
     protected:
         AuraStateType AuraState;
-
-        uint8  Stage;
-        bool   IsBerserk;
-
         uint32 Weapon;
-        uint32 SpecialAbilityTimer;
-        uint32 SpikeTimer;
-        uint32 TouchTimer;
-        uint32 BerserkTimer;
-
-        int32 VortexEmote;
         uint32 SisterNpcId;
         uint32 MyEmphatySpellId;
         uint32 OtherEssenceSpellId;
@@ -392,15 +353,14 @@ class boss_fjola : public CreatureScript
         {
             boss_fjolaAI(Creature* creature) : boss_twin_baseAI(creature)
             {
+                GenerateStageSequence();
             }
 
             void Reset() override
             {
                 SetEquipmentSlots(false, EQUIP_MAIN_1, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
-                Stage = 0;
                 Weapon = EQUIP_MAIN_1;
                 AuraState = AURA_STATE_UNKNOWN22;
-                VortexEmote = EMOTE_VORTEX;
                 SisterNpcId = NPC_DARKBANE;
                 MyEmphatySpellId = SPELL_TWIN_EMPATHY_DARK;
                 OtherEssenceSpellId = SPELL_DARK_ESSENCE_HELPER;
@@ -415,26 +375,80 @@ class boss_fjola : public CreatureScript
                 boss_twin_baseAI::Reset();
             }
 
+            void ExecuteEvent(uint32 eventId) override
+            {
+                if (eventId == EVENT_SPECIAL_ABILITY)
+                {
+                    if (CurrentStage == MAX_STAGES)
+                        GenerateStageSequence();
+
+                    switch (Stage[CurrentStage])
+                    {
+                        case STAGE_DARK_VORTEX:
+                            if (Creature* sister = GetSister())
+                                sister->AI()->DoAction(ACTION_VORTEX);
+                            break;
+                        case STAGE_DARK_PACT:
+                            if (Creature* sister = GetSister())
+                                sister->AI()->DoAction(ACTION_PACT);
+                            break;
+                        case STAGE_LIGHT_VORTEX:
+                            DoAction(ACTION_VORTEX);
+                            break;
+                        case STAGE_LIGHT_PACT:
+                            DoAction(ACTION_PACT);
+                            break;
+                        default:
+                            break;
+                    }
+                    ++CurrentStage;
+                    events.ScheduleEvent(EVENT_SPECIAL_ABILITY, 45 * IN_MILLISECONDS);
+                }
+                else
+                    boss_twin_baseAI::ExecuteEvent(eventId);
+            }
+
             void EnterCombat(Unit* who) override
             {
                 instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  EVENT_START_TWINS_FIGHT);
-
+                events.ScheduleEvent(EVENT_SPECIAL_ABILITY, 45 * IN_MILLISECONDS);
                 me->SummonCreature(NPC_BULLET_CONTROLLER, ToCCommonLoc[1].GetPositionX(), ToCCommonLoc[1].GetPositionY(), ToCCommonLoc[1].GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN);
                 boss_twin_baseAI::EnterCombat(who);
             }
 
             void EnterEvadeMode() override
             {
-                instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
+                instance->DoUseDoorOrButton(instance->GetGuidData(GO_MAIN_GATE_DOOR));
                 boss_twin_baseAI::EnterEvadeMode();
             }
 
             void JustReachedHome() override
             {
-                instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
+                instance->DoUseDoorOrButton(instance->GetGuidData(GO_MAIN_GATE_DOOR));
 
                 boss_twin_baseAI::JustReachedHome();
             }
+
+            void GenerateStageSequence()
+            {
+                CurrentStage = 0;
+
+                // Initialize and clean up.
+                for (int i = 0; i < MAX_STAGES; ++i)
+                    Stage[i] = i;
+
+                // Allocate an unique random stage to each position in the array.
+                for (int i = 0; i < MAX_STAGES - 1; ++i)
+                {
+                    int random = i + (rand32() % (MAX_STAGES - i));
+                    int temp = Stage[i];
+                    Stage[i] = Stage[random];
+                    Stage[random] = temp;
+                }
+            }
+            private:
+                uint8 Stage[4];
+                uint8 CurrentStage;
         };
 
         CreatureAI* GetAI(Creature* creature) const override
@@ -455,10 +469,8 @@ class boss_eydis : public CreatureScript
             void Reset() override
             {
                 SetEquipmentSlots(false, EQUIP_MAIN_2, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
-                Stage = 1;
                 Weapon = EQUIP_MAIN_2;
                 AuraState = AURA_STATE_UNKNOWN19;
-                VortexEmote = EMOTE_VORTEX;
                 SisterNpcId = NPC_LIGHTBANE;
                 MyEmphatySpellId = SPELL_TWIN_EMPATHY_LIGHT;
                 OtherEssenceSpellId = SPELL_LIGHT_ESSENCE_HELPER;
@@ -524,6 +536,12 @@ struct npc_unleashed_ballAI : public ScriptedAI
 {
     npc_unleashed_ballAI(Creature* creature) : ScriptedAI(creature)
     {
+        Initialize();
+    }
+
+    void Initialize()
+    {
+        RangeCheckTimer = 0.5*IN_MILLISECONDS;
     }
 
     void MoveToNextPoint()
@@ -531,8 +549,8 @@ struct npc_unleashed_ballAI : public ScriptedAI
         float x0 = ToCCommonLoc[1].GetPositionX(), y0 = ToCCommonLoc[1].GetPositionY(), r = 47.0f;
         float y = y0;
         float x = frand(x0 - r, x0 + r);
-        float sq = pow(r, 2) - pow(x - x0, 2);
-        float rt = sqrtf(fabs(sq));
+        float sq = std::pow(r, 2.f) - std::pow(x - x0, 2.f);
+        float rt = std::sqrt(std::fabs(sq));
         if (urand(0, 1))
             y = y0 + rt;
         else
@@ -548,7 +566,7 @@ struct npc_unleashed_ballAI : public ScriptedAI
         me->SetCanFly(true);
         SetCombatMovement(false);
         MoveToNextPoint();
-        RangeCheckTimer = 0.5*IN_MILLISECONDS;
+        Initialize();
     }
 
     void MovementInform(uint32 uiType, uint32 uiId) override
@@ -675,6 +693,14 @@ class spell_powering_up : public SpellScriptLoader
         {
             PrepareSpellScript(spell_powering_up_SpellScript);
 
+        public:
+            spell_powering_up_SpellScript()
+            {
+                spellId = 0;
+                poweringUp = 0;
+            }
+
+        private:
             uint32 spellId;
             uint32 poweringUp;
 
@@ -732,6 +758,13 @@ class spell_valkyr_essences : public SpellScriptLoader
         {
             PrepareAuraScript(spell_valkyr_essences_AuraScript);
 
+        public:
+            spell_valkyr_essences_AuraScript()
+            {
+                spellId = 0;
+            }
+
+        private:
             uint32 spellId;
 
             bool Load() override
@@ -756,7 +789,7 @@ class spell_valkyr_essences : public SpellScriptLoader
                             // Twin Vortex part
                             uint32 lightVortex = sSpellMgr->GetSpellIdForDifficulty(SPELL_LIGHT_VORTEX_DAMAGE, owner);
                             uint32 darkVortex = sSpellMgr->GetSpellIdForDifficulty(SPELL_DARK_VORTEX_DAMAGE, owner);
-                            int32 stacksCount = int32(dmgInfo.GetSpellInfo()->Effects[EFFECT_0].CalcValue()) * 0.001 - 1;
+                            int32 stacksCount = dmgInfo.GetSpellInfo()->Effects[EFFECT_0].CalcValue() / 1000 - 1;
 
                             if (lightVortex && darkVortex && stacksCount)
                             {
@@ -836,8 +869,8 @@ class spell_power_of_the_twins : public SpellScriptLoader
             {
                 if (InstanceScript* instance = GetCaster()->GetInstanceScript())
                 {
-                    if (Creature* Valk = ObjectAccessor::GetCreature(*GetCaster(), instance->GetData64(GetCaster()->GetEntry())))
-                        CAST_AI(boss_twin_baseAI, Valk->AI())->EnableDualWield(true);
+                    if (Creature* Valk = ObjectAccessor::GetCreature(*GetCaster(), instance->GetGuidData(GetCaster()->GetEntry())))
+                        ENSURE_AI(boss_twin_baseAI, Valk->AI())->EnableDualWield(true);
                 }
             }
 
@@ -845,8 +878,8 @@ class spell_power_of_the_twins : public SpellScriptLoader
             {
                 if (InstanceScript* instance = GetCaster()->GetInstanceScript())
                 {
-                    if (Creature* Valk = ObjectAccessor::GetCreature(*GetCaster(), instance->GetData64(GetCaster()->GetEntry())))
-                        CAST_AI(boss_twin_baseAI, Valk->AI())->EnableDualWield(false);
+                    if (Creature* Valk = ObjectAccessor::GetCreature(*GetCaster(), instance->GetGuidData(GetCaster()->GetEntry())))
+                        ENSURE_AI(boss_twin_baseAI, Valk->AI())->EnableDualWield(false);
                 }
             }
 
