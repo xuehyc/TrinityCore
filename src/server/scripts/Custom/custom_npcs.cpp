@@ -101,6 +101,13 @@ public:
                 else
                     sNullSecMgr->SetGuildZoneUnderAttack(guildZoneId, true, attacker);
             }
+            else
+                damage = 0;
+        }
+
+        void JustDied(Unit* killer) override
+        {
+            DeleteMe();
         }
 
         void UpdateAI(uint32 diff) override
@@ -149,9 +156,6 @@ public:
                 else
                     regenTimer -= diff;
             }
-
-            if (!me->IsAlive())
-                DeleteMe();
         }
 
         void DeleteMe()

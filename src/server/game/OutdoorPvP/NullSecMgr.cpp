@@ -148,11 +148,12 @@ void NullSecMgr::RemoveGuildZoneOwner(uint32 guildZoneId)
     if (guildZoneId > MAX_NULLSEC_ZONES)
         return;
 
-    m_guildZones[guildZoneId].Owner = NULL;
-    CharacterDatabase.DirectPExecute("UPDATE custom_nullsec_guild_zones SET owner = NULL WHERE guild_zone_id = %u", guildZoneId);
-    
     // Inform all players that a new territory is available
     sWorld->SendWorldText(LANG_NULLSEC_ZONE_LOST, m_guildZones[guildZoneId].Owner->GetName().c_str(), m_guildZones[guildZoneId].GuildZoneName.c_str());
+    // Remove ownership
+    m_guildZones[guildZoneId].Owner = NULL;
+    CharacterDatabase.DirectPExecute("UPDATE custom_nullsec_guild_zones SET owner = NULL WHERE guild_zone_id = %u", guildZoneId);
+
 }
 
 void NullSecMgr::OnPlayerEnterNullSecGuildZone(Player* player)
