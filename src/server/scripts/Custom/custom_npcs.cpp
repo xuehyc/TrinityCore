@@ -177,10 +177,10 @@ public:
 ######*/
 
 #define QUEST_ID_HORDE_TOUR    50001
-#define QUEST_ID_ALLIANCE_TOUR 50002
+#define QUEST_ID_ALLIANCE_TOUR 50003
 #define NPC_THUUL_IMAGE        50001
-#define NPC_BLA_IMAGE          0
-// #define SAY_FOLLOW_THE_IMAGE   "Sigue a mi imagen, colega!"
+#define NPC_MALIN_IMAGE        50002
+#define SAY_FOLLOW_THE_IMAGE   "Sigue a mi imagen, novato!"
 
 class npc_tour_guide : public CreatureScript
 {
@@ -193,7 +193,7 @@ public:
         if (quest->GetQuestId() == QUEST_ID_HORDE_TOUR)
             npcId = NPC_THUUL_IMAGE;
         else if (quest->GetQuestId() == QUEST_ID_ALLIANCE_TOUR)
-            npcId = NPC_BLA_IMAGE;
+            npcId = NPC_MALIN_IMAGE;
 
         if (!npcId)
             return true;
@@ -211,7 +211,7 @@ public:
         map->AddToMap(npcImage);
 
         // TODO: Dialogue to DB
-        // creature->Talk(followMe, CHAT_MSG_SAY, LANG_ORCISH, 10.0f);
+        creature->Say(SAY_FOLLOW_THE_IMAGE, LANG_UNIVERSAL);
 
         uint32 ficticialDamage = 0;
         npcImage->GetAI()->DamageTaken(player, ficticialDamage);
@@ -219,31 +219,9 @@ public:
     }
 };
 
-/*######
-## npc_thuul_image
-######*/
+// This enum is used in the next two npc scripts
 
-enum ThuulTexts
-{
-    SAY_MORE_JOUNG            = 0,
-    SAY_PVP_GENERAL           = 1,
-    SAY_PVP_HIGH_SEC          = 2,
-    SAY_PVP_LOW_SEC           = 3,
-    SAY_PVP_NULL_SEC          = 4,
-    SAY_PVP_CONQUERABLE_ZONES = 5,
-    SAY_FOLLOW_1              = 6,
-    SAY_BANKER                = 7,
-    SAY_FOLLOW_2              = 8,
-    SAY_PROFESSIONS_1         = 9,
-    SAY_PROFESSIONS_2         = 10,
-    SAY_PROFESSIONS_3         = 11,
-    SAY_NO_SOULBOUNDS         = 12,
-    SAY_FINISHING             = 13,
-    SAY_GOOD_LUCK             = 14,
-    SAY_TOO_FAR               = 15
-};
-
-enum ThuulPhases
+enum ImagePhases
 {
     PHASE_MOVING_PVP_1       = 0,
     PHASE_MOVING_PVP_2       = 1,
@@ -256,6 +234,30 @@ enum ThuulPhases
     PHASE_MOVING_END_1       = 8,
     PHASE_MOVING_END_2       = 9,
     PHASE_END                = 10
+};
+
+/*######
+## npc_thuul_image
+######*/
+
+enum ThuulImageTexts
+{
+    SAY_THUUL_MORE_JOUNG            = 0,
+    SAY_THUUL_PVP_GENERAL           = 1,
+    SAY_THUUL_PVP_HIGH_SEC          = 2,
+    SAY_THUUL_PVP_LOW_SEC           = 3,
+    SAY_THUUL_PVP_NULL_SEC          = 4,
+    SAY_THUUL_PVP_CONQUERABLE_ZONES = 5,
+    SAY_THUUL_FOLLOW_1              = 6,
+    SAY_THUUL_BANKER                = 7,
+    SAY_THUUL_FOLLOW_2              = 8,
+    SAY_THUUL_PROFESSIONS_1         = 9,
+    SAY_THUUL_PROFESSIONS_2         = 10,
+    SAY_THUUL_PROFESSIONS_3         = 11,
+    SAY_THUUL_NO_SOULBOUNDS         = 12,
+    SAY_THUUL_FINISHING             = 13,
+    SAY_THUUL_GOOD_LUCK             = 14,
+    SAY_THUUL_TOO_FAR               = 15
 };
 
 enum ThuulImageWP
@@ -291,7 +293,7 @@ public:
         npc_thuul_imageAI(Creature* creature) : ScriptedAI(creature)
         {
             phase = PHASE_MOVING_PVP_1;
-            nextSay = SAY_MORE_JOUNG;
+            nextSay = SAY_THUUL_MORE_JOUNG;
             teleportTimer = 0;
             sayTimer = 600000;
             forceDespawnTimer = 900000; // 15 minutes
@@ -327,7 +329,7 @@ public:
             player = doneBy->ToPlayer();
             // Start first movement
             me->GetMotionMaster()->MovePoint(1, ThuulWP[WP_HALL_OF_LEGENDS_1], true);
-            nextSay = SAY_MORE_JOUNG;
+            nextSay = SAY_THUUL_MORE_JOUNG;
             sayTimer = 3000;
         }
 
@@ -347,7 +349,7 @@ public:
             // If the player is too far from the NPC, set the mission as failed.
             if (player->GetDistance(me->GetPosition()) > 50.0f)
             {
-                Talk(SAY_TOO_FAR, player);
+                Talk(SAY_THUUL_TOO_FAR, player);
                 player->SetQuestStatus(QUEST_ID_HORDE_TOUR, QUEST_STATUS_FAILED);
                 DeleteMe();
             }
@@ -413,61 +415,61 @@ public:
             }
 
             // Control say timer (also phases when the chat ends)
-            if (sayTimer <= diff && nextSay <= SAY_GOOD_LUCK)
+            if (sayTimer <= diff && nextSay <= SAY_THUUL_GOOD_LUCK)
             {
                 Talk(nextSay, player);
                 switch (nextSay)
                 {
-                    case SAY_MORE_JOUNG:
+                    case SAY_THUUL_MORE_JOUNG:
                         sayTimer = 600000;
                         break;
-                    case SAY_PVP_GENERAL:
+                    case SAY_THUUL_PVP_GENERAL:
                         me->SetFacingToObject(player);
                         sayTimer = 7000;
                         break;
-                    case SAY_PVP_HIGH_SEC:
+                    case SAY_THUUL_PVP_HIGH_SEC:
                         sayTimer = 10000;
                         break;
-                    case SAY_PVP_LOW_SEC:
+                    case SAY_THUUL_PVP_LOW_SEC:
                         sayTimer = 13000;
                         break;
-                    case SAY_PVP_NULL_SEC:
+                    case SAY_THUUL_PVP_NULL_SEC:
                         sayTimer = 11000;
                         break;
-                    case SAY_PVP_CONQUERABLE_ZONES:
+                    case SAY_THUUL_PVP_CONQUERABLE_ZONES:
                         sayTimer = 10000;
                         break;
-                    case SAY_FOLLOW_1:
+                    case SAY_THUUL_FOLLOW_1:
                         sayTimer = 600000;
                         me->GetMotionMaster()->MovePoint(1, ThuulWP[WP_BANK_1], true);
                         phase = PHASE_MOVING_BANK_1;
                         break;
-                    case SAY_BANKER:
+                    case SAY_THUUL_BANKER:
                         me->SetFacingToObject(player);
                         sayTimer = 10000;
                         break;
-                    case SAY_FOLLOW_2:
+                    case SAY_THUUL_FOLLOW_2:
                         sayTimer = 600000;
                         me->GetMotionMaster()->MovePoint(1, ThuulWP[WP_PROFESSIONS], true);
                         phase = PHASE_MOVING_PROFESSIONS;
                         break;
-                    case SAY_PROFESSIONS_1:
+                    case SAY_THUUL_PROFESSIONS_1:
                         sayTimer = 12000;
                         break;
-                    case SAY_PROFESSIONS_2:
+                    case SAY_THUUL_PROFESSIONS_2:
                         sayTimer = 12000;
                         break;
-                    case SAY_PROFESSIONS_3:
+                    case SAY_THUUL_PROFESSIONS_3:
                         sayTimer = 10000;
                         break;
-                    case SAY_NO_SOULBOUNDS:
+                    case SAY_THUUL_NO_SOULBOUNDS:
                         sayTimer = 600000;
                         break;
-                    case SAY_FINISHING:
+                    case SAY_THUUL_FINISHING:
                         me->SetFacingToObject(player);
                         sayTimer = 9000;
                         break;
-                    case SAY_GOOD_LUCK:
+                    case SAY_THUUL_GOOD_LUCK:
                         teleportTimer = 3000;
                         break;
                     default:
@@ -505,9 +507,280 @@ public:
     }
 };
 
+/*######
+## npc_malin_image
+######*/
+
+enum MalinImageTexts
+{
+    SAY_MALIN_MORE_JOUNG            = 0,
+    SAY_MALIN_PVP_HIGH_SEC          = 1,
+    SAY_MALIN_PVP_LOW_SEC           = 2,
+    SAY_MALIN_PVP_NULL_SEC          = 3,
+    SAY_MALIN_PVP_CONQUERABLE_ZONES = 4,
+    SAY_MALIN_FOLLOW_1              = 5,
+    SAY_MALIN_BANKER                = 6,
+    SAY_MALIN_FOLLOW_2              = 7,
+    SAY_MALIN_PROFESSIONS_1         = 8,
+    SAY_MALIN_PROFESSIONS_2         = 9,
+    SAY_MALIN_PROFESSIONS_3         = 10,
+    SAY_MALIN_NO_SOULBOUNDS         = 11,
+    SAY_MALIN_PVP_GENERAL           = 12,
+    SAY_MALIN_FINISHING             = 13,
+    SAY_MALIN_GOOD_LUCK             = 14,
+    SAY_MALIN_TOO_FAR               = 15
+};
+
+enum MalinImageWP
+{
+    WP_MAGE_QUARTER   = 0,
+    WP_BRIDGE_1       = 1,
+    WP_BANK           = 2,
+    WP_TRADE_QUARTER  = 3,
+    WP_BRIDGE_2       = 4,
+    WP_OLD_TOWN       = 5,
+    WP_CHAMPIONS_HALL = 6
+};
+
+const Position MalinWP[7] = {
+    { -8916.56f, 786.25f, 87.22f, 0.67f },
+    { -8856.15f, 741.06f, 100.66f, 5.21f },
+    { -8913.28f, 625.00f, 99.52f, 0.48f },
+    { -8803.16f, 593.46f, 97.27f, 5.87f },
+    { -8717.90f, 516.45f, 96.77f, 4.46f },
+    { -8721.50f, 424.04f, 97.85f, 4.17f },
+    { -8773.59f, 416.46f, 103.95f, 5.32f }
+};
+
+const float MalinTeleportPos[4] = { -8950.61f, -132.75f, 83.52f, 0.17f };
+
+class npc_malin_image : public CreatureScript
+{
+public:
+    npc_malin_image() : CreatureScript("npc_malin_image") { }
+
+    struct npc_malin_imageAI : ScriptedAI
+    {
+        npc_malin_imageAI(Creature* creature) : ScriptedAI(creature)
+        {
+            phase = WP_MAGE_QUARTER;
+            nextSay = SAY_MALIN_MORE_JOUNG;
+            teleportTimer = 0;
+            sayTimer = 600000;
+            forceDespawnTimer = 900000; // 15 minutes
+            player = NULL;
+        }
+
+        uint8 phase;
+        uint8 nextSay;
+        Player* player;
+        uint32 sayTimer;  // Controls time between talks
+        uint32 teleportTimer;
+        uint32 forceDespawnTimer;
+
+        void EnterEvadeMode() override
+        {
+            DeleteMe();
+        }
+
+        void DamageTaken(Unit* doneBy, uint32& damage) override
+        {
+            if (doneBy->GetTypeId() != TYPEID_PLAYER)
+            {
+                damage = 0;
+                return;
+            }
+
+            if (player)
+            {
+                damage = 0;
+                return;
+            }
+
+            player = doneBy->ToPlayer();
+            // Start first movement
+            me->SetWalk(true);
+            me->GetMotionMaster()->MovePoint(1, MalinWP[WP_MAGE_QUARTER], true);
+            nextSay = SAY_MALIN_MORE_JOUNG;
+            sayTimer = 3000;
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            // Emergency check, for example if player disconnects,
+            // the NPC will despawn in several minutes.
+            if (forceDespawnTimer <= diff)
+                DeleteMe();
+            else
+                forceDespawnTimer -= diff;
+
+            // Player has disconnected / is not set yet?
+            if (!player)
+                return;
+
+            // If the player is too far from the NPC, set the mission as failed.
+            if (player->GetDistance(me->GetPosition()) > 50.0f)
+            {
+                Talk(SAY_MALIN_TOO_FAR, player);
+                player->SetQuestStatus(QUEST_ID_ALLIANCE_TOUR, QUEST_STATUS_FAILED);
+                DeleteMe();
+            }
+
+            // Control phases
+            switch (phase)
+            {
+            case PHASE_MOVING_PVP_1:
+                if (me->GetDistance(MalinWP[WP_MAGE_QUARTER]) < 1.0f)
+                {
+                    me->GetMotionMaster()->MovePoint(1, MalinWP[WP_BRIDGE_1]);
+                    phase = PHASE_MOVING_PVP_2;
+                }
+                break;
+            case PHASE_MOVING_PVP_2:
+                if (me->GetDistance(MalinWP[WP_BRIDGE_1]) < 1.0f)
+                {
+                    me->SetWalk(false);
+                    me->GetMotionMaster()->MovePoint(1, MalinWP[WP_BANK]);
+                    sayTimer = 1000;
+                    phase = PHASE_MOVING_BANK_1;
+                }
+                break;
+            case PHASE_MOVING_BANK_1:
+                if (me->GetDistance(MalinWP[WP_BANK]) < 1.0f)
+                {
+                    sayTimer = 2000;
+                    phase = PHASE_BANK;
+                }
+                break;
+            case PHASE_MOVING_BANK_2:
+                if (me->GetDistance(MalinWP[WP_TRADE_QUARTER]) < 1.0f)
+                {
+                    me->GetMotionMaster()->MovePoint(1, MalinWP[WP_BRIDGE_2]);
+                    phase = PHASE_MOVING_PROFESSIONS;
+                }
+                break;
+            case PHASE_MOVING_PROFESSIONS:
+                if (me->GetDistance(MalinWP[WP_BRIDGE_2]) < 1.0f)
+                {
+                    sayTimer = 2000;
+                    me->GetMotionMaster()->Clear();
+                    me->SetWalk(true);
+                    me->GetMotionMaster()->MovePoint(1, MalinWP[WP_OLD_TOWN], true);
+                    phase = PHASE_MOVING_END_1;
+                }
+                break;
+            case PHASE_MOVING_END_1:
+                if (me->GetDistance(MalinWP[WP_OLD_TOWN]) < 1.0f)
+                {
+                    me->GetMotionMaster()->MovePoint(1, MalinWP[WP_CHAMPIONS_HALL], true);
+                    phase = PHASE_MOVING_END_2;
+                }
+                break;
+            case PHASE_MOVING_END_2:
+                if (me->GetDistance(MalinWP[WP_CHAMPIONS_HALL]) < 1.0f)
+                {
+                    sayTimer = 2000;
+                    teleportTimer = 60000;
+                    phase = PHASE_END;
+                }
+                break;
+            default:
+                break;
+            }
+
+            // Control say timer (also phases when the chat ends)
+            if (sayTimer <= diff && nextSay <= SAY_MALIN_GOOD_LUCK)
+            {
+                Talk(nextSay, player);
+                switch (nextSay)
+                {
+                case SAY_MALIN_MORE_JOUNG:
+                    sayTimer = 7000;
+                    break;
+                case SAY_MALIN_PVP_HIGH_SEC:
+                    sayTimer = 12000;
+                    break;
+                case SAY_MALIN_PVP_LOW_SEC:
+                    sayTimer = 15000;
+                    break;
+                case SAY_MALIN_PVP_NULL_SEC:
+                    sayTimer = 15000;
+                    break;
+                case SAY_MALIN_PVP_CONQUERABLE_ZONES:
+                    sayTimer = 600000;
+                    break;
+                case SAY_MALIN_FOLLOW_1:
+                    sayTimer = 600000;
+                    break;
+                case SAY_MALIN_BANKER:
+                    sayTimer = 10000;
+                    break;
+                case SAY_MALIN_FOLLOW_2:
+                    sayTimer = 600000;
+                    me->GetMotionMaster()->MovePoint(1, MalinWP[WP_TRADE_QUARTER]);
+                    phase = PHASE_MOVING_BANK_2;
+                    break;
+                case SAY_MALIN_PROFESSIONS_1:
+                    sayTimer = 13000;
+                    break;
+                case SAY_MALIN_PROFESSIONS_2:
+                    sayTimer = 13000;
+                    break;
+                case SAY_MALIN_PROFESSIONS_3:
+                    sayTimer = 12000;
+                    break;
+                case SAY_MALIN_NO_SOULBOUNDS:
+                    sayTimer = 600000;
+                    break;
+                case SAY_MALIN_PVP_GENERAL:
+                    me->SetFacingToObject(player);
+                    sayTimer = 7000;
+                    break;
+                case SAY_MALIN_FINISHING:
+                    sayTimer = 9000;
+                    break;
+                case SAY_MALIN_GOOD_LUCK:
+                    teleportTimer = 3000;
+                    break;
+                default:
+                    break;
+                }
+                ++nextSay;
+            }
+            else
+                sayTimer -= diff;
+
+            // Control teleport
+            if (phase == PHASE_END)
+            {
+                if (teleportTimer <= diff)
+                {
+                    player->TeleportTo(0, MalinTeleportPos[0], MalinTeleportPos[1], MalinTeleportPos[2], MalinTeleportPos[3]);
+                    DeleteMe();
+                }
+                else
+                    teleportTimer -= diff;
+            }
+        }
+
+        void DeleteMe()
+        {
+            me->CombatStop();
+            me->CleanupsBeforeDelete();
+            me->AddObjectToRemoveList();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_malin_imageAI(creature);
+    }
+};
+
 void AddSC_custom_npcs()
 {
     new npc_standard_of_conquest();
     new npc_tour_guide();
     new npc_thuul_image();
+    new npc_malin_image();
 }
