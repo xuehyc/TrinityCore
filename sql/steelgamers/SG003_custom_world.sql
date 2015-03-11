@@ -129,3 +129,7 @@ INSERT INTO creature_text (`entry`, `groupid`, `id`, `text`, `type`, `language`,
 (50002, 13, 0, 'Hay muchas más cosas que tendrás que aprender por ti mismo. Ahora te teletransportaré a un lugar llamado Villanorte, donde podrás empezar tu aventura de forma segura', 14, 0, 100, 1, 0, 0, 'Imagen de Malin - Terminando', 0),
 (50002, 14, 0, '¡Buena suerte!', 14, 0, 100, 1, 0, 0, 'Imagen de Malin - Fin', 0),
 (50002, 15, 0, '¡Te has alejado demasiado de mi imagen! ¡No me pierdas de vista la próxima vez!', 14, 0, 100, 1, 0, 0, 'Imagen de Malin - Demasiado lejos', 0);
+-- New Horde spawn in Orgrimmar
+UPDATE playercreateinfo SET zone = 1637, position_x = 1921.47, position_y = -4142.46, position_z = 40.72, orientation = 1.66968 WHERE race IN (2, 5, 6, 8);
+-- New Alliance spawn in Stormwind
+UPDATE playercreateinfo SET zone = 1519, position_x = -8449.51, position_y = 343.249, position_z = 120.986, orientation = 5.38816 WHERE race IN (1, 3, 4, 7);

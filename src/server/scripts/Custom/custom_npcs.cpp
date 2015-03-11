@@ -105,7 +105,7 @@ public:
                 damage = 0;
         }
 
-        void JustDied(Unit* killer) override
+        void JustDied(Unit* /*killer*/) override
         {
             DeleteMe();
         }
@@ -285,7 +285,9 @@ const Position ThuulWP[7] = {
     { 1860.29f, -4513.38f, 23.87f, 3.64982f }
 };
 
-const float ThuulTeleportPos[4] = { -610.07f, -4253.52f, 39.04f, 3.28122f };
+const float ThuulTeleportOrcPos[4] = { -610.07f, -4253.52f, 39.04f, 3.28122f };
+const float ThuulTeleportTaurenPos[4] = { -2917.97f, -257.45f, 52.98f, 0.0f };
+const float ThuulTeleportUndeadPos[4] = { 1665.48f, 1678.08f, 120.53f, 0.0f };
 
 class npc_thuul_image : public CreatureScript
 {
@@ -489,7 +491,21 @@ public:
             {
                 if (teleportTimer <= diff)
                 {
-                    player->TeleportTo(1, ThuulTeleportPos[0], ThuulTeleportPos[1], ThuulTeleportPos[2], ThuulTeleportPos[3]);
+                    switch (player->getRace())
+                    {
+                        case RACE_ORC:
+                        case RACE_TROLL:
+                            player->TeleportTo(1, ThuulTeleportOrcPos[0], ThuulTeleportOrcPos[1], ThuulTeleportOrcPos[2], ThuulTeleportOrcPos[3]);
+                            break;
+                        case RACE_TAUREN:
+                            player->TeleportTo(1, ThuulTeleportTaurenPos[0], ThuulTeleportTaurenPos[1], ThuulTeleportTaurenPos[2], ThuulTeleportTaurenPos[3]);
+                            break;
+                        case RACE_UNDEAD_PLAYER:
+                            player->TeleportTo(0, ThuulTeleportUndeadPos[0], ThuulTeleportUndeadPos[1], ThuulTeleportUndeadPos[2], ThuulTeleportUndeadPos[3]);
+                            break;
+                        default:
+                            break;
+                    }
                     DeleteMe();
                 }
                 else
@@ -556,7 +572,9 @@ const Position MalinWP[7] = {
     { -8773.59f, 416.46f, 103.95f, 5.32f }
 };
 
-const float MalinTeleportPos[4] = { -8950.61f, -132.75f, 83.52f, 0.17f };
+const float MalinTeleportDwarfPos[4] = { -6232.01f, 333.55f, 383.18f, 3.65f };
+const float MalinTeleportNightElfPos[4] = { 10318.66f, 830.67f, 1326.38f, 3.32f };
+const float MalinTeleportHumanPos[4] = { -8950.61f, -132.75f, 83.52f, 0.17f };
 
 class npc_malin_image : public CreatureScript
 {
@@ -759,7 +777,21 @@ public:
             {
                 if (teleportTimer <= diff)
                 {
-                    player->TeleportTo(0, MalinTeleportPos[0], MalinTeleportPos[1], MalinTeleportPos[2], MalinTeleportPos[3]);
+                    switch (player->getRace())
+                    {
+                        case RACE_DWARF:
+                        case RACE_GNOME:
+                            player->TeleportTo(0, MalinTeleportDwarfPos[0], MalinTeleportDwarfPos[1], MalinTeleportDwarfPos[2], MalinTeleportDwarfPos[3]);
+                            break;
+                        case RACE_NIGHTELF:
+                            player->TeleportTo(1, MalinTeleportNightElfPos[0], MalinTeleportNightElfPos[1], MalinTeleportNightElfPos[2], MalinTeleportNightElfPos[3]);
+                            break;
+                        case RACE_HUMAN:
+                            player->TeleportTo(0, MalinTeleportHumanPos[0], MalinTeleportHumanPos[1], MalinTeleportHumanPos[2], MalinTeleportHumanPos[3]);
+                            break;
+                        default:
+                            break;
+                    }
                     DeleteMe();
                 }
                 else
