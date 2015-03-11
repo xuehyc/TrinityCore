@@ -3272,3 +3272,19 @@ PacketSpoof.BanDuration = 86400
 
 #
 ###################################################################################################
+
+###################################################################################################
+# CUSTOM STEEL GAMERS SETTINGS
+#
+# These are settings to configure the heavily customized Steel Gamers server
+#
+#    Custom.LowSecMinGoldDrop
+#        Description: Minimun gold a player must have in low sec territories to drop it
+#                     when killed by other player.
+#        Default:     20000 - 20 Golds
+#
+
+Custom.LowSecMinGoldDrop = 20000
+
+#
+###################################################################################################

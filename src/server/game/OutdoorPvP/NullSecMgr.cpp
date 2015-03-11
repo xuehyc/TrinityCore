@@ -40,7 +40,7 @@ void NullSecMgr::InitNullSecMgr()
 
     if (!result)
     {
-        TC_LOG_ERROR("server.loading", ">> Loaded 0 Null Sec Guild Zones. DB table `custom_nullsec_guild_zones` or `cutom_nullsec_guild_areas` is empty.");
+        TC_LOG_ERROR("server.loading", ">> Loaded 0 Null Sec Guild Zones. DB table `custom_nullsec_guild_zones` or `custom_nullsec_guild_areas` is empty.");
         return;
     }
 

@@ -32,20 +32,27 @@
 
 enum TeleportGraveyards
 {
-    GRAVEYARD_FERALAS            = 0,
-    GRAVEYARD_THOUSAND_NEEDLES   = 1,
-    GRAVEYARD_REDRIDGE_MOUNTAINS = 2,
-    GRAVEYARD_DUSKWOOD           = 3,
-    GRAVEYARD_WESTFALL           = 4
+    // Kalimdor graveyards
+    GRAVEYARD_DESOLACE,        // 0
+    GRAVEYARD_THE_BARRENS,     // 1
+    // Eastern Kingdoms graveyards
+    GRAVEYARD_ELWYNN_FOREST_1, // 2
+    GRAVEYARD_ELWYNN_FOREST_2, // 3
+    GRAVEYARD_ELWYNN_FOREST_3, // 4
+    GRAVEYARD_DUN_MOROGH,      // 5
+    GRAVEYARD_TIRISFAL_GLADES, // 6
+    GRAVEYARD_COUNT            // 7
 };
 
-Position const GraveyardsPositions[5] =
+Position const GraveyardsPositions[7] =
 {
         { -1967.22f, 1723.91f, 61.67f, 5.7387f },
         { -2515.37f, -1964.68f, 91.79f, 4.48131f },
         { -9339.96f, 172.11f, 61.57f, 3.56999f },
         { -9339.96f, 172.11f, 61.57f, 3.56999f },
-        { -9339.96f, 172.11f, 61.57f, 3.56999f }
+        { -9339.96f, 172.11f, 61.57f, 3.56999f },
+        { -5475.18f, -1845.84f, 399.79f, 4.19037f },
+        { 1773.33f, 768.81f, 55.69f, 5.98176f }
 };
 
 class CustomPlayerScript : public PlayerScript
@@ -55,51 +62,16 @@ public:
 
     void OnUpdateZone(Player* player, uint32 newZone, uint32 newArea, bool areaOnly) override
     {
-        // This zones are the new frontiers, so don't let the players cross them.
         switch (newZone)
         {
-            // The following zones are the new frontiers, so don't let the players enter them.
-            // TODO: More costal regions should be checked. May be change check type for Eastern Kingdoms. Block transports.
-            case RESTRICTED_ZONE_FERALAS:
-                player->TeleportTo(MAPID_KALIMDOR, GraveyardsPositions[GRAVEYARD_FERALAS].GetPositionX(),
-                    GraveyardsPositions[GRAVEYARD_FERALAS].GetPositionY(),
-                    GraveyardsPositions[GRAVEYARD_FERALAS].GetPositionZ(),
-                    GraveyardsPositions[GRAVEYARD_FERALAS].GetOrientation());
-                ChatHandler(player->GetSession()).SendSysMessage(LANG_FRONTIER_ZONE_ENTER);
-                break;
-            case RESTRICTED_ZONE_THOUSAND_NEEDLES:
-                player->TeleportTo(MAPID_KALIMDOR, GraveyardsPositions[GRAVEYARD_THOUSAND_NEEDLES].GetPositionX(),
-                    GraveyardsPositions[GRAVEYARD_THOUSAND_NEEDLES].GetPositionY(),
-                    GraveyardsPositions[GRAVEYARD_THOUSAND_NEEDLES].GetPositionZ(),
-                    GraveyardsPositions[GRAVEYARD_THOUSAND_NEEDLES].GetOrientation());
-                ChatHandler(player->GetSession()).SendSysMessage(LANG_FRONTIER_ZONE_ENTER);
-                break;
-            case RESTRICTED_ZONE_REDRIDGE_MOUNTAINS:
-                player->TeleportTo(MAPID_EASTERN_KINGDOMS, GraveyardsPositions[GRAVEYARD_REDRIDGE_MOUNTAINS].GetPositionX(),
-                    GraveyardsPositions[GRAVEYARD_REDRIDGE_MOUNTAINS].GetPositionY(),
-                    GraveyardsPositions[GRAVEYARD_REDRIDGE_MOUNTAINS].GetPositionZ(),
-                    GraveyardsPositions[GRAVEYARD_REDRIDGE_MOUNTAINS].GetOrientation());
-                ChatHandler(player->GetSession()).SendSysMessage(LANG_FRONTIER_ZONE_ENTER);
-                break;
-            case RESTRICTED_ZONE_DUSKWOOD:
-                player->TeleportTo(MAPID_EASTERN_KINGDOMS, GraveyardsPositions[GRAVEYARD_DUSKWOOD].GetPositionX(),
-                    GraveyardsPositions[GRAVEYARD_DUSKWOOD].GetPositionY(),
-                    GraveyardsPositions[GRAVEYARD_DUSKWOOD].GetPositionZ(),
-                    GraveyardsPositions[GRAVEYARD_DUSKWOOD].GetOrientation());
-                ChatHandler(player->GetSession()).SendSysMessage(LANG_FRONTIER_ZONE_ENTER);
-                break;
-            case RESTRICTED_ZONE_WESTFALL:
-                player->TeleportTo(MAPID_EASTERN_KINGDOMS, GraveyardsPositions[GRAVEYARD_WESTFALL].GetPositionX(),
-                    GraveyardsPositions[GRAVEYARD_WESTFALL].GetPositionY(),
-                    GraveyardsPositions[GRAVEYARD_WESTFALL].GetPositionZ(),
-                    GraveyardsPositions[GRAVEYARD_WESTFALL].GetOrientation());
-                ChatHandler(player->GetSession()).SendSysMessage(LANG_FRONTIER_ZONE_ENTER);
-                break;
             // The following zones are High Sec areas. We must force the player exit FFA PvP state, if his faction is the owner of the zone.
             case HIGHSEC_ZONE_MULGORE:
             case HIGHSEC_ZONE_DUROTAR:
+            case HIGHSEC_ZONE_TIRISFAL_GLADES:
             case HIGHSEC_ZONE_ORGRIMMAR:
             case HIGHSEC_ZONE_THUNDERBLUFF:
+            case HIGHSEC_ZONE_UNDERCITY:
+            
                 if (player->GetTeam() == HORDE)
                 {
                     player->pvpInfo.IsInHighSecZone = true;
@@ -114,8 +86,10 @@ public:
                 break;
             case HIGHSEC_ZONE_TELDRASSIL:
             case HIGHSEC_ZONE_ELWYNN_FOREST:
+            case HIGHSEC_ZONE_DUN_MOROGH:
             case HIGHSEC_ZONE_STORMWIND:
             case HIGHSEC_ZONE_DARNASSUS:
+            case HIGHSEC_ZONE_IRONFORGE:
                 if (player->GetTeam() == ALLIANCE)
                 {
                     player->pvpInfo.IsInHighSecZone = true;
@@ -147,7 +121,7 @@ public:
                 if (!areaOnly)
                     ChatHandler(player->GetSession()).SendSysMessage(LANG_NULLSEC_GENERAL_ENTER);
 
-                // If zone = area (for example, must roads) the area is not in a guild zone.
+                // If zone = area (for example, most roads) the area is not in a guild zone.
                 // Other exceptions like seas are handled in OnPlayerEnterNullSecGuildZone().
                 if (newZone == newArea && player->GetGuildZoneId() != GUILD_ZONE_NONE)
                     sNullSecMgr->OnPlayerLeaveNullSecGuildZone(player);
@@ -156,6 +130,37 @@ public:
                 player->pvpInfo.IsInHighSecZone = false;
                 break;
             default:
+                // Player can be:
+                //   a) In a restricted zone outside the open world map.
+                //   b) In an instanced map
+                if (!player->GetMap()->IsBattlegroundOrArena() && !player->GetInstanceId())
+                {
+                    // Player should be in a restricted area, outside the open zones. Return him to the nearest graveyard.
+                    float graveyardDistance = -1.0f;
+                    uint8 nearestGraveyard = GRAVEYARD_COUNT - 1;
+                    for (uint8 i = 0; i < GRAVEYARD_COUNT; ++i)
+                    {
+                        // Check if the player is in the same map as the graveyard
+                        if ((player->GetMapId() == MAPID_EASTERN_KINGDOMS && i <= GRAVEYARD_THE_BARRENS)
+                            || (player->GetMapId() == MAPID_KALIMDOR && i >= GRAVEYARD_ELWYNN_FOREST_1))
+                            continue;
+
+                        // Find nearest graveyard
+                        float tmpDistance = player->GetDistance(GraveyardsPositions[i]);
+                        if (graveyardDistance == -1.0f)
+                            graveyardDistance = tmpDistance;
+                        if (tmpDistance <= graveyardDistance)
+                        {
+                            graveyardDistance = tmpDistance;
+                            nearestGraveyard = i;
+                        }
+                    }
+                    player->TeleportTo(player->GetMapId(), GraveyardsPositions[nearestGraveyard].GetPositionX(),
+                        GraveyardsPositions[nearestGraveyard].GetPositionY(),
+                        GraveyardsPositions[nearestGraveyard].GetPositionZ(),
+                        GraveyardsPositions[nearestGraveyard].GetOrientation());
+                    ChatHandler(player->GetSession()).SendSysMessage(LANG_FRONTIER_ZONE_ENTER);
+                }
                 break;
         }
     }
@@ -172,46 +177,61 @@ public:
         if (zoneSec == ZONE_SECURITY_LEVEL_HIGH || zoneSec == ZONE_SECURITY_LEVEL_UNK)
             return;
 
-        // Get next free dynamic lootId
-        uint32 freeLootId = LootTemplates_Gameobject.GetFreeDynamicLootId();
-        if (!freeLootId) // There's too many dynamic loot entries in use
-            return;
-
-        std::vector<LootStoreItem> storeItems;
-
-        // Fill the gameobject's loot with the player's items, and destroy them.
-        // The bags itselfs are not dropped.
-        for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+        // Give the killer his money, only if the killed player has more than 20 golds (to avoid rage quiting on low levels)
+        // TODO: Put this values in the config file.
+        uint32 money = player->GetMoney();
+        if (money > sWorld->getIntConfig(CONFIG_CUSTOM_LOW_SEC_MIN_GOLD_DROP) || zoneSec == ZONE_SECURITY_LEVEL_NULL)
         {
-            if (Item* pItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-            {
-                uint32 count = pItem->GetCount();
-                //                     ItemId, reference, chance, needsquest, lootmode, groupid, mincount, maxcount
-                LootStoreItem lootItem(pItem->GetEntry(), 0, 100.0f, 0, 1, 0, count, count);
-                storeItems.push_back(lootItem);
-                player->DestroyItemCount(pItem, count, true);
-            }
+            player->ModifyMoney(money * -1, false);
+            uint32 golds = uint32(money / 10000);
+            uint32 silvers = uint32((money - (golds * 10000)) / 100);
+            uint32 coppers = uint32(money - (golds * 10000) - (silvers * 100));
+            ChatHandler(player->GetSession()).PSendSysMessage(LANG_PVP_MONEY_LOST, lootOwner->GetName().c_str(), golds, silvers, coppers);
+            lootOwner->ModifyMoney(money);
+            ChatHandler(lootOwner->GetSession()).PSendSysMessage(LANG_PVP_MONEY_WON, golds, silvers, coppers, player->GetName().c_str());
         }
-
-        for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+        
+        // If player is in Null Sec, drop his/her inventory and equipped items, the latest with a chance.
+        if (zoneSec == ZONE_SECURITY_LEVEL_NULL)
         {
-            if (Bag* pBag = player->GetBagByPos(i))
+            // Get next free dynamic lootId
+            uint32 freeLootId = LootTemplates_Gameobject.GetFreeDynamicLootId();
+            if (!freeLootId) // There's too many dynamic loot entries in use
+                return;
+
+            std::vector<LootStoreItem> storeItems;
+
+            // Fill the gameobject's loot with the player's items, and destroy them.
+            // The bags themselves are not dropped.
+            for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
             {
-                for (uint32 j = 0; j < pBag->GetBagSize(); j++)
+                if (Item* pItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                 {
-                    if (Item* pItem = player->GetItemByPos(i, j))
+                    uint32 count = pItem->GetCount();
+                    // ItemId, reference, chance, needsquest, lootmode, groupid, mincount, maxcount
+                    LootStoreItem lootItem(pItem->GetEntry(), 0, 100.0f, 0, 1, 0, count, count);
+                    storeItems.push_back(lootItem);
+                    player->DestroyItemCount(pItem, count, true);
+                }
+            }
+
+            for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+            {
+                if (Bag* pBag = player->GetBagByPos(i))
+                {
+                    for (uint32 j = 0; j < pBag->GetBagSize(); j++)
                     {
-                        uint32 count = pItem->GetCount();
-                        LootStoreItem lootItem(pItem->GetEntry(), 0, 100.0f, 0, 1, 0, count, count);
-                        storeItems.push_back(lootItem);
-                        player->DestroyItemCount(pItem, count, true);
+                        if (Item* pItem = player->GetItemByPos(i, j))
+                        {
+                            uint32 count = pItem->GetCount();
+                            LootStoreItem lootItem(pItem->GetEntry(), 0, 100.0f, 0, 1, 0, count, count);
+                            storeItems.push_back(lootItem);
+                            player->DestroyItemCount(pItem, count, true);
+                        }
                     }
                 }
             }
-        }
-        // If player is in Null Sec, drop also his/her equipped items, but with a chance.
-        if (zoneSec == ZONE_SECURITY_LEVEL_NULL)
-        {
+
             for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
             {
                 if (Item* pItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
@@ -222,40 +242,54 @@ public:
                     player->DestroyItemCount(pItem, count, true);
                 }
             }
-        }
-        // Add items to the loot store
-        LootTemplates_Gameobject.LoadDynamicLootTemplate(storeItems, freeLootId);
 
-        // Spawn the lootable player remains
-        float x = float(player->GetPositionX());
-        float y = float(player->GetPositionY());
-        float z = float(player->GetPositionZ());
-        float o = float(player->GetOrientation());
-        Map* map = player->GetMap();
+            // Add items to the loot store
+            LootTemplates_Gameobject.LoadDynamicLootTemplate(storeItems, freeLootId);
 
-        GameObject* object = new GameObject;
-        uint32 guidLow = sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT);
+            // Spawn the lootable player remains
+            float x = float(player->GetPositionX());
+            float y = float(player->GetPositionY());
+            float z = float(player->GetPositionZ());
+            float o = float(player->GetOrientation());
+            Map* map = player->GetMap();
 
-        if (!object->Create(guidLow, PLAYER_REMAINS_ENTRY, map, player->GetPhaseMaskForSpawn(), x, y, z, o, 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
-        {
-            delete object;
-            return;
-        }
+            GameObject* object = new GameObject;
+            uint32 guidLow = sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
-        map->AddToMap(object);
-        object->SetDynamicLootId(freeLootId);
+            if (!object->Create(guidLow, PLAYER_REMAINS_ENTRY, map, player->GetPhaseMaskForSpawn(), x, y, z, o, 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
+            {
+                delete object;
+                return;
+            }
 
-        // Give the killer his money
-        uint32 money = player->GetMoney();
-        if (money > 0)
-        {
-            player->ModifyMoney(money * -1, false);
-            uint32 golds = uint32(money / 10000);
-            uint32 silvers = uint32((money - (golds * 10000)) / 100);
-            uint32 coppers = uint32(money - (golds * 10000) - (silvers * 100));
-            ChatHandler(player->GetSession()).PSendSysMessage(LANG_PVP_MONEY_LOST, lootOwner->GetName().c_str(), golds, silvers, coppers);
-            lootOwner->ModifyMoney(money);
-            ChatHandler(lootOwner->GetSession()).PSendSysMessage(LANG_PVP_MONEY_WON, golds, silvers, coppers, player->GetName().c_str());
+            map->AddToMap(object);
+            object->SetDynamicLootId(freeLootId);
+
+            // Give the player the starting gear
+            if (CharStartOutfitEntry const* oEntry = GetCharStartOutfitEntry(player->getRace(), player->getClass(), player->getGender()))
+            {
+                for (int j = 0; j < MAX_OUTFIT_ITEMS; ++j)
+                {
+                    if (oEntry->ItemId[j] <= 0)
+                        continue;
+
+                    uint32 itemId = oEntry->ItemId[j];
+
+                    // just skip, reported in ObjectMgr::LoadItemTemplates
+                    ItemTemplate const* iProto = sObjectMgr->GetItemTemplate(itemId);
+                    if (!iProto)
+                        continue;
+
+                    // BuyCount by default
+                    uint32 count = iProto->BuyCount;
+
+                    // Skip food/drink
+                    if (iProto->Class == ITEM_CLASS_CONSUMABLE && iProto->SubClass == ITEM_SUBCLASS_FOOD)
+                        continue;
+
+                    player->StoreNewItemInBestSlots(itemId, count);
+                }
+            }
         }
     }
 };

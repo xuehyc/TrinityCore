@@ -17969,43 +17969,49 @@ ZoneSecurityLevels Unit::GetZoneSecurityLevel()
     const AreaTableEntry* atEntry = GetAreaEntryByAreaID(GetAreaId());
     if (atEntry)
     {
-        // Player is in Null Sec
-        // If the unit is a player, he can be in null sec if the zone is owned by the opposite faction
-        if (GetTypeId() == TYPEID_PLAYER)
-        {
-            if (((ToPlayer()->GetTeam() == TEAM_ALLIANCE && atEntry->team == TEAM_HORDE)
-                || (ToPlayer()->GetTeam() == TEAM_HORDE && atEntry->team == TEAM_ALLIANCE))
-                // Exclude Low Sec zones
-                || (sNullSecMgr->IsNullSecZone(GetZoneId())))
-                return ZONE_SECURITY_LEVEL_NULL;
-        }
-        else
-        {
-            if (sNullSecMgr->IsNullSecZone(GetZoneId()))
-                return ZONE_SECURITY_LEVEL_NULL;
-        }
+        uint32 zoneId = atEntry->zone;
+        if (!zoneId)
+            zoneId = atEntry->ID;
 
-        switch (atEntry->zone)
+        switch (zoneId)
         {
             // Unit is in High Sec. Bear in mind that if the unit was
             // of the opposite faction, Null Sec was returned previously.
-        case HIGHSEC_ZONE_MULGORE:
-        case HIGHSEC_ZONE_DUROTAR:
-        case HIGHSEC_ZONE_ORGRIMMAR:
-        case HIGHSEC_ZONE_THUNDERBLUFF:
-        case HIGHSEC_ZONE_TELDRASSIL:
-        case HIGHSEC_ZONE_ELWYNN_FOREST:
-        case HIGHSEC_ZONE_STORMWIND:
-        case HIGHSEC_ZONE_DARNASSUS:
-            return ZONE_SECURITY_LEVEL_HIGH;
-            // Player is in Low Sec zone
-        case LOWSEC_ZONE_DARKSHORE:
-        case LOWSEC_ZONE_ASHENVALE:
-        case LOWSEC_ZONE_AZSHARA:
-        case LOWSEC_ZONE_THE_BARRENS:
-            return ZONE_SECURITY_LEVEL_LOW;
-        default:
-            break;
+            case HIGHSEC_ZONE_MULGORE:
+            case HIGHSEC_ZONE_DUROTAR:
+            case HIGHSEC_ZONE_TIRISFAL_GLADES:
+            case HIGHSEC_ZONE_ORGRIMMAR:
+            case HIGHSEC_ZONE_THUNDERBLUFF:
+            case HIGHSEC_ZONE_UNDERCITY:
+            case HIGHSEC_ZONE_TELDRASSIL:
+            case HIGHSEC_ZONE_ELWYNN_FOREST:
+            case HIGHSEC_ZONE_DUN_MOROGH:
+            case HIGHSEC_ZONE_STORMWIND:
+            case HIGHSEC_ZONE_DARNASSUS:
+            case HIGHSEC_ZONE_IRONFORGE:
+                // If the unit is a player, he'll be in null sec if he is in a high sec territory of the enemy faction.
+                if (GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (((ToPlayer()->GetTeam() == TEAM_ALLIANCE && atEntry->team == TEAM_HORDE)
+                        || (ToPlayer()->GetTeam() == TEAM_HORDE && atEntry->team == TEAM_ALLIANCE)))
+                        return ZONE_SECURITY_LEVEL_NULL;
+                }
+                return ZONE_SECURITY_LEVEL_HIGH;
+                // Player is in Low Sec zone
+            case LOWSEC_ZONE_DARKSHORE:
+            case LOWSEC_ZONE_ASHENVALE:
+            case LOWSEC_ZONE_AZSHARA:
+            case LOWSEC_ZONE_THE_BARRENS:
+                return ZONE_SECURITY_LEVEL_LOW;
+            // Player is in Null Sec
+            case NULLSEC_ZONE_DESOLACE:
+            case NULLSEC_ZONE_WINTERSPRING:
+            case NULLSEC_ZONE_DUSTWALLOW_MARSH:
+            case NULLSEC_ZONE_STONETALON_MOUNTAINS:
+            case NULLSEC_ZONE_FELWOOD:
+                return ZONE_SECURITY_LEVEL_NULL;
+            default:
+                break;
         }
     }
     // Player is in instanced/out of the map territoy.
