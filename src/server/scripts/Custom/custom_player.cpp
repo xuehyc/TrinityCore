@@ -71,7 +71,6 @@ public:
             case HIGHSEC_ZONE_ORGRIMMAR:
             case HIGHSEC_ZONE_THUNDERBLUFF:
             case HIGHSEC_ZONE_UNDERCITY:
-            
                 if (player->GetTeam() == HORDE)
                 {
                     player->pvpInfo.IsInHighSecZone = true;
