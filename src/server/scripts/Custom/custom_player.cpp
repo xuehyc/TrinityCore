@@ -89,6 +89,7 @@ public:
             case HIGHSEC_ZONE_STORMWIND:
             case HIGHSEC_ZONE_DARNASSUS:
             case HIGHSEC_ZONE_IRONFORGE:
+            case HIGHSEC_ZONE_DEEPRUN_TRAM:
                 if (player->GetTeam() == ALLIANCE)
                 {
                     player->pvpInfo.IsInHighSecZone = true;
