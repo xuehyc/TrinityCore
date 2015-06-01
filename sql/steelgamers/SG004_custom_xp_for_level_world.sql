@@ -1,0 +1,2 @@
+-- Make leveling more or less constant and faster than retail from level 10 upwards
+UPDATE `player_xp_for_level` SET `xp_for_next_level` = xp_for_next_level * ((100 - lvl) / 100) WHERE lvl BETWEEN 11 AND 50;
