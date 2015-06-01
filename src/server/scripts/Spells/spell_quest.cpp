@@ -208,22 +208,23 @@ class spell_q6124_6129_apply_salve : public SpellScriptLoader
                 if (GetCastItem())
                     if (Creature* creatureTarget = GetHitCreature())
                     {
-                        uint32 uiNewEntry = 0;
+                        uint32 newEntry = 0;
                         switch (caster->GetTeam())
                         {
                             case HORDE:
                                 if (creatureTarget->GetEntry() == NPC_SICKLY_GAZELLE)
-                                    uiNewEntry = NPC_CURED_GAZELLE;
+                                    newEntry = NPC_CURED_GAZELLE;
                                 break;
                             case ALLIANCE:
                                 if (creatureTarget->GetEntry() == NPC_SICKLY_DEER)
-                                    uiNewEntry = NPC_CURED_DEER;
+                                    newEntry = NPC_CURED_DEER;
                                 break;
                         }
-                        if (uiNewEntry)
+                        if (newEntry)
                         {
-                            creatureTarget->UpdateEntry(uiNewEntry);
+                            creatureTarget->UpdateEntry(newEntry);
                             creatureTarget->DespawnOrUnsummon(DESPAWN_TIME);
+                            caster->KilledMonsterCredit(newEntry);
                         }
                     }
             }
@@ -338,7 +339,7 @@ class spell_q11396_11399_scourging_crystal_controller : public SpellScriptLoader
         SpellScript* GetSpellScript() const override
         {
             return new spell_q11396_11399_scourging_crystal_controller_SpellScript();
-        };
+        }
 };
 
 // 43882 Scourging Crystal Controller Dummy
@@ -374,7 +375,7 @@ class spell_q11396_11399_scourging_crystal_controller_dummy : public SpellScript
         SpellScript* GetSpellScript() const override
         {
             return new spell_q11396_11399_scourging_crystal_controller_dummy_SpellScript();
-        };
+        }
 };
 
 // http://www.wowhead.com/quest=11515 Blood for Blood
@@ -855,7 +856,7 @@ class spell_symbol_of_life_dummy : public SpellScriptLoader
         SpellScript* GetSpellScript() const override
         {
             return new spell_symbol_of_life_dummy_SpellScript();
-        };
+        }
 };
 
 // http://www.wowhead.com/quest=12659 Scalps!
@@ -898,7 +899,7 @@ class spell_q12659_ahunaes_knife : public SpellScriptLoader
         SpellScript* GetSpellScript() const override
         {
             return new spell_q12659_ahunaes_knife_SpellScript();
-        };
+        }
 };
 
 enum StoppingTheSpread
@@ -944,7 +945,7 @@ class spell_q9874_liquid_fire : public SpellScriptLoader
         SpellScript* GetSpellScript() const override
         {
             return new spell_q9874_liquid_fire_SpellScript();
-        };
+        }
 };
 
 enum SalvagingLifesStength
@@ -988,7 +989,7 @@ class spell_q12805_lifeblood_dummy : public SpellScriptLoader
         SpellScript* GetSpellScript() const override
         {
             return new spell_q12805_lifeblood_dummy_SpellScript();
-        };
+        }
 };
 
 /*
@@ -2422,6 +2423,36 @@ class spell_q10929_fumping : SpellScriptLoader
     }
 };
 
+class spell_q12414_hand_over_reins : public SpellScriptLoader
+{
+    public:
+        spell_q12414_hand_over_reins() : SpellScriptLoader("spell_q12414_hand_over_reins") { }
+
+        class spell_q12414_hand_over_reins_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_q12414_hand_over_reins_SpellScript);
+
+            void HandleScript(SpellEffIndex /*effIndex*/)
+            {
+                Creature* caster = GetCaster()->ToCreature();
+                GetHitUnit()->ExitVehicle();
+
+                if (caster)
+                    caster->DespawnOrUnsummon();
+            }
+
+            void Register() override
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_q12414_hand_over_reins_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_q12414_hand_over_reins_SpellScript();
+        }
+};
+
 void AddSC_quest_spell_scripts()
 {
     new spell_q55_sacred_cleansing();
@@ -2480,4 +2511,5 @@ void AddSC_quest_spell_scripts()
     new spell_q13400_illidan_kill_master();
     new spell_q14100_q14111_make_player_destroy_totems();
     new spell_q10929_fumping();
+    new spell_q12414_hand_over_reins();
 }

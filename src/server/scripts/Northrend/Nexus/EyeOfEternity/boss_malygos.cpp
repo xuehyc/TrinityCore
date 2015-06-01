@@ -128,7 +128,6 @@ enum Spells
     SPELL_ARCANE_BARRAGE_DAMAGE              = 63934, // the actual damage - cast by affected player by script spell
 
     // Transition /II-III/
-    SPELL_SUMMOM_RED_DRAGON_BUDYY            = 56070,
     SPELL_RIDE_RED_DRAGON_BUDDY              = 56071,
     SPELL_SUMMON_RED_DRAGON_BUDDY_F_CAST     = 58846, // After implicitly hit player targets they will force cast 56070 on self
     SPELL_DESTROY_PLATFORM_CHANNEL           = 58842,
@@ -520,11 +519,7 @@ public:
                     _despawned = false;
                     break;
                 case ACTION_CYCLIC_MOVEMENT:
-                    Movement::MoveSplineInit init(me);
-                    FillCirclePath(MalygosPositions[3], 120.0f, 283.2763f, init.Path(), true);
-                    init.SetFly();
-                    init.SetCyclic();
-                    init.Launch();
+                    me->GetMotionMaster()->MoveCirclePath(MalygosPositions[3].GetPositionX(), MalygosPositions[3].GetPositionY(), 283.2763f, 120.0f, true, 16);
                     break;
             }
         }
@@ -1020,22 +1015,6 @@ public:
         }
 
     private:
-        // Used to generate perfect cyclic movements (Enter Circle).
-        void FillCirclePath(Position const& centerPos, float radius, float z, Movement::PointsArray& path, bool clockwise)
-        {
-            float step = clockwise ? float(-M_PI) / 8.0f : float(M_PI) / 8.0f;
-            float angle = centerPos.GetAngle(me->GetPositionX(), me->GetPositionY());
-
-            for (uint8 i = 0; i < 16; angle += step, ++i)
-            {
-                G3D::Vector3 point;
-                point.x = centerPos.GetPositionX() + radius * cosf(angle);
-                point.y = centerPos.GetPositionY() + radius * sinf(angle);
-                point.z = z; // Don't use any height getters unless all bugs are fixed.
-                path.push_back(point);
-            }
-        }
-
         uint8 _phase; // Counter for phases used with a getter.
         uint8 _summonDeaths; // Keeps count of arcane trash.
         uint8 _preparingPulsesChecker; // In retail they use 2 preparing pulses with 7 sec CD, after they pass 2 seconds.
@@ -1326,11 +1305,7 @@ public:
         {
             if (action < ACTION_DELAYED_DESPAWN)
             {
-                Movement::MoveSplineInit init(me);
-                FillCirclePath(MalygosPositions[3], 35.0f, 282.3402f, init.Path(), true);
-                init.SetFly();
-                init.SetCyclic();
-                init.Launch();
+                me->GetMotionMaster()->MoveCirclePath(MalygosPositions[3].GetPositionX(), MalygosPositions[3].GetPositionY(), 282.3402f, 35.0f, true, 16);
             }
             else
             {
@@ -1339,21 +1314,6 @@ public:
         }
 
     private:
-        void FillCirclePath(Position const& centerPos, float radius, float z, Movement::PointsArray& path, bool clockwise)
-        {
-            float step = clockwise ? float(-M_PI) / 9.0f : float(M_PI) / 9.0f;
-            float angle = centerPos.GetAngle(me->GetPositionX(), me->GetPositionY());
-
-            for (uint8 i = 0; i < 18; angle += step, ++i)
-            {
-                G3D::Vector3 point;
-                point.x = centerPos.GetPositionX() + radius * cosf(angle);
-                point.y = centerPos.GetPositionY() + radius * sinf(angle);
-                point.z = z; // Don't use any height getters unless all bugs are fixed.
-                path.push_back(point);
-            }
-        }
-
         InstanceScript* _instance;
     };
 

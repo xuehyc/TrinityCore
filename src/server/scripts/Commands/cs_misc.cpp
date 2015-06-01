@@ -25,7 +25,6 @@
 #include "InstanceSaveMgr.h"
 #include "Language.h"
 #include "MovementGenerator.h"
-#include "ObjectAccessor.h"
 #include "Opcodes.h"
 #include "SpellAuras.h"
 #include "TargetedMovementGenerator.h"
@@ -36,6 +35,7 @@
 #include "GroupMgr.h"
 #include "MMapFactory.h"
 #include "DisableMgr.h"
+#include "SpellHistory.h"
 
 class misc_commandscript : public CommandScript
 {
@@ -237,7 +237,8 @@ public:
             zoneId, (zoneEntry ? zoneEntry->area_name[handler->GetSessionDbcLocale()] : unknown),
             areaId, (areaEntry ? areaEntry->area_name[handler->GetSessionDbcLocale()] : unknown),
             object->GetPhaseMask(),
-            object->GetPositionX(), object->GetPositionY(), object->GetPositionZ(), object->GetOrientation(),
+            object->GetPositionX(), object->GetPositionY(), object->GetPositionZ(), object->GetOrientation());
+        handler->PSendSysMessage(LANG_GRID_POSITION,
             cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), object->GetInstanceId(),
             zoneX, zoneY, groundZ, floorZ, haveMap, haveVMap, haveMMap);
 
@@ -708,7 +709,7 @@ public:
 
         if (!*args)
         {
-            target->RemoveAllSpellCooldown();
+            target->GetSpellHistory()->ResetAllCooldowns();
             handler->PSendSysMessage(LANG_REMOVEALL_COOLDOWN, nameLink.c_str());
         }
         else
@@ -718,14 +719,15 @@ public:
             if (!spellIid)
                 return false;
 
-            if (!sSpellMgr->GetSpellInfo(spellIid))
+            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellIid);
+            if (!spellInfo)
             {
                 handler->PSendSysMessage(LANG_UNKNOWN_SPELL, target == handler->GetSession()->GetPlayer() ? handler->GetTrinityString(LANG_YOU) : nameLink.c_str());
                 handler->SetSentErrorMessage(true);
                 return false;
             }
 
-            target->RemoveSpellCooldown(spellIid, true);
+            target->GetSpellHistory()->ResetCooldown(spellIid, true);
             handler->PSendSysMessage(LANG_REMOVE_COOLDOWN, spellIid, target == handler->GetSession()->GetPlayer() ? handler->GetTrinityString(LANG_YOU) : nameLink.c_str());
         }
         return true;
@@ -1438,7 +1440,7 @@ public:
          * Player %s %s (guid: %u)                   - I.    LANG_PINFO_PLAYER
          * ** GM Mode active, Phase: -1              - II.   LANG_PINFO_GM_ACTIVE (if GM)
          * ** Banned: (Type, Reason, Time, By)       - III.  LANG_PINFO_BANNED (if banned)
-         * ** Muted: (Time, Reason, By)              - IV.   LANG_PINFO_MUTED (if muted)
+         * ** Muted: (Reason, Time, By)              - IV.   LANG_PINFO_MUTED (if muted)
          * * Account: %s (id: %u), GM Level: %u      - V.    LANG_PINFO_ACC_ACCOUNT
          * * Last Login: %u (Failed Logins: %u)      - VI.   LANG_PINFO_ACC_LASTLOGIN
          * * Uses OS: %s - Latency: %u ms            - VII.  LANG_PINFO_ACC_OS
@@ -1691,7 +1693,7 @@ public:
 
         // Output IV. LANG_PINFO_MUTED if mute is applied
         if (muteTime > 0)
-            handler->PSendSysMessage(LANG_PINFO_MUTED, secsToTimeString(muteTime - time(NULL), true).c_str(), muteReason.c_str(), muteBy.c_str());
+            handler->PSendSysMessage(LANG_PINFO_MUTED, muteReason.c_str(), secsToTimeString(muteTime - time(nullptr), true).c_str(), muteBy.c_str());
 
         // Output V. LANG_PINFO_ACC_ACCOUNT
         handler->PSendSysMessage(LANG_PINFO_ACC_ACCOUNT, userName.c_str(), accId, security);
@@ -1980,7 +1982,7 @@ public:
         PreparedStatement *stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_MUTE_INFO);
         stmt->setUInt32(0, accountId);
         PreparedQueryResult result = LoginDatabase.Query(stmt);
-        
+
         if (!result)
         {
             handler->PSendSysMessage(LANG_COMMAND_MUTEHISTORY_EMPTY, accountName);
@@ -1991,16 +1993,16 @@ public:
         do
         {
             Field* fields = result->Fetch();
-            
+
             // we have to manually set the string for mutedate
             time_t sqlTime = fields[0].GetUInt32();
             tm timeinfo;
             char buffer[80];
-            
+
             // set it to string
             localtime_r(&sqlTime, &timeinfo);
             strftime(buffer, sizeof(buffer),"%Y-%m-%d %I:%M%p", &timeinfo);
-            
+
             handler->PSendSysMessage(LANG_COMMAND_MUTEHISTORY_OUTPUT, buffer, fields[1].GetUInt32(), fields[2].GetCString(), fields[3].GetCString());
         } while (result->NextRow());
         return true;

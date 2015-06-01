@@ -24,7 +24,6 @@
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Player.h"
-#include "UpdateMask.h"
 #include "Path.h"
 #include "WaypointMovementGenerator.h"
 
@@ -238,7 +237,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recvData)
             TaxiPathNodeEntry const& node = flight->GetPath()[flight->GetCurrentNode()];
             flight->SkipCurrentNode();
 
-            GetPlayer()->TeleportTo(curDestNode->map_id, node.x, node.y, node.z, GetPlayer()->GetOrientation());
+            GetPlayer()->TeleportTo(curDestNode->map_id, node.LocX, node.LocY, node.LocZ, GetPlayer()->GetOrientation());
         }
         return;
     }
