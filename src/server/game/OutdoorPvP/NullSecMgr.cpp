@@ -73,6 +73,7 @@ void NullSecMgr::InitNullSecMgr()
             nullSecGuildZoneData.GuildZoneId = guildZoneId;
             nullSecGuildZoneData.GuildZoneName = fields[1].GetString();
             nullSecGuildZoneData.ZoneId = fields[8].GetUInt32();
+            nullSecGuildZoneData.Areas.push_back(fields[9].GetUInt32());
             nullSecGuildZoneData.VitalArea = fields[2].GetUInt32();
             Position standardPosition {fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat(), fields[6].GetFloat()};
             nullSecGuildZoneData.StandardPosition = standardPosition;

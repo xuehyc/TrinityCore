@@ -163,6 +163,8 @@ UPDATE `creature_template` SET `ScriptName` = 'npc_null_sec_gossip' WHERE `entry
 6272,
 4893,
 4894,
-5388
+5388,
+5199,
+8140
 )
 AND `ScriptName` = '';
