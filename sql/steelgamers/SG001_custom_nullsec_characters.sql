@@ -39,7 +39,8 @@ COMMENT='Stores what areas delimit each of the player controllable zones.'
 COLLATE='utf8_general_ci'
 ENGINE=InnoDB;
 
-REPLACE INTO `custom_nullsec_guild_areas` VALUES
+DELETE FROM `custom_nullsec_guild_areas`;
+INSERT INTO `custom_nullsec_guild_areas` (`guild_zone_id`, `zone_id`, `area_id`) VALUES
 -- Winterspring North
 (1, 618, 2241),
 (1, 618, 2242),
@@ -82,7 +83,7 @@ REPLACE INTO `custom_nullsec_guild_areas` VALUES
 (5, 361, 2481),
 -- Stonetalon Mountains East
 (6, 406, 469),
-(6, 406, 469),
+(6, 406, 460),
 (6, 406, 463),
 (6, 406, 461),
 (6, 406, 2541),
@@ -98,7 +99,6 @@ REPLACE INTO `custom_nullsec_guild_areas` VALUES
 -- Stonetalon Mountains West
 (7, 406, 464),
 (7, 406, 465),
-(7, 406, 464),
 (7, 406, 467),
 (7, 406, 468),
 -- Desolace North

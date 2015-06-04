@@ -29,9 +29,9 @@ EndScriptData */
 #include "GuildMgr.h"
 
 #define MAX_STANDARD_HEALTH 100000
-#define TIME_TO_REGEN 60000 // 10 minutes
-#define TIME_TO_CLAIM 180000   // 30 minutes
-#define TIME_TO_DESPAWN 60000      // 5 seconds
+#define TIME_TO_REGEN 60000   // 10 minutes
+#define TIME_TO_CLAIM 180000  // 30 minutes
+#define TIME_TO_DESPAWN 60000 // 5 seconds
 
 enum States
 {
@@ -173,6 +173,33 @@ public:
     CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_standard_of_conquestAI(creature);
+    }
+};
+
+class npc_null_sec_gossip : public CreatureScript
+{
+public:
+    npc_null_sec_gossip() : CreatureScript("npc_null_sec_gossip") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (creature->GetZoneSecurityLevel() != ZONE_SECURITY_LEVEL_NULL)
+            return false;
+
+        if (player->IsGameMaster())
+            return false;
+
+        // The NPC will interact with the player only if his/her guild has conquered the zone or the zone has no owner
+        Guild* zoneOwner = sNullSecMgr->GetNullSecZoneOwner(sNullSecMgr->GetNullSecGuildZone(creature->GetZoneId(), creature->GetAreaId()));
+        if (zoneOwner == NULL)
+            return false;
+
+        if (player->GetGuild() == zoneOwner)
+            return false;
+
+        // do not interact with the player
+        player->PlayerTalkClass->ClearMenus();
+        return true;
     }
 };
 
@@ -816,6 +843,7 @@ public:
 void AddSC_custom_npcs()
 {
     new npc_standard_of_conquest();
+    new npc_null_sec_gossip();
     new npc_tour_guide();
     new npc_thuul_image();
     new npc_malin_image();
