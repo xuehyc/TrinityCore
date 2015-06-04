@@ -130,10 +130,11 @@ public:
                 player->pvpInfo.IsInHighSecZone = false;
                 break;
             default:
-                // Player can be:
+                // The player can be:
                 //   a) In a restricted zone outside the open world map.
-                //   b) In an instanced map
-                if (!player->GetMap()->IsBattlegroundOrArena() && !player->GetInstanceId())
+                //   b) In an instanced map.
+                // Also ignore this if the player is a Game Master.
+                if (!player->GetMap()->IsBattlegroundOrArena() && !player->GetInstanceId() && !player->IsGameMaster())
                 {
                     // Player should be in a restricted area, outside the open zones. Return him to the nearest graveyard.
                     float graveyardDistance = -1.0f;
