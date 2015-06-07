@@ -35,8 +35,8 @@ void NullSecMgr::InitNullSecMgr()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                                   0                1                  2                3             4             5             6             7        8          9
-    QueryResult result = CharacterDatabase.Query("SELECT a.guild_zone_id, a.guild_zone_name, a.vital_area_id, a.standard_x, a.standard_y, a.standard_z, a.standard_o, a.owner, b.zone_id, b.area_id FROM custom_nullsec_guild_zones AS a, custom_nullsec_guild_areas AS b WHERE a.guild_zone_id = b.guild_zone_id ORDER BY a.guild_zone_id");
+    //                                                   0                1                  2                3             4             5             6             7        8          9          10                  11                  12
+    QueryResult result = CharacterDatabase.Query("SELECT a.guild_zone_id, a.guild_zone_name, a.vital_area_id, a.standard_x, a.standard_y, a.standard_z, a.standard_o, a.owner, b.zone_id, b.area_id, a.lowsec_respawn_x, a.lowsec_respawn_y, a.lowsec_respawn_z FROM custom_nullsec_guild_zones AS a, custom_nullsec_guild_areas AS b WHERE a.guild_zone_id = b.guild_zone_id ORDER BY a.guild_zone_id");
 
     if (!result)
     {
@@ -75,8 +75,8 @@ void NullSecMgr::InitNullSecMgr()
             nullSecGuildZoneData.ZoneId = fields[8].GetUInt32();
             nullSecGuildZoneData.Areas.push_back(fields[9].GetUInt32());
             nullSecGuildZoneData.VitalArea = fields[2].GetUInt32();
-            Position standardPosition {fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat(), fields[6].GetFloat()};
-            nullSecGuildZoneData.StandardPosition = standardPosition;
+            nullSecGuildZoneData.StandardPosition = Position { fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat(), fields[6].GetFloat() };
+            nullSecGuildZoneData.LowSecRespawnPosition = Position { fields[10].GetFloat(), fields[11].GetFloat(), fields[12].GetFloat() };
             if (!fields[2].GetUInt32())
                 nullSecGuildZoneData.Owner = NULL;
             else
@@ -273,6 +273,14 @@ Position NullSecMgr::GetStandardPositionByGuildZoneId(uint32 guildZoneId)
     return m_guildZones[guildZoneId].StandardPosition;
 }
 
+Position NullSecMgr::GetLowSecRespawnPositionByGuildZoneId(uint32 guildZoneId)
+{
+    if (guildZoneId > MAX_NULLSEC_ZONES || !guildZoneId)
+        return NULL;
+
+    return m_guildZones[guildZoneId].LowSecRespawnPosition;
+}
+
 bool NullSecMgr::IsGuildZoneUnderAttack(uint32 guildZoneId)
 {
     if (guildZoneId > MAX_NULLSEC_ZONES || !guildZoneId)
@@ -328,6 +336,40 @@ std::string NullSecMgr::GetGuildZoneName(uint32 guildZoneId)
         return NULL;
 
     return m_guildZones[guildZoneId].GuildZoneName;
+}
+
+Position NullSecMgr::GetNearestRespawnPointForPlayer(Player* player)
+{
+    if (!player->IsInGuildZone())
+        return player->GetPosition();
+
+    // Check first distance to all posible null sec respawn points, if the
+    // player's guild has conquered them, and select the nearest possible.
+    uint32 guildZoneId = player->GetGuildZoneId();
+    float nearestNullSecDistance = 0.0f;
+    uint32 nearestNullSecLocation = GUILD_ZONE_NONE;
+    if (player->GetGuild())
+    {
+        for (uint8 i = GUILD_ZONE_NONE + 1; i < TOTAL_GUILD_ZONES; ++i)
+        {
+            if (GetNullSecZoneOwner(i) == player->GetGuild())
+            {
+                Position nullSecPos = GetStandardPositionByGuildZoneId(i);
+                float distance = player->GetDistance2d(nullSecPos.GetPositionX(), nullSecPos.GetPositionY());
+                if (distance < nearestNullSecDistance || nearestNullSecDistance == 0.0f)
+                {
+                    nearestNullSecDistance = distance;
+                    nearestNullSecLocation = i;
+                }
+            }
+        }
+    }
+    // Now check what's nearer, the low sec respawn point or the null sec respawn point (if any)
+    Position lowSecPos = GetLowSecRespawnPositionByGuildZoneId(guildZoneId);
+    if (nearestNullSecLocation != GUILD_ZONE_NONE && player->GetDistance2d(lowSecPos.GetPositionX(), lowSecPos.GetPositionY()) > nearestNullSecDistance)
+        return GetStandardPositionByGuildZoneId(nearestNullSecLocation);
+    
+    return GetLowSecRespawnPositionByGuildZoneId(guildZoneId);
 }
 
 void NullSecMgr::OnGuildDisband(Guild* guild)

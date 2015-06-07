@@ -36,6 +36,7 @@ struct NullSecGuildZoneData
     std::vector<uint32> Areas;
     uint32 VitalArea;
     Position StandardPosition;
+    Position LowSecRespawnPosition;
     Guild* Owner;
     Guild* Attacker;
     bool IsUnderAttack;
@@ -64,6 +65,7 @@ public:
     uint32 GetNullSecGuildZone(uint32 zoneId, uint32 areaId);
     uint32 GetVitalAreaByGuildZoneId(uint32 guildZoneId);
     Position GetStandardPositionByGuildZoneId(uint32 guildZoneId);
+    Position GetLowSecRespawnPositionByGuildZoneId(uint32 guildZoneId);
     bool IsGuildZoneUnderAttack(uint32 guildZoneId);
     void SetGuildZoneUnderAttack(uint32 guildZoneId, bool underAttack, Guild* attacker = NULL);
     Guild* GetGuildZoneAttacker(uint32 guildZoneId);
@@ -71,6 +73,7 @@ public:
     void OnPlayerEnterNullSecZone(Player* player);
     void OnPlayerEnterNullSecGuildZone(Player* player);
     void OnPlayerLeaveNullSecGuildZone(Player* player);
+    Position GetNearestRespawnPointForPlayer(Player* player);
     void OnGuildDisband(Guild* guild);
 
 private:

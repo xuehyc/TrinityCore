@@ -79,6 +79,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "GameObjectAI.h"
+#include "NullSecMgr.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -5379,7 +5380,10 @@ void Player::RepopAtGraveyard()
         if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(GetZoneId()))
             ClosestGrave = bf->GetClosestGraveYard(this);
         else
-            ClosestGrave = sObjectMgr->GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam());
+        {
+            Position respawnPos = sNullSecMgr->GetNearestRespawnPointForPlayer(this); // Will return the player's position if he's not in a conquerable zone
+            ClosestGrave = sObjectMgr->GetClosestGraveYard(respawnPos.GetPositionX(), respawnPos.GetPositionY(), respawnPos.GetPositionZ(), GetMapId(), GetTeam());
+        }
     }
 
     // stop countdown until repop

@@ -3632,7 +3632,8 @@ enum GuildZones
     GUILD_ZONE_DESOLACE_NORTH            = 8,
     GUILD_ZONE_DESOLACE_SOUTH            = 9,
     GUILD_ZONE_DUSTWALLOW_MARSH_NORTH    = 10,
-    GUILD_ZONE_DUSTWALLOW_MARSH_SOUTH    = 11
+    GUILD_ZONE_DUSTWALLOW_MARSH_SOUTH    = 11,
+    TOTAL_GUILD_ZONES                    = 12
 };
 
 // This zones must be defined here as, obviously, there's no flag in AreaTableEntry
