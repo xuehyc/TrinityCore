@@ -29,9 +29,11 @@ EndScriptData */
 #include "GuildMgr.h"
 
 #define MAX_STANDARD_HEALTH 100000
-#define TIME_TO_REGEN 60000   // 10 minutes
-#define TIME_TO_CLAIM 180000  // 30 minutes
-#define TIME_TO_DESPAWN 60000 // 5 seconds
+#define TIME_TO_REGEN 60000               // 10 minutes
+#define TIME_TO_CLAIM 180000              // 30 minutes
+#define TIME_TO_DESPAWN 60000             // 5 seconds
+#define TIME_TO_REMOVE_STEALTH 10000      // 10 seconds
+#define MAX_REMOVE_STEALTH_DISTANCE 80.0f // 80 meters
 
 enum States
 {
@@ -54,6 +56,7 @@ public:
             claimTimer = TIME_TO_CLAIM;
             despawnTimer = TIME_TO_DESPAWN;
             regenTimer = TIME_TO_REGEN;
+            removeStealthTimer = TIME_TO_REMOVE_STEALTH;
             standardOwner = NULL;
             guildZoneId = sNullSecMgr->GetNullSecGuildZone(me->GetZoneId(), me->GetAreaId());
         }
@@ -61,6 +64,7 @@ public:
         uint32 claimTimer;
         uint32 despawnTimer;
         uint32 regenTimer;
+        uint32 removeStealthTimer;
         uint32 standardState;
         uint32 guildZoneId;
         Guild* standardOwner;
@@ -81,6 +85,7 @@ public:
             claimTimer = TIME_TO_CLAIM;
             despawnTimer = TIME_TO_DESPAWN;
             regenTimer = TIME_TO_REGEN;
+            removeStealthTimer = TIME_TO_REMOVE_STEALTH;
         }
 
         void EnterEvadeMode() override
@@ -146,6 +151,23 @@ public:
                     claimTimer -= diff;
             }
 
+            if (standardState == STANDARD_STATE_CLAIMED)
+            {
+                if (removeStealthTimer <= diff)
+                {
+                    std::list<Player*> nearPlayers;
+                    me->GetPlayerListInGrid(nearPlayers, MAX_REMOVE_STEALTH_DISTANCE);
+                    for (std::list<Player*>::iterator itr = nearPlayers.begin(); itr != nearPlayers.end(); ++itr)
+                    {
+                        if ((*itr)->GetGuild() != standardOwner)
+                            (*itr)->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                    }
+                    removeStealthTimer = TIME_TO_REMOVE_STEALTH;
+                }
+                else
+                    removeStealthTimer -= diff;
+            }
+            
             if (UpdateVictim())
             {
                 if (regenTimer <= diff)
