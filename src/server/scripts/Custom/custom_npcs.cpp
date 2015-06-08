@@ -198,8 +198,28 @@ public:
             return false;
 
         // do not interact with the player
+        creature->Say("Lo siento pero no hablo con extrangeros. Es mejor que te vayas.", LANG_UNIVERSAL);
         player->PlayerTalkClass->ClearMenus();
         return true;
+    }
+
+    struct npc_null_sec_gossipAI : ScriptedAI
+    {
+        npc_null_sec_gossipAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        void InitializeAI() override
+        {
+            // Add gossip flag if the unit doesn't have it
+            if (!me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
+                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_null_sec_gossipAI(creature);
     }
 };
 
@@ -450,7 +470,7 @@ public:
             // Control say timer (also phases when the chat ends)
             if (sayTimer <= diff && nextSay <= SAY_THUUL_GOOD_LUCK)
             {
-                Talk(nextSay, player);
+                me->ToCreature()->Say(nextSay, player);
                 switch (nextSay)
                 {
                     case SAY_THUUL_MORE_JOUNG:
