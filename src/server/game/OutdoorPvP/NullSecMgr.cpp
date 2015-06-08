@@ -35,8 +35,8 @@ void NullSecMgr::InitNullSecMgr()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                                   0                1                  2                3             4             5             6             7        8          9          10                  11                  12
-    QueryResult result = CharacterDatabase.Query("SELECT a.guild_zone_id, a.guild_zone_name, a.vital_area_id, a.standard_x, a.standard_y, a.standard_z, a.standard_o, a.owner, b.zone_id, b.area_id, a.lowsec_respawn_x, a.lowsec_respawn_y, a.lowsec_respawn_z FROM custom_nullsec_guild_zones AS a, custom_nullsec_guild_areas AS b WHERE a.guild_zone_id = b.guild_zone_id ORDER BY a.guild_zone_id");
+    //                                                   0                1                  2                3             4             5             6             7        8          9          10                  11                  12                  13              14
+    QueryResult result = CharacterDatabase.Query("SELECT a.guild_zone_id, a.guild_zone_name, a.vital_area_id, a.standard_x, a.standard_y, a.standard_z, a.standard_o, a.owner, b.zone_id, b.area_id, a.lowsec_respawn_x, a.lowsec_respawn_y, a.lowsec_respawn_z, a.taxi_node_id, a.taxi_node_2_id FROM custom_nullsec_guild_zones AS a, custom_nullsec_guild_areas AS b WHERE a.guild_zone_id = b.guild_zone_id ORDER BY a.guild_zone_id");
 
     if (!result)
     {
@@ -84,6 +84,8 @@ void NullSecMgr::InitNullSecMgr()
             nullSecGuildZoneData.Attacker = NULL;
             nullSecGuildZoneData.IsUnderAttack = false;
             nullSecGuildZoneData.IntrudersCount = 0;
+            nullSecGuildZoneData.TaxiNode = fields[13].GetUInt32();
+            nullSecGuildZoneData.TaxiNode2 = fields[14].GetUInt32();
             m_guildZones[guildZoneId] = nullSecGuildZoneData;
             ++countZones;
             ++countAreas;
@@ -370,6 +372,28 @@ Position NullSecMgr::GetNearestRespawnPointForPlayer(Player* player)
         return GetStandardPositionByGuildZoneId(nearestNullSecLocation);
     
     return GetLowSecRespawnPositionByGuildZoneId(guildZoneId);
+}
+
+bool NullSecMgr::IsAllowedTaxiNode(Player* player, uint32 taxiNodeId)
+{
+    // Check if this player is allowed to fly to this node (ergo his guild has the zone conquered)
+    // If player is in null sec, he can't fly nowhere
+    if (player->IsInGuildZone())
+        return false;
+
+    // Get zone by the taxi node ID
+    for (uint8 i = GUILD_ZONE_NONE; i < TOTAL_GUILD_ZONES; ++i)
+    {
+        if (m_guildZones[i].TaxiNode == taxiNodeId || m_guildZones[i].TaxiNode2 == taxiNodeId)
+        {
+            if (player->GetGuild() == m_guildZones[i].Owner)
+                return true;
+            
+            return false;
+        }
+    }
+    // The destination is not in null sec
+    return true;
 }
 
 void NullSecMgr::OnGuildDisband(Guild* guild)

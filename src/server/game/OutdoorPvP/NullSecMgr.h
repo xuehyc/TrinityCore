@@ -41,6 +41,8 @@ struct NullSecGuildZoneData
     Guild* Attacker;
     bool IsUnderAttack;
     uint32 IntrudersCount;
+    uint32 TaxiNode;
+    uint32 TaxiNode2; // Some zones have 2 taxi nodes, one for the Alliance and one for the Horde.
 };
 
 class NullSecMgr
@@ -74,6 +76,7 @@ public:
     void OnPlayerEnterNullSecGuildZone(Player* player);
     void OnPlayerLeaveNullSecGuildZone(Player* player);
     Position GetNearestRespawnPointForPlayer(Player* player);
+    bool IsAllowedTaxiNode(Player* player, uint32 taxiNodeId);
     void OnGuildDisband(Guild* guild);
 
 private:

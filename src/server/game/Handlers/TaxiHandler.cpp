@@ -26,6 +26,8 @@
 #include "Player.h"
 #include "Path.h"
 #include "WaypointMovementGenerator.h"
+#include "Chat.h"
+#include "NullSecMgr.h"
 
 void WorldSession::HandleTaxiNodeStatusQueryOpcode(WorldPacket& recvData)
 {
@@ -83,6 +85,10 @@ void WorldSession::HandleTaxiQueryAvailableNodes(WorldPacket& recvData)
 
     // unknown taxi node case
     if (SendLearnNewTaxiNode(unit))
+        return;
+
+    // You can't go out null sec using the taxi system
+    if (GetPlayer()->IsInGuildZone())
         return;
 
     // known taxi node case
@@ -199,6 +205,13 @@ void WorldSession::HandleActivateTaxiExpressOpcode (WorldPacket& recvData)
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_ACTIVATETAXIEXPRESS from %d to %d", nodes.front(), nodes.back());
 
+    // Check if destination is in Null sec, and if the player can go there
+    if (!sNullSecMgr->IsAllowedTaxiNode(GetPlayer(), nodes.back()))
+    {
+        ChatHandler(GetPlayer()->GetSession()).SendSysMessage("No puedes volar a ese territorio.");
+        return;
+    }
+
     GetPlayer()->ActivateTaxiPathTo(nodes, npc);
 }
 
@@ -294,6 +307,13 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
     if (!npc)
     {
         TC_LOG_DEBUG("network", "WORLD: HandleActivateTaxiOpcode - %s not found or you can't interact with it.", guid.ToString().c_str());
+        return;
+    }
+
+    // Check if destination is in Null sec, and if the player can go there
+    if (!sNullSecMgr->IsAllowedTaxiNode(GetPlayer(), nodes[1]))
+    {
+        ChatHandler(GetPlayer()->GetSession()).SendSysMessage("No puedes volar a ese territorio.");
         return;
     }
 
