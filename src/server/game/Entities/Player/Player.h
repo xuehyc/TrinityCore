@@ -2324,6 +2324,8 @@ class Player : public Unit, public GridObject<Player>
         // Gold bank system
         uint32 GetBankMoney() { return m_bankMoney; };
         void ModifyBankMoney(int32 amount);
+        // Balanced BG/Arena system
+        bool HasSanctionedItemsEquippedForPvP();
 
     protected:
         // Gamemaster whisper whitelist

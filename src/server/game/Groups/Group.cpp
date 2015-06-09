@@ -1860,6 +1860,9 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
         // check Freeze debuff
         if (member->HasAura(9454))
             return ERR_BATTLEGROUND_JOIN_FAILED;
+        // Check if the player has forbidden items equipped
+        if (!member->HasSanctionedItemsEquippedForPvP())
+            return ERR_BATTLEGROUND_JOIN_FAILED;
     }
 
     // only check for MinPlayerCount since MinPlayerCount == MaxPlayerCount for arenas...

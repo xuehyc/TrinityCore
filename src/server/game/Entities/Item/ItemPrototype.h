@@ -662,6 +662,7 @@ struct ItemTemplate
     uint32 MinMoneyLoot;
     uint32 MaxMoneyLoot;
     uint32 FlagsCu;
+    bool IsAllowedInPvP;
 
     // helpers
     bool CanChangeEquipStateInCombat() const

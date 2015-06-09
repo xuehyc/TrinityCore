@@ -146,6 +146,13 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
             return;
         }
 
+        // Check if the player has the allowed items equipped
+        if (!_player->HasSanctionedItemsEquippedForPvP())
+        {
+            ChatHandler(_player->GetSession()).SendSysMessage("Tienes que tener un equipo de PvP equipado para poder entrar en batallas competitivas.");
+            return;
+        }
+
         if (_player->GetBattlegroundQueueIndex(bgQueueTypeIdRandom) < PLAYER_MAX_BATTLEGROUND_QUEUES)
         {
             // player is already in random queue
@@ -444,6 +451,13 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
 
         if (!_player->IsInvitedForBattlegroundQueueType(bgQueueTypeId))
             return;                                 // cheating?
+
+        // Check if the player has equipped ilegal items during the queue
+        if (!_player->HasSanctionedItemsEquippedForPvP())
+        {
+            ChatHandler(_player->GetSession()).SendSysMessage("Tienes que tener un equipo de PvP equipado para poder entrar en batallas competitivas.");
+            return;
+        }
 
         if (!_player->InBattleground())
             _player->SetBattlegroundEntryPoint();

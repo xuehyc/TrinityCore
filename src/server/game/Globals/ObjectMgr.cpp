@@ -2341,8 +2341,8 @@ void ObjectMgr::LoadItemTemplates()
                                              "TotemCategory, socketColor_1, socketContent_1, socketColor_2, socketContent_2, socketColor_3, socketContent_3, socketBonus, "
     //                                            126                 127                     128            129            130            131         132         133
                                              "GemProperties, RequiredDisenchantSkill, ArmorDamageModifier, duration, ItemLimitCategory, HolidayId, ScriptName, DisenchantID, "
-    //                                           134        135            136
-                                             "FoodType, minMoneyLoot, maxMoneyLoot, flagsCustom FROM item_template");
+    //                                           134        135            136          137           138
+                                             "FoodType, minMoneyLoot, maxMoneyLoot, flagsCustom, isAllowedInPvP FROM item_template");
 
     if (!result)
     {
@@ -2467,6 +2467,7 @@ void ObjectMgr::LoadItemTemplates()
         itemTemplate.MinMoneyLoot            = fields[135].GetUInt32();
         itemTemplate.MaxMoneyLoot            = fields[136].GetUInt32();
         itemTemplate.FlagsCu                 = fields[137].GetUInt32();
+        itemTemplate.IsAllowedInPvP          = fields[138].GetBool();
 
         // Checks
 

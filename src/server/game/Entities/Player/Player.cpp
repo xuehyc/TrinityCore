@@ -11453,6 +11453,11 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
                             return EQUIP_ERR_NOT_DURING_ARENA_MATCH;
                 }
 
+                // Players can't equip forbidden items during BGs/Arenas
+                if (Battleground* bg = GetBattleground())
+                    if (!pProto->IsAllowedInPvP)
+                        return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
+
                 if (IsInCombat()&& (pProto->Class == ITEM_CLASS_WEAPON || pProto->InventoryType == INVTYPE_RELIC) && m_weaponChangeTimer != 0)
                     return EQUIP_ERR_CANT_DO_RIGHT_NOW;         // maybe exist better err
 
@@ -26586,5 +26591,34 @@ bool Player::ValidateAppearance(uint8 race, uint8 class_, uint8 gender, uint8 ha
     else
         return false;
 
+    return true;
+}
+
+bool Player::HasSanctionedItemsEquippedForPvP()
+{
+    // Check if equipped items are allowed for PvP use
+    for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
+    {
+        if (i == EQUIPMENT_SLOT_BACK || i == EQUIPMENT_SLOT_FINGER1 || i == EQUIPMENT_SLOT_FINGER2 ||
+            i == EQUIPMENT_SLOT_NECK || i == EQUIPMENT_SLOT_TRINKET1 || i == EQUIPMENT_SLOT_TRINKET2 ||
+            i == EQUIPMENT_SLOT_BODY || i == EQUIPMENT_SLOT_TABARD || i == EQUIPMENT_SLOT_WAIST ||
+            i == EQUIPMENT_SLOT_WRISTS)
+            continue;
+        
+        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            ItemTemplate const* itemTemplate = pItem->GetTemplate();
+            if (!itemTemplate->IsAllowedInPvP)
+                return false;
+        }
+        // No item equipped
+        else
+        {
+            if (i == EQUIPMENT_SLOT_OFFHAND || (i == EQUIPMENT_SLOT_RANGED && getClass() != CLASS_HUNTER))
+                continue;
+
+            return false;
+        }
+    }
     return true;
 }
