@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -206,7 +206,7 @@ class spell_ioc_parachute_ic : public SpellScriptLoader
 class StartLaunchEvent : public BasicEvent
 {
     public:
-        StartLaunchEvent(float x, float y, float z, uint32 lowGuid) : _x(x), _y(y), _z(z), _lowGuid(lowGuid)
+        StartLaunchEvent(float x, float y, float z, ObjectGuid::LowType lowGuid) : _x(x), _y(y), _z(z), _lowGuid(lowGuid)
         {
         }
 
@@ -227,7 +227,7 @@ class StartLaunchEvent : public BasicEvent
 
     private:
         float _x, _y, _z;
-        uint32 _lowGuid;
+        ObjectGuid::LowType _lowGuid;
 };
 
 class spell_ioc_launch : public SpellScriptLoader
@@ -248,7 +248,7 @@ class spell_ioc_launch : public SpellScriptLoader
                 x = GetExplTargetDest()->GetPositionX();
                 y = GetExplTargetDest()->GetPositionY();
                 z = GetExplTargetDest()->GetPositionZ();
-                GetCaster()->ToCreature()->m_Events.AddEvent(new StartLaunchEvent(x, y, z, GetHitPlayer()->GetGUIDLow()), GetCaster()->ToCreature()->m_Events.CalculateTime(2500));
+                GetCaster()->ToCreature()->m_Events.AddEvent(new StartLaunchEvent(x, y, z, GetHitPlayer()->GetGUID().GetCounter()), GetCaster()->ToCreature()->m_Events.CalculateTime(2500));
             }
 
             void Register() override

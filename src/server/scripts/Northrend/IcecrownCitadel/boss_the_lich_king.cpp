@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -432,20 +432,21 @@ class StartMovementEvent : public BasicEvent
 {
     public:
         StartMovementEvent(Creature* summoner, Creature* owner)
-            : _summoner(summoner), _owner(owner)
+            : _summonerGuid(summoner->GetGUID()), _owner(owner)
         {
         }
 
         bool Execute(uint64 /*time*/, uint32 /*diff*/)
         {
             _owner->SetReactState(REACT_AGGRESSIVE);
-            if (Unit* target = _summoner->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(_summoner)))
-                _owner->AI()->AttackStart(target);
+            if (Creature* _summoner = ObjectAccessor::GetCreature(*_owner, _summonerGuid))
+                if (Unit* target = _summoner->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(_summoner)))
+                    _owner->AI()->AttackStart(target);
             return true;
         }
 
     private:
-        Creature* _summoner;
+        ObjectGuid _summonerGuid;
         Creature* _owner;
 };
 
@@ -1198,9 +1199,9 @@ class npc_tirion_fordring_tft : public CreatureScript
                     SetEquipmentSlots(true);    // remove glow on ashbringer
             }
 
-            void sGossipSelect(Player* /*player*/, uint32 sender, uint32 action) override
+            void sGossipSelect(Player* /*player*/, uint32 menuId, uint32 gossipListId) override
             {
-                if (me->GetCreatureTemplate()->GossipMenuId == sender && !action)
+                if (me->GetCreatureTemplate()->GossipMenuId == menuId && !gossipListId)
                 {
                     _events.SetPhase(PHASE_INTRO);
                     me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -235,7 +235,7 @@ public:
             summoned->GetMotionMaster()->MovePoint(0, AmbushMoveTo[spawnId]);
         }
 
-        void sQuestAccept(Player* player, Quest const* quest)
+        void sQuestAccept(Player* player, Quest const* quest) override
         {
             if (quest->GetQuestId() == QUEST_RINJI_TRAPPED)
             {
@@ -272,7 +272,7 @@ public:
             }
         }
 
-        void UpdateEscortAI(const uint32 diff) override
+        void UpdateEscortAI(uint32 diff) override
         {
             //Check if we have a current target
             if (!UpdateVictim())

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -234,7 +234,7 @@ void BattlegroundWS::AddPlayer(Player* player)
             if (player->getFaction() != leader->getFaction())
                 player->setFaction(leader->getFaction());
 
-    PlayerScores[player->GetGUIDLow()] = new BattlegroundWGScore(player->GetGUID());
+    PlayerScores[player->GetGUID().GetCounter()] = new BattlegroundWGScore(player->GetGUID());
 }
 
 void BattlegroundWS::RespawnFlag(uint32 Team, bool captured)
@@ -890,7 +890,10 @@ bool BattlegroundWS::CheckAchievementCriteriaMeet(uint32 criteriaId, Player cons
     switch (criteriaId)
     {
         case BG_CRITERIA_CHECK_SAVE_THE_DAY:
-            return GetFlagState(player->GetBGTeam()) == BG_WS_FLAG_STATE_ON_BASE;
+            if (target)
+                if (Player const* playerTarget = target->ToPlayer())
+                    return GetFlagState(playerTarget->GetBGTeam()) == BG_WS_FLAG_STATE_ON_BASE;
+            return false;
     }
 
     return Battleground::CheckAchievementCriteriaMeet(criteriaId, player, target, miscValue);

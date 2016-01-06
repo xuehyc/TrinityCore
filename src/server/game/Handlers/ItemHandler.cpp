@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -786,8 +786,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorGuid)
                 if (!_player->IsGameMaster() && !leftInStock)
                     continue;
 
-                ConditionList conditions = sConditionMgr->GetConditionsForNpcVendorEvent(vendor->GetEntry(), item->item);
-                if (!sConditionMgr->IsObjectMeetToConditions(_player, vendor, conditions))
+                if (!sConditionMgr->IsObjectMeetingVendorItemConditions(vendor->GetEntry(), item->item, _player, vendor))
                 {
                     TC_LOG_DEBUG("condition", "SendListInventory: conditions not met for creature entry %u item %u", vendor->GetEntry(), item->item);
                     continue;
@@ -1157,7 +1156,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_GIFT);
     stmt->setUInt32(0, item->GetOwnerGUID().GetCounter());
-    stmt->setUInt32(1, item->GetGUIDLow());
+    stmt->setUInt32(1, item->GetGUID().GetCounter());
     stmt->setUInt32(2, item->GetEntry());
     stmt->setUInt32(3, item->GetUInt32Value(ITEM_FIELD_FLAGS));
     trans->Append(stmt);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -21,13 +21,7 @@
 
 #include "Common.h"
 #include "DBCEnums.h"
-#include "Define.h"
-#include "Path.h"
 #include "Util.h"
-
-#include <map>
-#include <set>
-#include <vector>
 
 // Structures using to access raw DBC data and required packing to portability
 #pragma pack(push, 1)
@@ -815,7 +809,7 @@ struct CreatureModelDataEntry
 {
     uint32 Id;
     uint32 Flags;
-    //char* ModelPath[16]
+    char* ModelPath;
     //uint32 Unk1;
     float Scale;                                             // Used in calculation of unit collision data
     //int32 Unk2
@@ -1410,6 +1404,20 @@ struct MovieEntry
     //uint32      unk2;                                     // 2 always 100
 };
 
+struct NamesProfanityEntry
+{
+    //uint32    ID;                                         // 0
+    char const* Name;                                       // 1
+    int32       Language;                                   // 2
+};
+
+struct NamesReservedEntry
+{
+    //uint32    ID;                                         // 0
+    char const* Name;                                       // 1
+    int32       Language;                                   // 2
+};
+
 #define MAX_OVERRIDE_SPELL 10
 
 struct OverrideSpellDataEntry
@@ -1643,10 +1651,8 @@ struct SpellEntry
     uint32    AttributesEx5;                                // 9        m_attributesExE
     uint32    AttributesEx6;                                // 10       m_attributesExF
     uint32    AttributesEx7;                                // 11       m_attributesExG
-    uint32    Stances;                                      // 12       m_shapeshiftMask
-    // uint32 unk_320_2;                                    // 13       3.2.0
-    uint32    StancesNot;                                   // 14       m_shapeshiftExclude
-    // uint32 unk_320_3;                                    // 15       3.2.0
+    uint32    Stances[2];                                   // 12       m_shapeshiftMask
+    uint32    StancesNot[2];                                // 14       m_shapeshiftExclude
     uint32    Targets;                                      // 16       m_targets
     uint32    TargetCreatureType;                           // 17       m_targetCreatureType
     uint32    RequiresSpellFocus;                           // 18       m_requiresSpellFocus
@@ -1742,8 +1748,6 @@ struct SpellEntry
     //uint32  SpellDifficultyId;                            // 233      3.3.0
 };
 
-typedef std::set<uint32> SpellCategorySet;
-typedef std::map<uint32, SpellCategorySet > SpellCategoryStore;
 typedef std::set<uint32> PetFamilySpellsSet;
 typedef std::map<uint32, PetFamilySpellsSet > PetFamilySpellsStore;
 
@@ -2072,7 +2076,12 @@ struct VehicleSeatEntry
     uint32  m_flagsB;                                       // 45
                                                             // 46-57 added in 3.1, floats mostly
 
-    bool CanEnterOrExit() const { return (m_flags & VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT) != 0; }
+    bool CanEnterOrExit() const
+    {
+        return ((m_flags & VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT) != 0 ||
+                //If it has anmation for enter/ride, means it can be entered/exited by logic
+                (m_flags & (VEHICLE_SEAT_FLAG_HAS_LOWER_ANIM_FOR_ENTER | VEHICLE_SEAT_FLAG_HAS_LOWER_ANIM_FOR_RIDE)) != 0);
+    }
     bool CanSwitchFromSeat() const { return (m_flags & VEHICLE_SEAT_FLAG_CAN_SWITCH) != 0; }
     bool IsUsableByOverride() const { return (m_flags & (VEHICLE_SEAT_FLAG_UNCONTROLLED | VEHICLE_SEAT_FLAG_UNK18)
                                     || (m_flagsB & (VEHICLE_SEAT_FLAG_B_USABLE_FORCED | VEHICLE_SEAT_FLAG_B_USABLE_FORCED_2 |
@@ -2206,15 +2215,7 @@ struct TaxiPathBySourceAndDestination
 typedef std::map<uint32, TaxiPathBySourceAndDestination> TaxiPathSetForSource;
 typedef std::map<uint32, TaxiPathSetForSource> TaxiPathSetBySource;
 
-struct TaxiPathNodePtr
-{
-    TaxiPathNodePtr() : i_ptr(NULL) { }
-    TaxiPathNodePtr(TaxiPathNodeEntry const* ptr) : i_ptr(ptr) { }
-    TaxiPathNodeEntry const* i_ptr;
-    operator TaxiPathNodeEntry const& () const { return *i_ptr; }
-};
-
-typedef Path<TaxiPathNodePtr, TaxiPathNodeEntry const> TaxiPathNodeList;
+typedef std::vector<TaxiPathNodeEntry const*> TaxiPathNodeList;
 typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
 
 #define TaxiMaskSize 14

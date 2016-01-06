@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -186,7 +186,7 @@ class Group
         // group manipulation methods
         bool   Create(Player* leader);
         void   LoadGroupFromDB(Field* field);
-        void   LoadMemberFromDB(uint32 guidLow, uint8 memberFlags, uint8 subgroup, uint8 roles);
+        void   LoadMemberFromDB(ObjectGuid::LowType guidLow, uint8 memberFlags, uint8 subgroup, uint8 roles);
         bool   AddInvite(Player* player);
         void   RemoveInvite(Player* player);
         void   RemoveAllInvites();
@@ -211,7 +211,7 @@ class Group
         bool IsCreated()   const;
         ObjectGuid GetLeaderGUID() const;
         ObjectGuid GetGUID() const;
-        uint32 GetLowGUID() const;
+        ObjectGuid::LowType GetLowGUID() const;
         const char * GetLeaderName() const;
         LootMethod GetLootMethod() const;
         ObjectGuid GetLooterGuid() const;

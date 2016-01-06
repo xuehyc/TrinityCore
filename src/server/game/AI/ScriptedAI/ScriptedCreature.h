@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -23,6 +23,7 @@
 #include "CreatureAI.h"
 #include "CreatureAIImpl.h"
 #include "InstanceScript.h"
+#include "TaskScheduler.h"
 
 #define CAST_AI(a, b)   (dynamic_cast<a*>(b))
 #define ENSURE_AI(a,b)  (EnsureAI<a>(b))
@@ -182,9 +183,6 @@ struct ScriptedAI : public CreatureAI
     // *************
     // Variables
     // *************
-
-    //Pointer to creature we are manipulating
-    Creature* me;
 
     //For fleeing
     bool IsFleeing;
@@ -359,6 +357,8 @@ class BossAI : public ScriptedAI
         // is supposed to run more than once
         virtual void ExecuteEvent(uint32 /*eventId*/) { }
 
+        virtual void ScheduleTasks() { }
+
         void Reset() override { _Reset(); }
         void EnterCombat(Unit* /*who*/) override { _EnterCombat(); }
         void JustDied(Unit* /*killer*/) override { _JustDied(); }
@@ -384,6 +384,7 @@ class BossAI : public ScriptedAI
 
         EventMap events;
         SummonList summons;
+        TaskScheduler scheduler;
 
     private:
         BossBoundaryMap const* const _boundary;

@@ -28,18 +28,18 @@ EndScriptData */
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "NullSecMgr.h"
+#include "ObjectMgr.h"
 
 class custom_commandscript : public CommandScript
 {
 public:
     custom_commandscript() : CommandScript("custom_commandscript") { }
 
-    ChatCommand* GetCommands() const override
+	std::vector<ChatCommand> GetCommands() const override
     {
-        static ChatCommand commandTable[] =
+        static std::vector<ChatCommand> commandTable =
         {
-            { "reclamar", rbac::RBAC_PERM_COMMAND_SERVER_MOTD, true, &HandleReclamarCommand, "", NULL },
-            { NULL, 0, false, NULL, "", NULL }
+            { "reclamar", rbac::RBAC_PERM_COMMAND_SERVER_MOTD, true, &HandleReclamarCommand, "" }
         };
         return commandTable;
     }
@@ -100,7 +100,7 @@ public:
         Map* map = player->GetMap();
         Position pos = sNullSecMgr->GetStandardPositionByGuildZoneId(guildZoneId);
         Creature* creature = new Creature();
-        if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, player->GetPhaseMaskForSpawn(), NPC_STANDARD_OF_CONQUEST, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()))
+        if (!creature->Create(map->GenerateLowGuid<HighGuid::Unit>(), map, player->GetPhaseMaskForSpawn(), NPC_STANDARD_OF_CONQUEST, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()))
         {
             delete creature;
             sNullSecMgr->SetGuildZoneUnderAttack(guildZoneId, false);
@@ -109,7 +109,7 @@ public:
 
         creature->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()), player->GetPhaseMaskForSpawn());
 
-        uint32 db_guid = creature->GetDBTableGUIDLow();
+		ObjectGuid::LowType db_guid = creature->GetSpawnId();
 
         // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells()
         // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior

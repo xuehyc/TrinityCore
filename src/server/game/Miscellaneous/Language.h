@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -379,7 +379,8 @@ enum TrinityStrings
     LANG_COMMAND_CHEAT_POWER            = 361,
     LANG_COMMAND_CHEAT_WW               = 362,
     LANG_COMMAND_WHISPEROFFPLAYER       = 363,
-    // Room for more level 2              364-399 not used
+    LANG_COMMAND_CHEAT_TAXINODES        = 364,
+    // Room for more level 2              365-399 not used
 
     // level 3 chat
     LANG_SCRIPTS_RELOADED               = 400,
@@ -1203,36 +1204,40 @@ enum TrinityStrings
     LANG_NPCINFO_INHABIT_TYPE                     = 11008,
     LANG_NPCINFO_FLAGS_EXTRA                      = 11009,
 
-    // NOT RESERVED IDS                   12000-1999999999
-    // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
-    // For other tables maybe             2000010000-2147483647 (max index)
+    LANG_INSTANCE_LOGIN_GAMEMASTER_EXCEPTION      = 11010,
 
-    // Custom strings
-    // NullSecMgr and related.
-    LANG_HIGHSEC_GENERAL_ENTER  = 12000,
-    LANG_HIGHSEC_ALLIANCE_ENTER = 12001,
-    LANG_HIGHSEC_HORDE_ENTER    = 12002,
-    LANG_LOWSEC_GENERAL_ENTER   = 12003,
-    LANG_NULLSEC_GENERAL_ENTER  = 12004,
-    LANG_NULLSEC_ZONE_LOST      = 12005,
-    LANG_NULLSEC_ZONE_TAKEN     = 12006,
-    LANG_NULLSEC_NEUTRAL_ENTER  = 12007,
-    LANG_NULLSEC_HOSTILE_ENTER  = 12008,
-    LANG_NULLSEC_FRIENDLY_ENTER = 12009,
-    LANG_NULLSEC_LEAVE          = 12010,
-    LANG_NULLSEC_INTRUDER       = 12011,
-    LANG_FRONTIER_ZONE_ENTER    = 12012,
-    LANG_NULLSEC_UNDER_ATTACK   = 12013,
-    // .reclamar command
-    LANG_RECLAMAR_MISSED_ITEM    = 12014,
-    LANG_RECLAMAR_MISSED_GUILD   = 12015,
-    LANG_RECLAMAR_NO_NULLSEC     = 12016,
-    LANG_RECLAMAR_WRONG_AREA     = 12017,
-    LANG_RECLAMAR_HAS_OWNER      = 12018,
-    LANG_RECLAMAR_UNDER_ATTACK   = 12019,
-    LANG_RECLAMAR_ATTACK_STARTED = 12020,
-    // PvP player loot system
-    LANG_PVP_MONEY_LOST          = 12021,
-    LANG_PVP_MONEY_WON           = 12022
+    LANG_INSTANCE_BIND_MISMATCH                   = 11014,
+
+	// NOT RESERVED IDS                   12000-1999999999
+	// `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
+	// For other tables maybe             2000010000-2147483647 (max index)
+
+	// Custom strings
+	// NullSecMgr and related.
+	LANG_HIGHSEC_GENERAL_ENTER = 12000,
+	LANG_HIGHSEC_ALLIANCE_ENTER = 12001,
+	LANG_HIGHSEC_HORDE_ENTER = 12002,
+	LANG_LOWSEC_GENERAL_ENTER = 12003,
+	LANG_NULLSEC_GENERAL_ENTER = 12004,
+	LANG_NULLSEC_ZONE_LOST = 12005,
+	LANG_NULLSEC_ZONE_TAKEN = 12006,
+	LANG_NULLSEC_NEUTRAL_ENTER = 12007,
+	LANG_NULLSEC_HOSTILE_ENTER = 12008,
+	LANG_NULLSEC_FRIENDLY_ENTER = 12009,
+	LANG_NULLSEC_LEAVE = 12010,
+	LANG_NULLSEC_INTRUDER = 12011,
+	LANG_FRONTIER_ZONE_ENTER = 12012,
+	LANG_NULLSEC_UNDER_ATTACK = 12013,
+	// .reclamar command
+	LANG_RECLAMAR_MISSED_ITEM = 12014,
+	LANG_RECLAMAR_MISSED_GUILD = 12015,
+	LANG_RECLAMAR_NO_NULLSEC = 12016,
+	LANG_RECLAMAR_WRONG_AREA = 12017,
+	LANG_RECLAMAR_HAS_OWNER = 12018,
+	LANG_RECLAMAR_UNDER_ATTACK = 12019,
+	LANG_RECLAMAR_ATTACK_STARTED = 12020,
+	// PvP player loot system
+	LANG_PVP_MONEY_LOST = 12021,
+	LANG_PVP_MONEY_WON = 12022
 };
 #endif

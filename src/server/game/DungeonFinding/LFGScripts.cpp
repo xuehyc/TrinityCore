@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -44,6 +44,8 @@ void LFGPlayerScript::OnLogout(Player* player)
         player->GetSession()->SendLfgLfrList(false);
         sLFGMgr->LeaveLfg(player->GetGUID());
     }
+    else if (player->GetSession()->PlayerDisconnected())
+        sLFGMgr->LeaveLfg(player->GetGUID(), true);
 }
 
 void LFGPlayerScript::OnLogin(Player* player, bool /*loginFirst*/)
@@ -87,7 +89,7 @@ void LFGPlayerScript::OnMapChanged(Player* player)
             player->RemoveAurasDueToSpell(LFG_SPELL_LUCK_OF_THE_DRAW);
             player->TeleportTo(player->m_homebindMapId, player->m_homebindX, player->m_homebindY, player->m_homebindZ, 0.0f);
             TC_LOG_ERROR("lfg", "LFGPlayerScript::OnMapChanged, Player %s (%u) is in LFG dungeon map but does not have a valid group! "
-                "Teleporting to homebind.", player->GetName().c_str(), player->GetGUIDLow());
+                "Teleporting to homebind.", player->GetName().c_str(), player->GetGUID().GetCounter());
             return;
         }
 

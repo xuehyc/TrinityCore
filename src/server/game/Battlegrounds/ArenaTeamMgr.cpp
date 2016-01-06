@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -158,7 +158,7 @@ void ArenaTeamMgr::DistributeArenaPoints()
     for (std::map<uint32, uint32>::iterator playerItr = PlayerPoints.begin(); playerItr != PlayerPoints.end(); ++playerItr)
     {
         // Add points to player if online
-        if (Player* player = ObjectAccessor::FindConnectedPlayer(ObjectGuid(HIGHGUID_PLAYER, playerItr->first)))
+        if (Player* player = ObjectAccessor::FindConnectedPlayer(ObjectGuid(HighGuid::Player, playerItr->first)))
             player->ModifyArenaPoints(playerItr->second, trans);
         else    // Update database
         {

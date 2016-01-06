@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -22,6 +22,13 @@
 
 Quest::Quest(Field* questRecord)
 {
+    EmoteOnIncomplete = 0;
+    EmoteOnComplete = 0;
+    _reqItemsCount = 0;
+    _reqCreatureOrGOcount = 0;
+    _rewItemsCount = 0;
+    _rewChoiceItemsCount = 0;
+
     Id = questRecord[0].GetUInt32();
     Method = questRecord[1].GetUInt8();
     Level = questRecord[2].GetInt16();
@@ -29,21 +36,21 @@ Quest::Quest(Field* questRecord)
     ZoneOrSort = questRecord[4].GetInt16();
     Type = questRecord[5].GetUInt16();
     SuggestedPlayers = questRecord[6].GetUInt8();
-    LimitTime = questRecord[7].GetUInt32();
-    RequiredRaces = questRecord[8].GetUInt16();
+    TimeAllowed = questRecord[7].GetUInt32();
+    AllowableRaces = questRecord[8].GetUInt16();
     RequiredFactionId1 = questRecord[9].GetUInt16();
     RequiredFactionId2 = questRecord[10].GetUInt16();
     RequiredFactionValue1 = questRecord[11].GetInt32();
     RequiredFactionValue2 = questRecord[12].GetInt32();
-    NextQuestIdChain = questRecord[13].GetUInt32();
-    RewardXPId = questRecord[14].GetUInt8();
-    RewardOrRequiredMoney = questRecord[15].GetInt32();
-    RewardMoneyMaxLevel = questRecord[16].GetUInt32();
-    RewardSpell = questRecord[17].GetUInt32();
-    RewardSpellCast = questRecord[18].GetInt32();
+    RewardNextQuest = questRecord[13].GetUInt32();
+    RewardXPDifficulty = questRecord[14].GetUInt8();
+    RewardMoney = questRecord[15].GetInt32();
+    RewardBonusMoney = questRecord[16].GetUInt32();
+    RewardDisplaySpell = questRecord[17].GetUInt32();
+    RewardSpell = questRecord[18].GetInt32();
     RewardHonor = questRecord[19].GetUInt32();
-    RewardHonorMultiplier = questRecord[20].GetFloat();
-    SourceItemId = questRecord[21].GetUInt32();
+    RewardKillHonor = questRecord[20].GetFloat();
+    StartItem = questRecord[21].GetUInt32();
     Flags = questRecord[22].GetUInt32();
     RewardTitleId = questRecord[23].GetUInt8();
     RequiredPlayerKills = questRecord[24].GetUInt8();
@@ -51,98 +58,102 @@ Quest::Quest(Field* questRecord)
     RewardArenaPoints = questRecord[26].GetUInt16();
 
     for (int i = 0; i < QUEST_REWARDS_COUNT; ++i)
-        RewardItemId[i] = questRecord[27+i].GetUInt32();
+    {
+        RewardItemId[i] = questRecord[27+i*2].GetUInt32();
+        RewardItemIdCount[i] = questRecord[28+i*2].GetUInt16();
 
-    for (int i = 0; i < QUEST_REWARDS_COUNT; ++i)
-        RewardItemIdCount[i] = questRecord[31+i].GetUInt16();
+        if (RewardItemId[i])
+            ++_rewItemsCount;
+    }
 
     for (int i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
-        RewardChoiceItemId[i] = questRecord[35+i].GetUInt32();
+    {
+        RewardChoiceItemId[i] = questRecord[35+i*2].GetUInt32();
+        RewardChoiceItemCount[i] = questRecord[36+i*2].GetUInt16();
 
-    for (int i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
-        RewardChoiceItemCount[i] = questRecord[41+i].GetUInt16();
-
-    for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
-        RewardFactionId[i] = questRecord[47+i].GetUInt16();
-
-    for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
-        RewardFactionValueId[i] = questRecord[52+i].GetInt32();
+        if (RewardChoiceItemId[i])
+            ++_rewChoiceItemsCount;
+    }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
-        RewardFactionValueIdOverride[i] = questRecord[57+i].GetInt32();
+    {
+        RewardFactionId[i] = questRecord[47+i*3].GetUInt16();
+        RewardFactionValueId[i] = questRecord[48+i*3].GetInt32();
+        RewardFactionValueIdOverride[i] = questRecord[49+i*3].GetInt32();
+    }
 
-    PointMapId = questRecord[62].GetUInt16();
-    PointX = questRecord[63].GetFloat();
-    PointY = questRecord[64].GetFloat();
-    PointOption = questRecord[65].GetUInt32();
+    POIContinent = questRecord[62].GetUInt16();
+    POIx = questRecord[63].GetFloat();
+    POIy = questRecord[64].GetFloat();
+    POIPriority = questRecord[65].GetUInt32();
     Title = questRecord[66].GetString();
     Objectives = questRecord[67].GetString();
     Details = questRecord[68].GetString();
-    EndText = questRecord[69].GetString();
-    OfferRewardText = questRecord[70].GetString();
-    RequestItemsText = questRecord[71].GetString();
-    CompletedText = questRecord[72].GetString();
+    AreaDescription = questRecord[69].GetString();
+    CompletedText = questRecord[70].GetString();
 
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
-        RequiredNpcOrGo[i] = questRecord[73+i].GetInt32();
+    {
+        RequiredNpcOrGo[i] = questRecord[71+i].GetInt32();
+        RequiredNpcOrGoCount[i] = questRecord[75+i].GetUInt16();
+        ObjectiveText[i] = questRecord[100+i].GetString();
 
-    for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
-        RequiredNpcOrGoCount[i] = questRecord[77+i].GetUInt16();
-
-    for (int i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
-        RequiredSourceItemId[i] = questRecord[81+i].GetUInt32();
-
-    for (int i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
-        RequiredSourceItemCount[i] = questRecord[85+i].GetUInt16();
-
-    for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
-        RequiredItemId[i] = questRecord[89+i].GetUInt32();
-
-    for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
-        RequiredItemCount[i] = questRecord[95+i].GetUInt16();
-
-    // int8 Unknown0 = questRecord[101].GetUInt8();
-
-    for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
-        ObjectiveText[i] = questRecord[102+i].GetString();
-
-    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        DetailsEmote[i] = questRecord[106+i].GetUInt16();
-
-    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        DetailsEmoteDelay[i] = questRecord[110+i].GetUInt32();
-
-    EmoteOnIncomplete = questRecord[114].GetUInt16();
-    EmoteOnComplete = questRecord[115].GetUInt16();
-
-    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        OfferRewardEmote[i] = questRecord[116+i].GetInt16();
-
-    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        OfferRewardEmoteDelay[i] = questRecord[120+i].GetInt32();
-
-    //int32 VerifiedBuild = questRecord[124].GetInt32();
-
-    _reqItemsCount = 0;
-    _reqCreatureOrGOcount = 0;
-    _rewItemsCount = 0;
-    _rewChoiceItemsCount = 0;
-
-    for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
-        if (RequiredItemId[i])
-            ++_reqItemsCount;
-
-    for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
         if (RequiredNpcOrGo[i])
             ++_reqCreatureOrGOcount;
+    }
 
-    for (int i = 0; i < QUEST_REWARDS_COUNT; ++i)
-        if (RewardItemId[i])
-            ++_rewItemsCount;
+    for (int i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
+    {
+        ItemDrop[i] = questRecord[79+i].GetUInt32();
+        ItemDropQuantity[i] = questRecord[83+i].GetUInt16();
+    }
 
-    for (int i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
-        if (RewardChoiceItemId[i])
-            ++_rewChoiceItemsCount;
+    for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
+    {
+        RequiredItemId[i] = questRecord[87+i].GetUInt32();
+        RequiredItemCount[i] = questRecord[93+i].GetUInt16();
+
+        if (RequiredItemId[i])
+            ++_reqItemsCount;
+    }
+
+    // int8 Unknown0 = questRecord[99].GetUInt8();
+    // int32 VerifiedBuild = questRecord[104].GetInt32();
+
+    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
+    {
+        DetailsEmote[i] = 0;
+        DetailsEmoteDelay[i] = 0;
+        OfferRewardEmote[i] = 0;
+        OfferRewardEmoteDelay[i] = 0;
+    }
+}
+
+void Quest::LoadQuestDetails(Field* fields)
+{
+    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
+        DetailsEmote[i] = fields[1+i].GetUInt16();
+
+    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
+        DetailsEmoteDelay[i] = fields[5+i].GetUInt32();
+}
+
+void Quest::LoadQuestRequestItems(Field* fields)
+{
+    EmoteOnComplete = fields[1].GetUInt16();
+    EmoteOnIncomplete = fields[2].GetUInt16();
+    RequestItemsText = fields[3].GetString();
+}
+
+void Quest::LoadQuestOfferReward(Field* fields)
+{
+    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
+        OfferRewardEmote[i] = fields[1+i].GetUInt16();
+
+    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
+        OfferRewardEmoteDelay[i] = fields[5+i].GetUInt32();
+
+    OfferRewardText = fields[9].GetString();
 }
 
 void Quest::LoadQuestTemplateAddon(Field* fields)
@@ -161,7 +172,7 @@ void Quest::LoadQuestTemplateAddon(Field* fields)
     RequiredMaxRepFaction = fields[12].GetUInt16();
     RequiredMinRepValue = fields[13].GetInt32();
     RequiredMaxRepValue = fields[14].GetInt32();
-    SourceItemIdCount = fields[15].GetUInt8();
+    StartItemCount = fields[15].GetUInt8();
     SpecialFlags = fields[16].GetUInt8();
 
     if (SpecialFlags & QUEST_SPECIAL_FLAGS_AUTO_ACCEPT)
@@ -183,7 +194,7 @@ uint32 Quest::XPValue(Player* player) const
         else if (diffFactor > 10)
             diffFactor = 10;
 
-        uint32 xp = diffFactor * xpentry->Exp[RewardXPId] / 10;
+        uint32 xp = diffFactor * xpentry->Exp[RewardXPDifficulty] / 10;
         if (xp <= 100)
             xp = 5 * ((xp + 2) / 5);
         else if (xp <= 500)
@@ -202,11 +213,11 @@ uint32 Quest::XPValue(Player* player) const
 int32 Quest::GetRewOrReqMoney() const
 {
     // RequiredMoney: the amount is the negative copper sum.
-    if (RewardOrRequiredMoney <= 0)
-        return RewardOrRequiredMoney;
+    if (RewardMoney <= 0)
+        return RewardMoney;
 
     // RewardMoney: the positive amount
-    return int32(RewardOrRequiredMoney * sWorld->getRate(RATE_MONEY_QUEST));
+    return int32(RewardMoney * sWorld->getRate(RATE_MONEY_QUEST));
 }
 
 uint32 Quest::GetRewMoneyMaxLevel() const
@@ -216,7 +227,7 @@ uint32 Quest::GetRewMoneyMaxLevel() const
         return 0;
 
     // Else, return the rewarded copper sum modified by the rate
-    return uint32(RewardMoneyMaxLevel * sWorld->getRate(RATE_MONEY_MAX_LEVEL_QUEST));
+    return uint32(RewardBonusMoney * sWorld->getRate(RATE_MONEY_MAX_LEVEL_QUEST));
 }
 
 bool Quest::IsAutoAccept() const

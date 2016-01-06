@@ -27,6 +27,7 @@ EndScriptData */
 #include "ScriptedCreature.h"
 #include "NullSecMgr.h"
 #include "GuildMgr.h"
+#include "ObjectMgr.h"
 
 #define MAX_STANDARD_HEALTH 100000
 #define TIME_TO_REGEN 60000               // 10 minutes
@@ -274,7 +275,7 @@ public:
         // Spawn the NPC
         Map* map = creature->GetMap();
         Creature* npcImage = new Creature();
-        uint32 tempGuid = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
+        uint32 tempGuid = map->GenerateLowGuid<HighGuid::Unit>();
         if (!npcImage->Create(tempGuid, map, player->GetPhaseMaskForSpawn(), npcId, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation()))
         {
             delete npcImage;

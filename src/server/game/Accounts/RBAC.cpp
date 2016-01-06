@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,7 +17,6 @@
 
 #include "RBAC.h"
 #include "AccountMgr.h"
-#include "DatabaseEnv.h"
 #include "Log.h"
 
 namespace rbac
@@ -180,7 +179,24 @@ void RBACData::LoadFromDB()
     stmt->setUInt32(0, GetId());
     stmt->setInt32(1, GetRealmId());
 
-    PreparedQueryResult result = LoginDatabase.Query(stmt);
+    LoadFromDBCallback(LoginDatabase.Query(stmt));
+}
+
+PreparedQueryResultFuture RBACData::LoadFromDBAsync()
+{
+    ClearData();
+
+    TC_LOG_DEBUG("rbac", "RBACData::LoadFromDB [Id: %u Name: %s]: Loading permissions", GetId(), GetName().c_str());
+    // Load account permissions (granted and denied) that affect current realm
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_RBAC_ACCOUNT_PERMISSIONS);
+    stmt->setUInt32(0, GetId());
+    stmt->setInt32(1, GetRealmId());
+
+    return LoginDatabase.AsyncQuery(stmt);
+}
+
+void RBACData::LoadFromDBCallback(PreparedQueryResult result)
+{
     if (result)
     {
         do
@@ -190,8 +206,7 @@ void RBACData::LoadFromDB()
                 GrantPermission(fields[0].GetUInt32());
             else
                 DenyPermission(fields[0].GetUInt32());
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
     }
 
     // Add default permissions

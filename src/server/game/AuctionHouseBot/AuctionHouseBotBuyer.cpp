@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -102,6 +102,10 @@ uint32 AuctionBotBuyer::GetItemInformation(BuyerConfiguration& config)
     for (AuctionHouseObject::AuctionEntryMap::const_iterator itr = house->GetAuctionsBegin(); itr != house->GetAuctionsEnd(); ++itr)
     {
         AuctionEntry* entry = itr->second;
+
+        if (!entry->owner)
+            continue; // Skip auctions owned by AHBot
+
         Item* item = sAuctionMgr->GetAItem(entry->itemGUIDLow);
         if (!item)
             continue;
@@ -135,10 +139,10 @@ uint32 AuctionBotBuyer::GetItemInformation(BuyerConfiguration& config)
                 itemInfo.MinBuyPrice = std::min(itemInfo.MinBuyPrice, itemBuyPrice);
         }
 
-        // Add/update to EligibleItems if:
-        // has a bid by player or
-        // has no bids and not owned by bot
-        if ((entry->bid && entry->bidder) || (entry->owner && !entry->bid))
+        // Add/update EligibleItems if:
+        // * no bid
+        // * bid from player
+        if (!entry->bid || entry->bidder)
         {
             config.EligibleItems[entry->Id].LastExist = now;
             config.EligibleItems[entry->Id].AuctionId = entry->Id;

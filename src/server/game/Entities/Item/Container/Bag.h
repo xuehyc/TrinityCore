@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -35,7 +35,7 @@ class Bag : public Item
         void AddToWorld() override;
         void RemoveFromWorld() override;
 
-        bool Create(uint32 guidlow, uint32 itemid, Player const* owner) override;
+        bool Create(ObjectGuid::LowType guidlow, ObjectGuid::LowType itemid, Player const* owner) override;
 
         void Clear();
         void StoreItem(uint8 slot, Item* pItem, bool update);
@@ -54,7 +54,7 @@ class Bag : public Item
         // overwrite virtual Item::SaveToDB
         void SaveToDB(SQLTransaction& trans) override;
         // overwrite virtual Item::LoadFromDB
-        bool LoadFromDB(uint32 guid, ObjectGuid owner_guid, Field* fields, uint32 entry) override;
+        bool LoadFromDB(ObjectGuid::LowType guid, ObjectGuid owner_guid, Field* fields, uint32 entry) override;
         // overwrite virtual Item::DeleteFromDB
         void DeleteFromDB(SQLTransaction& trans) override;
 

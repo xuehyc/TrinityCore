@@ -1,5 +1,5 @@
  /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -113,7 +113,7 @@ class instance_zulaman : public InstanceMapScript
                 return false;
             }
 
-            void OnPlayerEnter(Player* /*player*/)
+            void OnPlayerEnter(Player* /*player*/) override
             {
                 if (!HarrisonJonesGUID)
                     instance->SummonCreature(NPC_HARRISON_JONES, HarrisonJonesLoc);
@@ -197,7 +197,7 @@ class instance_zulaman : public InstanceMapScript
                 return ss.str();
             }
 
-            void Load(const char* load)
+            void Load(const char* load) override
             {
                 if (!load)
                     return;

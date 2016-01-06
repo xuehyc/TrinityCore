@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -188,15 +188,15 @@ class OPvPCapturePointZM_GraveYard : public OPvPCapturePoint
 
         void ChangeState() override { }
 
-        void FillInitialWorldStates(WorldPacket & data);
+        void FillInitialWorldStates(WorldPacket & data) override;
 
         void UpdateTowerState();
 
-        int32 HandleOpenGo(Player* player, ObjectGuid guid) override;
+        int32 HandleOpenGo(Player* player, GameObject* go) override;
 
         void SetBeaconState(uint32 controlling_team); // not good atm
 
-        bool HandleGossipOption(Player* player, ObjectGuid guid, uint32 gossipid) override;
+        bool HandleGossipOption(Player* player, Creature* creature, uint32 gossipid) override;
 
         bool HandleDropFlag(Player* player, uint32 spellId) override;
 

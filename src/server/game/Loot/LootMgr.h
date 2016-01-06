@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -132,7 +132,7 @@ struct LootStoreItem
     uint8   groupid     : 7;
     uint8   mincount;                                       // mincount for drop items
     uint8   maxcount;                                       // max drop count for the item mincount or Ref multiplicator
-    ConditionList conditions;                               // additional loot condition
+    ConditionContainer conditions;                               // additional loot condition
 
     // Constructor
     // displayid is filled in IsValid() which must be called after
@@ -146,14 +146,14 @@ struct LootStoreItem
                                                             // Checks correctness of values
 };
 
-typedef std::set<uint32> AllowedLooterSet;
+typedef std::set<ObjectGuid::LowType> AllowedLooterSet;
 
 struct LootItem
 {
     uint32  itemid;
     uint32  randomSuffix;
     int32   randomPropertyId;
-    ConditionList conditions;                               // additional loot condition
+    ConditionContainer conditions;                               // additional loot condition
     AllowedLooterSet allowedGUIDs;
     uint8   count             : 8;
     bool    is_looted         : 1;
@@ -257,7 +257,7 @@ class LootTemplate
         void AddEntry(LootStoreItem* item);
         // Rolls for every item in the template and adds the rolled items the the loot
         void Process(Loot& loot, bool rate, uint16 lootMode, uint8 groupId = 0) const;
-        void CopyConditions(const ConditionList& conditions);
+        void CopyConditions(const ConditionContainer& conditions);
         void CopyConditions(LootItem* li) const;
 
         // True if template includes at least 1 quest drop entry

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -82,7 +82,7 @@ Group* GroupMgr::GetGroupByDbStoreId(uint32 storageId) const
     return NULL;
 }
 
-uint32 GroupMgr::GenerateGroupId()
+ObjectGuid::LowType GroupMgr::GenerateGroupId()
 {
     if (NextGroupId >= 0xFFFFFFFE)
     {
@@ -92,7 +92,7 @@ uint32 GroupMgr::GenerateGroupId()
     return NextGroupId++;
 }
 
-Group* GroupMgr::GetGroupByGUID(uint32 groupId) const
+Group* GroupMgr::GetGroupByGUID(ObjectGuid::LowType groupId) const
 {
     GroupContainer::const_iterator itr = GroupStore.find(groupId);
     if (itr != GroupStore.end())

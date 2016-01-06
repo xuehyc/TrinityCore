@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -229,7 +229,7 @@ void BattlegroundAB::AddPlayer(Player* player)
             if (player->getFaction() != leader->getFaction())
                 player->setFaction(leader->getFaction());
 
-    PlayerScores[player->GetGUIDLow()] = new BattlegroundABScore(player->GetGUID());
+	PlayerScores[player->GetGUID().GetCounter()] = new BattlegroundABScore(player->GetGUID());
 }
 
 void BattlegroundAB::RemovePlayer(Player* player, ObjectGuid /*guid*/, uint32 /*team*/)
@@ -317,7 +317,7 @@ int32 BattlegroundAB::_GetNodeNameId(uint8 node)
         case BG_AB_NODE_LUMBER_MILL:return LANG_BG_AB_NODE_LUMBER_MILL;
         case BG_AB_NODE_GOLD_MINE:  return LANG_BG_AB_NODE_GOLD_MINE;
         default:
-            ASSERT(false);
+            ABORT();
     }
     return 0;
 }

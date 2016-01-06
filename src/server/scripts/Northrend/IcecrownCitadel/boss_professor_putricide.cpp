@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -205,7 +205,7 @@ struct RotfaceHeightCheck
 
     bool operator()(Creature* stalker) const
     {
-        return stalker->GetPositionZ() < _rotface->GetPositionZ() + 5.0f;
+        return stalker->GetPositionZ() > _rotface->GetPositionZ() + 5.0f;
     }
 
 private:
@@ -236,7 +236,6 @@ class boss_professor_putricide : public CreatureScript
                 summons.DespawnAll();
                 SetPhase(PHASE_COMBAT_1);
                 _experimentState = EXPERIMENT_STATE_OOZE;
-                me->SetReactState(REACT_DEFENSIVE);
                 me->SetWalk(false);
                 if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
                     me->GetMotionMaster()->MovementExpired();
@@ -616,7 +615,7 @@ class boss_professor_putricide : public CreatureScript
                             DoCast(me, SPELL_TEAR_GAS_PERIODIC_TRIGGER, true);
                             break;
                         case EVENT_RESUME_ATTACK:
-                            me->SetReactState(REACT_DEFENSIVE);
+                            me->SetReactState(REACT_AGGRESSIVE);
                             AttackStart(me->GetVictim());
                             // remove Tear Gas
                             me->RemoveAurasDueToSpell(SPELL_TEAR_GAS_PERIODIC_TRIGGER);

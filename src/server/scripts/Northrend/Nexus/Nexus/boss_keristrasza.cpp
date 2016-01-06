@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -117,14 +117,12 @@ class boss_keristrasza : public CreatureScript
                 ContainmentSphereGUIDs[1] = instance->GetGuidData(ORMOROKS_CONTAINMET_SPHERE);
                 ContainmentSphereGUIDs[2] = instance->GetGuidData(TELESTRAS_CONTAINMET_SPHERE);
 
-                GameObject* ContainmentSpheres[DATA_CONTAINMENT_SPHERES];
-
                 for (uint8 i = 0; i < DATA_CONTAINMENT_SPHERES; ++i)
                 {
-                    ContainmentSpheres[i] = ObjectAccessor::GetGameObject(*me, ContainmentSphereGUIDs[i]);
-                    if (!ContainmentSpheres[i])
+                    GameObject* ContainmentSphere = ObjectAccessor::GetGameObject(*me, ContainmentSphereGUIDs[i]);
+                    if (!ContainmentSphere)
                         return false;
-                    if (ContainmentSpheres[i]->GetGoState() != GO_STATE_ACTIVE)
+                    if (ContainmentSphere->GetGoState() != GO_STATE_ACTIVE)
                         return false;
                 }
                 if (remove_prison)

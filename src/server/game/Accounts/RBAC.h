@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -40,7 +40,7 @@
 #ifndef _RBAC_H
 #define _RBAC_H
 
-#include "Define.h"
+#include "DatabaseEnv.h"
 #include <string>
 #include <set>
 #include <map>
@@ -694,6 +694,8 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_INSTANCE_GET_BOSS_STATE                = 796,
     RBAC_PERM_COMMAND_PVPSTATS                               = 797,
     RBAC_PERM_COMMAND_MODIFY_XP                              = 798,
+    // 799 - 834 6.x only
+    RBAC_PERM_COMMAND_DEBUG_LOADCELLS                        = 835,
 
     // custom permissions 1000+
     RBAC_PERM_MAX
@@ -862,6 +864,8 @@ class RBACData
 
         /// Loads all permissions assigned to current account
         void LoadFromDB();
+        PreparedQueryResultFuture LoadFromDBAsync();
+        void LoadFromDBCallback(PreparedQueryResult result);
 
         /// Sets security level
         void SetSecurityLevel(uint8 id)

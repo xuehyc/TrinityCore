@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -57,6 +57,7 @@ EndContentData */
 #include "SpellAuras.h"
 #include "Pet.h"
 #include "CreatureTextMgr.h"
+#include "SmartAI.h"
 
 /*########
 # npc_air_force_bots
@@ -942,6 +943,28 @@ public:
     {
         npc_garments_of_questsAI(Creature* creature) : npc_escortAI(creature)
         {
+            switch (me->GetEntry())
+            {
+                case ENTRY_SHAYA:
+                    quest = QUEST_MOON;
+                    break;
+                case ENTRY_ROBERTS:
+                    quest = QUEST_LIGHT_1;
+                    break;
+                case ENTRY_DOLF:
+                    quest = QUEST_LIGHT_2;
+                    break;
+                case ENTRY_KORJA:
+                    quest = QUEST_SPIRIT;
+                    break;
+                case ENTRY_DG_KEL:
+                    quest = QUEST_DARKNESS;
+                    break;
+                default:
+                    quest = 0;
+                    break;
+            }
+
             Reset();
         }
 
@@ -951,6 +974,7 @@ public:
         bool CanRun;
 
         uint32 RunAwayTimer;
+        uint32 quest;
 
         void Reset() override
         {
@@ -982,93 +1006,20 @@ public:
 
                 if (Player* player = caster->ToPlayer())
                 {
-                    switch (me->GetEntry())
+                    if (quest && player->GetQuestStatus(quest) == QUEST_STATUS_INCOMPLETE)
                     {
-                        case ENTRY_SHAYA:
-                            if (player->GetQuestStatus(QUEST_MOON) == QUEST_STATUS_INCOMPLETE)
-                            {
-                                if (IsHealed && !CanRun && spell->Id == SPELL_FORTITUDE_R1)
-                                {
-                                    Talk(SAY_THANKS, caster);
-                                    CanRun = true;
-                                }
-                                else if (!IsHealed && spell->Id == SPELL_LESSER_HEAL_R2)
-                                {
-                                    CasterGUID = caster->GetGUID();
-                                    me->SetStandState(UNIT_STAND_STATE_STAND);
-                                    Talk(SAY_HEALED, caster);
-                                    IsHealed = true;
-                                }
-                            }
-                            break;
-                        case ENTRY_ROBERTS:
-                            if (player->GetQuestStatus(QUEST_LIGHT_1) == QUEST_STATUS_INCOMPLETE)
-                            {
-                                if (IsHealed && !CanRun && spell->Id == SPELL_FORTITUDE_R1)
-                                {
-                                    Talk(SAY_THANKS, caster);
-                                    CanRun = true;
-                                }
-                                else if (!IsHealed && spell->Id == SPELL_LESSER_HEAL_R2)
-                                {
-                                    CasterGUID = caster->GetGUID();
-                                    me->SetStandState(UNIT_STAND_STATE_STAND);
-                                    Talk(SAY_HEALED, caster);
-                                    IsHealed = true;
-                                }
-                            }
-                            break;
-                        case ENTRY_DOLF:
-                            if (player->GetQuestStatus(QUEST_LIGHT_2) == QUEST_STATUS_INCOMPLETE)
-                            {
-                                if (IsHealed && !CanRun && spell->Id == SPELL_FORTITUDE_R1)
-                                {
-                                    Talk(SAY_THANKS, caster);
-                                    CanRun = true;
-                                }
-                                else if (!IsHealed && spell->Id == SPELL_LESSER_HEAL_R2)
-                                {
-                                    CasterGUID = caster->GetGUID();
-                                    me->SetStandState(UNIT_STAND_STATE_STAND);
-                                    Talk(SAY_HEALED, caster);
-                                    IsHealed = true;
-                                }
-                            }
-                            break;
-                        case ENTRY_KORJA:
-                            if (player->GetQuestStatus(QUEST_SPIRIT) == QUEST_STATUS_INCOMPLETE)
-                            {
-                                if (IsHealed && !CanRun && spell->Id == SPELL_FORTITUDE_R1)
-                                {
-                                    Talk(SAY_THANKS, caster);
-                                    CanRun = true;
-                                }
-                                else if (!IsHealed && spell->Id == SPELL_LESSER_HEAL_R2)
-                                {
-                                    CasterGUID = caster->GetGUID();
-                                    me->SetStandState(UNIT_STAND_STATE_STAND);
-                                    Talk(SAY_HEALED, caster);
-                                    IsHealed = true;
-                                }
-                            }
-                            break;
-                        case ENTRY_DG_KEL:
-                            if (player->GetQuestStatus(QUEST_DARKNESS) == QUEST_STATUS_INCOMPLETE)
-                            {
-                                if (IsHealed && !CanRun && spell->Id == SPELL_FORTITUDE_R1)
-                                {
-                                    Talk(SAY_THANKS, caster);
-                                    CanRun = true;
-                                }
-                                else if (!IsHealed && spell->Id == SPELL_LESSER_HEAL_R2)
-                                {
-                                    CasterGUID = caster->GetGUID();
-                                    me->SetStandState(UNIT_STAND_STATE_STAND);
-                                    Talk(SAY_HEALED, caster);
-                                    IsHealed = true;
-                                }
-                            }
-                            break;
+                        if (IsHealed && !CanRun && spell->Id == SPELL_FORTITUDE_R1)
+                        {
+                            Talk(SAY_THANKS, caster);
+                            CanRun = true;
+                        }
+                        else if (!IsHealed && spell->Id == SPELL_LESSER_HEAL_R2)
+                        {
+                            CasterGUID = caster->GetGUID();
+                            me->SetStandState(UNIT_STAND_STATE_STAND);
+                            Talk(SAY_HEALED, caster);
+                            IsHealed = true;
+                        }
                     }
 
                     // give quest credit, not expect any special quest objectives
@@ -2401,137 +2352,202 @@ enum PossibleBankerActions
 class npc_gold_banker : public CreatureScript
 {
 public:
-    npc_gold_banker() : CreatureScript("npc_gold_banker") { }
+	npc_gold_banker() : CreatureScript("npc_gold_banker") { }
 
-    bool OnGossipHello(Player* player, Creature* creature) override
-    {
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SAVE_MONEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_WITHDRAW_MONEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ACCOUNT_BALANCE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-        player->PlayerTalkClass->SendGossipMenu(GOSSIP_TEXT_BANKER, creature->GetGUID());
-        return true;
-    }
+	bool OnGossipHello(Player* player, Creature* creature) override
+	{
+		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SAVE_MONEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_WITHDRAW_MONEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ACCOUNT_BALANCE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+		player->PlayerTalkClass->SendGossipMenu(GOSSIP_TEXT_BANKER, creature->GetGUID());
+		return true;
+	}
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
-    {
-        uint32 totalMoney = 0;
-        uint8 extraActionWithdraw = 0;
-        uint8 bankerAction = BANKER_ACTION_UNK;
-        bool goBack = false;
+	bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
+	{
+		uint32 totalMoney = 0;
+		uint8 extraActionWithdraw = 0;
+		uint8 bankerAction = BANKER_ACTION_UNK;
+		bool goBack = false;
 
-        if (action >= GOSSIP_ACTION_INFO_DEF + 4 && action <= GOSSIP_ACTION_INFO_DEF + 12)
-            bankerAction = BANKER_ACTION_SAVE_MONEY;
-        else if (action >= GOSSIP_ACTION_INFO_DEF + 13 && action <= GOSSIP_ACTION_INFO_DEF + 21)
-            bankerAction = BANKER_ACTION_WITHDRAW_MONEY;
+		if (action >= GOSSIP_ACTION_INFO_DEF + 4 && action <= GOSSIP_ACTION_INFO_DEF + 12)
+			bankerAction = BANKER_ACTION_SAVE_MONEY;
+		else if (action >= GOSSIP_ACTION_INFO_DEF + 13 && action <= GOSSIP_ACTION_INFO_DEF + 21)
+			bankerAction = BANKER_ACTION_WITHDRAW_MONEY;
 
-        if (action == GOSSIP_ACTION_INFO_DEF + 2)
-            extraActionWithdraw = 9;
+		if (action == GOSSIP_ACTION_INFO_DEF + 2)
+			extraActionWithdraw = 9;
 
-        switch (action)
+		switch (action)
+		{
+		case GOSSIP_ACTION_INFO_DEF + 1: // Save money
+		case GOSSIP_ACTION_INFO_DEF + 2: // Withdraw money
+			player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_1_COPPER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4 + extraActionWithdraw);
+			player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_10_COPPER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5 + extraActionWithdraw);
+			player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_1_SILVER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6 + extraActionWithdraw);
+			player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_10_SILVER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7 + extraActionWithdraw);
+			player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_1_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8 + extraActionWithdraw);
+			player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_10_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 9 + extraActionWithdraw);
+			player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_100_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 10 + extraActionWithdraw);
+			player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_1000_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 11 + extraActionWithdraw);
+			player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_ALL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 12 + extraActionWithdraw);
+			player->PlayerTalkClass->SendGossipMenu(GOSSIP_TEXT_MANIPULATE_GOLD, creature->GetGUID());
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 3: // View account balance
+			bankerAction = BANKER_ACTION_SHOW_BALANCE;
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 4:
+		case GOSSIP_ACTION_INFO_DEF + 13:
+			totalMoney = 1;
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 5:
+		case GOSSIP_ACTION_INFO_DEF + 14:
+			totalMoney = 10;
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 6:
+		case GOSSIP_ACTION_INFO_DEF + 15:
+			totalMoney = 100;
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 7:
+		case GOSSIP_ACTION_INFO_DEF + 16:
+			totalMoney = 1000;
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 8:
+		case GOSSIP_ACTION_INFO_DEF + 17:
+			totalMoney = 10000;
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 9:
+		case GOSSIP_ACTION_INFO_DEF + 18:
+			totalMoney = 100000;
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 10:
+		case GOSSIP_ACTION_INFO_DEF + 19:
+			totalMoney = 1000000;
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 11:
+		case GOSSIP_ACTION_INFO_DEF + 20:
+			totalMoney = 10000000;
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 12:
+		case GOSSIP_ACTION_INFO_DEF + 21:
+			if (bankerAction == BANKER_ACTION_SAVE_MONEY)
+				totalMoney = player->GetMoney();
+			else if (bankerAction == BANKER_ACTION_WITHDRAW_MONEY)
+				totalMoney = player->GetBankMoney();
+			break;
+		}
+		// To inform the player later
+		uint32 golds = uint32(totalMoney / 10000);
+		uint32 silvers = uint32((totalMoney - (golds * 10000)) / 100);
+		uint32 coppers = uint32(totalMoney - (golds * 10000) - (silvers * 100));
+
+		if (bankerAction == BANKER_ACTION_SAVE_MONEY)
+		{
+			if (player->GetMoney() >= totalMoney)
+			{
+				player->ModifyBankMoney(totalMoney);
+				player->ModifyMoney(totalMoney * -1);
+				ChatHandler(player->GetSession()).PSendSysMessage("Has guardado %u Oros, %u Platas y %u Cobres en el banco.", golds, silvers, coppers);
+			}
+			else
+				ChatHandler(player->GetSession()).PSendSysMessage("No tienes suficiente dinero.");
+			goBack = true;
+		}
+		else if (bankerAction == BANKER_ACTION_WITHDRAW_MONEY)
+		{
+			if (player->GetBankMoney() >= totalMoney)
+			{
+				player->ModifyBankMoney(totalMoney * -1);
+				player->ModifyMoney(totalMoney);
+				ChatHandler(player->GetSession()).PSendSysMessage("Has retirado %u Oros, %u Platas y %u Cobres en el banco.", golds, silvers, coppers);
+			}
+			else
+				ChatHandler(player->GetSession()).PSendSysMessage("No tienes suficiente dinero en el banco.");
+			goBack = true;
+		}
+		else if (bankerAction == BANKER_ACTION_SHOW_BALANCE)
+		{
+			totalMoney = player->GetBankMoney();
+			uint32 golds = uint32(totalMoney / 10000);
+			uint32 silvers = uint32((totalMoney - (golds * 10000)) / 100);
+			uint32 coppers = uint32(totalMoney - (golds * 10000) - (silvers * 100));
+			ChatHandler(player->GetSession()).PSendSysMessage("Tienes %u Oros, %u Platas y %u Cobres a buen recaudo.", golds, silvers, coppers);
+			goBack = true;
+		}
+
+		if (goBack)
+		{
+			player->PlayerTalkClass->ClearMenus();
+			this->OnGossipHello(player, creature);
+		}
+
+		return true;
+	}
+};
+
+enum StableMasters
+{
+    SPELL_MINIWING                  = 54573,
+    SPELL_JUBLING                   = 54611,
+    SPELL_DARTER                    = 54619,
+    SPELL_WORG                      = 54631,
+    SPELL_SMOLDERWEB                = 54634,
+    SPELL_CHIKEN                    = 54677,
+    SPELL_WOLPERTINGER              = 54688,
+
+    STABLE_MASTER_GOSSIP_SUB_MENU   = 9820
+};
+
+class npc_stable_master : public CreatureScript
+{
+    public:
+        npc_stable_master() : CreatureScript("npc_stable_master") { }
+
+        struct npc_stable_masterAI : public SmartAI
         {
-        case GOSSIP_ACTION_INFO_DEF + 1: // Save money
-        case GOSSIP_ACTION_INFO_DEF + 2: // Withdraw money
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_1_COPPER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4 + extraActionWithdraw);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_10_COPPER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5 + extraActionWithdraw);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_1_SILVER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6 + extraActionWithdraw);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_10_SILVER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7 + extraActionWithdraw);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_1_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8 + extraActionWithdraw);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_10_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 9 + extraActionWithdraw);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_100_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 10 + extraActionWithdraw);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_1000_GOLD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 11 + extraActionWithdraw);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_ITEM_ALL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 12 + extraActionWithdraw);
-            player->PlayerTalkClass->SendGossipMenu(GOSSIP_TEXT_MANIPULATE_GOLD, creature->GetGUID());
-            break;
-        case GOSSIP_ACTION_INFO_DEF + 3: // View account balance
-            bankerAction = BANKER_ACTION_SHOW_BALANCE;
-            break;
-        case GOSSIP_ACTION_INFO_DEF + 4:
-        case GOSSIP_ACTION_INFO_DEF + 13:
-            totalMoney = 1;
-            break;
-        case GOSSIP_ACTION_INFO_DEF + 5:
-        case GOSSIP_ACTION_INFO_DEF + 14:
-            totalMoney = 10;
-            break;
-        case GOSSIP_ACTION_INFO_DEF + 6:
-        case GOSSIP_ACTION_INFO_DEF + 15:
-            totalMoney = 100;
-            break;
-        case GOSSIP_ACTION_INFO_DEF + 7:
-        case GOSSIP_ACTION_INFO_DEF + 16:
-            totalMoney = 1000;
-            break;
-        case GOSSIP_ACTION_INFO_DEF + 8:
-        case GOSSIP_ACTION_INFO_DEF + 17:
-            totalMoney = 10000;
-            break;
-        case GOSSIP_ACTION_INFO_DEF + 9:
-        case GOSSIP_ACTION_INFO_DEF + 18:
-            totalMoney = 100000;
-            break;
-        case GOSSIP_ACTION_INFO_DEF + 10:
-        case GOSSIP_ACTION_INFO_DEF + 19:
-            totalMoney = 1000000;
-            break;
-        case GOSSIP_ACTION_INFO_DEF + 11:
-        case GOSSIP_ACTION_INFO_DEF + 20:
-            totalMoney = 10000000;
-            break;
-        case GOSSIP_ACTION_INFO_DEF + 12:
-        case GOSSIP_ACTION_INFO_DEF + 21:
-            if (bankerAction == BANKER_ACTION_SAVE_MONEY)
-                totalMoney = player->GetMoney();
-            else if (bankerAction == BANKER_ACTION_WITHDRAW_MONEY)
-                totalMoney = player->GetBankMoney();
-            break;
-        }
-        // To inform the player later
-        uint32 golds = uint32(totalMoney / 10000);
-        uint32 silvers = uint32((totalMoney - (golds * 10000)) / 100);
-        uint32 coppers = uint32(totalMoney - (golds * 10000) - (silvers * 100));
+            npc_stable_masterAI(Creature* creature) : SmartAI(creature) { }
 
-        if (bankerAction == BANKER_ACTION_SAVE_MONEY)
-        {
-            if (player->GetMoney() >= totalMoney)
+            void sGossipSelect(Player* player, uint32 menuId, uint32 gossipListId) override
             {
-                player->ModifyBankMoney(totalMoney);
-                player->ModifyMoney(totalMoney * -1);
-                ChatHandler(player->GetSession()).PSendSysMessage("Has guardado %u Oros, %u Platas y %u Cobres en el banco.", golds, silvers, coppers);
-            }
-            else
-                ChatHandler(player->GetSession()).PSendSysMessage("No tienes suficiente dinero.");
-            goBack = true;
-        }
-        else if (bankerAction == BANKER_ACTION_WITHDRAW_MONEY)
-        {
-            if (player->GetBankMoney() >= totalMoney)
-            {
-                player->ModifyBankMoney(totalMoney * -1);
-                player->ModifyMoney(totalMoney);
-                ChatHandler(player->GetSession()).PSendSysMessage("Has retirado %u Oros, %u Platas y %u Cobres en el banco.", golds, silvers, coppers);
-            }
-            else
-                ChatHandler(player->GetSession()).PSendSysMessage("No tienes suficiente dinero en el banco.");
-            goBack = true;
-        }
-        else if (bankerAction == BANKER_ACTION_SHOW_BALANCE)
-        {
-            totalMoney = player->GetBankMoney();
-            uint32 golds = uint32(totalMoney / 10000);
-            uint32 silvers = uint32((totalMoney - (golds * 10000)) / 100);
-            uint32 coppers = uint32(totalMoney - (golds * 10000) - (silvers * 100));
-            ChatHandler(player->GetSession()).PSendSysMessage("Tienes %u Oros, %u Platas y %u Cobres a buen recaudo.", golds, silvers, coppers);
-            goBack = true;
-        }
+                SmartAI::sGossipSelect(player, menuId, gossipListId);
+                if (menuId != STABLE_MASTER_GOSSIP_SUB_MENU)
+                    return;
 
-        if (goBack)
-        {
-            player->PlayerTalkClass->ClearMenus();
-            this->OnGossipHello(player, creature);
-        }
+                switch (gossipListId)
+                {
+                    case 0:
+                        player->CastSpell(player, SPELL_MINIWING, false);
+                        break;
+                    case 1:
+                        player->CastSpell(player, SPELL_JUBLING, false);
+                        break;
+                    case 2:
+                        player->CastSpell(player, SPELL_DARTER, false);
+                        break;
+                    case 3:
+                        player->CastSpell(player, SPELL_WORG, false);
+                        break;
+                    case 4:
+                        player->CastSpell(player, SPELL_SMOLDERWEB, false);
+                        break;
+                    case 5:
+                        player->CastSpell(player, SPELL_CHIKEN, false);
+                        break;
+                    case 6:
+                        player->CastSpell(player, SPELL_WOLPERTINGER, false);
+                        break;
+                    default:
+                        return;
+                }
 
-        return true;
-    }
+                player->PlayerTalkClass->SendCloseGossip();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const override
+        {
+            return new npc_stable_masterAI(creature);
+        }
 };
 
 void AddSC_npcs_special()
@@ -2557,4 +2573,5 @@ void AddSC_npcs_special()
     new npc_spring_rabbit();
     new npc_imp_in_a_ball();
     new npc_gold_banker();
+    new npc_stable_master();
 }

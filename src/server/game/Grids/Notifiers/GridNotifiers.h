@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -722,18 +722,6 @@ namespace Trinity
         NearestGameObjectTypeInObjectRangeCheck(NearestGameObjectTypeInObjectRangeCheck const&);
     };
 
-    class GameObjectWithDbGUIDCheck
-    {
-        public:
-            GameObjectWithDbGUIDCheck(WorldObject const& /*obj*/, uint32 db_guid) : i_db_guid(db_guid) { }
-            bool operator()(GameObject const* go) const
-            {
-                return go->GetDBTableGUIDLow() == i_db_guid;
-            }
-        private:
-            uint32 i_db_guid;
-    };
-
     // Unit checks
 
     class MostHPMissingInRange
@@ -833,18 +821,6 @@ namespace Trinity
             WorldObject const* i_obj;
             Unit const* i_funit;
             float i_range;
-    };
-
-    class CreatureWithDbGUIDCheck
-    {
-        public:
-            CreatureWithDbGUIDCheck(WorldObject const* /*obj*/, uint32 lowguid) : i_lowguid(lowguid) { }
-            bool operator()(Creature* u)
-            {
-                return u->GetDBTableGUIDLow() == i_lowguid;
-            }
-        private:
-            uint32 i_lowguid;
     };
 
     class AnyFriendlyUnitInObjectRangeCheck
@@ -950,7 +926,7 @@ namespace Trinity
             bool operator()(Unit* u)
             {
                 // Check contains checks for: live, non-selectable, non-attackable flags, flight check and GM check, ignore totems
-                if (u->GetTypeId() == TYPEID_UNIT && u->ToCreature()->IsTotem())
+                if (u->GetTypeId() == TYPEID_UNIT && u->IsTotem())
                     return false;
 
                 if (i_funit->_IsValidAttackTarget(u, _spellInfo, i_obj->GetTypeId() == TYPEID_DYNAMICOBJECT ? i_obj : NULL) && i_obj->IsWithinDistInMap(u, i_range))

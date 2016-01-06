@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -159,6 +159,8 @@ protected:
 #ifndef TC_SOCKET_USE_IOCP
     MessageBuffer _writeBuffer;
 #endif
+
+    boost::asio::io_service& io_service() { return _socket.get_io_service(); }
 
 private:
     void ReadHandlerInternal(boost::system::error_code error, size_t transferredBytes)

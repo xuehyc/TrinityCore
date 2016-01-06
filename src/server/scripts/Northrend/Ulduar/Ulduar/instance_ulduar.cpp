@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -54,6 +54,15 @@ MinionData const minionData[] =
     { 0,                  0,                    }
 };
 
+ObjectData const creatureData[] =
+{
+    { NPC_BRANN_BRONZEBEARD_INTRO,  DATA_BRANN_BRONZEBEARD_INTRO  },
+    { NPC_LORE_KEEPER_OF_NORGANNON, DATA_LORE_KEEPER_OF_NORGANNON },
+    { NPC_HIGH_EXPLORER_DELLORAH,   DATA_DELLORAH                 },
+    { NPC_BRONZEBEARD_RADIO,        DATA_BRONZEBEARD_RADIO        },
+    { 0,                            0,                            }
+};
+
 class instance_ulduar : public InstanceMapScript
 {
     public:
@@ -68,6 +77,7 @@ class instance_ulduar : public InstanceMapScript
 
                 LoadDoorData(doorData);
                 LoadMinionData(minionData);
+                LoadObjectData(creatureData, nullptr);
 
                 _algalonTimer = 61;
                 _maxArmorItemLevel = 0;
@@ -420,6 +430,8 @@ class instance_ulduar : public InstanceMapScript
                             algalon->AI()->JustSummoned(creature);
                         break;
                 }
+
+                InstanceScript::OnCreatureCreate(creature);
             }
 
             void OnCreatureRemove(Creature* creature) override
@@ -446,6 +458,8 @@ class instance_ulduar : public InstanceMapScript
                     default:
                         break;
                 }
+
+                InstanceScript::OnCreatureRemove(creature);
             }
 
             void OnGameObjectCreate(GameObject* gameObject) override
