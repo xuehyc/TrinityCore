@@ -83,3 +83,8 @@ add_subdirectory(dep)
 
 # add core sources
 add_subdirectory(src)
+
+# add tests if enabled
+if(WITH_TESTS)
+  add_subdirectory(test)
+endif()

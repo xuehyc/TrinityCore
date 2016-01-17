@@ -37,6 +37,12 @@ else()
   message("* Build map/vmap tools   : No  (default)")
 endif()
 
+if( WITH_TESTS )
+  message("* Build unit tests       : Yes")
+else()
+  message("* Build unit tests       : No  (default)")
+endif()
+
 if( USE_COREPCH )
   message("* Build core w/PCH       : Yes (default)")
 else()
