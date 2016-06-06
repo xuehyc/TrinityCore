@@ -89,7 +89,7 @@ public:
             removeStealthTimer = TIME_TO_REMOVE_STEALTH;
         }
 
-        void EnterEvadeMode() override
+        void EnterEvadeMode(EvadeReason /*why*/) override
         {
             if (standardState == STANDARD_STATE_CLAIMED)
                 sNullSecMgr->SetGuildZoneUnderAttack(guildZoneId, false);
@@ -173,7 +173,7 @@ public:
             {
                 if (regenTimer <= diff)
                 {
-                    EnterEvadeMode();
+                    EnterEvadeMode(EVADE_REASON_OTHER);
                     regenTimer = TIME_TO_REGEN;
                 }
                 else
@@ -383,7 +383,7 @@ public:
         uint32 teleportTimer;
         uint32 forceDespawnTimer;
 
-        void EnterEvadeMode() override
+        void EnterEvadeMode(EvadeReason /*why*/) override
         {
             DeleteMe();
         }
@@ -670,7 +670,7 @@ public:
         uint32 teleportTimer;
         uint32 forceDespawnTimer;
 
-        void EnterEvadeMode() override
+        void EnterEvadeMode(EvadeReason /*why*/) override
         {
             DeleteMe();
         }
