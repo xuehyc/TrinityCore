@@ -71,7 +71,7 @@ public:
 
         // Check if the player is in the correct area to start claiming
         uint32 guildZoneId = sNullSecMgr->GetNullSecGuildZone(player->GetZoneId(), player->GetAreaId());
-        const AreaTableEntry* atEntry = GetAreaEntryByAreaID(sNullSecMgr->GetVitalAreaByGuildZoneId(guildZoneId));
+        AreaTableEntry const* atEntry = sAreaTableStore.LookupEntry(sNullSecMgr->GetVitalAreaByGuildZoneId(guildZoneId));
 
         if (player->GetAreaId() != atEntry->ID)
         {

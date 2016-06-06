@@ -853,9 +853,10 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         uint32 GetLootId() const;
         void SetDynamicLootId(uint32 dynamicLootId) { m_dynamicLootId = dynamicLootId; };
 
-    protected:
         void AIM_Destroy();
         bool AIM_Initialize();
+        
+    protected:
 
         GameObjectModel* CreateModel();
         void UpdateModel();                                 // updates model in case displayId were changed

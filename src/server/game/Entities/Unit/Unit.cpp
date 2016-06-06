@@ -17665,7 +17665,7 @@ void Unit::Whisper(uint32 textId, Player* target, bool isBossWhisper /*= false*/
 
 ZoneSecurityLevels Unit::GetZoneSecurityLevel()
 {
-    const AreaTableEntry* atEntry = GetAreaEntryByAreaID(GetAreaId());
+    AreaTableEntry const* atEntry = sAreaTableStore.LookupEntry(GetAreaId());
     if (atEntry)
     {
         uint32 zoneId = atEntry->zone;
