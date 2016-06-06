@@ -1246,10 +1246,6 @@ enum TrinityStrings
 	LANG_RECLAMAR_ATTACK_STARTED = 12020,
 	// PvP player loot system
 	LANG_PVP_MONEY_LOST = 12021,
-<<<<<<< HEAD
-	LANG_PVP_MONEY_WON = 12022
-=======
 	LANG_PVP_MONEY_WON  = 12022
->>>>>>> 34dc4b5bd6efd3fc1c04a566a3dc2c6a1e871592
 };
 #endif
