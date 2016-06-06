@@ -42,6 +42,7 @@ go_amberpine_outhouse
 go_hive_pod
 go_veil_skith_cage
 go_player_remains
+go_toy_train_set
 EndContentData */
 
 #include "ScriptMgr.h"
@@ -1171,7 +1172,7 @@ public:
                 player->CastSpell(player, SPELL_CLEANSING_SOUL);
                 player->SetStandState(UNIT_STAND_STATE_SIT);
             }
-            return true;
+        return true;
     }
 };
 
@@ -1210,11 +1211,56 @@ public:
     {
         if (state == GO_JUST_DEACTIVATED)
         {
-            go->SetRespawnTime(0);                                 // not save respawn time
+            go->SetRespawnTime(0);                                 // do not save respawn time
             go->CleanupsBeforeDelete();
             go->Delete();
         }
     }
+}
+
+/*######
+## go_toy_train_set
+######*/
+
+enum ToyTrainSpells
+{
+    SPELL_TOY_TRAIN_PULSE       = 61551,
+};
+
+class go_toy_train_set : public GameObjectScript
+{
+    public:
+        go_toy_train_set() : GameObjectScript("go_toy_train_set") { }
+
+        struct go_toy_train_setAI : public GameObjectAI
+        {
+            go_toy_train_setAI(GameObject* go) : GameObjectAI(go), _pulseTimer(3 * IN_MILLISECONDS) { }
+
+            void UpdateAI(uint32 diff) override
+            {
+                if (diff < _pulseTimer)
+                    _pulseTimer -= diff;
+                else
+                {
+                    go->CastSpell(nullptr, SPELL_TOY_TRAIN_PULSE, true);
+                    _pulseTimer = 6 * IN_MILLISECONDS;
+                }
+            }
+
+            // triggered on wrecker'd
+            void DoAction(int32 /*action*/) override
+            {
+                go->Delete();
+            }
+
+        private:
+            uint32 _pulseTimer;
+        };
+
+        GameObjectAI* GetAI(GameObject* go) const override
+        {
+            return new go_toy_train_setAI(go);
+        }
 };
 
 void AddSC_go_scripts()
@@ -1253,4 +1299,5 @@ void AddSC_go_scripts()
     new go_frostblade_shrine();
     new go_midsummer_bonfire();
     new go_player_remains();
+    new go_toy_train_set();
 }
