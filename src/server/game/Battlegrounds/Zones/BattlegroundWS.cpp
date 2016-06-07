@@ -25,6 +25,7 @@
 #include "WorldPacket.h"
 #include "ObjectAccessor.h"
 #include "Group.h"
+#include "ObjectMgr.h"
 
 // these variables aren't used outside of this file, so declare them only here
 enum BG_WSG_Rewards

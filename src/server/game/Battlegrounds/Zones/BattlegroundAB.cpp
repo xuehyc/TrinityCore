@@ -25,6 +25,7 @@
 #include "Util.h"
 #include "WorldSession.h"
 #include "Group.h"
+#include "ObjectMgr.h"
 
 BattlegroundAB::BattlegroundAB()
 {
