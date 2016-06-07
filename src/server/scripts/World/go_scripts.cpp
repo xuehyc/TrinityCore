@@ -1216,7 +1216,7 @@ public:
             go->Delete();
         }
     }
-}
+};
 
 /*######
 ## go_toy_train_set
