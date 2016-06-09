@@ -19,7 +19,7 @@
 #ifndef NULL_SEC_MGR_H_
 #define NULL_SEC_MGR_H_
 
-#define MAX_NULLSEC_ZONES 11
+#define MAX_NULLSEC_ZONES 5
 #define NO_GUILD_ZONE NULL
 #define ITEM_STANDARD_OF_CONQUEST 25555
 #define NPC_STANDARD_OF_CONQUEST 50000
@@ -33,16 +33,16 @@ struct NullSecGuildZoneData
     uint32 GuildZoneId;
     std::string GuildZoneName;
     uint32 ZoneId;
-    std::vector<uint32> Areas;
-    uint32 VitalArea;
-    Position StandardPosition;
+	uint32 VitalAreas[3];
+	uint8 VitalAreasStatus[3];
+	Position StandardPositions[3];
     Position LowSecRespawnPosition;
     Guild* Owner;
     Guild* Attacker;
     bool IsUnderAttack;
+	bool IsContested;
     uint32 IntrudersCount;
-    uint32 TaxiNode;
-    uint32 TaxiNode2; // Some zones have 2 taxi nodes, one for the Alliance and one for the Horde.
+	std::vector<uint32> TaxiNodes;
 };
 
 class NullSecMgr
@@ -65,14 +65,13 @@ public:
     void RemoveGuildZoneOwner(uint32 guildZoneId);
     bool IsNullSecZone(uint32 zoneId);
     uint32 GetNullSecGuildZone(uint32 zoneId, uint32 areaId);
-    uint32 GetVitalAreaByGuildZoneId(uint32 guildZoneId);
-    Position GetStandardPositionByGuildZoneId(uint32 guildZoneId);
+    uint32* GetVitalAreasByGuildZoneId(uint32 guildZoneId);
+    Position GetStandardPositionByVitalArea(uint32 guildZoneId, uint32 vitalArea);
     Position GetLowSecRespawnPositionByGuildZoneId(uint32 guildZoneId);
     bool IsGuildZoneUnderAttack(uint32 guildZoneId);
-    void SetGuildZoneUnderAttack(uint32 guildZoneId, bool underAttack, Guild* attacker = NULL);
+    void SetGuildZoneUnderAttack(uint32 guildZoneId, bool underAttack, Guild* attacker);
     Guild* GetGuildZoneAttacker(uint32 guildZoneId);
     std::string GetGuildZoneName(uint32 guildZone);
-    void OnPlayerEnterNullSecZone(Player* player);
     void OnPlayerEnterNullSecGuildZone(Player* player);
     void OnPlayerLeaveNullSecGuildZone(Player* player);
     Position GetNearestRespawnPointForPlayer(Player* player);

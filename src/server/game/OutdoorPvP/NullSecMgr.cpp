@@ -35,12 +35,16 @@ void NullSecMgr::InitNullSecMgr()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                                   0                1                  2                3             4             5             6             7        8          9          10                  11                  12                  13              14
-    QueryResult result = CharacterDatabase.Query("SELECT a.guild_zone_id, a.guild_zone_name, a.vital_area_id, a.standard_x, a.standard_y, a.standard_z, a.standard_o, a.owner, b.zone_id, b.area_id, a.lowsec_respawn_x, a.lowsec_respawn_y, a.lowsec_respawn_z, a.taxi_node_id, a.taxi_node_2_id FROM custom_nullsec_guild_zones AS a, custom_nullsec_guild_areas AS b WHERE a.guild_zone_id = b.guild_zone_id ORDER BY a.guild_zone_id");
+    //                                                   0              1                2        3                4                5                6                    7                    8
+    QueryResult result = CharacterDatabase.Query("SELECT guild_zone_id, guild_zone_name, zone_id, vital_area_id_1, vital_area_id_2, vital_area_id_3, vital_area_1_status, vital_area_2_status, vital_area_3_status, "
+	//                                                   9             10            11           12           13           14           15           16           17           18           19      20            21
+												        "standard_x_1, standard_x_2, standard_x_3, standard_y_1, standard_y_2, standard_y_3, standard_z_1, standard_z_2, standard_z_3, standard_o_1, standard_o_2, standard_o_3, "
+	//                                                   22     23                24                25                26              27              28              29       
+														"owner, lowsec_respawn_x, lowsec_respawn_y, lowsec_respawn_z, taxi_node_id_1, taxi_node_id_2, taxi_node_id_3, taxi_node_id_4 FROM custom_nullsec_guild_zones ORDER BY guild_zone_id");
 
     if (!result)
     {
-        TC_LOG_ERROR("server.loading", ">> Loaded 0 Null Sec Guild Zones. DB table `custom_nullsec_guild_zones` or `custom_nullsec_guild_areas` is empty.");
+        TC_LOG_ERROR("server.loading", ">> Loaded 0 Null Sec Guild Zones. DB table `custom_nullsec_guild_zones` is empty.");
         return;
     }
 
@@ -52,67 +56,42 @@ void NullSecMgr::InitNullSecMgr()
     {
         Field* fields = result->Fetch();
 
-        // Load only an area...
-        if (fields[0].GetUInt32() == guildZoneId)
+        guildZoneId = fields[0].GetUInt32();
+
+        if (guildZoneId > MAX_NULLSEC_ZONES)
         {
-            m_guildZones[guildZoneId].Areas.push_back(fields[9].GetUInt32());
-            ++countAreas;
+            TC_LOG_ERROR("sql.sql", "Invalid Guild Zone ID value %u in custom_nullsec_zones, skipped.", guildZoneId);
+            continue;
         }
-        // ... or zone and area
+        
+        NullSecGuildZoneData nullSecGuildZoneData;
+        nullSecGuildZoneData.GuildZoneId = guildZoneId;
+        nullSecGuildZoneData.GuildZoneName = fields[1].GetString();
+        nullSecGuildZoneData.ZoneId = fields[8].GetUInt32();
+
+		for (uint8 i = 0; i < 3; ++i)
+		{
+			nullSecGuildZoneData.VitalAreas[i] = fields[i + 3].GetUInt32();
+			nullSecGuildZoneData.VitalAreasStatus[i] = fields[i + 6].GetUInt8();
+            nullSecGuildZoneData.StandardPositions[0] = Position{ fields[i + 9].GetFloat(), fields[i + 12].GetFloat(), fields[i + 15].GetFloat(), fields[i + 18].GetFloat() };
+		}
+
+        nullSecGuildZoneData.LowSecRespawnPosition = Position { fields[23].GetFloat(), fields[24].GetFloat(), fields[25].GetFloat() };
+        if (!fields[22].GetUInt32())
+            nullSecGuildZoneData.Owner = NULL;
         else
-        {
-            guildZoneId = fields[0].GetUInt32();
+            nullSecGuildZoneData.Owner = sGuildMgr->GetGuildById(fields[22].GetUInt32());
+        nullSecGuildZoneData.Attacker = NULL;
+        nullSecGuildZoneData.IsUnderAttack = false;
+        nullSecGuildZoneData.IntrudersCount = 0;
 
-            if (guildZoneId > MAX_NULLSEC_ZONES)
-            {
-                TC_LOG_ERROR("sql.sql", "Invalid Guild Zone ID value %u in custom_nullsec_zones, skipped.", guildZoneId);
-                continue;
-            }
+        for (uint8 i = 26; i < 30; ++i)
+            nullSecGuildZoneData.TaxiNodes.push_back(fields[i].GetUInt32());
 
-            NullSecGuildZoneData nullSecGuildZoneData;
-            nullSecGuildZoneData.GuildZoneId = guildZoneId;
-            nullSecGuildZoneData.GuildZoneName = fields[1].GetString();
-            nullSecGuildZoneData.ZoneId = fields[8].GetUInt32();
-            nullSecGuildZoneData.Areas.push_back(fields[9].GetUInt32());
-            nullSecGuildZoneData.VitalArea = fields[2].GetUInt32();
-            nullSecGuildZoneData.StandardPosition = Position { fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat(), fields[6].GetFloat() };
-            nullSecGuildZoneData.LowSecRespawnPosition = Position { fields[10].GetFloat(), fields[11].GetFloat(), fields[12].GetFloat() };
-            if (!fields[2].GetUInt32())
-                nullSecGuildZoneData.Owner = NULL;
-            else
-                nullSecGuildZoneData.Owner = sGuildMgr->GetGuildById(fields[7].GetUInt32());
-            nullSecGuildZoneData.Attacker = NULL;
-            nullSecGuildZoneData.IsUnderAttack = false;
-            nullSecGuildZoneData.IntrudersCount = 0;
-            nullSecGuildZoneData.TaxiNode = fields[13].GetUInt32();
-            nullSecGuildZoneData.TaxiNode2 = fields[14].GetUInt32();
-            m_guildZones[guildZoneId] = nullSecGuildZoneData;
-            ++countZones;
-            ++countAreas;
-        }
-    } while (result->NextRow());
-
-    TC_LOG_INFO("server.loading", ">> Loaded %u custom Null Sec Guild Zones with %u Null Sec Guild Areas in %u ms.", countZones, countAreas, GetMSTimeDiffToNow(oldMSTime));
-
-    oldMSTime = getMSTime();
-
-    //                                                0
-    result = CharacterDatabase.Query("SELECT DISTINCT zone_id FROM custom_nullsec_guild_areas");
-
-    if (!result)
-    {
-        TC_LOG_ERROR("server.loading", ">> Loaded 0 Null Sec Zones. DB table `cutom_nullsec_guild_areas` is empty.");
-        return;
-    }
-
-    countZones = 0;
-
-    do
-    {
-        Field* fields = result->Fetch();
-        // Add new zone to the null sec list.
-        m_nullSecZones.push_back(fields[0].GetUInt32());
+        m_guildZones[guildZoneId] = nullSecGuildZoneData;
+        m_nullSecZones.push_back(fields[2].GetUInt32());
         ++countZones;
+
     } while (result->NextRow());
 }
 
@@ -239,7 +218,7 @@ bool NullSecMgr::IsNullSecZone(uint32 zoneId)
     return false;
 }
 
-uint32 NullSecMgr::GetNullSecGuildZone(uint32 zoneId, uint32 areaId)
+uint32 NullSecMgr::GetNullSecGuildZoneId(uint32 zoneId)
 {
     if (!IsNullSecZone(zoneId))
         return GUILD_ZONE_NONE;
@@ -259,20 +238,26 @@ uint32 NullSecMgr::GetNullSecGuildZone(uint32 zoneId, uint32 areaId)
     return GUILD_ZONE_NONE;
 }
 
-uint32 NullSecMgr::GetVitalAreaByGuildZoneId(uint32 guildZoneId)
-{
-    if (guildZoneId > MAX_NULLSEC_ZONES || !guildZoneId)
-        return 0;
-
-    return m_guildZones[guildZoneId].VitalArea;
-}
-
-Position NullSecMgr::GetStandardPositionByGuildZoneId(uint32 guildZoneId)
+uint32* NullSecMgr::GetVitalAreasByGuildZoneId(uint32 guildZoneId)
 {
     if (guildZoneId > MAX_NULLSEC_ZONES || !guildZoneId)
         return NULL;
 
-    return m_guildZones[guildZoneId].StandardPosition;
+    return m_guildZones[guildZoneId].VitalAreas;
+}
+
+Position NullSecMgr::GetStandardPositionByVitalArea(uint32 guildZoneId, uint32 vitalArea)
+{
+    if (!vitalArea || !guildZoneId || guildZoneId > MAX_NULLSEC_ZONES)
+        return NULL;
+
+    for (uint8 i = 0; i < MAX_VITAL_AREAS; ++i)
+    {
+        if (m_guildZones[guildZoneId].VitalAreas[i] == vitalArea)
+            return m_guildZones[guildZoneId].StandardPositions[i];
+    }
+
+    return NULL;
 }
 
 Position NullSecMgr::GetLowSecRespawnPositionByGuildZoneId(uint32 guildZoneId)

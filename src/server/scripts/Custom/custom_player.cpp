@@ -104,8 +104,10 @@ public:
             // These are the Low Sec Areas, FFA PvP is allowed here.
             case LOWSEC_ZONE_DARKSHORE:
             case LOWSEC_ZONE_ASHENVALE:
-            case LOWSEC_ZONE_AZSHARA:
+            case LOWSEC_ZONE_THOUSAND_NEEDLES:
             case LOWSEC_ZONE_THE_BARRENS:
+			case LOWSEC_ZONE_TANARIS:
+			case LOWSEC_ZONE_STONETALON_MOUNTAINS:
                 player->pvpInfo.IsInHighSecZone = false;
                 if (!areaOnly)
                     ChatHandler(player->GetSession()).SendSysMessage(LANG_LOWSEC_GENERAL_ENTER);
@@ -113,11 +115,13 @@ public:
                 player->SetGuildZoneId(GUILD_ZONE_NONE);
                 break;
             // And these are the Null Sec zones, FFA PvP is encouraged here.
-            case NULLSEC_ZONE_WINTERSPRING:
+            // case NULLSEC_ZONE_WINTERSPRING:
             case NULLSEC_ZONE_FELWOOD:
-            case NULLSEC_ZONE_STONETALON_MOUNTAINS:
+            case NULLSEC_ZONE_FERALAS:
             case NULLSEC_ZONE_DESOLACE:
             case NULLSEC_ZONE_DUSTWALLOW_MARSH:
+			// case NULLSEC_ZONE_UNGORO:
+			case NULLSEC_ZONE_AZSHARA:
                 if (!areaOnly)
                     ChatHandler(player->GetSession()).SendSysMessage(LANG_NULLSEC_GENERAL_ENTER);
 
@@ -178,8 +182,7 @@ public:
         if (zoneSec == ZONE_SECURITY_LEVEL_HIGH || zoneSec == ZONE_SECURITY_LEVEL_UNK)
             return;
 
-        // Give the killer his money, only if the killed player has more than 20 golds (to avoid rage quiting on low levels)
-        // TODO: Put this values in the config file.
+        // Give the killer his money, only if the killed player has more than X golds (to avoid rage quiting on low levels)
         uint32 money = player->GetMoney();
         if (money > sWorld->getIntConfig(CONFIG_CUSTOM_LOW_SEC_MIN_GOLD_DROP) || zoneSec == ZONE_SECURITY_LEVEL_NULL)
         {

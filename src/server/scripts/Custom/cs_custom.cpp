@@ -39,33 +39,33 @@ public:
     {
         static std::vector<ChatCommand> commandTable =
         {
-            { "reclamar", rbac::RBAC_PERM_COMMAND_SERVER_MOTD, true, &HandleReclamarCommand, "" }
+            { "claim", rbac::RBAC_PERM_COMMAND_SERVER_MOTD, true, &HandleClaimCommand, "" }
         };
         return commandTable;
     }
 
-    static bool HandleReclamarCommand(ChatHandler* handler, char const* /*args*/)
+    static bool HandleClaimCommand(ChatHandler* handler, char const* /*args*/)
     {
         Player* player = handler->GetSession()->GetPlayer();
 
         // Check if the player has the needed item
         if (!player->HasItemCount(ITEM_STANDARD_OF_CONQUEST))
         {
-            handler->SendSysMessage(LANG_RECLAMAR_MISSED_ITEM);
+            handler->SendSysMessage(LANG_CLAIM_MISSED_ITEM);
             return true;
         }
         
         // Check if player is in a guild
         if (!player->GetGuild())
         {
-            handler->SendSysMessage(LANG_RECLAMAR_MISSED_GUILD);
+            handler->SendSysMessage(LANG_CLAIM_MISSED_GUILD);
             return true;
         }
 
         // Check if he is in a Null Sec conquerable zone
         if (!player->GetGuildZoneId())
         {
-            handler->SendSysMessage(LANG_RECLAMAR_NO_NULLSEC);
+            handler->SendSysMessage(LANG_CLAIM_NO_NULLSEC);
             return true;
         }
 
@@ -75,21 +75,21 @@ public:
 
         if (player->GetAreaId() != atEntry->ID)
         {
-            handler->PSendSysMessage(LANG_RECLAMAR_WRONG_AREA, atEntry->area_name[handler->GetSessionDbcLocale()]);
+            handler->PSendSysMessage(LANG_CLAIM_WRONG_AREA, atEntry->area_name[handler->GetSessionDbcLocale()]);
             return true;
         }
 
         // Check if the zone is not conquered by other guild
         if (sNullSecMgr->GetNullSecZoneOwner(guildZoneId) != NULL)
         {
-            handler->PSendSysMessage(LANG_RECLAMAR_HAS_OWNER, atEntry->area_name[handler->GetSessionDbcLocale()]);
+            handler->PSendSysMessage(LANG_CLAIM_HAS_OWNER, atEntry->area_name[handler->GetSessionDbcLocale()]);
             return true;
         }
 
         // Check if zone is not under attack
         if (sNullSecMgr->IsGuildZoneUnderAttack(guildZoneId))
         {
-            handler->PSendSysMessage(LANG_RECLAMAR_UNDER_ATTACK);
+            handler->PSendSysMessage(LANG_CLAIM_UNDER_ATTACK);
             return true;
         }
 
@@ -127,7 +127,7 @@ public:
 
         // Delete the item from the player's inventory
         player->DestroyItemCount(ITEM_STANDARD_OF_CONQUEST, 1, true);
-        handler->PSendSysMessage(LANG_RECLAMAR_ATTACK_STARTED, sNullSecMgr->GetGuildZoneName(guildZoneId).c_str());
+        handler->PSendSysMessage(LANG_CLAIM_ATTACK_STARTED, sNullSecMgr->GetGuildZoneName(guildZoneId).c_str());
         return true;
     }
 };
