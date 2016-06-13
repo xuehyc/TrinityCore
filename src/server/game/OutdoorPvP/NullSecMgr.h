@@ -37,7 +37,7 @@ struct NullSecGuildZoneData
 	uint8 VitalAreasStatus[3];
 	Position StandardPositions[3];
     Position LowSecRespawnPosition;
-    Guild* Owner;
+    Guild* Owners[3];
     Guild* Attacker;
     bool IsUnderAttack;
 	bool IsContested;

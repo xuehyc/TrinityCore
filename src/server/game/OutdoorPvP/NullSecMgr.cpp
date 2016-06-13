@@ -39,8 +39,8 @@ void NullSecMgr::InitNullSecMgr()
     QueryResult result = CharacterDatabase.Query("SELECT guild_zone_id, guild_zone_name, zone_id, vital_area_id_1, vital_area_id_2, vital_area_id_3, vital_area_1_status, vital_area_2_status, vital_area_3_status, "
 	//                                                   9             10            11           12           13           14           15           16           17           18           19      20            21
 												        "standard_x_1, standard_x_2, standard_x_3, standard_y_1, standard_y_2, standard_y_3, standard_z_1, standard_z_2, standard_z_3, standard_o_1, standard_o_2, standard_o_3, "
-	//                                                   22     23                24                25                26              27              28              29       
-														"owner, lowsec_respawn_x, lowsec_respawn_y, lowsec_respawn_z, taxi_node_id_1, taxi_node_id_2, taxi_node_id_3, taxi_node_id_4 FROM custom_nullsec_guild_zones ORDER BY guild_zone_id");
+	//                                                   22                  23                  24                  25                26                27                 28             29              30              31
+														"vital_area_owner_1, vital_area_owner_2, vital_area_owner_3, lowsec_respawn_x, lowsec_respawn_y, lowsec_respawn_z, taxi_node_id_1, taxi_node_id_2, taxi_node_id_3, taxi_node_id_4 FROM custom_nullsec_guild_zones ORDER BY guild_zone_id");
 
     if (!result)
     {
@@ -55,7 +55,6 @@ void NullSecMgr::InitNullSecMgr()
     do
     {
         Field* fields = result->Fetch();
-
         guildZoneId = fields[0].GetUInt32();
 
         if (guildZoneId > MAX_NULLSEC_ZONES)
@@ -76,16 +75,26 @@ void NullSecMgr::InitNullSecMgr()
             nullSecGuildZoneData.StandardPositions[0] = Position{ fields[i + 9].GetFloat(), fields[i + 12].GetFloat(), fields[i + 15].GetFloat(), fields[i + 18].GetFloat() };
 		}
 
-        nullSecGuildZoneData.LowSecRespawnPosition = Position { fields[23].GetFloat(), fields[24].GetFloat(), fields[25].GetFloat() };
+        nullSecGuildZoneData.LowSecRespawnPosition = Position { fields[25].GetFloat(), fields[26].GetFloat(), fields[27].GetFloat() };
+        
+        for (var i = 0; i < 3; ++i)
+        {
+            if (fields[i + 22].GetUint32())
+                nullSecGuildZoneData.Owners[i] = sGuildMgr->GetGuildById(fields[i + 22].GetUint32());
+            else
+                nullSecGuildZoneData.Owners[i] = NULL;
+        }
+
         if (!fields[22].GetUInt32())
             nullSecGuildZoneData.Owner = NULL;
         else
             nullSecGuildZoneData.Owner = sGuildMgr->GetGuildById(fields[22].GetUInt32());
+
         nullSecGuildZoneData.Attacker = NULL;
         nullSecGuildZoneData.IsUnderAttack = false;
         nullSecGuildZoneData.IntrudersCount = 0;
 
-        for (uint8 i = 26; i < 30; ++i)
+        for (uint8 i = 28; i < 32; ++i)
             nullSecGuildZoneData.TaxiNodes.push_back(fields[i].GetUInt32());
 
         m_guildZones[guildZoneId] = nullSecGuildZoneData;
