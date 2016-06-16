@@ -91,7 +91,7 @@ void NullSecMgr::InitNullSecMgr()
         nullSecGuildZoneData.IsUnderAttack = false;
         nullSecGuildZoneData.IntrudersCount = 0;
 
-        for (uint8 i = 28; i < 32; ++i)
+        for (uint8 i = 27; i < 31; ++i)
             nullSecGuildZoneData.TaxiNodes.push_back(fields[i].GetUInt32());
 
         m_guildZones[guildZoneId] = nullSecGuildZoneData;
