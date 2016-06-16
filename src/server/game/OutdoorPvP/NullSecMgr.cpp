@@ -35,12 +35,12 @@ void NullSecMgr::InitNullSecMgr()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                                   0              1                2        3                4                5                6                    7                    8
-    QueryResult result = CharacterDatabase.Query("SELECT guild_zone_id, guild_zone_name, zone_id, vital_area_id_1, vital_area_id_2, vital_area_id_3, vital_area_1_status, vital_area_2_status, vital_area_3_status, "
-	//                                                   9             10            11            12            13            14            15            16            17            18            19            20
-												        "standard_x_1, standard_x_2, standard_x_3, standard_y_1, standard_y_2, standard_y_3, standard_z_1, standard_z_2, standard_z_3, standard_o_1, standard_o_2, standard_o_3, "
-	//                                                   21                  22                  23                  24                25                26                 27             28              29              30
-														"vital_area_owner_1, vital_area_owner_2, vital_area_owner_3, lowsec_respawn_x, lowsec_respawn_y, lowsec_respawn_z, taxi_node_id_1, taxi_node_id_2, taxi_node_id_3, taxi_node_id_4 FROM custom_nullsec_guild_zones ORDER BY guild_zone_id");
+    //                                                   0              1                2        3                4                5
+    QueryResult result = CharacterDatabase.Query("SELECT guild_zone_id, guild_zone_name, zone_id, vital_area_id_1, vital_area_id_2, vital_area_id_3, "
+	//                                                   6             7             8             9             10            11            12            13            14            15            16            17
+                                                        "standard_x_1, standard_x_2, standard_x_3, standard_y_1, standard_y_2, standard_y_3, standard_z_1, standard_z_2, standard_z_3, standard_o_1, standard_o_2, standard_o_3, "
+	//                                                   18                  19                  20                  21                22                23                24              25              26              27
+                                                        "vital_area_owner_1, vital_area_owner_2, vital_area_owner_3, lowsec_respawn_x, lowsec_respawn_y, lowsec_respawn_z, taxi_node_id_1, taxi_node_id_2, taxi_node_id_3, taxi_node_id_4 FROM custom_nullsec_guild_zones ORDER BY guild_zone_id");
 
     if (!result)
     {
@@ -71,11 +71,10 @@ void NullSecMgr::InitNullSecMgr()
 		for (uint8 i = 0; i < 3; ++i)
 		{
 			nullSecGuildZoneData.VitalAreas[i] = fields[i + 3].GetUInt32();
-			nullSecGuildZoneData.VitalAreasStatus[i] = fields[i + 6].GetUInt8();
-            nullSecGuildZoneData.StandardPositions[i] = Position{ fields[i + 9].GetFloat(), fields[i + 12].GetFloat(), fields[i + 15].GetFloat(), fields[i + 18].GetFloat() };
-            if (fields[i + 21].GetUInt32())
+            nullSecGuildZoneData.StandardPositions[i] = Position{ fields[i + 6].GetFloat(), fields[i + 9].GetFloat(), fields[i + 12].GetFloat(), fields[i + 15].GetFloat() };
+            if (fields[i + 18].GetUInt32())
             {
-                nullSecGuildZoneData.Owners[i] = sGuildMgr->GetGuildById(fields[i + 21].GetUInt32());
+                nullSecGuildZoneData.Owners[i] = sGuildMgr->GetGuildById(fields[i + 18].GetUInt32());
                 nullSecGuildZoneData.VitalAreasStatus[i] = VITAL_AREA_STATUS_CONQUERED;
             }
             else
@@ -86,12 +85,10 @@ void NullSecMgr::InitNullSecMgr()
             nullSecGuildZoneData.VitalAreasAttackers[i] = NULL;
 		}
 
-        nullSecGuildZoneData.LowSecRespawnPosition = Position { fields[25].GetFloat(), fields[26].GetFloat(), fields[27].GetFloat() };
-        nullSecGuildZoneData.Attacker = NULL;
-        nullSecGuildZoneData.IsUnderAttack = false;
+        nullSecGuildZoneData.LowSecRespawnPosition = Position { fields[22].GetFloat(), fields[23].GetFloat(), fields[24].GetFloat() };
         nullSecGuildZoneData.IntrudersCount = 0;
 
-        for (uint8 i = 27; i < 31; ++i)
+        for (uint8 i = 24; i < 28; ++i)
             nullSecGuildZoneData.TaxiNodes.push_back(fields[i].GetUInt32());
 
         m_guildZones[guildZoneId] = nullSecGuildZoneData;
@@ -99,6 +96,20 @@ void NullSecMgr::InitNullSecMgr()
         ++countZones;
 
     } while (result->NextRow());
+}
+
+bool NullSecMgr::IsNullSecVitalArea(uint32 guildZoneId, uint32 area)
+{
+    if (guildZoneId > TOTAL_GUILD_ZONES || !guildZoneId || !area)
+        return false;
+
+    for (uint8 i = 0; i < 3; ++i)
+    {
+        if (m_guildZones[guildZoneId].VitalAreas[i] == area)
+            return true;
+    }
+
+    return false;
 }
 
 Guild* NullSecMgr::GetNullSecVitalAreaOwner(uint32 guildZoneId, uint32 vitalAreaId)
@@ -111,21 +122,6 @@ Guild* NullSecMgr::GetNullSecVitalAreaOwner(uint32 guildZoneId, uint32 vitalArea
         if (m_guildZones[guildZoneId].VitalAreas[i] == vitalAreaId)
             return m_guildZones[guildZoneId].Owners[i];
     }
-
-    return NULL;
-}
-
-Guild* NullSecMgr::GetNullSecOwner(uint32 guildZoneId)
-{
-    if (guildZoneId > TOTAL_GUILD_ZONES || !guildZoneId)
-        return NULL;
-
-    if (m_guildZones[guildZoneId].Owners[0] == m_guildZones[guildZoneId].Owners[1] ||
-        m_guildZones[guildZoneId].Owners[0] == m_guildZones[guildZoneId].Owners[2])
-        return m_guildZones[guildZoneId].Owners[0];
-
-    if (m_guildZones[guildZoneId].Owners[1] == m_guildZones[guildZoneId].Owners[2])
-        return m_guildZones[guildZoneId].Owners[1];
 
     return NULL;
 }
@@ -154,7 +150,7 @@ void NullSecMgr::SetNullSecVitalAreaOwner(uint32 guildZoneId, Guild* guild, uint
             break;
         }
     }
-    
+
     // Inform all players that a strategic point has been taken and the new owner of the zone if necessary
     if (GetNullSecOwner(guildZoneId) == guild)
         sWorld->SendWorldText(LANG_NULLSEC_ZONE_TAKEN, guild->GetName().c_str(), m_guildZones[guildZoneId].GuildZoneName.c_str());
@@ -194,6 +190,225 @@ void NullSecMgr::RemoveNullSecVitalAreaOwner(uint32 guildZoneId, uint32 vitalAre
             break;
         }
     }
+}
+
+Position NullSecMgr::GetStandardPositionByVitalArea(uint32 guildZoneId, uint32 vitalArea)
+{
+    if (!vitalArea || !guildZoneId || guildZoneId > TOTAL_GUILD_ZONES)
+        return NULL;
+
+    for (uint8 i = 0; i < MAX_VITAL_AREAS; ++i)
+    {
+        if (m_guildZones[guildZoneId].VitalAreas[i] == vitalArea)
+            return m_guildZones[guildZoneId].StandardPositions[i];
+    }
+
+    return NULL;
+}
+
+void NullSecMgr::SetNullSecVitalAreaStatus(uint32 guildZoneId, uint32 areaId, uint8 status)
+{
+    if (!guildZoneId || guildZoneId > TOTAL_GUILD_ZONES || !areaId || status > VITAL_AREA_STATUS_UNDER_ATTACK)
+        return;
+
+    for (uint8 i = 0; i < 3; ++i)
+    {
+        if (m_guildZones[guildZoneId].VitalAreas[i] == areaId)
+            m_guildZones[guildZoneId].VitalAreasStatus[i] = status;
+    }
+}
+
+uint8 NullSecMgr::GetNullSecVitalAreaStatus(uint32 guildZoneId, uint32 areaId)
+{
+    if (!guildZoneId || guildZoneId > TOTAL_GUILD_ZONES || !areaId)
+        return VITAL_AREA_STATUS_UNKNOWN;
+
+    for (uint8 i = 0; i < 3; ++i)
+    {
+        if (m_guildZones[guildZoneId].VitalAreas[i] == areaId)
+            return m_guildZones[guildZoneId].VitalAreasStatus[i];
+    }
+
+    return VITAL_AREA_STATUS_UNKNOWN;
+}
+
+void NullSecMgr::SetNullSecVitalAreaAttacker(uint32 guildZoneId, uint32 areaId, Guild* attacker = NULL)
+{
+    if (!guildZoneId || guildZoneId > TOTAL_GUILD_ZONES || !areaId)
+        return;
+
+    for (uint8 i = 0; i < 3; ++i)
+    {
+        if (m_guildZones[guildZoneId].VitalAreas[i] == areaId)
+        {
+            if (attacker && !m_guildZones[guildZoneId].VitalAreasAttackers[i])
+            {
+                Guild* owner = GetNullSecVitalAreaOwner(guildZoneId, areaId);
+                // Inform only the owners of the zone or everyone on the server if the zone hasn't been conquered
+                const SessionMap worldSessions = sWorld->GetAllSessions();
+                for (SessionMap::const_iterator itr = worldSessions.begin(); itr != worldSessions.end(); ++itr)
+                {
+                    if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld() || !itr->second->GetPlayer()->GetGuild())
+                        continue;
+
+                    if (owner)
+                    {
+                        if (itr->second->GetPlayer()->GetGuild() == owner)
+                            ChatHandler(itr->second).PSendSysMessage(LANG_NULLSEC_UNDER_ATTACK, m_guildZones[guildZoneId].GuildZoneName.c_str());
+                    }
+                    else
+                        ChatHandler(itr->second).PSendSysMessage(LANG_NULLSEC_UNDER_ATTACK, m_guildZones[guildZoneId].GuildZoneName.c_str());
+                }
+            }
+            // Set attacker after sending system messages to players, or IsNullSecUnderAttack() will return always true
+            m_guildZones[guildZoneId].VitalAreasAttackers[i] = attacker;
+        }
+    }
+}
+
+Guild* NullSecMgr::GetNullSecVitalAreaAttacker(uint32 guildZoneId, uint32 areaId)
+{
+    if (!guildZoneId || guildZoneId > TOTAL_GUILD_ZONES || !areaId)
+        return NULL;
+
+    for (uint8 i = 0; i < 3; ++i)
+    {
+        if (m_guildZones[guildZoneId].VitalAreas[i] == areaId)
+            return m_guildZones[guildZoneId].VitalAreasAttackers[i];
+    }
+
+    return NULL;
+}
+
+
+Guild* NullSecMgr::GetNullSecOwner(uint32 guildZoneId)
+{
+    if (guildZoneId > TOTAL_GUILD_ZONES || !guildZoneId)
+        return NULL;
+
+    if (m_guildZones[guildZoneId].Owners[0] == m_guildZones[guildZoneId].Owners[1] ||
+        m_guildZones[guildZoneId].Owners[0] == m_guildZones[guildZoneId].Owners[2])
+        return m_guildZones[guildZoneId].Owners[0];
+
+    if (m_guildZones[guildZoneId].Owners[1] == m_guildZones[guildZoneId].Owners[2])
+        return m_guildZones[guildZoneId].Owners[1];
+
+    return NULL;
+}
+
+bool NullSecMgr::IsNullSecZone(uint32 zoneId)
+{
+    for (std::vector<uint32>::iterator itr = m_nullSecZones.begin(); itr != m_nullSecZones.end(); ++itr)
+    {
+        if (*itr == zoneId)
+            return true;
+    }
+    return false;
+}
+
+uint32 NullSecMgr::GetNullSecGuildZoneId(uint32 zoneId)
+{
+    for (std::map<uint32, NullSecGuildZoneData>::iterator itr = m_guildZones.begin(); itr != m_guildZones.end(); ++itr)
+    {
+        if (itr->second.ZoneId == zoneId)
+            return itr->second.GuildZoneId;
+    }
+
+    return GUILD_ZONE_NONE;
+}
+
+bool NullSecMgr::IsNullSecUnderAttack(uint32 guildZoneId)
+{
+    if (guildZoneId > TOTAL_GUILD_ZONES || !guildZoneId)
+        return false;
+
+    for (uint8 i = 0; i < 3; ++i)
+    {
+        if (m_guildZones[guildZoneId].VitalAreasStatus[i] == VITAL_AREA_STATUS_UNDER_ATTACK)
+            return true;
+    }
+
+    return false;
+}
+
+std::string NullSecMgr::GetNullSecName(uint32 guildZoneId)
+{
+    if (guildZoneId > TOTAL_GUILD_ZONES || !guildZoneId)
+        return NULL;
+
+    return m_guildZones[guildZoneId].GuildZoneName;
+}
+
+Position NullSecMgr::GetLowSecRespawnPositionByGuildZoneId(uint32 guildZoneId)
+{
+    if (guildZoneId > TOTAL_GUILD_ZONES || !guildZoneId)
+        return NULL;
+
+    return m_guildZones[guildZoneId].LowSecRespawnPosition;
+}
+
+Position NullSecMgr::GetNearestRespawnPointForPlayer(Player* player)
+{
+    if (!player->IsInGuildZone())
+        return player->GetPosition();
+
+    // Check first distance to all posible null sec respawn points, if the
+    // player's guild has conquered them, and select the nearest possible.
+    uint32 guildZoneId = player->GetGuildZoneId();
+    float nearestNullSecDistance = 0.0f;
+    Position nearestNullSecPosition = NULL;
+
+    if (player->GetGuild())
+    {
+        for (uint8 i = GUILD_ZONE_NONE + 1; i <= TOTAL_GUILD_ZONES; ++i)
+        {
+            if (GetNullSecOwner(i) == player->GetGuild())
+            {
+                for (uint8 j = 0; j < 3; ++j)
+                {
+                    Position nullSecPos = GetStandardPositionByVitalArea(i, m_guildZones[i].VitalAreas[j]);
+                    float distance = player->GetDistance2d(nullSecPos.GetPositionX(), nullSecPos.GetPositionY());
+                    if (distance < nearestNullSecDistance || nearestNullSecDistance == 0.0f)
+                    {
+                        nearestNullSecDistance = distance;
+                        nearestNullSecPosition = nullSecPos;
+                    }
+                }
+            }
+        }
+    }
+
+    // Now check what's nearer, the low sec respawn point or the null sec respawn point (if any)
+    Position lowSecPos = GetLowSecRespawnPositionByGuildZoneId(guildZoneId);
+    if (nearestNullSecPosition != NULL && player->GetDistance2d(lowSecPos.GetPositionX(), lowSecPos.GetPositionY()) > nearestNullSecDistance)
+        return nearestNullSecPosition;
+    
+    return GetLowSecRespawnPositionByGuildZoneId(guildZoneId);
+}
+
+bool NullSecMgr::IsAllowedTaxiNode(Player* player, uint32 taxiNodeId)
+{
+    // Check if this player is allowed to fly to this node (ergo his guild has the zone conquered)
+    // If player is in null sec, he can't fly nowhere
+    if (player->IsInGuildZone())
+        return false;
+
+    // Get zone by the taxi node ID
+    for (uint8 guildZoneId = GUILD_ZONE_NONE + 1; guildZoneId <= TOTAL_GUILD_ZONES; ++guildZoneId)
+    {
+        for (std::vector<uint32>::iterator itr = m_guildZones[guildZoneId].TaxiNodes.begin(); itr != m_guildZones[guildZoneId].TaxiNodes.end(); ++itr)
+        {
+            if (*itr == taxiNodeId)
+            {
+                if (player->GetGuild() == GetNullSecOwner(guildZoneId))
+                    return true;
+
+                return false;
+            }
+        }
+    }
+    // The destination is not in null sec
+    return true;
 }
 
 void NullSecMgr::OnPlayerEnterNullSec(Player* player)
@@ -264,263 +479,6 @@ void NullSecMgr::OnPlayerLeaveNullSec(Player* player)
     // TODO: May be inform the members of the guild that owns the zone that it's clear (intruders == 0)?
     player->InGuildZone(false);
     player->SetGuildZoneId(GUILD_ZONE_NONE);
-}
-
-bool NullSecMgr::IsNullSecZone(uint32 zoneId)
-{
-    for (std::vector<uint32>::iterator itr = m_nullSecZones.begin(); itr != m_nullSecZones.end(); ++itr)
-    {
-        if (*itr == zoneId)
-            return true;
-    }
-    return false;
-}
-
-uint32 NullSecMgr::GetNullSecGuildZoneId(uint32 zoneId)
-{
-    for (std::map<uint32, NullSecGuildZoneData>::iterator itr = m_guildZones.begin(); itr != m_guildZones.end(); ++itr)
-    {
-        if (itr->second.ZoneId == zoneId)
-            return itr->second.GuildZoneId;
-    }
-
-    return GUILD_ZONE_NONE;
-}
-
-bool NullSecMgr::IsNullSecVitalArea(uint32 guildZoneId, uint32 area)
-{
-    if (guildZoneId > TOTAL_GUILD_ZONES || !guildZoneId || !area)
-        return false;
-
-    for (uint8 i = 0; i < 3; ++i)
-    {
-        if (m_guildZones[guildZoneId].VitalAreas[i] == area)
-            return true;
-    }
-
-    return false;
-}
-
-Position NullSecMgr::GetStandardPositionByVitalArea(uint32 guildZoneId, uint32 vitalArea)
-{
-    if (!vitalArea || !guildZoneId || guildZoneId > TOTAL_GUILD_ZONES)
-        return NULL;
-
-    for (uint8 i = 0; i < MAX_VITAL_AREAS; ++i)
-    {
-        if (m_guildZones[guildZoneId].VitalAreas[i] == vitalArea)
-            return m_guildZones[guildZoneId].StandardPositions[i];
-    }
-
-    return NULL;
-}
-
-Position NullSecMgr::GetLowSecRespawnPositionByGuildZoneId(uint32 guildZoneId)
-{
-    if (guildZoneId > TOTAL_GUILD_ZONES || !guildZoneId)
-        return NULL;
-
-    return m_guildZones[guildZoneId].LowSecRespawnPosition;
-}
-
-bool NullSecMgr::IsNullSecUnderAttack(uint32 guildZoneId)
-{
-    if (guildZoneId > TOTAL_GUILD_ZONES || !guildZoneId)
-        return false;
-
-    for (uint8 i = 0; i < 3; ++i)
-    {
-        if (m_guildZones[guildZoneId].VitalAreasStatus[i] == VITAL_AREA_STATUS_UNDER_ATTACK)
-            return true;
-    }
-
-    return false;
-}
-
-void NullSecMgr::SetNullSecUnderAttack(uint32 guildZoneId, bool underAttack, Guild* attacker)
-{
-    if (guildZoneId > TOTAL_GUILD_ZONES || !guildZoneId)
-        return;
-
-    if (underAttack && !attacker)
-        return;
-
-    if (underAttack && m_guildZones[guildZoneId].IsUnderAttack && attacker == m_guildZones[guildZoneId].Attacker)
-        return;
-
-    m_guildZones[guildZoneId].IsUnderAttack = underAttack;
-
-    if (underAttack)
-    {
-        m_guildZones[guildZoneId].Attacker = attacker;
-        Guild* owner = GetNullSecOwner(guildZoneId);
-        if (owner)
-        {
-            // Inform only the owners of the zone
-            const SessionMap worldSessions = sWorld->GetAllSessions();
-            for (SessionMap::const_iterator itr = worldSessions.begin(); itr != worldSessions.end(); ++itr)
-            {
-                if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld() || !itr->second->GetPlayer()->GetGuild())
-                    continue;
-
-                if (itr->second->GetPlayer()->GetGuild() == owner)
-                    ChatHandler(itr->second).PSendSysMessage(LANG_NULLSEC_UNDER_ATTACK, m_guildZones[guildZoneId].GuildZoneName.c_str());
-            }
-        }
-    }
-    else
-        m_guildZones[guildZoneId].Attacker = NULL;
-}
-
-Guild* NullSecMgr::GetNullSecAttacker(uint32 guildZoneId)
-{
-    if (guildZoneId > TOTAL_GUILD_ZONES || !guildZoneId)
-        return NULL;
-
-    return m_guildZones[guildZoneId].Attacker;
-}
-
-std::string NullSecMgr::GetNullSecName(uint32 guildZoneId)
-{
-    if (guildZoneId > TOTAL_GUILD_ZONES || !guildZoneId)
-        return NULL;
-
-    return m_guildZones[guildZoneId].GuildZoneName;
-}
-
-void NullSecMgr::SetNullSecVitalAreaStatus(uint32 guildZoneId, uint32 areaId, uint8 status)
-{
-    if (!guildZoneId || guildZoneId > TOTAL_GUILD_ZONES || !areaId || status > VITAL_AREA_STATUS_UNDER_ATTACK)
-        return;
-
-    for (uint8 i = 0; i < 3; ++i)
-    {
-        if (m_guildZones[guildZoneId].VitalAreas[i] == areaId)
-            m_guildZones[guildZoneId].VitalAreasStatus[i] = status;
-    }
-}
-
-uint8 NullSecMgr::GetNullSecVitalAreaStatus(uint32 guildZoneId, uint32 areaId)
-{
-    if (!guildZoneId || guildZoneId > TOTAL_GUILD_ZONES || !areaId)
-        return VITAL_AREA_STATUS_UNKNOWN;
-
-    for (uint8 i = 0; i < 3; ++i)
-    {
-        if (m_guildZones[guildZoneId].VitalAreas[i] == areaId)
-            return m_guildZones[guildZoneId].VitalAreasStatus[i];
-    }
-
-    return VITAL_AREA_STATUS_UNKNOWN;
-}
-
-void NullSecMgr::SetNullSecVitalAreaAttacker(uint32 guildZoneId, uint32 areaId, Guild* attacker = NULL)
-{
-    if (!guildZoneId || guildZoneId > TOTAL_GUILD_ZONES || !areaId)
-        return;
-
-    for (uint8 i = 0; i < 3; ++i)
-    {
-        if (m_guildZones[guildZoneId].VitalAreas[i] == areaId)
-        {
-            m_guildZones[guildZoneId].VitalAreasAttackers[i] = attacker;
-            if (attacker && IsNullSecUnderAttack(guildZoneId))
-            {
-                Guild* owner = GetNullSecOwner(guildZoneId);
-                // Inform only the owners of the zone or everyone on the server if the zone hasn't been conquered
-                const SessionMap worldSessions = sWorld->GetAllSessions();
-                for (SessionMap::const_iterator itr = worldSessions.begin(); itr != worldSessions.end(); ++itr)
-                {
-                    if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld() || !itr->second->GetPlayer()->GetGuild())
-                        continue;
-
-                    if (owner)
-                    {
-                        if (itr->second->GetPlayer()->GetGuild() == owner)
-                            ChatHandler(itr->second).PSendSysMessage(LANG_NULLSEC_UNDER_ATTACK, m_guildZones[guildZoneId].GuildZoneName.c_str());
-                    }
-                    else
-                        ChatHandler(itr->second).PSendSysMessage(LANG_NULLSEC_UNDER_ATTACK, m_guildZones[guildZoneId].GuildZoneName.c_str());
-                }
-            }
-        }
-    }
-}
-
-Guild* NullSecMgr::GetNullSecVitalAreaAttacker(uint32 guildZoneId, uint32 areaId)
-{
-    if (!guildZoneId || guildZoneId > TOTAL_GUILD_ZONES || !areaId)
-        return NULL;
-
-    for (uint8 i = 0; i < 3; ++i)
-    {
-        if (m_guildZones[guildZoneId].VitalAreas[i] == areaId)
-            return m_guildZones[guildZoneId].VitalAreasAttackers[i];
-    }
-
-    return NULL;
-}
-
-Position NullSecMgr::GetNearestRespawnPointForPlayer(Player* player)
-{
-    if (!player->IsInGuildZone())
-        return player->GetPosition();
-
-    // Check first distance to all posible null sec respawn points, if the
-    // player's guild has conquered them, and select the nearest possible.
-    uint32 guildZoneId = player->GetGuildZoneId();
-    float nearestNullSecDistance = 0.0f;
-    Position nearestNullSecPosition = NULL;
-    if (player->GetGuild())
-    {
-        for (uint8 i = GUILD_ZONE_NONE + 1; i <= TOTAL_GUILD_ZONES; ++i)
-        {
-            if (GetNullSecOwner(i) == player->GetGuild())
-            {
-                for (uint8 j = 0; j < 3; ++j)
-                {
-                    Position nullSecPos = GetStandardPositionByVitalArea(i, m_guildZones[i].VitalAreas[j]);
-                    float distance = player->GetDistance2d(nullSecPos.GetPositionX(), nullSecPos.GetPositionY());
-                    if (distance < nearestNullSecDistance || nearestNullSecDistance == 0.0f)
-                    {
-                        nearestNullSecDistance = distance;
-                        nearestNullSecPosition = nullSecPos;
-                    }
-                }
-            }
-        }
-    }
-    // Now check what's nearer, the low sec respawn point or the null sec respawn point (if any)
-    Position lowSecPos = GetLowSecRespawnPositionByGuildZoneId(guildZoneId);
-    if (nearestNullSecPosition != NULL && player->GetDistance2d(lowSecPos.GetPositionX(), lowSecPos.GetPositionY()) > nearestNullSecDistance)
-        return nearestNullSecPosition;
-    
-    return GetLowSecRespawnPositionByGuildZoneId(guildZoneId);
-}
-
-bool NullSecMgr::IsAllowedTaxiNode(Player* player, uint32 taxiNodeId)
-{
-    // Check if this player is allowed to fly to this node (ergo his guild has the zone conquered)
-    // If player is in null sec, he can't fly nowhere
-    if (player->IsInGuildZone())
-        return false;
-
-    // Get zone by the taxi node ID
-    for (uint8 guildZoneId = GUILD_ZONE_NONE + 1; guildZoneId <= TOTAL_GUILD_ZONES; ++guildZoneId)
-    {
-        for (std::vector<uint32>::iterator itr = m_guildZones[guildZoneId].TaxiNodes.begin(); itr != m_guildZones[guildZoneId].TaxiNodes.end(); ++itr)
-        {
-            if (*itr == taxiNodeId)
-            {
-                if (player->GetGuild() == GetNullSecOwner(guildZoneId))
-                    return true;
-
-                return false;
-            }
-        }
-    }
-    // The destination is not in null sec
-    return true;
 }
 
 void NullSecMgr::OnGuildDisband(Guild* guild)

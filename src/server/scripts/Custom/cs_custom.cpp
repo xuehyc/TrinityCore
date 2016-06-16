@@ -121,7 +121,6 @@ public:
         delete creature;
 
         // Set the Null Sec Vital Area under attack _before_ adding the NPC to the world
-        sNullSecMgr->SetNullSecVitalAreaStatus(guildZoneId, atEntry->ID, VITAL_AREA_STATUS_UNDER_ATTACK);
         sNullSecMgr->SetNullSecVitalAreaAttacker(guildZoneId, atEntry->ID, player->GetGuild());
 
         creature = new Creature();

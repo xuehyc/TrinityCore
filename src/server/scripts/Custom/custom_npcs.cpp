@@ -91,11 +91,6 @@ public:
 
         void EnterEvadeMode(EvadeReason /*why*/) override
         {
-            if (standardState == STANDARD_STATE_CLAIMED)
-            {
-                sNullSecMgr->SetNullSecVitalAreaStatus(guildZoneId, me->GetAreaId(), VITAL_AREA_STATUS_CONQUERED);
-                sNullSecMgr->SetNullSecVitalAreaAttacker(guildZoneId, me->GetAreaId(), NULL);
-            }
         }
         
         void DamageTaken(Unit* doneBy, uint32& damage) override
@@ -107,11 +102,8 @@ public:
                 Guild* attacker = doneBy->ToPlayer()->GetGuild();
                 if (attacker == standardOwner || !attacker)
                     damage = 0;
-                else
-                {
-                    sNullSecMgr->SetNullSecVitalAreaStatus(guildZoneId, me->GetAreaId(), VITAL_AREA_STATUS_UNDER_ATTACK);
+                else if (sNullSecMgr->GetNullSecVitalAreaAttacker(guildZoneId, me->GetAreaId()) != attacker)
                     sNullSecMgr->SetNullSecVitalAreaAttacker(guildZoneId, me->GetAreaId(), attacker);
-                }
             }
             else
                 damage = 0;
@@ -153,7 +145,8 @@ public:
                     me->SetHealth(MAX_STANDARD_HEALTH);
                     standardState = STANDARD_STATE_CLAIMED;
                     sNullSecMgr->SetNullSecVitalAreaOwner(guildZoneId, standardOwner, me->GetAreaId());
-                    EnterEvadeMode(EVADE_REASON_OTHER);
+                    sNullSecMgr->SetNullSecVitalAreaStatus(guildZoneId, me->GetAreaId(), VITAL_AREA_STATUS_CONQUERED);
+                    sNullSecMgr->SetNullSecVitalAreaAttacker(guildZoneId, me->GetAreaId(), NULL);
                 }
                 else
                     claimTimer -= diff;
@@ -180,7 +173,8 @@ public:
             {
                 if (regenTimer <= diff)
                 {
-                    EnterEvadeMode(EVADE_REASON_OTHER);
+                    sNullSecMgr->SetNullSecVitalAreaStatus(guildZoneId, me->GetAreaId(), VITAL_AREA_STATUS_CONQUERED);
+                    sNullSecMgr->SetNullSecVitalAreaAttacker(guildZoneId, me->GetAreaId(), NULL);
                     regenTimer = TIME_TO_REGEN;
                 }
                 else

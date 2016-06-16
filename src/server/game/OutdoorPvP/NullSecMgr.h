@@ -38,9 +38,6 @@ struct NullSecGuildZoneData
     Guild* Owners[3];
 	Position StandardPositions[3];
     Position LowSecRespawnPosition;
-    Guild* Attacker;
-    bool IsUnderAttack;
-	bool IsContested;
     uint32 IntrudersCount;
 	std::vector<uint32> TaxiNodes;
 };
@@ -74,8 +71,6 @@ public:
     bool IsNullSecZone(uint32 zoneId);
     Guild* GetNullSecOwner(uint32 guildZoneId);
     bool IsNullSecUnderAttack(uint32 guildZoneId);
-    void SetNullSecUnderAttack(uint32 guildZoneId, bool underAttack, Guild* attacker = NULL);
-    Guild* GetNullSecAttacker(uint32 guildZoneId);
     std::string GetNullSecName(uint32 guildZone);
     
     void OnPlayerEnterNullSec(Player* player);
