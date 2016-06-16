@@ -615,4 +615,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
 
     // DeserterTracker
     PrepareStatement(CHAR_INS_DESERTER_TRACK, "INSERT INTO battleground_deserters (guid, type, datetime) VALUES (?, ?, NOW())", CONNECTION_ASYNC);
+
+    // NullSec owner updates
+    PrepareStatement(CHAR_UPD_NULLSEC_VITAL_AREA_OWNER, "UPDATE custom_nullsec_guild_zones SET vital_area_owner_1 = ?, vital_area_owner_2 = ?, vital_area_owner_3 = ? WHERE guild_zone_id = ?", CONNECTION_ASYNC);
 }

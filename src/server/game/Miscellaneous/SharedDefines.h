@@ -3592,6 +3592,14 @@ enum ZoneSecurityLevels
     ZONE_SECURITY_LEVEL_NULL = 3
 };
 
+enum VitalAreaStatus
+{
+    VITAL_AREA_STATUS_UNCONQUERED  = 0,
+    VITAL_AREA_STATUS_CONQUERED    = 1,
+    VITAL_AREA_STATUS_UNDER_ATTACK = 2,
+    VITAL_AREA_STATUS_UNKNOWN      = 3
+};
+
 // Enum with IDs for each of the zones that can be controlled by player guilds.
 enum GuildZones
 {

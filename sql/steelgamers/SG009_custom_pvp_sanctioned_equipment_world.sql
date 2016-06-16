@@ -3,21 +3,21 @@ ALTER TABLE `item_template`
 
 -- Weapons
 UPDATE item_template SET
-    Itemlevel = 45,
-    RequiredLevel = 40,
-    stat_value1 = stat_value1 * 0.5,
-    stat_value2 = stat_value2 * 0.5,
-    stat_value3 = stat_value3 * 0.5,
-    stat_value4 = stat_value4 * 0.5,
-    stat_value5 = stat_value5 * 0.5,
-    stat_value6 = stat_value6 * 0.5,
-    stat_value7 = stat_value7 * 0.5,
-    stat_value8 = stat_value8 * 0.5,
-    stat_value9 = stat_value9 * 0.5,
-    stat_value10 = stat_value10 * 0.5,
-    dmg_min1 = dmg_min1 * 0.5,
-    dmg_max1 = dmg_max1 * 0.5,
-    armor = armor * 0.5,
+    Itemlevel = 65,
+    RequiredLevel = 50,
+    stat_value1 = stat_value1 * 0.75,
+    stat_value2 = stat_value2 * 0.75,
+    stat_value3 = stat_value3 * 0.75,
+    stat_value4 = stat_value4 * 0.75,
+    stat_value5 = stat_value5 * 0.75,
+    stat_value6 = stat_value6 * 0.75,
+    stat_value7 = stat_value7 * 0.75,
+    stat_value8 = stat_value8 * 0.75,
+    stat_value9 = stat_value9 * 0.75,
+    stat_value10 = stat_value10 * 0.75,
+    dmg_min1 = dmg_min1 * 0.75,
+    dmg_max1 = dmg_max1 * 0.75,
+    armor = armor * 0.75,
     isAllowedInPvP = 1
 WHERE entry IN (
     12584,
@@ -62,24 +62,23 @@ WHERE entry IN (
     23467,
     23468,
     23469
-) AND RequiredLevel > 40;
+) AND RequiredLevel > 50;
 
 -- Armor
 UPDATE item_template SET
-    RequiredLevel = 40,
-    ItemLevel = 45,
-    RequiredLevel = 40,
-    stat_value1 = stat_value1 * 0.5,
-    stat_value2 = stat_value2 * 0.5,
-    stat_value3 = stat_value3 * 0.5,
-    stat_value4 = stat_value4 * 0.5,
-    stat_value5 = stat_value5 * 0.5,
-    stat_value6 = stat_value6 * 0.5,
-    stat_value7 = stat_value7 * 0.5,
-    stat_value8 = stat_value8 * 0.5,
-    stat_value9 = stat_value9 * 0.5,
-    stat_value10 = stat_value10 * 0.5,
-    armor = armor * 0.5,
+    RequiredLevel = 50,
+    ItemLevel = 65,
+    stat_value1 = stat_value1 * 0.75,
+    stat_value2 = stat_value2 * 0.75,
+    stat_value3 = stat_value3 * 0.75,
+    stat_value4 = stat_value4 * 0.75,
+    stat_value5 = stat_value5 * 0.75,
+    stat_value6 = stat_value6 * 0.75,
+    stat_value7 = stat_value7 * 0.75,
+    stat_value8 = stat_value8 * 0.75,
+    stat_value9 = stat_value9 * 0.75,
+    stat_value10 = stat_value10 * 0.75,
+    armor = armor * 0.75,
     isAllowedInPvP = 1
 WHERE entry IN (
     16437,
@@ -298,7 +297,7 @@ WHERE entry IN (
     29615,
     29616,
     29617
-) AND RequiredLevel > 40;
+) AND RequiredLevel > 50;
 
 -- Necklaces, cloaks, shirts, tabards, rings, trinkets, wrists and waist items are not restricted
 UPDATE item_template SET isAllowedInPvP = 1 WHERE InventoryType IN (2, 4, 6, 9, 11, 12, 16, 19);

@@ -31,7 +31,7 @@ EndScriptData */
 
 #define MAX_STANDARD_HEALTH 100000
 #define TIME_TO_REGEN 60000               // 10 minutes
-#define TIME_TO_CLAIM 180000              // 30 minutes
+#define TIME_TO_CLAIM 60000              // 30 minutes
 #define TIME_TO_DESPAWN 60000             // 5 seconds
 #define TIME_TO_REMOVE_STEALTH 10000      // 10 seconds
 #define MAX_REMOVE_STEALTH_DISTANCE 80.0f // 80 meters
@@ -59,7 +59,7 @@ public:
             regenTimer = TIME_TO_REGEN;
             removeStealthTimer = TIME_TO_REMOVE_STEALTH;
             standardOwner = NULL;
-            guildZoneId = sNullSecMgr->GetNullSecGuildZone(me->GetZoneId(), me->GetAreaId());
+            guildZoneId = sNullSecMgr->GetNullSecGuildZoneId(me->GetZoneId());
         }
 
         uint32 claimTimer;
@@ -78,7 +78,7 @@ public:
 
             me->SetMaxHealth(MAX_STANDARD_HEALTH / 4);
             me->SetHealth(MAX_STANDARD_HEALTH / 4);
-            standardOwner = sNullSecMgr->GetGuildZoneAttacker(guildZoneId);
+            standardOwner = sNullSecMgr->GetNullSecVitalAreaAttacker(guildZoneId, me->GetAreaId());
         }
 
         void Reset() override
@@ -92,7 +92,10 @@ public:
         void EnterEvadeMode(EvadeReason /*why*/) override
         {
             if (standardState == STANDARD_STATE_CLAIMED)
-                sNullSecMgr->SetGuildZoneUnderAttack(guildZoneId, false);
+            {
+                sNullSecMgr->SetNullSecVitalAreaStatus(guildZoneId, me->GetAreaId(), VITAL_AREA_STATUS_CONQUERED);
+                sNullSecMgr->SetNullSecVitalAreaAttacker(guildZoneId, me->GetAreaId(), NULL);
+            }
         }
         
         void DamageTaken(Unit* doneBy, uint32& damage) override
@@ -105,7 +108,10 @@ public:
                 if (attacker == standardOwner || !attacker)
                     damage = 0;
                 else
-                    sNullSecMgr->SetGuildZoneUnderAttack(guildZoneId, true, attacker);
+                {
+                    sNullSecMgr->SetNullSecVitalAreaStatus(guildZoneId, me->GetAreaId(), VITAL_AREA_STATUS_UNDER_ATTACK);
+                    sNullSecMgr->SetNullSecVitalAreaAttacker(guildZoneId, me->GetAreaId(), attacker);
+                }
             }
             else
                 damage = 0;
@@ -126,7 +132,7 @@ public:
                 else
                 {
                     // NPC has spawned in an already conquered zone, the owner is the zone controller.
-                    standardOwner = sNullSecMgr->GetNullSecZoneOwner(guildZoneId);
+                    standardOwner = sNullSecMgr->GetNullSecVitalAreaOwner(guildZoneId, me->GetAreaId());
                     if (standardOwner)
                     {
                         me->SetMaxHealth(MAX_STANDARD_HEALTH);
@@ -146,7 +152,8 @@ public:
                     me->SetMaxHealth(MAX_STANDARD_HEALTH);
                     me->SetHealth(MAX_STANDARD_HEALTH);
                     standardState = STANDARD_STATE_CLAIMED;
-                    sNullSecMgr->SetNullSecZoneOwner(guildZoneId, standardOwner);
+                    sNullSecMgr->SetNullSecVitalAreaOwner(guildZoneId, standardOwner, me->GetAreaId());
+                    EnterEvadeMode(EVADE_REASON_OTHER);
                 }
                 else
                     claimTimer -= diff;
@@ -184,9 +191,10 @@ public:
         void DeleteMe()
         {
             if (standardState == STANDARD_STATE_CLAIMED && standardOwner)
-                sNullSecMgr->RemoveGuildZoneOwner(guildZoneId);
+                sNullSecMgr->RemoveNullSecVitalAreaOwner(guildZoneId, me->GetAreaId());
 
-            sNullSecMgr->SetGuildZoneUnderAttack(guildZoneId, false);
+            sNullSecMgr->SetNullSecVitalAreaStatus(guildZoneId, me->GetAreaId(), VITAL_AREA_STATUS_UNCONQUERED);
+            sNullSecMgr->SetNullSecVitalAreaAttacker(guildZoneId, me->GetAreaId(), NULL);
             me->CombatStop();
             me->DeleteFromDB();
             me->AddObjectToRemoveList();
@@ -213,7 +221,7 @@ public:
             return false;
 
         // The NPC will interact with the player only if his/her guild has conquered the zone or the zone has no owner
-        Guild* zoneOwner = sNullSecMgr->GetNullSecZoneOwner(sNullSecMgr->GetNullSecGuildZone(creature->GetZoneId(), creature->GetAreaId()));
+        Guild* zoneOwner = sNullSecMgr->GetNullSecOwner(sNullSecMgr->GetNullSecGuildZoneId(creature->GetZoneId()));
         if (zoneOwner == NULL)
             return false;
 
@@ -221,7 +229,7 @@ public:
             return false;
 
         // do not interact with the player
-        creature->Say("Lo siento pero no hablo con extrangeros. Es mejor que te vayas.", LANG_UNIVERSAL);
+        creature->Say("I'm sorry but I don't talk to strangers. It'll be better that you leave.", LANG_UNIVERSAL);
         player->PlayerTalkClass->ClearMenus();
         return true;
     }

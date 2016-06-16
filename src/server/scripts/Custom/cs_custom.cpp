@@ -70,40 +70,44 @@ public:
         }
 
         // Check if the player is in the correct area to start claiming
-        uint32 guildZoneId = sNullSecMgr->GetNullSecGuildZone(player->GetZoneId(), player->GetAreaId());
-        AreaTableEntry const* atEntry = sAreaTableStore.LookupEntry(sNullSecMgr->GetVitalAreaByGuildZoneId(guildZoneId));
+        uint32 guildZoneId = sNullSecMgr->GetNullSecGuildZoneId(player->GetZoneId());
 
-        if (player->GetAreaId() != atEntry->ID)
+        if (!sNullSecMgr->IsNullSecVitalArea(guildZoneId, player->GetAreaId()))
         {
-            handler->PSendSysMessage(LANG_CLAIM_WRONG_AREA, atEntry->area_name[handler->GetSessionDbcLocale()]);
+            handler->PSendSysMessage(LANG_CLAIM_WRONG_AREA/*, atEntry->area_name[handler->GetSessionDbcLocale()]*/);
             return true;
         }
 
+        AreaTableEntry const* atEntry = sAreaTableStore.LookupEntry(player->GetAreaId());
+        uint8 vitalAreaStatus = sNullSecMgr->GetNullSecVitalAreaStatus(guildZoneId, atEntry->ID);
         // Check if the zone is not conquered by other guild
-        if (sNullSecMgr->GetNullSecZoneOwner(guildZoneId) != NULL)
+        if (vitalAreaStatus == VITAL_AREA_STATUS_CONQUERED)
         {
-            handler->PSendSysMessage(LANG_CLAIM_HAS_OWNER, atEntry->area_name[handler->GetSessionDbcLocale()]);
+            handler->PSendSysMessage(LANG_CLAIM_HAS_OWNER);
             return true;
         }
 
-        // Check if zone is not under attack
-        if (sNullSecMgr->IsGuildZoneUnderAttack(guildZoneId))
+        // Check if area is not under attack
+        if (vitalAreaStatus == VITAL_AREA_STATUS_UNDER_ATTACK)
         {
             handler->PSendSysMessage(LANG_CLAIM_UNDER_ATTACK);
             return true;
         }
 
-        // Set the Null Sec Guild Zone under attack
-        sNullSecMgr->SetGuildZoneUnderAttack(guildZoneId, true, player->GetGuild());
+        
 
         // Spawn the NPC
         Map* map = player->GetMap();
-        Position pos = sNullSecMgr->GetStandardPositionByGuildZoneId(guildZoneId);
+        Position pos = sNullSecMgr->GetStandardPositionByVitalArea(guildZoneId, atEntry->ID);
+
+        if (pos == NULL)
+            return false;
+
         Creature* creature = new Creature();
+
         if (!creature->Create(map->GenerateLowGuid<HighGuid::Unit>(), map, player->GetPhaseMaskForSpawn(), NPC_STANDARD_OF_CONQUEST, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()))
         {
             delete creature;
-            sNullSecMgr->SetGuildZoneUnderAttack(guildZoneId, false);
             return false;
         }
 
@@ -115,11 +119,18 @@ public:
         // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
         creature->CleanupsBeforeDelete();
         delete creature;
+
+        // Set the Null Sec Vital Area under attack _before_ adding the NPC to the world
+        sNullSecMgr->SetNullSecVitalAreaStatus(guildZoneId, atEntry->ID, VITAL_AREA_STATUS_UNDER_ATTACK);
+        sNullSecMgr->SetNullSecVitalAreaAttacker(guildZoneId, atEntry->ID, player->GetGuild());
+
         creature = new Creature();
         if (!creature->LoadCreatureFromDB(db_guid, map))
         {
             delete creature;
-            sNullSecMgr->SetGuildZoneUnderAttack(guildZoneId, false);
+            // Reset territory status
+            sNullSecMgr->SetNullSecVitalAreaStatus(guildZoneId, atEntry->ID, VITAL_AREA_STATUS_UNCONQUERED);
+            sNullSecMgr->SetNullSecVitalAreaAttacker(guildZoneId, atEntry->ID, NULL);
             return false;
         }
 
@@ -127,7 +138,8 @@ public:
 
         // Delete the item from the player's inventory
         player->DestroyItemCount(ITEM_STANDARD_OF_CONQUEST, 1, true);
-        handler->PSendSysMessage(LANG_CLAIM_ATTACK_STARTED, sNullSecMgr->GetGuildZoneName(guildZoneId).c_str());
+        handler->PSendSysMessage(LANG_CLAIM_ATTACK_STARTED, sNullSecMgr->GetNullSecName(guildZoneId).c_str());
+
         return true;
     }
 };

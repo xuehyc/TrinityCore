@@ -19,7 +19,6 @@
 #ifndef NULL_SEC_MGR_H_
 #define NULL_SEC_MGR_H_
 
-#define MAX_NULLSEC_ZONES 5
 #define NO_GUILD_ZONE NULL
 #define ITEM_STANDARD_OF_CONQUEST 25555
 #define NPC_STANDARD_OF_CONQUEST 50000
@@ -35,9 +34,10 @@ struct NullSecGuildZoneData
     uint32 ZoneId;
 	uint32 VitalAreas[3];
 	uint8 VitalAreasStatus[3];
+    Guild* VitalAreasAttackers[3];
+    Guild* Owners[3];
 	Position StandardPositions[3];
     Position LowSecRespawnPosition;
-    Guild* Owners[3];
     Guild* Attacker;
     bool IsUnderAttack;
 	bool IsContested;
@@ -59,24 +59,33 @@ public:
         return &instance;
     }
     void InitNullSecMgr();
-    Guild* GetNullSecZoneOwner(uint32 guildZoneId);
-    void SetNullSecZoneOwner(uint32 guildZoneId, Guild* guild);
-    void SetNullSecZoneOwner(uint32 guildZoneId, uint32 guildId);
-    void RemoveGuildZoneOwner(uint32 guildZoneId);
-    bool IsNullSecZone(uint32 zoneId);
-    uint32 GetNullSecGuildZone(uint32 zoneId, uint32 areaId);
-    uint32* GetVitalAreasByGuildZoneId(uint32 guildZoneId);
+
+    bool IsNullSecVitalArea(uint32 guildZoneId, uint32 area);
+    Guild* GetNullSecVitalAreaOwner(uint32 guildZoneId, uint32 vitalAreaId);
+    void SetNullSecVitalAreaOwner(uint32 guildZoneId, Guild* guild, uint32 vitalAreaId);
+    void RemoveNullSecVitalAreaOwner(uint32 guildZoneId, uint32 vitalAreaId);
+    void SetNullSecVitalAreaStatus(uint32 guildZoneId, uint32 areaId, uint8 status);
+    uint8 GetNullSecVitalAreaStatus(uint32 guildZoneId, uint32 areaId);
+    void SetNullSecVitalAreaAttacker(uint32 guildZoneId, uint32 areaId, Guild* attacker);
+    Guild* GetNullSecVitalAreaAttacker(uint32 guildZoneId, uint32 areaId);
     Position GetStandardPositionByVitalArea(uint32 guildZoneId, uint32 vitalArea);
+
+    uint32 GetNullSecGuildZoneId(uint32 zoneId);
+    bool IsNullSecZone(uint32 zoneId);
+    Guild* GetNullSecOwner(uint32 guildZoneId);
+    bool IsNullSecUnderAttack(uint32 guildZoneId);
+    void SetNullSecUnderAttack(uint32 guildZoneId, bool underAttack, Guild* attacker = NULL);
+    Guild* GetNullSecAttacker(uint32 guildZoneId);
+    std::string GetNullSecName(uint32 guildZone);
+    
+    void OnPlayerEnterNullSec(Player* player);
+    void OnPlayerLeaveNullSec(Player* player);
+    void OnGuildDisband(Guild* guild);
+
     Position GetLowSecRespawnPositionByGuildZoneId(uint32 guildZoneId);
-    bool IsGuildZoneUnderAttack(uint32 guildZoneId);
-    void SetGuildZoneUnderAttack(uint32 guildZoneId, bool underAttack, Guild* attacker);
-    Guild* GetGuildZoneAttacker(uint32 guildZoneId);
-    std::string GetGuildZoneName(uint32 guildZone);
-    void OnPlayerEnterNullSecGuildZone(Player* player);
-    void OnPlayerLeaveNullSecGuildZone(Player* player);
     Position GetNearestRespawnPointForPlayer(Player* player);
     bool IsAllowedTaxiNode(Player* player, uint32 taxiNodeId);
-    void OnGuildDisband(Guild* guild);
+    
 
 private:
     typedef std::map<uint32, NullSecGuildZoneData> NullSecGuildZoneDataMap;

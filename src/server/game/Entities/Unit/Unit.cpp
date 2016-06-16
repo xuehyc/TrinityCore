@@ -17696,18 +17696,21 @@ ZoneSecurityLevels Unit::GetZoneSecurityLevel()
                         return ZONE_SECURITY_LEVEL_NULL;
                 }
                 return ZONE_SECURITY_LEVEL_HIGH;
-                // Player is in Low Sec zone
+            // Player is in Low Sec zone
             case LOWSEC_ZONE_DARKSHORE:
             case LOWSEC_ZONE_ASHENVALE:
-            case LOWSEC_ZONE_AZSHARA:
             case LOWSEC_ZONE_THE_BARRENS:
+            case LOWSEC_ZONE_THOUSAND_NEEDLES:
+            case LOWSEC_ZONE_TANARIS:
+            case LOWSEC_ZONE_STONETALON_MOUNTAINS:
                 return ZONE_SECURITY_LEVEL_LOW;
             // Player is in Null Sec
             case NULLSEC_ZONE_DESOLACE:
-            case NULLSEC_ZONE_WINTERSPRING:
+            // case NULLSEC_ZONE_WINTERSPRING:
             case NULLSEC_ZONE_DUSTWALLOW_MARSH:
-            case NULLSEC_ZONE_STONETALON_MOUNTAINS:
             case NULLSEC_ZONE_FELWOOD:
+            case NULLSEC_ZONE_AZSHARA:
+            case NULLSEC_ZONE_FERALAS:
                 return ZONE_SECURITY_LEVEL_NULL;
             default:
                 break;

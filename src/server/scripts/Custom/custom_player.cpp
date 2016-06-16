@@ -125,12 +125,7 @@ public:
                 if (!areaOnly)
                     ChatHandler(player->GetSession()).SendSysMessage(LANG_NULLSEC_GENERAL_ENTER);
 
-                // If zone = area (for example, most roads) the area is not in a guild zone.
-                // Other exceptions like seas are handled in OnPlayerEnterNullSecGuildZone().
-                if (newZone == newArea && player->GetGuildZoneId() != GUILD_ZONE_NONE)
-                    sNullSecMgr->OnPlayerLeaveNullSecGuildZone(player);
-                else
-                    sNullSecMgr->OnPlayerEnterNullSecGuildZone(player);
+                sNullSecMgr->OnPlayerEnterNullSec(player);
                 player->pvpInfo.IsInHighSecZone = false;
                 break;
             default:
