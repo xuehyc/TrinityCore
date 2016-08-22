@@ -1484,6 +1484,9 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_HOTSWAP_INSTALL_ENABLED] = sConfigMgr->GetBoolDefault("HotSwap.EnableInstall", true);
     m_bool_configs[CONFIG_HOTSWAP_PREFIX_CORRECTION_ENABLED] = sConfigMgr->GetBoolDefault("HotSwap.EnablePrefixCorrection", true);
 
+	// lasyan3 patches
+	m_int_configs[CONFIG_QUEST_AUTOCOMPLETE_DELAY] = sConfigMgr->GetIntDefault("Custom.AutoCompleteQuestDelay", 0);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

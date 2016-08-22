@@ -16148,8 +16148,11 @@ void Player::AreaExploredOrEventHappens(uint32 questId)
                 SendQuestComplete(questId);
             }**/
         }
-        if (CanCompleteQuest(questId))
-            CompleteQuest(questId);
+		if (CanCompleteQuest(questId))
+		{
+			AutoQuestCompleteDisplayQuestGiver(questId);
+			CompleteQuest(questId);
+		}
     }
 }
 
@@ -16207,9 +16210,11 @@ void Player::ItemAddedQuestCheck(uint32 entry, uint32 count)
                     // FIXME: verify if there's any packet sent updating item
                 }
 
-                if (CanCompleteQuest(questid))
-                    CompleteQuest(questid);
-
+				if (CanCompleteQuest(questid))
+				{
+					CompleteQuest(questid);
+					AutoQuestCompleteDisplayQuestGiver(questid);
+				}
                 return;
             }
         }
@@ -16310,18 +16315,21 @@ void Player::KilledMonsterCredit(uint32 entry, ObjectGuid guid /*= ObjectGuid::E
 
                     uint32 reqkill = obj.ObjectID;
 
-                    if (reqkill == real_entry)
-                    {
-                        uint32 reqKillCount = obj.Amount;
-                        uint16 curKillCount = GetQuestObjectiveData(qInfo, obj.StorageIndex);
-                        if (curKillCount < reqKillCount)
-                        {
-                            SetQuestObjectiveData(qInfo, obj.StorageIndex, curKillCount + addKillCount);
-                            SendQuestUpdateAddCredit(qInfo, guid, obj, curKillCount + addKillCount);
-                        }
+					if (reqkill == real_entry)
+					{
+						uint32 reqKillCount = obj.Amount;
+						uint16 curKillCount = GetQuestObjectiveData(qInfo, obj.StorageIndex);
+						if (curKillCount < reqKillCount)
+						{
+							SetQuestObjectiveData(qInfo, obj.StorageIndex, curKillCount + addKillCount);
+							SendQuestUpdateAddCredit(qInfo, guid, obj, curKillCount + addKillCount);
+						}
 
-                        if (CanCompleteQuest(questid))
-                            CompleteQuest(questid);
+						if (CanCompleteQuest(questid))
+						{
+							CompleteQuest(questid);
+							AutoQuestCompleteDisplayQuestGiver(questid);
+						}
 
                         // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
                         break;
@@ -16395,27 +16403,30 @@ void Player::KillCreditGO(uint32 entry, ObjectGuid guid)
         {
             if (qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_CAST) /*&& !qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_KILL)*/)
             {
-                for (QuestObjective const& obj : qInfo->GetObjectives())
-                {
-                    if (obj.Type != QUEST_OBJECTIVE_GAMEOBJECT)
-                        continue;
+				for (QuestObjective const& obj : qInfo->GetObjectives())
+				{
+					if (obj.Type != QUEST_OBJECTIVE_GAMEOBJECT)
+						continue;
 
-                    uint32 reqTarget = obj.ObjectID;
+					uint32 reqTarget = obj.ObjectID;
 
-                    // other not this creature/GO related objectives
-                    if (reqTarget != entry)
-                        continue;
+					// other not this creature/GO related objectives
+					if (reqTarget != entry)
+						continue;
 
-                    uint32 reqCastCount = obj.Amount;
-                    uint32 curCastCount = GetQuestObjectiveData(qInfo, obj.StorageIndex);
-                    if (curCastCount < reqCastCount)
-                    {
-                        SetQuestObjectiveData(qInfo, obj.StorageIndex, curCastCount + addCastCount);
-                        SendQuestUpdateAddCredit(qInfo, guid, obj, curCastCount + addCastCount);
-                    }
+					uint32 reqCastCount = obj.Amount;
+					uint32 curCastCount = GetQuestObjectiveData(qInfo, obj.StorageIndex);
+					if (curCastCount < reqCastCount)
+					{
+						SetQuestObjectiveData(qInfo, obj.StorageIndex, curCastCount + addCastCount);
+						SendQuestUpdateAddCredit(qInfo, guid, obj, curCastCount + addCastCount);
+					}
 
-                    if (CanCompleteQuest(questid))
-                        CompleteQuest(questid);
+					if (CanCompleteQuest(questid))
+					{
+						CompleteQuest(questid);
+						AutoQuestCompleteDisplayQuestGiver(questid);
+					}
 
                     // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
                     break;
@@ -16881,6 +16892,47 @@ bool Player::HasPvPForcingQuest() const
     }
 
     return false;
+}
+
+void Player::AutoQuestCompleteDisplayQuestGiver(uint32 p_questId)
+{
+	if (sWorld->getIntConfig(CONFIG_QUEST_AUTOCOMPLETE_DELAY) == 0) return;
+	std::ostringstream sql;
+	sql << "SELECT c.id FROM creature c"
+		<< " INNER JOIN creature_queststarter s ON s.id = c.id"
+		<< " INNER JOIN creature_questender e ON e.id = c.id AND e.quest = s.quest"
+		<< " WHERE e.quest = %d";
+	QueryResult result = WorldDatabase.PQuery(sql.str().c_str(), p_questId);
+	if (!result)
+		return;
+	if (result->GetRowCount() > 1)
+		return;
+
+	uint32 entry = (*result)[0].GetUInt32();
+	bool visible = false;
+	for (auto itr = m_clientGUIDs.begin(); itr != m_clientGUIDs.end(); ++itr)
+	{
+		if (!itr->IsCreatureOrPet() && !itr->IsCreatureOrVehicle()) continue;
+		Creature* questgiver = ObjectAccessor::GetCreatureOrPetOrVehicle(*this, *itr);
+		if (!questgiver || questgiver->IsHostileTo(this))
+			continue;
+		if (!questgiver->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
+			continue;
+		if (questgiver->GetEntry() == entry)
+			return; // Quest giver already exists on the same map than the player
+	}
+	TempSummon *_sum = SummonCreature(entry, GetPositionX(), GetPositionY(), GetPositionZ(), 3.3f, TEMPSUMMON_TIMED_DESPAWN, sWorld->getIntConfig(CONFIG_QUEST_AUTOCOMPLETE_DELAY) * 1000);
+	_sum->SetInFront(this);
+	// remove fake death
+	if (HasUnitState(UNIT_STATE_DIED))
+		RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+	// Stop the npc if moving
+	_sum->StopMoving();
+	_sum->SetReactState(REACT_PASSIVE);
+	// Display quest popup
+	m_lastQuestCompleted = sObjectMgr->GetQuestTemplate(p_questId);
+	PrepareGossipMenu(_sum, _sum->GetCreatureTemplate()->GossipMenuId, true);
+	SendPreparedGossip(_sum);
 }
 
 /*********************************************************/
