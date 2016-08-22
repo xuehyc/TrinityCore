@@ -17,10 +17,12 @@
 
 // This is where scripts' loading functions should be declared:
 void AddSC_solocraft();
+void AddSC_FireWorksOnLevelUp();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
 {
 	AddSC_solocraft();
+	AddSC_FireWorksOnLevelUp();
 }

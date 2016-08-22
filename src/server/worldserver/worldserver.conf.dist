@@ -3999,4 +3999,12 @@ Metric.OverallStatusInterval = 1
 
 Solocraft.Enable = 0
 
+#
+#     FireWorksOnLevelUp
+#        Description: Players shoot a firework when reach level 80.
+#        Default:     0
+
+FireWorksOnLevelUp = 1
+
+#
 ###################################################################################################
