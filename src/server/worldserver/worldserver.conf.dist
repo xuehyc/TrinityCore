@@ -4053,4 +4053,11 @@ Reset.on.login = 1
 Login.Announcer.Enable = 1
 
 #
+#     Boss.Announcer.Enable
+#        Description: System announce who killed a world boss in global.
+#        Default:     1
+
+Boss.Announcer.Enable = 1
+
+#
 ###################################################################################################
