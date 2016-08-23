@@ -4046,4 +4046,11 @@ StartGuild.Horde = 0
 Reset.on.login = 1
 
 #
+#     Login.Announcer.Enable
+#        Description: Announce every player and bots login
+#        Default:     1
+
+Login.Announcer.Enable = 1
+
+#
 ###################################################################################################

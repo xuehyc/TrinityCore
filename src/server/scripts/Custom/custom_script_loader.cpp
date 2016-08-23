@@ -21,6 +21,7 @@ void AddSC_FireWorksOnLevelUp();
 void AddSC_Player_Boa();
 void AddSC_gon_playerscripts();
 void AddSC_login_script();
+void AddSC_announce_login();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -31,4 +32,5 @@ void AddCustomScripts()
 	AddSC_Player_Boa();
 	AddSC_gon_playerscripts();
 	AddSC_login_script();
+	AddSC_announce_login();
 }
