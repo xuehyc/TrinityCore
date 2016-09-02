@@ -72,6 +72,9 @@ These control the version of Winsock used by G3D.
     #define G3D_LINUX
 #elif defined(__linux__)
     #define G3D_LINUX
+#elif defined(__FreeBSD_kernel__) && defined(__GLIBC_)
+    # GNU/kFreeBSD which has a Debian userland
+    #define G3D_LINUX
 #elif defined(__APPLE__)
     #define G3D_LINUX
 
