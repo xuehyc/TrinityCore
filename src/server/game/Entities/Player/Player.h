@@ -2808,6 +2808,9 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
 
         void AdjustQuestReqItemCount(Quest const* quest);
 
+		void AutoQuestCompleteDisplayQuestGiver(uint32 questId);// LASYAN3
+		Quest const *m_lastQuestCompleted = NULL;// LASYAN3
+
         bool IsCanDelayTeleport() const { return m_bCanDelayTeleport; }
         void SetCanDelayTeleport(bool setting) { m_bCanDelayTeleport = setting; }
         bool IsHasDelayedTeleport() const { return m_bHasDelayedTeleport; }

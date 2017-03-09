@@ -16,10 +16,25 @@
  */
 
 // This is where scripts' loading functions should be declared:
-
+void AddSC_solocraft();
+void AddSC_FireWorksOnLevelUp();
+void AddSC_Player_Boa();
+void AddSC_gon_playerscripts();
+void AddSC_login_script();
+void AddSC_announce_login();
+void AddSC_Boss_Announcer();
+void AddSC_XpWeekend();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
 {
+	AddSC_solocraft();
+	AddSC_FireWorksOnLevelUp();
+	AddSC_Player_Boa();
+	AddSC_gon_playerscripts();
+	AddSC_login_script();
+	AddSC_announce_login();
+	AddSC_Boss_Announcer();
+	AddSC_XpWeekend();
 }

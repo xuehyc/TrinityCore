@@ -3998,3 +3998,90 @@ Metric.OverallStatusInterval = 1
 
 #
 ###################################################################################################
+
+####################
+# PATCHES SETTINGS #
+####################
+
+###################################################################################################
+# lasyan3 #
+###########
+#     Custom.AutoCompleteQuestDelay
+#         Set it to a number to enable the summon of the quest giver of the quest you just completed.
+#	      The number indicates the duration of the summoning.
+#     Default : 0 (AutoComplete Disable)
+#     Example : 180 (When a quest is completed, the quest giver will be summoned for 3 minutes)
+#
+
+Custom.AutoCompleteQuestDelay = 180
+
+#
+###################################################################################################
+
+###################################################################################################
+#
+#     Solocraft.Enable
+#        Description: Solocraft is a script to increase players and bots stats in raids, 
+#		 based on group size. It feels a little Hacky, but raids is unfair hard with playerbots.
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+Solocraft.Enable = 0
+
+#
+#     FireWorksOnLevelUp
+#        Description: Players shoot a firework when reach level 80.
+#        Default:     0
+
+FireWorksOnLevelUp = 1
+
+#
+#     Login.BoA
+#        Description: New players get some starting equipment.
+#        Default:     1
+
+Login.BoA = 1
+
+#
+#     StartGuild
+#        Description: New players automatically added for the configurated guild IDs.
+#		 Example: 	  StartGuild.Alliance = 45
+#					  StartGuild.Horde = 46
+#        Default:     0 (disabled)
+
+StartGuild.Alliance = 0
+StartGuild.Horde = 0
+
+#
+#     Reset.on.login
+#        Description: Restore players health, mana and cooldowns when log into the game.
+#        Default:     1
+
+Reset.on.login = 1
+
+#
+#     Login.Announcer.Enable
+#        Description: Announce every player and bots login
+#        Default:     1
+
+Login.Announcer.Enable = 1
+
+#
+#     Boss.Announcer.Enable
+#        Description: System announce who killed a world boss in global.
+#        Default:     1
+
+Boss.Announcer.Enable = 1
+
+#
+#    Double XP Weekend
+#        Description: Enables or disables the Double XP Weekend Script
+#
+#    DoubleXP.Enable
+#        Default:     1 (enabled)
+#                     0 (disabled)
+
+DoubleXP.Enable = 1
+
+#
+###################################################################################################
