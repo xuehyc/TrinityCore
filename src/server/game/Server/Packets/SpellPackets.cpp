@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -645,6 +645,7 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Spells::SpellCooldownStru
 {
     data << uint32(cooldown.SrecID);
     data << uint32(cooldown.ForcedCooldown);
+    data << float(cooldown.ModRate);
     return data;
 }
 
@@ -666,6 +667,7 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Spells::SpellHistoryEntry
     data << uint32(historyEntry.Category);
     data << int32(historyEntry.RecoveryTime);
     data << int32(historyEntry.CategoryRecoveryTime);
+    data << float(historyEntry.ModRate);
     data.WriteBit(historyEntry.unused622_1.is_initialized());
     data.WriteBit(historyEntry.unused622_2.is_initialized());
     data.WriteBit(historyEntry.OnHold);
@@ -709,6 +711,7 @@ WorldPacket const* WorldPackets::Spells::SetSpellCharges::Write()
     _worldPacket << int32(Category);
     _worldPacket << uint32(NextRecoveryTime);
     _worldPacket << uint8(ConsumedCharges);
+    _worldPacket << float(ChargeModRate);
     _worldPacket.WriteBit(IsPet);
     _worldPacket.FlushBits();
 
@@ -719,6 +722,7 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Spells::SpellChargeEntry 
 {
     data << uint32(chargeEntry.Category);
     data << uint32(chargeEntry.NextRecoveryTime);
+    data << float(chargeEntry.ChargeModRate);
     data << uint8(chargeEntry.ConsumedCharges);
     return data;
 }
@@ -750,6 +754,22 @@ WorldPacket const* WorldPackets::Spells::CancelSpellVisual::Write()
 {
     _worldPacket << Source;
     _worldPacket << int32(SpellVisualID);
+
+    return &_worldPacket;
+}
+
+WorldPacket const* WorldPackets::Spells::PlaySpellVisual::Write()
+{
+    _worldPacket << Source;
+    _worldPacket << Target;
+    _worldPacket << TargetPostion;
+    _worldPacket << SpellVisualID;
+    _worldPacket << TravelSpeed;
+    _worldPacket << MissReason;
+    _worldPacket << ReflectStatus;
+    _worldPacket << Orientation;
+    _worldPacket.WriteBit(SpeedAsTime);
+    _worldPacket.FlushBits();
 
     return &_worldPacket;
 }
@@ -821,7 +841,7 @@ WorldPacket const* WorldPackets::Spells::ResurrectRequest::Write()
     _worldPacket << uint32(ResurrectOffererVirtualRealmAddress);
     _worldPacket << uint32(PetNumber);
     _worldPacket << int32(SpellID);
-    _worldPacket.WriteBits(Name.length(), 6);
+    _worldPacket.WriteBits(Name.length(), 11);
     _worldPacket.WriteBit(UseTimer);
     _worldPacket.WriteBit(Sickness);
     _worldPacket.FlushBits();

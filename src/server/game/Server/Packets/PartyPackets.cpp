@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -47,7 +47,6 @@ void WorldPackets::Party::PartyInviteClient::Read()
     _worldPacket >> PartyIndex;
     _worldPacket >> ProposedRoles;
     _worldPacket >> TargetGUID;
-    _worldPacket >> TargetCfgRealmID;
 
     targetNameLen = _worldPacket.ReadBits(9);
     targetRealmLen = _worldPacket.ReadBits(9);
@@ -419,6 +418,7 @@ WorldPacket const* WorldPackets::Party::GroupNewLeader::Write()
 ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Party::PartyPlayerInfo const& playerInfo)
 {
     data.WriteBits(playerInfo.Name.size(), 6);
+    data.WriteBit(playerInfo.FromSocialQueue);
     data << playerInfo.GUID;
     data << uint8(playerInfo.Status);
     data << uint8(playerInfo.Subgroup);

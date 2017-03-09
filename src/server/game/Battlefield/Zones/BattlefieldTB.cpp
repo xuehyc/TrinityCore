@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
 *
 * This program is free software; you can redistribute it and/or modify it
 * under the terms of the GNU General Public License as published by the
@@ -79,14 +79,14 @@ bool BattlefieldTB::SetupBattlefield()
 
     // Set timer
     m_Timer = sWorld->getWorldState(TB_WS_TIME_NEXT_BATTLE);
-    
+
     // Defending team isn't set yet? Choose randomly.
     if (sWorld->getWorldState(TB_WS_FACTION_CONTROLLING) == 0)
-        sWorld->setWorldState(TB_WS_FACTION_CONTROLLING, uint64(urand(1, 2)));
+        sWorld->setWorldState(TB_WS_FACTION_CONTROLLING, uint32(urand(1, 2)));
 
     // Set defender team
     SetDefenderTeam(TeamId(sWorld->getWorldState(TB_WS_FACTION_CONTROLLING) - 1));
-    
+
     // Just to save world states
     SendInitWorldStatesToAll();
 
@@ -96,17 +96,17 @@ bool BattlefieldTB::SetupBattlefield()
         TolBaradCapturePoint* capturePoint = new TolBaradCapturePoint(this, GetDefenderTeam());
 
         //Spawn flag pole
-        if (GameObject* go = SpawnGameObject(TBCapturePoints[i].entryFlagPole[GetDefenderTeam()], TBCapturePoints[i].x, TBCapturePoints[i].y, TBCapturePoints[i].z, TBCapturePoints[i].o))
+        if (GameObject* go = SpawnGameObject(TBCapturePoints[i].entryFlagPole[GetDefenderTeam()], TBCapturePoints[i].pos, G3D::Quat()))
         {
             go->SetGoArtKit(GetDefenderTeam() == TEAM_ALLIANCE ? TB_GO_ARTKIT_FLAG_ALLIANCE : TB_GO_ARTKIT_FLAG_HORDE);
             capturePoint->SetCapturePointData(go);
         }
         AddCapturePoint(capturePoint);
     }
-    
+
     // Spawn towers
     for (uint8 i = 0; i < TB_TOWERS_COUNT; i++)
-        if (GameObject* go = SpawnGameObject(TBTowers[i].entry, TBTowers[i].x, TBTowers[i].y, TBTowers[i].z, TBTowers[i].o))
+        if (GameObject* go = SpawnGameObject(TBTowers[i].entry, TBTowers[i].pos, G3D::Quat()))
             Towers.insert(go->GetGUID());
 
     // Init Graveyards
@@ -122,7 +122,7 @@ bool BattlefieldTB::SetupBattlefield()
 
         // Spawn spirits
         for (uint8 team = 0; team < 2; team++)
-            if (Creature* creature = SpawnCreature(TBGraveyards[i].spiritEntry[team], TBGraveyards[i].x, TBGraveyards[i].y, TBGraveyards[i].z, TBGraveyards[i].o, TeamId(team)))
+            if (Creature* creature = SpawnCreature(TBGraveyards[i].spiritEntry[team], TBGraveyards[i].pos))
                 graveyard->SetSpirit(creature, TeamId(team));
 
         m_GraveyardList[i] = graveyard;
@@ -132,7 +132,7 @@ bool BattlefieldTB::SetupBattlefield()
     warnedFiveMinutes = false;
     warnedTwoMinutes = false;
     warnedOneMinute = false;
-    
+
     UpdateNPCsAndGameObjects();
 
     return true;
@@ -163,7 +163,7 @@ bool BattlefieldTB::Update(uint32 diff)
             SendWarning(TB_TEXT_PREPARATIONS_IN_1_MIN);
         }
     }
-    
+
     if (!updatedNPCAndObjects)
     {
         if (m_updateObjectsTimer <= diff)
@@ -208,7 +208,7 @@ void BattlefieldTB::OnPlayerJoinWar(Player* player)
     player->SetPvP(true);
 
     // Bonus damage buff for attackers
-    if (player->GetTeam() == GetAttackerTeam() && GetData(BATTLEFIELD_TB_DATA_TOWERS_DESTROYED) > 0)
+    if (player->GetTeamId() == GetAttackerTeam() && GetData(BATTLEFIELD_TB_DATA_TOWERS_DESTROYED) > 0)
         player->CastCustomSpell(SPELL_TOWER_ATTACK_BONUS, SPELLVALUE_AURA_STACK, GetData(BATTLEFIELD_TB_DATA_TOWERS_DESTROYED), player, TRIGGERED_FULL_MASK);
 }
 
@@ -299,7 +299,7 @@ void BattlefieldTB::FillInitialWorldStates(WorldPackets::WorldState::InitWorldSt
     packet.Worldstates.emplace_back(uint32(TB_WS_BUILDINGS_CAPTURED_SHOW), int32(IsWarTime() ? 1 : 0));
     packet.Worldstates.emplace_back(uint32(TB_WS_BUILDINGS_CAPTURED), int32(GetData(BATTLEFIELD_TB_DATA_BUILDINGS_CAPTURED)));
     packet.Worldstates.emplace_back(uint32(TB_WS_TOWERS_DESTROYED), int32(0));
-    
+
     packet.Worldstates.emplace_back(uint32(TB_WS_TIME_BATTLE_END_SHOW), int32(IsWarTime() ? 1 : 0));
 
     packet.Worldstates.emplace_back(uint32(TB_WS_STATE_BATTLE), int32(IsWarTime() ? 1 : 0));
@@ -340,7 +340,7 @@ void BattlefieldTB::FillInitialWorldStates(WorldPackets::WorldState::InitWorldSt
     }
 
     packet.Worldstates.emplace_back(uint32(TB_WS_TIME_NEXT_BATTLE_SHOW), int32(!IsWarTime() ? 1 : 0));
-    
+
     packet.Worldstates.emplace_back(uint32(TB_WS_ALLIANCE_CONTROLS_SHOW), int32(!IsWarTime() && GetDefenderTeam() == TEAM_ALLIANCE ? 1 : 0));
     packet.Worldstates.emplace_back(uint32(TB_WS_HORDE_CONTROLS_SHOW), int32(!IsWarTime() && GetDefenderTeam() == TEAM_HORDE ? 1 : 0));
 
@@ -352,7 +352,7 @@ void BattlefieldTB::FillInitialWorldStates(WorldPackets::WorldState::InitWorldSt
     //packet.Worldstates.emplace_back(uint32(TB_WS_66_UNKNOWN), int32(0));
 
     packet.Worldstates.emplace_back(uint32(TB_WS_KEEP_ALLIANCE), int32(GetDefenderTeam() == TEAM_ALLIANCE ? 1 : 0));
-    packet.Worldstates.emplace_back(uint32(TB_WS_KEEP_HORDE), int32(GetDefenderTeam() == TEAM_HORDE ? 1 : 0));    
+    packet.Worldstates.emplace_back(uint32(TB_WS_KEEP_HORDE), int32(GetDefenderTeam() == TEAM_HORDE ? 1 : 0));
 }
 
 void BattlefieldTB::SendInitWorldStatesTo(Player* player)
@@ -370,18 +370,18 @@ void BattlefieldTB::SendInitWorldStatesTo(Player* player)
 void BattlefieldTB::SendInitWorldStatesToAll()
 {
     // Save
-    sWorld->setWorldState(TB_WS_STATE_BATTLE, uint64(IsWarTime() ? 1 : 0));
-    sWorld->setWorldState(TB_WS_ALLIANCE_CONTROLS_SHOW, uint64(!IsWarTime() && GetDefenderTeam() == TEAM_ALLIANCE ? 1 : 0));
-    sWorld->setWorldState(TB_WS_HORDE_CONTROLS_SHOW, uint64(!IsWarTime() && GetDefenderTeam() == TEAM_HORDE ? 1 : 0));
-    sWorld->setWorldState(TB_WS_ALLIANCE_ATTACKING_SHOW, uint64(IsWarTime() && GetAttackerTeam() == TEAM_ALLIANCE ? 1 : 0));
-    sWorld->setWorldState(TB_WS_HORDE_ATTACKING_SHOW, uint64(IsWarTime() && GetAttackerTeam() == TEAM_HORDE ? 1 : 0));
-    sWorld->setWorldState(TB_WS_TIME_NEXT_BATTLE, uint64(!IsWarTime() ? m_Timer : 0));
-    sWorld->setWorldState(TB_WS_TIME_NEXT_BATTLE_SHOW, uint64(!IsWarTime() ? 1 : 0));
+    sWorld->setWorldState(TB_WS_STATE_BATTLE, uint32(IsWarTime() ? 1 : 0));
+    sWorld->setWorldState(TB_WS_ALLIANCE_CONTROLS_SHOW, uint32(!IsWarTime() && GetDefenderTeam() == TEAM_ALLIANCE ? 1 : 0));
+    sWorld->setWorldState(TB_WS_HORDE_CONTROLS_SHOW, uint32(!IsWarTime() && GetDefenderTeam() == TEAM_HORDE ? 1 : 0));
+    sWorld->setWorldState(TB_WS_ALLIANCE_ATTACKING_SHOW, uint32(IsWarTime() && GetAttackerTeam() == TEAM_ALLIANCE ? 1 : 0));
+    sWorld->setWorldState(TB_WS_HORDE_ATTACKING_SHOW, uint32(IsWarTime() && GetAttackerTeam() == TEAM_HORDE ? 1 : 0));
+    sWorld->setWorldState(TB_WS_TIME_NEXT_BATTLE, uint32(!IsWarTime() ? m_Timer : 0));
+    sWorld->setWorldState(TB_WS_TIME_NEXT_BATTLE_SHOW, uint32(!IsWarTime() ? 1 : 0));
 
     // Tol Barad
-    for (uint8 team = 0; team < 2; team++)
-        for (GuidSet::iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
-            if (Player* player = ObjectAccessor::FindPlayer(*itr))
+    for (uint8 team = 0; team < BG_TEAMS_COUNT; team++)
+        for (ObjectGuid const& guid : m_players[team])
+            if (Player* player = ObjectAccessor::FindPlayer(guid))
                 SendInitWorldStatesTo(player);
 
     // Tol Barad Peninsula
@@ -400,8 +400,8 @@ void BattlefieldTB::OnStartGrouping()
 
     // Teleport players out of questing area
     for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
-        for (GuidSet::const_iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
-            if (Player* player = ObjectAccessor::FindPlayer(*itr))
+        for (ObjectGuid const& guid : m_players[team])
+            if (Player* player = ObjectAccessor::FindPlayer(guid))
                 if (player->GetAreaId() == TBQuestAreas[m_iCellblockRandom].entry)
                     player->CastSpell(player, TBQuestAreas[m_iCellblockRandom].teleportSpell, true);
 
@@ -441,8 +441,8 @@ void BattlefieldTB::OnBattleEnd(bool endByTimer)
 
     for (uint8 team = 0; team < 2; ++team)
     {
-        for (GuidSet::const_iterator itr = m_PlayersInWar[team].begin(); itr != m_PlayersInWar[team].end(); ++itr)
-            if (Player* player = ObjectAccessor::FindPlayer(*itr))
+        for (ObjectGuid const& guid : m_PlayersInWar[team])
+            if (Player* player = ObjectAccessor::FindPlayer(guid))
                 RemoveAurasFromPlayer(player);
 
         m_PlayersInWar[team].clear();
@@ -473,7 +473,7 @@ void BattlefieldTB::UpdateNPCsAndGameObjects()
         if (GameObject* gameobject = GetGameObject(guid))
             gameobject->Delete();
     TemporaryGOs.clear();
-    
+
     // Tol Barad gates - closed during warmup
     if (GameObject* gates = GetGameObject(TBGatesGUID))
         gates->SetGoState(GetState() == BATTLEFIELD_WARMUP ? GO_STATE_READY : GO_STATE_ACTIVE);
@@ -483,7 +483,7 @@ void BattlefieldTB::UpdateNPCsAndGameObjects()
         door->SetGoState(GetState() == BATTLEFIELD_INACTIVE ? GO_STATE_ACTIVE : GO_STATE_READY);
 
     // Decide which cellblock and questgiver will be active.
-    m_iCellblockRandom = GetState() == BATTLEFIELD_INACTIVE ? urand(0, CELLBLOCK_MAX - 1) : CELLBLOCK_NONE;
+    m_iCellblockRandom = GetState() == BATTLEFIELD_INACTIVE ? urand(CELLBLOCK_THE_HOLE, CELLBLOCK_CURSED_DEPTHS) : uint8(CELLBLOCK_NONE);
 
     // To The Hole gate
     if (GameObject* door = GetGameObject(m_gateToTheHoleGUID))
@@ -510,7 +510,7 @@ void BattlefieldTB::UpdateNPCsAndGameObjects()
             TolBaradCapturePoint* capturePoint = new TolBaradCapturePoint(this, GetDefenderTeam());
 
             //Spawn flag pole
-            if (GameObject* go = SpawnGameObject(TBCapturePoints[i].entryFlagPole[GetDefenderTeam()], TBCapturePoints[i].x, TBCapturePoints[i].y, TBCapturePoints[i].z, TBCapturePoints[i].o))
+            if (GameObject* go = SpawnGameObject(TBCapturePoints[i].entryFlagPole[GetDefenderTeam()], TBCapturePoints[i].pos, G3D::Quat()))
             {
                 go->SetGoArtKit(GetDefenderTeam() == TEAM_ALLIANCE ? TB_GO_ARTKIT_FLAG_ALLIANCE : TB_GO_ARTKIT_FLAG_HORDE);
                 capturePoint->SetCapturePointData(go);
@@ -530,24 +530,24 @@ void BattlefieldTB::UpdateNPCsAndGameObjects()
         for (uint8 i = 0; i < TB_QUEST_INFANTRY_MAX; i++)
         {
             uint32 entry = TB_QUEST_INFANTRY[GetDefenderTeam()][urand(0,3)];
-            if (Creature* creature = SpawnCreature(entry, TBQuestInfantrySpawnData[i], GetDefenderTeam()))
+            if (Creature* creature = SpawnCreature(entry, TBQuestInfantrySpawnData[i]))
                 TemporaryNPCs.insert(creature->GetGUID());
         }
-            
+
         for (uint8 i = 0; i < TB_GUARDS_MAX; i++)
-            if (Creature* creature = SpawnCreature(GetDefenderTeam() == TEAM_ALLIANCE ? NPC_BARADIN_GUARD : NPC_HELLSCREAMS_SENTRY, GuardNPCSpawns[i], GetDefenderTeam()))
+            if (Creature* creature = SpawnCreature(GetDefenderTeam() == TEAM_ALLIANCE ? NPC_BARADIN_GUARD : NPC_HELLSCREAMS_SENTRY, GuardNPCSpawns[i]))
                 TemporaryNPCs.insert(creature->GetGUID());
 
         for (uint8 i = 0; i < TB_FACTION_NPC_MAX; i++)
-            if (Creature* creature = SpawnCreature(GetDefenderTeam() == TEAM_ALLIANCE ? FactionNPCSpawns[i].entryAlliance : FactionNPCSpawns[i].entryHorde, FactionNPCSpawns[i].x, FactionNPCSpawns[i].y, FactionNPCSpawns[i].z, FactionNPCSpawns[i].o, GetDefenderTeam()))
+            if (Creature* creature = SpawnCreature(GetDefenderTeam() == TEAM_ALLIANCE ? FactionNPCSpawns[i].entryAlliance : FactionNPCSpawns[i].entryHorde, FactionNPCSpawns[i].pos))
                 TemporaryNPCs.insert(creature->GetGUID());
 
-        if (Creature* creature = SpawnCreature(RandomQuestgivers[GetDefenderTeam()][m_iCellblockRandom], RandomQuestgiverPos, GetDefenderTeam()))
+        if (Creature* creature = SpawnCreature(RandomQuestgivers[GetDefenderTeam()][m_iCellblockRandom], RandomQuestgiverPos))
             TemporaryNPCs.insert(creature->GetGUID());
 
         // Spawn portals
         for (uint8 i = 0; i < TB_PORTAL_MAX; i++)
-            if (GameObject* go = SpawnGameObject(TBPortalEntry[GetDefenderTeam()], TBPortals[i].GetPositionX(), TBPortals[i].GetPositionY(), TBPortals[i].GetPositionZ(), TBPortals[i].GetOrientation()))
+            if (GameObject* go = SpawnGameObject(TBPortalEntry[GetDefenderTeam()], TBPortals[i], G3D::Quat()))
                 TemporaryGOs.insert(go->GetGUID());
 
         // Update towers
@@ -558,7 +558,7 @@ void BattlefieldTB::UpdateNPCsAndGameObjects()
     else if (GetState() == BATTLEFIELD_IN_PROGRESS)
     {
         for (uint8 i = 0; i < TB_ABANDONED_SIEGE_ENGINE_COUNT; i++)
-            if (Creature* creature = SpawnCreature(NPC_ABANDONED_SIEGE_ENGINE, TBAbandonedSiegeEngineSpawnData[i], GetDefenderTeam()))
+            if (Creature* creature = SpawnCreature(NPC_ABANDONED_SIEGE_ENGINE, TBAbandonedSiegeEngineSpawnData[i]))
                 TemporaryNPCs.insert(creature->GetGUID());
 
         for (ObjectGuid guid : Towers)
@@ -573,7 +573,7 @@ void BattlefieldTB::UpdateNPCsAndGameObjects()
 
     // Spawn banners
     for (uint8 i = 0; i < TB_BANNER_MAX; i++)
-        if (GameObject* go = SpawnGameObject(TBBannerEntry[GetDefenderTeam()], TBBanners[i].GetPositionX(), TBBanners[i].GetPositionY(), TBBanners[i].GetPositionZ(), TBBanners[i].GetOrientation()))
+        if (GameObject* go = SpawnGameObject(TBBannerEntry[GetDefenderTeam()], TBBanners[i], G3D::Quat()))
             TemporaryGOs.insert(go->GetGUID());
 
     // Set graveyard controls
@@ -754,8 +754,8 @@ void BattlefieldTB::TowerDestroyed(TBTowerId tbTowerId)
     SendUpdateWorldState(uint32(TBTowers[tbTowerId].wsDestroyed), int32(1));
 
     // Attack bonus buff
-    for (GuidSet::const_iterator itr = m_PlayersInWar[GetAttackerTeam()].begin(); itr != m_PlayersInWar[GetAttackerTeam()].end(); ++itr)
-        if (Player* player = ObjectAccessor::FindPlayer(*itr))
+    for (ObjectGuid const& guid : m_PlayersInWar[GetAttackerTeam()])
+        if (Player* player = ObjectAccessor::FindPlayer(guid))
             player->CastCustomSpell(SPELL_TOWER_ATTACK_BONUS, SPELLVALUE_AURA_STACK, GetData(BATTLEFIELD_TB_DATA_TOWERS_DESTROYED), player, TRIGGERED_FULL_MASK);
 
     // Honor reward
@@ -785,8 +785,8 @@ void BattlefieldTB::HandleKill(Player* killer, Unit* victim)
         return;
 
     TeamId killerTeam = killer->GetTeamId();
-    for (GuidSet::const_iterator itr = m_PlayersInWar[killerTeam].begin(); itr != m_PlayersInWar[killerTeam].end(); ++itr)
-        if (Player* player = ObjectAccessor::FindPlayer(*itr))
+    for (ObjectGuid const& guid : m_PlayersInWar[killerTeam])
+        if (Player* player = ObjectAccessor::FindPlayer(guid))
             if (player->GetDistance2d(killer) < 40.0f)
                 PromotePlayer(player);
 }

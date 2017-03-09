@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -25,6 +25,7 @@
 #include "Object.h"
 #include "LootMgr.h"
 #include "DatabaseEnv.h"
+#include <G3D/Quat.h>
 
 class GameObjectAI;
 class Group;
@@ -40,8 +41,6 @@ struct GameObjectTemplate
     std::string IconName;
     std::string castBarCaption;
     std::string unk1;
-    uint32  faction;
-    uint32  flags;
     float   size;
     int32   RequiredLevel;
     union
@@ -686,10 +685,11 @@ struct GameObjectTemplate
     {
         switch (type)
         {
-            case GAMEOBJECT_TYPE_QUESTGIVER: return questgiver.allowMounted != 0;
-            case GAMEOBJECT_TYPE_TEXT: return text.allowMounted != 0;
-            case GAMEOBJECT_TYPE_GOOBER: return goober.allowMounted != 0;
-            case GAMEOBJECT_TYPE_SPELLCASTER: return spellCaster.allowMounted != 0;
+            case GAMEOBJECT_TYPE_QUESTGIVER:    return questgiver.allowMounted != 0;
+            case GAMEOBJECT_TYPE_TEXT:          return text.allowMounted != 0;
+            case GAMEOBJECT_TYPE_GOOBER:        return goober.allowMounted != 0;
+            case GAMEOBJECT_TYPE_SPELLCASTER:   return spellCaster.allowMounted != 0;
+            case GAMEOBJECT_TYPE_UI_LINK:       return UILink.allowMounted != 0;
             default: return false;
         }
     }
@@ -698,20 +698,21 @@ struct GameObjectTemplate
     {
         switch (type)
         {
-            case GAMEOBJECT_TYPE_DOOR:          return door.open;
-            case GAMEOBJECT_TYPE_BUTTON:        return button.open;
-            case GAMEOBJECT_TYPE_QUESTGIVER:    return questgiver.open;
-            case GAMEOBJECT_TYPE_CHEST:         return chest.open;
-            case GAMEOBJECT_TYPE_TRAP:          return trap.open;
-            case GAMEOBJECT_TYPE_GOOBER:        return goober.open;
-            case GAMEOBJECT_TYPE_AREADAMAGE:    return areaDamage.open;
-            case GAMEOBJECT_TYPE_CAMERA:        return camera.open;
-            case GAMEOBJECT_TYPE_FLAGSTAND:     return flagStand.open;
-            case GAMEOBJECT_TYPE_FISHINGHOLE:   return fishingHole.open;
-            case GAMEOBJECT_TYPE_FLAGDROP:      return flagDrop.open;
-            case GAMEOBJECT_TYPE_NEW_FLAG:      return newflag.open;
-            case GAMEOBJECT_TYPE_NEW_FLAG_DROP: return newflagdrop.open;
-            case GAMEOBJECT_TYPE_CAPTURE_POINT: return capturePoint.open;
+            case GAMEOBJECT_TYPE_DOOR:              return door.open;
+            case GAMEOBJECT_TYPE_BUTTON:            return button.open;
+            case GAMEOBJECT_TYPE_QUESTGIVER:        return questgiver.open;
+            case GAMEOBJECT_TYPE_CHEST:             return chest.open;
+            case GAMEOBJECT_TYPE_TRAP:              return trap.open;
+            case GAMEOBJECT_TYPE_GOOBER:            return goober.open;
+            case GAMEOBJECT_TYPE_AREADAMAGE:        return areaDamage.open;
+            case GAMEOBJECT_TYPE_CAMERA:            return camera.open;
+            case GAMEOBJECT_TYPE_FLAGSTAND:         return flagStand.open;
+            case GAMEOBJECT_TYPE_FISHINGHOLE:       return fishingHole.open;
+            case GAMEOBJECT_TYPE_FLAGDROP:          return flagDrop.open;
+            case GAMEOBJECT_TYPE_NEW_FLAG:          return newflag.open;
+            case GAMEOBJECT_TYPE_NEW_FLAG_DROP:     return newflagdrop.open;
+            case GAMEOBJECT_TYPE_CAPTURE_POINT:     return capturePoint.open;
+            case GAMEOBJECT_TYPE_GATHERING_NODE:    return gatheringNode.open;
             default: return 0;
         }
     }
@@ -745,10 +746,11 @@ struct GameObjectTemplate
     {
         switch (type)
         {
-            case GAMEOBJECT_TYPE_BUTTON:      return button.linkedTrap;
-            case GAMEOBJECT_TYPE_CHEST:       return chest.linkedTrap;
-            case GAMEOBJECT_TYPE_SPELL_FOCUS: return spellFocus.linkedTrap;
-            case GAMEOBJECT_TYPE_GOOBER:      return goober.linkedTrap;
+            case GAMEOBJECT_TYPE_BUTTON:            return button.linkedTrap;
+            case GAMEOBJECT_TYPE_CHEST:             return chest.linkedTrap;
+            case GAMEOBJECT_TYPE_SPELL_FOCUS:       return spellFocus.linkedTrap;
+            case GAMEOBJECT_TYPE_GOOBER:            return goober.linkedTrap;
+            case GAMEOBJECT_TYPE_GATHERING_NODE:    return gatheringNode.linkedTrap;
             default: return 0;
         }
     }
@@ -774,8 +776,10 @@ struct GameObjectTemplate
     {
         switch (type)
         {
-            case GAMEOBJECT_TYPE_CHEST:       return chest.chestLoot;
-            case GAMEOBJECT_TYPE_FISHINGHOLE: return fishingHole.chestLoot;
+            case GAMEOBJECT_TYPE_CHEST:                 return chest.chestLoot;
+            case GAMEOBJECT_TYPE_FISHINGHOLE:           return fishingHole.chestLoot;
+            case GAMEOBJECT_TYPE_GATHERING_NODE:        return gatheringNode.chestLoot;
+            case GAMEOBJECT_TYPE_CHALLENGE_MODE_REWARD: return challengeModeReward.chestLoot;
             default: return 0;
         }
     }
@@ -794,9 +798,10 @@ struct GameObjectTemplate
     {
         switch (type)
         {
-            case GAMEOBJECT_TYPE_GOOBER:        return goober.eventID;
-            case GAMEOBJECT_TYPE_CHEST:         return chest.triggeredEvent;
-            case GAMEOBJECT_TYPE_CAMERA:        return camera.eventID;
+            case GAMEOBJECT_TYPE_GOOBER:            return goober.eventID;
+            case GAMEOBJECT_TYPE_CHEST:             return chest.triggeredEvent;
+            case GAMEOBJECT_TYPE_CAMERA:            return camera.eventID;
+            case GAMEOBJECT_TYPE_GATHERING_NODE:    return gatheringNode.triggeredEvent;
             default: return 0;
         }
     }
@@ -812,8 +817,19 @@ struct GameObjectTemplate
     }
 };
 
+// From `gameobject_template_addon`
+struct GameObjectTemplateAddon
+{
+    uint32  entry;
+    uint32  faction;
+    uint32  flags;
+    uint32  mingold;
+    uint32  maxgold;
+};
+
 // Benchmarked: Faster than std::map (insert/find)
 typedef std::unordered_map<uint32, GameObjectTemplate> GameObjectTemplateContainer;
+typedef std::unordered_map<uint32, GameObjectTemplateAddon> GameObjectTemplateAddonContainer;
 
 class OPvPCapturePoint;
 struct TransportAnimation;
@@ -857,6 +873,7 @@ struct GameObjectLocale
 // `gameobject_addon` table
 struct GameObjectAddon
 {
+    G3D::Quat ParentRotation;
     InvisibilityType invisibilityType;
     uint32 InvisibilityValue;
 };
@@ -879,8 +896,7 @@ enum GOState
 // from `gameobject`
 struct GameObjectData
 {
-    explicit GameObjectData() : id(0), mapid(0), phaseMask(0), posX(0.0f), posY(0.0f), posZ(0.0f), orientation(0.0f),
-                                rotation0(0.0f), rotation1(0.0f), rotation2(0.0f), rotation3(0.0f), spawntimesecs(0),
+    explicit GameObjectData() : id(0), mapid(0), phaseMask(0), posX(0.0f), posY(0.0f), posZ(0.0f), orientation(0.0f), spawntimesecs(0),
                                 animprogress(0), go_state(GO_STATE_ACTIVE), spawnMask(0), artKit(0), phaseid(0), phaseGroup(0), dbData(true) { }
     uint32 id;                                              // entry in gamobject_template
     uint16 mapid;
@@ -889,10 +905,7 @@ struct GameObjectData
     float posY;
     float posZ;
     float orientation;
-    float rotation0;
-    float rotation1;
-    float rotation2;
-    float rotation3;
+    G3D::Quat rotation;
     int32  spawntimesecs;
     uint32 animprogress;
     GOState go_state;
@@ -936,9 +949,10 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         void RemoveFromWorld() override;
         void CleanupsBeforeDelete(bool finalCleanup = true) override;
 
-        bool Create(uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state, uint32 artKit = 0);
+        bool Create(uint32 name_id, Map* map, uint32 phaseMask, Position const& pos, G3D::Quat const& rotation, uint32 animprogress, GOState go_state, uint32 artKit = 0);
         void Update(uint32 p_time) override;
         GameObjectTemplate const* GetGOInfo() const { return m_goInfo; }
+        GameObjectTemplateAddon const* GetTemplateAddon() const { return m_goTemplateAddon; }
         GameObjectData const* GetGOData() const { return m_goData; }
         GameObjectValue const* GetGOValue() const { return &m_goValue; }
 
@@ -948,7 +962,12 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
 
         ObjectGuid::LowType GetSpawnId() const { return m_spawnId; }
 
-        void UpdateRotationFields(float rotation2 = 0.0f, float rotation3 = 0.0f);
+         // z_rot, y_rot, x_rot - rotation angles around z, y and x axes
+        void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot);
+        void SetWorldRotation(G3D::Quat const& rot);
+        G3D::Quat const& GetWorldRotation() const { return m_worldRotation; }
+        void SetParentRotation(G3D::Quat const& rotation);      // transforms(rotates) transport's path
+        int64 GetPackedWorldRotation() const { return m_packedRotation; }
 
         // overwrite WorldObject function for proper name localization
         std::string const& GetNameForLocaleIdx(LocaleConstant locale_idx) const override;
@@ -1006,6 +1025,7 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         uint32 GetRespawnDelay() const { return m_respawnDelayTime; }
         void Refresh();
         void Delete();
+        void SendGameObjectDespawn();
         void getFishLoot(Loot* loot, Player* loot_owner);
         void getFishLootJunk(Loot* loot, Player* loot_owner);
         GameobjectTypes GetGoType() const { return GameobjectTypes(GetByteValue(GAMEOBJECT_BYTES_1, 1)); }
@@ -1055,7 +1075,7 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
 
         Player* GetLootRecipient() const;
         Group* GetLootRecipientGroup() const;
-        void SetLootRecipient(Unit* unit);
+        void SetLootRecipient(Unit* unit, Group* group = nullptr);
         bool IsLootAllowedFor(Player const* player) const;
         bool HasLootRecipient() const { return !m_lootRecipient.IsEmpty() || !m_lootRecipientGroup.IsEmpty(); }
         uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
@@ -1086,6 +1106,7 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         GameObject* LookupFishingHoleAround(float range);
 
         void CastSpell(Unit* target, uint32 spell, bool triggered = true);
+        void CastSpell(Unit* target, uint32 spell, TriggerCastFlags triggered);
         void SendCustomAnim(uint32 anim);
         bool IsInRange(float x, float y, float z, float radius) const;
 
@@ -1103,7 +1124,6 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
 
         void EventInform(uint32 eventId, WorldObject* invoker = NULL);
 
-        uint64 GetRotation() const { return m_rotation; }
         virtual uint32 GetScriptId() const { return GetGOInfo()->ScriptId; }
         GameObjectAI* AI() const { return m_AI; }
 
@@ -1147,6 +1167,8 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         bool        m_spawnedByDefault;
         time_t      m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
                                                             // For traps this: spell casting cooldown, for doors/buttons: reset time.
+        GOState     m_prevGoState;                          // What state to set whenever resetting
+
         GuidSet m_SkillupList;
 
         ObjectGuid m_ritualOwnerGUID;                       // used for GAMEOBJECT_TYPE_RITUAL where GO is not summoned (no owner)
@@ -1158,10 +1180,12 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
 
         ObjectGuid::LowType m_spawnId;                               ///< For new or temporary gameobjects is 0 for saved it is lowguid
         GameObjectTemplate const* m_goInfo;
+        GameObjectTemplateAddon const* m_goTemplateAddon;
         GameObjectData const* m_goData;
         GameObjectValue m_goValue;
 
-        uint64 m_rotation;
+        int64 m_packedRotation;
+        G3D::Quat m_worldRotation;
         Position m_stationaryPosition;
 
         ObjectGuid m_lootRecipient;
@@ -1170,6 +1194,7 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
     private:
         void RemoveFromOwner();
         void SwitchDoorOrButton(bool activate, bool alternative = false);
+        void UpdatePackedRotation();
 
         //! Object distance/size - overridden from Object::_IsWithinDist. Needs to take in account proper GO size.
         bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool /*is3D*/) const override

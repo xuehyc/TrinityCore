@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -119,8 +119,8 @@ WorldPacket const* WorldPackets::Quest::QueryQuestInfoResponse::Write()
         for (uint32 i = 0; i < QUEST_REWARD_REPUTATIONS_COUNT; ++i)
         {
             _worldPacket << int32(Info.RewardFactionID[i]);
-            _worldPacket << int32(Info.RewardFactionOverride[i]);
             _worldPacket << int32(Info.RewardFactionValue[i]);
+            _worldPacket << int32(Info.RewardFactionOverride[i]);
             _worldPacket << int32(Info.RewardFactionCapIn[i]);
         }
 
@@ -161,7 +161,8 @@ WorldPacket const* WorldPackets::Quest::QueryQuestInfoResponse::Write()
             _worldPacket << int32(questObjective.ObjectID);
             _worldPacket << int32(questObjective.Amount);
             _worldPacket << uint32(questObjective.Flags);
-            _worldPacket << float(questObjective.UnkFloat);
+            _worldPacket << uint32(questObjective.Flags2);
+            _worldPacket << float(questObjective.ProgressBarWeight);
 
             _worldPacket << int32(questObjective.VisualEffects.size());
             for (int32 visualEffect : questObjective.VisualEffects)
@@ -236,8 +237,8 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Quest::QuestRewards const
     for (uint32 i = 0; i < QUEST_REWARD_REPUTATIONS_COUNT; ++i)
     {
         data << int32(questRewards.FactionID[i]);
-        data << int32(questRewards.FactionOverride[i]);
         data << int32(questRewards.FactionValue[i]);
+        data << int32(questRewards.FactionOverride[i]);
         data << int32(questRewards.FactionCapIn[i]);
     }
 
@@ -288,9 +289,9 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Quest::QuestGiverOfferRew
 WorldPacket const* WorldPackets::Quest::QuestGiverOfferRewardMessage::Write()
 {
     _worldPacket << QuestData; // WorldPackets::Quest::QuestGiverOfferReward
+    _worldPacket << int32(QuestPackageID);
     _worldPacket << int32(PortraitTurnIn);
     _worldPacket << int32(PortraitGiver);
-    _worldPacket << int32(QuestPackageID);
 
     _worldPacket.WriteBits(QuestTitle.size(), 9);
     _worldPacket.WriteBits(RewardText.size(), 12);
@@ -573,6 +574,22 @@ void WorldPackets::Quest::PushQuestToParty::Read()
 WorldPacket const* WorldPackets::Quest::DailyQuestsReset::Write()
 {
     _worldPacket << int32(Count);
+
+    return &_worldPacket;
+}
+
+WorldPacket const* WorldPackets::Quest::WorldQuestUpdate::Write()
+{
+    _worldPacket << uint32(WorldQuestUpdates.size());
+
+    for (WorldQuestUpdateInfo const& worldQuestUpdate : WorldQuestUpdates)
+    {
+        _worldPacket << int32(worldQuestUpdate.LastUpdate);
+        _worldPacket << uint32(worldQuestUpdate.QuestID);
+        _worldPacket << uint32(worldQuestUpdate.Timer);
+        _worldPacket << int32(worldQuestUpdate.VariableID);
+        _worldPacket << int32(worldQuestUpdate.Value);
+    }
 
     return &_worldPacket;
 }

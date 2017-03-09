@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -128,7 +128,7 @@ enum AuraType
     SPELL_AURA_MOD_STALKED                                  = 68,
     SPELL_AURA_SCHOOL_ABSORB                                = 69,
     SPELL_AURA_EXTRA_ATTACKS                                = 70,
-    SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL                 = 71,
+    SPELL_AURA_71                                           = 71,
     SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT                    = 72,
     SPELL_AURA_MOD_POWER_COST_SCHOOL                        = 73,
     SPELL_AURA_REFLECT_SPELLS_SCHOOL                        = 74,
@@ -236,7 +236,7 @@ enum AuraType
     SPELL_AURA_SPIRIT_OF_REDEMPTION                         = 176,
     SPELL_AURA_AOE_CHARM                                    = 177,
     SPELL_AURA_178                                          = 178,  // old SPELL_AURA_MOD_DEBUFF_RESISTANCE, unused
-    SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE               = 179,
+    SPELL_AURA_MOD_POWER_DISPLAY                            = 179,
     SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS                 = 180,
     SPELL_AURA_181                                          = 181,  // old SPELL_AURA_MOD_FLAT_SPELL_CRIT_DAMAGE_VERSUS - possible flat spell crit damage versus
     SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT               = 182,
@@ -275,7 +275,7 @@ enum AuraType
     SPELL_AURA_ARENA_PREPARATION                            = 215,
     SPELL_AURA_HASTE_SPELLS                                 = 216,
     SPELL_AURA_MOD_MELEE_HASTE_2                            = 217,
-    SPELL_AURA_HASTE_RANGED                                 = 218,
+    SPELL_AURA_218                                          = 218,  // old SPELL_AURA_HASTE_RANGED
     SPELL_AURA_MOD_MANA_REGEN_FROM_STAT                     = 219,
     SPELL_AURA_MOD_RATING_FROM_STAT                         = 220,
     SPELL_AURA_MOD_DETAUNT                                  = 221,
@@ -315,7 +315,7 @@ enum AuraType
     SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT            = 255,
     SPELL_AURA_NO_REAGENT_USE                               = 256,
     SPELL_AURA_MOD_TARGET_RESIST_BY_SPELL_CLASS             = 257,
-    SPELL_AURA_258                                          = 258,
+    SPELL_AURA_OVERRIDE_SUMMONED_OBJECT                     = 258,
     SPELL_AURA_259                                          = 259,  // old SPELL_AURA_MOD_HOT_PCT, unused 4.3.4
     SPELL_AURA_SCREEN_EFFECT                                = 260,
     SPELL_AURA_PHASE                                        = 261,
@@ -379,7 +379,7 @@ enum AuraType
     SPELL_AURA_MOD_MELEE_HASTE_3                            = 319,
     SPELL_AURA_MOD_RANGED_HASTE_2                           = 320,
     SPELL_AURA_MOD_NO_ACTIONS                               = 321,
-    SPELL_AURA_INTERFERE_TARGETTING                         = 322,  // NYI
+    SPELL_AURA_INTERFERE_TARGETTING                         = 322,
     SPELL_AURA_323                                          = 323,  // Not used in 4.3.4
     SPELL_AURA_324                                          = 324,  // spell critical chance (probably by school mask)
     SPELL_AURA_325                                          = 325,  // Not used in 4.3.4
@@ -459,14 +459,14 @@ enum AuraType
     SPELL_AURA_399                                          = 399,
     SPELL_AURA_MOD_SKILL_2                                  = 400,
     SPELL_AURA_401                                          = 401,
-    SPELL_AURA_MOD_POWER_DISPLAY                            = 402,
+    SPELL_AURA_MOD_OVERRIDE_POWER_DISPLAY                   = 402,
     SPELL_AURA_OVERRIDE_SPELL_VISUAL                        = 403,
     SPELL_AURA_OVERRIDE_ATTACK_POWER_BY_SP_PCT              = 404,
     SPELL_AURA_MOD_RATING_PCT                               = 405,  // NYI
     SPELL_AURA_406                                          = 406,
     SPELL_AURA_MOD_FEAR_2                                   = 407,  // NYI
     SPELL_AURA_408                                          = 408,
-    SPELL_AURA_409                                          = 409,
+    SPELL_AURA_CAN_TURN_WHILE_FALLING                       = 409,
     SPELL_AURA_410                                          = 410,
     SPELL_AURA_MOD_MAX_CHARGES                              = 411,
     SPELL_AURA_412                                          = 412,
@@ -487,14 +487,14 @@ enum AuraType
     SPELL_AURA_SCALE_PLAYER_LEVEL                           = 427,  // NYI
     SPELL_AURA_428                                          = 428,
     SPELL_AURA_429                                          = 429,
-    SPELL_AURA_430                                          = 430,
-    SPELL_AURA_431                                          = 431,
+    SPELL_AURA_PLAY_SCENE                                   = 430,
+    SPELL_AURA_MOD_OVERRIDE_ZONE_PVP_TYPE                   = 431,  // NYI
     SPELL_AURA_432                                          = 432,
     SPELL_AURA_433                                          = 433,
     SPELL_AURA_434                                          = 434,
     SPELL_AURA_435                                          = 435,
     SPELL_AURA_MOD_ENVIRONMENTAL_DAMAGE_TAKEN               = 436,  // NYI
-    SPELL_AURA_437                                          = 437,
+    SPELL_AURA_MOD_MINIMUM_SPEED_RATE                       = 437,
     SPELL_AURA_PRELOAD_PHASE                                = 438,  // NYI
     SPELL_AURA_439                                          = 439,
     SPELL_AURA_MOD_MULTISTRIKE_DAMAGE                       = 440,  // NYI
@@ -512,7 +512,7 @@ enum AuraType
     SPELL_AURA_452                                          = 452,
     SPELL_AURA_CHARGE_RECOVERY_MOD                          = 453,
     SPELL_AURA_CHARGE_RECOVERY_MULTIPLIER                   = 454,
-    SPELL_AURA_455                                          = 455,
+    SPELL_AURA_MOD_ROOT_2                                   = 455,
     SPELL_AURA_CHARGE_RECOVERY_AFFECTED_BY_HASTE            = 456,
     SPELL_AURA_CHARGE_RECOVERY_AFFECTED_BY_HASTE_REGEN      = 457,
     SPELL_AURA_IGNORE_DUAL_WIELD_HIT_PENALTY                = 458,  // NYI

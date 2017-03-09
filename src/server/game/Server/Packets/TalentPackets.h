@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -92,6 +92,25 @@ namespace WorldPackets
             uint32 Reason = 0;
             int32 SpellID = 0;
             std::vector<uint16> Talents;
+        };
+
+        struct GlyphBinding
+        {
+            GlyphBinding(uint32 spellId = 0, uint16 glyphId = 0) : SpellID(spellId), GlyphID(glyphId) { }
+
+            uint32 SpellID;
+            uint16 GlyphID;
+        };
+
+        class ActiveGlyphs final : public ServerPacket
+        {
+        public:
+            ActiveGlyphs() : ServerPacket(SMSG_ACTIVE_GLYPHS) { }
+
+            WorldPacket const* Write() override;
+
+            std::vector<GlyphBinding> Glyphs;
+            bool IsFullUpdate = false;
         };
     }
 }

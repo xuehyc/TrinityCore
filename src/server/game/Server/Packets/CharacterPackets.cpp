@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -330,10 +330,8 @@ WorldPacket const* WorldPackets::Character::GenerateRandomCharacterNameResult::W
     return &_worldPacket;
 }
 
-WorldPackets::Character::ReorderCharacters::ReorderCharacters(WorldPacket&& packet) : ClientPacket(CMSG_REORDER_CHARACTERS, std::move(packet)),
-    Entries(sWorld->getIntConfig(CONFIG_CHARACTERS_PER_REALM))
+WorldPackets::Character::ReorderCharacters::ReorderCharacters(WorldPacket&& packet) : ClientPacket(CMSG_REORDER_CHARACTERS, std::move(packet))
 {
-
 }
 
 void WorldPackets::Character::ReorderCharacters::Read()
@@ -390,17 +388,16 @@ WorldPacket const* WorldPackets::Character::CharacterLoginFailed::Write()
     return &_worldPacket;
 }
 
+void WorldPackets::Character::LogoutRequest::Read()
+{
+    IdleLogout = _worldPacket.ReadBit();
+}
+
 WorldPacket const* WorldPackets::Character::LogoutResponse::Write()
 {
     _worldPacket << int32(LogoutResult);
     _worldPacket.WriteBit(Instant);
     _worldPacket.FlushBits();
-    return &_worldPacket;
-}
-
-WorldPacket const* WorldPackets::Character::LogoutComplete::Write()
-{
-    _worldPacket << SwitchToCharacter;
     return &_worldPacket;
 }
 

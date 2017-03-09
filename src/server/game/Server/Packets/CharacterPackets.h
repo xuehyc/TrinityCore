@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -140,7 +140,7 @@ namespace WorldPackets
                 uint8 unkWod61x          = 0;
                 uint32 LastPlayedTime    = 0;
                 uint16 SpecID            = 0;
-                uint32 Unknown703;
+                uint32 Unknown703        = 0;
 
                 struct PetInfo
                 {
@@ -371,7 +371,7 @@ namespace WorldPackets
 
             void Read() override;
 
-            Array<ReorderInfo> Entries;
+            Array<ReorderInfo, MAX_CHARACTERS_PER_REALM> Entries;
         };
 
         class UndeleteCharacter final : public ClientPacket
@@ -477,7 +477,9 @@ namespace WorldPackets
         public:
             LogoutRequest(WorldPacket&& packet) : ClientPacket(CMSG_LOGOUT_REQUEST, std::move(packet)) { }
 
-            void Read() override { }
+            void Read() override;
+
+            bool IdleLogout = false;
         };
 
         class LogoutResponse final : public ServerPacket
@@ -494,11 +496,9 @@ namespace WorldPackets
         class LogoutComplete final : public ServerPacket
         {
         public:
-            LogoutComplete() : ServerPacket(SMSG_LOGOUT_COMPLETE, 2) { }
+            LogoutComplete() : ServerPacket(SMSG_LOGOUT_COMPLETE, 0) { }
 
-            WorldPacket const* Write() override;
-
-            ObjectGuid SwitchToCharacter;
+            WorldPacket const* Write() override { return &_worldPacket; }
         };
 
         class LogoutCancel final : public ClientPacket

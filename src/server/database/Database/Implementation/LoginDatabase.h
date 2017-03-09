@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -129,6 +129,12 @@ enum LoginDatabaseStatements
     LOGIN_SEL_BNET_ACCOUNT_ID_BY_GAME_ACCOUNT,
     LOGIN_UPD_BNET_GAME_ACCOUNT_LINK,
     LOGIN_SEL_BNET_MAX_ACCOUNT_INDEX,
+    LOGIN_SEL_BNET_GAME_ACCOUNT_LIST,
+
+    LOGIN_UPD_BNET_FAILED_LOGINS,
+    LOGIN_INS_BNET_ACCOUNT_AUTO_BANNED,
+    LOGIN_DEL_BNET_EXPIRED_ACCOUNT_BANNED,
+    LOGIN_UPD_BNET_RESET_FAILED_LOGINS,
 
     LOGIN_SEL_LAST_CHAR_UNDELETE,
     LOGIN_UPD_LAST_CHAR_UNDELETE,
@@ -146,6 +152,9 @@ enum LoginDatabaseStatements
 
     LOGIN_SEL_ACCOUNT_HEIRLOOMS,
     LOGIN_REP_ACCOUNT_HEIRLOOMS,
+
+    LOGIN_SEL_ACCOUNT_MOUNTS,
+    LOGIN_REP_ACCOUNT_MOUNTS,
 
     LOGIN_SEL_BNET_ITEM_APPEARANCES,
     LOGIN_INS_BNET_ITEM_APPEARANCES,

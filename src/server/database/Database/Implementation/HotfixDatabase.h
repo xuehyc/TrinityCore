@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -111,6 +111,8 @@ enum HotfixDatabaseStatements
     HOTFIX_SEL_CHR_SPECIALIZATION,
     HOTFIX_SEL_CHR_SPECIALIZATION_LOCALE,
 
+    HOTFIX_SEL_CINEMATIC_CAMERA,
+
     HOTFIX_SEL_CINEMATIC_SEQUENCES,
 
     HOTFIX_SEL_CREATURE_DISPLAY_INFO,
@@ -196,7 +198,11 @@ enum HotfixDatabaseStatements
 
     HOTFIX_SEL_GEM_PROPERTIES,
 
+    HOTFIX_SEL_GLYPH_BINDABLE_SPELL,
+
     HOTFIX_SEL_GLYPH_PROPERTIES,
+
+    HOTFIX_SEL_GLYPH_REQUIRED_SPEC,
 
     HOTFIX_SEL_GUILD_COLOR_BACKGROUND,
 
@@ -345,6 +351,8 @@ enum HotfixDatabaseStatements
 
     HOTFIX_SEL_POWER_DISPLAY,
 
+    HOTFIX_SEL_POWER_TYPE,
+
     HOTFIX_SEL_PVP_DIFFICULTY,
 
     HOTFIX_SEL_QUEST_FACTION_REWARD,
@@ -365,6 +373,16 @@ enum HotfixDatabaseStatements
     HOTFIX_SEL_RULESET_ITEM_UPGRADE,
 
     HOTFIX_SEL_SCALING_STAT_DISTRIBUTION,
+
+    HOTFIX_SEL_SCENARIO,
+    HOTFIX_SEL_SCENARIO_LOCALE,
+
+    HOTFIX_SEL_SCENARIO_STEP,
+    HOTFIX_SEL_SCENARIO_STEP_LOCALE,
+
+    HOTFIX_SEL_SCENE_SCRIPT,
+
+    HOTFIX_SEL_SCENE_SCRIPT_PACKAGE,
 
     HOTFIX_SEL_SKILL_LINE,
     HOTFIX_SEL_SKILL_LINE_LOCALE,
@@ -452,6 +470,8 @@ enum HotfixDatabaseStatements
     HOTFIX_SEL_SPELL_X_SPELL_VISUAL,
 
     HOTFIX_SEL_SUMMON_PROPERTIES,
+
+    HOTFIX_SEL_TACT_KEY,
 
     HOTFIX_SEL_TALENT,
     HOTFIX_SEL_TALENT_LOCALE,

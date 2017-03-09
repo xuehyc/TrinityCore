@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "Object.h"
 #include "LootMgr.h"
+#include "ItemEnchantmentMgr.h"
 #include "ItemTemplate.h"
 #include "DatabaseEnv.h"
 
@@ -263,7 +264,7 @@ extern ItemModifier const IllusionModifierSlotBySpec[MAX_SPECIALIZATIONS];
 struct BonusData
 {
     uint32 Quality;
-    int32 ItemLevel;
+    int32 ItemLevelBonus;
     int32 RequiredLevel;
     int32 ItemStatType[MAX_ITEM_PROTO_STATS];
     int32 ItemStatValue[MAX_ITEM_PROTO_STATS];
@@ -273,12 +274,22 @@ struct BonusData
     uint32 AppearanceModID;
     float RepairCostMultiplier;
     uint32 ScalingStatDistribution;
-
+    uint32 ItemLevelOverride;
     uint32 GemItemLevelBonus[MAX_ITEM_PROTO_SOCKETS];
+    bool HasItemLevelBonus;
 
     void Initialize(ItemTemplate const* proto);
     void Initialize(WorldPackets::Item::ItemInstance const& itemInstance);
     void AddBonus(uint32 type, int32 const (&values)[2]);
+
+private:
+    struct
+    {
+        int32 AppearanceModPriority;
+        int32 ScalingStatDistributionPriority;
+        int32 ItemLevelOverridePriority;
+        bool HasQualityBonus;
+    } _state;
 };
 
 #pragma pack(push, 1)
@@ -318,8 +329,8 @@ class TC_GAME_API Item : public Object
 
         void SetBinding(bool val) { ApplyModFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_SOULBOUND, val); }
         bool IsSoulBound() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_SOULBOUND); }
-        bool IsBoundAccountWide() const { return (GetTemplate()->GetFlags() & ITEM_FLAG_BIND_TO_ACCOUNT) != 0; }
-        bool IsBattlenetAccountBound() const { return (GetTemplate()->GetFlags2() & ITEM_FLAG2_BNET_ACCOUNT_BOUND) != 0; }
+        bool IsBoundAccountWide() const { return (GetTemplate()->GetFlags() & ITEM_FLAG_IS_BOUND_TO_ACCOUNT) != 0; }
+        bool IsBattlenetAccountBound() const { return (GetTemplate()->GetFlags2() & ITEM_FLAG2_BNET_ACCOUNT_TRADE_OK) != 0; }
         bool IsBindedNotWith(Player const* player) const;
         bool IsBoundByEnchant() const;
         virtual void SaveToDB(SQLTransaction& trans);
@@ -385,9 +396,10 @@ class TC_GAME_API Item : public Object
         // RandomPropertyId (signed but stored as unsigned)
         int32 GetItemRandomPropertyId() const { return GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID); }
         uint32 GetItemSuffixFactor() const { return GetUInt32Value(ITEM_FIELD_PROPERTY_SEED); }
-        void SetItemRandomProperties(int32 randomPropId);
+        void SetItemRandomProperties(ItemRandomEnchantmentId const& randomPropId);
         void UpdateItemSuffixFactor();
-        static int32 GenerateItemRandomPropertyId(uint32 item_id);
+        static ItemRandomEnchantmentId GenerateItemRandomPropertyId(uint32 item_id);
+        ItemRandomEnchantmentId GetItemRandomEnchantmentId() const { return m_randomEnchantment; }
         void SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges, ObjectGuid caster = ObjectGuid::Empty);
         void SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration, Player* owner);
         void SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges);
@@ -397,7 +409,7 @@ class TC_GAME_API Item : public Object
         uint32 GetEnchantmentCharges(EnchantmentSlot slot)  const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET);}
         DynamicFieldStructuredView<ItemDynamicFieldGems> GetGems() const;
         ItemDynamicFieldGems const* GetGem(uint16 slot) const;
-        void SetGem(uint16 slot, ItemDynamicFieldGems const* gem);
+        void SetGem(uint16 slot, ItemDynamicFieldGems const* gem, uint32 gemScalingLevel);
 
         std::string const& GetText() const { return m_text; }
         void SetText(std::string const& text) { m_text = text; }
@@ -518,7 +530,9 @@ class TC_GAME_API Item : public Object
         uint32 m_paidMoney;
         uint32 m_paidExtendedCost;
         GuidSet allowedGUIDs;
+        ItemRandomEnchantmentId m_randomEnchantment;        // store separately to easily find which bonus list is the one randomly given for stat rerolling
         ObjectGuid m_childItem;
         std::unordered_map<uint32, uint16> m_artifactPowerIdToIndex;
+        std::array<uint32, MAX_ITEM_PROTO_SOCKETS> m_gemScalingLevels;
 };
 #endif

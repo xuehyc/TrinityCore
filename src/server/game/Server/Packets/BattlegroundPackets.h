@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -271,15 +271,13 @@ namespace WorldPackets
 
             WorldPacket const* Write() override;
 
-            uint8 MaxLevel = 0;
-            bool PvpAnywhere = false;
             ObjectGuid BattlemasterGuid;
-            bool IsRandomBG = false;
-            uint8 MinLevel = 0;
-            bool HasHolidayWinToday = false;
             int32 BattlemasterListID = 0;
-            bool HasRandomWinToday = false;
+            uint8 MinLevel = 0;
+            uint8 MaxLevel = 0;
             std::vector<int32> Battlefields;    // Players cannot join a specific battleground instance anymore - this is always empty
+            bool PvpAnywhere = false;
+            bool HasRandomWinToday = false;
         };
 
         class GetPVPOptionsEnabled final : public ClientPacket

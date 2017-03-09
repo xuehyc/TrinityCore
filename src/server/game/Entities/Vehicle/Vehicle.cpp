@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -521,6 +521,9 @@ void Vehicle::RelocatePassengers()
 {
     ASSERT(_me->GetMap());
 
+    std::vector<std::pair<Unit*, Position>> seatRelocation;
+    seatRelocation.reserve(Seats.size());
+
     // not sure that absolute position calculation is correct, it must depend on vehicle pitch angle
     for (SeatMap::const_iterator itr = Seats.begin(); itr != Seats.end(); ++itr)
     {
@@ -532,9 +535,12 @@ void Vehicle::RelocatePassengers()
             passenger->m_movementInfo.transport.pos.GetPosition(px, py, pz, po);
             CalculatePassengerPosition(px, py, pz, &po);
 
-            passenger->UpdatePosition(px, py, pz, po);
+            seatRelocation.emplace_back(passenger, Position(px, py, pz, po));
         }
     }
+
+    for (auto const& pair : seatRelocation)
+        pair.first->UpdatePosition(pair.second);
 }
 
 /**
@@ -724,12 +730,6 @@ void Vehicle::RemovePendingEventsForPassenger(Unit* passenger)
     }
 }
 
-VehicleJoinEvent::~VehicleJoinEvent()
-{
-    if (Target)
-        Target->RemovePendingEvent(this);
-}
-
 /**
  * @fn bool VehicleJoinEvent::Execute(uint64, uint32)
  *
@@ -846,6 +846,9 @@ void VehicleJoinEvent::Abort(uint64)
     {
         TC_LOG_DEBUG("entities.vehicle", "Passenger %s, Entry: %u, board on vehicle %s, Entry: %u SeatId: %d cancelled",
             Passenger->GetGUID().ToString().c_str(), Passenger->GetEntry(), Target->GetBase()->GetGUID().ToString().c_str(), Target->GetBase()->GetEntry(), (int32)Seat->first);
+
+        /// Remove the pending event when Abort was called on the event directly
+        Target->RemovePendingEvent(this);
 
         /// @SPELL_AURA_CONTROL_VEHICLE auras can be applied even when the passenger is not (yet) on the vehicle.
         /// When this code is triggered it means that something went wrong in @Vehicle::AddPassenger, and we should remove

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -346,7 +346,7 @@ void Garrison::LearnBlueprint(uint32 garrBuildingId)
     if (!sGarrBuildingStore.LookupEntry(garrBuildingId))
         learnBlueprintResult.Result = GARRISON_ERROR_INVALID_BUILDINGID;
     else if (_knownBuildings.count(garrBuildingId))
-        learnBlueprintResult.Result = GARRISON_ERROR_BLUEPRINT_KNOWN;
+        learnBlueprintResult.Result = GARRISON_ERROR_BLUEPRINT_EXISTS;
     else
         _knownBuildings.insert(garrBuildingId);
 
@@ -363,7 +363,7 @@ void Garrison::UnlearnBlueprint(uint32 garrBuildingId)
     if (!sGarrBuildingStore.LookupEntry(garrBuildingId))
         unlearnBlueprintResult.Result = GARRISON_ERROR_INVALID_BUILDINGID;
     else if (!_knownBuildings.count(garrBuildingId))
-        unlearnBlueprintResult.Result = GARRISON_ERROR_BLUEPRINT_NOT_KNOWN;
+        unlearnBlueprintResult.Result = GARRISON_ERROR_REQUIRES_BLUEPRINT;
     else
         _knownBuildings.erase(garrBuildingId);
 
@@ -497,7 +497,7 @@ void Garrison::AddFollower(uint32 garrFollowerId)
     GarrFollowerEntry const* followerEntry = sGarrFollowerStore.LookupEntry(garrFollowerId);
     if (_followerIds.count(garrFollowerId) || !followerEntry)
     {
-        addFollowerResult.Result = GARRISON_GENERIC_UNKNOWN_ERROR;
+        addFollowerResult.Result = GARRISON_ERROR_FOLLOWER_EXISTS;
         _owner->SendDirectMessage(addFollowerResult.Write());
         return;
     }
@@ -609,7 +609,7 @@ GarrisonError Garrison::CheckBuildingPlacement(uint32 garrPlotInstanceId, uint32
     GarrPlotInstanceEntry const* plotInstance = sGarrPlotInstanceStore.LookupEntry(garrPlotInstanceId);
     Plot const* plot = GetPlot(garrPlotInstanceId);
     if (!plotInstance || !plot)
-        return GARRISON_ERROR_INVALID_PLOT;
+        return GARRISON_ERROR_INVALID_PLOT_INSTANCEID;
 
     GarrBuildingEntry const* building = sGarrBuildingStore.LookupEntry(garrBuildingId);
     if (!building)
@@ -625,7 +625,7 @@ GarrisonError Garrison::CheckBuildingPlacement(uint32 garrPlotInstanceId, uint32
     if (building->Flags & GARRISON_BUILDING_FLAG_NEEDS_PLAN)
     {
         if (!_knownBuildings.count(garrBuildingId))
-            return GARRISON_ERROR_BLUEPRINT_NOT_KNOWN;
+            return GARRISON_ERROR_REQUIRES_BLUEPRINT;
     }
     else // Building is built as a quest reward
         return GARRISON_ERROR_INVALID_BUILDINGID;
@@ -661,7 +661,7 @@ GarrisonError Garrison::CheckBuildingRemoval(uint32 garrPlotInstanceId) const
 {
     Plot const* plot = GetPlot(garrPlotInstanceId);
     if (!plot)
-        return GARRISON_ERROR_INVALID_PLOT;
+        return GARRISON_ERROR_INVALID_PLOT_INSTANCEID;
 
     if (!plot->BuildingInfo.PacketInfo)
         return GARRISON_ERROR_NO_BUILDING;
@@ -727,7 +727,7 @@ GameObject* Garrison::Plot::CreateGameObject(Map* map, GarrisonFactionIndex fact
 
     Position const& pos = PacketInfo.PlotPos;
     GameObject* building = new GameObject();
-    if (!building->Create(entry, map, 0, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 255, GO_STATE_READY))
+    if (!building->Create(entry, map, 0, pos, G3D::Quat(), 255, GO_STATE_READY))
     {
         delete building;
         return nullptr;
@@ -739,8 +739,7 @@ GameObject* Garrison::Plot::CreateGameObject(Map* map, GarrisonFactionIndex fact
         {
             Position const& pos2 = finalizeInfo->FactionInfo[faction].Pos;
             GameObject* finalizer = new GameObject();
-            if (finalizer->Create(finalizeInfo->FactionInfo[faction].GameObjectId, map, 0, pos2.GetPositionX(), pos2.GetPositionY(),
-                pos2.GetPositionZ(), pos2.GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 255, GO_STATE_READY))
+            if (finalizer->Create(finalizeInfo->FactionInfo[faction].GameObjectId, map, 0, pos2, G3D::Quat(), 255, GO_STATE_READY))
             {
                 // set some spell id to make the object delete itself after use
                 finalizer->SetSpellId(finalizer->GetGOInfo()->goober.spell);

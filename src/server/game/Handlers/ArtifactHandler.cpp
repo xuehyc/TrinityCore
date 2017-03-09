@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -192,10 +192,8 @@ void WorldSession::HandleConfirmArtifactRespec(WorldPackets::Artifact::ConfirmAr
         artifact->SetArtifactPower(&newPower);
 
         if (artifact->IsEquipped())
-        {
-            ArtifactPowerRankEntry const* artifactPowerRank = sDB2Manager.GetArtifactPowerRank(artifactPower.ArtifactPowerId, 0);
-            _player->ApplyArtifactPowerRank(artifact, artifactPowerRank, false);
-        }
+            if (ArtifactPowerRankEntry const* artifactPowerRank = sDB2Manager.GetArtifactPowerRank(artifactPower.ArtifactPowerId, 0))
+                _player->ApplyArtifactPowerRank(artifact, artifactPowerRank, false);
     }
 
     for (ItemDynamicFieldArtifactPowers const& power : artifact->GetArtifactPowers())

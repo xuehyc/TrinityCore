@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -368,7 +368,7 @@ void Guild::BankTab::LoadFromDB(Field* fields)
 
 bool Guild::BankTab::LoadItemFromDB(Field* fields)
 {
-    uint8 slotId = fields[42].GetUInt8();
+    uint8 slotId = fields[46].GetUInt8();
     ObjectGuid::LowType itemGuid = fields[0].GetUInt64();
     uint32 itemEntry = fields[1].GetUInt32();
     if (slotId >= GUILD_BANK_MAX_SLOTS)
@@ -1409,6 +1409,11 @@ void Guild::HandleSetAchievementTracking(WorldSession* session, std::set<uint32>
     }
 }
 
+void Guild::HandleGetAchievementMembers(WorldSession* session, uint32 achievementId)
+{
+    m_achievementMgr.SendAchievementMembers(session->GetPlayer(), achievementId);
+}
+
 void Guild::HandleSetMOTD(WorldSession* session, std::string const& motd)
 {
     if (m_motd == motd)
@@ -2394,7 +2399,7 @@ void Guild::LoadBankTabFromDB(Field* fields)
 
 bool Guild::LoadBankItemFromDB(Field* fields)
 {
-    uint8 tabId = fields[41].GetUInt8();
+    uint8 tabId = fields[45].GetUInt8();
     if (tabId >= _GetPurchasedTabsSize())
     {
         TC_LOG_ERROR("guild", "Invalid tab for item (GUID: %u, id: #%u) in guild bank, skipped.",
@@ -3219,7 +3224,7 @@ void Guild::_SendBankContentUpdate(uint8 tabId, SlotIds slots) const
                 {
                     if (gemData.ItemId)
                     {
-                        WorldPackets::Item::ItemGemInstanceData gem;
+                        WorldPackets::Item::ItemGemData gem;
                         gem.Slot = i;
                         gem.Item.Initialize(&gemData);
                         itemInfo.SocketEnchant.push_back(gem);
@@ -3238,8 +3243,6 @@ void Guild::_SendBankContentUpdate(uint8 tabId, SlotIds slots) const
                     packet.WithdrawalsRemaining = int32(_GetMemberRemainingSlots(itr->second, tabId));
                     player->GetSession()->SendPacket(packet.Write());
                 }
-
-        TC_LOG_DEBUG("guild", "WORLD: Sent SMSG_GUILD_BANK_QUERY_RESULTS");
     }
 }
 
@@ -3303,7 +3306,7 @@ void Guild::SendBankList(WorldSession* session, uint8 tabId, bool fullUpdate) co
                     {
                         if (gemData.ItemId)
                         {
-                            WorldPackets::Item::ItemGemInstanceData gem;
+                            WorldPackets::Item::ItemGemData gem;
                             gem.Slot = i;
                             gem.Item.Initialize(&gemData);
                             itemInfo.SocketEnchant.push_back(gem);
@@ -3320,8 +3323,6 @@ void Guild::SendBankList(WorldSession* session, uint8 tabId, bool fullUpdate) co
     }
 
     session->SendPacket(packet.Write());
-
-    TC_LOG_DEBUG("guild", "WORLD: Sent SMSG_GUILD_BANK_QUERY_RESULTS");
 }
 
 void Guild::SendGuildRanksUpdate(ObjectGuid setterGuid, ObjectGuid targetGuid, uint32 rank)

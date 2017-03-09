@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -24,6 +24,7 @@
 #include "Config.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
+#include "QueryCallback.h"
 #include "AccountMgr.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -151,8 +152,6 @@ WorldSession::WorldSession(uint32 id, std::string&& name, uint32 battlenetAccoun
 
     m_Socket[CONNECTION_TYPE_REALM] = sock;
     _instanceConnectKey.Raw = UI64LIT(0);
-
-    InitializeQueryCallbackParameters();
 }
 
 /// WorldSession destructor
@@ -315,7 +314,7 @@ void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* status, 
 }
 
 /// Logging helper for unexpected opcodes
-void WorldSession::LogUnprocessedTail(WorldPacket* packet)
+void WorldSession::LogUnprocessedTail(WorldPacket const* packet)
 {
     if (!sLog->ShouldLog("network.opcode", LOG_LEVEL_TRACE) || packet->rpos() >= packet->wpos())
         return;
@@ -370,7 +369,6 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                     {
                         sScriptMgr->OnPacketReceive(this, *packet);
                         opHandle->Call(this, *packet);
-                        LogUnprocessedTail(packet);
                     }
                     // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
                     break;
@@ -383,7 +381,6 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                         // not expected _player or must checked in packet hanlder
                         sScriptMgr->OnPacketReceive(this, *packet);
                         opHandle->Call(this, *packet);
-                        LogUnprocessedTail(packet);
                     }
                     break;
                 case STATUS_TRANSFER:
@@ -395,7 +392,6 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                     {
                         sScriptMgr->OnPacketReceive(this, *packet);
                         opHandle->Call(this, *packet);
-                        LogUnprocessedTail(packet);
                     }
                     break;
                 case STATUS_AUTHED:
@@ -415,7 +411,6 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                     {
                         sScriptMgr->OnPacketReceive(this, *packet);
                         opHandle->Call(this, *packet);
-                        LogUnprocessedTail(packet);
                     }
                     break;
                 case STATUS_NEVER:
@@ -514,9 +509,8 @@ void WorldSession::LogoutPlayer(bool save)
 
     if (_player)
     {
-        ObjectGuid lguid = _player->GetLootGUID();
-        if (!lguid.IsEmpty())
-            DoLootRelease(lguid);
+        if (!_player->GetLootGUID().IsEmpty())
+            DoLootReleaseAll();
 
         ///- If the player just died before logging out, make him appear as a ghost
         if (_player->GetDeathTimer())
@@ -868,135 +862,17 @@ void WorldSession::SetPlayer(Player* player)
         m_GUIDLow = _player->GetGUID().GetCounter();
 }
 
-void WorldSession::InitializeQueryCallbackParameters()
-{
-    // Callback parameters that have pointers in them should be properly
-    // initialized to nullptr here.
-}
-
 void WorldSession::ProcessQueryCallbacks()
 {
-    PreparedQueryResult result;
+    _queryProcessor.ProcessReadyQueries();
 
     if (_realmAccountLoginCallback.valid() && _realmAccountLoginCallback.wait_for(std::chrono::seconds(0)) == std::future_status::ready &&
         _accountLoginCallback.valid() && _accountLoginCallback.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
         InitializeSessionCallback(_realmAccountLoginCallback.get(), _accountLoginCallback.get());
 
-    //! HandleCharEnumOpcode and HandleCharUndeleteEnumOpcode
-    if (_charEnumCallback.IsReady())
-    {
-        _charEnumCallback.GetResult(result);
-
-        if (_charEnumCallback.GetParam())
-            HandleCharUndeleteEnum(result);
-        else
-            HandleCharEnum(result);
-
-        _charEnumCallback.FreeResult();
-    }
-
-    //! HandleCharCreateOpcode
-    if (_charCreateCallback.IsReady())
-    {
-        _charCreateCallback.GetResult(result);
-        HandleCharCreateCallback(result, _charCreateCallback.GetParam().get());
-    }
-
-    //! HandleCharCustomizeOpcode
-    if (_charCustomizeCallback.IsReady())
-    {
-        _charCustomizeCallback.GetResult(result);
-        HandleCharCustomizeCallback(result, _charCustomizeCallback.GetParam().get());
-        _charCustomizeCallback.Reset();
-    }
-
-    //! HandleCharRaceOrFactionChangeOpcode
-    if (_charFactionChangeCallback.IsReady())
-    {
-        _charFactionChangeCallback.GetResult(result);
-        HandleCharRaceOrFactionChangeCallback(result, _charFactionChangeCallback.GetParam().get());
-        _charFactionChangeCallback.Reset();
-    }
-
     //! HandlePlayerLoginOpcode
     if (_charLoginCallback.valid() && _charLoginCallback.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
-    {
-        SQLQueryHolder* param = _charLoginCallback.get();
-        HandlePlayerLogin((LoginQueryHolder*)param);
-    }
-
-    //! HandleAddFriendOpcode
-    if (_addFriendCallback.IsReady())
-    {
-        std::string param = _addFriendCallback.GetParam();
-        _addFriendCallback.GetResult(result);
-        HandleAddFriendOpcodeCallBack(result, param);
-        _addFriendCallback.FreeResult();
-    }
-
-    //- HandleCharRenameOpcode
-    if (_charRenameCallback.IsReady())
-    {
-        _charRenameCallback.GetResult(result);
-        HandleCharRenameCallBack(result, _charRenameCallback.GetParam().get());
-        _charRenameCallback.Reset();
-    }
-
-    /// HandleUndeleteCooldownStatusOpcode
-    /// wait until no char undelete is in progress
-    if (!_charUndeleteCallback.GetStage() && _undeleteCooldownStatusCallback.IsReady())
-    {
-        _undeleteCooldownStatusCallback.GetResult(result);
-        HandleUndeleteCooldownStatusCallback(result);
-    }
-
-    /// HandleCharUndeleteOpcode
-    if (_charUndeleteCallback.IsReady())
-    {
-        _charUndeleteCallback.GetResult(result);
-        HandleCharUndeleteCallback(result, _charUndeleteCallback.GetParam().get());
-    }
-
-    //- HandleCharAddIgnoreOpcode
-    if (_addIgnoreCallback.valid() && _addIgnoreCallback.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
-    {
-        result = _addIgnoreCallback.get();
-        HandleAddIgnoreOpcodeCallBack(result);
-    }
-
-    //- SendStabledPet
-    if (_sendStabledPetCallback.IsReady())
-    {
-        ObjectGuid param = _sendStabledPetCallback.GetParam();
-        _sendStabledPetCallback.GetResult(result);
-        SendStablePetCallback(result, param);
-        _sendStabledPetCallback.FreeResult();
-    }
-
-    //- HandleStablePet
-    if (_stablePetCallback.valid() && _stablePetCallback.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
-    {
-        result = _stablePetCallback.get();
-        HandleStablePetCallback(result);
-    }
-
-    //- HandleUnstablePet
-    if (_unstablePetCallback.IsReady())
-    {
-        uint32 param = _unstablePetCallback.GetParam();
-        _unstablePetCallback.GetResult(result);
-        HandleUnstablePetCallback(result, param);
-        _unstablePetCallback.FreeResult();
-    }
-
-    //- HandleStableSwapPet
-    if (_stableSwapCallback.IsReady())
-    {
-        uint32 param = _stableSwapCallback.GetParam();
-        _stableSwapCallback.GetResult(result);
-        HandleStableSwapPetCallback(result, param);
-        _stableSwapCallback.FreeResult();
-    }
+        HandlePlayerLogin(reinterpret_cast<LoginQueryHolder*>(_charLoginCallback.get()));
 }
 
 void WorldSession::InitWarden(BigNumber* k)
@@ -1028,7 +904,7 @@ void WorldSession::LoadPermissions()
     _RBACData->LoadFromDB();
 }
 
-PreparedQueryResultFuture WorldSession::LoadPermissionsAsync()
+QueryCallback WorldSession::LoadPermissionsAsync()
 {
     uint32 id = GetAccountId();
     uint8 secLevel = GetSecurity();
@@ -1079,6 +955,7 @@ public:
         BATTLE_PET_SLOTS,
         GLOBAL_ACCOUNT_HEIRLOOMS,
         GLOBAL_REALM_CHARACTER_COUNTS,
+        MOUNTS,
         ITEM_APPEARANCES,
         ITEM_FAVORITE_APPEARANCES,
 
@@ -1106,6 +983,10 @@ public:
         stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_HEIRLOOMS);
         stmt->setUInt32(0, battlenetAccountId);
         ok = SetPreparedQuery(GLOBAL_ACCOUNT_HEIRLOOMS, stmt) && ok;
+
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_MOUNTS);
+        stmt->setUInt32(0, battlenetAccountId);
+        ok = SetPreparedQuery(MOUNTS, stmt) && ok;
 
         stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_BNET_CHARACTER_COUNTS_BY_ACCOUNT_ID);
         stmt->setUInt32(0, accountId);
@@ -1152,6 +1033,7 @@ void WorldSession::InitializeSessionCallback(SQLQueryHolder* realmHolder, SQLQue
     LoadTutorialsData(realmHolder->GetPreparedResult(AccountInfoQueryHolderPerRealm::TUTORIALS));
     _collectionMgr->LoadAccountToys(holder->GetPreparedResult(AccountInfoQueryHolder::GLOBAL_ACCOUNT_TOYS));
     _collectionMgr->LoadAccountHeirlooms(holder->GetPreparedResult(AccountInfoQueryHolder::GLOBAL_ACCOUNT_HEIRLOOMS));
+    _collectionMgr->LoadAccountMounts(holder->GetPreparedResult(AccountInfoQueryHolder::MOUNTS));
     _collectionMgr->LoadAccountItemAppearances(holder->GetPreparedResult(AccountInfoQueryHolder::ITEM_APPEARANCES), holder->GetPreparedResult(AccountInfoQueryHolder::ITEM_FAVORITE_APPEARANCES));
 
     if (!m_inQueue)

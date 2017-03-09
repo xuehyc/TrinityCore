@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -53,7 +53,7 @@ namespace WorldPackets
             bool Leader = false;
             std::vector<int32> QuestItems;
             uint32 CreatureMovementInfoID = 0;
-            uint32 HealthScalingExpansion = 0;
+            int32 HealthScalingExpansion = 0;
             uint32 RequiredExpansion = 0;
             uint32 VignetteID = 0;
             uint32 Flags[2];

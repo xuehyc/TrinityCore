@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -232,17 +232,26 @@ ByteBuffer& operator>>(ByteBuffer& data, WorldPackets::Item::ItemInstance& itemI
     return data;
 }
 
-ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Item::ItemGemInstanceData const& itemGemInstanceData)
+ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Item::ItemEnchantData const& itemEnchantData)
 {
-    data << uint8(itemGemInstanceData.Slot);
-    data << itemGemInstanceData.Item;
+    data << int32(itemEnchantData.ID);
+    data << uint32(itemEnchantData.Expiration);
+    data << int32(itemEnchantData.Charges);
+    data << uint8(itemEnchantData.Slot);
     return data;
 }
 
-ByteBuffer& operator>>(ByteBuffer& data, WorldPackets::Item::ItemGemInstanceData& itemGemInstanceData)
+ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Item::ItemGemData const& itemGemData)
 {
-    data >> itemGemInstanceData.Slot;
-    data >> itemGemInstanceData.Item;
+    data << uint8(itemGemData.Slot);
+    data << itemGemData.Item;
+    return data;
+}
+
+ByteBuffer& operator>>(ByteBuffer& data, WorldPackets::Item::ItemGemData& itemGemData)
+{
+    data >> itemGemData.Slot;
+    data >> itemGemData.Item;
     return data;
 }
 
@@ -299,7 +308,9 @@ void WorldPackets::Item::ItemInstance::Initialize(::LootItem const& lootItem)
 {
     ItemID               = lootItem.itemid;
     RandomPropertiesSeed = lootItem.randomSuffix;
-    RandomPropertiesID   = lootItem.randomPropertyId;
+    if (lootItem.randomPropertyId.Type != ItemRandomEnchantmentType::BonusList)
+        RandomPropertiesID = lootItem.randomPropertyId.Id;
+
     if (!lootItem.BonusListIDs.empty())
     {
         ItemBonus = boost::in_place();
@@ -317,8 +328,10 @@ void WorldPackets::Item::ItemInstance::Initialize(::LootItem const& lootItem)
 void WorldPackets::Item::ItemInstance::Initialize(::VoidStorageItem const* voidItem)
 {
     ItemID = voidItem->ItemEntry;
-    RandomPropertiesID = voidItem->ItemRandomPropertyId;
     RandomPropertiesSeed = voidItem->ItemSuffixFactor;
+    if (voidItem->ItemRandomPropertyId.Type != ItemRandomEnchantmentType::BonusList)
+        RandomPropertiesID = voidItem->ItemRandomPropertyId.Id;
+
     if (voidItem->ItemUpgradeId || voidItem->FixedScalingLevel || voidItem->ArtifactKnowledgeLevel)
     {
         Modifications = boost::in_place();

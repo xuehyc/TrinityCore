@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -70,10 +70,10 @@ namespace WorldPackets
 
         struct MonsterSplineSpellEffectExtraData
         {
-            ObjectGuid field_1;
-            uint32 field_2;
-            uint32 field_3;
-            uint32 field_4;
+            ObjectGuid TargetGUID;
+            uint32 SpellVisualID = 0;
+            uint32 ProgressCurveID = 0;
+            uint32 ParabolicCurveID = 0;
         };
 
         struct MovementSpline
@@ -210,7 +210,7 @@ namespace WorldPackets
 
             uint32 MapID = 0;
             uint8 Arg = 0;
-            int32 MapDifficultyXConditionID;
+            int32 MapDifficultyXConditionID = 0;
             uint32 TransfertAbort = 0;
         };
 
@@ -413,6 +413,7 @@ namespace WorldPackets
             uint32 MountDisplayID = 0;
             UpdateCollisionHeightReason Reason = UPDATE_COLLISION_HEIGHT_MOUNT;
             uint32 SequenceIndex = 0;
+            int32 ScaleDuration = 0;
             float Height = 1.0f;
         };
 
@@ -535,6 +536,45 @@ namespace WorldPackets
 
             uint32 SequenceIndex = 1;
             uint32 Reason = 1;
+        };
+
+        class MoveSetCompoundState final : public ServerPacket
+        {
+        public:
+            struct CollisionHeightInfo
+            {
+                float Height = 0.0f;
+                float Scale = 0.0f;
+                UpdateCollisionHeightReason Reason;
+            };
+
+            struct KnockBackInfo
+            {
+                float HorzSpeed = 0.0f;
+                G3D::Vector2 Direction;
+                float InitVertSpeed = 0.0f;
+            };
+
+            struct MoveStateChange
+            {
+                MoveStateChange(OpcodeServer messageId, uint32 sequenceIndex) : MessageID(messageId), SequenceIndex(sequenceIndex) { }
+
+                uint16 MessageID = 0;
+                uint32 SequenceIndex = 0;
+                Optional<float> Speed;
+                Optional<KnockBackInfo> KnockBack;
+                Optional<int32> VehicleRecID;
+                Optional<CollisionHeightInfo> CollisionHeight;
+                Optional<MovementForce> MovementForce_;
+                Optional<ObjectGuid> Unknown;
+            };
+
+            MoveSetCompoundState() : ServerPacket(SMSG_MOVE_SET_COMPOUND_STATE, 4 + 1) { }
+
+            WorldPacket const* Write() override;
+
+            ObjectGuid MoverGUID;
+            std::vector<MoveStateChange> StateChanges;
         };
     }
 

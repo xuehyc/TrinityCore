@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -38,6 +38,7 @@ WorldPacket const* WorldPackets::Pet::PetSpells::Write()
         _worldPacket << int32(cooldown.SpellID);
         _worldPacket << int32(cooldown.Duration);
         _worldPacket << int32(cooldown.CategoryDuration);
+        _worldPacket << float(cooldown.ModRate);
         _worldPacket << uint16(cooldown.Category);
     }
 
@@ -45,6 +46,7 @@ WorldPacket const* WorldPackets::Pet::PetSpells::Write()
     {
         _worldPacket << int32(history.CategoryID);
         _worldPacket << int32(history.RecoveryTime);
+        _worldPacket << float(history.ChargeModRate);
         _worldPacket << int8(history.ConsumedCharges);
     }
 

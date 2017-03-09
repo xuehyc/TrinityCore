@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -219,9 +219,7 @@ WorldPacket const* WorldPackets::Battleground::BattlefieldList::Write()
         _worldPacket.append(Battlefields.data(), Battlefields.size());
 
     _worldPacket.WriteBit(PvpAnywhere);
-    _worldPacket.WriteBit(HasHolidayWinToday);
     _worldPacket.WriteBit(HasRandomWinToday);
-    _worldPacket.WriteBit(IsRandomBG);
     _worldPacket.FlushBits();
     return &_worldPacket;
 }

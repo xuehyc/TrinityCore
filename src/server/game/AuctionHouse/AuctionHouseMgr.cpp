@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -850,7 +850,7 @@ void AuctionEntry::BuildAuctionInfo(std::vector<WorldPackets::AuctionHouse::Auct
     {
         if (gemData.ItemId)
         {
-            WorldPackets::Item::ItemGemInstanceData gem;
+            WorldPackets::Item::ItemGemData gem;
             gem.Slot = i;
             gem.Item.Initialize(&gemData);
             auctionItem.Gems.push_back(gem);

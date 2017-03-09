@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -67,6 +67,25 @@ WorldPacket const* WorldPackets::Talent::LearnTalentsFailed::Write()
     _worldPacket << uint32(Talents.size());
     if (!Talents.empty())
         _worldPacket.append(Talents.data(), Talents.size());
+
+    return &_worldPacket;
+}
+
+ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Talent::GlyphBinding const& glyphBinding)
+{
+    data << uint32(glyphBinding.SpellID);
+    data << uint16(glyphBinding.GlyphID);
+    return data;
+}
+
+WorldPacket const* WorldPackets::Talent::ActiveGlyphs::Write()
+{
+    _worldPacket << uint32(Glyphs.size());
+    for (GlyphBinding const& glyph : Glyphs)
+        _worldPacket << glyph;
+
+    _worldPacket.WriteBit(IsFullUpdate);
+    _worldPacket.FlushBits();
 
     return &_worldPacket;
 }

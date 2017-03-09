@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -329,7 +329,7 @@ void WorldSession::HandleDestroyItemOpcode(WorldPackets::Item::DestroyItem& dest
         return;
     }
 
-    if (item->GetTemplate()->GetFlags() & ITEM_FLAG_INDESTRUCTIBLE)
+    if (item->GetTemplate()->GetFlags() & ITEM_FLAG_NO_USER_DESTROY)
     {
         _player->SendEquipError(EQUIP_ERR_DROP_BOUND_ITEM, NULL, NULL);
         return;
@@ -575,8 +575,6 @@ void WorldSession::HandleListInventoryOpcode(WorldPackets::NPC::Hello& packet)
 
 void WorldSession::SendListInventory(ObjectGuid vendorGuid)
 {
-    TC_LOG_DEBUG("network", "WORLD: Sent SMSG_LIST_INVENTORY");
-
     Creature* vendor = GetPlayer()->GetNPCIfCanInteractWith(vendorGuid, UNIT_NPC_FLAG_VENDOR);
     if (!vendor)
     {
@@ -621,12 +619,12 @@ void WorldSession::SendListInventory(ObjectGuid vendorGuid)
             if (!_player->IsGameMaster()) // ignore conditions if GM on
             {
                 // Respect allowed class
-                if (!(itemTemplate->GetAllowableClass() & _player->getClassMask()) && itemTemplate->GetBonding() == BIND_WHEN_PICKED_UP)
+                if (!(itemTemplate->GetAllowableClass() & _player->getClassMask()) && itemTemplate->GetBonding() == BIND_ON_ACQUIRE)
                     continue;
 
                 // Only display items in vendor lists for the team the player is on
-                if ((itemTemplate->GetFlags2() & ITEM_FLAG2_HORDE_ONLY && _player->GetTeam() == ALLIANCE) ||
-                    (itemTemplate->GetFlags2() & ITEM_FLAG2_ALLIANCE_ONLY && _player->GetTeam() == HORDE))
+                if ((itemTemplate->GetFlags2() & ITEM_FLAG2_FACTION_HORDE && _player->GetTeam() == ALLIANCE) ||
+                    (itemTemplate->GetFlags2() & ITEM_FLAG2_FACTION_ALLIANCE && _player->GetTeam() == HORDE))
                     continue;
 
                 // Items sold out are not displayed in list
@@ -782,7 +780,7 @@ void WorldSession::HandleWrapItem(WorldPackets::Item::WrapItem& packet)
         return;
     }
 
-    if (!(gift->GetTemplate()->GetFlags() & ITEM_FLAG_WRAPPER)) // cheating: non-wrapper wrapper
+    if (!(gift->GetTemplate()->GetFlags() & ITEM_FLAG_IS_WRAPPER)) // cheating: non-wrapper wrapper
     {
         _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, gift, NULL);
         return;
@@ -972,7 +970,7 @@ void WorldSession::HandleSocketGems(WorldPackets::Item::SocketGems& socketGems)
         ItemTemplate const* iGemProto = gems[i]->GetTemplate();
 
         // unique item (for new and already placed bit removed enchantments
-        if (iGemProto->GetFlags() & ITEM_FLAG_UNIQUE_EQUIPPED)
+        if (iGemProto->GetFlags() & ITEM_FLAG_UNIQUE_EQUIPPABLE)
         {
             for (uint32 j = 0; j < MAX_GEM_SOCKETS; ++j)
             {
@@ -1054,7 +1052,11 @@ void WorldSession::HandleSocketGems(WorldPackets::Item::SocketGems& socketGems)
     {
         if (gems[i])
         {
-            itemTarget->SetGem(i, &gemData[i]);
+            uint32 gemScalingLevel = _player->getLevel();
+            if (uint32 fixedLevel = gems[i]->GetModifier(ITEM_MODIFIER_SCALING_STAT_DISTRIBUTION_FIXED_LEVEL))
+                gemScalingLevel = fixedLevel;
+
+            itemTarget->SetGem(i, &gemData[i], gemScalingLevel);
 
             if (gemProperties[i] && gemProperties[i]->EnchantID)
                 itemTarget->SetEnchantment(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT + i), gemProperties[i]->EnchantID, 0, 0, _player->GetGUID());

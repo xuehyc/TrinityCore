@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -31,7 +31,7 @@ enum WarlockSpells
 {
     SPELL_WARLOCK_AFTERMATH_STUN                    = 85387,
     SPELL_WARLOCK_BANE_OF_DOOM_EFFECT               = 18662,
-    SPELL_WARLOCK_CREATE_HEALTHSTONE                = 34130,
+    SPELL_WARLOCK_CREATE_HEALTHSTONE                = 23517,
     SPELL_WARLOCK_CURSE_OF_DOOM_EFFECT              = 18662,
     SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST         = 62388,
     SPELL_WARLOCK_DEMONIC_CIRCLE_SUMMON             = 48018,
@@ -431,6 +431,8 @@ class spell_warl_demon_soul : public SpellScriptLoader
                             case CREATURE_FAMILY_IMP:
                                 caster->CastSpell(caster, SPELL_WARLOCK_DEMON_SOUL_IMP);
                                 break;
+                            default:
+                                break;
                         }
                     }
                 }
@@ -493,6 +495,8 @@ class spell_warl_demonic_empowerment : public SpellScriptLoader
                                 break;
                             case CREATURE_FAMILY_IMP:
                                 targetCreature->CastSpell(targetCreature, SPELL_WARLOCK_DEMONIC_EMPOWERMENT_IMP, true);
+                                break;
+                            default:
                                 break;
                         }
                     }

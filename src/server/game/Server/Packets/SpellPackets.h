@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -639,6 +639,7 @@ namespace WorldPackets
 
             uint32 SrecID = 0;
             uint32 ForcedCooldown = 0;
+            float ModRate = 1.0f;
         };
 
         class SpellCooldown : public ServerPacket
@@ -660,6 +661,7 @@ namespace WorldPackets
             uint32 Category = 0;
             int32 RecoveryTime = 0;
             int32 CategoryRecoveryTime = 0;
+            float ModRate = 1.0f;
             bool OnHold = false;
             Optional<uint32> unused622_1;   ///< This field is not used for anything in the client in 6.2.2.20444
             Optional<uint32> unused622_2;   ///< This field is not used for anything in the client in 6.2.2.20444
@@ -707,12 +709,14 @@ namespace WorldPackets
             uint32 Category = 0;
             uint32 NextRecoveryTime = 0;
             uint8 ConsumedCharges = 0;
+            float ChargeModRate = 1.0f;
         };
 
         struct SpellChargeEntry
         {
             uint32 Category = 0;
             uint32 NextRecoveryTime = 0;
+            float ChargeModRate = 1.0f;
             uint8 ConsumedCharges = 0;
         };
 
@@ -755,6 +759,24 @@ namespace WorldPackets
 
             ObjectGuid Source;
             int32 SpellVisualID = 0;
+        };
+
+        class PlaySpellVisual final : public ServerPacket
+        {
+        public:
+            PlaySpellVisual() : ServerPacket(SMSG_PLAY_SPELL_VISUAL, 16 + 16 + 2 + 4 + 1 + 2 + 4 + 4 * 4) { }
+
+            WorldPacket const* Write() override;
+
+            ObjectGuid Source;
+            ObjectGuid Target;
+            uint16 MissReason = 0;
+            uint32 SpellVisualID = 0;
+            bool SpeedAsTime = false;
+            uint16 ReflectStatus = 0;
+            float TravelSpeed = 0.0f;
+            G3D::Vector3 TargetPostion;
+            float Orientation = 0.0f;
         };
 
         class PlaySpellVisualKit final : public ServerPacket

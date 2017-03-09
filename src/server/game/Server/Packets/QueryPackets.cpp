@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -73,9 +73,9 @@ WorldPacket const* WorldPackets::Query::QueryCreatureResponse::Write()
         _worldPacket << float(Stats.EnergyMulti);
         _worldPacket << uint32(Stats.QuestItems.size());
         _worldPacket << int32(Stats.CreatureMovementInfoID);
+        _worldPacket << int32(Stats.HealthScalingExpansion);
         _worldPacket << int32(Stats.RequiredExpansion);
-        _worldPacket << int32(0); // FlagQuest
-        _worldPacket << int32(0);
+        _worldPacket << int32(Stats.VignetteID);
 
         if (!Stats.Title.empty())
             _worldPacket << Stats.Title;

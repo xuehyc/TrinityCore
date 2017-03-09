@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <boost/filesystem.hpp>
 
 #include "PathCommon.h"
 #include "MapBuilder.h"
@@ -42,10 +44,7 @@ bool checkDirectories(bool debugOutput)
 
     dirFiles.clear();
     if (getDirContents(dirFiles, "mmaps") == LISTFILE_DIRECTORY_NOT_FOUND)
-    {
-        printf("'mmaps' directory does not exist\n");
-        return false;
-    }
+        return boost::filesystem::create_directory("mmaps");
 
     dirFiles.clear();
     if (debugOutput)

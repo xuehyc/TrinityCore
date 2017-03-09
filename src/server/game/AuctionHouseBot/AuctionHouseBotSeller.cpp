@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -142,23 +142,23 @@ bool AuctionBotSeller::Initialize()
         // bounding filters
         switch (prototype->GetBonding())
         {
-            case NO_BIND:
+            case BIND_NONE:
                 if (!sAuctionBotConfig->GetConfig(CONFIG_AHBOT_BIND_NO))
                     continue;
                 break;
-            case BIND_WHEN_PICKED_UP:
+            case BIND_ON_ACQUIRE:
                 if (!sAuctionBotConfig->GetConfig(CONFIG_AHBOT_BIND_PICKUP))
                     continue;
                 break;
-            case BIND_WHEN_EQUIPED:
+            case BIND_ON_EQUIP:
                 if (!sAuctionBotConfig->GetConfig(CONFIG_AHBOT_BIND_EQUIP))
                     continue;
                 break;
-            case BIND_WHEN_USE:
+            case BIND_ON_USE:
                 if (!sAuctionBotConfig->GetConfig(CONFIG_AHBOT_BIND_USE))
                     continue;
                 break;
-            case BIND_QUEST_ITEM:
+            case BIND_QUEST:
                 if (!sAuctionBotConfig->GetConfig(CONFIG_AHBOT_BIND_QUEST))
                     continue;
                 break;
@@ -987,8 +987,7 @@ void AuctionBotSeller::AddNewAuctions(SellerConfiguration& config)
 
         // Update the just created item so that if it needs random properties it has them.
         // Ex:  Notched Shortsword of Stamina will only generate as a Notched Shortsword without this.
-        if (int32 randomPropertyId = Item::GenerateItemRandomPropertyId(itemId))
-            item->SetItemRandomProperties(randomPropertyId);
+        item->SetItemRandomProperties(Item::GenerateItemRandomPropertyId(itemId));
 
         uint32 buyoutPrice;
         uint32 bidPrice = 0;

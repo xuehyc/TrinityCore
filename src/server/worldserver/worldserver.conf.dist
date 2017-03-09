@@ -88,6 +88,7 @@ LogsDir = ""
 #    LoginDatabaseInfo
 #    WorldDatabaseInfo
 #    CharacterDatabaseInfo
+#    HotfixDatabaseInfo
 #        Description: Database connection settings for the world server.
 #        Example:     "hostname;port;username;password;database"
 #                     ".;somenumber;username;password;database" - (Use named pipes on Windows
@@ -115,6 +116,7 @@ HotfixDatabaseInfo    = "127.0.0.1;3306;trinity;trinity;hotfixes"
 #    LoginDatabase.WorkerThreads
 #    WorldDatabase.WorkerThreads
 #    CharacterDatabase.WorkerThreads
+#    HotfixDatabase.WorkerThreads
 #        Description: The amount of worker threads spawned to handle asynchronous (delayed) MySQL
 #                     statements. Each worker thread is mirrored with its own connection to the
 #                     MySQL server and their own thread on the MySQL server.
@@ -132,11 +134,12 @@ HotfixDatabase.WorkerThreads    = 1
 #    LoginDatabase.SynchThreads
 #    WorldDatabase.SynchThreads
 #    CharacterDatabase.SynchThreads
+#    HotfixDatabase.SynchThreads
 #        Description: The amount of MySQL connections spawned to handle.
-#        Default:     1 - (LoginDatabase.WorkerThreads)
-#                     1 - (WorldDatabase.WorkerThreads)
-#                     2 - (CharacterDatabase.WorkerThreads)
-#                     1 - (HotfixDatabase.WorkerThreads)
+#        Default:     1 - (LoginDatabase.SynchThreads)
+#                     1 - (WorldDatabase.SynchThreads)
+#                     2 - (CharacterDatabase.SynchThreads)
+#                     1 - (HotfixDatabase.SynchThreads)
 
 LoginDatabase.SynchThreads     = 1
 WorldDatabase.SynchThreads     = 1
@@ -676,7 +679,7 @@ DeclinedNames = 0
 #                     1 - (Expansion 1)
 #                     0 - (Disabled, Ignore and disable expansion content (maps, races, classes)
 
-Expansion = 5
+Expansion = 6
 
 #
 #    MinPlayerName
@@ -843,11 +846,11 @@ SkipCinematics = 0
 #
 #    MaxPlayerLevel
 #        Description: Maximum level that can be reached by players.
-#        Important:   Levels beyond 100 are not recommended at all.
+#        Important:   Levels beyond 110 are not recommended at all.
 #        Range:       1-255
-#        Default:     100
+#        Default:     110
 
-MaxPlayerLevel = 100
+MaxPlayerLevel = 110
 
 #
 #    MinDualSpecLevel
@@ -1042,6 +1045,15 @@ Quests.IgnoreAutoAccept = 0
 #                     1 - (Enabled, clients will not be told to automatically complete any quest.)
 
 Quests.IgnoreAutoComplete = 0
+
+#
+#    Quests.DailyResetTime
+#        Description: Hour of the day when daily quest reset occurs.
+#        Range:       0-23
+#        Default:     3 - (3:00 AM, Blizzlike)
+#
+
+Quests.DailyResetTime = 3
 
 #
 #    Guild.EventLogRecordsCount
@@ -1722,10 +1734,10 @@ Creature.MovingStopTimeForPlayer = 180000
 #        Description: Chat protection from creating fake messages using a lot spaces or other
 #                     invisible symbols. Not applied to the addon language, but may break old
 #                     addons that use normal languages for sending data to other clients.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
+#        Default:     1 - (Enabled, Blizzlike)
+#                     0 - (Disabled)
 
-ChatFakeMessagePreventing = 0
+ChatFakeMessagePreventing = 1
 
 #
 #    ChatStrictLinkChecking.Severity
@@ -1781,24 +1793,27 @@ Channel.RestrictedLfg = 1
 
 #
 #    ChatLevelReq.Channel
-#        Description: Level requirement for characters to be able to write in chat channels.
+#    ChatLevelReq.Whisper
+#    ChatLevelReq.Emote
+#    ChatLevelReq.Say
+#    ChatLevelReq.Yell
+#        Description: Level requirement for characters to be able to use chats.
 #        Default:     1
 
 ChatLevelReq.Channel = 1
-
-#
-#    ChatLevelReq.Whisper
-#        Description: Level requirement for characters to be able to whisper other characters.
-#        Default:     1
-
 ChatLevelReq.Whisper = 1
+ChatLevelReq.Emote = 1
+ChatLevelReq.Say = 1
+ChatLevelReq.Yell = 1
 
 #
-#    ChatLevelReq.Say
-#        Description: Level requirement for characters to be able to use say/yell/emote.
+#    PartyLevelReq
+#        Description: Minimum level at which players can invite to group, even if they aren't on
+#                     the invitee friends list. (Players who are on that friend list can always
+#                     invite despite having lower level)
 #        Default:     1
 
-ChatLevelReq.Say = 1
+PartyLevelReq = 1
 
 #
 #    PreserveCustomChannels
@@ -1916,6 +1931,13 @@ GM.AllowInvite = 0
 GM.LowerSecurity = 0
 
 #
+#    GM.ForceShutdownThreshold
+#        Description: Minimum shutdown time in seconds before 'force' is required if other players are connected.
+#        Default:     30
+
+GM.ForceShutdownThreshold = 30
+
+#
 ###################################################################################################
 
 ###################################################################################################
@@ -2023,28 +2045,27 @@ Visibility.Notify.Period.InBGArenas   = 1000
 #    Rate.RunicPower.Loss
 #    Rate.Focus
 #    Rate.Energy
-#    Rate.Loyalty
-#        Description: Multiplier to configure health, mana, incoming rage, loss of rage, focus
-#                     energy and loyalty increase or decrease.
-#        Default:     1 - (Rate.Health)
-#                     1 - (Rate.Mana)
-#                     1 - (Rate.Rage.Income)
-#                     1 - (Rate.Rage.Loss)
-#                     1 - (Rate.RunicPower.Income)
-#                     1 - (Rate.RunicPower.Loss)
-#                     1 - (Rate.Focus)
-#                     1 - (Rate.Energy)
-#                     1 - (Rate.Loyalty)
+#        Description: Multiplier to configure health and power increase or decrease.
+#        Default:     1 for all regen rates
 
 Rate.Health            = 1
 Rate.Mana              = 1
-Rate.Rage.Income       = 1
+Rate.Rage.Gain         = 1
 Rate.Rage.Loss         = 1
-Rate.RunicPower.Income = 1
-Rate.RunicPower.Loss   = 1
 Rate.Focus             = 1
 Rate.Energy            = 1
-Rate.Loyalty           = 1
+Rate.ComboPoints.Loss  = 1
+Rate.RunicPower.Gain   = 1
+Rate.RunicPower.Loss   = 1
+Rate.SoulShards.Loss   = 1
+Rate.LunarPower.Loss   = 1
+Rate.HolyPower.Loss    = 1
+Rate.Maelstrom.Loss    = 1
+Rate.Chi.Loss          = 1
+Rate.Insanity.Loss     = 1
+Rate.ArcaneCharges.Loss= 1
+Rate.Fury.Loss         = 1
+Rate.Pain.Loss         = 1
 
 #
 #    Rate.Skill.Discovery
@@ -2503,6 +2524,14 @@ Battleground.RewardLoserHonorFirst      = 4500
 Battleground.RewardLoserHonorLast       = 3500
 
 #
+#    Battleground.ReportAFK
+#        Description: Number of reports needed to kick someone AFK from Battleground.
+#        Range:       1-9
+#        Default:     3
+
+Battleground.ReportAFK = 3
+
+#
 ###################################################################################################
 
 ###################################################################################################
@@ -2721,7 +2750,6 @@ Arena.ArenaWinRatingModifier1 = 48
 #        Default:     24
 
 Arena.ArenaWinRatingModifier2 = 24
-
 
 #
 #    Arena.ArenaLoseRatingModifier
@@ -3136,6 +3164,30 @@ Calculate.Gameoject.Zone.Area.Data = 0
 
 NoGrayAggro.Above = 0
 NoGrayAggro.Below = 0
+
+#
+#    PreventRenameCharacterOnCustomization
+#        Description: If option is set to 1, player can not rename the character in character customization.
+#                     Applies to all character customization commands.
+#        Default:     0 - (Disabled, character can be renamed in Character Customization)
+#                     1 - (Enabled, character can not be renamed in Character Customization)
+#
+
+PreventRenameCharacterOnCustomization = 0
+
+#
+#     Creature.CheckInvalidPosition
+#        Description: Check possible invalid position for creatures at startup (WARNING: SLOW WORLD SERVER STARTUP)
+#        Default:     0  - (Do not show)
+
+Creature.CheckInvalidPosition = 0
+
+#
+#     GameObject.CheckInvalidPosition
+#        Description: Check possible invalid position for game objects at startup (WARNING: SLOW WORLD SERVER STARTUP)
+#        Default:     0  - (Do not show)
+
+GameObject.CheckInvalidPosition = 0
 
 #
 ###################################################################################################
@@ -3748,6 +3800,7 @@ Logger.mmaps=3,Server
 #Logger.bg.arena=3,Console Server
 #Logger.bg.battlefield=3,Console Server
 #Logger.bg.battleground=3,Console Server
+#Logger.bg.reportpvpafk=3,Console Server
 #Logger.chat.log=3,Console Server
 #Logger.calendar=3,Console Server
 #Logger.chat.system=3,Console Server
@@ -3756,6 +3809,7 @@ Logger.mmaps=3,Server
 #Logger.condition=3,Console Server
 #Logger.criteria=3,Console Server
 #Logger.criteria.achievement=3,Console Server
+#Logger.entities.areatrigger=3,Console Server
 #Logger.entities.pet=3,Console Server
 #Logger.entities.player.character=3,Console Server
 #Logger.entities.player.dump=3,Console Server
@@ -3837,22 +3891,6 @@ Currency.ResetDay = 3
 Currency.ResetHour = 6
 
 #
-#    Currency.StartHonorPoints
-#        Amount of honor points that new players will start with
-#        Default: 0 (with precision)
-#
-
-Currency.StartHonorPoints = 0
-
-#
-#    Currency.MaxHonorPoints
-#        Amount honor points a player can have
-#        Default: 4000
-#
-
-Currency.MaxHonorPoints = 4000
-
-#
 #    Currency.StartApexisCrystals
 #        Amount of Apexis Crystals that new players will start with
 #        Default: 0 (with precision)
@@ -3883,30 +3921,6 @@ Currency.StartJusticePoints = 0
 #
 
 Currency.MaxJusticePoints = 4000
-
-#
-#    Currency.StartConquestPoints
-#        Amount of conquest points that new players will start with
-#        Default: 0 (with precision)
-#
-
-Currency.StartConquestPoints = 0
-
-#
-#    Currency.ConquestPointsWeekCap
-#        Amount of conquest points that player can earn per week
-#        Default: 1350
-#
-
-Currency.ConquestPointsWeekCap = 1350
-
-#
-#    Currency.ConquestPointsArenaReward
-#        Amount of conquest points rewarded by winning arenas
-#        Default: 180
-#
-
-Currency.ConquestPointsArenaReward = 180
 
 #
 ###################################################################################################

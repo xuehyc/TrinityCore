@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -82,6 +82,7 @@ class DynamicObject;
 class GameObject;
 class InstanceScript;
 class Player;
+class Scenario;
 class TempSummon;
 class Transport;
 class Unit;
@@ -362,7 +363,7 @@ struct MovementInfo
     // common
     ObjectGuid guid;
     uint32 flags;
-    uint16 flags2;
+    uint32 flags2;
     Position pos;
     uint32 time;
 
@@ -422,11 +423,11 @@ struct MovementInfo
     void RemoveMovementFlag(uint32 flag) { flags &= ~flag; }
     bool HasMovementFlag(uint32 flag) const { return (flags & flag) != 0; }
 
-    uint16 GetExtraMovementFlags() const { return flags2; }
-    void SetExtraMovementFlags(uint16 flag) { flags2 = flag; }
-    void AddExtraMovementFlag(uint16 flag) { flags2 |= flag; }
-    void RemoveExtraMovementFlag(uint16 flag) { flags2 &= ~flag; }
-    bool HasExtraMovementFlag(uint16 flag) const { return (flags2 & flag) != 0; }
+    uint32 GetExtraMovementFlags() const { return flags2; }
+    void SetExtraMovementFlags(uint32 flag) { flags2 = flag; }
+    void AddExtraMovementFlag(uint32 flag) { flags2 |= flag; }
+    void RemoveExtraMovementFlag(uint32 flag) { flags2 &= ~flag; }
+    bool HasExtraMovementFlag(uint32 flag) const { return (flags2 & flag) != 0; }
 
     uint32 GetFallTime() const { return jump.fallTime; }
     void SetFallTime(uint32 fallTime) { jump.fallTime = fallTime; }
@@ -592,6 +593,8 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
         bool IsWithinDistInMap(WorldObject const* obj, float dist2compare, bool is3D = true) const;
         bool IsWithinLOS(float x, float y, float z) const;
         bool IsWithinLOSInMap(WorldObject const* obj) const;
+        Position GetHitSpherePointFor(Position const& dest) const;
+        void GetHitSpherePointFor(Position const& dest, float& x, float& y, float& z) const;
         bool GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D = true) const;
         bool IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D = true) const;
         bool IsInRange2d(float x, float y, float minRange, float maxRange) const;
@@ -599,7 +602,8 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
         bool isInFront(WorldObject const* target, float arc = float(M_PI)) const;
         bool isInBack(WorldObject const* target, float arc = float(M_PI)) const;
 
-        bool IsInBetween(WorldObject const* obj1, WorldObject const* obj2, float size = 0) const;
+        bool IsInBetween(Position const& pos1, Position const& pos2, float size = 0) const;
+        bool IsInBetween(WorldObject const* obj1, WorldObject const* obj2, float size = 0) const { return obj1 && obj2 && IsInBetween(obj1->GetPosition(), obj2->GetPosition(), size); }
 
         virtual void CleanupsBeforeDelete(bool finalCleanup = true);  // used in destructor or explicitly before mass creature delete to remove cross-references to already deleted units
 
@@ -609,10 +613,8 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
 
         virtual uint8 getLevelForTarget(WorldObject const* /*target*/) const { return 1; }
 
-        void PlayDistanceSound(uint32 sound_id, Player* target = NULL);
-        void PlayDirectSound(uint32 sound_id, Player* target = NULL);
-
-        void SendObjectDeSpawnAnim(ObjectGuid guid);
+        void PlayDistanceSound(uint32 soundId, Player* target = nullptr);
+        void PlayDirectSound(uint32 soundId, Player* target = nullptr);
 
         virtual void SaveRespawnTime() { }
         void AddObjectToRemoveList();
@@ -643,9 +645,12 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
         void SetZoneScript();
         ZoneScript* GetZoneScript() const { return m_zoneScript; }
 
-        TempSummon* SummonCreature(uint32 id, Position const &pos, TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0, uint32 vehId = 0) const;
+        Scenario* GetScenario() const;
+
+        TempSummon* SummonCreature(uint32 id, Position const& pos, TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0, uint32 vehId = 0) const;
         TempSummon* SummonCreature(uint32 id, float x, float y, float z, float ang = 0, TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0) const;
-        GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime /* s */);
+        GameObject* SummonGameObject(uint32 entry, Position const& pos, G3D::Quat const& rot, uint32 respawnTime /* s */);
+        GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, G3D::Quat const& rot, uint32 respawnTime /* s */);
         Creature*   SummonTrigger(float x, float y, float z, float ang, uint32 dur, CreatureAI* (*GetAI)(Creature*) = NULL);
         void SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list = NULL);
 
@@ -653,8 +658,8 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
         GameObject* FindNearestGameObject(uint32 entry, float range) const;
         GameObject* FindNearestGameObjectOfType(GameobjectTypes type, float range) const;
 
-        void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList, uint32 uiEntry, float fMaxSearchRange) const;
-        void GetCreatureListWithEntryInGrid(std::list<Creature*>& lList, uint32 uiEntry, float fMaxSearchRange) const;
+        void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList, uint32 uiEntry = 0, float fMaxSearchRange = 250.0f) const;
+        void GetCreatureListWithEntryInGrid(std::list<Creature*>& lList, uint32 uiEntry = 0, float fMaxSearchRange = 250.0f) const;
         void GetPlayerListInGrid(std::list<Player*>& lList, float fMaxSearchRange) const;
 
         void DestroyForNearbyPlayers();
@@ -682,17 +687,9 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
         bool IsPermanentWorldObject() const { return m_isWorldObject; }
         bool IsWorldObject() const;
 
-        template<class NOTIFIER> void VisitNearbyObject(float const& radius, NOTIFIER& notifier) const { if (IsInWorld()) GetMap()->VisitAll(GetPositionX(), GetPositionY(), radius, notifier); }
-        template<class NOTIFIER> void VisitNearbyGridObject(float const& radius, NOTIFIER& notifier) const { if (IsInWorld()) GetMap()->VisitGrid(GetPositionX(), GetPositionY(), radius, notifier); }
-        template<class NOTIFIER> void VisitNearbyWorldObject(float const& radius, NOTIFIER& notifier) const { if (IsInWorld()) GetMap()->VisitWorld(GetPositionX(), GetPositionY(), radius, notifier); }
-
-#ifdef MAP_BASED_RAND_GEN
-        int32 irand(int32 min, int32 max) const     { return int32 (GetMap()->mtRand.randInt(max - min)) + min; }
-        uint32 urand(uint32 min, uint32 max) const  { return GetMap()->mtRand.randInt(max - min) + min;}
-        int32 rand32() const                        { return GetMap()->mtRand.randInt();}
-        double rand_norm() const                    { return GetMap()->mtRand.randExc();}
-        double rand_chance() const                  { return GetMap()->mtRand.randExc(100.0);}
-#endif
+        template<class NOTIFIER> void VisitNearbyObject(float radius, NOTIFIER& notifier) const { if (IsInWorld()) GetMap()->VisitAll(GetPositionX(), GetPositionY(), radius, notifier); }
+        template<class NOTIFIER> void VisitNearbyGridObject(float radius, NOTIFIER& notifier) const { if (IsInWorld()) GetMap()->VisitGrid(GetPositionX(), GetPositionY(), radius, notifier); }
+        template<class NOTIFIER> void VisitNearbyWorldObject(float radius, NOTIFIER& notifier) const { if (IsInWorld()) GetMap()->VisitWorld(GetPositionX(), GetPositionY(), radius, notifier); }
 
         uint32  LastUsedScriptID;
 

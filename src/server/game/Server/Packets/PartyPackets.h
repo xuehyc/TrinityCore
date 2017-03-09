@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -49,7 +49,6 @@ namespace WorldPackets
 
             int8 PartyIndex = 0;
             int32 ProposedRoles = 0;
-            int32 TargetCfgRealmID = 0;
             std::string TargetName;
             std::string TargetRealm;
             ObjectGuid TargetGUID;
@@ -492,6 +491,7 @@ namespace WorldPackets
             uint8 Subgroup = 0u;
             uint8 Flags = 0u;
             uint8 RolesAssigned = 0u;
+            bool FromSocialQueue = false;
         };
 
         struct PartyLFGInfo
@@ -613,6 +613,14 @@ namespace WorldPackets
 
             ObjectGuid Player;
             ObjectGuid Victim;
+        };
+
+        class GroupDestroyed final : public ServerPacket
+        {
+        public:
+            GroupDestroyed() : ServerPacket(SMSG_GROUP_DESTROYED, 0) { }
+
+            WorldPacket const* Write() override { return &_worldPacket; }
         };
     }
 }
