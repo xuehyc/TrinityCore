@@ -1163,7 +1163,10 @@ void Player::Update(uint32 p_time)
 
                     // do attack
                     AttackerStateUpdate(victim, BASE_ATTACK);
-                    resetAttackTimer(BASE_ATTACK);
+					if (sWorld->getBoolConfig(CONFIG_HURT_IN_REAL_TIME))
+						resetAttackTimer(BASE_ATTACK), AttackStop();
+					else
+						resetAttackTimer(BASE_ATTACK);
                 }
             }
 
@@ -23457,14 +23460,17 @@ void Player::SendInitialPacketsBeforeAddToMap()
     /// SMSG_EQUIPMENT_SET_LIST
     SendEquipmentSetList();
 
+	float speedrate = sWorld->getFloatConfig(CONFIG_SPEED_GAME);
+	uint32 speedtime = ((sWorld->GetGameTime() - sWorld->GetUptime()) + (sWorld->GetUptime() * speedrate));
+
     m_achievementMgr->SendAllData(this);
 
     /// SMSG_LOGIN_SETTIMESPEED
-    static float const TimeSpeed = 0.01666667f;
+    static float const TimeSpeed = 0.01666667f * speedrate;
     WorldPackets::Misc::LoginSetTimeSpeed loginSetTimeSpeed;
     loginSetTimeSpeed.NewSpeed = TimeSpeed;
-    loginSetTimeSpeed.GameTime = sWorld->GetGameTime();
-    loginSetTimeSpeed.ServerTime = sWorld->GetGameTime();
+    loginSetTimeSpeed.GameTime = speedtime;
+    loginSetTimeSpeed.ServerTime = speedtime;
     loginSetTimeSpeed.GameTimeHolidayOffset = 0; /// @todo
     loginSetTimeSpeed.ServerTimeHolidayOffset = 0; /// @todo
     SendDirectMessage(loginSetTimeSpeed.Write());
