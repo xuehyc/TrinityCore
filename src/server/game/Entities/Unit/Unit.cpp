@@ -557,7 +557,7 @@ void Unit::resetAttackTimer(WeaponAttackType type)
 	{
 		if (GetTypeId() == TYPEID_PLAYER || (ToCreature()->GetOwner() && ToCreature()->GetOwner()->GetTypeId() == TYPEID_PLAYER))
 		{
-			m_attackTimer[type] = uint32(GetBaseAttackTime(type) * m_modAttackSpeedPct[type] / 3 / sWorld->getFloatConfig(CONFIG_ATTACKSPEED_PLAYER));
+			m_attackTimer[type] = uint32(GetBaseAttackTime(type) * m_modAttackSpeedPct[type] / 2 / sWorld->getFloatConfig(CONFIG_ATTACKSPEED_PLAYER));
 		}
 		else
 		{
