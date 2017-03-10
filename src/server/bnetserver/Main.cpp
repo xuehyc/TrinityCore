@@ -42,7 +42,7 @@ using namespace boost::program_options;
 namespace fs = boost::filesystem;
 
 #ifndef _TRINITY_BNET_CONFIG
-# define _TRINITY_BNET_CONFIG  "bnetserver.conf"
+# define _TRINITY_BNET_CONFIG  "Settings/login.conf"
 #endif
 
 #if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
