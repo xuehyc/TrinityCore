@@ -1477,6 +1477,10 @@ void World::LoadConfigSettings(bool reload)
 	// lasyan3 patches
 	m_int_configs[CONFIG_QUEST_AUTOCOMPLETE_DELAY] = sConfigMgr->GetIntDefault("Custom.AutoCompleteQuestDelay", 0);
 
+	// Honor for elites and guards
+	m_bool_configs[CONFIG_GAIN_HONOR_GUARD] = sConfigMgr->GetBoolDefault("Custom.GainHonorOnGuardKill", false);
+	m_bool_configs[CONFIG_GAIN_HONOR_ELITE] = sConfigMgr->GetBoolDefault("Custom.GainHonorOnEliteKill", false);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
