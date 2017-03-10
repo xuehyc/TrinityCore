@@ -4006,6 +4006,7 @@ Metric.OverallStatusInterval = 1
 ###################################################################################################
 # lasyan3 #
 ###########
+#
 #     Custom.AutoCompleteQuestDelay
 #         Set it to a number to enable the summon of the quest giver of the quest you just completed.
 #	      The number indicates the duration of the summoning.
@@ -4020,9 +4021,11 @@ Custom.AutoCompleteQuestDelay = 180
 #         Set it to a number upper than 1 to speed up realm timer
 #     Default : 1 (Real Time)
 #     Example : 60 to force 1scde (real time) = 1 minute (realm timer)
+#
 
 Custom.SpeedGame = 1
 
+#
 #     Custom.NoCastTime
 #         Set it to 1 to disable cast time
 #     Default : 0 (Cast Time Enable)
@@ -4030,12 +4033,15 @@ Custom.SpeedGame = 1
 
 Custom.NoCastTime = 0
 
+#
 #     Custom.HurtInRealTime
 #         Set it to 1 to disable autohurt with weapon
 #     Default : 0 (Autohurt Enable)
+#
 
 Custom.HurtInRealTime = 0
 
+#
 #     Custom.AttackSpeedForPlayer
 #     Custom.AttackSpeedForMobs
 #         Set it to a number upper than 1 to speed up the attack of the player or the mobs
@@ -4046,6 +4052,14 @@ Custom.HurtInRealTime = 0
 
 Custom.AttackSpeedForPlayer = 1.0
 Custom.AttackSpeedForMobs = 1.0
+
+#
+#     Custom.RespawnSpeed
+#         Set it to a number upper than 1 to speed up the respawn of mobs (and lower than 1 to slow down).
+#     Default : 1.0 (Normal speed)
+#
+
+Custom.RespawnSpeed = 1.0
 
 #
 ###################################################################################################
