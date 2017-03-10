@@ -37,7 +37,7 @@ add_executable(bnetserver
 
 if (NOT WIN32)
   set_target_properties(bnetserver PROPERTIES
-    COMPILE_DEFINITIONS _TRINITY_BNET_CONFIG="${CONF_DIR}/bnetserver.conf"
+    COMPILE_DEFINITIONS _TRINITY_BNET_CONFIG="Settings/login.conf"
   )
 endif()
 
