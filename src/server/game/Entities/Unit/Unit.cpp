@@ -25,6 +25,7 @@
 #include "CellImpl.h"
 #include "ChatTextBuilder.h"
 #include "ConditionMgr.h"
+#include "Config.h"
 #include "CreatureAI.h"
 #include "CreatureAIImpl.h"
 #include "CreatureGroups.h"
@@ -552,7 +553,14 @@ void Unit::DisableSpline()
 
 void Unit::resetAttackTimer(WeaponAttackType type)
 {
-    m_attackTimer[type] = uint32(GetBaseAttackTime(type) * m_modAttackSpeedPct[type]);
+	if (sConfigMgr->GetBoolDefault("Custom.HurtInRealTime", true))
+	{
+		m_attackTimer[type] = uint32(GetBaseAttackTime(type) * m_modAttackSpeedPct[type] / 2);
+	}
+	else
+	{
+		m_attackTimer[type] = uint32(GetBaseAttackTime(type) * m_modAttackSpeedPct[type]);
+	}
 }
 
 bool Unit::IsWithinCombatRange(const Unit* obj, float dist2compare) const
