@@ -1465,6 +1465,7 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype, std::vector<int32> const
             if (Guild* guild = player->GetGuild())
                 guild->AddGuildNews(GUILD_NEWS_ITEM_CRAFTED, player->GetGUID(), 0, pProto->GetId());
 
+		sScriptMgr->OnCreateItem(player, pItem, num_to_add);
 
         // we succeeded in creating at least one item, so a levelup is possible
         if (bgType == 0)

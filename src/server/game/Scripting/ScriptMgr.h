@@ -748,6 +748,15 @@ class TC_GAME_API PlayerScript : public UnitScript
 
         // Called when a player completes a movie
         virtual void OnMovieComplete(Player* /*player*/, uint32 /*movieId*/) { }
+
+		//After looting item
+		virtual void OnLootItem(Player* player, Item* item, uint32 count) { }
+
+		//After creating item (eg profession item creation)
+		virtual void OnCreateItem(Player* player, Item* item, uint32 count) { }
+
+		//After receiving item as a quest reward
+		virtual void OnQuestRewardItem(Player* player, Item* item, uint32 count) { }
 };
 
 class TC_GAME_API AccountScript : public ScriptObject
@@ -1131,6 +1140,9 @@ class TC_GAME_API ScriptMgr
         void OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 newArea);
         void OnQuestStatusChange(Player* player, uint32 questId);
         void OnMovieComplete(Player* player, uint32 movieId);
+		void OnLootItem(Player* player, Item* item, uint32 count);
+		void OnCreateItem(Player* player, Item* item, uint32 count);
+		void OnQuestRewardItem(Player* player, Item* item, uint32 count);
 
     public: /* AccountScript */
 

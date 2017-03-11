@@ -25584,6 +25584,8 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, AELootResult* aeResult/* 
         // LootItem is being removed (looted) from the container, delete it from the DB.
         if (!loot->containerID.IsEmpty())
             loot->DeleteLootItemFromContainerItemDB(item->itemid);
+
+		sScriptMgr->OnLootItem(this, newitem, item->count);
     }
     else
         SendEquipError(msg, nullptr, nullptr, item->itemid);
