@@ -4076,15 +4076,17 @@ Solocraft.Enable = 0
 
 #
 #     FireWorksOnLevelUp
-#        Description: Players shoot a firework when reach level 80.
-#        Default:     0
+#        Description: Players shoot a firework when reach level 110.
+#        Default:     0 (disabled)
+#                     1 (enabled)
 
 FireWorksOnLevelUp = 1
 
 #
 #     Login.BoA
 #        Description: New players get some starting equipment.
-#        Default:     1
+#        Default:     0 (disabled)
+#                     1 (enabled)
 
 Login.BoA = 1
 
@@ -4101,21 +4103,24 @@ StartGuild.Horde = 0
 #
 #     Reset.on.login
 #        Description: Restore players health, mana and cooldowns when log into the game.
-#        Default:     1
+#        Default:     0 (disabled)
+#                     1 (enabled)
 
 Reset.on.login = 1
 
 #
 #     Login.Announcer.Enable
 #        Description: Announce every player and bots login
-#        Default:     1
+#        Default:     0 (disabled)
+#                     1 (enabled)
 
 Login.Announcer.Enable = 1
 
 #
 #     Boss.Announcer.Enable
 #        Description: System announce who killed a world boss in global.
-#        Default:     1
+#        Default:     0 (disabled)
+#                     1 (enabled)
 
 Boss.Announcer.Enable = 1
 
