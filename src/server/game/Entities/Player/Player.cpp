@@ -106,6 +106,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "WorldStatePackets.h"
+#include "DynamicResurrection.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -4681,17 +4682,22 @@ void Player::RepopAtGraveyard()
 
     // if no grave found, stay at the current location
     // and don't show spirit healer location
-    if (ClosestGrave)
-    {
-        TeleportTo(ClosestGrave->MapID, ClosestGrave->Loc.X, ClosestGrave->Loc.Y, ClosestGrave->Loc.Z, (ClosestGrave->Facing * M_PI) / 180); // Orientation is initially in degrees
-        if (isDead())                                        // not send if alive, because it used in TeleportTo()
-        {
-            WorldPackets::Misc::DeathReleaseLoc packet;
-            packet.MapID = ClosestGrave->MapID;
-            packet.Loc = G3D::Vector3(ClosestGrave->Loc.X, ClosestGrave->Loc.Y, ClosestGrave->Loc.Z);
-            GetSession()->SendPacket(packet.Write());
-        }
-    }
+	if (ClosestGrave)
+	{
+		if (sDynRes->IsInDungeonOrRaid(this) && sDynRes->CheckForSpawnPoint(this))
+			sDynRes->DynamicResurrection(this);
+		else
+		{
+			TeleportTo(ClosestGrave->MapID, ClosestGrave->Loc.X, ClosestGrave->Loc.Y, ClosestGrave->Loc.Z, (ClosestGrave->Facing * M_PI) / 180); // Orientation is initially in degrees
+			if (isDead())                                        // not send if alive, because it used in TeleportTo()
+			{
+				WorldPackets::Misc::DeathReleaseLoc packet;
+				packet.MapID = ClosestGrave->MapID;
+				packet.Loc = G3D::Vector3(ClosestGrave->Loc.X, ClosestGrave->Loc.Y, ClosestGrave->Loc.Z);
+				GetSession()->SendPacket(packet.Write());
+			}
+		}
+	}
     else if (GetPositionZ() < GetMap()->GetMinHeight(GetPositionX(), GetPositionY()))
         TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, GetOrientation());
 

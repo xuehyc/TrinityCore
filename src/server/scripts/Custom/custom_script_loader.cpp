@@ -25,6 +25,7 @@ void AddSC_announce_login();
 void AddSC_Boss_Announcer();
 void AddSC_XpWeekend();
 void AddSC_RandomEnchantsScript();
+void AddSC_Dynamic_Resurrections();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -39,4 +40,5 @@ void AddCustomScripts()
 	AddSC_Boss_Announcer();
 	AddSC_XpWeekend();
 	AddSC_RandomEnchantsScript();
+	AddSC_Dynamic_Resurrections();
 }
