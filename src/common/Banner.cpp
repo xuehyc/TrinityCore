@@ -21,17 +21,27 @@
 
 void Trinity::Banner::Show(char const* applicationName, void(*log)(char const* text), void(*logExtraInfo)())
 {
-    log(Trinity::StringFormat("%s (%s)", GitRevision::GetFullVersion(), applicationName).c_str());
-    log("<Ctrl-C> to stop.\n");
-    log(" ______                       __");
-    log("/\\__  _\\       __          __/\\ \\__");
-    log("\\/_/\\ \\/ _ __ /\\_\\    ___ /\\_\\ \\, _\\  __  __");
-    log("   \\ \\ \\/\\`'__\\/\\ \\ /' _ `\\/\\ \\ \\ \\/ /\\ \\/\\ \\");
-    log("    \\ \\ \\ \\ \\/ \\ \\ \\/\\ \\/\\ \\ \\ \\ \\ \\_\\ \\ \\_\\ \\");
-    log("     \\ \\_\\ \\_\\  \\ \\_\\ \\_\\ \\_\\ \\_\\ \\__\\\\/`____ \\");
-    log("      \\/_/\\/_/   \\/_/\\/_/\\/_/\\/_/\\/__/ `/___/> \\");
-    log("                                 C O R E  /\\___/");
-    log("http://TrinityCore.org                    \\/__/\n");
+	log(" ");
+	log("###############################################################################");
+	log(" ");
+	log("  SSSSs   Ss                SSs            SSSSSs");
+	log(" Ss   Ss                     Ss           Ss    Ss");
+	log("Ss     S  Ss Ss           SS Ss  SSSSS   Ss         SSSSs   Ss SSs   SSSSSs");
+	log(" Ss      SSs Sssss    SSSSSs Ss Ss    Ss Ss        Ss   Ss  SSSs Ss Ss    Ss");
+	log("  SSSSs   Ss Ss  Ss  Ss   Ss Ss Ss    Ss Ss       Ss     Ss Ss      Ss    Ss");
+	log("      Ss  Ss Ss   Ss Ss   Ss Ss SSSSSS   Ss       Ss     Ss Ss      SSSSSSs");
+	log(" S     Ss Ss Ss   Ss Ss   Ss Ss Ss       Ss       Ss     Ss Ss      Ss");
+	log(" Ss   Ss  Ss Ss   Ss  SSSSSs Ss Ss     s  Ss    S  Ss   Ss  Ss      Ss");
+	log("  SSSSs   Ss Ss   Ss      Ss Ss  SSSSSs    SSSSS    SSSSs   Ss       SSSSSSs");
+	log("                          Ss");
+	log("                      SSSSs");
+	log(" ");
+	log("Based on ProjectLegion source.");
+	log(" ");
+	log(" https://github.com/conan513/SingleCore_TC ");
+	log(" ");
+	log("###############################################################################");
+	log(" ");
 
     if (logExtraInfo)
         logExtraInfo();
