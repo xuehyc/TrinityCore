@@ -4161,6 +4161,16 @@ Custom.GainHonorOnGuardKill = 1
 Custom.GainHonorOnEliteKill = 1
 
 #
+#     XP for PvP kills
+#         Set the XP and money rate for PvP kills.
+#     Xp.For.Pvp.Low.Rate = 1
+#     Xp.For.Pvp.High.Rate = 1
+#
+
+Xp.For.Pvp.Low.Rate = 1
+Xp.For.Pvp.High.Rate = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################
