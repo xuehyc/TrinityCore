@@ -4109,6 +4109,14 @@ StartGuild.Horde = 0
 Reset.on.login = 1
 
 #
+#     Duel.Reset.Enable
+#        Description: Restore players health, mana and cooldowns when a duel started and ended.
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+Duel.Reset.Enable = 1
+
+#
 #     Login.Announcer.Enable
 #        Description: Announce every player and bots login
 #        Default:     0 (disabled)

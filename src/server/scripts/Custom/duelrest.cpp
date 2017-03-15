@@ -1,5 +1,6 @@
 #include "ScriptMgr.h"
 #include "Player.h"
+#include "Config.h"
 #include "chat.h"
 
 class Duel_Reset : public PlayerScript
@@ -35,36 +36,42 @@ public:
 
 	void OnDuelStart(Player* playerwin, Player* playerlose)
 	{
-		if (!UsingPreDuelInfo)
+		if (sConfigMgr->GetBoolDefault("Duel.Reset.Enable", true))
 		{
-			DoFullReset(playerwin, playerlose);
-		}
-		if (UsingPreDuelInfo)
-		{
-			GetInfoPreDuel(playerwin, playerlose);
+			if (!UsingPreDuelInfo)
+			{
+				DoFullReset(playerwin, playerlose);
+			}
+			if (UsingPreDuelInfo)
+			{
+				GetInfoPreDuel(playerwin, playerlose);
+			}
 		}
 	}
 
 	void OnDuelEnd(Player* playerwin, Player* playerlose, DuelCompleteType /*type*/)
 	{
-		playerwin->SetHealth(playerData[playerwin->GetGUID()].resethealth);
-		playerwin->SetPower(playerwin->getPowerType(),playerData[playerwin->GetGUID()].resetPower);
-		playerlose->SetHealth(playerData[playerlose->GetGUID()].resethealth);
-		playerlose->SetPower(playerlose->getPowerType(), playerData[playerlose->GetGUID()].resetPower);
-				
-		if (!UsingPreDuelInfo)
+		if (sConfigMgr->GetBoolDefault("Duel.Reset.Enable", true))
 		{
-			playerwin->GetSession()->SendNotification("Your Health & Mana has been reset.");
-			playerlose->GetSession()->SendNotification("Your Health & Mana has been reset.");
-			playerwin->GetSpellHistory()->ResetAllCooldowns();
+			playerwin->SetHealth(playerData[playerwin->GetGUID()].resethealth);
+			playerwin->SetPower(playerwin->getPowerType(), playerData[playerwin->GetGUID()].resetPower);
+			playerlose->SetHealth(playerData[playerlose->GetGUID()].resethealth);
+			playerlose->SetPower(playerlose->getPowerType(), playerData[playerlose->GetGUID()].resetPower);
+
+			if (!UsingPreDuelInfo)
+			{
+				playerwin->GetSession()->SendNotification("Your Health & Mana has been reset.");
+				playerlose->GetSession()->SendNotification("Your Health & Mana has been reset.");
+				playerwin->GetSpellHistory()->ResetAllCooldowns();
+			}
+			else
+			{
+				playerwin->GetSession()->SendNotification("Your Health & Mana has been reset to what they were before the duel!");
+				playerlose->GetSession()->SendNotification("Your Health & Mana has been reset to what they were before the duel!");
+			}
+			playerData.erase(playerwin->GetGUID());
+			playerData.erase(playerlose->GetGUID());
 		}
-		else
-		{
-			playerwin->GetSession()->SendNotification("Your Health & Mana has been reset to what they were before the duel!");
-			playerlose->GetSession()->SendNotification("Your Health & Mana has been reset to what they were before the duel!");
-		}
-		playerData.erase(playerwin->GetGUID());
-		playerData.erase(playerlose->GetGUID());
 	}
 };
 
