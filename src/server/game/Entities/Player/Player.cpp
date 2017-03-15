@@ -41,6 +41,7 @@
 #include "CombatPackets.h"
 #include "Common.h"
 #include "ConditionMgr.h"
+#include "Config.h"
 #include "CreatureAI.h"
 #include "DB2Stores.h"
 #include "DatabaseEnv.h"
@@ -215,6 +216,10 @@ Player::Player(WorldSession* session) : Unit(true), m_sceneMgr(this)
         m_bgBattlegroundQueueID[j].invitedToInstance = 0;
         m_bgBattlegroundQueueID[j].joinTime = 0;
     }
+
+    // PlayedTimeReward
+	ptr_Interval = sConfigMgr->GetIntDefault("PlayedTimeReward.Interval", 0);
+	ptr_Money = sConfigMgr->GetIntDefault("PlayedTimeReward.Money", 0);
 
     m_logintime = time(nullptr);
     m_Last_tick = m_logintime;
@@ -1101,6 +1106,19 @@ void Player::Update(uint32 p_time)
         stmt->setUInt32(3, GetSession()->GetAccountId());
         LoginDatabase.Execute(stmt);
     }
+
+	// PlayedTimeReward
+	if (ptr_Interval > 0)
+	{
+		if (ptr_Interval <= p_time)
+		{
+			GetSession()->SendNotification("Bonus for played time.");
+			ModifyMoney(ptr_Money);
+			ptr_Interval = sConfigMgr->GetIntDefault("PlayedTimeReward.Interval", 0);
+		}
+		else
+	ptr_Interval -= p_time;
+	}
 
     if (!m_timedquests.empty())
     {
