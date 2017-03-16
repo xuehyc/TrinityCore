@@ -4704,8 +4704,11 @@ void Player::RepopAtGraveyard()
     // and don't show spirit healer location
 	if (ClosestGrave)
 	{
-		if (sDynRes->IsInDungeonOrRaid(this) && sDynRes->CheckForSpawnPoint(this))
-			sDynRes->DynamicResurrection(this);
+		if (sConfigMgr->GetBoolDefault("Dungeon.Checkpoints.Enable", true))
+		{
+			if (sDynRes->IsInDungeonOrRaid(this) && sDynRes->CheckForSpawnPoint(this))
+				sDynRes->DynamicResurrection(this);
+		}
 		else
 		{
 			TeleportTo(ClosestGrave->MapID, ClosestGrave->Loc.X, ClosestGrave->Loc.Y, ClosestGrave->Loc.Z, (ClosestGrave->Facing * M_PI) / 180); // Orientation is initially in degrees
