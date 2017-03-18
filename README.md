@@ -1,3 +1,10 @@
+
+# Come and join to the Single Player Project Discord Server!
+![logo](http://i.imgur.com/Rn2rKfy.png) 
+## --> https://discord.gg/TpxqWWT <--
+
+
+
 # ![logo](https://community.trinitycore.org/public/style_images/1_trinitycore.png) TrinityCore (master)
 
 [![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/TrinityCore/TrinityCore.svg)](https://isitmaintained.com/project/TrinityCore/TrinityCore "Average time to resolve an issue") [![Percentage of issues still open](https://isitmaintained.com/badge/open/TrinityCore/TrinityCore.svg)](https://isitmaintained.com/project/TrinityCore/TrinityCore "Percentage of issues still open")
