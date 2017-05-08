@@ -11753,9 +11753,9 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
         if (!pItem)
             return nullptr;
 
-        if (pItem->GetTemplate()->GetBonding() == BIND_ON_ACQUIRE ||
-            pItem->GetTemplate()->GetBonding() == BIND_QUEST ||
-            (pItem->GetTemplate()->GetBonding() == BIND_ON_EQUIP && IsBagPos(pos)))
+        if (pItem->GetBonding() == BIND_ON_ACQUIRE ||
+            pItem->GetBonding() == BIND_QUEST ||
+            (pItem->GetBonding() == BIND_ON_EQUIP && IsBagPos(pos)))
             pItem->SetBinding(true);
 
         Bag* pBag = (bag == INVENTORY_SLOT_BAG_0) ? NULL : GetBagByPos(bag);
@@ -11796,9 +11796,9 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
     }
     else
     {
-        if (pItem2->GetTemplate()->GetBonding() == BIND_ON_ACQUIRE ||
-            pItem2->GetTemplate()->GetBonding() == BIND_QUEST ||
-            (pItem2->GetTemplate()->GetBonding() == BIND_ON_EQUIP && IsBagPos(pos)))
+        if (pItem2->GetBonding() == BIND_ON_ACQUIRE ||
+            pItem2->GetBonding() == BIND_QUEST ||
+            (pItem2->GetBonding() == BIND_ON_EQUIP && IsBagPos(pos)))
             pItem2->SetBinding(true);
 
         pItem2->SetCount(pItem2->GetCount() + count);
@@ -12106,7 +12106,7 @@ void Player::VisualizeItem(uint8 slot, Item* pItem)
         return;
 
     // check also  BIND_ON_ACQUIRE and BIND_QUEST for .additem or .additemset case by GM (not binded at adding to inventory)
-    if (pItem->GetTemplate()->GetBonding() == BIND_ON_EQUIP || pItem->GetTemplate()->GetBonding() == BIND_ON_ACQUIRE || pItem->GetTemplate()->GetBonding() == BIND_QUEST)
+    if (pItem->GetBonding() == BIND_ON_EQUIP || pItem->GetBonding() == BIND_ON_ACQUIRE || pItem->GetBonding() == BIND_QUEST)
     {
         pItem->SetBinding(true);
         if (IsInWorld())
@@ -14734,8 +14734,11 @@ bool Player::CanCompleteQuest(uint32 quest_id)
         {
             for (QuestObjective const& obj : qInfo->GetObjectives())
             {
-                if (!IsQuestObjectiveComplete(obj))
-                    return false;
+                if (!(obj.Flags & QUEST_OBJECTIVE_FLAG_OPTIONAL) && !(obj.Flags & QUEST_OBJECTIVE_FLAG_PART_OF_PROGRESS_BAR))
+                {
+                    if (!IsQuestObjectiveComplete(obj))
+                        return false;
+                }
             }
 
             if (qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) && q_status.Timer == 0)
@@ -16876,9 +16879,6 @@ bool Player::IsQuestObjectiveComplete(QuestObjective const& objective) const
     Quest const* quest = sObjectMgr->GetQuestTemplate(objective.QuestID);
     ASSERT(quest);
 
-    if (objective.Flags & QUEST_OBJECTIVE_FLAG_PART_OF_PROGRESS_BAR)
-        return true;
-
     switch (objective.Type)
     {
         case QUEST_OBJECTIVE_MONSTER:
@@ -18474,7 +18474,7 @@ void Player::_LoadInventory(PreparedQueryResult result, PreparedQueryResult arti
             {
                 auto artifactDataItr = artifactData.find(item->GetGUID());
                 if (item->GetTemplate()->GetArtifactID() && artifactDataItr != artifactData.end())
-                    item->LoadArtifactData(std::get<0>(artifactDataItr->second), std::get<1>(artifactDataItr->second), std::get<2>(artifactDataItr->second));
+                    item->LoadArtifactData(this, std::get<0>(artifactDataItr->second), std::get<1>(artifactDataItr->second), std::get<2>(artifactDataItr->second));
 
                 ObjectGuid bagGuid = fields[44].GetUInt64() ? ObjectGuid::Create<HighGuid::Item>(fields[44].GetUInt64()) : ObjectGuid::Empty;
                 uint8 slot = fields[45].GetUInt8();
@@ -23105,9 +23105,9 @@ bool Player::HaveAtClient(Object const* u) const
     return u == this || m_clientGUIDs.find(u->GetGUID()) != m_clientGUIDs.end();
 }
 
-bool Player::IsNeverVisible() const
+bool Player::IsNeverVisibleFor(WorldObject const* seer) const
 {
-    if (Unit::IsNeverVisible())
+    if (Unit::IsNeverVisibleFor(seer))
         return true;
 
     if (GetSession()->PlayerLogout() || GetSession()->PlayerLoading())
@@ -24676,10 +24676,8 @@ bool Player::isHonorOrXPTarget(Unit const* victim) const
 
     if (Creature const* const creature = victim->ToCreature())
     {
-        if (creature->IsTotem() ||
-            creature->IsPet() ||
-            creature->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL)
-                return false;
+        if (!creature->CanGiveExperience())
+            return false;
     }
     return true;
 }
