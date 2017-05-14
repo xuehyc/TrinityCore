@@ -21,10 +21,9 @@
 #ifndef _HOTFIXDATABASE_H
 #define _HOTFIXDATABASE_H
 
-#include "DatabaseWorkerPool.h"
 #include "MySQLConnection.h"
 
-enum HotfixDatabaseStatements
+enum HotfixDatabaseStatements : uint32
 {
     /*  Naming standard for defines:
         {DB}_{SEL/INS/UPD/DEL/REP}_{Summary of data changed}
@@ -116,6 +115,8 @@ enum HotfixDatabaseStatements
     HOTFIX_SEL_CINEMATIC_CAMERA,
 
     HOTFIX_SEL_CINEMATIC_SEQUENCES,
+
+    HOTFIX_SEL_CONVERSATION_LINE,
 
     HOTFIX_SEL_CREATURE_DISPLAY_INFO,
 
@@ -525,13 +526,12 @@ public:
     typedef HotfixDatabaseStatements Statements;
 
     //- Constructors for sync and async connections
-    HotfixDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) { }
-    HotfixDatabaseConnection(ProducerConsumerQueue<SQLOperation*>* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
+    HotfixDatabaseConnection(MySQLConnectionInfo& connInfo);
+    HotfixDatabaseConnection(ProducerConsumerQueue<SQLOperation*>* q, MySQLConnectionInfo& connInfo);
+    ~HotfixDatabaseConnection();
 
     //- Loads database type specific prepared statements
     void DoPrepareStatements() override;
 };
-
-typedef DatabaseWorkerPool<HotfixDatabaseConnection> HotfixDatabaseWorkerPool;
 
 #endif
