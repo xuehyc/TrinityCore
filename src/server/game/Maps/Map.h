@@ -28,17 +28,19 @@
 #include "GridRefManager.h"
 #include "MapRefManager.h"
 #include "DynamicTree.h"
-#include "GameObjectModel.h"
 #include "ObjectGuid.h"
 
 #include <bitset>
 #include <list>
 #include <memory>
 #include <mutex>
+#include <set>
+#include <unordered_set>
 
 class Battleground;
 class BattlegroundMap;
 class CreatureGroup;
+class GameObjectModel;
 class Group;
 class InstanceMap;
 class InstanceSave;
@@ -223,18 +225,6 @@ public:
 };
 
 #pragma pack(push, 1)
-
-struct InstanceTemplate
-{
-    uint32 Parent;
-    uint32 ScriptId;
-    bool AllowMount;
-};
-
-enum LevelRequirementVsMode
-{
-    LEVELREQUIREMENT_HEROIC = 70
-};
 
 struct ZoneDynamicInfo
 {
@@ -769,6 +759,7 @@ class TC_GAME_API InstanceMap : public Map
         void CreateInstanceData(bool load);
         bool Reset(uint8 method);
         uint32 GetScriptId() const { return i_script_id; }
+        std::string const& GetScriptName() const;
         InstanceScript* GetInstanceScript() { return i_data; }
         InstanceScript const* GetInstanceScript() const { return i_data; }
         InstanceScenario* GetInstanceScenario() { return i_scenario; }

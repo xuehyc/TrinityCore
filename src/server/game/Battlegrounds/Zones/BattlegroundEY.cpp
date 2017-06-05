@@ -17,14 +17,19 @@
  */
 
 #include "BattlegroundEY.h"
-#include "WorldPacket.h"
 #include "BattlegroundMgr.h"
+#include "BattlegroundPackets.h"
 #include "Creature.h"
+#include "DB2Stores.h"
+#include "GameObject.h"
 #include "Language.h"
 #include "Log.h"
+#include "Map.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "Random.h"
 #include "Util.h"
+#include "WorldStatePackets.h"
 
 // these variables aren't used outside of this file, so declare them only here
 uint32 BG_EY_HonorScoreTicks[BG_HONOR_MODE_NUM] =

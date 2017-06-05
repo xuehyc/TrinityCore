@@ -16,22 +16,25 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "WorldSession.h"
+#include "CellImpl.h"
 #include "Common.h"
-#include "Log.h"
 #include "Corpse.h"
 #include "Creature.h"
+#include "DB2Stores.h"
 #include "GameObject.h"
-#include "CellImpl.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
+#include "Guild.h"
 #include "GuildMgr.h"
+#include "Item.h"
+#include "Log.h"
 #include "LootMgr.h"
-#include "ObjectAccessor.h"
+#include "LootPackets.h"
 #include "Object.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "WorldPacket.h"
-#include "LootPackets.h"
-#include "WorldSession.h"
 
 class AELootCreatureCheck
 {
@@ -551,11 +554,9 @@ void WorldSession::HandleSetLootSpecialization(WorldPackets::Loot::SetLootSpecia
     if (packet.SpecID)
     {
         if (ChrSpecializationEntry const* chrSpec = sChrSpecializationStore.LookupEntry(packet.SpecID))
-        {
             if (chrSpec->ClassID == GetPlayer()->getClass())
                 GetPlayer()->SetLootSpecId(packet.SpecID);
-        }
     }
     else
-        GetPlayer()->SetLootSpecId(packet.SpecID);
+        GetPlayer()->SetLootSpecId(0);
 }

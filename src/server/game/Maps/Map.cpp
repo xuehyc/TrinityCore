@@ -17,13 +17,13 @@
  */
 
 #include "Map.h"
-#include "MapManager.h"
 #include "Battleground.h"
-#include "MMapFactory.h"
 #include "CellImpl.h"
 #include "Conversation.h"
+#include "DatabaseEnv.h"
 #include "DisableMgr.h"
 #include "DynamicTree.h"
+#include "GameObjectModel.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "GridStates.h"
@@ -31,9 +31,14 @@
 #include "InstancePackets.h"
 #include "InstanceScenario.h"
 #include "InstanceScript.h"
+#include "Log.h"
 #include "MapInstanced.h"
+#include "MapManager.h"
 #include "MiscPackets.h"
+#include "MMapFactory.h"
+#include "MotionMaster.h"
 #include "ObjectAccessor.h"
+#include "ObjectGridLoader.h"
 #include "ObjectMgr.h"
 #include "Pet.h"
 #include "ScriptMgr.h"
@@ -41,6 +46,8 @@
 #include "Vehicle.h"
 #include "VMapFactory.h"
 #include "Weather.h"
+#include "World.h"
+#include "WorldSession.h"
 
 u_map_magic MapMagic        = { {'M','A','P','S'} };
 u_map_magic MapVersionMagic = { {'v','1','.','8'} };
@@ -3506,6 +3513,11 @@ bool InstanceMap::Reset(uint8 method)
     }
 
     return m_mapRefManager.isEmpty();
+}
+
+std::string const& InstanceMap::GetScriptName() const
+{
+    return sObjectMgr->GetScriptName(i_script_id);
 }
 
 void InstanceMap::PermBindAllPlayers()

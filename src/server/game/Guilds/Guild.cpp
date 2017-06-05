@@ -16,22 +16,29 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Guild.h"
 #include "AccountMgr.h"
+#include "Bag.h"
 #include "CalendarMgr.h"
+#include "CalendarPackets.h"
 #include "Chat.h"
+#include "ChatPackets.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
-#include "Guild.h"
+#include "DB2Stores.h"
 #include "GuildFinderMgr.h"
 #include "GuildMgr.h"
 #include "GuildPackets.h"
 #include "Language.h"
 #include "Log.h"
+#include "Map.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "Player.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
-#include "Opcodes.h"
-#include "ChatPackets.h"
-#include "CalendarPackets.h"
+#include "World.h"
+#include "WorldSession.h"
 
 #define MAX_GUILD_BANK_TAB_TEXT_LEN 500
 #define EMBLEM_PRICE 10 * GOLD
@@ -358,6 +365,11 @@ void Guild::RankInfo::SetBankTabSlotsAndRights(GuildBankRightsAndSlots rightsAnd
     }
 }
 
+Guild::BankTab::BankTab(ObjectGuid::LowType guildId, uint8 tabId) : m_guildId(guildId), m_tabId(tabId)
+{
+    memset(m_items, 0, GUILD_BANK_MAX_SLOTS * sizeof(Item*));
+}
+
 // BankTab
 void Guild::BankTab::LoadFromDB(Field* fields)
 {
@@ -497,6 +509,26 @@ void Guild::BankTab::SendText(Guild const* guild, WorldSession* session) const
         TC_LOG_DEBUG("guild", "SMSG_GUILD_BANK_QUERY_TEXT_RESULT [Broadcast]: Tabid: %u, Text: %s", m_tabId, m_text.c_str());
         guild->BroadcastPacket(textQuery.Write());
     }
+}
+
+Guild::Member::Member(ObjectGuid::LowType guildId, ObjectGuid guid, uint8 rankId) :
+    m_guildId(guildId),
+    m_guid(guid),
+    m_zoneId(0),
+    m_level(0),
+    m_class(0),
+    _gender(0),
+    m_flags(GUILDMEMBER_STATUS_NONE),
+    m_logoutTime(::time(nullptr)),
+    m_accountId(0),
+    m_rankId(rankId),
+    m_achievementPoints(0),
+    m_totalActivity(0),
+    m_weekActivity(0),
+    m_totalReputation(0),
+    m_weekReputation(0)
+{
+    memset(m_bankWithdraw, 0, (GUILD_BANK_MAX_TABS + 1) * sizeof(int32));
 }
 
 // Member
@@ -656,6 +688,16 @@ void Guild::Member::ResetValues(bool weekly /* = false*/)
     }
 }
 
+Player* Guild::Member::FindPlayer() const
+{
+    return ObjectAccessor::FindPlayer(m_guid);
+}
+
+Player* Guild::Member::FindConnectedPlayer() const
+{
+    return ObjectAccessor::FindConnectedPlayer(m_guid);
+}
+
 // Get amount of money/slots left for today.
 // If (tabId == GUILD_BANK_MAX_TABS) return money amount.
 // Otherwise return remaining items amount for specified tab.
@@ -707,6 +749,15 @@ void EmblemInfo::SaveToDB(ObjectGuid::LowType guildId) const
     stmt->setUInt32(4, m_backgroundColor);
     stmt->setUInt64(5, guildId);
     CharacterDatabase.Execute(stmt);
+}
+
+Guild::MoveItemData::MoveItemData(Guild* guild, Player* player, uint8 container, uint8 slotId) : m_pGuild(guild), m_pPlayer(player),
+m_container(container), m_slotId(slotId), m_pItem(nullptr), m_pClonedItem(nullptr)
+{
+}
+
+Guild::MoveItemData::~MoveItemData()
+{
 }
 
 // MoveItemData
@@ -874,7 +925,7 @@ Item* Guild::BankMoveItemData::StoreItem(SQLTransaction& trans, Item* pItem)
         return nullptr;
 
     Item* pLastItem = pItem;
-    for (ItemPosCountVec::const_iterator itr = m_vec.begin(); itr != m_vec.end(); )
+    for (auto itr = m_vec.begin(); itr != m_vec.end(); )
     {
         ItemPosCount pos(*itr);
         ++itr;
@@ -1242,30 +1293,11 @@ bool Guild::SetName(std::string const& name)
     stmt->setUInt64(1, GetId());
     CharacterDatabase.Execute(stmt);
 
-    /* TODO 6.x update me
-    ObjectGuid guid = GetGUID();
-    WorldPacket data(SMSG_GUILD_NAME_CHANGED, 24 + 8 + 1);
-    data.WriteBit(guid[5]);
-    data.WriteBits(name.length(), 8);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[2]);
+    WorldPackets::Guild::GuildNameChanged guildNameChanged;
+    guildNameChanged.GuildGUID = GetGUID();
+    guildNameChanged.GuildName = m_name;
+    BroadcastPacket(guildNameChanged.Write());
 
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteString(name);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
-
-    BroadcastPacket(&data); */
     return true;
 }
 
@@ -2759,6 +2791,21 @@ void Guild::SetBankTabText(uint8 tabId, std::string const& text)
         eventPacket.Tab = tabId;
         BroadcastPacket(eventPacket.Write());
     }
+}
+
+bool Guild::_HasRankRight(Player const* player, uint32 right) const
+{
+    if (player)
+        if (Member const* member = GetMember(player->GetGUID()))
+            return (_GetRankRights(member->GetRankId()) & right) != GR_RIGHT_NONE;
+    return false;
+}
+
+void Guild::_DeleteMemberFromDB(ObjectGuid::LowType lowguid)
+{
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_MEMBER);
+    stmt->setUInt64(0, lowguid);
+    CharacterDatabase.Execute(stmt);
 }
 
 // Private methods

@@ -16,22 +16,26 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Common.h"
-#include "ObjectMgr.h"
-#include "World.h"
-#include "WorldSession.h"
-#include "DatabaseEnv.h"
-
+#include "Chat.h"
 #include "AccountMgr.h"
 #include "CellImpl.h"
-#include "Chat.h"
+#include "ChatLink.h"
+#include "ChatPackets.h"
+#include "Common.h"
+#include "DatabaseEnv.h"
+#include "DB2Stores.h"
 #include "GridNotifiersImpl.h"
+#include "Group.h"
 #include "Language.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "Optional.h"
 #include "Player.h"
+#include "Realm.h"
 #include "ScriptMgr.h"
-#include "ChatLink.h"
-#include "Group.h"
+#include "World.h"
+#include "WorldSession.h"
 
 ChatCommand::ChatCommand(char const* name, uint32 permission, bool allowConsole, pHandler handler, std::string help, std::vector<ChatCommand> childCommands /*= std::vector<ChatCommand>()*/)
     : Name(ASSERT_NOTNULL(name)), Permission(permission), AllowConsole(allowConsole), Handler(handler), Help(std::move(help)), ChildCommands(std::move(childCommands))
@@ -83,6 +87,16 @@ char const* ChatHandler::GetTrinityString(uint32 entry) const
 bool ChatHandler::isAvailable(ChatCommand const& cmd) const
 {
     return HasPermission(cmd.Permission);
+}
+
+bool ChatHandler::HasPermission(uint32 permission) const
+{
+    return m_session->HasPermission(permission);
+}
+
+std::string ChatHandler::GetNameLink() const
+{
+    return GetNameLink(m_session->GetPlayer());
 }
 
 bool ChatHandler::HasLowerSecurity(Player* target, ObjectGuid guid, bool strong)

@@ -24,10 +24,13 @@ EndScriptData */
 
 #include "AccountMgr.h"
 #include "Chat.h"
+#include "DatabaseEnv.h"
 #include "Language.h"
 #include "Log.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "World.h"
+#include "WorldSession.h"
 #include <boost/asio/ip/address_v4.hpp>
 
 class account_commandscript : public CommandScript

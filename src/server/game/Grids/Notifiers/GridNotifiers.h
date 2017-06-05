@@ -19,25 +19,17 @@
 #ifndef TRINITY_GRIDNOTIFIERS_H
 #define TRINITY_GRIDNOTIFIERS_H
 
-#include "ObjectGridLoader.h"
-#include "UpdateData.h"
-#include <iostream>
-
-#include "Corpse.h"
-#include "Object.h"
 #include "AreaTrigger.h"
+#include "Creature.h"
+#include "Corpse.h"
 #include "Conversation.h"
 #include "DynamicObject.h"
 #include "GameObject.h"
-#include "Player.h"
-#include "Unit.h"
-#include "CreatureAI.h"
-#include "Spell.h"
-#include "WorldSession.h"
 #include "Packet.h"
-
-class Player;
-//class Map;
+#include "Player.h"
+#include "Spell.h"
+#include "UnitAI.h"
+#include "UpdateData.h"
 
 namespace Trinity
 {
@@ -156,8 +148,7 @@ namespace Trinity
             if (!player->HaveAtClient(i_source))
                 return;
 
-            if (WorldSession* session = player->GetSession())
-                session->SendPacket(i_message);
+            player->SendDirectMessage(i_message);
         }
     };
 
@@ -895,9 +886,6 @@ namespace Trinity
 
             bool operator()(Unit* u) const
             {
-                if (G3D::fuzzyEq(_range, 0))
-                    return false;
-
                 if (_raid)
                 {
                     if (!_refUnit->IsInRaidWith(u))
@@ -969,7 +957,7 @@ namespace Trinity
                 : i_obj(obj), i_funit(funit), _spellInfo(NULL), i_range(range)
             {
                 if (DynamicObject const* dynObj = i_obj->ToDynObject())
-                    _spellInfo = sSpellMgr->GetSpellInfo(dynObj->GetSpellId());
+                    _spellInfo = dynObj->GetSpellInfo();
             }
 
             bool operator()(Unit* u) const
@@ -1014,8 +1002,8 @@ namespace Trinity
                 if (!u->IsWithinLOSInMap(i_enemy))
                     return;
 
-                if (u->AI())
-                    u->AI()->AttackStart(i_enemy);
+                if (u->GetAI() && u->IsAIEnabled)
+                    u->GetAI()->AttackStart(i_enemy);
             }
         private:
             Unit* const i_funit;

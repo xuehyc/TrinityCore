@@ -16,32 +16,38 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Common.h"
-#include "WorldPacket.h"
-#include "Opcodes.h"
-#include "Log.h"
-#include "ObjectMgr.h"
-#include "SpellMgr.h"
-#include "Player.h"
-#include "Unit.h"
-#include "ObjectAccessor.h"
-#include "CellImpl.h"
-#include "Util.h"
-#include "Spell.h"
 #include "SpellAuraEffects.h"
-#include "Battleground.h"
-#include "OutdoorPvPMgr.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "ScriptMgr.h"
-#include "Vehicle.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
-#include "WeatherMgr.h"
-#include "Pet.h"
-#include "ReputationMgr.h"
+#include "Battleground.h"
+#include "CellImpl.h"
+#include "Common.h"
+#include "DB2Stores.h"
+#include "GridNotifiersImpl.h"
+#include "Item.h"
+#include "Log.h"
+#include "LootMgr.h"
 #include "MiscPackets.h"
+#include "MotionMaster.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "OutdoorPvPMgr.h"
+#include "Pet.h"
+#include "Player.h"
+#include "ReputationMgr.h"
+#include "ScriptMgr.h"
+#include "Spell.h"
 #include "SpellHistory.h"
+#include "SpellMgr.h"
+#include "Unit.h"
+#include "Util.h"
+#include "Vehicle.h"
+#include "Weather.h"
+#include "WeatherMgr.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
+#include <G3D/g3dmath.h>
 
 class Aura;
 //
@@ -6339,7 +6345,7 @@ void AuraEffect::HandleAuraForceWeather(AuraApplication const* aurApp, uint8 mod
     if (apply)
     {
         WorldPackets::Misc::Weather weather(WeatherState(GetMiscValue()), 1.0f);
-        target->GetSession()->SendPacket(weather.Write());
+        target->SendDirectMessage(weather.Write());
     }
     else
     {
@@ -6464,12 +6470,12 @@ void AuraEffect::HandleCreateAreaTrigger(AuraApplication const* aurApp, uint8 mo
     if (apply)
     {
         AreaTrigger* areaTrigger = new AreaTrigger();
-        if (!areaTrigger->CreateAreaTrigger(GetMiscValue(), GetCaster(), target, GetSpellInfo(), *target, GetBase()->GetDuration(), GetBase()->GetSpellXSpellVisualId()))
+        if (!areaTrigger->CreateAreaTrigger(GetMiscValue(), GetCaster(), target, GetSpellInfo(), *target, GetBase()->GetDuration(), GetBase()->GetSpellXSpellVisualId(), ObjectGuid::Empty, this))
             delete areaTrigger;
     }
     else
     {
         if (Unit* caster = GetCaster())
-            caster->RemoveAreaTrigger(GetSpellInfo()->Id);
+            caster->RemoveAreaTrigger(this);
     }
 }

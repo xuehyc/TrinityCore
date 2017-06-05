@@ -33,13 +33,14 @@ npc_death_ravager
 EndContentData */
 
 #include "ScriptMgr.h"
-#include "ScriptedCreature.h"
-#include "ScriptedEscortAI.h"
-#include "ScriptedGossip.h"
-#include "Cell.h"
 #include "CellImpl.h"
 #include "GridNotifiersImpl.h"
-#include "GridNotifiers.h"
+#include "Log.h"
+#include "MotionMaster.h"
+#include "ObjectAccessor.h"
+#include "ScriptedEscortAI.h"
+#include "ScriptedGossip.h"
+#include "TemporarySummon.h"
 
 /*######
 ## npc_draenei_survivor

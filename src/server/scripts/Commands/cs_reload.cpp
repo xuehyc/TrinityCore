@@ -31,9 +31,13 @@ EndScriptData */
 #include "Chat.h"
 #include "ConversationDataStore.h"
 #include "CreatureTextMgr.h"
+#include "DatabaseEnv.h"
 #include "DisableMgr.h"
+#include "ItemEnchantmentMgr.h"
 #include "Language.h"
 #include "LFGMgr.h"
+#include "Log.h"
+#include "LootMgr.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
@@ -44,6 +48,7 @@ EndScriptData */
 #include "SupportMgr.h"
 #include "WardenCheckMgr.h"
 #include "WaypointManager.h"
+#include "World.h"
 
 class reload_commandscript : public CommandScript
 {

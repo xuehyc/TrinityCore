@@ -17,13 +17,18 @@
  */
 
 #include "BattlegroundWS.h"
+#include "BattlegroundMgr.h"
+#include "BattlegroundPackets.h"
+#include "DB2Stores.h"
 #include "GameObject.h"
 #include "Language.h"
 #include "Log.h"
+#include "Map.h"
 #include "Object.h"
-#include "BattlegroundMgr.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "WorldPacket.h"
+#include "WorldStatePackets.h"
 
 // these variables aren't used outside of this file, so declare them only here
 enum BG_WSG_Rewards

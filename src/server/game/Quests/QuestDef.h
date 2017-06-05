@@ -19,18 +19,13 @@
 #ifndef TRINITYCORE_QUEST_H
 #define TRINITYCORE_QUEST_H
 
-#include "Define.h"
-#include "DatabaseEnv.h"
-#include "SharedDefines.h"
-#include "WorldPacket.h"
+#include "Common.h"
 #include "DBCEnums.h"
-
-#include <string>
+#include "DatabaseEnvFwd.h"
+#include "SharedDefines.h"
 #include <vector>
 
 class Player;
-
-class ObjectMgr;
 
 namespace WorldPackets
 {
@@ -106,7 +101,7 @@ enum QuestTradeSkill
     QUEST_TRSKILL_JEWELCRAFTING  = 14
 };
 
-enum QuestStatus
+enum QuestStatus : uint8
 {
     QUEST_STATUS_NONE           = 0,
     QUEST_STATUS_COMPLETE       = 1,

@@ -19,12 +19,15 @@
 #include "WorldSession.h"
 #include "CollectionMgr.h"
 #include "Common.h"
-#include "Config.h"
+#include "DatabaseEnv.h"
 #include "GameObjectAI.h"
 #include "GameObjectPackets.h"
+#include "Guild.h"
 #include "GuildMgr.h"
+#include "Item.h"
 #include "Log.h"
 #include "Player.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
@@ -33,6 +36,7 @@
 #include "SpellPackets.h"
 #include "Totem.h"
 #include "TotemPackets.h"
+#include "World.h"
 
 void WorldSession::HandleUseItemOpcode(WorldPackets::Spells::UseItem& packet)
 {
@@ -452,7 +456,7 @@ void WorldSession::HandleTotemDestroyed(WorldPackets::Totem::TotemDestroyed& tot
     if (!_player->m_SummonSlot[slotId])
         return;
 
-    Creature* totem = GetPlayer()->GetMap()->GetCreature(_player->m_SummonSlot[slotId]);
+    Creature* totem = ObjectAccessor::GetCreature(*GetPlayer(), _player->m_SummonSlot[slotId]);
     if (totem && totem->IsTotem() && totem->GetGUID() == totemDestroyed.TotemGUID)
         totem->ToTotem()->UnSummon();
 }

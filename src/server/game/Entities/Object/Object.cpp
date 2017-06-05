@@ -17,35 +17,37 @@
  */
 
 #include "Object.h"
-#include "Common.h"
-#include "SharedDefines.h"
-#include "WorldPacket.h"
-#include "Opcodes.h"
-#include "Log.h"
-#include "World.h"
-#include "Creature.h"
-#include "Player.h"
-#include "Vehicle.h"
-#include "ObjectMgr.h"
-#include "UpdateData.h"
-#include "Util.h"
-#include "ObjectAccessor.h"
-#include "Transport.h"
-#include "VMapFactory.h"
+#include "AreaTriggerTemplate.h"
+#include "BattlefieldMgr.h"
 #include "CellImpl.h"
-#include "GridNotifiers.h"
+#include "CinematicMgr.h"
+#include "Common.h"
+#include "Creature.h"
 #include "GridNotifiersImpl.h"
+#include "InstanceScenario.h"
+#include "Item.h"
+#include "Log.h"
+#include "MiscPackets.h"
+#include "MovementPackets.h"
+#include "MovementTypedefs.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "OutdoorPvPMgr.h"
+#include "Player.h"
+#include "SharedDefines.h"
 #include "SpellAuraEffects.h"
-#include "UpdateFieldFlags.h"
 #include "TemporarySummon.h"
 #include "Totem.h"
-#include "MovementPackets.h"
-#include "OutdoorPvPMgr.h"
+#include "Transport.h"
 #include "Unit.h"
-#include "BattlefieldMgr.h"
-#include "MiscPackets.h"
-#include "InstanceScenario.h"
-#include "AreaTriggerTemplate.h"
+#include "UpdateData.h"
+#include "UpdateFieldFlags.h"
+#include "Util.h"
+#include "VMapFactory.h"
+#include "Vehicle.h"
+#include "World.h"
+#include "WorldSession.h"
+#include <G3D/Vector3.h>
 
 Object::Object()
 {
@@ -127,7 +129,6 @@ void Object::_Create(ObjectGuid const& guid)
 
     SetGuidValue(OBJECT_FIELD_GUID, guid);
     SetUInt16Value(OBJECT_FIELD_TYPE, 0, m_objectType);
-    m_PackGUID.Set(guid);
 }
 
 std::string Object::_ConcatFields(uint16 startIndex, uint16 size) const
@@ -239,7 +240,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
 
     ByteBuffer buf(0x400);
     buf << uint8(updateType);
-    buf << GetPackGUID();
+    buf << GetGUID();
     buf << uint8(m_objectTypeId);
 
     BuildMovementUpdate(&buf, flags);
@@ -259,7 +260,7 @@ void Object::SendUpdateToPlayer(Player* player)
     else
         BuildCreateUpdateBlockForPlayer(&upd, player);
     upd.BuildPacket(&packet);
-    player->GetSession()->SendPacket(&packet);
+    player->SendDirectMessage(&packet);
 }
 
 void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) const
@@ -267,7 +268,7 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) c
     ByteBuffer buf(500);
 
     buf << uint8(UPDATETYPE_VALUES);
-    buf << GetPackGUID();
+    buf << GetGUID();
 
     BuildValuesUpdate(UPDATETYPE_VALUES, &buf, target);
     BuildDynamicValuesUpdate(UPDATETYPE_VALUES, &buf, target);
@@ -385,7 +386,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
         bool HasFall = HasFallDirection || unit->m_movementInfo.jump.fallTime != 0;
         bool HasSpline = unit->IsSplineEnabled();
 
-        *data << GetPackGUID();                                         // MoverGUID
+        *data << GetGUID();                                         // MoverGUID
 
         *data << uint32(unit->m_movementInfo.time);                     // MoveTime
         *data << float(unit->GetPositionX());
@@ -570,15 +571,10 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
 
         if (hasAreaTriggerSpline)
         {
-            std::vector<G3D::Vector3> const& splinePoints = areaTrigger->GetSpline().getPoints();
-
             *data << uint32(areaTrigger->GetTimeToTarget());
             *data << uint32(areaTrigger->GetElapsedTimeForMovement());
 
-            data->WriteBits(splinePoints.size(), 16);
-
-            for (G3D::Vector3 const& spline : splinePoints)
-                *data << spline.x << spline.y << spline.z;
+            WorldPackets::Movement::CommonMovement::WriteCreateObjectAreaTriggerSpline(areaTrigger->GetSpline(), *data);
         }
 
         if (hasTargetRollPitchYaw)
@@ -625,11 +621,11 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
             *data << float(areaTriggerTemplate->PolygonDatas.Height);
             *data << float(areaTriggerTemplate->PolygonDatas.HeightTarget);
 
-            for (G3D::Vector2 const& vertice : areaTriggerTemplate->PolygonVertices)
-                *data << vertice.x << vertice.y;
+            for (TaggedPosition<Position::XY> const& vertice : areaTriggerTemplate->PolygonVertices)
+                *data << vertice;
 
-            for (G3D::Vector2 const& vertice : areaTriggerTemplate->PolygonVerticesTarget)
-                *data << vertice.x << vertice.y;
+            for (TaggedPosition<Position::XY> const& vertice : areaTriggerTemplate->PolygonVerticesTarget)
+                *data << vertice;
         }
 
         if (hasAreaTriggerCylinder)
@@ -2495,7 +2491,7 @@ TempSummon* WorldObject::SummonCreature(uint32 id, float x, float y, float z, fl
     return SummonCreature(id, pos, spwtype, despwtime, 0);
 }
 
-GameObject* WorldObject::SummonGameObject(uint32 entry, Position const& pos, G3D::Quat const& rot, uint32 respawnTime)
+GameObject* WorldObject::SummonGameObject(uint32 entry, Position const& pos, QuaternionData const& rot, uint32 respawnTime)
 {
     if (!IsInWorld())
         return nullptr;
@@ -2527,7 +2523,7 @@ GameObject* WorldObject::SummonGameObject(uint32 entry, Position const& pos, G3D
     return go;
 }
 
-GameObject* WorldObject::SummonGameObject(uint32 entry, float x, float y, float z, float ang, G3D::Quat const& rot, uint32 respawnTime)
+GameObject* WorldObject::SummonGameObject(uint32 entry, float x, float y, float z, float ang, QuaternionData const& rot, uint32 respawnTime)
 {
     if (!x && !y && !z)
     {

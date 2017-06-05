@@ -16,34 +16,42 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Common.h"
-#include "ObjectMgr.h"
-#include "World.h"
-#include "WorldPacket.h"
-
 #include "BattlegroundMgr.h"
-#include "BattlegroundAV.h"
 #include "BattlegroundAB.h"
-#include "BattlegroundEY.h"
-#include "BattlegroundWS.h"
-#include "BattlegroundNA.h"
+#include "BattlegroundAV.h"
 #include "BattlegroundBE.h"
-#include "BattlegroundRL.h"
-#include "BattlegroundSA.h"
-#include "BattlegroundDS.h"
-#include "BattlegroundRV.h"
-#include "BattlegroundIC.h"
-#include "BattlegroundTP.h"
 #include "BattlegroundBFG.h"
+#include "BattlegroundDS.h"
+#include "BattlegroundEY.h"
+#include "BattlegroundIC.h"
+#include "BattlegroundNA.h"
+#include "BattlegroundPackets.h"
+#include "BattlegroundRL.h"
+#include "BattlegroundRV.h"
+#include "BattlegroundSA.h"
+#include "BattlegroundTP.h"
+#include "BattlegroundWS.h"
+#include "Common.h"
+#include "Containers.h"
+#include "DatabaseEnv.h"
+#include "DB2Stores.h"
+#include "DisableMgr.h"
+#include "GameEventMgr.h"
+#include "Log.h"
 #include "Map.h"
 #include "MapInstanced.h"
 #include "MapManager.h"
-#include "Player.h"
-#include "GameEventMgr.h"
-#include "SharedDefines.h"
-#include "DisableMgr.h"
+#include "ObjectMgr.h"
 #include "Opcodes.h"
-#include "Containers.h"
+#include "Player.h"
+#include "SharedDefines.h"
+#include "World.h"
+#include "WorldPacket.h"
+
+bool BattlegroundTemplate::IsArena() const
+{
+    return BattlemasterEntry->InstanceType == MAP_ARENA;
+}
 
 /*********************************************************/
 /***            BATTLEGROUND MANAGER                   ***/
@@ -612,7 +620,7 @@ void BattlegroundMgr::SendAreaSpiritHealerQueryOpcode(Player* player, Battlegrou
     WorldPackets::Battleground::AreaSpiritHealerTime areaSpiritHealerTime;
     areaSpiritHealerTime.HealerGuid = guid;
     areaSpiritHealerTime.TimeLeft = time_;
-    player->GetSession()->SendPacket(areaSpiritHealerTime.Write());
+    player->SendDirectMessage(areaSpiritHealerTime.Write());
 }
 
 bool BattlegroundMgr::IsArenaType(BattlegroundTypeId bgTypeId)

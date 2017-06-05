@@ -15,11 +15,18 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Common.h"
 #include "GuildMgr.h"
+#include "DB2Stores.h"
+#include "DatabaseEnv.h"
+#include "Guild.h"
+#include "Log.h"
+#include "ObjectMgr.h"
+#include "World.h"
+#include <algorithm>
 
 GuildMgr::GuildMgr() : NextGuildId(UI64LIT(1))
-{ }
+{
+}
 
 GuildMgr::~GuildMgr()
 {

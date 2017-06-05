@@ -23,23 +23,25 @@ Category: commandscripts
 EndScriptData */
 
 #include "ScriptMgr.h"
-#include "ObjectMgr.h"
+#include "Bag.h"
 #include "BattlefieldMgr.h"
 #include "BattlegroundMgr.h"
-#include "Chat.h"
-#include "Cell.h"
 #include "CellImpl.h"
+#include "Chat.h"
+#include "ChatPackets.h"
 #include "Conversation.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
 #include "GossipDef.h"
-#include "M2Stores.h"
-#include "Transport.h"
+#include "GridNotifiersImpl.h"
 #include "Language.h"
+#include "Log.h"
+#include "M2Stores.h"
 #include "MapManager.h"
 #include "MovementPackets.h"
+#include "ObjectMgr.h"
+#include "RBAC.h"
 #include "SpellPackets.h"
-
+#include "Transport.h"
+#include "WorldSession.h"
 #include <fstream>
 #include <limits>
 
@@ -378,26 +380,6 @@ public:
                 std::string val6;
                 parsedStream >> val6;
                 data << val6;
-            }
-            else if (type == "appitsguid")
-            {
-                data << unit->GetPackGUID();
-            }
-            else if (type == "appmyguid")
-            {
-                data << player->GetPackGUID();
-            }
-            else if (type == "appgoguid")
-            {
-                GameObject* obj = handler->GetNearbyGameObject();
-                if (!obj)
-                {
-                    handler->PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, UI64LIT(0));
-                    handler->SetSentErrorMessage(true);
-                    ifs.close();
-                    return false;
-                }
-                data << obj->GetPackGUID();
             }
             else if (type == "goguid")
             {

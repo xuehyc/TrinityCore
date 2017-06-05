@@ -16,10 +16,15 @@
  */
 
 #include "TransportMgr.h"
-#include "Transport.h"
+#include "DatabaseEnv.h"
 #include "InstanceScript.h"
+#include "Log.h"
 #include "MapManager.h"
+#include "MoveSplineInitArgs.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Spline.h"
+#include "Transport.h"
 
 TransportTemplate::~TransportTemplate()
 {
@@ -87,6 +92,15 @@ void TransportMgr::LoadTransportTemplates()
     } while (result->NextRow());
 
     TC_LOG_INFO("server.loading", ">> Loaded %u transport templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void TransportMgr::LoadTransportAnimationAndRotation()
+{
+    for (TransportAnimationEntry const* anim : sTransportAnimationStore)
+        AddPathNodeToTransport(anim->TransportID, anim->TimeIndex, anim);
+
+    for (TransportRotationEntry const* rot : sTransportRotationStore)
+        AddPathRotationToTransport(rot->TransportID, rot->TimeIndex, rot);
 }
 
 class SplineRawInitializer
