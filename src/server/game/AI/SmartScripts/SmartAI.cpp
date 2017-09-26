@@ -74,11 +74,7 @@ SmartAI::SmartAI(Creature* c) : CreatureAI(c)
 
 bool SmartAI::IsAIControlled() const
 {
-    if (me->IsControlledByPlayer())
-        return false;
-    if (mIsCharmed)
-        return false;
-    return true;
+    return !mIsCharmed;
 }
 
 void SmartAI::UpdateDespawn(const uint32 diff)
@@ -95,7 +91,7 @@ void SmartAI::UpdateDespawn(const uint32 diff)
             mDespawnState++;
         }
         else
-            me->DespawnOrUnsummon();
+            me->DespawnOrUnsummon(0, Seconds(mRespawnTime));
     } else mDespawnTime -= diff;
 }
 
@@ -532,6 +528,7 @@ bool SmartAI::AssistPlayerInCombatAgainst(Unit* who)
 void SmartAI::JustRespawned()
 {
     mDespawnTime = 0;
+    mRespawnTime = 0;
     mDespawnState = 0;
     mEscortState = SMART_ESCORT_NONE;
     me->SetVisible(true);

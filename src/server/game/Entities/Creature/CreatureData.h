@@ -19,6 +19,7 @@
 #define CreatureData_h__
 
 #include "DBCEnums.h"
+#include "Optional.h"
 #include "SharedDefines.h"
 #include "UnitDefines.h"
 #include <string>
@@ -291,6 +292,13 @@ const uint32 MAX_CREATURE_NAMES = 4;
 const uint32 MAX_CREATURE_SPELLS = 8;
 const uint32 MAX_CREATURE_DIFFICULTIES = 3;
 
+struct CreatureLevelScaling
+{
+    uint16 MinLevel;
+    uint16 MaxLevel;
+    int16 DeltaLevel;
+};
+
 // from `creature_template` table
 struct TC_GAME_API CreatureTemplate
 {
@@ -308,6 +316,7 @@ struct TC_GAME_API CreatureTemplate
     uint32  GossipMenuId;
     int16   minlevel;
     int16   maxlevel;
+    Optional<CreatureLevelScaling> levelScaling;
     int32   HealthScalingExpansion;
     uint32  RequiredExpansion;
     uint32  VignetteID;                                     /// @todo Read Vignette.db2
@@ -328,9 +337,7 @@ struct TC_GAME_API CreatureTemplate
     uint32  unit_flags3;                                    // enum UnitFlags3 mask values
     uint32  dynamicflags;
     CreatureFamily  family;                                 // enum CreatureFamily values (optional)
-    uint32  trainer_type;
     uint32  trainer_class;
-    uint32  trainer_race;
     uint32  type;                                           // enum CreatureType values
     uint32  type_flags;                                     // enum CreatureTypeFlags mask values
     uint32  type_flags2;                                    // unknown enum, only set for 4 creatures (with value 1)
@@ -492,7 +499,7 @@ struct CreatureData
                      posX(0.0f), posY(0.0f), posZ(0.0f), orientation(0.0f), spawntimesecs(0),
                      spawndist(0.0f), currentwaypoint(0), curhealth(0), curmana(0), movementType(0),
                      spawnMask(0), npcflag(0), unit_flags(0), unit_flags2(0), unit_flags3(0), dynamicflags(0),
-                     phaseid(0), phaseGroup(0), dbData(true) { }
+                     phaseid(0), phaseGroup(0), ScriptId(0), dbData(true) { }
     uint32 id;                                              // entry in creature_template
     uint16 mapid;
     uint32 phaseMask;
@@ -593,41 +600,6 @@ struct VendorItemData
     {
         m_items.clear();
     }
-};
-
-#define MAX_TRAINERSPELL_ABILITY_REQS 3
-
-struct TrainerSpell
-{
-    TrainerSpell() : SpellID(0), MoneyCost(0), ReqSkillLine(0), ReqSkillRank(0), ReqLevel(0), Index(0)
-    {
-        for (uint8 i = 0; i < MAX_TRAINERSPELL_ABILITY_REQS; ++i)
-            ReqAbility[i] = 0;
-    }
-
-    uint32 SpellID;
-    uint32 MoneyCost;
-    uint32 ReqSkillLine;
-    uint32 ReqSkillRank;
-    uint32 ReqLevel;
-    uint32 ReqAbility[MAX_TRAINERSPELL_ABILITY_REQS];
-    uint32 Index;
-
-    // helpers
-    bool IsCastable() const { return ReqAbility[0] != SpellID; }
-};
-
-typedef std::unordered_map<uint32 /*spellid*/, TrainerSpell> TrainerSpellMap;
-
-struct TC_GAME_API TrainerSpellData
-{
-    TrainerSpellData() : trainerType(0) { }
-    ~TrainerSpellData() { spellList.clear(); }
-
-    TrainerSpellMap spellList;
-    uint32 trainerType;                                     // trainer type based at trainer spells, can be different from creature_template value.
-                                                            // req. for correct show non-prof. trainers like weaponmaster, allowed values 0 and 2.
-    TrainerSpell const* Find(uint32 spell_id) const;
 };
 
 #endif // CreatureData_h__

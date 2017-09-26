@@ -117,7 +117,7 @@ class spell_gen_adaptive_warding : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
-                if (eventInfo.GetDamageInfo()->GetSpellInfo()) // eventInfo.GetSpellInfo()
+                if (!eventInfo.GetSpellInfo())
                     return false;
 
                 // find Mage Armor
@@ -160,7 +160,7 @@ class spell_gen_adaptive_warding : public SpellScriptLoader
                     default:
                         return;
                 }
-                GetTarget()->CastSpell(GetTarget(), spellId, true, NULL, aurEff);
+                GetTarget()->CastSpell(GetTarget(), spellId, true, nullptr, aurEff);
             }
 
             void Register() override
@@ -2120,7 +2120,7 @@ class spell_gen_obsidian_armor : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
-                if (eventInfo.GetDamageInfo()->GetSpellInfo()) // eventInfo.GetSpellInfo()
+                if (!eventInfo.GetSpellInfo())
                     return false;
 
                 if (GetFirstSchoolInMask(eventInfo.GetSchoolMask()) == SPELL_SCHOOL_NORMAL)
@@ -3363,38 +3363,51 @@ class spell_gen_tournament_pennant : public SpellScriptLoader
         }
 };
 
-
-
 enum PvPTrinketTriggeredSpells
 {
     SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER         = 72752,
     SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER_WOTF    = 72757
 };
 
+template <uint32 TriggeredSpellId>
 class spell_pvp_trinket_wotf_shared_cd : public SpellScriptLoader
 {
     public:
-        spell_pvp_trinket_wotf_shared_cd() : SpellScriptLoader("spell_pvp_trinket_wotf_shared_cd") { }
+        spell_pvp_trinket_wotf_shared_cd(char const* ScriptName) : SpellScriptLoader(ScriptName) { }
 
+        template <uint32 Triggered>
         class spell_pvp_trinket_wotf_shared_cd_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_pvp_trinket_wotf_shared_cd_SpellScript);
 
-            bool Load() override
-            {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
-            }
-
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
-                return ValidateSpellInfo({ SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER, SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER_WOTF });
+                return ValidateSpellInfo({ Triggered });
             }
 
             void HandleScript()
             {
-                // This is only needed because spells cast from spell_linked_spell are triggered by default
-                // Spell::SendSpellCooldown() skips all spells with TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD
-                GetCaster()->GetSpellHistory()->StartCooldown(GetSpellInfo(), 0, GetSpell());
+                /*
+                 * @workaround: PendingCast flag normally means 'triggered' spell, however
+                 * if the spell is cast triggered, the core won't send SMSG_SPELL_GO packet
+                 * so client never registers the cooldown (see Spell::IsNeedSendToClient)
+                 *
+                 * ServerToClient: SMSG_SPELL_GO (0x0132) Length: 42 ConnIdx: 0 Time: 07/19/2010 02:32:35.000 Number: 362675
+                 * Caster GUID: Full: Player
+                 * Caster Unit GUID: Full: Player
+                 * Cast Count: 0
+                 * Spell ID: 72752 (72752)
+                 * Cast Flags: PendingCast, Unknown3, Unknown7 (265)
+                 * Time: 3901468825
+                 * Hit Count: 1
+                 * [0] Hit GUID: Player
+                 * Miss Count: 0
+                 * Target Flags: Unit (2)
+                 * Target GUID: 0x0
+                */
+
+                // Spell flags need further research, until then just cast not triggered
+                GetCaster()->CastSpell((Unit*)nullptr, Triggered, false);
             }
 
             void Register() override
@@ -3405,7 +3418,7 @@ class spell_pvp_trinket_wotf_shared_cd : public SpellScriptLoader
 
         SpellScript* GetSpellScript() const override
         {
-            return new spell_pvp_trinket_wotf_shared_cd_SpellScript();
+            return new spell_pvp_trinket_wotf_shared_cd_SpellScript<TriggeredSpellId>();
         }
 };
 
@@ -4570,8 +4583,6 @@ void AddSC_generic_spell_scripts()
     new spell_gen_increase_stats_buff("spell_dru_mark_of_the_wild");
     new spell_gen_increase_stats_buff("spell_pri_power_word_fortitude");
     new spell_gen_increase_stats_buff("spell_pri_shadow_protection");
-    new spell_gen_increase_stats_buff("spell_mage_arcane_brilliance");
-    new spell_gen_increase_stats_buff("spell_mage_dalaran_brilliance");
     new spell_gen_interrupt();
     new spell_gen_lifebloom("spell_hexlord_lifebloom", SPELL_HEXLORD_MALACRASS_LIFEBLOOM_FINAL_HEAL);
     new spell_gen_lifebloom("spell_tur_ragepaw_lifebloom", SPELL_TUR_RAGEPAW_LIFEBLOOM_FINAL_HEAL);
@@ -4610,7 +4621,8 @@ void AddSC_generic_spell_scripts()
     new spell_gen_throw_shield();
     new spell_gen_tournament_duel();
     new spell_gen_tournament_pennant();
-    new spell_pvp_trinket_wotf_shared_cd();
+    new spell_pvp_trinket_wotf_shared_cd<SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER>("spell_pvp_trinket_shared_cd");
+    new spell_pvp_trinket_wotf_shared_cd<SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER_WOTF>("spell_wotf_shared_cd");
     new spell_gen_turkey_marker();
     new spell_gen_upper_deck_create_foam_sword();
     new spell_gen_vampiric_touch();

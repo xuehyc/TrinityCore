@@ -511,11 +511,12 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPackets::AreaTrigger::AreaTrigge
                 Quest const* qInfo = sObjectMgr->GetQuestTemplate(questId);
                 if (qInfo && player->GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE)
                 {
-                    for (uint8 j = 0; j < qInfo->Objectives.size(); ++j)
+                    for (QuestObjective const& obj : qInfo->Objectives)
                     {
-                        if (qInfo->Objectives[j].Type == QUEST_OBJECTIVE_AREATRIGGER)
+                        if (obj.Type == QUEST_OBJECTIVE_AREATRIGGER && !player->IsQuestObjectiveComplete(obj))
                         {
-                            player->SetQuestObjectiveData(qInfo, j, int32(true));
+                            player->SetQuestObjectiveData(obj, 1);
+                            player->SendQuestUpdateAddCreditSimple(obj);
                             break;
                         }
                     }
@@ -765,26 +766,6 @@ void WorldSession::HandlePlayedTime(WorldPackets::Character::RequestPlayedTime& 
     playedTime.LevelTime = _player->GetLevelPlayedTime();
     playedTime.TriggerEvent = packet.TriggerScriptEvent;  // 0-1 - will not show in chat frame
     SendPacket(playedTime.Write());
-}
-
-void WorldSession::HandleWorldTeleportOpcode(WorldPackets::Misc::WorldTeleport& worldTeleport)
-{
-    if (GetPlayer()->IsInFlight())
-    {
-        TC_LOG_DEBUG("network", "Player '%s' (%s) in flight, ignore worldport command.",
-            GetPlayer()->GetName().c_str(), GetPlayer()->GetGUID().ToString().c_str());
-        return;
-    }
-
-    WorldLocation loc(worldTeleport.MapID, worldTeleport.Pos);
-    loc.SetOrientation(worldTeleport.Facing);
-    TC_LOG_DEBUG("network", "CMSG_WORLD_TELEPORT: Player = %s, map = %u, pos = %s",
-        GetPlayer()->GetName().c_str(), worldTeleport.MapID, loc.ToString().c_str());
-
-    if (HasPermission(rbac::RBAC_PERM_OPCODE_WORLD_TELEPORT))
-        GetPlayer()->TeleportTo(loc);
-    else
-        SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
 }
 
 void WorldSession::HandleWhoIsOpcode(WorldPackets::Who::WhoIsRequest& packet)
@@ -1186,4 +1167,10 @@ void WorldSession::HandlePvpPrestigeRankUp(WorldPackets::Misc::PvpPrestigeRankUp
 {
     if (_player->CanPrestige())
         _player->Prestige();
+}
+
+void WorldSession::HandleCloseInteraction(WorldPackets::Misc::CloseInteraction& closeInteraction)
+{
+    if (_player->PlayerTalkClass->GetInteractionData().SourceGuid == closeInteraction.SourceGuid)
+        _player->PlayerTalkClass->GetInteractionData().Reset();
 }

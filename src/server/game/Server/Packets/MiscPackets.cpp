@@ -576,15 +576,6 @@ void WorldPackets::Misc::SetPvP::Read()
     EnablePVP = _worldPacket.ReadBit();
 }
 
-void WorldPackets::Misc::WorldTeleport::Read()
-{
-    _worldPacket >> MapID;
-    _worldPacket >> TransportGUID;
-    _worldPacket >> Pos;
-    _worldPacket >> Facing;
-    _worldPacket >> LfgDungeonID;
-}
-
 WorldPacket const* WorldPackets::Misc::AccountHeirloomUpdate::Write()
 {
     _worldPacket.WriteBit(IsFullUpdate);
@@ -670,4 +661,9 @@ void WorldPackets::Misc::MountSetFavorite::Read()
 {
     _worldPacket >> MountSpellID;
     IsFavorite = _worldPacket.ReadBit();
+}
+
+void WorldPackets::Misc::CloseInteraction::Read()
+{
+    _worldPacket >> SourceGuid;
 }

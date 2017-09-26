@@ -94,10 +94,11 @@ class spell_rog_blade_flurry : public SpellScriptLoader
             {
                 PreventDefaultAction();
 
-                TC_LOG_ERROR("misc", "damage: %u procSpell: %u",
-                    eventInfo.GetDamageInfo()->GetDamage(), eventInfo.GetDamageInfo()->GetSpellInfo() ? eventInfo.GetDamageInfo()->GetSpellInfo()->Id : 0);
-
-                GetTarget()->CastCustomSpell(SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK, SPELLVALUE_BASE_POINT0, eventInfo.GetDamageInfo()->GetDamage(), _procTarget, true, NULL, aurEff);
+                if (DamageInfo* damageInfo = eventInfo.GetDamageInfo())
+                {
+                    int32 damage = damageInfo->GetDamage();
+                    GetTarget()->CastCustomSpell(SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK, SPELLVALUE_BASE_POINT0, damage, _procTarget, true, nullptr, aurEff);
+                }
             }
 
             void Register() override
@@ -325,11 +326,12 @@ class spell_rog_deadly_poison : public SpellScriptLoader
 };
 
 // 51690 - Killing Spree
-#define KillingSpreeScriptName "spell_rog_killing_spree"
 class spell_rog_killing_spree : public SpellScriptLoader
 {
     public:
-        spell_rog_killing_spree() : SpellScriptLoader(KillingSpreeScriptName) { }
+        static char constexpr const ScriptName[] = "spell_rog_killing_spree";
+
+        spell_rog_killing_spree() : SpellScriptLoader(ScriptName) { }
 
         class spell_rog_killing_spree_SpellScript : public SpellScript
         {
@@ -344,10 +346,8 @@ class spell_rog_killing_spree : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 if (Aura* aura = GetCaster()->GetAura(SPELL_ROGUE_KILLING_SPREE))
-                {
-                    if (spell_rog_killing_spree_AuraScript* script = dynamic_cast<spell_rog_killing_spree_AuraScript*>(aura->GetScriptByName(KillingSpreeScriptName)))
+                    if (spell_rog_killing_spree_AuraScript* script = aura->GetScript<spell_rog_killing_spree_AuraScript>(ScriptName))
                         script->AddTarget(GetHitUnit());
-                }
             }
 
             void Register() override
@@ -424,6 +424,7 @@ class spell_rog_killing_spree : public SpellScriptLoader
             return new spell_rog_killing_spree_AuraScript();
         }
 };
+char constexpr const spell_rog_killing_spree::ScriptName[];
 
 // 31666 - Master of Subtlety
 class spell_rog_master_of_subtlety : public SpellScriptLoader
