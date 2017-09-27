@@ -1,5 +1,7 @@
 //script made by SymbolixDEV
 #include "Config.h"
+#include "GridNotifiersImpl.h"
+#include "SpellHistory.h"
 
 class login_script : public PlayerScript
 {

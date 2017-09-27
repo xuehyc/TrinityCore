@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "GuildMgr.h"
 #include "Config.h"
+#include "Guild.h"
 
 class gon_playerscripts : public PlayerScript
 {

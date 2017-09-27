@@ -8,6 +8,8 @@
 #include "Map.h"
 #include "Group.h"
 #include "InstanceScript.h"
+#include "Chat.h"
+#include "Log.h"
 
 /*
  * TODO:

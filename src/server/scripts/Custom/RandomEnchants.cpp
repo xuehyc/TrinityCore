@@ -5,6 +5,9 @@
 #include "ScriptMgr.h"
 #include "Player.h"
 #include "Configuration/Config.h"
+#include "Chat.h"
+#include "DatabaseEnv.h"
+#include "Item.h"
 
 class RandomEnchantsPlayer : public PlayerScript{
 public:

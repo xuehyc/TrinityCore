@@ -1,7 +1,9 @@
 #include "ScriptMgr.h"
 #include "Player.h"
 #include "Config.h"
-#include "chat.h"
+#include "Chat.h"
+#include "SpellHistory.h"
+#include "WorldSession.h"
 
 class Duel_Reset : public PlayerScript
 {
