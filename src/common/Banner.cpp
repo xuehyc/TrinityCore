@@ -21,25 +21,22 @@
 
 void Trinity::Banner::Show(char const* applicationName, void(*log)(char const* text), void(*logExtraInfo)())
 {
-	log(" ");
-	log("###############################################################################");
-	log(" ");
-	log("  SSSSs   Ss                SSs            SSSSSs");
-	log(" Ss   Ss                     Ss           Ss    Ss");
-	log("Ss     S  Ss Ss           SS Ss  SSSSS   Ss         SSSSs   Ss SSs   SSSSSs");
-	log(" Ss      SSs Sssss    SSSSSs Ss Ss    Ss Ss        Ss   Ss  SSSs Ss Ss    Ss");
-	log("  SSSSs   Ss Ss  Ss  Ss   Ss Ss Ss    Ss Ss       Ss     Ss Ss      Ss    Ss");
-	log("      Ss  Ss Ss   Ss Ss   Ss Ss SSSSSS   Ss       Ss     Ss Ss      SSSSSSs");
-	log(" S     Ss Ss Ss   Ss Ss   Ss Ss Ss       Ss       Ss     Ss Ss      Ss");
-	log(" Ss   Ss  Ss Ss   Ss  SSSSSs Ss Ss     s  Ss    S  Ss   Ss  Ss      Ss");
-	log("  SSSSs   Ss Ss   Ss      Ss Ss  SSSSSs    SSSSS    SSSSs   Ss       SSSSSSs");
-	log("                          Ss");
-	log("                      SSSSs");
-	log(" ");
-	log("Based on ProjectLegion source.");
-	log(" ");
-	log(" https://github.com/conan513/SingleCore_TC ");
-	log(" ");
+    log(" ");
+    log("###############################################################################");
+    log(" ");
+    log("  SSSSs   Ss                SSs            SSSSSs");
+    log(" Ss   Ss                     Ss           Ss    Ss");
+    log("Ss     S  Ss Ss           SS Ss  SSSSS   Ss         SSSSs   Ss SSs   SSSSSs");
+    log(" Ss      SSs Sssss    SSSSSs Ss Ss    Ss Ss        Ss   Ss  SSSs Ss Ss    Ss");
+    log("  SSSSs   Ss Ss  Ss  Ss   Ss Ss Ss    Ss Ss       Ss     Ss Ss      Ss    Ss");
+    log("      Ss  Ss Ss   Ss Ss   Ss Ss SSSSSS   Ss       Ss     Ss Ss      SSSSSSs");
+    log(" S     Ss Ss Ss   Ss Ss   Ss Ss Ss       Ss       Ss     Ss Ss      Ss");
+    log(" Ss   Ss  Ss Ss   Ss  SSSSSs Ss Ss     s  Ss    S  Ss   Ss  Ss      Ss");
+    log("  SSSSs   Ss Ss   Ss      Ss Ss  SSSSSs    SSSSS    SSSSs   Ss       SSSSSSs");
+    log("                          Ss");
+    log("                      SSSSs                    <<< Based on AshamaneCore >>>");
+    log(" ");
+    log(" https://github.com/AshamaneProject/AshamaneCore ");
 	log("###############################################################################");
 	log(" ");
 
