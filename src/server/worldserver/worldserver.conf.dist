@@ -40,6 +40,7 @@
 #    CURRENCIES SETTINGS
 #    PACKET SPOOF PROTECTION SETTINGS
 #    METRIC SETTINGS
+#	 DARK-iCE MODS
 #
 ###################################################################################################
 
@@ -4074,3 +4075,29 @@ Metric.OverallStatusInterval = 1
 
 #
 ###################################################################################################
+#Dark-iCE Mods
+###################################################################################################
+#
+#     Solocraft.Enable
+#        Description: Solocraft is a script to increase players and bots stats in raids, 
+#		 based on group size. It feels a little Hacky, but raids is unfair hard with playerbots.
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+Solocraft.Enable = 0
+
+#
+#     Login.BoA
+#        Description: New players get some starting equipment.
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+Login.BoA = 0
+
+#
+#     Congrats.Level
+#        Description: Server gives money for players on every 10 level.
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+Congrats.Level = 0
