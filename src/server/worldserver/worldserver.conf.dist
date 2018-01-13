@@ -4101,6 +4101,7 @@ Login.BoA = 0
 #                     1 (enabled)
 
 Congrats.Level = 0
+
 #
 #     Time Is Money Friend
 #         Gives money for players who is online after every X minutes.
@@ -4110,3 +4111,11 @@ Congrats.Level = 0
 
 TimeIsMoneyFriend.Interval = 3600000
 TimeIsMoneyFriend.Money    = 1000
+
+#
+#     Login.Announcer.Enable
+#        Description: Announce every player and bots login
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+Login.Announcer.Enable = 0

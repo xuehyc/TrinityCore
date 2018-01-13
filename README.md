@@ -52,6 +52,7 @@ make pull requests to our [Github repository](https://github.com/AshamaneProject
 - Congrats on Level
 - Login BOA (Heirlooms for Starting Characters)
 - Solocraft
+- Announce Login
 
 ## Requirements
 
