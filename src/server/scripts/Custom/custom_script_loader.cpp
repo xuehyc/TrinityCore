@@ -21,6 +21,7 @@ void AddSC_solocraft();
 void AddSC_Player_Boa();
 void AddSC_custom_CongratsOnLevel();
 void AddSC_announce_login();
+void AddSC_XpWeekend();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -31,4 +32,5 @@ void AddCustomScripts()
 	AddSC_Player_Boa();
 	AddSC_custom_CongratsOnLevel();
 	AddSC_announce_login();
+	AddSC_XpWeekend();
 }
