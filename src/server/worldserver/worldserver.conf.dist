@@ -4101,3 +4101,12 @@ Login.BoA = 0
 #                     1 (enabled)
 
 Congrats.Level = 0
+#
+#     Time Is Money Friend
+#         Gives money for players who is online after every X minutes.
+#
+#     Default:  TimeIsMoneyFriend.Interval = 3600000 (1 hour) [0 - disabled]
+#               TimeIsMoneyFriend.Money    = 1000 (10 silver)
+
+TimeIsMoneyFriend.Interval = 3600000
+TimeIsMoneyFriend.Money    = 1000

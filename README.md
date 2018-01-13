@@ -46,6 +46,13 @@ It is completely open source; community involvement is highly encouraged.
 If you wish to contribute ideas or code please visit our site linked below or
 make pull requests to our [Github repository](https://github.com/AshamaneProject/AshamaneCore/pulls).
 
+## Dark-iCE Mods
+
+- Time is Money Friend
+- Congrats on Level
+- Login BOA (Heirlooms for Starting Characters)
+- Solocraft
+
 ## Requirements
 
 
