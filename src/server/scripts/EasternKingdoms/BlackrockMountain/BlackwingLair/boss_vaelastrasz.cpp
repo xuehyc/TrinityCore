@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -196,7 +196,7 @@ public:
                             {
                                 ++i;
                                 target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true); // not aggro leader
-                                if (target && target->getPowerType() == POWER_MANA)
+                                if (target && target->GetPowerType() == POWER_MANA)
                                     i = 3;
                             }
                             if (target)                                     // cast on self (see below)

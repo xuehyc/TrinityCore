@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,6 +16,7 @@
  */
 
 // This is where scripts' loading functions should be declared:
+void AddSC_custom_npcs();
 void AddSC_solocraft();
 void AddSC_FireWorksOnLevelUp();
 void AddSC_Player_Boa();
@@ -33,16 +34,17 @@ void AddSC_custom_CongratsOnLevel();
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
 {
-	AddSC_solocraft();
-	AddSC_FireWorksOnLevelUp();
-	AddSC_Player_Boa();
-	AddSC_gon_playerscripts();
-	AddSC_login_script();
-	AddSC_announce_login();
-	AddSC_Boss_Announcer();
-	AddSC_XpWeekend();
-	AddSC_RandomEnchantsScript();
-	AddSC_Dynamic_Resurrections();
-	AddSC_Duel_Reset();
-	AddSC_custom_CongratsOnLevel();
+    AddSC_custom_npcs();
+    AddSC_solocraft();
+    AddSC_FireWorksOnLevelUp();
+    AddSC_Player_Boa();
+    AddSC_gon_playerscripts();
+    AddSC_login_script();
+    AddSC_announce_login();
+    AddSC_Boss_Announcer();
+    AddSC_XpWeekend();
+    AddSC_RandomEnchantsScript();
+    AddSC_Dynamic_Resurrections();
+    AddSC_Duel_Reset();
+    AddSC_custom_CongratsOnLevel();
 }

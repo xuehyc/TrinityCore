@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -31,6 +31,11 @@ namespace WorldPackets
             {
                 WorldStateInfo(uint32 variableID, int32 value)
                     : VariableID(variableID), Value(value) { }
+
+                bool operator < (const WorldStateInfo& info) const
+                {
+                    return (VariableID < info.VariableID);
+                }
 
                 uint32 VariableID;
                 int32 Value;

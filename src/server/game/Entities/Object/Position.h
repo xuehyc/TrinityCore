@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -117,6 +117,17 @@ public:
     void GetPosition(float &x, float &y, float &z, float &o) const
     {
         x = m_positionX; y = m_positionY; z = m_positionZ; o = m_orientation;
+    }
+
+    void GetPositionWithDistInFront(float dist, float& x, float& y)
+    {
+        GetPositionWithDistInOrientation(dist, GetOrientation(), x, y);
+    }
+
+    void GetPositionWithDistInOrientation(float dist, float orientation, float& x, float& y)
+    {
+        x = GetPositionX() + (dist * cos(orientation));
+        y = GetPositionY() + (dist * sin(orientation));
     }
 
     Position GetPosition() const { return *this; }

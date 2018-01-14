@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -55,385 +55,6 @@ bool IsPartOfSkillLine(uint32 skillId, uint32 spellId)
             return true;
 
     return false;
-}
-
-DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto)
-{
-    if (spellproto->IsPositive())
-        return DIMINISHING_NONE;
-
-    if (spellproto->HasAura(DIFFICULTY_NONE, SPELL_AURA_MOD_TAUNT))
-        return DIMINISHING_TAUNT;
-
-    switch (spellproto->Id)
-    {
-        case 64803:     // Entrapment
-        case 135373:    // Entrapment
-            return DIMINISHING_ROOT;
-        case 24394:     // Intimidation
-            return DIMINISHING_STUN;
-        case 118345:    // Pulverize (Primal Earth Elemental)
-            return DIMINISHING_STUN;
-        case 118905:    // Static Charge (Capacitor Totem)
-            return DIMINISHING_STUN;
-        case 108199:    // Gorefiend's Grasp
-            return DIMINISHING_AOE_KNOCKBACK;
-        default:
-            break;
-    }
-
-    // Explicit Diminishing Groups
-    switch (spellproto->SpellFamilyName)
-    {
-        case SPELLFAMILY_GENERIC:
-            break;
-        case SPELLFAMILY_MAGE:
-        {
-            // Frostjaw -- 102051
-            if (spellproto->SpellFamilyFlags[2] & 0x40000)
-                return DIMINISHING_SILENCE;
-
-            // Frost Nova -- 122
-            if (spellproto->SpellFamilyFlags[0] & 0x40)
-                return DIMINISHING_ROOT;
-            // Ice Ward -- 111340
-            if (spellproto->SpellFamilyFlags[0] & 0x80000 && spellproto->SpellFamilyFlags[2] & 0x2000)
-                return DIMINISHING_ROOT;
-            // Freeze (Water Elemental) -- 33395
-            if (spellproto->SpellFamilyFlags[2] & 0x200)
-                return DIMINISHING_ROOT;
-
-            // Deep Freeze -- 44572
-            if (spellproto->SpellFamilyFlags[1] & 0x100000)
-                return DIMINISHING_STUN;
-
-            // Dragon's Breath -- 31661
-            if (spellproto->SpellFamilyFlags[0] & 0x800000)
-                return DIMINISHING_INCAPACITATE;
-            // Polymorph -- 118
-            if (spellproto->SpellFamilyFlags[0] & 0x1000000)
-                return DIMINISHING_INCAPACITATE;
-            // Ring of Frost -- 82691
-            if (spellproto->SpellFamilyFlags[2] & 0x40)
-                return DIMINISHING_INCAPACITATE;
-            // Ice Nova -- 157997
-            if (spellproto->SpellFamilyFlags[2] & 0x800000)
-                return DIMINISHING_INCAPACITATE;
-            break;
-        }
-        case SPELLFAMILY_WARRIOR:
-        {
-            // Shockwave -- 132168
-            if (spellproto->SpellFamilyFlags[1] & 0x8000)
-                return DIMINISHING_STUN;
-            // Storm Bolt -- 132169
-            if (spellproto->SpellFamilyFlags[2] & 0x1000)
-                return DIMINISHING_STUN;
-
-            // Intimidating Shout -- 5246
-            if (spellproto->SpellFamilyFlags[0] & 0x40000)
-                return DIMINISHING_DISORIENT;
-
-            // Hamstring -- 1715, 8 seconds in PvP (6.0)
-            if (spellproto->SpellFamilyFlags[0] & 0x2)
-                return DIMINISHING_LIMITONLY;
-            break;
-        }
-        case SPELLFAMILY_WARLOCK:
-        {
-            // Mortal Coil -- 6789
-            if (spellproto->SpellFamilyFlags[0] & 0x80000)
-                return DIMINISHING_INCAPACITATE;
-            // Banish -- 710
-            if (spellproto->SpellFamilyFlags[1] & 0x8000000)
-                return DIMINISHING_INCAPACITATE;
-
-            // Fear -- 118699
-            if (spellproto->SpellFamilyFlags[1] & 0x400)
-                return DIMINISHING_DISORIENT;
-            // Howl of Terror -- 5484
-            if (spellproto->SpellFamilyFlags[1] & 0x8)
-                return DIMINISHING_DISORIENT;
-
-            // Shadowfury -- 30283
-            if (spellproto->SpellFamilyFlags[1] & 0x1000)
-                return DIMINISHING_STUN;
-            // Summon Infernal -- 22703
-            if (spellproto->SpellFamilyFlags[0] & 0x1000)
-                return DIMINISHING_STUN;
-            break;
-        }
-        case SPELLFAMILY_WARLOCK_PET:
-        {
-            // Fellash -- 115770
-            // Whiplash -- 6360
-            if (spellproto->SpellFamilyFlags[0] & 0x8000000)
-                return DIMINISHING_AOE_KNOCKBACK;
-
-            // Mesmerize (Shivarra pet) -- 115268
-            // Seduction (Succubus pet) -- 6358
-            if (spellproto->SpellFamilyFlags[0] & 0x2000000)
-                return DIMINISHING_DISORIENT;
-
-            // Axe Toss (Felguard pet) -- 89766
-            if (spellproto->SpellFamilyFlags[1] & 0x4)
-                return DIMINISHING_STUN;
-            break;
-        }
-        case SPELLFAMILY_DRUID:
-        {
-            // Maim -- 22570
-            if (spellproto->SpellFamilyFlags[1] & 0x80)
-                return DIMINISHING_STUN;
-            // Mighty Bash -- 5211
-            if (spellproto->SpellFamilyFlags[0] & 0x2000)
-                return DIMINISHING_STUN;
-            // Rake -- 163505 -- no flags on the stun
-            if (spellproto->Id == 163505)
-                return DIMINISHING_STUN;
-
-            // Incapacitating Roar -- 99, no flags on the stun, 14
-            if (spellproto->SpellFamilyFlags[1] & 0x1)
-                return DIMINISHING_INCAPACITATE;
-
-            // Cyclone -- 33786
-            if (spellproto->SpellFamilyFlags[1] & 0x20)
-                return DIMINISHING_DISORIENT;
-
-            // Typhoon -- 61391
-            if (spellproto->SpellFamilyFlags[1] & 0x1000000)
-                return DIMINISHING_AOE_KNOCKBACK;
-            // Ursol's Vortex -- 118283, no family flags
-            if (spellproto->Id == 118283)
-                return DIMINISHING_AOE_KNOCKBACK;
-
-            // Entangling Roots -- 339
-            if (spellproto->SpellFamilyFlags[0] & 0x200)
-                return DIMINISHING_ROOT;
-            // Mass Entanglement -- 102359
-            if (spellproto->SpellFamilyFlags[2] & 0x4)
-                return DIMINISHING_ROOT;
-
-            // Faerie Fire -- 770, 20 seconds in PvP (6.0)
-            if (spellproto->SpellFamilyFlags[0] & 0x400)
-                return DIMINISHING_LIMITONLY;
-            break;
-        }
-        case SPELLFAMILY_ROGUE:
-        {
-            // Cheap Shot -- 1833
-            if (spellproto->SpellFamilyFlags[0] & 0x400)
-                return DIMINISHING_STUN;
-            // Kidney Shot -- 408
-            if (spellproto->SpellFamilyFlags[0] & 0x200000)
-                return DIMINISHING_STUN;
-
-            // Gouge -- 1776
-            if (spellproto->SpellFamilyFlags[0] & 0x8)
-                return DIMINISHING_INCAPACITATE;
-            // Sap -- 6770
-            if (spellproto->SpellFamilyFlags[0] & 0x80)
-                return DIMINISHING_INCAPACITATE;
-
-            // Blind -- 2094
-            if (spellproto->SpellFamilyFlags[0] & 0x1000000)
-                return DIMINISHING_DISORIENT;
-
-            // Garrote -- 1330
-            if (spellproto->SpellFamilyFlags[1] & 0x20000000)
-                return DIMINISHING_SILENCE;
-            break;
-        }
-        case SPELLFAMILY_HUNTER:
-        {
-            // Charge (Tenacity pet) -- 53148, no flags
-            if (spellproto->Id == 53148)
-                return DIMINISHING_ROOT;
-            // Narrow Escape -- 136634, no flags
-            if (spellproto->Id == 136634)
-                return DIMINISHING_ROOT;
-
-            // Binding Shot -- 117526, no flags
-            if (spellproto->Id == 117526)
-                return DIMINISHING_STUN;
-
-            // Freezing Trap -- 3355
-            if (spellproto->SpellFamilyFlags[0] & 0x8)
-                return DIMINISHING_INCAPACITATE;
-            // Wyvern Sting -- 19386
-            if (spellproto->SpellFamilyFlags[1] & 0x1000)
-                return DIMINISHING_INCAPACITATE;
-            break;
-        }
-        case SPELLFAMILY_PALADIN:
-        {
-            // Repentance -- 20066
-            if (spellproto->SpellFamilyFlags[0] & 0x4)
-                return DIMINISHING_INCAPACITATE;
-
-            // Turn Evil -- 10326
-            if (spellproto->SpellFamilyFlags[1] & 0x800000)
-                return DIMINISHING_DISORIENT;
-
-            // Avenger's Shield -- 31935
-            if (spellproto->SpellFamilyFlags[0] & 0x4000)
-                return DIMINISHING_SILENCE;
-
-            // Fist of Justice -- 105593
-            // Hammer of Justice -- 853
-            if (spellproto->SpellFamilyFlags[0] & 0x800)
-                return DIMINISHING_STUN;
-            // Holy Wrath -- 119072
-            if (spellproto->SpellFamilyFlags[1] & 0x200000)
-                return DIMINISHING_STUN;
-            break;
-        }
-        case SPELLFAMILY_SHAMAN:
-        {
-            // Hex -- 51514
-            if (spellproto->SpellFamilyFlags[1] & 0x8000)
-                return DIMINISHING_INCAPACITATE;
-
-            // Thunderstorm -- 51490
-            if (spellproto->SpellFamilyFlags[1] & 0x2000)
-                return DIMINISHING_AOE_KNOCKBACK;
-
-            // Earthgrab Totem -- 64695
-            if (spellproto->SpellFamilyFlags[2] & 0x4000)
-                return DIMINISHING_ROOT;
-            break;
-        }
-        case SPELLFAMILY_DEATHKNIGHT:
-        {
-            // Strangulate -- 47476
-            if (spellproto->SpellFamilyFlags[0] & 0x200)
-                return DIMINISHING_SILENCE;
-
-            // Asphyxiate -- 108194
-            if (spellproto->SpellFamilyFlags[2] & 0x100000)
-                return DIMINISHING_STUN;
-            // Gnaw (Ghoul) -- 91800, no flags
-            if (spellproto->Id == 91800)
-                return DIMINISHING_STUN;
-            // Monstrous Blow (Ghoul w/ Dark Transformation active) -- 91797
-            if (spellproto->Id == 91797)
-                return DIMINISHING_STUN;
-            break;
-        }
-        case SPELLFAMILY_PRIEST:
-        {
-            // Dominate Mind -- 605
-            if (spellproto->SpellFamilyFlags[0] & 0x20000 && spellproto->GetSpellVisual() == 39068)
-                return DIMINISHING_INCAPACITATE;
-            // Holy Word: Chastise -- 88625
-            if (spellproto->SpellFamilyFlags[2] & 0x20)
-                return DIMINISHING_INCAPACITATE;
-            // Psychic Horror -- 64044
-            if (spellproto->SpellFamilyFlags[2] & 0x2000)
-                return DIMINISHING_INCAPACITATE;
-
-            // Psychic Scream -- 8122
-            if (spellproto->SpellFamilyFlags[0] & 0x10000)
-                return DIMINISHING_DISORIENT;
-
-            // Silence -- 15487
-            if (spellproto->SpellFamilyFlags[1] & 0x200000 && spellproto->SchoolMask == 32)
-                return DIMINISHING_SILENCE;
-            break;
-        }
-        case SPELLFAMILY_MONK:
-        {
-            // Disable -- 116706, no flags
-            if (spellproto->Id == 116706)
-                return DIMINISHING_ROOT;
-
-            // Charging Ox Wave -- 119392
-            if (spellproto->SpellFamilyFlags[1] & 0x10000)
-                return DIMINISHING_STUN;
-            // Fists of Fury -- 120086
-            if (spellproto->SpellFamilyFlags[1] & 0x800000 && !(spellproto->SpellFamilyFlags[2] & 0x8))
-                return DIMINISHING_STUN;
-            // Leg Sweep -- 119381
-            if (spellproto->SpellFamilyFlags[1] & 0x200)
-                return DIMINISHING_STUN;
-
-            // Incendiary Breath (honor talent) -- 202274, no flags
-            if (spellproto->Id == 202274)
-                return DIMINISHING_INCAPACITATE;
-            // Paralysis -- 115078
-            if (spellproto->SpellFamilyFlags[2] & 0x800000)
-                return DIMINISHING_INCAPACITATE;
-            break;
-        }
-        default:
-            break;
-    }
-
-    return DIMINISHING_NONE;
-}
-
-DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
-{
-    switch (group)
-    {
-        case DIMINISHING_TAUNT:
-        case DIMINISHING_STUN:
-            return DRTYPE_ALL;
-        case DIMINISHING_LIMITONLY:
-        case DIMINISHING_NONE:
-            return DRTYPE_NONE;
-        default:
-            return DRTYPE_PLAYER;
-    }
-}
-
-DiminishingLevels GetDiminishingReturnsMaxLevel(DiminishingGroup group)
-{
-    switch (group)
-    {
-        case DIMINISHING_TAUNT:
-            return DIMINISHING_LEVEL_TAUNT_IMMUNE;
-        case DIMINISHING_AOE_KNOCKBACK:
-            return DIMINISHING_LEVEL_2;
-        default:
-            return DIMINISHING_LEVEL_IMMUNE;
-    }
-}
-
-int32 GetDiminishingReturnsLimitDuration(SpellInfo const* spellproto)
-{
-    // Explicit diminishing duration
-    switch (spellproto->SpellFamilyName)
-    {
-        case SPELLFAMILY_DRUID:
-        {
-            // Faerie Fire - 20 seconds in PvP (6.0)
-            if (spellproto->SpellFamilyFlags[0] & 0x400)
-                return 20 * IN_MILLISECONDS;
-            break;
-        }
-        case SPELLFAMILY_HUNTER:
-        {
-            // Binding Shot - 3 seconds in PvP (6.0)
-            if (spellproto->Id == 117526)
-                return 3 * IN_MILLISECONDS;
-            // Wyvern Sting - 6 seconds in PvP (6.0)
-            if (spellproto->SpellFamilyFlags[1] & 0x1000)
-                return 6 * IN_MILLISECONDS;
-            break;
-        }
-        case SPELLFAMILY_MONK:
-        {
-            // Paralysis - 4 seconds in PvP regardless of if they are facing you (6.0)
-            if (spellproto->SpellFamilyFlags[2] & 0x800000)
-                return 4 * IN_MILLISECONDS;
-            break;
-        }
-        default:
-            break;
-    }
-
-    return 8 * IN_MILLISECONDS;
 }
 
 SpellMgr::SpellMgr() { }
@@ -857,15 +478,11 @@ bool SpellMgr::CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcE
         return false;
 
     // check spell family name/flags (if set) for spells
-    if (eventInfo.GetTypeMask() & (PERIODIC_PROC_FLAG_MASK | SPELL_PROC_FLAG_MASK | PROC_FLAG_DONE_TRAP_ACTIVATION))
+    if (eventInfo.GetTypeMask() & (PERIODIC_PROC_FLAG_MASK | SPELL_PROC_FLAG_MASK))
     {
-        SpellInfo const* eventSpellInfo = eventInfo.GetSpellInfo();
-
-        if (procEntry.SpellFamilyName && eventSpellInfo && (procEntry.SpellFamilyName != eventSpellInfo->SpellFamilyName))
-            return false;
-
-        if (procEntry.SpellFamilyMask && eventSpellInfo && !(procEntry.SpellFamilyMask & eventSpellInfo->SpellFamilyFlags))
-            return false;
+        if (SpellInfo const* eventSpellInfo = eventInfo.GetSpellInfo())
+            if (!eventSpellInfo->IsAffected(procEntry.SpellFamilyName, procEntry.SpellFamilyMask))
+                return false;
     }
 
     // check spell type mask (if set)
@@ -951,7 +568,7 @@ const std::vector<int32>* SpellMgr::GetSpellLinked(int32 spell_id) const
     return itr != mSpellLinkedMap.end() ? &(itr->second) : NULL;
 }
 
-PetLevelupSpellSet const* SpellMgr::GetPetLevelupSpellList(uint32 petFamily) const
+PetLevelupSpellStore const* SpellMgr::GetPetLevelupSpellList(uint32 petFamily) const
 {
     PetLevelupSpellMap::const_iterator itr = mPetLevelupSpellMap.find(petFamily);
     if (itr != mPetLevelupSpellMap.end())
@@ -1004,6 +621,10 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
         if (!player || gender != player->getGender())
             return false;
 
+    if (teamId != -1)                            // is not expected team
+        if (!player || player->GetTeamId() != teamId)
+            return false;
+
     if (raceMask)                                // is not expected race
         if (!player || !(raceMask & player->getRaceMask()))
             return false;
@@ -1017,7 +638,7 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
             return false;
 
     if (questEnd)                                // is not in expected forbidden quest state
-        if (!player || (((1 << player->GetQuestStatus(questEnd)) & questEndStatus) == 0))
+        if (!player || (((1 << player->GetQuestStatus(questEnd)) & questEndStatus) != 0))
             return false;
 
     if (auraSpell)                               // does not have expected aura
@@ -1654,77 +1275,6 @@ void SpellMgr::LoadSpellGroupStackRules()
     TC_LOG_INFO("server.loading", ">> Loaded %u spell group stack rules in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-// Used for prepare can/can't triggr aura
-static bool InitTriggerAuraData();
-// Define can trigger auras
-static bool isTriggerAura[TOTAL_AURAS];
-// Triggered always, even from triggered spells
-static bool isAlwaysTriggeredAura[TOTAL_AURAS];
-// Prepare lists
-static bool procPrepared = InitTriggerAuraData();
-
-// List of auras that CAN be trigger but may not exist in spell_proc_event
-// in most case need for drop charges
-// in some types of aura need do additional check
-// for example SPELL_AURA_MECHANIC_IMMUNITY - need check for mechanic
-bool InitTriggerAuraData()
-{
-    for (uint16 i = 0; i < TOTAL_AURAS; ++i)
-    {
-        isTriggerAura[i] = false;
-        isAlwaysTriggeredAura[i] = false;
-    }
-    isTriggerAura[SPELL_AURA_DUMMY] = true;
-    isTriggerAura[SPELL_AURA_MOD_CONFUSE] = true;
-    isTriggerAura[SPELL_AURA_MOD_THREAT] = true;
-    isTriggerAura[SPELL_AURA_MOD_STUN] = true; // Aura does not have charges but needs to be removed on trigger
-    isTriggerAura[SPELL_AURA_MOD_DAMAGE_DONE] = true;
-    isTriggerAura[SPELL_AURA_MOD_DAMAGE_TAKEN] = true;
-    isTriggerAura[SPELL_AURA_MOD_RESISTANCE] = true;
-    isTriggerAura[SPELL_AURA_MOD_STEALTH] = true;
-    isTriggerAura[SPELL_AURA_MOD_FEAR] = true; // Aura does not have charges but needs to be removed on trigger
-    isTriggerAura[SPELL_AURA_MOD_ROOT] = true;
-    isTriggerAura[SPELL_AURA_TRANSFORM] = true;
-    isTriggerAura[SPELL_AURA_REFLECT_SPELLS] = true;
-    isTriggerAura[SPELL_AURA_DAMAGE_IMMUNITY] = true;
-    isTriggerAura[SPELL_AURA_PROC_TRIGGER_SPELL] = true;
-    isTriggerAura[SPELL_AURA_PROC_TRIGGER_DAMAGE] = true;
-    isTriggerAura[SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK] = true;
-    isTriggerAura[SPELL_AURA_SCHOOL_ABSORB] = true; // Savage Defense untested
-    isTriggerAura[SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT] = true;
-    isTriggerAura[SPELL_AURA_MOD_POWER_COST_SCHOOL] = true;
-    isTriggerAura[SPELL_AURA_REFLECT_SPELLS_SCHOOL] = true;
-    isTriggerAura[SPELL_AURA_MECHANIC_IMMUNITY] = true;
-    isTriggerAura[SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN] = true;
-    isTriggerAura[SPELL_AURA_SPELL_MAGNET] = true;
-    isTriggerAura[SPELL_AURA_MOD_ATTACK_POWER] = true;
-    isTriggerAura[SPELL_AURA_MOD_POWER_REGEN_PERCENT] = true;
-    isTriggerAura[SPELL_AURA_INTERCEPT_MELEE_RANGED_ATTACKS] = true;
-    isTriggerAura[SPELL_AURA_OVERRIDE_CLASS_SCRIPTS] = true;
-    isTriggerAura[SPELL_AURA_MOD_MECHANIC_RESISTANCE] = true;
-    isTriggerAura[SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS] = true;
-    isTriggerAura[SPELL_AURA_MOD_MELEE_HASTE] = true;
-    isTriggerAura[SPELL_AURA_MOD_MELEE_HASTE_3] = true;
-    isTriggerAura[SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE] = true;
-    isTriggerAura[SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE] = true;
-    isTriggerAura[SPELL_AURA_MOD_SPELL_DAMAGE_FROM_CASTER] = true;
-    isTriggerAura[SPELL_AURA_MOD_SPELL_CRIT_CHANCE] = true;
-    isTriggerAura[SPELL_AURA_ABILITY_IGNORE_AURASTATE] = true;
-    isTriggerAura[SPELL_AURA_MOD_ROOT_2] = true;
-
-    isAlwaysTriggeredAura[SPELL_AURA_OVERRIDE_CLASS_SCRIPTS] = true;
-    isAlwaysTriggeredAura[SPELL_AURA_MOD_FEAR] = true;
-    isAlwaysTriggeredAura[SPELL_AURA_MOD_ROOT] = true;
-    isAlwaysTriggeredAura[SPELL_AURA_MOD_STUN] = true;
-    isAlwaysTriggeredAura[SPELL_AURA_TRANSFORM] = true;
-    isAlwaysTriggeredAura[SPELL_AURA_SPELL_MAGNET] = true;
-    isAlwaysTriggeredAura[SPELL_AURA_SCHOOL_ABSORB] = true;
-    isAlwaysTriggeredAura[SPELL_AURA_MOD_STEALTH] = true;
-    isAlwaysTriggeredAura[SPELL_AURA_MOD_ROOT_2] = true;
-
-    return true;
-}
-
 void SpellMgr::LoadSpellProcs()
 {
     uint32 oldMSTime = getMSTime();
@@ -1806,6 +1356,8 @@ void SpellMgr::LoadSpellProcs()
                     procEntry.Charges = spellInfo->ProcCharges;
                 if (!procEntry.Chance && !procEntry.ProcsPerMinute)
                     procEntry.Chance = float(spellInfo->ProcChance);
+                if (procEntry.Cooldown == Milliseconds::zero())
+                    procEntry.Cooldown = Milliseconds(spellInfo->ProcCooldown);
 
                 // validate data
                 if (procEntry.SchoolMask & ~SPELL_SCHOOL_MASK_ALL)
@@ -1854,6 +1406,83 @@ void SpellMgr::LoadSpellProcs()
 
     TC_LOG_INFO("server.loading", ">> Loaded %u spell proc conditions and data in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 
+    // Define can trigger auras
+    bool isTriggerAura[TOTAL_AURAS];
+    // Triggered always, even from triggered spells
+    bool isAlwaysTriggeredAura[TOTAL_AURAS];
+    // SpellTypeMask to add to the proc
+    uint32 spellTypeMask[TOTAL_AURAS];
+
+    // List of auras that CAN trigger but may not exist in spell_proc
+    // in most cases needed to drop charges
+
+    // some aura types need additional checks (eg SPELL_AURA_MECHANIC_IMMUNITY needs mechanic check)
+    // see AuraEffect::CheckEffectProc
+    for (uint16 i = 0; i < TOTAL_AURAS; ++i)
+    {
+        isTriggerAura[i] = false;
+        isAlwaysTriggeredAura[i] = false;
+        spellTypeMask[i] = PROC_SPELL_TYPE_MASK_ALL;
+    }
+
+    isTriggerAura[SPELL_AURA_DUMMY] = true;
+    isTriggerAura[SPELL_AURA_MOD_CONFUSE] = true;
+    isTriggerAura[SPELL_AURA_MOD_THREAT] = true;
+    isTriggerAura[SPELL_AURA_MOD_STUN] = true; // Aura does not have charges but needs to be removed on trigger
+    isTriggerAura[SPELL_AURA_MOD_DAMAGE_DONE] = true;
+    isTriggerAura[SPELL_AURA_MOD_DAMAGE_TAKEN] = true;
+    isTriggerAura[SPELL_AURA_MOD_RESISTANCE] = true;
+    isTriggerAura[SPELL_AURA_MOD_STEALTH] = true;
+    isTriggerAura[SPELL_AURA_MOD_FEAR] = true; // Aura does not have charges but needs to be removed on trigger
+    isTriggerAura[SPELL_AURA_MOD_ROOT] = true;
+    isTriggerAura[SPELL_AURA_TRANSFORM] = true;
+    isTriggerAura[SPELL_AURA_REFLECT_SPELLS] = true;
+    isTriggerAura[SPELL_AURA_DAMAGE_IMMUNITY] = true;
+    isTriggerAura[SPELL_AURA_PROC_TRIGGER_SPELL] = true;
+    isTriggerAura[SPELL_AURA_PROC_TRIGGER_DAMAGE] = true;
+    isTriggerAura[SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK] = true;
+    isTriggerAura[SPELL_AURA_SCHOOL_ABSORB] = true; // Savage Defense untested
+    isTriggerAura[SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT] = true;
+    isTriggerAura[SPELL_AURA_MOD_POWER_COST_SCHOOL] = true;
+    isTriggerAura[SPELL_AURA_REFLECT_SPELLS_SCHOOL] = true;
+    isTriggerAura[SPELL_AURA_MECHANIC_IMMUNITY] = true;
+    isTriggerAura[SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN] = true;
+    isTriggerAura[SPELL_AURA_SPELL_MAGNET] = true;
+    isTriggerAura[SPELL_AURA_MOD_ATTACK_POWER] = true;
+    isTriggerAura[SPELL_AURA_MOD_POWER_REGEN_PERCENT] = true;
+    isTriggerAura[SPELL_AURA_INTERCEPT_MELEE_RANGED_ATTACKS] = true;
+    isTriggerAura[SPELL_AURA_OVERRIDE_CLASS_SCRIPTS] = true;
+    isTriggerAura[SPELL_AURA_MOD_MECHANIC_RESISTANCE] = true;
+    isTriggerAura[SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS] = true;
+    isTriggerAura[SPELL_AURA_MOD_MELEE_HASTE] = true;
+    isTriggerAura[SPELL_AURA_MOD_MELEE_HASTE_3] = true;
+    isTriggerAura[SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE] = true;
+    isTriggerAura[SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE] = true;
+    isTriggerAura[SPELL_AURA_MOD_SPELL_DAMAGE_FROM_CASTER] = true;
+    isTriggerAura[SPELL_AURA_MOD_SPELL_CRIT_CHANCE] = true;
+    isTriggerAura[SPELL_AURA_ABILITY_IGNORE_AURASTATE] = true;
+    isTriggerAura[SPELL_AURA_MOD_ROOT_2] = true;
+
+    isAlwaysTriggeredAura[SPELL_AURA_OVERRIDE_CLASS_SCRIPTS] = true;
+    isAlwaysTriggeredAura[SPELL_AURA_MOD_STEALTH] = true;
+    isAlwaysTriggeredAura[SPELL_AURA_MOD_CONFUSE] = true;
+    isAlwaysTriggeredAura[SPELL_AURA_MOD_FEAR] = true;
+    isAlwaysTriggeredAura[SPELL_AURA_MOD_ROOT] = true;
+    isAlwaysTriggeredAura[SPELL_AURA_MOD_STUN] = true;
+    isAlwaysTriggeredAura[SPELL_AURA_TRANSFORM] = true;
+    isAlwaysTriggeredAura[SPELL_AURA_SPELL_MAGNET] = true;
+    isAlwaysTriggeredAura[SPELL_AURA_SCHOOL_ABSORB] = true;
+    isAlwaysTriggeredAura[SPELL_AURA_MOD_STEALTH] = true;
+    isAlwaysTriggeredAura[SPELL_AURA_MOD_ROOT_2] = true;
+
+    spellTypeMask[SPELL_AURA_MOD_STEALTH] = PROC_SPELL_TYPE_DAMAGE | PROC_SPELL_TYPE_NO_DMG_HEAL;
+    spellTypeMask[SPELL_AURA_MOD_CONFUSE] = PROC_SPELL_TYPE_DAMAGE;
+    spellTypeMask[SPELL_AURA_MOD_FEAR] = PROC_SPELL_TYPE_DAMAGE;
+    spellTypeMask[SPELL_AURA_MOD_ROOT] = PROC_SPELL_TYPE_DAMAGE;
+    spellTypeMask[SPELL_AURA_MOD_ROOT_2] = PROC_SPELL_TYPE_DAMAGE;
+    spellTypeMask[SPELL_AURA_MOD_STUN] = PROC_SPELL_TYPE_DAMAGE;
+    spellTypeMask[SPELL_AURA_TRANSFORM] = PROC_SPELL_TYPE_DAMAGE;
+
     // This generates default procs to retain compatibility with previous proc system
     TC_LOG_INFO("server.loading", "Generating spell proc data from SpellMap...");
     count = 0;
@@ -1864,10 +1493,16 @@ void SpellMgr::LoadSpellProcs()
         if (!spellInfo)
             continue;
 
+        // Data already present in DB, overwrites default proc
         if (mSpellProcMap.find(spellInfo->Id) != mSpellProcMap.end())
             continue;
 
-        bool found = false, addTriggerFlag = false;
+        // Nothing to do if no flags set
+        if (!spellInfo->ProcFlags)
+            continue;
+
+        bool addTriggerFlag = false;
+        uint32 procSpellTypeMask = PROC_SPELL_TYPE_NONE;
         for (SpellEffectInfo const* effect : spellInfo->GetEffectsForDifficulty(DIFFICULTY_NONE))
         {
             if (!effect || !effect->IsEffect())
@@ -1880,17 +1515,28 @@ void SpellMgr::LoadSpellProcs()
             if (!isTriggerAura[auraName])
                 continue;
 
-            found = true;
-
-            if (!addTriggerFlag && isAlwaysTriggeredAura[auraName])
+            procSpellTypeMask |= spellTypeMask[auraName];
+            if (isAlwaysTriggeredAura[auraName])
                 addTriggerFlag = true;
+
+            // many proc auras with taken procFlag mask don't have attribute "can proc with triggered"
+            // they should proc nevertheless (example mage armor spells with judgement)
+            if (!addTriggerFlag && (spellInfo->ProcFlags & TAKEN_HIT_PROC_FLAG_MASK) != 0)
+            {
+                switch (auraName)
+                {
+                    case SPELL_AURA_PROC_TRIGGER_SPELL:
+                    case SPELL_AURA_PROC_TRIGGER_DAMAGE:
+                        addTriggerFlag = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
             break;
         }
 
-        if (!found)
-            continue;
-
-        if (!spellInfo->ProcFlags)
+        if (!procSpellTypeMask)
             continue;
 
         SpellProcEntry procEntry;
@@ -1904,7 +1550,7 @@ void SpellMgr::LoadSpellProcs()
         if (procEntry.SpellFamilyMask)
             procEntry.SpellFamilyName = spellInfo->SpellFamilyName;
 
-        procEntry.SpellTypeMask   = PROC_SPELL_TYPE_MASK_ALL;
+        procEntry.SpellTypeMask   = procSpellTypeMask;
         procEntry.SpellPhaseMask  = PROC_SPELL_PHASE_HIT;
         procEntry.HitMask         = PROC_HIT_NONE; // uses default proc @see SpellMgr::CanSpellTriggerProcOnEvent
 
@@ -1926,7 +1572,7 @@ void SpellMgr::LoadSpellProcs()
 
         procEntry.ProcsPerMinute  = 0;
         procEntry.Chance          = spellInfo->ProcChance;
-        procEntry.Cooldown        = Milliseconds::zero();
+        procEntry.Cooldown        = Milliseconds(spellInfo->ProcCooldown);
         procEntry.Charges         = spellInfo->ProcCharges;
 
         mSpellProcMap[spellInfo->Id] = procEntry;
@@ -2247,11 +1893,11 @@ void SpellMgr::LoadPetLevelupSpellMap()
                 if (!spell->SpellLevel)
                     continue;
 
-                PetLevelupSpellSet& spellSet = mPetLevelupSpellMap[i];
+                PetLevelupSpellStore& spellSet = mPetLevelupSpellMap[i];
                 if (spellSet.empty())
                     ++family_count;
 
-                spellSet.insert(PetLevelupSpellSet::value_type(spell->SpellLevel, spell->Id));
+                spellSet.push_back(spell->Id);
                 ++count;
             }
         }
@@ -2276,16 +1922,16 @@ bool LoadPetDefaultSpells_helper(CreatureTemplate const* cInfo, PetDefaultSpells
         return false;
 
     // remove duplicates with levelupSpells if any
-    if (PetLevelupSpellSet const* levelupSpells = cInfo->family ? sSpellMgr->GetPetLevelupSpellList(cInfo->family) : NULL)
+    if (PetLevelupSpellStore const* levelupSpells = cInfo->family ? sSpellMgr->GetPetLevelupSpellList(cInfo->family) : NULL)
     {
         for (uint8 j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
         {
             if (!petDefSpells.spellid[j])
                 continue;
 
-            for (PetLevelupSpellSet::const_iterator itr = levelupSpells->begin(); itr != levelupSpells->end(); ++itr)
+            for (PetLevelupSpellStore::const_iterator itr = levelupSpells->begin(); itr != levelupSpells->end(); ++itr)
             {
-                if (itr->second == petDefSpells.spellid[j])
+                if (*itr == petDefSpells.spellid[j])
                 {
                     petDefSpells.spellid[j] = 0;
                     break;
@@ -2365,8 +2011,8 @@ void SpellMgr::LoadSpellAreas()
     mSpellAreaForQuestEndMap.clear();
     mSpellAreaForAuraMap.clear();
 
-    //                                                  0     1         2              3               4                 5          6          7       8         9
-    QueryResult result = WorldDatabase.Query("SELECT spell, area, quest_start, quest_start_status, quest_end_status, quest_end, aura_spell, racemask, gender, autocast FROM spell_area");
+    //                                                  0     1         2              3               4                 5          6         7       8         9       10
+    QueryResult result = WorldDatabase.Query("SELECT spell, area, quest_start, quest_start_status, quest_end_status, quest_end, aura_spell, teamId, racemask, gender, autocast FROM spell_area");
     if (!result)
     {
         TC_LOG_INFO("server.loading", ">> Loaded 0 spell area requirements. DB table `spell_area` is empty.");
@@ -2388,9 +2034,10 @@ void SpellMgr::LoadSpellAreas()
         spellArea.questEndStatus      = fields[4].GetUInt32();
         spellArea.questEnd            = fields[5].GetUInt32();
         spellArea.auraSpell           = fields[6].GetInt32();
-        spellArea.raceMask            = fields[7].GetUInt32();
-        spellArea.gender              = Gender(fields[8].GetUInt8());
-        spellArea.autocast            = fields[9].GetBool();
+        spellArea.teamId              = fields[7].GetInt8();
+        spellArea.raceMask            = fields[8].GetUInt32();
+        spellArea.gender              = Gender(fields[9].GetUInt8());
+        spellArea.autocast            = fields[10].GetBool();
 
         if (SpellInfo const* spellInfo = GetSpellInfo(spell))
         {
@@ -2415,6 +2062,8 @@ void SpellMgr::LoadSpellAreas()
                 if (spellArea.questStart != itr->second.questStart)
                     continue;
                 if (spellArea.auraSpell != itr->second.auraSpell)
+                    continue;
+                if (spellArea.teamId != itr->second.teamId)
                     continue;
                 if ((spellArea.raceMask & itr->second.raceMask) == 0)
                     continue;
@@ -2505,6 +2154,12 @@ void SpellMgr::LoadSpellAreas()
                     continue;
                 }
             }
+        }
+
+        if (spellArea.teamId < -1 || spellArea.teamId > TEAM_HORDE)
+        {
+            TC_LOG_ERROR("sql.sql", "The spell %u listed in `spell_area` has wrong team id (%u) requirement.", spell, spellArea.teamId);
+            continue;
         }
 
         if (spellArea.raceMask && (spellArea.raceMask & RACEMASK_ALL_PLAYABLE) == 0)
@@ -3035,6 +2690,12 @@ void SpellMgr::LoadSpellInfoCorrections()
         const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->SpellClassMask = flag128(685904631, 1151048, 0, 0);
     });
 
+    // Death and Decay
+    ApplySpellFix({ 52212 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
+    });
+
     // Oscillation Field
     ApplySpellFix({ 37408 }, [](SpellInfo* spellInfo)
     {
@@ -3069,12 +2730,9 @@ void SpellMgr::LoadSpellInfoCorrections()
         27892, // To Anchor 1
         27928, // To Anchor 1
         27935, // To Anchor 1
-        27915, // Anchor to Skulls
-        27931, // Anchor to Skulls
-        27937  // Anchor to Skulls
     }, [](SpellInfo* spellInfo)
     {
-        spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
     });
 
     // Wrath of the Plaguebringer
@@ -3116,7 +2774,7 @@ void SpellMgr::LoadSpellInfoCorrections()
     // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with
     ApplySpellFix({ 61719 }, [](SpellInfo* spellInfo)
     {
-        spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_HITBYSPELL | AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
+        spellInfo->AuraInterruptFlags[0] = AURA_INTERRUPT_FLAG_HITBYSPELL | AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
     });
 
     ApplySpellFix({
@@ -3153,7 +2811,7 @@ void SpellMgr::LoadSpellInfoCorrections()
         47134  // Quest Complete
     }, [](SpellInfo* spellInfo)
     {
-        //! HACK: This spell break quest complete for alliance and on retail not used °_O
+        //! HACK: This spell break quest complete for alliance and on retail not used
         const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->Effect = 0;
     });
 
@@ -3201,6 +2859,12 @@ void SpellMgr::LoadSpellInfoCorrections()
     ApplySpellFix({ 59544, 121093 }, [](SpellInfo* spellInfo)
     {
         spellInfo->SpellFamilyFlags[2] = 0x80000000;
+    });
+
+    // Unleashed Souls
+    ApplySpellFix({ 68979 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13); // 50000yd
     });
 
     //
@@ -3281,7 +2945,7 @@ void SpellMgr::LoadSpellInfoCorrections()
     ApplySpellFix({ 63414 }, [](SpellInfo* spellInfo)
     {
         const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->TargetB = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-        spellInfo->ChannelInterruptFlags = 0;
+        spellInfo->ChannelInterruptFlags.fill(0);
     });
 
     // Rocket Strike (Mimiron)
@@ -3382,7 +3046,7 @@ void SpellMgr::LoadSpellInfoCorrections()
     // Lock Players and Tap Chest
     ApplySpellFix({ 72347 }, [](SpellInfo* spellInfo)
     {
-                spellInfo->AttributesEx3 &= ~SPELL_ATTR3_NO_INITIAL_AGGRO;
+        spellInfo->AttributesEx3 &= ~SPELL_ATTR3_NO_INITIAL_AGGRO;
     });
 
     // Resistant Skin (Deathbringer Saurfang adds)
@@ -3649,7 +3313,7 @@ void SpellMgr::LoadSpellInfoCorrections()
     // Threatening Gaze
     ApplySpellFix({ 24314 }, [](SpellInfo* spellInfo)
     {
-        spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CAST | AURA_INTERRUPT_FLAG_MOVE | AURA_INTERRUPT_FLAG_JUMP;
+        spellInfo->AuraInterruptFlags[0] |= AURA_INTERRUPT_FLAG_CAST | AURA_INTERRUPT_FLAG_MOVE | AURA_INTERRUPT_FLAG_JUMP;
     });
 
     // Tree of Life (Passive)
@@ -3682,6 +3346,12 @@ void SpellMgr::LoadSpellInfoCorrections()
         const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->TargetA = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
     });
 
+    // Fel Rush &  Demon Hunter Glide
+    ApplySpellFix({ 199737, 131347 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AuraInterruptFlags[0] |= AURA_INTERRUPT_FLAG_LANDING;
+    });
+
     //
     // ISLE OF CONQUEST SPELLS
     //
@@ -3710,15 +3380,128 @@ void SpellMgr::LoadSpellInfoCorrections()
     // Blaze of Glory
     ApplySpellFix({ 99252 }, [](SpellInfo* spellInfo)
     {
-        spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CHANGE_MAP;
+        spellInfo->AuraInterruptFlags[0] |= AURA_INTERRUPT_FLAG_CHANGE_MAP;
+    });
+
+    ApplySpellFix({
+        98135, // Summon Fragment of Rhyolith
+        98553  // Summon Spark of Rhyolith
+    }, [](SpellInfo* spellInfo)
+    {
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+    });
+
+    // Volcanic Birth
+    ApplySpellFix({ 98010 }, [](SpellInfo* spellInfo)
+    {
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_1))->TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_1))->TargetB = 0;
+    });
+
+    // Burning Orbs summon
+    ApplySpellFix({ 98565 }, [](SpellInfo* spellInfo)
+    {
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->TargetB = 0;
     });
     // ENDOF FIRELANDS SPELLS
 
-    // Summon Master Li Fei
-    ApplySpellFix({ 102445 }, [](SpellInfo* spellInfo)
+    // THE WANDERING ISLE SPELLS
+    // Summon Pet
+    ApplySpellFix({ 107924 }, [](SpellInfo* spellInfo)
+    {
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_1))->TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    });
+
+    ApplySpellFix({
+        102445, // Summon Master Li Fei
+        102499, // Fire Crash
+        118499, // Summon Aysa
+        118500, // Summon Ji
+        116190, // Summon Child 1
+        116191, // Summon Child 2
+        108786, // Summon Stack of Reeds
+        108827, // Summon Stack of Planks
+        108847, // Summon Stack of Blocks
+        108858, // Summon Tiger Stand
+        104450, // Summon Ji Yuan
+        104571, // Summon Aysa
+        126040, // Summon Master Shang Xi
+        115334, // Summon Aysa
+        115336, // Summon Ji
+        115338, // Summon Jojo
+        115493, // Summon Aysa
+        115494, // Summon Ji
+        115495, // Summon Jojo
+        117597  // Summon Ji
+    }, [](SpellInfo* spellInfo)
     {
         const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->TargetA = SpellImplicitTargetInfo(TARGET_DEST_DB);
     });
+
+    // Taste of Iron Game Aura
+    ApplySpellFix({ 164042 }, [](SpellInfo* spellInfo)
+    {
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_2))->Effect = 0;
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_2))->Effect = 0;
+    });
+
+    // Play Teleport Dalaran Scene
+    ApplySpellFix({ 227861 }, [](SpellInfo* spellInfo)
+    {
+        // Area 7881 should be applied to player by Dalaran Gob, but NYI
+        spellInfo->RequiredAreasID = 0;
+    });
+
+    ApplySpellFix({
+        114710, // Forcecast Summon Amberleaf Troublemaker
+        118032  // Water Spout
+    }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->MaxAffectedTargets = 1;
+    });
+
+    // Summon Lightning
+    ApplySpellFix({ 109062 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(1);
+    });
+
+    // Flame Spout
+    ApplySpellFix({ 114685 }, [](SpellInfo* spellInfo)
+    {
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_1_YARD);
+    });
+
+    // Ride Vehicle
+    ApplySpellFix({ 102717 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->RecoveryTime = 0;
+    });
+
+    // Summon Jojo Ironbrow
+    ApplySpellFix({ 108845 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(4); // 120 seconds
+    });
+
+    // Eject Passenger 1
+    ApplySpellFix({ 60603 }, [](SpellInfo* spellInfo)
+    {
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->BasePoints = 1;
+    });
+
+    ApplySpellFix({
+        105002, // Summon Hot Air Balloon
+        120344, // Summon Aysa
+        120345, // Summon Jojo
+        120749, // Summon Ji
+        120753  // Summon Garrosh
+    }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(7); // 10yd
+    });
+    // ENDOF THE WANDERING ISLE SPELLS
 
     SpellInfo* spellInfo = NULL;
     for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)
@@ -3777,6 +3560,36 @@ void SpellMgr::LoadSpellInfoSpellSpecificAndAuraState()
     }
 
     TC_LOG_INFO("server.loading", ">> Loaded SpellInfo SpellSpecific and AuraState in %u ms", GetMSTimeDiffToNow(oldMSTime));
+}
+
+void SpellMgr::LoadSpellInfoDiminishing()
+{
+    uint32 oldMSTime = getMSTime();
+
+    for (SpellInfo* spellInfo : mSpellInfoMap)
+    {
+        if (!spellInfo)
+            continue;
+
+        spellInfo->_LoadSpellDiminishInfo();
+    }
+
+    TC_LOG_INFO("server.loading", ">> Loaded SpellInfo diminishing infos in %u ms", GetMSTimeDiffToNow(oldMSTime));
+}
+
+void SpellMgr::LoadSpellInfoImmunities()
+{
+    uint32 oldMSTime = getMSTime();
+
+    for (SpellInfo* spellInfo : mSpellInfoMap)
+    {
+        if (!spellInfo)
+            continue;
+
+        spellInfo->_LoadImmunityInfo();
+    }
+
+    TC_LOG_INFO("server.loading", ">> Loaded SpellInfo immunity infos in %u ms", GetMSTimeDiffToNow(oldMSTime));
 }
 
 void SpellMgr::LoadPetFamilySpellsStore()

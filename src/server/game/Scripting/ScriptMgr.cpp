@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -20,6 +20,7 @@
 #include "AreaTrigger.h"
 #include "AreaTriggerAI.h"
 #include "Chat.h"
+#include "Conversation.h"
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "CreatureAIImpl.h"
@@ -110,7 +111,15 @@ struct is_script_database_bound<AreaTriggerEntityScript>
     : std::true_type { };
 
 template<>
+struct is_script_database_bound<ConversationScript>
+    : std::true_type { };
+
+template<>
 struct is_script_database_bound<SceneScript>
+    : std::true_type { };
+
+template<>
+struct is_script_database_bound<QuestScript>
     : std::true_type { };
 
 enum Spells
@@ -328,7 +337,6 @@ class ScriptRegistrySwapHooks
 {
 };
 
-/// This hook is responsible for swapping OutdoorPvP's
 template<typename Base>
 class UnsupportedScriptRegistrySwapHooks
     : public ScriptRegistrySwapHookBase
@@ -744,6 +752,35 @@ private:
     bool swapped;
 };
 
+/// This hook is responsible for swapping QuestScript's
+template<typename Base>
+class ScriptRegistrySwapHooks<QuestScript, Base>
+    : public ScriptRegistrySwapHookBase
+{
+public:
+    ScriptRegistrySwapHooks() : swapped(false) { }
+
+    void BeforeReleaseContext(std::string const& context) final override
+    {
+        auto const bounds = static_cast<Base*>(this)->_ids_of_contexts.equal_range(context);
+        if (bounds.first != bounds.second)
+            swapped = true;
+    }
+
+    void BeforeSwapContext(bool /*initialize*/) override
+    {
+        swapped = false;
+    }
+
+    void BeforeUnload() final override
+    {
+        ASSERT(!swapped);
+    }
+
+private:
+    bool swapped;
+};
+
 /// This hook is responsible for swapping SpellScriptLoader's
 template<typename Base>
 class ScriptRegistrySwapHooks<SpellScriptLoader, Base>
@@ -1052,6 +1089,9 @@ private:
         itr->second
 
 // Utility macros for finding specific scripts.
+#define GET_SCRIPT_NO_RET(T, I, V) \
+    T* V = ScriptRegistry<T>::Instance()->GetScriptById(I);
+
 #define GET_SCRIPT(T, I, V) \
     T* V = ScriptRegistry<T>::Instance()->GetScriptById(I); \
     if (!V) \
@@ -1742,8 +1782,15 @@ CreatureAI* ScriptMgr::GetCreatureAI(Creature* creature)
 {
     ASSERT(creature);
 
-    GET_SCRIPT_RET(CreatureScript, creature->GetScriptId(), tmpscript, NULL);
-    return tmpscript->GetAI(creature);
+    GET_SCRIPT_NO_RET(CreatureScript, creature->GetScriptId(), tmpscript);
+    if (tmpscript)
+        return tmpscript->GetAI(creature);
+
+    GET_SCRIPT_NO_RET(VehicleScript, creature->GetScriptId(), tmpVehiclescript);
+    if (tmpVehiclescript)
+        return tmpVehiclescript->GetAI(creature);
+
+    return nullptr;
 }
 
 GameObjectAI* ScriptMgr::GetGameObjectAI(GameObject* gameobject)
@@ -2215,6 +2262,11 @@ void ScriptMgr::OnPlayerLogin(Player* player, bool firstLogin)
     FOREACH_SCRIPT(PlayerScript)->OnLogin(player, firstLogin);
 }
 
+void ScriptMgr::OnPlayerUpdate(Player* player, uint32 diff)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnUpdate(player, diff);
+}
+
 void ScriptMgr::OnPlayerLogout(Player* player)
 {
     FOREACH_SCRIPT(PlayerScript)->OnLogout(player);
@@ -2245,9 +2297,39 @@ void ScriptMgr::OnPlayerBindToInstance(Player* player, Difficulty difficulty, ui
     FOREACH_SCRIPT(PlayerScript)->OnBindToInstance(player, difficulty, mapid, permanent, extendState);
 }
 
-void ScriptMgr::OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 newArea)
+void ScriptMgr::OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 oldZone, uint32 newArea)
 {
-    FOREACH_SCRIPT(PlayerScript)->OnUpdateZone(player, newZone, newArea);
+    FOREACH_SCRIPT(PlayerScript)->OnUpdateZone(player, newZone, oldZone, newArea);
+}
+
+void ScriptMgr::OnPlayerUpdateArea(Player* player, uint32 newArea, uint32 oldArea)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnUpdateArea(player, newArea, oldArea);
+}
+
+void ScriptMgr::OnQuestAccept(Player* player, const Quest* quest)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnQuestAccept(player, quest);
+}
+
+void ScriptMgr::OnQuestReward(Player* player, const Quest* quest)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnQuestReward(player, quest);
+}
+
+void ScriptMgr::OnObjectiveValidate(Player* player, uint32 questID, uint32 objectiveID)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnObjectiveValidate(player, questID, objectiveID);
+}
+
+void ScriptMgr::OnQuestComplete(Player* player, const Quest* quest)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnQuestComplete(player, quest);
+}
+
+void ScriptMgr::OnQuestAbandon(Player* player, const Quest* quest)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnQuestAbandon(player, quest);
 }
 
 void ScriptMgr::OnQuestStatusChange(Player* player, uint32 questId)
@@ -2255,9 +2337,44 @@ void ScriptMgr::OnQuestStatusChange(Player* player, uint32 questId)
     FOREACH_SCRIPT(PlayerScript)->OnQuestStatusChange(player, questId);
 }
 
+void ScriptMgr::OnModifyPower(Player* player, Powers power, int32 oldValue, int32& newValue, bool regen, bool after)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnModifyPower(player, power, oldValue, newValue, regen, after);
+}
+
+void ScriptMgr::OnPlayerTakeDamage(Player* player, uint32 damage, SpellSchoolMask schoolMask)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnTakeDamage(player, damage, schoolMask);
+}
+
+void ScriptMgr::OnSceneStart(Player* player, uint32 scenePackageId, uint32 sceneInstanceId)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnSceneStart(player, scenePackageId, sceneInstanceId);
+}
+
+void ScriptMgr::OnSceneTriggerEvent(Player* player, uint32 sceneInstanceId, std::string p_Event)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnSceneTriggerEvent(player, sceneInstanceId, p_Event);
+}
+
+void ScriptMgr::OnSceneCancel(Player* player, uint32 sceneInstanceId)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnSceneCancel(player, sceneInstanceId);
+}
+
+void ScriptMgr::OnSceneComplete(Player* player, uint32 sceneInstanceId)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnSceneComplete(player, sceneInstanceId);
+}
+
 void ScriptMgr::OnMovieComplete(Player* player, uint32 movieId)
 {
     FOREACH_SCRIPT(PlayerScript)->OnMovieComplete(player, movieId);
+}
+
+void ScriptMgr::OnPlayerChoiceResponse(Player* player, uint32 choiceId, uint32 responseId)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnPlayerChoiceResponse(player, choiceId, responseId);
 }
 
 // Account
@@ -2291,19 +2408,34 @@ void ScriptMgr::OnFailedPasswordChange(uint32 accountId)
     FOREACH_SCRIPT(AccountScript)->OnFailedPasswordChange(accountId);
 }
 
+// Rest
+void ScriptMgr::OnRestGetReceived(std::string url, RestResponse& response)
+{
+    FOR_SCRIPTS(RestScript, itr, end)
+        if (itr->second->GetName() == url)
+            itr->second->OnGet(response);
+}
+
+void ScriptMgr::OnRestPostReceived(std::string url, boost::property_tree::ptree tree, RestResponse& response)
+{
+    FOR_SCRIPTS(RestScript, itr, end)
+        if (itr->second->GetName() == url)
+            itr->second->OnPost(tree, response);
+}
+
 void ScriptMgr::OnLootItem(Player* player, Item* item, uint32 count)
 {
-	FOREACH_SCRIPT(PlayerScript)->OnLootItem(player, item, count);
+    FOREACH_SCRIPT(PlayerScript)->OnLootItem(player, item, count);
 }
 
 void ScriptMgr::OnCreateItem(Player* player, Item* item, uint32 count)
 {
-	FOREACH_SCRIPT(PlayerScript)->OnCreateItem(player, item, count);
+    FOREACH_SCRIPT(PlayerScript)->OnCreateItem(player, item, count);
 }
 
 void ScriptMgr::OnQuestRewardItem(Player* player, Item* item, uint32 count)
 {
-	FOREACH_SCRIPT(PlayerScript)->OnQuestRewardItem(player, item, count);
+    FOREACH_SCRIPT(PlayerScript)->OnQuestRewardItem(player, item, count);
 }
 
 // Guild
@@ -2425,6 +2557,15 @@ void ScriptMgr::ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& dama
     FOREACH_SCRIPT(PlayerScript)->ModifySpellDamageTaken(target, attacker, damage);
 }
 
+// Conversation
+void ScriptMgr::OnConversationCreate(Conversation* conversation, Unit* creator)
+{
+    ASSERT(conversation);
+
+    GET_SCRIPT(ConversationScript, conversation->GetScriptId(), tmpscript);
+    tmpscript->OnConversationCreate(conversation, creator);
+}
+
 // Scene
 void ScriptMgr::OnSceneStart(Player* player, uint32 sceneInstanceID, SceneTemplate const* sceneTemplate)
 {
@@ -2460,6 +2601,24 @@ void ScriptMgr::OnSceneComplete(Player* player, uint32 sceneInstanceID, SceneTem
 
     GET_SCRIPT(SceneScript, sceneTemplate->ScriptId, tmpscript);
     tmpscript->OnSceneComplete(player, sceneInstanceID, sceneTemplate);
+}
+
+void ScriptMgr::OnQuestStatusChange(Player* player, Quest const* quest, QuestStatus oldStatus, QuestStatus newStatus)
+{
+    ASSERT(player);
+    ASSERT(quest);
+
+    GET_SCRIPT(QuestScript, quest->GetScriptId(), tmpscript);
+    tmpscript->OnQuestStatusChange(player, quest, oldStatus, newStatus);
+}
+
+void ScriptMgr::OnQuestObjectiveChange(Player* player, Quest const* quest, QuestObjective const& objective, int32 oldAmount, int32 newAmount)
+{
+    ASSERT(player);
+    ASSERT(quest);
+
+    GET_SCRIPT(QuestScript, quest->GetScriptId(), tmpscript);
+    tmpscript->OnQuestObjectiveChange(player, quest, objective, oldAmount, newAmount);
 }
 
 SpellScriptLoader::SpellScriptLoader(const char* name)
@@ -2635,10 +2794,22 @@ AccountScript::AccountScript(const char* name)
     ScriptRegistry<AccountScript>::Instance()->AddScript(this);
 }
 
+RestScript::RestScript(const char* url)
+    : ScriptObject(url)
+{
+    ScriptRegistry<RestScript>::Instance()->AddScript(this);
+}
+
 SceneScript::SceneScript(const char* name)
     : ScriptObject(name)
 {
     ScriptRegistry<SceneScript>::Instance()->AddScript(this);
+}
+
+QuestScript::QuestScript(const char* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<QuestScript>::Instance()->AddScript(this);
 }
 
 GuildScript::GuildScript(const char* name)
@@ -2657,6 +2828,12 @@ AreaTriggerEntityScript::AreaTriggerEntityScript(const char* name)
     : ScriptObject(name)
 {
     ScriptRegistry<AreaTriggerEntityScript>::Instance()->AddScript(this);
+}
+
+ConversationScript::ConversationScript(char const* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<ConversationScript>::Instance()->AddScript(this);
 }
 
 // Specialize for each script type class like so:
@@ -2686,5 +2863,8 @@ template class TC_GAME_API ScriptRegistry<GuildScript>;
 template class TC_GAME_API ScriptRegistry<GroupScript>;
 template class TC_GAME_API ScriptRegistry<UnitScript>;
 template class TC_GAME_API ScriptRegistry<AccountScript>;
+template class TC_GAME_API ScriptRegistry<RestScript>;
 template class TC_GAME_API ScriptRegistry<AreaTriggerEntityScript>;
+template class TC_GAME_API ScriptRegistry<ConversationScript>;
 template class TC_GAME_API ScriptRegistry<SceneScript>;
+template class TC_GAME_API ScriptRegistry<QuestScript>;

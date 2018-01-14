@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -95,6 +95,7 @@ enum RotateDirection
 struct JumpArrivalCastArgs
 {
     uint32 SpellId;
+    ObjectGuid Caster;
     ObjectGuid Target;
 };
 
@@ -228,6 +229,7 @@ class TC_GAME_API MotionMaster //: private std::stack<MovementGenerator *>
         void MoveDistract(uint32 time);
         void MovePath(uint32 path_id, bool repeatable);
         void MoveRotate(uint32 time, RotateDirection direction);
+        void MoveBackward(uint32 id, float x, float y, float z, float speed = 0.0f);
 
         MovementGeneratorType GetCurrentMovementGeneratorType() const;
         MovementGeneratorType GetMotionSlotType(int slot) const;

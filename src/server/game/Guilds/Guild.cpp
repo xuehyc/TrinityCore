@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -235,8 +235,8 @@ void Guild::NewsLogEntry::WritePacket(WorldPackets::Guild::GuildNews& newsPacket
     newsEvent.Flags = int32(GetFlags());
     newsEvent.Type = int32(GetType());
 
-    //for (uint8 i = 0; i < 2; i++)
-    //    newsEvent.Data[i] =
+    newsEvent.Data[0] = GetValue();
+    newsEvent.Data[1] = 0;
 
     //newsEvent.MemberList.push_back(MemberGuid);
 

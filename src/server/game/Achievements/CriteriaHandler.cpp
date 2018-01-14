@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,7 +22,8 @@
 #include "DB2Stores.h"
 #include "DisableMgr.h"
 #include "GameEventMgr.h"
-#include "Garrison.h"
+#include "WodGarrison.h"
+#include "ClassHall.h"
 #include "Group.h"
 #include "InstanceScript.h"
 #include "Log.h"
@@ -786,6 +787,9 @@ void CriteriaHandler::UpdateCriteria(CriteriaTypes type, uint64 miscValue1 /*= 0
             case CRITERIA_TYPE_ORDER_HALL_TALENT_LEARNED:
             case CRITERIA_TYPE_ORDER_HALL_RECRUIT_TROOP:
             case CRITERIA_TYPE_COMPLETE_WORLD_QUEST:
+            case CRITERIA_TYPE_GAIN_PARAGON_REPUTATION:
+            case CRITERIA_TYPE_EARN_HONOR_XP:
+            case CRITERIA_TYPE_RELIC_TALENT_UNLOCKED:
                 break;                                   // Not implemented yet :(
         }
 
@@ -1145,6 +1149,9 @@ bool CriteriaHandler::IsCompletedCriteria(Criteria const* criteria, uint64 requi
         case CRITERIA_TYPE_PLACE_GARRISON_BUILDING:
         case CRITERIA_TYPE_OWN_BATTLE_PET_COUNT:
         case CRITERIA_TYPE_APPEARANCE_UNLOCKED_BY_SLOT:
+        case CRITERIA_TYPE_GAIN_PARAGON_REPUTATION:
+        case CRITERIA_TYPE_EARN_HONOR_XP:
+        case CRITERIA_TYPE_RELIC_TALENT_UNLOCKED:
             return progress->Counter >= requiredAmount;
         case CRITERIA_TYPE_COMPLETE_ACHIEVEMENT:
         case CRITERIA_TYPE_COMPLETE_QUEST:
@@ -1556,9 +1563,30 @@ bool CriteriaHandler::RequirementsSatisfied(Criteria const* criteria, uint64 mis
 
 bool CriteriaHandler::AdditionalRequirementsSatisfied(ModifierTreeNode const* tree, uint64 miscValue1, uint64 miscValue2, Unit const* unit, Player* referencePlayer) const
 {
-    for (ModifierTreeNode const* node : tree->Children)
-        if (!AdditionalRequirementsSatisfied(node, miscValue1, miscValue2, unit, referencePlayer))
+    const uint64 requiredCount = tree->Entry->Amount;
+
+    switch (tree->Entry->Operator)
+    {
+        case CRITERIA_TREE_OPERATOR_ANY:
+        {
+            uint64 progress = 0;
+            for (ModifierTreeNode const* node : tree->Children)
+                if (AdditionalRequirementsSatisfied(node, miscValue1, miscValue2, unit, referencePlayer))
+                    if (++progress >= requiredCount)
+                        return true;
+
             return false;
+        }
+        case CRITERIA_TREE_OPERATOR_ALL:
+        default:
+        {
+            for (ModifierTreeNode const* node : tree->Children)
+                if (!AdditionalRequirementsSatisfied(node, miscValue1, miscValue2, unit, referencePlayer))
+                    return false;
+
+            break;
+        }
+    }
 
     uint32 reqType = tree->Entry->Type;
     if (!reqType)
@@ -1713,55 +1741,65 @@ bool CriteriaHandler::AdditionalRequirementsSatisfied(ModifierTreeNode const* tr
             if (miscValue1 != reqValue)
                 return false;
             break;
+        case CRITERIA_ADDITIONAL_CONDITION_REPUTATION: // 95
+            if (referencePlayer->GetReputation(reqValue) < int32(tree->Entry->Asset[1]))
+                return false;
+            break;
         case CRITERIA_ADDITIONAL_CONDITION_GARRISON_FOLLOWER_ENTRY: // 144
         {
             if (!referencePlayer)
                 return false;
-            Garrison* garrison = referencePlayer->GetGarrison();
-            if (!garrison)
-                return false;
-            Garrison::Follower const* follower = garrison->GetFollower(miscValue1);
-            if (!follower || follower->PacketInfo.GarrFollowerID != reqValue)
-                return false;
-            break;
+
+            for (auto const& garrison : referencePlayer->GetGarrisons())
+            {
+                Garrison::Follower const* follower = garrison.second->GetFollower(miscValue1);
+                if (follower && follower->PacketInfo.GarrFollowerID == reqValue)
+                    return true;
+            }
+
+            return false;
         }
         case CRITERIA_ADDITIONAL_CONDITION_GARRISON_FOLLOWER_QUALITY: // 145
         {
             if (!referencePlayer)
                 return false;
-            Garrison* garrison = referencePlayer->GetGarrison();
-            if (!garrison)
-                return false;
-            Garrison::Follower const* follower = garrison->GetFollower(miscValue1);
-            if (!follower || follower->PacketInfo.Quality != reqValue)
-                return false;
 
-            break;
+            for (auto const& garrison : referencePlayer->GetGarrisons())
+            {
+                Garrison::Follower const* follower = garrison.second->GetFollower(miscValue1);
+                if (follower && follower->PacketInfo.Quality == reqValue)
+                    return true;
+            }
+
+            return false;
         }
         case CRITERIA_ADDITIONAL_CONDITION_GARRISON_FOLLOWER_LEVEL: // 146
         {
             if (!referencePlayer)
                 return false;
-            Garrison* garrison = referencePlayer->GetGarrison();
-            if (!garrison)
-                return false;
-            Garrison::Follower const* follower = garrison->GetFollower(miscValue1);
-            if (!follower || follower->PacketInfo.FollowerLevel < reqValue)
-                return false;
 
-            break;
+            for (auto const& garrison : referencePlayer->GetGarrisons())
+            {
+                Garrison::Follower const* follower = garrison.second->GetFollower(miscValue1);
+                if (follower && follower->PacketInfo.FollowerLevel >= reqValue)
+                    return true;
+            }
+
+            return false;
         }
         case CRITERIA_ADDITIONAL_CONDITION_GARRISON_FOLLOWER_ILVL: // 184
         {
             if (!referencePlayer)
                 return false;
-            Garrison* garrison = referencePlayer->GetGarrison();
-            if (!garrison)
-                return false;
-            Garrison::Follower const* follower = garrison->GetFollower(miscValue1);
-            if (!follower || follower->GetItemLevel() < reqValue)
-                return false;
-            break;
+
+            for (auto const& garrison : referencePlayer->GetGarrisons())
+            {
+                Garrison::Follower const* follower = garrison.second->GetFollower(miscValue1);
+                if (follower && follower->GetItemLevel() >= reqValue)
+                    return true;
+            }
+
+            return false;
         }
         case CRITERIA_ADDITIONAL_CONDITION_HONOR_LEVEL: // 193
             if (!referencePlayer || referencePlayer->GetHonorLevel() != reqValue)
@@ -2138,6 +2176,12 @@ char const* CriteriaMgr::GetCriteriaTypeString(CriteriaTypes type)
             return "COMPLETE_WORLD_QUEST";
         case CRITERIA_TYPE_TRANSMOG_SET_UNLOCKED:
             return "TRANSMOG_SET_UNLOCKED";
+        case CRITERIA_TYPE_GAIN_PARAGON_REPUTATION:
+            return "GAIN_PARAGON_REPUTATION";
+        case CRITERIA_TYPE_EARN_HONOR_XP:
+            return "EARN_HONOR_XP";
+        case CRITERIA_TYPE_RELIC_TALENT_UNLOCKED:
+            return "RELIC_TALENT_UNLOCKED";
     }
     return "MISSING_TYPE";
 }

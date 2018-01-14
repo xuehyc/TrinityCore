@@ -28,6 +28,8 @@
 #    ARENA CONFIG
 #    NETWORK CONFIG
 #    CONSOLE AND REMOTE ACCESS
+#    REST SERVICE
+#    WORLD TO DISCORD
 #    CHARACTER DELETE OPTIONS
 #    CUSTOM SERVER OPTIONS
 #    AUCTION HOUSE BOT SETTINGS
@@ -796,24 +798,6 @@ CharactersPerAccount = 50
 #        Default:     12 - (Client limitation)
 
 CharactersPerRealm = 12
-
-#
-#    DeathKnightsPerRealm
-#        Description: Limit number of death knight characters per account on this realm.
-#        Range:       1-12
-#        Default:     1
-
-DeathKnightsPerRealm = 1
-
-#
-#    CharacterCreating.MinLevelForDeathKnight
-#        Description: Limit creating death knights only for account with another
-#                     character of specific level (ignored for GM accounts).
-#        Default:     55 - (Enabled, Requires at least another level 55 character)
-#                     0  - (Disabled)
-#                     1  - (Enabled, Requires at least another level 1 character)
-
-CharacterCreating.MinLevelForDeathKnight = 55
 
 #
 #    DemonHuntersPerRealm
@@ -2895,6 +2879,64 @@ SOAP.Port = 7878
 ###################################################################################################
 
 ###################################################################################################
+# REST SERVICE
+#
+#
+#    WorldREST.Enabled
+#        Description: Enable REST service.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+WorldREST.Enabled = 0
+
+#
+#    WorldREST.BindIP
+#        Description: Bind REST service to IP/hostname.
+#        Default:     "127.0.0.1" - (Bind to localhost)
+
+WorldREST.BindIP = "127.0.0.1"
+
+#
+#    WorldREST.Port
+#        Description: TCP port to reach the REST service.
+#        Default:     8082
+
+WorldREST.Port = 8082
+
+#
+#    WorldREST.AuthToken
+#        Description: Auth Token, user will have to set this in headers to reach REST service
+#                     Minimum length (security reason) : 16 characters
+#        Default:     ""
+
+WorldREST.AuthToken = ""
+
+#
+###################################################################################################
+
+###################################################################################################
+# WORLD TO DISCORD
+#
+#
+#    WorldREST.Enabled
+#        Description: Enable World to Discord service.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+WorldToDiscord.Enabled = 0
+
+#
+#    WorldREST.RelayURL
+#        Description: Relay http server that will handle the http call
+#                     every 2 seconds with world channel player chats
+#        Default:     "http://127.0.0.1:8083"
+
+WorldToDiscord.RelayURL = "http://127.0.0.1:8083"
+
+#
+###################################################################################################
+
+###################################################################################################
 # CHARACTER DELETE OPTIONS
 #
 #    CharDelete.Method
@@ -3218,6 +3260,15 @@ GameObject.CheckInvalidPosition = 0
 
 ###################################################################################################
 # AUCTION HOUSE BOT SETTINGS
+#
+#    AuctionHouseBot.Account
+#       Description: Account ID for AHBot characters. If non-zero, all auctions and bids associated
+#                    with the AHBot will randomly be assigned one of this account's characters.
+#       Default:     0
+#
+
+AuctionHouseBot.Account = 0
+
 #
 #    AuctionHouseBot.Update.Interval
 #       Description: Interval in seconds for AHBot to get updated
@@ -3791,6 +3842,7 @@ Appender.Console=1,3,0
 Appender.Server=2,2,0,Server.log,w
 Appender.GM=2,2,15,gm/gm_%s.log
 Appender.DBErrors=2,2,0,DBErrors.log
+Appender.SQLUpdateLog=2,1,16,SQLUpdate.log,w
 
 #  Logger config values: Given a logger "name"
 #    Logger.name
@@ -3864,7 +3916,7 @@ Logger.mmaps=3,Server
 #Logger.server.bnetserver=3,Console Server
 #Logger.spells=3,Console Server
 #Logger.spells.periodic=3,Console Server
-#Logger.sql.dev=3,Console Server
+#Logger.sql.dev=1,SQLUpdateLog
 #Logger.sql.driver=3,Console Server
 #Logger.warden=3,Console Server
 

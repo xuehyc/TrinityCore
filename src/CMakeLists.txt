@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -15,6 +15,10 @@ if(WIN32)
   )
 endif(WIN32)
 
+if (WITH_CPR)
+    add_definitions(-DWITH_CPR)
+endif(WITH_CPR)
+
 add_subdirectory(genrev)
 add_subdirectory(common)
 
@@ -25,4 +29,3 @@ endif(SERVERS)
 if(TOOLS)
   add_subdirectory(tools)
 endif(TOOLS)
-

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012-2014 Arctium Emulation <http://arctium.org>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -126,15 +126,6 @@ namespace Connection_Patcher
                 return Constants::BinaryTypes(*reinterpret_cast<uint32_t const*>(data.data()));
         }
 
-        std::string GetFileChecksum(std::vector<unsigned char> const& data)
-        {
-            SHA256Hash h;
-            h.UpdateData(data.data(), data.size());
-            h.Finalize();
-
-            return ByteArrayToHexStr(h.GetDigest(), h.GetLength());
-        }
-
         std::set<size_t> SearchOffset(std::vector<unsigned char> const& binary, std::vector<unsigned char> const& pattern)
         {
             std::set<size_t> offsets;
@@ -144,12 +135,6 @@ namespace Connection_Patcher
 
                 for (size_t j = 0; j < pattern.size(); j++)
                 {
-                    if (pattern[j] == 0)
-                    {
-                        matches++;
-                        continue;
-                    }
-
                     if (binary[i + j] != pattern[j])
                         break;
 

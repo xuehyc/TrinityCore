@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -152,7 +152,7 @@ enum TrinityStrings
     LANG_YOU_CHANGE_ENERGY              = 122,
     LANG_YOURS_ENERGY_CHANGED           = 123,
 
-    LANG_CURRENT_ENERGY                 = 124,              //log
+    LANG_CURRENT_ENERGY                 = 124,
     LANG_YOU_CHANGE_RAGE                = 125,
     LANG_YOURS_RAGE_CHANGED             = 126,
     LANG_YOU_CHANGE_LVL                 = 127,
@@ -1246,6 +1246,29 @@ enum TrinityStrings
     LANG_CREATURE_NOT_AI_ENABLED                  = 11015,
     LANG_SELECT_PLAYER_OR_PET                     = 11016,
     LANG_SHUTDOWN_DELAYED                         = 11017,
-    LANG_SHUTDOWN_CANCELLED                       = 11018
+    LANG_SHUTDOWN_CANCELLED                       = 11018,
+    LANG_YOU_CHANGE_POWER                         = 11019,
+    LANG_YOUR_POWER_CHANGED                       = 11020,
+    LANG_INVALID_POWER_NAME                       = 11021,
+
+    LANG_LIST_QUESTS                              = 11022,
+    LANG_LIST_QUESTS_DETAIL                       = 11023,
+
+    //Twin Peaks
+    LANG_BG_TP_START_TWO_MINUTES                  = 12000,
+    LANG_BG_TP_START_ONE_MINUTE                   = 12001,
+    LANG_BG_TP_START_HALF_MINUTE                  = 12002,
+    LANG_BG_TP_HAS_BEGUN                          = 12003,
+    LANG_BG_TP_CAPTURED_HF                        = 12004,
+    LANG_BG_TP_CAPTURED_AF                        = 12005,
+    LANG_BG_TP_DROPPED_HF                         = 12006,
+    LANG_BG_TP_DROPPED_AF                         = 12007,
+    LANG_BG_TP_RETURNED_AF                        = 12008,
+    LANG_BG_TP_RETURNED_HF                        = 12009,
+    LANG_BG_TP_PICKEDUP_HF                        = 12010,
+    LANG_BG_TP_PICKEDUP_AF                        = 12011,
+    LANG_BG_TP_F_PLACED                           = 12012,
+    LANG_BG_TP_ALLIANCE_FLAG_RESPAWNED            = 12013,
+    LANG_BG_TP_HORDE_FLAG_RESPAWNED               = 12014
 };
 #endif

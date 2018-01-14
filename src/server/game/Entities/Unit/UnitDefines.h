@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -216,6 +216,7 @@ enum UnitFlags2 : uint32
     UNIT_FLAG2_FORCE_MOVEMENT               = 0x00000040,
     UNIT_FLAG2_DISARM_OFFHAND               = 0x00000080,
     UNIT_FLAG2_DISABLE_PRED_STATS           = 0x00000100,   // Player has disabled predicted stats (Used by raid frames)
+    UNIT_FLAG2_UNK16                        = 0x00000200,
     UNIT_FLAG2_DISARM_RANGED                = 0x00000400,   // this does not disable ranged weapon display (maybe additional flag needed?)
     UNIT_FLAG2_REGENERATE_POWER             = 0x00000800,
     UNIT_FLAG2_RESTRICT_PARTY_INTERACTION   = 0x00001000,   // Restrict interaction to party or raid
@@ -226,6 +227,18 @@ enum UnitFlags2 : uint32
     UNIT_FLAG2_PLAY_DEATH_ANIM              = 0x00020000,   // Plays special death animation upon death
     UNIT_FLAG2_ALLOW_CHEAT_SPELLS           = 0x00040000,   // Allows casting spells with AttributesEx7 & SPELL_ATTR7_IS_CHEAT_SPELL
     UNIT_FLAG2_NO_ACTIONS                   = 0x00800000,
+    UNIT_FLAG2_UNK4                         = 0x00100000,
+    UNIT_FLAG2_UNK5                         = 0x00200000,
+    UNIT_FLAG2_UNK6                         = 0x00400000,
+    UNIT_FLAG2_UNK7                         = 0x00800000,
+    UNIT_FLAG2_UNK8                         = 0x01000000,
+    UNIT_FLAG2_UPDATE_REACTION              = 0x02000000,
+    UNIT_FLAG2_SELECTION_DISABLED           = 0x04000000,   ///< Cant select (even in GM mode)
+    UNIT_FLAG2_UNK11                        = 0x08000000,
+    UNIT_FLAG2_UNK12                        = 0x10000000,   ///< Cant target, hide highlight, hide name (work on faction 14/7 but not 35)
+    UNIT_FLAG2_UNK13                        = 0x20000000,
+    UNIT_FLAG2_UNK14                        = 0x40000000,
+    UNIT_FLAG2_UNK15                        = 0x80000000,
     MAX_UNIT_FLAGS_2 = 19
 };
 
@@ -233,6 +246,37 @@ enum UnitFlags2 : uint32
 enum UnitFlags3 : uint32
 {
     UNIT_FLAG3_UNK1                         = 0x00000001,
+    UNIT_FLAG3_UNK2                         = 0x00000002,
+    UNIT_FLAG3_CAN_FIGHT_WITHOUT_DISMOUNT   = 0x00000004,
+    UNIT_FLAG3_UNK4                         = 0x00000008,
+    UNIT_FLAG3_UNK5                         = 0x00000010,
+    UNIT_FLAG3_UNK6                         = 0x00000020,
+    UNIT_FLAG3_UNK7                         = 0x00000040,
+    UNIT_FLAG3_UNK8                         = 0x00000080,
+    UNIT_FLAG3_UNK9                         = 0x00000100,
+    UNIT_FLAG3_UNK10                        = 0x00000200,
+    UNIT_FLAG3_UNK11                        = 0x00000400,
+    UNIT_FLAG3_UNK12                        = 0x00000800,
+    UNIT_FLAG3_UNK13                        = 0x00001000,
+    UNIT_FLAG3_UNK14                        = 0x00002000,
+    UNIT_FLAG3_UNK15                        = 0x00004000,
+    UNIT_FLAG3_UNK16                        = 0x00008000,
+    UNIT_FLAG3_UNK17                        = 0x00010000,
+    UNIT_FLAG3_UNK18                        = 0x00020000,
+    UNIT_FLAG3_UNK19                        = 0x00040000,
+    UNIT_FLAG3_UNK20                        = 0x00080000,
+    UNIT_FLAG3_UNK21                        = 0x00100000,
+    UNIT_FLAG3_UNK22                        = 0x00200000,
+    UNIT_FLAG3_UNK23                        = 0x00400000,
+    UNIT_FLAG3_UNK24                        = 0x00800000,
+    UNIT_FLAG3_UNK25                        = 0x01000000,
+    UNIT_FLAG3_UNK26                        = 0x02000000,
+    UNIT_FLAG3_UNK27                        = 0x04000000,
+    UNIT_FLAG3_UNK28                        = 0x08000000,
+    UNIT_FLAG3_UNK29                        = 0x10000000,
+    UNIT_FLAG3_UNK30                        = 0x20000000,
+    UNIT_FLAG3_UNK31                        = 0x40000000,
+    UNIT_FLAG3_UNK32                        = 0x80000000,
     MAX_UNIT_FLAGS_3 = 1
 };
 
@@ -270,6 +314,7 @@ enum NPCFlags : uint64
     UNIT_NPC_FLAG_ARTIFACT_POWER_RESPEC = 0x0008000000,     // artifact powers reset
     UNIT_NPC_FLAG_TRANSMOGRIFIER        = 0x0010000000,     // transmogrification
     UNIT_NPC_FLAG_VAULTKEEPER           = 0x0020000000,     // void storage
+    UNIT_NPC_FLAG_WILD_BATTLE_PET       = 0x0040000000,     // Pet that player can fight (Battle Pet)
     UNIT_NPC_FLAG_BLACK_MARKET          = 0x0080000000,     // black market
     UNIT_NPC_FLAG_ITEM_UPGRADE_MASTER   = 0x0100000000,
     UNIT_NPC_FLAG_GARRISON_ARCHITECT    = 0x0200000000,

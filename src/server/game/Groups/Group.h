@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -219,6 +219,8 @@ struct RaidMarker
 class TC_GAME_API Group
 {
     public:
+        Ashamane::VariablesSafe Variables;
+
         struct MemberSlot
         {
             ObjectGuid  guid;

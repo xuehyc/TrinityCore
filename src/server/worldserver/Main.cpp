@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -32,6 +32,7 @@
 #include "DatabaseLoader.h"
 #include "GitRevision.h"
 #include "InstanceSaveMgr.h"
+#include "IoContext.h"
 #include "MapManager.h"
 #include "Metric.h"
 #include "MySQLThreading.h"
@@ -45,19 +46,24 @@
 #include "ScriptMgr.h"
 #include "ScriptReloadMgr.h"
 #include "TCSoap.h"
+#include "RESTService.h"
 #include "World.h"
 #include "WorldSocket.h"
 #include "WorldSocketMgr.h"
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
-#include <boost/asio/io_service.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/program_options.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <google/protobuf/stubs/common.h>
 #include <iostream>
 #include <csignal>
+
+#ifdef WITH_CPR
+    #include <cpr/cpr.h>
+#endif
 
 using namespace boost::program_options;
 namespace fs = boost::filesystem;
@@ -85,8 +91,8 @@ int m_ServiceStatus = -1;
 class FreezeDetector
 {
 public:
-    FreezeDetector(boost::asio::io_service& ioService, uint32 maxCoreStuckTime)
-        : _timer(ioService), _worldLoopCounter(0), _lastChangeMsTime(0), _maxCoreStuckTimeInMs(maxCoreStuckTime) { }
+    FreezeDetector(Trinity::Asio::IoContext& ioContext, uint32 maxCoreStuckTime)
+        : _timer(ioContext), _worldLoopCounter(0), _lastChangeMsTime(0), _maxCoreStuckTimeInMs(maxCoreStuckTime) { }
 
     static void Start(std::shared_ptr<FreezeDetector> const& freezeDetector)
     {
@@ -103,8 +109,28 @@ private:
     uint32 _maxCoreStuckTimeInMs;
 };
 
+#ifdef WITH_CPR
+class WorldToDiscord
+{
+public:
+    WorldToDiscord(boost::asio::io_service& ioService)
+        : _timer(ioService) { }
+
+    static void Start(std::shared_ptr<WorldToDiscord> const& worldToDiscord)
+    {
+        worldToDiscord->_timer.expires_from_now(boost::posix_time::seconds(5));
+        worldToDiscord->_timer.async_wait(std::bind(&WorldToDiscord::Handler, std::weak_ptr<WorldToDiscord>(worldToDiscord), std::placeholders::_1));
+    }
+
+    static void Handler(std::weak_ptr<WorldToDiscord> worldToDiscordRed, boost::system::error_code const& error);
+
+private:
+    boost::asio::deadline_timer _timer;
+};
+#endif
+
 void SignalHandler(boost::system::error_code const& error, int signalNumber);
-AsyncAcceptor* StartRaSocketAcceptor(boost::asio::io_service& ioService);
+AsyncAcceptor* StartRaSocketAcceptor(Trinity::Asio::IoContext& ioContext);
 bool StartDB();
 void StopDB();
 void WorldUpdateLoop();
@@ -148,11 +174,11 @@ extern int main(int argc, char** argv)
         return 1;
     }
 
-    std::shared_ptr<boost::asio::io_service> ioService = std::make_shared<boost::asio::io_service>();
+    std::shared_ptr<Trinity::Asio::IoContext> ioContext = std::make_shared<Trinity::Asio::IoContext>();
 
     sLog->RegisterAppender<AppenderDB>();
-    // If logs are supposed to be handled async then we need to pass the io_service into the Log singleton
-    sLog->Initialize(sConfigMgr->GetBoolDefault("Log.Async.Enable", false) ? ioService.get() : nullptr);
+    // If logs are supposed to be handled async then we need to pass the IoContext into the Log singleton
+    sLog->Initialize(sConfigMgr->GetBoolDefault("Log.Async.Enable", false) ? ioContext.get() : nullptr);
 
     Trinity::Banner::Show("worldserver-daemon",
         [](char const* text)
@@ -189,8 +215,8 @@ extern int main(int argc, char** argv)
         }
     }
 
-    // Set signal handlers (this must be done before starting io_service threads, because otherwise they would unblock and exit)
-    boost::asio::signal_set signals(*ioService, SIGINT, SIGTERM);
+    // Set signal handlers (this must be done before starting IoContext threads, because otherwise they would unblock and exit)
+    boost::asio::signal_set signals(*ioContext, SIGINT, SIGTERM);
 #if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
     signals.add(SIGBREAK);
 #endif
@@ -198,9 +224,9 @@ extern int main(int argc, char** argv)
 
     // Start the Boost based thread pool
     int numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
-    std::shared_ptr<std::vector<std::thread>> threadPool(new std::vector<std::thread>(), [ioService](std::vector<std::thread>* del)
+    std::shared_ptr<std::vector<std::thread>> threadPool(new std::vector<std::thread>(), [ioContext](std::vector<std::thread>* del)
     {
-        ioService->stop();
+        ioContext->stop();
         for (std::thread& thr : *del)
             thr.join();
 
@@ -211,7 +237,7 @@ extern int main(int argc, char** argv)
         numThreads = 1;
 
     for (int i = 0; i < numThreads; ++i)
-        threadPool->push_back(std::thread([ioService]() { ioService->run(); }));
+        threadPool->push_back(std::thread([ioContext]() { ioContext->run(); }));
 
     // Set process priority according to configuration settings
     SetProcessPriority("server.worldserver", sConfigMgr->GetIntDefault(CONFIG_PROCESSOR_AFFINITY, 0), sConfigMgr->GetBoolDefault(CONFIG_HIGH_PRIORITY, false));
@@ -225,13 +251,13 @@ extern int main(int argc, char** argv)
     // Set server offline (not connectable)
     LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = flag | %u WHERE id = '%d'", REALM_FLAG_OFFLINE, realm.Id.Realm);
 
-    sRealmList->Initialize(*ioService, sConfigMgr->GetIntDefault("RealmsStateUpdateDelay", 10));
+    sRealmList->Initialize(*ioContext, sConfigMgr->GetIntDefault("RealmsStateUpdateDelay", 10));
 
     std::shared_ptr<void> sRealmListHandle(nullptr, [](void*) { sRealmList->Close(); });
 
     LoadRealmInfo();
 
-    sMetric->Initialize(realm.Name, *ioService, []()
+    sMetric->Initialize(realm.Name, *ioContext, []()
     {
         TC_METRIC_VALUE("online_players", sWorld->GetPlayerCount());
     });
@@ -267,7 +293,7 @@ extern int main(int argc, char** argv)
     // Start the Remote Access port (acceptor) if enabled
     std::unique_ptr<AsyncAcceptor> raAcceptor;
     if (sConfigMgr->GetBoolDefault("Ra.Enable", false))
-        raAcceptor.reset(StartRaSocketAcceptor(*ioService));
+        raAcceptor.reset(StartRaSocketAcceptor(*ioContext));
 
     // Start soap serving thread if enabled
     std::shared_ptr<std::thread> soapThread;
@@ -294,11 +320,22 @@ extern int main(int argc, char** argv)
         return 1;
     }
 
-    if (!sWorldSocketMgr.StartWorldNetwork(*ioService, worldListener, worldPort, instancePort, networkThreads))
+    if (!sWorldSocketMgr.StartWorldNetwork(*ioContext, worldListener, worldPort, instancePort, networkThreads))
     {
         TC_LOG_ERROR("server.worldserver", "Failed to initialize network");
         return 1;
     }
+
+    if (sConfigMgr->GetBoolDefault("WorldREST.Enabled", false))
+    {
+        if (!sRestService.Start())
+        {
+            TC_LOG_ERROR("server.worldserver", "Failed to initialize Rest service");
+            return 1;
+        }
+    }
+
+    std::shared_ptr<void> sRestServiceHandle(nullptr, [](void*) { sRestService.Stop(); });
 
     std::shared_ptr<void> sWorldSocketMgrHandle(nullptr, [](void*)
     {
@@ -327,11 +364,21 @@ extern int main(int argc, char** argv)
     realm.PopulationLevel = 0.0f;
     realm.Flags = RealmFlags(realm.Flags & ~uint32(REALM_FLAG_OFFLINE));
 
+#ifdef WITH_CPR
+    std::shared_ptr<WorldToDiscord> worldToDiscord;
+    if (sConfigMgr->GetBoolDefault("WorldToDiscord.Enabled", false))
+    {
+        worldToDiscord = std::make_shared<WorldToDiscord>(*ioContext);
+        WorldToDiscord::Start(worldToDiscord);
+        TC_LOG_INFO("server.worldserver", "Starting up world to discord thread...");
+    }
+#endif
+
     // Start the freeze check callback cycle in 5 seconds (cycle itself is 1 sec)
     std::shared_ptr<FreezeDetector> freezeDetector;
     if (int coreStuckTime = sConfigMgr->GetIntDefault("MaxCoreStuckTime", 0))
     {
-        freezeDetector = std::make_shared<FreezeDetector>(*ioService, coreStuckTime * 1000);
+        freezeDetector = std::make_shared<FreezeDetector>(*ioContext, coreStuckTime * 1000);
         FreezeDetector::Start(freezeDetector);
         TC_LOG_INFO("server.worldserver", "Starting up anti-freeze thread (%u seconds max stuck time)...", coreStuckTime);
     }
@@ -346,6 +393,8 @@ extern int main(int argc, char** argv)
     threadPool.reset();
 
     sLog->SetSynchronous();
+
+    sRestService.Stop();
 
     sScriptMgr->OnShutdown();
 
@@ -500,12 +549,101 @@ void FreezeDetector::Handler(std::weak_ptr<FreezeDetector> freezeDetectorRef, bo
     }
 }
 
-AsyncAcceptor* StartRaSocketAcceptor(boost::asio::io_service& ioService)
+#ifdef WITH_CPR
+std::string GetFormatedMessage(DiscordMessage* discordMessage)
+{
+    std::ostringstream returnString;
+    std::string blizzIcon = discordMessage->isGm ? ":blizz: " : "";
+    returnString << blizzIcon << "[" << discordMessage->characterName << "] : " << discordMessage->message;
+    return returnString.str();
+}
+
+std::string GetChannelName(DiscordMessageChannel channelType)
+{
+    switch (channelType)
+    {
+        case DISCORD_WORLD_A:   return "world_a";
+        case DISCORD_WORLD_H:   return "world_h";
+        case DISCORD_TICKET:    return "tickets";
+    }
+
+    return "";
+}
+
+bool SendToDiscord(std::string channel, std::string text)
+{
+    std::string nodeServerRelayURL = sConfigMgr->GetStringDefault("WorldToDiscord.RelayURL", "http://127.0.0.1:8083");
+    boost::replace_all(text, "\"", "\\\"");
+
+    std::ostringstream payload;
+    payload << "{ \"channel\": \"" << channel << "\", \"text\": \"" << text << "\"}";
+
+    cpr::Response r = cpr::Post(cpr::Url{ nodeServerRelayURL }, cpr::Body{ payload.str() });
+    return r.status_code == 200;
+}
+
+void WorldToDiscord::Handler(std::weak_ptr<WorldToDiscord> worldToDiscordRef, boost::system::error_code const& error)
+{
+    if (!error)
+    {
+        if (std::shared_ptr<WorldToDiscord> worldToDiscord = worldToDiscordRef.lock())
+        {
+            std::map<DiscordMessageChannel, std::list<std::string>> messagesByChannel;
+
+            if (!DiscordMessageQueue.empty())
+            {
+                DiscordMessage* discordMessage;
+
+                while (!DiscordMessageQueue.empty())
+                {
+                    DiscordMessageQueue.next(discordMessage);
+
+                    std::string formatedMessage;
+
+                    switch (discordMessage->channel)
+                    {
+                        case DISCORD_WORLD_A:
+                        case DISCORD_WORLD_H:
+                        {
+                            formatedMessage = GetFormatedMessage(discordMessage);
+                            break;
+                        }
+                        default:
+                        {
+                            formatedMessage = discordMessage->message;
+                            break;
+                        }
+                    }
+
+                    messagesByChannel[discordMessage->channel].push_back(formatedMessage);
+
+                    delete discordMessage;
+                }
+
+                for (auto messageList : messagesByChannel)
+                {
+                    const char* const delim = "\\n";
+
+                    std::ostringstream imploded;
+                    std::copy(messageList.second.begin(), messageList.second.end(), std::ostream_iterator<std::string>(imploded, delim));
+
+                    SendToDiscord(GetChannelName(messageList.first), imploded.str());
+                }
+            }
+
+            worldToDiscord->_timer.expires_from_now(boost::posix_time::seconds(2));
+            worldToDiscord->_timer.async_wait(std::bind(&WorldToDiscord::Handler, worldToDiscordRef, std::placeholders::_1));
+        }
+    }
+}
+#endif
+
+AsyncAcceptor* StartRaSocketAcceptor(Trinity::Asio::IoContext& ioContext)
 {
     uint16 raPort = uint16(sConfigMgr->GetIntDefault("Ra.Port", 3443));
     std::string raListener = sConfigMgr->GetStringDefault("Ra.IP", "0.0.0.0");
 
-    AsyncAcceptor* acceptor = new AsyncAcceptor(ioService, raListener, raPort);
+    AsyncAcceptor* acceptor = new AsyncAcceptor(ioContext, raListener, raPort);
     if (!acceptor->Bind())
     {
         TC_LOG_ERROR("server.worldserver", "Failed to bind RA socket acceptor");

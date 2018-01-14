@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -27,6 +27,8 @@ WorldPacket const* WorldPackets::WorldState::InitWorldStates::Write()
     _worldPacket << uint32(MapID);
     _worldPacket << uint32(AreaID);
     _worldPacket << uint32(SubareaID);
+
+    std::sort(Worldstates.begin(), Worldstates.end());
 
     _worldPacket << uint32(Worldstates.size());
     for (WorldStateInfo const& wsi : Worldstates)

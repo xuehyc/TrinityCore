@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -713,6 +713,7 @@ struct TC_GAME_API ItemTemplate
     uint32 GetFlags() const { return ExtendedData->Flags[0]; }
     uint32 GetFlags2() const { return ExtendedData->Flags[1]; }
     uint32 GetFlags3() const { return ExtendedData->Flags[2]; }
+    uint32 GetFlags4() const { return ExtendedData->Flags[3]; }
     float GetUnk1() const { return ExtendedData->Unk1; }
     float GetUnk2() const { return ExtendedData->Unk2; }
     uint32 GetBuyCount() const { return std::max<uint32>(ExtendedData->BuyCount, 1u); }

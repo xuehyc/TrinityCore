@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #define ZONE_SCRIPT_H_
 
 #include "Define.h"
+#include "Common.h"
 #include "ObjectGuid.h"
 
 class Creature;
@@ -30,6 +31,8 @@ struct CreatureData;
 class TC_GAME_API ZoneScript
 {
     public:
+        Ashamane::VariablesSafe Variables;
+
         ZoneScript() { }
         virtual ~ZoneScript() { }
 

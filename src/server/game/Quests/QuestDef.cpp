@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -21,6 +21,7 @@
 #include "Field.h"
 #include "GameTables.h"
 #include "Log.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "QuestPackets.h"
 #include "World.h"
@@ -212,6 +213,7 @@ void Quest::LoadQuestTemplateAddon(Field* fields)
     SourceItemIdCount = fields[15].GetUInt8();
     RewardMailSenderEntry = fields[16].GetUInt32();
     SpecialFlags = fields[17].GetUInt8();
+    ScriptId = sObjectMgr->GetScriptId(fields[18].GetString());
 
     if (SpecialFlags & QUEST_SPECIAL_FLAGS_AUTO_ACCEPT)
         Flags |= QUEST_FLAGS_AUTO_ACCEPT;
@@ -377,6 +379,42 @@ bool Quest::IsRaidQuest(Difficulty difficulty) const
 
     if ((Flags & QUEST_FLAGS_RAID) != 0)
         return true;
+
+    return false;
+}
+
+bool Quest::IsWorldQuest() const
+{
+    switch (QuestInfoID)
+    {
+        case QUEST_INFO_WORLD_QUEST:
+        case QUEST_INFO_WORLD_QUEST_EPIC:
+        case QUEST_INFO_WORLD_QUEST_ELITE:
+        case QUEST_INFO_WORLD_QUEST_RARE_ELITE:
+        case QUEST_INFO_WORLD_QUEST_PVP:
+        case QUEST_INFO_WORLD_QUEST_FIRST_AID:
+        case QUEST_INFO_WORLD_QUEST_BATTLEPET:
+        case QUEST_INFO_WORLD_QUEST_BLACKSMITHING:
+        case QUEST_INFO_WORLD_QUEST_LEATHERWORKING:
+        case QUEST_INFO_WORLD_QUEST_ALCHEMY:
+        case QUEST_INFO_WORLD_QUEST_HERBALISM:
+        case QUEST_INFO_WORLD_QUEST_MINING:
+        case QUEST_INFO_WORLD_QUEST_TAILORING:
+        case QUEST_INFO_WORLD_QUEST_ENGINEERING:
+        case QUEST_INFO_WORLD_QUEST_ENCHANTING:
+        case QUEST_INFO_WORLD_QUEST_SKINNINg:
+        case QUEST_INFO_WORLD_QUEST_JEWELCRAFTING:
+        case QUEST_INFO_WORLD_QUEST_INSCRIPTION:
+        case QUEST_INFO_WORLD_QUEST_ARCHEOLOGY:
+        case QUEST_INFO_WORLD_QUEST_FISHING:
+        case QUEST_INFO_WORLD_QUEST_COOKING:
+        case QUEST_INFO_WORLD_QUEST_RARE_2:
+        case QUEST_INFO_WORLD_QUEST_RARE_ELITE_2:
+        case QUEST_INFO_WORLD_QUEST_DUNGEON:
+            return true;
+        default:
+            break;
+    }
 
     return false;
 }

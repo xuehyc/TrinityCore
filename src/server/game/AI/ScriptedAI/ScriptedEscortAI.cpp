@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -159,14 +159,10 @@ void npc_escortAI::JustDied(Unit* /*killer*/)
         {
             for (GroupReference* groupRef = group->GetFirstMember(); groupRef != NULL; groupRef = groupRef->next())
                 if (Player* member = groupRef->GetSource())
-                    if (member->GetQuestStatus(m_pQuestForEscort->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
-                        member->FailQuest(m_pQuestForEscort->GetQuestId());
+                    member->FailQuest(m_pQuestForEscort->GetQuestId());
         }
         else
-        {
-            if (player->GetQuestStatus(m_pQuestForEscort->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
-                player->FailQuest(m_pQuestForEscort->GetQuestId());
-        }
+            player->FailQuest(m_pQuestForEscort->GetQuestId());
     }
 }
 
@@ -243,6 +239,8 @@ void npc_escortAI::UpdateAI(uint32 diff)
             //End of the line
             if (CurrentWP == WaypointList.end())
             {
+                LastWaypointReached();
+
                 if (DespawnAtEnd)
                 {
                     TC_LOG_DEBUG("scripts", "EscortAI reached end of waypoints");

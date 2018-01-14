@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -183,5 +183,12 @@ WorldPacket const* WorldPackets::NPC::TrainerBuyFailed::Write()
 
 void WorldPackets::NPC::RequestStabledPets::Read()
 {
+    _worldPacket >> StableMaster;
+}
+
+void WorldPackets::NPC::SetPetSlot::Read()
+{
+    _worldPacket >> PetNumber;
+    _worldPacket >> DestSlot;
     _worldPacket >> StableMaster;
 }

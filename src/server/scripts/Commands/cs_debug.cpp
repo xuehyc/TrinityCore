@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -37,6 +37,7 @@ EndScriptData */
 #include "M2Stores.h"
 #include "MapManager.h"
 #include "MovementPackets.h"
+#include "MotionMaster.h"
 #include "ObjectMgr.h"
 #include "RBAC.h"
 #include "SpellPackets.h"
@@ -71,6 +72,12 @@ public:
             { "sellerror",     rbac::RBAC_PERM_COMMAND_DEBUG_SEND_SELLERROR,     false, &HandleDebugSendSellErrorCommand,       "" },
             { "setphaseshift", rbac::RBAC_PERM_COMMAND_DEBUG_SEND_SETPHASESHIFT, false, &HandleDebugSendSetPhaseShiftCommand,   "" },
             { "spellfail",     rbac::RBAC_PERM_COMMAND_DEBUG_SEND_SPELLFAIL,     false, &HandleDebugSendSpellFailCommand,       "" },
+            { "playerchoice",  rbac::RBAC_PERM_COMMAND_DEBUG_SEND_PLAYER_CHOICE, false, &HandleDebugSendPlayerChoiceCommand,    "" },
+        };
+        static std::vector<ChatCommand> debugMovementForceCommandTable =
+        {
+            { "apply",         rbac::RBAC_PERM_COMMAND_DEBUG_APPLY_MOVEMENT_FORCE,      false, &HandleDebugApplyForceMovementCommand,  "" },
+            { "remove",        rbac::RBAC_PERM_COMMAND_DEBUG_REMOVE_MOVEMENT_FORCE,     false, &HandleDebugRemoveForceMovementCommand, "" },
         };
         static std::vector<ChatCommand> debugCommandTable =
         {
@@ -106,6 +113,9 @@ public:
             { "raidreset",     rbac::RBAC_PERM_COMMAND_INSTANCE_UNBIND,     false, &HandleDebugRaidResetCommand,        "" },
             { "neargraveyard", rbac::RBAC_PERM_COMMAND_NEARGRAVEYARD,       false, &HandleDebugNearGraveyard,           "" },
             { "conversation" , rbac::RBAC_PERM_COMMAND_DEBUG_CONVERSATION,  false, &HandleDebugConversationCommand,     "" },
+            { "criteria",      rbac::RBAC_PERM_COMMAND_DEBUG,               false, &HandleDebugCriteriaCommand,         "" },
+            { "movementforce", rbac::RBAC_PERM_COMMAND_DEBUG_MOVEMENT_FORCE,false, nullptr,                             "", debugMovementForceCommandTable },
+            { "playercondition",rbac::RBAC_PERM_COMMAND_DEBUG,              false, &HandleDebugPlayerConditionCommand,  "" },
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -242,6 +252,18 @@ public:
         castFailed.FailedArg2 = failArg2;
         handler->GetSession()->SendPacket(castFailed.Write());
 
+        return true;
+    }
+
+    static bool HandleDebugSendPlayerChoiceCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        int32 choiceId = atoi(args);
+        Player* player = handler->GetSession()->GetPlayer();
+
+        player->SendPlayerChoice(player->GetGUID(), choiceId);
         return true;
     }
 
@@ -929,7 +951,7 @@ public:
 
         Map* map = handler->GetSession()->GetPlayer()->GetMap();
 
-        if (!v->Create(map->GenerateLowGuid<HighGuid::Vehicle>(), map, handler->GetSession()->GetPlayer()->GetPhaseMask(), entry, x, y, z, o, nullptr, id))
+        if (!v->Create(map->GenerateLowGuid<HighGuid::Vehicle>(), map, entry, x, y, z, o, nullptr, id))
         {
             delete v;
             return false;
@@ -1457,13 +1479,10 @@ public:
             return false;
         }
 
-        if (target->GetTypeId() == TYPEID_UNIT)
-        {
-            if (target->ToCreature()->GetDBPhase() > 0)
-                handler->PSendSysMessage("Target creature's PhaseId in DB: %d", target->ToCreature()->GetDBPhase());
-            else if (target->ToCreature()->GetDBPhase() < 0)
-                handler->PSendSysMessage("Target creature's PhaseGroup in DB: %d", abs(target->ToCreature()->GetDBPhase()));
-        }
+        if (target->GetDBPhase() > 0)
+            handler->PSendSysMessage("Target creature's PhaseId in DB: %d", target->GetDBPhase());
+        else if (target->GetDBPhase() < 0)
+            handler->PSendSysMessage("Target creature's PhaseGroup in DB: %d", abs(target->GetDBPhase()));
 
         std::stringstream phases;
 
@@ -1573,6 +1592,92 @@ public:
         }
 
         return Conversation::CreateConversation(conversationEntry, target, *target, { target->GetGUID() }) != nullptr;
+    }
+
+    static bool HandleDebugCriteriaCommand(ChatHandler* handler, char const* args)
+    {
+        if (!args)
+            return false;
+
+        WorldPacket packet;
+
+        packet << uint32(atoi(args));
+        packet << uint64(1);
+        packet << handler->GetSession()->GetPlayer()->GetGUID();
+        packet << uint32(0);
+        packet.AppendPackedTime(time(nullptr));
+        packet << uint32(0);
+        packet << uint32(0);
+
+        handler->GetSession()->SendPacket(&packet);
+        return true;
+    }
+
+    static bool HandleDebugApplyForceMovementCommand(ChatHandler* handler, char const* args)
+    {
+        Unit* unit = handler->getSelectedUnit();
+        if (!unit)
+        {
+            handler->SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        Player* player = handler->GetSession()->GetPlayer();
+
+        float magnitude     = 10.0f;
+        Position direction  = player->GetPosition();
+
+        if (*args)
+        {
+            char* magnitudeStr = strtok((char*)args, " ");
+            char* directionX = strtok(NULL, " ");
+            char* directionY = strtok(NULL, " ");
+            char* directionZ = strtok(NULL, " ");
+
+            if (magnitudeStr)
+                magnitude = (float)atof(magnitudeStr);
+
+            if (directionX && directionY && directionZ)
+                direction.Relocate((float)atof(directionX), (float)atof(directionY), (float)atof(directionZ));
+        }
+
+        unit->ApplyMovementForce(player->GetGUID(), magnitude, direction);
+        return true;
+    }
+
+    static bool HandleDebugRemoveForceMovementCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        Unit* unit = handler->getSelectedUnit();
+        if (!unit)
+        {
+            handler->SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        unit->RemoveMovementForce(handler->GetSession()->GetPlayer()->GetGUID());
+        return true;
+    }
+
+    static bool HandleDebugPlayerConditionCommand(ChatHandler* handler, char const* args)
+    {
+        if (!args)
+            return false;
+
+        uint32 conditionId = atoi(args);
+        Player* player = handler->getSelectedPlayerOrSelf();
+
+        PlayerConditionEntry const* playerCondition = sPlayerConditionStore.LookupEntry(conditionId);
+        if (!playerCondition)
+            return false;
+
+        if (sConditionMgr->IsPlayerMeetingCondition(player, playerCondition))
+            handler->PSendSysMessage("True");
+        else
+            handler->PSendSysMessage("False");
+
+        return true;
     }
 };
 
