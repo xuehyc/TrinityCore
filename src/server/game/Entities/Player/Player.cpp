@@ -15408,7 +15408,8 @@ void Player::ForceCompleteQuest(uint32 quest_id)
         }
     }
 
-    CompleteQuest(quest_id);
+    if (GetQuestStatus(quest_id) != QUEST_STATUS_COMPLETE)
+        CompleteQuest(quest_id);
 }
 
 void Player::CompleteQuest(uint32 quest_id)
@@ -15619,7 +15620,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
                 ItemPosCountVec dest;
                 if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardItemCount[i]) == EQUIP_ERR_OK)
                 {
-                    std::vector<int32> bonusListIDs = sDB2Manager.GetItemBonusTreeVector(reward, 0);
+                    std::vector<int32> bonusListIDs = sDB2Manager.GetItemBonusTreeVector(itemId, 0);
 
                     Item* item = StoreNewItem(dest, itemId, true, GenerateItemRandomPropertyId(itemId), GuidSet(), 0, bonusListIDs);
                     SendNewItem(item, quest->RewardItemCount[i], true, false);
@@ -15660,6 +15661,9 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
         if (moneyRew > 0)
             UpdateCriteria(CRITERIA_TYPE_MONEY_FROM_QUEST_REWARD, uint32(moneyRew));
     }
+
+    if (quest->IsWorldQuest())
+        sWorldQuestMgr->RewardQuestForPlayer(this, quest->ID);
 
     // honor reward
     if (uint32 honor = quest->CalculateHonorGain(getLevel()))
