@@ -1136,7 +1136,7 @@ void Player::Update(uint32 p_time)
 	{
 		if (ptr_Interval <= p_time)
 		{
-			GetSession()->SendNotification("Thank you for playing with Single Player Project. Here is some money for your loyality. :)");
+			GetSession()->SendNotification("Thank you for playing with Dark-iCE. Here is some money for your loyalty. :)");
 			ModifyMoney(ptr_Money);
 			ptr_Interval = sConfigMgr->GetIntDefault("TimeIsMoneyFriend.Interval", 0);
 		}
