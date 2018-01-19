@@ -1314,6 +1314,7 @@ class TC_GAME_API Unit : public WorldObject
         void ApplyMovementForce(ObjectGuid source, float magnitude, Position direction, Position origin = Position());
         void RemoveMovementForce(ObjectGuid source);
         void RemoveAllMovementForces();
+        std::unordered_map<ObjectGuid, WorldPackets::Movement::MovementForce> const& GetMovementForces() const { return _movementForces; }
 
         void SetInFront(WorldObject const* target);
         void SetFacingTo(float ori, bool force = false);
@@ -1913,6 +1914,7 @@ class TC_GAME_API Unit : public WorldObject
 
         void GetAttackableUnitListInRange(std::list<Unit*> &list, float fMaxSearchRange) const;
         void GetAreatriggerListInRange(std::list<AreaTrigger*>& list, float fMaxSearchRange) const;
+        void GetSceneObjectListInRange(std::list<SceneObject*>& list, float fMaxSearchRange) const;
         void GetConversationListInRange(std::list<Conversation*>& list, float fMaxSearchRange) const;
         void GetAreaTriggerListWithSpellIDInRange(std::list<AreaTrigger*>& list, uint32 spellid, float fMaxSearchRange) const;
 
