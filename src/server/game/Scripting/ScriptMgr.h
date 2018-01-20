@@ -848,7 +848,7 @@ class TC_GAME_API PlayerScript : public UnitScript
         //After looting item
         virtual void OnLootItem(Player* player, Item* item, uint32 count) { }
 
-        After creating item (eg profession item creation)
+        //After creating item (eg profession item creation)
         virtual void OnCreateItem(Player* player, Item* item, uint32 count) { }
 
         //After receiving item as a quest reward

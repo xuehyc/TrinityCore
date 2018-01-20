@@ -23,17 +23,17 @@ public:
 	void GetInfoPreDuel(Player* playerwin, Player* playerlose)
 	{
 		playerData[playerwin->GetGUID()].resethealth = playerwin->GetHealth();
-		playerData[playerwin->GetGUID()].resetPower = playerwin->GetPower(playerwin->getPowerType());
+		playerData[playerwin->GetGUID()].resetPower = playerwin->GetPower(playerwin->GetPowerType());
 		playerData[playerlose->GetGUID()].resethealth = playerlose->GetHealth();
-		playerData[playerlose->GetGUID()].resetPower = playerlose->GetPower(playerlose->getPowerType());
+		playerData[playerlose->GetGUID()].resetPower = playerlose->GetPower(playerlose->GetPowerType());
 	
 	}
 	void DoFullReset(Player* playerwin, Player* playerlose)
 	{
 		playerData[playerwin->GetGUID()].resethealth = playerwin->GetMaxHealth();
-		playerData[playerwin->GetGUID()].resetPower = playerwin->GetMaxPower(playerlose->getPowerType());
+		playerData[playerwin->GetGUID()].resetPower = playerwin->GetMaxPower(playerlose->GetPowerType());
 		playerData[playerlose->GetGUID()].resethealth = playerlose->GetMaxHealth();
-		playerData[playerlose->GetGUID()].resetPower = playerlose->GetMaxPower(playerwin->getPowerType());
+		playerData[playerlose->GetGUID()].resetPower = playerlose->GetMaxPower(playerwin->GetPowerType());
 	}
 
 	void OnDuelStart(Player* playerwin, Player* playerlose)
@@ -56,9 +56,9 @@ public:
 		if (sConfigMgr->GetBoolDefault("Duel.Reset.Enable", true))
 		{
 			playerwin->SetHealth(playerData[playerwin->GetGUID()].resethealth);
-			playerwin->SetPower(playerwin->getPowerType(), playerData[playerwin->GetGUID()].resetPower);
+			playerwin->SetPower(playerwin->GetPowerType(), playerData[playerwin->GetGUID()].resetPower);
 			playerlose->SetHealth(playerData[playerlose->GetGUID()].resethealth);
-			playerlose->SetPower(playerlose->getPowerType(), playerData[playerlose->GetGUID()].resetPower);
+			playerlose->SetPower(playerlose->GetPowerType(), playerData[playerlose->GetGUID()].resetPower);
 
 			if (!UsingPreDuelInfo)
 			{

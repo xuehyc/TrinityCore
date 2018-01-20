@@ -83,7 +83,7 @@ private:
 				player->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, float(difficulty * 100), true);
 			}
 			player->SetFullHealth();
-			if (player->getPowerType() == POWER_MANA) {
+			if (player->GetPowerType() == POWER_MANA) {
 				player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
 			}
 		}

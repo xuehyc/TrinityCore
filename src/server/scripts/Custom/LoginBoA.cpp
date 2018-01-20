@@ -40,7 +40,7 @@ public:
                 chest = 69889;
                 trinkett = 42991;
                 weapon = 69893;
-				shield 122391;
+                shield = 122391;
 				shoulders2 = 42951;
 				chest2 = 48683;
 				trinkett2 = 42992;
@@ -204,7 +204,6 @@ public:
                     default:
                         player->AddItem(shoulders, 1);
                         player->AddItem(trinkett, 2);
-                        player->AddItem(ring, 1);
                         player->AddItem(chest, 1);
                         player->AddItem(weapon, 1);
             player->AddItem(bag, 4);
