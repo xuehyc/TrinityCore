@@ -724,33 +724,33 @@ public:
         {
             if (GetTarget()->GetGameObject(GetId()))
             {
-                Unit* l_Target = GetTarget();
-                SpellInfo const* l_SpellInfo = sSpellMgr->GetSpellInfo(SPELL_WARLOCK_DEMONIC_CIRCLE_TELEPORT);
+                Unit* target = GetTarget();
+                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_WARLOCK_DEMONIC_CIRCLE_TELEPORT);
 
-                if (l_Target == nullptr || l_SpellInfo == nullptr)
+                if (!target || !spellInfo)
                     return;
 
-                GameObject* l_Circle = l_Target->GetGameObject(GetId());
-
-                if (l_Circle == nullptr)
+                GameObject* circle = target->GetGameObject(GetId());
+                if (!circle)
                 {
                     if (firstTick)
                         GetAura()->SetDuration(0);
+
                     return;
                 }
 
                 // Here we check if player is in demonic circle teleport range, if so add
                 // WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST; allowing him to cast the WARLOCK_DEMONIC_CIRCLE_TELEPORT.
                 // If not in range remove the WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST.
-                if (AuraApplication* l_CircleSummon = l_Target->GetAuraApplication(GetSpellInfo()->Id, l_Target->GetGUID()))
+                if (AuraApplication* circleSummon = target->GetAuraApplication(GetSpellInfo()->Id, target->GetGUID()))
                 {
-                    if (l_Target->IsWithinDist(l_Circle, l_SpellInfo->GetMaxRange(true)))
-                        l_CircleSummon->SendFakeAuraUpdate(SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST, false);
-                    else
-                        l_CircleSummon->SendFakeAuraUpdate(SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST, true);
+                    if (target->IsWithinDist(circle, spellInfo->GetMaxRange(true)) && !target->HasVisibleAura(circleSummon))
+                        circleSummon->SendFakeAuraUpdate(SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST, false);
+                    else if (target->HasVisibleAura(circleSummon))
+                        circleSummon->SendFakeAuraUpdate(SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST, true);
                 }
                 else
-                    GetTarget()->RemoveAura(SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST);
+                    target->RemoveAura(SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST);
             }
         }
 
@@ -1896,43 +1896,52 @@ public:
     {
         PrepareAuraScript(spell_warlock_agony_AuraScript);
 
-        float tick = (float)rand() / (float)(RAND_MAX / 0.99f);
-
         void HandleDummyPeriodic(AuraEffect const* /* auraEffect */)
         {
-            if (GetStackAmount() >= 20) //If we have more than 20, dont do anything
-                return;
-
             Unit* caster = GetCaster();
-            if(!caster)
+            if (!caster)
                 return;
 
-            if(GetStackAmount() >= 10 && !caster->HasAura(SPELL_WARLOCK_WRITHE_IN_AGONY)) //If we have more than 10 and DONT have the writhe of agony talent, dont do anything
+            float soulShardAgonyTick = caster->Variables.GetValue<float>("SoulShardAgonyTick", frand(0.0f, 99.0f));
+            soulShardAgonyTick += 16.0f / float(sqrt(GetStackAmount()));
+
+            if (soulShardAgonyTick >= 100.0f)
+            {
+                soulShardAgonyTick = frand(0.0f, 99.0f);
+
+                if (Player* player = GetCaster()->ToPlayer())
+                    if (player->GetPower(POWER_SOUL_SHARDS) < player->GetMaxPower(POWER_SOUL_SHARDS))
+                        player->SetPower(POWER_SOUL_SHARDS, player->GetPower(POWER_SOUL_SHARDS) + 10);
+            }
+
+            caster->Variables.Set("SoulShardAgonyTick", soulShardAgonyTick);
+
+            // If we have more than 20, dont do anything
+            if (GetStackAmount() >= 20)
+                return;
+
+            // If we have more than 10 and DONT have the writhe of agony talent, dont do anything
+            if (GetStackAmount() >= 10 && !caster->HasAura(SPELL_WARLOCK_WRITHE_IN_AGONY))
                 return;
 
             //The only cases the code below is executed is :
             //Stacks < 10
             //Stacks < 20 AND player has Writhe of Agony talent.
             SetStackAmount(GetStackAmount() + 1);
+        }
 
-            tick += 0.16 / float(sqrt(GetStackAmount()));
-
-            if (tick >= 1.f)
-            {
-                tick = (float)rand() / (float)(RAND_MAX / 0.99f);
-
-                Player* player = GetCaster()->ToPlayer();
-                if (!player)
-                    return;
-
-                if (player->GetPower(POWER_SOUL_SHARDS) < player->GetMaxPower(POWER_SOUL_SHARDS))
-                    player->SetPower(POWER_SOUL_SHARDS, player->GetPower(POWER_SOUL_SHARDS) + 1);
-            }
+        void OnRemove(const AuraEffect* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            // If last agony removed, remove tick counter
+            if (Unit* caster = GetCaster())
+                if (!caster->GetOwnedAura(SPELL_WARLOCK_AGONY))
+                    caster->Variables.Remove("SoulShardAgonyTick");
         }
 
         void Register() override
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_warlock_agony_AuraScript::HandleDummyPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_warlock_agony_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
@@ -2333,7 +2342,7 @@ public:
             {
                 AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
                 if (removeMode == AURA_REMOVE_BY_DEATH)
-                    GetCaster()->SetPower(POWER_SOUL_SHARDS, GetCaster()->GetPower(POWER_SOUL_SHARDS) + 300);
+                    GetCaster()->SetPower(POWER_SOUL_SHARDS, GetCaster()->GetPower(POWER_SOUL_SHARDS) + 30);
             }
         }
 
@@ -2659,7 +2668,7 @@ public:
             {
                 AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
                 if (removeMode == AURA_REMOVE_BY_DEATH)
-                    GetCaster()->SetPower(POWER_SOUL_SHARDS, GetCaster()->GetPower(POWER_SOUL_SHARDS) + 5);
+                    GetCaster()->SetPower(POWER_SOUL_SHARDS, GetCaster()->GetPower(POWER_SOUL_SHARDS) + 50);
             }
         }
 

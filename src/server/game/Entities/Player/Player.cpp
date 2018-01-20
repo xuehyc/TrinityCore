@@ -7363,6 +7363,10 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
         if (Guild* guild = GetGuild())
             guild->UpdateMemberData(this, GUILD_MEMBER_DATA_ZONEID, newZone);
+
+        if (ZoneScript* oldZoneScript = GetZoneScript())
+            if (oldZoneScript->IsZoneScript())
+                oldZoneScript->OnPlayerExit(this);
     }
 
     // group update
@@ -7378,6 +7382,15 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     // zone changed, so area changed as well, update it.
     UpdateArea(newArea);
+
+    if (m_zoneUpdateId != oldZone)
+    {
+        SetZoneScript();
+
+        if (ZoneScript* newZoneScript = GetZoneScript())
+            if (newZoneScript->IsZoneScript())
+                GetZoneScript()->OnPlayerEnter(this);
+    }
 
     sScriptMgr->OnPlayerUpdateZone(this, newZone, oldZone, newArea);
 
@@ -15480,7 +15493,8 @@ void Player::ForceCompleteQuest(uint32 quest_id)
         }
     }
 
-    CompleteQuest(quest_id);
+    if (GetQuestStatus(quest_id) != QUEST_STATUS_COMPLETE)
+        CompleteQuest(quest_id);
 }
 
 void Player::CompleteQuest(uint32 quest_id)
@@ -15691,7 +15705,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
                 ItemPosCountVec dest;
                 if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardItemCount[i]) == EQUIP_ERR_OK)
                 {
-                    std::vector<int32> bonusListIDs = sDB2Manager.GetItemBonusTreeVector(reward, 0);
+                    std::vector<int32> bonusListIDs = sDB2Manager.GetItemBonusTreeVector(itemId, 0);
 
                     Item* item = StoreNewItem(dest, itemId, true, GenerateItemRandomPropertyId(itemId), GuidSet(), 0, bonusListIDs);
                     SendNewItem(item, quest->RewardItemCount[i], true, false);
@@ -15732,6 +15746,9 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
         if (moneyRew > 0)
             UpdateCriteria(CRITERIA_TYPE_MONEY_FROM_QUEST_REWARD, uint32(moneyRew));
     }
+
+    if (quest->IsWorldQuest())
+        sWorldQuestMgr->RewardQuestForPlayer(this, quest->ID);
 
     // honor reward
     if (uint32 honor = quest->CalculateHonorGain(getLevel()))
@@ -24123,6 +24140,7 @@ template void Player::UpdateVisibilityOf(Corpse*        target, UpdateData& data
 template void Player::UpdateVisibilityOf(GameObject*    target, UpdateData& data, std::set<Unit*>& visibleNow);
 template void Player::UpdateVisibilityOf(DynamicObject* target, UpdateData& data, std::set<Unit*>& visibleNow);
 template void Player::UpdateVisibilityOf(AreaTrigger*   target, UpdateData& data, std::set<Unit*>& visibleNow);
+template void Player::UpdateVisibilityOf(SceneObject*   target, UpdateData& data, std::set<Unit*>& visibleNow);
 template void Player::UpdateVisibilityOf(Conversation*  target, UpdateData& data, std::set<Unit*>& visibleNow);
 
 void Player::UpdateObjectVisibility(bool forced)

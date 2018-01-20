@@ -710,6 +710,7 @@ void AreaTrigger::UpdateTimeToTarget(uint32 timeToTarget)
     float currentTimePercent = GetCurrentTimePercent();
     int lastPositionIndex = 0;
     float percentFromLastPoint = 0;
+
     _spline->computeIndex(currentTimePercent, lastPositionIndex, percentFromLastPoint);
 
     std::vector<G3D::Vector3> newPoints;
@@ -764,7 +765,9 @@ void AreaTrigger::UpdateSplinePosition(uint32 diff)
 
     int lastPositionIndex = 0;
     float percentFromLastPoint = 0;
-    _spline->computeIndex(currentTimePercent, lastPositionIndex, percentFromLastPoint);
+
+    if (currentTimePercent > 0.0f)
+        _spline->computeIndex(currentTimePercent, lastPositionIndex, percentFromLastPoint);
 
     G3D::Vector3 currentPosition;
     _spline->evaluate_percent(lastPositionIndex, percentFromLastPoint, currentPosition);
@@ -807,7 +810,8 @@ float AreaTrigger::GetCurrentTimePercent()
             currentTimePercent = progress;
     }
 
-    return currentTimePercent;
+    // currentTimePercent must be between 0.f and 1.f
+    return std::max(0.f, std::min(currentTimePercent, 1.f));
 }
 
 void AreaTrigger::DebugVisualizePosition()

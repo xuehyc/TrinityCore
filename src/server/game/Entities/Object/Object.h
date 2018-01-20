@@ -44,6 +44,7 @@ class InstanceScript;
 class Map;
 class Player;
 class Scenario;
+class SceneObject;
 class TempSummon;
 class Transport;
 class Unit;
@@ -285,8 +286,12 @@ class TC_GAME_API Object
         AreaTrigger const* ToAreaTrigger() const { if (IsAreaTrigger()) return reinterpret_cast<AreaTrigger const*>(this); else return nullptr; }
 
         inline bool IsConversation() const { return GetTypeId() == TYPEID_CONVERSATION; }
-        Conversation* ToConversation() { if (GetTypeId() == TYPEID_CONVERSATION) return reinterpret_cast<Conversation*>(this); else return nullptr; }
-        Conversation const* ToConversation() const { if (GetTypeId() == TYPEID_CONVERSATION) return reinterpret_cast<Conversation const*>(this); else return nullptr; }
+        Conversation* ToConversation() { if (IsConversation()) return reinterpret_cast<Conversation*>(this); else return nullptr; }
+        Conversation const* ToConversation() const { if (IsConversation()) return reinterpret_cast<Conversation const*>(this); else return nullptr; }
+
+        inline bool IsSceneObject() const { return GetTypeId() == TYPEID_SCENEOBJECT; }
+        SceneObject* ToSceneObject() { if (IsSceneObject()) return reinterpret_cast<SceneObject*>(this); else return nullptr; }
+        SceneObject const* ToSceneObject() const { if (IsSceneObject()) return reinterpret_cast<SceneObject const*>(this); else return nullptr; }
 
     protected:
         Object();
@@ -393,10 +398,10 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
         void GetNearPoint2D(float &x, float &y, float distance, float absAngle) const;
         void GetNearPoint(WorldObject const* searcher, float &x, float &y, float &z, float searcher_size, float distance2d, float absAngle) const;
         void GetClosePoint(float &x, float &y, float &z, float size, float distance2d = 0, float angle = 0) const;
-        void MovePosition(Position &pos, float dist, float angle);
+        void MovePosition(Position &pos, float dist, float angle = 0.0f);
         Position GetNearPosition(float dist, float angle);
         void MovePositionToFirstCollision(Position &pos, float dist, float angle);
-        Position GetFirstCollisionPosition(float dist, float angle);
+        Position GetFirstCollisionPosition(float dist, float angle = 0.0f);
         Position GetRandomNearPosition(float radius);
         void GetContactPoint(WorldObject const* obj, float &x, float &y, float &z, float distance2d = CONTACT_DISTANCE) const;
 

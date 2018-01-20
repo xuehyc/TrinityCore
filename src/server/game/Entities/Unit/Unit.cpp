@@ -275,7 +275,7 @@ SpellSchoolMask ProcEventInfo::GetSchoolMask() const
 
 SpellNonMeleeDamage::SpellNonMeleeDamage(Unit* _attacker, Unit* _target, uint32 _SpellID, uint32 _SpellXSpellVisualID, uint32 _schoolMask, ObjectGuid _castId)
     : target(_target), attacker(_attacker), castId(_castId), SpellID(_SpellID), SpellXSpellVisualID(_SpellXSpellVisualID), damage(0), schoolMask(_schoolMask),
-    absorb(0), resist(0), periodicLog(false), blocked(0), HitInfo(0), cleanDamage(0), preHitHealth(_target->GetHealth())
+    absorb(0), resist(0), periodicLog(false), blocked(0), HitInfo(0), cleanDamage(0), fullBlock(false), preHitHealth(_target->GetHealth())
 {
 }
 
@@ -1181,6 +1181,11 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
                     if (victim->isBlockCritical())
                         value *= 2; // double blocked percent
                     damageInfo->blocked = CalculatePct(damage, value);
+                    if (damage <= int32(damageInfo->blocked))
+                    {
+                        damageInfo->blocked = uint32(damage);
+                        damageInfo->fullBlock = true;
+                    }
                     damage -= damageInfo->blocked;
                 }
 
@@ -1217,6 +1222,15 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
     damageInfo->damage = damage;
     DamageInfo dmgInfo(*damageInfo, SPELL_DIRECT_DAMAGE, BASE_ATTACK, PROC_HIT_NONE);
     CalcAbsorbResist(dmgInfo);
+    damageInfo->absorb = dmgInfo.GetAbsorb();
+    damageInfo->resist = dmgInfo.GetResist();
+
+    if (damageInfo->absorb)
+        damageInfo->HitInfo |= (damageInfo->damage - damageInfo->absorb == 0 ? HITINFO_FULL_ABSORB : HITINFO_PARTIAL_ABSORB);
+
+    if (damageInfo->resist)
+        damageInfo->HitInfo |= (damageInfo->damage - damageInfo->resist == 0 ? HITINFO_FULL_RESIST : HITINFO_PARTIAL_RESIST);
+
     damageInfo->damage = dmgInfo.GetDamage();
 }
 
@@ -2760,22 +2774,22 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, Unit const* victi
         {
             chance = 5.0f;
 
-            if (IsPet() || IsHunterPet() || IsGuardian())
+            if (GetOwner() && GetOwner()->IsPlayer() && (IsPet() || IsHunterPet() || IsGuardian()))
             {
                 switch (attackType)
                 {
-                case BASE_ATTACK:
-                    chance = GetOwner()->GetFloatValue(PLAYER_CRIT_PERCENTAGE);
-                    break;
-                case OFF_ATTACK:
-                    chance = GetOwner()->GetFloatValue(PLAYER_OFFHAND_CRIT_PERCENTAGE);
-                    break;
-                case RANGED_ATTACK:
-                    chance = GetOwner()->GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE);
-                    break;
-                default:
-                    chance = 0.0f;
-                    break;
+                    case BASE_ATTACK:
+                        chance = GetOwner()->GetFloatValue(PLAYER_CRIT_PERCENTAGE);
+                        break;
+                    case OFF_ATTACK:
+                        chance = GetOwner()->GetFloatValue(PLAYER_OFFHAND_CRIT_PERCENTAGE);
+                        break;
+                    case RANGED_ATTACK:
+                        chance = GetOwner()->GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE);
+                        break;
+                    default:
+                        chance = 0.0f;
+                        break;
                 }
             }
             chance += GetTotalAuraModifier(SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
@@ -5185,12 +5199,12 @@ void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage const* log)
     if (log->damage > log->preHitHealth)
         packet.Overkill = log->damage - log->preHitHealth;
     else
-        packet.Overkill = 0;
+        packet.Overkill = -1;
 
     packet.SchoolMask = log->schoolMask;
-    packet.ShieldBlock = log->blocked;
-    packet.Resisted = log->resist;
     packet.Absorbed = log->absorb;
+    packet.Resisted = log->resist;
+    packet.ShieldBlock = log->blocked;
     packet.Periodic = log->periodicLog;
     packet.Flags = log->HitInfo;
 
@@ -5204,10 +5218,10 @@ void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage const* log)
 void Unit::ProcSkillsAndAuras(Unit* actionTarget, uint32 typeMaskActor, uint32 typeMaskActionTarget, uint32 spellTypeMask, uint32 spellPhaseMask, uint32 hitMask, Spell* spell, DamageInfo* damageInfo, HealInfo* healInfo)
 {
     WeaponAttackType attType = damageInfo ? damageInfo->GetAttackType() : BASE_ATTACK;
-    if (typeMaskActor && CanProc())
+    if (typeMaskActor)
         ProcSkillsAndReactives(false, actionTarget, typeMaskActor, hitMask, attType);
 
-    if (typeMaskActionTarget && actionTarget && actionTarget->CanProc())
+    if (typeMaskActionTarget && actionTarget)
         actionTarget->ProcSkillsAndReactives(true, this, typeMaskActionTarget, hitMask, attType);
 
     TriggerAurasProcOnEvent(nullptr, nullptr, actionTarget, typeMaskActor, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
@@ -6611,7 +6625,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // Pets just add their bonus damage to their spell damage
     // note that their spell damage is just gain of their own auras
     if (HasUnitTypeMask(UNIT_MASK_GUARDIAN))
-        DoneAdvertisedBenefit += ((Guardian*)this)->GetBonusDamage();
+        DoneAdvertisedBenefit += static_cast<Guardian const*>(this)->GetBonusDamage();
 
     // Check for table values
     if (effect->BonusCoefficientFromAP > 0.0f)
@@ -6835,9 +6849,9 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask) const
     int32 DoneAdvertisedBenefit = 0;
 
     AuraEffectList const& mDamageDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE);
-    for (AuraEffectList::const_iterator i = mDamageDone.begin(); i != mDamageDone.end(); ++i)
-        if ((*i)->GetMiscValue() & schoolMask)
-            DoneAdvertisedBenefit += (*i)->GetAmount();
+    for (AuraEffect const* aurEff : mDamageDone)
+        if (aurEff->GetMiscValue() & schoolMask)
+            DoneAdvertisedBenefit += aurEff->GetAmount();
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
@@ -6850,22 +6864,21 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask) const
 
         // Damage bonus from stats
         AuraEffectList const& mDamageDoneOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT);
-        for (AuraEffectList::const_iterator i = mDamageDoneOfStatPercent.begin(); i != mDamageDoneOfStatPercent.end(); ++i)
+        for (AuraEffect const* aurEff : mDamageDoneOfStatPercent)
         {
-            if ((*i)->GetMiscValue() & schoolMask)
+            if ((aurEff->GetMiscValue() & schoolMask) != 0)
             {
                 // stat used stored in miscValueB for this aura
-                Stats usedStat = Stats((*i)->GetMiscValueB());
-                DoneAdvertisedBenefit += int32(CalculatePct(GetStat(usedStat), (*i)->GetAmount()));
+                Stats const usedStat = static_cast<Stats>(aurEff->GetMiscValueB());
+                DoneAdvertisedBenefit += static_cast<int32>(CalculatePct(GetStat(usedStat), aurEff->GetAmount()));
             }
         }
+
         // ... and attack power
-        AuraEffectList const& mDamageDonebyAP = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER);
-        for (AuraEffectList::const_iterator i =mDamageDonebyAP.begin(); i != mDamageDonebyAP.end(); ++i)
-            if ((*i)->GetMiscValue() & schoolMask)
-                DoneAdvertisedBenefit += int32(CalculatePct(GetTotalAttackPowerValue(BASE_ATTACK), (*i)->GetAmount()));
+        DoneAdvertisedBenefit += static_cast<int32>(CalculatePct(GetTotalAttackPowerValue(BASE_ATTACK), GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER, schoolMask)));
 
     }
+
     return DoneAdvertisedBenefit;
 }
 
@@ -7335,6 +7348,9 @@ bool Unit::IsImmunedToDamage(SpellInfo const* spellInfo) const
     if (!spellInfo)
         return false;
 
+    if (spellInfo->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT))
+        return false;
+
     if (spellInfo->HasAttribute(SPELL_ATTR1_UNAFFECTED_BY_SCHOOL_IMMUNE) || spellInfo->HasAttribute(SPELL_ATTR2_UNAFFECTED_BY_AURA_SCHOOL_IMMUNE))
         return false;
 
@@ -7528,7 +7544,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
 
     if (APbonus != 0)                                       // Can be negative
     {
-        bool normalized = spellProto && spellProto->HasEffect(GetMap()->GetDifficultyID(), SPELL_EFFECT_NORMALIZED_WEAPON_DMG);
+        bool const normalized = spellProto && spellProto->HasEffect(GetMap()->GetDifficultyID(), SPELL_EFFECT_NORMALIZED_WEAPON_DMG);
         DoneFlatBenefit += int32(APbonus / 3.5f * GetAPMultiplier(attType, normalized));
     }
 
@@ -10214,14 +10230,13 @@ uint32 createProcHitMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missCond
                 hitMask |= PROC_HIT_PARRY;
                 break;
             case SPELL_MISS_BLOCK:
-                hitMask |= PROC_HIT_BLOCK;
+                // spells can't be partially blocked (it's damage can though)
+                hitMask |= PROC_HIT_BLOCK | PROC_HIT_FULL_BLOCK;
                 break;
             case SPELL_MISS_EVADE:
                 hitMask |= PROC_HIT_EVADE;
                 break;
             case SPELL_MISS_IMMUNE:
-                hitMask |= PROC_HIT_IMMUNE;
-                break;
             case SPELL_MISS_IMMUNE2:
                 hitMask |= PROC_HIT_IMMUNE;
                 break;
@@ -10234,6 +10249,9 @@ uint32 createProcHitMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missCond
             case SPELL_MISS_REFLECT:
                 hitMask |= PROC_HIT_REFLECT;
                 break;
+            case SPELL_MISS_RESIST:
+                hitMask |= PROC_HIT_FULL_RESIST;
+                break;
             default:
                 break;
         }
@@ -10242,15 +10260,27 @@ uint32 createProcHitMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missCond
     {
         // On block
         if (damageInfo->blocked)
+        {
             hitMask |= PROC_HIT_BLOCK;
+            if (damageInfo->fullBlock)
+                hitMask |= PROC_HIT_FULL_BLOCK;
+        }
         // On absorb
         if (damageInfo->absorb)
             hitMask |= PROC_HIT_ABSORB;
-        // On crit
-        if (damageInfo->HitInfo & SPELL_HIT_TYPE_CRIT)
-            hitMask |= PROC_HIT_CRITICAL;
-        else
-            hitMask |= PROC_HIT_NORMAL;
+
+        // Don't set hit/crit hitMask if damage is nullified
+        bool const damageNullified = (damageInfo->HitInfo & (HITINFO_FULL_ABSORB | HITINFO_FULL_RESIST)) != 0 || (hitMask & PROC_HIT_FULL_BLOCK) != 0;
+        if (!damageNullified)
+        {
+            // On crit
+            if (damageInfo->HitInfo & SPELL_HIT_TYPE_CRIT)
+                hitMask |= PROC_HIT_CRITICAL;
+            else
+                hitMask |= PROC_HIT_NORMAL;
+        }
+        else if ((damageInfo->HitInfo & HITINFO_FULL_RESIST) != 0)
+            hitMask |= PROC_HIT_FULL_RESIST;
     }
 
     return hitMask;
@@ -10358,7 +10388,7 @@ void Unit::TriggerAurasProcOnEvent(AuraApplicationList* myProcAuras, AuraApplica
     // prepare data for self trigger
     ProcEventInfo myProcEventInfo(this, actionTarget, actionTarget, typeMaskActor, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
     AuraApplicationProcContainer myAurasTriggeringProc;
-    if (typeMaskActor && CanProc())
+    if (typeMaskActor)
     {
         GetProcAurasTriggeredOnEvent(myAurasTriggeringProc, myProcAuras, myProcEventInfo);
 
@@ -10381,7 +10411,7 @@ void Unit::TriggerAurasProcOnEvent(AuraApplicationList* myProcAuras, AuraApplica
     // prepare data for target trigger
     ProcEventInfo targetProcEventInfo(this, actionTarget, this, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
     AuraApplicationProcContainer targetAurasTriggeringProc;
-    if (typeMaskActionTarget && actionTarget && actionTarget->CanProc())
+    if (typeMaskActionTarget && actionTarget)
         actionTarget->GetProcAurasTriggeredOnEvent(targetAurasTriggeringProc, targetProcAuras, targetProcEventInfo);
 
     TriggerAurasProcOnEvent(myProcEventInfo, myAurasTriggeringProc);
@@ -14343,11 +14373,11 @@ void Unit::Talk(uint32 textId, ChatMsg msgType, float textRange, WorldObject con
 {
     if (!sBroadcastTextStore.LookupEntry(textId))
     {
-        TC_LOG_ERROR("entities.unit", "WorldObject::MonsterText: `broadcast_text` was not %u found", textId);
+        TC_LOG_ERROR("entities.unit", "WorldObject::MonsterText: `broadcast_text` (ID: %u) was not found", textId);
         return;
     }
 
-    Trinity::BroadcastTextBuilder builder(this, msgType, textId, target);
+    Trinity::BroadcastTextBuilder builder(this, msgType, textId, getGender(), target);
     Trinity::LocalizedPacketDo<Trinity::BroadcastTextBuilder> localizer(builder);
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::BroadcastTextBuilder> > worker(this, textRange, localizer);
     Cell::VisitWorldObjects(this, worker, textRange);
@@ -14569,6 +14599,22 @@ void Unit::GetAreatriggerListInRange(std::list<AreaTrigger*>& list, float fMaxSe
 
     TypeContainerVisitor<Trinity::AreaTriggerListSearcher<Trinity::AnyAreatriggerInObjectRangeCheck>, WorldTypeMapContainer> l_WorldSearcher(searcher);
     TypeContainerVisitor<Trinity::AreaTriggerListSearcher<Trinity::AnyAreatriggerInObjectRangeCheck>, GridTypeMapContainer>  l_GridSearcher(searcher);
+
+    l_Cell.Visit(l_Coords, l_WorldSearcher, *GetMap(), *this, fMaxSearchRange);
+    l_Cell.Visit(l_Coords, l_GridSearcher, *GetMap(), *this, fMaxSearchRange);
+}
+
+void Unit::GetSceneObjectListInRange(std::list<SceneObject*>& list, float fMaxSearchRange) const
+{
+    CellCoord l_Coords(Trinity::ComputeCellCoord(GetPositionX(), GetPositionY()));
+    Cell l_Cell(l_Coords);
+    l_Cell.SetNoCreate();
+
+    Trinity::AnySceneObjectInObjectRangeCheck l_Check(this, fMaxSearchRange);
+    Trinity::SceneObjectVectorSearcher<Trinity::AnySceneObjectInObjectRangeCheck> searcher(this, list, l_Check);
+
+    TypeContainerVisitor<Trinity::SceneObjectVectorSearcher<Trinity::AnySceneObjectInObjectRangeCheck>, WorldTypeMapContainer> l_WorldSearcher(searcher);
+    TypeContainerVisitor<Trinity::SceneObjectVectorSearcher<Trinity::AnySceneObjectInObjectRangeCheck>, GridTypeMapContainer>  l_GridSearcher(searcher);
 
     l_Cell.Visit(l_Coords, l_WorldSearcher, *GetMap(), *this, fMaxSearchRange);
     l_Cell.Visit(l_Coords, l_GridSearcher, *GetMap(), *this, fMaxSearchRange);
