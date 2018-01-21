@@ -4274,6 +4274,16 @@ Dungeon.Checkpoints.Enable = 1
 Congrats.Level = 0
 
 #
+#    Skip pandaren starting area
+#        Enable this if you want to skip the Wandering Isle (pandaren starting area)
+#
+#    Skip.Pandaren.Enable
+#        Default:     1 (enabled)
+#                     0 (disabled)
+
+Skip.Pandaren.Enable = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################

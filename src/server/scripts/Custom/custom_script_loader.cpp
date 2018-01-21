@@ -29,6 +29,7 @@ void AddSC_RandomEnchantsScript();
 void AddSC_Dynamic_Resurrections();
 void AddSC_Duel_Reset();
 void AddSC_custom_CongratsOnLevel();
+void AddSC_skip_pandaren();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -47,4 +48,5 @@ void AddCustomScripts()
     AddSC_Dynamic_Resurrections();
     AddSC_Duel_Reset();
     AddSC_custom_CongratsOnLevel();
+	AddSC_skip_pandaren();
 }
