@@ -13,16 +13,8 @@ public:
         {
             if (p_Player->getRace() == RACE_PANDAREN_NEUTRAL/* && p_p_Player->getLevel() >= 75*/)
                 p_Player->ShowNeutralPlayerFactionSelectUI();
-        }
+                p_Player->SetLevel(5);
 
-
-        if (sConfigMgr->GetBoolDefault("Skip.Pandaren.Enable", true))
-        {
-            if (p_Player->getRace() == RACE_PANDAREN_NEUTRAL/* && p_p_Player->getLevel() >= 75*/)
-            {
-
-            std::ostringstream ss;
-            sWorld->SendServerMessage(SERVER_MSG_STRING, ss.str().c_str());
             uint32 shoulders = 0, chest = 0, trinkett = 0, weapon = 0, weapon2 = 0, weapon3 = 0, shield = 0, shoulders2 = 0, chest2 = 0, trinkett2 = 0, bag = 0;
 
             bag = 41600;
@@ -213,10 +205,8 @@ public:
                 p_Player->AddItem(weapon, 1);
                 p_Player->AddItem(bag, 4);
             }
-            }
         }
     }
-
 };
 
 void AddSC_skip_pandaren()
