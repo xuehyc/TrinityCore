@@ -11,16 +11,17 @@ public:
     {
         if (sConfigMgr->GetBoolDefault("Skip.Pandaren.Enable", true))
         {
-            if (p_Player->getRace() == RACE_PANDAREN_NEUTRAL/* && p_p_Player->getLevel() >= 75*/)
+            if (p_Player->getRace() == RACE_PANDAREN_NEUTRAL)
+            {
                 p_Player->ShowNeutralPlayerFactionSelectUI();
                 p_Player->SetLevel(5);
 
-            uint32 shoulders = 0, chest = 0, trinkett = 0, weapon = 0, weapon2 = 0, weapon3 = 0, shield = 0, shoulders2 = 0, chest2 = 0, trinkett2 = 0, bag = 0;
+                uint32 shoulders = 0, chest = 0, trinkett = 0, weapon = 0, weapon2 = 0, weapon3 = 0, shield = 0, shoulders2 = 0, chest2 = 0, trinkett2 = 0, bag = 0;
 
-            bag = 41600;
-            switch (p_Player->getClass())
-            {
-            case CLASS_WARRIOR:
+                bag = 41600;
+                switch (p_Player->getClass())
+                {
+                case CLASS_WARRIOR:
                 //Warrior
                 shoulders = 93893;
                 chest = 93892;
@@ -31,7 +32,8 @@ public:
                 chest2 = 122381;
                 weapon2 = 42943;
                 break;
-            case CLASS_PALADIN:
+
+                case CLASS_PALADIN:
                 //Paladin
                 shoulders = 69890;
                 chest = 69889;
@@ -43,7 +45,8 @@ public:
                 trinkett2 = 42992;
                 weapon2 = 42948;
                 break;
-            case CLASS_HUNTER:
+
+                case CLASS_HUNTER:
                 //Hunter
                 shoulders = 42950;
                 chest = 48677;
@@ -52,7 +55,8 @@ public:
                 weapon2 = 42946;
                 weapon3 = 44093;
                 break;
-            case CLASS_ROGUE:
+
+                case CLASS_ROGUE:
                 //Rogue
                 shoulders = 42952;
                 chest = 48689;
@@ -60,21 +64,24 @@ public:
                 weapon = 42944;
                 weapon2 = 42944;
                 break;
-            case CLASS_PRIEST:
+
+                case CLASS_PRIEST:
                 //Priest
                 shoulders = 42985;
                 chest = 48691;
                 trinkett = 42992;
                 weapon = 42947;
                 break;
-            case CLASS_DEATH_KNIGHT:
+
+                case CLASS_DEATH_KNIGHT:
                 //Death Knight
                 shoulders = 42949;
                 chest = 48685;
                 trinkett = 42991;
                 weapon = 42945;
                 break;
-            case CLASS_SHAMAN:
+
+                case CLASS_SHAMAN:
                 //Shaman
                 shoulders = 122375;
                 chest = 48683;
@@ -85,21 +92,24 @@ public:
                 chest2 = 122379;
                 weapon2 = 122385;
                 break;
-            case CLASS_MAGE:
+
+                case CLASS_MAGE:
                 //Mage
                 shoulders = 42985;
                 chest = 48691;
                 trinkett = 42992;
                 weapon = 42947;
                 break;
-            case CLASS_WARLOCK:
+
+                case CLASS_WARLOCK:
                 //Warlock
                 shoulders = 42985;
                 chest = 48691;
                 trinkett = 42992;
                 weapon = 42947;
                 break;
-            case CLASS_DRUID:
+
+                case CLASS_DRUID:
                 //Druid
                 shoulders = 42984;
                 chest = 48687;
@@ -110,7 +120,8 @@ public:
                 trinkett2 = 42991;
                 weapon2 = 48718;
                 break;
-            case CLASS_MONK:
+
+                case CLASS_MONK:
                 //Monk
                 shoulders = 42984;
                 chest = 48687;
@@ -120,12 +131,13 @@ public:
                 chest2 = 48689;
                 trinkett2 = 42991;
                 weapon2 = 48716;
-            default:
-                return;
-            }
-            switch (p_Player->getClass())
-            {
-            case CLASS_WARRIOR:
+
+                default:
+                    return;
+                }
+                switch (p_Player->getClass())
+                {
+                case CLASS_WARRIOR:
                 p_Player->AddItem(shoulders, 1);
                 p_Player->AddItem(chest, 1);
                 p_Player->AddItem(trinkett, 2);
@@ -136,7 +148,7 @@ public:
                 p_Player->AddItem(weapon2, 1);
                 p_Player->AddItem(bag, 4);
                 break;
-            case CLASS_PALADIN:
+                case CLASS_PALADIN:
                 p_Player->AddItem(shoulders, 1);
                 p_Player->AddItem(chest, 1);
                 p_Player->AddItem(trinkett, 2);
@@ -148,7 +160,7 @@ public:
                 p_Player->AddItem(weapon2, 1);
                 p_Player->AddItem(bag, 4);
                 break;
-            case CLASS_HUNTER:
+                case CLASS_HUNTER:
                 p_Player->AddItem(shoulders, 1);
                 p_Player->AddItem(trinkett, 2);
                 p_Player->AddItem(chest, 1);
@@ -157,7 +169,7 @@ public:
                 p_Player->AddItem(weapon3, 1);
                 p_Player->AddItem(bag, 4);
                 break;
-            case CLASS_ROGUE:
+                case CLASS_ROGUE:
                 p_Player->AddItem(shoulders, 1);
                 p_Player->AddItem(trinkett, 2);
                 p_Player->AddItem(chest, 1);
@@ -165,7 +177,7 @@ public:
                 p_Player->AddItem(weapon2, 1);
                 p_Player->AddItem(bag, 4);
                 break;
-            case CLASS_DRUID:
+                case CLASS_DRUID:
                 p_Player->AddItem(shoulders, 1);
                 p_Player->AddItem(trinkett, 2);
                 p_Player->AddItem(chest, 1);
@@ -176,7 +188,7 @@ public:
                 p_Player->AddItem(weapon2, 1);
                 p_Player->AddItem(bag, 4);
                 break;
-            case CLASS_SHAMAN:
+                case CLASS_SHAMAN:
                 p_Player->AddItem(shoulders, 1);
                 p_Player->AddItem(chest, 1);
                 p_Player->AddItem(trinkett, 2);
@@ -187,7 +199,7 @@ public:
                 p_Player->AddItem(weapon2, 2);
                 p_Player->AddItem(bag, 4);
                 break;
-            case CLASS_MONK:
+                case CLASS_MONK:
                 p_Player->AddItem(shoulders, 1);
                 p_Player->AddItem(trinkett, 2);
                 p_Player->AddItem(chest, 1);
@@ -198,12 +210,13 @@ public:
                 p_Player->AddItem(weapon2, 1);
                 p_Player->AddItem(bag, 4);
                 break;
-            default:
+                default:
                 p_Player->AddItem(shoulders, 1);
                 p_Player->AddItem(trinkett, 2);
                 p_Player->AddItem(chest, 1);
                 p_Player->AddItem(weapon, 1);
                 p_Player->AddItem(bag, 4);
+                }
             }
         }
     }
