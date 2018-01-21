@@ -1,6 +1,9 @@
+/*
+ * Made by ConanHUN for Single Player Project - Ashamane (legion) repack
+ */
+
 #include "Config.h"
 #include "Player.h"
-#include "object.h"
 
 class spp_skip_pandaren : public PlayerScript
 {
