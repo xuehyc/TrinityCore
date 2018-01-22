@@ -30,6 +30,7 @@ void AddSC_Dynamic_Resurrections();
 void AddSC_Duel_Reset();
 void AddSC_custom_CongratsOnLevel();
 void AddSC_skip_pandaren();
+void AddSC_MoneyForKillsScripts();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -49,4 +50,5 @@ void AddCustomScripts()
     AddSC_Duel_Reset();
     AddSC_custom_CongratsOnLevel();
 	AddSC_skip_pandaren();
+	AddSC_MoneyForKillsScripts();
 }
