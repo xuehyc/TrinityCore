@@ -4142,15 +4142,6 @@ Custom.RespawnSpeed = 1.0
 
 ###################################################################################################
 #
-#     Solocraft.Enable
-#        Description: Solocraft is a script to increase players and bots stats in raids, 
-#		 based on group size. It feels a little Hacky, but raids is unfair hard with playerbots.
-#        Default:     0 (disabled)
-#                     1 (enabled)
-
-Solocraft.Enable = 0
-
-#
 #     FireWorksOnLevelUp
 #        Description: Players shoot a firework when reach level 110.
 #        Default:     0 (disabled)
@@ -4373,6 +4364,33 @@ MFK.Kill.Multiplier = 100
 MFK.PVP.Multiplier = 200
 MFK.DungeonBoss.Multiplier = 25
 MFK.WorldBoss.Multiplier = 200
+
+#
+###################################################################################################
+
+###################################################################################################
+# SOLOCRAFT #
+#############
+#
+#     Solocraft.Enable
+#        Description: Solocraft trying to keep the balance in dungeons and raids, 
+#		 based on group size. It feels a little hacky, but good for low populated servers.
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+Solocraft.Enable = 1
+
+# Announce the module when the player logs in?
+
+Solocraft.Announce = 1
+
+# Difficulty Multipliers
+# Defaults: 5, 10, 25, 10
+
+Solocraft.Dungeon = 5 
+Solocraft.Heroic = 10
+Solocraft.Raid25 = 25
+Solocraft.Raid40 = 10
 
 #
 ###################################################################################################
