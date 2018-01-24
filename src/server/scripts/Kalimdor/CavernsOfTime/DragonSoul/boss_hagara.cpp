@@ -1623,7 +1623,7 @@ class npc_hagara_the_stormbinder_ice_wave : public CreatureScript
                 }
             }
 
-            void UpdateAI(const uint32 diff) override
+            void UpdateAI(const uint32 /*diff*/) override
             {
                 if (bDespawn)
                     return;
