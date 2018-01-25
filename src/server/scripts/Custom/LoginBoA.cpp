@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "Config.h"
 #include "Chat.h"
+#include "SharedDefines.h"
 #include "World.h"
 #define Welcome_Name "Blood Lust"
 
