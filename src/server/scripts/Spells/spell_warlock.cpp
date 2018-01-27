@@ -4038,10 +4038,13 @@ public:
 
             if (Spell const* spell = eventInfo.GetProcSpell())
             {
-                std::vector<SpellPowerCost> const& costs = spell->GetPowerCost();
-                auto costData = std::find_if(costs.begin(), costs.end(), [](SpellPowerCost const& cost) { return cost.Power == POWER_MANA && cost.Amount > 0; });
-                if (costData == costs.end())
-                    return false;
+                canBeRecalculated = false;
+                if (Unit* caster = GetCaster())
+                {
+                    // +80.68% from sp bonus
+                    float bonus = 0.8068f;
+
+                    bonus *= caster->SpellBaseHealingBonusDone(GetSpellInfo()->GetSchoolMask());
 
                 refund = costData->Amount;
                 return true;
