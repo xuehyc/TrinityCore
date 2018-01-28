@@ -1173,10 +1173,6 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
 		uint32 ptr_Interval;
 		uint32 ptr_Money;
 
-		// TimeIsMoneyFriend
-		uint32 ptr_Interval;
-		uint32 ptr_Money;
-
         // Played Time Stuff
         time_t m_logintime;
         time_t m_Last_tick;

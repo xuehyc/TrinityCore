@@ -1141,19 +1141,6 @@ void Player::Update(uint32 p_time)
 	{
 		if (ptr_Interval <= p_time)
 		{
-			GetSession()->SendNotification("Thank you for playing with Dark-iCE. Here is some money for your loyalty. :)");
-			ModifyMoney(ptr_Money);
-			ptr_Interval = sConfigMgr->GetIntDefault("TimeIsMoneyFriend.Interval", 0);
-		}
-		else
-	ptr_Interval -= p_time;
-	}
-
-	// TimeIsMoneyFriend
-	if (ptr_Interval > 0)
-	{
-		if (ptr_Interval <= p_time)
-		{
 			std::ostringstream ss;
 			ss << "|cff3DAEFF[Time is money friend]|cffFFD800 You recieved |cffFF0000" << sConfigMgr->GetIntDefault("TimeIsMoneyFriend.Money", 0) << "|cffFFD800 money for |cffFF0000"<< sConfigMgr->GetIntDefault("TimeIsMoneyFriend.Interval", 0) /60000 <<"|cffFFD800 minute(s) played time.|cffFFD800";
 			sWorld->SendServerMessage(SERVER_MSG_STRING, ss.str().c_str());("");
