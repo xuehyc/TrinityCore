@@ -1,6 +1,8 @@
 #include "Player.h"
 #include "Config.h"
 #include "Chat.h"
+#include "SharedDefines.h"
+#include "World.h"
 #define Welcome_Name "Blood Lust"
 
 class Player_Boa : public PlayerScript
@@ -40,7 +42,7 @@ public:
                 chest = 69889;
                 trinkett = 42991;
                 weapon = 69893;
-                shield = 122391;
+				shield = 122391;
 				shoulders2 = 42951;
 				chest2 = 48683;
 				trinkett2 = 42992;

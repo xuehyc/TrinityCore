@@ -227,6 +227,10 @@ Player::Player(WorldSession* session) : Unit(true), m_sceneMgr(this)
         m_bgBattlegroundQueueID[j].invitedToInstance = 0;
         m_bgBattlegroundQueueID[j].joinTime = 0;
     }
+	
+	// TimeIsMoneyFriend
+	ptr_Interval = sConfigMgr->GetIntDefault("TimeIsMoneyFriend.Interval", 0);
+	ptr_Money = sConfigMgr->GetIntDefault("TimeIsMoneyFriend.Money", 0);
 
     // TimeIsMoneyFriend
 	ptr_Interval = sConfigMgr->GetIntDefault("TimeIsMoneyFriend.Interval", 0);
@@ -1131,6 +1135,19 @@ void Player::Update(uint32 p_time)
         stmt->setUInt32(3, GetSession()->GetAccountId());
         LoginDatabase.Execute(stmt);
     }
+	
+	// TimeIsMoneyFriend
+	if (ptr_Interval > 0)
+	{
+		if (ptr_Interval <= p_time)
+		{
+			GetSession()->SendNotification("Thank you for playing with Dark-iCE. Here is some money for your loyalty. :)");
+			ModifyMoney(ptr_Money);
+			ptr_Interval = sConfigMgr->GetIntDefault("TimeIsMoneyFriend.Interval", 0);
+		}
+		else
+	ptr_Interval -= p_time;
+	}
 
 	// TimeIsMoneyFriend
 	if (ptr_Interval > 0)

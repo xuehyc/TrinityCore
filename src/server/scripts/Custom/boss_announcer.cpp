@@ -4,6 +4,7 @@
 #include "ScriptMgr.h"
 #include "Config.h"
 #include <Player.h>
+#include "World.h"
 
 class Boss_Announcer : public PlayerScript
 {

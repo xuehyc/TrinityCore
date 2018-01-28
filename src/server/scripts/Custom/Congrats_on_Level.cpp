@@ -46,6 +46,7 @@ their bags are full.
 #include "ScriptMgr.h"
 #include "SharedDefines.h"
 #include "Transaction.h"
+#include "World.h"
 #include "WorldSession.h"
 #include <sstream>
 #include <string>
@@ -124,12 +125,33 @@ public:
 				//item2 = ITEMID2;
 				//spell = SPELLID;
 				break;
+			case 90:
+				//1100G
+				money = 1100;
+				//item = ITEMID;
+				//item2 = ITEMID2;
+				//spell = SPELLID;
+				break;
+			case 100:
+				//1500G
+				money = 1500;
+				//item = ITEMID;
+				//item2 = ITEMID2;
+				//spell = SPELLID;
+				break;
+			case 110:
+				//2000G
+				money = 2000;
+				//item = ITEMID;
+				//item2 = ITEMID2;
+				//spell = SPELLID;
+				break;
 			default:
 				return;
 			}
 
 			std::ostringstream ss;
-			ss << "|cffFF0000[The Server]|r  congratulates" << player->GetName() << " for reaching Level " << (uint32)newLevel;
+			ss << "|cffFF0000[The Server]|r  congratulates " << player->GetName() << " for reaching Level " << (uint32)newLevel;
 			sWorld->SendServerMessage(SERVER_MSG_STRING, ss.str().c_str());
 
 			std::ostringstream ss2;
