@@ -88,25 +88,7 @@ void AreaTrigger::RemoveFromWorld()
     }
 }
 
-bool AreaTrigger::LoadFromDB(ObjectGuid::LowType guidLow, Map* map)
-{
-    AreaTriggerDataStore::AreaTriggerDataList const* areaTriggerList = sAreaTriggerDataStore->GetStaticAreaTriggersByMap(map->GetId());
-    if (!areaTriggerList)
-        return false;
-
-    for (AreaTriggerData const& trigger : *areaTriggerList)
-    {
-        if (trigger.guid == guidLow)
-        {
-            Position pos(trigger.position_x, trigger.position_y, trigger.position_z);
-            return CreateStaticAreaTrigger(trigger.id, guidLow, pos, map, trigger.scriptId);
-        }
-    }
-
-    return false;
-}
-
-bool AreaTrigger::CreateAreaTrigger(uint32 spellMiscId, Unit* caster, Unit* target, SpellInfo const* spell, Position const& pos, int32 duration, uint32 spellXSpellVisualId, ObjectGuid const& castId /*= ObjectGuid::Empty*/, AuraEffect const* aurEff)
+bool AreaTrigger::Create(uint32 spellMiscId, Unit* caster, Unit* target, SpellInfo const* spell, Position const& pos, int32 duration, uint32 spellXSpellVisualId, ObjectGuid const& castId, AuraEffect const* aurEff)
 {
     _targetGuid = target ? target->GetGUID() : ObjectGuid::Empty;
     _aurEff = aurEff;
@@ -194,46 +176,16 @@ bool AreaTrigger::CreateAreaTrigger(uint32 spellMiscId, Unit* caster, Unit* targ
     return true;
 }
 
-bool AreaTrigger::CreateStaticAreaTrigger(uint32 entry, ObjectGuid::LowType guidLow, Position const& pos, Map* map, uint32 scriptId /*= 0*/)
+AreaTrigger* AreaTrigger::CreateAreaTrigger(uint32 spellMiscId, Unit* caster, Unit* target, SpellInfo const* spell, Position const& pos, int32 duration, uint32 spellXSpellVisualId, ObjectGuid const& castId /*= ObjectGuid::Empty*/, AuraEffect const* aurEff /*= nullptr*/)
 {
-    ASSERT(map != nullptr);
-
-    _targetGuid = ObjectGuid::Empty;
-    _aurEff = nullptr;
-    _spawnId = guidLow;
-    _guidScriptId = scriptId;
-
-    SetMap(map);
-    Relocate(pos);
-    if (!IsPositionValid())
+    AreaTrigger* at = new AreaTrigger();
+    if (!at->Create(spellMiscId, caster, target, spell, pos, duration, spellXSpellVisualId, castId, aurEff))
     {
-        TC_LOG_ERROR("entities.areatrigger", "AreaTrigger (entry %u) not staticaly created. Invalid coordinates (X: %f Y: %f)", entry, GetPositionX(), GetPositionY());
-        return false;
+        delete at;
+        return nullptr;
     }
 
-    _areaTriggerTemplate = sAreaTriggerDataStore->GetAreaTriggerTemplate(entry);
-    if (!_areaTriggerTemplate)
-    {
-        TC_LOG_ERROR("entities.areatrigger", "AreaTrigger not created. Invalid areatrigger entry (%u)", entry);
-        return false;
-    }
-
-    Object::_Create(ObjectGuid::Create<HighGuid::AreaTrigger>(GetMapId(), GetTemplate()->Id, guidLow));
-
-    SetEntry(GetTemplate()->Id);
-    SetDuration(-1);
-
-    SetObjectScale(1.0f);
-
-    SetFloatValue(AREATRIGGER_BOUNDS_RADIUS_2D, GetTemplate()->MaxSearchRadius);
-
-    UpdateShape();
-
-    AI_Initialize();
-
-    _ai->OnCreate();
-
-    return true;
+    return at;
 }
 
 void AreaTrigger::Update(uint32 diff)
