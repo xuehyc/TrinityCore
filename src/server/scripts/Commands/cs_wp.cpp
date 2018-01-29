@@ -665,27 +665,22 @@ public:
             target->AddObjectToRemoveList();
 
             // re-create
-            Creature* wpCreature = Creature::CreateCreature(VISUAL_WAYPOINT, map, chr->GetPosition());
-            if (!wpCreature)
+            Creature* wpCreature = new Creature();
+            if (!wpCreature->Create(map->GenerateLowGuid<HighGuid::Creature>(), map, VISUAL_WAYPOINT, chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), chr->GetOrientation()))
             {
                 handler->PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
+                delete wpCreature;
                 return false;
             }
 
             wpCreature->CopyPhaseFrom(chr);
             wpCreature->SaveToDB(map->GetId(), UI64LIT(1) << map->GetSpawnMode());
-
-            ObjectGuid::LowType dbGuid = wpCreature->GetSpawnId();
-
-            // current "wpCreature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
-            wpCreature->CleanupsBeforeDelete();
-            delete wpCreature;
-
             // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-            wpCreature = Creature::CreateCreatureFromDB(dbGuid, map);
-            if (!wpCreature)
+            /// @todo Should we first use "Create" then use "LoadFromDB"?
+            if (!wpCreature->LoadCreatureFromDB(wpCreature->GetSpawnId(), map))
             {
                 handler->PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
+                delete wpCreature;
                 return false;
             }
 
@@ -881,29 +876,31 @@ public:
 
                 Player* chr = handler->GetSession()->GetPlayer();
                 Map* map = chr->GetMap();
-                Position pos = { x, y, z, chr->GetOrientation() };
+                float o = chr->GetOrientation();
 
-                Creature* wpCreature = Creature::CreateCreature(id, map, pos);
-                if (!wpCreature)
+                Creature* wpCreature = new Creature();
+                if (!wpCreature->Create(map->GenerateLowGuid<HighGuid::Creature>(), map, id, x, y, z, o))
                 {
                     handler->PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
+                    delete wpCreature;
                     return false;
                 }
 
                 wpCreature->CopyPhaseFrom(chr);
                 wpCreature->SaveToDB(map->GetId(), UI64LIT(1) << map->GetSpawnMode());
 
-                ObjectGuid::LowType dbGuid = wpCreature->GetSpawnId();
-
-                // current "wpCreature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
-                wpCreature->CleanupsBeforeDelete();
-                delete wpCreature;
+                // Set "wpguid" column to the visual waypoint
+                stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_WAYPOINT_DATA_WPGUID);
+                stmt->setUInt64(0, wpCreature->GetSpawnId());
+                stmt->setUInt32(1, pathid);
+                stmt->setUInt32(2, point);
+                WorldDatabase.Execute(stmt);
 
                 // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-                wpCreature = Creature::CreateCreatureFromDB(dbGuid, map);
-                if (!wpCreature)
+                if (!wpCreature->LoadCreatureFromDB(wpCreature->GetSpawnId(), map))
                 {
                     handler->PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
+                    delete wpCreature;
                     return false;
                 }
 
@@ -913,13 +910,6 @@ public:
                     wpCreature->SetObjectScale(0.5f);
                     wpCreature->SetLevel(std::min<uint32>(point, STRONG_MAX_LEVEL));
                 }
-
-                // Set "wpguid" column to the visual waypoint
-                stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_WAYPOINT_DATA_WPGUID);
-                stmt->setUInt64(0, wpCreature->GetSpawnId());
-                stmt->setUInt32(1, pathid);
-                stmt->setUInt32(2, point);
-                WorldDatabase.Execute(stmt);
             }
             while (result->NextRow());
 
@@ -949,29 +939,24 @@ public:
             uint32 id = VISUAL_WAYPOINT;
 
             Player* chr = handler->GetSession()->GetPlayer();
+            float o = chr->GetOrientation();
             Map* map = chr->GetMap();
-            Position pos = { x, y, z, chr->GetOrientation() };
 
-            Creature* creature = Creature::CreateCreature(id, map, pos);
-            if (!creature)
+            Creature* creature = new Creature();
+            if (!creature->Create(map->GenerateLowGuid<HighGuid::Creature>(), map, id, x, y, z, o))
             {
                 handler->PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
+                delete creature;
                 return false;
             }
 
             creature->CopyPhaseFrom(chr);
             creature->SaveToDB(map->GetId(), UI64LIT(1) << map->GetSpawnMode());
 
-            ObjectGuid::LowType dbGuid = creature->GetSpawnId();
-
-            // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
-            creature->CleanupsBeforeDelete();
-            delete creature;
-
-            creature = Creature::CreateCreatureFromDB(dbGuid, map);
-            if (!creature)
+            if (!creature->LoadCreatureFromDB(creature->GetSpawnId(), map))
             {
                 handler->PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
+                delete creature;
                 return false;
             }
 
@@ -1007,28 +992,22 @@ public:
 
             Player* chr = handler->GetSession()->GetPlayer();
             Map* map = chr->GetMap();
-            Position pos = { x, y, z, o };
 
-            Creature* creature = Creature::CreateCreature(id, map, pos);
-            if (!creature)
+            Creature* creature = new Creature();
+            if (!creature->Create(map->GenerateLowGuid<HighGuid::Creature>(), map, id, x, y, z, o))
             {
                 handler->PSendSysMessage(LANG_WAYPOINT_NOTCREATED, id);
+                delete creature;
                 return false;
             }
 
             creature->CopyPhaseFrom(chr);
             creature->SaveToDB(map->GetId(), UI64LIT(1) << map->GetSpawnMode());
 
-            ObjectGuid::LowType dbGuid = creature->GetSpawnId();
-
-            // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
-            creature->CleanupsBeforeDelete();
-            delete creature;
-
-            creature = Creature::CreateCreatureFromDB(dbGuid, map);
-            if (!creature)
+            if (!creature->LoadCreatureFromDB(creature->GetSpawnId(), map))
             {
                 handler->PSendSysMessage(LANG_WAYPOINT_NOTCREATED, id);
+                delete creature;
                 return false;
             }
 

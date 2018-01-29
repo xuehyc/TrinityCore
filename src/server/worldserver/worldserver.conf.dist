@@ -40,7 +40,6 @@
 #    CURRENCIES SETTINGS
 #    PACKET SPOOF PROTECTION SETTINGS
 #    METRIC SETTINGS
-#	 DARK-iCE MODS
 #
 ###################################################################################################
 
@@ -4075,57 +4074,3 @@ Metric.OverallStatusInterval = 1
 
 #
 ###################################################################################################
-#Dark-iCE Mods
-###################################################################################################
-#
-#     Solocraft.Enable
-#        Description: Solocraft is a script to increase players and bots stats in raids, 
-#		 based on group size. It feels a little Hacky, but raids is unfair hard with playerbots.
-#        Default:     0 (disabled)
-#                     1 (enabled)
-
-Solocraft.Enable = 0
-
-#
-#     Login.BoA
-#        Description: New players get some starting equipment.
-#        Default:     0 (disabled)
-#                     1 (enabled)
-
-Login.BoA = 0
-
-#
-#     Congrats.Level
-#        Description: Server gives money for players on every 10 level.
-#        Default:     0 (disabled)
-#                     1 (enabled)
-
-Congrats.Level = 0
-
-#
-#     Time Is Money Friend
-#         Gives money for players who is online after every X minutes.
-#
-#     Default:  TimeIsMoneyFriend.Interval = 3600000 (1 hour) [0 - disabled]
-#               TimeIsMoneyFriend.Money    = 1000 (10 silver)
-
-TimeIsMoneyFriend.Interval = 3600000
-TimeIsMoneyFriend.Money    = 1000
-
-#
-#     Login.Announcer.Enable
-#        Description: Announce every player and bots login
-#        Default:     0 (disabled)
-#                     1 (enabled)
-
-Login.Announcer.Enable = 0
-
-#
-#    Double XP Weekend
-#        Description: Enables or disables the Double XP Weekend Script
-#
-#    DoubleXP.Enable
-#        Default:     1 (enabled)
-#                     0 (disabled)
-
-DoubleXP.Enable = 0

@@ -947,16 +947,19 @@ public:
         if (!ve)
             return false;
 
-        Map* map = handler->GetSession()->GetPlayer()->GetMap();
-        Position pos = { x, y, z, o };
+        Creature* v = new Creature();
 
-        Creature* v = Creature::CreateCreature(entry, map, pos, id);
-        if (!v)
+        Map* map = handler->GetSession()->GetPlayer()->GetMap();
+
+        if (!v->Create(map->GenerateLowGuid<HighGuid::Vehicle>(), map, entry, x, y, z, o, nullptr, id))
+        {
+            delete v;
             return false;
+        }
 
         v->CopyPhaseFrom(handler->GetSession()->GetPlayer());
 
-        map->AddToMap(v);
+        map->AddToMap(v->ToCreature());
 
         return true;
     }

@@ -294,10 +294,13 @@ void Transport::RemovePassenger(WorldObject* passenger)
 Creature* Transport::CreateNPCPassenger(ObjectGuid::LowType guid, CreatureData const* data)
 {
     Map* map = GetMap();
+    Creature* creature = new Creature();
 
-    Creature* creature = Creature::CreateCreatureFromDB(guid, map, false);
-    if (!creature)
-        return nullptr;
+    if (!creature->LoadCreatureFromDB(guid, map, false))
+    {
+        delete creature;
+        return NULL;
+    }
 
     ASSERT(data);
 
@@ -323,7 +326,7 @@ Creature* Transport::CreateNPCPassenger(ObjectGuid::LowType guid, CreatureData c
     {
         TC_LOG_ERROR("entities.transport", "Passenger %s not created. Suggested coordinates aren't valid (X: %f Y: %f)", creature->GetGUID().ToString().c_str(), creature->GetPositionX(), creature->GetPositionY());
         delete creature;
-        return nullptr;
+        return NULL;
     }
 
     if (data->phaseId)
@@ -337,7 +340,7 @@ Creature* Transport::CreateNPCPassenger(ObjectGuid::LowType guid, CreatureData c
     if (!map->AddToMap(creature))
     {
         delete creature;
-        return nullptr;
+        return NULL;
     }
 
     _staticPassengers.insert(creature);
@@ -348,10 +351,13 @@ Creature* Transport::CreateNPCPassenger(ObjectGuid::LowType guid, CreatureData c
 GameObject* Transport::CreateGOPassenger(ObjectGuid::LowType guid, GameObjectData const* data)
 {
     Map* map = GetMap();
+    GameObject* go = new GameObject();
 
-    GameObject* go = GameObject::CreateGameObjectFromDB(guid, map, false);
-    if (!go)
-        return nullptr;
+    if (!go->LoadGameObjectFromDB(guid, map, false))
+    {
+        delete go;
+        return NULL;
+    }
 
     ASSERT(data);
 
@@ -372,13 +378,13 @@ GameObject* Transport::CreateGOPassenger(ObjectGuid::LowType guid, GameObjectDat
     {
         TC_LOG_ERROR("entities.transport", "Passenger %s not created. Suggested coordinates aren't valid (X: %f Y: %f)", go->GetGUID().ToString().c_str(), go->GetPositionX(), go->GetPositionY());
         delete go;
-        return nullptr;
+        return NULL;
     }
 
     if (!map->AddToMap(go))
     {
         delete go;
-        return nullptr;
+        return NULL;
     }
 
     _staticPassengers.insert(go);
@@ -445,7 +451,7 @@ TempSummon* Transport::SummonPassenger(uint32 entry, Position const& pos, TempSu
     else
         phases = GetPhases(); // If there was no summoner, try to use the transport phases
 
-    TempSummon* summon = nullptr;
+    TempSummon* summon = NULL;
     switch (mask)
     {
         case UNIT_MASK_SUMMON:
@@ -472,7 +478,7 @@ TempSummon* Transport::SummonPassenger(uint32 entry, Position const& pos, TempSu
     if (!summon->Create(map->GenerateLowGuid<HighGuid::Creature>(), map, entry, x, y, z, o, nullptr, vehId))
     {
         delete summon;
-        return nullptr;
+        return NULL;
     }
 
     for (uint32 phase : phases)
@@ -496,7 +502,7 @@ TempSummon* Transport::SummonPassenger(uint32 entry, Position const& pos, TempSu
     if (!map->AddToMap<Creature>(summon))
     {
         delete summon;
-        return nullptr;
+        return NULL;
     }
 
     _staticPassengers.insert(summon);

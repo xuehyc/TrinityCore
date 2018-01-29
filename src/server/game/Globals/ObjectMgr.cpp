@@ -2197,10 +2197,11 @@ ObjectGuid::LowType ObjectMgr::AddGOData(uint32 entry, uint32 mapId, float x, fl
     // We use spawn coords to spawn
     if (!map->Instanceable() && map->IsGridLoaded(x, y))
     {
-        GameObject* go = GameObject::CreateGameObjectFromDB(guid, map);
-        if (!go)
+        GameObject* go = new GameObject;
+        if (!go->LoadGameObjectFromDB(guid, map))
         {
             TC_LOG_ERROR("misc", "AddGOData: cannot add gameobject entry %u to map", entry);
+            delete go;
             return UI64LIT(0);
         }
     }
@@ -2249,10 +2250,11 @@ ObjectGuid::LowType ObjectMgr::AddCreatureData(uint32 entry, uint32 mapId, float
     // We use spawn coords to spawn
     if (!map->Instanceable() && !map->IsRemovalGrid(x, y))
     {
-        Creature* creature = Creature::CreateCreatureFromDB(guid, map);
-        if (!creature)
+        Creature* creature = new Creature();
+        if (!creature->LoadCreatureFromDB(guid, map))
         {
             TC_LOG_ERROR("misc", "AddCreature: Cannot add creature entry %u to map", entry);
+            delete creature;
             return UI64LIT(0);
         }
     }
