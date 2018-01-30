@@ -1168,10 +1168,6 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         bool GetCommandStatus(uint32 command) const { return (_activeCheats & command) != 0; }
         void SetCommandStatusOn(uint32 command) { _activeCheats |= command; }
         void SetCommandStatusOff(uint32 command) { _activeCheats &= ~command; }
-		
-		// TimeIsMoneyFriend
-		uint32 ptr_Interval;
-		uint32 ptr_Money;
 
         // Played Time Stuff
         time_t m_logintime;

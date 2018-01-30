@@ -46,7 +46,6 @@ their bags are full.
 #include "ScriptMgr.h"
 #include "SharedDefines.h"
 #include "Transaction.h"
-#include "World.h"
 #include "WorldSession.h"
 #include <sstream>
 #include <string>
@@ -152,7 +151,7 @@ public:
 
 			std::ostringstream ss;
 			ss << "|cffFF0000[The Server]|r  congratulates " << player->GetName() << " for reaching Level " << (uint32)newLevel;
-			sWorld->SendServerMessage(SERVER_MSG_STRING, ss.str().c_str());
+//			sWorld->SendServerMessage(SERVER_MSG_STRING, ss.str().c_str());
 
 			std::ostringstream ss2;
 			//ss2 << "Du wurdest mit " << money << " gold und Items belohnt!";
