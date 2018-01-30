@@ -1,6 +1,8 @@
 #include "Player.h"
 #include "Config.h"
 #include "Chat.h"
+#include "SharedDefines.h"
+#include "World.h"
 #define Welcome_Name "Blood Lust"
 
 class Player_Boa : public PlayerScript
@@ -15,9 +17,9 @@ public:
 		{
         if (!firstLogin) // Run script only on first login
             return;
-//        std::ostringstream ss;
-//        ss << "|cffFF0000["<<Welcome_Name<<"]|r Welcome " << player->GetName() << " to the server! ";
-//        sWorld->SendServerMessage(SERVER_MSG_STRING, ss.str().c_str());
+        std::ostringstream ss;
+        ss << "|cffFF0000["<<Welcome_Name<<"]|r Welcome " << player->GetName() << " to the server! ";
+        sWorld->SendServerMessage(SERVER_MSG_STRING, ss.str().c_str());
         uint32 shoulders = 0, chest = 0, trinkett = 0, weapon = 0, weapon2 = 0, weapon3 = 0, shield = 0, shoulders2 = 0, chest2 = 0, trinkett2 = 0, bag = 0;
 
         bag = 41600;
