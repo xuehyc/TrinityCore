@@ -160,9 +160,13 @@ public:
         Player* player = handler->GetSession()->GetPlayer();
         Map* map = player->GetMap();
 
-        GameObject* object = GameObject::CreateGameObject(objectInfo->entry, map, *player, QuaternionData::fromEulerAnglesZYX(player->GetOrientation(), 0.0f, 0.0f), 255, GO_STATE_READY);
-        if (!object)
+        GameObject* object = new GameObject();
+
+        if (!object->Create(objectInfo->entry, map, *player, QuaternionData::fromEulerAnglesZYX(player->GetOrientation(), 0.0f, 0.0f), 255, GO_STATE_READY))
+        {
+            delete object;
             return false;
+        }
 
         object->CopyPhaseFrom(player);
 
@@ -180,10 +184,13 @@ public:
         // this is required to avoid weird behavior and memory leaks
         delete object;
 
+        object = new GameObject();
         // this will generate a new guid if the object is in an instance
-        object = GameObject::CreateGameObjectFromDB(spawnId, map);
-        if (!object)
+        if (!object->LoadGameObjectFromDB(spawnId, map))
+        {
+            delete object;
             return false;
+        }
 
         /// @todo is it really necessary to add both the real and DB table guid here ?
         sObjectMgr->AddGameobjectToGrid(spawnId, ASSERT_NOTNULL(sObjectMgr->GetGOData(spawnId)));

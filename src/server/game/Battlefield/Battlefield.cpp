@@ -798,20 +798,25 @@ Creature* Battlefield::SpawnCreature(uint32 entry, Position const& pos)
         return nullptr;
     }
 
-    if (!sObjectMgr->GetCreatureTemplate(entry))
+    CreatureTemplate const* cinfo = sObjectMgr->GetCreatureTemplate(entry);
+    if (!cinfo)
     {
         TC_LOG_ERROR("bg.battlefield", "Battlefield::SpawnCreature: entry %u does not exist.", entry);
         return nullptr;
     }
 
-    Creature* creature = Creature::CreateCreature(entry, map, pos);
-    if (!creature)
+    float x, y, z, o;
+    pos.GetPosition(x, y, z, o);
+
+    Creature* creature = new Creature();
+    if (!creature->Create(map->GenerateLowGuid<HighGuid::Creature>(), map, entry, x, y, z, o))
     {
         TC_LOG_ERROR("bg.battlefield", "Battlefield::SpawnCreature: Can't create creature entry: %u", entry);
+        delete creature;
         return nullptr;
     }
 
-    creature->SetHomePosition(pos);
+    creature->SetHomePosition(x, y, z, o);
 
     // Set creature in world
     map->AddToMap(creature);
@@ -831,17 +836,19 @@ GameObject* Battlefield::SpawnGameObject(uint32 entry, Position const& pos, Quat
         return nullptr;
     }
 
-    if (!sObjectMgr->GetGameObjectTemplate(entry))
+    GameObjectTemplate const* goInfo = sObjectMgr->GetGameObjectTemplate(entry);
+    if (!goInfo)
     {
         TC_LOG_ERROR("bg.battlefield", "Battlefield::SpawnGameObject: GameObject template %u not found in database! Battlefield not created!", entry);
         return nullptr;
     }
 
     // Create gameobject
-    GameObject* go = GameObject::CreateGameObject(entry, map, pos, rot, 255, GO_STATE_READY);
-    if (!go)
+    GameObject* go = new GameObject();
+    if (!go->Create(entry, map, pos, rot, 255, GO_STATE_READY))
     {
         TC_LOG_ERROR("bg.battlefield", "Battlefield::SpawnGameObject: Could not create gameobject template %u! Battlefield has not been created!", entry);
+        delete go;
         return nullptr;
     }
 

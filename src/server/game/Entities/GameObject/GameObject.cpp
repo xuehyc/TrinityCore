@@ -203,7 +203,7 @@ void GameObject::RemoveFromWorld()
     }
 }
 
-bool GameObject::Create(uint32 entry, Map* map, Position const& pos, QuaternionData const& rotation, uint32 animProgress, GOState goState, uint32 artKit)
+bool GameObject::Create(uint32 name_id, Map* map, Position const& pos, QuaternionData const& rotation, uint32 animprogress, GOState go_state, uint32 artKit /*= 0*/)
 {
     ASSERT(map);
     SetMap(map);
@@ -212,34 +212,34 @@ bool GameObject::Create(uint32 entry, Map* map, Position const& pos, QuaternionD
     m_stationaryPosition.Relocate(pos);
     if (!IsPositionValid())
     {
-        TC_LOG_ERROR("misc", "Gameobject (Spawn id: " UI64FMTD " Entry: %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)", GetSpawnId(), entry, pos.GetPositionX(), pos.GetPositionY());
+        TC_LOG_ERROR("misc", "Gameobject (Spawn id: " UI64FMTD " Entry: %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)", GetSpawnId(), name_id, pos.GetPositionX(), pos.GetPositionY());
         return false;
     }
 
     SetZoneScript();
     if (m_zoneScript)
     {
-        entry = m_zoneScript->GetGameObjectEntry(m_spawnId, entry);
-        if (!entry)
+        name_id = m_zoneScript->GetGameObjectEntry(m_spawnId, name_id);
+        if (!name_id)
             return false;
     }
 
-    GameObjectTemplate const* goInfo = sObjectMgr->GetGameObjectTemplate(entry);
-    if (!goInfo)
+    GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(name_id);
+    if (!goinfo)
     {
-        TC_LOG_ERROR("sql.sql", "Gameobject (Spawn id: " UI64FMTD " Entry: %u) not created: non-existing entry in `gameobject_template`. Map: %u (X: %f Y: %f Z: %f)", GetSpawnId(), entry, map->GetId(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+        TC_LOG_ERROR("sql.sql", "Gameobject (Spawn id: " UI64FMTD " Entry: %u) not created: non-existing entry in `gameobject_template`. Map: %u (X: %f Y: %f Z: %f)", GetSpawnId(), name_id, map->GetId(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
         return false;
     }
 
-    if (goInfo->type == GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT)
+    if (goinfo->type == GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT)
     {
-        TC_LOG_ERROR("sql.sql", "Gameobject (Spawn id: " UI64FMTD " Entry: %u) not created: gameobject type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.", GetSpawnId(), entry);
+        TC_LOG_ERROR("sql.sql", "Gameobject (Spawn id: " UI64FMTD " Entry: %u) not created: gameobject type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.", GetSpawnId(), name_id);
         return false;
     }
 
     ObjectGuid guid;
-    if (goInfo->type != GAMEOBJECT_TYPE_TRANSPORT)
-        guid = ObjectGuid::Create<HighGuid::GameObject>(map->GetId(), goInfo->entry, map->GenerateLowGuid<HighGuid::GameObject>());
+    if (goinfo->type != GAMEOBJECT_TYPE_TRANSPORT)
+        guid = ObjectGuid::Create<HighGuid::GameObject>(map->GetId(), goinfo->entry, map->GenerateLowGuid<HighGuid::GameObject>());
     else
     {
         guid = ObjectGuid::Create<HighGuid::Transport>(map->GenerateLowGuid<HighGuid::Transport>());
@@ -248,12 +248,12 @@ bool GameObject::Create(uint32 entry, Map* map, Position const& pos, QuaternionD
 
     Object::_Create(guid);
 
-    m_goInfo = goInfo;
-    m_goTemplateAddon = sObjectMgr->GetGameObjectTemplateAddon(entry);
+    m_goInfo = goinfo;
+    m_goTemplateAddon = sObjectMgr->GetGameObjectTemplateAddon(name_id);
 
-    if (goInfo->type >= MAX_GAMEOBJECT_TYPE)
+    if (goinfo->type >= MAX_GAMEOBJECT_TYPE)
     {
-        TC_LOG_ERROR("sql.sql", "Gameobject (%s Spawn id: " UI64FMTD " Entry: %u) not created: non-existing GO type '%u' in `gameobject_template`. It will crash client if created.", guid.ToString().c_str(), GetSpawnId(), entry, goInfo->type);
+        TC_LOG_ERROR("sql.sql", "Gameobject (%s Spawn id: " UI64FMTD " Entry: %u) not created: non-existing GO type '%u' in `gameobject_template`. It will crash client if created.", guid.ToString().c_str(), GetSpawnId(), name_id, goinfo->type);
         return false;
     }
 
@@ -267,7 +267,7 @@ bool GameObject::Create(uint32 entry, Map* map, Position const& pos, QuaternionD
 
     SetParentRotation(parentRotation);
 
-    SetObjectScale(goInfo->size);
+    SetObjectScale(goinfo->size);
 
     if (m_goTemplateAddon)
     {
@@ -281,24 +281,24 @@ bool GameObject::Create(uint32 entry, Map* map, Position const& pos, QuaternionD
         }
     }
 
-    SetEntry(goInfo->entry);
+    SetEntry(goinfo->entry);
 
     // set name for logs usage, doesn't affect anything ingame
-    SetName(goInfo->name);
+    SetName(goinfo->name);
 
-    SetDisplayId(goInfo->displayId);
+    SetDisplayId(goinfo->displayId);
 
     m_model = CreateModel();
     // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
-    SetGoType(GameobjectTypes(goInfo->type));
-    m_prevGoState = goState;
-    SetGoState(goState);
+    SetGoType(GameobjectTypes(goinfo->type));
+    m_prevGoState = go_state;
+    SetGoState(go_state);
     SetGoArtKit(artKit);
 
-    switch (goInfo->type)
+    switch (goinfo->type)
     {
         case GAMEOBJECT_TYPE_FISHINGHOLE:
-            SetGoAnimProgress(animProgress);
+            SetGoAnimProgress(animprogress);
             m_goValue.FishingHole.MaxOpens = urand(GetGOInfo()->fishingHole.minRestock, GetGOInfo()->fishingHole.maxRestock);
             break;
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
@@ -310,37 +310,37 @@ bool GameObject::Create(uint32 entry, Map* map, Position const& pos, QuaternionD
             break;
         case GAMEOBJECT_TYPE_TRANSPORT:
         {
-            m_goValue.Transport.AnimationInfo = sTransportMgr->GetTransportAnimInfo(goInfo->entry);
+            m_goValue.Transport.AnimationInfo = sTransportMgr->GetTransportAnimInfo(goinfo->entry);
             m_goValue.Transport.PathProgress = getMSTime();
             if (m_goValue.Transport.AnimationInfo)
                 m_goValue.Transport.PathProgress -= m_goValue.Transport.PathProgress % GetTransportPeriod();    // align to period
             m_goValue.Transport.CurrentSeg = 0;
             m_goValue.Transport.StateUpdateTimer = 0;
             m_goValue.Transport.StopFrames = new std::vector<uint32>();
-            if (goInfo->transport.Timeto2ndfloor > 0)
-                m_goValue.Transport.StopFrames->push_back(goInfo->transport.Timeto2ndfloor);
-            if (goInfo->transport.Timeto3rdfloor > 0)
-                m_goValue.Transport.StopFrames->push_back(goInfo->transport.Timeto3rdfloor);
-            if (goInfo->transport.Timeto4thfloor > 0)
-                m_goValue.Transport.StopFrames->push_back(goInfo->transport.Timeto4thfloor);
-            if (goInfo->transport.Timeto5thfloor > 0)
-                m_goValue.Transport.StopFrames->push_back(goInfo->transport.Timeto5thfloor);
-            if (goInfo->transport.Timeto6thfloor > 0)
-                m_goValue.Transport.StopFrames->push_back(goInfo->transport.Timeto6thfloor);
-            if (goInfo->transport.Timeto7thfloor > 0)
-                m_goValue.Transport.StopFrames->push_back(goInfo->transport.Timeto7thfloor);
-            if (goInfo->transport.Timeto8thfloor > 0)
-                m_goValue.Transport.StopFrames->push_back(goInfo->transport.Timeto8thfloor);
-            if (goInfo->transport.Timeto9thfloor > 0)
-                m_goValue.Transport.StopFrames->push_back(goInfo->transport.Timeto9thfloor);
-            if (goInfo->transport.Timeto10thfloor > 0)
-                m_goValue.Transport.StopFrames->push_back(goInfo->transport.Timeto10thfloor);
-            if (goInfo->transport.startOpen)
-                SetTransportState(GO_STATE_TRANSPORT_STOPPED, goInfo->transport.startOpen - 1);
+            if (goinfo->transport.Timeto2ndfloor > 0)
+                m_goValue.Transport.StopFrames->push_back(goinfo->transport.Timeto2ndfloor);
+            if (goinfo->transport.Timeto3rdfloor > 0)
+                m_goValue.Transport.StopFrames->push_back(goinfo->transport.Timeto3rdfloor);
+            if (goinfo->transport.Timeto4thfloor > 0)
+                m_goValue.Transport.StopFrames->push_back(goinfo->transport.Timeto4thfloor);
+            if (goinfo->transport.Timeto5thfloor > 0)
+                m_goValue.Transport.StopFrames->push_back(goinfo->transport.Timeto5thfloor);
+            if (goinfo->transport.Timeto6thfloor > 0)
+                m_goValue.Transport.StopFrames->push_back(goinfo->transport.Timeto6thfloor);
+            if (goinfo->transport.Timeto7thfloor > 0)
+                m_goValue.Transport.StopFrames->push_back(goinfo->transport.Timeto7thfloor);
+            if (goinfo->transport.Timeto8thfloor > 0)
+                m_goValue.Transport.StopFrames->push_back(goinfo->transport.Timeto8thfloor);
+            if (goinfo->transport.Timeto9thfloor > 0)
+                m_goValue.Transport.StopFrames->push_back(goinfo->transport.Timeto9thfloor);
+            if (goinfo->transport.Timeto10thfloor > 0)
+                m_goValue.Transport.StopFrames->push_back(goinfo->transport.Timeto10thfloor);
+            if (goinfo->transport.startOpen)
+                SetTransportState(GO_STATE_TRANSPORT_STOPPED, goinfo->transport.startOpen - 1);
             else
                 SetTransportState(GO_STATE_TRANSPORT_ACTIVE);
 
-            SetGoAnimProgress(animProgress);
+            SetGoAnimProgress(animprogress);
             break;
         }
         case GAMEOBJECT_TYPE_FISHINGNODE:
@@ -361,7 +361,7 @@ bool GameObject::Create(uint32 entry, Map* map, Position const& pos, QuaternionD
             }
             break;
         default:
-            SetGoAnimProgress(animProgress);
+            SetGoAnimProgress(animprogress);
             break;
     }
 
@@ -386,43 +386,17 @@ bool GameObject::Create(uint32 entry, Map* map, Position const& pos, QuaternionD
 
     if (uint32 linkedEntry = GetGOInfo()->GetLinkedGameObjectEntry())
     {
-        if (GameObject* linkedGo = GameObject::CreateGameObject(linkedEntry, map, pos, rotation, 255, GO_STATE_READY))
+        GameObject* linkedGO = new GameObject();
+        if (linkedGO->Create(linkedEntry, map, pos, rotation, 255, GO_STATE_READY))
         {
-            SetLinkedTrap(linkedGo);
-            if (!map->AddToMap(linkedGo))
-                delete linkedGo;
+            SetLinkedTrap(linkedGO);
+            map->AddToMap(linkedGO);
         }
+        else
+            delete linkedGO;
     }
 
     return true;
-}
-
-GameObject* GameObject::CreateGameObject(uint32 entry, Map* map, Position const& pos, QuaternionData const& rotation, uint32 animProgress, GOState goState, uint32 artKit /*= 0*/)
-{
-    GameObjectTemplate const* goInfo = sObjectMgr->GetGameObjectTemplate(entry);
-    if (!goInfo)
-        return nullptr;
-
-    GameObject* go = new GameObject();
-    if (!go->Create(entry, map, pos, rotation, animProgress, goState, artKit))
-    {
-        delete go;
-        return nullptr;
-    }
-
-    return go;
-}
-
-GameObject* GameObject::CreateGameObjectFromDB(ObjectGuid::LowType spawnId, Map* map, bool addToMap /*= true*/)
-{
-    GameObject* go = new GameObject();
-    if (!go->LoadGameObjectFromDB(spawnId, map, addToMap))
-    {
-        delete go;
-        return nullptr;
-    }
-
-    return go;
 }
 
 void GameObject::Update(uint32 diff)
@@ -2632,6 +2606,7 @@ class GameObjectModelOwnerImpl : public GameObjectModelOwnerBase
 {
 public:
     explicit GameObjectModelOwnerImpl(GameObject const* owner) : _owner(owner) { }
+    virtual ~GameObjectModelOwnerImpl() = default;
 
     virtual bool IsSpawned() const override { return _owner->isSpawned(); }
     virtual uint32 GetDisplayId() const override { return _owner->GetDisplayId(); }
