@@ -57,6 +57,8 @@ make pull requests to our [Github repository](https://github.com/AshamaneProject
 - Login BOA (Heirlooms for Starting Characters)
 - Solocraft
 - Announce Login
+- Boss Announcer
+- Double XP Weekend
 
 ## Requirements
 
