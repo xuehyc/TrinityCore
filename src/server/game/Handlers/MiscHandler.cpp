@@ -76,8 +76,29 @@ void WorldSession::HandleRepopRequest(WorldPackets::Misc::RepopRequest& /*packet
         GetPlayer()->KillPlayer();
     }
 
-    //this is spirit release confirm?
     GetPlayer()->RemovePet(nullptr, PET_SAVE_DISMISS, true);
+
+    // If we are inside an instance, check if player should resurect at instance beginning
+    if (InstanceTemplate const* instanceTemplate = sObjectMgr->GetInstanceTemplate(GetPlayer()->GetMapId()))
+        if (instanceTemplate->InsideResurrection)
+            if (InstanceScript* instanceScript = GetPlayer()->GetInstanceScript())
+            {
+                Position resurectPosition;
+
+                if (WorldSafeLocsEntry const* entranceLocation = sWorldSafeLocsStore.LookupEntry(instanceScript->GetEntranceLocation()))
+                    resurectPosition.Relocate(entranceLocation->Loc.X, entranceLocation->Loc.Y, entranceLocation->Loc.Z, entranceLocation->Facing);
+                else if (AreaTriggerTeleportStruct const* areaTrigger = sObjectMgr->GetMapEntranceTrigger(GetPlayer()->GetMapId()))
+                    resurectPosition.Relocate(areaTrigger->target_X, areaTrigger->target_Y, areaTrigger->target_Z, areaTrigger->target_Orientation);
+
+                if (!resurectPosition.IsPositionEmpty())
+                {
+                    GetPlayer()->NearTeleportTo(resurectPosition);
+                    GetPlayer()->ResurrectPlayer(75.0f);
+                    return;
+                }
+            }
+
+    //this is spirit release confirm?
     GetPlayer()->BuildPlayerRepop();
     GetPlayer()->RepopAtGraveyard();
 }

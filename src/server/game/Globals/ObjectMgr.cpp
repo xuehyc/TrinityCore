@@ -5469,8 +5469,8 @@ void ObjectMgr::LoadInstanceTemplate()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                                0     1       2        4
-    QueryResult result = WorldDatabase.Query("SELECT map, parent, script, allowMount FROM instance_template");
+    //                                                0     1       2        3                4
+    QueryResult result = WorldDatabase.Query("SELECT map, parent, script, allowMount, insideResurrection FROM instance_template");
 
     if (!result)
     {
@@ -5493,9 +5493,10 @@ void ObjectMgr::LoadInstanceTemplate()
 
         InstanceTemplate instanceTemplate;
 
-        instanceTemplate.AllowMount = fields[3].GetBool();
-        instanceTemplate.Parent     = uint32(fields[1].GetUInt16());
-        instanceTemplate.ScriptId   = sObjectMgr->GetScriptId(fields[2].GetString());
+        instanceTemplate.Parent             = uint32(fields[1].GetUInt16());
+        instanceTemplate.ScriptId           = sObjectMgr->GetScriptId(fields[2].GetString());
+        instanceTemplate.AllowMount         = fields[3].GetBool();
+        instanceTemplate.InsideResurrection = fields[4].GetBool();
 
         _instanceTemplateStore[mapID] = instanceTemplate;
 
@@ -6659,10 +6660,11 @@ AreaTriggerTeleportStruct const* ObjectMgr::GetMapEntranceTrigger(uint32 Map) co
         if (itr->second.target_mapId == Map)
         {
             AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(itr->first);
-            if (atEntry)
+            if (itr->first < 0 || atEntry)
                 return &itr->second;
         }
     }
+
     return nullptr;
 }
 
