@@ -4269,10 +4269,18 @@ Congrats.Level = 0
 #        Enable this if you want to skip the Wandering Isle (pandaren starting area)
 #
 #    Skip.Pandaren.Enable
-#        Default:     1 (enabled)
-#                     0 (disabled)
+#        Default:    1 (enabled)
+#                    0 (disabled)
 
 Skip.Pandaren.Enable = 1
+
+#
+#    Disallow.Multiple.Client
+#        Description: This option disallow to use multiple game from the same network.
+#        Default:    0 (disabled)
+#                    1 (enabled)
+
+Disallow.Multiple.Client = 0
 
 #
 ###################################################################################################
