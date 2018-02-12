@@ -30,6 +30,8 @@ void AddSC_Dynamic_Resurrections();
 void AddSC_Duel_Reset();
 void AddSC_custom_CongratsOnLevel();
 void AddSC_skip_pandaren();
+void AddSC_skip_worgen();
+void AddSC_skip_goblin();
 void AddSC_MoneyForKillsScripts();
 void AddSC_player_session_checks();
 
@@ -51,6 +53,8 @@ void AddCustomScripts()
     AddSC_Duel_Reset();
     AddSC_custom_CongratsOnLevel();
     AddSC_skip_pandaren();
+    AddSC_skip_worgen();
+    AddSC_skip_goblin();
     AddSC_MoneyForKillsScripts();
     AddSC_player_session_checks();
 }

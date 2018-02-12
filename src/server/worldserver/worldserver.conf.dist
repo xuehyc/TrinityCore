@@ -4275,6 +4275,26 @@ Congrats.Level = 0
 Skip.Pandaren.Enable = 1
 
 #
+#    Skip worgen starting area
+#        Enable this if you want to skip the worgen starting area
+#
+#    Skip.Worgen.Enable
+#        Default:    1 (enabled)
+#                    0 (disabled)
+
+Skip.Worgeb.Enable = 1
+
+#
+#    Skip goblin starting area
+#        Enable this if you want to skip the goblin starting area
+#
+#    Skip.Goblin.Enable
+#        Default:    1 (enabled)
+#                    0 (disabled)
+
+Skip.Goblin.Enable = 1
+
+#
 #    Disallow.Multiple.Client
 #        Description: This option disallow to use multiple game from the same network.
 #        Default:    0 (disabled)
