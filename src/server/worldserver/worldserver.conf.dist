@@ -4303,6 +4303,14 @@ Skip.Goblin.Enable = 1
 Disallow.Multiple.Client = 0
 
 #
+#    Custom.XP.Rate.NPC
+#        Description: This option activate the Custom XP Rate NPCs on the starting areas.
+#        Default:    0 (disabled)
+#                    1 (enabled)
+
+Custom.XP.Rate.NPC = 0
+
+#
 ###################################################################################################
 
 ###################################################################################################
