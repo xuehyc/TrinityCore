@@ -3524,6 +3524,35 @@ void SpellMgr::LoadSpellInfoCorrections()
     });
 
     // Tree of Life (Passive)
+    // DEADMINES SPELLS
+    //
+    // Glubtok
+    // Fists of Flame
+    ApplySpellFix({
+        87874,
+        91268,
+        87896,
+        91269
+    }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(2); // Combat Range
+    });
+
+    // Fists of Frost
+    ApplySpellFix({
+        87899,
+        91272,
+        87901,
+        91273,
+    }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(2); // Combat Range
+    });
+
+    // END OF DEADMINES SPELLS
+
+
+    // Tree of Life (Passive)
     ApplySpellFix({ 5420 }, [](SpellInfo* spellInfo)
     {
         spellInfo->Stances = UI64LIT(1) << (FORM_TREE_OF_LIFE - 1);
