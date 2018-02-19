@@ -31,7 +31,7 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level
     {
         case CLASS_DEATH_KNIGHT:
         {
-            for (uint8 i = 0; i < TaxiMaskSize; ++i)
+            for (std::size_t i = 0; i < TaxiMaskSize; ++i)
                 m_taximask[i] |= sOldContinentsNodesMask[i] & factionMask[i];
             break;
         }
@@ -47,6 +47,8 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level
         case RACE_DRAENEI:
         case RACE_WORGEN:
         case RACE_PANDAREN_ALLIANCE:
+        case RACE_VOID_ELF:
+        case RACE_LIGHTFORGED_DRAENEI:
             SetTaximaskNode(2);     // Stormwind, Elwynn
             SetTaximaskNode(6);     // Ironforge, Dun Morogh
             SetTaximaskNode(26);    // Lor'danel, Darkshore
@@ -68,6 +70,8 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level
         case RACE_BLOODELF:
         case RACE_GOBLIN:
         case RACE_PANDAREN_HORDE:
+        case RACE_NIGHTBORNE:
+        case RACE_HIGHMOUNTAIN_TAUREN:
             SetTaximaskNode(11);    // Undercity, Tirisfal
             SetTaximaskNode(22);    // Thunder Bluff, Mulgore
             SetTaximaskNode(23);    // Orgrimmar, Durotar
@@ -112,7 +116,7 @@ void PlayerTaxi::LoadTaxiMask(std::string const &data)
 {
     Tokenizer tokens(data, ' ');
 
-    uint8 index = 0;
+    std::size_t index = 0;
     for (Tokenizer::const_iterator iter = tokens.begin(); index < TaxiMaskSize && iter != tokens.end(); ++iter, ++index)
     {
         // load and set bits only for existing taxi nodes
@@ -202,7 +206,7 @@ uint32 PlayerTaxi::GetCurrentTaxiPath() const
 
 std::ostringstream& operator<<(std::ostringstream& ss, PlayerTaxi const& taxi)
 {
-    for (uint8 i = 0; i < TaxiMaskSize; ++i)
+    for (std::size_t i = 0; i < TaxiMaskSize; ++i)
         ss << uint32(taxi.m_taximask[i]) << ' ';
     return ss;
 }
