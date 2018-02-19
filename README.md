@@ -1,16 +1,11 @@
 # ![logo](https://c10.patreonusercontent.com/3/eyJ3IjoxNjAwfQ%3D%3D/patreon-posts/pN11oD_JT1i7n5Bb2YfU_beobbtmfnaVgrAWm29o5SUF9Rc95FAMFECFrBzdmqbi.png?token-time=2145916800&token-hash=HAOcQWtWqan0_PR4Ix6hlFBmXreGdh1l9u7a7Ph1Ca8%3D) Dark-iCE
 
-Dark-iCE is a repack distributor of Legion 7.3.2 based on AshamaneCore with our own additions and custom content
+Dark-iCE is a repack distributor of Legion 7.3.5 based on AshamaneCore with our own additions and custom content
 Any and all questions, concerns and/or issues should be addressed towards Our project and our discord community and NOT to 
 AshamaneCore developers themseleves as they do not directly support Dark-iCE and may not be responsible for ALL
 changes in our repacks or cores.. leave them alone so they can do what they do best and we can continue to provide
 you with the best they have to offer.
 
-Dark-iCE would like to thank Conan513 for his work on the SPP project up until
-Year's end of 2017. We use said repo's up until the end of the year
-but include no further updates. Check his Repo if you would like to see what he 
-is doing now:
-https://github.com/conan513/SingleCore_TC/tree/AshamaneCore
 
 # AshamaneCore
 
