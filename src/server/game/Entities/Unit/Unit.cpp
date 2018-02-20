@@ -12511,7 +12511,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     }
                 }
                 // Based on Skin color
-                else if (getRace() == RACE_TAUREN)
+                else if (getRace() == RACE_TAUREN || getRace() == RACE_HIGHMOUNTAIN_TAUREN)
                 {
                     uint8 skinColor = GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID);
                     if (HasAura(210333)) // Glyph of the Feral Chameleon
@@ -12671,7 +12671,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     }
                 }
                 // Based on Skin color
-                else if (getRace() == RACE_TAUREN)
+                else if (getRace() == RACE_TAUREN || getRace() == RACE_HIGHMOUNTAIN_TAUREN)
                 {
                     uint8 skinColor = GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID);
                     if (HasAura(107059)) // Glyph of the Ursol Chameleon
@@ -12744,6 +12744,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     {
                         case RACE_NIGHTELF: // Blue
                             return 64328;
+                        case RACE_HIGHMOUNTAIN_TAUREN: // TEMP FIX, TODO
                         case RACE_TAUREN: // Brown
                             return 64329;
                         case RACE_WORGEN: // Purple
@@ -12765,6 +12766,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                 {
                     case RACE_NIGHTELF:
                         return 15374;
+                    case RACE_HIGHMOUNTAIN_TAUREN: // TEMP FIX, TODO
                     case RACE_TAUREN:
                         return 15375;
                     case RACE_WORGEN:
@@ -12795,6 +12797,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                         return 40816;
                     case RACE_TROLL:
                     case RACE_TAUREN:
+                    case RACE_HIGHMOUNTAIN_TAUREN:
                         return 45339;
                     default:
                         break;
@@ -12884,6 +12887,7 @@ uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
             break;
         }
         case RACE_TAUREN:
+        case RACE_HIGHMOUNTAIN_TAUREN:
         {
             switch (totemType)
             {
