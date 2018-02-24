@@ -17,6 +17,7 @@ public:
             if (p_Player->GetMapId() == 654)
             {
                 p_Player->SetLevel(5);
+                p_Player->LearnSpell(68996, true);
                 p_Player->TeleportTo(0, -9033.559570f, -45.981701f, 88.419296f, 0.0f);
 
                 uint32 shoulders = 0, chest = 0, trinkett = 0, weapon = 0, weapon2 = 0, weapon3 = 0, shield = 0, shoulders2 = 0, chest2 = 0, trinkett2 = 0, bag = 0;
