@@ -373,6 +373,8 @@ Player::Player(WorldSession* session) : Unit(true), m_sceneMgr(this)
     _insideGarrisonType = GARRISON_TYPE_NONE;
 
     m_shopTimer = 0;
+
+    _usePvpItemLevels = false;
 }
 
 Player::~Player()
@@ -622,8 +624,7 @@ bool Player::Create(ObjectGuid::LowType guidlow, WorldPackets::Character::Charac
     // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
     UpdateMaxHealth();                                      // Update max Health (for add bonus from stamina)
     SetFullHealth();
-    if (GetPowerType() == POWER_MANA)
-        SetFullPower(POWER_MANA);
+    SetFullPower(POWER_MANA);
 
     // original spells
     LearnDefaultSkills();
@@ -2641,13 +2642,9 @@ void Player::GiveLevel(uint8 level)
 
     _ApplyAllLevelScaleItemMods(true); // Moved to above SetFullHealth so player will have full health from Heirlooms
 
-    // set current level health and mana/energy to maximum after applying all mods.
+    // Only health and mana are set to maximum.
     SetFullHealth();
     SetFullPower(POWER_MANA);
-    SetFullPower(POWER_ENERGY);
-    if (GetPower(POWER_RAGE) > GetMaxPower(POWER_RAGE))
-        SetFullPower(POWER_RAGE);
-    SetPower(POWER_FOCUS, 0);
 
     // update level to hunter/summon pet
     if (Pet* pet = GetPet())
@@ -3750,10 +3747,6 @@ void Player::ResetPvpTalents()
             continue;
 
         if (talentInfo->ClassID && talentInfo->ClassID != getClass())
-            continue;
-
-        // skip non-existent talent ranks
-        if (talentInfo->SpellID == 0)
             continue;
 
         RemovePvpTalent(talentInfo);
@@ -7553,7 +7546,7 @@ void Player::DuelComplete(DuelCompleteType type)
     }
 
     duel->opponent->DisablePvpRules();
-    duel->initiator->DisablePvpRules();
+    DisablePvpRules();
 
     sScriptMgr->OnPlayerDuelEnd(duel->opponent, this, type);
 
@@ -18760,7 +18753,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
     uint32 loadedPowers = 0;
     for (uint32 i = 0; i < MAX_POWERS; ++i)
     {
-        if (GetPowerIndex(i) != MAX_POWERS)
+        if (GetPowerIndex(Powers(i)) != MAX_POWERS)
         {
             uint32 savedPower = fields[56 + loadedPowers].GetUInt32();
             uint32 maxPower = GetUInt32Value(UNIT_FIELD_MAXPOWER + loadedPowers);
@@ -19211,7 +19204,12 @@ void Player::_LoadInventory(PreparedQueryResult result, PreparedQueryResult arti
                         item->CopyArtifactDataFromParent(parent);
                     }
                     else
-                        err = EQUIP_ERR_WRONG_BAG_TYPE_3; // send by mail
+                    {
+                        item->DeleteFromDB(trans);
+                        item->DeleteFromInventoryDB(trans);
+                        delete item;
+                        continue;
+                    }
                 }
 
                 // Item is not in bag
@@ -20693,7 +20691,7 @@ void Player::SaveToDB(bool create /*=false*/)
         uint32 storedPowers = 0;
         for (uint32 i = 0; i < MAX_POWERS; ++i)
         {
-            if (GetPowerIndex(i) != MAX_POWERS)
+            if (GetPowerIndex(Powers(i)) != MAX_POWERS)
             {
                 stmt->setUInt32(index++, GetUInt32Value(UNIT_FIELD_POWER + storedPowers));
                 if (++storedPowers >= MAX_POWERS_PER_CLASS)
@@ -20838,7 +20836,7 @@ void Player::SaveToDB(bool create /*=false*/)
         uint32 storedPowers = 0;
         for (uint32 i = 0; i < MAX_POWERS; ++i)
         {
-            if (GetPowerIndex(i) != MAX_POWERS)
+            if (GetPowerIndex(Powers(i)) != MAX_POWERS)
             {
                 stmt->setUInt32(index++, GetUInt32Value(UNIT_FIELD_POWER + storedPowers));
                 if (++storedPowers >= MAX_POWERS_PER_CLASS)
@@ -24580,6 +24578,8 @@ void Player::SendInitialPacketsAfterAddToMap()
     }
 
     SendGarrisonRemoteInfo();
+
+    UpdateItemLevelAreaBasedScaling();
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()
@@ -25506,6 +25506,7 @@ bool Player::HasItemFitToSpellRequirements(SpellInfo const* spellInfo, Item cons
             }
             else
             {
+                // requires item equipped in all armor slots
                 for (uint8 i : {EQUIPMENT_SLOT_HEAD, EQUIPMENT_SLOT_SHOULDERS, EQUIPMENT_SLOT_CHEST, EQUIPMENT_SLOT_WAIST, EQUIPMENT_SLOT_LEGS, EQUIPMENT_SLOT_FEET, EQUIPMENT_SLOT_WRISTS, EQUIPMENT_SLOT_HANDS})
                 {
                     Item* item = GetUseableItemByPos(INVENTORY_SLOT_BAG_0, i);
@@ -27039,8 +27040,16 @@ TalentLearnResult Player::LearnPvpTalent(uint32 talentID, int32* spellOnCooldown
     if (!talentInfo)
         return TALENT_FAILED_UNKNOWN;
 
-    if (talentInfo->SpecID && talentInfo->SpecID != GetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID))
-        return TALENT_FAILED_UNKNOWN;
+    if (talentInfo->SpecID)
+    {
+        if (talentInfo->SpecID != GetInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID))
+            return TALENT_FAILED_UNKNOWN;
+    }
+    else if (talentInfo->Role >= 0)
+    {
+        if (talentInfo->Role != sChrSpecializationStore.AssertEntry(GetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID))->Role)
+            return TALENT_FAILED_UNKNOWN;
+    }
 
     // prevent learn talent for different class (cheating)
     if (talentInfo->ClassID && talentInfo->ClassID != getClass())
@@ -27053,7 +27062,7 @@ TalentLearnResult Player::LearnPvpTalent(uint32 talentID, int32* spellOnCooldown
     // Check if player doesn't have any talent in current tier
     for (uint32 c = 0; c < MAX_PVP_TALENT_COLUMNS; ++c)
     {
-        for (PvpTalentEntry const* talent : sDB2Manager.GetPvpTalentsByPosition(talentInfo->TierID, c))
+        for (PvpTalentEntry const* talent : sDB2Manager.GetPvpTalentsByPosition(getClass(), talentInfo->TierID, c))
         {
             if (HasPvpTalent(talent->ID, GetActiveTalentGroup()) && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
                 return TALENT_FAILED_REST_AREA;
@@ -27160,12 +27169,21 @@ void Player::EnablePvpRules(bool dueToCombat /*= false*/)
             aura->SetDuration(-1);
         }
     }
+
+    UpdateItemLevelAreaBasedScaling();
 }
 
 void Player::DisablePvpRules()
 {
+    // Don't disable pvp rules when in pvp zone.
+    if (IsInAreaThatActivatesPvpTalents())
+        return;
+
     if (!GetCombatTimer())
+    {
         RemoveAurasDueToSpell(SPELL_PVP_RULES_ENABLED);
+        UpdateItemLevelAreaBasedScaling();
+    }
     else if (Aura* aura = GetAura(SPELL_PVP_RULES_ENABLED))
         aura->SetDuration(aura->GetSpellInfo()->GetMaxDuration());
 }
@@ -27177,10 +27195,7 @@ bool Player::HasPvpRulesEnabled() const
 
 bool Player::IsInAreaThatActivatesPvpTalents() const
 {
-    uint32 zoneID, areaID;
-    GetZoneAndAreaId(zoneID, areaID);
-
-    return IsAreaThatActivatesPvpTalents(areaID);
+    return IsAreaThatActivatesPvpTalents(GetAreaId());
 }
 
 bool Player::IsAreaThatActivatesPvpTalents(uint32 areaID) const
@@ -27190,14 +27205,20 @@ bool Player::IsAreaThatActivatesPvpTalents(uint32 areaID) const
 
     if (AreaTableEntry const* area = sAreaTableStore.LookupEntry(areaID))
     {
-        if (area->IsSanctuary())
-            return false;
+        do
+        {
+            if (area->IsSanctuary())
+                return false;
 
-        if (!area->ActivatesPvpTalents())
-            if (area->ParentAreaID)
-                return IsAreaThatActivatesPvpTalents(area->ParentAreaID);
+            if (area->Flags[0] & AREA_FLAG_ARENA)
+                return true;
 
-        return area->ActivatesPvpTalents();
+            if (sBattlefieldMgr->GetBattlefieldToZoneId(area->ID))
+                return true;
+
+            area = sAreaTableStore.LookupEntry(area->ParentAreaID);
+
+        } while (area);
     }
 
     return false;
@@ -29568,4 +29589,21 @@ void Player::UpdateShop(uint32 diff)
     } while (result->NextRow());
 
     CharacterDatabase.CommitTransaction(trans);
+}
+
+void Player::UpdateItemLevelAreaBasedScaling()
+{
+    // @todo Activate pvp item levels during world pvp
+    Map* map = GetMap();
+    bool pvpActivity = map->IsBattlegroundOrArena() || map->GetEntry()->Flags[1] & 0x40 || HasPvpRulesEnabled();
+
+    if (_usePvpItemLevels != pvpActivity)
+    {
+        float healthPct = GetHealthPct();
+        _RemoveAllItemMods();
+        ActivatePvpItemLevels(pvpActivity);
+        _ApplyAllItemMods();
+        SetHealth(CalculatePct(GetMaxHealth(), healthPct));
+    }
+    // @todo other types of power scaling such as timewalking
 }
