@@ -28,12 +28,12 @@ void AddSC_XpWeekend();
 void AddSC_RandomEnchantsScript();
 void AddSC_Dynamic_Resurrections();
 void AddSC_Duel_Reset();
-void AddSC_custom_CongratsOnLevel();
 void AddSC_skip_pandaren();
 void AddSC_skip_worgen();
 void AddSC_skip_goblin();
 void AddSC_MoneyForKillsScripts();
 void AddSC_player_session_checks();
+void AddSC_CongratsOnLevelScripts();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -51,10 +51,10 @@ void AddCustomScripts()
     AddSC_RandomEnchantsScript();
     AddSC_Dynamic_Resurrections();
     AddSC_Duel_Reset();
-    AddSC_custom_CongratsOnLevel();
     AddSC_skip_pandaren();
     AddSC_skip_worgen();
     AddSC_skip_goblin();
     AddSC_MoneyForKillsScripts();
     AddSC_player_session_checks();
+    AddSC_CongratsOnLevelScripts();
 }
