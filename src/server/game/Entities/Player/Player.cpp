@@ -4851,17 +4851,24 @@ void Player::RepopAtGraveyard()
 				}
 			}
 		}
-		else
-		{
-			TeleportTo(ClosestGrave->MapID, ClosestGrave->Loc.X, ClosestGrave->Loc.Y, ClosestGrave->Loc.Z, (ClosestGrave->Facing * M_PI) / 180); // Orientation is initially in degrees
-			if (isDead())                                        // not send if alive, because it used in TeleportTo()
-			{
-				WorldPackets::Misc::DeathReleaseLoc packet;
-				packet.MapID = ClosestGrave->MapID;
-				packet.Loc = Position(ClosestGrave->Loc.X, ClosestGrave->Loc.Y, ClosestGrave->Loc.Z);
-				GetSession()->SendPacket(packet.Write());
-			}
-		}
+        else
+        {
+            if (sConfigMgr->GetBoolDefault("Hardcore.Mode.Enable", true))
+            {
+                TeleportTo(1, 16229.599609f, 16267.900391, 14.0f, 0.0f); // Orientation is initially in degrees
+            }
+            else
+            {
+                TeleportTo(ClosestGrave->MapID, ClosestGrave->Loc.X, ClosestGrave->Loc.Y, ClosestGrave->Loc.Z, (ClosestGrave->Facing * M_PI) / 180); // Orientation is initially in degrees
+                if (isDead())                                        // not send if alive, because it used in TeleportTo()
+                {
+                    WorldPackets::Misc::DeathReleaseLoc packet;
+                    packet.MapID = ClosestGrave->MapID;
+                    packet.Loc = Position(ClosestGrave->Loc.X, ClosestGrave->Loc.Y, ClosestGrave->Loc.Z);
+                    GetSession()->SendPacket(packet.Write());
+                }
+            }
+        }
 	}
     else if (GetPositionZ() < GetMap()->GetMinHeight(GetPositionX(), GetPositionY()))
         TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, GetOrientation());

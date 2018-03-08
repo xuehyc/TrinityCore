@@ -75,7 +75,7 @@ RealmID = 1
 #        Example:     "@prefix@/share/trinitycore"
 #        Default:     "."
 
-DataDir = "."
+DataDir = "Server\Data"
 
 #
 #    LogsDir
@@ -84,7 +84,7 @@ DataDir = "."
 #                     Logs directory must exists, or log file creation will be disabled.
 #        Default:     "" - (Log files will be stored in the current path)
 
-LogsDir = ""
+LogsDir = "Server\Logs"
 
 #
 #    LoginDatabaseInfo
@@ -109,10 +109,10 @@ LogsDir = ""
 #    Don't open port on firewall to external connections (it belongs to mysql, not to wow server).
 #    The username you choose must have permisions to create/alter/rename tables.
 
-LoginDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;auth"
-WorldDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;world"
-CharacterDatabaseInfo = "127.0.0.1;3306;trinity;trinity;characters"
-HotfixDatabaseInfo    = "127.0.0.1;3306;trinity;trinity;hotfixes"
+LoginDatabaseInfo     = "127.0.0.1;3310;root;123456;realmd"
+WorldDatabaseInfo     = "127.0.0.1;3310;root;123456;world"
+CharacterDatabaseInfo = "127.0.0.1;3310;root;123456;characters"
+HotfixDatabaseInfo    = "127.0.0.1;3310;root;123456;hotfixes"
 
 #
 #    LoginDatabase.WorkerThreads
@@ -197,7 +197,7 @@ ThreadPool = 2
 #                     "/usr/bin/cmake"
 #        Default:     ""
 
-CMakeCommand  = ""
+CMakeCommand  = "Server/Tools/cmake/bin/cmake.exe"
 
 #
 #    BuildDirectory
@@ -215,7 +215,7 @@ BuildDirectory  = ""
 #        Example:     "../TrinityCore"
 #        Default:     ""
 
-SourceDirectory  = ""
+SourceDirectory  = "."
 
 #
 #    MySQLExecutable
@@ -226,7 +226,7 @@ SourceDirectory  = ""
 #                     "/usr/bin/mysql"
 #        Default:     ""
 
-MySQLExecutable = ""
+MySQLExecutable = "Server/Database/bin/mysql.exe"
 
 #
 ###################################################################################################
@@ -398,7 +398,7 @@ DisconnectToleranceInterval = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-mmap.enablePathFinding = 0
+mmap.enablePathFinding = 1
 
 #
 #    vmap.enableLOS
@@ -1075,6 +1075,7 @@ Guild.BankEventLogRecordsCount = 25
 #        Default:     250
 
 Guild.NewsLogRecordsCount = 250
+Guild.SaveInterval = 15
 
 #
 #    MaxPrimaryTradeSkill
@@ -1340,7 +1341,7 @@ Updates.CleanDeadRefMaxCount = 3
 #        Default:     1 - (Enabled)
 #                     0 - (Disabled)
 
-HotSwap.Enabled = 1
+HotSwap.Enabled = 0
 
 #
 #    HotSwap.ScriptDir
@@ -1398,7 +1399,7 @@ HotSwap.EnablePrefixCorrection = 1
 #                     "Release" - Release builds only
 #                     "Debug" - Debug builds only
 
-HotSwap.ReCompilerBuildType = ""
+HotSwap.ReCompilerBuildType = "Release"
 
 #
 ###################################################################################################
@@ -2923,7 +2924,7 @@ WorldREST.AuthToken = ""
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-WorldToDiscord.Enabled = 0
+WorldToDiscord.Enabled = 1
 
 #
 #    WorldREST.RelayURL
@@ -3370,7 +3371,7 @@ AuctionHouseBot.Items.Loot = 1
 #       Default:     0 - (Disabled)
 #                    1 - (Enabled)
 
-AuctionHouseBot.Items.Misc = 0
+AuctionHouseBot.Items.Misc = 1
 
 #
 #    AuctionHouseBot.Bind.*
@@ -3509,12 +3510,12 @@ AuctionHouseBot.Items.ReqSkill.Max = 0
 #       Default:     0, 2000, 2500, 1500, 1000, 0, 0 (Gray, white, green, blue, purple, orange, yellow)
 
 AuctionHouseBot.Items.Amount.Gray = 0
-AuctionHouseBot.Items.Amount.White = 2000
-AuctionHouseBot.Items.Amount.Green = 2500
-AuctionHouseBot.Items.Amount.Blue = 1500
-AuctionHouseBot.Items.Amount.Purple = 1000
-AuctionHouseBot.Items.Amount.Orange = 0
-AuctionHouseBot.Items.Amount.Yellow = 0
+AuctionHouseBot.Items.Amount.White = 1000
+AuctionHouseBot.Items.Amount.Green = 1250
+AuctionHouseBot.Items.Amount.Blue = 750
+AuctionHouseBot.Items.Amount.Purple = 500
+AuctionHouseBot.Items.Amount.Orange = 250
+AuctionHouseBot.Items.Amount.Yellow = 150
 
 #
 #    AuctionHouseBot.Class.*
@@ -3845,11 +3846,10 @@ BlackMarket.UpdatePeriod = 24
 #                         Example:  536870912 (512 mb)
 #
 
-Appender.Console=1,3,0
+Appender.Console=1,3,0,13 7 11 10 3 1
 Appender.Server=2,2,0,Server.log,w
 Appender.GM=2,2,15,gm/gm_%s.log
 Appender.DBErrors=2,2,0,DBErrors.log
-Appender.SQLUpdateLog=2,1,16,SQLUpdate.log,w
 
 #  Logger config values: Given a logger "name"
 #    Logger.name
@@ -3872,8 +3872,8 @@ Appender.SQLUpdateLog=2,1,16,SQLUpdate.log,w
 Logger.root=5,Console Server
 Logger.server=3,Console Server
 Logger.commands.gm=3,Console GM
-Logger.scripts.hotswap=3,Console Server
-Logger.sql.sql=5,Console DBErrors
+Logger.scripts.hotswap=0,Console Server
+Logger.sql.sql=0,Console DBErrors
 Logger.sql.updates=3,Console Server
 Logger.mmaps=3,Server
 
@@ -3918,12 +3918,12 @@ Logger.mmaps=3,Server
 #Logger.pool=3,Console Server
 #Logger.rbac=3,Console Server
 #Logger.scenes=3,Console Server
-#Logger.scripts=3,Console Server
-#Logger.scripts.ai=3,Console Server
+Logger.scripts=0,Console Server
+Logger.scripts.ai=0,Console Server
 #Logger.server.bnetserver=3,Console Server
-#Logger.spells=3,Console Server
-#Logger.spells.periodic=3,Console Server
-#Logger.sql.dev=1,SQLUpdateLog
+Logger.spells=0,Console Server
+Logger.spells.periodic=0,Console Server
+#Logger.sql.dev=3,Console Server
 #Logger.sql.driver=3,Console Server
 #Logger.warden=3,Console Server
 
@@ -4154,7 +4154,7 @@ Custom.RespawnSpeed = 1.0
 #        Default:     0 (disabled)
 #                     1 (enabled)
 
-FireWorksOnLevelUp = 1
+FireWorksOnLevelUp = 0
 
 #
 #     Login.BoA
@@ -4162,7 +4162,7 @@ FireWorksOnLevelUp = 1
 #        Default:     0 (disabled)
 #                     1 (enabled)
 
-Login.BoA = 1
+Login.BoA = 0
 
 #
 #     StartGuild
@@ -4180,7 +4180,7 @@ StartGuild.Horde = 0
 #        Default:     0 (disabled)
 #                     1 (enabled)
 
-Reset.on.login = 1
+Reset.on.login = 0
 
 #
 #     Duel.Reset.Enable
@@ -4188,7 +4188,7 @@ Reset.on.login = 1
 #        Default:     0 (disabled)
 #                     1 (enabled)
 
-Duel.Reset.Enable = 1
+Duel.Reset.Enable = 0
 
 #
 #     Login.Announcer.Enable
@@ -4204,7 +4204,7 @@ Login.Announcer.Enable = 1
 #        Default:     0 (disabled)
 #                     1 (enabled)
 
-Boss.Announcer.Enable = 1
+Boss.Announcer.Enable = 0
 
 #
 #    Double XP Weekend
@@ -4214,7 +4214,7 @@ Boss.Announcer.Enable = 1
 #        Default:     1 (enabled)
 #                     0 (disabled)
 
-DoubleXP.Enable = 1
+DoubleXP.Enable = 0
 
 #
 # Custom.GainHonorOnGuardKill
@@ -4223,14 +4223,14 @@ DoubleXP.Enable = 1
 # as so in the database.
 # Default : 0 (No honor when you kill a guard)
 
-Custom.GainHonorOnGuardKill = 1
+Custom.GainHonorOnGuardKill = 0
 
 #
 # Custom.GainHonorOnEliteKill
 # Set it to 1 to gain honor when you kill an elite mob (this does not apply on rare mob, unless he is also elite).
 # Default : 0 (No honor when you kill an elite mob)
 
-Custom.GainHonorOnEliteKill = 1
+Custom.GainHonorOnEliteKill = 0
 
 #
 #     XP for PvP kills
@@ -4249,8 +4249,8 @@ Xp.For.Pvp.High.Rate = 1
 #     Default:  TimeIsMoneyFriend.Interval = 600000 (10 minutes)
 #               TimeIsMoneyFriend.Money    = 1000 (10 silver)
 
-TimeIsMoneyFriend.Interval = 600000
-TimeIsMoneyFriend.Money    = 1000
+TimeIsMoneyFriend.Interval = 0
+TimeIsMoneyFriend.Money    = 0
 
 #
 #    Dungeon Checkpoints
@@ -4261,23 +4261,22 @@ TimeIsMoneyFriend.Money    = 1000
 #        Default:     1 (enabled)
 #                     0 (disabled)
 
-Dungeon.Checkpoints.Enable = 1
+Dungeon.Checkpoints.Enable = 0
 
 #
-#     Congrats.Level
-#        Description: Server gives money for players on every 10 level.
-#        Default:     0 (disabled)
-#                     1 (enabled)
+#     Congrats.Level // NOT WORKING ANYMORE, NEW SETTINGS CAN FIND BELOW
 
 Congrats.Level = 0
 
 #
 #    Skip pandaren starting area
 #        Enable this if you want to skip the Wandering Isle (pandaren starting area)
+#        You can choose faction instantly and Pandaren characters leveled up to 5 
+#        and get some starting items.
 #
 #    Skip.Pandaren.Enable
-#        Default:    1 (enabled)
-#                    0 (disabled)
+#        Default:     1 (enabled)
+#                     0 (disabled)
 
 Skip.Pandaren.Enable = 1
 
@@ -4289,7 +4288,7 @@ Skip.Pandaren.Enable = 1
 #        Default:    1 (enabled)
 #                    0 (disabled)
 
-Skip.Worgeb.Enable = 1
+Skip.Worgen.Enable = 1
 
 #
 #    Skip goblin starting area
@@ -4318,6 +4317,16 @@ Disallow.Multiple.Client = 0
 Custom.XP.Rate.NPC = 0
 
 #
+#    Hardcore.Mode.Enable
+#        Description: Classic hardcore mode.
+#                     You can't resurrect with spirit healer and can't return to your corpse.
+#
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+Hardcore.Mode.Enable = 0
+
+#
 ###################################################################################################
 
 ###################################################################################################
@@ -4328,7 +4337,7 @@ Custom.XP.Rate.NPC = 0
 #        Announce a message on login for this module
 #        Default:     1
 
-RandomEnchants.AnnounceOnLogin = 1
+RandomEnchants.AnnounceOnLogin = 0
 
 #
 #     RandomEnchants.OnLoginMessage
@@ -4342,21 +4351,21 @@ RandomEnchants.OnLoginMessage="This server is based on Single Player Project - L
 #        Chance at random enchant on looting an item
 #        Default:     1
 
-RandomEnchants.OnLoot = 1
+RandomEnchants.OnLoot = 0
 
 #
 #     RandomEnchants.OnCreate
 #        Chance at random enchant on creating an item via profession
 #        Default:     1
 
-RandomEnchants.OnCreate = 1
+RandomEnchants.OnCreate = 0
 
 #
 #     RandomEnchants.OnQuestReward (Not working yet)
 #        Chance at random enchant on obtaining item from quest reward
 #        Default:     1
 
-RandomEnchants.OnQuestReward = 1
+RandomEnchants.OnQuestReward = 0
 
 #
 ###################################################################################################
@@ -4368,7 +4377,7 @@ RandomEnchants.OnQuestReward = 1
 # Enable the module? (1: true | 0: false)
 # Default: 1
 
-MFK.Enable = 1
+MFK.Enable = 0
 
 # Announce the module when the player logs in?
 # Default: 1
@@ -4434,6 +4443,112 @@ Solocraft.Dungeon = 5
 Solocraft.Heroic = 10
 Solocraft.Raid25 = 25
 Solocraft.Raid40 = 10
+
+#
+###################################################################################################
+
+###################################################################################################
+# CONGRATS ON LEVEL-UP #
+########################
+
+# Enable the module? (1: true | 0: false)
+
+Congrats.On.Level.Enable = 1
+
+# Announce the module when the player logs in?
+
+Congrats.On.Level.Announce = 1
+
+# Set what the player receives at each level
+# M: Gold 
+# S: SpellID to be cast on the player
+# 1: First ItemID to be given to the player
+# 2: Second ItemID to be given to the player
+
+# Level 10
+# 1 Gold / Blessing of Kings
+# Red Rose / TCG: Foam Sword Rack
+Congrats.L10M = 1;
+Congrats.L10S = 20217
+Congrats.L101 = 3419
+Congrats.L102 = 45062
+
+# Level 20
+# 10 Gold / Power Word Fortitude
+# Rag Doll / TCG: Flag of Ownership
+Congrats.L20M = 10
+Congrats.L20S = 48161
+Congrats.L201 = 5433
+Congrats.L202 = 38578
+
+# Level 30
+# 15 Gold / Mark of the Wild
+# Sleeveless T-Shirt / TCG: Ogre Pinata 
+Congrats.L30M = 15
+Congrats.L30S = 48469
+Congrats.L301 = 18231
+Congrats.L302 = 46780
+
+# Level 40
+# 20 Gold / Blessing of Kings
+# Shadow Circuit / TCG: Carved Ogre Idol 
+Congrats.L40M = 20
+Congrats.L40S = 20217
+Congrats.L401 = 31945
+Congrats.L402 = 49704
+
+# Level 50
+# 25 Gold / Power Word Fortutude
+# Blood of the Mountain / TCG: Imp in a Ball
+Congrats.L50M = 25
+Congrats.L50S = 48161
+Congrats.L501 = 11382
+Congrats.L502 = 32542
+
+# Level 60
+# 30 Gold / Mark of the Wild
+# Direbrew's Remote / TCG: Goblin Gumbo Kettle
+Congrats.L60M = 30
+Congrats.L60S = 48469
+Congrats.L601 = 37863
+Congrats.L602 = 33219
+
+# Level 70
+# 35 Gold / Power Word Fortitude
+# Cuergo's Gold / TCG: Instant Statue Pedestal
+Congrats.L70M = 35
+Congrats.L70S = 48161
+Congrats.L701 = 9360
+Congrats.L702 = 54212
+
+# Level 80
+# 100 Gold / Blessing of Kings
+# Cuergo's Gold with Worm / Haunted Momento
+Congrats.L80M = 100
+Congrats.L80S = 20217
+Congrats.L801 = 9361
+Congrats.L802 = 40110
+
+# Level 90
+# Money, SpellBuff, Item1, Item2
+Congrats.L90M = 0
+Congrats.L90S = 0
+Congrats.L901 = 0
+Congrats.L902 = 0
+
+# Level 100
+# Money, SpellBuff, Item1, Item2
+Congrats.L100M = 0
+Congrats.L100S = 0
+Congrats.L1001 = 0
+Congrats.L1002 = 0
+
+# Level 110
+# Money, SpellBuff, Item1, Item2
+Congrats.L110M = 0
+Congrats.L110S = 0
+Congrats.L1101 = 0
+Congrats.L1102 = 0
 
 #
 ###################################################################################################
