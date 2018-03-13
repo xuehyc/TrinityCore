@@ -32,7 +32,7 @@ class npc_rate_xp_modifier : public CreatureScript
 
         bool OnGossipHello(Player* player, Creature* creature) override
         {
-            if (sConfigMgr->GetBoolDefault("Custom.XP.Rate.NPC.Enable", true))
+            if (sConfigMgr->GetBoolDefault("Custom.XP.Rate.NPC", true))
             {
                 for (uint32 i = 1; i <= MAX_RATE; ++i)
                 {
