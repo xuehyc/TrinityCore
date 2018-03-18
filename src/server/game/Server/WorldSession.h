@@ -113,8 +113,11 @@ namespace WorldPackets
     namespace Bank
     {
         class AutoBankItem;
+        class AutoBankReagent;
         class AutoStoreBankItem;
+        class AutoStoreBankReagent;
         class BuyBankSlot;
+        class DepositReagentBank;
     }
 
     namespace Battlefield
@@ -328,7 +331,11 @@ namespace WorldPackets
         class GuildBankQueryTab;
         class GuildBankDepositMoney;
         class GuildBankWithdrawMoney;
+        class GuildBankSwapItemsLegacy;
         class GuildBankSwapItems;
+        class GuildBankSwapItemsCount;
+        class GuildBankSwapItemsAuto;
+        class GuildBankSwapItemsBankBankCount;
         class GuildBankBuyTab;
         class GuildBankUpdateTab;
         class GuildBankLogQuery;
@@ -1391,8 +1398,12 @@ class TC_GAME_API WorldSession
 
         // Bank
         void HandleAutoBankItemOpcode(WorldPackets::Bank::AutoBankItem& packet);
+        void HandleAutoBankReagentOpcode(WorldPackets::Bank::AutoBankReagent& packet);
         void HandleAutoStoreBankItemOpcode(WorldPackets::Bank::AutoStoreBankItem& packet);
+        void HandleAutoStoreBankReagentOpcode(WorldPackets::Bank::AutoStoreBankReagent& packet);
         void HandleBuyBankSlotOpcode(WorldPackets::Bank::BuyBankSlot& packet);
+        void HandleBuyReagentBankOpcode(WorldPackets::NPC::Hello& packet);
+        void HandleDepositReagentBankOpcode(WorldPackets::Bank::DepositReagentBank& packet);
 
         // Black Market
         void HandleBlackMarketOpen(WorldPackets::BlackMarket::BlackMarketOpen& blackMarketOpen);
@@ -1609,7 +1620,15 @@ class TC_GAME_API WorldSession
         void HandleGuildBankLogQuery(WorldPackets::Guild::GuildBankLogQuery& packet);
         void HandleGuildBankDepositMoney(WorldPackets::Guild::GuildBankDepositMoney& packet);
         void HandleGuildBankWithdrawMoney(WorldPackets::Guild::GuildBankWithdrawMoney& packet);
-        void HandleGuildBankSwapItems(WorldPackets::Guild::GuildBankSwapItems& packet);
+        void HandleGuildBankSwapItemsLegacy(WorldPackets::Guild::GuildBankSwapItemsLegacy& packet);
+
+        void HandleGuildBankSwapItemsPlayerBank(WorldPackets::Guild::GuildBankSwapItems& packet);
+        void HandleGuildBankSwapItemsBankPlayer(WorldPackets::Guild::GuildBankSwapItems& packet);
+        void HandleGuildBankSwapItemsBankBank(WorldPackets::Guild::GuildBankSwapItems& packet);
+        void HandleGuildBankSwapItemsPlayerBankCount(WorldPackets::Guild::GuildBankSwapItemsCount& packet);
+        void HandleGuildBankSwapItemsBankPlayerCount(WorldPackets::Guild::GuildBankSwapItemsCount& packet);
+        void HandleGuildBankSwapItemsBankPlayerAuto(WorldPackets::Guild::GuildBankSwapItemsAuto& packet);
+        void HandleGuildBankSwapItemsBankBankCount(WorldPackets::Guild::GuildBankSwapItemsBankBankCount& packet);
 
         void HandleGuildBankUpdateTab(WorldPackets::Guild::GuildBankUpdateTab& packet);
         void HandleGuildBankBuyTab(WorldPackets::Guild::GuildBankBuyTab& packet);
