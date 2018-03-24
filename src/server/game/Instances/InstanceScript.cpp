@@ -665,6 +665,26 @@ void InstanceScript::DoCastSpellOnPlayers(uint32 spell)
                 player->CastSpell(player, spell, true);
 }
 
+// Cast spell on all players in instance
+void InstanceScript::DoPlayScenePackageIdOnPlayers(uint32 scenePackageId)
+{
+    Map::PlayerList const &PlayerList = instance->GetPlayers();
+
+    if (!PlayerList.isEmpty())
+        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            if (Player* player = i->GetSource())
+                player->GetSceneMgr().PlaySceneByPackageId(scenePackageId);
+}
+void InstanceScript::DoRemoveForcedMovementsOnPlayers(ObjectGuid forceGuid)
+{
+    Map::PlayerList const &PlayerList = instance->GetPlayers();
+
+    if (!PlayerList.isEmpty())
+        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            if (Player* player = i->GetSource())
+                player->RemoveMovementForce(forceGuid);
+}
+
 bool InstanceScript::ServerAllowsTwoSideGroups()
 {
     return sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP);
@@ -952,12 +972,10 @@ void InstanceScript::UpdateCombatResurrection(uint32 diff)
     if (!_combatResurrectionTimerStarted)
         return;
 
-    _combatResurrectionTimer -= diff;
-    if (_combatResurrectionTimer <= 0)
-    {
+    if (_combatResurrectionTimer <= diff)
         AddCombatResurrectionCharge();
-        _combatResurrectionTimerStarted = false;
-    }
+    else
+        _combatResurrectionTimer -= diff;
 }
 
 void InstanceScript::InitializeCombatResurrections(uint8 charges /*= 1*/, uint32 interval /*= 0*/)
@@ -974,7 +992,6 @@ void InstanceScript::AddCombatResurrectionCharge()
 {
     ++_combatResurrectionCharges;
     _combatResurrectionTimer = GetCombatResurrectionChargeInterval();
-    _combatResurrectionTimerStarted = true;
 
     WorldPackets::Instance::InstanceEncounterGainCombatResurrectionCharge gainCombatResurrectionCharge;
     gainCombatResurrectionCharge.InCombatResCount = _combatResurrectionCharges;
@@ -993,7 +1010,7 @@ void InstanceScript::ResetCombatResurrections()
 {
     _combatResurrectionCharges = 0;
     _combatResurrectionTimer = 0;
-    _combatResurrectionTimerStarted = 0;
+    _combatResurrectionTimerStarted = false;
 }
 
 uint32 InstanceScript::GetCombatResurrectionChargeInterval() const
