@@ -91,6 +91,7 @@
 #include "OutdoorPvPMgr.h"
 #include "Pet.h"
 #include "PetPackets.h"
+#include "PhasingHandler.h"
 #include "QueryHolder.h"
 #include "QuestDef.h"
 #include "QuestObjectiveCriteriaMgr.h"
@@ -2321,7 +2322,7 @@ GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid const& guid, Gameo
 bool Player::IsUnderWater() const
 {
     return IsInWater() &&
-        GetPositionZ() < (GetBaseMap()->GetWaterLevel(GetPositionX(), GetPositionY())-2);
+        GetPositionZ() < (GetBaseMap()->GetWaterLevel(GetPhaseShift(), GetPositionX(), GetPositionY()) - 2);
 }
 
 void Player::SetInWater(bool apply)
@@ -2344,8 +2345,15 @@ void Player::SetInWater(bool apply)
 
 bool Player::IsInAreaTriggerRadius(const AreaTriggerEntry* trigger) const
 {
-    if (!trigger || int32(GetMapId()) != trigger->ContinentID)
+    if (!trigger)
         return false;
+
+    if (int32(GetMapId()) != trigger->ContinentID && !GetPhaseShift().HasVisibleMapId(trigger->ContinentID))
+        return false;
+
+    if (trigger->PhaseID || trigger->PhaseGroupID || trigger->PhaseUseFlags)
+        if (!PhasingHandler::InDbPhaseShift(this, trigger->PhaseUseFlags, trigger->PhaseID, trigger->PhaseGroupID))
+            return false;
 
     if (trigger->Radius > 0.f)
     {
@@ -2385,10 +2393,13 @@ void Player::SetGameMaster(bool on)
         getHostileRefManager().setOnlineOfflineState(false);
         CombatStopWithPets();
 
+        PhasingHandler::SetAlwaysVisible(GetPhaseShift(), true);
         m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GM, GetSession()->GetSecurity());
     }
     else
     {
+        PhasingHandler::SetAlwaysVisible(GetPhaseShift(), false);
+
         m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON;
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
@@ -6230,7 +6241,7 @@ void Player::CheckAreaExploreAndOutdoor()
         return;
 
     bool isOutdoor;
-    uint32 areaId = GetBaseMap()->GetAreaId(GetPositionX(), GetPositionY(), GetPositionZ(), &isOutdoor);
+    uint32 areaId = GetBaseMap()->GetAreaId(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ(), &isOutdoor);
     AreaTableEntry const* areaEntry = sAreaTableStore.LookupEntry(areaId);
 
     if (sWorld->getBoolConfig(CONFIG_VMAP_INDOOR_CHECK) && !isOutdoor)
@@ -7285,7 +7296,7 @@ uint32 Player::GetZoneIdFromDB(ObjectGuid guid)
         if (!sMapStore.LookupEntry(map))
             return 0;
 
-        zone = sMapMgr->GetZoneId(map, posx, posy, posz);
+        zone = sMapMgr->GetZoneId(PhasingHandler::GetEmptyPhaseShift(), map, posx, posy, posz);
 
         if (zone > 0)
         {
@@ -7329,7 +7340,7 @@ void Player::UpdateArea(uint32 newArea)
     UpdatePvPState(true);
 
     UpdateAreaDependentAuras(newArea);
-    UpdateAreaAndZonePhase();
+    PhasingHandler::OnAreaChange(this);
 
     if (IsAreaThatActivatesPvpTalents(newArea))
         EnablePvpRules();
@@ -7471,8 +7482,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     UpdateLocalChannels(newZone);
 
     UpdateZoneDependentAuras(newZone);
-
-    UpdateAreaAndZonePhase();
 }
 
 //If players are too far away from the duel flag... they lose the duel
@@ -16771,7 +16780,7 @@ void Player::SendQuestUpdate(uint32 questId)
     }
 
     UpdateForQuestWorldObjects();
-    SendUpdatePhasing();
+    PhasingHandler::OnConditionChange(this);
 }
 
 QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
@@ -24647,6 +24656,8 @@ void Player::SendInitialPacketsAfterAddToMap()
         SendRaidDifficulty((difficulty->Flags & DIFFICULTY_FLAG_LEGACY) != 0);
     }
 
+    PhasingHandler::OnMapChange(this);
+
     SendGarrisonRemoteInfo();
 
     UpdateItemLevelAreaBasedScaling();
@@ -26138,7 +26149,7 @@ int32 Player::NextGroupUpdateSequenceNumber(GroupCategory category)
 void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
 {
     LiquidData liquid_status;
-    ZLiquidStatus res = m->getLiquidStatus(x, y, z, MAP_ALL_LIQUIDS, &liquid_status);
+    ZLiquidStatus res = m->getLiquidStatus(GetPhaseShift(), x, y, z, MAP_ALL_LIQUIDS, &liquid_status);
     if (!res)
     {
         m_MirrorTimerFlags &= ~(UNDERWATER_INWATER | UNDERWATER_INLAVA | UNDERWATER_INSLIME | UNDERWARER_INDARKWATER);
@@ -26979,7 +26990,7 @@ TalentLearnResult Player::LearnTalent(uint32 talentId, int32* spellOnCooldown)
     if (IsInCombat())
         return TALENT_FAILED_AFFECTING_COMBAT;
 
-    if (isDead() || GetMap()->IsBattlegroundOrArena())
+    if (isDead())
         return TALENT_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
     if (!GetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID))
@@ -27028,7 +27039,10 @@ TalentLearnResult Player::LearnTalent(uint32 talentId, int32* spellOnCooldown)
     {
         for (TalentEntry const* talent : sDB2Manager.GetTalentsByPosition(getClass(), talentInfo->TierID, c))
         {
-            if (HasTalent(talent->ID, GetActiveTalentGroup()) && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
+            if (!HasTalent(talent->ID, GetActiveTalentGroup()))
+                continue;
+
+            if (!HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && !HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHANGING_TALENTS))
                 return TALENT_FAILED_REST_AREA;
 
             if (GetSpellHistory()->HasCooldown(talent->SpellID))
@@ -28909,7 +28923,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
         if (!new_name.empty())
             pet->SetName(new_name);
 
-        pet->CopyPhaseFrom(this);
+        PhasingHandler::InheritPhaseShift(pet, this);
 
         pet->SetCreatorGUID(GetGUID());
         pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, getFaction());
@@ -29054,16 +29068,6 @@ void Player::ValidateMovementInfo(MovementInfo* mi)
         mi->AddMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
 
     #undef REMOVE_VIOLATING_FLAGS
-}
-
-void Player::SendUpdatePhasing()
-{
-    if (!IsInWorld())
-        return;
-
-    RebuildTerrainSwaps(); // to set default map swaps
-
-    GetSession()->SendSetPhaseShift(GetPhases(), GetTerrainSwaps(), GetWorldMapAreaSwaps());
 }
 
 void Player::SendSupercededSpell(uint32 oldSpell, uint32 newSpell) const
