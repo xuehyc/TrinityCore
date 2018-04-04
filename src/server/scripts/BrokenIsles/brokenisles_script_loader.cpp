@@ -67,12 +67,12 @@ void AddSC_boss_the_soultakers();
 void AddSC_boss_withered_jim();
 
 // Black Rook Hold
-//void AddSC_instance_black_rook_hold();
-//void AddSC_black_rook_hold();
-//void AddSC_boss_amalgam_of_souls();
-//void AddSC_boss_illysanna_ravencrest();
-//void AddSC_boss_smashspite_the_hateful();
-//void AddSC_boss_lord_kurtalos_ravencrest();
+void AddSC_instance_black_rook_hold();
+void AddSC_black_rook_hold();
+void AddSC_boss_amalgam_of_souls();
+void AddSC_boss_illysanna_ravencrest();
+void AddSC_boss_smashspite_the_hateful();
+void AddSC_boss_lord_kurtalos_ravencrest();
 
 // Darkheart Thicket
 void AddSC_instance_darkheart_thicket();
@@ -102,6 +102,7 @@ void AddSC_boss_warlord_parjesh();
 
 // Maw of Souls
 void AddSC_instance_maw_of_souls();
+void AddSC_maw_of_souls();
 void AddSC_boss_ymiron_maw();
 void AddSC_boss_harbaron_maw();
 void AddSC_boss_helya_maw();
@@ -219,12 +220,12 @@ void AddBrokenIslesScripts()
     AddSC_boss_withered_jim();
 
     // Black Rook Hold
-    //AddSC_instance_black_rook_hold();
-    //AddSC_black_rook_hold();
-    //AddSC_boss_amalgam_of_souls();
-    //AddSC_boss_illysanna_ravencrest();
-    //AddSC_boss_smashspite_the_hateful();
-    //AddSC_boss_lord_kurtalos_ravencrest();
+    AddSC_instance_black_rook_hold();
+    AddSC_black_rook_hold();
+    AddSC_boss_amalgam_of_souls();
+    AddSC_boss_illysanna_ravencrest();
+    AddSC_boss_smashspite_the_hateful();
+    AddSC_boss_lord_kurtalos_ravencrest();
 
     // Darkheart Thicket
     AddSC_instance_darkheart_thicket();
@@ -254,6 +255,7 @@ void AddBrokenIslesScripts()
 
     // Maw of Souls
     AddSC_instance_maw_of_souls();
+    AddSC_maw_of_souls();
     AddSC_boss_ymiron_maw();
     AddSC_boss_harbaron_maw();
     AddSC_boss_helya_maw();
