@@ -6080,11 +6080,40 @@ uint32 ObjectMgr::GetNearestTaxiNode(float x, float y, float z, uint32 mapid, ui
     float dist = 10000;
     uint32 id = 0;
 
+    std::map<uint32, uint32> mapOverrides;
+
+    /// Special case for taxi in garrison phased map
+    for (uint32 i = 0; i < sGarrSiteLevelStore.GetNumRows(); ++i)
+    {
+        if (GarrSiteLevelEntry const* entry = sGarrSiteLevelStore.LookupEntry(i))
+        {
+            mapOverrides[entry->MapID] = MAP_DRAENOR;
+
+            if (entry->MapID == mapid)
+                mapid = MAP_DRAENOR;
+        }
+    }
+
+    switch (mapid)
+    {
+        // Tanaan
+        case MAP_TANAAN_JUNGLE:
+            mapOverrides[mapid] = MAP_DRAENOR;
+            mapid = MAP_DRAENOR;
+            break;
+        default:
+            break;
+    }
+
     uint32 requireFlag = (team == ALLIANCE) ? TAXI_NODE_FLAG_ALLIANCE : TAXI_NODE_FLAG_HORDE;
     for (TaxiNodesEntry const* node : sTaxiNodesStore)
     {
-        if (!node || node->ContinentID != mapid || !(node->Flags & requireFlag))
+        if (!node || !(node->Flags & requireFlag))
             continue;
+
+        if (node->ContinentID != mapid)
+            if (mapOverrides.find(node->ContinentID) != mapOverrides.end() && mapOverrides[node->ContinentID] != mapid)
+                continue;
 
         uint8  field   = (uint8)((node->ID - 1) / 8);
         uint32 submask = 1 << ((node->ID - 1) % 8);
@@ -6736,7 +6765,7 @@ void ObjectMgr::SetHighestGuids()
     if (result)
         sArenaTeamMgr->SetNextArenaTeamId((*result)[0].GetUInt32()+1);
 
-    result = CharacterDatabase.Query("SELECT MAX(setguid) FROM character_equipmentsets");
+    result = CharacterDatabase.Query("SELECT MAX(maxguid) FROM ((SELECT MAX(setguid) AS maxguid FROM character_equipmentsets) UNION (SELECT MAX(setguid) AS maxguid FROM character_transmog_outfits)) allsets");
     if (result)
         _equipmentSetGuid = (*result)[0].GetUInt64()+1;
 
