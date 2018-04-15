@@ -13292,140 +13292,140 @@ void AccountService::CallServerMethod(uint32 token, uint32 methodId, MessageBuff
       break;
     }
     default:
-      TC_LOG_ERROR("service.protobuf", "Bad method id %u.", methodId);
+      TC_LOG_DEBUG("service.protobuf", "Bad method id %u.", methodId);
       SendResponse(service_hash_, methodId, token, ERROR_RPC_INVALID_METHOD);
       break;
     }
 }
 
 uint32 AccountService::HandleGetGameAccountBlob(::bgs::protocol::account::v1::GameAccountHandle const* request, ::bgs::protocol::account::v1::GameAccountBlob* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.GetGameAccountBlob({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.GetGameAccountBlob({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleGetAccount(::bgs::protocol::account::v1::GetAccountRequest const* request, ::bgs::protocol::account::v1::GetAccountResponse* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.GetAccount({ %s })",
+    TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.GetAccount({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleCreateGameAccount(::bgs::protocol::account::v1::CreateGameAccountRequest const* request, ::bgs::protocol::account::v1::GameAccountHandle* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.CreateGameAccount({ %s })",
+    TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.CreateGameAccount({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleIsIgrAddress(::bgs::protocol::account::v1::IsIgrAddressRequest const* request, ::bgs::protocol::NoData* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.IsIgrAddress({ %s })",
+    TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.IsIgrAddress({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleCacheExpire(::bgs::protocol::account::v1::CacheExpireRequest const* request) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.CacheExpire({ %s })",
+    TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.CacheExpire({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleCredentialUpdate(::bgs::protocol::account::v1::CredentialUpdateRequest const* request, ::bgs::protocol::account::v1::CredentialUpdateResponse* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.CredentialUpdate({ %s })",
+    TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.CredentialUpdate({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleSubscribe(::bgs::protocol::account::v1::SubscriptionUpdateRequest const* request, ::bgs::protocol::account::v1::SubscriptionUpdateResponse* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.Subscribe({ %s })",
+    TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.Subscribe({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleUnsubscribe(::bgs::protocol::account::v1::SubscriptionUpdateRequest const* request, ::bgs::protocol::NoData* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.Unsubscribe({ %s })",
+    TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.Unsubscribe({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleGetAccountState(::bgs::protocol::account::v1::GetAccountStateRequest const* request, ::bgs::protocol::account::v1::GetAccountStateResponse* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.GetAccountState({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.GetAccountState({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleGetGameAccountState(::bgs::protocol::account::v1::GetGameAccountStateRequest const* request, ::bgs::protocol::account::v1::GetGameAccountStateResponse* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.GetGameAccountState({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.GetGameAccountState({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleGetLicenses(::bgs::protocol::account::v1::GetLicensesRequest const* request, ::bgs::protocol::account::v1::GetLicensesResponse* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.GetLicenses({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.GetLicenses({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleGetGameTimeRemainingInfo(::bgs::protocol::account::v1::GetGameTimeRemainingInfoRequest const* request, ::bgs::protocol::account::v1::GetGameTimeRemainingInfoResponse* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.GetGameTimeRemainingInfo({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.GetGameTimeRemainingInfo({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleGetGameSessionInfo(::bgs::protocol::account::v1::GetGameSessionInfoRequest const* request, ::bgs::protocol::account::v1::GetGameSessionInfoResponse* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.GetGameSessionInfo({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.GetGameSessionInfo({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleGetCAISInfo(::bgs::protocol::account::v1::GetCAISInfoRequest const* request, ::bgs::protocol::account::v1::GetCAISInfoResponse* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.GetCAISInfo({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.GetCAISInfo({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleForwardCacheExpire(::bgs::protocol::account::v1::ForwardCacheExpireRequest const* request, ::bgs::protocol::NoData* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.ForwardCacheExpire({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.ForwardCacheExpire({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleGetAuthorizedData(::bgs::protocol::account::v1::GetAuthorizedDataRequest const* request, ::bgs::protocol::account::v1::GetAuthorizedDataResponse* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.GetAuthorizedData({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.GetAuthorizedData({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleAccountFlagUpdate(::bgs::protocol::account::v1::AccountFlagUpdateRequest const* request) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.AccountFlagUpdate({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.AccountFlagUpdate({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleGameAccountFlagUpdate(::bgs::protocol::account::v1::GameAccountFlagUpdateRequest const* request) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.GameAccountFlagUpdate({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.GameAccountFlagUpdate({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleUpdateParentalControlsAndCAIS(::bgs::protocol::account::v1::UpdateParentalControlsAndCAISRequest const* request, ::bgs::protocol::NoData* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.UpdateParentalControlsAndCAIS({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.UpdateParentalControlsAndCAIS({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleCreateGameAccount2(::bgs::protocol::account::v1::CreateGameAccountRequest const* request, ::bgs::protocol::account::v1::CreateGameAccountResponse* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.CreateGameAccount2({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.CreateGameAccount2({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleGetGameAccount(::bgs::protocol::account::v1::GetGameAccountRequest const* request, ::bgs::protocol::account::v1::GetGameAccountResponse* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.GetGameAccount({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.GetGameAccount({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountService::HandleQueueDeductRecord(::bgs::protocol::account::v1::QueueDeductRecordRequest const* request, ::bgs::protocol::NoData* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountService.QueueDeductRecord({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountService.QueueDeductRecord({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
@@ -13526,32 +13526,32 @@ void AccountListener::CallServerMethod(uint32 token, uint32 methodId, MessageBuf
       break;
     }
     default:
-      TC_LOG_ERROR("service.protobuf", "Bad method id %u.", methodId);
+      TC_LOG_DEBUG("service.protobuf", "Bad method id %u.", methodId);
       SendResponse(service_hash_, methodId, token, ERROR_RPC_INVALID_METHOD);
       break;
     }
 }
 
 uint32 AccountListener::HandleOnAccountStateUpdated(::bgs::protocol::account::v1::AccountStateNotification const* request) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountListener.OnAccountStateUpdated({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountListener.OnAccountStateUpdated({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountListener::HandleOnGameAccountStateUpdated(::bgs::protocol::account::v1::GameAccountStateNotification const* request) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountListener.OnGameAccountStateUpdated({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountListener.OnGameAccountStateUpdated({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountListener::HandleOnGameAccountsUpdated(::bgs::protocol::account::v1::GameAccountNotification const* request) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountListener.OnGameAccountsUpdated({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountListener.OnGameAccountsUpdated({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }
 
 uint32 AccountListener::HandleOnGameSessionUpdated(::bgs::protocol::account::v1::GameAccountSessionNotification const* request) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method AccountListener.OnGameSessionUpdated({ %s })",
+  TC_LOG_DEBUG("service.protobuf", "%s Client tried to call not implemented method AccountListener.OnGameSessionUpdated({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }

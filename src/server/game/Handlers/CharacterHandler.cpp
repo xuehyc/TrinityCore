@@ -691,7 +691,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPackets::Character::CreateCharact
                 return;
             }
 
-            if ((haveSameRace && skipCinematics == 1) || skipCinematics == 2 || RACE_PANDAREN_NEUTRAL)
+            if ((haveSameRace && skipCinematics == 1) || skipCinematics == 2)
                 newChar.setCinematic(1);                          // not show intro
 
             newChar.SetAtLoginFlag(AT_LOGIN_FIRST);               // First login

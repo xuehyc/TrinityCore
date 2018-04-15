@@ -458,14 +458,14 @@ WorldSocket::ReadDataHandlerResult WorldSocket::ReadDataHandler()
 
             if (!_worldSession)
             {
-                TC_LOG_ERROR("network.opcode", "ProcessIncoming: Client not authed opcode = %u", uint32(opcode));
+                TC_LOG_DEBUG("network.opcode", "ProcessIncoming: Client not authed opcode = %u", uint32(opcode));
                 return ReadDataHandlerResult::Error;
             }
 
             OpcodeHandler const* handler = opcodeTable[opcode];
             if (!handler)
             {
-                TC_LOG_ERROR("network.opcode", "No defined handler for opcode %s sent by %s", GetOpcodeNameForLogging(static_cast<OpcodeClient>(packet.GetOpcode())).c_str(), _worldSession->GetPlayerInfo().c_str());
+                TC_LOG_DEBUG("network.opcode", "No defined handler for opcode %s sent by %s", GetOpcodeNameForLogging(static_cast<OpcodeClient>(packet.GetOpcode())).c_str(), _worldSession->GetPlayerInfo().c_str());
                 break;
             }
 
