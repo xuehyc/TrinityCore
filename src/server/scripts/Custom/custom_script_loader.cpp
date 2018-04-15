@@ -34,6 +34,7 @@ void AddSC_skip_goblin();
 void AddSC_MoneyForKillsScripts();
 void AddSC_player_session_checks();
 void AddSC_CongratsOnLevelScripts();
+void AddSC_WhoLoggedScripts();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -57,4 +58,5 @@ void AddCustomScripts()
     AddSC_MoneyForKillsScripts();
     AddSC_player_session_checks();
     AddSC_CongratsOnLevelScripts();
+    AddSC_WhoLoggedScripts();
 }

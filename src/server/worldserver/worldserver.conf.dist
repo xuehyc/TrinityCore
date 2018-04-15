@@ -4344,6 +4344,14 @@ Custom.XP.Rate.NPC = 0
 Hardcore.Mode.Enable = 0
 
 #
+#    Who-logged.console
+#        Description: Shows in the console who logged into the game.
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+Who-logged.console = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################
