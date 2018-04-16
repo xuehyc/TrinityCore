@@ -68,6 +68,7 @@ struct boss_amalgam_of_souls : public BossAI
             if (me->HealthWillBeBelowPctDamaged(50, damage))
             {
                 me->CastSpell(nullptr, SPELL_CALL_SOULS, false);
+                events.DelayEvents(33s);
                 events.ScheduleEvent(SPELL_CALL_SOULS, 3s);
                 events.ScheduleEvent(SPELL_SOUL_BURST, 33s);
             }
@@ -80,10 +81,7 @@ struct boss_amalgam_of_souls : public BossAI
             return;
 
         if (--restlessSoulsCount == 0)
-        {
             me->RemoveAurasDueToSpell(SPELL_CALL_SOULS_VISUAL);
-            events.CancelEvent(SPELL_SOUL_BURST);
-        }
     }
 
     void ExecuteEvent(uint32 eventId) override
@@ -121,7 +119,9 @@ struct boss_amalgam_of_souls : public BossAI
                 me->GetScheduler().Schedule(1s, 2s, [this](TaskContext context)
                 {
                     Position pos;
-                    GetRandPosFromCenterInDist(me, 10.f, pos);
+                    GetRandPosFromCenterInDist(me, 30.f, pos);
+                    pos.m_positionZ = 20.0f;
+
                     me->SummonCreature(NPC_RESTLESS_SOUL, pos);
 
                     if (context.GetRepeatCounter() <= 6)
@@ -132,6 +132,12 @@ struct boss_amalgam_of_souls : public BossAI
             default:
                 break;
         }
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        BossAI::JustDied(killer);
+        me->RemoveAurasDueToSpell(SPELL_CALL_SOULS_VISUAL);
     }
 
 private:
@@ -163,6 +169,9 @@ struct npc_aos_restless_soul : public ScriptedAI
 
     void IsSummonedBy(Unit* summoner) override
     {
+        me->SetSpeed(MOVE_FLIGHT, 1.5f);
+        me->SetSpeed(MOVE_RUN,    1.5f);
+
         me->SetReactState(REACT_PASSIVE);
         me->GetMotionMaster()->MovePoint(1, *summoner, false);
     }
@@ -178,15 +187,26 @@ struct npc_aos_restless_soul : public ScriptedAI
         {
             me->DespawnOrUnsummon();
             me->CastSpell(nullptr, SPELL_SOULGORGE, true);
+
+            if (CreatureAI* ai = GetSummonerAI())
+                ai->DoAction(ACTION_SOUL_KILLED);
         }
     }
 
     void JustDied(Unit* /*killer*/) override
     {
+        if (CreatureAI* ai = GetSummonerAI())
+            ai->DoAction(ACTION_SOUL_KILLED);
+    }
+private:
+    CreatureAI* GetSummonerAI()
+    {
         if (TempSummon* meTempSummon = me->ToTempSummon())
             if (Unit* summoner = meTempSummon->GetSummoner())
                 if (summoner->IsCreature() && summoner->IsAIEnabled)
-                    summoner->ToCreature()->AI()->DoAction(ACTION_SOUL_KILLED);
+                    return summoner->ToCreature()->AI();
+
+        return nullptr;
     }
 };
 

@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ScriptedCreature.h"
 #include "ScriptMgr.h"
 #include "black_rook_hold.h"
 
@@ -29,7 +30,7 @@ enum Spells
     // Phase 1 - Vengeance
     SPELL_VENGEFUL_SHEAR        = 197418,
 
-    SPELL_DARK_RUSH             = 197478,
+    SPELL_DARK_RUSH_PREPARE     = 197478,
     SPELL_BLAZING_TRAIL         = 197521,
 
     SPELL_BRUTAL_GLAIVE         = 197546,
@@ -45,6 +46,8 @@ enum Spells
     SPELL_ARCANE_BLITZ          = 197797,
 };
 
+Position centerPos = { 3086.38f, 7295.11f, 103.53f };
+
 // 98696
 struct boss_illysanna_ravencrest : public BossAI
 {
@@ -52,11 +55,23 @@ struct boss_illysanna_ravencrest : public BossAI
 
     void ScheduleTasks() override
     {
-        events.ScheduleEvent(SPELL_VENGEFUL_SHEAR,  16s,        0, PHASE_VENGEANCE);
-        events.ScheduleEvent(SPELL_DARK_RUSH,       10s, 20s,   0, PHASE_VENGEANCE);
-        events.ScheduleEvent(SPELL_BRUTAL_GLAIVE,   12s,        0, PHASE_VENGEANCE);
+        events.ScheduleEvent(SPELL_VENGEFUL_SHEAR,      16s,        PHASE_VENGEANCE);
+        events.ScheduleEvent(SPELL_DARK_RUSH_PREPARE,   10s, 20s,   PHASE_VENGEANCE);
+        events.ScheduleEvent(SPELL_BRUTAL_GLAIVE,       12s,        PHASE_VENGEANCE);
+    }
 
-        events.ScheduleEvent(SPELL_EYE_BEAMS,       12s,        0, PHASE_FURY);
+    void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+    {
+        if (me->HealthWillBeBelowPctDamaged(50, damage))
+        {
+            events.CancelEventGroup(PHASE_VENGEANCE);
+
+            events.ScheduleEvent(SPELL_EYE_BEAMS,           12s, PHASE_FURY);
+            events.ScheduleEvent(NPC_SOUL_TORN_VANGUARD,    15s, PHASE_FURY);
+
+            if (IsHeroic())
+                events.ScheduleEvent(NPC_RISEN_ARCANIST,        20s, PHASE_FURY);
+        }
     }
 
     void ExecuteEvent(uint32 eventId) override
@@ -69,10 +84,10 @@ struct boss_illysanna_ravencrest : public BossAI
                 events.Repeat(16s);
                 break;
             }
-            case SPELL_DARK_RUSH:
+            case SPELL_DARK_RUSH_PREPARE:
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                    DoCast(target, SPELL_DARK_RUSH);
+                    DoCast(target, SPELL_DARK_RUSH_PREPARE);
 
                 events.Repeat(10s, 20s);
                 break;
@@ -93,6 +108,22 @@ struct boss_illysanna_ravencrest : public BossAI
                 events.Repeat(10s, 20s);
                 break;
             }
+            case NPC_SOUL_TORN_VANGUARD:
+            {
+                Position summonPos;
+                GetRandPosFromCenterInDist(&centerPos, 14.f, summonPos);
+                me->SummonCreature(NPC_SOUL_TORN_VANGUARD, summonPos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 2000);
+                events.Repeat(15s);
+                break;
+            }
+            case NPC_RISEN_ARCANIST:
+            {
+                Position summonPos;
+                GetRandPosFromCenterInDist(&centerPos, 14.f, summonPos);
+                me->SummonCreature(NPC_RISEN_ARCANIST, summonPos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 2000);
+                events.Repeat(20s);
+                break;
+            }
             default:
                 break;
         }
@@ -106,6 +137,8 @@ struct npc_soultorn_vanguard : public ScriptedAI
 
     void Reset() override
     {
+        DoZoneInCombat();
+
         me->GetScheduler().Schedule(5s, 10s, [](TaskContext context)
         {
             GetContextUnit()->CastSpell(nullptr, SPELL_BONECRUSHING_STRIKE, false);
@@ -118,6 +151,11 @@ struct npc_soultorn_vanguard : public ScriptedAI
 struct npc_risen_arcanist : public ScriptedAI
 {
     npc_risen_arcanist(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        DoZoneInCombat();
+    }
 
     void UpdateAI(uint32 /*diff*/) override
     {

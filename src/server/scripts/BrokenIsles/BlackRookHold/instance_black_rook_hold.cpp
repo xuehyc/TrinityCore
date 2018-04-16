@@ -17,6 +17,7 @@
 
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
+#include "ObjectAccessor.h"
 #include "black_rook_hold.h"
 
 DoorData const doorData[] =
@@ -28,8 +29,8 @@ DoorData const doorData[] =
     { GOB_DOOR_AMALGAME_ROOM_3,         DATA_AMALGAM_OF_SOULS,      DOOR_TYPE_ROOM      },
     { GOB_DOOR_AMALGAME_ROOM_4,         DATA_AMALGAM_OF_SOULS,      DOOR_TYPE_ROOM      },
     { GOB_DOOR_AMALGAME_EXIT,           DATA_AMALGAM_OF_SOULS,      DOOR_TYPE_PASSAGE   },
-    { GOB_DOOR_ILLYSANNA_PORTCULLIS_1,  DATA_ILLYSANNA_RAVENCREST,  DOOR_TYPE_ROOM      },
-    { GOB_DOOR_ILLYSANNA_PORTCULLIS_2,  DATA_ILLYSANNA_RAVENCREST,  DOOR_TYPE_ROOM      },
+    { GOB_DOOR_ILLYSANNA_PORTCULLIS_1,  DATA_ILLYSANNA_RAVENCREST,  DOOR_TYPE_PASSAGE   },
+    { GOB_DOOR_ILLYSANNA_PORTCULLIS_2,  DATA_ILLYSANNA_RAVENCREST,  DOOR_TYPE_PASSAGE   },
     { GOB_DOOR_ILLYSANNA_ENTER,         DATA_ILLYSANNA_RAVENCREST,  DOOR_TYPE_ROOM      },
     { GOB_DOOR_ILLYSANNA_EXIT_1,        DATA_ILLYSANNA_RAVENCREST,  DOOR_TYPE_PASSAGE   },
     { GOB_DOOR_ILLYSANNA_EXIT_2,        DATA_ILLYSANNA_RAVENCREST,  DOOR_TYPE_PASSAGE   },
@@ -46,7 +47,149 @@ struct instance_black_rook_hold : public InstanceScript
     {
         SetBossNumber(DATA_MAX_ENCOUNTERS);
         LoadDoorData(doorData);
+
+        events.ScheduleEvent(DATA_STAIRS_BOULDER_1, 3s);
+
+        SetData(DATA_ILLYSANNA_PREEVENT_LOWER, NOT_STARTED);
+        SetData(DATA_ILLYSANNA_PREEVENT_UPPER, NOT_STARTED);
     }
+
+    void OnCreatureCreate(Creature* creature) override
+    {
+        InstanceScript::OnCreatureCreate(creature);
+
+        if (instance->IsHeroic())
+            creature->SetHealth(creature->GetHealth() * 2.f);
+        if (instance->IsMythic())
+            creature->SetHealth(creature->GetHealth() * 1.33f);
+
+        if (creature->isDead())
+            return;
+
+        switch (creature->GetEntry())
+        {
+            case NPC_SOUL_TORN_CHAMPION:
+            case NPC_RISEN_SCOUT:
+            case NPC_RISEN_ARCHER:
+            case NPC_RISEN_ARCANIST_PREEVENT:
+            {
+                if (creature->GetPositionZ() < 90.f)
+                    m_illysannaPreEventLowerMobs.push_back(creature->GetGUID());
+                else if (creature->GetPositionZ() > 100.f)
+                {
+                    creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                    m_illysannaPreEventUpperMobs.push_back(creature->GetGUID());
+                }
+
+                break;
+            }
+            case NPC_COMMANDER_SHEMDAHSOHN:
+            {
+                m_illysannaPreEventUpperMobs.push_back(creature->GetGUID());
+                break;
+            }
+        }
+    }
+
+    void OnUnitDeath(Unit* unit) override
+    {
+        if (!unit->IsCreature())
+            return;
+
+        if (GetData(DATA_ILLYSANNA_PREEVENT_LOWER) == NOT_STARTED)
+        {
+            m_illysannaPreEventLowerMobs.remove(unit->GetGUID());
+
+            if (m_illysannaPreEventLowerMobs.size() == 0)
+            {
+                SetData(DATA_ILLYSANNA_PREEVENT_LOWER, DONE);
+
+                for (ObjectGuid guid : m_illysannaPreEventUpperMobs)
+                {
+                    if (Creature* creature = ObjectAccessor::GetCreature(*unit, guid))
+                    {
+                        Position jumpPos = creature->GetPosition();
+                        GetPositionWithDistInFront(creature, 15.f, jumpPos);
+                        jumpPos.m_positionZ = 86.412155f;
+
+                        creature->GetMotionMaster()->MoveJump(jumpPos, 10.f, 10.f);
+
+                        creature->GetScheduler().Schedule(2s, [](TaskContext context)
+                        {
+                            if (Player* player = GetContextCreature()->SelectNearestPlayer())
+                                GetContextCreature()->Attack(player, true);
+
+                            GetContextCreature()->RemoveFlag(UNIT_NPC_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                        });
+                    }
+                }
+            }
+        }
+        else if (GetData(DATA_ILLYSANNA_PREEVENT_UPPER) == NOT_STARTED)
+        {
+            m_illysannaPreEventUpperMobs.remove(unit->GetGUID());
+
+            if (m_illysannaPreEventUpperMobs.size() == 0)
+            {
+                HandleGameObject(GetObjectGuid(GOB_DOOR_ILLYSANNA_PORTCULLIS_1), true);
+                HandleGameObject(GetObjectGuid(GOB_DOOR_ILLYSANNA_PORTCULLIS_2), true);
+                SetData(DATA_ILLYSANNA_PREEVENT_UPPER, DONE);
+            }
+        }
+    }
+
+    void Update(uint32 diff) override
+    {
+        events.Update(diff);
+
+        switch (events.ExecuteEvent())
+        {
+            case DATA_STAIRS_BOULDER_1:
+            {
+                if (HasPlayerUpperThan(125.f))
+                {
+                    events.CancelEvent(DATA_STAIRS_BOULDER_1);
+                    events.ScheduleEvent(DATA_STAIRS_BOULDER_2, 3s);
+                    break;
+                }
+
+                uint8 boulderSide = urand(0, 1);
+                if (Creature* boulder = instance->SummonCreature(NPC_BOULDER, firstBoulderPositions[boulderSide][0]))
+                    boulder->GetMotionMaster()->MoveSmoothPath(1, firstBoulderPositions[boulderSide], FIRST_BOULDER_PATH_SIZE);
+                events.Repeat(4s);
+                break;
+            }
+            case DATA_STAIRS_BOULDER_2:
+            {
+                if (HasPlayerUpperThan(190.f))
+                {
+                    events.CancelEvent(DATA_STAIRS_BOULDER_2);
+                    break;
+                }
+
+                uint8 boulderSide = urand(0, 1);
+                if (Creature* boulder = instance->SummonCreature(NPC_BOULDER, secondBoulderPositions[boulderSide][0]))
+                    boulder->GetMotionMaster()->MoveSmoothPath(2, secondBoulderPositions[boulderSide], SECOND_BOULDER_PATH_SIZE);
+                events.Repeat(5s);
+                break;
+            }
+        }
+    }
+
+private:
+    bool HasPlayerUpperThan(float minZ)
+    {
+        Map::PlayerList const& players = instance->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+            if (itr->GetSource() && itr->GetSource()->GetPositionZ() >= minZ)
+                return true;
+
+        return false;
+    }
+
+    EventMap events;
+    std::list<ObjectGuid> m_illysannaPreEventLowerMobs;
+    std::list<ObjectGuid> m_illysannaPreEventUpperMobs;
 };
 
 void AddSC_instance_black_rook_hold()
