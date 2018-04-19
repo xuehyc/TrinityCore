@@ -50,6 +50,7 @@ struct CreatureTemplate;
 struct CurrencyTypesEntry;
 struct FactionEntry;
 struct ItemExtendedCostEntry;
+struct ItemLimitCategoryEntry;
 struct ItemSetEffect;
 struct ItemTemplate;
 struct Loot;
@@ -2298,6 +2299,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
 
         uint32 DoRandomRoll(uint32 minimum, uint32 maximum);
         void ShowNeutralPlayerFactionSelectUI();
+        uint8 GetItemLimitCategoryQuantity(ItemLimitCategoryEntry const* limitEntry) const;
 
         void UpdateItemLevelAreaBasedScaling();
         void ActivatePvpItemLevels(bool activate) { _usePvpItemLevels = activate; }
