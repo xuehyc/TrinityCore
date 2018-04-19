@@ -4352,6 +4352,14 @@ Hardcore.Mode.Enable = 0
 Who-logged.console = 1
 
 #
+#    WorldChat.Enable
+#        Description: Enable to chat worldwide with .world command.
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+WorldChat.Enable = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################

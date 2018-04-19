@@ -95,7 +95,12 @@ namespace {
             {
                 if (sConfigMgr->GetBoolDefault("Solocraft.Announce", true))
                 {
-                    ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00SoloCraft |rmodule.");
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00SoloCraft |rmodule is active.");
+                }
+
+                if (sConfigMgr->GetBoolDefault("WorldChat.Enable", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00WorldChat |r module is active. Use |cffFF0000.world |rcommand.");
                 }
             }
         }

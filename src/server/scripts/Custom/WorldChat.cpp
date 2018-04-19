@@ -21,6 +21,8 @@
 #include "ScriptMgr.h"
 #include "Util.h"
 #include "WorldSession.h"
+#include "Config.h"
+#include "ScriptMgr.h"
 
 /* Colors */
 #define MSG_COLOR_ORANGE "|cffFFA500"
@@ -87,11 +89,14 @@ class World_Chat : public CommandScript
 
     std::vector<ChatCommand> GetCommands() const override
     {
+        if (sConfigMgr->GetBoolDefault("WorldChat.Enable", true))
+        {
             static std::vector<ChatCommand> HandleWorldChatCommandTable =
             {
                 { "world",  rbac::RBAC_PERM_COMMAND_WORLD_CHAT, true, &HandleWorldChatCommand, ""},
             };
             return HandleWorldChatCommandTable;
+        }
     }
 };
 
