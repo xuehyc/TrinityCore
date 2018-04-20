@@ -88,23 +88,6 @@ namespace {
             TC_LOG_INFO("scripts.solocraft.player.instance", "[Solocraft] solocraft_player_instance_handler Loaded");
         }
 
-        // Announce Module
-        void OnLogin(Player *player, bool /*firstLogin*/) override
-        {
-            if (sConfigMgr->GetBoolDefault("Solocraft.Enable", true))
-            {
-                if (sConfigMgr->GetBoolDefault("Solocraft.Announce", true))
-                {
-                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00SoloCraft |rmodule is active.");
-                }
-
-                if (sConfigMgr->GetBoolDefault("WorldChat.Enable", true))
-                {
-                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00WorldChat |r module is active. Use |cffFF0000.world |rcommand.");
-                }
-            }
-        }
-
         void OnMapChanged(Player *player) override
         {
             if (sConfigMgr->GetBoolDefault("Solocraft.Enable", true))

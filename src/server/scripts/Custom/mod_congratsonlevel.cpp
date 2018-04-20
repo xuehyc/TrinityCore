@@ -70,18 +70,6 @@ class CongratsOnLevel : public PlayerScript
 public:
     CongratsOnLevel() : PlayerScript("CongratsOnLevel") { }
 
-    // Announce Module
-    void OnLogin(Player* player, bool /*firstLogin*/) override
-    {
-        if (sConfigMgr->GetBoolDefault("Congrats.On.Level.Enable", true))
-        {
-            if (sConfigMgr->GetBoolDefault("Congrats.On.Level.Announce", true))
-            {
-                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00CongratsOnLevel |rmodule.");
-            }
-        }
-    }
-
     // Level Up Rewards
     void OnLevelChanged(Player* player, uint8 oldLevel)
     {

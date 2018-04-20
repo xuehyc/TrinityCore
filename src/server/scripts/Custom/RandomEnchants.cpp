@@ -14,11 +14,11 @@ public:
 
     RandomEnchantsPlayer() : PlayerScript("RandomEnchantsPlayer") { }
 
-	void OnLogin(Player* player, bool /*loginFirst*/)
+	/*void OnLogin(Player* player, bool)
 	{
 		if (sConfigMgr->GetBoolDefault("RandomEnchants.AnnounceOnLogin", true))
             ChatHandler(player->GetSession()).SendSysMessage(sConfigMgr->GetStringDefault("RandomEnchants.OnLoginMessage", "This server is based on Single Player Project - Legion repack.").c_str());
-    }
+    }*/
 	void OnLootItem(Player* player, Item* item, uint32 count)
 	{
 		if (sConfigMgr->GetBoolDefault("RandomEnchants.OnLoot", true))

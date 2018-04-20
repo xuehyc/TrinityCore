@@ -4360,6 +4360,14 @@ Who-logged.console = 1
 WorldChat.Enable = 1
 
 #
+#    Module.Announcer.Enable
+#        Description: Shows the enabled custom modules on login.
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+Module.Announcer.Enable = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################

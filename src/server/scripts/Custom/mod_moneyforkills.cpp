@@ -79,17 +79,6 @@ class MoneyForKills : public PlayerScript
 public:
     MoneyForKills() : PlayerScript("MoneyForKills") { }
 
-    // Announce Module
-    void OnLogin(Player *player, bool /*firstLogin*/) override {
-        if (sConfigMgr->GetBoolDefault("MFK.Enable", true))
-        {
-            if (sConfigMgr->GetBoolDefault("MFK.Announce", true))
-            {
-                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00MoneyForKills |rmodule.");
-            }
-        }
-    }
-
     // Player Kill Reward
     void OnPVPKill(Player* player, Player* victim)
     {
