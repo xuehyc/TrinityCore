@@ -31,9 +31,9 @@ namespace {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00WorldChat |rmodule is active. Use |cffFF0000.world |rcommand.");
                 }
 				
-                if (sConfigMgr->GetBoolDefault("RandomEnchants.AnnounceOnLogin", true))
+                if (sConfigMgr->GetBoolDefault("RandomEnchants.OnLoot", true))
                 {
-                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00RandomEnchants |rmodule is active.");
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00RandomEnchants on loot |rmodule is active.");
                 }		
 				
 			    if (sConfigMgr->GetBoolDefault("Custom.XP.Rate.NPC", true))
@@ -100,23 +100,18 @@ namespace {
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00DisallowMultipleClient |rmodule is active.");
                 }
-				
-				if (sConfigMgr->GetBoolDefault("Disallow.Multiple.Client", true))
-                {
-                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00DisallowMultipleClient |rmodule is active.");
-                }
-				
+								
 				if (sConfigMgr->GetBoolDefault("Hardcore.Mode.Enable", true))
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00HardcoreMode |rmodule is active.");
                 }
 				
-				if (sConfigMgr->GetBoolDefault("MFK.Announce", true))
+				if (sConfigMgr->GetBoolDefault("MFK.Enable", true))
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00MoneyForKill |rmodule is active.");
                 }
 				
-				if (sConfigMgr->GetBoolDefault("Congrats.On.Level.Announce", true))
+				if (sConfigMgr->GetBoolDefault("Congrats.On.Level.Enable", true))
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00CongratsOnLevel |rmodule is active.");
                 }
