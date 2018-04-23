@@ -57,7 +57,7 @@ void PetBattle::BuildPlayerUpdate(uint8 index, WorldPackets::PetBattle::PetBattl
         FillPlayerUpdate(GetPlayer1(), playerUpdate);
     else
     {
-        if (m_battleType = PET_BATTLE_PVE)
+        if (m_battleType == PET_BATTLE_PVE)
             FillPlayerUpdate(GetOriginalWildPet(), playerUpdate);
         else
             FillPlayerUpdate(GetPlayer2(), playerUpdate);
@@ -82,17 +82,17 @@ void PetBattle::FillPlayerUpdate(Player* player, WorldPackets::PetBattle::PetBat
     for (WorldPackets::BattlePet::BattlePetSlot slot : slots)
     {
         WorldPackets::PetBattle::PetBattlePetUpdate petBattlePetUpdate;
-        petBattlePetUpdate.BattlePetGUID    = slot.Pet->Guid;
-        petBattlePetUpdate.SpeciesID        = slot.Pet->Species;
-        petBattlePetUpdate.Level            = slot.Pet->Level;
-        petBattlePetUpdate.Xp               = slot.Pet->Exp;
-        petBattlePetUpdate.CurHealth        = slot.Pet->Health;
-        petBattlePetUpdate.MaxHealth        = slot.Pet->MaxHealth;
-        petBattlePetUpdate.Power            = slot.Pet->Power;
-        petBattlePetUpdate.Speed            = slot.Pet->Speed;
-        petBattlePetUpdate.BreedQuality     = slot.Pet->Breed;
+        petBattlePetUpdate.BattlePetGUID    = slot.Pet.Guid;
+        petBattlePetUpdate.SpeciesID        = slot.Pet.Species;
+        petBattlePetUpdate.Level            = slot.Pet.Level;
+        petBattlePetUpdate.Xp               = slot.Pet.Exp;
+        petBattlePetUpdate.CurHealth        = slot.Pet.Health;
+        petBattlePetUpdate.MaxHealth        = slot.Pet.MaxHealth;
+        petBattlePetUpdate.Power            = slot.Pet.Power;
+        petBattlePetUpdate.Speed            = slot.Pet.Speed;
+        petBattlePetUpdate.BreedQuality     = slot.Pet.Breed;
 
-        petBattlePetUpdate.DisplayID        = slot.Pet->CreatureID; //TODO
+        petBattlePetUpdate.DisplayID        = slot.Pet.CreatureID; //TODO
         petBattlePetUpdate.NpcTeamMemberID  = 0; //TODO
         petBattlePetUpdate.StatusFlags      = 0; //TODO
 
