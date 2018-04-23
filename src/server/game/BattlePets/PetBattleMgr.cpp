@@ -16,6 +16,7 @@
  */
 
 #include "BattlePet.h"
+#include "BattlePetDataStore.h"
 #include "ObjectAccessor.h"
 #include "PetBattleMgr.h"
 #include "WildBattlePet.h"
@@ -114,9 +115,9 @@ void PetBattleMgr::SendFinalizeLocation(Player* player, PetBattleRequest request
 
 void PetBattleMgr::StartPetBattle(Player* /*player*/, PetBattleRequest /*request*/)
 {
-    uint64 petBattleID = ++m_MaxPetBattleID;
-    //m_petBattles[petBattleID] = new PetBattle(petBattleID);
-    //m_petBattles[petBattleID]->Start();
+    /*uint64 petBattleID = ++m_MaxPetBattleID;
+    m_petBattles[petBattleID] = new PetBattle(petBattleID);
+    m_petBattles[petBattleID]->Start();*/
 }
 
 void PetBattleMgr::EndPetBattle(uint64 petBattleId)
