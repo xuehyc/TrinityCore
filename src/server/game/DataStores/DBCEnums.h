@@ -165,6 +165,22 @@ enum ArtifactPowerFlag : uint8
 
 #define BATTLE_PET_SPECIES_MAX_ID 2164
 
+enum BattlePetSpeciesFlags
+{
+    BATTLE_PET_SPECIES_FLAG_NOT_CAPTURABLE  = 0x400
+};
+
+enum BattlePetSpeciesSourceType
+{
+    BATTLE_PET_SPECIES_SOURCE_LOOT          = 0,
+    BATTLE_PET_SPECIES_SOURCE_QUEST         = 1,
+    BATTLE_PET_SPECIES_SOURCE_VENDOR        = 2,
+    BATTLE_PET_SPECIES_SOURCE_PROFESSION    = 3,
+    BATTLE_PET_SPECIES_SOURCE_WILD_PET      = 4,
+    BATTLE_PET_SPECIES_SOURCE_ACHIEVEMENT   = 5,
+    BATTLE_PET_SPECIES_SOURCE_WORLD_EVENT   = 6,
+};
+
 enum ChrSpecializationFlag
 {
     CHR_SPECIALIZATION_FLAG_CASTER                  = 0x01,
@@ -729,24 +745,24 @@ enum ItemExtendedCostFlags
 
 enum ItemBonusType
 {
-    ITEM_BONUS_ITEM_LEVEL                   = 1,
-    ITEM_BONUS_STAT                         = 2,
-    ITEM_BONUS_QUALITY                      = 3,
-    ITEM_BONUS_DESCRIPTION                  = 4,
-    ITEM_BONUS_SUFFIX                       = 5,
-    ITEM_BONUS_SOCKET                       = 6,
-    ITEM_BONUS_APPEARANCE                   = 7,
-    ITEM_BONUS_REQUIRED_LEVEL               = 8,
-    ITEM_BONUS_DISPLAY_TOAST_METHOD         = 9,
-    ITEM_BONUS_REPAIR_COST_MULTIPLIER       = 10,
-    ITEM_BONUS_SCALING_STAT_DISTRIBUTION    = 11,
-    ITEM_BONUS_DISENCHANT_LOOT_ID           = 12,
-    ITEM_BONUS_SCALING_STAT_DISTRIBUTION_2  = 13,
-    ITEM_BONUS_ITEM_LEVEL_CAN_INCREASE      = 14,                 // Displays a + next to item level indicating it can warforge
-    ITEM_BONUS_RANDOM_ENCHANTMENT           = 15,                 // Responsible for showing "<Random additional stats>" or "+%d Rank Random Minor Trait" in the tooltip before item is obtained
-    ITEM_BONUS_BONDING                      = 16,
-    ITEM_BONUS_RELIC_TYPE                   = 17,
-    ITEM_BONUS_OVERRIDE_REQUIRED_LEVEL      = 18
+    ITEM_BONUS_ITEM_LEVEL                       = 1,
+    ITEM_BONUS_STAT                             = 2,
+    ITEM_BONUS_QUALITY                          = 3,
+    ITEM_BONUS_DESCRIPTION                      = 4,
+    ITEM_BONUS_SUFFIX                           = 5,
+    ITEM_BONUS_SOCKET                           = 6,
+    ITEM_BONUS_APPEARANCE                       = 7,
+    ITEM_BONUS_REQUIRED_LEVEL                   = 8,
+    ITEM_BONUS_DISPLAY_TOAST_METHOD             = 9,
+    ITEM_BONUS_REPAIR_COST_MULTIPLIER           = 10,
+    ITEM_BONUS_SCALING_STAT_DISTRIBUTION        = 11,
+    ITEM_BONUS_DISENCHANT_LOOT_ID               = 12,
+    ITEM_BONUS_SCALING_STAT_DISTRIBUTION_FIXED  = 13,
+    ITEM_BONUS_ITEM_LEVEL_CAN_INCREASE          = 14,             // Displays a + next to item level indicating it can warforge
+    ITEM_BONUS_RANDOM_ENCHANTMENT               = 15,             // Responsible for showing "<Random additional stats>" or "+%d Rank Random Minor Trait" in the tooltip before item is obtained
+    ITEM_BONUS_BONDING                          = 16,
+    ITEM_BONUS_RELIC_TYPE                       = 17,
+    ITEM_BONUS_OVERRIDE_REQUIRED_LEVEL          = 18
 };
 
 enum ItemLimitCategoryMode
