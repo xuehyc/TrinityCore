@@ -107,7 +107,7 @@ enum XPColorChar : uint8;
     MailScript
     SessionScript
     CollisionScript
-    ArenaTeamScript
+    ArenaGroupScript
 
 */
 
