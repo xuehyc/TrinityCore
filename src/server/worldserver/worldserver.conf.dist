@@ -4382,6 +4382,15 @@ WorldChat.Enable = 1
 Module.Announcer.Enable = 1
 
 #
+#    CompleteQuest.Command
+#        Description: Allow the ".completequest [LINK]" command for normal players.
+#                     This can helps to complete bugged quests.
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+CompleteQuest.Command = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################

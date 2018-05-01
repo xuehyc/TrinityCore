@@ -35,9 +35,9 @@ void AddSC_MoneyForKillsScripts();
 void AddSC_player_session_checks();
 void AddSC_CongratsOnLevelScripts();
 void AddSC_WhoLoggedScripts();
-//void AddSC_World_Chat();
 void AddSC_spp_module_announcer();
 void AddSC_cs_world_chat();
+void AddSC_quest_complete_command();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -62,7 +62,7 @@ void AddCustomScripts()
     AddSC_player_session_checks();
     AddSC_CongratsOnLevelScripts();
     AddSC_WhoLoggedScripts();
-    //AddSC_World_Chat();
     AddSC_spp_module_announcer();
     AddSC_cs_world_chat();
+    AddSC_quest_complete_command();
 }
