@@ -118,7 +118,7 @@ namespace {
 				
 				if (sConfigMgr->GetBoolDefault("CompleteQuest.Command", true))
                 {
-                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00WorldChat |rmodule is active. Use |cffFF0000.completequest [LINK] |rcommand.");
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00CompleteQuest.Command |rmodule is active. Use |cffFF0000.completequest [LINK] |rcommand.");
                 }
             }
             ChatHandler(player->GetSession()).SendSysMessage("This server is based on |cffFF0000Single Player Project - AshamaneCore |rrepack.");
