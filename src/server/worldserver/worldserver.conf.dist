@@ -4391,6 +4391,15 @@ Module.Announcer.Enable = 1
 CompleteQuest.Command = 1
 
 #
+#     KilledByCreature.Announcer
+#        Description: Announce everyone on the server, if a player killed by a creature.
+#                     This can be usefull with the Hardcode Mode.
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+KilledByCreature.Announcer = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################
