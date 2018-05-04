@@ -29,6 +29,7 @@ class Creature;
 class DynamicObject;
 class GameObject;
 class PlayerAI;
+class Spell;
 class WorldObject;
 struct Position;
 
@@ -126,6 +127,7 @@ class TC_GAME_API CreatureAI : public UnitAI
         // Called when the creature summon successfully other creature
         virtual void JustSummoned(Creature* /*summon*/) { }
         virtual void IsSummonedBy(Unit* /*summoner*/) { }
+        virtual void IsSummonedBy(Spell const* /*summonSpell*/) { }
 
         virtual void SummonedCreatureDespawn(Creature* /*summon*/) { }
         virtual void SummonedCreatureDies(Creature* /*summon*/, Unit* /*killer*/) { }
