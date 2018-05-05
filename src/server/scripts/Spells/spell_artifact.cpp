@@ -34,6 +34,8 @@ enum SpellIds
     SPELL_DH_FURY_OF_THE_ILLIDARI_AT                = 202796,
     SPELL_DH_FURY_OF_THE_ILLIDARI_MH                = 201628,
     SPELL_DH_FURY_OF_THE_ILLIDARI_OH                = 201789,
+    SPELL_DRUID_ASHAMANE_FRENZY                     = 210722,
+    SPELL_DRUID_ASHAMANE_FRENZY_DAMAGE              = 210723,
     SPELL_DRUID_NEW_MOON                            = 202767,
     SPELL_DRUID_NEW_MOON_OVERRIDE                   = 202787,
     SPELL_DRUID_HALF_MOON                           = 202768,
@@ -562,6 +564,50 @@ class spell_arti_dru_full_moon : public SpellScript
     }
 };
 
+#define ASHAMANE_FRENZY_TARGET "ashamane_frenzy_target"
+
+// 210722 - Ashamane's Frenzy
+class spell_arti_dru_ashamane_frenzy : public SpellScript
+{
+    PrepareSpellScript(spell_arti_dru_ashamane_frenzy);
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        if (Unit* target = GetHitUnit())
+            GetCaster()->Variables.Set(ASHAMANE_FRENZY_TARGET, target->GetGUID());
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_arti_dru_ashamane_frenzy::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
+// 210722 - Ashamane's Frenzy
+class aura_arti_dru_ashamane_frenzy : public AuraScript
+{
+    PrepareAuraScript(aura_arti_dru_ashamane_frenzy);
+
+    void HandleDummyTick(AuraEffect const* aurEff)
+    {
+        if (Unit* caster = GetCaster())
+            if (Unit* target = ObjectAccessor::GetUnit(*caster, caster->Variables.GetValue<ObjectGuid>(ASHAMANE_FRENZY_TARGET)))
+                caster->CastSpell(target, SPELL_DRUID_ASHAMANE_FRENZY_DAMAGE, true, NULL, aurEff);
+    }
+
+    void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (Unit* caster = GetCaster())
+            caster->Variables.Remove(ASHAMANE_FRENZY_TARGET);
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(aura_arti_dru_ashamane_frenzy::HandleDummyTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_arti_dru_ashamane_frenzy::OnRemove, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 // 193371 - Call to the Void
 class spell_arti_pri_call_of_the_void : public AuraScript
 {
@@ -585,15 +631,32 @@ class spell_arti_pri_call_of_the_void : public AuraScript
 };
 
 // 98167 - Void Tendril
-struct npc_arti_priest_void_tendril : public ScriptedAI
+struct npc_arti_priest_void_tendril : public Scripted_NoMovementAI
 {
-    npc_arti_priest_void_tendril(Creature* p_Creature) : ScriptedAI(p_Creature) { }
+    npc_arti_priest_void_tendril(Creature* p_Creature) : Scripted_NoMovementAI(p_Creature) { }
 
     void IsSummonedBy(Unit* summoner) override
     {
-        if (Unit* target = ObjectAccessor::GetUnit(*summoner, summoner->GetTarget()))
-            me->CastSpell(target, SPELL_PRIEST_MIND_FLAY, false);
+        _targetGuid = summoner->GetTarget();
+        if (Unit* target = ObjectAccessor::GetUnit(*me, _targetGuid))
+        {
+            AttackStart(target);
+            me->GetScheduler().Schedule(250ms, [this](TaskContext context)
+            {
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                if (Unit* owner = me->GetOwner())
+                    if (Unit* target = ObjectAccessor::GetUnit(*me, _targetGuid))
+                        me->CastCustomSpell(SPELL_PRIEST_MIND_FLAY, SPELLVALUE_BASE_POINT0, owner->GetTotalSpellPowerValue(SPELL_SCHOOL_MASK_SHADOW, false), target);
+
+                context.Repeat();
+            });
+        }
     }
+
+private:
+    ObjectGuid _targetGuid;
 };
 
 void AddSC_artifact_spell_scripts()
@@ -601,6 +664,7 @@ void AddSC_artifact_spell_scripts()
     RegisterSpellScript(spell_arti_dru_new_moon);
     RegisterSpellScript(spell_arti_dru_half_moon);
     RegisterSpellScript(spell_arti_dru_full_moon);
+    RegisterSpellAndAuraScriptPair(spell_arti_dru_ashamane_frenzy, aura_arti_dru_ashamane_frenzy);
 
     RegisterAuraScript(spell_arti_mage_immolation);
     RegisterSpellScript(spell_arti_mage_phoenix_flames);

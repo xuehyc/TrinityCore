@@ -3325,6 +3325,12 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->AuraInterruptFlags[0] |= AURA_INTERRUPT_FLAG_CAST | AURA_INTERRUPT_FLAG_MOVE | AURA_INTERRUPT_FLAG_JUMP;
     });
 
+    // Travel Form (dummy) - cannot be cast indoors.
+    ApplySpellFix({ 783 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Attributes |= SPELL_ATTR0_OUTDOORS_ONLY;
+    });
+
     // Tree of Life (Passive)
     ApplySpellFix({ 5420 }, [](SpellInfo* spellInfo)
     {
@@ -3503,7 +3509,14 @@ void SpellMgr::LoadSpellInfoCorrections()
     // Priest void form insanity regen rate
     ApplySpellFix({ 194249 }, [](SpellInfo* spellInfo)
     {
-        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_1))->BasePoints /= 10;
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_1))->BasePoints /= 5;
+    });
+
+    // Warrior commanding shout
+    ApplySpellFix({ 97463 }, [](SpellInfo* spellInfo)
+    {
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->ApplyAuraName = SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT;
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->BasePoints = 15;
     });
 
     ApplySpellFix({

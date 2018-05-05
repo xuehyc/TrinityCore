@@ -523,14 +523,15 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) override
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_MISDIRECTION_PROC))
-                return false;
-            return true;
+            return ValidateSpellInfo({ SPELL_HUNTER_MISDIRECTION_PROC });
         }
 
         void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
-            if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_DEFAULT || !GetTarget()->HasAura(SPELL_HUNTER_MISDIRECTION_PROC))
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEFAULT || GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_INTERRUPT)
+                return;
+                
+            if (!GetTarget()->HasAura(SPELL_HUNTER_MISDIRECTION_PROC))
                 GetTarget()->ResetRedirectThreat();
         }
 
@@ -3018,7 +3019,7 @@ public:
 
         void OnUnitExit(Unit* unit) override
         {
-            if (!unit)
+            if (!unit || !at->GetCaster())
                 return;
 
             Position pos = at->GetPosition();
@@ -3027,7 +3028,7 @@ public:
             if (unit->HasAura(SPELL_HUNTER_BINDING_SHOT_AURA) && unit->GetExactDist(&pos) >= 5.0f)
             {
                 unit->RemoveAura(SPELL_HUNTER_BINDING_SHOT_AURA);
-                unit->CastSpell(unit, SPELL_HUNTER_BINDING_SHOT_STUN, true);
+                at->GetCaster()->CastSpell(unit, SPELL_HUNTER_BINDING_SHOT_STUN, true);
             }
         }
     };
