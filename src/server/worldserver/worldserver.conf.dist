@@ -4400,6 +4400,15 @@ CompleteQuest.Command = 1
 KilledByCreature.Announcer = 1
 
 #
+#     PvPKill.Announcer
+#        Description: Announce everyone on the server, if a player killed by another player.
+#                     This can be usefull with the Hardcode Mode.
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+PvPKill.Announcer = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################

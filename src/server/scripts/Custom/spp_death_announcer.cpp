@@ -24,7 +24,7 @@ public:
 			std::ostringstream stream;
 			stream << "|CFF" << tag_colour <<
 				"|r|cff" << plr_colour << " " << plr <<
-				"|r killed by a |CFF" << creature_colour << "[" << creature_n << "]|r " "creature" << "!";
+				"|r killed by a |CFF" << creature_colour << "" << creature_n << "|r " "creature" << "!";
 			sWorld->SendServerMessage(SERVER_MSG_STRING, stream.str().c_str());
 			}
 		}
@@ -40,7 +40,7 @@ public:
             std::ostringstream stream;
             stream << "|CFF" << tag_colour <<
                 "|r|cff" << plr_colour << " " << plr <<
-                "|r killed by the legendary |CFF" << creature_colour << "[" << creature_n << "]|r " "world boss" << "!";
+                "|r killed by the legendary |CFF" << creature_colour << "" << creature_n << "|r " "world boss" << "!";
             sWorld->SendServerMessage(SERVER_MSG_STRING, stream.str().c_str());
         }
 
@@ -55,8 +55,29 @@ public:
             std::ostringstream stream;
             stream << "|CFF" << tag_colour <<
                 "|r|cff" << plr_colour << " " << plr <<
-                "|r killed by the mighty |CFF" << creature_colour << "[" << creature_n << "]|r " "dungeon boss" << "!";
+                "|r killed by the mighty |CFF" << creature_colour << "" << creature_n << "|r " "dungeon boss" << "!";
             sWorld->SendServerMessage(SERVER_MSG_STRING, stream.str().c_str());
+        }
+    }
+
+    void OnPVPKill(Player* killer, Player* killed)
+    {
+        if (sConfigMgr->GetBoolDefault("PvPKill.Announcer", true))
+        {
+            if (killer->IsPlayer())
+            {
+                std::string plr = killed->GetName();
+                std::string creature_n = killer->GetName();
+                bool ingroup = killed->GetGroup();
+                std::string tag_colour = "7bbef7";
+                std::string plr_colour = "7bbef7";
+                std::string creature_colour = "ff0000";
+                std::ostringstream stream;
+                stream << "|CFF" << tag_colour <<
+                    "|r|cff" << plr_colour << " " << plr <<
+                    "|r killed by |CFF" << creature_colour << "" << creature_n << "|r " "player" << "!";
+                sWorld->SendServerMessage(SERVER_MSG_STRING, stream.str().c_str());
+            }
         }
     }
 };
