@@ -223,6 +223,8 @@ void TempSummon::InitSummon(Spell const* summonSpell /*= nullptr*/)
     Unit* owner = GetSummoner();
     if (owner)
     {
+        owner->AddSummonedCreature(GetGUID(), GetEntry());
+
         if (owner->GetTypeId() == TYPEID_UNIT && owner->ToCreature()->IsAIEnabled)
             owner->ToCreature()->AI()->JustSummoned(this);
         if (IsAIEnabled)
@@ -263,9 +265,13 @@ void TempSummon::UnSummon(uint32 msTime)
         return;
     }
 
-    Unit* owner = GetSummoner();
-    if (owner && owner->GetTypeId() == TYPEID_UNIT && owner->ToCreature()->IsAIEnabled)
-        owner->ToCreature()->AI()->SummonedCreatureDespawn(this);
+    if (Unit* owner = GetSummoner())
+    {
+        owner->RemoveSummonedCreature(GetGUID());
+
+        if (owner->IsCreature() && owner->ToCreature()->IsAIEnabled)
+            owner->ToCreature()->AI()->SummonedCreatureDespawn(this);
+    }
 
     AddObjectToRemoveList();
 }
