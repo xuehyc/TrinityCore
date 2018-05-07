@@ -138,6 +138,7 @@ enum ShamanSpells
     SPELL_SHAMAN_MAIL_SPECIALIZATION_AGI                    = 86099,
     SPELL_SHAMAN_MANA_TIDE                                  = 16191,
     SPELL_SHAMAN_NATURE_GUARDIAN                            = 31616,
+    SPELL_SHAMAN_OVERCHARGE                                 = 210727,
     SPELL_SHAMAN_PATH_OF_FLAMES_SPREAD                      = 210621,
     SPELL_SHAMAN_PATH_OF_FLAMES_TALENT                      = 201909,
     SPELL_SHAMAN_RAINFALL                                   = 215864,
@@ -2771,11 +2772,9 @@ struct npc_lightning_surge_totem : public ScriptedAI
 
     void Reset() override
     {
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_REMOVE_CLIENT_CONTROL);
-        me->GetScheduler().Schedule(10s, [this](TaskContext context)
+        me->GetScheduler().Schedule(2s, [this](TaskContext /*context*/)
         {
             me->CastSpell(me, SPELL_TOTEM_LIGHTNING_SURGE_EFFECT, true);
-            context.Repeat();
         });
     }
 };
@@ -2787,7 +2786,6 @@ struct npc_resonance_totem : public ScriptedAI
 
     void Reset() override
     {
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_REMOVE_CLIENT_CONTROL);
         me->GetScheduler().Schedule(1s, [this](TaskContext context)
         {
             me->CastSpell(me, SPELL_TOTEM_RESONANCE_EFFECT, true);
@@ -2827,14 +2825,16 @@ struct npc_earth_grab_totem : public ScriptedAI
 
             for (auto target : unitList)
             {
+                if (target->HasAura(SPELL_TOTEM_EARTH_GRAB_ROOT_EFFECT))
+                    continue;
+
                 if (std::find(alreadyRooted.begin(), alreadyRooted.end(), target->GetGUID()) == alreadyRooted.end())
                 {
                     alreadyRooted.push_back(target->GetGUID());
-                    if (!target->HasAura(SPELL_TOTEM_EARTH_GRAB_ROOT_EFFECT))
-                        me->CastSpell(target, SPELL_TOTEM_EARTH_GRAB_ROOT_EFFECT, true);
+                    me->CastSpell(target, SPELL_TOTEM_EARTH_GRAB_ROOT_EFFECT, true);
                 }
-
-                me->CastSpell(target, SPELL_TOTEM_EARTH_GRAB_SLOW_EFFECT, true);
+                else
+                    me->CastSpell(target, SPELL_TOTEM_EARTH_GRAB_SLOW_EFFECT, true);
             }
 
             context.Repeat();
@@ -2864,7 +2864,6 @@ struct npc_tailwind_totem : public ScriptedAI
 
     void Reset() override
     {
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_REMOVE_CLIENT_CONTROL);
         me->GetScheduler().Schedule(1s, [this](TaskContext context)
         {
             me->CastSpell(me, SPELL_TOTEM_TAIL_WIND_EFFECT, true);
@@ -2907,7 +2906,6 @@ struct npc_earthen_shield_totem : public ScriptedAI
 
     void Reset() override
     {
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_REMOVE_CLIENT_CONTROL);
         me->CastSpell(me, SPELL_SHAMAN_AT_EARTHEN_SHIELD_TOTEM, true);
     }
 };
@@ -3061,7 +3059,6 @@ struct npc_ancestral_protection_totem : public ScriptedAI
 
     void Reset() override
     {
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_REMOVE_CLIENT_CONTROL);
         me->CastSpell(me, SPELL_TOTEM_ANCESTRAL_PROTECTION_AT, true);
     }
 };
@@ -3267,7 +3264,6 @@ struct npc_skyfury_totem : public ScriptedAI
     void Reset() override
     {
         m_uiBuffTimer = DELAY;
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_REMOVE_CLIENT_CONTROL);
         ApplyBuff();
     }
 
@@ -3314,7 +3310,6 @@ struct npc_grounding_totem : public ScriptedAI
 
     void Reset() override
     {
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_REMOVE_CLIENT_CONTROL);
         me->CastSpell(me, SPELL_TOTEM_GROUDING_TOTEM_EFFECT, true);
     }
 };
@@ -3656,6 +3651,52 @@ class spell_sha_fire_elemental : public SpellScript
     }
 };
 
+// 187837 - Lightning Bolt
+class spell_sha_enhancement_lightning_bolt : public SpellScript
+{
+    PrepareSpellScript(spell_sha_enhancement_lightning_bolt);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_SHAMAN_OVERCHARGE });
+    }
+
+    void HandleTakePower(Powers& /*power*/, int32& powerCount)
+    {
+        _maxTakenPower      = 0;
+        _maxDamagePercent   = 0;
+
+        if (Aura* overcharge = GetCaster()->GetAura(SPELL_SHAMAN_OVERCHARGE))
+        {
+            _maxTakenPower      = overcharge->GetSpellEffectInfo(EFFECT_0)->BasePoints;
+            _maxDamagePercent   = overcharge->GetSpellEffectInfo(EFFECT_1)->BasePoints;
+        }
+
+        _takenPower = powerCount = std::min(GetCaster()->GetPower(POWER_MAELSTROM), _maxTakenPower);
+    }
+
+    void HandleDamage(SpellEffIndex /*effIndex*/)
+    {
+        if (_maxTakenPower > 0)
+        {
+            int32 increasedDamagePercent = CalculatePct(_maxDamagePercent, float(_takenPower) / float(_maxTakenPower) * 100.f);
+            int32 hitDamage = CalculatePct(GetHitDamage(), 100 + increasedDamagePercent);
+            SetHitDamage(hitDamage);
+        }
+    }
+
+    void Register() override
+    {
+        OnTakePower += SpellOnTakePowerFn(spell_sha_enhancement_lightning_bolt::HandleTakePower);
+        OnEffectHitTarget += SpellEffectFn(spell_sha_enhancement_lightning_bolt::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+
+private:
+    int32 _takenPower;
+    int32 _maxTakenPower;
+    int32 _maxDamagePercent;
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new at_sha_earthquake_totem();
@@ -3730,6 +3771,7 @@ void AddSC_shaman_spell_scripts()
     RegisterSpellScript(spell_sha_earth_shock);
     RegisterSpellScript(spell_sha_earth_elemental);
     RegisterSpellScript(spell_sha_fire_elemental);
+    RegisterSpellScript(spell_sha_enhancement_lightning_bolt);
 }
 
 void AddSC_npc_totem_scripts()
