@@ -55,6 +55,9 @@ enum ShamanSpells
     SPELL_SHAMAN_CRASH_LIGHTNING_PROC                       = 195592,
     SPELL_SHAMAN_CRASH_LIGTHNING                            = 187874,
     SPELL_SHAMAN_CRASH_LIGTHNING_AURA                       = 187878,
+    SPELL_SHAMAN_CRASHING_STORM_DUMMY                       = 192246,
+    SPELL_SHAMAN_CRASHING_STORM_AT                          = 210797,
+    SPELL_SHAMAN_CRASHING_STORM_DAMAGE                      = 210801,
     SPELL_SHAMAN_DOOM_WINDS                                 = 204945,
     SPELL_SHAMAN_EARTHBIND_FOR_EARTHGRAB_TOTEM              = 116947,
     SPELL_SHAMAN_EARTHEN_RAGE_DAMAGE                        = 170379,
@@ -80,6 +83,8 @@ enum ShamanSpells
     SPELL_SHAMAN_FERAL_LUNGE_DAMAGE                         = 215802,
     SPELL_SHAMAN_FERAL_SPIRIT                               = 51533,
     SPELL_SHAMAN_FERAL_SPIRIT_SUMMON                        = 228562,
+    SPELL_SHAMAN_FERAL_SPIRIT_ENERGIZE                      = 190185,
+    SPELL_SHAMAN_FERAL_SPIRIT_ENERGIZE_DUMMY                = 231723,
     SPELL_SHAMAN_FIRE_ELEMENTAL_DUMMY                       = 198067,
     SPELL_SHAMAN_FIRE_ELEMENTAL_SUMMON                      = 188592,
     SPELL_SHAMAN_FIRE_NOVA                                  = 1535,
@@ -155,6 +160,9 @@ enum ShamanSpells
     SPELL_SHAMAN_STONE_BULWARK_ABSORB                       = 114893,
     SPELL_SHAMAN_STORMBRINGER                               = 201845,
     SPELL_SHAMAN_STORMBRINGER_PROC                          = 201846,
+    SPELL_SHAMAN_STORMLASH                                  = 195255,
+    SPELL_SHAMAN_STORMLASH_BUFF                             = 195222,
+    SPELL_SHAMAN_STORMLASH_DAMAGE                           = 213307,
     SPELL_SHAMAN_STORMSTRIKE                                = 17364,
     SPELL_SHAMAN_STORMSTRIKE_MAIN                           = 32175,
     SPELL_SHAMAN_TIDAL_WAVES                                = 53390,
@@ -367,6 +375,9 @@ public:
             targetsHit++;
             if (targetsHit == 2)
                 caster->CastSpell(caster, SPELL_SHAMAN_CRASH_LIGTHNING_AURA, true);
+
+            if (caster->HasAura(SPELL_SHAMAN_CRASHING_STORM_DUMMY))
+                caster->CastSpell(nullptr, SPELL_SHAMAN_CRASHING_STORM_AT, true);
         }
 
         void Register() override
@@ -732,40 +743,28 @@ class spell_sha_fire_nova : public SpellScriptLoader
 };
 
 // 10400 - Flametongue
-class spell_sha_flametongue : public SpellScriptLoader
+// 194084 - Flametongue
+class spell_sha_flametongue : public AuraScript
 {
-public:
-    spell_sha_flametongue() : SpellScriptLoader("spell_sha_flametongue") { }
+    PrepareAuraScript(spell_sha_flametongue);
 
-    class spell_sha_flametongue_AuraScript : public AuraScript
+    bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        PrepareAuraScript(spell_sha_flametongue_AuraScript);
+        return ValidateSpellInfo({ SPELL_SHAMAN_FLAMETONGUE_ATTACK });
+    }
 
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_FLAMETONGUE_ATTACK))
-                return false;
-            return true;
-        }
-
-        void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-        {
-            PreventDefaultAction();
-
-            Unit* attacker = eventInfo.GetActor();
-            int32 damage = int32(attacker->GetTotalAttackPowerValue(BASE_ATTACK) * 0.075f / 2600 * attacker->getAttackTimer(BASE_ATTACK));
-            attacker->CastCustomSpell(SPELL_SHAMAN_FLAMETONGUE_ATTACK, SPELLVALUE_BASE_POINT0, damage, eventInfo.GetActionTarget(), TRIGGERED_FULL_MASK, nullptr, aurEff);
-        }
-
-        void Register() override
-        {
-            OnEffectProc += AuraEffectProcFn(spell_sha_flametongue_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
+    void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
-        return new spell_sha_flametongue_AuraScript();
+        PreventDefaultAction();
+
+        Unit* attacker = eventInfo.GetActor();
+        int32 damage = int32(attacker->GetTotalAttackPowerValue(BASE_ATTACK) * 0.2f / 2600 * attacker->getAttackTimer(BASE_ATTACK));
+        attacker->CastCustomSpell(SPELL_SHAMAN_FLAMETONGUE_ATTACK, SPELLVALUE_BASE_POINT0, damage, eventInfo.GetActionTarget(), TRIGGERED_FULL_MASK, nullptr, aurEff);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_sha_flametongue::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
     }
 };
 
@@ -1979,54 +1978,39 @@ enum ShamanTotems
 };
 
 // 33757 - Windfury
-class spell_sha_windfury : public SpellScriptLoader
+class spell_sha_windfury : public AuraScript
 {
-public:
-    spell_sha_windfury() : SpellScriptLoader("spell_sha_windfury") { }
+    PrepareAuraScript(spell_sha_windfury);
 
-    class spell_sha_windfury_AuraScript : public AuraScript
+    bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        PrepareAuraScript(spell_sha_windfury_AuraScript);
+        return ValidateSpellInfo({ SPELL_SHAMAN_WINDFURY_ATTACK });
+    }
 
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_WINDFURY_ATTACK))
-                return false;
-            return true;
-        }
-
-        void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-        {
-            PreventDefaultAction();
-
-            //Proc Chance is increased by 6.24% of Mastery (ceiled)
-            float masteryBonus = 0.0f;
-            if (Player* player = eventInfo.GetActor()->ToPlayer())
-                masteryBonus += (player->GetFloatValue(PLAYER_MASTERY)*6.24f) / 100.0f;
-
-            float rollChance = 5.0f + masteryBonus;
-            if (roll_chance_f(rollChance) || eventInfo.GetActor()->HasAura(SPELL_SHAMAN_DOOM_WINDS))
-                for (uint32 i = 0; i < 2; ++i)
-                    eventInfo.GetActor()->CastSpell(eventInfo.GetProcTarget(), SPELL_SHAMAN_WINDFURY_ATTACK, true, nullptr, aurEff);
-        }
-
-        bool CheckProc(ProcEventInfo& eventInfo)
-        {
-            if (eventInfo.GetDamageInfo()->GetAttackType() == BASE_ATTACK)
-                return true;
-            return false;
-        }
-
-        void Register() override
-        {
-            DoCheckProc += AuraCheckProcFn(spell_sha_windfury_AuraScript::CheckProc);
-            OnEffectProc += AuraEffectProcFn(spell_sha_windfury_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
+    bool CheckProc(ProcEventInfo& eventInfo)
     {
-        return new spell_sha_windfury_AuraScript();
+        return eventInfo.GetDamageInfo()->GetAttackType() == BASE_ATTACK;
+    }
+
+    void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+
+        //Proc Chance is increased by 6.24% of Mastery (ceiled)
+        float masteryBonus = 0.0f;
+        if (Player* player = eventInfo.GetActor()->ToPlayer())
+            masteryBonus += (player->GetFloatValue(PLAYER_MASTERY)*6.24f) / 100.0f;
+
+        float rollChance = 5.0f + masteryBonus;
+        if (roll_chance_f(rollChance) || eventInfo.GetActor()->HasAura(SPELL_SHAMAN_DOOM_WINDS))
+            for (uint32 i = 0; i < 2; ++i)
+                eventInfo.GetActor()->CastSpell(eventInfo.GetProcTarget(), SPELL_SHAMAN_WINDFURY_ATTACK, true, nullptr, aurEff);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_sha_windfury::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_sha_windfury::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
     }
 };
 
@@ -2067,47 +2051,32 @@ public:
 };
 
 //187880 - Maelstrom Weapon
-class spell_sha_maelstrom_weapon : public SpellScriptLoader
+class spell_sha_maelstrom_weapon : public AuraScript
 {
-public:
-    spell_sha_maelstrom_weapon() : SpellScriptLoader("spell_sha_maelstrom_weapon") {}
+    PrepareAuraScript(spell_sha_maelstrom_weapon);
 
-    class spell_sha_maelstrom_weapon_AuraScript : public AuraScript
+    bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        PrepareAuraScript(spell_sha_maelstrom_weapon_AuraScript);
+        return ValidateSpellInfo({ SPELL_SHAMAN_MAELSTROM_WEAPON_POWER });
+    }
 
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_MAELSTROM_WEAPON_POWER))
-                return false;
-            return true;
-        }
-
-        bool CheckEffectProc(ProcEventInfo& eventInfo)
-        {
-            if (eventInfo.GetDamageInfo()->GetAttackType() == BASE_ATTACK ||
-                eventInfo.GetDamageInfo()->GetAttackType() == OFF_ATTACK ||
-                eventInfo.GetSpellInfo()->Id == SPELL_SHAMAN_WINDFURY_ATTACK)
-                return true;
-            return false;
-        }
-
-        void HandleEffectProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
-        {
-            if (Unit* caster = GetCaster())
-                caster->CastSpell(caster, SPELL_SHAMAN_MAELSTROM_WEAPON_POWER, true);
-        }
-
-        void Register() override
-        {
-            DoCheckProc += AuraCheckProcFn(spell_sha_maelstrom_weapon_AuraScript::CheckEffectProc);
-            OnEffectProc += AuraEffectProcFn(spell_sha_maelstrom_weapon_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
+    bool CheckEffectProc(ProcEventInfo& eventInfo)
     {
-        return new spell_sha_maelstrom_weapon_AuraScript();
+        return eventInfo.GetDamageInfo()->GetAttackType() == BASE_ATTACK ||
+               eventInfo.GetDamageInfo()->GetAttackType() == OFF_ATTACK ||
+               eventInfo.GetSpellInfo()->Id == SPELL_SHAMAN_WINDFURY_ATTACK;
+    }
+
+    void HandleEffectProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+    {
+        if (Unit* caster = GetCaster())
+            caster->CastSpell(caster, SPELL_SHAMAN_MAELSTROM_WEAPON_POWER, true);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_sha_maelstrom_weapon::CheckEffectProc);
+        OnEffectProc += AuraEffectProcFn(spell_sha_maelstrom_weapon::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
     }
 };
 
@@ -3697,6 +3666,75 @@ private:
     int32 _maxDamagePercent;
 };
 
+// 195255 - Stormlash
+class aura_sha_stormlash : public AuraScript
+{
+    PrepareAuraScript(aura_sha_stormlash);
+
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+    {
+        if (Unit* caster = GetCaster())
+            caster->CastSpell(caster, SPELL_SHAMAN_STORMLASH_BUFF, true);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(aura_sha_stormlash::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+};
+
+// 195222 - Stormlash Buff
+class aura_sha_stormlash_buff : public AuraScript
+{
+    PrepareAuraScript(aura_sha_stormlash_buff);
+
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+    {
+        eventInfo.GetActor()->CastSpell(eventInfo.GetActionTarget(), SPELL_SHAMAN_STORMLASH_DAMAGE, true);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(aura_sha_stormlash_buff::HandleProc, EFFECT_1, SPELL_AURA_DUMMY);
+    }
+};
+
+// Spell 210797 - Crashing Storm
+// AT - 11353
+class at_sha_crashing_storm : public AreaTriggerAI
+{
+public:
+    at_sha_crashing_storm(AreaTrigger* areaTrigger) : AreaTriggerAI(areaTrigger) { }
+
+    void OnCreate() override
+    {
+        if (Unit* caster = at->GetCaster())
+        {
+            caster->GetScheduler().Schedule(0ms, SPELL_SHAMAN_CRASHING_STORM_AT, [this](TaskContext context)
+            {
+                GetContextUnit()->CastSpell(at->GetPosition(), SPELL_SHAMAN_CRASHING_STORM_DAMAGE, true);
+
+                if (context.GetRepeatCounter() < 7)
+                    context.Repeat(1s);
+            });
+        }
+    }
+};
+
+// 29264
+struct npc_feral_spirit : public ScriptedAI
+{
+    npc_feral_spirit(Creature* p_Creature) : ScriptedAI(p_Creature) { }
+
+    void DamageDealt(Unit* /*victim*/, uint32& /*damage*/, DamageEffectType /*damageType*/) override
+    {
+        if (TempSummon* tempSum = me->ToTempSummon())
+            if (Unit* owner = tempSum->GetOwner())
+                if (owner->HasAura(SPELL_SHAMAN_FERAL_SPIRIT_ENERGIZE_DUMMY))
+                    owner->CastSpell(owner, SPELL_SHAMAN_FERAL_SPIRIT_ENERGIZE, true);
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new at_sha_earthquake_totem();
@@ -3726,7 +3764,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_feral_spirit();
     new spell_sha_fire_nova();
     new spell_sha_flame_shock_elem();
-    new spell_sha_flametongue();
+    RegisterAuraScript(spell_sha_flametongue);
     new spell_sha_fulmination();
     new spell_sha_fury_of_air();
     new spell_sha_glyph_of_healing_wave();
@@ -3749,7 +3787,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_lightning_bolt_elem();
     new spell_sha_lightning_shield();
     new spell_sha_liquid_magma_effect();
-    new spell_sha_maelstrom_weapon();
+    RegisterAuraScript(spell_sha_maelstrom_weapon);
     new spell_sha_nature_guardian();
     new spell_sha_path_of_flames_spread();
     new spell_sha_resonance_effect();
@@ -3761,7 +3799,7 @@ void AddSC_shaman_spell_scripts()
     RegisterAuraScript(spell_sha_tidal_waves);
     new spell_sha_totem_mastery();
     new spell_sha_wellspring();
-    new spell_sha_windfury();
+    RegisterAuraScript(spell_sha_windfury);
     new spell_shaman_windfury_weapon();
     RegisterSpellScript(spell_sha_undulation);
     RegisterSpellScript(spell_sha_chain_lightning);
@@ -3772,6 +3810,10 @@ void AddSC_shaman_spell_scripts()
     RegisterSpellScript(spell_sha_earth_elemental);
     RegisterSpellScript(spell_sha_fire_elemental);
     RegisterSpellScript(spell_sha_enhancement_lightning_bolt);
+    RegisterAuraScript(aura_sha_stormlash);
+    RegisterAuraScript(aura_sha_stormlash_buff);
+    RegisterAreaTriggerAI(at_sha_crashing_storm);
+    RegisterCreatureAI(npc_feral_spirit);
 }
 
 void AddSC_npc_totem_scripts()
