@@ -773,8 +773,9 @@ public:
 
         bool CheckProc(ProcEventInfo& eventInfo)
         {
-            if (eventInfo.GetDamageInfo()->GetAttackType() == BASE_ATTACK ||
-                eventInfo.GetDamageInfo()->GetAttackType() == OFF_ATTACK)
+            if (eventInfo.GetDamageInfo() &&
+                (eventInfo.GetDamageInfo()->GetAttackType() == BASE_ATTACK ||
+                 eventInfo.GetDamageInfo()->GetAttackType() == OFF_ATTACK))
             {
                 Unit* caster = eventInfo.GetDamageInfo()->GetAttacker();
                 Unit* target = eventInfo.GetDamageInfo()->GetVictim();
