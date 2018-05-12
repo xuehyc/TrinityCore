@@ -20,11 +20,8 @@
 #include "ScriptedGossip.h"
 #include "ScriptMgr.h"
 #include "World.h"
-<<<<<<< HEAD
 #include "Config.h"
 #include "Chat.h"
-=======
->>>>>>> 382750f587223f2753642e86a1a680faa877a58e
 
 class npc_rate_xp_modifier : public CreatureScript
 {
