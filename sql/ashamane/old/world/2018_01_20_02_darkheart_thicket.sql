@@ -764,6 +764,10 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `P
 (@CGUID+434, 111042, 1466, 7673, 0, 8388870, 0, 0, 0, 0, 2666.72, 1320.316, 141.5491, 5.831089, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 23420), -- Nightmare Fire (Area: 0 - Difficulty: Normal) (Auras: 221067 - Feu cauchemardesque)
 (@CGUID+435, 111042, 1466, 7673, 0, 8388870, 0, 0, 0, 0, 2723.746, 1276.453, 142.4416, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 23420), -- Nightmare Fire (Area: 0 - Difficulty: Normal) (Auras: 221067 - Feu cauchemardesque)
 (@CGUID+436, 101329, 1466, 7673, 0, 8388870, 0, 0, 0, 0, 2686.353, 1290.243, 131.8871, 0.7438113, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 23420), -- Nightmare Bindings (Area: 0 - Difficulty: Normal) (Auras: 199752 - Liens du Cauchemar)
+<<<<<<< HEAD
+=======
+-- (@CGUID+437, 100652, UNKNOWN, 7673, 0, 8388870, 0, 0, 0, 0, -0.4, -0.2, 0, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 23420), -- Malfurion Hurlorage (Area: 0 - Difficulty: Normal) (Auras: 46598 - Ride Vehicle Hardcoded) - !!! on transport - transport template not found !!!
+>>>>>>> 382750f587223f2753642e86a1a680faa877a58e
 (@CGUID+438, 111042, 1466, 7673, 0, 8388870, 0, 0, 0, 0, 2682.589, 1293.826, 138.4925, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 23420), -- Nightmare Fire (Area: 0 - Difficulty: Normal) (Auras: 221067 - Feu cauchemardesque)
 (@CGUID+439, 111042, 1466, 7673, 0, 8388870, 0, 0, 0, 0, 2709.099, 1273.031, 138.1911, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 23420), -- Nightmare Fire (Area: 0 - Difficulty: Normal) (Auras: 221067 - Feu cauchemardesque)
 (@CGUID+440, 111042, 1466, 7673, 0, 8388870, 0, 0, 0, 0, 2675.246, 1292.668, 159.4652, 1.75219, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 23420), -- Nightmare Fire (Area: 0 - Difficulty: Normal) (Auras: 221067 - Feu cauchemardesque)

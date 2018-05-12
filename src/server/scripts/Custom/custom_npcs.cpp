@@ -20,8 +20,11 @@
 #include "ScriptedGossip.h"
 #include "ScriptMgr.h"
 #include "World.h"
+<<<<<<< HEAD
 #include "Config.h"
 #include "Chat.h"
+=======
+>>>>>>> 382750f587223f2753642e86a1a680faa877a58e
 
 class npc_rate_xp_modifier : public CreatureScript
 {
@@ -32,6 +35,7 @@ class npc_rate_xp_modifier : public CreatureScript
 
         bool OnGossipHello(Player* player, Creature* creature) override
         {
+<<<<<<< HEAD
             if (sConfigMgr->GetBoolDefault("Custom.XP.Rate.NPC", true))
             {
                 for (uint32 i = 1; i <= MAX_RATE; ++i)
@@ -49,6 +53,20 @@ class npc_rate_xp_modifier : public CreatureScript
             }
             else
                 ChatHandler(player->GetSession()).SendSysMessage("The Custom XP Rate NPC is |cff4CFF00disabled |ron this server.");
+=======
+            for (uint32 i = 1; i <= MAX_RATE; ++i)
+            {
+                if (i == player->GetPersonnalXpRate())
+                    continue;
+
+                if (i == sWorld->getRate(RATE_XP_KILL))
+                    continue;
+
+                std::ostringstream gossipText;
+                gossipText << "Rate x" << i;
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, gossipText.str(), GOSSIP_SENDER_MAIN, i);
+            }
+>>>>>>> 382750f587223f2753642e86a1a680faa877a58e
 
             if (player->GetPersonnalXpRate())
             {

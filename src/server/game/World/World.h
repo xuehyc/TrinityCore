@@ -592,7 +592,7 @@ struct CharacterInfo
 class TC_GAME_API World
 {
     public:
-        Ashamane::VariablesSafe Variables;
+        Ashamane::AnyData Variables;
 
         static World* instance();
 

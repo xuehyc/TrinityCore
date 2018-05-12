@@ -1765,7 +1765,7 @@ void Creature::setDeathState(DeathState s)
     if (s == JUST_DIED)
     {
         m_corpseRemoveTime = time(NULL) + m_corpseDelay;
-		m_respawnTime = time(NULL) + (m_respawnDelay / sWorld->getFloatConfig(CONFIG_RESPAWNSPEED));
+        m_respawnTime = time(NULL) + (m_respawnDelay / sWorld->getFloatConfig(CONFIG_RESPAWNSPEED));
 
         // Respawn time cannot be lower than corpse remove time
         m_respawnTime = std::max(m_corpseRemoveTime, m_respawnTime);
