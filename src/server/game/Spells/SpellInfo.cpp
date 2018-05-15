@@ -577,6 +577,11 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster /*= nullptr*/, int32 const* 
 
         value = caster->ApplyEffectModifiers(_spellInfo, EffectIndex, value);
 
+        if (value < -100.f)
+            if (SpellEffectInfo const* spellEffectInfo = _spellInfo->GetEffect(EffectIndex))
+                if (spellEffectInfo->ApplyAuraName == SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN)
+                    value /= 100.f;
+
         // amount multiplication based on caster's level
         if (!caster->IsControlledByPlayer() &&
             _spellInfo->SpellLevel && _spellInfo->SpellLevel != caster->getLevel() &&
@@ -3752,6 +3757,19 @@ std::vector<SpellPowerCost> SpellInfo::CalcPowerCost(Unit const* caster, SpellSc
 
             if (power->PowerCostMaxPct)
                 healthCost += int32(CalculatePct(caster->GetMaxHealth(), power->PowerCostMaxPct));
+
+            int32 optionalCost = int32(power->OptionalCost);
+            optionalCost += caster->GetTotalAuraModifier(SPELL_AURA_MOD_ADDITIONAL_POWER_COST, [this, power](AuraEffect const* aurEff) -> bool
+            {
+                return aurEff->GetMiscValue() == power->PowerType
+                    && aurEff->IsAffectingSpell(this);
+            });
+
+            if (optionalCost)
+            {
+                int32 remainingPower = caster->GetPower(Powers(power->PowerType)) - powerCost;
+                powerCost += RoundToInterval<int32>(remainingPower, 0, optionalCost);
+            }
 
             if (power->PowerType != POWER_HEALTH)
             {

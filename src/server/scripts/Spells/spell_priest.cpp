@@ -61,6 +61,9 @@ enum PriestSpells
     SPELL_PRIEST_DISPEL_MAGIC_FRIENDLY              = 97690,
     SPELL_PRIEST_DISPEL_MAGIC_HOSTILE               = 97691,
     SPELL_PRIEST_DIVINE_AEGIS                       = 47753,
+    SPELL_PRIEST_DIVINE_STAR                        = 110744,
+    SPELL_PRIEST_DIVINE_STAR_HEAL                   = 110745,
+    SPELL_PRIEST_DIVINE_STAR_DAMAGE                 = 122128,
     SPELL_PRIEST_DIVINE_TOUCH                       = 63544,
     SPELL_PRIEST_GLYPH_OF_CIRCLE_OF_HEALING         = 55675,
     SPELL_PRIEST_GLYPH_OF_DISPEL_MAGIC              = 55677,
@@ -108,8 +111,8 @@ enum PriestSpells
     SPELL_PRIEST_EVANGELISM_STACK                   = 81661,
     SPELL_PRIEST_FROM_DARKNESS_COMES_LIGHT_AURA     = 109186,
     SPELL_PRIEST_GUARDIAN_SPIRIT_AURA               = 47788,
-    SPELL_PRIEST_HALO_HEAL_HOLY                     = 120692,
-    SPELL_PRIEST_HALO_HEAL_SHADOW                   = 120696,
+    SPELL_PRIEST_HALO_HEAL                          = 120692,
+    SPELL_PRIEST_HALO_DAMAGE                        = 120696,
     SPELL_PRIEST_HOLY_SPARK                         = 131567,
     SPELL_PRIEST_HOLY_WORD_SANCTUARY_AREA           = 88685,
     SPELL_PRIEST_HOLY_WORD_SANCTUARY_HEAL           = 88686,
@@ -2475,105 +2478,64 @@ class spell_pri_spirit_of_redemption_form : public AuraScript
 };
 
 // Atonement - 81749
-class spell_pri_atonement : public SpellScriptLoader
+class spell_pri_atonement : public AuraScript
 {
-public:
-    spell_pri_atonement() : SpellScriptLoader("spell_pri_atonement") {}
+    PrepareAuraScript(spell_pri_atonement);
 
-    class spell_pri_atonement_AuraScript : public AuraScript
+    bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        PrepareAuraScript(spell_pri_atonement_AuraScript);
+        return ValidateSpellInfo({ SPELL_PRIEST_ATONEMENT_AURA, SPELL_PRIEST_ATONEMENT_HEAL });
+    }
 
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_ATONEMENT_AURA) ||
-                !sSpellMgr->GetSpellInfo(SPELL_PRIEST_ATONEMENT_HEAL))
-                return false;
-            return true;
-        }
-
-        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-        {
-            Unit* caster = GetCaster();
-            if (!caster)
-                return;
-
-            if (!caster->ToPlayer())
-                return;
-
-            // Heal = DamageDealt * (40 * (1+mastery%))
-            uint32 damage = eventInfo.GetDamageInfo() ? eventInfo.GetDamageInfo()->GetDamage() : 0;
-            float mastery = caster->GetFloatValue(PLAYER_MASTERY);
-            int32 base = aurEff->GetBaseAmount();
-            AddPct(base, mastery);
-            uint32 heal = CalculatePct(damage, base);
-
-            std::list<Unit*> units;
-            Trinity::AnyFriendlyUnitInObjectRangeCheck check(caster, caster, 100.0f);
-            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, units, check);
-            Cell::VisitAllObjects(caster, searcher, 100.0f);
-
-            for (Unit* u : units)
-            {
-                if (!u->HasAura(SPELL_PRIEST_ATONEMENT_AURA, caster->GetGUID()))
-                    continue;
-
-                caster->CastCustomSpell(SPELL_PRIEST_ATONEMENT_HEAL, SPELLVALUE_BASE_POINT0, heal, u, TRIGGERED_FULL_MASK);
-            }
-        }
-
-        void Register() override
-        {
-            OnEffectProc += AuraEffectProcFn(spell_pri_atonement_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
-        return new spell_pri_atonement_AuraScript();
+        Unit* caster = GetCaster();
+        if (!caster || !caster->IsPlayer())
+            return;
+
+        // Heal = DamageDealt * (40 * (1+mastery%))
+        uint32 damage = eventInfo.GetDamageInfo() ? eventInfo.GetDamageInfo()->GetDamage() : 0;
+        int32 base = aurEff->GetBaseAmount();
+        AddPct(base, caster->GetFloatValue(PLAYER_MASTERY));
+        uint32 heal = CalculatePct(damage, base);
+
+        std::list<Unit*> units;
+        caster->GetFriendlyUnitListInRange(units, 100.f);
+
+        for (Unit* unit : units)
+            if (unit->HasAura(SPELL_PRIEST_ATONEMENT_AURA, caster->GetGUID()))
+                caster->CastCustomSpell(SPELL_PRIEST_ATONEMENT_HEAL, SPELLVALUE_BASE_POINT0, heal, unit, TRIGGERED_FULL_MASK);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_pri_atonement::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
     }
 };
 
 // Atonement Aura - 194384
-class spell_pri_atonement_aura : public SpellScriptLoader
+class spell_pri_atonement_aura : public AuraScript
 {
-public:
-    spell_pri_atonement_aura() : SpellScriptLoader("spell_pri_atonement_aura") {}
+    PrepareAuraScript(spell_pri_atonement_aura);
 
-    class spell_pri_atonement_aura_AuraScript : public AuraScript
+    void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
-        PrepareAuraScript(spell_pri_atonement_aura_AuraScript);
-
-        void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* caster = GetCaster();
-            if (!caster)
-                return;
-
+        if (Unit* caster = GetCaster())
             if (caster->HasAura(SPELL_PRIEST_ATONEMENT))
                 caster->CastSpell(caster, SPELL_PRIEST_PLEA_MANA, true);
-        }
+    }
 
-        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* caster = GetCaster();
-            if (!caster)
-                return;
-
+    void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (Unit* caster = GetCaster())
             if (Aura* aur = caster->GetAura(SPELL_PRIEST_PLEA_MANA))
                 aur->ModStackAmount(-1);
-        }
+    }
 
-        void Register() override
-        {
-            AfterEffectApply += AuraEffectApplyFn(spell_pri_atonement_aura_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            AfterEffectRemove += AuraEffectRemoveFn(spell_pri_atonement_aura_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
+    void Register() override
     {
-        return new spell_pri_atonement_aura_AuraScript();
+        AfterEffectApply += AuraEffectApplyFn(spell_pri_atonement_aura::HandleApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectRemoveFn(spell_pri_atonement_aura::HandleRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
     }
 };
 
@@ -2720,106 +2682,119 @@ public:
 
 // Angelic Feather areatrigger - created by SPELL_PRIEST_ANGELIC_FEATHER_AREATRIGGER
 // AreaTriggerID - 337
-class at_pri_angelic_feather : public AreaTriggerEntityScript
+struct at_pri_angelic_feather : AreaTriggerAI
 {
-public:
-    at_pri_angelic_feather() : AreaTriggerEntityScript("at_pri_angelic_feather") { }
+    at_pri_angelic_feather(AreaTrigger* areatrigger) : AreaTriggerAI(areatrigger) { }
 
-    struct at_pri_angelic_featherAI : AreaTriggerAI
+    void OnInitialize() override
     {
-        at_pri_angelic_featherAI(AreaTrigger* areatrigger) : AreaTriggerAI(areatrigger) { }
-
-        // Called when the AreaTrigger has just been initialized, just before added to map
-        void OnInitialize() override
+        if (Unit* caster = at->GetCaster())
         {
-            if (Unit* caster = at->GetCaster())
-            {
-                std::vector<AreaTrigger*> areaTriggers = caster->GetAreaTriggers(SPELL_PRIEST_ANGELIC_FEATHER_AREATRIGGER);
+            std::vector<AreaTrigger*> areaTriggers = caster->GetAreaTriggers(SPELL_PRIEST_ANGELIC_FEATHER_AREATRIGGER);
 
-                if (areaTriggers.size() >= 3)
-                    areaTriggers.front()->SetDuration(0);
+            if (areaTriggers.size() >= 3)
+                areaTriggers.front()->SetDuration(0);
+        }
+    }
+
+    void OnUnitEnter(Unit* unit) override
+    {
+        if (Unit* caster = at->GetCaster())
+        {
+            if (caster->IsFriendlyTo(unit) && unit->IsPlayer())
+            {
+                // If target already has aura, increase duration to max 130% of initial duration
+                caster->CastSpell(unit, SPELL_PRIEST_ANGELIC_FEATHER_AURA, true);
+                at->SetDuration(0);
             }
         }
-
-        void OnUnitEnter(Unit* unit) override
-        {
-            if (Unit* caster = at->GetCaster())
-            {
-                if (caster->IsFriendlyTo(unit) && !unit->IsSummon())
-                {
-                    // If target already has aura, increase duration to max 130% of initial duration
-                    caster->CastSpell(unit, SPELL_PRIEST_ANGELIC_FEATHER_AURA, true);
-                    at->SetDuration(0);
-                }
-            }
-        }
-    };
-
-    AreaTriggerAI* GetAI(AreaTrigger* areatrigger) const override
-    {
-        return new at_pri_angelic_featherAI(areatrigger);
     }
 };
 
 // Power Word: Barrier - 62618
 // AreaTriggerID - 1489
-class at_pri_power_word_barrier : public AreaTriggerEntityScript
+struct at_pri_power_word_barrier : AreaTriggerAI
 {
-public:
-    at_pri_power_word_barrier() : AreaTriggerEntityScript("at_pri_power_word_barrier")
+    at_pri_power_word_barrier(AreaTrigger* areatrigger) : AreaTriggerAI(areatrigger) { }
+
+    void OnUnitEnter(Unit* unit) override
     {
+        Unit* caster = at->GetCaster();
+
+        if (!caster || !unit)
+            return;
+
+        if (!caster->ToPlayer())
+            return;
+
+        if (caster->IsFriendlyTo(unit))
+            caster->CastSpell(unit, SPELL_PRIEST_POWER_WORD_BARRIER_BUFF, true);
     }
 
-    struct at_pri_power_word_barrierAI : AreaTriggerAI
+    void OnUnitExit(Unit* unit) override
     {
-        at_pri_power_word_barrierAI(AreaTrigger* areatrigger) : AreaTriggerAI(areatrigger) { }
+        Unit* caster = at->GetCaster();
 
-        void OnUnitEnter(Unit* unit) override
-        {
-            Unit* caster = at->GetCaster();
+        if (!caster || !unit)
+            return;
 
-            if (!caster || !unit)
-                return;
+        if (!caster->ToPlayer())
+            return;
 
-            if (!caster->ToPlayer())
-                return;
+        if (unit->HasAura(SPELL_PRIEST_POWER_WORD_BARRIER_BUFF, caster->GetGUID()))
+            unit->RemoveAurasDueToSpell(SPELL_PRIEST_POWER_WORD_BARRIER_BUFF, caster->GetGUID());
+    }
+};
 
-            if (caster->IsFriendlyTo(unit))
-                caster->CastSpell(unit, SPELL_PRIEST_POWER_WORD_BARRIER_BUFF, true);
-        }
+// 120517 - Halo
+// AreaTriggerID - 3921
+struct at_pri_halo : AreaTriggerAI
+{
+    at_pri_halo(AreaTrigger* areatrigger) : AreaTriggerAI(areatrigger) { }
 
-        void OnUnitExit(Unit* unit) override
-        {
-            Unit* caster = at->GetCaster();
-
-            if (!caster || !unit)
-                return;
-
-            if (!caster->ToPlayer())
-                return;
-
-            if (unit->HasAura(SPELL_PRIEST_POWER_WORD_BARRIER_BUFF, caster->GetGUID()))
-                unit->RemoveAurasDueToSpell(SPELL_PRIEST_POWER_WORD_BARRIER_BUFF, caster->GetGUID());
-        }
-    };
-
-    AreaTriggerAI* GetAI(AreaTrigger* areatrigger) const override
+    void OnUnitEnter(Unit* unit) override
     {
-        return new at_pri_power_word_barrierAI(areatrigger);
+        if (Unit* caster = at->GetCaster())
+        {
+            if (caster->IsValidAssistTarget(unit))
+                caster->CastSpell(unit, SPELL_PRIEST_HALO_HEAL, true);
+            else if (caster->IsValidAttackTarget(unit))
+                caster->CastSpell(unit, SPELL_PRIEST_HALO_DAMAGE, true);
+        }
+    }
+};
+
+// 110744 - Divine Star
+// AreaTriggerID - 6700
+struct at_pri_divine_star : AreaTriggerAI
+{
+    at_pri_divine_star(AreaTrigger* areatrigger) : AreaTriggerAI(areatrigger) { }
+
+    void OnUnitEnter(Unit* unit) override
+    {
+        if (Unit* caster = at->GetCaster())
+        {
+            if (caster->IsValidAssistTarget(unit))
+                caster->CastSpell(unit, SPELL_PRIEST_DIVINE_STAR_HEAL, true);
+            else if (caster->IsValidAttackTarget(unit))
+                caster->CastSpell(unit, SPELL_PRIEST_DIVINE_STAR_DAMAGE, true);
+        }
     }
 };
 
 void AddSC_priest_spell_scripts()
 {
-    new at_pri_angelic_feather();
-    new at_pri_power_word_barrier();
+    RegisterAreaTriggerAI(at_pri_angelic_feather);
+    RegisterAreaTriggerAI(at_pri_power_word_barrier);
+    RegisterAreaTriggerAI(at_pri_halo);
+    RegisterAreaTriggerAI(at_pri_divine_star);
 
     new spell_pri_shadow_mend();
     new spell_pri_shadow_mend_aura();
     new spell_pri_plea();
     new spell_pri_power_word_radiance();
-    new spell_pri_atonement();
-    new spell_pri_atonement_aura();
+    RegisterAuraScript(spell_pri_atonement);
+    RegisterAuraScript(spell_pri_atonement_aura);
     new spell_pri_psychic_scream();
     new spell_pri_smite_absorb();
     new spell_pri_focused_will();

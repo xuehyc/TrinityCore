@@ -4697,13 +4697,15 @@ float Unit::GetTotalAuraMultiplier(AuraType auratype, std::function<bool(AuraEff
             // Check if the Aura Effect has a the Same Effect Stack Rule and if so, use the highest amount of that SpellGroup
             // If the Aura Effect does not have this Stack Rule, it returns false so we can add to the multiplier as usual
             if (!sSpellMgr->AddSameEffectStackRuleSpellGroups(aurEff->GetSpellInfo(), aurEff->GetAmount(), sameEffectSpellGroup))
-                AddPct(multiplier, aurEff->GetAmount());
+                if (int32 amount = aurEff->GetAmount())
+                    AddPct(multiplier, aurEff->GetAmount());
         }
     }
 
     // Add the highest of the Same Effect Stack Rule SpellGroups to the multiplier
     for (auto itr = sameEffectSpellGroup.begin(); itr != sameEffectSpellGroup.end(); ++itr)
-        AddPct(multiplier, itr->second);
+        if (itr->second)
+            AddPct(multiplier, itr->second);
 
     return multiplier;
 }
@@ -8208,7 +8210,7 @@ bool Unit::_IsValidAssistTarget(Unit const* target, SpellInfo const* bySpell) co
 
     // can't assist unattackable units or GMs
     if (target->HasUnitState(UNIT_STATE_UNATTACKABLE)
-        || (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->IsGameMaster()))
+        || (target->IsPlayer() && target->ToPlayer()->IsGameMaster()))
         return false;
 
     // can't assist own vehicle or passenger
