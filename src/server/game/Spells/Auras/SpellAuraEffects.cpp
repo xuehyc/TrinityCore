@@ -325,7 +325,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNoReagentUseAura,                          //256 SPELL_AURA_NO_REAGENT_USE Use SpellClassMask for spell select
     &AuraEffect::HandleNULL,                                      //257 SPELL_AURA_MOD_TARGET_RESIST_BY_SPELL_CLASS Use SpellClassMask for spell select
     &AuraEffect::HandleNoImmediateEffect,                         //258 SPELL_AURA_OVERRIDE_SUMMONED_OBJECT implemented in Spell::EffectTransmitted
-    &AuraEffect::HandleUnused,                                    //259 unused (4.3.4) old SPELL_AURA_MOD_HOT_PCT
+    &AuraEffect::HandleNoImmediateEffect,                         //259 SPELL_AURA_MOD_HOT_PCT
     &AuraEffect::HandleNoImmediateEffect,                         //260 SPELL_AURA_SCREEN_EFFECT (miscvalue = id in ScreenEffect.dbc) not required any code
     &AuraEffect::HandlePhase,                                     //261 SPELL_AURA_PHASE
     &AuraEffect::HandleNoImmediateEffect,                         //262 SPELL_AURA_ABILITY_IGNORE_AURASTATE implemented in Spell::CheckCast
@@ -378,7 +378,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //309 SPELL_AURA_MOD_RESILIENCE
     &AuraEffect::HandleNoImmediateEffect,                         //310 SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE implemented in Spell::CalculateDamageDone
     &AuraEffect::HandleNULL,                                      //311 0 spells in 3.3.5
-    &AuraEffect::HandleNULL,                                      //312 0 spells in 3.3.5
+    &AuraEffect::HandleNULL,                                      //312 SPELL_AURA_ANIM_REPLACEMENT_SET - No server handling required
     &AuraEffect::HandleUnused,                                    //313 unused (4.3.4)
     &AuraEffect::HandlePreventResurrection,                       //314 SPELL_AURA_PREVENT_RESURRECTION todo
     &AuraEffect::HandleNoImmediateEffect,                         //315 SPELL_AURA_UNDERWATER_WALKING todo
@@ -420,11 +420,11 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //351 SPELL_AURA_351
     &AuraEffect::HandleNULL,                                      //352 SPELL_AURA_352
     &AuraEffect::HandleNULL,                                      //353 SPELL_AURA_MOD_CAMOUFLAGE
-    &AuraEffect::HandleNULL,                                      //354 SPELL_AURA_354
-    &AuraEffect::HandleNULL,                                      //355 SPELL_AURA_MOD_CASTING_SPEED
+    &AuraEffect::HandleNoImmediateEffect,                         //354 SPELL_AURA_MOD_HEALING_VS_HEALTH_TARGET_LOST
+    &AuraEffect::HandleNoImmediateEffect,                         //355 SPELL_AURA_MOD_CASTING_SPEED
     &AuraEffect::HandleNULL,                                      //356 SPELL_AURA_356
     &AuraEffect::HandleNULL,                                      //357 SPELL_AURA_ENABLE_BOSS1_UNIT_FRAME
-    &AuraEffect::HandleNULL,                                      //358 SPELL_AURA_358
+    &AuraEffect::HandleNoImmediateEffect,                         //358 SPELL_AURA_WORGEN_ALTERED_FORM
     &AuraEffect::HandleNULL,                                      //359 SPELL_AURA_359
     &AuraEffect::HandleNULL,                                      //360 SPELL_AURA_PROC_TRIGGER_SPELL_COPY
     &AuraEffect::HandleNULL,                                      //361 SPELL_AURA_OVERRIDE_AUTOATTACK_WITH_MELEE_SPELL
@@ -434,13 +434,13 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //365 SPELL_AURA_MAX_FAR_CLIP_PLANE
     &AuraEffect::HandleOverrideSpellPowerByAttackPower,           //366 SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT
     &AuraEffect::HandleNULL,                                      //367 SPELL_AURA_OVERRIDE_AUTOATTACK_WITH_RANGED_SPELL
-    &AuraEffect::HandleUnused,                                    //368 unused (4.3.4)
+    &AuraEffect::HandleUnused,                                    //368 unused (4.3.4) clone weapon
     &AuraEffect::HandleNULL,                                      //369 SPELL_AURA_ENABLE_POWER_BAR_TIMER
     &AuraEffect::HandleNULL,                                      //370 SPELL_AURA_SET_FAIR_FAR_CLIP
     &AuraEffect::HandleNULL,                                      //371
-    &AuraEffect::HandleNULL,                                      //372
+    &AuraEffect::HandleAuraMountedVisual,                         //372 SPELL_AURA_MOUNTED_VISUAL
     &AuraEffect::HandleNULL,                                      //373 SPELL_AURA_MOD_SPEED_NO_CONTROL
-    &AuraEffect::HandleNULL,                                      //374 SPELL_AURA_MODIFY_FALL_DAMAGE_PCT
+    &AuraEffect::HandleNoImmediateEffect,                         //374 SPELL_AURA_MODIFY_FALL_DAMAGE_PCT
     &AuraEffect::HandleNULL,                                      //375
     &AuraEffect::HandleNULL,                                      //376 SPELL_AURA_MOD_CURRENCY_GAIN_FROM_SOURCE
     &AuraEffect::HandleNULL,                                      //377 SPELL_AURA_CAST_WHILE_WALKING_2
@@ -459,7 +459,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //390
     &AuraEffect::HandleNULL,                                      //391
     &AuraEffect::HandleNULL,                                      //392
-    &AuraEffect::HandleNULL,                                      //393
+    &AuraEffect::HandleNoImmediateEffect,                         //393 SPELL_AURA_DEFLECT_FRONT_SPELLS
     &AuraEffect::HandleShowConfirmationPrompt,                    //394 SPELL_AURA_SHOW_CONFIRMATION_PROMPT
     &AuraEffect::HandleCreateAreaTrigger,                         //395 SPELL_AURA_AREA_TRIGGER
     &AuraEffect::HandleNULL,                                      //396 SPELL_AURA_TRIGGER_SPELL_ON_POWER_AMOUNT
@@ -473,7 +473,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleOverrideAttackPowerBySpellPower,           //404 SPELL_AURA_OVERRIDE_ATTACK_POWER_BY_SP_PCT
     &AuraEffect::HandleModRatingPct,                              //405 SPELL_AURA_MOD_RATING_PCT
     &AuraEffect::HandleNULL,                                      //406 SPELL_AURA_KEYBOUND_OVERRIDE
-    &AuraEffect::HandleNULL,                                      //407 SPELL_AURA_MOD_FEAR_2
+    &AuraEffect::HandleModFear,                                   //407 SPELL_AURA_MOD_FEAR_2
     &AuraEffect::HandleNULL,                                      //408
     &AuraEffect::HandleAuraCanTurnWhileFalling,                   //409 SPELL_AURA_CAN_TURN_WHILE_FALLING
     &AuraEffect::HandleNULL,                                      //410
@@ -488,7 +488,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleAuraModIncreaseBaseManaPercent,            //419 SPELL_AURA_MOD_BASE_MANA_PCT
     &AuraEffect::HandleNULL,                                      //420 SPELL_AURA_MOD_BATTLE_PET_XP_PCT
     &AuraEffect::HandleNULL,                                      //421 SPELL_AURA_MOD_ABSORB_EFFECTS_AMOUNT_PCT
-    &AuraEffect::HandleNULL,                                      //422
+    &AuraEffect::HandleNULL,                                      //422 SPELL_AURA_MOD_ABSORB_EFFECTS_AMOUNT_PCT_2
     &AuraEffect::HandleNULL,                                      //423
     &AuraEffect::HandleNULL,                                      //424
     &AuraEffect::HandleNULL,                                      //425
@@ -526,13 +526,13 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNoImmediateEffect,                         //457 SPELL_AURA_CHARGE_RECOVERY_AFFECTED_BY_HASTE_REGEN implemented in SpellHistory::GetChargeRecoveryTime
     &AuraEffect::HandleNULL,                                      //458 SPELL_AURA_IGNORE_DUAL_WIELD_HIT_PENALTY
     &AuraEffect::HandleNULL,                                      //459 SPELL_AURA_IGNORE_MOVEMENT_FORCES
-    &AuraEffect::HandleNULL,                                      //460 SPELL_AURA_RESET_COOLDOWNS_ON_DUEL_START
+    &AuraEffect::HandleNoImmediateEffect,                         //460 SPELL_AURA_RESET_COOLDOWNS_ON_DUEL_START
     &AuraEffect::HandleNULL,                                      //461
     &AuraEffect::HandleNULL,                                      //462 SPELL_AURA_MOD_HEALING_AND_ABSORB_FROM_CASTER
     &AuraEffect::HandleNULL,                                      //463 SPELL_AURA_CONVERT_CRIT_RATING_PCT_TO_PARRY_RATING used by Riposte
     &AuraEffect::HandleNULL,                                      //464 SPELL_AURA_MOD_ATTACK_POWER_OF_BONUS_ARMOR
-    &AuraEffect::HandleNULL,                                      //465 SPELL_AURA_MOD_BONUS_ARMOR
-    &AuraEffect::HandleNULL,                                      //466 SPELL_AURA_MOD_BONUS_ARMOR_PCT
+    &AuraEffect::HandleModStatBonusArmor,                         //465 SPELL_AURA_MOD_BONUS_ARMOR
+    &AuraEffect::HandleModStatBonusArmorPercent,                  //466 SPELL_AURA_MOD_BONUS_ARMOR_PCT
     &AuraEffect::HandleModStatBonusPercent,                       //467 SPELL_AURA_MOD_STAT_BONUS_PCT
     &AuraEffect::HandleNULL,                                      //468 SPELL_AURA_TRIGGER_SPELL_ON_HEALTH_PCT
     &AuraEffect::HandleShowConfirmationPrompt,                    //469 SPELL_AURA_SHOW_CONFIRMATION_PROMPT_WITH_DIFFICULTY
@@ -551,13 +551,13 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleProfilCamera,                              //482 SPELL_AURA_PROFIL_CAMERA
     &AuraEffect::HandleNULL,                                      //483 SPELL_AURA_SUPPRESS_TRANSFORMS
     &AuraEffect::HandleNULL,                                      //484
-    &AuraEffect::HandleNULL,                                      //485
+    &AuraEffect::HandleModMovementforcesSpeedPercent,             //485 SPELL_AURA_MOD_MOVEMENT_FORCES_SPEED_PCT
     &AuraEffect::HandleNULL,                                      //486
     &AuraEffect::HandleNULL,                                      //487
     &AuraEffect::HandleNULL,                                      //488
     &AuraEffect::HandleNULL,                                      //489
     &AuraEffect::HandleNULL,                                      //490
-    &AuraEffect::HandleNULL,                                      //491
+    &AuraEffect::HandleNoImmediateEffect,                         //491 SPELL_AURA_MOD_HONOR_GAIN_PCT_2 implemented in Player::RewardHonor
 };
 
 AuraEffect::AuraEffect(Aura* base, uint32 effIndex, int32 *baseAmount, Unit* caster) :
@@ -2588,6 +2588,85 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
     }
 }
 
+void AuraEffect::HandleAuraMountedVisual(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (apply)
+    {
+        uint32 creatureEntry = GetMiscValue();
+        uint32 displayId = 0;
+        uint32 vehicleId = 0;
+
+        if (MountEntry const* mountEntry = sDB2Manager.GetMount(GetId()))
+        {
+            if (DB2Manager::MountXDisplayContainer const* mountDisplays = sDB2Manager.GetMountDisplays(mountEntry->ID))
+            {
+                if (mountEntry->IsSelfMount())
+                {
+                    displayId = DISPLAYID_HIDDEN_MOUNT;
+                }
+                else
+                {
+                    DB2Manager::MountXDisplayContainer usableDisplays;
+                    std::copy_if(mountDisplays->begin(), mountDisplays->end(), std::back_inserter(usableDisplays), [target](MountXDisplayEntry const* mountDisplay)
+                    {
+                        if (Player* playerTarget = target->ToPlayer())
+                            if (PlayerConditionEntry const* playerCondition = sPlayerConditionStore.LookupEntry(mountDisplay->PlayerConditionID))
+                                return sConditionMgr->IsPlayerMeetingCondition(playerTarget, playerCondition);
+
+                        return true;
+                    });
+
+                    if (!usableDisplays.empty())
+                        displayId = Trinity::Containers::SelectRandomContainerElement(usableDisplays)->CreatureDisplayInfoID;
+                }
+            }
+        }
+
+        if (CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(creatureEntry))
+        {
+            vehicleId = creatureInfo->VehicleId;
+
+            if (!displayId)
+            {
+                displayId = ObjectMgr::ChooseDisplayId(creatureInfo);
+                sObjectMgr->GetCreatureModelRandomGender(&displayId);
+            }
+
+            //some spell has one aura of mount and one of vehicle
+            for (SpellEffectInfo const* effect : GetBase()->GetSpellEffectInfos())
+                if (effect && effect->Effect == SPELL_EFFECT_SUMMON && effect->MiscValue == GetMiscValue())
+                    displayId = 0;
+        }
+
+        target->Mount(displayId, vehicleId, creatureEntry);
+
+        // cast speed aura
+        if (mode & AURA_EFFECT_HANDLE_REAL)
+            if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAmount()))
+                target->CastSpell(target, mountCapability->ModSpellAuraID, true);
+    }
+    else
+    {
+        target->Dismount();
+        //some mounts like Headless Horseman's Mount or broom stick are skill based spell
+        // need to remove ALL arura related to mounts, this will stop client crash with broom stick
+        // and never endless flying after using Headless Horseman's Mount
+        if (mode & AURA_EFFECT_HANDLE_REAL)
+        {
+            target->RemoveAurasByType(SPELL_AURA_MOUNTED);
+
+            // remove speed aura
+            if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAmount()))
+                target->RemoveAurasDueToSpell(mountCapability->ModSpellAuraID, target->GetGUID());
+        }
+    }
+}
+
 void AuraEffect::HandleAuraAllowFlight(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK))
@@ -3545,6 +3624,28 @@ void AuraEffect::HandleAuraModExpertise(AuraApplication const* aurApp, uint8 mod
 
     target->ToPlayer()->UpdateExpertise(BASE_ATTACK);
     target->ToPlayer()->UpdateExpertise(OFF_ATTACK);
+}
+
+void AuraEffect::HandleModStatBonusArmor(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (target->IsPlayer() || target->IsPet())
+        target->HandleStatModifier(UNIT_MOD_ARMOR, BASE_VALUE, float(GetAmount()), apply);
+}
+
+void AuraEffect::HandleModStatBonusArmorPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (target->IsPlayer() || target->IsPet())
+        target->HandleStatModifier(UNIT_MOD_ARMOR, BASE_PCT_EXCLUDE_CREATE, float(GetAmount()), apply);
 }
 
 void AuraEffect::HandleModStatBonusPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -6284,8 +6385,7 @@ void AuraEffect::HandleLinkedSummon(AuraApplication const* aurApp, uint8 mode, b
         for (auto spellEffect : triggerSpellInfo->GetEffectsForDifficulty(target->FindMap()->GetDifficultyID()))
             if (spellEffect && spellEffect->Effect == SPELL_EFFECT_SUMMON)
                 if (uint32 summonEntry = spellEffect->MiscValue)
-                    if (std::find(summonedEntries.begin(), summonedEntries.end(), summonEntry) == summonedEntries.end())
-                        summonedEntries.push_back(summonEntry);
+                    summonedEntries.push_back(summonEntry);
 
         // we don't know if there can be multiple summons for the same effect, so consider only 1 summon for each effect
         // most of the spells have multiple effects with the same summon spell id for multiple spawns, so right now it's safe to assume there's only 1 spawn per effect
@@ -6311,4 +6411,19 @@ void AuraEffect::HandleLinkedSummon(AuraApplication const* aurApp, uint8 mode, b
             }
         }
     }
+}
+
+
+void AuraEffect::HandleModMovementforcesSpeedPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (!apply)
+        for (auto& forces : target->GetMovementForces())
+            ApplyPercentModFloatVar(forces.second.Magnitude, GetAmount(), apply);
+
+    target->ReApplyAllMovementForces();
 }

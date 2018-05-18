@@ -179,6 +179,7 @@ class TC_GAME_API AuraEffect
         void HandleAuraModSkill(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         //  movement
         void HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+        void HandleAuraMountedVisual(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraAllowFlight(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraWaterWalk(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraFeatherFall(AuraApplication const* aurApp, uint8 mode, bool apply) const;
@@ -237,6 +238,8 @@ class TC_GAME_API AuraEffect
         void HandleModTotalPercentStat(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraModResistenceOfStatPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraModExpertise(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+        void HandleModStatBonusArmor(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+        void HandleModStatBonusArmorPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleModStatBonusPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleOverrideSpellPowerByAttackPower(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleOverrideAttackPowerBySpellPower(AuraApplication const* aurApp, uint8 mode, bool apply) const;
@@ -321,6 +324,7 @@ class TC_GAME_API AuraEffect
         void HandleCreateAreaTrigger(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleProfilCamera(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleLinkedSummon(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+        void HandleModMovementforcesSpeedPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
 
         // aura effect periodic tick handlers
         void HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const;

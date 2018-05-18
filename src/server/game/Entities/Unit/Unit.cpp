@@ -2113,6 +2113,9 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(Unit const* victim, WeaponAttackTy
     if (victim->GetTypeId() == TYPEID_UNIT && victim->ToCreature()->IsEvadingAttacks())
         return MELEE_HIT_EVADE;
 
+    if (victim->HasAuraType(SPELL_AURA_DEFLECT_FRONT_SPELLS) && victim->isInFront(this))
+        return MELEE_HIT_MISS;
+
     // Miss chance based on melee
     int32 miss_chance = int32(MeleeSpellMissChance(victim, attType, 0) * 100.0f);
 
@@ -2361,6 +2364,9 @@ bool Unit::CanUseAttackType(uint8 attacktype) const
 // Melee based spells hit result calculations
 SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spellInfo) const
 {
+    if (victim->isInFront(this) && victim->HasAuraType(SPELL_AURA_DEFLECT_FRONT_SPELLS))
+        return SPELL_MISS_DEFLECT;
+
     WeaponAttackType attType = BASE_ATTACK;
 
     // Check damage class instead of attack type to correctly handle judgements
@@ -2499,6 +2505,9 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spellInfo
 /// @todo need use unit spell resistances in calculations
 SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spellInfo) const
 {
+    if (victim->isInFront(this) && victim->HasAuraType(SPELL_AURA_DEFLECT_FRONT_SPELLS))
+        return SPELL_MISS_DEFLECT;
+
     // Can`t miss on dead target (on skinning for example)
     if ((!victim->IsAlive() && victim->GetTypeId() != TYPEID_PLAYER))
         return SPELL_MISS_NONE;
@@ -7176,7 +7185,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     return uint32(std::max(heal, 0.0f));
 }
 
-float Unit::SpellHealingPctDone(Unit* /*victim*/, SpellInfo const* spellProto) const
+float Unit::SpellHealingPctDone(Unit* victim, SpellInfo const* spellProto) const
 {
     // For totems pct done mods are calculated when its calculation is run on the player in SpellHealingBonusDone.
     if (GetTypeId() == TYPEID_UNIT && IsTotem())
@@ -7194,10 +7203,18 @@ float Unit::SpellHealingPctDone(Unit* /*victim*/, SpellInfo const* spellProto) c
     // Healing done percent
     DoneTotalMod *= GetTotalAuraMultiplier(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
 
+    // Healing bonus based on targets hp
+    AuraEffectList const& healingVsHealthTargetLost = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_VS_HEALTH_TARGET_LOST);
+    for (auto itr : healingVsHealthTargetLost)
+    {
+        int32 amount = itr->GetAmount() * (1.0f - (victim->GetHealthPct() / 100.0f));
+        AddPct(DoneTotalMod, amount);
+    }
+
     return DoneTotalMod;
 }
 
-uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 healamount, DamageEffectType /*damagetype*/, SpellEffectInfo const* spellEffect, uint32 stack) const
+uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 healamount, DamageEffectType damagetype, SpellEffectInfo const* spellEffect, uint32 stack) const
 {
     float TakenTotalMod = 1.0f;
 
@@ -7213,6 +7230,9 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
     // Tenacity increase healing % taken
     if (AuraEffect const* Tenacity = GetAuraEffect(58549, 0))
         AddPct(TakenTotalMod, Tenacity->GetAmount());
+
+    if (damagetype == DOT)
+        TakenTotalMod *= GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_HOT_PCT, spellProto->GetSchoolMask());
 
     // Healing Done
     int32 TakenTotal = 0;
@@ -13898,7 +13918,7 @@ void Unit::ApplyMovementForce(ObjectGuid source, float magnitude, Position direc
     moveApplyMovementForce.SequenceIndex = m_movementCounter++;
 
     moveApplyMovementForce.Force.ID             = source;
-    moveApplyMovementForce.Force.Magnitude      = magnitude;
+    moveApplyMovementForce.Force.Magnitude      = magnitude * GetTotalAuraMultiplier(SPELL_AURA_MOD_MOVEMENT_FORCES_SPEED_PCT);
     moveApplyMovementForce.Force.Origin         = origin;
     moveApplyMovementForce.Force.Direction      = direction;
     moveApplyMovementForce.Force.TransportID    = GetTransport() ? GetTransport()->GetEntry() : 0;
@@ -13930,6 +13950,18 @@ void Unit::RemoveAllMovementForces()
 
     for (auto itr: movementForcesCopy)
         RemoveMovementForce(itr.first);
+}
+
+void Unit::ReApplyAllMovementForces()
+{
+    // We need to copy the map because RemoveMovementForce method will delete from original map
+    std::unordered_map<ObjectGuid, WorldPackets::Movement::MovementForce> movementForcesCopy = _movementForces;
+
+    for (auto itr : movementForcesCopy)
+        RemoveMovementForce(itr.first);
+
+    for (auto itr : movementForcesCopy)
+        ApplyMovementForce(itr.first, itr.second.Magnitude, itr.second.Direction, itr.second.Origin);
 }
 
 void Unit::SendSetVehicleRecId(uint32 vehicleId)

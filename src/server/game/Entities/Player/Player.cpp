@@ -798,6 +798,8 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
     if (IsImmuneToEnvironmentalDamage())
         return 0;
 
+    damage *= GetTotalAuraMultiplier(SPELL_AURA_MOD_ENVIRONMENTAL_DAMAGE_TAKEN);
+
     // Absorb, resist some environmental damage type
     uint32 absorb = 0;
     uint32 resist = 0;
@@ -6710,6 +6712,7 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
 
         // apply honor multiplier from aura (not stacking-get highest)
         AddPct(honor_f, GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HONOR_GAIN_PCT));
+        AddPct(honor_f, GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HONOR_GAIN_PCT_2));
         honor_f += _restMgr->GetRestBonusFor(REST_TYPE_HONOR, honor_f);
     }
 
@@ -22018,6 +22021,27 @@ void Player::UpdateDuelFlag(time_t currTime)
 
     sScriptMgr->OnPlayerDuelStart(this, duel->opponent);
 
+    if (HasAuraType(SPELL_AURA_RESET_COOLDOWNS_ON_DUEL_START))
+    {
+        // remove cooldowns on spells that have < 10 min CD > 30 sec and has no onHold
+        GetSpellHistory()->ResetCooldowns([](SpellHistory::CooldownStorageType::iterator itr) -> bool
+        {
+            SpellHistory::Clock::time_point now = SpellHistory::Clock::now();
+            uint32 cooldownDuration = itr->second.CooldownEnd > now ? std::chrono::duration_cast<std::chrono::milliseconds>(itr->second.CooldownEnd - now).count() : 0;
+            SpellInfo const* spellInfo = sSpellMgr->AssertSpellInfo(itr->first);
+            return spellInfo->RecoveryTime < 10 * MINUTE * IN_MILLISECONDS
+                && spellInfo->CategoryRecoveryTime < 10 * MINUTE * IN_MILLISECONDS
+                && !itr->second.OnHold
+                && cooldownDuration > 0
+                && (spellInfo->RecoveryTime - cooldownDuration) >(MINUTE / 2) * IN_MILLISECONDS
+                && (spellInfo->CategoryRecoveryTime - cooldownDuration) > (MINUTE / 2) * IN_MILLISECONDS;
+        }, true);
+
+        // pet cooldowns
+        if (Pet* pet = GetPet())
+            pet->GetSpellHistory()->ResetAllCooldowns();
+    }
+
     SetUInt32Value(PLAYER_DUEL_TEAM, 1);
     duel->opponent->SetUInt32Value(PLAYER_DUEL_TEAM, 2);
 
@@ -26837,6 +26861,8 @@ void Player::HandleFall(MovementInfo const& movementInfo)
         if (damageperc > 0)
         {
             uint32 damage = (uint32)(damageperc * GetMaxHealth()*sWorld->getRate(RATE_DAMAGE_FALL));
+
+            damage *= GetTotalAuraMultiplier(SPELL_AURA_MODIFY_FALL_DAMAGE_PCT);
 
             if (GetCommandStatus(CHEAT_GOD))
                 damage = 0;

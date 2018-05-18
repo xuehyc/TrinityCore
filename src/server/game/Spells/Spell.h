@@ -465,12 +465,14 @@ class TC_GAME_API Spell
         void EffectRemoveTalent(SpellEffIndex effIndex);
         void EffectDestroyItem(SpellEffIndex effIndex);
         void EffectLearnGarrisonBuilding(SpellEffIndex effIndex);
+        void EffectGrip(SpellEffIndex effIndex);
         void EffectCreateGarrison(SpellEffIndex effIndex);
         void EffectCreateConversation(SpellEffIndex effIndex);
         void EffectAddGarrisonFollower(SpellEffIndex effIndex);
         void EffectActivateGarrisonBuilding(SpellEffIndex effIndex);
         void EffectHealBattlePetPct(SpellEffIndex effIndex);
         void EffectEnableBattlePets(SpellEffIndex effIndex);
+        void EffectApplyAuraWithAmount(SpellEffIndex effIndex);
         void EffectLaunchQuestChoice(SpellEffIndex effIndex);
         void EffectLootWithToast(SpellEffIndex effIndex);
         void EffectUncageBattlePet(SpellEffIndex effIndex);

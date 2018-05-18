@@ -279,8 +279,8 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //199 SPELL_EFFECT_199
     &Spell::EffectHealBattlePetPct,                         //200 SPELL_EFFECT_HEAL_BATTLEPET_PCT
     &Spell::EffectEnableBattlePets,                         //201 SPELL_EFFECT_ENABLE_BATTLE_PETS
-    &Spell::EffectNULL,                                     //202 SPELL_EFFECT_202
-    &Spell::EffectNULL,                                     //203 SPELL_EFFECT_203
+    &Spell::EffectApplyAuraWithAmount,                      //202 SPELL_EFFECT_APPLY_AURA_WITH_AMOUNT
+    &Spell::EffectRemoveAura,                               //203 SPELL_EFFECT_REMOVE_AURA_2
     &Spell::EffectNULL,                                     //204 SPELL_EFFECT_CHANGE_BATTLEPET_QUALITY
     &Spell::EffectLaunchQuestChoice,                        //205 SPELL_EFFECT_LAUNCH_QUEST_CHOICE
     &Spell::EffectNULL,                                     //206 SPELL_EFFECT_ALTER_ITEM
@@ -290,7 +290,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectLearnGarrisonBuilding,                    //210 SPELL_EFFECT_LEARN_GARRISON_BUILDING
     &Spell::EffectNULL,                                     //211 SPELL_EFFECT_LEARN_GARRISON_SPECIALIZATION
     &Spell::EffectNULL,                                     //212 SPELL_EFFECT_212
-    &Spell::EffectNULL,                                     //213 SPELL_EFFECT_213
+    &Spell::EffectGrip,                                     //213 SPELL_EFFECT_GRIP
     &Spell::EffectCreateGarrison,                           //214 SPELL_EFFECT_CREATE_GARRISON
     &Spell::EffectNULL,                                     //215 SPELL_EFFECT_UPGRADE_CHARACTER_SPELLS
     &Spell::EffectNULL,                                     //216 SPELL_EFFECT_CREATE_SHIPMENT
@@ -5629,6 +5629,20 @@ void Spell::EffectLearnGarrisonBuilding(SpellEffIndex effIndex)
         garrison->ToWodGarrison()->LearnBlueprint(GetEffect(effIndex)->MiscValue);
 }
 
+void Spell::EffectGrip(SpellEffIndex /*effIndex*/)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
+        return;
+
+    if (m_caster->IsInFlight() || !m_targets.HasDst())
+        return;
+
+    if (WorldObject* worldObject = m_targets.GetObjectTarget())
+        m_caster->GetMotionMaster()->MoveJump(worldObject->GetPosition(), 63.0f, 3.75f, m_spellInfo->Id);
+    else if (Unit* target = m_targets.GetUnitTarget())
+        m_caster->GetMotionMaster()->MoveJump(target->GetPosition(), 63.0f, 3.75f, m_spellInfo->Id);
+}
+
 void Spell::EffectCreateGarrison(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
@@ -5717,6 +5731,17 @@ void Spell::EffectEnableBattlePets(SpellEffIndex /*effIndex*/)
     Player* plr = unitTarget->ToPlayer();
     plr->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_PET_BATTLES_UNLOCKED);
     plr->GetSession()->GetBattlePetMgr()->UnlockSlot(0);
+}
+
+void Spell::EffectApplyAuraWithAmount(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    if (!m_spellAura || !unitTarget)
+        return;
+    ASSERT(unitTarget == m_spellAura->GetOwner());
+    m_spellAura->_ApplyEffectForTargets(effIndex);
 }
 
 void Spell::EffectLaunchQuestChoice(SpellEffIndex /*effIndex*/)

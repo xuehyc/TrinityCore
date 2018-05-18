@@ -1337,6 +1337,8 @@ class TC_GAME_API Unit : public WorldObject
         void ApplyMovementForce(ObjectGuid source, float magnitude, Position direction, Position origin = Position());
         void RemoveMovementForce(ObjectGuid source);
         void RemoveAllMovementForces();
+        void ReApplyAllMovementForces();
+        std::unordered_map<ObjectGuid, WorldPackets::Movement::MovementForce>& GetMovementForces() { return _movementForces; }
         std::unordered_map<ObjectGuid, WorldPackets::Movement::MovementForce> const& GetMovementForces() const { return _movementForces; }
 
         void SetInFront(WorldObject const* target);
