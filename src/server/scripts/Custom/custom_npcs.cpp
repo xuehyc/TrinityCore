@@ -22,6 +22,7 @@
 #include "World.h"
 #include "Config.h"
 #include "Chat.h"
+#include "WorldSession.h"
 
 class npc_rate_xp_modifier : public CreatureScript
 {
@@ -48,7 +49,11 @@ class npc_rate_xp_modifier : public CreatureScript
                 }
             }
             else
-                ChatHandler(player->GetSession()).SendSysMessage("The Custom XP Rate NPC is |cff4CFF00disabled |ron this server.");
+            {
+                std::ostringstream gossipText;
+                gossipText << "The Custom XP Rate NPC |cff4CFF00disabled |ron this server.";
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, gossipText.str(), GOSSIP_SENDER_MAIN, 0);
+            }
 
             if (player->GetPersonnalXpRate())
             {
@@ -67,6 +72,74 @@ class npc_rate_xp_modifier : public CreatureScript
             player->SetPersonnalXpRate(float(std::min(MAX_RATE, uiAction)));
             return true;
         }
+
+        struct customnpc_passivesAI : public ScriptedAI
+        {
+            customnpc_passivesAI(Creature * creature) : ScriptedAI(creature) { }
+
+            uint32 uiAdATimer;
+            //uint32 uiAdBTimer;
+            //uint32 uiAdCTimer;
+
+            void Reset()
+            {
+                uiAdATimer = 1000;
+                //uiAdBTimer = 23000;
+                //uiAdCTimer = 11000;
+            }
+
+            // Speak
+            void UpdateAI(uint32 diff)
+            {
+                if (Player *player = me->SelectNearestPlayer(10))
+                {
+                    if (uiAdATimer <= diff)
+                    {
+                        std::ostringstream messageTaunt;
+                        messageTaunt << "|cff4CFF00Greetings, " << player->GetName() << "!";
+                        player->GetSession()->SendNotification(messageTaunt.str().c_str());
+                        //me->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);
+                        me->CastSpell(me, 44940);
+                        uiAdATimer = 61000;
+                    }
+                    else
+                        uiAdATimer -= diff;
+
+                    /*if (uiAdBTimer <= diff)
+                    {
+                        std::ostringstream messageTaunt;
+                        messageTaunt << "|cff4CFF00I see you, " << player->GetName() << "!";
+                        player->GetSession()->SendNotification(messageTaunt.str().c_str());
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_CHICKEN);
+                        me->CastSpell(me, 74311);
+                        uiAdBTimer = 61000;
+                    }
+                    else
+                        uiAdBTimer -= diff;
+
+                    if (uiAdCTimer <= diff)
+                    {
+                        std::ostringstream messageTaunt;
+                        messageTaunt << "|cff4CFF00Hey " << player->GetName() << " Come over here!";
+                        player->GetSession()->SendNotification(messageTaunt.str().c_str());
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_CRY);
+                        me->CastSpell(me, 72339);
+                        uiAdCTimer = 61000;
+                    }
+                    else
+                    {
+                        uiAdCTimer -= diff;
+                    }*/
+                }
+            }
+        };
+
+        // Creature AI
+        CreatureAI * GetAI(Creature * creature) const
+        {
+            return new customnpc_passivesAI(creature);
+        }
+
 };
 
 void AddSC_custom_npcs()
