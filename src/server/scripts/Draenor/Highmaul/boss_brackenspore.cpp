@@ -412,7 +412,7 @@ class boss_brackenspore : public CreatureScript
 
                     m_Instance->SendEncounterUnit(EncounterFrameType::ENCOUNTER_FRAME_DISENGAGE, me);
 
-                    CastSpellToPlayers(me->GetMap(), me, eSpells::BrackensporeBonus, true);
+                    instance->DoCastSpellOnPlayers(eSpells::BrackensporeBonus, me);
 
                     if (IsLFR())
                     {
@@ -604,7 +604,7 @@ class boss_brackenspore : public CreatureScript
                 if (l_Map == nullptr)
                     return;
 
-                float orientation = frand(0.0f, 2 * M_PI);
+                float orientation = frand(0.0f, 2 * float(M_PI));
 
                 /// Use different spawn radius depending on orientation
                 float radius = GetSpawnRangeByOrientation(orientation);
@@ -1460,7 +1460,7 @@ class spell_highmaul_flamethrower : public SpellScriptLoader
                     if (l_CreepingMoss.empty())
                         return;
 
-                    l_CreepingMoss.remove_if([this, caster](AreaTrigger* at) -> bool
+                    l_CreepingMoss.remove_if([caster](AreaTrigger* at) -> bool
                     {
                         if (at == nullptr)
                             return true;
@@ -1587,7 +1587,7 @@ class spell_highmaul_spore_shot : public SpellScriptLoader
                 if (targets.empty())
                     return;
 
-                targets.remove_if([this](WorldObject* p_Object) -> bool
+                targets.remove_if([](WorldObject* p_Object) -> bool
                 {
                     if (p_Object == nullptr)
                         return true;
@@ -1904,25 +1904,27 @@ public:
 };
 
 /// Gorian Strands - 10094
-class areatrigger_at_highmaul_infested_waters : public AreaTriggerAI
+class areatrigger_at_highmaul_infested_waters : public AreaTriggerScript
 {
 public:
-    areatrigger_at_highmaul_infested_waters(AreaTrigger* areatrigger) : AreaTriggerAI(areatrigger) { }
+    areatrigger_at_highmaul_infested_waters() : AreaTriggerScript("areatrigger_at_highmaul_infested_waters") { }
 
     enum eSpell
     {
         InfestedWaters = 164642
     };
 
-    void OnUnitEnter(Unit* unit) override
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/, bool entered)
     {
-        unit->RemoveAura(eSpell::InfestedWaters);
-    }
+        if (entered)
+            player->RemoveAura(eSpell::InfestedWaters);
+        else
+        {
+            if (player->GetPositionZ() < 0.0f)
+                player->CastSpell(player, eSpell::InfestedWaters, true);
+        }
 
-    void OnUnitExit(Unit* unit) override
-    {
-        if (unit->GetPositionZ() < 0.0f)
-            unit->CastSpell(unit, eSpell::InfestedWaters, true);
+        return false;
     }
 };
 
@@ -1959,5 +1961,5 @@ void AddSC_boss_brackenspore()
     RegisterAreaTriggerAI(areatrigger_highmaul_call_of_the_tides);
 
     /// AreaTriggers (Area)
-    RegisterAreaTriggerAI(areatrigger_at_highmaul_infested_waters);
+    new areatrigger_at_highmaul_infested_waters();
 }

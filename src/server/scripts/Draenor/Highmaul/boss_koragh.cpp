@@ -503,7 +503,7 @@ class boss_koragh : public CreatureScript
                     me->DespawnCreaturesInArea(eHighmaulCreatures::VolatileAnomaly, 400);
                     summons.DespawnAll();
 
-                    CastSpellToPlayers(me->GetMap(), me, eSpells::KoraghBonus, true);
+                    instance->DoCastSpellOnPlayers(eSpells::KoraghBonus, me);
 
                     if (IsLFR())
                     {
@@ -2140,7 +2140,7 @@ class areatrigger_highmaul_overflowing_energy : public AreaTriggerAI
 
         void OnCreate() override
         {
-            float l_Rotation = frand(0.0f, 2 * M_PI);
+            float l_Rotation = frand(0.0f, 2 * float(M_PI));
             float l_Range = frand(10.0f, 30.0f);
 
             Position dest =

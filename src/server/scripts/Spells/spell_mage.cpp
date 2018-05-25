@@ -951,57 +951,31 @@ class spell_mage_pyroblast_clearcasting_driver : public AuraScript
 };
 
 // Fireball 133
-class spell_mage_fireball : public SpellScript
+// Pyroblast 11366
+class spell_mage_firestarter : public SpellScript
 {
-    PrepareSpellScript(spell_mage_fireball);
-
-    SpellModifier * mod = nullptr;
+    PrepareSpellScript(spell_mage_firestarter);
 
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
         return ValidateSpellInfo
         ({
             SPELL_MAGE_FIREBALL,
+            SPELL_MAGE_PYROBLAST,
             SPELL_MAGE_FIRESTARTER
         });
     }
 
-    void HandleDummy()
+    void HandleCritChance(Unit* victim, float& chance)
     {
-        Unit* caster = GetCaster();
-        Unit* explunit = GetExplTargetUnit();
-        if (!caster || !explunit)
-            return;
-
-        if (explunit->GetHealthPct() >= 90 && caster->HasAura(SPELL_MAGE_FIRESTARTER))
-        {
-            Player* player = GetCaster()->ToPlayer();
-
-            mod = new SpellModifier(caster->GetAura(SPELL_MAGE_FIRESTARTER));
-            mod->op = SPELLMOD_CRITICAL_CHANCE;
-            mod->type = SPELLMOD_FLAT;
-            mod->spellId = SPELL_MAGE_FIREBALL;
-            mod->value = 20000000;
-
-            player->AddSpellMod(mod, true);
-        }
-    }
-
-    void RemoveMod()
-    {
-        Player* caster = GetCaster()->ToPlayer();
-        Unit* target = GetHitUnit();
-        if (!caster || !target)
-            return;
-
-        if (mod)
-            caster->AddSpellMod(mod, false);
+        if (Aura* aura = GetCaster()->GetAura(SPELL_MAGE_FIRESTARTER))
+            if (victim->GetHealthPct() >= aura->GetEffect(EFFECT_0)->GetBaseAmount())
+                chance = 100.f;
     }
 
     void Register() override
     {
-        AfterCast += SpellCastFn(spell_mage_fireball::HandleDummy);
-        AfterHit += SpellHitFn(spell_mage_fireball::RemoveMod);
+        OnCalcCritChance += SpellOnCalcCritChanceFn(spell_mage_firestarter::HandleCritChance);
     }
 };
 
@@ -1010,27 +984,29 @@ class spell_mage_cold_snap : public SpellScript
 {
     PrepareSpellScript(spell_mage_cold_snap);
 
-    bool Validate(SpellInfo const* /*spellInfo*/) override
+    std::initializer_list<uint32> spells;
+
+    bool Load() override
     {
-        return ValidateSpellInfo
-        ({
+        spells =
+        {
             SPELL_MAGE_FROST_NOVA,
             SPELL_MAGE_CONE_OF_COLD,
             SPELL_MAGE_ICE_BARRIER,
             SPELL_MAGE_ICE_BLOCK
-        });
+        };
+        return true;
+    }
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo(spells);
     }
 
     void HandleOnHit(SpellEffIndex /*effIndex*/)
     {
-        Unit* caster = GetCaster();
-        if (!caster)
-            return;
-
-        caster->GetSpellHistory()->ResetCooldown(SPELL_MAGE_ICE_BLOCK, true);
-        caster->GetSpellHistory()->ResetCooldown(SPELL_MAGE_FROST_NOVA, true);
-        caster->GetSpellHistory()->ResetCooldown(SPELL_MAGE_CONE_OF_COLD, true);
-        caster->GetSpellHistory()->ResetCooldown(SPELL_MAGE_ICE_BARRIER, true);
+        for (uint32 spell : spells)
+            GetCaster()->GetSpellHistory()->ResetCooldown(spell, true);
     }
 
     void Register() override
@@ -1044,21 +1020,21 @@ class spell_mage_ice_block : public AuraScript
 {
     PrepareAuraScript(spell_mage_ice_block);
 
+    void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_HYPOTHERMIA, true);
+    }
+
     void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
         if (GetTarget()->HasAura(SPELL_MAGE_GLACIAL_INSULATION))
             GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_ICE_BARRIER, true);
     }
 
-    void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-    {
-        GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_HYPOTHERMIA, true);
-    }
-
     void Register() override
     {
-        OnEffectRemove += AuraEffectRemoveFn(spell_mage_ice_block::OnRemove, EFFECT_2, SPELL_AURA_SCHOOL_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
         OnEffectApply += AuraEffectApplyFn(spell_mage_ice_block::OnApply, EFFECT_2, SPELL_AURA_SCHOOL_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
+        OnEffectRemove += AuraEffectRemoveFn(spell_mage_ice_block::OnRemove, EFFECT_2, SPELL_AURA_SCHOOL_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
     }
 };
 
@@ -2813,7 +2789,7 @@ void AddSC_mage_spell_scripts()
     RegisterSpellScript(spell_mage_blizzard);
     RegisterSpellScript(spell_mage_frozen_orb);
     RegisterSpellScript(spell_mage_frost_bomb_damage);
-    RegisterSpellScript(spell_mage_fireball);
+    RegisterSpellScript(spell_mage_firestarter);
     RegisterSpellScript(spell_mage_pyroblast);
     RegisterSpellScript(spell_mage_living_bomb);
     RegisterSpellScript(spell_mage_living_bomb_spread);
