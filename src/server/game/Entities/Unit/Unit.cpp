@@ -727,6 +727,7 @@ bool Unit::HasBreakableByDamageCrowdControlAura(Unit* excludeCasterChannel) cons
 
     return (   HasBreakableByDamageAuraType(SPELL_AURA_MOD_CONFUSE, excludeAura)
             || HasBreakableByDamageAuraType(SPELL_AURA_MOD_FEAR, excludeAura)
+            || HasBreakableByDamageAuraType(SPELL_AURA_MOD_FEAR_2, excludeAura)
             || HasBreakableByDamageAuraType(SPELL_AURA_MOD_STUN, excludeAura)
             || HasBreakableByDamageAuraType(SPELL_AURA_MOD_ROOT, excludeAura)
             || HasBreakableByDamageAuraType(SPELL_AURA_MOD_ROOT_2, excludeAura)
@@ -4331,6 +4332,21 @@ void Unit::_ApplyAllAuraStatMods()
 {
     for (AuraApplicationMap::iterator i = m_appliedAuras.begin(); i != m_appliedAuras.end(); ++i)
         (*i).second->GetBase()->HandleAllEffects(i->second, AURA_EFFECT_HANDLE_STAT, true);
+}
+
+Player::AuraEffectList const Unit::GetAuraEffectsByTypes(std::initializer_list<AuraType> types) const
+{
+    Player::AuraEffectList returnAuraEffectList;
+
+    for (AuraType type : types)
+    {
+        Player::AuraEffectList typeAuraEffectList = GetAuraEffectsByType(type);
+
+        if (!typeAuraEffectList.empty())
+            returnAuraEffectList.insert(returnAuraEffectList.end(), typeAuraEffectList.begin(), typeAuraEffectList.end());
+    }
+
+    return returnAuraEffectList;
 }
 
 AuraEffect* Unit::GetAuraEffect(uint32 spellId, uint8 effIndex, ObjectGuid caster) const
@@ -11553,7 +11569,7 @@ void Unit::SetControlled(bool apply, UnitState state)
                 SetConfused(false);
                 break;
             case UNIT_STATE_FLEEING:
-                if (HasAuraType(SPELL_AURA_MOD_FEAR))
+                if (HasAuraType(SPELL_AURA_MOD_FEAR) || HasAuraType(SPELL_AURA_MOD_FEAR_2))
                     return;
 
                 SetFeared(false);
@@ -11574,7 +11590,7 @@ void Unit::SetControlled(bool apply, UnitState state)
 
             if (HasAuraType(SPELL_AURA_MOD_CONFUSE))
                 SetConfused(true);
-            else if (HasAuraType(SPELL_AURA_MOD_FEAR))
+            else if (HasAuraType(SPELL_AURA_MOD_FEAR) || HasAuraType(SPELL_AURA_MOD_FEAR_2))
                 SetFeared(true);
         }
     }
@@ -11661,7 +11677,7 @@ void Unit::SetFeared(bool apply)
         SetTarget(ObjectGuid::Empty);
 
         Unit* caster = NULL;
-        Unit::AuraEffectList const& fearAuras = GetAuraEffectsByType(SPELL_AURA_MOD_FEAR);
+        Unit::AuraEffectList const& fearAuras = GetAuraEffectsByTypes({ SPELL_AURA_MOD_FEAR, SPELL_AURA_MOD_FEAR_2 });
         if (!fearAuras.empty())
             caster = ObjectAccessor::GetUnit(*this, fearAuras.front()->GetCasterGUID());
         if (!caster)
