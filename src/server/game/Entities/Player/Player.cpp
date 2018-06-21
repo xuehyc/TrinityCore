@@ -1445,6 +1445,8 @@ void Player::setDeathState(DeathState s)
         ResetCriteria(CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, CRITERIA_CONDITION_NO_DEATH);
         ResetCriteria(CRITERIA_TYPE_HONORABLE_KILL, CRITERIA_CONDITION_NO_DEATH);
         ResetCriteria(CRITERIA_TYPE_GET_KILLING_BLOWS, CRITERIA_CONDITION_NO_DEATH);
+
+        sScriptMgr->OnPlayerDeath(this);
     }
 
     Unit::setDeathState(s);
