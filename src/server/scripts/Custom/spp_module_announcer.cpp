@@ -120,6 +120,10 @@ namespace {
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00CompleteQuest.Command |rmodule is active. Use |cffFF0000.completequest [LINK] |rcommand.");
                 }
+				if (sConfigMgr->GetBoolDefault("AutoRevive.Enable", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00AutoRevive |rmodule is active.");
+                }				
             }
             ChatHandler(player->GetSession()).SendSysMessage("This server is based on |cffFF0000Single Player Project - AshamaneCore |rrepack.");
             ChatHandler(player->GetSession()).SendSysMessage("Website:|cffADD8E6 https://www.patreon.com/conan513 |r");
