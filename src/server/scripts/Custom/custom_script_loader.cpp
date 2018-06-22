@@ -41,6 +41,8 @@ void AddSC_quest_complete_command();
 void AddSC_Death_Announcer();
 void AddSC_BuffCommandScripts();
 void AddSC_AutoReviveScripts();
+void AddSC_BGRewardScripts();
+void AddSC_premium_account();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -71,4 +73,6 @@ void AddCustomScripts()
 	AddSC_Death_Announcer();
     AddSC_BuffCommandScripts();
     AddSC_AutoReviveScripts();
+    AddSC_BGRewardScripts();
+    AddSC_premium_account();
 }
