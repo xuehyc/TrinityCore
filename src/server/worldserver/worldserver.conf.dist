@@ -4531,6 +4531,32 @@ Solocraft.Raid40 = 10
 ###################################################################################################
 
 ###################################################################################################
+# IMMORTAL MODE #
+#################
+#
+#    ImmortalMode
+#        Description: Players cannot be killed by a mobs or in PVP, but can take damage
+#
+#        Value:       1 (Enable)
+#                     0 (Disable)
+
+ImmortalMode.PVE.Enable = 0
+ImmortalMode.PVP.Enable = 0
+
+#
+#    ImmortalMode.Zone
+#        Description: Players can't be killed in a certain zone.
+#
+#        Value:       0  (all zones)
+#                     1+ (specified zone)
+
+ImmortalMode.PVE.ZoneID = 0
+ImmortalMode.PVE.ZoneID = 0
+
+#
+###################################################################################################
+
+###################################################################################################
 # CONGRATS ON LEVEL-UP #
 ########################
 
