@@ -39,10 +39,10 @@ public:
 
 	std::vector<ChatCommand> GetCommands() const override
 	{
-		static std::vector<ChatCommand> commandTable = // .commands
-		{
-			{ "buff",				SEC_PLAYER,			false, &HandleBuffCommand,	"" }
-		};
+        static std::vector<ChatCommand> commandTable =
+        {
+            { "buff",  rbac::RBAC_PERM_COMMAND_PLAYER_BUFF_COMMAND, true, &HandleBuffCommand, "" },
+        };
 
 		return commandTable;
 	}
