@@ -1721,6 +1721,16 @@ void Battleground::HandleKillPlayer(Player* victim, Player* killer)
         if (killer == victim)
             return;
 
+        // First blood 
+        for (BattlegroundScoreMap::const_iterator itr = PlayerScores.begin(); itr != PlayerScores.end(); ++itr)
+        {
+            if (itr->second->HonorableKills != 0)
+                break;
+
+            if ((*itr) == (*PlayerScores.rbegin()))
+                PSendMessageToAll(LANG_UTA_FIRST_BLOOD, CHAT_MSG_BG_SYSTEM_NEUTRAL, NULL, killer->GetName().c_str());
+        }
+
         UpdatePlayerScore(killer, SCORE_HONORABLE_KILLS, 1);
         UpdatePlayerScore(killer, SCORE_KILLING_BLOWS, 1);
 
@@ -1741,6 +1751,75 @@ void Battleground::HandleKillPlayer(Player* victim, Player* killer)
         victim->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
         RewardXPAtKill(killer, victim);
     }
+
+    /// UT Awards
+
+    if (!isBattleground())
+        return;
+
+    BattlegroundScoreMap::const_iterator killerIt = PlayerScores.find(killer->GetGUID());
+    BattlegroundScoreMap::const_iterator victimIt = PlayerScores.find(victim->GetGUID());
+
+    if (killerIt != PlayerScores.end() || victimIt != PlayerScores.end() || !killerIt->second || !victimIt->second)
+        return;
+
+    BattlegroundScore::KillStreakInfo& killerKillStreak = killerIt->second->KillStreak;
+    BattlegroundScore::KillStreakInfo& victimKillStreak = victimIt->second->KillStreak;
+
+    // Can freely to change it.
+    const uint8 IntervBetKills = 5;
+
+    // Interrupted a series of kills
+    if (victimKillStreak.Public >= IntervBetKills) 
+        PSendMessageToAll(LANG_UTA_INTERRUPTED_SERIES, CHAT_MSG_BG_SYSTEM_NEUTRAL, NULL, killer->GetName().c_str(), victim->GetName().c_str());
+
+    victimKillStreak.Private = 0;
+    victimKillStreak.Public = 0;
+    ++killerKillStreak.Private;
+    ++killerKillStreak.Public;
+
+    // Public award
+    uint16 divided = killerKillStreak.Public / IntervBetKills;
+    if (divided > 0 && (killerKillStreak.Public % IntervBetKills) == 0)
+    {
+        int32 publicAwardEntry = LANG_UTA_KILLING_SPREE + (divided - 1);
+        if (publicAwardEntry > LANG_UTA_BEYOND_GODLIKE)
+            publicAwardEntry = LANG_UTA_BEYOND_GODLIKE;
+ 
+        PSendMessageToAll(publicAwardEntry, CHAT_MSG_BG_SYSTEM_NEUTRAL, NULL, killer->GetName().c_str());
+    }
+
+    // Private award
+    const uint16 maxTimeIntervBetwKills = 5000;
+    if (killerKillStreak.Private >= 2)
+    {
+        if (GetMSTimeDiffToNow(killerKillStreak.LastKillTime) <= maxTimeIntervBetwKills)
+        {
+            int32 privateAwardEntry = LANG_UTA_DOUBLE_KILL + (killerKillStreak.Private - 2);
+            if (privateAwardEntry > LANG_UTA_HOLY_SHIT)
+                privateAwardEntry = LANG_UTA_HOLY_SHIT;
+
+            std::string message(killer->GetSession()->GetTrinityString(privateAwardEntry));
+   
+            // todo: packet builder
+            WorldPacket data(SMSG_MESSAGE_BOX, 200);
+            data << (uint8)CHAT_MSG_RAID_BOSS_EMOTE;
+            data << (uint32)LANG_UNIVERSAL;
+            data << (uint64)0;
+            data << (uint32)0;  
+            data << (uint32)1;
+            data << (uint8)0;
+            data << (uint64)0;
+            data << (uint32)(message.length() + 1);
+            data << message.c_str();
+            data << (uint8)0;
+            killer->GetSession()->SendPacket(&data);
+        }
+        else
+            killerKillStreak.Private = 1;
+    }
+
+    killerKillStreak.LastKillTime = getMSTime();
 }
 
 // Return the player's team based on battlegroundplayer info

@@ -1109,6 +1109,26 @@ enum TrinityStrings
     // Use for custom patches             11000-11999
     LANG_AUTO_BROADCAST                 = 11000,
     LANG_INVALID_REALMID                = 11001,
+         
+    LANG_MODIFIER_ONLINE_CHARACTERS_BROADCAST = 11400,
+    LANG_MODIFIER_ONLINE_CHARACTERS_WHISPER   = 11401,
+
+    // UT Awards
+    LANG_UTA_DOUBLE_KILL                = 20100,
+    LANG_UTA_TRIPLE_KILL                = 20101,
+    LANG_UTA_MULTI_KILL                 = 20102,
+    LANG_UTA_MEGA_KILL                  = 20103,
+    LANG_UTA_ULTRA_KILL                 = 20104,
+    LANG_UTA_MONSTER_KILL               = 20105,
+    LANG_UTA_HOLY_SHIT                  = 20106,
+    LANG_UTA_FIRST_BLOOD                = 20110,
+    LANG_UTA_KILLING_SPREE              = 20111,
+    LANG_UTA_DOMINATION                 = 20112,
+    LANG_UTA_RAMPAGE                    = 20113,
+    LANG_UTA_UNSTOPPABLE                = 20114,
+    LANG_UTA_GODLIKE                    = 20115,
+    LANG_UTA_BEYOND_GODLIKE             = 20116,
+    LANG_UTA_INTERRUPTED_SERIES         = 20119,
 
     // Show Kick in world
     LANG_COMMAND_KICKMESSAGE_WORLD = 11002,

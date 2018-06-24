@@ -4661,3 +4661,44 @@ Congrats.L1102 = 0
 
 #
 ###################################################################################################
+
+###################################################################################################
+# MODIFIER ONLINE CHARACTERS
+#
+#    ModifierOnlineCharacters.Enable
+#        Set Modifier Online Characters status.
+#        Default: 1 - Enable
+#                 0 - Disable
+
+ModifierOnlineCharacters.Enable = 1
+
+#    ModifierOnlineCharacters.MinTimer
+#        Set min interval between sending characters
+#        Default: 60 (1 hours)
+
+ModifierOnlineCharacters.MinTimer = 60
+
+#    ModifierOnlineCharacters.MaxTimer
+#        Set min interval between sending characters
+#        Default: 180 (3 hours)
+
+ModifierOnlineCharacters.MaxTimer = 180
+
+#    ModifierOnlineCharacters.MinMoney
+#        Set the min amount of money to add to the online players.(coper)
+#        Will be sent with the calculation: (ModifierOnlineCharacters.MinMoney * Character Level) / 10
+#
+#        Default: 100
+
+ModifierOnlineCharacters.MinMoney = 100
+
+#    ModifierOnlineCharacters.MaxMoney
+#        Set the max amount of money to add to the online players.(coper)
+#        Will be sent with the calculation: (ModifierOnlineCharacters.MaxMoney * Character Level) / 10
+#
+#        Default: 200
+
+ModifierOnlineCharacters.MaxMoney = 200
+
+#
+###################################################################################################

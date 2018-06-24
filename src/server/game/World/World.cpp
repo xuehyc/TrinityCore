@@ -1511,6 +1511,13 @@ void World::LoadConfigSettings(bool reload)
     rate_values[CONFIG_XP_FOR_PVP_LOW_RATE] = sConfigMgr->GetFloatDefault("Xp.For.Pvp.Low.Rate", 1.0f);
     rate_values[CONFIG_XP_FOR_PVP_HIGH_RATE] = sConfigMgr->GetFloatDefault("Xp.For.Pvp.High.Rate", 1.0f);
 
+    // modifier online characters
+    m_bool_configs[CONFIG_MODIFIER_ONLINE_CHARACTERS_ENABLE] = sConfigMgr->GetBoolDefault("ModifierOnlineCharacters.Enable", true);
+    m_int_configs[CONFIG_MODIFIER_ONLINE_CHARACTERS_MIN_TIMER] = (sConfigMgr->GetIntDefault("ModifierOnlineCharacters.MinTimer", 60) * MINUTE * IN_MILLISECONDS);
+    m_int_configs[CONFIG_MODIFIER_ONLINE_CHARACTERS_MAX_TIMER] = (sConfigMgr->GetIntDefault("ModifierOnlineCharacters.MaxTimer", 180) * MINUTE * IN_MILLISECONDS);
+    m_int_configs[CONFIG_MODIFIER_ONLINE_CHARACTERS_MIN_MONEY] = sConfigMgr->GetIntDefault("ModifierOnlineCharacters.MinMoney", 100);
+    m_int_configs[CONFIG_MODIFIER_ONLINE_CHARACTERS_MAX_MONEY] = sConfigMgr->GetIntDefault("ModifierOnlineCharacters.MaxMoney", 200);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
@@ -2127,6 +2134,9 @@ void World::SetInitialWorldSettings()
 
     m_timers[WUPDATE_CHECK_FILECHANGES].SetInterval(500);
 
+    uint32 mocInterval = urand(getIntConfig(CONFIG_MODIFIER_ONLINE_CHARACTERS_MIN_TIMER), getIntConfig(CONFIG_MODIFIER_ONLINE_CHARACTERS_MAX_TIMER));
+    m_timers[WUPDATE_MODIFIER_ONLINE_CHARACTERS].SetInterval(mocInterval);
+
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
     //one second is 1000 -(tested on win system)
@@ -2538,6 +2548,34 @@ void World::Update(uint32 diff)
     {
         m_timers[WUPDATE_GUILDSAVE].Reset();
         sGuildMgr->SaveGuilds();
+    }
+
+    if (m_timers[WUPDATE_MODIFIER_ONLINE_CHARACTERS].Passed())
+    {
+        m_timers[WUPDATE_MODIFIER_ONLINE_CHARACTERS].Reset();
+
+        if (getBoolConfig(CONFIG_MODIFIER_ONLINE_CHARACTERS_ENABLE))
+        {
+            // Send separately because not all players sent.
+            SendWorldText(LANG_MODIFIER_ONLINE_CHARACTERS_BROADCAST);
+
+            for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+            {
+                if (!itr->second)
+                    continue;
+
+                Player* player = itr->second->GetPlayer();
+
+                if (!player || !player->IsInWorld() || player->isAFK())
+                    continue;
+
+                uint32 sendMoneyCount = urand(getIntConfig(CONFIG_MODIFIER_ONLINE_CHARACTERS_MIN_MONEY), getIntConfig(CONFIG_MODIFIER_ONLINE_CHARACTERS_MAX_MONEY));
+                sendMoneyCount = (sendMoneyCount * player->getLevel()) / 10;
+
+                player->ModifyMoney(sendMoneyCount);
+                ChatHandler(itr->second).PSendSysMessage(LANG_MODIFIER_ONLINE_CHARACTERS_WHISPER, sendMoneyCount); 
+            }
+        }
     }
 
     // update the instance reset times

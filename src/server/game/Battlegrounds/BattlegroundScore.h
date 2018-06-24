@@ -92,6 +92,15 @@ struct BattlegroundScore
         uint32 DamageDone;
         uint32 HealingDone;
 
+        struct KillStreakInfo
+        {
+            KillStreakInfo() : Private(0), Public(0), LastKillTime(0) {}
+
+            uint8 Private;
+            uint16 Public;
+            uint32 LastKillTime;
+        } KillStreak;
+
 public:
         uint32 RatingChange;
 };
