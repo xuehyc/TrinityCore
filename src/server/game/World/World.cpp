@@ -23,6 +23,7 @@
 #include "World.h"
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
+#include "ArchaeologyMgr.h"
 #include "AreaTriggerDataStore.h"
 #include "AuctionHouseBot.h"
 #include "AuctionHouseMgr.h"
@@ -2077,6 +2078,9 @@ void World::SetInitialWorldSettings()
 
     TC_LOG_INFO("server.loading", "Loading Creature Text Locales...");
     sCreatureTextMgr->LoadCreatureTextLocales();
+
+    TC_LOG_INFO("server.loading", "Loading Archaeology Digsites...");
+    sArchaeologyMgr->LoadDigsites();
 
     TC_LOG_INFO("server.loading", "Initializing Scripts...");
     sScriptMgr->Initialize();
