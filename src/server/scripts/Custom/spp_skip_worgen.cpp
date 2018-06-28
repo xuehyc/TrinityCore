@@ -16,7 +16,7 @@ public:
         {
             if (p_Player->GetMapId() == 654)
             {
-                p_Player->SetLevel(5);
+                //p_Player->SetLevel(5);
                 p_Player->LearnSpell(68996, true);
                 p_Player->TeleportTo(0, -9033.559570f, -45.981701f, 88.419296f, 0.0f);
 

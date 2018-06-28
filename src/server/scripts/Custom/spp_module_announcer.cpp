@@ -118,15 +118,23 @@ namespace {
 				
 				if (sConfigMgr->GetBoolDefault("CompleteQuest.Command", true))
                 {
-                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00CompleteQuest.Command |rmodule is active. Use |cffFF0000.completequest [LINK] |rcommand.");
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00CompleteQuest Command |rmodule is active. Use |cffFF0000.completequest [LINK] |rcommand.");
                 }
 				if (sConfigMgr->GetBoolDefault("ImmortalMode.PVE.Enable", true))
                 {
-                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00ImmortalMode.PVE |rmodule is active.");
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Immortal Mode (PVE) |rmodule is active.");
                 }
                 if (sConfigMgr->GetBoolDefault("ImmortalMode.PVP.Enable", true))
                 {
-                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00ImmortalMode.PVP |rmodule is active.");
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Immortal Mode (PVP) |rmodule is active.");
+                }
+                if (sConfigMgr->GetBoolDefault("KilledByCreature.Announcer", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00KilledByCreature Announcer |rmodule is active.");
+                }
+                if (sConfigMgr->GetBoolDefault("PvPKill.Announcer", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00PvPKill Announcer |rmodule is active.");
                 }
 
             }
@@ -136,6 +144,117 @@ namespace {
     };
 }
 
+class PrepareToPlay : public WorldScript
+{
+public:
+	PrepareToPlay() : WorldScript("PrepareToPlay") {}
+
+	void OnStartup() override
+	{
+        TC_LOG_INFO("server.loading", ".");
+		TC_LOG_INFO("server.loading", ">> Loading custom scripts:");
+        if (sConfigMgr->GetBoolDefault("Solocraft.Announce", true))
+        {
+            TC_LOG_INFO("server.loading", "Solocraft");
+        }
+        if (sConfigMgr->GetBoolDefault("WorldChat.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "WorldChat");
+        }
+        if (sConfigMgr->GetBoolDefault("RandomEnchants.OnLoot", true))
+        {
+            TC_LOG_INFO("server.loading", "RandomEnchants");
+        }
+        if (sConfigMgr->GetBoolDefault("Custom.XP.Rate.NPC", true))
+        {
+            TC_LOG_INFO("server.loading", "Custom XP Rate NPC");
+        }
+        if (sConfigMgr->GetBoolDefault("Login.Announcer.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "Login Announcer");
+        }
+        if (sConfigMgr->GetBoolDefault("Boss.Announcer.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "Boss Announcer");
+        }
+        if (sConfigMgr->GetBoolDefault("DoubleXP.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "Double XP Weekend");
+        }
+        if (sConfigMgr->GetBoolDefault("Duel.Reset.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "Duel Reset");
+        }
+        if (sConfigMgr->GetBoolDefault("FireWorksOnLevelUp", true))
+        {
+            TC_LOG_INFO("server.loading", "FireWorksOnLevelUp");
+        }
+        if (sConfigMgr->GetBoolDefault("Login.BoA", true))
+        {
+            TC_LOG_INFO("server.loading", "Login.BoA");
+        }
+        if (sConfigMgr->GetBoolDefault("Reset.on.login", true))
+        {
+            TC_LOG_INFO("server.loading", "Reset on login");
+        }
+        if (sConfigMgr->GetBoolDefault("Dungeon.Checkpoints.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "Dungeon Checkpoints");
+        }
+        if (sConfigMgr->GetBoolDefault("Skip.Worgen.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "Skip Worgen starting area");
+        }
+        if (sConfigMgr->GetBoolDefault("Skip.Goblin.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "Skip Goblin starting area");
+        }
+        if (sConfigMgr->GetBoolDefault("Skip.Pandaren.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "Skip Pandaren starting area");
+        }
+        if (sConfigMgr->GetBoolDefault("Disallow.Multiple.Client", true))
+        {
+            TC_LOG_INFO("server.loading", "Disallow Multiple Client");
+        }
+        if (sConfigMgr->GetBoolDefault("Hardcore.Mode.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "Hardcore Mode");
+        }
+        if (sConfigMgr->GetBoolDefault("MFK.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "Money for Kill");
+        }
+        if (sConfigMgr->GetBoolDefault("Congrats.On.Level.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "Congrats on Level");
+        }
+        if (sConfigMgr->GetBoolDefault("CompleteQuest.Command", true))
+        {
+            TC_LOG_INFO("server.loading", "CompleteQuest Command");
+        }
+        if (sConfigMgr->GetBoolDefault("ImmortalMode.PVE.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "Immortal Mode (PVE)");
+        }
+        if (sConfigMgr->GetBoolDefault("ImmortalMode.PVP.Enable", true))
+        {
+            TC_LOG_INFO("server.loading", "Immortal Mode (PVP)");
+        }
+        if (sConfigMgr->GetBoolDefault("KilledByCreature.Announcer", true))
+        {
+            TC_LOG_INFO("server.loading", "KilledByCreature Announcer");
+        }
+        if (sConfigMgr->GetBoolDefault("PvPKill.Announcer", true))
+        {
+            TC_LOG_INFO("server.loading", "PvPKill Announcer");
+        }
+        TC_LOG_INFO("server.loading", ".");
+        TC_LOG_INFO("server.loading", "Now you ready to play.");
+	}
+};
+
 void AddSC_spp_module_announcer() {
     new spp_module_announcer();
+    new PrepareToPlay();
 }

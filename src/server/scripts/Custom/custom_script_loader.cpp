@@ -39,10 +39,12 @@ void AddSC_spp_module_announcer();
 void AddSC_cs_world_chat();
 void AddSC_quest_complete_command();
 void AddSC_Death_Announcer();
-void AddSC_BuffCommandScripts();
 void AddSC_AutoReviveScripts();
 void AddSC_BGRewardScripts();
 void AddSC_premium_account();
+void AddSC_ZoneAreaTrackerScripts();
+void AddSC_KillStatTrackerScripts();
+void AddSC_DeathStatTrackerScripts();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -71,8 +73,10 @@ void AddCustomScripts()
     AddSC_cs_world_chat();
     AddSC_quest_complete_command();
 	AddSC_Death_Announcer();
-    AddSC_BuffCommandScripts();
     AddSC_AutoReviveScripts();
     AddSC_BGRewardScripts();
     AddSC_premium_account();
+    AddSC_ZoneAreaTrackerScripts();
+    AddSC_KillStatTrackerScripts();
+    AddSC_DeathStatTrackerScripts();
 }
