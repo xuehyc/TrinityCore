@@ -849,7 +849,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         else
             scale = cFamily->MinScale + float(getLevel() - cFamily->MinScaleLevel) / cFamily->MaxScaleLevel * (cFamily->MaxScale - cFamily->MinScale);
 
-        SetObjectScale(scale);
+        SetObjectScale(scale * 2);
     }
 
     // Resistance
@@ -1770,7 +1770,7 @@ void Pet::LearnSpecializationSpells()
         {
             SpecializationSpellsEntry const* specSpell = specSpells->at(j);
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(specSpell->SpellID);
-            if (!spellInfo || spellInfo->SpellLevel > getLevel())
+            if (!spellInfo || (spellInfo->SpellLevel && spellInfo->SpellLevel > getLevel()))
                 continue;
 
             learnedSpells.push_back(specSpell->SpellID);
