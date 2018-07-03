@@ -45,6 +45,7 @@ void AddSC_premium_account();
 void AddSC_ZoneAreaTrackerScripts();
 void AddSC_KillStatTrackerScripts();
 void AddSC_DeathStatTrackerScripts();
+void AddSC_LFG_SoloMode();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -79,4 +80,5 @@ void AddCustomScripts()
     AddSC_ZoneAreaTrackerScripts();
     AddSC_KillStatTrackerScripts();
     AddSC_DeathStatTrackerScripts();
+    AddSC_LFG_SoloMode();
 }

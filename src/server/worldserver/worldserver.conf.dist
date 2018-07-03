@@ -4410,6 +4410,15 @@ KilledByCreature.Announcer = 1
 PvPKill.Announcer = 1
 
 #
+#     LFG.SoloMode
+#        Description: This module allow to use LFG with 1-4 players.
+#                     Possible useful in offline play or on low populated servers.
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+LFG.SoloMode = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################

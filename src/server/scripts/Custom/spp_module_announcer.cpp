@@ -99,8 +99,8 @@ namespace {
 				if (sConfigMgr->GetBoolDefault("Disallow.Multiple.Client", true))
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00DisallowMultipleClient |rmodule is active.");
-                }
-								
+                }		
+				
 				if (sConfigMgr->GetBoolDefault("Hardcore.Mode.Enable", true))
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00HardcoreMode |rmodule is active.");
@@ -120,23 +120,31 @@ namespace {
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00CompleteQuest Command |rmodule is active. Use |cffFF0000.completequest [LINK] |rcommand.");
                 }
-				if (sConfigMgr->GetBoolDefault("ImmortalMode.PVE.Enable", true))
+				
+                if (sConfigMgr->GetBoolDefault("ImmortalMode.PVE.Enable", true))
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Immortal Mode (PVE) |rmodule is active.");
                 }
+				
                 if (sConfigMgr->GetBoolDefault("ImmortalMode.PVP.Enable", true))
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Immortal Mode (PVP) |rmodule is active.");
                 }
+				
                 if (sConfigMgr->GetBoolDefault("KilledByCreature.Announcer", true))
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00KilledByCreature Announcer |rmodule is active.");
                 }
+				
                 if (sConfigMgr->GetBoolDefault("PvPKill.Announcer", true))
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00PvPKill Announcer |rmodule is active.");
                 }
-
+				
+                if (sConfigMgr->GetBoolDefault("LFG.SoloMode", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00LFG SoloMode |rmodule is active.");
+                }
             }
             ChatHandler(player->GetSession()).SendSysMessage("This server is based on |cffFF0000Single Player Project - AshamaneCore |rrepack.");
             ChatHandler(player->GetSession()).SendSysMessage("Website:|cffADD8E6 https://www.patreon.com/conan513 |r");
@@ -248,6 +256,10 @@ public:
         if (sConfigMgr->GetBoolDefault("PvPKill.Announcer", true))
         {
             TC_LOG_INFO("server.loading", "- PvPKill Announcer");
+        }
+        if (sConfigMgr->GetBoolDefault("LFG.SoloMode", true))
+        {
+            TC_LOG_INFO("server.loading", "- LFG SoloMode");
         }
         TC_LOG_INFO("server.loading", ".");
         TC_LOG_INFO("server.loading", "Now you ready to play.");
