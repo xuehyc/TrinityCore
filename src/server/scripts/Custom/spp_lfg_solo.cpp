@@ -12,7 +12,10 @@ public:
     {
         if (sConfigMgr->GetBoolDefault("LFG.SoloMode", true))
         {
-            sLFGMgr->ToggleTesting();
+            if (!sLFGMgr->IsTesting())
+            {
+                sLFGMgr->ToggleTesting();
+            }
         }
     }
 };
