@@ -46,6 +46,7 @@ void AddSC_ZoneAreaTrackerScripts();
 void AddSC_KillStatTrackerScripts();
 void AddSC_DeathStatTrackerScripts();
 void AddSC_LFG_SoloMode();
+void AddSC_PvPScripts();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -81,4 +82,5 @@ void AddCustomScripts()
     AddSC_KillStatTrackerScripts();
     AddSC_DeathStatTrackerScripts();
     AddSC_LFG_SoloMode();
+    AddSC_PvPScripts();
 }

@@ -4711,3 +4711,72 @@ ModifierOnlineCharacters.MaxMoney = 200
 
 #
 ###################################################################################################
+
+###################################################################################################
+#
+# Detailed Logging Stat Configurations 
+# 
+# enabled:  This enables individual parts of the logging system
+# dumpSize:  How many lines of information are cached before being written to the log file.
+#            For smaller servers this can be left as a low number, but for larger servers this
+#            could cause slowdown due to constant disk writes.
+#
+
+KillDetailedLogging.enabled=true;
+KillDetailedLogging.dumpSize=10;
+
+DeathDetailedLogging.enabled=true;
+DeathetailedLogging.dumpSize=10;
+
+ZoneAreaDetailedLogging.enabled=true;
+ZoneAreaDetailedLogging.dumpSize=10;
+
+#
+###################################################################################################
+
+###################################################################################################
+# PVP/PLAYER INVENTORY LOOT #
+#############################
+#
+#    PvPChest
+#        Description: Enable or Disable this feature for the players to drop loot.
+#        Default:     Enabled  = 1
+#                     Disabled = 0
+
+PvPChest = 0
+
+#
+#    ChestID
+#        Description: allows the player to spawn the chest of their choice
+#        Default:     Enabled  = 179697
+#                    
+
+ChestID = "80000"
+
+#
+#    KillAnnounce
+#        Description: Announces to the player who killed them.
+#        Config:     Disable = "0" : Announce  = "1" : Notifaction = "2" : Both = "3"
+#                    
+
+KillAnnounce = "1"
+
+#
+#    ChestTimer
+#        Description: The ammount of time the chest is in world before despawn (In Seconds)
+#        Config: Default = 120
+#                    
+
+ChestTimer = "120"
+
+#
+#    spawnchestIP
+#        Description: Allow the chest to spawn if player is on the same IP address
+#        Config:     Disable = "0"
+#					 Enable = "1" do not spawn chest if same IP
+#                    
+
+spawnchestIP = "1"
+
+#
+###################################################################################################
