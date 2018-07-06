@@ -48,6 +48,9 @@ void AddSC_DeathStatTrackerScripts();
 void AddSC_LFG_SoloMode();
 void AddSC_PvPScripts();
 
+// ADM declaration begin
+// ADM declaration end
+
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
@@ -83,4 +86,7 @@ void AddCustomScripts()
     AddSC_DeathStatTrackerScripts();
     AddSC_LFG_SoloMode();
     AddSC_PvPScripts();
+
+    // ADM call begin
+    // ADM call end
 }
