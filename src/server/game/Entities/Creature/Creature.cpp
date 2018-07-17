@@ -1331,6 +1331,8 @@ void Creature::UpdateLevelDependantStats()
     SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, stats->AttackPower);
     SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED, BASE_VALUE, stats->RangedAttackPower);
 
+    sScriptMgr->Creature_SelectLevel(cInfo, this);
+
     float armor = (float)stats->GenerateArmor(cInfo); /// @todo Why is this treated as uint32 when it's a float?
     SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, armor);
 }

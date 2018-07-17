@@ -47,6 +47,7 @@ void AddSC_KillStatTrackerScripts();
 void AddSC_DeathStatTrackerScripts();
 void AddSC_LFG_SoloMode();
 void AddSC_PvPScripts();
+void AddSC_VAS_AutoBalance();
 
 // ADM declaration begin
 // ADM declaration end
@@ -86,6 +87,7 @@ void AddCustomScripts()
     AddSC_DeathStatTrackerScripts();
     AddSC_LFG_SoloMode();
     AddSC_PvPScripts();
+    AddSC_VAS_AutoBalance();
 
     // ADM call begin
     // ADM call end

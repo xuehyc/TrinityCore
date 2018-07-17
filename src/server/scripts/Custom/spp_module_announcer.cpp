@@ -21,7 +21,7 @@ namespace {
         {
             if (sConfigMgr->GetBoolDefault("Module.Announcer.Enable", true))
             {
-                if (sConfigMgr->GetBoolDefault("Solocraft.Announce", true))
+                if (sConfigMgr->GetBoolDefault("Solocraft.Enable", true))
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00SoloCraft |rmodule is active.");
                 }
@@ -150,6 +150,11 @@ namespace {
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00PvPChest |rmodule is active.");
                 }
+
+                if (sConfigMgr->GetBoolDefault("VASAutoBalance.Instances", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00VAS AutoBalance |rmodule is active.");
+                }
             }
             ChatHandler(player->GetSession()).SendSysMessage("This server is based on |cffFF0000Single Player Project - AshamaneCore |rrepack.");
             ChatHandler(player->GetSession()).SendSysMessage("Website:|cffADD8E6 https://www.patreon.com/conan513 |r");
@@ -166,7 +171,7 @@ public:
 	{
         TC_LOG_INFO("server.loading", ".");
 		TC_LOG_INFO("server.loading", ">> Loaded custom scripts:");
-        if (sConfigMgr->GetBoolDefault("Solocraft.Announce", true))
+        if (sConfigMgr->GetBoolDefault("Solocraft.Enable", true))
         {
             TC_LOG_INFO("server.loading", "- Solocraft");
         }
@@ -269,6 +274,10 @@ public:
         if (sConfigMgr->GetBoolDefault("PvPChest", true))
         {
             TC_LOG_INFO("server.loading", "- PvPChest");
+        }
+        if (sConfigMgr->GetBoolDefault("VASAutoBalance.Instances", true))
+        {
+            TC_LOG_INFO("server.loading", "- VAS AutoBalance");
         }
         TC_LOG_INFO("server.loading", ".");
         TC_LOG_INFO("server.loading", "Now you ready to play.");

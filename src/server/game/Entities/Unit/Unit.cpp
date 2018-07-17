@@ -6621,6 +6621,8 @@ int32 Unit::HealBySpell(HealInfo& healInfo, bool critical /*= false*/)
     // calculate heal absorb and reduce healing
     CalcHealAbsorb(healInfo);
 
+    sScriptMgr->ModifyHealRecieved(healInfo);
+
     DealHeal(healInfo);
     SendHealSpellLog(healInfo, critical);
     return healInfo.GetEffectiveHeal();
