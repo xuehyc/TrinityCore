@@ -7851,7 +7851,7 @@ void Unit::Dismount()
     SendMessageToSet(data.Write(), true);
 
     // dismount as a vehicle
-    if (GetTypeId() == TYPEID_PLAYER && GetVehicleKit())
+    if (IsPlayer() && GetVehicleKit())
     {
         // Remove vehicle from player
         RemoveVehicleKit();
@@ -12057,7 +12057,7 @@ void Unit::RemoveVehicleKit(bool onRemoveFromWorld /*= false*/)
     m_vehicleKit->Uninstall();
     delete m_vehicleKit;
 
-    m_vehicleKit = NULL;
+    m_vehicleKit = nullptr;
 
     m_updateFlag &= ~UPDATEFLAG_VEHICLE;
     m_unitTypeMask &= ~UNIT_MASK_VEHICLE;
