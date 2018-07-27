@@ -4791,7 +4791,7 @@ spawnchestIP = "1"
 #        Example: VAS.AutoBalance.XPlayer = 1 will set everything for a 1 player game.
 #        Default:     1
 
-VASAutoBalance.numPlayer = 0
+VASAutoBalance.numPlayer = 1
 
 #
 #     VASAutoBalance.Instances
@@ -4805,7 +4805,7 @@ VASAutoBalance.Instances = 0
 #        Only apply scaling changes to dungeons
 #        Default:     1 (1 = ON, 0 = OFF)
 
-VASAutoBalance.DungeonsOnly = 0
+VASAutoBalance.DungeonsOnly = 1
 
 #
 #     VASAutoBalance.DebugLevel

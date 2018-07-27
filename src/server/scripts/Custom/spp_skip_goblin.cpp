@@ -16,7 +16,9 @@ public:
         {
             if (p_Player->GetMapId() == 648)
             {
+                p_Player->LearnSpell(77534, true); // Pack Hobgoblin
                 p_Player->TeleportTo(1, -621.477783f, -4253.324707f, 41.277771f, 0.0f);
+                ObjectAccessor::SaveAllPlayers();
             }
         }
     }
