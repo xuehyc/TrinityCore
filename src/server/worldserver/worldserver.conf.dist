@@ -4442,6 +4442,15 @@ PvPKill.Announcer = 1
 LFG.SoloMode = 1
 
 #
+#     Feed.Pet.Heal
+#        Description:  Heals your hunter pet when you feed it, similar to the post-cataclysm behavior. 
+#
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+Feed.Pet.Heal = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################

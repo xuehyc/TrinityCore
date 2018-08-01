@@ -48,6 +48,7 @@ void AddSC_DeathStatTrackerScripts();
 void AddSC_LFG_SoloMode();
 void AddSC_PvPScripts();
 void AddSC_VAS_AutoBalance();
+void AddSC_custom_feed_pet_heal();
 
 // ADM declaration begin
 // ADM declaration end
@@ -88,7 +89,8 @@ void AddCustomScripts()
     AddSC_LFG_SoloMode();
     AddSC_PvPScripts();
     AddSC_VAS_AutoBalance();
-
+    AddSC_custom_feed_pet_heal();
+	
     // ADM call begin
     // ADM call end
 }
