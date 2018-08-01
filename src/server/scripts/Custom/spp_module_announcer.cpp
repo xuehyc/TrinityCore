@@ -155,6 +155,26 @@ namespace {
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00VAS AutoBalance |rmodule is active.");
                 }
+				
+                if (sConfigMgr->GetBoolDefault("Custom.GainHonorOnGuardKill", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00GainHonorOnGuardKill |rmodule is active.");
+                }
+				
+                if (sConfigMgr->GetBoolDefault("Custom.GainHonorOnEliteKill", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00GainHonorOnEliteKill |rmodule is active.");
+                }
+				
+                if (sConfigMgr->GetBoolDefault("PvPRank.Rate.ExtraHonor", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00PvPRank Rate ExtraHonor |rmodule is active.");
+                }
+				
+                if (sConfigMgr->GetBoolDefault("Feed.Pet.Heal", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Feed Pet Heal |rmodule is active.");
+                }
             }
             ChatHandler(player->GetSession()).SendSysMessage("This server is based on |cffFF0000Single Player Project - AshamaneCore |rrepack.");
             ChatHandler(player->GetSession()).SendSysMessage("Website:|cffADD8E6 https://www.patreon.com/conan513 |r");
@@ -278,6 +298,22 @@ public:
         if (sConfigMgr->GetBoolDefault("VASAutoBalance.Instances", true))
         {
             TC_LOG_INFO("server.loading", "- VAS AutoBalance");
+        }
+        if (sConfigMgr->GetBoolDefault("Custom.GainHonorOnGuardKill", true))
+        {
+            TC_LOG_INFO("server.loading", "- GainHonorOnGuardKill");
+        }
+        if (sConfigMgr->GetBoolDefault("Custom.GainHonorOnEliteKill", true))
+        {
+            TC_LOG_INFO("server.loading", "- GainHonorOnEliteKill");
+        }
+        if (sConfigMgr->GetBoolDefault("PvPRank.Rate.ExtraHonor", true))
+        {
+            TC_LOG_INFO("server.loading", "- PvPRank Rate ExtraHonor");
+        }
+        if (sConfigMgr->GetBoolDefault("Feed.Pet.Heal", true))
+        {
+            TC_LOG_INFO("server.loading", "- Feed Pet Heal");
         }
         TC_LOG_INFO("server.loading", ".");
         TC_LOG_INFO("server.loading", "Now you ready to play.");
