@@ -175,6 +175,11 @@ namespace {
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Feed Pet Heal |rmodule is active.");
                 }
+
+                if (sConfigMgr->GetBoolDefault("Dynamic.XP.Rate", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Dynamic XP Rate |rmodule is active.");
+                }
             }
             ChatHandler(player->GetSession()).SendSysMessage("This server is based on |cffFF0000Single Player Project - AshamaneCore |rrepack.");
             ChatHandler(player->GetSession()).SendSysMessage("Website:|cffADD8E6 https://www.patreon.com/conan513 |r");
@@ -314,6 +319,10 @@ public:
         if (sConfigMgr->GetBoolDefault("Feed.Pet.Heal", true))
         {
             TC_LOG_INFO("server.loading", "- Feed Pet Heal");
+        }
+        if (sConfigMgr->GetBoolDefault("Dynamic.XP.Rate", true))
+        {
+            TC_LOG_INFO("server.loading", "- Dynamic XP Rate");
         }
         TC_LOG_INFO("server.loading", ".");
         TC_LOG_INFO("server.loading", "Now you ready to play.");
