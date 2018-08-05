@@ -4,7 +4,20 @@
 ![logo](http://i.imgur.com/Rn2rKfy.png) 
 ## --> https://discord.gg/TpxqWWT <--
 
-[![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/AshamaneProject/AshamaneCore.svg)](https://isitmaintained.com/project/AshamaneProject/AshamaneCore "Average time to resolve an issue") [![Percentage of issues still open](https://isitmaintained.com/badge/open/AshamaneProject/AshamaneCore.svg)](https://isitmaintained.com/project/AshamaneProject/AshamaneCore "Percentage of issues still open")
+--------------
+
+
+* [Build Status](#build-status)
+* [Introduction](#introduction)
+* [Requirements](#requirements)
+* [Install](#install)
+* [Reporting issues](#reporting-issues)
+* [Submitting fixes](#submitting-fixes)
+* [Copyright](#copyright)
+* [Authors &amp; Contributors](#authors--contributors)
+* [Links](#links)
+
+
 
 ## Build Status
 

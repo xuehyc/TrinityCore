@@ -2018,7 +2018,6 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         bool UpdatePosition(const Position &pos, bool teleport = false) override { return UpdatePosition(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teleport); }
         void UpdateUnderwaterState(Map* m, float x, float y, float z) override;
 
-        bool MeetPlayerCondition(uint32 conditionId) const;
         bool HasWorldQuestEnabled() const;
         void UpdateWorldQuestPosition(float x, float y);
 
@@ -2606,6 +2605,8 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void AddToPlayerPetDataStore(PlayerPetData* playerPetData);
 
         ArchaeologyPlayerMgr& GetArchaeologyMgr() { return m_archaeologyPlayerMgr; }
+
+        bool MeetPlayerCondition(uint32 conditionId) const;
 
     protected:
         // Gamemaster whisper whitelist

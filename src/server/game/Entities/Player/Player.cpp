@@ -561,7 +561,6 @@ bool Player::Create(ObjectGuid::LowType guidlow, WorldPackets::Character::Charac
     SetUInt64Value(PLAYER_FIELD_COINAGE, sWorld->getIntConfig(CONFIG_START_PLAYER_MONEY));
     SetCurrency(CURRENCY_TYPE_APEXIS_CRYSTALS, sWorld->getIntConfig(CONFIG_CURRENCY_START_APEXIS_CRYSTALS));
     SetCurrency(CURRENCY_TYPE_JUSTICE_POINTS, sWorld->getIntConfig(CONFIG_CURRENCY_START_JUSTICE_POINTS));
-    SetCurrency(CURRENCY_TYPE_ARTIFACT_KNOWLEDGE, sWorld->getIntConfig(CONFIG_CURRENCY_START_ARTIFACT_KNOWLEDGE));
 
     // start with every map explored
     if (sWorld->getBoolConfig(CONFIG_START_ALL_EXPLORED))
@@ -2662,6 +2661,10 @@ void Player::GiveLevel(uint8 level)
         UpdateSkillsToMaxSkillsForLevel();
 
     _ApplyAllLevelScaleItemMods(true); // Moved to above SetFullHealth so player will have full health from Heirlooms
+
+    if (Aura const* artifactAura = GetAura(ARTIFACTS_ALL_WEAPONS_GENERAL_WEAPON_EQUIPPED_PASSIVE))
+        if (Item* artifact = GetItemByGuid(artifactAura->GetCastItemGUID()))
+            artifact->CheckArtifactRelicSlotUnlock(this);
 
     // Only health and mana are set to maximum.
     SetFullHealth();
@@ -6134,15 +6137,6 @@ bool Player::UpdatePosition(float x, float y, float z, float orientation, bool t
     CheckAreaExploreAndOutdoor();
 
     return true;
-}
-
-bool Player::MeetPlayerCondition(uint32 conditionId) const
-{
-    if (PlayerConditionEntry const* playerCondition = sPlayerConditionStore.LookupEntry(conditionId))
-        if (sConditionMgr->IsPlayerMeetingCondition(this, playerCondition))
-            return true;
-
-    return false;
 }
 
 bool Player::HasWorldQuestEnabled() const
@@ -19329,8 +19323,9 @@ void Player::_LoadInventory(PreparedQueryResult result, PreparedQueryResult arti
             if (ArtifactPowerEntry const* artifactPower = sArtifactPowerStore.LookupEntry(artifactPowerData.ArtifactPowerId))
             {
                 uint32 maxRank = artifactPower->MaxPurchasableRank;
-                if (artifactPower->Flags & ARTIFACT_POWER_FLAG_MAX_RANK_WITH_TIER)
-                    maxRank += std::get<2>(artifactDataEntry);
+                // allow ARTIFACT_POWER_FLAG_FINAL to overflow maxrank here - needs to be handled in Item::CheckArtifactUnlock (will refund artifact power)
+                if (artifactPower->Flags & ARTIFACT_POWER_FLAG_MAX_RANK_WITH_TIER && artifactPower->Tier < std::get<2>(artifactDataEntry))
+                    maxRank += std::get<2>(artifactDataEntry) - artifactPower->Tier;
 
                 if (artifactPowerData.PurchasedRank > maxRank)
                     artifactPowerData.PurchasedRank = maxRank;
@@ -28978,6 +28973,15 @@ void Player::SendPlayerChoice(ObjectGuid sender, int32 choiceId)
     }
 
     SendDirectMessage(displayPlayerChoice.Write());
+}
+
+bool Player::MeetPlayerCondition(uint32 conditionId) const
+{
+    if (PlayerConditionEntry const* playerCondition = sPlayerConditionStore.LookupEntry(conditionId))
+        if (!ConditionMgr::IsPlayerMeetingCondition(this, playerCondition))
+            return false;
+
+    return true;
 }
 
 float Player::GetCollisionHeight(bool mounted) const
