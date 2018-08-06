@@ -107,7 +107,7 @@ namespace WorldPackets
             uint32 TravelDuration = 0;
             uint32 MissionDuration = 0;
             uint32 MissionState = 0;
-            uint32 Unknown1 = 0;
+            uint32 SuccessChance = 0;
             uint32 Unknown2 = 0;
         };
 
@@ -504,6 +504,65 @@ namespace WorldPackets
             uint16 FailReason = 1;
             GarrisonMission Mission;
             std::vector<uint64 /* dbID */> Followers;
+
+            WorldPacket const* Write() override;
+        };
+
+        class GarrisonCompleteMission final : public ClientPacket
+        {
+        public:
+            GarrisonCompleteMission(WorldPacket&& packet) : ClientPacket(CMSG_GARRISON_COMPLETE_MISSION, std::move(packet)) { }
+
+            void Read() override;
+
+            ObjectGuid NpcGUID;
+            uint32 MissionID;
+        };
+
+        class GarrisonCompleteMissionResult final : public ServerPacket
+        {
+        public:
+            GarrisonCompleteMissionResult() : ServerPacket(SMSG_GARRISON_COMPLETE_MISSION_RESULT, 4) { }
+
+            uint32 Result;
+            GarrisonMission Mission;
+            std::map<uint64 /*followerDBID*/, uint32 /*unk*/> Followers;
+            bool Succeed;
+
+            WorldPacket const* Write() override;
+        };
+
+        class GarrisonMissionBonusRoll final : public ClientPacket
+        {
+        public:
+            GarrisonMissionBonusRoll(WorldPacket&& packet) : ClientPacket(CMSG_GARRISON_MISSION_BONUS_ROLL, std::move(packet)) { }
+
+            void Read() override;
+
+            ObjectGuid NpcGUID;
+            uint32 MissionID;
+        };
+
+        class GarrisonMissionBonusRollResult final : public ServerPacket
+        {
+        public:
+            GarrisonMissionBonusRollResult() : ServerPacket(SMSG_GARRISON_MISSION_BONUS_ROLL_RESULT, 4) { }
+
+            GarrisonMission Mission;
+            uint32 Result;
+
+            WorldPacket const* Write() override;
+        };
+
+        class GarrisonFollowerChangeXP final : public ServerPacket
+        {
+        public:
+            GarrisonFollowerChangeXP() : ServerPacket(SMSG_GARRISON_FOLLOWER_CHANGED_XP, 4) { }
+
+            uint32 XP;
+            uint32 Unk;
+            GarrisonFollower OldFollower;
+            GarrisonFollower NewFollower;
 
             WorldPacket const* Write() override;
         };

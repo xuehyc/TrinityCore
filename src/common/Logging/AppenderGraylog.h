@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2017-2018 AshamaneProject <https://github.com/AshamaneProject>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,28 +15,23 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ClassHall_h__
-#define ClassHall_h__
+#ifndef APPENDERGRAYLOG_H
+#define APPENDERGRAYLOG_H
 
-#include "Player.h"
-#include "Garrison.h"
+#include "Appender.h"
 
-class GameObject;
-class Map;
-
-class TC_GAME_API ClassHall : public Garrison
+class TC_COMMON_API AppenderGraylog : public Appender
 {
-public:
+    public:
+        typedef std::integral_constant<AppenderType, APPENDER_GRAYLOG>::type TypeIndex;
 
-    explicit ClassHall(Player* owner);
+        AppenderGraylog(uint8 _id, std::string const& name, LogLevel level, AppenderFlags flags, std::vector<char const*> extraArgs);
+        AppenderType getType() const override { return TypeIndex::value; }
 
-    bool LoadFromDB() override;
-    void SaveToDB(SQLTransaction& trans) override;
+    private:
+        void _write(LogMessage const* message) override;
 
-    bool Create(uint32 garrSiteId) override;
-    void Delete() override;
-
-    bool IsAllowedArea(AreaTableEntry const* area) const override;
+        std::string _graylogSourceURL;
 };
 
-#endif // ClassHall_h__
+#endif

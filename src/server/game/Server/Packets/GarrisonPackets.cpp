@@ -91,7 +91,7 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Garrison::GarrisonMission
     data << uint32(mission.TravelDuration);
     data << uint32(mission.MissionDuration);
     data << uint32(mission.MissionState);
-    data << uint32(mission.Unknown1);
+    data << uint32(mission.SuccessChance);
     data << uint32(mission.Unknown2);
 
     return data;
@@ -473,6 +473,56 @@ WorldPacket const* WorldPackets::Garrison::GarrisonStartMissionResult::Write()
     _worldPacket << Followers.size();
     for (uint64 followerDbID : Followers)
         _worldPacket << followerDbID;
+
+    return &_worldPacket;
+}
+
+void WorldPackets::Garrison::GarrisonCompleteMission::Read()
+{
+    _worldPacket >> NpcGUID;
+    _worldPacket >> MissionID;
+}
+
+WorldPacket const* WorldPackets::Garrison::GarrisonCompleteMissionResult::Write()
+{
+    _worldPacket << Result;
+    _worldPacket << Mission;
+    _worldPacket << Mission.MissionRecID;
+    _worldPacket << uint32(Followers.size());
+
+    for (auto itr : Followers)
+    {
+        _worldPacket << itr.first;
+        _worldPacket << itr.second;
+    }
+
+    _worldPacket.WriteBit(Succeed);
+    _worldPacket.FlushBits();
+
+    return &_worldPacket;
+}
+
+void WorldPackets::Garrison::GarrisonMissionBonusRoll::Read()
+{
+    _worldPacket >> NpcGUID;
+    _worldPacket >> MissionID;
+}
+
+WorldPacket const* WorldPackets::Garrison::GarrisonMissionBonusRollResult::Write()
+{
+    _worldPacket << Mission;
+    _worldPacket << Mission.MissionRecID;
+    _worldPacket << Result;
+
+    return &_worldPacket;
+}
+
+WorldPacket const* WorldPackets::Garrison::GarrisonFollowerChangeXP::Write()
+{
+    _worldPacket << XP;
+    _worldPacket << Unk;
+    _worldPacket << OldFollower;
+    _worldPacket << NewFollower;
 
     return &_worldPacket;
 }
