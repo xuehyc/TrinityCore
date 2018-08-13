@@ -9,27 +9,23 @@
 #include "DatabaseEnv.h"
 #include "Item.h"
 
+
 class RandomEnchantsPlayer : public PlayerScript{
 public:
 
     RandomEnchantsPlayer() : PlayerScript("RandomEnchantsPlayer") { }
 
-	/*void OnLogin(Player* player, bool)
-	{
-		if (sConfigMgr->GetBoolDefault("RandomEnchants.AnnounceOnLogin", true))
-            ChatHandler(player->GetSession()).SendSysMessage(sConfigMgr->GetStringDefault("RandomEnchants.OnLoginMessage", "This server is based on Single Player Project - Legion repack.").c_str());
-    }*/
-	void OnLootItem(Player* player, Item* item, uint32 count)
+	void OnLootItem(Player* player, Item* item, uint32 count) override
 	{
 		if (sConfigMgr->GetBoolDefault("RandomEnchants.OnLoot", true))
 			RollPossibleEnchant(player, item);
 	}
-	void OnCreateItem(Player* player, Item* item, uint32 count)
+	void OnCreateItem(Player* player, Item* item, uint32 count) override
 	{
 		if (sConfigMgr->GetBoolDefault("RandomEnchants.OnCreate", true))
 			RollPossibleEnchant(player, item);
 	}
-	void OnQuestRewardItem(Player* player, Item* item, uint32 count)
+	void OnQuestRewardItem(Player* player, Item* item, uint32 count) override
 	{
 		if(sConfigMgr->GetBoolDefault("RandomEnchants.OnQuestReward", true))
 			RollPossibleEnchant(player, item);
@@ -38,8 +34,8 @@ public:
 	{
 		uint32 Quality = item->GetTemplate()->GetQuality();
 		uint32 Class = item->GetTemplate()->GetClass();
-		//if ((Quality > 5 && Quality < 0)/*eliminates enchanting anything that isn't a recognized quality*/ || (Class != 2 && Class != 4)/*eliminates enchanting anything but weapons/armor*/)
-			//return;
+		if ((Quality > 5 && Quality < 0)/*eliminates enchanting anything that isn't a recognized quality*/ || (Class != 2 && Class != 4)/*eliminates enchanting anything but weapons/armor*/)
+			return;
 		int slotRand[3] = { -1, -1, -1 };
 		uint32 slotEnch[3] = { 0, 1, 5 };
 		double roll1 = rand_chance();
@@ -84,10 +80,10 @@ public:
 		switch (Class)
 		{
 		case 2:
-			ClassQueryString = "ITEM_CLASS_WEAPON";
+			ClassQueryString = "WEAPON";
 			break;
 		case 4:
-			ClassQueryString = "ITEM_CLASS_ARMOR";
+			ClassQueryString = "ARMOR";
 			break;
 		}
 		if (ClassQueryString == "")
