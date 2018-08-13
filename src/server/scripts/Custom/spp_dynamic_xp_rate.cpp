@@ -50,6 +50,12 @@ class spp_dynamic_xp_rate : public PlayerScript
             if (player->getLevel() >= 110)
                 player->SetPersonnalXpRate(sConfigMgr->GetIntDefault("Dynamic.XP.Rate.110", 1));
         }
+
+        if (!sConfigMgr->GetBoolDefault("Dynamic.XP.Rate", true))
+        {
+            player->SetPersonnalXpRate(0);
+        }
+
     }
 
     void OnLevelChanged(Player * player, uint8 oldLevel)
