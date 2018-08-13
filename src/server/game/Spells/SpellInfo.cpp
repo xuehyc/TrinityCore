@@ -3702,7 +3702,6 @@ std::vector<SpellPowerCost> SpellInfo::CalcPowerCost(Unit const* caster, SpellSc
         costs.reserve(powers.size());
         int32 healthCost = 0;
 
-
         for (SpellPowerEntry const* power : powers)
         {
             if (power->RequiredAuraSpellID && !caster->HasAura(power->RequiredAuraSpellID))
@@ -3855,6 +3854,7 @@ std::vector<SpellPowerCost> SpellInfo::CalcPowerCost(Unit const* caster, SpellSc
                 if (cost.Power == Powers(power->PowerType))
                 {
                     cost.Amount += powerCost;
+                    cost.OptionalAmount += optionalCost;
                     found = true;
                 }
             }
@@ -3864,6 +3864,7 @@ std::vector<SpellPowerCost> SpellInfo::CalcPowerCost(Unit const* caster, SpellSc
                 SpellPowerCost cost;
                 cost.Power = Powers(power->PowerType);
                 cost.Amount = powerCost;
+                cost.OptionalAmount = optionalCost;
                 costs.push_back(cost);
             }
         }
