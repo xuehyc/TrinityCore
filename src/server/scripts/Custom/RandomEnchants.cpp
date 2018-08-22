@@ -53,7 +53,7 @@ public:
 					slotRand[2] = getRandEnchantment(item);
 			}
 		}
-		for (int i = 0; i < 2; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			if (slotRand[i] != -1)
 			{
