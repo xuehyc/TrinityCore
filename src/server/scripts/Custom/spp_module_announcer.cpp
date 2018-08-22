@@ -180,6 +180,11 @@ namespace {
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Dynamic XP Rate |rmodule is active.");
                 }
+				
+                if (sConfigMgr->GetBoolDefault("Save.On.LevelUp", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Save On LevelUp |rmodule is active.");
+                }
             }
             ChatHandler(player->GetSession()).SendSysMessage("This server is based on |cffFF0000Single Player Project - AshamaneCore |rrepack.");
             ChatHandler(player->GetSession()).SendSysMessage("Website:|cffADD8E6 https://www.patreon.com/conan513 |r");
@@ -323,6 +328,10 @@ public:
         if (sConfigMgr->GetBoolDefault("Dynamic.XP.Rate", true))
         {
             TC_LOG_INFO("server.loading", "- Dynamic XP Rate");
+        }
+        if (sConfigMgr->GetBoolDefault("Save.On.LevelUp", true))
+        {
+            TC_LOG_INFO("server.loading", "- Save on LevelUp");
         }
         TC_LOG_INFO("server.loading", ".");
         TC_LOG_INFO("server.loading", "Now you ready to play.");

@@ -4453,6 +4453,19 @@ LFG.SoloMode = 1
 Feed.Pet.Heal = 1
 
 #
+#     Save.On.LevelUp
+#        Description: Characters instantly saved if reached a new level.
+#
+#     Save.On.LevelUp.Announcer
+#        Description: Notify the players in chat if they characters saved.
+#
+#        Default:     0 (disabled)
+#                     1 (enabled)
+
+Save.On.LevelUp = 1
+Save.On.LevelUp.Announcer = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################

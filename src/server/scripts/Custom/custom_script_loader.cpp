@@ -50,6 +50,7 @@ void AddSC_PvPScripts();
 void AddSC_VAS_AutoBalance();
 void AddSC_custom_feed_pet_heal();
 void AddSC_dynamic_xp_rate();
+void AddSC_save_on_levelup();
 
 // ADM declaration begin
 // ADM declaration end
@@ -92,6 +93,7 @@ void AddCustomScripts()
     AddSC_VAS_AutoBalance();
     AddSC_custom_feed_pet_heal();
     AddSC_dynamic_xp_rate();
+    AddSC_save_on_levelup();
 	
     // ADM call begin
     // ADM call end
