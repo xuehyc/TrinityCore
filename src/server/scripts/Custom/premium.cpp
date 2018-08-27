@@ -297,7 +297,7 @@ public:
                 case 17: player->SetDisplayId(4527); break;     // Thrall                       'Orgrimmar Boss'
                 case 18: player->SetDisplayId(11657); break;    // Lady Sylvanas                'Undercity Boss'
                 case 19: player->SetDisplayId(4307); break;     // Cairne Bloodhoof             'Thunderbluff Boss'
-                case 20: player->SetDisplayId(17122); break;    // Lor´themar Theron            'Silvermoon City Boss'
+                case 20: player->SetDisplayId(17122); break;    // Lorthemar Theron            'Silvermoon City Boss'
                 case 21: player->SetDisplayId(3597); break;     // King Magni Bronzebeard       'Ironforge Boss'
                 case 22: player->SetDisplayId(5566); break;     // Highlord Bolvar Fordragon    'Stormwind Boss'
                 case 23: player->SetDisplayId(7006); break;     // High Tinker Mekkatorque      'Gnomer Boss'
@@ -311,7 +311,7 @@ public:
         }
     }
 
-    void SummonTempNPC(Player* player, uint32 entry, const char* salute = '\0')
+    void SummonTempNPC(Player* player, uint32 entry, const char* salute = 0)
     {
         if (!player || entry == 0)
             return;
