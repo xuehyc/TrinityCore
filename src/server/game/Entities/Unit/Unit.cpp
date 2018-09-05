@@ -12626,7 +12626,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     }
                 }
                 // Based on Skin color
-                else if (getRace() == RACE_TAUREN || getRace() == RACE_HIGHMOUNTAIN_TAUREN)
+                else if (getRace() == RACE_TAUREN)
                 {
                     uint8 skinColor = GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID);
                     if (HasAura(210333)) // Glyph of the Feral Chameleon
@@ -12682,6 +12682,29 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                             default: // Original - Grey
                                 return 8571;
                         }
+                    }
+                }
+                else if (getRace() == RACE_HIGHMOUNTAIN_TAUREN)
+                {
+                    uint8 skinColor = GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID);
+                    if (HasAura(210333)) // Glyph of the Feral Chameleon
+                        skinColor = urand(0, 4);
+
+                    // Highmountain Tauren have only 4 fur colors option :c
+                    switch (skinColor)
+                    {
+                        case 0:
+                            return 80598; // dark brown
+                        case 1:
+                            return 80597; // brown
+                        case 2:
+                            return 80599; // light brown with white horns
+                        case 3:
+                            return 80596; // dark
+                        case 4:
+                        default:
+                            return 80600; // light brown with brown horns (this one possibly bugged)
+
                     }
                 }
                 else if (Player::TeamForRace(getRace()) == ALLIANCE)
@@ -12786,7 +12809,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     }
                 }
                 // Based on Skin color
-                else if (getRace() == RACE_TAUREN || getRace() == RACE_HIGHMOUNTAIN_TAUREN)
+                else if (getRace() == RACE_TAUREN)
                 {
                     uint8 skinColor = GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID);
                     if (HasAura(107059)) // Glyph of the Ursol Chameleon
@@ -12844,6 +12867,28 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                         }
                     }
                 }
+                else if (getRace() == RACE_HIGHMOUNTAIN_TAUREN)
+                {
+                    uint8 skinColor = GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID);
+                    if (HasAura(107059)) // Glyph of the Ursol Chameleon
+                        skinColor = urand(0, 4);
+
+                    // Highmountain Tauren have only 4 fur colors option :c
+                    switch (skinColor)
+                    {
+                        case 0:
+                            return 80592; // red
+                        case 1:
+                            return 80595; // brown
+                        case 2:
+                            return 80593; // grey
+                        case 3:
+                            return 80591; // dark
+                        case 4:
+                        default:
+                            return 80594; // white
+                    }
+                }
                 else if (Player::TeamForRace(getRace()) == ALLIANCE)
                     return 29415;
                 else
@@ -12859,7 +12904,8 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     {
                         case RACE_NIGHTELF: // Blue
                             return 64328;
-                        case RACE_HIGHMOUNTAIN_TAUREN: // TEMP FIX, TODO
+                        case RACE_HIGHMOUNTAIN_TAUREN: // Eagle
+                            return 81439;
                         case RACE_TAUREN: // Brown
                             return 64329;
                         case RACE_WORGEN: // Purple
@@ -12885,7 +12931,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                 {
                     case RACE_NIGHTELF:
                         return 15374;
-                    case RACE_HIGHMOUNTAIN_TAUREN: // TEMP FIX, TODO
+                    case RACE_HIGHMOUNTAIN_TAUREN:
                     case RACE_TAUREN:
                         return 15375;
                     case RACE_WORGEN:
@@ -12916,8 +12962,9 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                         return 40816;
                     case RACE_TROLL:
                     case RACE_TAUREN:
-                    case RACE_HIGHMOUNTAIN_TAUREN:
                         return 45339;
+                    case RACE_HIGHMOUNTAIN_TAUREN:
+                        return 81440;
                     default:
                         break;
                 }
