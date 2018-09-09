@@ -1,4 +1,3 @@
-#include "ScriptPCH.h"
 #include "Chat.h"
 #include "WorldSession.h"
 #include "Player.h"

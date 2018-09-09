@@ -201,13 +201,11 @@ public:
 };
 
 
-class VAS_AutoBalance_AllMapScript : public AllMapScript
+class VAS_AutoBalance_AllMapScript : public PlayerScript
 {
 public:
-    VAS_AutoBalance_AllMapScript()
-        : AllMapScript("VAS_AutoBalance_AllMapScript")
-    {
-    }
+    VAS_AutoBalance_AllMapScript() : PlayerScript("VAS_AutoBalance_AllMapScript") { }
+
 
     void OnPlayerEnterAll(Map* map, Player* player)
     {
@@ -264,13 +262,10 @@ public:
 };
 
 
-class VAS_AutoBalance_AllCreatureScript : public AllCreatureScript
+class VAS_AutoBalance_AllCreatureScript : public CreatureScript
 {
 public:
-    VAS_AutoBalance_AllCreatureScript()
-        : AllCreatureScript("VAS_AutoBalance_AllCreatureScript")
-    {
-    }
+    VAS_AutoBalance_AllCreatureScript() : CreatureScript("VAS_AutoBalance_AllCreatureScript") { }
 
 
     void Creature_SelectLevel(const CreatureTemplate *creatureTemplate, Creature* creature)
