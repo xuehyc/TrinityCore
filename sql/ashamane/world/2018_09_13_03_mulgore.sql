@@ -1450,7 +1450,7 @@ INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `e
 (@GUID+273, @GUID+273*10, 0, 0, 1, 0, '');
 
 DELETE FROM `waypoint_data` WHERE `id` IN (@GUID+203*10,@GUID+217*10,@GUID+253*10,@GUID+261*10,@GUID+273*10);
-INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_type`, `action`, `action_chance`, `wpguid`) VALUES 
+REPLACE INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_type`, `action`, `action_chance`, `wpguid`) VALUES 
 ((@GUID+273)*10, 1, -1932.14, -459.797, -7.24711, 0, 0, 0, 0, 100, 0),
 ((@GUID+273)*10, 2, -1985.85, -387.735, -4.18228, 0, 0, 0, 0, 100, 0),
 ((@GUID+273)*10, 3, -1940.81, -332.337, -3.40891, 0, 0, 0, 0, 100, 0),
