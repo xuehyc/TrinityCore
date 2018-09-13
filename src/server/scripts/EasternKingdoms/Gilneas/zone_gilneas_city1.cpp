@@ -39,6 +39,8 @@
 #include "SpellScript.h"
 #include "Unit.h"
 #include "Vehicle.h"
+#include "MoveSplineInit.h"
+#include "MoveSpline.h"
 #include "zone_gilneas.h"
 
 enum eZoneGilneas
@@ -148,6 +150,118 @@ public:
                 break;
         }
     }
+};
+
+//gilnean crow 50260
+class npc_gilnean_crow : public CreatureScript
+{
+public:
+    npc_gilnean_crow() : CreatureScript("npc_gilnean_crow") { }
+
+    struct Coord
+    {
+        float x;
+        float y;
+        float z;
+    };
+
+    struct CrowFlyPosition
+    {
+        Coord FirstCoord;
+        Coord SecondCoord;
+    };
+
+    struct npc_gilnean_crow50260AI : public ScriptedAI
+    {
+        npc_gilnean_crow50260AI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint8 pointId;
+        bool flying = false;
+
+        const CrowFlyPosition CrowFlyPos[12] =
+        {
+            {{-1407.20f, 1441.68f, 39.6586f}, {-1407.20f, 1441.68f, 67.7066f}},
+            {{-1619.61f, 1310.61f, 27.7544f}, {-1619.61f, 1310.61f, 54.9702f}},
+            {{-1799.56f, 1552.02f, 34.9408f}, {-1799.56f, 1552.02f, 38.4683f}},
+            {{-1837.99f, 2289.09f, 50.2894f}, {-1837.99f, 2289.09f, 52.4776f}},
+            {{-1970.88f, 2326.11f, 36.5107f}, {-1970.88f, 2326.11f, 38.8598f}},
+            {{-1918.45f, 2406.86f, 37.4498f}, {-1918.45f, 2406.86f, 39.2891f}},
+            {{-1845.37f, 2322.57f, 47.8401f}, {-1845.37f, 2322.57f, 50.0315f}},
+            {{-1844.33f, 2492.53f, 6.67603f}, {-1844.33f, 2492.53f, 9.67311f}},
+            {{-2035.53f, 2289.68f, 28.7353f}, {-2035.53f, 2289.68f, 32.0705f}},
+            {{-2164.88f, 2222.65f, 27.4170f}, {-2164.88f, 2222.65f, 29.1592f}},
+            {{-1781.95f, 2382.97f, 51.9086f}, {-1781.95f, 2382.97f, 55.8622f}},
+            {{-1654.78f, 2503.14f, 109.893f}, {-1654.78f, 2503.14f, 115.819f}},
+        };
+
+        void InitializeAI()
+        {
+            FindFlyId();
+        }
+
+        void FindFlyId()
+        {
+            float dist = std::numeric_limits<float>::max();
+            int i = 0;
+
+            for (int j = 0; j < 12; ++j)
+            {
+                float _dist = me->GetDistance2d(CrowFlyPos[j].FirstCoord.x, CrowFlyPos[j].FirstCoord.y);
+
+                if (dist > _dist)
+                {
+                    dist = _dist;
+                    i = j;
+                }
+            }
+
+            pointId = i;
+        }
+
+        void FlyAway()
+        {
+            flying = true;
+
+            Movement::MoveSplineInit init(me);
+
+            G3D::Vector3 vertice0(
+                CrowFlyPos[pointId].FirstCoord.x + irand(-4, 4),
+                CrowFlyPos[pointId].FirstCoord.y + irand(-4, 4),
+                CrowFlyPos[pointId].FirstCoord.z + irand(-4, 4));
+            init.Path().push_back(vertice0);
+
+            G3D::Vector3 vertice1(
+                CrowFlyPos[pointId].SecondCoord.x + irand(-4, 4),
+                CrowFlyPos[pointId].SecondCoord.y + irand(-4, 4),
+                CrowFlyPos[pointId].SecondCoord.z + irand(-4, 4));
+            init.Path().push_back(vertice1);
+
+            init.SetFly();
+            init.SetSmooth();
+            init.SetVelocity(7.5f);
+            init.SetUncompressed();
+            init.Launch();
+            init.DisableTransportPathTransformations();
+            me->ForcedDespawn(10 * IN_MILLISECONDS);
+        }
+
+        void JustRespawned()
+        {
+            flying = false;
+        }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (!flying && who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 15.0f))
+                FlyAway();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gilnean_crow50260AI(creature);
+    }
+
 };
 
 // 34864
@@ -3571,9 +3685,9 @@ public:
         EVENT_CAST_TORCH,
     };
 
-    struct npc_crowley_horse_35231AI : public ScriptedAI
+    struct npc_crowley_horse_35231AI : public npc_escortAI
     {
-        npc_crowley_horse_35231AI(Creature *creature) : ScriptedAI(creature) { }
+        npc_crowley_horse_35231AI(Creature *creature) : npc_escortAI(creature) { }
 
         EventMap    m_events;
         ObjectGuid      m_playerGUID;
@@ -4528,5 +4642,6 @@ void AddSC_zone_gilneas_city1()
     new npc_lord_darius_crowley_35566();
     new npc_northgate_rebel_41015();
     new npc_frenzied_stalker_35627();
+    new npc_gilnean_crow();
 };
 
