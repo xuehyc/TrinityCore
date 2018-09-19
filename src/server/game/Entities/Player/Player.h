@@ -38,7 +38,6 @@
 #include "SceneMgr.h"
 #include <queue>
 #include "GarrisonMgr.h"
-#include "World.h"
 
 struct AccessRequirement;
 struct AchievementEntry;
@@ -2514,16 +2513,6 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
 
         std::string GetMapAreaAndZoneString() const;
         std::string GetCoordsMapAreaAndZoneString() const;
-        uint8 getLevel() const { return m_realLevel; }
-        uint8 getRealLevel() const { return m_realLevel; }
-        uint8 getAdaptiveLevel() const
-        {
-            if (sWorld->getBoolConfig(CONFIG_ADAPTIVE_LEVEL))
-                return m_adaptiveLevel;
-            else
-                return m_realLevel;
-        }
-        void GiveAdaptiveLevel(uint8 level);
 
         // Void Storage
         bool IsVoidStorageUnlocked() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_VOID_UNLOCKED); }
@@ -2953,8 +2942,6 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         float _PersonnalXpRate;
 
         uint32 _activeCheats;
-
-        uint8 m_realLevel, m_adaptiveLevel;
 
         PlayerGarrisonMap _garrisons;
         GarrisonType _insideGarrisonType;

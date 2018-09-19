@@ -1752,10 +1752,6 @@ float Creature::GetAttackDistance(Unit const* player) const
     uint8 expansionMaxLevel = uint8(GetMaxLevelForExpansion(GetCreatureTemplate()->RequiredExpansion));
 
     uint32 playerLevel = player->GetLevelForTarget(this);
-    if (player->m_ControlledByPlayer && player->ToPlayer())
-    {
-        playerLevel = player->ToPlayer()->getAdaptiveLevel();
-    }
     uint32 creatureLevel = GetLevelForTarget(player);
 
     if (aggroRate == 0.0f)
