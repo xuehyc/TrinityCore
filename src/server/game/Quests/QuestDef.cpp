@@ -257,9 +257,11 @@ void Quest::LoadQuestObjectiveVisualEffect(Field* fields)
 
 uint32 Quest::XPValue(uint32 playerLevel) const
 {
+    Player* player;
+
     if (playerLevel)
     {
-        uint32 questLevel = uint32(Level == -1 ? std::min(playerLevel, uint32(GetQuestMaxScalingLevel())) : Level);
+        uint32 questLevel = uint32(Level == -1 ? (player->getRealLevel(), uint32(GetQuestMaxScalingLevel())) : Level);
         QuestXPEntry const* questXp = sQuestXPStore.LookupEntry(questLevel);
         if (!questXp || RewardXPDifficulty >= 10)
             return 0;
@@ -268,7 +270,7 @@ uint32 Quest::XPValue(uint32 playerLevel) const
         if (questLevel != playerLevel)
             multiplier = sXpGameTable.GetRow(std::min(playerLevel, questLevel))->Divisor / sXpGameTable.GetRow(playerLevel)->Divisor;
 
-        int32 diffFactor = 2 * (questLevel - playerLevel) + 20;
+        int32 diffFactor = 2 * (questLevel - player->getAdaptiveLevel()) + 20;
         if (diffFactor < 1)
             diffFactor = 1;
         else if (diffFactor > 10)
