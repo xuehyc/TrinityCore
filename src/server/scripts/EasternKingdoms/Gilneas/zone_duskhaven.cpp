@@ -822,8 +822,10 @@ public:
                 this->FinishCast(SPELL_CAST_OK);
             else
             {
-                std::list<WorldObject*>::iterator itr = targets.begin();
-                GetCaster()->SetFacingToObject(*itr);
+                for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    GetCaster()->SetFacingToObject(*itr);
+                }
             }
         }
 
