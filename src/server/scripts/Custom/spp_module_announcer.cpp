@@ -185,6 +185,16 @@ namespace {
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Save On LevelUp |rmodule is active.");
                 }
+				
+                if (sConfigMgr->GetBoolDefault("Force.Starting.Level", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Force Starting Level |rmodule is active.");
+                }
+				
+                if (sConfigMgr->GetBoolDefault("Force.Teleport", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Force Teleport |rmodule is active.");
+                }
             }
             ChatHandler(player->GetSession()).SendSysMessage("This server is based on |cffFF0000Single Player Project - AshamaneCore |rrepack.");
             ChatHandler(player->GetSession()).SendSysMessage("Website:|cffADD8E6 https://www.patreon.com/conan513 |r");
@@ -332,6 +342,14 @@ public:
         if (sConfigMgr->GetBoolDefault("Save.On.LevelUp", true))
         {
             TC_LOG_INFO("server.loading", "- Save on LevelUp");
+        }
+        if (sConfigMgr->GetBoolDefault("Force.Teleport", true))
+        {
+            TC_LOG_INFO("server.loading", "- Force Teleport");
+        }
+        if (sConfigMgr->GetBoolDefault("Force.Starting.Level", true))
+        {
+            TC_LOG_INFO("server.loading", "- Force Starting Level");
         }
         TC_LOG_INFO("server.loading", ".");
         TC_LOG_INFO("server.loading", "Now you ready to play.");

@@ -17,8 +17,11 @@ public:
             if (p_Player->getRace() == RACE_PANDAREN_NEUTRAL)
             {
                 p_Player->ShowNeutralPlayerFactionSelectUI();
-                p_Player->SetLevel(5);
-
+				if (!sConfigMgr->GetBoolDefault("Force.Starting.Level", true))
+                {
+                    p_Player->SetLevel(5);
+                }
+				
                 uint32 shoulders = 0, chest = 0, trinkett = 0, weapon = 0, weapon2 = 0, weapon3 = 0, shield = 0, shoulders2 = 0, chest2 = 0, trinkett2 = 0, bag = 0;
 
                 bag = 41600;
