@@ -2,7 +2,7 @@
 DELETE FROM `creature` WHERE `guid`=210219198;
 
 DELETE FROM `gameobject` WHERE `guid`=49512;
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) 
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) 
 VALUES (49512, 300067, 530, 1, 1, 1, 0, 0, 0, -1, 8277.38, -7213.13, 137.63, 0, 0, 0, 0, 1, 300, 0, 0, 1, '', 0);
 
 DELETE FROM `gameobject_addon` WHERE `guid`=49512;

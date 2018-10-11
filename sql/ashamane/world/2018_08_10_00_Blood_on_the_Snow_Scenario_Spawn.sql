@@ -20,7 +20,7 @@ REPLACE INTO graveyard_zone (id, ghostzone, faction, comment) VALUES
 -- Start spawning creatures and objects, texts
 
 DELETE FROM creature WHERE map = 1130;
-INSERT INTO creature (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES 
+INSERT INTO creature (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES 
 (905001, 70799, 1130, 0, 0, 4096, 0, 1, 0, -1, 0, 0, -5247.95, -421.878, 389.101, 2.13096, 86400, 0, 0, 1200, 0, 0, 0, 0, 0, 0, 0, '', 0),
 (905002, 67965, 1130, 0, 0, 4096, 0, 1, 0, -1, 0, 0, -5246.21, -419.592, 389.175, 3.59398, 86400, 0, 0, 787882, 0, 0, 0, 0, 0, 0, 0, '', 0),
 (905003, 67965, 1130, 0, 0, 4096, 0, 1, 0, -1, 0, 0, -5244.75, -422.608, 388.755, 3.59398, 86400, 0, 0, 787882, 0, 0, 0, 0, 0, 0, 0, '', 0),
@@ -92,7 +92,7 @@ INSERT INTO creature (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficultie
 (905069, 70544, 1130, 0, 0, 4096, 0, 1, 0, -1, 0, 0, -5173.11, -253.662, 434.897, 2.4178, 86400, 0, 0, 7091178, 0, 0, 0, 0, 0, 0, 0, '', 0);
 
 DELETE FROM `gameobject` WHERE `map`=1130;
-INSERT INTO `gameobject` (guid, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, phaseuseflags, `phaseId`, phasegroup, terrainSwapMap, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, ScriptName, verifiedbuild) VALUES 
+INSERT INTO `gameobject` (guid, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, phaseuseflags, `phaseId`, phasegroup, terrainSwapMap, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, ScriptName, verifiedbuild) VALUES 
 (902000, 216323, 1130, 0, 0, 4096, 0, 1, 0, -1, -5239.37, -266.956, 434.897, 1.19677, 0, 0, 0.563308, 0.826247, 300, 0, 1, 0, '', 0),
 (902001, 216323, 1130, 0, 0, 4096, 0, 1, 0, -1, -5333.03, -230.662, 440.364, 5.06265, 0, 0, 0.573089, -0.819493, 300, 0, 1, 0, '', 0);
 

@@ -3,7 +3,7 @@
 SET @CGUID := 800000;
 
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+1209 AND @CGUID+1561;
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+1209, 36198, 654, 4714, 4786, 3, '105', 0, 0, 0, -1846.708, 2288.752, 42.4066, 0.6981317, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36198 (Area: 4786 - Difficulty: 0)
 (@CGUID+1210, 35374, 654, 4714, 4786, 3, '105', 0, 0, 0, -1844.415, 2267.5, 42.89349, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 35374 (Area: 4786 - Difficulty: 0)
 (@CGUID+1211, 36286, 654, 4714, 4786, 3, '105', 0, 0, 0, -1893.561, 2561.075, 1.550539, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36286 (Area: 4786 - Difficulty: 0)
@@ -46,7 +46,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+1248, 36453, 654, 4714, 4786, 3, '181', 0, 0, 0, -1901.337, 2264.097, 42.4066, 0.7853982, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36453 (Area: 4786 - Difficulty: 0)
 (@CGUID+1249, 36602, 654, 4714, 4786, 3, '181', 0, 0, 0, -1846.696, 2290.918, 49.4251, 0.7853982, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549); -- 36602 (Area: 4786 - Difficulty: 0)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+1250, 50260, 654, 4714, 4786, 3, '181', 0, 0, 0, -1835.3, 2292.924, 42.29861, 3.211406, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 50260 (Area: 4786 - Difficulty: 0)
 (@CGUID+1251, 36602, 654, 4714, 4786, 3, '181', 0, 0, 0, -1847.752, 2296.302, 42.53704, 0.8203048, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36602 (Area: 4786 - Difficulty: 0)
 (@CGUID+1252, 36713, 654, 4714, 4786, 3, '181', 0, 0, 0, -1857.743, 2244.059, 42.41618, 2.391101, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36713 (Area: 4786 - Difficulty: 0)
@@ -298,7 +298,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+1498, 36198, 654, 4714, 4793, 3, '182', 0, 0, 0, -1981.493, 2666.043, -2.156057, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36198 (Area: 4793 - Difficulty: 0)
 (@CGUID+1499, 36405, 654, 4714, 4793, 3, '182', 0, 0, 0, -1981.82, 2663.823, -1.845436, 0.8524256, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549); -- 36405 (Area: 4793 - Difficulty: 0)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+1500, 36405, 654, 4714, 4793, 3, '182', 0, 0, 0, -1971.87, 2641.354, 0.9579651, 1.213853, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36405 (Area: 4793 - Difficulty: 0)
 (@CGUID+1501, 36236, 654, 4714, 4793, 3, '182', 0, 0, 0, -1981.859, 2675.357, -2.157121, 5.811946, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36236 (Area: 4793 - Difficulty: 0)
 (@CGUID+1502, 36405, 654, 4714, 4793, 3, '182', 0, 0, 0, -1972.646, 2656.716, -0.8883166, 1.089683, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36405 (Area: 4793 - Difficulty: 0)
@@ -364,7 +364,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 
 SET @CGUID := 801562;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+3300;
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+0, 36236, 654, 4714, 5720, 3, '182', 0, 0, 0, -2114.707, 2484.644, 5.259289, 6.195919, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36236 (Area: 5720 - Difficulty: 0)
 (@CGUID+1, 36283, 654, 4714, 5720, 3, '182', 0, 0, 0, -2045.318, 2546.75, -1.922617, 0.2094395, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36283 (Area: 5720 - Difficulty: 0)
 (@CGUID+2, 36211, 654, 4714, 5720, 3, '182', 0, 0, 0, -2078.328, 2509.061, 1.605693, 2.10516, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36211 (Area: 5720 - Difficulty: 0)
@@ -616,7 +616,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+248, 36713, 654, 4714, 0, 3, '183', 0, 0, 0, -1861.75, 2237.144, 42.42178, 2.391101, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36713 (Area: 0 - Difficulty: 0)
 (@CGUID+249, 36651, 654, 4714, 0, 3, '183', 0, 0, 0, -1864.545, 2235.503, 42.40661, 3.298672, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549); -- 36651 (Area: 0 - Difficulty: 0)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+250, 36602, 654, 4714, 0, 3, '183', 0, 0, 0, -1912.288, 2249.813, 42.4066, 3.630285, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36602 (Area: 0 - Difficulty: 0)
 (@CGUID+251, 36717, 654, 4714, 4786, 3, '183', 0, 0, 0, -1867.021, 2232.498, 42.40661, 2.181662, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36717 (Area: 4786 - Difficulty: 0)
 (@CGUID+252, 36602, 654, 4714, 4786, 3, '183', 0, 0, 0, -1905.089, 2240.62, 42.40956, 3.979351, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 36602 (Area: 4786 - Difficulty: 0)
@@ -868,7 +868,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+498, 1420, 654, 4714, 0, 3, '186', 0, 0, 0, -1955.077, 1772.219, 4.937732, 1.634892, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 1420 (Area: 0 - Difficulty: 0)
 (@CGUID+499, 2914, 654, 4714, 0, 3, '186', 0, 0, 0, -1943.628, 1826.583, 5.186801, 2.794319, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549); -- 2914 (Area: 0 - Difficulty: 0)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+500, 2914, 654, 4714, 0, 3, '186', 0, 0, 0, -1942.446, 1742.059, 4.861871, 0.8802459, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 2914 (Area: 0 - Difficulty: 0)
 (@CGUID+501, 37067, 654, 4714, 0, 3, '186', 0, 0, 0, -2089.328, 1771.207, 5.51855, 3.124139, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 37067 (Area: 0 - Difficulty: 0)
 (@CGUID+502, 37067, 654, 4714, 0, 3, '186', 0, 0, 0, -2046.771, 1782.497, 5.995989, 4.677482, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 37067 (Area: 0 - Difficulty: 0)
@@ -1120,7 +1120,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+748, 38022, 654, 4714, 4730, 3, '186', 0, 0, 0, -2130.258, 1614.431, -43.47124, 5.599408, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38022 (Area: 4730 - Difficulty: 0)
 (@CGUID+749, 38022, 654, 4714, 4730, 3, '186', 0, 0, 0, -2134.361, 1618.257, -43.47189, 5.492939, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549); -- 38022 (Area: 4730 - Difficulty: 0)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+750, 37757, 654, 4714, 4730, 3, '186', 0, 0, 0, -2217.568, 1545.487, -40.97996, 0.2097417, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 37757 (Area: 4730 - Difficulty: 0)
 (@CGUID+751, 38022, 654, 4714, 4730, 3, '186', 0, 0, 0, -2116.068, 1615.49, -43.34274, 4.869469, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38022 (Area: 4730 - Difficulty: 0)
 (@CGUID+752, 37757, 654, 4714, 4730, 3, '186', 0, 0, 0, -2180.607, 1628.183, -39.87785, 0.006150842, 7200, 10, 0, 0, 0, 1, 0, 0, 0, 25549), -- 37757 (Area: 4730 - Difficulty: 0) (possible waypoints or random movement)
@@ -1372,7 +1372,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+998, 4075, 654, 4714, 0, 3, '186', 0, 0, 0, -1131.975, 955.6817, 40.70794, 3.560097, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 4075 (Area: 0 - Difficulty: 0)
 (@CGUID+999, 37694, 654, 4714, 0, 3, '186', 0, 0, 0, -1171.05, 870.1476, 23.67257, 3.316126, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549); -- 37694 (Area: 0 - Difficulty: 0)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+1000, 14881, 654, 4714, 0, 3, '186', 0, 0, 0, -1159.641, 1025.219, 43.31275, 5.531717, 7200, 10, 0, 0, 0, 1, 0, 0, 0, 25549), -- 14881 (Area: 0 - Difficulty: 0) (possible waypoints or random movement)
 (@CGUID+1001, 37701, 654, 4714, 0, 3, '186', 0, 0, 0, -1130.118, 941.0695, 42.79078, 4.206244, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 37701 (Area: 0 - Difficulty: 0)
 (@CGUID+1002, 24042, 654, 4714, 0, 3, '186', 0, 0, 0, -1126.993, 955.1268, 40.51578, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 24042 (Area: 0 - Difficulty: 0)
@@ -1624,7 +1624,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+1248, 4076, 654, 4755, 4758, 3, '187', 0, 0, 0, -1698.43, 1679.355, 20.69095, 4.145327, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 4076 (Area: 4758 - Difficulty: 0)
 (@CGUID+1249, 38192, 654, 4755, 4758, 3, '187', 0, 0, 0, -1668.519, 1616.75, 20.5728, 2.565634, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549); -- 38192 (Area: 4758 - Difficulty: 0)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+1250, 38192, 654, 4755, 4758, 3, '187', 0, 0, 0, -1664.05, 1649.212, 20.57315, 0.4712389, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38192 (Area: 4758 - Difficulty: 0)
 (@CGUID+1251, 28332, 654, 4755, 4758, 3, '187', 0, 0, 0, -1682.476, 1654.233, 20.57315, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 28332 (Area: 4758 - Difficulty: 0)
 (@CGUID+1252, 38613, 654, 4755, 4758, 3, '187', 0, 0, 0, -1663.144, 1588.259, 23.20663, 0.9250245, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38613 (Area: 4758 - Difficulty: 0)
@@ -1876,7 +1876,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+1498, 37889, 654, 4755, 4758, 3, '188', 0, 0, 0, -1668.188, 1716.456, -23.14004, 2.793546, 7200, 10, 0, 0, 0, 1, 0, 0, 0, 25549), -- 37889 (Area: 4758 - Difficulty: 0) (possible waypoints or random movement)
 (@CGUID+1499, 37889, 654, 4755, 4758, 3, '188', 0, 0, 0, -1676.054, 1744.98, -24.86851, 4.171588, 7200, 10, 0, 0, 0, 1, 0, 0, 0, 25549); -- 37889 (Area: 4758 - Difficulty: 0) (possible waypoints or random movement)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+1500, 37889, 654, 4755, 4758, 3, '188', 0, 0, 0, -1687.701, 1749.872, -24.93986, 4.292725, 7200, 10, 0, 0, 0, 1, 0, 0, 0, 25549), -- 37889 (Area: 4758 - Difficulty: 0) (possible waypoints or random movement)
 (@CGUID+1501, 37889, 654, 4755, 4758, 3, '188', 0, 0, 0, -1677.58, 1746.248, -25.03618, 1.403727, 7200, 10, 0, 0, 0, 1, 0, 0, 0, 25549), -- 37889 (Area: 4758 - Difficulty: 0) (possible waypoints or random movement)
 (@CGUID+1502, 37889, 654, 4755, 4758, 3, '188', 0, 0, 0, -1667.125, 1709.88, -20.95444, 5.874645, 7200, 10, 0, 0, 0, 1, 0, 0, 0, 25549), -- 37889 (Area: 4758 - Difficulty: 0) (possible waypoints or random movement)
@@ -2128,7 +2128,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+1748, 38363, 654, 4755, 4759, 3, '188', 0, 0, 0, -1288.885, 1680.767, 10.76005, 3.403392, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38363 (Area: 4759 - Difficulty: 0)
 (@CGUID+1749, 38363, 654, 4755, 4759, 3, '188', 0, 0, 0, -1294.8, 1671.755, 9.4023, 3.403392, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549); -- 38363 (Area: 4759 - Difficulty: 0)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+1750, 38363, 654, 4755, 4759, 3, '188', 0, 0, 0, -1298.09, 1686.418, 7.895457, 3.403392, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38363 (Area: 4759 - Difficulty: 0)
 (@CGUID+1751, 38363, 654, 4755, 4759, 3, '188', 0, 0, 0, -1287.6, 1626.33, 10.21613, 3.089233, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38363 (Area: 4759 - Difficulty: 0)
 (@CGUID+1752, 38363, 654, 4755, 4759, 3, '188', 0, 0, 0, -1267.72, 1624.595, 14.65348, 3.106686, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38363 (Area: 4759 - Difficulty: 0)
@@ -2380,7 +2380,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+1998, 38363, 654, 4714, 4728, 3, '188', 0, 0, 0, -1021.198, 1563.705, 42.09058, 1.32645, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38363 (Area: 4728 - Difficulty: 0)
 (@CGUID+1999, 38363, 654, 4714, 4728, 3, '188', 0, 0, 0, -1037.396, 1547.33, 46.87847, 2.792527, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549); -- 38363 (Area: 4728 - Difficulty: 0)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+2000, 38363, 654, 4714, 4728, 3, '188', 0, 0, 0, -1035.993, 1561.043, 45.80029, 1.780236, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38363 (Area: 4728 - Difficulty: 0)
 (@CGUID+2001, 38363, 654, 4714, 4728, 3, '188', 0, 0, 0, -1018.623, 1560.991, 43.57496, 0.418879, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38363 (Area: 4728 - Difficulty: 0)
 (@CGUID+2002, 38363, 654, 4714, 4728, 3, '188', 0, 0, 0, -1039.451, 1547.818, 46.79861, 2.775074, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38363 (Area: 4728 - Difficulty: 0)
@@ -2632,7 +2632,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+2248, 38363, 654, 4714, 4728, 3, '188', 0, 0, 0, -1272.5, 1512.969, 19.07019, 2.75762, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38363 (Area: 4728 - Difficulty: 0)
 (@CGUID+2249, 38364, 654, 4714, 4728, 3, '188', 0, 0, 0, -1268.118, 1553.048, 20.10586, 5.778532, 7200, 10, 0, 0, 0, 1, 0, 0, 0, 25549); -- 38364 (Area: 4728 - Difficulty: 0) (possible waypoints or random movement)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+2250, 38287, 654, 4714, 4728, 3, '188', 0, 0, 0, -1264.719, 1562.901, 20.30297, 3.351032, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38287 (Area: 4728 - Difficulty: 0)
 (@CGUID+2251, 38363, 654, 4714, 4728, 3, '188', 0, 0, 0, -1282.337, 1533.727, 17.56663, 3.106686, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38363 (Area: 4728 - Difficulty: 0)
 (@CGUID+2252, 38363, 654, 4714, 4728, 3, '188', 0, 0, 0, -1289.859, 1529.573, 17.08989, 3.106686, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 38363 (Area: 4728 - Difficulty: 0)
@@ -2884,7 +2884,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+2498, 37889, 654, 4714, 4727, 3, '188', 0, 0, 0, -1699.642, 1800.56, -21.78653, 2.785638, 7200, 10, 0, 0, 0, 1, 0, 0, 0, 25549), -- 37889 (Area: 4727 - Difficulty: 0) (possible waypoints or random movement)
 (@CGUID+2499, 37884, 654, 4714, 4727, 3, '188', 0, 0, 0, -1571.916, 1896.574, 5.549046, 0.2620508, 7200, 10, 0, 0, 0, 1, 0, 0, 0, 25549); -- 37884 (Area: 4727 - Difficulty: 0) (possible waypoints or random movement)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+2500, 37884, 654, 4714, 4727, 3, '188', 0, 0, 0, -1569.854, 1878.54, 4.32053, 3.125969, 7200, 10, 0, 0, 0, 1, 0, 0, 0, 25549), -- 37884 (Area: 4727 - Difficulty: 0) (possible waypoints or random movement)
 (@CGUID+2501, 37884, 654, 4714, 4727, 3, '188', 0, 0, 0, -1578.601, 1853.604, 4.46961, 1.637047, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 37884 (Area: 4727 - Difficulty: 0)
 (@CGUID+2502, 37884, 654, 4714, 4727, 3, '188', 0, 0, 0, -1556.021, 1914.866, 4.54335, 3.448617, 7200, 10, 0, 0, 0, 1, 0, 0, 0, 25549), -- 37884 (Area: 4727 - Difficulty: 0) (possible waypoints or random movement)
@@ -3136,7 +3136,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+2748, 37938, 0, 4714, 4725, 3, '189', 0, 0, 0, -0.33612, 0, 1.67892, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 37938 (Area: 4725 - Difficulty: 0)
 (@CGUID+2749, 37939, 654, 4714, 4725, 3, '189', 0, 0, 0, -1255.779, 2459.634, 62.63497, 5.563642, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549); -- 37939 (Area: 4725 - Difficulty: 0)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+2750, 37939, 654, 4714, 4725, 3, '189', 0, 0, 0, -1250.009, 2432.521, 57.2538, 1.137681, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 37939 (Area: 4725 - Difficulty: 0)
 (@CGUID+2751, 37916, 654, 4714, 4725, 3, '189', 0, 0, 0, -1251.026, 2463.527, 62.86137, 5.207511, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 37916 (Area: 4725 - Difficulty: 0)
 (@CGUID+2752, 37938, 0, 4714, 4725, 3, '189', 0, 0, 0, -0.33612, 0, 1.67892, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 37938 (Area: 4725 - Difficulty: 0)
@@ -3388,7 +3388,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+2998, 37939, 654, 4714, 4725, 3, '189', 0, 0, 0, -1332.32, 2610.76, 94.91334, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 37939 (Area: 4725 - Difficulty: 0)
 (@CGUID+2999, 37938, 0, 4714, 4725, 3, '189', 0, 0, 0, -0.33612, 0, 1.67892, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549); -- 37938 (Area: 4725 - Difficulty: 0)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+3000, 37938, 654, 4714, 4725, 3, '189', 0, 0, 0, -1296.243, 2575.61, 84.49677, 5.13934, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 37938 (Area: 4725 - Difficulty: 0)
 (@CGUID+3001, 37939, 654, 4714, 4725, 3, '189', 0, 0, 0, -1294.852, 2572.206, 83.88847, 5.215789, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 37939 (Area: 4725 - Difficulty: 0)
 (@CGUID+3002, 37939, 654, 4714, 4725, 3, '189', 0, 0, 0, -1322.92, 2605.29, 91.57954, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 37939 (Area: 4725 - Difficulty: 0)
@@ -3640,7 +3640,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+3248, 42141, 0, 4714, 0, 3, '191', 0, 0, 0, -10.75098, -14.25977, 33.87918, 0.2143321, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 42141 (Area: 0 - Difficulty: 0)
 (@CGUID+3249, 42141, 0, 4714, 0, 3, '191', 0, 0, 0, 13.19697, 24.50426, 89.93759, 3.647738, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549); -- 42141 (Area: 0 - Difficulty: 0)
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `VerifiedBuild`) VALUES
 (@CGUID+3250, 43703, 0, 4714, 0, 3, '191', 0, 0, 0, -0.132851, 4.12238, 84.79704, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 43703 (Area: 0 - Difficulty: 0)
 (@CGUID+3251, 42141, 0, 4714, 0, 3, '191', 0, 0, 0, 0.115611, 25.2395, 89.98874, 2.86234, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 42141 (Area: 0 - Difficulty: 0)
 (@CGUID+3252, 43793, 0, 4714, 0, 3, '191', 0, 0, 0, 9.19614, 4.57085, 84.79704, 0, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 25549), -- 43793 (Area: 0 - Difficulty: 0)

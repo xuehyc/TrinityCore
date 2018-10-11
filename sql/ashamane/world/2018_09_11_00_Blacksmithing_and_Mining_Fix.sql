@@ -43,7 +43,7 @@ UPDATE `creature` SET `PhaseId`=3200 WHERE `id`=92183;
 UPDATE `creature` SET `PhaseId`=3204 WHERE `id`=92438;
 DELETE FROM `creature` WHERE `id`=97261;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+01 AND @CGUID+16;
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
 (@CGUID+01, 97261, 1220, 0, 0, 3, 3201, 0, 0, 0, -740.861023, 4509.919922, 731.080994, 5.534260, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 25996),
 (@CGUID+02, 92183, 1220, 0, 0, 3, 3202, 0, 0, 0, -740.861023, 4509.919922, 731.080994, 5.534260, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 25996),
 (@CGUID+03, 96763, 1220, 0, 0, 3, 0, 0, 0, 0, 2954.992920, 7405.303711, 65.204597, 3.939429, 7200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 25996),
@@ -53,7 +53,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
  
 -- Spawn missing gameobject
 DELETE FROM `gameobject` WHERE `guid` BETWEEN @GGUID+01 AND @GGUID+19;
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) VALUES
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `PhaseId`, `PhaseGroup`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) VALUES
 (@GGUID+1, 267019, 1220, 0, 0, 1, 0, 0, 2981.59, 3768.4, 1349.34, 4.65384, -0, -0, -0.727502, 0.686106, 300, 255, 1, 0, '', 0),
 (@GGUID+2, 241510, 1220, 0, 0, 1, 0, 0, -747.525, 4505.13, 731.692, 2.01042, -0, -0, -0.844274, -0.535911, 300, 255, 1, 0, '', 0),
 (@GGUID+3, 241691, 1220, 0, 0, 1, 0, 0, 1470.03, 4999.18, 183.749, 4.93248, -0, -0, -0.625172, 0.780487, 300, 255, 1, 0, '', 0),
