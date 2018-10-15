@@ -2480,7 +2480,7 @@ UPDATE `spell_areatrigger` SET `DecalPropertiesId`=0, `TimeToTarget`=10000, `Tim
 UPDATE `spell_areatrigger` SET `DecalPropertiesId`=0, `TimeToTarget`=10000, `TimeToTargetScale`=10000, `VerifiedBuild`=26365 WHERE (`SpellMiscId`=8158 AND `AreaTriggerId`=12383); -- SpellId : 0
 
 DELETE FROM `conversation_line_template` WHERE `Id` IN (6413, 6412, 6411, 6410, 6819, 8706, 6818, 6817, 6816, 8190, 8189, 8188, 8187, 4304, 4303, 4302, 4301, 4300, 4299, 4308, 4307, 4306, 4305);
-INSERT INTO `conversation_line_template` (`Id`, `StartTime`, `UiCameraID`, `ActorIdx`, `Unk`, `VerifiedBuild`) VALUES
+INSERT INTO `conversation_line_template` (`Id`, `StartTime`, `UiCameraID`, `ActorIdx`, `Flags`, `VerifiedBuild`) VALUES
 (6413, 5804, 0, 0, 8252, 26365),
 (6412, 0, 0, 0, 0, 26365),
 (6411, 6184, 693732103, 0, 0, 26365),
