@@ -2243,12 +2243,12 @@ bool ScriptMgr::OnCriteriaCheck(uint32 scriptId, Player* source, Unit* target)
 }
 
 //Called From Unit::DealDamage
-uint32 ScriptMgr::DealDamage(Unit* AttackerUnit, Unit *pVictim, uint32 damage, DamageEffectType damagetype)
+/*uint32 ScriptMgr::DealDamage(Unit* AttackerUnit, Unit *pVictim, uint32 damage, DamageEffectType damagetype)
 {
 	FOR_SCRIPTS_RET(UnitScript, itr, end, damage)
 		damage = itr->second->DealDamage(AttackerUnit, pVictim, damage, damagetype);
 	return damage;
-}
+}*/
 
 // Player
 void ScriptMgr::OnPVPKill(Player* killer, Player* killed)
@@ -2676,11 +2676,11 @@ void ScriptMgr::ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& dama
     FOREACH_SCRIPT(PlayerScript)->ModifySpellDamageTaken(target, attacker, damage, spellInfo);
 }
 
-void ScriptMgr::ModifyHealRecieved(HealInfo& healInfo)
+/*void ScriptMgr::ModifyHealRecieved(HealInfo& healInfo)
 {
 	FOREACH_SCRIPT(UnitScript)->ModifyHealRecieved(healInfo);
     FOREACH_SCRIPT(PlayerScript)->ModifyHealRecieved(healInfo);
-}
+}*/
 
 AllMapScript::AllMapScript(const char* name)
 	: ScriptObject(name)

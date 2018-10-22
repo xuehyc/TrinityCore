@@ -73,6 +73,7 @@ reward range of the group and an option to only reward the player that got the k
 #include "Config.h"
 #include "Group.h"
 #include "Chat.h"
+#include "World.h"
 
 class MoneyForKills : public PlayerScript
 {

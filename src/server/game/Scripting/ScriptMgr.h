@@ -20,17 +20,10 @@
 #define SC_SCRIPTMGR_H
 
 #include "Common.h"
-#include <atomic>
-#include "DB2Stores.h"
-#include "Player.h"
-#include "QuestDef.h"
-#include "SharedDefines.h"
-#include "World.h"
-#include "Weather.h"
 #include "ObjectGuid.h"
 #include <vector>
 #include <boost/property_tree/ptree.hpp>
-#include "Unit.h"
+//#include "Unit.h"
 
 class AccountMgr;
 class Area;
@@ -80,7 +73,6 @@ class ZoneScript;
 
 struct AreaTriggerEntry;
 struct AuctionEntry;
-struct CreatureTemplate;
 struct ConditionSourceInfo;
 struct Condition;
 struct CreatureTemplate;
@@ -329,17 +321,17 @@ class TC_GAME_API FormulaScript : public ScriptObject
 
 class AllMapScript : public ScriptObject
 {
-	protected:
-	
-		AllMapScript(const char* name);
-	
-	public:
-	
-		// Called when a player enters any Map
-			virtual void OnPlayerEnterAll(Map* /*map*/, Player* /*player*/) { }
-			
-		// Called when a player leave any Map
-			virtual void OnPlayerLeaveAll(Map* /*map*/, Player* /*player*/) { }
+protected:
+
+    AllMapScript(const char* name);
+
+public:
+
+    // Called when a player enters any Map
+    virtual void OnPlayerEnterAll(Map* /*map*/, Player* /*player*/) { }
+
+    // Called when a player leave any Map
+    virtual void OnPlayerLeaveAll(Map* /*map*/, Player* /*player*/) { }
 };
 
 template<class TMap>
@@ -448,11 +440,11 @@ class TC_GAME_API UnitScript : public ScriptObject
         // Called when Spell Damage is being Dealt
         virtual void ModifySpellDamageTaken(Unit* /*target*/, Unit* /*attacker*/, int32& /*damage*/, SpellInfo const* /*spellInfo*/) { }
 
-		// Called when Heal is Recieved
-		virtual void ModifyHealRecieved(HealInfo& healInfo) { }
-		
-		//VAS AutoBalance
-		virtual uint32 DealDamage(Unit* AttackerUnit, Unit *pVictim, uint32 damage, DamageEffectType damagetype) { return damage; }
+        // Called when Heal is Recieved
+        //virtual void ModifyHealRecieved(HealInfo& healInfo) { }
+
+        //VAS AutoBalance
+        //virtual uint32 DealDamage(Unit* AttackerUnit, Unit *pVictim, uint32 damage, DamageEffectType damagetype) { return damage; }
 };
 
 class TC_GAME_API CreatureScript : public UnitScript, public UpdatableScript<Creature>
@@ -495,19 +487,20 @@ class TC_GAME_API CreatureScript : public UnitScript, public UpdatableScript<Cre
 };
 
 class AllCreatureScript : public ScriptObject
-	{
-	protected:
-	
-		AllCreatureScript(const char* name);
-		
-	public:
-	
-		// Called from End of Creature Update.
-		virtual void OnAllCreatureUpdate(Creature* /*creature*/, uint32 /*diff*/) { }
-			
-		// Called from End of Creature SelectLevel.
-		virtual void Creature_SelectLevel(const CreatureTemplate* /*cinfo*/, Creature* /*creature*/) { }
+{
+protected:
+
+    AllCreatureScript(const char* name);
+
+public:
+
+    // Called from End of Creature Update.
+    virtual void OnAllCreatureUpdate(Creature* /*creature*/, uint32 /*diff*/) { }
+
+    // Called from End of Creature SelectLevel.
+    virtual void Creature_SelectLevel(const CreatureTemplate* /*cinfo*/, Creature* /*creature*/) { }
 };
+
 
 class TC_GAME_API GameObjectScript : public ScriptObject, public UpdatableScript<GameObject>
 {
@@ -726,40 +719,7 @@ class TC_GAME_API PlayerScript : public UnitScript
     public:
 
         // Called when a player kills another player
-		virtual void OnPVPKill(Player* killer, Player* killed)
-		{
-			uint32 LowRate = sWorld->getRate(CONFIG_XP_FOR_PVP_LOW_RATE);
-			uint32 HighRate = sWorld->getRate(CONFIG_XP_FOR_PVP_HIGH_RATE);
-			uint32 killerlvl = killer->getLevel();
-			uint32 killedlvl = killed->getLevel();
-			int32 diff = killerlvl - killedlvl;
-			uint32 XPLow = (killedlvl * 5 + 45)*(1 + 0.05*diff)*LowRate;
-			uint32 XPHigh = (killedlvl * 5 + 45)*(1 + 0.05*diff)*HighRate;
-			uint32 minusgold = killer->GetMoney() - (diff * 10000);
-			uint32 plusgold = killed->GetMoney() + (diff * 10000);
-			uint32 killergold = killer->GetMoney();
-			uint32 killedgold = killed->GetMoney();
-			uint32 plusgold2 = killedgold + killergold;
-
-			if (killerlvl < killedlvl + 1)
-				killer->GiveXP(XPHigh, killed);
-			else
-				if (diff > 10)
-					if (killergold > minusgold)
-					{
-						killer->SetMoney(minusgold);
-						killed->SetMoney(plusgold);
-					}
-					else
-					{
-						killed->SetMoney(plusgold2);
-						killer->SetMoney(0);
-					}
-				else
-					if (0  < diff && diff <10)
-						killer->GiveXP(XPLow, killed);
-			return;
-		}
+        virtual void OnPVPKill(Player* /*killer*/, Player* /*killed*/) { }
 
         // Called when a player kills a creature
         virtual void OnCreatureKill(Player* /*killer*/, Creature* /*killed*/) { }
@@ -1149,10 +1109,10 @@ class TC_GAME_API ScriptMgr
     public: /* Unloading */
 
         void Unload();
-		
-		public: /* {VAS} Script Hooks */
-		
-		float VAS_Script_Hooks();
+
+    public: /* {VAS} Script Hooks */
+
+        float VAS_Script_Hooks();
 
     public: /* SpellScriptLoader */
 
@@ -1191,9 +1151,8 @@ class TC_GAME_API ScriptMgr
         void OnGainCalculation(uint32& gain, Player* player, Unit* unit);
         void OnGroupRateCalculation(float& rate, uint32 count, bool isRaid);
 
-        
     public: /* AllScript */
-	
+
         void OnPlayerEnterMapAll(Map* map, Player* player);
         void OnPlayerLeaveMapAll(Map* map, Player* player);
 
@@ -1219,10 +1178,10 @@ class TC_GAME_API ScriptMgr
         bool OnItemExpire(Player* player, ItemTemplate const* proto);
         bool OnItemRemove(Player* player, Item* item);
 
-	public: /* AllCreatureScript */
+    public: /* AllCreatureScript */
 		
-		void OnAllCreatureUpdate(Creature* creature, uint32 diff);
-		void Creature_SelectLevel(const CreatureTemplate *cinfo, Creature* creature);
+        void OnAllCreatureUpdate(Creature* creature, uint32 diff);
+        void Creature_SelectLevel(const CreatureTemplate *cinfo, Creature* creature);
 
     public: /* CreatureScript */
 
@@ -1410,8 +1369,8 @@ class TC_GAME_API ScriptMgr
         void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage);
         void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage);
         void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo);
-		void ModifyHealRecieved(HealInfo& healInfo);
-		uint32 DealDamage(Unit* AttackerUnit, Unit *pVictim, uint32 damage, DamageEffectType damagetype);
+        //void ModifyHealRecieved(HealInfo& healInfo);
+        //uint32 DealDamage(Unit* AttackerUnit, Unit *pVictim, uint32 damage, DamageEffectType damagetype);
 
     public: /* AreaTriggerEntityScript */
 

@@ -1,18 +1,14 @@
-#include "Chat.h"
-#include "WorldSession.h"
-#include "Player.h"
 #include "ScriptMgr.h"
 #include "Chat.h"
 #include "DatabaseEnv.h"
-#include "Item.h"
-#include "Language.h"
-#include "Mail.h"
+#include "DB2Stores.h"
 #include "ObjectMgr.h"
-#include "Pet.h"
 #include "Player.h"
 #include "RBAC.h"
-#include "WorldSession.h"
+#include "ReputationMgr.h"
+#include "World.h"
 #include "Config.h"
+
 
 class quest_complete_command : public CommandScript
 {

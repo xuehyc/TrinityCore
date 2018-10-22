@@ -63,6 +63,7 @@ config file for quick modifications.
 #include "Config.h"
 #include "Player.h"
 #include "Chat.h"
+#include "World.h"
 
 class CongratsOnLevel : public PlayerScript
 {

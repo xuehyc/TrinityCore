@@ -13,7 +13,7 @@
 #include "RBAC.h"
 #include "WorldSession.h"
 #include "Config.h"
-
+#include "World.h"
 
 const char* CLASS_ICON;
 const char* SPEC_ICON;

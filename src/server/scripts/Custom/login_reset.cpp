@@ -2,6 +2,7 @@
 #include "Config.h"
 #include "GridNotifiersImpl.h"
 #include "SpellHistory.h"
+#include "World.h"
 
 class login_script : public PlayerScript
 {
