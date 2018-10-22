@@ -7544,8 +7544,12 @@ void Player::UpdateZone(Area* oldArea)
             sBattlefieldMgr->HandlePlayerLeaveZone(this, oldZone);
         }
 
-        sOutdoorPvPMgr->HandlePlayerEnterZone(this, newZone);
-        sBattlefieldMgr->HandlePlayerEnterZone(this, newZone);
+        if (newZone)
+        {
+            sOutdoorPvPMgr->HandlePlayerEnterZone(this, newZone);
+            sBattlefieldMgr->HandlePlayerEnterZone(this, newZone);
+        }
+
         SendInitWorldStates();              // only if really enters to new zone, not just area change, works strange...
         if (Guild* guild = GetGuild())
             guild->UpdateMemberData(this, GUILD_MEMBER_DATA_ZONEID, GetZoneId());
@@ -7578,10 +7582,12 @@ void Player::UpdateZone(Area* oldArea)
 
     GetMap()->SendZoneDynamicInfo(newZoneId, this);
 
-    // in PvP, any not controlled zone (except zone->team == 6, default case)
-    // in PvE, only opposition team capital
-    switch (zoneEntry->FactionGroupMask)
+    if (zoneEntry)
     {
+        // in PvP, any not controlled zone (except zone->team == 6, default case)
+        // in PvE, only opposition team capital
+        switch (zoneEntry->FactionGroupMask)
+        {
         case AREATEAM_ALLY:
             pvpInfo.IsInHostileArea = GetTeam() != ALLIANCE && (sWorld->IsPvPRealm() || zoneEntry->Flags[0] & AREA_FLAG_CAPITAL);
             break;
@@ -7595,12 +7601,13 @@ void Player::UpdateZone(Area* oldArea)
         default:                                            // 6 in fact
             pvpInfo.IsInHostileArea = false;
             break;
+        }
     }
 
     // Treat players having a quest flagging for PvP as always in hostile area
     pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest();
 
-    if (zoneEntry->Flags[0] & AREA_FLAG_CAPITAL) // Is in a capital city
+    if (zoneEntry && zoneEntry->Flags[0] & AREA_FLAG_CAPITAL) // Is in a capital city
     {
         if (!pvpInfo.IsHostile || zoneEntry->IsSanctuary())
             _restMgr->SetRestFlag(REST_FLAG_IN_CITY);
