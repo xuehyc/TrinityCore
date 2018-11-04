@@ -195,8 +195,16 @@ namespace {
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Force Teleport |rmodule is active.");
                 }
+                if (sConfigMgr->GetBoolDefault("Custom.FastFishing", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00Custom FastFishing |rmodule is active.");
+                }
+                if (sConfigMgr->GetBoolDefault("WorldREST.Enabled", true))
+                {
+                    ChatHandler(player->GetSession()).SendSysMessage("|cff4CFF00WorldToDiscord |rmodule is active. Join to |cffFF0000world |r channel to enable the chat with other SPP users.");
+                }
             }
-            ChatHandler(player->GetSession()).SendSysMessage("This server is based on |cffFF0000Single Player Project - AshamaneCore |rrepack.");
+            ChatHandler(player->GetSession()).SendSysMessage("This server based on |cffFF0000Single Player Project - AshamaneCore |rrepack.");
             ChatHandler(player->GetSession()).SendSysMessage("Website:|cffADD8E6 https://www.patreon.com/conan513 |r");
         }
     };
@@ -350,6 +358,14 @@ public:
         if (sConfigMgr->GetBoolDefault("Force.Starting.Level", true))
         {
             TC_LOG_INFO("server.loading", "- Force Starting Level");
+        }
+        if (sConfigMgr->GetBoolDefault("Custom.FastFishing", true))
+        {
+            TC_LOG_INFO("server.loading", "- Custom FastFishing");
+        }
+        if (sConfigMgr->GetBoolDefault("WorldREST.Enabled", true))
+        {
+            TC_LOG_INFO("server.loading", "- WorldToDiscord");
         }
         TC_LOG_INFO("server.loading", ".");
         TC_LOG_INFO("server.loading", "Now you ready to play.");
