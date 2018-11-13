@@ -338,7 +338,7 @@ UPDATE `gameobject_template` SET `Data8`=39699 WHERE `entry`=241635;
 UPDATE `gameobject_template` SET `Data8`=39699 WHERE `entry`=241634;
 UPDATE `gameobject_template` SET `Data8`=39699 WHERE `entry`=241633;
  
-UPDATE `gameobject_loot_template` SET `Item`=124405 WHERE `Entry`=241633;
+-- UPDATE `gameobject_loot_template` SET `Item`=124405 WHERE `Entry`=241633;
  
 -- https://www.wowhead.com/npc=92489/mei-francis
 -- Quest 38523: Leystone Hoofplates
