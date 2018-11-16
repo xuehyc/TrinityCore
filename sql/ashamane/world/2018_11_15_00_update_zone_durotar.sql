@@ -9,7 +9,7 @@ UPDATE `creature_template` SET `minlevel`=5, `maxlevel`=20 WHERE `entry` IN (392
 -- https://www.wowhead.com/npc=3124/scorpid-worker 			
 -- https://www.wowhead.com/npc=3281/sarkoth 	
 DELETE FROM `creature_loot_template` WHERE `Item`=4862;			
-INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Change`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES 
+INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES 
 (3124, 4862, 0, 88.025199, 1, 1, 0, 1, 1, ''),
 (3281, 4862, 0,  6.209720, 1, 1, 0, 1, 1, '');
  
@@ -17,7 +17,7 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Change`, `Q
 -- https://www.wowhead.com/npc=1512/duskbat 			
 -- https://www.wowhead.com/npc=1513/mangy-duskbat
 DELETE FROM `creature_loot_template` WHERE `Item`=3264;			
-INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Change`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES 
+INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES 
 (1512, 4862, 0, 94.073679, 1, 1, 0, 1, 1, ''),
 (1513, 4862, 0, 85.870376, 1, 1, 0, 1, 1, '');
 
