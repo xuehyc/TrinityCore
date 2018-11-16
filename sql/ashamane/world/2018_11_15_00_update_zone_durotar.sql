@@ -2,8 +2,9 @@
 UPDATE `creature_template` SET `IconName`='Attack' WHERE `entry`=3102;
 
 -- https://www.wowhead.com/npc=39245/northwatch-lug
+-- https://www.wowhead.com/npc=39249/northwatch-lug
 -- https://www.wowhead.com/npc=39251/northwatch-supply-crate
-UPDATE `creature_template` SET `minlevel`=5, `maxlevel`=20 WHERE `entry` IN (39245, 39251);
+UPDATE `creature_template` SET `minlevel`=5, `maxlevel`=20 WHERE `entry` IN (39245, 39249, 39251);
 
 -- https://www.wowhead.com/item=4862/scorpid-worker-tail
 -- https://www.wowhead.com/npc=3124/scorpid-worker 			
