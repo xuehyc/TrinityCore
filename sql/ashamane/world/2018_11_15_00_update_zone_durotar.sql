@@ -27,8 +27,9 @@ UPDATE `quest_template_addon` SET `PrevQuestID`=24768 WHERE `ID`=24769;
 
 -- https://www.wowhead.com/quest=792/vile-familiars
 -- https://www.wowhead.com/quest=24766/the-arts-of-a-druid
-DELETE FROM `quest_template` WHERE `ID` IN (792, 24766);
-DELETE FROM `quest_template_addon` WHERE `ID` IN (792, 24766);
-DELETE FROM `quest_template_locale` WHERE `ID` IN (792, 24766);
-DELETE FROM `quest_objectives` WHERE `QuestID` IN (792, 24766);
-DELETE FROM `quest_objectives_locale` WHERE `QuestId` IN (792, 24766);
+-- https://www.wowhead.com/quest=25189/spirits-be-praised
+DELETE FROM `quest_template` WHERE `ID` IN (792, 24766, 25189);
+DELETE FROM `quest_template_addon` WHERE `ID` IN (792, 24766, 25189);
+DELETE FROM `quest_template_locale` WHERE `ID` IN (792, 24766, 25189);
+DELETE FROM `quest_objectives` WHERE `QuestID` IN (792, 24766, 25189);
+DELETE FROM `quest_objectives_locale` WHERE `QuestId` IN (792, 24766, 25189);
