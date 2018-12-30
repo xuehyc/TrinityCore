@@ -1236,11 +1236,11 @@ class spell_dk_howling_blast_aoe : public SpellScript
             if (target->GetGUID() == tar)
                 PreventHitDamage();
             else
-			{
-				Unit* caster = GetCaster();
-				if (caster)
-					caster->CastSpell(target, SPELL_DK_FROST_FEVER, true);
-			}    
+            {
+                Unit* caster = GetCaster();
+                if (caster)
+                    caster->CastSpell(target, SPELL_DK_FROST_FEVER, true);
+            }
         }
     }
 
