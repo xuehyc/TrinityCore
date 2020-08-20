@@ -1,4 +1,4 @@
-TrinityCore uses (parts of or in whole) the following opensource software :
+WarheadCore uses (parts of or in whole) the following opensource software :
 
 Boost (external)
   http://www.boost.org

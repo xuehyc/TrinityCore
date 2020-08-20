@@ -1,4 +1,4 @@
-# This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
+# This file is part of the WarheadCore Project. See AUTHORS file for Copyright information
 # Copyright 2019 Josua Mayer <josua.mayer97@gmail.com>
 #
 # This file is free software; as a special exception the author gives

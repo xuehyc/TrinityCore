@@ -1,5 +1,5 @@
 /*
- * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
+ * This file is part of the WarheadCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1215,7 +1215,7 @@ int CliHandler::GetSessionDbLocaleIndex() const
 
 bool AddonChannelCommandHandler::ParseCommands(char const* str)
 {
-    if (memcmp(str, "TrinityCore\t", 12))
+    if (memcmp(str, "WarheadCore\t", 12))
         return false;
     char opcode = str[12];
     if (!opcode) // str[12] is opcode
@@ -1264,7 +1264,7 @@ void AddonChannelCommandHandler::Send(std::string const& msg)
 void AddonChannelCommandHandler::SendAck() // a Command acknowledged, no body
 {
     ASSERT(echo);
-    char ack[18] = "TrinityCore\ta";
+    char ack[18] = "WarheadCore\ta";
     memcpy(ack+13, echo, 4);
     ack[17] = '\0';
     Send(ack);
@@ -1274,7 +1274,7 @@ void AddonChannelCommandHandler::SendAck() // a Command acknowledged, no body
 void AddonChannelCommandHandler::SendOK() // o Command OK, no body
 {
     ASSERT(echo);
-    char ok[18] = "TrinityCore\to";
+    char ok[18] = "WarheadCore\to";
     memcpy(ok+13, echo, 4);
     ok[17] = '\0';
     Send(ok);
@@ -1283,7 +1283,7 @@ void AddonChannelCommandHandler::SendOK() // o Command OK, no body
 void AddonChannelCommandHandler::SendFailed() // f Command failed, no body
 {
     ASSERT(echo);
-    char fail[18] = "TrinityCore\tf";
+    char fail[18] = "WarheadCore\tf";
     memcpy(fail + 13, echo, 4);
     fail[17] = '\0';
     Send(fail);
@@ -1296,7 +1296,7 @@ void AddonChannelCommandHandler::SendSysMessage(char const* str, bool escapeChar
     if (!hadAck)
         SendAck();
 
-    std::string msg = "TrinityCore\tm";
+    std::string msg = "WarheadCore\tm";
     msg.append(echo, 4);
     std::string body(str);
     if (escapeCharacters)

@@ -1,5 +1,5 @@
 /*
- * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
+ * This file is part of the WarheadCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1061,7 +1061,7 @@ private:
                 _last_time_user_informed = getMSTime();
 
                 // Informs the user that the attached debugger is blocking the automatic script rebuild.
-                LOG_INFO("scripts.hotswap", "Your attached debugger is blocking the TrinityCore "
+                LOG_INFO("scripts.hotswap", "Your attached debugger is blocking the WarheadCore "
                     "automatic script rebuild, please detach it!");
             }
 

@@ -1,5 +1,5 @@
 /*
- * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
+ * This file is part of the WarheadCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -90,7 +90,7 @@ char const* GitRevision::GetFullDatabase()
 
 char const* GitRevision::GetFullVersion()
 {
-  return "TrinityCore rev. " VER_PRODUCTVERSION_STR
+  return "WarheadCore rev. " VER_PRODUCTVERSION_STR
     " (" WARHEAD_PLATFORM_STR ", " _BUILD_DIRECTIVE ", " WARHEAD_LINKAGE_TYPE_STR ")";
 }
 
