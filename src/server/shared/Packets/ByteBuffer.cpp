@@ -55,7 +55,7 @@ ByteBufferSourceException::ByteBufferSourceException(size_t pos, size_t size,
 
 ByteBufferInvalidValueException::ByteBufferInvalidValueException(char const* type, char const* value)
 {
-    message().assign(Trinity::StringFormat("Invalid %s value (%s) found in ByteBuffer", type, value));
+    message().assign(Warhead::StringFormat("Invalid %s value (%s) found in ByteBuffer", type, value));
 }
 
 ByteBuffer& ByteBuffer::operator>>(float& value)
@@ -156,7 +156,7 @@ void ByteBuffer::print_storage() const
         o << read<uint8>(i) << " - ";
     o << " ";
 
-    TC_LOG_TRACE("network", "%s", o.str().c_str());
+    LOG_TRACE("network", "%s", o.str().c_str());
 }
 
 void ByteBuffer::textlike() const
@@ -173,7 +173,7 @@ void ByteBuffer::textlike() const
         o << buf;
     }
     o << " ";
-    TC_LOG_TRACE("network", "%s", o.str().c_str());
+    LOG_TRACE("network", "%s", o.str().c_str());
 }
 
 void ByteBuffer::hexlike() const
@@ -205,5 +205,5 @@ void ByteBuffer::hexlike() const
         o << buf;
     }
     o << " ";
-    TC_LOG_TRACE("network", "%s", o.str().c_str());
+    LOG_TRACE("network", "%s", o.str().c_str());
 }

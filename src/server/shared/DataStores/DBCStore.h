@@ -24,7 +24,7 @@
 #include <vector>
 
  /// Interface class for common access
-class TC_SHARED_API DBCStorageBase
+class WH_SHARED_API DBCStorageBase
 {
     public:
         DBCStorageBase(char const* fmt);

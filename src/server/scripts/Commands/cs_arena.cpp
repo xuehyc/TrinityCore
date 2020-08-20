@@ -145,10 +145,10 @@ public:
         std::string name = arena->GetName();
         arena->Disband();
         if (handler->GetSession())
-            TC_LOG_DEBUG("bg.arena", "GameMaster: %s %s disbanded arena team type: %u [Id: %u].",
+            LOG_DEBUG("bg.arena", "GameMaster: %s %s disbanded arena team type: %u [Id: %u].",
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(), arena->GetType(), teamId);
         else
-            TC_LOG_DEBUG("bg.arena", "Console: disbanded arena team type: %u [Id: %u].", arena->GetType(), teamId);
+            LOG_DEBUG("bg.arena", "Console: disbanded arena team type: %u [Id: %u].", arena->GetType(), teamId);
 
         delete(arena);
 
@@ -210,10 +210,10 @@ public:
 
         handler->PSendSysMessage(LANG_ARENA_RENAME, arena->GetId(), oldArenaStr, newArenaStr);
         if (handler->GetSession())
-            TC_LOG_DEBUG("bg.arena", "GameMaster: %s %s rename arena team \"%s\"[Id: %u] to \"%s\"",
+            LOG_DEBUG("bg.arena", "GameMaster: %s %s rename arena team \"%s\"[Id: %u] to \"%s\"",
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(), oldArenaStr, arena->GetId(), newArenaStr);
         else
-            TC_LOG_DEBUG("bg.arena", "Console: rename arena team \"%s\"[Id: %u] to \"%s\"", oldArenaStr, arena->GetId(), newArenaStr);
+            LOG_DEBUG("bg.arena", "Console: rename arena team \"%s\"[Id: %u] to \"%s\"", oldArenaStr, arena->GetId(), newArenaStr);
 
         return true;
     }
@@ -286,10 +286,10 @@ public:
 
         handler->PSendSysMessage(LANG_ARENA_CAPTAIN, arena->GetName().c_str(), arena->GetId(), oldCaptainNameData->Name.c_str(), target->GetName().c_str());
         if (handler->GetSession())
-            TC_LOG_DEBUG("bg.arena", "GameMaster: %s %s promoted player: %s %s to leader of arena team \"%s\"[Id: %u]",
+            LOG_DEBUG("bg.arena", "GameMaster: %s %s promoted player: %s %s to leader of arena team \"%s\"[Id: %u]",
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(), target->GetName().c_str(), target->GetGUID().ToString().c_str(), arena->GetName().c_str(), arena->GetId());
         else
-            TC_LOG_DEBUG("bg.arena", "Console: promoted player: %s %s to leader of arena team \"%s\"[Id: %u]",
+            LOG_DEBUG("bg.arena", "Console: promoted player: %s %s to leader of arena team \"%s\"[Id: %u]",
                 target->GetName().c_str(), target->GetGUID().ToString().c_str(), arena->GetName().c_str(), arena->GetId());
 
         return true;

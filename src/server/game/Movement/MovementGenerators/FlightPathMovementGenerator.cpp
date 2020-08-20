@@ -79,7 +79,7 @@ void FlightPathMovementGenerator::DoReset(Player* owner)
 
     if (currentNodeId == end)
     {
-        TC_LOG_DEBUG("movement.flightpath", "FlightPathMovementGenerator::DoReset: trying to start a flypath from the end point. %s", owner->GetDebugInfo().c_str());
+        LOG_DEBUG("movement.flightpath", "FlightPathMovementGenerator::DoReset: trying to start a flypath from the end point. %s", owner->GetDebugInfo().c_str());
         return;
     }
 
@@ -259,7 +259,7 @@ void FlightPathMovementGenerator::DoEventIfAny(Player* owner, TaxiPathNodeEntry 
 
     if (uint32 eventid = departure ? node->DepartureEventID : node->ArrivalEventID)
     {
-        TC_LOG_DEBUG("maps.script", "FlightPathMovementGenerator::DoEventIfAny: taxi %s event %u of node %u of path %u for player %s", departure ? "departure" : "arrival", eventid, node->NodeIndex, node->PathID, owner->GetName().c_str());
+        LOG_DEBUG("maps.script", "FlightPathMovementGenerator::DoEventIfAny: taxi %s event %u of node %u of path %u for player %s", departure ? "departure" : "arrival", eventid, node->NodeIndex, node->PathID, owner->GetName().c_str());
         owner->GetMap()->ScriptsStart(sEventScripts, eventid, owner, owner);
     }
 }
@@ -289,11 +289,11 @@ void FlightPathMovementGenerator::PreloadEndGrid()
     // Load the grid
     if (endMap)
     {
-        TC_LOG_DEBUG("movement.flightpath", "FlightPathMovementGenerator::PreloadEndGrid: preloading grid (%f, %f) for map %u at node index %u/%u", _endGridX, _endGridY, _endMapId, _preloadTargetNode, uint32(_path.size() - 1));
+        LOG_DEBUG("movement.flightpath", "FlightPathMovementGenerator::PreloadEndGrid: preloading grid (%f, %f) for map %u at node index %u/%u", _endGridX, _endGridY, _endMapId, _preloadTargetNode, uint32(_path.size() - 1));
         endMap->LoadGrid(_endGridX, _endGridY);
     }
     else
-        TC_LOG_DEBUG("movement.flightpath", "FlightPathMovementGenerator::PreloadEndGrid: unable to determine map to preload flightmaster grid");
+        LOG_DEBUG("movement.flightpath", "FlightPathMovementGenerator::PreloadEndGrid: unable to determine map to preload flightmaster grid");
 }
 
 uint32 FlightPathMovementGenerator::GetPathId(size_t index) const

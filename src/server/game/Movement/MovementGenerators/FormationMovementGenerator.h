@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_FORMATIONMOVEMENTGENERATOR_H
-#define TRINITY_FORMATIONMOVEMENTGENERATOR_H
+#ifndef WARHEAD_FORMATIONMOVEMENTGENERATOR_H
+#define WARHEAD_FORMATIONMOVEMENTGENERATOR_H
 
 #include "AbstractFollower.h"
 #include "MovementGenerator.h"
@@ -54,4 +54,4 @@ class FormationMovementGenerator : public MovementGeneratorMedium<Creature, Form
         TimeTracker _nextMoveTimer;
 };
 
-#endif // TRINITY_FORMATIONMOVEMENTGENERATOR_H
+#endif // WARHEAD_FORMATIONMOVEMENTGENERATOR_H

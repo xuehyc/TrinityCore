@@ -81,7 +81,7 @@ WorldObject::~WorldObject()
     {
         if (GetTypeId() == TYPEID_CORPSE)
         {
-            TC_LOG_FATAL("misc", "WorldObject::~WorldObject Corpse Type: %d (%s) deleted but still in map!!",
+            LOG_FATAL("misc", "WorldObject::~WorldObject Corpse Type: %d (%s) deleted but still in map!!",
                 ToCorpse()->GetType(), GetGUID().ToString().c_str());
             ABORT();
         }
@@ -93,15 +93,15 @@ Object::~Object()
 {
     if (IsInWorld())
     {
-        TC_LOG_FATAL("misc", "Object::~Object %s deleted but still in world!!", GetGUID().ToString().c_str());
+        LOG_FATAL("misc", "Object::~Object %s deleted but still in world!!", GetGUID().ToString().c_str());
         if (isType(TYPEMASK_ITEM))
-            TC_LOG_FATAL("misc", "Item slot %u", ((Item*)this)->GetSlot());
+            LOG_FATAL("misc", "Item slot %u", ((Item*)this)->GetSlot());
         ABORT();
     }
 
     if (m_objectUpdated)
     {
-        TC_LOG_FATAL("misc", "Object::~Object %s deleted but still in update list!!", GetGUID().ToString().c_str());
+        LOG_FATAL("misc", "Object::~Object %s deleted but still in update list!!", GetGUID().ToString().c_str());
         ABORT();
     }
 
@@ -193,7 +193,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
             flags |= UPDATEFLAG_HAS_TARGET;
     }
 
-    //TC_LOG_DEBUG("BuildCreateUpdate: update-type: %u, object-type: %u got flags: %X, flags2: %X", updateType, m_objectTypeId, flags, flags2);
+    //LOG_DEBUG("BuildCreateUpdate: update-type: %u, object-type: %u got flags: %X, flags2: %X", updateType, m_objectTypeId, flags, flags2);
 
     ByteBuffer buf(500);
     buf << uint8(updateType);
@@ -919,7 +919,7 @@ void Object::ApplyModFlag64(uint16 index, uint64 flag, bool apply)
 
 bool Object::PrintIndexError(uint32 index, bool set) const
 {
-    TC_LOG_ERROR("misc", "Attempt to %s non-existing value field: %u (count: %u) for object typeid: %u type mask: %u", (set ? "set value to" : "get value from"), index, m_valuesCount, GetTypeId(), m_objectType);
+    LOG_ERROR("misc", "Attempt to %s non-existing value field: %u (count: %u) for object typeid: %u type mask: %u", (set ? "set value to" : "get value from"), index, m_valuesCount, GetTypeId(), m_objectType);
 
     // ASSERT must fail after function call
     return false;
@@ -934,32 +934,32 @@ std::string Object::GetDebugInfo() const
 
 void MovementInfo::OutDebug()
 {
-    TC_LOG_DEBUG("misc", "MOVEMENT INFO");
-    TC_LOG_DEBUG("misc", "%s", guid.ToString().c_str());
-    TC_LOG_DEBUG("misc", "flags %u", flags);
-    TC_LOG_DEBUG("misc", "flags2 %u", flags2);
-    TC_LOG_DEBUG("misc", "time %u current time " UI64FMTD "", flags2, uint64(::time(nullptr)));
-    TC_LOG_DEBUG("misc", "position: `%s`", pos.ToString().c_str());
+    LOG_DEBUG("misc", "MOVEMENT INFO");
+    LOG_DEBUG("misc", "%s", guid.ToString().c_str());
+    LOG_DEBUG("misc", "flags %u", flags);
+    LOG_DEBUG("misc", "flags2 %u", flags2);
+    LOG_DEBUG("misc", "time %u current time " UI64FMTD "", flags2, uint64(::time(nullptr)));
+    LOG_DEBUG("misc", "position: `%s`", pos.ToString().c_str());
     if (flags & MOVEMENTFLAG_ONTRANSPORT)
     {
-        TC_LOG_DEBUG("misc", "TRANSPORT:");
-        TC_LOG_DEBUG("misc", "%s", transport.guid.ToString().c_str());
-        TC_LOG_DEBUG("misc", "position: `%s`", transport.pos.ToString().c_str());
-        TC_LOG_DEBUG("misc", "seat: %i", transport.seat);
-        TC_LOG_DEBUG("misc", "time: %u", transport.time);
+        LOG_DEBUG("misc", "TRANSPORT:");
+        LOG_DEBUG("misc", "%s", transport.guid.ToString().c_str());
+        LOG_DEBUG("misc", "position: `%s`", transport.pos.ToString().c_str());
+        LOG_DEBUG("misc", "seat: %i", transport.seat);
+        LOG_DEBUG("misc", "time: %u", transport.time);
         if (flags2 & MOVEMENTFLAG2_INTERPOLATED_MOVEMENT)
-            TC_LOG_DEBUG("misc", "time2: %u", transport.time2);
+            LOG_DEBUG("misc", "time2: %u", transport.time2);
     }
 
     if ((flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || (flags2 & MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING))
-        TC_LOG_DEBUG("misc", "pitch: %f", pitch);
+        LOG_DEBUG("misc", "pitch: %f", pitch);
 
-    TC_LOG_DEBUG("misc", "fallTime: %u", fallTime);
+    LOG_DEBUG("misc", "fallTime: %u", fallTime);
     if (flags & MOVEMENTFLAG_FALLING)
-        TC_LOG_DEBUG("misc", "j_zspeed: %f j_sinAngle: %f j_cosAngle: %f j_xyspeed: %f", jump.zspeed, jump.sinAngle, jump.cosAngle, jump.xyspeed);
+        LOG_DEBUG("misc", "j_zspeed: %f j_sinAngle: %f j_cosAngle: %f j_xyspeed: %f", jump.zspeed, jump.sinAngle, jump.cosAngle, jump.xyspeed);
 
     if (flags & MOVEMENTFLAG_SPLINE_ELEVATION)
-        TC_LOG_DEBUG("misc", "splineElevation: %f", splineElevation);
+        LOG_DEBUG("misc", "splineElevation: %f", splineElevation);
 }
 
 WorldObject::WorldObject(bool isWorldObject) : Object(), WorldLocation(), LastUsedScriptID(0),
@@ -1406,8 +1406,8 @@ void WorldObject::GetRandomPoint(Position const& pos, float distance, float& ran
     rand_y = pos.m_positionY + new_dist * std::sin(angle);
     rand_z = pos.m_positionZ;
 
-    Trinity::NormalizeMapCoord(rand_x);
-    Trinity::NormalizeMapCoord(rand_y);
+    Warhead::NormalizeMapCoord(rand_x);
+    Warhead::NormalizeMapCoord(rand_y);
     UpdateGroundPositionZ(rand_x, rand_y, rand_z);            // update to LOS height if available
 }
 
@@ -1780,13 +1780,13 @@ void WorldObject::SendMessageToSet(WorldPacket const* data, bool self) const
 
 void WorldObject::SendMessageToSetInRange(WorldPacket const* data, float dist, bool /*self*/) const
 {
-    Trinity::MessageDistDeliverer notifier(this, data, dist);
+    Warhead::MessageDistDeliverer notifier(this, data, dist);
     Cell::VisitWorldObjects(this, notifier, dist);
 }
 
 void WorldObject::SendMessageToSet(WorldPacket const* data, Player const* skipped_rcvr) const
 {
-    Trinity::MessageDistDeliverer notifier(this, data, GetVisibilityRange(), false, skipped_rcvr);
+    Warhead::MessageDistDeliverer notifier(this, data, GetVisibilityRange(), false, skipped_rcvr);
     Cell::VisitWorldObjects(this, notifier, GetVisibilityRange());
 }
 
@@ -1805,7 +1805,7 @@ void WorldObject::SetMap(Map* map)
         return;
     if (m_currMap)
     {
-        TC_LOG_FATAL("misc", "WorldObject::SetMap: obj %u new map %u %u, old map %u %u", (uint32)GetTypeId(), map->GetId(), map->GetInstanceId(), m_currMap->GetId(), m_currMap->GetInstanceId());
+        LOG_FATAL("misc", "WorldObject::SetMap: obj %u new map %u %u, old map %u %u", (uint32)GetTypeId(), map->GetId(), map->GetInstanceId(), m_currMap->GetId(), m_currMap->GetInstanceId());
         ABORT();
     }
     m_currMap = map;
@@ -1834,7 +1834,7 @@ void WorldObject::AddObjectToRemoveList()
     Map* map = FindMap();
     if (!map)
     {
-        TC_LOG_ERROR("misc", "Object %s at attempt add to move list not have valid map (Id: %u).", GetGUID().ToString().c_str(), GetMapId());
+        LOG_ERROR("misc", "Object %s at attempt add to move list not have valid map (Id: %u).", GetGUID().ToString().c_str(), GetMapId());
         return;
     }
 
@@ -1932,7 +1932,7 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
     summon->InitSummon();
 
     // call MoveInLineOfSight for nearby creatures
-    Trinity::AIRelocationNotifier notifier(*summon);
+    Warhead::AIRelocationNotifier notifier(*summon);
     Cell::VisitAllObjects(summon, notifier, GetVisibilityRange());
 
     return summon;
@@ -2009,7 +2009,7 @@ GameObject* WorldObject::SummonGameObject(uint32 entry, Position const& pos, Qua
     GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(entry);
     if (!goinfo)
     {
-        TC_LOG_ERROR("sql.sql", "Gameobject template %u not found in database!", entry);
+        LOG_ERROR("sql.sql", "Gameobject template %u not found in database!", entry);
         return nullptr;
     }
 
@@ -2075,7 +2075,7 @@ void WorldObject::SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list 
     std::vector<TempSummonData> const* data = sObjectMgr->GetSummonGroup(GetEntry(), GetTypeId() == TYPEID_GAMEOBJECT ? SUMMONER_TYPE_GAMEOBJECT : SUMMONER_TYPE_CREATURE, group);
     if (!data)
     {
-        TC_LOG_WARN("scripts", "%s (%s) tried to summon non-existing summon group %u.", GetName().c_str(), GetGUID().ToString().c_str(), group);
+        LOG_WARN("scripts", "%s (%s) tried to summon non-existing summon group %u.", GetName().c_str(), GetGUID().ToString().c_str(), group);
         return;
     }
 
@@ -2088,8 +2088,8 @@ void WorldObject::SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list 
 Creature* WorldObject::FindNearestCreature(uint32 entry, float range, bool alive) const
 {
     Creature* creature = nullptr;
-    Trinity::NearestCreatureEntryWithLiveStateInObjectRangeCheck checker(*this, entry, alive, range);
-    Trinity::CreatureLastSearcher<Trinity::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(this, creature, checker);
+    Warhead::NearestCreatureEntryWithLiveStateInObjectRangeCheck checker(*this, entry, alive, range);
+    Warhead::CreatureLastSearcher<Warhead::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(this, creature, checker);
     Cell::VisitAllObjects(this, searcher, range);
     return creature;
 }
@@ -2097,8 +2097,8 @@ Creature* WorldObject::FindNearestCreature(uint32 entry, float range, bool alive
 GameObject* WorldObject::FindNearestGameObject(uint32 entry, float range) const
 {
     GameObject* go = nullptr;
-    Trinity::NearestGameObjectEntryInObjectRangeCheck checker(*this, entry, range);
-    Trinity::GameObjectLastSearcher<Trinity::NearestGameObjectEntryInObjectRangeCheck> searcher(this, go, checker);
+    Warhead::NearestGameObjectEntryInObjectRangeCheck checker(*this, entry, range);
+    Warhead::GameObjectLastSearcher<Warhead::NearestGameObjectEntryInObjectRangeCheck> searcher(this, go, checker);
     Cell::VisitGridObjects(this, searcher, range);
     return go;
 }
@@ -2106,8 +2106,8 @@ GameObject* WorldObject::FindNearestGameObject(uint32 entry, float range) const
 GameObject* WorldObject::FindNearestUnspawnedGameObject(uint32 entry, float range) const
 {
     GameObject* go = nullptr;
-    Trinity::NearestUnspawnedGameObjectEntryInObjectRangeCheck checker(*this, entry, range);
-    Trinity::GameObjectLastSearcher<Trinity::NearestUnspawnedGameObjectEntryInObjectRangeCheck> searcher(this, go, checker);
+    Warhead::NearestUnspawnedGameObjectEntryInObjectRangeCheck checker(*this, entry, range);
+    Warhead::GameObjectLastSearcher<Warhead::NearestUnspawnedGameObjectEntryInObjectRangeCheck> searcher(this, go, checker);
     Cell::VisitGridObjects(this, searcher, range);
     return go;
 }
@@ -2115,8 +2115,8 @@ GameObject* WorldObject::FindNearestUnspawnedGameObject(uint32 entry, float rang
 GameObject* WorldObject::FindNearestGameObjectOfType(GameobjectTypes type, float range) const
 {
     GameObject* go = nullptr;
-    Trinity::NearestGameObjectTypeInObjectRangeCheck checker(*this, type, range);
-    Trinity::GameObjectLastSearcher<Trinity::NearestGameObjectTypeInObjectRangeCheck> searcher(this, go, checker);
+    Warhead::NearestGameObjectTypeInObjectRangeCheck checker(*this, type, range);
+    Warhead::GameObjectLastSearcher<Warhead::NearestGameObjectTypeInObjectRangeCheck> searcher(this, go, checker);
     Cell::VisitGridObjects(this, searcher, range);
     return go;
 }
@@ -2125,8 +2125,8 @@ Player* WorldObject::SelectNearestPlayer(float distance) const
 {
     Player* target = nullptr;
 
-    Trinity::NearestPlayerInObjectRangeCheck checker(this, distance);
-    Trinity::PlayerLastSearcher<Trinity::NearestPlayerInObjectRangeCheck> searcher(this, target, checker);
+    Warhead::NearestPlayerInObjectRangeCheck checker(this, distance);
+    Warhead::PlayerLastSearcher<Warhead::NearestPlayerInObjectRangeCheck> searcher(this, target, checker);
     Cell::VisitWorldObjects(this, searcher, distance);
 
     return target;
@@ -2599,17 +2599,17 @@ FactionTemplateEntry const* WorldObject::GetFactionTemplateEntry() const
         switch (GetTypeId())
         {
             case TYPEID_PLAYER:
-                TC_LOG_ERROR("entities.unit", "Player %s has invalid faction (faction template id) #%u", ToPlayer()->GetName().c_str(), factionId);
+                LOG_ERROR("entities.unit", "Player %s has invalid faction (faction template id) #%u", ToPlayer()->GetName().c_str(), factionId);
                 break;
             case TYPEID_UNIT:
-                TC_LOG_ERROR("entities.unit", "Creature (template id: %u) has invalid faction (faction template Id) #%u", ToCreature()->GetCreatureTemplate()->Entry, factionId);
+                LOG_ERROR("entities.unit", "Creature (template id: %u) has invalid faction (faction template Id) #%u", ToCreature()->GetCreatureTemplate()->Entry, factionId);
                 break;
             case TYPEID_GAMEOBJECT:
                 if (factionId) // Gameobjects may have faction template id = 0
-                    TC_LOG_ERROR("entities.faction", "GameObject (template id: %u) has invalid faction (faction template Id) #%u", ToGameObject()->GetGOInfo()->entry, factionId);
+                    LOG_ERROR("entities.faction", "GameObject (template id: %u) has invalid faction (faction template Id) #%u", ToGameObject()->GetGOInfo()->entry, factionId);
                 break;
             default:
-                TC_LOG_ERROR("entities.unit", "Object (name=%s, type=%u) has invalid faction (faction template Id) #%u", GetName().c_str(), uint32(GetTypeId()), factionId);
+                LOG_ERROR("entities.unit", "Object (name=%s, type=%u) has invalid faction (faction template Id) #%u", GetName().c_str(), uint32(GetTypeId()), factionId);
                 break;
         }
     }
@@ -2793,7 +2793,7 @@ SpellCastResult WorldObject::CastSpell(SpellCastTargets const& targets, uint32 s
     SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
     if (!info)
     {
-        TC_LOG_ERROR("entities.unit", "CastSpell: unknown spell %u by caster %s", spellId, GetGUID().ToString().c_str());
+        LOG_ERROR("entities.unit", "CastSpell: unknown spell %u by caster %s", spellId, GetGUID().ToString().c_str());
         return SPELL_FAILED_SPELL_UNAVAILABLE;
     }
 
@@ -2816,7 +2816,7 @@ SpellCastResult WorldObject::CastSpell(WorldObject* target, uint32 spellId, Cast
             targets.SetGOTarget(goTarget);
         else
         {
-            TC_LOG_ERROR("entities.unit", "CastSpell: Invalid target %s passed to spell cast by %s", target->GetGUID().ToString().c_str(), GetGUID().ToString().c_str());
+            LOG_ERROR("entities.unit", "CastSpell: Invalid target %s passed to spell cast by %s", target->GetGUID().ToString().c_str(), GetGUID().ToString().c_str());
             return SPELL_FAILED_BAD_TARGETS;
         }
     }
@@ -3110,24 +3110,24 @@ Unit* WorldObject::GetMagicHitRedirectTarget(Unit* victim, SpellInfo const* spel
 template <typename Container>
 void WorldObject::GetGameObjectListWithEntryInGrid(Container& gameObjectContainer, uint32 entry, float maxSearchRange /*= 250.0f*/) const
 {
-    Trinity::AllGameObjectsWithEntryInRange check(this, entry, maxSearchRange);
-    Trinity::GameObjectListSearcher<Trinity::AllGameObjectsWithEntryInRange> searcher(this, gameObjectContainer, check);
+    Warhead::AllGameObjectsWithEntryInRange check(this, entry, maxSearchRange);
+    Warhead::GameObjectListSearcher<Warhead::AllGameObjectsWithEntryInRange> searcher(this, gameObjectContainer, check);
     Cell::VisitGridObjects(this, searcher, maxSearchRange);
 }
 
 template <typename Container>
 void WorldObject::GetCreatureListWithEntryInGrid(Container& creatureContainer, uint32 entry, float maxSearchRange /*= 250.0f*/) const
 {
-    Trinity::AllCreaturesOfEntryInRange check(this, entry, maxSearchRange);
-    Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(this, creatureContainer, check);
+    Warhead::AllCreaturesOfEntryInRange check(this, entry, maxSearchRange);
+    Warhead::CreatureListSearcher<Warhead::AllCreaturesOfEntryInRange> searcher(this, creatureContainer, check);
     Cell::VisitGridObjects(this, searcher, maxSearchRange);
 }
 
 template <typename Container>
 void WorldObject::GetPlayerListInGrid(Container& playerContainer, float maxSearchRange) const
 {
-    Trinity::AnyPlayerInObjectRangeCheck checker(this, maxSearchRange);
-    Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, playerContainer, checker);
+    Warhead::AnyPlayerInObjectRangeCheck checker(this, maxSearchRange);
+    Warhead::PlayerListSearcher<Warhead::AnyPlayerInObjectRangeCheck> searcher(this, playerContainer, checker);
     Cell::VisitWorldObjects(this, searcher, maxSearchRange);
 }
 
@@ -3156,8 +3156,8 @@ void WorldObject::GetNearPoint2D(WorldObject const* searcher, float& x, float& y
     x = GetPositionX() + (effectiveReach + distance2d) * std::cos(absAngle);
     y = GetPositionY() + (effectiveReach + distance2d) * std::sin(absAngle);
 
-    Trinity::NormalizeMapCoord(x);
-    Trinity::NormalizeMapCoord(y);
+    Warhead::NormalizeMapCoord(x);
+    Warhead::NormalizeMapCoord(y);
 }
 
 void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, float& z, float distance2d, float absAngle) const
@@ -3236,9 +3236,9 @@ void WorldObject::MovePosition(Position &pos, float dist, float angle)
     desty = pos.m_positionY + dist * std::sin(angle);
 
     // Prevent invalid coordinates here, position is unchanged
-    if (!Trinity::IsValidMapCoord(destx, desty, pos.m_positionZ))
+    if (!Warhead::IsValidMapCoord(destx, desty, pos.m_positionZ))
     {
-        TC_LOG_FATAL("misc", "WorldObject::MovePosition: Object %s has invalid coordinates X: %f and Y: %f were passed!",
+        LOG_FATAL("misc", "WorldObject::MovePosition: Object %s has invalid coordinates X: %f and Y: %f were passed!",
             GetGUID().ToString().c_str(), destx, desty);
         return;
     }
@@ -3268,8 +3268,8 @@ void WorldObject::MovePosition(Position &pos, float dist, float angle)
         }
     }
 
-    Trinity::NormalizeMapCoord(pos.m_positionX);
-    Trinity::NormalizeMapCoord(pos.m_positionY);
+    Warhead::NormalizeMapCoord(pos.m_positionX);
+    Warhead::NormalizeMapCoord(pos.m_positionY);
     UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
     pos.SetOrientation(GetOrientation());
 }
@@ -3283,9 +3283,9 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
     destz = pos.m_positionZ;
 
     // Prevent invalid coordinates here, position is unchanged
-    if (!Trinity::IsValidMapCoord(destx, desty))
+    if (!Warhead::IsValidMapCoord(destx, desty))
     {
-        TC_LOG_FATAL("misc", "WorldObject::MovePositionToFirstCollision invalid coordinates X: %f and Y: %f were passed!", destx, desty);
+        LOG_FATAL("misc", "WorldObject::MovePositionToFirstCollision invalid coordinates X: %f and Y: %f were passed!", destx, desty);
         return;
     }
 
@@ -3344,8 +3344,8 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
     }
 
     float groundZ = VMAP_INVALID_HEIGHT_VALUE;
-    Trinity::NormalizeMapCoord(pos.m_positionX);
-    Trinity::NormalizeMapCoord(pos.m_positionY);
+    Warhead::NormalizeMapCoord(pos.m_positionX);
+    Warhead::NormalizeMapCoord(pos.m_positionY);
     UpdateAllowedPositionZ(destx, desty, destz, &groundZ);
 
     pos.SetOrientation(GetOrientation());
@@ -3406,8 +3406,8 @@ void WorldObject::DestroyForNearbyPlayers()
         return;
 
     std::list<Player*> targets;
-    Trinity::AnyPlayerInObjectRangeCheck check(this, GetVisibilityRange(), false);
-    Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, targets, check);
+    Warhead::AnyPlayerInObjectRangeCheck check(this, GetVisibilityRange(), false);
+    Warhead::PlayerListSearcher<Warhead::AnyPlayerInObjectRangeCheck> searcher(this, targets, check);
     Cell::VisitWorldObjects(this, searcher, GetVisibilityRange());
     for (std::list<Player*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
     {
@@ -3434,7 +3434,7 @@ void WorldObject::DestroyForNearbyPlayers()
 void WorldObject::UpdateObjectVisibility(bool /*forced*/)
 {
     //updates object's visibility for nearby players
-    Trinity::VisibleChangesNotifier notifier(*this);
+    Warhead::VisibleChangesNotifier notifier(*this);
     Cell::VisitWorldObjects(this, notifier, GetVisibilityRange());
 }
 
@@ -3566,14 +3566,14 @@ std::string WorldObject::GetDebugInfo() const
     return sstr.str();
 }
 
-template TC_GAME_API void WorldObject::GetGameObjectListWithEntryInGrid(std::list<GameObject*>&, uint32, float) const;
-template TC_GAME_API void WorldObject::GetGameObjectListWithEntryInGrid(std::deque<GameObject*>&, uint32, float) const;
-template TC_GAME_API void WorldObject::GetGameObjectListWithEntryInGrid(std::vector<GameObject*>&, uint32, float) const;
+template WH_GAME_API void WorldObject::GetGameObjectListWithEntryInGrid(std::list<GameObject*>&, uint32, float) const;
+template WH_GAME_API void WorldObject::GetGameObjectListWithEntryInGrid(std::deque<GameObject*>&, uint32, float) const;
+template WH_GAME_API void WorldObject::GetGameObjectListWithEntryInGrid(std::vector<GameObject*>&, uint32, float) const;
 
-template TC_GAME_API void WorldObject::GetCreatureListWithEntryInGrid(std::list<Creature*>&, uint32, float) const;
-template TC_GAME_API void WorldObject::GetCreatureListWithEntryInGrid(std::deque<Creature*>&, uint32, float) const;
-template TC_GAME_API void WorldObject::GetCreatureListWithEntryInGrid(std::vector<Creature*>&, uint32, float) const;
+template WH_GAME_API void WorldObject::GetCreatureListWithEntryInGrid(std::list<Creature*>&, uint32, float) const;
+template WH_GAME_API void WorldObject::GetCreatureListWithEntryInGrid(std::deque<Creature*>&, uint32, float) const;
+template WH_GAME_API void WorldObject::GetCreatureListWithEntryInGrid(std::vector<Creature*>&, uint32, float) const;
 
-template TC_GAME_API void WorldObject::GetPlayerListInGrid(std::list<Player*>&, float) const;
-template TC_GAME_API void WorldObject::GetPlayerListInGrid(std::deque<Player*>&, float) const;
-template TC_GAME_API void WorldObject::GetPlayerListInGrid(std::vector<Player*>&, float) const;
+template WH_GAME_API void WorldObject::GetPlayerListInGrid(std::list<Player*>&, float) const;
+template WH_GAME_API void WorldObject::GetPlayerListInGrid(std::deque<Player*>&, float) const;
+template WH_GAME_API void WorldObject::GetPlayerListInGrid(std::vector<Player*>&, float) const;

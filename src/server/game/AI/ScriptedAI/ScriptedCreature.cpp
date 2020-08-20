@@ -192,7 +192,7 @@ void ScriptedAI::DoPlaySoundToSet(WorldObject* source, uint32 soundId)
 
     if (!sSoundEntriesStore.LookupEntry(soundId))
     {
-        TC_LOG_ERROR("scripts.ai", "ScriptedAI::DoPlaySoundToSet: Invalid soundId %u used in DoPlaySoundToSet (Source: %s)", soundId, source->GetGUID().ToString().c_str());
+        LOG_ERROR("scripts.ai", "ScriptedAI::DoPlaySoundToSet: Invalid soundId %u used in DoPlaySoundToSet (Source: %s)", soundId, source->GetGUID().ToString().c_str());
         return;
     }
 
@@ -262,11 +262,11 @@ void ScriptedAI::ForceCombatStop(Creature* who, bool reset /*= true*/)
 
 void ScriptedAI::ForceCombatStopForCreatureEntry(uint32 entry, float maxSearchRange /*= 250.0f*/, bool samePhase /*= true*/, bool reset /*= true*/)
 {
-    TC_LOG_DEBUG("scripts.ai", "ScriptedAI::ForceCombatStopForCreatureEntry: called on '%s'. Debug info: %s", me->GetGUID().ToString().c_str(), me->GetDebugInfo().c_str());
+    LOG_DEBUG("scripts.ai", "ScriptedAI::ForceCombatStopForCreatureEntry: called on '%s'. Debug info: %s", me->GetGUID().ToString().c_str(), me->GetDebugInfo().c_str());
 
     std::list<Creature*> creatures;
-    Trinity::AllCreaturesOfEntryInRange check(me, entry, maxSearchRange);
-    Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, creatures, check);
+    Warhead::AllCreaturesOfEntryInRange check(me, entry, maxSearchRange);
+    Warhead::CreatureListSearcher<Warhead::AllCreaturesOfEntryInRange> searcher(me, creatures, check);
 
     if (!samePhase)
         searcher.i_phaseMask = PHASEMASK_ANYWHERE;
@@ -395,7 +395,7 @@ void ScriptedAI::DoTeleportPlayer(Unit* unit, float x, float y, float z, float o
     if (Player* player = unit->ToPlayer())
         player->TeleportTo(unit->GetMapId(), x, y, z, o, TELE_TO_NOT_LEAVE_COMBAT);
     else
-        TC_LOG_ERROR("scripts.ai", "ScriptedAI::DoTeleportPlayer: Creature %s Tried to teleport non-player unit (%s) to x: %f y:%f z: %f o: %f. Aborted.",
+        LOG_ERROR("scripts.ai", "ScriptedAI::DoTeleportPlayer: Creature %s Tried to teleport non-player unit (%s) to x: %f y:%f z: %f o: %f. Aborted.",
             me->GetGUID().ToString().c_str(), unit->GetGUID().ToString().c_str(), x, y, z, o);
 }
 
@@ -414,8 +414,8 @@ void ScriptedAI::DoTeleportAll(float x, float y, float z, float o)
 Unit* ScriptedAI::DoSelectLowestHpFriendly(float range, uint32 minHPDiff)
 {
     Unit* unit = nullptr;
-    Trinity::MostHPMissingInRange u_check(me, range, minHPDiff);
-    Trinity::UnitLastSearcher<Trinity::MostHPMissingInRange> searcher(me, unit, u_check);
+    Warhead::MostHPMissingInRange u_check(me, range, minHPDiff);
+    Warhead::UnitLastSearcher<Warhead::MostHPMissingInRange> searcher(me, unit, u_check);
     Cell::VisitAllObjects(me, searcher, range);
 
     return unit;
@@ -424,8 +424,8 @@ Unit* ScriptedAI::DoSelectLowestHpFriendly(float range, uint32 minHPDiff)
 Unit* ScriptedAI::DoSelectBelowHpPctFriendlyWithEntry(uint32 entry, float range, uint8 minHPDiff, bool excludeSelf)
 {
     Unit* unit = nullptr;
-    Trinity::FriendlyBelowHpPctEntryInRange u_check(me, entry, range, minHPDiff, excludeSelf);
-    Trinity::UnitLastSearcher<Trinity::FriendlyBelowHpPctEntryInRange> searcher(me, unit, u_check);
+    Warhead::FriendlyBelowHpPctEntryInRange u_check(me, entry, range, minHPDiff, excludeSelf);
+    Warhead::UnitLastSearcher<Warhead::FriendlyBelowHpPctEntryInRange> searcher(me, unit, u_check);
     Cell::VisitAllObjects(me, searcher, range);
 
     return unit;
@@ -434,8 +434,8 @@ Unit* ScriptedAI::DoSelectBelowHpPctFriendlyWithEntry(uint32 entry, float range,
 std::list<Creature*> ScriptedAI::DoFindFriendlyCC(float range)
 {
     std::list<Creature*> list;
-    Trinity::FriendlyCCedInRange u_check(me, range);
-    Trinity::CreatureListSearcher<Trinity::FriendlyCCedInRange> searcher(me, list, u_check);
+    Warhead::FriendlyCCedInRange u_check(me, range);
+    Warhead::CreatureListSearcher<Warhead::FriendlyCCedInRange> searcher(me, list, u_check);
     Cell::VisitAllObjects(me, searcher, range);
 
     return list;
@@ -444,8 +444,8 @@ std::list<Creature*> ScriptedAI::DoFindFriendlyCC(float range)
 std::list<Creature*> ScriptedAI::DoFindFriendlyMissingBuff(float range, uint32 uiSpellid)
 {
     std::list<Creature*> list;
-    Trinity::FriendlyMissingBuffInRange u_check(me, range, uiSpellid);
-    Trinity::CreatureListSearcher<Trinity::FriendlyMissingBuffInRange> searcher(me, list, u_check);
+    Warhead::FriendlyMissingBuffInRange u_check(me, range, uiSpellid);
+    Warhead::CreatureListSearcher<Warhead::FriendlyMissingBuffInRange> searcher(me, list, u_check);
     Cell::VisitAllObjects(me, searcher, range);
 
     return list;
@@ -455,8 +455,8 @@ Player* ScriptedAI::GetPlayerAtMinimumRange(float minimumRange)
 {
     Player* player = nullptr;
 
-    Trinity::PlayerAtMinimumRangeAway check(me, minimumRange);
-    Trinity::PlayerSearcher<Trinity::PlayerAtMinimumRangeAway> searcher(me, player, check);
+    Warhead::PlayerAtMinimumRangeAway check(me, minimumRange);
+    Warhead::PlayerSearcher<Warhead::PlayerAtMinimumRangeAway> searcher(me, player, check);
     Cell::VisitWorldObjects(me, searcher, minimumRange);
 
     return player;
@@ -597,7 +597,7 @@ void BossAI::_DespawnAtEvade(Seconds delayToRespawn /*= 30s*/, Creature* who /*=
 {
     if (delayToRespawn < 2s)
     {
-        TC_LOG_ERROR("scripts.ai", "BossAI::_DespawnAtEvade: called with delay of %ld seconds, defaulting to 2 (me: %s)", delayToRespawn.count(), me->GetGUID().ToString().c_str());
+        LOG_ERROR("scripts.ai", "BossAI::_DespawnAtEvade: called with delay of %ld seconds, defaulting to 2 (me: %s)", delayToRespawn.count(), me->GetGUID().ToString().c_str());
         delayToRespawn = 2s;
     }
 
@@ -606,7 +606,7 @@ void BossAI::_DespawnAtEvade(Seconds delayToRespawn /*= 30s*/, Creature* who /*=
 
     if (TempSummon* whoSummon = who->ToTempSummon())
     {
-        TC_LOG_WARN("scripts.ai", "BossAI::_DespawnAtEvade: called on a temporary summon (who: %s)", who->GetGUID().ToString().c_str());
+        LOG_WARN("scripts.ai", "BossAI::_DespawnAtEvade: called on a temporary summon (who: %s)", who->GetGUID().ToString().c_str());
         whoSummon->UnSummon();
         return;
     }

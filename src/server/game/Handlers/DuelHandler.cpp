@@ -35,9 +35,9 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     if (target->GetGuidValue(PLAYER_DUEL_ARBITER) != guid)
         return;
 
-    //TC_LOG_DEBUG("network", "WORLD: Received CMSG_DUEL_ACCEPTED");
-    TC_LOG_DEBUG("network", "Player 1 is: %s (%s)", player->GetGUID().ToString().c_str(), player->GetName().c_str());
-    TC_LOG_DEBUG("network", "Player 2 is: %s (%s)", target->GetGUID().ToString().c_str(), target->GetName().c_str());
+    //LOG_DEBUG("network", "WORLD: Received CMSG_DUEL_ACCEPTED");
+    LOG_DEBUG("network", "Player 1 is: %s (%s)", player->GetGUID().ToString().c_str(), player->GetName().c_str());
+    LOG_DEBUG("network", "Player 2 is: %s (%s)", target->GetGUID().ToString().c_str(), target->GetName().c_str());
 
     time_t now = GameTime::GetGameTime();
     player->duel->StartTime = now + 3;
@@ -52,7 +52,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 {
-    TC_LOG_DEBUG("network", "WORLD: Received CMSG_DUEL_CANCELLED");
+    LOG_DEBUG("network", "WORLD: Received CMSG_DUEL_CANCELLED");
     Player* player = GetPlayer();
 
     ObjectGuid guid;

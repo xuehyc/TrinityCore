@@ -62,7 +62,7 @@ enum WeatherState : uint32
 };
 
 /// Weather for one zone
-class TC_GAME_API Weather
+class WH_GAME_API Weather
 {
     public:
 

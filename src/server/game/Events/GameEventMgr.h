@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_GAMEEVENT_MGR_H
-#define TRINITY_GAMEEVENT_MGR_H
+#ifndef WARHEAD_GAMEEVENT_MGR_H
+#define WARHEAD_GAMEEVENT_MGR_H
 
 #include "Common.h"
 #include "ObjectGuid.h"
@@ -98,7 +98,7 @@ class Player;
 class Creature;
 class Quest;
 
-class TC_GAME_API GameEventMgr
+class WH_GAME_API GameEventMgr
 {
     private:
         GameEventMgr();
@@ -188,7 +188,7 @@ class TC_GAME_API GameEventMgr
 
 #define sGameEventMgr GameEventMgr::instance()
 
-TC_GAME_API bool IsHolidayActive(HolidayIds id);
-TC_GAME_API bool IsEventActive(uint16 eventId);
+WH_GAME_API bool IsHolidayActive(HolidayIds id);
+WH_GAME_API bool IsEventActive(uint16 eventId);
 
 #endif

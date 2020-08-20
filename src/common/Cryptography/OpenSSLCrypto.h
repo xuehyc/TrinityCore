@@ -30,9 +30,9 @@ namespace OpenSSLCrypto
 
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER < 0x1010000fL
     /// Needs to be called before threads using openssl are spawned
-    TC_COMMON_API void threadsSetup();
+    WH_COMMON_API void threadsSetup();
     /// Needs to be called after threads using openssl are despawned
-    TC_COMMON_API void threadsCleanup();
+    WH_COMMON_API void threadsCleanup();
 #else
     void threadsSetup() { };
     void threadsCleanup() { };

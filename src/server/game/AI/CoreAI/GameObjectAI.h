@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_GAMEOBJECTAI_H
-#define TRINITY_GAMEOBJECTAI_H
+#ifndef WARHEAD_GAMEOBJECTAI_H
+#define WARHEAD_GAMEOBJECTAI_H
 
 #include "Define.h"
 #include "ObjectGuid.h"
@@ -29,7 +29,7 @@ class Unit;
 class SpellInfo;
 class WorldObject;
 
-class TC_GAME_API GameObjectAI
+class WH_GAME_API GameObjectAI
 {
     protected:
         GameObject* const me;
@@ -99,7 +99,7 @@ class TC_GAME_API GameObjectAI
         virtual void SummonedCreatureDies(Creature* /*summon*/, Unit* /*killer*/) { }
 };
 
-class TC_GAME_API NullGameObjectAI : public GameObjectAI
+class WH_GAME_API NullGameObjectAI : public GameObjectAI
 {
     public:
         explicit NullGameObjectAI(GameObject* go);

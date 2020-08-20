@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_SCRIPTEDCREATURE_H
-#define TRINITY_SCRIPTEDCREATURE_H
+#ifndef WARHEAD_SCRIPTEDCREATURE_H
+#define WARHEAD_SCRIPTEDCREATURE_H
 
 #include "Creature.h"  // convenience include for scripts, all uses of ScriptedCreature also need Creature (except ScriptedCreature itself doesn't need Creature)
 #include "CreatureAI.h"
@@ -25,7 +25,7 @@
 
 class InstanceScript;
 
-class TC_GAME_API SummonList
+class WH_GAME_API SummonList
 {
 public:
     typedef GuidList StorageType;
@@ -96,7 +96,7 @@ public:
     {
         // We need to use a copy of SummonList here, otherwise original SummonList would be modified
         StorageType listCopy = _storage;
-        Trinity::Containers::RandomResize<StorageType, Predicate>(listCopy, std::forward<Predicate>(predicate), max);
+        Warhead::Containers::RandomResize<StorageType, Predicate>(listCopy, std::forward<Predicate>(predicate), max);
         DoActionImpl(info, listCopy);
     }
 
@@ -111,7 +111,7 @@ private:
     StorageType _storage;
 };
 
-class TC_GAME_API EntryCheckPredicate
+class WH_GAME_API EntryCheckPredicate
 {
     public:
         EntryCheckPredicate(uint32 entry) : _entry(entry) { }
@@ -121,13 +121,13 @@ class TC_GAME_API EntryCheckPredicate
         uint32 _entry;
 };
 
-class TC_GAME_API DummyEntryCheckPredicate
+class WH_GAME_API DummyEntryCheckPredicate
 {
     public:
         bool operator()(ObjectGuid) { return true; }
 };
 
-struct TC_GAME_API ScriptedAI : public CreatureAI
+struct WH_GAME_API ScriptedAI : public CreatureAI
 {
     public:
         explicit ScriptedAI(Creature* creature);
@@ -304,7 +304,7 @@ struct TC_GAME_API ScriptedAI : public CreatureAI
         bool _isHeroic;
 };
 
-class TC_GAME_API BossAI : public ScriptedAI
+class WH_GAME_API BossAI : public ScriptedAI
 {
     public:
         BossAI(Creature* creature, uint32 bossId);
@@ -349,7 +349,7 @@ class TC_GAME_API BossAI : public ScriptedAI
         uint32 const _bossId;
 };
 
-class TC_GAME_API WorldBossAI : public ScriptedAI
+class WH_GAME_API WorldBossAI : public ScriptedAI
 {
     public:
         WorldBossAI(Creature* creature);
@@ -408,4 +408,4 @@ inline void GetPlayerListInGrid(Container& container, WorldObject* source, float
     source->GetPlayerListInGrid(container, maxSearchRange);
 }
 
-#endif // TRINITY_SCRIPTEDCREATURE_H
+#endif // WARHEAD_SCRIPTEDCREATURE_H

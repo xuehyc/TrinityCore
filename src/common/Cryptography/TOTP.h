@@ -15,16 +15,16 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_TOTP_H
-#define TRINITY_TOTP_H
+#ifndef WARHEAD_TOTP_H
+#define WARHEAD_TOTP_H
 
 #include "Define.h"
 #include <ctime>
 #include <vector>
 
-namespace Trinity::Crypto
+namespace Warhead::Crypto
 {
-    struct TC_COMMON_API TOTP
+    struct WH_COMMON_API TOTP
     {
         static constexpr size_t RECOMMENDED_SECRET_LENGTH = 20;
         using Secret = std::vector<uint8>;

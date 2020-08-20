@@ -20,7 +20,7 @@
 #include "SmartEnum.h"
 #include <stdexcept>
 
-namespace Trinity
+namespace Warhead
 {
 namespace Impl
 {
@@ -29,7 +29,7 @@ namespace Impl
 |* data for enum 'SpawnObjectType' in 'SpawnData.h' auto-generated *|
 \*******************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpawnObjectType>::ToString(SpawnObjectType value)
+WH_API_EXPORT EnumText EnumUtils<SpawnObjectType>::ToString(SpawnObjectType value)
 {
     switch (value)
     {
@@ -40,10 +40,10 @@ TC_API_EXPORT EnumText EnumUtils<SpawnObjectType>::ToString(SpawnObjectType valu
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpawnObjectType>::Count() { return 2; }
+WH_API_EXPORT size_t EnumUtils<SpawnObjectType>::Count() { return 2; }
 
 template <>
-TC_API_EXPORT SpawnObjectType EnumUtils<SpawnObjectType>::FromIndex(size_t index)
+WH_API_EXPORT SpawnObjectType EnumUtils<SpawnObjectType>::FromIndex(size_t index)
 {
     switch (index)
     {

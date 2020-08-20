@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_BASE_ENCODING_HPP
-#define TRINITY_BASE_ENCODING_HPP
+#ifndef WARHEAD_BASE_ENCODING_HPP
+#define WARHEAD_BASE_ENCODING_HPP
 
 #include "Define.h"
 #include "Optional.h"
@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-namespace Trinity
+namespace Warhead
 {
 namespace Impl
 {

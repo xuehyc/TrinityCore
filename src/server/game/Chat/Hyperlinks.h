@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_HYPERLINKS_H
-#define TRINITY_HYPERLINKS_H
+#ifndef WARHEAD_HYPERLINKS_H
+#define WARHEAD_HYPERLINKS_H
 
 #include "ObjectGuid.h"
 #include <string>
@@ -31,7 +31,7 @@ class SpellInfo;
 class Quest;
 struct TalentEntry;
 
-namespace Trinity::Hyperlinks
+namespace Warhead::Hyperlinks
 {
 
     struct AchievementLinkData
@@ -144,56 +144,56 @@ namespace Trinity::Hyperlinks
         make_base_tag(title, uint32);
     #undef make_base_tag
 
-        struct TC_GAME_API achievement
+        struct WH_GAME_API achievement
         {
             using value_type = AchievementLinkData const&;
             static constexpr char const* tag() { return "achievement"; }
             static bool StoreTo(AchievementLinkData& val, char const* pos, size_t len);
         };
 
-        struct TC_GAME_API enchant
+        struct WH_GAME_API enchant
         {
             using value_type = SpellInfo const*;
             static constexpr char const* tag() { return "enchant"; }
             static bool StoreTo(SpellInfo const*& val, char const* pos, size_t len);
         };
 
-        struct TC_GAME_API glyph
+        struct WH_GAME_API glyph
         {
             using value_type = GlyphLinkData const&;
             static constexpr char const* tag() { return "glyph"; };
             static bool StoreTo(GlyphLinkData& val, char const* pos, size_t len);
         };
 
-        struct TC_GAME_API item
+        struct WH_GAME_API item
         {
             using value_type = ItemLinkData const&;
             static constexpr char const* tag() { return "item"; }
             static bool StoreTo(ItemLinkData& val, char const* pos, size_t len);
         };
 
-        struct TC_GAME_API quest
+        struct WH_GAME_API quest
         {
             using value_type = QuestLinkData const&;
             static constexpr char const* tag() { return "quest"; }
             static bool StoreTo(QuestLinkData& val, char const* pos, size_t len);
         };
 
-        struct TC_GAME_API spell
+        struct WH_GAME_API spell
         {
             using value_type = SpellInfo const*;
             static constexpr char const* tag() { return "spell"; }
             static bool StoreTo(SpellInfo const*& val, char const* pos, size_t len);
         };
 
-        struct TC_GAME_API talent
+        struct WH_GAME_API talent
         {
             using value_type = TalentLinkData const&;
             static constexpr char const* tag() { return "talent"; }
             static bool StoreTo(TalentLinkData& val, char const* pos, size_t len);
         };
 
-        struct TC_GAME_API trade
+        struct WH_GAME_API trade
         {
             using value_type = TradeskillLinkData const&;
             static constexpr char const* tag() { return "trade"; }
@@ -231,8 +231,8 @@ namespace Trinity::Hyperlinks
         std::pair<char const*, size_t> const data;
         std::pair<char const*, size_t> const text;
     };
-    HyperlinkInfo TC_GAME_API ParseHyperlink(char const* pos);
-    bool TC_GAME_API CheckAllLinks(std::string const&);
+    HyperlinkInfo WH_GAME_API ParseHyperlink(char const* pos);
+    bool WH_GAME_API CheckAllLinks(std::string const&);
 
 }
 

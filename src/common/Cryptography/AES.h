@@ -15,16 +15,16 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Trinity_AES_h__
-#define Trinity_AES_h__
+#ifndef Warhead_AES_h__
+#define Warhead_AES_h__
 
 #include "Define.h"
 #include <array>
 #include <openssl/evp.h>
 
-namespace Trinity::Crypto
+namespace Warhead::Crypto
 {
-    class TC_COMMON_API AES
+    class WH_COMMON_API AES
     {
     public:
         static constexpr size_t IV_SIZE_BYTES = 12;
@@ -48,4 +48,4 @@ namespace Trinity::Crypto
     };
 }
 
-#endif // Trinity_AES_h__
+#endif // Warhead_AES_h__

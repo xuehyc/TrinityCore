@@ -116,7 +116,7 @@ struct PackedGuidReader
     ObjectGuid& Guid;
 };
 
-class TC_GAME_API ObjectGuid
+class WH_GAME_API ObjectGuid
 {
     public:
         static ObjectGuid const Empty;
@@ -257,9 +257,9 @@ typedef std::unordered_set<ObjectGuid> GuidUnorderedSet;
 // minimum buffer size for packed guid is 9 bytes
 #define PACKED_GUID_MIN_BUFFER_SIZE 9
 
-class TC_GAME_API PackedGuid
+class WH_GAME_API PackedGuid
 {
-    friend TC_GAME_API ByteBuffer& operator<<(ByteBuffer& buf, PackedGuid const& guid);
+    friend WH_GAME_API ByteBuffer& operator<<(ByteBuffer& buf, PackedGuid const& guid);
 
     public:
         explicit PackedGuid() : _packedGuid(PACKED_GUID_MIN_BUFFER_SIZE) { _packedGuid.appendPackGUID(0); }
@@ -275,7 +275,7 @@ class TC_GAME_API PackedGuid
         ByteBuffer _packedGuid;
 };
 
-class TC_GAME_API ObjectGuidGeneratorBase
+class WH_GAME_API ObjectGuidGeneratorBase
 {
 public:
     ObjectGuidGeneratorBase(ObjectGuid::LowType start = 1) : _nextGuid(start) { }
@@ -292,7 +292,7 @@ protected:
 };
 
 template<HighGuid high>
-class TC_GAME_API ObjectGuidGenerator : public ObjectGuidGeneratorBase
+class WH_GAME_API ObjectGuidGenerator : public ObjectGuidGeneratorBase
 {
 public:
     explicit ObjectGuidGenerator(ObjectGuid::LowType start = 1) : ObjectGuidGeneratorBase(start) { }
@@ -309,11 +309,11 @@ public:
     }
 };
 
-TC_GAME_API ByteBuffer& operator<<(ByteBuffer& buf, ObjectGuid const& guid);
-TC_GAME_API ByteBuffer& operator>>(ByteBuffer& buf, ObjectGuid&       guid);
+WH_GAME_API ByteBuffer& operator<<(ByteBuffer& buf, ObjectGuid const& guid);
+WH_GAME_API ByteBuffer& operator>>(ByteBuffer& buf, ObjectGuid&       guid);
 
-TC_GAME_API ByteBuffer& operator<<(ByteBuffer& buf, PackedGuid const& guid);
-TC_GAME_API ByteBuffer& operator>>(ByteBuffer& buf, PackedGuidReader const& guid);
+WH_GAME_API ByteBuffer& operator<<(ByteBuffer& buf, PackedGuid const& guid);
+WH_GAME_API ByteBuffer& operator>>(ByteBuffer& buf, PackedGuidReader const& guid);
 
 inline PackedGuid ObjectGuid::WriteAsPacked() const { return PackedGuid(*this); }
 

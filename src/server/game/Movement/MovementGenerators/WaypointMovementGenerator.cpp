@@ -111,7 +111,7 @@ void WaypointMovementGenerator<Creature>::DoInitialize(Creature* owner)
 
     if (!_path)
     {
-        TC_LOG_ERROR("sql.sql", "WaypointMovementGenerator::DoInitialize: couldn't load path for creature (%s) (_pathId: %u)", owner->GetGUID().ToString().c_str(), _pathId);
+        LOG_ERROR("sql.sql", "WaypointMovementGenerator::DoInitialize: couldn't load path for creature (%s) (_pathId: %u)", owner->GetGUID().ToString().c_str(), _pathId);
         return;
     }
 
@@ -253,7 +253,7 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature* owner)
 
     if (waypoint.eventId && urand(0, 99) < waypoint.eventChance)
     {
-        TC_LOG_DEBUG("maps.script", "Creature movement start script %u at point %u for %s.", waypoint.eventId, _currentNode, owner->GetGUID().ToString().c_str());
+        LOG_DEBUG("maps.script", "Creature movement start script %u at point %u for %s.", waypoint.eventId, _currentNode, owner->GetGUID().ToString().c_str());
         owner->ClearUnitState(UNIT_STATE_ROAMING_MOVE);
         owner->GetMap()->ScriptsStart(sWaypointScripts, waypoint.eventId, owner, nullptr);
     }

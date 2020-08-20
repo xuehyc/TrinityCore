@@ -37,7 +37,7 @@ ChannelMgr::~ChannelMgr()
 {
     if (!sWorld->getBoolConfig(CONFIG_PRESERVE_CUSTOM_CHANNELS))
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 custom chat channels. Custom channel saving is disabled.");
+        LOG_INFO("server.loading", ">> Loaded 0 custom chat channels. Custom channel saving is disabled.");
         return;
     }
 
@@ -52,7 +52,7 @@ ChannelMgr::~ChannelMgr()
     QueryResult result = CharacterDatabase.Query("SELECT name, team, announce, ownership, password, bannedList FROM channels");
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 custom chat channels. DB table `channels` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 custom chat channels. DB table `channels` is empty.");
         return;
     }
 
@@ -71,7 +71,7 @@ ChannelMgr::~ChannelMgr()
         std::wstring channelName;
         if (!Utf8toWStr(dbName, channelName))
         {
-            TC_LOG_ERROR("server.loading", "Failed to load custom chat channel '%s' from database - invalid utf8 sequence? Deleted.", dbName.c_str());
+            LOG_ERROR("server.loading", "Failed to load custom chat channel '%s' from database - invalid utf8 sequence? Deleted.", dbName.c_str());
             toDelete.push_back({ dbName, team });
             continue;
         }
@@ -79,7 +79,7 @@ ChannelMgr::~ChannelMgr()
         ChannelMgr* mgr = forTeam(team);
         if (!mgr)
         {
-            TC_LOG_ERROR("server.loading", "Failed to load custom chat channel '%s' from database - invalid team %u. Deleted.", dbName.c_str(), team);
+            LOG_ERROR("server.loading", "Failed to load custom chat channel '%s' from database - invalid team %u. Deleted.", dbName.c_str(), team);
             toDelete.push_back({ dbName, team });
             continue;
         }
@@ -101,7 +101,7 @@ ChannelMgr::~ChannelMgr()
         CharacterDatabase.Execute(stmt);
     }
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u custom chat channels in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u custom chat channels in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 /*static*/ ChannelMgr* ChannelMgr::forTeam(uint32 team)

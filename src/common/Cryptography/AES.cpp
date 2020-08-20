@@ -19,25 +19,25 @@
 #include "Errors.h"
 #include <limits>
 
-Trinity::Crypto::AES::AES(bool encrypting) : _ctx(EVP_CIPHER_CTX_new()), _encrypting(encrypting)
+Warhead::Crypto::AES::AES(bool encrypting) : _ctx(EVP_CIPHER_CTX_new()), _encrypting(encrypting)
 {
     EVP_CIPHER_CTX_init(_ctx);
     int status = EVP_CipherInit_ex(_ctx, EVP_aes_128_gcm(), nullptr, nullptr, nullptr, _encrypting ? 1 : 0);
     ASSERT(status);
 }
 
-Trinity::Crypto::AES::~AES()
+Warhead::Crypto::AES::~AES()
 {
     EVP_CIPHER_CTX_free(_ctx);
 }
 
-void Trinity::Crypto::AES::Init(Key const& key)
+void Warhead::Crypto::AES::Init(Key const& key)
 {
     int status = EVP_CipherInit_ex(_ctx, nullptr, nullptr, key.data(), nullptr, -1);
     ASSERT(status);
 }
 
-bool Trinity::Crypto::AES::Process(IV const& iv, uint8* data, size_t length, Tag& tag)
+bool Warhead::Crypto::AES::Process(IV const& iv, uint8* data, size_t length, Tag& tag)
 {
     ASSERT(length <= std::numeric_limits<int>::max());
     int len = static_cast<int>(length);

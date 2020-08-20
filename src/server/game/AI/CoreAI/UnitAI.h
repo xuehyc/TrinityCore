@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_UNITAI_H
-#define TRINITY_UNITAI_H
+#ifndef WARHEAD_UNITAI_H
+#define WARHEAD_UNITAI_H
 
 #include "Containers.h"
 #include "Errors.h"
@@ -56,7 +56,7 @@ enum class SelectTargetMethod
 };
 
 // default predicate function to select target based on distance, player and/or aura criteria
-struct TC_GAME_API DefaultTargetSelector
+struct WH_GAME_API DefaultTargetSelector
 {
     public:
         // unit: the reference unit
@@ -77,7 +77,7 @@ struct TC_GAME_API DefaultTargetSelector
 
 // Target selector for spell casts checking range, auras and attributes
 /// @todo Add more checks from Spell::CheckCast
-struct TC_GAME_API SpellTargetSelector
+struct WH_GAME_API SpellTargetSelector
 {
     public:
         SpellTargetSelector(Unit* caster, uint32 spellId);
@@ -91,7 +91,7 @@ struct TC_GAME_API SpellTargetSelector
 // Very simple target selector, will just skip main target
 // NOTE: When passing to UnitAI::SelectTarget remember to use 0 as position for random selection
 //       because tank will not be in the temporary list
-struct TC_GAME_API NonTankTargetSelector
+struct WH_GAME_API NonTankTargetSelector
 {
     public:
         NonTankTargetSelector(Unit* source, bool playerOnly = true) : _source(source), _playerOnly(playerOnly) { }
@@ -103,7 +103,7 @@ struct TC_GAME_API NonTankTargetSelector
 };
 
 // Simple selector for units using mana
-struct TC_GAME_API PowerUsersSelector
+struct WH_GAME_API PowerUsersSelector
 {
     public:
         PowerUsersSelector(Unit const* unit, Powers power, float dist, bool playerOnly) : _me(unit), _power(power), _dist(dist), _playerOnly(playerOnly) { }
@@ -116,7 +116,7 @@ struct TC_GAME_API PowerUsersSelector
         bool const _playerOnly;
 };
 
-struct TC_GAME_API FarthestTargetSelector
+struct WH_GAME_API FarthestTargetSelector
 {
     public:
         FarthestTargetSelector(Unit const* unit, float dist, bool playerOnly, bool inLos) : _me(unit), _dist(dist), _playerOnly(playerOnly), _inLos(inLos) {}
@@ -129,7 +129,7 @@ struct TC_GAME_API FarthestTargetSelector
         bool _inLos;
 };
 
-class TC_GAME_API UnitAI
+class WH_GAME_API UnitAI
 {
     protected:
         Unit* const me;
@@ -195,7 +195,7 @@ class TC_GAME_API UnitAI
                 case SelectTargetMethod::MinDistance:
                     return targetList.front();
                 case SelectTargetMethod::Random:
-                    return Trinity::Containers::SelectRandomContainerElement(targetList);
+                    return Warhead::Containers::SelectRandomContainerElement(targetList);
                 default:
                     return nullptr;
             }
@@ -281,7 +281,7 @@ class TC_GAME_API UnitAI
                 return;
 
             if (targetType == SelectTargetMethod::Random)
-                Trinity::Containers::RandomResize(targetList, num);
+                Warhead::Containers::RandomResize(targetList, num);
             else
                 targetList.resize(num);
         }

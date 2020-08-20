@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_SPELLAURAS_H
-#define TRINITY_SPELLAURAS_H
+#ifndef WARHEAD_SPELLAURAS_H
+#define WARHEAD_SPELLAURAS_H
 
 #include "SpellAuraDefines.h"
 #include "SpellInfo.h"
@@ -42,7 +42,7 @@ class UnitAura;
 // update aura target map every 500 ms instead of every update - reduce amount of grid searcher calls
 #define UPDATE_TARGET_MAP_INTERVAL 500
 
-class TC_GAME_API AuraApplication
+class WH_GAME_API AuraApplication
 {
     friend class Unit;
 
@@ -95,7 +95,7 @@ struct CasterInfo
     bool  ApplyResilience = false;
 };
 
-class TC_GAME_API Aura
+class WH_GAME_API Aura
 {
     friend class Unit;
 
@@ -304,7 +304,7 @@ class TC_GAME_API Aura
         std::vector<AuraApplication*> _removedApplications;
 };
 
-class TC_GAME_API UnitAura : public Aura
+class WH_GAME_API UnitAura : public Aura
 {
     friend Aura* Aura::Create(AuraCreateInfo& createInfo);
     protected:
@@ -328,7 +328,7 @@ class TC_GAME_API UnitAura : public Aura
         std::unordered_map<ObjectGuid, uint8> _staticApplications; // non-area auras
 };
 
-class TC_GAME_API DynObjAura : public Aura
+class WH_GAME_API DynObjAura : public Aura
 {
     friend Aura* Aura::Create(AuraCreateInfo& createInfo);
     protected:
@@ -339,7 +339,7 @@ class TC_GAME_API DynObjAura : public Aura
         void FillTargetMap(std::unordered_map<Unit*, uint8>& targets, Unit* caster) override;
 };
 
-class TC_GAME_API ChargeDropEvent : public BasicEvent
+class WH_GAME_API ChargeDropEvent : public BasicEvent
 {
     friend class Aura;
     protected:

@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_DISABLEMGR_H
-#define TRINITY_DISABLEMGR_H
+#ifndef WARHEAD_DISABLEMGR_H
+#define WARHEAD_DISABLEMGR_H
 
 #include "Define.h"
 
@@ -60,11 +60,11 @@ enum MMapDisableTypes
 
 namespace DisableMgr
 {
-    TC_GAME_API void LoadDisables();
-    TC_GAME_API bool IsDisabledFor(DisableType type, uint32 entry, WorldObject const* ref, uint8 flags = 0);
-    TC_GAME_API void CheckQuestDisables();
-    TC_GAME_API bool IsVMAPDisabledFor(uint32 entry, uint8 flags);
-    TC_GAME_API bool IsPathfindingEnabled(uint32 mapId);
+    WH_GAME_API void LoadDisables();
+    WH_GAME_API bool IsDisabledFor(DisableType type, uint32 entry, WorldObject const* ref, uint8 flags = 0);
+    WH_GAME_API void CheckQuestDisables();
+    WH_GAME_API bool IsVMAPDisabledFor(uint32 entry, uint8 flags);
+    WH_GAME_API bool IsPathfindingEnabled(uint32 mapId);
 }
 
-#endif //TRINITY_DISABLEMGR_H
+#endif //WARHEAD_DISABLEMGR_H

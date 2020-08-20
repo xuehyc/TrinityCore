@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_SHAREDDEFINES_H
-#define TRINITY_SHAREDDEFINES_H
+#ifndef WARHEAD_SHAREDDEFINES_H
+#define WARHEAD_SHAREDDEFINES_H
 
 #include "DBCEnums.h"
 #include "Define.h"
@@ -3079,38 +3079,38 @@ enum SkillCategory
 
 enum TotemCategory
 {
-    TC_SKINNING_SKIFE_OLD          = 1,
-    TC_EARTH_TOTEM                 = 2,
-    TC_AIR_TOTEM                   = 3,
-    TC_FIRE_TOTEM                  = 4,
-    TC_WATER_TOTEM                 = 5,
-    TC_COPPER_ROD                  = 6,
-    TC_SILVER_ROD                  = 7,
-    TC_GOLDEN_ROD                  = 8,
-    TC_TRUESILVER_ROD              = 9,
-    TC_ARCANITE_ROD                = 10,
-    TC_MINING_PICK_OLD             = 11,
-    TC_PHILOSOPHERS_STONE          = 12,
-    TC_BLACKSMITH_HAMMER_OLD       = 13,
-    TC_ARCLIGHT_SPANNER            = 14,
-    TC_GYROMATIC_MA                = 15,
-    TC_MASTER_TOTEM                = 21,
-    TC_FEL_IRON_ROD                = 41,
-    TC_ADAMANTITE_ROD              = 62,
-    TC_ETERNIUM_ROD                = 63,
-    TC_HOLLOW_QUILL                = 81,
-    TC_RUNED_AZURITE_ROD           = 101,
-    TC_VIRTUOSO_INKING_SET         = 121,
-    TC_DRUMS                       = 141,
-    TC_GNOMISH_ARMY_KNIFE          = 161,
-    TC_BLACKSMITH_HAMMER           = 162,
-    TC_MINING_PICK                 = 165,
-    TC_SKINNING_KNIFE              = 166,
-    TC_HAMMER_PICK                 = 167,
-    TC_BLADED_PICKAXE              = 168,
-    TC_FLINT_AND_TINDER            = 169,
-    TC_RUNED_COBALT_ROD            = 189,
-    TC_RUNED_TITANIUM_ROD          = 190
+    WH_SKINNING_SKIFE_OLD          = 1,
+    WH_EARTH_TOTEM                 = 2,
+    WH_AIR_TOTEM                   = 3,
+    WH_FIRE_TOTEM                  = 4,
+    WH_WATER_TOTEM                 = 5,
+    WH_COPPER_ROD                  = 6,
+    WH_SILVER_ROD                  = 7,
+    WH_GOLDEN_ROD                  = 8,
+    WH_TRUESILVER_ROD              = 9,
+    WH_ARCANITE_ROD                = 10,
+    WH_MINING_PICK_OLD             = 11,
+    WH_PHILOSOPHERS_STONE          = 12,
+    WH_BLACKSMITH_HAMMER_OLD       = 13,
+    WH_ARCLIGHT_SPANNER            = 14,
+    WH_GYROMATIC_MA                = 15,
+    WH_MASTER_TOTEM                = 21,
+    WH_FEL_IRON_ROD                = 41,
+    WH_ADAMANTITE_ROD              = 62,
+    WH_ETERNIUM_ROD                = 63,
+    WH_HOLLOW_QUILL                = 81,
+    WH_RUNED_AZURITE_ROD           = 101,
+    WH_VIRTUOSO_INKING_SET         = 121,
+    WH_DRUMS                       = 141,
+    WH_GNOMISH_ARMY_KNIFE          = 161,
+    WH_BLACKSMITH_HAMMER           = 162,
+    WH_MINING_PICK                 = 165,
+    WH_SKINNING_KNIFE              = 166,
+    WH_HAMMER_PICK                 = 167,
+    WH_BLADED_PICKAXE              = 168,
+    WH_FLINT_AND_TINDER            = 169,
+    WH_RUNED_COBALT_ROD            = 189,
+    WH_RUNED_TITANIUM_ROD          = 190
 };
 
 enum UnitDynFlags
@@ -3862,18 +3862,18 @@ enum WorldState : uint32
     WS_DAILY_CALENDAR_DELETION_OLD_EVENTS_TIME = 20009,      // Next daily calendar deletions of old events time
 };
 
-namespace Trinity
+namespace Warhead
 {
 namespace Impl
 {
-    struct TC_SHARED_API CurrentServerProcessHolder
+    struct WH_SHARED_API CurrentServerProcessHolder
     {
         static ServerProcessTypes type() { return _type; }
         static ServerProcessTypes _type;
     };
 }
 }
-#define THIS_SERVER_PROCESS (Trinity::Impl::CurrentServerProcessHolder::type())
+#define THIS_SERVER_PROCESS (Warhead::Impl::CurrentServerProcessHolder::type())
 
 #define MAX_CREATURE_SPELL_DATA_SLOT 4
 

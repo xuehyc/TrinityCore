@@ -56,7 +56,7 @@ void RASession::Start()
     if (username.empty())
         return;
 
-    TC_LOG_INFO("commands.ra", "Accepting RA connection from user %s (IP: %s)", username.c_str(), GetRemoteIpAddress().c_str());
+    LOG_INFO("commands.ra", "Accepting RA connection from user %s (IP: %s)", username.c_str(), GetRemoteIpAddress().c_str());
 
     Send("Password: ");
 
@@ -71,7 +71,7 @@ void RASession::Start()
         return;
     }
 
-    TC_LOG_INFO("commands.ra", "User %s (IP: %s) authenticated correctly to RA", username.c_str(), GetRemoteIpAddress().c_str());
+    LOG_INFO("commands.ra", "User %s (IP: %s) authenticated correctly to RA", username.c_str(), GetRemoteIpAddress().c_str());
 
     // Authentication successful, send the motd
     Send(std::string(std::string(Motd::GetMotd()) + "\r\n").c_str());
@@ -130,7 +130,7 @@ bool RASession::CheckAccessLevel(const std::string& user)
 
     if (!result)
     {
-        TC_LOG_INFO("commands.ra", "User %s does not exist in database", user.c_str());
+        LOG_INFO("commands.ra", "User %s does not exist in database", user.c_str());
         return false;
     }
 
@@ -138,12 +138,12 @@ bool RASession::CheckAccessLevel(const std::string& user)
 
     if (fields[1].GetUInt8() < sConfigMgr->GetIntDefault("Ra.MinLevel", 3))
     {
-        TC_LOG_INFO("commands.ra", "User %s has no privilege to login", user.c_str());
+        LOG_INFO("commands.ra", "User %s has no privilege to login", user.c_str());
         return false;
     }
     else if (fields[2].GetInt32() != -1)
     {
-        TC_LOG_INFO("commands.ra", "User %s has to be assigned on all realms (with RealmID = '-1')", user.c_str());
+        LOG_INFO("commands.ra", "User %s has to be assigned on all realms (with RealmID = '-1')", user.c_str());
         return false;
     }
 
@@ -166,14 +166,14 @@ bool RASession::CheckPassword(const std::string& user, const std::string& pass)
 
     if (PreparedQueryResult result = LoginDatabase.Query(stmt))
     {
-        Trinity::Crypto::SRP6::Salt salt = (*result)[0].GetBinary<Trinity::Crypto::SRP6::SALT_LENGTH>();
-        Trinity::Crypto::SRP6::Verifier verifier = (*result)[1].GetBinary<Trinity::Crypto::SRP6::VERIFIER_LENGTH>();
+        Warhead::Crypto::SRP6::Salt salt = (*result)[0].GetBinary<Warhead::Crypto::SRP6::SALT_LENGTH>();
+        Warhead::Crypto::SRP6::Verifier verifier = (*result)[1].GetBinary<Warhead::Crypto::SRP6::VERIFIER_LENGTH>();
 
-        if (Trinity::Crypto::SRP6::CheckLogin(safe_user, safe_pass, salt, verifier))
+        if (Warhead::Crypto::SRP6::CheckLogin(safe_user, safe_pass, salt, verifier))
             return true;
     }
 
-    TC_LOG_INFO("commands.ra", "Wrong password for user: %s", user.c_str());
+    LOG_INFO("commands.ra", "Wrong password for user: %s", user.c_str());
     return false;
 }
 
@@ -182,7 +182,7 @@ bool RASession::ProcessCommand(std::string& command)
     if (command.length() == 0)
         return true;
 
-    TC_LOG_INFO("commands.ra", "Received command: %s", command.c_str());
+    LOG_INFO("commands.ra", "Received command: %s", command.c_str());
 
     // handle quit, exit and logout commands to terminate connection
     if (command == "quit" || command == "exit" || command == "logout")

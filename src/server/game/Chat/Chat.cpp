@@ -355,12 +355,12 @@ bool ChatHandler::SetDataForCommandInTable(std::vector<ChatCommand>& table, char
         // expected subcommand by full name DB content
         else if (*text)
         {
-            TC_LOG_ERROR("sql.sql", "Table `command` contains an unexpected subcommand '%s' in command '%s', skipped.", text, fullcommand.c_str());
+            LOG_ERROR("sql.sql", "Table `command` contains an unexpected subcommand '%s' in command '%s', skipped.", text, fullcommand.c_str());
             return false;
         }
 
         if (table[i].Permission != permission)
-            TC_LOG_INFO("misc", "Table `command` overwrite for command '%s' default permission (%u) by %u", fullcommand.c_str(), table[i].Permission, permission);
+            LOG_INFO("misc", "Table `command` overwrite for command '%s' default permission (%u) by %u", fullcommand.c_str(), table[i].Permission, permission);
 
         table[i].Permission = permission;
         table[i].Help          = help;
@@ -371,9 +371,9 @@ bool ChatHandler::SetDataForCommandInTable(std::vector<ChatCommand>& table, char
     if (!cmd.empty())
     {
         if (&table == &getCommandTable())
-            TC_LOG_ERROR("sql.sql", "Table `command` contains a non-existing command '%s', skipped.", cmd.c_str());
+            LOG_ERROR("sql.sql", "Table `command` contains a non-existing command '%s', skipped.", cmd.c_str());
         else
-            TC_LOG_ERROR("sql.sql", "Table `command` contains a non-existing subcommand '%s' in command '%s', skipped.", cmd.c_str(), fullcommand.c_str());
+            LOG_ERROR("sql.sql", "Table `command` contains a non-existing subcommand '%s' in command '%s', skipped.", cmd.c_str(), fullcommand.c_str());
     }
 
     return false;
@@ -799,8 +799,8 @@ GameObject* ChatHandler::GetNearbyGameObject()
 
     Player* pl = m_session->GetPlayer();
     GameObject* obj = nullptr;
-    Trinity::NearestGameObjectCheck check(*pl);
-    Trinity::GameObjectLastSearcher<Trinity::NearestGameObjectCheck> searcher(pl, obj, check);
+    Warhead::NearestGameObjectCheck check(*pl);
+    Warhead::GameObjectLastSearcher<Warhead::NearestGameObjectCheck> searcher(pl, obj, check);
     Cell::VisitGridObjects(pl, searcher, SIZE_OF_GRIDS);
     return obj;
 }

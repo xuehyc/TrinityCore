@@ -157,7 +157,7 @@ namespace WorldPackets
             uint32 MovieID = 0;
         };
 
-        class TC_GAME_API Weather final : public ServerPacket
+        class WH_GAME_API Weather final : public ServerPacket
         {
         public:
             Weather();
@@ -183,7 +183,7 @@ namespace WorldPackets
             std::array<uint32, MAX_STATS> StatDelta = { };
         };
 
-        class TC_GAME_API PlayMusic final : public ServerPacket
+        class WH_GAME_API PlayMusic final : public ServerPacket
         {
         public:
             PlayMusic() : ServerPacket(SMSG_PLAY_MUSIC, 4) { }
@@ -194,7 +194,7 @@ namespace WorldPackets
             uint32 SoundKitID = 0;
         };
 
-        class TC_GAME_API PlayObjectSound final : public ServerPacket
+        class WH_GAME_API PlayObjectSound final : public ServerPacket
         {
         public:
             PlayObjectSound() : ServerPacket(SMSG_PLAY_OBJECT_SOUND, 4 + 8) { }
@@ -208,7 +208,7 @@ namespace WorldPackets
 
         };
 
-        class TC_GAME_API PlaySound final : public ServerPacket
+        class WH_GAME_API PlaySound final : public ServerPacket
         {
         public:
             PlaySound() : ServerPacket(SMSG_PLAY_SOUND, 4) { }

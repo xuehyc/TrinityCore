@@ -15,14 +15,14 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_COMBATAI_H
-#define TRINITY_COMBATAI_H
+#ifndef WARHEAD_COMBATAI_H
+#define WARHEAD_COMBATAI_H
 
 #include "CreatureAI.h"
 
 class Creature;
 
-class TC_GAME_API AggressorAI : public CreatureAI
+class WH_GAME_API AggressorAI : public CreatureAI
 {
     public:
         explicit AggressorAI(Creature* creature) : CreatureAI(creature) { }
@@ -33,7 +33,7 @@ class TC_GAME_API AggressorAI : public CreatureAI
 
 typedef std::vector<uint32> SpellVector;
 
-class TC_GAME_API CombatAI : public CreatureAI
+class WH_GAME_API CombatAI : public CreatureAI
 {
     public:
         explicit CombatAI(Creature* creature) : CreatureAI(creature) { }
@@ -52,7 +52,7 @@ class TC_GAME_API CombatAI : public CreatureAI
         SpellVector Spells;
 };
 
-class TC_GAME_API CasterAI : public CombatAI
+class WH_GAME_API CasterAI : public CombatAI
 {
     public:
         explicit CasterAI(Creature* creature) : CombatAI(creature) { _attackDistance = MELEE_RANGE; }
@@ -64,7 +64,7 @@ class TC_GAME_API CasterAI : public CombatAI
         float _attackDistance;
 };
 
-struct TC_GAME_API ArcherAI : public CreatureAI
+struct WH_GAME_API ArcherAI : public CreatureAI
 {
     public:
         explicit ArcherAI(Creature* creature);
@@ -77,7 +77,7 @@ struct TC_GAME_API ArcherAI : public CreatureAI
         float _minimumRange;
 };
 
-struct TC_GAME_API TurretAI : public CreatureAI
+struct WH_GAME_API TurretAI : public CreatureAI
 {
     public:
         explicit TurretAI(Creature* creature);
@@ -94,7 +94,7 @@ struct TC_GAME_API TurretAI : public CreatureAI
 #define VEHICLE_CONDITION_CHECK_TIME 1000
 #define VEHICLE_DISMISS_TIME 5000
 
-struct TC_GAME_API VehicleAI : public CreatureAI
+struct WH_GAME_API VehicleAI : public CreatureAI
 {
     public:
         explicit VehicleAI(Creature* creature);

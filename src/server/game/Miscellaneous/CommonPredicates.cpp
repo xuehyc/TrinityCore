@@ -20,4 +20,4 @@
 #include "Unit.h"
 #include "SharedDefines.h"
 
-Trinity::Predicates::IsVictimOf::IsVictimOf(Unit const* attacker) : _victim(attacker ? attacker->GetVictim() : nullptr) { }
+Warhead::Predicates::IsVictimOf::IsVictimOf(Unit const* attacker) : _victim(attacker ? attacker->GetVictim() : nullptr) { }

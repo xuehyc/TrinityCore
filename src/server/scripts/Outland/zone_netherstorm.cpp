@@ -172,7 +172,7 @@ public:
                 return true;
             }
 
-            TC_LOG_DEBUG("scripts", "npc_commander_dawnforge event already in progress, need to wait.");
+            LOG_DEBUG("scripts", "npc_commander_dawnforge event already in progress, need to wait.");
             return false;
         }
 
@@ -428,7 +428,7 @@ public:
                         UnitsWithMana.push_back(ref->GetVictim());
                 if (!UnitsWithMana.empty())
                 {
-                    DoCast(Trinity::Containers::SelectRandomContainerElement(UnitsWithMana), SPELL_MANA_BURN);
+                    DoCast(Warhead::Containers::SelectRandomContainerElement(UnitsWithMana), SPELL_MANA_BURN);
                     ManaBurnTimer = urand(8000, 18000); // 8-18 sec cd
                 }
                 else

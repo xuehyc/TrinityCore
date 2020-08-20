@@ -20,7 +20,7 @@
 #include "SmartEnum.h"
 #include <stdexcept>
 
-namespace Trinity
+namespace Warhead
 {
 namespace Impl
 {
@@ -29,7 +29,7 @@ namespace Impl
 |* data for enum 'AuctionQuality' in 'AuctionHouseBot.h' auto-generated *|
 \************************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<AuctionQuality>::ToString(AuctionQuality value)
+WH_API_EXPORT EnumText EnumUtils<AuctionQuality>::ToString(AuctionQuality value)
 {
     switch (value)
     {
@@ -45,10 +45,10 @@ TC_API_EXPORT EnumText EnumUtils<AuctionQuality>::ToString(AuctionQuality value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<AuctionQuality>::Count() { return 7; }
+WH_API_EXPORT size_t EnumUtils<AuctionQuality>::Count() { return 7; }
 
 template <>
-TC_API_EXPORT AuctionQuality EnumUtils<AuctionQuality>::FromIndex(size_t index)
+WH_API_EXPORT AuctionQuality EnumUtils<AuctionQuality>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -67,7 +67,7 @@ TC_API_EXPORT AuctionQuality EnumUtils<AuctionQuality>::FromIndex(size_t index)
 |* data for enum 'AuctionHouseType' in 'AuctionHouseBot.h' auto-generated *|
 \**************************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<AuctionHouseType>::ToString(AuctionHouseType value)
+WH_API_EXPORT EnumText EnumUtils<AuctionHouseType>::ToString(AuctionHouseType value)
 {
     switch (value)
     {
@@ -79,10 +79,10 @@ TC_API_EXPORT EnumText EnumUtils<AuctionHouseType>::ToString(AuctionHouseType va
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<AuctionHouseType>::Count() { return 3; }
+WH_API_EXPORT size_t EnumUtils<AuctionHouseType>::Count() { return 3; }
 
 template <>
-TC_API_EXPORT AuctionHouseType EnumUtils<AuctionHouseType>::FromIndex(size_t index)
+WH_API_EXPORT AuctionHouseType EnumUtils<AuctionHouseType>::FromIndex(size_t index)
 {
     switch (index)
     {

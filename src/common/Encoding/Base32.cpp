@@ -44,12 +44,12 @@ struct B32Impl
     }
 };
 
-/*static*/ std::string Trinity::Encoding::Base32::Encode(std::vector<uint8> const& data)
+/*static*/ std::string Warhead::Encoding::Base32::Encode(std::vector<uint8> const& data)
 {
-    return Trinity::Impl::GenericBaseEncoding<B32Impl>::Encode(data);
+    return Warhead::Impl::GenericBaseEncoding<B32Impl>::Encode(data);
 }
 
-/*static*/ Optional<std::vector<uint8>> Trinity::Encoding::Base32::Decode(std::string const& data)
+/*static*/ Optional<std::vector<uint8>> Warhead::Encoding::Base32::Decode(std::string const& data)
 {
-    return Trinity::Impl::GenericBaseEncoding<B32Impl>::Decode(data);
+    return Warhead::Impl::GenericBaseEncoding<B32Impl>::Decode(data);
 }

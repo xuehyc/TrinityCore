@@ -122,7 +122,7 @@ enum LoginDatabaseStatements : uint32
     MAX_LOGINDATABASE_STATEMENTS
 };
 
-class TC_DATABASE_API LoginDatabaseConnection : public MySQLConnection
+class WH_DATABASE_API LoginDatabaseConnection : public MySQLConnection
 {
 public:
     typedef LoginDatabaseStatements Statements;

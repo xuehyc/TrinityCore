@@ -249,7 +249,7 @@ public:
 
         void PrepareEncounter()
         {
-            TC_LOG_DEBUG("scripts", "Barnes Opera Event - Introduction complete - preparing encounter %d", m_uiEventId);
+            LOG_DEBUG("scripts", "Barnes Opera Event - Introduction complete - preparing encounter %d", m_uiEventId);
             uint8 index = 0;
             uint8 count = 0;
 
@@ -358,17 +358,17 @@ public:
                 case GOSSIP_ACTION_INFO_DEF + 3:
                     CloseGossipMenuFor(player);
                     m_uiEventId = EVENT_OZ;
-                    TC_LOG_DEBUG("scripts", "player (%s) manually set Opera event to EVENT_OZ", player->GetGUID().ToString().c_str());
+                    LOG_DEBUG("scripts", "player (%s) manually set Opera event to EVENT_OZ", player->GetGUID().ToString().c_str());
                     break;
                 case GOSSIP_ACTION_INFO_DEF + 4:
                     CloseGossipMenuFor(player);
                     m_uiEventId = EVENT_HOOD;
-                    TC_LOG_DEBUG("scripts", "player (%s) manually set Opera event to EVENT_HOOD", player->GetGUID().ToString().c_str());
+                    LOG_DEBUG("scripts", "player (%s) manually set Opera event to EVENT_HOOD", player->GetGUID().ToString().c_str());
                     break;
                 case GOSSIP_ACTION_INFO_DEF + 5:
                     CloseGossipMenuFor(player);
                     m_uiEventId = EVENT_RAJ;
-                    TC_LOG_DEBUG("scripts", "player (%s) manually set Opera event to EVENT_RAJ", player->GetGUID().ToString().c_str());
+                    LOG_DEBUG("scripts", "player (%s) manually set Opera event to EVENT_RAJ", player->GetGUID().ToString().c_str());
                     break;
             }
 

@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_AUTHDEFINES_H
-#define TRINITY_AUTHDEFINES_H
+#ifndef WARHEAD_AUTHDEFINES_H
+#define WARHEAD_AUTHDEFINES_H
 
 #include "Define.h"
 #include <array>

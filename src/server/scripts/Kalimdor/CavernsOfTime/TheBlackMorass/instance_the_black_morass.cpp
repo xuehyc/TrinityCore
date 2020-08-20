@@ -192,7 +192,7 @@ public:
                 {
                     if (data == IN_PROGRESS)
                     {
-                        TC_LOG_DEBUG("scripts", "Instance The Black Morass: Starting event.");
+                        LOG_DEBUG("scripts", "Instance The Black Morass: Starting event.");
                         InitWorldState();
                         m_auiEncounter[1] = IN_PROGRESS;
                         ScheduleEventNextPortal(15s);
@@ -201,7 +201,7 @@ public:
                     if (data == DONE)
                     {
                         //this may be completed further out in the post-event
-                        TC_LOG_DEBUG("scripts", "Instance The Black Morass: Event completed.");
+                        LOG_DEBUG("scripts", "Instance The Black Morass: Event completed.");
                         Map::PlayerList const& players = instance->GetPlayers();
 
                         if (!players.isEmpty())
@@ -266,7 +266,7 @@ public:
             if (entry == RIFT_BOSS)
                 entry = RandRiftBoss();
 
-            TC_LOG_DEBUG("scripts", "Instance The Black Morass: Summoning rift boss entry %u.", entry);
+            LOG_DEBUG("scripts", "Instance The Black Morass: Summoning rift boss entry %u.", entry);
 
             Position pos = me->GetRandomNearPosition(10.0f);
 
@@ -276,7 +276,7 @@ public:
             if (Creature* summon = me->SummonCreature(entry, pos, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 10min))
                 return summon;
 
-            TC_LOG_DEBUG("scripts", "Instance The Black Morass: What just happened there? No boss, no loot, no fun...");
+            LOG_DEBUG("scripts", "Instance The Black Morass: What just happened there? No boss, no loot, no fun...");
             return nullptr;
         }
 
@@ -289,7 +289,7 @@ public:
                 if (tmp >= _currentRiftId)
                     ++tmp;
 
-                TC_LOG_DEBUG("scripts", "Instance The Black Morass: Creating Time Rift at locationId %i (old locationId was %u).", tmp, _currentRiftId);
+                LOG_DEBUG("scripts", "Instance The Black Morass: Creating Time Rift at locationId %i (old locationId was %u).", tmp, _currentRiftId);
 
                 _currentRiftId = tmp;
 

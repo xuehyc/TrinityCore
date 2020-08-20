@@ -32,7 +32,7 @@ EndScriptData */
 #include "SpellMgr.h"
 #include "WorldSession.h"
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 class cast_commandscript : public CommandScript
 {
 public:

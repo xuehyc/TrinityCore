@@ -55,7 +55,7 @@ struct PreparedStatementData
 };
 
 //- Upper-level class that is used in code
-class TC_DATABASE_API PreparedStatementBase
+class WH_DATABASE_API PreparedStatementBase
 {
     friend class PreparedStatementTask;
 
@@ -111,7 +111,7 @@ private:
 };
 
 //- Lower-level class, enqueuable operation
-class TC_DATABASE_API PreparedStatementTask : public SQLOperation
+class WH_DATABASE_API PreparedStatementTask : public SQLOperation
 {
     public:
         PreparedStatementTask(PreparedStatementBase* stmt, bool async = false);

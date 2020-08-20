@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_COMMONPREDICATES_H
-#define TRINITY_COMMONPREDICATES_H
+#ifndef WARHEAD_COMMONPREDICATES_H
+#define WARHEAD_COMMONPREDICATES_H
 
 #include "Define.h"
 #include <utility>
@@ -24,12 +24,12 @@
 class Unit;
 class WorldObject;
 
-namespace Trinity
+namespace Warhead
 {
     namespace Predicates
     {
         /// Only returns true for the given attacker's current victim, if any
-        class TC_GAME_API IsVictimOf
+        class WH_GAME_API IsVictimOf
         {
             public:
                 IsVictimOf(Unit const* attacker);
@@ -39,7 +39,7 @@ namespace Trinity
         };
 
         template <typename PRED>
-        class TC_GAME_API Inverter
+        class WH_GAME_API Inverter
         {
             public:
                 Inverter(PRED&& p) : _child(std::move(p)) { }
@@ -67,4 +67,4 @@ namespace Trinity
 }
 
 
-#endif //TRINITY_COMMONPREDICATES_H
+#endif //WARHEAD_COMMONPREDICATES_H

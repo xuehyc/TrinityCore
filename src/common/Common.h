@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_COMMON_H
-#define TRINITYCORE_COMMON_H
+#ifndef WARHEADCORE_COMMON_H
+#define WARHEADCORE_COMMON_H
 
 #include "Define.h"
 #include <array>
@@ -24,14 +24,14 @@
 #include <string>
 #include <utility>
 
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
 #  include <ws2tcpip.h>
 
-#  if TRINITY_COMPILER == TRINITY_COMPILER_INTEL
+#  if WARHEAD_COMPILER == WARHEAD_COMPILER_INTEL
 #    if !defined(BOOST_ASIO_HAS_MOVE)
 #      define BOOST_ASIO_HAS_MOVE
 #    endif // !defined(BOOST_ASIO_HAS_MOVE)
-#  endif // if TRINITY_COMPILER == TRINITY_COMPILER_INTEL
+#  endif // if WARHEAD_COMPILER == WARHEAD_COMPILER_INTEL
 #else
 #  include <sys/types.h>
 #  include <sys/ioctl.h>
@@ -42,7 +42,7 @@
 #  include <cstdlib>
 #endif
 
-#if TRINITY_COMPILER == TRINITY_COMPILER_MICROSOFT
+#if WARHEAD_COMPILER == WARHEAD_COMPILER_MICROSOFT
 
 #define atoll _atoi64
 #define llabs _abs64
@@ -99,9 +99,9 @@ enum LocaleConstant : uint8
 #define MAX_LOCALES 8
 #define MAX_ACCOUNT_TUTORIAL_VALUES 8
 
-TC_COMMON_API extern char const* localeNames[TOTAL_LOCALES];
+WH_COMMON_API extern char const* localeNames[TOTAL_LOCALES];
 
-TC_COMMON_API LocaleConstant GetLocaleByName(std::string const& name);
+WH_COMMON_API LocaleConstant GetLocaleByName(std::string const& name);
 
 // we always use stdlib std::max/std::min, undefine some not C++ standard defines (Win API and some other platforms)
 #ifdef max

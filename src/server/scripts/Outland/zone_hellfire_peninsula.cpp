@@ -167,7 +167,7 @@ public:
                     tempSummon->SetCanFollowOwner(false);
             }
             else
-                TC_LOG_ERROR("scripts", "TRINITY: npc_ancestral_wolf can not obtain owner or owner is not a player.");
+                LOG_ERROR("scripts", "WARHEAD: npc_ancestral_wolf can not obtain owner or owner is not a player.");
         }
 
         void Reset() override
@@ -975,8 +975,8 @@ struct npc_watch_commander_leonus : public ScriptedAI
                     std::list<Creature*> dummies;
                     for (uint32 entry : { NPC_INFERNAL_RAIN, NPC_FEAR_CONTROLLER })
                     {
-                        Trinity::AllCreaturesOfEntryInRange pred(me, entry);
-                        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, dummies, pred);
+                        Warhead::AllCreaturesOfEntryInRange pred(me, entry);
+                        Warhead::CreatureListSearcher<Warhead::AllCreaturesOfEntryInRange> searcher(me, dummies, pred);
                         Cell::VisitAllObjects(me, searcher, 500.0f);
                     }
 
@@ -1019,8 +1019,8 @@ struct npc_infernal_rain_hellfire : public ScriptedAI
         _targets.clear();
 
         std::vector<Creature*> others;
-        Trinity::AllCreaturesOfEntryInRange pred(me, NPC_INFERNAL_RAIN);
-        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, others, pred);
+        Warhead::AllCreaturesOfEntryInRange pred(me, NPC_INFERNAL_RAIN);
+        Warhead::CreatureListSearcher<Warhead::AllCreaturesOfEntryInRange> searcher(me, others, pred);
         Cell::VisitAllObjects(me, searcher, 500.0f);
         for (Creature* other : others)
             if (other->GetCreatureData()->movementType == 2)
@@ -1037,7 +1037,7 @@ struct npc_infernal_rain_hellfire : public ScriptedAI
             {
                 case EVENT_CAST:
                 {
-                    if (Creature* target = ObjectAccessor::GetCreature(*me, Trinity::Containers::SelectRandomContainerElement(_targets)))
+                    if (Creature* target = ObjectAccessor::GetCreature(*me, Warhead::Containers::SelectRandomContainerElement(_targets)))
                     {
                         CastSpellExtraArgs args;
                         args.AddSpellMod(SPELLVALUE_MAX_TARGETS, 1);

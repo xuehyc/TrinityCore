@@ -15,7 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/// \addtogroup Trinityd
+/// \addtogroup Warheadd
 /// @{
 /// \file
 
@@ -28,7 +28,7 @@
 #include "Log.h"
 #include "Util.h"
 
-#if TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM != WARHEAD_PLATFORM_WINDOWS
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "Chat.h"
@@ -41,7 +41,7 @@ static inline void PrintCliPrefix()
     printf("%s", CLI_PREFIX);
 }
 
-#if TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM != WARHEAD_PLATFORM_WINDOWS
 char* command_finder(char const* text, int state)
 {
     static size_t idx, len;
@@ -94,7 +94,7 @@ int cli_hook_func()
 
 void utf8print(void* /*arg*/, char const* str)
 {
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
     wchar_t wtemp_buf[6000];
     size_t wtemp_len = 6000-1;
     if (!Utf8toWStr(str, strlen(str), wtemp_buf, wtemp_len))
@@ -133,7 +133,7 @@ int kb_hit_return()
 /// %Thread start
 void CliThread()
 {
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
     // print this here the first time
     // later it will be printed after command queue updates
     PrintCliPrefix();
@@ -152,7 +152,7 @@ void CliThread()
 
         std::string command;
 
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
         wchar_t commandbuf[256];
         if (fgetws(commandbuf, sizeof(commandbuf), stdin))
         {
@@ -179,7 +179,7 @@ void CliThread()
             {
                 if (nextLineIndex == 0)
                 {
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
                     PrintCliPrefix();
 #endif
                     continue;
@@ -190,7 +190,7 @@ void CliThread()
 
             fflush(stdout);
             sWorld->QueueCliCommand(new CliCommandHolder(nullptr, command.c_str(), &utf8print, &commandFinished));
-#if TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM != WARHEAD_PLATFORM_WINDOWS
             add_history(command.c_str());
 #endif
         }

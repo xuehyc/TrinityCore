@@ -42,7 +42,7 @@ Warden::~Warden()
 
 void Warden::MakeModuleForClient()
 {
-    TC_LOG_DEBUG("warden", "Make module for client");
+    LOG_DEBUG("warden", "Make module for client");
     InitializeModuleForClient(_module.emplace());
 
     MD5_CTX ctx;
@@ -53,7 +53,7 @@ void Warden::MakeModuleForClient()
 
 void Warden::SendModuleToClient()
 {
-    TC_LOG_DEBUG("warden", "Send module to client");
+    LOG_DEBUG("warden", "Send module to client");
 
     // Create packet structure
     WardenModuleTransfer packet;
@@ -81,7 +81,7 @@ void Warden::SendModuleToClient()
 
 void Warden::RequestModule()
 {
-    TC_LOG_DEBUG("warden", "Request module");
+    LOG_DEBUG("warden", "Request module");
 
     // Create packet structure
     WardenModuleUse request;
@@ -115,7 +115,7 @@ void Warden::Update(uint32 diff)
             // Kick player if client response delays more than set in config
             if (_clientResponseTimer > maxClientResponseDelay * IN_MILLISECONDS)
             {
-                TC_LOG_WARN("warden", "%s (latency: %u, IP: %s) exceeded Warden module response delay (%s) - disconnecting client",
+                LOG_WARN("warden", "%s (latency: %u, IP: %s) exceeded Warden module response delay (%s) - disconnecting client",
                                 _session->GetPlayerInfo().c_str(), _session->GetLatency(), _session->GetRemoteAddress().c_str(), secsToTimeString(maxClientResponseDelay, TimeFormat::ShortText).c_str());
                 _session->KickPlayer("Warden::Update Warden module response delay exceeded");
             }
@@ -148,12 +148,12 @@ bool Warden::IsValidCheckSum(uint32 checksum, uint8 const* data, const uint16 le
 
     if (checksum != newChecksum)
     {
-        TC_LOG_DEBUG("warden", "CHECKSUM IS NOT VALID");
+        LOG_DEBUG("warden", "CHECKSUM IS NOT VALID");
         return false;
     }
     else
     {
-        TC_LOG_DEBUG("warden", "CHECKSUM IS VALID");
+        LOG_DEBUG("warden", "CHECKSUM IS VALID");
         return true;
     }
 }
@@ -224,7 +224,7 @@ void Warden::HandleData(ByteBuffer& buff)
     DecryptData(buff.contents(), buff.size());
     uint8 opcode;
     buff >> opcode;
-    TC_LOG_DEBUG("warden", "Got packet, opcode %02X, size %u", opcode, uint32(buff.size() - 1));
+    LOG_DEBUG("warden", "Got packet, opcode %02X, size %u", opcode, uint32(buff.size() - 1));
     buff.hexlike();
 
     switch (opcode)
@@ -239,17 +239,17 @@ void Warden::HandleData(ByteBuffer& buff)
         HandleCheckResult(buff);
         break;
     case WARDEN_CMSG_MEM_CHECKS_RESULT:
-        TC_LOG_DEBUG("warden", "NYI WARDEN_CMSG_MEM_CHECKS_RESULT received!");
+        LOG_DEBUG("warden", "NYI WARDEN_CMSG_MEM_CHECKS_RESULT received!");
         break;
     case WARDEN_CMSG_HASH_RESULT:
         HandleHashResult(buff);
         InitializeModule();
         break;
     case WARDEN_CMSG_MODULE_FAILED:
-        TC_LOG_DEBUG("warden", "NYI WARDEN_CMSG_MODULE_FAILED received!");
+        LOG_DEBUG("warden", "NYI WARDEN_CMSG_MODULE_FAILED received!");
         break;
     default:
-        TC_LOG_WARN("warden", "Got unknown warden opcode %02X of size %u.", opcode, uint32(buff.size() - 1));
+        LOG_WARN("warden", "Got unknown warden opcode %02X of size %u.", opcode, uint32(buff.size() - 1));
         break;
     }
 }

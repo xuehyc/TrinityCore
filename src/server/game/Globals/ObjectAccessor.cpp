@@ -78,8 +78,8 @@ HashMapHolder<Player>::MapType const& ObjectAccessor::GetPlayers()
     return HashMapHolder<Player>::GetContainer();
 }
 
-template class TC_GAME_API HashMapHolder<Player>;
-template class TC_GAME_API HashMapHolder<Transport>;
+template class WH_GAME_API HashMapHolder<Player>;
+template class WH_GAME_API HashMapHolder<Transport>;
 
 namespace PlayerNameMapHolder
 {

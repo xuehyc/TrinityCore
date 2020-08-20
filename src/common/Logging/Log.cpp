@@ -230,7 +230,7 @@ void Log::write(std::unique_ptr<LogMessage>&& msg) const
     if (_ioContext)
     {
         std::shared_ptr<LogOperation> logOperation = std::make_shared<LogOperation>(logger, std::move(msg));
-        Trinity::Asio::post(*_ioContext, Trinity::Asio::bind_executor(*_strand, [logOperation]() { logOperation->call(); }));
+        Warhead::Asio::post(*_ioContext, Warhead::Asio::bind_executor(*_strand, [logOperation]() { logOperation->call(); }));
     }
     else
         logger->write(msg.get());
@@ -266,7 +266,7 @@ std::string Log::GetTimestampStr()
     //       HH     hour (2 digits 00-23)
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
-    return Trinity::StringFormat("%04d-%02d-%02d_%02d-%02d-%02d",
+    return Warhead::StringFormat("%04d-%02d-%02d_%02d-%02d-%02d",
         aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
 }
 
@@ -357,12 +357,12 @@ Log* Log::instance()
     return &instance;
 }
 
-void Log::Initialize(Trinity::Asio::IoContext* ioContext)
+void Log::Initialize(Warhead::Asio::IoContext* ioContext)
 {
     if (ioContext)
     {
         _ioContext = ioContext;
-        _strand = new Trinity::Asio::Strand(*ioContext);
+        _strand = new Warhead::Asio::Strand(*ioContext);
     }
 
     LoadFromConfig();

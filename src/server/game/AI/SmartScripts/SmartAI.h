@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_SMARTAI_H
-#define TRINITY_SMARTAI_H
+#ifndef WARHEAD_SMARTAI_H
+#define WARHEAD_SMARTAI_H
 
 #include "Define.h"
 #include "CreatureAI.h"
@@ -36,7 +36,7 @@ enum SmartEscortState : uint8
 static float constexpr SMART_ESCORT_MAX_PLAYER_DIST = 60.f;
 static float constexpr SMART_MAX_AID_DIST = SMART_ESCORT_MAX_PLAYER_DIST / 2.f;
 
-class TC_GAME_API SmartAI : public CreatureAI
+class WH_GAME_API SmartAI : public CreatureAI
 {
     public:
         ~SmartAI() { }
@@ -245,7 +245,7 @@ class TC_GAME_API SmartAI : public CreatureAI
         uint32 _escortQuestId;
 };
 
-class TC_GAME_API SmartGameObjectAI : public GameObjectAI
+class WH_GAME_API SmartGameObjectAI : public GameObjectAI
 {
     public:
         SmartGameObjectAI(GameObject* go) : GameObjectAI(go), _gossipReturn(false) { }

@@ -20,7 +20,7 @@
 
 #include "SQLOperation.h"
 
-class TC_DATABASE_API SQLQueryHolderBase
+class WH_DATABASE_API SQLQueryHolderBase
 {
     friend class SQLQueryHolderTask;
     private:
@@ -46,7 +46,7 @@ public:
     }
 };
 
-class TC_DATABASE_API SQLQueryHolderTask : public SQLOperation
+class WH_DATABASE_API SQLQueryHolderTask : public SQLOperation
 {
     private:
         SQLQueryHolderBase* m_holder;
@@ -63,7 +63,7 @@ class TC_DATABASE_API SQLQueryHolderTask : public SQLOperation
         QueryResultHolderFuture GetFuture() { return m_result.get_future(); }
 };
 
-class TC_DATABASE_API SQLQueryHolderCallback
+class WH_DATABASE_API SQLQueryHolderCallback
 {
 public:
     SQLQueryHolderCallback(QueryResultHolderFuture&& future) : m_future(std::move(future)) { }

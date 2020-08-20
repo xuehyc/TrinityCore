@@ -20,7 +20,7 @@
 
 #include "Define.h"
 
-class TC_GAME_API UpdateTime
+class WH_GAME_API UpdateTime
 {
     public:
         uint32 GetLastUpdateTime() const;
@@ -34,12 +34,12 @@ class TC_GAME_API UpdateTime
         uint32 _lastUpdateTime;
 };
 
-class TC_GAME_API WorldUpdateTime : public UpdateTime
+class WH_GAME_API WorldUpdateTime : public UpdateTime
 {
     public:
         WorldUpdateTime() : UpdateTime() { }
 };
 
-TC_GAME_API extern WorldUpdateTime sWorldUpdateTime;
+WH_GAME_API extern WorldUpdateTime sWorldUpdateTime;
 
 #endif

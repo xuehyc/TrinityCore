@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYSERVER_PACKET_BUILDER_H
-#define TRINITYSERVER_PACKET_BUILDER_H
+#ifndef WARHEADSERVER_PACKET_BUILDER_H
+#define WARHEADSERVER_PACKET_BUILDER_H
 
 #include "Define.h"
 
@@ -40,4 +40,4 @@ namespace Movement
         static void WriteSplineSync(MoveSpline const& mov, ByteBuffer& data);
     };
 }
-#endif // TRINITYSERVER_PACKET_BUILDER_H
+#endif // WARHEADSERVER_PACKET_BUILDER_H

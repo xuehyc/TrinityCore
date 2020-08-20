@@ -30,7 +30,7 @@ void WaypointMgr::Load()
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 waypoints. DB table `waypoint_data` is empty!");
+        LOG_INFO("server.loading", ">> Loaded 0 waypoints. DB table `waypoint_data` is empty!");
         return;
     }
 
@@ -45,8 +45,8 @@ void WaypointMgr::Load()
         float z = fields[4].GetFloat();
         float o = fields[5].GetFloat();
 
-        Trinity::NormalizeMapCoord(x);
-        Trinity::NormalizeMapCoord(y);
+        Warhead::NormalizeMapCoord(x);
+        Warhead::NormalizeMapCoord(y);
 
         WaypointNode waypoint;
         waypoint.id = fields[1].GetUInt32();
@@ -58,7 +58,7 @@ void WaypointMgr::Load()
 
         if (waypoint.moveType >= WAYPOINT_MOVE_TYPE_MAX)
         {
-            TC_LOG_ERROR("sql.sql", "Waypoint %u in waypoint_data has invalid move_type, ignoring", waypoint.id);
+            LOG_ERROR("sql.sql", "Waypoint %u in waypoint_data has invalid move_type, ignoring", waypoint.id);
             continue;
         }
 
@@ -73,7 +73,7 @@ void WaypointMgr::Load()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u waypoints in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u waypoints in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 WaypointMgr* WaypointMgr::instance()
@@ -102,8 +102,8 @@ void WaypointMgr::ReloadPath(uint32 id)
         float z = fields[3].GetFloat();
         float o = fields[4].GetFloat();
 
-        Trinity::NormalizeMapCoord(x);
-        Trinity::NormalizeMapCoord(y);
+        Warhead::NormalizeMapCoord(x);
+        Warhead::NormalizeMapCoord(y);
 
         WaypointNode waypoint;
         waypoint.id = fields[0].GetUInt32();
@@ -115,7 +115,7 @@ void WaypointMgr::ReloadPath(uint32 id)
 
         if (waypoint.moveType >= WAYPOINT_MOVE_TYPE_MAX)
         {
-            TC_LOG_ERROR("sql.sql", "Waypoint %u in waypoint_data has invalid move_type, ignoring", waypoint.id);
+            LOG_ERROR("sql.sql", "Waypoint %u in waypoint_data has invalid move_type, ignoring", waypoint.id);
             continue;
         }
 

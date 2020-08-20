@@ -59,10 +59,10 @@ void LoadFromDB()
         }
         while (result->NextRow());
 
-        TC_LOG_INFO("server.loading", ">> Loaded %u known addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+        LOG_INFO("server.loading", ">> Loaded %u known addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     }
     else
-        TC_LOG_INFO("server.loading", ">> Loaded 0 known addons. DB table `addons` is empty!");
+        LOG_INFO("server.loading", ">> Loaded 0 known addons. DB table `addons` is empty!");
 
     oldMSTime = getMSTime();
     result = CharacterDatabase.Query("SELECT id, name, version, UNIX_TIMESTAMP(timestamp) FROM banned_addons ORDER BY timestamp");
@@ -91,7 +91,7 @@ void LoadFromDB()
         }
         while (result->NextRow());
 
-        TC_LOG_INFO("server.loading", ">> Loaded %u banned addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+        LOG_INFO("server.loading", ">> Loaded %u banned addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     }
 }
 

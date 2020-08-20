@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_CHATCOMMANDARGS_H
-#define TRINITY_CHATCOMMANDARGS_H
+#ifndef WARHEAD_CHATCOMMANDARGS_H
+#define WARHEAD_CHATCOMMANDARGS_H
 
 #include "ChatCommandHelpers.h"
 #include "ChatCommandTags.h"
@@ -26,7 +26,7 @@
 
 struct GameTele;
 
-namespace Trinity
+namespace Warhead
 {
 namespace ChatCommands
 {
@@ -50,7 +50,7 @@ struct ArgInfo<T, std::enable_if_t<std::is_integral_v<T> && std::is_signed_v<T>>
     static char const* TryConsume(T& val, char const* args)
     {
         char const* next = args;
-        std::string token(args, Trinity::Impl::ChatCommands::tokenize(next));
+        std::string token(args, Warhead::Impl::ChatCommands::tokenize(next));
         try
         {
             size_t processedChars = 0;
@@ -70,7 +70,7 @@ struct ArgInfo<T, std::enable_if_t<std::is_integral_v<T> && std::is_unsigned_v<T
     static char const* TryConsume(T& val, char const* args)
     {
         char const* next = args;
-        std::string token(args, Trinity::Impl::ChatCommands::tokenize(next));
+        std::string token(args, Warhead::Impl::ChatCommands::tokenize(next));
         try
         {
             size_t processedChars = 0;
@@ -90,7 +90,7 @@ struct ArgInfo<T, std::enable_if_t<std::is_floating_point_v<T>>>
     static char const* TryConsume(T& val, char const* args)
     {
         char const* next = args;
-        std::string token(args, Trinity::Impl::ChatCommands::tokenize(next));
+        std::string token(args, Warhead::Impl::ChatCommands::tokenize(next));
         try
         {
             size_t processedChars = 0;
@@ -110,7 +110,7 @@ struct ArgInfo<std::string, void>
     static char const* TryConsume(std::string& val, char const* args)
     {
         char const* next = args;
-        if (size_t len = Trinity::Impl::ChatCommands::tokenize(next))
+        if (size_t len = Warhead::Impl::ChatCommands::tokenize(next))
         {
             val.assign(args, len);
             return next;
@@ -211,28 +211,28 @@ struct ArgInfo<T, std::enable_if_t<std::is_base_of_v<ContainerTag, T>>>
 
 // AchievementEntry* from numeric id or link
 template <>
-struct TC_GAME_API ArgInfo<AchievementEntry const*>
+struct WH_GAME_API ArgInfo<AchievementEntry const*>
 {
     static char const* TryConsume(AchievementEntry const*&, char const*);
 };
 
 // GameTele* from string name or link
 template <>
-struct TC_GAME_API ArgInfo<GameTele const*>
+struct WH_GAME_API ArgInfo<GameTele const*>
 {
     static char const* TryConsume(GameTele const*&, char const*);
 };
 
 // SpellInfo const* from spell id or link
 template <>
-struct TC_GAME_API ArgInfo<SpellInfo const*>
+struct WH_GAME_API ArgInfo<SpellInfo const*>
 {
     static char const* TryConsume(SpellInfo const*&, char const*);
 };
 
 // bool from 1/0 or on/off
 template <>
-struct TC_GAME_API ArgInfo<bool>
+struct WH_GAME_API ArgInfo<bool>
 {
     static char const* TryConsume(bool&, char const*);
 };

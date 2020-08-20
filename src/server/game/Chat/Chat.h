@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_CHAT_H
-#define TRINITYCORE_CHAT_H
+#ifndef WARHEADCORE_CHAT_H
+#define WARHEADCORE_CHAT_H
 
 #include "Common.h"
 #include "ChatCommand.h"
@@ -38,7 +38,7 @@ class WorldPacket;
 
 struct GameTele;
 
-class TC_GAME_API ChatHandler
+class WH_GAME_API ChatHandler
 {
     public:
         WorldSession* GetSession() { return m_session; }
@@ -64,7 +64,7 @@ class TC_GAME_API ChatHandler
         template<typename... Args>
         void PSendSysMessage(char const* fmt, Args&&... args)
         {
-            SendSysMessage(Trinity::StringFormat(fmt, std::forward<Args>(args)...).c_str());
+            SendSysMessage(Warhead::StringFormat(fmt, std::forward<Args>(args)...).c_str());
         }
 
         template<typename... Args>
@@ -76,7 +76,7 @@ class TC_GAME_API ChatHandler
         template<typename... Args>
         std::string PGetParseString(uint32 entry, Args&&... args) const
         {
-            return Trinity::StringFormat(GetTrinityString(entry), std::forward<Args>(args)...);
+            return Warhead::StringFormat(GetTrinityString(entry), std::forward<Args>(args)...);
         }
 
         bool _ParseCommands(char const* text);
@@ -148,7 +148,7 @@ class TC_GAME_API ChatHandler
         bool sentErrorMessage;
 };
 
-class TC_GAME_API CliHandler : public ChatHandler
+class WH_GAME_API CliHandler : public ChatHandler
 {
     public:
         typedef void Print(void*, char const*);
@@ -170,7 +170,7 @@ class TC_GAME_API CliHandler : public ChatHandler
         Print* m_print;
 };
 
-class TC_GAME_API AddonChannelCommandHandler : public ChatHandler
+class WH_GAME_API AddonChannelCommandHandler : public ChatHandler
 {
     public:
         using ChatHandler::ChatHandler;

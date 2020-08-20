@@ -35,7 +35,7 @@ namespace VMAP
     struct AreaAndLiquidData;
 }
 
-class TC_COMMON_API DynamicMapTree
+class WH_COMMON_API DynamicMapTree
 {
     DynTreeImpl *impl;
 

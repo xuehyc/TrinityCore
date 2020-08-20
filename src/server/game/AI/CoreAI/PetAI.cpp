@@ -76,7 +76,7 @@ void PetAI::UpdateAI(uint32 diff)
 
         if (NeedToStop())
         {
-            TC_LOG_TRACE("scripts.ai.petai", "PetAI::UpdateAI: AI stopped attacking %s", me->GetGUID().ToString().c_str());
+            LOG_TRACE("scripts.ai.petai", "PetAI::UpdateAI: AI stopped attacking %s", me->GetGUID().ToString().c_str());
             StopAttack();
             return;
         }
@@ -368,7 +368,7 @@ void PetAI::HandleReturnMovement()
 
     if (!me->GetCharmInfo())
     {
-        TC_LOG_WARN("scripts.ai.petai", "me->GetCharmInfo() is NULL in PetAI::HandleReturnMovement(). Debug info: %s", GetDebugInfo().c_str());
+        LOG_WARN("scripts.ai.petai", "me->GetCharmInfo() is NULL in PetAI::HandleReturnMovement(). Debug info: %s", GetDebugInfo().c_str());
         return;
     }
 
@@ -498,7 +498,7 @@ bool PetAI::CanAttack(Unit* target)
 
     if (!me->GetCharmInfo())
     {
-        TC_LOG_WARN("scripts.ai.petai", "me->GetCharmInfo() is NULL in PetAI::CanAttack(). Debug info: %s", GetDebugInfo().c_str());
+        LOG_WARN("scripts.ai.petai", "me->GetCharmInfo() is NULL in PetAI::CanAttack(). Debug info: %s", GetDebugInfo().c_str());
         return false;
     }
 

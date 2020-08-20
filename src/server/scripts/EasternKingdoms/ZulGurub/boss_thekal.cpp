@@ -468,7 +468,7 @@ class npc_zealot_lorkhan : public CreatureScript
                         {
                             Unit* target = nullptr;
                             LorKhanSelectTargetToHeal check(me, 100.0f);
-                            Trinity::UnitLastSearcher<LorKhanSelectTargetToHeal> searcher(me, target, check);
+                            Warhead::UnitLastSearcher<LorKhanSelectTargetToHeal> searcher(me, target, check);
                             Cell::VisitAllObjects(me, searcher, 100.0f);
 
                             if (target)

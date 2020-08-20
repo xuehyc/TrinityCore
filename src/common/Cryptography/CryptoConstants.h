@@ -15,12 +15,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_CRYPTO_CONSTANTS_H
-#define TRINITY_CRYPTO_CONSTANTS_H
+#ifndef WARHEAD_CRYPTO_CONSTANTS_H
+#define WARHEAD_CRYPTO_CONSTANTS_H
 
 #include "Define.h"
 
-namespace Trinity::Crypto
+namespace Warhead::Crypto
 {
     struct Constants
     {

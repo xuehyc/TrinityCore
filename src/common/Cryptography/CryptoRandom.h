@@ -15,15 +15,15 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_CRYPTORANDOM_H
-#define TRINITY_CRYPTORANDOM_H
+#ifndef WARHEAD_CRYPTORANDOM_H
+#define WARHEAD_CRYPTORANDOM_H
 
 #include "Define.h"
 #include <array>
 
-namespace Trinity::Crypto
+namespace Warhead::Crypto
 {
-    void TC_COMMON_API GetRandomBytes(uint8* buf, size_t len);
+    void WH_COMMON_API GetRandomBytes(uint8* buf, size_t len);
 
     template <typename Container>
     void GetRandomBytes(Container& c)

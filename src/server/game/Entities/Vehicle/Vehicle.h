@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TRINITY_VEHICLE_H
-#define __TRINITY_VEHICLE_H
+#ifndef __WARHEAD_VEHICLE_H
+#define __WARHEAD_VEHICLE_H
 
 #include "ObjectDefines.h"
 #include "Object.h"
@@ -28,7 +28,7 @@ struct VehicleEntry;
 class Unit;
 class VehicleJoinEvent;
 
-class TC_GAME_API Vehicle : public TransportBase
+class WH_GAME_API Vehicle : public TransportBase
 {
     protected:
         friend bool Unit::CreateVehicleKit(uint32 id, uint32 creatureEntry);
@@ -121,7 +121,7 @@ class TC_GAME_API Vehicle : public TransportBase
         PendingJoinEventContainer _pendingJoinEvents;       ///< Collection of delayed join events for prospective passengers
 };
 
-class TC_GAME_API VehicleJoinEvent : public BasicEvent
+class WH_GAME_API VehicleJoinEvent : public BasicEvent
 {
     friend class Vehicle;
     protected:

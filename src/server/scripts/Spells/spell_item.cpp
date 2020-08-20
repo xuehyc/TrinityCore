@@ -365,7 +365,7 @@ class spell_item_aura_of_madness : public AuraScript
 
         PreventDefaultAction();
         Unit* caster = eventInfo.GetActor();
-        uint32 spellId = Trinity::Containers::SelectRandomContainerElement(triggeredSpells[caster->GetClass()]);
+        uint32 spellId = Warhead::Containers::SelectRandomContainerElement(triggeredSpells[caster->GetClass()]);
         caster->CastSpell(caster, spellId, aurEff);
 
         if (roll_chance_i(10))
@@ -618,7 +618,7 @@ class spell_item_deathbringers_will : public SpellScriptLoader
                 if (randomSpells.empty())
                     return;
 
-                uint32 spellId = Trinity::Containers::SelectRandomContainerElement(randomSpells);
+                uint32 spellId = Warhead::Containers::SelectRandomContainerElement(randomSpells);
                 caster->CastSpell(caster, spellId, aurEff);
             }
 
@@ -858,7 +858,7 @@ class spell_item_echoes_of_light : public SpellScript
         if (targets.size() < 2)
             return;
 
-        targets.sort(Trinity::HealthPctOrderPred());
+        targets.sort(Warhead::HealthPctOrderPred());
 
         WorldObject* target = targets.front();
         targets.clear();
@@ -3941,7 +3941,7 @@ class spell_item_taunt_flag_targeting : public SpellScript
             return;
         }
 
-        Trinity::Containers::RandomResize(targets, 1);
+        Warhead::Containers::RandomResize(targets, 1);
     }
 
     void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -4183,7 +4183,7 @@ class spell_item_mad_alchemists_potion : public SpellScript
         if (target->GetPowerType() == POWER_MANA)
             availableElixirs.push_back(28509); // Elixir of Major Mageblood (22840)
 
-        uint32 chosenElixir = Trinity::Containers::SelectRandomContainerElement(availableElixirs);
+        uint32 chosenElixir = Warhead::Containers::SelectRandomContainerElement(availableElixirs);
 
         bool useElixir = true;
 
@@ -4246,7 +4246,7 @@ class spell_item_crazy_alchemists_potion : public SpellScript
         if (target->GetPowerType() == POWER_MANA)
             availableElixirs.push_back(43186); // Runic Mana Potion(33448)
 
-        uint32 chosenElixir = Trinity::Containers::SelectRandomContainerElement(availableElixirs);
+        uint32 chosenElixir = Warhead::Containers::SelectRandomContainerElement(availableElixirs);
 
         target->CastSpell(target, chosenElixir, GetCastItem());
     }

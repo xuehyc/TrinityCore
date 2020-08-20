@@ -68,7 +68,7 @@ namespace WorldPackets
     template<std::size_t MaxBytesWithoutNullTerminator, typename... Validators>
     class String
     {
-        using ValidatorList = std::conditional_t<!Trinity::has_type<Strings::RawBytes, std::tuple<Validators...>>::value,
+        using ValidatorList = std::conditional_t<!Warhead::has_type<Strings::RawBytes, std::tuple<Validators...>>::value,
             std::tuple<Strings::ByteSize<MaxBytesWithoutNullTerminator>, Strings::Utf8, Validators...>,
             std::tuple<Strings::ByteSize<MaxBytesWithoutNullTerminator>, Validators...>>;
 

@@ -21,7 +21,7 @@
 #include <functional>
 #include <utility>
 
-namespace Trinity
+namespace Warhead
 {
     template<typename T>
     inline void hash_combine(std::size_t& seed, T const& val)
@@ -41,8 +41,8 @@ namespace std
         size_t operator()(std::pair<K, V> const& p) const
         {
             size_t hashVal = 0;
-            Trinity::hash_combine(hashVal, p.first);
-            Trinity::hash_combine(hashVal, p.second);
+            Warhead::hash_combine(hashVal, p.first);
+            Warhead::hash_combine(hashVal, p.second);
             return hashVal;
         }
     };

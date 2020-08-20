@@ -21,7 +21,7 @@
 #include "ArenaTeam.h"
 #include <unordered_map>
 
-class TC_GAME_API ArenaTeamMgr
+class WH_GAME_API ArenaTeamMgr
 {
 private:
     ArenaTeamMgr();

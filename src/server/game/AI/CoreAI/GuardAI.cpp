@@ -60,7 +60,7 @@ void GuardAI::EnterEvadeMode(EvadeReason /*why*/)
         return;
     }
 
-    TC_LOG_TRACE("scripts.ai", "GuardAI::EnterEvadeMode: %s enters evade mode.", me->GetGUID().ToString().c_str());
+    LOG_TRACE("scripts.ai", "GuardAI::EnterEvadeMode: %s enters evade mode.", me->GetGUID().ToString().c_str());
 
     me->RemoveAllAuras();
     me->CombatStop(true);

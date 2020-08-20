@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_DBCSTORES_H
-#define TRINITY_DBCSTORES_H
+#ifndef WARHEAD_DBCSTORES_H
+#define WARHEAD_DBCSTORES_H
 
 #include "DBCStore.h"
 #include "DBCStructure.h"
@@ -34,18 +34,18 @@ enum LocaleConstant : uint8;
 #endif
 
 typedef std::list<uint32> SimpleFactionsList;
-TC_GAME_API SimpleFactionsList const* GetFactionTeamList(uint32 faction);
+WH_GAME_API SimpleFactionsList const* GetFactionTeamList(uint32 faction);
 
-TC_GAME_API char* GetPetName(uint32 petfamily, uint32 dbclang);
-TC_GAME_API uint32 GetTalentSpellCost(uint32 spellId);
-TC_GAME_API TalentSpellPos const* GetTalentSpellPos(uint32 spellId);
+WH_GAME_API char* GetPetName(uint32 petfamily, uint32 dbclang);
+WH_GAME_API uint32 GetTalentSpellCost(uint32 spellId);
+WH_GAME_API TalentSpellPos const* GetTalentSpellPos(uint32 spellId);
 
-TC_GAME_API char const* GetRaceName(uint8 race, uint8 locale);
-TC_GAME_API char const* GetClassName(uint8 class_, uint8 locale);
+WH_GAME_API char const* GetRaceName(uint8 race, uint8 locale);
+WH_GAME_API char const* GetClassName(uint8 class_, uint8 locale);
 
-TC_GAME_API WMOAreaTableEntry const* GetWMOAreaTableEntryByTripple(int32 rootid, int32 adtid, int32 groupid);
+WH_GAME_API WMOAreaTableEntry const* GetWMOAreaTableEntryByTripple(int32 rootid, int32 adtid, int32 groupid);
 
-TC_GAME_API uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId);
+WH_GAME_API uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId);
 
 enum ContentLevels : uint8
 {
@@ -53,163 +53,163 @@ enum ContentLevels : uint8
     CONTENT_61_70,
     CONTENT_71_80
 };
-TC_GAME_API ContentLevels GetContentLevelsForMapAndZone(uint32 mapid, uint32 zoneId);
+WH_GAME_API ContentLevels GetContentLevelsForMapAndZone(uint32 mapid, uint32 zoneId);
 
-TC_GAME_API bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);
+WH_GAME_API bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);
 
-TC_GAME_API void Zone2MapCoordinates(float &x, float &y, uint32 zone);
-TC_GAME_API void Map2ZoneCoordinates(float &x, float &y, uint32 zone);
+WH_GAME_API void Zone2MapCoordinates(float &x, float &y, uint32 zone);
+WH_GAME_API void Map2ZoneCoordinates(float &x, float &y, uint32 zone);
 
 typedef std::map<uint32/*pair32(map, diff)*/, MapDifficulty> MapDifficultyMap;
-TC_GAME_API MapDifficulty const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty);
-TC_GAME_API MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, Difficulty &difficulty);
+WH_GAME_API MapDifficulty const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty);
+WH_GAME_API MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, Difficulty &difficulty);
 
-TC_GAME_API uint32 const* /*[MAX_TALENT_TABS]*/ GetTalentTabPages(uint8 cls);
+WH_GAME_API uint32 const* /*[MAX_TALENT_TABS]*/ GetTalentTabPages(uint8 cls);
 
-TC_GAME_API uint32 GetLiquidFlags(uint32 liquidType);
+WH_GAME_API uint32 GetLiquidFlags(uint32 liquidType);
 
-TC_GAME_API PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 level);
-TC_GAME_API PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattlegroundBracketId id);
+WH_GAME_API PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 level);
+WH_GAME_API PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattlegroundBracketId id);
 
-TC_GAME_API CharacterFacialHairStylesEntry const* GetCharFacialHairEntry(uint8 race, uint8 gender, uint8 facialHairID);
-TC_GAME_API CharSectionsEntry const* GetCharSectionEntry(uint8 race, CharSectionType genType, uint8 gender, uint8 type, uint8 color);
-TC_GAME_API CharStartOutfitEntry const* GetCharStartOutfitEntry(uint8 race, uint8 class_, uint8 gender);
+WH_GAME_API CharacterFacialHairStylesEntry const* GetCharFacialHairEntry(uint8 race, uint8 gender, uint8 facialHairID);
+WH_GAME_API CharSectionsEntry const* GetCharSectionEntry(uint8 race, CharSectionType genType, uint8 gender, uint8 type, uint8 color);
+WH_GAME_API CharStartOutfitEntry const* GetCharStartOutfitEntry(uint8 race, uint8 class_, uint8 gender);
 
-TC_GAME_API LFGDungeonEntry const* GetLFGDungeon(uint32 mapId, Difficulty difficulty);
+WH_GAME_API LFGDungeonEntry const* GetLFGDungeon(uint32 mapId, Difficulty difficulty);
 
-TC_GAME_API uint32 GetDefaultMapLight(uint32 mapId);
+WH_GAME_API uint32 GetDefaultMapLight(uint32 mapId);
 
 typedef std::unordered_multimap<uint32, SkillRaceClassInfoEntry const*> SkillRaceClassInfoMap;
 typedef std::pair<SkillRaceClassInfoMap::iterator, SkillRaceClassInfoMap::iterator> SkillRaceClassInfoBounds;
-TC_GAME_API SkillRaceClassInfoEntry const* GetSkillRaceClassInfo(uint32 skill, uint8 race, uint8 class_);
+WH_GAME_API SkillRaceClassInfoEntry const* GetSkillRaceClassInfo(uint32 skill, uint8 race, uint8 class_);
 
-TC_GAME_API ResponseCodes ValidateName(std::wstring const& name, LocaleConstant locale);
+WH_GAME_API ResponseCodes ValidateName(std::wstring const& name, LocaleConstant locale);
 
-TC_GAME_API EmotesTextSoundEntry const* FindTextSoundEmoteFor(uint32 emote, uint32 race, uint32 gender);
+WH_GAME_API EmotesTextSoundEntry const* FindTextSoundEmoteFor(uint32 emote, uint32 race, uint32 gender);
 
-TC_GAME_API extern DBCStorage <AchievementEntry>             sAchievementStore;
-TC_GAME_API extern DBCStorage <AchievementCriteriaEntry>     sAchievementCriteriaStore;
-TC_GAME_API extern DBCStorage <AreaTableEntry>               sAreaTableStore;
-TC_GAME_API extern DBCStorage <AreaGroupEntry>               sAreaGroupStore;
-TC_GAME_API extern DBCStorage <AreaPOIEntry>                 sAreaPOIStore;
-TC_GAME_API extern DBCStorage <AreaTriggerEntry>             sAreaTriggerStore;
-TC_GAME_API extern DBCStorage <AuctionHouseEntry>            sAuctionHouseStore;
-TC_GAME_API extern DBCStorage <BankBagSlotPricesEntry>       sBankBagSlotPricesStore;
-TC_GAME_API extern DBCStorage <BannedAddOnsEntry>            sBannedAddOnsStore;
-TC_GAME_API extern DBCStorage <BarberShopStyleEntry>         sBarberShopStyleStore;
-TC_GAME_API extern DBCStorage <BattlemasterListEntry>        sBattlemasterListStore;
-TC_GAME_API extern DBCStorage <ChatChannelsEntry>            sChatChannelsStore;
-TC_GAME_API extern DBCStorage <CharacterFacialHairStylesEntry> sCharacterFacialHairStylesStore;
-TC_GAME_API extern DBCStorage <CharSectionsEntry>            sCharSectionsStore;
-TC_GAME_API extern DBCStorage <CharStartOutfitEntry>         sCharStartOutfitStore;
-TC_GAME_API extern DBCStorage <CharTitlesEntry>              sCharTitlesStore;
-TC_GAME_API extern DBCStorage <ChrClassesEntry>              sChrClassesStore;
-TC_GAME_API extern DBCStorage <ChrRacesEntry>                sChrRacesStore;
-TC_GAME_API extern DBCStorage <CinematicCameraEntry>         sCinematicCameraStore;
-TC_GAME_API extern DBCStorage <CinematicSequencesEntry>      sCinematicSequencesStore;
-TC_GAME_API extern DBCStorage <CreatureDisplayInfoEntry>     sCreatureDisplayInfoStore;
-TC_GAME_API extern DBCStorage <CreatureDisplayInfoExtraEntry> sCreatureDisplayInfoExtraStore;
-TC_GAME_API extern DBCStorage <CreatureFamilyEntry>          sCreatureFamilyStore;
-TC_GAME_API extern DBCStorage <CreatureModelDataEntry>       sCreatureModelDataStore;
-TC_GAME_API extern DBCStorage <CreatureSpellDataEntry>       sCreatureSpellDataStore;
-TC_GAME_API extern DBCStorage <CreatureTypeEntry>            sCreatureTypeStore;
-TC_GAME_API extern DBCStorage <CurrencyTypesEntry>           sCurrencyTypesStore;
-TC_GAME_API extern DBCStorage <DestructibleModelDataEntry>   sDestructibleModelDataStore;
-TC_GAME_API extern DBCStorage <DungeonEncounterEntry>        sDungeonEncounterStore;
-TC_GAME_API extern DBCStorage <DurabilityCostsEntry>         sDurabilityCostsStore;
-TC_GAME_API extern DBCStorage <DurabilityQualityEntry>       sDurabilityQualityStore;
-TC_GAME_API extern DBCStorage <EmotesEntry>                  sEmotesStore;
-TC_GAME_API extern DBCStorage <EmotesTextEntry>              sEmotesTextStore;
-TC_GAME_API extern DBCStorage <EmotesTextSoundEntry>         sEmotesTextSoundStore;
-TC_GAME_API extern DBCStorage <FactionEntry>                 sFactionStore;
-TC_GAME_API extern DBCStorage <FactionTemplateEntry>         sFactionTemplateStore;
-TC_GAME_API extern DBCStorage <GameObjectArtKitEntry>        sGameObjectArtKitStore;
-TC_GAME_API extern DBCStorage <GameObjectDisplayInfoEntry>   sGameObjectDisplayInfoStore;
-TC_GAME_API extern DBCStorage <GemPropertiesEntry>           sGemPropertiesStore;
-TC_GAME_API extern DBCStorage <GlyphPropertiesEntry>         sGlyphPropertiesStore;
-TC_GAME_API extern DBCStorage <GlyphSlotEntry>               sGlyphSlotStore;
+WH_GAME_API extern DBCStorage <AchievementEntry>             sAchievementStore;
+WH_GAME_API extern DBCStorage <AchievementCriteriaEntry>     sAchievementCriteriaStore;
+WH_GAME_API extern DBCStorage <AreaTableEntry>               sAreaTableStore;
+WH_GAME_API extern DBCStorage <AreaGroupEntry>               sAreaGroupStore;
+WH_GAME_API extern DBCStorage <AreaPOIEntry>                 sAreaPOIStore;
+WH_GAME_API extern DBCStorage <AreaTriggerEntry>             sAreaTriggerStore;
+WH_GAME_API extern DBCStorage <AuctionHouseEntry>            sAuctionHouseStore;
+WH_GAME_API extern DBCStorage <BankBagSlotPricesEntry>       sBankBagSlotPricesStore;
+WH_GAME_API extern DBCStorage <BannedAddOnsEntry>            sBannedAddOnsStore;
+WH_GAME_API extern DBCStorage <BarberShopStyleEntry>         sBarberShopStyleStore;
+WH_GAME_API extern DBCStorage <BattlemasterListEntry>        sBattlemasterListStore;
+WH_GAME_API extern DBCStorage <ChatChannelsEntry>            sChatChannelsStore;
+WH_GAME_API extern DBCStorage <CharacterFacialHairStylesEntry> sCharacterFacialHairStylesStore;
+WH_GAME_API extern DBCStorage <CharSectionsEntry>            sCharSectionsStore;
+WH_GAME_API extern DBCStorage <CharStartOutfitEntry>         sCharStartOutfitStore;
+WH_GAME_API extern DBCStorage <CharTitlesEntry>              sCharTitlesStore;
+WH_GAME_API extern DBCStorage <ChrClassesEntry>              sChrClassesStore;
+WH_GAME_API extern DBCStorage <ChrRacesEntry>                sChrRacesStore;
+WH_GAME_API extern DBCStorage <CinematicCameraEntry>         sCinematicCameraStore;
+WH_GAME_API extern DBCStorage <CinematicSequencesEntry>      sCinematicSequencesStore;
+WH_GAME_API extern DBCStorage <CreatureDisplayInfoEntry>     sCreatureDisplayInfoStore;
+WH_GAME_API extern DBCStorage <CreatureDisplayInfoExtraEntry> sCreatureDisplayInfoExtraStore;
+WH_GAME_API extern DBCStorage <CreatureFamilyEntry>          sCreatureFamilyStore;
+WH_GAME_API extern DBCStorage <CreatureModelDataEntry>       sCreatureModelDataStore;
+WH_GAME_API extern DBCStorage <CreatureSpellDataEntry>       sCreatureSpellDataStore;
+WH_GAME_API extern DBCStorage <CreatureTypeEntry>            sCreatureTypeStore;
+WH_GAME_API extern DBCStorage <CurrencyTypesEntry>           sCurrencyTypesStore;
+WH_GAME_API extern DBCStorage <DestructibleModelDataEntry>   sDestructibleModelDataStore;
+WH_GAME_API extern DBCStorage <DungeonEncounterEntry>        sDungeonEncounterStore;
+WH_GAME_API extern DBCStorage <DurabilityCostsEntry>         sDurabilityCostsStore;
+WH_GAME_API extern DBCStorage <DurabilityQualityEntry>       sDurabilityQualityStore;
+WH_GAME_API extern DBCStorage <EmotesEntry>                  sEmotesStore;
+WH_GAME_API extern DBCStorage <EmotesTextEntry>              sEmotesTextStore;
+WH_GAME_API extern DBCStorage <EmotesTextSoundEntry>         sEmotesTextSoundStore;
+WH_GAME_API extern DBCStorage <FactionEntry>                 sFactionStore;
+WH_GAME_API extern DBCStorage <FactionTemplateEntry>         sFactionTemplateStore;
+WH_GAME_API extern DBCStorage <GameObjectArtKitEntry>        sGameObjectArtKitStore;
+WH_GAME_API extern DBCStorage <GameObjectDisplayInfoEntry>   sGameObjectDisplayInfoStore;
+WH_GAME_API extern DBCStorage <GemPropertiesEntry>           sGemPropertiesStore;
+WH_GAME_API extern DBCStorage <GlyphPropertiesEntry>         sGlyphPropertiesStore;
+WH_GAME_API extern DBCStorage <GlyphSlotEntry>               sGlyphSlotStore;
 
-TC_GAME_API extern DBCStorage <GtBarberShopCostBaseEntry>    sGtBarberShopCostBaseStore;
-TC_GAME_API extern DBCStorage <GtCombatRatingsEntry>         sGtCombatRatingsStore;
-TC_GAME_API extern DBCStorage <GtChanceToMeleeCritBaseEntry> sGtChanceToMeleeCritBaseStore;
-TC_GAME_API extern DBCStorage <GtChanceToMeleeCritEntry>     sGtChanceToMeleeCritStore;
-TC_GAME_API extern DBCStorage <GtChanceToSpellCritBaseEntry> sGtChanceToSpellCritBaseStore;
-TC_GAME_API extern DBCStorage <GtChanceToSpellCritEntry>     sGtChanceToSpellCritStore;
-TC_GAME_API extern DBCStorage <GtNPCManaCostScalerEntry>     sGtNPCManaCostScalerStore;
-TC_GAME_API extern DBCStorage <GtOCTClassCombatRatingScalarEntry> sGtOCTClassCombatRatingScalarStore;
-TC_GAME_API extern DBCStorage <GtOCTRegenHPEntry>            sGtOCTRegenHPStore;
-//TC_GAME_API extern DBCStorage <GtOCTRegenMPEntry>            sGtOCTRegenMPStore; -- not used currently
-TC_GAME_API extern DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore;
-TC_GAME_API extern DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore;
-TC_GAME_API extern DBCStorage <HolidaysEntry>                sHolidaysStore;
-TC_GAME_API extern DBCStorage <ItemEntry>                    sItemStore;
-TC_GAME_API extern DBCStorage <ItemBagFamilyEntry>           sItemBagFamilyStore;
-//TC_GAME_API extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently
-TC_GAME_API extern DBCStorage <ItemExtendedCostEntry>        sItemExtendedCostStore;
-TC_GAME_API extern DBCStorage <ItemLimitCategoryEntry>       sItemLimitCategoryStore;
-TC_GAME_API extern DBCStorage <ItemRandomPropertiesEntry>    sItemRandomPropertiesStore;
-TC_GAME_API extern DBCStorage <ItemRandomSuffixEntry>        sItemRandomSuffixStore;
-TC_GAME_API extern DBCStorage <ItemSetEntry>                 sItemSetStore;
-TC_GAME_API extern DBCStorage <LFGDungeonEntry>              sLFGDungeonStore;
-TC_GAME_API extern DBCStorage <LightEntry>                   sLightStore;
-TC_GAME_API extern DBCStorage <LiquidTypeEntry>              sLiquidTypeStore;
-TC_GAME_API extern DBCStorage <LockEntry>                    sLockStore;
-TC_GAME_API extern DBCStorage <MailTemplateEntry>            sMailTemplateStore;
-TC_GAME_API extern DBCStorage <MapEntry>                     sMapStore;
-//TC_GAME_API extern DBCStorage <MapDifficultyEntry>           sMapDifficultyStore; -- use GetMapDifficultyData insteed
-TC_GAME_API extern MapDifficultyMap                          sMapDifficultyMap;
-TC_GAME_API extern DBCStorage <MovieEntry>                   sMovieStore;
-TC_GAME_API extern DBCStorage <OverrideSpellDataEntry>       sOverrideSpellDataStore;
-TC_GAME_API extern DBCStorage <PowerDisplayEntry>            sPowerDisplayStore;
-TC_GAME_API extern DBCStorage <QuestSortEntry>               sQuestSortStore;
-TC_GAME_API extern DBCStorage <QuestXPEntry>                 sQuestXPStore;
-TC_GAME_API extern DBCStorage <QuestFactionRewEntry>         sQuestFactionRewardStore;
-TC_GAME_API extern DBCStorage <RandPropPointsEntry>          sRandPropPointsStore;
-TC_GAME_API extern DBCStorage <ScalingStatDistributionEntry> sScalingStatDistributionStore;
-TC_GAME_API extern DBCStorage <ScalingStatValuesEntry>       sScalingStatValuesStore;
-TC_GAME_API extern DBCStorage <SkillLineEntry>               sSkillLineStore;
-TC_GAME_API extern DBCStorage <SkillLineAbilityEntry>        sSkillLineAbilityStore;
-TC_GAME_API extern DBCStorage <SkillTiersEntry>              sSkillTiersStore;
-TC_GAME_API extern DBCStorage <SoundEntriesEntry>            sSoundEntriesStore;
-TC_GAME_API extern DBCStorage <SpellCastTimesEntry>          sSpellCastTimesStore;
-TC_GAME_API extern DBCStorage <SpellCategoryEntry>           sSpellCategoryStore;
-TC_GAME_API extern DBCStorage <SpellDifficultyEntry>         sSpellDifficultyStore;
-TC_GAME_API extern DBCStorage <SpellDurationEntry>           sSpellDurationStore;
-TC_GAME_API extern DBCStorage <SpellFocusObjectEntry>        sSpellFocusObjectStore;
-TC_GAME_API extern DBCStorage <SpellItemEnchantmentEntry>    sSpellItemEnchantmentStore;
-TC_GAME_API extern DBCStorage <SpellItemEnchantmentConditionEntry> sSpellItemEnchantmentConditionStore;
-TC_GAME_API extern PetFamilySpellsStore                      sPetFamilySpellsStore;
-TC_GAME_API extern std::unordered_set<uint32>                sPetTalentSpells;
-TC_GAME_API extern DBCStorage <SpellRadiusEntry>             sSpellRadiusStore;
-TC_GAME_API extern DBCStorage <SpellRangeEntry>              sSpellRangeStore;
-TC_GAME_API extern DBCStorage <SpellRuneCostEntry>           sSpellRuneCostStore;
-TC_GAME_API extern DBCStorage <SpellShapeshiftFormEntry>     sSpellShapeshiftFormStore;
-TC_GAME_API extern DBCStorage <SpellEntry>                   sSpellStore;
-TC_GAME_API extern DBCStorage <SpellVisualEntry>             sSpellVisualStore;
-TC_GAME_API extern DBCStorage <StableSlotPricesEntry>        sStableSlotPricesStore;
-TC_GAME_API extern DBCStorage <SummonPropertiesEntry>        sSummonPropertiesStore;
-TC_GAME_API extern DBCStorage <TalentEntry>                  sTalentStore;
-TC_GAME_API extern DBCStorage <TalentTabEntry>               sTalentTabStore;
-TC_GAME_API extern DBCStorage <TaxiNodesEntry>               sTaxiNodesStore;
-TC_GAME_API extern DBCStorage <TaxiPathEntry>                sTaxiPathStore;
-TC_GAME_API extern TaxiMask                                  sTaxiNodesMask;
-TC_GAME_API extern TaxiMask                                  sOldContinentsNodesMask;
-TC_GAME_API extern TaxiMask                                  sHordeTaxiNodesMask;
-TC_GAME_API extern TaxiMask                                  sAllianceTaxiNodesMask;
-TC_GAME_API extern TaxiMask                                  sDeathKnightTaxiNodesMask;
-TC_GAME_API extern TaxiPathSetBySource                       sTaxiPathSetBySource;
-TC_GAME_API extern TaxiPathNodesByPath                       sTaxiPathNodesByPath;
-TC_GAME_API extern DBCStorage <TransportAnimationEntry>      sTransportAnimationStore;
-TC_GAME_API extern DBCStorage <TransportRotationEntry>       sTransportRotationStore;
-TC_GAME_API extern DBCStorage <TeamContributionPointsEntry>  sTeamContributionPointsStore;
-TC_GAME_API extern DBCStorage <TotemCategoryEntry>           sTotemCategoryStore;
-TC_GAME_API extern DBCStorage <VehicleEntry>                 sVehicleStore;
-TC_GAME_API extern DBCStorage <VehicleSeatEntry>             sVehicleSeatStore;
-TC_GAME_API extern DBCStorage <WMOAreaTableEntry>            sWMOAreaTableStore;
-//TC_GAME_API extern DBCStorage <WorldMapAreaEntry>           sWorldMapAreaStore; -- use Zone2MapCoordinates and Map2ZoneCoordinates
-TC_GAME_API extern DBCStorage <WorldMapOverlayEntry>         sWorldMapOverlayStore;
-TC_GAME_API extern DBCStorage <WorldSafeLocsEntry>           sWorldSafeLocsStore;
+WH_GAME_API extern DBCStorage <GtBarberShopCostBaseEntry>    sGtBarberShopCostBaseStore;
+WH_GAME_API extern DBCStorage <GtCombatRatingsEntry>         sGtCombatRatingsStore;
+WH_GAME_API extern DBCStorage <GtChanceToMeleeCritBaseEntry> sGtChanceToMeleeCritBaseStore;
+WH_GAME_API extern DBCStorage <GtChanceToMeleeCritEntry>     sGtChanceToMeleeCritStore;
+WH_GAME_API extern DBCStorage <GtChanceToSpellCritBaseEntry> sGtChanceToSpellCritBaseStore;
+WH_GAME_API extern DBCStorage <GtChanceToSpellCritEntry>     sGtChanceToSpellCritStore;
+WH_GAME_API extern DBCStorage <GtNPCManaCostScalerEntry>     sGtNPCManaCostScalerStore;
+WH_GAME_API extern DBCStorage <GtOCTClassCombatRatingScalarEntry> sGtOCTClassCombatRatingScalarStore;
+WH_GAME_API extern DBCStorage <GtOCTRegenHPEntry>            sGtOCTRegenHPStore;
+//WH_GAME_API extern DBCStorage <GtOCTRegenMPEntry>            sGtOCTRegenMPStore; -- not used currently
+WH_GAME_API extern DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore;
+WH_GAME_API extern DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore;
+WH_GAME_API extern DBCStorage <HolidaysEntry>                sHolidaysStore;
+WH_GAME_API extern DBCStorage <ItemEntry>                    sItemStore;
+WH_GAME_API extern DBCStorage <ItemBagFamilyEntry>           sItemBagFamilyStore;
+//WH_GAME_API extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently
+WH_GAME_API extern DBCStorage <ItemExtendedCostEntry>        sItemExtendedCostStore;
+WH_GAME_API extern DBCStorage <ItemLimitCategoryEntry>       sItemLimitCategoryStore;
+WH_GAME_API extern DBCStorage <ItemRandomPropertiesEntry>    sItemRandomPropertiesStore;
+WH_GAME_API extern DBCStorage <ItemRandomSuffixEntry>        sItemRandomSuffixStore;
+WH_GAME_API extern DBCStorage <ItemSetEntry>                 sItemSetStore;
+WH_GAME_API extern DBCStorage <LFGDungeonEntry>              sLFGDungeonStore;
+WH_GAME_API extern DBCStorage <LightEntry>                   sLightStore;
+WH_GAME_API extern DBCStorage <LiquidTypeEntry>              sLiquidTypeStore;
+WH_GAME_API extern DBCStorage <LockEntry>                    sLockStore;
+WH_GAME_API extern DBCStorage <MailTemplateEntry>            sMailTemplateStore;
+WH_GAME_API extern DBCStorage <MapEntry>                     sMapStore;
+//WH_GAME_API extern DBCStorage <MapDifficultyEntry>           sMapDifficultyStore; -- use GetMapDifficultyData insteed
+WH_GAME_API extern MapDifficultyMap                          sMapDifficultyMap;
+WH_GAME_API extern DBCStorage <MovieEntry>                   sMovieStore;
+WH_GAME_API extern DBCStorage <OverrideSpellDataEntry>       sOverrideSpellDataStore;
+WH_GAME_API extern DBCStorage <PowerDisplayEntry>            sPowerDisplayStore;
+WH_GAME_API extern DBCStorage <QuestSortEntry>               sQuestSortStore;
+WH_GAME_API extern DBCStorage <QuestXPEntry>                 sQuestXPStore;
+WH_GAME_API extern DBCStorage <QuestFactionRewEntry>         sQuestFactionRewardStore;
+WH_GAME_API extern DBCStorage <RandPropPointsEntry>          sRandPropPointsStore;
+WH_GAME_API extern DBCStorage <ScalingStatDistributionEntry> sScalingStatDistributionStore;
+WH_GAME_API extern DBCStorage <ScalingStatValuesEntry>       sScalingStatValuesStore;
+WH_GAME_API extern DBCStorage <SkillLineEntry>               sSkillLineStore;
+WH_GAME_API extern DBCStorage <SkillLineAbilityEntry>        sSkillLineAbilityStore;
+WH_GAME_API extern DBCStorage <SkillTiersEntry>              sSkillTiersStore;
+WH_GAME_API extern DBCStorage <SoundEntriesEntry>            sSoundEntriesStore;
+WH_GAME_API extern DBCStorage <SpellCastTimesEntry>          sSpellCastTimesStore;
+WH_GAME_API extern DBCStorage <SpellCategoryEntry>           sSpellCategoryStore;
+WH_GAME_API extern DBCStorage <SpellDifficultyEntry>         sSpellDifficultyStore;
+WH_GAME_API extern DBCStorage <SpellDurationEntry>           sSpellDurationStore;
+WH_GAME_API extern DBCStorage <SpellFocusObjectEntry>        sSpellFocusObjectStore;
+WH_GAME_API extern DBCStorage <SpellItemEnchantmentEntry>    sSpellItemEnchantmentStore;
+WH_GAME_API extern DBCStorage <SpellItemEnchantmentConditionEntry> sSpellItemEnchantmentConditionStore;
+WH_GAME_API extern PetFamilySpellsStore                      sPetFamilySpellsStore;
+WH_GAME_API extern std::unordered_set<uint32>                sPetTalentSpells;
+WH_GAME_API extern DBCStorage <SpellRadiusEntry>             sSpellRadiusStore;
+WH_GAME_API extern DBCStorage <SpellRangeEntry>              sSpellRangeStore;
+WH_GAME_API extern DBCStorage <SpellRuneCostEntry>           sSpellRuneCostStore;
+WH_GAME_API extern DBCStorage <SpellShapeshiftFormEntry>     sSpellShapeshiftFormStore;
+WH_GAME_API extern DBCStorage <SpellEntry>                   sSpellStore;
+WH_GAME_API extern DBCStorage <SpellVisualEntry>             sSpellVisualStore;
+WH_GAME_API extern DBCStorage <StableSlotPricesEntry>        sStableSlotPricesStore;
+WH_GAME_API extern DBCStorage <SummonPropertiesEntry>        sSummonPropertiesStore;
+WH_GAME_API extern DBCStorage <TalentEntry>                  sTalentStore;
+WH_GAME_API extern DBCStorage <TalentTabEntry>               sTalentTabStore;
+WH_GAME_API extern DBCStorage <TaxiNodesEntry>               sTaxiNodesStore;
+WH_GAME_API extern DBCStorage <TaxiPathEntry>                sTaxiPathStore;
+WH_GAME_API extern TaxiMask                                  sTaxiNodesMask;
+WH_GAME_API extern TaxiMask                                  sOldContinentsNodesMask;
+WH_GAME_API extern TaxiMask                                  sHordeTaxiNodesMask;
+WH_GAME_API extern TaxiMask                                  sAllianceTaxiNodesMask;
+WH_GAME_API extern TaxiMask                                  sDeathKnightTaxiNodesMask;
+WH_GAME_API extern TaxiPathSetBySource                       sTaxiPathSetBySource;
+WH_GAME_API extern TaxiPathNodesByPath                       sTaxiPathNodesByPath;
+WH_GAME_API extern DBCStorage <TransportAnimationEntry>      sTransportAnimationStore;
+WH_GAME_API extern DBCStorage <TransportRotationEntry>       sTransportRotationStore;
+WH_GAME_API extern DBCStorage <TeamContributionPointsEntry>  sTeamContributionPointsStore;
+WH_GAME_API extern DBCStorage <TotemCategoryEntry>           sTotemCategoryStore;
+WH_GAME_API extern DBCStorage <VehicleEntry>                 sVehicleStore;
+WH_GAME_API extern DBCStorage <VehicleSeatEntry>             sVehicleSeatStore;
+WH_GAME_API extern DBCStorage <WMOAreaTableEntry>            sWMOAreaTableStore;
+//WH_GAME_API extern DBCStorage <WorldMapAreaEntry>           sWorldMapAreaStore; -- use Zone2MapCoordinates and Map2ZoneCoordinates
+WH_GAME_API extern DBCStorage <WorldMapOverlayEntry>         sWorldMapOverlayStore;
+WH_GAME_API extern DBCStorage <WorldSafeLocsEntry>           sWorldSafeLocsStore;
 
-TC_GAME_API void LoadDBCStores(const std::string& dataPath);
+WH_GAME_API void LoadDBCStores(const std::string& dataPath);
 
 #endif

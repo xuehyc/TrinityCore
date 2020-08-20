@@ -642,7 +642,7 @@ struct GameObjectLocale
     std::vector<std::string> CastBarCaption;
 };
 
-struct TC_GAME_API QuaternionData
+struct WH_GAME_API QuaternionData
 {
     float x, y, z, w;
 

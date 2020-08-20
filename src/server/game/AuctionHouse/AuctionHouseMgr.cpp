@@ -107,11 +107,11 @@ uint32 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32
     if (i)
         deposit += remainderbase * i * timeHr;
 
-    TC_LOG_DEBUG("auctionHouse", "MSV:        %u", MSV);
-    TC_LOG_DEBUG("auctionHouse", "Items:      %u", count);
-    TC_LOG_DEBUG("auctionHouse", "Multiplier: %f", multiplier);
-    TC_LOG_DEBUG("auctionHouse", "Deposit:    %u", deposit);
-    TC_LOG_DEBUG("auctionHouse", "Deposit rm: %f", remainderbase * count);
+    LOG_DEBUG("auctionHouse", "MSV:        %u", MSV);
+    LOG_DEBUG("auctionHouse", "Items:      %u", count);
+    LOG_DEBUG("auctionHouse", "Multiplier: %f", multiplier);
+    LOG_DEBUG("auctionHouse", "Deposit:    %u", deposit);
+    LOG_DEBUG("auctionHouse", "Deposit rm: %f", remainderbase * count);
 
     if (deposit < AH_MINIMUM_DEPOSIT * sWorld->getRate(RATE_AUCTION_DEPOSIT))
         return AH_MINIMUM_DEPOSIT * sWorld->getRate(RATE_AUCTION_DEPOSIT);
@@ -319,7 +319,7 @@ void AuctionHouseMgr::LoadAuctionItems()
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 auction items. DB table `auctionhouse` or `item_instance` is empty!");
+        LOG_INFO("server.loading", ">> Loaded 0 auction items. DB table `auctionhouse` or `item_instance` is empty!");
 
         return;
     }
@@ -336,7 +336,7 @@ void AuctionHouseMgr::LoadAuctionItems()
         ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemEntry);
         if (!proto)
         {
-            TC_LOG_ERROR("misc", "AuctionHouseMgr::LoadAuctionItems: Unknown item (GUID: %u item entry: #%u) in auction, skipped.", item_guid, itemEntry);
+            LOG_ERROR("misc", "AuctionHouseMgr::LoadAuctionItems: Unknown item (GUID: %u item entry: #%u) in auction, skipped.", item_guid, itemEntry);
             continue;
         }
 
@@ -352,7 +352,7 @@ void AuctionHouseMgr::LoadAuctionItems()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u auction items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u auction items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 
 }
 
@@ -365,7 +365,7 @@ void AuctionHouseMgr::LoadAuctions()
 
     if (!resultAuctions)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 auctions. DB table `auctionhouse` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 auctions. DB table `auctionhouse` is empty.");
 
         return;
     }
@@ -411,7 +411,7 @@ void AuctionHouseMgr::LoadAuctions()
 
     CharacterDatabase.CommitTransaction(trans);
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u auctions with %u bidders in %u ms", countAuctions, countBidders, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u auctions with %u bidders in %u ms", countAuctions, countBidders, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void AuctionHouseMgr::AddAItem(Item* it)
@@ -538,7 +538,7 @@ void AuctionHouseMgr::UpdatePendingAuctions()
         else
         {
             // Expire any auctions that we couldn't get a deposit for
-            TC_LOG_WARN("auctionHouse", "Player %s was offline, unable to retrieve deposit!", playerGUID.ToString().c_str());
+            LOG_WARN("auctionHouse", "Player %s was offline, unable to retrieve deposit!", playerGUID.ToString().c_str());
             PlayerAuctions* thisAH = itr->second.first;
             ++itr;
             CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
@@ -842,7 +842,7 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket& data, Item* sourceItem) const
     Item* item = (sourceItem) ? sourceItem : sAuctionMgr->GetAItem(itemGUIDLow);
     if (!item)
     {
-        TC_LOG_ERROR("misc", "AuctionEntry::BuildAuctionInfo: Auction %u has a non-existent item: %u", Id, itemGUIDLow);
+        LOG_ERROR("misc", "AuctionEntry::BuildAuctionInfo: Auction %u has a non-existent item: %u", Id, itemGUIDLow);
         return false;
     }
     data << uint32(Id);
@@ -931,7 +931,7 @@ bool AuctionEntry::LoadFromDB(Field* fields)
     auctionHouseEntry = AuctionHouseMgr::GetAuctionHouseEntryFromHouse(houseId);
     if (!auctionHouseEntry)
     {
-        TC_LOG_ERROR("misc", "Auction %u has invalid house id %u", Id, houseId);
+        LOG_ERROR("misc", "Auction %u has invalid house id %u", Id, houseId);
         return false;
     }
 
@@ -939,7 +939,7 @@ bool AuctionEntry::LoadFromDB(Field* fields)
     // and itemEntry in fact (GetAItem will fail if problematic in result check in AuctionHouseMgr::LoadAuctionItems)
     if (!sAuctionMgr->GetAItem(itemGUIDLow))
     {
-        TC_LOG_ERROR("misc", "Auction %u has not a existing item : %u", Id, itemGUIDLow);
+        LOG_ERROR("misc", "Auction %u has not a existing item : %u", Id, itemGUIDLow);
         return false;
     }
 
@@ -948,20 +948,20 @@ bool AuctionEntry::LoadFromDB(Field* fields)
 std::string AuctionEntry::BuildAuctionMailSubject(MailAuctionAnswers response) const
 {
     Item* item = sAuctionMgr->GetAItem(itemGUIDLow);
-    return Trinity::StringFormat("%u:%d:%u:%u:%u", itemEntry, item ? item->GetItemRandomPropertyId() : 0, response, Id, itemCount);
+    return Warhead::StringFormat("%u:%d:%u:%u:%u", itemEntry, item ? item->GetItemRandomPropertyId() : 0, response, Id, itemCount);
 }
 
 std::string AuctionEntry::BuildAuctionWonMailBody(ObjectGuid guid, uint32 bid, uint32 buyout)
 {
-    return Trinity::StringFormat("%llX:%u:%u", guid.GetRawValue(), bid, buyout);
+    return Warhead::StringFormat("%llX:%u:%u", guid.GetRawValue(), bid, buyout);
 }
 
 std::string AuctionEntry::BuildAuctionSoldMailBody(ObjectGuid guid, uint32 bid, uint32 buyout, uint32 deposit, uint32 consignment)
 {
-    return Trinity::StringFormat("%llX:%u:%u:%u:%u", guid.GetRawValue(), bid, buyout, deposit, consignment);
+    return Warhead::StringFormat("%llX:%u:%u:%u:%u", guid.GetRawValue(), bid, buyout, deposit, consignment);
 }
 
 std::string AuctionEntry::BuildAuctionInvoiceMailBody(ObjectGuid guid, uint32 bid, uint32 buyout, uint32 deposit, uint32 consignment, uint32 moneyDelay, uint32 eta)
 {
-    return Trinity::StringFormat("%llX:%u:%u:%u:%u:%u:%u", guid.GetRawValue(), bid, buyout, deposit, consignment, moneyDelay, eta);
+    return Warhead::StringFormat("%llX:%u:%u:%u:%u:%u:%u", guid.GetRawValue(), bid, buyout, deposit, consignment, moneyDelay, eta);
 }

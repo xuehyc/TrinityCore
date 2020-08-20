@@ -67,7 +67,7 @@ static Optional<BigNumber> GetHexFromConfig(char const* configKey, int bits)
     BigNumber secret;
     if (!secret.SetHexStr(str.c_str()))
     {
-        TC_LOG_FATAL("server.loading", "Invalid value for '%s' - specify a hexadecimal integer of up to %d bits with no prefix.", configKey, bits);
+        LOG_FATAL("server.loading", "Invalid value for '%s' - specify a hexadecimal integer of up to %d bits with no prefix.", configKey, bits);
         ABORT();
     }
 
@@ -75,7 +75,7 @@ static Optional<BigNumber> GetHexFromConfig(char const* configKey, int bits)
     threshold <<= bits;
     if (!((BigNumber(0) <= secret) && (secret < threshold)))
     {
-        TC_LOG_ERROR("server.loading", "Value for '%s' is out of bounds (should be an integer of up to %d bits with no prefix). Truncated to %d bits.", configKey, bits, bits);
+        LOG_ERROR("server.loading", "Value for '%s' is out of bounds (should be an integer of up to %d bits with no prefix). Truncated to %d bits.", configKey, bits, bits);
         secret %= threshold;
     }
     ASSERT(((BigNumber(0) <= secret) && (secret < threshold)));
@@ -121,15 +121,15 @@ void SecretMgr::AttemptLoad(Secrets i, LogLevel errorLevel, std::unique_lock<std
     // verify digest
     if (
         ((!oldDigest) != (!currentValue)) || // there is an old digest, but no current secret (or vice versa)
-        (oldDigest && !Trinity::Crypto::Argon2::Verify(currentValue->AsHexStr(), *oldDigest)) // there is an old digest, and the current secret does not match it
+        (oldDigest && !Warhead::Crypto::Argon2::Verify(currentValue->AsHexStr(), *oldDigest)) // there is an old digest, and the current secret does not match it
         )
     {
         if (info.owner != THIS_SERVER_PROCESS)
         {
             if (currentValue)
-                TC_LOG_MESSAGE_BODY("server.loading", errorLevel, "Invalid value for '%s' specified - this is not actually the secret being used in your auth DB.", info.configKey);
+                LOG_MESSAGE_BODY("server.loading", errorLevel, "Invalid value for '%s' specified - this is not actually the secret being used in your auth DB.", info.configKey);
             else
-                TC_LOG_MESSAGE_BODY("server.loading", errorLevel, "No value for '%s' specified - please specify the secret currently being used in your auth DB.", info.configKey);
+                LOG_MESSAGE_BODY("server.loading", errorLevel, "No value for '%s' specified - please specify the secret currently being used in your auth DB.", info.configKey);
             _secrets[i].state = Secret::LOAD_FAILED;
             return;
         }
@@ -138,9 +138,9 @@ void SecretMgr::AttemptLoad(Secrets i, LogLevel errorLevel, std::unique_lock<std
         if (oldDigest && info.oldKey) // there is an old digest, so there might be an old secret (if possible)
         {
             oldSecret = GetHexFromConfig(info.oldKey, info.bits);
-            if (oldSecret && !Trinity::Crypto::Argon2::Verify(oldSecret->AsHexStr(), *oldDigest))
+            if (oldSecret && !Warhead::Crypto::Argon2::Verify(oldSecret->AsHexStr(), *oldDigest))
             {
-                TC_LOG_MESSAGE_BODY("server.loading", errorLevel, "Invalid value for '%s' specified - this is not actually the secret previously used in your auth DB.", info.oldKey);
+                LOG_MESSAGE_BODY("server.loading", errorLevel, "Invalid value for '%s' specified - this is not actually the secret previously used in your auth DB.", info.oldKey);
                 _secrets[i].state = Secret::LOAD_FAILED;
                 return;
             }
@@ -150,12 +150,12 @@ void SecretMgr::AttemptLoad(Secrets i, LogLevel errorLevel, std::unique_lock<std
         Optional<std::string> error = AttemptTransition(Secrets(i), currentValue, oldSecret, !!oldDigest);
         if (error)
         {
-            TC_LOG_MESSAGE_BODY("server.loading", errorLevel, "Your value of '%s' changed, but we cannot transition your database to the new value:\n%s", info.configKey, error->c_str());
+            LOG_MESSAGE_BODY("server.loading", errorLevel, "Your value of '%s' changed, but we cannot transition your database to the new value:\n%s", info.configKey, error->c_str());
             _secrets[i].state = Secret::LOAD_FAILED;
             return;
         }
 
-        TC_LOG_INFO("server.loading", "Successfully transitioned database to new '%s' value.", info.configKey);
+        LOG_INFO("server.loading", "Successfully transitioned database to new '%s' value.", info.configKey);
     }
 
     if (currentValue)
@@ -188,15 +188,15 @@ Optional<std::string> SecretMgr::AttemptTransition(Secrets i, Optional<BigNumber
                 if (hadOldSecret)
                 {
                     if (!oldSecret)
-                        return Trinity::StringFormat("Cannot decrypt old TOTP tokens - add config key '%s' to authserver.conf!", secret_info[i].oldKey);
+                        return Warhead::StringFormat("Cannot decrypt old TOTP tokens - add config key '%s' to authserver.conf!", secret_info[i].oldKey);
 
-                    bool success = Trinity::Crypto::AEDecrypt<Trinity::Crypto::AES>(totpSecret, oldSecret->ToByteArray<Trinity::Crypto::AES::KEY_SIZE_BYTES>());
+                    bool success = Warhead::Crypto::AEDecrypt<Warhead::Crypto::AES>(totpSecret, oldSecret->ToByteArray<Warhead::Crypto::AES::KEY_SIZE_BYTES>());
                     if (!success)
-                        return Trinity::StringFormat("Cannot decrypt old TOTP tokens - value of '%s' is incorrect for some users!", secret_info[i].oldKey);
+                        return Warhead::StringFormat("Cannot decrypt old TOTP tokens - value of '%s' is incorrect for some users!", secret_info[i].oldKey);
                 }
 
                 if (newSecret)
-                    Trinity::Crypto::AEEncryptWithRandomIV<Trinity::Crypto::AES>(totpSecret, newSecret->ToByteArray<Trinity::Crypto::AES::KEY_SIZE_BYTES>());
+                    Warhead::Crypto::AEEncryptWithRandomIV<Warhead::Crypto::AES>(totpSecret, newSecret->ToByteArray<Warhead::Crypto::AES::KEY_SIZE_BYTES>());
 
                 LoginDatabasePreparedStatement* updateStmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_TOTP_SECRET);
                 updateStmt->setBinary(0, totpSecret);
@@ -221,7 +221,7 @@ Optional<std::string> SecretMgr::AttemptTransition(Secrets i, Optional<BigNumber
     {
         BigNumber salt;
         salt.SetRand(128);
-        Optional<std::string> hash = Trinity::Crypto::Argon2::Hash(newSecret->AsHexStr(), salt);
+        Optional<std::string> hash = Warhead::Crypto::Argon2::Hash(newSecret->AsHexStr(), salt);
         if (!hash)
             return std::string("Failed to hash new secret");
 

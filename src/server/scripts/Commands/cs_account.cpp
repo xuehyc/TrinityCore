@@ -41,7 +41,7 @@ EndScriptData */
 #include "WorldSession.h"
 #include <unordered_map>
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 
 class account_commandscript : public CommandScript
 {
@@ -113,7 +113,7 @@ public:
 
             if (!result)
             {
-                TC_LOG_ERROR("misc", "Account %u not found in login database when processing .account 2fa setup command.", accountId);
+                LOG_ERROR("misc", "Account %u not found in login database when processing .account 2fa setup command.", accountId);
                 handler->SendSysMessage(LANG_UNKNOWN_ERROR);
                 handler->SetSentErrorMessage(true);
                 return false;
@@ -128,17 +128,17 @@ public:
         }
 
         // store random suggested secrets
-        static std::unordered_map<uint32, Trinity::Crypto::TOTP::Secret> suggestions;
-        auto pair = suggestions.emplace(std::piecewise_construct, std::make_tuple(accountId), std::make_tuple(Trinity::Crypto::TOTP::RECOMMENDED_SECRET_LENGTH)); // std::vector 1-argument size_t constructor invokes resize
+        static std::unordered_map<uint32, Warhead::Crypto::TOTP::Secret> suggestions;
+        auto pair = suggestions.emplace(std::piecewise_construct, std::make_tuple(accountId), std::make_tuple(Warhead::Crypto::TOTP::RECOMMENDED_SECRET_LENGTH)); // std::vector 1-argument size_t constructor invokes resize
         if (pair.second) // no suggestion yet, generate random secret
-            Trinity::Crypto::GetRandomBytes(pair.first->second);
+            Warhead::Crypto::GetRandomBytes(pair.first->second);
 
         if (!pair.second && token) // suggestion already existed and token specified - validate
         {
-            if (Trinity::Crypto::TOTP::ValidateToken(pair.first->second, *token))
+            if (Warhead::Crypto::TOTP::ValidateToken(pair.first->second, *token))
             {
                 if (masterKey)
-                    Trinity::Crypto::AEEncryptWithRandomIV<Trinity::Crypto::AES>(pair.first->second, *masterKey);
+                    Warhead::Crypto::AEEncryptWithRandomIV<Warhead::Crypto::AES>(pair.first->second, *masterKey);
 
                 LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_TOTP_SECRET);
                 stmt->setBinary(0, pair.first->second);
@@ -153,7 +153,7 @@ public:
         }
 
         // new suggestion, or no token specified, output TOTP parameters
-        handler->PSendSysMessage(LANG_2FA_SECRET_SUGGESTION, Trinity::Encoding::Base32::Encode(pair.first->second));
+        handler->PSendSysMessage(LANG_2FA_SECRET_SUGGESTION, Warhead::Encoding::Base32::Encode(pair.first->second));
         handler->SetSentErrorMessage(true);
         return false;
     }
@@ -169,7 +169,7 @@ public:
         }
 
         uint32 const accountId = handler->GetSession()->GetAccountId();
-        Trinity::Crypto::TOTP::Secret secret;
+        Warhead::Crypto::TOTP::Secret secret;
         { // get current TOTP secret
             LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_TOTP_SECRET);
             stmt->setUInt32(0, accountId);
@@ -177,7 +177,7 @@ public:
 
             if (!result)
             {
-                TC_LOG_ERROR("misc", "Account %u not found in login database when processing .account 2fa setup command.", accountId);
+                LOG_ERROR("misc", "Account %u not found in login database when processing .account 2fa setup command.", accountId);
                 handler->SendSysMessage(LANG_UNKNOWN_ERROR);
                 handler->SetSentErrorMessage(true);
                 return false;
@@ -198,17 +198,17 @@ public:
         {
             if (masterKey)
             {
-                bool success = Trinity::Crypto::AEDecrypt<Trinity::Crypto::AES>(secret, *masterKey);
+                bool success = Warhead::Crypto::AEDecrypt<Warhead::Crypto::AES>(secret, *masterKey);
                 if (!success)
                 {
-                    TC_LOG_ERROR("misc", "Account %u has invalid ciphertext in TOTP token.", accountId);
+                    LOG_ERROR("misc", "Account %u has invalid ciphertext in TOTP token.", accountId);
                     handler->SendSysMessage(LANG_UNKNOWN_ERROR);
                     handler->SetSentErrorMessage(true);
                     return false;
                 }
             }
 
-            if (Trinity::Crypto::TOTP::ValidateToken(secret, *token))
+            if (Warhead::Crypto::TOTP::ValidateToken(secret, *token))
             {
                 LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_TOTP_SECRET);
                 stmt->setNull(0);
@@ -262,7 +262,7 @@ public:
                 handler->PSendSysMessage(LANG_ACCOUNT_CREATED, accountName);
                 if (handler->GetSession())
                 {
-                    TC_LOG_INFO("entities.player.character", "Account: %d (IP: %s) Character:[%s] %s) created Account %s (Email: '%s')",
+                    LOG_INFO("entities.player.character", "Account: %d (IP: %s) Character:[%s] %s) created Account %s (Email: '%s')",
                         handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                         handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(),
                         accountName.c_str(), email.value_or("").c_str());
@@ -446,7 +446,7 @@ public:
             handler->SendSysMessage(LANG_COMMAND_WRONGEMAIL);
             sScriptMgr->OnFailedEmailChange(handler->GetSession()->GetAccountId());
             handler->SetSentErrorMessage(true);
-            TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s Tried to change email, but the provided email [%s] is not equal to registration email [%s].",
+            LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s Tried to change email, but the provided email [%s] is not equal to registration email [%s].",
                 handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(),
                 email.c_str(), oldEmail.c_str());
@@ -458,7 +458,7 @@ public:
             handler->SendSysMessage(LANG_COMMAND_WRONGOLDPASSWORD);
             sScriptMgr->OnFailedEmailChange(handler->GetSession()->GetAccountId());
             handler->SetSentErrorMessage(true);
-            TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s Tried to change email, but the provided password is wrong.",
+            LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s Tried to change email, but the provided password is wrong.",
                 handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str());
             return false;
@@ -477,7 +477,7 @@ public:
             handler->SendSysMessage(LANG_NEW_EMAILS_NOT_MATCH);
             sScriptMgr->OnFailedEmailChange(handler->GetSession()->GetAccountId());
             handler->SetSentErrorMessage(true);
-            TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s Tried to change email, but the confirm email does not match.",
+            LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s Tried to change email, but the confirm email does not match.",
                 handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str());
             return false;
@@ -489,7 +489,7 @@ public:
             case AccountOpResult::AOR_OK:
                 handler->SendSysMessage(LANG_COMMAND_EMAIL);
                 sScriptMgr->OnEmailChange(handler->GetSession()->GetAccountId());
-                TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s Changed Email from [%s] to [%s].",
+                LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s Changed Email from [%s] to [%s].",
                     handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                     handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(),
                     oldEmail.c_str(), email.c_str());
@@ -519,7 +519,7 @@ public:
             handler->SendSysMessage(LANG_COMMAND_WRONGOLDPASSWORD);
             sScriptMgr->OnFailedPasswordChange(handler->GetSession()->GetAccountId());
             handler->SetSentErrorMessage(true);
-            TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s Tried to change password, but the provided old password is wrong.",
+            LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s Tried to change password, but the provided old password is wrong.",
                 handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str());
             return false;
@@ -532,7 +532,7 @@ public:
             handler->SendSysMessage(LANG_COMMAND_WRONGEMAIL);
             sScriptMgr->OnFailedPasswordChange(handler->GetSession()->GetAccountId());
             handler->SetSentErrorMessage(true);
-            TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s Tried to change password, but the entered email [%s] is wrong.",
+            LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s Tried to change password, but the entered email [%s] is wrong.",
                 handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(),
                 confirmEmail.value_or("").c_str());
@@ -555,7 +555,7 @@ public:
             case AccountOpResult::AOR_OK:
                 handler->SendSysMessage(LANG_COMMAND_PASSWORD);
                 sScriptMgr->OnPasswordChange(handler->GetSession()->GetAccountId());
-                TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s changed password.",
+                LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] %s changed password.",
                     handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                     handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str());
                 break;
@@ -846,14 +846,14 @@ public:
             return false;
         }
 
-        Optional<std::vector<uint8>> decoded = Trinity::Encoding::Base32::Decode(secret);
+        Optional<std::vector<uint8>> decoded = Warhead::Encoding::Base32::Decode(secret);
         if (!decoded)
         {
             handler->SendSysMessage(LANG_2FA_SECRET_INVALID);
             handler->SetSentErrorMessage(true);
             return false;
         }
-        if (128 < (decoded->size() + Trinity::Crypto::AES::IV_SIZE_BYTES + Trinity::Crypto::AES::TAG_SIZE_BYTES))
+        if (128 < (decoded->size() + Warhead::Crypto::AES::IV_SIZE_BYTES + Warhead::Crypto::AES::TAG_SIZE_BYTES))
         {
             handler->SendSysMessage(LANG_2FA_SECRET_TOO_LONG);
             handler->SetSentErrorMessage(true);
@@ -861,7 +861,7 @@ public:
         }
 
         if (masterKey)
-            Trinity::Crypto::AEEncryptWithRandomIV<Trinity::Crypto::AES>(*decoded, *masterKey);
+            Warhead::Crypto::AEEncryptWithRandomIV<Warhead::Crypto::AES>(*decoded, *masterKey);
 
         LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_TOTP_SECRET);
         stmt->setBinary(0, *decoded);
@@ -906,7 +906,7 @@ public:
         {
             case AccountOpResult::AOR_OK:
                 handler->SendSysMessage(LANG_COMMAND_EMAIL);
-                TC_LOG_INFO("entities.player.character", "ChangeEmail: Account %s [Id: %u] had it's email changed to %s.",
+                LOG_INFO("entities.player.character", "ChangeEmail: Account %s [Id: %u] had it's email changed to %s.",
                     accountName.c_str(), targetAccountId, email.c_str());
                 break;
             case AccountOpResult::AOR_NAME_NOT_EXIST:
@@ -961,7 +961,7 @@ public:
         {
             case AccountOpResult::AOR_OK:
                 handler->SendSysMessage(LANG_COMMAND_EMAIL);
-                TC_LOG_INFO("entities.player.character", "ChangeRegEmail: Account %s [Id: %u] had it's Registration Email changed to %s.",
+                LOG_INFO("entities.player.character", "ChangeRegEmail: Account %s [Id: %u] had it's Registration Email changed to %s.",
                     accountName.c_str(), targetAccountId, email.c_str());
                 break;
             case AccountOpResult::AOR_NAME_NOT_EXIST:

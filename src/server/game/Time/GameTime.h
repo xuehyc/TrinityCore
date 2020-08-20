@@ -24,22 +24,22 @@
 namespace GameTime
 {
     // Server start time
-    TC_GAME_API time_t GetStartTime();
+    WH_GAME_API time_t GetStartTime();
 
     // Current server time (unix) in seconds
-    TC_GAME_API time_t GetGameTime();
+    WH_GAME_API time_t GetGameTime();
 
     // Milliseconds since server start
-    TC_GAME_API uint32 GetGameTimeMS();
+    WH_GAME_API uint32 GetGameTimeMS();
 
     /// Current chrono system_clock time point
-    TC_GAME_API SystemTimePoint GetSystemTime();
+    WH_GAME_API SystemTimePoint GetSystemTime();
 
     /// Current chrono steady_clock time point
-    TC_GAME_API TimePoint Now();
+    WH_GAME_API TimePoint Now();
 
     /// Uptime (in secs)
-    TC_GAME_API uint32 GetUptime();
+    WH_GAME_API uint32 GetUptime();
 
     void UpdateGameTimers();
 }

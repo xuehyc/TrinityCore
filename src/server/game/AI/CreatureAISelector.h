@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_CREATUREAISELECTOR_H
-#define TRINITY_CREATUREAISELECTOR_H
+#ifndef WARHEAD_CREATUREAISELECTOR_H
+#define WARHEAD_CREATUREAISELECTOR_H
 
 class CreatureAI;
 class Creature;
@@ -27,9 +27,9 @@ class GameObject;
 
 namespace FactorySelector
 {
-    TC_GAME_API CreatureAI* SelectAI(Creature* creature);
-    TC_GAME_API MovementGenerator* SelectMovementGenerator(Unit* unit);
-    TC_GAME_API GameObjectAI* SelectGameObjectAI(GameObject* go);
+    WH_GAME_API CreatureAI* SelectAI(Creature* creature);
+    WH_GAME_API MovementGenerator* SelectMovementGenerator(Unit* unit);
+    WH_GAME_API GameObjectAI* SelectGameObjectAI(GameObject* go);
 }
 
 #endif

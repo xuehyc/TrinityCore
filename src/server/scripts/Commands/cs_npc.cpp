@@ -125,7 +125,7 @@ bool HandleNpcDespawnGroup(ChatHandler* handler, char const* args)
     return true;
 }
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 class npc_commandscript : public CommandScript
 {
 public:
@@ -882,7 +882,7 @@ public:
 
         if (dontdel_str)
         {
-            //TC_LOG_ERROR("misc", "DEBUG: All 3 params are set");
+            //LOG_ERROR("misc", "DEBUG: All 3 params are set");
 
             // All 3 params are set
             // GUID
@@ -890,7 +890,7 @@ public:
             // doNotDEL
             if (stricmp(dontdel_str, "NODEL") == 0)
             {
-                //TC_LOG_ERROR("misc", "DEBUG: doNotDelete = true;");
+                //LOG_ERROR("misc", "DEBUG: doNotDelete = true;");
                 doNotDelete = true;
             }
         }
@@ -899,10 +899,10 @@ public:
             // Only 2 params - but maybe NODEL is set
             if (type_str)
             {
-                TC_LOG_ERROR("misc", "DEBUG: Only 2 params ");
+                LOG_ERROR("misc", "DEBUG: Only 2 params ");
                 if (stricmp(type_str, "NODEL") == 0)
                 {
-                    //TC_LOG_ERROR("misc", "DEBUG: type_str, NODEL ");
+                    //LOG_ERROR("misc", "DEBUG: type_str, NODEL ");
                     doNotDelete = true;
                     type_str = nullptr;
                 }
@@ -1419,7 +1419,7 @@ public:
                 continue;
             ObjectGuid guid = ObjectGuid::Create<HighGuid::Player>(pair.first);
             Player const* player = ObjectAccessor::FindConnectedPlayer(guid);
-            handler->PSendSysMessage(LANG_COMMAND_NPC_SHOWLOOT_SUBLABEL, player ? player->GetName() : Trinity::StringFormat("Offline player (GuidLow 0x%08x)", pair.first).c_str(), pair.second->size());
+            handler->PSendSysMessage(LANG_COMMAND_NPC_SHOWLOOT_SUBLABEL, player ? player->GetName() : Warhead::StringFormat("Offline player (GuidLow 0x%08x)", pair.first).c_str(), pair.second->size());
 
             for (auto it = pair.second->cbegin(); it != pair.second->cend(); ++it)
             {

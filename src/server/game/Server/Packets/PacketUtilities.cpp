@@ -47,7 +47,7 @@ bool WorldPackets::Strings::Utf8::Validate(std::string const& value)
 
 bool WorldPackets::Strings::Hyperlinks::Validate(std::string const& value)
 {
-    if (!Trinity::Hyperlinks::CheckAllLinks(value))
+    if (!Warhead::Hyperlinks::CheckAllLinks(value))
         throw InvalidHyperlinkException(value);
     return true;
 }

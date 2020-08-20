@@ -33,7 +33,7 @@ target_include_directories(argon2
 
 target_link_libraries(argon2
   PRIVATE
-    trinity-dependency-interface)
+    warhead-dependency-interface)
 
 set_target_properties(argon2
   PROPERTIES

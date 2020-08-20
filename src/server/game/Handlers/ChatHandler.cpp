@@ -62,14 +62,14 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
     if (type >= MAX_CHAT_MSG_TYPE)
     {
-        TC_LOG_ERROR("network", "CHAT: Wrong message type received: %u", type);
+        LOG_ERROR("network", "CHAT: Wrong message type received: %u", type);
         recvData.rfinish();
         return;
     }
 
     if (lang == LANG_UNIVERSAL && type != CHAT_MSG_AFK && type != CHAT_MSG_DND)
     {
-        TC_LOG_ERROR("entities.player.cheat", "CMSG_MESSAGECHAT: Possible hacking-attempt: %s tried to send a message in universal language", GetPlayerInfo().c_str());
+        LOG_ERROR("entities.player.cheat", "CMSG_MESSAGECHAT: Possible hacking-attempt: %s tried to send a message in universal language", GetPlayerInfo().c_str());
         SendNotification(LANG_UNKNOWN_LANGUAGE);
         recvData.rfinish();
         return;
@@ -77,7 +77,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
     Player* sender = GetPlayer();
 
-    //TC_LOG_DEBUG("CHAT: packet received. type %u, lang %u", type, lang);
+    //LOG_DEBUG("CHAT: packet received. type %u, lang %u", type, lang);
 
     // prevent talking at unknown language (cheating)
     LanguageDesc const* langDesc = GetLanguageDescByID(lang);
@@ -127,7 +127,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 }
                 break;
             default:
-                TC_LOG_ERROR("network", "Player %s%s sent a chatmessage with an invalid language/message type combination",
+                LOG_ERROR("network", "Player %s%s sent a chatmessage with an invalid language/message type combination",
                                                      GetPlayer()->GetName().c_str(), GetPlayer()->GetGUID().ToString().c_str());
 
                 recvData.rfinish();
@@ -253,7 +253,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         for (uint8 c : msg)
             if (isNasty(c))
             {
-                TC_LOG_ERROR("network", "Player %s %s sent a message containing invalid character %u - blocked", GetPlayer()->GetName().c_str(),
+                LOG_ERROR("network", "Player %s %s sent a message containing invalid character %u - blocked", GetPlayer()->GetName().c_str(),
                     GetPlayer()->GetGUID().ToString().c_str(), uint8(c));
                 return;
             }
@@ -555,7 +555,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             break;
         }
         default:
-            TC_LOG_ERROR("network", "CHAT: unknown message type %u, lang: %u", type, lang);
+            LOG_ERROR("network", "CHAT: unknown message type %u, lang: %u", type, lang);
             break;
     }
 }
@@ -575,7 +575,7 @@ void WorldSession::HandleEmoteOpcode(WorldPackets::Chat::EmoteClient& packet)
     _player->HandleEmoteCommand(emoteId);
 }
 
-namespace Trinity
+namespace Warhead
 {
     class EmoteChatBuilder
     {
@@ -605,7 +605,7 @@ namespace Trinity
             uint32        i_emote_num;
             Unit const*   i_target;
     };
-}                                                           // namespace Trinity
+}                                                           // namespace Warhead
 
 void WorldSession::HandleTextEmoteOpcode(WorldPacket& recvData)
 {
@@ -651,15 +651,15 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recvData)
 
     Unit* unit = ObjectAccessor::GetUnit(*_player, guid);
 
-    CellCoord p = Trinity::ComputeCellCoord(GetPlayer()->GetPositionX(), GetPlayer()->GetPositionY());
+    CellCoord p = Warhead::ComputeCellCoord(GetPlayer()->GetPositionX(), GetPlayer()->GetPositionY());
 
     Cell cell(p);
     cell.SetNoCreate();
 
-    Trinity::EmoteChatBuilder emote_builder(*GetPlayer(), text_emote, emoteNum, unit);
-    Trinity::LocalizedPacketDo<Trinity::EmoteChatBuilder > emote_do(emote_builder);
-    Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::EmoteChatBuilder > > emote_worker(GetPlayer(), sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), emote_do);
-    TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::EmoteChatBuilder> >, WorldTypeMapContainer> message(emote_worker);
+    Warhead::EmoteChatBuilder emote_builder(*GetPlayer(), text_emote, emoteNum, unit);
+    Warhead::LocalizedPacketDo<Warhead::EmoteChatBuilder > emote_do(emote_builder);
+    Warhead::PlayerDistWorker<Warhead::LocalizedPacketDo<Warhead::EmoteChatBuilder > > emote_worker(GetPlayer(), sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), emote_do);
+    TypeContainerVisitor<Warhead::PlayerDistWorker<Warhead::LocalizedPacketDo<Warhead::EmoteChatBuilder> >, WorldTypeMapContainer> message(emote_worker);
     cell.Visit(p, message, *GetPlayer()->GetMap(), *GetPlayer(), sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE));
 
     GetPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DO_EMOTE, text_emote, 0, unit);
@@ -673,7 +673,7 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recvData)
 {
     ObjectGuid iguid;
     uint8 unk;
-    //TC_LOG_DEBUG("network", "WORLD: Received CMSG_CHAT_IGNORED");
+    //LOG_DEBUG("network", "WORLD: Received CMSG_CHAT_IGNORED");
 
     recvData >> iguid;
     recvData >> unk;                                       // probably related to spam reporting
@@ -689,7 +689,7 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleChannelDeclineInvite(WorldPacket &recvPacket)
 {
-    TC_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
+    LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 }
 
 void WorldSession::SendPlayerNotFoundNotice(std::string const& name)

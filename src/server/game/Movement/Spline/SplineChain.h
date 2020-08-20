@@ -15,13 +15,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_SPLINECHAIN_H
-#define TRINITY_SPLINECHAIN_H
+#ifndef WARHEAD_SPLINECHAIN_H
+#define WARHEAD_SPLINECHAIN_H
 
 #include "MoveSplineInitArgs.h"
 #include <G3D/Vector3.h>
 
-struct TC_GAME_API SplineChainLink
+struct WH_GAME_API SplineChainLink
 {
     SplineChainLink(Movement::PointsArray const& points, uint32 expectedDuration, uint32 msToNext, float velocity) : Points(points), ExpectedDuration(expectedDuration), TimeToNext(msToNext), Velocity(velocity) { }
     template <typename iteratorType> SplineChainLink(iteratorType begin, iteratorType end, uint32 expectedDuration, uint32 msToNext, float velocity) : Points(begin, end), ExpectedDuration(expectedDuration), TimeToNext(msToNext), Velocity(velocity) { }
@@ -32,7 +32,7 @@ struct TC_GAME_API SplineChainLink
     float Velocity;
 };
 
-struct TC_GAME_API SplineChainResumeInfo
+struct WH_GAME_API SplineChainResumeInfo
 {
     SplineChainResumeInfo() : PointID(0), Chain(nullptr), IsWalkMode(false), SplineIndex(0), PointIndex(0), TimeToNext(0) { }
     SplineChainResumeInfo(uint32 id, std::vector<SplineChainLink> const* chain, bool walk, uint8 splineIndex, uint8 wpIndex, uint32 msToNext) :

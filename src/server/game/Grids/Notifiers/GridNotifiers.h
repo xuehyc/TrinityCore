@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_GRIDNOTIFIERS_H
-#define TRINITY_GRIDNOTIFIERS_H
+#ifndef WARHEAD_GRIDNOTIFIERS_H
+#define WARHEAD_GRIDNOTIFIERS_H
 
 #include "Creature.h"
 #include "Corpse.h"
@@ -29,9 +29,9 @@
 #include "UnitAI.h"
 #include "UpdateData.h"
 
-namespace Trinity
+namespace Warhead
 {
-    struct TC_GAME_API VisibleNotifier
+    struct WH_GAME_API VisibleNotifier
     {
         Player &i_player;
         UpdateData i_data;
@@ -54,7 +54,7 @@ namespace Trinity
         void Visit(DynamicObjectMapType &);
     };
 
-    struct TC_GAME_API PlayerRelocationNotifier : public VisibleNotifier
+    struct WH_GAME_API PlayerRelocationNotifier : public VisibleNotifier
     {
         PlayerRelocationNotifier(Player &player) : VisibleNotifier(player) { }
 
@@ -63,7 +63,7 @@ namespace Trinity
         void Visit(PlayerMapType &);
     };
 
-    struct TC_GAME_API CreatureRelocationNotifier
+    struct WH_GAME_API CreatureRelocationNotifier
     {
         Creature &i_creature;
         CreatureRelocationNotifier(Creature &c) : i_creature(c) { }
@@ -72,7 +72,7 @@ namespace Trinity
         void Visit(PlayerMapType &);
     };
 
-    struct TC_GAME_API DelayedUnitRelocation
+    struct WH_GAME_API DelayedUnitRelocation
     {
         Map &i_map;
         Cell &cell;
@@ -85,7 +85,7 @@ namespace Trinity
         void Visit(PlayerMapType   &);
     };
 
-    struct TC_GAME_API AIRelocationNotifier
+    struct WH_GAME_API AIRelocationNotifier
     {
         Unit &i_unit;
         bool isCreature;
@@ -113,7 +113,7 @@ namespace Trinity
         void Visit(CorpseMapType &m) { updateObjects<Corpse>(m); }
     };
 
-    struct TC_GAME_API MessageDistDeliverer
+    struct WH_GAME_API MessageDistDeliverer
     {
         WorldObject const* i_source;
         WorldPacket const* i_message;
@@ -149,7 +149,7 @@ namespace Trinity
         }
     };
 
-    struct TC_GAME_API MessageDistDelivererToHostile
+    struct WH_GAME_API MessageDistDelivererToHostile
     {
         Unit* i_source;
         WorldPacket const* i_message;
@@ -620,7 +620,7 @@ namespace Trinity
 
     // WorldObject check classes
 
-    class TC_GAME_API AnyDeadUnitObjectInRangeCheck
+    class WH_GAME_API AnyDeadUnitObjectInRangeCheck
     {
         public:
             AnyDeadUnitObjectInRangeCheck(WorldObject* searchObj, float range) : i_searchObj(searchObj), i_range(range) { }
@@ -633,7 +633,7 @@ namespace Trinity
             float i_range;
     };
 
-    class TC_GAME_API AnyDeadUnitSpellTargetInRangeCheck : public AnyDeadUnitObjectInRangeCheck, public WorldObjectSpellTargetCheck
+    class WH_GAME_API AnyDeadUnitSpellTargetInRangeCheck : public AnyDeadUnitObjectInRangeCheck, public WorldObjectSpellTargetCheck
     {
         public:
             AnyDeadUnitSpellTargetInRangeCheck(WorldObject* searchObj, float range, SpellInfo const* spellInfo, SpellTargetCheckTypes check)

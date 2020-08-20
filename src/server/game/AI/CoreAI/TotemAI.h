@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_TOTEMAI_H
-#define TRINITY_TOTEMAI_H
+#ifndef WARHEAD_TOTEMAI_H
+#define WARHEAD_TOTEMAI_H
 
 #include "CreatureAI.h"
 #include "PassiveAI.h"
@@ -25,7 +25,7 @@
 class Creature;
 class Totem;
 
-class TC_GAME_API TotemAI : public NullCreatureAI
+class WH_GAME_API TotemAI : public NullCreatureAI
 {
     public:
         explicit TotemAI(Creature* creature);

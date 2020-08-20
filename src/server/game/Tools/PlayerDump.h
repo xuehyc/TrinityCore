@@ -64,7 +64,7 @@ struct DumpTable;
 struct TableStruct;
 class StringTransaction;
 
-class TC_GAME_API PlayerDump
+class WH_GAME_API PlayerDump
 {
     public:
         static void InitializeTables();
@@ -73,7 +73,7 @@ class TC_GAME_API PlayerDump
         PlayerDump() { }
 };
 
-class TC_GAME_API PlayerDumpWriter : public PlayerDump
+class WH_GAME_API PlayerDumpWriter : public PlayerDump
 {
     public:
         PlayerDumpWriter() { }
@@ -92,7 +92,7 @@ class TC_GAME_API PlayerDumpWriter : public PlayerDump
         std::set<uint64> _itemSets;
 };
 
-class TC_GAME_API PlayerDumpReader : public PlayerDump
+class WH_GAME_API PlayerDumpReader : public PlayerDump
 {
     public:
         PlayerDumpReader() { }

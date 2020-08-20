@@ -311,7 +311,7 @@ class spell_hatch_spiders : public SpellScript
 
        void HandleObjectAreaTargetSelect(std::list<WorldObject*>& targets)
        {
-           targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
+           targets.sort(Warhead::ObjectDistanceOrderPred(GetCaster()));
            targets.resize(GetSpellInfo()->MaxAffectedTargets);
        }
 

@@ -137,7 +137,7 @@ DBCStorage <MovieEntry> sMovieStore(MovieEntryfmt);
 
 DBCStorage<NamesProfanityEntry> sNamesProfanityStore(NamesProfanityEntryfmt);
 DBCStorage<NamesReservedEntry> sNamesReservedStore(NamesReservedEntryfmt);
-typedef std::array<std::vector<Trinity::wregex>, TOTAL_LOCALES> NameValidationRegexContainer;
+typedef std::array<std::vector<Warhead::wregex>, TOTAL_LOCALES> NameValidationRegexContainer;
 NameValidationRegexContainer NamesProfaneValidators;
 NameValidationRegexContainer NamesReservedValidators;
 
@@ -218,7 +218,7 @@ uint32 DBCFileCount = 0;
 
 static bool LoadDBC_assert_print(uint32 fsize, uint32 rsize, const std::string& filename)
 {
-    TC_LOG_ERROR("misc", "Size of '%s' set by format string (%u) not equal size of C++ structure (%u).", filename.c_str(), fsize, rsize);
+    LOG_ERROR("misc", "Size of '%s' set by format string (%u) not equal size of C++ structure (%u).", filename.c_str(), fsize, rsize);
 
     // ASSERT must fail after function call
     return false;
@@ -450,10 +450,10 @@ void LoadDBCStores(const std::string& dataPath)
         ASSERT(conversionResult);
 
         if (namesProfanity->Language != -1)
-            NamesProfaneValidators[namesProfanity->Language].emplace_back(wname, Trinity::regex::perl | Trinity::regex::icase | Trinity::regex::optimize);
+            NamesProfaneValidators[namesProfanity->Language].emplace_back(wname, Warhead::regex::perl | Warhead::regex::icase | Warhead::regex::optimize);
         else
             for (uint32 i = 0; i < TOTAL_LOCALES; ++i)
-                NamesProfaneValidators[i].emplace_back(wname, Trinity::regex::perl | Trinity::regex::icase | Trinity::regex::optimize);
+                NamesProfaneValidators[i].emplace_back(wname, Warhead::regex::perl | Warhead::regex::icase | Warhead::regex::optimize);
     }
 
     for (NamesReservedEntry const* namesReserved : sNamesReservedStore)
@@ -464,10 +464,10 @@ void LoadDBCStores(const std::string& dataPath)
         ASSERT(conversionResult);
 
         if (namesReserved->Language != -1)
-            NamesReservedValidators[namesReserved->Language].emplace_back(wname, Trinity::regex::perl | Trinity::regex::icase | Trinity::regex::optimize);
+            NamesReservedValidators[namesReserved->Language].emplace_back(wname, Warhead::regex::perl | Warhead::regex::icase | Warhead::regex::optimize);
         else
             for (uint32 i = 0; i < TOTAL_LOCALES; ++i)
-                NamesReservedValidators[i].emplace_back(wname, Trinity::regex::perl | Trinity::regex::icase | Trinity::regex::optimize);
+                NamesReservedValidators[i].emplace_back(wname, Warhead::regex::perl | Warhead::regex::icase | Warhead::regex::optimize);
     }
 
     for (PvPDifficultyEntry const* entry : sPvPDifficultyStore)
@@ -509,7 +509,7 @@ void LoadDBCStores(const std::string& dataPath)
             if (spellDiff->DifficultySpellID[x] <= 0 || !sSpellStore.LookupEntry(spellDiff->DifficultySpellID[x]))
             {
                 if (spellDiff->DifficultySpellID[x] > 0)//don't show error if spell is <= 0, not all modes have spells and there are unknown negative values
-                    TC_LOG_ERROR("sql.sql", "spelldifficulty_dbc: spell %i at field id:%u at spellid%i does not exist in SpellStore (spell.dbc), loaded as 0", spellDiff->DifficultySpellID[x], spellDiff->ID, x);
+                    LOG_ERROR("sql.sql", "spelldifficulty_dbc: spell %i at field id:%u at spellid%i does not exist in SpellStore (spell.dbc), loaded as 0", spellDiff->DifficultySpellID[x], spellDiff->ID, x);
                 newEntry.DifficultySpellID[x] = 0;//spell was <= 0 or invalid, set to 0
             }
             else
@@ -637,7 +637,7 @@ void LoadDBCStores(const std::string& dataPath)
     // error checks
     if (bad_dbc_files.size() >= DBCFileCount)
     {
-        TC_LOG_ERROR("misc", "Incorrect DataDir value in worldserver.conf or ALL required *.dbc files (%d) not found by path: %sdbc", DBCFileCount, dataPath.c_str());
+        LOG_ERROR("misc", "Incorrect DataDir value in worldserver.conf or ALL required *.dbc files (%d) not found by path: %sdbc", DBCFileCount, dataPath.c_str());
         exit(1);
     }
     else if (!bad_dbc_files.empty())
@@ -646,7 +646,7 @@ void LoadDBCStores(const std::string& dataPath)
         for (StoreProblemList::iterator i = bad_dbc_files.begin(); i != bad_dbc_files.end(); ++i)
             str += *i + "\n";
 
-        TC_LOG_ERROR("misc", "Some required *.dbc files (%u from %d) not found or not compatible:\n%s", (uint32)bad_dbc_files.size(), DBCFileCount, str.c_str());
+        LOG_ERROR("misc", "Some required *.dbc files (%u from %d) not found or not compatible:\n%s", (uint32)bad_dbc_files.size(), DBCFileCount, str.c_str());
         exit(1);
     }
 
@@ -659,11 +659,11 @@ void LoadDBCStores(const std::string& dataPath)
         !sMapStore.LookupEntry(724)                ||       // last map added in 3.3.5a
         !sSpellStore.LookupEntry(80864)            )        // last added spell in 3.3.5a
     {
-        TC_LOG_ERROR("misc", "You have _outdated_ DBC files. Please extract correct versions from current using client.");
+        LOG_ERROR("misc", "You have _outdated_ DBC files. Please extract correct versions from current using client.");
         exit(1);
     }
 
-    TC_LOG_INFO("server.loading", ">> Initialized %d data stores in %u ms", DBCFileCount, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Initialized %d data stores in %u ms", DBCFileCount, GetMSTimeDiffToNow(oldMSTime));
 
 }
 
@@ -888,7 +888,7 @@ CharacterFacialHairStylesEntry const* GetCharFacialHairEntry(uint8 race, uint8 g
 CharSectionsEntry const* GetCharSectionEntry(uint8 race, CharSectionType genType, uint8 gender, uint8 type, uint8 color)
 {
     uint32 const key = uint32(genType) | uint32(gender << 8) | uint32(race << 16);
-    for (auto const& section : Trinity::Containers::MapEqualRange(sCharSectionMap, key))
+    for (auto const& section : Warhead::Containers::MapEqualRange(sCharSectionMap, key))
     {
         if (section.second->VariationIndex == type && section.second->ColorIndex == color)
             return section.second;
@@ -958,13 +958,13 @@ ResponseCodes ValidateName(std::wstring const& name, LocaleConstant locale)
     if (locale >= TOTAL_LOCALES)
         return RESPONSE_FAILURE;
 
-    for (Trinity::wregex const& regex : NamesProfaneValidators[locale])
-        if (Trinity::regex_search(name, regex))
+    for (Warhead::wregex const& regex : NamesProfaneValidators[locale])
+        if (Warhead::regex_search(name, regex))
             return CHAR_NAME_PROFANE;
 
     // regexes at TOTAL_LOCALES are loaded from NamesReserved which is not locale specific
-    for (Trinity::wregex const& regex : NamesReservedValidators[locale])
-        if (Trinity::regex_search(name, regex))
+    for (Warhead::wregex const& regex : NamesReservedValidators[locale])
+        if (Warhead::regex_search(name, regex))
             return CHAR_NAME_RESERVED;
 
     return CHAR_NAME_SUCCESS;

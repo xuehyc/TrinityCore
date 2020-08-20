@@ -18,7 +18,7 @@
 #include "Argon2.h"
 #include <argon2/argon2.h>
 
-/*static*/ Optional<std::string> Trinity::Crypto::Argon2::Hash(std::string const& password, BigNumber const& salt, uint32 nIterations, uint32 kibMemoryCost)
+/*static*/ Optional<std::string> Warhead::Crypto::Argon2::Hash(std::string const& password, BigNumber const& salt, uint32 nIterations, uint32 kibMemoryCost)
 {
     char buf[ENCODED_HASH_LEN];
     std::vector<uint8> saltBytes = salt.ToByteVector();
@@ -37,7 +37,7 @@
     return {};
 }
 
-/*static*/ bool Trinity::Crypto::Argon2::Verify(std::string const& password, std::string const& hash)
+/*static*/ bool Warhead::Crypto::Argon2::Verify(std::string const& password, std::string const& hash)
 {
     int status = argon2id_verify(hash.c_str(), password.c_str(), password.length());
     return (status == ARGON2_OK);

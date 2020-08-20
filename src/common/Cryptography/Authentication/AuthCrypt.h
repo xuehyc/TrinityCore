@@ -22,7 +22,7 @@
 #include "AuthDefines.h"
 #include <array>
 
-class TC_COMMON_API AuthCrypt
+class WH_COMMON_API AuthCrypt
 {
     public:
         AuthCrypt();
@@ -34,8 +34,8 @@ class TC_COMMON_API AuthCrypt
         bool IsInitialized() const { return _initialized; }
 
     private:
-        Trinity::Crypto::ARC4 _clientDecrypt;
-        Trinity::Crypto::ARC4 _serverEncrypt;
+        Warhead::Crypto::ARC4 _clientDecrypt;
+        Warhead::Crypto::ARC4 _serverEncrypt;
         bool _initialized;
 };
 #endif

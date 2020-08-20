@@ -20,7 +20,7 @@
 #include "SmartEnum.h"
 #include <stdexcept>
 
-namespace Trinity
+namespace Warhead
 {
 namespace Impl
 {
@@ -29,7 +29,7 @@ namespace Impl
 |* data for enum 'WardenActions' in 'WardenCheckMgr.h' auto-generated *|
 \**********************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<WardenActions>::ToString(WardenActions value)
+WH_API_EXPORT EnumText EnumUtils<WardenActions>::ToString(WardenActions value)
 {
     switch (value)
     {
@@ -41,10 +41,10 @@ TC_API_EXPORT EnumText EnumUtils<WardenActions>::ToString(WardenActions value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<WardenActions>::Count() { return 3; }
+WH_API_EXPORT size_t EnumUtils<WardenActions>::Count() { return 3; }
 
 template <>
-TC_API_EXPORT WardenActions EnumUtils<WardenActions>::FromIndex(size_t index)
+WH_API_EXPORT WardenActions EnumUtils<WardenActions>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -59,7 +59,7 @@ TC_API_EXPORT WardenActions EnumUtils<WardenActions>::FromIndex(size_t index)
 |* data for enum 'WardenCheckType' in 'WardenCheckMgr.h' auto-generated *|
 \************************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<WardenCheckType>::ToString(WardenCheckType value)
+WH_API_EXPORT EnumText EnumUtils<WardenCheckType>::ToString(WardenCheckType value)
 {
     switch (value)
     {
@@ -77,10 +77,10 @@ TC_API_EXPORT EnumText EnumUtils<WardenCheckType>::ToString(WardenCheckType valu
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<WardenCheckType>::Count() { return 9; }
+WH_API_EXPORT size_t EnumUtils<WardenCheckType>::Count() { return 9; }
 
 template <>
-TC_API_EXPORT WardenCheckType EnumUtils<WardenCheckType>::FromIndex(size_t index)
+WH_API_EXPORT WardenCheckType EnumUtils<WardenCheckType>::FromIndex(size_t index)
 {
     switch (index)
     {

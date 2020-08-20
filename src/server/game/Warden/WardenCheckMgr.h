@@ -59,7 +59,7 @@ struct WardenCheck
 
 using WardenCheckResult = std::vector<uint8>;
 
-class TC_GAME_API WardenCheckMgr
+class WH_GAME_API WardenCheckMgr
 {
     private:
         WardenCheckMgr();

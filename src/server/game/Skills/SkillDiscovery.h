@@ -15,17 +15,17 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_SKILLDISCOVERY_H
-#define TRINITY_SKILLDISCOVERY_H
+#ifndef WARHEAD_SKILLDISCOVERY_H
+#define WARHEAD_SKILLDISCOVERY_H
 
 #include "Common.h"
 
 class Player;
 
-TC_GAME_API void LoadSkillDiscoveryTable();
-TC_GAME_API uint32 GetSkillDiscoverySpell(uint32 skillId, uint32 spellId, Player* player);
-TC_GAME_API bool HasDiscoveredAllSpells(uint32 spellId, Player* player);
-TC_GAME_API bool HasDiscoveredAnySpell(uint32 spellId, Player* player);
-TC_GAME_API uint32 GetExplicitDiscoverySpell(uint32 spellId, Player* player);
+WH_GAME_API void LoadSkillDiscoveryTable();
+WH_GAME_API uint32 GetSkillDiscoverySpell(uint32 skillId, uint32 spellId, Player* player);
+WH_GAME_API bool HasDiscoveredAllSpells(uint32 spellId, Player* player);
+WH_GAME_API bool HasDiscoveredAnySpell(uint32 spellId, Player* player);
+WH_GAME_API uint32 GetExplicitDiscoverySpell(uint32 spellId, Player* player);
 
 #endif

@@ -493,8 +493,8 @@ public:
         {
             // Returns true if no nearby player has aura "Test Ribbon Pole Channel".
             std::list<Player*> players;
-            Trinity::UnitAuraCheck check(true, SPELL_RIBBON_DANCE_COSMETIC);
-            Trinity::PlayerListSearcher<Trinity::UnitAuraCheck> searcher(me, players, check);
+            Warhead::UnitAuraCheck check(true, SPELL_RIBBON_DANCE_COSMETIC);
+            Warhead::PlayerListSearcher<Warhead::UnitAuraCheck> searcher(me, players, check);
             Cell::VisitWorldObjects(me, searcher, 10.0f);
 
             return players.empty();
@@ -909,7 +909,7 @@ void npc_doctor::npc_doctorAI::UpdateAI(uint32 diff)
                     patientEntry = HordeSoldierId[rand32() % 3];
                     break;
                 default:
-                    TC_LOG_ERROR("scripts", "Invalid entry for Triage doctor. Please check your database");
+                    LOG_ERROR("scripts", "Invalid entry for Triage doctor. Please check your database");
                     return;
             }
 

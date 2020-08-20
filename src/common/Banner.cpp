@@ -19,9 +19,9 @@
 #include "GitRevision.h"
 #include "StringFormat.h"
 
-void Trinity::Banner::Show(char const* applicationName, void(*log)(char const* text), void(*logExtraInfo)())
+void Warhead::Banner::Show(char const* applicationName, void(*log)(char const* text), void(*logExtraInfo)())
 {
-    log(Trinity::StringFormat("%s (%s)", GitRevision::GetFullVersion(), applicationName).c_str());
+    log(Warhead::StringFormat("%s (%s)", GitRevision::GetFullVersion(), applicationName).c_str());
     log("<Ctrl-C> to stop.\n");
     log(" ______                       __");
     log("/\\__  _\\       __          __/\\ \\__");

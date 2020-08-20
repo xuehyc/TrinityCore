@@ -60,7 +60,7 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT);
 
     stmt->setString(0, username);
-    auto [salt, verifier] = Trinity::Crypto::SRP6::MakeRegistrationData(username, password);
+    auto [salt, verifier] = Warhead::Crypto::SRP6::MakeRegistrationData(username, password);
     stmt->setBinary(1, salt);
     stmt->setBinary(2, verifier);
     stmt->setString(3, email);
@@ -149,11 +149,11 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accountId)
     return AccountOpResult::AOR_OK;
 }
 
-// Do not use this. Use the appropriate methods on Trinity::Crypto::SRP6 to do whatever you are trying to do.
+// Do not use this. Use the appropriate methods on Warhead::Crypto::SRP6 to do whatever you are trying to do.
 // See issue #25157.
 static std::string CalculateShaPassHash_DEPRECATED_DONOTUSE(std::string const& name, std::string const& password)
 {
-    return ByteArrayToHexStr(Trinity::Crypto::SHA1::GetDigestOf(name, ":", password));
+    return ByteArrayToHexStr(Warhead::Crypto::SHA1::GetDigestOf(name, ":", password));
 }
 
 AccountOpResult AccountMgr::ChangeUsername(uint32 accountId, std::string newUsername, std::string newPassword)
@@ -180,7 +180,7 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accountId, std::string newUser
     stmt->setUInt32(1, accountId);
     LoginDatabase.Execute(stmt);
 
-    auto [salt, verifier] = Trinity::Crypto::SRP6::MakeRegistrationData(newUsername, newPassword);
+    auto [salt, verifier] = Warhead::Crypto::SRP6::MakeRegistrationData(newUsername, newPassword);
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGON);
     stmt->setBinary(0, salt);
     stmt->setBinary(1, verifier);
@@ -216,7 +216,7 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accountId, std::string newPass
 
     Utf8ToUpperOnlyLatin(username);
     Utf8ToUpperOnlyLatin(newPassword);
-    auto [salt, verifier] = Trinity::Crypto::SRP6::MakeRegistrationData(username, newPassword);
+    auto [salt, verifier] = Warhead::Crypto::SRP6::MakeRegistrationData(username, newPassword);
 
     LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGON);
     stmt->setBinary(0, salt);
@@ -371,9 +371,9 @@ bool AccountMgr::CheckPassword(uint32 accountId, std::string password)
 
     if (PreparedQueryResult result = LoginDatabase.Query(stmt))
     {
-        Trinity::Crypto::SRP6::Salt salt = (*result)[0].GetBinary<Trinity::Crypto::SRP6::SALT_LENGTH>();
-        Trinity::Crypto::SRP6::Verifier verifier = (*result)[1].GetBinary<Trinity::Crypto::SRP6::VERIFIER_LENGTH>();
-        if (Trinity::Crypto::SRP6::CheckLogin(username, password, salt, verifier))
+        Warhead::Crypto::SRP6::Salt salt = (*result)[0].GetBinary<Warhead::Crypto::SRP6::SALT_LENGTH>();
+        Warhead::Crypto::SRP6::Verifier verifier = (*result)[1].GetBinary<Warhead::Crypto::SRP6::VERIFIER_LENGTH>();
+        if (Warhead::Crypto::SRP6::CheckLogin(username, password, salt, verifier))
             return true;
     }
 
@@ -438,17 +438,17 @@ void AccountMgr::LoadRBAC()
 {
     ClearRBAC();
 
-    TC_LOG_DEBUG("rbac", "AccountMgr::LoadRBAC");
+    LOG_DEBUG("rbac", "AccountMgr::LoadRBAC");
     uint32 oldMSTime = getMSTime();
     uint32 count1 = 0;
     uint32 count2 = 0;
     uint32 count3 = 0;
 
-    TC_LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading permissions");
+    LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading permissions");
     QueryResult result = LoginDatabase.Query("SELECT id, name FROM rbac_permissions");
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 account permission definitions. DB table `rbac_permissions` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 account permission definitions. DB table `rbac_permissions` is empty.");
         return;
     }
 
@@ -461,11 +461,11 @@ void AccountMgr::LoadRBAC()
     }
     while (result->NextRow());
 
-    TC_LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading linked permissions");
+    LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading linked permissions");
     result = LoginDatabase.Query("SELECT id, linkedId FROM rbac_linked_permissions ORDER BY id ASC");
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 linked permissions. DB table `rbac_linked_permissions` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 linked permissions. DB table `rbac_linked_permissions` is empty.");
         return;
     }
 
@@ -485,7 +485,7 @@ void AccountMgr::LoadRBAC()
         uint32 linkedPermissionId = field[1].GetUInt32();
         if (linkedPermissionId == permissionId)
         {
-            TC_LOG_ERROR("sql.sql", "RBAC Permission %u has itself as linked permission. Ignored", permissionId);
+            LOG_ERROR("sql.sql", "RBAC Permission %u has itself as linked permission. Ignored", permissionId);
             continue;
         }
         permission->AddLinkedPermission(linkedPermissionId);
@@ -493,11 +493,11 @@ void AccountMgr::LoadRBAC()
     }
     while (result->NextRow());
 
-    TC_LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading default permissions");
+    LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading default permissions");
     result = LoginDatabase.PQuery("SELECT secId, permissionId FROM rbac_default_permissions WHERE (realmId = %u OR realmId = -1) ORDER BY secId ASC", realm.Id.Realm);
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 default permission definitions. DB table `rbac_default_permissions` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 default permission definitions. DB table `rbac_default_permissions` is empty.");
         return;
     }
 
@@ -518,7 +518,7 @@ void AccountMgr::LoadRBAC()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u permission definitions, %u linked permissions and %u default permissions in %u ms", count1, count2, count3, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u permission definitions, %u linked permissions and %u default permissions in %u ms", count1, count2, count3, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void AccountMgr::UpdateAccountAccess(rbac::RBACData* rbac, uint32 accountId, uint8 securityLevel, int32 realmId)
@@ -557,7 +557,7 @@ void AccountMgr::UpdateAccountAccess(rbac::RBACData* rbac, uint32 accountId, uin
 
 rbac::RBACPermission const* AccountMgr::GetRBACPermission(uint32 permissionId) const
 {
-    TC_LOG_TRACE("rbac", "AccountMgr::GetRBACPermission: %u", permissionId);
+    LOG_TRACE("rbac", "AccountMgr::GetRBACPermission: %u", permissionId);
     rbac::RBACPermissionsContainer::const_iterator it = _permissions.find(permissionId);
     if (it != _permissions.end())
         return it->second;
@@ -569,7 +569,7 @@ bool AccountMgr::HasPermission(uint32 accountId, uint32 permissionId, uint32 rea
 {
     if (!accountId)
     {
-        TC_LOG_ERROR("rbac", "AccountMgr::HasPermission: Wrong accountId 0");
+        LOG_ERROR("rbac", "AccountMgr::HasPermission: Wrong accountId 0");
         return false;
     }
 
@@ -577,7 +577,7 @@ bool AccountMgr::HasPermission(uint32 accountId, uint32 permissionId, uint32 rea
     rbac.LoadFromDB();
     bool hasPermission = rbac.HasPermission(permissionId);
 
-    TC_LOG_DEBUG("rbac", "AccountMgr::HasPermission [AccountId: %u, PermissionId: %u, realmId: %d]: %u",
+    LOG_DEBUG("rbac", "AccountMgr::HasPermission [AccountId: %u, PermissionId: %u, realmId: %d]: %u",
                    accountId, permissionId, realmId, hasPermission);
     return hasPermission;
 }
@@ -593,6 +593,6 @@ void AccountMgr::ClearRBAC()
 
 rbac::RBACPermissionContainer const& AccountMgr::GetRBACDefaultPermissions(uint8 secLevel)
 {
-    TC_LOG_TRACE("rbac", "AccountMgr::GetRBACDefaultPermissions: secLevel %u - size: %u", secLevel, uint32(_defaultPermissions[secLevel].size()));
+    LOG_TRACE("rbac", "AccountMgr::GetRBACDefaultPermissions: secLevel %u - size: %u", secLevel, uint32(_defaultPermissions[secLevel].size()));
     return _defaultPermissions[secLevel];
 }

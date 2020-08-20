@@ -27,7 +27,7 @@
 #include <vector>
 
 /*! Transactions, high level class. */
-class TC_DATABASE_API TransactionBase
+class WH_DATABASE_API TransactionBase
 {
     friend class TransactionTask;
     friend class MySQLConnection;
@@ -43,7 +43,7 @@ class TC_DATABASE_API TransactionBase
         template<typename Format, typename... Args>
         void PAppend(Format&& sql, Args&&... args)
         {
-            Append(Trinity::StringFormat(std::forward<Format>(sql), std::forward<Args>(args)...).c_str());
+            Append(Warhead::StringFormat(std::forward<Format>(sql), std::forward<Args>(args)...).c_str());
         }
 
         std::size_t GetSize() const { return m_queries.size(); }
@@ -69,7 +69,7 @@ public:
 };
 
 /*! Low level class*/
-class TC_DATABASE_API TransactionTask : public SQLOperation
+class WH_DATABASE_API TransactionTask : public SQLOperation
 {
     template <class T> friend class DatabaseWorkerPool;
     friend class DatabaseWorker;
@@ -88,7 +88,7 @@ class TC_DATABASE_API TransactionTask : public SQLOperation
         static std::mutex _deadlockLock;
 };
 
-class TC_DATABASE_API TransactionWithResultTask : public TransactionTask
+class WH_DATABASE_API TransactionWithResultTask : public TransactionTask
 {
 public:
     TransactionWithResultTask(std::shared_ptr<TransactionBase> trans) : TransactionTask(trans) { }
@@ -101,7 +101,7 @@ protected:
     TransactionPromise m_result;
 };
 
-class TC_DATABASE_API TransactionCallback
+class WH_DATABASE_API TransactionCallback
 {
 public:
     TransactionCallback(TransactionFuture&& future) : m_future(std::move(future)) { }

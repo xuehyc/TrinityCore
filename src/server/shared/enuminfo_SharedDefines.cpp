@@ -20,7 +20,7 @@
 #include "SmartEnum.h"
 #include <stdexcept>
 
-namespace Trinity
+namespace Warhead
 {
 namespace Impl
 {
@@ -29,7 +29,7 @@ namespace Impl
 |* data for enum 'Races' in 'SharedDefines.h' auto-generated *|
 \*************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<Races>::ToString(Races value)
+WH_API_EXPORT EnumText EnumUtils<Races>::ToString(Races value)
 {
     switch (value)
     {
@@ -48,10 +48,10 @@ TC_API_EXPORT EnumText EnumUtils<Races>::ToString(Races value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<Races>::Count() { return 10; }
+WH_API_EXPORT size_t EnumUtils<Races>::Count() { return 10; }
 
 template <>
-TC_API_EXPORT Races EnumUtils<Races>::FromIndex(size_t index)
+WH_API_EXPORT Races EnumUtils<Races>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -73,7 +73,7 @@ TC_API_EXPORT Races EnumUtils<Races>::FromIndex(size_t index)
 |* data for enum 'Classes' in 'SharedDefines.h' auto-generated *|
 \***************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<Classes>::ToString(Classes value)
+WH_API_EXPORT EnumText EnumUtils<Classes>::ToString(Classes value)
 {
     switch (value)
     {
@@ -92,10 +92,10 @@ TC_API_EXPORT EnumText EnumUtils<Classes>::ToString(Classes value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<Classes>::Count() { return 10; }
+WH_API_EXPORT size_t EnumUtils<Classes>::Count() { return 10; }
 
 template <>
-TC_API_EXPORT Classes EnumUtils<Classes>::FromIndex(size_t index)
+WH_API_EXPORT Classes EnumUtils<Classes>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -117,7 +117,7 @@ TC_API_EXPORT Classes EnumUtils<Classes>::FromIndex(size_t index)
 |* data for enum 'Powers' in 'SharedDefines.h' auto-generated *|
 \**************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<Powers>::ToString(Powers value)
+WH_API_EXPORT EnumText EnumUtils<Powers>::ToString(Powers value)
 {
     switch (value)
     {
@@ -134,10 +134,10 @@ TC_API_EXPORT EnumText EnumUtils<Powers>::ToString(Powers value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<Powers>::Count() { return 8; }
+WH_API_EXPORT size_t EnumUtils<Powers>::Count() { return 8; }
 
 template <>
-TC_API_EXPORT Powers EnumUtils<Powers>::FromIndex(size_t index)
+WH_API_EXPORT Powers EnumUtils<Powers>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -157,7 +157,7 @@ TC_API_EXPORT Powers EnumUtils<Powers>::FromIndex(size_t index)
 |* data for enum 'SpellSchools' in 'SharedDefines.h' auto-generated *|
 \********************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpellSchools>::ToString(SpellSchools value)
+WH_API_EXPORT EnumText EnumUtils<SpellSchools>::ToString(SpellSchools value)
 {
     switch (value)
     {
@@ -173,10 +173,10 @@ TC_API_EXPORT EnumText EnumUtils<SpellSchools>::ToString(SpellSchools value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellSchools>::Count() { return 7; }
+WH_API_EXPORT size_t EnumUtils<SpellSchools>::Count() { return 7; }
 
 template <>
-TC_API_EXPORT SpellSchools EnumUtils<SpellSchools>::FromIndex(size_t index)
+WH_API_EXPORT SpellSchools EnumUtils<SpellSchools>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -195,7 +195,7 @@ TC_API_EXPORT SpellSchools EnumUtils<SpellSchools>::FromIndex(size_t index)
 |* data for enum 'SpellAttr0' in 'SharedDefines.h' auto-generated *|
 \******************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpellAttr0>::ToString(SpellAttr0 value)
+WH_API_EXPORT EnumText EnumUtils<SpellAttr0>::ToString(SpellAttr0 value)
 {
     switch (value)
     {
@@ -236,10 +236,10 @@ TC_API_EXPORT EnumText EnumUtils<SpellAttr0>::ToString(SpellAttr0 value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr0>::Count() { return 32; }
+WH_API_EXPORT size_t EnumUtils<SpellAttr0>::Count() { return 32; }
 
 template <>
-TC_API_EXPORT SpellAttr0 EnumUtils<SpellAttr0>::FromIndex(size_t index)
+WH_API_EXPORT SpellAttr0 EnumUtils<SpellAttr0>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -283,7 +283,7 @@ TC_API_EXPORT SpellAttr0 EnumUtils<SpellAttr0>::FromIndex(size_t index)
 |* data for enum 'SpellAttr1' in 'SharedDefines.h' auto-generated *|
 \******************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpellAttr1>::ToString(SpellAttr1 value)
+WH_API_EXPORT EnumText EnumUtils<SpellAttr1>::ToString(SpellAttr1 value)
 {
     switch (value)
     {
@@ -324,10 +324,10 @@ TC_API_EXPORT EnumText EnumUtils<SpellAttr1>::ToString(SpellAttr1 value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr1>::Count() { return 32; }
+WH_API_EXPORT size_t EnumUtils<SpellAttr1>::Count() { return 32; }
 
 template <>
-TC_API_EXPORT SpellAttr1 EnumUtils<SpellAttr1>::FromIndex(size_t index)
+WH_API_EXPORT SpellAttr1 EnumUtils<SpellAttr1>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -371,7 +371,7 @@ TC_API_EXPORT SpellAttr1 EnumUtils<SpellAttr1>::FromIndex(size_t index)
 |* data for enum 'SpellAttr2' in 'SharedDefines.h' auto-generated *|
 \******************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpellAttr2>::ToString(SpellAttr2 value)
+WH_API_EXPORT EnumText EnumUtils<SpellAttr2>::ToString(SpellAttr2 value)
 {
     switch (value)
     {
@@ -412,10 +412,10 @@ TC_API_EXPORT EnumText EnumUtils<SpellAttr2>::ToString(SpellAttr2 value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr2>::Count() { return 32; }
+WH_API_EXPORT size_t EnumUtils<SpellAttr2>::Count() { return 32; }
 
 template <>
-TC_API_EXPORT SpellAttr2 EnumUtils<SpellAttr2>::FromIndex(size_t index)
+WH_API_EXPORT SpellAttr2 EnumUtils<SpellAttr2>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -459,7 +459,7 @@ TC_API_EXPORT SpellAttr2 EnumUtils<SpellAttr2>::FromIndex(size_t index)
 |* data for enum 'SpellAttr3' in 'SharedDefines.h' auto-generated *|
 \******************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpellAttr3>::ToString(SpellAttr3 value)
+WH_API_EXPORT EnumText EnumUtils<SpellAttr3>::ToString(SpellAttr3 value)
 {
     switch (value)
     {
@@ -500,10 +500,10 @@ TC_API_EXPORT EnumText EnumUtils<SpellAttr3>::ToString(SpellAttr3 value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr3>::Count() { return 32; }
+WH_API_EXPORT size_t EnumUtils<SpellAttr3>::Count() { return 32; }
 
 template <>
-TC_API_EXPORT SpellAttr3 EnumUtils<SpellAttr3>::FromIndex(size_t index)
+WH_API_EXPORT SpellAttr3 EnumUtils<SpellAttr3>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -547,7 +547,7 @@ TC_API_EXPORT SpellAttr3 EnumUtils<SpellAttr3>::FromIndex(size_t index)
 |* data for enum 'SpellAttr4' in 'SharedDefines.h' auto-generated *|
 \******************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpellAttr4>::ToString(SpellAttr4 value)
+WH_API_EXPORT EnumText EnumUtils<SpellAttr4>::ToString(SpellAttr4 value)
 {
     switch (value)
     {
@@ -588,10 +588,10 @@ TC_API_EXPORT EnumText EnumUtils<SpellAttr4>::ToString(SpellAttr4 value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr4>::Count() { return 32; }
+WH_API_EXPORT size_t EnumUtils<SpellAttr4>::Count() { return 32; }
 
 template <>
-TC_API_EXPORT SpellAttr4 EnumUtils<SpellAttr4>::FromIndex(size_t index)
+WH_API_EXPORT SpellAttr4 EnumUtils<SpellAttr4>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -635,7 +635,7 @@ TC_API_EXPORT SpellAttr4 EnumUtils<SpellAttr4>::FromIndex(size_t index)
 |* data for enum 'SpellAttr5' in 'SharedDefines.h' auto-generated *|
 \******************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpellAttr5>::ToString(SpellAttr5 value)
+WH_API_EXPORT EnumText EnumUtils<SpellAttr5>::ToString(SpellAttr5 value)
 {
     switch (value)
     {
@@ -676,10 +676,10 @@ TC_API_EXPORT EnumText EnumUtils<SpellAttr5>::ToString(SpellAttr5 value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr5>::Count() { return 32; }
+WH_API_EXPORT size_t EnumUtils<SpellAttr5>::Count() { return 32; }
 
 template <>
-TC_API_EXPORT SpellAttr5 EnumUtils<SpellAttr5>::FromIndex(size_t index)
+WH_API_EXPORT SpellAttr5 EnumUtils<SpellAttr5>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -723,7 +723,7 @@ TC_API_EXPORT SpellAttr5 EnumUtils<SpellAttr5>::FromIndex(size_t index)
 |* data for enum 'SpellAttr6' in 'SharedDefines.h' auto-generated *|
 \******************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpellAttr6>::ToString(SpellAttr6 value)
+WH_API_EXPORT EnumText EnumUtils<SpellAttr6>::ToString(SpellAttr6 value)
 {
     switch (value)
     {
@@ -764,10 +764,10 @@ TC_API_EXPORT EnumText EnumUtils<SpellAttr6>::ToString(SpellAttr6 value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr6>::Count() { return 32; }
+WH_API_EXPORT size_t EnumUtils<SpellAttr6>::Count() { return 32; }
 
 template <>
-TC_API_EXPORT SpellAttr6 EnumUtils<SpellAttr6>::FromIndex(size_t index)
+WH_API_EXPORT SpellAttr6 EnumUtils<SpellAttr6>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -811,7 +811,7 @@ TC_API_EXPORT SpellAttr6 EnumUtils<SpellAttr6>::FromIndex(size_t index)
 |* data for enum 'SpellAttr7' in 'SharedDefines.h' auto-generated *|
 \******************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpellAttr7>::ToString(SpellAttr7 value)
+WH_API_EXPORT EnumText EnumUtils<SpellAttr7>::ToString(SpellAttr7 value)
 {
     switch (value)
     {
@@ -852,10 +852,10 @@ TC_API_EXPORT EnumText EnumUtils<SpellAttr7>::ToString(SpellAttr7 value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr7>::Count() { return 32; }
+WH_API_EXPORT size_t EnumUtils<SpellAttr7>::Count() { return 32; }
 
 template <>
-TC_API_EXPORT SpellAttr7 EnumUtils<SpellAttr7>::FromIndex(size_t index)
+WH_API_EXPORT SpellAttr7 EnumUtils<SpellAttr7>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -899,7 +899,7 @@ TC_API_EXPORT SpellAttr7 EnumUtils<SpellAttr7>::FromIndex(size_t index)
 |* data for enum 'Mechanics' in 'SharedDefines.h' auto-generated *|
 \*****************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<Mechanics>::ToString(Mechanics value)
+WH_API_EXPORT EnumText EnumUtils<Mechanics>::ToString(Mechanics value)
 {
     switch (value)
     {
@@ -940,10 +940,10 @@ TC_API_EXPORT EnumText EnumUtils<Mechanics>::ToString(Mechanics value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<Mechanics>::Count() { return 32; }
+WH_API_EXPORT size_t EnumUtils<Mechanics>::Count() { return 32; }
 
 template <>
-TC_API_EXPORT Mechanics EnumUtils<Mechanics>::FromIndex(size_t index)
+WH_API_EXPORT Mechanics EnumUtils<Mechanics>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -987,7 +987,7 @@ TC_API_EXPORT Mechanics EnumUtils<Mechanics>::FromIndex(size_t index)
 |* data for enum 'SpellDmgClass' in 'SharedDefines.h' auto-generated *|
 \*********************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpellDmgClass>::ToString(SpellDmgClass value)
+WH_API_EXPORT EnumText EnumUtils<SpellDmgClass>::ToString(SpellDmgClass value)
 {
     switch (value)
     {
@@ -1000,10 +1000,10 @@ TC_API_EXPORT EnumText EnumUtils<SpellDmgClass>::ToString(SpellDmgClass value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellDmgClass>::Count() { return 4; }
+WH_API_EXPORT size_t EnumUtils<SpellDmgClass>::Count() { return 4; }
 
 template <>
-TC_API_EXPORT SpellDmgClass EnumUtils<SpellDmgClass>::FromIndex(size_t index)
+WH_API_EXPORT SpellDmgClass EnumUtils<SpellDmgClass>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -1019,7 +1019,7 @@ TC_API_EXPORT SpellDmgClass EnumUtils<SpellDmgClass>::FromIndex(size_t index)
 |* data for enum 'SpellPreventionType' in 'SharedDefines.h' auto-generated *|
 \***************************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpellPreventionType>::ToString(SpellPreventionType value)
+WH_API_EXPORT EnumText EnumUtils<SpellPreventionType>::ToString(SpellPreventionType value)
 {
     switch (value)
     {
@@ -1031,10 +1031,10 @@ TC_API_EXPORT EnumText EnumUtils<SpellPreventionType>::ToString(SpellPreventionT
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellPreventionType>::Count() { return 3; }
+WH_API_EXPORT size_t EnumUtils<SpellPreventionType>::Count() { return 3; }
 
 template <>
-TC_API_EXPORT SpellPreventionType EnumUtils<SpellPreventionType>::FromIndex(size_t index)
+WH_API_EXPORT SpellPreventionType EnumUtils<SpellPreventionType>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -1049,7 +1049,7 @@ TC_API_EXPORT SpellPreventionType EnumUtils<SpellPreventionType>::FromIndex(size
 |* data for enum 'Emote' in 'SharedDefines.h' auto-generated *|
 \*************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<Emote>::ToString(Emote value)
+WH_API_EXPORT EnumText EnumUtils<Emote>::ToString(Emote value)
 {
     switch (value)
     {
@@ -1232,10 +1232,10 @@ TC_API_EXPORT EnumText EnumUtils<Emote>::ToString(Emote value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<Emote>::Count() { return 174; }
+WH_API_EXPORT size_t EnumUtils<Emote>::Count() { return 174; }
 
 template <>
-TC_API_EXPORT Emote EnumUtils<Emote>::FromIndex(size_t index)
+WH_API_EXPORT Emote EnumUtils<Emote>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -1421,7 +1421,7 @@ TC_API_EXPORT Emote EnumUtils<Emote>::FromIndex(size_t index)
 |* data for enum 'SpellFamilyNames' in 'SharedDefines.h' auto-generated *|
 \************************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpellFamilyNames>::ToString(SpellFamilyNames value)
+WH_API_EXPORT EnumText EnumUtils<SpellFamilyNames>::ToString(SpellFamilyNames value)
 {
     switch (value)
     {
@@ -1445,10 +1445,10 @@ TC_API_EXPORT EnumText EnumUtils<SpellFamilyNames>::ToString(SpellFamilyNames va
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellFamilyNames>::Count() { return 15; }
+WH_API_EXPORT size_t EnumUtils<SpellFamilyNames>::Count() { return 15; }
 
 template <>
-TC_API_EXPORT SpellFamilyNames EnumUtils<SpellFamilyNames>::FromIndex(size_t index)
+WH_API_EXPORT SpellFamilyNames EnumUtils<SpellFamilyNames>::FromIndex(size_t index)
 {
     switch (index)
     {

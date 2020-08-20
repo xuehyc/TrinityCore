@@ -29,7 +29,7 @@ endif(USE_COREPCH)
 
 GroupSources(${CMAKE_CURRENT_SOURCE_DIR})
 
-add_definitions(-DTRINITY_API_EXPORT_COMMON)
+add_definitions(-DWARHEAD_API_EXPORT_COMMON)
 
 add_library(common
   ${PRIVATE_SOURCES}
@@ -60,7 +60,7 @@ target_include_directories(common
 
 target_link_libraries(common
   PRIVATE
-    trinity-core-interface
+    warhead-core-interface
   PUBLIC
     argon2
     boost

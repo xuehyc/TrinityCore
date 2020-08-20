@@ -21,7 +21,7 @@
 #include <atomic>
 #include <utility>
 
-namespace Trinity
+namespace Warhead
 {
 namespace Impl
 {
@@ -164,6 +164,6 @@ private:
 }
 
 template<typename T, std::atomic<T*> T::* IntrusiveLink = nullptr>
-using MPSCQueue = std::conditional_t<IntrusiveLink != nullptr, Trinity::Impl::MPSCQueueIntrusive<T, IntrusiveLink>, Trinity::Impl::MPSCQueueNonIntrusive<T>>;
+using MPSCQueue = std::conditional_t<IntrusiveLink != nullptr, Warhead::Impl::MPSCQueueIntrusive<T, IntrusiveLink>, Warhead::Impl::MPSCQueueNonIntrusive<T>>;
 
 #endif // MPSCQueue_h__

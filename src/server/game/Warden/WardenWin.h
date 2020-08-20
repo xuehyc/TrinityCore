@@ -62,7 +62,7 @@ static_assert(sizeof(WardenInitModuleRequest) == (1 + 2 + 4 + 1 + 1 + 1 + 1 + (4
 class WorldSession;
 class Warden;
 
-class TC_GAME_API WardenWin : public Warden
+class WH_GAME_API WardenWin : public Warden
 {
     public:
         WardenWin();

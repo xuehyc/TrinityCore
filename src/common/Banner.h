@@ -20,11 +20,11 @@
 
 #include "Define.h"
 
-namespace Trinity
+namespace Warhead
 {
     namespace Banner
     {
-        TC_COMMON_API void Show(char const* applicationName, void(*log)(char const* text), void(*logExtraInfo)());
+        WH_COMMON_API void Show(char const* applicationName, void(*log)(char const* text), void(*logExtraInfo)());
     }
 }
 

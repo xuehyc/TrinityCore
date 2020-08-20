@@ -32,7 +32,7 @@ static std::unordered_map<AuctionQuality, uint32> const ahbotQualityLangIds =
         { AUCTION_QUALITY_YELLOW, LANG_AHBOT_QUALITY_YELLOW }
     };
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 
 class ahbot_commandscript : public CommandScript
 {

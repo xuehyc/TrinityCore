@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_CHATCOMMANDTAGS_H
-#define TRINITY_CHATCOMMANDTAGS_H
+#ifndef WARHEAD_CHATCOMMANDTAGS_H
+#define WARHEAD_CHATCOMMANDTAGS_H
 
 #include "advstd.h"
 #include "ChatCommandHelpers.h"
@@ -31,7 +31,7 @@
 #include <utility>
 #include <variant>
 
-namespace Trinity::ChatCommands
+namespace Warhead::ChatCommands
 {
     /************************** CONTAINER TAGS **********************************************\
     |* Simple holder classes to differentiate between extraction methods                    *|
@@ -61,7 +61,7 @@ namespace Trinity::ChatCommands
             {
                 if constexpr (sizeof...(chars) > 0)
                     return ExactSequence<chars...>::_TryConsume(pos);
-                else if (Trinity::Impl::ChatCommands::tokenize(pos)) /* we did not consume the entire token */
+                else if (Warhead::Impl::ChatCommands::tokenize(pos)) /* we did not consume the entire token */
                     return nullptr;
                 else
                     return pos;
@@ -86,7 +86,7 @@ namespace Trinity::ChatCommands
 
             char const* TryConsume(char const* pos)
             {
-                Trinity::Hyperlinks::HyperlinkInfo info = Trinity::Hyperlinks::ParseHyperlink(pos);
+                Warhead::Hyperlinks::HyperlinkInfo info = Warhead::Hyperlinks::ParseHyperlink(pos);
                 // invalid hyperlinks cannot be consumed
                 if (!info)
                     return nullptr;
@@ -103,7 +103,7 @@ namespace Trinity::ChatCommands
 
                 // finally, skip to end of token
                 pos = info.next;
-                Trinity::Impl::ChatCommands::tokenize(pos);
+                Warhead::Impl::ChatCommands::tokenize(pos);
 
                 // return final pos
                 return pos;
@@ -114,14 +114,14 @@ namespace Trinity::ChatCommands
     };
 
     // pull in link tags for user convenience
-    using namespace ::Trinity::Hyperlinks::LinkTags;
+    using namespace ::Warhead::Hyperlinks::LinkTags;
 }
 
 /************************** VARIANT TAG LOGIC *********************************\
 |* This has some special handling over in ChatCommand.h                       *|
 \******************************************************************************/
 
-namespace Trinity::Impl
+namespace Warhead::Impl
 {
     template <typename T>
     struct CastToVisitor {
@@ -130,7 +130,7 @@ namespace Trinity::Impl
     };
 }
 
-namespace Trinity::ChatCommands
+namespace Warhead::ChatCommands
 {
     template <typename T1, typename... Ts>
     struct Variant : public std::variant<T1, Ts...>
@@ -138,12 +138,12 @@ namespace Trinity::ChatCommands
         using base = std::variant<T1, Ts...>;
 
         using first_type = tag_base_t<T1>;
-        static constexpr bool have_operators = Trinity::Impl::ChatCommands::are_all_assignable<first_type, tag_base_t<Ts>...>::value;
+        static constexpr bool have_operators = Warhead::Impl::ChatCommands::are_all_assignable<first_type, tag_base_t<Ts>...>::value;
 
         template <bool C = have_operators>
         std::enable_if_t<C, first_type> operator*() const
         {
-            return visit(Trinity::Impl::CastToVisitor<first_type>());
+            return visit(Warhead::Impl::CastToVisitor<first_type>());
         }
 
         template <bool C = have_operators>
@@ -178,7 +178,7 @@ namespace Trinity::ChatCommands
 namespace std
 {
     template <typename... Ts>
-    auto operator<<(std::ostream& os, Trinity::ChatCommands::Variant<Ts...> const& v) -> std::enable_if_t<Trinity::ChatCommands::Variant<Ts...>::have_operators, std::ostream&>
+    auto operator<<(std::ostream& os, Warhead::ChatCommands::Variant<Ts...> const& v) -> std::enable_if_t<Warhead::ChatCommands::Variant<Ts...>::have_operators, std::ostream&>
     {
         return (os << *v);
     }

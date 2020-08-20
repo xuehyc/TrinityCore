@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_SKILL_EXTRA_ITEMS_H
-#define TRINITY_SKILL_EXTRA_ITEMS_H
+#ifndef WARHEAD_SKILL_EXTRA_ITEMS_H
+#define WARHEAD_SKILL_EXTRA_ITEMS_H
 
 #include "Common.h"
 
@@ -24,12 +24,12 @@
 class Player;
 
 // returns true and sets the appropriate info if the player can create a perfect item with the given spellId
-TC_GAME_API bool CanCreatePerfectItem(Player* player, uint32 spellId, float &perfectCreateChance, uint32 &perfectItemType);
+WH_GAME_API bool CanCreatePerfectItem(Player* player, uint32 spellId, float &perfectCreateChance, uint32 &perfectItemType);
 // load perfection proc info from DB
-TC_GAME_API void LoadSkillPerfectItemTable();
+WH_GAME_API void LoadSkillPerfectItemTable();
 // returns true and sets the appropriate info if the player can create extra items with the given spellId
-TC_GAME_API bool CanCreateExtraItems(Player* player, uint32 spellId, float &additionalChance, uint8 &additionalMax);
+WH_GAME_API bool CanCreateExtraItems(Player* player, uint32 spellId, float &additionalChance, uint8 &additionalMax);
 // function to load the extra item creation info from DB
-TC_GAME_API void LoadSkillExtraItemTable();
+WH_GAME_API void LoadSkillExtraItemTable();
 
 #endif

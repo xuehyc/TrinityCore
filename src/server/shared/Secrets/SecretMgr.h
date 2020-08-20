@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TRINITY_SECRETMGR_H__
-#define __TRINITY_SECRETMGR_H__
+#ifndef __WARHEAD_SECRETMGR_H__
+#define __WARHEAD_SECRETMGR_H__
 
 #include "BigNumber.h"
 #include "Common.h"
@@ -34,7 +34,7 @@ enum Secrets : uint32
     NUM_SECRETS
 };
 
-class TC_SHARED_API SecretMgr
+class WH_SHARED_API SecretMgr
 {
     private:
         SecretMgr() {}

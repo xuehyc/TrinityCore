@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_CHATCOMMAND_H
-#define TRINITY_CHATCOMMAND_H
+#ifndef WARHEAD_CHATCOMMAND_H
+#define WARHEAD_CHATCOMMAND_H
 
 #include "advstd.h"
 #include "ChatCommandArgs.h"
@@ -36,7 +36,7 @@ class CommandArgs;
 template <typename T>
 struct CommandArgsConsumerSingle
 {
-    using arginfo = Trinity::ChatCommands::ArgInfo<T>;
+    using arginfo = Warhead::ChatCommands::ArgInfo<T>;
     static char const* TryConsumeTo(T& val, char const* args)
     {
         return arginfo::TryConsume(val, args);
@@ -62,11 +62,11 @@ struct CommandArgsVariantConsumer
 };
 
 template <typename... Ts>
-struct CommandArgsConsumerSingle<Trinity::ChatCommands::Variant<Ts...>>
+struct CommandArgsConsumerSingle<Warhead::ChatCommands::Variant<Ts...>>
 {
-    static char const* TryConsumeTo(Trinity::ChatCommands::Variant<Ts...>& val, char const* args)
+    static char const* TryConsumeTo(Warhead::ChatCommands::Variant<Ts...>& val, char const* args)
     {
-        return CommandArgsVariantConsumer::TryConsumeTo<Trinity::ChatCommands::Variant<Ts...>, Ts...>(val, args);
+        return CommandArgsVariantConsumer::TryConsumeTo<Warhead::ChatCommands::Variant<Ts...>, Ts...>(val, args);
     }
 };
 
@@ -167,7 +167,7 @@ struct CommandArgsConsumerNext<std::tuple<Ts...>, offset>
     }
 };
 
-class TC_GAME_API CommandArgs
+class WH_GAME_API CommandArgs
 {
     public:
         CommandArgs(char const* args) : _original(args), _args(args) {}
@@ -227,7 +227,7 @@ template <typename T> struct ChatCommandStoreLastArg { static void store(T&, Com
 template <> struct ChatCommandStoreLastArg<char const*> { static void store(char const*& arg, CommandArgs& args) { arg = args.GetRemainingArgs(); } };
 template <> struct ChatCommandStoreLastArg<CommandArgs*> { static void store(CommandArgs*& arg, CommandArgs& args) { arg = &args; } };
 
-class TC_GAME_API ChatCommand
+class WH_GAME_API ChatCommand
 {
     using wrapper_func = bool(void*, ChatHandler*, char const*);
 

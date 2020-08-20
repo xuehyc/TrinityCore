@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_SPAWNDATA_H
-#define TRINITY_SPAWNDATA_H
+#ifndef WARHEAD_SPAWNDATA_H
+#define WARHEAD_SPAWNDATA_H
 
 #include "Position.h"
 
@@ -63,7 +63,7 @@ struct SpawnGroupTemplateData
     SpawnGroupFlags flags;
 };
 
-namespace Trinity { namespace Impl {
+namespace Warhead { namespace Impl {
     template <typename T>
     struct SpawnObjectTypeForImpl { static_assert(!std::is_same<T,T>::value, "This type does not have an associated spawn type!"); };
     template <> struct SpawnObjectTypeForImpl<Creature> { static constexpr SpawnObjectType value = SPAWN_TYPE_CREATURE; };
@@ -77,7 +77,7 @@ struct SpawnMetadata
     static constexpr bool TypeHasData(SpawnObjectType type) { return (type < NUM_SPAWN_TYPES_WITH_DATA); }
     static constexpr bool TypeIsValid(SpawnObjectType type) { return (type < NUM_SPAWN_TYPES); }
     template <typename T>
-    static constexpr SpawnObjectType TypeFor = Trinity::Impl::SpawnObjectTypeForImpl<T>::value;
+    static constexpr SpawnObjectType TypeFor = Warhead::Impl::SpawnObjectTypeForImpl<T>::value;
 
     SpawnData const* ToSpawnData() const { return TypeHasData(type) ? reinterpret_cast<SpawnData const*>(this) : nullptr; }
 

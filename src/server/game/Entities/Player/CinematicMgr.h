@@ -27,7 +27,7 @@
 class Player;
 struct FlyByCamera;
 
-class TC_GAME_API CinematicMgr
+class WH_GAME_API CinematicMgr
 {
     friend class Player;
 public:

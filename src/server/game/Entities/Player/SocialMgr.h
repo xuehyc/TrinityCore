@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TRINITY_SOCIALMGR_H
-#define __TRINITY_SOCIALMGR_H
+#ifndef __WARHEAD_SOCIALMGR_H
+#define __WARHEAD_SOCIALMGR_H
 
 #include "DatabaseEnvFwd.h"
 #include "Common.h"
@@ -98,7 +98,7 @@ enum FriendsResult : uint8
 #define SOCIALMGR_FRIEND_LIMIT  50u
 #define SOCIALMGR_IGNORE_LIMIT  50u
 
-class TC_GAME_API PlayerSocial
+class WH_GAME_API PlayerSocial
 {
     friend class SocialMgr;
 

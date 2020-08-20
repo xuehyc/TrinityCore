@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TrinityCore_Optional_h__
-#define TrinityCore_Optional_h__
+#ifndef WarheadCore_Optional_h__
+#define WarheadCore_Optional_h__
 
 #include <optional>
 
@@ -24,4 +24,4 @@
 template <class T>
 using Optional = std::optional<T>;
 
-#endif // TrinityCore_Optional_h__
+#endif // WarheadCore_Optional_h__

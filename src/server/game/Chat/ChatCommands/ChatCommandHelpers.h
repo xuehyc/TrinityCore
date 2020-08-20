@@ -15,12 +15,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_CHATCOMMANDHELPERS_H
-#define TRINITY_CHATCOMMANDHELPERS_H
+#ifndef WARHEAD_CHATCOMMANDHELPERS_H
+#define WARHEAD_CHATCOMMANDHELPERS_H
 
 #include <type_traits>
 
-namespace Trinity::ChatCommands
+namespace Warhead::ChatCommands
 {
     static constexpr char COMMAND_DELIMITER = ' ';
 
@@ -34,7 +34,7 @@ namespace Trinity::ChatCommands
     using tag_base_t = typename tag_base<T>::type;
 }
 
-namespace Trinity::Impl::ChatCommands
+namespace Warhead::Impl::ChatCommands
 {
     /***************** HELPERS *************************\
     |* These really aren't for outside use...          *|
@@ -42,8 +42,8 @@ namespace Trinity::Impl::ChatCommands
     inline std::size_t tokenize(char const*& end)
     {
         std::size_t len = 0;
-        for (; *end && *end != Trinity::ChatCommands::COMMAND_DELIMITER; ++end, ++len);
-        for (; *end && *end == Trinity::ChatCommands::COMMAND_DELIMITER; ++end);
+        for (; *end && *end != Warhead::ChatCommands::COMMAND_DELIMITER; ++end, ++len);
+        for (; *end && *end == Warhead::ChatCommands::COMMAND_DELIMITER; ++end);
         return len;
     }
 

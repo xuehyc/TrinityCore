@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_GAMEOBJECT_H
-#define TRINITYCORE_GAMEOBJECT_H
+#ifndef WARHEADCORE_GAMEOBJECT_H
+#define WARHEADCORE_GAMEOBJECT_H
 
 #include "Object.h"
 #include "DatabaseEnvFwd.h"
@@ -76,7 +76,7 @@ enum LootState
 // 5 sec for bobber catch
 #define FISHING_BOBBER_READY_TIME 5
 
-class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>, public MapObject
+class WH_GAME_API GameObject : public WorldObject, public GridObject<GameObject>, public MapObject
 {
     public:
         explicit GameObject();

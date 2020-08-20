@@ -46,12 +46,12 @@ struct B64Impl
     }
 };
 
-/*static*/ std::string Trinity::Encoding::Base64::Encode(std::vector<uint8> const& data)
+/*static*/ std::string Warhead::Encoding::Base64::Encode(std::vector<uint8> const& data)
 {
-    return Trinity::Impl::GenericBaseEncoding<B64Impl>::Encode(data);
+    return Warhead::Impl::GenericBaseEncoding<B64Impl>::Encode(data);
 }
 
-/*static*/ Optional<std::vector<uint8>> Trinity::Encoding::Base64::Decode(std::string const& data)
+/*static*/ Optional<std::vector<uint8>> Warhead::Encoding::Base64::Decode(std::string const& data)
 {
-    return Trinity::Impl::GenericBaseEncoding<B64Impl>::Decode(data);
+    return Warhead::Impl::GenericBaseEncoding<B64Impl>::Decode(data);
 }

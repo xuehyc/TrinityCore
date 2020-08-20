@@ -38,7 +38,7 @@ namespace
 
 WeatherData const* GetWeatherData(uint32 zone_id)
 {
-    return Trinity::Containers::MapGetValuePtr(_weatherData, zone_id);
+    return Warhead::Containers::MapGetValuePtr(_weatherData, zone_id);
 }
 
 void LoadWeatherData()
@@ -56,7 +56,7 @@ void LoadWeatherData()
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 weather definitions. DB table `game_weather` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 weather definitions. DB table `game_weather` is empty.");
         return;
     }
 
@@ -77,19 +77,19 @@ void LoadWeatherData()
             if (wzc.data[season].rainChance > 100)
             {
                 wzc.data[season].rainChance = 25;
-                TC_LOG_ERROR("sql.sql", "Weather for zone %u season %u has wrong rain chance > 100%%", zone_id, season);
+                LOG_ERROR("sql.sql", "Weather for zone %u season %u has wrong rain chance > 100%%", zone_id, season);
             }
 
             if (wzc.data[season].snowChance > 100)
             {
                 wzc.data[season].snowChance = 25;
-                TC_LOG_ERROR("sql.sql", "Weather for zone %u season %u has wrong snow chance > 100%%", zone_id, season);
+                LOG_ERROR("sql.sql", "Weather for zone %u season %u has wrong snow chance > 100%%", zone_id, season);
             }
 
             if (wzc.data[season].stormChance > 100)
             {
                 wzc.data[season].stormChance = 25;
-                TC_LOG_ERROR("sql.sql", "Weather for zone %u season %u has wrong storm chance > 100%%", zone_id, season);
+                LOG_ERROR("sql.sql", "Weather for zone %u season %u has wrong storm chance > 100%%", zone_id, season);
             }
         }
 
@@ -99,7 +99,7 @@ void LoadWeatherData()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u weather definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u weather definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 } // namespace

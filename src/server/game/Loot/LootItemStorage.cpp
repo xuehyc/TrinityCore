@@ -94,10 +94,10 @@ void LootItemStorage::LoadStorageFromDB()
             ++count;
         } while (result->NextRow());
 
-        TC_LOG_INFO("server.loading", ">> Loaded %u stored item loots in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+        LOG_INFO("server.loading", ">> Loaded %u stored item loots in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     }
     else
-        TC_LOG_INFO("server.loading", ">> Loaded 0 stored item loots");
+        LOG_INFO("server.loading", ">> Loaded 0 stored item loots");
 
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ITEMCONTAINER_MONEY);
     result = CharacterDatabase.Query(stmt);
@@ -124,10 +124,10 @@ void LootItemStorage::LoadStorageFromDB()
             ++count;
         } while (result->NextRow());
 
-        TC_LOG_INFO("server.loading", ">> Loaded %u stored item money in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+        LOG_INFO("server.loading", ">> Loaded %u stored item money in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     }
     else
-        TC_LOG_INFO("server.loading", ">> Loaded 0 stored item money");
+        LOG_INFO("server.loading", ">> Loaded 0 stored item money");
 }
 
 bool LootItemStorage::LoadStoredLoot(Item* item, Player* player)
@@ -242,7 +242,7 @@ void LootItemStorage::AddNewStoredLoot(Loot* loot, Player* player)
         auto itr = _lootItemStore.find(loot->containerID);
         if (itr != _lootItemStore.end())
         {
-            TC_LOG_ERROR("misc", "Trying to store item loot by player: %s for container id: %u that is already in storage!", player->GetGUID().ToString().c_str(), loot->containerID);
+            LOG_ERROR("misc", "Trying to store item loot by player: %s for container id: %u that is already in storage!", player->GetGUID().ToString().c_str(), loot->containerID);
             return;
         }
     }

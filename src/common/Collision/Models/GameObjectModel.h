@@ -37,7 +37,7 @@ namespace VMAP
 class GameObject;
 struct GameObjectDisplayInfoEntry;
 
-class TC_COMMON_API GameObjectModelOwnerBase
+class WH_COMMON_API GameObjectModelOwnerBase
 {
 public:
     virtual ~GameObjectModelOwnerBase() = default;
@@ -51,7 +51,7 @@ public:
     virtual void DebugVisualizeCorner(G3D::Vector3 const& /*corner*/) const = 0;
 };
 
-class TC_COMMON_API GameObjectModel /*, public Intersectable*/
+class WH_COMMON_API GameObjectModel /*, public Intersectable*/
 {
     GameObjectModel() : phasemask(0), iInvScale(0), iScale(0), iModel(nullptr), isWmo(false) { }
 public:
@@ -93,6 +93,6 @@ private:
     bool isWmo;
 };
 
-TC_COMMON_API void LoadGameObjectModelList(std::string const& dataPath);
+WH_COMMON_API void LoadGameObjectModelList(std::string const& dataPath);
 
 #endif // _GAMEOBJECT_MODEL_H

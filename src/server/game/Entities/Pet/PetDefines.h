@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_PET_DEFINES_H
-#define TRINITYCORE_PET_DEFINES_H
+#ifndef WARHEADCORE_PET_DEFINES_H
+#define WARHEADCORE_PET_DEFINES_H
 
 #include "Define.h"
 #include "Optional.h"

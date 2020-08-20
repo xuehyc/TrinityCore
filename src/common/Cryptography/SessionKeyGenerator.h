@@ -18,8 +18,8 @@
 #include <cstring>
 #include "CryptoHash.h"
 
-#ifndef TRINITY_SESSIONKEYGENERATOR_HPP
-#define TRINITY_SESSIONKEYGENERATOR_HPP
+#ifndef WARHEAD_SESSIONKEYGENERATOR_HPP
+#define WARHEAD_SESSIONKEYGENERATOR_HPP
 
 template <typename Hash>
 class SessionKeyGenerator

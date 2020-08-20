@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_MAP_H
-#define TRINITY_MAP_H
+#ifndef WARHEAD_MAP_H
+#define WARHEAD_MAP_H
 
 #include "Define.h"
 
@@ -64,7 +64,7 @@ struct SummonPropertiesEntry;
 enum Difficulty : uint8;
 enum WeatherState : uint32;
 
-namespace Trinity { struct ObjectUpdater; }
+namespace Warhead { struct ObjectUpdater; }
 namespace VMAP { enum class ModelIgnoreFlags : uint32; }
 
 struct ScriptAction
@@ -188,7 +188,7 @@ struct PositionFullTerrainStatus
     Optional<LiquidData> liquidInfo;
 };
 
-class TC_GAME_API GridMap
+class WH_GAME_API GridMap
 {
     uint32  _flags;
     union{
@@ -317,7 +317,7 @@ inline bool CompareRespawnInfo::operator()(RespawnInfo const* a, RespawnInfo con
     return a->type < b->type;
 }
 
-class TC_GAME_API Map : public GridRefManager<NGridType>
+class WH_GAME_API Map : public GridRefManager<NGridType>
 {
     friend class MapReference;
     public:
@@ -345,7 +345,7 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
         template<class T> bool AddToMap(T *);
         template<class T> void RemoveFromMap(T *, bool);
 
-        void VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Trinity::ObjectUpdater, GridTypeMapContainer> &gridVisitor, TypeContainerVisitor<Trinity::ObjectUpdater, WorldTypeMapContainer> &worldVisitor);
+        void VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Warhead::ObjectUpdater, GridTypeMapContainer> &gridVisitor, TypeContainerVisitor<Warhead::ObjectUpdater, WorldTypeMapContainer> &worldVisitor);
         virtual void Update(uint32);
 
         float GetVisibilityRange() const { return m_VisibleDistance; }
@@ -362,13 +362,13 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
 
         bool IsRemovalGrid(float x, float y) const
         {
-            GridCoord p = Trinity::ComputeGridCoord(x, y);
+            GridCoord p = Warhead::ComputeGridCoord(x, y);
             return !getNGrid(p.x_coord, p.y_coord) || getNGrid(p.x_coord, p.y_coord)->GetGridState() == GRID_STATE_REMOVAL;
         }
         bool IsRemovalGrid(Position const& pos) const { return IsRemovalGrid(pos.GetPositionX(), pos.GetPositionY()); }
 
         bool IsGridLoaded(uint32 gridId) const { return IsGridLoaded(GridCoord(gridId % MAX_NUMBER_OF_GRIDS, gridId / MAX_NUMBER_OF_GRIDS)); }
-        bool IsGridLoaded(float x, float y) const { return IsGridLoaded(Trinity::ComputeGridCoord(x, y)); }
+        bool IsGridLoaded(float x, float y) const { return IsGridLoaded(Warhead::ComputeGridCoord(x, y)); }
         bool IsGridLoaded(Position const& pos) const { return IsGridLoaded(pos.GetPositionX(), pos.GetPositionY()); }
 
         bool GetUnloadLock(GridCoord const& p) const { return getNGrid(p.x_coord, p.y_coord)->getUnloadLock(); }
@@ -913,7 +913,7 @@ enum InstanceResetMethod
     INSTANCE_RESET_RESPAWN_DELAY
 };
 
-class TC_GAME_API InstanceMap : public Map
+class WH_GAME_API InstanceMap : public Map
 {
     public:
         InstanceMap(uint32 id, time_t, uint32 InstanceId, uint8 SpawnMode, Map* _parent);
@@ -949,7 +949,7 @@ class TC_GAME_API InstanceMap : public Map
         uint32 i_script_id;
 };
 
-class TC_GAME_API BattlegroundMap : public Map
+class WH_GAME_API BattlegroundMap : public Map
 {
     public:
         BattlegroundMap(uint32 id, time_t, uint32 InstanceId, Map* _parent, uint8 spawnMode);

@@ -61,7 +61,7 @@ public:
                 if (Player* player = itr->GetSource())
                     return player;
             }
-            TC_LOG_DEBUG("scripts", "Instance Razorfen Kraul: GetPlayerInMap, but PlayerList is empty!");
+            LOG_DEBUG("scripts", "Instance Razorfen Kraul: GetPlayerInMap, but PlayerList is empty!");
             return nullptr;
         }
 
