@@ -30,7 +30,7 @@ EndScriptData */
 #include "Player.h"
 #include "RBAC.h"
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 
 class event_commandscript : public CommandScript
 {

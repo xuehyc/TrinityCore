@@ -20,7 +20,7 @@
 #include "SmartEnum.h"
 #include <stdexcept>
 
-namespace Trinity::Impl
+namespace Warhead::Impl
 {
 
 /*******************************************************************\
@@ -52,7 +52,7 @@ WH_API_EXPORT SpawnObjectType EnumUtils<SpawnObjectType>::FromIndex(size_t index
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpawnObjectType>::ToIndex(SpawnObjectType value)
+WH_API_EXPORT size_t EnumUtils<SpawnObjectType>::ToIndex(SpawnObjectType value)
 {
     switch (value)
     {

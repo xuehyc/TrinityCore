@@ -391,9 +391,9 @@ void WardenWin::HandleCheckResult(ByteBuffer &buff)
                 WardenCheckResult const& expected = sWardenCheckMgr->GetCheckResult(id);
                 if (response != expected)
                 {
-                    TC_LOG_DEBUG("warden", "RESULT MEM_CHECK fail CheckId %u account Id %u", id, _session->GetAccountId());
-                    TC_LOG_DEBUG("warden", "Expected: %s", ByteArrayToHexStr(expected).c_str());
-                    TC_LOG_DEBUG("warden", "Got:      %s", ByteArrayToHexStr(response).c_str());
+                    LOG_DEBUG("warden", "RESULT MEM_CHECK fail CheckId %u account Id %u", id, _session->GetAccountId());
+                    LOG_DEBUG("warden", "Expected: %s", ByteArrayToHexStr(expected).c_str());
+                    LOG_DEBUG("warden", "Got:      %s", ByteArrayToHexStr(response).c_str());
                     checkFailed = id;
                     continue;
                 }

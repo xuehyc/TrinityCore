@@ -20,7 +20,7 @@
 #include "SmartEnum.h"
 #include <stdexcept>
 
-namespace Trinity::Impl
+namespace Warhead::Impl
 {
 
 /**********************************************************************\
@@ -54,7 +54,7 @@ WH_API_EXPORT WardenActions EnumUtils<WardenActions>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<WardenActions>::ToIndex(WardenActions value)
+WH_API_EXPORT size_t EnumUtils<WardenActions>::ToIndex(WardenActions value)
 {
     switch (value)
     {
@@ -108,7 +108,7 @@ WH_API_EXPORT WardenCheckType EnumUtils<WardenCheckType>::FromIndex(size_t index
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<WardenCheckType>::ToIndex(WardenCheckType value)
+WH_API_EXPORT size_t EnumUtils<WardenCheckType>::ToIndex(WardenCheckType value)
 {
     switch (value)
     {

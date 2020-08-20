@@ -55,16 +55,16 @@ class EnumUtils
         template <typename Enum>
         static EnumText ToString(Enum value) { return Warhead::Impl::EnumUtils<Enum>::ToString(value); }
         template <typename Enum>
-        static Enum FromIndex(size_t index) { return Trinity::Impl::EnumUtils<Enum>::FromIndex(index); }
+        static Enum FromIndex(size_t index) { return Warhead::Impl::EnumUtils<Enum>::FromIndex(index); }
         template <typename Enum>
-        static uint32 ToIndex(Enum value) { return Trinity::Impl::EnumUtils<Enum>::ToIndex(value);}
+        static uint32 ToIndex(Enum value) { return Warhead::Impl::EnumUtils<Enum>::ToIndex(value);}
 
         template<typename Enum>
         static bool IsValid(Enum value)
         {
             try
             {
-                Trinity::Impl::EnumUtils<Enum>::ToIndex(value);
+                Warhead::Impl::EnumUtils<Enum>::ToIndex(value);
                 return true;
             } catch (...)
             {

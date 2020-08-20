@@ -1095,7 +1095,7 @@ class WH_GAME_API ScriptMgr
         std::string _currentContext;
 };
 
-namespace Trinity::SpellScripts
+namespace Warhead::SpellScripts
 {
     template<typename T>
     using is_SpellScript = std::is_base_of<SpellScript, T>;
@@ -1107,9 +1107,9 @@ namespace Trinity::SpellScripts
 template <typename... Ts>
 class GenericSpellAndAuraScriptLoader : public SpellScriptLoader
 {
-    using SpellScriptType = typename Trinity::find_type_if_t<Trinity::SpellScripts::is_SpellScript, Ts...>;
-    using AuraScriptType = typename Trinity::find_type_if_t<Trinity::SpellScripts::is_AuraScript, Ts...>;
-    using ArgsType = typename Trinity::find_type_if_t<Trinity::is_tuple, Ts...>;
+    using SpellScriptType = typename Warhead::find_type_if_t<Warhead::SpellScripts::is_SpellScript, Ts...>;
+    using AuraScriptType = typename Warhead::find_type_if_t<Warhead::SpellScripts::is_AuraScript, Ts...>;
+    using ArgsType = typename Warhead::find_type_if_t<Warhead::is_tuple, Ts...>;
 
 public:
     GenericSpellAndAuraScriptLoader(char const* name, ArgsType&& args) : SpellScriptLoader(name), _args(std::move(args)) { }
@@ -1117,16 +1117,16 @@ public:
 private:
     SpellScript* GetSpellScript() const override
     {
-        if constexpr (!std::is_same_v<SpellScriptType, Trinity::find_type_end>)
-            return Trinity::new_from_tuple<SpellScriptType>(_args);
+        if constexpr (!std::is_same_v<SpellScriptType, Warhead::find_type_end>)
+            return Warhead::new_from_tuple<SpellScriptType>(_args);
         else
             return nullptr;
     }
 
     AuraScript* GetAuraScript() const override
     {
-        if constexpr (!std::is_same_v<AuraScriptType, Trinity::find_type_end>)
-            return Trinity::new_from_tuple<AuraScriptType>(_args);
+        if constexpr (!std::is_same_v<AuraScriptType, Warhead::find_type_end>)
+            return Warhead::new_from_tuple<AuraScriptType>(_args);
         else
             return nullptr;
     }

@@ -20,7 +20,7 @@
 #include "SmartEnum.h"
 #include <stdexcept>
 
-namespace Trinity::Impl
+namespace Warhead::Impl
 {
 
 /***************************************************************\
@@ -112,7 +112,7 @@ WH_API_EXPORT UnitFlags EnumUtils<UnitFlags>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<UnitFlags>::ToIndex(UnitFlags value)
+WH_API_EXPORT size_t EnumUtils<UnitFlags>::ToIndex(UnitFlags value)
 {
     switch (value)
     {
@@ -231,7 +231,7 @@ WH_API_EXPORT NPCFlags EnumUtils<NPCFlags>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<NPCFlags>::ToIndex(NPCFlags value)
+WH_API_EXPORT size_t EnumUtils<NPCFlags>::ToIndex(NPCFlags value)
 {
     switch (value)
     {

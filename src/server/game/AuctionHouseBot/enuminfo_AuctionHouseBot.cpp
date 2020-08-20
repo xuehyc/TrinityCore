@@ -20,7 +20,7 @@
 #include "SmartEnum.h"
 #include <stdexcept>
 
-namespace Trinity::Impl
+namespace Warhead::Impl
 {
 
 /************************************************************************\
@@ -62,7 +62,7 @@ WH_API_EXPORT AuctionQuality EnumUtils<AuctionQuality>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<AuctionQuality>::ToIndex(AuctionQuality value)
+WH_API_EXPORT size_t EnumUtils<AuctionQuality>::ToIndex(AuctionQuality value)
 {
     switch (value)
     {
@@ -108,7 +108,7 @@ WH_API_EXPORT AuctionHouseType EnumUtils<AuctionHouseType>::FromIndex(size_t ind
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<AuctionHouseType>::ToIndex(AuctionHouseType value)
+WH_API_EXPORT size_t EnumUtils<AuctionHouseType>::ToIndex(AuctionHouseType value)
 {
     switch (value)
     {

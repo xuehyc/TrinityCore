@@ -20,7 +20,7 @@
 #include "SmartEnum.h"
 #include <stdexcept>
 
-namespace Trinity::Impl
+namespace Warhead::Impl
 {
 
 /*************************************************************\
@@ -68,7 +68,7 @@ WH_API_EXPORT Races EnumUtils<Races>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<Races>::ToIndex(Races value)
+WH_API_EXPORT size_t EnumUtils<Races>::ToIndex(Races value)
 {
     switch (value)
     {
@@ -131,7 +131,7 @@ WH_API_EXPORT Classes EnumUtils<Classes>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<Classes>::ToIndex(Classes value)
+WH_API_EXPORT size_t EnumUtils<Classes>::ToIndex(Classes value)
 {
     switch (value)
     {
@@ -190,7 +190,7 @@ WH_API_EXPORT Powers EnumUtils<Powers>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<Powers>::ToIndex(Powers value)
+WH_API_EXPORT size_t EnumUtils<Powers>::ToIndex(Powers value)
 {
     switch (value)
     {
@@ -245,7 +245,7 @@ WH_API_EXPORT SpellSchools EnumUtils<SpellSchools>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellSchools>::ToIndex(SpellSchools value)
+WH_API_EXPORT size_t EnumUtils<SpellSchools>::ToIndex(SpellSchools value)
 {
     switch (value)
     {
@@ -349,7 +349,7 @@ WH_API_EXPORT SpellAttr0 EnumUtils<SpellAttr0>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr0>::ToIndex(SpellAttr0 value)
+WH_API_EXPORT size_t EnumUtils<SpellAttr0>::ToIndex(SpellAttr0 value)
 {
     switch (value)
     {
@@ -478,7 +478,7 @@ WH_API_EXPORT SpellAttr1 EnumUtils<SpellAttr1>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr1>::ToIndex(SpellAttr1 value)
+WH_API_EXPORT size_t EnumUtils<SpellAttr1>::ToIndex(SpellAttr1 value)
 {
     switch (value)
     {
@@ -607,7 +607,7 @@ WH_API_EXPORT SpellAttr2 EnumUtils<SpellAttr2>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr2>::ToIndex(SpellAttr2 value)
+WH_API_EXPORT size_t EnumUtils<SpellAttr2>::ToIndex(SpellAttr2 value)
 {
     switch (value)
     {
@@ -736,7 +736,7 @@ WH_API_EXPORT SpellAttr3 EnumUtils<SpellAttr3>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr3>::ToIndex(SpellAttr3 value)
+WH_API_EXPORT size_t EnumUtils<SpellAttr3>::ToIndex(SpellAttr3 value)
 {
     switch (value)
     {
@@ -865,7 +865,7 @@ WH_API_EXPORT SpellAttr4 EnumUtils<SpellAttr4>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr4>::ToIndex(SpellAttr4 value)
+WH_API_EXPORT size_t EnumUtils<SpellAttr4>::ToIndex(SpellAttr4 value)
 {
     switch (value)
     {
@@ -994,7 +994,7 @@ WH_API_EXPORT SpellAttr5 EnumUtils<SpellAttr5>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr5>::ToIndex(SpellAttr5 value)
+WH_API_EXPORT size_t EnumUtils<SpellAttr5>::ToIndex(SpellAttr5 value)
 {
     switch (value)
     {
@@ -1123,7 +1123,7 @@ WH_API_EXPORT SpellAttr6 EnumUtils<SpellAttr6>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr6>::ToIndex(SpellAttr6 value)
+WH_API_EXPORT size_t EnumUtils<SpellAttr6>::ToIndex(SpellAttr6 value)
 {
     switch (value)
     {
@@ -1252,7 +1252,7 @@ WH_API_EXPORT SpellAttr7 EnumUtils<SpellAttr7>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellAttr7>::ToIndex(SpellAttr7 value)
+WH_API_EXPORT size_t EnumUtils<SpellAttr7>::ToIndex(SpellAttr7 value)
 {
     switch (value)
     {
@@ -1381,7 +1381,7 @@ WH_API_EXPORT Mechanics EnumUtils<Mechanics>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<Mechanics>::ToIndex(Mechanics value)
+WH_API_EXPORT size_t EnumUtils<Mechanics>::ToIndex(Mechanics value)
 {
     switch (value)
     {
@@ -1454,7 +1454,7 @@ WH_API_EXPORT SpellDmgClass EnumUtils<SpellDmgClass>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellDmgClass>::ToIndex(SpellDmgClass value)
+WH_API_EXPORT size_t EnumUtils<SpellDmgClass>::ToIndex(SpellDmgClass value)
 {
     switch (value)
     {
@@ -1497,7 +1497,7 @@ WH_API_EXPORT SpellPreventionType EnumUtils<SpellPreventionType>::FromIndex(size
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellPreventionType>::ToIndex(SpellPreventionType value)
+WH_API_EXPORT size_t EnumUtils<SpellPreventionType>::ToIndex(SpellPreventionType value)
 {
     switch (value)
     {
@@ -1881,7 +1881,7 @@ WH_API_EXPORT Emote EnumUtils<Emote>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<Emote>::ToIndex(Emote value)
+WH_API_EXPORT size_t EnumUtils<Emote>::ToIndex(Emote value)
 {
     switch (value)
     {
@@ -2118,7 +2118,7 @@ WH_API_EXPORT SpellFamilyNames EnumUtils<SpellFamilyNames>::FromIndex(size_t ind
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellFamilyNames>::ToIndex(SpellFamilyNames value)
+WH_API_EXPORT size_t EnumUtils<SpellFamilyNames>::ToIndex(SpellFamilyNames value)
 {
     switch (value)
     {
