@@ -222,7 +222,7 @@ void WardenWin::RequestChecks()
 
         uint16 const id = *(_otherChecksIt++);
 
-        WardenCheck const& check = sWardenCheckMgr->GetCheckDataById(id);
+        WardenCheck const& check = sWardenCheckMgr->GetCheckData(id);
         if (!check.Str.empty())
         {
             buff << uint8(check.Str.size());
@@ -241,7 +241,7 @@ void WardenWin::RequestChecks()
 
     for (uint16 const id : _currentChecks)
     {
-        WardenCheck const& check = sWardenCheckMgr->GetCheckDataById(id);
+        WardenCheck const& check = sWardenCheckMgr->GetCheckData(id);
 
         WardenCheckType const type = check.Type;
         buff << uint8(type ^ xorByte);
@@ -369,7 +369,7 @@ void WardenWin::HandleCheckResult(ByteBuffer &buff)
     uint16 checkFailed = 0;
     for (uint16 const id : _currentChecks)
     {
-        WardenCheck const& check = sWardenCheckMgr->GetCheckDataById(id);
+        WardenCheck const& check = sWardenCheckMgr->GetCheckData(id);
 
         switch (check.Type)
         {
@@ -388,9 +388,12 @@ void WardenWin::HandleCheckResult(ByteBuffer &buff)
                 std::vector<uint8> response;
                 response.resize(check.Length);
                 buff.read(response.data(), response.size());
-                if (response != sWardenCheckMgr->GetCheckResultById(id))
+                WardenCheckResult const& expected = sWardenCheckMgr->GetCheckResult(id);
+                if (response != expected)
                 {
-                    LOG_DEBUG("warden", "RESULT MEM_CHECK fail CheckId %u account Id %u", id, _session->GetAccountId());
+                    TC_LOG_DEBUG("warden", "RESULT MEM_CHECK fail CheckId %u account Id %u", id, _session->GetAccountId());
+                    TC_LOG_DEBUG("warden", "Expected: %s", ByteArrayToHexStr(expected).c_str());
+                    TC_LOG_DEBUG("warden", "Got:      %s", ByteArrayToHexStr(response).c_str());
                     checkFailed = id;
                     continue;
                 }
@@ -421,7 +424,7 @@ void WardenWin::HandleCheckResult(ByteBuffer &buff)
                 if (Lua_Result != 0)
                 {
                     uint8 luaStrLen = buff.read<uint8>();
-                    if (luaStrLen != 0)
+                    if (luaStrLen == 0)
                     {
                         std::string str;
                         str.resize(luaStrLen);
@@ -450,7 +453,7 @@ void WardenWin::HandleCheckResult(ByteBuffer &buff)
                 std::vector<uint8> result;
                 result.resize(Warhead::Crypto::SHA1::DIGEST_LENGTH);
                 buff.read(result.data(), result.size());
-                if (result != sWardenCheckMgr->GetCheckResultById(id)) // SHA1
+                if (result != sWardenCheckMgr->GetCheckResult(id)) // SHA1
                 {
                     LOG_DEBUG("warden", "RESULT MPQ_CHECK fail, CheckId %u account Id %u", id, _session->GetAccountId());
                     checkFailed = id;
@@ -467,7 +470,7 @@ void WardenWin::HandleCheckResult(ByteBuffer &buff)
 
     if (checkFailed > 0)
     {
-        WardenCheck const& check = sWardenCheckMgr->GetCheckDataById(checkFailed);
+        WardenCheck const& check = sWardenCheckMgr->GetCheckData(checkFailed);
         char const* penalty = ApplyPenalty(&check);
         LOG_WARN("warden", "%s failed Warden check %u (%s). Action: %s", _session->GetPlayerInfo().c_str(), checkFailed, EnumUtils::ToConstant(check.Type), penalty);
     }
@@ -475,4 +478,32 @@ void WardenWin::HandleCheckResult(ByteBuffer &buff)
     // Set hold off timer, minimum timer should at least be 1 second
     uint32 holdOff = sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_CHECK_HOLDOFF);
     _checkTimer = (holdOff < 1 ? 1 : holdOff) * IN_MILLISECONDS;
+}
+
+size_t WardenWin::DEBUG_ForceSpecificChecks(std::vector<uint16> const& checks)
+{
+    std::vector<uint16>::iterator memChecksIt = _memChecks.begin();
+    std::vector<uint16>::iterator otherChecksIt = _otherChecks.begin();
+
+    size_t n = 0;
+    for (uint16 check : checks)
+    {
+        if (auto it = std::find(memChecksIt, _memChecks.end(), check); it != _memChecks.end())
+        {
+            std::iter_swap(it, memChecksIt);
+            ++memChecksIt;
+            ++n;
+        }
+        else if (auto it = std::find(otherChecksIt, _otherChecks.end(), check); it != _otherChecks.end())
+        {
+            std::iter_swap(it, otherChecksIt);
+            ++otherChecksIt;
+            ++n;
+        }
+    }
+
+    _memChecksIt = _memChecks.begin();
+    _otherChecksIt = _otherChecks.begin();
+
+    return n;
 }

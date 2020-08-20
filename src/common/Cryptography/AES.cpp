@@ -39,7 +39,7 @@ void Warhead::Crypto::AES::Init(Key const& key)
 
 bool Warhead::Crypto::AES::Process(IV const& iv, uint8* data, size_t length, Tag& tag)
 {
-    ASSERT(length <= std::numeric_limits<int>::max());
+    ASSERT(length <= static_cast<size_t>(std::numeric_limits<int>::max()));
     int len = static_cast<int>(length);
     if (!EVP_CipherInit_ex(_ctx, nullptr, nullptr, nullptr, iv.data(), -1))
         return false;
