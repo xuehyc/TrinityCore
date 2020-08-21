@@ -425,56 +425,60 @@ class spell_item_brittle_armor : public SpellScript
     }
 };
 
-// 64411 - Blessing of Ancient Kings (Val'anyr, Hammer of Ancient Kings)
 enum BlessingOfAncientKings
 {
     SPELL_PROTECTION_OF_ANCIENT_KINGS   = 64413
 };
-
-class spell_item_blessing_of_ancient_kings : public AuraScript
+class spell_item_blessing_of_ancient_kings : public SpellScriptLoader
 {
-    PrepareAuraScript(spell_item_blessing_of_ancient_kings);
+    public:
+        spell_item_blessing_of_ancient_kings() : SpellScriptLoader("spell_item_blessing_of_ancient_kings") { }
 
-    bool Validate(SpellInfo const* /*spellInfo*/) override
-    {
-        return ValidateSpellInfo({ SPELL_PROTECTION_OF_ANCIENT_KINGS });
-    }
-
-    bool CheckProc(ProcEventInfo& eventInfo)
-    {
-        return eventInfo.GetProcTarget() != nullptr;
-    }
-
-    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-    {
-        PreventDefaultAction();
-
-        HealInfo* healInfo = eventInfo.GetHealInfo();
-        if (!healInfo || !healInfo->GetHeal())
-            return;
-
-        int32 absorb = int32(CalculatePct(healInfo->GetHeal(), 15.0f));
-        if (AuraEffect* protEff = eventInfo.GetProcTarget()->GetAuraEffect(SPELL_PROTECTION_OF_ANCIENT_KINGS, 0, eventInfo.GetActor()->GetGUID()))
+        class spell_item_blessing_of_ancient_kings_AuraScript : public AuraScript
         {
-            // The shield can grow to a maximum size of 20,000 damage absorbtion
-            protEff->SetAmount(std::min<int32>(protEff->GetAmount() + absorb, 20000));
+            PrepareAuraScript(spell_item_blessing_of_ancient_kings_AuraScript);
 
-            // Refresh and return to prevent replacing the aura
-            protEff->GetBase()->RefreshDuration();
-        }
-        else
+            bool Validate(SpellInfo const* /*spellInfo*/) override
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_PROTECTION_OF_ANCIENT_KINGS))
+                    return false;
+                return true;
+            }
+
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                return eventInfo.GetProcTarget() != nullptr;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+
+                int32 absorb = int32(CalculatePct(eventInfo.GetHealInfo()->GetHeal(), 15.0f));
+                // All heals contribute to one bubble
+                if (AuraEffect* protEff = eventInfo.GetProcTarget()->GetAuraEffect(SPELL_PROTECTION_OF_ANCIENT_KINGS, 0/*, eventInfo.GetActor()->GetGUID()*/))
+                {
+                    // The shield can grow to a maximum size of 20,000 damage absorbtion
+                    protEff->SetAmount(std::min<int32>(protEff->GetAmount() + absorb, 20000));
+
+                    // Refresh and return to prevent replacing the aura
+                    protEff->GetBase()->RefreshDuration();
+                }
+                else
+                    GetTarget()->CastCustomSpell(SPELL_PROTECTION_OF_ANCIENT_KINGS, SPELLVALUE_BASE_POINT0, absorb, eventInfo.GetProcTarget(), true, NULL, aurEff);
+            }
+
+            void Register() override
+            {
+                DoCheckProc += AuraCheckProcFn(spell_item_blessing_of_ancient_kings_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_item_blessing_of_ancient_kings_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const override
         {
-            CastSpellExtraArgs args(aurEff);
-            args.AddSpellBP0(absorb);
-            GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_PROTECTION_OF_ANCIENT_KINGS, args);
+            return new spell_item_blessing_of_ancient_kings_AuraScript();
         }
-    }
-
-    void Register() override
-    {
-        DoCheckProc += AuraCheckProcFn(spell_item_blessing_of_ancient_kings::CheckProc);
-        OnEffectProc += AuraEffectProcFn(spell_item_blessing_of_ancient_kings::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-    }
 };
 
 // 64415 Val'anyr Hammer of Ancient Kings - Equip Effect
