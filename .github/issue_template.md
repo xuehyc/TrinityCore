@@ -1,42 +1,31 @@
-<!--- (**********************************)
-      (** Fill in the following fields **)
-      (**********************************) --->
+#### CURRENT BEHAVIOUR:
+<!-- Describe the bug in detail. Database to link spells, NPCs, quests etc https://wowgaming.altervista.org/aowow/ -->
 
-**Description:**
+#### EXPECTED BEHAVIOUR:
+<!-- Describe how it should be working without the bug. -->
 
-CHANGEME Description of the problem or issue here.
+#### STEPS TO REPRODUCE THE PROBLEM:
+1. 
+2. 
+3. 
+<!-- Describe precisely how to reproduce the bug so we can fix it or confirm its existence:
+ - Which commands to use? Which NPC to teleport to?
+ - Do we need to have debug flags on Cmake?
+ - Do we need to look at the console while the bug happens?
+ - Other steps
+-->
 
-**Current behaviour:**
+#### EXTRA INFO:
+<!--
+Any information that can help the developers to identify and fix the issue should be put here.
+Examples:
+- the code line(s) that cause the issue
+- does this feature work in other server appplications (e.g. CMaNGOS, TrinityCore, AzerothCore, etc...) ?
+-->
 
-CHANGEME Tell us what happens.
-If this is a crash, post the crashlog (upload to https://gist.github.com/).
+#### HASH/COMMIT:
+<!-- Copy the first line of the `worldserver`, `authserver` startup.
+For example: WarheadCore rev. 08a7a4639d18 2020-08-22 04:15:15 +0700 (logs branch) (Win64, RelWithDebInfo, Dynamic) (worldserver-daemon) -->
 
-**Expected behaviour:**
-
-CHANGEME Tell us what should happen instead.
-
-**Steps to reproduce the problem:**
-
-1. CHANGEME Step 1 include entries of affected creatures / items / quests with a link to the relevant wowhead page.  
-2. Step 2
-3. Step 3
-
-**Branch(es):**
-
-Writing server debug on console will return the best results for reporting bugs (3.3.5a for now)
-CHANGEME 3.3.5, master or both
-
-**TC rev. hash/commit:** 
-
-CHANGEME Copy the first line of the `worldserver`, `authserver` or `bnetserver` startup.
-For example: TrinityCore rev. 0000000000 2000-01-09 11:31:41 +0100 (my branch) (Win64, RelWithDebInfo, Static) (bnetserver)
-
-**TDB version:**  CHANGEME Version of the TrinityCore database
-
-**Operating system:** CHANGEME OS
-
-
-<!--- Notes
-- This template is for problem reports. For other types of report, edit it accordingly.
-- For fixes containing C++ changes, create a Pull Request.
---->
+#### OPERATING SYSTEM:
+<!-- Windows 7/10, Debian 8/9/10, Ubuntu 16/18 etc... -->
