@@ -92,10 +92,6 @@ target_link_libraries(Foundation
   PRIVATE
     warhead-dependency-interface)
 
-target_compile_definitions(Foundation
-  PUBLIC
-    $<$<CONFIG:RelWithDebInfo>:_DEBUG>)
-
 target_compile_features(Foundation
   PUBLIC
     cxx_defaulted_move_initializers)
