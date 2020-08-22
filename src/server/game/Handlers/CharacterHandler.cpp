@@ -694,7 +694,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
     {
         std::string dump;
         if (PlayerDumpWriter().GetDump(guid.GetCounter(), dump))
-            sLog->outCharDump(dump.c_str(), accountId, guid.GetRawValue(), name.c_str());
+            LOG_CHAR_DUMP(dump, accountId, guid.GetRawValue(), name);
     }
 
     sCalendarMgr->RemoveAllPlayerEventsAndInvites(guid);

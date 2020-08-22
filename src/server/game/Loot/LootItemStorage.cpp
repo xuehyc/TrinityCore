@@ -128,6 +128,8 @@ void LootItemStorage::LoadStorageFromDB()
     }
     else
         LOG_INFO("server.loading", ">> Loaded 0 stored item money");
+
+    LOG_INFO("server.loading", "");
 }
 
 bool LootItemStorage::LoadStoredLoot(Item* item, Player* player)

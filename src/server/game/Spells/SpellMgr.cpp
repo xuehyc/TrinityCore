@@ -971,6 +971,7 @@ void SpellMgr::LoadSpellRanks()
     while (!finished);
 
     LOG_INFO("server.loading", ">> Loaded %u spell rank records in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellRequired()
@@ -1031,7 +1032,7 @@ void SpellMgr::LoadSpellRequired()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u spell required records in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellLearnSkills()
@@ -1078,6 +1079,7 @@ void SpellMgr::LoadSpellLearnSkills()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u Spell Learn Skills from DBC in %u ms", dbc_count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellLearnSpells()
@@ -1179,6 +1181,7 @@ void SpellMgr::LoadSpellLearnSpells()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u spell learn spells + %u found in DBC in %u ms", count, dbc_count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellTargetPositions()
@@ -1281,6 +1284,7 @@ void SpellMgr::LoadSpellTargetPositions()
     }*/
 
     LOG_INFO("server.loading", ">> Loaded %u spell teleport coordinates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellGroups()
@@ -1360,6 +1364,7 @@ void SpellMgr::LoadSpellGroups()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u spell group definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellGroupStackRules()
@@ -1512,6 +1517,7 @@ void SpellMgr::LoadSpellGroupStackRules()
     }
 
     LOG_INFO("server.loading", ">> Parsed %u SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT stack rules in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellProcs()
@@ -1663,6 +1669,7 @@ void SpellMgr::LoadSpellProcs()
         LOG_INFO("server.loading", ">> Loaded 0 spell proc conditions and data. DB table `spell_proc` is empty.");
 
     LOG_INFO("server.loading", ">> Loaded %u spell proc conditions and data in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 
     // Define can trigger auras
     bool isTriggerAura[TOTAL_AURAS];
@@ -1876,6 +1883,7 @@ void SpellMgr::LoadSpellProcs()
     }
 
     LOG_INFO("server.loading", ">> Generated spell proc data for %u spells in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellBonuses()
@@ -1915,6 +1923,7 @@ void SpellMgr::LoadSpellBonuses()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u extra spell bonus data in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellThreats()
@@ -1954,6 +1963,7 @@ void SpellMgr::LoadSpellThreats()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u SpellThreatEntries in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSkillLineAbilityMap()
@@ -1975,6 +1985,7 @@ void SpellMgr::LoadSkillLineAbilityMap()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u SkillLineAbility MultiMap Data in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellPetAuras()
@@ -2035,6 +2046,7 @@ void SpellMgr::LoadSpellPetAuras()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u spell pet auras in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 // Fill custom data about enchancments
@@ -2075,6 +2087,7 @@ void SpellMgr::LoadEnchantCustomAttr()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u custom enchant attributes in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellEnchantProcData()
@@ -2117,6 +2130,7 @@ void SpellMgr::LoadSpellEnchantProcData()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u enchant proc data definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellLinked()
@@ -2176,6 +2190,7 @@ void SpellMgr::LoadSpellLinked()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u linked spells in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadPetLevelupSpellMap()
@@ -2232,6 +2247,7 @@ void SpellMgr::LoadPetLevelupSpellMap()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u pet levelup and default spells for %u families in %u ms", count, family_count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 bool LoadPetDefaultSpells_helper(CreatureTemplate const* cInfo, PetDefaultSpellsEntry& petDefSpells)
@@ -2315,6 +2331,7 @@ void SpellMgr::LoadPetDefaultSpells()
     }
 
     LOG_INFO("server.loading", ">> Loaded addition spells for %u pet spell data entries in %u ms", countData, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 
     LOG_INFO("server.loading", "Loading summonable creature templates...");
     oldMSTime = getMSTime();
@@ -2358,6 +2375,7 @@ void SpellMgr::LoadPetDefaultSpells()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u summonable creature templates in %u ms", countCreature, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellAreas()
@@ -2556,6 +2574,7 @@ void SpellMgr::LoadSpellAreas()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u spell area requirements in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellInfoStore()
@@ -2585,6 +2604,7 @@ void SpellMgr::LoadSpellInfoStore()
 
 
     LOG_INFO("server.loading", ">> Loaded SpellInfo store in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::UnloadSpellInfoStore()
@@ -2949,6 +2969,7 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
     }
 
     LOG_INFO("server.loading", ">> Loaded SpellInfo custom attributes in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 inline void ApplySpellFix(std::initializer_list<uint32> spellIds, void(*fix)(SpellInfo*))
@@ -5010,6 +5031,7 @@ void SpellMgr::LoadSpellInfoCorrections()
         entry->Type[2] = LOCK_KEY_NONE;
 
     LOG_INFO("server.loading", ">> Loaded SpellInfo corrections in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellInfoSpellSpecificAndAuraState()
@@ -5027,6 +5049,7 @@ void SpellMgr::LoadSpellInfoSpellSpecificAndAuraState()
     }
 
     LOG_INFO("server.loading", ">> Loaded SpellInfo SpellSpecific and AuraState in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellInfoDiminishing()
@@ -5042,6 +5065,7 @@ void SpellMgr::LoadSpellInfoDiminishing()
     }
 
     LOG_INFO("server.loading", ">> Loaded SpellInfo diminishing infos in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void SpellMgr::LoadSpellInfoImmunities()
@@ -5057,4 +5081,5 @@ void SpellMgr::LoadSpellInfoImmunities()
     }
 
     LOG_INFO("server.loading", ">> Loaded SpellInfo immunity infos in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }

@@ -2377,6 +2377,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaList()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u achievement criteria in %u ms.", loaded, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void AchievementGlobalMgr::LoadAchievementReferenceList()
@@ -2406,6 +2407,7 @@ void AchievementGlobalMgr::LoadAchievementReferenceList()
         const_cast<AchievementEntry*>(achievement)->InstanceID = 631;    // Correct map requirement (currently has Ulduar)
 
     LOG_INFO("server.loading", ">> Loaded %u achievement references in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void AchievementGlobalMgr::LoadAchievementCriteriaData()
@@ -2540,6 +2542,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaData()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u additional achievement criteria data in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void AchievementGlobalMgr::LoadCompletedAchievements()
@@ -2559,6 +2562,7 @@ void AchievementGlobalMgr::LoadCompletedAchievements()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 realm first completed achievements. DB table `character_achievement` is empty.");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -2584,6 +2588,7 @@ void AchievementGlobalMgr::LoadCompletedAchievements()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %lu realm first completed achievements in %u ms.", (unsigned long)_allCompletedAchievements.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void AchievementGlobalMgr::LoadRewards()
@@ -2598,6 +2603,7 @@ void AchievementGlobalMgr::LoadRewards()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 achievement rewards. DB table `achievement_reward` is empty.");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -2699,6 +2705,7 @@ void AchievementGlobalMgr::LoadRewards()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u achievement rewards in %u ms.", uint32(m_achievementRewards.size()), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void AchievementGlobalMgr::LoadRewardLocales()
@@ -2713,6 +2720,7 @@ void AchievementGlobalMgr::LoadRewardLocales()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 achievement reward locale strings.  DB table `achievement_reward_locale` is empty.");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -2739,6 +2747,7 @@ void AchievementGlobalMgr::LoadRewardLocales()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u achievement reward locale strings in %u ms.", uint32(m_achievementRewardLocales.size()), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 AchievementEntry const* AchievementGlobalMgr::GetAchievement(uint32 achievementId) const

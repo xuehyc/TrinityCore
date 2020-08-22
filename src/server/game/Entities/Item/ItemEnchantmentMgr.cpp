@@ -76,6 +76,8 @@ void LoadRandomEnchantmentsTable()
     }
     else
         LOG_INFO("server.loading", ">> Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
+
+    LOG_INFO("server.loading", "");
 }
 
 uint32 GetItemEnchantMod(int32 entry)

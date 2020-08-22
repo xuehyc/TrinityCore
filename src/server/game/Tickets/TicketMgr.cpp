@@ -326,7 +326,7 @@ void TicketMgr::LoadTickets()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 GM tickets. DB table `gm_ticket` is empty!");
-
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -353,7 +353,7 @@ void TicketMgr::LoadTickets()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u GM tickets in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
+    LOG_INFO("server.loading", "");
 }
 
 void TicketMgr::LoadSurveys()
@@ -366,7 +366,7 @@ void TicketMgr::LoadSurveys()
         _lastSurveyId = (*result)[0].GetUInt32();
 
     LOG_INFO("server.loading", ">> Loaded GM Survey count from database in %u ms", GetMSTimeDiffToNow(oldMSTime));
-
+    LOG_INFO("server.loading", "");
 }
 
 void TicketMgr::AddTicket(GmTicket* ticket)

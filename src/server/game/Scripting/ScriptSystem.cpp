@@ -159,6 +159,7 @@ void SystemMgr::LoadScriptSplineChains()
         } while (resultWP->NextRow());
 
         LOG_INFO("server.loading", ">> Loaded spline chain data for %u chains, consisting of %u splines with %u waypoints in %u ms", chainCount, splineCount, wpCount, GetMSTimeDiffToNow(oldMSTime));
+        LOG_INFO("server.loading", "");
     }
 }
 

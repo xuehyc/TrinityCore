@@ -613,6 +613,7 @@ void BattlegroundMgr::LoadBattlegroundTemplates()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u battlegrounds in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void BattlegroundMgr::InitAutomaticArenaPointDistribution()
@@ -917,6 +918,7 @@ void BattlegroundMgr::LoadBattleMastersEntry()
     CheckBattleMasters();
 
     LOG_INFO("server.loading", ">> Loaded %u battlemaster entries in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void BattlegroundMgr::CheckBattleMasters()

@@ -89,6 +89,7 @@ void SmartWaypointMgr::LoadFromDB()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u SmartAI waypoint paths (total %u waypoints) in %u ms", count, total, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 WaypointPath const* SmartWaypointMgr::GetPath(uint32 id)
@@ -371,6 +372,7 @@ void SmartAIMgr::LoadSmartAIFromDB()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u SmartAI scripts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 
     UnLoadHelperStores();
 }

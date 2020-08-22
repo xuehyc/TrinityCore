@@ -23,7 +23,6 @@
 * authentication server
 */
 
-#include "AppenderDB.h"
 #include "AuthSocketMgr.h"
 #include "Banner.h"
 #include "Config.h"
@@ -104,12 +103,12 @@ int main(int argc, char** argv)
                                  std::vector<std::string>(argv, argv + argc),
                                  configError))
     {
-        printf("Error in config file: %s\n", configError.c_str());
+        SYS_LOG_ERROR("Error in config file: %s\n", configError.c_str());
         return 1;
     }
 
-    sLog->RegisterAppender<AppenderDB>();
-    sLog->Initialize(nullptr);
+    // Init all logs
+    sLog->Initialize();
 
     Warhead::Banner::Show("authserver",
         [](char const* text)
@@ -118,9 +117,9 @@ int main(int argc, char** argv)
         },
         []()
         {
-            LOG_INFO("server.authserver", "Using configuration file %s.", sConfigMgr->GetFilename().c_str());
-            LOG_INFO("server.authserver", "Using SSL version: %s (library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
-            LOG_INFO("server.authserver", "Using Boost version: %i.%i.%i", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
+            LOG_INFO("server.authserver", "> Using configuration file:       %s", sConfigMgr->GetFilename().c_str());
+            LOG_INFO("server.authserver", "> Using SSL version:              %s (library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
+            LOG_INFO("server.authserver", "> Using Boost version:            %i.%i.%i", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
         }
     );
 
@@ -244,7 +243,8 @@ bool StartDB()
         return false;
 
     LOG_INFO("server.authserver", "Started auth database connection pool.");
-    sLog->SetRealmId(0); // Enables DB appenders when realm is set.
+    LOG_INFO("server.authserver", "");
+
     return true;
 }
 

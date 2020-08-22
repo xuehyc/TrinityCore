@@ -100,6 +100,7 @@ void LoadWeatherData()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u weather definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 } // namespace

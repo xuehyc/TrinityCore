@@ -774,7 +774,7 @@ bool LootTemplate::isReference(uint32 id)
         if ((*ieItr)->itemid == id && (*ieItr)->reference > 0)
             return true;
 
-    return false;//not found or not reference
+    return false; // not found or not reference
 }
 
 void LoadLootTemplates_Creature()
@@ -812,6 +812,8 @@ void LoadLootTemplates_Creature()
         LOG_INFO("server.loading", ">> Loaded %u creature loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         LOG_INFO("server.loading", ">> Loaded 0 creature loot templates. DB table `creature_loot_template` is empty");
+
+    LOG_INFO("server.loading", "");
 }
 
 void LoadLootTemplates_Disenchant()
@@ -845,6 +847,8 @@ void LoadLootTemplates_Disenchant()
         LOG_INFO("server.loading", ">> Loaded %u disenchanting loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         LOG_INFO("server.loading", ">> Loaded 0 disenchanting loot templates. DB table `disenchant_loot_template` is empty");
+
+    LOG_INFO("server.loading", "");
 }
 
 void LoadLootTemplates_Fishing()
@@ -868,6 +872,8 @@ void LoadLootTemplates_Fishing()
         LOG_INFO("server.loading", ">> Loaded %u fishing loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         LOG_INFO("server.loading", ">> Loaded 0 fishing loot templates. DB table `fishing_loot_template` is empty");
+
+    LOG_INFO("server.loading", "");
 }
 
 void LoadLootTemplates_Gameobject()
@@ -902,6 +908,8 @@ void LoadLootTemplates_Gameobject()
         LOG_INFO("server.loading", ">> Loaded %u gameobject loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         LOG_INFO("server.loading", ">> Loaded 0 gameobject loot templates. DB table `gameobject_loot_template` is empty");
+
+    LOG_INFO("server.loading", "");
 }
 
 void LoadLootTemplates_Item()
@@ -926,6 +934,8 @@ void LoadLootTemplates_Item()
         LOG_INFO("server.loading", ">> Loaded %u item loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         LOG_INFO("server.loading", ">> Loaded 0 item loot templates. DB table `item_loot_template` is empty");
+
+    LOG_INFO("server.loading", "");
 }
 
 void LoadLootTemplates_Milling()
@@ -955,6 +965,8 @@ void LoadLootTemplates_Milling()
         LOG_INFO("server.loading", ">> Loaded %u milling loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         LOG_INFO("server.loading", ">> Loaded 0 milling loot templates. DB table `milling_loot_template` is empty");
+
+    LOG_INFO("server.loading", "");
 }
 
 void LoadLootTemplates_Pickpocketing()
@@ -989,6 +1001,8 @@ void LoadLootTemplates_Pickpocketing()
         LOG_INFO("server.loading", ">> Loaded %u pickpocketing loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         LOG_INFO("server.loading", ">> Loaded 0 pickpocketing loot templates. DB table `pickpocketing_loot_template` is empty");
+
+    LOG_INFO("server.loading", "");
 }
 
 void LoadLootTemplates_Prospecting()
@@ -1018,6 +1032,8 @@ void LoadLootTemplates_Prospecting()
         LOG_INFO("server.loading", ">> Loaded %u prospecting loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         LOG_INFO("server.loading", ">> Loaded 0 prospecting loot templates. DB table `prospecting_loot_template` is empty");
+
+    LOG_INFO("server.loading", "");
 }
 
 void LoadLootTemplates_Mail()
@@ -1042,6 +1058,8 @@ void LoadLootTemplates_Mail()
         LOG_INFO("server.loading", ">> Loaded %u mail loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         LOG_INFO("server.loading", ">> Loaded 0 mail loot templates. DB table `mail_loot_template` is empty");
+
+    LOG_INFO("server.loading", "");
 }
 
 void LoadLootTemplates_Skinning()
@@ -1076,6 +1094,8 @@ void LoadLootTemplates_Skinning()
         LOG_INFO("server.loading", ">> Loaded %u skinning loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         LOG_INFO("server.loading", ">> Loaded 0 skinning loot templates. DB table `skinning_loot_template` is empty");
+
+    LOG_INFO("server.loading", "");
 }
 
 void LoadLootTemplates_Spell()
@@ -1116,6 +1136,8 @@ void LoadLootTemplates_Spell()
         LOG_INFO("server.loading", ">> Loaded %u spell loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         LOG_INFO("server.loading", ">> Loaded 0 spell loot templates. DB table `spell_loot_template` is empty");
+
+    LOG_INFO("server.loading", "");
 }
 
 void LoadLootTemplates_Reference()
@@ -1144,6 +1166,7 @@ void LoadLootTemplates_Reference()
     LootTemplates_Reference.ReportUnusedIds(lootIdSet);
 
     LOG_INFO("server.loading", ">> Loaded refence loot templates in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void LoadLootTables()

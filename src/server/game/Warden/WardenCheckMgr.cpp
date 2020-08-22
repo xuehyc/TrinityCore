@@ -16,7 +16,6 @@
  */
 
 #include "WardenCheckMgr.h"
-
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Errors.h"
@@ -36,6 +35,7 @@ void WardenCheckMgr::LoadWardenChecks()
     if (!sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
     {
         LOG_INFO("warden", ">> Warden disabled, loading checks skipped.");
+        LOG_INFO("warden", "");
         return;
     }
 
@@ -101,6 +101,7 @@ void WardenCheckMgr::LoadWardenChecks()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u warden checks in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void WardenCheckMgr::LoadWardenOverrides()
@@ -111,6 +112,7 @@ void WardenCheckMgr::LoadWardenOverrides()
     if (!sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
     {
         LOG_INFO("warden", ">> Warden disabled, loading check overrides skipped.");
+        LOG_INFO("warden", "");
         return;
     }
 
@@ -147,6 +149,7 @@ void WardenCheckMgr::LoadWardenOverrides()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u warden action overrides in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 WardenCheckMgr* WardenCheckMgr::instance()

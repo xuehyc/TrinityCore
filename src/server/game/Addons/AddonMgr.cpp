@@ -93,6 +93,8 @@ void LoadFromDB()
 
         LOG_INFO("server.loading", ">> Loaded %u banned addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     }
+
+    LOG_INFO("server.loading", "");
 }
 
 void SaveAddon(std::string const& name, uint32 publicKeyCrc)

@@ -95,6 +95,7 @@ void LoadGameObjectModelList(std::string const& dataPath)
 
     fclose(model_list_file);
     VMAP_INFO_LOG("server.loading", ">> Loaded %u GameObject models in %u ms", uint32(model_list.size()), GetMSTimeDiffToNow(oldMSTime));
+    VMAP_INFO_LOG("server.loading", "");
 }
 
 GameObjectModel::~GameObjectModel()

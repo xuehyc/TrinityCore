@@ -20,7 +20,6 @@
 /// \file
 
 #include "Common.h"
-#include "AppenderDB.h"
 #include "AsyncAcceptor.h"
 #include "Banner.h"
 #include "BattlegroundMgr.h"
@@ -142,15 +141,14 @@ extern int main(int argc, char** argv)
                                  std::vector<std::string>(argv, argv + argc),
                                  configError))
     {
-        printf("Error in config file: %s\n", configError.c_str());
+        SYS_LOG_ERROR("Error in config file: %s\n", configError.c_str());
         return 1;
     }
 
     std::shared_ptr<Warhead::Asio::IoContext> ioContext = std::make_shared<Warhead::Asio::IoContext>();
 
-    sLog->RegisterAppender<AppenderDB>();
-    // If logs are supposed to be handled async then we need to pass the IoContext into the Log singleton
-    sLog->Initialize(sConfigMgr->GetBoolDefault("Log.Async.Enable", false) ? ioContext.get() : nullptr);
+    // Init all logs
+    sLog->Initialize();
 
     Warhead::Banner::Show("worldserver-daemon",
         [](char const* text)
@@ -159,9 +157,9 @@ extern int main(int argc, char** argv)
         },
         []()
         {
-            LOG_INFO("server.worldserver", "Using configuration file %s.", sConfigMgr->GetFilename().c_str());
-            LOG_INFO("server.worldserver", "Using SSL version: %s (library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
-            LOG_INFO("server.worldserver", "Using Boost version: %i.%i.%i", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
+            LOG_INFO("server.worldserver", "> Using configuration file:       %s", sConfigMgr->GetFilename().c_str());
+            LOG_INFO("server.worldserver", "> Using SSL version:              %s (library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
+            LOG_INFO("server.worldserver", "> Using Boost version:            %i.%i.%i", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
         }
     );
 
@@ -343,8 +341,6 @@ extern int main(int argc, char** argv)
 
     // Shutdown starts here
     threadPool.reset();
-
-    sLog->SetSynchronous();
 
     sScriptMgr->OnShutdown();
 
@@ -581,7 +577,8 @@ bool StartDB()
         return false;
     }
 
-    LOG_INFO("server.worldserver", "Realm running as realm ID %d", realm.Id.Realm);
+    LOG_INFO("server.worldserver", "Loading world info...");
+    LOG_INFO("server.worldserver", "> Realm running as realm ID %d", realm.Id.Realm);
 
     ///- Clean the database before starting
     ClearOnlineAccounts();
@@ -591,7 +588,8 @@ bool StartDB()
 
     sWorld->LoadDBVersion();
 
-    LOG_INFO("server.worldserver", "Using World DB: %s", sWorld->GetDBVersion());
+    LOG_INFO("server.worldserver", "> Using World DB: %s", sWorld->GetDBVersion());
+    LOG_INFO("server.worldserver", "");
     return true;
 }
 

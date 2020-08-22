@@ -39,7 +39,10 @@ void IpLocationStore::Load()
 
     std::string databaseFilePath = sConfigMgr->GetStringDefault("IPLocationFile", "");
     if (databaseFilePath.empty())
+    {
+        LOG_INFO("server.loading", "");
         return;
+    }
 
     // Check if file exists
     std::ifstream databaseFile(databaseFilePath);
@@ -95,6 +98,7 @@ void IpLocationStore::Load()
     databaseFile.close();
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " ip location entries.", _ipLocationStore.size());
+    LOG_INFO("server.loading", "");
 }
 
 IpLocationRecord const* IpLocationStore::GetLocationRecord(std::string const& ipAddress) const

@@ -374,6 +374,7 @@ void PlayerDump::InitializeTables()
     ASSERT(CharacterTables.size() == DUMP_TABLE_COUNT);
 
     LOG_INFO("server.loading", ">> Initialized tables for PlayerDump in %u ms.", GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 // Low level functions

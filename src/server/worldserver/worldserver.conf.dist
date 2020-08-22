@@ -3816,172 +3816,217 @@ AuctionHouseBot.Buyer.Recheck.Interval = 20
 ###################################################################################################
 
 ###################################################################################################
-# LOGGING SYSTEM SETTINGS
 #
-#  Appender config values: Given an appender "name"
-#    Appender.name
-#        Description: Defines 'where to log'.
-#        Format:      Type,LogLevel,Flags,optional1,optional2,optional3
+#  LOGGING SYSTEM SETTINGS
 #
+#  Log channel config values: Given an channel "name"
+#    Log.Channel.name
+#        Description: Defines 'where to log'
+#        Format:      Type,Times,Pattern,Optional1,Optional2,Optional3,Optional4,Optional5
+#                       
 #                     Type
-#                         0 - (None)
-#                         1 - (Console)
-#                         2 - (File)
-#                         3 - (DB)
+#                       1 - (Console) (is unique)
+#                       2 - (File)
+#                              
+#                    Times (all types)
+#                       utc: Rotation strategy is based on UTC time (default).
+#                       local: Rotation strategy is based on local time.   
 #
-#                     LogLevel
-#                         0 - (Disabled)
-#                         1 - (Trace)
-#                         2 - (Debug)
-#                         3 - (Info)
-#                         4 - (Warn)
-#                         5 - (Error)
-#                         6 - (Fatal)
+#                    Pattern (all type)
+#                       %s - message source
+#                       %t - message text
+#                       %l - message priority level (1 .. 7)
+#                       %p - message priority (Fatal, Critical, Error, Warning, Notice, Information, Debug, Trace)
+#                       %q - abbreviated message priority (F, C, E, W, N, I, D, T)
+#                       %P - message process identifier
+#                       %T - message thread name
+#                       %I - message thread identifier (numeric)
+#                       %O - message thread OS identifier (numeric)
+#                       %N - node or host name
+#                       %U - message source file path (empty string if not set)
+#                       %u - message source line number (0 if not set)
+#                       %w - message date/time abbreviated weekday (Mon, Tue, ...)
+#                       %W - message date/time full weekday (Monday, Tuesday, ...)
+#                       %b - message date/time abbreviated month (Jan, Feb, ...)
+#                       %B - message date/time full month (January, February, ...)
+#                       %d - message date/time zero-padded day of month (01 .. 31)
+#                       %e - message date/time day of month (1 .. 31)
+#                       %f - message date/time space-padded day of month ( 1 .. 31)
+#                       %m - message date/time zero-padded month (01 .. 12)
+#                       %n - message date/time month (1 .. 12)
+#                       %o - message date/time space-padded month ( 1 .. 12)
+#                       %y - message date/time year without century (70)
+#                       %Y - message date/time year with century (1970)
+#                       %H - message date/time hour (00 .. 23)
+#                       %h - message date/time hour (00 .. 12)
+#                       %a - message date/time am/pm
+#                       %A - message date/time AM/PM
+#                       %M - message date/time minute (00 .. 59)
+#                       %S - message date/time second (00 .. 59)
+#                       %i - message date/time millisecond (000 .. 999)
+#                       %c - message date/time centisecond (0 .. 9)
+#                       %F - message date/time fractional seconds/microseconds (000000 - 999999)
+#                       %z - time zone differential in ISO 8601 format (Z or +NN.NN)
+#                       %Z - time zone differential in RFC format (GMT or +NNNN)
+#                       %L - convert time to local time (must be specified before any date/time specifier; does not itself output anything)
+#                       %E - epoch time (UTC, seconds since midnight, January 1, 1970)
+#                       %v[width] - the message source (%s) but text length is padded/cropped to 'width'
+#                       %[name] - the value of the message parameter with the given name
+#                       %% - percent sign
+#                           Example for file "%Y-%m-%d %H:%M:%S %t" 
+#                           Example for console "%t"
 #
-#                     Flags:
-#                         0 - None
-#                         1 - Prefix Timestamp to the text
-#                         2 - Prefix Log Level to the text
-#                         4 - Prefix Log Filter type to the text
-#                         8 - Append timestamp to the log file name. Format: YYYY-MM-DD_HH-MM-SS
-#                             (Only used with Type = 2)
-#                        16 - Make a backup of existing file before overwrite
-#                             (Only used with Mode = w)
+#                    Optional1 - Colors (is type Console)
+#                       Format: "fatal critical error warning notice info debug trace"
+#                       black
+#                       red
+#                       green
+#                       brown
+#                       blue
+#                       magenta
+#                       cyan
+#                       gray
+#                       darkGray
+#                       lightRed
+#                       lightGreen
+#                       yellow
+#                       lightBlue
+#                       lightMagenta
+#                       lightCyan
+#                       white
+#                         Example: "lightRed lightRed red brown magenta cyan lightMagenta green"
 #
-#                     Colors (read as optional1 if Type = Console)
-#                         Format: "fatal error warn info debug trace"
-#                         0 - BLACK
-#                         1 - RED
-#                         2 - GREEN
-#                         3 - BROWN
-#                         4 - BLUE
-#                         5 - MAGENTA
-#                         6 - CYAN
-#                         7 - GREY
-#                         8 - YELLOW
-#                         9 - LRED
-#                        10 - LGREEN
-#                        11 - LBLUE
-#                        12 - LMAGENTA
-#                        13 - LCYAN
-#                        14 - WHITE
-#                         Example: "13 11 9 5 3 1"
+#                     Optional1 - File name (is type file)
+#                       Example: "Auth.log"
 #
-#                     File: Name of the file (read as optional1 if Type = File)
-#                         Allows to use one "%s" to create dynamic files
+#                     Optional2 - Rotate on open (is type File)
+#                       true: The log file is rotated (and archived) when the channel is opened.
+#                       false: Log messages will be appended to an existing log file, if it exists (unless other conditions for a rotation are met). This is the default.
 #
-#                     Mode: Mode to open the file (read as optional2 if Type = File)
-#                          a - (Append)
-#                          w - (Overwrite)
+#                     Optional3 - Rotation (is type File)
+#                       never: no log rotation
+#                       [day,][hh]:mm: the file is rotated on specified day/time day - day is specified as long or short day name (Monday|Mon, Tuesday|Tue, ... ); day can be omitted, in which case log is rotated every day hh - valid hour range is 00-23; hour can be omitted, in which case log is rotated every hour mm - valid minute range is 00-59; minute must be specified
+#                       daily: the file is rotated daily
+#                       weekly: the file is rotated every seven days
+#                       monthly: the file is rotated every 30 days
+#                       <n> minutes: the file is rotated every <n> minutes, where <n> is an integer greater than zero.
+#                       <n> hours: the file is rotated every <n> hours, where <n> is an integer greater than zero.
+#                       <n> days: the file is rotated every <n> days, where <n> is an integer greater than zero.
+#                       <n> weeks: the file is rotated every <n> weeks, where <n> is an integer greater than zero.
+#                       <n> months: the file is rotated every <n> months, where <n> is an integer greater than zero and a month has 30 days.
+#                       <n>: the file is rotated when its size exceeds <n> bytes.
+#                       <n> K: the file is rotated when its size exceeds <n> Kilobytes.
+#                       <n> M: the file is rotated when its size exceeds <n> Megabytes.
+#                           Example: "daily"
 #
-#                     MaxFileSize: Maximum file size of the log file before creating a new log file
-#                     (read as optional3 if Type = File)
-#                         Size is measured in bytes expressed in a 64-bit unsigned integer.
-#                         Maximum value is 4294967295 (4 GB). Leave blank for no limit.
-#                         NOTE: Does not work with dynamic filenames.
-#                         Example:  536870912 (512 MB)
+#                     Optional4 - Archive (is type File)
+#                       number: A number, starting with 0, is appended to the name of archived log files. 
+#                               The newest archived log file always has the number 0. 
+#                               For example, if the log file is named "access.log", and it fulfils the criteria for rotation, the file is renamed to "access.log.0". 
+#                               If a file named "access.log.0" already exists, it is renamed to "access.log.1", and so on.
+#                       timestamp: A timestamp is appended to the log file name. 
+#                                  For example, if the log file is named "access.log", and it fulfils the criteria for rotation, the file is renamed to "access.log.20050802110300".
+#
+#                     Optional5 - Flush (is type File).
+#                       true: Every essages is immediately flushed to the log file.
+#                       false: Messages are not immediately flushed to the log file (default).
 #
 
-Appender.Console=1,3,0
-Appender.Server=2,2,0,Server.log,w
-Appender.GM=2,2,15,gm/gm_%s.log
-Appender.DBErrors=2,2,0,DBErrors.log
+LogChannel.Console = 1,local,"%H:%M:%S %t","lightRed lightRed red brown magenta cyan lightMagenta green"
+LogChannel.Server = 2,local,"%Y-%m-%d %H:%M:%S %t",Server.log,false,daily,false
+LogChannel.GM = 2,local,"%Y-%m-%d %H:%M:%S %t",gm_%s.log,false,daily,false
+LogChannel.DBErrors = 2,local,"%Y-%m-%d %H:%M:%S %t",DBErrors.log,false,daily,false
 
+#
 #  Logger config values: Given a logger "name"
 #    Logger.name
 #        Description: Defines 'What to log'
-#        Format:      LogLevel,AppenderList
+#        Format:      LogLevel,LogChannel
 #
 #                     LogLevel
 #                         0 - (Disabled)
-#                         1 - (Trace)
-#                         2 - (Debug)
-#                         3 - (Info)
-#                         4 - (Warn)
-#                         5 - (Error)
-#                         6 - (Fatal)
+#                         1 - (Fatal)
+#                         2 - (Critical)
+#						  3 - (Error)
+#                         4 - (Warning)
+#                         5 - (Notice)
+#                         6 - (Info)
+#                         7 - (Debug)
+#						  8 - (Trace)
 #
-#                     AppenderList: List of appenders linked to logger
+#                     File channel: file channel linked to logger
 #                     (Using spaces as separator).
 #
 
-Logger.root=5,Console Server
-Logger.server=3,Console Server
-Logger.commands.gm=3,Console GM
-Logger.scripts.hotswap=3,Console Server
-Logger.sql.sql=5,Console DBErrors
-Logger.sql.updates=3,Console Server
-Logger.mmaps=3,Server
+Logger.root=4,Server
+Logger.server=6,Server
+Logger.commands.gm=6,GM
+Logger.scripts.hotswap=4,Server
+Logger.sql.sql=4,DBErrors
+Logger.sql.updates=6,Server
+Logger.mmaps=6,Server
+Logger.warden=6,Server
 
-#Logger.achievement=3,Console Server
-#Logger.addon=3,Console Server
-#Logger.ahbot=3,Console Server
-#Logger.auctionHouse=3,Console Server
-#Logger.bg.arena=3,Console Server
-#Logger.bg.battlefield=3,Console Server
-#Logger.bg.battleground=3,Console Server
-#Logger.bg.reportpvpafk=3,Console Server
-#Logger.chat.log=3,Console Server
-#Logger.calendar=3,Console Server
-#Logger.chat.system=3,Console Server
-#Logger.cheat=3,Console Server
-#Logger.commands.ra=3,Console Server
-#Logger.condition=3,Console Server
-#Logger.entities.faction=3,Console Server
-#Logger.entities.gameobject=3,Console Server
-#Logger.entities.pet=3,Console Server
-#Logger.entities.player=3,Console Server
-#Logger.entities.player.character=3,Console Server
-#Logger.entities.player.dump=3,Console Server
-#Logger.entities.player.items=3,Console Server
-#Logger.entities.player.loading=3,Console Server
-#Logger.entities.player.skills=3,Console Server
-#Logger.entities.transport=3,Console Server
-#Logger.entities.unit=3,Console Server
-#Logger.entities.unit.ai=3,Console Server
-#Logger.entities.vehicle=3,Console Server
-#Logger.gameevent=3,Console Server
-#Logger.guild=3,Console Server
-#Logger.lfg=3,Console Server
-#Logger.loot=3,Console Server
-#Logger.maps.script=3,Console Server
-#Logger.maps=3,Console Server
-#Logger.misc=3,Console Server
-#Logger.mmaps.tiles=3,Console Server
-#Logger.movement.flightpath=3,Console Server
-#Logger.movement.motionmaster=3,Console Server
-#Logger.movement.splinechain=3,Console Server
-#Logger.network=3,Console Server
-#Logger.network.kick=3,Console Server
-#Logger.network.opcode=3,Console Server
-#Logger.network.soap=3,Console Server
-#Logger.outdoorpvp=3,Console Server
-#Logger.pool=3,Console Server
-#Logger.rbac=3,Console Server
-#Logger.scripts=3,Console Server
-#Logger.scripts.ai=3,Console Server
-#Logger.scripts.ai.escortai=3,Console Server
-#Logger.scripts.ai.followerai=3,Console Server
-#Logger.scripts.ai.petai=3,Console Server
-#Logger.scripts.ai.sai=3,Console Server
-#Logger.scripts.cos=3,Console Server
-#Logger.server.authserver=3,Console Server
-#Logger.spells=3,Console Server
-#Logger.spells.aura.effect=3,Console Server
-#Logger.spells.aura.effect.nospell=3,Console Server
-#Logger.spells.effect=3,Console Server
-#Logger.spells.effect.nospell=3,Console Server
-#Logger.sql.dev=3,Console Server
-#Logger.sql.driver=3,Console Server
-#Logger.warden=3,Console Server
-
-#
-#    Log.Async.Enable
-#        Description: Enables asynchronous message logging.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-Log.Async.Enable = 0
+#Logger.achievement=6,Server
+#Logger.addon=6,Server
+#Logger.ahbot=6,Server
+#Logger.auctionHouse=6,Server
+#Logger.bg.arena=6,Server
+#Logger.bg.battlefield=6,Server
+#Logger.bg.battleground=6,Server
+#Logger.bg.reportpvpafk=6,Server
+#Logger.chat.log=6,Server
+#Logger.calendar=6,Server
+#Logger.chat.system=6,Server
+#Logger.cheat=6,Server
+#Logger.commands.ra=6,Server
+#Logger.condition=6,Server
+#Logger.entities.faction=6,Server
+#Logger.entities.gameobject=6,Server
+#Logger.entities.pet=6,Server
+#Logger.entities.player=6,Server
+#Logger.entities.player.character=6,Server
+#Logger.entities.player.dump=6,Server
+#Logger.entities.player.items=6,Server
+#Logger.entities.player.loading=6,Server
+#Logger.entities.player.skills=6,Server
+#Logger.entities.transport=6,Server
+#Logger.entities.unit=6,Server
+#Logger.entities.unit.ai=6,Server
+#Logger.entities.vehicle=6,Server
+#Logger.gameevent=6,Server
+#Logger.guild=6,Server
+#Logger.lfg=6,Server
+#Logger.loot=6,Server
+#Logger.maps.script=6,Server
+#Logger.maps=6,Server
+#Logger.misc=6,Server
+#Logger.mmaps.tiles=6,Server
+#Logger.movement.flightpath=6,Server
+#Logger.movement.motionmaster=6,Server
+#Logger.movement.splinechain=6,Server
+#Logger.network=6,Server
+#Logger.network.kick=6,Server
+#Logger.network.opcode=6,Server
+#Logger.network.soap=6,Server
+#Logger.outdoorpvp=6,Server
+#Logger.pool=6,Server
+#Logger.rbac=6,Server
+#Logger.scripts=6,Server
+#Logger.scripts.ai=6,Server
+#Logger.scripts.ai.escortai=6,Server
+#Logger.scripts.ai.followerai=6,Server
+#Logger.scripts.ai.petai=6,Server
+#Logger.scripts.ai.sai=6,Server
+#Logger.scripts.cos=6,Server
+#Logger.server.authserver=6,Server
+#Logger.spells=6,Server
+#Logger.spells.aura.effect=6,Server
+#Logger.spells.aura.effect.nospell=6,Server
+#Logger.spells.effect=6,Server
+#Logger.spells.effect.nospell=6,Server
+#Logger.sql.dev=6,Server
+#Logger.sql.driver=6,Server
 
 #
 #    Allow.IP.Based.Action.Logging

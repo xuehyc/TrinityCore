@@ -99,6 +99,7 @@ void CalendarMgr::LoadFromDB()
         while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u calendar events in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
     count = 0;
     oldMSTime = getMSTime();
 
@@ -127,6 +128,7 @@ void CalendarMgr::LoadFromDB()
         while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u calendar invites in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 
     for (uint64 i = 1; i < _maxEventId; ++i)
         if (!GetEvent(i))

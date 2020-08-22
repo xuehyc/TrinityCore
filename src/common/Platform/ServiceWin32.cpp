@@ -114,7 +114,7 @@ bool WinServiceInstall()
         CloseServiceHandle(serviceControlManager);
     }
 
-    printf("Service installed\n");
+    SYS_LOG_INFO("Service installed");
     return true;
 }
 

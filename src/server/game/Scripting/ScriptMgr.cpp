@@ -1075,8 +1075,8 @@ void ScriptMgr::Initialize()
                      "but no core script found!", scriptName.c_str());
     }
 
-    LOG_INFO("server.loading", ">> Loaded %u C++ scripts in %u ms",
-        GetScriptCount(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u C++ scripts in %u ms", GetScriptCount(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ScriptMgr::SetScriptContext(std::string const& context)

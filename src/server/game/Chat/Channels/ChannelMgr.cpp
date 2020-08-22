@@ -38,6 +38,7 @@ ChannelMgr::~ChannelMgr()
     if (!sWorld->getBoolConfig(CONFIG_PRESERVE_CUSTOM_CHANNELS))
     {
         LOG_INFO("server.loading", ">> Loaded 0 custom chat channels. Custom channel saving is disabled.");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -53,6 +54,7 @@ ChannelMgr::~ChannelMgr()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 custom chat channels. DB table `channels` is empty.");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -102,6 +104,7 @@ ChannelMgr::~ChannelMgr()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u custom chat channels in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 /*static*/ ChannelMgr* ChannelMgr::forTeam(uint32 team)

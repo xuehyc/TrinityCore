@@ -20,7 +20,6 @@
 
 #include "BigNumber.h"
 #include "Common.h"
-#include "LogCommon.h"
 #include "Optional.h"
 #include <array>
 #include <mutex>

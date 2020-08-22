@@ -224,6 +224,7 @@ void GameEventMgr::LoadFromDB()
         {
             mGameEvent.clear();
             LOG_INFO("server.loading", ">> Loaded 0 game events. DB table `game_event` is empty.");
+            LOG_INFO("server.loading", "");
             return;
         }
 
@@ -283,7 +284,7 @@ void GameEventMgr::LoadFromDB()
         while (result->NextRow());
 
         LOG_INFO("server.loading", ">> Loaded %u game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
-
+        LOG_INFO("server.loading", "");
     }
 
     LOG_INFO("server.loading", "Loading Game Event Saves Data...");
@@ -294,7 +295,10 @@ void GameEventMgr::LoadFromDB()
         QueryResult result = CharacterDatabase.Query("SELECT eventEntry, state, next_start FROM game_event_save");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 game event saves in game events. DB table `game_event_save` is empty.");
+            LOG_INFO("server.loading", "");
+        }
         else
         {
             uint32 count = 0;
@@ -326,7 +330,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u game event saves in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
-
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -337,7 +341,10 @@ void GameEventMgr::LoadFromDB()
         //                                                   0             1
         QueryResult result = WorldDatabase.Query("SELECT eventEntry, prerequisite_event FROM game_event_prerequisite");
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 game event prerequisites in game events. DB table `game_event_prerequisite` is empty.");
+            LOG_INFO("server.loading", "");
+        }
         else
         {
             uint32 count = 0;
@@ -374,7 +381,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u game event prerequisites in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
-
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -386,7 +393,10 @@ void GameEventMgr::LoadFromDB()
         QueryResult result = WorldDatabase.Query("SELECT guid, eventEntry FROM game_event_creature");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 creatures in game events. DB table `game_event_creature` is empty.");
+            LOG_INFO("server.loading", "");
+        }
         else
         {
             uint32 count = 0;
@@ -424,7 +434,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u creatures in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
-
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -436,7 +446,10 @@ void GameEventMgr::LoadFromDB()
         QueryResult result = WorldDatabase.Query("SELECT guid, eventEntry FROM game_event_gameobject");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 gameobjects in game events. DB table `game_event_gameobject` is empty.");
+            LOG_INFO("server.loading", "");
+        } 
         else
         {
             uint32 count = 0;
@@ -474,6 +487,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u gameobjects in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -486,7 +500,10 @@ void GameEventMgr::LoadFromDB()
                                                  "FROM creature JOIN game_event_model_equip ON creature.guid = game_event_model_equip.guid");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 model/equipment changes in game events. DB table `game_event_model_equip` is empty.");
+            LOG_INFO("server.loading", "");
+        }
         else
         {
             uint32 count = 0;
@@ -529,6 +546,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u model/equipment changes in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -540,7 +558,10 @@ void GameEventMgr::LoadFromDB()
         QueryResult result = WorldDatabase.Query("SELECT id, quest, eventEntry FROM game_event_creature_quest");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 quests additions in game events. DB table `game_event_creature_quest` is empty.");
+            LOG_INFO("server.loading", "");
+        } 
         else
         {
             uint32 count = 0;
@@ -566,6 +587,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u quests additions in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -577,7 +599,10 @@ void GameEventMgr::LoadFromDB()
         QueryResult result = WorldDatabase.Query("SELECT id, quest, eventEntry FROM game_event_gameobject_quest");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 go quests additions in game events. DB table `game_event_gameobject_quest` is empty.");
+            LOG_INFO("server.loading", "");
+        } 
         else
         {
             uint32 count = 0;
@@ -603,6 +628,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u quests additions in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -614,7 +640,10 @@ void GameEventMgr::LoadFromDB()
         QueryResult result = WorldDatabase.Query("SELECT quest, eventEntry, condition_id, num FROM game_event_quest_condition");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 quest event conditions in game events. DB table `game_event_quest_condition` is empty.");
+            LOG_INFO("server.loading", "");
+        }
         else
         {
             uint32 count = 0;
@@ -642,6 +671,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u quest event conditions in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -653,7 +683,10 @@ void GameEventMgr::LoadFromDB()
         QueryResult result = WorldDatabase.Query("SELECT eventEntry, condition_id, req_num, max_world_state_field, done_world_state_field FROM game_event_condition");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 conditions in game events. DB table `game_event_condition` is empty.");
+            LOG_INFO("server.loading", "");
+        }
         else
         {
             uint32 count = 0;
@@ -680,6 +713,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u conditions in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -691,7 +725,10 @@ void GameEventMgr::LoadFromDB()
         QueryResult result = CharacterDatabase.Query("SELECT eventEntry, condition_id, done FROM game_event_condition_save");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 condition saves in game events. DB table `game_event_condition_save` is empty.");
+            LOG_INFO("server.loading", "");
+        } 
         else
         {
             uint32 count = 0;
@@ -724,6 +761,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u condition saves in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -735,7 +773,10 @@ void GameEventMgr::LoadFromDB()
         QueryResult result = WorldDatabase.Query("SELECT guid, eventEntry, npcflag FROM game_event_npcflag");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 npcflags in game events. DB table `game_event_npcflag` is empty.");
+            LOG_INFO("server.loading", "");
+        }
         else
         {
             uint32 count = 0;
@@ -760,6 +801,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u npcflags in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -771,7 +813,10 @@ void GameEventMgr::LoadFromDB()
         QueryResult result = WorldDatabase.Query("SELECT questId, eventEntry FROM game_event_seasonal_questrelation");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 seasonal quests additions in game events. DB table `game_event_seasonal_questrelation` is empty.");
+            LOG_INFO("server.loading", "");
+        }
         else
         {
             uint32 count = 0;
@@ -801,6 +846,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u quests additions in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -812,7 +858,10 @@ void GameEventMgr::LoadFromDB()
         QueryResult result = WorldDatabase.Query("SELECT eventEntry, guid, item, maxcount, incrtime, ExtendedCost FROM game_event_npc_vendor ORDER BY guid, slot ASC");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 vendor additions in game events. DB table `game_event_npc_vendor` is empty.");
+            LOG_INFO("server.loading", "");
+        } 
         else
         {
             uint32 count = 0;
@@ -863,6 +912,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u vendor additions in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -874,7 +924,10 @@ void GameEventMgr::LoadFromDB()
         QueryResult result = WorldDatabase.Query("SELECT EventEntry, BattlegroundID FROM game_event_battleground_holiday");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 battleground holidays in game events. DB table `game_event_battleground_holiday` is empty.");
+            LOG_INFO("server.loading", "");
+        }
         else
         {
             uint32 count = 0;
@@ -897,6 +950,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u battleground holidays in game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -909,7 +963,10 @@ void GameEventMgr::LoadFromDB()
                                                  " JOIN game_event_pool ON pool_template.entry = game_event_pool.pool_entry");
 
         if (!result)
+        {
             LOG_INFO("server.loading", ">> Loaded 0 pools for game events. DB table `game_event_pool` is empty.");
+            LOG_INFO("server.loading", "");
+        }
         else
         {
             uint32 count = 0;
@@ -942,6 +999,7 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u pools for game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 }
@@ -1064,8 +1122,9 @@ void GameEventMgr::StartArenaSeason()
     }
 
     StartEvent(eventId, true);
-    LOG_INFO("gameevent", "Arena Season %u started...", season);
 
+    LOG_INFO("gameevent", "Arena Season %u started...", season);
+    LOG_INFO("server.loading", "");
 }
 
 uint32 GameEventMgr::Update()                               // return the next event delay in ms

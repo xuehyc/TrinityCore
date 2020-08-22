@@ -89,6 +89,7 @@ void TransportMgr::LoadTransportTemplates()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u transport templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void TransportMgr::LoadTransportAnimationAndRotation()
@@ -452,6 +453,7 @@ void TransportMgr::SpawnContinentTransports()
     }
 
     LOG_INFO("server.loading", ">> Spawned %u continent transports in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void TransportMgr::CreateInstanceTransports(Map* map)

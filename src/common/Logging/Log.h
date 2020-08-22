@@ -15,117 +15,153 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WARHEADCORE_LOG_H
-#define WARHEADCORE_LOG_H
+#ifndef _LOG_H
+#define _LOG_H
 
-#include "Define.h"
-#include "AsioHacksFwd.h"
-#include "LogCommon.h"
+#include "Common.h"
 #include "StringFormat.h"
-
+#include "Poco/FormattingChannel.h"
 #include <memory>
 #include <unordered_map>
 #include <vector>
 
-class Appender;
-class Logger;
-struct LogMessage;
-
-namespace Warhead
+enum LogLevel
 {
-    namespace Asio
-    {
-        class IoContext;
-    }
-}
+    LOG_LEVEL_DISABLED,
+    LOG_LEVEL_FATAL,
+    LOG_LEVEL_CRITICAL,
+    LOG_LEVEL_ERROR,
+    LOG_LEVEL_WARNING,
+    LOG_LEVEL_NOTICE,
+    LOG_LEVEL_INFO,
+    LOG_LEVEL_DEBUG,
+    LOG_LEVEL_TRACE,
 
-#define LOGGER_ROOT "root"
+    LOG_LEVEL_MAX
+};
 
-typedef Appender*(*AppenderCreatorFn)(uint8 id, std::string const& name, LogLevel level, AppenderFlags flags, std::vector<char const*>&& extraArgs);
-
-template <class AppenderImpl>
-Appender* CreateAppender(uint8 id, std::string const& name, LogLevel level, AppenderFlags flags, std::vector<char const*>&& extraArgs)
+// For create LogChannel
+enum ChannelOptions
 {
-    return new AppenderImpl(id, name, level, flags, std::forward<std::vector<char const*>>(extraArgs));
-}
+    CHANNEL_OPTIONS_TYPE,
+    CHANNEL_OPTIONS_TIMES,
+    CHANNEL_OPTIONS_PATTERN,
+    CHANNEL_OPTIONS_OPTION_1,
+    CHANNEL_OPTIONS_OPTION_2,
+    CHANNEL_OPTIONS_OPTION_3,
+    CHANNEL_OPTIONS_OPTION_4,
+    CHANNEL_OPTIONS_OPTION_5
+};
+
+enum ChannelOptionsType
+{
+    CHANNEL_OPTIONS_TYPE_CONSOLE = 1,
+    CHANNEL_OPTIONS_TYPE_FILE
+};
+
+// For create Logger
+enum LoggerOptions
+{
+    LOGGER_OPTIONS_LOG_LEVEL,
+    LOGGER_OPTIONS_CHANNEL_NAME
+};
+
+using Poco::FormattingChannel;
 
 class WH_COMMON_API Log
 {
-    typedef std::unordered_map<std::string, Logger> LoggerMap;
+private:
+    Log();
+    ~Log();
+    Log(Log const&) = delete;
+    Log(Log&&) = delete;
+    Log& operator=(Log const&) = delete;
+    Log& operator=(Log&&) = delete;
 
-    private:
-        Log();
-        ~Log();
-        Log(Log const&) = delete;
-        Log(Log&&) = delete;
-        Log& operator=(Log const&) = delete;
-        Log& operator=(Log&&) = delete;
+public:
+    static Log* instance();
 
-    public:
-        static Log* instance();
+    void Initialize();
+    void LoadFromConfig();
+    void InitSystemLogger();
 
-        void Initialize(Warhead::Asio::IoContext* ioContext);
-        void SetSynchronous();  // Not threadsafe - should only be called from main() after all threads are joined
-        void LoadFromConfig();
-        void Close();
-        bool ShouldLog(std::string const& type, LogLevel level) const;
-        bool SetLogLevel(std::string const& name, int32 level, bool isLogger = true);
+    bool ShouldLog(std::string const& type, LogLevel level) const;
+    std::string const& GetLogsDir() const { return m_logsDir; }
 
-        template<typename Format, typename... Args>
-        inline void outMessage(std::string const& filter, LogLevel const level, Format&& fmt, Args&&... args)
-        {
-            outMessage(filter, level, Warhead::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...));
-        }
+    void outCharDump(std::string const& str, uint32 accountId, uint64 guid, std::string const& name);    
 
-        template<typename Format, typename... Args>
-        void outCommand(uint32 account, Format&& fmt, Args&&... args)
-        {
-            if (!ShouldLog("commands.gm", LOG_LEVEL_INFO))
-                return;
+    template<typename Format, typename... Args>
+    inline void outMessage(std::string const& filter, LogLevel const level, Format&& fmt, Args&& ... args)
+    {
+        outMessage(filter, level, Warhead::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...));
+    }
 
-            outCommand(Warhead::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...), std::to_string(account));
-        }
+    template<typename Format, typename... Args>
+    void outCommand(uint32 account, Format&& fmt, Args&& ... args)
+    {
+        if (!ShouldLog(LOGGER_GM, LOG_LEVEL_INFO))
+            return;
 
-        void outCharDump(char const* str, uint32 account_id, uint64 guid, char const* name);
+        outCommand(std::to_string(account), Warhead::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...));
+    }
 
-        void SetRealmId(uint32 id);
+    template<typename Format, typename... Args>
+    void outSys(LogLevel const level, Format&& fmt, Args&& ... args)
+    {
+        outSys(level, Warhead::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...));
+    }
 
-        template<class AppenderImpl>
-        void RegisterAppender()
-        {
-            using Index = typename AppenderImpl::TypeIndex;
-            RegisterAppender(Index::value, &CreateAppender<AppenderImpl>);
-        }
+private:
+    typedef std::unordered_map<std::string, FormattingChannel*> ChannelMapFiles;
+    typedef std::unordered_map<std::string, FormattingChannel*> ChannelMapConsole;
 
-        std::string const& GetLogsDir() const { return m_logsDir; }
-        std::string const& GetLogsTimestamp() const { return m_logsTimestamp; }
+    void AddFileChannel(std::string ChannelName, FormattingChannel* channel);
+    void AddConsoleChannel(std::string ChannelName, FormattingChannel* channel);
+    FormattingChannel* GetFileChannel(std::string ChannelName);
+    FormattingChannel* GetConsoleChannel();
+    void ClearnAllChannels();
+    std::string GetLoggerByType(std::string const& type) const;
 
-    private:
-        static std::string GetTimestampStr();
-        void write(std::unique_ptr<LogMessage>&& msg) const;
+    void _Write(std::string const& filter, LogLevel const level, std::string const& message);
+    void _writeCommand(std::string const message, std::string const accountid);
 
-        Logger const* GetLoggerByType(std::string const& type) const;
-        Appender* GetAppenderByName(std::string const& name);
-        uint8 NextAppenderId();
-        void CreateAppenderFromConfig(std::string const& name);
-        void CreateLoggerFromConfig(std::string const& name);
-        void ReadAppendersFromConfig();
-        void ReadLoggersFromConfig();
-        void RegisterAppender(uint8 index, AppenderCreatorFn appenderCreateFn);
-        void outMessage(std::string const& filter, LogLevel level, std::string&& message);
-        void outCommand(std::string&& message, std::string&& param1);
+    void outMessage(std::string const& filter, LogLevel const level, std::string&& message);
+    void outCommand(std::string&& AccountID, std::string&& message);
+    void outSys(LogLevel level, std::string&& message);
+    std::string GetDynamicFileName(std::string ChannelName, std::string Arg);
 
-        std::unordered_map<uint8, AppenderCreatorFn> appenderFactory;
-        std::unordered_map<uint8, std::unique_ptr<Appender>> appenders;
-        std::unordered_map<std::string, std::unique_ptr<Logger>> loggers;
-        uint8 AppenderId;
-        LogLevel lowestLogLevel;
+    void CreateLogger(std::string Name, LogLevel const level, std::string FileChannelName);
+    void CreateLoggerFromConfig(std::string const& ConfigLoggerName);
+    void CreateChannelsFromConfig(std::string const& LogChannelName);
+    void ReadLoggersFromConfig();
+    void ReadChannelsFromConfig();
 
-        std::string m_logsDir;
-        std::string m_logsTimestamp;
+    void InitLogsDir();
+    void Clear();
 
-        Warhead::Asio::IoContext* _ioContext;
-        Warhead::Asio::Strand* _strand;
+    std::string GetPositionOptions(std::string Options, uint8 Position, std::string Default = "");
+    std::string GetChannelFromLogger(std::string LoggerName);
+
+    ChannelMapFiles _ChannelMapFiles;
+    ChannelMapConsole _ChannelMapConsole;
+
+    std::string m_logsDir;    
+
+    // Const loggers name
+    std::string const LOGGER_ROOT = "root";
+    std::string const LOGGER_GM = "commands.gm";
+    std::string const LOGGER_GM_DYNAMIC = "commands.gm.dynamic";
+    std::string const LOGGER_PLAYER_DUMP = "entities.player.dump";
+
+    // Const logger used in system only
+    std::string const LOGGER_SYSTEM = "system";
+
+    // Prefix's
+    std::string const PREFIX_LOGGER = "Logger.";
+    std::string const PREFIX_CHANNEL = "LogChannel.";
+
+    // Console channel
+    std::string _CONSOLE_CHANNEL = "";
 };
 
 #define sLog Log::instance()
@@ -143,14 +179,12 @@ class WH_COMMON_API Log
         } \
     }
 
-#ifdef PERFORMANCE_PROFILING
-#define LOG_MESSAGE_BODY(filterType__, level__, ...) ((void)0)
-#elif WARHEAD_PLATFORM != WARHEAD_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM != WARHEAD_PLATFORM_WINDOWS
 void check_args(char const*, ...) ATTR_PRINTF(1, 2);
 void check_args(std::string const&, ...);
 
 // This will catch format errors on build time
-#define LOG_MESSAGE_BODY(filterType__, level__, ...)                 \
+#define LOG_MSG_BODY(filterType__, level__, ...)                        \
         do {                                                            \
             if (sLog->ShouldLog(filterType__, level__))                 \
             {                                                           \
@@ -161,7 +195,7 @@ void check_args(std::string const&, ...);
             }                                                           \
         } while (0)
 #else
-#define LOG_MESSAGE_BODY(filterType__, level__, ...)                 \
+#define LOG_MSG_BODY(filterType__, level__, ...)                        \
         __pragma(warning(push))                                         \
         __pragma(warning(disable:4127))                                 \
         do {                                                            \
@@ -171,22 +205,50 @@ void check_args(std::string const&, ...);
         __pragma(warning(pop))
 #endif
 
-#define LOG_TRACE(filterType__, ...) \
-    LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_TRACE, __VA_ARGS__)
-
-#define LOG_DEBUG(filterType__, ...) \
-    LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_DEBUG, __VA_ARGS__)
-
-#define LOG_INFO(filterType__, ...)  \
-    LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_INFO, __VA_ARGS__)
-
-#define LOG_WARN(filterType__, ...)  \
-    LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_WARN, __VA_ARGS__)
-
-#define LOG_ERROR(filterType__, ...) \
-    LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_ERROR, __VA_ARGS__)
-
+// Fatal - 1
 #define LOG_FATAL(filterType__, ...) \
-    LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_FATAL, __VA_ARGS__)
+    LOG_MSG_BODY(filterType__, LOG_LEVEL_FATAL, __VA_ARGS__)
+
+// Critical - 2
+#define LOG_CRIT(filterType__, ...) \
+    LOG_MSG_BODY(filterType__, LOG_LEVEL_CRITICAL, __VA_ARGS__)
+
+// Error - 3
+#define LOG_ERROR(filterType__, ...) \
+    LOG_MSG_BODY(filterType__, LOG_LEVEL_ERROR, __VA_ARGS__)
+
+// Warning - 4
+#define LOG_WARN(filterType__, ...)  \
+    LOG_MSG_BODY(filterType__, LOG_LEVEL_WARNING, __VA_ARGS__)
+
+// Notice - 5
+#define LOG_NOTICE(filterType__, ...)  \
+    LOG_MSG_BODY(filterType__, LOG_LEVEL_NOTICE, __VA_ARGS__)
+
+// Info - 6
+#define LOG_INFO(filterType__, ...)  \
+    LOG_MSG_BODY(filterType__, LOG_LEVEL_INFO, __VA_ARGS__)
+
+// Debug - 7
+#define LOG_DEBUG(filterType__, ...) \
+    LOG_MSG_BODY(filterType__, LOG_LEVEL_DEBUG, __VA_ARGS__)
+
+// Trace - 8
+#define LOG_TRACE(filterType__, ...) \
+    LOG_MSG_BODY(filterType__, LOG_LEVEL_TRACE, __VA_ARGS__)
+
+#define LOG_CHAR_DUMP(message__, accountId__, guid__, name__) \
+    sLog->outCharDump(message__, accountId__, guid__, name__)
+
+#define LOG_GM(accountId__, ...) \
+    sLog->outCommand(accountId__, __VA_ARGS__)
+
+// System Error level 3
+#define SYS_LOG_ERROR(...) \
+    sLog->outSys(LOG_LEVEL_ERROR, __VA_ARGS__)
+
+// System Info level 6
+#define SYS_LOG_INFO(...) \
+    sLog->outSys(LOG_LEVEL_INFO, __VA_ARGS__)
 
 #endif

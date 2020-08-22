@@ -427,7 +427,7 @@ public:
         if (name.empty() || level < 0 || (type != "a" && type != "l"))
             return false;
 
-        sLog->SetLogLevel(name, level, type == "l");
+        // sLog->SetLogLevel(name, level, type == "l");
         return true;
     }
 

@@ -101,6 +101,8 @@ uint32 DatabaseWorkerPool<T>::Open()
                     (_connections[IDX_SYNCH].size() + _connections[IDX_ASYNC].size()));
     }
 
+    LOG_INFO("sql.driver", "");
+
     return error;
 }
 

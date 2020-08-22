@@ -74,6 +74,7 @@ void WaypointMgr::Load()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u waypoints in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 WaypointMgr* WaypointMgr::instance()

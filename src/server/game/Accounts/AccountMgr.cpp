@@ -449,6 +449,7 @@ void AccountMgr::LoadRBAC()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 account permission definitions. DB table `rbac_permissions` is empty.");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -466,6 +467,7 @@ void AccountMgr::LoadRBAC()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 linked permissions. DB table `rbac_linked_permissions` is empty.");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -498,6 +500,7 @@ void AccountMgr::LoadRBAC()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 default permission definitions. DB table `rbac_default_permissions` is empty.");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -519,6 +522,7 @@ void AccountMgr::LoadRBAC()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u permission definitions, %u linked permissions and %u default permissions in %u ms", count1, count2, count3, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void AccountMgr::UpdateAccountAccess(rbac::RBACData* rbac, uint32 accountId, uint8 securityLevel, int32 realmId)

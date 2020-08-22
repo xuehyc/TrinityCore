@@ -37,7 +37,11 @@ void CharacterDatabaseCleaner::CleanDatabase()
     // check flags which clean ups are necessary
     QueryResult result = CharacterDatabase.PQuery("SELECT value FROM worldstates WHERE entry = %d", WS_CLEANING_FLAGS);
     if (!result)
+    {
+        LOG_INFO("server.loading", ">> Not found data for cleaned");
+        LOG_INFO("server.loading", "");
         return;
+    } 
 
     uint32 flags = (*result)[0].GetUInt32();
 
@@ -65,6 +69,7 @@ void CharacterDatabaseCleaner::CleanDatabase()
     sWorld->SetCleaningFlags(flags);
 
     LOG_INFO("server.loading", ">> Cleaned character database in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void CharacterDatabaseCleaner::CheckUnique(char const* column, char const* table, bool (*check)(uint32))

@@ -294,7 +294,7 @@ void InstanceSaveManager::LoadInstances()
     sInstanceSaveMgr->LoadResetTimes();
 
     LOG_INFO("server.loading", ">> Loaded instances in %u ms", GetMSTimeDiffToNow(oldMSTime));
-
+    LOG_INFO("server.loading", "");
 }
 
 void InstanceSaveManager::LoadResetTimes()

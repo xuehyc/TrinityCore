@@ -83,6 +83,7 @@ void BattlefieldMgr::InitBattlefield()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u battlefields in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void BattlefieldMgr::AddZone(uint32 zoneId, Battlefield* bf)

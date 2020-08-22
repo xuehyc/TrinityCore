@@ -76,6 +76,7 @@ void CharacterCache::LoadCharacterCacheStorage()
     if (!result)
     {
         LOG_INFO("server.loading", "No character name data loaded, empty query");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -87,6 +88,7 @@ void CharacterCache::LoadCharacterCacheStorage()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", "Loaded character infos for " SZFMTD " characters in %u ms", _characterCacheStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 /*

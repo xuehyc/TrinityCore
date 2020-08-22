@@ -127,9 +127,9 @@ void SecretMgr::AttemptLoad(Secrets i, LogLevel errorLevel, std::unique_lock<std
         if (info.owner != THIS_SERVER_PROCESS)
         {
             if (currentValue)
-                LOG_MESSAGE_BODY("server.loading", errorLevel, "Invalid value for '%s' specified - this is not actually the secret being used in your auth DB.", info.configKey);
+                LOG_MSG_BODY("server.loading", errorLevel, "Invalid value for '%s' specified - this is not actually the secret being used in your auth DB.", info.configKey);
             else
-                LOG_MESSAGE_BODY("server.loading", errorLevel, "No value for '%s' specified - please specify the secret currently being used in your auth DB.", info.configKey);
+                LOG_MSG_BODY("server.loading", errorLevel, "No value for '%s' specified - please specify the secret currently being used in your auth DB.", info.configKey);
             _secrets[i].state = Secret::LOAD_FAILED;
             return;
         }
@@ -140,7 +140,7 @@ void SecretMgr::AttemptLoad(Secrets i, LogLevel errorLevel, std::unique_lock<std
             oldSecret = GetHexFromConfig(info.oldKey, info.bits);
             if (oldSecret && !Warhead::Crypto::Argon2::Verify(oldSecret->AsHexStr(), *oldDigest))
             {
-                LOG_MESSAGE_BODY("server.loading", errorLevel, "Invalid value for '%s' specified - this is not actually the secret previously used in your auth DB.", info.oldKey);
+                LOG_MSG_BODY("server.loading", errorLevel, "Invalid value for '%s' specified - this is not actually the secret previously used in your auth DB.", info.oldKey);
                 _secrets[i].state = Secret::LOAD_FAILED;
                 return;
             }
@@ -150,7 +150,7 @@ void SecretMgr::AttemptLoad(Secrets i, LogLevel errorLevel, std::unique_lock<std
         Optional<std::string> error = AttemptTransition(Secrets(i), currentValue, oldSecret, !!oldDigest);
         if (error)
         {
-            LOG_MESSAGE_BODY("server.loading", errorLevel, "Your value of '%s' changed, but we cannot transition your database to the new value:\n%s", info.configKey, error->c_str());
+            LOG_MSG_BODY("server.loading", errorLevel, "Your value of '%s' changed, but we cannot transition your database to the new value:\n%s", info.configKey, error->c_str());
             _secrets[i].state = Secret::LOAD_FAILED;
             return;
         }

@@ -477,7 +477,6 @@ void World::LoadConfigSettings(bool reload)
             LOG_ERROR("misc", "World settings reload fail: %s.", configError.c_str());
             return;
         }
-        sLog->LoadFromConfig();
         sMetric->LoadFromConfigs();
     }
 
@@ -1054,8 +1053,10 @@ void World::LoadConfigSettings(bool reload)
         m_timers[WUPDATE_CLEANDB].Reset();
     }
     m_int_configs[CONFIG_LOGDB_CLEARTIME] = sConfigMgr->GetIntDefault("LogDB.Opt.ClearTime", 1209600); // 14 days default
-    LOG_INFO("server.loading", "Will clear `logs` table of entries older than %i seconds every %u minutes.",
-        m_int_configs[CONFIG_LOGDB_CLEARTIME], m_int_configs[CONFIG_LOGDB_CLEARINTERVAL]);
+
+    if (!reload)
+        LOG_INFO("server.loading", "Will clear `logs` table of entries older than %i seconds every %u minutes.",
+            m_int_configs[CONFIG_LOGDB_CLEARTIME], m_int_configs[CONFIG_LOGDB_CLEARINTERVAL]);
 
     m_int_configs[CONFIG_SKILL_CHANCE_ORANGE] = sConfigMgr->GetIntDefault("SkillChance.Orange", 100);
     m_int_configs[CONFIG_SKILL_CHANCE_YELLOW] = sConfigMgr->GetIntDefault("SkillChance.Yellow", 75);
@@ -1228,7 +1229,9 @@ void World::LoadConfigSettings(bool reload)
         else
             LOG_ERROR("server.loading", "ClientCacheVersion can't be negative %d, ignored.", clientCacheId);
     }
-    LOG_INFO("server.loading", "Client cache version set to: %u", m_int_configs[CONFIG_CLIENTCACHE_VERSION]);
+
+    if (!reload)
+        LOG_INFO("server.loading", "Client cache version set to: %u", m_int_configs[CONFIG_CLIENTCACHE_VERSION]);
 
     m_int_configs[CONFIG_GUILD_EVENT_LOG_COUNT] = sConfigMgr->GetIntDefault("Guild.EventLogRecordsCount", GUILD_EVENTLOG_MAX_RECORDS);
     if (m_int_configs[CONFIG_GUILD_EVENT_LOG_COUNT] > GUILD_EVENTLOG_MAX_RECORDS)
@@ -1369,15 +1372,11 @@ void World::LoadConfigSettings(bool reload)
             LOG_ERROR("server.loading", "DataDir option can't be changed at worldserver.conf reload, using current value (%s).", m_dataPath.c_str());
     }
     else
-    {
         m_dataPath = dataPath;
-        LOG_INFO("server.loading", "Using DataDir %s", m_dataPath.c_str());
-    }
 
     m_bool_configs[CONFIG_ENABLE_MMAPS] = sConfigMgr->GetBoolDefault("mmap.enablePathFinding", false);
-    LOG_INFO("server.loading", "WORLD: MMap data directory is: %smmaps", m_dataPath.c_str());
-
     m_bool_configs[CONFIG_VMAP_INDOOR_CHECK] = sConfigMgr->GetBoolDefault("vmap.enableIndoorCheck", 0);
+
     bool enableIndoor = sConfigMgr->GetBoolDefault("vmap.enableIndoorCheck", true);
     bool enableLOS = sConfigMgr->GetBoolDefault("vmap.enableLOS", true);
     bool enableHeight = sConfigMgr->GetBoolDefault("vmap.enableHeight", true);
@@ -1387,8 +1386,29 @@ void World::LoadConfigSettings(bool reload)
 
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableLineOfSightCalc(enableLOS);
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableHeightCalc(enableHeight);
-    LOG_INFO("server.loading", "VMap support included. LineOfSight: %i, getHeight: %i, indoorCheck: %i", enableLOS, enableHeight, enableIndoor);
-    LOG_INFO("server.loading", "VMap data directory is: %svmaps", m_dataPath.c_str());
+
+    if (!reload)
+    {
+        auto VMAPBoolToString = [](bool value) -> std::string
+        {
+            if (value)
+                return "Enable";
+
+            return "Disable";
+        };
+
+        LOG_INFO("server.loading", "");
+        LOG_INFO("server.loading", "Loading data configurations...");
+        LOG_INFO("server.loading", "> Using DataDir:          %s", m_dataPath.c_str());
+        LOG_INFO("server.loading", "> VMap data directory is: %svmaps", m_dataPath.c_str());
+        LOG_INFO("server.loading", "> MMap data directory is: %smmaps", m_dataPath.c_str());
+        LOG_INFO("server.loading", "");
+        LOG_INFO("server.loading", "Loading VMap configurations...");
+        LOG_INFO("server.loading", "> Line Of Sight:          %s", VMAPBoolToString(enableLOS).c_str());
+        LOG_INFO("server.loading", "> Get Height:             %s", VMAPBoolToString(enableHeight).c_str());
+        LOG_INFO("server.loading", "> Indoor Check:           %s", VMAPBoolToString(enableIndoor).c_str());
+        LOG_INFO("server.loading", "");
+    }
 
     m_int_configs[CONFIG_MAX_WHO] = sConfigMgr->GetIntDefault("MaxWhoListReturns", 49);
     m_bool_configs[CONFIG_START_ALL_SPELLS] = sConfigMgr->GetBoolDefault("PlayerStart.AllSpells", false);
@@ -1527,9 +1547,6 @@ void World::LoadConfigSettings(bool reload)
 /// Initialize the World
 void World::SetInitialWorldSettings()
 {
-    if (uint32 realmId = sConfigMgr->GetIntDefault("RealmID", 0)) // 0 reserved for auth
-        sLog->SetRealmId(realmId);
-
     ///- Server startup begin
     uint32 startupBegin = getMSTime();
 
@@ -1678,6 +1695,7 @@ void World::SetInitialWorldSettings()
 
     sObjectMgr->SetDBCLocaleIndex(GetDefaultDbcLocale());        // Get once for all the locale index of DBC language (console/broadcasts)
     LOG_INFO("server.loading", ">> Localization strings loaded in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 
     LOG_INFO("server.loading", "Loading Account Roles and Permissions...");
     sAccountMgr->LoadRBAC();
@@ -1696,6 +1714,7 @@ void World::SetInitialWorldSettings()
 
     LOG_INFO("server.loading", "Loading Transport animations and rotations...");
     sTransportMgr->LoadTransportAnimationAndRotation();
+    LOG_INFO("server.loading", "");
 
     LOG_INFO("server.loading", "Loading Spell Rank Data...");
     sSpellMgr->LoadSpellRanks();
@@ -1831,12 +1850,14 @@ void World::SetInitialWorldSettings()
 
     LOG_INFO("server.loading", "Loading Quests Starters and Enders...");
     sObjectMgr->LoadQuestStartersAndEnders();                    // must be after quest load
+    LOG_INFO("server.loading", "");
 
     LOG_INFO("server.loading", "Loading Quests Greetings...");
     sObjectMgr->LoadQuestGreetings();                           // must be loaded after creature_template, gameobject_template tables
 
     LOG_INFO("server.loading", "Loading Objects Pooling Data...");
     sPoolMgr->LoadFromDB();
+
     LOG_INFO("server.loading", "Loading Quest Pooling Data...");
     sQuestPoolMgr->LoadFromDB();                                // must be after quest templates
 
@@ -1935,14 +1956,19 @@ void World::SetInitialWorldSettings()
 
     LOG_INFO("server.loading", "Loading Achievements...");
     sAchievementMgr->LoadAchievementReferenceList();
+
     LOG_INFO("server.loading", "Loading Achievement Criteria Lists...");
     sAchievementMgr->LoadAchievementCriteriaList();
+
     LOG_INFO("server.loading", "Loading Achievement Criteria Data...");
     sAchievementMgr->LoadAchievementCriteriaData();
+
     LOG_INFO("server.loading", "Loading Achievement Rewards...");
     sAchievementMgr->LoadRewards();
+
     LOG_INFO("server.loading", "Loading Achievement Reward Locales...");
     sAchievementMgr->LoadRewardLocales();
+
     LOG_INFO("server.loading", "Loading Completed Achievements...");
     sAchievementMgr->LoadCompletedAchievements();
 
@@ -2135,6 +2161,7 @@ void World::SetInitialWorldSettings()
 
     LOG_INFO("server.loading", "Initialize AuctionHouseBot...");
     sAuctionBot->Initialize();
+    LOG_INFO("server.loading", "");
 
     LOG_INFO("server.loading", "Initializing chat channels...");
     ChannelMgr::LoadFromDB();
@@ -2172,6 +2199,7 @@ void World::SetInitialWorldSettings()
 
     LOG_INFO("server.loading", "Deleting expired bans...");
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate<>bandate");      // One-time query
+    LOG_INFO("server.loading", "");
 
     LOG_INFO("server.loading", "Initializing quest reset times...");
     InitQuestResetTimes();
@@ -2201,7 +2229,9 @@ void World::SetInitialWorldSettings()
 
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
 
+    LOG_INFO("server.worldserver", "");
     LOG_INFO("server.worldserver", "World initialized in %u minutes %u seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
+    LOG_INFO("server.worldserver", "");
 
     WH_METRIC_EVENT("events", "World initialized", "World initialized in " + std::to_string(startupDuration / 60000) + " minutes " + std::to_string((startupDuration % 60000) / 1000) + " seconds");
 }
@@ -2247,6 +2277,7 @@ void World::DetectDBCLang()
     m_defaultDbcLocale = LocaleConstant(default_locale);
 
     LOG_INFO("server.loading", "Using %s DBC Locale as default. All available DBC locales: %s", localeNames[m_defaultDbcLocale], availableLocalsStr.empty() ? "<none>" : availableLocalsStr.c_str());
+    LOG_INFO("server.loading", "");
 }
 
 void World::LoadAutobroadcasts()
@@ -2264,6 +2295,7 @@ void World::LoadAutobroadcasts()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 autobroadcasts definitions. DB table `autobroadcast` is empty for this realm!");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -2281,6 +2313,7 @@ void World::LoadAutobroadcasts()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u autobroadcast definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 /// Update the World !
@@ -3502,7 +3535,7 @@ void World::LoadWorldStates()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u world states in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
+    LOG_INFO("server.loading", "");
 }
 
 bool World::IsPvPRealm() const

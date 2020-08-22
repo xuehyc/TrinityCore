@@ -254,6 +254,7 @@ void QuestPoolMgr::LoadFromDB()
     CharacterDatabase.CommitTransaction(trans);
 
     LOG_INFO("server.loading", ">> Loaded %zu daily, %zu weekly and %zu monthly quest pools in %u ms", _dailyPools.size(), _weeklyPools.size(), _monthlyPools.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void QuestPoolMgr::Regenerate(std::vector<QuestPool>& pools)

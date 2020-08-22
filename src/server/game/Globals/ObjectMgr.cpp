@@ -516,6 +516,7 @@ void ObjectMgr::LoadCreatureTemplates()
         CheckCreatureTemplate(&ctPair.second);
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " creature definitions in %u ms", _creatureTemplateStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadCreatureTemplate(Field* fields)
@@ -791,6 +792,7 @@ void ObjectMgr::LoadCreatureTemplateAddons()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u creature template addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
@@ -1326,6 +1328,7 @@ void ObjectMgr::LoadCreatureAddons()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u creature addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadGameObjectAddons()
@@ -1384,6 +1387,7 @@ void ObjectMgr::LoadGameObjectAddons()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u gameobject addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 GameObjectAddon const* ObjectMgr::GetGameObjectAddon(ObjectGuid::LowType lowguid) const
@@ -1519,6 +1523,7 @@ void ObjectMgr::LoadEquipmentTemplates()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u equipment templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadCreatureMovementOverrides()
@@ -1558,6 +1563,7 @@ void ObjectMgr::LoadCreatureMovementOverrides()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " movement overrides in %u ms", _creatureMovementOverrides.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 CreatureModelInfo const* ObjectMgr::GetCreatureModelInfo(uint32 modelId) const
@@ -1684,6 +1690,7 @@ void ObjectMgr::LoadCreatureModelInfo()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u creature model based info in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadPlayerTotemModels()
@@ -1733,6 +1740,7 @@ void ObjectMgr::LoadPlayerTotemModels()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u player totem model records in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 uint32 ObjectMgr::GetModelForTotem(SummonSlot totemSlot, Races race) const
@@ -1925,6 +1933,7 @@ void ObjectMgr::LoadLinkedRespawn()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded " UI64FMTD " linked respawns in %u ms", uint64(_linkedRespawnStore.size()), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 bool ObjectMgr::SetCreatureLinkedRespawn(ObjectGuid::LowType guidLow, ObjectGuid::LowType linkedGuidLow)
@@ -2063,6 +2072,7 @@ void ObjectMgr::LoadTempSummons()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u temp summons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadCreatures()
@@ -2233,6 +2243,7 @@ void ObjectMgr::LoadCreatures()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " creatures in %u ms", _creatureDataStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::AddCreatureToGrid(ObjectGuid::LowType guid, CreatureData const* data)
@@ -2539,6 +2550,7 @@ void ObjectMgr::LoadGameObjects()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " gameobjects in %u ms", _gameObjectDataStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadSpawnGroupTemplates()
@@ -2582,6 +2594,7 @@ void ObjectMgr::LoadSpawnGroupTemplates()
         data.mapId = 0;
         data.flags = SPAWNGROUP_FLAG_SYSTEM;
     }
+
     if (_spawnGroupDataStore.find(1) == _spawnGroupDataStore.end())
     {
         LOG_ERROR("sql.sql", "Default legacy spawn group (index 1) is missing from DB! Manually inserted.");
@@ -2597,7 +2610,7 @@ void ObjectMgr::LoadSpawnGroupTemplates()
     else
         LOG_INFO("server.loading", ">> Loaded 0 spawn group templates. DB table `spawn_group_template` is empty.");
 
-    return;
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadSpawnGroups()
@@ -2661,6 +2674,7 @@ void ObjectMgr::LoadSpawnGroups()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u spawn group members in %u ms", numMembers, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadInstanceSpawnGroups()
@@ -2718,6 +2732,7 @@ void ObjectMgr::LoadInstanceSpawnGroups()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u instance spawn groups in %u ms", n, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::OnDeleteSpawnData(SpawnData const* data)
@@ -3395,6 +3410,7 @@ void ObjectMgr::LoadItemTemplates()
         LOG_ERROR("sql.sql", "Item (Entry: %u) does not exist in `item_template` but is referenced in `CharStartOutfit.dbc`", *itr);
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " item templates in %u ms", _itemTemplateStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 ItemTemplate const* ObjectMgr::GetItemTemplate(uint32 entry) const
@@ -3511,6 +3527,7 @@ void ObjectMgr::LoadItemSetNames()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u item set names in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadVehicleTemplateAccessories()
@@ -3566,6 +3583,7 @@ void ObjectMgr::LoadVehicleTemplateAccessories()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u Vehicle Template Accessories in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadVehicleAccessories()
@@ -3582,6 +3600,7 @@ void ObjectMgr::LoadVehicleAccessories()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 Vehicle Accessories in %u ms", GetMSTimeDiffToNow(oldMSTime));
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -3609,6 +3628,7 @@ void ObjectMgr::LoadVehicleAccessories()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u Vehicle Accessories in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadVehicleSeatAddon()
@@ -3625,6 +3645,7 @@ void ObjectMgr::LoadVehicleSeatAddon()
     if (!result)
     {
         LOG_ERROR("server.loading", ">> Loaded 0 vehicle seat addons. DB table `vehicle_seat_addon` is empty.");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -3665,6 +3686,7 @@ void ObjectMgr::LoadVehicleSeatAddon()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u Vehicle Seat Addon entries in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadPetLevelInfo()
@@ -3755,6 +3777,7 @@ void ObjectMgr::LoadPetLevelInfo()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u level pet stats definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 PetLevelInfo const* ObjectMgr::GetPetLevelInfo(uint32 creature_id, uint8 level) const
@@ -3887,6 +3910,7 @@ void ObjectMgr::LoadPlayerInfo()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u player create definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -3957,9 +3981,9 @@ void ObjectMgr::LoadPlayerInfo()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u custom player create items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
-
 
     // Load playercreate skills
     LOG_INFO("server.loading", "Loading Player Create Skill Data...");
@@ -4032,6 +4056,7 @@ void ObjectMgr::LoadPlayerInfo()
             } while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u player create skills in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -4094,6 +4119,7 @@ void ObjectMgr::LoadPlayerInfo()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u custom player create spells in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -4149,6 +4175,7 @@ void ObjectMgr::LoadPlayerInfo()
             } while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u player create cast spells in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -4194,6 +4221,7 @@ void ObjectMgr::LoadPlayerInfo()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u player create actions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -4275,6 +4303,7 @@ void ObjectMgr::LoadPlayerInfo()
         }
 
         LOG_INFO("server.loading", ">> Loaded %u level health/mana definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+        LOG_INFO("server.loading", "");
     }
 
     // Loading levels data (class/race dependent)
@@ -4383,6 +4412,7 @@ void ObjectMgr::LoadPlayerInfo()
         }
 
         LOG_INFO("server.loading", ">> Loaded %u level stats definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+        LOG_INFO("server.loading", "");
     }
 
     // Loading xp per level data
@@ -4440,6 +4470,7 @@ void ObjectMgr::LoadPlayerInfo()
         }
 
         LOG_INFO("server.loading", ">> Loaded %u xp for level definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+        LOG_INFO("server.loading", "");
     }
 }
 
@@ -5284,17 +5315,14 @@ void ObjectMgr::LoadQuests()
     }
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " quests definitions in %u ms", _questTemplates.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadQuestStartersAndEnders()
 {
-    LOG_INFO("server.loading", "Loading GO Start Quest Data...");
     LoadGameobjectQuestStarters();
-    LOG_INFO("server.loading", "Loading GO End Quest Data...");
     LoadGameobjectQuestEnders();
-    LOG_INFO("server.loading", "Loading Creature Start Quest Data...");
     LoadCreatureQuestStarters();
-    LOG_INFO("server.loading", "Loading Creature End Quest Data...");
     LoadCreatureQuestEnders();
 }
 
@@ -5645,6 +5673,7 @@ void ObjectMgr::LoadScripts(ScriptsType type)
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u script definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadSpellScripts()
@@ -5809,6 +5838,7 @@ void ObjectMgr::LoadSpellScriptNames()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u spell script names in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::ValidateSpellScripts()
@@ -5879,6 +5909,7 @@ void ObjectMgr::ValidateSpellScripts()
     }
 
     LOG_INFO("server.loading", ">> Validated %u scripts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadPageTexts()
@@ -5920,6 +5951,7 @@ void ObjectMgr::LoadPageTexts()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u page texts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 PageText const* ObjectMgr::GetPageText(uint32 pageEntry)
@@ -5971,6 +6003,7 @@ void ObjectMgr::LoadInstanceTemplate()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 instance templates. DB table `page_text` is empty!");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -6000,6 +6033,7 @@ void ObjectMgr::LoadInstanceTemplate()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u instance templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 InstanceTemplate const* ObjectMgr::GetInstanceTemplate(uint32 mapID) const
@@ -6096,6 +6130,7 @@ void ObjectMgr::LoadInstanceEncounters()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u instance encounters in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 GossipText const* ObjectMgr::GetGossipText(uint32 Text_ID) const
@@ -6188,6 +6223,7 @@ void ObjectMgr::LoadGossipText()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u npc texts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadNpcTextLocales()
@@ -6250,6 +6286,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
     if (!result)
     {
         LOG_INFO("server.loading", ">> No expired mails found.");
+        LOG_INFO("server.loading", "");
         return;                                             // any mails need to be returned or deleted
     }
 
@@ -6350,6 +6387,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Processed %u expired mails: %u deleted and %u returned in %u ms", deletedCount + returnedCount, deletedCount, returnedCount, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadQuestAreaTriggers()
@@ -6407,6 +6445,7 @@ void ObjectMgr::LoadQuestAreaTriggers()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u quest trigger points in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 QuestGreeting const* ObjectMgr::GetQuestGreeting(ObjectGuid guid) const
@@ -6488,6 +6527,7 @@ void ObjectMgr::LoadQuestGreetings()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u quest_greeting in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadQuestGreetingLocales()
@@ -6627,6 +6667,7 @@ void ObjectMgr::LoadTavernAreaTriggers()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u tavern triggers in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadAreaTriggerScripts()
@@ -6660,6 +6701,7 @@ void ObjectMgr::LoadAreaTriggerScripts()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " areatrigger scripts in %u ms", _areaTriggerScriptStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 uint32 ObjectMgr::GetNearestTaxiNode(float x, float y, float z, uint32 mapid, uint32 team)
@@ -6829,6 +6871,7 @@ void ObjectMgr::LoadGraveyardZones()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u graveyard-zone links in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 WorldSafeLocsEntry const* ObjectMgr::GetDefaultGraveyard(uint32 team) const
@@ -7132,6 +7175,7 @@ void ObjectMgr::LoadAreaTriggerTeleports()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u area trigger teleport definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadAccessRequirements()
@@ -7223,6 +7267,7 @@ void ObjectMgr::LoadAccessRequirements()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u access requirement definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 /*
@@ -7658,6 +7703,7 @@ void ObjectMgr::LoadGameObjectTemplate()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " game object templates in %u ms", _gameObjectTemplateStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadGameObjectTemplateAddons()
@@ -7730,6 +7776,7 @@ void ObjectMgr::LoadGameObjectTemplateAddons()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u game object template addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadGameObjectOverrides()
@@ -7768,6 +7815,7 @@ void ObjectMgr::LoadGameObjectOverrides()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u gameobject faction and flags overrides in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadExplorationBaseXP()
@@ -7795,6 +7843,7 @@ void ObjectMgr::LoadExplorationBaseXP()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u BaseXP definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 uint32 ObjectMgr::GetBaseXP(uint8 level)
@@ -7838,6 +7887,7 @@ void ObjectMgr::LoadPetNames()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u pet name parts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadPetNumber()
@@ -7852,6 +7902,7 @@ void ObjectMgr::LoadPetNumber()
     }
 
     LOG_INFO("server.loading", ">> Loaded the max pet number: %d in %u ms", _hiPetNumber-1, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 std::string ObjectMgr::GeneratePetName(uint32 entry)
@@ -7961,6 +8012,7 @@ void ObjectMgr::LoadReputationRewardRate()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u reputation_reward_rate in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadReputationOnKill()
@@ -8033,6 +8085,7 @@ void ObjectMgr::LoadReputationOnKill()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u creature award reputation definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadReputationSpilloverTemplate()
@@ -8125,6 +8178,7 @@ void ObjectMgr::LoadReputationSpilloverTemplate()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u reputation_spillover_template in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadPointsOfInterest()
@@ -8171,6 +8225,7 @@ void ObjectMgr::LoadPointsOfInterest()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u Points of Interest definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadQuestPOI()
@@ -8264,6 +8319,7 @@ void ObjectMgr::LoadQuestPOI()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " quest POI definitions in %u ms", _questPOIStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadNPCSpellClickSpells()
@@ -8329,6 +8385,7 @@ void ObjectMgr::LoadNPCSpellClickSpells()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u spellclick definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::DeleteCreatureData(ObjectGuid::LowType guid)
@@ -8469,6 +8526,7 @@ void ObjectMgr::LoadReservedPlayersNames()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 reserved player names. DB table `reserved_name` is empty!");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -8495,6 +8553,7 @@ void ObjectMgr::LoadReservedPlayersNames()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u reserved player names in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 bool ObjectMgr::IsReservedName(const std::string& name) const
@@ -8706,6 +8765,7 @@ void ObjectMgr::LoadGameObjectForQuests()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u GameObjects for quests in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 bool ObjectMgr::LoadTrinityStrings()
@@ -8718,6 +8778,7 @@ bool ObjectMgr::LoadTrinityStrings()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 trinity strings. DB table `trinity_string` is empty. You have imported an incorrect database for more info search for TCE00003 on forum.");
+        LOG_INFO("server.loading", "");
         return false;
     }
 
@@ -8737,6 +8798,7 @@ bool ObjectMgr::LoadTrinityStrings()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " trinity strings in %u ms", _trinityStringStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
     return true;
 }
 
@@ -8788,6 +8850,7 @@ void ObjectMgr::LoadFishingBaseSkillLevel()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u areas for fishing base skill level in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 bool ObjectMgr::CheckDeclinedNames(const std::wstring& w_ownname, DeclinedName const& names)
@@ -8924,6 +8987,7 @@ void ObjectMgr::LoadGameTele()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u GameTeleports in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 GameTele const* ObjectMgr::GetGameTele(const std::string& name) const
@@ -9086,6 +9150,7 @@ void ObjectMgr::LoadMailLevelRewards()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u level dependent mail rewards in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadTrainers()
@@ -9231,6 +9296,7 @@ void ObjectMgr::LoadTrainers()
     }
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " Trainers in %u ms", _trainers.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadCreatureDefaultTrainers()
@@ -9266,6 +9332,7 @@ void ObjectMgr::LoadCreatureDefaultTrainers()
     }
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " default trainers in %u ms", _creatureDefaultTrainers.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 uint32 ObjectMgr::LoadReferenceVendor(int32 vendor, int32 item, std::set<uint32>* skip_vendors)
@@ -9356,6 +9423,7 @@ void ObjectMgr::LoadVendors()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %d Vendors in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadGossipMenu()
@@ -9392,6 +9460,7 @@ void ObjectMgr::LoadGossipMenu()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u gossip_menu IDs in %u ms", uint32(_gossipMenusStore.size()), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadGossipMenuItems()
@@ -9468,6 +9537,7 @@ void ObjectMgr::LoadGossipMenuItems()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u gossip_menu_option entries in %u ms", uint32(_gossipMenuItemsStore.size()), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 Trainer::Trainer const* ObjectMgr::GetTrainer(uint32 creatureId) const
@@ -9654,6 +9724,7 @@ void ObjectMgr::LoadScriptNames()
     std::sort(_scriptNamesStore.begin(), _scriptNamesStore.end());
 
     LOG_INFO("server.loading", ">> Loaded " SZFMTD " ScriptNames in %u ms", _scriptNamesStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 ObjectMgr::ScriptNameContainer const& ObjectMgr::GetAllScriptNames() const
@@ -9802,6 +9873,7 @@ void ObjectMgr::LoadBroadcastTextLocales()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u broadcast text locales in %u ms", uint32(_broadcastTextStore.size()), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 CreatureBaseStats const* ObjectMgr::GetCreatureBaseStats(uint8 level, uint8 unitClass)
@@ -9895,6 +9967,7 @@ void ObjectMgr::LoadCreatureClassLevelStats()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u creature base stats in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadFactionChangeAchievements()
@@ -9930,6 +10003,7 @@ void ObjectMgr::LoadFactionChangeAchievements()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u faction change achievement pairs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadFactionChangeItems()
@@ -9965,6 +10039,7 @@ void ObjectMgr::LoadFactionChangeItems()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u faction change item pairs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadFactionChangeQuests()
@@ -10000,6 +10075,7 @@ void ObjectMgr::LoadFactionChangeQuests()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u faction change quest pairs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadFactionChangeReputations()
@@ -10035,6 +10111,7 @@ void ObjectMgr::LoadFactionChangeReputations()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u faction change reputation pairs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadFactionChangeSpells()
@@ -10070,6 +10147,7 @@ void ObjectMgr::LoadFactionChangeSpells()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u faction change spell pairs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadFactionChangeTitles()
@@ -10105,6 +10183,7 @@ void ObjectMgr::LoadFactionChangeTitles()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u faction change title pairs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 GameObjectTemplate const* ObjectMgr::GetGameObjectTemplate(uint32 entry) const
@@ -10216,6 +10295,7 @@ void ObjectMgr::LoadGameObjectQuestItems()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u gameobject quest items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::LoadCreatureQuestItems()
@@ -10261,6 +10341,7 @@ void ObjectMgr::LoadCreatureQuestItems()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u creature quest items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void ObjectMgr::InitializeQueriesData(QueryDataGroup mask)
@@ -10271,6 +10352,7 @@ void ObjectMgr::InitializeQueriesData(QueryDataGroup mask)
     if (!sWorld->getBoolConfig(CONFIG_CACHE_DATA_QUERIES))
     {
         LOG_INFO("server.loading", ">> Query data caching is disabled. Skipped initialization.");
+        LOG_INFO("server.loading", "");
         return;
     }
 
@@ -10300,6 +10382,7 @@ void ObjectMgr::InitializeQueriesData(QueryDataGroup mask)
             poiWrapperPair.second.InitializeQueryData();
 
     LOG_INFO("server.loading", ">> Initialized query cache data in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 void QuestPOIWrapper::InitializeQueryData()

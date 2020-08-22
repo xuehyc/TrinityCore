@@ -169,6 +169,7 @@ void FormationMgr::LoadCreatureFormations()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u creatures in formations in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 FormationInfo* FormationMgr::GetFormationInfo(ObjectGuid::LowType spawnId)

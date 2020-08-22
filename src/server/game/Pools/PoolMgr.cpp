@@ -470,6 +470,7 @@ void PoolMgr::LoadFromDB()
         while (result->NextRow());
 
         LOG_INFO("server.loading", ">> Loaded %u objects pools in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+        LOG_INFO("server.loading", "");
     }
 
     // Creatures
@@ -526,11 +527,11 @@ void PoolMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u creatures in pools in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
     // Gameobjects
-
     LOG_INFO("server.loading", "Loading Gameobject Pooling Data...");
     {
         uint32 oldMSTime = getMSTime();
@@ -595,11 +596,11 @@ void PoolMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_INFO("server.loading", ">> Loaded %u gameobject in pools in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
     // Pool of pools
-
     LOG_INFO("server.loading", "Loading Mother Pooling Data...");
     {
         uint32 oldMSTime = getMSTime();
@@ -686,6 +687,7 @@ void PoolMgr::LoadFromDB()
             }
 
             LOG_INFO("server.loading", ">> Loaded %u pools in mother pools in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("server.loading", "");
         }
     }
 
@@ -732,7 +734,6 @@ void PoolMgr::LoadFromDB()
             while (result->NextRow());
 
             LOG_DEBUG("pool", "Pool handling system initialized, %u pools spawned in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-
         }
     }
 }

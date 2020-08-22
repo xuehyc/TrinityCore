@@ -110,6 +110,7 @@ void LoadSkillPerfectItemTable()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u spell perfection definitions in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 // struct to store information about extra item creation
@@ -197,6 +198,7 @@ void LoadSkillExtraItemTable()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u spell specialization definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 bool CanCreatePerfectItem(Player* player, uint32 spellId, float &perfectCreateChance, uint32 &perfectItemType)

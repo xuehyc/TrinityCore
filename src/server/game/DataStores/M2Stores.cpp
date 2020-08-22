@@ -176,7 +176,7 @@ bool readCamera(M2Camera const* cam, uint32 buffSize, M2Header const* header, Ci
 void LoadM2Cameras(std::string const& dataPath)
 {
     sFlyByCameraStore.clear();
-    LOG_INFO("server.loading", ">> Loading Cinematic Camera files");
+    LOG_INFO("server.loading", "Loading Cinematic Camera files...");
 
     uint32 oldMSTime = getMSTime();
     for (CinematicCameraEntry const* dbcentry : sCinematicCameraStore)
@@ -251,6 +251,7 @@ void LoadM2Cameras(std::string const& dataPath)
     }
 
     LOG_INFO("server.loading", ">> Loaded %u cinematic waypoint sets in %u ms", (uint32)sFlyByCameraStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 std::vector<FlyByCamera> const* GetFlyByCameras(uint32 cinematicCameraId)

@@ -153,6 +153,7 @@ void LoadSkillDiscoveryTable()
     }
 
     LOG_INFO("server.loading", ">> Loaded %u skill discovery definitions in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "");
 }
 
 uint32 GetExplicitDiscoverySpell(uint32 spellId, Player* player)

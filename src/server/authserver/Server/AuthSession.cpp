@@ -131,6 +131,7 @@ std::array<uint8, 16> VersionChallenge = { { 0xBA, 0xA3, 0x1E, 0x99, 0xA0, 0x0B,
     if (!result)
     {
         LOG_INFO("server.authserver", ">> No password hashes to update - this took us %u ms to realize", GetMSTimeDiffToNow(start));
+        LOG_INFO("server.authserver", "");
         return;
     }
 
@@ -189,6 +190,7 @@ std::array<uint8, 16> VersionChallenge = { { 0xBA, 0xA3, 0x1E, 0x99, 0xA0, 0x0B,
     LoginDatabase.CommitTransaction(tx);
 
     LOG_INFO("server.authserver", ">> %u password hashes updated in %u ms", c, GetMSTimeDiffToNow(start));
+    LOG_INFO("server.authserver", "");
 }
 
 std::unordered_map<uint8, AuthHandler> AuthSession::InitHandlers()

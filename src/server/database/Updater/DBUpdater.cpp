@@ -198,6 +198,7 @@ bool DBUpdater<T>::Create(DatabaseWorkerPool<T>& pool)
     }
 
     LOG_INFO("sql.updates", "Done.");
+    LOG_INFO("sql.updates", "");
     boost::filesystem::remove(temp);
     return true;
 }
@@ -244,6 +245,7 @@ bool DBUpdater<T>::Update(DatabaseWorkerPool<T>& pool)
     else
         LOG_INFO("sql.updates", ">> Applied " SZFMTD " %s. %s", result.updated, result.updated == 1 ? "query" : "queries", info.c_str());
 
+    LOG_INFO("sql.updates", "");
     return true;
 }
 
@@ -265,6 +267,7 @@ bool DBUpdater<T>::Populate(DatabaseWorkerPool<T>& pool)
     if (p.empty())
     {
         LOG_INFO("sql.updates", ">> No base file provided, skipped!");
+        LOG_INFO("sql.updates", "");
         return true;
     }
 
@@ -304,6 +307,7 @@ bool DBUpdater<T>::Populate(DatabaseWorkerPool<T>& pool)
     }
 
     LOG_INFO("sql.updates", ">> Done!");
+    LOG_INFO("sql.updates", "");
     return true;
 }
 

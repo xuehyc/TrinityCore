@@ -72,3 +72,7 @@ argon2
 catch2
   https://github.com/catchorg/Catch2
   Version: v2.13.0
+
+POCO (Portable Components) C++ Libraries are
+  https://pocoproject.org/
+  Version: 1.10.1

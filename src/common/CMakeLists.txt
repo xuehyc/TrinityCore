@@ -64,6 +64,7 @@ target_link_libraries(common
   PUBLIC
     argon2
     boost
+    Poco::Foundation
     fmt
     g3dlib
     Detour
