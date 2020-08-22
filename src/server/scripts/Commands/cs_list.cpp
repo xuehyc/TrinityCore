@@ -40,7 +40,7 @@ EndScriptData */
 #include "SpellAuraEffects.h"
 #include "WorldSession.h"
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 
 class list_commandscript : public CommandScript
 {

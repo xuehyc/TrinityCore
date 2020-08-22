@@ -67,13 +67,13 @@ void WardenCheckMgr::LoadWardenChecks()
 
         if (category == NUM_CHECK_CATEGORIES)
         {
-            TC_LOG_ERROR("sql.sql", "Warden check with id %u lists check type %u in `warden_checks`, which is not supported. Skipped.", id, type);
+            LOG_ERROR("sql.sql", "Warden check with id %u lists check type %u in `warden_checks`, which is not supported. Skipped.", id, type);
             continue;
         }
 
         if ((type == LUA_EVAL_CHECK) && (id > 9999))
         {
-            TC_LOG_ERROR("sql.sql", "Warden Lua check with id %u found in `warden_checks`. Lua checks may have four-digit IDs at most. Skipped.", id);
+            LOG_ERROR("sql.sql", "Warden Lua check with id %u found in `warden_checks`. Lua checks may have four-digit IDs at most. Skipped.", id);
             continue;
         }
 
@@ -105,7 +105,7 @@ void WardenCheckMgr::LoadWardenChecks()
         {
             if (wardenCheck.Str.size() > WARDEN_MAX_LUA_CHECK_LENGTH)
             {
-                TC_LOG_ERROR("sql.sql", "Found over-long Lua check for Warden check with id %u in `warden_checks`. Max length is %u. Skipped.", id, WARDEN_MAX_LUA_CHECK_LENGTH);
+                LOG_ERROR("sql.sql", "Found over-long Lua check for Warden check with id %u in `warden_checks`. Max length is %u. Skipped.", id, WARDEN_MAX_LUA_CHECK_LENGTH);
                 continue;
             }
 

@@ -270,13 +270,13 @@ bool Warden::ProcessLuaCheckResponse(std::string const& msg)
         if (check.Type == LUA_EVAL_CHECK)
         {
             char const* penalty = ApplyPenalty(&check);
-            TC_LOG_WARN("warden", "%s failed Warden check %u (%s). Action: %s", _session->GetPlayerInfo().c_str(), id, EnumUtils::ToConstant(check.Type), penalty);
+            LOG_WARN("warden", "%s failed Warden check %u (%s). Action: %s", _session->GetPlayerInfo().c_str(), id, EnumUtils::ToConstant(check.Type), penalty);
             return true;
         }
     }
 
     char const* penalty = ApplyPenalty(nullptr);
-    TC_LOG_WARN("warden", "%s sent bogus Lua check response for Warden. Action: %s", _session->GetPlayerInfo().c_str(), penalty);
+    LOG_WARN("warden", "%s sent bogus Lua check response for Warden. Action: %s", _session->GetPlayerInfo().c_str(), penalty);
     return true;
 }
 

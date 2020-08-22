@@ -46,7 +46,6 @@ static_assert((sizeof(_luaEvalPrefix)-1 + sizeof(_luaEvalMidfix)-1 + sizeof(_lua
 
 WardenWin::WardenWin() : Warden(), _serverTicks(0)
 {
-        Warhead::Containers::RandomShuffle(checks);
     for (WardenCheckCategory category : EnumUtils::Iterate<WardenCheckCategory>())
     {
         auto& [checks, checksIt] = _checks[category];

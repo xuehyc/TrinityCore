@@ -69,7 +69,7 @@ WH_API_EXPORT size_t EnumUtils<WardenActions>::ToIndex(WardenActions value)
 |* data for enum 'WardenCheckCategory' in 'WardenCheckMgr.h' auto-generated *|
 \****************************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<WardenCheckCategory>::ToString(WardenCheckCategory value)
+WH_API_EXPORT EnumText EnumUtils<WardenCheckCategory>::ToString(WardenCheckCategory value)
 {
     switch (value)
     {
@@ -81,10 +81,10 @@ TC_API_EXPORT EnumText EnumUtils<WardenCheckCategory>::ToString(WardenCheckCateg
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<WardenCheckCategory>::Count() { return 3; }
+WH_API_EXPORT size_t EnumUtils<WardenCheckCategory>::Count() { return 3; }
 
 template <>
-TC_API_EXPORT WardenCheckCategory EnumUtils<WardenCheckCategory>::FromIndex(size_t index)
+WH_API_EXPORT WardenCheckCategory EnumUtils<WardenCheckCategory>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -96,7 +96,7 @@ TC_API_EXPORT WardenCheckCategory EnumUtils<WardenCheckCategory>::FromIndex(size
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<WardenCheckCategory>::ToIndex(WardenCheckCategory value)
+WH_API_EXPORT size_t EnumUtils<WardenCheckCategory>::ToIndex(WardenCheckCategory value)
 {
     switch (value)
     {
