@@ -57,7 +57,7 @@
 #undef GetClassName
 #endif
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 
 class misc_commandscript : public CommandScript
 {

@@ -2067,7 +2067,7 @@ WH_API_EXPORT size_t EnumUtils<Emote>::ToIndex(Emote value)
 |* data for enum 'WeatherType' in 'SharedDefines.h' auto-generated *|
 \*******************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<WeatherType>::ToString(WeatherType value)
+WH_API_EXPORT EnumText EnumUtils<WeatherType>::ToString(WeatherType value)
 {
     switch (value)
     {
@@ -2082,10 +2082,10 @@ TC_API_EXPORT EnumText EnumUtils<WeatherType>::ToString(WeatherType value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<WeatherType>::Count() { return 6; }
+WH_API_EXPORT size_t EnumUtils<WeatherType>::Count() { return 6; }
 
 template <>
-TC_API_EXPORT WeatherType EnumUtils<WeatherType>::FromIndex(size_t index)
+WH_API_EXPORT WeatherType EnumUtils<WeatherType>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -2100,7 +2100,7 @@ TC_API_EXPORT WeatherType EnumUtils<WeatherType>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<WeatherType>::ToIndex(WeatherType value)
+WH_API_EXPORT size_t EnumUtils<WeatherType>::ToIndex(WeatherType value)
 {
     switch (value)
     {
