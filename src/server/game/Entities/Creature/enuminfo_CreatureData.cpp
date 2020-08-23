@@ -20,7 +20,7 @@
 #include "SmartEnum.h"
 #include <stdexcept>
 
-namespace Warhead::Impl
+namespace Warhead::Impl::EnumUtilsImpl
 {
 
 /*************************************************************************\
