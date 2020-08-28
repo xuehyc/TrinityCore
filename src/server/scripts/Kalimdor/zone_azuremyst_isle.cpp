@@ -597,8 +597,6 @@ public:
                         (*itr)->Respawn();
                 }
             }
-            else
-                LOG_ERROR("scripts", "SD2 ERROR: FlagList is empty!");
         }
 
         void UpdateAI(uint32 diff) override
