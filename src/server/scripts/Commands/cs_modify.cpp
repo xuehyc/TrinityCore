@@ -561,7 +561,7 @@ public:
         if (strchr(args, 'g') || strchr(args, 's') || strchr(args, 'c'))
             moneyToAddO = MoneyStringToMoney(std::string(args));
         else
-            moneyToAddO = Trinity::StringTo<int32>(args);
+            moneyToAddO = Warhead::StringTo<int32>(args);
 
         if (!moneyToAddO)
             return false;

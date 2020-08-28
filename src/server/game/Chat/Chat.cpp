@@ -175,7 +175,7 @@ void ChatHandler::SendSysMessage(const char *str, bool escapeCharacters)
     // Replace every "|" with "||" in msg
     if (escapeCharacters && msg.find('|') != std::string::npos)
     {
-        std::vector<std::string_view> tokens = Trinity::Tokenize(msg, '|', true);
+        std::vector<std::string_view> tokens = Warhead::Tokenize(msg, '|', true);
         std::ostringstream stream;
         for (size_t i = 0; i < tokens.size() - 1; ++i)
             stream << tokens[i] << "||";
@@ -185,7 +185,7 @@ void ChatHandler::SendSysMessage(const char *str, bool escapeCharacters)
     }
 
     WorldPacket data;
-    for (std::string_view line : Trinity::Tokenize(str, '\n', true))
+    for (std::string_view line : Warhead::Tokenize(str, '\n', true))
     {
         BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, nullptr, nullptr, line);
         m_session->SendPacket(&data);
@@ -195,7 +195,7 @@ void ChatHandler::SendSysMessage(const char *str, bool escapeCharacters)
 void ChatHandler::SendGlobalSysMessage(const char *str)
 {
     WorldPacket data;
-    for (std::string_view line : Trinity::Tokenize(str, '\n', true))
+    for (std::string_view line : Warhead::Tokenize(str, '\n', true))
     {
         BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, nullptr, nullptr, line);
         sWorld->SendGlobalMessage(&data);
@@ -205,7 +205,7 @@ void ChatHandler::SendGlobalSysMessage(const char *str)
 void ChatHandler::SendGlobalGMSysMessage(const char *str)
 {
     WorldPacket data;
-    for (std::string_view line : Trinity::Tokenize(str, '\n', true))
+    for (std::string_view line : Warhead::Tokenize(str, '\n', true))
     {
         BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, nullptr, nullptr, line);
         sWorld->SendGlobalGMMessage(&data);

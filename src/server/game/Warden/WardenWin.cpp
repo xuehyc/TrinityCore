@@ -195,7 +195,7 @@ static constexpr uint8 GetCheckPacketBaseSize(WardenCheckType type)
         case MPQ_CHECK: return 1;
         case PAGE_CHECK_A: return (4 + 1);
         case PAGE_CHECK_B: return (4 + 1);
-        case MODULE_CHECK: return (4 + Trinity::Crypto::HMAC_SHA1::DIGEST_LENGTH);
+        case MODULE_CHECK: return (4 + Warhead::Crypto::HMAC_SHA1::DIGEST_LENGTH);
         case MEM_CHECK: return (1 + 4 + 1);
         default: return 0;
     }
@@ -245,10 +245,10 @@ void WardenWin::RequestChecks()
         }
     }
 
-    Trinity::Containers::RandomShuffle(_currentChecks);
+    Warhead::Containers::RandomShuffle(_currentChecks);
 
     uint16 expectedSize = 4;
-    Trinity::Containers::EraseIf(_currentChecks,
+    Warhead::Containers::EraseIf(_currentChecks,
         [&expectedSize](uint16 id)
         {
             uint8 const thisSize = GetCheckPacketSize(sWardenCheckMgr->GetCheckData(id));
@@ -354,13 +354,13 @@ void WardenWin::RequestChecks()
 
     if (buff.size() == expectedSize)
     {
-        TC_LOG_DEBUG("warden", "Finished building warden packet, size is %zu bytes", buff.size());
-        TC_LOG_DEBUG("warden", "Sent checks: %s", idstring().c_str());
+        LOG_DEBUG("warden", "Finished building warden packet, size is %zu bytes", buff.size());
+        LOG_DEBUG("warden", "Sent checks: %s", idstring().c_str());
     }
     else
     {
-        TC_LOG_WARN("warden", "Finished building warden packet, size is %zu bytes, but expected %u bytes!", buff.size(), expectedSize);
-        TC_LOG_WARN("warden", "Sent checks: %s", idstring().c_str());
+        LOG_WARN("warden", "Finished building warden packet, size is %zu bytes, but expected %u bytes!", buff.size(), expectedSize);
+        LOG_WARN("warden", "Sent checks: %s", idstring().c_str());
     }
 
     // Encrypt with warden RC4 key

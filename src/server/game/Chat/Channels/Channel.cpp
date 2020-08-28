@@ -74,9 +74,9 @@ Channel::Channel(std::string const& name, uint32 team /*= 0*/, std::string const
     _channelPassword(),
     _zoneEntry(nullptr)
 {
-    for (std::string_view guid : Trinity::Tokenize(banList, ' ', false))
+    for (std::string_view guid : Warhead::Tokenize(banList, ' ', false))
     {
-        ObjectGuid banned(Trinity::StringTo<uint64>(guid).value_or(0));
+        ObjectGuid banned(Warhead::StringTo<uint64>(guid).value_or(0));
         if (!banned)
             continue;
 

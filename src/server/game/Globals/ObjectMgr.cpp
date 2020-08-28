@@ -737,11 +737,11 @@ void ObjectMgr::LoadCreatureTemplateAddons()
         creatureAddon.emote                     = fields[5].GetUInt32();
         creatureAddon.visibilityDistanceType    = VisibilityDistanceType(fields[6].GetUInt8());
 
-        for (std::string_view aura : Trinity::Tokenize(fields[7].GetStringView(), ' ', false))
+        for (std::string_view aura : Warhead::Tokenize(fields[7].GetStringView(), ' ', false))
         {
 
             SpellInfo const* spellInfo = nullptr;
-            if (Optional<uint32> spellId = Trinity::StringTo<uint32>(aura))
+            if (Optional<uint32> spellId = Warhead::StringTo<uint32>(aura))
                 spellInfo = sSpellMgr->GetSpellInfo(*spellId);
 
             if (!spellInfo)
@@ -1275,10 +1275,10 @@ void ObjectMgr::LoadCreatureAddons()
         creatureAddon.emote                     = fields[5].GetUInt32();
         creatureAddon.visibilityDistanceType    = VisibilityDistanceType(fields[6].GetUInt8());
 
-        for (std::string_view aura : Trinity::Tokenize(fields[7].GetStringView(), ' ', false))
+        for (std::string_view aura : Warhead::Tokenize(fields[7].GetStringView(), ' ', false))
         {
             SpellInfo const* spellInfo = nullptr;
-            if (Optional<uint32> spellId = Trinity::StringTo<uint32>(aura))
+            if (Optional<uint32> spellId = Warhead::StringTo<uint32>(aura))
                 spellInfo = sSpellMgr->GetSpellInfo(*spellId);
 
             if (!spellInfo)

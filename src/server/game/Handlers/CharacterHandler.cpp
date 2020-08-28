@@ -2069,20 +2069,20 @@ void WorldSession::HandleCharFactionOrRaceChangeCallback(std::shared_ptr<Charact
             // Title conversion
             if (!knownTitlesStr.empty())
             {
-                std::vector<std::string_view> tokens = Trinity::Tokenize(knownTitlesStr, ' ', false);
+                std::vector<std::string_view> tokens = Warhead::Tokenize(knownTitlesStr, ' ', false);
                 std::array<uint32, KNOWN_TITLES_SIZE * 2> knownTitles;
 
                 for (uint32 index = 0; index < knownTitles.size(); ++index)
                 {
                     Optional<uint32> thisMask;
                     if (index < tokens.size())
-                        thisMask = Trinity::StringTo<uint32>(tokens[index]);
+                        thisMask = Warhead::StringTo<uint32>(tokens[index]);
 
                     if (thisMask)
                         knownTitles[index] = *thisMask;
                     else
                     {
-                        TC_LOG_WARN("entities.player", "%s has invalid title data '%s' at index %u - skipped, this may result in titles being lost",
+                        LOG_WARN("entities.player", "%s has invalid title data '%s' at index %u - skipped, this may result in titles being lost",
                             GetPlayerInfo().c_str(), (index < tokens.size()) ? std::string(tokens[index]).c_str() : "<none>", index);
                         knownTitles[index] = 0;
                     }

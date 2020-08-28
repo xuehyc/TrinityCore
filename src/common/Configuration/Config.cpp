@@ -138,12 +138,12 @@ bool ConfigMgr::GetBoolDefault(std::string const& name, bool def, bool quiet) co
 {
     std::string val = GetValueDefault(name, std::string(def ? "1" : "0"), quiet);
     val.erase(std::remove(val.begin(), val.end(), '"'), val.end());
-    Optional<bool> boolVal = Trinity::StringTo<bool>(val);
+    Optional<bool> boolVal = Warhead::StringTo<bool>(val);
     if (boolVal)
         return *boolVal;
     else
     {
-        TC_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use '%s' instead",
+        LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use '%s' instead",
             name.c_str(), _filename.c_str(), def ? "true" : "false");
         return def;
     }

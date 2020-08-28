@@ -89,7 +89,7 @@ void Metric::LoadFromConfigs()
             return;
         }
 
-        std::vector<std::string_view> tokens = Trinity::Tokenize(connectionInfo, ';', true);
+        std::vector<std::string_view> tokens = Warhead::Tokenize(connectionInfo, ';', true);
         if (tokens.size() != 3)
         {
             LOG_ERROR("metric", "'Metric.ConnectionInfo' specified with wrong format in configuration file.");

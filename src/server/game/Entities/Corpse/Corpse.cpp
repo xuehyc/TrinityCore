@@ -167,7 +167,7 @@ bool Corpse::LoadCorpseFromDB(ObjectGuid::LowType guid, Field* fields)
     SetUInt32Value(CORPSE_FIELD_DISPLAY_ID, fields[5].GetUInt32());
     if (!_LoadIntoDataField(fields[6].GetString(), CORPSE_FIELD_ITEM, EQUIPMENT_SLOT_END))
     {
-        TC_LOG_ERROR("entities.player", "Corpse (%s, owner: %s) is not created, given equipment info is not valid ('%s')",
+        LOG_ERROR("entities.player", "Corpse (%s, owner: %s) is not created, given equipment info is not valid ('%s')",
             GetGUID().ToString().c_str(), GetOwnerGUID().ToString().c_str(), fields[6].GetString().c_str());
     }
     SetUInt32Value(CORPSE_FIELD_BYTES_1, fields[7].GetUInt32());

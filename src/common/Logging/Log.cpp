@@ -18,6 +18,7 @@
 #include "Log.h"
 #include "Config.h"
 #include "Util.h"
+#include "StringConvert.h"
 #include "Poco/FormattingChannel.h"
 #include "Poco/PatternFormatter.h"
 #include "Poco/SplitterChannel.h"
@@ -183,16 +184,16 @@ void Log::ReadChannelsFromConfig()
         CreateChannelsFromConfig(channelName);
 }
 
-std::string Log::GetPositionOptions(std::string Options, uint8 Position, std::string Default /*= ""*/)
+std::string const& Log::GetPositionOptions(std::string Options, uint8 Position, std::string Default /*= ""*/)
 {
-    Tokenizer tokens(Options, ',');
+    auto const& tokens = Warhead::Tokenize(Options, ',', true);
     if (tokens.size() < Position + 1)
         return Default;
 
-    return tokens[Position];
+    return std::string(tokens[Position]);
 }
 
-std::string Log::GetLoggerByType(std::string const& type) const
+std::string const& Log::GetLoggerByType(std::string const& type) const
 {
     if (Logger::has(type))
         return type;
@@ -228,17 +229,19 @@ std::string Log::GetDynamicFileName(std::string ChannelName, std::string Arg)
     return namebuf;
 }
 
-FormattingChannel* Log::GetFileChannel(std::string ChannelName)
+FormattingChannel* Log::GetFileChannel(std::string const& ChannelName)
 {
-    if (_ChannelMapFiles.count(ChannelName))
-        return _ChannelMapFiles[ChannelName];
+    auto const& itr = _ChannelMapFiles.find(ChannelName);
+    if (itr != _ChannelMapFiles.end())
+        return  _ChannelMapFiles[ChannelName];
 
     return nullptr;
 }
 
 FormattingChannel* Log::GetConsoleChannel()
 {
-    if (_ChannelMapConsole.count(_CONSOLE_CHANNEL))
+    auto const& itr = _ChannelMapConsole.find(_CONSOLE_CHANNEL);
+    if (itr != _ChannelMapConsole.end())
         return _ChannelMapConsole[_CONSOLE_CHANNEL];
 
     return nullptr;
@@ -256,7 +259,8 @@ void Log::AddConsoleChannel(std::string ChannelName, FormattingChannel* channel)
 
 void Log::AddFileChannel(std::string ChannelName, FormattingChannel* channel)
 {
-    if (_ChannelMapFiles.count(ChannelName))
+    auto const& itr = _ChannelMapFiles.find(ChannelName);
+    if (itr != _ChannelMapFiles.end())
         return;
 
     _ChannelMapFiles[ChannelName] = channel;
@@ -268,14 +272,14 @@ void Log::ClearnAllChannels()
     _ChannelMapConsole.clear();
 }
 
-std::string Log::GetChannelFromLogger(std::string LoggerName)
+std::string const& Log::GetChannelFromLogger(std::string LoggerName)
 {
     std::string LoggerOption = sConfigMgr->GetStringDefault(PREFIX_LOGGER + LoggerName, "6,Server");
     
-    Tokenizer tokens(LoggerOption, ',');
+    auto const& tokens = Warhead::Tokenize(LoggerOption, ',', true);
 
     if (tokens.size())
-        return tokens[LOGGER_OPTIONS_CHANNEL_NAME];
+        return std::string(tokens[LOGGER_OPTIONS_CHANNEL_NAME]);
 
     return "";
 }
@@ -325,30 +329,30 @@ void Log::CreateLoggerFromConfig(std::string const& ConfigLoggerName)
         return;
     }
 
-    Tokenizer tokens(options, ',');
+    auto const& tokens = Warhead::Tokenize(options, ',', true);
     if (!tokens.size() || tokens.size() > LOGGER_OPTIONS_CHANNEL_NAME + 1)
     {
         SYS_LOG_ERROR("Log::CreateLoggerFromConfig: Bad config options for Logger (%s)", LoggerName.c_str());
         return;
     }
 
-    LogLevel level = LogLevel(atoi(GetPositionOptions(options, LOGGER_OPTIONS_LOG_LEVEL).c_str()));
+    LogLevel level = LogLevel(Warhead::StringTo<uint8>(GetPositionOptions(options, LOGGER_OPTIONS_LOG_LEVEL)).value_or(LOG_LEVEL_MAX));
     if (level >= LOG_LEVEL_MAX)
     {
         SYS_LOG_ERROR("Log::CreateLoggerFromConfig: Wrong Log Level for logger %s", LoggerName.c_str());
         return;
     }
 
-    std::string FileChannel = GetPositionOptions(options, LOGGER_OPTIONS_CHANNEL_NAME);
+    auto FileChannel = GetPositionOptions(options, LOGGER_OPTIONS_CHANNEL_NAME);
 
     // Check file channel
     if (!GetFileChannel(FileChannel))
     {
-        SYS_LOG_ERROR("Log::CreateLoggerFromConfig - Not found file channel '%s'", FileChannel.c_str());
+        SYS_LOG_ERROR("Log::CreateLoggerFromConfig - Not found file channel '%s'", std::string(FileChannel).c_str());
         return;
     }
 
-    CreateLogger(LoggerName, level, FileChannel);
+    CreateLogger(LoggerName, level, std::string(FileChannel));
 }
 
 void Log::CreateChannelsFromConfig(std::string const& LogChannelName)
@@ -365,7 +369,7 @@ void Log::CreateChannelsFromConfig(std::string const& LogChannelName)
         return;
     }
 
-    Tokenizer tokens(options, ',');
+    auto const& tokens = Warhead::Tokenize(options, ',', true);
     if (tokens.size() < CHANNEL_OPTIONS_PATTERN + 1)
     {
         SYS_LOG_ERROR("Log::CreateLoggerFromConfig: Wrong config option (< CHANNEL_OPTIONS_PATTERN) LogChannel.%s=%s\n", ChannelName.c_str(), options.c_str());
@@ -420,19 +424,19 @@ void Log::CreateChannelsFromConfig(std::string const& LogChannelName)
         // Init Colors
         if (!GetPositionOptions(options, CHANNEL_OPTIONS_OPTION_1).empty())
         {
-            Tokenizer tokens(GetPositionOptions(options, CHANNEL_OPTIONS_OPTION_1), ' ');
+            auto const& tokens = Warhead::Tokenize(GetPositionOptions(options, CHANNEL_OPTIONS_OPTION_1), ' ', true);
             if (tokens.size() == 8)
             {
                 try
                 {
-                    _channel->setProperty("fatalColor", tokens[0]);
-                    _channel->setProperty("criticalColor", tokens[1]);
-                    _channel->setProperty("errorColor", tokens[2]);
-                    _channel->setProperty("warningColor", tokens[3]);
-                    _channel->setProperty("noticeColor", tokens[4]);
-                    _channel->setProperty("informationColor", tokens[5]);
-                    _channel->setProperty("debugColor", tokens[6]);
-                    _channel->setProperty("traceColor", tokens[7]);
+                    _channel->setProperty("fatalColor", std::string(tokens[0]));
+                    _channel->setProperty("criticalColor", std::string(tokens[1]));
+                    _channel->setProperty("errorColor", std::string(tokens[2]));
+                    _channel->setProperty("warningColor", std::string(tokens[3]));
+                    _channel->setProperty("noticeColor", std::string(tokens[4]));
+                    _channel->setProperty("informationColor", std::string(tokens[5]));
+                    _channel->setProperty("debugColor", std::string(tokens[6]));
+                    _channel->setProperty("traceColor", std::string(tokens[7]));
                 }
                 catch (const std::exception& e)
                 {
@@ -557,7 +561,7 @@ void Log::_writeCommand(std::string const message, std::string const accountid)
         if (LoggerOption.empty())
             return;
 
-        Tokenizer tokens(LoggerOption, ',');
+        auto const& tokens = Warhead::Tokenize(LoggerOption, ',', true);
         if (tokens.size() < LOGGER_OPTIONS_CHANNEL_NAME + 1)
             return;
 

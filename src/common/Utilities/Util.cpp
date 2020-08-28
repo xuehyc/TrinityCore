@@ -36,7 +36,7 @@
   #include <arpa/inet.h>
 #endif
 
-std::vector<std::string_view> Trinity::Tokenize(std::string_view str, char sep, bool keepEmpty)
+std::vector<std::string_view> Warhead::Tokenize(std::string_view str, char sep, bool keepEmpty)
 {
     std::vector<std::string_view> tokens;
 
@@ -202,7 +202,7 @@ Optional<int32> MoneyStringToMoney(std::string const& moneyString)
     bool hadS = false;
     bool hadC = false;
 
-    for (std::string_view token : Trinity::Tokenize(moneyString, ' ', false))
+    for (std::string_view token : Warhead::Tokenize(moneyString, ' ', false))
     {
         uint32 unit;
         switch (token[token.length() - 1])
@@ -226,7 +226,7 @@ Optional<int32> MoneyStringToMoney(std::string const& moneyString)
                 return std::nullopt;
         }
 
-        Optional<uint32> amount = Trinity::StringTo<uint32>(token.substr(0, token.length() - 1));
+        Optional<uint32> amount = Warhead::StringTo<uint32>(token.substr(0, token.length() - 1));
         if (amount)
             money += (unit * *amount);
         else

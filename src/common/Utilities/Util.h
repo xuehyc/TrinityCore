@@ -38,7 +38,7 @@ enum class TimeFormat : uint8
 
 namespace Warhead
 {
-    TC_COMMON_API std::vector<std::string_view> Tokenize(std::string_view str, char sep, bool keepEmpty);
+    WH_COMMON_API std::vector<std::string_view> Tokenize(std::string_view str, char sep, bool keepEmpty);
 
     /* this would return string_view into temporary otherwise */
     std::vector<std::string_view> Tokenize(std::string&&, char, bool) = delete;
@@ -48,7 +48,7 @@ namespace Warhead
     inline std::vector<std::string_view> Tokenize(char const* str, char sep, bool keepEmpty) { return Tokenize(std::string_view(str ? str : ""), sep, keepEmpty); }
 }
 
-TC_COMMON_API Optional<int32> MoneyStringToMoney(std::string const& moneyString);
+WH_COMMON_API Optional<int32> MoneyStringToMoney(std::string const& moneyString);
 
 WH_COMMON_API struct tm* localtime_r(time_t const* time, struct tm *result);
 WH_COMMON_API time_t LocalTimeToUTCTime(time_t time);

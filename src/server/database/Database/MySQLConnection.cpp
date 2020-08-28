@@ -32,7 +32,7 @@
 
 MySQLConnectionInfo::MySQLConnectionInfo(std::string const& infoString)
 {
-    std::vector<std::string_view> tokens = Trinity::Tokenize(infoString, ';', true);
+    std::vector<std::string_view> tokens = Warhead::Tokenize(infoString, ';', true);
 
     if (tokens.size() != 5 && tokens.size() != 6)
         return;

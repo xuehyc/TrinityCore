@@ -3886,8 +3886,8 @@ Unit* SmartScript::DoSelectLowestHpPercentFriendly(float range, uint32 minHpPct,
         return nullptr;
 
     Unit* unit = nullptr;
-    Trinity::MostHPPercentMissingInRange u_check(me, range, minHpPct, maxHpPct);
-    Trinity::UnitLastSearcher<Trinity::MostHPPercentMissingInRange> searcher(me, unit, u_check);
+    Warhead::MostHPPercentMissingInRange u_check(me, range, minHpPct, maxHpPct);
+    Warhead::UnitLastSearcher<Warhead::MostHPPercentMissingInRange> searcher(me, unit, u_check);
     Cell::VisitGridObjects(me, searcher, range);
     return unit;
 }
