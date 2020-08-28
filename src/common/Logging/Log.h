@@ -124,7 +124,7 @@ private:
     FormattingChannel* GetConsoleChannel();
 
     void ClearnAllChannels();
-    std::string const& GetLoggerByType(std::string const& type) const;
+    std::string const GetLoggerByType(std::string const& type) const;
 
     void _Write(std::string const& filter, LogLevel const level, std::string const& message);
     void _writeCommand(std::string const message, std::string const accountid);
@@ -143,8 +143,8 @@ private:
     void InitLogsDir();
     void Clear();
 
-    std::string const& GetPositionOptions(std::string Options, uint8 Position, std::string Default = "");
-    std::string const& GetChannelFromLogger(std::string LoggerName);
+    std::string GetPositionOptions(std::string Options, uint8 Position, std::string const& Default = "");
+    std::string const GetChannelFromLogger(std::string LoggerName);
 
     ChannelMapFiles _ChannelMapFiles;
     ChannelMapConsole _ChannelMapConsole;

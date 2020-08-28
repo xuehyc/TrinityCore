@@ -184,7 +184,7 @@ void Log::ReadChannelsFromConfig()
         CreateChannelsFromConfig(channelName);
 }
 
-std::string const& Log::GetPositionOptions(std::string Options, uint8 Position, std::string Default /*= ""*/)
+std::string Log::GetPositionOptions(std::string Options, uint8 Position, std::string const& Default /*= ""*/)
 {
     auto const& tokens = Warhead::Tokenize(Options, ',', true);
     if (tokens.size() < Position + 1)
@@ -193,7 +193,7 @@ std::string const& Log::GetPositionOptions(std::string Options, uint8 Position, 
     return std::string(tokens[Position]);
 }
 
-std::string const& Log::GetLoggerByType(std::string const& type) const
+std::string const Log::GetLoggerByType(std::string const& type) const
 {
     if (Logger::has(type))
         return type;
@@ -272,7 +272,7 @@ void Log::ClearnAllChannels()
     _ChannelMapConsole.clear();
 }
 
-std::string const& Log::GetChannelFromLogger(std::string LoggerName)
+std::string const Log::GetChannelFromLogger(std::string LoggerName)
 {
     std::string LoggerOption = sConfigMgr->GetStringDefault(PREFIX_LOGGER + LoggerName, "6,Server");
     
@@ -422,9 +422,11 @@ void Log::CreateChannelsFromConfig(std::string const& LogChannelName)
         AutoPtr<CONSOLE_CHANNEL> _channel(new CONSOLE_CHANNEL);
 
         // Init Colors
-        if (!GetPositionOptions(options, CHANNEL_OPTIONS_OPTION_1).empty())
+        std::string const& colorOptions = GetPositionOptions(options, CHANNEL_OPTIONS_OPTION_1);
+
+        if (!colorOptions.empty())
         {
-            auto const& tokens = Warhead::Tokenize(GetPositionOptions(options, CHANNEL_OPTIONS_OPTION_1), ' ', true);
+            auto const& tokens = Warhead::Tokenize(colorOptions, ' ', true);
             if (tokens.size() == 8)
             {
                 try
