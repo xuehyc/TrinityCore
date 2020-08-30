@@ -722,8 +722,7 @@ private:
         for (fs::directory_iterator dir_itr(libraryDirectory); dir_itr != dir_end ; ++dir_itr)
             if (fs::is_regular_file(dir_itr->path()) && HasValidScriptModuleName(dir_itr->path().filename().generic_string()))
             {
-                LOG_INFO("scripts.hotswap", "Loading script module \"%s\"...",
-                    dir_itr->path().filename().generic_string().c_str());
+                LOG_INFO("scripts.hotswap", "Loading script module \"%s\"...", dir_itr->path().filename().generic_string().c_str());
 
                 // Don't swap the script context to do bulk loading
                 ProcessLoadScriptModule(dir_itr->path(), false);
@@ -731,6 +730,7 @@ private:
             }
 
         LOG_INFO("scripts.hotswap", ">> Loaded %u script modules.", count);
+        LOG_INFO("scripts.hotswap", "");
     }
 
     // Initialize all enabled file watchers.
@@ -949,6 +949,7 @@ private:
         sScriptMgr->SetScriptContext(module_name);
         (*module)->AddScripts();
         LOG_TRACE("scripts.hotswap", ">> Registered all scripts of module %s.", module_name.c_str());
+        LOG_INFO("scripts.hotswap", "");
 
         if (swap_context)
             sScriptMgr->SwapScriptContext();
@@ -1268,8 +1269,7 @@ private:
     /// since most users will forget this.
     void DoCMakePrefixCorrectionIfNeeded()
     {
-        LOG_INFO("scripts.hotswap", "Correcting your CMAKE_INSTALL_PREFIX in \"%s\"...",
-                    BuiltInConfig::GetBuildDirectory().c_str());
+        LOG_INFO("scripts.hotswap", "Correcting your CMAKE_INSTALL_PREFIX in \"%s\"...", BuiltInConfig::GetBuildDirectory().c_str());
 
         auto const cmake_cache_path = fs::absolute("CMakeCache.txt",
             BuiltInConfig::GetBuildDirectory());
@@ -1363,6 +1363,7 @@ private:
                 else
                 {
                     LOG_INFO("scripts.hotswap", ">> CMAKE_INSTALL_PREFIX is equal to the current path of execution.");
+                    LOG_INFO("scripts.hotswap", "");
                     return;
                 }
             }
