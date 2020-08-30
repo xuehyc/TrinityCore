@@ -1,5 +1,5 @@
 /*
- * This file is part of the WarheadCore Project. See AUTHORS file for Copyright information
+ * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,25 +15,30 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _VMAPFACTORY_H
-#define _VMAPFACTORY_H
+#ifndef TRINITY_CATCH2_H
+#define TRINITY_CATCH2_H
 
-#include "IVMapManager.h"
+#include "Optional.h"
+#include <iostream>
+#include <typeinfo>
 
-/**
-This is the access point to the VMapManager.
-*/
-
-namespace VMAP
+template <typename T>
+std::ostream& operator<<(std::ostream& os, Optional<T> const& value)
 {
-    class VMapManager2;
-
-    class WH_COMMON_API VMapFactory
-    {
-        public:
-            static VMapManager2* createOrGetVMapManager();
-            static void clear();
-    };
-
+    os << "Opt";
+    if (value)
+        os << " { " << *value << " }";
+    else
+        os << " (<empty>)";
+    return os;
 }
+
+inline std::ostream& operator<<(std::ostream& os, std::nullopt_t)
+{
+    os << "<empty>";
+    return os;
+}
+
+#include "catch2/catch.hpp"
+
 #endif
