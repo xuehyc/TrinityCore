@@ -30,7 +30,7 @@
 
 struct GameTele;
 
-namespace Trinity::Impl::ChatCommands
+namespace Warhead::Impl::ChatCommands
 {
 
 /************************** ARGUMENT HANDLERS *******************************************\

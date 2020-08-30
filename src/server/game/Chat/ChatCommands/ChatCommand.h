@@ -33,7 +33,7 @@
 class ChatHandler;
 class CommandArgs;
 
-namespace Trinity::Impl::ChatCommands
+namespace Warhead::Impl::ChatCommands
 {
     template <typename T>
     struct SingleConsumer
@@ -45,13 +45,13 @@ namespace Trinity::Impl::ChatCommands
     };
 
     template <typename... Ts>
-    struct SingleConsumer<Trinity::ChatCommands::Variant<Ts...>>
+    struct SingleConsumer<Warhead::ChatCommands::Variant<Ts...>>
     {
         using V = std::variant<Ts...>;
         static constexpr size_t N = std::variant_size_v<V>;
 
         template <size_t I>
-        static Optional<std::string_view> TryAtIndex(Trinity::ChatCommands::Variant<Ts...>& val, [[maybe_unused]] std::string_view args)
+        static Optional<std::string_view> TryAtIndex(Warhead::ChatCommands::Variant<Ts...>& val, [[maybe_unused]] std::string_view args)
         {
             if constexpr (I < N)
             {
@@ -64,7 +64,7 @@ namespace Trinity::Impl::ChatCommands
                 return std::nullopt;
         }
 
-        static Optional<std::string_view> TryConsumeTo(Trinity::ChatCommands::Variant<Ts...>& val, std::string_view args)
+        static Optional<std::string_view> TryConsumeTo(Warhead::ChatCommands::Variant<Ts...>& val, std::string_view args)
         {
             return TryAtIndex<0>(val, args);
         }
@@ -128,13 +128,13 @@ namespace Trinity::Impl::ChatCommands
             return args;
     }
 
-    template <typename T> struct HandlerToTuple { static_assert(Trinity::dependant_false_v<T>, "Invalid command handler signature"); };
+    template <typename T> struct HandlerToTuple { static_assert(Warhead::dependant_false_v<T>, "Invalid command handler signature"); };
     template <typename... Ts> struct HandlerToTuple<bool(*)(ChatHandler*, Ts...)> { using type = std::tuple<ChatHandler*, advstd::remove_cvref_t<Ts>...>; };
     template <typename T> using TupleType = typename HandlerToTuple<T>::type;
 }
 
 
-class TC_GAME_API ChatCommand
+class WH_GAME_API ChatCommand
 {
     using wrapper_func = bool(void*, ChatHandler*, char const*);
 
@@ -145,11 +145,11 @@ class TC_GAME_API ChatCommand
         {
             _wrapper = [](void* handler, ChatHandler* chatHandler, char const* argsStr)
             {
-                using Tuple = Trinity::Impl::ChatCommands::TupleType<TypedHandler>;
+                using Tuple = Warhead::Impl::ChatCommands::TupleType<TypedHandler>;
 
                 Tuple arguments;
                 std::get<0>(arguments) = chatHandler;
-                if (Trinity::Impl::ChatCommands::ConsumeFromOffset<Tuple, 1>(arguments, argsStr))
+                if (Warhead::Impl::ChatCommands::ConsumeFromOffset<Tuple, 1>(arguments, argsStr))
                     return std::apply(reinterpret_cast<TypedHandler>(handler), std::move(arguments));
                 else
                     return false;

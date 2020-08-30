@@ -116,7 +116,7 @@ namespace Warhead::Hyperlinks
             template <typename T>
             static std::enable_if_t<std::is_integral_v<T>, bool> StoreTo(T& val, std::string_view data)
             {
-                if (Optional<T> res = Trinity::StringTo<T>(data))
+                if (Optional<T> res = Warhead::StringTo<T>(data))
                 {
                     val = *res;
                     return true;
@@ -127,7 +127,7 @@ namespace Warhead::Hyperlinks
 
             static bool StoreTo(ObjectGuid& val, std::string_view data)
             {
-                if (Optional<uint64> res = Trinity::StringTo<uint64>(data, 16))
+                if (Optional<uint64> res = Warhead::StringTo<uint64>(data, 16))
                 {
                     val.Set(*res);
                     return true;
@@ -242,8 +242,8 @@ namespace Warhead::Hyperlinks
         std::string_view const data;
         std::string_view const text;
     };
-    HyperlinkInfo TC_GAME_API ParseSingleHyperlink(std::string_view str);
-    bool TC_GAME_API CheckAllLinks(std::string_view str);
+    HyperlinkInfo WH_GAME_API ParseSingleHyperlink(std::string_view str);
+    bool WH_GAME_API CheckAllLinks(std::string_view str);
 
 }
 

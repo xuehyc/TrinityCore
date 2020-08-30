@@ -36,13 +36,13 @@ class HyperlinkDataTokenizer
 
             if (size_t off = _str.find(HYPERLINK_DATA_DELIMITER); off != std::string_view::npos)
             {
-                if (!Trinity::Hyperlinks::LinkTags::base_tag::StoreTo(val, _str.substr(0, off)))
+                if (!Warhead::Hyperlinks::LinkTags::base_tag::StoreTo(val, _str.substr(0, off)))
                     return false;
                 _str = _str.substr(off+1);
             }
             else
             {
-                if (!Trinity::Hyperlinks::LinkTags::base_tag::StoreTo(val, _str))
+                if (!Warhead::Hyperlinks::LinkTags::base_tag::StoreTo(val, _str))
                     return false;
                 _str = std::string_view();
             }
@@ -55,7 +55,7 @@ class HyperlinkDataTokenizer
         std::string_view _str;
 };
 
-bool Trinity::Hyperlinks::LinkTags::achievement::StoreTo(AchievementLinkData& val, std::string_view text)
+bool Warhead::Hyperlinks::LinkTags::achievement::StoreTo(AchievementLinkData& val, std::string_view text)
 {
     HyperlinkDataTokenizer t(text);
     uint32 achievementId;
@@ -81,7 +81,7 @@ bool Trinity::Hyperlinks::LinkTags::achievement::StoreTo(AchievementLinkData& va
         t.TryConsumeTo(val.Criteria[1]) && t.TryConsumeTo(val.Criteria[2]) && t.TryConsumeTo(val.Criteria[3]) && t.IsEmpty());
 }
 
-bool Trinity::Hyperlinks::LinkTags::enchant::StoreTo(SpellInfo const*& val, std::string_view text)
+bool Warhead::Hyperlinks::LinkTags::enchant::StoreTo(SpellInfo const*& val, std::string_view text)
 {
     HyperlinkDataTokenizer t(text);
     uint32 spellId;
@@ -90,7 +90,7 @@ bool Trinity::Hyperlinks::LinkTags::enchant::StoreTo(SpellInfo const*& val, std:
     return (val = sSpellMgr->GetSpellInfo(spellId)) && val->HasAttribute(SPELL_ATTR0_TRADESPELL);
 }
 
-bool Trinity::Hyperlinks::LinkTags::glyph::StoreTo(GlyphLinkData& val, std::string_view text)
+bool Warhead::Hyperlinks::LinkTags::glyph::StoreTo(GlyphLinkData& val, std::string_view text)
 {
     HyperlinkDataTokenizer t(text);
     uint32 slot, prop;
@@ -103,7 +103,7 @@ bool Trinity::Hyperlinks::LinkTags::glyph::StoreTo(GlyphLinkData& val, std::stri
     return true;
 }
 
-bool Trinity::Hyperlinks::LinkTags::item::StoreTo(ItemLinkData& val, std::string_view text)
+bool Warhead::Hyperlinks::LinkTags::item::StoreTo(ItemLinkData& val, std::string_view text)
 {
     HyperlinkDataTokenizer t(text);
     uint32 itemId, dummy;
@@ -115,7 +115,7 @@ bool Trinity::Hyperlinks::LinkTags::item::StoreTo(ItemLinkData& val, std::string
         t.TryConsumeTo(val.RenderLevel) && t.IsEmpty() && !dummy;
 }
 
-bool Trinity::Hyperlinks::LinkTags::quest::StoreTo(QuestLinkData& val, std::string_view text)
+bool Warhead::Hyperlinks::LinkTags::quest::StoreTo(QuestLinkData& val, std::string_view text)
 {
     HyperlinkDataTokenizer t(text);
     uint32 questId;
@@ -124,7 +124,7 @@ bool Trinity::Hyperlinks::LinkTags::quest::StoreTo(QuestLinkData& val, std::stri
     return (val.Quest = sObjectMgr->GetQuestTemplate(questId)) && t.TryConsumeTo(val.QuestLevel) && t.IsEmpty();
 }
 
-bool Trinity::Hyperlinks::LinkTags::spell::StoreTo(SpellInfo const*& val, std::string_view text)
+bool Warhead::Hyperlinks::LinkTags::spell::StoreTo(SpellInfo const*& val, std::string_view text)
 {
     HyperlinkDataTokenizer t(text);
     uint32 spellId;
@@ -133,7 +133,7 @@ bool Trinity::Hyperlinks::LinkTags::spell::StoreTo(SpellInfo const*& val, std::s
     return !!(val = sSpellMgr->GetSpellInfo(spellId));
 }
 
-bool Trinity::Hyperlinks::LinkTags::talent::StoreTo(TalentLinkData& val, std::string_view text)
+bool Warhead::Hyperlinks::LinkTags::talent::StoreTo(TalentLinkData& val, std::string_view text)
 {
     HyperlinkDataTokenizer t(text);
     uint32 talentId;
@@ -150,7 +150,7 @@ bool Trinity::Hyperlinks::LinkTags::talent::StoreTo(TalentLinkData& val, std::st
     return true;
 }
 
-bool Trinity::Hyperlinks::LinkTags::trade::StoreTo(TradeskillLinkData& val, std::string_view text)
+bool Warhead::Hyperlinks::LinkTags::trade::StoreTo(TradeskillLinkData& val, std::string_view text)
 {
     HyperlinkDataTokenizer t(text);
     uint32 spellId;

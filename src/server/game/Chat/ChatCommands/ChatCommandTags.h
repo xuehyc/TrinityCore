@@ -33,7 +33,7 @@
 #include <utility>
 #include <variant>
 
-namespace Trinity::Impl::ChatCommands
+namespace Warhead::Impl::ChatCommands
 {
     struct ContainerTag {};
     template <typename T>
@@ -43,11 +43,11 @@ namespace Trinity::Impl::ChatCommands
     };
 }
 
-namespace Trinity::ChatCommands
+namespace Warhead::ChatCommands
 {
     /************************** CONTAINER TAGS **********************************************\
     |* Simple holder classes to differentiate between extraction methods                    *|
-    |* Must inherit from Trinity::Impl::ChatCommands::ContainerTag                          *|
+    |* Must inherit from Warhead::Impl::ChatCommands::ContainerTag                          *|
     |* Must implement the following:                                                        *|
     |* - TryConsume: std::string_view -> Optional<std::string_view>                         *|
     |*   returns nullopt if no match, otherwise the tail of the provided argument string    *|
@@ -57,7 +57,7 @@ namespace Trinity::ChatCommands
     \****************************************************************************************/
 
     template <char c1, char... chars>
-    struct ExactSequence : Trinity::Impl::ChatCommands::ContainerTag
+    struct ExactSequence : Warhead::Impl::ChatCommands::ContainerTag
     {
         using value_type = void;
 
@@ -77,7 +77,7 @@ namespace Trinity::ChatCommands
         {
             if ((N <= args.length()) && ExactSequence::Match(args.data()))
             {
-                auto [remainingToken, tail] = Trinity::Impl::ChatCommands::tokenize(args.substr(N));
+                auto [remainingToken, tail] = Warhead::Impl::ChatCommands::tokenize(args.substr(N));
                 if (remainingToken.empty()) // if this is not empty, then we did not consume the full token
                     return tail;
             }
@@ -85,7 +85,7 @@ namespace Trinity::ChatCommands
         }
     };
 
-    struct Tail : std::string_view, Trinity::Impl::ChatCommands::ContainerTag
+    struct Tail : std::string_view, Warhead::Impl::ChatCommands::ContainerTag
     {
         using value_type = std::string_view;
 
@@ -96,7 +96,7 @@ namespace Trinity::ChatCommands
         }
     };
 
-    struct WTail : std::wstring, Trinity::Impl::ChatCommands::ContainerTag
+    struct WTail : std::wstring, Warhead::Impl::ChatCommands::ContainerTag
     {
         using value_type = std::wstring;
 
@@ -110,7 +110,7 @@ namespace Trinity::ChatCommands
     };
 
     template <typename linktag>
-    struct Hyperlink : Trinity::Impl::ChatCommands::ContainerTag
+    struct Hyperlink : Warhead::Impl::ChatCommands::ContainerTag
     {
         using value_type = typename linktag::value_type;
         using storage_type = advstd::remove_cvref_t<value_type>;
@@ -122,7 +122,7 @@ namespace Trinity::ChatCommands
 
             Optional<std::string_view> TryConsume(std::string_view args)
             {
-                Trinity::Hyperlinks::HyperlinkInfo info = Trinity::Hyperlinks::ParseSingleHyperlink(args);
+                Warhead::Hyperlinks::HyperlinkInfo info = Warhead::Hyperlinks::ParseSingleHyperlink(args);
                 // invalid hyperlinks cannot be consumed
                 if (!info)
                     return std::nullopt;
@@ -136,7 +136,7 @@ namespace Trinity::ChatCommands
                     return std::nullopt;
 
                 // finally, skip any potential delimiters
-                auto [token, next] = Trinity::Impl::ChatCommands::tokenize(info.tail);
+                auto [token, next] = Warhead::Impl::ChatCommands::tokenize(info.tail);
                 if (token.empty()) /* empty token = first character is delimiter, skip past it */
                     return next;
                 else
@@ -171,8 +171,8 @@ namespace Warhead::ChatCommands
     {
         using base = std::variant<T1, Ts...>;
 
-        using first_type = Trinity::Impl::ChatCommands::tag_base_t<T1>;
-        static constexpr bool have_operators = Trinity::Impl::ChatCommands::are_all_assignable<first_type, Trinity::Impl::ChatCommands::tag_base_t<Ts>...>::value;
+        using first_type = Warhead::Impl::ChatCommands::tag_base_t<T1>;
+        static constexpr bool have_operators = Warhead::Impl::ChatCommands::are_all_assignable<first_type, Warhead::Impl::ChatCommands::tag_base_t<Ts>...>::value;
 
         template <bool C = have_operators>
         std::enable_if_t<C, first_type> operator*() const

@@ -31,7 +31,7 @@ using namespace Warhead::Hyperlinks;
 
 inline uint8 toHex(char c) { return (c >= '0' && c <= '9') ? c - '0' + 0x10 : (c >= 'a' && c <= 'f') ? c - 'a' + 0x1a : 0x00; }
 // Validates a single hyperlink
-HyperlinkInfo Trinity::Hyperlinks::ParseSingleHyperlink(std::string_view str)
+HyperlinkInfo Warhead::Hyperlinks::ParseSingleHyperlink(std::string_view str)
 {
     uint32 color = 0;
     std::string_view tag;
@@ -354,7 +354,7 @@ static bool ValidateLinkInfo(HyperlinkInfo const& info)
 }
 
 // Validates all hyperlinks and control sequences contained in str
-bool Trinity::Hyperlinks::CheckAllLinks(std::string_view str)
+bool Warhead::Hyperlinks::CheckAllLinks(std::string_view str)
 {
     // Step 1: Disallow all control sequences except ||, |H, |h, |c and |r
     {

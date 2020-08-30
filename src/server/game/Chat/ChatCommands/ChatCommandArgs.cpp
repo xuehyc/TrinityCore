@@ -30,7 +30,7 @@ struct AchievementVisitor
     value_type operator()(Hyperlink<achievement> achData) const { return achData->Achievement; }
     value_type operator()(uint32 achId) const { return sAchievementMgr->GetAchievement(achId); }
 };
-Optional<std::string_view> Trinity::Impl::ChatCommands::ArgInfo<AchievementEntry const*>::TryConsume(AchievementEntry const*& data, std::string_view args)
+Optional<std::string_view> Warhead::Impl::ChatCommands::ArgInfo<AchievementEntry const*>::TryConsume(AchievementEntry const*& data, std::string_view args)
 {
     Variant<Hyperlink<achievement>, uint32> val;
     Optional<std::string_view> next = SingleConsumer<decltype(val)>::TryConsumeTo(val, args);
@@ -45,7 +45,7 @@ struct GameTeleVisitor
     value_type operator()(Hyperlink<tele> tele) const { return sObjectMgr->GetGameTele(tele); }
     value_type operator()(std::string const& tele) const { return sObjectMgr->GetGameTele(tele); }
 };
-Optional<std::string_view> Trinity::Impl::ChatCommands::ArgInfo<GameTele const*>::TryConsume(GameTele const*& data, std::string_view args)
+Optional<std::string_view> Warhead::Impl::ChatCommands::ArgInfo<GameTele const*>::TryConsume(GameTele const*& data, std::string_view args)
 {
     Variant<Hyperlink<tele>, std::string> val;
     Optional<std::string_view> next = SingleConsumer<decltype(val)>::TryConsumeTo(val, args);
@@ -68,7 +68,7 @@ struct SpellInfoVisitor
 
     value_type operator()(uint32 spellId) const { return sSpellMgr->GetSpellInfo(spellId); }
 };
-Optional<std::string_view> Trinity::Impl::ChatCommands::ArgInfo<SpellInfo const*>::TryConsume(SpellInfo const*& data, std::string_view args)
+Optional<std::string_view> Warhead::Impl::ChatCommands::ArgInfo<SpellInfo const*>::TryConsume(SpellInfo const*& data, std::string_view args)
 {
     Variant<Hyperlink<enchant>, Hyperlink<glyph>, Hyperlink<spell>, Hyperlink<talent>, Hyperlink<trade>, uint32> val;
     Optional<std::string_view> next = SingleConsumer<decltype(val)>::TryConsumeTo(val, args);

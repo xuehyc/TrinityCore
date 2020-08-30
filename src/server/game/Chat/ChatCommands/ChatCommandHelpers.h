@@ -21,7 +21,7 @@
 #include <string_view>
 #include <type_traits>
 
-namespace Trinity::Impl::ChatCommands
+namespace Warhead::Impl::ChatCommands
 {
     /***************** HELPERS *************************\
     |* These really aren't for outside use...          *|
