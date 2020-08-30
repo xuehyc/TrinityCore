@@ -492,6 +492,12 @@ class instance_icecrown_citadel : public InstanceMapScript
             {
                 switch (go->GetEntry())
                 {
+                    case GO_SPIRIT_ALARM_1:
+                    case GO_SPIRIT_ALARM_2:
+                    case GO_SPIRIT_ALARM_3:
+                    case GO_SPIRIT_ALARM_4:
+                        SetPositionTraps(go);
+                        break;
                     case GO_DOODAD_ICECROWN_ICEWALL02:
                     case GO_ICEWALL:
                     case GO_LORD_MARROWGAR_S_ENTRANCE:
@@ -1461,6 +1467,31 @@ class instance_icecrown_citadel : public InstanceMapScript
                     default:
                         break;
                 }
+            }
+
+            void SetPositionTraps(GameObject* go)
+            {
+                std::vector<Position> trapPositions;
+
+                switch (go->GetEntry())
+                {
+                case GO_SPIRIT_ALARM_1:
+                    trapPositions = { { -160.96f, 2210.46f, 35.24f, 0.0f }, {-176.27f, 2201.93f, 35.24f, 0.0f}, {-207.83f, 2207.38f, 35.24f, 0.0f} };
+                    break;
+                case GO_SPIRIT_ALARM_2:
+                    trapPositions = { {-178.41f, 2225.11f, 35.24f, 0.0f}, {-195.23f, 2221.55f, 35.24f, 0.0f}, {-209.94f, 2250.34f, 37.99f, 0.0f}, };
+                    break;
+                case GO_SPIRIT_ALARM_3:
+                    trapPositions = { {-289.80f, 2216.60f, 42.39f, 0.0f}, {-317.76f, 2216.11f, 42.57f, 0.0f}, {-301.07f, 2216.62f, 42.0f, 0.0f}, };
+                    break;
+                case GO_SPIRIT_ALARM_4:
+                    trapPositions = { {-276.07f, 2206.76f, 42.57f, 0.0f}, {-304.44f, 2199.11f, 41.99f, 0.0f}, {-292.82f, 2204.61f, 42.02f, 0.0f} };
+                    break;
+                default:
+                    break;
+                }
+
+                go->Relocate(Warhead::Containers::SelectRandomContainerElement(trapPositions));
             }
 
         protected:
