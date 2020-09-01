@@ -29,6 +29,8 @@
 struct AchievementEntry;
 struct GlyphPropertiesEntry;
 struct GlyphSlotEntry;
+struct ItemRandomPropertiesEntry;
+struct ItemRandomSuffixEntry;
 struct ItemTemplate;
 class SpellInfo;
 class Quest;
@@ -40,7 +42,7 @@ namespace Warhead::Hyperlinks
     struct AchievementLinkData
     {
         AchievementEntry const* Achievement;
-        ObjectGuid::LowType CharacterId;
+        ObjectGuid CharacterId;
         bool IsFinished;
         uint8 Year;
         uint8 Month;
@@ -59,8 +61,9 @@ namespace Warhead::Hyperlinks
         ItemTemplate const* Item;
         uint32 EnchantId;
         std::array<uint32, 3> GemEnchantId;
-        int32 RandomPropertyId;
-        int32 RandomPropertySeed;
+        ItemRandomPropertiesEntry const* RandomProperty;
+        ItemRandomSuffixEntry const* RandomSuffix;
+        uint32 RandomSuffixBaseAmount;
         uint8 RenderLevel;
     };
 
@@ -95,7 +98,7 @@ namespace Warhead::Hyperlinks
         |*   - this method SHOULD be constexpr                                                  *|
         |*   - returns identifier string for the link ("creature", "creature_entry", "item")    *|
         |* - MUST expose static ::StoreTo method, (storage&, std::string_view)                  *|
-        |*   - assign value_type& based on content of std::string_view                          *|
+        |*   - assign storage& based on content of std::string_view                             *|
         |*   - return value indicates success/failure                                           *|
         |*   - for integral/string types this can be achieved by extending base_tag             *|
         \****************************************************************************************/
