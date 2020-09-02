@@ -32,12 +32,6 @@ add_executable(worldserver
   ${PRIVATE_SOURCES}
 )
 
-if(NOT WIN32)
-  set_target_properties(worldserver PROPERTIES
-    COMPILE_DEFINITIONS _WARHEAD_CORE_CONFIG="${CONF_DIR}/worldserver.conf"
-  )
-endif()
-
 if(UNIX AND NOT NOJEM AND NOT APPLE)
   set(worldserver_LINK_FLAGS "-pthread -lncurses ${worldserver_LINK_FLAGS}")
 endif()
@@ -75,30 +69,13 @@ if(WORLDSERVER_DYNAMIC_SCRIPT_MODULES_DEPENDENCIES)
   add_dependencies(worldserver ${WORLDSERVER_DYNAMIC_SCRIPT_MODULES_DEPENDENCIES})
 endif()
 
-if(COPY_CONF AND WIN32)
-  if("${CMAKE_MAKE_PROGRAM}" MATCHES "MSBuild")
-    add_custom_command(TARGET worldserver
-      POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/worldserver.conf.dist ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/
-    )
-  elseif(MINGW)
-    add_custom_command(TARGET worldserver
-      POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/worldserver.conf.dist ${CMAKE_BINARY_DIR}/bin/
-    )
-  endif()
-endif()
+# Install config
+ConfigInstall(worldserver)
 
 if(UNIX)
   install(TARGETS worldserver DESTINATION bin)
-  if(COPY_CONF)
-    install(FILES worldserver.conf.dist DESTINATION ${CONF_DIR})
-  endif()
 elseif(WIN32)
   install(TARGETS worldserver DESTINATION "${CMAKE_INSTALL_PREFIX}")
-  if(COPY_CONF)
-    install(FILES worldserver.conf.dist DESTINATION "${CMAKE_INSTALL_PREFIX}")
-  endif()
 endif()
 
 # Generate precompiled header
