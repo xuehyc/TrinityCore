@@ -17,6 +17,8 @@ if(COPY_CONF)
   endif()
 endif()
 
+add_definitions(-DCONF_DIR=$<1:"${CONF_DIR}">)
+
 message("")
 
 # Show infomation about the options selected during configuration

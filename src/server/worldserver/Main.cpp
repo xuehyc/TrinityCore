@@ -119,7 +119,7 @@ extern int main(int argc, char** argv)
     Warhead::Impl::CurrentServerProcessHolder::_type = SERVER_PROCESS_WORLDSERVER;
     signal(SIGABRT, &Warhead::AbortHandler);
 
-    auto configFile = fs::absolute(_WARHEAD_CORE_CONFIG);
+    auto configFile = fs::path(sConfigMgr->GetConfigPath() + std::string(_WARHEAD_CORE_CONFIG));
     std::string configService;
 
     auto vm = GetConsoleArguments(argc, argv, configFile, configService);
@@ -136,14 +136,11 @@ extern int main(int argc, char** argv)
         WinServiceRun();
 #endif
 
-    std::string configError;
-    if (!sConfigMgr->LoadInitial(configFile.generic_string(),
-                                 std::vector<std::string>(argv, argv + argc),
-                                 configError))
-    {
-        SYS_LOG_ERROR("Error in config file: %s\n", configError.c_str());
+    // Add file and args in config
+    sConfigMgr->Configure(configFile.generic_string(), std::vector<std::string>(argv, argv + argc));
+
+    if (!sConfigMgr->LoadAppConfigs())
         return 1;
-    }
 
     std::shared_ptr<Warhead::Asio::IoContext> ioContext = std::make_shared<Warhead::Asio::IoContext>();
 
@@ -626,7 +623,7 @@ variables_map GetConsoleArguments(int argc, char** argv, fs::path& configFile, s
     all.add_options()
         ("help,h", "print usage message")
         ("version,v", "print version build info")
-        ("config,c", value<fs::path>(&configFile)->default_value(fs::absolute(_WARHEAD_CORE_CONFIG)),
+        ("config,c", value<fs::path>(&configFile)->default_value(fs::path(sConfigMgr->GetConfigPath() + std::string(_WARHEAD_CORE_CONFIG))),
                      "use <arg> as configuration file")
         ("update-databases-only,u", "updates databases only")
         ;

@@ -59,16 +59,12 @@ namespace
     }
 }
 
-bool ConfigMgr::LoadInitial(std::string file, std::vector<std::string> args,
-                            std::string& error)
+bool ConfigMgr::LoadInitial(std::string const& file, std::string& error)
 {
     std::lock_guard<std::mutex> lock(_configLock);
 
-    _filename = std::move(file);
-    _args = std::move(args);
-
     bpt::ptree fullTree;
-    if (!LoadFile(_filename, fullTree, error))
+    if (!LoadFile(file, fullTree, error))
         return false;
 
     // Since we're using only one section per config file, we skip the section and have direct property access
@@ -101,7 +97,7 @@ ConfigMgr* ConfigMgr::instance()
 bool ConfigMgr::Reload(std::vector<std::string>& errors)
 {
     std::string error;
-    if (!LoadInitial(_filename, std::move(_args), error))
+    if (!LoadInitial(_filename, error))
         errors.push_back(std::move(error));
 
     for (std::string const& additionalFile : _additonalFiles)
@@ -213,4 +209,42 @@ std::vector<std::string> ConfigMgr::GetKeysByString(std::string const& name)
             keys.push_back(child.first);
 
     return keys;
+}
+
+std::string const ConfigMgr::GetConfigPath()
+{
+    std::lock_guard<std::mutex> lock(_configLock);
+
+#if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
+    return "configs/";
+#else
+    return std::string(CONF_DIR) + "/";
+#endif
+}
+
+void ConfigMgr::Configure(std::string const& fileName, std::vector<std::string> args)
+{
+    _filename = fileName;
+    _args = std::move(args);
+}
+
+bool ConfigMgr::LoadAppConfigs()
+{
+    std::string configError;
+
+    // #1 - Load init config file .conf.dist
+    if (!sConfigMgr->LoadInitial(_filename + ".dist", configError))
+    {
+        SYS_LOG_ERROR("Error in config file: %s\n", configError.c_str());
+        return false;
+    }
+
+    // #2 - Load .conf file
+    if (!sConfigMgr->LoadAdditionalFile(_filename, true, configError))
+    {
+        SYS_LOG_ERROR("Error in config file: %s\n", configError.c_str());
+        return false;
+    }
+
+    return true;
 }

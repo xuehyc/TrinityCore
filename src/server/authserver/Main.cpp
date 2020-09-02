@@ -82,7 +82,7 @@ int main(int argc, char** argv)
     Warhead::Impl::CurrentServerProcessHolder::_type = SERVER_PROCESS_AUTHSERVER;
     signal(SIGABRT, &Warhead::AbortHandler);
 
-    auto configFile = fs::absolute(_WARHEAD_REALM_CONFIG);
+    auto configFile = fs::path(sConfigMgr->GetConfigPath() + std::string(_WARHEAD_REALM_CONFIG));
     std::string configService;
     auto vm = GetConsoleArguments(argc, argv, configFile, configService);
     // exit if help or version is enabled
@@ -98,14 +98,11 @@ int main(int argc, char** argv)
         return WinServiceRun() ? 0 : 1;
 #endif
 
-    std::string configError;
-    if (!sConfigMgr->LoadInitial(configFile.generic_string(),
-                                 std::vector<std::string>(argv, argv + argc),
-                                 configError))
-    {
-        SYS_LOG_ERROR("Error in config file: %s\n", configError.c_str());
+    // Add file and args in config
+    sConfigMgr->Configure(configFile.generic_string(), std::vector<std::string>(argv, argv + argc));
+
+    if (!sConfigMgr->LoadAppConfigs())
         return 1;
-    }
 
     // Init all logs
     sLog->Initialize();
@@ -317,7 +314,7 @@ variables_map GetConsoleArguments(int argc, char** argv, fs::path& configFile, s
     all.add_options()
         ("help,h", "print usage message")
         ("version,v", "print version build info")
-        ("config,c", value<fs::path>(&configFile)->default_value(fs::absolute(_WARHEAD_REALM_CONFIG)),
+        ("config,c", value<fs::path>(&configFile)->default_value(fs::path(sConfigMgr->GetConfigPath() + std::string(_WARHEAD_REALM_CONFIG))),
                      "use <arg> as configuration file")
         ;
 #if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
