@@ -26,7 +26,7 @@
 #include "Poco/Logger.h"
 #include "Poco/AutoPtr.h"
 #include <sstream>
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
 #if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
 #include "Poco/WindowsConsoleChannel.h"
@@ -150,8 +150,8 @@ void Log::InitLogsDir()
         if ((m_logsDir.at(m_logsDir.length() - 1) != '/') && (m_logsDir.at(m_logsDir.length() - 1) != '\\'))
             m_logsDir.push_back('/');
 
-    std::filesystem::path LogsPath(m_logsDir);
-    if (!std::filesystem::is_directory(LogsPath))
+    boost::filesystem::path LogsPath(m_logsDir);
+    if (!boost::filesystem::is_directory(LogsPath))
         m_logsDir = "";
 }
 
