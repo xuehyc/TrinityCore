@@ -77,6 +77,7 @@ namespace Warhead::Hyperlinks
     {
         TalentEntry const* Talent;
         uint8 Rank;
+        SpellInfo const* Spell;
     };
 
     struct TradeskillLinkData
