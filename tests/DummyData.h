@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_DUMMYDATA_H
-#define TRINITY_DUMMYDATA_H
+#ifndef WARHEAD_DUMMYDATA_H
+#define WARHEAD_DUMMYDATA_H
 
 #include "Common.h"
 #include "Define.h"

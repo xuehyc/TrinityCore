@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_CATCH2_H
-#define TRINITY_CATCH2_H
+#ifndef WARHEAD_CATCH2_H
+#define WARHEAD_CATCH2_H
 
 #include "Optional.h"
 #include <iostream>

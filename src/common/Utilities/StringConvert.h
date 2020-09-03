@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITY_STRINGCONVERT_H
-#define TRINITY_STRINGCONVERT_H
+#ifndef WARHEAD_STRINGCONVERT_H
+#define WARHEAD_STRINGCONVERT_H
 
 #include "Define.h"
 #include "Errors.h"
@@ -86,7 +86,7 @@ namespace Warhead::Impl::StringConvertImpl
         }
     };
 
-#ifdef TRINITY_NEED_CHARCONV_WORKAROUND
+#ifdef WARHEAD_NEED_CHARCONV_WORKAROUND
     /*
         If this is defined, std::from_chars will cause linkage errors for 64-bit types.
         (This is a bug in clang-7.)
@@ -171,7 +171,7 @@ namespace Warhead::Impl::StringConvertImpl
         }
     };
 
-#if TRINITY_COMPILER == TRINITY_COMPILER_MICROSOFT
+#if WARHEAD_COMPILER == WARHEAD_COMPILER_MICROSOFT
     template <typename T>
     struct For<T, std::enable_if_t<std::is_floating_point_v<T>>>
     {

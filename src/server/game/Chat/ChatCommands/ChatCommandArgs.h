@@ -43,7 +43,7 @@ namespace Warhead::Impl::ChatCommands
 |*                                                                                      *|
 \****************************************************************************************/
 template <typename T, typename = void>
-struct ArgInfo { static_assert(Trinity::dependant_false_v<T>, "Invalid command parameter type - see ChatCommandArgs.h for possible types"); };
+struct ArgInfo { static_assert(Warhead::dependant_false_v<T>, "Invalid command parameter type - see ChatCommandArgs.h for possible types"); };
 
 // catch-all for number types
 template <typename T>
