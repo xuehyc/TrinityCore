@@ -65,7 +65,7 @@ namespace Warhead::ChatCommands
 
         static bool Match(char const* pos)
         {
-            if (*(pos++) != c1)
+            if (std::toupper(*(pos++)) != std::toupper(c1))
                 return false;
             else if constexpr (sizeof...(chars) > 0)
                 return ExactSequence<chars...>::Match(pos);
@@ -151,11 +151,7 @@ namespace Warhead::ChatCommands
     using namespace ::Warhead::Hyperlinks::LinkTags;
 }
 
-/************************** VARIANT TAG LOGIC *********************************\
-|* This has some special handling over in ChatCommand.h                       *|
-\******************************************************************************/
-
-namespace Warhead::Impl
+namespace Trinity::Impl
 {
     template <typename T>
     struct CastToVisitor {
