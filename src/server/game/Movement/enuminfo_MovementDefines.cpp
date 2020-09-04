@@ -1,5 +1,5 @@
 /*
- * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
+ * This file is part of the WarheadCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,14 +20,14 @@
 #include "SmartEnum.h"
 #include <stdexcept>
 
-namespace Trinity::Impl::EnumUtilsImpl
+namespace Warhead::Impl::EnumUtilsImpl
 {
 
 /*******************************************************************************\
 |* data for enum 'MovementGeneratorType' in 'MovementDefines.h' auto-generated *|
 \*******************************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<MovementGeneratorType>::ToString(MovementGeneratorType value)
+WH_API_EXPORT EnumText EnumUtils<MovementGeneratorType>::ToString(MovementGeneratorType value)
 {
     switch (value)
     {
@@ -55,10 +55,10 @@ TC_API_EXPORT EnumText EnumUtils<MovementGeneratorType>::ToString(MovementGenera
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<MovementGeneratorType>::Count() { return 19; }
+WH_API_EXPORT size_t EnumUtils<MovementGeneratorType>::Count() { return 19; }
 
 template <>
-TC_API_EXPORT MovementGeneratorType EnumUtils<MovementGeneratorType>::FromIndex(size_t index)
+WH_API_EXPORT MovementGeneratorType EnumUtils<MovementGeneratorType>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -86,7 +86,7 @@ TC_API_EXPORT MovementGeneratorType EnumUtils<MovementGeneratorType>::FromIndex(
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<MovementGeneratorType>::ToIndex(MovementGeneratorType value)
+WH_API_EXPORT size_t EnumUtils<MovementGeneratorType>::ToIndex(MovementGeneratorType value)
 {
     switch (value)
     {

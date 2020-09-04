@@ -43,7 +43,7 @@ namespace Warhead::Impl::ChatCommands
     |*                                                                                      *|
     \****************************************************************************************/
     template <typename T, typename = void>
-    struct ArgInfo { static_assert(Trinity::dependant_false_v<T>, "Invalid command parameter type - see ChatCommandArgs.h for possible types"); };
+    struct ArgInfo { static_assert(Warhead::dependant_false_v<T>, "Invalid command parameter type - see ChatCommandArgs.h for possible types"); };
 
     // catch-all for number types
     template <typename T>
@@ -242,13 +242,13 @@ namespace Warhead::Impl::ChatCommands
 
     // variant
     template <typename... Ts>
-    struct ArgInfo<Trinity::ChatCommands::Variant<Ts...>>
+    struct ArgInfo<Warhead::ChatCommands::Variant<Ts...>>
     {
         using V = std::variant<Ts...>;
         static constexpr size_t N = std::variant_size_v<V>;
 
         template <size_t I>
-        static Optional<std::string_view> TryAtIndex(Trinity::ChatCommands::Variant<Ts...>& val, [[maybe_unused]] std::string_view args)
+        static Optional<std::string_view> TryAtIndex(Warhead::ChatCommands::Variant<Ts...>& val, [[maybe_unused]] std::string_view args)
         {
             if constexpr (I < N)
             {
@@ -261,7 +261,7 @@ namespace Warhead::Impl::ChatCommands
                 return std::nullopt;
         }
 
-        static Optional<std::string_view> TryConsume(Trinity::ChatCommands::Variant<Ts...>& val, std::string_view args)
+        static Optional<std::string_view> TryConsume(Warhead::ChatCommands::Variant<Ts...>& val, std::string_view args)
         {
             return TryAtIndex<0>(val, args);
         }
@@ -269,28 +269,28 @@ namespace Warhead::Impl::ChatCommands
 
     // AchievementEntry* from numeric id or link
     template <>
-    struct TC_GAME_API ArgInfo<AchievementEntry const*>
+    struct WH_GAME_API ArgInfo<AchievementEntry const*>
     {
         static Optional<std::string_view> TryConsume(AchievementEntry const*&, std::string_view);
     };
 
     // GameTele* from string name or link
     template <>
-    struct TC_GAME_API ArgInfo<GameTele const*>
+    struct WH_GAME_API ArgInfo<GameTele const*>
     {
         static Optional<std::string_view> TryConsume(GameTele const*&, std::string_view);
     };
 
     // ItemTemplate* from numeric id or link
     template <>
-    struct TC_GAME_API ArgInfo<ItemTemplate const*>
+    struct WH_GAME_API ArgInfo<ItemTemplate const*>
     {
         static Optional<std::string_view> TryConsume(ItemTemplate const*&, std::string_view);
     };
 
     // SpellInfo const* from spell id or link
     template <>
-    struct TC_GAME_API ArgInfo<SpellInfo const*>
+    struct WH_GAME_API ArgInfo<SpellInfo const*>
     {
         static Optional<std::string_view> TryConsume(SpellInfo const*&, std::string_view);
     };

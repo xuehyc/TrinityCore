@@ -151,7 +151,7 @@ namespace Warhead::ChatCommands
     using namespace ::Warhead::Hyperlinks::LinkTags;
 }
 
-namespace Trinity::Impl
+namespace Warhead::Impl
 {
     template <typename T>
     struct CastToVisitor {

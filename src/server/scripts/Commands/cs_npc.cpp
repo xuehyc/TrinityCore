@@ -46,7 +46,7 @@ EndScriptData */
 #include <boost/core/demangle.hpp>
 #include <typeinfo>
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 using CreatureSpawnId = Variant<Hyperlink<creature>, ObjectGuid::LowType>;
 using CreatureEntry = Variant<Hyperlink<creature_entry>, uint32>;
 
@@ -666,7 +666,7 @@ public:
 
         if (!sCreatureDisplayInfoStore.LookupEntry(displayId))
         {
-            handler->PSendSysMessage(LANG_COMMAND_INVALID_PARAM, Trinity::ToString(displayId).c_str());
+            handler->PSendSysMessage(LANG_COMMAND_INVALID_PARAM, Warhead::ToString(displayId).c_str());
             handler->SetSentErrorMessage(true);
             return false;
         }

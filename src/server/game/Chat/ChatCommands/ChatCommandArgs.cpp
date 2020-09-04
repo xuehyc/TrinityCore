@@ -60,7 +60,7 @@ struct ItemTemplateVisitor
     value_type operator()(Hyperlink<item> item) const { return item->Item; }
     value_type operator()(uint32 item) { return sObjectMgr->GetItemTemplate(item); }
 };
-Optional<std::string_view> Trinity::Impl::ChatCommands::ArgInfo<ItemTemplate const*>::TryConsume(ItemTemplate const*& data, std::string_view args)
+Optional<std::string_view> Warhead::Impl::ChatCommands::ArgInfo<ItemTemplate const*>::TryConsume(ItemTemplate const*& data, std::string_view args)
 {
     Variant<Hyperlink<item>, uint32> val;
     Optional<std::string_view> next = SingleConsumer<decltype(val)>::TryConsumeTo(val, args);
