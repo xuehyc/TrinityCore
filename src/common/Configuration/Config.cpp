@@ -17,6 +17,7 @@
 
 #include "Config.h"
 #include "Log.h"
+#include "SystemLog.h"
 #include "StringConvert.h"
 #include "Util.h"
 #include <boost/property_tree/ini_parser.hpp>

@@ -19,6 +19,7 @@
 
 #include "Common.h"
 #include "Log.h"
+#include "SystemLog.h"
 #include <cstring>
 #include <windows.h>
 #include <winsvc.h>

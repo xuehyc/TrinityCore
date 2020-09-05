@@ -383,7 +383,7 @@ void Map::SwitchGridContainers(Creature* obj, bool on)
     if (!IsGridLoaded(GridCoord(cell.data.Part.grid_x, cell.data.Part.grid_y)))
         return;
 
-    if (sLog->ShouldLog("maps", LOG_LEVEL_DEBUG))
+    if (sLog->ShouldLog("maps", LogLevel::LOG_LEVEL_DEBUG))
     {
         // Extract bitfield values
         uint32 const grid_x = cell.data.Part.grid_x;
@@ -428,7 +428,7 @@ void Map::SwitchGridContainers(GameObject* obj, bool on)
     if (!IsGridLoaded(GridCoord(cell.data.Part.grid_x, cell.data.Part.grid_y)))
         return;
 
-    if (sLog->ShouldLog("maps", LOG_LEVEL_DEBUG))
+    if (sLog->ShouldLog("maps", LogLevel::LOG_LEVEL_DEBUG))
     {
         // Extract bitfield values
         uint32 const grid_x = cell.data.Part.grid_x;

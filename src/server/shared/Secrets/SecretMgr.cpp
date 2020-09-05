@@ -90,7 +90,7 @@ void SecretMgr::Initialize()
         if (secret_info[i].flags() & SECRET_FLAG_DEFER_LOAD)
             continue;
         std::unique_lock<std::mutex> lock(_secrets[i].lock);
-        AttemptLoad(Secrets(i), LOG_LEVEL_FATAL, lock);
+        AttemptLoad(Secrets(i), LogLevel::LOG_LEVEL_FATAL, lock);
         if (!_secrets[i].IsAvailable())
             ABORT(); // load failed
     }
@@ -101,7 +101,7 @@ SecretMgr::Secret const& SecretMgr::GetSecret(Secrets i)
     std::unique_lock<std::mutex> lock(_secrets[i].lock);
 
     if (_secrets[i].state == Secret::NOT_LOADED_YET)
-        AttemptLoad(i, LOG_LEVEL_ERROR, lock);
+        AttemptLoad(i, LogLevel::LOG_LEVEL_ERROR, lock);
     return _secrets[i];
 }
 
