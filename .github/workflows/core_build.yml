@@ -30,10 +30,40 @@ jobs:
         env:
           CONTINUOUS_INTEGRATION: true
       - name: Configure CMake static
-        run: source ./apps/ci/ci-config-cmake-static.sh
+        run: source ./apps/ci/ci-cmake-static.sh
         if: matrix.modules == 'static'
       - name: Configure CMake dynamic
-        run: source ./apps/ci/ci-config-cmake-dynamic.sh
+        run: source ./apps/ci/ci-cmake-dynamic.sh
         if: matrix.modules == 'dynamic'
+      - name: Build core
+        run: source ./apps/ci/ci-compile.sh
+
+  nopch-build:
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [clang10]
+        modules: [nopch]
+    runs-on: ubuntu-20.04
+    name: ${{ matrix.compiler }}-${{ matrix.modules }}
+    env:
+      COMPILER: ${{ matrix.compiler }}
+      BUILDTYPE: ${{ matrix.modules }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache
+        uses: actions/cache@v1.1.2
+        with:
+          path: /home/runner/.ccache
+          key: ccache:${{ matrix.compiler }}:${{ matrix.modules }}-modules:${{ github.ref }}:${{ github.sha }}
+          restore-keys: |
+            ccache:${{ matrix.compiler }}:${{ matrix.modules }}-modules:${{ github.ref }}
+            ccache:${{ matrix.compiler }}:${{ matrix.modules }}-modules
+      - name: Configure OS and install deps
+        run: source ./apps/ci/ci-config-os.sh
+        env:
+          CONTINUOUS_INTEGRATION: true
+      - name: Configure CMake dynamic ${{ matrix.modules }}
+        run: source ./apps/ci/ci-cmake-nopch.sh
       - name: Build core
         run: source ./apps/ci/ci-compile.sh

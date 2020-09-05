@@ -41,7 +41,7 @@ void CharacterDatabaseCleaner::CleanDatabase()
         LOG_INFO("server.loading", ">> Not found data for cleaned");
         LOG_INFO("server.loading", "");
         return;
-    } 
+    }
 
     uint32 flags = (*result)[0].GetUInt32();
 

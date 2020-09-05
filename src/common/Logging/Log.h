@@ -90,7 +90,7 @@ public:
     bool ShouldLog(std::string const& type, LogLevel level) const;
     std::string const& GetLogsDir() const { return m_logsDir; }
 
-    void outCharDump(std::string const& str, uint32 accountId, uint64 guid, std::string const& name);    
+    void outCharDump(std::string const& str, uint32 accountId, uint64 guid, std::string const& name);
 
     template<typename Format, typename... Args>
     inline void outMessage(std::string const& filter, LogLevel const level, Format&& fmt, Args&& ... args)
@@ -149,7 +149,7 @@ private:
     ChannelMapFiles _ChannelMapFiles;
     ChannelMapConsole _ChannelMapConsole;
 
-    std::string m_logsDir;    
+    std::string m_logsDir;
 
     // Const loggers name
     std::string const LOGGER_ROOT = "root";

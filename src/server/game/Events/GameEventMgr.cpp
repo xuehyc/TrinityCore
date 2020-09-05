@@ -449,7 +449,7 @@ void GameEventMgr::LoadFromDB()
         {
             LOG_INFO("server.loading", ">> Loaded 0 gameobjects in game events. DB table `game_event_gameobject` is empty.");
             LOG_INFO("server.loading", "");
-        } 
+        }
         else
         {
             uint32 count = 0;
@@ -561,7 +561,7 @@ void GameEventMgr::LoadFromDB()
         {
             LOG_INFO("server.loading", ">> Loaded 0 quests additions in game events. DB table `game_event_creature_quest` is empty.");
             LOG_INFO("server.loading", "");
-        } 
+        }
         else
         {
             uint32 count = 0;
@@ -602,7 +602,7 @@ void GameEventMgr::LoadFromDB()
         {
             LOG_INFO("server.loading", ">> Loaded 0 go quests additions in game events. DB table `game_event_gameobject_quest` is empty.");
             LOG_INFO("server.loading", "");
-        } 
+        }
         else
         {
             uint32 count = 0;
@@ -728,7 +728,7 @@ void GameEventMgr::LoadFromDB()
         {
             LOG_INFO("server.loading", ">> Loaded 0 condition saves in game events. DB table `game_event_condition_save` is empty.");
             LOG_INFO("server.loading", "");
-        } 
+        }
         else
         {
             uint32 count = 0;
@@ -861,7 +861,7 @@ void GameEventMgr::LoadFromDB()
         {
             LOG_INFO("server.loading", ">> Loaded 0 vendor additions in game events. DB table `game_event_npc_vendor` is empty.");
             LOG_INFO("server.loading", "");
-        } 
+        }
         else
         {
             uint32 count = 0;

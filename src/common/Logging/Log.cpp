@@ -214,7 +214,7 @@ bool Log::ShouldLog(std::string const& type, LogLevel level) const
 {
     if (GetLoggerByType(type) == LOGGER_ROOT)
         return false;
-    
+
     return Logger::get(type).getLevel() >= level;
 }
 
@@ -275,7 +275,7 @@ void Log::ClearnAllChannels()
 std::string const Log::GetChannelFromLogger(std::string LoggerName)
 {
     std::string LoggerOption = sConfigMgr->GetStringDefault(PREFIX_LOGGER + LoggerName, "6,Server");
-    
+
     auto const& tokens = Warhead::Tokenize(LoggerOption, ',', true);
 
     if (tokens.size())
@@ -362,7 +362,7 @@ void Log::CreateChannelsFromConfig(std::string const& LogChannelName)
 
     std::string options = sConfigMgr->GetStringDefault(LogChannelName, "");
     std::string ChannelName = LogChannelName.substr(PREFIX_CHANNEL.length());
-    
+
     if (options.empty())
     {
         SYS_LOG_ERROR("Log::CreateLoggerFromConfig: Missing config option LogChannel.%s", ChannelName.c_str());
@@ -395,7 +395,7 @@ void Log::CreateChannelsFromConfig(std::string const& LogChannelName)
         SYS_LOG_ERROR("Log::CreateLoggerFromConfig: Empty times for LogChannel.%s", ChannelName.c_str());
         return;
     }
-    
+
     std::string Pattern = GetPositionOptions(options, CHANNEL_OPTIONS_PATTERN);
     if (Pattern.empty())
     {
@@ -456,7 +456,7 @@ void Log::CreateChannelsFromConfig(std::string const& LogChannelName)
             SYS_LOG_ERROR("Log::CreateLoggerFromConfig: _CONSOLE_CHANNEL is no empty!");
             return;
         }
-        
+
         AddConsoleChannel(ChannelName, new FormattingChannel(_pattern, _channel));
     }
     else if (ChannelType == CHANNEL_OPTIONS_TYPE_FILE)
@@ -496,7 +496,7 @@ void Log::CreateChannelsFromConfig(std::string const& LogChannelName)
                 _channel->setProperty("flush", Flush);
 
             if (!Archive.empty())
-                _channel->setProperty("archive", Archive);            
+                _channel->setProperty("archive", Archive);
         }
         catch (const std::exception& e)
         {
@@ -609,7 +609,7 @@ void Log::_writeCommand(std::string const message, std::string const accountid)
                 _channel->setProperty("flush", Flush);
 
             if (!Archive.empty())
-                _channel->setProperty("archive", Archive);            
+                _channel->setProperty("archive", Archive);
         }
         catch (const std::exception& e)
         {

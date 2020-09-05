@@ -199,7 +199,7 @@ void GuildMgr::LoadGuilds()
         {
             LOG_INFO("server.loading", ">> Loaded 0 guild members. DB table `guild_member` is empty.");
             LOG_INFO("server.loading", "");
-        } 
+        }
         else
         {
             uint32 count = 0;
