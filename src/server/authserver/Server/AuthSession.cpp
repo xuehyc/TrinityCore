@@ -399,8 +399,8 @@ void AuthSession::LogonChallengeCallback(PreparedQueryResult result)
 
     _srp6.emplace(
         _accountInfo.Login,
-        fields[10].GetBinary<Trinity::Crypto::SRP6::SALT_LENGTH>(),
-        fields[11].GetBinary<Trinity::Crypto::SRP6::VERIFIER_LENGTH>()
+        fields[10].GetBinary<Warhead::Crypto::SRP6::SALT_LENGTH>(),
+        fields[11].GetBinary<Warhead::Crypto::SRP6::VERIFIER_LENGTH>()
     );
 
     // Fill the response packet with the result

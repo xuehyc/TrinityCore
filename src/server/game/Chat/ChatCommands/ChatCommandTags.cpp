@@ -25,19 +25,19 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 
-Optional<std::string_view> Trinity::ChatCommands::QuotedString::TryConsume(std::string_view args)
+Optional<std::string_view> Warhead::ChatCommands::QuotedString::TryConsume(std::string_view args)
 {
     if (args.empty())
         return std::nullopt;
     if ((args[0] != '"') && (args[0] != '\''))
-        return Trinity::Impl::ChatCommands::ArgInfo<std::string>::TryConsume(*this, args);
+        return Warhead::Impl::ChatCommands::ArgInfo<std::string>::TryConsume(*this, args);
 
     char const QUOTE = args[0];
     for (size_t i = 1; i < args.length(); ++i)
     {
         if (args[i] == QUOTE)
         {
-            auto [remainingToken, tail] = Trinity::Impl::ChatCommands::tokenize(args.substr(i + 1));
+            auto [remainingToken, tail] = Warhead::Impl::ChatCommands::tokenize(args.substr(i + 1));
             if (remainingToken.empty()) // if this is not empty, then we did not consume the full token
                 return tail;
             else
@@ -56,10 +56,10 @@ Optional<std::string_view> Trinity::ChatCommands::QuotedString::TryConsume(std::
     return std::nullopt;
 }
 
-Optional<std::string_view> Trinity::ChatCommands::AccountIdentifier::TryConsume(std::string_view args)
+Optional<std::string_view> Warhead::ChatCommands::AccountIdentifier::TryConsume(std::string_view args)
 {
     std::string_view text;
-    Optional<std::string_view> next = Trinity::Impl::ChatCommands::ArgInfo<std::string_view>::TryConsume(text, args);
+    Optional<std::string_view> next = Warhead::Impl::ChatCommands::ArgInfo<std::string_view>::TryConsume(text, args);
     if (!next)
         return std::nullopt;
 
@@ -72,7 +72,7 @@ Optional<std::string_view> Trinity::ChatCommands::AccountIdentifier::TryConsume(
         return next;
 
     // try parsing as account id instead
-    Optional<uint32> id = Trinity::StringTo<uint32>(text, 10);
+    Optional<uint32> id = Warhead::StringTo<uint32>(text, 10);
     if (!id)
         return std::nullopt;
     _id = *id;
@@ -83,10 +83,10 @@ Optional<std::string_view> Trinity::ChatCommands::AccountIdentifier::TryConsume(
         return std::nullopt;
 }
 
-Optional<std::string_view> Trinity::ChatCommands::PlayerIdentifier::TryConsume(std::string_view args)
+Optional<std::string_view> Warhead::ChatCommands::PlayerIdentifier::TryConsume(std::string_view args)
 {
     Variant<Hyperlink<player>, ObjectGuid::LowType, std::string_view> val;
-    Optional<std::string_view> next = Trinity::Impl::ChatCommands::ArgInfo<decltype(val)>::TryConsume(val, args);
+    Optional<std::string_view> next = Warhead::Impl::ChatCommands::ArgInfo<decltype(val)>::TryConsume(val, args);
     if (!next)
         return std::nullopt;
 
@@ -117,10 +117,10 @@ Optional<std::string_view> Trinity::ChatCommands::PlayerIdentifier::TryConsume(s
     }
 }
 
-Trinity::ChatCommands::PlayerIdentifier::PlayerIdentifier(Player& player)
+Warhead::ChatCommands::PlayerIdentifier::PlayerIdentifier(Player& player)
     : _name(player.GetName()), _guid(player.GetGUID()), _player(&player) {}
 
-/*static*/ Optional<Trinity::ChatCommands::PlayerIdentifier> Trinity::ChatCommands::PlayerIdentifier::FromTarget(ChatHandler* handler)
+/*static*/ Optional<Warhead::ChatCommands::PlayerIdentifier> Warhead::ChatCommands::PlayerIdentifier::FromTarget(ChatHandler* handler)
 {
     if (Player* player = handler->GetPlayer())
         if (Player* target = player->GetSelectedPlayer())
@@ -129,7 +129,7 @@ Trinity::ChatCommands::PlayerIdentifier::PlayerIdentifier(Player& player)
 
 }
 
-/*static*/ Optional<Trinity::ChatCommands::PlayerIdentifier> Trinity::ChatCommands::PlayerIdentifier::FromSelf(ChatHandler* handler)
+/*static*/ Optional<Warhead::ChatCommands::PlayerIdentifier> Warhead::ChatCommands::PlayerIdentifier::FromSelf(ChatHandler* handler)
 {
     if (Player* player = handler->GetPlayer())
         return { *player };

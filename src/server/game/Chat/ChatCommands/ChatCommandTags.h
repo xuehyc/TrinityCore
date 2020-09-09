@@ -113,14 +113,14 @@ namespace Warhead::ChatCommands
         }
     };
 
-    struct QuotedString : std::string, Trinity::Impl::ChatCommands::ContainerTag
+    struct QuotedString : std::string, Warhead::Impl::ChatCommands::ContainerTag
     {
         using value_type = std::string;
 
         TC_GAME_API Optional<std::string_view> TryConsume(std::string_view args);
     };
 
-    struct TC_GAME_API AccountIdentifier : Trinity::Impl::ChatCommands::ContainerTag
+    struct TC_GAME_API AccountIdentifier : Warhead::Impl::ChatCommands::ContainerTag
     {
         using value_type = uint32;
 
@@ -138,7 +138,7 @@ namespace Warhead::ChatCommands
             std::string _name;
     };
 
-    struct TC_GAME_API PlayerIdentifier : Trinity::Impl::ChatCommands::ContainerTag
+    struct TC_GAME_API PlayerIdentifier : Warhead::Impl::ChatCommands::ContainerTag
     {
         using value_type = Player*;
 
@@ -278,7 +278,7 @@ namespace Warhead::ChatCommands
         constexpr bool holds_alternative() const { return std::holds_alternative<T>(static_cast<base const&>(*this)); }
 
         template <bool C = have_operators>
-        friend std::enable_if_t<C, std::ostream&> operator<<(std::ostream& os, Trinity::ChatCommands::Variant<T1, Ts...> const& v)
+        friend std::enable_if_t<C, std::ostream&> operator<<(std::ostream& os, Warhead::ChatCommands::Variant<T1, Ts...> const& v)
         {
             return (os << *v);
         }

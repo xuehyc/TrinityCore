@@ -1128,8 +1128,8 @@ struct npc_icc_nerubar_broodkeeper : public ScriptedAI
                 {
                     // Select a friendly target between 1% and 75% hp
                     Unit* target = nullptr;
-                    Trinity::MostHPPercentMissingInRange u_check(me, 40.0f, 1, 75);
-                    Trinity::UnitLastSearcher<Trinity::MostHPPercentMissingInRange> searcher(me, target, u_check);
+                    Warhead::MostHPPercentMissingInRange u_check(me, 40.0f, 1, 75);
+                    Warhead::UnitLastSearcher<Warhead::MostHPPercentMissingInRange> searcher(me, target, u_check);
                     Cell::VisitGridObjects(me, searcher, 40.0f);
 
                     if (target)

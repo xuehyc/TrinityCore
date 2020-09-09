@@ -89,7 +89,7 @@ private:
     void ReconnectChallengeCallback(PreparedQueryResult result);
     void RealmListCallback(PreparedQueryResult result);
 
-    bool VerifyVersion(uint8 const* a, int32 aLength, Trinity::Crypto::SHA1::Digest const& versionProof, bool isReconnect);
+    bool VerifyVersion(uint8 const* a, int32 aLength, Warhead::Crypto::SHA1::Digest const& versionProof, bool isReconnect);
 
     Optional<Warhead::Crypto::SRP6> _srp6;
     SessionKey _sessionKey;

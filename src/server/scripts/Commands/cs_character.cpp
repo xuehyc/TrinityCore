@@ -37,7 +37,7 @@ EndScriptData */
 #include "World.h"
 #include "WorldSession.h"
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 class character_commandscript : public CommandScript
 {
 public:
@@ -268,7 +268,7 @@ public:
                 if (target->GetUInt32Value(PLAYER_CHOSEN_TITLE) == titleInfo->MaskID)
                     activeStr = handler->GetTrinityString(LANG_ACTIVE);
 
-                std::string titleName = Trinity::StringFormat(name, targetName.c_str());
+                std::string titleName = Warhead::StringFormat(name, targetName.c_str());
 
                 // send title in "id (idx:idx) - [namedlink locale]" format
                 if (handler->GetSession())

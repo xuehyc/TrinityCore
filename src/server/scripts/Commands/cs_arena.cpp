@@ -34,7 +34,7 @@ EndScriptData */
 #include "WorldSession.h"
 
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 class arena_commandscript : public CommandScript
 {
 public:
