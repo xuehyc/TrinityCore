@@ -139,8 +139,6 @@ int main(int argc, char** argv)
 
     sSecretMgr->Initialize();
 
-    AuthSession::ServerStartup();
-
     // Load IP Location Database
     sIPLocation->Load();
 
