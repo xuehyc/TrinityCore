@@ -597,7 +597,7 @@ struct _Socket
 #define MAX_ITEM_PROTO_SPELLS  5
 #define MAX_ITEM_PROTO_STATS  10
 
-struct TC_GAME_API ItemTemplate
+struct WH_GAME_API ItemTemplate
 {
     friend class ObjectMgr;
 

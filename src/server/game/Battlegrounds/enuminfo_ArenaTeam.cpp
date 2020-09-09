@@ -27,7 +27,7 @@ namespace Warhead::Impl::EnumUtilsImpl
 |* data for enum 'ArenaTeamTypes' in 'ArenaTeam.h' auto-generated *|
 \******************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<ArenaTeamTypes>::ToString(ArenaTeamTypes value)
+WH_API_EXPORT EnumText EnumUtils<ArenaTeamTypes>::ToString(ArenaTeamTypes value)
 {
     switch (value)
     {
@@ -39,10 +39,10 @@ TC_API_EXPORT EnumText EnumUtils<ArenaTeamTypes>::ToString(ArenaTeamTypes value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<ArenaTeamTypes>::Count() { return 3; }
+WH_API_EXPORT size_t EnumUtils<ArenaTeamTypes>::Count() { return 3; }
 
 template <>
-TC_API_EXPORT ArenaTeamTypes EnumUtils<ArenaTeamTypes>::FromIndex(size_t index)
+WH_API_EXPORT ArenaTeamTypes EnumUtils<ArenaTeamTypes>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -54,7 +54,7 @@ TC_API_EXPORT ArenaTeamTypes EnumUtils<ArenaTeamTypes>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<ArenaTeamTypes>::ToIndex(ArenaTeamTypes value)
+WH_API_EXPORT size_t EnumUtils<ArenaTeamTypes>::ToIndex(ArenaTeamTypes value)
 {
     switch (value)
     {

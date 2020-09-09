@@ -117,10 +117,10 @@ namespace Warhead::ChatCommands
     {
         using value_type = std::string;
 
-        TC_GAME_API Optional<std::string_view> TryConsume(std::string_view args);
+        WH_GAME_API Optional<std::string_view> TryConsume(std::string_view args);
     };
 
-    struct TC_GAME_API AccountIdentifier : Warhead::Impl::ChatCommands::ContainerTag
+    struct WH_GAME_API AccountIdentifier : Warhead::Impl::ChatCommands::ContainerTag
     {
         using value_type = uint32;
 
@@ -138,7 +138,7 @@ namespace Warhead::ChatCommands
             std::string _name;
     };
 
-    struct TC_GAME_API PlayerIdentifier : Warhead::Impl::ChatCommands::ContainerTag
+    struct WH_GAME_API PlayerIdentifier : Warhead::Impl::ChatCommands::ContainerTag
     {
         using value_type = Player*;
 
