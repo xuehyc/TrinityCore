@@ -1296,7 +1296,7 @@ WH_API_EXPORT size_t EnumUtils<SpellAttr7>::ToIndex(SpellAttr7 value)
 |* data for enum 'SpellCastResult' in 'SharedDefines.h' auto-generated *|
 \***********************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SpellCastResult>::ToString(SpellCastResult value)
+WH_API_EXPORT EnumText EnumUtils<SpellCastResult>::ToString(SpellCastResult value)
 {
     switch (value)
     {
@@ -1494,10 +1494,10 @@ TC_API_EXPORT EnumText EnumUtils<SpellCastResult>::ToString(SpellCastResult valu
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellCastResult>::Count() { return 189; }
+WH_API_EXPORT size_t EnumUtils<SpellCastResult>::Count() { return 189; }
 
 template <>
-TC_API_EXPORT SpellCastResult EnumUtils<SpellCastResult>::FromIndex(size_t index)
+WH_API_EXPORT SpellCastResult EnumUtils<SpellCastResult>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -1695,7 +1695,7 @@ TC_API_EXPORT SpellCastResult EnumUtils<SpellCastResult>::FromIndex(size_t index
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SpellCastResult>::ToIndex(SpellCastResult value)
+WH_API_EXPORT size_t EnumUtils<SpellCastResult>::ToIndex(SpellCastResult value)
 {
     switch (value)
     {
@@ -1896,7 +1896,7 @@ TC_API_EXPORT size_t EnumUtils<SpellCastResult>::ToIndex(SpellCastResult value)
 |* data for enum 'AuraStateType' in 'SharedDefines.h' auto-generated *|
 \*********************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<AuraStateType>::ToString(AuraStateType value)
+WH_API_EXPORT EnumText EnumUtils<AuraStateType>::ToString(AuraStateType value)
 {
     switch (value)
     {
@@ -1923,10 +1923,10 @@ TC_API_EXPORT EnumText EnumUtils<AuraStateType>::ToString(AuraStateType value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<AuraStateType>::Count() { return 18; }
+WH_API_EXPORT size_t EnumUtils<AuraStateType>::Count() { return 18; }
 
 template <>
-TC_API_EXPORT AuraStateType EnumUtils<AuraStateType>::FromIndex(size_t index)
+WH_API_EXPORT AuraStateType EnumUtils<AuraStateType>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -1953,7 +1953,7 @@ TC_API_EXPORT AuraStateType EnumUtils<AuraStateType>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<AuraStateType>::ToIndex(AuraStateType value)
+WH_API_EXPORT size_t EnumUtils<AuraStateType>::ToIndex(AuraStateType value)
 {
     switch (value)
     {
@@ -2805,7 +2805,7 @@ WH_API_EXPORT size_t EnumUtils<WeatherType>::ToIndex(WeatherType value)
 |* data for enum 'ChatMsg' in 'SharedDefines.h' auto-generated *|
 \***************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<ChatMsg>::ToString(ChatMsg value)
+WH_API_EXPORT EnumText EnumUtils<ChatMsg>::ToString(ChatMsg value)
 {
     switch (value)
     {
@@ -2867,10 +2867,10 @@ TC_API_EXPORT EnumText EnumUtils<ChatMsg>::ToString(ChatMsg value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<ChatMsg>::Count() { return 53; }
+WH_API_EXPORT size_t EnumUtils<ChatMsg>::Count() { return 53; }
 
 template <>
-TC_API_EXPORT ChatMsg EnumUtils<ChatMsg>::FromIndex(size_t index)
+WH_API_EXPORT ChatMsg EnumUtils<ChatMsg>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -2932,7 +2932,7 @@ TC_API_EXPORT ChatMsg EnumUtils<ChatMsg>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<ChatMsg>::ToIndex(ChatMsg value)
+WH_API_EXPORT size_t EnumUtils<ChatMsg>::ToIndex(ChatMsg value)
 {
     switch (value)
     {

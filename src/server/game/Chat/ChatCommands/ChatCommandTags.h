@@ -56,7 +56,7 @@ namespace Warhead::Impl::ChatCommands
     }
 
 #define CHATCOMMANDS_IMPL_SPLIT_LITERAL_EXTRACT_CHAR(z, i, strliteral) \
-        BOOST_PP_COMMA_IF(i) Trinity::Impl::ChatCommands::GetChar(strliteral, i)
+        BOOST_PP_COMMA_IF(i) Warhead::Impl::ChatCommands::GetChar(strliteral, i)
 
 #define CHATCOMMANDS_IMPL_SPLIT_LITERAL_CONSTRAINED(maxlen, strliteral)  \
         BOOST_PP_REPEAT(maxlen, CHATCOMMANDS_IMPL_SPLIT_LITERAL_EXTRACT_CHAR, strliteral)
@@ -79,7 +79,7 @@ namespace Warhead::ChatCommands
     \****************************************************************************************/
 
     template <char... chars>
-    struct ExactSequence : Trinity::Impl::ChatCommands::ContainerTag
+    struct ExactSequence : Warhead::Impl::ChatCommands::ContainerTag
     {
         using value_type = void;
 
@@ -87,7 +87,7 @@ namespace Warhead::ChatCommands
         {
             if (StringStartsWithI(args, _string))
             {
-                auto [remainingToken, tail] = Trinity::Impl::ChatCommands::tokenize(args.substr(_string.length()));
+                auto [remainingToken, tail] = Warhead::Impl::ChatCommands::tokenize(args.substr(_string.length()));
                 if (remainingToken.empty()) // if this is not empty, then we did not consume the full token
                     return tail;
             }
@@ -100,9 +100,9 @@ namespace Warhead::ChatCommands
             static constexpr std::string_view _string = { _storage.data() };
     };
 
-#define EXACT_SEQUENCE(str) Trinity::ChatCommands::ExactSequence<CHATCOMMANDS_IMPL_SPLIT_LITERAL(str)>
+#define EXACT_SEQUENCE(str) Warhead::ChatCommands::ExactSequence<CHATCOMMANDS_IMPL_SPLIT_LITERAL(str)>
 
-    struct Tail : std::string_view, Trinity::Impl::ChatCommands::ContainerTag
+    struct Tail : std::string_view, Warhead::Impl::ChatCommands::ContainerTag
     {
         using value_type = std::string_view;
 

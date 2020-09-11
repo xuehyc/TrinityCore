@@ -20,14 +20,14 @@
 #include "SmartEnum.h"
 #include <stdexcept>
 
-namespace Trinity::Impl::EnumUtilsImpl
+namespace Warhead::Impl::EnumUtilsImpl
 {
 
 /*********************************************************************\
 |* data for enum 'InventoryResult' in 'ItemDefines.h' auto-generated *|
 \*********************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<InventoryResult>::ToString(InventoryResult value)
+WH_API_EXPORT EnumText EnumUtils<InventoryResult>::ToString(InventoryResult value)
 {
     switch (value)
     {
@@ -124,10 +124,10 @@ TC_API_EXPORT EnumText EnumUtils<InventoryResult>::ToString(InventoryResult valu
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<InventoryResult>::Count() { return 88; }
+WH_API_EXPORT size_t EnumUtils<InventoryResult>::Count() { return 88; }
 
 template <>
-TC_API_EXPORT InventoryResult EnumUtils<InventoryResult>::FromIndex(size_t index)
+WH_API_EXPORT InventoryResult EnumUtils<InventoryResult>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -224,7 +224,7 @@ TC_API_EXPORT InventoryResult EnumUtils<InventoryResult>::FromIndex(size_t index
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<InventoryResult>::ToIndex(InventoryResult value)
+WH_API_EXPORT size_t EnumUtils<InventoryResult>::ToIndex(InventoryResult value)
 {
     switch (value)
     {
@@ -324,7 +324,7 @@ TC_API_EXPORT size_t EnumUtils<InventoryResult>::ToIndex(InventoryResult value)
 |* data for enum 'BuyResult' in 'ItemDefines.h' auto-generated *|
 \***************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<BuyResult>::ToString(BuyResult value)
+WH_API_EXPORT EnumText EnumUtils<BuyResult>::ToString(BuyResult value)
 {
     switch (value)
     {
@@ -342,10 +342,10 @@ TC_API_EXPORT EnumText EnumUtils<BuyResult>::ToString(BuyResult value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<BuyResult>::Count() { return 9; }
+WH_API_EXPORT size_t EnumUtils<BuyResult>::Count() { return 9; }
 
 template <>
-TC_API_EXPORT BuyResult EnumUtils<BuyResult>::FromIndex(size_t index)
+WH_API_EXPORT BuyResult EnumUtils<BuyResult>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -363,7 +363,7 @@ TC_API_EXPORT BuyResult EnumUtils<BuyResult>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<BuyResult>::ToIndex(BuyResult value)
+WH_API_EXPORT size_t EnumUtils<BuyResult>::ToIndex(BuyResult value)
 {
     switch (value)
     {
@@ -384,7 +384,7 @@ TC_API_EXPORT size_t EnumUtils<BuyResult>::ToIndex(BuyResult value)
 |* data for enum 'SellResult' in 'ItemDefines.h' auto-generated *|
 \****************************************************************/
 template <>
-TC_API_EXPORT EnumText EnumUtils<SellResult>::ToString(SellResult value)
+WH_API_EXPORT EnumText EnumUtils<SellResult>::ToString(SellResult value)
 {
     switch (value)
     {
@@ -400,10 +400,10 @@ TC_API_EXPORT EnumText EnumUtils<SellResult>::ToString(SellResult value)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SellResult>::Count() { return 7; }
+WH_API_EXPORT size_t EnumUtils<SellResult>::Count() { return 7; }
 
 template <>
-TC_API_EXPORT SellResult EnumUtils<SellResult>::FromIndex(size_t index)
+WH_API_EXPORT SellResult EnumUtils<SellResult>::FromIndex(size_t index)
 {
     switch (index)
     {
@@ -419,7 +419,7 @@ TC_API_EXPORT SellResult EnumUtils<SellResult>::FromIndex(size_t index)
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<SellResult>::ToIndex(SellResult value)
+WH_API_EXPORT size_t EnumUtils<SellResult>::ToIndex(SellResult value)
 {
     switch (value)
     {

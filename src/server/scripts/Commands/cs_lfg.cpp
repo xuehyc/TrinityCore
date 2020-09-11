@@ -27,7 +27,7 @@
 #include "Player.h"
 #include "RBAC.h"
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 
 void PrintPlayerInfo(ChatHandler* handler, Player const* player)
 {
