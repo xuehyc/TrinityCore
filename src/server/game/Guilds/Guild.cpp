@@ -110,7 +110,7 @@ void Guild::SendCommandResult(WorldSession* session, GuildCommandType type, Guil
     resultPacket.Name = param;
     session->SendPacket(resultPacket.Write());
 
-    WH_LOG_DEBUG("guild", "SMSG_GUILD_COMMAND_RESULT [%s]: Type: %u, code: %u, param: %s"
+    LOG_DEBUG("guild", "SMSG_GUILD_COMMAND_RESULT [%s]: Type: %u, code: %u, param: %s"
          , session->GetPlayerInfo().c_str(), type, errCode, resultPacket.Name.c_str());
 }
 
@@ -1101,7 +1101,7 @@ bool Guild::Create(Player* pLeader, std::string_view name)
     m_bankMoney = 0;
     m_createdDate = GameTime::GetGameTime();
 
-    WH_LOG_DEBUG("guild", "GUILD: creating guild [%s] for leader %s %s",
+    LOG_DEBUG("guild", "GUILD: creating guild [%s] for leader %s %s",
         m_name.c_str(), pLeader->GetName().c_str(), m_leaderGuid.ToString().c_str());
 
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
@@ -1427,7 +1427,7 @@ void Guild::HandleSetRankInfo(WorldSession* session, uint8 rankId, std::string_v
 
         _BroadcastEvent(GE_RANK_UPDATED, ObjectGuid::Empty, std::to_string(rankId), rankInfo->GetName(), std::to_string(m_ranks.size()));
 
-        WH_LOG_DEBUG("guild", "Changed RankName to '%s', rights to 0x%08X", rankInfo->GetName().c_str(), rights);
+        LOG_DEBUG("guild", "Changed RankName to '%s', rights to 0x%08X", rankInfo->GetName().c_str(), rights);
     }
 }
 
@@ -1501,7 +1501,7 @@ void Guild::HandleInviteMember(WorldSession* session, std::string_view name)
 
     SendCommandResult(session, GUILD_COMMAND_INVITE, ERR_GUILD_COMMAND_SUCCESS, name);
 
-    WH_LOG_DEBUG("guild", "Player %s invited %s to join his Guild", player->GetName().c_str(), pInvitee->GetName().c_str());
+    LOG_DEBUG("guild", "Player %s invited %s to join his Guild", player->GetName().c_str(), pInvitee->GetName().c_str());
 
     pInvitee->SetGuildIdInvited(m_id);
     _LogEvent(GUILD_EVENT_LOG_INVITE_PLAYER, player->GetGUID().GetCounter(), pInvitee->GetGUID().GetCounter());
@@ -1953,7 +1953,7 @@ bool Guild::LoadMemberFromDB(Field* fields)
     auto [memberIt, isNew] = m_members.try_emplace(lowguid, m_id, playerGuid, fields[2].GetUInt8());
     if (!isNew)
     {
-        WH_LOG_ERROR("guild", "Tried to add %s to guild '%s'. Member already exists.", playerGuid.ToString().c_str(), m_name.c_str());
+        LOG_ERROR("guild", "Tried to add %s to guild '%s'. Member already exists.", playerGuid.ToString().c_str(), m_name.c_str());
         return false;
     }
 
@@ -2217,7 +2217,7 @@ bool Guild::AddMember(CharacterDatabaseTransaction trans, ObjectGuid guid, uint8
     auto [memberIt, isNew] = m_members.try_emplace(lowguid, m_id, guid, rankId);
     if (!isNew)
     {
-        WH_LOG_ERROR("guild", "Tried to add %s to guild '%s'. Member already exists.", guid.ToString().c_str(), m_name.c_str());
+        LOG_ERROR("guild", "Tried to add %s to guild '%s'. Member already exists.", guid.ToString().c_str(), m_name.c_str());
         return false;
     }
 
