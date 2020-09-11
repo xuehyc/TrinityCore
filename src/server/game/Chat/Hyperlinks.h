@@ -70,7 +70,7 @@ namespace Warhead::Hyperlinks
     struct QuestLinkData
     {
         ::Quest const* Quest;
-        uint8 QuestLevel;
+        int16 QuestLevel;
     };
 
     struct TalentLinkData
