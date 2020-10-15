@@ -22,8 +22,8 @@
 #include "SpellMgr.h"
 #include "Util.h"
 
-using namespace Trinity::ChatCommands;
-using ChatCommandResult = Trinity::Impl::ChatCommands::ChatCommandResult;
+using namespace Warhead::ChatCommands;
+using ChatCommandResult = Warhead::Impl::ChatCommands::ChatCommandResult;
 
 struct AchievementVisitor
 {
@@ -31,7 +31,7 @@ struct AchievementVisitor
     value_type operator()(Hyperlink<achievement> achData) const { return achData->Achievement; }
     value_type operator()(uint32 achId) const { return sAchievementMgr->GetAchievement(achId); }
 };
-ChatCommandResult Trinity::Impl::ChatCommands::ArgInfo<AchievementEntry const*>::TryConsume(AchievementEntry const*& data, ChatHandler const* handler, std::string_view args)
+ChatCommandResult Warhead::Impl::ChatCommands::ArgInfo<AchievementEntry const*>::TryConsume(AchievementEntry const*& data, ChatHandler const* handler, std::string_view args)
 {
     Variant<Hyperlink<achievement>, uint32> val;
     ChatCommandResult result = ArgInfo<decltype(val)>::TryConsume(val, handler, args);
@@ -48,7 +48,7 @@ struct GameTeleVisitor
     value_type operator()(Hyperlink<tele> tele) const { return sObjectMgr->GetGameTele(tele); }
     value_type operator()(std::string_view tele) const { return sObjectMgr->GetGameTele(tele); }
 };
-ChatCommandResult Trinity::Impl::ChatCommands::ArgInfo<GameTele const*>::TryConsume(GameTele const*& data, ChatHandler const* handler, std::string_view args)
+ChatCommandResult Warhead::Impl::ChatCommands::ArgInfo<GameTele const*>::TryConsume(GameTele const*& data, ChatHandler const* handler, std::string_view args)
 {
     Variant<Hyperlink<tele>, std::string_view> val;
     ChatCommandResult result = ArgInfo<decltype(val)>::TryConsume(val, handler, args);
@@ -66,7 +66,7 @@ struct ItemTemplateVisitor
     value_type operator()(Hyperlink<item> item) const { return item->Item; }
     value_type operator()(uint32 item) { return sObjectMgr->GetItemTemplate(item); }
 };
-ChatCommandResult Trinity::Impl::ChatCommands::ArgInfo<ItemTemplate const*>::TryConsume(ItemTemplate const*& data, ChatHandler const* handler, std::string_view args)
+ChatCommandResult Warhead::Impl::ChatCommands::ArgInfo<ItemTemplate const*>::TryConsume(ItemTemplate const*& data, ChatHandler const* handler, std::string_view args)
 {
     Variant<Hyperlink<item>, uint32> val;
     ChatCommandResult result = ArgInfo<decltype(val)>::TryConsume(val, handler, args);
@@ -91,7 +91,7 @@ struct SpellInfoVisitor
 
     value_type operator()(uint32 spellId) const { return sSpellMgr->GetSpellInfo(spellId); }
 };
-ChatCommandResult Trinity::Impl::ChatCommands::ArgInfo<SpellInfo const*>::TryConsume(SpellInfo const*& data, ChatHandler const* handler, std::string_view args)
+ChatCommandResult Warhead::Impl::ChatCommands::ArgInfo<SpellInfo const*>::TryConsume(SpellInfo const*& data, ChatHandler const* handler, std::string_view args)
 {
     Variant<Hyperlink<enchant>, Hyperlink<glyph>, Hyperlink<spell>, Hyperlink<talent>, Hyperlink<trade>, uint32> val;
     ChatCommandResult result = ArgInfo<decltype(val)>::TryConsume(val, handler, args);

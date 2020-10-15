@@ -19,13 +19,13 @@
 #include "Chat.h"
 #include "ObjectMgr.h"
 
-void Trinity::Impl::ChatCommands::SendErrorMessageToHandler(ChatHandler* handler, std::string_view str)
+void Warhead::Impl::ChatCommands::SendErrorMessageToHandler(ChatHandler* handler, std::string_view str)
 {
     handler->SendSysMessage(str);
     handler->SetSentErrorMessage(true);
 }
 
-char const* Trinity::Impl::ChatCommands::GetTrinityString(ChatHandler const* handler, TrinityStrings which)
+char const* Warhead::Impl::ChatCommands::GetTrinityString(ChatHandler const* handler, TrinityStrings which)
 {
     return handler->GetTrinityString(which);
 }

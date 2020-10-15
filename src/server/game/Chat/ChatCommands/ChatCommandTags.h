@@ -43,7 +43,7 @@ namespace Warhead::Impl::ChatCommands
 {
     struct ContainerTag
     {
-        using ChatCommandResult = Trinity::Impl::ChatCommands::ChatCommandResult;
+        using ChatCommandResult = Warhead::Impl::ChatCommands::ChatCommandResult;
     };
 
     template <typename T>
@@ -102,7 +102,7 @@ namespace Warhead::ChatCommands
                     return tail;
                 start = args.substr(0, _string.length() + remainingToken.length());
             }
-            return Trinity::Impl::ChatCommands::FormatTrinityString(handler, LANG_CMDPARSER_EXACT_SEQ_MISMATCH, STRING_VIEW_FMT_ARG(_string), STRING_VIEW_FMT_ARG(start));
+            return Warhead::Impl::ChatCommands::FormatTrinityString(handler, LANG_CMDPARSER_EXACT_SEQ_MISMATCH, STRING_VIEW_FMT_ARG(_string), STRING_VIEW_FMT_ARG(start));
         }
 
         private:
@@ -137,7 +137,7 @@ namespace Warhead::ChatCommands
             if (Utf8toWStr(args, *this))
                 return std::string_view();
             else
-                return Trinity::Impl::ChatCommands::GetTrinityString(handler, LANG_CMDPARSER_INVALID_UTF8);
+                return Warhead::Impl::ChatCommands::GetTrinityString(handler, LANG_CMDPARSER_INVALID_UTF8);
         }
     };
 
@@ -145,7 +145,7 @@ namespace Warhead::ChatCommands
     {
         using value_type = std::string;
 
-        TC_GAME_API ChatCommandResult TryConsume(ChatHandler const* handler, std::string_view args);
+        WH_GAME_API ChatCommandResult TryConsume(ChatHandler const* handler, std::string_view args);
     };
 
     struct WH_GAME_API AccountIdentifier : Warhead::Impl::ChatCommands::ContainerTag
@@ -223,7 +223,7 @@ namespace Warhead::ChatCommands
 
             // store value
             if (!linktag::StoreTo(val, info.data))
-                return Trinity::Impl::ChatCommands::GetTrinityString(handler, LANG_CMDPARSER_LINKDATA_INVALID);
+                return Warhead::Impl::ChatCommands::GetTrinityString(handler, LANG_CMDPARSER_LINKDATA_INVALID);
 
             // finally, skip any potential delimiters
             auto [token, next] = Warhead::Impl::ChatCommands::tokenize(info.tail);

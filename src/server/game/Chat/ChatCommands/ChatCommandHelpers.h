@@ -120,12 +120,12 @@ namespace Warhead::Impl::ChatCommands
             std::variant<std::monostate, std::string_view, std::string> _storage;
     };
 
-    TC_GAME_API void SendErrorMessageToHandler(ChatHandler* handler, std::string_view str);
-    TC_GAME_API char const* GetTrinityString(ChatHandler const* handler, TrinityStrings which);
+    WH_GAME_API void SendErrorMessageToHandler(ChatHandler* handler, std::string_view str);
+    WH_GAME_API char const* GetTrinityString(ChatHandler const* handler, TrinityStrings which);
     template <typename... Ts>
     std::string FormatTrinityString(ChatHandler const* handler, TrinityStrings which, Ts&&... args)
     {
-        return Trinity::StringFormat(GetTrinityString(handler, which), std::forward<Ts>(args)...);
+        return Warhead::StringFormat(GetTrinityString(handler, which), std::forward<Ts>(args)...);
     }
 }
 

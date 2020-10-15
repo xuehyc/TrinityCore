@@ -25,9 +25,9 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 
-using namespace Trinity::Impl::ChatCommands;
+using namespace Warhead::Impl::ChatCommands;
 
-ChatCommandResult Trinity::ChatCommands::QuotedString::TryConsume(ChatHandler const* handler, std::string_view args)
+ChatCommandResult Warhead::ChatCommands::QuotedString::TryConsume(ChatHandler const* handler, std::string_view args)
 {
     if (args.empty())
         return std::nullopt;
@@ -58,7 +58,7 @@ ChatCommandResult Trinity::ChatCommands::QuotedString::TryConsume(ChatHandler co
     return std::nullopt;
 }
 
-ChatCommandResult Trinity::ChatCommands::AccountIdentifier::TryConsume(ChatHandler const* handler, std::string_view args)
+ChatCommandResult Warhead::ChatCommands::AccountIdentifier::TryConsume(ChatHandler const* handler, std::string_view args)
 {
     std::string_view text;
     ChatCommandResult next = ArgInfo<std::string_view>::TryConsume(text, handler, args);
@@ -85,7 +85,7 @@ ChatCommandResult Trinity::ChatCommands::AccountIdentifier::TryConsume(ChatHandl
         return FormatTrinityString(handler, LANG_CMDPARSER_ACCOUNT_ID_NO_EXIST, _id);
 }
 
-ChatCommandResult Trinity::ChatCommands::PlayerIdentifier::TryConsume(ChatHandler const* handler, std::string_view args)
+ChatCommandResult Warhead::ChatCommands::PlayerIdentifier::TryConsume(ChatHandler const* handler, std::string_view args)
 {
     Variant<Hyperlink<player>, ObjectGuid::LowType, std::string_view> val;
     ChatCommandResult next = ArgInfo<decltype(val)>::TryConsume(val, handler, args);

@@ -656,7 +656,7 @@ struct npc_high_overlord_saurfang_icc : public ScriptedAI
 
                 std::list<Creature*> guardList;
                 GetCreatureListWithEntryInGrid(guardList, me, NPC_SE_KOR_KRON_REAVER, 20.0f);
-                guardList.sort(Trinity::ObjectDistanceOrderPred(me));
+                guardList.sort(Warhead::ObjectDistanceOrderPred(me));
                 uint32 x = 1;
                 for (auto itr = guardList.begin(); itr != guardList.end(); ++x, ++itr)
                     (*itr)->AI()->SetData(0, x);
@@ -857,7 +857,7 @@ struct npc_muradin_bronzebeard_icc : public ScriptedAI
                 _events.SetPhase(PHASE_INTRO_A);
                 std::list<Creature*> guardList;
                 GetCreatureListWithEntryInGrid(guardList, me, NPC_SE_SKYBREAKER_MARINE, 20.0f);
-                guardList.sort(Trinity::ObjectDistanceOrderPred(me));
+                guardList.sort(Warhead::ObjectDistanceOrderPred(me));
                 uint32 x = 1;
                 for (auto itr = guardList.begin(); itr != guardList.end(); ++x, ++itr)
                     (*itr)->AI()->SetData(0, x);
@@ -1150,7 +1150,7 @@ private:
         // select one random target, preferring ranged targets
         uint32 targetsAtRange = 0;
         uint32 const minTargets = uint32(GetCaster()->GetMap()->Is25ManRaid() ? 10 : 4);
-        targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
+        targets.sort(Warhead::ObjectDistanceOrderPred(GetCaster(), false));
 
         // get target count at range
         for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr, ++targetsAtRange)
@@ -1208,7 +1208,7 @@ class spell_deathbringer_boiling_blood : public SpellScript
         if (targets.empty())
             return;
 
-        WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+        WorldObject* target = Warhead::Containers::SelectRandomContainerElement(targets);
         targets.clear();
         targets.push_back(target);
     }

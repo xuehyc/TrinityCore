@@ -75,7 +75,7 @@ namespace Warhead::Impl::ChatCommands
                 return result2;
             if (result1.HasErrorMessage() && result2.HasErrorMessage())
             {
-                return Trinity::StringFormat("%s \"%s\"\n%s \"%s\"",
+                return Warhead::StringFormat("%s \"%s\"\n%s \"%s\"",
                     GetTrinityString(handler, LANG_CMDPARSER_EITHER), result2.GetErrorMessage().c_str(),
                     GetTrinityString(handler, LANG_CMDPARSER_OR), result1.GetErrorMessage().c_str());
             }
@@ -118,13 +118,13 @@ class WH_GAME_API ChatCommand
 
                 Tuple arguments;
                 std::get<0>(arguments) = chatHandler;
-                Trinity::Impl::ChatCommands::ChatCommandResult result = Trinity::Impl::ChatCommands::ConsumeFromOffset<Tuple, 1>(arguments, chatHandler, argsStr);
+                Warhead::Impl::ChatCommands::ChatCommandResult result = Warhead::Impl::ChatCommands::ConsumeFromOffset<Tuple, 1>(arguments, chatHandler, argsStr);
                 if (result)
                     return std::apply(reinterpret_cast<TypedHandler>(handler), std::move(arguments));
                 else
                 {
                     if (result.HasErrorMessage())
-                        Trinity::Impl::ChatCommands::SendErrorMessageToHandler(chatHandler, result.GetErrorMessage());
+                        Warhead::Impl::ChatCommands::SendErrorMessageToHandler(chatHandler, result.GetErrorMessage());
                     return false;
                 }
             };
