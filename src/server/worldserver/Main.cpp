@@ -510,11 +510,11 @@ bool LoadRealmInfo(Warhead::Asio::IoContext& ioContext)
     if (!result)
         return false;
 
-    boost::asio::ip::tcp::resolver resolver(ioContext);
+    Trinity::Asio::Resolver resolver(ioContext);
 
     Field* fields = result->Fetch();
     realm.Name = fields[1].GetString();
-    Optional<boost::asio::ip::tcp::endpoint> externalAddress = Warhead::Net::Resolve(resolver, boost::asio::ip::tcp::v4(), fields[2].GetString(), "");
+    Optional<boost::asio::ip::tcp::endpoint> externalAddress = resolver.Resolve(boost::asio::ip::tcp::v4(), fields[2].GetString(), "");
     if (!externalAddress)
     {
         LOG_ERROR("server.worldserver", "Could not resolve address %s", fields[2].GetString().c_str());
@@ -523,7 +523,7 @@ bool LoadRealmInfo(Warhead::Asio::IoContext& ioContext)
 
     realm.ExternalAddress = std::make_unique<boost::asio::ip::address>(externalAddress->address());
 
-    Optional<boost::asio::ip::tcp::endpoint> localAddress = Warhead::Net::Resolve(resolver, boost::asio::ip::tcp::v4(), fields[3].GetString(), "");
+    Optional<boost::asio::ip::tcp::endpoint> localAddress = resolver.Resolve(boost::asio::ip::tcp::v4(), fields[3].GetString(), "");
     if (!localAddress)
     {
         LOG_ERROR("server.worldserver", "Could not resolve address %s", fields[3].GetString().c_str());
@@ -532,7 +532,7 @@ bool LoadRealmInfo(Warhead::Asio::IoContext& ioContext)
 
     realm.LocalAddress = std::make_unique<boost::asio::ip::address>(localAddress->address());
 
-    Optional<boost::asio::ip::tcp::endpoint> localSubmask = Warhead::Net::Resolve(resolver, boost::asio::ip::tcp::v4(), fields[4].GetString(), "");
+    Optional<boost::asio::ip::tcp::endpoint> localSubmask = resolver.Resolve(boost::asio::ip::tcp::v4(), fields[4].GetString(), "");
     if (!localSubmask)
     {
         LOG_ERROR("server.worldserver", "Could not resolve address %s", fields[4].GetString().c_str());

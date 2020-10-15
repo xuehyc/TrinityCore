@@ -24,6 +24,8 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "World.h"
+#include <fstream>
+#include <sstream>
 
 // static data
 enum GuidType : uint8
@@ -713,7 +715,7 @@ bool PlayerDumpWriter::GetDump(ObjectGuid::LowType guid, std::string& dump)
     return true;
 }
 
-DumpReturn PlayerDumpWriter::WriteDump(std::string const& file, ObjectGuid::LowType guid)
+DumpReturn PlayerDumpWriter::WriteDumpToFile(std::string const& file, ObjectGuid::LowType guid)
 {
     if (sWorld->getBoolConfig(CONFIG_PDUMP_NO_PATHS))
         if (strchr(file.c_str(), '\\') || strchr(file.c_str(), '/'))
@@ -739,6 +741,14 @@ DumpReturn PlayerDumpWriter::WriteDump(std::string const& file, ObjectGuid::LowT
     return ret;
 }
 
+DumpReturn PlayerDumpWriter::WriteDumpToString(std::string& dump, ObjectGuid::LowType guid)
+{
+    DumpReturn ret = DUMP_SUCCESS;
+    if (!GetDump(guid, dump))
+        ret = DUMP_CHARACTER_DELETED;
+    return ret;
+}
+
 // Reading - High-level functions
 inline void FixNULLfields(std::string& line)
 {
@@ -751,15 +761,11 @@ inline void FixNULLfields(std::string& line)
     }
 }
 
-DumpReturn PlayerDumpReader::LoadDump(std::string const& file, uint32 account, std::string name, ObjectGuid::LowType guid)
+DumpReturn PlayerDumpReader::LoadDump(std::istream& input, uint32 account, std::string name, ObjectGuid::LowType guid)
 {
     uint32 charcount = AccountMgr::GetCharactersCount(account);
     if (charcount >= 10)
         return DUMP_TOO_MANY_CHARS;
-
-    FileHandle fin = GetFileHandle(file.c_str(), "r");
-    if (!fin)
-        return DUMP_FILE_OPEN_ERROR;
 
     std::string newguid, chraccount;
 
@@ -809,8 +815,7 @@ DumpReturn PlayerDumpReader::LoadDump(std::string const& file, uint32 account, s
     std::map<uint64, uint64> equipmentSetIds;
     uint64 equipmentSetGuidOffset = sObjectMgr->_equipmentSetGuid;
 
-    static size_t const BUFFER_SIZE = 32000;
-    char buf[BUFFER_SIZE] = { };
+    std::string line;
 
     uint8 gender = GENDER_NONE;
     uint8 race = RACE_NONE;
@@ -821,17 +826,8 @@ DumpReturn PlayerDumpReader::LoadDump(std::string const& file, uint32 account, s
     size_t lineNumber = 0;
 
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-    while (!feof(fin.get()))
+    while (std::getline(input, line))
     {
-        if (!fgets(buf, BUFFER_SIZE, fin.get()))
-        {
-            if (feof(fin.get()))
-                break;
-            return DUMP_FILE_BROKEN;
-        }
-
-        std::string line;
-        line.assign(buf);
         ++lineNumber;
 
         // skip empty strings
@@ -951,6 +947,9 @@ DumpReturn PlayerDumpReader::LoadDump(std::string const& file, uint32 account, s
         trans->Append(line.c_str());
     }
 
+    if (input.fail() && !input.eof())
+        return DUMP_FILE_BROKEN;
+
     CharacterDatabase.CommitTransaction(trans);
 
     // in case of name conflict player has to rename at login anyway
@@ -967,4 +966,18 @@ DumpReturn PlayerDumpReader::LoadDump(std::string const& file, uint32 account, s
     sWorld->UpdateRealmCharCount(account);
 
     return DUMP_SUCCESS;
+}
+
+DumpReturn PlayerDumpReader::LoadDumpFromString(std::string const& dump, uint32 account, std::string name, ObjectGuid::LowType guid)
+{
+    std::istringstream input(dump);
+    return LoadDump(input, account, name, guid);
+}
+
+DumpReturn PlayerDumpReader::LoadDumpFromFile(std::string const& file, uint32 account, std::string name, ObjectGuid::LowType guid)
+{
+    std::ifstream input(file);
+    if (!input)
+        return DUMP_FILE_OPEN_ERROR;
+    return LoadDump(input, account, name, guid);
 }

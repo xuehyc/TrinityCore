@@ -44,15 +44,6 @@ namespace boost
     }
 }
 
-namespace Warhead
-{
-    namespace Asio
-    {
-        class IoContext;
-        class DeadlineTimer;
-    }
-}
-
 /// Storage object for the list of realms on the server
 class WH_SHARED_API RealmList
 {
@@ -83,8 +74,8 @@ private:
     std::vector<RealmBuildInfo> _builds;
     RealmMap _realms;
     uint32 _updateInterval;
-    std::unique_ptr<Warhead::Asio::DeadlineTimer> _updateTimer;
-    std::unique_ptr<boost::asio::ip::tcp_resolver> _resolver;
+    std::unique_ptr<Trinity::Asio::DeadlineTimer> _updateTimer;
+    std::unique_ptr<Trinity::Asio::Resolver> _resolver;
 };
 
 #define sRealmList RealmList::Instance()

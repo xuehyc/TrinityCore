@@ -135,6 +135,17 @@ void SmartAI::PausePath(uint32 delay, bool forced)
     GetScript()->ProcessEventsFor(SMART_EVENT_WAYPOINT_PAUSED, nullptr, _currentWaypointNode, GetScript()->GetPathId());
 }
 
+bool SmartAI::CanResumePath()
+{
+    if (!HasEscortState(SMART_ESCORT_ESCORTING))
+    {
+        // The whole resume logic doesn't support this case
+        return false;
+    }
+
+    return HasEscortState(SMART_ESCORT_PAUSED);
+}
+
 void SmartAI::StopPath(uint32 DespawnTime, uint32 quest, bool fail)
 {
     if (!HasEscortState(SMART_ESCORT_ESCORTING))
@@ -926,7 +937,8 @@ void SmartAI::UpdatePath(uint32 diff)
     // handle pause
     if (HasEscortState(SMART_ESCORT_PAUSED) && (_waypointReached || _waypointPauseForced))
     {
-        if (!me->IsInCombat() && !HasEscortState(SMART_ESCORT_RETURNING))
+        // Resume only if there was a pause timer set
+        if (_waypointPauseTimer && !me->IsInCombat() && !HasEscortState(SMART_ESCORT_RETURNING))
         {
             if (_waypointPauseTimer <= diff)
                 ResumePath();

@@ -33,6 +33,8 @@
 #include "CharacterCache.h"
 #include "CharacterDatabaseCleaner.h"
 #include "Chat.h"
+#include "ChatCommand.h"
+#include "ChatPackets.h"
 #include "Config.h"
 #include "CreatureAIRegistry.h"
 #include "CreatureGroups.h"
@@ -2102,8 +2104,8 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Initialize query data...");
     sObjectMgr->InitializeQueriesData(QUERY_DATA_ALL);
 
-    LOG_INFO("server.loading", "Initialize commands...");
-    ChatHandler::InitializeCommandTable();
+    TC_LOG_INFO("server.loading", "Initialize commands...");
+    Trinity::ChatCommands::LoadCommandMap();
 
     ///- Initialize game time and timers
     LOG_INFO("server.loading", "Initialize game time and timers");
@@ -3054,8 +3056,8 @@ void World::ShutdownMsg(bool show, Player* player, const std::string& reason)
 
         ServerMessageType msgid = (m_ShutdownMask & SHUTDOWN_MASK_RESTART) ? SERVER_MSG_RESTART_TIME : SERVER_MSG_SHUTDOWN_TIME;
 
-        SendServerMessage(msgid, str.c_str(), player);
-        LOG_DEBUG("misc", "Server is %s in %s", (m_ShutdownMask & SHUTDOWN_MASK_RESTART ? "restart" : "shuttingdown"), str.c_str());
+        SendServerMessage(msgid, str, player);
+        TC_LOG_DEBUG("misc", "Server is %s in %s", (m_ShutdownMask & SHUTDOWN_MASK_RESTART ? "restart" : "shuttingdown"), str.c_str());
     }
 }
 
@@ -3081,17 +3083,17 @@ uint32 World::ShutdownCancel()
 }
 
 /// Send a server message to the user(s)
-void World::SendServerMessage(ServerMessageType type, const char *text, Player* player)
+void World::SendServerMessage(ServerMessageType messageID, std::string stringParam /*= ""*/, Player* player /*= nullptr*/)
 {
-    WorldPacket data(SMSG_SERVER_MESSAGE, 50);              // guess size
-    data << uint32(type);
-    if (type <= SERVER_MSG_STRING)
-        data << text;
+    WorldPackets::Chat::ChatServerMessage chatServerMessage;
+    chatServerMessage.MessageID = int32(messageID);
+    if (messageID <= SERVER_MSG_STRING)
+        chatServerMessage.StringParam = stringParam;
 
     if (player)
-        player->SendDirectMessage(&data);
+        player->SendDirectMessage(chatServerMessage.Write());
     else
-        SendGlobalMessage(&data);
+        SendGlobalMessage(chatServerMessage.Write());
 }
 
 void World::UpdateSessions(uint32 diff)

@@ -113,7 +113,14 @@ enum SpellRangeFlag
     SPELL_RANGE_RANGED              = 2      //hunter range and ranged weapon
 };
 
-struct WH_GAME_API SpellDestination
+enum SpellFinishReason : uint8
+{
+    SPELL_FINISHED_SUCCESSFUL_CAST      = 0, // spell has sucessfully launched
+    SPELL_FINISHED_CANCELED             = 1, // spell has been canceled (interrupts)
+    SPELL_FINISHED_CHANNELING_COMPLETE  = 2  // spell channeling has been finished
+};
+
+struct TC_GAME_API SpellDestination
 {
     SpellDestination();
     SpellDestination(float x, float y, float z, float orientation = 0.0f, uint32 mapId = MAPID_INVALID);

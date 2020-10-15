@@ -33,7 +33,11 @@ EndScriptData */
 #include "Player.h"
 #include "RBAC.h"
 
-using namespace Warhead::ChatCommands;
+#if TRINITY_COMPILER == TRINITY_COMPILER_GNU
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
+using namespace Trinity::ChatCommands;
 class guild_commandscript : public CommandScript
 {
 public:
