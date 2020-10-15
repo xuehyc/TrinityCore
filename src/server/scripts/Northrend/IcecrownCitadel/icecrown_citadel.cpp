@@ -1343,87 +1343,53 @@ class spell_icc_sprit_alarm : public SpellScript
     void HandleEvent(SpellEffIndex effIndex)
     {
         PreventHitDefaultEffect(effIndex);
+
         uint32 trapId = 0;
+        float range = 0.0f;
+
         switch (GetSpellInfo()->Effects[effIndex].MiscValue)
         {
             case EVENT_AWAKEN_WARD_1:
                 trapId = GO_SPIRIT_ALARM_1;
+                range = 100.0f;
                 break;
             case EVENT_AWAKEN_WARD_2:
                 trapId = GO_SPIRIT_ALARM_2;
+                range = 100.0f;
                 break;
             case EVENT_AWAKEN_WARD_3:
                 trapId = GO_SPIRIT_ALARM_3;
+                range = 50.0f;
                 break;
             case EVENT_AWAKEN_WARD_4:
                 trapId = GO_SPIRIT_ALARM_4;
+                range = 50.0f;
                 break;
             default:
                 return;
         }
 
-            void HandleEvent(SpellEffIndex effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
+        if (GameObject* trap = GetGObjCaster()->FindNearestGameObject(trapId, 5.0f))
+            trap->SetRespawnTime(trap->GetGOInfo()->GetAutoCloseTime() / IN_MILLISECONDS);
 
-                uint32 trapId = 0;
-                float range = 0.0f;
+        std::list<Creature*> wards;
+        GetGObjCaster()->GetCreatureListWithEntryInGrid(wards, NPC_DEATHBOUND_WARD, range);
+        wards.sort(Warhead::ObjectDistanceOrderPred(GetGObjCaster()));
 
-                switch (GetSpellInfo()->Effects[effIndex].MiscValue)
-                {
-                    case EVENT_AWAKEN_WARD_1:
-                        trapId = GO_SPIRIT_ALARM_1;
-                        range = 100.0f;
-                        break;
-                    case EVENT_AWAKEN_WARD_2:
-                        trapId = GO_SPIRIT_ALARM_2;
-                        range = 100.0f;
-                        break;
-                    case EVENT_AWAKEN_WARD_3:
-                        trapId = GO_SPIRIT_ALARM_3;
-                        range = 50.0f;
-                        break;
-                    case EVENT_AWAKEN_WARD_4:
-                        trapId = GO_SPIRIT_ALARM_4;
-                        range = 50.0f;
-                        break;
-                    default:
-                        return;
-                }
-
-                if (GameObject* trap = GetGObjCaster()->FindNearestGameObject(trapId, 5.0f))
-                    trap->SetRespawnTime(trap->GetGOInfo()->GetAutoCloseTime() / IN_MILLISECONDS);
-
-                std::list<Creature*> wards;
-                GetGObjCaster()->GetCreatureListWithEntryInGrid(wards, NPC_DEATHBOUND_WARD, range);
-                wards.sort(Warhead::ObjectDistanceOrderPred(GetGObjCaster()));
-
-                for (auto const& itr : wards)
-                {
-                    Player* target = itr->SelectNearestPlayer(150.0f);
-                    if (!target)
-                        break;
-
-                    Creature* deathboundWard = itr;
-
-                    if (deathboundWard->IsAlive() && deathboundWard->HasAura(SPELL_STONEFORM))
-                    {
-                        deathboundWard->AI()->Talk(SAY_TRAP_ACTIVATE);
-                        deathboundWard->RemoveAurasDueToSpell(SPELL_STONEFORM);
-                        deathboundWard->AI()->DoMeleeAttackIfReady();
-                        deathboundWard->AI()->SetData(1, 1);
-                        break;
-                    }
-                }
-            }
-
-            void Register() override
-            {
-                (*itr)->AI()->Talk(SAY_TRAP_ACTIVATE);
-                (*itr)->RemoveAurasDueToSpell(SPELL_STONEFORM);
-                if (Unit* target = (*itr)->SelectNearestTarget(150.0f))
-                    (*itr)->AI()->AttackStart(target);
+        for (auto const& itr : wards)
+        {
+            Player* target = itr->SelectNearestPlayer(150.0f);
+            if (!target)
                 break;
+
+            Creature* deathboundWard = itr;
+
+            if (deathboundWard->IsAlive() && deathboundWard->HasAura(SPELL_STONEFORM))
+            {
+                deathboundWard->AI()->Talk(SAY_TRAP_ACTIVATE);
+                deathboundWard->RemoveAurasDueToSpell(SPELL_STONEFORM);
+                deathboundWard->AI()->DoMeleeAttackIfReady();
+                deathboundWard->AI()->SetData(1, 1);
             }
         }
     }
