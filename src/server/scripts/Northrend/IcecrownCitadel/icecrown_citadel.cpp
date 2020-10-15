@@ -1378,10 +1378,6 @@ class spell_icc_sprit_alarm : public SpellScript
 
         for (auto const& itr : wards)
         {
-            Player* target = itr->SelectNearestPlayer(150.0f);
-            if (!target)
-                break;
-
             Creature* deathboundWard = itr;
 
             if (deathboundWard->IsAlive() && deathboundWard->HasAura(SPELL_STONEFORM))
@@ -1390,6 +1386,7 @@ class spell_icc_sprit_alarm : public SpellScript
                 deathboundWard->RemoveAurasDueToSpell(SPELL_STONEFORM);
                 deathboundWard->AI()->DoMeleeAttackIfReady();
                 deathboundWard->AI()->SetData(1, 1);
+                break;
             }
         }
     }
