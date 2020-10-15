@@ -1510,6 +1510,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                     break;
                 }
 
+                if (trapPositions.empty())
+                    return;
+
                 go->Relocate(Warhead::Containers::SelectRandomContainerElement(trapPositions));
             }
 
