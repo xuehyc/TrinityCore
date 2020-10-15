@@ -2104,8 +2104,8 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Initialize query data...");
     sObjectMgr->InitializeQueriesData(QUERY_DATA_ALL);
 
-    TC_LOG_INFO("server.loading", "Initialize commands...");
-    Trinity::ChatCommands::LoadCommandMap();
+    LOG_INFO("server.loading", "Initialize commands...");
+    Warhead::ChatCommands::LoadCommandMap();
 
     ///- Initialize game time and timers
     LOG_INFO("server.loading", "Initialize game time and timers");
@@ -3057,7 +3057,7 @@ void World::ShutdownMsg(bool show, Player* player, const std::string& reason)
         ServerMessageType msgid = (m_ShutdownMask & SHUTDOWN_MASK_RESTART) ? SERVER_MSG_RESTART_TIME : SERVER_MSG_SHUTDOWN_TIME;
 
         SendServerMessage(msgid, str, player);
-        TC_LOG_DEBUG("misc", "Server is %s in %s", (m_ShutdownMask & SHUTDOWN_MASK_RESTART ? "restart" : "shuttingdown"), str.c_str());
+        LOG_DEBUG("misc", "Server is %s in %s", (m_ShutdownMask & SHUTDOWN_MASK_RESTART ? "restart" : "shuttingdown"), str.c_str());
     }
 }
 

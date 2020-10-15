@@ -510,7 +510,7 @@ bool LoadRealmInfo(Warhead::Asio::IoContext& ioContext)
     if (!result)
         return false;
 
-    Trinity::Asio::Resolver resolver(ioContext);
+    Warhead::Asio::Resolver resolver(ioContext);
 
     Field* fields = result->Fetch();
     realm.Name = fields[1].GetString();

@@ -27,7 +27,7 @@ EndScriptData */
 #include "Chat.h"
 #include "RBAC.h"
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 
 class bf_commandscript : public CommandScript
 {

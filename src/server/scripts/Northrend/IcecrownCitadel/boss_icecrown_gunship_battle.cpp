@@ -2008,7 +2008,7 @@ class spell_igb_burning_pitch_selector : public SpellScript
 
         if (!targets.empty())
         {
-            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+            WorldObject* target = Warhead::Containers::SelectRandomContainerElement(targets);
             targets.clear();
             targets.push_back(target);
         }
@@ -2054,7 +2054,7 @@ class spell_igb_rocket_artillery : public SpellScript
     {
         if (!targets.empty())
         {
-            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+            WorldObject* target = Warhead::Containers::SelectRandomContainerElement(targets);
             targets.clear();
             targets.push_back(target);
         }

@@ -29,7 +29,7 @@
 #include "RBAC.h"
 #include "SpellAuras.h"
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 
 enum Spells
 {

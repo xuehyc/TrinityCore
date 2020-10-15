@@ -166,12 +166,12 @@ MetricStopWatch<LoggerType> MakeMetricStopWatch(LoggerType&& loggerFunc)
 #define WH_METRIC_UNIQUE_NAME(name) WH_METRIC_CONCAT(name, __LINE__)
 
 #if defined PERFORMANCE_PROFILING || defined WITHOUT_METRICS
-#define TC_METRIC_EVENT(category, title, description) ((void)0)
-#define TC_METRIC_VALUE(category, value, ...) ((void)0)
-#define TC_METRIC_TIMER(category, ...) ((void)0)
-#define TC_METRIC_DETAILED_EVENT(category, title, description) ((void)0)
-#define TC_METRIC_DETAILED_TIMER(category, ...) ((void)0)
-#define TC_METRIC_DETAILED_NO_THRESHOLD_TIMER(category, ...) ((void)0)
+#define WH_METRIC_EVENT(category, title, description) ((void)0)
+#define WH_METRIC_VALUE(category, value, ...) ((void)0)
+#define WH_METRIC_TIMER(category, ...) ((void)0)
+#define WH_METRIC_DETAILED_EVENT(category, title, description) ((void)0)
+#define WH_METRIC_DETAILED_TIMER(category, ...) ((void)0)
+#define WH_METRIC_DETAILED_NO_THRESHOLD_TIMER(category, ...) ((void)0)
 #else
 #  if WARHEAD_PLATFORM != WARHEAD_PLATFORM_WINDOWS
 #define WH_METRIC_EVENT(category, title, description)                  \

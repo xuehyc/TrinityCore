@@ -40,8 +40,8 @@ RealmList* RealmList::Instance()
 void RealmList::Initialize(Warhead::Asio::IoContext& ioContext, uint32 updateInterval)
 {
     _updateInterval = updateInterval;
-    _updateTimer = std::make_unique<Trinity::Asio::DeadlineTimer>(ioContext);
-    _resolver = std::make_unique<Trinity::Asio::Resolver>(ioContext);
+    _updateTimer = std::make_unique<Warhead::Asio::DeadlineTimer>(ioContext);
+    _resolver = std::make_unique<Warhead::Asio::Resolver>(ioContext);
 
     LoadBuildInfo();
     // Get the content of the realmlist table in the database

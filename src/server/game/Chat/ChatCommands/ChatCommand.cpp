@@ -27,9 +27,9 @@
 #include "ScriptMgr.h"
 #include "WorldSession.h"
 
-using ChatSubCommandMap = std::map<std::string_view, Trinity::Impl::ChatCommands::ChatCommandNode, StringCompareLessI_T>;
+using ChatSubCommandMap = std::map<std::string_view, Warhead::Impl::ChatCommands::ChatCommandNode, StringCompareLessI_T>;
 
-void Trinity::Impl::ChatCommands::ChatCommandNode::LoadFromBuilder(ChatCommandBuilder const& builder)
+void Warhead::Impl::ChatCommands::ChatCommandNode::LoadFromBuilder(ChatCommandBuilder const& builder)
 {
     if (std::holds_alternative<ChatCommandBuilder::InvokerEntry>(builder._data))
     {
@@ -43,7 +43,7 @@ void Trinity::Impl::ChatCommands::ChatCommandNode::LoadFromBuilder(ChatCommandBu
         LoadCommandsIntoMap(this, _subCommands, std::get<ChatCommandBuilder::SubCommandEntry>(builder._data));
 }
 
-/*static*/ void Trinity::Impl::ChatCommands::ChatCommandNode::LoadCommandsIntoMap(ChatCommandNode* blank, ChatSubCommandMap& map, Trinity::ChatCommands::ChatCommandTable const& commands)
+/*static*/ void Warhead::Impl::ChatCommands::ChatCommandNode::LoadCommandsIntoMap(ChatCommandNode* blank, ChatSubCommandMap& map, Warhead::ChatCommands::ChatCommandTable const& commands)
 {
     for (ChatCommandBuilder const& builder : commands)
     {
@@ -54,7 +54,7 @@ void Trinity::Impl::ChatCommands::ChatCommandNode::LoadFromBuilder(ChatCommandBu
         }
         else
         {
-            std::vector<std::string_view> const tokens = Trinity::Tokenize(builder._name, COMMAND_DELIMITER, false);
+            std::vector<std::string_view> const tokens = Warhead::Tokenize(builder._name, COMMAND_DELIMITER, false);
             ASSERT(!tokens.empty(), "Invalid command name '" STRING_VIEW_FMT "'.", STRING_VIEW_FMT_ARG(builder._name));
             ChatSubCommandMap* subMap = &map;
             for (size_t i = 0, n = (tokens.size() - 1); i < n; ++i)
@@ -65,14 +65,14 @@ void Trinity::Impl::ChatCommands::ChatCommandNode::LoadFromBuilder(ChatCommandBu
 }
 
 static ChatSubCommandMap COMMAND_MAP;
-/*static*/ ChatSubCommandMap const& Trinity::Impl::ChatCommands::ChatCommandNode::GetTopLevelMap()
+/*static*/ ChatSubCommandMap const& Warhead::Impl::ChatCommands::ChatCommandNode::GetTopLevelMap()
 {
     if (COMMAND_MAP.empty())
         LoadCommandMap();
     return COMMAND_MAP;
 }
-/*static*/ void Trinity::Impl::ChatCommands::ChatCommandNode::InvalidateCommandMap() { COMMAND_MAP.clear(); }
-/*static*/ void Trinity::Impl::ChatCommands::ChatCommandNode::LoadCommandMap()
+/*static*/ void Warhead::Impl::ChatCommands::ChatCommandNode::InvalidateCommandMap() { COMMAND_MAP.clear(); }
+/*static*/ void Warhead::Impl::ChatCommands::ChatCommandNode::LoadCommandMap()
 {
     InvalidateCommandMap();
     LoadCommandsIntoMap(nullptr, COMMAND_MAP, sScriptMgr->GetChatCommands());
@@ -87,7 +87,7 @@ static ChatSubCommandMap COMMAND_MAP;
 
             ChatCommandNode* cmd = nullptr;
             ChatSubCommandMap* map = &COMMAND_MAP;
-            for (std::string_view key : Trinity::Tokenize(name, COMMAND_DELIMITER, false))
+            for (std::string_view key : Warhead::Tokenize(name, COMMAND_DELIMITER, false))
             {
                 auto it = map->find(key);
                 if (it != map->end())
@@ -97,7 +97,7 @@ static ChatSubCommandMap COMMAND_MAP;
                 }
                 else
                 {
-                    TC_LOG_ERROR("sql.sql", "Table `command` contains data for non-existant command '" STRING_VIEW_FMT "'. Skipped.", STRING_VIEW_FMT_ARG(name));
+                    LOG_ERROR("sql.sql", "Table `command` contains data for non-existant command '" STRING_VIEW_FMT "'. Skipped.", STRING_VIEW_FMT_ARG(name));
                     cmd = nullptr;
                     break;
                 }
@@ -107,12 +107,12 @@ static ChatSubCommandMap COMMAND_MAP;
                 continue;
 
             if (std::holds_alternative<std::string>(cmd->_help))
-                TC_LOG_ERROR("sql.sql", "Table `command` contains duplicate data for command '" STRING_VIEW_FMT "'. Skipped.", STRING_VIEW_FMT_ARG(name));
+                LOG_ERROR("sql.sql", "Table `command` contains duplicate data for command '" STRING_VIEW_FMT "'. Skipped.", STRING_VIEW_FMT_ARG(name));
 
             if (std::holds_alternative<std::monostate>(cmd->_help))
                 cmd->_help.emplace<std::string>(help);
             else
-                TC_LOG_ERROR("sql.sql", "Table `command` contains legacy help text for command '" STRING_VIEW_FMT "', which uses `trinity_string`. Skipped.", STRING_VIEW_FMT_ARG(name));
+                LOG_ERROR("sql.sql", "Table `command` contains legacy help text for command '" STRING_VIEW_FMT "', which uses `trinity_string`. Skipped.", STRING_VIEW_FMT_ARG(name));
         } while (result->NextRow());
     }
 
@@ -120,10 +120,10 @@ static ChatSubCommandMap COMMAND_MAP;
         cmd.ResolveNames(std::string(name));
 }
 
-void Trinity::Impl::ChatCommands::ChatCommandNode::ResolveNames(std::string name)
+void Warhead::Impl::ChatCommands::ChatCommandNode::ResolveNames(std::string name)
 {
     if (_invoker && std::holds_alternative<std::monostate>(_help))
-        TC_LOG_WARN("sql.sql", "Table `command` is missing help text for command '" STRING_VIEW_FMT "'.", STRING_VIEW_FMT_ARG(name));
+        LOG_WARN("sql.sql", "Table `command` is missing help text for command '" STRING_VIEW_FMT "'.", STRING_VIEW_FMT_ARG(name));
 
     _name = name;
     for (auto& [subToken, cmd] : _subCommands)
@@ -166,7 +166,7 @@ static void LogCommandUsage(WorldSession const& session, uint32 permission, std:
         targetGuid.ToString().c_str());
 }
 
-void Trinity::Impl::ChatCommands::ChatCommandNode::SendCommandHelp(ChatHandler& handler) const
+void Warhead::Impl::ChatCommands::ChatCommandNode::SendCommandHelp(ChatHandler& handler) const
 {
     bool const hasInvoker = IsInvokerVisible(handler);
     if (hasInvoker)
@@ -199,7 +199,7 @@ void Trinity::Impl::ChatCommands::ChatCommandNode::SendCommandHelp(ChatHandler& 
     }
 }
 
-namespace Trinity::Impl::ChatCommands
+namespace Warhead::Impl::ChatCommands
 {
     struct FilteredCommandListIterator
     {
@@ -240,7 +240,7 @@ namespace Trinity::Impl::ChatCommands
     };
 }
 
-/*static*/ bool Trinity::Impl::ChatCommands::ChatCommandNode::TryExecuteCommand(ChatHandler& handler, std::string_view cmdStr)
+/*static*/ bool Warhead::Impl::ChatCommands::ChatCommandNode::TryExecuteCommand(ChatHandler& handler, std::string_view cmdStr)
 {
     ChatCommandNode const* cmd = nullptr;
     ChatSubCommandMap const* map = &GetTopLevelMap();
@@ -307,11 +307,11 @@ namespace Trinity::Impl::ChatCommands
     return false;
 }
 
-/*static*/ void Trinity::Impl::ChatCommands::ChatCommandNode::SendCommandHelpFor(ChatHandler& handler, std::string_view cmdStr)
+/*static*/ void Warhead::Impl::ChatCommands::ChatCommandNode::SendCommandHelpFor(ChatHandler& handler, std::string_view cmdStr)
 {
     ChatCommandNode const* cmd = nullptr;
     ChatSubCommandMap const* map = &GetTopLevelMap();
-    for (std::string_view token : Trinity::Tokenize(cmdStr, COMMAND_DELIMITER, false))
+    for (std::string_view token : Warhead::Tokenize(cmdStr, COMMAND_DELIMITER, false))
     {
         FilteredCommandListIterator it1(*map, handler, token);
         if (!it1)
@@ -369,7 +369,7 @@ namespace Trinity::Impl::ChatCommands
         handler.PSendSysMessage(LANG_CMD_INVALID, STRING_VIEW_FMT_ARG(cmdStr));
 }
 
-/*static*/ std::vector<std::string> Trinity::Impl::ChatCommands::ChatCommandNode::GetAutoCompletionsFor(ChatHandler const& handler, std::string_view cmdStr)
+/*static*/ std::vector<std::string> Warhead::Impl::ChatCommands::ChatCommandNode::GetAutoCompletionsFor(ChatHandler const& handler, std::string_view cmdStr)
 {
     std::string path;
     ChatCommandNode const* cmd = nullptr;
@@ -401,12 +401,12 @@ namespace Trinity::Impl::ChatCommands
                 {
                     if (prefix.empty())
                     {
-                        return Trinity::StringFormat(STRING_VIEW_FMT "%c" STRING_VIEW_FMT,
+                        return Warhead::StringFormat(STRING_VIEW_FMT "%c" STRING_VIEW_FMT,
                             STRING_VIEW_FMT_ARG(match), COMMAND_DELIMITER, STRING_VIEW_FMT_ARG(suffix));
                     }
                     else
                     {
-                        return Trinity::StringFormat(STRING_VIEW_FMT "%c" STRING_VIEW_FMT "%c" STRING_VIEW_FMT,
+                        return Warhead::StringFormat(STRING_VIEW_FMT "%c" STRING_VIEW_FMT "%c" STRING_VIEW_FMT,
                             STRING_VIEW_FMT_ARG(prefix), COMMAND_DELIMITER, STRING_VIEW_FMT_ARG(match), COMMAND_DELIMITER, STRING_VIEW_FMT_ARG(suffix));
                     }
                 });
@@ -425,7 +425,7 @@ namespace Trinity::Impl::ChatCommands
             path.assign(it1->first);
         else
         {
-            path = Trinity::StringFormat(STRING_VIEW_FMT "%c" STRING_VIEW_FMT,
+            path = Warhead::StringFormat(STRING_VIEW_FMT "%c" STRING_VIEW_FMT,
                 STRING_VIEW_FMT_ARG(path), COMMAND_DELIMITER, STRING_VIEW_FMT_ARG(it1->first));
         }
         cmd = &it1->second;
@@ -439,7 +439,7 @@ namespace Trinity::Impl::ChatCommands
         if (cmd)
         { /* if we matched a command at some point, auto-complete it */
             return {
-                Trinity::StringFormat(STRING_VIEW_FMT "%c" STRING_VIEW_FMT,
+                Warhead::StringFormat(STRING_VIEW_FMT "%c" STRING_VIEW_FMT,
                     STRING_VIEW_FMT_ARG(path), COMMAND_DELIMITER, STRING_VIEW_FMT_ARG(oldTail))
             };
         }
@@ -454,7 +454,7 @@ namespace Trinity::Impl::ChatCommands
                 return std::string(match);
             else
             {
-                return Trinity::StringFormat(STRING_VIEW_FMT "%c" STRING_VIEW_FMT,
+                return Warhead::StringFormat(STRING_VIEW_FMT "%c" STRING_VIEW_FMT,
                     STRING_VIEW_FMT_ARG(prefix), COMMAND_DELIMITER, STRING_VIEW_FMT_ARG(match));
             }
         });
@@ -466,16 +466,16 @@ namespace Trinity::Impl::ChatCommands
     }
 }
 
-bool Trinity::Impl::ChatCommands::ChatCommandNode::IsInvokerVisible(ChatHandler const& who) const
+bool Warhead::Impl::ChatCommands::ChatCommandNode::IsInvokerVisible(ChatHandler const& who) const
 {
     if (!_invoker)
         return false;
-    if (who.IsConsole() && (_permission.AllowConsole == Trinity::ChatCommands::Console::No))
+    if (who.IsConsole() && (_permission.AllowConsole == Warhead::ChatCommands::Console::No))
         return false;
     return who.HasPermission(_permission.RequiredPermission);
 }
 
-bool Trinity::Impl::ChatCommands::ChatCommandNode::HasVisibleSubCommands(ChatHandler const& who) const
+bool Warhead::Impl::ChatCommands::ChatCommandNode::HasVisibleSubCommands(ChatHandler const& who) const
 {
     for (auto it = _subCommands.begin(); it != _subCommands.end(); ++it)
         if (it->second.IsVisible(who))
@@ -483,9 +483,9 @@ bool Trinity::Impl::ChatCommands::ChatCommandNode::HasVisibleSubCommands(ChatHan
     return false;
 }
 
-void Trinity::ChatCommands::LoadCommandMap() { Trinity::Impl::ChatCommands::ChatCommandNode::LoadCommandMap(); }
-void Trinity::ChatCommands::InvalidateCommandMap() { Trinity::Impl::ChatCommands::ChatCommandNode::InvalidateCommandMap(); }
-bool Trinity::ChatCommands::TryExecuteCommand(ChatHandler& handler, std::string_view cmd) { return Trinity::Impl::ChatCommands::ChatCommandNode::TryExecuteCommand(handler, cmd); }
-void Trinity::ChatCommands::SendCommandHelpFor(ChatHandler& handler, std::string_view cmd) { Trinity::Impl::ChatCommands::ChatCommandNode::SendCommandHelpFor(handler, cmd); }
-std::vector<std::string> Trinity::ChatCommands::GetAutoCompletionsFor(ChatHandler const& handler, std::string_view cmd) { return Trinity::Impl::ChatCommands::ChatCommandNode::GetAutoCompletionsFor(handler, cmd); }
+void Warhead::ChatCommands::LoadCommandMap() { Warhead::Impl::ChatCommands::ChatCommandNode::LoadCommandMap(); }
+void Warhead::ChatCommands::InvalidateCommandMap() { Warhead::Impl::ChatCommands::ChatCommandNode::InvalidateCommandMap(); }
+bool Warhead::ChatCommands::TryExecuteCommand(ChatHandler& handler, std::string_view cmd) { return Warhead::Impl::ChatCommands::ChatCommandNode::TryExecuteCommand(handler, cmd); }
+void Warhead::ChatCommands::SendCommandHelpFor(ChatHandler& handler, std::string_view cmd) { Warhead::Impl::ChatCommands::ChatCommandNode::SendCommandHelpFor(handler, cmd); }
+std::vector<std::string> Warhead::ChatCommands::GetAutoCompletionsFor(ChatHandler const& handler, std::string_view cmd) { return Warhead::Impl::ChatCommands::ChatCommandNode::GetAutoCompletionsFor(handler, cmd); }
 

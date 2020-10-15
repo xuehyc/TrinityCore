@@ -152,7 +152,7 @@ void ChatHandler::SendSysMessage(uint32 entry)
 
 bool ChatHandler::_ParseCommands(std::string_view text)
 {
-    if (Trinity::ChatCommands::TryExecuteCommand(*this, text))
+    if (Warhead::ChatCommands::TryExecuteCommand(*this, text))
         return true;
 
     // Pretend commands don't exist for regular players
@@ -182,7 +182,7 @@ bool ChatHandler::ParseCommands(std::string_view text)
         return false;
 
     // ignore messages with separator after .
-    if (text[1] == Trinity::Impl::ChatCommands::COMMAND_DELIMITER)
+    if (text[1] == Warhead::Impl::ChatCommands::COMMAND_DELIMITER)
         return false;
 
     return _ParseCommands(text.substr(1));

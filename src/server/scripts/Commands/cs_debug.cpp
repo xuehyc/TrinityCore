@@ -51,7 +51,7 @@ EndScriptData */
 #include <map>
 #include <set>
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 
 class debug_commandscript : public CommandScript
 {

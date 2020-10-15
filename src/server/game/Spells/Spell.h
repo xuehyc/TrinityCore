@@ -120,7 +120,7 @@ enum SpellFinishReason : uint8
     SPELL_FINISHED_CHANNELING_COMPLETE  = 2  // spell channeling has been finished
 };
 
-struct TC_GAME_API SpellDestination
+struct WH_GAME_API SpellDestination
 {
     SpellDestination();
     SpellDestination(float x, float y, float z, float orientation = 0.0f, uint32 mapId = MAPID_INVALID);

@@ -78,7 +78,7 @@ enum AuctionEntryFlag : uint8
     AUCTION_ENTRY_FLAG_GM_LOG_BUYER = 0x1  // write transaction to gm log file for buyer (optimization flag - avoids querying database for offline player permissions)
 };
 
-struct TC_GAME_API AuctionEntry
+struct WH_GAME_API AuctionEntry
 {
     uint32 Id;
     uint8 houseId;

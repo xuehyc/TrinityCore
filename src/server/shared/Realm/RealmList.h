@@ -74,8 +74,8 @@ private:
     std::vector<RealmBuildInfo> _builds;
     RealmMap _realms;
     uint32 _updateInterval;
-    std::unique_ptr<Trinity::Asio::DeadlineTimer> _updateTimer;
-    std::unique_ptr<Trinity::Asio::Resolver> _resolver;
+    std::unique_ptr<Warhead::Asio::DeadlineTimer> _updateTimer;
+    std::unique_ptr<Warhead::Asio::Resolver> _resolver;
 };
 
 #define sRealmList RealmList::Instance()

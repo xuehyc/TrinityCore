@@ -57,11 +57,11 @@
 #undef GetClassName
 #endif
 
-#if TRINITY_COMPILER == TRINITY_COMPILER_GNU
+#if WARHEAD_COMPILER == WARHEAD_COMPILER_GNU
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-using namespace Trinity::ChatCommands;
+using namespace Warhead::ChatCommands;
 
 class misc_commandscript : public CommandScript
 {
@@ -601,7 +601,7 @@ public:
 
     static bool HandleCommandsCommand(ChatHandler* handler)
     {
-        Trinity::ChatCommands::SendCommandHelpFor(*handler, "");
+        Warhead::ChatCommands::SendCommandHelpFor(*handler, "");
         return true;
     }
 
@@ -694,9 +694,9 @@ public:
 
     static bool HandleHelpCommand(ChatHandler* handler, Tail cmd)
     {
-        Trinity::ChatCommands::SendCommandHelpFor(*handler, cmd);
+        Warhead::ChatCommands::SendCommandHelpFor(*handler, cmd);
         if (cmd.empty())
-            Trinity::ChatCommands::SendCommandHelpFor(*handler, "help");
+            Warhead::ChatCommands::SendCommandHelpFor(*handler, "help");
         return true;
     }
 

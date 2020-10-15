@@ -29,7 +29,7 @@
 #include "Log.h"
 #include "Util.h"
 
-#if TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM != WARHEAD_PLATFORM_WINDOWS
 #include "Chat.h"
 #include "ChatCommand.h"
 #include <cstring>
@@ -44,8 +44,8 @@ static inline void PrintCliPrefix()
     printf("%s", CLI_PREFIX);
 }
 
-#if TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS
-namespace Trinity::Impl::Readline
+#if WARHEAD_PLATFORM != WARHEAD_PLATFORM_WINDOWS
+namespace Warhead::Impl::Readline
 {
     static std::vector<std::string> vec;
     char* cli_unpack_vector(char const*, int state)
@@ -62,7 +62,7 @@ namespace Trinity::Impl::Readline
     char** cli_completion(char const* text, int /*start*/, int /*end*/)
     {
         ::rl_attempted_completion_over = 1;
-        vec = Trinity::ChatCommands::GetAutoCompletionsFor(CliHandler(nullptr,nullptr), text);
+        vec = Warhead::ChatCommands::GetAutoCompletionsFor(CliHandler(nullptr,nullptr), text);
         return ::rl_completion_matches(text, &cli_unpack_vector);
     }
 
@@ -77,7 +77,7 @@ namespace Trinity::Impl::Readline
 
 void utf8print(void* /*arg*/, std::string_view str)
 {
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
     std::wstring wbuf;
     if (!Utf8toWStr(str, wbuf))
         return;
@@ -120,12 +120,12 @@ void CliThread()
     // later it will be printed after command queue updates
     PrintCliPrefix();
 #else
-    ::rl_attempted_completion_function = &Trinity::Impl::Readline::cli_completion;
+    ::rl_attempted_completion_function = &Warhead::Impl::Readline::cli_completion;
     {
         static char BLANK = '\0';
         ::rl_completer_word_break_characters = &BLANK;
     }
-    ::rl_event_hook = &Trinity::Impl::Readline::cli_hook_func;
+    ::rl_event_hook = &Warhead::Impl::Readline::cli_hook_func;
 #endif
 
     if (sConfigMgr->GetBoolDefault("BeepAtStart", true))

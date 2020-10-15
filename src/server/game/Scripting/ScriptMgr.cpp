@@ -872,17 +872,17 @@ class ScriptRegistrySwapHooks<CommandScript, Base>
 public:
     void BeforeReleaseContext(std::string const& /*context*/) final override
     {
-        Trinity::ChatCommands::InvalidateCommandMap();
+        Warhead::ChatCommands::InvalidateCommandMap();
     }
 
     void BeforeSwapContext(bool /*initialize*/) override
     {
-        Trinity::ChatCommands::InvalidateCommandMap();
+        Warhead::ChatCommands::InvalidateCommandMap();
     }
 
     void BeforeUnload() final override
     {
-        Trinity::ChatCommands::InvalidateCommandMap();
+        Warhead::ChatCommands::InvalidateCommandMap();
     }
 };
 
@@ -1618,13 +1618,13 @@ OutdoorPvP* ScriptMgr::CreateOutdoorPvP(uint32 scriptId)
     return tmpscript->GetOutdoorPvP();
 }
 
-Trinity::ChatCommands::ChatCommandTable ScriptMgr::GetChatCommands()
+Warhead::ChatCommands::ChatCommandTable ScriptMgr::GetChatCommands()
 {
-    Trinity::ChatCommands::ChatCommandTable table;
+    Warhead::ChatCommands::ChatCommandTable table;
 
     FOR_SCRIPTS(CommandScript, itr, end)
     {
-        Trinity::ChatCommands::ChatCommandTable cmds = itr->second->GetCommands();
+        Warhead::ChatCommands::ChatCommandTable cmds = itr->second->GetCommands();
         std::move(cmds.begin(), cmds.end(), std::back_inserter(table));
     }
 

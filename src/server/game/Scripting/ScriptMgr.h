@@ -73,7 +73,7 @@ struct ItemTemplate;
 struct MapEntry;
 struct Position;
 
-namespace Trinity::ChatCommands { struct ChatCommandBuilder; }
+namespace Warhead::ChatCommands { struct ChatCommandBuilder; }
 
 enum BattlegroundTypeId : uint32;
 enum ContentLevels : uint8;
@@ -513,7 +513,7 @@ class WH_GAME_API CommandScript : public ScriptObject
     public:
 
         // Should return a pointer to a valid command table (ChatCommand array) to be used by ChatHandler.
-        virtual std::vector<Trinity::ChatCommands::ChatCommandBuilder> GetCommands() const = 0;
+        virtual std::vector<Warhead::ChatCommands::ChatCommandBuilder> GetCommands() const = 0;
 };
 
 class WH_GAME_API WeatherScript : public ScriptObject, public UpdatableScript<Weather>
@@ -969,7 +969,7 @@ class WH_GAME_API ScriptMgr
 
     public: /* CommandScript */
 
-        std::vector<Trinity::ChatCommands::ChatCommandBuilder> GetChatCommands();
+        std::vector<Warhead::ChatCommands::ChatCommandBuilder> GetChatCommands();
 
     public: /* WeatherScript */
 
