@@ -34,7 +34,6 @@ enum GuidType : uint8
     GUID_TYPE_ACCOUNT,
     GUID_TYPE_CHAR,
     GUID_TYPE_PET,
-    GUID_TYPE_MAIL,
     GUID_TYPE_ITEM,
 
     // 64 bit long guids
@@ -72,9 +71,7 @@ struct BaseTable
 BaseTable const BaseTables[] =
 {
     { "character_pet",           "id",      "owner",      GUID_TYPE_PET           },
-    { "mail",                    "id",      "receiver",   GUID_TYPE_MAIL          },
     { "item_instance",           "guid",    "owner_guid", GUID_TYPE_ITEM          },
-
     { "character_equipmentsets", "setguid", "guid",       GUID_TYPE_EQUIPMENT_SET }
 };
 
@@ -581,7 +578,6 @@ void PlayerDumpWriter::PopulateGuids(ObjectGuid::LowType guid)
         switch (baseTable.StoredType)
         {
             case GUID_TYPE_ITEM:
-            case GUID_TYPE_MAIL:
             case GUID_TYPE_PET:
             case GUID_TYPE_EQUIPMENT_SET:
                 break;
@@ -601,10 +597,6 @@ void PlayerDumpWriter::PopulateGuids(ObjectGuid::LowType guid)
                 case GUID_TYPE_ITEM:
                     if (ObjectGuid::LowType itemLowGuid = (*result)[0].GetUInt32())
                         _items.insert(itemLowGuid);
-                    break;
-                case GUID_TYPE_MAIL:
-                    if (ObjectGuid::LowType mailLowGuid = (*result)[0].GetUInt32())
-                        _mails.insert(mailLowGuid);
                     break;
                 case GUID_TYPE_PET:
                     if (ObjectGuid::LowType petLowGuid = (*result)[0].GetUInt32())

@@ -21,6 +21,7 @@
 #include "Packet.h"
 #include "ItemDefines.h"
 #include "Mail.h"
+#include "ObjectGuid.h"
 #include "Optional.h"
 #include "PacketUtilities.h"
 

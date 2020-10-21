@@ -18,6 +18,7 @@
 #include "AuctionHouseMgr.h"
 #include "Player.h"
 #include "Language.h"
+#include "Log.h"
 
  // Auction info
 void Player::CalculateAuctionLotsCounter()

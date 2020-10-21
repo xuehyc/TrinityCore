@@ -22,6 +22,7 @@
 #include "Mail.h"
 #include "Item.h"
 #include "ObjectGuid.h"
+#include "Timer.h"
 
 struct AuctionEntry;
 struct CalendarEvent;
@@ -66,7 +67,7 @@ class WH_GAME_API MailMgr
 {
 private:
     MailMgr();
-    ~MailMgr();      
+    ~MailMgr();
 
 public:
     static MailMgr* instance();
@@ -90,7 +91,7 @@ public:
     void SendMailWithTemplateBy(Object* sender, ObjectGuid::LowType receiver, uint16 mailTemplateId, MailCheckMask mask = MAIL_CHECK_MASK_HAS_BODY, uint32 deliver_delay = 0);
     void SendMailWithTemplateByGUID(ObjectGuid::LowType sender, ObjectGuid::LowType receiver, uint8 messageType, uint16 mailTemplateId, MailCheckMask mask = MAIL_CHECK_MASK_HAS_BODY, uint32 deliver_delay = 0);
 
-    void RemoveAllMailsFor(ObjectGuid::LowType playerId);   
+    void RemoveAllMailsFor(ObjectGuid::LowType playerId);
 
     uint32 GetUnreadMessagesAndNextDelivertime(ObjectGuid::LowType playerId, time_t& delivertime);
     uint32 GetMailBoxSize(ObjectGuid::LowType playerId);
@@ -150,7 +151,7 @@ protected:
     void _RemoveMoneyFromMail(uint32 mailId, CharacterDatabaseTransaction& trans) const;
 
 private:
-    typedef std::unordered_map<uint32, Item*> ItemMap;    
+    typedef std::unordered_map<uint32, Item*> ItemMap;
 
     MailMap m_mails;
     MailItemMap m_mailitems;

@@ -15,7 +15,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "DatabaseEnv.h"
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "Mail.h"
 #include "MailMgr.h"
@@ -54,7 +56,7 @@ void MailExternalMgr::_DoUpdate()
 {
     LOG_DEBUG("mailexternal", "External Mail> Sending mails in queue...");
 
-    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_GET_EXTERNAL_MAIL);    
+    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_GET_EXTERNAL_MAIL);
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
     if (!result)
     {
@@ -62,7 +64,7 @@ void MailExternalMgr::_DoUpdate()
         return;
     }
 
-    CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();    
+    CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
 
     do
     {
@@ -102,5 +104,5 @@ void MailExternalMgr::_DoUpdate()
     } while (result->NextRow());
 
     CharacterDatabase.CommitTransaction(trans);
-    LOG_DEBUG("mailexternal", "External Mail> All Mails Sent...");    
+    LOG_DEBUG("mailexternal", "External Mail> All Mails Sent...");
 }

@@ -4143,7 +4143,7 @@ Metric.OverallStatusInterval = 1
 
 ###################################################################################################
 #    Antispam.Mail.Controller = 100 - how many mails player can hold in mailbox, include mail in future (from auctionhouse and calendar).
-#        Description: When player will receive this limit, he just can't bid or bidout from auction. Calendar will not sent mail him. 
+#        Description: When player will receive this limit, he just can't bid or bidout from auction. Calendar will not sent mail him.
 #                     And another player can't sent mail to him, just will see error overloaded mailbox of receiver.
 
 Antispam.Mail.Controller = 100

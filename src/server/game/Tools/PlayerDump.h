@@ -82,7 +82,6 @@ class WH_GAME_API PlayerDumpWriter : public PlayerDump
         void PopulateGuids(ObjectGuid::LowType guid);
 
         std::set<ObjectGuid::LowType> _pets;
-        std::set<ObjectGuid::LowType> _mails;
         std::set<ObjectGuid::LowType> _items;
 
         std::set<uint64> _itemSets;

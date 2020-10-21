@@ -21,10 +21,12 @@
 #include "BattlegroundMgr.h"
 #include "CalendarMgr.h"
 #include "CharacterCache.h"
+#include "DatabaseEnv.h"
 #include "DBCStores.h"
 #include "GameTime.h"
 #include "Guild.h"
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "RBAC.h"
 #include "Mail.h"
@@ -91,10 +93,10 @@ void MailMgr::SendMailBy(Object* sender, ObjectGuid::LowType receiver, std::stri
     uint8 m_messageType;
     uint8 m_stationery;
     ObjectGuid::LowType m_senderId;
-    time_t expire_time, deliver_time;    
+    time_t expire_time, deliver_time;
 
     if (!PrepareMessageAttributeBy(sender, receiver, m_messageType, m_stationery, m_senderId, deliver_delay, COD, expire_time, deliver_time))
-        return; 
+        return;
 
     uint32 mail_id = AddNewMail(m_messageType, m_stationery, 0, m_senderId, receiver, subject, body, false, money, expire_time, deliver_time, COD, mask);
 
@@ -506,10 +508,10 @@ void MailMgr::clearDependInstanceItemsBeforeDeletePlayer(ObjectGuid::LowType pla
         } while (resultItems->NextRow());
 
         CharacterDatabase.CommitTransaction(trans);
-    }    
+    }
 }
 
-bool MailMgr::PrepareMessageAttributeBy(Object* sender, ObjectGuid::LowType receiver, uint8& m_messageType, uint8& m_stationery, ObjectGuid::LowType& m_senderId, uint32 deliver_delay, uint32 COD, time_t& expire_time, time_t& deliver_time)
+bool MailMgr::PrepareMessageAttributeBy(Object* sender, ObjectGuid::LowType /*receiver*/, uint8& m_messageType, uint8& m_stationery, ObjectGuid::LowType& m_senderId, uint32 deliver_delay, uint32 COD, time_t& expire_time, time_t& deliver_time)
 {
     m_stationery = MAIL_STATIONERY_DEFAULT;
 
@@ -543,7 +545,7 @@ bool MailMgr::PrepareMessageAttributeBy(Object* sender, ObjectGuid::LowType rece
     }
 
     if (!typeIsOk)
-        return false;    
+        return false;
 
     deliver_time = GameTime::GetGameTime() + deliver_delay;
 
@@ -673,7 +675,7 @@ uint32 MailMgr::AddNewMail(uint8 messageType, uint8 stationery, uint16 mailTempl
 
 void MailMgr::RemoveAllMailsFor(ObjectGuid::LowType playerId)
 {
-    std::list<uint32> mID;
+    std::vector<uint32> mID;
     for (MailMap::const_iterator itr = m_mails.begin(); itr != m_mails.end(); ++itr)
     {
         if (itr->second.receiver == playerId)
@@ -684,13 +686,14 @@ void MailMgr::RemoveAllMailsFor(ObjectGuid::LowType playerId)
         return;
 
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-    for (std::list<uint32>::const_iterator itr = mID.begin(); itr != mID.end(); ++itr)
+    for (std::vector<uint32>::const_iterator itr = mID.begin(); itr != mID.end(); ++itr)
     {
         if (*itr)
             RemoveMail(*itr, trans);
     }
     CharacterDatabase.CommitTransaction(trans);
 
+    mID.clear();
     clearDependInstanceItemsBeforeDeletePlayer(playerId);
 }
 
@@ -773,7 +776,7 @@ void MailMgr::RemoveMailItem(ObjectGuid::LowType itemGuidLow, CharacterDatabaseT
 
 void MailMgr::RemoveMailItemsByMailId(uint32 mailID, CharacterDatabaseTransaction& trans)
 {
-    std::list<uint32> miID;
+    std::vector<uint32> miID;
     for (MailItemMap::const_iterator itr = m_mailitems.begin(); itr != m_mailitems.end(); ++itr)
     {
         if (itr->second.messageID == mailID)
@@ -786,7 +789,7 @@ void MailMgr::RemoveMailItemsByMailId(uint32 mailID, CharacterDatabaseTransactio
     if (miID.empty())
         return;
 
-    for (std::list<uint32>::const_iterator itr = miID.begin(); itr != miID.end(); ++itr)
+    for (std::vector<uint32>::const_iterator itr = miID.begin(); itr != miID.end(); ++itr)
     {
         if (*itr)
             m_mailitems.erase(*itr);
@@ -868,7 +871,6 @@ bool MailMgr::HandleMailDelete(uint32 mailID)
             if (itr->second.COD && itr->second.sender && itr->second.messageType == MAIL_NORMAL)
                 SendMailByGUID(0, itr->second.sender, MAIL_NORMAL, "Money received", "From old mail with COD", itr->second.COD, MAIL_CHECK_MASK_COD_PAYMENT);
         }
-            
     }
 
     if (result)
@@ -882,12 +884,12 @@ bool MailMgr::HandleMailDelete(uint32 mailID)
 }
 
 uint8 MailMgr::HandleMailReturnToSender(uint32 mailID)
-{    
-    uint8 result = 0;    
-    
+{
+    uint8 result = 0;
+
     // 0 = MAIL_ERR_INTERNAL_ERROR
     // 1 = MAIL_ERR_RECIPIENT_CAP_REACHED
-    // 2 = MAIL_OK    
+    // 2 = MAIL_OK
 
     uint32 old_maild     = 0;
     uint32 new_sender    = 0;
@@ -905,7 +907,7 @@ uint8 MailMgr::HandleMailReturnToSender(uint32 mailID)
                 continue; // return 0
 
             ObjectGuid oldsenderGuid(HighGuid::Player, itr->second.sender);
-            ObjectGuid oldreceiverGuid(HighGuid::Player, itr->second.receiver);            
+            ObjectGuid oldreceiverGuid(HighGuid::Player, itr->second.receiver);
 
             uint32 sr_account = 0;
             uint32 rc_account = 0;
@@ -952,7 +954,7 @@ uint8 MailMgr::HandleMailReturnToSender(uint32 mailID)
         // 1 step - send new mail
         uint32 new_mailID = SendReturnMailByGUID(old_maild, new_sender, new_receiver, subject, body, money, itemsExist, deliver_delay);
 
-        // 2 step - update mail_items for new mailid        
+        // 2 step - update mail_items for new mailid
         if (itemsExist)
         {
             CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
@@ -977,7 +979,7 @@ uint8 MailMgr::HandleMailReturnToSender(uint32 mailID)
         // 3 step - delete old mail
         CharacterDatabaseTransaction trans2 = CharacterDatabase.BeginTransaction();
         RemoveMail(old_maild, trans2);
-        CharacterDatabase.CommitTransaction(trans2);        
+        CharacterDatabase.CommitTransaction(trans2);
     }
 
     return result;
@@ -1079,7 +1081,7 @@ uint8 MailMgr::HandleMailTakeItem(Player* player, uint32 mailID, ObjectGuid::Low
                 count = it->GetCount();                      // save counts before store and possible merge with deleting
                 it->SetState(ITEM_UNCHANGED);                       // need to set this state, otherwise item cannot be removed later, if neccessary
                 player->MoveItemToInventory(dest, it, true);
-                player->SaveInventoryAndGoldToDB(trans);                
+                player->SaveInventoryAndGoldToDB(trans);
 
                 // upd owner of item
                 CharacterDatabasePreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ITEM_OWNER);
@@ -1534,7 +1536,7 @@ void MailMgr::_LoadMailedItemPointers()
 
 void MailMgr::_DeleteExpiryMails(bool startServer)
 {
-    std::list<uint32>mailIds;
+    std::vector<uint32>mailIds;
     time_t now = GameTime::GetGameTime();
 
     for (MailMap::iterator itr = m_mails.begin(); itr != m_mails.end(); ++itr)
@@ -1552,9 +1554,9 @@ void MailMgr::_DeleteExpiryMails(bool startServer)
     if (!mailIds.empty())
     {
         CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-        for (std::list<uint32>::iterator itr = mailIds.begin(); itr != mailIds.end(); ++itr)
-            RemoveMail((*itr), trans);        
-        
+        for (std::vector<uint32>::iterator itr = mailIds.begin(); itr != mailIds.end(); ++itr)
+            RemoveMail((*itr), trans);
+
         CharacterDatabase.CommitTransaction(trans);
     }
 

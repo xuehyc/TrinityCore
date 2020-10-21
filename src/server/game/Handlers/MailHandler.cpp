@@ -260,7 +260,7 @@ void WorldSession::HandleSendMail(WorldPackets::Mail::SendMailClient& sendMail)
         {
             bool log = HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE);
             if (!sendMail.Attachments.empty())
-            {                
+            {
                 for (Item* item : items)
                 {
                     if (log)
@@ -382,7 +382,7 @@ void WorldSession::HandleMailTakeItem(WorldPackets::Mail::MailTakeItem& takeItem
             break;
         default:
             break;
-    }    
+    }
 }
 
 void WorldSession::HandleMailTakeMoney(WorldPackets::Mail::MailTakeMoney& takeMoney)
