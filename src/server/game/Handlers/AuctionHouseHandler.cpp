@@ -27,6 +27,7 @@
 #include "Language.h"
 #include "Log.h"
 #include "Mail.h"
+#include "MailMgr.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -118,6 +119,13 @@ void WorldSession::SendAuctionOwnerNotification(AuctionEntry* auction)
 //this void creates new auction and adds auction to some auctionhouse
 void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
 {
+    if (GetPlayer() && (sMailMgr->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > sWorld->getIntConfig(CONFIG_ANTISPAM_MAIL_COUNT_CONTROLLER))
+    {
+        GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_CAP_REACHED);
+        recvData.rfinish();
+        return;
+    }
+
     ObjectGuid auctioneer;
     uint32 itemsCount, etime, bid, buyout;
     recvData >> auctioneer;
@@ -338,6 +346,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
         SendAuctionCommandResult(AH->Id, AUCTION_SELL_ITEM, ERR_AUCTION_OK);
 
         GetPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CREATE_AUCTION, 1);
+        GetPlayer()->AddLotsCount();
     }
     else // Required stack size of auction does not match to current item stack size, clone item and set correct stack size
     {
@@ -420,6 +429,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
         SendAuctionCommandResult(AH->Id, AUCTION_SELL_ITEM, ERR_AUCTION_OK);
 
         GetPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CREATE_AUCTION, 1);
+        GetPlayer()->AddLotsCount();
     }
 }
 
@@ -427,6 +437,13 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
 void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
 {
     LOG_DEBUG("network", "WORLD: Received CMSG_AUCTION_PLACE_BID");
+
+    if (GetPlayer() && (sMailMgr->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > sWorld->getIntConfig(CONFIG_ANTISPAM_MAIL_COUNT_CONTROLLER))
+    {
+        GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_CAP_REACHED);
+        recvData.rfinish();
+        return;
+    }
 
     ObjectGuid auctioneer;
     uint32 auctionId;
@@ -500,7 +517,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
             else
             {
                 // mail to last bidder and return money
-                sAuctionMgr->SendAuctionOutbiddedMail(auction, price, GetPlayer(), trans);
+                sAuctionMgr->SendAuctionOutbiddedMail(auction, price, GetPlayer());
                 player->ModifyMoney(-int32(price));
             }
         }
@@ -531,6 +548,8 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
             stmt->setUInt32(0, auction->Id);
             stmt->setUInt32(1, auction->bidder);
             trans->Append(stmt);
+
+            GetPlayer()->AddLotsCount();
         }
 
         SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, ERR_AUCTION_OK);
@@ -544,7 +563,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
         {
             player->ModifyMoney(-int32(auction->buyout));
             if (auction->bidder)                          //buyout for bidded auction ..
-                sAuctionMgr->SendAuctionOutbiddedMail(auction, auction->buyout, GetPlayer(), trans);
+                sAuctionMgr->SendAuctionOutbiddedMail(auction, auction->buyout, GetPlayer());
         }
         auction->bidder = player->GetGUID().GetCounter();
         auction->bid = auction->buyout;
@@ -556,8 +575,8 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
         GetPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_BID, auction->buyout);
 
         //- Mails must be under transaction control too to prevent data loss
-        sAuctionMgr->SendAuctionSalePendingMail(auction, trans);
-        sAuctionMgr->SendAuctionSuccessfulMail(auction, trans);
+        sAuctionMgr->SendAuctionSalePendingMail(auction);
+        sAuctionMgr->SendAuctionSuccessfulMail(auction);
         sAuctionMgr->SendAuctionWonMail(auction, trans);
 
         SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, ERR_AUCTION_OK);
@@ -575,6 +594,13 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
 void WorldSession::HandleAuctionRemoveItem(WorldPacket& recvData)
 {
     LOG_DEBUG("network", "WORLD: Received CMSG_AUCTION_REMOVE_ITEM");
+
+    if (GetPlayer() && (sMailMgr->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > sWorld->getIntConfig(CONFIG_ANTISPAM_MAIL_COUNT_CONTROLLER))
+    {
+        GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_CAP_REACHED);
+        recvData.rfinish();
+        return;
+    }
 
     ObjectGuid auctioneer;
     uint32 auctionId;
@@ -610,14 +636,16 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recvData)
                 if (!player->HasEnoughMoney(auctionCut))          //player doesn't have enough money, maybe message needed
                     return;
                 //some auctionBidderNotification would be needed, but don't know that parts..
-                sAuctionMgr->SendAuctionCancelledToBidderMail(auction, trans);
+                sAuctionMgr->SendAuctionCancelledToBidderMail(auction);
                 player->ModifyMoney(-int32(auctionCut));
             }
 
+            std::list<Item*> itemlist;
+            itemlist.push_back(pItem);
             // item will deleted or added to received mail list
-            MailDraft(auction->BuildAuctionMailSubject(AUCTION_CANCELED), "")
-                .AddItem(pItem)
-                .SendMailTo(trans, player, auction, MAIL_CHECK_MASK_COPIED);
+            sMailMgr->SendMailByAuctionHouseWithItems(auction, player->GetGUID().GetCounter(), auction->BuildAuctionMailSubject(AUCTION_CANCELED), AuctionEntry::BuildAuctionMailBody(0, 0, auction->buyout, auction->deposit, 0), 0, itemlist, MAIL_CHECK_MASK_COPIED);
+            itemlist.clear();
+
         }
         else
         {
@@ -636,7 +664,7 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recvData)
 
     //inform player, that auction is removed
     SendAuctionCommandResult(auction->Id, AUCTION_CANCEL, ERR_AUCTION_OK);
-
+    player->RemoveLotsCount();
     // Now remove the auction
 
     player->SaveInventoryAndGoldToDB(trans);

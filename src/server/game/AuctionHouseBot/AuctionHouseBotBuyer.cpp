@@ -395,15 +395,15 @@ void AuctionBotBuyer::BuyEntry(AuctionEntry* auction, AuctionHouseObject* auctio
 
     // Send mail to previous bidder if any
     if (auction->bidder && !sAuctionBotConfig->IsBotChar(auction->bidder))
-        sAuctionMgr->SendAuctionOutbiddedMail(auction, auction->buyout, nullptr, trans);
+        sAuctionMgr->SendAuctionOutbiddedMail(auction, auction->buyout, nullptr);
 
     // Set bot as bidder and set new bid amount
     auction->bidder = sAuctionBotConfig->GetRandCharExclude(auction->owner);
     auction->bid = auction->buyout;
 
     // Mails must be under transaction control too to prevent data loss
-    sAuctionMgr->SendAuctionSalePendingMail(auction, trans);
-    sAuctionMgr->SendAuctionSuccessfulMail(auction, trans);
+    sAuctionMgr->SendAuctionSalePendingMail(auction);
+    sAuctionMgr->SendAuctionSuccessfulMail(auction);
     sAuctionMgr->SendAuctionWonMail(auction, trans);
 
     // Delete auction from DB
@@ -426,7 +426,7 @@ void AuctionBotBuyer::PlaceBidToEntry(AuctionEntry* auction, uint32 bidPrice)
 
     // Send mail to previous bidder if any
     if (auction->bidder && !sAuctionBotConfig->IsBotChar(auction->bidder))
-        sAuctionMgr->SendAuctionOutbiddedMail(auction, bidPrice, nullptr, trans);
+        sAuctionMgr->SendAuctionOutbiddedMail(auction, bidPrice, nullptr);
 
     // Set bot as bidder and set new bid amount
     auction->bidder = sAuctionBotConfig->GetRandCharExclude(auction->owner);

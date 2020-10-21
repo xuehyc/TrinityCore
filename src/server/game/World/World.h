@@ -75,7 +75,6 @@ enum WorldTimers
     WUPDATE_EVENTS,
     WUPDATE_CLEANDB,
     WUPDATE_AUTOBROADCAST,
-    WUPDATE_MAILBOXQUEUE,
     WUPDATE_DELETECHARS,
     WUPDATE_AHBOT,
     WUPDATE_PINGDB,
@@ -396,6 +395,7 @@ enum WorldIntConfigs
     CONFIG_RESPAWN_DYNAMICMINIMUM_GAMEOBJECT,
     CONFIG_RESPAWN_GUIDWARNING_FREQUENCY,
     CONFIG_SOCKET_TIMEOUTTIME_ACTIVE,
+    CONFIG_ANTISPAM_MAIL_COUNT_CONTROLLER,
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -798,8 +798,6 @@ class WH_GAME_API World
         bool m_isClosed;
 
         IntervalTimer m_timers[WUPDATE_COUNT];
-        time_t mail_timer;
-        time_t mail_timer_expires;
 
         SessionMap m_sessions;
         typedef std::unordered_map<uint32, time_t> DisconnectMap;

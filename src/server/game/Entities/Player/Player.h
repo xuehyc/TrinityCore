@@ -79,8 +79,6 @@ enum ItemClass : uint8;
 enum LootError : uint8;
 enum LootType : uint8;
 
-typedef std::deque<Mail*> PlayerMails;
-
 #define PLAYER_MAX_SKILLS           127
 #define PLAYER_MAX_DAILY_QUESTS     25
 #define PLAYER_EXPLORED_ZONES_SIZE  128
@@ -709,8 +707,8 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_REPUTATION              = 7,
     PLAYER_LOGIN_QUERY_LOAD_INVENTORY               = 8,
     PLAYER_LOGIN_QUERY_LOAD_ACTIONS                 = 9,
-    PLAYER_LOGIN_QUERY_LOAD_MAILS                   = 10,
-    PLAYER_LOGIN_QUERY_LOAD_MAIL_ITEMS              = 11,
+    PLAYER_LOGIN_QUERY_LOAD_MAIL_COUNT              = 10,
+    PLAYER_LOGIN_QUERY_LOAD_MAIL_DATE               = 11,
     PLAYER_LOGIN_QUERY_LOAD_SOCIAL_LIST             = 12,
     PLAYER_LOGIN_QUERY_LOAD_HOME_BIND               = 13,
     PLAYER_LOGIN_QUERY_LOAD_SPELL_COOLDOWNS         = 14,
@@ -1346,8 +1344,6 @@ class WH_GAME_API Player : public Unit, public GridObject<Player>
         static void DeleteOldCharacters();
         static void DeleteOldCharacters(uint32 keepDays);
 
-        bool m_mailsUpdated;
-
         void SetBindPoint(ObjectGuid guid) const;
         void SendTalentWipeConfirm(ObjectGuid guid) const;
         void ResetPetTalents();
@@ -1380,30 +1376,13 @@ class WH_GAME_API Player : public Unit, public GridObject<Player>
         void UpdateNextMailTimeAndUnreads();
         void AddNewMailDeliverTime(time_t deliver_time);
 
-        void RemoveMail(uint32 id);
-
-        void AddMail(Mail* mail) { m_mail.push_front(mail);}// for call from WorldSession::SendMailTo
-        uint32 GetMailSize() { return m_mail.size();}
-        Mail* GetMail(uint32 id);
-
-        PlayerMails const& GetMails() const { return m_mail; }
-
         void SendItemRetrievalMail(uint32 itemEntry, uint32 count); // Item retrieval mails sent by The Postmaster (34337), used in multiple places.
-
         /*********************************************************/
         /*** MAILED ITEMS SYSTEM ***/
         /*********************************************************/
 
-        uint8 unReadMails;
+        uint32 unReadMails;
         time_t m_nextMailDelivereTime;
-
-        typedef std::unordered_map<uint32, Item*> ItemMap;
-
-        ItemMap mMitems;                                    //template defined in objectmgr.cpp
-
-        Item* GetMItem(uint32 id);
-        void AddMItem(Item* it);
-        bool RemoveMItem(uint32 id);
 
         void SendOnCancelExpectedVehicleRideAura() const;
         void PetSpellInitialize();
@@ -1694,6 +1673,18 @@ class WH_GAME_API Player : public Unit, public GridObject<Player>
         void ResurrectPlayer(float restore_percent, bool applySickness = false);
         void BuildPlayerRepop();
         void RepopAtGraveyard();
+
+        /*********************************************************/
+        /***                  CUSTOM SYSTEMS                   ***/
+        /*********************************************************///
+
+        // Auction info
+        void CalculateAuctionLotsCounter();
+        uint32 GetAuctionLotsCount() const { return m_auctionlots; }
+        void AddLotsCount() { ++m_auctionlots; }
+        void RemoveLotsCount() { m_auctionlots - 1 > 0 ? --m_auctionlots : m_auctionlots = 0; }
+
+        //End of Custom Systems
 
         void RemoveGhoul();
 
@@ -2224,8 +2215,6 @@ class WH_GAME_API Player : public Unit, public GridObject<Player>
         void _LoadGlyphAuras();
         void _LoadBoundInstances(PreparedQueryResult result);
         void _LoadInventory(PreparedQueryResult result, uint32 timeDiff);
-        void _LoadMail(PreparedQueryResult mailsResult, PreparedQueryResult mailItemsResult);
-        static Item* _LoadMailedItem(ObjectGuid const& playerGuid, Player* player, uint32 mailId, Mail* mail, Field* fields);
         void _LoadQuestStatus(PreparedQueryResult result);
         void _LoadQuestStatusRewarded(PreparedQueryResult result);
         void _LoadDailyQuestStatus(PreparedQueryResult result);
@@ -2253,7 +2242,6 @@ class WH_GAME_API Player : public Unit, public GridObject<Player>
         void _SaveActions(CharacterDatabaseTransaction trans);
         void _SaveAuras(CharacterDatabaseTransaction trans);
         void _SaveInventory(CharacterDatabaseTransaction trans);
-        void _SaveMail(CharacterDatabaseTransaction trans);
         void _SaveQuestStatus(CharacterDatabaseTransaction trans);
         void _SaveDailyQuestStatus(CharacterDatabaseTransaction trans);
         void _SaveWeeklyQuestStatus(CharacterDatabaseTransaction trans);
@@ -2314,7 +2302,6 @@ class WH_GAME_API Player : public Unit, public GridObject<Player>
         uint32 m_GuildIdInvited;
         uint32 m_ArenaTeamIdInvited;
 
-        PlayerMails m_mail;
         PlayerSpellMap m_spells;
         PlayerTalentMap* m_talents[MAX_TALENT_SPECS];
         uint32 m_lastPotionId;                              // last used health/mana potion in combat, that block next potion use
@@ -2477,6 +2464,15 @@ class WH_GAME_API Player : public Unit, public GridObject<Player>
         uint32 m_DelayedOperations;
         bool m_bCanDelayTeleport;
         bool m_bHasDelayedTeleport;
+
+        /*********************************************************/
+        /***                  Atiesh FEATURES                  ***/
+        /*********************************************************///
+
+        // others
+        uint32 m_auctionlots;       // Auction lots count for all auctions
+
+        //End of Atiesh features
 
         std::unique_ptr<PetStable> m_petStable;
 
