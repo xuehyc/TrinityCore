@@ -101,6 +101,7 @@ void CalendarMgr::LoadFromDB()
         while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u calendar events in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
     count = 0;
     oldMSTime = getMSTime();
 

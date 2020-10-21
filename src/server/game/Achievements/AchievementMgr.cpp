@@ -1579,6 +1579,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
             sMailMgr->SendMailWithItemsByGUID(reward->SenderCreatureId, GetPlayer()->GetGUID().GetCounter(), MAIL_CREATURE, subject, text, 0, itemlist);
         else
             sMailMgr->SendMailWithTemplateByGUID(reward->SenderCreatureId, GetPlayer()->GetGUID().GetCounter(), MAIL_CREATURE, reward->MailTemplateId);
+
         itemlist.clear();
         CharacterDatabase.CommitTransaction(trans);
     }

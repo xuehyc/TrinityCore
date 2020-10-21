@@ -857,7 +857,7 @@ bool AddonChannelCommandHandler::ParseCommands(std::string_view str)
 {
     if (str.length() < 17)
         return false;
-    if (!StringStartsWith(str, "TrinityCore\t"))
+    if (!StringStartsWith(str, "WarheadCore\t"))
         return false;
     char opcode = str[12];
     echo = &str[13];

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019+ ATieshCore <https://at-wow.org/>
+ * This file is part of the WarheadCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _MAILEXTERNAL_H
-#define _MAILEXTERNAL_H
+#ifndef _MAIL_EXTERNAL_H
+#define _MAIL_EXTERNAL_H
 
 #include "Common.h"
 #include "ObjectGuid.h"

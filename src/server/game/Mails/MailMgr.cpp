@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019+ ATieshCore <https://at-wow.org/>
+ * This file is part of the WarheadCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -39,7 +39,7 @@
 #include "WorldSession.h"
 #include "WorldPacket.h"
 
-#define MAX_NETCLIENT_PACKET_SIZE (32767 - 1)               // Client hardcap: int16 with trailing zero space otherwise crash on memory free
+constexpr uint32 MAX_NETCLIENT_PACKET_SIZE = 32767 - 1; // Client hardcap: int16 with trailing zero space otherwise crash on memory free
 
 MailMgr* MailMgr::instance()
 {
@@ -1055,7 +1055,8 @@ uint8 MailMgr::HandleMailTakeItem(Player* player, uint32 mailID, ObjectGuid::Low
                             if (!sCharacterCache->GetCharacterNameByGuid(sender_guid, sender_name))
                                 sender_name = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
                         }
-                        sLog->outCommand(player->GetSession()->GetAccountId(), "GM %s (Account: %u) receiver mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
+
+                        LOG_GM(player->GetSession()->GetAccountId(), "GM %s (Account: %u) receiver mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
                             player->GetName().c_str(), player->GetSession()->GetAccountId(), it->GetTemplate()->Name1.c_str(), it->GetEntry(), it->GetCount(), itr->second.COD, sender_name.c_str(), sender_accId);
                     }
                     else if (!receiver)

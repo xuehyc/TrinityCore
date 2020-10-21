@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019+ ATieshCore <https://at-wow.org/>
+ * This file is part of the WarheadCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -26,6 +26,7 @@
 
 struct AuctionEntry;
 struct CalendarEvent;
+
 enum MailTimers
 {
     MAIL_UPDATE_INTERVAL = 1000 // 1 sec

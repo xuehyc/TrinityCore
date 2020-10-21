@@ -1,5 +1,5 @@
 /*
- * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
+ * This file is part of the WarheadCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -156,7 +156,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction, CharacterDatabas
 
         uint32 ownerAccId = sCharacterCache->GetCharacterAccountIdByGuid(ownerGuid);
 
-        sLog->outCommand(bidderAccId, "GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: %u. Original owner %s (Account: %u)",
+        LOG_GM(bidderAccId, "GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: %u. Original owner %s (Account: %u)",
             bidderName.c_str(), bidderAccId, pItem->GetTemplate()->Name1.c_str(), pItem->GetEntry(), pItem->GetCount(), auction->bid, ownerName.c_str(), ownerAccId);
     }
 
@@ -660,17 +660,16 @@ void AuctionHouseObject::Update()
 
 void AuctionHouseObject::BuildListAllLots(Player* player, uint32& totalcount)
 {
-    for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
+    for (auto const& itr : AuctionsMap)
     {
-        AuctionEntry* Aentry = itr->second;
-        if (Aentry && Aentry->bidders.find(player->GetGUID()) != Aentry->bidders.end())
-            ++totalcount;
-    }
+        AuctionEntry* aEntry = itr.second;
+        if (!aEntry)
+            continue;
 
-    for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
-    {
-        AuctionEntry* Aentry = itr->second;
-        if (Aentry && Aentry->owner == player->GetGUID().GetCounter())
+        if (aEntry->bidders.find(player->GetGUID()) != aEntry->bidders.end())
+            ++totalcount;
+
+        if (aEntry->owner == player->GetGUID().GetCounter())
             ++totalcount;
     }
 }
@@ -952,11 +951,10 @@ bool AuctionEntry::LoadFromDB(Field* fields)
 
     return true;
 }
+
 std::string AuctionEntry::BuildAuctionMailSubject(MailAuctionAnswers response) const
 {
-    std::ostringstream strm;
-    strm << itemEntry << ":0:" << response << ':' << Id << ':' << itemCount;
-    return strm.str();
+    return Warhead::StringFormat("%u:0:%u:%u:%u", itemEntry, static_cast<uint8>(response), Id, itemCount);
 }
 
 std::string AuctionEntry::BuildAuctionMailBody(ObjectGuid::LowType lowGuid, uint32 bid, uint32 buyout, uint32 deposit, uint32 cut)

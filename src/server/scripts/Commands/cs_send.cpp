@@ -256,6 +256,7 @@ public:
         handler->PSendSysMessage(LANG_MAIL_SENT, nameLink.c_str());
         return true;
     }
+
     /// Send a message to a player in game
     static bool HandleSendMessageCommand(ChatHandler* handler, char const* args)
     {
@@ -287,6 +288,7 @@ public:
 
         return true;
     }
+
     /// Send a message to a player in game
     static bool HandleExpireTime(ChatHandler* handler, char const* /*args*/)
     {

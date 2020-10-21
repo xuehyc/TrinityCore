@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2019 AtieshCore <https://at-wow.org/>
+ * This file is part of the WarheadCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,7 +20,7 @@
 #include "Language.h"
 #include "Log.h"
 
- // Auction info
+// Auction info
 void Player::CalculateAuctionLotsCounter()
 {
     uint32 count = 0;
