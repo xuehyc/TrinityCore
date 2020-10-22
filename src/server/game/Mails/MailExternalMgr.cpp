@@ -33,21 +33,15 @@ MailExternalMgr* MailExternalMgr::instance()
 
 void MailExternalMgr::Initialize()
 {
-    _timer.Reset(MINUTE * 1000);    // upd only 1 time in minute
+    m_updateTimer = 1000;
 }
 
 void MailExternalMgr::Update(uint32 diff)
 {
     m_updateTimer += diff;
-    if (m_updateTimer >= MAIL_UPDATE_INTERVAL) // upd only each 1 sec
+    if (m_updateTimer >= MAIL_UPDATE_INTERVAL * MINUTE) // upd only 1 time in minute
     {
-        _timer.Update(m_updateTimer / 1000);
-        if (_timer.Passed())
-        {
-            _DoUpdate();
-            _timer.Reset(MINUTE);
-        }
-
+        _DoUpdate();
         m_updateTimer = 0;
     }
 }
@@ -70,7 +64,7 @@ void MailExternalMgr::_DoUpdate()
     {
         Field* fields = result->Fetch();
         uint32 id = fields[0].GetUInt32();
-        ObjectGuid receiver_guid = ObjectGuid(HighGuid::Player, fields[1].GetUInt32());
+        ObjectGuid::LowType receiver_guid = fields[1].GetUInt32();
         std::string subject = fields[2].GetString();
         std::string body = fields[3].GetString();
         uint32 money = fields[4].GetUInt32();
@@ -88,12 +82,12 @@ void MailExternalMgr::_DoUpdate()
                 {
                     itemlist.push_back(mailItem);
                     mailItem->SaveToDB(trans);
-                    LOG_DEBUG("mailexternal", "External Mail> Adding %u of item with id %u", itemCount, itemId);
+                    LOG_INFO("server", "External Mail> Adding %u copies of item with id %u for player_id %u", itemCount, itemId, receiver_guid);
                 }
             }
         }
 
-        sMailMgr->SendMailWithItemsByGUID(receiver_guid, receiver_guid, MAIL_NORMAL, subject, body, money, itemlist);
+        sMailMgr->SendMailWithItemsByGUID(0, receiver_guid, MAIL_NORMAL, subject, body, money, itemlist);
         itemlist.clear();
 
         CharacterDatabasePreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_DEL_EXTERNAL_MAIL);

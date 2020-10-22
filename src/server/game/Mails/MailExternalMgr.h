@@ -40,7 +40,6 @@ protected:
 private:
     // update interval
     uint32 m_updateTimer;
-    TimeTracker _timer;
 };
 
 #define sMailExternalMgr MailExternalMgr::instance()
