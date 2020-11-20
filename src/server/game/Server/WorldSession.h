@@ -427,7 +427,7 @@ class WH_GAME_API WorldSession
         void SendClientCacheVersion(uint32 version);
 
         void InitializeSession();
-        void InitializeSessionCallback(CharacterDatabaseQueryHolder* realmHolder);
+        void InitializeSessionCallback(CharacterDatabaseQueryHolder const& realmHolder);
 
         rbac::RBACData* GetRBACData();
         bool HasPermission(uint32 permissionId);
@@ -605,7 +605,7 @@ class WH_GAME_API WorldSession
         void HandleCharCreateOpcode(WorldPacket& recvPacket);
         void HandlePlayerLoginOpcode(WorldPacket& recvPacket);
         void HandleCharEnum(PreparedQueryResult result);
-        void HandlePlayerLogin(LoginQueryHolder* holder);
+        void HandlePlayerLogin(LoginQueryHolder const& holder);
         void HandleCharFactionOrRaceChange(WorldPacket& recvData);
         void HandleCharFactionOrRaceChangeCallback(std::shared_ptr<CharacterFactionChangeInfo> factionChangeInfo, PreparedQueryResult result);
         void HandleCharRenameOpcode(WorldPacket& recvData);
