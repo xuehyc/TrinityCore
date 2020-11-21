@@ -578,7 +578,30 @@ struct boss_headless_horseman : public ScriptedAI
                         SchedulePhase3Events();
                     }
 
-            DoPlaySoundToSet(me, Warhead::Containers::SelectRandomContainerElement(HeadlessHorsemanRandomLaughSound));
+                    if (Unit* target = SelectTarget(SelectTargetMethod::MaxThreat))
+                        AttackStart(target);
+                    break;
+                case EVENT_CONFLAGRATE:
+                    if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 30.0f, true, false))
+                    {
+                        DoCastSelf(SPELL_HORSEMANS_CONFLAGRATION_SOUND, true);
+                        DoCastSelf(SPELL_HORSEMANS_CONFLAGRATION_SOUND_THROTTLE, true);
+                        DoCast(target, SPELL_CONFLAGRATION);
+                        Talk(SAY_CONFLAGRATION);
+                    }
+                    _events.Repeat(18s, 21s);
+                    break;
+                case EVENT_SUMMON_PUMPKIN:
+                    DoCastSelf(SPELL_SUMMON_PUMPKIN_BURST_DELAY);
+                    _events.Repeat(30s);
+                    break;
+                case EVENT_RANDOM_LAUGH:
+                    DoPlaySoundToSet(me, Warhead::Containers::SelectRandomContainerElement(HeadlessHorsemanRandomLaughSound));
+                    _events.Repeat(30s, 60s);
+                    break;
+                default:
+                    break;
+            }
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
@@ -914,11 +937,10 @@ class spell_summon_pumpkin_burst_delay : public AuraScript
     }
 };
 
-        if (_withHead && _laughTimer.Passed())
-        {
-            _laughTimer.Reset(randtime(11s, 22s));
-            DoPlaySoundToSet(me, Warhead::Containers::SelectRandomContainerElement(HeadlessHorsemanRandomLaughSound));
-        }
+// 42428 - Headless Horseman Climax - Head Is Dead
+class spell_headless_horseman_head_is_dead : public SpellScript
+{
+    PrepareSpellScript(spell_headless_horseman_head_is_dead);
 
     void HandleDummy(SpellEffIndex /*effIndex*/)
     {
