@@ -50,7 +50,7 @@ namespace Trainer
         NotEnoughSkill = 2
     };
 
-    struct TC_GAME_API Spell
+    struct WH_GAME_API Spell
     {
         uint32 SpellId = 0;
         uint32 MoneyCost = 0;
@@ -62,7 +62,7 @@ namespace Trainer
         bool IsCastable() const;
     };
 
-    class TC_GAME_API Trainer
+    class WH_GAME_API Trainer
     {
     public:
         Trainer(uint32 trainerId, Type type, uint32 requirement, std::string greeting, std::vector<Spell> spells);
