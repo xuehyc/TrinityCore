@@ -25,7 +25,7 @@
 #define ICCScriptName "instance_icecrown_citadel"
 #define DataHeader "IC"
 
-uint32 const EncounterCount = 13;
+uint32 const EncounterCount = 14;
 
 // Shared spells used by more than one script
 enum ICSharedSpells
@@ -84,6 +84,7 @@ enum ICDataTypes
     DATA_VALITHRIA_DREAMWALKER         = 10,
     DATA_SINDRAGOSA                    = 11,
     DATA_THE_LICH_KING                 = 12,
+    DATA_SINDRAGOSA_GAUNTLET           = 13,
 
     // Additional data
     DATA_SAURFANG_EVENT_NPC            = 13,
@@ -299,6 +300,14 @@ enum ICCreaturesIds
     NPC_NIGHTMARE_PORTAL_PRE_EFFECT             = 38429,
     NPC_DREAM_PORTAL                            = 37945,
     NPC_NIGHTMARE_PORTAL                        = 38430,
+
+    // Sindragosa Gauntlet
+    NPC_SINDRAGOSA_GAUNTLET                     = 37503,
+    NPC_NERUBAR_CHAMPION                        = 37501,
+    NPC_NERUBAR_WEBWEAVER                       = 37502,
+    NPC_NERUBAR_BROODLING                       = 37232,
+    NPC_FROSTWARDEN_SORCERESS                   = 37229,
+    NPC_FROSTWARDEN_WARRIOR                     = 37228,
 
     // Sindragosa
     NPC_SINDRAGOSA                              = 36853,

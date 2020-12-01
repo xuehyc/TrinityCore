@@ -69,6 +69,9 @@ enum ICCTexts
 
     // Rotting Frost Giant
     EMOTE_DEATH_PLAGUE_WARNING = 0,
+
+    // Sindragosa Gauntlet
+    SAY_INIT                   = 0
 };
 
 enum ICCSpells
@@ -134,7 +137,12 @@ enum ICCSpells
     SPELL_WEB_BEAM                  = 69887,
     SPELL_CRYPT_SCARABS             = 70965,
     SPELL_WEB_WRAP                  = 70980,
-    SPELL_DARK_MENDING              = 71020
+    SPELL_DARK_MENDING              = 71020,
+
+    // Sindragosa Gauntlet
+    SPELL_WEB_BEAM2                 = 69986,
+    SPELL_WEB                       = 71327,
+    SPELL_RUSH                      = 71801
 };
 
 enum ICCTimedEventIds
@@ -180,6 +188,13 @@ enum ICCTimedEventIds
 
     // Invisible Stalker (Float, Uninteractible, LargeAOI)
     EVENT_SOUL_MISSILE,
+
+    // Sindragosa Gauntlet
+    EVENT_CHECK_FIGHT,
+    EVENT_GAUNTLET_PHASE_1,
+    EVENT_GAUNTLET_PHASE_2,
+    EVENT_GAUNTLET_PHASE_3,
+    EVENT_SUMMON_BROODLING
 };
 
 enum ICCDataTypes
@@ -1601,6 +1616,441 @@ class at_icc_nerubar_broodkeeper : public OnlyOnceAreaTriggerScript
         }
 };
 
+// GauntletEvent
+struct npc_icc_gauntlet_controller : public NullCreatureAI
+{
+    npc_icc_gauntlet_controller(Creature* creature) : NullCreatureAI(creature), summons(me)
+    {
+        instance = creature->GetInstanceScript();
+    }
+
+    void Reset() override
+    {
+        events.Reset();
+        summons.DespawnAll();
+
+        if (instance->GetBossState(DATA_SINDRAGOSA_GAUNTLET) != DONE)
+        {
+            instance->SetBossState(DATA_SINDRAGOSA_GAUNTLET, NOT_STARTED);
+            SummonSpiders();
+        }
+    }
+
+    void DoAction(int32 param) override
+    {
+        if (param != 1)
+            return;
+
+        Talk(SAY_INIT);
+        me->setActive(true);
+        events.Reset();
+        events.SetPhase(0);
+        events.ScheduleEvent(EVENT_CHECK_FIGHT, 1s);
+        events.ScheduleEvent(EVENT_GAUNTLET_PHASE_1, 0s);
+        instance->SetBossState(DATA_SINDRAGOSA_GAUNTLET, IN_PROGRESS);
+    }
+
+    void JustReachedHome() override
+    {
+        me->setActive(false);
+    }
+
+    void JustDied(Unit* /*unit*/) override
+    {
+        instance->SetBossState(DATA_SINDRAGOSA_GAUNTLET, DONE);
+    }
+
+    void JustSummoned(Creature* summon) override
+    {
+        summons.Summon(summon);
+
+        if (summon->GetPositionZ() > 220.0f)
+        {
+            summon->SetDisableGravity(true);
+            summon->SetHover(true);
+        }
+    }
+
+    void SummonedCreatureDies(Creature* summon, Unit* /*unit*/) override
+    {
+        summons.Despawn(summon);
+
+        auto GetEntryCount = [&](uint32 entry)
+        {
+            uint32 count = 0;
+
+            for (auto const& itr : summons)
+                if (itr.GetEntry() == entry)
+                    count++;
+
+            return count;
+        };
+
+        if (summon->GetEntry() != NPC_NERUBAR_BROODLING && GetEntryCount(NPC_NERUBAR_BROODLING) == summons.size())
+        {
+            if (events.GetPhaseMask() == 0)
+            {
+                events.SetPhase(1);
+                events.ScheduleEvent(EVENT_GAUNTLET_PHASE_2, 0s);
+            }
+            else if (events.GetPhaseMask() == 1)
+            {
+                events.SetPhase(2);
+                events.ScheduleEvent(EVENT_GAUNTLET_PHASE_3, 0s);
+            }
+            else
+                Unit::Kill(me, me);
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        events.Update(diff);
+
+        switch (events.ExecuteEvent())
+        {
+            case EVENT_CHECK_FIGHT:
+            {
+                for (auto const& itr : me->GetMap()->GetPlayers())
+                {
+                    Player* player = itr.GetSource();
+                    if (!player)
+                        continue;
+
+                    if (me->GetDistance(player) > 100.0f || !player->IsAlive() || player->IsGameMaster())
+                        continue;
+
+                    events.ScheduleEvent(EVENT_CHECK_FIGHT, 1s);
+                    return;
+                }
+
+                CreatureAI::EnterEvadeMode();
+                return;
+            }
+            case EVENT_GAUNTLET_PHASE_1:
+                ScheduleBroodlings();
+                SpidersMoveDown();
+                break;
+            case EVENT_GAUNTLET_PHASE_2:
+                ScheduleBroodlings();
+                SummonFrostwardens();
+                break;
+            case EVENT_GAUNTLET_PHASE_3:
+                ScheduleBroodlings();
+                SummonSpiders();
+                SpidersMoveDown();
+                break;
+            case EVENT_SUMMON_BROODLING:
+                SummonBroodling();
+                break;
+        }
+    }
+
+private:
+    SummonList summons;
+    InstanceScript* instance;
+    EventMap events;
+
+    void ScheduleBroodlings()
+    {
+        for (uint8 i = 0; i < 30; ++i)
+            events.ScheduleEvent(EVENT_SUMMON_BROODLING, 10s + Milliseconds(i * 350));
+    }
+
+    void SummonBroodling()
+    {
+        float dist = frand(18.0f, 39.0f);
+        float o = rand_norm() * 2 * M_PI;
+
+        if (Creature* broodling = me->SummonCreature(NPC_NERUBAR_BROODLING, me->GetPositionX() + cos(o) * dist, me->GetPositionY() + sin(o) * dist, 250.0f, Position::NormalizeOrientation(o - M_PI)))
+            broodling->AI()->DoAction(ACTION_NERUBAR_FALL);
+    }
+
+    void SummonFrostwardens()
+    {
+        for (uint8 i = 0; i < 3; ++i)
+        {
+            me->SummonCreature(i == 1 ? NPC_FROSTWARDEN_SORCERESS : NPC_FROSTWARDEN_WARRIOR, 4173.94f + i * 7.0f, 2409.15f, 211.033f, 1.56f);
+            me->SummonCreature(i == 1 ? NPC_FROSTWARDEN_SORCERESS : NPC_FROSTWARDEN_WARRIOR, 4173.94f + i * 7.0f, 2556.71f, 211.033f, 4.712f);
+        }
+    }
+
+    void SummonSpiders()
+    {
+        me->SummonCreature(NPC_NERUBAR_CHAMPION, 4207.30f, 2532.00f, 256.0, 4.253f);
+        me->SummonCreature(NPC_NERUBAR_WEBWEAVER, 4228.79f, 2510.36f, 256.0f, 3.577f);
+        me->SummonCreature(NPC_NERUBAR_CHAMPION, 4228.34f, 2458.20f, 256.0f, 2.642f);
+        me->SummonCreature(NPC_NERUBAR_WEBWEAVER, 4207.54f, 2437.18f, 256.0f, 2.073f);
+        me->SummonCreature(NPC_NERUBAR_CHAMPION, 4156.20f, 2436.80f, 256.0f, 1.083f);
+        me->SummonCreature(NPC_NERUBAR_WEBWEAVER, 4133.50f, 2459.28f, 256.0f, 0.483f);
+        me->SummonCreature(NPC_NERUBAR_CHAMPION, 4134.28f, 2509.71f, 256.0f, 5.788f);
+        me->SummonCreature(NPC_NERUBAR_WEBWEAVER, 4156.29f, 2532.19f, 256.0f, 5.187f);
+    }
+
+    void SpidersMoveDown()
+    {
+        for (auto const& itr : summons)
+        {
+            Creature* spider = ObjectAccessor::GetCreature(*me, itr);
+            if (!spider)
+                continue;
+
+            spider->AI()->DoAction(ACTION_NERUBAR_FALL);
+        }
+    }
+};
+
+struct npc_icc_nerubar_champion : public ScriptedAI
+{
+    npc_icc_nerubar_champion(Creature* creature) : ScriptedAI(creature) { }
+
+    // We set the anim tier and flags manually because we don't need them anymore once the spiders are down
+    void InitializeAI() override
+    {
+        me->SetDisableGravity(true);
+        me->SetImmuneToAll(true);
+        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_03);
+    }
+
+    void Reset() override
+    {
+        _scheduler.CancelAll();
+    }
+
+    void JustEngagedWith(Unit* /*who*/) override
+    {
+        _scheduler.Schedule(500ms, [this](TaskContext rush)
+        {
+            if (!me || !me->IsInCombat() || !me->GetVictim())
+            {
+                rush.Repeat(500ms);
+                return;
+            }
+
+            if (!me->IsInRange(me->GetVictim(), 8.0f, 25.0f))
+            {
+                rush.Repeat(500ms);
+                return;
+            }
+
+            DoCastVictim(SPELL_RUSH);
+
+            rush.Repeat(10s);
+        });
+    }
+
+    void DoAction(int32 action) override
+    {
+        if (action != ACTION_NERUBAR_FALL)
+            return;
+
+        DoCastSelf(SPELL_WEB_BEAM);
+        float x, y, z;
+        me->GetPosition(x, y);
+        z = me->GetFloorZ();
+        me->SetHomePosition(x, y, z, me->GetOrientation());
+
+        me->GetMotionMaster()->MoveLand(POINT_LAND, Position(x, y, z));
+        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+
+        DoZoneInCombat();
+    }
+
+    void MovementInform(uint32 type, uint32 id) override
+    {
+        if (type == EFFECT_MOTION_TYPE && id == POINT_LAND)
+        {
+            me->SetImmuneToAll(false);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetDisableGravity(false);
+            me->SetHover(false);
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        _scheduler.Update(diff, [this]
+        {
+            DoMeleeAttackIfReady();
+        });
+    }
+
+private:
+    TaskScheduler _scheduler;
+};
+
+struct npc_icc_nerubar_webweaver : public ScriptedAI
+{
+    npc_icc_nerubar_webweaver(Creature* creature) : ScriptedAI(creature) { }
+
+    // We set the anim tier and flags manually because we don't need them anymore once the spiders are down
+    void InitializeAI() override
+    {
+        me->SetDisableGravity(true);
+        me->SetImmuneToAll(true);
+        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_03);
+    }
+
+    void Reset() override
+    {
+        _scheduler.CancelAll();
+    }
+
+    void JustEngagedWith(Unit* /*who*/) override
+    {
+        _scheduler.Schedule(1s, [this](TaskContext crypt_scarabs)
+        {
+            crypt_scarabs.Repeat(2s, 2500ms);
+
+            if (!me || !me->IsInCombat() || !me->GetVictim())
+                return;
+
+            if (me->GetPowerType() != POWER_MANA)
+                return;
+
+            auto SetCombatMovie = [&](bool on, bool stopMoving)
+            {
+                if (me->IsEngaged())
+                {
+                    if (on)
+                    {
+                        if (!me->HasReactState(REACT_PASSIVE) && me->GetVictim() && !me->GetMotionMaster()->HasMovementGenerator([](MovementGenerator const* movement) -> bool
+                            {
+                                return movement->GetMovementGeneratorType() == CHASE_MOTION_TYPE && movement->Mode == MOTION_MODE_DEFAULT && movement->Priority == MOTION_PRIORITY_NORMAL;
+                            }))
+                            me->GetMotionMaster()->MoveChase(me->GetVictim());
+                    }
+                    else if (MovementGenerator* movement = me->GetMotionMaster()->GetMovementGenerator([](MovementGenerator const* a) -> bool
+                        {
+                            return a->GetMovementGeneratorType() == CHASE_MOTION_TYPE && a->Mode == MOTION_MODE_DEFAULT && a->Priority == MOTION_PRIORITY_NORMAL;
+                        }))
+                    {
+                        me->GetMotionMaster()->Remove(movement);
+
+                        if (stopMoving)
+                            me->StopMoving();
+                    }
+                }
+            };
+
+            SpellCastResult result = me->CastSpell(me->GetVictim(), SPELL_CRYPT_SCARABS);
+            bool spellCastFailed = (result != SPELL_CAST_OK && result != SPELL_FAILED_SPELL_IN_PROGRESS);
+
+            SetCombatMovie(spellCastFailed, true);
+        });
+
+        _scheduler.Schedule(4s, 9s, [this](TaskContext web)
+        {
+            web.Repeat(11s, 25s);
+
+            if (!me || !me->IsInCombat() || !me->GetVictim())
+                return;
+
+            if (Unit* target = SelectTarget(SelectTargetMethod::Random))
+                DoCast(target, SPELL_WEB);
+        });
+    }
+
+    void DoAction(int32 action) override
+    {
+        if (action != ACTION_NERUBAR_FALL)
+            return;
+
+        DoCastSelf(SPELL_WEB_BEAM);
+        float x, y, z;
+        me->GetPosition(x, y);
+        z = me->GetFloorZ();
+        me->SetHomePosition(x, y, z, me->GetOrientation());
+
+        me->GetMotionMaster()->MoveLand(POINT_LAND, Position(x, y, z));
+        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+
+        DoZoneInCombat();
+    }
+
+    void MovementInform(uint32 type, uint32 id) override
+    {
+        if (type == EFFECT_MOTION_TYPE && id == POINT_LAND)
+        {
+            me->SetImmuneToAll(false);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetDisableGravity(false);
+            me->SetHover(false);
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        _scheduler.Update(diff);
+    }
+
+private:
+    TaskScheduler _scheduler;
+};
+
+struct npc_icc_nerubar_broodling : public ScriptedAI
+{
+    npc_icc_nerubar_broodling(Creature* creature) : ScriptedAI(creature) { }
+
+    // We set the anim tier and flags manually because we don't need them anymore once the spiders are down
+    void InitializeAI() override
+    {
+        me->SetDisableGravity(true);
+        me->SetImmuneToAll(true);
+        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_03);
+    }
+
+    void DoAction(int32 action) override
+    {
+        if (action != ACTION_NERUBAR_FALL)
+            return;
+
+        DoCastSelf(SPELL_WEB_BEAM);
+        float x, y, z;
+        me->GetPosition(x, y);
+        z = me->GetFloorZ();
+        me->SetHomePosition(x, y, z, me->GetOrientation());
+
+        me->GetMotionMaster()->MoveLand(POINT_LAND, Position(x, y, z));
+        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+
+        DoZoneInCombat();
+    }
+
+    void MovementInform(uint32 type, uint32 id) override
+    {
+        if (type == EFFECT_MOTION_TYPE && id == POINT_LAND)
+        {
+            me->SetImmuneToAll(false);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetDisableGravity(false);
+            me->SetHover(false);
+        }
+    }
+};
+
+class at_icc_gauntlet_event : public AreaTriggerScript
+{
+public:
+    at_icc_gauntlet_event() : AreaTriggerScript("at_icc_gauntlet_event") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/) override
+    {
+        if (InstanceScript* instance = player->GetInstanceScript())
+            if (instance->GetBossState(DATA_SINDRAGOSA_GAUNTLET) == NOT_STARTED && !player->IsGameMaster())
+                if (Creature* gauntlet = ObjectAccessor::GetCreature(*player, instance->GetGuidData(NPC_SINDRAGOSA_GAUNTLET)))
+                    gauntlet->AI()->DoAction(1);
+
+        return true;
+    }
+};
+
 void AddSC_icecrown_citadel()
 {
     // Creatures
@@ -1618,6 +2068,10 @@ void AddSC_icecrown_citadel()
     RegisterIcecrownCitadelCreatureAI(npc_darkfallen_advisor);
     RegisterIcecrownCitadelCreatureAI(npc_darkfallen_tactician);
     RegisterIcecrownCitadelCreatureAI(npc_icc_nerubar_broodkeeper);
+    RegisterIcecrownCitadelCreatureAI(npc_icc_gauntlet_controller);
+    RegisterIcecrownCitadelCreatureAI(npc_icc_nerubar_champion);
+    RegisterIcecrownCitadelCreatureAI(npc_icc_nerubar_webweaver);
+    RegisterIcecrownCitadelCreatureAI(npc_icc_nerubar_broodling);
 
     // GameObjects
     RegisterGameObjectAI(go_empowering_blood_orb);
@@ -1639,4 +2093,5 @@ void AddSC_icecrown_citadel()
     new at_icc_shutdown_traps();
     new at_icc_start_blood_quickening();
     new at_icc_nerubar_broodkeeper();
+    new at_icc_gauntlet_event();
 }
