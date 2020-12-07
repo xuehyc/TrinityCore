@@ -78,7 +78,7 @@ if(ASAN)
 endif()
 
 if(MSAN)
-  target_compile_options(trinity-compile-option-interface
+  target_compile_options(warhead-compile-option-interface
     INTERFACE
       -fno-omit-frame-pointer
       -fsanitize=memory
@@ -86,7 +86,7 @@ if(MSAN)
       -mllvm
       -msan-keep-going=1)
 
-  target_link_options(trinity-compile-option-interface
+  target_link_options(warhead-compile-option-interface
     INTERFACE
       -fno-omit-frame-pointer
       -fsanitize=memory
@@ -96,12 +96,12 @@ if(MSAN)
 endif()
 
 if(UBSAN)
-  target_compile_options(trinity-compile-option-interface
+  target_compile_options(warhead-compile-option-interface
     INTERFACE
       -fno-omit-frame-pointer
       -fsanitize=undefined)
 
-  target_link_options(trinity-compile-option-interface
+  target_link_options(warhead-compile-option-interface
     INTERFACE
       -fno-omit-frame-pointer
       -fsanitize=undefined)
@@ -110,12 +110,12 @@ if(UBSAN)
 endif()
 
 if(TSAN)
-  target_compile_options(trinity-compile-option-interface
+  target_compile_options(warhead-compile-option-interface
     INTERFACE
       -fno-omit-frame-pointer
       -fsanitize=thread)
 
-  target_link_options(trinity-compile-option-interface
+  target_link_options(warhead-compile-option-interface
     INTERFACE
       -fno-omit-frame-pointer
       -fsanitize=thread)
