@@ -35,7 +35,7 @@
 #include "Language.h"
 #include "Log.h"
 #include "LootMgr.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldSession.h"
 #include "WorldPacket.h"
 
@@ -924,7 +924,7 @@ uint8 MailMgr::HandleMailReturnToSender(uint32 mailID)
             {
                 if (Player* receiver = ObjectAccessor::FindPlayerByLowGUID(itr->second.sender))
                 {
-                    if (GetMailBoxSize(itr->second.sender) + receiver->GetAuctionLotsCount() > sWorld->getIntConfig(CONFIG_ANTISPAM_MAIL_COUNT_CONTROLLER))
+                    if (GetMailBoxSize(itr->second.sender) + receiver->GetAuctionLotsCount() > CONF_GET_UINT("Antispam.Mail.Controller"))
                     {
                         result = 1;
                         continue; // return 1
@@ -945,7 +945,7 @@ uint8 MailMgr::HandleMailReturnToSender(uint32 mailID)
 
             bool needItemDelay = sr_account != rc_account;
             // If theres is an item, there is a one hour delivery delay.
-            deliver_delay = needItemDelay ? sWorld->getIntConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
+            deliver_delay = needItemDelay ? CONF_GET_INT("MailDeliveryDelay") : 0;
         }
     }
 

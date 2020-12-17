@@ -23,6 +23,7 @@
 #include "Chat.h"
 #include "DatabaseEnv.h"
 #include "DisableMgr.h"
+#include "GameConfig.h"
 #include "GridNotifiers.h"
 #include "Group.h"
 #include "GroupMgr.h"
@@ -129,7 +130,7 @@ public:
 
     static bool HandlePvPstatsCommand(ChatHandler* handler)
     {
-        if (sWorld->getBoolConfig(CONFIG_BATTLEGROUND_STORE_STATISTICS_ENABLE))
+        if (CONF_GET_BOOL("Battleground.StoreStatistics.Enable"))
         {
             CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PVPSTATS_FACTIONS_OVERALL);
             PreparedQueryResult result = CharacterDatabase.Query(stmt);
@@ -622,7 +623,7 @@ public:
 
         if (target->IsAlive())
         {
-            if (sWorld->getBoolConfig(CONFIG_DIE_COMMAND_MODE))
+            if (CONF_GET_BOOL("Die.Command.Mode"))
                 Unit::Kill(handler->GetSession()->GetPlayer(), target);
             else
                 Unit::DealDamage(handler->GetSession()->GetPlayer(), target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
@@ -861,7 +862,7 @@ public:
         }
 
         // save if the player has last been saved over 20 seconds ago
-        uint32 saveInterval = sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);
+        uint32 saveInterval = CONF_GET_INT("PlayerSaveInterval");
         if (saveInterval == 0 || (saveInterval > 20 * IN_MILLISECONDS && player->GetSaveTimer() <= saveInterval - 20 * IN_MILLISECONDS))
             player->SaveToDB();
 
@@ -903,7 +904,7 @@ public:
                 kickReasonStr = kickReason;
         }
 
-        if (sWorld->getBoolConfig(CONFIG_SHOW_KICK_IN_WORLD))
+        if (CONF_GET_BOOL("ShowKickInWorld"))
             sWorld->SendWorldText(LANG_COMMAND_KICKMESSAGE_WORLD, (handler->GetSession() ? handler->GetSession()->GetPlayerName().c_str() : "Server"), playerName.c_str(), kickReasonStr.c_str());
         else
             handler->PSendSysMessage(LANG_COMMAND_KICKMESSAGE, playerName.c_str());
@@ -1337,7 +1338,7 @@ public:
     static bool HandleChangeWeather(ChatHandler* handler, WeatherType type, float intensity)
     {
         // Weather is OFF
-        if (!sWorld->getBoolConfig(CONFIG_WEATHER))
+        if (!CONF_GET_BOOL("ActivateWeather"))
         {
             handler->SendSysMessage(LANG_WEATHER_DISABLED);
             handler->SetSentErrorMessage(true);
@@ -1719,7 +1720,7 @@ public:
         handler->PSendSysMessage(LANG_PINFO_ACC_IP, lastIp.c_str(), locked ? handler->GetTrinityString(LANG_YES) : handler->GetTrinityString(LANG_NO));
 
         // Output X. LANG_PINFO_CHR_LEVEL
-        if (level != sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+        if (level != CONF_GET_INT("MaxPlayerLevel"))
             handler->PSendSysMessage(LANG_PINFO_CHR_LEVEL_LOW, level, xp, xptotal, (xptotal - xp));
         else
             handler->PSendSysMessage(LANG_PINFO_CHR_LEVEL_HIGH, level);
@@ -1897,7 +1898,7 @@ public:
         LoginDatabase.Execute(stmt);
 
         std::string nameLink = handler->playerLink(*player);
-        if (sWorld->getBoolConfig(CONFIG_SHOW_MUTE_IN_WORLD))
+        if (CONF_GET_BOOL("ShowMuteInWorld"))
             sWorld->SendWorldText(LANG_COMMAND_MUTEMESSAGE_WORLD, muteBy.c_str(), nameLink.c_str(), muteTime, muteReasonStr.c_str());
         if (target)
         {
@@ -2375,7 +2376,7 @@ public:
         // Check if duration needs to be retrieved from config
         if (getDurationFromConfig)
         {
-            freezeDuration = sWorld->getIntConfig(CONFIG_GM_FREEZE_DURATION);
+            freezeDuration = CONF_GET_INT("GM.FreezeAuraDuration");
             canApplyFreeze = true;
         }
 

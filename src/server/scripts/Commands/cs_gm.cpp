@@ -31,8 +31,9 @@ EndScriptData */
 #include "Opcodes.h"
 #include "Player.h"
 #include "Realm.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldSession.h"
+#include "World.h"
 
 using namespace Warhead::ChatCommands;
 
@@ -123,7 +124,7 @@ public:
             AccountTypes playerSec = player->GetSession()->GetSecurity();
             if ((player->IsGameMaster() ||
                 (player->GetSession()->HasPermission(rbac::RBAC_PERM_COMMANDS_APPEAR_IN_GM_LIST) &&
-                    playerSec <= AccountTypes(sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_GM_LIST)))) &&
+                    playerSec <= AccountTypes(CONF_GET_INT("GM.InGMList.Level")))) &&
                 (!handler->GetSession() || player->IsVisibleGloballyFor(handler->GetSession()->GetPlayer())))
             {
                 if (first)

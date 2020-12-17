@@ -18,7 +18,7 @@
 #include "GameTime.h"
 #include "ScriptMgr.h"
 #include "Util.h"
-#include "World.h"
+#include "GameConfig.h"
 
 namespace
 {
@@ -26,7 +26,7 @@ namespace
     {
         time_t time = GameTime::GetGameTime();
         tm localTm = TimeBreakdown(time);
-        uint32 weekdayMaskBoosted = sWorld->getIntConfig(CONFIG_XP_BOOST_DAYMASK);
+        uint32 weekdayMaskBoosted = CONF_GET_INT("XP.Boost.Daymask");
         uint32 weekdayMask = (1 << localTm.tm_wday);
         bool currentDayBoosted = (weekdayMask & weekdayMaskBoosted) != 0;
         return currentDayBoosted;
@@ -41,7 +41,7 @@ public:
     void OnGiveXP(Player* /*player*/, uint32& amount, Unit* /*unit*/) override
     {
         if (IsXPBoostActive())
-            amount *= sWorld->getRate(RATE_XP_BOOST);
+            amount *= sGameConfig->GetOption<float>("XP.Boost.Rate");
     }
 };
 

@@ -34,6 +34,7 @@ EndScriptData */
 #include "ReputationMgr.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
+#include "GameConfig.h"
 #include "World.h"
 #include "WorldSession.h"
 
@@ -100,7 +101,7 @@ public:
 
         bool found = false;
         uint32 count = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
 
         // converting string that we try to find to lower case
         wstrToLower(wNamePart);
@@ -178,7 +179,7 @@ public:
 
         bool found = false;
         uint32 count = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
 
         CreatureTemplateContainer const& ctc = sObjectMgr->GetCreatureTemplates();
         for (auto const& creatureTemplatePair : ctc)
@@ -256,7 +257,7 @@ public:
 
         bool found = false;
         uint32 count = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
 
         GameEventMgr::GameEventDataMap const& events = sGameEventMgr->GetEventMap();
         GameEventMgr::ActiveEvents const& activeEvents = sGameEventMgr->GetActiveEventList();
@@ -314,7 +315,7 @@ public:
 
         bool found = false;
         uint32 count = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
 
         for (uint32 id = 0; id < sFactionStore.GetNumRows(); ++id)
         {
@@ -413,7 +414,7 @@ public:
 
         bool found = false;
         uint32 count = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
 
         // Search in `item_template`
         ItemTemplateContainer const& its = sObjectMgr->GetItemTemplateStore();
@@ -519,7 +520,7 @@ public:
 
         bool found = false;
         uint32 count = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
 
         // Search in ItemSet.dbc
         for (uint32 id = 0; id < sItemSetStore.GetNumRows(); id++)
@@ -590,7 +591,7 @@ public:
 
         bool found = false;
         uint32 count = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
 
         GameObjectTemplateContainer const& gotc = sObjectMgr->GetGameObjectTemplates();
         for (auto const& gameObjectTemplatePair : gotc)
@@ -669,7 +670,7 @@ public:
 
         bool found = false;
         uint32 count = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
 
         ObjectMgr::QuestContainer const& questTemplates = sObjectMgr->GetQuestTemplates();
         for (auto const& questTemplatePair : questTemplates)
@@ -839,7 +840,7 @@ public:
 
         bool found = false;
         uint32 count = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
 
         // Search in SkillLine.dbc
         for (uint32 id = 0; id < sSkillLineStore.GetNumRows(); id++)
@@ -927,7 +928,7 @@ public:
 
         bool found = false;
         uint32 count = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
 
         // Search in Spell.dbc
         for (uint32 id = 0; id < sSpellMgr->GetSpellInfoStoreSize(); ++id)
@@ -1106,7 +1107,7 @@ public:
 
         bool found = false;
         uint32 count = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
 
         // Search in TaxiNodes.dbc
         for (uint32 id = 0; id < sTaxiNodesStore.GetNumRows(); id++)
@@ -1188,7 +1189,7 @@ public:
 
         std::ostringstream reply;
         uint32 count = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
         bool limitReached = false;
 
         GameTeleContainer const & teleMap = sObjectMgr->GetGameTeleMap();
@@ -1243,7 +1244,7 @@ public:
         wstrToLower(wNamePart);
 
         uint32 counter = 0;                                     // Counter for figure out that we found smth.
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
 
         // Search in CharTitles.dbc
         for (uint32 id = 0; id < sCharTitlesStore.GetNumRows(); id++)
@@ -1321,7 +1322,7 @@ public:
         wstrToLower(wNamePart);
 
         uint32 counter = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
         uint8 locale = handler->GetSession() ? handler->GetSession()->GetSessionDbcLocale() : sWorld->GetDefaultDbcLocale();
 
         // search in Map.dbc
@@ -1500,7 +1501,7 @@ public:
 
         int32 counter = 0;
         uint32 count = 0;
-        uint32 maxResults = sWorld->getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+        uint32 maxResults = CONF_GET_INT("Command.LookupMaxResults");
 
         do
         {

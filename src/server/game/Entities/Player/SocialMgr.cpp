@@ -20,7 +20,7 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "RBAC.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
@@ -220,7 +220,7 @@ void SocialMgr::GetFriendInfo(Player* player, ObjectGuid const& friendGUID, Frie
     // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
 
     if (!player->GetSession()->HasPermission(rbac::RBAC_PERM_WHO_SEE_ALL_SEC_LEVELS) &&
-        target->GetSession()->GetSecurity() > AccountTypes(sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST)))
+        target->GetSession()->GetSecurity() > AccountTypes(CONF_GET_INT("GM.InWhoList.Level")))
         return;
 
     // player can see member of other team only if CONFIG_ALLOW_TWO_SIDE_WHO_LIST
@@ -288,7 +288,7 @@ void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket const* pack
 {
     ASSERT(player);
 
-    AccountTypes gmSecLevel = AccountTypes(sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST));
+    AccountTypes gmSecLevel = AccountTypes(CONF_GET_INT("GM.InWhoList.Level"));
     for (SocialMap::const_iterator itr = _socialMap.begin(); itr != _socialMap.end(); ++itr)
     {
         PlayerSocial::PlayerSocialMap::const_iterator itr2 = itr->second._playerSocialMap.find(player->GetGUID());

@@ -23,7 +23,7 @@
 #include "MovementDefines.h"
 #include "MoveSpline.h"
 #include "MoveSplineInit.h"
-#include "World.h"
+#include "GameConfig.h"
 
 //----- Point Movement Generator
 
@@ -192,7 +192,7 @@ void AssistanceMovementGenerator::Finalize(Unit* owner, bool active, bool moveme
         ownerCreature->SetNoCallAssistance(false);
         ownerCreature->CallAssistance();
         if (ownerCreature->IsAlive())
-            ownerCreature->GetMotionMaster()->MoveSeekAssistanceDistract(sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY));
+            ownerCreature->GetMotionMaster()->MoveSeekAssistanceDistract(CONF_GET_INT("CreatureFamilyAssistanceDelay"));
     }
 }
 

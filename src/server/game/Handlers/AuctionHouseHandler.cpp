@@ -33,7 +33,7 @@
 #include "Player.h"
 #include "UpdateMask.h"
 #include "Util.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 
 //void called when player click on auctioneer npc
@@ -59,9 +59,9 @@ void WorldSession::HandleAuctionHelloOpcode(WorldPacket& recvData)
 //this void causes that auction window is opened
 void WorldSession::SendAuctionHello(ObjectGuid guid, Creature* unit)
 {
-    if (GetPlayer()->GetLevel() < sWorld->getIntConfig(CONFIG_AUCTION_LEVEL_REQ))
+    if (GetPlayer()->GetLevel() < CONF_GET_INT("LevelReq.Auction"))
     {
-        SendNotification(GetTrinityString(LANG_AUCTION_REQ), sWorld->getIntConfig(CONFIG_AUCTION_LEVEL_REQ));
+        SendNotification(GetTrinityString(LANG_AUCTION_REQ), CONF_GET_INT("LevelReq.Auction"));
         return;
     }
 
@@ -119,7 +119,7 @@ void WorldSession::SendAuctionOwnerNotification(AuctionEntry* auction)
 //this void creates new auction and adds auction to some auctionhouse
 void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
 {
-    if (GetPlayer() && (sMailMgr->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > sWorld->getIntConfig(CONFIG_ANTISPAM_MAIL_COUNT_CONTROLLER))
+    if (GetPlayer() && (sMailMgr->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > CONF_GET_UINT("Antispam.Mail.Controller"))
     {
         GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_CAP_REACHED);
         recvData.rfinish();
@@ -259,7 +259,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
 
     Item* item = items[0];
 
-    uint32 auctionTime = uint32(etime * sWorld->getRate(RATE_AUCTION_TIME));
+    uint32 auctionTime = uint32(etime * CONF_GET_FLOAT("Rate.Auction.Time"));
     AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(creature->GetFaction());
 
     uint32 deposit = sAuctionMgr->GetAuctionDeposit(auctionHouseEntry, etime, item, finalCount);
@@ -271,7 +271,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
 
     AuctionEntry* AH = new AuctionEntry();
 
-    if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
+    if (CONF_GET_BOOL("AllowTwoSide.Interaction.Auction"))
         AH->houseId = AUCTIONHOUSE_NEUTRAL;
     else
     {
@@ -438,7 +438,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
 {
     LOG_DEBUG("network", "WORLD: Received CMSG_AUCTION_PLACE_BID");
 
-    if (GetPlayer() && (sMailMgr->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > sWorld->getIntConfig(CONFIG_ANTISPAM_MAIL_COUNT_CONTROLLER))
+    if (GetPlayer() && (sMailMgr->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > CONF_GET_UINT("Antispam.Mail.Controller"))
     {
         GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_CAP_REACHED);
         recvData.rfinish();
@@ -595,7 +595,7 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recvData)
 {
     LOG_DEBUG("network", "WORLD: Received CMSG_AUCTION_REMOVE_ITEM");
 
-    if (GetPlayer() && (sMailMgr->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > sWorld->getIntConfig(CONFIG_ANTISPAM_MAIL_COUNT_CONTROLLER))
+    if (GetPlayer() && (sMailMgr->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > CONF_GET_UINT("Antispam.Mail.Controller"))
     {
         GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_CAP_REACHED);
         recvData.rfinish();
@@ -828,11 +828,11 @@ void WorldSession::HandleAuctionListItems(WorldPacket& recvData)
     auctionHouse->BuildListAuctionItems(data, _player,
         wsearchedname, listfrom, levelmin, levelmax, usable,
         auctionSlotID, auctionMainCategory, auctionSubCategory, quality,
-        count, totalcount, (getAll != 0 && sWorld->getIntConfig(CONFIG_AUCTION_GETALL_DELAY) != 0));
+        count, totalcount, (getAll != 0 && CONF_GET_INT("Auction.GetAllScanDelay") != 0));
 
     data.put<uint32>(0, count);
     data << (uint32) totalcount;
-    data << (uint32) sWorld->getIntConfig(CONFIG_AUCTION_SEARCH_DELAY);
+    data << (uint32) CONF_GET_INT("Auction.SearchDelay");
     SendPacket(&data);
 }
 

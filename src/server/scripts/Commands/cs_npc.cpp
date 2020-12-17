@@ -41,8 +41,9 @@ EndScriptData */
 #include "RBAC.h"
 #include "SmartEnum.h"
 #include "Transport.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldSession.h"
+#include "World.h"
 
 using namespace Warhead::ChatCommands;
 
@@ -266,7 +267,7 @@ public:
     //change level of creature or pet
     static bool HandleNpcSetLevelCommand(ChatHandler* handler, uint8 lvl)
     {
-        if (lvl < 1 || lvl > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) + 3)
+        if (lvl < 1 || lvl > CONF_GET_INT("MaxPlayerLevel") + 3)
         {
             handler->SendSysMessage(LANG_BAD_VALUE);
             handler->SetSentErrorMessage(true);

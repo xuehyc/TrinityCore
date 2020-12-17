@@ -37,7 +37,7 @@ EndScriptData */
 #include "ScriptMgr.h"
 #include "SecretMgr.h"
 #include "TOTP.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldSession.h"
 #include <unordered_map>
 
@@ -216,7 +216,7 @@ public:
 
     static bool HandleAccountAddonCommand(ChatHandler* handler, uint8 expansion)
     {
-        if (expansion > sWorld->getIntConfig(CONFIG_EXPANSION))
+        if (expansion > CONF_GET_INT("Expansion"))
         {
             handler->SendSysMessage(LANG_IMPROPER_VALUE);
             handler->SetSentErrorMessage(true);
@@ -499,7 +499,7 @@ public:
     static bool HandleAccountPasswordCommand(ChatHandler* handler, std::string const& oldPassword, std::string const& newPassword, std::string const& confirmPassword, Optional<std::string> const& confirmEmail)
     {
         // First, we check config. What security type (sec type) is it ? Depending on it, the command branches out
-        uint32 const pwConfig = sWorld->getIntConfig(CONFIG_ACC_PASSCHANGESEC); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
+        uint32 const pwConfig = CONF_GET_INT("Account.PasswordChangeSecurity"); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
 
         // We compare the old, saved password to the entered old password - no chance for the unauthorized.
         if (!AccountMgr::CheckPassword(handler->GetSession()->GetAccountId(), oldPassword))
@@ -569,7 +569,7 @@ public:
 
         // Security level required
         bool hasRBAC = (handler->HasPermission(rbac::RBAC_PERM_EMAIL_CONFIRM_FOR_PASS_CHANGE) ? true : false);
-        uint32 pwConfig = sWorld->getIntConfig(CONFIG_ACC_PASSCHANGESEC); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
+        uint32 pwConfig = CONF_GET_INT("Account.PasswordChangeSecurity"); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
 
         handler->PSendSysMessage(LANG_ACCOUNT_SEC_TYPE, (pwConfig == PW_NONE  ? "Lowest level: No Email input required." :
                                                          pwConfig == PW_EMAIL ? "Highest level: Email input required." :
@@ -640,7 +640,7 @@ public:
             handler->HasLowerSecurityAccount(nullptr, accountId, true))
             return false;
 
-        if (expansion > sWorld->getIntConfig(CONFIG_EXPANSION))
+        if (expansion > CONF_GET_INT("Expansion"))
             return false;
 
         LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_EXPANSION);

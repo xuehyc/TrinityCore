@@ -35,7 +35,7 @@
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 
 void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recvData)
@@ -49,7 +49,7 @@ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recvData)
         return;
 
     // Stop the npc if moving
-    unit->PauseMovement(sWorld->getIntConfig(CONFIG_CREATURE_STOP_FOR_PLAYER));
+    unit->PauseMovement(CONF_GET_INT("Creature.MovingStopTimeForPlayer"));
     unit->SetHomePosition(unit->GetPosition());
 
     BattlegroundTypeId bgTypeId = sBattlegroundMgr->GetBattleMasterBG(unit->GetEntry());
@@ -514,7 +514,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
         LOG_DEBUG("bg.battleground", "Battleground: player %s %s left queue for bgtype %u, queue type %u.", _player->GetName().c_str(), _player->GetGUID().ToString().c_str(), bg->GetTypeID(), bgQueueTypeId);
 
         // track if player refuses to join the BG after being invited
-        if (bg->isBattleground() && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_TRACK_DESERTERS) &&
+        if (bg->isBattleground() && CONF_GET_BOOL("Battleground.TrackDeserters.Enable") &&
                 (bg->GetStatus() == STATUS_IN_PROGRESS || bg->GetStatus() == STATUS_WAIT_JOIN))
         {
             CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_DESERTER_TRACK);

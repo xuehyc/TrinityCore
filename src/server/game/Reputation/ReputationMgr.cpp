@@ -22,7 +22,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
@@ -381,7 +381,7 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
         if (incremental)
         {
             // int32 *= float cause one point loss?
-            standing = int32(floor((float)standing * sWorld->getRate(RATE_REPUTATION_GAIN) + 0.5f));
+            standing = int32(floor((float)standing * CONF_GET_FLOAT("Rate.Reputation.Gain") + 0.5f));
             standing += itr->second.Standing + BaseRep;
         }
 

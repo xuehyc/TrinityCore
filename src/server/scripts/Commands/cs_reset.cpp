@@ -32,8 +32,9 @@ EndScriptData */
 #include "Pet.h"
 #include "Player.h"
 #include "RBAC.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldSession.h"
+#include "World.h"
 
 #if WARHEAD_COMPILER == WARHEAD_COMPILER_GNU
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -139,8 +140,8 @@ public:
 
         // set starting level
         uint32 startLevel = target->GetClass() != CLASS_DEATH_KNIGHT
-            ? sWorld->getIntConfig(CONFIG_START_PLAYER_LEVEL)
-            : sWorld->getIntConfig(CONFIG_START_DEATH_KNIGHT_PLAYER_LEVEL);
+            ? CONF_GET_INT("StartPlayerLevel")
+            : CONF_GET_INT("StartDeathKnightPlayerLevel");
 
         target->_ApplyAllLevelScaleItemMods(false);
         target->SetLevel(startLevel);

@@ -27,7 +27,7 @@
 #include "SpellMgr.h"
 #include "StringConvert.h"
 #include "VMapManager2.h"
-#include "World.h"
+#include "GameConfig.h"
 
 namespace DisableMgr
 {
@@ -419,7 +419,7 @@ bool IsVMAPDisabledFor(uint32 entry, uint8 flags)
 
 bool IsPathfindingEnabled(uint32 mapId)
 {
-    return sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS)
+    return CONF_GET_BOOL("mmap.enablePathFinding")
         && !IsDisabledFor(DISABLE_TYPE_MMAP, mapId, nullptr, MMAP_DISABLE_PATHFINDING);
 }
 

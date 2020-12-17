@@ -34,7 +34,7 @@
 #include "Player.h"
 #include "Realm.h"
 #include "ScriptMgr.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
@@ -59,7 +59,7 @@ AuctionHouseMgr* AuctionHouseMgr::instance()
 
 AuctionHouseObject* AuctionHouseMgr::GetAuctionsMap(uint32 factionTemplateId)
 {
-    if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
+    if (CONF_GET_BOOL("AllowTwoSide.Interaction.Auction"))
         return &mNeutralAuctions;
 
     // teams have linked auction houses
@@ -76,7 +76,7 @@ AuctionHouseObject* AuctionHouseMgr::GetAuctionsMap(uint32 factionTemplateId)
 
 AuctionHouseObject* AuctionHouseMgr::GetAuctionsMapByHouseId(uint8 auctionHouseId)
 {
-    if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
+    if (CONF_GET_BOOL("AllowTwoSide.Interaction.Auction"))
         return &mNeutralAuctions;
 
     switch(auctionHouseId)
@@ -92,12 +92,12 @@ uint32 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32
     uint32 MSV = pItem->GetTemplate()->SellPrice;
 
     if (MSV <= 0)
-        return AH_MINIMUM_DEPOSIT * sWorld->getRate(RATE_AUCTION_DEPOSIT);
+        return AH_MINIMUM_DEPOSIT * CONF_GET_FLOAT("Rate.Auction.Deposit");
 
     float multiplier = CalculatePct(float(entry->DepositRate), 3);
     uint32 timeHr = (((time / 60) / 60) / 12);
-    uint32 deposit = uint32(MSV * multiplier * sWorld->getRate(RATE_AUCTION_DEPOSIT));
-    float remainderbase = float(MSV * multiplier * sWorld->getRate(RATE_AUCTION_DEPOSIT)) - deposit;
+    uint32 deposit = uint32(MSV * multiplier * CONF_GET_FLOAT("Rate.Auction.Deposit"));
+    float remainderbase = float(MSV * multiplier * CONF_GET_FLOAT("Rate.Auction.Deposit")) - deposit;
 
     deposit *= timeHr * count;
 
@@ -114,8 +114,8 @@ uint32 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32
     LOG_DEBUG("auctionHouse", "Deposit:    %u", deposit);
     LOG_DEBUG("auctionHouse", "Deposit rm: %f", remainderbase * count);
 
-    if (deposit < AH_MINIMUM_DEPOSIT * sWorld->getRate(RATE_AUCTION_DEPOSIT))
-        return AH_MINIMUM_DEPOSIT * sWorld->getRate(RATE_AUCTION_DEPOSIT);
+    if (deposit < AH_MINIMUM_DEPOSIT * CONF_GET_FLOAT("Rate.Auction.Deposit"))
+        return AH_MINIMUM_DEPOSIT * CONF_GET_FLOAT("Rate.Auction.Deposit");
     else
         return deposit;
 }
@@ -219,7 +219,7 @@ void AuctionHouseMgr::SendAuctionSuccessfulMail(AuctionEntry* auction)
             owner->GetSession()->SendAuctionOwnerNotification(auction);
         }
 
-        sMailMgr->SendMailByAuctionHouse(auction, auction->owner, auction->BuildAuctionMailSubject(AUCTION_SUCCESSFUL), AuctionEntry::BuildAuctionMailBody(auction->bidder, auction->bid, auction->buyout, auction->deposit, auction->GetAuctionCut()), profit, MAIL_CHECK_MASK_COPIED, sWorld->getIntConfig(CONFIG_MAIL_DELIVERY_DELAY));
+        sMailMgr->SendMailByAuctionHouse(auction, auction->owner, auction->BuildAuctionMailSubject(AUCTION_SUCCESSFUL), AuctionEntry::BuildAuctionMailBody(auction->bidder, auction->bid, auction->buyout, auction->deposit, auction->GetAuctionCut()), profit, MAIL_CHECK_MASK_COPIED, CONF_GET_INT("MailDeliveryDelay"));
     }
 }
 
@@ -556,7 +556,7 @@ AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntry(uint32 factionTem
 {
     uint32 houseid = AUCTIONHOUSE_NEUTRAL; // goblin auction house
 
-    if (!sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
+    if (!CONF_GET_BOOL("AllowTwoSide.Interaction.Auction"))
     {
         // FIXME: found way for proper auctionhouse selection by another way
         // AuctionHouse.dbc have faction field with _player_ factions associated with auction house races.
@@ -577,7 +577,7 @@ AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntry(uint32 factionTem
 
 AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntryFromHouse(uint8 houseId)
 {
-    return (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION)) ? sAuctionHouseStore.LookupEntry(AUCTIONHOUSE_NEUTRAL) : sAuctionHouseStore.LookupEntry(houseId);
+    return (CONF_GET_BOOL("AllowTwoSide.Interaction.Auction")) ? sAuctionHouseStore.LookupEntry(AUCTIONHOUSE_NEUTRAL) : sAuctionHouseStore.LookupEntry(houseId);
 }
 
 void AuctionHouseObject::AddAuction(AuctionEntry* auction)
@@ -737,7 +737,7 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
             if (count >= MAX_GETALL_RETURN)
                 break;
         }
-        GetAllThrottleMap[player->GetGUID()] = curTime + sWorld->getIntConfig(CONFIG_AUCTION_GETALL_DELAY);
+        GetAllThrottleMap[player->GetGUID()] = curTime + CONF_GET_INT("Auction.GetAllScanDelay");
         return;
     }
 
@@ -877,7 +877,7 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket& data, Item* sourceItem) const
 
 uint32 AuctionEntry::GetAuctionCut() const
 {
-    int32 cut = int32(CalculatePct(bid, auctionHouseEntry->ConsignmentRate) * sWorld->getRate(RATE_AUCTION_CUT));
+    int32 cut = int32(CalculatePct(bid, auctionHouseEntry->ConsignmentRate) * CONF_GET_FLOAT("Rate.Auction.Cut"));
     return std::max(cut, 0);
 }
 

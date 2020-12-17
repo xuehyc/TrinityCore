@@ -34,6 +34,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
+#include "GameConfig.h"
 #include "World.h"
 #include "WorldSession.h"
 #include <boost/iterator/counting_iterator.hpp>
@@ -126,7 +127,7 @@ void Guild::SendSaveEmblemResult(WorldSession* session, GuildEmblemError errCode
 // LogHolder
 template <typename Entry>
 Guild::LogHolder<Entry>::LogHolder()
-    : m_maxRecords(sWorld->getIntConfig(std::is_same_v<Entry, BankEventLogEntry> ? CONFIG_GUILD_BANK_EVENT_LOG_COUNT : CONFIG_GUILD_EVENT_LOG_COUNT)), m_nextGUID(uint32(GUILD_EVENT_LOG_GUID_UNDEFINED))
+    : m_maxRecords(sGameConfig->GetOption<int32>(std::is_same_v<Entry, BankEventLogEntry> ? "Guild.BankEventLogRecordsCount" : "Guild.EventLogRecordsCount")), m_nextGUID(uint32(GUILD_EVENT_LOG_GUID_UNDEFINED))
 { }
 
 template <typename Entry> template <typename... Ts>
@@ -1475,7 +1476,7 @@ void Guild::HandleInviteMember(WorldSession* session, std::string_view name)
     if (pInvitee->GetSocial()->HasIgnore(player->GetGUID()))
         return;
 
-    if (!sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) && pInvitee->GetTeam() != player->GetTeam())
+    if (!CONF_GET_BOOL("AllowTwoSide.Interaction.Guild") && pInvitee->GetTeam() != player->GetTeam())
     {
         SendCommandResult(session, GUILD_COMMAND_INVITE, ERR_GUILD_NOT_ALLIED, name);
         return;
@@ -1518,7 +1519,7 @@ void Guild::HandleInviteMember(WorldSession* session, std::string_view name)
 void Guild::HandleAcceptMember(WorldSession* session)
 {
     Player* player = session->GetPlayer();
-    if (!sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) &&
+    if (!CONF_GET_BOOL("AllowTwoSide.Interaction.Guild") &&
         player->GetTeam() != sCharacterCache->GetCharacterTeamByGuid(GetLeaderGUID()))
         return;
 

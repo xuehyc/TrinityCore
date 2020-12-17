@@ -26,7 +26,7 @@
 #include "Log.h"
 #include "MiscPackets.h"
 #include "ObjectMgr.h"
-#include "World.h"
+#include "GameConfig.h"
 
 class CreatureTextBuilder
 {
@@ -280,15 +280,15 @@ uint32 CreatureTextMgr::SendChat(Creature* source, uint8 textGroup, WorldObject 
 
 float CreatureTextMgr::GetRangeForChatType(ChatMsg msgType) const
 {
-    float dist = sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY);
+    float dist = CONF_GET_FLOAT("ListenRange.Say");
     switch (msgType)
     {
         case CHAT_MSG_MONSTER_YELL:
-            dist = sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL);
+            dist = CONF_GET_FLOAT("ListenRange.Yell");
             break;
         case CHAT_MSG_MONSTER_EMOTE:
         case CHAT_MSG_RAID_BOSS_EMOTE:
-            dist = sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE);
+            dist = CONF_GET_FLOAT("ListenRange.TextEmote");
             break;
         default:
             break;

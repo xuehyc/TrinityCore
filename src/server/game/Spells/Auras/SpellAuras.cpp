@@ -19,6 +19,7 @@
 #include "CellImpl.h"
 #include "Config.h"
 #include "DynamicObject.h"
+#include "GameConfig.h"
 #include "GridNotifiersImpl.h"
 #include "Item.h"
 #include "Log.h"
@@ -1891,7 +1892,7 @@ bool Aura::CanStackWith(Aura const* existingAura) const
     //    Sometimes this bugs out and doesn't switch the check mark. It has no effect on the actual tracking though.
     //  * The minimap dots are yellow for both resources
     if (m_spellInfo->HasAura(SPELL_AURA_TRACK_RESOURCES) && existingSpellInfo->HasAura(SPELL_AURA_TRACK_RESOURCES))
-        return sWorld->getBoolConfig(CONFIG_ALLOW_TRACK_BOTH_RESOURCES);
+        return CONF_GET_BOOL("AllowTrackBothResources");
 
     // check spell specific stack rules
     if (m_spellInfo->IsAuraExclusiveBySpecificWith(existingSpellInfo)

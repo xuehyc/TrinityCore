@@ -48,7 +48,7 @@ ScriptReloadMgr* ScriptReloadMgr::instance()
 #include "StartProcess.h"
 #include "Timer.h"
 #include "Util.h"
-#include "World.h"
+#include "GameConfig.h"
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/system/system_error.hpp>
@@ -579,7 +579,7 @@ public:
     /// into the running server.
     void Initialize() final override
     {
-        if (!sWorld->getBoolConfig(CONFIG_HOTSWAP_ENABLED))
+        if (!CONF_GET_BOOL("HotSwap.Enabled"))
             return;
 
         if (BuiltInConfig::GetBuildDirectory().find(" ") != std::string::npos)
@@ -622,7 +622,7 @@ public:
         (void)code;
 
         // Correct the CMake prefix when needed
-        if (sWorld->getBoolConfig(CONFIG_HOTSWAP_PREFIX_CORRECTION_ENABLED))
+        if (CONF_GET_BOOL("HotSwap.EnablePrefixCorrection"))
             DoCMakePrefixCorrectionIfNeeded();
 
         InitializeDefaultLibraries();
@@ -1009,7 +1009,7 @@ private:
         {
             // Terminate the current build job when an associated source was changed
             // while compiling and the terminate early option is enabled.
-            if (sWorld->getBoolConfig(CONFIG_HOTSWAP_EARLY_TERMINATION_ENABLED))
+            if (CONF_GET_BOOL("HotSwap.EnableEarlyTermination"))
             {
                 if (!terminate_early && _sources_changed.find(_build_job->GetModuleName()) != _sources_changed.end())
                 {
@@ -1129,7 +1129,7 @@ private:
 
         // Rerun CMake when we need to recreate the build files
         if (rebuild_buildfiles
-            && sWorld->getBoolConfig(CONFIG_HOTSWAP_BUILD_FILE_RECREATION_ENABLED))
+            && CONF_GET_BOOL("HotSwap.EnableBuildFileRecreation"))
             DoRerunCMake();
         else
             DoCompileCurrentProcessedModule();
@@ -1172,7 +1172,7 @@ private:
             {
                 if (!error) // Build was successful
                 {
-                    if (sWorld->getBoolConfig(CONFIG_HOTSWAP_INSTALL_ENABLED))
+                    if (CONF_GET_BOOL("HotSwap.EnableInstall"))
                     {
                         // Continue with the installation when it's enabled
                         LOG_INFO("scripts.hotswap",
@@ -1557,7 +1557,7 @@ void SourceUpdateListener::handleFileAction(efsw::WatchID watchid, std::string c
     // LOG_TRACE("scripts.hotswap", "Source listener detected change on possible file \"%s/%s\" (%s).", dir.c_str(), filename.c_str(), ActionToString(action));
 
     // Skip the file change notification if the recompiler is disabled
-    if (!sWorld->getBoolConfig(CONFIG_HOTSWAP_RECOMPILER_ENABLED))
+    if (!CONF_GET_BOOL("HotSwap.EnableReCompiler"))
         return;
 
     // Split moved actions into a delete and an add action

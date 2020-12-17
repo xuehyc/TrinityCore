@@ -25,7 +25,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "Random.h"
-#include "World.h"
+#include "GameConfig.h"
 
  //
  // --------- LootItem ---------
@@ -435,11 +435,11 @@ void Loot::generateMoneyLoot(uint32 minAmount, uint32 maxAmount)
     if (maxAmount > 0)
     {
         if (maxAmount <= minAmount)
-            gold = uint32(maxAmount * sWorld->getRate(RATE_DROP_MONEY));
+            gold = uint32(maxAmount * CONF_GET_FLOAT("Rate.Drop.Money"));
         else if ((maxAmount - minAmount) < 32700)
-            gold = uint32(urand(minAmount, maxAmount) * sWorld->getRate(RATE_DROP_MONEY));
+            gold = uint32(urand(minAmount, maxAmount) * CONF_GET_FLOAT("Rate.Drop.Money"));
         else
-            gold = uint32(urand(minAmount >> 8, maxAmount >> 8) * sWorld->getRate(RATE_DROP_MONEY)) << 8;
+            gold = uint32(urand(minAmount >> 8, maxAmount >> 8) * CONF_GET_FLOAT("Rate.Drop.Money")) << 8;
     }
 }
 

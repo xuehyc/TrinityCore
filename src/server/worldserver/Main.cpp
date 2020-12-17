@@ -29,6 +29,7 @@
 #include "DatabaseEnv.h"
 #include "DatabaseLoader.h"
 #include "DeadlineTimer.h"
+#include "GameConfig.h"
 #include "GitRevision.h"
 #include "InstanceSaveMgr.h"
 #include "IoContext.h"
@@ -275,7 +276,7 @@ extern int main(int argc, char** argv)
     }
 
     // Launch the worldserver listener socket
-    uint16 worldPort = uint16(sWorld->getIntConfig(CONFIG_PORT_WORLD));
+    uint16 worldPort = uint16(CONF_GET_INT("WorldServerPort"));
     std::string worldListener = sConfigMgr->GetStringDefault("BindIP", "0.0.0.0");
 
     int networkThreads = sConfigMgr->GetIntDefault("Network.Threads", 1);

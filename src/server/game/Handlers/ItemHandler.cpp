@@ -27,7 +27,7 @@
 #include "Player.h"
 #include "SpellInfo.h"
 #include "QueryPackets.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 
 void WorldSession::HandleSplitItemOpcode(WorldPacket& recvData)
@@ -315,7 +315,7 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPackets::Query::QueryItemSin
 
     if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(query.ItemID))
     {
-        if (sWorld->getBoolConfig(CONFIG_CACHE_DATA_QUERIES))
+        if (CONF_GET_BOOL("CacheDataQueries"))
             SendPacket(&itemTemplate->QueryData[static_cast<uint32>(GetSessionDbLocaleIndex())]);
         else
         {
@@ -619,7 +619,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorGuid, uint32 vendorEntry)
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     // Stop the npc if moving
-    vendor->PauseMovement(sWorld->getIntConfig(CONFIG_CREATURE_STOP_FOR_PLAYER));
+    vendor->PauseMovement(CONF_GET_INT("Creature.MovingStopTimeForPlayer"));
     vendor->SetHomePosition(vendor->GetPosition());
 
     SetCurrentVendor(vendorEntry);

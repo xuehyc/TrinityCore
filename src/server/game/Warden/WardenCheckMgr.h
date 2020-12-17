@@ -74,17 +74,6 @@ constexpr WardenCheckCategory GetWardenCheckCategory(WardenCheckType type)
     }
 }
 
-constexpr WorldIntConfigs GetWardenCategoryCountConfig(WardenCheckCategory category)
-{
-    switch (category)
-    {
-        case INJECT_CHECK_CATEGORY: return CONFIG_WARDEN_NUM_INJECT_CHECKS;
-        case LUA_CHECK_CATEGORY:    return CONFIG_WARDEN_NUM_LUA_CHECKS;
-        case MODDED_CHECK_CATEGORY: return CONFIG_WARDEN_NUM_CLIENT_MOD_CHECKS;
-        default:                    return INT_CONFIG_VALUE_COUNT;
-    }
-}
-
 struct WardenCheck
 {
     uint16 CheckId;

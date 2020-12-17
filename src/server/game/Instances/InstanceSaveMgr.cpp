@@ -32,7 +32,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "Timer.h"
-#include "World.h"
+#include "GameConfig.h"
 
 uint16 InstanceSaveManager::ResetTimeDelay[] = {3600, 900, 300, 60};
 
@@ -345,7 +345,7 @@ void InstanceSaveManager::LoadResetTimes()
     }
 
     // load the global respawn times for raid/heroic instances
-    uint32 resetHour = sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR);
+    uint32 resetHour = CONF_GET_INT("Instance.ResetTimeHour");
     if (QueryResult result = CharacterDatabase.Query("SELECT mapid, difficulty, resettime FROM instance_reset"))
     {
         do
@@ -394,7 +394,7 @@ void InstanceSaveManager::LoadResetTimes()
             continue;
 
         // the reset_delay must be at least one day
-        uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(RATE_INSTANCE_RESET_TIME))/DAY) * DAY);
+        uint32 period = uint32(((mapDiff->resetTime * CONF_GET_FLOAT("Rate.InstanceResetTime"))/DAY) * DAY);
         if (period < DAY)
             period = DAY;
 
@@ -450,8 +450,8 @@ time_t InstanceSaveManager::GetSubsequentResetTime(uint32 mapid, Difficulty diff
         return 0;
     }
 
-    time_t resetHour = sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR);
-    time_t period = uint32(((mapDiff->resetTime * sWorld->getRate(RATE_INSTANCE_RESET_TIME)) / DAY) * DAY);
+    time_t resetHour = CONF_GET_INT("Instance.ResetTimeHour");
+    time_t period = uint32(((mapDiff->resetTime * CONF_GET_FLOAT("Rate.InstanceResetTime")) / DAY) * DAY);
     if (period < DAY)
         period = DAY;
 

@@ -32,7 +32,7 @@
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 
 bool WorldSession::CanOpenMailBox(ObjectGuid guid)
@@ -71,9 +71,9 @@ void WorldSession::HandleSendMail(WorldPackets::Mail::SendMailClient& sendMail)
 
     Player* player = _player;
 
-    if (_player->GetLevel() < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
+    if (_player->GetLevel() < CONF_GET_INT("LevelReq.Mail"))
     {
-        SendNotification(GetTrinityString(LANG_MAIL_SENDER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
+        SendNotification(GetTrinityString(LANG_MAIL_SENDER_REQ), CONF_GET_INT("LevelReq.Mail"));
         return;
     }
 
@@ -186,9 +186,9 @@ void WorldSession::HandleSendMail(WorldPackets::Mail::SendMailClient& sendMail)
             return;
         }
 
-        if (receiverLevel < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
+        if (receiverLevel < CONF_GET_INT("LevelReq.Mail"))
         {
-            SendNotification(GetTrinityString(LANG_MAIL_RECEIVER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
+            SendNotification(GetTrinityString(LANG_MAIL_RECEIVER_REQ), CONF_GET_INT("LevelReq.Mail"));
             return;
         }
 
@@ -292,7 +292,7 @@ void WorldSession::HandleSendMail(WorldPackets::Mail::SendMailClient& sendMail)
         }
 
         // If theres is an item, there is a one hour delivery delay if sent to another account's character.
-        uint32 deliver_delay = needItemDelay ? sWorld->getIntConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
+        uint32 deliver_delay = needItemDelay ? CONF_GET_INT("MailDeliveryDelay") : 0;
 
         // don't ask for COD if there are no items
         if (sendMail.Attachments.empty())

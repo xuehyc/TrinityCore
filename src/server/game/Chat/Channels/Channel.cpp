@@ -31,7 +31,7 @@
 #include "Player.h"
 #include "SocialMgr.h"
 #include "StringConvert.h"
-#include "World.h"
+#include "GameConfig.h"
 
 Channel::Channel(uint32 channelId, uint32 team /*= 0*/, AreaTableEntry const* zoneEntry /*= nullptr*/) :
     _isDirty(false),
@@ -144,7 +144,7 @@ void Channel::UpdateChannelInDB()
         return;
 
     _isDirty = false;
-    _nextActivityUpdateTime = now + urand(1 * MINUTE, 6 * MINUTE) * std::max(1u, sWorld->getIntConfig(CONFIG_PRESERVE_CUSTOM_CHANNEL_INTERVAL));
+    _nextActivityUpdateTime = now + urand(1 * MINUTE, 6 * MINUTE) * std::max(1, CONF_GET_INT("PreserveCustomChannelInterval"));
 }
 
 void Channel::JoinChannel(Player* player, std::string const& pass)
@@ -179,7 +179,7 @@ void Channel::JoinChannel(Player* player, std::string const& pass)
     }
 
     if (HasFlag(CHANNEL_FLAG_LFG) &&
-        sWorld->getBoolConfig(CONFIG_RESTRICTED_LFG_CHANNEL) &&
+        CONF_GET_BOOL("Channel.RestrictedLfg") &&
         AccountMgr::IsPlayerAccount(player->GetSession()->GetSecurity()) && //FIXME: Move to RBAC
         player->GetGroup())
     {
@@ -613,7 +613,7 @@ void Channel::List(Player const* player) const
     size_t pos = data.wpos();
     data << uint32(0);                                  // size of list, placeholder
 
-    uint32 gmLevelInWhoList = sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST);
+    uint32 gmLevelInWhoList = CONF_GET_INT("GM.InWhoList.Level");
 
     uint32 count  = 0;
     for (PlayerContainer::const_iterator i = _playersStore.begin(); i != _playersStore.end(); ++i)
@@ -682,7 +682,7 @@ void Channel::Say(ObjectGuid guid, std::string const& what, uint32 lang) const
         return;
 
     // TODO: Add proper RBAC check
-    if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
+    if (CONF_GET_BOOL("AllowTwoSide.Interaction.Channel"))
         lang = LANG_UNIVERSAL;
 
     if (!IsOn(guid))

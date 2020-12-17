@@ -34,7 +34,7 @@
 #include "RBAC.h"
 #include "ScriptMgr.h"
 #include "ScriptReloadMgr.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldSession.h"
 #include <cstdarg>
 #include <sstream>
@@ -690,7 +690,7 @@ void InstanceScript::DoCastSpellOnPlayer(Player* player, uint32 spell, bool incl
 
 bool InstanceScript::ServerAllowsTwoSideGroups()
 {
-    return sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP);
+    return CONF_GET_BOOL("AllowTwoSide.Interaction.Group");
 }
 
 bool InstanceScript::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/ /*= nullptr*/, uint32 /*miscvalue1*/ /*= 0*/)

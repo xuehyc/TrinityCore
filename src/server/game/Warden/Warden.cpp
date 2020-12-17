@@ -22,14 +22,12 @@
 #include "Opcodes.h"
 #include "ByteBuffer.h"
 #include "GameTime.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "Util.h"
 #include "Warden.h"
 #include "AccountMgr.h"
-
 #include <openssl/sha.h>
 #include <openssl/md5.h>
-
 #include <charconv>
 
 Warden::Warden() : _session(nullptr), _checkTimer(10 * IN_MILLISECONDS), _clientResponseTimer(0),
@@ -110,7 +108,7 @@ void Warden::Update(uint32 diff)
 
     if (_dataSent)
     {
-        uint32 maxClientResponseDelay = sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_RESPONSE_DELAY);
+        uint32 maxClientResponseDelay = CONF_GET_INT("Warden.ClientResponseDelay");
 
         if (maxClientResponseDelay > 0)
         {
@@ -193,7 +191,7 @@ char const* Warden::ApplyPenalty(WardenCheck const* check)
     if (check)
         action = check->Action;
     else
-        action = WardenActions(sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_FAIL_ACTION));
+        action = WardenActions(CONF_GET_INT("Warden.ClientCheckFailAction"));
 
     switch (action)
     {
@@ -210,7 +208,7 @@ char const* Warden::ApplyPenalty(WardenCheck const* check)
             if (check)
                 banReason << ": " << check->Comment << " (CheckId: " << check->CheckId << ")";
 
-            sWorld->BanAccount(BAN_ACCOUNT, accountName, sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_BAN_DURATION), banReason.str(),"Server");
+            sWorld->BanAccount(BAN_ACCOUNT, accountName, CONF_GET_INT("Warden.BanDuration"), banReason.str(),"Server");
 
             break;
         }

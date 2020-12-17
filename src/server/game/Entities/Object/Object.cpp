@@ -48,7 +48,7 @@
 #include "Vehicle.h"
 #include "VMapFactory.h"
 #include "VMapManager2.h"
-#include "World.h"
+#include "GameConfig.h"
 #include <G3D/Vector3.h>
 
 constexpr float VisibilityDistances[AsUnderlyingType(VisibilityDistanceType::Max)] =
@@ -3173,7 +3173,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     (searcher ? searcher : this)->UpdateAllowedPositionZ(x, y, z);
 
     // if detection disabled, return first point
-    if (!sWorld->getBoolConfig(CONFIG_DETECT_POS_COLLISION))
+    if (!CONF_GET_BOOL("DetectPosCollision"))
         return;
 
     // return if the point is already in LoS

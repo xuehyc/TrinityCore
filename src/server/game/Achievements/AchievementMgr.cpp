@@ -24,6 +24,7 @@
 #include "DBCEnums.h"
 #include "DisableMgr.h"
 #include "GameEventMgr.h"
+#include "GameConfig.h"
 #include "GameTime.h"
 #include "GridNotifiersImpl.h"
 #include "Guild.h"
@@ -438,7 +439,7 @@ bool AchievementCriteriaData::Meets(uint32 criteria_id, Player const* source, Wo
             return source->GetMapId() == map_id.mapId;
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_NTH_BIRTHDAY:
         {
-            time_t birthday_start = time_t(sWorld->getIntConfig(CONFIG_BIRTHDAY_TIME));
+            time_t birthday_start = time_t(CONF_GET_INT("BirthdayTime"));
             tm birthday_tm;
             localtime_r(&birthday_start, &birthday_tm);
 
@@ -704,8 +705,8 @@ void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement) 
     {
         Warhead::BroadcastTextBuilder _builder(GetPlayer(), CHAT_MSG_ACHIEVEMENT, BROADCAST_TEXT_ACHIEVEMENT_EARNED, GetPlayer()->GetNativeGender(), GetPlayer(), achievement->ID);
         Warhead::LocalizedPacketDo<Warhead::BroadcastTextBuilder> _localizer(_builder);
-        Warhead::PlayerDistWorker<Warhead::LocalizedPacketDo<Warhead::BroadcastTextBuilder>> _worker(GetPlayer(), sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), _localizer);
-        Cell::VisitWorldObjects(GetPlayer(), _worker, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
+        Warhead::PlayerDistWorker<Warhead::LocalizedPacketDo<Warhead::BroadcastTextBuilder>> _worker(GetPlayer(), CONF_GET_FLOAT("ListenRange.Say"), _localizer);
+        Cell::VisitWorldObjects(GetPlayer(), _worker, CONF_GET_FLOAT("ListenRange.Say"));
     }
 
     WorldPacket data(SMSG_ACHIEVEMENT_EARNED, 8+4+8);
@@ -713,7 +714,7 @@ void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement) 
     data << uint32(achievement->ID);
     data.AppendPackedTime(GameTime::GetGameTime());
     data << uint32(0);
-    GetPlayer()->SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), true);
+    GetPlayer()->SendMessageToSetInRange(&data, CONF_GET_FLOAT("ListenRange.Say"), true);
 }
 
 void AchievementMgr::SendCriteriaUpdate(AchievementCriteriaEntry const* entry, CriteriaProgress const* progress, uint32 timeElapsed, bool timedCompleted) const

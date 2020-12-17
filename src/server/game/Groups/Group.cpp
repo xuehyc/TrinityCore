@@ -2154,7 +2154,7 @@ void Group::ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo)
         {
             if (!isEmpty)
                 SendMsgTo->SendResetInstanceFailed(0, instanceSave->GetMapId());
-            else if (sWorld->getBoolConfig(CONFIG_INSTANCES_RESET_ANNOUNCE))
+            else if (CONF_GET_BOOL("InstancesResetAnnounce"))
             {
                 if (Group* group = SendMsgTo->GetGroup())
                 {

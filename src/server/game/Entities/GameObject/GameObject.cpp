@@ -22,6 +22,7 @@
 #include "DatabaseEnv.h"
 #include "GameObjectAI.h"
 #include "GameObjectModel.h"
+#include "GameConfig.h"
 #include "GameTime.h"
 #include "GossipDef.h"
 #include "GridNotifiersImpl.h"
@@ -842,7 +843,7 @@ void GameObject::Update(uint32 diff)
             }
 
             uint32 respawnDelay = m_respawnDelayTime;
-            if (uint32 scalingMode = sWorld->getIntConfig(CONFIG_RESPAWN_DYNAMICMODE))
+            if (uint32 scalingMode = CONF_GET_INT("Respawn.DynamicMode"))
                 GetMap()->ApplyDynamicModeRespawnScaling(this, this->m_spawnId, respawnDelay, scalingMode);
             m_respawnTime = GameTime::GetGameTime() + respawnDelay;
 

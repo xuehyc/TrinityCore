@@ -35,7 +35,7 @@
 #include "SpellPackets.h"
 #include "Totem.h"
 #include "TotemPackets.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 
 void WorldSession::HandleClientCastFlags(WorldPacket& recvPacket, uint8 castFlags, SpellCastTargets& targets)
@@ -468,7 +468,7 @@ void WorldSession::HandleCancelAuraOpcode(WorldPackets::Spells::CancelAura& canc
     _player->RemoveOwnedAura(cancelAura.SpellID, ObjectGuid::Empty, 0, AURA_REMOVE_BY_CANCEL);
 
     // If spell being removed is a resource tracker, see if player was tracking both (herbs / minerals) and remove the other
-    if (sWorld->getBoolConfig(CONFIG_ALLOW_TRACK_BOTH_RESOURCES) && spellInfo->HasAura(SPELL_AURA_TRACK_RESOURCES))
+    if (CONF_GET_BOOL("AllowTrackBothResources") && spellInfo->HasAura(SPELL_AURA_TRACK_RESOURCES))
     {
         Unit::AuraEffectList const& auraEffects = _player->GetAuraEffectsByType(SPELL_AURA_TRACK_RESOURCES);
         if (!auraEffects.empty())

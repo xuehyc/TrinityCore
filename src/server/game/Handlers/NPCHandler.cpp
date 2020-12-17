@@ -39,7 +39,7 @@
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "Trainer.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 
 enum StableResultCode
@@ -165,7 +165,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recvData)
     //    GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     // Stop the npc if moving
-    unit->PauseMovement(sWorld->getIntConfig(CONFIG_CREATURE_STOP_FOR_PLAYER));
+    unit->PauseMovement(CONF_GET_INT("Creature.MovingStopTimeForPlayer"));
     unit->SetHomePosition(unit->GetPosition());
 
     // If spiritguide, no need for gossip menu, just put player into resurrect queue

@@ -51,7 +51,7 @@ Copied events should probably have a new owner
 #include "Opcodes.h"
 #include "Player.h"
 #include "SocialMgr.h"
-#include "World.h"
+#include "GameConfig.h"
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recvData*/)
 {
@@ -553,7 +553,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
         return;
     }
 
-    if (_player->GetTeam() != inviteeTeam && !sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CALENDAR))
+    if (_player->GetTeam() != inviteeTeam && !CONF_GET_BOOL("AllowTwoSide.Interaction.Calendar"))
     {
         sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_NOT_ALLIED);
         return;

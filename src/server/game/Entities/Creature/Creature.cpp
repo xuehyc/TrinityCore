@@ -260,7 +260,7 @@ Creature::Creature(bool isWorldObject): Unit(isWorldObject), MapObject(), m_grou
 
     DisableReputationGain = false;
 
-    m_SightDistance = sWorld->getFloatConfig(CONFIG_SIGHT_MONSTER);
+    m_SightDistance = CONF_GET_FLOAT("MonsterSight");
     m_CombatDistance = 0;//MELEE_RANGE;
 
     ResetLootMode(); // restore default loot mode
@@ -829,7 +829,7 @@ void Creature::Update(uint32 diff)
                     {
                         // regenerate health if cannot reach the target and the setting is set to do so.
                         // this allows to disable the health regen of raid bosses if pathfinding has issues for whatever reason
-                        if (sWorld->getBoolConfig(CONFIG_REGEN_HP_CANNOT_REACH_TARGET_IN_RAID) || !GetMap()->IsRaid())
+                        if (CONF_GET_BOOL("Creature.RegenHPCannotReachTargetInRaid") || !GetMap()->IsRaid())
                         {
                             RegenerateHealth();
                             LOG_DEBUG("entities.unit.chase", "RegenerateHealth() enabled because Creature cannot reach the target. Detail: %s", GetDebugInfo().c_str());
@@ -879,7 +879,7 @@ void Creature::Regenerate(Powers power)
         case POWER_FOCUS:
         {
             // For hunter pets.
-            addvalue = 24 * sWorld->getRate(RATE_POWER_FOCUS);
+            addvalue = 24 * CONF_GET_FLOAT("Rate.Focus");
             break;
         }
         case POWER_ENERGY:
@@ -895,7 +895,7 @@ void Creature::Regenerate(Powers power)
             {
                 if (!IsUnderLastManaUseEffect())
                 {
-                    float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
+                    float ManaIncreaseRate = CONF_GET_FLOAT("Rate.Mana");
                     float Spirit = GetStat(STAT_SPIRIT);
 
                     addvalue = uint32((Spirit / 5.0f + 17.0f) * ManaIncreaseRate);
@@ -934,7 +934,7 @@ void Creature::RegenerateHealth()
     // Not only pet, but any controlled creature (and not polymorphed)
     if (GetCharmerOrOwnerGUID() && !IsPolymorphed())
     {
-        float HealthIncreaseRate = sWorld->getRate(RATE_HEALTH);
+        float HealthIncreaseRate = CONF_GET_FLOAT("Rate.Health");
         float Spirit = GetStat(STAT_SPIRIT);
 
         if (GetPower(POWER_MANA) > 0)
@@ -961,7 +961,7 @@ void Creature::DoFleeToGetAssistance()
     if (HasAuraType(SPELL_AURA_PREVENTS_FLEEING))
         return;
 
-    float radius = sWorld->getFloatConfig(CONFIG_CREATURE_FAMILY_FLEE_ASSISTANCE_RADIUS);
+    float radius = CONF_GET_FLOAT("CreatureFamilyFleeAssistanceRadius");
     if (radius >0)
     {
         Creature* creature = nullptr;
@@ -1070,19 +1070,19 @@ bool Creature::Create(ObjectGuid::LowType guidlow, Map* map, uint32 phaseMask, u
     switch (GetCreatureTemplate()->rank)
     {
         case CREATURE_ELITE_RARE:
-            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_RARE);
+            m_corpseDelay = CONF_GET_INT("Corpse.Decay.RARE");
             break;
         case CREATURE_ELITE_ELITE:
-            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_ELITE);
+            m_corpseDelay = CONF_GET_INT("Corpse.Decay.ELITE");
             break;
         case CREATURE_ELITE_RAREELITE:
-            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_RAREELITE);
+            m_corpseDelay = CONF_GET_INT("Corpse.Decay.RAREELITE");
             break;
         case CREATURE_ELITE_WORLDBOSS:
-            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_WORLDBOSS);
+            m_corpseDelay = CONF_GET_INT("Corpse.Decay.WORLDBOSS");
             break;
         default:
-            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_NORMAL);
+            m_corpseDelay = CONF_GET_INT("Corpse.Decay.NORMAL");
             break;
     }
 
@@ -1478,17 +1478,17 @@ float Creature::_GetHealthMod(int32 Rank)
     switch (Rank)                                           // define rates for each elite rank
     {
         case CREATURE_ELITE_NORMAL:
-            return sWorld->getRate(RATE_CREATURE_NORMAL_HP);
+            return CONF_GET_FLOAT("Rate.Creature.Normal.HP");
         case CREATURE_ELITE_ELITE:
-            return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_HP);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.Elite.HP");
         case CREATURE_ELITE_RAREELITE:
-            return sWorld->getRate(RATE_CREATURE_ELITE_RAREELITE_HP);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.RAREELITE.HP");
         case CREATURE_ELITE_WORLDBOSS:
-            return sWorld->getRate(RATE_CREATURE_ELITE_WORLDBOSS_HP);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.WORLDBOSS.HP");
         case CREATURE_ELITE_RARE:
-            return sWorld->getRate(RATE_CREATURE_ELITE_RARE_HP);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.RARE.HP");
         default:
-            return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_HP);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.Elite.HP");
     }
 }
 
@@ -1503,17 +1503,17 @@ float Creature::_GetDamageMod(int32 Rank)
     switch (Rank)                                           // define rates for each elite rank
     {
         case CREATURE_ELITE_NORMAL:
-            return sWorld->getRate(RATE_CREATURE_NORMAL_DAMAGE);
+            return CONF_GET_FLOAT("Rate.Creature.Normal.Damage");
         case CREATURE_ELITE_ELITE:
-            return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_DAMAGE);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.Elite.Damage");
         case CREATURE_ELITE_RAREELITE:
-            return sWorld->getRate(RATE_CREATURE_ELITE_RAREELITE_DAMAGE);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.RAREELITE.Damage");
         case CREATURE_ELITE_WORLDBOSS:
-            return sWorld->getRate(RATE_CREATURE_ELITE_WORLDBOSS_DAMAGE);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.WORLDBOSS.Damage");
         case CREATURE_ELITE_RARE:
-            return sWorld->getRate(RATE_CREATURE_ELITE_RARE_DAMAGE);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.RARE.Damage");
         default:
-            return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_DAMAGE);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.Elite.Damage");
     }
 }
 
@@ -1522,17 +1522,17 @@ float Creature::GetSpellDamageMod(int32 Rank) const
     switch (Rank)                                           // define rates for each elite rank
     {
         case CREATURE_ELITE_NORMAL:
-            return sWorld->getRate(RATE_CREATURE_NORMAL_SPELLDAMAGE);
+            return CONF_GET_FLOAT("Rate.Creature.Normal.SpellDamage");
         case CREATURE_ELITE_ELITE:
-            return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.Elite.SpellDamage");
         case CREATURE_ELITE_RAREELITE:
-            return sWorld->getRate(RATE_CREATURE_ELITE_RAREELITE_SPELLDAMAGE);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.RAREELITE.SpellDamage");
         case CREATURE_ELITE_WORLDBOSS:
-            return sWorld->getRate(RATE_CREATURE_ELITE_WORLDBOSS_SPELLDAMAGE);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.WORLDBOSS.SpellDamage");
         case CREATURE_ELITE_RARE:
-            return sWorld->getRate(RATE_CREATURE_ELITE_RARE_SPELLDAMAGE);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.RARE.SpellDamage");
         default:
-            return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE);
+            return CONF_GET_FLOAT("Rate.Creature.Elite.Elite.SpellDamage");
     }
 }
 
@@ -1892,8 +1892,8 @@ bool Creature::CheckNoGrayAggroConfig(uint32 playerLevel, uint32 creatureLevel) 
     if (Warhead::XP::GetColorCode(playerLevel, creatureLevel) != XP_GRAY)
         return false;
 
-    uint32 notAbove = sWorld->getIntConfig(CONFIG_NO_GRAY_AGGRO_ABOVE);
-    uint32 notBelow = sWorld->getIntConfig(CONFIG_NO_GRAY_AGGRO_BELOW);
+    uint32 notAbove = CONF_GET_INT("NoGrayAggro.Above");
+    uint32 notBelow = CONF_GET_INT("NoGrayAggro.Below");
     if (notAbove == 0 && notBelow == 0)
         return false;
 
@@ -1904,13 +1904,13 @@ bool Creature::CheckNoGrayAggroConfig(uint32 playerLevel, uint32 creatureLevel) 
 
 float Creature::GetAttackDistance(Unit const* player) const
 {
-    float aggroRate = sWorld->getRate(RATE_CREATURE_AGGRO);
+    float aggroRate = CONF_GET_FLOAT("Rate.Creature.Aggro");
     if (aggroRate == 0)
         return 0.0f;
 
     // WoW Wiki: the minimum radius seems to be 5 yards, while the maximum range is 45 yards
-    float maxRadius = (45.0f * sWorld->getRate(RATE_CREATURE_AGGRO));
-    float minRadius = (5.0f * sWorld->getRate(RATE_CREATURE_AGGRO));
+    float maxRadius = (45.0f * CONF_GET_FLOAT("Rate.Creature.Aggro"));
+    float minRadius = (5.0f * CONF_GET_FLOAT("Rate.Creature.Aggro"));
 
     uint8 expansionMaxLevel = uint8(GetMaxLevelForExpansion(GetCreatureTemplate()->expansion));
     int32 levelDifference = GetLevel() - player->GetLevel();
@@ -1923,7 +1923,7 @@ float Creature::GetAttackDistance(Unit const* player) const
     float aggroRadius = baseAggroDistance + float(levelDifference);
 
     // detect range auras
-    if (float(GetLevel() + 5) <= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+    if (float(GetLevel() + 5) <= CONF_GET_INT("MaxPlayerLevel"))
     {
         aggroRadius += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
         aggroRadius += player->GetTotalAuraModifier(SPELL_AURA_MOD_DETECTED_RANGE);
@@ -1953,7 +1953,7 @@ void Creature::setDeathState(DeathState s)
         m_corpseRemoveTime = GameTime::GetGameTime() + m_corpseDelay;
 
         uint32 respawnDelay = m_respawnDelay;
-        if (uint32 scalingMode = sWorld->getIntConfig(CONFIG_RESPAWN_DYNAMICMODE))
+        if (uint32 scalingMode = CONF_GET_INT("Respawn.DynamicMode"))
             GetMap()->ApplyDynamicModeRespawnScaling(this, m_spawnId, respawnDelay, scalingMode);
 
         // @todo remove the boss respawn time hack in a dynspawn follow-up once we have creature groups in instances
@@ -2143,7 +2143,7 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn, Seconds forceRespawnTimer)
         else
         {
             uint32 respawnDelay = m_respawnDelay;
-            if (uint32 scalingMode = sWorld->getIntConfig(CONFIG_RESPAWN_DYNAMICMODE))
+            if (uint32 scalingMode = CONF_GET_INT("Respawn.DynamicMode"))
                 GetMap()->ApplyDynamicModeRespawnScaling(this, m_spawnId, respawnDelay, scalingMode);
             m_respawnTime = GameTime::GetGameTime() + respawnDelay;
             SaveRespawnTime();
@@ -2290,7 +2290,7 @@ void Creature::CallAssistance()
     {
         SetNoCallAssistance(true);
 
-        float radius = sWorld->getFloatConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS);
+        float radius = CONF_GET_FLOAT("CreatureFamilyAssistanceRadius");
 
         if (radius > 0)
         {
@@ -2308,7 +2308,7 @@ void Creature::CallAssistance()
                     e->AddAssistant((*assistList.begin())->GetGUID());
                     assistList.pop_front();
                 }
-                m_Events.AddEvent(e, m_Events.CalculateTime(Milliseconds(sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY))));
+                m_Events.AddEvent(e, m_Events.CalculateTime(Milliseconds(CONF_GET_INT("CreatureFamilyAssistanceDelay"))));
             }
         }
     }
@@ -2705,7 +2705,7 @@ void Creature::AllLootRemovedFromCorpse()
     if (m_corpseRemoveTime <= now)
         return;
 
-    float decayRate = sWorld->getRate(RATE_CORPSE_DECAY_LOOTED);
+    float decayRate = CONF_GET_FLOAT("Rate.Corpse.Decay.Looted");
 
     // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
     if (loot.loot_type == LOOT_SKINNING)
@@ -2721,7 +2721,7 @@ uint8 Creature::GetLevelForTarget(WorldObject const* target) const
     if (!isWorldBoss() || !target->ToUnit())
         return Unit::GetLevelForTarget(target);
 
-    uint16 level = target->ToUnit()->GetLevel() + sWorld->getIntConfig(CONFIG_WORLD_BOSS_LEVEL_DIFF);
+    uint16 level = target->ToUnit()->GetLevel() + CONF_GET_INT("WorldBossLevelDiff");
     if (level < 1)
         return 1;
     if (level > 255)
@@ -3241,7 +3241,7 @@ bool Creature::IsMovementPreventedByCasting() const
 
 void Creature::StartPickPocketRefillTimer()
 {
-    _pickpocketLootRestore = GameTime::GetGameTime() + sWorld->getIntConfig(CONFIG_CREATURE_PICKPOCKET_REFILL);
+    _pickpocketLootRestore = GameTime::GetGameTime() + CONF_GET_INT("Creature.PickPocketRefillDelay");
 }
 
 bool Creature::CanGeneratePickPocketLoot() const

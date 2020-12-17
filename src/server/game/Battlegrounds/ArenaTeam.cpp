@@ -26,7 +26,7 @@
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
@@ -37,7 +37,7 @@ ArenaTeam::ArenaTeam()
     Stats.WeekGames   = 0;
     Stats.SeasonGames = 0;
     Stats.Rank        = 0;
-    Stats.Rating      = sWorld->getIntConfig(CONFIG_ARENA_START_RATING);
+    Stats.Rating      = CONF_GET_INT("Arena.ArenaStartRating");
     Stats.WeekWins    = 0;
     Stats.SeasonWins  = 0;
 }
@@ -126,8 +126,8 @@ bool ArenaTeam::AddMember(ObjectGuid playerGuid)
     // Set player's personal rating
     uint16 personalRating = 0;
 
-    if (sWorld->getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING) > 0)
-        personalRating = uint16(sWorld->getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING));
+    if (CONF_GET_INT("Arena.ArenaStartPersonalRating") > 0)
+        personalRating = uint16(CONF_GET_INT("Arena.ArenaStartPersonalRating"));
     else if (GetRating() >= 1000)
         personalRating = 1000;
 
@@ -141,7 +141,7 @@ bool ArenaTeam::AddMember(ObjectGuid playerGuid)
     if (result)
         matchMakerRating = (*result)[0].GetUInt16();
     else
-        matchMakerRating = sWorld->getIntConfig(CONFIG_ARENA_START_MATCHMAKER_RATING);
+        matchMakerRating = CONF_GET_INT("Arena.ArenaStartMatchmakerRating");
 
     // Remove all player signatures from other petitions
     // This will prevent player from joining too many arena teams and corrupt arena team data integrity
@@ -241,7 +241,7 @@ bool ArenaTeam::LoadMembersFromDB(QueryResult result)
         newMember.Name             = fields[6].GetString();
         newMember.Class            = fields[7].GetUInt8();
         newMember.PersonalRating   = fields[8].GetUInt16();
-        newMember.MatchMakerRating = fields[9].GetUInt16() > 0 ? fields[9].GetUInt16() : sWorld->getIntConfig(CONFIG_ARENA_START_MATCHMAKER_RATING);
+        newMember.MatchMakerRating = fields[9].GetUInt16() > 0 ? fields[9].GetUInt16() : CONF_GET_INT("Arena.ArenaStartMatchmakerRating");
 
         // Delete member if character information is missing
         if (newMember.Name.empty())
@@ -628,7 +628,7 @@ uint32 ArenaTeam::GetPoints(uint32 memberRating)
 
     if (rating <= 1500)
     {
-        if (sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID) < 6)
+        if (CONF_GET_INT("Arena.ArenaSeason.ID") < 6)
             points = (float)rating * 0.22f + 14.0f;
         else
             points = 344;
@@ -642,7 +642,7 @@ uint32 ArenaTeam::GetPoints(uint32 memberRating)
     else if (Type == ARENA_TEAM_3v3)
         points *= 0.88f;
 
-    points *= sWorld->getRate(RATE_ARENA_POINTS);
+    points *= CONF_GET_FLOAT("Rate.ArenaPoints");
 
     return (uint32) points;
 }
@@ -705,7 +705,7 @@ int32 ArenaTeam::GetMatchmakerRatingMod(uint32 ownRating, uint32 opponentRating,
     */
 
     // Real rating modification
-    mod *= sWorld->getFloatConfig(CONFIG_ARENA_MATCHMAKER_RATING_MODIFIER);
+    mod *= CONF_GET_FLOAT("Arena.ArenaMatchmakerRatingModifier");
 
     return (int32)ceil(mod);
 }
@@ -724,7 +724,7 @@ int32 ArenaTeam::GetRatingMod(uint32 ownRating, uint32 opponentRating, bool won 
     {
         if (ownRating < 1300)
         {
-            float win_rating_modifier1 = sWorld->getFloatConfig(CONFIG_ARENA_WIN_RATING_MODIFIER_1);
+            float win_rating_modifier1 = CONF_GET_FLOAT("Arena.ArenaWinRatingModifier1");
 
             if (ownRating < 1000)
                 mod =  win_rating_modifier1 * (1.0f - chance);
@@ -732,10 +732,10 @@ int32 ArenaTeam::GetRatingMod(uint32 ownRating, uint32 opponentRating, bool won 
                 mod = ((win_rating_modifier1 / 2.0f) + ((win_rating_modifier1 / 2.0f) * (1300.0f - float(ownRating)) / 300.0f)) * (1.0f - chance);
         }
         else
-            mod = sWorld->getFloatConfig(CONFIG_ARENA_WIN_RATING_MODIFIER_2) * (1.0f - chance);
+            mod = CONF_GET_FLOAT("Arena.ArenaWinRatingModifier2") * (1.0f - chance);
     }
     else
-        mod = sWorld->getFloatConfig(CONFIG_ARENA_LOSE_RATING_MODIFIER) * (-chance);
+        mod = CONF_GET_FLOAT("Arena.ArenaLoseRatingModifier") * (-chance);
 
     return (int32)ceil(mod);
 }

@@ -34,8 +34,9 @@ EndScriptData */
 #include "Player.h"
 #include "PlayerDump.h"
 #include "ReputationMgr.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldSession.h"
+#include "World.h"
 
 using namespace Warhead::ChatCommands;
 
@@ -485,7 +486,7 @@ public:
 
         if (uint32 charCount = AccountMgr::GetCharactersCount(newAccount.GetID()))
         {
-            if (charCount >= sWorld->getIntConfig(CONFIG_CHARACTERS_PER_REALM))
+            if (charCount >= CONF_GET_UINT("CharactersPerRealm"))
             {
                 handler->PSendSysMessage(LANG_ACCOUNT_CHARACTER_LIST_FULL, newAccount.GetName().c_str(), newAccount.GetID());
                 handler->SetSentErrorMessage(true);
@@ -705,7 +706,7 @@ public:
      */
     static bool HandleCharacterDeletedOldCommand(ChatHandler* /*handler*/, Optional<uint16> days)
     {
-        int32 keepDays = static_cast<int32>(sWorld->getIntConfig(CONFIG_CHARDELETE_KEEP_DAYS));
+        int32 keepDays = static_cast<int32>(CONF_GET_INT("CharDelete.KeepDays"));
 
         if (days)
             keepDays = static_cast<int32>(*days);

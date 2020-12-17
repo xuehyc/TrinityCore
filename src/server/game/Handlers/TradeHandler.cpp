@@ -28,7 +28,7 @@
 #include "SpellMgr.h"
 #include "SocialMgr.h"
 #include "TradeData.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 
 void WorldSession::SendTradeStatus(TradeStatusInfo const& info)
@@ -624,9 +624,9 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (GetPlayer()->GetLevel() < sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ))
+    if (GetPlayer()->GetLevel() < CONF_GET_INT("LevelReq.Trade"))
     {
-        SendNotification(GetTrinityString(LANG_TRADE_REQ), sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ));
+        SendNotification(GetTrinityString(LANG_TRADE_REQ), CONF_GET_INT("LevelReq.Trade"));
         info.Status = TRADE_STATUS_CLOSE_WINDOW;
         SendTradeStatus(info);
         return;
@@ -684,7 +684,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
     }
 
     if (pOther->GetTeam() != _player->GetTeam() &&
-        (!sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_TRADE) &&
+        (!CONF_GET_BOOL("AllowTwoSide.Trade") &&
          !GetPlayer()->GetSession()->HasPermission(rbac::RBAC_PERM_ALLOW_TWO_SIDE_TRADE)))
     {
         info.Status = TRADE_STATUS_WRONG_FACTION;

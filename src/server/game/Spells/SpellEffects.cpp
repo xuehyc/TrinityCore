@@ -3702,7 +3702,7 @@ void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
-    if (!sWorld->getBoolConfig(CONFIG_CAST_UNSTUCK))
+    if (!CONF_GET_BOOL("CastUnstuck"))
         return;
 
     Player* player = m_caster->ToPlayer();
@@ -4881,7 +4881,7 @@ void Spell::EffectProspecting(SpellEffIndex /*effIndex*/)
     if (itemTarget->GetCount() < 5)
         return;
 
-    if (sWorld->getBoolConfig(CONFIG_SKILL_PROSPECTING))
+    if (CONF_GET_BOOL("SkillChance.Prospecting"))
     {
         uint32 SkillValue = player->GetPureSkillValue(SKILL_JEWELCRAFTING);
         uint32 reqSkillValue = itemTarget->GetTemplate()->RequiredSkillRank;
@@ -4906,7 +4906,7 @@ void Spell::EffectMilling(SpellEffIndex /*effIndex*/)
     if (itemTarget->GetCount() < 5)
         return;
 
-    if (sWorld->getBoolConfig(CONFIG_SKILL_MILLING))
+    if (CONF_GET_BOOL("SkillChance.Milling"))
     {
         uint32 SkillValue = player->GetPureSkillValue(SKILL_INSCRIPTION);
         uint32 reqSkillValue = itemTarget->GetTemplate()->RequiredSkillRank;

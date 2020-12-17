@@ -21,7 +21,7 @@
 #include "Log.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldSession.h"
 #include "WorldStatePackets.h"
 
@@ -213,7 +213,7 @@ void Arena::EndBattleground(uint32 winner)
                 LOG_DEBUG("bg.arena", "Arena match Type: %u for Team1Id: %u - Team2Id: %u ended. WinnerTeamId: %u. Winner rating: +%d, Loser rating: %d",
                     GetArenaType(), GetArenaTeamIdByIndex(TEAM_ALLIANCE), GetArenaTeamIdByIndex(TEAM_HORDE), winnerArenaTeam->GetId(), winnerChange, loserChange);
 
-                if (sWorld->getBoolConfig(CONFIG_ARENA_LOG_EXTENDED_INFO))
+                if (CONF_GET_BOOL("ArenaLog.ExtendedInfo"))
                     for (auto const& score : PlayerScores)
                         if (Player* player = ObjectAccessor::FindConnectedPlayer(ObjectGuid(HighGuid::Player, score.first)))
                         {

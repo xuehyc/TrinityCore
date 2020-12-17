@@ -27,7 +27,7 @@
 #include "Player.h"
 #include "VMapFactory.h"
 #include "VMapManager2.h"
-#include "World.h"
+#include "GameConfig.h"
 
 MapInstanced::MapInstanced(uint32 id, time_t expiry) : Map(id, expiry, 0, DUNGEON_DIFFICULTY_NORMAL)
 {
@@ -234,7 +234,7 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave* save,
     bool load_data = save != nullptr;
     map->CreateInstanceData(load_data);
 
-    if (sWorld->getBoolConfig(CONFIG_INSTANCEMAP_LOAD_GRIDS))
+    if (CONF_GET_BOOL("InstanceMapLoadAllGrids"))
         map->LoadAllCells();
 
     m_InstancedMaps[InstanceId] = map;
@@ -278,7 +278,7 @@ bool MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
 
     itr->second->UnloadAll();
     // should only unload VMaps if this is the last instance and grid unloading is enabled
-    if (m_InstancedMaps.size() <= 1 && sWorld->getBoolConfig(CONFIG_GRID_UNLOAD))
+    if (m_InstancedMaps.size() <= 1 && CONF_GET_BOOL("GridUnload"))
     {
         VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(itr->second->GetId());
         MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(itr->second->GetId());

@@ -24,7 +24,7 @@
 #include "Player.h"
 #include "QuestPackets.h"
 #include "QuestPools.h"
-#include "World.h"
+#include "GameConfig.h"
 
 Quest::Quest(Field* questRecord)
 {
@@ -215,9 +215,9 @@ uint32 Quest::GetXPReward(Player const* player) const
             diffFactor = 10;
 
         uint32 xp = RoundXPValue(diffFactor * xpentry->Difficulty[_rewardXPDifficulty] / 10);
-        if (sWorld->getIntConfig(CONFIG_MIN_QUEST_SCALED_XP_RATIO))
+        if (CONF_GET_INT("MinQuestScaledXPRatio"))
         {
-            uint32 minScaledXP = RoundXPValue(xpentry->Difficulty[_rewardXPDifficulty]) * sWorld->getIntConfig(CONFIG_MIN_QUEST_SCALED_XP_RATIO) / 100;
+            uint32 minScaledXP = RoundXPValue(xpentry->Difficulty[_rewardXPDifficulty]) * CONF_GET_INT("MinQuestScaledXPRatio") / 100;
             xp = std::max(minScaledXP, xp);
         }
 
@@ -264,7 +264,7 @@ void Quest::BuildQuestRewards(WorldPackets::Quest::QuestRewards& rewards, Player
         }
 
         rewards.RewardMoney = GetRewOrReqMoney(player);
-        rewards.RewardXPDifficulty = GetXPReward(player) * sWorld->getRate(RATE_XP_QUEST);
+        rewards.RewardXPDifficulty = GetXPReward(player) * CONF_GET_FLOAT("Rate.XP.Quest");
     }
 
     rewards.RewardHonor = 10 * CalculateHonorGain(player->GetQuestLevel(this)); // rewarded honor points. Multiply with 10 to satisfy client
@@ -292,9 +292,9 @@ int32 Quest::GetRewOrReqMoney(Player const* player) const
 
     // RewardMoney: the positive amount
     if (!player || !player->IsMaxLevel())
-        return int32(_rewardMoney * sWorld->getRate(RATE_MONEY_QUEST));
+        return int32(_rewardMoney * CONF_GET_FLOAT("Rate.Quest.Money.Reward"));
     else // At level cap, the money reward is the maximum amount between normal and bonus money reward
-        return std::max(int32(GetRewMoneyMaxLevel()), int32(_rewardMoney * sWorld->getRate(RATE_MONEY_QUEST)));
+        return std::max(int32(GetRewMoneyMaxLevel()), int32(_rewardMoney * CONF_GET_FLOAT("Rate.Quest.Money.Reward")));
 }
 
 uint32 Quest::GetRewMoneyMaxLevel() const
@@ -304,17 +304,17 @@ uint32 Quest::GetRewMoneyMaxLevel() const
         return 0;
 
     // Else, return the rewarded copper sum modified by the rate
-    return uint32(_rewardBonusMoney * sWorld->getRate(RATE_MONEY_MAX_LEVEL_QUEST));
+    return uint32(_rewardBonusMoney * CONF_GET_FLOAT("Rate.Quest.Money.Max.Level.Reward"));
 }
 
 bool Quest::IsAutoAccept() const
 {
-    return !sWorld->getBoolConfig(CONFIG_QUEST_IGNORE_AUTO_ACCEPT) && HasFlag(QUEST_FLAGS_AUTO_ACCEPT);
+    return !CONF_GET_BOOL("Quests.IgnoreAutoAccept") && HasFlag(QUEST_FLAGS_AUTO_ACCEPT);
 }
 
 bool Quest::IsAutoComplete() const
 {
-    return !sWorld->getBoolConfig(CONFIG_QUEST_IGNORE_AUTO_COMPLETE) && (_method == 0 || HasFlag(QUEST_FLAGS_AUTOCOMPLETE));
+    return !CONF_GET_BOOL("Quests.IgnoreAutoComplete") && (_method == 0 || HasFlag(QUEST_FLAGS_AUTOCOMPLETE));
 }
 
 bool Quest::IsRaidQuest(Difficulty difficulty) const
@@ -342,7 +342,7 @@ bool Quest::IsAllowedInRaid(Difficulty difficulty) const
     if (IsRaidQuest(difficulty))
         return true;
 
-    return sWorld->getBoolConfig(CONFIG_QUEST_IGNORE_RAID);
+    return CONF_GET_BOOL("Quests.IgnoreRaid");
 }
 
 uint32 Quest::CalculateHonorGain(uint8 level) const

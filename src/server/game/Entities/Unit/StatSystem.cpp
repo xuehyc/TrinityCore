@@ -24,7 +24,7 @@
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
-#include "World.h"
+#include "GameConfig.h"
 #include <numeric>
 
 inline bool _ModifyUInt32(bool apply, uint32& baseValue, int32& amount)
@@ -613,8 +613,8 @@ void Player::UpdateBlockPercentage()
         // Increase from rating
         value += GetRatingBonusValue(CR_BLOCK);
 
-        if (sWorld->getBoolConfig(CONFIG_STATS_LIMITS_ENABLE))
-             value = value > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_BLOCK) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_BLOCK) : value;
+        if (CONF_GET_BOOL("Stats.Limits.Enable"))
+             value = value > CONF_GET_FLOAT("Stats.Limits.Block") ? CONF_GET_FLOAT("Stats.Limits.Block") : value;
 
         value = value < 0.0f ? 0.0f : value;
     }
@@ -653,8 +653,8 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
     // Modify crit from weapon skill and maximized defense skill of same level victim difference
     value += (int32(GetWeaponSkillValue(attType)) - int32(GetMaxSkillValueForLevel())) * 0.04f;
 
-    if (sWorld->getBoolConfig(CONFIG_STATS_LIMITS_ENABLE))
-         value = value > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_CRIT) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_CRIT) : value;
+    if (CONF_GET_BOOL("Stats.Limits.Enable"))
+         value = value > CONF_GET_FLOAT("Stats.Limits.Crit") ? CONF_GET_FLOAT("Stats.Limits.Crit") : value;
 
     value = std::max(0.0f, value);
     SetStatFloatValue(index, value);
@@ -771,8 +771,8 @@ void Player::UpdateParryPercentage()
         // apply diminishing formula to diminishing parry chance
         value = CalculateDiminishingReturns(parry_cap, GetClass(), nondiminishing, diminishing);
 
-        if (sWorld->getBoolConfig(CONFIG_STATS_LIMITS_ENABLE))
-             value = value > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_PARRY) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_PARRY) : value;
+        if (CONF_GET_BOOL("Stats.Limits.Enable"))
+             value = value > CONF_GET_FLOAT("Stats.Limits.Parry") ? CONF_GET_FLOAT("Stats.Limits.Parry") : value;
 
         value = value < 0.0f ? 0.0f : value;
     }
@@ -809,8 +809,8 @@ void Player::UpdateDodgePercentage()
     // apply diminishing formula to diminishing dodge chance
     float value = CalculateDiminishingReturns(dodge_cap, GetClass(), nondiminishing, diminishing);
 
-    if (sWorld->getBoolConfig(CONFIG_STATS_LIMITS_ENABLE))
-         value = value > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_DODGE) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_DODGE) : value;
+    if (CONF_GET_BOOL("Stats.Limits.Enable"))
+         value = value > CONF_GET_FLOAT("Stats.Limits.Dodge") ? CONF_GET_FLOAT("Stats.Limits.Dodge") : value;
 
     value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, value);

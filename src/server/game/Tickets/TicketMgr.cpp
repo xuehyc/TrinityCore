@@ -21,12 +21,12 @@
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "GameTime.h"
+#include "GameConfig.h"
 #include "Language.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
 #include "Opcodes.h"
 #include "Player.h"
-#include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
@@ -280,7 +280,7 @@ TicketMgr::~TicketMgr()
 
 void TicketMgr::Initialize()
 {
-    SetStatus(sWorld->getBoolConfig(CONFIG_ALLOW_TICKETS));
+    SetStatus(CONF_GET_BOOL("AllowTickets"));
 }
 
 void TicketMgr::ResetTickets()

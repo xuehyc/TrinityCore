@@ -22,7 +22,7 @@
 #include "SpellHistory.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
-#include "World.h"
+#include "GameConfig.h"
 
 class DuelResetScript : public PlayerScript
 {
@@ -33,7 +33,7 @@ class DuelResetScript : public PlayerScript
         void OnDuelStart(Player* player1, Player* player2) override
         {
             // Cooldowns reset
-            if (sWorld->getBoolConfig(CONFIG_RESET_DUEL_COOLDOWNS))
+            if (CONF_GET_BOOL("ResetDuelCooldowns"))
             {
                 player1->GetSpellHistory()->SaveCooldownStateBeforeDuel();
                 player2->GetSpellHistory()->SaveCooldownStateBeforeDuel();
@@ -43,7 +43,7 @@ class DuelResetScript : public PlayerScript
             }
 
             // Health and mana reset
-            if (sWorld->getBoolConfig(CONFIG_RESET_DUEL_HEALTH_MANA))
+            if (CONF_GET_BOOL("ResetDuelHealthMana"))
             {
                 player1->SaveHealthBeforeDuel();
                 player1->SaveManaBeforeDuel();
@@ -62,7 +62,7 @@ class DuelResetScript : public PlayerScript
             if (type == DUEL_WON)
             {
                 // Cooldown restore
-                if (sWorld->getBoolConfig(CONFIG_RESET_DUEL_COOLDOWNS))
+                if (CONF_GET_BOOL("ResetDuelCooldowns"))
                 {
                     ResetSpellCooldowns(winner, false);
                     ResetSpellCooldowns(loser, false);
@@ -72,7 +72,7 @@ class DuelResetScript : public PlayerScript
                 }
 
                 // Health and mana restore
-                if (sWorld->getBoolConfig(CONFIG_RESET_DUEL_HEALTH_MANA))
+                if (CONF_GET_BOOL("ResetDuelHealthMana"))
                 {
                     winner->RestoreHealthAfterDuel();
                     loser->RestoreHealthAfterDuel();

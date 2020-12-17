@@ -15,7 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "World.h"
+#include "GameConfig.h"
 
 // This is where scripts' loading functions should be declared:
 // world
@@ -54,9 +54,11 @@ void AddWorldScripts()
 
     // FIXME: This should be moved in a script validation hook.
     // To avoid duplicate code, we check once /*ONLY*/ if logging is permitted or not.
-    if (sWorld->getBoolConfig(CONFIG_IP_BASED_ACTION_LOGGING))
+    if (CONF_GET_BOOL("Allow.IP.Based.Action.Logging"))
         AddSC_action_ip_logger(); // location: scripts\World\action_ip_logger.cpp
+
     AddSC_duel_reset();
-    if (sWorld->getIntConfig(CONFIG_XP_BOOST_DAYMASK) != 0)
+
+    if (CONF_GET_INT("XP.Boost.Daymask"))
         AddSC_xp_boost();
 }

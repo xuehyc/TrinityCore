@@ -25,7 +25,7 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptSystem.h"
-#include "World.h"
+#include "GameConfig.h"
 
 enum Points
 {
@@ -222,7 +222,7 @@ void EscortAI::UpdateAI(uint32 diff)
 
                 bool isEscort = false;
                 if (CreatureData const* creatureData = me->GetCreatureData())
-                    isEscort = (sWorld->getBoolConfig(CONFIG_RESPAWN_DYNAMIC_ESCORTNPC) && (creatureData->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC));
+                    isEscort = (CONF_GET_BOOL("Respawn.DynamicEscortNPC") && (creatureData->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC));
 
                 if (_instantRespawn)
                 {
@@ -280,7 +280,7 @@ void EscortAI::Start(bool isActiveAttacker /* = true*/, bool run /* = false */, 
     // Queue respawn from the point it starts
     if (CreatureData const* cdata = me->GetCreatureData())
     {
-        if (sWorld->getBoolConfig(CONFIG_RESPAWN_DYNAMIC_ESCORTNPC) && (cdata->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC))
+        if (CONF_GET_BOOL("Respawn.DynamicEscortNPC") && (cdata->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC))
             me->SaveRespawnTime(me->GetRespawnDelay());
     }
 

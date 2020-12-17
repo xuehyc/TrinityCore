@@ -23,7 +23,7 @@
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
-#include "World.h"
+#include "GameConfig.h"
 
 float constexpr MAX_PLAYER_DISTANCE = 100.0f;
 
@@ -158,7 +158,7 @@ void FollowerAI::StartFollow(Player* player, uint32 factionForFollower, uint32 q
 {
     if (CreatureData const* cdata = me->GetCreatureData())
     {
-        if (sWorld->getBoolConfig(CONFIG_RESPAWN_DYNAMIC_ESCORTNPC) && (cdata->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC))
+        if (CONF_GET_BOOL("Respawn.DynamicEscortNPC") && (cdata->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC))
             me->SaveRespawnTime(me->GetRespawnDelay());
     }
 

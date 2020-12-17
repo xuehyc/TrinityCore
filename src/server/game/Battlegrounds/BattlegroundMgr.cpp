@@ -57,7 +57,7 @@ bool BattlegroundTemplate::IsArena() const
 /*********************************************************/
 
 BattlegroundMgr::BattlegroundMgr() :
-    m_NextRatedArenaUpdate(sWorld->getIntConfig(CONFIG_ARENA_RATED_UPDATE_TIMER)),
+    m_NextRatedArenaUpdate(CONF_GET_INT("Arena.RatedUpdateTimer")),
     m_NextAutoDistributionTime(0),
     m_AutoDistributionTimeChecker(0), m_UpdateTimer(0), m_ArenaTesting(false), m_Testing(false)
 { }
@@ -145,7 +145,7 @@ void BattlegroundMgr::Update(uint32 diff)
     }
 
     // if rating difference counts, maybe force-update queues
-    if (sWorld->getIntConfig(CONFIG_ARENA_MAX_RATING_DIFFERENCE) && sWorld->getIntConfig(CONFIG_ARENA_RATED_UPDATE_TIMER))
+    if (CONF_GET_INT("Arena.MaxRatingDifference") && CONF_GET_INT("Arena.RatedUpdateTimer"))
     {
         // it's time to force update
         if (m_NextRatedArenaUpdate < diff)
@@ -158,13 +158,13 @@ void BattlegroundMgr::Update(uint32 diff)
                         BATTLEGROUND_AA, BattlegroundBracketId(bracket),
                         BattlegroundMgr::BGArenaType(BattlegroundQueueTypeId(qtype)), true, 0);
 
-            m_NextRatedArenaUpdate = sWorld->getIntConfig(CONFIG_ARENA_RATED_UPDATE_TIMER);
+            m_NextRatedArenaUpdate = CONF_GET_INT("Arena.RatedUpdateTimer");
         }
         else
             m_NextRatedArenaUpdate -= diff;
     }
 
-    if (sWorld->getBoolConfig(CONFIG_ARENA_AUTO_DISTRIBUTE_POINTS))
+    if (CONF_GET_BOOL("Arena.AutoDistributePoints"))
     {
         if (m_AutoDistributionTimeChecker < diff)
         {
@@ -173,7 +173,7 @@ void BattlegroundMgr::Update(uint32 diff)
                 sArenaTeamMgr->DistributeArenaPoints();
 
                 time_t arenaDistributionTime = sWorld->getWorldState(WS_ARENA_DISTRIBUTION_TIME) == 0 ? m_NextAutoDistributionTime : time_t(sWorld->getWorldState(WS_ARENA_DISTRIBUTION_TIME));
-                m_NextAutoDistributionTime = arenaDistributionTime + BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY * sWorld->getIntConfig(CONFIG_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS);
+                m_NextAutoDistributionTime = arenaDistributionTime + BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY * CONF_GET_INT("Arena.AutoDistributeInterval");
                 sWorld->setWorldState(WS_ARENA_DISTRIBUTION_TIME, uint64(m_NextAutoDistributionTime));
             }
             m_AutoDistributionTimeChecker = 600000; // check 10 minutes
@@ -618,7 +618,7 @@ void BattlegroundMgr::LoadBattlegroundTemplates()
 
 void BattlegroundMgr::InitAutomaticArenaPointDistribution()
 {
-    if (!sWorld->getBoolConfig(CONFIG_ARENA_AUTO_DISTRIBUTE_POINTS) || !sWorld->getBoolConfig(CONFIG_ARENA_SEASON_IN_PROGRESS))
+    if (!CONF_GET_BOOL("Arena.AutoDistributePoints") || !CONF_GET_BOOL("Arena.ArenaSeason.InProgress"))
         return;
 
     time_t wstime = time_t(sWorld->getWorldState(WS_ARENA_DISTRIBUTION_TIME));
@@ -639,9 +639,9 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket* data, ObjectGuid 
     if (!player)
         return;
 
-    uint32 winner_kills = player->GetRandomWinner() ? sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_HONOR_LAST) : sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_HONOR_FIRST);
-    uint32 winner_arena = player->GetRandomWinner() ? sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_ARENA_LAST) : sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_ARENA_FIRST);
-    uint32 loser_kills = player->GetRandomWinner() ? sWorld->getIntConfig(CONFIG_BG_REWARD_LOSER_HONOR_LAST) : sWorld->getIntConfig(CONFIG_BG_REWARD_LOSER_HONOR_FIRST);
+    uint32 winner_kills = player->GetRandomWinner() ? CONF_GET_INT("Battleground.RewardWinnerHonorLast") : CONF_GET_INT("Battleground.RewardWinnerHonorFirst");
+    uint32 winner_arena = player->GetRandomWinner() ? CONF_GET_INT("Battleground.RewardWinnerArenaLast") : CONF_GET_INT("Battleground.RewardWinnerArenaFirst");
+    uint32 loser_kills = player->GetRandomWinner() ? CONF_GET_INT("Battleground.RewardLoserHonorLast") : CONF_GET_INT("Battleground.RewardLoserHonorFirst");
 
     winner_kills = Warhead::Honor::hk_honor_at_level(player->GetLevel(), float(winner_kills));
     loser_kills = Warhead::Honor::hk_honor_at_level(player->GetLevel(), float(loser_kills));
@@ -854,7 +854,7 @@ void BattlegroundMgr::ScheduleQueueUpdate(uint32 arenaMatchmakerRating, uint8 ar
 uint32 BattlegroundMgr::GetMaxRatingDifference() const
 {
     // this is for stupid people who can't use brain and set max rating difference to 0
-    uint32 diff = sWorld->getIntConfig(CONFIG_ARENA_MAX_RATING_DIFFERENCE);
+    uint32 diff = CONF_GET_INT("Arena.MaxRatingDifference");
     if (diff == 0)
         diff = 5000;
     return diff;
@@ -862,12 +862,12 @@ uint32 BattlegroundMgr::GetMaxRatingDifference() const
 
 uint32 BattlegroundMgr::GetRatingDiscardTimer() const
 {
-    return sWorld->getIntConfig(CONFIG_ARENA_RATING_DISCARD_TIMER);
+    return CONF_GET_INT("Arena.RatingDiscardTimer");
 }
 
 uint32 BattlegroundMgr::GetPrematureFinishTime() const
 {
-    return sWorld->getIntConfig(CONFIG_BATTLEGROUND_PREMATURE_FINISH_TIMER);
+    return CONF_GET_INT("Battleground.PrematureFinishTimer");
 }
 
 void BattlegroundMgr::LoadBattleMastersEntry()

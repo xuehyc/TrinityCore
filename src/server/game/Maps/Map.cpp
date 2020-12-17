@@ -22,6 +22,7 @@
 #include "DisableMgr.h"
 #include "DynamicTree.h"
 #include "GameObjectModel.h"
+#include "GameConfig.h"
 #include "GameTime.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
@@ -65,7 +66,7 @@ static uint16 const holetab_v[4] = { 0x000F, 0x00F0, 0x0F00, 0xF000 };
 
 #define DEFAULT_GRID_EXPIRY     300
 #define MAX_GRID_LOAD_TIME      50
-#define MAX_CREATURE_ATTACK_RADIUS  (45.0f * sWorld->getRate(RATE_CREATURE_AGGRO))
+#define MAX_CREATURE_ATTACK_RADIUS  (45.0f * CONF_GET_FLOAT("Rate.Creature.Aggro"))
 
 GridState* si_GridStates[MAX_GRID_STATE];
 
@@ -495,7 +496,7 @@ void Map::EnsureGridCreated_i(GridCoord const& p)
     {
         LOG_DEBUG("maps", "Creating grid[%u, %u] for map %u instance %u", p.x_coord, p.y_coord, GetId(), i_InstanceId);
 
-        setNGrid(new NGridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord, p.x_coord, p.y_coord, i_gridExpiry, sWorld->getBoolConfig(CONFIG_GRID_UNLOAD)),
+        setNGrid(new NGridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord, p.x_coord, p.y_coord, i_gridExpiry, CONF_GET_BOOL("GridUnload")),
             p.x_coord, p.y_coord);
 
         // build a linkage between this map and NGridType
@@ -777,7 +778,7 @@ void Map::Update(uint32 t_diff)
     if (_respawnCheckTimer <= t_diff)
     {
         ProcessRespawns();
-        _respawnCheckTimer = sWorld->getIntConfig(CONFIG_RESPAWN_MINCHECKINTERVALMS);
+        _respawnCheckTimer = CONF_GET_INT("Respawn.MinCheckIntervalMS");
     }
     else
         _respawnCheckTimer -= t_diff;
@@ -2882,7 +2883,7 @@ bool Map::isInLineOfSight(float x1, float y1, float z1, float x2, float y2, floa
     if ((checks & LINEOFSIGHT_CHECK_VMAP)
       && !VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(GetId(), x1, y1, z1, x2, y2, z2, ignoreFlags))
         return false;
-    if (sWorld->getBoolConfig(CONFIG_CHECK_GOBJECT_LOS) && (checks & LINEOFSIGHT_CHECK_GOBJECT)
+    if (CONF_GET_BOOL("CheckGameObjectLoS") && (checks & LINEOFSIGHT_CHECK_GOBJECT)
       && !_dynamicTree.isInLineOfSight(x1, y1, z1, x2, y2, z2, phasemask))
         return false;
     return true;
@@ -3047,7 +3048,7 @@ bool Map::CheckRespawn(RespawnInfo* info)
             case SPAWN_TYPE_CREATURE:
             {
                 // escort check for creatures only (if the world config boolean is set)
-                bool const isEscort = (sWorld->getBoolConfig(CONFIG_RESPAWN_DYNAMIC_ESCORTNPC) && data->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC);
+                bool const isEscort = (CONF_GET_BOOL("Respawn.DynamicEscortNPC") && data->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC);
 
                 auto range = _creatureBySpawnIdStore.equal_range(info->spawnId);
                 for (auto it = range.first; it != range.second; ++it)
@@ -3332,10 +3333,10 @@ void Map::ApplyDynamicModeRespawnScaling(WorldObject const* obj, ObjectGuid::Low
     uint32 const playerCount = it->second;
     if (!playerCount)
         return;
-    double const adjustFactor = sWorld->getFloatConfig(type == SPAWN_TYPE_GAMEOBJECT ? CONFIG_RESPAWN_DYNAMICRATE_GAMEOBJECT : CONFIG_RESPAWN_DYNAMICRATE_CREATURE) / playerCount;
+    double const adjustFactor = CONF_GET_FLOAT(type == SPAWN_TYPE_GAMEOBJECT ? "Respawn.DynamicRateGameObject" : "Respawn.DynamicRateCreature") / playerCount;
     if (adjustFactor >= 1.0) // nothing to do here
         return;
-    uint32 const timeMinimum = sWorld->getIntConfig(type == SPAWN_TYPE_GAMEOBJECT ? CONFIG_RESPAWN_DYNAMICMINIMUM_GAMEOBJECT : CONFIG_RESPAWN_DYNAMICMINIMUM_CREATURE);
+    uint32 const timeMinimum = CONF_GET_INT(type == SPAWN_TYPE_GAMEOBJECT ? "Respawn.DynamicMinimumGameObject" : "Respawn.DynamicMinimumCreature");
     if (respawnDelay <= timeMinimum)
         return;
 
@@ -3771,7 +3772,7 @@ InstanceMap::InstanceMap(uint32 id, time_t expiry, uint32 InstanceId, uint8 Spaw
 
     // the timer is started by default, and stopped when the first player joins
     // this make sure it gets unloaded if for some reason no player joins
-    m_unloadTimer = std::max(sWorld->getIntConfig(CONFIG_INSTANCE_UNLOAD_DELAY), (uint32)MIN_UNLOAD_DELAY);
+    m_unloadTimer = std::max(CONF_GET_INT("Instance.UnloadDelay"), MIN_UNLOAD_DELAY);
 }
 
 InstanceMap::~InstanceMap()
@@ -3961,7 +3962,7 @@ void InstanceMap::RemovePlayerFromMap(Player* player, bool remove)
 
     // if last player set unload timer
     if (!m_unloadTimer && m_mapRefManager.getSize() == 1)
-        m_unloadTimer = m_unloadWhenEmpty ? MIN_UNLOAD_DELAY : std::max(sWorld->getIntConfig(CONFIG_INSTANCE_UNLOAD_DELAY), (uint32)MIN_UNLOAD_DELAY);
+        m_unloadTimer = m_unloadWhenEmpty ? MIN_UNLOAD_DELAY : std::max(CONF_GET_INT("Instance.UnloadDelay"), MIN_UNLOAD_DELAY);
 
     Map::RemovePlayerFromMap(player, remove);
 
@@ -4586,7 +4587,7 @@ Corpse* Map::ConvertCorpseToBones(ObjectGuid const& ownerGuid, bool insignia /*=
     // create the bones only if the map and the grid is loaded at the corpse's location
     // ignore bones creating option in case insignia
     if ((insignia ||
-        (IsBattlegroundOrArena() ? sWorld->getBoolConfig(CONFIG_DEATH_BONES_BG_OR_ARENA) : sWorld->getBoolConfig(CONFIG_DEATH_BONES_WORLD))) &&
+        (IsBattlegroundOrArena() ? CONF_GET_BOOL("Death.Bones.BattlegroundOrArena") : CONF_GET_BOOL("Death.Bones.World"))) &&
         !IsRemovalGrid(corpse->GetPositionX(), corpse->GetPositionY()))
     {
         // Create bones, don't change Corpse

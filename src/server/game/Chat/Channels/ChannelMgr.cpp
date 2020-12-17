@@ -21,7 +21,7 @@
 #include "DBCStores.h"
 #include "Log.h"
 #include "Player.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldSession.h"
 
 ChannelMgr::~ChannelMgr()
@@ -35,7 +35,7 @@ ChannelMgr::~ChannelMgr()
 
 /*static*/ void ChannelMgr::LoadFromDB()
 {
-    if (!sWorld->getBoolConfig(CONFIG_PRESERVE_CUSTOM_CHANNELS))
+    if (!CONF_GET_BOOL("PreserveCustomChannels"))
     {
         LOG_INFO("server.loading", ">> Loaded 0 custom chat channels. Custom channel saving is disabled.");
         LOG_INFO("server.loading", "");
@@ -43,7 +43,7 @@ ChannelMgr::~ChannelMgr()
     }
 
     uint32 oldMSTime = getMSTime();
-    if (uint32 days = sWorld->getIntConfig(CONFIG_PRESERVE_CUSTOM_CHANNEL_DURATION))
+    if (uint32 days = CONF_GET_INT("PreserveCustomChannelDuration"))
     {
         CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_OLD_CHANNELS);
         stmt->setUInt32(0, days * DAY);
@@ -112,7 +112,7 @@ ChannelMgr::~ChannelMgr()
     static ChannelMgr allianceChannelMgr(ALLIANCE);
     static ChannelMgr hordeChannelMgr(HORDE);
 
-    if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
+    if (CONF_GET_BOOL("AllowTwoSide.Interaction.Channel"))
         return &allianceChannelMgr;        // cross-faction
 
     if (team == ALLIANCE)

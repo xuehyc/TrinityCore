@@ -40,7 +40,7 @@
 #include "SpellAuraEffects.h"
 #include "Util.h"
 #include "Warden.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 #include <algorithm>
 
@@ -121,7 +121,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             case CHAT_MSG_BATTLEGROUND:
             case CHAT_MSG_WHISPER:
                 // check if addon messages are disabled
-                if (!sWorld->getBoolConfig(CONFIG_ADDON_CHANNEL))
+                if (!CONF_GET_BOOL("AddonChannel"))
                 {
                     recvData.rfinish();
                     return;
@@ -158,13 +158,13 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                     case CHAT_MSG_RAID_LEADER:
                     case CHAT_MSG_RAID_WARNING:
                         // allow two side chat at group channel if two side group allowed
-                        if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+                        if (CONF_GET_BOOL("AllowTwoSide.Interaction.Group"))
                             lang = LANG_UNIVERSAL;
                         break;
                     case CHAT_MSG_GUILD:
                     case CHAT_MSG_OFFICER:
                         // allow two side chat at guild channel if two side guild allowed
-                        if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD))
+                        if (CONF_GET_BOOL("AllowTwoSide.Interaction.Guild"))
                             lang = LANG_UNIVERSAL;
                         break;
                 }
@@ -266,7 +266,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             }
 
         // collapse multiple spaces into one
-        if (sWorld->getBoolConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
+        if (CONF_GET_BOOL("ChatFakeMessagePreventing"))
         {
             auto end = std::unique(msg.begin(), msg.end(), [](char c1, char c2) { return (c1 == ' ') && (c2 == ' '); });
             msg.erase(end, msg.end());
@@ -285,9 +285,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             if (!sender->IsAlive())
                 return;
 
-            if (sender->GetLevel() < sWorld->getIntConfig(CONFIG_CHAT_SAY_LEVEL_REQ))
+            if (sender->GetLevel() < CONF_GET_INT("ChatLevelReq.Say"))
             {
-                SendNotification(GetTrinityString(LANG_SAY_REQ), sWorld->getIntConfig(CONFIG_CHAT_SAY_LEVEL_REQ));
+                SendNotification(GetTrinityString(LANG_SAY_REQ), CONF_GET_INT("ChatLevelReq.Say"));
                 return;
             }
 
@@ -300,9 +300,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             if (!sender->IsAlive())
                 return;
 
-            if (sender->GetLevel() < sWorld->getIntConfig(CONFIG_CHAT_EMOTE_LEVEL_REQ))
+            if (sender->GetLevel() < CONF_GET_INT("ChatLevelReq.Emote"))
             {
-                SendNotification(GetTrinityString(LANG_SAY_REQ), sWorld->getIntConfig(CONFIG_CHAT_EMOTE_LEVEL_REQ));
+                SendNotification(GetTrinityString(LANG_SAY_REQ), CONF_GET_INT("ChatLevelReq.Emote"));
                 return;
             }
 
@@ -315,9 +315,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             if (!sender->IsAlive())
                 return;
 
-            if (sender->GetLevel() < sWorld->getIntConfig(CONFIG_CHAT_YELL_LEVEL_REQ))
+            if (sender->GetLevel() < CONF_GET_INT("ChatLevelReq.Yell"))
             {
-                SendNotification(GetTrinityString(LANG_SAY_REQ), sWorld->getIntConfig(CONFIG_CHAT_YELL_LEVEL_REQ));
+                SendNotification(GetTrinityString(LANG_SAY_REQ), CONF_GET_INT("ChatLevelReq.Yell"));
                 return;
             }
 
@@ -342,9 +342,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             // Apply checks only if receiver is not already in whitelist and if receiver is not a GM with ".whisper on"
             if (!receiver->IsInWhisperWhiteList(sender->GetGUID()) && !receiver->IsGameMasterAcceptingWhispers())
             {
-                if (!sender->IsGameMaster() && sender->GetLevel() < sWorld->getIntConfig(CONFIG_CHAT_WHISPER_LEVEL_REQ))
+                if (!sender->IsGameMaster() && sender->GetLevel() < CONF_GET_INT("ChatLevelReq.Whisper"))
                 {
-                    SendNotification(GetTrinityString(LANG_WHISPER_REQ), sWorld->getIntConfig(CONFIG_CHAT_WHISPER_LEVEL_REQ));
+                    SendNotification(GetTrinityString(LANG_WHISPER_REQ), CONF_GET_INT("ChatLevelReq.Whisper"));
                     return;
                 }
 
@@ -363,7 +363,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
             // If player is a Gamemaster and doesn't accept whisper, we auto-whitelist every player that the Gamemaster is talking to
             // We also do that if a player is under the required level for whispers.
-            if (receiver->GetLevel() < sWorld->getIntConfig(CONFIG_CHAT_WHISPER_LEVEL_REQ) ||
+            if (receiver->GetLevel() < CONF_GET_INT("ChatLevelReq.Whisper") ||
                 (HasPermission(rbac::RBAC_PERM_CAN_FILTER_WHISPERS) && !sender->isAcceptWhispers() && !sender->IsInWhisperWhiteList(receiver->GetGUID())))
                 sender->AddWhisperWhiteList(receiver->GetGUID());
 
@@ -457,7 +457,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CHAT_MSG_RAID_WARNING:
         {
             Group* group = GetPlayer()->GetGroup();
-            if (!group || !(group->isRaidGroup() || sWorld->getBoolConfig(CONFIG_CHAT_PARTY_RAID_WARNINGS)) || !(group->IsLeader(GetPlayer()->GetGUID()) || group->IsAssistant(GetPlayer()->GetGUID())) || group->isBGGroup())
+            if (!group || !(group->isRaidGroup() || CONF_GET_BOOL("PartyRaidWarnings")) || !(group->IsLeader(GetPlayer()->GetGUID()) || group->IsAssistant(GetPlayer()->GetGUID())) || group->isBGGroup())
                 return;
 
             sScriptMgr->OnPlayerChat(GetPlayer(), type, lang, msg, group);
@@ -500,9 +500,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         {
             if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHAT_CHANNEL_REQ))
             {
-                if (sender->GetLevel() < sWorld->getIntConfig(CONFIG_CHAT_CHANNEL_LEVEL_REQ))
+                if (sender->GetLevel() < CONF_GET_INT("ChatLevelReq.Channel"))
                 {
-                    SendNotification(GetTrinityString(LANG_CHANNEL_REQ), sWorld->getIntConfig(CONFIG_CHAT_CHANNEL_LEVEL_REQ));
+                    SendNotification(GetTrinityString(LANG_CHANNEL_REQ), CONF_GET_INT("ChatLevelReq.Channel"));
                     return;
                 }
             }
@@ -665,9 +665,9 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recvData)
 
     Warhead::EmoteChatBuilder emote_builder(*GetPlayer(), text_emote, emoteNum, unit);
     Warhead::LocalizedPacketDo<Warhead::EmoteChatBuilder > emote_do(emote_builder);
-    Warhead::PlayerDistWorker<Warhead::LocalizedPacketDo<Warhead::EmoteChatBuilder > > emote_worker(GetPlayer(), sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), emote_do);
+    Warhead::PlayerDistWorker<Warhead::LocalizedPacketDo<Warhead::EmoteChatBuilder > > emote_worker(GetPlayer(), CONF_GET_FLOAT("ListenRange.TextEmote"), emote_do);
     TypeContainerVisitor<Warhead::PlayerDistWorker<Warhead::LocalizedPacketDo<Warhead::EmoteChatBuilder> >, WorldTypeMapContainer> message(emote_worker);
-    cell.Visit(p, message, *GetPlayer()->GetMap(), *GetPlayer(), sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE));
+    cell.Visit(p, message, *GetPlayer()->GetMap(), *GetPlayer(), CONF_GET_FLOAT("ListenRange.TextEmote"));
 
     GetPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DO_EMOTE, text_emote, 0, unit);
 

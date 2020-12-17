@@ -37,7 +37,7 @@
 #include "RBAC.h"
 #include "SharedDefines.h"
 #include "SocialMgr.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldSession.h"
 
 namespace lfg
@@ -56,7 +56,7 @@ LFGDungeonData::LFGDungeonData(LFGDungeonEntry const* dbc) : id(dbc->ID), name(d
 }
 
 LFGMgr::LFGMgr(): m_QueueTimer(0), m_lfgProposalId(1),
-    m_options(sWorld->getIntConfig(CONFIG_LFG_OPTIONSMASK))
+    m_options(CONF_GET_INT("DungeonFinder.OptionsMask"))
 {
 }
 
@@ -150,10 +150,10 @@ void LFGMgr::LoadRewards()
             continue;
         }
 
-        if (!maxLevel || maxLevel > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+        if (!maxLevel || maxLevel > CONF_GET_UINT("MaxPlayerLevel"))
         {
             LOG_ERROR("sql.sql", "Level %u specified for dungeon %u in table `lfg_dungeon_rewards` can never be reached!", maxLevel, dungeonId);
-            maxLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+            maxLevel = CONF_GET_INT("MaxPlayerLevel");
         }
 
         if (!firstQuestId || !sObjectMgr->GetQuestTemplate(firstQuestId))
@@ -1878,7 +1878,7 @@ void LFGMgr::SetLeader(ObjectGuid gguid, ObjectGuid leader)
 
 void LFGMgr::SetTeam(ObjectGuid guid, uint8 team)
 {
-    if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+    if (CONF_GET_BOOL("AllowTwoSide.Interaction.Group"))
         team = 0;
 
     PlayersStore[guid].SetTeam(team);

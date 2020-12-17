@@ -29,7 +29,7 @@
 #include "SpellAuraEffects.h"
 #include "SpellScript.h"
 #include "Vehicle.h"
-#include "World.h"
+#include "GameConfig.h"
 
 // 45102 Romantic Picnic
 enum SpellsPicnic
@@ -1476,7 +1476,7 @@ class spell_brewfest_barker_bunny : public SpellScriptLoader
                     BroadcastTextId = RAND(SAY_THUNDERBREWS_1, SAY_THUNDERBREWS_2, SAY_THUNDERBREWS_3, SAY_THUNDERBREWS_4);
 
                 if (BroadcastTextId)
-                    target->Talk(BroadcastTextId, CHAT_MSG_SAY, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), target);
+                    target->Talk(BroadcastTextId, CHAT_MSG_SAY, sGameConfig->GetOption<float>("ListenRange.Say"), target);
             }
 
             void Register() override

@@ -17,6 +17,7 @@
 
 #include "WardenWin.h"
 #include "Common.h"
+#include "GameConfig.h"
 #include "ByteBuffer.h"
 #include "Containers.h"
 #include "CryptoRandom.h"
@@ -32,7 +33,6 @@
 #include "Util.h"
 #include "WardenModuleWin.h"
 #include "WardenCheckMgr.h"
-#include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
@@ -43,6 +43,16 @@ static constexpr char _luaEvalPostfix[] = ",'GUILD')end";
 
 static_assert((sizeof(_luaEvalPrefix)-1 + sizeof(_luaEvalMidfix)-1 + sizeof(_luaEvalPostfix)-1 + WARDEN_MAX_LUA_CHECK_LENGTH) == 255);
 
+std::string const GetWardenCategoryCountConfig(WardenCheckCategory category)
+{
+    switch (category)
+    {
+        case INJECT_CHECK_CATEGORY: return "Warden.NumInjectionChecks";
+        case LUA_CHECK_CATEGORY:    return "Warden.NumLuaSandboxChecks";
+        case MODDED_CHECK_CATEGORY: return "Warden.NumClientModChecks";
+        default:                    return "";
+    }
+}
 
 WardenWin::WardenWin() : Warden(), _serverTicks(0)
 {
@@ -237,7 +247,7 @@ void WardenWin::RequestChecks()
     for (WardenCheckCategory category : EnumUtils::Iterate<WardenCheckCategory>())
     {
         auto& [checks, checksIt] = _checks[category];
-        for (uint32 i = 0, n = sWorld->getIntConfig(GetWardenCategoryCountConfig(category)); i < n; ++i)
+        for (uint32 i = 0, n = CONF_GET_INT(GetWardenCategoryCountConfig(category)); i < n; ++i)
         {
             if (checksIt == checks.end()) // all checks were already sent, list will be re-filled on next Update() run
                 break;
@@ -524,7 +534,7 @@ void WardenWin::HandleCheckResult(ByteBuffer &buff)
     }
 
     // Set hold off timer, minimum timer should at least be 1 second
-    uint32 holdOff = sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_CHECK_HOLDOFF);
+    uint32 holdOff = CONF_GET_INT("Warden.ClientCheckHoldOff");
     _checkTimer = (holdOff < 1 ? 1 : holdOff) * IN_MILLISECONDS;
 }
 

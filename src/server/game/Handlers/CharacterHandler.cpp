@@ -24,6 +24,7 @@
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
 #include "GameObject.h"
+#include "GameConfig.h"
 #include "GameTime.h"
 #include "GitRevision.h"
 #include "Group.h"
@@ -137,7 +138,7 @@ bool LoginQueryHolder::Initialize()
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_SPELL_COOLDOWNS, stmt);
 
-    if (sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED))
+    if (CONF_GET_BOOL("DeclinedNames"))
     {
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_DECLINEDNAMES);
         stmt->setUInt32(0, lowGuid);
@@ -253,7 +254,7 @@ void WorldSession::HandleCharEnumOpcode(WorldPacket& /*recvData*/)
 
     /// get all the data necessary for loading all characters (along with their pets) on the account
 
-    if (sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED))
+    if (CONF_GET_BOOL("DeclinedNames"))
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ENUM_DECLINED_NAME);
     else
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ENUM);
@@ -281,7 +282,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 
     if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_TEAMMASK))
     {
-        if (uint32 mask = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_DISABLED))
+        if (uint32 mask = CONF_GET_INT("CharacterCreating.Disabled"))
         {
             bool disabled = false;
 
@@ -344,7 +345,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
             return;
         }
 
-        uint32 raceMaskDisabled = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_DISABLED_RACEMASK);
+        uint32 raceMaskDisabled = CONF_GET_INT("CharacterCreating.Disabled.RaceMask");
         if ((1 << (createInfo->Race - 1)) & raceMaskDisabled)
         {
             SendCharCreate(CHAR_CREATE_DISABLED);
@@ -354,7 +355,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 
     if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_CLASSMASK))
     {
-        uint32 classMaskDisabled = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_DISABLED_CLASSMASK);
+        uint32 classMaskDisabled = CONF_GET_INT("CharacterCreating.Disabled.ClassMask");
         if ((1 << (createInfo->Class - 1)) & classMaskDisabled)
         {
             SendCharCreate(CHAR_CREATE_DISABLED);
@@ -387,14 +388,14 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
     if (createInfo->Class == CLASS_DEATH_KNIGHT && !HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_DEATH_KNIGHT))
     {
         // speedup check for death knight class disabled case
-        if (sWorld->getIntConfig(CONFIG_DEATH_KNIGHTS_PER_REALM) == 0)
+        if (CONF_GET_INT("DeathKnightsPerRealm") == 0)
         {
             SendCharCreate(CHAR_CREATE_UNIQUE_CLASS_LIMIT);
             return;
         }
 
         // speedup check for death knight class disabled case
-        if (sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_DEATH_KNIGHT) > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+        if (CONF_GET_INT("CharacterCreating.MinLevelForDeathKnight") > CONF_GET_INT("MaxPlayerLevel"))
         {
             SendCharCreate(CHAR_CREATE_LEVEL_REQUIREMENT);
             return;
@@ -426,7 +427,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
             acctCharCount = uint64(fields[0].GetDouble());
         }
 
-        if (acctCharCount >= sWorld->getIntConfig(CONFIG_CHARACTERS_PER_ACCOUNT))
+        if (acctCharCount >= static_cast<uint64>(CONF_GET_INT("CharactersPerAccount")))
         {
             SendCharCreate(CHAR_CREATE_ACCOUNT_LIMIT);
             return;
@@ -443,7 +444,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
             Field* fields = result->Fetch();
             createInfo->CharCount = uint8(fields[0].GetUInt64()); // SQL's COUNT() returns uint64 but it will always be less than uint8.Max
 
-            if (createInfo->CharCount >= sWorld->getIntConfig(CONFIG_CHARACTERS_PER_REALM))
+            if (createInfo->CharCount >= CONF_GET_INT("CharactersPerRealm"))
             {
                 SendCharCreate(CHAR_CREATE_SERVER_LIMIT);
                 return;
@@ -451,21 +452,21 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
         }
 
         bool allowTwoSideAccounts = !sWorld->IsPvPRealm() || HasPermission(rbac::RBAC_PERM_TWO_SIDE_CHARACTER_CREATION);
-        uint32 skipCinematics = sWorld->getIntConfig(CONFIG_SKIP_CINEMATICS);
+        uint32 skipCinematics = CONF_GET_INT("SkipCinematics");
 
         std::function<void(PreparedQueryResult)> finalizeCharacterCreation = [this, createInfo](PreparedQueryResult result)
         {
             bool haveSameRace = false;
-            uint32 deathKnightReqLevel = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_DEATH_KNIGHT);
+            uint32 deathKnightReqLevel = CONF_GET_INT("CharacterCreating.MinLevelForDeathKnight");
             bool hasDeathKnightReqLevel = (deathKnightReqLevel == 0);
             bool allowTwoSideAccounts = !sWorld->IsPvPRealm() || HasPermission(rbac::RBAC_PERM_TWO_SIDE_CHARACTER_CREATION);
-            uint32 skipCinematics = sWorld->getIntConfig(CONFIG_SKIP_CINEMATICS);
+            uint32 skipCinematics = CONF_GET_INT("SkipCinematics");
             bool checkDeathKnightReqs = createInfo->Class == CLASS_DEATH_KNIGHT && !HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_DEATH_KNIGHT);
 
             if (result)
             {
                 uint32 team = Player::TeamForRace(createInfo->Race);
-                uint32 freeDeathKnightSlots = sWorld->getIntConfig(CONFIG_DEATH_KNIGHTS_PER_REALM);
+                uint32 freeDeathKnightSlots = CONF_GET_INT("DeathKnightsPerRealm");
 
                 Field* field = result->Fetch();
                 uint8 accRace = field[1].GetUInt8();
@@ -762,7 +763,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder const& holder)
         SendPacket(Motd::GetMotdPacket());
 
         // send server info
-        if (sWorld->getIntConfig(CONFIG_ENABLE_SINFO_LOGIN) == 1)
+        if (CONF_GET_INT("Server.LoginInfo") == 1)
             chH.PSendSysMessage(GitRevision::GetFullVersion());
     }
 
@@ -904,12 +905,12 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder const& holder)
             pCurrChar->CastSpell(pCurrChar, spellId, true);
 
         // Start with all map areas explored if enabled
-        if (sWorld->getBoolConfig(CONFIG_START_ALL_EXPLORED))
+        if (CONF_GET_BOOL("PlayerStart.MapsExplored"))
             for (uint8 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i)
                 pCurrChar->SetFlag(PLAYER_EXPLORED_ZONES_1 + i, 0xFFFFFFFF);
 
         // Max relevant reputations if "StartAllReputation" is enabled
-        if (sWorld->getBoolConfig(CONFIG_START_ALL_REP))
+        if (CONF_GET_BOOL("PlayerStart.AllReputation"))
         {
             ReputationMgr& repMgr = pCurrChar->GetReputationMgr();
             repMgr.SetOneFactionReputation(sFactionStore.LookupEntry( 942), 42999, false); // Cenarion Expedition
@@ -977,7 +978,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder const& holder)
     if (sWorld->IsShuttingDown())
         sWorld->ShutdownMsg(true, pCurrChar);
 
-    if (sWorld->getBoolConfig(CONFIG_ALL_TAXI_PATHS))
+    if (CONF_GET_BOOL("AllFlightPaths"))
         pCurrChar->SetTaxiCheater(true);
 
     if (pCurrChar->IsGameMaster())
@@ -1408,7 +1409,7 @@ void WorldSession::HandleCharCustomizeCallback(std::shared_ptr<CharacterCustomiz
     atLoginFlags &= ~AT_LOGIN_CUSTOMIZE;
 
     // prevent character rename
-    if (sWorld->getBoolConfig(CONFIG_PREVENT_RENAME_CUSTOMIZATION) && (customizeInfo->Name != oldName))
+    if (CONF_GET_BOOL("PreventRenameCharacterOnCustomization") && (customizeInfo->Name != oldName))
     {
         SendCharCustomize(CHAR_NAME_FAILURE, customizeInfo.get());
         return;
@@ -1681,7 +1682,7 @@ void WorldSession::HandleCharFactionOrRaceChangeCallback(std::shared_ptr<Charact
 
     if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RACEMASK))
     {
-        uint32 raceMaskDisabled = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_DISABLED_RACEMASK);
+        uint32 raceMaskDisabled = CONF_GET_INT("CharacterCreating.Disabled.RaceMask");
         if ((1 << (factionChangeInfo->Race - 1)) & raceMaskDisabled)
         {
             SendCharFactionChange(CHAR_CREATE_ERROR, factionChangeInfo.get());
@@ -1690,7 +1691,7 @@ void WorldSession::HandleCharFactionOrRaceChangeCallback(std::shared_ptr<Charact
     }
 
     // prevent character rename
-    if (sWorld->getBoolConfig(CONFIG_PREVENT_RENAME_CUSTOMIZATION) && (factionChangeInfo->Name != characterInfo->Name))
+    if (CONF_GET_BOOL("PreventRenameCharacterOnCustomization") && (factionChangeInfo->Name != characterInfo->Name))
     {
         SendCharFactionChange(CHAR_NAME_FAILURE, factionChangeInfo.get());
         return;
@@ -1862,7 +1863,7 @@ void WorldSession::HandleCharFactionOrRaceChangeCallback(std::shared_ptr<Charact
                 trans->Append(stmt);
             }
 
-            if (!sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD))
+            if (!CONF_GET_BOOL("AllowTwoSide.Interaction.Guild"))
             {
                 // Reset guild
                 if (Guild* guild = sGuildMgr->GetGuildById(characterInfo->GuildId))

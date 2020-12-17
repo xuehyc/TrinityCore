@@ -25,7 +25,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SharedDefines.h"
-#include "World.h"
+#include "GameConfig.h"
 
 namespace Warhead
 {
@@ -157,10 +157,10 @@ namespace Warhead
                     baseGain = 0;
             }
 
-            if (sWorld->getIntConfig(CONFIG_MIN_CREATURE_SCALED_XP_RATIO))
+            if (CONF_GET_INT("MinCreatureScaledXPRatio"))
             {
                 // Use mob level instead of player level to avoid overscaling on gain in a min is enforced
-                uint32 baseGainMin = (mob_level * 5 + nBaseExp) * sWorld->getIntConfig(CONFIG_MIN_CREATURE_SCALED_XP_RATIO) / 100;
+                uint32 baseGainMin = (mob_level * 5 + nBaseExp) * CONF_GET_INT("MinCreatureScaledXPRatio") / 100;
                 baseGain = std::max(baseGainMin, baseGain);
             }
 
@@ -193,7 +193,7 @@ namespace Warhead
                     xpMod *= creature->GetCreatureTemplate()->ModExperience;
                 }
 
-                xpMod *= isBattleGround ? sWorld->getRate(RATE_XP_BG_KILL) : sWorld->getRate(RATE_XP_KILL);
+                xpMod *= isBattleGround ? CONF_GET_FLOAT("Rate.XP.BattlegroundKill") : CONF_GET_FLOAT("Rate.XP.Kill");
                 if (creature && creature->m_PlayerDamageReq) // if players dealt less than 50% of the damage and were credited anyway (due to CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ), scale XP gained appropriately (linear scaling)
                     xpMod *= 1.0f - 2.0f * creature->m_PlayerDamageReq / creature->GetMaxHealth();
 

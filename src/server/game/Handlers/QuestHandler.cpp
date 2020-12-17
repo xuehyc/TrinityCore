@@ -32,7 +32,7 @@
 #include "QuestDef.h"
 #include "QuestPackets.h"
 #include "ScriptMgr.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 
 void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
@@ -92,7 +92,7 @@ void WorldSession::HandleQuestgiverHelloOpcode(WorldPacket& recvData)
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     // Stop the npc if moving
-    creature->PauseMovement(sWorld->getIntConfig(CONFIG_CREATURE_STOP_FOR_PLAYER));
+    creature->PauseMovement(CONF_GET_INT("Creature.MovingStopTimeForPlayer"));
     creature->SetHomePosition(creature->GetPosition());
 
     _player->PlayerTalkClass->ClearMenus();
@@ -431,7 +431,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recvData)
 
             LOG_INFO("network", "Player %s abandoned quest %u", _player->GetGUID().ToString().c_str(), questId);
 
-            if (sWorld->getBoolConfig(CONFIG_QUEST_ENABLE_QUEST_TRACKER)) // check if Quest Tracker is enabled
+            if (CONF_GET_BOOL("Quests.EnableQuestTracker")) // check if Quest Tracker is enabled
             {
                 // prepare Quest Tracker datas
                 CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_QUEST_TRACK_ABANDON_TIME);

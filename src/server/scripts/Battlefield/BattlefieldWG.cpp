@@ -25,6 +25,7 @@
 #include "Battleground.h"
 #include "CreatureTextMgr.h"
 #include "GameObject.h"
+#include "GameConfig.h"
 #include "GameTime.h"
 #include "Log.h"
 #include "MapManager.h"
@@ -417,13 +418,13 @@ bool BattlefieldWG::SetupBattlefield()
 
     InitStalker(BATTLEFIELD_WG_NPC_STALKER, WintergraspStalkerPos);
 
-    m_MaxPlayer = sWorld->getIntConfig(CONFIG_WINTERGRASP_PLR_MAX);
-    m_IsEnabled = sWorld->getBoolConfig(CONFIG_WINTERGRASP_ENABLE);
-    m_MinPlayer = sWorld->getIntConfig(CONFIG_WINTERGRASP_PLR_MIN);
-    m_MinLevel = sWorld->getIntConfig(CONFIG_WINTERGRASP_PLR_MIN_LVL);
-    m_BattleTime = sWorld->getIntConfig(CONFIG_WINTERGRASP_BATTLETIME) * MINUTE * IN_MILLISECONDS;
-    m_NoWarBattleTime = sWorld->getIntConfig(CONFIG_WINTERGRASP_NOBATTLETIME) * MINUTE * IN_MILLISECONDS;
-    m_RestartAfterCrash = sWorld->getIntConfig(CONFIG_WINTERGRASP_RESTART_AFTER_CRASH) * MINUTE * IN_MILLISECONDS;
+    m_MaxPlayer = CONF_GET_INT("Wintergrasp.PlayerMax");
+    m_IsEnabled = CONF_GET_BOOL("Wintergrasp.Enable");
+    m_MinPlayer = CONF_GET_INT("Wintergrasp.PlayerMin");
+    m_MinLevel = CONF_GET_INT("Wintergrasp.PlayerMinLvl");
+    m_BattleTime = CONF_GET_INT("Wintergrasp.BattleTimer") * MINUTE * IN_MILLISECONDS;
+    m_NoWarBattleTime = CONF_GET_INT("Wintergrasp.NoBattleTimer") * MINUTE * IN_MILLISECONDS;
+    m_RestartAfterCrash = CONF_GET_INT("Wintergrasp.CrashRestartTimer") * MINUTE * IN_MILLISECONDS;
 
     m_TimeForAcceptInvite = 20;
     m_StartGroupingTimer = 15 * MINUTE * IN_MILLISECONDS;

@@ -29,6 +29,7 @@ EndScriptData */
 #include "CellImpl.h"
 #include "Channel.h"
 #include "Chat.h"
+#include "GameConfig.h"
 #include "GameTime.h"
 #include "GossipDef.h"
 #include "GridNotifiersImpl.h"
@@ -1701,8 +1702,8 @@ public:
             );
         }
 
-        handler->PSendSysMessage("Guid Warn Level: %u", sWorld->getIntConfig(CONFIG_RESPAWN_GUIDWARNLEVEL));
-        handler->PSendSysMessage("Guid Alert Level: %u", sWorld->getIntConfig(CONFIG_RESPAWN_GUIDALERTLEVEL));
+        handler->PSendSysMessage("Guid Warn Level: %u", CONF_GET_INT("Respawn.GuidWarnLevel"));
+        handler->PSendSysMessage("Guid Alert Level: %u", CONF_GET_INT("Respawn.GuidAlertLevel"));
         return true;
     }
 

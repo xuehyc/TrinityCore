@@ -21,7 +21,7 @@
 #include "Errors.h"
 #include "Log.h"
 #include "Warden.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
@@ -32,7 +32,7 @@ void WardenCheckMgr::LoadWardenChecks()
     uint32 oldMSTime = getMSTime();
 
     // Check if Warden is enabled by config before loading anything
-    if (!sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
+    if (!CONF_GET_BOOL("Warden.Enabled"))
     {
         LOG_INFO("warden", ">> Warden disabled, loading checks skipped.");
         LOG_INFO("warden", "");
@@ -115,7 +115,7 @@ void WardenCheckMgr::LoadWardenChecks()
         }
 
         // initialize action with default action from config, this may be overridden later
-        wardenCheck.Action = WardenActions(sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_FAIL_ACTION));
+        wardenCheck.Action = WardenActions(CONF_GET_INT("Warden.ClientCheckFailAction"));
 
         _pools[category].push_back(id);
         ++count;
@@ -131,7 +131,7 @@ void WardenCheckMgr::LoadWardenOverrides()
     uint32 oldMSTime = getMSTime();
 
     // Check if Warden is enabled by config before loading anything
-    if (!sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
+    if (!CONF_GET_BOOL("Warden.Enabled"))
     {
         LOG_INFO("warden", ">> Warden disabled, loading check overrides skipped.");
         LOG_INFO("warden", "");

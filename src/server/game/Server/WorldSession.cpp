@@ -49,7 +49,7 @@
 #include "Vehicle.h"
 #include "WardenMac.h"
 #include "WardenWin.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldPacket.h"
 #include "WorldSocket.h"
 #include <zlib.h>
@@ -378,7 +378,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
             LOG_ERROR("network", "%s sent %s with an invalid link:\n%s", GetPlayerInfo().c_str(),
                 GetOpcodeNameForLogging(static_cast<OpcodeClient>(packet->GetOpcode())).c_str(), ihe.GetInvalidValue().c_str());
 
-            if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_KICK))
+            if (CONF_GET_INT("ChatStrictLinkChecking.Kick"))
                 KickPlayer("WorldSession::Update Invalid chat link");
         }
         catch (WorldPackets::IllegalHyperlinkException const& ihe)
@@ -386,7 +386,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
             LOG_ERROR("network", "%s sent %s which illegally contained a hyperlink:\n%s", GetPlayerInfo().c_str(),
                 GetOpcodeNameForLogging(static_cast<OpcodeClient>(packet->GetOpcode())).c_str(), ihe.GetInvalidValue().c_str());
 
-            if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_KICK))
+            if (CONF_GET_INT("ChatStrictLinkChecking.Kick"))
                 KickPlayer("WorldSession::Update Illegal chat link");
         }
         catch (WorldPackets::PacketArrayMaxCapacityException const& pamce)
@@ -515,7 +515,7 @@ void WorldSession::LogoutPlayer(bool save)
             if (BattlegroundQueueTypeId bgQueueTypeId = _player->GetBattlegroundQueueTypeId(i))
             {
                 // track if player logs out after invited to join BG
-                if (_player->IsInvitedForBattlegroundQueueType(bgQueueTypeId) && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_TRACK_DESERTERS))
+                if (_player->IsInvitedForBattlegroundQueueType(bgQueueTypeId) && CONF_GET_BOOL("Battleground.TrackDeserters.Enable"))
                 {
                     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_DESERTER_TRACK);
                     stmt->setUInt32(0, _player->GetGUID().GetCounter());
@@ -633,7 +633,7 @@ bool WorldSession::ValidateHyperlinksAndMaybeKick(std::string const& str)
     LOG_ERROR("network", "Player %s%s sent a message with an invalid link:\n%s", GetPlayer()->GetName().c_str(),
         GetPlayer()->GetGUID().ToString().c_str(), str.c_str());
 
-    if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_KICK))
+    if (CONF_GET_INT("ChatStrictLinkChecking.Kick"))
         KickPlayer("WorldSession::ValidateHyperlinksAndMaybeKick Invalid chat link");
 
     return false;
@@ -647,7 +647,7 @@ bool WorldSession::DisallowHyperlinksAndMaybeKick(std::string const& str)
     LOG_ERROR("network", "Player %s %s sent a message which illegally contained a hyperlink:\n%s", GetPlayer()->GetName().c_str(),
                  GetPlayer()->GetGUID().ToString().c_str(), str.c_str());
 
-    if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_KICK))
+    if (CONF_GET_INT("ChatStrictLinkChecking.Kick"))
         KickPlayer("WorldSession::DisallowHyperlinksAndMaybeKick Illegal chat link");
 
     return false;
@@ -701,9 +701,9 @@ char const* WorldSession::GetTrinityString(uint32 entry) const
 void WorldSession::ResetTimeOutTime(bool onlyActive)
 {
     if (GetPlayer())
-        m_timeOutTime = GameTime::GetGameTime() + time_t(sWorld->getIntConfig(CONFIG_SOCKET_TIMEOUTTIME_ACTIVE));
+        m_timeOutTime = GameTime::GetGameTime() + time_t(CONF_GET_INT("SocketTimeOutTimeActive"));
     else if (!onlyActive)
-        m_timeOutTime = GameTime::GetGameTime() + time_t(sWorld->getIntConfig(CONFIG_SOCKET_TIMEOUTTIME));
+        m_timeOutTime = GameTime::GetGameTime() + time_t(CONF_GET_INT("SocketTimeOutTime"));
 }
 
 bool WorldSession::IsConnectionIdle() const
@@ -1304,7 +1304,7 @@ void WorldSession::InitializeSessionCallback(CharacterDatabaseQueryHolder const&
     ResetTimeOutTime(false);
 
     SendAddonsInfo();
-    SendClientCacheVersion(sWorld->getIntConfig(CONFIG_CLIENTCACHE_VERSION));
+    SendClientCacheVersion(CONF_GET_INT("ClientCacheVersion"));
     SendTutorialsData();
 }
 
@@ -1368,8 +1368,8 @@ bool WorldSession::DosProtection::EvaluateOpcode(WorldPacket& p, time_t time) co
         }
         case POLICY_BAN:
         {
-            BanMode bm = (BanMode)sWorld->getIntConfig(CONFIG_PACKET_SPOOF_BANMODE);
-            uint32 duration = sWorld->getIntConfig(CONFIG_PACKET_SPOOF_BANDURATION); // in seconds
+            BanMode bm = (BanMode)CONF_GET_INT("PacketSpoof.BanMode");
+            uint32 duration = CONF_GET_INT("PacketSpoof.BanDuration"); // in seconds
             std::string nameOrIp = "";
             switch (bm)
             {
@@ -1633,7 +1633,7 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
     return maxPacketCounterAllowed;
 }
 
-WorldSession::DosProtection::DosProtection(WorldSession* s) : Session(s), _policy((Policy)sWorld->getIntConfig(CONFIG_PACKET_SPOOF_POLICY))
+WorldSession::DosProtection::DosProtection(WorldSession* s) : Session(s), _policy((Policy)CONF_GET_INT("PacketSpoof.Policy"))
 {
 }
 

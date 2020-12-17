@@ -27,6 +27,7 @@ EndScriptData */
 #include "CharacterCache.h"
 #include "Chat.h"
 #include "DatabaseEnv.h"
+#include "GameConfig.h"
 #include "GameTime.h"
 #include "Language.h"
 #include "ObjectAccessor.h"
@@ -123,14 +124,14 @@ public:
             {
                 if (atoi(durationStr) > 0)
                 {
-                    if (sWorld->getBoolConfig(CONFIG_SHOW_BAN_IN_WORLD))
+                    if (CONF_GET_BOOL("ShowBanInWorld"))
                         sWorld->SendWorldText(LANG_BAN_CHARACTER_YOUBANNEDMESSAGE_WORLD, author.c_str(), name.c_str(), secsToTimeString(TimeStringToSecs(durationStr), TimeFormat::ShortText).c_str(), reasonStr);
                     else
                         handler->PSendSysMessage(LANG_BAN_YOUBANNED, name.c_str(), secsToTimeString(TimeStringToSecs(durationStr), TimeFormat::ShortText).c_str(), reasonStr);
                 }
                 else
                 {
-                    if (sWorld->getBoolConfig(CONFIG_SHOW_BAN_IN_WORLD))
+                    if (CONF_GET_BOOL("ShowBanInWorld"))
                         sWorld->SendWorldText(LANG_BAN_CHARACTER_YOUPERMBANNEDMESSAGE_WORLD, author.c_str(), name.c_str(), reasonStr);
                     else
                         handler->PSendSysMessage(LANG_BAN_YOUPERMBANNED, name.c_str(), reasonStr);
@@ -210,14 +211,14 @@ public:
             case BAN_SUCCESS:
                 if (atoi(durationStr) > 0)
                 {
-                    if (sWorld->getBoolConfig(CONFIG_SHOW_BAN_IN_WORLD))
+                    if (CONF_GET_BOOL("ShowBanInWorld"))
                         sWorld->SendWorldText(LANG_BAN_ACCOUNT_YOUBANNEDMESSAGE_WORLD, author.c_str(), nameOrIP.c_str(), secsToTimeString(TimeStringToSecs(durationStr), TimeFormat::ShortText).c_str(), reasonStr);
                     else
                         handler->PSendSysMessage(LANG_BAN_YOUBANNED, nameOrIP.c_str(), secsToTimeString(TimeStringToSecs(durationStr), TimeFormat::ShortText).c_str(), reasonStr);
                 }
                 else
                 {
-                    if (sWorld->getBoolConfig(CONFIG_SHOW_BAN_IN_WORLD))
+                    if (CONF_GET_BOOL("ShowBanInWorld"))
                         sWorld->SendWorldText(LANG_BAN_ACCOUNT_YOUPERMBANNEDMESSAGE_WORLD, author.c_str(), nameOrIP.c_str(), reasonStr);
                     else
                         handler->PSendSysMessage(LANG_BAN_YOUPERMBANNED, nameOrIP.c_str(), reasonStr);

@@ -27,6 +27,7 @@ EndScriptData */
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "DatabaseLoader.h"
+#include "GameConfig.h"
 #include "GameTime.h"
 #include "GitRevision.h"
 #include "Language.h"
@@ -43,9 +44,7 @@ EndScriptData */
 #include "VMapManager2.h"
 #include "World.h"
 #include "WorldSession.h"
-
 #include <numeric>
-
 #include <boost/filesystem/operations.hpp>
 #include <openssl/crypto.h>
 #include <openssl/opensslv.h>
@@ -125,7 +124,7 @@ public:
 
     static bool HandleServerDebugCommand(ChatHandler* handler, char const* /*args*/)
     {
-        uint16 worldPort = uint16(sWorld->getIntConfig(CONFIG_PORT_WORLD));
+        uint16 worldPort = uint16(CONF_GET_INT("WorldServerPort"));
         std::string dbPortOutput;
 
         {
@@ -176,11 +175,11 @@ public:
         handler->PSendSysMessage("Worldserver listening connections on port %" PRIu16, worldPort);
         handler->PSendSysMessage("%s", dbPortOutput.c_str());
 
-        bool vmapIndoorCheck = sWorld->getBoolConfig(CONFIG_VMAP_INDOOR_CHECK);
+        bool vmapIndoorCheck = CONF_GET_BOOL("vmap.enableIndoorCheck");
         bool vmapLOSCheck = VMAP::VMapFactory::createOrGetVMapManager()->isLineOfSightCalcEnabled();
         bool vmapHeightCheck = VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled();
 
-        bool mmapEnabled = sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS);
+        bool mmapEnabled = CONF_GET_BOOL("mmap.enablePathFinding");
 
         std::string dataDir = sWorld->GetDataPath();
         std::vector<std::string> subDirs;
@@ -509,9 +508,9 @@ private:
                 return false;
 
         // Override parameter "delay" with the configuration value if there are still players connected and "force" parameter was not specified
-        if (delay < (int32)sWorld->getIntConfig(CONFIG_FORCE_SHUTDOWN_THRESHOLD) && !(shutdownMask & SHUTDOWN_MASK_FORCE) && !IsOnlyUser(handler->GetSession()))
+        if (delay < (int32)CONF_GET_INT("GM.ForceShutdownThreshold") && !(shutdownMask & SHUTDOWN_MASK_FORCE) && !IsOnlyUser(handler->GetSession()))
         {
-            delay = (int32)sWorld->getIntConfig(CONFIG_FORCE_SHUTDOWN_THRESHOLD);
+            delay = (int32)CONF_GET_INT("GM.ForceShutdownThreshold");
             handler->PSendSysMessage(LANG_SHUTDOWN_DELAYED, delay);
         }
 

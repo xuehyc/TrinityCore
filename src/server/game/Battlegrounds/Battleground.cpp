@@ -37,6 +37,7 @@
 #include "TemporarySummon.h"
 #include "Transport.h"
 #include "Util.h"
+#include "World.h"
 #include "WorldPacket.h"
 #include "WorldStatePackets.h"
 #include <cstdarg>
@@ -265,7 +266,7 @@ inline void Battleground::_ProcessOfflineQueue()
         {
             if (itr->second.OfflineRemoveTime <= GameTime::GetGameTime())
             {
-                if (isBattleground() && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_TRACK_DESERTERS) &&
+                if (isBattleground() && CONF_GET_BOOL("Battleground.TrackDeserters.Enable") &&
                     (GetStatus() == STATUS_IN_PROGRESS || GetStatus() == STATUS_WAIT_JOIN))
                 {
                     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_DESERTER_TRACK);
@@ -497,7 +498,7 @@ inline void Battleground::_ProcessJoin(uint32 diff)
                     player->ResetAllPowers();
                 }
             // Announce BG starting
-            if (sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE))
+            if (CONF_GET_BOOL("Battleground.QueueAnnouncer.Enable"))
                 sWorld->SendWorldText(LANG_BG_STARTED_ANNOUNCE_WORLD, GetName().c_str(), GetMinLevel(), GetMaxLevel());
         }
     }
@@ -693,7 +694,7 @@ void Battleground::EndBattleground(uint32 winner)
 
     CharacterDatabasePreparedStatement* stmt = nullptr;
     uint64 battlegroundId = 1;
-    if (isBattleground() && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_STORE_STATISTICS_ENABLE))
+    if (isBattleground() && CONF_GET_BOOL("Battleground.StoreStatistics.Enable"))
     {
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PVPSTATS_MAXID);
         PreparedQueryResult result = CharacterDatabase.Query(stmt);
@@ -742,11 +743,11 @@ void Battleground::EndBattleground(uint32 winner)
             //needed cause else in av some creatures will kill the players at the end
             player->CombatStop();
 
-        uint32 winner_kills = player->GetRandomWinner() ? sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_HONOR_LAST) : sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_HONOR_FIRST);
-        uint32 loser_kills = player->GetRandomWinner() ? sWorld->getIntConfig(CONFIG_BG_REWARD_LOSER_HONOR_LAST) : sWorld->getIntConfig(CONFIG_BG_REWARD_LOSER_HONOR_FIRST);
-        uint32 winner_arena = player->GetRandomWinner() ? sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_ARENA_LAST) : sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_ARENA_FIRST);
+        uint32 winner_kills = player->GetRandomWinner() ? CONF_GET_INT("Battleground.RewardWinnerHonorLast") : CONF_GET_INT("Battleground.RewardWinnerHonorFirst");
+        uint32 loser_kills = player->GetRandomWinner() ? CONF_GET_INT("Battleground.RewardLoserHonorLast") : CONF_GET_INT("Battleground.RewardLoserHonorFirst");
+        uint32 winner_arena = player->GetRandomWinner() ? CONF_GET_INT("Battleground.RewardWinnerArenaLast") : CONF_GET_INT("Battleground.RewardWinnerArenaFirst");
 
-        if (isBattleground() && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_STORE_STATISTICS_ENABLE))
+        if (isBattleground() && CONF_GET_BOOL("Battleground.StoreStatistics.Enable"))
         {
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_PVPSTATS_PLAYER);
             BattlegroundScoreMap::const_iterator score = PlayerScores.find(player->GetGUID().GetCounter());
@@ -1125,11 +1126,11 @@ void Battleground::RemoveFromBGFreeSlotQueue()
 // returns the number how many players can join battleground to MaxPlayersPerTeam
 uint32 Battleground::GetFreeSlotsForTeam(uint32 Team) const
 {
-    // if BG is starting and CONFIG_BATTLEGROUND_INVITATION_TYPE == BG_QUEUE_INVITATION_TYPE_NO_BALANCE, invite anyone
-    if (GetStatus() == STATUS_WAIT_JOIN && sWorld->getIntConfig(CONFIG_BATTLEGROUND_INVITATION_TYPE) == BG_QUEUE_INVITATION_TYPE_NO_BALANCE)
+    // if BG is starting and "Battleground.InvitationType" == BG_QUEUE_INVITATION_TYPE_NO_BALANCE, invite anyone
+    if (GetStatus() == STATUS_WAIT_JOIN && CONF_GET_INT("Battleground.InvitationType") == BG_QUEUE_INVITATION_TYPE_NO_BALANCE)
         return (GetInvitedCount(Team) < GetMaxPlayersPerTeam()) ? GetMaxPlayersPerTeam() - GetInvitedCount(Team) : 0;
 
-    // if BG is already started or CONFIG_BATTLEGROUND_INVITATION_TYPE != BG_QUEUE_INVITATION_TYPE_NO_BALANCE, do not allow to join too much players of one faction
+    // if BG is already started or "Battleground.InvitationType" != BG_QUEUE_INVITATION_TYPE_NO_BALANCE, do not allow to join too much players of one faction
     uint32 otherTeamInvitedCount;
     uint32 thisTeamInvitedCount;
     uint32 otherTeamPlayersCount;
@@ -1794,7 +1795,7 @@ void Battleground::SetBracket(PvPDifficultyEntry const* bracketEntry)
 
 void Battleground::RewardXPAtKill(Player* killer, Player* victim)
 {
-    if (sWorld->getBoolConfig(CONFIG_BG_XP_FOR_KILL) && killer && victim)
+    if (CONF_GET_BOOL("Battleground.GiveXPForKills") && killer && victim)
         killer->RewardPlayerAndGroupAtKill(victim, true);
 }
 

@@ -21,7 +21,7 @@
 #include "Player.h"
 #include "QuestDef.h"
 #include "QuestPackets.h"
-#include "World.h"
+#include "GameConfig.h"
 #include "WorldSession.h"
 
 GossipMenu::GossipMenu()
@@ -408,7 +408,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, ObjectGuid npcGU
     packet.InformUnit = _session->GetPlayer()->GetPlayerSharingQuest();
     packet.QuestID = quest->GetQuestId();
     packet.AutoLaunched = activateAccept;
-    packet.Flags = quest->GetFlags() & (sWorld->getBoolConfig(CONFIG_QUEST_IGNORE_AUTO_ACCEPT) ? ~QUEST_FLAGS_AUTO_ACCEPT : ~0);
+    packet.Flags = quest->GetFlags() & (CONF_GET_BOOL("Quests.IgnoreAutoAccept") ? ~QUEST_FLAGS_AUTO_ACCEPT : ~0);
     packet.SuggestedGroupNum = quest->GetSuggestedPlayers();
 
     quest->BuildQuestRewards(packet.Rewards, _session->GetPlayer());
@@ -424,7 +424,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, ObjectGuid npcGU
 
 void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
 {
-    if (sWorld->getBoolConfig(CONFIG_CACHE_DATA_QUERIES))
+    if (CONF_GET_BOOL("CacheDataQueries"))
         _session->SendPacket(&quest->QueryData[static_cast<uint32>(_session->GetSessionDbLocaleIndex())]);
     else
     {
