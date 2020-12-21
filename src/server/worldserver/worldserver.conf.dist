@@ -3974,6 +3974,7 @@ LogChannel.DBErrors = "2","local","%Y-%m-%d %H:%M:%S %t","DBErrors.log","true","
 Logger.root=4,Console Server
 Logger.server=6,Console Server
 Logger.commands.gm=6,GM
+Logger.config=6,Console Server
 Logger.scripts.hotswap=6,Console
 Logger.sql.sql=4,Console DBErrors
 Logger.sql.updates=6,Console Server

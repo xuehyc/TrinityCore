@@ -332,7 +332,6 @@ void GameConfig::LoadBoolConfigs(bool reload /*= false*/)
     AddOption<bool>("PlayerDump.DisallowOverwrite");
     AddOption<bool>("Wintergrasp.Enable");
     AddOption<bool>("Stats.Limits.Enable");
-    AddOption<bool>("SetDeprecatedExternalPasswords");
     AddOption<bool>("Allow.IP.Based.Action.Logging");
     AddOption<bool>("Calculate.Creature.Zone.Area.Data");
     AddOption<bool>("Calculate.Gameoject.Zone.Area.Data");

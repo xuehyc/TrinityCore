@@ -484,11 +484,11 @@ void World::LoadConfigSettings(bool reload)
     sGameConfig->Load(reload);
 
     ///- Read the player limit and the Message of the day from the config file
-    SetPlayerAmountLimit(sConfigMgr->GetIntDefault("PlayerLimit", 100));
-    Motd::SetMotd(sConfigMgr->GetStringDefault("Motd", "Welcome to a Warhead Core Server."));
+    SetPlayerAmountLimit(CONF_GET_INT("PlayerLimit"));
+    Motd::SetMotd(CONF_GET_STR("Motd"));
 
     ///- Get string for new logins (newly created characters)
-    SetNewCharString(sConfigMgr->GetStringDefault("PlayerStart.String", ""));
+    SetNewCharString(CONF_GET_STR("PlayerStart.String"));
 
     ///- Read all rates from the config file
     auto CheckRate = [](std::string const& optionName)
@@ -497,7 +497,7 @@ void World::LoadConfigSettings(bool reload)
 
         if (_rate < 0.0f)
         {
-            LOG_ERROR("server.loading", "%s (%f) must be > 0. Using 1 instead.", optionName.c_str(), _rate);
+            LOG_ERROR("config", "%s (%f) must be > 0. Using 1 instead.", optionName.c_str(), _rate);
             sGameConfig->SetOption<float>(optionName, 1.0f);
         }
     };
@@ -539,7 +539,7 @@ void World::LoadConfigSettings(bool reload)
         tempFloatOption = CONF_GET_FLOAT(optionName);
         if (tempFloatOption < 0.0f)
         {
-            LOG_ERROR("server.loading", "%s (%f) must be >= 0. Using 0.0 instead", optionName.c_str(), tempFloatOption);
+            LOG_ERROR("config", "%s (%f) must be >= 0. Using 0.0 instead", optionName.c_str(), tempFloatOption);
             sGameConfig->SetOption<float>(optionName, 1.0f);
         }
     };
@@ -553,40 +553,40 @@ void World::LoadConfigSettings(bool reload)
     tempIntOption = CONF_GET_INT("Compression");
     if (tempIntOption < 1 || tempIntOption > 9)
     {
-        LOG_ERROR("server.loading", "Compression level (%i) must be in range 1..9. Using default compression level (1).", tempIntOption);
+        LOG_ERROR("config", "Compression level (%i) must be in range 1..9. Using default compression level (1).", tempIntOption);
         sGameConfig->SetOption<int32>("Compression", 1);
     }
 
     tempIntOption = CONF_GET_INT("Auction.SearchDelay");
     if (tempIntOption < 100 || tempIntOption > 10000)
     {
-        LOG_ERROR("server.loading", "Auction.SearchDelay (%i) must be between 100 and 10000. Using default of 300ms", tempIntOption);
+        LOG_ERROR("config", "Auction.SearchDelay (%i) must be between 100 and 10000. Using default of 300ms", tempIntOption);
         sGameConfig->SetOption<int32>("Auction.SearchDelay", 300);
     }
 
     if (CONF_GET_BOOL("BaseMapLoadAllGrids") && CONF_GET_BOOL("GridUnload"))
     {
-        LOG_ERROR("server.loading", "BaseMapLoadAllGrids enabled, but GridUnload also enabled. GridUnload must be disabled to enable base map pre-loading. Base map pre-loading disabled");
+        LOG_ERROR("config", "BaseMapLoadAllGrids enabled, but GridUnload also enabled. GridUnload must be disabled to enable base map pre-loading. Base map pre-loading disabled");
         sGameConfig->SetOption<bool>("BaseMapLoadAllGrids", false);
     }
 
     if (CONF_GET_BOOL("InstanceMapLoadAllGrids") && CONF_GET_BOOL("GridUnload"))
     {
-        LOG_ERROR("server.loading", "InstanceMapLoadAllGrids enabled, but GridUnload also enabled. GridUnload must be disabled to enable instance map pre-loading. Instance map pre-loading disabled");
+        LOG_ERROR("config", "InstanceMapLoadAllGrids enabled, but GridUnload also enabled. GridUnload must be disabled to enable instance map pre-loading. Instance map pre-loading disabled");
         sGameConfig->SetOption<bool>("InstanceMapLoadAllGrids", false);
     }
 
     tempIntOption = CONF_GET_INT("PlayerSave.Stats.MinLevel");
     if (tempIntOption > MAX_LEVEL)
     {
-        LOG_ERROR("server.loading", "PlayerSave.Stats.MinLevel (%i) must be in range 0..80. Using default, do not save character stats (0).", tempIntOption);
+        LOG_ERROR("config", "PlayerSave.Stats.MinLevel (%i) must be in range 0..80. Using default, do not save character stats (0).", tempIntOption);
         sGameConfig->SetOption<int32>("PlayerSave.Stats.MinLevel", 0);
     }
 
     tempIntOption = CONF_GET_INT("GridCleanUpDelay");
     if (tempIntOption < MIN_GRID_DELAY)
     {
-        LOG_ERROR("server.loading", "GridCleanUpDelay (%i) must be greater %u. Use this minimal value.", tempIntOption, MIN_GRID_DELAY);
+        LOG_ERROR("config", "GridCleanUpDelay (%i) must be greater %u. Use this minimal value.", tempIntOption, MIN_GRID_DELAY);
         sGameConfig->SetOption<int32>("GridCleanUpDelay", MIN_GRID_DELAY);
     }
 
@@ -596,7 +596,7 @@ void World::LoadConfigSettings(bool reload)
     tempIntOption = CONF_GET_INT("MapUpdateInterval");
     if (tempIntOption < MIN_MAP_UPDATE_DELAY)
     {
-        LOG_ERROR("server.loading", "MapUpdateInterval (%i) must be greater %u. Use this minimal value.", tempIntOption, MIN_MAP_UPDATE_DELAY);
+        LOG_ERROR("config", "MapUpdateInterval (%i) must be greater %u. Use this minimal value.", tempIntOption, MIN_MAP_UPDATE_DELAY);
         sGameConfig->SetOption<int32>("MapUpdateInterval", MIN_MAP_UPDATE_DELAY);
     }
 
@@ -608,7 +608,7 @@ void World::LoadConfigSettings(bool reload)
         tempIntOption = CONF_GET_INT(optionName);
         if (tempIntOption > 100)
         {
-            LOG_ERROR("server.loading", "%s (%i) must be in range 0..100. Set to 0.", optionName.c_str(), tempIntOption);
+            LOG_ERROR("config", "%s (%i) must be in range 0..100. Set to 0.", optionName.c_str(), tempIntOption);
             sGameConfig->SetOption<int32>(optionName, 0);
         }
     };
@@ -622,7 +622,7 @@ void World::LoadConfigSettings(bool reload)
         int32 confSymbols = CONF_GET_INT(optionName);
         if (confSymbols < 1 || confSymbols > maxNameSymols)
         {
-            LOG_ERROR("server.loading", "%s (%u) must be in range 1..%u. Set to 2.", optionName.c_str(), confSymbols, maxNameSymols);
+            LOG_ERROR("config", "%s (%u) must be in range 1..%u. Set to 2.", optionName.c_str(), confSymbols, maxNameSymols);
             sGameConfig->SetOption<int32>(optionName, 2);
         }
     };
@@ -634,7 +634,7 @@ void World::LoadConfigSettings(bool reload)
     int32 charactersPerRealm = CONF_GET_INT("CharactersPerRealm");
     if (charactersPerRealm < 1 || charactersPerRealm > 10)
     {
-        LOG_ERROR("server.loading", "CharactersPerRealm (%i) must be in range 1..10. Set to 10.", charactersPerRealm);
+        LOG_ERROR("config", "CharactersPerRealm (%i) must be in range 1..10. Set to 10.", charactersPerRealm);
         sGameConfig->SetOption<int32>("CharactersPerRealm", 10);
     }
 
@@ -642,7 +642,7 @@ void World::LoadConfigSettings(bool reload)
     tempIntOption = CONF_GET_INT("CharactersPerAccount");
     if (tempIntOption < charactersPerRealm)
     {
-        LOG_ERROR("server.loading", "CharactersPerAccount (%i) can't be less than CharactersPerRealm (%i).", tempIntOption, charactersPerRealm);
+        LOG_ERROR("config", "CharactersPerAccount (%i) can't be less than CharactersPerRealm (%i).", tempIntOption, charactersPerRealm);
         sGameConfig->SetOption<int32>("CharactersPerAccount", charactersPerRealm);
     }
 
@@ -740,14 +740,14 @@ void World::LoadConfigSettings(bool reload)
     tempIntOption = CONF_GET_INT("Quests.DailyResetTime");
     if (tempIntOption > 23)
     {
-        LOG_ERROR("server.loading", "Quests.DailyResetTime (%i) must be in range 0..23. Set to 3.", tempIntOption);
+        LOG_ERROR("config", "Quests.DailyResetTime (%i) must be in range 0..23. Set to 3.", tempIntOption);
         sGameConfig->SetOption<int32>("Quests.DailyResetTime", 3);
     }
 
     tempIntOption = CONF_GET_INT("Quests.WeeklyResetWDay");
     if (tempIntOption > 6)
     {
-        LOG_ERROR("server.loading", "Quests.WeeklyResetDay (%i) must be in range 0..6. Set to 3 (Wednesday).", tempIntOption);
+        LOG_ERROR("config", "Quests.WeeklyResetDay (%i) must be in range 0..6. Set to 3 (Wednesday).", tempIntOption);
         sGameConfig->SetOption<int32>("Quests.WeeklyResetWDay", 3);
     }
 
@@ -773,7 +773,7 @@ void World::LoadConfigSettings(bool reload)
     tempIntOption = CONF_GET_INT("CleanOldMailTime");
     if (tempIntOption > 23)
     {
-        LOG_ERROR("server.loading", "CleanOldMailTime (%u) must be an hour, between 0 and 23. Set to 4.", tempIntOption);
+        LOG_ERROR("config", "CleanOldMailTime (%u) must be an hour, between 0 and 23. Set to 4.", tempIntOption);
         sGameConfig->SetOption<int32>("CleanOldMailTime", 4);
     }
 
@@ -793,7 +793,7 @@ void World::LoadConfigSettings(bool reload)
     tempIntOption = CONF_GET_INT("LogDB.Opt.ClearInterval");
     if (tempIntOption <= 0)
     {
-        LOG_ERROR("server.loading", "LogDB.Opt.ClearInterval (%i) must be > 0, set to default 10.", tempIntOption);
+        LOG_ERROR("config", "LogDB.Opt.ClearInterval (%i) must be > 0, set to default 10.", tempIntOption);
         sGameConfig->SetOption<int32>("LogDB.Opt.ClearInterval", 10);
     }
 
@@ -804,7 +804,7 @@ void World::LoadConfigSettings(bool reload)
     }
 
     if (!reload)
-        LOG_TRACE("server.loading", "Will clear `logs` table of entries older than %i seconds every %u minutes.",
+        LOG_TRACE("config", "Will clear `logs` table of entries older than %i seconds every %u minutes.",
             CONF_GET_INT("LogDB.Opt.ClearTime"), tempIntOption);
 
     tempIntOption = CONF_GET_INT("MaxOverspeedPings");
@@ -845,7 +845,7 @@ void World::LoadConfigSettings(bool reload)
     tempIntOption = CONF_GET_INT("Battleground.ReportAFK");
     if (tempIntOption < 1 || tempIntOption > 9)
     {
-        LOG_ERROR("server.loading", "Battleground.ReportAFK (%d) must be >0. Using 3 instead.", tempIntOption);
+        LOG_ERROR("config", "Battleground.ReportAFK (%d) must be >0. Using 3 instead.", tempIntOption);
         sGameConfig->SetOption<int32>("Battleground.ReportAFK", 3);
     }
 
@@ -855,14 +855,11 @@ void World::LoadConfigSettings(bool reload)
         if (clientCacheId)
         {
             sGameConfig->SetOption<int32>("ClientCacheVersion", clientCacheId);
-            LOG_INFO("server.loading", "Client cache version set to: %u", clientCacheId);
+            LOG_INFO("config", "Client cache version set to: %u", clientCacheId);
         }
         else
-            LOG_ERROR("server.loading", "ClientCacheVersion can't be negative %d, ignored.", clientCacheId);
+            LOG_ERROR("config", "ClientCacheVersion can't be negative %d, ignored.", clientCacheId);
     }
-
-    // if (!reload)
-        // LOG_INFO("server.loading", "Client cache version set to: %u", CONF_GET_INT("ClientCacheVersion"));
 
     auto CheckLogRecordsCount = [&tempIntOption](std::string const& optionName, int32 const& maxRecords)
     {
@@ -925,19 +922,19 @@ void World::LoadConfigSettings(bool reload)
 
     if (noGrayAggroAbove > maxPlayerLevel)
     {
-       LOG_ERROR("server.loading", "NoGrayAggro.Above (%i) must be in range 0..%u. Set to %u.", noGrayAggroAbove, maxPlayerLevel, maxPlayerLevel);
+       LOG_ERROR("config", "NoGrayAggro.Above (%i) must be in range 0..%u. Set to %u.", noGrayAggroAbove, maxPlayerLevel, maxPlayerLevel);
        sGameConfig->SetOption<int32>("NoGrayAggro.Above", maxPlayerLevel);
     }
 
     if (noGrayAggroBelow > maxPlayerLevel)
     {
-       LOG_ERROR("server.loading", "NoGrayAggro.Below (%i) must be in range 0..%u. Set to %u.", noGrayAggroBelow, maxPlayerLevel, maxPlayerLevel);
+       LOG_ERROR("config", "NoGrayAggro.Below (%i) must be in range 0..%u. Set to %u.", noGrayAggroBelow, maxPlayerLevel, maxPlayerLevel);
        sGameConfig->SetOption<int32>("NoGrayAggro.Below", maxPlayerLevel);
     }
 
     if (noGrayAggroAbove > 0 && noGrayAggroAbove < noGrayAggroBelow)
     {
-       LOG_ERROR("server.loading", "NoGrayAggro.Below (%i) cannot be greater than NoGrayAggro.Above (%i). Set to %i.", noGrayAggroBelow, noGrayAggroAbove, noGrayAggroAbove);
+       LOG_ERROR("config", "NoGrayAggro.Below (%i) cannot be greater than NoGrayAggro.Above (%i). Set to %i.", noGrayAggroBelow, noGrayAggroAbove, noGrayAggroAbove);
        sGameConfig->SetOption<int32>("NoGrayAggro.Below", noGrayAggroAbove);
     }
 
@@ -945,21 +942,21 @@ void World::LoadConfigSettings(bool reload)
     tempIntOption = CONF_GET_INT("Respawn.DynamicMode");
     if (tempIntOption > 1)
     {
-        LOG_ERROR("server.loading", "Invalid value for Respawn.DynamicMode (%u). Set to 0.", tempIntOption);
+        LOG_ERROR("config", "Invalid value for Respawn.DynamicMode (%u). Set to 0.", tempIntOption);
         sGameConfig->SetOption<int32>("Respawn.DynamicMode", 0);
     }
 
     tempIntOption = CONF_GET_INT("Respawn.GuidWarnLevel");
     if (tempIntOption > 16777215)
     {
-        LOG_ERROR("server.loading", "Respawn.GuidWarnLevel (%u) cannot be greater than maximum GUID (16777215). Set to 12000000.", tempIntOption);
+        LOG_ERROR("config", "Respawn.GuidWarnLevel (%u) cannot be greater than maximum GUID (16777215). Set to 12000000.", tempIntOption);
         sGameConfig->SetOption<int32>("Respawn.GuidWarnLevel", 12000000);
     }
 
     tempIntOption = CONF_GET_INT("Respawn.GuidAlertLevel");
     if (tempIntOption > 16777215)
     {
-        LOG_ERROR("server.loading", "Respawn.GuidWarnLevel (%u) cannot be greater than maximum GUID (16777215). Set to 16000000.", tempIntOption);
+        LOG_ERROR("config", "Respawn.GuidWarnLevel (%u) cannot be greater than maximum GUID (16777215). Set to 16000000.", tempIntOption);
         sGameConfig->SetOption<int32>("Respawn.GuidWarnLevel", 16000000);
     }
 
@@ -967,10 +964,10 @@ void World::LoadConfigSettings(bool reload)
 
     auto CheckDynamicRate = [&tempFloatOption](std::string const& optionName)
     {
-        tempFloatOption = CONF_GET_INT(optionName);
+        tempFloatOption = CONF_GET_FLOAT(optionName);
         if (tempFloatOption < 0.0f)
         {
-            LOG_ERROR("server.loading", "%s (%f) must be positive. Set to 10.", optionName.c_str(), tempFloatOption);
+            LOG_ERROR("config", "%s (%f) must be positive. Set to 10.", optionName.c_str(), tempFloatOption);
             sGameConfig->SetOption<float>(optionName, 10.0f);
         }
     };
@@ -998,7 +995,7 @@ void World::LoadConfigSettings(bool reload)
     if (reload)
     {
         if (dataPath != m_dataPath)
-            LOG_ERROR("server.loading", "DataDir option can't be changed at worldserver.conf reload, using current value (%s).", m_dataPath.c_str());
+            LOG_ERROR("config", "DataDir option can't be changed at worldserver.conf reload, using current value (%s).", m_dataPath.c_str());
     }
     else
         m_dataPath = dataPath;
@@ -1008,7 +1005,7 @@ void World::LoadConfigSettings(bool reload)
     bool enableHeight = sConfigMgr->GetBoolDefault("vmap.enableHeight", true);
 
     if (!enableHeight)
-        LOG_ERROR("server.loading", "VMap height checking disabled! Creatures movements and other various things WILL be broken! Expect no support.");
+        LOG_ERROR("config", "VMap height checking disabled! Creatures movements and other various things WILL be broken! Expect no support.");
 
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableLineOfSightCalc(enableLOS);
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableHeightCalc(enableHeight);
