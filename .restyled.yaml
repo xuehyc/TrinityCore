@@ -39,5 +39,24 @@ restylers:
   - clang-format:
       enabled: false
   - astyle:
-      arguments: ["-A1", "-xV", "-S", "-N", "-Y", "-p", "-xg", "-k1", "-W1", "-O", "-xM", "-xj", "-H", "-xf", "-xh", "-xy"]
+      arguments: [
+        "-A1", # --style=allman / --style=bsd / --style=break / -A1
+        "-xV", # --attach-closing-while / -xV
+        "-C",  # --indent-classes / -C
+        "-S",  # --indent-switches / -S
+        "-N",  # --indent-namespaces / -N
+        "-Y",  # --indent-col1-comments / -Y
+        "-p",  # --pad-oper / -p
+        "-xg", # --pad-comma / -xg
+        "-k1", # --align-pointer=type / -k1
+        "-W1", # --align-reference=type / -W1
+        "-O",  # --keep-one-line-blocks / -O
+        "-xM", # --align-method-colon / -xM
+        "-xj", # --remove-braces / -xj
+        "-H",  # --pad-header / -H
+        "-xf", # --attach-return-type / -xf
+        "-xh", # --attach-return-type-decl / -xh
+        "-xy", # --close-templates / -xy
+        "-xC200" # --max-code-length=# / -xC#
+        ]
   - "*"
