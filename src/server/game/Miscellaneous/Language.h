@@ -25,7 +25,7 @@ enum BroadcastTextIds
     BROADCAST_TEXT_FLEE_FOR_ASSIST        = 1150
 };
 
-enum TrinityStrings
+enum WarheadStrings
 {
     // for chat commands
     LANG_SELECT_CHAR_OR_CREATURE          = 1,

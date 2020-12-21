@@ -151,7 +151,7 @@ public:
         if (message.empty())
             return false;
 
-        sWorld->SendServerMessage(SERVER_MSG_STRING, Warhead::StringFormat(handler->GetTrinityString(LANG_SYSTEMMESSAGE), message.data()).c_str());
+        sWorld->SendServerMessage(SERVER_MSG_STRING, Warhead::StringFormat(handler->GetWarheadString(LANG_SYSTEMMESSAGE), message.data()).c_str());
         return true;
     }
 
@@ -171,7 +171,7 @@ public:
         if (message.empty())
             return false;
 
-        std::string str = handler->GetTrinityString(LANG_GLOBAL_NOTIFY);
+        std::string str = handler->GetWarheadString(LANG_GLOBAL_NOTIFY);
         str += message;
 
         WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
@@ -187,7 +187,7 @@ public:
         if (message.empty())
             return false;
 
-        std::string str = handler->GetTrinityString(LANG_GM_NOTIFY);
+        std::string str = handler->GetWarheadString(LANG_GM_NOTIFY);
         str += message;
 
         WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
@@ -202,7 +202,7 @@ public:
     {
         if (!operationArg)
         {
-            handler->PSendSysMessage(LANG_COMMAND_WHISPERACCEPTING, handler->GetSession()->GetPlayer()->isAcceptWhispers() ?  handler->GetTrinityString(LANG_ON) : handler->GetTrinityString(LANG_OFF));
+            handler->PSendSysMessage(LANG_COMMAND_WHISPERACCEPTING, handler->GetSession()->GetPlayer()->isAcceptWhispers() ?  handler->GetWarheadString(LANG_ON) : handler->GetWarheadString(LANG_OFF));
             return true;
         }
 

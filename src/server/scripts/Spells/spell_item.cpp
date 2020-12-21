@@ -27,6 +27,7 @@
 #include "Creature.h"
 #include "CreatureAIImpl.h"
 #include "DBCStores.h"
+#include "GameLocale.h"
 #include "LootMgr.h"
 #include "Map.h"
 #include "ObjectMgr.h"
@@ -330,7 +331,7 @@ class spell_item_aura_of_madness : public AuraScript
             SPELL_NARCISSISM,
             SPELL_MARTYR_COMPLEX,
             SPELL_DEMENTIA
-        }) && sObjectMgr->GetBroadcastText(SAY_MADNESS);
+        }) && sGameLocale->GetBroadcastText(SAY_MADNESS);
     }
 
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
@@ -650,7 +651,7 @@ class spell_item_decahedral_dwarven_dice : public SpellScript
 
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        if (!sObjectMgr->GetBroadcastText(TEXT_DECAHEDRAL_DWARVEN_DICE))
+        if (!sGameLocale->GetBroadcastText(TEXT_DECAHEDRAL_DWARVEN_DICE))
             return false;
         return true;
     }
@@ -2309,7 +2310,7 @@ class spell_item_worn_troll_dice : public SpellScript
 
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        if (!sObjectMgr->GetBroadcastText(TEXT_WORN_TROLL_DICE))
+        if (!sGameLocale->GetBroadcastText(TEXT_WORN_TROLL_DICE))
             return false;
         return true;
     }
@@ -3929,7 +3930,7 @@ class spell_item_taunt_flag_targeting : public SpellScript
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
         return ValidateSpellInfo({ SPELL_TAUNT_FLAG }) &&
-            sObjectMgr->GetBroadcastText(EMOTE_PLANTS_FLAG);
+            sGameLocale->GetBroadcastText(EMOTE_PLANTS_FLAG);
     }
 
     void FilterTargets(std::list<WorldObject*>& targets)

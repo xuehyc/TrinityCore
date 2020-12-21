@@ -68,7 +68,7 @@ ChatCommandResult Warhead::ChatCommands::AccountIdentifier::TryConsume(ChatHandl
     // first try parsing as account name
     _name.assign(text);
     if (!Utf8ToUpperOnlyLatin(_name))
-        return GetTrinityString(handler, LANG_CMDPARSER_INVALID_UTF8);
+        return GetWarheadString(handler, LANG_CMDPARSER_INVALID_UTF8);
     _id = AccountMgr::GetId(_name);
     if (_id) // account with name exists, we are done
         return next;
@@ -76,13 +76,13 @@ ChatCommandResult Warhead::ChatCommands::AccountIdentifier::TryConsume(ChatHandl
     // try parsing as account id instead
     Optional<uint32> id = Warhead::StringTo<uint32>(text, 10);
     if (!id)
-        return FormatTrinityString(handler, LANG_CMDPARSER_ACCOUNT_NAME_NO_EXIST, STRING_VIEW_FMT_ARG(_name));
+        return FormatWarheadString(handler, LANG_CMDPARSER_ACCOUNT_NAME_NO_EXIST, STRING_VIEW_FMT_ARG(_name));
     _id = *id;
 
     if (AccountMgr::GetName(_id, _name))
         return next;
     else
-        return FormatTrinityString(handler, LANG_CMDPARSER_ACCOUNT_ID_NO_EXIST, _id);
+        return FormatWarheadString(handler, LANG_CMDPARSER_ACCOUNT_ID_NO_EXIST, _id);
 }
 
 ChatCommandResult Warhead::ChatCommands::PlayerIdentifier::TryConsume(ChatHandler const* handler, std::string_view args)
@@ -98,7 +98,7 @@ ChatCommandResult Warhead::ChatCommands::PlayerIdentifier::TryConsume(ChatHandle
         if ((_player = ObjectAccessor::FindPlayerByLowGUID(_guid.GetCounter())))
             _name = _player->GetName();
         else if (!sCharacterCache->GetCharacterNameByGuid(_guid, _name))
-            return FormatTrinityString(handler, LANG_CMDPARSER_CHAR_GUID_NO_EXIST, _guid.ToString().c_str());
+            return FormatWarheadString(handler, LANG_CMDPARSER_CHAR_GUID_NO_EXIST, _guid.ToString().c_str());
         return next;
     }
     else
@@ -109,12 +109,12 @@ ChatCommandResult Warhead::ChatCommands::PlayerIdentifier::TryConsume(ChatHandle
             _name.assign(val.get<std::string_view>());
 
         if (!normalizePlayerName(_name))
-            return FormatTrinityString(handler, LANG_CMDPARSER_CHAR_NAME_INVALID, STRING_VIEW_FMT_ARG(_name));
+            return FormatWarheadString(handler, LANG_CMDPARSER_CHAR_NAME_INVALID, STRING_VIEW_FMT_ARG(_name));
 
         if ((_player = ObjectAccessor::FindPlayerByName(_name)))
             _guid = _player->GetGUID();
         else if (!(_guid = sCharacterCache->GetCharacterGuidByName(_name)))
-            return FormatTrinityString(handler, LANG_CMDPARSER_CHAR_NAME_NO_EXIST, STRING_VIEW_FMT_ARG(_name));
+            return FormatWarheadString(handler, LANG_CMDPARSER_CHAR_NAME_NO_EXIST, STRING_VIEW_FMT_ARG(_name));
         return next;
     }
 }

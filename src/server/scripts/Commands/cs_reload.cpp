@@ -31,6 +31,7 @@ EndScriptData */
 #include "CreatureTextMgr.h"
 #include "DatabaseEnv.h"
 #include "DisableMgr.h"
+#include "GameLocale.h"
 #include "ItemEnchantmentMgr.h"
 #include "Language.h"
 #include "LFGMgr.h"
@@ -160,7 +161,7 @@ public:
             { "spell_threats",                 rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_THREATS,                    true,  &HandleReloadSpellThreatsCommand,               "" },
             { "spell_group_stack_rules",       rbac::RBAC_PERM_COMMAND_RELOAD_SPELL_GROUP_STACK_RULES,          true,  &HandleReloadSpellGroupStackRulesCommand,       "" },
             { "trainer",                       rbac::RBAC_PERM_COMMAND_RELOAD_TRAINER,                          true,  &HandleReloadTrainerCommand,                    "" },
-            { "trinity_string",                rbac::RBAC_PERM_COMMAND_RELOAD_WARHEAD_STRING,                   true,  &HandleReloadTrinityStringCommand,              "" },
+            { "trinity_string",                rbac::RBAC_PERM_COMMAND_RELOAD_WARHEAD_STRING,                   true,  &HandleReloadWarheadStringCommand,              "" },
             { "waypoint_scripts",              rbac::RBAC_PERM_COMMAND_RELOAD_WAYPOINT_SCRIPTS,                 true,  &HandleReloadWpScriptsCommand,                  "" },
             { "waypoint_data",                 rbac::RBAC_PERM_COMMAND_RELOAD_WAYPOINT_DATA,                    true,  &HandleReloadWpCommand,                         "" },
             { "vehicle_accessory",             rbac::RBAC_PERM_COMMAND_RELOAD_VEHICLE_ACCESORY,                 true,  &HandleReloadVehicleAccessoryCommand,           "" },
@@ -197,7 +198,7 @@ public:
         HandleReloadAccessRequirementCommand(handler, "");
         HandleReloadMailLevelRewardCommand(handler, "");
         HandleReloadReservedNameCommand(handler, "");
-        HandleReloadTrinityStringCommand(handler, "");
+        HandleReloadWarheadStringCommand(handler, "");
         HandleReloadGameTeleCommand(handler, "");
 
         HandleReloadCreatureMovementOverrideCommand(handler, "");
@@ -397,8 +398,8 @@ public:
     static bool HandleReloadBroadcastTextCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading Broadcast texts...");
-        sObjectMgr->LoadBroadcastTexts();
-        sObjectMgr->LoadBroadcastTextLocales();
+        sGameLocale->LoadBroadcastTexts();
+        sGameLocale->LoadBroadcastTextLocales();
         handler->SendGlobalGMSysMessage("DB table `broadcast_text` reloaded.");
         return true;
     }
@@ -534,7 +535,7 @@ public:
     static bool HandleReloadLocalesQuestGreetingCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading Quest Greeting locales...");
-        sObjectMgr->LoadQuestGreetingLocales();
+        sGameLocale->LoadQuestGreetingLocales();
         handler->SendGlobalGMSysMessage("DB table `quest_greeting_locale` reloaded.");
         return true;
     }
@@ -680,10 +681,10 @@ public:
         return true;
     }
 
-    static bool HandleReloadTrinityStringCommand(ChatHandler* handler, char const* /*args*/)
+    static bool HandleReloadWarheadStringCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading trinity_string Table!");
-        sObjectMgr->LoadTrinityStrings();
+        sGameLocale->LoadWarheadStrings();
         handler->SendGlobalGMSysMessage("DB table `trinity_string` reloaded.");
         return true;
     }
@@ -1010,7 +1011,7 @@ public:
     static bool HandleReloadLocalesAchievementRewardCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading Achievement Reward Data Locale...");
-        sAchievementMgr->LoadRewardLocales();
+        sGameLocale->LoadAchievementRewardLocales();
         handler->SendGlobalGMSysMessage("DB table `achievement_reward_locale` reloaded.");
         return true;
     }
@@ -1026,7 +1027,7 @@ public:
     static bool HandleReloadLocalesCreatureCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading Creature Template Locale...");
-        sObjectMgr->LoadCreatureLocales();
+        sGameLocale->LoadCreatureLocales();
         handler->SendGlobalGMSysMessage("DB table `creature_template_locale` reloaded.");
         return true;
     }
@@ -1042,7 +1043,7 @@ public:
     static bool HandleReloadLocalesGameobjectCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading Gameobject Template Locale... ");
-        sObjectMgr->LoadGameObjectLocales();
+        sGameLocale->LoadGameObjectLocales();
         handler->SendGlobalGMSysMessage("DB table `gameobject_template_locale` reloaded.");
         return true;
     }
@@ -1050,7 +1051,7 @@ public:
     static bool HandleReloadLocalesGossipMenuOptionCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading Gossip Menu Option Locale... ");
-        sObjectMgr->LoadGossipMenuItemsLocales();
+        sGameLocale->LoadGossipMenuItemsLocales();
         handler->SendGlobalGMSysMessage("DB table `gossip_menu_option_locale` reloaded.");
         return true;
     }
@@ -1058,7 +1059,7 @@ public:
     static bool HandleReloadLocalesItemCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading Item Template Locale... ");
-        sObjectMgr->LoadItemLocales();
+        sGameLocale->LoadItemLocales();
         handler->SendGlobalGMSysMessage("DB table `item_template_locale` reloaded.");
         return true;
     }
@@ -1066,7 +1067,7 @@ public:
     static bool HandleReloadLocalesItemSetNameCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading Item set name Locale... ");
-        sObjectMgr->LoadItemSetNameLocales();
+        sGameLocale->LoadItemSetNameLocales();
         handler->SendGlobalGMSysMessage("DB table `item_set_name_locale` reloaded.");
         return true;
     }
@@ -1074,7 +1075,7 @@ public:
     static bool HandleReloadLocalesNpcTextCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading NPC Text Locale... ");
-        sObjectMgr->LoadNpcTextLocales();
+        sGameLocale->LoadNpcTextLocales();
         handler->SendGlobalGMSysMessage("DB table `npc_text_locale` reloaded.");
         return true;
     }
@@ -1082,7 +1083,7 @@ public:
     static bool HandleReloadLocalesPageTextCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading Page Text Locale... ");
-        sObjectMgr->LoadPageTextLocales();
+        sGameLocale->LoadPageTextLocales();
         handler->SendGlobalGMSysMessage("DB table `page_text_locale` reloaded.");
         return true;
     }
@@ -1090,7 +1091,7 @@ public:
     static bool HandleReloadLocalesPointsOfInterestCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading Points Of Interest Locale... ");
-        sObjectMgr->LoadPointOfInterestLocales();
+        sGameLocale->LoadPointOfInterestLocales();
         handler->SendGlobalGMSysMessage("DB table `points_of_interest_locale` reloaded.");
         return true;
     }
@@ -1098,7 +1099,7 @@ public:
     static bool HandleReloadLocalesQuestCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading Quest Template Locale... ");
-        sObjectMgr->LoadQuestLocales();
+        sGameLocale->LoadQuestLocales();
         handler->SendGlobalGMSysMessage("DB table `quest_template_locale` reloaded.");
         return true;
     }
@@ -1106,7 +1107,7 @@ public:
     static bool HandleReloadLocalesQuestOfferRewardCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading Quest Offer Reward Locale... ");
-        sObjectMgr->LoadQuestOfferRewardLocale();
+        sGameLocale->LoadQuestOfferRewardLocale();
         handler->SendGlobalGMSysMessage("DB table `quest_offer_reward_locale` reloaded.");
         return true;
     }
@@ -1114,7 +1115,7 @@ public:
     static bool HandleReloadLocalesQuestRequestItemsCommand(ChatHandler* handler, char const* /*args*/)
     {
         LOG_INFO("misc", "Re-Loading Quest Request Item Locale... ");
-        sObjectMgr->LoadQuestRequestItemsLocale();
+        sGameLocale->LoadQuestRequestItemsLocale();
         handler->SendGlobalGMSysMessage("DB table `quest_request_item_locale` reloaded.");
         return true;
     }

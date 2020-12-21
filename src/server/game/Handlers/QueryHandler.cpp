@@ -21,6 +21,7 @@
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
 #include "GameConfig.h"
+#include "GameLocale.h"
 #include "GameTime.h"
 #include "Log.h"
 #include "MapManager.h"
@@ -228,7 +229,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
 
         for (uint8 i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
         {
-            BroadcastText const* bct = sObjectMgr->GetBroadcastText(gossip->Options[i].BroadcastTextID);
+            BroadcastText const* bct = sGameLocale->GetBroadcastText(gossip->Options[i].BroadcastTextID);
             if (bct)
             {
                 text0[i] = bct->GetText(locale, GENDER_MALE, true);
@@ -242,10 +243,10 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
 
             if (locale != DEFAULT_LOCALE && !bct)
             {
-                if (NpcTextLocale const* npcTextLocale = sObjectMgr->GetNpcTextLocale(textID))
+                if (NpcTextLocale const* npcTextLocale = sGameLocale->GetNpcTextLocale(textID))
                 {
-                    ObjectMgr::GetLocaleString(npcTextLocale->Text_0[i], locale, text0[i]);
-                    ObjectMgr::GetLocaleString(npcTextLocale->Text_1[i], locale, text1[i]);
+                    sGameLocale->GetLocaleString(npcTextLocale->Text_0[i], locale, text0[i]);
+                    sGameLocale->GetLocaleString(npcTextLocale->Text_1[i], locale, text1[i]);
                 }
             }
 
@@ -302,8 +303,8 @@ void WorldSession::HandleQueryPageText(WorldPacket& recvData)
 
             LocaleConstant localeConstant = GetSessionDbLocaleIndex();
             if (localeConstant != LOCALE_enUS)
-                if (PageTextLocale const* pageTextLocale = sObjectMgr->GetPageTextLocale(pageID))
-                    ObjectMgr::GetLocaleString(pageTextLocale->Text, localeConstant, Text);
+                if (PageTextLocale const* pageTextLocale = sGameLocale->GetPageTextLocale(pageID))
+                    sGameLocale->GetLocaleString(pageTextLocale->Text, localeConstant, Text);
 
             data << Text;
             data << uint32(pageText->NextPageID);

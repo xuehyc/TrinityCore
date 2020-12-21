@@ -28,6 +28,8 @@ EndScriptData */
 #include "CreatureGroups.h"
 #include "DatabaseEnv.h"
 #include "FollowMovementGenerator.h"
+#include "GameConfig.h"
+#include "GameLocale.h"
 #include "GameTime.h"
 #include "Language.h"
 #include "Log.h"
@@ -41,7 +43,6 @@ EndScriptData */
 #include "RBAC.h"
 #include "SmartEnum.h"
 #include "Transport.h"
-#include "GameConfig.h"
 #include "WorldSession.h"
 #include "World.h"
 
@@ -1108,16 +1109,10 @@ public:
     static void _ShowLootEntry(ChatHandler* handler, uint32 itemId, uint8 itemCount, bool alternateString = false)
     {
         ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(itemId);
-        ItemLocale const* itemLocale = sObjectMgr->GetItemLocale(itemId);
-        char const* name = nullptr;
-        if (itemLocale)
-            name = itemLocale->Name[handler->GetSessionDbcLocale()].c_str();
-        if ((!name || !*name) && itemTemplate)
-            name = itemTemplate->Name1.c_str();
-        if (!name)
-            name = "Unknown item";
+        std::string const& itemNameLocale = sGameLocale->GetItemNameLocale(itemId, handler->GetSessionDbLocaleIndex());
+
         handler->PSendSysMessage(alternateString ? LANG_COMMAND_NPC_SHOWLOOT_ENTRY_2 : LANG_COMMAND_NPC_SHOWLOOT_ENTRY,
-            itemCount, ItemQualityColors[itemTemplate ? itemTemplate->Quality : uint32(ITEM_QUALITY_POOR)], itemId, name, itemId);
+            itemCount, ItemQualityColors[itemTemplate ? itemTemplate->Quality : uint32(ITEM_QUALITY_POOR)], itemId, itemNameLocale.c_str(), itemId);
     }
     static void _IterateNotNormalLootMap(ChatHandler* handler, NotNormalLootItemMap const& map, std::vector<LootItem> const& items)
     {

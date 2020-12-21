@@ -718,21 +718,10 @@ private:
     void _LoadTotalAP();
 };
 
-struct ItemLocale
-{
-    std::vector<std::string> Name;
-    std::vector<std::string> Description;
-};
-
 struct ItemSetNameEntry
 {
     std::string name;
     uint32 InventoryType;
-};
-
-struct ItemSetNameLocale
-{
-    std::vector<std::string> Name;
 };
 
 #endif

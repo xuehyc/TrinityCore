@@ -44,6 +44,7 @@
 #include "GameEventMgr.h"
 #include "GameObjectModel.h"
 #include "GameConfig.h"
+#include "GameLocale.h"
 #include "GameTime.h"
 #include "GitRevision.h"
 #include "GridNotifiersImpl.h"
@@ -53,6 +54,7 @@
 #include "IPLocation.h"
 #include "Language.h"
 #include "LFGMgr.h"
+#include "LocaleCommon.h"
 #include "Log.h"
 #include "LootItemStorage.h"
 #include "LootMgr.h"
@@ -91,7 +93,6 @@
 #include "WeatherMgr.h"
 #include "WhoListStorage.h"
 #include "WorldSession.h"
-
 #include <boost/asio/ip/address.hpp>
 
 WH_GAME_API std::atomic<bool> World::m_stopEvent(false);
@@ -1098,7 +1099,7 @@ void World::SetInitialWorldSettings()
     ///- Loading strings. Getting no records means core load has to be canceled because no error message can be output.
 
     LOG_INFO("server.loading", "Loading Warhead strings...");
-    if (!sObjectMgr->LoadTrinityStrings())
+    if (!sGameLocale->LoadWarheadStrings())
         exit(1);                                            // Error message displayed in function already
 
     ///- Update the realm entry in the database with the realm type from the config file
@@ -1175,31 +1176,11 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Loading character cache store...");
     sCharacterCache->LoadCharacterCacheStorage();
 
-    LOG_INFO("server.loading", "Loading Broadcast texts...");
-    sObjectMgr->LoadBroadcastTexts();
-    sObjectMgr->LoadBroadcastTextLocales();
-
-    LOG_INFO("server.loading", "Loading Localization strings...");
-    uint32 oldMSTime = getMSTime();
-    sObjectMgr->LoadCreatureLocales();
-    sObjectMgr->LoadGameObjectLocales();
-    sObjectMgr->LoadItemLocales();
-    sObjectMgr->LoadItemSetNameLocales();
-    sObjectMgr->LoadQuestLocales();
-    sObjectMgr->LoadQuestOfferRewardLocale();
-    sObjectMgr->LoadQuestRequestItemsLocale();
-    sObjectMgr->LoadNpcTextLocales();
-    sObjectMgr->LoadPageTextLocales();
-    sObjectMgr->LoadGossipMenuItemsLocales();
-    sObjectMgr->LoadPointOfInterestLocales();
-    sObjectMgr->LoadQuestGreetingLocales();
-
-    sObjectMgr->SetDBCLocaleIndex(GetDefaultDbcLocale());        // Get once for all the locale index of DBC language (console/broadcasts)
-    LOG_INFO("server.loading", ">> Localization strings loaded in %u ms", GetMSTimeDiffToNow(oldMSTime));
-    LOG_INFO("server.loading", "");
-
     LOG_INFO("server.loading", "Loading Account Roles and Permissions...");
     sAccountMgr->LoadRBAC();
+
+    LOG_INFO("server.loading", "Loading Game locale texts...");
+    sGameLocale->LoadAllLocales();
 
     LOG_INFO("server.loading", "Loading Page Texts...");
     sObjectMgr->LoadPageTexts();
@@ -1466,9 +1447,6 @@ void World::SetInitialWorldSettings()
 
     LOG_INFO("server.loading", "Loading Achievement Rewards...");
     sAchievementMgr->LoadRewards();
-
-    LOG_INFO("server.loading", "Loading Achievement Reward Locales...");
-    sAchievementMgr->LoadRewardLocales();
 
     LOG_INFO("server.loading", "Loading Completed Achievements...");
     sAchievementMgr->LoadCompletedAchievements();
@@ -2138,7 +2116,7 @@ namespace Warhead
             explicit WorldWorldTextBuilder(uint32 textId, va_list* args = nullptr) : i_textId(textId), i_args(args) { }
             void operator()(WorldPacketList& data_list, LocaleConstant loc_idx)
             {
-                char const* text = sObjectMgr->GetTrinityString(i_textId, loc_idx);
+                char const* text = sGameLocale->GetWarheadString(i_textId, loc_idx);
 
                 if (i_args)
                 {
@@ -2180,7 +2158,7 @@ void World::SendWorldText(uint32 string_id, ...)
     va_start(ap, string_id);
 
     Warhead::WorldWorldTextBuilder wt_builder(string_id, &ap);
-    Warhead::LocalizedPacketListDo<Warhead::WorldWorldTextBuilder> wt_do(wt_builder);
+    Warhead::Game::Locale::LocalizedPacketListDo<Warhead::WorldWorldTextBuilder> wt_do(wt_builder);
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
         if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
@@ -2199,7 +2177,7 @@ void World::SendGMText(uint32 string_id, ...)
     va_start(ap, string_id);
 
     Warhead::WorldWorldTextBuilder wt_builder(string_id, &ap);
-    Warhead::LocalizedPacketListDo<Warhead::WorldWorldTextBuilder> wt_do(wt_builder);
+    Warhead::Game::Locale::LocalizedPacketListDo<Warhead::WorldWorldTextBuilder> wt_do(wt_builder);
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
         // Session should have permissions to receive global gm messages

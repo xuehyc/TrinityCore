@@ -40,7 +40,7 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recvData)
 
     if (GetPlayer()->GetLevel() < CONF_GET_INT("LevelReq.Ticket"))
     {
-        SendNotification(GetTrinityString(LANG_TICKET_REQ), CONF_GET_INT("LevelReq.Ticket"));
+        SendNotification(GetWarheadString(LANG_TICKET_REQ), CONF_GET_INT("LevelReq.Ticket"));
         return;
     }
 

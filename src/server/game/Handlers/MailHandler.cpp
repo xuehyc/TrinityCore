@@ -73,7 +73,7 @@ void WorldSession::HandleSendMail(WorldPackets::Mail::SendMailClient& sendMail)
 
     if (_player->GetLevel() < CONF_GET_INT("LevelReq.Mail"))
     {
-        SendNotification(GetTrinityString(LANG_MAIL_SENDER_REQ), CONF_GET_INT("LevelReq.Mail"));
+        SendNotification(GetWarheadString(LANG_MAIL_SENDER_REQ), CONF_GET_INT("LevelReq.Mail"));
         return;
     }
 
@@ -188,7 +188,7 @@ void WorldSession::HandleSendMail(WorldPackets::Mail::SendMailClient& sendMail)
 
         if (receiverLevel < CONF_GET_INT("LevelReq.Mail"))
         {
-            SendNotification(GetTrinityString(LANG_MAIL_RECEIVER_REQ), CONF_GET_INT("LevelReq.Mail"));
+            SendNotification(GetWarheadString(LANG_MAIL_RECEIVER_REQ), CONF_GET_INT("LevelReq.Mail"));
             return;
         }
 

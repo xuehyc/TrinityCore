@@ -18,13 +18,14 @@
 #include "QuestDef.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
+#include "GameConfig.h"
+#include "GameLocale.h"
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
 #include "QuestPackets.h"
 #include "QuestPools.h"
-#include "GameConfig.h"
 
 Quest::Quest(Field* questRecord)
 {
@@ -393,16 +394,16 @@ WorldPacket Quest::BuildQueryData(LocaleConstant loc) const
     for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
         locQuestObjectiveText[i] = ObjectiveText[i];
 
-    if (QuestLocale const* localeData = sObjectMgr->GetQuestLocale(GetQuestId()))
+    if (QuestLocale const* localeData = sGameLocale->GetQuestLocale(GetQuestId()))
     {
-        ObjectMgr::GetLocaleString(localeData->Title, loc, locQuestTitle);
-        ObjectMgr::GetLocaleString(localeData->Details, loc, locQuestDetails);
-        ObjectMgr::GetLocaleString(localeData->Objectives, loc, locQuestObjectives);
-        ObjectMgr::GetLocaleString(localeData->AreaDescription, loc, locQuestAreaDescription);
-        ObjectMgr::GetLocaleString(localeData->CompletedText, loc, locQuestCompletedText);
+        sGameLocale->GetLocaleString(localeData->Title, loc, locQuestTitle);
+        sGameLocale->GetLocaleString(localeData->Details, loc, locQuestDetails);
+        sGameLocale->GetLocaleString(localeData->Objectives, loc, locQuestObjectives);
+        sGameLocale->GetLocaleString(localeData->AreaDescription, loc, locQuestAreaDescription);
+        sGameLocale->GetLocaleString(localeData->CompletedText, loc, locQuestCompletedText);
 
         for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
-            ObjectMgr::GetLocaleString(localeData->ObjectiveText[i], loc, locQuestObjectiveText[i]);
+            sGameLocale->GetLocaleString(localeData->ObjectiveText[i], loc, locQuestObjectiveText[i]);
     }
 
     response.Info.QuestID = GetQuestId();

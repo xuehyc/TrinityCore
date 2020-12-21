@@ -24,6 +24,7 @@
 #include "CreatureTextMgr.h"
 #include "DatabaseEnv.h"
 #include "Formulas.h"
+#include "GameLocale.h"
 #include "GameTime.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
@@ -592,7 +593,7 @@ void Battleground::SendChatMessage(Creature* source, uint8 textId, WorldObject* 
 
 void Battleground::SendBroadcastText(uint32 id, ChatMsg msgType, WorldObject const* target)
 {
-    if (!sObjectMgr->GetBroadcastText(id))
+    if (!sGameLocale->GetBroadcastText(id))
     {
         LOG_ERROR("bg.battleground", "Battleground::SendBroadcastText: `broadcast_text` (ID: %u) was not found", id);
         return;
@@ -1588,8 +1589,8 @@ void Battleground::SendMessageToAll(uint32 entry, ChatMsg msgType, Player const*
     if (!entry)
         return;
 
-    Warhead::TrinityStringChatBuilder builder(nullptr, msgType, entry, source);
-    Warhead::LocalizedPacketDo<Warhead::TrinityStringChatBuilder> localizer(builder);
+    Warhead::WarheadStringChatBuilder builder(nullptr, msgType, entry, source);
+    Warhead::LocalizedPacketDo<Warhead::WarheadStringChatBuilder> localizer(builder);
     BroadcastWorker(localizer);
 }
 
@@ -1601,8 +1602,8 @@ void Battleground::PSendMessageToAll(uint32 entry, ChatMsg msgType, Player const
     va_list ap;
     va_start(ap, source);
 
-    Warhead::TrinityStringChatBuilder builder(nullptr, msgType, entry, source, &ap);
-    Warhead::LocalizedPacketDo<Warhead::TrinityStringChatBuilder> localizer(builder);
+    Warhead::WarheadStringChatBuilder builder(nullptr, msgType, entry, source, &ap);
+    Warhead::LocalizedPacketDo<Warhead::WarheadStringChatBuilder> localizer(builder);
     BroadcastWorker(localizer);
 
     va_end(ap);

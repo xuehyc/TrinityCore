@@ -61,7 +61,7 @@ void WorldSession::SendAuctionHello(ObjectGuid guid, Creature* unit)
 {
     if (GetPlayer()->GetLevel() < CONF_GET_INT("LevelReq.Auction"))
     {
-        SendNotification(GetTrinityString(LANG_AUCTION_REQ), CONF_GET_INT("LevelReq.Auction"));
+        SendNotification(GetWarheadString(LANG_AUCTION_REQ), CONF_GET_INT("LevelReq.Auction"));
         return;
     }
 

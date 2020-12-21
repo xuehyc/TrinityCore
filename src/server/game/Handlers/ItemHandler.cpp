@@ -20,6 +20,8 @@
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
+#include "GameConfig.h"
+#include "GameLocale.h"
 #include "Opcodes.h"
 #include "Item.h"
 #include "Log.h"
@@ -27,7 +29,6 @@
 #include "Player.h"
 #include "SpellInfo.h"
 #include "QueryPackets.h"
-#include "GameConfig.h"
 #include "WorldPacket.h"
 
 void WorldSession::HandleSplitItemOpcode(WorldPacket& recvData)
@@ -811,8 +812,8 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket& recvData)
         std::string Name = pName->name;
         LocaleConstant localeConstant = GetSessionDbLocaleIndex();
         if (localeConstant != LOCALE_enUS)
-            if (ItemSetNameLocale const* isnl = sObjectMgr->GetItemSetNameLocale(itemid))
-                ObjectMgr::GetLocaleString(isnl->Name, localeConstant, Name);
+            if (ItemSetNameLocale const* isnl = sGameLocale->GetItemSetNameLocale(itemid))
+                sGameLocale->GetLocaleString(isnl->Name, localeConstant, Name);
 
         WorldPacket data(SMSG_ITEM_NAME_QUERY_RESPONSE, (4+Name.size()+1+4));
         data << uint32(itemid);

@@ -174,7 +174,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         if (!CanSpeak())
         {
             std::string timeStr = secsToTimeString(m_muteTime - GameTime::GetGameTime());
-            SendNotification(GetTrinityString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
+            SendNotification(GetWarheadString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
             recvData.rfinish(); // Prevent warnings
             return;
         }
@@ -185,7 +185,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
     if (sender->HasAura(1852) && type != CHAT_MSG_WHISPER)
     {
-        SendNotification(GetTrinityString(LANG_GM_SILENCE), sender->GetName().c_str());
+        SendNotification(GetWarheadString(LANG_GM_SILENCE), sender->GetName().c_str());
         recvData.rfinish();
         return;
     }
@@ -287,7 +287,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
             if (sender->GetLevel() < CONF_GET_INT("ChatLevelReq.Say"))
             {
-                SendNotification(GetTrinityString(LANG_SAY_REQ), CONF_GET_INT("ChatLevelReq.Say"));
+                SendNotification(GetWarheadString(LANG_SAY_REQ), CONF_GET_INT("ChatLevelReq.Say"));
                 return;
             }
 
@@ -302,7 +302,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
             if (sender->GetLevel() < CONF_GET_INT("ChatLevelReq.Emote"))
             {
-                SendNotification(GetTrinityString(LANG_SAY_REQ), CONF_GET_INT("ChatLevelReq.Emote"));
+                SendNotification(GetWarheadString(LANG_SAY_REQ), CONF_GET_INT("ChatLevelReq.Emote"));
                 return;
             }
 
@@ -317,7 +317,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
             if (sender->GetLevel() < CONF_GET_INT("ChatLevelReq.Yell"))
             {
-                SendNotification(GetTrinityString(LANG_SAY_REQ), CONF_GET_INT("ChatLevelReq.Yell"));
+                SendNotification(GetWarheadString(LANG_SAY_REQ), CONF_GET_INT("ChatLevelReq.Yell"));
                 return;
             }
 
@@ -344,7 +344,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             {
                 if (!sender->IsGameMaster() && sender->GetLevel() < CONF_GET_INT("ChatLevelReq.Whisper"))
                 {
-                    SendNotification(GetTrinityString(LANG_WHISPER_REQ), CONF_GET_INT("ChatLevelReq.Whisper"));
+                    SendNotification(GetWarheadString(LANG_WHISPER_REQ), CONF_GET_INT("ChatLevelReq.Whisper"));
                     return;
                 }
 
@@ -357,7 +357,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
             if (GetPlayer()->HasAura(1852) && !receiver->IsGameMaster())
             {
-                SendNotification(GetTrinityString(LANG_GM_SILENCE), GetPlayer()->GetName().c_str());
+                SendNotification(GetWarheadString(LANG_GM_SILENCE), GetPlayer()->GetName().c_str());
                 return;
             }
 
@@ -502,7 +502,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             {
                 if (sender->GetLevel() < CONF_GET_INT("ChatLevelReq.Channel"))
                 {
-                    SendNotification(GetTrinityString(LANG_CHANNEL_REQ), CONF_GET_INT("ChatLevelReq.Channel"));
+                    SendNotification(GetWarheadString(LANG_CHANNEL_REQ), CONF_GET_INT("ChatLevelReq.Channel"));
                     return;
                 }
             }
@@ -527,7 +527,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 }
                 else                                        // New AFK mode
                 {
-                    sender->autoReplyMsg = msg.empty() ? GetTrinityString(LANG_PLAYER_AFK_DEFAULT) : msg;
+                    sender->autoReplyMsg = msg.empty() ? GetWarheadString(LANG_PLAYER_AFK_DEFAULT) : msg;
 
                     if (sender->isDND())
                         sender->ToggleDND();
@@ -550,7 +550,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             }
             else                                            // New DND mode
             {
-                sender->autoReplyMsg = msg.empty() ? GetTrinityString(LANG_PLAYER_DND_DEFAULT) : msg;
+                sender->autoReplyMsg = msg.empty() ? GetWarheadString(LANG_PLAYER_DND_DEFAULT) : msg;
 
                 if (sender->isAFK())
                     sender->ToggleAFK();
@@ -622,7 +622,7 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recvData)
     if (!CanSpeak())
     {
         std::string timeStr = secsToTimeString(m_muteTime - GameTime::GetGameTime());
-        SendNotification(GetTrinityString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
+        SendNotification(GetWarheadString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
         return;
     }
 

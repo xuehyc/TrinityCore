@@ -16,11 +16,10 @@
  */
 
 #include "ItemTemplate.h"
-#include "ObjectMgr.h"
+#include "GameLocale.h"
 #include "Opcodes.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
-
 #include "Packets/QueryPackets.h"
 
 bool ItemTemplate::HasSignature() const
@@ -169,10 +168,10 @@ WorldPacket ItemTemplate::BuildQueryData(LocaleConstant loc) const
     std::string locName = Name1;
     std::string locDescription = Description;
 
-    if (ItemLocale const* il = sObjectMgr->GetItemLocale(ItemId))
+    if (ItemLocale const* il = sGameLocale->GetItemLocale(ItemId))
     {
-        ObjectMgr::GetLocaleString(il->Name, loc, locName);
-        ObjectMgr::GetLocaleString(il->Description, loc, locDescription);
+        sGameLocale->GetLocaleString(il->Name, loc, locName);
+        sGameLocale->GetLocaleString(il->Description, loc, locDescription);
     }
 
     response.ItemID = ItemId;

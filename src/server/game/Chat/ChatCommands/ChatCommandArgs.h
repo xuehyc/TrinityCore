@@ -62,12 +62,12 @@ namespace Warhead::Impl::ChatCommands
             if (Optional<T> v = StringTo<T>(token, 0))
                 val = *v;
             else
-                return FormatTrinityString(handler, LANG_CMDPARSER_STRING_VALUE_INVALID, STRING_VIEW_FMT_ARG(token), GetTypeName<T>().c_str());
+                return FormatWarheadString(handler, LANG_CMDPARSER_STRING_VALUE_INVALID, STRING_VIEW_FMT_ARG(token), GetTypeName<T>().c_str());
 
             if constexpr (std::is_floating_point_v<T>)
             {
                 if (!std::isfinite(val))
-                    return FormatTrinityString(handler, LANG_CMDPARSER_STRING_VALUE_INVALID, STRING_VIEW_FMT_ARG(token), GetTypeName<T>().c_str());
+                    return FormatWarheadString(handler, LANG_CMDPARSER_STRING_VALUE_INVALID, STRING_VIEW_FMT_ARG(token), GetTypeName<T>().c_str());
             }
 
             return tail;
@@ -116,7 +116,7 @@ namespace Warhead::Impl::ChatCommands
                 if (Utf8toWStr(utf8view, val))
                     return next;
                 else
-                    return GetTrinityString(handler, LANG_CMDPARSER_INVALID_UTF8);
+                    return GetWarheadString(handler, LANG_CMDPARSER_INVALID_UTF8);
             }
             else
                 return std::nullopt;
@@ -200,7 +200,7 @@ namespace Warhead::Impl::ChatCommands
             }
 
             if (next1)
-                return FormatTrinityString(handler, LANG_CMDPARSER_STRING_VALUE_INVALID, STRING_VIEW_FMT_ARG(strVal), GetTypeName<T>().c_str());
+                return FormatWarheadString(handler, LANG_CMDPARSER_STRING_VALUE_INVALID, STRING_VIEW_FMT_ARG(strVal), GetTypeName<T>().c_str());
             else
                 return next1;
         }
@@ -273,9 +273,9 @@ namespace Warhead::Impl::ChatCommands
                     if (!nestedResult.HasErrorMessage())
                         return thisResult;
                     if (StringStartsWith(nestedResult.GetErrorMessage(), "\""))
-                        return Warhead::StringFormat("\"%s\"\n%s %s", thisResult.GetErrorMessage().c_str(), GetTrinityString(handler, LANG_CMDPARSER_OR), nestedResult.GetErrorMessage().c_str());
+                        return Warhead::StringFormat("\"%s\"\n%s %s", thisResult.GetErrorMessage().c_str(), GetWarheadString(handler, LANG_CMDPARSER_OR), nestedResult.GetErrorMessage().c_str());
                     else
-                        return Warhead::StringFormat("\"%s\"\n%s \"%s\"", thisResult.GetErrorMessage().c_str(), GetTrinityString(handler, LANG_CMDPARSER_OR), nestedResult.GetErrorMessage().c_str());
+                        return Warhead::StringFormat("\"%s\"\n%s \"%s\"", thisResult.GetErrorMessage().c_str(), GetWarheadString(handler, LANG_CMDPARSER_OR), nestedResult.GetErrorMessage().c_str());
                 }
             }
             else
@@ -286,7 +286,7 @@ namespace Warhead::Impl::ChatCommands
         {
             ChatCommandResult result = TryAtIndex<0>(val, handler, args);
             if (result.HasErrorMessage() && (result.GetErrorMessage().find('\n') != std::string::npos))
-                return Warhead::StringFormat("%s %s", GetTrinityString(handler, LANG_CMDPARSER_EITHER), result.GetErrorMessage().c_str());
+                return Warhead::StringFormat("%s %s", GetWarheadString(handler, LANG_CMDPARSER_EITHER), result.GetErrorMessage().c_str());
             return result;
         }
     };

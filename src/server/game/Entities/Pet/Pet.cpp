@@ -19,6 +19,7 @@
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Formulas.h"
+#include "GameLocale.h"
 #include "Group.h"
 #include "InstanceScript.h"
 #include "Log.h"
@@ -801,7 +802,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     if (CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family))
         SetName(cFamily->Name[sWorld->GetDefaultDbcLocale()]);
     else
-        SetName(creature->GetNameForLocaleIdx(sObjectMgr->GetDBCLocaleIndex()));
+        SetName(creature->GetNameForLocaleIdx(sGameLocale->GetDBCLocaleIndex()));
 
     return true;
 }

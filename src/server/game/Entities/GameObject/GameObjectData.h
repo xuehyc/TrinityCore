@@ -636,12 +636,6 @@ struct GameObjectTemplateAddon : public GameObjectOverride
     std::array<uint32, 4> artKits = {};
 };
 
-struct GameObjectLocale
-{
-    std::vector<std::string> Name;
-    std::vector<std::string> CastBarCaption;
-};
-
 struct WH_GAME_API QuaternionData
 {
     float x, y, z, w;

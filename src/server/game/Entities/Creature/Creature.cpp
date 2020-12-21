@@ -25,6 +25,7 @@
 #include "DatabaseEnv.h"
 #include "Formulas.h"
 #include "GameEventMgr.h"
+#include "GameLocale.h"
 #include "GameTime.h"
 #include "GossipDef.h"
 #include "GridNotifiersImpl.h"
@@ -176,10 +177,10 @@ WorldPacket CreatureTemplate::BuildQueryData(LocaleConstant loc) const
     WorldPackets::Query::QueryCreatureResponse queryTemp;
 
     std::string locName = Name, locTitle = Title;
-    if (CreatureLocale const* cl = sObjectMgr->GetCreatureLocale(Entry))
+    if (CreatureLocale const* cl = sGameLocale->GetCreatureLocale(Entry))
     {
-        ObjectMgr::GetLocaleString(cl->Name, loc, locName);
-        ObjectMgr::GetLocaleString(cl->Title, loc, locTitle);
+        sGameLocale->GetLocaleString(cl->Name, loc, locName);
+        sGameLocale->GetLocaleString(cl->Title, loc, locTitle);
     }
 
     queryTemp.CreatureID = Entry;
@@ -2829,7 +2830,7 @@ std::string const & Creature::GetNameForLocaleIdx(LocaleConstant loc_idx) const
     if (loc_idx != DEFAULT_LOCALE)
     {
         uint8 uloc_idx = uint8(loc_idx);
-        CreatureLocale const* cl = sObjectMgr->GetCreatureLocale(GetEntry());
+        CreatureLocale const* cl = sGameLocale->GetCreatureLocale(GetEntry());
         if (cl)
         {
             if (cl->Name.size() > uloc_idx && !cl->Name[uloc_idx].empty())

@@ -34,10 +34,10 @@ void Warhead::Impl::ChatCommands::ChatCommandNode::LoadFromBuilder(ChatCommandBu
     if (std::holds_alternative<ChatCommandBuilder::InvokerEntry>(builder._data))
     {
         ASSERT(!_invoker, "Duplicate blank sub-command.");
-        TrinityStrings help;
+        WarheadStrings help;
         std::tie(_invoker, help, _permission) = *(std::get<ChatCommandBuilder::InvokerEntry>(builder._data));
         if (help)
-            _help.emplace<TrinityStrings>(help);
+            _help.emplace<WarheadStrings>(help);
     }
     else
         LoadCommandsIntoMap(this, _subCommands, std::get<ChatCommandBuilder::SubCommandEntry>(builder._data));
@@ -171,8 +171,8 @@ void Warhead::Impl::ChatCommands::ChatCommandNode::SendCommandHelp(ChatHandler& 
     bool const hasInvoker = IsInvokerVisible(handler);
     if (hasInvoker)
     {
-        if (std::holds_alternative<TrinityStrings>(_help))
-            handler.SendSysMessage(std::get<TrinityStrings>(_help));
+        if (std::holds_alternative<WarheadStrings>(_help))
+            handler.SendSysMessage(std::get<WarheadStrings>(_help));
         else if (std::holds_alternative<std::string>(_help))
             handler.SendSysMessage(std::get<std::string>(_help));
         else
@@ -488,4 +488,3 @@ void Warhead::ChatCommands::InvalidateCommandMap() { Warhead::Impl::ChatCommands
 bool Warhead::ChatCommands::TryExecuteCommand(ChatHandler& handler, std::string_view cmd) { return Warhead::Impl::ChatCommands::ChatCommandNode::TryExecuteCommand(handler, cmd); }
 void Warhead::ChatCommands::SendCommandHelpFor(ChatHandler& handler, std::string_view cmd) { Warhead::Impl::ChatCommands::ChatCommandNode::SendCommandHelpFor(handler, cmd); }
 std::vector<std::string> Warhead::ChatCommands::GetAutoCompletionsFor(ChatHandler const& handler, std::string_view cmd) { return Warhead::Impl::ChatCommands::ChatCommandNode::GetAutoCompletionsFor(handler, cmd); }
-

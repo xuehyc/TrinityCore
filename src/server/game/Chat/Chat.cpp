@@ -22,6 +22,7 @@
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
 #include "GameConfig.h"
+#include "GameLocale.h"
 #include "GridNotifiersImpl.h"
 #include "Language.h"
 #include "Log.h"
@@ -37,9 +38,9 @@
 
 Player* ChatHandler::GetPlayer() const { return m_session ? m_session->GetPlayer() : nullptr; }
 
-char const* ChatHandler::GetTrinityString(uint32 entry) const
+char const* ChatHandler::GetWarheadString(uint32 entry) const
 {
-    return m_session->GetTrinityString(entry);
+    return m_session->GetWarheadString(entry);
 }
 
 bool ChatHandler::HasPermission(uint32 permission) const
@@ -148,7 +149,7 @@ void ChatHandler::SendGlobalGMSysMessage(const char *str)
 
 void ChatHandler::SendSysMessage(uint32 entry)
 {
-    SendSysMessage(GetTrinityString(entry));
+    SendSysMessage(GetWarheadString(entry));
 }
 
 bool ChatHandler::_ParseCommands(std::string_view text)
@@ -773,9 +774,9 @@ std::string ChatHandler::GetNameLink(Player* chr) const
     return playerLink(chr->GetName());
 }
 
-char const* CliHandler::GetTrinityString(uint32 entry) const
+char const* CliHandler::GetWarheadString(uint32 entry) const
 {
-    return sObjectMgr->GetTrinityStringForDBCLocale(entry);
+    return sGameLocale->GetWarheadStringForDBCLocale(entry);
 }
 
 void CliHandler::SendSysMessage(std::string_view str, bool /*escapeCharacters*/)
@@ -796,7 +797,7 @@ bool CliHandler::ParseCommands(std::string_view str)
 
 std::string CliHandler::GetNameLink() const
 {
-    return GetTrinityString(LANG_CONSOLE_COMMAND);
+    return GetWarheadString(LANG_CONSOLE_COMMAND);
 }
 
 bool CliHandler::needReportToTarget(Player* /*chr*/) const
@@ -855,7 +856,7 @@ LocaleConstant CliHandler::GetSessionDbcLocale() const
 
 int CliHandler::GetSessionDbLocaleIndex() const
 {
-    return sObjectMgr->GetDBCLocaleIndex();
+    return sGameLocale->GetDBCLocaleIndex();
 }
 
 bool AddonChannelCommandHandler::ParseCommands(std::string_view str)

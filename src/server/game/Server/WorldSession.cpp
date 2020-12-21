@@ -28,6 +28,8 @@
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "DBCStructure.h"
+#include "GameConfig.h"
+#include "GameLocale.h"
 #include "GameTime.h"
 #include "Group.h"
 #include "Guild.h"
@@ -37,7 +39,6 @@
 #include "Map.h"
 #include "Metric.h"
 #include "MoveSpline.h"
-#include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "OutdoorPvPMgr.h"
 #include "PacketUtilities.h"
@@ -49,7 +50,6 @@
 #include "Vehicle.h"
 #include "WardenMac.h"
 #include "WardenWin.h"
-#include "GameConfig.h"
 #include "WorldPacket.h"
 #include "WorldSocket.h"
 #include <zlib.h>
@@ -672,7 +672,7 @@ void WorldSession::SendNotification(const char *format, ...)
 
 void WorldSession::SendNotification(uint32 string_id, ...)
 {
-    char const* format = GetTrinityString(string_id);
+    char const* format = GetWarheadString(string_id);
     if (format)
     {
         va_list ap;
@@ -693,9 +693,9 @@ bool WorldSession::CanSpeak() const
     return m_muteTime <= GameTime::GetGameTime();
 }
 
-char const* WorldSession::GetTrinityString(uint32 entry) const
+char const* WorldSession::GetWarheadString(uint32 entry) const
 {
-    return sObjectMgr->GetTrinityString(entry, GetSessionDbLocaleIndex());
+    return sGameLocale->GetWarheadString(entry, GetSessionDbLocaleIndex());
 }
 
 void WorldSession::ResetTimeOutTime(bool onlyActive)

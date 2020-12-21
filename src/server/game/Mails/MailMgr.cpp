@@ -23,6 +23,8 @@
 #include "CharacterCache.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
+#include "GameConfig.h"
+#include "GameLocale.h"
 #include "GameTime.h"
 #include "Guild.h"
 #include "ObjectAccessor.h"
@@ -35,7 +37,6 @@
 #include "Language.h"
 #include "Log.h"
 #include "LootMgr.h"
-#include "GameConfig.h"
 #include "WorldSession.h"
 #include "WorldPacket.h"
 
@@ -1053,7 +1054,7 @@ uint8 MailMgr::HandleMailTakeItem(Player* player, uint32 mailID, ObjectGuid::Low
                             sender_accId = sCharacterCache->GetCharacterAccountIdByGuid(sender_guid);
 
                             if (!sCharacterCache->GetCharacterNameByGuid(sender_guid, sender_name))
-                                sender_name = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
+                                sender_name = sGameLocale->GetWarheadStringForDBCLocale(LANG_UNKNOWN);
                         }
 
                         LOG_GM(player->GetSession()->GetAccountId(), "GM %s (Account: %u) receiver mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",

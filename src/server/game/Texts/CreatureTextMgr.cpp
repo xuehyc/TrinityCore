@@ -27,6 +27,8 @@
 #include "MiscPackets.h"
 #include "ObjectMgr.h"
 #include "GameConfig.h"
+#include "GameLocale.h"
+#include "LocaleCommon.h"
 
 class CreatureTextBuilder
 {
@@ -150,7 +152,7 @@ void CreatureTextMgr::LoadCreatureTexts()
 
         if (temp.BroadcastTextId)
         {
-            if (!sObjectMgr->GetBroadcastText(temp.BroadcastTextId))
+            if (!sGameLocale->GetBroadcastText(temp.BroadcastTextId))
             {
                 LOG_ERROR("sql.sql", "CreatureTextMgr: Entry %u, Group %u, Id %u in table `creature_text` has non-existing or incompatible BroadcastTextId %u.", temp.creatureId, temp.groupId, temp.id, temp.BroadcastTextId);
                 temp.BroadcastTextId = 0;
@@ -200,7 +202,7 @@ void CreatureTextMgr::LoadCreatureTextLocales()
             continue;
 
         CreatureTextLocale& data = mLocaleTextMap[CreatureTextId(creatureId, groupId, id)];
-        ObjectMgr::AddLocaleString(fields[4].GetString(), locale, data.Text);
+        Warhead::Game::Locale::AddLocaleString(fields[4].GetString(), locale, data.Text);
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u creature localized texts in %u ms", uint32(mLocaleTextMap.size()), GetMSTimeDiffToNow(oldMSTime));
@@ -437,7 +439,7 @@ std::string CreatureTextMgr::GetLocalizedChatString(uint32 entry, uint8 gender, 
         locale = DEFAULT_LOCALE;
 
     std::string baseText = "";
-    BroadcastText const* bct = sObjectMgr->GetBroadcastText(groupItr->BroadcastTextId);
+    BroadcastText const* bct = sGameLocale->GetBroadcastText(groupItr->BroadcastTextId);
 
     if (bct)
         baseText = bct->GetText(locale, gender);
@@ -448,7 +450,7 @@ std::string CreatureTextMgr::GetLocalizedChatString(uint32 entry, uint8 gender, 
     {
         LocaleCreatureTextMap::const_iterator locItr = mLocaleTextMap.find(CreatureTextId(entry, uint32(textGroup), id));
         if (locItr != mLocaleTextMap.end())
-            ObjectMgr::GetLocaleString(locItr->second.Text, locale, baseText);
+            sGameLocale->GetLocaleString(locItr->second.Text, locale, baseText);
     }
 
     return baseText;

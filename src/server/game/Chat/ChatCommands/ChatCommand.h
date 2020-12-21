@@ -94,8 +94,8 @@ namespace Warhead::Impl::ChatCommands
             if (result1.HasErrorMessage() && result2.HasErrorMessage())
             {
                 return Warhead::StringFormat("%s \"%s\"\n%s \"%s\"",
-                    GetTrinityString(handler, LANG_CMDPARSER_EITHER), result2.GetErrorMessage().c_str(),
-                    GetTrinityString(handler, LANG_CMDPARSER_OR), result1.GetErrorMessage().c_str());
+                    GetWarheadString(handler, LANG_CMDPARSER_EITHER), result2.GetErrorMessage().c_str(),
+                    GetWarheadString(handler, LANG_CMDPARSER_OR), result1.GetErrorMessage().c_str());
             }
             else if (result1.HasErrorMessage())
                 return result1;
@@ -204,7 +204,7 @@ namespace Warhead::Impl::ChatCommands
             std::string _name;
             CommandInvoker _invoker;
             CommandPermissions _permission;
-            std::variant<std::monostate, TrinityStrings, std::string> _help;
+            std::variant<std::monostate, WarheadStrings, std::string> _help;
             std::map<std::string_view, ChatCommandNode, StringCompareLessI_T> _subCommands;
     };
 }
@@ -217,14 +217,14 @@ namespace Warhead::ChatCommands
         struct InvokerEntry
         {
             template <typename T>
-            InvokerEntry(T& handler, TrinityStrings help, rbac::RBACPermissions permission, Warhead::ChatCommands::Console allowConsole)
+            InvokerEntry(T& handler, WarheadStrings help, rbac::RBACPermissions permission, Warhead::ChatCommands::Console allowConsole)
                 : _invoker{ handler }, _help{ help }, _permissions{ permission, allowConsole }
             {}
             InvokerEntry(InvokerEntry const&) = default;
             InvokerEntry(InvokerEntry&&) = default;
 
             Warhead::Impl::ChatCommands::CommandInvoker _invoker;
-            TrinityStrings _help;
+            WarheadStrings _help;
             Warhead::Impl::ChatCommands::CommandPermissions _permissions;
 
             auto operator*() const { return std::tie(_invoker, _help, _permissions); }
@@ -235,13 +235,13 @@ namespace Warhead::ChatCommands
         ChatCommandBuilder(ChatCommandBuilder const&) = default;
 
         template <typename TypedHandler>
-        ChatCommandBuilder(char const* name, TypedHandler& handler, TrinityStrings help, rbac::RBACPermissions permission, Warhead::ChatCommands::Console allowConsole)
+        ChatCommandBuilder(char const* name, TypedHandler& handler, WarheadStrings help, rbac::RBACPermissions permission, Warhead::ChatCommands::Console allowConsole)
             : _name{ ASSERT_NOTNULL(name) }, _data{ std::in_place_type<InvokerEntry>, handler, help, permission, allowConsole }
         {}
 
         template <typename TypedHandler>
         ChatCommandBuilder(char const* name, TypedHandler& handler, rbac::RBACPermissions permission, Warhead::ChatCommands::Console allowConsole)
-            : ChatCommandBuilder(name, handler, TrinityStrings(), permission, allowConsole)
+            : ChatCommandBuilder(name, handler, WarheadStrings(), permission, allowConsole)
         {}
         ChatCommandBuilder(char const* name, std::vector<ChatCommandBuilder> const& subCommands)
             : _name{ ASSERT_NOTNULL(name) }, _data{ std::in_place_type<SubCommandEntry>, subCommands }
@@ -249,13 +249,13 @@ namespace Warhead::ChatCommands
 
         [[deprecated("char const* parameters to command handlers are deprecated; convert this to a typed argument handler instead")]]
         ChatCommandBuilder(char const* name, bool(&handler)(ChatHandler*, char const*), rbac::RBACPermissions permission, Warhead::ChatCommands::Console allowConsole)
-            : ChatCommandBuilder(name, handler, TrinityStrings(), permission, allowConsole)
+            : ChatCommandBuilder(name, handler, WarheadStrings(), permission, allowConsole)
         {}
 
         template <typename TypedHandler>
         [[deprecated("you are using the old-style command format; convert this to the new format ({ name, handler (not a pointer!), permission, Console::(Yes/No) })")]]
         ChatCommandBuilder(char const* name, rbac::RBACPermissions permission, bool console, TypedHandler* handler, char const*)
-            : ChatCommandBuilder(name, *handler, TrinityStrings(), permission, static_cast<Warhead::ChatCommands::Console>(console))
+            : ChatCommandBuilder(name, *handler, WarheadStrings(), permission, static_cast<Warhead::ChatCommands::Console>(console))
         {}
 
         [[deprecated("you are using the old-style command format; convert this to the new format ({ name, subCommands })")]]

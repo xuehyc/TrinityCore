@@ -246,14 +246,6 @@ struct AchievementReward
 
 typedef std::unordered_map<uint32, AchievementReward> AchievementRewards;
 
-struct AchievementRewardLocale
-{
-    std::vector<std::string> Subject;
-    std::vector<std::string> Text;
-};
-
-typedef std::unordered_map<uint32, AchievementRewardLocale> AchievementRewardLocales;
-
 struct CompletedAchievementData
 {
     time_t date;
@@ -356,12 +348,6 @@ class WH_GAME_API AchievementGlobalMgr
             return iter != m_achievementRewards.end() ? &iter->second : nullptr;
         }
 
-        AchievementRewardLocale const* GetAchievementRewardLocale(AchievementEntry const* achievement) const
-        {
-            AchievementRewardLocales::const_iterator iter = m_achievementRewardLocales.find(achievement->ID);
-            return iter != m_achievementRewardLocales.end() ? &iter->second : nullptr;
-        }
-
         AchievementCriteriaDataSet const* GetCriteriaDataSet(AchievementCriteriaEntry const* achievementCriteria) const
         {
             AchievementCriteriaDataMap::const_iterator iter = m_criteriaDataMap.find(achievementCriteria->ID);
@@ -376,7 +362,6 @@ class WH_GAME_API AchievementGlobalMgr
         void LoadAchievementReferenceList();
         void LoadCompletedAchievements();
         void LoadRewards();
-        void LoadRewardLocales();
         AchievementEntry const* GetAchievement(uint32 achievementId) const;
         AchievementCriteriaEntry const* GetAchievementCriteria(uint32 achievementId) const;
     private:
@@ -404,7 +389,6 @@ class WH_GAME_API AchievementGlobalMgr
         std::unordered_map<uint32 /*achievementId*/, SystemTimePoint /*completionTime*/> _allCompletedAchievements;
 
         AchievementRewards m_achievementRewards;
-        AchievementRewardLocales m_achievementRewardLocales;
 
         friend class UnitTestDataLoader;
 };

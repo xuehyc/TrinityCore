@@ -38,7 +38,7 @@ ChatCommandResult Warhead::Impl::ChatCommands::ArgInfo<AchievementEntry const*>:
     if (!result || (data = val.visit(AchievementVisitor())))
         return result;
     if (uint32* id = std::get_if<uint32>(&val))
-        return FormatTrinityString(handler, LANG_CMDPARSER_ACHIEVEMENT_NO_EXIST, *id);
+        return FormatWarheadString(handler, LANG_CMDPARSER_ACHIEVEMENT_NO_EXIST, *id);
     return std::nullopt;
 }
 
@@ -55,9 +55,9 @@ ChatCommandResult Warhead::Impl::ChatCommands::ArgInfo<GameTele const*>::TryCons
     if (!result || (data = val.visit(GameTeleVisitor())))
         return result;
     if (val.holds_alternative<Hyperlink<tele>>())
-        return FormatTrinityString(handler, LANG_CMDPARSER_GAME_TELE_ID_NO_EXIST, static_cast<uint32>(std::get<Hyperlink<tele>>(val)));
+        return FormatWarheadString(handler, LANG_CMDPARSER_GAME_TELE_ID_NO_EXIST, static_cast<uint32>(std::get<Hyperlink<tele>>(val)));
     else
-        return FormatTrinityString(handler, LANG_CMDPARSER_GAME_TELE_NO_EXIST, STRING_VIEW_FMT_ARG(std::get<std::string_view>(val)));
+        return FormatWarheadString(handler, LANG_CMDPARSER_GAME_TELE_NO_EXIST, STRING_VIEW_FMT_ARG(std::get<std::string_view>(val)));
 }
 
 struct ItemTemplateVisitor
@@ -73,7 +73,7 @@ ChatCommandResult Warhead::Impl::ChatCommands::ArgInfo<ItemTemplate const*>::Try
     if (!result || (data = val.visit(ItemTemplateVisitor())))
         return result;
     if (uint32* id = std::get_if<uint32>(&val))
-        return FormatTrinityString(handler, LANG_CMDPARSER_ITEM_NO_EXIST, *id);
+        return FormatWarheadString(handler, LANG_CMDPARSER_ITEM_NO_EXIST, *id);
     return std::nullopt;
 }
 
@@ -98,6 +98,6 @@ ChatCommandResult Warhead::Impl::ChatCommands::ArgInfo<SpellInfo const*>::TryCon
     if (!result || (data = val.visit(SpellInfoVisitor())))
         return result;
     if (uint32* id = std::get_if<uint32>(&val))
-        return FormatTrinityString(handler, LANG_CMDPARSER_SPELL_NO_EXIST, *id);
+        return FormatWarheadString(handler, LANG_CMDPARSER_SPELL_NO_EXIST, *id);
     return std::nullopt;
 }

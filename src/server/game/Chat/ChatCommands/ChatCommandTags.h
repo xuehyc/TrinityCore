@@ -102,7 +102,7 @@ namespace Warhead::ChatCommands
                     return tail;
                 start = args.substr(0, _string.length() + remainingToken.length());
             }
-            return Warhead::Impl::ChatCommands::FormatTrinityString(handler, LANG_CMDPARSER_EXACT_SEQ_MISMATCH, STRING_VIEW_FMT_ARG(_string), STRING_VIEW_FMT_ARG(start));
+            return Warhead::Impl::ChatCommands::FormatWarheadString(handler, LANG_CMDPARSER_EXACT_SEQ_MISMATCH, STRING_VIEW_FMT_ARG(_string), STRING_VIEW_FMT_ARG(start));
         }
 
         private:
@@ -137,7 +137,7 @@ namespace Warhead::ChatCommands
             if (Utf8toWStr(args, *this))
                 return std::string_view();
             else
-                return Warhead::Impl::ChatCommands::GetTrinityString(handler, LANG_CMDPARSER_INVALID_UTF8);
+                return Warhead::Impl::ChatCommands::GetWarheadString(handler, LANG_CMDPARSER_INVALID_UTF8);
         }
     };
 
@@ -223,7 +223,7 @@ namespace Warhead::ChatCommands
 
             // store value
             if (!linktag::StoreTo(val, info.data))
-                return Warhead::Impl::ChatCommands::GetTrinityString(handler, LANG_CMDPARSER_LINKDATA_INVALID);
+                return Warhead::Impl::ChatCommands::GetWarheadString(handler, LANG_CMDPARSER_LINKDATA_INVALID);
 
             // finally, skip any potential delimiters
             auto [token, next] = Warhead::Impl::ChatCommands::tokenize(info.tail);

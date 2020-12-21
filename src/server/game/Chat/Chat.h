@@ -59,7 +59,7 @@ class WH_GAME_API ChatHandler
         static char* LineFromMessage(char*& pos) { char* start = strtok(pos, "\n"); pos = nullptr; return start; }
 
         // function with different implementation for chat/console
-        virtual char const* GetTrinityString(uint32 entry) const;
+        virtual char const* GetWarheadString(uint32 entry) const;
         virtual void SendSysMessage(std::string_view str, bool escapeCharacters = false);
 
         void SendSysMessage(uint32 entry);
@@ -79,7 +79,7 @@ class WH_GAME_API ChatHandler
         template<typename... Args>
         std::string PGetParseString(uint32 entry, Args&&... args) const
         {
-            return Warhead::StringFormat(GetTrinityString(entry), std::forward<Args>(args)...);
+            return Warhead::StringFormat(GetWarheadString(entry), std::forward<Args>(args)...);
         }
 
         bool _ParseCommands(std::string_view text);
@@ -141,7 +141,7 @@ class WH_GAME_API CliHandler : public ChatHandler
         explicit CliHandler(void* callbackArg, Print* zprint) : m_callbackArg(callbackArg), m_print(zprint) { }
 
         // overwrite functions
-        char const* GetTrinityString(uint32 entry) const override;
+        char const* GetWarheadString(uint32 entry) const override;
         bool HasPermission(uint32 /*permission*/) const override { return true; }
         void SendSysMessage(std::string_view, bool escapeCharacters) override;
         bool ParseCommands(std::string_view str) override;

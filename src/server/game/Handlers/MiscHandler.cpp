@@ -696,7 +696,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
                         LOG_DEBUG("maps", "MAP: Player '%s' cannot enter instance map '%s' because their permanent bind is incompatible with their group's", player->GetName().c_str(), mapName);
                         // is there a special opcode for this?
                         // @todo figure out how to get player localized difficulty string (e.g. "10 player", "Heroic" etc)
-                        ChatHandler(player->GetSession()).PSendSysMessage(player->GetSession()->GetTrinityString(LANG_INSTANCE_BIND_MISMATCH), mapName);
+                        ChatHandler(player->GetSession()).PSendSysMessage(player->GetSession()->GetWarheadString(LANG_INSTANCE_BIND_MISMATCH), mapName);
                     }
                     reviveAtTrigger = true;
                     break;

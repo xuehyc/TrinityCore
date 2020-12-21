@@ -17,18 +17,18 @@
 
 #include "ChatTextBuilder.h"
 #include "Chat.h"
-#include "ObjectMgr.h"
+#include "GameLocale.h"
 #include <cstdarg>
 
 void Warhead::BroadcastTextBuilder::operator()(WorldPacket& data, LocaleConstant locale) const
 {
-    BroadcastText const* bct = sObjectMgr->GetBroadcastText(_textId);
+    BroadcastText const* bct = sGameLocale->GetBroadcastText(_textId);
     ChatHandler::BuildChatPacket(data, _msgType, bct ? Language(bct->LanguageID) : LANG_UNIVERSAL, _source, _target, bct ? bct->GetText(locale, _gender) : "", _achievementId, "", locale);
 }
 
 size_t Warhead::BroadcastTextBuilder::operator()(WorldPacket* data, LocaleConstant locale) const
 {
-    BroadcastText const* bct = sObjectMgr->GetBroadcastText(_textId);
+    BroadcastText const* bct = sGameLocale->GetBroadcastText(_textId);
     return ChatHandler::BuildChatPacket(*data, _msgType, bct ? Language(bct->LanguageID) : LANG_UNIVERSAL, _source, _target, bct ? bct->GetText(locale, _gender) : "", _achievementId, "", locale);
 }
 
@@ -37,9 +37,9 @@ void Warhead::CustomChatTextBuilder::operator()(WorldPacket& data, LocaleConstan
     ChatHandler::BuildChatPacket(data, _msgType, _language, _source, _target, _text, 0, "", locale);
 }
 
-void Warhead::TrinityStringChatBuilder::operator()(WorldPacket& data, LocaleConstant locale) const
+void Warhead::WarheadStringChatBuilder::operator()(WorldPacket& data, LocaleConstant locale) const
 {
-    char const* text = sObjectMgr->GetTrinityString(_textId, locale);
+    char const* text = sGameLocale->GetWarheadString(_textId, locale);
 
     if (_args)
     {

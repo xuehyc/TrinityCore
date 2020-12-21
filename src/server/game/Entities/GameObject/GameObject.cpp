@@ -23,6 +23,7 @@
 #include "GameObjectAI.h"
 #include "GameObjectModel.h"
 #include "GameConfig.h"
+#include "GameLocale.h"
 #include "GameTime.h"
 #include "GossipDef.h"
 #include "GridNotifiersImpl.h"
@@ -60,10 +61,10 @@ WorldPacket GameObjectTemplate::BuildQueryData(LocaleConstant loc) const
     std::string locIconName = IconName;
     std::string locCastBarCaption = castBarCaption;
 
-    if (GameObjectLocale const* gameObjectLocale = sObjectMgr->GetGameObjectLocale(entry))
+    if (GameObjectLocale const* gameObjectLocale = sGameLocale->GetGameObjectLocale(entry))
     {
-        ObjectMgr::GetLocaleString(gameObjectLocale->Name, loc, locName);
-        ObjectMgr::GetLocaleString(gameObjectLocale->CastBarCaption, loc, locCastBarCaption);
+        sGameLocale->GetLocaleString(gameObjectLocale->Name, loc, locName);
+        sGameLocale->GetLocaleString(gameObjectLocale->CastBarCaption, loc, locCastBarCaption);
     }
 
     queryTemp.GameObjectID = entry;
@@ -2142,7 +2143,7 @@ std::string const & GameObject::GetNameForLocaleIdx(LocaleConstant loc_idx) cons
     if (loc_idx != DEFAULT_LOCALE)
     {
         uint8 uloc_idx = uint8(loc_idx);
-        if (GameObjectLocale const* cl = sObjectMgr->GetGameObjectLocale(GetEntry()))
+        if (GameObjectLocale const* cl = sGameLocale->GetGameObjectLocale(GetEntry()))
             if (cl->Name.size() > uloc_idx && !cl->Name[uloc_idx].empty())
                 return cl->Name[uloc_idx];
     }

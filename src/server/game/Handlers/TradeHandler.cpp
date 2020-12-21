@@ -626,7 +626,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
     if (GetPlayer()->GetLevel() < CONF_GET_INT("LevelReq.Trade"))
     {
-        SendNotification(GetTrinityString(LANG_TRADE_REQ), CONF_GET_INT("LevelReq.Trade"));
+        SendNotification(GetWarheadString(LANG_TRADE_REQ), CONF_GET_INT("LevelReq.Trade"));
         info.Status = TRADE_STATUS_CLOSE_WINDOW;
         SendTradeStatus(info);
         return;

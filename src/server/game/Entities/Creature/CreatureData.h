@@ -281,12 +281,6 @@ struct WH_GAME_API CreatureBaseStats
     static CreatureBaseStats const* GetBaseStats(uint8 level, uint8 unitClass);
 };
 
-struct CreatureLocale
-{
-    std::vector<std::string> Name;
-    std::vector<std::string> Title;
-};
-
 struct EquipmentInfo
 {
     uint32  ItemEntry[MAX_EQUIPMENT_ITEMS];

@@ -25,7 +25,7 @@ void Warhead::Impl::ChatCommands::SendErrorMessageToHandler(ChatHandler* handler
     handler->SetSentErrorMessage(true);
 }
 
-char const* Warhead::Impl::ChatCommands::GetTrinityString(ChatHandler const* handler, TrinityStrings which)
+char const* Warhead::Impl::ChatCommands::GetWarheadString(ChatHandler const* handler, WarheadStrings which)
 {
-    return handler->GetTrinityString(which);
+    return handler->GetWarheadString(which);
 }
