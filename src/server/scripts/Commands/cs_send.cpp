@@ -21,7 +21,7 @@
 #include "Item.h"
 #include "Language.h"
 #include "Mail.h"
-#include "MailMgr.h"
+#include "Mail.h"
 #include "ObjectMgr.h"
 #include "Pet.h"
 #include "Player.h"

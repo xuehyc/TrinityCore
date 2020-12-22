@@ -23,7 +23,7 @@
 #include "GuildMgr.h"
 #include "Log.h"
 #include "Mail.h"
-#include "MailMgr.h"
+#include "Mail.h"
 #include "ObjectAccessor.h"
 #include "Opcodes.h"
 #include "Player.h"

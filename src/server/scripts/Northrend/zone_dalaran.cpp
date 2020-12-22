@@ -26,7 +26,7 @@ Script Data End */
 #include "ScriptMgr.h"
 #include "DatabaseEnv.h"
 #include "Mail.h"
-#include "MailMgr.h"
+#include "Mail.h"
 #include "Map.h"
 #include "MotionMaster.h"
 #include "Player.h"

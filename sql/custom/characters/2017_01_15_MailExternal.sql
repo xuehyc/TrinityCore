@@ -1,15 +1,21 @@
---
--- Table structure for table `mail_external`
---
+-- ----------------------------
+-- Table structure for mail_external
+-- ----------------------------
+
 DROP TABLE IF EXISTS `mail_external`;
-CREATE TABLE IF NOT EXISTS `mail_external` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `receiver` bigint(20) DEFAULT NULL,
-  `subject` varchar(50) DEFAULT NULL,
-  `message` varchar(255) DEFAULT NULL,
-  `money` int(11) DEFAULT NULL,
-  `item` int(11) DEFAULT NULL,
-  `item_count` int(11) DEFAULT NULL,
-  `sended` int(11) DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+
+CREATE TABLE `mail_external` (
+    `ID` bigint (20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `PlayerName` varchar(20) CHARACTER
+    SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '1',
+    `Subject` varchar(200) CHARACTER
+    SET utf8 COLLATE utf8_general_ci NULL DEFAULT 'Support Message',
+    `Message` varchar(500) CHARACTER
+    SET utf8 COLLATE utf8_general_ci NULL DEFAULT 'Support Message',
+    `Money` int (20) UNSIGNED NOT NULL DEFAULT 0,
+    `ItemID` int (20) UNSIGNED NOT NULL DEFAULT 0,
+    `ItemCount` int (20) UNSIGNED NOT NULL DEFAULT 1,
+    `CreatureEntry` int (20) UNSIGNED NOT NULL DEFAULT 95008,
+    PRIMARY KEY (`ID`)
+    USING BTREE) ENGINE = InnoDB AUTO_INCREMENT = 501 CHARACTER
+SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;

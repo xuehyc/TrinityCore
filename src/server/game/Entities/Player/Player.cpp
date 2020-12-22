@@ -65,7 +65,7 @@
 #include "LootItemStorage.h"
 #include "LootMgr.h"
 #include "Mail.h"
-#include "MailMgr.h"
+#include "Mail.h"
 #include "MailPackets.h"
 #include "MapManager.h"
 #include "MiscPackets.h"

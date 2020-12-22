@@ -35,7 +35,7 @@
 #include "Language.h"
 #include "Log.h"
 #include "Mail.h"
-#include "MailMgr.h"
+#include "Mail.h"
 #include "Map.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"

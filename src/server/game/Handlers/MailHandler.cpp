@@ -26,7 +26,7 @@
 #include "Language.h"
 #include "Log.h"
 #include "Mail.h"
-#include "MailMgr.h"
+#include "Mail.h"
 #include "MailPackets.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
