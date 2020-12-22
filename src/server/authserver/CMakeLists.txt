@@ -58,7 +58,7 @@ set_target_properties(authserver
         "server")
 
 # Install config
-ConfigInstall(authserver)
+ConfigInstall(authserver "authserver.conf")
 
 if(UNIX)
   install(TARGETS authserver DESTINATION bin)

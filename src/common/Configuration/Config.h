@@ -30,7 +30,7 @@ class WH_COMMON_API ConfigMgr
     ~ConfigMgr() = default;
 
 public:
-    bool LoadAppConfigs();
+    bool LoadAppConfigs(bool enableCustom = true);
     void Configure(std::string const& fileName, std::vector<std::string> args);
 
     static ConfigMgr* instance();

@@ -70,7 +70,8 @@ if(WORLDSERVER_DYNAMIC_SCRIPT_MODULES_DEPENDENCIES)
 endif()
 
 # Install config
-ConfigInstall(worldserver)
+ConfigInstall(worldserver "worldserver.conf")
+ConfigInstall(worldserver "warhead.conf")
 
 if(UNIX)
   install(TARGETS worldserver DESTINATION bin)
