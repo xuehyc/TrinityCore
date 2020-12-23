@@ -3470,23 +3470,6 @@ enum ComplaintStatus : uint8
     COMPLAINT_ENABLED_WITH_AUTO_IGNORE      = 2
 };
 
-/// Ban function modes
-enum BanMode
-{
-    BAN_ACCOUNT,
-    BAN_CHARACTER,
-    BAN_IP
-};
-
-/// Ban function return codes
-enum BanReturn
-{
-    BAN_SUCCESS,
-    BAN_SYNTAX_ERROR,
-    BAN_NOTFOUND,
-    BAN_EXISTS
-};
-
 enum PvPTeamId
 {
     PVP_TEAM_HORDE       = 0, // Battleground: Horde,    Arena: Green

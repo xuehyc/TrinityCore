@@ -16,6 +16,7 @@
  */
 
 #include "Common.h"
+#include "BanManager.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Log.h"
@@ -204,12 +205,12 @@ char const* Warden::ApplyPenalty(WardenCheck const* check)
             AccountMgr::GetName(_session->GetAccountId(), accountName);
             std::stringstream banReason;
             banReason << "Warden Anticheat Violation";
+
             // Check can be NULL, for example if the client sent a wrong signature in the warden packet (CHECKSUM FAIL)
             if (check)
                 banReason << ": " << check->Comment << " (CheckId: " << check->CheckId << ")";
 
-            sWorld->BanAccount(BAN_ACCOUNT, accountName, CONF_GET_INT("Warden.BanDuration"), banReason.str(),"Server");
-
+            sBan->BanAccount(accountName, std::to_string(CONF_GET_INT("Warden.BanDuration")) + "s", banReason.str(), "Server");
             break;
         }
         case WARDEN_ACTION_LOG:

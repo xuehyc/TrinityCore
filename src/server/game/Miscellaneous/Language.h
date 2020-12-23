@@ -1190,17 +1190,7 @@ enum WarheadStrings
     LANG_AUTO_BROADCAST                   = 11000,
     LANG_INVALID_REALMID                  = 11001,
 
-    // Show Kick in world
-    LANG_COMMAND_KICKMESSAGE_WORLD        = 11002,
-
-    // Show Mute in world
-    LANG_COMMAND_MUTEMESSAGE_WORLD        = 11003,
-
-    // Show Ban in world
-    LANG_BAN_CHARACTER_YOUBANNEDMESSAGE_WORLD     = 11004,
-    LANG_BAN_CHARACTER_YOUPERMBANNEDMESSAGE_WORLD = 11005,
-    LANG_BAN_ACCOUNT_YOUBANNEDMESSAGE_WORLD       = 11006,
-    LANG_BAN_ACCOUNT_YOUPERMBANNEDMESSAGE_WORLD   = 11007,
+    // 11002-11003 - free
 
     LANG_NPCINFO_MOVEMENT_DATA                    = 11008,
     LANG_NPCINFO_FLAGS_EXTRA                      = 11009,
@@ -1213,6 +1203,22 @@ enum WarheadStrings
     LANG_CREATURE_NOT_AI_ENABLED                  = 11015,
     LANG_SELECT_PLAYER_OR_PET                     = 11016,
     LANG_SHUTDOWN_DELAYED                         = 11017,
-    LANG_SHUTDOWN_CANCELLED                       = 11018
+    LANG_SHUTDOWN_CANCELLED                       = 11018,
+
+    // Kick, Mute, Ban in world
+
+    // Show Kick in world
+    LANG_COMMAND_KICKMESSAGE_WORLD                = 11100,
+
+    // Show Mute in world
+    LANG_COMMAND_MUTEMESSAGE_WORLD                = 11101,
+
+    // Show Ban in world
+    LANG_BAN_CHARACTER_MESSAGE_WORLD              = 11102,
+    LANG_BAN_CHARACTER_PERM_MESSAGE_WORLD         = 11103,
+    LANG_BAN_ACCOUNT_MESSAGE_WORLD                = 11104,
+    LANG_BAN_ACCOUNT_PERM_MESSAGE_WORLD           = 11105,
+    LANG_BAN_IP_MESSAGE_WORLD                     = 11106,
+    LANG_BAN_IP_PERM_MESSAGE_WORLD                = 11107
 };
 #endif

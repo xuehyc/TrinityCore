@@ -22,6 +22,7 @@
 #include "WorldSession.h"
 #include "AccountMgr.h"
 #include "AddonMgr.h"
+#include "BanManager.h"
 #include "BattlegroundMgr.h"
 #include "CharacterPackets.h"
 #include "Config.h"
@@ -1368,17 +1369,25 @@ bool WorldSession::DosProtection::EvaluateOpcode(WorldPacket& p, time_t time) co
         }
         case POLICY_BAN:
         {
-            BanMode bm = (BanMode)CONF_GET_INT("PacketSpoof.BanMode");
-            uint32 duration = CONF_GET_INT("PacketSpoof.BanDuration"); // in seconds
-            std::string nameOrIp = "";
+            BanMode bm = static_cast<BanMode>(CONF_GET_INT("PacketSpoof.BanMode"));
+            std::string const& duration = std::to_string(CONF_GET_INT("PacketSpoof.BanDuration")) + "s"; // in seconds
+            std::string const& reason = "DOS (Packet Flooding/Spoofing";
+            std::string const& author = "Server: AutoDOS";
+
             switch (bm)
             {
-                case BAN_CHARACTER: // not supported, ban account
-                case BAN_ACCOUNT: (void)sAccountMgr->GetName(Session->GetAccountId(), nameOrIp); break;
-                case BAN_IP: nameOrIp = Session->GetRemoteAddress(); break;
+                case BAN_CHARACTER:
+                    sBan->BanCharacter(Session->GetPlayerName(), duration, reason, author);
+                    break;
+                case BAN_ACCOUNT:
+                    sBan->BanAccountByPlayerName(Session->GetPlayerName(), duration, reason, author);
+                    break;
+                case BAN_IP:
+                    sBan->BanIP(Session->GetRemoteAddress(), duration, reason, author);
+                    break;
             }
-            sWorld->BanAccount(bm, nameOrIp, duration, "DOS (Packet Flooding/Spoofing", "Server: AutoDOS");
-            LOG_WARN("network", "AntiDOS: Player automatically banned for %u seconds.", duration);
+
+            LOG_WARN("network", "AntiDOS: Player automatically banned for %s seconds.", duration.c_str());
             Session->KickPlayer("WorldSession::DosProtection::EvaluateOpcode AntiDOS");
             return false;
         }

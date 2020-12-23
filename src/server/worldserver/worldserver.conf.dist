@@ -4074,6 +4074,7 @@ PacketSpoof.Policy = 1
 #        Description: If PacketSpoof.Policy equals 2, this will determine the ban mode.
 #        Note:        Banning by character not supported for logical reasons.
 #        Default:     0 - Ban Account
+#                     1 - Ban Player
 #                     2 - Ban IP
 #
 

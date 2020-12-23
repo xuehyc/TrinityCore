@@ -287,11 +287,6 @@ class WH_GAME_API World
 
         void KickAll();
         void KickAllLess(AccountTypes sec);
-        BanReturn BanAccount(BanMode mode, std::string const& nameOrIP, std::string const& duration, std::string const& reason, std::string const& author);
-        BanReturn BanAccount(BanMode mode, std::string const& nameOrIP, uint32 duration_secs, std::string const& reason, std::string const& author);
-        bool RemoveBanAccount(BanMode mode, std::string const& nameOrIP);
-        BanReturn BanCharacter(std::string const& name, std::string const& duration, std::string const& reason, std::string const& author);
-        bool RemoveBanCharacter(std::string const& name);
 
         // for max speed access
         static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
