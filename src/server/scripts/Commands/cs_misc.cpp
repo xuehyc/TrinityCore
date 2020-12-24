@@ -39,6 +39,7 @@
 #include "MMapFactory.h"
 #include "MotionMaster.h"
 #include "MovementDefines.h"
+#include "MuteManager.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
@@ -1497,7 +1498,8 @@ public:
         std::string OS                = handler->GetWarheadString(LANG_UNKNOWN);
 
         // Mute data print variables
-        int64 muteTime                = -1;
+        std::string muteLeft          = "0000-00-00_00-00-00";
+        uint32 muteTime                = 0;
         std::string muteReason        = handler->GetWarheadString(LANG_NO_REASON);
         std::string muteBy            = handler->GetWarheadString(LANG_UNKNOWN);
 
@@ -1549,7 +1551,6 @@ public:
             latency           = target->GetSession()->GetLatency();
             raceid            = target->GetRace();
             classid           = target->GetClass();
-            muteTime          = target->GetSession()->m_muteTime;
             mapId             = target->GetMapId();
             areaId            = target->GetAreaId();
             alive             = target->IsAlive() ? handler->GetWarheadString(LANG_YES) : handler->GetWarheadString(LANG_NO);
@@ -1625,12 +1626,22 @@ public:
                 lastIp    = handler->GetWarheadString(LANG_UNAUTHORIZED);
                 lastLogin = handler->GetWarheadString(LANG_UNAUTHORIZED);
             }
-            muteTime      = fields[6].GetUInt64();
-            muteReason    = fields[7].GetString();
-            muteBy        = fields[8].GetString();
-            failedLogins  = fields[9].GetUInt32();
-            locked        = fields[10].GetUInt8();
-            OS            = fields[11].GetString();
+
+            failedLogins  = fields[6].GetUInt32();
+            locked        = fields[7].GetUInt8();
+            OS            = fields[8].GetString();
+        }
+
+        // Check mute info if exist
+        auto muteInfo = sMute->GetMuteInfo(accId);
+        if (muteInfo)
+        {
+            auto const& [_muteDate, _muteTime, _reason, _author] = *muteInfo;
+
+            muteTime = std::abs(_muteTime);
+            muteLeft = secsToTimeString(static_cast<uint64>(_muteDate + muteTime) - GameTime::GetGameTime(), TimeFormat::ShortText);
+            muteReason = _reason;
+            muteBy = _author;
         }
 
         // Creates a chat link to the character. Returns nameLink
@@ -1655,8 +1666,6 @@ public:
             bannedBy      = fields[2].GetString();
             banReason     = fields[3].GetString();
         }
-
-
 
         // Can be used to query data from Characters database
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PINFO_XP);
@@ -1702,8 +1711,8 @@ public:
             handler->PSendSysMessage(LANG_PINFO_BANNED, banType.c_str(), banReason.c_str(), banTime > 0 ? secsToTimeString(banTime - GameTime::GetGameTime(), TimeFormat::ShortText).c_str() : handler->GetWarheadString(LANG_PERMANENTLY), bannedBy.c_str());
 
         // Output IV. LANG_PINFO_MUTED if mute is applied
-        if (muteTime > 0)
-            handler->PSendSysMessage(LANG_PINFO_MUTED, muteReason.c_str(), secsToTimeString(muteTime - GameTime::GetGameTime(), TimeFormat::ShortText).c_str(), muteBy.c_str());
+        if (muteTime)
+            handler->PSendSysMessage(LANG_PINFO_MUTED, muteReason.c_str(), secsToTimeString(muteTime, TimeFormat::ShortText).c_str(), muteLeft.c_str(), muteBy.c_str());
 
         // Output V. LANG_PINFO_ACC_ACCOUNT
         handler->PSendSysMessage(LANG_PINFO_ACC_ACCOUNT, userName.c_str(), accId, security);
@@ -1848,6 +1857,7 @@ public:
 
         if (!player)
             player = PlayerIdentifier::FromTarget(handler);
+
         if (!player)
         {
             handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
@@ -1867,49 +1877,10 @@ public:
         if (handler->HasLowerSecurity(target, player->GetGUID(), true))
             return false;
 
-        LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
-        std::string muteBy = "";
-        if (Player* gmPlayer = handler->GetPlayer())
-            muteBy = gmPlayer->GetName();
-        else
-            muteBy = handler->GetWarheadString(LANG_CONSOLE);
+        sMute->MutePlayer(player->GetName(), muteTime, handler->GetSession() ? handler->GetSession()->GetPlayerName() : handler->GetWarheadString(LANG_CONSOLE), muteReasonStr);
 
-        if (target)
-        {
-            // Target is online, mute will be in effect right away.
-            int64 mutedUntil = GameTime::GetGameTime() + static_cast<int64>(muteTime) * MINUTE;
-            target->GetSession()->m_muteTime = mutedUntil;
-            stmt->setInt64(0, mutedUntil);
-        }
-        else
-        {
-            // Target is offline, mute will be in effect starting from the next login.
-            stmt->setInt64(0, -static_cast<int64>(muteTime) * MINUTE);
-        }
-
-        stmt->setString(1, muteReasonStr);
-        stmt->setString(2, muteBy);
-        stmt->setUInt32(3, accountId);
-        LoginDatabase.Execute(stmt);
-        stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT_MUTE);
-        stmt->setUInt32(0, accountId);
-        stmt->setUInt32(1, muteTime);
-        stmt->setString(2, muteBy);
-        stmt->setString(3, muteReasonStr);
-        LoginDatabase.Execute(stmt);
-
-        std::string nameLink = handler->playerLink(*player);
-        if (CONF_GET_BOOL("ShowMuteInWorld"))
-            sWorld->SendWorldText(LANG_COMMAND_MUTEMESSAGE_WORLD, muteBy.c_str(), nameLink.c_str(), muteTime, muteReasonStr.c_str());
-        if (target)
-        {
-            ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOUR_CHAT_DISABLED, muteTime, muteBy.c_str(), muteReasonStr.c_str());
-            handler->PSendSysMessage(LANG_YOU_DISABLE_CHAT, nameLink.c_str(), muteTime, muteReasonStr.c_str());
-        }
-        else
-        {
-            handler->PSendSysMessage(LANG_COMMAND_DISABLE_CHAT_DELAYED, nameLink.c_str(), muteTime, muteReasonStr.c_str());
-        }
+        if (!CONF_GET_BOOL("ShowMuteInWorld"))
+            handler->PSendSysMessage(LANG_YOU_DISABLE_CHAT, handler->playerLink(player->GetName()).c_str(), muteTime, muteReasonStr.c_str());
 
         return true;
     }
@@ -1931,34 +1902,19 @@ public:
                 target = session->GetPlayer();
 
         // must have strong lesser security level
-        if (handler->HasLowerSecurity (target, targetGuid, true))
+        if (handler->HasLowerSecurity(target, targetGuid, true))
             return false;
 
-        if (target)
+        if (target && target->GetSession() && target->GetSession()->CanSpeak())
         {
-            if (target->GetSession()->CanSpeak())
-            {
-                handler->SendSysMessage(LANG_CHAT_ALREADY_ENABLED);
-                handler->SetSentErrorMessage(true);
-                return false;
-            }
-
-            target->GetSession()->m_muteTime = 0;
+            handler->SendSysMessage(LANG_CHAT_ALREADY_ENABLED);
+            handler->SetSentErrorMessage(true);
+            return false;
         }
 
-        LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
-        stmt->setInt64(0, 0);
-        stmt->setString(1, "");
-        stmt->setString(2, "");
-        stmt->setUInt32(3, accountId);
-        LoginDatabase.Execute(stmt);
+        sMute->UnMutePlayer(targetName);
 
-        if (target)
-            ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOUR_CHAT_ENABLED);
-
-        std::string nameLink = handler->playerLink(targetName);
-
-        handler->PSendSysMessage(LANG_YOU_ENABLE_CHAT, nameLink.c_str());
+        handler->PSendSysMessage(LANG_YOU_ENABLE_CHAT, handler->playerLink(targetName).c_str());
 
         return true;
     }

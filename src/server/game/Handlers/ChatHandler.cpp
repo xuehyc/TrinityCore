@@ -25,6 +25,7 @@
 #include "ChatPackets.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
+#include "GameConfig.h"
 #include "GameTime.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
@@ -40,8 +41,8 @@
 #include "SpellAuraEffects.h"
 #include "Util.h"
 #include "Warden.h"
-#include "GameConfig.h"
 #include "WorldPacket.h"
+#include "MuteManager.h"
 #include <algorithm>
 
 inline bool isNasty(uint8 c)
@@ -129,7 +130,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 break;
             default:
                 LOG_ERROR("network", "Player %s%s sent a chatmessage with an invalid language/message type combination",
-                                                     GetPlayer()->GetName().c_str(), GetPlayer()->GetGUID().ToString().c_str());
+                          GetPlayer()->GetName().c_str(), GetPlayer()->GetGUID().ToString().c_str());
 
                 recvData.rfinish();
                 return;
@@ -173,8 +174,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
         if (!CanSpeak())
         {
-            std::string timeStr = secsToTimeString(m_muteTime - GameTime::GetGameTime());
-            SendNotification(GetWarheadString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
+            SendNotification(GetWarheadString(LANG_WAIT_BEFORE_SPEAKING), sMute->GetMuteTimeString(GetAccountId()).c_str());
             recvData.rfinish(); // Prevent warnings
             return;
         }
@@ -621,8 +621,7 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recvData)
 
     if (!CanSpeak())
     {
-        std::string timeStr = secsToTimeString(m_muteTime - GameTime::GetGameTime());
-        SendNotification(GetWarheadString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
+        SendNotification(GetWarheadString(LANG_WAIT_BEFORE_SPEAKING), sMute->GetMuteTimeString(GetAccountId()).c_str());
         return;
     }
 

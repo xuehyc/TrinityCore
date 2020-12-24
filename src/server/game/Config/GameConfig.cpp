@@ -324,6 +324,7 @@ void GameConfig::LoadBoolConfigs(bool reload /*= false*/)
     AddOption<bool>("ShowKickInWorld");
     AddOption<bool>("ShowMuteInWorld");
     AddOption<bool>("ShowBanInWorld");
+    AddOption<bool>("Mute.AddAfterLogin.Enable");
     AddOption<bool>("Warden.Enabled");
     AddOption<bool>("DBC.EnforceItemAttributes");
     AddOption<bool>("InstancesResetAnnounce");

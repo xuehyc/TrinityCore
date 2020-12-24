@@ -40,6 +40,7 @@
 #include "Map.h"
 #include "Metric.h"
 #include "MoveSpline.h"
+#include "MuteManager.h"
 #include "Opcodes.h"
 #include "OutdoorPvPMgr.h"
 #include "PacketUtilities.h"
@@ -105,8 +106,7 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 }
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, std::string&& name, std::shared_ptr<WorldSocket> sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter):
-    m_muteTime(mute_time),
+WorldSession::WorldSession(uint32 id, std::string&& name, std::shared_ptr<WorldSocket> sock, AccountTypes sec, uint8 expansion, LocaleConstant locale, uint32 recruiter, bool isARecruiter):
     m_timeOutTime(0),
     AntiDOS(this),
     m_GUIDLow(0),
@@ -153,6 +153,8 @@ WorldSession::WorldSession(uint32 id, std::string&& name, std::shared_ptr<WorldS
 /// WorldSession destructor
 WorldSession::~WorldSession()
 {
+    sScriptMgr->OnAccountLogout(GetAccountId());
+
     ///- unload player if not unloaded
     if (_player)
         LogoutPlayer (true);
@@ -691,7 +693,7 @@ void WorldSession::SendNotification(uint32 string_id, ...)
 
 bool WorldSession::CanSpeak() const
 {
-    return m_muteTime <= GameTime::GetGameTime();
+    return sMute->CanSpeak(GetAccountId());
 }
 
 char const* WorldSession::GetWarheadString(uint32 entry) const

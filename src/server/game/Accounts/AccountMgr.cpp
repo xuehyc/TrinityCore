@@ -140,7 +140,7 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accountId)
     loginStmt->setUInt32(0, accountId);
     trans->Append(loginStmt);
 
-    loginStmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_MUTED);
+    loginStmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_MUTE_EXPIRED);
     loginStmt->setUInt32(0, accountId);
     trans->Append(loginStmt);
 
