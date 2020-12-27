@@ -54,9 +54,9 @@ public:
     bool RemoveBanIP(std::string const& IP);
     bool RemoveBanCharacter(std::string const& characterName);
 
-    Optional<std::tuple<uint32, uint32, std::string, std::string>> GetBanInfoIP(std::string const& characterName);
-    Optional<std::tuple<uint32, uint32, std::string, std::string>> GetBanInfoAccount(std::string const& characterName);
-    Optional<std::tuple<uint32, uint32, std::string, std::string>> GetBanInfoCharacter(std::string const& characterName);
+    Optional<std::tuple<uint32, uint32, std::string, std::string>> GetBanInfoIP(std::string_view characterName);
+    Optional<std::tuple<uint32, uint32, std::string, std::string>> GetBanInfoAccount(std::string_view characterName);
+    Optional<std::tuple<uint32, uint32, std::string, std::string>> GetBanInfoCharacter(std::string_view characterName);
 };
 
 #define sBan BanManager::instance()

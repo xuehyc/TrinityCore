@@ -266,9 +266,9 @@ bool BanManager::RemoveBanCharacter(std::string const& characterName)
     return true;
 }
 
-Optional<std::tuple<uint32, uint32, std::string, std::string>> BanManager::GetBanInfoIP(std::string const& characterName)
+Optional<std::tuple<uint32, uint32, std::string, std::string>> BanManager::GetBanInfoIP(std::string_view characterName)
 {
-    uint32 accountID = sCharacterCache->GetCharacterAccountIdByName(characterName);
+    uint32 accountID = sCharacterCache->GetCharacterAccountIdByName(std::string(characterName));
     if (!accountID)
         return std::nullopt;
 
@@ -284,9 +284,9 @@ Optional<std::tuple<uint32, uint32, std::string, std::string>> BanManager::GetBa
     return std::make_tuple(fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetString(), fields[3].GetString());
 }
 
-Optional<std::tuple<uint32, uint32, std::string, std::string>> BanManager::GetBanInfoAccount(std::string const& characterName)
+Optional<std::tuple<uint32, uint32, std::string, std::string>> BanManager::GetBanInfoAccount(std::string_view characterName)
 {
-    uint32 accountID = sCharacterCache->GetCharacterAccountIdByName(characterName);
+    uint32 accountID = sCharacterCache->GetCharacterAccountIdByName(std::string(characterName));
     if (!accountID)
         return std::nullopt;
 
@@ -302,13 +302,13 @@ Optional<std::tuple<uint32, uint32, std::string, std::string>> BanManager::GetBa
     return std::make_tuple(fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetString(), fields[3].GetString());
 }
 
-Optional<std::tuple<uint32, uint32, std::string, std::string>> BanManager::GetBanInfoCharacter(std::string const& characterName)
+Optional<std::tuple<uint32, uint32, std::string, std::string>> BanManager::GetBanInfoCharacter(std::string_view characterName)
 {
     if (characterName.empty())
         return std::nullopt;
 
     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_BAN_INFO_BY_NAME);
-    stmt->setString(0, characterName);
+    stmt->setStringView(0, characterName);
 
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
     if (!result)
