@@ -102,11 +102,13 @@ WH_GAME_API std::atomic<uint32> World::m_worldLoopCounter(0);
 
 WH_GAME_API float World::m_MaxVisibleDistanceOnContinents = DEFAULT_VISIBILITY_DISTANCE;
 WH_GAME_API float World::m_MaxVisibleDistanceInInstances  = DEFAULT_VISIBILITY_INSTANCE;
-WH_GAME_API float World::m_MaxVisibleDistanceInBGArenas   = DEFAULT_VISIBILITY_BGARENAS;
+WH_GAME_API float World::m_MaxVisibleDistanceInBG         = DEFAULT_VISIBILITY_BGARENAS;
+WH_GAME_API float World::m_MaxVisibleDistanceInArenas     = DEFAULT_VISIBILITY_BGARENAS;
 
 WH_GAME_API int32 World::m_visibility_notify_periodOnContinents = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
 WH_GAME_API int32 World::m_visibility_notify_periodInInstances  = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
-WH_GAME_API int32 World::m_visibility_notify_periodInBGArenas   = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
+WH_GAME_API int32 World::m_visibility_notify_periodInBG         = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
+WH_GAME_API int32 World::m_visibility_notify_periodInArenas     = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
 
 /// World constructor
 World::World()
@@ -900,22 +902,36 @@ void World::LoadConfigSettings(bool reload)
         m_MaxVisibleDistanceInInstances = MAX_VISIBILITY_DISTANCE;
     }
 
-    // Visibility in BG/Arenas
-    m_MaxVisibleDistanceInBGArenas = CONF_GET_FLOAT("Visibility.Distance.BGArenas");
-    if (m_MaxVisibleDistanceInBGArenas < 45 * rateAggro)
+    // Visibility in BG
+    m_MaxVisibleDistanceInBG = CONF_GET_FLOAT("Visibility.Distance.BG");
+    if (m_MaxVisibleDistanceInBG < 45 * rateAggro)
     {
-        LOG_ERROR("config", "Visibility.Distance.BGArenas can't be less max aggro radius %f", 45 * rateAggro);
-        m_MaxVisibleDistanceInBGArenas = 45 * rateAggro;
+        LOG_ERROR("config", "Visibility.Distance.BG can't be less max aggro radius %f", 45 * rateAggro);
+        m_MaxVisibleDistanceInBG = 45 * rateAggro;
     }
     else if (m_MaxVisibleDistanceInBG > MAX_VISIBILITY_DISTANCE)
     {
-        LOG_ERROR("config", "Visibility.Distance.BGArenas can't be greater %f", MAX_VISIBILITY_DISTANCE);
-        m_MaxVisibleDistanceInBGArenas = MAX_VISIBILITY_DISTANCE;
+        LOG_ERROR("config", "Visibility.Distance.BG can't be greater %f", MAX_VISIBILITY_DISTANCE);
+        m_MaxVisibleDistanceInBG = MAX_VISIBILITY_DISTANCE;
+    }
+
+    // Visibility in Arenas
+    m_MaxVisibleDistanceInArenas = CONF_GET_FLOAT("Visibility.Distance.Arenas");
+    if (m_MaxVisibleDistanceInArenas < 45 * rateAggro)
+    {
+        LOG_ERROR("config", "Visibility.Distance.Arenas can't be less max aggro radius %f", 45 * rateAggro);
+        m_MaxVisibleDistanceInArenas = 45 * rateAggro;
+    }
+    else if (m_MaxVisibleDistanceInArenas > MAX_VISIBILITY_DISTANCE)
+    {
+        LOG_ERROR("config", "Visibility.Distance.Arenas can't be greater %f", MAX_VISIBILITY_DISTANCE);
+        m_MaxVisibleDistanceInArenas = MAX_VISIBILITY_DISTANCE;
     }
 
     m_visibility_notify_periodOnContinents = CONF_GET_INT("Visibility.Notify.Period.OnContinents");
     m_visibility_notify_periodInInstances = CONF_GET_INT("Visibility.Notify.Period.InInstances");
-    m_visibility_notify_periodInBGArenas = CONF_GET_INT("Visibility.Notify.Period.InBGArenas");
+    m_visibility_notify_periodInBG = CONF_GET_INT("Visibility.Notify.Period.InBG");
+    m_visibility_notify_periodInArenas = CONF_GET_INT("Visibility.Notify.Period.InArenas");
 
     // No aggro from gray mobs
     auto noGrayAggroAbove = CONF_GET_INT("NoGrayAggro.Above");
