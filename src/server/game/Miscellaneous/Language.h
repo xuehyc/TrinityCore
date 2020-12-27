@@ -738,7 +738,7 @@ enum WarheadStrings
     LANG_ARENA_TESTING                    = 785,
     LANG_AUTO_ANN                         = 786,
     LANG_ANNOUNCE_COLOR                   = 787,
-    // 788-799 - free
+    // 790-799 - free
 
     // in game strings
     LANG_PET_INVALID_NAME                 = 800,
@@ -767,7 +767,9 @@ enum WarheadStrings
     // Pinfo commands
     LANG_PINFO_PLAYER                     = 453,
     LANG_PINFO_GM_ACTIVE                  = 548,
-    LANG_PINFO_BANNED                     = 549,
+    LANG_PINFO_BANNED_IP                  = 549,
+    LANG_PINFO_BANNED_ACCOUNT             = 788,
+    LANG_PINFO_BANNED_CHARACTER           = 789,
     LANG_PINFO_MUTED                      = 550,
     LANG_PINFO_ACC_ACCOUNT                = 714,
     LANG_PINFO_ACC_LASTLOGIN              = 716,

@@ -18,6 +18,7 @@
 #include "ScriptMgr.h"
 #include "AccountMgr.h"
 #include "ArenaTeamMgr.h"
+#include "BanManager.h"
 #include "CellImpl.h"
 #include "CharacterCache.h"
 #include "Chat.h"
@@ -1439,7 +1440,7 @@ public:
         CharacterDatabasePreparedStatement* stmt = nullptr;
 
         // To make sure we get a target, we convert our guid to an omniversal...
-        ObjectGuid parseGUID(HighGuid::Player, uint32(atoul(args)));
+        ObjectGuid parseGUID(HighGuid::Player, *Warhead::StringTo<uint32>(args));
 
         // ... and make sure we get a target, somehow.
         if (sCharacterCache->GetCharacterNameByGuid(parseGUID, targetName))
@@ -1498,16 +1499,10 @@ public:
         std::string OS                = handler->GetWarheadString(LANG_UNKNOWN);
 
         // Mute data print variables
-        std::string muteLeft          = "0000-00-00_00-00-00";
-        uint32 muteTime                = 0;
+        std::string muteLeft          = handler->GetWarheadString(LANG_UNKNOWN);
+        uint32 muteTime               = 0;
         std::string muteReason        = handler->GetWarheadString(LANG_NO_REASON);
         std::string muteBy            = handler->GetWarheadString(LANG_UNKNOWN);
-
-        // Ban data print variables
-        int64 banTime                 = -1;
-        std::string banType           = handler->GetWarheadString(LANG_UNKNOWN);
-        std::string banReason         = handler->GetWarheadString(LANG_NO_REASON);
-        std::string bannedBy          = handler->GetWarheadString(LANG_UNKNOWN);
 
         // Character data print variables
         uint8 raceid, classid           = 0; //RACE_NONE, CLASS_NONE
@@ -1647,25 +1642,46 @@ public:
         // Creates a chat link to the character. Returns nameLink
         std::string nameLink = handler->playerLink(targetName);
 
-        // Returns banType, banTime, bannedBy, banreason
-        stmt2 = LoginDatabase.GetPreparedStatement(LOGIN_SEL_PINFO_BANS);
-        stmt2->setUInt32(0, accId);
-        PreparedQueryResult result2 = LoginDatabase.Query(stmt2);
-        if (!result2)
+        // Ban section. Returns banType, banLeft, banTime, bannedBy, banreason
+        auto ShowBanInfo = [&]()
         {
-            banType = handler->GetWarheadString(LANG_CHARACTER);
-            stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PINFO_BANS);
-            stmt->setUInt32(0, lowguid);
-            result2 = CharacterDatabase.Query(stmt);
-        }
+            auto const& banInfoIP = sBan->GetBanInfoIP(targetName);
+            auto const& banInfoAcc = sBan->GetBanInfoAccount(targetName);
+            auto const& banInfoChar = sBan->GetBanInfoCharacter(targetName);
 
-        if (result2)
-        {
-            Field* fields = result2->Fetch();
-            banTime       = int64(fields[1].GetUInt64() ? 0 : fields[0].GetUInt32());
-            bannedBy      = fields[2].GetString();
-            banReason     = fields[3].GetString();
-        }
+            if (!banInfoIP && !banInfoAcc && !banInfoChar)
+                return;
+
+            auto GetTimers = [&](uint32 const& _banDate, uint32 const& _unBanDate) -> std::tuple<std::string, std::string>
+            {
+                bool isPermanently = _banDate == _unBanDate;
+                auto leftTime = isPermanently ? "--" : secsToTimeString(_unBanDate - GameTime::GetGameTime(), TimeFormat::ShortText);
+                auto banTime = isPermanently ? handler->GetWarheadString(LANG_PERMANENTLY) : secsToTimeString(_unBanDate - _banDate, TimeFormat::ShortText);
+
+                return std::make_tuple(leftTime, banTime);
+            };
+
+            if (banInfoIP)
+            {
+                auto const& [_banDate, _unBanDate, _author, _reason] = *banInfoIP;
+                auto const& [leftTime, banTime] = GetTimers(_banDate, _unBanDate);
+                handler->PSendSysMessage(LANG_PINFO_BANNED_IP, leftTime.c_str(), banTime.c_str(), _author.c_str(), _reason.c_str());
+            }
+
+            if (banInfoAcc)
+            {
+                auto const& [_banDate, _unBanDate, _author, _reason] = *banInfoAcc;
+                auto const& [leftTime, banTime] = GetTimers(_banDate, _unBanDate);
+                handler->PSendSysMessage(LANG_PINFO_BANNED_ACCOUNT, leftTime.c_str(), banTime.c_str(), _author.c_str(), _reason.c_str());
+            }
+
+            if (banInfoChar)
+            {
+                auto const& [_banDate, _unBanDate, _author, _reason] = *banInfoChar;
+                auto const& [leftTime, banTime] = GetTimers(_banDate, _unBanDate);
+                handler->PSendSysMessage(LANG_PINFO_BANNED_CHARACTER, leftTime.c_str(), banTime.c_str(), _author.c_str(), _reason.c_str());
+            }
+        };
 
         // Can be used to query data from Characters database
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PINFO_XP);
@@ -1700,19 +1716,18 @@ public:
 
         // Initiate output
         // Output I. LANG_PINFO_PLAYER
-        handler->PSendSysMessage(LANG_PINFO_PLAYER, target ? "" : handler->GetWarheadString(LANG_OFFLINE), nameLink.c_str(), lowguid);
+        handler->PSendSysMessage(LANG_PINFO_PLAYER, nameLink.c_str(), target ? "" : handler->GetWarheadString(LANG_OFFLINE), lowguid);
 
         // Output II. LANG_PINFO_GM_ACTIVE if character is gamemaster
         if (target && target->IsGameMaster())
             handler->PSendSysMessage(LANG_PINFO_GM_ACTIVE);
 
         // Output III. LANG_PINFO_BANNED if ban exists and is applied
-        if (banTime >= 0)
-            handler->PSendSysMessage(LANG_PINFO_BANNED, banType.c_str(), banReason.c_str(), banTime > 0 ? secsToTimeString(banTime - GameTime::GetGameTime(), TimeFormat::ShortText).c_str() : handler->GetWarheadString(LANG_PERMANENTLY), bannedBy.c_str());
+        ShowBanInfo();
 
         // Output IV. LANG_PINFO_MUTED if mute is applied
         if (muteTime)
-            handler->PSendSysMessage(LANG_PINFO_MUTED, muteReason.c_str(), secsToTimeString(muteTime, TimeFormat::ShortText).c_str(), muteLeft.c_str(), muteBy.c_str());
+            handler->PSendSysMessage(LANG_PINFO_MUTED, muteLeft.c_str(), secsToTimeString(muteTime, TimeFormat::ShortText).c_str(), muteBy.c_str(), muteReason.c_str());
 
         // Output V. LANG_PINFO_ACC_ACCOUNT
         handler->PSendSysMessage(LANG_PINFO_ACC_ACCOUNT, userName.c_str(), accId, security);
@@ -1744,13 +1759,14 @@ public:
         handler->PSendSysMessage(LANG_PINFO_CHR_ALIVE, alive.c_str());
 
         // Output XIII. LANG_PINFO_CHR_PHASE if player is not in GM mode (GM is in every phase)
-        if (target && !target->IsGameMaster())                            // IsInWorld() returns false on loadingscreen, so it's more
-            handler->PSendSysMessage(LANG_PINFO_CHR_PHASE, phase);        // precise than just target (safer ?).
-                                                                          // However, as we usually just require a target here, we use target instead.
+        // IsInWorld() returns false on loadingscreen, so it's more precise than just target (safer ?). However, as we usually just require a target here, we use target instead.
+        if (target && !target->IsGameMaster())
+            handler->PSendSysMessage(LANG_PINFO_CHR_PHASE, phase);
+
         // Output XIV. LANG_PINFO_CHR_MONEY
-        uint32 gold                   = money / GOLD;
-        uint32 silv                   = (money % GOLD) / SILVER;
-        uint32 copp                   = (money % GOLD) % SILVER;
+        uint32 gold = money / GOLD;
+        uint32 silv = (money % GOLD) / SILVER;
+        uint32 copp = (money % GOLD) % SILVER;
         handler->PSendSysMessage(LANG_PINFO_CHR_MONEY, gold, silv, copp);
 
         // Position data
@@ -1781,8 +1797,10 @@ public:
         {
             handler->PSendSysMessage(LANG_PINFO_CHR_GUILD, guildName.c_str(), guildId);
             handler->PSendSysMessage(LANG_PINFO_CHR_GUILD_RANK, guildRank.c_str(), uint32(guildRankId));
+
             if (!note.empty())
                 handler->PSendSysMessage(LANG_PINFO_CHR_GUILD_NOTE, note.c_str());
+
             if (!officeNote.empty())
                 handler->PSendSysMessage(LANG_PINFO_CHR_GUILD_ONOTE, officeNote.c_str());
         }

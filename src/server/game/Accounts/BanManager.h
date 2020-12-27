@@ -19,6 +19,8 @@
 #define _BAN_MANAGER_H_
 
 #include "Common.h"
+#include "Optional.h"
+#include <tuple>
 
 /// Ban function return codes
 enum BanReturn
@@ -51,6 +53,10 @@ public:
     bool RemoveBanAccountByPlayerName(std::string const& characterName);
     bool RemoveBanIP(std::string const& IP);
     bool RemoveBanCharacter(std::string const& characterName);
+
+    Optional<std::tuple<uint32, uint32, std::string, std::string>> GetBanInfoIP(std::string const& characterName);
+    Optional<std::tuple<uint32, uint32, std::string, std::string>> GetBanInfoAccount(std::string const& characterName);
+    Optional<std::tuple<uint32, uint32, std::string, std::string>> GetBanInfoCharacter(std::string const& characterName);
 };
 
 #define sBan BanManager::instance()

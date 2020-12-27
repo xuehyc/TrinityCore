@@ -265,3 +265,56 @@ bool BanManager::RemoveBanCharacter(std::string const& characterName)
     CharacterDatabase.Execute(stmt);
     return true;
 }
+
+Optional<std::tuple<uint32, uint32, std::string, std::string>> BanManager::GetBanInfoIP(std::string const& characterName)
+{
+    uint32 accountID = sCharacterCache->GetCharacterAccountIdByName(characterName);
+    if (!accountID)
+        return std::nullopt;
+
+    LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_IP_INFO_BY_ACC_ID);
+    stmt->setUInt32(0, accountID);
+
+    PreparedQueryResult result = LoginDatabase.Query(stmt);
+    if (!result)
+        return std::nullopt;
+
+    Field* fields = result->Fetch();
+
+    return std::make_tuple(fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetString(), fields[3].GetString());
+}
+
+Optional<std::tuple<uint32, uint32, std::string, std::string>> BanManager::GetBanInfoAccount(std::string const& characterName)
+{
+    uint32 accountID = sCharacterCache->GetCharacterAccountIdByName(characterName);
+    if (!accountID)
+        return std::nullopt;
+
+    LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BANNED_INFO);
+    stmt->setUInt32(0, accountID);
+
+    PreparedQueryResult result = LoginDatabase.Query(stmt);
+    if (!result)
+        return std::nullopt;
+
+    Field* fields = result->Fetch();
+
+    return std::make_tuple(fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetString(), fields[3].GetString());
+}
+
+Optional<std::tuple<uint32, uint32, std::string, std::string>> BanManager::GetBanInfoCharacter(std::string const& characterName)
+{
+    if (characterName.empty())
+        return std::nullopt;
+
+    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_BAN_INFO_BY_NAME);
+    stmt->setString(0, characterName);
+
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+    if (!result)
+        return std::nullopt;
+
+    Field* fields = result->Fetch();
+
+    return std::make_tuple(fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetString(), fields[3].GetString());
+}
