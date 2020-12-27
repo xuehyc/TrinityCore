@@ -907,7 +907,7 @@ void World::LoadConfigSettings(bool reload)
         LOG_ERROR("config", "Visibility.Distance.BGArenas can't be less max aggro radius %f", 45 * rateAggro);
         m_MaxVisibleDistanceInBGArenas = 45 * rateAggro;
     }
-    else if (m_MaxVisibleDistanceInBGArenas > MAX_VISIBILITY_DISTANCE)
+    else if (m_MaxVisibleDistanceInBG > MAX_VISIBILITY_DISTANCE)
     {
         LOG_ERROR("config", "Visibility.Distance.BGArenas can't be greater %f", MAX_VISIBILITY_DISTANCE);
         m_MaxVisibleDistanceInBGArenas = MAX_VISIBILITY_DISTANCE;

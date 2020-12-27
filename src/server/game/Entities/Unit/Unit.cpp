@@ -6401,10 +6401,9 @@ void Unit::EnergizeBySpell(Unit* victim, uint32 spellId, int32 damage, Powers po
 
 void Unit::EnergizeBySpell(Unit* victim, SpellInfo const* spellInfo, int32 damage, Powers powerType)
 {
-    SendEnergizeSpellLog(victim, spellInfo->Id, damage, powerType);
-    // needs to be called after sending spell log
-    victim->ModifyPower(powerType, damage);
+    victim->ModifyPower(powerType, damage, false);
     victim->GetThreatManager().ForwardThreatForAssistingMe(this, float(damage)/2, spellInfo, true);
+    SendEnergizeSpellLog(victim, spellInfo->Id, damage, powerType);
 }
 
 uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint8 effIndex, Optional<float> const& donePctTotal, uint32 stack /*= 1*/) const
@@ -8348,7 +8347,7 @@ int32 Unit::GetHealthGain(int32 dVal)
 }
 
 // returns negative amount on power reduction
-int32 Unit::ModifyPower(Powers power, int32 dVal)
+int32 Unit::ModifyPower(Powers power, int32 dVal, bool withPowerUpdate /*= true*/)
 {
     int32 gain = 0;
 
@@ -8360,7 +8359,7 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
     int32 val = dVal + curPower;
     if (val <= 0)
     {
-        SetPower(power, 0);
+        SetPower(power, 0, withPowerUpdate);
         return -curPower;
     }
 
@@ -8368,12 +8367,12 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
 
     if (val < maxPower)
     {
-        SetPower(power, val);
+        SetPower(power, val, withPowerUpdate);
         gain = val - curPower;
     }
     else if (curPower != maxPower)
     {
-        SetPower(power, maxPower);
+        SetPower(power, maxPower, withPowerUpdate);
         gain = maxPower - curPower;
     }
 
@@ -9364,7 +9363,7 @@ void Unit::SetMaxHealth(uint32 val)
         SetHealth(val);
 }
 
-void Unit::SetPower(Powers power, uint32 val)
+void Unit::SetPower(Powers power, uint32 val, bool withPowerUpdate /*= true*/)
 {
     if (GetPower(power) == val)
         return;
@@ -9375,11 +9374,14 @@ void Unit::SetPower(Powers power, uint32 val)
 
     SetStatInt32Value(UNIT_FIELD_POWER1 + power, val);
 
-    WorldPacket data(SMSG_POWER_UPDATE);
-    data << GetPackGUID();
-    data << uint8(power);
-    data << uint32(val);
-    SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER);
+    if (withPowerUpdate)
+    {
+        WorldPacket data(SMSG_POWER_UPDATE, 8 + 1 + 4);
+        data << GetPackGUID();
+        data << uint8(power);
+        data << uint32(val);
+        SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER);
+    }
 
     // group update
     if (Player* player = ToPlayer())
