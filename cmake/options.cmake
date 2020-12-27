@@ -22,7 +22,7 @@ if(SCRIPTS)
   endif()
 endif()
 
-set(SCRIPTS "static" CACHE STRING "Build core with scripts")
+set(SCRIPTS "dynamic" CACHE STRING "Build core with scripts")
 set_property(CACHE SCRIPTS PROPERTY STRINGS ${SCRIPTS_AVAILABLE_OPTIONS})
 
 # Build a list of all script modules when -DSCRIPT="custom" is selected
@@ -33,10 +33,10 @@ foreach(SCRIPT_MODULE ${SCRIPT_MODULE_LIST})
   set_property(CACHE ${SCRIPT_MODULE_VARIABLE} PROPERTY STRINGS default disabled static dynamic)
 endforeach()
 
-option(TOOLS            "Build map/vmap/mmap extraction/assembler tools"              1)
+option(TOOLS            "Build map/vmap/mmap extraction/assembler tools"              0)
 option(USE_SCRIPTPCH    "Use precompiled headers when compiling scripts"              1)
 option(USE_COREPCH      "Use precompiled headers when compiling servers"              1)
-option(WITH_DYNAMIC_LINKING "Enable dynamic library linking."                         0)
+option(WITH_DYNAMIC_LINKING "Enable dynamic library linking."                         1)
 IsDynamicLinkingRequired(WITH_DYNAMIC_LINKING_FORCED)
 if(WITH_DYNAMIC_LINKING AND WITH_DYNAMIC_LINKING_FORCED)
   set(WITH_DYNAMIC_LINKING_FORCED OFF)

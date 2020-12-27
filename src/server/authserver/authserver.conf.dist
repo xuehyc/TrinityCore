@@ -190,12 +190,12 @@ IPLocationFile = ""
 #                                                                 section my.ini)
 #                     ".;/path/to/unix_socket;username;password;database" - (use Unix sockets on
 #                                                                           Unix/Linux)
-#        Default:     "127.0.0.1;3306;warhead;warhead;auth"
+#        Default:     "127.0.0.1;3306;warhead;warhead;wh_auth"
 #
 #    The SSL option will enable TLS when connecting to the specified database. If not provided or
 #    any value other than 'ssl' is set, TLS will not be used.
 
-LoginDatabaseInfo = "127.0.0.1;3306;warhead;warhead;auth"
+LoginDatabaseInfo = "127.0.0.1;3306;warhead;warhead;wh_auth"
 
 #
 #    LoginDatabase.WorkerThreads
@@ -246,7 +246,7 @@ TOTPMasterSecret =
 #        Default:     0  - (All Disabled)
 #                     1  - (All Enabled)
 
-Updates.EnableDatabases = 0
+Updates.EnableDatabases = 1
 
 #
 #    Updates.AutoSetup
