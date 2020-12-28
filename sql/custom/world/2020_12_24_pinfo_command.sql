@@ -1,10 +1,9 @@
-SET
-@r = '|r ', -- Reset color with whitespace
-@r1 = '|r', -- Reset color without whitespace
-@red = '|cFFFF0000',
-@extraColor = '|cff7bbef7',
-@newLine = CONCAT(@red, '│', @r1, @extraColor),
-@newLineList = CONCAT(@red, '│', @r1, '- ', @extraColor);
+SET @r := '|r '; -- Reset color with whitespace
+SET @r1 := '|r'; -- Reset color without whitespace
+SET @red := '|cFFFF0000';
+SET @extraColor := '|cff7bbef7';
+SET @newLine := CONCAT(@red, '│', @r1, @extraColor);
+SET @newLineList := CONCAT(@red, '│', @r1, '- ', @extraColor);
 
 -- Add new strings
 DELETE FROM `warhead_string` WHERE `entry` IN (453, 548, 549, 550, 714, 716, 749, 752, 788, 789, 843, 844, 845, 846, 847, 848, 849, 850, 851, 852, 853, 854, 871, 879, 882);
