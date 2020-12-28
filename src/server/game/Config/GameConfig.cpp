@@ -519,7 +519,8 @@ void GameConfig::LoadIntConfigs(bool reload /*= false*/)
     AddOption<int32>("Guild.BankEventLogRecordsCount");
     AddOption<int32>("Visibility.Notify.Period.OnContinents");
     AddOption<int32>("Visibility.Notify.Period.InInstances");
-    AddOption<int32>("Visibility.Notify.Period.InBGArenas");
+    AddOption<int32>("Visibility.Notify.Period.InBG");
+    AddOption<int32>("Visibility.Notify.Period.InArenas");
     AddOption<int32>("CharDelete.Method");
     AddOption<int32>("CharDelete.MinLevel");
     AddOption<int32>("CharDelete.DeathKnight.MinLevel");
@@ -684,7 +685,8 @@ void GameConfig::LoadFloatConfigs(bool reload /*= false*/)
     AddOption<float>("Arena.ArenaMatchmakerRatingModifier", 24.0f);
     AddOption<float>("Visibility.Distance.Continents", DEFAULT_VISIBILITY_DISTANCE);
     AddOption<float>("Visibility.Distance.Instances", DEFAULT_VISIBILITY_INSTANCE);
-    AddOption<float>("Visibility.Distance.BGArenas", DEFAULT_VISIBILITY_BGARENAS);
+    AddOption<float>("Visibility.Distance.BG", DEFAULT_VISIBILITY_BGARENAS);
+    AddOption<float>("Visibility.Distance.Arenas", DEFAULT_VISIBILITY_BGARENAS);
     AddOption<float>("Respawn.DynamicRateCreature");
     AddOption<float>("Respawn.DynamicRateGameObject");
     AddOption<float>("Stats.Limits.Dodge");
