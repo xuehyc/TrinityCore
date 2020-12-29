@@ -2306,7 +2306,7 @@ float GridMap::getMinHeight(float x, float y) const
     if (!_minHeightPlanes)
         return -500.0f;
 
-    GridCoord gridCoord = Warhead::ComputeGridCoord(x, y);
+    GridCoord gridCoord = Trinity::ComputeGridCoordSimple(x, y);
 
     int32 doubleGridX = int32(std::floor(-(x - MAP_HALFSIZE) / CENTER_GRID_OFFSET));
     int32 doubleGridY = int32(std::floor(-(y - MAP_HALFSIZE) / CENTER_GRID_OFFSET));
