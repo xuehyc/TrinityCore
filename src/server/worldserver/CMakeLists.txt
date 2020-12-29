@@ -70,8 +70,8 @@ if(WORLDSERVER_DYNAMIC_SCRIPT_MODULES_DEPENDENCIES)
 endif()
 
 # Install config
-ConfigInstall(worldserver "worldserver.conf")
-ConfigInstall(worldserver "warhead.conf")
+CopyDefaultConfig(worldserver)
+CollectModulesConfig(${CMAKE_CURRENT_SOURCE_DIR}/ModuleConfigs)
 
 if(UNIX)
   install(TARGETS worldserver DESTINATION bin)

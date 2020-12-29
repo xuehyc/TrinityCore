@@ -74,7 +74,7 @@ bool ConfigMgr::LoadInitial(std::string const& file, std::string& error)
     return true;
 }
 
-bool ConfigMgr::LoadAdditionalFile(std::string file, bool keepOnReload, std::string& error)
+bool ConfigMgr::LoadAdditionalFile(std::string file, std::string& error)
 {
     bpt::ptree fullTree;
     if (!LoadFile(file, fullTree, error))
@@ -82,9 +82,6 @@ bool ConfigMgr::LoadAdditionalFile(std::string file, bool keepOnReload, std::str
 
     for (bpt::ptree::value_type const& child : fullTree.begin()->second)
         _config.put_child(bpt::ptree::path_type(child.first, '/'), child.second);
-
-    if (keepOnReload)
-        _additonalFiles.emplace_back(std::move(file));
 
     return true;
 }
@@ -95,17 +92,12 @@ ConfigMgr* ConfigMgr::instance()
     return &instance;
 }
 
-bool ConfigMgr::Reload(std::vector<std::string>& errors)
+bool ConfigMgr::Reload()
 {
-    std::string error;
-    if (!LoadInitial(_filename, error))
-        errors.push_back(std::move(error));
+    if (!LoadAppConfigs())
+        return false;
 
-    for (std::string const& additionalFile : _additonalFiles)
-        if (!LoadAdditionalFile(additionalFile, false, error))
-            errors.push_back(std::move(error));
-
-    return errors.empty();
+    return LoadModulesConfigs();
 }
 
 template<class T>
@@ -223,47 +215,88 @@ std::string const ConfigMgr::GetConfigPath()
 #endif
 }
 
-void ConfigMgr::Configure(std::string const& fileName, std::vector<std::string> args)
+void ConfigMgr::Configure(std::string const& initFileName, std::vector<std::string> args, std::string const& modulesConfigList /*= ""*/)
 {
-    _filename = fileName;
+    _filename = initFileName;
     _args = std::move(args);
+
+    if (!modulesConfigList.empty())
+        for (auto const& itr : Warhead::Tokenize(modulesConfigList, ',', false))
+            _additonalFiles.emplace_back(std::string(itr));
 }
 
-bool ConfigMgr::LoadAppConfigs(bool enableCustom /*= true*/)
+bool ConfigMgr::LoadAppConfigs()
 {
     std::string configError;
-    std::string whConfig = "warhead.conf";
 
     // #1 - Load init config file .conf.dist
-    if (!sConfigMgr->LoadInitial(_filename + ".dist", configError))
+    if (!LoadInitial(_filename + ".dist", configError))
     {
-        SYS_LOG_ERROR("Error in config file: %s\n", configError.c_str());
+        SYS_LOG_ERROR("> Config: Error in config file: %s", configError.c_str());
         return false;
     }
 
     // #2 - Load .conf file
-    if (!sConfigMgr->LoadAdditionalFile(_filename, true, configError))
+    if (!LoadAdditionalFile(_filename, configError))
     {
-        SYS_LOG_ERROR("Error in config file: %s\n", configError.c_str());
+        SYS_LOG_ERROR("> Config: Error in config file: %s", configError.c_str());
         return false;
     }
 
-    if (enableCustom)
+    return true;
+}
+
+bool ConfigMgr::LoadModulesConfigs()
+{
+    if (_additonalFiles.empty())
+        return false;
+
+    // Start loading module configs
+    std::vector<std::string /*config variant*/> moduleConfigFiles;
+    std::string error;
+    std::string const& moduleConfigPath = GetConfigPath() + "modules/";
+    bool isExistDefaultConfig = true;
+    bool isExistDistConfig = true;
+
+    for (auto const& distFileName : _additonalFiles)
     {
-        // #3 - Load .dist custom file
-        if (!sConfigMgr->LoadAdditionalFile(sConfigMgr->GetConfigPath() + whConfig + ".dist", true, configError))
+        std::string defaultFileName = distFileName;
+
+        if (!defaultFileName.empty())
+            defaultFileName.erase(defaultFileName.end() - 5, defaultFileName.end());
+
+        // Load .conf.dist config
+        if (!LoadAdditionalFile(moduleConfigPath + distFileName, error))
         {
-            SYS_LOG_ERROR("Error in config file: %s\n", configError.c_str());
-            return false;
+            LOG_ERROR("config", "> Config: Error at loading module config file. %s", error.c_str());
+            isExistDistConfig = false;
         }
 
-        // #4 - Load .conf custom file
-        if (!sConfigMgr->LoadAdditionalFile(sConfigMgr->GetConfigPath() + whConfig, true, configError))
+        // Load .conf config
+        if (!LoadAdditionalFile(moduleConfigPath + defaultFileName, error))
         {
-            SYS_LOG_ERROR("Error in config file: %s\n", configError.c_str());
-            return false;
+            LOG_ERROR("config", "> Config: Error at loading module config file. %s", error.c_str());
+            isExistDefaultConfig = false;
         }
+
+        if (isExistDefaultConfig && isExistDistConfig)
+            moduleConfigFiles.emplace_back(defaultFileName);
+        else if (!isExistDefaultConfig && isExistDistConfig)
+            moduleConfigFiles.emplace_back(distFileName);
     }
+
+    // If module configs not exist - no load
+    if (moduleConfigFiles.empty())
+        return false;
+
+    // Print modules configurations
+    LOG_INFO("config", "");
+    LOG_INFO("config", "Using modules configuration:");
+
+    for (auto const& itr : moduleConfigFiles)
+        LOG_INFO("config", "> %s", itr.c_str());
+
+    LOG_INFO("config", "");
 
     return true;
 }

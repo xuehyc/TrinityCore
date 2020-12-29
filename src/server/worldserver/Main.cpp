@@ -138,7 +138,7 @@ extern int main(int argc, char** argv)
 #endif
 
     // Add file and args in config
-    sConfigMgr->Configure(configFile.generic_string(), std::vector<std::string>(argv, argv + argc));
+    sConfigMgr->Configure(configFile.generic_string(), std::vector<std::string>(argv, argv + argc), WH_MODULE_CONFIG_LIST);
 
     if (!sConfigMgr->LoadAppConfigs())
         return 1;
@@ -160,6 +160,9 @@ extern int main(int argc, char** argv)
             LOG_INFO("server.worldserver", "> Using Boost version:            %i.%i.%i", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
         }
     );
+
+    if (!sConfigMgr->LoadModulesConfigs())
+        return 1;
 
     OpenSSLCrypto::threadsSetup();
 

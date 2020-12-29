@@ -101,7 +101,7 @@ int main(int argc, char** argv)
     // Add file and args in config
     sConfigMgr->Configure(configFile.generic_string(), std::vector<std::string>(argv, argv + argc));
 
-    if (!sConfigMgr->LoadAppConfigs(false))
+    if (!sConfigMgr->LoadAppConfigs())
         return 1;
 
     // Init all logs
