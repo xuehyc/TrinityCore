@@ -3044,8 +3044,7 @@ bool Map::CheckRespawn(RespawnInfo* info)
         case SPAWN_TYPE_CREATURE:
         {
             // escort check for creatures only (if the world config boolean is set)
-            bool const isEscort = (sWorld->getBoolConfig(CONFIG_RESPAWN_DYNAMIC_ESCORTNPC) && data->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC);
-                bool const isEscort = (CONF_GET_BOOL("Respawn.DynamicEscortNPC") && data->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC);
+            bool const isEscort = (CONF_GET_BOOL("Respawn.DynamicEscortNPC") && data->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC);
 
             auto range = _creatureBySpawnIdStore.equal_range(info->spawnId);
             for (auto it = range.first; it != range.second; ++it)
