@@ -167,7 +167,6 @@ void GameLocale::LoadAchievementRewardLocales()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded %u Achievement Reward Locale strings in %u ms", static_cast<uint32>(_achievementRewardLocales.size()), GetMSTimeDiffToNow(oldMSTime));
-    LOG_INFO("server.loading", "");
 }
 
 void GameLocale::LoadBroadcastTexts()
@@ -207,13 +206,10 @@ void GameLocale::LoadBroadcastTexts()
         bct.EmotesID = fields[11].GetUInt32();
         bct.Flags = fields[12].GetUInt32();
 
-        if (bct.SoundEntriesID)
+        if (bct.SoundEntriesID && !sSoundEntriesStore.LookupEntry(bct.SoundEntriesID))
         {
-            if (!sSoundEntriesStore.LookupEntry(bct.SoundEntriesID))
-            {
-                LOG_DEBUG("broadcasttext", "BroadcastText (Id: %u) in table `broadcast_text` has SoundEntriesID %u but sound does not exist.", bct.Id, bct.SoundEntriesID);
-                bct.SoundEntriesID = 0;
-            }
+            LOG_DEBUG("broadcasttext", "BroadcastText (Id: %u) in table `broadcast_text` has SoundEntriesID %u but sound does not exist.", bct.Id, bct.SoundEntriesID);
+            bct.SoundEntriesID = 0;
         }
 
         if (!GetLanguageDescByID(bct.LanguageID))
@@ -222,31 +218,22 @@ void GameLocale::LoadBroadcastTexts()
             bct.LanguageID = LANG_UNIVERSAL;
         }
 
-        if (bct.EmoteId1)
+        if (bct.EmoteId1 && !sEmotesStore.LookupEntry(bct.EmoteId1))
         {
-            if (!sEmotesStore.LookupEntry(bct.EmoteId1))
-            {
-                LOG_DEBUG("broadcasttext", "BroadcastText (Id: %u) in table `broadcast_text` has EmoteId1 %u but emote does not exist.", bct.Id, bct.EmoteId1);
-                bct.EmoteId1 = 0;
-            }
+            LOG_DEBUG("broadcasttext", "BroadcastText (Id: %u) in table `broadcast_text` has EmoteId1 %u but emote does not exist.", bct.Id, bct.EmoteId1);
+            bct.EmoteId1 = 0;
         }
 
-        if (bct.EmoteId2)
+        if (bct.EmoteId2 && !sEmotesStore.LookupEntry(bct.EmoteId2))
         {
-            if (!sEmotesStore.LookupEntry(bct.EmoteId2))
-            {
-                LOG_DEBUG("broadcasttext", "BroadcastText (Id: %u) in table `broadcast_text` has EmoteId2 %u but emote does not exist.", bct.Id, bct.EmoteId2);
-                bct.EmoteId2 = 0;
-            }
+            LOG_DEBUG("broadcasttext", "BroadcastText (Id: %u) in table `broadcast_text` has EmoteId2 %u but emote does not exist.", bct.Id, bct.EmoteId2);
+            bct.EmoteId2 = 0;
         }
 
-        if (bct.EmoteId3)
+        if (bct.EmoteId3 && !sEmotesStore.LookupEntry(bct.EmoteId3))
         {
-            if (!sEmotesStore.LookupEntry(bct.EmoteId3))
-            {
-                LOG_DEBUG("broadcasttext", "BroadcastText (Id: %u) in table `broadcast_text` has EmoteId3 %u but emote does not exist.", bct.Id, bct.EmoteId3);
-                bct.EmoteId3 = 0;
-            }
+            LOG_DEBUG("broadcasttext", "BroadcastText (Id: %u) in table `broadcast_text` has EmoteId3 %u but emote does not exist.", bct.Id, bct.EmoteId3);
+            bct.EmoteId3 = 0;
         }
 
         _broadcastTextStore.emplace(bct.Id, bct);
@@ -921,37 +908,9 @@ std::string const GameLocale::GetItemLink(uint32 itemID, int8 index_loc /*= DEFA
         return "";
 
     std::string name = GetItemNameLocale(itemID, index_loc);
-    std::string color = "cffffffff";
+    uint32 color = ItemQualityColors[itemTemplate ? itemTemplate->Quality : uint32(ITEM_QUALITY_POOR)];
 
-    switch (itemTemplate->Quality)
-    {
-        case 0:
-            color = "cff9d9d9d";
-            break;
-        case 1:
-            color = "cffffffff";
-            break;
-        case 2:
-            color = "cff1eff00";
-            break;
-        case 3:
-            color = "cff0070dd";
-            break;
-        case 4:
-            color = "cffa335ee";
-            break;
-        case 5:
-            color = "cffff8000";
-            break;
-        case 6:
-        case 7:
-            color = "cffe6cc80";
-            break;
-        default:
-            break;
-    }
-
-    return Warhead::StringFormat("|%s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color.c_str(), itemID, name.c_str());
+    return Warhead::StringFormat("|c%08x|Hitem:%d:0:0:0:0:0:0:0:0|h[%s]|h|r", color, itemID, name.c_str());
 }
 
 std::string const GameLocale::GetSpellLink(uint32 spellID, int8 index_loc /*= DEFAULT_LOCALE*/)
