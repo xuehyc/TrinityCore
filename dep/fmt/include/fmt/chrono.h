@@ -8,6 +8,7 @@
 #ifndef FMT_CHRONO_H_
 #define FMT_CHRONO_H_
 
+#include <algorithm>
 #include <chrono>
 #include <ctime>
 #include <locale>
@@ -72,43 +73,27 @@ FMT_CONSTEXPR To lossless_integral_conversion(const From from, int& ec) {
   static_assert(F::is_integer, "From must be integral");
   static_assert(T::is_integer, "To must be integral");
 
-  if (F::is_signed && !T::is_signed) {
+  if (detail::const_check(F::is_signed && !T::is_signed)) {
     // From may be negative, not allowed!
     if (fmt::detail::is_negative(from)) {
       ec = 1;
       return {};
     }
-
     // From is positive. Can it always fit in To?
-    if (F::digits <= T::digits) {
-      // yes, From always fits in To.
-    } else {
-      // from may not fit in To, we have to do a dynamic check
-      if (from > static_cast<From>((T::max)())) {
-        ec = 1;
-        return {};
-      }
+    if (F::digits > T::digits &&
+        from > static_cast<From>(detail::max_value<To>())) {
+      ec = 1;
+      return {};
     }
   }
 
-  if (!F::is_signed && T::is_signed) {
-    // can from be held in To?
-    if (F::digits < T::digits) {
-      // yes, From always fits in To.
-    } else {
-      // from may not fit in To, we have to do a dynamic check
-      if (from > static_cast<From>((T::max)())) {
-        // outside range.
-        ec = 1;
-        return {};
-      }
-    }
+  if (!F::is_signed && T::is_signed && F::digits >= T::digits &&
+      from > static_cast<From>(detail::max_value<To>())) {
+    ec = 1;
+    return {};
   }
-
-  // reaching here means all is ok for lossless conversion.
-  return static_cast<To>(from);
-
-}  // function
+  return static_cast<To>(from);  // Lossless conversion.
+}
 
 template <typename To, typename From,
           FMT_ENABLE_IF(std::is_same<From, To>::value)>
@@ -190,11 +175,9 @@ To safe_duration_cast(std::chrono::duration<FromRep, FromPeriod> from,
   // safe conversion to IntermediateRep
   IntermediateRep count =
       lossless_integral_conversion<IntermediateRep>(from.count(), ec);
-  if (ec) {
-    return {};
-  }
+  if (ec) return {};
   // multiply with Factor::num without overflow or underflow
-  if (Factor::num != 1) {
+  if (detail::const_check(Factor::num != 1)) {
     const auto max1 = detail::max_value<IntermediateRep>() / Factor::num;
     if (count > max1) {
       ec = 1;
@@ -209,17 +192,9 @@ To safe_duration_cast(std::chrono::duration<FromRep, FromPeriod> from,
     count *= Factor::num;
   }
 
-  // this can't go wrong, right? den>0 is checked earlier.
-  if (Factor::den != 1) {
-    count /= Factor::den;
-  }
-  // convert to the to type, safely
-  using ToRep = typename To::rep;
-  const ToRep tocount = lossless_integral_conversion<ToRep>(count, ec);
-  if (ec) {
-    return {};
-  }
-  return To{tocount};
+  if (detail::const_check(Factor::den != 1)) count /= Factor::den;
+  auto tocount = lossless_integral_conversion<typename To::rep>(count, ec);
+  return ec ? To() : To(tocount);
 }
 
 /**
@@ -314,7 +289,11 @@ inline null<> gmtime_r(...) { return null<>(); }
 inline null<> gmtime_s(...) { return null<>(); }
 }  // namespace detail
 
-// Thread-safe replacement for std::localtime
+/**
+  Converts given time since epoch as ``std::time_t`` value into calendar time,
+  expressed in local time. Unlike ``std::localtime``, this function is
+  thread-safe on most platforms.
+ */
 inline std::tm localtime(std::time_t time) {
   struct dispatcher {
     std::time_t time_;
@@ -351,7 +330,16 @@ inline std::tm localtime(std::time_t time) {
   return lt.tm_;
 }
 
-// Thread-safe replacement for std::gmtime
+inline std::tm localtime(
+    std::chrono::time_point<std::chrono::system_clock> time_point) {
+  return localtime(std::chrono::system_clock::to_time_t(time_point));
+}
+
+/**
+  Converts given time since epoch as ``std::time_t`` value into calendar time,
+  expressed in Coordinated Universal Time (UTC). Unlike ``std::gmtime``, this
+  function is thread-safe on most platforms.
+ */
 inline std::tm gmtime(std::time_t time) {
   struct dispatcher {
     std::time_t time_;
@@ -387,33 +375,58 @@ inline std::tm gmtime(std::time_t time) {
   return gt.tm_;
 }
 
+inline std::tm gmtime(
+    std::chrono::time_point<std::chrono::system_clock> time_point) {
+  return gmtime(std::chrono::system_clock::to_time_t(time_point));
+}
+
 namespace detail {
 inline size_t strftime(char* str, size_t count, const char* format,
                        const std::tm* time) {
-  return std::strftime(str, count, format, time);
+  // Assign to a pointer to suppress GCCs -Wformat-nonliteral
+  // First assign the nullptr to suppress -Wsuggest-attribute=format
+  std::size_t (*strftime)(char*, std::size_t, const char*, const std::tm*) =
+      nullptr;
+  strftime = std::strftime;
+  return strftime(str, count, format, time);
 }
 
 inline size_t strftime(wchar_t* str, size_t count, const wchar_t* format,
                        const std::tm* time) {
-  return std::wcsftime(str, count, format, time);
+  // See above
+  std::size_t (*wcsftime)(wchar_t*, std::size_t, const wchar_t*,
+                          const std::tm*) = nullptr;
+  wcsftime = std::wcsftime;
+  return wcsftime(str, count, format, time);
 }
 }  // namespace detail
 
+template <typename Char>
+struct formatter<std::chrono::time_point<std::chrono::system_clock>, Char>
+    : formatter<std::tm, Char> {
+  template <typename FormatContext>
+  auto format(std::chrono::time_point<std::chrono::system_clock> val,
+              FormatContext& ctx) -> decltype(ctx.out()) {
+    std::tm time = localtime(val);
+    return formatter<std::tm, Char>::format(time, ctx);
+  }
+};
+
 template <typename Char> struct formatter<std::tm, Char> {
-  template <typename ParseContext>
-  auto parse(ParseContext& ctx) -> decltype(ctx.begin()) {
+  FMT_CONSTEXPR auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     auto it = ctx.begin();
     if (it != ctx.end() && *it == ':') ++it;
     auto end = it;
     while (end != ctx.end() && *end != '}') ++end;
-    tm_format.reserve(detail::to_unsigned(end - it + 1));
-    tm_format.append(it, end);
-    tm_format.push_back('\0');
+    specs = {it, detail::to_unsigned(end - it)};
     return end;
   }
 
   template <typename FormatContext>
   auto format(const std::tm& tm, FormatContext& ctx) -> decltype(ctx.out()) {
+    basic_memory_buffer<Char> tm_format;
+    tm_format.append(specs.begin(), specs.end());
+    tm_format.push_back('\0');
     basic_memory_buffer<Char> buf;
     size_t start = buf.size();
     for (;;) {
@@ -436,34 +449,68 @@ template <typename Char> struct formatter<std::tm, Char> {
     return std::copy(buf.begin(), buf.end(), ctx.out());
   }
 
-  basic_memory_buffer<Char> tm_format;
+  basic_string_view<Char> specs;
 };
 
 namespace detail {
 template <typename Period> FMT_CONSTEXPR const char* get_units() {
   return nullptr;
 }
-template <> FMT_CONSTEXPR const char* get_units<std::atto>() { return "as"; }
-template <> FMT_CONSTEXPR const char* get_units<std::femto>() { return "fs"; }
-template <> FMT_CONSTEXPR const char* get_units<std::pico>() { return "ps"; }
-template <> FMT_CONSTEXPR const char* get_units<std::nano>() { return "ns"; }
-template <> FMT_CONSTEXPR const char* get_units<std::micro>() { return "µs"; }
-template <> FMT_CONSTEXPR const char* get_units<std::milli>() { return "ms"; }
-template <> FMT_CONSTEXPR const char* get_units<std::centi>() { return "cs"; }
-template <> FMT_CONSTEXPR const char* get_units<std::deci>() { return "ds"; }
-template <> FMT_CONSTEXPR const char* get_units<std::ratio<1>>() { return "s"; }
-template <> FMT_CONSTEXPR const char* get_units<std::deca>() { return "das"; }
-template <> FMT_CONSTEXPR const char* get_units<std::hecto>() { return "hs"; }
-template <> FMT_CONSTEXPR const char* get_units<std::kilo>() { return "ks"; }
-template <> FMT_CONSTEXPR const char* get_units<std::mega>() { return "Ms"; }
-template <> FMT_CONSTEXPR const char* get_units<std::giga>() { return "Gs"; }
-template <> FMT_CONSTEXPR const char* get_units<std::tera>() { return "Ts"; }
-template <> FMT_CONSTEXPR const char* get_units<std::peta>() { return "Ps"; }
-template <> FMT_CONSTEXPR const char* get_units<std::exa>() { return "Es"; }
-template <> FMT_CONSTEXPR const char* get_units<std::ratio<60>>() {
+template <> FMT_CONSTEXPR inline const char* get_units<std::atto>() {
+  return "as";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::femto>() {
+  return "fs";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::pico>() {
+  return "ps";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::nano>() {
+  return "ns";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::micro>() {
+  return "µs";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::milli>() {
+  return "ms";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::centi>() {
+  return "cs";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::deci>() {
+  return "ds";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::ratio<1>>() {
+  return "s";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::deca>() {
+  return "das";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::hecto>() {
+  return "hs";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::kilo>() {
+  return "ks";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::mega>() {
+  return "Ms";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::giga>() {
+  return "Gs";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::tera>() {
+  return "Ts";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::peta>() {
+  return "Ps";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::exa>() {
+  return "Es";
+}
+template <> FMT_CONSTEXPR inline const char* get_units<std::ratio<60>>() {
   return "m";
 }
-template <> FMT_CONSTEXPR const char* get_units<std::ratio<3600>>() {
+template <> FMT_CONSTEXPR inline const char* get_units<std::ratio<3600>>() {
   return "h";
 }
 
@@ -634,28 +681,29 @@ FMT_CONSTEXPR const Char* parse_chrono_format(const Char* begin,
 struct chrono_format_checker {
   FMT_NORETURN void report_no_date() { FMT_THROW(format_error("no date")); }
 
-  template <typename Char> void on_text(const Char*, const Char*) {}
+  template <typename Char>
+  FMT_CONSTEXPR void on_text(const Char*, const Char*) {}
   FMT_NORETURN void on_abbr_weekday() { report_no_date(); }
   FMT_NORETURN void on_full_weekday() { report_no_date(); }
   FMT_NORETURN void on_dec0_weekday(numeric_system) { report_no_date(); }
   FMT_NORETURN void on_dec1_weekday(numeric_system) { report_no_date(); }
   FMT_NORETURN void on_abbr_month() { report_no_date(); }
   FMT_NORETURN void on_full_month() { report_no_date(); }
-  void on_24_hour(numeric_system) {}
-  void on_12_hour(numeric_system) {}
-  void on_minute(numeric_system) {}
-  void on_second(numeric_system) {}
+  FMT_CONSTEXPR void on_24_hour(numeric_system) {}
+  FMT_CONSTEXPR void on_12_hour(numeric_system) {}
+  FMT_CONSTEXPR void on_minute(numeric_system) {}
+  FMT_CONSTEXPR void on_second(numeric_system) {}
   FMT_NORETURN void on_datetime(numeric_system) { report_no_date(); }
   FMT_NORETURN void on_loc_date(numeric_system) { report_no_date(); }
   FMT_NORETURN void on_loc_time(numeric_system) { report_no_date(); }
   FMT_NORETURN void on_us_date() { report_no_date(); }
   FMT_NORETURN void on_iso_date() { report_no_date(); }
-  void on_12_hour_time() {}
-  void on_24_hour_time() {}
-  void on_iso_time() {}
-  void on_am_pm() {}
-  void on_duration_value() {}
-  void on_duration_unit() {}
+  FMT_CONSTEXPR void on_12_hour_time() {}
+  FMT_CONSTEXPR void on_24_hour_time() {}
+  FMT_CONSTEXPR void on_iso_time() {}
+  FMT_CONSTEXPR void on_am_pm() {}
+  FMT_CONSTEXPR void on_duration_value() {}
+  FMT_CONSTEXPR void on_duration_unit() {}
   FMT_NORETURN void on_utc_offset() { report_no_date(); }
   FMT_NORETURN void on_tz_name() { report_no_date(); }
 };
@@ -681,7 +729,8 @@ inline bool isfinite(T value) {
 // Converts value to int and checks that it's in the range [0, upper).
 template <typename T, FMT_ENABLE_IF(std::is_integral<T>::value)>
 inline int to_nonnegative_int(T value, int upper) {
-  FMT_ASSERT(value >= 0 && value <= upper, "invalid value");
+  FMT_ASSERT(value >= 0 && to_unsigned(value) <= to_unsigned(upper),
+             "invalid value");
   (void)upper;
   return static_cast<int>(value);
 }
@@ -759,15 +808,21 @@ inline std::chrono::duration<Rep, std::milli> get_milliseconds(
   return std::chrono::duration<Rep, std::milli>(static_cast<Rep>(ms));
 }
 
-template <typename Char, typename Rep, typename OutputIt>
-OutputIt format_duration_value(OutputIt out, Rep val, int precision) {
-  const Char pr_f[] = {'{', ':', '.', '{', '}', 'f', '}', 0};
-  if (precision >= 0) return format_to(out, pr_f, val, precision);
-  const Char fp_f[] = {'{', ':', 'g', '}', 0};
-  const Char format[] = {'{', '}', 0};
-  return format_to(out, std::is_floating_point<Rep>::value ? fp_f : format,
-                   val);
+template <typename Char, typename Rep, typename OutputIt,
+          FMT_ENABLE_IF(std::is_integral<Rep>::value)>
+OutputIt format_duration_value(OutputIt out, Rep val, int) {
+  return write<Char>(out, val);
 }
+
+template <typename Char, typename Rep, typename OutputIt,
+          FMT_ENABLE_IF(std::is_floating_point<Rep>::value)>
+OutputIt format_duration_value(OutputIt out, Rep val, int precision) {
+  auto specs = basic_format_specs<Char>();
+  specs.precision = precision;
+  specs.type = precision > 0 ? 'f' : 'g';
+  return write<Char>(out, val, specs);
+}
+
 template <typename Char, typename OutputIt>
 OutputIt copy_unit(string_view unit, OutputIt out, Char) {
   return std::copy(unit.begin(), unit.end(), out);
@@ -785,10 +840,15 @@ template <typename Char, typename Period, typename OutputIt>
 OutputIt format_duration_unit(OutputIt out) {
   if (const char* unit = get_units<Period>())
     return copy_unit(string_view(unit), out, Char());
-  const Char num_f[] = {'[', '{', '}', ']', 's', 0};
-  if (const_check(Period::den == 1)) return format_to(out, num_f, Period::num);
-  const Char num_def_f[] = {'[', '{', '}', '/', '{', '}', ']', 's', 0};
-  return format_to(out, num_def_f, Period::num, Period::den);
+  *out++ = '[';
+  out = write<Char>(out, Period::num);
+  if (const_check(Period::den != 1)) {
+    *out++ = '/';
+    out = write<Char>(out, Period::den);
+  }
+  *out++ = ']';
+  *out++ = 's';
+  return out;
 }
 
 template <typename FormatContext, typename OutputIt, typename Rep,
@@ -1016,11 +1076,11 @@ template <typename Rep, typename Period, typename Char>
 struct formatter<std::chrono::duration<Rep, Period>, Char> {
  private:
   basic_format_specs<Char> specs;
-  int precision;
+  int precision = -1;
   using arg_ref_type = detail::arg_ref<Char>;
   arg_ref_type width_ref;
   arg_ref_type precision_ref;
-  mutable basic_string_view<Char> format_str;
+  basic_string_view<Char> format_str;
   using duration = std::chrono::duration<Rep, Period>;
 
   struct spec_handler {
@@ -1043,17 +1103,21 @@ struct formatter<std::chrono::duration<Rep, Period>, Char> {
     }
 
     void on_error(const char* msg) { FMT_THROW(format_error(msg)); }
-    void on_fill(basic_string_view<Char> fill) { f.specs.fill = fill; }
-    void on_align(align_t align) { f.specs.align = align; }
-    void on_width(int width) { f.specs.width = width; }
-    void on_precision(int _precision) { f.precision = _precision; }
-    void end_precision() {}
+    FMT_CONSTEXPR void on_fill(basic_string_view<Char> fill) {
+      f.specs.fill = fill;
+    }
+    FMT_CONSTEXPR void on_align(align_t align) { f.specs.align = align; }
+    FMT_CONSTEXPR void on_width(int width) { f.specs.width = width; }
+    FMT_CONSTEXPR void on_precision(int _precision) {
+      f.precision = _precision;
+    }
+    FMT_CONSTEXPR void end_precision() {}
 
-    template <typename Id> void on_dynamic_width(Id arg_id) {
+    template <typename Id> FMT_CONSTEXPR void on_dynamic_width(Id arg_id) {
       f.width_ref = make_arg_ref(arg_id);
     }
 
-    template <typename Id> void on_dynamic_precision(Id arg_id) {
+    template <typename Id> FMT_CONSTEXPR void on_dynamic_precision(Id arg_id) {
       f.precision_ref = make_arg_ref(arg_id);
     }
   };
@@ -1083,8 +1147,6 @@ struct formatter<std::chrono::duration<Rep, Period>, Char> {
   }
 
  public:
-  formatter() : precision(-1) {}
-
   FMT_CONSTEXPR auto parse(basic_format_parse_context<Char>& ctx)
       -> decltype(ctx.begin()) {
     auto range = do_parse(ctx);

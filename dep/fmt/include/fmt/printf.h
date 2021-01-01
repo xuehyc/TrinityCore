@@ -181,7 +181,7 @@ template <typename Char> class printf_width_handler {
 template <typename Char, typename Context>
 void vprintf(buffer<Char>& buf, basic_string_view<Char> format,
              basic_format_args<Context> args) {
-  Context(std::back_inserter(buf), format, args).format();
+  Context(buffer_appender<Char>(buf), format, args).format();
 }
 }  // namespace detail
 
@@ -474,14 +474,19 @@ OutputIt basic_printf_context<OutputIt, Char>::format() {
   const Char* end = parse_ctx_.end();
   auto it = start;
   while (it != end) {
+    if (!detail::find<false, Char>(it, end, '%', it)) {
+      it = end;  // detail::find leaves it == nullptr if it doesn't find '%'
+      break;
+    }
     char_type c = *it++;
-    if (c != '%') continue;
     if (it != end && *it == c) {
-      out = std::copy(start, it, out);
+      out = detail::write(
+          out, basic_string_view<Char>(start, detail::to_unsigned(it - start)));
       start = ++it;
       continue;
     }
-    out = std::copy(start, it - 1, out);
+    out = detail::write(out, basic_string_view<Char>(
+                                 start, detail::to_unsigned(it - 1 - start)));
 
     format_specs specs;
     specs.align = align::right;
@@ -593,12 +598,13 @@ OutputIt basic_printf_context<OutputIt, Char>::format() {
     // Format argument.
     out = visit_format_arg(ArgFormatter(out, specs, *this), arg);
   }
-  return std::copy(start, it, out);
+  return detail::write(
+      out, basic_string_view<Char>(start, detail::to_unsigned(it - start)));
 }
 
 template <typename Char>
 using basic_printf_context_t =
-    basic_printf_context<std::back_insert_iterator<detail::buffer<Char>>, Char>;
+    basic_printf_context<detail::buffer_appender<Char>, Char>;
 
 using printf_context = basic_printf_context_t<char>;
 using wprintf_context = basic_printf_context_t<wchar_t>;
