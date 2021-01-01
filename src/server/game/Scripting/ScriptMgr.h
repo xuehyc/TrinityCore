@@ -19,6 +19,7 @@
 #define SC_SCRIPTMGR_H
 
 #include "Common.h"
+#include "DatabaseEnvFwd.h"
 #include "ObjectGuid.h"
 #include "Tuples.h"
 #include "Types.h"
@@ -389,6 +390,11 @@ class WH_GAME_API ItemScript : public ScriptObject
 
         // Called before casting a combat spell from this item (chance on hit spells of item template, can be used to prevent cast if returning false)
         virtual bool OnCastItemCombatSpell(Player* /*player*/, Unit* /*victim*/, SpellInfo const* /*spellInfo*/, Item* /*item*/) { return true; }
+
+        virtual void OnMirrorImageDisplayItem(const Item* /*item*/, uint32& /*display*/) { }
+
+        // Called before item delete
+        virtual void OnItemDelFromDB(CharacterDatabaseTransaction /*trans*/, ObjectGuid::LowType /*itemGuid*/) { }
 };
 
 class WH_GAME_API UnitScript : public ScriptObject
@@ -732,6 +738,12 @@ class WH_GAME_API PlayerScript : public ScriptObject
 
         // Called when a player presses release when he died
         virtual void OnPlayerRepop(Player* /*player*/) { }
+
+        // To change behaviour of set visible item slot
+        virtual void OnPlayerAfterSetVisibleItemSlot(Player* /*player*/, uint8 /*slot*/, Item* /*item*/) { }
+
+        // After an item has been moved from inventory
+        virtual void OnPlayerAfterMoveItemFromInventory(Player* /*player*/, Item* /*it*/, uint8 /*bag*/, uint8 /*slot*/, bool /*update*/) { }
 };
 
 class WH_GAME_API AccountScript : public ScriptObject
@@ -945,6 +957,8 @@ class WH_GAME_API ScriptMgr
         bool OnItemExpire(Player* player, ItemTemplate const* proto);
         bool OnItemRemove(Player* player, Item* item);
         bool OnCastItemCombatSpell(Player* player, Unit* victim, SpellInfo const* spellInfo, Item* item);
+        void OnMirrorImageDisplayItem(const Item* item, uint32& display);
+        void OnItemDelFromDB(CharacterDatabaseTransaction trans, ObjectGuid::LowType itemGuid);
 
     public: /* CreatureScript */
 
@@ -1050,6 +1064,8 @@ class WH_GAME_API ScriptMgr
         void OnQuestStatusChange(Player* player, uint32 questId);
         void OnMovieComplete(Player* player, uint32 movieId);
         void OnPlayerRepop(Player* player);
+        void OnPlayerAfterSetVisibleItemSlot(Player* player, uint8 slot, Item* item);
+        void OnPlayerAfterMoveItemFromInventory(Player* player, Item* it, uint8 bag, uint8 slot, bool update);
 
     public: /* AccountScript */
 

@@ -144,7 +144,7 @@ WH_GAME_API extern DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptSto
 WH_GAME_API extern DBCStorage <HolidaysEntry>                sHolidaysStore;
 WH_GAME_API extern DBCStorage <ItemEntry>                    sItemStore;
 WH_GAME_API extern DBCStorage <ItemBagFamilyEntry>           sItemBagFamilyStore;
-//WH_GAME_API extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently
+WH_GAME_API extern DBCStorage <ItemDisplayInfoEntry>         sItemDisplayInfoStore;
 WH_GAME_API extern DBCStorage <ItemExtendedCostEntry>        sItemExtendedCostStore;
 WH_GAME_API extern DBCStorage <ItemLimitCategoryEntry>       sItemLimitCategoryStore;
 WH_GAME_API extern DBCStorage <ItemRandomPropertiesEntry>    sItemRandomPropertiesStore;

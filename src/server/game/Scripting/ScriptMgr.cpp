@@ -1574,6 +1574,16 @@ bool ScriptMgr::OnCastItemCombatSpell(Player* player, Unit* victim, SpellInfo co
     return tmpscript->OnCastItemCombatSpell(player, victim, spellInfo, item);
 }
 
+void ScriptMgr::OnMirrorImageDisplayItem(const Item* item, uint32& display)
+{
+    FOREACH_SCRIPT(ItemScript)->OnMirrorImageDisplayItem(item, display);
+}
+
+void ScriptMgr::OnItemDelFromDB(CharacterDatabaseTransaction trans, ObjectGuid::LowType itemGuid)
+{
+    FOREACH_SCRIPT(ItemScript)->OnItemDelFromDB(trans, itemGuid);
+}
+
 CreatureAI* ScriptMgr::GetCreatureAI(Creature* creature)
 {
     ASSERT(creature);
@@ -1976,6 +1986,16 @@ void ScriptMgr::OnQuestObjectiveProgress(Player* player, Quest const* quest, uin
 void ScriptMgr::OnMovieComplete(Player* player, uint32 movieId)
 {
     FOREACH_SCRIPT(PlayerScript)->OnMovieComplete(player, movieId);
+}
+
+void ScriptMgr::OnPlayerAfterSetVisibleItemSlot(Player* player, uint8 slot, Item* item)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnPlayerAfterSetVisibleItemSlot(player, slot, item);
+}
+
+void ScriptMgr::OnPlayerAfterMoveItemFromInventory(Player* player, Item* it, uint8 bag, uint8 slot, bool update)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnPlayerAfterMoveItemFromInventory(player, it, bag, slot, update);
 }
 
 // Account
