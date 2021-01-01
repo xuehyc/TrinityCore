@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of the WarheadCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -16,6 +16,7 @@
  */
 
 #include "GameLocale.h"
+#include "GameConfig.h"
 #include "LocaleCommon.h"
 #include "ModuleLocale.h"
 #include "AccountMgr.h"
@@ -42,6 +43,9 @@ GameLocale* GameLocale::instance()
 
 void GameLocale::LoadAllLocales()
 {
+    // Get once for all the locale index of DBC language (console/broadcasts)
+    SetDBCLocaleIndex(sWorld->GetDefaultDbcLocale());
+
     uint32 oldMSTime = getMSTime();
 
     LoadBroadcastTexts();
@@ -63,8 +67,6 @@ void GameLocale::LoadAllLocales()
     LoadClassStrings();
     sModuleLocale->Init();
 
-    // Get once for all the locale index of DBC language (console/broadcasts)
-    sGameLocale->SetDBCLocaleIndex(sWorld->GetDefaultDbcLocale());
     LOG_INFO("server.loading", ">> Localization strings loaded in %u ms", GetMSTimeDiffToNow(oldMSTime));
     LOG_INFO("server.loading", "");
 }
@@ -152,6 +154,9 @@ void GameLocale::LoadAchievementRewardLocales()
 
         LocaleConstant locale = GetLocaleByName(localeName);
         if (locale == LOCALE_enUS)
+            continue;
+
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
             continue;
 
         AchievementRewardLocale& data = _achievementRewardLocales[ID];
@@ -275,6 +280,9 @@ void GameLocale::LoadBroadcastTextLocales()
         if (locale == LOCALE_enUS)
             continue;
 
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
+            continue;
+
         auto const& bct = _broadcastTextStore.find(id);
         if (bct == _broadcastTextStore.end())
         {
@@ -311,6 +319,9 @@ void GameLocale::LoadCreatureLocales()
         if (locale == LOCALE_enUS)
             continue;
 
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
+            continue;
+
         CreatureLocale& data = _creatureLocaleStore[id];
 
         Warhead::Game::Locale::AddLocaleString(fields[2].GetString(), locale, data.Name);
@@ -344,6 +355,9 @@ void GameLocale::LoadGossipMenuItemsLocales()
         if (locale == LOCALE_enUS)
             continue;
 
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
+            continue;
+
         GossipMenuItemsLocale& data = _gossipMenuItemsLocaleStore[MAKE_PAIR32(menuId, optionId)];
 
         Warhead::Game::Locale::AddLocaleString(fields[3].GetString(), locale, data.OptionText);
@@ -375,6 +389,9 @@ void GameLocale::LoadGameObjectLocales()
         if (locale == LOCALE_enUS)
             continue;
 
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
+            continue;
+
         GameObjectLocale& data = _gameObjectLocaleStore[id];
 
         Warhead::Game::Locale::AddLocaleString(fields[2].GetString(), locale, data.Name);
@@ -403,6 +420,9 @@ void GameLocale::LoadItemLocales()
 
         LocaleConstant locale = GetLocaleByName(localeName);
         if (locale == LOCALE_enUS)
+            continue;
+
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
             continue;
 
         ItemLocale& data = _itemLocaleStore[id];
@@ -436,6 +456,9 @@ void GameLocale::LoadItemSetNameLocales()
         if (locale == LOCALE_enUS)
             continue;
 
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
+            continue;
+
         ItemSetNameLocale& data = _itemSetNameLocaleStore[id];
 
         Warhead::Game::Locale::AddLocaleString(fields[2].GetString(), locale, data.Name);
@@ -467,6 +490,9 @@ void GameLocale::LoadNpcTextLocales()
 
         LocaleConstant locale = GetLocaleByName(localeName);
         if (locale == LOCALE_enUS)
+            continue;
+
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
             continue;
 
         NpcTextLocale& data = _npcTextLocaleStore[id];
@@ -504,6 +530,9 @@ void GameLocale::LoadPageTextLocales()
         if (locale == LOCALE_enUS)
             continue;
 
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
+            continue;
+
         PageTextLocale& data = _pageTextLocaleStore[id];
 
         Warhead::Game::Locale::AddLocaleString(fields[2].GetString(), locale, data.Text);
@@ -535,6 +564,9 @@ void GameLocale::LoadPointOfInterestLocales()
         if (locale == LOCALE_enUS)
             continue;
 
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
+            continue;
+
         PointOfInterestLocale& data = _pointOfInterestLocaleStore[id];
 
         Warhead::Game::Locale::AddLocaleString(fields[2].GetString(), locale, data.Name);
@@ -563,6 +595,9 @@ void GameLocale::LoadQuestLocales()
 
         LocaleConstant locale = GetLocaleByName(localeName);
         if (locale == LOCALE_enUS)
+            continue;
+
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
             continue;
 
         QuestLocale& data = _questLocaleStore[id];
@@ -602,6 +637,9 @@ void GameLocale::LoadQuestOfferRewardLocale()
         if (locale == LOCALE_enUS)
             continue;
 
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
+            continue;
+
         QuestOfferRewardLocale& data = _questOfferRewardLocaleStore[id];
 
         Warhead::Game::Locale::AddLocaleString(fields[2].GetString(), locale, data.RewardText);
@@ -630,6 +668,9 @@ void GameLocale::LoadQuestRequestItemsLocale()
 
         LocaleConstant locale = GetLocaleByName(localeName);
         if (locale == LOCALE_enUS)
+            continue;
+
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
             continue;
 
         QuestRequestItemsLocale& data = _questRequestItemsLocaleStore[id];
@@ -678,6 +719,9 @@ void GameLocale::LoadQuestGreetingLocales()
 
         LocaleConstant locale = GetLocaleByName(localeName);
         if (locale == LOCALE_enUS)
+            continue;
+
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
             continue;
 
         QuestGreetingLocale& data = _questGreetingLocaleStore[MAKE_PAIR32(id, type)];
@@ -794,7 +838,8 @@ void GameLocale::LoadRaceStrings()
         std::string localeName = fields[1].GetString();
 
         LocaleConstant locale = GetLocaleByName(localeName);
-        if (locale == LOCALE_enUS)
+
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
             continue;
 
         auto& data = _raceStringStore[ID];
@@ -828,7 +873,8 @@ void GameLocale::LoadClassStrings()
         std::string localeName = fields[1].GetString();
 
         LocaleConstant locale = GetLocaleByName(localeName);
-        if (locale == LOCALE_enUS)
+
+        if (CONF_GET_BOOL("Language.SupportOnlyDefault") && locale != GetDBCLocaleIndex())
             continue;
 
         auto& data = _classStringStore[ID];

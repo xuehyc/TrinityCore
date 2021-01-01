@@ -643,6 +643,15 @@ StrictPetNames = 0
 DBC.Locale = 255
 
 #
+#    Language.SupportOnlyDefault
+#        Description: Loading only support game locales data from DB
+#        Default:     1 - (Enable)
+#                     0 - (Disable)
+#
+
+Language.SupportOnlyDefault = 1
+
+#
 #    DeclinedNames
 #        Description: Allow Russian clients to set and use declined names.
 #        Default:     0 - (Disabled, Except when the Russian RealmZone is set)

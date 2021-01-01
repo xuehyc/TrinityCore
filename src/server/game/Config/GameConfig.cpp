@@ -254,6 +254,7 @@ void GameConfig::LoadBoolConfigs(bool reload /*= false*/)
     if (reload)
         _boolConfigs.clear();
 
+    AddOption<bool>("Language.SupportOnlyDefault", true);
     AddOption<bool>("AllowTickets", true);
     AddOption<bool>("DeletedCharacterTicketTrace");
     AddOption<bool>("DurabilityLoss.InPvP");

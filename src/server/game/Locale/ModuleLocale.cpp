@@ -34,6 +34,7 @@ ModuleLocale* ModuleLocale::instance()
 
 void ModuleLocale::Init()
 {
+    LOG_INFO("server.loading", "");
     LOG_INFO("server.loading", ">> Loading modules strings");
     LoadModuleString();
 }
