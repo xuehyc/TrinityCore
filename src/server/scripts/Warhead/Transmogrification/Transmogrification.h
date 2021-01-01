@@ -30,7 +30,7 @@ class Creature;
 class WorldSession;
 struct ItemTemplate;
 
-class WH_GAME_API Transmogrification
+class Transmogrification
 {
     Transmogrification() = default;
     ~Transmogrification() = default;
