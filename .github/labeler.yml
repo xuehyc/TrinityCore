@@ -1,0 +1,35 @@
+Dependence:
+  - dep/**/*
+
+DB:
+  - sql/**/*.sql
+
+Core:
+  - any: ['src/**/*', '!src/server/scripts/*', '!src/tests/*']
+
+Scripts:
+  - src/server/scripts/**/*.cpp
+  - src/server/scripts/**/*.h
+
+Scripts Warhead:
+  - src/server/scripts/Warhead/**/*
+  - src/server/scripts/Warhead/**/*
+
+Tools:
+  - src/tools/**/*
+
+Documentation:
+  - ./*.md
+
+Bash:
+  - ./*.sh
+  - apps/**/*.sh
+
+Cmake:
+  - ./*.cmake
+  - cmake/**/*
+  - src/**/*.cmake
+  - src/**/CMakeLists.txt
+
+Workflow:
+  - .github/workflows/*

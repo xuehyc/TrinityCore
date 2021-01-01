@@ -1,14 +1,12 @@
-on:
-  pull_request_target:
-    types: [opened]
+name: "PR Labeler"
+on: [pull_request_target]
 
 jobs:
-  pr_labeler:
-    runs-on: ubuntu-latest
-    name: Pull Request Labeler
+  triage:
+    runs-on: ubuntu-20.04
     steps:
-    - name: Pull Request Labeler
-      id: pr-labeler
-      uses: TrinityCore/GitHub-Actions@pr-labeler-prod
+    - uses: actions/labeler@main
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+        configuration-path: .github/labeler.yml
+        sync-labels: true
