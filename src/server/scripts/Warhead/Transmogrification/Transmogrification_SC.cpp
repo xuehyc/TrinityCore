@@ -17,9 +17,10 @@
 
 #include "Transmogrification.h"
 #include "GameConfig.h"
-#include "GossipDef.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 
 class Transmogrification_NPC : public CreatureScript
 {
