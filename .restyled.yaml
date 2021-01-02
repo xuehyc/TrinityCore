@@ -42,8 +42,6 @@ restylers:
       arguments: [
         "-A1", # --style=allman / --style=bsd / --style=break / -A1
         "-xV", # --attach-closing-while / -xV
-        "-C",  # --indent-classes / -C
-        "-S",  # --indent-switches / -S
         "-N",  # --indent-namespaces / -N
         "-Y",  # --indent-col1-comments / -Y
         "-p",  # --pad-oper / -p
