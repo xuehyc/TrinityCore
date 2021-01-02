@@ -20,6 +20,8 @@
 
 #include "Common.h"
 #include "ObjectGuid.h"
+#include <set>
+#include <unordered_map>
 #include <vector>
 
 #define MAX_OPTIONS 25 // do not alter
