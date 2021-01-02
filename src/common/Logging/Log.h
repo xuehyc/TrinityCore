@@ -70,7 +70,6 @@ enum LoggerOptions
 
 class WH_COMMON_API Log
 {
-private:
     Log();
     ~Log();
     Log(Log const&) = delete;
@@ -154,13 +153,10 @@ void check_args(std::string const&, ...);
         } while (0)
 #else
 #define LOG_MSG_BODY(filterType__, level__, ...)                        \
-        /*__pragma(warning(push))*/                                     \
-        /*__pragma(warning(disable:4127))*/                             \
         do {                                                            \
             if (sLog->ShouldLog(filterType__, level__))                 \
                 LOG_EXCEPTION_FREE(filterType__, level__, __VA_ARGS__); \
-        } while (0)                                                     \
-        /*__pragma(warning(pop))*/
+        } while (0)
 #endif
 
 // Fatal - 1

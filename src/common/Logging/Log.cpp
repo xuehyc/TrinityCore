@@ -72,7 +72,7 @@ namespace
             return;
         }
 
-        _channelStore.insert(std::make_pair(channelName, channel));
+        _channelStore.emplace(channelName, channel);
     }
 
     Poco::Logger* GetLoggerByType(std::string_view type)
@@ -262,9 +262,9 @@ void Log::CreateLoggerFromConfig(std::string const& configLoggerName)
     {
         Logger::create(loggerName, splitterChannel, static_cast<uint8>(level));
     }
-    catch (const std::exception& e)
+    catch (const Poco::Exception& e)
     {
-        SYS_LOG_ERROR("Log::CreateLogger - %s", e.what());
+        SYS_LOG_ERROR("Log::CreateLogger - %s", e.displayText().c_str());
     }
 }
 
@@ -324,9 +324,9 @@ void Log::CreateChannelsFromConfig(std::string const& logChannelName)
         _pattern->setProperty("pattern", std::string(pattern));
         _pattern->setProperty("times", std::string(times));
     }
-    catch (const std::exception& e)
+    catch (const Poco::Exception& e)
     {
-        SYS_LOG_ERROR("Log::CreateLoggerFromConfig: %s\n", e.what());
+        SYS_LOG_ERROR("Log::CreateLoggerFromConfig: %s\n", e.displayText().c_str());
     }
 
     if (channelType.value() == static_cast<uint8>(FormattingChannelType::FORMATTING_CHANNEL_TYPE_CONSOLE))
@@ -340,7 +340,7 @@ void Log::CreateChannelsFromConfig(std::string const& logChannelName)
         if (!colorOptions.empty())
         {
             auto const& tokensColor = Warhead::Tokenize(colorOptions, ' ', false);
-            if (tokensColor.size() == 8)
+            if (tokensColor.size() != static_cast<size_t>(LogLevel::LOG_LEVEL_MAX) - 1)
             {
                 try
                 {
@@ -353,9 +353,9 @@ void Log::CreateChannelsFromConfig(std::string const& logChannelName)
                     _channel->setProperty("debugColor", std::string(tokensColor[6]));
                     _channel->setProperty("traceColor", std::string(tokensColor[7]));
                 }
-                catch (const std::exception& e)
+                catch (const Poco::Exception& e)
                 {
-                    SYS_LOG_ERROR("Log::CreateLoggerFromConfig: %s", e.what());
+                    SYS_LOG_ERROR("Log::CreateLoggerFromConfig: %s", e.displayText().c_str());
                 }
             }
             else
@@ -404,9 +404,9 @@ void Log::CreateChannelsFromConfig(std::string const& logChannelName)
             if (!archive.empty())
                 _fileChannel->setProperty("archive", std::string(archive));
         }
-        catch (const std::exception& e)
+        catch (const Poco::Exception& e)
         {
-            SYS_LOG_ERROR("Log::CreateLoggerFromConfig: %s", e.what());
+            SYS_LOG_ERROR("Log::CreateLoggerFromConfig: %s", e.displayText().c_str());
         }
 
         ::AddFormattingChannel(channelName, new FormattingChannel(_pattern, _fileChannel));
@@ -453,9 +453,9 @@ void Log::_Write(std::string_view filter, LogLevel const level, std::string cons
             break;
         }
     }
-    catch (const std::exception& e)
+    catch (const Poco::Exception& e)
     {
-        SYS_LOG_ERROR("Log::_Write - %s", e.what());
+        SYS_LOG_ERROR("Log::_Write - %s", e.displayText().c_str());
     }
 }
 
