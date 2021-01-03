@@ -483,7 +483,6 @@ bool BattlefieldWG::SetupBattlefield()
         m_GraveyardList[i] = graveyard;
     }
 
-
     Workshops.resize(WG_MAX_WORKSHOP);
     // Spawn workshop creatures and gameobjects
     for (uint8 i = 0; i < WG_MAX_WORKSHOP; i++)
@@ -578,7 +577,6 @@ void BattlefieldWG::OnBattleStart()
     }
     else
         LOG_ERROR("bg.battlefield", "WG: Failed to spawn titan relic.");
-
 
     // Update tower visibility and update faction
     for (auto itr = CanonList.begin(); itr != CanonList.end(); ++itr)

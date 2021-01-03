@@ -156,7 +156,6 @@ void Warhead::WorldObjectSearcher<Check>::Visit(DynamicObjectMapType &m)
     }
 }
 
-
 template<class Check>
 void Warhead::WorldObjectLastSearcher<Check>::Visit(GameObjectMapType &m)
 {

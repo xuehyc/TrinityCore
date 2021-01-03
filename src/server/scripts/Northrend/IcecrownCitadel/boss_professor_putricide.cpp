@@ -1081,7 +1081,6 @@ class spell_putricide_unbound_plague : public SpellScript
             }
         }
 
-
         targets.remove_if(Warhead::UnitAuraCheck(true, sSpellMgr->GetSpellIdForDifficulty(SPELL_UNBOUND_PLAGUE, GetCaster())));
         Warhead::Containers::RandomResize(targets, 1);
     }

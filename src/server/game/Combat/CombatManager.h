@@ -137,7 +137,6 @@ class WH_GAME_API CombatManager
         std::unordered_map<ObjectGuid, CombatReference*> _pveRefs;
         std::unordered_map<ObjectGuid, PvPCombatReference*> _pvpRefs;
 
-
     friend struct CombatReference;
     friend struct PvPCombatReference;
 };

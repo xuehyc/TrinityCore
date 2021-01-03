@@ -66,5 +66,4 @@ namespace Warhead
     }
 }
 
-
 #endif //WARHEAD_COMMONPREDICATES_H
