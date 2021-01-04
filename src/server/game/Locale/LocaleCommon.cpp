@@ -37,7 +37,7 @@ void Warhead::Game::Locale::ModulesLocaleTextBuilder::operator()(WorldPacketList
     if (i_args)
     {
         // we need copy va_list before use or original va_list will corrupted
-        va_list ap;
+        std::va_list ap;
         va_copy(ap, *i_args);
 
         char str[2048];

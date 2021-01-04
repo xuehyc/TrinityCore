@@ -23,6 +23,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include <vector>
+#include <cstdarg>
 
 namespace Warhead::Game::Locale
 {
@@ -32,7 +33,7 @@ namespace Warhead::Game::Locale
     {
     public:
         typedef std::vector<WorldPacket*> WorldPacketList;
-        explicit ModulesLocaleTextBuilder(uint32 textId, std::string const& moduleName, va_list* args = nullptr) : i_textId(textId), _moduleName(moduleName), i_args(args) { }
+        explicit ModulesLocaleTextBuilder(uint32 textId, std::string const& moduleName, std::va_list* args = nullptr) : i_textId(textId), _moduleName(moduleName), i_args(args) { }
 
         void operator()(WorldPacketList& data_list, LocaleConstant loc_idx);
     private:
@@ -42,7 +43,7 @@ namespace Warhead::Game::Locale
 
         uint32 i_textId;
         std::string const& _moduleName;
-        va_list* i_args;
+        std::va_list* i_args;
     };
 
     // Prepare using Builder localized packets with caching and send to player
