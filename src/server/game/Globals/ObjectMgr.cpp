@@ -3433,6 +3433,41 @@ void ObjectMgr::LoadVehicleTemplateAccessories()
     LOG_INFO("server.loading", "");
 }
 
+void ObjectMgr::LoadVehicleTemplate()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _vehicleTemplateStore.clear();
+
+    //                                               0           1
+    QueryResult result = WorldDatabase.Query("SELECT creatureId, despawnDelayMs FROM vehicle_template");
+
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", ">> Loaded 0 vehicle template. DB table `vehicle_template` is empty.");
+        return;
+    }
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 creatureId = fields[0].GetUInt32();
+
+        if (!sObjectMgr->GetCreatureTemplate(creatureId))
+        {
+            TC_LOG_ERROR("sql.sql", "Table `vehicle_template`: Vehicle %u does not exist.", creatureId);
+            continue;
+        }
+
+        VehicleTemplate& vehicleTemplate = _vehicleTemplateStore[creatureId];
+        vehicleTemplate.DespawnDelay = Milliseconds(fields[1].GetInt32());
+
+    } while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded " SZFMTD " Vehicle Template entries in %u ms", _vehicleTemplateStore.size(), GetMSTimeDiffToNow(oldMSTime));
+}
+
 void ObjectMgr::LoadVehicleAccessories()
 {
     uint32 oldMSTime = getMSTime();
@@ -9513,6 +9548,11 @@ CreatureTemplate const* ObjectMgr::GetCreatureTemplate(uint32 entry) const
 QuestPOIWrapper const* ObjectMgr::GetQuestPOIWrapper(uint32 questId) const
 {
     return Warhead::Containers::MapGetValuePtr(_questPOIStore, questId);
+}
+
+VehicleTemplate const* ObjectMgr::GetVehicleTemplate(Vehicle* veh) const
+{
+    return Trinity::Containers::MapGetValuePtr(_vehicleTemplateStore, veh->GetCreatureEntry());
 }
 
 VehicleAccessoryList const* ObjectMgr::GetVehicleAccessoryList(Vehicle* veh) const
