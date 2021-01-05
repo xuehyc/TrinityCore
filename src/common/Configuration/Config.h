@@ -53,7 +53,6 @@ private:
     bool LoadInitial(std::string const& file, std::string& error);
     bool LoadAdditionalFile(std::string file, std::string& error);
 
-
     template<class T>
     T GetValueDefault(std::string const& name, T def, bool quiet) const;
 };

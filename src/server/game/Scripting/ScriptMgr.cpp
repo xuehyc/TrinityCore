@@ -79,7 +79,7 @@ struct is_script_database_bound<AreaTriggerScript>
 
 template<>
 struct is_script_database_bound<BattlefieldScript>
-        : std::true_type { };
+    : std::true_type { };
 
 template<>
 struct is_script_database_bound<BattlegroundScript>
