@@ -340,7 +340,7 @@ void Log::CreateChannelsFromConfig(std::string const& logChannelName)
         if (!colorOptions.empty())
         {
             auto const& tokensColor = Warhead::Tokenize(colorOptions, ' ', false);
-            if (tokensColor.size() != static_cast<size_t>(LogLevel::LOG_LEVEL_MAX) - 1)
+            if (tokensColor.size() == static_cast<size_t>(LogLevel::LOG_LEVEL_MAX) - 1)
             {
                 try
                 {
