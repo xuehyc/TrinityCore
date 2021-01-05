@@ -725,6 +725,8 @@ class WH_GAME_API Guild
 
         void ResetTimes();
 
+        auto const& GetAllMembers() { return m_members; }
+
     protected:
         ObjectGuid::LowType m_id;
         std::string m_name;
