@@ -1165,7 +1165,7 @@ public:
 
     static bool HandleReloadVehicleTemplateCommand(ChatHandler* handler, char const* /*args*/)
     {
-        TC_LOG_INFO("misc", "Reloading vehicle_template table...");
+        LOG_INFO("misc", "Reloading vehicle_template table...");
         sObjectMgr->LoadVehicleTemplate();
         handler->SendGlobalGMSysMessage("Vehicle templates reloaded.");
         return true;
