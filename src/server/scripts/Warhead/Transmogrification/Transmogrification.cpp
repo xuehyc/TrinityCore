@@ -1412,4 +1412,3 @@ void Transmogrification::SetVisibleItemSlot(Player* player, uint8 slot, Item* it
     if (uint32 entry = GetFakeEntry(item->GetGUID()))
         player->SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * 2), entry);
 }
-

@@ -54,7 +54,7 @@ enum LevelLimit : uint8
 };
 
 // bracketId for level ranges
-enum BattlegroundBracketId : uint8                
+enum BattlegroundBracketId : uint8
 {
     BG_BRACKET_ID_FIRST          = 0,
     BG_BRACKET_ID_LAST           = 15
