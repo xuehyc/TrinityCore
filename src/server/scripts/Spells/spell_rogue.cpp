@@ -1134,6 +1134,7 @@ class spell_rog_vanish : public AuraScript
     {
         Unit* unitTarget = GetTarget();
         unitTarget->RemoveAurasByType(SPELL_AURA_MOD_STALKED);
+        unitTarget->CombatStop();
 
         // See if we already are stealthed. If so, we're done.
         if (unitTarget->HasAura(SPELL_ROGUE_STEALTH))
