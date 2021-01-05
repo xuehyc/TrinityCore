@@ -29,6 +29,7 @@
 #include "Log.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 #include "World.h"
 
 /*********************************************************/
@@ -157,9 +158,13 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, Battlegr
     uint32 index = 0;
     if (!isRated && !isPremade)
         index += PVP_TEAMS_COUNT;
+
     if (ginfo->Team == HORDE)
         index++;
+
     LOG_DEBUG("bg.battleground", "Adding Group to BattlegroundQueue bgTypeId : %u, bracket_id : %u, index : %u", BgTypeId, bracketId, index);
+
+    sScriptMgr->OnQueueAddGroup(this, ginfo, index, leader, grp, bracketEntry, isPremade);
 
     uint32 lastOnlineTime = GameTime::GetGameTimeMS();
 
@@ -505,6 +510,9 @@ void BattlegroundQueue::FillPlayersToBG(Battleground* bg, BattlegroundBracketId 
     uint32 aliCount   = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE].size();
     uint32 hordeCount = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].size();
 
+    if (!sScriptMgr->CanFillPlayersToBG(this, bg, aliFree, hordeFree, bracket_id))
+        return;
+
     // try to get even teams
     if (CONF_GET_INT("Battleground.InvitationType") == BG_QUEUE_INVITATION_TYPE_EVEN)
     {
@@ -663,6 +671,12 @@ bool BattlegroundQueue::CheckPremadeMatch(BattlegroundBracketId bracket_id, uint
 // this method tries to create battleground or arena with MinPlayersPerTeam against MinPlayersPerTeam
 bool BattlegroundQueue::CheckNormalMatch(Battleground* bg_template, BattlegroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers)
 {
+    uint32 coef = 1;
+
+    sScriptMgr->OnCheckNormalMatch(this, coef, bg_template, bracket_id, minPlayers, maxPlayers);
+
+    minPlayers = minPlayers * coef;
+
     GroupsQueueType::const_iterator itr_team[PVP_TEAMS_COUNT];
     for (uint32 i = 0; i < PVP_TEAMS_COUNT; i++)
     {

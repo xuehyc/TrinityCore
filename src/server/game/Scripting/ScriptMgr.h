@@ -32,6 +32,7 @@ class AuraScript;
 class Battlefield;
 class Battleground;
 class BattlegroundMap;
+class BattlegroundQueue;
 class Channel;
 class Creature;
 class CreatureAI;
@@ -73,10 +74,13 @@ struct CreatureData;
 struct ItemTemplate;
 struct MapEntry;
 struct Position;
+struct PvPDifficultyEntry;
+struct GroupQueueInfo;
 
 namespace Warhead::ChatCommands { struct ChatCommandBuilder; }
 
 enum BattlegroundTypeId : uint32;
+enum BattlegroundBracketId : uint8;
 enum ContentLevels : uint8;
 enum Difficulty : uint8;
 enum DuelCompleteType : uint8;
@@ -840,6 +844,42 @@ class WH_GAME_API GroupScript : public ScriptObject
         virtual void OnDisband(Group* /*group*/) { }
 };
 
+class WH_GAME_API BGScript : public ScriptObject
+{
+protected:
+
+    BGScript(char const* name);
+
+public:
+
+    // Start Battlegroud
+    virtual void OnBattlegroundStart(Battleground* /*bg*/) { }
+
+    // End Battleground
+    virtual void OnBattlegroundEnd(Battleground* /*bg*/, uint32 /*winner*/) { }
+
+    // Update Battlegroud
+    virtual void OnBattlegroundUpdate(Battleground* /*bg*/, uint32 /*diff*/) { }
+
+    // Add Player in Battlegroud
+    virtual void OnBattlegroundAddPlayer(Battleground* /*bg*/, Player* /*player*/) { }
+
+    // Before added player in Battlegroud
+    virtual void OnBattlegroundBeforeAddPlayer(Battleground* /*bg*/, Player* /*player*/) { }
+
+    // Remove player at leave BG
+    virtual void OnBattlegroundRemovePlayerAtLeave(Battleground* /*bg*/, ObjectGuid /*guid*/, bool /*transport*/, bool /*sendPacket*/) { }
+
+    virtual void OnQueueAddGroup(BattlegroundQueue* /*queue*/, GroupQueueInfo* /*ginfo*/, uint32& /*index*/, Player* /*leader*/, Group* /*grp*/, PvPDifficultyEntry const* /*bracketEntry*/, bool /*isPremade*/) { }
+
+    virtual bool CanFillPlayersToBG(BattlegroundQueue* /*queue*/, Battleground* /*bg*/, const int32 /*aliFree*/, const int32 /*hordeFree*/, BattlegroundBracketId /*bracket_id*/) { return true; }
+
+    virtual bool CanFillPlayersToBGWithSpecific(BattlegroundQueue* /*queue*/, Battleground* /*bg*/, const int32 /*aliFree*/, const int32 /*hordeFree*/,
+        BattlegroundBracketId /*thisBracketId*/, BattlegroundQueue* /*specificQueue*/, BattlegroundBracketId /*specificBracketId*/) { return true; }
+
+    virtual void OnCheckNormalMatch(BattlegroundQueue* /*queue*/, uint32& /*Coef*/, Battleground* /*bgTemplate*/, BattlegroundBracketId /*bracket_id*/, uint32& /*minPlayers*/, uint32& /*maxPlayers*/) { }
+};
+
 // Manages registration, loading, and execution of scripts.
 class WH_GAME_API ScriptMgr
 {
@@ -1107,6 +1147,20 @@ class WH_GAME_API ScriptMgr
         void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage);
         void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage);
         void ModifyVehiclePassengerExitPos(Unit* passenger, Vehicle* vehicle, Position& pos);
+
+    public: /* BGScript */
+
+        void OnBattlegroundStart(Battleground* bg);
+        void OnBattlegroundEnd(Battleground* bg, uint32 winner);
+        void OnBattlegroundUpdate(Battleground* bg, uint32 diff);
+        void OnBattlegroundAddPlayer(Battleground* bg, Player* player);
+        void OnBattlegroundBeforeAddPlayer(Battleground* bg, Player* player);
+        void OnBattlegroundRemovePlayerAtLeave(Battleground* bg, ObjectGuid guid, bool transport, bool sendPacket);
+        void OnQueueAddGroup(BattlegroundQueue* queue, GroupQueueInfo* ginfo, uint32& index, Player* leader, Group* grp, PvPDifficultyEntry const* bracketEntry, bool isPremade);
+        bool CanFillPlayersToBG(BattlegroundQueue* queue, Battleground* bg, const int32 aliFree, const int32 hordeFree, BattlegroundBracketId bracket_id);
+        bool CanFillPlayersToBGWithSpecific(BattlegroundQueue* queue, Battleground* bg, const int32 aliFree, const int32 hordeFree,
+            BattlegroundBracketId thisBracketId, BattlegroundQueue* specificQueue, BattlegroundBracketId specificBracketId);
+        void OnCheckNormalMatch(BattlegroundQueue* queue, uint32& Coef, Battleground* bgTemplate, BattlegroundBracketId bracket_id, uint32& minPlayers, uint32& maxPlayers);
 
     private:
         uint32 _scriptCount;
