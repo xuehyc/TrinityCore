@@ -145,6 +145,7 @@ class WH_GAME_API ArenaTeam
         bool Empty() const { return Members.empty(); }
         MemberList::iterator m_membersBegin() { return Members.begin(); }
         MemberList::iterator m_membersEnd() { return Members.end(); }
+        MemberList& GetMembers() { return Members; }
         bool IsMember(ObjectGuid guid) const;
 
         ArenaTeamMember* GetMember(ObjectGuid guid);
