@@ -77,13 +77,13 @@ namespace
     TaskScheduler scheduler;
 }
 
-MailExternalMgr* MailExternalMgr::instance()
+MailExternal* MailExternal::instance()
 {
-    static MailExternalMgr instance;
+    static MailExternal instance;
     return &instance;
 }
 
-void MailExternalMgr::Initialize()
+void MailExternal::Initialize()
 {
     scheduler.Schedule(5s, [this](TaskContext context)
     {
@@ -97,12 +97,12 @@ void MailExternalMgr::Initialize()
     LOG_INFO("server.loading", "");
 }
 
-void MailExternalMgr::Update(uint32 diff)
+void MailExternal::Update(uint32 diff)
 {
     scheduler.Update(diff);
 }
 
-void MailExternalMgr::SendMails()
+void MailExternal::SendMails()
 {
     // Check mails
     if (_mailStore.empty())
@@ -111,6 +111,7 @@ void MailExternalMgr::SendMails()
     LOG_TRACE("mail.external", "> External Mail: SendMails");
 
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+    auto stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_EXTERNAL_MAIL);
 
     for (auto const& [ID, exMail] : _mailStore)
     {
@@ -130,7 +131,8 @@ void MailExternalMgr::SendMails()
             sMailMgr->SendMailWithItemsByGUID(0, exMail.PlayerGuid, MAIL_CREATURE, exMail.Subject, exMail.Body, exMail.Money, _itemlist);
         }
 
-        trans->PAppend("DELETE FROM mail_external WHERE id = %u", ID);
+        stmt->setUInt32(0, ID);
+        trans->Append(stmt);
     }
 
     CharacterDatabase.CommitTransaction(trans);
@@ -142,11 +144,11 @@ void MailExternalMgr::SendMails()
     _mailStore.clear();
 }
 
-void MailExternalMgr::GetMailsFromDB()
+void MailExternal::GetMailsFromDB()
 {
     LOG_TRACE("mail.external", "> External Mail: Sending mails in queue...");
 
-    PreparedQueryResult result = CharacterDatabase.Query(CharacterDatabase.GetPreparedStatement(CHAR_GET_EXTERNAL_MAIL));
+    PreparedQueryResult result = CharacterDatabase.Query(CharacterDatabase.GetPreparedStatement(CHAR_SEL_EXTERNAL_MAIL));
     if (!result)
     {
         LOG_TRACE("mail.external", "> External Mail: No mails in queue...");
@@ -195,4 +197,19 @@ void MailExternalMgr::GetMailsFromDB()
 
         _mailStore.emplace(_data.ID, _data);
     } while (result->NextRow());
+}
+
+void MailExternal::AddMail(std::string_view charName, std::string_view thanksSubject, std::string_view thanksText, uint32 money, uint32 itemID, uint32 itemCount, uint32 creatureEntry)
+{
+    // INSERT INTO `mail_external` (`PlayerName`, `Subject`, `Message`, `Money`, `ItemID`, `ItemCount`, `CreatureEntry`) VALUES (?, ?, ?, ?, ?, ?, ?)
+    auto stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_EXTERNAL_MAIL);
+    stmt->setStringView(0, charName);
+    stmt->setStringView(1, thanksSubject);
+    stmt->setStringView(2, thanksText);
+    stmt->setUInt32(3, money);
+    stmt->setUInt32(4, itemID);
+    stmt->setUInt32(5, itemCount);
+    stmt->setUInt32(6, creatureEntry);
+
+    CharacterDatabase.Query(stmt);
 }

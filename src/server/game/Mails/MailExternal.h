@@ -20,19 +20,20 @@
 
 #include "Common.h"
 
-class WH_GAME_API MailExternalMgr
+class WH_GAME_API MailExternal
 {
-    public:
-        static MailExternalMgr* instance();
+public:
+    static MailExternal* instance();
 
-        void Initialize();
-        void Update(uint32 diff);
+    void Initialize();
+    void Update(uint32 diff);
+    void AddMail(std::string_view charName, std::string_view thanksSubject, std::string_view thanksText, uint32 money, uint32 itemID, uint32 itemCount, uint32 creatureEntry);
 
-    private:
-        void SendMails();
-        void GetMailsFromDB();
+private:
+    void SendMails();
+    void GetMailsFromDB();
 };
 
-#define sMailExternalMgr MailExternalMgr::instance()
+#define sMailExternal MailExternal::instance()
 
 #endif // _MAILEXTERNAL_H

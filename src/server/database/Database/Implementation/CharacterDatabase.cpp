@@ -599,8 +599,9 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_INS_DESERTER_TRACK, "INSERT INTO battleground_deserters (guid, type, datetime) VALUES (?, ?, NOW())", CONNECTION_ASYNC);
 
     // MailExternal
-    PrepareStatement(CHAR_GET_EXTERNAL_MAIL, "SELECT `ID`, `PlayerName`, `Subject`, `Message`, `Money`, `ItemID`, `ItemCount`, `CreatureEntry` FROM `mail_external` ORDER BY `ID` ASC", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_EXTERNAL_MAIL, "SELECT `ID`, `PlayerName`, `Subject`, `Message`, `Money`, `ItemID`, `ItemCount`, `CreatureEntry` FROM `mail_external` ORDER BY `ID` ASC", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_EXTERNAL_MAIL, "DELETE FROM `mail_external` WHERE `ID` = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_EXTERNAL_MAIL, "INSERT INTO `mail_external` (`PlayerName`, `Subject`, `Message`, `Money`, `ItemID`, `ItemCount`, `CreatureEntry`) VALUES (?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 }
 
 CharacterDatabaseConnection::CharacterDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo)
