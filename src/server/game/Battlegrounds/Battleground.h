@@ -111,7 +111,8 @@ enum BattlegroundMarks
     ITEM_WS_MARK_OF_HONOR           = 20558,
     ITEM_AB_MARK_OF_HONOR           = 20559,
     ITEM_EY_MARK_OF_HONOR           = 29024,
-    ITEM_SA_MARK_OF_HONOR           = 42425
+    ITEM_SA_MARK_OF_HONOR           = 42425,
+    ITEM_IC_MARK_OF_HONOR           = 47395
 };
 
 enum BattlegroundMarksCount
