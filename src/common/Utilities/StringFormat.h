@@ -15,10 +15,11 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WARHEADCORE_STRING_FORMAT_H
-#define WARHEADCORE_STRING_FORMAT_H
+#ifndef _STRING_FORMAT_H_
+#define _STRING_FORMAT_H_
 
-#include "fmt/printf.h"
+#include "Common.h"
+#include <fmt/printf.h>
 
 namespace Warhead
 {
@@ -48,6 +49,17 @@ namespace Warhead
     {
         return fmt.empty();
     }
+}
+
+namespace Warhead::String
+{
+    WH_COMMON_API std::string Trim(std::string& str);
+    WH_COMMON_API std::string TrimLeft(std::string& str);
+    WH_COMMON_API std::string TrimLeftInPlace(std::string& str);
+    WH_COMMON_API std::string TrimRight(std::string& str);
+    WH_COMMON_API std::string TrimRightInPlace(std::string& str);
+    WH_COMMON_API std::string Replace(std::string& str, std::string const& from, std::string const& to);
+    WH_COMMON_API std::string ReplaceInPlace(std::string& str, std::string const& from, std::string const& to);
 }
 
 #endif
