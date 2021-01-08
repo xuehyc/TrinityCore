@@ -17,21 +17,21 @@
 
 #include "Transmogrification.h"
 #include "Bag.h"
-#include "DatabaseEnv.h"
 #include "DBCStores.h"
-#include "GameEventMgr.h"
+#include "DatabaseEnv.h"
 #include "GameConfig.h"
+#include "GameEventMgr.h"
 #include "GameLocale.h"
-#include "ModuleLocale.h"
 #include "Item.h"
 #include "Log.h"
+#include "ModuleLocale.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
-#include "WorldSession.h"
 #include "World.h"
+#include "WorldSession.h"
 
 namespace
 {

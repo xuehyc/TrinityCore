@@ -15,9 +15,39 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+void AddSC_AntiAD();
+void AddSC_ArenaReward();
+void AddSC_BGReward();
+void AddSC_BossAnnouncer();
+void AddSC_DonateIPS();
+void AddSC_DungeonBuff();
+void AddSC_FactionsIconsChannel();
+void AddSC_GMChatColor();
+void AddSC_GuildLevelSystem();
+void AddSC_ItemLevelUp();
+void AddSC_NotifyMuted();
+void AddSC_OnlineReward();
+void AddSC_PlayerInfoAtLogin();
+void AddSC_QuestBuff();
+void AddSC_UnbindInstance();
 void AddSC_Transmogrification();
 
 void AddWarheadScripts()
 {
+    AddSC_AntiAD();
+    AddSC_ArenaReward();
+    AddSC_BGReward();
+    AddSC_BossAnnouncer();
+    AddSC_DonateIPS();
+    AddSC_DungeonBuff();
+    AddSC_FactionsIconsChannel();
+    AddSC_GMChatColor();
+    AddSC_GuildLevelSystem();
+    AddSC_ItemLevelUp();
+    AddSC_NotifyMuted();
+    AddSC_OnlineReward();
+    AddSC_PlayerInfoAtLogin();
+    AddSC_QuestBuff();
+    AddSC_UnbindInstance();
     AddSC_Transmogrification();
 }
