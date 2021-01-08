@@ -33,6 +33,7 @@
 #include "Player.h"
 #include "Timer.h"
 #include "GameConfig.h"
+#include "Timer.h"
 
 uint16 InstanceSaveManager::ResetTimeDelay[] = {3600, 900, 300, 60};
 
@@ -368,7 +369,7 @@ void InstanceSaveManager::LoadResetTimes()
             }
 
             // update the reset time if the hour in the configs changes
-            uint64 newresettime = GetLocalHourTimestamp(oldresettime, resetHour, false);
+            uint64 newresettime = Warhead::Time::GetLocalHourTimestamp(oldresettime, resetHour, false);
             if (oldresettime != newresettime)
             {
                 CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GLOBAL_INSTANCE_RESETTIME);
@@ -402,7 +403,7 @@ void InstanceSaveManager::LoadResetTimes()
         if (!t)
         {
             // initialize the reset time
-            t = GetLocalHourTimestamp(today + period, resetHour);
+            t = Warhead::Time::GetLocalHourTimestamp(today + period, resetHour);
 
             CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_GLOBAL_INSTANCE_RESETTIME);
             stmt->setUInt16(0, uint16(mapid));
@@ -416,7 +417,7 @@ void InstanceSaveManager::LoadResetTimes()
             // assume that expired instances have already been cleaned
             // calculate the next reset time
             time_t day = (t / DAY) * DAY;
-            t = GetLocalHourTimestamp(day + ((today - day) / period + 1) * period, resetHour);
+            t = Warhead::Time::GetLocalHourTimestamp(day + ((today - day) / period + 1) * period, resetHour);
 
             CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GLOBAL_INSTANCE_RESETTIME);
             stmt->setUInt64(0, uint64(t));
@@ -455,7 +456,7 @@ time_t InstanceSaveManager::GetSubsequentResetTime(uint32 mapid, Difficulty diff
     if (period < DAY)
         period = DAY;
 
-    return GetLocalHourTimestamp(((resetTime + MINUTE) / DAY * DAY) + period, resetHour);
+    return Warhead::Time::GetLocalHourTimestamp(((resetTime + MINUTE) / DAY * DAY) + period, resetHour);
 }
 
 void InstanceSaveManager::SetResetTimeFor(uint32 mapid, Difficulty d, time_t t)

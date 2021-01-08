@@ -42,6 +42,7 @@ EndScriptData */
 #include "Player.h"
 #include "RBAC.h"
 #include "SmartEnum.h"
+#include "Timer.h"
 #include "Transport.h"
 #include "WorldSession.h"
 #include "World.h"
@@ -485,8 +486,9 @@ public:
 
         if (curRespawnDelay < 0)
             curRespawnDelay = 0;
-        std::string curRespawnDelayStr = secsToTimeString(uint64(curRespawnDelay), TimeFormat::ShortText);
-        std::string defRespawnDelayStr = secsToTimeString(target->GetRespawnDelay(), TimeFormat::ShortText);
+
+        std::string curRespawnDelayStr = Warhead::Time::ToTimeString<Seconds>(uint64(curRespawnDelay));
+        std::string defRespawnDelayStr = Warhead::Time::ToTimeString<Seconds>(target->GetRespawnDelay());
 
         handler->PSendSysMessage(LANG_NPCINFO_CHAR, target->GetName().c_str(), target->GetSpawnId(), target->GetGUID().GetCounter(), entry, faction, npcflags, displayid, nativeid);
         if (target->GetCreatureData() && target->GetCreatureData()->spawnGroupData->groupId)

@@ -19,13 +19,14 @@
 #include "ScriptMgr.h"
 #include "Util.h"
 #include "GameConfig.h"
+#include "Timer.h"
 
 namespace
 {
     bool IsXPBoostActive()
     {
         time_t time = GameTime::GetGameTime();
-        tm localTm = TimeBreakdown(time);
+        tm localTm = Warhead::Time::TimeBreakdown(time);
         uint32 weekdayMaskBoosted = CONF_GET_INT("XP.Boost.Daymask");
         uint32 weekdayMask = (1 << localTm.tm_wday);
         bool currentDayBoosted = (weekdayMask & weekdayMaskBoosted) != 0;

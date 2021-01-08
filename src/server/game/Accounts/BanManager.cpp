@@ -27,6 +27,7 @@
 #include "WorldSession.h"
 #include "GameTime.h"
 #include "GameConfig.h"
+#include "Timer.h"
 
 BanManager* BanManager::instance()
 {
@@ -35,7 +36,7 @@ BanManager* BanManager::instance()
 }
 
 /// Ban an account, duration will be parsed using TimeStringToSecs if it is positive, otherwise permban
-BanReturn BanManager::BanAccount(std::string const& accountName, std::string const& duration, std::string const& reason, std::string const& author)
+BanReturn BanManager::BanAccount(std::string const& accountName, std::string_view duration, std::string const& reason, std::string const& author)
 {
     if (accountName.empty() || duration.empty())
         return BAN_SYNTAX_ERROR;
@@ -44,7 +45,7 @@ BanReturn BanManager::BanAccount(std::string const& accountName, std::string con
     if (AccountMgr::IsBannedAccount(accountName))
         return BAN_EXISTS;
 
-    uint32 durationSecs = TimeStringToSecs(duration);
+    uint32 durationSecs = Warhead::Time::TimeStringTo<Seconds>(duration);
     uint32 accountID = AccountMgr::GetId(accountName);
 
     if (!accountID)
@@ -74,8 +75,8 @@ BanReturn BanManager::BanAccount(std::string const& accountName, std::string con
 
     if (CONF_GET_BOOL("ShowBanInWorld"))
     {
-        if (TimeStringToSecs(duration))
-            sWorld->SendWorldText(LANG_BAN_ACCOUNT_MESSAGE_WORLD, author.c_str(), accountName.c_str(), secsToTimeString(TimeStringToSecs(duration), TimeFormat::ShortText).c_str(), reason.c_str());
+        if (durationSecs)
+            sWorld->SendWorldText(LANG_BAN_ACCOUNT_MESSAGE_WORLD, author.c_str(), accountName.c_str(), Warhead::Time::ToTimeString<Seconds>(durationSecs).c_str(), reason.c_str());
         else
             sWorld->SendWorldText(LANG_BAN_ACCOUNT_PERM_MESSAGE_WORLD, author.c_str(), accountName.c_str(), reason.c_str());
     }
@@ -84,7 +85,7 @@ BanReturn BanManager::BanAccount(std::string const& accountName, std::string con
 }
 
 /// Ban an account by player name, duration will be parsed using TimeStringToSecs if it is positive, otherwise permban
-BanReturn BanManager::BanAccountByPlayerName(std::string const& characterName, std::string const& duration, std::string const& reason, std::string const& author)
+BanReturn BanManager::BanAccountByPlayerName(std::string const& characterName, std::string_view duration, std::string const& reason, std::string const& author)
 {
     if (characterName.empty() || duration.empty())
         return BAN_SYNTAX_ERROR;
@@ -102,16 +103,17 @@ BanReturn BanManager::BanAccountByPlayerName(std::string const& characterName, s
 }
 
 /// Ban an IP address, duration will be parsed using TimeStringToSecs if it is positive, otherwise permban
-BanReturn BanManager::BanIP(std::string const& IP, std::string const& duration, std::string const& reason, std::string const& author)
+BanReturn BanManager::BanIP(std::string const& IP, std::string_view duration, std::string const& reason, std::string const& author)
 {
     if (IP.empty() || duration.empty())
         return BAN_SYNTAX_ERROR;
 
-    uint32 durationSecs = TimeStringToSecs(duration);
+    uint32 durationSecs = Warhead::Time::TimeStringTo<Seconds>(duration);
 
     // No SQL injection with prepared statements
     LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BY_IP);
     stmt->setString(0, IP);
+
     PreparedQueryResult resultAccounts = LoginDatabase.Query(stmt);
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_IP_BANNED);
     stmt->setString(0, IP);
@@ -122,8 +124,8 @@ BanReturn BanManager::BanIP(std::string const& IP, std::string const& duration, 
 
     if (CONF_GET_BOOL("ShowBanInWorld"))
     {
-        if (TimeStringToSecs(duration))
-            sWorld->SendWorldText(LANG_BAN_IP_MESSAGE_WORLD, author.c_str(), IP.c_str(), secsToTimeString(TimeStringToSecs(duration), TimeFormat::ShortText).c_str(), reason.c_str());
+        if (durationSecs)
+            sWorld->SendWorldText(LANG_BAN_IP_MESSAGE_WORLD, author.c_str(), IP.c_str(), Warhead::Time::ToTimeString<Seconds>(durationSecs).c_str(), reason.c_str());
         else
             sWorld->SendWorldText(LANG_BAN_IP_PERM_MESSAGE_WORLD, author.c_str(), IP.c_str(), reason.c_str());
     }
@@ -151,11 +153,11 @@ BanReturn BanManager::BanIP(std::string const& IP, std::string const& duration, 
 }
 
 /// Ban an character, duration will be parsed using TimeStringToSecs if it is positive, otherwise permban
-BanReturn BanManager::BanCharacter(std::string const& characterName, std::string const& duration, std::string const& reason, std::string const& author)
+BanReturn BanManager::BanCharacter(std::string const& characterName, std::string_view duration, std::string const& reason, std::string const& author)
 {
     Player* targetPlayer = ObjectAccessor::FindConnectedPlayerByName(characterName);
     ObjectGuid::LowType targetGuid = 0;
-    uint32 durationSecs = TimeStringToSecs(duration);
+    uint32 durationSecs = Warhead::Time::TimeStringTo<Seconds>(duration);
 
     /// Pick a player to ban if not online
     if (!targetPlayer)
@@ -190,8 +192,8 @@ BanReturn BanManager::BanCharacter(std::string const& characterName, std::string
 
     if (CONF_GET_BOOL("ShowBanInWorld"))
     {
-        if (TimeStringToSecs(duration))
-            sWorld->SendWorldText(LANG_BAN_CHARACTER_MESSAGE_WORLD, author.c_str(), characterName.c_str(), secsToTimeString(TimeStringToSecs(duration), TimeFormat::ShortText).c_str(), reason.c_str());
+        if (durationSecs)
+            sWorld->SendWorldText(LANG_BAN_CHARACTER_MESSAGE_WORLD, author.c_str(), characterName.c_str(), Warhead::Time::ToTimeString<Seconds>(durationSecs).c_str(), reason.c_str());
         else
             sWorld->SendWorldText(LANG_BAN_CHARACTER_PERM_MESSAGE_WORLD, author.c_str(), characterName.c_str(), reason.c_str());
     }

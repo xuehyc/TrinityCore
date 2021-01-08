@@ -50,6 +50,7 @@
 #include "SpellAuras.h"
 #include "SpellHistory.h"
 #include "SpellMgr.h"
+#include "Timer.h"
 #include "Transport.h"
 #include "Weather.h"
 #include "WeatherMgr.h"
@@ -1426,8 +1427,8 @@ public:
         auto GetTimers = [&](uint32 const& _banDate, uint32 const& _unBanDate)
         {
             bool isPermanently = _banDate == _unBanDate;
-            auto leftTime = isPermanently ? "--" : secsToTimeString(_unBanDate - GameTime::GetGameTime(), TimeFormat::ShortText);
-            auto banTime = isPermanently ? handler->GetWarheadString(LANG_PERMANENTLY) : secsToTimeString(_unBanDate - _banDate, TimeFormat::ShortText);
+            auto leftTime = isPermanently ? "--" : Warhead::Time::ToTimeString<Seconds>(_unBanDate - GameTime::GetGameTime());
+            auto banTime = isPermanently ? handler->GetWarheadString(LANG_PERMANENTLY) : Warhead::Time::ToTimeString<Seconds>(_unBanDate - _banDate);
 
             return std::make_tuple(leftTime, banTime);
         };
@@ -1674,7 +1675,7 @@ public:
             auto const& [_muteDate, _muteTime, _reason, _author] = *muteInfo;
 
             muteTime = std::abs(_muteTime);
-            muteLeft = secsToTimeString(static_cast<uint64>(_muteDate + muteTime) - GameTime::GetGameTime(), TimeFormat::ShortText);
+            muteLeft = Warhead::Time::ToTimeString<Seconds>(static_cast<uint64>(_muteDate + muteTime) - GameTime::GetGameTime());
             muteReason = _reason;
             muteBy = _author;
         }
@@ -1726,7 +1727,7 @@ public:
 
         // Output IV. LANG_PINFO_MUTED if mute is applied
         if (muteTime)
-            handler->PSendSysMessage(LANG_PINFO_MUTED, muteLeft.c_str(), secsToTimeString(muteTime, TimeFormat::ShortText).c_str(), muteBy.c_str(), muteReason.c_str());
+            handler->PSendSysMessage(LANG_PINFO_MUTED, muteLeft.c_str(), Warhead::Time::ToTimeString<Seconds>(muteTime).c_str(), muteBy.c_str(), muteReason.c_str());
 
         // Output V. LANG_PINFO_ACC_ACCOUNT
         handler->PSendSysMessage(LANG_PINFO_ACC_ACCOUNT, userName.c_str(), accId, security);
@@ -1805,7 +1806,7 @@ public:
         }
 
         // Output XX. LANG_PINFO_CHR_PLAYEDTIME
-        handler->PSendSysMessage(LANG_PINFO_CHR_PLAYEDTIME, (secsToTimeString(totalPlayerTime, TimeFormat::ShortText, true)).c_str());
+        handler->PSendSysMessage(LANG_PINFO_CHR_PLAYEDTIME, Warhead::Time::ToTimeString<Seconds>(totalPlayerTime).c_str());
 
         // Mail Data - an own query, because it may or may not be useful.
         // SQL: "SELECT SUM(CASE WHEN (checked & 1) THEN 1 ELSE 0 END) AS 'readmail', COUNT(*) AS 'totalmail' FROM mail WHERE `receiver` = ?"

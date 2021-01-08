@@ -37,6 +37,7 @@ EndScriptData */
 #include "GameConfig.h"
 #include "WorldSession.h"
 #include "World.h"
+#include "Timer.h"
 
 using namespace Warhead::ChatCommands;
 
@@ -177,7 +178,7 @@ public:
 
         for (DeletedInfoList::const_iterator itr = foundList.begin(); itr != foundList.end(); ++itr)
         {
-            std::string dateStr = TimeToTimestampStr(itr->deleteDate);
+            std::string dateStr = Warhead::Time::TimeToTimestampStr(itr->deleteDate);
 
             if (!handler->GetSession())
                 handler->PSendSysMessage(LANG_CHARACTER_DELETED_LIST_LINE_CONSOLE,

@@ -29,6 +29,7 @@
 #include "Player.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "Timer.h"
 
 inline float GetAge(uint64 t) { return float(GameTime::GetGameTime() - t) / DAY; }
 
@@ -178,8 +179,8 @@ std::string GmTicket::FormatMessageString(ChatHandler& handler, bool detailed) c
     std::stringstream ss;
     ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTGUID, _id);
     ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTNAME, _playerName.c_str());
-    ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTAGECREATE, (secsToTimeString(curTime - _createTime, TimeFormat::ShortText)).c_str());
-    ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTAGE, (secsToTimeString(curTime - _lastModifiedTime, TimeFormat::ShortText)).c_str());
+    ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTAGECREATE, Warhead::Time::ToTimeString<Seconds>(curTime - _createTime).c_str());
+    ss << handler.PGetParseString(LANG_COMMAND_TICKETLISTAGE, Warhead::Time::ToTimeString<Seconds>(curTime - _lastModifiedTime).c_str());
 
     std::string name;
     if (sCharacterCache->GetCharacterNameByGuid(_assignedTo, name))
@@ -258,9 +259,10 @@ void GmTicket::SetChatLog(std::list<uint32> time, std::string const& log)
     std::stringstream ss(log);
     std::stringstream newss;
     std::string line;
+
     while (std::getline(ss, line) && !time.empty())
     {
-        newss << secsToTimeString(time.front()) << ": " << line << "\n";
+        newss << Warhead::Time::ToTimeString<Seconds>(time.front()) << ": " << line << "\n";
         time.pop_front();
     }
 

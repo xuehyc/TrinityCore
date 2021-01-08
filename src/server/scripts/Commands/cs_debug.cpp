@@ -44,6 +44,7 @@ EndScriptData */
 #include "QuestPools.h"
 #include "RBAC.h"
 #include "SpellMgr.h"
+#include "Timer.h"
 #include "Transport.h"
 #include "Warden.h"
 #include "World.h"
@@ -1472,17 +1473,17 @@ public:
         if (daily)
         {
             sWorld->ResetDailyQuests();
-            handler->PSendSysMessage("Daily quests have been reset. Next scheduled reset: %s", TimeToHumanReadable(sWorld->getWorldState(WS_DAILY_QUEST_RESET_TIME)).c_str());
+            handler->PSendSysMessage("Daily quests have been reset. Next scheduled reset: %s", Warhead::Time::TimeToHumanReadable(sWorld->getWorldState(WS_DAILY_QUEST_RESET_TIME)).c_str());
         }
         if (weekly)
         {
             sWorld->ResetWeeklyQuests();
-            handler->PSendSysMessage("Weekly quests have been reset. Next scheduled reset: %s", TimeToHumanReadable(sWorld->getWorldState(WS_WEEKLY_QUEST_RESET_TIME)).c_str());
+            handler->PSendSysMessage("Weekly quests have been reset. Next scheduled reset: %s", Warhead::Time::TimeToHumanReadable(sWorld->getWorldState(WS_WEEKLY_QUEST_RESET_TIME)).c_str());
         }
         if (monthly)
         {
             sWorld->ResetMonthlyQuests();
-            handler->PSendSysMessage("Monthly quests have been reset. Next scheduled reset: %s", TimeToHumanReadable(sWorld->getWorldState(WS_MONTHLY_QUEST_RESET_TIME)).c_str());
+            handler->PSendSysMessage("Monthly quests have been reset. Next scheduled reset: %s", Warhead::Time::TimeToHumanReadable(sWorld->getWorldState(WS_MONTHLY_QUEST_RESET_TIME)).c_str());
         }
 
         return true;

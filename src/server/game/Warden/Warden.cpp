@@ -27,6 +27,7 @@
 #include "Util.h"
 #include "Warden.h"
 #include "AccountMgr.h"
+#include "Timer.h"
 #include <openssl/sha.h>
 #include <openssl/md5.h>
 #include <charconv>
@@ -117,7 +118,7 @@ void Warden::Update(uint32 diff)
             if (_clientResponseTimer > maxClientResponseDelay * IN_MILLISECONDS)
             {
                 LOG_WARN("warden", "%s (latency: %u, IP: %s) exceeded Warden module response delay (%s) - disconnecting client",
-                                _session->GetPlayerInfo().c_str(), _session->GetLatency(), _session->GetRemoteAddress().c_str(), secsToTimeString(maxClientResponseDelay, TimeFormat::ShortText).c_str());
+                                _session->GetPlayerInfo().c_str(), _session->GetLatency(), _session->GetRemoteAddress().c_str(), Warhead::Time::ToTimeString<Seconds>(maxClientResponseDelay).c_str());
                 _session->KickPlayer("Warden::Update Warden module response delay exceeded");
             }
             else

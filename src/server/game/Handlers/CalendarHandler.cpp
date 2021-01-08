@@ -52,6 +52,7 @@ Copied events should probably have a new owner
 #include "Player.h"
 #include "SocialMgr.h"
 #include "GameConfig.h"
+#include "Timer.h"
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recvData*/)
 {
@@ -237,7 +238,7 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
     recvData.ReadPackedTime(unkPackedTime);
     recvData >> flags;
 
-    eventPackedTime = uint32(LocalTimeToUTCTime(eventPackedTime));
+    eventPackedTime = uint32(Warhead::Time::LocalTimeToUTCTime(eventPackedTime));
 
     // prevent events in the past
     // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
@@ -370,7 +371,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
     recvData.ReadPackedTime(timeZoneTime);
     recvData >> flags;
 
-    eventPackedTime = uint32(LocalTimeToUTCTime(eventPackedTime));
+    eventPackedTime = uint32(Warhead::Time::LocalTimeToUTCTime(eventPackedTime));
 
     // prevent events in the past
     // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
@@ -429,7 +430,7 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recvData)
     LOG_DEBUG("network", "CMSG_CALENDAR_COPY_EVENT [%s], EventId [" UI64FMTD
         "] inviteId [" UI64FMTD "] Time: %u", guid.ToString().c_str(), eventId, inviteId, eventTime);
 
-    eventTime = uint32(LocalTimeToUTCTime(eventTime));
+    eventTime = uint32(Warhead::Time::LocalTimeToUTCTime(eventTime));
 
     // prevent events in the past
     // To Do: properly handle timezones and remove the "- time_t(86400L)" hack

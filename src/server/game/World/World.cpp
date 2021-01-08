@@ -83,6 +83,7 @@
 #include "SmartScriptMgr.h"
 #include "SpellMgr.h"
 #include "TicketMgr.h"
+#include "Timer.h"
 #include "TransportMgr.h"
 #include "Unit.h"
 #include "UpdateTime.h"
@@ -231,11 +232,11 @@ void World::TriggerGuidWarning()
     time_t today = (gameTime / DAY) * DAY;
 
     // Check if our window to restart today has passed. 5 mins until quiet time
-    while (gameTime >= GetLocalHourTimestamp(today, CONF_GET_INT("Respawn.RestartQuietTime")) - 1810)
+    while (gameTime >= Warhead::Time::GetLocalHourTimestamp(today, CONF_GET_INT("Respawn.RestartQuietTime")) - 1810)
         today += DAY;
 
     // Schedule restart for 30 minutes before quiet time, or as long as we have
-    _warnShutdownTime = GetLocalHourTimestamp(today, CONF_GET_INT("Respawn.RestartQuietTime")) - 1800;
+    _warnShutdownTime = Warhead::Time::GetLocalHourTimestamp(today, CONF_GET_INT("Respawn.RestartQuietTime")) - 1800;
 
     _guidWarn = true;
     SendGuidWarning();
@@ -1713,10 +1714,10 @@ void World::SetInitialWorldSettings()
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
 
     LOG_INFO("server.worldserver", "");
-    LOG_INFO("server.worldserver", "World initialized in %u minutes %u seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
+    LOG_INFO("server.worldserver", "World initialized in %s", Warhead::Time::ToTimeString<Milliseconds>(startupDuration, TimeOutput::Milliseconds, TimeFormat::FullText).c_str());
     LOG_INFO("server.worldserver", "");
 
-    WH_METRIC_EVENT("events", "World initialized", "World initialized in " + std::to_string(startupDuration / 60000) + " minutes " + std::to_string((startupDuration % 60000) / 1000) + " seconds");
+    WH_METRIC_EVENT("events", "World initialized", "World initialized in " + Warhead::Time::ToTimeString<Milliseconds>(startupDuration, TimeOutput::Milliseconds, TimeFormat::FullText));
 }
 
 void World::DetectDBCLang()
@@ -2345,7 +2346,7 @@ void World::ShutdownMsg(bool show, Player* player, const std::string& reason)
         (m_ShutdownTimer < 12 * HOUR && (m_ShutdownTimer % HOUR) == 0) || // < 12 h ; every 1 h
         (m_ShutdownTimer > 12 * HOUR && (m_ShutdownTimer % (12 * HOUR)) == 0)) // > 12 h ; every 12 h
     {
-        std::string str = secsToTimeString(m_ShutdownTimer, TimeFormat::Numeric);
+        std::string str = Warhead::Time::ToTimeString<Seconds>(m_ShutdownTimer, TimeOutput::Milliseconds, TimeFormat::Numeric);
         if (!reason.empty())
             str += " - " + reason;
 
@@ -2540,7 +2541,7 @@ void World::InitQuestResetTimes()
 
 static time_t GetNextDailyResetTime(time_t t)
 {
-    return GetLocalHourTimestamp(t, CONF_GET_INT("Quests.DailyResetTime"), true);
+    return Warhead::Time::GetLocalHourTimestamp(t, CONF_GET_INT("Quests.DailyResetTime"), true);
 }
 
 void World::ResetDailyQuests()
@@ -2570,7 +2571,7 @@ void World::ResetDailyQuests()
 static time_t GetNextWeeklyResetTime(time_t t)
 {
     t = GetNextDailyResetTime(t);
-    tm time = TimeBreakdown(t);
+    tm time = Warhead::Time::TimeBreakdown(t);
     int wday = time.tm_wday;
     int target = CONF_GET_INT("Quests.WeeklyResetWDay");
     if (target < wday)
@@ -2606,7 +2607,7 @@ void World::ResetWeeklyQuests()
 static time_t GetNextMonthlyResetTime(time_t t)
 {
     t = GetNextDailyResetTime(t);
-    tm time = TimeBreakdown(t);
+    tm time = Warhead::Time::TimeBreakdown(t);
     if (time.tm_mday == 1)
         return t;
 
@@ -2681,7 +2682,7 @@ void World::InitRandomBGResetTime()
 void World::InitCalendarOldEventsDeletionTime()
 {
     time_t now = GameTime::GetGameTime();
-    time_t nextDeletionTime = GetLocalHourTimestamp(now, CONF_GET_INT("Calendar.DeleteOldEventsHour"));
+    time_t nextDeletionTime = Warhead::Time::GetLocalHourTimestamp(now, CONF_GET_INT("Calendar.DeleteOldEventsHour"));
     time_t currentDeletionTime = getWorldState(WS_DAILY_CALENDAR_DELETION_OLD_EVENTS_TIME);
 
     // If the reset time saved in the worldstate is before now it means the server was offline when the reset was supposed to occur.

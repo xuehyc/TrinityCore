@@ -24,6 +24,7 @@
 #include "Language.h"
 #include "Player.h"
 #include "World.h"
+#include "Timer.h"
 
 MuteManager* MuteManager::instance()
 {
@@ -146,7 +147,7 @@ std::string const MuteManager::GetMuteTimeString(uint32 accountID)
     if (!_muteTime)
         return "";
 
-    return secsToTimeString(_muteTime - GameTime::GetGameTime());
+    return Warhead::Time::ToTimeString<Seconds>(_muteTime - GameTime::GetGameTime());
 }
 
 bool MuteManager::CanSpeak(uint32 accountID)

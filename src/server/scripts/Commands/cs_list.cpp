@@ -40,6 +40,7 @@ EndScriptData */
 #include "RBAC.h"
 #include "SpellAuraEffects.h"
 #include "WorldSession.h"
+#include "Timer.h"
 
 using namespace Warhead::ChatCommands;
 
@@ -523,7 +524,7 @@ public:
                     std::string senderStr = handler->playerLink(sender);
                     handler->PSendSysMessage(LANG_LIST_MAIL_INFO_1, messageId, subject.c_str(), gold, silv, copp);
                     handler->PSendSysMessage(LANG_LIST_MAIL_INFO_2, senderStr.c_str(), senderId, receiverStr.c_str(), receiverId);
-                    handler->PSendSysMessage(LANG_LIST_MAIL_INFO_3, TimeToTimestampStr(deliverTime).c_str(), TimeToTimestampStr(expireTime).c_str());
+                    handler->PSendSysMessage(LANG_LIST_MAIL_INFO_3, Warhead::Time::TimeToTimestampStr(deliverTime).c_str(), Warhead::Time::TimeToTimestampStr(expireTime).c_str());
 
                     if (hasItem == 1)
                     {
@@ -659,7 +660,7 @@ public:
                 }
                 uint32 gridY = ri->gridId / MAX_NUMBER_OF_GRIDS;
                 uint32 gridX = ri->gridId % MAX_NUMBER_OF_GRIDS;
-                std::string respawnTime = ri->respawnTime > GameTime::GetGameTime() ? secsToTimeString(uint64(ri->respawnTime - GameTime::GetGameTime()), TimeFormat::ShortText) : stringOverdue;
+                std::string respawnTime = ri->respawnTime > GameTime::GetGameTime() ? Warhead::Time::ToTimeString<Seconds>(uint64(ri->respawnTime - GameTime::GetGameTime())) : stringOverdue;
                 handler->PSendSysMessage("%u | %u | [%02u,%02u] | %s (%u) | %s%s", ri->spawnId, ri->entry, gridX, gridY, GetZoneName(respawnZoneId, locale), respawnZoneId, respawnTime.c_str(), map->IsSpawnGroupActive(data->spawnGroupData->groupId) ? "" : " (inactive)");
             }
         }

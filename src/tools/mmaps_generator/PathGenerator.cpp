@@ -340,6 +340,6 @@ int main(int argc, char** argv)
         builder.buildMaps({});
 
     if (!silent)
-        printf("Finished. MMAPS were built in %s\n", secsToTimeString(GetMSTimeDiffToNow(start) / 1000).c_str());
+        printf("Finished. MMAPS were built in %s\n", Warhead::Time::ToTimeString<Seconds>(GetMSTimeDiffToNow(start) / 1000).c_str());
     return 0;
 }

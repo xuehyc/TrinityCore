@@ -26,6 +26,7 @@
 #include "Pet.h"
 #include "Player.h"
 #include "RBAC.h"
+#include "Timer.h"
 #include "WorldSession.h"
 
 #if WARHEAD_COMPILER == WARHEAD_COMPILER_GNU
@@ -293,9 +294,10 @@ public:
     static bool HandleExpireTime(ChatHandler* handler, char const* /*args*/)
     {
         time_t expTime = sMailMgr->GetMailMgrExpiryTimer();
+
         /// - Send the message
-        std::string time = secsToTimeString(uint64(expTime));
-        handler->PSendSysMessage("|cffff0000[next ExpiryMail will in]:|r %s", time);
+        std::string time = Warhead::Time::ToTimeString<Seconds>(expTime);
+        handler->PSendSysMessage("|cffff0000[next ExpiryMail will in]:|r %s", time.c_str());
 
         return true;
     }

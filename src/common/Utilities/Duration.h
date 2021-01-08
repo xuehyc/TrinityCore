@@ -20,6 +20,9 @@
 
 #include <chrono>
 
+/// Microseconds shorthand typedef.
+typedef std::chrono::microseconds Microseconds;
+
 /// Milliseconds shorthand typedef.
 typedef std::chrono::milliseconds Milliseconds;
 
@@ -39,9 +42,9 @@ typedef std::chrono::system_clock::time_point SystemTimePoint;
 /// Makes std::chrono_literals globally available.
 using namespace std::chrono_literals;
 
-constexpr std::chrono::hours operator""_days(unsigned long long days)
+constexpr Hours operator""_days(unsigned long long days)
 {
-    return std::chrono::hours(days * 24h);
+    return Hours(days * 24h);
 }
 
 #endif // _DURATION_H_

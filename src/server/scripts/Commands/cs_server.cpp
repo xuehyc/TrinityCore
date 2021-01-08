@@ -38,6 +38,7 @@ EndScriptData */
 #include "RBAC.h"
 #include "Realm.h"
 #include "ServerMotd.h"
+#include "Timer.h"
 #include "UpdateTime.h"
 #include "Util.h"
 #include "VMapFactory.h"
@@ -260,7 +261,7 @@ public:
         uint32 queuedClientsNum     = sWorld->GetQueuedSessionCount();
         uint32 maxActiveClientsNum  = sWorld->GetMaxActiveSessionCount();
         uint32 maxQueuedClientsNum  = sWorld->GetMaxQueuedSessionCount();
-        std::string uptime          = secsToTimeString(GameTime::GetUptime());
+        std::string uptime          = Warhead::Time::ToTimeString<Seconds>(GameTime::GetUptime(), TimeOutput::Seconds, TimeFormat::FullText);
         uint32 updateTime           = sWorldUpdateTime.GetLastUpdateTime();
 
         handler->PSendSysMessage("%s", GitRevision::GetFullVersion());
@@ -268,9 +269,10 @@ public:
         handler->PSendSysMessage(LANG_CONNECTED_USERS, activeClientsNum, maxActiveClientsNum, queuedClientsNum, maxQueuedClientsNum);
         handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
         handler->PSendSysMessage(LANG_UPDATE_DIFF, updateTime);
+
         // Can't use sWorld->ShutdownMsg here in case of console command
         if (sWorld->IsShuttingDown())
-            handler->PSendSysMessage(LANG_SHUTDOWN_TIMELEFT, secsToTimeString(sWorld->GetShutDownTimeLeft()).c_str());
+            handler->PSendSysMessage(LANG_SHUTDOWN_TIMELEFT, Warhead::Time::ToTimeString<Seconds>(sWorld->GetShutDownTimeLeft(), TimeOutput::Seconds, TimeFormat::FullText).c_str());
 
         return true;
     }
@@ -476,7 +478,7 @@ private:
         }
         else
         {
-            delay = TimeStringToSecs(std::string(delayStr));
+            delay = Warhead::Time::TimeStringTo<Seconds>(delayStr);
 
             if (delay == 0)
                 return false;
