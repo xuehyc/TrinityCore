@@ -57,10 +57,10 @@ public:
     }
 };
 
-class Transmogrification_Item : public ItemScript
+class Transmogrification_Misc : public MiscScript
 {
 public:
-    Transmogrification_Item() : ItemScript("Transmogrification_Item") { }
+    Transmogrification_Misc() : MiscScript("Transmogrification_Misc") { }
 
     void OnItemDelFromDB(CharacterDatabaseTransaction /*trans*/, ObjectGuid::LowType itemGuid) override
     {
@@ -153,7 +153,7 @@ public:
 
 void AddSC_Transmogrification()
 {
-    new Transmogrification_Item();
+    new Transmogrification_Misc();
     new Transmogrification_NPC();
     new Transmogrification_Player();
     new Transmogrification_World();

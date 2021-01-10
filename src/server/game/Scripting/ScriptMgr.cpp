@@ -1574,16 +1574,6 @@ bool ScriptMgr::OnCastItemCombatSpell(Player* player, Unit* victim, SpellInfo co
     return tmpscript->OnCastItemCombatSpell(player, victim, spellInfo, item);
 }
 
-void ScriptMgr::OnMirrorImageDisplayItem(const Item* item, uint32& display)
-{
-    FOREACH_SCRIPT(ItemScript)->OnMirrorImageDisplayItem(item, display);
-}
-
-void ScriptMgr::OnItemDelFromDB(CharacterDatabaseTransaction trans, ObjectGuid::LowType itemGuid)
-{
-    FOREACH_SCRIPT(ItemScript)->OnItemDelFromDB(trans, itemGuid);
-}
-
 CreatureAI* ScriptMgr::GetCreatureAI(Creature* creature)
 {
     ASSERT(creature);
@@ -2206,6 +2196,17 @@ void ScriptMgr::OnCheckNormalMatch(BattlegroundQueue* queue, uint32& Coef, Battl
     FOREACH_SCRIPT(BGScript)->OnCheckNormalMatch(queue, Coef, bgTemplate, bracket_id, minPlayers, maxPlayers);
 }
 
+// MiscScript
+void ScriptMgr::OnMirrorImageDisplayItem(const Item* item, uint32& display)
+{
+    FOREACH_SCRIPT(MiscScript)->OnMirrorImageDisplayItem(item, display);
+}
+
+void ScriptMgr::OnItemDelFromDB(CharacterDatabaseTransaction trans, ObjectGuid::LowType itemGuid)
+{
+    FOREACH_SCRIPT(MiscScript)->OnItemDelFromDB(trans, itemGuid);
+}
+
 SpellScriptLoader::SpellScriptLoader(char const* name)
     : ScriptObject(name)
 {
@@ -2407,6 +2408,12 @@ BGScript::BGScript(char const* name)
     ScriptRegistry<BGScript>::Instance()->AddScript(this);
 }
 
+MiscScript::MiscScript(char const* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<MiscScript>::Instance()->AddScript(this);
+}
+
 // Specialize for each script type class like so:
 template class WH_GAME_API ScriptRegistry<SpellScriptLoader>;
 template class WH_GAME_API ScriptRegistry<ServerScript>;
@@ -2436,3 +2443,4 @@ template class WH_GAME_API ScriptRegistry<GroupScript>;
 template class WH_GAME_API ScriptRegistry<UnitScript>;
 template class WH_GAME_API ScriptRegistry<AccountScript>;
 template class WH_GAME_API ScriptRegistry<BGScript>;
+template class WH_GAME_API ScriptRegistry<MiscScript>;

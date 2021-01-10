@@ -393,11 +393,6 @@ class WH_GAME_API ItemScript : public ScriptObject
 
         // Called before casting a combat spell from this item (chance on hit spells of item template, can be used to prevent cast if returning false)
         virtual bool OnCastItemCombatSpell(Player* /*player*/, Unit* /*victim*/, SpellInfo const* /*spellInfo*/, Item* /*item*/) { return true; }
-
-        virtual void OnMirrorImageDisplayItem(const Item* /*item*/, uint32& /*display*/) { }
-
-        // Called before item delete
-        virtual void OnItemDelFromDB(CharacterDatabaseTransaction /*trans*/, ObjectGuid::LowType /*itemGuid*/) { }
 };
 
 class WH_GAME_API UnitScript : public ScriptObject
@@ -880,6 +875,20 @@ public:
     virtual void OnCheckNormalMatch(BattlegroundQueue* /*queue*/, uint32& /*Coef*/, Battleground* /*bgTemplate*/, BattlegroundBracketId /*bracket_id*/, uint32& /*minPlayers*/, uint32& /*maxPlayers*/) { }
 };
 
+class WH_GAME_API MiscScript : public ScriptObject
+{
+protected:
+
+    MiscScript(char const* name);
+
+public:
+    // Called before SendPacket in HandleMirrorImageDataRequest
+    virtual void OnMirrorImageDisplayItem(const Item* /*item*/, uint32& /*display*/) { }
+
+    // Called before item delete
+    virtual void OnItemDelFromDB(CharacterDatabaseTransaction /*trans*/, ObjectGuid::LowType /*itemGuid*/) { }
+};
+
 // Manages registration, loading, and execution of scripts.
 class WH_GAME_API ScriptMgr
 {
@@ -996,8 +1005,6 @@ class WH_GAME_API ScriptMgr
         bool OnItemExpire(Player* player, ItemTemplate const* proto);
         bool OnItemRemove(Player* player, Item* item);
         bool OnCastItemCombatSpell(Player* player, Unit* victim, SpellInfo const* spellInfo, Item* item);
-        void OnMirrorImageDisplayItem(const Item* item, uint32& display);
-        void OnItemDelFromDB(CharacterDatabaseTransaction trans, ObjectGuid::LowType itemGuid);
 
     public: /* CreatureScript */
 
@@ -1161,6 +1168,11 @@ class WH_GAME_API ScriptMgr
         bool CanFillPlayersToBGWithSpecific(BattlegroundQueue* queue, Battleground* bg, const int32 aliFree, const int32 hordeFree,
             BattlegroundBracketId thisBracketId, BattlegroundQueue* specificQueue, BattlegroundBracketId specificBracketId);
         void OnCheckNormalMatch(BattlegroundQueue* queue, uint32& Coef, Battleground* bgTemplate, BattlegroundBracketId bracket_id, uint32& minPlayers, uint32& maxPlayers);
+
+    public: /* MiscScript */
+
+        void OnMirrorImageDisplayItem(const Item* item, uint32& display);
+        void OnItemDelFromDB(CharacterDatabaseTransaction trans, ObjectGuid::LowType itemGuid);
 
     private:
         uint32 _scriptCount;
