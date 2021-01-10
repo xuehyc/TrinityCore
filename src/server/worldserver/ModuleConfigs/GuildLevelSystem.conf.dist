@@ -28,33 +28,9 @@
 GLS.Enable = 1
 
 #
-#    GLS.MaxLevel
-#        Maximum level for guilds
-#        Default: 30
+#    GLS.Criteria.ShowItems.Enable
+#        Enable show items in criteria list
+#        Default: 1
 #
 
-GLS.MaxLevel = 30
-
-#
-#    GLS.Exp.ItemID
-#        ItemID for upgrade levels guild
-#        Default: 37711
-#
-
-GLS.Exp.ItemID = 37711
-
-#
-#   GLS.ColorChat.Rank0
-#        Color code for guild chat rank 0
-#        Default: "|cffff0000"
-#
-
-GLS.ColorChat.Rank0 = "|cffff0000"
-
-#
-#   GLS.ColorChat.Rank0
-#        Color code for guild chat rank 1
-#        Default: "|cffff0000"
-#
-
-GLS.ColorChat.Rank1 = "|cffff0000"
+GLS.Criteria.ShowItems.Enable = 1
