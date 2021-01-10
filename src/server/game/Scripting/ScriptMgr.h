@@ -280,6 +280,9 @@ class WH_GAME_API WorldScript : public ScriptObject
 
         // Called when the world is actually shut down.
         virtual void OnShutdown() { }
+
+        // Called before init server
+        virtual void OnLoadCustomScripts() { }
 };
 
 class WH_GAME_API FormulaScript : public ScriptObject
@@ -973,6 +976,7 @@ class WH_GAME_API ScriptMgr
         void OnWorldUpdate(uint32 diff);
         void OnStartup();
         void OnShutdown();
+        void OnLoadCustomScripts();
 
     public: /* FormulaScript */
 

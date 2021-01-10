@@ -1803,6 +1803,11 @@ void ScriptMgr::OnShutdown()
     FOREACH_SCRIPT(WorldScript)->OnShutdown();
 }
 
+void ScriptMgr::OnLoadCustomScripts()
+{
+    FOREACH_SCRIPT(WorldScript)->OnLoadCustomScripts();
+}
+
 bool ScriptMgr::OnCriteriaCheck(uint32 scriptId, Player* source, Unit* target)
 {
     ASSERT(source);

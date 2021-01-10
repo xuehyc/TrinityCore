@@ -1711,6 +1711,8 @@ void World::SetInitialWorldSettings()
         });
     }
 
+    sScriptMgr->OnLoadCustomScripts();
+
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
 
     LOG_INFO("server.worldserver", "");
