@@ -243,7 +243,7 @@ public:
         sGameConfig->AddOption<int32>("AntiAD.Check.Channels", 8);
     }
 
-    void OnStartup() override
+    void OnLoadCustomScripts() override
     {
         if (!CONF_GET_BOOL("AntiAD.Enable"))
             return;

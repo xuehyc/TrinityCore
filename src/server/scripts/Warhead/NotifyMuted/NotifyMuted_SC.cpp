@@ -69,7 +69,7 @@ public:
         sGameConfig->AddOption<bool>("NotCanSpeakMsg.Enable");
     }
 
-    void OnStartup() override
+    void OnLoadCustomScripts() override
     {
         sModuleLocale->CheckStrings(MODULE_NAME, NM_LOCALE_MAX);
     }

@@ -107,7 +107,7 @@ public:
         sGameConfig->AddOption<bool>("UnbindInsance.Enable");
     }
 
-    void OnStartup() override
+    void OnLoadCustomScripts() override
     {
         sUI->Init();
     }

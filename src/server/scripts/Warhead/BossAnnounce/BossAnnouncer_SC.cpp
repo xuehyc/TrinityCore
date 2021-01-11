@@ -128,7 +128,7 @@ public:
         sGameConfig->AddOption<bool>("BossAnnouncer.Enable");
     }
 
-    void OnStartup() override
+    void OnLoadCustomScripts() override
     {
         sModuleLocale->CheckStrings(MODULE_NAME, BOSS_AN_LOCALE_MAX);
     }

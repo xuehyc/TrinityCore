@@ -60,7 +60,7 @@ public:
         sGameConfig->AddOption<int32>("OnlineReward.PerTime.ItemCount", 1);
     }
 
-    void OnStartup() override
+    void OnLoadCustomScripts() override
     {
         if (!CONF_GET_BOOL("OnlineReward.Enable"))
             return;

@@ -166,7 +166,7 @@ public:
         sGameConfig->AddOption<std::string>("ILU.Teleport.Location");
     }
 
-    void OnStartup() override
+    void OnLoadCustomScripts() override
     {
         sModuleLocale->CheckStrings(MODULE_NAME, ILU_LOCALE_MAX);
     }

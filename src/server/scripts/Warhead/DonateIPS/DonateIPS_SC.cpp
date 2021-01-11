@@ -274,7 +274,7 @@ public:
         sGameConfig->AddOption<bool>("IPSShop.Enable");
     }
 
-    void OnStartup() override
+    void OnLoadCustomScripts() override
     {
         if (!CONF_GET_BOOL("IPSShop.Enable"))
             return;

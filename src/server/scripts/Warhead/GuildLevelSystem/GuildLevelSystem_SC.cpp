@@ -194,7 +194,7 @@ public:
         sGameConfig->AddOption<bool>("GLS.Criteria.ShowItems.Enable");
     }
 
-    void OnStartup() override
+    void OnLoadCustomScripts() override
     {
         if (!CONF_GET_BOOL("GLS.Enable"))
             return;

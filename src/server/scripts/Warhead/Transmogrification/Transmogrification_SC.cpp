@@ -145,7 +145,7 @@ public:
         sTransmog->LoadConfig(reload);
     }
 
-    void OnStartup() override
+    void OnLoadCustomScripts() override
     {
         sTransmog->Init();
     }

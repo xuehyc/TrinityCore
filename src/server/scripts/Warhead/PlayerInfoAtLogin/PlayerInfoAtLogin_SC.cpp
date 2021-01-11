@@ -86,7 +86,7 @@ public:
         sGameConfig->AddOption<bool>("PlayerInfoAtLogin.Enable");
     }
 
-    void OnStartup() override
+    void OnLoadCustomScripts() override
     {
         sModuleLocale->CheckStrings(MODULE_NAME, PIAL_LOCALE_MAX);
     }
