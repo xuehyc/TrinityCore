@@ -1683,7 +1683,6 @@ void World::SetInitialWorldSettings()
 
     LOG_INFO("server.loading", "Deleting expired bans...");
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate<>bandate");      // One-time query
-    LOG_INFO("server.loading", "");
 
     LOG_INFO("server.loading", "Initializing quest reset times...");
     InitQuestResetTimes();
@@ -1711,7 +1710,18 @@ void World::SetInitialWorldSettings()
         });
     }
 
-    sScriptMgr->OnLoadCustomScripts();
+    // Loading custom scripts section
+    {
+        uint32 startTime = getMSTime();
+
+        LOG_INFO("server.loading", "");
+        LOG_INFO("server.loading", "> Start loading custom scripts...");
+        LOG_INFO("server.loading", "");
+
+        sScriptMgr->OnLoadCustomScripts();
+
+        LOG_INFO("server.loading", "> Custom scripts loaded in %s", Warhead::Time::ToTimeString<Milliseconds>(GetMSTimeDiffToNow(startTime), TimeOutput::Milliseconds, TimeFormat::FullText).c_str());
+    }
 
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
 

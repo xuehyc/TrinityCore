@@ -144,6 +144,7 @@ void WardenCheckMgr::LoadWardenOverrides()
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 Warden action overrides. DB table `warden_action` is empty!");
+        LOG_INFO("server.loading", "");
         return;
     }
 
