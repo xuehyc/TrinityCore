@@ -71,7 +71,7 @@ public:
         if (!result)
             return;
 
-        LOG_TRACE("modules.ips", "> DonateIPS: SendDonate");
+        LOG_TRACE("scripts.warhead", "> DonateIPS: SendDonate");
 
         do
         {
@@ -83,20 +83,20 @@ public:
 
             if (!normalizePlayerName(playerName))
             {
-                LOG_ERROR("modules.ips", "> DonateIPS: Некорректное имя персонажа (%s)", playerName.c_str());
+                LOG_ERROR("scripts.warhead", "> DonateIPS: Некорректное имя персонажа (%s)", playerName.c_str());
                 continue;
             }
 
             auto playerGuid = sCharacterCache->GetCharacterGuidByName(playerName);
             if (!playerGuid)
             {
-                LOG_ERROR("modules.ips", "> DonateIPS: Неверное имя персонажа (%s)", playerName.c_str());
+                LOG_ERROR("scripts.warhead", "> DonateIPS: Неверное имя персонажа (%s)", playerName.c_str());
                 continue;
             }
 
             if (!sCharacterCache->GetCharacterNameByGuid(playerGuid, playerName))
             {
-                LOG_ERROR("modules.ips", "> DonateIPS: Ошибка получения данных о персонаже (%s)", playerName.c_str());
+                LOG_ERROR("scripts.warhead", "> DonateIPS: Ошибка получения данных о персонаже (%s)", playerName.c_str());
                 continue;
             }
 
@@ -164,7 +164,7 @@ private:
     {
         auto shopID = ipsData->ShopID;
         if (!shopID)
-            LOG_FATAL("modules.ips", "> DonateIPS: невозможно найти данные шоп айди для номера (%u)", ipsData->ID);
+            LOG_FATAL("scripts.warhead", "> DonateIPS: невозможно найти данные шоп айди для номера (%u)", ipsData->ID);
 
         switch (shopID->Type)
         {
@@ -184,7 +184,7 @@ private:
                 SendRewardChangeCustomize(ipsData->CharName);
                 break;
             default:
-                LOG_FATAL("modules.ips", "> DonateIPS: Неверый тип шоп айди (%u)", static_cast<uint32>(shopID->Type));
+                LOG_FATAL("scripts.warhead", "> DonateIPS: Неверый тип шоп айди (%u)", static_cast<uint32>(shopID->Type));
                 return;
         }
 
@@ -250,7 +250,7 @@ private:
         if (itr != _shopStore.end())
             return &itr->second;
 
-        LOG_FATAL("modules.ips", "> DonateIPS: невозможно найти данные для шоп айди (%u)", shopID);
+        LOG_FATAL("scripts.warhead", "> DonateIPS: невозможно найти данные для шоп айди (%u)", shopID);
 
         return nullptr;
     }

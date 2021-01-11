@@ -58,7 +58,7 @@ void OnlineReward::InitSystem()
 
 void OnlineReward::LoadRewards()
 {
-    LOG_INFO("module", "Loading online rewards...");
+    LOG_INFO("scripts.warhead", "Loading online rewards...");
 
     _rewards.clear();
     uint32 msTime = getMSTime();
@@ -66,8 +66,8 @@ void OnlineReward::LoadRewards()
     QueryResult result = CharacterDatabase.Query("SELECT RewardPlayedTime, ItemID, Count FROM online_reward");
     if (!result)
     {
-        LOG_WARN("module", "> DB table `online_reward` is empty!");
-        LOG_WARN("module", "");
+        LOG_WARN("scripts.warhead", "> DB table `online_reward` is empty!");
+        LOG_WARN("scripts.warhead", "");
         return;
     }
 
@@ -84,20 +84,20 @@ void OnlineReward::LoadRewards()
         // Проверка
         if (!seconds)
         {
-            LOG_ERROR("module", "-> Time = 0? Really? Skip...");
+            LOG_ERROR("scripts.warhead", "-> Time = 0? Really? Skip...");
             continue;
         }
 
         ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(RPT.ItemID);
         if (!itemTemplate)
         {
-            LOG_ERROR("module", "-> Item with number %u not found. Skip", RPT.ItemID);
+            LOG_ERROR("scripts.warhead", "-> Item with number %u not found. Skip", RPT.ItemID);
             continue;
         }
 
         if (!RPT.ItemCount)
         {
-            LOG_ERROR("module", "-> Item count for number %u - 0. Set to 1", RPT.ItemID);
+            LOG_ERROR("scripts.warhead", "-> Item count for number %u - 0. Set to 1", RPT.ItemID);
             RPT.ItemCount = 1;
         }
 
@@ -105,8 +105,8 @@ void OnlineReward::LoadRewards()
 
     } while (result->NextRow());
 
-    LOG_INFO("module", ">> Loaded %u reward in %u ms", static_cast<uint32>(_rewards.size()), GetMSTimeDiffToNow(msTime));
-    LOG_INFO("module", "");
+    LOG_INFO("scripts.warhead", ">> Loaded %u reward in %u ms", static_cast<uint32>(_rewards.size()), GetMSTimeDiffToNow(msTime));
+    LOG_INFO("scripts.warhead", "");
 }
 
 void OnlineReward::AddRewardHistory(ObjectGuid::LowType guid)

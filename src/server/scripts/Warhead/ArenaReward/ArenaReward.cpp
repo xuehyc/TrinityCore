@@ -63,7 +63,7 @@ namespace
                 player->AddAura(SPELL_PARALYSE, player);
                 player->AddAura(SPELL_EXILE, player);
 
-                LOG_DEBUG("module.ar", "> Player (%s) paralyse!", player->GetName().c_str());
+                LOG_DEBUG("scripts.warhead", "> Player (%s) paralyse!", player->GetName().c_str());
             }
         }
 
@@ -311,7 +311,7 @@ bool ArenaReward::CheckIP(Battleground* bg, uint32 winner)
         if (!playersName.empty())
             playersName.erase(playersName.end() - 2, playersName.end());
 
-        LOG_WARN("module.ar", "> AR: Players (%s) used same ip for farming arena", playersName.c_str());
+        LOG_WARN("scripts.warhead", "> AR: Players (%s) used same ip for farming arena", playersName.c_str());
     }
 
     return isIPFound;
@@ -333,7 +333,7 @@ bool ArenaReward::CheckEqipment(Battleground* bg, uint32 winner)
 
             if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
             {
-                LOG_WARN("module.ar", "> AR: Player (%s) is no full equipment! Slot (%u) is empty", player->GetName().c_str(), slot);
+                LOG_WARN("scripts.warhead", "> AR: Player (%s) is no full equipment! Slot (%u) is empty", player->GetName().c_str(), slot);
                 return false;
             }
         }
@@ -396,7 +396,7 @@ bool ArenaReward::CheckHealth(Battleground* bg, uint32 winner)
     {
         if (player->GetMaxHealth() <= 10000)
         {
-            LOG_WARN("module.ar", "> AR: Player (%s) have (%u) health", player->GetName().c_str(), player->GetMaxHealth());
+            LOG_WARN("scripts.warhead", "> AR: Player (%s) have (%u) health", player->GetName().c_str(), player->GetMaxHealth());
             return true;
         }
 

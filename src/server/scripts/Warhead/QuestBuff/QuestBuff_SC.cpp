@@ -53,8 +53,8 @@ public:
         QueryResult result = WorldDatabase.Query("SELECT `QuestID`, `SpellID`, `SpellRank`, `Category` FROM quest_buff ORDER BY `Category`, `SpellRank`");
         if (!result)
         {
-            LOG_INFO("module", ">> In DB table `quest_buff` not data. Loading canceled");
-            LOG_INFO("module", "");
+            LOG_INFO("scripts.warhead", ">> In DB table `quest_buff` not data. Loading canceled");
+            LOG_INFO("scripts.warhead", "");
             return;
         }
 
@@ -77,7 +77,7 @@ public:
             auto spell = sSpellStore.LookupEntry(QB.SpellID);
             if (!spell)
             {
-                LOG_ERROR("module", "-> Spell with number (%u) not found. Skip.", QB.SpellID);
+                LOG_ERROR("scripts.warhead", "-> Spell with number (%u) not found. Skip.", QB.SpellID);
                 continue;
             }
 
@@ -85,8 +85,8 @@ public:
 
         } while (result->NextRow());
 
-        LOG_INFO("module", ">> Loaded %u quest buffs in %u ms", (uint32)_Store.size(), GetMSTimeDiffToNow(msTime));
-        LOG_INFO("module", "");
+        LOG_INFO("scripts.warhead", ">> Loaded %u quest buffs in %u ms", (uint32)_Store.size(), GetMSTimeDiffToNow(msTime));
+        LOG_INFO("scripts.warhead", "");
     }
 
     uint32 GetHighRankByCategory(Player* player, uint32 Cat)

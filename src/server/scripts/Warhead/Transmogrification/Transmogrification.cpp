@@ -105,7 +105,7 @@ void Transmogrification::Init()
 
     if (!sObjectMgr->GetItemTemplate(tokenEntry))
     {
-        LOG_ERROR("module.transmog", "Transmogrification.TokenEntry (%u) does not exist. Using default.", tokenEntry);
+        LOG_ERROR("scripts.warhead", "Transmogrification.TokenEntry (%u) does not exist. Using default.", tokenEntry);
         sGameConfig->SetOption<int32>("Transmogrification.TokenEntry", 49426);
     }
 }
@@ -240,7 +240,7 @@ std::string const Transmogrification::GetSlotName(Player* player, uint8 slot) co
             return sModuleLocale->GetModuleString(MODULE_NAME, TRANSMOG_LOCALE_TABARD, localeIndex).value_or("Tabard"); // Tabard
         default:
         {
-            LOG_FATAL("module.transmog", "> Transmog: unknown slot (%u)", slot);
+            LOG_FATAL("scripts.warhead", "> Transmog: unknown slot (%u)", slot);
             return "";
         }
     }
@@ -793,7 +793,7 @@ void Transmogrification::LoadConfig(bool reload)
 
     if (!reload)
     {
-        LOG_DEBUG("module.transmog", "Deleting non-existing transmogrification entries...");
+        LOG_DEBUG("scripts.warhead", "Deleting non-existing transmogrification entries...");
         CharacterDatabase.DirectExecute("DELETE FROM custom_transmogrification WHERE NOT EXISTS (SELECT 1 FROM item_instance WHERE item_instance.guid = custom_transmogrification.GUID)");
 
         // Clean even if disabled

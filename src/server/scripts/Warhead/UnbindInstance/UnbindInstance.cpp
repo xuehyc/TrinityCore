@@ -134,7 +134,7 @@ namespace
 
 void UnbindInstance::Init()
 {
-    LOG_INFO("module.unbind", "Загрузка вариантов стоимости сброса кд...");
+    LOG_INFO("scripts.warhead", "Загрузка вариантов стоимости сброса кд...");
     LoadCostData();
 }
 
@@ -158,7 +158,7 @@ void UnbindInstance::LoadCostData()
 
     if (!result)
     {
-        LOG_WARN("module.unbind", "> Загружено 0 вариантов стоимости. Таблица `unbind_instance_cost` пустая.");
+        LOG_WARN("scripts.warhead", "> Загружено 0 вариантов стоимости. Таблица `unbind_instance_cost` пустая.");
         return;
     }
 
@@ -167,7 +167,7 @@ void UnbindInstance::LoadCostData()
         ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(itemID);
         if (!itemTemplate)
         {
-            LOG_ERROR("module.unbind", "> UI: ItemID (%u) is not exist!", itemID);
+            LOG_ERROR("scripts.warhead", "> UI: ItemID (%u) is not exist!", itemID);
             return false;
         }
 
@@ -204,8 +204,8 @@ void UnbindInstance::LoadCostData()
         _costStore.insert(std::make_pair(_UIData.ItemID, _UIData));
     } while (result->NextRow());
 
-    LOG_INFO("module.unbind", ">> Загружено %u вариантов за %u мс", static_cast<uint32>(_costStore.size()), GetMSTimeDiffToNow(oldMSTime));
-    LOG_INFO("module.unbind", "");
+    LOG_INFO("scripts.warhead", ">> Загружено %u вариантов за %u мс", static_cast<uint32>(_costStore.size()), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("scripts.warhead", "");
 }
 
 void UnbindInstance::SendGossipHello(Player* player, Creature* creature)
@@ -314,7 +314,7 @@ void UnbindInstance::BindInfo(Player* player, Creature* creature, uint32 sender,
                 case RAID_DIFFICULTY_25MAN_HEROIC:
                     return uiCostsStore.CountForRaid25Heroic;
                 default:
-                    LOG_FATAL("module.unbind", "> UI: Incorrect diff for raid (%d)", sender - GOSSIP_SENDER_DIFFICULTY);
+                    LOG_FATAL("scripts.warhead", "> UI: Incorrect diff for raid (%d)", sender - GOSSIP_SENDER_DIFFICULTY);
                     break;
             }
         }
@@ -325,7 +325,7 @@ void UnbindInstance::BindInfo(Player* player, Creature* creature, uint32 sender,
                 case DUNGEON_DIFFICULTY_HEROIC:
                     return uiCostsStore.CountForDungeonHeroic;
                 default:
-                    LOG_FATAL("module.unbind", "> UI: Incorrect diff for dungeon (%d)", sender - GOSSIP_SENDER_DIFFICULTY);
+                    LOG_FATAL("scripts.warhead", "> UI: Incorrect diff for dungeon (%d)", sender - GOSSIP_SENDER_DIFFICULTY);
                     break;
             }
         }
@@ -382,7 +382,7 @@ void UnbindInstance::Unbind(Player* player, Creature* creature, uint32 sender, u
                 case RAID_DIFFICULTY_25MAN_HEROIC:
                     return uiCostsStore.CountForRaid25Heroic;
                 default:
-                    LOG_FATAL("module.unbind", "> UI: Incorrect diff for raid (%d)", sender - GOSSIP_SENDER_DIFFICULTY);
+                    LOG_FATAL("scripts.warhead", "> UI: Incorrect diff for raid (%d)", sender - GOSSIP_SENDER_DIFFICULTY);
                     break;
             }
         }
@@ -393,7 +393,7 @@ void UnbindInstance::Unbind(Player* player, Creature* creature, uint32 sender, u
                 case DUNGEON_DIFFICULTY_HEROIC:
                     return uiCostsStore.CountForDungeonHeroic;
                 default:
-                    LOG_FATAL("module.unbind", "> UI: Incorrect diff for dungeon (%d)", sender - GOSSIP_SENDER_DIFFICULTY);
+                    LOG_FATAL("scripts.warhead", "> UI: Incorrect diff for dungeon (%d)", sender - GOSSIP_SENDER_DIFFICULTY);
                     break;
             }
         }

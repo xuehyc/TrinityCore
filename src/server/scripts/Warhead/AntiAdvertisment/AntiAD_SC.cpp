@@ -72,13 +72,13 @@ public:
     {
         uint32 oldMSTime = getMSTime();
 
-        LOG_INFO("module.antiad", "Loading anti advertisment...");
+        LOG_INFO("scripts.warhead", "Loading anti advertisment...");
 
         QueryResult result = WorldDatabase.PQuery("SELECT Pattern FROM `anti_ad_patterns`");
         if (!result)
         {
-            LOG_INFO("module.antiad", ">> Loading 0 word. DB table `anti_ad_patterns` is empty.");
-            LOG_INFO("module.antiad", "");
+            LOG_INFO("scripts.warhead", ">> Loading 0 word. DB table `anti_ad_patterns` is empty.");
+            LOG_INFO("scripts.warhead", "");
             return;
         }
 
@@ -96,18 +96,18 @@ public:
         try
         {
             Poco::RegularExpression re(_pattern);
-            LOG_INFO("module.antiad", ">> Regular expression '%s' successfully loaded in %u ms", _pattern.c_str(), GetMSTimeDiffToNow(oldMSTime));
+            LOG_INFO("scripts.warhead", ">> Regular expression '%s' successfully loaded in %u ms", _pattern.c_str(), GetMSTimeDiffToNow(oldMSTime));
         }
         catch (const Poco::Exception& e)
         {
-            LOG_FATAL("module.antiad", ">> %s", e.displayText().c_str());
-            LOG_FATAL("module.antiad", ">> Regular expression failed loaded (%s)", _pattern.c_str());
+            LOG_FATAL("scripts.warhead", ">> %s", e.displayText().c_str());
+            LOG_FATAL("scripts.warhead", ">> Regular expression failed loaded (%s)", _pattern.c_str());
 
             // Set disable module
             sGameConfig->SetOption<bool>("AntiAD.Enable", false);
         }
 
-        LOG_INFO("module.antiad", "");
+        LOG_INFO("scripts.warhead", "");
     }
 
     bool IsNeedCheckChannel(uint8 channelType)
@@ -129,7 +129,7 @@ public:
         }
         catch (const Poco::Exception& e)
         {
-            LOG_FATAL("module.antiad", "%s", e.displayText().c_str());
+            LOG_FATAL("scripts.warhead", "%s", e.displayText().c_str());
         }
 
         return false;
