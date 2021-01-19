@@ -25,4 +25,4 @@
 #        Default: 0
 #
 
-PlayerInfoAtLogin.Enable = 0
+PlayerInfoAtLogin.Enable = 1

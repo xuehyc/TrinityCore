@@ -25,4 +25,4 @@
 #        Default: 0
 #
 
-NotCanSpeakMsg.Enable = 0
+NotCanSpeakMsg.Enable = 1
