@@ -275,7 +275,7 @@ bool ConfigMgr::LoadModulesConfigs()
         // Load .conf config
         if (!LoadAdditionalFile(moduleConfigPath + defaultFileName, error))
         {
-            LOG_ERROR("config", "> Config: Error at loading module config file. %s", error.c_str());
+            LOG_DEBUG("config", "> Config: Error at loading module config file. %s", error.c_str());
             isExistDefaultConfig = false;
         }
 
