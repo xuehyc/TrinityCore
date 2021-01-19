@@ -2421,6 +2421,9 @@ void ObjectMgr::LoadGameObjects()
         {
             LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: %u Entry: %u) with invalid rotation quaternion (non-unit), defaulting to orientation on Z axis only", guid, data.id);
             data.rotation = QuaternionData::fromEulerAnglesZYX(data.spawnPoint.GetOrientation(), 0.0f, 0.0f);
+
+            LOG_ERROR("sql.sql", "> FIX: 'UPDATE `gameobject` SET `rotation0` = %f, `rotation1` = %f, `rotation2` = %f, `rotation3` = %f WHERE `guid` = %u;'",
+                data.rotation.x, data.rotation.y, data.rotation.z, data.rotation.w, data.spawnId);
         }
 
         if (data.phaseMask == 0)
