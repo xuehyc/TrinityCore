@@ -985,7 +985,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder const& holder)
         SendNotification(LANG_GM_ON);
 
     std::string IP_str = GetRemoteAddress();
-    TC_LOG_INFO("entities.player.character", "Account: %d (IP: %s) Login Character:[%s] %s Level: %d, XP: %u/%u (%u left)",
+    LOG_INFO("entities.player.character", "Account: %d (IP: %s) Login Character:[%s] %s Level: %d, XP: %u/%u (%u left)",
         GetAccountId(), IP_str.c_str(), pCurrChar->GetName().c_str(), pCurrChar->GetGUID().ToString().c_str(), pCurrChar->GetLevel(),
         _player->GetXP(), _player->GetXPForNextLevel(), _player->GetXPForNextLevel() - _player->GetXP());
 
