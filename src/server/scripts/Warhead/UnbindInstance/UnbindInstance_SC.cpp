@@ -46,8 +46,6 @@ public:
 
         bool OnGossipSelect(Player* player, uint32 /*menu_id*/, uint32 gossipListId) override
         {
-            ClearGossipMenuFor(player);
-
             uint32 action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
             uint32 sender = player->PlayerTalkClass->GetGossipOptionSender(gossipListId);
 
