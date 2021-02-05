@@ -643,6 +643,11 @@ class WH_GAME_API Map : public GridRefManager<NGridType>
             _updateObjects.erase(obj);
         }
 
+        size_t GetActiveNonPlayersCount() const
+        {
+            return m_activeNonPlayers.size();
+        }
+
         virtual std::string GetDebugInfo() const;
 
     private:

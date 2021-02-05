@@ -246,6 +246,9 @@ void WardenWin::RequestChecks()
 
     for (WardenCheckCategory category : EnumUtils::Iterate<WardenCheckCategory>())
     {
+        if (IsWardenCategoryInWorldOnly(category) && !_session->GetPlayer())
+            continue;
+
         auto& [checks, checksIt] = _checks[category];
         for (uint32 i = 0, n = CONF_GET_INT(GetWardenCategoryCountConfig(category)); i < n; ++i)
         {
