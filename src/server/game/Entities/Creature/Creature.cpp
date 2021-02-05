@@ -2740,8 +2740,7 @@ void Creature::AllLootRemovedFromCorpse()
         return;
 
     // Scripts can choose to ignore RATE_CORPSE_DECAY_LOOTED by calling SetCorpseDelay(timer, true)
-    float decayRate = m_ignoreCorpseDecayRatio ? 1.f : sWorld->getRate(RATE_CORPSE_DECAY_LOOTED);
-    float decayRate = CONF_GET_FLOAT("Rate.Corpse.Decay.Looted");
+    float decayRate = m_ignoreCorpseDecayRatio ? 1.f : CONF_GET_FLOAT("Rate.Corpse.Decay.Looted");
 
     // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
     if (loot.loot_type == LOOT_SKINNING)
