@@ -1012,9 +1012,9 @@ void World::LoadConfigSettings(bool reload)
     else
         m_dataPath = dataPath;
 
-    bool enableIndoor = sConfigMgr->GetBoolDefault("vmap.enableIndoorCheck", true);
-    bool enableLOS = sConfigMgr->GetBoolDefault("vmap.enableLOS", true);
-    bool enableHeight = sConfigMgr->GetBoolDefault("vmap.enableHeight", true);
+    bool enableIndoor = sConfigMgr->GetOption<bool>("vmap.enableIndoorCheck", true);
+    bool enableLOS = sConfigMgr->GetOption<bool>("vmap.enableLOS", true);
+    bool enableHeight = sConfigMgr->GetOption<bool>("vmap.enableHeight", true);
 
     if (!enableHeight)
         LOG_ERROR("config", "VMap height checking disabled! Creatures movements and other various things WILL be broken! Expect no support.");
@@ -1734,7 +1734,7 @@ void World::SetInitialWorldSettings()
 
 void World::DetectDBCLang()
 {
-    uint8 m_lang_confid = sConfigMgr->GetIntDefault("DBC.Locale", 255);
+    uint8 m_lang_confid = sConfigMgr->GetOption<int32>("DBC.Locale", 255);
 
     if (m_lang_confid != 255 && m_lang_confid >= TOTAL_LOCALES)
     {
@@ -1783,7 +1783,7 @@ void World::LoadAutobroadcasts()
     m_Autobroadcasts.clear();
     m_AutobroadcastsWeights.clear();
 
-    uint32 realmId = sConfigMgr->GetIntDefault("RealmID", 0);
+    uint32 realmId = sConfigMgr->GetOption<int32>("RealmID", 0);
     LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_AUTOBROADCAST);
     stmt->setInt32(0, realmId);
     PreparedQueryResult result = LoginDatabase.Query(stmt);

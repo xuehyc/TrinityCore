@@ -21,6 +21,7 @@
 #include "Define.h"
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 class WH_COMMON_API ConfigMgr
 {
@@ -38,23 +39,27 @@ public:
 
     bool Reload();
 
-    std::string GetStringDefault(std::string const& name, const std::string& def, bool quiet = false) const;
-    bool GetBoolDefault(std::string const& name, bool def, bool quiet = false) const;
-    int GetIntDefault(std::string const& name, int def, bool quiet = false) const;
-    float GetFloatDefault(std::string const& name, float def, bool quiet = false) const;
-
     std::string const& GetFilename();
     std::string const GetConfigPath();
     std::vector<std::string> const& GetArguments() const;
     std::vector<std::string> GetKeysByString(std::string const& name);
 
+    template<class T>
+    T GetOption(std::string const& name, T const& def) const;
+
 private:
     /// Method used only for loading main configuration files (authserver.conf and worldserver.conf)
-    bool LoadInitial(std::string const& file, std::string& error);
-    bool LoadAdditionalFile(std::string file, std::string& error);
+    bool LoadInitial(std::string const& file);
+    bool LoadAdditionalFile(std::string file);
 
     template<class T>
-    T GetValueDefault(std::string const& name, T def, bool quiet) const;
+    T GetValueDefault(std::string const& name, T const& def) const;
+};
+
+class WH_COMMON_API ConfigException : public std::length_error
+{
+public:
+    explicit ConfigException(std::string const& message) : std::length_error(message) { }
 };
 
 #define sConfigMgr ConfigMgr::instance()

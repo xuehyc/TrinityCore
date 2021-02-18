@@ -225,4 +225,3 @@ std::string Warhead::Time::TimeToHumanReadable(time_t t)
     strftime(buf, 30, "%c", &time);
     return std::string(buf);
 }
-

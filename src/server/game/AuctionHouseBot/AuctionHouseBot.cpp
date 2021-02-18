@@ -98,7 +98,7 @@ bool AuctionBotConfig::Initialize()
 
 void AuctionBotConfig::SetConfig(AuctionBotConfigUInt32Values index, char const* fieldname, uint32 defvalue)
 {
-    SetConfig(index, sConfigMgr->GetIntDefault(fieldname, defvalue));
+    SetConfig(index, sConfigMgr->GetOption<int32>(fieldname, defvalue));
 
     if (int32(GetConfig(index)) < 0)
     {
@@ -109,7 +109,7 @@ void AuctionBotConfig::SetConfig(AuctionBotConfigUInt32Values index, char const*
 
 void AuctionBotConfig::SetConfigMax(AuctionBotConfigUInt32Values index, char const* fieldname, uint32 defvalue, uint32 maxvalue)
 {
-    SetConfig(index, sConfigMgr->GetIntDefault(fieldname, defvalue));
+    SetConfig(index, sConfigMgr->GetOption<int32>(fieldname, defvalue));
 
     if (GetConfig(index) > maxvalue)
     {
@@ -120,7 +120,7 @@ void AuctionBotConfig::SetConfigMax(AuctionBotConfigUInt32Values index, char con
 
 void AuctionBotConfig::SetConfigMinMax(AuctionBotConfigUInt32Values index, char const* fieldname, uint32 defvalue, uint32 minvalue, uint32 maxvalue)
 {
-    SetConfig(index, sConfigMgr->GetIntDefault(fieldname, defvalue));
+    SetConfig(index, sConfigMgr->GetOption<int32>(fieldname, defvalue));
 
     if (GetConfig(index) > maxvalue)
     {
@@ -137,12 +137,12 @@ void AuctionBotConfig::SetConfigMinMax(AuctionBotConfigUInt32Values index, char 
 
 void AuctionBotConfig::SetConfig(AuctionBotConfigBoolValues index, char const* fieldname, bool defvalue)
 {
-    SetConfig(index, sConfigMgr->GetBoolDefault(fieldname, defvalue));
+    SetConfig(index, sConfigMgr->GetOption<bool>(fieldname, defvalue));
 }
 
 void AuctionBotConfig::SetConfig(AuctionBotConfigFloatValues index, char const* fieldname, float defvalue)
 {
-    SetConfig(index, sConfigMgr->GetFloatDefault(fieldname, defvalue));
+    SetConfig(index, sConfigMgr->GetOption<float>(fieldname, defvalue));
 }
 
 //Get AuctionHousebot configuration file
@@ -154,8 +154,8 @@ void AuctionBotConfig::GetConfigFromFile()
     SetConfigMax(CONFIG_AHBOT_HORDE_ITEM_AMOUNT_RATIO, "AuctionHouseBot.Horde.Items.Amount.Ratio", 100, 10000);
     SetConfigMax(CONFIG_AHBOT_NEUTRAL_ITEM_AMOUNT_RATIO, "AuctionHouseBot.Neutral.Items.Amount.Ratio", 100, 10000);
 
-    SetAHBotIncludes(sConfigMgr->GetStringDefault("AuctionHouseBot.forceIncludeItems", ""));
-    SetAHBotExcludes(sConfigMgr->GetStringDefault("AuctionHouseBot.forceExcludeItems", ""));
+    SetAHBotIncludes(sConfigMgr->GetOption<std::string>("AuctionHouseBot.forceIncludeItems", ""));
+    SetAHBotExcludes(sConfigMgr->GetOption<std::string>("AuctionHouseBot.forceExcludeItems", ""));
 
     SetConfig(CONFIG_AHBOT_BUYER_ALLIANCE_ENABLED, "AuctionHouseBot.Buyer.Alliance.Enabled", false);
     SetConfig(CONFIG_AHBOT_BUYER_HORDE_ENABLED, "AuctionHouseBot.Buyer.Horde.Enabled", false);

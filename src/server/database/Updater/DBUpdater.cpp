@@ -227,10 +227,10 @@ bool DBUpdater<T>::Update(DatabaseWorkerPool<T>& pool)
     try
     {
         result = updateFetcher.Update(
-            sConfigMgr->GetBoolDefault("Updates.Redundancy", true),
-            sConfigMgr->GetBoolDefault("Updates.AllowRehash", true),
-            sConfigMgr->GetBoolDefault("Updates.ArchivedRedundancy", false),
-            sConfigMgr->GetIntDefault("Updates.CleanDeadRefMaxCount", 3));
+            sConfigMgr->GetOption<bool>("Updates.Redundancy", true),
+            sConfigMgr->GetOption<bool>("Updates.AllowRehash", true),
+            sConfigMgr->GetOption<bool>("Updates.ArchivedRedundancy", false),
+            sConfigMgr->GetOption<int32>("Updates.CleanDeadRefMaxCount", 3));
     }
     catch (UpdateException&)
     {

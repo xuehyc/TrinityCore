@@ -54,15 +54,15 @@ bool Metric::Connect()
 void Metric::LoadFromConfigs()
 {
     bool previousValue = _enabled;
-    _enabled = sConfigMgr->GetBoolDefault("Metric.Enable", false);
-    _updateInterval = sConfigMgr->GetIntDefault("Metric.Interval", 10);
+    _enabled = sConfigMgr->GetOption<bool>("Metric.Enable", false);
+    _updateInterval = sConfigMgr->GetOption<int32>("Metric.Interval", 10);
     if (_updateInterval < 1)
     {
         LOG_ERROR("metric", "'Metric.Interval' config set to %d, overriding to 1.", _updateInterval);
         _updateInterval = 1;
     }
 
-    _overallStatusTimerInterval = sConfigMgr->GetIntDefault("Metric.OverallStatusInterval", 1);
+    _overallStatusTimerInterval = sConfigMgr->GetOption<int32>("Metric.OverallStatusInterval", 1);
     if (_overallStatusTimerInterval < 1)
     {
         LOG_ERROR("metric", "'Metric.OverallStatusInterval' config set to %d, overriding to 1.", _overallStatusTimerInterval);
@@ -73,7 +73,7 @@ void Metric::LoadFromConfigs()
     std::vector<std::string> thresholdSettings = sConfigMgr->GetKeysByString("Metric.Threshold.");
     for (std::string const& thresholdSetting : thresholdSettings)
     {
-        int thresholdValue = sConfigMgr->GetIntDefault(thresholdSetting, 0);
+        int thresholdValue = sConfigMgr->GetOption<int32>(thresholdSetting, 0);
         std::string thresholdName = thresholdSetting.substr(strlen("Metric.Threshold."));
         _thresholds[thresholdName] = thresholdValue;
     }
@@ -82,7 +82,7 @@ void Metric::LoadFromConfigs()
     // Cancel any scheduled operation if the config changed from Enabled to Disabled.
     if (_enabled && !previousValue)
     {
-        std::string connectionInfo = sConfigMgr->GetStringDefault("Metric.ConnectionInfo", "");
+        std::string connectionInfo = sConfigMgr->GetOption<std::string>("Metric.ConnectionInfo", "");
         if (connectionInfo.empty())
         {
             LOG_ERROR("metric", "'Metric.ConnectionInfo' not specified in configuration file.");

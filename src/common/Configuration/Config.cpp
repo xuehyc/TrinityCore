@@ -19,71 +19,108 @@
 #include "Log.h"
 #include "SystemLog.h"
 #include "StringConvert.h"
+#include "StringFormat.h"
 #include "Util.h"
-#include <boost/property_tree/ini_parser.hpp>
-#include <algorithm>
-#include <memory>
 #include <mutex>
-
-namespace bpt = boost::property_tree;
+#include <fstream>
+#include <unordered_map>
 
 namespace
 {
     std::string _filename;
     std::vector<std::string> _additonalFiles;
     std::vector<std::string> _args;
-    bpt::ptree _config;
+    std::unordered_map<std::string /*name*/, std::string /*value*/> _configOptions;
     std::mutex _configLock;
 
-    bool LoadFile(std::string const& file, bpt::ptree& fullTree, std::string& error)
+    void AddKey(std::string const& optionName, std::string const& optionKey, bool replace = true)
+    {
+        auto const& itr = _configOptions.find(optionName);
+        if (itr != _configOptions.end())
+        {
+            if (!replace)
+            {
+                LOG_NOTICE("config", "> Config: Option '%s' is exist! Option key - '%s'", optionName.c_str(), itr->second.c_str());
+                return;
+            }
+
+            _configOptions.erase(optionName);
+        }
+
+        _configOptions.emplace(optionName, optionKey);
+
+        LOG_TRACE("config", "> Config: Add '%s' - '%s'", optionName.c_str(), optionKey.c_str());
+    }
+
+    void ParseFile(std::string const& file)
+    {
+        std::ifstream in(file);
+
+        if (in.fail())
+            throw ConfigException(Warhead::StringFormat("Config::LoadFile: Failed open file '%s'", file.c_str()));
+
+        uint32 count = 0;
+
+        while (in.good())
+        {
+            std::string line;
+            std::getline(in, line);
+
+            if (line.empty())
+                continue;
+
+            line = Warhead::String::Reduce(line);
+
+            // comments
+            if (line[0] == '#' || line[0] == '[')
+                continue;
+
+            auto const equal_pos = line.find('=');
+
+            if (equal_pos == std::string::npos || equal_pos == line.length())
+                return;
+
+            auto entry = Warhead::String::Reduce(line.substr(0, equal_pos));
+            auto value = Warhead::String::Reduce(line.substr(equal_pos + 1));
+
+            value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
+
+            AddKey(entry, value);
+
+            count++;
+        }
+
+        if (!count)
+            throw ConfigException(Warhead::StringFormat("Config::LoadFile: Empty file '%s'", file.c_str()));
+    }
+
+    bool LoadFile(std::string const& file)
     {
         try
         {
-            bpt::ini_parser::read_ini(file, fullTree);
-
-            if (fullTree.empty())
-            {
-                error = "empty file (" + file + ")";
-                return false;
-            }
+            ParseFile(file);
+            return true;
         }
-        catch (bpt::ini_parser::ini_parser_error const& e)
+        catch (const std::exception& e)
         {
-            if (e.line() == 0)
-                error = e.message() + " (" + e.filename() + ")";
-            else
-                error = e.message() + " (" + e.filename() + ":" + std::to_string(e.line()) + ")";
-            return false;
+            SYS_LOG_ERROR("> Config: %s", e.what());
         }
 
-        return true;
+        return false;
     }
 }
 
-bool ConfigMgr::LoadInitial(std::string const& file, std::string& error)
+bool ConfigMgr::LoadInitial(std::string const& file)
 {
     std::lock_guard<std::mutex> lock(_configLock);
-
-    bpt::ptree fullTree;
-    if (!LoadFile(file, fullTree, error))
-        return false;
-
-    // Since we're using only one section per config file, we skip the section and have direct property access
-    _config = fullTree.begin()->second;
-
-    return true;
+    _configOptions.clear();
+    return LoadFile(file);
 }
 
-bool ConfigMgr::LoadAdditionalFile(std::string file, std::string& error)
+bool ConfigMgr::LoadAdditionalFile(std::string file)
 {
-    bpt::ptree fullTree;
-    if (!LoadFile(file, fullTree, error))
-        return false;
-
-    for (bpt::ptree::value_type const& child : fullTree.begin()->second)
-        _config.put_child(bpt::ptree::path_type(child.first, '/'), child.second);
-
-    return true;
+    std::lock_guard<std::mutex> lock(_configLock);
+    return LoadFile(file);
 }
 
 ConfigMgr* ConfigMgr::instance()
@@ -101,83 +138,62 @@ bool ConfigMgr::Reload()
 }
 
 template<class T>
-T ConfigMgr::GetValueDefault(std::string const& name, T def, bool quiet) const
+T ConfigMgr::GetValueDefault(std::string const& name, T const& def) const
 {
-    try
+    auto const& itr = _configOptions.find(name);
+    if (itr == _configOptions.end())
     {
-        return _config.get<T>(bpt::ptree::path_type(name, '/'));
-    }
-    catch (bpt::ptree_bad_path const&)
-    {
-        if (!quiet)
-        {
-            LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
-                name.c_str(), _filename.c_str(), name.c_str(), std::to_string(def).c_str());
-        }
-    }
-    catch (bpt::ptree_bad_data const&)
-    {
-        LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
-            name.c_str(), _filename.c_str(), std::to_string(def).c_str());
+        LOG_WARN("config", "> Config: Missing name %s in config, add \"%s = %s\"",
+            name.c_str(), name.c_str(), Warhead::ToString(def).c_str());
+        return def;
     }
 
-    return def;
+    auto value = Warhead::StringTo<T>(itr->second);
+    if (!value)
+    {
+        LOG_ERROR("config", "> Config: Bad value defined for name '%s', going to use '%s' instead",
+            name.c_str(), Warhead::ToString(def).c_str());
+        return def;
+    }
+
+    return *value;
 }
 
 template<>
-std::string ConfigMgr::GetValueDefault<std::string>(std::string const& name, std::string def, bool quiet) const
+std::string ConfigMgr::GetValueDefault<std::string>(std::string const& name, std::string const& def) const
 {
-    try
+    auto const& itr = _configOptions.find(name);
+    if (itr == _configOptions.end())
     {
-        return _config.get<std::string>(bpt::ptree::path_type(name, '/'));
-    }
-    catch (bpt::ptree_bad_path const&)
-    {
-        if (!quiet)
-        {
-            LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
-                name.c_str(), _filename.c_str(), name.c_str(), def.c_str());
-        }
-    }
-    catch (bpt::ptree_bad_data const&)
-    {
-        LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
-            name.c_str(), _filename.c_str(), def.c_str());
-    }
+        LOG_WARN("config", "> Config: Missing name %s in config, add \"%s = %s\"",
+            name.c_str(), name.c_str(), def.c_str());
 
-    return def;
-}
-
-std::string ConfigMgr::GetStringDefault(std::string const& name, const std::string& def, bool quiet) const
-{
-    std::string val = GetValueDefault(name, def, quiet);
-    val.erase(std::remove(val.begin(), val.end(), '"'), val.end());
-    return val;
-}
-
-bool ConfigMgr::GetBoolDefault(std::string const& name, bool def, bool quiet) const
-{
-    std::string val = GetValueDefault(name, std::string(def ? "1" : "0"), quiet);
-    val.erase(std::remove(val.begin(), val.end(), '"'), val.end());
-    Optional<bool> boolVal = Warhead::StringTo<bool>(val);
-    if (boolVal)
-        return *boolVal;
-    else
-    {
-        LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use '%s' instead",
-            name.c_str(), _filename.c_str(), def ? "true" : "false");
         return def;
     }
+
+    return itr->second;
 }
 
-int ConfigMgr::GetIntDefault(std::string const& name, int def, bool quiet) const
+template<class T>
+T ConfigMgr::GetOption(std::string const& name, T const& def) const
 {
-    return GetValueDefault(name, def, quiet);
+    return GetValueDefault<T>(name, def);
 }
 
-float ConfigMgr::GetFloatDefault(std::string const& name, float def, bool quiet) const
+template<>
+WH_COMMON_API bool ConfigMgr::GetOption<bool>(std::string const& name, bool const& def) const
 {
-    return GetValueDefault(name, def, quiet);
+    std::string val = GetValueDefault(name, std::string(def ? "1" : "0"));
+
+    auto boolVal = Warhead::StringTo<bool>(val);
+    if (!boolVal)
+    {
+        LOG_ERROR("config", "> Config: Bad value defined for name '%s', going to use '%s' instead",
+            name.c_str(), def ? "true" : "false");
+        return def;
+    }
+
+    return *boolVal;
 }
 
 std::string const& ConfigMgr::GetFilename()
@@ -197,9 +213,9 @@ std::vector<std::string> ConfigMgr::GetKeysByString(std::string const& name)
 
     std::vector<std::string> keys;
 
-    for (bpt::ptree::value_type const& child : _config)
-        if (child.first.compare(0, name.length(), name) == 0)
-            keys.push_back(child.first);
+    for (auto const& [optionName, key] : _configOptions)
+        if (!optionName.compare(0, name.length(), name))
+            keys.emplace_back(optionName);
 
     return keys;
 }
@@ -227,21 +243,13 @@ void ConfigMgr::Configure(std::string const& initFileName, std::vector<std::stri
 
 bool ConfigMgr::LoadAppConfigs()
 {
-    std::string configError;
-
     // #1 - Load init config file .conf.dist
-    if (!LoadInitial(_filename + ".dist", configError))
-    {
-        SYS_LOG_ERROR("> Config: Error in config file: %s", configError.c_str());
+    if (!LoadInitial(_filename + ".dist"))
         return false;
-    }
 
     // #2 - Load .conf file
-    if (!LoadAdditionalFile(_filename, configError))
-    {
-        SYS_LOG_ERROR("> Config: Error in config file: %s", configError.c_str());
+    if (!LoadAdditionalFile(_filename))
         return false;
-    }
 
     return true;
 }
@@ -253,7 +261,6 @@ bool ConfigMgr::LoadModulesConfigs()
 
     // Start loading module configs
     std::vector<std::string /*config variant*/> moduleConfigFiles;
-    std::string error;
     std::string const& moduleConfigPath = GetConfigPath() + "modules/";
     bool isExistDefaultConfig = true;
     bool isExistDistConfig = true;
@@ -266,18 +273,12 @@ bool ConfigMgr::LoadModulesConfigs()
             defaultFileName.erase(defaultFileName.end() - 5, defaultFileName.end());
 
         // Load .conf.dist config
-        if (!LoadAdditionalFile(moduleConfigPath + distFileName, error))
-        {
-            LOG_ERROR("config", "> Config: Error at loading module config file. %s", error.c_str());
+        if (!LoadAdditionalFile(moduleConfigPath + distFileName))
             isExistDistConfig = false;
-        }
 
         // Load .conf config
-        if (!LoadAdditionalFile(moduleConfigPath + defaultFileName, error))
-        {
-            LOG_DEBUG("config", "> Config: Error at loading module config file. %s", error.c_str());
+        if (!LoadAdditionalFile(moduleConfigPath + defaultFileName))
             isExistDefaultConfig = false;
-        }
 
         if (isExistDefaultConfig && isExistDistConfig)
             moduleConfigFiles.emplace_back(defaultFileName);
@@ -300,3 +301,19 @@ bool ConfigMgr::LoadModulesConfigs()
 
     return true;
 }
+
+#define TEMPLATE_CONFIG_OPTION(__typename) \
+    template WH_COMMON_API __typename ConfigMgr::GetOption<__typename>(std::string const& name, __typename const& def) const;
+
+TEMPLATE_CONFIG_OPTION(std::string)
+TEMPLATE_CONFIG_OPTION(uint8)
+TEMPLATE_CONFIG_OPTION(int8)
+TEMPLATE_CONFIG_OPTION(uint16)
+TEMPLATE_CONFIG_OPTION(int16)
+TEMPLATE_CONFIG_OPTION(uint32)
+TEMPLATE_CONFIG_OPTION(int32)
+TEMPLATE_CONFIG_OPTION(uint64)
+TEMPLATE_CONFIG_OPTION(int64)
+TEMPLATE_CONFIG_OPTION(float)
+
+#undef TEMPLATE_CONFIG_OPTION

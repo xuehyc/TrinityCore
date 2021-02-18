@@ -558,7 +558,7 @@ public:
     {
         // When an absolute path is given in the config use it,
         // otherwise interpret paths relative to the executable.
-        fs::path path(sConfigMgr->GetStringDefault("HotSwap.ScriptDir", "scripts"));
+        fs::path path(sConfigMgr->GetOption<std::string>("HotSwap.ScriptDir", "scripts"));
         if (path.is_absolute())
             return path;
         else
@@ -1112,7 +1112,7 @@ private:
         // Find the best build directive for the module
         auto build_directive = [&] () -> std::string
         {
-            auto directive = sConfigMgr->GetStringDefault("HotSwap.ReCompilerBuildType", "");
+            auto directive = sConfigMgr->GetOption<std::string>("HotSwap.ReCompilerBuildType", "");
             if (!directive.empty())
                 return directive;
 

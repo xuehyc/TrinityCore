@@ -24,8 +24,8 @@
 #include <mysqld_error.h>
 
 DatabaseLoader::DatabaseLoader(std::string const& logger, uint32 const defaultUpdateMask)
-    : _logger(logger), _autoSetup(sConfigMgr->GetBoolDefault("Updates.AutoSetup", true)),
-    _updateFlags(sConfigMgr->GetIntDefault("Updates.EnableDatabases", defaultUpdateMask))
+    : _logger(logger), _autoSetup(sConfigMgr->GetOption<bool>("Updates.AutoSetup", true)),
+    _updateFlags(sConfigMgr->GetOption<int32>("Updates.EnableDatabases", defaultUpdateMask))
 {
 }
 
@@ -36,14 +36,14 @@ DatabaseLoader& DatabaseLoader::AddDatabase(DatabaseWorkerPool<T>& pool, std::st
 
     _open.push([this, name, updatesEnabledForThis, &pool]() -> bool
     {
-        std::string const dbString = sConfigMgr->GetStringDefault(name + "DatabaseInfo", "");
+        std::string const dbString = sConfigMgr->GetOption<std::string>(name + "DatabaseInfo", "");
         if (dbString.empty())
         {
             LOG_ERROR(_logger, "Database %s not specified in configuration file!", name.c_str());
             return false;
         }
 
-        uint8 const asyncThreads = uint8(sConfigMgr->GetIntDefault(name + "Database.WorkerThreads", 1));
+        uint8 const asyncThreads = uint8(sConfigMgr->GetOption<int32>(name + "Database.WorkerThreads", 1));
         if (asyncThreads < 1 || asyncThreads > 32)
         {
             LOG_ERROR(_logger, "%s database: invalid number of worker threads specified. "
@@ -51,7 +51,7 @@ DatabaseLoader& DatabaseLoader::AddDatabase(DatabaseWorkerPool<T>& pool, std::st
             return false;
         }
 
-        uint8 const synchThreads = uint8(sConfigMgr->GetIntDefault(name + "Database.SynchThreads", 1));
+        uint8 const synchThreads = uint8(sConfigMgr->GetOption<int32>(name + "Database.SynchThreads", 1));
 
         pool.SetConnectionInfo(dbString, asyncThreads, synchThreads);
         if (uint32 error = pool.Open())

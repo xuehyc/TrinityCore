@@ -147,7 +147,7 @@ public:
 
         handler->PSendSysMessage("Compiled on: %s", GitRevision::GetHostOSVersion());
 
-        uint32 updateFlags = sConfigMgr->GetIntDefault("Updates.EnableDatabases", DatabaseLoader::DATABASE_NONE);
+        uint32 updateFlags = sConfigMgr->GetOption<int32>("Updates.EnableDatabases", DatabaseLoader::DATABASE_NONE);
         if (!updateFlags)
             handler->SendSysMessage("Automatic database updates are disabled for all databases!");
         else
@@ -303,7 +303,7 @@ public:
                 sWorld->SetPlayerSecurityLimit(SEC_ADMINISTRATOR);
             else if (strncmp(paramStr, "reset", limit) == 0)
             {
-                sWorld->SetPlayerAmountLimit(sConfigMgr->GetIntDefault("PlayerLimit", 100));
+                sWorld->SetPlayerAmountLimit(sConfigMgr->GetOption<int32>("PlayerLimit", 100));
                 sWorld->LoadDBAllowedSecurityLevel();
             }
             else

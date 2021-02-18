@@ -134,7 +134,7 @@ void Log::LoadFromConfig()
 
 void Log::InitLogsDir()
 {
-    m_logsDir = sConfigMgr->GetStringDefault("LogsDir", "");
+    m_logsDir = sConfigMgr->GetOption<std::string>("LogsDir", "");
 
     if (!m_logsDir.empty())
         if ((m_logsDir.at(m_logsDir.length() - 1) != '/') && (m_logsDir.at(m_logsDir.length() - 1) != '\\'))
@@ -195,7 +195,7 @@ bool Log::ShouldLog(std::string_view type, LogLevel level) const
 
 std::string const Log::GetChannelsFromLogger(std::string const& loggerName)
 {
-    std::string const& loggerOptions = sConfigMgr->GetStringDefault(PREFIX_LOGGER + loggerName, "6, Console Server");
+    std::string const& loggerOptions = sConfigMgr->GetOption<std::string>(PREFIX_LOGGER + loggerName, "6, Console Server");
 
     auto const& tokensOptions = Warhead::Tokenize(loggerOptions, ',', true);
     if (tokensOptions.empty())
@@ -209,7 +209,7 @@ void Log::CreateLoggerFromConfig(std::string const& configLoggerName)
     if (configLoggerName.empty())
         return;
 
-    std::string const& options = sConfigMgr->GetStringDefault(configLoggerName, "");
+    std::string const& options = sConfigMgr->GetOption<std::string>(configLoggerName, "");
     std::string const& loggerName = configLoggerName.substr(PREFIX_LOGGER.length());
 
     if (loggerName == "system")
@@ -273,7 +273,7 @@ void Log::CreateChannelsFromConfig(std::string const& logChannelName)
     if (logChannelName.empty())
         return;
 
-    std::string const& options = sConfigMgr->GetStringDefault(logChannelName, "");
+    std::string const& options = sConfigMgr->GetOption<std::string>(logChannelName, "");
     std::string const& channelName = logChannelName.substr(PREFIX_CHANNEL.length());
 
     if (options.empty())

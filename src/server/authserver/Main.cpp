@@ -121,7 +121,7 @@ int main(int argc, char** argv)
     );
 
     // authserver PID file creation
-    std::string pidFile = sConfigMgr->GetStringDefault("PidFile", "");
+    std::string pidFile = sConfigMgr->GetOption<std::string>("PidFile", "");
     if (!pidFile.empty())
     {
         if (uint32 pid = CreatePIDFile(pidFile))
@@ -147,7 +147,7 @@ int main(int argc, char** argv)
     std::shared_ptr<Warhead::Asio::IoContext> ioContext = std::make_shared<Warhead::Asio::IoContext>();
 
     // Get the list of realms for the server
-    sRealmList->Initialize(*ioContext, sConfigMgr->GetIntDefault("RealmsStateUpdateDelay", 20));
+    sRealmList->Initialize(*ioContext, sConfigMgr->GetOption<int32>("RealmsStateUpdateDelay", 20));
 
     std::shared_ptr<void> sRealmListHandle(nullptr, [](void*) { sRealmList->Close(); });
 
@@ -158,14 +158,14 @@ int main(int argc, char** argv)
     }
 
     // Start the listening port (acceptor) for auth connections
-    int32 port = sConfigMgr->GetIntDefault("RealmServerPort", 3724);
+    int32 port = sConfigMgr->GetOption<int32>("RealmServerPort", 3724);
     if (port < 0 || port > 0xFFFF)
     {
         LOG_ERROR("server.authserver", "Specified port out of allowed range (1-65535)");
         return 1;
     }
 
-    std::string bindIp = sConfigMgr->GetStringDefault("BindIP", "0.0.0.0");
+    std::string bindIp = sConfigMgr->GetOption<std::string>("BindIP", "0.0.0.0");
 
     if (!sAuthSocketMgr.StartNetwork(*ioContext, bindIp, port))
     {
@@ -183,15 +183,15 @@ int main(int argc, char** argv)
     signals.async_wait(std::bind(&SignalHandler, std::weak_ptr<Warhead::Asio::IoContext>(ioContext), std::placeholders::_1, std::placeholders::_2));
 
     // Set process priority according to configuration settings
-    SetProcessPriority("server.authserver", sConfigMgr->GetIntDefault(CONFIG_PROCESSOR_AFFINITY, 0), sConfigMgr->GetBoolDefault(CONFIG_HIGH_PRIORITY, false));
+    SetProcessPriority("server.authserver", sConfigMgr->GetOption<int32>(CONFIG_PROCESSOR_AFFINITY, 0), sConfigMgr->GetOption<bool>(CONFIG_HIGH_PRIORITY, false));
 
     // Enabled a timed callback for handling the database keep alive ping
-    int32 dbPingInterval = sConfigMgr->GetIntDefault("MaxPingTime", 30);
+    int32 dbPingInterval = sConfigMgr->GetOption<int32>("MaxPingTime", 30);
     std::shared_ptr<Warhead::Asio::DeadlineTimer> dbPingTimer = std::make_shared<Warhead::Asio::DeadlineTimer>(*ioContext);
     dbPingTimer->expires_from_now(boost::posix_time::minutes(dbPingInterval));
     dbPingTimer->async_wait(std::bind(&KeepDatabaseAliveHandler, std::weak_ptr<Warhead::Asio::DeadlineTimer>(dbPingTimer), dbPingInterval, std::placeholders::_1));
 
-    int32 banExpiryCheckInterval = sConfigMgr->GetIntDefault("BanExpiryCheckInterval", 60);
+    int32 banExpiryCheckInterval = sConfigMgr->GetOption<int32>("BanExpiryCheckInterval", 60);
     std::shared_ptr<Warhead::Asio::DeadlineTimer> banExpiryCheckTimer = std::make_shared<Warhead::Asio::DeadlineTimer>(*ioContext);
     banExpiryCheckTimer->expires_from_now(boost::posix_time::seconds(banExpiryCheckInterval));
     banExpiryCheckTimer->async_wait(std::bind(&BanExpiryHandler, std::weak_ptr<Warhead::Asio::DeadlineTimer>(banExpiryCheckTimer), banExpiryCheckInterval, std::placeholders::_1));

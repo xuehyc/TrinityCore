@@ -23,6 +23,19 @@ std::string Warhead::String::Trim(std::string& str)
     return Poco::trim(str);
 }
 
+// Taken from https://stackoverflow.com/a/1798170
+std::string Warhead::String::Trim(std::string const& str, std::string_view whitespace /*= " \t"*/)
+{
+    const auto strBegin = str.find_first_not_of(whitespace);
+    if (strBegin == std::string::npos)
+        return ""; // no content
+
+    auto const strEnd = str.find_last_not_of(whitespace);
+    auto const strRange = strEnd - strBegin + 1;
+
+    return str.substr(strBegin, strRange);
+}
+
 std::string Warhead::String::TrimLeft(std::string& str)
 {
     return Poco::trimLeft(str);
@@ -41,6 +54,27 @@ std::string Warhead::String::TrimRight(std::string& str)
 std::string Warhead::String::TrimRightInPlace(std::string& str)
 {
     return Poco::trimRightInPlace(str);
+}
+
+std::string Warhead::String::Reduce(std::string const& str, std::string_view fill /*= " "*/, std::string_view whitespace /*= " \t"*/)
+{
+    // trim first
+    auto result = Trim(str, whitespace);
+
+    // replace sub ranges
+    auto beginSpace = result.find_first_of(whitespace);
+    while (beginSpace != std::string::npos)
+    {
+        const auto endSpace = result.find_first_not_of(whitespace, beginSpace);
+        const auto range = endSpace - beginSpace;
+
+        result.replace(beginSpace, range, fill);
+
+        const auto newStart = beginSpace + fill.length();
+        beginSpace = result.find_first_of(whitespace, newStart);
+    }
+
+    return result;
 }
 
 std::string Warhead::String::Replace(std::string& str, std::string const& from, std::string const& to)

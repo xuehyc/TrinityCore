@@ -174,7 +174,7 @@ extern int main(int argc, char** argv)
     seed.SetRand(16 * 8);
 
     /// worldserver PID file creation
-    std::string pidFile = sConfigMgr->GetStringDefault("PidFile", "");
+    std::string pidFile = sConfigMgr->GetOption<std::string>("PidFile", "");
     if (!pidFile.empty())
     {
         if (uint32 pid = CreatePIDFile(pidFile))
@@ -194,7 +194,7 @@ extern int main(int argc, char** argv)
     signals.async_wait(SignalHandler);
 
     // Start the Boost based thread pool
-    int numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
+    int numThreads = sConfigMgr->GetOption<int32>("ThreadPool", 1);
     std::shared_ptr<std::vector<std::thread>> threadPool(new std::vector<std::thread>(), [ioContext](std::vector<std::thread>* del)
     {
         ioContext->stop();
@@ -211,7 +211,7 @@ extern int main(int argc, char** argv)
         threadPool->push_back(std::thread([ioContext]() { ioContext->run(); }));
 
     // Set process priority according to configuration settings
-    SetProcessPriority("server.worldserver", sConfigMgr->GetIntDefault(CONFIG_PROCESSOR_AFFINITY, 0), sConfigMgr->GetBoolDefault(CONFIG_HIGH_PRIORITY, false));
+    SetProcessPriority("server.worldserver", sConfigMgr->GetOption<int32>(CONFIG_PROCESSOR_AFFINITY, 0), sConfigMgr->GetOption<bool>(CONFIG_HIGH_PRIORITY, false));
 
     // Start the databases
     if (!StartDB())
@@ -263,14 +263,14 @@ extern int main(int argc, char** argv)
 
     // Start the Remote Access port (acceptor) if enabled
     std::unique_ptr<AsyncAcceptor> raAcceptor;
-    if (sConfigMgr->GetBoolDefault("Ra.Enable", false))
+    if (sConfigMgr->GetOption<bool>("Ra.Enable", false))
         raAcceptor.reset(StartRaSocketAcceptor(*ioContext));
 
     // Start soap serving thread if enabled
     std::shared_ptr<std::thread> soapThread;
-    if (sConfigMgr->GetBoolDefault("SOAP.Enabled", false))
+    if (sConfigMgr->GetOption<bool>("SOAP.Enabled", false))
     {
-        soapThread.reset(new std::thread(TCSoapThread, sConfigMgr->GetStringDefault("SOAP.IP", "127.0.0.1"), uint16(sConfigMgr->GetIntDefault("SOAP.Port", 7878))),
+        soapThread.reset(new std::thread(TCSoapThread, sConfigMgr->GetOption<std::string>("SOAP.IP", "127.0.0.1"), uint16(sConfigMgr->GetOption<int32>("SOAP.Port", 7878))),
             [](std::thread* thr)
         {
             thr->join();
@@ -280,9 +280,9 @@ extern int main(int argc, char** argv)
 
     // Launch the worldserver listener socket
     uint16 worldPort = uint16(CONF_GET_INT("WorldServerPort"));
-    std::string worldListener = sConfigMgr->GetStringDefault("BindIP", "0.0.0.0");
+    std::string worldListener = sConfigMgr->GetOption<std::string>("BindIP", "0.0.0.0");
 
-    int networkThreads = sConfigMgr->GetIntDefault("Network.Threads", 1);
+    int networkThreads = sConfigMgr->GetOption<int32>("Network.Threads", 1);
 
     if (networkThreads <= 0)
     {
@@ -316,7 +316,7 @@ extern int main(int argc, char** argv)
 
     // Start the freeze check callback cycle in 5 seconds (cycle itself is 1 sec)
     std::shared_ptr<FreezeDetector> freezeDetector;
-    if (int coreStuckTime = sConfigMgr->GetIntDefault("MaxCoreStuckTime", 60))
+    if (int coreStuckTime = sConfigMgr->GetOption<int32>("MaxCoreStuckTime", 60))
     {
         freezeDetector = std::make_shared<FreezeDetector>(*ioContext, coreStuckTime * 1000);
         FreezeDetector::Start(freezeDetector);
@@ -330,9 +330,9 @@ extern int main(int argc, char** argv)
     // Launch CliRunnable thread
     std::shared_ptr<std::thread> cliThread;
 #ifdef _WIN32
-    if (sConfigMgr->GetBoolDefault("Console.Enable", true) && (m_ServiceStatus == -1)/* need disable console in service mode*/)
+    if (sConfigMgr->GetOption<bool>("Console.Enable", true) && (m_ServiceStatus == -1)/* need disable console in service mode*/)
 #else
-    if (sConfigMgr->GetBoolDefault("Console.Enable", true))
+    if (sConfigMgr->GetOption<bool>("Console.Enable", true))
 #endif
     {
         cliThread.reset(new std::thread(CliThread), &ShutdownCLIThread);
@@ -493,8 +493,8 @@ void FreezeDetector::Handler(std::weak_ptr<FreezeDetector> freezeDetectorRef, bo
 
 AsyncAcceptor* StartRaSocketAcceptor(Warhead::Asio::IoContext& ioContext)
 {
-    uint16 raPort = uint16(sConfigMgr->GetIntDefault("Ra.Port", 3443));
-    std::string raListener = sConfigMgr->GetStringDefault("Ra.IP", "0.0.0.0");
+    uint16 raPort = uint16(sConfigMgr->GetOption<int32>("Ra.Port", 3443));
+    std::string raListener = sConfigMgr->GetOption<std::string>("Ra.IP", "0.0.0.0");
 
     AsyncAcceptor* acceptor = new AsyncAcceptor(ioContext, raListener, raPort);
     if (!acceptor->Bind())
@@ -571,7 +571,7 @@ bool StartDB()
         return false;
 
     ///- Get the realm Id from the configuration file
-    realm.Id.Realm = sConfigMgr->GetIntDefault("RealmID", 0);
+    realm.Id.Realm = sConfigMgr->GetOption<int32>("RealmID", 0);
     if (!realm.Id.Realm)
     {
         LOG_ERROR("server.worldserver", "Realm ID not defined in configuration file");

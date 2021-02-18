@@ -63,7 +63,7 @@ WH_GAME_API void GameConfig::AddOption<bool>(std::string const& optionName, std:
         return;
     }
 
-    _boolConfigs.emplace(optionName, sConfigMgr->GetBoolDefault(optionName, def == std::nullopt ? false : *def));
+    _boolConfigs.emplace(optionName, sConfigMgr->GetOption<bool>(optionName, def == std::nullopt ? false : *def));
 }
 
 template<>
@@ -77,7 +77,7 @@ WH_GAME_API void GameConfig::AddOption<std::string>(std::string const& optionNam
         return;
     }
 
-    _stringConfigs.emplace(std::make_pair(optionName, sConfigMgr->GetStringDefault(optionName, def == std::nullopt ? "" : *def)));
+    _stringConfigs.emplace(std::make_pair(optionName, sConfigMgr->GetOption<std::string>(optionName, def == std::nullopt ? "" : *def)));
 }
 
 template<>
@@ -91,7 +91,7 @@ WH_GAME_API void GameConfig::AddOption<int32>(std::string const& optionName, std
         return;
     }
 
-    _intConfigs.emplace(std::make_pair(optionName, sConfigMgr->GetIntDefault(optionName, def == std::nullopt ? 0 : *def)));
+    _intConfigs.emplace(std::make_pair(optionName, sConfigMgr->GetOption<int32>(optionName, def == std::nullopt ? 0 : *def)));
 }
 
 template<>
@@ -111,7 +111,7 @@ WH_GAME_API void GameConfig::AddOption<float>(std::string const& optionName, std
         return;
     }
 
-    _floatConfigs.emplace(std::make_pair(optionName, sConfigMgr->GetFloatDefault(optionName, def == std::nullopt ? 1.0f : *def)));
+    _floatConfigs.emplace(std::make_pair(optionName, sConfigMgr->GetOption<float>(optionName, def == std::nullopt ? 1.0f : *def)));
 }
 
 // Get option
@@ -587,7 +587,7 @@ void GameConfig::LoadIntConfigs(bool reload /*= false*/)
     {
         for (auto const& itr : _notChangeConfigs)
         {
-            uint32 val = sConfigMgr->GetIntDefault(itr.first, itr.second);
+            uint32 val = sConfigMgr->GetOption<int32>(itr.first, itr.second);
             uint32 tempIntOption = itr.second;
 
             if (val != tempIntOption)

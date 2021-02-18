@@ -37,7 +37,7 @@ void IpLocationStore::Load()
     _ipLocationStore.clear();
     LOG_INFO("server.loading", "Loading IP Location Database...");
 
-    std::string databaseFilePath = sConfigMgr->GetStringDefault("IPLocationFile", "");
+    std::string databaseFilePath = sConfigMgr->GetOption<std::string>("IPLocationFile", "");
     if (databaseFilePath.empty())
     {
         LOG_INFO("server.loading", "");

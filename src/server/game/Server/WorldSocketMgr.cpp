@@ -55,15 +55,15 @@ WorldSocketMgr& WorldSocketMgr::Instance()
 
 bool WorldSocketMgr::StartWorldNetwork(Warhead::Asio::IoContext& ioContext, std::string const& bindIp, uint16 port, int threadCount)
 {
-    _tcpNoDelay = sConfigMgr->GetBoolDefault("Network.TcpNodelay", true);
+    _tcpNoDelay = sConfigMgr->GetOption<bool>("Network.TcpNodelay", true);
 
     int const max_connections = WARHEAD_MAX_LISTEN_CONNECTIONS;
     LOG_DEBUG("misc", "Max allowed socket connections %d", max_connections);
 
     // -1 means use default
-    _socketSystemSendBufferSize = sConfigMgr->GetIntDefault("Network.OutKBuff", -1);
+    _socketSystemSendBufferSize = sConfigMgr->GetOption<int32>("Network.OutKBuff", -1);
 
-    _socketApplicationSendBufferSize = sConfigMgr->GetIntDefault("Network.OutUBuff", 65536);
+    _socketApplicationSendBufferSize = sConfigMgr->GetOption<int32>("Network.OutUBuff", 65536);
 
     if (_socketApplicationSendBufferSize <= 0)
     {

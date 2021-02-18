@@ -23,7 +23,7 @@ template<typename Fn>
 static std::string GetStringWithDefaultValueFromFunction(
     std::string const& key, Fn getter)
 {
-    std::string const value = sConfigMgr->GetStringDefault(key, "");
+    std::string const value = sConfigMgr->GetOption<std::string>(key, "");
     return value.empty() ? getter() : value;
 }
 
