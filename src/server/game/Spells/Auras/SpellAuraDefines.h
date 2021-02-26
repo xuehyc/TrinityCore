@@ -397,7 +397,7 @@ enum AuraType : uint32
     SPELL_AURA_324                                          = 324,  // spell critical chance (probably by school mask)
     SPELL_AURA_325                                          = 325,  // Not used in 4.3.4
     SPELL_AURA_PHASE_GROUP                                  = 326,  // Puts the player in all the phases that are in the group with id = miscB
-    SPELL_AURA_327                                          = 327,  // Not used in 4.3.4
+    SPELL_AURA_PHASE_ALWAYS_VISIBLE                         = 327,  // Sets PhaseShiftFlags::AlwaysVisible
     SPELL_AURA_TRIGGER_SPELL_ON_POWER_PCT                   = 328,  // NYI Triggers spell when power goes above (MiscB = 0) or falls below (MiscB = 1) specified percent value (once, not every time condition has meet)
     SPELL_AURA_MOD_POWER_GAIN_PCT                           = 329,  // NYI
     SPELL_AURA_CAST_WHILE_WALKING                           = 330,
