@@ -768,13 +768,6 @@ void World::LoadConfigSettings(bool reload)
         sGameConfig->SetOption<int32>("GM.StartLevel", MAX_LEVEL);
     }
 
-    tempIntOption = CONF_GET_INT("CleanOldMailTime");
-    if (tempIntOption > 23)
-    {
-        LOG_ERROR("config", "CleanOldMailTime (%u) must be an hour, between 0 and 23. Set to 4.", tempIntOption);
-        sGameConfig->SetOption<int32>("CleanOldMailTime", 4);
-    }
-
     tempIntOption = CONF_GET_INT("UpdateUptimeInterval");
     if (tempIntOption <= 0)
     {
@@ -1668,7 +1661,7 @@ void World::SetInitialWorldSettings()
 
     ///- Initialize Mails
     LOG_INFO("server.loading", "Starting Mail System");
-    sMailMgr->Initialize();
+    sMail->Initialize();
 
     ///- Initialize Mails External
     LOG_INFO("server.loading", "Starting Mail External System");
@@ -1988,7 +1981,7 @@ void World::Update(uint32 diff)
 
     {
         WH_METRIC_TIMER("world_update_time", WH_METRIC_TAG("type", "Update mails"));
-        sMailMgr->Update(diff);
+        sMail->Update(diff);
     }
 
     {

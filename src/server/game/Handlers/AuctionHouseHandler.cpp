@@ -27,7 +27,6 @@
 #include "Language.h"
 #include "Log.h"
 #include "Mail.h"
-#include "Mail.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -119,7 +118,7 @@ void WorldSession::SendAuctionOwnerNotification(AuctionEntry* auction)
 //this void creates new auction and adds auction to some auctionhouse
 void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
 {
-    if (GetPlayer() && (sMailMgr->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > CONF_GET_UINT("Antispam.Mail.Controller"))
+    if (GetPlayer() && (sMail->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > CONF_GET_UINT("Antispam.Mail.Controller"))
     {
         GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_CAP_REACHED);
         recvData.rfinish();
@@ -438,7 +437,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
 {
     LOG_DEBUG("network", "WORLD: Received CMSG_AUCTION_PLACE_BID");
 
-    if (GetPlayer() && (sMailMgr->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > CONF_GET_UINT("Antispam.Mail.Controller"))
+    if (GetPlayer() && (sMail->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > CONF_GET_UINT("Antispam.Mail.Controller"))
     {
         GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_CAP_REACHED);
         recvData.rfinish();
@@ -595,7 +594,7 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recvData)
 {
     LOG_DEBUG("network", "WORLD: Received CMSG_AUCTION_REMOVE_ITEM");
 
-    if (GetPlayer() && (sMailMgr->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > CONF_GET_UINT("Antispam.Mail.Controller"))
+    if (GetPlayer() && (sMail->GetMailBoxSize(GetPlayer()->GetGUID().GetCounter()) + GetPlayer()->GetAuctionLotsCount()) > CONF_GET_UINT("Antispam.Mail.Controller"))
     {
         GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_CAP_REACHED);
         recvData.rfinish();
@@ -640,10 +639,10 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recvData)
                 player->ModifyMoney(-int32(auctionCut));
             }
 
-            std::list<Item*> itemlist;
+            std::vector<Item*> itemlist;
             itemlist.push_back(pItem);
             // item will deleted or added to received mail list
-            sMailMgr->SendMailByAuctionHouseWithItems(auction, player->GetGUID().GetCounter(), auction->BuildAuctionMailSubject(AUCTION_CANCELED), AuctionEntry::BuildAuctionMailBody(0, 0, auction->buyout, auction->deposit, 0), 0, itemlist, MAIL_CHECK_MASK_COPIED);
+            sMail->SendMailByAuctionHouseWithItems(auction, player->GetGUID().GetCounter(), auction->BuildAuctionMailSubject(AUCTION_CANCELED), AuctionEntry::BuildAuctionMailBody(0, 0, auction->buyout, auction->deposit, 0), 0, itemlist, MAIL_CHECK_MASK_COPIED);
             itemlist.clear();
         }
         else

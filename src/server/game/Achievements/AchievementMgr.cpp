@@ -35,7 +35,6 @@
 #include "Language.h"
 #include "Log.h"
 #include "Mail.h"
-#include "Mail.h"
 #include "Map.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
@@ -1565,7 +1564,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
             }
         }
 
-        std::list<Item*>itemlist;
+        std::vector<Item*>itemlist;
         CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
 
         Item* item = reward->ItemId ? Item::CreateItem(reward->ItemId, 1, GetPlayer()) : nullptr;
@@ -1578,9 +1577,9 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
         }
 
         if (!reward->MailTemplateId)
-            sMailMgr->SendMailWithItemsByGUID(reward->SenderCreatureId, GetPlayer()->GetGUID().GetCounter(), MAIL_CREATURE, subject, text, 0, itemlist);
+            sMail->SendMailWithItemsByGUID(reward->SenderCreatureId, GetPlayer()->GetGUID().GetCounter(), MAIL_CREATURE, subject, text, 0, itemlist);
         else
-            sMailMgr->SendMailWithTemplateByGUID(reward->SenderCreatureId, GetPlayer()->GetGUID().GetCounter(), MAIL_CREATURE, reward->MailTemplateId);
+            sMail->SendMailWithTemplateByGUID(reward->SenderCreatureId, GetPlayer()->GetGUID().GetCounter(), MAIL_CREATURE, reward->MailTemplateId);
 
         itemlist.clear();
         CharacterDatabase.CommitTransaction(trans);

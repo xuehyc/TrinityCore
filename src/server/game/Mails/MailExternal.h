@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _MAIL_EXTERNAL_H
-#define _MAIL_EXTERNAL_H
+#ifndef _MAIL_EXTERNAL_H_
+#define _MAIL_EXTERNAL_H_
 
 #include "Common.h"
 
@@ -27,7 +27,7 @@ public:
 
     void Initialize();
     void Update(uint32 diff);
-    void AddMail(std::string_view charName, std::string_view thanksSubject, std::string_view thanksText, uint32 money, uint32 itemID, uint32 itemCount, uint32 creatureEntry);
+    void AddMail(std::string_view charName, std::string_view thanksSubject, std::string_view thanksText, uint32 money, uint32 itemID, uint32 itemCount, uint32 creatureEntry = 0);
 
 private:
     void SendMails();
@@ -36,4 +36,4 @@ private:
 
 #define sMailExternal MailExternal::instance()
 
-#endif // _MAILEXTERNAL_H
+#endif // _MAIL_EXTERNAL_H_

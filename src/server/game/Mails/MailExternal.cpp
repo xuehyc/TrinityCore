@@ -18,10 +18,10 @@
 #include "MailExternal.h"
 #include "CharacterCache.h"
 #include "DatabaseEnv.h"
-#include "ObjectMgr.h"
-#include "Mail.h"
 #include "Item.h"
 #include "Log.h"
+#include "Mail.h"
+#include "ObjectMgr.h"
 #include "TaskScheduler.h"
 
 namespace
@@ -111,13 +111,12 @@ void MailExternal::SendMails()
     LOG_TRACE("mail.external", "> External Mail: SendMails");
 
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-    auto stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_EXTERNAL_MAIL);
 
     for (auto const& [ID, exMail] : _mailStore)
     {
         for (auto const& items : exMail._overCountItems)
         {
-            std::list<Item*> _itemlist;
+            std::vector<Item*> _itemlist;
 
             for (auto const& itr : items)
             {
@@ -128,11 +127,10 @@ void MailExternal::SendMails()
                 }
             }
 
-            sMailMgr->SendMailWithItemsByGUID(0, exMail.PlayerGuid, MAIL_CREATURE, exMail.Subject, exMail.Body, exMail.Money, _itemlist);
+            sMail->SendMailWithItemsByGUID(exMail.CreatureEntry, exMail.PlayerGuid, MAIL_CREATURE, exMail.Subject, exMail.Body, exMail.Money, _itemlist);
         }
 
-        stmt->setUInt32(0, ID);
-        trans->Append(stmt);
+        trans->PAppend("DELETE FROM mail_external WHERE id = %u", ID);
     }
 
     CharacterDatabase.CommitTransaction(trans);
@@ -199,7 +197,7 @@ void MailExternal::GetMailsFromDB()
     } while (result->NextRow());
 }
 
-void MailExternal::AddMail(std::string_view charName, std::string_view thanksSubject, std::string_view thanksText, uint32 money, uint32 itemID, uint32 itemCount, uint32 creatureEntry)
+void MailExternal::AddMail(std::string_view charName, std::string_view thanksSubject, std::string_view thanksText, uint32 money, uint32 itemID, uint32 itemCount, uint32 creatureEntry /*= 0*/)
 {
     // INSERT INTO `mail_external` (`PlayerName`, `Subject`, `Message`, `Money`, `ItemID`, `ItemCount`, `CreatureEntry`) VALUES (?, ?, ?, ?, ?, ?, ?)
     auto stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_EXTERNAL_MAIL);

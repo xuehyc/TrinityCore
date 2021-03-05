@@ -65,7 +65,6 @@
 #include "LootItemStorage.h"
 #include "LootMgr.h"
 #include "Mail.h"
-#include "Mail.h"
 #include "MailPackets.h"
 #include "MapManager.h"
 #include "MiscPackets.h"
@@ -2641,7 +2640,7 @@ void Player::GiveLevel(uint8 level)
         pet->SynchronizeLevelWithOwner();
 
     if (MailLevelReward const* mailReward = sObjectMgr->GetMailLevelReward(level, GetRaceMask()))
-        sMailMgr->SendMailWithTemplateByGUID(mailReward->senderEntry, GetGUID().GetCounter(), MAIL_CREATURE, mailReward->mailTemplateId);
+        sMail->SendMailWithTemplateByGUID(mailReward->senderEntry, GetGUID().GetCounter(), MAIL_CREATURE, mailReward->mailTemplateId);
 
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
 
@@ -2981,7 +2980,7 @@ void Player::UpdateNextMailTimeAndUnreads()
     // calculate next delivery time (min. from non-delivered mails
     // and recalculate unReadMail
     m_nextMailDelivereTime = 0;
-    unReadMails = sMailMgr->GetUnreadMessagesAndNextDelivertime(GetGUID().GetCounter(), m_nextMailDelivereTime);
+    unReadMails = sMail->GetUnreadMessagesAndNextDelivertime(GetGUID().GetCounter(), m_nextMailDelivereTime);
 }
 
 void Player::AddNewMailDeliverTime(time_t deliver_time)
@@ -4085,7 +4084,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
         // Completely remove from the database
         case CHAR_DELETE_REMOVE:
         {
-            sMailMgr->RemoveAllMailsFor(guid);
+            sMail->RemoveAllMailsFor(guid);
 
             // Unsummon and delete for pets in world is not required: player deleted from CLI or character list with not loaded pet.
             // NOW we can finally clear other DB data related to character
@@ -15116,9 +15115,9 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     if (uint32 mail_template_id = quest->GetRewMailTemplateId())
     {
         if (uint32 questMailSender = quest->GetRewMailSenderEntry())
-            sMailMgr->SendMailWithTemplateByGUID(questMailSender, this->GetGUID().GetCounter(), MAIL_CREATURE, mail_template_id, MAIL_CHECK_MASK_HAS_BODY, quest->GetRewMailDelaySecs());
+            sMail->SendMailWithTemplateByGUID(questMailSender, this->GetGUID().GetCounter(), MAIL_CREATURE, mail_template_id, MAIL_CHECK_MASK_HAS_BODY, quest->GetRewMailDelaySecs());
         else
-            sMailMgr->SendMailWithTemplateBy(questGiver, this->GetGUID().GetCounter(), mail_template_id, MAIL_CHECK_MASK_HAS_BODY, quest->GetRewMailDelaySecs());
+            sMail->SendMailWithTemplateBy(questGiver, this->GetGUID().GetCounter(), mail_template_id, MAIL_CHECK_MASK_HAS_BODY, quest->GetRewMailDelaySecs());
     }
 
     if (quest->IsDaily() || quest->IsDFQuest())
@@ -18104,13 +18103,13 @@ void Player::_LoadInventory(PreparedQueryResult result, uint32 timeDiff)
         {
             std::string subject = GetSession()->GetWarheadString(LANG_NOT_EQUIPPED_ITEM);
 
-            std::list<Item*> sendItems;
+            std::vector<Item*> sendItems;
             for (uint8 i = 0; !problematicItems.empty() && i < MAX_MAIL_ITEMS; ++i)
             {
                 sendItems.push_back(problematicItems.front());
                 problematicItems.pop_front();
             }
-            sMailMgr->SendMailWithItemsBy(this, this->GetGUID().GetCounter(), subject, "There were problems with equipping item(s).", 0, sendItems);
+            sMail->SendMailWithItemsBy(this, this->GetGUID().GetCounter(), subject, "There were problems with equipping item(s).", 0, sendItems);
             sendItems.clear();
         }
         CharacterDatabase.CommitTransaction(trans);
@@ -23361,9 +23360,9 @@ void Player::AutoUnequipOffhandIfNeed(bool force /*= false*/)
         CharacterDatabase.CommitTransaction(trans);
 
         std::string subject = GetSession()->GetWarheadString(LANG_NOT_EQUIPPED_ITEM);
-        std::list<Item*> itemsInMail;
+        std::vector<Item*> itemsInMail;
         itemsInMail.push_back(offItem);
-        sMailMgr->SendMailWithItemsBy(this, this->GetGUID().GetCounter(), subject, "There were problems with equipping one or several items", 0, itemsInMail);
+        sMail->SendMailWithItemsBy(this, this->GetGUID().GetCounter(), subject, "There were problems with equipping one or several items", 0, itemsInMail);
         itemsInMail.clear();
     }
 }
@@ -26135,7 +26134,7 @@ void Player::RefundItem(Item* item)
 
 void Player::SendItemRetrievalMail(uint32 itemEntry, uint32 count)
 {
-    std::list<Item*> maillist;
+    std::vector<Item*> maillist;
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
     if (Item* item = Item::CreateItem(itemEntry, count, nullptr))
     {
@@ -26144,8 +26143,8 @@ void Player::SendItemRetrievalMail(uint32 itemEntry, uint32 count)
     }
     CharacterDatabase.CommitTransaction(trans);
 
-    //sMailMgr->SendMailWithItemsBy(ObjectGuid::LowType sender, ObjectGuid::LowType receiver, uint8 m_messageType, std::string const& subject, std::string const& body, uint32 money, std::list<Item*> const& itemlist, MailCheckMask mask, uint32 deliver_delay, uint32 COD);
-    sMailMgr->SendMailWithItemsByGUID(34337, this->GetGUID().GetCounter(), MAIL_CREATURE, "Recovered Item", "We recovered a lost item in the twisting nether and noted that it was yours.$B$BPlease find said object enclosed.", 0, maillist);
+    //sMail->SendMailWithItemsBy(ObjectGuid::LowType sender, ObjectGuid::LowType receiver, uint8 m_messageType, std::string const& subject, std::string const& body, uint32 money, std::list<Item*> const& itemlist, MailCheckMask mask, uint32 deliver_delay, uint32 COD);
+    sMail->SendMailWithItemsByGUID(34337, this->GetGUID().GetCounter(), MAIL_CREATURE, "Recovered Item", "We recovered a lost item in the twisting nether and noted that it was yours.$B$BPlease find said object enclosed.", 0, maillist);
     maillist.clear();
 }
 

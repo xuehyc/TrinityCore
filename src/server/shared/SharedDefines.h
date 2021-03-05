@@ -3516,7 +3516,7 @@ enum MailResponseType
     MAIL_MADE_PERMANENT     = 5
 };
 
-enum MailResponseResult
+enum MailResponseResult : uint8
 {
     MAIL_OK                            = 0,
     MAIL_ERR_EQUIP_ERROR               = 1,
