@@ -69,7 +69,7 @@ namespace
             if (line.empty())
                 continue;
 
-            line = Warhead::String::Reduce(line);
+            line = Warhead::String::Trim(line, in.getloc());
 
             // comments
             if (line[0] == '#' || line[0] == '[')
@@ -80,8 +80,8 @@ namespace
             if (equal_pos == std::string::npos || equal_pos == line.length())
                 return;
 
-            auto entry = Warhead::String::Reduce(line.substr(0, equal_pos));
-            auto value = Warhead::String::Reduce(line.substr(equal_pos + 1));
+            auto entry = Warhead::String::Trim(line.substr(0, equal_pos), in.getloc());
+            auto value = Warhead::String::Trim(line.substr(equal_pos + 1), in.getloc());
 
             value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
 
@@ -257,7 +257,7 @@ bool ConfigMgr::LoadAppConfigs()
 bool ConfigMgr::LoadModulesConfigs()
 {
     if (_additonalFiles.empty())
-        return false;
+        return true;
 
     // Start loading module configs
     std::vector<std::string /*config variant*/> moduleConfigFiles;
