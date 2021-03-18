@@ -205,7 +205,7 @@ class spell_dru_bristling_fur : public AuraScript
         return ValidateSpellInfo({ SPELL_DRUID_BRISTLING_FUR_GAIN_RAGE });
     }
 
-    void HandleProc(AuraEffect* /*aurEff*/, ProcEventInfo& eventInfo)
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
     {
         // BristlingFurRage = 100 * Damage / MaxHealth.
         if (DamageInfo* damageInfo = eventInfo.GetDamageInfo())
@@ -262,7 +262,7 @@ class spell_dru_earthwarden : public AuraScript
         return ValidateSpellInfo({ SPELL_DRUID_THRASH_CAT, SPELL_DRUID_THRASH_BEAR, SPELL_DRUID_EARTHWARDEN_AURA });
     }
 
-    void HandleProc(AuraEffect* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
     {
         Unit* target = GetTarget();
         target->CastSpell(target, SPELL_DRUID_EARTHWARDEN_AURA, true);
@@ -282,7 +282,7 @@ class spell_dru_ferocious_bite : public SpellScript
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
         return ValidateSpellInfo({ SPELL_DRUID_INCARNATION_KING_OF_THE_JUNGLE  })
-            && sSpellMgr->AssertSpellInfo(SPELL_DRUID_INCARNATION_KING_OF_THE_JUNGLE, DIFFICULTY_NONE)->GetEffect(EFFECT_1);
+            && sSpellMgr->AssertSpellInfo(SPELL_DRUID_INCARNATION_KING_OF_THE_JUNGLE)->GetEffect(EFFECT_1);
     }
 
     void HandleHitTargetBurn(SpellEffIndex /*effIndex*/)
@@ -451,7 +451,7 @@ class spell_dru_galactic_guardian : public AuraScript
         return ValidateSpellInfo({ SPELL_DRUID_GALACTIC_GUARDIAN_AURA });
     }
 
-    void HandleProc(AuraEffect* /*aurEff*/, ProcEventInfo& eventInfo)
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
     {
         if (DamageInfo* damageInfo = eventInfo.GetDamageInfo())
         {
@@ -486,7 +486,7 @@ class spell_dru_gore : public AuraScript
         return roll_chance_i(aurEff->GetAmount());
     }
 
-    void HandleProc(AuraEffect* /*aurEff*/, ProcEventInfo& /*procInfo*/)
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*procInfo*/)
     {
         Unit* owner = GetTarget();
         owner->CastSpell(owner, SPELL_DRUID_GORE_PROC);
@@ -592,7 +592,7 @@ public:
                 });
         }
 
-        void HandleProc(AuraEffect* aurEff, ProcEventInfo& eventInfo)
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
             PreventDefaultAction();
             SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
@@ -841,7 +841,7 @@ public:
             return ValidateSpellInfo({ SPELL_DRUID_BALANCE_T10_BONUS, SPELL_DRUID_BALANCE_T10_BONUS_PROC });
         }
 
-        void HandleProc(AuraEffect* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+        void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
         {
             Unit* target = GetTarget();
             if (target->HasAura(SPELL_DRUID_BALANCE_T10_BONUS))
@@ -1364,7 +1364,7 @@ public:
             return ValidateSpellInfo({ SPELL_DRUID_LANGUISH });
         }
 
-        void HandleProc(AuraEffect* aurEff, ProcEventInfo& eventInfo)
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
             PreventDefaultAction();
 
@@ -1375,9 +1375,9 @@ public:
             Unit* caster = eventInfo.GetActor();
             Unit* target = eventInfo.GetProcTarget();
 
-            SpellInfo const* spellInfo = sSpellMgr->AssertSpellInfo(SPELL_DRUID_LANGUISH, GetCastDifficulty());
+            SpellInfo const* spellInfo = sSpellMgr->AssertSpellInfo(SPELL_DRUID_LANGUISH);
             int32 amount = CalculatePct(static_cast<int32>(damageInfo->GetDamage()), aurEff->GetAmount());
-            amount /= spellInfo->GetMaxTicks();
+            amount /= spellInfo->GetMaxTicks(DIFFICULTY_NONE);
             // Add remaining ticks to damage done
             amount += target->GetRemainingPeriodicAmount(caster->GetGUID(), SPELL_DRUID_LANGUISH, SPELL_AURA_PERIODIC_DAMAGE);
 
@@ -1483,7 +1483,7 @@ public:
             return caster->GetGroup() || caster != eventInfo.GetProcTarget();
         }
 
-        void HandleProc(AuraEffect* aurEff, ProcEventInfo& eventInfo)
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
             PreventDefaultAction();
 
@@ -1658,7 +1658,7 @@ public:
             if (player->GetSkillValue(SKILL_RIDING) < 75)
                 return SPELL_FAILED_APPRENTICE_RIDING_REQUIREMENT;
 
-            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(player->IsInWater() ? SPELL_DRUID_FORM_AQUATIC : SPELL_DRUID_FORM_STAG, GetCastDifficulty());
+            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(player->IsInWater() ? SPELL_DRUID_FORM_AQUATIC : SPELL_DRUID_FORM_STAG);
             return spellInfo->CheckLocation(player->GetMapId(), player->GetZoneId(), player->GetAreaId(), player);
         }
 
@@ -1717,7 +1717,7 @@ public:
         SpellCastResult CheckLocationForForm(uint32 spell)
         {
             Player* player = GetTarget()->ToPlayer();
-            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell, GetCastDifficulty());
+            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell);
             return spellInfo->CheckLocation(player->GetMapId(), player->GetZoneId(), player->GetAreaId(), player);
         }
     };
