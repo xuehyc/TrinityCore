@@ -1046,6 +1046,11 @@ bool Aura::CanBeSaved() const
     if (GetId() == 67483 || GetId() == 67484 || GetId() == 48517 || GetId() == 48518)
         return false;
 
+    // Don't save druid forms, only the dummy. It will cast the appropriate form
+    //        Swift Flight            Flight             Aquatic                Stag
+    if (GetId() == 40120 || GetId() == 33943 || GetId() == 1066 || GetId() == 165961)
+        return false;
+
     // don't save auras removed by proc system
     if (IsUsingCharges() && !GetCharges())
         return false;
