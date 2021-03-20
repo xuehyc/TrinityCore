@@ -183,7 +183,6 @@ enum BG_TP_Events
 {
     TP_EVENT_SPAWN_FLAGS = 1,
     TP_EVENT_CLOSE_BATTLEGROUND,
-    TP_EVENT_UPDATE_BATTLEGROUND_TIMER,
     TP_EVENT_RESPAWN_ALLIANCE_FLAG,
     TP_EVENT_RESPAWN_HORDE_FLAG,
 };
@@ -304,7 +303,7 @@ class BattlegroundTP : public Battleground
         int32 _flagSpellForceTimer;
         bool _bothFlagsKept;
         uint8 _flagDebuffState;                            // 0 - no debuffs, 1 - focused assault, 2 - brutal assault
-        uint8 _minutesElapsed;
+        uint32 m_EndTimestamp;
 
         void PostUpdateImpl(uint32 diff) override;
 

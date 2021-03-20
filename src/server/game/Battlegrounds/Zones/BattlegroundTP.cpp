@@ -69,7 +69,7 @@ BattlegroundTP::BattlegroundTP()
     m_ReputationCapture = 0;
     m_HonorWinKills = 0;
     m_HonorEndKills = 0;
-    _minutesElapsed = 0;
+    m_EndTimestamp = 0;
 }
 
 BattlegroundTP::~BattlegroundTP() { }
@@ -107,11 +107,6 @@ void BattlegroundTP::PostUpdateImpl(uint32 diff)
                         EndBattleground(HORDE);
                     else
                         EndBattleground(ALLIANCE);
-                    break;
-                case TP_EVENT_UPDATE_BATTLEGROUND_TIMER:
-                    _minutesElapsed++;
-                    UpdateWorldState(BG_TP_STATE_TIMER, 25 - _minutesElapsed);
-                    events.Repeat(Minutes(1));
                     break;
                 default:
                     break;
@@ -239,14 +234,14 @@ void BattlegroundTP::StartingEventOpenDoors()
     // Scheduling flag spawn event
     events.ScheduleEvent(TP_EVENT_SPAWN_FLAGS, Seconds(2) + Milliseconds(500));
 
-    // Schedulung battleground timer update
-    events.ScheduleEvent(TP_EVENT_UPDATE_BATTLEGROUND_TIMER, Minutes(1));
-
     // players joining later are not eligibles
     StartCriteriaTimer(CRITERIA_TIMED_TYPE_EVENT, TP_EVENT_START_BATTLE);
 
+    // Send start timer
+    m_EndTimestamp = time(nullptr) + 1500;
+
     UpdateWorldState(BG_TP_STATE_TIMER_ACTIVE, 1);
-    UpdateWorldState(BG_TP_STATE_TIMER, 25);
+    UpdateWorldState(BG_TP_STATE_TIMER, m_EndTimestamp);
 }
 
 bool BattlegroundTP::SetupBattleground()
@@ -329,7 +324,6 @@ void BattlegroundTP::Reset()
         m_HonorWinKills = 1;
         m_HonorEndKills = 2;
     }
-    _minutesElapsed                  = 0;
     _lastFlagCaptureTeam             = 0;
     _bothFlagsKept                   = false;
     _flagDebuffState                 = 0;
@@ -374,7 +368,7 @@ void BattlegroundTP::FillInitialWorldStates(WorldPackets::WorldState::InitWorldS
 
         /// Show Timer
         data.Worldstates.emplace_back(uint32(BG_TP_STATE_TIMER_ACTIVE), uint32(1));
-        data.Worldstates.emplace_back(uint32(BG_TP_STATE_TIMER), uint32(25 - _minutesElapsed));
+        data.Worldstates.emplace_back(uint32(BG_TP_STATE_TIMER), uint32(m_EndTimestamp));
     }
     else
     {
