@@ -20,6 +20,15 @@
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
+void AddSolocraftScripts();
+void AddSC_skip_StarterArea();
+void AddSC_start_equipment();
+void AddSC_XpWeekend();
+
 void AddCustomScripts()
 {
+	AddSolocraftScripts();
+	AddSC_skip_StarterArea();
+    AddSC_start_equipment();
+    AddSC_XpWeekend();
 }
