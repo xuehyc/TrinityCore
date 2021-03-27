@@ -988,9 +988,12 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
 
     // SpellInterruptsEntry
     SpellInterruptsEntry const* _interrupt = GetSpellInterrupts();
-    InterruptFlags = _interrupt ? _interrupt->InterruptFlags : 0;
-    AuraInterruptFlags = _interrupt ? _interrupt->AuraInterruptFlags[0] : 0;
-    ChannelInterruptFlags = _interrupt ? _interrupt->ChannelInterruptFlags[0] : 0;
+
+    AuraInterruptFlags = _interrupt ? SpellAuraInterruptFlags(_interrupt->AuraInterruptFlags[0]) : SpellAuraInterruptFlags::None;
+    AuraInterruptFlags2 = _interrupt? SpellAuraInterruptFlags2(_interrupt->AuraInterruptFlags[1]) : SpellAuraInterruptFlags2::None;
+    ChannelInterruptFlags = _interrupt ? SpellAuraInterruptFlags(_interrupt->ChannelInterruptFlags[0] ) : SpellAuraInterruptFlags::None;
+    ChannelInterruptFlags2 =  _interrupt ? SpellAuraInterruptFlags2(_interrupt->ChannelInterruptFlags[1]) : SpellAuraInterruptFlags2::None;
+    InterruptFlags = _interrupt ? SpellInterruptFlags(_interrupt->InterruptFlags) : SpellInterruptFlags::None;
 
     // SpellLevelsEntry
     SpellLevelsEntry const* _levels = GetSpellLevels();
@@ -1107,6 +1110,20 @@ bool SpellInfo::HasOnlyDamageEffects() const
     }
 
     return true;
+}
+
+bool SpellInfo::CanBeInterrupted(Unit* interruptTarget) const
+{
+    return HasAttribute(SPELL_ATTR7_CAN_ALWAYS_BE_INTERRUPTED)
+        || HasChannelInterruptFlag(SpellAuraInterruptFlags::Damage | SpellAuraInterruptFlags::EnteringCombat)
+        || (interruptTarget->IsPlayer() && InterruptFlags.HasFlag(SpellInterruptFlags::DamageCancelsPlayerOnly))
+        || (!(interruptTarget->GetMechanicImmunityMask() & (1 << MECHANIC_INTERRUPT))
+        && PreventionType & SPELL_PREVENTION_TYPE_SILENCE);
+}
+
+bool SpellInfo::HasAnyAuraInterruptFlag() const
+{
+    return AuraInterruptFlags != SpellAuraInterruptFlags::None || AuraInterruptFlags2 != SpellAuraInterruptFlags2::None;
 }
 
 bool SpellInfo::IsExplicitDiscovery() const
@@ -1360,7 +1377,7 @@ bool SpellInfo::IsCooldownStartedOnEvent() const
     if (HasAttribute(SPELL_ATTR0_DISABLED_WHILE_ACTIVE))
         return true;
 
-    return CategoryEntry && CategoryEntry->Flags & SPELL_CATEGORY_FLAG_COOLDOWN_STARTS_ON_EVENT;
+    return CategoryEntry && CategoryEntry->GetFlags().HasFlag(SpellCategoryFlags::CooldownEventOnLeaveCombat);
 }
 
 bool SpellInfo::IsDeathPersistent() const
@@ -1434,7 +1451,7 @@ bool SpellInfo::IsChanneled() const
 
 bool SpellInfo::IsMoveAllowedChannel() const
 {
-    return IsChanneled() && ((HasAttribute(SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING) && !(ChannelInterruptFlags & AURA_INTERRUPT_FLAG_MOVE)) || (!(ChannelInterruptFlags & (AURA_INTERRUPT_FLAG_MOVE | AURA_INTERRUPT_FLAG_TURNING))));
+    return IsChanneled() && ((HasAttribute(SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING) && !ChannelInterruptFlags.HasFlag(SpellAuraInterruptFlags::Moving | SpellAuraInterruptFlags::Turning)));
 }
 
 bool SpellInfo::NeedsComboPoints() const
@@ -1664,14 +1681,14 @@ SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
             TC_LOG_ERROR("spells", "GetErrorAtShapeshiftedCast: unknown shapeshift %u", form);
             return SPELL_CAST_OK;
         }
-        actAsShifted = !(shapeInfo->Flags & 1);            // shapeshift acts as normal form for spells
+        actAsShifted = !shapeInfo->GetFlags().HasFlag(SpellShapeshiftFormFlags::Stance);
     }
 
     if (actAsShifted)
     {
-        if (HasAttribute(SPELL_ATTR0_NOT_SHAPESHIFT)) // not while shapeshifted
+        if (HasAttribute(SPELL_ATTR0_NOT_SHAPESHIFT) || (shapeInfo && shapeInfo->GetFlags().HasFlag(SpellShapeshiftFormFlags::CanOnlyCastShapeshiftSpells))) // not while shapeshifted
             return SPELL_FAILED_NOT_SHAPESHIFT;
-        else if (Stances != UI64LIT(0))               // needs other shapeshift
+        else if (Stances != 0)                   // needs other shapeshift
             return SPELL_FAILED_ONLY_SHAPESHIFT;
     }
     else
@@ -2265,7 +2282,7 @@ void SpellInfo::_LoadSpellSpecific()
             case SPELLFAMILY_GENERIC:
             {
                 // Food / Drinks (mostly)
-                if (AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
+                if (HasAuraInterruptFlag(SpellAuraInterruptFlags::Standing))
                 {
                     bool food = false;
                     bool drink = false;
@@ -3079,6 +3096,8 @@ void SpellInfo::ApplyAllSpellImmunitiesTo(Unit* target, uint8 effIndex, bool app
                     auraSpellInfo->Id != Id);                                     // Don't remove self
             });
         }
+        if (apply && schoolImmunity & SPELL_SCHOOL_MASK_NORMAL)
+            target->RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags::InvulnerabilityBuff);
     }
 
     if (uint32 mechanicImmunity = immuneInfo->MechanicImmuneMask)
@@ -3109,7 +3128,12 @@ void SpellInfo::ApplyAllSpellImmunitiesTo(Unit* target, uint8 effIndex, bool app
     }
 
     if (uint32 damageImmunity = immuneInfo->DamageSchoolMask)
+    {
         target->ApplySpellImmune(Id, IMMUNITY_DAMAGE, damageImmunity, apply);
+
+        if (apply && damageImmunity & SPELL_SCHOOL_MASK_NORMAL)
+            target->RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags::InvulnerabilityBuff);
+    }
 
     for (AuraType auraType : immuneInfo->AuraTypeImmune)
     {
@@ -3253,20 +3277,20 @@ uint32 SpellInfo::GetAllowedMechanicMask() const
     return _allowedMechanicMask;
 }
 
-uint32 SpellInfo::GetMechanicImmunityMask(Unit* caster, bool channeled) const
+uint32 SpellInfo::GetMechanicImmunityMask(Unit* caster) const
 {
+    if (HasAttribute(SPELL_ATTR7_CAN_ALWAYS_BE_INTERRUPTED))
+        return 0;
+
     uint32 casterMechanicImmunityMask = caster->GetMechanicImmunityMask();
     uint32 mechanicImmunityMask = 0;
-    uint32 flags = channeled ? ChannelInterruptFlags : InterruptFlags;
-
-    // @todo: research other interrupt flags
-    if (flags & SPELL_INTERRUPT_FLAG_INTERRUPT)
+    if (CanBeInterrupted(caster))
     {
-        if (casterMechanicImmunityMask & (1 << MECHANIC_SILENCE))
-            mechanicImmunityMask |= (1 << MECHANIC_SILENCE);
-
         if (casterMechanicImmunityMask & (1 << MECHANIC_INTERRUPT))
             mechanicImmunityMask |= (1 << MECHANIC_INTERRUPT);
+
+        if (casterMechanicImmunityMask & (1 << MECHANIC_SILENCE))
+            mechanicImmunityMask |= (1 << MECHANIC_SILENCE);
     }
 
     return mechanicImmunityMask;

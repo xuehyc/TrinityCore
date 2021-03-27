@@ -2145,6 +2145,8 @@ struct SpellCategoryEntry
     uint32 Flags;                                          // 1
     uint32 UsesPerWeek;                                    // 2
     // char* Name;                                         // 3
+
+    EnumFlag<SpellCategoryFlags> GetFlags() const { return static_cast<SpellCategoryFlags>(Flags); }
 };
 
 struct SpellDifficultyEntry
@@ -2261,6 +2263,8 @@ struct SpellShapeshiftFormEntry
     uint32  PresetSpellID[MAX_SHAPESHIFT_SPELLS];           // 11 - 18 spells which appear in the bar after shapeshifting
     uint32  MountTypeID;                                    // 19
     //uint32  ExitSoundEntriesID;                           // 20
+
+    EnumFlag<SpellShapeshiftFormFlags> GetFlags() const { return static_cast<SpellShapeshiftFormFlags>(Flags); }
 };
 
 // SpellShapeshift.dbc

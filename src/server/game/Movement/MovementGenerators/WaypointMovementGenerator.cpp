@@ -67,8 +67,8 @@ void WaypointMovementGenerator<Creature>::DoInitialize(Creature* creature)
         }
     }
 
-    // We launch the first movement after a initial 1s delay.
-    _nextMoveTimer.Reset(1000);
+    // We launch the first movement after a initial 1ms delay.
+    _nextMoveTimer.Reset(1);
 
     // inform AI
     if (creature->IsAIEnabled)
@@ -230,6 +230,13 @@ void WaypointMovementGenerator<Creature>::StartMove(Creature* creature, bool rel
             break;
         default:
             break;
+    }
+
+    if (creature->CanFly())
+    {
+        init.SetFly();
+        init.SetSmooth();
+        init.SetUncompressed();
     }
 
     if (waypoint.Velocity > 0.f)

@@ -23,6 +23,7 @@
 #include "DBCStructure.h"
 #include "Object.h"
 #include "SpellAuraDefines.h"
+#include "SpellDefines.h"
 
 #include <boost/container/flat_set.hpp>
 
@@ -369,9 +370,11 @@ class TC_GAME_API SpellInfo
         uint32 CategoryRecoveryTime;
         uint32 StartRecoveryCategory;
         uint32 StartRecoveryTime;
-        uint32 InterruptFlags;
-        uint32 AuraInterruptFlags;
-        uint32 ChannelInterruptFlags;
+        EnumFlag<SpellInterruptFlags> InterruptFlags = SpellInterruptFlags::None;
+        EnumFlag<SpellAuraInterruptFlags> AuraInterruptFlags = SpellAuraInterruptFlags::None;
+        EnumFlag<SpellAuraInterruptFlags2> AuraInterruptFlags2 = SpellAuraInterruptFlags2::None;
+        EnumFlag<SpellAuraInterruptFlags> ChannelInterruptFlags = SpellAuraInterruptFlags::None;
+        EnumFlag<SpellAuraInterruptFlags2> ChannelInterruptFlags2 = SpellAuraInterruptFlags2::None;
         uint32 ProcFlags;
         uint32 ProcChance;
         uint32 ProcCharges;
@@ -477,6 +480,15 @@ class TC_GAME_API SpellInfo
         inline bool HasAttribute(SpellAttr9 attribute)  const { return !!(AttributesEx9 & attribute); }
         inline bool HasAttribute(SpellAttr10 attribute) const { return !!(AttributesEx10 & attribute); }
         inline bool HasAttribute(SpellCustomAttributes customAttribute) const { return !!(AttributesCu & customAttribute); }
+
+        bool CanBeInterrupted(Unit* interruptTarget) const;
+
+        bool HasAnyAuraInterruptFlag() const;
+        bool HasAuraInterruptFlag(SpellAuraInterruptFlags flag) const { return AuraInterruptFlags.HasFlag(flag); }
+        bool HasAuraInterruptFlag(SpellAuraInterruptFlags2 flag) const { return AuraInterruptFlags2.HasFlag(flag); }
+
+        bool HasChannelInterruptFlag(SpellAuraInterruptFlags flag) const { return ChannelInterruptFlags.HasFlag(flag); }
+        bool HasChannelInterruptFlag(SpellAuraInterruptFlags2 flag) const { return ChannelInterruptFlags2.HasFlag(flag); }
 
         bool IsExplicitDiscovery() const;
         bool IsLootCrafting() const;
@@ -593,7 +605,7 @@ class TC_GAME_API SpellInfo
 
         uint32 GetAllowedMechanicMask() const;
 
-        uint32 GetMechanicImmunityMask(Unit* caster, bool channeled) const;
+        uint32 GetMechanicImmunityMask(Unit* caster) const;
 
     private:
         // loading helpers

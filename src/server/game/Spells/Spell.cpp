@@ -2709,7 +2709,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // Failed Pickpocket, reveal rogue
         if (missInfo == SPELL_MISS_RESIST && m_spellInfo->HasAttribute(SPELL_ATTR0_CU_PICKPOCKET) && unitTarget->GetTypeId() == TYPEID_UNIT)
         {
-            m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK, 0, this);
+            m_caster->RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags::Interacting, 0, this);
             unitTarget->ToCreature()->EngageWithTarget(m_caster);
         }
     }
@@ -2798,7 +2798,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
             return SPELL_MISS_EVADE;
 
         if (m_caster->_IsValidAttackTarget(unit, m_spellInfo))
-            unit->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HITBYSPELL, 0, this);
+            unit->RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags::HostileActionReceived);
         else if (m_caster->IsFriendlyTo(unit))
         {
             // for delayed spells ignore negative spells (after duel end) for friendly targets
@@ -3265,9 +3265,8 @@ void Spell::prepare(SpellCastTargets const& targets, AuraEffect const* triggered
     // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
     // don't cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
     if (((m_spellInfo->IsChanneled() || m_casttime) && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->isMoving() &&
-        m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT) && !m_caster->HasAuraTypeWithAffectMask(SPELL_AURA_CAST_WHILE_WALKING, m_spellInfo) && (!m_caster->IsCharmed() || !m_caster->GetCharmerGUID().IsCreature()))
-    if ((m_spellInfo->IsChanneled() || m_casttime) && m_caster->GetTypeId() == TYPEID_PLAYER && (!m_caster->IsCharmed() || !m_caster->GetCharmerGUID().IsCreature()) && m_caster->isMoving() && m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT)
-
+        m_spellInfo->InterruptFlags.HasFlag(SpellInterruptFlags::Movement)) && !m_caster->HasAuraTypeWithAffectMask(SPELL_AURA_CAST_WHILE_WALKING, m_spellInfo) && (!m_caster->IsCharmed() || !m_caster->GetCharmerGUID().IsCreature()))
+    if ((m_spellInfo->IsChanneled() || m_casttime) && m_caster->GetTypeId() == TYPEID_PLAYER && (!m_caster->IsCharmed() || !m_caster->GetCharmerGUID().IsCreature()) && m_caster->isMoving() && m_spellInfo->InterruptFlags.HasFlag(SpellInterruptFlags::Movement))
     {
         // 1. Has casttime, 2. Or doesn't have flag to allow movement during channel
         if (m_casttime || !m_spellInfo->IsMoveAllowedChannel())
@@ -3303,16 +3302,8 @@ void Spell::prepare(SpellCastTargets const& targets, AuraEffect const* triggered
     {
         // stealth must be removed at cast starting (at show channel bar)
         // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
-        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS) && m_spellInfo->IsBreakingStealth())
-        {
-            m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST, 0, this);
-            for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                if (m_spellInfo->Effects[i].GetUsedTargetObjectType() == TARGET_OBJECT_TYPE_UNIT)
-                {
-                    m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_SPELL_ATTACK, 0, this);
-                    break;
-                }
-        }
+        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS) && m_spellInfo->IsBreakingStealth() && !m_spellInfo->HasAttribute(SPELL_ATTR2_IGNORE_ACTION_AURA_INTERRUPT_FLAGS))
+            m_caster->RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags::Action);
 
         m_caster->SetCurrentCastSpell(this);
         SendSpellStart();
@@ -3664,6 +3655,10 @@ void Spell::_cast(bool skipCheck)
     if (!(hitMask & PROC_HIT_CRITICAL))
         hitMask |= PROC_HIT_NORMAL;
 
+    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS) && !m_spellInfo->HasAttribute(SPELL_ATTR2_IGNORE_ACTION_AURA_INTERRUPT_FLAGS))
+        m_originalCaster->RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags::ActionDelayed);
+
+    m_originalCaster->RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags::ActionDelayed);
     m_originalCaster->ProcSkillsAndAuras(nullptr, procAttacker, PROC_FLAG_NONE, PROC_SPELL_TYPE_MASK_ALL, PROC_SPELL_PHASE_CAST, hitMask, this, nullptr, nullptr);
 
     // Call CreatureAI hook OnSuccessfulSpellCast
@@ -3681,14 +3676,14 @@ void Spell::handle_immediate()
         if (duration > 0)
         {
             m_spellState = SPELL_STATE_CASTING;
-            m_caster->AddInterruptMask(m_spellInfo->ChannelInterruptFlags);
+            m_caster->AddInterruptMask(m_spellInfo->ChannelInterruptFlags, m_spellInfo->ChannelInterruptFlags2);
             m_channeledDuration = duration;
             SendChannelStart(duration);
         }
         else if (duration == -1)
         {
             m_spellState = SPELL_STATE_CASTING;
-            m_caster->AddInterruptMask(m_spellInfo->ChannelInterruptFlags);
+            m_caster->AddInterruptMask(m_spellInfo->ChannelInterruptFlags, m_spellInfo->ChannelInterruptFlags2);
             SendChannelStart(duration);
         }
     }
@@ -3894,7 +3889,7 @@ void Spell::update(uint32 difftime)
     // check if the player caster has moved before the spell finished
     // with the exception of spells affected with SPELL_AURA_CAST_WHILE_WALKING effect
     if ((m_caster->GetTypeId() == TYPEID_PLAYER && m_timer != 0) &&
-        m_caster->isMoving() && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT &&
+        m_caster->isMoving() && (m_spellInfo->InterruptFlags.HasFlag(SpellInterruptFlags::Movement) &&
         (m_spellInfo->Effects[0].Effect != SPELL_EFFECT_STUCK || !m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR))) &&
         !m_caster->HasAuraTypeWithAffectMask(SPELL_AURA_CAST_WHILE_WALKING, m_spellInfo))
     {
@@ -4280,7 +4275,7 @@ void Spell::SendSpellStart()
 
     uint32 castFlags = CAST_FLAG_HAS_TRAJECTORY;
     uint32 schoolImmunityMask = m_casttime != 0 ? m_caster->GetSchoolImmunityMask() : 0;
-    uint32 mechanicImmunityMask = m_casttime != 0 ? m_spellInfo->GetMechanicImmunityMask(m_caster, false) : 0;
+    uint32 mechanicImmunityMask = m_casttime != 0 ? m_spellInfo->GetMechanicImmunityMask(m_caster) : 0;
 
     if (schoolImmunityMask || mechanicImmunityMask)
         castFlags |= CAST_FLAG_IMMUNITY;
@@ -4299,8 +4294,9 @@ void Spell::SendSpellStart()
     if (m_spellInfo->RuneCostID && m_spellInfo->PowerType == POWER_RUNE)
         castFlags |= CAST_FLAG_NO_GCD; // not needed, but Blizzard sends it
 
-    if ((m_casttime && m_spellInfo->HasEffect(SPELL_EFFECT_HEAL)) || m_spellInfo->HasAura(SPELL_AURA_PERIODIC_HEAL))
-        castFlags |= CAST_FLAG_HEAL_PREDICTION;
+    if (m_spellInfo->HasAttribute(SPELL_ATTR8_HEAL_PREDICTION))
+        if (m_casttime || m_spellInfo->HasAura(SPELL_AURA_PERIODIC_HEAL))
+            castFlags |= CAST_FLAG_HEAL_PREDICTION;
 
     WorldPackets::Spells::SpellStart packet;
     WorldPackets::Spells::SpellCastData& castData = packet.Cast;
@@ -4363,25 +4359,7 @@ void Spell::SendSpellStart()
     }
 
     if (castFlags & CAST_FLAG_HEAL_PREDICTION)
-    {
-        uint8 predictionType = DOT;
-        int32 amount = 0;
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
-        {
-            if (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_HEAL || m_spellInfo->Effects[i].Effect == SPELL_EFFECT_HEAL_PCT)
-            {
-                Unit* target = m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster;
-                int32 heal = CalculateDamage(i, target);
-                amount += m_caster->SpellHealingBonusDone(target, m_spellInfo, heal, HEAL, i);
-                predictionType = DIRECT_DAMAGE;
-            }
-        }
-
-        castData.Predict.emplace();
-        castData.Predict->Points = amount;
-        castData.Predict->Type = predictionType;
-        castData.Predict->BeaconGUID = m_caster->GetGUID();
-    }
+        UpdateSpellHealPrediction(castData.Predict.emplace());
 
     m_caster->SendMessageToSet(packet.Write(), true);
 }
@@ -4607,6 +4585,59 @@ void Spell::UpdateSpellCastDataAmmo(WorldPackets::Spells::SpellAmmo& ammo)
     ammo.InventoryType = ammoInventoryType;
 }
 
+void Spell::UpdateSpellHealPrediction(WorldPackets::Spells::SpellHealPrediction& predict)
+{
+    Unit* target = m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster;
+    predict.Type = 0;
+
+    /*
+    * @todo: implement
+    if (AuraEffect const* beaconOfLightEffect = m_caster->GetDummyAuraEffect(SPELLFAMILY_PALADIN, 3032, EFFECT_0))
+    {
+        if (beaconOfLightEffect->GetCasterGUID() == m_caster->GetGUID())
+        {
+            predict.Type = 2;
+            predict.BeaconGUID = beaconOfLightEffect->GetBase()->GetUnitOwner()->GetGUID();
+        }
+    }
+    */
+
+    for (uint8 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
+    {
+        SpellEffectInfo const& effect = m_spellInfo->Effects[effIndex];
+        if (!effect.IsEffect())
+            continue;
+
+        switch (effect.Effect)
+        {
+            case SPELL_EFFECT_HEAL:
+            case SPELL_EFFECT_HEAL_PCT:
+                predict.Points += m_caster->SpellHealingBonusDone(target, m_spellInfo, effect.CalcValue(m_caster, nullptr, target), HEAL, effIndex);
+                break;
+            case SPELL_EFFECT_APPLY_AURA:
+            {
+                switch (effect.ApplyAuraName)
+                {
+                    case SPELL_AURA_PERIODIC_HEAL:
+                        predict.Points += m_caster->SpellHealingBonusDone(target, m_spellInfo, effect.CalcValue(m_caster, nullptr, target), HEAL, effIndex) * m_spellInfo->GetMaxTicks();
+                        break;
+                    case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
+                        if (SpellInfo const* spell = sSpellMgr->GetSpellInfo(effect.TriggerSpell))
+                            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                                if (spell->Effects[i].Effect == SPELL_EFFECT_HEAL || spell->Effects[i].Effect == SPELL_EFFECT_HEAL_PCT)
+                                    predict.Points += m_caster->SpellHealingBonusDone(target, spell, spell->Effects[i].CalcValue(m_caster, nullptr, target), HEAL, i) * m_spellInfo->GetMaxTicks();
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    }
+}
+
 void Spell::SendLogExecute()
 {
     WorldPacket data(SMSG_SPELLLOGEXECUTE, (8+4+4+4+4+8));
@@ -4804,38 +4835,14 @@ void Spell::SendChannelStart(uint32 duration)
 
     uint32 castFlags = CAST_FLAG_HAS_TRAJECTORY;
     uint32 schoolImmunityMask = m_caster->GetSchoolImmunityMask();
-    uint32 mechanicImmunityMask = m_spellInfo->GetMechanicImmunityMask(m_caster, true);
+    uint32 mechanicImmunityMask = m_spellInfo->GetMechanicImmunityMask(m_caster);
 
     if (schoolImmunityMask || mechanicImmunityMask)
         castFlags |= CAST_FLAG_IMMUNITY;
 
-    // Determining triggered healing spells and store their healing amount for heal prediction
-    uint32 predictedHealing = 0;
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
-    {
-        if (!m_spellInfo->Effects[i].TriggerSpell)
-            continue;
-
-        SpellInfo const* spell = sSpellMgr->GetSpellInfo(m_spellInfo->Effects[i].TriggerSpell);
-        if (!spell)
-            continue;
-
-        for (uint8 j = 0; j < MAX_SPELL_EFFECTS; j++)
-        {
-            if (spell->Effects[j].Effect == SPELL_EFFECT_HEAL)
-            {
-                Unit* target = m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster;
-                int32 heal = spell->Effects[j].CalcValue(m_caster);
-                predictedHealing += m_caster->SpellHealingBonusDone(target, spell, heal, SPELL_DIRECT_DAMAGE, j);
-            }
-        }
-    }
-
     uint8 ticks = m_spellInfo->GetMaxTicks();
     if (m_spellInfo->HasAttribute(SPELL_ATTR5_START_PERIODIC_AT_APPLY))
         ++ticks;
-
-    predictedHealing *= ticks;
 
     WorldPackets::Spells::ChannelStart packet;
     packet.CasterGUID = m_caster->GetGUID();
@@ -4849,13 +4856,12 @@ void Spell::SendChannelStart(uint32 duration)
         packet.InterruptImmunities->SchoolImmunities = mechanicImmunityMask; // CastImmunities
     }
 
-    if (predictedHealing)
+    if (m_spellInfo->HasAttribute(SPELL_ATTR8_HEAL_PREDICTION))
     {
         castFlags |= CAST_FLAG_HEAL_PREDICTION;
 
         WorldPackets::Spells::SpellHealPrediction predict;
-        predict.Type = DIRECT_DAMAGE;
-        predict.Points = predictedHealing;
+        UpdateSpellHealPrediction(predict);
         packet.HealPrediction.emplace(channelTarget, predict);
     }
 
@@ -5535,7 +5541,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint
     {
         // skip stuck spell to allow use it in falling case and apply spell limitations at movement
         if ((!m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR) || m_spellInfo->Effects[0].Effect != SPELL_EFFECT_STUCK) &&
-            (IsAutoRepeat() || (m_spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) != 0))
+            (IsAutoRepeat() || m_spellInfo->HasAuraInterruptFlag(SpellAuraInterruptFlags::Standing)))
             return SPELL_FAILED_MOVING;
     }
 
@@ -7231,10 +7237,6 @@ void Spell::Delayed() // only called in DealDamage()
     if (isDelayableNoMore())                                 // Spells may only be delayed twice
         return;
 
-    // spells not loosing casting time (slam, dynamites, bombs..)
-    //if (!(m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_DAMAGE))
-    //    return;
-
     //check pushback reduce
     int32 delaytime = 500;                                  // spellcasting delay is normally 500ms
     int32 delayReduce = 100;                                // must be initialized to 100 for percent modifiers
@@ -7476,8 +7478,7 @@ bool Spell::IsChannelActive() const
 
 bool Spell::IsAutoActionResetSpell() const
 {
-    /// @todo changed SPELL_INTERRUPT_FLAG_AUTOATTACK -> SPELL_INTERRUPT_FLAG_INTERRUPT to fix compile - is this check correct at all?
-    if (IsTriggered() || !(m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT))
+    if (IsTriggered())
         return false;
 
     if (!m_casttime && m_spellInfo->HasAttribute(SPELL_ATTR6_NOT_RESET_SWING_IF_INSTANT))
