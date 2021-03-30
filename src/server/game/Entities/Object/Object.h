@@ -19,7 +19,6 @@
 #define _OBJECT_H
 
 #include "Common.h"
-#include "DataMap.h"
 #include "Duration.h"
 #include "GridReference.h"
 #include "GridRefManager.h"
@@ -183,8 +182,6 @@ class TC_GAME_API Object
         inline bool IsAreaTrigger() const { return GetTypeId() == TYPEID_AREATRIGGER; }
         AreaTrigger* ToAreaTrigger() { if (GetTypeId() == TYPEID_AREATRIGGER) return reinterpret_cast<AreaTrigger*>(this); else return nullptr; }
         AreaTrigger const* ToAreaTrigger() const { if (GetTypeId() == TYPEID_AREATRIGGER) return reinterpret_cast<AreaTrigger const*>(this); else return nullptr; }
-
-        DataMap CustomData;
 
     protected:
         Object();
