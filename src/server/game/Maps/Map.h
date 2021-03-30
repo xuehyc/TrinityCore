@@ -21,6 +21,7 @@
 #include "Define.h"
 
 #include "Cell.h"
+#include "DataMap.h"
 #include "DynamicTree.h"
 #include "GridDefines.h"
 #include "GridRefManager.h"
@@ -677,6 +678,8 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
         {
             _updateObjects.erase(obj);
         }
+
+        DataMap CustomData;
 
     private:
 
