@@ -2254,7 +2254,6 @@ void LFGMgr::ToggleSoloLFG()
     m_isSoloLFG = !m_isSoloLFG;
 }
 
-
 bool LFGDungeonData::IsRaid() const
 {
     if (MapEntry const* mapInfo = sMapStore.LookupEntry(map))
