@@ -24,6 +24,9 @@
 #include "Types.h"
 #include <vector>
 
+// cOncienS
+#include "EventBridge.h"
+
 class AccountMgr;
 class AuctionHouseObject;
 class Aura;
@@ -91,7 +94,7 @@ enum XPColorChar : uint8;
 #define VISIBLE_RANGE       166.0f                          //MAX visible range (size of grid)
 
 /*
-    @todo Add more script type classes.
+    TODO: Add more script type classes.
 
     MailScript
     SessionScript
@@ -1046,8 +1049,9 @@ class TC_GAME_API ScriptMgr
         void OnQuestStatusChange(Player* player, uint32 questId);
         void OnMovieComplete(Player* player, uint32 movieId);
         void OnPlayerRepop(Player* player);
+        void OnPlayerUpdatePosition(Player* player);
 
-    public: /* AccountScript */
+public: /* AccountScript */
 
         void OnAccountLogin(uint32 accountId);
         void OnFailedAccountLogin(uint32 accountId);
@@ -1094,6 +1098,9 @@ class TC_GAME_API ScriptMgr
         ScriptLoaderCallbackType _script_loader_callback;
 
         std::string _currentContext;
+
+        // cOncienS
+        EventBridge*	eb;
 };
 
 namespace Trinity::SpellScripts

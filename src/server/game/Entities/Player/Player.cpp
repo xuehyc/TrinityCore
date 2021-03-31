@@ -6360,6 +6360,9 @@ bool Player::UpdatePosition(float x, float y, float z, float orientation, bool t
 
     CheckAreaExploreAndOutdoor();
 
+    // cOncienS
+    sScriptMgr->OnPlayerUpdatePosition(this);
+
     return true;
 }
 
