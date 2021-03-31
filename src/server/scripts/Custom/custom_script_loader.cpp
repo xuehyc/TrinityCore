@@ -26,6 +26,7 @@ void AddSC_start_equipment();
 void AddSC_XpWeekend();
 void AddSC_AutoBalance();
 void AddLfgSoloScripts();
+void AddMoneyForKillsScripts();
 
 void AddCustomScripts()
 {
@@ -35,4 +36,5 @@ void AddCustomScripts()
     AddSC_XpWeekend();
     AddSC_AutoBalance();
     AddLfgSoloScripts();
+    AddMoneyForKillsScripts();
 }
