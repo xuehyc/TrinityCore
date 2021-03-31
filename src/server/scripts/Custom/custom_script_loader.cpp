@@ -25,6 +25,7 @@ void AddSC_skip_StarterArea();
 void AddSC_start_equipment();
 void AddSC_XpWeekend();
 void AddSC_AutoBalance();
+void AddLfgSoloScripts();
 
 void AddCustomScripts()
 {
@@ -33,4 +34,5 @@ void AddCustomScripts()
     AddSC_start_equipment();
     AddSC_XpWeekend();
     AddSC_AutoBalance();
+    AddLfgSoloScripts();
 }
