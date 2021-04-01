@@ -1,5 +1,4 @@
-Delete from `creature_trainer` where `CreatureId` = '15285';
-Delete from `creature_trainer` where `CreatureId` = '38244';
+DELETE FROM `creature_trainer` WHERE `CreatureId` IN (15279, 15284, 15280, 42618, 15285, 38244, 15513, 15283);
 
 Insert into `gossip_menu_option` values
 ('14139','0','3', 'I seek more training in the priestly ways.','3266','5','16','15600'),
