@@ -77,6 +77,13 @@ Read file [COPYING](COPYING)
 ## Authors &amp; Contributors
 
 Read file [AUTHORS](AUTHORS)
+Project Contributors
+acidmanifesto
+aW49qA2V3RxMqD
+Gwenpool
+Jinnaix
+Serithul
+
 
 
 ## Links
