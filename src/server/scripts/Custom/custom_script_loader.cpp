@@ -27,6 +27,7 @@ void AddSC_XpWeekend();
 void AddSC_AutoBalance();
 void AddLfgSoloScripts();
 void AddMoneyForKillsScripts();
+void AddGainHonorGuardScripts();
 
 void AddCustomScripts()
 {
@@ -37,4 +38,5 @@ void AddCustomScripts()
     AddSC_AutoBalance();
     AddLfgSoloScripts();
     AddMoneyForKillsScripts();
+    AddGainHonorGuardScripts();
 }

@@ -273,7 +273,6 @@ public:
                     guild->BroadcastToGuild(killer->GetSession(), false, message, LANG_UNIVERSAL);
             }
 
-
             if (sConfigMgr->GetBoolDefault(MFKAnnounceGroupSuicide, false))
             {
                 Group* group = killer->GetGroup();
