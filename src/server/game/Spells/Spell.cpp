@@ -21,6 +21,7 @@
 #include "Battleground.h"
 #include "CellImpl.h"
 #include "Common.h"
+#include "Config.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
 #include "DB2Stores.h"
@@ -3256,6 +3257,10 @@ void Spell::prepare(SpellCastTargets const& targets, AuraEffect const* triggered
         }
         else
             m_casttime = 0; // Set cast time to 0 if .cheat casttime is enabled.
+
+                    // if config enable and spell used hearthstone
+        if (sConfigMgr->GetBoolDefault("HearthstoneSpell.Toggle", false) && m_spellInfo->Id == 8690)
+            m_casttime = sConfigMgr->GetIntDefault("HearthstoneSpell.CastTime", 10000);
     }
     else
         m_casttime = m_spellInfo->CalcCastTime(m_caster->getLevel(), this);
@@ -3633,6 +3638,9 @@ void Spell::_cast(bool skipCheck)
 
         //Clear spell cooldowns after every spell is cast if .cheat cooldown is enabled.
         if (modOwner->GetCommandStatus(CHEAT_COOLDOWN))
+            m_caster->GetSpellHistory()->ResetCooldown(m_spellInfo->Id, true);
+
+        if (m_spellInfo->Id == 8690 && sConfigMgr->GetBoolDefault("HearthstoneSpell.Toggle", false) && sConfigMgr->GetBoolDefault("HearthstoneSpell.NoCD", false))
             m_caster->GetSpellHistory()->ResetCooldown(m_spellInfo->Id, true);
     }
 
@@ -8221,6 +8229,10 @@ void Spell::TriggerGlobalCooldown()
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_COOLDOWN))
+            return;
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (m_spellInfo->Id == 8690 && sConfigMgr->GetBoolDefault("HearthstoneSpell.Toggle", false) && sConfigMgr->GetBoolDefault("HearthstoneSpell.NoCD", false))
             return;
 
     // Global cooldown can't leave range 1..1.5 secs

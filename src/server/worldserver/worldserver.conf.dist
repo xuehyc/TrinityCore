@@ -5298,3 +5298,29 @@ GainConquestGuard.GainConquestRate = 1.0
 
 #
 ###################################################################################################
+###################################################################################################
+# HEARTHSTONE SPELL
+#
+#     HearthstoneSpell.Toggle
+#        Description: Allows hearthstone cast time and cooldown to be changed
+#
+
+HearthstoneSpell.Toggle = 1
+
+#
+#    HearthstoneSpell.CastTime
+#        Description: Changes the cast time of hearthstone spell
+#        Default:     1000 - (time in milliseconds) 10 seconds
+#
+
+HearthstoneSpell.CastTime = 500
+
+#
+#    HearthstoneSpell.NoCD
+#        Description: Disable Hearthstone Cooldown
+#
+
+HearthstoneSpell.NoCD = 1
+
+#
+###################################################################################################
