@@ -28,6 +28,7 @@ void AddSC_AutoBalance();
 void AddLfgSoloScripts();
 void AddMoneyForKillsScripts();
 void AddGainHonorGuardScripts();
+void AddGainConquestGuardScripts();
 
 void AddCustomScripts()
 {
@@ -39,4 +40,5 @@ void AddCustomScripts()
     AddLfgSoloScripts();
     AddMoneyForKillsScripts();
     AddGainHonorGuardScripts();
+    AddGainConquestGuardScripts();
 }

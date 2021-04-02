@@ -1,5 +1,5 @@
 /*
-* Remake of LASYAN3's PATCH Honor for kill Module
+* Inspired by LASYAN3's PATCH Honor for kill Module
 * Developed by SPP DEV MDIC
 * Gwenpool 434 Branch
  */
@@ -17,19 +17,19 @@
 #include "World.h"
 #include "WorldPacket.h"
 
-bool GainHonorGuardEnable = 1;
-bool GainHonorGuardAnnounceModule = 1;
-bool GainHonorGuardOnGuardKill = 1;
-bool GainHonorGuardOnEliteKill = 1;
-bool GainHonorGuardOnGuardKillAnnounce = 1;
-bool GainHonorGuardOnEliteKillAnnounce = 1;
-bool GainHonorRateEnable = 1;
-float GainHonorRate = 1.0;
+bool GainConquestGuardEnable = 1;
+bool GainConquestGuardAnnouceModule = 1;
+bool GainConquestGuardOnGuardKill = 1;
+bool GainConquestGuardOnEliteKill = 1;
+bool GainConquestGuardOnGuardKillAnnounce = 1;
+bool GainConquestGuardOnEliteKillAnnounce = 1;
+bool GainConquestRateEnable = 1;
+float GainConquestRate = 1.0;
 
-class GainHonorGuardConfig : public WorldScript
+class GainConquestGuardConfig : public WorldScript
 {
 public:
-    GainHonorGuardConfig() : WorldScript("GainHonorGuardConfig") {}
+    GainConquestGuardConfig() : WorldScript("GainConquestGuardConfig") {}
 
     void OnBeforeConfigLoad(bool reload)
     {
@@ -43,70 +43,70 @@ public:
     // Load Configuration Settings
     void SetInitialWorldSettings()
     {
-        GainHonorGuardEnable = sConfigMgr->GetBoolDefault("GainHonorGuard.Enable", 1);
-        GainHonorGuardAnnounceModule = sConfigMgr->GetBoolDefault("GainHonorGuard.Announce", 1);
+        GainConquestGuardEnable = sConfigMgr->GetBoolDefault("GainConquestGuard.Enable", 1);
+        GainConquestGuardAnnouceModule = sConfigMgr->GetBoolDefault("GainConquestGuard.Announce", 1);
 
         //Gain Honor Settings
-        GainHonorGuardOnGuardKill = sConfigMgr->GetBoolDefault("GainHonorGuard.GainHonorOnGuardKill", 0);
-        GainHonorGuardOnEliteKill = sConfigMgr->GetBoolDefault("GainHonorGuard.GainHonorOnEliteKill", 0);
+        GainConquestGuardOnGuardKill = sConfigMgr->GetBoolDefault("GainConquestGuard.GainConquestOnGuardKill", 0);
+        GainConquestGuardOnEliteKill = sConfigMgr->GetBoolDefault("GainConquestGuard.GainConquestOnEliteKill", 0);
 
         //Announce honor gained
-        GainHonorGuardOnGuardKillAnnounce = sConfigMgr->GetBoolDefault("GainHonorGuard.GainHonorOnGuardKillAnnounce", 0);
-        GainHonorGuardOnEliteKillAnnounce = sConfigMgr->GetBoolDefault("GainHonorGuard.GainHonorOnEliteKillAnnounce", 0);
+        GainConquestGuardOnGuardKillAnnounce = sConfigMgr->GetBoolDefault("GainConquestGuard.GainConquestOnGuardKillAnnounce", 0);
+        GainConquestGuardOnEliteKillAnnounce = sConfigMgr->GetBoolDefault("GainConquestGuard.GainConquestOnEliteKillAnnounce", 0);
 
         //Honor Rate
-        GainHonorRateEnable = sConfigMgr->GetBoolDefault("GainHonorGuard.GainHonorRateEnable", 0);
-        GainHonorRate = abs(sConfigMgr->GetFloatDefault("GainHonorGuard.GainHonorRate", 1.0));
+        GainConquestRateEnable = sConfigMgr->GetBoolDefault("GainConquestGuard.GainConquestRateEnable", 0);
+        GainConquestRate = abs(sConfigMgr->GetFloatDefault("GainConquestGuard.GainConquestRate", 1.0));
     }
 };
 
-class GainHonorGuardAnnouce : public PlayerScript
+class GainConquestGuardAnnouce : public PlayerScript
 {
 
 public:
 
-    GainHonorGuardAnnouce() : PlayerScript("GainHonorGuard") {}
+    GainConquestGuardAnnouce() : PlayerScript("GainConquestGuardAnnouce") {}
 
     // Announce Module
     void OnLogin(Player* player, bool /*firstLogin*/) override
     {
 
         // Announce Module
-        if (GainHonorGuardEnable)
+        if (GainConquestGuardEnable)
         {
-            if (GainHonorGuardAnnounceModule)
+            if (GainConquestGuardAnnouceModule)
             {
-                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00SPP Honor for Elite Kills|rmodule.");
+                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00SPP Conquest for Elite Kills|rmodule.");
             }
         }
     }
 };
 
-class GainHonorGuard : public PlayerScript
+class GainConquestGuard : public PlayerScript
 {
 
 public:
 
-    GainHonorGuard() : PlayerScript("GainHonorGuard") {}
+    GainConquestGuard() : PlayerScript("GainConquestGuard") {}
 
     void OnCreatureKill(Player* player, Creature* killed)  //override
     {
-        RewardHonor(player, killed);
+        RewardConquest(player, killed);
     }
 
     void OnCreatureKilledByPet(Player* player, Creature* killed) //override
     {
-        RewardHonor(player, killed);
+        RewardConquest(player, killed);
     }
 
     //Reward Honor from either a Guard (creature 32768 flag) or Elite kill.  
-    void RewardHonor(Player* player, Creature* killed)
+    void RewardConquest(Player* player, Creature* killed)
     {
-        if (GainHonorGuardEnable && player->IsAlive() && !player->InArena() && !player->HasAura(SPELL_AURA_PLAYER_INACTIVE))
+        if (GainConquestGuardEnable && player->IsAlive() && !player->InArena() && !player->HasAura(SPELL_AURA_PLAYER_INACTIVE))
         {
             if (killed || !killed->HasAuraType(SPELL_AURA_NO_PVP_CREDIT))
             {
-                if ((GainHonorGuardOnGuardKill && killed->ToCreature()->IsGuard()) || (GainHonorGuardOnEliteKill && killed->ToCreature()->isElite()))
+                if ((GainConquestGuardOnGuardKill && killed->ToCreature()->IsGuard()) || (GainConquestGuardOnEliteKill && killed->ToCreature()->isElite()))
                 {
 
                     std::ostringstream ss;
@@ -147,9 +147,9 @@ public:
                         }
 
                         //Custom Gain Honor Rate 
-                        if (GainHonorRateEnable)
+                        if (GainConquestRateEnable)
                         {
-                            honor_f *= GainHonorRate;
+                            honor_f *= GainConquestRate;
                         }
                         else
                         {
@@ -166,17 +166,17 @@ public:
                         data << honor;
 
                         // add honor points to player
-                        player->ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, honor, true, true);
+                        player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, honor, true, true);
 
                         //announce to player if honor was gained
-                        if (GainHonorGuardOnGuardKill && killed->ToCreature()->IsGuard() && GainHonorGuardOnGuardKillAnnounce)
+                        if (GainConquestGuardOnGuardKill && killed->ToCreature()->IsGuard() && GainConquestGuardOnGuardKillAnnounce)
                         {
-                            ss << "You have been awarded Honor.";
+                            ss << "You have been awarded Conquest.";
                             ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), honor);
                         }
-                        else if (GainHonorGuardOnEliteKill && killed->ToCreature()->isElite() && GainHonorGuardOnEliteKillAnnounce)
+                        else if (GainConquestGuardOnEliteKill && killed->ToCreature()->isElite() && GainConquestGuardOnEliteKillAnnounce)
                         {
-                            ss << "You have been awarded Honor.";
+                            ss << "You have been awarded Conquest.";
                             ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), honor);
                         }
                     }
@@ -199,9 +199,9 @@ public:
 
 };
 
-void AddGainHonorGuardScripts()
+void AddGainConquestGuardScripts()
 {
-    new GainHonorGuardConfig();
-    new GainHonorGuardAnnouce();
-    new GainHonorGuard();
+    new GainConquestGuardConfig();
+    new GainConquestGuardAnnouce();
+    new GainConquestGuard();
 }

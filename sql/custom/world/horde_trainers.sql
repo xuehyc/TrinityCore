@@ -1,4 +1,15 @@
 DELETE FROM `creature_trainer` WHERE `CreatureId` IN (15279, 15284, 15280, 42618, 15285, 38244, 15513, 15283);
+insert into `creature_trainer` values 
+('15279', '44', '14136', '0'),
+('15284', '127', '14139', '0'),
+('15280', '168', '14137', '0'),
+('42618', '32', '11645', '0'),
+('15285', '17', '14140', '0'),
+('38244', '17', '10985', '0'),
+('15513', '15', '14141', '0'),
+('15283', '32', '14138', '0');
+
+DELETE FROM `gossip_menu_option` WHERE  `MenuId` IN (14136, 14139, 14137, 11645, 14140, 10985, 14141, 14138);
 
 Insert into `gossip_menu_option` values
 ('14139','0','3', 'I seek more training in the priestly ways.','3266','5','16','15600'),
@@ -25,12 +36,3 @@ Insert into `gossip_menu_option` values
 ('14140','2','0','Learn about Dual Talent Specialization.','33762','20','1','15600'),
 ('14141','2','0','Learn about Dual Talent Specialization.','33762','20','1','15600'),
 ('11645','2','0','Learn about Dual Talent Specialization.','33762','20','1','15600');
-insert into `creature_trainer` values 
-('15279', '44', '14136', '0'),
-('15284', '127', '14139', '0'),
-('15280', '168', '14137', '0'),
-('42618', '32', '11645', '0'),
-('15285', '17', '14140', '0'),
-('38244', '17', '10985', '0'),
-('15513', '15', '14141', '0'),
-('15283', '32', '14138', '0');

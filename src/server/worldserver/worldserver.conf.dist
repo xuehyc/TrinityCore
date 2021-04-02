@@ -5224,3 +5224,77 @@ GainHonorGuard.GainHonorRate = 1.0
 
 #
 ###################################################################################################
+###################################################################################################
+#  Gain Conquest for Kill on elite and Guards#
+##############################################
+#
+# Enable the module? (1: true | 0: false)
+#
+
+GainConquestGuard.Enable = 0
+
+#
+# Announce the module when the player logs in?
+#
+GainConquestGuard.Announce = 0
+#
+###################################################################################################
+# Gain Conquest Settings #
+#######################
+#
+# GainConquestOnGuardKill
+# Set it to 1 to gain Conquest when you kill a guard.
+# Note that not all city guards will give you Conquest. It seems only capital and big city guards are flagged
+# as so in the database.
+# Default : 0 (No Conquest when you kill a guard)
+
+GainConquestGuard.GainConquestOnGuardKill = 0
+
+# GainConquestOnEliteKill
+# Set it to 1 to gain Conquest when you kill an elite mob (this does not apply on rare mob, unless he is also elite).
+# Default : 0 (No Conquest when you kill an elite mob)
+
+GainConquestGuard.GainConquestOnEliteKill = 0
+
+#
+###################################################################################################
+# Announce Conquest Gained #
+#########################
+#
+# GainConquestOnGuardKillAnnounce
+# Announce to player how much Conquest gained when player kills a non-gray guard. 
+# Must enable GainConquestOnGuardKill for this to work 
+# Default : 0 (Disabled)
+
+GainConquestGuard.GainConquestOnGuardKillAnnounce = 0
+
+# GainConquestOnEliteKillAnnounce
+# Announce to player how much Conquest gained when player kills a non-gray elite creature. 
+# Must enable GainConquestOnEliteKill for this to work
+# Default : 0 (Disabled)
+
+GainConquestGuard.GainConquestOnEliteKillAnnounce = 0
+
+#
+###################################################################################################
+# Conquest Rate Settings#
+######################
+#
+# GainConquestRateEnable
+# Enable the custom Conquest Gain Rate to change the amount of Conquest gained. 
+# The current rate is using the "Conquest_f *= sWorld->getRate(RATE_Conquest)" calculation.
+# This setting allows you to change the RATE_Conquest value to a different rate. 
+# Default : 0 (Disabled)
+
+GainConquestGuard.GainConquestRateEnable = 0
+
+# GainConquestRate
+# Rate multiplier to base Conquest gained. 
+# Must enable GainConquestRateEnable for this to work
+# Example : 0.5 will half Conquest gained
+# Default : 1.0 (Standard RATE_Conquest)
+
+GainConquestGuard.GainConquestRate = 1.0
+
+#
+###################################################################################################
