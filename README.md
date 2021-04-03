@@ -1,3 +1,6 @@
+# catacomspp project 
+A Fork and Community Single Player Project Dev project of the Catacylsm Preservation Project by Trinitycore.
+
 # ![logo](https://community.trinitycore.org/public/style_images/1_trinitycore.png) TrinityCore
 
 ## Build Status
@@ -77,18 +80,6 @@ Read file [COPYING](COPYING)
 ## Authors &amp; Contributors
 
 Read file [AUTHORS](AUTHORS)
-
-Forked From 
-+ The Cataclysm Prevervation Project
-
-Cata Single Player Project Contributors
-
-+ acidmanifesto
-+ aW49qA2V3RxMqD
-+ Gwenpool
-+ Jinnaix
-+ Serithul
-
 
 
 ## Links
