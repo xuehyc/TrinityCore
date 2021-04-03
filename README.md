@@ -81,6 +81,16 @@ Read file [COPYING](COPYING)
 
 Read file [AUTHORS](AUTHORS)
 
+Forked From
+
+The Cataclysm Prevervation Project
+Cata Single Player Project Contributors
+
+acidmanifesto
+aW49qA2V3RxMqD
+Gwenpool
+Jinnaix
+Serithul
 
 ## Links
 
