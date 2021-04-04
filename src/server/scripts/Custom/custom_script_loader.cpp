@@ -30,6 +30,7 @@ void AddMoneyForKillsScripts();
 void AddGainHonorGuardScripts();
 void AddGainConquestGuardScripts();
 void AddSC_announce_login();
+void AddSC_Death_Announcer();
 
 void AddCustomScripts()
 {
@@ -43,4 +44,5 @@ void AddCustomScripts()
     AddGainHonorGuardScripts();
     AddGainConquestGuardScripts();
     AddSC_announce_login();
+    AddSC_Death_Announcer();
 }

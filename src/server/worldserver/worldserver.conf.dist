@@ -5326,7 +5326,7 @@ HearthstoneSpell.NoCD = 1
 ###################################################################################################
 ###################################################################################################
 # Login Announcer#
-################
+##################
 #
 #     Login.Announcer.Enable
 #        Announce Player login to server.
@@ -5336,6 +5336,28 @@ HearthstoneSpell.NoCD = 1
 Login.Announcer.Enable = 1
 
 #
+#
+#
+###################################################################################################
+###################################################################################################
+# Death Announcers#
+###################
+#
+#     KilledByCreature.Announcer
+#        Announce Player Killed by Creature to server.
+#        Default:     1 (Default)
+#                      0 (Disabled)
+
+KilledByCreature.Announcer = 1
+
+#
+#     PvPKill.Announcer
+#        Announce Player Killed by PVP to server.
+#        Default:     1 (Default)
+#                      0 (Disabled)
+
+PvPKill.Announcer = 1
+
 #
 #
 ###################################################################################################
