@@ -29,6 +29,7 @@ void AddLfgSoloScripts();
 void AddMoneyForKillsScripts();
 void AddGainHonorGuardScripts();
 void AddGainConquestGuardScripts();
+void AddSC_announce_login();
 
 void AddCustomScripts()
 {
@@ -41,4 +42,5 @@ void AddCustomScripts()
     AddMoneyForKillsScripts();
     AddGainHonorGuardScripts();
     AddGainConquestGuardScripts();
+    AddSC_announce_login();
 }
