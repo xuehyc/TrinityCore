@@ -76,7 +76,7 @@ public:
         {
             if (GainConquestGuardAnnouceModule)
             {
-                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00SPP Conquest for Elite Kills|rmodule.");
+                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00SPP Conquest for Elite Kills |rmodule.");
             }
         }
     }

@@ -76,7 +76,7 @@ public:
         {
             if (GainHonorGuardAnnounceModule)
             {
-                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00SPP Honor for Elite Kills|rmodule.");
+                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00SPP Honor for Elite Kills |rmodule.");
             }
         }
     }
