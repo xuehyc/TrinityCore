@@ -5361,3 +5361,25 @@ PvPKill.Announcer = 1
 #
 #
 ###################################################################################################
+###################################################################################################
+# Save on Level Up#
+###################
+#
+#     Save.On.LevelUp
+#        Saves Character instantly on level up to server.
+#        Default:     1 (Default)
+#                      0 (Disabled)
+
+Save.On.LevelUp = 1
+
+#
+#     Save.On.LevelUp.Announcer
+#        Announce to player when save occurs on level up.
+#        Default:     1 (Default)
+#                      0 (Disabled)
+
+Save.On.LevelUp.Announcer = 1
+
+#
+#
+###################################################################################################
