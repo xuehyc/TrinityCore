@@ -30,6 +30,7 @@ public:
         std::string playerName = p->GetName();
         uint32 pAccountID = p->GetSession()->GetAccountId();
         uint32 pLevel = p->getLevel();
+        std::string pRace;
         std::string pClass;
         std::ostringstream message;
 
@@ -37,6 +38,49 @@ public:
         if (!sConfigMgr->GetBoolDefault("Who-logged.console", true))
         {
             return;
+        }
+
+        switch (p->getRace())
+        {
+        case RACE_NONE:
+            pRace = "None";
+            break;
+        case RACE_HUMAN:
+            pRace = "Human";
+            break;
+        case RACE_ORC:
+            pRace = "Orc";
+            break;
+        case RACE_DWARF:
+            pRace = "Dwarf";
+            break;
+        case RACE_NIGHTELF:
+            pRace = "Night Elf";
+            break;
+        case RACE_UNDEAD_PLAYER:
+            pRace = "Undead";
+            break;
+        case RACE_TAUREN:
+            pRace = "Tauren";
+            break;
+        case RACE_GNOME:
+            pRace = "Gnome";
+            break;
+        case RACE_TROLL:
+            pRace = "Troll";
+            break;
+        case RACE_GOBLIN:
+            pRace = "Goblin";
+            break;
+        case RACE_BLOODELF:
+            pRace = "Blood Elf";
+            break;
+        case RACE_DRAENEI:
+            pRace = "Draenei";
+            break;
+        case RACE_WORGEN:
+            pRace = "Worgen";
+            break;
         }
 
         switch (p->getClass())
@@ -73,7 +117,7 @@ public:
             break;
         }
 
-        printf("Player '%s' has logged in : Level '%u' : Class '%s' : IP '%s' : AccountID '%u'", playerName.c_str(), pLevel, pClass.c_str(), playerIP.c_str(), pAccountID);
+        printf("Player '%s' has logged in : Level '%u' : Race '%s' : Class '%s' : IP '%s' : AccountID '%u'", playerName.c_str(), pLevel, pRace.c_str(), pClass.c_str(), playerIP.c_str(), pAccountID);
     }
 };
 
