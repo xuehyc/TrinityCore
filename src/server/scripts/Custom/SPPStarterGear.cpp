@@ -208,7 +208,7 @@ public:
     {
         if (sConfigMgr->GetBoolDefault("SPP.Start.Equipment.Announce", true))
         {
-            ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00SPP Start Equipment |rmodule.");
+            ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff0000ffSPP Start Equipment |rmodule.");
         }
     }
 };
