@@ -306,7 +306,7 @@ public:
         {
             if (SoloCraftAnnounceModule)
             {
-                ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00SPP CATA SoloCraft Custom |rmodule.");
+                ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00SPP Cata SoloCraft Custom |rmodule.");
             }
         }
     }

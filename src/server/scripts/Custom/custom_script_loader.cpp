@@ -32,6 +32,7 @@ void AddGainConquestGuardScripts();
 void AddSC_announce_login();
 void AddSC_Death_Announcer();
 void AddSC_save_on_levelup();
+void AddSC_WhoLoggedScripts();
 
 void AddCustomScripts()
 {
@@ -47,4 +48,5 @@ void AddCustomScripts()
     AddSC_announce_login();
     AddSC_Death_Announcer();
     AddSC_save_on_levelup();
+    AddSC_WhoLoggedScripts();
 }
