@@ -5421,37 +5421,3 @@ Racial.Traits.Swap.Gold = 10
 
 #
 ################################################################################################### 
-###################################################################################################
-#SPP Starter Guild #
-####################
-#
-#
-#    StartGuild.Announce
-#         Description: Announces the module.
-#         Default:    0 - (Disabled)
-#                     1 - (Enabled)
-
-StartGuild.Announce = 0
-
-#    Starter Guild
-#        When enable, will auto add new characters to the starter guilds when created.
-#
-#    StartGuild.Enablee
-#         Description: Enables the module.
-#         Default:    0 - (Disabled)
-#                     1 - (Enabled)
-
-StartGuild.Enable = 0
-
-#
-#    StartGuild.Alliance
-#    StartGuild.Horde
-#         Description: Adds player to select guild id.
-#         Default:    0 - (Disabled)
-#                     1234 - (any guid id)
-
-StartGuild.Alliance = 0
-StartGuild.Horde = 0
-
-#
-###################################################################################################
