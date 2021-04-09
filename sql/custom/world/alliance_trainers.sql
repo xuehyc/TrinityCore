@@ -13,7 +13,7 @@ insert into `creature_trainer` values
 ('35839', '145', '10694', '0'),
 ('42366', '17', '11621', '0');
 
-DELETE FROM `gossip_menu_option` WHERE  `MenuId` IN (10694, 10697, 10698, ,10699, 10702, 11620, 10878, 10879, 11617, 11621, 11810, 11831);
+DELETE FROM `gossip_menu_option` WHERE  `MenuId` IN (10694, 10697, 10698, 10699, 10702, 11620, 10878, 10879, 11617, 11621, 11810, 11831);
 
 Insert into `gossip_menu_option` values
 ('10694','0','3', 'I require warrior training.','3266','5','16','15600'),
