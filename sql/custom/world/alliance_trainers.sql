@@ -1,4 +1,4 @@
-DELETE FROM `creature_trainer` WHERE `CreatureId` IN (37115, 37121, 42331, 42323, 42366, 43006, 43455);
+DELETE FROM `creature_trainer` WHERE `CreatureId` IN (35874, 37115, 37121, 42331, 42323, 42366, 43006, 43455);
 insert into `creature_trainer` values 
 ('43455', '32', '11831', '0'),
 ('43006', '44', '11810', '0'),
@@ -6,11 +6,15 @@ insert into `creature_trainer` values
 ('37121', '44', '10878', '0'),
 ('37115', '134', '10879', '0'),
 ('42323', '127', '11617', '0'),
+('35874', '15', '10697', '0'),
 ('42366', '17', '11621', '0');
 
-DELETE FROM `gossip_menu_option` WHERE  `MenuId` IN ( 11620, 10878, 10879, 11617, 11621, 11810, 11831);
+DELETE FROM `gossip_menu_option` WHERE  `MenuId` IN (10697, 11620, 10878, 10879, 11617, 11621, 11810, 11831);
 
 Insert into `gossip_menu_option` values
+('10697','0','3', 'I seek training in the ways of the Hunter.','3266','5','16','15600'),
+('10697','1','0','I wish to unlearn my talents.','62295','16','16','15600'),
+('10697','2','0','Learn about Dual Talent Specialization.','33762','20','1','15600'),
 ('11617','0','3', 'I seek more training in the priestly ways.','3266','5','16','15600'),
 ('11617','1','0','I wish to unlearn my talents.','62295','16','16','15600'),
 ('11617','2','0','Learn about Dual Talent Specialization.','33762','20','1','15600'),
