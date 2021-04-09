@@ -33,7 +33,9 @@ void AddSC_Death_Announcer();
 void AddSC_save_on_levelup();
 void AddSC_WhoLoggedScripts();
 void AddSC_racial_traits_npc();
+void AddSC_Band_aid();
 void AddSC_announce_login();
+
 
 void AddCustomScripts()
 {
@@ -50,5 +52,6 @@ void AddCustomScripts()
     AddSC_save_on_levelup();
     AddSC_WhoLoggedScripts();
     AddSC_racial_traits_npc();
+    AddSC_Band_aid();
     AddSC_announce_login();
 }
