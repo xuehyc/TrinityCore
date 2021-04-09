@@ -1,4 +1,4 @@
-DELETE FROM `creature_trainer` WHERE `CreatureId` IN (35874, 37115, 37121, 42331, 42323, 42366, 43006, 43455);
+DELETE FROM `creature_trainer` WHERE `CreatureId` IN (35839, 35874, 35869, 35871, 35872, 37115, 37121, 42331, 42323, 42366, 43006, 43455);
 insert into `creature_trainer` values 
 ('43455', '32', '11831', '0'),
 ('43006', '44', '11810', '0'),
@@ -7,17 +7,33 @@ insert into `creature_trainer` values
 ('37115', '134', '10879', '0'),
 ('42323', '127', '11617', '0'),
 ('35874', '15', '10697', '0'),
+('35869', '32', '10702', '0'),
+('35872', '44', '10698', '0'),
+('35871', '17', '10699', '0'),
+('35839', '145', '10694', '0'),
 ('42366', '17', '11621', '0');
 
-DELETE FROM `gossip_menu_option` WHERE  `MenuId` IN (10697, 11620, 10878, 10879, 11617, 11621, 11810, 11831);
+DELETE FROM `gossip_menu_option` WHERE  `MenuId` IN (10694, 10697, 10698, ,10699 10702, 11620, 10878, 10879, 11617, 11621, 11810, 11831);
 
 Insert into `gossip_menu_option` values
+('10694','0','3', 'I require warrior training.','3266','5','16','15600'),
+('10694','1','0','I wish to unlearn my talents.','62295','16','16','15600'),
+('10694','2','0','Learn about Dual Talent Specialization.','33762','20','1','15600'),
+('10698','0','3', 'I require mage training.','3266','5','16','15600'),
+('10698','1','0','I wish to unlearn my talents.','62295','16','16','15600'),
+('10698','2','0','Learn about Dual Talent Specialization.','33762','20','1','15600'),
+('10702','0','3', 'I am interested in warlock training.','3266','5','16','15600'),
+('10702','1','0','I wish to unlearn my talents.','62295','16','16','15600'),
+('10702','2','0','Learn about Dual Talent Specialization.','33762','20','1','15600'),
 ('10697','0','3', 'I seek training in the ways of the Hunter.','3266','5','16','15600'),
 ('10697','1','0','I wish to unlearn my talents.','62295','16','16','15600'),
 ('10697','2','0','Learn about Dual Talent Specialization.','33762','20','1','15600'),
 ('11617','0','3', 'I seek more training in the priestly ways.','3266','5','16','15600'),
 ('11617','1','0','I wish to unlearn my talents.','62295','16','16','15600'),
 ('11617','2','0','Learn about Dual Talent Specialization.','33762','20','1','15600'),
+('10699','0','3', 'I would like training.','3266','5','16','15600'),
+('10699','1','0','I wish to unlearn my talents.','62295','16','16','15600'),
+('10699','2','0','Learn about Dual Talent Specialization.','33762','20','1','15600'),
 ('11621','0','3', 'I would like training.','3266','5','16','15600'),
 ('11621','1','0','I wish to unlearn my talents.','62295','16','16','15600'),
 ('11621','2','0','Learn about Dual Talent Specialization.','33762','20','1','15600'),
