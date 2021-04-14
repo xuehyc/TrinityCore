@@ -110,8 +110,91 @@ public:
     }
 };
 
+class stagecoach : public CreatureScript
+{
+public:
+
+    stagecoach() : CreatureScript("stagecoach") {}
+
+    struct stagecoachAI : public ScriptedAI
+    {
+        stagecoachAI(Creature* creature) : ScriptedAI(creature) { }
+
+        bool GossipHello(Player* player) override
+        {
+            if (player->IsInCombat())
+            {
+                ClearGossipMenuFor(player);
+                ChatHandler(player->GetSession()).PSendSysMessage("You are still in combat!");
+                return true;
+            }
+            else
+            {
+                return OnGossipHello(player, me);
+            }
+        }
+
+        static bool OnGossipHello(Player* player, Creature* creature)
+        {
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, "I am ready to go!", GOSSIP_SENDER_MAIN, 11);
+            SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+            return true;
+        }
+
+        bool GossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
+        {
+            uint32 const sender = player->PlayerTalkClass->GetGossipOptionSender(gossipListId);
+            uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
+            return OnGossipSelect(player, me, sender, action);
+        }
+
+        bool OnGossipSelect(Player* player, Creature* _creature, uint32 /*sender*/, uint32 uiAction)
+        {
+            ClearGossipMenuFor(player);
+
+            switch (uiAction)
+            {
+
+            case 11:
+
+                if (player)
+                {
+                    if (player->GetTeam() == ALLIANCE && player->GetQuestStatus(24438) == QUEST_STATUS_COMPLETE)//EXODUS
+                    {
+                        AddGossipItemFor(player, GOSSIP_ICON_TALK, "I am ready to go!", GOSSIP_SENDER_MAIN, 1);//Check
+                    }
+                    AddGossipItemFor(player, GOSSIP_ICON_TALK, "I'm not ready yet", GOSSIP_SENDER_MAIN, 1111);
+                    SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, _creature->GetGUID());
+                }
+                break;
+
+            case 1111://close
+                CloseGossipMenuFor(player);
+                break;
+
+            case 1://Menu
+                player->TeleportTo(654, -2216.50f, 1809.03f, 11.77f, 2.9544f);
+                if (!player->GetPhaseShift().HasPhase(186))
+                PhasingHandler::AddPhase(player, 186, true);
+                break;
+               
+            default:
+
+                break;
+            }
+            return true;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new stagecoachAI(creature);
+    }
+};
+
 void AddSC_Band_aid()
 {
     new drowningwatchmen();
     new lornacrowley36457();
+    new stagecoach();
 }
