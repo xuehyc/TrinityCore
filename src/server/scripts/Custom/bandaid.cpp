@@ -24,6 +24,13 @@ SPP DEV MDic
 #include "ObjectAccessor.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
+#include "CreatureAI.h"
+#include "DBCStructure.h"
+#include "GameTime.h"
+#include "Log.h"
+#include "ObjectMgr.h"
+#include "TemporarySummon.h"
+#include "PhasingHandler.h"
 
 // npc id 36440 quest https://www.wowhead.com/quest=14395 Gasping for air
 // Worgen Quest Starter zone
@@ -45,7 +52,9 @@ public:
         {
             if (player->GetQuestStatus(14395) == QUEST_STATUS_INCOMPLETE)
             {
+                Creature* drowning = me->FindNearestCreature(36440, 2.0f);
                 player->KilledMonsterCredit(36450);
+                drowning->DisappearAndDie();
                 return true;
             }
             return false;
