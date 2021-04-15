@@ -155,6 +155,7 @@ Player::Player(WorldSession* session): Unit(true)
 
     m_ingametime = 0;
     m_sharedQuestId = 0;
+    m_popupQuestId = 0;
 
     m_ExtraFlags = 0;
 
@@ -7859,7 +7860,17 @@ void Player::CastItemCombatSpell(DamageInfo const& damageInfo, Item* item, ItemT
 {
     // Can do effect if any damage done to target
     // for done procs allow normal + critical + absorbs by default
-    bool canTrigger = (damageInfo.GetHitMask() & (PROC_HIT_NORMAL | PROC_HIT_CRITICAL | PROC_HIT_ABSORB)) != 0;
+    bool canTrigger = [&]()
+    {
+        if (!(damageInfo.GetHitMask() & (PROC_HIT_NORMAL | PROC_HIT_CRITICAL | PROC_HIT_ABSORB)))
+            return false;
+
+        if (damageInfo.GetSpellInfo() && damageInfo.GetSpellInfo()->HasAttribute(SPELL_ATTR3_CANT_TRIGGER_CASTER_PROCS))
+            return false;
+
+        return true;
+    }();
+
     if (canTrigger)
     {
         for (ItemEffect const& effect : proto->Effects)
@@ -14258,7 +14269,10 @@ void Player::SendPreparedQuest(ObjectGuid guid)
                 if (quest->IsAutoComplete() && quest->IsRepeatable() && !quest->IsDailyOrWeekly())
                     PlayerTalkClass->SendQuestGiverRequestItems(quest, guid, CanCompleteRepeatableQuest(quest), true);
                 else
+                {
+                    SetPopupQuestId(0);
                     PlayerTalkClass->SendQuestGiverQuestDetails(quest, guid, true, false);
+                }
             }
         }
     }
@@ -23298,6 +23312,19 @@ void Player::ClearComboPoints()
     m_comboTarget.Clear();
 }
 
+bool Player::IsInGroup(ObjectGuid groupGuid) const
+{
+    if (Group const* group = GetGroup())
+        if (group->GetGUID() == groupGuid)
+            return true;
+
+    if (Group const* group = GetOriginalGroup())
+        if (group->GetGUID() == groupGuid)
+            return true;
+
+    return false;
+}
+
 void Player::SetGroup(Group* group, int8 subgroup)
 {
     if (group == nullptr)
@@ -23473,7 +23500,10 @@ void Player::SendInitialPacketsAfterAddToMap()
     if (GetPlayerSharingQuest())
     {
         if (Quest const* quest = sObjectMgr->GetQuestTemplate(GetSharedQuestID()))
+        {
+            SetPopupQuestId(0);
             PlayerTalkClass->SendQuestGiverQuestDetails(quest, GetGUID(), true, false);
+        }
         else
             ClearQuestSharingInfo();
     }

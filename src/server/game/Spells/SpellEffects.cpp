@@ -1837,7 +1837,20 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
     if (!m_originalCaster)
         return;
 
-    bool personalSpawn = (properties->Flags & SUMMON_PROP_FLAG_PERSONAL_SPAWN) != 0;
+    ObjectGuid privateObjectOwner = [&]()
+    {
+        if (!(properties->Flags & (SUMMON_PROP_FLAG_PERSONAL_SPAWN | SUMMON_PROP_FLAG_PERSONAL_GROUP_SPAWN)))
+            return ObjectGuid::Empty;
+
+        if (m_originalCaster->IsPrivateObject())
+            return m_originalCaster->GetPrivateObjectOwner();
+
+        if (properties->Flags & SUMMON_PROP_FLAG_PERSONAL_GROUP_SPAWN)
+            if (m_originalCaster->IsPlayer() && m_originalCaster->ToPlayer()->GetGroup())
+                return m_originalCaster->ToPlayer()->GetGroup()->GetGUID();
+
+        return m_originalCaster->GetGUID();
+    }();
 
     int32 duration = m_spellInfo->GetDuration();
     if (Player* modOwner = m_originalCaster->GetSpellModOwner())
@@ -1881,7 +1894,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
 
     if (numSummons == 1)
     {
-        if (TempSummon* summon = m_caster->GetMap()->SummonCreature(entry, *destTarget, properties, duration, m_originalCaster, m_spellInfo->Id, 0, personalSpawn, health))
+        if (TempSummon* summon = m_caster->GetMap()->SummonCreature(entry, *destTarget, properties, duration, m_originalCaster, m_spellInfo->Id, 0, privateObjectOwner, health))
         {
             // Summoned vehicles shall be mounted right away if possible
             if (properties->Control == SUMMON_CATEGORY_VEHICLE && summon->IsVehicle())
@@ -1914,7 +1927,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         {
             // Multiple summons are summoned at random points within the destination radius
             Position pos = m_caster->GetRandomPoint(*destTarget, radius);
-            if (TempSummon* summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster, m_spellInfo->Id, 0, personalSpawn, health))
+            if (TempSummon* summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster, m_spellInfo->Id, 0, privateObjectOwner, health))
                 ExecuteLogEffectSummonObject(effIndex, summon);
         }
     }
@@ -5136,10 +5149,14 @@ void Spell::EffectQuestStart(SpellEffIndex effIndex)
         if (quest->IsAutoAccept() && player->CanAddQuest(quest, false))
         {
             player->AddQuestAndCheckCompletion(quest, player);
+            player->SetPopupQuestId(0);
             player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, player->GetGUID(), true, true);
         }
         else
+        {
+            player->SetPopupQuestId(quest->GetQuestId());
             player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, player->GetGUID(), true, false);
+        }
     }
 }
 
@@ -5561,7 +5578,7 @@ void Spell::EffectSummonPersonalGameObject(SpellEffIndex effIndex)
 
     go->SetRespawnTime(duration > 0 ? duration / IN_MILLISECONDS : 0);
     go->SetSpellId(m_spellInfo->Id);
-    go->SetVisibleByUnitOnly(m_caster->GetGUID());
+    go->SetPrivateObjectOwner(m_caster->GetGUID());
 
     ExecuteLogEffectSummonObject(effIndex, go);
 
