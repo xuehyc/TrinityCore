@@ -110,6 +110,16 @@ public:
     }
 };
 
+/* Quest Fix 24438
+https://www.wowhead.com/quest=24438/exodus
+https://www.wowhead.com/npc=44928/stagecoach-carriage
+Added missing Stagecoach
+Original SQL to Restore:
+DELETE FROM `creature_template` WHERE  `entry`=198888;
+DELETE FROM `creature` WHERE  `guid`=396668;
+UPDATE `creature` SET `PhaseId`='186' WHERE  `guid`=256018;
+UPDATE `world`.`creature` SET `PhaseId`='186' WHERE  `guid`=256108;
+*/
 class stagecoach : public CreatureScript
 {
 public:
@@ -192,9 +202,95 @@ public:
     }
 };
 
+/*
+Battle for Gilneas Kill Credit Workaround.
+https://www.wowhead.com/quest=24904/the-battle-for-gilneas-city
+UPDATE `creature` SET `npcflag`='1', `ScriptName`='krennan' WHERE  `guid`=256580;
+*/
+class krennan : public CreatureScript
+{
+public:
+
+    krennan() : CreatureScript("krennan") {}
+
+    struct krennanAI : public ScriptedAI
+    {
+        krennanAI(Creature* creature) : ScriptedAI(creature) { }
+
+        bool GossipHello(Player* player) override
+        {
+            if (player->IsInCombat())
+            {
+                ClearGossipMenuFor(player);
+                ChatHandler(player->GetSession()).PSendSysMessage("You are still in combat!");
+                return true;
+            }
+            else
+            {
+                return OnGossipHello(player, me);
+            }
+        }
+
+        static bool OnGossipHello(Player* player, Creature* creature)
+        {
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, "Hey There!", GOSSIP_SENDER_MAIN, 11);
+            SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+            return true;
+        }
+
+        bool GossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
+        {
+            uint32 const sender = player->PlayerTalkClass->GetGossipOptionSender(gossipListId);
+            uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
+            return OnGossipSelect(player, me, sender, action);
+        }
+
+        bool OnGossipSelect(Player* player, Creature* _creature, uint32 /*sender*/, uint32 uiAction)
+        {
+            ClearGossipMenuFor(player);
+
+            switch (uiAction)
+            {
+
+            case 11:
+
+                if (player)
+                {
+                    if (player->GetTeam() == ALLIANCE && player->GetQuestStatus(24904) == QUEST_STATUS_INCOMPLETE)//EXODUS
+                    {
+                        AddGossipItemFor(player, GOSSIP_ICON_TALK, "I am ready to go!", GOSSIP_SENDER_MAIN, 1);//Check
+                    }
+                    AddGossipItemFor(player, GOSSIP_ICON_TALK, "I'm not ready yet", GOSSIP_SENDER_MAIN, 1111);
+                    SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, _creature->GetGUID());
+                }
+                break;
+
+            case 1111://close
+                CloseGossipMenuFor(player);
+                break;
+
+            case 1://Menu
+                player->KilledMonsterCredit(38854);
+                break;
+
+            default:
+
+                break;
+            }
+            return true;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new krennanAI(creature);
+    }
+};
+
 void AddSC_Band_aid()
 {
     new drowningwatchmen();
     new lornacrowley36457();
     new stagecoach();
+    new krennan();
 }
