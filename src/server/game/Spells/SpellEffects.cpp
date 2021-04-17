@@ -4824,6 +4824,9 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
                 case 2: lastSec = 13; break;
             }
 
+            if (sWorld->getBoolConfig(CONFIG_FAST_FISHING))
+                lastSec = 17;
+
             // Duration of the fishing bobber can't be higher than the Fishing channeling duration
             duration = std::min(duration, duration - lastSec*IN_MILLISECONDS + FISHING_BOBBER_READY_TIME*IN_MILLISECONDS);
             break;

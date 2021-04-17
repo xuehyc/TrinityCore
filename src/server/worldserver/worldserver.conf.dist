@@ -5420,4 +5420,36 @@ SPPCATA.Racial.Trait.Swap.Announce.enable = 1
 Racial.Traits.Swap.Gold = 10
 
 #
-################################################################################################### 
+###################################################################################################
+###################################################################################################
+#
+# Custom.FastFishing
+# Set it to 1 to make fishing a lot faster!
+# Default : 0 (Fishing is normal)
+#
+
+Custom.FastFishing = 0
+
+#
+###################################################################################################
+###################################################################################################
+#
+# Custom.AttackSpeedForPlayer
+# Set it to a number upper than 1 to speed up the attack of the player
+# Default : 1.0 (Normal speed)
+# Example : 2.0 (Player attack speed is 200% faster)
+#
+
+Custom.AttackSpeedForPlayer = 1.0
+
+#
+# Custom.AttackSpeedForMobs
+# Set it to a number upper than 1 to speed up the attack of the mobs
+# Default : 1.0 (Normal speed)
+# Example : 0.5 (Mobs attack speed is 50% slower)
+#
+
+Custom.AttackSpeedForMobs = 1.0
+
+#
+###################################################################################################
