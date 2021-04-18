@@ -87,13 +87,13 @@ public:
         {
             if (player->GetQuestStatus(14416) == QUEST_STATUS_INCOMPLETE)
             {
+                Creature* horse = me->FindNearestCreature(36540, 5.0f);
                 player->FindNearestCreature(36540, 5.0f, true);
-                {
-                    player->KilledMonsterCredit(36560);
-                    return true;
-                }
-                return false;
+                player->KilledMonsterCredit(36560);
+                horse->DisappearAndDie();
+                return true;
             }
+            return false;
 
             if (me->IsQuestGiver())
                 player->PrepareQuestMenu(me->GetGUID());
