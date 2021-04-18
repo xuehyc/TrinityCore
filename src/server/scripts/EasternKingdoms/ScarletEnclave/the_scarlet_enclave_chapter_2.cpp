@@ -476,6 +476,10 @@ public:
         {
             switch (me->GetEntry())
             {
+                case 49356:                                     // Gally Lumpstain
+                    if (player->GetQuestStatus(28650) == QUEST_STATUS_INCOMPLETE)
+                        return true;
+                    break;
                 case 29061:                                     // Ellen Stanbridge
                     if (player->GetQuestStatus(12742) == QUEST_STATUS_INCOMPLETE)
                         return true;
