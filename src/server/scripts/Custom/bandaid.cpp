@@ -287,10 +287,43 @@ public:
     }
 };
 
+/* Gnome Quest 27635 Decontamination Bandaid fix
+https://www.wowhead.com/quest=27635/decontamination
+https://www.wowhead.com/npc=46185/sanitron-500
+*/
+class sanitron500 : public CreatureScript
+{
+public:
+
+    sanitron500() : CreatureScript("sanitron500") {}
+
+    struct sanitron500AI : public ScriptedAI
+    {
+        sanitron500AI(Creature* creature) : ScriptedAI(creature) { }
+
+        bool GossipHello(Player* player) override
+        {
+            if (player->GetQuestStatus(27635) == QUEST_STATUS_INCOMPLETE)
+            {
+                player->CompleteQuest(27635);
+                player->RemoveAurasDueToSpell(80653);
+                player->TeleportTo(0, -5172.84f, 693.686f, 288.08f, 4.835f);
+                return true;
+            }
+            return false;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new sanitron500AI(creature);
+    }
+};
 void AddSC_Band_aid()
 {
     new drowningwatchmen();
     new lornacrowley36457();
     new stagecoach();
     new krennan();
+    new sanitron500();
 }
