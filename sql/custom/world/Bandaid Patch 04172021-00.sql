@@ -16,6 +16,7 @@ DELETE FROM `broadcast_text` WHERE  `ID`=77873;
 DELETE FROM `broadcast_text` WHERE  `ID`=77874;
 DELETE FROM `broadcast_text` WHERE  `ID`=77875;
 UPDATE `creature_template` SET `unit_flags`='0' WHERE  `entry`=49356;
+DELETE FROM `creature_addon` WHERE  `entry`=396689
 */
 DELETE FROM `creature` WHERE  `guid`=396689;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseUseFlags`, `phaseMask`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES (396689, 49356, 609, 4298, 4352, 1, 0, 4, 171, 0, -1, 0, 0, 1330.47, -5753.55, 137.388, 3.28455, 300, 0, 0, 10, 0, 0, 0, 0, 0, 'npc_a_special_surprise', 0);
@@ -57,3 +58,6 @@ DELETE FROM `creature_template_addon` WHERE  `entry`=49356;
 INSERT INTO `creature_template_addon` (`entry`, `waypointPathId`, `cyclicSplinePathId`, `mount`, `bytes1`, `bytes2`, `emote`, `aiAnimKit`, `movementAnimKit`, `meleeAnimKit`, `visibilityDistanceType`, `auras`) VALUES (49356, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, NULL);
 
 UPDATE `creature_template` SET `unit_flags`='33536' WHERE  `entry`=49356;
+
+DELETE FROM `creature_addon` WHERE  `guid`=396689;
+INSERT INTO `creature_addon` (`guid`, `waypointPathId`, `cyclicSplinePathId`, `mount`, `bytes1`, `bytes2`, `emote`, `aiAnimKit`, `movementAnimKit`, `meleeAnimKit`, `visibilityDistanceType`, `auras`) VALUES (396689, 0, 0, 0, 65544, 1, 0, 0, 0, 0, 0, NULL);
