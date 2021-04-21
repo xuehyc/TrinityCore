@@ -287,10 +287,46 @@ public:
     }
 };
 
+/*Quest 10069 The Ways of the Light
+https://www.wowhead.com/quest=10069/ways-of-the-light
+Auto Complete script
+Setting it to auto complete in the sql isnt working.
+Setting it to disable isnt working in the sql database.
+Quest Template for this isnt not in the hotfixes or dbc files.
+How the quest is according to wowhead\official guide\ youtube is not the same as how it is presented in the game.
+We can not have two learn spell requirements in this quest tempalte of cpp with how cpp has it being presented
+which isnt how the quest suppose to be.
+Quest complete command does not complete the quest because of the above.
+This is the only solution I can provide until further comes from the CPP themselves.
+~MDic
+*/
+class BEPTF : public PlayerScript
+{
+public:
+    BEPTF() : PlayerScript("BEPTF") { }
+
+    void OnLogin(Player* Player, bool /*firstLogin*/) override
+    {
+        if (Player->getClass() == CLASS_PALADIN && Player->GetAreaId() == 3431)
+        {
+            if (Player->GetQuestStatus(10069) == QUEST_STATUS_NONE)//The Light of Dawn
+            {
+                Player->AddQuest(sObjectMgr->GetQuestTemplate(10069), nullptr);
+                Player->RewardQuest(sObjectMgr->GetQuestTemplate(10069), false, Player);
+            }
+            if (Player->GetQuestStatus(10069) == QUEST_STATUS_INCOMPLETE)//The Light of Dawn
+            {
+                Player->RewardQuest(sObjectMgr->GetQuestTemplate(10069), false, Player);
+            }
+        }
+    }
+};
+
 void AddSC_Band_aid()
 {
     new drowningwatchmen();
     new lornacrowley36457();
     new stagecoach();
     new krennan();
+    new BEPTF();
 }
