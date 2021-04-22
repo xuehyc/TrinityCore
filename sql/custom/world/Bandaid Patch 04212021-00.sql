@@ -16,3 +16,9 @@ UPDATE `trainer_spell` SET `SpellID` = 93321 WHERE `TrainerID` = 40 AND `SpellId
 
 -- Correct shaman spell trainer
 UPDATE `trainer_spell` SET `SpellID` = 86529 WHERE `TrainerID` = 124 AND `SpellId` = 87507;
+
+/* Vehicle spell fix
+https://www.wowhead.com/quest=14071/rolling-with-my-homies
+UPDATE `creature_template` SET `VehicleId`=0 WHERE `entry`=34840;
+*/
+UPDATE `creature_template` SET `VehicleId`=448 WHERE `entry`=34840;
