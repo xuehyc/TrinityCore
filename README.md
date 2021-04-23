@@ -1,5 +1,6 @@
 # catacomspp project 
 A Fork and Community Single Player Project Dev project of the Catacylsm Preservation Project by Trinitycore.
+Cata Com Spp is a fork of The Cataclysm Preservation Project. all initail commits are their work and credit goes to them for that. That aside, this is a passion project to bring the Single Player Project to both Cata and Mop. Currently we are working on cata only.
 
 # ![logo](https://community.trinitycore.org/public/style_images/1_trinitycore.png) TrinityCore
 
