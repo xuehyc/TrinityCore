@@ -14,7 +14,7 @@ INSERT INTO smart_scripts (entryorguid,source_type,id,link,event_type,event_phas
 (@VEHICLE,0,0,1,11,0,100,0,0,0,0,0, 81,16777216,0,0,0,0,0, 1,0,0,0,0,0,0,0, "Sanitron 500 - On Respawn - Set npc flag"),
 (@VEHICLE,0,1,2,25,0,100,0,0,0,0,0, 66,0,0,0,0,0,0, 1,0,0,0,0,0,0,0, "Sanitron 500 - On Reset - Set Home Position"),
 (@VEHICLE,0,2,3,25,0,100,0,0,0,0,0, 22,1,0,0,0,0,0, 1,0,0,0,0,0,0,0, "Sanitron 500 - On Reset - Set Phase 1"),
-(@VEHICLE,0,3,4,73,0,100,0,86319,0,0,0,28,80653,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"Remove Decontamination"),
+(@VEHICLE,0,3,4,73,0,100,0,86319,0,0,0,28,80653,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"Sanitron 500 - Remove Decontamination"),
 (@VEHICLE,0,4,0,27,1,100,0,0,0,0,0, 80,@VEHICLE*100,0,0,0,0,0, 1,0,0,0,0,0,0,0, "Sanitron 500 - Start Decontamination Script"),
 (@VEHICLE*100,9,0,1,0,1,100,0,0,0,0,0, 22,2,0,0,0,0,0, 1,0,0,0,0,0,0,0, "Sanitron 500 - Script - Set Phase 2"),
 (@VEHICLE*100,9,1,2,0,2,100,0,0,0,0,0, 1,0,0,0,0,0,0, 1,0,0,0,0,0,0,0, "Sanitron 500 - Script - Say 0"),
