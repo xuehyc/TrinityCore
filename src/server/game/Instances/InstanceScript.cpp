@@ -724,17 +724,21 @@ void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 credi
         return;
 
     uint32 dungeonId = 0;
+    uint32 encounterId = 0;
 
+    bool isFinalEncounter = false;
     for (DungeonEncounter const* encounter : *encounters)
     {
         if (encounter->creditType != type || encounter->creditEntry != creditEntry)
             continue;
 
         completedEncounters |= 1 << encounter->dbcEntry->Bit;
+        encounterId = encounter->dbcEntry->ID;
 
         // Encounter is marked as final encounter of the dungeon
         if (encounter->lastEncounterDungeon)
         {
+            isFinalEncounter = true;
             dungeonId = encounter->lastEncounterDungeon;
 
             if (instance->GetDifficulty() != sLFGDungeonStore.LookupEntry(encounter->lastEncounterDungeon)->DifficultyID)
@@ -742,6 +746,19 @@ void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 credi
 
             TC_LOG_DEBUG("lfg", "UpdateEncounterState: Instance %s (instanceId %u) completed encounter %s. Credit Dungeon: %u", instance->GetMapName(), instance->GetInstanceId(), encounter->dbcEntry->Name, dungeonId);
             break;
+        }
+        else if (instance->IsRaid())
+        {
+            // Obtain a improvised dungeon ID to get level requirements for guild challenge rewards and news entry.
+            for (LFGDungeonEntry const* dungeonEntry : sLFGDungeonStore)
+            {
+                uint8 difficulty = encounter->dbcEntry->DifficultyID != -1 ? encounter->dbcEntry->DifficultyID : instance->GetDifficulty();
+                if (dungeonEntry->MapID != int32(instance->GetId()) || dungeonEntry->DifficultyID != difficulty)
+                    continue;
+
+                dungeonId = dungeonEntry->ID;
+                break;
+            }
         }
     }
 
@@ -779,7 +796,7 @@ void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 credi
         }
 
         // Dungeon Reward handling
-        if (group->isLFGGroup() && !LFGRewarded && dungeonId)
+        if (group->isLFGGroup() && !LFGRewarded && dungeonId && isFinalEncounter)
         {
             sLFGMgr->FinishDungeon(group->GetGUID(), dungeonId, instance);
             LFGRewarded = true;
@@ -798,8 +815,14 @@ void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 credi
             continue;
 
         if (itr.second <= entry->Maxlevel)
+        {
             if (Player* player = playersByGuild[itr.first])
+            {
                 guild->CompleteChallenge(instance->IsNonRaidDungeon() ? GUILD_CHALLENGE_TYPE_DUNGEON : GUILD_CHALLENGE_TYPE_RAID, player);
+                if (instance->IsRaid())
+                    guild->AddGuildNews(GUILD_NEWS_DUNGEON_ENCOUNTER, ObjectGuid::Empty, 0, encounterId);
+            }
+        }
     }
 }
 
