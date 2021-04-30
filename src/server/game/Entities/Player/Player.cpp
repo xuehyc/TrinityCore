@@ -1204,8 +1204,14 @@ void Player::Update(uint32 p_time)
             m_zoneUpdateTimer -= p_time;
     }
 
+    // Power regeneration update
+    _powerUpdateTimer -= p_time;
     if (IsAlive())
         RegenerateAll(p_time);
+
+    // Reset the power update timer after regeneration happened
+    if (_powerUpdateTimer <= 0)
+        _powerUpdateTimer = GetPowerUpdateInterval();
 
     if (m_deathState == JUST_DIED)
         KillPlayer();
@@ -6779,7 +6785,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
 
     if (uint32(newTotalCount) != oldTotalCount)
     {
-        if (currency->Flags & CURRENCY_FLAG_COUNT_SEASON_TOTAL)
+        if (currency->Flags & CURRENCY_FLAG_COUNT_SEASON_TOTAL && !isRefund)
             hasSeasonCount = true;
 
         if (itr->second.state != PLAYERCURRENCY_NEW)
@@ -8554,11 +8560,11 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
     {
         SetLootGUID(guid);
 
-        WorldPacket data(SMSG_LOOT_RESPONSE, 8 + 1  + 50 + 1 + 1);           // we guess size
-        data << uint64(guid);
-        data << uint8(loot_type);
-        data << LootView(*loot, this, permission);
-        SendDirectMessage(&data);
+        WorldPackets::Loot::LootResponse packet;
+        packet.Owner = guid;
+        packet.AcquireReason = loot_type;
+        loot->BuildLootResponse(packet, this, permission);
+        SendDirectMessage(packet.Write());
 
         // add 'this' player as one of the players that are looting 'loot'
         loot->AddLooter(GetGUID());
@@ -8572,11 +8578,11 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
 
 void Player::SendLootError(ObjectGuid guid, LootError error) const
 {
-    WorldPacket data(SMSG_LOOT_RESPONSE, 10);
-    data << uint64(guid);
-    data << uint8(LOOT_NONE);
-    data << uint8(error);
-    SendDirectMessage(&data);
+    WorldPackets::Loot::LootResponse lootResponse;
+    lootResponse.Owner = guid;
+    lootResponse.AcquireReason = LOOT_NONE;
+    lootResponse.FailureReason = error;
+    SendDirectMessage(lootResponse.Write());
 }
 
 void Player::SendNotifyLootMoneyRemoved() const

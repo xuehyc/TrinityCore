@@ -25,6 +25,7 @@
 
 class ByteBuffer;
 class Item;
+struct LootItem;
 
 namespace WorldPackets
 {
@@ -33,10 +34,12 @@ namespace WorldPackets
         struct ItemInstance
         {
             void Initialize(::Item const* item);
+            void Initialize(::LootItem const& lootItem);
 
             uint32 ItemID = 0;
-            uint32 RandomPropertiesSeed = 0;
-            uint32 RandomPropertiesID = 0;
+            int32 ItemDisplayID = 0;
+            int32 RandomPropertiesSeed = 0;
+            int32 RandomPropertiesID = 0;
 
             bool operator==(ItemInstance const& r) const;
             bool operator!=(ItemInstance const& r) const { return !(*this == r); }
