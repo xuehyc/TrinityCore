@@ -406,7 +406,7 @@ bool Utf8ToUpperOnlyLatin(std::string& utf8String)
     return WStrToUtf8(wstr, utf8String);
 }
 
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
 bool ReadWinConsole(std::string& str, size_t size /*= 256*/)
 {
     wchar_t* commandbuf = new wchar_t[size + 1];
@@ -440,7 +440,7 @@ bool WriteWinConsole(std::string_view str, bool error /*= false*/)
 }
 #endif
 
-std::string Trinity::Impl::ByteArrayToHexStr(uint8 const* bytes, size_t arrayLen, bool reverse /* = false */)
+std::string Warhead::Impl::ByteArrayToHexStr(uint8 const* bytes, size_t arrayLen, bool reverse /* = false */)
 {
     int32 init = 0;
     int32 end = arrayLen;

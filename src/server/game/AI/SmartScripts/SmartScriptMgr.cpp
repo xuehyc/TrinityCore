@@ -137,7 +137,7 @@ void SmartAIMgr::LoadSmartAIFromDB()
         temp.entryOrGuid = fields[0].GetInt32();
         if (!temp.entryOrGuid)
         {
-            TC_LOG_ERROR("sql.sql", "SmartAIMgr::LoadSmartAIFromDB: invalid entryorguid (0), skipped loading.");
+            LOG_ERROR("sql.sql", "SmartAIMgr::LoadSmartAIFromDB: invalid entryorguid (0), skipped loading.");
             continue;
         }
 

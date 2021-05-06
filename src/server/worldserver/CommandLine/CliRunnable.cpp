@@ -77,7 +77,7 @@ namespace Warhead::Impl::Readline
 
 void utf8print(void* /*arg*/, std::string_view str)
 {
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
     WriteWinConsole(str);
 #else
 {
@@ -134,7 +134,7 @@ void CliThread()
 
         std::string command;
 
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
         if (!ReadWinConsole(command))
         {
             PrintCliPrefix();

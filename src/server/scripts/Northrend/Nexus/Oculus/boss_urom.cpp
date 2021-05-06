@@ -103,7 +103,7 @@ struct boss_urom : public BossAI
         for (uint8 i = 0; i < 3; ++i)
             _group.push_back(i);
 
-        Trinity::Containers::RandomShuffle(_group);
+        Warhead::Containers::RandomShuffle(_group);
     }
 
     void EnterEvadeMode(EvadeReason why) override

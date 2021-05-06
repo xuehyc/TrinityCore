@@ -152,13 +152,13 @@ struct boss_xevozz : public BossAI
 
             std::list<uint8> summonSpells = { 0, 1, 2 };
 
-            uint8 spell = Trinity::Containers::SelectRandomContainerElement(summonSpells);
+            uint8 spell = Warhead::Containers::SelectRandomContainerElement(summonSpells);
             DoCast(me, EtherealSphereSummonSpells[spell]);
             summonSpells.remove(spell);
 
             if (IsHeroic())
             {
-                spell = Trinity::Containers::SelectRandomContainerElement(summonSpells);
+                spell = Warhead::Containers::SelectRandomContainerElement(summonSpells);
                 task.Schedule(Milliseconds(2500), [this, spell](TaskContext /*task*/)
                 {
                     DoCast(me, EtherealSphereHeroicSummonSpells[spell]);

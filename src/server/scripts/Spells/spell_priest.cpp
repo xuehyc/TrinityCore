@@ -277,7 +277,7 @@ class spell_pri_circle_of_healing : public SpellScript
 
         if (targets.size() > maxTargets)
         {
-            targets.sort(Trinity::HealthPctOrderPred());
+            targets.sort(Warhead::HealthPctOrderPred());
             targets.resize(maxTargets);
         }
     }
@@ -344,7 +344,7 @@ class spell_pri_divine_hymn : public SpellScript
 
         if (targets.size() > maxTargets)
         {
-            targets.sort(Trinity::HealthPctOrderPred());
+            targets.sort(Warhead::HealthPctOrderPred());
             targets.resize(maxTargets);
         }
     }
@@ -478,7 +478,7 @@ class spell_pri_hymn_of_hope : public SpellScript
 
         if (targets.size() > maxTargets)
         {
-            targets.sort(Trinity::PowerPctOrderPred(POWER_MANA));
+            targets.sort(Warhead::PowerPctOrderPred(POWER_MANA));
             targets.resize(maxTargets);
         }
     }
@@ -726,7 +726,7 @@ class spell_pri_mind_sear : public SpellScript
 
     void FilterTargets(std::list<WorldObject*>& unitList)
     {
-        unitList.remove_if(Trinity::ObjectGUIDCheck(GetCaster()->GetChannelObjectGuid()));
+        unitList.remove_if(Warhead::ObjectGUIDCheck(GetCaster()->GetChannelObjectGuid()));
     }
 
     void Register() override
