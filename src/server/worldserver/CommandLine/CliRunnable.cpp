@@ -77,12 +77,8 @@ namespace Warhead::Impl::Readline
 
 void utf8print(void* /*arg*/, std::string_view str)
 {
-#if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
-    std::wstring wbuf;
-    if (!Utf8toWStr(str, wbuf))
-        return;
-
-    wprintf(L"%s", wbuf.c_str());
+#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+    WriteWinConsole(str);
 #else
 {
     printf(STRING_VIEW_FMT, STRING_VIEW_FMT_ARG(str));
@@ -138,15 +134,11 @@ void CliThread()
 
         std::string command;
 
-#if WARHEAD_PLATFORM == WARHEAD_PLATFORM_WINDOWS
-        wchar_t commandbuf[256];
-        if (fgetws(commandbuf, sizeof(commandbuf), stdin))
+#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+        if (!ReadWinConsole(command))
         {
-            if (!WStrToUtf8(commandbuf, wcslen(commandbuf), command))
-            {
-                PrintCliPrefix();
-                continue;
-            }
+            PrintCliPrefix();
+            continue;
         }
 #else
         char* command_str = readline(CLI_PREFIX);

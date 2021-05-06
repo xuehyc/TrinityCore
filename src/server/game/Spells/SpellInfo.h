@@ -533,6 +533,8 @@ class WH_GAME_API SpellInfo
 
         uint32 GetAllowedMechanicMask() const;
 
+        uint32 GetMechanicImmunityMask(Unit* caster) const;
+
     private:
         // loading helpers
         void _InitializeExplicitTargetMask();
