@@ -279,7 +279,9 @@ WH_COMMON_API bool ReadWinConsole(std::string& str, size_t size = 256);
 WH_COMMON_API bool WriteWinConsole(std::string_view str, bool error = false);
 #endif
 
-WH_COMMON_API bool IsIPAddress(char const* ipaddress);
+TC_COMMON_API Optional<std::size_t> RemoveCRLF(std::string& str);
+
+TC_COMMON_API bool IsIPAddress(char const* ipaddress);
 
 WH_COMMON_API uint32 CreatePIDFile(std::string const& filename);
 WH_COMMON_API uint32 GetPID();
