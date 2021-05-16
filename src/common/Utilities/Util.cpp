@@ -439,7 +439,7 @@ bool WriteWinConsole(std::string_view str, bool error /*= false*/)
 }
 #endif
 
-TC_COMMON_API Optional<std::size_t> RemoveCRLF(std::string & str)
+WH_COMMON_API Optional<std::size_t> RemoveCRLF(std::string & str)
 {
     std::size_t nextLineIndex = str.find_first_of("\r\n");
     if (nextLineIndex == std::string::npos)
@@ -449,7 +449,7 @@ TC_COMMON_API Optional<std::size_t> RemoveCRLF(std::string & str)
     return nextLineIndex;
 }
 
-std::string Trinity::Impl::ByteArrayToHexStr(uint8 const* bytes, size_t arrayLen, bool reverse /* = false */)
+std::string Warhead::Impl::ByteArrayToHexStr(uint8 const* bytes, size_t arrayLen, bool reverse /* = false */)
 {
     int32 init = 0;
     int32 end = arrayLen;

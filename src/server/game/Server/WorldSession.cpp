@@ -1678,7 +1678,7 @@ bool WorldSession::IsRightUnitBeingMoved(ObjectGuid guid)
     // the client is attempting to tamper movement data
     if (!client->GetActivelyMovedUnit() || client->GetActivelyMovedUnit()->GetGUID() != guid)
     {
-        TC_LOG_INFO("entities.unit", "Attempt at tampering movement data by Player %s", _player->GetName().c_str());
+        LOG_INFO("entities.unit", "Attempt at tampering movement data by Player %s", _player->GetName().c_str());
         return false;
     }
 
@@ -1687,7 +1687,7 @@ bool WorldSession::IsRightUnitBeingMoved(ObjectGuid guid)
     // as control over that unit is revoked (through a 'SMSG_CONTROL_UPDATE allowMove=false' message).
     if (!client->IsAllowedToMove(guid))
     {
-        TC_LOG_DEBUG("entities.unit", "Bad or outdated movement data by Player %s", _player->GetName().c_str());
+        LOG_DEBUG("entities.unit", "Bad or outdated movement data by Player %s", _player->GetName().c_str());
         return false;
     }
 

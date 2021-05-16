@@ -511,13 +511,13 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
     {
         if (mover->GetSpeed(move_type) > newspeed)         // must be greater - just correct
         {
-            TC_LOG_ERROR("network", "%sSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value",
+            LOG_ERROR("network", "%sSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value",
                 move_type_name[move_type], _player->GetName().c_str(), mover->GetSpeed(move_type), newspeed);
             mover->SetSpeedRate(move_type, mover->GetSpeedRate(move_type));
         }
         else                                                // must be lesser - cheating
         {
-            TC_LOG_DEBUG("misc", "Player %s from account id %u kicked for incorrect speed (must be %f instead %f)",
+            LOG_DEBUG("misc", "Player %s from account id %u kicked for incorrect speed (must be %f instead %f)",
                 _player->GetName().c_str(), _player->GetSession()->GetAccountId(), mover->GetSpeed(move_type), newspeed);
             _player->GetSession()->KickPlayer("WorldSession::HandleForceSpeedChangeAck Incorrect speed");
         }
@@ -538,12 +538,12 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recvData)
     if (!client->IsAllowedToMove(guid))
     {
         // @todo log or kick or do nothing depending on configuration
-        TC_LOG_DEBUG("entities.unit", "set active mover FAILED for client of player %s. GUID %s.", _player->GetName().c_str(), guid.ToString().c_str());
+        LOG_DEBUG("entities.unit", "set active mover FAILED for client of player %s. GUID %s.", _player->GetName().c_str(), guid.ToString().c_str());
         return;
     }
 
     // step 2:
-    TC_LOG_DEBUG("entities.unit", "set active mover OK for client of player %s. GUID %s.", _player->GetName().c_str(), guid.ToString().c_str());
+    LOG_DEBUG("entities.unit", "set active mover OK for client of player %s. GUID %s.", _player->GetName().c_str(), guid.ToString().c_str());
     Unit* newActivelyMovedUnit = ObjectAccessor::GetUnit(*_player, guid);
     client->SetActivelyMovedUnit(newActivelyMovedUnit);
 }
@@ -562,11 +562,11 @@ void WorldSession::HandleMoveNotActiveMover(WorldPacket &recvData)
     if (client->GetActivelyMovedUnit() == nullptr || client->GetActivelyMovedUnit()->GetGUID() != old_mover_guid)
     {
         // this shouldn't never happen in theory
-        TC_LOG_WARN("entities.unit", "unset active mover FAILED for client of player %s. GUID %s.", _player->GetName().c_str(), old_mover_guid.ToString().c_str());
+        LOG_WARN("entities.unit", "unset active mover FAILED for client of player %s. GUID %s.", _player->GetName().c_str(), old_mover_guid.ToString().c_str());
         return;
     }
 
-    TC_LOG_DEBUG("entities.unit", "unset active mover OK for client of player %s. GUID %s.", _player->GetName().c_str(), old_mover_guid.ToString().c_str());
+    LOG_DEBUG("entities.unit", "unset active mover OK for client of player %s. GUID %s.", _player->GetName().c_str(), old_mover_guid.ToString().c_str());
     client->SetActivelyMovedUnit(nullptr);
 }
 
@@ -658,7 +658,7 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recvData)
 
 void WorldSession::HandleMoveRootAck(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "CMSG_FORCE_MOVE_ROOT_ACK");
+    LOG_DEBUG("network", "CMSG_FORCE_MOVE_ROOT_ACK");
 
     ObjectGuid guid;                                        // guid - unused
     recvData >> guid.ReadAsPacked();
@@ -677,7 +677,7 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recvData)
 
 void WorldSession::HandleFeatherFallAck(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: CMSG_MOVE_FEATHER_FALL_ACK");
+    LOG_DEBUG("network", "WORLD: CMSG_MOVE_FEATHER_FALL_ACK");
 
     ObjectGuid guid;                                        // guid - unused
     recvData >> guid.ReadAsPacked();
@@ -698,7 +698,7 @@ void WorldSession::HandleFeatherFallAck(WorldPacket& recvData)
 
 void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK");
+    LOG_DEBUG("network", "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK");
 
     ObjectGuid guid;                                        // guid - unused
     recvData >> guid.ReadAsPacked();
@@ -717,7 +717,7 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
 
 void WorldSession::HandleMoveSetCanFlyAckOpcode(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: CMSG_MOVE_SET_CAN_FLY_ACK");
+    LOG_DEBUG("network", "WORLD: CMSG_MOVE_SET_CAN_FLY_ACK");
 
     ObjectGuid guid;                                        // guid - unused
     recvData >> guid.ReadAsPacked();
@@ -738,7 +738,7 @@ void WorldSession::HandleMoveSetCanFlyAckOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleMoveSetCanTransitionBetweenSwinAndFlyAck(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK");
+    LOG_DEBUG("network", "WORLD: CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK");
 
     ObjectGuid guid;
     recvData >> guid.ReadAsPacked();
@@ -759,7 +759,7 @@ void WorldSession::HandleMoveSetCanTransitionBetweenSwinAndFlyAck(WorldPacket& r
 
 void WorldSession::HandleMoveGravityDisableAck(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: CMSG_MOVE_GRAVITY_DISABLE_ACK");
+    LOG_DEBUG("network", "WORLD: CMSG_MOVE_GRAVITY_DISABLE_ACK");
 
     ObjectGuid guid;
     recvData >> guid.ReadAsPacked();
@@ -778,7 +778,7 @@ void WorldSession::HandleMoveGravityDisableAck(WorldPacket& recvData)
 
 void WorldSession::HandleMoveGravityEnableAck(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: CMSG_MOVE_GRAVITY_ENABLE_ACK");
+    LOG_DEBUG("network", "WORLD: CMSG_MOVE_GRAVITY_ENABLE_ACK");
 
     ObjectGuid guid;
     recvData >> guid.ReadAsPacked();
@@ -797,7 +797,7 @@ void WorldSession::HandleMoveGravityEnableAck(WorldPacket& recvData)
 
 void WorldSession::HandleMoveSetCollisionHgtAck(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: CMSG_MOVE_SET_COLLISION_HGT_ACK");
+    LOG_DEBUG("network", "WORLD: CMSG_MOVE_SET_COLLISION_HGT_ACK");
 
     ObjectGuid guid;
     float  newValue;
