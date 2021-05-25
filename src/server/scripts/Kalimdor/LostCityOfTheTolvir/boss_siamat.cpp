@@ -202,6 +202,7 @@ struct boss_siamat : public BossAI
                 }, 2s);
                 break;
             default:
+                summons.Summon(summon);
                 break;
         }
     }
