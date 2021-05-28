@@ -33,7 +33,9 @@ public:
         std::string pRace;
         std::string pClass;
         std::ostringstream message;
-
+        time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        std::tm aTm;
+        localtime_r(&tt, &aTm);
 
         if (!sConfigMgr->GetBoolDefault("Who-logged.console", true))
         {
@@ -117,7 +119,8 @@ public:
             break;
         }
 
-        printf("Player '%s' has logged in : Level '%u' : Race '%s' : Class '%s' : IP '%s' : AccountID '%u'", playerName.c_str(), pLevel, pRace.c_str(), pClass.c_str(), playerIP.c_str(), pAccountID);
+        TC_LOG_INFO("chat.log.system", "%04d-%02d-%02d %02d:%02d:%02d Player '%s' has logged in : Level '%u' : Race '%s' : Class '%s' : IP '%s' : AccountID '%u'",
+            aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, playerName.c_str(), pLevel, pRace.c_str(), pClass.c_str(), playerIP.c_str(), pAccountID);
     }
 };
 

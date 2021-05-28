@@ -37,17 +37,17 @@ class ChatLogScript : public PlayerScript
             switch (type)
             {
                 case CHAT_MSG_SAY:
-                    TC_LOG_INFO("chat.log.say", "%04d-%02d-%02d_%02d:%02d:%02d Player %s says (language %u): %s",
+                    TC_LOG_INFO("chat.log.say", "%04d-%02d-%02d %02d:%02d:%02d Player %s says (language %u): %s",
                         aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), lang, msg.c_str());
                     break;
 
                 case CHAT_MSG_EMOTE:
-                    TC_LOG_INFO("chat.log.emote", "%04d-%02d-%02d_%02d:%02d:%02d Player %s emotes: %s",
+                    TC_LOG_INFO("chat.log.emote", "%04d-%02d-%02d %02d:%02d:%02d Player %s emotes: %s",
                         aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), msg.c_str());
                     break;
 
                 case CHAT_MSG_YELL:
-                    TC_LOG_INFO("chat.log.yell", "%04d-%02d-%02d_%02d:%02d:%02d Player %s yells (language %u): %s",
+                    TC_LOG_INFO("chat.log.yell", "%04d-%02d-%02d %02d:%02d:%02d Player %s yells (language %u): %s",
                         aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), lang, msg.c_str());
                     break;
             }
@@ -61,10 +61,10 @@ class ChatLogScript : public PlayerScript
             localtime_r(&tt, &aTm);
 
             if (lang != LANG_ADDON)
-                TC_LOG_INFO("chat.log.whisper", "%04d-%02d-%02d_%02d:%02d:%02d Player %s tells %s: %s",
+                TC_LOG_INFO("chat.log.whisper", "%04d-%02d-%02d %02d:%02d:%02d Player %s tells %s: %s",
                     aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), receiver ? receiver->GetName().c_str() : "<unknown>", msg.c_str());
             else
-                TC_LOG_INFO("chat.log.addon.whisper", "%04d-%02d-%02d_%02d:%02d:%02d Player %s tells %s: %s",
+                TC_LOG_INFO("chat.log.addon.whisper", "%04d-%02d-%02d %02d:%02d:%02d Player %s tells %s: %s",
                     aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), receiver ? receiver->GetName().c_str() : "<unknown>", msg.c_str());
         }
 
@@ -80,48 +80,48 @@ class ChatLogScript : public PlayerScript
             {
                 case CHAT_MSG_PARTY:
                     if (lang != LANG_ADDON)
-                        TC_LOG_INFO("chat.log.party", "%04d-%02d-%02d_%02d:%02d:%02d Player %s tells group with leader %s: %s",
+                        TC_LOG_INFO("chat.log.party", "%04d-%02d-%02d %02d:%02d:%02d Player %s tells group with leader %s: %s",
                             aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), group ? group->GetLeaderName() : "<unknown>", msg.c_str());
                     else
-                        TC_LOG_INFO("chat.log.addon.party", "%04d-%02d-%02d_%02d:%02d:%02d Player %s tells group with leader %s: %s",
+                        TC_LOG_INFO("chat.log.addon.party", "%04d-%02d-%02d %02d:%02d:%02d Player %s tells group with leader %s: %s",
                             aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), group ? group->GetLeaderName() : "<unknown>", msg.c_str());
                     break;
 
                 case CHAT_MSG_PARTY_LEADER:
-                    TC_LOG_INFO("chat.log.party", "%04d-%02d-%02d_%02d:%02d:%02d Leader %s tells group: %s",
+                    TC_LOG_INFO("chat.log.party", "%04d-%02d-%02d %02d:%02d:%02d Leader %s tells group: %s",
                         aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), msg.c_str());
                     break;
 
                 case CHAT_MSG_RAID:
                     if (lang != LANG_ADDON)
-                        TC_LOG_INFO("chat.log.raid", "%04d-%02d-%02d_%02d:%02d:%02d Player %s tells raid with leader %s: %s",
+                        TC_LOG_INFO("chat.log.raid", "%04d-%02d-%02d %02d:%02d:%02d Player %s tells raid with leader %s: %s",
                             aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), group ? group->GetLeaderName() : "<unknown>", msg.c_str());
                     else
-                        TC_LOG_INFO("chat.log.addon.raid", "%04d-%02d-%02d_%02d:%02d:%02d Player %s tells raid with leader %s: %s",
+                        TC_LOG_INFO("chat.log.addon.raid", "%04d-%02d-%02d %02d:%02d:%02d Player %s tells raid with leader %s: %s",
                             aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), group ? group->GetLeaderName() : "<unknown>", msg.c_str());
                     break;
 
                 case CHAT_MSG_RAID_LEADER:
-                    TC_LOG_INFO("chat.log.raid", "%04d-%02d-%02d_%02d:%02d:%02d Leader player %s tells raid: %s",
+                    TC_LOG_INFO("chat.log.raid", "%04d-%02d-%02d %02d:%02d:%02d Leader player %s tells raid: %s",
                         aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), msg.c_str());
                     break;
 
                 case CHAT_MSG_RAID_WARNING:
-                    TC_LOG_INFO("chat.log.raid", "%04d-%02d-%02d_%02d:%02d:%02d Leader player %s warns raid with: %s",
+                    TC_LOG_INFO("chat.log.raid", "%04d-%02d-%02d %02d:%02d:%02d Leader player %s warns raid with: %s",
                         aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), msg.c_str());
                     break;
 
                 case CHAT_MSG_BATTLEGROUND:
                     if (lang != LANG_ADDON)
-                        TC_LOG_INFO("chat.log.bg", "%04d-%02d-%02d_%02d:%02d:%02d Player %s tells battleground with leader %s: %s",
+                        TC_LOG_INFO("chat.log.bg", "%04d-%02d-%02d %02d:%02d:%02d Player %s tells battleground with leader %s: %s",
                             aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), group ? group->GetLeaderName() : "<unknown>", msg.c_str());
                     else
-                        TC_LOG_INFO("chat.log.addon.bg", "%04d-%02d-%02d_%02d:%02d:%02d Player %s tells battleground with leader %s: %s",
+                        TC_LOG_INFO("chat.log.addon.bg", "%04d-%02d-%02d %02d:%02d:%02d Player %s tells battleground with leader %s: %s",
                             aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), group ? group->GetLeaderName() : "<unknown>", msg.c_str());
                     break;
 
                 case CHAT_MSG_BATTLEGROUND_LEADER:
-                    TC_LOG_INFO("chat.log.bg", "%04d-%02d-%02d_%02d:%02d:%02d Leader player %s tells battleground: %s",
+                    TC_LOG_INFO("chat.log.bg", "%04d-%02d-%02d %02d:%02d:%02d Leader player %s tells battleground: %s",
                         aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), msg.c_str());
                     break;
             }
@@ -138,15 +138,15 @@ class ChatLogScript : public PlayerScript
             {
                 case CHAT_MSG_GUILD:
                     if (lang != LANG_ADDON)
-                        TC_LOG_INFO("chat.log.guild", "%04d-%02d-%02d_%02d:%02d:%02d Player %s tells guild %s: %s",
+                        TC_LOG_INFO("chat.log.guild", "%04d-%02d-%02d %02d:%02d:%02d Player %s tells guild %s: %s",
                             aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), guild ? guild->GetName().c_str() : "<unknown>", msg.c_str());
                     else
-                        TC_LOG_INFO("chat.log.addon.guild", "%04d-%02d-%02d_%02d:%02d:%02d Player %s sends to guild %s: %s",
+                        TC_LOG_INFO("chat.log.addon.guild", "%04d-%02d-%02d %02d:%02d:%02d Player %s sends to guild %s: %s",
                             aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), guild ? guild->GetName().c_str() : "<unknown>", msg.c_str());
                     break;
 
                 case CHAT_MSG_OFFICER:
-                    TC_LOG_INFO("chat.log.guild.officer", "%04d-%02d-%02d_%02d:%02d:%02d Player %s tells guild %s officers: %s",
+                    TC_LOG_INFO("chat.log.guild.officer", "%04d-%02d-%02d %02d:%02d:%02d Player %s tells guild %s officers: %s",
                         aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), guild ? guild->GetName().c_str() : "<unknown>", msg.c_str());
                     break;
             }
@@ -166,12 +166,12 @@ class ChatLogScript : public PlayerScript
                              channel->HasFlag(CHANNEL_FLAG_LFG));
 
             if (isSystem)
-                TC_LOG_INFO("chat.log.system", "%04d-%02d-%02d_%02d:%02d:%02d Player %s tells channel %s: %s",
+                TC_LOG_INFO("chat.log.system", "%04d-%02d-%02d %02d:%02d:%02d Player %s tells channel %s: %s",
                     aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), channel->GetName().c_str(), msg.c_str());
             else
             {
                 std::string channelName = channel ? channel->GetName() : "<unknown>";
-                TC_LOG_INFO("chat.log.channel." + channelName, "%04d-%02d-%02d_%02d:%02d:%02d Player %s tells channel %s: %s",
+                TC_LOG_INFO("chat.log.channel." + channelName, "%04d-%02d-%02d %02d:%02d:%02d Player %s tells channel %s: %s",
                     aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec, player->GetName().c_str(), channelName.c_str(), msg.c_str());
             }
         }
