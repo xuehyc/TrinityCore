@@ -20,6 +20,7 @@
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
+void AddSC_FireWorksOnLevelUp();
 void AddSolocraftScripts();
 void AddSC_skip_StarterArea();
 void AddSC_start_equipment();
@@ -39,6 +40,7 @@ void AddSC_announce_login();
 
 void AddCustomScripts()
 {
+    AddSC_FireWorksOnLevelUp();
 	AddSolocraftScripts();
 	AddSC_skip_StarterArea();
     AddSC_start_equipment();
