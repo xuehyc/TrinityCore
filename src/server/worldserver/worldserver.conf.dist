@@ -5448,7 +5448,7 @@ Custom.AttackSpeedForMobs = 1.0
 ###################################################################################################
 #
 #     FireWorksOnLevelUp
-#        Description: Players shoot a firework when reach level 110.
+#        Description: Players shoot a firework when reach level as defined in the src.
 #        Default:     0 (disabled)
 #                     1 (enabled)
 
