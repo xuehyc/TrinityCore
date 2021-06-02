@@ -462,7 +462,7 @@ private:
                     //Buff Spellpower
                     if (difficulty > 0) //Debuffed characters do not get spellpower
                     {
-                        SpellPowerBonus = static_cast<int>((player->GetLevel() * SoloCraftSpellMult) * difficulty);//Yes, I pulled this calc out of my butt.
+                        SpellPowerBonus = static_cast<int>((player->getLevel() * SoloCraftSpellMult) * difficulty);//Yes, I pulled this calc out of my butt.
                         player->ApplySpellPowerBonus(SpellPowerBonus, true);
                         //sLog->outError("%u: spellpower Bonus applied: %i", player->GetGUID(), SpellPowerBonus);
                     }
