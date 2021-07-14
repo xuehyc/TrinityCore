@@ -54,7 +54,6 @@ struct AuctionEntry;
 struct DeclinedName;
 struct ItemTemplate;
 struct MovementInfo;
-struct TradeStatusInfo;
 
 namespace lfg
 {
@@ -143,6 +142,12 @@ namespace WorldPackets
         class SetGuildMaster;
     }
 
+    namespace Inspect
+    {
+        class RequestHonorStats;
+        class RequestInspectRatedBgStats;
+    }
+
     namespace Misc
     {
         class CompleteCinematic;
@@ -201,6 +206,21 @@ namespace WorldPackets
         class CancelQueuedSpell;
         class UseItem;
         class UpdateMissileTrajectory;
+    }
+
+    namespace Trade
+    {
+        class AcceptTrade;
+        class BeginTrade;
+        class BusyTrade;
+        class CancelTrade;
+        class ClearTradeItem;
+        class IgnoreTrade;
+        class InitiateTrade;
+        class SetTradeGold;
+        class SetTradeItem;
+        class TradeStatus;
+        class UnacceptTrade;
     }
 
     namespace Who
@@ -507,7 +527,7 @@ class TC_GAME_API WorldSession
 
         void SendAttackStop(Unit const* enemy);
 
-        void SendTradeStatus(TradeStatusInfo const& status);
+        void SendTradeStatus(WorldPackets::Trade::TradeStatus& info);
         void SendUpdateTrade(bool trader_data = true);
         void SendCancelTrade();
 
@@ -657,7 +677,9 @@ class TC_GAME_API WorldSession
         void HandleInspectOpcode(WorldPacket& recvPacket);
 
         // new party stats
-        void HandleInspectHonorStatsOpcode(WorldPacket& recvPacket);
+        void HandleRequestHonorStatsOpcode(WorldPackets::Inspect::RequestHonorStats& packet);
+        void HandleRequestInspectRatedBgStatsOpcode(WorldPackets::Inspect::RequestInspectRatedBgStats& packet);
+
 
         void HandleMoveWaterWalkAck(WorldPacket& recvPacket);
         void HandleFeatherFallAck(WorldPacket& recvData);
@@ -870,16 +892,16 @@ class TC_GAME_API WorldSession
         void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
         void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
 
-        void HandleAcceptTradeOpcode(WorldPacket& recvPacket);
-        void HandleBeginTradeOpcode(WorldPacket& recvPacket);
-        void HandleBusyTradeOpcode(WorldPacket& recvPacket);
-        void HandleCancelTradeOpcode(WorldPacket& recvPacket);
-        void HandleClearTradeItemOpcode(WorldPacket& recvPacket);
-        void HandleIgnoreTradeOpcode(WorldPacket& recvPacket);
-        void HandleInitiateTradeOpcode(WorldPacket& recvPacket);
-        void HandleSetTradeGoldOpcode(WorldPacket& recvPacket);
-        void HandleSetTradeItemOpcode(WorldPacket& recvPacket);
-        void HandleUnacceptTradeOpcode(WorldPacket& recvPacket);
+        void HandleAcceptTradeOpcode(WorldPackets::Trade::AcceptTrade& packet);
+        void HandleBeginTradeOpcode(WorldPackets::Trade::BeginTrade& packet);
+        void HandleBusyTradeOpcode(WorldPackets::Trade::BusyTrade& packet);
+        void HandleCancelTradeOpcode(WorldPackets::Trade::CancelTrade& packet);
+        void HandleClearTradeItemOpcode(WorldPackets::Trade::ClearTradeItem& packet);
+        void HandleIgnoreTradeOpcode(WorldPackets::Trade::IgnoreTrade& packet);
+        void HandleInitiateTradeOpcode(WorldPackets::Trade::InitiateTrade& packet);
+        void HandleSetTradeGoldOpcode(WorldPackets::Trade::SetTradeGold& packet);
+        void HandleSetTradeItemOpcode(WorldPackets::Trade::SetTradeItem& packet);
+        void HandleUnacceptTradeOpcode(WorldPackets::Trade::UnacceptTrade& packet);
 
         void HandleAuctionHelloOpcode(WorldPacket& recvPacket);
         void HandleAuctionListItems(WorldPacket& recvData);
