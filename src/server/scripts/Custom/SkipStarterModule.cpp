@@ -191,46 +191,6 @@ public:
     }
 };
 
-class spp_skip_worgen : public PlayerScript
-{
-public:
-    spp_skip_worgen() : PlayerScript("spp_skip_worgen") { }
-
-    void OnLogin(Player* Player, bool firstLogin) override
-    {
-        int WGL = sConfigMgr->GetFloatDefault("Skip.Worgen.Start.Level", 18);
-
-        if (sConfigMgr->GetBoolDefault("Skip.Worgen.Starter.Enable", true))
-        {
-            if (Player->GetMapId() == 654)
-            {
-                if (!firstLogin)
-                    return;
-                Player->LearnSpell(72792, false); // Learn Racials
-                Player->LearnSpell(72857, false); // Learn Two Forms
-                Player->LearnSpell(95759, false); // Learn Darkflight
-                Player->TeleportTo(1, 8181.060059f, 999.103027f, 7.253240f, 6.174160f);
-                Player->SetLevel(WGL);
-                ObjectAccessor::SaveAllPlayers();
-            }
-        }
-
-        if (sConfigMgr->GetBoolDefault("GM.Skip.Worgen.Starter.Enable", true))
-        {
-            if (Player->GetSession()->GetSecurity() >= SEC_MODERATOR && Player->GetMapId() == 654)
-            {
-                if (!firstLogin)
-                    return;
-                Player->LearnSpell(72792, false); // Learn Racials
-                Player->LearnSpell(72857, false); // Learn Two Forms
-                Player->LearnSpell(95759, false); // Learn Darkflight
-                Player->TeleportTo(1, 8181.060059f, 999.103027f, 7.253240f, 6.174160f);
-                Player->SetLevel(WGL);
-                ObjectAccessor::SaveAllPlayers();
-            }
-        }
-    }
-};
 
 class spp_skip_goblin : public PlayerScript
 {
@@ -269,6 +229,47 @@ public:
                 {
                     Player->AddQuest(sObjectMgr->GetQuestTemplate(25267), NULL);
                 }
+                ObjectAccessor::SaveAllPlayers();
+            }
+        }
+    }
+};
+
+class spp_skip_worgen : public PlayerScript
+{
+public:
+    spp_skip_worgen() : PlayerScript("spp_skip_worgen") { }
+
+    void OnLogin(Player* Player, bool firstLogin) override
+    {
+        int WGL = sConfigMgr->GetFloatDefault("Skip.Worgen.Start.Level", 18);
+
+        if (sConfigMgr->GetBoolDefault("Skip.Worgen.Starter.Enable", true))
+        {
+            if (Player->GetMapId() == 654)
+            {
+                if (!firstLogin)
+                    return;
+                Player->LearnSpell(72792, false); // Learn Racials
+                Player->LearnSpell(72857, false); // Learn Two Forms
+                Player->LearnSpell(95759, false); // Learn Darkflight
+                Player->TeleportTo(1, 8181.060059f, 999.103027f, 7.253240f, 6.174160f);
+                Player->SetLevel(WGL);
+                ObjectAccessor::SaveAllPlayers();
+            }
+        }
+
+        if (sConfigMgr->GetBoolDefault("GM.Skip.Worgen.Starter.Enable", true))
+        {
+            if (Player->GetSession()->GetSecurity() >= SEC_MODERATOR && Player->GetMapId() == 654)
+            {
+                if (!firstLogin)
+                    return;
+                Player->LearnSpell(72792, false); // Learn Racials
+                Player->LearnSpell(72857, false); // Learn Two Forms
+                Player->LearnSpell(95759, false); // Learn Darkflight
+                Player->TeleportTo(1, 8181.060059f, 999.103027f, 7.253240f, 6.174160f);
+                Player->SetLevel(WGL);
                 ObjectAccessor::SaveAllPlayers();
             }
         }
@@ -551,6 +552,122 @@ public:
     }
 };
 
+#define LOCALE_WORSKIP_0 "I wish to skip the Worgen starter questline."
+#define LOCALE_WORSKIP_1 "늑대인간 스타터 퀘스트 라인을 건너뛰고 싶습니다."
+#define LOCALE_WORSKIP_2 "Je souhaite sauter la série de quêtes de démarrage Worgen."
+#define LOCALE_WORSKIP_3 "Ich möchte die Worgen-Starter-Questreihe überspringen."
+#define LOCALE_WORSKIP_4 "我想跳過狼人新手任務線。"
+#define LOCALE_WORSKIP_5 "我想跳過狼人新手任務線。"
+#define LOCALE_WORSKIP_6 "Deseo omitir la línea de misiones de inicio de los huargen."
+#define LOCALE_WORSKIP_7 "Deseo omitir la línea de misiones de inicio de los huargen."
+#define LOCALE_WORSKIP_8 "Я хочу пропустить начальную цепочку заданий воргенов."
+
+class spp_optional_worgen_skip : public CreatureScript
+{
+public:
+    spp_optional_worgen_skip() : CreatureScript("npc_tc_skip_worg") { }
+
+    struct npc_SkipWorgAI : public ScriptedAI
+    {
+        npc_SkipWorgAI(Creature* creature) : ScriptedAI(creature) { }
+
+        bool GossipHello(Player* player) override
+        {
+            if (player->IsInCombat())
+            {
+                ClearGossipMenuFor(player);
+                ChatHandler(player->GetSession()).PSendSysMessage("You are still in combat!");
+                return true;
+            }
+            else
+            {
+                return OnGossipHello(player, me);
+            }
+        }
+
+        bool GossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
+        {
+            uint32 const sender = player->PlayerTalkClass->GetGossipOptionSender(gossipListId);
+            uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
+            return OnGossipSelect(player, me, sender, action);
+        }
+
+        static bool OnGossipHello(Player* player, Creature* me)
+        {
+            if (me->IsQuestGiver())
+                player->PrepareQuestMenu(me->GetGUID());
+
+            if (sConfigMgr->GetBoolDefault("Skip.Worgen.Optional.Enable", true))
+            {
+                char const* localizedEntry;
+                switch (player->GetSession()->GetSessionDbcLocale())
+                {
+                case LOCALE_koKR: localizedEntry = LOCALE_WORSKIP_1; break;
+                case LOCALE_frFR: localizedEntry = LOCALE_WORSKIP_2; break;
+                case LOCALE_deDE: localizedEntry = LOCALE_WORSKIP_3; break;
+                case LOCALE_zhCN: localizedEntry = LOCALE_WORSKIP_4; break;
+                case LOCALE_zhTW: localizedEntry = LOCALE_WORSKIP_5; break;
+                case LOCALE_esES: localizedEntry = LOCALE_WORSKIP_6; break;
+                case LOCALE_esMX: localizedEntry = LOCALE_WORSKIP_7; break;
+                case LOCALE_ruRU: localizedEntry = LOCALE_WORSKIP_8; break;
+                case LOCALE_enUS: default: localizedEntry = LOCALE_WORSKIP_0;
+                }
+                player->PrepareQuestMenu(me->GetGUID());
+                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, localizedEntry, GOSSIP_SENDER_MAIN, 31);
+            }
+
+            player->TalkedToCreature(me->GetEntry(), me->GetGUID());
+            SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
+            return true;
+        }
+
+        bool OnGossipSelect(Player* player, Creature* _creature, uint32 /*sender*/, uint32 gossipListId)
+        {
+            int WGL = sConfigMgr->GetFloatDefault("Skip.Worgen.Start.Level", 16);
+            ClearGossipMenuFor(player);
+
+            switch (gossipListId)
+            {
+            case 31:
+                if (player)
+                {
+                    AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Yes", GOSSIP_SENDER_MAIN, 32);
+                    AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "No", GOSSIP_SENDER_MAIN, 33);
+                    SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
+                }
+                break;
+
+            case 32:
+                if (player->getLevel() <= WGL)
+                {
+                    player->SetLevel(WGL);
+                }
+                player->LearnSpell(72792, false); // Learn Racials
+                player->LearnSpell(72857, false); // Learn Two Forms
+                player->LearnSpell(95759, false); // Learn Darkflight
+                player->TeleportTo(1, 8181.060059f, 999.103027f, 7.253240f, 6.174160f);
+                player->SetLevel(WGL);
+                ObjectAccessor::SaveAllPlayers();// Save
+                CloseGossipMenuFor(player);
+                break;
+
+            case 33://close
+                CloseGossipMenuFor(player);
+                break;
+
+            default:
+
+                break;
+            }
+            return true;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_SkipWorgAI(creature);
+    }
+};
 void AddSC_skip_StarterArea()
 {
     new SPP_skip_deathknight_announce;
@@ -561,4 +678,5 @@ void AddSC_skip_StarterArea()
     new spp_skip_worgen;
     new spp_optional_deathknight_skip;
     new spp_optional_goblin_skip();
+    new spp_optional_worgen_skip();
 }
