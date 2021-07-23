@@ -4721,17 +4721,17 @@ Skip.Deathknight.Optional.Enable = 1
 #         Default:    0 - (Disabled)
 #                     1 - (Enabled)
 
-Skip.Goblin.Starter.Announce.enable = 0
+Skip.Goblin.Starter.Announce.enable = 1
 
 #    Skip.Goblin.Enable
-#         Active Module for all new accounts regardless of account level.
+#         Active Module for all new accounts regardless of account level. Instant Skip on Goblin Creation.
 #         Default:    0 - (Disabled)
 #                     1 - (Enabled)
 
 Skip.Goblin.Starter.Enable = 0
 
 #    GM.Skip.Goblin.Starter.Enable
-#         Active Module for all new accounts of a GM account level ONLY.
+#         Active Module for all new accounts of a GM account level ONLY. Instant Skip on Goblin Creation.
 #         Ensure you have Skip.Goblin.Starter.Enable set to 0 if using this conf.
 #         Default:    0 - (Disabled)
 #                     1 - (Enabled)
@@ -4739,11 +4739,17 @@ Skip.Goblin.Starter.Enable = 0
 GM.Skip.Goblin.Starter.Enable = 0
 
 #    Skip.Goblin.Start.Level
-#         Adjusted Goblin Start Level if module is used.
+#         Adjusted Goblin Start Level if module is used. 
 #         Default:    16 - (Default)
 #
 
 Skip.Goblin.Start.Level = 16
+
+#    Skip.Goblin.Optional.Enable
+#    Enables optional to skip when talking to Sassy Hardwrench on first creation of Goblin.
+#    Default: 1 - (Active)
+
+Skip.Goblin.Optional.Enable = 1
 
 #
 ###################################################################################################
