@@ -37,7 +37,7 @@ public:
                 day == boost::date_time::Saturday ||
                 day == boost::date_time::Sunday) {
 
-                ChatHandler(player->GetSession()).PSendSysMessage("Double XP Weekend is going on now!");
+                ChatHandler(player->GetSession()).PSendSysMessage("|cff00ffffDouble XP Weekend is going on now!|");
             }
         }
     }

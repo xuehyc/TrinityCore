@@ -213,7 +213,7 @@ public:
     {
         if (sConfigMgr->GetBoolDefault("AutoBalanceAnnounce.enable", true))
         {
-            ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00SPP Cata AutoBalance |rmodule.");
+            ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cffff00ffSPP Cata AutoBalance |rmodule.");
         }
 
     }

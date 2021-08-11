@@ -25,7 +25,7 @@ public:
         // Announce Module
         if (sConfigMgr->GetBoolDefault("SoloLFG.Announce", true))
         {
-            ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00SPP Cata LFG Solo Dungeon Finder|r.");
+            ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cFFB0C4DESPP Cata LFG Solo Dungeon Finder|r.");
         }
     }
 };

@@ -42,7 +42,7 @@ public:
     {
         if (sConfigMgr->GetBoolDefault("SPPCATA.Racial.Trait.Swap.Announce.enable", true))
         {
-            ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00SPP Cata Racial Trait Swap NPC |rmodule.");
+            ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cFF90EE90SPP Cata Racial Trait Swap NPC |rmodule.");
         }
     }
 };

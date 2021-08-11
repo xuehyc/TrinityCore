@@ -21,7 +21,7 @@ public:
         {
             if (sConfigMgr->GetBoolDefault("Save.On.LevelUp.Announcer", true))
             {
-                ChatHandler(player->GetSession()).SendSysMessage("Characters saved on the server.");
+                ChatHandler(player->GetSession()).SendSysMessage("|cFF008000Characters saved on the server.|");
             }
 
             ObjectAccessor::SaveAllPlayers();
