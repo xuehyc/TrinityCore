@@ -49,7 +49,7 @@ class SolocraftConfig : public WorldScript
 public:
     SolocraftConfig() : WorldScript("SolocraftConfig") {}
     // Load Configuration Settings
-    void SetInitialWorldSettings()
+    void OnConfigLoad(bool reload) override
     {
         // Dungeon Base Level
         dungeons =
