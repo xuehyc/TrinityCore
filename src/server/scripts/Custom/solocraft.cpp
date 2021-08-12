@@ -1,10 +1,29 @@
-
 /*
-Orignal Azeroth Module Pulled from https://github.com/azerothcore/mod-solocraft
-Which is a fork of https://github.com/conan513/mod-solocraft
-Refactored to Trinitycore 434
-and improved upon by Single Player Project Developer MDic
-*/
+ * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Orignal Azeroth Module Pulled from https://github.com/azerothcore/mod-solocraft
+ * Which is a fork of https://github.com/conan513/mod-solocraft
+ * Refactored to Trinitycore Custom 335
+ * and improved upon by Single Player Project Developer MDic
+
+ * Orignal Azeroth Module Pulled from https://github.com/azerothcore/mod-solocraft
+ * Which is a fork of https://github.com/conan513/mod-solocraft
+ * Refactored to Trinitycore Custom 434 GwenPool Branch
+ * and improved upon by Single Player Project Developer MDic
+ */
 
 #include <map>
 #include "Config.h"
@@ -21,22 +40,9 @@ and improved upon by Single Player Project Developer MDic
 #include <math.h>
 #include <unordered_map>
 
-bool SoloCraftEnable = 1;
-bool SoloCraftAnnounceModule = 1;
-bool SoloCraftDebuffEnable = 1;
-float SoloCraftSpellMult = 1.0;
-float SoloCraftStatsMult = 100.0;
-uint32 SolocraftLevelDiff = 1;
-uint32 SolocraftDungeonLevel = 1;
 std::unordered_map<uint32, uint32> dungeons;
 std::unordered_map<uint32, float> diff_Multiplier;
 std::unordered_map<uint32, float> diff_Multiplier_Heroics;
-float D5 = 1.0;
-float D10 = 1.0;
-float D25 = 1.0;
-float D40 = 1.0;
-float D649H10 = 1.0;
-float D649H25 = 1.0;
 
 class SolocraftConfig : public WorldScript
 {
@@ -45,16 +51,6 @@ public:
     // Load Configuration Settings
     void SetInitialWorldSettings()
     {
-        SoloCraftEnable = sConfigMgr->GetBoolDefault("Solocraft.Enable", 1);
-        SoloCraftAnnounceModule = sConfigMgr->GetBoolDefault("Solocraft.Announce", 1);
-        //Balancing
-        SoloCraftDebuffEnable = sConfigMgr->GetBoolDefault("SoloCraft.Debuff.Enable", 1);
-        SoloCraftSpellMult = sConfigMgr->GetFloatDefault("SoloCraft.Spellpower.Mult", 2.5);
-        SoloCraftStatsMult = sConfigMgr->GetFloatDefault("SoloCraft.Stats.Mult", 100.0);
-        //Level Thresholds
-        SolocraftLevelDiff = sConfigMgr->GetIntDefault("Solocraft.Max.Level.Diff", 10);
-        //Catch All Dungeon Level Threshold
-        SolocraftDungeonLevel = sConfigMgr->GetIntDefault("Solocraft.Dungeon.Level", 85);
         // Dungeon Base Level
         dungeons =
         {
@@ -142,14 +138,8 @@ public:
             {725, sConfigMgr->GetIntDefault("Solocraft.TheStonecore.Level", 78) },                        // TheStonecore
             {657, sConfigMgr->GetIntDefault("Solocraft.VortexPinnacle.Level", 78) },                      // Vortex Pinnacle
             {643, sConfigMgr->GetIntDefault("Solocraft.ThroneofTides.Level", 80) },                       // ThroneofTides
-
         };
-        // Dungeon Difficulty
-        // Catch alls
-        D5 = sConfigMgr->GetFloatDefault("Solocraft.Dungeon", 5.0);
-        D10 = sConfigMgr->GetFloatDefault("Solocraft.Heroic", 10.0);
-        D25 = sConfigMgr->GetFloatDefault("Solocraft.Raid25", 25.0);
-        D40 = sConfigMgr->GetFloatDefault("Solocraft.Raid40", 40.0);
+
         diff_Multiplier =
         {
             // WOW Classic Instances
@@ -235,7 +225,6 @@ public:
             {754, sConfigMgr->GetFloatDefault("Solocraft.ThroneoftheFourWindsRaid", 10.0) },               // Throne of the Four Winds
             {757, sConfigMgr->GetFloatDefault("Solocraft.BaradinHoldRaid", 10.0) },                        // BaradinHold
             {967, sConfigMgr->GetFloatDefault("Solocraft.DragonSoulRaid", 10.0) },                         // Dragonsoul
-
         };
         // Heroics
         diff_Multiplier_Heroics =
@@ -289,13 +278,11 @@ public:
             {939, sConfigMgr->GetFloatDefault("Solocraft.WellofEternityH", 5.0) },                        // Well of Eternity H
             {951, sConfigMgr->GetFloatDefault("Solocraft.TheNexusLegendary", 5.0) },                      // The Nexus Legendary
             {859, sConfigMgr->GetFloatDefault("Solocraft.ZulGurubH", 5.0) },                              // ZulGurub H
-
         };
-        //Unique Raids beyond the heroic and normal versions of themselves
-        D649H10 = sConfigMgr->GetFloatDefault("Solocraft.ArgentTournamentRaidH10", 10.0);  //Trial of the Crusader 10 Heroic
-        D649H25 = sConfigMgr->GetFloatDefault("Solocraft.ArgentTournamentRaidH25", 25.0);  //Trial of the Crusader 25 Heroic
+
     }
 };
+
 class SolocraftAnnounce : public PlayerScript
 {
 public:
@@ -303,9 +290,9 @@ public:
     void OnLogin(Player* Player, bool /*firstLogin*/) override
     {
         // Announce Module
-        if (SoloCraftEnable)
+        if (sConfigMgr->GetBoolDefault("Solocraft.Enable", true))
         {
-            if (SoloCraftAnnounceModule)
+            if (sConfigMgr->GetBoolDefault("Solocraft.Announce", true))
             {
                 ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff00ccffSPP Cata SoloCraft Custom |rmodule.");
             }
@@ -323,6 +310,7 @@ public:
         }
     }
 };
+
 class solocraft_player_instance_handler : public PlayerScript {
 public:
     solocraft_player_instance_handler() : PlayerScript("solocraft_player_instance_handler") {}
@@ -342,6 +330,14 @@ private:
     // Set the instance difficulty
     int CalculateDifficulty(Map* map, Player* /*player*/)
     {
+        float D5 = sConfigMgr->GetFloatDefault("Solocraft.Dungeon", 5.0);
+        float D10 = sConfigMgr->GetFloatDefault("Solocraft.Heroic", 10.0);
+        float D25 = sConfigMgr->GetFloatDefault("Solocraft.Raid25", 25.0);
+        float D40 = sConfigMgr->GetFloatDefault("Solocraft.Raid40", 40.0);
+        //Unique Raids beyond the heroic and normal versions of themselves
+        float D649H10 = sConfigMgr->GetFloatDefault("Solocraft.ArgentTournamentRaidH10", 10.0);  //Trial of the Crusader 10 Heroic
+        float D649H25 = sConfigMgr->GetFloatDefault("Solocraft.ArgentTournamentRaidH25", 25.0);  //Trial of the Crusader 25 Heroic
+
         //float difficulty = 0.0;//changed from 1.0
         if (map)
         {
@@ -385,6 +381,7 @@ private:
     }
     // Set the Dungeon Level
     int CalculateDungeonLevel(Map* map, Player* /*player*/) {
+        uint32 SolocraftDungeonLevel = sConfigMgr->GetIntDefault("Solocraft.Dungeon.Level", 85);
         if (dungeons.find(map->GetId()) == dungeons.end())
         {
             return SolocraftDungeonLevel; //map not found returns the catch all value
@@ -405,6 +402,11 @@ private:
     // Apply the player buffs
     void ApplyBuffs(Player* player, Map* map, float difficulty, int dunLevel, int numInGroup)
     {
+        uint32 SolocraftLevelDiff = sConfigMgr->GetIntDefault("Solocraft.Max.Level.Diff", 10);
+        bool SoloCraftDebuffEnable = sConfigMgr->GetBoolDefault("SoloCraft.Debuff.Enable", 1);
+        float SoloCraftSpellMult = sConfigMgr->GetFloatDefault("SoloCraft.Spellpower.Mult", 2.5);
+        float SoloCraftStatsMult = sConfigMgr->GetFloatDefault("SoloCraft.Stats.Mult", 100.0);
+
         int SpellPowerBonus = 0;
         //Check whether to buff the player or check to debuff back to normal
         if (difficulty != 0)
@@ -456,7 +458,7 @@ private:
                     if (result)
                     {
                         // remove spellpower bonus
-                        player->ApplySpellPowerBonus((*result)[3].GetUInt32() * (*result)[4].GetFloat(),false);
+                        player->ApplySpellPowerBonus((*result)[3].GetUInt32() * (*result)[4].GetFloat(), false);
                     }
 
                     //Buff Spellpower
