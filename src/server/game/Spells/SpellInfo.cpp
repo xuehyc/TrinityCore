@@ -906,6 +906,7 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
     SchoolMask = spellEntry->SchoolMask;
     RuneCostID = spellEntry->RuneCostID;
     SpellDifficultyId = spellEntry->Difficulty;
+    BonusCoefficient = spellEntry->BonusCoefficient;
     SpellScalingId = spellEntry->ScalingID;
     SpellAuraOptionsId = spellEntry->AuraOptionsID;
     SpellAuraRestrictionsId = spellEntry->AuraRestrictionsID;
@@ -3102,7 +3103,7 @@ void SpellInfo::ApplyAllSpellImmunitiesTo(Unit* target, uint8 effIndex, bool app
 
     if (uint32 mechanicImmunity = immuneInfo->MechanicImmuneMask)
     {
-        for (uint32 i = 0; i < MAX_MECHANIC; ++i)
+        for (uint32 i = MECHANIC_CHARM; i < MAX_MECHANIC; ++i)
             if (mechanicImmunity & (1 << i))
                 target->ApplySpellImmune(Id, IMMUNITY_MECHANIC, i, apply);
 

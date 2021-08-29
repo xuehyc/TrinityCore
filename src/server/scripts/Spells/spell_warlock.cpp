@@ -51,9 +51,9 @@ enum WarlockSpells
     SPELL_WARLOCK_DEMONIC_EMPOWERMENT_VOIDWALKER    = 54443,
     SPELL_WARLOCK_DEMON_SOUL_IMP                    = 79459,
     SPELL_WARLOCK_DEMON_SOUL_FELHUNTER              = 79460,
-    SPELL_WARLOCK_DEMON_SOUL_FELGUARD               = 79452,
-    SPELL_WARLOCK_DEMON_SOUL_SUCCUBUS               = 79453,
-    SPELL_WARLOCK_DEMON_SOUL_VOIDWALKER             = 79454,
+    SPELL_WARLOCK_DEMON_SOUL_FELGUARD               = 79462,
+    SPELL_WARLOCK_DEMON_SOUL_SUCCUBUS               = 79463,
+    SPELL_WARLOCK_DEMON_SOUL_VOIDWALKER             = 79464,
     SPELL_WARLOCK_DRAIN_LIFE                        = 689,
     SPELL_WARLOCK_DRAIN_LIFE_HEAL                   = 89653,
     SPELL_WARLOCK_DRAIN_LIFE_SOULBURN               = 89420,
@@ -1640,6 +1640,23 @@ class spell_warl_pandemic_script : public SpellScript
     }
 };
 
+// -63156 - Decimation
+class spell_warl_decimation : public AuraScript
+{
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        if (AuraEffect const* healthThresholdEffect = GetEffect(EFFECT_1))
+            return eventInfo.GetProcTarget() && eventInfo.GetProcTarget()->GetHealthPct() <= healthThresholdEffect->GetAmount();
+
+        return false;
+    }
+
+    void Register() override
+    {
+        DoCheckProc.Register(&spell_warl_decimation::CheckProc);
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     RegisterSpellScript(spell_warl_aftermath);
@@ -1650,6 +1667,7 @@ void AddSC_warlock_spell_scripts()
     RegisterSpellScript(spell_warl_conflagrate);
     RegisterSpellScript(spell_warl_curse_of_weakness);
     RegisterSpellScript(spell_warl_create_healthstone);
+    RegisterSpellScript(spell_warl_decimation);
     RegisterSpellScript(spell_warl_demonic_circle_summon);
     RegisterSpellScript(spell_warl_demonic_circle_teleport);
     RegisterSpellScript(spell_warl_demonic_empowerment);

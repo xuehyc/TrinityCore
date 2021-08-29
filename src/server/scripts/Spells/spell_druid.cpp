@@ -257,6 +257,10 @@ class spell_dru_eclipse_mastery_driver_passive : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
+        Player* player = GetTarget()->ToPlayer();
+        if (!player || player->GetPrimaryTalentTree(player->GetActiveSpec()) != TALENT_TREE_DRUID_BALANCE)
+            return false;
+
         return eventInfo.GetSpellInfo();
     }
 
@@ -698,8 +702,9 @@ class spell_dru_living_seed : public AuraScript
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
-        int32 amount = CalculatePct(eventInfo.GetHealInfo()->GetHeal(), aurEff->GetAmount());
-        GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_DRUID_LIVING_SEED_PROC, CastSpellExtraArgs(aurEff).AddSpellBP0(amount));
+        int32 amount = CalculatePct(eventInfo.GetHealInfo()->GetEffectiveHeal(), aurEff->GetAmount());
+        if (amount)
+            GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_DRUID_LIVING_SEED_PROC, CastSpellExtraArgs(aurEff).AddSpellBP0(amount));
     }
 
     void Register() override
@@ -1171,11 +1176,10 @@ class spell_dru_effloresence : public AuraScript
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
-        int32 healAmount = 0;
 
         if (HealInfo* heal = eventInfo.GetHealInfo())
         {
-            healAmount = CalculatePct(heal->GetHeal(), GetSpellInfo()->Effects[EFFECT_0].BasePoints);
+            int32 healAmount = CalculatePct(heal->GetEffectiveHeal(), GetSpellInfo()->Effects[EFFECT_0].BasePoints);
             if (healAmount)
                 GetTarget()->CastSpell(heal->GetTarget(), GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, CastSpellExtraArgs(aurEff).AddSpellMod(SPELLVALUE_BASE_POINT1, healAmount));
         }
@@ -1966,6 +1970,21 @@ class spell_dru_nourish : public SpellScript
     }
 };
 
+// 6807 - Maul (Bear Form)
+class spell_dru_maul : public SpellScript
+{
+    void HandleDamage(SpellEffIndex /*effIndex*/)
+    {
+        int32 damage = 35 + GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.19f - 1;
+        SetEffectValue(damage);
+    }
+
+    void Register() override
+    {
+        OnEffectLaunchTarget.Register(&spell_dru_maul::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     RegisterSpellScript(spell_dru_astral_alignment);
@@ -1994,6 +2013,7 @@ void AddSC_druid_spell_scripts()
     RegisterSpellScript(spell_dru_lifebloom);
     RegisterSpellScript(spell_dru_living_seed);
     RegisterSpellScript(spell_dru_living_seed_proc);
+    RegisterSpellScript(spell_dru_maul);
     RegisterSpellScript(spell_dru_moonfire);
     RegisterSpellScript(spell_dru_nourish);
     RegisterSpellScript(spell_dru_pulverize);
