@@ -220,9 +220,9 @@ IPLocationFile = ""
 #                                                                 section my.ini)
 #                     ".;/path/to/unix_socket;username;password;database" - (use Unix sockets on
 #                                                                           Unix/Linux)
-#        Default:     "127.0.0.1;3306;trinity;trinity;auth"
+#        Default:     "127.0.0.1;3306;root;password;legion_auth"
 
-LoginDatabaseInfo = "127.0.0.1;3306;trinity;trinity;auth"
+LoginDatabaseInfo = "127.0.0.1;3306;root;;legion_auth"
 
 #
 #    LoginDatabase.WorkerThreads

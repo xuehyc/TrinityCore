@@ -336,7 +336,7 @@ extern int main(int argc, char** argv)
         TC_LOG_INFO("server.worldserver", "Starting up anti-freeze thread (%u seconds max stuck time)...", coreStuckTime);
     }
 
-    TC_LOG_INFO("server.worldserver", "%s (worldserver-daemon) ready...", GitRevision::GetFullVersion());
+    TC_LOG_INFO("server.worldserver", " To create an account enter bnetaccount create email password");
 
     sScriptMgr->OnStartup();
 
