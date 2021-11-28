@@ -46,6 +46,7 @@ public:
     std::string const& GetFilename();
     std::vector<std::string> const& GetArguments() const;
     std::vector<std::string> GetKeysByString(std::string const& name);
+    std::vector<int32> GetIntegerValues(std::string const& name);
 
 private:
     template<class T>

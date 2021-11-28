@@ -168,3 +168,17 @@ std::vector<std::string> ConfigMgr::GetKeysByString(std::string const& name)
 
     return keys;
 }
+
+std::vector<int32> ConfigMgr::GetIntegerValues(std::string const& name)
+{
+    std::lock_guard<std::mutex> lock(_configLock);
+
+    std::vector<int32> keys;
+
+    std::istringstream is(GetStringDefault(name, ""));
+    int32 n;
+    while (is >> n)
+        keys.push_back(n);
+
+    return keys;
+}
