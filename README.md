@@ -1,77 +1,59 @@
-# ![logo](https://community.trinitycore.org/public/style_images/1_trinitycore.png) TrinityCore (master)
+<p align="center"> <img src="https://raw.githubusercontent.com/MobiusDevelopment/MobiusCore/master/logo.png"/></p>
 
-[![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/TrinityCore/TrinityCore.svg)](https://isitmaintained.com/project/TrinityCore/TrinityCore "Average time to resolve an issue") [![Percentage of issues still open](https://isitmaintained.com/badge/open/TrinityCore/TrinityCore.svg)](https://isitmaintained.com/project/TrinityCore/TrinityCore "Percentage of issues still open")
+<p align="center">
+  <a href="#introduction">Introduction</a> •
+  <a href="#requirements">Requirements</a> •
+  <a href="#install">Install</a> •
+  <a href="#copyright">Copyright</a> •
+  <a href="#authors--contributors">Authors &amp; Contributors</a> •
+  <a href="#links">Links</a>
+</p>
 
---------------
-
-
-* [Build Status](#build-status)
-* [Introduction](#introduction)
-* [Requirements](#requirements)
-* [Install](#install)
-* [Reporting issues](#reporting-issues)
-* [Submitting fixes](#submitting-fixes)
-* [Copyright](#copyright)
-* [Authors &amp; Contributors](#authors--contributors)
-* [Links](#links)
-
-
-
-## Build Status
-
-master | 3.3.5
-:------------: | :------------:
-[![master Build Status](https://travis-ci.org/TrinityCore/TrinityCore.svg?branch=master)](https://travis-ci.org/TrinityCore/TrinityCore) | [![3.3.5 Build Status](https://travis-ci.org/TrinityCore/TrinityCore.svg?branch=3.3.5)](https://travis-ci.org/TrinityCore/TrinityCore)
-[![master Build status](https://ci.appveyor.com/api/projects/status/54d0u1fxe50ad80o/branch/master?svg=true)](https://ci.appveyor.com/project/DDuarte/trinitycore/branch/master) | [![Build status](https://ci.appveyor.com/api/projects/status/54d0u1fxe50ad80o/branch/3.3.5?svg=true)](https://ci.appveyor.com/project/DDuarte/trinitycore/branch/3.3.5)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/435/badge.svg)](https://scan.coverity.com/projects/435) | [![Coverity Scan Build Status](https://scan.coverity.com/projects/4656/badge.svg)](https://scan.coverity.com/projects/4656)
+---
 
 ## Introduction
 
-TrinityCore is a *MMORPG* Framework based mostly in C++.
+MobiusCore is a *MMORPG* Framework based mostly in C++.<br>
+It is derived from *MaNGOS*, the *Massive Network Game Object Server*.
 
-It is derived from *MaNGOS*, the *Massive Network Game Object Server*, and is
-based on the code of that project with extensive changes over time to optimize,
-improve and cleanup the codebase at the same time as improving the in-game
-mechanics and functionality.
 
-It is completely open source; community involvement is highly encouraged.
+### Conclusions after researching for a decent project
++ Repacks cannot be trusted, because most of them are distributed without sources.
++ Badly written code, with no coding standards is hard to track and can result to unwanted game behavior.
++ Communicating with TrinityCore, or other projects, gets offensive for no reason at most times.
++ Everyone mentions how special his project is, but still using actual MaNGOS sources.
 
-If you wish to contribute ideas or code, please visit our site linked below or
-make pull requests to our [Github repository](https://github.com/TrinityCore/TrinityCore/pulls).
 
-For further information on the TrinityCore project, please visit our project
-website at [TrinityCore.org](https://www.trinitycore.org).
+### Mentality behind the creation of MobiusCore
++ Nostagia for Legion, the expansion that brought the players back to the game, before lore was decimated.
++ Create a community interested in working and sharing openly missing content using the same coding standards.
++ Prefer missing content that can be added relatively easy over time, than no control over the sources.
++ Find the most clean fork of TrinityCore before 7.3.5 branch was removed and move forward from there.
+
 
 ## Requirements
 
-
-Software requirements are available in the [wiki](https://www.trinitycore.info/display/tc/Requirements) for
-Windows, Linux and macOS.
++ MySQL 5.7.0
++ Boost 1.68 x64
++ CMake 3.21.3 x64
++ OpenSSL 1.0.2j x64
++ MS Visual Studio 2019
 
 
 ## Install
 
-Detailed installation guides are available in the [wiki](https://www.trinitycore.info/display/tc/Installation+Guide) for
-Windows, Linux and macOS.
+What you should do to open project on Windows.
++ Install MySQL server
++ Restore the database backups
++ Install MS Visual Studio 2019
++ Install OpenSSL at C:\OpenSSL-Win64
++ Install or compile Boost at C:\boost_1_68_0
++ Set enviroment variable BOOST_ROOT to C:/boost_1_68_0/ (requires restart)
++ Install CMake
++ Generate project files with CMake
++ Go to your build folder and open MobiusCore.sln
 
-
-## Reporting issues
-
-Issues can be reported via the [Github issue tracker](https://github.com/TrinityCore/TrinityCore/labels/Branch-master).
-
-Please take the time to review existing issues before submitting your own to
-prevent duplicates.
-
-In addition, thoroughly read through the [issue tracker guide](https://community.trinitycore.org/topic/37-the-trinitycore-issuetracker-and-you/) to ensure
-your report contains the required information. Incorrect or poorly formed
-reports are wasteful and are subject to deletion.
-
-
-## Submitting fixes
-
-C++ fixes are submitted as pull requests via Github. For more information on how to
-properly submit a pull request, read the [how-to: maintain a remote fork](https://community.trinitycore.org/topic/9002-howto-maintain-a-remote-fork-for-pull-requests-tortoisegit/).
-For SQL only fixes, open a ticket; if a bug report exists for the bug, post on an existing ticket.
+<i>*If you are not familiar with any of the above a google search is highly recommended.</i>
 
 
 ## Copyright
@@ -88,6 +70,7 @@ Read file [AUTHORS](AUTHORS).
 
 ## Links
 
-* [Website](https://www.trinitycore.org)
-* [Wiki](https://www.trinitycore.info)
-* [Forums](https://community.trinitycore.org)
+* [MySQL](https://dev.mysql.com/downloads/mysql/5.7.html)
+* [Boost](https://boostorg.jfrog.io/artifactory/main/release/1.68.0/)
+* [CMake](https://cmake.org/download/)
+* [OpenSSL](https://www.mediafire.com/file/9otndn68ymb9egc/Win64OpenSSL-1_0_2j.exe/file)
