@@ -20,6 +20,7 @@
 #define __TRINITY_ACHIEVEMENTMGR_H
 
 #include "CriteriaHandler.h"
+#include "Config.h"
 
 class Guild;
 
@@ -51,6 +52,7 @@ class TC_GAME_API AchievementMgr : public CriteriaHandler
 public:
     AchievementMgr();
     ~AchievementMgr();
+    std::vector<int32> DisabledIds = sConfigMgr->GetIntegerValues("DisabledAchievements");
 
     void CheckAllAchievementCriteria(Player* referencePlayer);
 

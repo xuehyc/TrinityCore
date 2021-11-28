@@ -504,6 +504,30 @@ MapUpdate.Threads = 1
 CleanCharacterDB = 0
 
 #
+#    DisabledAchievements
+#        Description: Disable unwanted achievements, like unobtainable feats of strength.
+#        Default:     429 2398 3636 4400 5512 5863 6131 7853 8820 9016 9496 10058 10741 11210 11211 11848
+#        429 Sulfuras, Hand of Ragnaros
+#        2398 WoW's 4th Anniversary
+#        3636 Jade Tiger
+#        4400 WoW's 5th Anniversary
+#        5512 WoW's 6th Anniversary
+#        5863 WoW's 7th Anniversary
+#        6131 WoW's 8th Anniversary
+#        7853 WoW's 9th Anniversary
+#        8820 WoW's 10th Anniversary
+#        9016 Breaker of the Black Harvest
+#        9496 Warlord's Deathwheel
+#        10058 WoW's 11th Anniversary
+#        10741 WoW's 12th Anniversary
+#        11210 Fight for the Alliance
+#        11211 Fight for the Horde
+#        11848 WoW's 13th Anniversary
+#
+
+DisabledAchievements = 429 2398 3636 4400 5512 5863 6131 7853 8820 9016 9496 10058 10741 11210 11211 11848
+
+#
 #    PersistentCharacterCleanFlags
 #        Description: Determines the character clean flags that remain set after cleanups.
 #                     This is a bitmask value, check /doc/CharacterDBCleanup.txt for more

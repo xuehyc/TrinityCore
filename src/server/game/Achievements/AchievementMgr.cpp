@@ -168,6 +168,11 @@ bool AchievementMgr::IsCompletedAchievement(AchievementEntry const* entry)
     if (!tree)
         return false;
 
+    // Disabled achievements configuration.
+    for (int32 const& id : DisabledIds)
+        if (entry->ID == id)
+            return false;
+
     // For SUMM achievements, we have to count the progress of each criteria of the achievement.
     // Oddly, the target count is NOT contained in the achievement, but in each individual criteria
     if (entry->Flags & ACHIEVEMENT_FLAG_SUMM)
