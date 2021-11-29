@@ -625,7 +625,7 @@ void CriteriaHandler::UpdateCriteria(CriteriaTypes type, uint64 miscValue1 /*= 0
                 break;
             }
             case CRITERIA_TYPE_GAIN_EXALTED_REPUTATION:
-                SetCriteriaProgress(criteria, referencePlayer->GetReputationMgr().GetExaltedFactionCount(), referencePlayer);
+                SetCriteriaProgress(criteria, referencePlayer->GetReputationMgr().GetExaltedFactionCount() - 1, referencePlayer);
                 break;
             case CRITERIA_TYPE_LEARN_SKILLLINE_SPELLS:
             case CRITERIA_TYPE_LEARN_SKILL_LINE:
