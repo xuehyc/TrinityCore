@@ -1,22 +1,22 @@
-REVOKE ALL PRIVILEGES ON * . * FROM 'trinity'@'localhost';
+REVOKE ALL PRIVILEGES ON * . * FROM 'mobius'@'localhost';
 
-REVOKE ALL PRIVILEGES ON `world` . * FROM 'trinity'@'localhost';
+REVOKE ALL PRIVILEGES ON `world` . * FROM 'mobius'@'localhost';
 
-REVOKE GRANT OPTION ON `world` . * FROM 'trinity'@'localhost';
+REVOKE GRANT OPTION ON `world` . * FROM 'mobius'@'localhost';
 
-REVOKE ALL PRIVILEGES ON `characters` . * FROM 'trinity'@'localhost';
+REVOKE ALL PRIVILEGES ON `characters` . * FROM 'mobius'@'localhost';
 
-REVOKE GRANT OPTION ON `characters` . * FROM 'trinity'@'localhost';
+REVOKE GRANT OPTION ON `characters` . * FROM 'mobius'@'localhost';
 
-REVOKE ALL PRIVILEGES ON `auth` . * FROM 'trinity'@'localhost';
+REVOKE ALL PRIVILEGES ON `auth` . * FROM 'mobius'@'localhost';
 
-REVOKE GRANT OPTION ON `auth` . * FROM 'trinity'@'localhost';
+REVOKE GRANT OPTION ON `auth` . * FROM 'mobius'@'localhost';
 
-REVOKE ALL PRIVILEGES ON `hotfixes` . * FROM 'trinity'@'localhost';
+REVOKE ALL PRIVILEGES ON `hotfixes` . * FROM 'mobius'@'localhost';
 
-REVOKE GRANT OPTION ON `hotfixes` . * FROM 'trinity'@'localhost';
+REVOKE GRANT OPTION ON `hotfixes` . * FROM 'mobius'@'localhost';
 
-DROP USER 'trinity'@'localhost';
+DROP USER 'mobius'@'localhost';
 
 DROP DATABASE IF EXISTS `world`;
 

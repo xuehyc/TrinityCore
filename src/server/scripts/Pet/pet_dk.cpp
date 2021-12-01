@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /*
@@ -54,8 +42,8 @@ class npc_pet_dk_ebon_gargoyle : public CreatureScript
 
                 // Find victim of Summon Gargoyle spell
                 std::list<Unit*> targets;
-                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 30.0f);
-                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                Server::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 30.0f);
+                Server::UnitListSearcher<Server::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
                 Cell::VisitAllObjects(me, searcher, 30.0f);
                 for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
                     if ((*iter)->HasAura(SPELL_DK_SUMMON_GARGOYLE_1, ownerGuid))

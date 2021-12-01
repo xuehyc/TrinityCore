@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "WorldSession.h"
@@ -274,7 +261,7 @@ void WorldSession::HandleLootOpcode(WorldPackets::Loot::LootUnit& packet)
 
     std::list<Creature*> corpses;
     AELootCreatureCheck check(_player, packet.Unit);
-    Trinity::CreatureListSearcher<AELootCreatureCheck> searcher(_player, corpses, check);
+    Server::CreatureListSearcher<AELootCreatureCheck> searcher(_player, corpses, check);
     Cell::VisitGridObjects(_player, searcher, AELootCreatureCheck::LootDistance);
 
     if (!corpses.empty())
@@ -472,7 +459,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
         return;
     }
 
-    TC_LOG_DEBUG("network", "WorldSession::HandleLootMasterGiveOpcode (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = [%s].", target->GetName().c_str());
+    LOG_DEBUG("network", "WorldSession::HandleLootMasterGiveOpcode (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = [%s].", target->GetName().c_str());
 
     if (_player->GetLootGUID() != lootguid)
     {
@@ -483,7 +470,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     if (!_player->IsInRaidWith(target) || !_player->IsInMap(target))
     {
         _player->SendLootError(lootguid, ObjectGuid::Empty, LOOT_ERROR_MASTER_OTHER);
-        TC_LOG_INFO("entities.player.cheat", "MasterLootItem: Player %s tried to give an item to ineligible player %s !", GetPlayer()->GetName().c_str(), target->GetName().c_str());
+        LOG_INFO("entities.player.cheat", "MasterLootItem: Player %s tried to give an item to ineligible player %s !", GetPlayer()->GetName().c_str(), target->GetName().c_str());
         return;
     }
 
@@ -511,7 +498,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
 
     if (slotid >= loot->items.size() + loot->quest_items.size())
     {
-        TC_LOG_DEBUG("loot", "MasterLootItem: Player %s might be using a hack! (slot %d, size %lu)",
+        LOG_DEBUG("loot", "MasterLootItem: Player %s might be using a hack! (slot %d, size %lu)",
             GetPlayer()->GetName().c_str(), slotid, (unsigned long)loot->items.size());
         return;
     }

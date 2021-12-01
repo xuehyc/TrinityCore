@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "icecrown_citadel.h"
@@ -415,7 +403,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         {
                             std::list<Player*> targets;
                             SelectRandomTarget(false, &targets);
-                            Trinity::Containers::RandomResize(targets, Is25ManRaid() ? 3 : 2);
+                            Server::Containers::RandomResize(targets, Is25ManRaid() ? 3 : 2);
                             if (targets.size() > 1)
                             {
                                 Talk(SAY_PACT_OF_THE_DARKFALLEN);
@@ -438,7 +426,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         {
                             std::list<Player*> targets;
                             SelectRandomTarget(false, &targets);
-                            Trinity::Containers::RandomResize(targets, uint32(Is25ManRaid() ? 4 : 2));
+                            Server::Containers::RandomResize(targets, uint32(Is25ManRaid() ? 4 : 2));
                             for (std::list<Player*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                                 DoCast(*itr, SPELL_TWILIGHT_BLOODBOLT);
                             DoCast(me, SPELL_TWILIGHT_BLOODBOLT_TARGET);
@@ -507,11 +495,11 @@ class boss_blood_queen_lana_thel : public CreatureScript
 
                 if (includeOfftank)
                 {
-                    tempTargets.sort(Trinity::ObjectDistanceOrderPred(me->GetVictim()));
+                    tempTargets.sort(Server::ObjectDistanceOrderPred(me->GetVictim()));
                     return tempTargets.front();
                 }
 
-                return Trinity::Containers::SelectRandomContainerElement(tempTargets);
+                return Server::Containers::SelectRandomContainerElement(tempTargets);
             }
 
             GuidSet _vampires;
@@ -687,7 +675,7 @@ class spell_blood_queen_bloodbolt : public SpellScriptLoader
             {
                 uint32 targetCount = (targets.size() + 2) / 3;
                 targets.remove_if(BloodboltHitCheck(static_cast<LanaThelAI*>(GetCaster()->GetAI())));
-                Trinity::Containers::RandomResize(targets, targetCount);
+                Server::Containers::RandomResize(targets, targetCount);
                 // mark targets now, effect hook has missile travel time delay (might cast next in that time)
                 for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                     GetCaster()->GetAI()->SetGUID((*itr)->GetGUID(), GUID_BLOODBOLT);
@@ -761,7 +749,7 @@ class spell_blood_queen_pact_of_the_darkfallen : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
-                targets.remove_if(Trinity::UnitAuraCheck(false, SPELL_PACT_OF_THE_DARKFALLEN));
+                targets.remove_if(Server::UnitAuraCheck(false, SPELL_PACT_OF_THE_DARKFALLEN));
 
                 bool remove = true;
                 std::list<WorldObject*>::const_iterator itrEnd = targets.end(), itr, itr2;
@@ -845,7 +833,7 @@ class spell_blood_queen_pact_of_the_darkfallen_dmg_target : public SpellScriptLo
 
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
-                unitList.remove_if(Trinity::UnitAuraCheck(true, SPELL_PACT_OF_THE_DARKFALLEN));
+                unitList.remove_if(Server::UnitAuraCheck(true, SPELL_PACT_OF_THE_DARKFALLEN));
                 unitList.push_back(GetCaster());
             }
 

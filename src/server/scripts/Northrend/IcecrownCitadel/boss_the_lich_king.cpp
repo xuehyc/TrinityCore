@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "icecrown_citadel.h"
@@ -520,7 +508,7 @@ class boss_the_lich_king : public CreatureScript
 
                 // Reset The Frozen Throne gameobjects
                 FrozenThroneResetWorker reset;
-                Trinity::GameObjectWorker<FrozenThroneResetWorker> worker(me, reset);
+                Server::GameObjectWorker<FrozenThroneResetWorker> worker(me, reset);
                 Cell::VisitGridObjects(me, worker, 333.0f);
 
                 // Reset any light override
@@ -1028,7 +1016,7 @@ class boss_the_lich_king : public CreatureScript
                                 GetCreatureListWithEntryInGrid(triggers, terenas, NPC_WORLD_TRIGGER_INFINITE_AOI, 100.0f);
                                 if (!triggers.empty())
                                 {
-                                    triggers.sort(Trinity::ObjectDistanceOrderPred(terenas, true));
+                                    triggers.sort(Server::ObjectDistanceOrderPred(terenas, true));
                                     Creature* spawner = triggers.front();
                                     spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
                                     spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_2, true);  // summons bombs on players
@@ -1492,11 +1480,11 @@ class npc_valkyr_shadowguard : public CreatureScript
                             {
                                 std::list<Creature*> triggers;
                                 GetCreatureListWithEntryInGrid(triggers, me, NPC_WORLD_TRIGGER, 150.0f);
-                                triggers.remove_if(Trinity::HeightDifferenceCheck(platform, 5.0f, true));
+                                triggers.remove_if(Server::HeightDifferenceCheck(platform, 5.0f, true));
                                 if (triggers.empty())
                                     return;
 
-                                triggers.sort(Trinity::ObjectDistanceOrderPred(me));
+                                triggers.sort(Server::ObjectDistanceOrderPred(me));
                                 DoCast(target, SPELL_VALKYR_CARRY);
                                 _dropPoint.Relocate(triggers.front());
                                 _events.ScheduleEvent(EVENT_MOVE_TO_DROP_POS, 1500);
@@ -2101,7 +2089,7 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
         private:
             void SelectTarget(std::list<Unit*>& targets)
             {
-                targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
+                targets.sort(Server::ObjectDistanceOrderPred(GetCaster()));
                 if (targets.size() < 2)
                     return;
 
@@ -2285,7 +2273,7 @@ class spell_the_lich_king_quake : public SpellScriptLoader
             void FilterTargets(std::list<WorldObject*>& targets)
             {
                 if (GameObject* platform = ObjectAccessor::GetGameObject(*GetCaster(), GetCaster()->GetInstanceScript()->GetGuidData(DATA_ARTHAS_PLATFORM)))
-                    targets.remove_if(Trinity::HeightDifferenceCheck(platform, 5.0f, false));
+                    targets.remove_if(Server::HeightDifferenceCheck(platform, 5.0f, false));
             }
 
             void HandleSendEvent(SpellEffIndex /*effIndex*/)
@@ -2408,7 +2396,7 @@ class spell_the_lich_king_defile : public SpellScriptLoader
             void CorrectRange(std::list<WorldObject*>& targets)
             {
                 targets.remove_if(ExactDistanceCheck(GetCaster(), 10.0f * GetCaster()->GetObjectScale()));
-                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_HARVEST_SOUL_VALKYR));
+                targets.remove_if(Server::UnitAuraCheck(true, SPELL_HARVEST_SOUL_VALKYR));
             }
 
             void ChangeDamageAndGrow()
@@ -2527,11 +2515,11 @@ class spell_the_lich_king_valkyr_target_search : public SpellScriptLoader
                 if (targets.empty())
                     return;
 
-                targets.remove_if(Trinity::UnitAuraCheck(true, GetSpellInfo()->Id));
+                targets.remove_if(Server::UnitAuraCheck(true, GetSpellInfo()->Id));
                 if (targets.empty())
                     return;
 
-                _target = Trinity::Containers::SelectRandomContainerElement(targets);
+                _target = Server::Containers::SelectRandomContainerElement(targets);
                 targets.clear();
                 targets.push_back(_target);
                 GetCaster()->GetAI()->SetGUID(_target->GetGUID());
@@ -2718,7 +2706,7 @@ class spell_the_lich_king_vile_spirit_move_target_search : public SpellScriptLoa
                 if (targets.empty())
                     return;
 
-                _target = Trinity::Containers::SelectRandomContainerElement(targets);
+                _target = Server::Containers::SelectRandomContainerElement(targets);
             }
 
             void HandleScript(SpellEffIndex effIndex)

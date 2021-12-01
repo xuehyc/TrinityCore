@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /*
@@ -80,8 +68,8 @@ class spell_love_is_in_the_air_romantic_picnic : public SpellScriptLoader
                 // For nearby players, check if they have the same aura. If so, cast Romantic Picnic (45123)
                 // required by achievement and "hearts" visual
                 std::list<Player*> playerList;
-                Trinity::AnyPlayerInObjectRangeCheck checker(target, INTERACTION_DISTANCE*2);
-                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(target, playerList, checker);
+                Server::AnyPlayerInObjectRangeCheck checker(target, INTERACTION_DISTANCE*2);
+                Server::PlayerListSearcher<Server::AnyPlayerInObjectRangeCheck> searcher(target, playerList, checker);
                 Cell::VisitWorldObjects(target, searcher, INTERACTION_DISTANCE * 2);
                 for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                 {

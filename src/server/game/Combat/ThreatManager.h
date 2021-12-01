@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _THREATMANAGER
@@ -39,14 +26,14 @@ class SpellInfo;
 //==============================================================
 // Class to calculate the real threat based
 
-struct TC_GAME_API ThreatCalcHelper
+struct GAME_API ThreatCalcHelper
 {
     static float calcThreat(Unit* hatedUnit, Unit* hatingUnit, float threat, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NORMAL, SpellInfo const* threatSpell = nullptr);
     static bool isValidProcess(Unit* hatedUnit, Unit* hatingUnit, SpellInfo const* threatSpell = nullptr);
 };
 
 //==============================================================
-class TC_GAME_API HostileReference : public Reference<Unit, ThreatManager>
+class GAME_API HostileReference : public Reference<Unit, ThreatManager>
 {
     public:
         HostileReference(Unit* refUnit, ThreatManager* threatManager, float threat);
@@ -144,7 +131,7 @@ class TC_GAME_API HostileReference : public Reference<Unit, ThreatManager>
 //==============================================================
 class ThreatManager;
 
-class TC_GAME_API ThreatContainer
+class GAME_API ThreatContainer
 {
         friend class ThreatManager;
 
@@ -201,7 +188,7 @@ class TC_GAME_API ThreatContainer
 
 //=================================================
 
-class TC_GAME_API ThreatManager
+class GAME_API ThreatManager
 {
     public:
         friend class HostileReference;
@@ -280,7 +267,7 @@ class TC_GAME_API ThreatManager
 
 //=================================================
 
-namespace Trinity
+namespace Server
 {
     // Binary predicate for sorting HostileReferences based on threat value
     class ThreatOrderPred

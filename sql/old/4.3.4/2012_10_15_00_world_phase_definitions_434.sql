@@ -37,8 +37,8 @@ AUTO_INCREMENT=1
 ENGINE=MyISAM
 COLLATE='utf8_general_ci';
 
-DELETE FROM `trinity_string` WHERE `entry` BETWEEN 176 AND 182;
-INSERT INTO `trinity_string` (`entry`, `content_default`) VALUES
+DELETE FROM `server_string` WHERE `entry` BETWEEN 176 AND 182;
+INSERT INTO `server_string` (`entry`, `content_default`) VALUES
 (176, '|cff0099FFPhaseMgr: Report for player: %s, zoneId: %u, level: %u, team: %u, phaseupdateflag: %u|r'),
 (177, '|cff663399PhaseMgr: There are no definitions defined for zoneId %u.|r'),
 (178, '|cff0066FFPhaseMgr: Success (entry: %u) - added %s %u to the players phase.|r'),

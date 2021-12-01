@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /* ScriptData
@@ -287,9 +275,9 @@ public:
             if (fields[2].GetBool() && (fields[1].GetUInt64() == uint64(0) || unbanDate >= time(NULL)))
                 active = true;
             bool permanent = (fields[1].GetUInt64() == uint64(0));
-            std::string banTime = permanent ? handler->GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[1].GetUInt64(), true);
+            std::string banTime = permanent ? handler->GetServerString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[1].GetUInt64(), true);
             handler->PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
-                fields[0].GetCString(), banTime.c_str(), active ? handler->GetTrinityString(LANG_YES) : handler->GetTrinityString(LANG_NO), fields[4].GetCString(), fields[5].GetCString());
+                fields[0].GetCString(), banTime.c_str(), active ? handler->GetServerString(LANG_YES) : handler->GetServerString(LANG_NO), fields[4].GetCString(), fields[5].GetCString());
         }
         while (result->NextRow());
 
@@ -343,9 +331,9 @@ public:
             if (fields[2].GetUInt8() && (!fields[1].GetUInt32() || unbanDate >= time(NULL)))
                 active = true;
             bool permanent = (fields[1].GetUInt32() == uint32(0));
-            std::string banTime = permanent ? handler->GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[1].GetUInt32(), true);
+            std::string banTime = permanent ? handler->GetServerString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[1].GetUInt32(), true);
             handler->PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
-                TimeToTimestampStr(fields[0].GetUInt32()).c_str(), banTime.c_str(), active ? handler->GetTrinityString(LANG_YES) : handler->GetTrinityString(LANG_NO), fields[4].GetCString(), fields[5].GetCString());
+                TimeToTimestampStr(fields[0].GetUInt32()).c_str(), banTime.c_str(), active ? handler->GetServerString(LANG_YES) : handler->GetServerString(LANG_NO), fields[4].GetCString(), fields[5].GetCString());
         }
         while (result->NextRow());
 
@@ -377,8 +365,8 @@ public:
         Field* fields = result->Fetch();
         bool permanent = !fields[6].GetUInt64();
         handler->PSendSysMessage(LANG_BANINFO_IPENTRY,
-            fields[0].GetCString(), fields[1].GetCString(), permanent ? handler->GetTrinityString(LANG_BANINFO_NEVER) : fields[2].GetCString(),
-            permanent ? handler->GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetCString(), fields[5].GetCString());
+            fields[0].GetCString(), fields[1].GetCString(), permanent ? handler->GetServerString(LANG_BANINFO_NEVER) : fields[2].GetCString(),
+            permanent ? handler->GetServerString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetCString(), fields[5].GetCString());
 
 
         return true;

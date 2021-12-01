@@ -1,22 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_DB2STRUCTURE_H
-#define TRINITY_DB2STRUCTURE_H
+#ifndef SERVER_DB2STRUCTURE_H
+#define SERVER_DB2STRUCTURE_H
 
 #include "Define.h"
 #include "DBCEnums.h"
@@ -906,7 +894,7 @@ struct DurabilityQualityEntry
 struct EmotesEntry
 {
     uint32 ID;
-    Trinity::RaceMask<int64> RaceMask;
+    Server::RaceMask<int64> RaceMask;
     char const* EmoteSlashCommand;
     uint32 EmoteFlags;
     uint32 SpellVisualKitID;
@@ -936,7 +924,7 @@ struct EmotesTextSoundEntry
 
 struct FactionEntry
 {
-    Trinity::RaceMask<int64> ReputationRaceMask[4];
+    Server::RaceMask<int64> ReputationRaceMask[4];
     LocalizedString* Name;
     LocalizedString* Description;
     uint32 ID;
@@ -1575,7 +1563,7 @@ struct ItemRandomSuffixEntry
 
 struct ItemSearchNameEntry
 {
-    Trinity::RaceMask<int64> AllowableRace;
+    Server::RaceMask<int64> AllowableRace;
     LocalizedString* Display;
     uint32 ID;
     int32 Flags[3];
@@ -1615,7 +1603,7 @@ struct ItemSetSpellEntry
 struct ItemSparseEntry
 {
     uint32 ID;
-    Trinity::RaceMask<int64> AllowableRace;
+    Server::RaceMask<int64> AllowableRace;
     LocalizedString* Display;
     LocalizedString* Display1;
     LocalizedString* Display2;
@@ -2015,7 +2003,7 @@ struct PhaseXPhaseGroupEntry
 
 struct PlayerConditionEntry
 {
-    Trinity::RaceMask<int64> RaceMask;
+    Server::RaceMask<int64> RaceMask;
     LocalizedString* FailureDescription;
     uint32 ID;
     uint8 Flags;
@@ -2355,7 +2343,7 @@ struct SkillLineEntry
 
 struct SkillLineAbilityEntry
 {
-    Trinity::RaceMask<int64> RaceMask;
+    Server::RaceMask<int64> RaceMask;
     uint32 ID;
     int32 Spell;
     int32 SupercedesSpell;
@@ -2374,7 +2362,7 @@ struct SkillLineAbilityEntry
 struct SkillRaceClassInfoEntry
 {
     uint32 ID;
-    Trinity::RaceMask<int64> RaceMask;
+    Server::RaceMask<int64> RaceMask;
     int16 SkillID;
     uint16 Flags;
     int16 SkillTierID;

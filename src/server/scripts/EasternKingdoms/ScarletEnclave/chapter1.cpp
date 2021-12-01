@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "ScriptMgr.h"
@@ -190,7 +178,7 @@ public:
                         anchorGUID = anchor->GetGUID();
                     }
                     else
-                        TC_LOG_ERROR("scripts", "npc_unworthy_initiateAI: unable to find anchor!");
+                        LOG_ERROR("scripts", "npc_unworthy_initiateAI: unable to find anchor!");
 
                     float dist = 99.0f;
                     GameObject* prison = NULL;
@@ -210,7 +198,7 @@ public:
                     if (prison)
                         prison->ResetDoorOrButton();
                     else
-                        TC_LOG_ERROR("scripts", "npc_unworthy_initiateAI: unable to find prison!");
+                        LOG_ERROR("scripts", "npc_unworthy_initiateAI: unable to find prison!");
                 }
                 break;
             case PHASE_TO_EQUIP:
@@ -221,7 +209,7 @@ public:
                     else
                     {
                         me->GetMotionMaster()->MovePoint(1, anchorX, anchorY, me->GetPositionZ());
-                        //TC_LOG_DEBUG("scripts", "npc_unworthy_initiateAI: move to %f %f %f", anchorX, anchorY, me->GetPositionZ());
+                        //LOG_DEBUG("scripts", "npc_unworthy_initiateAI: move to %f %f %f", anchorX, anchorY, me->GetPositionZ());
                         phase = PHASE_EQUIPING;
                         wait_timer = 0;
                     }

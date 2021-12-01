@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /*
@@ -732,8 +720,8 @@ class spell_gen_cannibalize : public SpellScriptLoader
                 float max_range = GetSpellInfo()->GetMaxRange(false);
                 WorldObject* result = NULL;
                 // search for nearby enemy corpse in range
-                Trinity::AnyDeadUnitSpellTargetInRangeCheck check(caster, max_range, GetSpellInfo(), TARGET_CHECK_ENEMY);
-                Trinity::WorldObjectSearcher<Trinity::AnyDeadUnitSpellTargetInRangeCheck> searcher(caster, result, check);
+                Server::AnyDeadUnitSpellTargetInRangeCheck check(caster, max_range, GetSpellInfo(), TARGET_CHECK_ENEMY);
+                Server::WorldObjectSearcher<Server::AnyDeadUnitSpellTargetInRangeCheck> searcher(caster, result, check);
                 Cell::VisitWorldObjects(caster, searcher, max_range);
                 if (!result)
                     Cell::VisitGridObjects(caster, searcher, max_range);
@@ -2661,7 +2649,7 @@ class spell_gen_replenishment : public SpellScriptLoader
 
                 if (targets.size() > maxTargets)
                 {
-                    targets.sort(Trinity::PowerPctOrderPred(POWER_MANA));
+                    targets.sort(Server::PowerPctOrderPred(POWER_MANA));
                     targets.resize(maxTargets);
                 }
             }
@@ -4066,7 +4054,7 @@ public:
                         SetBonusValueForEffect(EFFECT_0, 5, aurEff);
                         break;
                     default:
-                        TC_LOG_ERROR("spells", "SpellId %u couldn't be processed in spell_gen_mixology_bonus", GetId());
+                        LOG_ERROR("spells", "SpellId %u couldn't be processed in spell_gen_mixology_bonus", GetId());
                         break;
                 }
                 amount += bonus;

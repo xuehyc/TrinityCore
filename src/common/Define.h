@@ -1,27 +1,14 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_DEFINE_H
-#define TRINITY_DEFINE_H
+#ifndef SERVER_DEFINE_H
+#define SERVER_DEFINE_H
 
 #include "CompilerDefs.h"
 
-#if TRINITY_COMPILER == TRINITY_COMPILER_GNU
+#if SERVER_COMPILER == SERVER_COMPILER_GNU
 #  if !defined(__STDC_FORMAT_MACROS)
 #    define __STDC_FORMAT_MACROS
 #  endif
@@ -47,19 +34,19 @@
 #include <cinttypes>
 #include <climits>
 
-#define TRINITY_LITTLEENDIAN 0
-#define TRINITY_BIGENDIAN    1
+#define SERVER_LITTLEENDIAN 0
+#define SERVER_BIGENDIAN    1
 
-#if !defined(TRINITY_ENDIAN)
+#if !defined(SERVER_ENDIAN)
 #  if defined (BOOST_BIG_ENDIAN)
-#    define TRINITY_ENDIAN TRINITY_BIGENDIAN
+#    define SERVER_ENDIAN SERVER_BIGENDIAN
 #  else
-#    define TRINITY_ENDIAN TRINITY_LITTLEENDIAN
+#    define SERVER_ENDIAN SERVER_LITTLEENDIAN
 #  endif
 #endif
 
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
-#  define TRINITY_PATH_MAX 260
+#if SERVER_PLATFORM == SERVER_PLATFORM_WINDOWS
+#  define SERVER_PATH_MAX 260
 #  define _USE_MATH_DEFINES
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
@@ -67,74 +54,74 @@
 #  ifndef DECLSPEC_DEPRECATED
 #    define DECLSPEC_DEPRECATED __declspec(deprecated)
 #  endif //DECLSPEC_DEPRECATED
-#else // TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS
-#  define TRINITY_PATH_MAX PATH_MAX
+#else // SERVER_PLATFORM != SERVER_PLATFORM_WINDOWS
+#  define SERVER_PATH_MAX PATH_MAX
 #  define DECLSPEC_NORETURN
 #  define DECLSPEC_DEPRECATED
-#endif // TRINITY_PLATFORM
+#endif // SERVER_PLATFORM
 
 #if !defined(COREDEBUG)
-#  define TRINITY_INLINE inline
+#  define SERVER_INLINE inline
 #else //COREDEBUG
-#  if !defined(TRINITY_DEBUG)
-#    define TRINITY_DEBUG
-#  endif //TRINITY_DEBUG
-#  define TRINITY_INLINE
+#  if !defined(SERVER_DEBUG)
+#    define SERVER_DEBUG
+#  endif //SERVER_DEBUG
+#  define SERVER_INLINE
 #endif //!COREDEBUG
 
-#if TRINITY_COMPILER == TRINITY_COMPILER_GNU
+#if SERVER_COMPILER == SERVER_COMPILER_GNU
 #  define ATTR_NORETURN __attribute__((__noreturn__))
 #  define ATTR_PRINTF(F, V) __attribute__ ((__format__ (__printf__, F, V)))
 #  define ATTR_DEPRECATED __attribute__((__deprecated__))
-#else //TRINITY_COMPILER != TRINITY_COMPILER_GNU
+#else //SERVER_COMPILER != SERVER_COMPILER_GNU
 #  define ATTR_NORETURN
 #  define ATTR_PRINTF(F, V)
 #  define ATTR_DEPRECATED
-#endif //TRINITY_COMPILER == TRINITY_COMPILER_GNU
+#endif //SERVER_COMPILER == SERVER_COMPILER_GNU
 
-#ifdef TRINITY_API_USE_DYNAMIC_LINKING
-#  if TRINITY_COMPILER == TRINITY_COMPILER_MICROSOFT
-#    define TC_API_EXPORT __declspec(dllexport)
-#    define TC_API_IMPORT __declspec(dllimport)
-#  elif TRINITY_COMPILER == TRINITY_COMPILER_GNU
-#    define TC_API_EXPORT __attribute__((visibility("default")))
-#    define TC_API_IMPORT
+#ifdef SERVER_API_USE_DYNAMIC_LINKING
+#  if SERVER_COMPILER == SERVER_COMPILER_MICROSOFT
+#    define API_EXPORT __declspec(dllexport)
+#    define API_IMPORT __declspec(dllimport)
+#  elif SERVER_COMPILER == SERVER_COMPILER_GNU
+#    define API_EXPORT __attribute__((visibility("default")))
+#    define API_IMPORT
 #  else
 #    error compiler not supported!
 #  endif
 #else
-#  define TC_API_EXPORT
-#  define TC_API_IMPORT
+#  define API_EXPORT
+#  define API_IMPORT
 #endif
 
-#ifdef TRINITY_API_EXPORT_COMMON
-#  define TC_COMMON_API TC_API_EXPORT
+#ifdef SERVER_API_EXPORT_COMMON
+#  define COMMON_API API_EXPORT
 #else
-#  define TC_COMMON_API TC_API_IMPORT
+#  define COMMON_API API_IMPORT
 #endif
 
-#ifdef TRINITY_API_EXPORT_PROTO
-#  define TC_PROTO_API TC_API_EXPORT
+#ifdef SERVER_API_EXPORT_PROTO
+#  define PROTO_API API_EXPORT
 #else
-#  define TC_PROTO_API TC_API_IMPORT
+#  define PROTO_API API_IMPORT
 #endif
 
-#ifdef TRINITY_API_EXPORT_DATABASE
-#  define TC_DATABASE_API TC_API_EXPORT
+#ifdef SERVER_API_EXPORT_DATABASE
+#  define DATABASE_API API_EXPORT
 #else
-#  define TC_DATABASE_API TC_API_IMPORT
+#  define DATABASE_API API_IMPORT
 #endif
 
-#ifdef TRINITY_API_EXPORT_SHARED
-#  define TC_SHARED_API TC_API_EXPORT
+#ifdef SERVER_API_EXPORT_SHARED
+#  define SHARED_API API_EXPORT
 #else
-#  define TC_SHARED_API TC_API_IMPORT
+#  define SHARED_API API_IMPORT
 #endif
 
-#ifdef TRINITY_API_EXPORT_GAME
-#  define TC_GAME_API TC_API_EXPORT
+#ifdef SERVER_API_EXPORT_GAME
+#  define GAME_API API_EXPORT
 #else
-#  define TC_GAME_API TC_API_IMPORT
+#  define GAME_API API_IMPORT
 #endif
 
 #define UI64FMTD "%" PRIu64
@@ -165,4 +152,4 @@ enum DBCFormer
     FT_LONG = 'l'                                           // uint64
 };
 
-#endif //TRINITY_DEFINE_H
+#endif //SERVER_DEFINE_H

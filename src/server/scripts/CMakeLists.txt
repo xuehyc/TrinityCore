@@ -1,12 +1,5 @@
-# Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
-#
-# This file is free software; as a special exception the author gives
-# unlimited permission to copy and/or distribute it, with or without
-# modifications, as long as this notice is preserved.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# This file is part of the MobiusCore project.
+# See AUTHORS file for copyright information.
 
 message("")
 
@@ -100,27 +93,27 @@ GroupSources(${CMAKE_CURRENT_SOURCE_DIR})
 # it to the variable arguments
 function(ConfigureScriptLoader SCRIPTLOADER_NAME LOADER_OUT IS_DYNAMIC_SCRIPTLOADER)
   # Deduces following variables which are referenced by thge template:
-  # TRINITY_IS_DYNAMIC_SCRIPTLOADER
-  # TRINITY_SCRIPTS_FORWARD_DECL
-  # TRINITY_SCRIPTS_INVOKE
-  # TRINITY_CURRENT_SCRIPT_PROJECT
+  # SERVER_IS_DYNAMIC_SCRIPTLOADER
+  # SERVER_SCRIPTS_FORWARD_DECL
+  # SERVER_SCRIPTS_INVOKE
+  # SERVER_CURRENT_SCRIPT_PROJECT
 
   # To generate export macros
-  set(TRINITY_IS_DYNAMIC_SCRIPTLOADER ${IS_DYNAMIC_SCRIPTLOADER})
+  set(SERVER_IS_DYNAMIC_SCRIPTLOADER ${IS_DYNAMIC_SCRIPTLOADER})
   # To generate forward declarations of the loading functions
-  unset(TRINITY_SCRIPTS_FORWARD_DECL)
-  unset(TRINITY_SCRIPTS_INVOKE)
+  unset(SERVER_SCRIPTS_FORWARD_DECL)
+  unset(SERVER_SCRIPTS_INVOKE)
   # The current script project which is built in
-  set(TRINITY_CURRENT_SCRIPT_PROJECT ${SCRIPTLOADER_NAME})
+  set(SERVER_CURRENT_SCRIPT_PROJECT ${SCRIPTLOADER_NAME})
   foreach(LOCALE_SCRIPT_MODULE ${ARGN})
     # Determine the loader function ("Add##${NameOfDirectory}##Scripts()")
     set(LOADER_FUNCTION
       "Add${LOCALE_SCRIPT_MODULE}Scripts()")
     # Generate the funciton call and the forward declarations
-    set(TRINITY_SCRIPTS_FORWARD_DECL
-      "${TRINITY_SCRIPTS_FORWARD_DECL}void ${LOADER_FUNCTION};\n")
-    set(TRINITY_SCRIPTS_INVOKE
-      "${TRINITY_SCRIPTS_INVOKE}    ${LOADER_FUNCTION};\n")
+    set(SERVER_SCRIPTS_FORWARD_DECL
+      "${SERVER_SCRIPTS_FORWARD_DECL}void ${LOADER_FUNCTION};\n")
+    set(SERVER_SCRIPTS_INVOKE
+      "${SERVER_SCRIPTS_INVOKE}    ${LOADER_FUNCTION};\n")
   endforeach()
   set(GENERATED_LOADER ${CMAKE_CURRENT_BINARY_DIR}/gen_scriptloader/${SCRIPTLOADER_NAME}/ScriptLoader.cpp)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ScriptLoader.cpp.in.cmake ${GENERATED_LOADER})
@@ -163,7 +156,7 @@ foreach(SCRIPT_MODULE ${SCRIPT_MODULE_LIST})
       ${SCRIPT_MODULE_PRIVATE_SCRIPTLOADER})
     target_link_libraries(${SCRIPT_MODULE_PROJECT_NAME}
       PRIVATE
-        trinity-core-interface
+        mobius-core-interface
       PUBLIC
         game)
 
@@ -210,7 +203,7 @@ add_library(scripts STATIC
 
 target_link_libraries(scripts
   PRIVATE
-    trinity-core-interface
+    mobius-core-interface
   PUBLIC
     game-interface)
 

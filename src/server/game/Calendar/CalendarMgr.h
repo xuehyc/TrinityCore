@@ -1,22 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_CALENDARMGR_H
-#define TRINITY_CALENDARMGR_H
+#ifndef SERVER_CALENDARMGR_H
+#define SERVER_CALENDARMGR_H
 
 #include "Common.h"
 #include "DatabaseEnvFwd.h"
@@ -133,7 +121,7 @@ enum CalendarError
 #define CALENDAR_MAX_INVITES            100
 #define CALENDAR_DEFAULT_RESPONSE_TIME  946684800 // 01/01/2000 00:00:00
 
-struct TC_GAME_API CalendarInvite
+struct GAME_API CalendarInvite
 {
     public:
         CalendarInvite(CalendarInvite const& calendarInvite, uint64 inviteId, uint64 eventId)
@@ -193,7 +181,7 @@ struct TC_GAME_API CalendarInvite
         std::string _note;
 };
 
-struct TC_GAME_API CalendarEvent
+struct GAME_API CalendarEvent
 {
     public:
         CalendarEvent(CalendarEvent const& calendarEvent, uint64 eventId)
@@ -273,7 +261,7 @@ typedef std::vector<CalendarInvite*> CalendarInviteStore;
 typedef std::set<CalendarEvent*> CalendarEventStore;
 typedef std::map<uint64 /* eventID */, CalendarInviteStore > CalendarEventInviteStore;
 
-class TC_GAME_API CalendarMgr
+class GAME_API CalendarMgr
 {
     private:
         CalendarMgr();

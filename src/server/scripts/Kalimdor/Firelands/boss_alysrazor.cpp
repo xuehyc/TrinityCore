@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "ScriptMgr.h"
@@ -164,7 +152,7 @@ class TrashRespawnWorker
 static void AlysrazorTrashEvaded(Creature* creature)
 {
     TrashRespawnWorker check;
-    Trinity::CreatureWorker<TrashRespawnWorker> worker(creature, check);
+    Server::CreatureWorker<TrashRespawnWorker> worker(creature, check);
     Cell::VisitGridObjects(creature, worker, SIZE_OF_GRIDS);
 }
 
@@ -462,11 +450,11 @@ class npc_egg_pile : public CreatureScript
                         {
                             std::list<Creature*> eggs;
                             MoltenEggCheck check(me);
-                            Trinity::CreatureListSearcher<MoltenEggCheck> searcher(me, eggs, check);
+                            Server::CreatureListSearcher<MoltenEggCheck> searcher(me, eggs, check);
                             Cell::VisitGridObjects(me, searcher, 20.0f);
                             if (!eggs.empty())
                             {
-                                Creature* egg = Trinity::Containers::SelectRandomContainerElement(eggs);
+                                Creature* egg = Server::Containers::SelectRandomContainerElement(eggs);
                                 egg->CastSpell(egg, SPELL_SUMMON_SMOULDERING_HATCHLING, TRIGGERED_FULL_MASK);
                                 egg->SetDisplayId(MODEL_INVISIBLE_STALKER);
                                 egg->m_Events.AddEvent(new RespawnEggEvent(egg), egg->m_Events.CalculateTime(5000));

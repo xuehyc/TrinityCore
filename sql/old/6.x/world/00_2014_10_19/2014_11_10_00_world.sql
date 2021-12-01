@@ -12,8 +12,8 @@ INSERT INTO `command` (`name`, `permission`, `help`) VALUES
 ('bnetaccount unlink', 215, 'Syntax: .bnetaccount unlink $gameaccount $password\nRemoves battle.net account link from $gameaccount'),
 ('bnetaccount gameaccountcreate', 216, 'Syntax: .bnetaccount gameaccountcreate $account\nCreate additional game account for specified battle.net account.');
 
-DELETE FROM `trinity_string` WHERE `entry` BETWEEN 1185 AND 1189;
-INSERT INTO `trinity_string` (`entry`, `content_default`) VALUES
+DELETE FROM `server_string` WHERE `entry` BETWEEN 1185 AND 1189;
+INSERT INTO `server_string` (`entry`, `content_default`) VALUES
 (1185, 'Battle.net account %s was linked with game account %s.'),
 (1186, 'Battle.net account %s or game account %s does not exist.'),
 (1187, 'Game account %s is already linked with a battle.net account.'),

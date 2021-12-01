@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "AppenderFile.h"
@@ -28,7 +16,7 @@ AppenderFile::AppenderFile(uint8 id, std::string const& name, LogLevel level, Ap
     _fileSize(0)
 {
     if (extraArgs.empty())
-        throw InvalidAppenderArgsException(Trinity::StringFormat("Log::CreateAppenderFromConfig: Missing file name for appender %s\n", name.c_str()));
+        throw InvalidAppenderArgsException(Server::StringFormat("Log::CreateAppenderFromConfig: Missing file name for appender %s\n", name.c_str()));
 
     _fileName = extraArgs[0];
 
@@ -66,8 +54,8 @@ void AppenderFile::_write(LogMessage const* message)
 
     if (_dynamicName)
     {
-        char namebuf[TRINITY_PATH_MAX];
-        snprintf(namebuf, TRINITY_PATH_MAX, _fileName.c_str(), message->param1.c_str());
+        char namebuf[SERVER_PATH_MAX];
+        snprintf(namebuf, SERVER_PATH_MAX, _fileName.c_str(), message->param1.c_str());
         // always use "a" with dynamic name otherwise it could delete the log we wrote in last _write() call
         FILE* file = OpenFile(namebuf, "a", _backup || exceedMaxSize);
         if (!file)

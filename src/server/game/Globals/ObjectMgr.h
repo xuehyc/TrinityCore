@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _OBJECTMGR_H
@@ -124,7 +111,7 @@ enum ScriptCommands
     SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT    = 21,               // source = WorldObject (if present used as a search center), datalong = script id, datalong2 = unit lowguid, dataint = script table to use (see ScriptsType)
     SCRIPT_COMMAND_KILL                  = 22,               // source/target = Creature, dataint = remove corpse attribute
 
-    // TrinityCore only
+    // MobiusCore only
     SCRIPT_COMMAND_ORIENTATION           = 30,               // source = Unit, target (datalong > 0) = Unit, datalong = > 0 turn source to face target, o = orientation
     SCRIPT_COMMAND_EQUIP                 = 31,               // soucre = Creature, datalong = equipment id
     SCRIPT_COMMAND_MODEL                 = 32,               // source = Creature, datalong = model id
@@ -418,15 +405,15 @@ typedef std::multimap<uint32, ScriptInfo> ScriptMap;
 typedef std::map<uint32, ScriptMap > ScriptMapMap;
 typedef std::multimap<uint32 /*spell id*/, std::pair<uint32 /*script id*/, bool /*enabled*/>> SpellScriptsContainer;
 typedef std::pair<SpellScriptsContainer::iterator, SpellScriptsContainer::iterator> SpellScriptsBounds;
-TC_GAME_API extern ScriptMapMap sSpellScripts;
-TC_GAME_API extern ScriptMapMap sEventScripts;
-TC_GAME_API extern ScriptMapMap sWaypointScripts;
+GAME_API extern ScriptMapMap sSpellScripts;
+GAME_API extern ScriptMapMap sEventScripts;
+GAME_API extern ScriptMapMap sWaypointScripts;
 
 std::string GetScriptsTableNameByType(ScriptsType type);
 ScriptMapMap* GetScriptsMapByType(ScriptsType type);
 std::string GetScriptCommandName(ScriptCommands command);
 
-struct TC_GAME_API SpellClickInfo
+struct GAME_API SpellClickInfo
 {
     uint32 spellId;
     uint8 castFlags;
@@ -469,10 +456,10 @@ struct CellObjectGuids
 typedef std::unordered_map<uint32/*cell_id*/, CellObjectGuids> CellObjectGuidsMap;
 typedef std::unordered_map<uint32/*(mapid, spawnMode) pair*/, CellObjectGuidsMap> MapObjectGuids;
 
-// Trinity Trainer Reference start range
-#define TRINITY_TRAINER_START_REF      200000
+// Mobius Trainer Reference start range
+#define SERVER_TRAINER_START_REF      200000
 
-struct TrinityString
+struct ServerString
 {
     std::vector<std::string> Content;
 };
@@ -531,7 +518,7 @@ struct PlayerChoiceLocale
     std::unordered_map<int32 /*ResponseId*/, PlayerChoiceResponseLocale> Responses;
 };
 
-typedef std::unordered_map<uint32, TrinityString> TrinityStringContainer;
+typedef std::unordered_map<uint32, ServerString> ServerStringContainer;
 
 typedef std::multimap<uint32, uint32> QuestRelations; // unit/go -> quest
 typedef std::multimap<uint32, uint32> QuestRelationsReverse; // quest -> unit/go
@@ -612,7 +599,7 @@ struct MailLevelReward
     MailLevelReward() : raceMask({ 0 }), mailTemplateId(0), senderEntry(0) { }
     MailLevelReward(uint32 _raceMask, uint32 _mailTemplateId, uint32 _senderEntry) : raceMask({ _raceMask }), mailTemplateId(_mailTemplateId), senderEntry(_senderEntry) { }
 
-    Trinity::RaceMask<uint64> raceMask;
+    Server::RaceMask<uint64> raceMask;
     uint32 mailTemplateId;
     uint32 senderEntry;
 };
@@ -842,7 +829,7 @@ SkillRangeType GetSkillRangeType(SkillRaceClassInfoEntry const* rcEntry);
 #define MAX_PET_NAME             12                         // max allowed by client name length
 #define MAX_CHARTER_NAME         24                         // max allowed by client name length
 
-TC_GAME_API bool normalizePlayerName(std::string& name);
+GAME_API bool normalizePlayerName(std::string& name);
 
 struct ExtendedPlayerName
 {
@@ -860,7 +847,7 @@ struct LanguageDesc
     uint32   skill_id;
 };
 
-TC_GAME_API extern LanguageDesc lang_description[LANGUAGES_COUNT];
+GAME_API extern LanguageDesc lang_description[LANGUAGES_COUNT];
 LanguageDesc const* GetLanguageDescByID(uint32 lang);
 
 enum EncounterCreditType : uint8
@@ -914,7 +901,7 @@ struct RaceUnlockRequirement
 
 class PlayerDumpReader;
 
-class TC_GAME_API ObjectMgr
+class GAME_API ObjectMgr
 {
     friend class PlayerDumpReader;
 
@@ -1150,7 +1137,7 @@ class TC_GAME_API ObjectMgr
             return _creatureQuestInvolvedRelationsReverse.equal_range(questId);
         }
 
-        bool LoadTrinityStrings();
+        bool LoadServerStrings();
 
         void LoadEventScripts();
         void LoadSpellScripts();
@@ -1412,15 +1399,15 @@ class TC_GAME_API ObjectMgr
         GameObjectData& NewGOData(ObjectGuid::LowType guid) { return _gameObjectDataStore[guid]; }
         void DeleteGOData(ObjectGuid::LowType guid);
 
-        TrinityString const* GetTrinityString(uint32 entry) const
+        ServerString const* GetServerString(uint32 entry) const
         {
-            TrinityStringContainer::const_iterator itr = _trinityStringStore.find(entry);
-            if (itr == _trinityStringStore.end())
+            ServerStringContainer::const_iterator itr = _serverStringStore.find(entry);
+            if (itr == _serverStringStore.end())
                 return nullptr;
             return &itr->second;
         }
-        char const* GetTrinityString(uint32 entry, LocaleConstant locale) const;
-        char const* GetTrinityStringForDBCLocale(uint32 entry) const { return GetTrinityString(entry, DBCLocaleIndex); }
+        char const* GetServerString(uint32 entry, LocaleConstant locale) const;
+        char const* GetServerStringForDBCLocale(uint32 entry) const { return GetServerString(entry, DBCLocaleIndex); }
         LocaleConstant GetDBCLocaleIndex() const { return DBCLocaleIndex; }
         void SetDBCLocaleIndex(LocaleConstant locale) { DBCLocaleIndex = locale; }
 
@@ -1715,7 +1702,7 @@ class TC_GAME_API ObjectMgr
 
         std::unordered_map<int32, PlayerChoiceLocale> _playerChoiceLocales;
 
-        TrinityStringContainer _trinityStringStore;
+        ServerStringContainer _serverStringStore;
 
         CacheVendorItemContainer _cacheVendorItemStore;
         std::unordered_map<uint32, Trainer::Trainer> _trainers;

@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef SC_GOSSIP_H
@@ -87,15 +74,15 @@ enum eTradeskill
     GOSSIP_SENDER_SEC_STABLEMASTER      = 10
 };
 
-void TC_GAME_API ClearGossipMenuFor(Player* player);
+void GAME_API ClearGossipMenuFor(Player* player);
 // Using provided text, not from DB
-void TC_GAME_API AddGossipItemFor(Player* player, uint32 icon, std::string const& text, uint32 sender, uint32 action);
+void GAME_API AddGossipItemFor(Player* player, uint32 icon, std::string const& text, uint32 sender, uint32 action);
 // Using provided texts, not from DB
-void TC_GAME_API AddGossipItemFor(Player* player, uint32 icon, std::string const& text, uint32 sender, uint32 action, std::string const& popupText, uint32 popupMoney, bool coded);
+void GAME_API AddGossipItemFor(Player* player, uint32 icon, std::string const& text, uint32 sender, uint32 action, std::string const& popupText, uint32 popupMoney, bool coded);
 // Uses gossip item info from DB
-void TC_GAME_API AddGossipItemFor(Player* player, uint32 gossipMenuID, uint32 gossipMenuItemID, uint32 sender, uint32 action);
-void TC_GAME_API SendGossipMenuFor(Player* player, uint32 npcTextID, ObjectGuid const& guid);
-void TC_GAME_API SendGossipMenuFor(Player* player, uint32 npcTextID, Creature const* creature);
-void TC_GAME_API CloseGossipMenuFor(Player* player);
+void GAME_API AddGossipItemFor(Player* player, uint32 gossipMenuID, uint32 gossipMenuItemID, uint32 sender, uint32 action);
+void GAME_API SendGossipMenuFor(Player* player, uint32 npcTextID, ObjectGuid const& guid);
+void GAME_API SendGossipMenuFor(Player* player, uint32 npcTextID, Creature const* creature);
+void GAME_API CloseGossipMenuFor(Player* player);
 
 #endif

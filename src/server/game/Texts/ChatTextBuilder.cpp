@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "ChatTextBuilder.h"
@@ -21,7 +9,7 @@
 #include "ObjectMgr.h"
 #include <cstdarg>
 
-WorldPackets::Packet* Trinity::BroadcastTextBuilder::operator()(LocaleConstant locale) const
+WorldPackets::Packet* Server::BroadcastTextBuilder::operator()(LocaleConstant locale) const
 {
     BroadcastTextEntry const* bct = sBroadcastTextStore.LookupEntry(_textId);
     WorldPackets::Chat::Chat* chat = new WorldPackets::Chat::Chat();
@@ -29,18 +17,18 @@ WorldPackets::Packet* Trinity::BroadcastTextBuilder::operator()(LocaleConstant l
     return chat;
 }
 
-WorldPackets::Packet* Trinity::CustomChatTextBuilder::operator()(LocaleConstant locale) const
+WorldPackets::Packet* Server::CustomChatTextBuilder::operator()(LocaleConstant locale) const
 {
     WorldPackets::Chat::Chat* chat = new WorldPackets::Chat::Chat();
     chat->Initialize(_msgType, _language, _source, _target, _text, 0, "", locale);
     return chat;
 }
 
-WorldPackets::Packet* Trinity::TrinityStringChatBuilder::operator()(LocaleConstant locale) const
+WorldPackets::Packet* Server::ServerStringChatBuilder::operator()(LocaleConstant locale) const
 {
     WorldPackets::Chat::Chat* packet = new WorldPackets::Chat::Chat();
 
-    char const* text = sObjectMgr->GetTrinityString(_textId, locale);
+    char const* text = sObjectMgr->GetServerString(_textId, locale);
 
     if (_args)
     {

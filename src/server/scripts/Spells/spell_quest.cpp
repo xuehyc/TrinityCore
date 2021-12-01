@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /*
@@ -1592,8 +1580,8 @@ class spell_q11010_q11102_q11023_choose_loc : public SpellScriptLoader
                 Unit* caster = GetCaster();
                 // Check for player that is in 65 y range
                 std::list<Player*> playerList;
-                Trinity::AnyPlayerInObjectRangeCheck checker(caster, 65.0f);
-                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(caster, playerList, checker);
+                Server::AnyPlayerInObjectRangeCheck checker(caster, 65.0f);
+                Server::PlayerListSearcher<Server::AnyPlayerInObjectRangeCheck> searcher(caster, playerList, checker);
                 Cell::VisitWorldObjects(caster, searcher, 65.0f);
                 for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                     // Check if found player target is on fly mount or using flying form

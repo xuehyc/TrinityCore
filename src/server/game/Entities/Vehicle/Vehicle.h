@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef __TRINITY_VEHICLE_H
-#define __TRINITY_VEHICLE_H
+#ifndef __SERVER_VEHICLE_H
+#define __SERVER_VEHICLE_H
 
 #include "ObjectDefines.h"
 #include "Object.h"
@@ -29,7 +16,7 @@ struct VehicleEntry;
 class Unit;
 class VehicleJoinEvent;
 
-class TC_GAME_API Vehicle : public TransportBase
+class GAME_API Vehicle : public TransportBase
 {
     protected:
         friend bool Unit::CreateVehicleKit(uint32 id, uint32 creatureEntry, bool);
@@ -118,7 +105,7 @@ class TC_GAME_API Vehicle : public TransportBase
         PendingJoinEventContainer _pendingJoinEvents;       ///< Collection of delayed join events for prospective passengers
 };
 
-class TC_GAME_API VehicleJoinEvent : public BasicEvent
+class GAME_API VehicleJoinEvent : public BasicEvent
 {
     friend class Vehicle;
     protected:

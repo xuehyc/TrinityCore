@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _SPELLMGR_H
@@ -416,7 +403,7 @@ enum EffectRadiusIndex
 };
 
 // Spell pet auras
-class TC_GAME_API PetAura
+class GAME_API PetAura
 {
     private:
         typedef std::unordered_map<uint32, uint32> PetAuraMap;
@@ -470,14 +457,14 @@ enum SpellAreaFlag
     SPELL_AREA_FLAG_IGNORE_AUTOCAST_ON_QUEST_STATUS_CHANGE  = 0x4, // if this flag is set then spell will not be applied automatically on quest status change
 };
 
-struct TC_GAME_API SpellArea
+struct GAME_API SpellArea
 {
     uint32 spellId;
     uint32 areaId;                                          // zone/subzone/or 0 is not limited to zone
     uint32 questStart;                                      // quest start (quest must be active or rewarded for spell apply)
     uint32 questEnd;                                        // quest end (quest must not be rewarded for spell apply)
     int32  auraSpell;                                       // spell aura must be applied for spell apply)if possitive) and it must not be applied in other case
-    Trinity::RaceMask<uint64> raceMask;                     // can be applied only to races
+    Server::RaceMask<uint64> raceMask;                     // can be applied only to races
     Gender gender;                                          // can be applied only to gender
     uint32 questStartStatus;                                // QuestStatus that quest_start must have in order to keep the spell
     uint32 questEndStatus;                                  // QuestStatus that the quest_end must have in order to keep the spell (if the quest_end's status is different than this, the spell will be dropped)
@@ -584,7 +571,7 @@ inline bool IsProfessionOrRidingSkill(uint32 skill)
 
 bool IsPartOfSkillLine(uint32 skillId, uint32 spellId);
 
-TC_GAME_API extern PetFamilySpellsStore                         sPetFamilySpellsStore;
+GAME_API extern PetFamilySpellsStore                         sPetFamilySpellsStore;
 
 struct SpellInfoLoadHelper
 {
@@ -609,7 +596,7 @@ struct SpellInfoLoadHelper
 
 typedef std::map<std::pair<uint32 /*SpellId*/, uint8 /*RaceId*/>, uint32 /*DisplayId*/> SpellTotemModelMap;
 
-class TC_GAME_API SpellMgr
+class GAME_API SpellMgr
 {
     // Constructors
     private:
@@ -634,7 +621,7 @@ class TC_GAME_API SpellMgr
         uint32 GetSpellWithRank(uint32 spell_id, uint32 rank, bool strict = false) const;
 
         // Spell Required table
-        Trinity::IteratorPair<SpellRequiredMap::const_iterator> GetSpellsRequiredForSpellBounds(uint32 spell_id) const;
+        Server::IteratorPair<SpellRequiredMap::const_iterator> GetSpellsRequiredForSpellBounds(uint32 spell_id) const;
         SpellsRequiringSpellMapBounds GetSpellsRequiringSpellBounds(uint32 spell_id) const;
         bool IsSpellRequiringSpell(uint32 spellid, uint32 req_spellid) const;
 

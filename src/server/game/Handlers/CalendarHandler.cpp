@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /*
@@ -329,7 +316,7 @@ void WorldSession::HandleCalendarEventSignup(WorldPackets::Calendar::CalendarEve
 {
     ObjectGuid guid = _player->GetGUID();
 
-    TC_LOG_DEBUG("network", "CMSG_CALENDAR_EVENT_SIGNUP [%s] EventId [" UI64FMTD "] Tentative %u", guid.ToString().c_str(), calendarEventSignUp.EventID, calendarEventSignUp.Tentative);
+    LOG_DEBUG("network", "CMSG_CALENDAR_EVENT_SIGNUP [%s] EventId [" UI64FMTD "] Tentative %u", guid.ToString().c_str(), calendarEventSignUp.EventID, calendarEventSignUp.Tentative);
 
     if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(calendarEventSignUp.EventID))
     {
@@ -381,7 +368,7 @@ void WorldSession::HandleCalendarEventRemoveInvite(WorldPackets::Calendar::Calen
 {
     ObjectGuid guid = _player->GetGUID();
 
-    TC_LOG_DEBUG("network", "CMSG_CALENDAR_REMOVE_INVITE [%s] EventId [" UI64FMTD
+    LOG_DEBUG("network", "CMSG_CALENDAR_REMOVE_INVITE [%s] EventId [" UI64FMTD
         "], ownerInviteId [" UI64FMTD "], Invitee ([%s] id: [" UI64FMTD "])",
         guid.ToString().c_str(), calendarRemoveInvite.EventID, calendarRemoveInvite.ModeratorID, calendarRemoveInvite.Guid.ToString().c_str(), calendarRemoveInvite.InviteID);
 
@@ -403,7 +390,7 @@ void WorldSession::HandleCalendarEventStatus(WorldPackets::Calendar::CalendarEve
 {
     ObjectGuid guid = _player->GetGUID();
 
-    TC_LOG_DEBUG("network", "CMSG_CALENDAR_EVENT_STATUS [%s] EventId ["
+    LOG_DEBUG("network", "CMSG_CALENDAR_EVENT_STATUS [%s] EventId ["
         UI64FMTD "] ownerInviteId [" UI64FMTD "], Invitee ([%s] id: ["
         UI64FMTD "], status %u", guid.ToString().c_str(), calendarEventStatus.EventID, calendarEventStatus.ModeratorID, calendarEventStatus.Guid.ToString().c_str(), calendarEventStatus.InviteID, calendarEventStatus.Status);
 
@@ -428,7 +415,7 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPackets::Calendar::Ca
 {
     ObjectGuid guid = _player->GetGUID();
 
-    TC_LOG_DEBUG("network", "CMSG_CALENDAR_EVENT_MODERATOR_STATUS [%s] EventID ["
+    LOG_DEBUG("network", "CMSG_CALENDAR_EVENT_MODERATOR_STATUS [%s] EventID ["
         UI64FMTD "] ModeratorID [" UI64FMTD "], Invitee ([%s] InviteID: ["
         UI64FMTD "], Status %u", guid.ToString().c_str(), calendarEventModeratorStatus.EventID, calendarEventModeratorStatus.ModeratorID, calendarEventModeratorStatus.Guid.ToString().c_str(), calendarEventModeratorStatus.InviteID, calendarEventModeratorStatus.Status);
 
@@ -450,7 +437,7 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPackets::Calendar::Ca
 void WorldSession::HandleCalendarComplain(WorldPackets::Calendar::CalendarComplain& calendarComplain)
 {
     ObjectGuid guid = _player->GetGUID();
-    TC_LOG_DEBUG("network", "CMSG_CALENDAR_COMPLAIN [%s] EventId ["
+    LOG_DEBUG("network", "CMSG_CALENDAR_COMPLAIN [%s] EventId ["
         UI64FMTD "] guid [%s] InviteId [" UI64FMTD "]", guid.ToString().c_str(), calendarComplain.EventID,
         calendarComplain.InvitedByGUID.ToString().c_str(), calendarComplain.InviteID);
 
@@ -462,14 +449,14 @@ void WorldSession::HandleCalendarGetNumPending(WorldPackets::Calendar::CalendarG
     ObjectGuid guid = _player->GetGUID();
     uint32 pending = sCalendarMgr->GetPlayerNumPending(guid);
 
-    TC_LOG_DEBUG("network", "CMSG_CALENDAR_GET_NUM_PENDING: [%s] Pending: %u", guid.ToString().c_str(), pending);
+    LOG_DEBUG("network", "CMSG_CALENDAR_GET_NUM_PENDING: [%s] Pending: %u", guid.ToString().c_str(), pending);
 
     SendPacket(WorldPackets::Calendar::CalendarSendNumPending(pending).Write());
 }
 
 void WorldSession::HandleSetSavedInstanceExtend(WorldPackets::Calendar::SetSavedInstanceExtend& setSavedInstanceExtend)
 {
-    TC_LOG_DEBUG("network", "CMSG_SET_SAVED_INSTANCE_EXTEND - MapId: %u, Difficulty: %u, ToggleExtend: %s", setSavedInstanceExtend.MapID, setSavedInstanceExtend.DifficultyID, setSavedInstanceExtend.Extend ? "On" : "Off");
+    LOG_DEBUG("network", "CMSG_SET_SAVED_INSTANCE_EXTEND - MapId: %u, Difficulty: %u, ToggleExtend: %s", setSavedInstanceExtend.MapID, setSavedInstanceExtend.DifficultyID, setSavedInstanceExtend.Extend ? "On" : "Off");
 
     if (Player* player = GetPlayer())
     {
@@ -528,7 +515,7 @@ void WorldSession::SendCalendarRaidLockoutUpdated(InstanceSave const* save)
         return;
 
     ObjectGuid guid = _player->GetGUID();
-    TC_LOG_DEBUG("network", "SMSG_CALENDAR_RAID_LOCKOUT_UPDATED [%s] Map: %u, Difficulty %u", guid.ToString().c_str(), save->GetMapId(), save->GetDifficultyID());
+    LOG_DEBUG("network", "SMSG_CALENDAR_RAID_LOCKOUT_UPDATED [%s] Map: %u, Difficulty %u", guid.ToString().c_str(), save->GetMapId(), save->GetDifficultyID());
 
     time_t currTime = time(NULL);
 

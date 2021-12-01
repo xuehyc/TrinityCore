@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2020 TrinityCore <http://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "AreaTriggerAI.h"
@@ -595,7 +583,7 @@ public:
             // Convert list to vector, so we can access iterator to be able to shuffle the list
             std::vector<Creature*> balancePolesList{ std::make_move_iterator(std::begin(polesList)), std::make_move_iterator(std::end(polesList)) };
             // Shuffle the list so NPCs won't jump always on the same poles
-            Trinity::Containers::RandomShuffle(balancePolesList);
+            Server::Containers::RandomShuffle(balancePolesList);
 
             for (std::vector<Creature*>::const_iterator itr = balancePolesList.begin(); itr != balancePolesList.end(); ++itr)
             {

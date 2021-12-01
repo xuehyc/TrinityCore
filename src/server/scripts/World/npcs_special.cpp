@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "ScriptMgr.h"
@@ -123,14 +110,14 @@ public:
             }
 
             if (!SpawnAssoc)
-                TC_LOG_ERROR("sql.sql", "TCSR: Creature template entry %u has ScriptName npc_air_force_bots, but it's not handled by that script", creature->GetEntry());
+                LOG_ERROR("sql.sql", "TCSR: Creature template entry %u has ScriptName npc_air_force_bots, but it's not handled by that script", creature->GetEntry());
             else
             {
                 CreatureTemplate const* spawnedTemplate = sObjectMgr->GetCreatureTemplate(SpawnAssoc->spawnedCreatureEntry);
 
                 if (!spawnedTemplate)
                 {
-                    TC_LOG_ERROR("sql.sql", "TCSR: Creature template entry %u does not exist in DB, which is required by npc_air_force_bots", SpawnAssoc->spawnedCreatureEntry);
+                    LOG_ERROR("sql.sql", "TCSR: Creature template entry %u does not exist in DB, which is required by npc_air_force_bots", SpawnAssoc->spawnedCreatureEntry);
                     SpawnAssoc = NULL;
                     return;
                 }
@@ -150,7 +137,7 @@ public:
                 SpawnedGUID = summoned->GetGUID();
             else
             {
-                TC_LOG_ERROR("sql.sql", "TCSR: npc_air_force_bots: wasn't able to spawn Creature %u", SpawnAssoc->spawnedCreatureEntry);
+                LOG_ERROR("sql.sql", "TCSR: npc_air_force_bots: wasn't able to spawn Creature %u", SpawnAssoc->spawnedCreatureEntry);
                 SpawnAssoc = NULL;
             }
 
@@ -483,7 +470,7 @@ public:
 
             if (!targets.empty())
             {
-                _lastTargetGUID = Trinity::Containers::SelectRandomContainerElement(targets)->GetGUID();
+                _lastTargetGUID = Server::Containers::SelectRandomContainerElement(targets)->GetGUID();
 
                 return _lastTargetGUID;
             }
@@ -565,8 +552,8 @@ public:
         {
             // Returns true if no nearby player has aura "Test Ribbon Pole Channel".
             std::list<Player*> players;
-            Trinity::UnitAuraCheck check(true, SPELL_RIBBON_DANCE_COSMETIC);
-            Trinity::PlayerListSearcher<Trinity::UnitAuraCheck> searcher(me, players, check);
+            Server::UnitAuraCheck check(true, SPELL_RIBBON_DANCE_COSMETIC);
+            Server::PlayerListSearcher<Server::UnitAuraCheck> searcher(me, players, check);
             Cell::VisitWorldObjects(me, searcher, 10.0f);
 
             return players.empty();
@@ -983,7 +970,7 @@ void npc_doctor::npc_doctorAI::UpdateAI(uint32 diff)
                     patientEntry = HordeSoldierId[rand32() % 3];
                     break;
                 default:
-                    TC_LOG_ERROR("scripts", "Invalid entry for Triage doctor. Please check your database");
+                    LOG_ERROR("scripts", "Invalid entry for Triage doctor. Please check your database");
                     return;
             }
 

@@ -1,6 +1,6 @@
-DELETE FROM `trinity_string` WHERE `entry`=1029;
+DELETE FROM `server_string` WHERE `entry`=1029;
 
-INSERT INTO `trinity_string` (`entry`, `content_default`) VALUES
+INSERT INTO `server_string` (`entry`, `content_default`) VALUES
 (1029, 'Account name must contain the @ symbol.');
 
 DELETE FROM `command` WHERE `permission` IN (207,208,209,210,211,212,213);

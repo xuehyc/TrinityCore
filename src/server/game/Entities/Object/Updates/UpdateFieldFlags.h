@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _UPDATEFIELDFLAGS_H
@@ -37,17 +25,17 @@ enum UpdatefieldFlags
     UF_FLAG_URGENT_SELF_ONLY    = 0x400
 };
 
-TC_GAME_API extern uint32 ItemUpdateFieldFlags[CONTAINER_END];
-TC_GAME_API extern uint32 ItemDynamicUpdateFieldFlags[CONTAINER_DYNAMIC_END];
-TC_GAME_API extern uint32 UnitUpdateFieldFlags[PLAYER_END];
-TC_GAME_API extern uint32 UnitDynamicUpdateFieldFlags[PLAYER_DYNAMIC_END];
-TC_GAME_API extern uint32 GameObjectUpdateFieldFlags[GAMEOBJECT_END];
-TC_GAME_API extern uint32 GameObjectDynamicUpdateFieldFlags[GAMEOBJECT_DYNAMIC_END];
-TC_GAME_API extern uint32 DynamicObjectUpdateFieldFlags[DYNAMICOBJECT_END];
-TC_GAME_API extern uint32 CorpseUpdateFieldFlags[CORPSE_END];
-TC_GAME_API extern uint32 AreaTriggerUpdateFieldFlags[AREATRIGGER_END];
-TC_GAME_API extern uint32 SceneObjectUpdateFieldFlags[SCENEOBJECT_END];
-TC_GAME_API extern uint32 ConversationUpdateFieldFlags[CONVERSATION_END];
-TC_GAME_API extern uint32 ConversationDynamicUpdateFieldFlags[CONVERSATION_DYNAMIC_END];
+GAME_API extern uint32 ItemUpdateFieldFlags[CONTAINER_END];
+GAME_API extern uint32 ItemDynamicUpdateFieldFlags[CONTAINER_DYNAMIC_END];
+GAME_API extern uint32 UnitUpdateFieldFlags[PLAYER_END];
+GAME_API extern uint32 UnitDynamicUpdateFieldFlags[PLAYER_DYNAMIC_END];
+GAME_API extern uint32 GameObjectUpdateFieldFlags[GAMEOBJECT_END];
+GAME_API extern uint32 GameObjectDynamicUpdateFieldFlags[GAMEOBJECT_DYNAMIC_END];
+GAME_API extern uint32 DynamicObjectUpdateFieldFlags[DYNAMICOBJECT_END];
+GAME_API extern uint32 CorpseUpdateFieldFlags[CORPSE_END];
+GAME_API extern uint32 AreaTriggerUpdateFieldFlags[AREATRIGGER_END];
+GAME_API extern uint32 SceneObjectUpdateFieldFlags[SCENEOBJECT_END];
+GAME_API extern uint32 ConversationUpdateFieldFlags[CONVERSATION_END];
+GAME_API extern uint32 ConversationDynamicUpdateFieldFlags[CONVERSATION_DYNAMIC_END];
 
 #endif // _UPDATEFIELDFLAGS_H

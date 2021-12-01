@@ -1,7 +1,7 @@
--- `trinity_string` Language.h entries
+-- `server_string` Language.h entries
 
-DELETE FROM `trinity_string` WHERE `entry` > 716 AND `entry` < 750;
-INSERT INTO `trinity_string` VALUES
+DELETE FROM `server_string` WHERE `entry` > 716 AND `entry` < 750;
+INSERT INTO `server_string` VALUES
 (717,'Alliance',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (718,'Horde',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (719,'%s was destroyed by the %s!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),

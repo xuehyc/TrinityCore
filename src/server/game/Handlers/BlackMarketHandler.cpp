@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "WorldSession.h"
@@ -30,7 +18,7 @@ void WorldSession::HandleBlackMarketOpen(WorldPackets::BlackMarket::BlackMarketO
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(blackMarketOpen.Guid, UNIT_NPC_FLAG_BLACK_MARKET | UNIT_NPC_FLAG_BLACK_MARKET_VIEW);
     if (!unit)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleBlackMarketHello - Unit (GUID: %s) not found or you can't interact with him.", blackMarketOpen.Guid.ToString().c_str());
+        LOG_DEBUG("network", "WORLD: HandleBlackMarketHello - Unit (GUID: %s) not found or you can't interact with him.", blackMarketOpen.Guid.ToString().c_str());
         return;
     }
 
@@ -57,7 +45,7 @@ void WorldSession::HandleBlackMarketRequestItems(WorldPackets::BlackMarket::Blac
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(blackMarketRequestItems.Guid, UNIT_NPC_FLAG_BLACK_MARKET | UNIT_NPC_FLAG_BLACK_MARKET_VIEW);
     if (!unit)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleBlackMarketRequestItems - Unit (GUID: %s) not found or you can't interact with him.", blackMarketRequestItems.Guid.ToString().c_str());
+        LOG_DEBUG("network", "WORLD: HandleBlackMarketRequestItems - Unit (GUID: %s) not found or you can't interact with him.", blackMarketRequestItems.Guid.ToString().c_str());
         return;
     }
 
@@ -75,42 +63,42 @@ void WorldSession::HandleBlackMarketBidOnItem(WorldPackets::BlackMarket::BlackMa
     Creature* unit = player->GetNPCIfCanInteractWith(blackMarketBidOnItem.Guid, UNIT_NPC_FLAG_BLACK_MARKET);
     if (!unit)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleBlackMarketBidOnItem - Unit (GUID: %s) not found or you can't interact with him.", blackMarketBidOnItem.Guid.ToString().c_str());
+        LOG_DEBUG("network", "WORLD: HandleBlackMarketBidOnItem - Unit (GUID: %s) not found or you can't interact with him.", blackMarketBidOnItem.Guid.ToString().c_str());
         return;
     }
 
     BlackMarketEntry* entry = sBlackMarketMgr->GetAuctionByID(blackMarketBidOnItem.MarketID);
     if (!entry)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleBlackMarketBidOnItem - Player (%s, name: %s) tried to bid on a nonexistent auction (MarketId: %i).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), blackMarketBidOnItem.MarketID);
+        LOG_DEBUG("network", "WORLD: HandleBlackMarketBidOnItem - Player (%s, name: %s) tried to bid on a nonexistent auction (MarketId: %i).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), blackMarketBidOnItem.MarketID);
         SendBlackMarketBidOnItemResult(ERR_BMAH_ITEM_NOT_FOUND, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
         return;
     }
 
     if (entry->GetBidder() == player->GetGUID().GetCounter())
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleBlackMarketBidOnItem - Player (%s, name: %s) tried to place a bid on an item he already bid on. (MarketId: %i).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), blackMarketBidOnItem.MarketID);
+        LOG_DEBUG("network", "WORLD: HandleBlackMarketBidOnItem - Player (%s, name: %s) tried to place a bid on an item he already bid on. (MarketId: %i).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), blackMarketBidOnItem.MarketID);
         SendBlackMarketBidOnItemResult(ERR_BMAH_ALREADY_BID, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
         return;
     }
 
     if (!entry->ValidateBid(blackMarketBidOnItem.BidAmount))
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleBlackMarketBidOnItem - Player (%s, name: %s) tried to place an invalid bid. Amount: %lu (MarketId: %i).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), blackMarketBidOnItem.BidAmount, blackMarketBidOnItem.MarketID);
+        LOG_DEBUG("network", "WORLD: HandleBlackMarketBidOnItem - Player (%s, name: %s) tried to place an invalid bid. Amount: %lu (MarketId: %i).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), blackMarketBidOnItem.BidAmount, blackMarketBidOnItem.MarketID);
         SendBlackMarketBidOnItemResult(ERR_BMAH_HIGHER_BID, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
         return;
     }
 
     if (!player->HasEnoughMoney(blackMarketBidOnItem.BidAmount))
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleBlackMarketBidOnItem - Player (%s, name: %s) does not have enough money to place bid. (MarketId: %i).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), blackMarketBidOnItem.MarketID);
+        LOG_DEBUG("network", "WORLD: HandleBlackMarketBidOnItem - Player (%s, name: %s) does not have enough money to place bid. (MarketId: %i).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), blackMarketBidOnItem.MarketID);
         SendBlackMarketBidOnItemResult(ERR_BMAH_NOT_ENOUGH_MONEY, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
         return;
     }
 
     if (entry->GetSecondsRemaining() <= 0)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleBlackMarketBidOnItem - Player (%s, name: %s) tried to bid on a completed auction. (MarketId: %i).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), blackMarketBidOnItem.MarketID);
+        LOG_DEBUG("network", "WORLD: HandleBlackMarketBidOnItem - Player (%s, name: %s) tried to bid on a completed auction. (MarketId: %i).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), blackMarketBidOnItem.MarketID);
         SendBlackMarketBidOnItemResult(ERR_BMAH_DATABASE_ERROR, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
         return;
     }

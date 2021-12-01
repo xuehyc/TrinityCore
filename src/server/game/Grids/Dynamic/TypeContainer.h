@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_TYPECONTAINER_H
-#define TRINITY_TYPECONTAINER_H
+#ifndef SERVER_TYPECONTAINER_H
+#define SERVER_TYPECONTAINER_H
 
 /*
  * Here, you'll find a series of containers that allow you to hold multiple
@@ -86,13 +73,13 @@ template<class OBJECT_TYPES>
 class TypeMapContainer
 {
     public:
-        template<class SPECIFIC_TYPE> size_t Count() const { return Trinity::Count(i_elements, (SPECIFIC_TYPE*)NULL); }
+        template<class SPECIFIC_TYPE> size_t Count() const { return Server::Count(i_elements, (SPECIFIC_TYPE*)NULL); }
 
         /// inserts a specific object into the container
         template<class SPECIFIC_TYPE>
         bool insert(SPECIFIC_TYPE *obj)
         {
-            SPECIFIC_TYPE* t = Trinity::Insert(i_elements, obj);
+            SPECIFIC_TYPE* t = Server::Insert(i_elements, obj);
             return (t != NULL);
         }
 
@@ -100,7 +87,7 @@ class TypeMapContainer
         //template<class SPECIFIC_TYPE>
         //bool remove(SPECIFIC_TYPE* obj)
         //{
-        //    SPECIFIC_TYPE* t = Trinity::Remove(i_elements, obj);
+        //    SPECIFIC_TYPE* t = Server::Remove(i_elements, obj);
         //    return (t != NULL);
         //}
 
@@ -118,19 +105,19 @@ public:
     template<class SPECIFIC_TYPE>
     bool Insert(KEY_TYPE const& handle, SPECIFIC_TYPE* obj)
     {
-        return Trinity::Insert(_elements, handle, obj);
+        return Server::Insert(_elements, handle, obj);
     }
 
     template<class SPECIFIC_TYPE>
     bool Remove(KEY_TYPE const& handle)
     {
-        return Trinity::Remove(_elements, handle, (SPECIFIC_TYPE*)NULL);
+        return Server::Remove(_elements, handle, (SPECIFIC_TYPE*)NULL);
     }
 
     template<class SPECIFIC_TYPE>
     SPECIFIC_TYPE* Find(KEY_TYPE const& handle)
     {
-        return Trinity::Find(_elements, handle, (SPECIFIC_TYPE*)NULL);
+        return Server::Find(_elements, handle, (SPECIFIC_TYPE*)NULL);
     }
 
     ContainerUnorderedMap<OBJECT_TYPES, KEY_TYPE>& GetElements() { return _elements; }

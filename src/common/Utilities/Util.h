@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _UTIL_H
@@ -24,7 +11,7 @@
 #include <string>
 #include <vector>
 
-class TC_COMMON_API Tokenizer
+class COMMON_API Tokenizer
 {
 public:
     typedef std::vector<char const*> StorageType;
@@ -52,15 +39,15 @@ private:
     StorageType m_storage;
 };
 
-TC_COMMON_API void stripLineInvisibleChars(std::string &src);
+COMMON_API void stripLineInvisibleChars(std::string &src);
 
-TC_COMMON_API int64 MoneyStringToMoney(const std::string& moneyString);
+COMMON_API int64 MoneyStringToMoney(const std::string& moneyString);
 
-TC_COMMON_API struct tm* localtime_r(const time_t* time, struct tm *result);
+COMMON_API struct tm* localtime_r(const time_t* time, struct tm *result);
 
-TC_COMMON_API std::string secsToTimeString(uint64 timeInSecs, bool shortText = false, bool hoursOnly = false);
-TC_COMMON_API uint32 TimeStringToSecs(const std::string& timestring);
-TC_COMMON_API std::string TimeToTimestampStr(time_t t);
+COMMON_API std::string secsToTimeString(uint64 timeInSecs, bool shortText = false, bool hoursOnly = false);
+COMMON_API uint32 TimeStringToSecs(const std::string& timestring);
+COMMON_API std::string TimeToTimestampStr(time_t t);
 
 inline void ApplyPercentModFloatVar(float& var, float val, bool apply)
 {
@@ -95,23 +82,23 @@ inline T RoundToInterval(T& num, T floor, T ceil)
 }
 
 // UTF8 handling
-TC_COMMON_API bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr);
+COMMON_API bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr);
 
 // in wsize==max size of buffer, out wsize==real string size
-TC_COMMON_API bool Utf8toWStr(char const* utf8str, size_t csize, wchar_t* wstr, size_t& wsize);
+COMMON_API bool Utf8toWStr(char const* utf8str, size_t csize, wchar_t* wstr, size_t& wsize);
 
 inline bool Utf8toWStr(const std::string& utf8str, wchar_t* wstr, size_t& wsize)
 {
     return Utf8toWStr(utf8str.c_str(), utf8str.size(), wstr, wsize);
 }
 
-TC_COMMON_API bool WStrToUtf8(std::wstring const& wstr, std::string& utf8str);
+COMMON_API bool WStrToUtf8(std::wstring const& wstr, std::string& utf8str);
 // size==real string size
-TC_COMMON_API bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str);
+COMMON_API bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str);
 
 // set string to "" if invalid utf8 sequence
-TC_COMMON_API size_t utf8length(std::string& utf8str);
-TC_COMMON_API void utf8truncate(std::string& utf8str, size_t len);
+COMMON_API size_t utf8length(std::string& utf8str);
+COMMON_API void utf8truncate(std::string& utf8str, size_t len);
 
 inline bool isBasicLatinCharacter(wchar_t wchar)
 {
@@ -280,28 +267,28 @@ inline wchar_t wcharToLower(wchar_t wchar)
     return wchar;
 }
 
-TC_COMMON_API void wstrToUpper(std::wstring& str);
-TC_COMMON_API void wstrToLower(std::wstring& str);
+COMMON_API void wstrToUpper(std::wstring& str);
+COMMON_API void wstrToLower(std::wstring& str);
 
-TC_COMMON_API std::wstring GetMainPartOfName(std::wstring const& wname, uint32 declension);
+COMMON_API std::wstring GetMainPartOfName(std::wstring const& wname, uint32 declension);
 
-TC_COMMON_API bool utf8ToConsole(const std::string& utf8str, std::string& conStr);
-TC_COMMON_API bool consoleToUtf8(const std::string& conStr, std::string& utf8str);
-TC_COMMON_API bool Utf8FitTo(const std::string& str, std::wstring const& search);
-TC_COMMON_API void utf8printf(FILE* out, const char *str, ...);
-TC_COMMON_API void vutf8printf(FILE* out, const char *str, va_list* ap);
-TC_COMMON_API bool Utf8ToUpperOnlyLatin(std::string& utf8String);
+COMMON_API bool utf8ToConsole(const std::string& utf8str, std::string& conStr);
+COMMON_API bool consoleToUtf8(const std::string& conStr, std::string& utf8str);
+COMMON_API bool Utf8FitTo(const std::string& str, std::wstring const& search);
+COMMON_API void utf8printf(FILE* out, const char *str, ...);
+COMMON_API void vutf8printf(FILE* out, const char *str, va_list* ap);
+COMMON_API bool Utf8ToUpperOnlyLatin(std::string& utf8String);
 
-TC_COMMON_API bool IsIPAddress(char const* ipaddress);
+COMMON_API bool IsIPAddress(char const* ipaddress);
 
-TC_COMMON_API uint32 CreatePIDFile(std::string const& filename);
-TC_COMMON_API uint32 GetPID();
+COMMON_API uint32 CreatePIDFile(std::string const& filename);
+COMMON_API uint32 GetPID();
 
-TC_COMMON_API std::string ByteArrayToHexStr(uint8 const* bytes, uint32 length, bool reverse = false);
-TC_COMMON_API void HexStrToByteArray(std::string const& str, uint8* out, bool reverse = false);
+COMMON_API std::string ByteArrayToHexStr(uint8 const* bytes, uint32 length, bool reverse = false);
+COMMON_API void HexStrToByteArray(std::string const& str, uint8* out, bool reverse = false);
 
-TC_COMMON_API bool StringToBool(std::string const& str);
-TC_COMMON_API float DegToRad(float degrees);
+COMMON_API bool StringToBool(std::string const& str);
+COMMON_API float DegToRad(float degrees);
 
 // simple class for not-modifyable list
 template <typename T>
@@ -348,7 +335,7 @@ class HookList final
         }
 };
 
-class TC_COMMON_API flag128
+class COMMON_API flag128
 {
 private:
     uint32 part[4];

@@ -2,8 +2,8 @@ DELETE FROM `command` WHERE `name`='bnetaccount listgameaccounts';
 INSERT INTO `command` (`name`,`permission`,`help`) VALUES
 ('bnetaccount listgameaccounts', 830, 'Syntax: .bnetaccount listgameaccounts $email $password\nLists all game accounts linked to battle.net $email');
 
-DELETE FROM `trinity_string` WHERE `entry` IN (1034,1035);
-INSERT INTO `trinity_string` (`entry`,`content_default`) VALUES
+DELETE FROM `server_string` WHERE `entry` IN (1034,1035);
+INSERT INTO `server_string` (`entry`,`content_default`) VALUES
 (1034, '| Account Id |  Internal name   |   Display name   |'),
 (1035, 'Battle.net account %s has no linked game accounts.');
 

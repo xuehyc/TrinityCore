@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /// \addtogroup world The World
@@ -544,7 +531,7 @@ enum WorldStates
 };
 
 /// Storage class for commands issued for delayed execution
-struct TC_GAME_API CliCommandHolder
+struct GAME_API CliCommandHolder
 {
     typedef void(*Print)(void*, const char*);
     typedef void(*CommandFinished)(void*, bool success);
@@ -566,7 +553,7 @@ private:
 typedef std::unordered_map<uint32, WorldSession*> SessionMap;
 
 /// The World
-class TC_GAME_API World
+class GAME_API World
 {
     public:
         static World* instance();
@@ -879,9 +866,9 @@ class TC_GAME_API World
         QueryCallbackProcessor _queryProcessor;
 };
 
-TC_GAME_API extern Realm realm;
+GAME_API extern Realm realm;
 
-TC_GAME_API uint32 GetVirtualRealmAddress();
+GAME_API uint32 GetVirtualRealmAddress();
 
 #define sWorld World::instance()
 

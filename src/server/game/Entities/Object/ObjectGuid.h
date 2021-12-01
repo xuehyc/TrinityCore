@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef ObjectGuid_h__
@@ -203,11 +190,11 @@ class ByteBuffer;
 
 #pragma pack(push, 1)
 
-class TC_GAME_API ObjectGuid
+class GAME_API ObjectGuid
 {
-    friend TC_GAME_API std::ostream& operator<<(std::ostream& stream, ObjectGuid const& guid);
-    friend TC_GAME_API ByteBuffer& operator<<(ByteBuffer& buf, ObjectGuid const& guid);
-    friend TC_GAME_API ByteBuffer& operator>>(ByteBuffer& buf, ObjectGuid& guid);
+    friend GAME_API std::ostream& operator<<(std::ostream& stream, ObjectGuid const& guid);
+    friend GAME_API ByteBuffer& operator<<(ByteBuffer& buf, ObjectGuid const& guid);
+    friend GAME_API ByteBuffer& operator>>(ByteBuffer& buf, ObjectGuid& guid);
 
     public:
         static ObjectGuid const Empty;
@@ -367,7 +354,7 @@ typedef std::deque<ObjectGuid> GuidDeque;
 typedef std::vector<ObjectGuid> GuidVector;
 typedef std::unordered_set<ObjectGuid> GuidUnorderedSet;
 
-class TC_GAME_API ObjectGuidGeneratorBase
+class GAME_API ObjectGuidGeneratorBase
 {
 public:
     ObjectGuidGeneratorBase(ObjectGuid::LowType start = UI64LIT(1)) : _nextGuid(start) { }
@@ -382,7 +369,7 @@ protected:
 };
 
 template<HighGuid high>
-class TC_GAME_API ObjectGuidGenerator : public ObjectGuidGeneratorBase
+class GAME_API ObjectGuidGenerator : public ObjectGuidGeneratorBase
 {
 public:
     explicit ObjectGuidGenerator(ObjectGuid::LowType start = UI64LIT(1)) : ObjectGuidGeneratorBase(start) { }
@@ -395,10 +382,10 @@ public:
     }
 };
 
-TC_GAME_API ByteBuffer& operator<<(ByteBuffer& buf, ObjectGuid const& guid);
-TC_GAME_API ByteBuffer& operator>>(ByteBuffer& buf, ObjectGuid&       guid);
+GAME_API ByteBuffer& operator<<(ByteBuffer& buf, ObjectGuid const& guid);
+GAME_API ByteBuffer& operator>>(ByteBuffer& buf, ObjectGuid&       guid);
 
-TC_GAME_API std::ostream& operator<<(std::ostream& stream, ObjectGuid const& guid);
+GAME_API std::ostream& operator<<(std::ostream& stream, ObjectGuid const& guid);
 
 namespace std
 {
@@ -413,7 +400,7 @@ namespace std
     };
 }
 
-namespace Trinity
+namespace Server
 {
     namespace Legacy
     {

@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_UNITAI_H
-#define TRINITY_UNITAI_H
+#ifndef SERVER_UNITAI_H
+#define SERVER_UNITAI_H
 
 #include "Containers.h"
 #include "EventMap.h"
@@ -54,7 +41,7 @@ enum SelectAggroTarget
 };
 
 // default predicate function to select target based on distance, player and/or aura criteria
-struct TC_GAME_API DefaultTargetSelector
+struct GAME_API DefaultTargetSelector
 {
     Unit const* me;
     float m_dist;
@@ -72,7 +59,7 @@ struct TC_GAME_API DefaultTargetSelector
 
 // Target selector for spell casts checking range, auras and attributes
 /// @todo Add more checks from Spell::CheckCast
-struct TC_GAME_API SpellTargetSelector : public std::unary_function<Unit*, bool>
+struct GAME_API SpellTargetSelector : public std::unary_function<Unit*, bool>
 {
     public:
         SpellTargetSelector(Unit* caster, uint32 spellId);
@@ -86,7 +73,7 @@ struct TC_GAME_API SpellTargetSelector : public std::unary_function<Unit*, bool>
 // Very simple target selector, will just skip main target
 // NOTE: When passing to UnitAI::SelectTarget remember to use 0 as position for random selection
 //       because tank will not be in the temporary list
-struct TC_GAME_API NonTankTargetSelector : public std::unary_function<Unit*, bool>
+struct GAME_API NonTankTargetSelector : public std::unary_function<Unit*, bool>
 {
     public:
         NonTankTargetSelector(Unit* source, bool playerOnly = true) : _source(source), _playerOnly(playerOnly) { }
@@ -98,7 +85,7 @@ struct TC_GAME_API NonTankTargetSelector : public std::unary_function<Unit*, boo
 };
 
 // Simple selector for units using mana
-struct TC_GAME_API PowerUsersSelector
+struct GAME_API PowerUsersSelector
 {
 public:
     PowerUsersSelector(Unit const* unit, Powers power, float dist, bool playerOnly) : _me(unit), _power(power), _dist(dist), _playerOnly(playerOnly) { }
@@ -111,7 +98,7 @@ private:
     bool const _playerOnly;
 };
 
-struct TC_GAME_API FarthestTargetSelector
+struct GAME_API FarthestTargetSelector
 {
 public:
     FarthestTargetSelector(Unit const* unit, float dist, bool playerOnly, bool inLos) : _me(unit), _dist(dist), _playerOnly(playerOnly), _inLos(inLos) {}
@@ -124,9 +111,9 @@ private:
     bool _inLos;
 };
 
-TC_GAME_API void SortByDistanceTo(Unit* reference, std::list<Unit*>& targets);
+GAME_API void SortByDistanceTo(Unit* reference, std::list<Unit*>& targets);
 
-class TC_GAME_API UnitAI
+class GAME_API UnitAI
 {
     protected:
         Unit* const me;
@@ -203,7 +190,7 @@ class TC_GAME_API UnitAI
                     return *ritr;
                 }
                 case SELECT_TARGET_RANDOM:
-                    return Trinity::Containers::SelectRandomContainerElement(targetList);
+                    return Server::Containers::SelectRandomContainerElement(targetList);
                 default:
                     break;
             }
@@ -235,7 +222,7 @@ class TC_GAME_API UnitAI
                 targetList.reverse();
 
             if (targetType == SELECT_TARGET_RANDOM)
-                Trinity::Containers::RandomResize(targetList, maxTargets);
+                Server::Containers::RandomResize(targetList, maxTargets);
             else
                 targetList.resize(maxTargets);
         }

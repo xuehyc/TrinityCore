@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2012-2014 Arctium Emulation <http://arctium.org>
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef CONNECTION_PATCHER_PATCHES_COMMON_HPP
@@ -50,7 +37,7 @@ namespace Connection_Patcher
                     0xF0, 0xB8, 0x32, 0xCB, 0x5B, 0x66, 0xCE, 0x51, 0x54, 0xB4, 0xC3, 0xD3, 0xD4, 0xDC, 0xB3, 0xEE
                 };
             }
-            static std::string VersionsFile() { return "trinity6.github.io/%s/%s/build/versi"; };
+            static std::string VersionsFile() { return "mobius6.github.io/%s/%s/build/versi"; };
             static std::vector<unsigned char> CertBundleUrl() { return { 'h', 't', 't', 'p', 's', ':', '/', '/', 't', 'r', 'i', 'n', 'i', 't', 'y', '6', '.', 'g', 'i', 't', 'h', 'u', 'b', '.', 'i', 'o', '/', 'B', 'n', 'e', 't', '/', 'z', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', '/', 'c', 'l', 'i', 'e', 'n', 't', '/', 'b', 'g', 's', '-', 'k', 'e', 'y', '-', 'f', 'i', 'n', 'g', 'e', 'r', 'p', 'r', 'i', 'n', 't' }; }
             static std::string CertificateBundle()
             {

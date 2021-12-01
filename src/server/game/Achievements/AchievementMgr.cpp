@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "AchievementMgr.h"
@@ -79,14 +66,14 @@ bool AchievementMgr::CanUpdateCriteriaTree(Criteria const* criteria, CriteriaTre
 
     if (HasAchieved(achievement->ID))
     {
-        TC_LOG_TRACE("criteria.achievement", "AchievementMgr::CanUpdateCriteriaTree: (Id: %u Type %s Achievement %u) Achievement already earned",
+        LOG_TRACE("criteria.achievement", "AchievementMgr::CanUpdateCriteriaTree: (Id: %u Type %s Achievement %u) Achievement already earned",
             criteria->ID, CriteriaMgr::GetCriteriaTypeString(criteria->Entry->Type), achievement->ID);
         return false;
     }
 
     if (achievement->InstanceID != -1 && referencePlayer->GetMapId() != uint32(achievement->InstanceID))
     {
-        TC_LOG_TRACE("criteria.achievement", "AchievementMgr::CanUpdateCriteriaTree: (Id: %u Type %s Achievement %u) Wrong map",
+        LOG_TRACE("criteria.achievement", "AchievementMgr::CanUpdateCriteriaTree: (Id: %u Type %s Achievement %u) Wrong map",
             criteria->ID, CriteriaMgr::GetCriteriaTypeString(criteria->Entry->Type), achievement->ID);
         return false;
     }
@@ -94,7 +81,7 @@ bool AchievementMgr::CanUpdateCriteriaTree(Criteria const* criteria, CriteriaTre
     if ((achievement->Faction == ACHIEVEMENT_FACTION_HORDE    && referencePlayer->GetTeam() != HORDE) ||
         (achievement->Faction == ACHIEVEMENT_FACTION_ALLIANCE && referencePlayer->GetTeam() != ALLIANCE))
     {
-        TC_LOG_TRACE("criteria.achievement", "AchievementMgr::CanUpdateCriteriaTree: (Id: %u Type %s Achievement %u) Wrong faction",
+        LOG_TRACE("criteria.achievement", "AchievementMgr::CanUpdateCriteriaTree: (Id: %u Type %s Achievement %u) Wrong faction",
             criteria->ID, CriteriaMgr::GetCriteriaTypeString(criteria->Entry->Type), achievement->ID);
         return false;
     }
@@ -276,7 +263,7 @@ void PlayerAchievementMgr::LoadFromDB(PreparedQueryResult achievementResult, Pre
             if (!criteria)
             {
                 // Removing non-existing criteria data for all characters
-                TC_LOG_ERROR("criteria.achievement", "Non-existing achievement criteria %u data has been removed from the table `character_achievement_progress`.", id);
+                LOG_ERROR("criteria.achievement", "Non-existing achievement criteria %u data has been removed from the table `character_achievement_progress`.", id);
 
                 CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_ACHIEV_PROGRESS_CRITERIA);
                 stmt->setUInt32(0, id);
@@ -349,7 +336,7 @@ void PlayerAchievementMgr::SaveToDB(CharacterDatabaseTransaction& trans)
 
 void PlayerAchievementMgr::ResetCriteria(CriteriaTypes type, uint64 miscValue1, uint64 miscValue2, bool evenIfCriteriaComplete)
 {
-    TC_LOG_DEBUG("criteria.achievement", "PlayerAchievementMgr::ResetCriteria(%u, " UI64FMTD ", " UI64FMTD ")", type, miscValue1, miscValue2);
+    LOG_DEBUG("criteria.achievement", "PlayerAchievementMgr::ResetCriteria(%u, " UI64FMTD ", " UI64FMTD ")", type, miscValue1, miscValue2);
 
     // disable for gamemasters with GM-mode enabled
     if (_owner->IsGameMaster())
@@ -481,7 +468,7 @@ void PlayerAchievementMgr::CompletedAchievement(AchievementEntry const* achievem
     if (!_owner->GetSession()->PlayerLoading())
         SendAchievementEarned(achievement);
 
-    TC_LOG_INFO("criteria.achievement", "PlayerAchievementMgr::CompletedAchievement(%u). %s", achievement->ID, GetOwnerInfo().c_str());
+    LOG_INFO("criteria.achievement", "PlayerAchievementMgr::CompletedAchievement(%u). %s", achievement->ID, GetOwnerInfo().c_str());
 
     CompletedAchievementData& ca = _completedAchievements[achievement->ID];
     ca.Date = time(NULL);
@@ -589,14 +576,14 @@ void PlayerAchievementMgr::SendAchievementEarned(AchievementEntry const* achieve
     if (achievement->Flags & ACHIEVEMENT_FLAG_HIDDEN)
         return;
 
-    TC_LOG_DEBUG("criteria.achievement", "PlayerAchievementMgr::SendAchievementEarned(%u)", achievement->ID);
+    LOG_DEBUG("criteria.achievement", "PlayerAchievementMgr::SendAchievementEarned(%u)", achievement->ID);
 
     if (!(achievement->Flags & ACHIEVEMENT_FLAG_TRACKING_FLAG))
     {
         if (Guild* guild = sGuildMgr->GetGuildById(_owner->GetGuildId()))
         {
-            Trinity::BroadcastTextBuilder _builder(_owner, CHAT_MSG_GUILD_ACHIEVEMENT, BROADCAST_TEXT_ACHIEVEMENT_EARNED, _owner->getGender(), _owner, achievement->ID);
-            Trinity::LocalizedPacketDo<Trinity::BroadcastTextBuilder> _localizer(_builder);
+            Server::BroadcastTextBuilder _builder(_owner, CHAT_MSG_GUILD_ACHIEVEMENT, BROADCAST_TEXT_ACHIEVEMENT_EARNED, _owner->getGender(), _owner, achievement->ID);
+            Server::LocalizedPacketDo<Server::BroadcastTextBuilder> _localizer(_builder);
             guild->BroadcastWorker(_localizer, _owner);
         }
 
@@ -612,9 +599,9 @@ void PlayerAchievementMgr::SendAchievementEarned(AchievementEntry const* achieve
         // if player is in world he can tell his friends about new achievement
         else if (_owner->IsInWorld())
         {
-            Trinity::BroadcastTextBuilder _builder(_owner, CHAT_MSG_ACHIEVEMENT, BROADCAST_TEXT_ACHIEVEMENT_EARNED, _owner->getGender(), _owner, achievement->ID);
-            Trinity::LocalizedPacketDo<Trinity::BroadcastTextBuilder> _localizer(_builder);
-            Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::BroadcastTextBuilder>> _worker(_owner, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), _localizer);
+            Server::BroadcastTextBuilder _builder(_owner, CHAT_MSG_ACHIEVEMENT, BROADCAST_TEXT_ACHIEVEMENT_EARNED, _owner->getGender(), _owner, achievement->ID);
+            Server::LocalizedPacketDo<Server::BroadcastTextBuilder> _localizer(_builder);
+            Server::PlayerDistWorker<Server::LocalizedPacketDo<Server::BroadcastTextBuilder>> _worker(_owner, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), _localizer);
             Cell::VisitWorldObjects(_owner, _worker, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
         }
     }
@@ -720,7 +707,7 @@ void GuildAchievementMgr::LoadFromDB(PreparedQueryResult achievementResult, Prep
             if (!criteria)
             {
                 // we will remove not existed criteria for all guilds
-                TC_LOG_ERROR("criteria.achievement", "Non-existing achievement criteria %u data removed from table `guild_achievement_progress`.", id);
+                LOG_ERROR("criteria.achievement", "Non-existing achievement criteria %u data removed from table `guild_achievement_progress`.", id);
 
                 CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_ACHIEV_PROGRESS_CRITERIA_GUILD);
                 stmt->setUInt32(0, id);
@@ -885,7 +872,7 @@ void GuildAchievementMgr::SendAchievementMembers(Player* receiver, uint32 achiev
 
 void GuildAchievementMgr::CompletedAchievement(AchievementEntry const* achievement, Player* referencePlayer)
 {
-    TC_LOG_DEBUG("criteria.achievement", "GuildAchievementMgr::CompletedAchievement(%u)", achievement->ID);
+    LOG_DEBUG("criteria.achievement", "GuildAchievementMgr::CompletedAchievement(%u)", achievement->ID);
 
     if (achievement->Flags & ACHIEVEMENT_FLAG_COUNTER || HasAchieved(achievement->ID))
         return;
@@ -978,12 +965,12 @@ CriteriaList const& GuildAchievementMgr::GetCriteriaByType(CriteriaTypes type) c
 
 std::string PlayerAchievementMgr::GetOwnerInfo() const
 {
-    return Trinity::StringFormat("%s %s", _owner->GetGUID().ToString().c_str(), _owner->GetName().c_str());
+    return Server::StringFormat("%s %s", _owner->GetGUID().ToString().c_str(), _owner->GetName().c_str());
 }
 
 std::string GuildAchievementMgr::GetOwnerInfo() const
 {
-    return Trinity::StringFormat("Guild ID " UI64FMTD " %s", _owner->GetId(), _owner->GetName().c_str());
+    return Server::StringFormat("Guild ID " UI64FMTD " %s", _owner->GetId(), _owner->GetName().c_str());
 }
 
 AchievementGlobalMgr* AchievementGlobalMgr::Instance()
@@ -1043,7 +1030,7 @@ void AchievementGlobalMgr::LoadAchievementReferenceList()
 
     if (sAchievementStore.GetNumRows() == 0)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 achievement references.");
+        LOG_INFO("server.loading", ">> Loaded 0 achievement references.");
         return;
     }
 
@@ -1068,7 +1055,7 @@ void AchievementGlobalMgr::LoadAchievementReferenceList()
         achievement->InstanceID = 631;
     });
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u achievement references in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u achievement references in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void AchievementGlobalMgr::LoadCompletedAchievements()
@@ -1086,7 +1073,7 @@ void AchievementGlobalMgr::LoadCompletedAchievements()
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 realm first completed achievements. DB table `character_achievement` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 realm first completed achievements. DB table `character_achievement` is empty.");
         return;
     }
 
@@ -1099,7 +1086,7 @@ void AchievementGlobalMgr::LoadCompletedAchievements()
         if (!achievement)
         {
             // Remove non-existing achievements from all characters
-            TC_LOG_ERROR("criteria.achievement", "Non-existing achievement %u data has been removed from the table `character_achievement`.", achievementId);
+            LOG_ERROR("criteria.achievement", "Non-existing achievement %u data has been removed from the table `character_achievement`.", achievementId);
 
             CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_ACHIEVMENT);
             stmt->setUInt32(0, achievementId);
@@ -1112,7 +1099,7 @@ void AchievementGlobalMgr::LoadCompletedAchievements()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %lu realm first completed achievements in %u ms.", (unsigned long)_allCompletedAchievements.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %lu realm first completed achievements in %u ms.", (unsigned long)_allCompletedAchievements.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 void AchievementGlobalMgr::LoadRewards()
@@ -1126,7 +1113,7 @@ void AchievementGlobalMgr::LoadRewards()
 
     if (!result)
     {
-        TC_LOG_ERROR("server.loading", ">> Loaded 0 achievement rewards. DB table `achievement_reward` is empty.");
+        LOG_ERROR("server.loading", ">> Loaded 0 achievement rewards. DB table `achievement_reward` is empty.");
         return;
     }
 
@@ -1137,7 +1124,7 @@ void AchievementGlobalMgr::LoadRewards()
         AchievementEntry const* achievement = sAchievementStore.LookupEntry(id);
         if (!achievement)
         {
-            TC_LOG_ERROR("sql.sql", "Table `achievement_reward` contains a wrong achievement ID (%u), ignored.", id);
+            LOG_ERROR("sql.sql", "Table `achievement_reward` contains a wrong achievement ID (%u), ignored.", id);
             continue;
         }
 
@@ -1153,19 +1140,19 @@ void AchievementGlobalMgr::LoadRewards()
         // must be title or mail at least
         if (!reward.TitleId[0] && !reward.TitleId[1] && !reward.SenderCreatureId)
         {
-            TC_LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) does not contain title or item reward data. Ignored.", id);
+            LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) does not contain title or item reward data. Ignored.", id);
             continue;
         }
 
         if (achievement->Faction == ACHIEVEMENT_FACTION_ANY && (!reward.TitleId[0] ^ !reward.TitleId[1]))
-            TC_LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) contains the title (A: %u H: %u) for only one team.", id, reward.TitleId[0], reward.TitleId[1]);
+            LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) contains the title (A: %u H: %u) for only one team.", id, reward.TitleId[0], reward.TitleId[1]);
 
         if (reward.TitleId[0])
         {
             CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(reward.TitleId[0]);
             if (!titleEntry)
             {
-                TC_LOG_ERROR("sql.sql", "Table `achievement_reward` (Entry: %u) contains an invalid title id (%u) in `title_A`, set to 0", id, reward.TitleId[0]);
+                LOG_ERROR("sql.sql", "Table `achievement_reward` (Entry: %u) contains an invalid title id (%u) in `title_A`, set to 0", id, reward.TitleId[0]);
                 reward.TitleId[0] = 0;
             }
         }
@@ -1175,7 +1162,7 @@ void AchievementGlobalMgr::LoadRewards()
             CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(reward.TitleId[1]);
             if (!titleEntry)
             {
-                TC_LOG_ERROR("sql.sql", "Table `achievement_reward` (Entry: %u) contains an invalid title id (%u) in `title_H`, set to 0", id, reward.TitleId[1]);
+                LOG_ERROR("sql.sql", "Table `achievement_reward` (Entry: %u) contains an invalid title id (%u) in `title_H`, set to 0", id, reward.TitleId[1]);
                 reward.TitleId[1] = 0;
             }
         }
@@ -1185,41 +1172,41 @@ void AchievementGlobalMgr::LoadRewards()
         {
             if (!sObjectMgr->GetCreatureTemplate(reward.SenderCreatureId))
             {
-                TC_LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) contains an invalid creature ID %u as sender, mail reward skipped.", id, reward.SenderCreatureId);
+                LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) contains an invalid creature ID %u as sender, mail reward skipped.", id, reward.SenderCreatureId);
                 reward.SenderCreatureId = 0;
             }
         }
         else
         {
             if (reward.ItemId)
-                TC_LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) does not have sender data, but contains an item reward. Item will not be rewarded.", id);
+                LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) does not have sender data, but contains an item reward. Item will not be rewarded.", id);
 
             if (!reward.Subject.empty())
-                TC_LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) does not have sender data, but contains a mail subject.", id);
+                LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) does not have sender data, but contains a mail subject.", id);
 
             if (!reward.Body.empty())
-                TC_LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) does not have sender data, but contains mail text.", id);
+                LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) does not have sender data, but contains mail text.", id);
 
             if (reward.MailTemplateId)
-                TC_LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) does not have sender data, but has a MailTemplate.", id);
+                LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) does not have sender data, but has a MailTemplate.", id);
         }
 
         if (reward.MailTemplateId)
         {
             if (!sMailTemplateStore.LookupEntry(reward.MailTemplateId))
             {
-                TC_LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) is using an invalid MailTemplate (%u).", id, reward.MailTemplateId);
+                LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) is using an invalid MailTemplate (%u).", id, reward.MailTemplateId);
                 reward.MailTemplateId = 0;
             }
             else if (!reward.Subject.empty() || !reward.Body.empty())
-                TC_LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) is using MailTemplate (%u) and mail subject/text.", id, reward.MailTemplateId);
+                LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) is using MailTemplate (%u) and mail subject/text.", id, reward.MailTemplateId);
         }
 
         if (reward.ItemId)
         {
             if (!sObjectMgr->GetItemTemplate(reward.ItemId))
             {
-                TC_LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) contains an invalid item id %u, reward mail will not contain the rewarded item.", id, reward.ItemId);
+                LOG_ERROR("sql.sql", "Table `achievement_reward` (ID: %u) contains an invalid item id %u, reward mail will not contain the rewarded item.", id, reward.ItemId);
                 reward.ItemId = 0;
             }
         }
@@ -1227,7 +1214,7 @@ void AchievementGlobalMgr::LoadRewards()
         _achievementRewards[id] = reward;
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u achievement rewards in %u ms.", uint32(_achievementRewards.size()), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u achievement rewards in %u ms.", uint32(_achievementRewards.size()), GetMSTimeDiffToNow(oldMSTime));
 }
 
 void AchievementGlobalMgr::LoadRewardLocales()
@@ -1241,7 +1228,7 @@ void AchievementGlobalMgr::LoadRewardLocales()
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 achievement reward locale strings.  DB table `achievement_reward_locale` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 achievement reward locale strings.  DB table `achievement_reward_locale` is empty.");
         return;
     }
 
@@ -1254,7 +1241,7 @@ void AchievementGlobalMgr::LoadRewardLocales()
 
         if (_achievementRewards.find(id) == _achievementRewards.end())
         {
-            TC_LOG_ERROR("sql.sql", "Table `achievement_reward_locale` (ID: %u) contains locale strings for a non-existing achievement reward.", id);
+            LOG_ERROR("sql.sql", "Table `achievement_reward_locale` (ID: %u) contains locale strings for a non-existing achievement reward.", id);
             continue;
         }
 
@@ -1267,5 +1254,5 @@ void AchievementGlobalMgr::LoadRewardLocales()
         ObjectMgr::AddLocaleString(fields[3].GetString(), locale, data.Body);
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u achievement reward locale strings in %u ms.", uint32(_achievementRewardLocales.size()), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u achievement reward locale strings in %u ms.", uint32(_achievementRewardLocales.size()), GetMSTimeDiffToNow(oldMSTime));
 }

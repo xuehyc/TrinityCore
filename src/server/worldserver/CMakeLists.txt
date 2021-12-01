@@ -1,12 +1,5 @@
-# Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
-#
-# This file is free software; as a special exception the author gives
-# unlimited permission to copy and/or distribute it, with or without
-# modifications, as long as this notice is preserved.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# This file is part of the MobiusCore project.
+# See AUTHORS file for copyright information.
 
 CollectSourceFiles(
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -33,7 +26,7 @@ add_executable(worldserver
 
 if( NOT WIN32 )
   set_target_properties(worldserver PROPERTIES
-    COMPILE_DEFINITIONS _TRINITY_CORE_CONFIG="${CONF_DIR}/worldserver.conf"
+    COMPILE_DEFINITIONS _SERVER_CORE_CONFIG="${CONF_DIR}/worldserver.conf"
   )
 endif()
 
@@ -45,7 +38,7 @@ set_target_properties(worldserver PROPERTIES LINK_FLAGS "${worldserver_LINK_FLAG
 
 target_link_libraries(worldserver
   PRIVATE
-    trinity-core-interface
+    mobius-core-interface
   PUBLIC
     scripts
     game

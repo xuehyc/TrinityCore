@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _REALMLIST_H
@@ -72,7 +59,7 @@ namespace JSON
     }
 }
 
-namespace Trinity
+namespace Server
 {
     namespace Asio
     {
@@ -82,7 +69,7 @@ namespace Trinity
 }
 
 /// Storage object for the list of realms on the server
-class TC_SHARED_API RealmList
+class SHARED_API RealmList
 {
 public:
     typedef std::map<Battlenet::RealmHandle, Realm> RealmMap;
@@ -91,7 +78,7 @@ public:
 
     ~RealmList();
 
-    void Initialize(Trinity::Asio::IoContext& ioContext, uint32 updateInterval);
+    void Initialize(Server::Asio::IoContext& ioContext, uint32 updateInterval);
     void Close();
 
     Realm const* GetRealm(Battlenet::RealmHandle const& id) const;
@@ -117,7 +104,7 @@ private:
     RealmMap _realms;
     std::unordered_set<std::string> _subRegions;
     uint32 _updateInterval;
-    std::unique_ptr<Trinity::Asio::DeadlineTimer> _updateTimer;
+    std::unique_ptr<Server::Asio::DeadlineTimer> _updateTimer;
     std::unique_ptr<boost::asio::ip::tcp_resolver> _resolver;
 };
 

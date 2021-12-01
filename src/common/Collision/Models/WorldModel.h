@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _WORLDMODEL_H
@@ -34,7 +21,7 @@ namespace VMAP
     struct LocationInfo;
     enum class ModelIgnoreFlags : uint32;
 
-    class TC_COMMON_API MeshTriangle
+    class COMMON_API MeshTriangle
     {
         public:
             MeshTriangle() : idx0(0), idx1(0), idx2(0) { }
@@ -45,7 +32,7 @@ namespace VMAP
             uint32 idx2;
     };
 
-    class TC_COMMON_API WmoLiquid
+    class COMMON_API WmoLiquid
     {
         public:
             WmoLiquid(uint32 width, uint32 height, const G3D::Vector3 &corner, uint32 type);
@@ -71,7 +58,7 @@ namespace VMAP
     };
 
     /*! holding additional info for WMO group files */
-    class TC_COMMON_API GroupModel
+    class COMMON_API GroupModel
     {
         public:
             GroupModel() : iBound(), iMogpFlags(0), iGroupWMOID(0), iLiquid(NULL) { }
@@ -104,7 +91,7 @@ namespace VMAP
     };
 
     /*! Holds a model (converted M2 or WMO) in its original coordinate space */
-    class TC_COMMON_API WorldModel
+    class COMMON_API WorldModel
     {
         public:
             WorldModel(): Flags(0), RootWMOID(0) { }

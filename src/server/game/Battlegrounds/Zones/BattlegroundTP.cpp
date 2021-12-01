@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "BattlegroundTP.h"
@@ -265,7 +253,7 @@ bool BattlegroundTP::SetupBattleground()
         || !AddObject(BG_TP_OBJECT_DOOR_H_3, BG_OBJECT_DOOR_H_3_TP_ENTRY, 1558.088f, 372.7654f, 1.723727f, 6.178466f, 0, 0, 0, 0, RESPAWN_IMMEDIATELY)
         || !AddObject(BG_TP_OBJECT_DOOR_H_4, BG_OBJECT_DOOR_H_4_TP_ENTRY, 1558.623f, 379.1595f, -6.409669f, 4.607672f, 0, 0, 0, 0, RESPAWN_IMMEDIATELY))
     {
-        TC_LOG_ERROR("misc", "BatteGroundTP: Failed to spawn some objects. Battleground not created!");
+        LOG_ERROR("misc", "BatteGroundTP: Failed to spawn some objects. Battleground not created!");
         return false;
     }
 
@@ -282,13 +270,13 @@ bool BattlegroundTP::SetupBattleground()
 
             if (!AddSpiritGuide(creatureType, grave->Loc.X, grave->Loc.Y, grave->Loc.Z, orientation, TeamId(team)))
             {
-                TC_LOG_ERROR("misc", "BatteGroundTP: Failed to spawn spirit guide id: %u. Battleground not created!", grave->ID);
+                LOG_ERROR("misc", "BatteGroundTP: Failed to spawn spirit guide id: %u. Battleground not created!", grave->ID);
                 return false;
             }
         }
         else
         {
-            TC_LOG_ERROR("misc", "BatteGroundTP: Failed to find grave %u. Battleground not created!", BG_TP_GraveyardIds[i]);
+            LOG_ERROR("misc", "BatteGroundTP: Failed to find grave %u. Battleground not created!", BG_TP_GraveyardIds[i]);
             return false;
         }
     }
@@ -786,7 +774,7 @@ void BattlegroundTP::RemovePlayer(Player* player, ObjectGuid guid, uint32 /* tea
     {
         if (!player)
         {
-            TC_LOG_ERROR("bg.battleground", "BattlegroundTP: Removing offline player who has the FLAG!!");
+            LOG_ERROR("bg.battleground", "BattlegroundTP: Removing offline player who has the FLAG!!");
             SetAllianceFlagPicker(ObjectGuid::Empty);
             RespawnFlag(ALLIANCE, false);
         }
@@ -797,7 +785,7 @@ void BattlegroundTP::RemovePlayer(Player* player, ObjectGuid guid, uint32 /* tea
     {
         if (!player)
         {
-            TC_LOG_ERROR("bg.battleground", "BattlegroundTP: Removing offline player who has the FLAG!!");
+            LOG_ERROR("bg.battleground", "BattlegroundTP: Removing offline player who has the FLAG!!");
             SetHordeFlagPicker(ObjectGuid::Empty);
             RespawnFlag(HORDE, false);
         }
@@ -810,12 +798,12 @@ void BattlegroundTP::RespawnFlag(uint32 Team, bool captured)
 {
     if (Team == ALLIANCE)
     {
-        TC_LOG_DEBUG("bg.battleground", "Respawn Alliance flag");
+        LOG_DEBUG("bg.battleground", "Respawn Alliance flag");
         _flagState[TEAM_ALLIANCE] = BG_TP_FLAG_STATE_ON_BASE;
     }
     else
     {
-        TC_LOG_DEBUG("bg.battleground", "Respawn Horde flag");
+        LOG_DEBUG("bg.battleground", "Respawn Horde flag");
         _flagState[TEAM_HORDE] = BG_TP_FLAG_STATE_ON_BASE;
     }
 
@@ -879,7 +867,7 @@ void BattlegroundTP::RespawnFlagAfterDrop(uint32 team)
     if (GameObject* obj = GetBgMap()->GetGameObject(GetDroppedFlagGUID(team)))
         obj->Delete();
     else
-        TC_LOG_ERROR("bg.battleground", "unknown dropped flag (%s)", GetDroppedFlagGUID(team).ToString().c_str());
+        LOG_ERROR("bg.battleground", "unknown dropped flag (%s)", GetDroppedFlagGUID(team).ToString().c_str());
 
     SetDroppedFlagGUID(ObjectGuid::Empty, GetTeamIndexByTeamId(team));
     _bothFlagsKept = false;

@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _TILEASSEMBLER_H_
@@ -36,7 +23,7 @@ namespace VMAP
     */
     //===============================================
 
-    class TC_COMMON_API ModelPosition
+    class COMMON_API ModelPosition
     {
         private:
             G3D::Matrix3 iRotation;
@@ -64,7 +51,7 @@ namespace VMAP
         bool operator<(TileSpawn const& right) const { return Id < right.Id; }
     };
 
-    struct TC_COMMON_API MapSpawns
+    struct COMMON_API MapSpawns
     {
         MapSpawns() { }
 
@@ -77,7 +64,7 @@ namespace VMAP
     typedef std::deque<MapSpawns> MapData;
     //===============================================
 
-    struct TC_COMMON_API GroupModel_Raw
+    struct COMMON_API GroupModel_Raw
     {
         uint32 mogpflags;
         uint32 GroupWMOID;
@@ -95,7 +82,7 @@ namespace VMAP
         bool Read(FILE* f);
     };
 
-    struct TC_COMMON_API WorldModel_Raw
+    struct COMMON_API WorldModel_Raw
     {
         uint32 RootWMOID;
         std::vector<GroupModel_Raw> groupsArray;
@@ -103,7 +90,7 @@ namespace VMAP
         bool Read(const char * path);
     };
 
-    class TC_COMMON_API TileAssembler
+    class COMMON_API TileAssembler
     {
         private:
             std::string iDestDir;

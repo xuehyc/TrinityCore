@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /* ScriptData
@@ -145,10 +133,10 @@ public:
         std::string name = arena->GetName();
         arena->Disband();
         if (handler->GetSession())
-            TC_LOG_DEBUG("bg.arena", "GameMaster: %s [%s] disbanded arena team type: %u [Id: %u].",
+            LOG_DEBUG("bg.arena", "GameMaster: %s [%s] disbanded arena team type: %u [Id: %u].",
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(), arena->GetType(), teamId);
         else
-            TC_LOG_DEBUG("bg.arena", "Console: disbanded arena team type: %u [Id: %u].", arena->GetType(), teamId);
+            LOG_DEBUG("bg.arena", "Console: disbanded arena team type: %u [Id: %u].", arena->GetType(), teamId);
 
         delete(arena);
 
@@ -210,10 +198,10 @@ public:
 
         handler->PSendSysMessage(LANG_ARENA_RENAME, arena->GetId(), oldArenaStr, newArenaStr);
         if (handler->GetSession())
-            TC_LOG_DEBUG("bg.arena", "GameMaster: %s [%s] rename arena team \"%s\"[Id: %u] to \"%s\"",
+            LOG_DEBUG("bg.arena", "GameMaster: %s [%s] rename arena team \"%s\"[Id: %u] to \"%s\"",
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(), oldArenaStr, arena->GetId(), newArenaStr);
         else
-            TC_LOG_DEBUG("bg.arena", "Console: rename arena team \"%s\"[Id: %u] to \"%s\"", oldArenaStr, arena->GetId(), newArenaStr);
+            LOG_DEBUG("bg.arena", "Console: rename arena team \"%s\"[Id: %u] to \"%s\"", oldArenaStr, arena->GetId(), newArenaStr);
 
         return true;
     }
@@ -286,11 +274,11 @@ public:
 
         handler->PSendSysMessage(LANG_ARENA_CAPTAIN, arena->GetName().c_str(), arena->GetId(), oldCaptainName.c_str(), target->GetName().c_str());
         if (handler->GetSession())
-            TC_LOG_DEBUG("bg.arena", "GameMaster: %s [%s] promoted player: %s [%s] to leader of arena team \"%s\"[Id: %u]",
+            LOG_DEBUG("bg.arena", "GameMaster: %s [%s] promoted player: %s [%s] to leader of arena team \"%s\"[Id: %u]",
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(),
                 target->GetName().c_str(), target->GetGUID().ToString().c_str(), arena->GetName().c_str(), arena->GetId());
         else
-            TC_LOG_DEBUG("bg.arena", "Console: promoted player: %s [%s] to leader of arena team \"%s\"[Id: %u]",
+            LOG_DEBUG("bg.arena", "Console: promoted player: %s [%s] to leader of arena team \"%s\"[Id: %u]",
                 target->GetName().c_str(), target->GetGUID().ToString().c_str(), arena->GetName().c_str(), arena->GetId());
 
         return true;

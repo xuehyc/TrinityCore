@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://www.mangosproject.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_POOLHANDLER_H
-#define TRINITY_POOLHANDLER_H
+#ifndef SERVER_POOLHANDLER_H
+#define SERVER_POOLHANDLER_H
 
 #include "Define.h"
 #include <map>
@@ -48,7 +35,7 @@ class Pool                                                  // for Pool of Pool 
 typedef std::set<uint64> ActivePoolObjects;
 typedef std::map<uint64, uint32> ActivePoolPools;
 
-class TC_GAME_API ActivePoolData
+class GAME_API ActivePoolData
 {
     public:
         template<typename T>
@@ -71,7 +58,7 @@ class TC_GAME_API ActivePoolData
 };
 
 template <class T>
-class TC_GAME_API PoolGroup
+class GAME_API PoolGroup
 {
     typedef std::vector<PoolObject> PoolObjectList;
     public:
@@ -106,7 +93,7 @@ typedef std::multimap<uint32, uint32> PooledQuestRelation;
 typedef std::pair<PooledQuestRelation::const_iterator, PooledQuestRelation::const_iterator> PooledQuestRelationBounds;
 typedef std::pair<PooledQuestRelation::iterator, PooledQuestRelation::iterator> PooledQuestRelationBoundsNC;
 
-class TC_GAME_API PoolMgr
+class GAME_API PoolMgr
 {
     private:
         PoolMgr();

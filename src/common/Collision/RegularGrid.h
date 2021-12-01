@@ -1,3 +1,8 @@
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
+ */
+
 #ifndef _REGULAR_GRID_H
 #define _REGULAR_GRID_H
 
@@ -19,7 +24,7 @@ class NodeCreatorFunc = NodeCreator<Node>,
 class BoundsFunc = BoundsTrait<T>,
 class PositionFunc = PositionTrait<T>
 >
-class TC_COMMON_API RegularGrid2D
+class COMMON_API RegularGrid2D
 {
 public:
 
@@ -66,7 +71,7 @@ public:
 
     void remove(const T& value)
     {
-        for (auto& p : Trinity::Containers::MapEqualRange(memberTable, &value))
+        for (auto& p : Server::Containers::MapEqualRange(memberTable, &value))
             p.second->remove(value);
         // Remove the member
         memberTable.erase(&value);

@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "AuctionHouseBot.h"
@@ -97,11 +84,11 @@ uint64 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32
     if (i)
         deposit += remainderbase * i * timeHr;
 
-    TC_LOG_DEBUG("auctionHouse", "MSV:        %u", MSV);
-    TC_LOG_DEBUG("auctionHouse", "Items:      %u", count);
-    TC_LOG_DEBUG("auctionHouse", "Multiplier: %f", multiplier);
-    TC_LOG_DEBUG("auctionHouse", "Deposit:    " UI64FMTD, deposit);
-    TC_LOG_DEBUG("auctionHouse", "Deposit rm: %f", remainderbase * count);
+    LOG_DEBUG("auctionHouse", "MSV:        %u", MSV);
+    LOG_DEBUG("auctionHouse", "Items:      %u", count);
+    LOG_DEBUG("auctionHouse", "Multiplier: %f", multiplier);
+    LOG_DEBUG("auctionHouse", "Deposit:    " UI64FMTD, deposit);
+    LOG_DEBUG("auctionHouse", "Deposit rm: %f", remainderbase * count);
 
     if (deposit < AH_MINIMUM_DEPOSIT * sWorld->getRate(RATE_AUCTION_DEPOSIT))
         return AH_MINIMUM_DEPOSIT * sWorld->getRate(RATE_AUCTION_DEPOSIT);
@@ -135,7 +122,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction, CharacterDatabas
         logGmTrade = AccountMgr::HasPermission(bidderAccId, rbac::RBAC_PERM_LOG_GM_TRADE, realm.Id.Realm);
 
         if (logGmTrade && !sCharacterCache->GetCharacterNameByGuid(bidderGuid, bidderName))
-            bidderName = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
+            bidderName = sObjectMgr->GetServerStringForDBCLocale(LANG_UNKNOWN);
     }
 
     if (logGmTrade)
@@ -143,7 +130,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction, CharacterDatabas
         ObjectGuid ownerGuid = ObjectGuid::Create<HighGuid::Player>(auction->owner);
         std::string ownerName;
         if (!sCharacterCache->GetCharacterNameByGuid(ownerGuid, ownerName))
-            ownerName = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
+            ownerName = sObjectMgr->GetServerStringForDBCLocale(LANG_UNKNOWN);
 
         uint32 ownerAccId = sCharacterCache->GetCharacterAccountIdByGuid(ownerGuid);
 
@@ -307,7 +294,7 @@ void AuctionHouseMgr::LoadAuctionItems()
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 auction items. DB table `auctionhouse` or `item_instance` is empty!");
+        LOG_INFO("server.loading", ">> Loaded 0 auction items. DB table `auctionhouse` or `item_instance` is empty!");
         return;
     }
 
@@ -323,7 +310,7 @@ void AuctionHouseMgr::LoadAuctionItems()
         ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemEntry);
         if (!proto)
         {
-            TC_LOG_ERROR("misc", "AuctionHouseMgr::LoadAuctionItems: Unknown item (GUID: " UI64FMTD " item entry: #%u) in auction, skipped.", itemGuid, itemEntry);
+            LOG_ERROR("misc", "AuctionHouseMgr::LoadAuctionItems: Unknown item (GUID: " UI64FMTD " item entry: #%u) in auction, skipped.", itemGuid, itemEntry);
             continue;
         }
 
@@ -339,7 +326,7 @@ void AuctionHouseMgr::LoadAuctionItems()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u auction items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u auction items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void AuctionHouseMgr::LoadAuctions()
@@ -351,7 +338,7 @@ void AuctionHouseMgr::LoadAuctions()
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 auctions. DB table `auctionhouse` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 auctions. DB table `auctionhouse` is empty.");
         return;
     }
 
@@ -376,7 +363,7 @@ void AuctionHouseMgr::LoadAuctions()
 
     CharacterDatabase.CommitTransaction(trans);
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u auctions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u auctions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 
 }
 
@@ -504,7 +491,7 @@ void AuctionHouseMgr::UpdatePendingAuctions()
         else
         {
             // Expire any auctions that we couldn't get a deposit for
-            TC_LOG_WARN("auctionHouse", "Player %s was offline, unable to retrieve deposit!", playerGUID.ToString().c_str());
+            LOG_WARN("auctionHouse", "Player %s was offline, unable to retrieve deposit!", playerGUID.ToString().c_str());
             PlayerAuctions* thisAH = itr->second.first;
             ++itr;
             CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
@@ -823,7 +810,7 @@ void AuctionEntry::BuildAuctionInfo(std::vector<WorldPackets::AuctionHouse::Auct
     Item* item = (sourceItem) ? sourceItem : sAuctionMgr->GetAItem(itemGUIDLow);
     if (!item)
     {
-        TC_LOG_ERROR("misc", "AuctionEntry::BuildAuctionInfo: Auction %u has a non-existent item: " UI64FMTD, Id, itemGUIDLow);
+        LOG_ERROR("misc", "AuctionEntry::BuildAuctionInfo: Auction %u has a non-existent item: " UI64FMTD, Id, itemGUIDLow);
         return;
     }
 
@@ -926,14 +913,14 @@ bool AuctionEntry::LoadFromDB(Field* fields)
     CreatureData const* auctioneerData = sObjectMgr->GetCreatureData(auctioneer);
     if (!auctioneerData)
     {
-        TC_LOG_ERROR("misc", "Auction %u has not a existing auctioneer (GUID : " UI64FMTD ")", Id, auctioneer);
+        LOG_ERROR("misc", "Auction %u has not a existing auctioneer (GUID : " UI64FMTD ")", Id, auctioneer);
         return false;
     }
 
     CreatureTemplate const* auctioneerInfo = sObjectMgr->GetCreatureTemplate(auctioneerData->id);
     if (!auctioneerInfo)
     {
-        TC_LOG_ERROR("misc", "Auction %u has not a existing auctioneer (GUID : " UI64FMTD " Entry: %u)", Id, auctioneer, auctioneerData->id);
+        LOG_ERROR("misc", "Auction %u has not a existing auctioneer (GUID : " UI64FMTD " Entry: %u)", Id, auctioneer, auctioneerData->id);
         return false;
     }
 
@@ -941,7 +928,7 @@ bool AuctionEntry::LoadFromDB(Field* fields)
     auctionHouseEntry = AuctionHouseMgr::GetAuctionHouseEntry(factionTemplateId, &houseId);
     if (!auctionHouseEntry)
     {
-        TC_LOG_ERROR("misc", "Auction %u has auctioneer (GUID : " UI64FMTD " Entry: %u) with wrong faction %u", Id, auctioneer, auctioneerData->id, factionTemplateId);
+        LOG_ERROR("misc", "Auction %u has auctioneer (GUID : " UI64FMTD " Entry: %u) with wrong faction %u", Id, auctioneer, auctioneerData->id, factionTemplateId);
         return false;
     }
 
@@ -949,7 +936,7 @@ bool AuctionEntry::LoadFromDB(Field* fields)
     // and itemEntry in fact (GetAItem will fail if problematic in result check in AuctionHouseMgr::LoadAuctionItems)
     if (!sAuctionMgr->GetAItem(itemGUIDLow))
     {
-        TC_LOG_ERROR("misc", "Auction %u has not a existing item : " UI64FMTD, Id, itemGUIDLow);
+        LOG_ERROR("misc", "Auction %u has not a existing item : " UI64FMTD, Id, itemGUIDLow);
         return false;
     }
     return true;

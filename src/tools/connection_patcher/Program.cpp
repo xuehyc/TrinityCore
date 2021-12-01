@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2012-2014 Arctium Emulation <http://arctium.org>
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "Helper.hpp"
@@ -33,9 +20,9 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options.hpp>
 
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if SERVER_PLATFORM == SERVER_PLATFORM_WINDOWS
 #include <Shlobj.h>
-#elif TRINITY_PLATFORM == TRINITY_PLATFORM_UNIX
+#elif SERVER_PLATFORM == SERVER_PLATFORM_UNIX
 #include <pwd.h>
 #endif
 
@@ -63,15 +50,15 @@ namespace Connection_Patcher
             patcher->Patch(Patches::Common::CertBundleUrl(), Patterns::Common::CertBundleUrl());
 
             std::cout << "patching BNet certificate file signature\n";
-            Trinity::Crypto::RSA rsa;
-            rsa.LoadFromString(Patches::Common::CertificatePrivateKey(), Trinity::Crypto::RSA::PrivateKey{});
+            Server::Crypto::RSA rsa;
+            rsa.LoadFromString(Patches::Common::CertificatePrivateKey(), Server::Crypto::RSA::PrivateKey{});
             std::unique_ptr<uint8[]> modulusArray = rsa.GetModulus().AsByteArray(256);
             patcher->Patch(std::vector<uint8>(modulusArray.get(), modulusArray.get() + 256), Patterns::Common::CertSignatureModulus());
 
             std::cout << "patching Versions\n";
             // sever the connection to blizzard's versions file to stop it from updating and replace with custom version
             // this is good practice with or without the retail version, just to stop the exe from auto-patching randomly
-            // hardcode %s.patch.battle.net:1119/%s/versions to trinity6.github.io/%s/%s/build/versi
+            // hardcode %s.patch.battle.net:1119/%s/versions to mobius6.github.io/%s/%s/build/versi
             std::string verPatch(Patches::Common::VersionsFile());
             std::string buildPattern = "build";
 
@@ -106,9 +93,9 @@ namespace Connection_Patcher
             signatureHash.Finalize();
             std::array<uint8, 256> signature;
 
-            Trinity::Crypto::RSA rsa;
-            rsa.LoadFromString(Patches::Common::CertificatePrivateKey(), Trinity::Crypto::RSA::PrivateKey{});
-            rsa.Sign(signatureHash.GetDigest(), signatureHash.GetLength(), signature.data(), Trinity::Crypto::RSA::SHA256{});
+            Server::Crypto::RSA rsa;
+            rsa.LoadFromString(Patches::Common::CertificatePrivateKey(), Server::Crypto::RSA::PrivateKey{});
+            rsa.Sign(signatureHash.GetDigest(), signatureHash.GetLength(), signature.data(), Server::Crypto::RSA::SHA256{});
 
             ofs.write(reinterpret_cast<char const*>(signature.data()), signature.size());
         }
@@ -152,7 +139,7 @@ int main(int argc, char** argv)
 
     try
     {
-        Trinity::Banner::Show("connection_patcher", [](char const* text) { std::cout << text << std::endl; }, nullptr);
+        Server::Banner::Show("connection_patcher", [](char const* text) { std::cout << text << std::endl; }, nullptr);
 
         auto vm = GetConsoleArguments(argc, argv);
 
@@ -167,19 +154,19 @@ int main(int argc, char** argv)
         std::string renamed_binary_path(binary_path);
         std::wstring appDataPath;
 
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if SERVER_PLATFORM == SERVER_PLATFORM_WINDOWS
         wchar_t* tempPath(nullptr);
         SHGetKnownFolderPath(FOLDERID_ProgramData, 0, NULL, &tempPath);
         appDataPath = std::wstring(tempPath);
         CoTaskMemFree(tempPath);
-#elif TRINITY_PLATFORM == TRINITY_PLATFORM_UNIX
+#elif SERVER_PLATFORM == SERVER_PLATFORM_UNIX
         char* tempPath(nullptr);
         if ((tempPath = getenv("HOME")) == nullptr)
             tempPath = getpwuid(getuid())->pw_dir;
         std::string tempPathStr(tempPath);
         appDataPath.assign(tempPathStr.begin(), tempPathStr.end());
         appDataPath += std::wstring(L"/.wine/drive_c/users/Public/Application Data");
-#elif TRINITY_PLATFORM == TRINITY_PLATFORM_APPLE
+#elif SERVER_PLATFORM == SERVER_PLATFORM_APPLE
         appDataPath = L"/Users/Shared";
 #endif
         std::cout << "Creating patched binary..." << std::endl;

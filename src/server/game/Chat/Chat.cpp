@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "Chat.h"
@@ -80,9 +67,9 @@ void ChatHandler::invalidateCommandTable()
     commandTableCache.reset();
 }
 
-char const* ChatHandler::GetTrinityString(uint32 entry) const
+char const* ChatHandler::GetServerString(uint32 entry) const
 {
-    return m_session->GetTrinityString(entry);
+    return m_session->GetServerString(entry);
 }
 
 bool ChatHandler::isAvailable(ChatCommand const& cmd) const
@@ -250,7 +237,7 @@ void ChatHandler::SendGlobalGMSysMessage(const char *str)
 
 void ChatHandler::SendSysMessage(uint32 entry)
 {
-    SendSysMessage(GetTrinityString(entry));
+    SendSysMessage(GetServerString(entry));
 }
 
 bool ChatHandler::ExecuteCommandInTable(std::vector<ChatCommand> const& table, const char* text, std::string const& fullcmd)
@@ -390,12 +377,12 @@ bool ChatHandler::SetDataForCommandInTable(std::vector<ChatCommand>& table, char
         // expected subcommand by full name DB content
         else if (*text)
         {
-            TC_LOG_ERROR("sql.sql", "Table `command` contains an unexpected subcommand '%s' in command '%s', skipped.", text, fullcommand.c_str());
+            LOG_ERROR("sql.sql", "Table `command` contains an unexpected subcommand '%s' in command '%s', skipped.", text, fullcommand.c_str());
             return false;
         }
 
         if (table[i].Permission != permission)
-            TC_LOG_INFO("misc", "Table `command` overwrite for command '%s' default permission (%u) by %u", fullcommand.c_str(), table[i].Permission, permission);
+            LOG_INFO("misc", "Table `command` overwrite for command '%s' default permission (%u) by %u", fullcommand.c_str(), table[i].Permission, permission);
 
         table[i].Permission = permission;
         table[i].Help          = help;
@@ -406,9 +393,9 @@ bool ChatHandler::SetDataForCommandInTable(std::vector<ChatCommand>& table, char
     if (!cmd.empty())
     {
         if (&table == &getCommandTable())
-            TC_LOG_ERROR("sql.sql", "Table `command` contains a non-existing command '%s', skipped.", cmd.c_str());
+            LOG_ERROR("sql.sql", "Table `command` contains a non-existing command '%s', skipped.", cmd.c_str());
         else
-            TC_LOG_ERROR("sql.sql", "Table `command` contains a non-existing subcommand '%s' in command '%s', skipped.", cmd.c_str(), fullcommand.c_str());
+            LOG_ERROR("sql.sql", "Table `command` contains a non-existing subcommand '%s' in command '%s', skipped.", cmd.c_str(), fullcommand.c_str());
     }
 
     return false;
@@ -787,8 +774,8 @@ GameObject* ChatHandler::GetNearbyGameObject()
 
     Player* pl = m_session->GetPlayer();
     GameObject* obj = nullptr;
-    Trinity::NearestGameObjectCheck check(*pl);
-    Trinity::GameObjectLastSearcher<Trinity::NearestGameObjectCheck> searcher(pl, obj, check);
+    Server::NearestGameObjectCheck check(*pl);
+    Server::GameObjectLastSearcher<Server::NearestGameObjectCheck> searcher(pl, obj, check);
     Cell::VisitGridObjects(pl, searcher, SIZE_OF_GRIDS);
     return obj;
 }
@@ -1108,9 +1095,9 @@ std::string ChatHandler::GetNameLink(Player* chr) const
     return playerLink(chr->GetName());
 }
 
-char const* CliHandler::GetTrinityString(uint32 entry) const
+char const* CliHandler::GetServerString(uint32 entry) const
 {
-    return sObjectMgr->GetTrinityStringForDBCLocale(entry);
+    return sObjectMgr->GetServerStringForDBCLocale(entry);
 }
 
 bool CliHandler::isAvailable(ChatCommand const& cmd) const
@@ -1127,7 +1114,7 @@ void CliHandler::SendSysMessage(const char *str, bool /*escapeCharacters*/)
 
 std::string CliHandler::GetNameLink() const
 {
-    return GetTrinityString(LANG_CONSOLE_COMMAND);
+    return GetServerString(LANG_CONSOLE_COMMAND);
 }
 
 bool CliHandler::needReportToTarget(Player* /*chr*/) const

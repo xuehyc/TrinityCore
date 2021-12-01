@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /* ScriptData
@@ -567,7 +554,7 @@ void hyjalAI::SummonNextWave(const Wave wave[18], uint32 Count, float Base[4][3]
         else
         {
             NextWaveTimer = 15000;
-            TC_LOG_DEBUG("scripts", "HyjalAI: debug mode is enabled. Next Wave in 15 seconds");
+            LOG_DEBUG("scripts", "HyjalAI: debug mode is enabled. Next Wave in 15 seconds");
         }
     }
     else
@@ -909,8 +896,8 @@ void hyjalAI::HideNearPos(float x, float y)
 {
     // First get all creatures.
     std::list<Creature*> creatures;
-    Trinity::AllFriendlyCreaturesInGrid creature_check(me);
-    Trinity::CreatureListSearcher<Trinity::AllFriendlyCreaturesInGrid> creature_searcher(me, creatures, creature_check);
+    Server::AllFriendlyCreaturesInGrid creature_check(me);
+    Server::CreatureListSearcher<Server::AllFriendlyCreaturesInGrid> creature_searcher(me, creatures, creature_check);
     Cell::VisitGridObjects(x, y, me->GetMap(), creature_searcher, me->GetGridActivationRange());
 
     if (!creatures.empty())
@@ -925,8 +912,8 @@ void hyjalAI::HideNearPos(float x, float y)
 
 void hyjalAI::RespawnNearPos(float x, float y)
 {
-    Trinity::RespawnDo u_do;
-    Trinity::WorldObjectWorker<Trinity::RespawnDo> worker(me, u_do);
+    Server::RespawnDo u_do;
+    Server::WorldObjectWorker<Server::RespawnDo> worker(me, u_do);
     Cell::VisitGridObjects(x, y, me->GetMap(), worker, me->GetGridActivationRange());
 }
 
@@ -953,8 +940,8 @@ void hyjalAI::WaypointReached(uint32 waypointId)
         //all alive guards walk near here
         // First get all creatures.
         std::list<Creature*> creatures;
-        Trinity::AllFriendlyCreaturesInGrid creature_check(me);
-        Trinity::CreatureListSearcher<Trinity::AllFriendlyCreaturesInGrid> creature_searcher(me, creatures, creature_check);
+        Server::AllFriendlyCreaturesInGrid creature_check(me);
+        Server::CreatureListSearcher<Server::AllFriendlyCreaturesInGrid> creature_searcher(me, creatures, creature_check);
         Cell::VisitGridObjects(me, creature_searcher, me->GetGridActivationRange());
 
         if (!creatures.empty())
@@ -985,8 +972,8 @@ void hyjalAI::DoOverrun(uint32 faction, const uint32 diff)
         if (TeleportTimer <= diff)
         {
             std::list<Creature*> creatures;
-            Trinity::AllFriendlyCreaturesInGrid creature_check(me);
-            Trinity::CreatureListSearcher<Trinity::AllFriendlyCreaturesInGrid> creature_searcher(me, creatures, creature_check);
+            Server::AllFriendlyCreaturesInGrid creature_check(me);
+            Server::CreatureListSearcher<Server::AllFriendlyCreaturesInGrid> creature_searcher(me, creatures, creature_check);
             Cell::VisitGridObjects(me, creature_searcher, me->GetGridActivationRange());
 
             if (!creatures.empty())

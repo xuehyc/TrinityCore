@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "GameObject.h"
@@ -148,7 +135,7 @@ void GameObject::RemoveFromOwner()
     }
 
     // This happens when a mage portal is despawned after the caster changes map (for example using the portal)
-    TC_LOG_DEBUG("misc", "Removed GameObject (%s SpellId: %u LinkedGO: %u) that just lost any reference to the owner (%s) GO list",
+    LOG_DEBUG("misc", "Removed GameObject (%s SpellId: %u LinkedGO: %u) that just lost any reference to the owner (%s) GO list",
         GetGUID().ToString().c_str(), m_spellId, GetGOInfo()->GetLinkedGameObjectEntry(), ownerGUID.ToString().c_str());
     SetOwnerGUID(ObjectGuid::Empty);
 }
@@ -196,7 +183,7 @@ void GameObject::RemoveFromWorld()
         WorldObject::RemoveFromWorld();
 
         if (m_spawnId)
-            Trinity::Containers::MultimapErasePair(GetMap()->GetGameObjectBySpawnIdStore(), m_spawnId, this);
+            Server::Containers::MultimapErasePair(GetMap()->GetGameObjectBySpawnIdStore(), m_spawnId, this);
         GetMap()->GetObjectsStore().Remove<GameObject>(GetGUID());
     }
 }
@@ -210,7 +197,7 @@ bool GameObject::Create(uint32 entry, Map* map, Position const& pos, QuaternionD
     m_stationaryPosition.Relocate(pos);
     if (!IsPositionValid())
     {
-        TC_LOG_ERROR("misc", "Gameobject (Spawn id: " UI64FMTD " Entry: %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)", GetSpawnId(), entry, pos.GetPositionX(), pos.GetPositionY());
+        LOG_ERROR("misc", "Gameobject (Spawn id: " UI64FMTD " Entry: %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)", GetSpawnId(), entry, pos.GetPositionX(), pos.GetPositionY());
         return false;
     }
 
@@ -225,13 +212,13 @@ bool GameObject::Create(uint32 entry, Map* map, Position const& pos, QuaternionD
     GameObjectTemplate const* goInfo = sObjectMgr->GetGameObjectTemplate(entry);
     if (!goInfo)
     {
-        TC_LOG_ERROR("sql.sql", "Gameobject (Spawn id: " UI64FMTD " Entry: %u) not created: non-existing entry in `gameobject_template`. Map: %u (X: %f Y: %f Z: %f)", GetSpawnId(), entry, map->GetId(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+        LOG_ERROR("sql.sql", "Gameobject (Spawn id: " UI64FMTD " Entry: %u) not created: non-existing entry in `gameobject_template`. Map: %u (X: %f Y: %f Z: %f)", GetSpawnId(), entry, map->GetId(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
         return false;
     }
 
     if (goInfo->type == GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT)
     {
-        TC_LOG_ERROR("sql.sql", "Gameobject (Spawn id: " UI64FMTD " Entry: %u) not created: gameobject type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.", GetSpawnId(), entry);
+        LOG_ERROR("sql.sql", "Gameobject (Spawn id: " UI64FMTD " Entry: %u) not created: gameobject type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.", GetSpawnId(), entry);
         return false;
     }
 
@@ -251,7 +238,7 @@ bool GameObject::Create(uint32 entry, Map* map, Position const& pos, QuaternionD
 
     if (goInfo->type >= MAX_GAMEOBJECT_TYPE)
     {
-        TC_LOG_ERROR("sql.sql", "Gameobject (%s Spawn id: " UI64FMTD " Entry: %u) not created: non-existing GO type '%u' in `gameobject_template`. It will crash client if created.", guid.ToString().c_str(), GetSpawnId(), entry, goInfo->type);
+        LOG_ERROR("sql.sql", "Gameobject (%s Spawn id: " UI64FMTD " Entry: %u) not created: non-existing GO type '%u' in `gameobject_template`. It will crash client if created.", guid.ToString().c_str(), GetSpawnId(), entry, goInfo->type);
         return false;
     }
 
@@ -448,7 +435,7 @@ void GameObject::Update(uint32 diff)
     if (AI())
         AI()->UpdateAI(diff);
     else if (!AIM_Initialize())
-        TC_LOG_ERROR("misc", "Could not initialize GameObjectAI");
+        LOG_ERROR("misc", "Could not initialize GameObjectAI");
 
     switch (m_lootState)
     {
@@ -498,7 +485,7 @@ void GameObject::Update(uint32 diff)
 
                             G3D::Vector3 src(GetPositionX(), GetPositionY(), GetPositionZ());
 
-                            TC_LOG_DEBUG("misc", "Src: %s Dest: %s", src.toString().c_str(), pos.toString().c_str());
+                            LOG_DEBUG("misc", "Src: %s Dest: %s", src.toString().c_str(), pos.toString().c_str());
 
                             GetMap()->GameObjectRelocation(this, pos.x, pos.y, pos.z, GetOrientation());
                         }
@@ -662,16 +649,16 @@ void GameObject::Update(uint32 diff)
                     if (Unit* owner = GetOwner())
                     {
                         // Hunter trap: Search units which are unfriendly to the trap's owner
-                        Trinity::NearestAttackableNoTotemUnitInObjectRangeCheck checker(this, owner, radius);
-                        Trinity::UnitLastSearcher<Trinity::NearestAttackableNoTotemUnitInObjectRangeCheck> searcher(this, target, checker);
+                        Server::NearestAttackableNoTotemUnitInObjectRangeCheck checker(this, owner, radius);
+                        Server::UnitLastSearcher<Server::NearestAttackableNoTotemUnitInObjectRangeCheck> searcher(this, target, checker);
                         Cell::VisitAllObjects(this, searcher, radius);
                     }
                     else
                     {
                         // Environmental trap: Any player
                         Player* player = nullptr;
-                        Trinity::AnyPlayerInObjectRangeCheck checker(this, radius);
-                        Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, player, checker);
+                        Server::AnyPlayerInObjectRangeCheck checker(this, radius);
+                        Server::PlayerSearcher<Server::AnyPlayerInObjectRangeCheck> searcher(this, player, checker);
                         Cell::VisitWorldObjects(this, searcher, radius);
                         target = player;
                     }
@@ -926,7 +913,7 @@ void GameObject::SaveToDB()
     GameObjectData const* data = sObjectMgr->GetGOData(m_spawnId);
     if (!data)
     {
-        TC_LOG_ERROR("misc", "GameObject::SaveToDB failed, cannot get gameobject data!");
+        LOG_ERROR("misc", "GameObject::SaveToDB failed, cannot get gameobject data!");
         return;
     }
 
@@ -1013,7 +1000,7 @@ bool GameObject::LoadGameObjectFromDB(ObjectGuid::LowType spawnId, Map* map, boo
     GameObjectData const* data = sObjectMgr->GetGOData(spawnId);
     if (!data)
     {
-        TC_LOG_ERROR("sql.sql", "Gameobject (GUID: " UI64FMTD ") not found in table `gameobject`, can't load. ", spawnId);
+        LOG_ERROR("sql.sql", "Gameobject (GUID: " UI64FMTD ") not found in table `gameobject`, can't load. ", spawnId);
         return false;
     }
 
@@ -1288,8 +1275,8 @@ void GameObject::TriggeringLinkedGameObject(uint32 trapEntry, Unit* target)
 GameObject* GameObject::LookupFishingHoleAround(float range)
 {
     GameObject* ok = nullptr;
-    Trinity::NearestGameObjectFishingHole u_check(*this, range);
-    Trinity::GameObjectSearcher<Trinity::NearestGameObjectFishingHole> checker(this, ok, u_check);
+    Server::NearestGameObjectFishingHole u_check(*this, range);
+    Server::GameObjectSearcher<Server::NearestGameObjectFishingHole> checker(this, ok, u_check);
     Cell::VisitGridObjects(this, checker, range);
     return ok;
 }
@@ -1516,7 +1503,7 @@ void GameObject::Use(Unit* user)
 
                 if (info->goober.eventID)
                 {
-                    TC_LOG_DEBUG("maps.script", "Goober ScriptStart id %u for GO entry %u (GUID " UI64FMTD ").", info->goober.eventID, GetEntry(), GetSpawnId());
+                    LOG_DEBUG("maps.script", "Goober ScriptStart id %u for GO entry %u (GUID " UI64FMTD ").", info->goober.eventID, GetEntry(), GetSpawnId());
                     GetMap()->ScriptsStart(sEventScripts, info->goober.eventID, player, this);
                     EventInform(info->goober.eventID, user);
                 }
@@ -1605,7 +1592,7 @@ void GameObject::Use(Unit* user)
 
                     //provide error, no fishable zone or area should be 0
                     if (!zone_skill)
-                        TC_LOG_ERROR("sql.sql", "Fishable areaId %u are not properly defined in `skill_fishing_base_level`.", subzone);
+                        LOG_ERROR("sql.sql", "Fishable areaId %u are not properly defined in `skill_fishing_base_level`.", subzone);
 
                     int32 skill = player->GetSkillValue(SKILL_FISHING);
 
@@ -1621,7 +1608,7 @@ void GameObject::Use(Unit* user)
 
                     int32 roll = irand(1, 100);
 
-                    TC_LOG_DEBUG("misc", "Fishing check (skill: %i zone min skill: %i chance %i roll: %i", skill, zone_skill, chance, roll);
+                    LOG_DEBUG("misc", "Fishing check (skill: %i zone min skill: %i chance %i roll: %i", skill, zone_skill, chance, roll);
 
                     player->UpdateFishingSkill();
 
@@ -1742,7 +1729,7 @@ void GameObject::Use(Unit* user)
                 if (info->ritual.casterTargetSpell && info->ritual.casterTargetSpell != 1) // No idea why this field is a bool in some cases
                     for (uint32 i = 0; i < info->ritual.casterTargetSpellTargets; i++)
                         // m_unique_users can contain only player GUIDs
-                        if (Player* target = ObjectAccessor::GetPlayer(*this, Trinity::Containers::SelectRandomContainerElement(m_unique_users)))
+                        if (Player* target = ObjectAccessor::GetPlayer(*this, Server::Containers::SelectRandomContainerElement(m_unique_users)))
                             spellCaster->CastSpell(target, info->ritual.casterTargetSpell, true);
 
                 // finish owners spell
@@ -1972,7 +1959,7 @@ void GameObject::Use(Unit* user)
         }
         default:
             if (GetGoType() >= MAX_GAMEOBJECT_TYPE)
-                TC_LOG_ERROR("misc", "GameObject::Use(): unit (type: %u, %s, name: %s) tries to use object (%s, name: %s) of unknown type (%u)",
+                LOG_ERROR("misc", "GameObject::Use(): unit (type: %u, %s, name: %s) tries to use object (%s, name: %s) of unknown type (%u)",
                     user->GetTypeId(), user->GetGUID().ToString().c_str(), user->GetName().c_str(), GetGUID().ToString().c_str(), GetGOInfo()->name.c_str(), GetGoType());
             break;
     }
@@ -1984,9 +1971,9 @@ void GameObject::Use(Unit* user)
     if (!spellInfo)
     {
         if (user->GetTypeId() != TYPEID_PLAYER || !sOutdoorPvPMgr->HandleCustomSpell(user->ToPlayer(), spellId, this))
-            TC_LOG_ERROR("misc", "WORLD: unknown spell id %u at use action for gameobject (Entry: %u GoType: %u)", spellId, GetEntry(), GetGoType());
+            LOG_ERROR("misc", "WORLD: unknown spell id %u at use action for gameobject (Entry: %u GoType: %u)", spellId, GetEntry(), GetGoType());
         else
-            TC_LOG_DEBUG("outdoorpvp", "WORLD: %u non-dbc spell was handled by OutdoorPvP", spellId);
+            LOG_DEBUG("outdoorpvp", "WORLD: %u non-dbc spell was handled by OutdoorPvP", spellId);
         return;
     }
 

@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "Opcodes.h"
@@ -84,19 +71,19 @@ void OpcodeTable::ValidateAndSetClientOpcode(OpcodeClient opcode, char const* na
 {
     if (uint32(opcode) == NULL_OPCODE)
     {
-        TC_LOG_ERROR("network", "Opcode %s does not have a value", name);
+        LOG_ERROR("network", "Opcode %s does not have a value", name);
         return;
     }
 
     if (uint32(opcode) >= NUM_OPCODE_HANDLERS)
     {
-        TC_LOG_ERROR("network", "Tried to set handler for an invalid opcode %d", opcode);
+        LOG_ERROR("network", "Tried to set handler for an invalid opcode %d", opcode);
         return;
     }
 
     if (_internalTableClient[opcode] != NULL)
     {
-        TC_LOG_ERROR("network", "Tried to override client handler of %s with %s (opcode %u)", opcodeTable[opcode]->Name, name, opcode);
+        LOG_ERROR("network", "Tried to override client handler of %s with %s (opcode %u)", opcodeTable[opcode]->Name, name, opcode);
         return;
     }
 
@@ -107,31 +94,31 @@ void OpcodeTable::ValidateAndSetServerOpcode(OpcodeServer opcode, char const* na
 {
     if (uint32(opcode) == NULL_OPCODE)
     {
-        TC_LOG_ERROR("network", "Opcode %s does not have a value", name);
+        LOG_ERROR("network", "Opcode %s does not have a value", name);
         return;
     }
 
     if (uint32(opcode) >= NUM_OPCODE_HANDLERS)
     {
-        TC_LOG_ERROR("network", "Tried to set handler for an invalid opcode %d", opcode);
+        LOG_ERROR("network", "Tried to set handler for an invalid opcode %d", opcode);
         return;
     }
 
     if (conIdx >= MAX_CONNECTION_TYPES)
     {
-        TC_LOG_ERROR("network", "Tried to set invalid connection type %u for opcode %s", conIdx, name);
+        LOG_ERROR("network", "Tried to set invalid connection type %u for opcode %s", conIdx, name);
         return;
     }
 
     if (IsInstanceOnlyOpcode(opcode) && conIdx != CONNECTION_TYPE_INSTANCE)
     {
-        TC_LOG_ERROR("network", "Tried to set invalid connection type %u for instance only opcode %s", conIdx, name);
+        LOG_ERROR("network", "Tried to set invalid connection type %u for instance only opcode %s", conIdx, name);
         return;
     }
 
     if (_internalTableServer[opcode] != NULL)
     {
-        TC_LOG_ERROR("network", "Tried to override server handler of %s with %s (opcode %u)", opcodeTable[opcode]->Name, name, opcode);
+        LOG_ERROR("network", "Tried to override server handler of %s with %s (opcode %u)", opcodeTable[opcode]->Name, name, opcode);
         return;
     }
 

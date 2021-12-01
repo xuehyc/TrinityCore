@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /// @todo Implement proper support for vehicle+player teleportation
@@ -571,7 +559,7 @@ void BattlefieldWG::OnBattleStart()
         m_titansRelicGUID = relic->GetGUID();
     }
     else
-        TC_LOG_ERROR("bg.battlefield", "WG: Failed to spawn titan relic.");
+        LOG_ERROR("bg.battlefield", "WG: Failed to spawn titan relic.");
 
 
     // Update tower visibility and update faction
@@ -798,7 +786,7 @@ uint8 BattlefieldWG::GetSpiritGraveyardId(uint32 areaId) const
         case AREA_THE_CHILLED_QUAGMIRE:
             return BATTLEFIELD_WG_GY_HORDE;
         default:
-            TC_LOG_ERROR("bg.battlefield", "BattlefieldWG::GetSpiritGraveyardId: Unexpected Area Id %u", areaId);
+            LOG_ERROR("bg.battlefield", "BattlefieldWG::GetSpiritGraveyardId: Unexpected Area Id %u", areaId);
             break;
     }
 
@@ -1483,7 +1471,7 @@ void BfWGGameObjectBuilding::Destroyed()
             if (_wg->GetRelic())
                 _wg->GetRelic()->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NOT_SELECTABLE);
             else
-                TC_LOG_ERROR("bg.battlefield.wg", "Titan Relic not found.");
+                LOG_ERROR("bg.battlefield.wg", "Titan Relic not found.");
             break;
         default:
             break;

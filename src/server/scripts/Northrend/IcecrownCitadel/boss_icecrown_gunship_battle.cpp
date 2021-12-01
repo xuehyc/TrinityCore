@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "icecrown_citadel.h"
@@ -1470,8 +1458,8 @@ struct npc_gunship_boarding_addAI : public gunship_npc_AI
             me->GetSpellHistory()->AddCooldown(BurningPitchId, 0, std::chrono::seconds(3));
 
             std::list<Player*> players;
-            Trinity::UnitAuraCheck check(true, Instance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE ? SPELL_ON_ORGRIMS_HAMMER_DECK : SPELL_ON_SKYBREAKER_DECK);
-            Trinity::PlayerListSearcher<Trinity::UnitAuraCheck> searcher(me, players, check);
+            Server::UnitAuraCheck check(true, Instance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE ? SPELL_ON_ORGRIMS_HAMMER_DECK : SPELL_ON_SKYBREAKER_DECK);
+            Server::PlayerListSearcher<Server::UnitAuraCheck> searcher(me, players, check);
             Cell::VisitWorldObjects(me, searcher, 200.0f);
 
             players.remove_if([this](Player* player)
@@ -1481,7 +1469,7 @@ struct npc_gunship_boarding_addAI : public gunship_npc_AI
 
             if (!players.empty())
             {
-                players.sort(Trinity::ObjectDistanceOrderPred(me));
+                players.sort(Server::ObjectDistanceOrderPred(me));
                 for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
                     me->AddThreat(*itr, 1.0f);
 
@@ -1534,8 +1522,8 @@ struct npc_gunship_boarding_addAI : public gunship_npc_AI
     bool HasAttackablePlayerNearby()
     {
         std::list<Player*> players;
-        Trinity::UnitAuraCheck check(true, Instance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE ? SPELL_ON_ORGRIMS_HAMMER_DECK : SPELL_ON_SKYBREAKER_DECK);
-        Trinity::PlayerListSearcher<Trinity::UnitAuraCheck> searcher(me, players, check);
+        Server::UnitAuraCheck check(true, Instance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE ? SPELL_ON_ORGRIMS_HAMMER_DECK : SPELL_ON_SKYBREAKER_DECK);
+        Server::PlayerListSearcher<Server::UnitAuraCheck> searcher(me, players, check);
         Cell::VisitWorldObjects(me, searcher,200.0f );
 
         players.remove_if([this](Player* player)
@@ -2214,7 +2202,7 @@ class spell_igb_burning_pitch_selector : public SpellScriptLoader
 
                 if (!targets.empty())
                 {
-                    WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                    WorldObject* target = Server::Containers::SelectRandomContainerElement(targets);
                     targets.clear();
                     targets.push_back(target);
                 }
@@ -2280,7 +2268,7 @@ class spell_igb_rocket_artillery : public SpellScriptLoader
             {
                 if (!targets.empty())
                 {
-                    WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                    WorldObject* target = Server::Containers::SelectRandomContainerElement(targets);
                     targets.clear();
                     targets.push_back(target);
                 }

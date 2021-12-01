@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2019 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "MotionMaster.h"
@@ -198,7 +186,7 @@ struct npc_feasting_valarjar : public ScriptedAI
     {
         _scheduler.Schedule(5s, 30s, [this](TaskContext context)
         {
-            uint32 emoteID = Trinity::Containers::SelectRandomContainerElement(_randomEmotes);
+            uint32 emoteID = Server::Containers::SelectRandomContainerElement(_randomEmotes);
             if (emoteID == EMOTE_ONESHOT_EAT_NO_SHEATHE)
             {
                 me->SetVirtualItem(0, urand(0, 1) ? ITEM_MONSTER_ITEM_MUTTON_WITH_BITE : ITEM_MONSTER_ITEM_TANKARD_WOODEN);
@@ -274,7 +262,7 @@ struct npc_valarjar_paying_respect_to_odyn : ScriptedAI
             case POINT_TABLE:
                 _scheduler.Schedule(3s, 6s, [this](TaskContext /*context*/)
                 {
-                    me->HandleEmoteCommand(Trinity::Containers::SelectRandomContainerElement(_randomEmotes));
+                    me->HandleEmoteCommand(Server::Containers::SelectRandomContainerElement(_randomEmotes));
                 });
 
                 _scheduler.Schedule(7s, 15s, [this](TaskContext /*context*/)
@@ -558,7 +546,7 @@ struct npc_spectating_valarjar : public ScriptedAI
     {
         _scheduler.Schedule(5s, 30s, [this](TaskContext context)
         {
-            me->HandleEmoteCommand(Trinity::Containers::SelectRandomContainerElement(_randomEmotes));
+            me->HandleEmoteCommand(Server::Containers::SelectRandomContainerElement(_randomEmotes));
             context.Repeat();
         });
 
@@ -847,7 +835,7 @@ struct npc_weapon_inspector_valarjar : public ScriptedAI
         _scheduler.Schedule(15s, 20s, [this](TaskContext context)
         {
             me->SetAIAnimKitId(0);
-            std::pair<uint32, uint32> weapons = Trinity::Containers::SelectRandomContainerElement(_randomWeapons);
+            std::pair<uint32, uint32> weapons = Server::Containers::SelectRandomContainerElement(_randomWeapons);
             me->SetVirtualItem(0, weapons.first);
             me->SetVirtualItem(1, weapons.second);
 

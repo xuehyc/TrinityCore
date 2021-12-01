@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "WorldSession.h"
@@ -42,7 +30,7 @@ bool WorldSession::CanOpenMailBox(ObjectGuid guid)
     {
         if (!HasPermission(rbac::RBAC_PERM_COMMAND_MAILBOX))
         {
-            TC_LOG_WARN("cheat", "%s attempted to open mailbox by using a cheat.", _player->GetName().c_str());
+            LOG_WARN("cheat", "%s attempted to open mailbox by using a cheat.", _player->GetName().c_str());
             return false;
         }
     }
@@ -80,7 +68,7 @@ void WorldSession::HandleSendMail(WorldPackets::Mail::SendMail& packet)
 
     if (player->getLevel() < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
     {
-        SendNotification(GetTrinityString(LANG_MAIL_SENDER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
+        SendNotification(GetServerString(LANG_MAIL_SENDER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
         return;
     }
 
@@ -90,7 +78,7 @@ void WorldSession::HandleSendMail(WorldPackets::Mail::SendMail& packet)
 
     if (!receiverGuid)
     {
-        TC_LOG_INFO("network", "Player %s is sending mail to %s (GUID: not existing!) with subject %s "
+        LOG_INFO("network", "Player %s is sending mail to %s (GUID: not existing!) with subject %s "
             "and body %s includes " SZFMTD " items, " SI64FMTD " copper and " SI64FMTD " COD copper with StationeryID = %d",
             GetPlayerInfo().c_str(), packet.Info.Target.c_str(), packet.Info.Subject.c_str(), packet.Info.Body.c_str(),
             packet.Info.Attachments.size(), packet.Info.SendMoney, packet.Info.Cod, packet.Info.StationeryID);
@@ -101,7 +89,7 @@ void WorldSession::HandleSendMail(WorldPackets::Mail::SendMail& packet)
     if (packet.Info.SendMoney < 0)
     {
         GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_INTERNAL_ERROR);
-        TC_LOG_WARN("cheat", "Player %s attempted to send mail to %s (%s) with negative money value (SendMoney: " SI64FMTD ")",
+        LOG_WARN("cheat", "Player %s attempted to send mail to %s (%s) with negative money value (SendMoney: " SI64FMTD ")",
             GetPlayerInfo().c_str(), packet.Info.Target.c_str(), receiverGuid.ToString().c_str(), packet.Info.SendMoney);
         return;
     }
@@ -109,12 +97,12 @@ void WorldSession::HandleSendMail(WorldPackets::Mail::SendMail& packet)
     if (packet.Info.Cod < 0)
     {
         GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_INTERNAL_ERROR);
-        TC_LOG_WARN("cheat", "Player %s attempted to send mail to %s (%s) with negative COD value (Cod: " SI64FMTD ")",
+        LOG_WARN("cheat", "Player %s attempted to send mail to %s (%s) with negative COD value (Cod: " SI64FMTD ")",
             GetPlayerInfo().c_str(), packet.Info.Target.c_str(), receiverGuid.ToString().c_str(), packet.Info.Cod);
         return;
     }
 
-    TC_LOG_INFO("network", "Player %s is sending mail to %s (%s) with subject %s and body %s "
+    LOG_INFO("network", "Player %s is sending mail to %s (%s) with subject %s and body %s "
         "includes " SZFMTD " items, " SI64FMTD " copper and " SI64FMTD  " COD copper with StationeryID = %d",
         GetPlayerInfo().c_str(), packet.Info.Target.c_str(), receiverGuid.ToString().c_str(), packet.Info.Subject.c_str(),
         packet.Info.Body.c_str(), packet.Info.Attachments.size(), packet.Info.SendMoney, packet.Info.Cod, packet.Info.StationeryID);
@@ -210,7 +198,7 @@ void WorldSession::HandleSendMail(WorldPackets::Mail::SendMail& packet)
 
     if (receiverLevel < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
     {
-        SendNotification(GetTrinityString(LANG_MAIL_RECEIVER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
+        SendNotification(GetServerString(LANG_MAIL_RECEIVER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
         return;
     }
 
@@ -489,7 +477,7 @@ void WorldSession::HandleMailTakeItem(WorldPackets::Mail::MailTakeItem& packet)
                     sender_accId = sCharacterCache->GetCharacterAccountIdByGuid(sender_guid);
 
                     if (!sCharacterCache->GetCharacterNameByGuid(sender_guid, sender_name))
-                        sender_name = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
+                        sender_name = sObjectMgr->GetServerStringForDBCLocale(LANG_UNKNOWN);
                 }
                 sLog->outCommand(GetAccountId(), "GM %s (Account: %u) receiver mail item: %s (Entry: %u Count: %u) and send COD money: " UI64FMTD " to player: %s (Account: %u)",
                     GetPlayerName().c_str(), GetAccountId(), it->GetTemplate()->GetDefaultLocaleName(), it->GetEntry(), it->GetCount(), m->COD, sender_name.c_str(), sender_accId);

@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_LOOTMGR_H
-#define TRINITY_LOOTMGR_H
+#ifndef SERVER_LOOTMGR_H
+#define SERVER_LOOTMGR_H
 
 #include "Define.h"
 #include "ConditionMgr.h"
@@ -34,7 +21,7 @@ class Player;
 struct Loot;
 struct LootItem;
 
-struct TC_GAME_API LootStoreItem
+struct GAME_API LootStoreItem
 {
     uint32  itemid;                                         // id of the item
     uint32  reference;                                      // referenced TemplateleId
@@ -62,7 +49,7 @@ typedef std::unordered_map<uint32, LootTemplate*> LootTemplateMap;
 
 typedef std::set<uint32> LootIdSet;
 
-class TC_GAME_API LootStore
+class GAME_API LootStore
 {
     public:
         explicit LootStore(char const* name, char const* entryName, bool ratesAllowed)
@@ -99,7 +86,7 @@ class TC_GAME_API LootStore
         bool m_ratesAllowed;
 };
 
-class TC_GAME_API LootTemplate
+class GAME_API LootTemplate
 {
     class LootGroup;                                       // A set of loot definitions for items (refs are not allowed inside)
     typedef std::vector<LootGroup*> LootGroups;
@@ -137,33 +124,33 @@ class TC_GAME_API LootTemplate
 
 //=====================================================
 
-TC_GAME_API extern LootStore LootTemplates_Creature;
-TC_GAME_API extern LootStore LootTemplates_Fishing;
-TC_GAME_API extern LootStore LootTemplates_Gameobject;
-TC_GAME_API extern LootStore LootTemplates_Item;
-TC_GAME_API extern LootStore LootTemplates_Mail;
-TC_GAME_API extern LootStore LootTemplates_Milling;
-TC_GAME_API extern LootStore LootTemplates_Pickpocketing;
-TC_GAME_API extern LootStore LootTemplates_Reference;
-TC_GAME_API extern LootStore LootTemplates_Skinning;
-TC_GAME_API extern LootStore LootTemplates_Disenchant;
-TC_GAME_API extern LootStore LootTemplates_Prospecting;
-TC_GAME_API extern LootStore LootTemplates_Spell;
+GAME_API extern LootStore LootTemplates_Creature;
+GAME_API extern LootStore LootTemplates_Fishing;
+GAME_API extern LootStore LootTemplates_Gameobject;
+GAME_API extern LootStore LootTemplates_Item;
+GAME_API extern LootStore LootTemplates_Mail;
+GAME_API extern LootStore LootTemplates_Milling;
+GAME_API extern LootStore LootTemplates_Pickpocketing;
+GAME_API extern LootStore LootTemplates_Reference;
+GAME_API extern LootStore LootTemplates_Skinning;
+GAME_API extern LootStore LootTemplates_Disenchant;
+GAME_API extern LootStore LootTemplates_Prospecting;
+GAME_API extern LootStore LootTemplates_Spell;
 
-TC_GAME_API void LoadLootTemplates_Creature();
-TC_GAME_API void LoadLootTemplates_Fishing();
-TC_GAME_API void LoadLootTemplates_Gameobject();
-TC_GAME_API void LoadLootTemplates_Item();
-TC_GAME_API void LoadLootTemplates_Mail();
-TC_GAME_API void LoadLootTemplates_Milling();
-TC_GAME_API void LoadLootTemplates_Pickpocketing();
-TC_GAME_API void LoadLootTemplates_Skinning();
-TC_GAME_API void LoadLootTemplates_Disenchant();
-TC_GAME_API void LoadLootTemplates_Prospecting();
+GAME_API void LoadLootTemplates_Creature();
+GAME_API void LoadLootTemplates_Fishing();
+GAME_API void LoadLootTemplates_Gameobject();
+GAME_API void LoadLootTemplates_Item();
+GAME_API void LoadLootTemplates_Mail();
+GAME_API void LoadLootTemplates_Milling();
+GAME_API void LoadLootTemplates_Pickpocketing();
+GAME_API void LoadLootTemplates_Skinning();
+GAME_API void LoadLootTemplates_Disenchant();
+GAME_API void LoadLootTemplates_Prospecting();
 
-TC_GAME_API void LoadLootTemplates_Spell();
-TC_GAME_API void LoadLootTemplates_Reference();
+GAME_API void LoadLootTemplates_Spell();
+GAME_API void LoadLootTemplates_Reference();
 
-TC_GAME_API void LoadLootTables();
+GAME_API void LoadLootTables();
 
 #endif

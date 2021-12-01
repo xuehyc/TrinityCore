@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "ScriptMgr.h"
@@ -88,7 +76,7 @@ public:
         sAuctionBot->SetItemsAmount(qVals);
 
         for (int i = 0; i < MAX_AUCTION_QUALITY; ++i)
-            handler->PSendSysMessage(LANG_AHBOT_ITEMS_AMOUNT, handler->GetTrinityString(ahbotQualityIds[i]), sAuctionBotConfig->GetConfigItemQualityAmount(AuctionQuality(i)));
+            handler->PSendSysMessage(LANG_AHBOT_ITEMS_AMOUNT, handler->GetServerString(ahbotQualityIds[i]), sAuctionBotConfig->GetConfigItemQualityAmount(AuctionQuality(i)));
 
         return true;
     }
@@ -102,7 +90,7 @@ public:
         uint32 qualityVal = atoi(arg);
 
         sAuctionBot->SetItemsAmountForQuality(Q, qualityVal);
-        handler->PSendSysMessage(LANG_AHBOT_ITEMS_AMOUNT, handler->GetTrinityString(ahbotQualityIds[Q]),
+        handler->PSendSysMessage(LANG_AHBOT_ITEMS_AMOUNT, handler->GetServerString(ahbotQualityIds[Q]),
             sAuctionBotConfig->GetConfigItemQualityAmount(Q));
 
         return true;
@@ -185,7 +173,7 @@ public:
 
         uint32 fmtId = session ? LANG_AHBOT_STATUS_FORMAT_CHAT : LANG_AHBOT_STATUS_FORMAT_CONSOLE;
 
-        handler->PSendSysMessage(fmtId, handler->GetTrinityString(LANG_AHBOT_STATUS_ITEM_COUNT),
+        handler->PSendSysMessage(fmtId, handler->GetServerString(LANG_AHBOT_STATUS_ITEM_COUNT),
             statusInfo[AUCTION_HOUSE_ALLIANCE].ItemsCount,
             statusInfo[AUCTION_HOUSE_HORDE].ItemsCount,
             statusInfo[AUCTION_HOUSE_NEUTRAL].ItemsCount,
@@ -195,7 +183,7 @@ public:
 
         if (all)
         {
-            handler->PSendSysMessage(fmtId, handler->GetTrinityString(LANG_AHBOT_STATUS_ITEM_RATIO),
+            handler->PSendSysMessage(fmtId, handler->GetServerString(LANG_AHBOT_STATUS_ITEM_RATIO),
                 sAuctionBotConfig->GetConfig(CONFIG_AHBOT_ALLIANCE_ITEM_AMOUNT_RATIO),
                 sAuctionBotConfig->GetConfig(CONFIG_AHBOT_HORDE_ITEM_AMOUNT_RATIO),
                 sAuctionBotConfig->GetConfig(CONFIG_AHBOT_NEUTRAL_ITEM_AMOUNT_RATIO),
@@ -213,7 +201,7 @@ public:
                 handler->SendSysMessage(LANG_AHBOT_STATUS_TITLE2_CHAT);
 
             for (int i = 0; i < MAX_AUCTION_QUALITY; ++i)
-                handler->PSendSysMessage(fmtId, handler->GetTrinityString(ahbotQualityIds[i]),
+                handler->PSendSysMessage(fmtId, handler->GetServerString(ahbotQualityIds[i]),
                     statusInfo[AUCTION_HOUSE_ALLIANCE].QualityInfo[i],
                     statusInfo[AUCTION_HOUSE_HORDE].QualityInfo[i],
                     statusInfo[AUCTION_HOUSE_NEUTRAL].QualityInfo[i],

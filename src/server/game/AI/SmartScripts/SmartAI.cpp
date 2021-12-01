@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "SmartAI.h"
@@ -111,7 +99,7 @@ WayPoint* SmartAI::GetNextWayPoint()
         mLastWP = (*itr).second;
         if (mLastWP->id != mCurrentWPID)
         {
-            TC_LOG_ERROR("misc", "SmartAI::GetNextWayPoint: Got not expected waypoint id %u, expected %u", mLastWP->id, mCurrentWPID);
+            LOG_ERROR("misc", "SmartAI::GetNextWayPoint: Got not expected waypoint id %u, expected %u", mLastWP->id, mCurrentWPID);
         }
         return (*itr).second;
     }
@@ -122,7 +110,7 @@ void SmartAI::StartPath(bool run, uint32 path, bool repeat, Unit* invoker)
 {
     if (me->IsInCombat())// no wp movement in combat
     {
-        TC_LOG_ERROR("misc", "SmartAI::StartPath: Creature entry %u wanted to start waypoint movement while in combat, ignoring.", me->GetEntry());
+        LOG_ERROR("misc", "SmartAI::StartPath: Creature entry %u wanted to start waypoint movement while in combat, ignoring.", me->GetEntry());
         return;
     }
 
@@ -177,7 +165,7 @@ void SmartAI::PausePath(uint32 delay, bool forced)
         return;
     if (HasEscortState(SMART_ESCORT_PAUSED))
     {
-        TC_LOG_ERROR("misc", "SmartAI::PausePath: Creature entry %u wanted to pause waypoint movement while already paused, ignoring.", me->GetEntry());
+        LOG_ERROR("misc", "SmartAI::PausePath: Creature entry %u wanted to pause waypoint movement while already paused, ignoring.", me->GetEntry());
         return;
     }
     mForcedPaused = forced;
@@ -995,7 +983,7 @@ void SmartGameObjectAI::Reset()
 // Called when a player opens a gossip dialog with the gameobject.
 bool SmartGameObjectAI::GossipHello(Player* player, bool reportUse)
 {
-    TC_LOG_DEBUG("scripts.ai", "SmartGameObjectAI::GossipHello");
+    LOG_DEBUG("scripts.ai", "SmartGameObjectAI::GossipHello");
     GetScript()->ProcessEventsFor(SMART_EVENT_GOSSIP_HELLO, player, uint32(reportUse), 0, false, nullptr, go);
     return false;
 }
@@ -1076,7 +1064,7 @@ class SmartTrigger : public AreaTriggerScript
             if (!player->IsAlive())
                 return false;
 
-            TC_LOG_DEBUG("scripts.ai", "AreaTrigger %u is using SmartTrigger script", trigger->ID);
+            LOG_DEBUG("scripts.ai", "AreaTrigger %u is using SmartTrigger script", trigger->ID);
             SmartScript script;
             script.OnInitialize(nullptr, trigger);
             script.ProcessEventsFor(SMART_EVENT_AREATRIGGER_ONTRIGGER, player, trigger->ID);

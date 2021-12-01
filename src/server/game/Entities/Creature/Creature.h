@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITYCORE_CREATURE_H
-#define TRINITYCORE_CREATURE_H
+#ifndef SERVERCORE_CREATURE_H
+#define SERVERCORE_CREATURE_H
 
 #include "Unit.h"
 #include "Common.h"
@@ -59,7 +46,7 @@ typedef std::list<VendorItemCount> VendorItemCounts;
 typedef std::vector<uint8> CreatureTextRepeatIds;
 typedef std::unordered_map<uint8, CreatureTextRepeatIds> CreatureTextRepeatGroup;
 
-class TC_GAME_API Creature : public Unit, public GridObject<Creature>, public MapObject
+class GAME_API Creature : public Unit, public GridObject<Creature>, public MapObject
 {
     public:
         explicit Creature(bool isWorldObject = false);
@@ -419,7 +406,7 @@ class TC_GAME_API Creature : public Unit, public GridObject<Creature>, public Ma
         CreatureTextRepeatGroup m_textRepeat;
 };
 
-class TC_GAME_API AssistDelayEvent : public BasicEvent
+class GAME_API AssistDelayEvent : public BasicEvent
 {
     public:
         AssistDelayEvent(ObjectGuid victim, Unit& owner) : BasicEvent(), m_victim(victim), m_owner(owner) { }
@@ -434,7 +421,7 @@ class TC_GAME_API AssistDelayEvent : public BasicEvent
         Unit&             m_owner;
 };
 
-class TC_GAME_API ForcedDespawnDelayEvent : public BasicEvent
+class GAME_API ForcedDespawnDelayEvent : public BasicEvent
 {
     public:
         ForcedDespawnDelayEvent(Creature& owner, Seconds const& respawnTimer) : BasicEvent(), m_owner(owner), m_respawnTimer(respawnTimer) { }

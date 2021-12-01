@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "AreaTriggerDataStore.h"
@@ -53,13 +41,13 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
 
             if (actionType >= AREATRIGGER_ACTION_MAX)
             {
-                TC_LOG_ERROR("sql.sql", "Table `areatrigger_template_actions` has invalid ActionType (%u) for AreaTriggerId %u and Param %u", actionType, areaTriggerId, action.Param);
+                LOG_ERROR("sql.sql", "Table `areatrigger_template_actions` has invalid ActionType (%u) for AreaTriggerId %u and Param %u", actionType, areaTriggerId, action.Param);
                 continue;
             }
 
             if (targetType >= AREATRIGGER_ACTION_USER_MAX)
             {
-                TC_LOG_ERROR("sql.sql", "Table `areatrigger_template_actions` has invalid TargetType (%u) for AreaTriggerId %u and Param %u", targetType, areaTriggerId, action.Param);
+                LOG_ERROR("sql.sql", "Table `areatrigger_template_actions` has invalid TargetType (%u) for AreaTriggerId %u and Param %u", targetType, areaTriggerId, action.Param);
                 continue;
             }
 
@@ -72,7 +60,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
     }
     else
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates actions. DB table `areatrigger_template_actions` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates actions. DB table `areatrigger_template_actions` is empty.");
     }
 
     //                                                     0              1    2         3         4               5
@@ -88,13 +76,13 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
             if (!verticeFields[4].IsNull() && !verticeFields[5].IsNull())
                 verticesTargetByAreaTrigger[areaTriggerId].emplace_back(verticeFields[4].GetFloat(), verticeFields[5].GetFloat());
             else if (verticeFields[4].IsNull() != verticeFields[5].IsNull())
-                TC_LOG_ERROR("sql.sql", "Table `areatrigger_template_polygon_vertices` has listed invalid target vertices (AreaTrigger: %u, Index: %u).", areaTriggerId, verticeFields[1].GetUInt32());
+                LOG_ERROR("sql.sql", "Table `areatrigger_template_polygon_vertices` has listed invalid target vertices (AreaTrigger: %u, Index: %u).", areaTriggerId, verticeFields[1].GetUInt32());
         }
         while (vertices->NextRow());
     }
     else
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates polygon vertices. DB table `areatrigger_template_polygon_vertices` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates polygon vertices. DB table `areatrigger_template_polygon_vertices` is empty.");
     }
 
     //                                                    0            1  2  3
@@ -110,7 +98,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
     }
     else
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates splines. DB table `spell_areatrigger_splines` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates splines. DB table `spell_areatrigger_splines` is empty.");
     }
 
     //                                                      0   1     2      3      4      5      6      7      8      9
@@ -126,7 +114,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
 
             if (type >= AREATRIGGER_TYPE_MAX)
             {
-                TC_LOG_ERROR("sql.sql", "Table `areatrigger_template` has listed areatrigger (Id: %u) with invalid type %u.", areaTriggerTemplate.Id, type);
+                LOG_ERROR("sql.sql", "Table `areatrigger_template` has listed areatrigger (Id: %u) with invalid type %u.", areaTriggerTemplate.Id, type);
                 continue;
             }
 
@@ -162,7 +150,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
 
             if (!miscTemplate.Template)
             {
-                TC_LOG_ERROR("sql.sql", "Table `spell_areatrigger` reference invalid AreaTriggerId %u for miscId %u", areatriggerId, miscTemplate.MiscId);
+                LOG_ERROR("sql.sql", "Table `spell_areatrigger` reference invalid AreaTriggerId %u for miscId %u", areatriggerId, miscTemplate.MiscId);
                 continue;
             }
 
@@ -170,7 +158,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
             miscTemplate.Curve = Value; \
             if (miscTemplate.Curve && !sCurveStore.LookupEntry(miscTemplate.Curve)) \
             { \
-                TC_LOG_ERROR("sql.sql", "Table `spell_areatrigger` has listed areatrigger (MiscId: %u, Id: %u) with invalid " #Curve " (%u), set to 0!", \
+                LOG_ERROR("sql.sql", "Table `spell_areatrigger` has listed areatrigger (MiscId: %u, Id: %u) with invalid " #Curve " (%u), set to 0!", \
                     miscTemplate.MiscId, areatriggerId, miscTemplate.Curve); \
                 miscTemplate.Curve = 0; \
             }
@@ -198,7 +186,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
     }
     else
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 Spell AreaTrigger templates. DB table `spell_areatrigger` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 Spell AreaTrigger templates. DB table `spell_areatrigger` is empty.");
     }
 
     //                                                                  0            1           2             3                4             5        6                 7
@@ -212,7 +200,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
             auto atSpellMiscItr = _areaTriggerTemplateSpellMisc.find(spellMiscId);
             if (atSpellMiscItr == _areaTriggerTemplateSpellMisc.end())
             {
-                TC_LOG_ERROR("sql.sql", "Table `spell_areatrigger_circular` reference invalid SpellMiscId %u", spellMiscId);
+                LOG_ERROR("sql.sql", "Table `spell_areatrigger_circular` reference invalid SpellMiscId %u", spellMiscId);
                 continue;
             }
 
@@ -224,7 +212,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
             circularMovementInfo.Float = Value; \
             if (!std::isfinite(circularMovementInfo.Float)) \
             { \
-                TC_LOG_ERROR("sql.sql", "Table `spell_areatrigger_circular` has listed areatrigger (MiscId: %u) with invalid " #Float " (%f), set to 0!", \
+                LOG_ERROR("sql.sql", "Table `spell_areatrigger_circular` has listed areatrigger (MiscId: %u) with invalid " #Float " (%f), set to 0!", \
                     spellMiscId, circularMovementInfo.Float); \
                 circularMovementInfo.Float = 0.0f; \
             }
@@ -243,10 +231,10 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
     }
     else
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates circular movement infos. DB table `spell_areatrigger_circular` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates circular movement infos. DB table `spell_areatrigger_circular` is empty.");
     }
 
-    TC_LOG_INFO("server.loading", ">> Loaded " SZFMTD " spell areatrigger templates in %u ms.", _areaTriggerTemplateStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded " SZFMTD " spell areatrigger templates in %u ms.", _areaTriggerTemplateStore.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 AreaTriggerTemplate const* AreaTriggerDataStore::GetAreaTriggerTemplate(uint32 areaTriggerId) const

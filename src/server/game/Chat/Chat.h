@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITYCORE_CHAT_H
-#define TRINITYCORE_CHAT_H
+#ifndef SERVERCORE_CHAT_H
+#define SERVERCORE_CHAT_H
 
 #include "ObjectGuid.h"
 #include "SharedDefines.h"
@@ -37,7 +24,7 @@ struct GameTele;
 
 enum LocaleConstant : uint8;
 
-class TC_GAME_API ChatCommand
+class GAME_API ChatCommand
 {
     typedef bool(*pHandler)(ChatHandler*, char const*);
 
@@ -52,7 +39,7 @@ class TC_GAME_API ChatCommand
         std::vector<ChatCommand> ChildCommands;
 };
 
-class TC_GAME_API ChatHandler
+class GAME_API ChatHandler
 {
     public:
         WorldSession* GetSession() { return m_session; }
@@ -62,7 +49,7 @@ class TC_GAME_API ChatHandler
         static char* LineFromMessage(char*& pos) { char* start = strtok(pos, "\n"); pos = nullptr; return start; }
 
         // function with different implementation for chat/console
-        virtual char const* GetTrinityString(uint32 entry) const;
+        virtual char const* GetServerString(uint32 entry) const;
         virtual void SendSysMessage(char const* str, bool escapeCharacters = false);
 
         void SendSysMessage(uint32 entry);
@@ -70,7 +57,7 @@ class TC_GAME_API ChatHandler
         template<typename... Args>
         void PSendSysMessage(const char* fmt, Args&&... args)
         {
-            SendSysMessage(Trinity::StringFormat(fmt, std::forward<Args>(args)...).c_str());
+            SendSysMessage(Server::StringFormat(fmt, std::forward<Args>(args)...).c_str());
         }
 
         template<typename... Args>
@@ -82,7 +69,7 @@ class TC_GAME_API ChatHandler
         template<typename... Args>
         std::string PGetParseString(uint32 entry, Args&&... args) const
         {
-            return Trinity::StringFormat(GetTrinityString(entry), std::forward<Args>(args)...);
+            return Server::StringFormat(GetServerString(entry), std::forward<Args>(args)...);
         }
 
         bool ParseCommands(const char* text);
@@ -152,14 +139,14 @@ class TC_GAME_API ChatHandler
         bool sentErrorMessage;
 };
 
-class TC_GAME_API CliHandler : public ChatHandler
+class GAME_API CliHandler : public ChatHandler
 {
     public:
         typedef void Print(void*, char const*);
         explicit CliHandler(void* callbackArg, Print* zprint) : m_callbackArg(callbackArg), m_print(zprint) { }
 
         // overwrite functions
-        char const* GetTrinityString(uint32 entry) const override;
+        char const* GetServerString(uint32 entry) const override;
         bool isAvailable(ChatCommand const& cmd) const override;
         bool HasPermission(uint32 /*permission*/) const override { return true; }
         void SendSysMessage(const char *str, bool escapeCharacters) override;

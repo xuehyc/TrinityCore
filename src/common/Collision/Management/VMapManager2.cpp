@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include <iostream>
@@ -317,11 +304,11 @@ namespace VMAP
             WorldModel* worldmodel = new WorldModel();
             if (!worldmodel->readFile(basepath + filename + ".vmo"))
             {
-                TC_LOG_ERROR("misc", "VMapManager2: could not load '%s%s.vmo'", basepath.c_str(), filename.c_str());
+                LOG_ERROR("misc", "VMapManager2: could not load '%s%s.vmo'", basepath.c_str(), filename.c_str());
                 delete worldmodel;
                 return NULL;
             }
-            TC_LOG_DEBUG("maps", "VMapManager2: loading file '%s%s'", basepath.c_str(), filename.c_str());
+            LOG_DEBUG("maps", "VMapManager2: loading file '%s%s'", basepath.c_str(), filename.c_str());
             
             worldmodel->Flags = flags;
             
@@ -340,12 +327,12 @@ namespace VMAP
         auto model = iLoadedModelFiles.find(filename);
         if (model == iLoadedModelFiles.end())
         {
-            TC_LOG_ERROR("misc", "VMapManager2: trying to unload non-loaded file '%s'", filename.c_str());
+            LOG_ERROR("misc", "VMapManager2: trying to unload non-loaded file '%s'", filename.c_str());
             return;
         }
         if (model->second.decRefCount() == 0)
         {
-            TC_LOG_DEBUG("maps", "VMapManager2: unloading file '%s'", filename.c_str());
+            LOG_DEBUG("maps", "VMapManager2: unloading file '%s'", filename.c_str());
             delete model->second.getModel();
             iLoadedModelFiles.erase(model);
         }

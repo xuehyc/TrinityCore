@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "VMapFactory.h"
@@ -49,7 +36,7 @@ void LoadGameObjectModelList(std::string const& dataPath)
     FILE* model_list_file = fopen((dataPath + "vmaps/" + VMAP::GAMEOBJECT_MODELS).c_str(), "rb");
     if (!model_list_file)
     {
-        TC_LOG_ERROR("misc", "Unable to open '%s' file.", VMAP::GAMEOBJECT_MODELS);
+        LOG_ERROR("misc", "Unable to open '%s' file.", VMAP::GAMEOBJECT_MODELS);
         return;
     }
 
@@ -57,7 +44,7 @@ void LoadGameObjectModelList(std::string const& dataPath)
     if (fread(magic, 1, 8, model_list_file) != 8
         || memcmp(magic, VMAP::VMAP_MAGIC, 8) != 0)
     {
-        TC_LOG_ERROR("misc", "File '%s' has wrong header, expected %s.", VMAP::GAMEOBJECT_MODELS, VMAP::VMAP_MAGIC);
+        LOG_ERROR("misc", "File '%s' has wrong header, expected %s.", VMAP::GAMEOBJECT_MODELS, VMAP::VMAP_MAGIC);
         fclose(model_list_file);
         return;
     }
@@ -79,13 +66,13 @@ void LoadGameObjectModelList(std::string const& dataPath)
             || fread(&v1, sizeof(Vector3), 1, model_list_file) != 1
             || fread(&v2, sizeof(Vector3), 1, model_list_file) != 1)
         {
-            TC_LOG_ERROR("misc", "File '%s' seems to be corrupted!", VMAP::GAMEOBJECT_MODELS);
+            LOG_ERROR("misc", "File '%s' seems to be corrupted!", VMAP::GAMEOBJECT_MODELS);
             break;
         }
 
         if (v1.isNaN() || v2.isNaN())
         {
-            TC_LOG_ERROR("misc", "File '%s' Model '%s' has invalid v1%s v2%s values!", VMAP::GAMEOBJECT_MODELS, std::string(buff, name_length).c_str(), v1.toString().c_str(), v2.toString().c_str());
+            LOG_ERROR("misc", "File '%s' Model '%s' has invalid v1%s v2%s values!", VMAP::GAMEOBJECT_MODELS, std::string(buff, name_length).c_str(), v1.toString().c_str(), v2.toString().c_str());
             continue;
         }
 
@@ -93,7 +80,7 @@ void LoadGameObjectModelList(std::string const& dataPath)
     }
 
     fclose(model_list_file);
-    TC_LOG_INFO("server.loading", ">> Loaded %u GameObject models in %u ms", uint32(model_list.size()), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u GameObject models in %u ms", uint32(model_list.size()), GetMSTimeDiffToNow(oldMSTime));
 }
 
 GameObjectModel::~GameObjectModel()
@@ -112,7 +99,7 @@ bool GameObjectModel::initialize(std::unique_ptr<GameObjectModelOwnerBase> model
     // ignore models with no bounds
     if (mdl_box == G3D::AABox::zero())
     {
-        TC_LOG_ERROR("misc", "GameObject model %s has zero bounds, loading skipped", it->second.name.c_str());
+        LOG_ERROR("misc", "GameObject model %s has zero bounds, loading skipped", it->second.name.c_str());
         return false;
     }
 
@@ -226,7 +213,7 @@ bool GameObjectModel::UpdatePosition()
     // ignore models with no bounds
     if (mdl_box == G3D::AABox::zero())
     {
-        TC_LOG_ERROR("misc", "GameObject model %s has zero bounds, loading skipped", it->second.name.c_str());
+        LOG_ERROR("misc", "GameObject model %s has zero bounds, loading skipped", it->second.name.c_str());
         return false;
     }
 

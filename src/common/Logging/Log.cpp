@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2008 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "Log.h"
@@ -231,7 +218,7 @@ void Log::write(std::unique_ptr<LogMessage>&& msg) const
     if (_ioContext)
     {
         std::shared_ptr<LogOperation> logOperation = std::make_shared<LogOperation>(logger, std::move(msg));
-        Trinity::Asio::post(*_ioContext, Trinity::Asio::bind_executor(*_strand, [logOperation]() { logOperation->call(); }));
+        Server::Asio::post(*_ioContext, Server::Asio::bind_executor(*_strand, [logOperation]() { logOperation->call(); }));
     }
     else
         logger->write(msg.get());
@@ -269,7 +256,7 @@ std::string Log::GetTimestampStr()
     //       SS     seconds (2 digits 00-59)
     try
     {
-        return Trinity::StringFormat("%04d-%02d-%02d_%02d-%02d-%02d",
+        return Server::StringFormat("%04d-%02d-%02d_%02d-%02d-%02d",
             aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
     }
     catch (std::exception const& ex)
@@ -366,12 +353,12 @@ Log* Log::instance()
     return &instance;
 }
 
-void Log::Initialize(Trinity::Asio::IoContext* ioContext)
+void Log::Initialize(Server::Asio::IoContext* ioContext)
 {
     if (ioContext)
     {
         _ioContext = ioContext;
-        _strand = new Trinity::Asio::Strand(*ioContext);
+        _strand = new Server::Asio::Strand(*ioContext);
     }
 
     LoadFromConfig();

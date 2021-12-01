@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "GameTables.h"
@@ -45,14 +33,14 @@ inline uint32 LoadGameTable(std::vector<std::string>& errors, GameTable<T>& stor
     std::ifstream stream(path.string());
     if (!stream)
     {
-        errors.push_back(Trinity::StringFormat("GameTable file %s cannot be opened.", path.string().c_str()));
+        errors.push_back(Server::StringFormat("GameTable file %s cannot be opened.", path.string().c_str()));
         return 0;
     }
 
     std::string headers;
     if (!std::getline(stream, headers))
     {
-        errors.push_back(Trinity::StringFormat("GameTable file %s is empty.", path.string().c_str()));
+        errors.push_back(Server::StringFormat("GameTable file %s is empty.", path.string().c_str()));
         return 0;
     }
 
@@ -151,5 +139,5 @@ void LoadGameTables(std::string const& dataPath)
         WPFatal(false, "Some required *.txt GameTable files (" SZFMTD ") not found or not compatible:\n%s", bad_gt_files.size(), str.str().c_str());
     }
 
-    TC_LOG_INFO("server.loading", ">> Initialized %d GameTables in %u ms", gameTableCount, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Initialized %d GameTables in %u ms", gameTableCount, GetMSTimeDiffToNow(oldMSTime));
 }

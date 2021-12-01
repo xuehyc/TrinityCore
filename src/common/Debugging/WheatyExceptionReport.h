@@ -1,7 +1,12 @@
+//==========================================
+// Matt Pietrek
+// MSDN Magazine, 2002
+// FILE: WheatyExceptionReport.CPP
+//==========================================
 #ifndef _WHEATYEXCEPTIONREPORT_
 #define _WHEATYEXCEPTIONREPORT_
 
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS && !defined(__MINGW32__)
+#if SERVER_PLATFORM == SERVER_PLATFORM_WINDOWS && !defined(__MINGW32__)
 
 #include <winnt.h>
 #include <winternl.h>

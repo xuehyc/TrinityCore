@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef __TRINITY_ACHIEVEMENTMGR_H
-#define __TRINITY_ACHIEVEMENTMGR_H
+#ifndef __SERVER_ACHIEVEMENTMGR_H
+#define __SERVER_ACHIEVEMENTMGR_H
 
 #include "CriteriaHandler.h"
 #include "Config.h"
@@ -47,7 +34,7 @@ struct CompletedAchievementData
     bool Changed;
 };
 
-class TC_GAME_API AchievementMgr : public CriteriaHandler
+class GAME_API AchievementMgr : public CriteriaHandler
 {
 public:
     AchievementMgr();
@@ -75,7 +62,7 @@ protected:
     uint32 _achievementPoints;
 };
 
-class TC_GAME_API PlayerAchievementMgr : public AchievementMgr
+class GAME_API PlayerAchievementMgr : public AchievementMgr
 {
 public:
     explicit PlayerAchievementMgr(Player* owner);
@@ -110,7 +97,7 @@ private:
     Player* _owner;
 };
 
-class TC_GAME_API GuildAchievementMgr : public AchievementMgr
+class GAME_API GuildAchievementMgr : public AchievementMgr
 {
 public:
     explicit GuildAchievementMgr(Guild* owner);
@@ -143,7 +130,7 @@ private:
     Guild* _owner;
 };
 
-class TC_GAME_API AchievementGlobalMgr
+class GAME_API AchievementGlobalMgr
 {
     AchievementGlobalMgr() { }
     ~AchievementGlobalMgr() { }

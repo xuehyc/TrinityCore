@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "Scenario.h"
@@ -34,7 +22,7 @@ Scenario::Scenario(ScenarioData const* scenarioData) : _data(scenarioData), _cur
     if (ScenarioStepEntry const* step = GetFirstStep())
         SetStep(step);
     else
-        TC_LOG_ERROR("scenario", "Scenario::Scenario: Could not launch Scenario (id: %u), found no valid scenario step", _data->Entry->ID);
+        LOG_ERROR("scenario", "Scenario::Scenario: Could not launch Scenario (id: %u), found no valid scenario step", _data->Entry->ID);
 }
 
 Scenario::~Scenario()
@@ -79,7 +67,7 @@ void Scenario::CompleteStep(ScenarioStepEntry const* step)
     if (IsComplete())
         CompleteScenario();
     else
-        TC_LOG_ERROR("scenario", "Scenario::CompleteStep: Scenario (id: %u, step: %u) was completed, but could not determine new step, or validate scenario completion.", step->ScenarioID, step->ID);
+        LOG_ERROR("scenario", "Scenario::CompleteStep: Scenario (id: %u, step: %u) was completed, but could not determine new step, or validate scenario completion.", step->ScenarioID, step->ID);
 }
 
 void Scenario::CompleteScenario()

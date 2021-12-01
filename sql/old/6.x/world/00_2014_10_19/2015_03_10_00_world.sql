@@ -1,5 +1,5 @@
-DELETE FROM `trinity_string` WHERE `entry` = 1190;
-INSERT INTO `trinity_string` (`entry`, `content_default`) VALUES (1190, 'Ticket system is disabled. You can\'t change its status.');
+DELETE FROM `server_string` WHERE `entry` = 1190;
+INSERT INTO `server_string` (`entry`, `content_default`) VALUES (1190, 'Ticket system is disabled. You can\'t change its status.');
 
 UPDATE `command` SET `name`='reload support', `help`='Syntax: .reload support\r\nReload support system tables.' WHERE  `name`='reload gm_tickets';
 

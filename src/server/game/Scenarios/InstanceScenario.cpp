@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "InstanceScenario.h"
@@ -47,7 +35,7 @@ void InstanceScenario::SaveToDB()
     uint32 id = _map->GetInstanceId();
     if (!id)
     {
-        TC_LOG_DEBUG("scenario", "Scenario::SaveToDB: Can not save scenario progress without an instance save. Map::GetInstanceId() did not return an instance save.");
+        LOG_DEBUG("scenario", "Scenario::SaveToDB: Can not save scenario progress without an instance save. Map::GetInstanceId() did not return an instance save.");
         return;
     }
 
@@ -111,7 +99,7 @@ void InstanceScenario::LoadInstanceData(uint32 instanceId)
             if (!criteria)
             {
                 // Removing non-existing criteria data for all instances
-                TC_LOG_ERROR("criteria.instancescenarios", "Removing scenario criteria %u data from the table `instance_scenario_progress`.", id);
+                LOG_ERROR("criteria.instancescenarios", "Removing scenario criteria %u data from the table `instance_scenario_progress`.", id);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_SCENARIO_INSTANCE_CRITERIA);
                 stmt->setUInt32(0, instanceId);
@@ -156,7 +144,7 @@ void InstanceScenario::LoadInstanceData(uint32 instanceId)
 
 std::string InstanceScenario::GetOwnerInfo() const
 {
-    return Trinity::StringFormat("Instance ID %u", _map->GetInstanceId());
+    return Server::StringFormat("Instance ID %u", _map->GetInstanceId());
 }
 
 void InstanceScenario::SendPacket(WorldPacket const* data) const

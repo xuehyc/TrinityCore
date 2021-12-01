@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "WorldSession.h"
@@ -124,7 +111,7 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
             if (myItems[i])
             {
                 // logging
-                TC_LOG_DEBUG("network", "partner storing: %s", myItems[i]->GetGUID().ToString().c_str());
+                LOG_DEBUG("network", "partner storing: %s", myItems[i]->GetGUID().ToString().c_str());
                 if (HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
                 {
                     sLog->outCommand(_player->GetSession()->GetAccountId(), "GM %s (Account: %u) trade: %s (Entry: %d Count: %u) to player: %s (Account: %u)",
@@ -142,7 +129,7 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
             if (hisItems[i])
             {
                 // logging
-                TC_LOG_DEBUG("network", "player storing: %s", hisItems[i]->GetGUID().ToString().c_str());
+                LOG_DEBUG("network", "player storing: %s", hisItems[i]->GetGUID().ToString().c_str());
                 if (HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
                 {
                     sLog->outCommand(trader->GetSession()->GetAccountId(), "GM %s (Account: %u) trade: %s (Entry: %d Count: %u) to player: %s (Account: %u)",
@@ -165,21 +152,21 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
             if (myItems[i])
             {
                 if (!traderCanTrade)
-                    TC_LOG_ERROR("network", "trader can't store item: %s", myItems[i]->GetGUID().ToString().c_str());
+                    LOG_ERROR("network", "trader can't store item: %s", myItems[i]->GetGUID().ToString().c_str());
                 if (_player->CanStoreItem(NULL_BAG, NULL_SLOT, playerDst, myItems[i], false) == EQUIP_ERR_OK)
                     _player->MoveItemToInventory(playerDst, myItems[i], true, true);
                 else
-                    TC_LOG_ERROR("network", "player can't take item back: %s", myItems[i]->GetGUID().ToString().c_str());
+                    LOG_ERROR("network", "player can't take item back: %s", myItems[i]->GetGUID().ToString().c_str());
             }
             // return the already removed items to the original owner
             if (hisItems[i])
             {
                 if (!playerCanTrade)
-                    TC_LOG_ERROR("network", "player can't store item: %s", hisItems[i]->GetGUID().ToString().c_str());
+                    LOG_ERROR("network", "player can't store item: %s", hisItems[i]->GetGUID().ToString().c_str());
                 if (trader->CanStoreItem(NULL_BAG, NULL_SLOT, traderDst, hisItems[i], false) == EQUIP_ERR_OK)
                     trader->MoveItemToInventory(traderDst, hisItems[i], true, true);
                 else
-                    TC_LOG_ERROR("network", "trader can't take item back: %s", hisItems[i]->GetGUID().ToString().c_str());
+                    LOG_ERROR("network", "trader can't take item back: %s", hisItems[i]->GetGUID().ToString().c_str());
             }
         }
     }
@@ -197,7 +184,7 @@ static void setAcceptTradeMode(TradeData* myTrade, TradeData* hisTrade, Item* *m
     {
         if (Item* item = myTrade->GetItem(TradeSlots(i)))
         {
-            TC_LOG_DEBUG("network", "player trade %s bag: %u slot: %u", item->GetGUID().ToString().c_str(), item->GetBagSlot(), item->GetSlot());
+            LOG_DEBUG("network", "player trade %s bag: %u slot: %u", item->GetGUID().ToString().c_str(), item->GetBagSlot(), item->GetSlot());
             //Can return NULL
             myItems[i] = item;
             myItems[i]->SetInTrade();
@@ -205,7 +192,7 @@ static void setAcceptTradeMode(TradeData* myTrade, TradeData* hisTrade, Item* *m
 
         if (Item* item = hisTrade->GetItem(TradeSlots(i)))
         {
-            TC_LOG_DEBUG("network", "partner trade %s bag: %u slot: %u", item->GetGUID().ToString().c_str(), item->GetBagSlot(), item->GetSlot());
+            LOG_DEBUG("network", "partner trade %s bag: %u slot: %u", item->GetGUID().ToString().c_str(), item->GetBagSlot(), item->GetSlot());
             hisItems[i] = item;
             hisItems[i]->SetInTrade();
         }
@@ -612,7 +599,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPackets::Trade::InitiateTrade&
 
     if (GetPlayer()->getLevel() < sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ))
     {
-        SendNotification(GetTrinityString(LANG_TRADE_REQ), sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ));
+        SendNotification(GetServerString(LANG_TRADE_REQ), sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ));
         return;
     }
 
@@ -686,7 +673,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPackets::Trade::InitiateTrade&
 
     if (pOther->getLevel() < sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ))
     {
-        SendNotification(GetTrinityString(LANG_TRADE_OTHER_REQ), sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ));
+        SendNotification(GetServerString(LANG_TRADE_OTHER_REQ), sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ));
         return;
     }
 

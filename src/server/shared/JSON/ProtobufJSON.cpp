@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "ProtobufJSON.h"
@@ -231,7 +219,7 @@ bool Deserializer::Key(const Ch* str, rapidjson::SizeType /*length*/, bool /*cop
     google::protobuf::FieldDescriptor const* field = _objectState.top()->GetDescriptor()->FindFieldByName(str);
     if (!field)
     {
-        _errors.push_back(Trinity::StringFormat("Message %s has no field %s.", _objectState.top()->GetTypeName().c_str(), str));
+        _errors.push_back(Server::StringFormat("Message %s has no field %s.", _objectState.top()->GetTypeName().c_str(), str));
         return false;
     }
 
@@ -293,7 +281,7 @@ bool Deserializer::Uint(uint32 i)
             break;
         }
         default:
-            _errors.push_back(Trinity::StringFormat("Expected field type to be uint32 or string but got %s instead.", _state.top()->cpp_type_name()));
+            _errors.push_back(Server::StringFormat("Expected field type to be uint32 or string but got %s instead.", _state.top()->cpp_type_name()));
             return false;
     }
 
@@ -331,7 +319,7 @@ bool Deserializer::Double(double d)
             SET_FIELD(message, field, Double, d);
             break;
         default:
-            _errors.push_back(Trinity::StringFormat("Expected field type to be float or double but got %s instead.", _state.top()->cpp_type_name()));
+            _errors.push_back(Server::StringFormat("Expected field type to be float or double but got %s instead.", _state.top()->cpp_type_name()));
             return false;
     }
 
@@ -349,7 +337,7 @@ bool Deserializer::String(const Ch* str, rapidjson::SizeType /*length*/, bool /*
             google::protobuf::EnumValueDescriptor const* enumValue = field->enum_type()->FindValueByName(str);
             if (!enumValue)
             {
-                _errors.push_back(Trinity::StringFormat("Field %s enum %s does not have a value named %s.", field->full_name().c_str(), field->enum_type()->full_name().c_str(), str));
+                _errors.push_back(Server::StringFormat("Field %s enum %s does not have a value named %s.", field->full_name().c_str(), field->enum_type()->full_name().c_str(), str));
                 return false;
             }
 
@@ -360,7 +348,7 @@ bool Deserializer::String(const Ch* str, rapidjson::SizeType /*length*/, bool /*
             SET_FIELD(message, field, String, str);
             break;
         default:
-            _errors.push_back(Trinity::StringFormat("Expected field type to be string or enum but got %s instead.", _state.top()->cpp_type_name()));
+            _errors.push_back(Server::StringFormat("Expected field type to be string or enum but got %s instead.", _state.top()->cpp_type_name()));
             return false;
     }
 
@@ -374,7 +362,7 @@ bool Deserializer::StartObject()
     {
         if (_state.top()->cpp_type() != google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE)
         {
-            _errors.push_back(Trinity::StringFormat("Expected field %s to be a message but got %s instead.", _state.top()->cpp_type_name()));
+            _errors.push_back(Server::StringFormat("Expected field %s to be a message but got %s instead.", _state.top()->cpp_type_name()));
             return false;
         }
 
@@ -409,7 +397,7 @@ bool Deserializer::StartArray()
 
     if (_state.top()->is_repeated() ^ (_state.top()->type() != google::protobuf::FieldDescriptor::TYPE_BYTES))
     {
-        _errors.push_back(Trinity::StringFormat("Expected field %s type to be exactly an array OR bytes but it was both or none.", _state.top()->full_name().c_str()));
+        _errors.push_back(Server::StringFormat("Expected field %s type to be exactly an array OR bytes but it was both or none.", _state.top()->full_name().c_str()));
         return false;
     }
 
@@ -420,7 +408,7 @@ bool Deserializer::CheckType(google::protobuf::FieldDescriptor::CppType expected
 {
     if (_state.top()->cpp_type() != expectedType)
     {
-        _errors.push_back(Trinity::StringFormat("Expected field %s type to be %s but got %s instead.",
+        _errors.push_back(Server::StringFormat("Expected field %s type to be %s but got %s instead.",
             _state.top()->full_name().c_str(), google::protobuf::FieldDescriptor::CppTypeName(expectedType), _state.top()->cpp_type_name()));
         return false;
     }
@@ -449,7 +437,7 @@ bool JSON::Deserialize(std::string const& json, google::protobuf::Message* messa
     if (!deserializer.ReadMessage(json, message))
     {
         for (std::size_t i = 0; i < deserializer.GetErrors().size(); ++i)
-            TC_LOG_ERROR("json", "%s", deserializer.GetErrors()[i].c_str());
+            LOG_ERROR("json", "%s", deserializer.GetErrors()[i].c_str());
         return false;
     }
 

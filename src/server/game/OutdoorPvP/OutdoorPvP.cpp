@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "OutdoorPvP.h"
@@ -133,13 +121,13 @@ bool OPvPCapturePoint::AddCreature(uint32 type, uint32 entry, uint32 map, float 
 
 bool OPvPCapturePoint::SetCapturePointData(uint32 entry, uint32 map, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3)
 {
-    TC_LOG_DEBUG("outdoorpvp", "Creating capture point %u", entry);
+    LOG_DEBUG("outdoorpvp", "Creating capture point %u", entry);
 
     // check info existence
     GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(entry);
     if (!goinfo || goinfo->type != GAMEOBJECT_TYPE_CONTROL_ZONE)
     {
-        TC_LOG_ERROR("outdoorpvp", "OutdoorPvP: GO %u is not capture point!", entry);
+        LOG_ERROR("outdoorpvp", "OutdoorPvP: GO %u is not capture point!", entry);
         return false;
     }
 
@@ -161,7 +149,7 @@ bool OPvPCapturePoint::DelCreature(uint32 type)
     ObjectGuid::LowType spawnId = m_Creatures[type];
     if (!spawnId)
     {
-        TC_LOG_DEBUG("outdoorpvp", "opvp creature type %u was already deleted", type);
+        LOG_DEBUG("outdoorpvp", "opvp creature type %u was already deleted", type);
         return false;
     }
 
@@ -176,7 +164,7 @@ bool OPvPCapturePoint::DelCreature(uint32 type)
         c->AddObjectToRemoveList();
     }
 
-    TC_LOG_DEBUG("outdoorpvp", "deleting opvp creature type %u", type);
+    LOG_DEBUG("outdoorpvp", "deleting opvp creature type %u", type);
     // explicit removal from map
     // beats me why this is needed, but with the recent removal "cleanup" some creatures stay in the map if "properly" deleted
     // so this is a big fat workaround, if AddObjectToRemoveList and DoDelayedMovesAndRemoves worked correctly, this wouldn't be needed
@@ -271,7 +259,7 @@ void OutdoorPvP::HandlePlayerLeaveZone(Player* player, uint32 /*zone*/)
     if (!player->GetSession()->PlayerLogout())
         SendRemoveWorldStates(player);
     m_players[player->GetTeamId()].erase(player->GetGUID());
-    TC_LOG_DEBUG("outdoorpvp", "Player %s left an outdoorpvp zone", player->GetName().c_str());
+    LOG_DEBUG("outdoorpvp", "Player %s left an outdoorpvp zone", player->GetName().c_str());
 }
 
 void OutdoorPvP::HandlePlayerResurrects(Player* /*player*/, uint32 /*zone*/) { }
@@ -308,8 +296,8 @@ bool OPvPCapturePoint::Update(uint32 diff)
     }
 
     std::list<Player*> players;
-    Trinity::AnyPlayerInObjectRangeCheck checker(m_capturePoint, radius);
-    Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(m_capturePoint, players, checker);
+    Server::AnyPlayerInObjectRangeCheck checker(m_capturePoint, radius);
+    Server::PlayerListSearcher<Server::AnyPlayerInObjectRangeCheck> searcher(m_capturePoint, players, checker);
     Cell::VisitWorldObjects(m_capturePoint, searcher, radius);
 
     for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
@@ -399,7 +387,7 @@ bool OPvPCapturePoint::Update(uint32 diff)
 
     if (m_OldState != m_State)
     {
-        //TC_LOG_ERROR("outdoorpvp", "%u->%u", m_OldState, m_State);
+        //LOG_ERROR("outdoorpvp", "%u->%u", m_OldState, m_State);
         if (oldTeam != m_team)
             ChangeTeam(oldTeam);
         ChangeState();
@@ -569,7 +557,7 @@ void OutdoorPvP::AddCapturePoint(OPvPCapturePoint* cp)
     OPvPCapturePointMap::iterator i = m_capturePoints.find(cp->m_capturePointSpawnId);
     if (i != m_capturePoints.end())
     {
-        TC_LOG_ERROR("outdoorpvp", "OutdoorPvP::AddCapturePoint: CapturePoint " UI64FMTD " already exists!", cp->m_capturePointSpawnId);
+        LOG_ERROR("outdoorpvp", "OutdoorPvP::AddCapturePoint: CapturePoint " UI64FMTD " already exists!", cp->m_capturePointSpawnId);
         delete i->second;
     }
     m_capturePoints[cp->m_capturePointSpawnId] = cp;
@@ -637,7 +625,7 @@ void OutdoorPvP::OnGameObjectRemove(GameObject* go)
 void OutdoorPvP::SendDefenseMessage(uint32 zoneId, uint32 id)
 {
     DefenseMessageBuilder builder(zoneId, id);
-    Trinity::LocalizedPacketDo<DefenseMessageBuilder> localizer(builder);
+    Server::LocalizedPacketDo<DefenseMessageBuilder> localizer(builder);
     BroadcastWorker(localizer, zoneId);
 }
 

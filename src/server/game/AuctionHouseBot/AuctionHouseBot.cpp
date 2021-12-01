@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "AuctionHouseBot.h"
@@ -38,22 +26,22 @@ bool AuctionBotConfig::Initialize()
 
     if (!GetConfig(CONFIG_AHBOT_BUYER_ENABLED) && !GetConfig(CONFIG_AHBOT_SELLER_ENABLED))
     {
-        TC_LOG_INFO("ahbot", "AHBOT is Disabled.");
+        LOG_INFO("ahbot", "AHBOT is Disabled.");
         return false;
     }
 
     if (GetConfig(CONFIG_AHBOT_ALLIANCE_ITEM_AMOUNT_RATIO) == 0 && GetConfig(CONFIG_AHBOT_HORDE_ITEM_AMOUNT_RATIO) == 0 && GetConfig(CONFIG_AHBOT_NEUTRAL_ITEM_AMOUNT_RATIO) == 0 &&
         !GetConfig(CONFIG_AHBOT_BUYER_ALLIANCE_ENABLED) && !GetConfig(CONFIG_AHBOT_BUYER_HORDE_ENABLED) && !GetConfig(CONFIG_AHBOT_BUYER_NEUTRAL_ENABLED))
     {
-        TC_LOG_INFO("ahbot", "All feature of AuctionHouseBot are disabled!");
+        LOG_INFO("ahbot", "All feature of AuctionHouseBot are disabled!");
         return false;
     }
 
     if (GetConfig(CONFIG_AHBOT_ALLIANCE_ITEM_AMOUNT_RATIO) == 0 && GetConfig(CONFIG_AHBOT_HORDE_ITEM_AMOUNT_RATIO) == 0 && GetConfig(CONFIG_AHBOT_NEUTRAL_ITEM_AMOUNT_RATIO) == 0)
-        TC_LOG_INFO("ahbot", "AuctionHouseBot SELLER is disabled!");
+        LOG_INFO("ahbot", "AuctionHouseBot SELLER is disabled!");
 
     if (!GetConfig(CONFIG_AHBOT_BUYER_ALLIANCE_ENABLED) && !GetConfig(CONFIG_AHBOT_BUYER_HORDE_ENABLED) && !GetConfig(CONFIG_AHBOT_BUYER_NEUTRAL_ENABLED))
-        TC_LOG_INFO("ahbot", "AuctionHouseBot BUYER is disabled!");
+        LOG_INFO("ahbot", "AuctionHouseBot BUYER is disabled!");
 
     _itemsPerCycleBoost = GetConfig(CONFIG_AHBOT_ITEMS_PER_CYCLE_BOOST);
     _itemsPerCycleNormal = GetConfig(CONFIG_AHBOT_ITEMS_PER_CYCLE_NORMAL);
@@ -70,10 +58,10 @@ bool AuctionBotConfig::Initialize()
                 _AHBotCharacters.push_back((*result)[0].GetUInt64());
             } while (result->NextRow());
 
-            TC_LOG_DEBUG("ahbot", "AuctionHouseBot found " UI64FMTD " characters", result->GetRowCount());
+            LOG_DEBUG("ahbot", "AuctionHouseBot found " UI64FMTD " characters", result->GetRowCount());
         }
         else
-            TC_LOG_WARN("ahbot", "AuctionHouseBot Account ID %u has no associated characters.", ahBotAccId);
+            LOG_WARN("ahbot", "AuctionHouseBot Account ID %u has no associated characters.", ahBotAccId);
     }
 
     return true;
@@ -85,7 +73,7 @@ void AuctionBotConfig::SetConfig(AuctionBotConfigUInt32Values index, char const*
 
     if (int32(GetConfig(index)) < 0)
     {
-        TC_LOG_ERROR("ahbot", "AHBot: %s (%i) can't be negative. Using %u instead.", fieldname, int32(GetConfig(index)), defvalue);
+        LOG_ERROR("ahbot", "AHBot: %s (%i) can't be negative. Using %u instead.", fieldname, int32(GetConfig(index)), defvalue);
         SetConfig(index, defvalue);
     }
 }
@@ -96,7 +84,7 @@ void AuctionBotConfig::SetConfigMax(AuctionBotConfigUInt32Values index, char con
 
     if (GetConfig(index) > maxvalue)
     {
-        TC_LOG_ERROR("ahbot", "AHBot: %s (%u) must be in range 0...%u. Using %u instead.", fieldname, GetConfig(index), maxvalue, maxvalue);
+        LOG_ERROR("ahbot", "AHBot: %s (%u) must be in range 0...%u. Using %u instead.", fieldname, GetConfig(index), maxvalue, maxvalue);
         SetConfig(index, maxvalue);
     }
 }
@@ -107,13 +95,13 @@ void AuctionBotConfig::SetConfigMinMax(AuctionBotConfigUInt32Values index, char 
 
     if (GetConfig(index) > maxvalue)
     {
-        TC_LOG_ERROR("ahbot", "AHBot: %s (%u) must be in range %u...%u. Using %u instead.", fieldname, GetConfig(index), minvalue, maxvalue, maxvalue);
+        LOG_ERROR("ahbot", "AHBot: %s (%u) must be in range %u...%u. Using %u instead.", fieldname, GetConfig(index), minvalue, maxvalue, maxvalue);
         SetConfig(index, maxvalue);
     }
 
     if (GetConfig(index) < minvalue)
     {
-        TC_LOG_ERROR("ahbot", "AHBot: %s (%u) must be in range %u...%u. Using %u instead.", fieldname, GetConfig(index), minvalue, maxvalue, minvalue);
+        LOG_ERROR("ahbot", "AHBot: %s (%u) must be in range %u...%u. Using %u instead.", fieldname, GetConfig(index), minvalue, maxvalue, minvalue);
         SetConfig(index, minvalue);
     }
 }
@@ -303,7 +291,7 @@ ObjectGuid::LowType AuctionBotConfig::GetRandChar() const
     if (_AHBotCharacters.empty())
         return ObjectGuid::LowType(0);
 
-    return Trinity::Containers::SelectRandomContainerElement(_AHBotCharacters);
+    return Server::Containers::SelectRandomContainerElement(_AHBotCharacters);
 }
 
 // Picks a random AHBot character, but excludes a specific one. This is used
@@ -323,7 +311,7 @@ ObjectGuid::LowType AuctionBotConfig::GetRandCharExclude(ObjectGuid::LowType exc
     if (filteredCharacters.empty())
         return ObjectGuid::LowType(0);
 
-    return Trinity::Containers::SelectRandomContainerElement(filteredCharacters);
+    return Server::Containers::SelectRandomContainerElement(filteredCharacters);
 }
 
 bool AuctionBotConfig::IsBotChar(ObjectGuid::LowType characterID) const

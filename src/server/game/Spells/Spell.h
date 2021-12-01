@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef __SPELL_H
@@ -149,7 +136,7 @@ enum SpellRangeFlag
     SPELL_RANGE_RANGED              = 2      //hunter range and ranged weapon
 };
 
-struct TC_GAME_API SpellDestination
+struct GAME_API SpellDestination
 {
     SpellDestination();
     SpellDestination(float x, float y, float z, float orientation = 0.0f, uint32 mapId = MAPID_INVALID);
@@ -201,7 +188,7 @@ struct SpellLogEffectFeedPetParams
     int32 ItemID        = 0;
 };
 
-class TC_GAME_API SpellCastTargets
+class GAME_API SpellCastTargets
 {
     public:
         SpellCastTargets();
@@ -327,7 +314,7 @@ typedef std::vector<std::pair<uint32, ObjectGuid>> DispelList;
 
 static const uint32 SPELL_INTERRUPT_NONPLAYER = 32747;
 
-class TC_GAME_API Spell
+class GAME_API Spell
 {
     friend void SetUnitCurrentCastSpell(Unit* unit, Spell* spell);
     friend class SpellScript;
@@ -908,9 +895,9 @@ class TC_GAME_API Spell
         std::vector<SpellEffectInfo const*> _effects;
 };
 
-namespace Trinity
+namespace Server
 {
-    struct TC_GAME_API WorldObjectSpellTargetCheck
+    struct GAME_API WorldObjectSpellTargetCheck
     {
         Unit* _caster;
         Unit* _referer;
@@ -925,7 +912,7 @@ namespace Trinity
         bool operator()(WorldObject* target);
     };
 
-    struct TC_GAME_API WorldObjectSpellNearbyTargetCheck : public WorldObjectSpellTargetCheck
+    struct GAME_API WorldObjectSpellNearbyTargetCheck : public WorldObjectSpellTargetCheck
     {
         float _range;
         Position const* _position;
@@ -934,7 +921,7 @@ namespace Trinity
         bool operator()(WorldObject* target);
     };
 
-    struct TC_GAME_API WorldObjectSpellAreaTargetCheck : public WorldObjectSpellTargetCheck
+    struct GAME_API WorldObjectSpellAreaTargetCheck : public WorldObjectSpellTargetCheck
     {
         float _range;
         Position const* _position;
@@ -943,7 +930,7 @@ namespace Trinity
         bool operator()(WorldObject* target);
     };
 
-    struct TC_GAME_API WorldObjectSpellConeTargetCheck : public WorldObjectSpellAreaTargetCheck
+    struct GAME_API WorldObjectSpellConeTargetCheck : public WorldObjectSpellAreaTargetCheck
     {
         float _coneAngle;
         WorldObjectSpellConeTargetCheck(float coneAngle, float range, Unit* caster,
@@ -951,7 +938,7 @@ namespace Trinity
         bool operator()(WorldObject* target);
     };
 
-    struct TC_GAME_API WorldObjectSpellTrajTargetCheck : public WorldObjectSpellTargetCheck
+    struct GAME_API WorldObjectSpellTrajTargetCheck : public WorldObjectSpellTargetCheck
     {
         float _range;
         Position const* _position;

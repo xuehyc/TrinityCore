@@ -438,7 +438,7 @@ google::protobuf::ServiceDescriptor const* ResourcesService::descriptor() {
 }
 
 void ResourcesService::GetContentHandle(::bgs::protocol::resources::v1::ContentHandleRequest const* request, std::function<void(::bgs::protocol::ContentHandle const*)> responseCallback) {
-  TC_LOG_DEBUG("service.protobuf", "%s Server called client method ResourcesService.GetContentHandle(bgs.protocol.resources.v1.ContentHandleRequest{ %s })",
+  LOG_DEBUG("service.protobuf", "%s Server called client method ResourcesService.GetContentHandle(bgs.protocol.resources.v1.ContentHandleRequest{ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   std::function<void(MessageBuffer)> callback = [responseCallback](MessageBuffer buffer) -> void {
     ::bgs::protocol::ContentHandle response;
@@ -453,17 +453,17 @@ void ResourcesService::CallServerMethod(uint32 token, uint32 methodId, MessageBu
     case 1: {
       ::bgs::protocol::resources::v1::ContentHandleRequest request;
       if (!request.ParseFromArray(buffer.GetReadPointer(), buffer.GetActiveSize())) {
-        TC_LOG_DEBUG("service.protobuf", "%s Failed to parse request for ResourcesService.GetContentHandle server method call.", GetCallerInfo().c_str());
+        LOG_DEBUG("service.protobuf", "%s Failed to parse request for ResourcesService.GetContentHandle server method call.", GetCallerInfo().c_str());
         SendResponse(service_hash_, 1, token, ERROR_RPC_MALFORMED_REQUEST);
         return;
       }
-      TC_LOG_DEBUG("service.protobuf", "%s Client called server method ResourcesService.GetContentHandle(bgs.protocol.resources.v1.ContentHandleRequest{ %s }).",
+      LOG_DEBUG("service.protobuf", "%s Client called server method ResourcesService.GetContentHandle(bgs.protocol.resources.v1.ContentHandleRequest{ %s }).",
         GetCallerInfo().c_str(), request.ShortDebugString().c_str());
       std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)> continuation = [token](ServiceBase* service, uint32 status, ::google::protobuf::Message const* response)
       {
         ASSERT(response->GetDescriptor() == ::bgs::protocol::ContentHandle::descriptor());
         ResourcesService* self = static_cast<ResourcesService*>(service);
-        TC_LOG_DEBUG("service.protobuf", "%s Client called server method ResourcesService.GetContentHandle() returned bgs.protocol.ContentHandle{ %s } status %u.",
+        LOG_DEBUG("service.protobuf", "%s Client called server method ResourcesService.GetContentHandle() returned bgs.protocol.ContentHandle{ %s } status %u.",
           self->GetCallerInfo().c_str(), response->ShortDebugString().c_str(), status);
         if (!status)
           self->SendResponse(self->service_hash_, 1, token, response);
@@ -477,14 +477,14 @@ void ResourcesService::CallServerMethod(uint32 token, uint32 methodId, MessageBu
       break;
     }
     default:
-      TC_LOG_ERROR("service.protobuf", "Bad method id %u.", methodId);
+      LOG_ERROR("service.protobuf", "Bad method id %u.", methodId);
       SendResponse(service_hash_, methodId, token, ERROR_RPC_INVALID_METHOD);
       break;
     }
 }
 
 uint32 ResourcesService::HandleGetContentHandle(::bgs::protocol::resources::v1::ContentHandleRequest const* request, ::bgs::protocol::ContentHandle* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {
-  TC_LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method ResourcesService.GetContentHandle({ %s })",
+  LOG_ERROR("service.protobuf", "%s Client tried to call not implemented method ResourcesService.GetContentHandle({ %s })",
     GetCallerInfo().c_str(), request->ShortDebugString().c_str());
   return ERROR_RPC_NOT_IMPLEMENTED;
 }

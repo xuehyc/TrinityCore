@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /*
@@ -355,7 +343,7 @@ class spell_item_aura_of_madness : public SpellScriptLoader
 
                 PreventDefaultAction();
                 Unit* caster = eventInfo.GetActor();
-                uint32 spellId = Trinity::Containers::SelectRandomContainerElement(triggeredSpells[caster->getClass()]);
+                uint32 spellId = Server::Containers::SelectRandomContainerElement(triggeredSpells[caster->getClass()]);
                 caster->CastSpell(caster, spellId, true, nullptr, aurEff);
 
                 if (roll_chance_i(10))
@@ -611,7 +599,7 @@ class spell_item_deathbringers_will : public SpellScriptLoader
                 if (randomSpells.empty())
                     return;
 
-                uint32 spellId = Trinity::Containers::SelectRandomContainerElement(randomSpells);
+                uint32 spellId = Server::Containers::SelectRandomContainerElement(randomSpells);
                 caster->CastSpell(caster, spellId, true, nullptr, aurEff);
             }
 
@@ -872,7 +860,7 @@ class spell_item_echoes_of_light : public SpellScriptLoader
                 if (targets.size() < 2)
                     return;
 
-                targets.sort(Trinity::HealthPctOrderPred());
+                targets.sort(Server::HealthPctOrderPred());
 
                 WorldObject* target = targets.front();
                 targets.clear();
@@ -989,11 +977,11 @@ class spell_item_flask_of_the_north : public SpellScriptLoader
 
                 if (possibleSpells.empty())
                 {
-                    TC_LOG_WARN("spells", "Missing spells for class %u in script spell_item_flask_of_the_north", caster->getClass());
+                    LOG_WARN("spells", "Missing spells for class %u in script spell_item_flask_of_the_north", caster->getClass());
                     return;
                 }
 
-                caster->CastSpell(caster, Trinity::Containers::SelectRandomContainerElement(possibleSpells), true);
+                caster->CastSpell(caster, Server::Containers::SelectRandomContainerElement(possibleSpells), true);
             }
 
             void Register() override
@@ -2320,7 +2308,7 @@ class spell_item_wormhole_pandaria : public SpellScriptLoader
             void HandleTeleport(SpellEffIndex effIndex)
             {
                 PreventHitDefaultEffect(effIndex);
-                uint32 spellId = Trinity::Containers::SelectRandomContainerElement(WormholeTargetLocations);
+                uint32 spellId = Server::Containers::SelectRandomContainerElement(WormholeTargetLocations);
                 GetCaster()->CastSpell(GetHitUnit(), spellId, true);
             }
 
@@ -4186,7 +4174,7 @@ class spell_item_taunt_flag_targeting : public SpellScriptLoader
                     return;
                 }
 
-                Trinity::Containers::RandomResize(targets, 1);
+                Server::Containers::RandomResize(targets, 1);
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -4716,7 +4704,7 @@ public:
             if (target->GetPowerType() == POWER_MANA)
                 availableElixirs.push_back(28509); // Elixir of Major Mageblood (22840)
 
-            uint32 chosenElixir = Trinity::Containers::SelectRandomContainerElement(availableElixirs);
+            uint32 chosenElixir = Server::Containers::SelectRandomContainerElement(availableElixirs);
 
             bool useElixir = true;
 
@@ -4791,7 +4779,7 @@ public:
             if (target->GetPowerType() == POWER_MANA)
                 availableElixirs.push_back(43186); // Runic Mana Potion(33448)
 
-            uint32 chosenElixir = Trinity::Containers::SelectRandomContainerElement(availableElixirs);
+            uint32 chosenElixir = Server::Containers::SelectRandomContainerElement(availableElixirs);
 
             target->CastSpell(target, chosenElixir, true, GetCastItem());
         }

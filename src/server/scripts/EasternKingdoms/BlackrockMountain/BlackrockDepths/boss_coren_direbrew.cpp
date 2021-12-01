@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "GameObjectAI.h"
@@ -552,7 +540,7 @@ class spell_send_mug_target_picker : public SpellScriptLoader
             {
                 Unit* caster = GetCaster();
 
-                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_HAS_DARK_BREWMAIDENS_BREW));
+                targets.remove_if(Server::UnitAuraCheck(true, SPELL_HAS_DARK_BREWMAIDENS_BREW));
 
                 if (targets.size() > 1)
                     targets.remove_if([caster](WorldObject* obj)
@@ -565,7 +553,7 @@ class spell_send_mug_target_picker : public SpellScriptLoader
                 if (targets.empty())
                     return;
 
-                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                WorldObject* target = Server::Containers::SelectRandomContainerElement(targets);
                 targets.clear();
                 targets.push_back(target);
             }

@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "Common.h"
@@ -47,7 +34,7 @@ void WardenCheckMgr::LoadWardenChecks()
     // Check if Warden is enabled by config before loading anything
     if (!sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
     {
-        TC_LOG_INFO("warden", ">> Warden disabled, loading checks skipped.");
+        LOG_INFO("warden", ">> Warden disabled, loading checks skipped.");
         return;
     }
 
@@ -55,7 +42,7 @@ void WardenCheckMgr::LoadWardenChecks()
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 Warden checks. DB table `warden_checks` is empty!");
+        LOG_INFO("server.loading", ">> Loaded 0 Warden checks. DB table `warden_checks` is empty!");
         return;
     }
 
@@ -147,7 +134,7 @@ void WardenCheckMgr::LoadWardenChecks()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u warden checks.", count);
+    LOG_INFO("server.loading", ">> Loaded %u warden checks.", count);
 }
 
 void WardenCheckMgr::LoadWardenOverrides()
@@ -155,7 +142,7 @@ void WardenCheckMgr::LoadWardenOverrides()
     // Check if Warden is enabled by config before loading anything
     if (!sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
     {
-        TC_LOG_INFO("warden", ">> Warden disabled, loading check overrides skipped.");
+        LOG_INFO("warden", ">> Warden disabled, loading check overrides skipped.");
         return;
     }
 
@@ -164,7 +151,7 @@ void WardenCheckMgr::LoadWardenOverrides()
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 Warden action overrides. DB table `warden_action` is empty!");
+        LOG_INFO("server.loading", ">> Loaded 0 Warden action overrides. DB table `warden_action` is empty!");
         return;
     }
 
@@ -181,10 +168,10 @@ void WardenCheckMgr::LoadWardenOverrides()
 
         // Check if action value is in range (0-2, see WardenActions enum)
         if (action > WARDEN_ACTION_BAN)
-            TC_LOG_ERROR("warden", "Warden check override action out of range (ID: %u, action: %u)", checkId, action);
+            LOG_ERROR("warden", "Warden check override action out of range (ID: %u, action: %u)", checkId, action);
         // Check if check actually exists before accessing the CheckStore vector
         else if (checkId > CheckStore.size())
-            TC_LOG_ERROR("warden", "Warden check action override for non-existing check (ID: %u, action: %u), skipped", checkId, action);
+            LOG_ERROR("warden", "Warden check action override for non-existing check (ID: %u, action: %u), skipped", checkId, action);
         else
         {
             CheckStore[checkId]->Action = WardenActions(action);
@@ -193,7 +180,7 @@ void WardenCheckMgr::LoadWardenOverrides()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u warden action overrides.", count);
+    LOG_INFO("server.loading", ">> Loaded %u warden action overrides.", count);
 }
 
 WardenCheckMgr* WardenCheckMgr::instance()

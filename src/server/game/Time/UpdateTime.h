@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef __UPDATETIME_H
@@ -24,7 +12,7 @@
 
 #define AVG_DIFF_COUNT 500
 
-class TC_GAME_API UpdateTime
+class GAME_API UpdateTime
 {
     using DiffTableArray = std::array<uint32, AVG_DIFF_COUNT>;
 
@@ -56,7 +44,7 @@ class TC_GAME_API UpdateTime
         uint32 _recordedTime;
 };
 
-class TC_GAME_API WorldUpdateTime : public UpdateTime
+class GAME_API WorldUpdateTime : public UpdateTime
 {
     public:
         WorldUpdateTime() : UpdateTime(), _recordUpdateTimeInverval(0), _recordUpdateTimeMin(0), _lastRecordTime(0) { }
@@ -71,6 +59,6 @@ class TC_GAME_API WorldUpdateTime : public UpdateTime
         uint32 _lastRecordTime;
 };
 
-TC_GAME_API extern WorldUpdateTime sWorldUpdateTime;
+GAME_API extern WorldUpdateTime sWorldUpdateTime;
 
 #endif

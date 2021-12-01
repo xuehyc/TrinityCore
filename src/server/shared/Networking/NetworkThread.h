@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef NetworkThread_h__
@@ -120,13 +108,13 @@ protected:
 
     void Run()
     {
-        TC_LOG_DEBUG("misc", "Network Thread Starting");
+        LOG_DEBUG("misc", "Network Thread Starting");
 
         _updateTimer.expires_from_now(boost::posix_time::milliseconds(10));
         _updateTimer.async_wait(std::bind(&NetworkThread<SocketType>::Update, this));
         _ioContext.run();
 
-        TC_LOG_DEBUG("misc", "Network Thread exits");
+        LOG_DEBUG("misc", "Network Thread exits");
         _newSockets.clear();
         _sockets.clear();
     }
@@ -171,9 +159,9 @@ private:
     std::mutex _newSocketsLock;
     SocketContainer _newSockets;
 
-    Trinity::Asio::IoContext _ioContext;
+    Server::Asio::IoContext _ioContext;
     tcp::socket _acceptSocket;
-    Trinity::Asio::DeadlineTimer _updateTimer;
+    Server::Asio::DeadlineTimer _updateTimer;
 };
 
 #endif // NetworkThread_h__

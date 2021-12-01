@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "WorldSession.h"
@@ -30,7 +18,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPackets::Transmogrification::Tra
     // Validate
     if (!player->GetNPCIfCanInteractWith(transmogrifyItems.Npc, UNIT_NPC_FLAG_TRANSMOGRIFIER))
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s not found or player can't interact with it.", transmogrifyItems.Npc.ToString().c_str());
+        LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s not found or player can't interact with it.", transmogrifyItems.Npc.ToString().c_str());
         return;
     }
 
@@ -47,7 +35,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPackets::Transmogrification::Tra
         // slot of the transmogrified item
         if (transmogItem.Slot >= EQUIPMENT_SLOT_END)
         {
-            TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (%s, name: %s) tried to transmogrify wrong slot (%u) when transmogrifying items.", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.Slot);
+            LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (%s, name: %s) tried to transmogrify wrong slot (%u) when transmogrifying items.", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.Slot);
             return;
         }
 
@@ -55,7 +43,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPackets::Transmogrification::Tra
         Item* itemTransmogrified = player->GetItemByPos(INVENTORY_SLOT_BAG_0, transmogItem.Slot);
         if (!itemTransmogrified)
         {
-            TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (%s, name: %s) tried to transmogrify an invalid item in a valid slot (slot: %u).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.Slot);
+            LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - Player (%s, name: %s) tried to transmogrify an invalid item in a valid slot (slot: %u).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.Slot);
             return;
         }
 
@@ -64,7 +52,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPackets::Transmogrification::Tra
             ItemModifiedAppearanceEntry const* itemModifiedAppearance = sItemModifiedAppearanceStore.LookupEntry(transmogItem.ItemModifiedAppearanceID);
             if (!itemModifiedAppearance)
             {
-                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify using invalid appearance (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.ItemModifiedAppearanceID);
+                LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify using invalid appearance (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.ItemModifiedAppearanceID);
                 return;
             }
 
@@ -72,20 +60,20 @@ void WorldSession::HandleTransmogrifyItems(WorldPackets::Transmogrification::Tra
             std::tie(hasAppearance, isTemporary) = GetCollectionMgr()->HasItemAppearance(transmogItem.ItemModifiedAppearanceID);
             if (!hasAppearance)
             {
-                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify using appearance he has not collected (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.ItemModifiedAppearanceID);
+                LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify using appearance he has not collected (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.ItemModifiedAppearanceID);
                 return;
             }
             ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(itemModifiedAppearance->ItemID);
             if (player->CanUseItem(itemTemplate) != EQUIP_ERR_OK)
             {
-                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify using appearance he can never use (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.ItemModifiedAppearanceID);
+                LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify using appearance he can never use (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.ItemModifiedAppearanceID);
                 return;
             }
 
             // validity of the transmogrification items
             if (!Item::CanTransmogrifyItemWithItem(itemTransmogrified, itemModifiedAppearance))
             {
-                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s failed CanTransmogrifyItemWithItem (%u with appearance %d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), itemTransmogrified->GetEntry(), transmogItem.ItemModifiedAppearanceID);
+                LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s failed CanTransmogrifyItemWithItem (%u with appearance %d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), itemTransmogrified->GetEntry(), transmogItem.ItemModifiedAppearanceID);
                 return;
             }
 
@@ -103,20 +91,20 @@ void WorldSession::HandleTransmogrifyItems(WorldPackets::Transmogrification::Tra
         {
             if (transmogItem.Slot != EQUIPMENT_SLOT_MAINHAND && transmogItem.Slot != EQUIPMENT_SLOT_OFFHAND)
             {
-                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify illusion into non-weapon slot (%u).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.Slot);
+                LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify illusion into non-weapon slot (%u).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.Slot);
                 return;
             }
 
             SpellItemEnchantmentEntry const* illusion = sSpellItemEnchantmentStore.LookupEntry(transmogItem.SpellItemEnchantmentID);
             if (!illusion)
             {
-                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify illusion using invalid enchant (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.SpellItemEnchantmentID);
+                LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify illusion using invalid enchant (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.SpellItemEnchantmentID);
                 return;
             }
 
             if (!illusion->ItemVisual || !(illusion->Flags & ENCHANTMENT_COLLECTABLE))
             {
-                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify illusion using not allowed enchant (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.SpellItemEnchantmentID);
+                LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify illusion using not allowed enchant (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.SpellItemEnchantmentID);
                 return;
             }
 
@@ -124,14 +112,14 @@ void WorldSession::HandleTransmogrifyItems(WorldPackets::Transmogrification::Tra
             {
                 if (!sConditionMgr->IsPlayerMeetingCondition(player, condition))
                 {
-                    TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify illusion using not collected enchant (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.SpellItemEnchantmentID);
+                    LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify illusion using not collected enchant (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.SpellItemEnchantmentID);
                     return;
                 }
             }
 
             if (illusion->ScalingClassRestricted > 0 && uint8(illusion->ScalingClassRestricted) != player->getClass())
             {
-                TC_LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify illusion using not allowed class enchant (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.SpellItemEnchantmentID);
+                LOG_DEBUG("network", "WORLD: HandleTransmogrifyItems - %s, Name: %s tried to transmogrify illusion using not allowed class enchant (%d).", player->GetGUID().ToString().c_str(), player->GetName().c_str(), transmogItem.SpellItemEnchantmentID);
                 return;
             }
 

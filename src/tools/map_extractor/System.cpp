@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "Banner.h"
@@ -354,7 +341,7 @@ bool ReadCinematicCameraDBC()
 
     // get camera file list from DB2
     for (size_t i = 0; i < db2.GetRecordCount(); ++i)
-        CameraFileNames.insert(Trinity::StringFormat("FILE%08X.xxx", db2.GetRecord(i).GetUInt32("FileDataID")));
+        CameraFileNames.insert(Server::StringFormat("FILE%08X.xxx", db2.GetRecord(i).GetUInt32("FileDataID")));
 
     printf("Done! (" SZFMTD " CinematicCameras loaded)\n", CameraFileNames.size());
     return true;
@@ -1087,7 +1074,7 @@ void ExtractMaps(uint32 build)
     {
         printf("Extract %s (" SZFMTD "/" SZFMTD ")                  \n", map_ids[z].name, z+1, map_ids.size());
         // Loadup map grid data
-        storagePath = Trinity::StringFormat("World\\Maps\\%s\\%s.wdt", map_ids[z].name, map_ids[z].name);
+        storagePath = Server::StringFormat("World\\Maps\\%s\\%s.wdt", map_ids[z].name, map_ids[z].name);
         ChunkedFile wdt;
         if (!wdt.loadFile(CascStorage, storagePath, false))
             continue;
@@ -1100,8 +1087,8 @@ void ExtractMaps(uint32 build)
                 if (!(chunk->As<wdt_MAIN>()->adt_list[y][x].flag & 0x1))
                     continue;
 
-                storagePath = Trinity::StringFormat("World\\Maps\\%s\\%s_%u_%u.adt", map_ids[z].name, map_ids[z].name, x, y);
-                outputFileName =  Trinity::StringFormat("%s/maps/%04u_%02u_%02u.map", output_path.string().c_str(), map_ids[z].id, y, x);
+                storagePath = Server::StringFormat("World\\Maps\\%s\\%s_%u_%u.adt", map_ids[z].name, map_ids[z].name, x, y);
+                outputFileName =  Server::StringFormat("%s/maps/%04u_%02u_%02u.map", output_path.string().c_str(), map_ids[z].id, y, x);
                 bool ignoreDeepWater = IsDeepWaterIgnored(map_ids[z].id, y, x);
                 ConvertADT(storagePath, outputFileName, y, x, build, ignoreDeepWater);
             }
@@ -1372,7 +1359,7 @@ static bool RetardCheck()
 
 int main(int argc, char * arg[])
 {
-    Trinity::Banner::Show("Map & DBC Extractor", [](char const* text) { printf("%s\n", text); }, nullptr);
+    Server::Banner::Show("Map & DBC Extractor", [](char const* text) { printf("%s\n", text); }, nullptr);
 
     input_path = boost::filesystem::current_path();
     output_path = boost::filesystem::current_path();

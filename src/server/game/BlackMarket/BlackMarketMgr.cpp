@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "BlackMarketMgr.h"
@@ -68,7 +56,7 @@ void BlackMarketMgr::LoadTemplates()
     QueryResult result = WorldDatabase.Query("SELECT marketId, sellerNpc, itemEntry, quantity, minBid, duration, chance, bonusListIDs FROM blackmarket_template");
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 black market templates. DB table `blackmarket_template` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 black market templates. DB table `blackmarket_template` is empty.");
         return;
     }
 
@@ -86,7 +74,7 @@ void BlackMarketMgr::LoadTemplates()
         AddTemplate(templ);
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u black market templates in %u ms.", uint32(_templates.size()), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u black market templates in %u ms.", uint32(_templates.size()), GetMSTimeDiffToNow(oldMSTime));
 }
 
 void BlackMarketMgr::LoadAuctions()
@@ -106,7 +94,7 @@ void BlackMarketMgr::LoadAuctions()
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 black market auctions. DB table `blackmarket_auctions` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 black market auctions. DB table `blackmarket_auctions` is empty.");
         return;
     }
 
@@ -137,7 +125,7 @@ void BlackMarketMgr::LoadAuctions()
 
     CharacterDatabase.CommitTransaction(trans);
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u black market auctions in %u ms.", uint32(_auctions.size()), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u black market auctions in %u ms.", uint32(_auctions.size()), GetMSTimeDiffToNow(oldMSTime));
 }
 
 void BlackMarketMgr::Update(bool updateTime)
@@ -193,7 +181,7 @@ void BlackMarketMgr::RefreshAuctions()
         templates.push_back(pair.second);
     }
 
-    Trinity::Containers::RandomResize(templates, sWorld->getIntConfig(CONFIG_BLACKMARKET_MAXAUCTIONS));
+    Server::Containers::RandomResize(templates, sWorld->getIntConfig(CONFIG_BLACKMARKET_MAXAUCTIONS));
 
     for (BlackMarketTemplate const* templat : templates)
     {
@@ -286,7 +274,7 @@ void BlackMarketMgr::SendAuctionWonMail(BlackMarketEntry* entry, CharacterDataba
         logGmTrade = AccountMgr::HasPermission(bidderAccId, rbac::RBAC_PERM_LOG_GM_TRADE, realm.Id.Realm);
 
         if (logGmTrade && !sCharacterCache->GetCharacterNameByGuid(bidderGuid, bidderName))
-            bidderName = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
+            bidderName = sObjectMgr->GetServerStringForDBCLocale(LANG_UNKNOWN);
     }
 
     // Create item
@@ -380,13 +368,13 @@ bool BlackMarketTemplate::LoadFromDB(Field* fields)
 
     if (!sObjectMgr->GetCreatureTemplate(SellerNPC))
     {
-        TC_LOG_ERROR("misc", "Black market template %i does not have a valid seller. (Entry: %u)", MarketID, SellerNPC);
+        LOG_ERROR("misc", "Black market template %i does not have a valid seller. (Entry: %u)", MarketID, SellerNPC);
         return false;
     }
 
     if (!sObjectMgr->GetItemTemplate(Item.ItemID))
     {
-        TC_LOG_ERROR("misc", "Black market template %i does not have a valid item. (Entry: %u)", MarketID, Item.ItemID);
+        LOG_ERROR("misc", "Black market template %i does not have a valid item. (Entry: %u)", MarketID, Item.ItemID);
         return false;
     }
 
@@ -426,7 +414,7 @@ bool BlackMarketEntry::LoadFromDB(Field* fields)
     BlackMarketTemplate const* templ = sBlackMarketMgr->GetTemplateByID(_marketId);
     if (!templ)
     {
-        TC_LOG_ERROR("misc", "Black market auction %i does not have a valid id.", _marketId);
+        LOG_ERROR("misc", "Black market auction %i does not have a valid id.", _marketId);
         return false;
     }
 
@@ -438,7 +426,7 @@ bool BlackMarketEntry::LoadFromDB(Field* fields)
     // Either no bidder or existing player
     if (_bidder && !sCharacterCache->GetCharacterAccountIdByGuid(ObjectGuid::Create<HighGuid::Player>(_bidder))) // Probably a better way to check if player exists
     {
-        TC_LOG_ERROR("misc", "Black market auction %i does not have a valid bidder (GUID: " UI64FMTD " ).", _marketId, _bidder);
+        LOG_ERROR("misc", "Black market auction %i does not have a valid bidder (GUID: " UI64FMTD " ).", _marketId, _bidder);
         return false;
     }
 

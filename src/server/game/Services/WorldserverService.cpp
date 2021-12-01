@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "WorldserverService.h"
@@ -45,7 +33,7 @@ uint32 Battlenet::GameUtilitiesService::HandleProcessClientRequest(game_utilitie
 
     if (!command)
     {
-        TC_LOG_ERROR("session.rpc", "%s sent ClientRequest with no command.", GetCallerInfo().c_str());
+        LOG_ERROR("session.rpc", "%s sent ClientRequest with no command.", GetCallerInfo().c_str());
         return ERROR_RPC_MALFORMED_REQUEST;
     }
 
@@ -101,7 +89,7 @@ uint32 Battlenet::GameUtilitiesService::HandleRealmJoinRequest(std::unordered_ma
 {
     auto realmAddress = params.find("Param_RealmAddress");
     if (realmAddress != params.end())
-        return sRealmList->JoinRealm(uint32(realmAddress->second->uint_value()), realm.Build, Trinity::Net::make_address(_session->GetRemoteAddress()), _session->GetRealmListSecret(),
+        return sRealmList->JoinRealm(uint32(realmAddress->second->uint_value()), realm.Build, Server::Net::make_address(_session->GetRemoteAddress()), _session->GetRealmListSecret(),
             _session->GetSessionDbcLocale(), _session->GetOS(), _session->GetAccountName(), response);
 
     return ERROR_WOW_SERVICES_INVALID_JOIN_TICKET;

@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef __SOCKET_H__
@@ -31,7 +19,7 @@ using boost::asio::ip::tcp;
 
 #define READ_BLOCK_SIZE 4096
 #ifdef BOOST_ASIO_HAS_IOCP
-#define TC_SOCKET_USE_IOCP
+#define SOCKET_USE_IOCP
 #endif
 
 /**
@@ -85,7 +73,7 @@ public:
         if (_closed)
             return false;
 
-#ifndef TC_SOCKET_USE_IOCP
+#ifndef SOCKET_USE_IOCP
         if (_isWritingAsync || (_writeQueue.empty() && !_closing))
             return true;
 
@@ -132,7 +120,7 @@ public:
     {
         _writeQueue.push(std::move(buffer));
 
-#ifdef TC_SOCKET_USE_IOCP
+#ifdef SOCKET_USE_IOCP
         AsyncProcessQueue();
 #endif
     }
@@ -147,7 +135,7 @@ public:
         boost::system::error_code shutdownError;
         _socket.shutdown(boost::asio::socket_base::shutdown_send, shutdownError);
         if (shutdownError)
-            TC_LOG_DEBUG("network", "Socket::CloseSocket: %s errored when shutting down socket: %i (%s)", GetRemoteIpAddress().to_string().c_str(),
+            LOG_DEBUG("network", "Socket::CloseSocket: %s errored when shutting down socket: %i (%s)", GetRemoteIpAddress().to_string().c_str(),
                 shutdownError.value(), shutdownError.message().c_str());
 
         OnClose();
@@ -170,7 +158,7 @@ protected:
 
         _isWritingAsync = true;
 
-#ifdef TC_SOCKET_USE_IOCP
+#ifdef SOCKET_USE_IOCP
         MessageBuffer& buffer = _writeQueue.front();
         _socket.async_write_some(boost::asio::buffer(buffer.GetReadPointer(), buffer.GetActiveSize()), std::bind(&Socket<T, Stream>::WriteHandler,
             this->shared_from_this(), std::placeholders::_1, std::placeholders::_2));
@@ -187,7 +175,7 @@ protected:
         boost::system::error_code err;
         _socket.set_option(tcp::no_delay(enable), err);
         if (err)
-            TC_LOG_DEBUG("network", "Socket::SetNoDelay: failed to set_option(boost::asio::ip::tcp::no_delay) for %s - %d (%s)",
+            LOG_DEBUG("network", "Socket::SetNoDelay: failed to set_option(boost::asio::ip::tcp::no_delay) for %s - %d (%s)",
                 GetRemoteIpAddress().to_string().c_str(), err.value(), err.message().c_str());
     }
 
@@ -209,7 +197,7 @@ private:
         ReadHandler();
     }
 
-#ifdef TC_SOCKET_USE_IOCP
+#ifdef SOCKET_USE_IOCP
 
     void WriteHandler(boost::system::error_code error, std::size_t transferedBytes)
     {

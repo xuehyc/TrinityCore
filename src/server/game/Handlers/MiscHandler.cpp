@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "WorldSession.h"
@@ -73,7 +60,7 @@ void WorldSession::HandleRepopRequest(WorldPackets::Misc::RepopRequest& /*packet
     // release spirit after he's killed but before he is updated
     if (GetPlayer()->getDeathState() == JUST_DIED)
     {
-        TC_LOG_DEBUG("network", "HandleRepopRequestOpcode: got request after player %s(%s) was killed and before he was updated",
+        LOG_DEBUG("network", "HandleRepopRequestOpcode: got request after player %s(%s) was killed and before he was updated",
             GetPlayer()->GetName().c_str(), GetPlayer()->GetGUID().ToString().c_str());
         GetPlayer()->KillPlayer();
     }
@@ -88,7 +75,7 @@ void WorldSession::HandleWhoOpcode(WorldPackets::Who::WhoRequestPkt& whoRequest)
 {
     WorldPackets::Who::WhoRequest& request = whoRequest.Request;
 
-    TC_LOG_DEBUG("network", "WorldSession::HandleWhoOpcode: MinLevel: %u, MaxLevel: %u, Name: %s (VirtualRealmName: %s), Guild: %s (GuildVirtualRealmName: %s), RaceFilter: " UI64FMTD ", ClassFilter: %d, Areas: " SZFMTD ", Words: " SZFMTD ".",
+    LOG_DEBUG("network", "WorldSession::HandleWhoOpcode: MinLevel: %u, MaxLevel: %u, Name: %s (VirtualRealmName: %s), Guild: %s (GuildVirtualRealmName: %s), RaceFilter: " UI64FMTD ", ClassFilter: %d, Areas: " SZFMTD ", Words: " SZFMTD ".",
         request.MinLevel, request.MaxLevel, request.Name.c_str(), request.VirtualRealmName.c_str(), request.Guild.c_str(), request.GuildVirtualRealmName.c_str(),
         request.RaceFilter.RawValue, request.ClassFilter, whoRequest.Areas.size(), request.Words.size());
 
@@ -113,7 +100,7 @@ void WorldSession::HandleWhoOpcode(WorldPackets::Who::WhoRequestPkt& whoRequest)
     wWords.resize(request.Words.size());
     for (size_t i = 0; i < request.Words.size(); ++i)
     {
-        TC_LOG_DEBUG("network", "WorldSession::HandleWhoOpcode: Word: %s", request.Words[i].Word.c_str());
+        LOG_DEBUG("network", "WorldSession::HandleWhoOpcode: Word: %s", request.Words[i].Word.c_str());
 
         // user entered string, it used as universal search pattern(guild+player name)?
         if (!Utf8toWStr(request.Words[i].Word, wWords[i]))
@@ -131,7 +118,7 @@ void WorldSession::HandleWhoOpcode(WorldPackets::Who::WhoRequestPkt& whoRequest)
     wstrToLower(wPlayerName);
     wstrToLower(wGuildName);
 
-    // client send in case not set max level value 100 but Trinity supports 255 max level,
+    // client send in case not set max level value 100 but server supports 255 max level,
     // update it to show GMs with characters after 100 level
     if (whoRequest.Request.MaxLevel >= MAX_LEVEL)
         whoRequest.Request.MaxLevel = STRONG_MAX_LEVEL;
@@ -368,7 +355,7 @@ void WorldSession::HandleRequestCemeteryList(WorldPackets::Misc::RequestCemetery
 
     if (graveyardIds.empty())
     {
-        TC_LOG_DEBUG("network", "No graveyards found for zone %u for %s (team %u) in CMSG_REQUEST_CEMETERY_LIST",
+        LOG_DEBUG("network", "No graveyards found for zone %u for %s (team %u) in CMSG_REQUEST_CEMETERY_LIST",
             zoneId, _player->GetGUID().ToString().c_str(), team);
         return;
     }
@@ -460,7 +447,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPackets::AreaTrigger::AreaTrigge
     Player* player = GetPlayer();
     if (player->IsInFlight())
     {
-        TC_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (%s) in flight, ignore Area Trigger ID:%u",
+        LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (%s) in flight, ignore Area Trigger ID:%u",
             player->GetName().c_str(), player->GetGUID().ToString().c_str(), packet.AreaTriggerID);
         return;
     }
@@ -468,14 +455,14 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPackets::AreaTrigger::AreaTrigge
     AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(packet.AreaTriggerID);
     if (!atEntry)
     {
-        TC_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (%s) send unknown (by DBC) Area Trigger ID:%u",
+        LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (%s) send unknown (by DBC) Area Trigger ID:%u",
             player->GetName().c_str(), player->GetGUID().ToString().c_str(), packet.AreaTriggerID);
         return;
     }
 
     if (packet.Entered && !player->IsInAreaTriggerRadius(atEntry))
     {
-        TC_LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (%s) too far, ignore Area Trigger ID: %u",
+        LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '%s' (%s) too far, ignore Area Trigger ID: %u",
             player->GetName().c_str(), player->GetGUID().ToString().c_str(), packet.AreaTriggerID);
         return;
     }
@@ -543,39 +530,39 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPackets::AreaTrigger::AreaTrigge
             switch (denyReason)
             {
                 case Map::CANNOT_ENTER_NO_ENTRY:
-                    TC_LOG_DEBUG("maps", "MAP: Player '%s' attempted to enter map with id %d which has no entry", player->GetName().c_str(), at->target_mapId);
+                    LOG_DEBUG("maps", "MAP: Player '%s' attempted to enter map with id %d which has no entry", player->GetName().c_str(), at->target_mapId);
                     break;
                 case Map::CANNOT_ENTER_UNINSTANCED_DUNGEON:
-                    TC_LOG_DEBUG("maps", "MAP: Player '%s' attempted to enter dungeon map %d but no instance template was found", player->GetName().c_str(), at->target_mapId);
+                    LOG_DEBUG("maps", "MAP: Player '%s' attempted to enter dungeon map %d but no instance template was found", player->GetName().c_str(), at->target_mapId);
                     break;
                 case Map::CANNOT_ENTER_DIFFICULTY_UNAVAILABLE:
-                    TC_LOG_DEBUG("maps", "MAP: Player '%s' attempted to enter instance map %d but the requested difficulty was not found", player->GetName().c_str(), at->target_mapId);
+                    LOG_DEBUG("maps", "MAP: Player '%s' attempted to enter instance map %d but the requested difficulty was not found", player->GetName().c_str(), at->target_mapId);
                     if (MapEntry const* entry = sMapStore.LookupEntry(at->target_mapId))
                         player->SendTransferAborted(entry->ID, TRANSFER_ABORT_DIFFICULTY, player->GetDifficultyID(entry));
                     break;
                 case Map::CANNOT_ENTER_NOT_IN_RAID:
-                    TC_LOG_DEBUG("maps", "MAP: Player '%s' must be in a raid group to enter map %d", player->GetName().c_str(), at->target_mapId);
+                    LOG_DEBUG("maps", "MAP: Player '%s' must be in a raid group to enter map %d", player->GetName().c_str(), at->target_mapId);
                     player->SendRaidGroupOnlyMessage(RAID_GROUP_ERR_ONLY, 0);
                     reviveAtTrigger = true;
                     break;
                 case Map::CANNOT_ENTER_CORPSE_IN_DIFFERENT_INSTANCE:
                     player->GetSession()->SendPacket(WorldPackets::AreaTrigger::AreaTriggerNoCorpse().Write());
-                    TC_LOG_DEBUG("maps", "MAP: Player '%s' does not have a corpse in instance map %d and cannot enter", player->GetName().c_str(), at->target_mapId);
+                    LOG_DEBUG("maps", "MAP: Player '%s' does not have a corpse in instance map %d and cannot enter", player->GetName().c_str(), at->target_mapId);
                     break;
                 case Map::CANNOT_ENTER_INSTANCE_BIND_MISMATCH:
                     if (MapEntry const* entry = sMapStore.LookupEntry(at->target_mapId))
                     {
                         char const* mapName = entry->MapName->Str[player->GetSession()->GetSessionDbcLocale()];
-                        TC_LOG_DEBUG("maps", "MAP: Player '%s' cannot enter instance map '%s' because their permanent bind is incompatible with their group's", player->GetName().c_str(), mapName);
+                        LOG_DEBUG("maps", "MAP: Player '%s' cannot enter instance map '%s' because their permanent bind is incompatible with their group's", player->GetName().c_str(), mapName);
                         // is there a special opcode for this?
                         // @todo figure out how to get player localized difficulty string (e.g. "10 player", "Heroic" etc)
-                        ChatHandler(player->GetSession()).PSendSysMessage(player->GetSession()->GetTrinityString(LANG_INSTANCE_BIND_MISMATCH), mapName);
+                        ChatHandler(player->GetSession()).PSendSysMessage(player->GetSession()->GetServerString(LANG_INSTANCE_BIND_MISMATCH), mapName);
                     }
                     reviveAtTrigger = true;
                     break;
                 case Map::CANNOT_ENTER_TOO_MANY_INSTANCES:
                     player->SendTransferAborted(at->target_mapId, TRANSFER_ABORT_TOO_MANY_INSTANCES);
-                    TC_LOG_DEBUG("maps", "MAP: Player '%s' cannot enter instance map %d because he has exceeded the maximum number of instances per hour.", player->GetName().c_str(), at->target_mapId);
+                    LOG_DEBUG("maps", "MAP: Player '%s' cannot enter instance map %d because he has exceeded the maximum number of instances per hour.", player->GetName().c_str(), at->target_mapId);
                     reviveAtTrigger = true;
                     break;
                 case Map::CANNOT_ENTER_MAX_PLAYERS:
@@ -632,7 +619,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPackets::AreaTrigger::AreaTrigge
 
 void WorldSession::HandleUpdateAccountData(WorldPackets::ClientConfig::UserClientUpdateAccountData& packet)
 {
-    TC_LOG_DEBUG("network", "WORLD: Received CMSG_UPDATE_ACCOUNT_DATA: type %u, time %u, decompressedSize %u",
+    LOG_DEBUG("network", "WORLD: Received CMSG_UPDATE_ACCOUNT_DATA: type %u, time %u, decompressedSize %u",
         packet.DataType, packet.Time, packet.Size);
 
     if (packet.DataType > NUM_ACCOUNT_DATA_TYPES)
@@ -646,7 +633,7 @@ void WorldSession::HandleUpdateAccountData(WorldPackets::ClientConfig::UserClien
 
     if (packet.Size > 0xFFFF)
     {
-        TC_LOG_ERROR("network", "UAD: Account data packet too big, size %u", packet.Size);
+        LOG_ERROR("network", "UAD: Account data packet too big, size %u", packet.Size);
         return;
     }
 
@@ -656,7 +643,7 @@ void WorldSession::HandleUpdateAccountData(WorldPackets::ClientConfig::UserClien
     uLongf realSize = packet.Size;
     if (uncompress(dest.contents(), &realSize, packet.CompressedData.contents(), packet.CompressedData.size()) != Z_OK)
     {
-        TC_LOG_ERROR("network", "UAD: Failed to decompress account data");
+        LOG_ERROR("network", "UAD: Failed to decompress account data");
         return;
     }
 
@@ -668,7 +655,7 @@ void WorldSession::HandleUpdateAccountData(WorldPackets::ClientConfig::UserClien
 
 void WorldSession::HandleRequestAccountData(WorldPackets::ClientConfig::RequestAccountData& request)
 {
-    TC_LOG_DEBUG("network", "WORLD: Received CMSG_REQUEST_ACCOUNT_DATA: type %u", request.DataType);
+    LOG_DEBUG("network", "WORLD: Received CMSG_REQUEST_ACCOUNT_DATA: type %u", request.DataType);
 
     if (request.DataType >= NUM_ACCOUNT_DATA_TYPES)
         return;
@@ -687,7 +674,7 @@ void WorldSession::HandleRequestAccountData(WorldPackets::ClientConfig::RequestA
 
     if (data.Size && compress(data.CompressedData.contents(), &destSize, (uint8 const*)adata->Data.c_str(), data.Size) != Z_OK)
     {
-        TC_LOG_ERROR("network", "RAD: Failed to compress account data");
+        LOG_ERROR("network", "RAD: Failed to compress account data");
         return;
     }
 
@@ -701,7 +688,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPackets::Spells::SetActionBu
     uint32 action = ACTION_BUTTON_ACTION(packet.Action);
     uint32 type = ACTION_BUTTON_TYPE(packet.Action);
 
-    TC_LOG_DEBUG("network", "CMSG_SET_ACTION_BUTTON Button: %u Action: %u Type: %u", packet.Index, action, type);
+    LOG_DEBUG("network", "CMSG_SET_ACTION_BUTTON Button: %u Action: %u Type: %u", packet.Index, action, type);
 
     if (!packet.Action)
         GetPlayer()->RemoveActionButton(packet.Index);
@@ -736,7 +723,7 @@ void WorldSession::HandleSetActionBarToggles(WorldPackets::Character::SetActionB
     if (!GetPlayer())                                        // ignore until not logged (check needed because STATUS_AUTHED)
     {
         if (packet.Mask != 0)
-            TC_LOG_ERROR("network", "WorldSession::HandleSetActionBarToggles in not logged state with value: %u, ignored", uint32(packet.Mask));
+            LOG_ERROR("network", "WorldSession::HandleSetActionBarToggles in not logged state with value: %u, ignored", uint32(packet.Mask));
         return;
     }
 
@@ -754,7 +741,7 @@ void WorldSession::HandlePlayedTime(WorldPackets::Character::RequestPlayedTime& 
 
 void WorldSession::HandleWhoIsOpcode(WorldPackets::Who::WhoIsRequest& packet)
 {
-    TC_LOG_DEBUG("network", "Received whois command from player %s for character %s",
+    LOG_DEBUG("network", "Received whois command from player %s for character %s",
         GetPlayer()->GetName().c_str(), packet.CharName.c_str());
 
     if (!HasPermission(rbac::RBAC_PERM_OPCODE_WHOIS))
@@ -808,15 +795,15 @@ void WorldSession::HandleFarSightOpcode(WorldPackets::Misc::FarSight& packet)
 {
     if (packet.Enable)
     {
-        TC_LOG_DEBUG("network", "Added FarSight %s to %s", _player->GetGuidValue(PLAYER_FARSIGHT).ToString().c_str(), _player->GetGUID().ToString().c_str());
+        LOG_DEBUG("network", "Added FarSight %s to %s", _player->GetGuidValue(PLAYER_FARSIGHT).ToString().c_str(), _player->GetGUID().ToString().c_str());
         if (WorldObject* target = _player->GetViewpoint())
             _player->SetSeer(target);
         else
-            TC_LOG_DEBUG("network", "Player %s (%s) requests non-existing seer %s", _player->GetName().c_str(), _player->GetGUID().ToString().c_str(), _player->GetGuidValue(PLAYER_FARSIGHT).ToString().c_str());
+            LOG_DEBUG("network", "Player %s (%s) requests non-existing seer %s", _player->GetName().c_str(), _player->GetGUID().ToString().c_str(), _player->GetGuidValue(PLAYER_FARSIGHT).ToString().c_str());
     }
     else
     {
-        TC_LOG_DEBUG("network", "%s set vision to self", _player->GetGUID().ToString().c_str());
+        LOG_DEBUG("network", "%s set vision to self", _player->GetGUID().ToString().c_str());
         _player->SetSeer(_player);
     }
 
@@ -842,19 +829,19 @@ void WorldSession::HandleTimeSyncResponse(WorldPackets::Misc::TimeSyncResponse& 
     // Prevent crashing server if queue is empty
     if (_player->m_timeSyncQueue.empty())
     {
-        TC_LOG_ERROR("network", "Received CMSG_TIME_SYNC_RESPONSE from player %s without requesting it (hacker?)", _player->GetName().c_str());
+        LOG_ERROR("network", "Received CMSG_TIME_SYNC_RESPONSE from player %s without requesting it (hacker?)", _player->GetName().c_str());
         return;
     }
 
     if (packet.SequenceIndex != _player->m_timeSyncQueue.front())
-        TC_LOG_ERROR("network", "Wrong time sync counter from player %s (cheater?)", _player->GetName().c_str());
+        LOG_ERROR("network", "Wrong time sync counter from player %s (cheater?)", _player->GetName().c_str());
 
-    TC_LOG_DEBUG("network", "Time sync received: counter %u, client ticks %u, time since last sync %u", packet.SequenceIndex, packet.ClientTime, packet.ClientTime - _player->m_timeSyncClient);
+    LOG_DEBUG("network", "Time sync received: counter %u, client ticks %u, time since last sync %u", packet.SequenceIndex, packet.ClientTime, packet.ClientTime - _player->m_timeSyncClient);
 
     uint32 ourTicks = packet.ClientTime + (GameTime::GetGameTimeMS() - _player->m_timeSyncServer);
 
     // diff should be small
-    TC_LOG_DEBUG("network", "Our ticks: %u, diff %u, latency %u", ourTicks, ourTicks - packet.ClientTime, GetLatency());
+    LOG_DEBUG("network", "Our ticks: %u, diff %u, latency %u", ourTicks, ourTicks - packet.ClientTime, GetLatency());
 
     _player->m_timeSyncClient = packet.ClientTime;
     _player->m_timeSyncQueue.pop();
@@ -876,21 +863,21 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPackets::Misc::SetDunge
     DifficultyEntry const* difficultyEntry = sDifficultyStore.LookupEntry(setDungeonDifficulty.DifficultyID);
     if (!difficultyEntry)
     {
-        TC_LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent an invalid instance mode %d!",
+        LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent an invalid instance mode %d!",
             _player->GetGUID().ToString().c_str(), setDungeonDifficulty.DifficultyID);
         return;
     }
 
     if (difficultyEntry->InstanceType != MAP_INSTANCE)
     {
-        TC_LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent an non-dungeon instance mode %d!",
+        LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent an non-dungeon instance mode %d!",
             _player->GetGUID().ToString().c_str(), difficultyEntry->ID);
         return;
     }
 
     if (!(difficultyEntry->Flags & DIFFICULTY_FLAG_CAN_SELECT))
     {
-        TC_LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent unselectable instance mode %d!",
+        LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent unselectable instance mode %d!",
             _player->GetGUID().ToString().c_str(), difficultyEntry->ID);
         return;
     }
@@ -903,7 +890,7 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPackets::Misc::SetDunge
     Map* map = _player->FindMap();
     if (map && map->IsDungeon())
     {
-        TC_LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: player (Name: %s, %s) tried to reset the instance while player is inside!",
+        LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: player (Name: %s, %s) tried to reset the instance while player is inside!",
             _player->GetName().c_str(), _player->GetGUID().ToString().c_str());
         return;
     }
@@ -924,7 +911,7 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPackets::Misc::SetDunge
 
                 if (groupGuy->GetMap()->IsNonRaidDungeon())
                 {
-                    TC_LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s tried to reset the instance while group member (Name: %s, %s) is inside!",
+                    LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s tried to reset the instance while group member (Name: %s, %s) is inside!",
                         _player->GetGUID().ToString().c_str(), groupGuy->GetName().c_str(), groupGuy->GetGUID().ToString().c_str());
                     return;
                 }
@@ -948,28 +935,28 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPackets::Misc::SetRaidDiff
     DifficultyEntry const* difficultyEntry = sDifficultyStore.LookupEntry(setRaidDifficulty.DifficultyID);
     if (!difficultyEntry)
     {
-        TC_LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent an invalid instance mode %u!",
+        LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent an invalid instance mode %u!",
             _player->GetGUID().ToString().c_str(), setRaidDifficulty.DifficultyID);
         return;
     }
 
     if (difficultyEntry->InstanceType != MAP_RAID)
     {
-        TC_LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent an non-dungeon instance mode %u!",
+        LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent an non-dungeon instance mode %u!",
             _player->GetGUID().ToString().c_str(), difficultyEntry->ID);
         return;
     }
 
     if (!(difficultyEntry->Flags & DIFFICULTY_FLAG_CAN_SELECT))
     {
-        TC_LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent unselectable instance mode %u!",
+        LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent unselectable instance mode %u!",
             _player->GetGUID().ToString().c_str(), difficultyEntry->ID);
         return;
     }
 
     if (((difficultyEntry->Flags & DIFFICULTY_FLAG_LEGACY) >> 5) != setRaidDifficulty.Legacy)
     {
-        TC_LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent not matching legacy difficulty %u!",
+        LOG_DEBUG("network", "WorldSession::HandleSetDungeonDifficultyOpcode: %s sent not matching legacy difficulty %u!",
             _player->GetGUID().ToString().c_str(), difficultyEntry->ID);
         return;
     }
@@ -982,7 +969,7 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPackets::Misc::SetRaidDiff
     Map* map = _player->FindMap();
     if (map && map->IsDungeon())
     {
-        TC_LOG_DEBUG("network", "WorldSession::HandleSetRaidDifficultyOpcode: player (Name: %s, %s) tried to reset the instance while player is inside!",
+        LOG_DEBUG("network", "WorldSession::HandleSetRaidDifficultyOpcode: player (Name: %s, %s) tried to reset the instance while player is inside!",
             _player->GetName().c_str(), _player->GetGUID().ToString().c_str());
         return;
     }
@@ -1003,7 +990,7 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPackets::Misc::SetRaidDiff
 
                 if (groupGuy->GetMap()->IsRaid())
                 {
-                    TC_LOG_DEBUG("network", "WorldSession::HandleSetRaidDifficultyOpcode: %s tried to reset the instance while group member (Name: %s, %s) is inside!",
+                    LOG_DEBUG("network", "WorldSession::HandleSetRaidDifficultyOpcode: %s tried to reset the instance while group member (Name: %s, %s) is inside!",
                         _player->GetGUID().ToString().c_str(), groupGuy->GetName().c_str(), groupGuy->GetGUID().ToString().c_str());
                     return;
                 }
@@ -1050,7 +1037,7 @@ void WorldSession::HandleInstanceLockResponse(WorldPackets::Instance::InstanceLo
 {
     if (!_player->HasPendingBind())
     {
-        TC_LOG_INFO("network", "InstanceLockResponse: Player %s (%s) tried to bind himself/teleport to graveyard without a pending bind!",
+        LOG_INFO("network", "InstanceLockResponse: Player %s (%s) tried to bind himself/teleport to graveyard without a pending bind!",
             _player->GetName().c_str(), _player->GetGUID().ToString().c_str());
         return;
     }
@@ -1070,7 +1057,7 @@ void WorldSession::HandleViolenceLevel(WorldPackets::Misc::ViolenceLevel& /*viol
 
 void WorldSession::HandleObjectUpdateFailedOpcode(WorldPackets::Misc::ObjectUpdateFailed& objectUpdateFailed)
 {
-    TC_LOG_ERROR("network", "Object update failed for %s for player %s (%s)", objectUpdateFailed.ObjectGUID.ToString().c_str(), GetPlayerName().c_str(), _player->GetGUID().ToString().c_str());
+    LOG_ERROR("network", "Object update failed for %s for player %s (%s)", objectUpdateFailed.ObjectGUID.ToString().c_str(), GetPlayerName().c_str(), _player->GetGUID().ToString().c_str());
 
     // If create object failed for current player then client will be stuck on loading screen
     if (_player->GetGUID() == objectUpdateFailed.ObjectGUID)
@@ -1085,7 +1072,7 @@ void WorldSession::HandleObjectUpdateFailedOpcode(WorldPackets::Misc::ObjectUpda
 
 void WorldSession::HandleObjectUpdateRescuedOpcode(WorldPackets::Misc::ObjectUpdateRescued& objectUpdateRescued)
 {
-    TC_LOG_ERROR("network", "Object update rescued for %s for player %s (%s)", objectUpdateRescued.ObjectGUID.ToString().c_str(), GetPlayerName().c_str(), _player->GetGUID().ToString().c_str());
+    LOG_ERROR("network", "Object update rescued for %s for player %s (%s)", objectUpdateRescued.ObjectGUID.ToString().c_str(), GetPlayerName().c_str(), _player->GetGUID().ToString().c_str());
 
     // Client received values update after destroying object
     // re-register object in m_clientGUIDs to send DestroyObject on next visibility update
@@ -1096,7 +1083,7 @@ void WorldSession::HandleSaveCUFProfiles(WorldPackets::Misc::SaveCUFProfiles& pa
 {
     if (packet.CUFProfiles.size() > MAX_CUF_PROFILES)
     {
-        TC_LOG_ERROR("entities.player", "HandleSaveCUFProfiles - %s tried to save more than %i CUF profiles. Hacking attempt?", GetPlayerName().c_str(), MAX_CUF_PROFILES);
+        LOG_ERROR("entities.player", "HandleSaveCUFProfiles - %s tried to save more than %i CUF profiles. Hacking attempt?", GetPlayerName().c_str(), MAX_CUF_PROFILES);
         return;
     }
 

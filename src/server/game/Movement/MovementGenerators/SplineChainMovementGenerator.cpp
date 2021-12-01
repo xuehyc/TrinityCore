@@ -1,19 +1,7 @@
-/*
-* Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 2 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
+ */
 
 #include "SplineChainMovementGenerator.h"
 #include "Creature.h"
@@ -38,18 +26,18 @@ uint32 SplineChainMovementGenerator::SendPathSpline(Unit* me, Movement::PointsAr
 void SplineChainMovementGenerator::SendSplineFor(Unit* me, uint32 index, uint32& toNext)
 {
     ASSERT(index < _chainSize);
-    TC_LOG_DEBUG("movement.splinechain", "%s: Sending spline for %u.", me->GetGUID().ToString().c_str(), index);
+    LOG_DEBUG("movement.splinechain", "%s: Sending spline for %u.", me->GetGUID().ToString().c_str(), index);
 
     SplineChainLink const& thisLink = _chain[index];
     uint32 actualDuration = SendPathSpline(me, thisLink.Points);
     if (actualDuration != thisLink.ExpectedDuration)
     {
-        TC_LOG_DEBUG("movement.splinechain", "%s: Sent spline for %u, duration is %u ms. Expected was %u ms (delta %d ms). Adjusting.", me->GetGUID().ToString().c_str(), index, actualDuration, thisLink.ExpectedDuration, int32(actualDuration) - int32(thisLink.ExpectedDuration));
+        LOG_DEBUG("movement.splinechain", "%s: Sent spline for %u, duration is %u ms. Expected was %u ms (delta %d ms). Adjusting.", me->GetGUID().ToString().c_str(), index, actualDuration, thisLink.ExpectedDuration, int32(actualDuration) - int32(thisLink.ExpectedDuration));
         toNext = uint32(double(actualDuration)/double(thisLink.ExpectedDuration) * toNext);
     }
     else
     {
-        TC_LOG_DEBUG("movement.splinechain", "%s: Sent spline for %u, duration is %u ms.", me->GetGUID().ToString().c_str(), index, actualDuration);
+        LOG_DEBUG("movement.splinechain", "%s: Sent spline for %u, duration is %u ms.", me->GetGUID().ToString().c_str(), index, actualDuration);
     }
 }
 
@@ -64,12 +52,12 @@ void SplineChainMovementGenerator::Initialize(Unit* me)
             SplineChainLink const& thisLink = _chain[_nextIndex];
             if (_nextFirstWP >= thisLink.Points.size())
             {
-                TC_LOG_ERROR("movement.splinechain", "%s: Attempted to resume spline chain from invalid resume state (%u, %u).", me->GetGUID().ToString().c_str(), _nextIndex, _nextFirstWP);
+                LOG_ERROR("movement.splinechain", "%s: Attempted to resume spline chain from invalid resume state (%u, %u).", me->GetGUID().ToString().c_str(), _nextIndex, _nextFirstWP);
                 _nextFirstWP = thisLink.Points.size()-1;
             }
             Movement::PointsArray partial(thisLink.Points.begin() + (_nextFirstWP-1), thisLink.Points.end());
             SendPathSpline(me, partial);
-            TC_LOG_DEBUG("movement.splinechain", "%s: Resumed spline chain generator from resume state.", me->GetGUID().ToString().c_str());
+            LOG_DEBUG("movement.splinechain", "%s: Resumed spline chain generator from resume state.", me->GetGUID().ToString().c_str());
             ++_nextIndex;
             if (!_msToNext)
                 _msToNext = 1;
@@ -86,7 +74,7 @@ void SplineChainMovementGenerator::Initialize(Unit* me)
     }
     else
     {
-        TC_LOG_ERROR("movement", "SplineChainMovementGenerator::Initialize - empty spline chain passed for %s.", me->GetGUID().ToString().c_str());
+        LOG_ERROR("movement", "SplineChainMovementGenerator::Initialize - empty spline chain passed for %s.", me->GetGUID().ToString().c_str());
     }
 }
 
@@ -114,7 +102,7 @@ bool SplineChainMovementGenerator::Update(Unit* me, uint32 diff)
     if (_msToNext <= diff)
     {
         // Send next spline
-        TC_LOG_DEBUG("movement.splinechain", "%s: Should send spline %u (%u ms late).", me->GetGUID().ToString().c_str(), _nextIndex, diff - _msToNext);
+        LOG_DEBUG("movement.splinechain", "%s: Should send spline %u (%u ms late).", me->GetGUID().ToString().c_str(), _nextIndex, diff - _msToNext);
         _msToNext = std::max(_chain[_nextIndex].TimeToNext, 1u);
         SendSplineFor(me, _nextIndex, _msToNext);
         ++_nextIndex;

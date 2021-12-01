@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _TASK_SCHEDULER_H_
@@ -44,7 +32,7 @@ class TaskContext;
 /// with the same duration or a new one.
 /// It also provides access to the repeat counter which is useful for task that repeat itself often
 /// but behave different every time (spoken event dialogs for example).
-class TC_COMMON_API TaskScheduler
+class COMMON_API TaskScheduler
 {
     friend class TaskContext;
 
@@ -129,7 +117,7 @@ class TC_COMMON_API TaskScheduler
         };
     };
 
-    class TC_COMMON_API TaskQueue
+    class COMMON_API TaskQueue
     {
         std::multiset<TaskContainer, Compare> container;
 
@@ -406,7 +394,7 @@ private:
     void Dispatch(success_t const& callback);
 };
 
-class TC_COMMON_API TaskContext
+class COMMON_API TaskContext
 {
     friend class TaskScheduler;
 

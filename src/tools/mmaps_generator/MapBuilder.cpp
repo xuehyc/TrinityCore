@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "MapBuilder.h"
@@ -107,7 +94,7 @@ namespace MMAP
             mapID = (*itr).m_mapId;
 
             files.clear();
-            getDirContents(files, "vmaps", Trinity::StringFormat("%04u_*.vmtile", mapID));
+            getDirContents(files, "vmaps", Server::StringFormat("%04u_*.vmtile", mapID));
             for (uint32 i = 0; i < files.size(); ++i)
             {
                 tileX = uint32(atoi(files[i].substr(8, 2).c_str()));
@@ -119,7 +106,7 @@ namespace MMAP
             }
 
             files.clear();
-            getDirContents(files, "maps", Trinity::StringFormat("%04u*", mapID));
+            getDirContents(files, "maps", Server::StringFormat("%04u*", mapID));
             for (uint32 i = 0; i < files.size(); ++i)
             {
                 tileY = uint32(atoi(files[i].substr(5, 2).c_str()));
@@ -530,7 +517,7 @@ namespace MMAP
         dtNavMesh* navMesh)
     {
         // console output
-        std::string tileString = Trinity::StringFormat("[Map %04u] [%02i,%02i]: ", mapID, tileX, tileY);
+        std::string tileString = Server::StringFormat("[Map %04u] [%02i,%02i]: ", mapID, tileX, tileY);
         printf("%s Building movemap tiles...\n", tileString.c_str());
 
         IntermediateValues iv;
@@ -947,7 +934,7 @@ namespace MMAP
                 case 1555:  // TransportBoostExperienceAllianceGunship.wdt
                 case 1556:  // TransportBoostExperienceHordeGunship.wdt
                 case 1561:  // TechTestCosmeticParentPerformance.wdt
-                case 1582:  // Artifact�DalaranVaultAcquisition.wdt // no, this weird symbol is not an encoding error.
+                case 1582:  // Artifact?DalaranVaultAcquisition.wdt // no, this weird symbol is not an encoding error.
                 case 1584:  // JulienTestLand-DevOnly.wdt
                 case 1586:  // AssualtOnStormwind.wdt (Assault on Stormwind - Dev Map)
                 case 1588:  // DevMapA.wdt

@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_CELLIMPL_H
-#define TRINITY_CELLIMPL_H
+#ifndef SERVER_CELLIMPL_H
+#define SERVER_CELLIMPL_H
 
 #include <cmath>
 
@@ -37,7 +24,7 @@ inline Cell::Cell(CellCoord const& p)
 
 inline Cell::Cell(float x, float y)
 {
-    CellCoord p = Trinity::ComputeCellCoord(x, y);
+    CellCoord p = Server::ComputeCellCoord(x, y);
     data.Part.grid_x = p.x_coord / MAX_NUMBER_OF_CELLS;
     data.Part.grid_y = p.y_coord / MAX_NUMBER_OF_CELLS;
     data.Part.cell_x = p.x_coord % MAX_NUMBER_OF_CELLS;
@@ -50,12 +37,12 @@ inline CellArea Cell::CalculateCellArea(float x, float y, float radius)
 {
     if (radius <= 0.0f)
     {
-        CellCoord center = Trinity::ComputeCellCoord(x, y).normalize();
+        CellCoord center = Server::ComputeCellCoord(x, y).normalize();
         return CellArea(center, center);
     }
 
-    CellCoord centerX = Trinity::ComputeCellCoord(x - radius, y - radius).normalize();
-    CellCoord centerY = Trinity::ComputeCellCoord(x + radius, y + radius).normalize();
+    CellCoord centerX = Server::ComputeCellCoord(x - radius, y - radius).normalize();
+    CellCoord centerY = Server::ComputeCellCoord(x + radius, y + radius).normalize();
 
     return CellArea(centerX, centerY);
 }
@@ -181,7 +168,7 @@ inline void Cell::VisitCircle(TypeContainerVisitor<T, CONTAINER>& visitor, Map& 
 template<class T>
 inline void Cell::VisitGridObjects(WorldObject const* center_obj, T& visitor, float radius, bool dont_load)
 {
-    CellCoord p(Trinity::ComputeCellCoord(center_obj->GetPositionX(), center_obj->GetPositionY()));
+    CellCoord p(Server::ComputeCellCoord(center_obj->GetPositionX(), center_obj->GetPositionY()));
     Cell cell(p);
     if (dont_load)
         cell.SetNoCreate();
@@ -193,7 +180,7 @@ inline void Cell::VisitGridObjects(WorldObject const* center_obj, T& visitor, fl
 template<class T>
 inline void Cell::VisitWorldObjects(WorldObject const* center_obj, T& visitor, float radius, bool dont_load)
 {
-    CellCoord p(Trinity::ComputeCellCoord(center_obj->GetPositionX(), center_obj->GetPositionY()));
+    CellCoord p(Server::ComputeCellCoord(center_obj->GetPositionX(), center_obj->GetPositionY()));
     Cell cell(p);
     if (dont_load)
         cell.SetNoCreate();
@@ -205,7 +192,7 @@ inline void Cell::VisitWorldObjects(WorldObject const* center_obj, T& visitor, f
 template<class T>
 inline void Cell::VisitAllObjects(WorldObject const* center_obj, T& visitor, float radius, bool dont_load)
 {
-    CellCoord p(Trinity::ComputeCellCoord(center_obj->GetPositionX(), center_obj->GetPositionY()));
+    CellCoord p(Server::ComputeCellCoord(center_obj->GetPositionX(), center_obj->GetPositionY()));
     Cell cell(p);
     if (dont_load)
         cell.SetNoCreate();
@@ -219,7 +206,7 @@ inline void Cell::VisitAllObjects(WorldObject const* center_obj, T& visitor, flo
 template<class T>
 inline void Cell::VisitGridObjects(float x, float y, Map* map, T& visitor, float radius, bool dont_load)
 {
-    CellCoord p(Trinity::ComputeCellCoord(x, y));
+    CellCoord p(Server::ComputeCellCoord(x, y));
     Cell cell(p);
     if (dont_load)
         cell.SetNoCreate();
@@ -231,7 +218,7 @@ inline void Cell::VisitGridObjects(float x, float y, Map* map, T& visitor, float
 template<class T>
 inline void Cell::VisitWorldObjects(float x, float y, Map* map, T& visitor, float radius, bool dont_load)
 {
-    CellCoord p(Trinity::ComputeCellCoord(x, y));
+    CellCoord p(Server::ComputeCellCoord(x, y));
     Cell cell(p);
     if (dont_load)
         cell.SetNoCreate();
@@ -243,7 +230,7 @@ inline void Cell::VisitWorldObjects(float x, float y, Map* map, T& visitor, floa
 template<class T>
 inline void Cell::VisitAllObjects(float x, float y, Map* map, T& visitor, float radius, bool dont_load)
 {
-    CellCoord p(Trinity::ComputeCellCoord(x, y));
+    CellCoord p(Server::ComputeCellCoord(x, y));
     Cell cell(p);
     if (dont_load)
         cell.SetNoCreate();

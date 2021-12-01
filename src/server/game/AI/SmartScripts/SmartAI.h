@@ -1,22 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_SMARTAI_H
-#define TRINITY_SMARTAI_H
+#ifndef SERVER_SMARTAI_H
+#define SERVER_SMARTAI_H
 
 #include "Define.h"
 #include "CreatureAI.h"
@@ -40,7 +28,7 @@ enum SmartEscortVars
     SMART_MAX_AID_DIST    = SMART_ESCORT_MAX_PLAYER_DIST / 2
 };
 
-class TC_GAME_API SmartAI : public CreatureAI
+class GAME_API SmartAI : public CreatureAI
 {
     public:
         ~SmartAI(){ }
@@ -245,7 +233,7 @@ class TC_GAME_API SmartAI : public CreatureAI
         uint32 mConditionsTimer;
 };
 
-class TC_GAME_API SmartGameObjectAI : public GameObjectAI
+class GAME_API SmartGameObjectAI : public GameObjectAI
 {
     public:
         SmartGameObjectAI(GameObject* g) : GameObjectAI(g) { }

@@ -1,26 +1,14 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_AREA_BOUNDARY_H
-#define TRINITY_AREA_BOUNDARY_H
+#ifndef SERVER_AREA_BOUNDARY_H
+#define SERVER_AREA_BOUNDARY_H
 
 #include "Position.h"
 
-class TC_GAME_API AreaBoundary
+class GAME_API AreaBoundary
 {
     public:
         enum BoundaryType
@@ -67,7 +55,7 @@ class TC_GAME_API AreaBoundary
         bool m_isInvertedBoundary;
 };
 
-class TC_GAME_API RectangleBoundary : public AreaBoundary
+class GAME_API RectangleBoundary : public AreaBoundary
 {
     public:
         // X axis is north/south, Y axis is east/west, larger values are northwest
@@ -80,7 +68,7 @@ class TC_GAME_API RectangleBoundary : public AreaBoundary
         const float _minX, _maxX, _minY, _maxY;
 };
 
-class TC_GAME_API CircleBoundary : public AreaBoundary
+class GAME_API CircleBoundary : public AreaBoundary
 {
     public:
         CircleBoundary(Position const& center, double radius, bool isInverted = false);
@@ -96,7 +84,7 @@ class TC_GAME_API CircleBoundary : public AreaBoundary
         const double _radiusSq;
 };
 
-class TC_GAME_API EllipseBoundary : public AreaBoundary
+class GAME_API EllipseBoundary : public AreaBoundary
 {
     public:
         EllipseBoundary(Position const& center, double radiusX, double radiusY, bool isInverted = false);
@@ -110,7 +98,7 @@ class TC_GAME_API EllipseBoundary : public AreaBoundary
         const double _radiusYSq, _scaleXSq;
 };
 
-class TC_GAME_API TriangleBoundary : public AreaBoundary
+class GAME_API TriangleBoundary : public AreaBoundary
 {
     public:
         TriangleBoundary(Position const& pointA, Position const& pointB, Position const& pointC, bool isInverted = false);
@@ -124,7 +112,7 @@ class TC_GAME_API TriangleBoundary : public AreaBoundary
         const double _abx, _bcx, _cax, _aby, _bcy, _cay;
 };
 
-class TC_GAME_API ParallelogramBoundary : public AreaBoundary
+class GAME_API ParallelogramBoundary : public AreaBoundary
 {
     public:
         // Note: AB must be orthogonal to AD
@@ -139,7 +127,7 @@ class TC_GAME_API ParallelogramBoundary : public AreaBoundary
         const double _abx, _dax, _aby, _day;
 };
 
-class TC_GAME_API ZRangeBoundary : public AreaBoundary
+class GAME_API ZRangeBoundary : public AreaBoundary
 {
     public:
         ZRangeBoundary(float minZ, float maxZ, bool isInverted = false);
@@ -151,4 +139,4 @@ class TC_GAME_API ZRangeBoundary : public AreaBoundary
         const float _minZ, _maxZ;
 };
 
-#endif //TRINITY_AREA_BOUNDARY_H
+#endif //SERVER_AREA_BOUNDARY_H

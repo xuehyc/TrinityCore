@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_SPELLAURAS_H
-#define TRINITY_SPELLAURAS_H
+#ifndef SERVER_SPELLAURAS_H
+#define SERVER_SPELLAURAS_H
 
 #include "SpellAuraDefines.h"
 #include "SpellInfo.h"
@@ -47,7 +34,7 @@ class ChargeDropEvent;
 // update aura target map every 500 ms instead of every update - reduce amount of grid searcher calls
 #define UPDATE_TARGET_MAP_INTERVAL 500
 
-class TC_GAME_API AuraApplication
+class GAME_API AuraApplication
 {
     friend void Unit::_ApplyAura(AuraApplication * aurApp, uint32 effMask);
     friend void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMode);
@@ -113,7 +100,7 @@ struct AuraLoadEffectInfo
 };
 #pragma pack(pop)
 
-class TC_GAME_API Aura
+class GAME_API Aura
 {
     friend Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint32 effMask, Unit* caster, int32 *baseAmount, Item* castItem, ObjectGuid casterGUID, bool resetPeriodicTimer, ObjectGuid castItemGuid, int32 castItemLevel);
     public:
@@ -336,7 +323,7 @@ class TC_GAME_API Aura
         SpellEffectInfoVector _spelEffectInfos;
 };
 
-class TC_GAME_API UnitAura : public Aura
+class GAME_API UnitAura : public Aura
 {
     friend Aura* Aura::Create(SpellInfo const* spellproto, ObjectGuid castId, uint32 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, Item* castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, int32 castItemLevel);
     public:
@@ -357,7 +344,7 @@ class TC_GAME_API UnitAura : public Aura
         DiminishingGroup m_AuraDRGroup;                 // Diminishing
 };
 
-class TC_GAME_API DynObjAura : public Aura
+class GAME_API DynObjAura : public Aura
 {
     friend Aura* Aura::Create(SpellInfo const* spellproto, ObjectGuid castId, uint32 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, Item* castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, int32 castItemLevel);
     public:
@@ -368,7 +355,7 @@ class TC_GAME_API DynObjAura : public Aura
         void FillTargetMap(std::unordered_map<Unit*, uint32>& targets, Unit* caster) override;
 };
 
-class TC_GAME_API ChargeDropEvent : public BasicEvent
+class GAME_API ChargeDropEvent : public BasicEvent
 {
     friend class Aura;
     protected:

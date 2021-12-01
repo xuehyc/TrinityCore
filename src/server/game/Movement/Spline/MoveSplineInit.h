@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITYSERVER_MOVESPLINEINIT_H
-#define TRINITYSERVER_MOVESPLINEINIT_H
+#ifndef SERVERSERVER_MOVESPLINEINIT_H
+#define SERVERSERVER_MOVESPLINEINIT_H
 
 #include "MoveSplineInitArgs.h"
 
@@ -34,7 +21,7 @@ namespace Movement
     };
 
     // Transforms coordinates from global to transport offsets
-    class TC_GAME_API TransportPathTransform
+    class GAME_API TransportPathTransform
     {
     public:
         TransportPathTransform(Unit* owner, bool transformForTransport)
@@ -48,7 +35,7 @@ namespace Movement
 
     /*  Initializes and launches spline movement
      */
-    class TC_GAME_API MoveSplineInit
+    class GAME_API MoveSplineInit
     {
     public:
 
@@ -192,4 +179,4 @@ namespace Movement
         args.spellEffectExtra = spellEffectExtraData;
     }
 }
-#endif // TRINITYSERVER_MOVESPLINEINIT_H
+#endif // SERVERSERVER_MOVESPLINEINIT_H

@@ -1,1 +1,1 @@
-UPDATE `trinity_string` SET `content_default`='│ Phases: %s' WHERE `entry`=846;
+UPDATE `server_string` SET `content_default`='│ Phases: %s' WHERE `entry`=846;

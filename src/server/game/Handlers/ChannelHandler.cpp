@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "WorldSession.h"
@@ -31,7 +18,7 @@ static size_t const MAX_CHANNEL_PASS_STR = 31;
 
 void WorldSession::HandleJoinChannel(WorldPackets::Channel::JoinChannel& packet)
 {
-    TC_LOG_DEBUG("chat.system", "CMSG_JOIN_CHANNEL %s ChatChannelId: %u, CreateVoiceSession: %u, Internal: %u, ChannelName: %s, Password: %s",
+    LOG_DEBUG("chat.system", "CMSG_JOIN_CHANNEL %s ChatChannelId: %u, CreateVoiceSession: %u, Internal: %u, ChannelName: %s, Password: %s",
         GetPlayerInfo().c_str(), packet.ChatChannelId, packet.CreateVoiceSession, packet.Internal, packet.ChannelName.c_str(), packet.Password.c_str());
 
     AreaTableEntry const* zone = sAreaTableStore.LookupEntry(GetPlayer()->GetZoneId());
@@ -58,7 +45,7 @@ void WorldSession::HandleJoinChannel(WorldPackets::Channel::JoinChannel& packet)
 
 void WorldSession::HandleLeaveChannel(WorldPackets::Channel::LeaveChannel& packet)
 {
-    TC_LOG_DEBUG("chat.system", "CMSG_LEAVE_CHANNEL %s ChannelName: %s, ZoneChannelID: %u",
+    LOG_DEBUG("chat.system", "CMSG_LEAVE_CHANNEL %s ChannelName: %s, ZoneChannelID: %u",
         GetPlayerInfo().c_str(), packet.ChannelName.c_str(), packet.ZoneChannelID);
 
     if (packet.ChannelName.empty() && !packet.ZoneChannelID)
@@ -89,7 +76,7 @@ void WorldSession::HandleLeaveChannel(WorldPackets::Channel::LeaveChannel& packe
 
 void WorldSession::HandleChannelCommand(WorldPackets::Channel::ChannelCommand& packet)
 {
-    TC_LOG_DEBUG("chat.system", "%s %s ChannelName: %s",
+    LOG_DEBUG("chat.system", "%s %s ChannelName: %s",
         GetOpcodeNameForLogging(packet.GetOpcode()).c_str(), GetPlayerInfo().c_str(), packet.ChannelName.c_str());
 
     if (Channel* channel = ChannelMgr::GetChannelForPlayerByNamePart(packet.ChannelName, GetPlayer()))
@@ -119,12 +106,12 @@ void WorldSession::HandleChannelPlayerCommand(WorldPackets::Channel::ChannelPlay
 {
     if (packet.Name.length() >= MAX_CHANNEL_NAME_STR)
     {
-        TC_LOG_DEBUG("chat.system", "%s %s ChannelName: %s, Name: %s, Name too long.",
+        LOG_DEBUG("chat.system", "%s %s ChannelName: %s, Name: %s, Name too long.",
             GetOpcodeNameForLogging(packet.GetOpcode()).c_str(), GetPlayerInfo().c_str(), packet.ChannelName.c_str(), packet.Name.c_str());
         return;
     }
 
-    TC_LOG_DEBUG("chat.system", "%s %s ChannelName: %s, Name: %s",
+    LOG_DEBUG("chat.system", "%s %s ChannelName: %s, Name: %s",
         GetOpcodeNameForLogging(packet.GetOpcode()).c_str(), GetPlayerInfo().c_str(), packet.ChannelName.c_str(), packet.Name.c_str());
 
     if (!normalizePlayerName(packet.Name))
@@ -177,12 +164,12 @@ void WorldSession::HandleChannelPassword(WorldPackets::Channel::ChannelPassword&
 {
     if (packet.Password.length() > MAX_CHANNEL_PASS_STR)
     {
-        TC_LOG_DEBUG("chat.system", "%s %s ChannelName: %s, Password: %s, Password too long.",
+        LOG_DEBUG("chat.system", "%s %s ChannelName: %s, Password: %s, Password too long.",
             GetOpcodeNameForLogging(packet.GetOpcode()).c_str(), GetPlayerInfo().c_str(), packet.ChannelName.c_str(), packet.Password.c_str());
         return;
     }
 
-    TC_LOG_DEBUG("chat.system", "%s %s ChannelName: %s, Password: %s",
+    LOG_DEBUG("chat.system", "%s %s ChannelName: %s, Password: %s",
         GetOpcodeNameForLogging(packet.GetOpcode()).c_str(), GetPlayerInfo().c_str(), packet.ChannelName.c_str(), packet.Password.c_str());
 
     if (Channel* channel = ChannelMgr::GetChannelForPlayerByNamePart(packet.ChannelName, GetPlayer()))

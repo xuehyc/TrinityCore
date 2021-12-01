@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "Config.h"
@@ -88,12 +75,12 @@ T ConfigMgr::GetValueDefault(std::string const& name, T def) const
     }
     catch (bpt::ptree_bad_path)
     {
-        TC_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
+        LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
             name.c_str(), _filename.c_str(), name.c_str(), std::to_string(def).c_str());
     }
     catch (bpt::ptree_bad_data)
     {
-        TC_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
+        LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
             name.c_str(), _filename.c_str(), std::to_string(def).c_str());
     }
 
@@ -109,12 +96,12 @@ std::string ConfigMgr::GetValueDefault<std::string>(std::string const& name, std
     }
     catch (bpt::ptree_bad_path)
     {
-        TC_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
+        LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
             name.c_str(), _filename.c_str(), name.c_str(), def.c_str());
     }
     catch (bpt::ptree_bad_data)
     {
-        TC_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
+        LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
             name.c_str(), _filename.c_str(), def.c_str());
     }
 

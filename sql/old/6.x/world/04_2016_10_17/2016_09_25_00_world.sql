@@ -18,8 +18,8 @@ INSERT INTO `command` (`name`,`permission`,`help`) VALUES
 ('list scenes', 849, 'Syntax: .list scenes\nList of all active scenes for targeted character.'),
 ('reload scenes', 850, 'Syntax: .reload scenes\nReload scene_template table.');
 
-DELETE FROM `trinity_string` WHERE `entry` IN (5062, 5063, 5064, 5065, 5066, 5067, 5068, 5069);
-INSERT INTO `trinity_string` (`entry`, `content_default`) VALUES
+DELETE FROM `server_string` WHERE `entry` IN (5062, 5063, 5064, 5065, 5066, 5067, 5068, 5069);
+INSERT INTO `server_string` (`entry`, `content_default`) VALUES
 (5062, 'Scene debugging turned on.'),
 (5063, 'Scene debugging turned off.'),
 (5064, 'Scene : started (instance : %u - package : %u - flags : %u)'),

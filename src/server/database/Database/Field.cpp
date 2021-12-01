@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "Field.h"
@@ -36,7 +24,7 @@ uint8 Field::GetUInt8() const
     if (!data.value)
         return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     if (!IsType(DatabaseFieldTypes::Int8))
     {
         LogWrongType(__FUNCTION__);
@@ -54,7 +42,7 @@ int8 Field::GetInt8() const
     if (!data.value)
         return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     if (!IsType(DatabaseFieldTypes::Int8))
     {
         LogWrongType(__FUNCTION__);
@@ -72,7 +60,7 @@ uint16 Field::GetUInt16() const
     if (!data.value)
         return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     if (!IsType(DatabaseFieldTypes::Int16))
     {
         LogWrongType(__FUNCTION__);
@@ -90,7 +78,7 @@ int16 Field::GetInt16() const
     if (!data.value)
         return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     if (!IsType(DatabaseFieldTypes::Int16))
     {
         LogWrongType(__FUNCTION__);
@@ -108,7 +96,7 @@ uint32 Field::GetUInt32() const
     if (!data.value)
         return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     if (!IsType(DatabaseFieldTypes::Int32))
     {
         LogWrongType(__FUNCTION__);
@@ -126,7 +114,7 @@ int32 Field::GetInt32() const
     if (!data.value)
         return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     if (!IsType(DatabaseFieldTypes::Int32))
     {
         LogWrongType(__FUNCTION__);
@@ -144,7 +132,7 @@ uint64 Field::GetUInt64() const
     if (!data.value)
         return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     if (!IsType(DatabaseFieldTypes::Int64))
     {
         LogWrongType(__FUNCTION__);
@@ -162,7 +150,7 @@ int64 Field::GetInt64() const
     if (!data.value)
         return 0;
 
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     if (!IsType(DatabaseFieldTypes::Int64))
     {
         LogWrongType(__FUNCTION__);
@@ -180,7 +168,7 @@ float Field::GetFloat() const
     if (!data.value)
         return 0.0f;
 
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     if (!IsType(DatabaseFieldTypes::Float))
     {
         LogWrongType(__FUNCTION__);
@@ -198,7 +186,7 @@ double Field::GetDouble() const
     if (!data.value)
         return 0.0f;
 
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     if (!IsType(DatabaseFieldTypes::Double) && !IsType(DatabaseFieldTypes::Decimal))
     {
         LogWrongType(__FUNCTION__);
@@ -216,7 +204,7 @@ char const* Field::GetCString() const
     if (!data.value)
         return NULL;
 
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     if (IsNumeric() && data.raw)
     {
         LogWrongType(__FUNCTION__);
@@ -291,11 +279,11 @@ bool Field::IsNumeric() const
         data.type == DatabaseFieldTypes::Double);
 }
 
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
 
 void Field::LogWrongType(char const* getter) const
 {
-    TC_LOG_WARN("sql.sql", "Warning: %s on %s field %s.%s (%s.%s) at index %u.",
+    LOG_WARN("sql.sql", "Warning: %s on %s field %s.%s (%s.%s) at index %u.",
         getter, meta.Type, meta.TableAlias, meta.Alias, meta.TableName, meta.Name, meta.Index);
 }
 

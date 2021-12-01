@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _PLAYER_H
@@ -123,7 +110,7 @@ enum SpellModType : uint8
     SPELLMOD_END
 };
 
-// 2^n values, Player::m_isunderwater is a bitmask. These are Trinity internal values, they are never send to any client
+// 2^n values, Player::m_isunderwater is a bitmask. These are server internal values, they are never send to any client
 enum PlayerUnderwaterState
 {
     UNDERWATER_NONE                     = 0x00,
@@ -852,7 +839,7 @@ enum PlayerDelayedOperations
 // Player summoning auto-decline time (in secs)
 #define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
 // Maximum money amount : 2^31 - 1
-TC_GAME_API extern uint64 const MAX_MONEY_AMOUNT;
+GAME_API extern uint64 const MAX_MONEY_AMOUNT;
 
 enum BindExtensionState
 {
@@ -1005,7 +992,7 @@ static uint32 const DefaultTalentRowLevels[MAX_TALENT_TIERS] = { 15, 30, 45, 60,
 static uint32 const DKTalentRowLevels[MAX_TALENT_TIERS] = { 57, 58, 59, 60, 75, 90, 100 };
 static uint32 const DHTalentRowLevels[MAX_TALENT_TIERS] = { 99, 100, 102, 104, 106, 108, 110 };
 
-struct TC_GAME_API SpecializationInfo
+struct GAME_API SpecializationInfo
 {
     SpecializationInfo() : ResetTalentsCost(0), ResetTalentsTime(0), PrimarySpecialization(0), ActiveGroup(0)
     {
@@ -1037,7 +1024,7 @@ uint8 constexpr PLAYER_MAX_HONOR_LEVEL = 50;
 uint8 constexpr PLAYER_LEVEL_MIN_HONOR = 110;
 uint32 constexpr SPELL_PVP_RULES_ENABLED = 134735;
 
-class TC_GAME_API Player : public Unit, public GridObject<Player>
+class GAME_API Player : public Unit, public GridObject<Player>
 {
     friend class WorldSession;
     friend class CinematicMgr;
@@ -1505,7 +1492,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
 
         static bool IsValidGender(uint8 Gender) { return Gender <= GENDER_FEMALE; }
         static bool IsValidClass(uint8 Class) { return ((1 << (Class - 1)) & CLASSMASK_ALL_PLAYABLE) != 0; }
-        static bool IsValidRace(uint8 Race) { return Trinity::RaceMask<uint64>{ RACEMASK_ALL_PLAYABLE }.HasRace(Race); }
+        static bool IsValidRace(uint8 Race) { return Server::RaceMask<uint64>{ RACEMASK_ALL_PLAYABLE }.HasRace(Race); }
         static bool ValidateAppearance(uint8 race, uint8 class_, uint8 gender, uint8 hairID, uint8 hairColor, uint8 faceID, uint8 facialHair, uint8 skinColor, std::array<uint8, PLAYER_CUSTOM_DISPLAY_SIZE> const& customDisplay, bool create = false);
 
         /*********************************************************/
@@ -2737,7 +2724,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         bool _usePvpItemLevels;
 };
 
-TC_GAME_API void AddItemsSetItem(Player* player, Item* item);
-TC_GAME_API void RemoveItemsSetItem(Player* player, ItemTemplate const* proto);
+GAME_API void AddItemsSetItem(Player* player, Item* item);
+GAME_API void RemoveItemsSetItem(Player* player, ItemTemplate const* proto);
 
 #endif

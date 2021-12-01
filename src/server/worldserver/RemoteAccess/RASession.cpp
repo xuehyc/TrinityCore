@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "RASession.h"
@@ -56,7 +43,7 @@ void RASession::Start()
     if (username.empty())
         return;
 
-    TC_LOG_INFO("commands.ra", "Accepting RA connection from user %s (IP: %s)", username.c_str(), GetRemoteIpAddress().c_str());
+    LOG_INFO("commands.ra", "Accepting RA connection from user %s (IP: %s)", username.c_str(), GetRemoteIpAddress().c_str());
 
     Send("Password: ");
 
@@ -71,7 +58,7 @@ void RASession::Start()
         return;
     }
 
-    TC_LOG_INFO("commands.ra", "User %s (IP: %s) authenticated correctly to RA", username.c_str(), GetRemoteIpAddress().c_str());
+    LOG_INFO("commands.ra", "User %s (IP: %s) authenticated correctly to RA", username.c_str(), GetRemoteIpAddress().c_str());
 
     // Authentication successful, send the motd
     for (std::string const& line : sWorld->GetMotd())
@@ -81,7 +68,7 @@ void RASession::Start()
     // Read commands
     for (;;)
     {
-        Send("TC>");
+        Send("MC>");
         std::string command = ReadString();
 
         if (ProcessCommand(command))
@@ -132,7 +119,7 @@ bool RASession::CheckAccessLevel(const std::string& user)
 
     if (!result)
     {
-        TC_LOG_INFO("commands.ra", "User %s does not exist in database", user.c_str());
+        LOG_INFO("commands.ra", "User %s does not exist in database", user.c_str());
         return false;
     }
 
@@ -140,12 +127,12 @@ bool RASession::CheckAccessLevel(const std::string& user)
 
     if (fields[1].GetUInt8() < sConfigMgr->GetIntDefault("Ra.MinLevel", SEC_ADMINISTRATOR))
     {
-        TC_LOG_INFO("commands.ra", "User %s has no privilege to login", user.c_str());
+        LOG_INFO("commands.ra", "User %s has no privilege to login", user.c_str());
         return false;
     }
     else if (fields[2].GetInt32() != -1)
     {
-        TC_LOG_INFO("commands.ra", "User %s has to be assigned on all realms (with RealmID = '-1')", user.c_str());
+        LOG_INFO("commands.ra", "User %s has to be assigned on all realms (with RealmID = '-1')", user.c_str());
         return false;
     }
 
@@ -171,7 +158,7 @@ bool RASession::CheckPassword(const std::string& user, const std::string& pass)
 
     if (!result)
     {
-        TC_LOG_INFO("commands.ra", "Wrong password for user: %s", user.c_str());
+        LOG_INFO("commands.ra", "Wrong password for user: %s", user.c_str());
         return false;
     }
 
@@ -183,7 +170,7 @@ bool RASession::ProcessCommand(std::string& command)
     if (command.length() == 0)
         return true;
 
-    TC_LOG_INFO("commands.ra", "Received command: %s", command.c_str());
+    LOG_INFO("commands.ra", "Received command: %s", command.c_str());
 
     // handle quit, exit and logout commands to terminate connection
     if (command == "quit" || command == "exit" || command == "logout")

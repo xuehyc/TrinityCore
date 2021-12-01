@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "Common.h"
@@ -33,7 +20,7 @@ void CharacterDatabaseCleaner::CleanDatabase()
     if (!sWorld->getBoolConfig(CONFIG_CLEAN_CHARACTER_DB))
         return;
 
-    TC_LOG_INFO("misc", "Cleaning character database...");
+    LOG_INFO("misc", "Cleaning character database...");
 
     uint32 oldMSTime = getMSTime();
 
@@ -67,7 +54,7 @@ void CharacterDatabaseCleaner::CleanDatabase()
 
     sWorld->SetCleaningFlags(flags);
 
-    TC_LOG_INFO("server.loading", ">> Cleaned character database in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Cleaned character database in %u ms", GetMSTimeDiffToNow(oldMSTime));
 }
 
 void CharacterDatabaseCleaner::CheckUnique(const char* column, const char* table, bool (*check)(uint32))
@@ -75,7 +62,7 @@ void CharacterDatabaseCleaner::CheckUnique(const char* column, const char* table
     QueryResult result = CharacterDatabase.PQuery("SELECT DISTINCT %s FROM %s", column, table);
     if (!result)
     {
-        TC_LOG_INFO("misc", "Table %s is empty.", table);
+        LOG_INFO("misc", "Table %s is empty.", table);
         return;
     }
 

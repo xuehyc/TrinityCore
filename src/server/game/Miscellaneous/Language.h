@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef __TRINITY_LANGUAGE_H
-#define __TRINITY_LANGUAGE_H
+#ifndef __SERVER_LANGUAGE_H
+#define __SERVER_LANGUAGE_H
 
 enum BroadcastTextIds
 {
@@ -26,7 +13,7 @@ enum BroadcastTextIds
     BROADCAST_TEXT_FLEE_FOR_ASSIST      = 1150
 };
 
-enum TrinityStrings
+enum ServerStrings
 {
     // for chat commands
     LANG_SELECT_CHAR_OR_CREATURE        = 1,
@@ -964,7 +951,7 @@ enum TrinityStrings
     LANG_COMMAND_TICKETPENDING          = 2027,
     LANG_COMMAND_TICKETRESET            = 2028,
 
-    // Trinity strings                    5000-9999
+    // Server strings                    5000-9999
     LANG_COMMAND_FREEZE                 = 5000,
     LANG_COMMAND_FREEZE_ERROR           = 5001,
     LANG_COMMAND_FREEZE_WRONG           = 5002,
@@ -1047,7 +1034,7 @@ enum TrinityStrings
     LANG_NPCINFO_UNIT_FIELD_FLAGS_3     = 5071,
     LANG_NPCINFO_NPC_FLAGS              = 5072,
 
-    // Room for more Trinity strings      5073-9999
+    // Room for more server strings      5073-9999
 
     // Level requirement notifications
     LANG_SAY_REQ                        = 6604,

@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "StartProcess.h"
@@ -28,7 +16,7 @@ using namespace boost::process;
 using namespace boost::process::initializers;
 using namespace boost::iostreams;
 
-namespace Trinity
+namespace Server
 {
 
 template<typename T>
@@ -71,7 +59,7 @@ static int CreateChildProcess(T waiter, std::string const& executable,
 
     if (!secure)
     {
-        TC_LOG_TRACE(logger, "Starting process \"%s\" with arguments: \"%s\".",
+        LOG_TRACE(logger, "Starting process \"%s\" with arguments: \"%s\".",
                 executable.c_str(), boost::algorithm::join(args, " ").c_str());
     }
 
@@ -106,12 +94,12 @@ static int CreateChildProcess(T waiter, std::string const& executable,
 
     auto outInfo = MakeTCLogSink([&](std::string msg)
     {
-        TC_LOG_INFO(logger, "%s", msg.c_str());
+        LOG_INFO(logger, "%s", msg.c_str());
     });
 
     auto outError = MakeTCLogSink([&](std::string msg)
     {
-        TC_LOG_ERROR(logger, "%s", msg.c_str());
+        LOG_ERROR(logger, "%s", msg.c_str());
     });
 
     copy(outFd, outInfo);
@@ -123,7 +111,7 @@ static int CreateChildProcess(T waiter, std::string const& executable,
 
     if (!secure)
     {
-        TC_LOG_TRACE(logger, ">> Process \"%s\" finished with return value %i.",
+        LOG_TRACE(logger, ">> Process \"%s\" finished with return value %i.",
                 executable.c_str(), result);
     }
 
@@ -255,4 +243,4 @@ std::string SearchExecutableInPath(std::string const& filename)
     }
 }
 
-} // namespace Trinity
+} // namespace Server

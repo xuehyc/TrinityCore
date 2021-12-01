@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "ScriptMgr.h"
@@ -1790,7 +1778,7 @@ class spell_mimiron_fire_search : public SpellScriptLoader
                 if (_noTarget)
                     return;
 
-                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                WorldObject* target = Server::Containers::SelectRandomContainerElement(targets);
                 targets.clear();
                 targets.push_back(target);
             }
@@ -1931,12 +1919,12 @@ class spell_mimiron_napalm_shell : public SpellScriptLoader
                 if (targets.empty())
                     return;
 
-                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                WorldObject* target = Server::Containers::SelectRandomContainerElement(targets);
 
-                targets.remove_if(Trinity::AllWorldObjectsInRange(GetCaster(), 15.0f));
+                targets.remove_if(Server::AllWorldObjectsInRange(GetCaster(), 15.0f));
 
                 if (!targets.empty())
-                    target = Trinity::Containers::SelectRandomContainerElement(targets);
+                    target = Server::Containers::SelectRandomContainerElement(targets);
 
                 targets.clear();
                 targets.push_back(target);
@@ -2264,12 +2252,12 @@ class spell_mimiron_rocket_strike_target_select : public SpellScriptLoader
                 if (targets.empty())
                     return;
 
-                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                WorldObject* target = Server::Containers::SelectRandomContainerElement(targets);
 
-                targets.remove_if(Trinity::AllWorldObjectsInRange(GetCaster(), 15.0f));
+                targets.remove_if(Server::AllWorldObjectsInRange(GetCaster(), 15.0f));
 
                 if (!targets.empty())
-                    target = Trinity::Containers::SelectRandomContainerElement(targets);
+                    target = Server::Containers::SelectRandomContainerElement(targets);
 
                 targets.clear();
                 targets.push_back(target);
@@ -2549,12 +2537,12 @@ class spell_mimiron_summon_frost_bomb_target : public SpellScriptLoader
                 if (targets.empty())
                     return;
 
-                targets.remove_if(Trinity::AllWorldObjectsInRange(GetCaster(), 15.0f));
+                targets.remove_if(Server::AllWorldObjectsInRange(GetCaster(), 15.0f));
 
                 if (targets.empty())
                     return;
 
-                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                WorldObject* target = Server::Containers::SelectRandomContainerElement(targets);
 
                 targets.clear();
                 targets.push_back(target);

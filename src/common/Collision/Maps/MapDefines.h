@@ -1,3 +1,8 @@
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
+ */
+
 #ifndef _MAPDEFINES_H
 #define _MAPDEFINES_H
 

@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITYCORE_QUEST_H
-#define TRINITYCORE_QUEST_H
+#ifndef SERVERCORE_QUEST_H
+#define SERVERCORE_QUEST_H
 
 #include "Common.h"
 #include "DBCEnums.h"
@@ -204,7 +191,7 @@ enum QuestFlagsEx : uint32
 enum QuestSpecialFlags
 {
     QUEST_SPECIAL_FLAGS_NONE                 = 0x000,
-    // Trinity flags for set SpecialFlags in DB if required but used only at server
+    // Server flags for set SpecialFlags in DB if required but used only at server
     QUEST_SPECIAL_FLAGS_REPEATABLE           = 0x001,   // Set by 1 in SpecialFlags from DB
     QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT = 0x002,   // Set by 2 in SpecialFlags from DB (if required area explore, spell SPELL_EFFECT_QUEST_COMPLETE casting, table `FECT_QUEST_COMPLETE casting, table `*_script` command SCRIPT_COMMAND_QUEST_EXPLORED use, set from script)
     QUEST_SPECIAL_FLAGS_AUTO_ACCEPT          = 0x004,   // Set by 4 in SpecialFlags in DB if the quest is to be auto-accepted.
@@ -334,7 +321,7 @@ typedef std::vector<QuestObjective> QuestObjectives;
 // This Quest class provides a convenient way to access a few pretotaled (cached) quest details,
 // all base quest information, and any utility functions such as generating the amount of
 // xp to give
-class TC_GAME_API Quest
+class GAME_API Quest
 {
     friend class ObjectMgr;
     friend class Player;
@@ -371,7 +358,7 @@ class TC_GAME_API Quest
         int32  GetQuestMaxScalingLevel() const { return MaxScalingLevel; }
         uint32 GetQuestInfoID() const { return QuestInfoID; }
         uint32 GetAllowableClasses() const { return AllowableClasses; }
-        Trinity::RaceMask<uint64> GetAllowableRaces() const { return AllowableRaces; }
+        Server::RaceMask<uint64> GetAllowableRaces() const { return AllowableRaces; }
         uint32 GetRequiredSkill() const { return RequiredSkillId; }
         uint32 GetRequiredSkillValue() const { return RequiredSkillPoints; }
         uint32 GetRequiredMinRepFaction() const { return RequiredMinRepFaction; }
@@ -525,7 +512,7 @@ class TC_GAME_API Quest
         uint32 SoundTurnIn;
         uint32 AreaGroupID;
         uint32 LimitTime;
-        Trinity::RaceMask<uint64> AllowableRaces;
+        Server::RaceMask<uint64> AllowableRaces;
         uint32 QuestRewardID;
         int32 Expansion;
         QuestObjectives Objectives;

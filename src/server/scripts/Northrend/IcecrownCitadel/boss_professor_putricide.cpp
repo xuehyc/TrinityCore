@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "icecrown_citadel.h"
@@ -458,7 +446,7 @@ class boss_professor_putricide : public CreatureScript
                             list.remove_if(RotfaceHeightCheck(rotface));
                             if (list.size() > 4)
                             {
-                                list.sort(Trinity::ObjectDistanceOrderPred(rotface));
+                                list.sort(Server::ObjectDistanceOrderPred(rotface));
                                 do
                                 {
                                     list.pop_back();
@@ -913,7 +901,7 @@ class spell_putricide_ooze_channel : public SpellScriptLoader
                     return;
                 }
 
-                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                WorldObject* target = Server::Containers::SelectRandomContainerElement(targets);
                 targets.clear();
                 targets.push_back(target);
                 _target = target;
@@ -1196,8 +1184,8 @@ class spell_putricide_unbound_plague : public SpellScriptLoader
                     }
                 }
 
-                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_UNBOUND_PLAGUE));
-                Trinity::Containers::RandomResize(targets, 1);
+                targets.remove_if(Server::UnitAuraCheck(true, SPELL_UNBOUND_PLAGUE));
+                Server::Containers::RandomResize(targets, 1);
             }
 
             void HandleScript(SpellEffIndex /*effIndex*/)
@@ -1257,7 +1245,7 @@ class spell_putricide_eat_ooze : public SpellScriptLoader
                 if (targets.empty())
                     return;
 
-                targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
+                targets.sort(Server::ObjectDistanceOrderPred(GetCaster()));
                 WorldObject* target = targets.front();
                 targets.clear();
                 targets.push_back(target);

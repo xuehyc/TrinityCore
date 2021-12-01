@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /* ScriptData
@@ -38,11 +26,11 @@ enum Spells
 
 #define LOCALE_TRICK_OR_TREAT_0 "Trick or Treat!"
 #define LOCALE_TRICK_OR_TREAT_2 "Des bonbons ou des blagues!"
-#define LOCALE_TRICK_OR_TREAT_3 "SÃ¼ÃŸes oder Saures!"
-#define LOCALE_TRICK_OR_TREAT_6 "Â¡Truco o trato!"
+#define LOCALE_TRICK_OR_TREAT_3 "Süßes oder Saures!"
+#define LOCALE_TRICK_OR_TREAT_6 "¡Truco o trato!"
 
 #define LOCALE_INNKEEPER_0 "Make this inn my home."
-#define LOCALE_INNKEEPER_3 "Ich mÃ¶chte dieses Gasthaus zu meinem Heimatort machen."
+#define LOCALE_INNKEEPER_3 "Ich möchte dieses Gasthaus zu meinem Heimatort machen."
 
 class npc_innkeeper : public CreatureScript
 {

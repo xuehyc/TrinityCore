@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _MAPTREE_H
@@ -31,7 +18,7 @@ namespace VMAP
     enum class LoadResult : uint8;
     enum class ModelIgnoreFlags : uint32;
 
-    struct TC_COMMON_API LocationInfo
+    struct COMMON_API LocationInfo
     {
         LocationInfo(): hitInstance(nullptr), hitModel(nullptr), ground_Z(-G3D::finf()) { }
         const ModelInstance* hitInstance;
@@ -39,7 +26,7 @@ namespace VMAP
         float ground_Z;
     };
 
-    class TC_COMMON_API StaticMapTree
+    class COMMON_API StaticMapTree
     {
         typedef std::unordered_map<uint32, bool> loadedTileMap;
         typedef std::unordered_map<uint32, uint32> loadedSpawnMap;
@@ -96,7 +83,7 @@ namespace VMAP
             StaticMapTree& operator=(StaticMapTree const& right) = delete;
     };
 
-    struct TC_COMMON_API AreaInfo
+    struct COMMON_API AreaInfo
     {
         AreaInfo(): result(false), ground_Z(-G3D::finf()), flags(0), adtId(0),
             rootId(0), groupId(0) { }

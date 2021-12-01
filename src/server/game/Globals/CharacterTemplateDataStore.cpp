@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "CharacterTemplateDataStore.h"
@@ -46,14 +34,14 @@ void CharacterTemplateDataStore::LoadCharacterTemplates()
             if (!((factionGroup & (FACTION_MASK_PLAYER | FACTION_MASK_ALLIANCE)) == (FACTION_MASK_PLAYER | FACTION_MASK_ALLIANCE)) &&
                 !((factionGroup & (FACTION_MASK_PLAYER | FACTION_MASK_HORDE)) == (FACTION_MASK_PLAYER | FACTION_MASK_HORDE)))
             {
-                TC_LOG_ERROR("sql.sql", "Faction group %u defined for character template %u in `character_template_class` is invalid. Skipped.", factionGroup, templateId);
+                LOG_ERROR("sql.sql", "Faction group %u defined for character template %u in `character_template_class` is invalid. Skipped.", factionGroup, templateId);
                 continue;
             }
 
             ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(classID);
             if (!classEntry)
             {
-                TC_LOG_ERROR("sql.sql", "Class %u defined for character template %u in `character_template_class` does not exists, skipped.", classID, templateId);
+                LOG_ERROR("sql.sql", "Class %u defined for character template %u in `character_template_class` does not exists, skipped.", classID, templateId);
                 continue;
             }
 
@@ -63,13 +51,13 @@ void CharacterTemplateDataStore::LoadCharacterTemplates()
     }
     else
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 character template classes. DB table `character_template_class` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 character template classes. DB table `character_template_class` is empty.");
     }
 
     QueryResult templates = WorldDatabase.Query("SELECT Id, Name, Description, Level FROM character_template");
     if (!templates)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 character templates. DB table `character_template` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 character templates. DB table `character_template` is empty.");
         return;
     }
 
@@ -86,7 +74,7 @@ void CharacterTemplateDataStore::LoadCharacterTemplates()
 
         if (templ.Classes.empty())
         {
-            TC_LOG_ERROR("sql.sql", "Character template %u does not have any classes defined in `character_template_class`. Skipped.", templ.TemplateSetId);
+            LOG_ERROR("sql.sql", "Character template %u does not have any classes defined in `character_template_class`. Skipped.", templ.TemplateSetId);
             continue;
         }
 
@@ -94,7 +82,7 @@ void CharacterTemplateDataStore::LoadCharacterTemplates()
     }
     while (templates->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded " SZFMTD " character templates in %u ms.", _characterTemplateStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded " SZFMTD " character templates in %u ms.", _characterTemplateStore.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 CharacterTemplateContainer const& CharacterTemplateDataStore::GetCharacterTemplates() const

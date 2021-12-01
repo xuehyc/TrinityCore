@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "LoginRESTService.h"
@@ -71,14 +59,14 @@ int32 handle_post_plugin(soap* soapClient)
     return sLoginService.HandleHttpRequest(soapClient, "POST", sLoginService._postHandlers);
 }
 
-bool LoginRESTService::Start(Trinity::Asio::IoContext* ioContext)
+bool LoginRESTService::Start(Server::Asio::IoContext* ioContext)
 {
     _ioContext = ioContext;
     _bindIP = sConfigMgr->GetStringDefault("BindIP", "0.0.0.0");
     _port = sConfigMgr->GetIntDefault("LoginREST.Port", 8081);
     if (_port < 0 || _port > 0xFFFF)
     {
-        TC_LOG_ERROR("server.rest", "Specified login service port (%d) out of allowed range (1-65535), defaulting to 8081", _port);
+        LOG_ERROR("server.rest", "Specified login service port (%d) out of allowed range (1-65535), defaulting to 8081", _port);
         _port = 8081;
     }
 
@@ -86,25 +74,25 @@ bool LoginRESTService::Start(Trinity::Asio::IoContext* ioContext)
     boost::asio::ip::tcp::resolver resolver(*ioContext);
 
     std::string configuredAddress = sConfigMgr->GetStringDefault("LoginREST.ExternalAddress", "127.0.0.1");
-    Optional<boost::asio::ip::tcp::endpoint> externalAddress = Trinity::Net::Resolve(resolver, boost::asio::ip::tcp::v4(), configuredAddress, std::to_string(_port));
+    Optional<boost::asio::ip::tcp::endpoint> externalAddress = Server::Net::Resolve(resolver, boost::asio::ip::tcp::v4(), configuredAddress, std::to_string(_port));
     if (!externalAddress)
     {
-        TC_LOG_ERROR("server.rest", "Could not resolve LoginREST.ExternalAddress %s", configuredAddress.c_str());
+        LOG_ERROR("server.rest", "Could not resolve LoginREST.ExternalAddress %s", configuredAddress.c_str());
         return false;
     }
 
     _externalAddress = *externalAddress;
 
     configuredAddress = sConfigMgr->GetStringDefault("LoginREST.LocalAddress", "127.0.0.1");
-    Optional<boost::asio::ip::tcp::endpoint> localAddress = Trinity::Net::Resolve(resolver, boost::asio::ip::tcp::v4(), configuredAddress, std::to_string(_port));
+    Optional<boost::asio::ip::tcp::endpoint> localAddress = Server::Net::Resolve(resolver, boost::asio::ip::tcp::v4(), configuredAddress, std::to_string(_port));
     if (!localAddress)
     {
-        TC_LOG_ERROR("server.rest", "Could not resolve LoginREST.LocalAddress %s", configuredAddress.c_str());
+        LOG_ERROR("server.rest", "Could not resolve LoginREST.LocalAddress %s", configuredAddress.c_str());
         return false;
     }
 
     _localAddress = *localAddress;
-    _localNetmask = Trinity::Net::GetDefaultNetmaskV4(_localAddress.address().to_v4());
+    _localNetmask = Server::Net::GetDefaultNetmaskV4(_localAddress.address().to_v4());
 
     // set up form inputs
     Battlenet::JSON::Login::FormInput* input;
@@ -145,7 +133,7 @@ boost::asio::ip::tcp::endpoint const& LoginRESTService::GetAddressForClient(boos
     else if (_localAddress.address().is_loopback())
         return _externalAddress;
 
-    if (Trinity::Net::IsInNetwork(_localAddress.address().to_v4(), _localNetmask, address.to_v4()))
+    if (Server::Net::IsInNetwork(_localAddress.address().to_v4(), _localNetmask, address.to_v4()))
         return _localAddress;
 
     return _externalAddress;
@@ -161,11 +149,11 @@ void LoginRESTService::Run()
     soapServer.send_timeout = 5;
     if (!soap_valid_socket(soap_bind(&soapServer, _bindIP.c_str(), _port, 100)))
     {
-        TC_LOG_ERROR("server.rest", "Couldn't bind to %s:%d", _bindIP.c_str(), _port);
+        LOG_ERROR("server.rest", "Couldn't bind to %s:%d", _bindIP.c_str(), _port);
         return;
     }
 
-    TC_LOG_INFO("server.rest", "Login service bound to http://%s:%d", _bindIP.c_str(), _port);
+    LOG_INFO("server.rest", "Login service bound to http://%s:%d", _bindIP.c_str(), _port);
 
     http_post_handlers handlers[] =
     {
@@ -198,13 +186,13 @@ void LoginRESTService::Run()
         std::shared_ptr<AsyncRequest> soapClient = std::make_shared<AsyncRequest>(soapServer);
         if (soap_ssl_accept(soapClient->GetClient()) != SOAP_OK)
         {
-            TC_LOG_DEBUG("server.rest", "Failed SSL handshake from IP=%s", boost::asio::ip::address_v4(soapClient->GetClient()->ip).to_string().c_str());
+            LOG_DEBUG("server.rest", "Failed SSL handshake from IP=%s", boost::asio::ip::address_v4(soapClient->GetClient()->ip).to_string().c_str());
             continue;
         }
 
-        TC_LOG_DEBUG("server.rest", "Accepted connection from IP=%s", boost::asio::ip::address_v4(soapClient->GetClient()->ip).to_string().c_str());
+        LOG_DEBUG("server.rest", "Accepted connection from IP=%s", boost::asio::ip::address_v4(soapClient->GetClient()->ip).to_string().c_str());
 
-        Trinity::Asio::post(*_ioContext, [soapClient]()
+        Server::Asio::post(*_ioContext, [soapClient]()
         {
             soapClient->GetClient()->user = (void*)&soapClient; // this allows us to make a copy of pointer inside GET/POST handlers to increment reference count
             soap_begin(soapClient->GetClient());
@@ -215,12 +203,12 @@ void LoginRESTService::Run()
     // and release the context handle here - soap does not own it so it should not free it on exit
     soapServer.ctx = nullptr;
 
-    TC_LOG_INFO("server.rest", "Login service exiting...");
+    LOG_INFO("server.rest", "Login service exiting...");
 }
 
 int32 LoginRESTService::HandleHttpRequest(soap* soapClient, char const* method, HttpMethodHandlerMap const& handlers)
 {
-    TC_LOG_DEBUG("server.rest", "[%s:%d] Handling %s request path=\"%s\"",
+    LOG_DEBUG("server.rest", "[%s:%d] Handling %s request path=\"%s\"",
         boost::asio::ip::address_v4(soapClient->ip).to_string().c_str(), soapClient->port, method, soapClient->path);
 
     size_t pathLength = strlen(soapClient->path);
@@ -294,7 +282,7 @@ int32 LoginRESTService::HandleGetGameAccounts(std::shared_ptr<AsyncRequest> requ
         SendResponse(request->GetClient(), response);
     })));
 
-    Trinity::Asio::post(*_ioContext, [this, request]() { HandleAsyncRequest(request); });
+    Server::Asio::post(*_ioContext, [this, request]() { HandleAsyncRequest(request); });
 
     return SOAP_OK;
 }
@@ -302,7 +290,7 @@ int32 LoginRESTService::HandleGetGameAccounts(std::shared_ptr<AsyncRequest> requ
 int32 LoginRESTService::HandleGetPortal(std::shared_ptr<AsyncRequest> request)
 {
     boost::asio::ip::tcp::endpoint const& endpoint = GetAddressForClient(boost::asio::ip::address_v4(request->GetClient()->ip));
-    std::string response = Trinity::StringFormat("%s:%d", endpoint.address().to_string().c_str(), sConfigMgr->GetIntDefault("BattlenetPort", 1119));
+    std::string response = Server::StringFormat("%s:%d", endpoint.address().to_string().c_str(), sConfigMgr->GetIntDefault("BattlenetPort", 1119));
 
     soap_response(request->GetClient(), SOAP_FILE);
     soap_send_raw(request->GetClient(), response.c_str(), response.length());
@@ -388,7 +376,7 @@ int32 LoginRESTService::HandlePostLogin(std::shared_ptr<AsyncRequest> request)
                 uint32 maxWrongPassword = uint32(sConfigMgr->GetIntDefault("WrongPass.MaxCount", 0));
 
                 if (sConfigMgr->GetBoolDefault("WrongPass.Logging", false))
-                    TC_LOG_DEBUG("server.rest", "[%s, Account %s, Id %u] Attempted to connect with wrong password!", ip_address.c_str(), login.c_str(), accountId);
+                    LOG_DEBUG("server.rest", "[%s, Account %s, Id %u] Attempted to connect with wrong password!", ip_address.c_str(), login.c_str(), accountId);
 
                 if (maxWrongPassword)
                 {
@@ -399,7 +387,7 @@ int32 LoginRESTService::HandlePostLogin(std::shared_ptr<AsyncRequest> request)
 
                     ++failedLogins;
 
-                    TC_LOG_DEBUG("server.rest", "MaxWrongPass : %u, failed_login : %u", maxWrongPassword, accountId);
+                    LOG_DEBUG("server.rest", "MaxWrongPass : %u, failed_login : %u", maxWrongPassword, accountId);
 
                     if (failedLogins >= maxWrongPassword)
                     {
@@ -435,7 +423,7 @@ int32 LoginRESTService::HandlePostLogin(std::shared_ptr<AsyncRequest> request)
         sLoginService.SendResponse(request->GetClient(), loginResult);
     })));
 
-    Trinity::Asio::post(*_ioContext, [this, request]() { HandleAsyncRequest(request); });
+    Server::Asio::post(*_ioContext, [this, request]() { HandleAsyncRequest(request); });
 
     return SOAP_OK;
 }
@@ -475,7 +463,7 @@ int32 LoginRESTService::HandlePostRefreshLoginTicket(std::shared_ptr<AsyncReques
         SendResponse(request->GetClient(), loginRefreshResult);
     })));
 
-    Trinity::Asio::post(*_ioContext, [this, request]() { HandleAsyncRequest(request); });
+    Server::Asio::post(*_ioContext, [this, request]() { HandleAsyncRequest(request); });
 
     return SOAP_OK;
 }
@@ -493,7 +481,7 @@ void LoginRESTService::HandleAsyncRequest(std::shared_ptr<AsyncRequest> request)
 {
     if (!request->InvokeIfReady())
     {
-        Trinity::Asio::post(*_ioContext, [this, request]() { HandleAsyncRequest(request); });
+        Server::Asio::post(*_ioContext, [this, request]() { HandleAsyncRequest(request); });
     }
     else if (request->GetResponseStatus())
     {

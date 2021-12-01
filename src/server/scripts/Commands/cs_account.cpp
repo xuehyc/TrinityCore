@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /* ScriptData
@@ -140,7 +128,7 @@ public:
                 handler->PSendSysMessage(LANG_ACCOUNT_CREATED, accountName);
                 if (handler->GetSession())
                 {
-                    TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) created Account %s (Email: '%s')",
+                    LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) created Account %s (Email: '%s')",
                         handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                         handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(),
                         accountName, email.c_str());
@@ -300,7 +288,7 @@ public:
                 else
                 {
                     handler->PSendSysMessage("IP2Location] No information");
-                    TC_LOG_DEBUG("server.bnetserver", "IP2Location] No information");
+                    LOG_DEBUG("server.bnetserver", "IP2Location] No information");
                 }
             }
             else if (param == "off")
@@ -381,7 +369,7 @@ public:
             handler->SendSysMessage(LANG_COMMAND_WRONGEMAIL);
             sScriptMgr->OnFailedEmailChange(handler->GetSession()->GetAccountId());
             handler->SetSentErrorMessage(true);
-            TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Tried to change email, but the provided email [%s] is not equal to registration email [%s].",
+            LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Tried to change email, but the provided email [%s] is not equal to registration email [%s].",
                 handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(),
                 email, oldEmail);
@@ -393,7 +381,7 @@ public:
             handler->SendSysMessage(LANG_COMMAND_WRONGOLDPASSWORD);
             sScriptMgr->OnFailedEmailChange(handler->GetSession()->GetAccountId());
             handler->SetSentErrorMessage(true);
-            TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Tried to change email, but the provided password is wrong.",
+            LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Tried to change email, but the provided password is wrong.",
                 handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str());
             return false;
@@ -412,7 +400,7 @@ public:
             handler->SendSysMessage(LANG_NEW_EMAILS_NOT_MATCH);
             sScriptMgr->OnFailedEmailChange(handler->GetSession()->GetAccountId());
             handler->SetSentErrorMessage(true);
-            TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Tried to change email, but the provided password is wrong.",
+            LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Tried to change email, but the provided password is wrong.",
                 handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str());
             return false;
@@ -425,7 +413,7 @@ public:
             case AccountOpResult::AOR_OK:
                 handler->SendSysMessage(LANG_COMMAND_EMAIL);
                 sScriptMgr->OnEmailChange(handler->GetSession()->GetAccountId());
-                TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Changed Email from [%s] to [%s].",
+                LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Changed Email from [%s] to [%s].",
                     handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                     handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(),
                     oldEmail, email);
@@ -479,7 +467,7 @@ public:
             handler->SendSysMessage(LANG_COMMAND_WRONGOLDPASSWORD);
             sScriptMgr->OnFailedPasswordChange(handler->GetSession()->GetAccountId());
             handler->SetSentErrorMessage(true);
-            TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Tried to change password, but the provided old password is wrong.",
+            LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Tried to change password, but the provided old password is wrong.",
                 handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str());
             return false;
@@ -492,7 +480,7 @@ public:
             handler->SendSysMessage(LANG_COMMAND_WRONGEMAIL);
             sScriptMgr->OnFailedPasswordChange(handler->GetSession()->GetAccountId());
             handler->SetSentErrorMessage(true);
-            TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Tried to change password, but the entered email [%s] is wrong.",
+            LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Tried to change password, but the entered email [%s] is wrong.",
                 handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                 handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str(),
                 emailConfirmation);
@@ -515,7 +503,7 @@ public:
             case AccountOpResult::AOR_OK:
                 handler->SendSysMessage(LANG_COMMAND_PASSWORD);
                 sScriptMgr->OnPasswordChange(handler->GetSession()->GetAccountId());
-                TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Changed Password.",
+                LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Changed Password.",
                     handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                     handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUID().ToString().c_str());
                 break;
@@ -858,7 +846,7 @@ public:
         {
             case AccountOpResult::AOR_OK:
                 handler->SendSysMessage(LANG_COMMAND_EMAIL);
-                TC_LOG_INFO("entities.player.character", "ChangeEmail: Account %s [Id: %u] had it's email changed to %s.",
+                LOG_INFO("entities.player.character", "ChangeEmail: Account %s [Id: %u] had it's email changed to %s.",
                     accountName.c_str(), targetAccountId, email);
                 break;
             case AccountOpResult::AOR_NAME_NOT_EXIST:
@@ -934,7 +922,7 @@ public:
         {
             case AccountOpResult::AOR_OK:
                 handler->SendSysMessage(LANG_COMMAND_EMAIL);
-                TC_LOG_INFO("entities.player.character", "ChangeRegEmail: Account %s [Id: %u] had it's Registration Email changed to %s.",
+                LOG_INFO("entities.player.character", "ChangeRegEmail: Account %s [Id: %u] had it's Registration Email changed to %s.",
                     accountName.c_str(), targetAccountId, email);
                 break;
             case AccountOpResult::AOR_NAME_NOT_EXIST:

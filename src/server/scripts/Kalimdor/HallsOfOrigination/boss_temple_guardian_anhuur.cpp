@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "ScriptMgr.h"
@@ -141,7 +129,7 @@ public:
                     std::list<Creature*> stalkers;
                     GetCreatureListWithEntryInGrid(stalkers, me, NPC_CAVE_IN_STALKER, 100.0f);
 
-                    stalkers.remove_if(Trinity::HeightDifferenceCheck(door, 0.0f, false)); // Target only the bottom ones
+                    stalkers.remove_if(Server::HeightDifferenceCheck(door, 0.0f, false)); // Target only the bottom ones
                     for (std::list<Creature*>::iterator itr = stalkers.begin(); itr != stalkers.end(); ++itr)
                     {
                         if ((*itr)->GetPositionX() > door->GetPositionX())
@@ -241,17 +229,17 @@ public:
 
                         std::list<Creature*> stalkers;
                         GetCreatureListWithEntryInGrid(stalkers, me, NPC_CAVE_IN_STALKER, 100.0f);
-                        stalkers.remove_if(Trinity::HeightDifferenceCheck(ObjectAccessor::GetGameObject(*me, instance->GetGuidData(DATA_ANHUUR_DOOR)), 5.0f, true));
+                        stalkers.remove_if(Server::HeightDifferenceCheck(ObjectAccessor::GetGameObject(*me, instance->GetGuidData(DATA_ANHUUR_DOOR)), 5.0f, true));
 
                         if (stalkers.empty())
                             break;
 
-                        stalkers.sort(Trinity::ObjectDistanceOrderPred(target));
+                        stalkers.sort(Server::ObjectDistanceOrderPred(target));
 
                         // Get the closest statue face (any of its eyes)
                         Creature* eye1 = stalkers.front();
                         stalkers.remove(eye1); // Remove the eye.
-                        stalkers.sort(Trinity::ObjectDistanceOrderPred(eye1)); // Find the second eye.
+                        stalkers.sort(Server::ObjectDistanceOrderPred(eye1)); // Find the second eye.
                         Creature* eye2 = stalkers.front();
 
                         eye1->CastSpell(eye1, SPELL_SEARING_LIGHT, true);
@@ -291,9 +279,9 @@ class spell_anhuur_shield_of_light : public SpellScriptLoader
                 {
                     if (GameObject* go = ObjectAccessor::GetGameObject(*GetCaster(), script->GetGuidData(DATA_ANHUUR_DOOR)))
                     {
-                        targets.remove_if(Trinity::HeightDifferenceCheck(go, 5.0f, false));
+                        targets.remove_if(Server::HeightDifferenceCheck(go, 5.0f, false));
                         targets.remove(GetCaster());
-                        targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
+                        targets.sort(Server::ObjectDistanceOrderPred(GetCaster()));
                         targets.resize(2);
                     }
                 }

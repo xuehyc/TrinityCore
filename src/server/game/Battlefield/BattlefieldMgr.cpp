@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "BattlefieldMgr.h"
@@ -46,26 +34,26 @@ void BattlefieldMgr::InitBattlefield()
     // respawn, init variables
     if (!wg->SetupBattlefield())
     {
-        TC_LOG_INFO("bg.battlefield", "Battlefield: Wintergrasp init failed.");
+        LOG_INFO("bg.battlefield", "Battlefield: Wintergrasp init failed.");
         delete wg;
     }
     else
     {
         _battlefieldSet.push_back(wg);
-        TC_LOG_INFO("bg.battlefield", "Battlefield: Wintergrasp successfully initiated.");
+        LOG_INFO("bg.battlefield", "Battlefield: Wintergrasp successfully initiated.");
     }
 
     Battlefield* tb = new BattlefieldTB;
     // respawn, init variables
     if (!tb->SetupBattlefield())
     {
-        TC_LOG_DEBUG("bg.battlefield", "Battlefield: Tol Barad init failed.");
+        LOG_DEBUG("bg.battlefield", "Battlefield: Tol Barad init failed.");
         delete tb;
     }
     else
     {
         _battlefieldSet.push_back(tb);
-        TC_LOG_DEBUG("bg.battlefield", "Battlefield: Tol Barad successfully initiated.");
+        LOG_DEBUG("bg.battlefield", "Battlefield: Tol Barad successfully initiated.");
     }
 }
 
@@ -85,7 +73,7 @@ void BattlefieldMgr::HandlePlayerEnterZone(Player* player, uint32 zoneId)
         return;
 
     bf->HandlePlayerEnterZone(player, zoneId);
-    TC_LOG_DEBUG("bg.battlefield", "%s entered battlefield id %u", player->GetGUID().ToString().c_str(), bf->GetTypeId());
+    LOG_DEBUG("bg.battlefield", "%s entered battlefield id %u", player->GetGUID().ToString().c_str(), bf->GetTypeId());
 }
 
 void BattlefieldMgr::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
@@ -99,7 +87,7 @@ void BattlefieldMgr::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
         return;
 
     itr->second->HandlePlayerLeaveZone(player, zoneId);
-    TC_LOG_DEBUG("bg.battlefield", "Player %s left battlefield id %u", player->GetGUID().ToString().c_str(), itr->second->GetTypeId());
+    LOG_DEBUG("bg.battlefield", "Player %s left battlefield id %u", player->GetGUID().ToString().c_str(), itr->second->GetTypeId());
 }
 
 Battlefield* BattlefieldMgr::GetBattlefieldToZoneId(uint32 zoneId)

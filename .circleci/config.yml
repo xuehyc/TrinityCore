@@ -2,7 +2,7 @@ version: 2
 jobs:
   pch_and_sql:
     docker:
-      - image: trinitycore/circle-ci:master-buildpacks-disco
+      - image: mobiuscore/circle-ci:master-buildpacks-disco
       - image: circleci/mysql:5.7
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
@@ -45,7 +45,7 @@ jobs:
             ./worldserver --version
   nopch:
     docker:
-      - image: trinitycore/circle-ci:master-buildpacks-disco
+      - image: mobiuscore/circle-ci:master-buildpacks-disco
     steps:
       - run:
           name: Requirements

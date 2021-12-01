@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "PhaseShift.h"
@@ -115,7 +103,7 @@ bool PhaseShift::CanSee(PhaseShift const& other) const
     {
         ObjectGuid ownerGuid = PersonalGuid;
         ObjectGuid otherPersonalGuid = other.PersonalGuid;
-        return Trinity::Containers::Intersects(Phases.begin(), Phases.end(), other.Phases.begin(), other.Phases.end(),
+        return Server::Containers::Intersects(Phases.begin(), Phases.end(), other.Phases.begin(), other.Phases.end(),
             [&ownerGuid, &otherPersonalGuid, excludePhasesWithFlag](PhaseRef const& myPhase, PhaseRef const& /*otherPhase*/)
         {
             return !myPhase.Flags.HasFlag(excludePhasesWithFlag) && (!myPhase.Flags.HasFlag(PhaseFlags::Personal) || ownerGuid == otherPersonalGuid);

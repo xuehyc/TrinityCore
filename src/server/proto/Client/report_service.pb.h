@@ -39,7 +39,7 @@ namespace report {
 namespace v1 {
 
 // Internal implementation detail -- do not call these.
-void TC_PROTO_API protobuf_AddDesc_report_5fservice_2eproto();
+void PROTO_API protobuf_AddDesc_report_5fservice_2eproto();
 void protobuf_AssignDesc_report_5fservice_2eproto();
 void protobuf_ShutdownFile_report_5fservice_2eproto();
 
@@ -48,7 +48,7 @@ class SubmitReportRequest;
 
 // ===================================================================
 
-class TC_PROTO_API SendReportRequest : public ::google::protobuf::Message {
+class PROTO_API SendReportRequest : public ::google::protobuf::Message {
  public:
   SendReportRequest();
   virtual ~SendReportRequest();
@@ -120,7 +120,7 @@ class TC_PROTO_API SendReportRequest : public ::google::protobuf::Message {
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
   ::bgs::protocol::report::v1::Report* report_;
-  friend void TC_PROTO_API protobuf_AddDesc_report_5fservice_2eproto();
+  friend void PROTO_API protobuf_AddDesc_report_5fservice_2eproto();
   friend void protobuf_AssignDesc_report_5fservice_2eproto();
   friend void protobuf_ShutdownFile_report_5fservice_2eproto();
 
@@ -129,7 +129,7 @@ class TC_PROTO_API SendReportRequest : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class TC_PROTO_API SubmitReportRequest : public ::google::protobuf::Message {
+class PROTO_API SubmitReportRequest : public ::google::protobuf::Message {
  public:
   SubmitReportRequest();
   virtual ~SubmitReportRequest();
@@ -213,7 +213,7 @@ class TC_PROTO_API SubmitReportRequest : public ::google::protobuf::Message {
   mutable int _cached_size_;
   ::bgs::protocol::account::v1::GameAccountHandle* agent_id_;
   ::bgs::protocol::report::v1::ReportType* report_type_;
-  friend void TC_PROTO_API protobuf_AddDesc_report_5fservice_2eproto();
+  friend void PROTO_API protobuf_AddDesc_report_5fservice_2eproto();
   friend void protobuf_AssignDesc_report_5fservice_2eproto();
   friend void protobuf_ShutdownFile_report_5fservice_2eproto();
 
@@ -222,7 +222,7 @@ class TC_PROTO_API SubmitReportRequest : public ::google::protobuf::Message {
 };
 // ===================================================================
 
-class TC_PROTO_API ReportService : public ServiceBase
+class PROTO_API ReportService : public ServiceBase
 {
  public:
 

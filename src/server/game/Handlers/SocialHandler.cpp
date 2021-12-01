@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "WorldSession.h"
@@ -31,7 +19,7 @@
 
 void WorldSession::HandleContactListOpcode(WorldPackets::Social::SendContactList& packet)
 {
-    TC_LOG_DEBUG("network", "WorldSession::HandleContactListOpcode: Flags: %u", packet.Flags);
+    LOG_DEBUG("network", "WorldSession::HandleContactListOpcode: Flags: %u", packet.Flags);
     _player->GetSocial()->SendSocialList(_player, packet.Flags);
 }
 
@@ -40,7 +28,7 @@ void WorldSession::HandleAddFriendOpcode(WorldPackets::Social::AddFriend& packet
     if (!normalizePlayerName(packet.Name))
         return;
 
-    TC_LOG_DEBUG("network", "WorldSession::HandleAddFriendOpcode: %s asked to add friend: %s",
+    LOG_DEBUG("network", "WorldSession::HandleAddFriendOpcode: %s asked to add friend: %s",
         GetPlayerInfo().c_str(), packet.Name.c_str());
 
     FriendsResult friendResult = FRIEND_NOT_FOUND;
@@ -83,7 +71,7 @@ void WorldSession::HandleAddFriendOpcode(WorldPackets::Social::AddFriend& packet
 void WorldSession::HandleDelFriendOpcode(WorldPackets::Social::DelFriend& packet)
 {
     /// @todo: handle VirtualRealmAddress
-    TC_LOG_DEBUG("network", "WorldSession::HandleDelFriendOpcode: %s", packet.Player.Guid.ToString().c_str());
+    LOG_DEBUG("network", "WorldSession::HandleDelFriendOpcode: %s", packet.Player.Guid.ToString().c_str());
 
     GetPlayer()->GetSocial()->RemoveFromSocialList(packet.Player.Guid, SOCIAL_FLAG_FRIEND);
 
@@ -95,7 +83,7 @@ void WorldSession::HandleAddIgnoreOpcode(WorldPackets::Social::AddIgnore& packet
     if (!normalizePlayerName(packet.Name))
         return;
 
-    TC_LOG_DEBUG("network", "WorldSession::HandleAddIgnoreOpcode: %s asked to Ignore: %s",
+    LOG_DEBUG("network", "WorldSession::HandleAddIgnoreOpcode: %s asked to Ignore: %s",
         GetPlayer()->GetName().c_str(), packet.Name.c_str());
 
     ObjectGuid ignoreGuid = sCharacterCache->GetCharacterGuidByName(packet.Name);
@@ -122,7 +110,7 @@ void WorldSession::HandleAddIgnoreOpcode(WorldPackets::Social::AddIgnore& packet
 void WorldSession::HandleDelIgnoreOpcode(WorldPackets::Social::DelIgnore& packet)
 {
     /// @todo: handle VirtualRealmAddress
-    TC_LOG_DEBUG("network", "WorldSession::HandleDelIgnoreOpcode: %s", packet.Player.Guid.ToString().c_str());
+    LOG_DEBUG("network", "WorldSession::HandleDelIgnoreOpcode: %s", packet.Player.Guid.ToString().c_str());
 
     GetPlayer()->GetSocial()->RemoveFromSocialList(packet.Player.Guid, SOCIAL_FLAG_IGNORED);
 
@@ -132,6 +120,6 @@ void WorldSession::HandleDelIgnoreOpcode(WorldPackets::Social::DelIgnore& packet
 void WorldSession::HandleSetContactNotesOpcode(WorldPackets::Social::SetContactNotes& packet)
 {
     /// @todo: handle VirtualRealmAddress
-    TC_LOG_DEBUG("network", "WorldSession::HandleSetContactNotesOpcode: Contact: %s, Notes: %s", packet.Player.Guid.ToString().c_str(), packet.Notes.c_str());
+    LOG_DEBUG("network", "WorldSession::HandleSetContactNotesOpcode: Contact: %s, Notes: %s", packet.Player.Guid.ToString().c_str(), packet.Notes.c_str());
     _player->GetSocial()->SetFriendNote(packet.Player.Guid, packet.Notes);
 }

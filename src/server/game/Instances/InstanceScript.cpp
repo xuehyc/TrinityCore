@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "InstanceScript.h"
@@ -52,14 +39,14 @@ BossBoundaryData::~BossBoundaryData()
 InstanceScript::InstanceScript(InstanceMap* map) : instance(map), completedEncounters(0),
 _entranceId(0), _temporaryEntranceId(0), _combatResurrectionTimer(0), _combatResurrectionCharges(0), _combatResurrectionTimerStarted(false)
 {
-#ifdef TRINITY_API_USE_DYNAMIC_LINKING
+#ifdef SERVER_API_USE_DYNAMIC_LINKING
     uint32 scriptId = sObjectMgr->GetInstanceTemplate(map->GetId())->ScriptId;
     auto const scriptname = sObjectMgr->GetScriptName(scriptId);
     ASSERT(!scriptname.empty());
    // Acquire a strong reference from the script module
    // to keep it loaded until this object is destroyed.
     module_reference = sScriptMgr->AcquireModuleReferenceOfScriptName(scriptname);
-#endif // #ifndef TRINITY_API_USE_DYNAMIC_LINKING
+#endif // #ifndef SERVER_API_USE_DYNAMIC_LINKING
 }
 
 void InstanceScript::SaveToDB()
@@ -158,7 +145,7 @@ void InstanceScript::LoadMinionData(const MinionData* data)
 
         ++data;
     }
-    TC_LOG_DEBUG("scripts", "InstanceScript::LoadMinionData: " UI64FMTD " minions loaded.", uint64(minions.size()));
+    LOG_DEBUG("scripts", "InstanceScript::LoadMinionData: " UI64FMTD " minions loaded.", uint64(minions.size()));
 }
 
 void InstanceScript::LoadDoorData(const DoorData* data)
@@ -170,7 +157,7 @@ void InstanceScript::LoadDoorData(const DoorData* data)
 
         ++data;
     }
-    TC_LOG_DEBUG("scripts", "InstanceScript::LoadDoorData: " UI64FMTD " doors loaded.", uint64(doors.size()));
+    LOG_DEBUG("scripts", "InstanceScript::LoadDoorData: " UI64FMTD " doors loaded.", uint64(doors.size()));
 }
 
 void InstanceScript::LoadObjectData(ObjectData const* creatureData, ObjectData const* gameObjectData)
@@ -181,7 +168,7 @@ void InstanceScript::LoadObjectData(ObjectData const* creatureData, ObjectData c
     if (gameObjectData)
         LoadObjectData(gameObjectData, _gameObjectInfo);
 
-    TC_LOG_DEBUG("scripts", "InstanceScript::LoadObjectData: " SZFMTD " objects loaded.", _creatureInfo.size() + _gameObjectInfo.size());
+    LOG_DEBUG("scripts", "InstanceScript::LoadObjectData: " SZFMTD " objects loaded.", _creatureInfo.size() + _gameObjectInfo.size());
 }
 
 void InstanceScript::LoadObjectData(ObjectData const* data, ObjectInfoMap& objectInfo)
@@ -318,7 +305,7 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
         if (bossInfo->state == TO_BE_DECIDED) // loading
         {
             bossInfo->state = state;
-            //TC_LOG_ERROR("misc", "Inialize boss %u state as %u.", id, (uint32)state);
+            //LOG_ERROR("misc", "Inialize boss %u state as %u.", id, (uint32)state);
             return false;
         }
         else
@@ -467,7 +454,7 @@ void InstanceScript::HandleGameObject(ObjectGuid guid, bool open, GameObject* go
     if (go)
         go->SetGoState(open ? GO_STATE_ACTIVE : GO_STATE_READY);
     else
-        TC_LOG_DEBUG("scripts", "InstanceScript: HandleGameObject failed");
+        LOG_DEBUG("scripts", "InstanceScript: HandleGameObject failed");
 }
 
 void InstanceScript::DoUseDoorOrButton(ObjectGuid guid, uint32 withRestoreTime /*= 0*/, bool useAlternativeState /*= false*/)
@@ -485,10 +472,10 @@ void InstanceScript::DoUseDoorOrButton(ObjectGuid guid, uint32 withRestoreTime /
                 go->ResetDoorOrButton();
         }
         else
-            TC_LOG_ERROR("scripts", "InstanceScript: DoUseDoorOrButton can't use gameobject entry %u, because type is %u.", go->GetEntry(), go->GetGoType());
+            LOG_ERROR("scripts", "InstanceScript: DoUseDoorOrButton can't use gameobject entry %u, because type is %u.", go->GetEntry(), go->GetGoType());
     }
     else
-        TC_LOG_DEBUG("scripts", "InstanceScript: DoUseDoorOrButton failed");
+        LOG_DEBUG("scripts", "InstanceScript: DoUseDoorOrButton failed");
 }
 
 void InstanceScript::DoCloseDoorOrButton(ObjectGuid guid)
@@ -504,10 +491,10 @@ void InstanceScript::DoCloseDoorOrButton(ObjectGuid guid)
                 go->ResetDoorOrButton();
         }
         else
-            TC_LOG_ERROR("scripts", "InstanceScript: DoCloseDoorOrButton can't use gameobject entry %u, because type is %u.", go->GetEntry(), go->GetGoType());
+            LOG_ERROR("scripts", "InstanceScript: DoCloseDoorOrButton can't use gameobject entry %u, because type is %u.", go->GetEntry(), go->GetGoType());
     }
     else
-        TC_LOG_DEBUG("scripts", "InstanceScript: DoCloseDoorOrButton failed");
+        LOG_DEBUG("scripts", "InstanceScript: DoCloseDoorOrButton failed");
 }
 
 void InstanceScript::DoRespawnGameObject(ObjectGuid guid, uint32 timeToDespawn /*= MINUTE*/)
@@ -521,7 +508,7 @@ void InstanceScript::DoRespawnGameObject(ObjectGuid guid, uint32 timeToDespawn /
             case GAMEOBJECT_TYPE_TRAP:
             case GAMEOBJECT_TYPE_FISHINGNODE:
                 // not expect any of these should ever be handled
-                TC_LOG_ERROR("scripts", "InstanceScript: DoRespawnGameObject can't respawn gameobject entry %u, because type is %u.", go->GetEntry(), go->GetGoType());
+                LOG_ERROR("scripts", "InstanceScript: DoRespawnGameObject can't respawn gameobject entry %u, because type is %u.", go->GetEntry(), go->GetGoType());
                 return;
             default:
                 break;
@@ -533,7 +520,7 @@ void InstanceScript::DoRespawnGameObject(ObjectGuid guid, uint32 timeToDespawn /
         go->SetRespawnTime(timeToDespawn);
     }
     else
-        TC_LOG_DEBUG("scripts", "InstanceScript: DoRespawnGameObject failed");
+        LOG_DEBUG("scripts", "InstanceScript: DoRespawnGameObject failed");
 }
 
 void InstanceScript::DoUpdateWorldState(uint32 uiStateId, uint32 uiStateData)
@@ -547,7 +534,7 @@ void InstanceScript::DoUpdateWorldState(uint32 uiStateId, uint32 uiStateData)
                 player->SendUpdateWorldState(uiStateId, uiStateData);
     }
     else
-        TC_LOG_DEBUG("scripts", "DoUpdateWorldState attempt send data but no players in map.");
+        LOG_DEBUG("scripts", "DoUpdateWorldState attempt send data but no players in map.");
 }
 
 // Send Notify to all players in instance
@@ -638,7 +625,7 @@ bool InstanceScript::ServerAllowsTwoSideGroups()
 
 bool InstanceScript::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/ /*= NULL*/, uint32 /*miscvalue1*/ /*= 0*/)
 {
-    TC_LOG_ERROR("misc", "Achievement system call InstanceScript::CheckAchievementCriteriaMeet but instance script for map %u not have implementation for achievement criteria %u",
+    LOG_ERROR("misc", "Achievement system call InstanceScript::CheckAchievementCriteriaMeet but instance script for map %u not have implementation for achievement criteria %u",
         instance->GetId(), criteria_id);
     return false;
 }
@@ -733,7 +720,7 @@ void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 credi
             if (encounter->lastEncounterDungeon)
             {
                 dungeonId = encounter->lastEncounterDungeon;
-                TC_LOG_DEBUG("lfg", "UpdateEncounterState: Instance %s (instanceId %u) completed encounter %s. Credit Dungeon: %u",
+                LOG_DEBUG("lfg", "UpdateEncounterState: Instance %s (instanceId %u) completed encounter %s. Credit Dungeon: %u",
                     instance->GetMapName(), instance->GetInstanceId(), encounter->dbcEntry->Name->Str[sWorld->GetDefaultDbcLocale()], dungeonId);
                 break;
             }

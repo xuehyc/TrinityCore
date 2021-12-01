@@ -1,12 +1,5 @@
-# Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
-#
-# This file is free software; as a special exception the author gives
-# unlimited permission to copy and/or distribute it, with or without
-# modifications, as long as this notice is preserved.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# This file is part of the MobiusCore project.
+# See AUTHORS file for copyright information.
 
 if(WIN32)
  set(BOOST_DEBUG ON)
@@ -95,5 +88,5 @@ endif()
 if (NOT STD_HAS_WORKING_WREGEX)
   target_compile_definitions(boost
     INTERFACE
-      -DTC_HAS_BROKEN_WSTRING_REGEX)
+      -DHAS_BROKEN_WSTRING_REGEX)
 endif()

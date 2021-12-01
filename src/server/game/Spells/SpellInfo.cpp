@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "SpellInfo.h"
@@ -1818,7 +1806,7 @@ SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
         shapeInfo = sSpellShapeshiftFormStore.LookupEntry(form);
         if (!shapeInfo)
         {
-            TC_LOG_ERROR("spells", "GetErrorAtShapeshiftedCast: unknown shapeshift %u", form);
+            LOG_ERROR("spells", "GetErrorAtShapeshiftedCast: unknown shapeshift %u", form);
             return SPELL_CAST_OK;
         }
         actAsShifted = !(shapeInfo->Flags & SHAPESHIFT_FORM_IS_NOT_A_SHAPESHIFT);
@@ -3725,7 +3713,7 @@ std::vector<SpellPowerCost> SpellInfo::CalcPowerCost(Unit const* caster, SpellSc
                     continue;
                 }
 
-                TC_LOG_ERROR("spells", "SpellInfo::CalcPowerCost: Unknown power type '%d' in spell %d", power->PowerType, Id);
+                LOG_ERROR("spells", "SpellInfo::CalcPowerCost: Unknown power type '%d' in spell %d", power->PowerType, Id);
                 continue;
             }
 
@@ -3750,10 +3738,10 @@ std::vector<SpellPowerCost> SpellInfo::CalcPowerCost(Unit const* caster, SpellSc
                         break;
                     case POWER_RUNES:
                     case POWER_RUNIC_POWER:
-                        TC_LOG_DEBUG("spells", "CalculateManaCost: Not implemented yet!");
+                        LOG_DEBUG("spells", "CalculateManaCost: Not implemented yet!");
                         break;
                     default:
-                        TC_LOG_ERROR("spells", "CalculateManaCost: Unknown power type '%d' in spell %d", power->PowerType, Id);
+                        LOG_ERROR("spells", "CalculateManaCost: Unknown power type '%d' in spell %d", power->PowerType, Id);
                         continue;
                 }
             }

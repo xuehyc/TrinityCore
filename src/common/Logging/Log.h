@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITYCORE_LOG_H
-#define TRINITYCORE_LOG_H
+#ifndef SERVERCORE_LOG_H
+#define SERVERCORE_LOG_H
 
 #include "Define.h"
 #include "AsioHacksFwd.h"
@@ -31,7 +18,7 @@ class Appender;
 class Logger;
 struct LogMessage;
 
-namespace Trinity
+namespace Server
 {
     namespace Asio
     {
@@ -49,7 +36,7 @@ Appender* CreateAppender(uint8 id, std::string const& name, LogLevel level, Appe
     return new AppenderImpl(id, name, level, flags, std::forward<std::vector<char const*>>(extraArgs));
 }
 
-class TC_COMMON_API Log
+class COMMON_API Log
 {
     private:
         Log();
@@ -62,7 +49,7 @@ class TC_COMMON_API Log
     public:
         static Log* instance();
 
-        void Initialize(Trinity::Asio::IoContext* ioContext);
+        void Initialize(Server::Asio::IoContext* ioContext);
         void SetSynchronous();  // Not threadsafe - should only be called from main() after all threads are joined
         void LoadFromConfig();
         void Close();
@@ -72,7 +59,7 @@ class TC_COMMON_API Log
         template<typename Format, typename... Args>
         inline void outMessage(std::string const& filter, LogLevel const level, Format&& fmt, Args&&... args)
         {
-            outMessage(filter, level, Trinity::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...));
+            outMessage(filter, level, Server::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...));
         }
 
         template<typename Format, typename... Args>
@@ -81,7 +68,7 @@ class TC_COMMON_API Log
             if (!ShouldLog("commands.gm", LOG_LEVEL_INFO))
                 return;
 
-            outCommand(Trinity::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...), std::to_string(account));
+            outCommand(Server::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...), std::to_string(account));
         }
 
         void outCharDump(char const* str, uint32 account_id, uint64 guid, char const* name);
@@ -122,8 +109,8 @@ class TC_COMMON_API Log
         std::string m_logsDir;
         std::string m_logsTimestamp;
 
-        Trinity::Asio::IoContext* _ioContext;
-        Trinity::Asio::Strand* _strand;
+        Server::Asio::IoContext* _ioContext;
+        Server::Asio::Strand* _strand;
 };
 
 #define sLog Log::instance()
@@ -141,12 +128,12 @@ class TC_COMMON_API Log
         } \
     }
 
-#if TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS
+#if SERVER_PLATFORM != SERVER_PLATFORM_WINDOWS
 void check_args(const char*, ...) ATTR_PRINTF(1, 2);
 void check_args(std::string const&, ...);
 
 // This will catch format errors on build time
-#define TC_LOG_MESSAGE_BODY(filterType__, level__, ...)                 \
+#define LOG_MESSAGE_BODY(filterType__, level__, ...)                 \
         do {                                                            \
             if (sLog->ShouldLog(filterType__, level__))                 \
             {                                                           \
@@ -157,7 +144,7 @@ void check_args(std::string const&, ...);
             }                                                           \
         } while (0)
 #else
-#define TC_LOG_MESSAGE_BODY(filterType__, level__, ...)                 \
+#define LOG_MESSAGE_BODY(filterType__, level__, ...)                 \
         __pragma(warning(push))                                         \
         __pragma(warning(disable:4127))                                 \
         do {                                                            \
@@ -167,22 +154,22 @@ void check_args(std::string const&, ...);
         __pragma(warning(pop))
 #endif
 
-#define TC_LOG_TRACE(filterType__, ...) \
-    TC_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_TRACE, __VA_ARGS__)
+#define LOG_TRACE(filterType__, ...) \
+    LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_TRACE, __VA_ARGS__)
 
-#define TC_LOG_DEBUG(filterType__, ...) \
-    TC_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_DEBUG, __VA_ARGS__)
+#define LOG_DEBUG(filterType__, ...) \
+    LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_DEBUG, __VA_ARGS__)
 
-#define TC_LOG_INFO(filterType__, ...)  \
-    TC_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_INFO, __VA_ARGS__)
+#define LOG_INFO(filterType__, ...)  \
+    LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_INFO, __VA_ARGS__)
 
-#define TC_LOG_WARN(filterType__, ...)  \
-    TC_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_WARN, __VA_ARGS__)
+#define LOG_WARN(filterType__, ...)  \
+    LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_WARN, __VA_ARGS__)
 
-#define TC_LOG_ERROR(filterType__, ...) \
-    TC_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_ERROR, __VA_ARGS__)
+#define LOG_ERROR(filterType__, ...) \
+    LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_ERROR, __VA_ARGS__)
 
-#define TC_LOG_FATAL(filterType__, ...) \
-    TC_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_FATAL, __VA_ARGS__)
+#define LOG_FATAL(filterType__, ...) \
+    LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_FATAL, __VA_ARGS__)
 
 #endif

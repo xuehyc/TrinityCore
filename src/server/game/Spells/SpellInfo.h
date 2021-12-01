@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _SPELLINFO_H
@@ -277,7 +265,7 @@ struct AuraInterruptFlagIndex<SpellAuraInterruptFlags2>
 
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType);
 
-class TC_GAME_API SpellImplicitTargetInfo
+class GAME_API SpellImplicitTargetInfo
 {
 private:
     Targets _target;
@@ -308,7 +296,7 @@ private:
     static StaticData _data[TOTAL_SPELL_TARGETS];
 };
 
-struct TC_GAME_API ImmunityInfo
+struct GAME_API ImmunityInfo
 {
     uint32 SchoolImmuneMask = 0;
     uint32 ApplyHarmfulAuraImmuneMask = 0;
@@ -320,7 +308,7 @@ struct TC_GAME_API ImmunityInfo
     boost::container::flat_set<SpellEffectName> SpellEffectImmune;
 };
 
-class TC_GAME_API SpellEffectInfo
+class GAME_API SpellEffectInfo
 {
     SpellInfo const* _spellInfo;
 public:
@@ -414,7 +402,7 @@ typedef std::vector<AuraEffect*> AuraEffectVector;
 
 struct SpellInfoLoadHelper;
 
-struct TC_GAME_API SpellDiminishInfo
+struct GAME_API SpellDiminishInfo
 {
     DiminishingGroup DiminishGroup = DIMINISHING_NONE;
     DiminishingReturnsType DiminishReturnType = DRTYPE_NONE;
@@ -428,7 +416,7 @@ struct SpellPowerCost
     int32 Amount;
 };
 
-class TC_GAME_API SpellInfo
+class GAME_API SpellInfo
 {
     friend class SpellMgr;
 

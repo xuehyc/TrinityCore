@@ -55,7 +55,7 @@ target_include_directories(casc
 
 target_link_libraries(casc
   PRIVATE
-    trinity-dependency-interface
+    mobius-dependency-interface
   PUBLIC
     zlib)
 

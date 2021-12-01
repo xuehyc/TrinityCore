@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "Pet.h"
@@ -198,7 +185,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
 
         if (!IsPositionValid())
         {
-            TC_LOG_ERROR("entities.pet", "Pet (%s, entry %d) not loaded. Suggested coordinates isn't valid (X: %f Y: %f)",
+            LOG_ERROR("entities.pet", "Pet (%s, entry %d) not loaded. Suggested coordinates isn't valid (X: %f Y: %f)",
                 GetGUID().ToString().c_str(), GetEntry(), GetPositionX(), GetPositionY());
             return false;
         }
@@ -231,7 +218,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
             break;
         default:
             if (!IsPetGhoul())
-                TC_LOG_ERROR("entities.pet", "Pet have incorrect type (%u) for pet loading.", getPetType());
+                LOG_ERROR("entities.pet", "Pet have incorrect type (%u) for pet loading.", getPetType());
             break;
     }
 
@@ -249,7 +236,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     Relocate(px, py, pz, owner->GetOrientation());
     if (!IsPositionValid())
     {
-        TC_LOG_ERROR("entities.pet", "Pet (%s, entry %d) not loaded. Suggested coordinates isn't valid (X: %f Y: %f)",
+        LOG_ERROR("entities.pet", "Pet (%s, entry %d) not loaded. Suggested coordinates isn't valid (X: %f Y: %f)",
             GetGUID().ToString().c_str(), GetEntry(), GetPositionX(), GetPositionY());
         return false;
     }
@@ -335,7 +322,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
         CastPetAuras(current);
     }
 
-    TC_LOG_DEBUG("entities.pet", "New Pet has %s", GetGUID().ToString().c_str());
+    LOG_DEBUG("entities.pet", "New Pet has %s", GetGUID().ToString().c_str());
 
     uint16 specId = fields[16].GetUInt16();
     if (ChrSpecializationEntry const* petSpec = sChrSpecializationStore.LookupEntry(specId))
@@ -576,7 +563,7 @@ void Pet::Update(uint32 diff)
             {
                 if (owner->GetPetGUID() != GetGUID())
                 {
-                    TC_LOG_ERROR("entities.pet", "Pet %u is not pet of owner %s, removed", GetEntry(), GetOwner()->GetName().c_str());
+                    LOG_ERROR("entities.pet", "Pet %u is not pet of owner %s, removed", GetEntry(), GetOwner()->GetName().c_str());
                     Remove(getPetType() == HUNTER_PET?PET_SAVE_AS_DELETED:PET_SAVE_NOT_IN_SLOT);
                     return;
                 }
@@ -701,7 +688,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 
     if (!IsPositionValid())
     {
-        TC_LOG_ERROR("entities.pet", "Pet (%s, entry %d) not created base at creature. Suggested coordinates isn't valid (X: %f Y: %f)",
+        LOG_ERROR("entities.pet", "Pet (%s, entry %d) not created base at creature. Suggested coordinates isn't valid (X: %f Y: %f)",
             GetGUID().ToString().c_str(), GetEntry(), GetPositionX(), GetPositionY());
         return false;
     }
@@ -709,7 +696,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     CreatureTemplate const* cinfo = GetCreatureTemplate();
     if (!cinfo)
     {
-        TC_LOG_ERROR("entities.pet", "CreateBaseAtCreature() failed, creatureInfo is missing!");
+        LOG_ERROR("entities.pet", "CreateBaseAtCreature() failed, creatureInfo is missing!");
         return false;
     }
 
@@ -738,7 +725,7 @@ bool Pet::CreateBaseAtCreatureInfo(CreatureTemplate const* cinfo, Unit* owner)
 
 bool Pet::CreateBaseAtTamed(CreatureTemplate const* cinfo, Map* map)
 {
-    TC_LOG_DEBUG("entities.pet", "Pet::CreateBaseForTamed");
+    LOG_DEBUG("entities.pet", "Pet::CreateBaseForTamed");
     if (!Create(map->GenerateLowGuid<HighGuid::Pet>(), map, cinfo->Entry))
         return false;
 
@@ -784,7 +771,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         }
         else
         {
-            TC_LOG_ERROR("entities.pet", "Unknown type pet %u is summoned by player class %u",
+            LOG_ERROR("entities.pet", "Unknown type pet %u is summoned by player class %u",
                            GetEntry(), GetOwner()->getClass());
         }
     }
@@ -1129,7 +1116,7 @@ void Pet::_SaveSpells(CharacterDatabaseTransaction& trans)
 
 void Pet::_LoadAuras(uint32 timediff)
 {
-    TC_LOG_DEBUG("entities.pet", "Loading auras for %s", GetGUID().ToString().c_str());
+    LOG_DEBUG("entities.pet", "Loading auras for %s", GetGUID().ToString().c_str());
 
     /*
                     0      1           2            3       4           5
@@ -1188,7 +1175,7 @@ void Pet::_LoadAuras(uint32 timediff)
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(key.SpellId);
             if (!spellInfo)
             {
-                TC_LOG_ERROR("entities.pet", "Unknown aura (spellid %u), ignore.", key.SpellId);
+                LOG_ERROR("entities.pet", "Unknown aura (spellid %u), ignore.", key.SpellId);
                 continue;
             }
 
@@ -1224,7 +1211,7 @@ void Pet::_LoadAuras(uint32 timediff)
 
                 aura->SetLoadedState(maxDuration, remainTime, remainCharges, stackCount, recalculateMask, info.Amounts.data());
                 aura->ApplyForTargets();
-                TC_LOG_DEBUG("entities.pet", "Added aura spellid %u, effectmask %u", spellInfo->Id, key.EffectMask);
+                LOG_DEBUG("entities.pet", "Added aura spellid %u, effectmask %u", spellInfo->Id, key.EffectMask);
             }
         }
         while (auraResult->NextRow());
@@ -1296,7 +1283,7 @@ bool Pet::addSpell(uint32 spellId, ActiveStates active /*= ACT_DECIDE*/, PetSpel
         // do pet spell book cleanup
         if (state == PETSPELL_UNCHANGED)                    // spell load case
         {
-            TC_LOG_ERROR("entities.pet", "Pet::addSpell: Non-existed in SpellStore spell #%u request, deleting for all pets in `pet_spell`.", spellId);
+            LOG_ERROR("entities.pet", "Pet::addSpell: Non-existed in SpellStore spell #%u request, deleting for all pets in `pet_spell`.", spellId);
 
             CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_PET_SPELL);
 
@@ -1305,7 +1292,7 @@ bool Pet::addSpell(uint32 spellId, ActiveStates active /*= ACT_DECIDE*/, PetSpel
             CharacterDatabase.Execute(stmt);
         }
         else
-            TC_LOG_ERROR("entities.pet", "Pet::addSpell: Non-existed in SpellStore spell #%u request.", spellId);
+            LOG_ERROR("entities.pet", "Pet::addSpell: Non-existed in SpellStore spell #%u request.", spellId);
 
         return false;
     }

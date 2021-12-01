@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
-
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "UpdateTime.h"
@@ -101,7 +89,7 @@ void UpdateTime::_RecordUpdateTimeDuration(std::string const& text, uint32 minUp
     uint32 diff = getMSTimeDiff(_recordedTime, thisTime);
 
     if (diff > minUpdateTime)
-        TC_LOG_INFO("misc", "Recored Update Time of %s: %u.", text.c_str(), diff);
+        LOG_INFO("misc", "Recored Update Time of %s: %u.", text.c_str(), diff);
 
     _recordedTime = thisTime;
 }
@@ -123,7 +111,7 @@ void WorldUpdateTime::RecordUpdateTime(uint32 gameTimeMs, uint32 diff, uint32 se
     {
         if (getMSTimeDiff(_lastRecordTime, gameTimeMs) > _recordUpdateTimeInverval)
         {
-            TC_LOG_DEBUG("misc", "Update time diff: %u. Players online: %u.", GetAverageUpdateTime(), sessionCount);
+            LOG_DEBUG("misc", "Update time diff: %u. Players online: %u.", GetAverageUpdateTime(), sessionCount);
             _lastRecordTime = gameTimeMs;
         }
     }

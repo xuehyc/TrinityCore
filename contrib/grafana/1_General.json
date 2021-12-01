@@ -725,7 +725,7 @@
                 {
                   "key": "realm",
                   "operator": "=",
-                  "value": "Trinity"
+                  "value": "Mobius"
                 }
               ]
             },
@@ -844,8 +844,8 @@
       {
         "allFormat": "regex values",
         "current": {
-          "text": "Trinity",
-          "value": "Trinity"
+          "text": "Mobius",
+          "value": "Mobius"
         },
         "datasource": "Influx",
         "includeAll": false,
@@ -854,8 +854,8 @@
         "name": "realm",
         "options": [
           {
-            "text": "Trinity",
-            "value": "Trinity",
+            "text": "Mobius",
+            "value": "Mobius",
             "selected": true
           }
         ],

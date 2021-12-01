@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "BattlePetMgr.h"
@@ -101,7 +89,7 @@ void BattlePetMgr::LoadAvailablePetBreeds()
     QueryResult result = WorldDatabase.Query("SELECT speciesId, breedId FROM battle_pet_breeds");
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 battle pet breeds. DB table `battle_pet_breeds` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 battle pet breeds. DB table `battle_pet_breeds` is empty.");
         return;
     }
 
@@ -114,7 +102,7 @@ void BattlePetMgr::LoadAvailablePetBreeds()
 
         if (!sBattlePetSpeciesStore.LookupEntry(speciesId))
         {
-            TC_LOG_ERROR("sql.sql", "Non-existing BattlePetSpecies.db2 entry %u was referenced in `battle_pet_breeds` by row (%u, %u).", speciesId, speciesId, breedId);
+            LOG_ERROR("sql.sql", "Non-existing BattlePetSpecies.db2 entry %u was referenced in `battle_pet_breeds` by row (%u, %u).", speciesId, speciesId, breedId);
             continue;
         }
 
@@ -124,7 +112,7 @@ void BattlePetMgr::LoadAvailablePetBreeds()
         ++count;
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u battle pet breeds.", count);
+    LOG_INFO("server.loading", ">> Loaded %u battle pet breeds.", count);
 }
 
 void BattlePetMgr::LoadDefaultPetQualities()
@@ -132,7 +120,7 @@ void BattlePetMgr::LoadDefaultPetQualities()
     QueryResult result = WorldDatabase.Query("SELECT speciesId, quality FROM battle_pet_quality");
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 battle pet qualities. DB table `battle_pet_quality` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 battle pet qualities. DB table `battle_pet_quality` is empty.");
         return;
     }
 
@@ -144,7 +132,7 @@ void BattlePetMgr::LoadDefaultPetQualities()
 
         if (!sBattlePetSpeciesStore.LookupEntry(speciesId))
         {
-            TC_LOG_ERROR("sql.sql", "Non-existing BattlePetSpecies.db2 entry %u was referenced in `battle_pet_quality` by row (%u, %u).", speciesId, speciesId, quality);
+            LOG_ERROR("sql.sql", "Non-existing BattlePetSpecies.db2 entry %u was referenced in `battle_pet_quality` by row (%u, %u).", speciesId, speciesId, quality);
             continue;
         }
 
@@ -153,7 +141,7 @@ void BattlePetMgr::LoadDefaultPetQualities()
         _defaultQualityPerSpecies[speciesId] = quality;
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u battle pet qualities.", uint32(_defaultQualityPerSpecies.size()));
+    LOG_INFO("server.loading", ">> Loaded %u battle pet qualities.", uint32(_defaultQualityPerSpecies.size()));
 }
 
 uint16 BattlePetMgr::RollPetBreed(uint32 species)
@@ -162,7 +150,7 @@ uint16 BattlePetMgr::RollPetBreed(uint32 species)
     if (itr == _availableBreedsPerSpecies.end())
         return 3; // default B/B
 
-    return Trinity::Containers::SelectRandomContainerElement(itr->second);
+    return Server::Containers::SelectRandomContainerElement(itr->second);
 }
 
 uint8 BattlePetMgr::GetDefaultPetQuality(uint32 species)
@@ -198,7 +186,7 @@ void BattlePetMgr::LoadFromDB(PreparedQueryResult pets, PreparedQueryResult slot
             {
                 if (GetPetCount(species) >= MAX_BATTLE_PETS_PER_SPECIES)
                 {
-                    TC_LOG_ERROR("misc", "Battlenet account with id %u has more than 3 battle pets of species %u", _owner->GetBattlenetAccountId(), species);
+                    LOG_ERROR("misc", "Battlenet account with id %u has more than 3 battle pets of species %u", _owner->GetBattlenetAccountId(), species);
                     continue;
                 }
 
@@ -305,7 +293,7 @@ void BattlePetMgr::SaveToDB(LoginDatabaseTransaction& trans)
 
 BattlePetMgr::BattlePet* BattlePetMgr::GetPet(ObjectGuid guid)
 {
-    return Trinity::Containers::MapGetValuePtr(_pets, guid.GetCounter());
+    return Server::Containers::MapGetValuePtr(_pets, guid.GetCounter());
 }
 
 void BattlePetMgr::AddPet(uint32 species, uint32 creatureId, uint16 breed, uint8 quality, uint16 level /*= 1*/)

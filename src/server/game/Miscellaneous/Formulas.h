@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_FORMULAS_H
-#define TRINITY_FORMULAS_H
+#ifndef SERVER_FORMULAS_H
+#define SERVER_FORMULAS_H
 
 #include "Creature.h"
 #include "GameTables.h"
@@ -27,7 +14,7 @@
 #include "SharedDefines.h"
 #include "World.h"
 
-namespace Trinity
+namespace Server
 {
     inline uint32 GetExpansionForLevel(uint32 level)
     {
@@ -60,7 +47,7 @@ namespace Trinity
         {
             return uint32(ceil(hk_honor_at_level_f(level, multiplier)));
         }
-    } // namespace Trinity::Honor
+    } // namespace Server::Honor
 
     namespace XP
     {
@@ -242,7 +229,7 @@ namespace Trinity
             sScriptMgr->OnGroupRateCalculation(rate, count, isRaid);
             return rate;
         }
-    } // namespace Trinity::XP
+    } // namespace Server::XP
 
     namespace Currency
     {
@@ -262,7 +249,7 @@ namespace Trinity
             // WowWiki: Battleground ratings receive a bonus of 22.2% to the cap they generate
             return uint32((ConquestRatingCalculator(rate) * 1.222f) + 0.5f);
         }
-    } // namespace Trinity::Currency
-} // namespace Trinity
+    } // namespace Server::Currency
+} // namespace Server
 
 #endif

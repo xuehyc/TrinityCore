@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "icecrown_citadel.h"
@@ -658,7 +646,7 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                             return;
 
                         GetCreatureListWithEntryInGrid(_guardList, me, NPC_SE_KOR_KRON_REAVER, 20.0f);
-                        _guardList.sort(Trinity::ObjectDistanceOrderPred(me));
+                        _guardList.sort(Server::ObjectDistanceOrderPred(me));
                         uint32 x = 1;
                         for (std::list<Creature*>::iterator itr = _guardList.begin(); itr != _guardList.end(); ++x, ++itr)
                             (*itr)->AI()->SetData(0, x);
@@ -855,7 +843,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
 
                         _events.SetPhase(PHASE_INTRO_A);
                         GetCreatureListWithEntryInGrid(_guardList, me, NPC_SE_SKYBREAKER_MARINE, 20.0f);
-                        _guardList.sort(Trinity::ObjectDistanceOrderPred(me));
+                        _guardList.sort(Server::ObjectDistanceOrderPred(me));
                         uint32 x = 1;
                         for (std::list<Creature*>::iterator itr = _guardList.begin(); itr != _guardList.end(); ++x, ++itr)
                             (*itr)->AI()->SetData(0, x);
@@ -1237,7 +1225,7 @@ class spell_deathbringer_blood_nova_targeting : public SpellScriptLoader
                 // select one random target, preferring ranged targets
                 uint32 targetsAtRange = 0;
                 uint32 const minTargets = uint32(GetCaster()->GetMap()->Is25ManRaid() ? 10 : 4);
-                targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
+                targets.sort(Server::ObjectDistanceOrderPred(GetCaster(), false));
 
                 // get target count at range
                 for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr, ++targetsAtRange)
@@ -1306,7 +1294,7 @@ class spell_deathbringer_boiling_blood : public SpellScriptLoader
                 if (targets.empty())
                     return;
 
-                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                WorldObject* target = Server::Containers::SelectRandomContainerElement(targets);
                 targets.clear();
                 targets.push_back(target);
             }

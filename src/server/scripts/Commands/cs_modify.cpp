@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /* ScriptData
@@ -87,7 +75,7 @@ public:
     }
 
     template<typename... Args>
-    static void NotifyModification(ChatHandler* handler, Unit* target, TrinityStrings resourceMessage, TrinityStrings resourceReportMessage, Args&&... args)
+    static void NotifyModification(ChatHandler* handler, Unit* target, ServerStrings resourceMessage, ServerStrings resourceReportMessage, Args&&... args)
     {
         if (Player* player = target->ToPlayer())
         {
@@ -572,7 +560,7 @@ public:
         {
             int64 newmoney = int64(targetMoney) + moneyToAdd;
 
-            TC_LOG_DEBUG("misc", handler->GetTrinityString(LANG_CURRENT_MONEY), std::to_string(targetMoney).c_str(), std::to_string(moneyToAdd).c_str(), std::to_string(newmoney).c_str());
+            LOG_DEBUG("misc", handler->GetServerString(LANG_CURRENT_MONEY), std::to_string(targetMoney).c_str(), std::to_string(moneyToAdd).c_str(), std::to_string(newmoney).c_str());
             if (newmoney <= 0)
             {
                 NotifyModification(handler, target, LANG_YOU_TAKE_ALL_MONEY, LANG_YOURS_ALL_MONEY_GONE);
@@ -604,7 +592,7 @@ public:
             target->ModifyMoney(moneyToAdd);
         }
 
-        TC_LOG_DEBUG("misc", handler->GetTrinityString(LANG_NEW_MONEY), std::to_string(targetMoney).c_str(), std::to_string(moneyToAdd).c_str(), std::to_string(target->GetMoney()).c_str());
+        LOG_DEBUG("misc", handler->GetServerString(LANG_NEW_MONEY), std::to_string(targetMoney).c_str(), std::to_string(moneyToAdd).c_str(), std::to_string(target->GetMoney()).c_str());
 
         return true;
     }
@@ -746,7 +734,7 @@ public:
             amount = -42000;
             for (; r < MAX_REPUTATION_RANK; ++r)
             {
-                std::string rank = handler->GetTrinityString(ReputationRankStrIndex[r]);
+                std::string rank = handler->GetServerString(ReputationRankStrIndex[r]);
                 if (rank.empty())
                     continue;
 

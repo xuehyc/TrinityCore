@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "CalendarMgr.h"
@@ -90,7 +78,7 @@ void CalendarMgr::LoadFromDB()
         }
         while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u calendar events", count);
+    LOG_INFO("server.loading", ">> Loaded %u calendar events", count);
     count = 0;
 
     //                                                       0         1        2        3       4       5             6               7
@@ -117,7 +105,7 @@ void CalendarMgr::LoadFromDB()
         }
         while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u calendar invites", count);
+    LOG_INFO("server.loading", ">> Loaded %u calendar invites", count);
 
     for (uint64 i = 1; i < _maxEventId; ++i)
         if (!GetEvent(i))
@@ -299,7 +287,7 @@ CalendarEvent* CalendarMgr::GetEvent(uint64 eventId) const
         if ((*itr)->GetEventId() == eventId)
             return *itr;
 
-    TC_LOG_DEBUG("calendar", "CalendarMgr::GetEvent: [" UI64FMTD "] not found!", eventId);
+    LOG_DEBUG("calendar", "CalendarMgr::GetEvent: [" UI64FMTD "] not found!", eventId);
     return NULL;
 }
 
@@ -310,7 +298,7 @@ CalendarInvite* CalendarMgr::GetInvite(uint64 inviteId) const
             if ((*itr2)->GetInviteId() == inviteId)
                 return *itr2;
 
-    TC_LOG_DEBUG("calendar", "CalendarMgr::GetInvite: [" UI64FMTD "] not found!", inviteId);
+    LOG_DEBUG("calendar", "CalendarMgr::GetInvite: [" UI64FMTD "] not found!", inviteId);
     return NULL;
 }
 

@@ -1,22 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_DB2STORES_H
-#define TRINITY_DB2STORES_H
+#ifndef SERVER_DB2STORES_H
+#define SERVER_DB2STORES_H
 
 #include "DB2Store.h"
 #include "DB2Structure.h"
@@ -34,186 +22,186 @@
 
 class DB2HotfixGeneratorBase;
 
-TC_GAME_API extern DB2Storage<AchievementEntry>                     sAchievementStore;
-TC_GAME_API extern DB2Storage<AnimKitEntry>                         sAnimKitStore;
-TC_GAME_API extern DB2Storage<AreaTableEntry>                       sAreaTableStore;
-TC_GAME_API extern DB2Storage<AreaTriggerEntry>                     sAreaTriggerStore;
-TC_GAME_API extern DB2Storage<ArmorLocationEntry>                   sArmorLocationStore;
-TC_GAME_API extern DB2Storage<ArtifactEntry>                        sArtifactStore;
-TC_GAME_API extern DB2Storage<ArtifactCategoryEntry>                sArtifactCategoryStore;
-TC_GAME_API extern DB2Storage<ArtifactAppearanceEntry>              sArtifactAppearanceStore;
-TC_GAME_API extern DB2Storage<ArtifactAppearanceSetEntry>           sArtifactAppearanceSetStore;
-TC_GAME_API extern DB2Storage<ArtifactPowerEntry>                   sArtifactPowerStore;
-TC_GAME_API extern DB2Storage<ArtifactPowerPickerEntry>             sArtifactPowerPickerStore;
-TC_GAME_API extern DB2Storage<ArtifactTierEntry>                    sArtifactTierStore;
-TC_GAME_API extern DB2Storage<ArtifactUnlockEntry>                  sArtifactUnlockStore;
-TC_GAME_API extern DB2Storage<AuctionHouseEntry>                    sAuctionHouseStore;
-TC_GAME_API extern DB2Storage<BankBagSlotPricesEntry>               sBankBagSlotPricesStore;
-TC_GAME_API extern DB2Storage<BannedAddonsEntry>                    sBannedAddonsStore;
-TC_GAME_API extern DB2Storage<BarberShopStyleEntry>                 sBarberShopStyleStore;
-TC_GAME_API extern DB2Storage<BattlePetBreedQualityEntry>           sBattlePetBreedQualityStore;
-TC_GAME_API extern DB2Storage<BattlePetBreedStateEntry>             sBattlePetBreedStateStore;
-TC_GAME_API extern DB2Storage<BattlePetSpeciesEntry>                sBattlePetSpeciesStore;
-TC_GAME_API extern DB2Storage<BattlePetSpeciesStateEntry>           sBattlePetSpeciesStateStore;
-TC_GAME_API extern DB2Storage<BattlemasterListEntry>                sBattlemasterListStore;
-TC_GAME_API extern DB2Storage<BroadcastTextEntry>                   sBroadcastTextStore;
-TC_GAME_API extern DB2Storage<Cfg_RegionsEntry>                     sCfgRegionsStore;
-TC_GAME_API extern DB2Storage<CharStartOutfitEntry>                 sCharStartOutfitStore;
-TC_GAME_API extern DB2Storage<CharTitlesEntry>                      sCharTitlesStore;
-TC_GAME_API extern DB2Storage<ChatChannelsEntry>                    sChatChannelsStore;
-TC_GAME_API extern DB2Storage<ChrClassesEntry>                      sChrClassesStore;
-TC_GAME_API extern DB2Storage<ChrRacesEntry>                        sChrRacesStore;
-TC_GAME_API extern DB2Storage<ChrSpecializationEntry>               sChrSpecializationStore;
-TC_GAME_API extern DB2Storage<CinematicCameraEntry>                 sCinematicCameraStore;
-TC_GAME_API extern DB2Storage<CinematicSequencesEntry>              sCinematicSequencesStore;
-TC_GAME_API extern DB2Storage<ConversationLineEntry>                sConversationLineStore;
-TC_GAME_API extern DB2Storage<CreatureDisplayInfoEntry>             sCreatureDisplayInfoStore;
-TC_GAME_API extern DB2Storage<CreatureDisplayInfoExtraEntry>        sCreatureDisplayInfoExtraStore;
-TC_GAME_API extern DB2Storage<CreatureFamilyEntry>                  sCreatureFamilyStore;
-TC_GAME_API extern DB2Storage<CreatureModelDataEntry>               sCreatureModelDataStore;
-TC_GAME_API extern DB2Storage<CreatureTypeEntry>                    sCreatureTypeStore;
-TC_GAME_API extern DB2Storage<CriteriaEntry>                        sCriteriaStore;
-TC_GAME_API extern DB2Storage<CriteriaTreeEntry>                    sCriteriaTreeStore;
-TC_GAME_API extern DB2Storage<CurrencyTypesEntry>                   sCurrencyTypesStore;
-TC_GAME_API extern DB2Storage<CurveEntry>                           sCurveStore;
-TC_GAME_API extern DB2Storage<DestructibleModelDataEntry>           sDestructibleModelDataStore;
-TC_GAME_API extern DB2Storage<DifficultyEntry>                      sDifficultyStore;
-TC_GAME_API extern DB2Storage<DungeonEncounterEntry>                sDungeonEncounterStore;
-TC_GAME_API extern DB2Storage<DurabilityCostsEntry>                 sDurabilityCostsStore;
-TC_GAME_API extern DB2Storage<DurabilityQualityEntry>               sDurabilityQualityStore;
-TC_GAME_API extern DB2Storage<EmotesEntry>                          sEmotesStore;
-TC_GAME_API extern DB2Storage<EmotesTextEntry>                      sEmotesTextStore;
-TC_GAME_API extern DB2Storage<FactionEntry>                         sFactionStore;
-TC_GAME_API extern DB2Storage<FactionTemplateEntry>                 sFactionTemplateStore;
-TC_GAME_API extern DB2Storage<GameObjectDisplayInfoEntry>           sGameObjectDisplayInfoStore;
-TC_GAME_API extern DB2Storage<GameObjectsEntry>                     sGameObjectsStore;
-TC_GAME_API extern DB2Storage<GarrAbilityEntry>                     sGarrAbilityStore;
-TC_GAME_API extern DB2Storage<GarrBuildingEntry>                    sGarrBuildingStore;
-TC_GAME_API extern DB2Storage<GarrBuildingPlotInstEntry>            sGarrBuildingPlotInstStore;
-TC_GAME_API extern DB2Storage<GarrClassSpecEntry>                   sGarrClassSpecStore;
-TC_GAME_API extern DB2Storage<GarrFollowerEntry>                    sGarrFollowerStore;
-TC_GAME_API extern DB2Storage<GarrFollowerXAbilityEntry>            sGarrFollowerXAbilityStore;
-TC_GAME_API extern DB2Storage<GarrPlotEntry>                        sGarrPlotStore;
-TC_GAME_API extern DB2Storage<GarrPlotBuildingEntry>                sGarrPlotBuildingStore;
-TC_GAME_API extern DB2Storage<GarrPlotInstanceEntry>                sGarrPlotInstanceStore;
-TC_GAME_API extern DB2Storage<GarrSiteLevelEntry>                   sGarrSiteLevelStore;
-TC_GAME_API extern DB2Storage<GarrSiteLevelPlotInstEntry>           sGarrSiteLevelPlotInstStore;
-TC_GAME_API extern DB2Storage<GemPropertiesEntry>                   sGemPropertiesStore;
-TC_GAME_API extern DB2Storage<GlyphPropertiesEntry>                 sGlyphPropertiesStore;
-TC_GAME_API extern DB2Storage<GuildColorBackgroundEntry>            sGuildColorBackgroundStore;
-TC_GAME_API extern DB2Storage<GuildColorBorderEntry>                sGuildColorBorderStore;
-TC_GAME_API extern DB2Storage<GuildColorEmblemEntry>                sGuildColorEmblemStore;
-TC_GAME_API extern DB2Storage<GuildPerkSpellsEntry>                 sGuildPerkSpellsStore;
-TC_GAME_API extern DB2Storage<HolidaysEntry>                        sHolidaysStore;
-TC_GAME_API extern DB2Storage<ImportPriceArmorEntry>                sImportPriceArmorStore;
-TC_GAME_API extern DB2Storage<ImportPriceQualityEntry>              sImportPriceQualityStore;
-TC_GAME_API extern DB2Storage<ImportPriceShieldEntry>               sImportPriceShieldStore;
-TC_GAME_API extern DB2Storage<ImportPriceWeaponEntry>               sImportPriceWeaponStore;
-TC_GAME_API extern DB2Storage<ItemAppearanceEntry>                  sItemAppearanceStore;
-TC_GAME_API extern DB2Storage<ItemArmorQualityEntry>                sItemArmorQualityStore;
-TC_GAME_API extern DB2Storage<ItemArmorShieldEntry>                 sItemArmorShieldStore;
-TC_GAME_API extern DB2Storage<ItemArmorTotalEntry>                  sItemArmorTotalStore;
-TC_GAME_API extern DB2Storage<ItemBagFamilyEntry>                   sItemBagFamilyStore;
-TC_GAME_API extern DB2Storage<ItemDamageAmmoEntry>                  sItemDamageAmmoStore;
-TC_GAME_API extern DB2Storage<ItemDamageOneHandEntry>               sItemDamageOneHandStore;
-TC_GAME_API extern DB2Storage<ItemDamageOneHandCasterEntry>         sItemDamageOneHandCasterStore;
-TC_GAME_API extern DB2Storage<ItemDamageTwoHandEntry>               sItemDamageTwoHandStore;
-TC_GAME_API extern DB2Storage<ItemDamageTwoHandCasterEntry>         sItemDamageTwoHandCasterStore;
-TC_GAME_API extern DB2Storage<ItemDisenchantLootEntry>              sItemDisenchantLootStore;
-TC_GAME_API extern DB2Storage<ItemEffectEntry>                      sItemEffectStore;
-TC_GAME_API extern DB2Storage<ItemEntry>                            sItemStore;
-TC_GAME_API extern DB2Storage<ItemExtendedCostEntry>                sItemExtendedCostStore;
-TC_GAME_API extern DB2Storage<ItemLimitCategoryEntry>               sItemLimitCategoryStore;
-TC_GAME_API extern DB2Storage<ItemModifiedAppearanceEntry>          sItemModifiedAppearanceStore;
-TC_GAME_API extern DB2Storage<ItemPriceBaseEntry>                   sItemPriceBaseStore;
-TC_GAME_API extern DB2Storage<ItemRandomPropertiesEntry>            sItemRandomPropertiesStore;
-TC_GAME_API extern DB2Storage<ItemRandomSuffixEntry>                sItemRandomSuffixStore;
-TC_GAME_API extern DB2Storage<ItemSearchNameEntry>                  sItemSearchNameStore;
-TC_GAME_API extern DB2Storage<ItemSetEntry>                         sItemSetStore;
-TC_GAME_API extern DB2Storage<ItemSetSpellEntry>                    sItemSetSpellStore;
-TC_GAME_API extern DB2Storage<ItemSparseEntry>                      sItemSparseStore;
-TC_GAME_API extern DB2Storage<ItemSpecEntry>                        sItemSpecStore;
-TC_GAME_API extern DB2Storage<ItemSpecOverrideEntry>                sItemSpecOverrideStore;
-TC_GAME_API extern DB2Storage<ItemUpgradeEntry>                     sItemUpgradeStore;
-TC_GAME_API extern DB2Storage<LFGDungeonsEntry>                     sLFGDungeonsStore;
-TC_GAME_API extern DB2Storage<LiquidTypeEntry>                      sLiquidTypeStore;
-TC_GAME_API extern DB2Storage<LockEntry>                            sLockStore;
-TC_GAME_API extern DB2Storage<MailTemplateEntry>                    sMailTemplateStore;
-TC_GAME_API extern DB2Storage<MapEntry>                             sMapStore;
-TC_GAME_API extern DB2Storage<ModifierTreeEntry>                    sModifierTreeStore;
-TC_GAME_API extern DB2Storage<MountCapabilityEntry>                 sMountCapabilityStore;
-TC_GAME_API extern DB2Storage<MountEntry>                           sMountStore;
-TC_GAME_API extern DB2Storage<MovieEntry>                           sMovieStore;
-TC_GAME_API extern DB2Storage<OverrideSpellDataEntry>               sOverrideSpellDataStore;
-TC_GAME_API extern DB2Storage<PhaseEntry>                           sPhaseStore;
-TC_GAME_API extern DB2Storage<PlayerConditionEntry>                 sPlayerConditionStore;
-TC_GAME_API extern DB2Storage<PowerDisplayEntry>                    sPowerDisplayStore;
-TC_GAME_API extern DB2Storage<PvpTalentEntry>                       sPvpTalentStore;
-TC_GAME_API extern DB2Storage<PvpTalentUnlockEntry>                 sPvpTalentUnlockStore;
-TC_GAME_API extern DB2Storage<QuestFactionRewardEntry>              sQuestFactionRewardStore;
-TC_GAME_API extern DB2Storage<QuestMoneyRewardEntry>                sQuestMoneyRewardStore;
-TC_GAME_API extern DB2Storage<QuestSortEntry>                       sQuestSortStore;
-TC_GAME_API extern DB2Storage<QuestXPEntry>                         sQuestXPStore;
-TC_GAME_API extern DB2Storage<RandPropPointsEntry>                  sRandPropPointsStore;
-TC_GAME_API extern DB2Storage<RewardPackEntry>                      sRewardPackStore;
-TC_GAME_API extern DB2Storage<SandboxScalingEntry>                  sSandboxScalingStore;
-TC_GAME_API extern DB2Storage<ScalingStatDistributionEntry>         sScalingStatDistributionStore;
-TC_GAME_API extern DB2Storage<ScenarioEntry>                        sScenarioStore;
-TC_GAME_API extern DB2Storage<ScenarioStepEntry>                    sScenarioStepStore;
-TC_GAME_API extern DB2Storage<SkillLineEntry>                       sSkillLineStore;
-TC_GAME_API extern DB2Storage<SceneScriptPackageEntry>              sSceneScriptPackageStore;
-TC_GAME_API extern DB2Storage<SkillLineAbilityEntry>                sSkillLineAbilityStore;
-TC_GAME_API extern DB2Storage<SkillRaceClassInfoEntry>              sSkillRaceClassInfoStore;
-TC_GAME_API extern DB2Storage<SoundKitEntry>                        sSoundKitStore;
-TC_GAME_API extern DB2Storage<SpellEntry>                           sSpellStore;
-TC_GAME_API extern DB2Storage<SpellAuraOptionsEntry>                sSpellAuraOptionsStore;
-TC_GAME_API extern DB2Storage<SpellAuraRestrictionsEntry>           sSpellAuraRestrictionsStore;
-TC_GAME_API extern DB2Storage<SpellCastTimesEntry>                  sSpellCastTimesStore;
-TC_GAME_API extern DB2Storage<SpellCastingRequirementsEntry>        sSpellCastingRequirementsStore;
-TC_GAME_API extern DB2Storage<SpellCategoriesEntry>                 sSpellCategoriesStore;
-TC_GAME_API extern DB2Storage<SpellCategoryEntry>                   sSpellCategoryStore;
-TC_GAME_API extern DB2Storage<SpellClassOptionsEntry>               sSpellClassOptionsStore;
-TC_GAME_API extern DB2Storage<SpellCooldownsEntry>                  sSpellCooldownsStore;
-TC_GAME_API extern DB2Storage<SpellDurationEntry>                   sSpellDurationStore;
-TC_GAME_API extern DB2Storage<SpellEffectEntry>                     sSpellEffectStore;
-TC_GAME_API extern DB2Storage<SpellEquippedItemsEntry>              sSpellEquippedItemsStore;
-TC_GAME_API extern DB2Storage<SpellFocusObjectEntry>                sSpellFocusObjectStore;
-TC_GAME_API extern DB2Storage<SpellInterruptsEntry>                 sSpellInterruptsStore;
-TC_GAME_API extern DB2Storage<SpellItemEnchantmentEntry>            sSpellItemEnchantmentStore;
-TC_GAME_API extern DB2Storage<SpellItemEnchantmentConditionEntry>   sSpellItemEnchantmentConditionStore;
-TC_GAME_API extern DB2Storage<SpellLearnSpellEntry>                 sSpellLearnSpellStore;
-TC_GAME_API extern DB2Storage<SpellLevelsEntry>                     sSpellLevelsStore;
-TC_GAME_API extern DB2Storage<SpellMiscEntry>                       sSpellMiscStore;
-TC_GAME_API extern DB2Storage<SpellPowerEntry>                      sSpellPowerStore;
-TC_GAME_API extern DB2Storage<SpellProcsPerMinuteEntry>             sSpellProcsPerMinuteStore;
-TC_GAME_API extern DB2Storage<SpellRadiusEntry>                     sSpellRadiusStore;
-TC_GAME_API extern DB2Storage<SpellRangeEntry>                      sSpellRangeStore;
-TC_GAME_API extern DB2Storage<SpellReagentsEntry>                   sSpellReagentsStore;
-TC_GAME_API extern DB2Storage<SpellScalingEntry>                    sSpellScalingStore;
-TC_GAME_API extern DB2Storage<SpellShapeshiftEntry>                 sSpellShapeshiftStore;
-TC_GAME_API extern DB2Storage<SpellShapeshiftFormEntry>             sSpellShapeshiftFormStore;
-TC_GAME_API extern DB2Storage<SpellTargetRestrictionsEntry>         sSpellTargetRestrictionsStore;
-TC_GAME_API extern DB2Storage<SpellTotemsEntry>                     sSpellTotemsStore;
-TC_GAME_API extern DB2Storage<SpellVisualKitEntry>                  sSpellVisualKitStore;
-TC_GAME_API extern DB2Storage<SpellXSpellVisualEntry>               sSpellXSpellVisualStore;
-TC_GAME_API extern DB2Storage<SummonPropertiesEntry>                sSummonPropertiesStore;
-TC_GAME_API extern DB2Storage<TalentEntry>                          sTalentStore;
-TC_GAME_API extern DB2Storage<TaxiNodesEntry>                       sTaxiNodesStore;
-TC_GAME_API extern DB2Storage<TaxiPathEntry>                        sTaxiPathStore;
-TC_GAME_API extern DB2Storage<TransmogHolidayEntry>                 sTransmogHolidayStore;
-TC_GAME_API extern DB2Storage<TransmogSetEntry>                     sTransmogSetStore;
-TC_GAME_API extern DB2Storage<TransmogSetGroupEntry>                sTransmogSetGroupStore;
-TC_GAME_API extern DB2Storage<TransmogSetItemEntry>                 sTransmogSetItemStore;
-TC_GAME_API extern DB2Storage<TransportAnimationEntry>              sTransportAnimationStore;
-TC_GAME_API extern DB2Storage<TransportRotationEntry>               sTransportRotationStore;
-TC_GAME_API extern DB2Storage<UnitPowerBarEntry>                    sUnitPowerBarStore;
-TC_GAME_API extern DB2Storage<VehicleEntry>                         sVehicleStore;
-TC_GAME_API extern DB2Storage<VehicleSeatEntry>                     sVehicleSeatStore;
-TC_GAME_API extern DB2Storage<WorldEffectEntry>                     sWorldEffectStore;
-TC_GAME_API extern DB2Storage<WorldMapAreaEntry>                    sWorldMapAreaStore;
-TC_GAME_API extern DB2Storage<WorldMapOverlayEntry>                 sWorldMapOverlayStore;
-TC_GAME_API extern DB2Storage<WorldSafeLocsEntry>                   sWorldSafeLocsStore;
-TC_GAME_API extern DB2Storage<WorldStateExpressionEntry>            sWorldStateExpressionStore;
+GAME_API extern DB2Storage<AchievementEntry>                     sAchievementStore;
+GAME_API extern DB2Storage<AnimKitEntry>                         sAnimKitStore;
+GAME_API extern DB2Storage<AreaTableEntry>                       sAreaTableStore;
+GAME_API extern DB2Storage<AreaTriggerEntry>                     sAreaTriggerStore;
+GAME_API extern DB2Storage<ArmorLocationEntry>                   sArmorLocationStore;
+GAME_API extern DB2Storage<ArtifactEntry>                        sArtifactStore;
+GAME_API extern DB2Storage<ArtifactCategoryEntry>                sArtifactCategoryStore;
+GAME_API extern DB2Storage<ArtifactAppearanceEntry>              sArtifactAppearanceStore;
+GAME_API extern DB2Storage<ArtifactAppearanceSetEntry>           sArtifactAppearanceSetStore;
+GAME_API extern DB2Storage<ArtifactPowerEntry>                   sArtifactPowerStore;
+GAME_API extern DB2Storage<ArtifactPowerPickerEntry>             sArtifactPowerPickerStore;
+GAME_API extern DB2Storage<ArtifactTierEntry>                    sArtifactTierStore;
+GAME_API extern DB2Storage<ArtifactUnlockEntry>                  sArtifactUnlockStore;
+GAME_API extern DB2Storage<AuctionHouseEntry>                    sAuctionHouseStore;
+GAME_API extern DB2Storage<BankBagSlotPricesEntry>               sBankBagSlotPricesStore;
+GAME_API extern DB2Storage<BannedAddonsEntry>                    sBannedAddonsStore;
+GAME_API extern DB2Storage<BarberShopStyleEntry>                 sBarberShopStyleStore;
+GAME_API extern DB2Storage<BattlePetBreedQualityEntry>           sBattlePetBreedQualityStore;
+GAME_API extern DB2Storage<BattlePetBreedStateEntry>             sBattlePetBreedStateStore;
+GAME_API extern DB2Storage<BattlePetSpeciesEntry>                sBattlePetSpeciesStore;
+GAME_API extern DB2Storage<BattlePetSpeciesStateEntry>           sBattlePetSpeciesStateStore;
+GAME_API extern DB2Storage<BattlemasterListEntry>                sBattlemasterListStore;
+GAME_API extern DB2Storage<BroadcastTextEntry>                   sBroadcastTextStore;
+GAME_API extern DB2Storage<Cfg_RegionsEntry>                     sCfgRegionsStore;
+GAME_API extern DB2Storage<CharStartOutfitEntry>                 sCharStartOutfitStore;
+GAME_API extern DB2Storage<CharTitlesEntry>                      sCharTitlesStore;
+GAME_API extern DB2Storage<ChatChannelsEntry>                    sChatChannelsStore;
+GAME_API extern DB2Storage<ChrClassesEntry>                      sChrClassesStore;
+GAME_API extern DB2Storage<ChrRacesEntry>                        sChrRacesStore;
+GAME_API extern DB2Storage<ChrSpecializationEntry>               sChrSpecializationStore;
+GAME_API extern DB2Storage<CinematicCameraEntry>                 sCinematicCameraStore;
+GAME_API extern DB2Storage<CinematicSequencesEntry>              sCinematicSequencesStore;
+GAME_API extern DB2Storage<ConversationLineEntry>                sConversationLineStore;
+GAME_API extern DB2Storage<CreatureDisplayInfoEntry>             sCreatureDisplayInfoStore;
+GAME_API extern DB2Storage<CreatureDisplayInfoExtraEntry>        sCreatureDisplayInfoExtraStore;
+GAME_API extern DB2Storage<CreatureFamilyEntry>                  sCreatureFamilyStore;
+GAME_API extern DB2Storage<CreatureModelDataEntry>               sCreatureModelDataStore;
+GAME_API extern DB2Storage<CreatureTypeEntry>                    sCreatureTypeStore;
+GAME_API extern DB2Storage<CriteriaEntry>                        sCriteriaStore;
+GAME_API extern DB2Storage<CriteriaTreeEntry>                    sCriteriaTreeStore;
+GAME_API extern DB2Storage<CurrencyTypesEntry>                   sCurrencyTypesStore;
+GAME_API extern DB2Storage<CurveEntry>                           sCurveStore;
+GAME_API extern DB2Storage<DestructibleModelDataEntry>           sDestructibleModelDataStore;
+GAME_API extern DB2Storage<DifficultyEntry>                      sDifficultyStore;
+GAME_API extern DB2Storage<DungeonEncounterEntry>                sDungeonEncounterStore;
+GAME_API extern DB2Storage<DurabilityCostsEntry>                 sDurabilityCostsStore;
+GAME_API extern DB2Storage<DurabilityQualityEntry>               sDurabilityQualityStore;
+GAME_API extern DB2Storage<EmotesEntry>                          sEmotesStore;
+GAME_API extern DB2Storage<EmotesTextEntry>                      sEmotesTextStore;
+GAME_API extern DB2Storage<FactionEntry>                         sFactionStore;
+GAME_API extern DB2Storage<FactionTemplateEntry>                 sFactionTemplateStore;
+GAME_API extern DB2Storage<GameObjectDisplayInfoEntry>           sGameObjectDisplayInfoStore;
+GAME_API extern DB2Storage<GameObjectsEntry>                     sGameObjectsStore;
+GAME_API extern DB2Storage<GarrAbilityEntry>                     sGarrAbilityStore;
+GAME_API extern DB2Storage<GarrBuildingEntry>                    sGarrBuildingStore;
+GAME_API extern DB2Storage<GarrBuildingPlotInstEntry>            sGarrBuildingPlotInstStore;
+GAME_API extern DB2Storage<GarrClassSpecEntry>                   sGarrClassSpecStore;
+GAME_API extern DB2Storage<GarrFollowerEntry>                    sGarrFollowerStore;
+GAME_API extern DB2Storage<GarrFollowerXAbilityEntry>            sGarrFollowerXAbilityStore;
+GAME_API extern DB2Storage<GarrPlotEntry>                        sGarrPlotStore;
+GAME_API extern DB2Storage<GarrPlotBuildingEntry>                sGarrPlotBuildingStore;
+GAME_API extern DB2Storage<GarrPlotInstanceEntry>                sGarrPlotInstanceStore;
+GAME_API extern DB2Storage<GarrSiteLevelEntry>                   sGarrSiteLevelStore;
+GAME_API extern DB2Storage<GarrSiteLevelPlotInstEntry>           sGarrSiteLevelPlotInstStore;
+GAME_API extern DB2Storage<GemPropertiesEntry>                   sGemPropertiesStore;
+GAME_API extern DB2Storage<GlyphPropertiesEntry>                 sGlyphPropertiesStore;
+GAME_API extern DB2Storage<GuildColorBackgroundEntry>            sGuildColorBackgroundStore;
+GAME_API extern DB2Storage<GuildColorBorderEntry>                sGuildColorBorderStore;
+GAME_API extern DB2Storage<GuildColorEmblemEntry>                sGuildColorEmblemStore;
+GAME_API extern DB2Storage<GuildPerkSpellsEntry>                 sGuildPerkSpellsStore;
+GAME_API extern DB2Storage<HolidaysEntry>                        sHolidaysStore;
+GAME_API extern DB2Storage<ImportPriceArmorEntry>                sImportPriceArmorStore;
+GAME_API extern DB2Storage<ImportPriceQualityEntry>              sImportPriceQualityStore;
+GAME_API extern DB2Storage<ImportPriceShieldEntry>               sImportPriceShieldStore;
+GAME_API extern DB2Storage<ImportPriceWeaponEntry>               sImportPriceWeaponStore;
+GAME_API extern DB2Storage<ItemAppearanceEntry>                  sItemAppearanceStore;
+GAME_API extern DB2Storage<ItemArmorQualityEntry>                sItemArmorQualityStore;
+GAME_API extern DB2Storage<ItemArmorShieldEntry>                 sItemArmorShieldStore;
+GAME_API extern DB2Storage<ItemArmorTotalEntry>                  sItemArmorTotalStore;
+GAME_API extern DB2Storage<ItemBagFamilyEntry>                   sItemBagFamilyStore;
+GAME_API extern DB2Storage<ItemDamageAmmoEntry>                  sItemDamageAmmoStore;
+GAME_API extern DB2Storage<ItemDamageOneHandEntry>               sItemDamageOneHandStore;
+GAME_API extern DB2Storage<ItemDamageOneHandCasterEntry>         sItemDamageOneHandCasterStore;
+GAME_API extern DB2Storage<ItemDamageTwoHandEntry>               sItemDamageTwoHandStore;
+GAME_API extern DB2Storage<ItemDamageTwoHandCasterEntry>         sItemDamageTwoHandCasterStore;
+GAME_API extern DB2Storage<ItemDisenchantLootEntry>              sItemDisenchantLootStore;
+GAME_API extern DB2Storage<ItemEffectEntry>                      sItemEffectStore;
+GAME_API extern DB2Storage<ItemEntry>                            sItemStore;
+GAME_API extern DB2Storage<ItemExtendedCostEntry>                sItemExtendedCostStore;
+GAME_API extern DB2Storage<ItemLimitCategoryEntry>               sItemLimitCategoryStore;
+GAME_API extern DB2Storage<ItemModifiedAppearanceEntry>          sItemModifiedAppearanceStore;
+GAME_API extern DB2Storage<ItemPriceBaseEntry>                   sItemPriceBaseStore;
+GAME_API extern DB2Storage<ItemRandomPropertiesEntry>            sItemRandomPropertiesStore;
+GAME_API extern DB2Storage<ItemRandomSuffixEntry>                sItemRandomSuffixStore;
+GAME_API extern DB2Storage<ItemSearchNameEntry>                  sItemSearchNameStore;
+GAME_API extern DB2Storage<ItemSetEntry>                         sItemSetStore;
+GAME_API extern DB2Storage<ItemSetSpellEntry>                    sItemSetSpellStore;
+GAME_API extern DB2Storage<ItemSparseEntry>                      sItemSparseStore;
+GAME_API extern DB2Storage<ItemSpecEntry>                        sItemSpecStore;
+GAME_API extern DB2Storage<ItemSpecOverrideEntry>                sItemSpecOverrideStore;
+GAME_API extern DB2Storage<ItemUpgradeEntry>                     sItemUpgradeStore;
+GAME_API extern DB2Storage<LFGDungeonsEntry>                     sLFGDungeonsStore;
+GAME_API extern DB2Storage<LiquidTypeEntry>                      sLiquidTypeStore;
+GAME_API extern DB2Storage<LockEntry>                            sLockStore;
+GAME_API extern DB2Storage<MailTemplateEntry>                    sMailTemplateStore;
+GAME_API extern DB2Storage<MapEntry>                             sMapStore;
+GAME_API extern DB2Storage<ModifierTreeEntry>                    sModifierTreeStore;
+GAME_API extern DB2Storage<MountCapabilityEntry>                 sMountCapabilityStore;
+GAME_API extern DB2Storage<MountEntry>                           sMountStore;
+GAME_API extern DB2Storage<MovieEntry>                           sMovieStore;
+GAME_API extern DB2Storage<OverrideSpellDataEntry>               sOverrideSpellDataStore;
+GAME_API extern DB2Storage<PhaseEntry>                           sPhaseStore;
+GAME_API extern DB2Storage<PlayerConditionEntry>                 sPlayerConditionStore;
+GAME_API extern DB2Storage<PowerDisplayEntry>                    sPowerDisplayStore;
+GAME_API extern DB2Storage<PvpTalentEntry>                       sPvpTalentStore;
+GAME_API extern DB2Storage<PvpTalentUnlockEntry>                 sPvpTalentUnlockStore;
+GAME_API extern DB2Storage<QuestFactionRewardEntry>              sQuestFactionRewardStore;
+GAME_API extern DB2Storage<QuestMoneyRewardEntry>                sQuestMoneyRewardStore;
+GAME_API extern DB2Storage<QuestSortEntry>                       sQuestSortStore;
+GAME_API extern DB2Storage<QuestXPEntry>                         sQuestXPStore;
+GAME_API extern DB2Storage<RandPropPointsEntry>                  sRandPropPointsStore;
+GAME_API extern DB2Storage<RewardPackEntry>                      sRewardPackStore;
+GAME_API extern DB2Storage<SandboxScalingEntry>                  sSandboxScalingStore;
+GAME_API extern DB2Storage<ScalingStatDistributionEntry>         sScalingStatDistributionStore;
+GAME_API extern DB2Storage<ScenarioEntry>                        sScenarioStore;
+GAME_API extern DB2Storage<ScenarioStepEntry>                    sScenarioStepStore;
+GAME_API extern DB2Storage<SkillLineEntry>                       sSkillLineStore;
+GAME_API extern DB2Storage<SceneScriptPackageEntry>              sSceneScriptPackageStore;
+GAME_API extern DB2Storage<SkillLineAbilityEntry>                sSkillLineAbilityStore;
+GAME_API extern DB2Storage<SkillRaceClassInfoEntry>              sSkillRaceClassInfoStore;
+GAME_API extern DB2Storage<SoundKitEntry>                        sSoundKitStore;
+GAME_API extern DB2Storage<SpellEntry>                           sSpellStore;
+GAME_API extern DB2Storage<SpellAuraOptionsEntry>                sSpellAuraOptionsStore;
+GAME_API extern DB2Storage<SpellAuraRestrictionsEntry>           sSpellAuraRestrictionsStore;
+GAME_API extern DB2Storage<SpellCastTimesEntry>                  sSpellCastTimesStore;
+GAME_API extern DB2Storage<SpellCastingRequirementsEntry>        sSpellCastingRequirementsStore;
+GAME_API extern DB2Storage<SpellCategoriesEntry>                 sSpellCategoriesStore;
+GAME_API extern DB2Storage<SpellCategoryEntry>                   sSpellCategoryStore;
+GAME_API extern DB2Storage<SpellClassOptionsEntry>               sSpellClassOptionsStore;
+GAME_API extern DB2Storage<SpellCooldownsEntry>                  sSpellCooldownsStore;
+GAME_API extern DB2Storage<SpellDurationEntry>                   sSpellDurationStore;
+GAME_API extern DB2Storage<SpellEffectEntry>                     sSpellEffectStore;
+GAME_API extern DB2Storage<SpellEquippedItemsEntry>              sSpellEquippedItemsStore;
+GAME_API extern DB2Storage<SpellFocusObjectEntry>                sSpellFocusObjectStore;
+GAME_API extern DB2Storage<SpellInterruptsEntry>                 sSpellInterruptsStore;
+GAME_API extern DB2Storage<SpellItemEnchantmentEntry>            sSpellItemEnchantmentStore;
+GAME_API extern DB2Storage<SpellItemEnchantmentConditionEntry>   sSpellItemEnchantmentConditionStore;
+GAME_API extern DB2Storage<SpellLearnSpellEntry>                 sSpellLearnSpellStore;
+GAME_API extern DB2Storage<SpellLevelsEntry>                     sSpellLevelsStore;
+GAME_API extern DB2Storage<SpellMiscEntry>                       sSpellMiscStore;
+GAME_API extern DB2Storage<SpellPowerEntry>                      sSpellPowerStore;
+GAME_API extern DB2Storage<SpellProcsPerMinuteEntry>             sSpellProcsPerMinuteStore;
+GAME_API extern DB2Storage<SpellRadiusEntry>                     sSpellRadiusStore;
+GAME_API extern DB2Storage<SpellRangeEntry>                      sSpellRangeStore;
+GAME_API extern DB2Storage<SpellReagentsEntry>                   sSpellReagentsStore;
+GAME_API extern DB2Storage<SpellScalingEntry>                    sSpellScalingStore;
+GAME_API extern DB2Storage<SpellShapeshiftEntry>                 sSpellShapeshiftStore;
+GAME_API extern DB2Storage<SpellShapeshiftFormEntry>             sSpellShapeshiftFormStore;
+GAME_API extern DB2Storage<SpellTargetRestrictionsEntry>         sSpellTargetRestrictionsStore;
+GAME_API extern DB2Storage<SpellTotemsEntry>                     sSpellTotemsStore;
+GAME_API extern DB2Storage<SpellVisualKitEntry>                  sSpellVisualKitStore;
+GAME_API extern DB2Storage<SpellXSpellVisualEntry>               sSpellXSpellVisualStore;
+GAME_API extern DB2Storage<SummonPropertiesEntry>                sSummonPropertiesStore;
+GAME_API extern DB2Storage<TalentEntry>                          sTalentStore;
+GAME_API extern DB2Storage<TaxiNodesEntry>                       sTaxiNodesStore;
+GAME_API extern DB2Storage<TaxiPathEntry>                        sTaxiPathStore;
+GAME_API extern DB2Storage<TransmogHolidayEntry>                 sTransmogHolidayStore;
+GAME_API extern DB2Storage<TransmogSetEntry>                     sTransmogSetStore;
+GAME_API extern DB2Storage<TransmogSetGroupEntry>                sTransmogSetGroupStore;
+GAME_API extern DB2Storage<TransmogSetItemEntry>                 sTransmogSetItemStore;
+GAME_API extern DB2Storage<TransportAnimationEntry>              sTransportAnimationStore;
+GAME_API extern DB2Storage<TransportRotationEntry>               sTransportRotationStore;
+GAME_API extern DB2Storage<UnitPowerBarEntry>                    sUnitPowerBarStore;
+GAME_API extern DB2Storage<VehicleEntry>                         sVehicleStore;
+GAME_API extern DB2Storage<VehicleSeatEntry>                     sVehicleSeatStore;
+GAME_API extern DB2Storage<WorldEffectEntry>                     sWorldEffectStore;
+GAME_API extern DB2Storage<WorldMapAreaEntry>                    sWorldMapAreaStore;
+GAME_API extern DB2Storage<WorldMapOverlayEntry>                 sWorldMapOverlayStore;
+GAME_API extern DB2Storage<WorldSafeLocsEntry>                   sWorldSafeLocsStore;
+GAME_API extern DB2Storage<WorldStateExpressionEntry>            sWorldStateExpressionStore;
 
 struct TaxiPathBySourceAndDestination
 {
@@ -230,12 +218,12 @@ typedef std::map<uint32, TaxiPathSetForSource> TaxiPathSetBySource;
 typedef std::vector<TaxiPathNodeEntry const*> TaxiPathNodeList;
 typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
 
-TC_GAME_API extern TaxiMask                                         sTaxiNodesMask;
-TC_GAME_API extern TaxiMask                                         sOldContinentsNodesMask;
-TC_GAME_API extern TaxiMask                                         sHordeTaxiNodesMask;
-TC_GAME_API extern TaxiMask                                         sAllianceTaxiNodesMask;
-TC_GAME_API extern TaxiPathSetBySource                              sTaxiPathSetBySource;
-TC_GAME_API extern TaxiPathNodesByPath                              sTaxiPathNodesByPath;
+GAME_API extern TaxiMask                                         sTaxiNodesMask;
+GAME_API extern TaxiMask                                         sOldContinentsNodesMask;
+GAME_API extern TaxiMask                                         sHordeTaxiNodesMask;
+GAME_API extern TaxiMask                                         sAllianceTaxiNodesMask;
+GAME_API extern TaxiPathSetBySource                              sTaxiPathSetBySource;
+GAME_API extern TaxiPathNodesByPath                              sTaxiPathNodesByPath;
 
 #define DEFINE_DB2_SET_COMPARATOR(structure) \
     struct structure ## Comparator \
@@ -244,7 +232,7 @@ TC_GAME_API extern TaxiPathNodesByPath                              sTaxiPathNod
         static bool Compare(structure const* left, structure const* right); \
     };
 
-class TC_GAME_API DB2Manager
+class GAME_API DB2Manager
 {
 public:
     DEFINE_DB2_SET_COMPARATOR(MountTypeXCapabilityEntry)

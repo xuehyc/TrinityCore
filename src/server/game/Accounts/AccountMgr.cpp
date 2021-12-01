@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "AccountMgr.h"
@@ -431,17 +418,17 @@ void AccountMgr::LoadRBAC()
 {
     ClearRBAC();
 
-    TC_LOG_DEBUG("rbac", "AccountMgr::LoadRBAC");
+    LOG_DEBUG("rbac", "AccountMgr::LoadRBAC");
     uint32 oldMSTime = getMSTime();
     uint32 count1 = 0;
     uint32 count2 = 0;
     uint32 count3 = 0;
 
-    TC_LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading permissions");
+    LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading permissions");
     QueryResult result = LoginDatabase.Query("SELECT id, name FROM rbac_permissions");
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 account permission definitions. DB table `rbac_permissions` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 account permission definitions. DB table `rbac_permissions` is empty.");
         return;
     }
 
@@ -454,11 +441,11 @@ void AccountMgr::LoadRBAC()
     }
     while (result->NextRow());
 
-    TC_LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading linked permissions");
+    LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading linked permissions");
     result = LoginDatabase.Query("SELECT id, linkedId FROM rbac_linked_permissions ORDER BY id ASC");
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 linked permissions. DB table `rbac_linked_permissions` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 linked permissions. DB table `rbac_linked_permissions` is empty.");
         return;
     }
 
@@ -478,7 +465,7 @@ void AccountMgr::LoadRBAC()
         uint32 linkedPermissionId = field[1].GetUInt32();
         if (linkedPermissionId == permissionId)
         {
-            TC_LOG_ERROR("sql.sql", "RBAC Permission %u has itself as linked permission. Ignored", permissionId);
+            LOG_ERROR("sql.sql", "RBAC Permission %u has itself as linked permission. Ignored", permissionId);
             continue;
         }
         permission->AddLinkedPermission(linkedPermissionId);
@@ -486,11 +473,11 @@ void AccountMgr::LoadRBAC()
     }
     while (result->NextRow());
 
-    TC_LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading default permissions");
+    LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading default permissions");
     result = LoginDatabase.PQuery("SELECT secId, permissionId FROM rbac_default_permissions WHERE (realmId = %u OR realmId = -1) ORDER BY secId ASC", realm.Id.Realm);
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 default permission definitions. DB table `rbac_default_permissions` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 default permission definitions. DB table `rbac_default_permissions` is empty.");
         return;
     }
 
@@ -511,7 +498,7 @@ void AccountMgr::LoadRBAC()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u permission definitions, %u linked permissions and %u default permissions in %u ms", count1, count2, count3, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u permission definitions, %u linked permissions and %u default permissions in %u ms", count1, count2, count3, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void AccountMgr::UpdateAccountAccess(rbac::RBACData* rbac, uint32 accountId, uint8 securityLevel, int32 realmId)
@@ -550,7 +537,7 @@ void AccountMgr::UpdateAccountAccess(rbac::RBACData* rbac, uint32 accountId, uin
 
 rbac::RBACPermission const* AccountMgr::GetRBACPermission(uint32 permissionId) const
 {
-    TC_LOG_TRACE("rbac", "AccountMgr::GetRBACPermission: %u", permissionId);
+    LOG_TRACE("rbac", "AccountMgr::GetRBACPermission: %u", permissionId);
     rbac::RBACPermissionsContainer::const_iterator it = _permissions.find(permissionId);
     if (it != _permissions.end())
         return it->second;
@@ -562,7 +549,7 @@ bool AccountMgr::HasPermission(uint32 accountId, uint32 permissionId, uint32 rea
 {
     if (!accountId)
     {
-        TC_LOG_ERROR("rbac", "AccountMgr::HasPermission: Wrong accountId 0");
+        LOG_ERROR("rbac", "AccountMgr::HasPermission: Wrong accountId 0");
         return false;
     }
 
@@ -570,7 +557,7 @@ bool AccountMgr::HasPermission(uint32 accountId, uint32 permissionId, uint32 rea
     rbac.LoadFromDB();
     bool hasPermission = rbac.HasPermission(permissionId);
 
-    TC_LOG_DEBUG("rbac", "AccountMgr::HasPermission [AccountId: %u, PermissionId: %u, realmId: %d]: %u",
+    LOG_DEBUG("rbac", "AccountMgr::HasPermission [AccountId: %u, PermissionId: %u, realmId: %d]: %u",
                    accountId, permissionId, realmId, hasPermission);
     return hasPermission;
 }
@@ -586,6 +573,6 @@ void AccountMgr::ClearRBAC()
 
 rbac::RBACPermissionContainer const& AccountMgr::GetRBACDefaultPermissions(uint8 secLevel)
 {
-    TC_LOG_TRACE("rbac", "AccountMgr::GetRBACDefaultPermissions: secLevel %u - size: %u", secLevel, uint32(_defaultPermissions[secLevel].size()));
+    LOG_TRACE("rbac", "AccountMgr::GetRBACDefaultPermissions: secLevel %u - size: %u", secLevel, uint32(_defaultPermissions[secLevel].size()));
     return _defaultPermissions[secLevel];
 }

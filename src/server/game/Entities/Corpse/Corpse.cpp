@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "CharacterCache.h"
@@ -79,7 +66,7 @@ bool Corpse::Create(ObjectGuid::LowType guidlow, Player* owner)
 
     if (!IsPositionValid())
     {
-        TC_LOG_ERROR("entities.player", "Corpse (guidlow " UI64FMTD ", owner %s) not created. Suggested coordinates isn't valid (X: %f Y: %f)",
+        LOG_ERROR("entities.player", "Corpse (guidlow " UI64FMTD ", owner %s) not created. Suggested coordinates isn't valid (X: %f Y: %f)",
             guidlow, owner->GetName().c_str(), owner->GetPositionX(), owner->GetPositionY());
         return false;
     }
@@ -89,7 +76,7 @@ bool Corpse::Create(ObjectGuid::LowType guidlow, Player* owner)
     SetObjectScale(1.0f);
     SetGuidValue(CORPSE_FIELD_OWNER, owner->GetGUID());
 
-    _cellCoord = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
+    _cellCoord = Server::ComputeCellCoord(GetPositionX(), GetPositionY());
 
     PhasingHandler::InheritPhaseShift(this, owner);
 
@@ -184,12 +171,12 @@ bool Corpse::LoadCorpseFromDB(ObjectGuid::LowType guid, Field* fields)
 
     if (!IsPositionValid())
     {
-        TC_LOG_ERROR("entities.player", "Corpse (%s, owner: %s) is not created, given coordinates are not valid (X: %f, Y: %f, Z: %f)",
+        LOG_ERROR("entities.player", "Corpse (%s, owner: %s) is not created, given coordinates are not valid (X: %f, Y: %f, Z: %f)",
             GetGUID().ToString().c_str(), GetOwnerGUID().ToString().c_str(), posX, posY, posZ);
         return false;
     }
 
-    _cellCoord = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());
+    _cellCoord = Server::ComputeCellCoord(GetPositionX(), GetPositionY());
     return true;
 }
 

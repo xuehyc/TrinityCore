@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_BYTECONVERTER_H
-#define TRINITY_BYTECONVERTER_H
+#ifndef SERVER_BYTECONVERTER_H
+#define SERVER_BYTECONVERTER_H
 
 /** ByteConverter reverse your byte order.  This is use
     for cross platform where they have different endians.
@@ -44,7 +31,7 @@ namespace ByteConverter
     }
 }
 
-#if TRINITY_ENDIAN == TRINITY_BIGENDIAN
+#if SERVER_ENDIAN == SERVER_BIGENDIAN
 template<typename T> inline void EndianConvert(T& val) { ByteConverter::apply<T>(&val); }
 template<typename T> inline void EndianConvertReverse(T&) { }
 template<typename T> inline void EndianConvertPtr(void* val) { ByteConverter::apply<T>(val); }

@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "M2Stores.h"
@@ -176,17 +164,17 @@ bool readCamera(M2Camera const* cam, uint32 buffSize, M2Header const* header, Ci
     return true;
 }
 
-TC_GAME_API void LoadM2Cameras(std::string const& dataPath)
+GAME_API void LoadM2Cameras(std::string const& dataPath)
 {
     sFlyByCameraStore.clear();
-    TC_LOG_INFO("server.loading", ">> Loading Cinematic Camera files");
+    LOG_INFO("server.loading", ">> Loading Cinematic Camera files");
 
     boost::filesystem::path camerasPath = boost::filesystem::path(dataPath) / "cameras";
 
     uint32 oldMSTime = getMSTime();
     for (CinematicCameraEntry const* cameraEntry : sCinematicCameraStore)
     {
-        boost::filesystem::path filename = camerasPath / Trinity::StringFormat("FILE%08X.xxx", cameraEntry->FileDataID);
+        boost::filesystem::path filename = camerasPath / Server::StringFormat("FILE%08X.xxx", cameraEntry->FileDataID);
 
         // Convert to native format
         filename.make_preferred();
@@ -202,7 +190,7 @@ TC_GAME_API void LoadM2Cameras(std::string const& dataPath)
         // Reject if not at least the size of the header
         if (static_cast<uint32 const>(fileSize) < sizeof(M2Header) + 4)
         {
-            TC_LOG_ERROR("server.loading", "Camera file %s is damaged. File is smaller than header size", filename.string().c_str());
+            LOG_ERROR("server.loading", "Camera file %s is damaged. File is smaller than header size", filename.string().c_str());
             m2file.close();
             continue;
         }
@@ -216,7 +204,7 @@ TC_GAME_API void LoadM2Cameras(std::string const& dataPath)
         // Check file has correct magic (MD21)
         if (strcmp(fileCheck, "MD21"))
         {
-            TC_LOG_ERROR("server.loading", "Camera file %s is damaged. File identifier not found.", filename.string().c_str());
+            LOG_ERROR("server.loading", "Camera file %s is damaged. File identifier not found.", filename.string().c_str());
             m2file.close();
             continue;
         }
@@ -247,7 +235,7 @@ TC_GAME_API void LoadM2Cameras(std::string const& dataPath)
 
         if (!fileValid)
         {
-            TC_LOG_ERROR("server.loading", "Camera file %s is damaged. File is smaller than header size.", filename.string().c_str());
+            LOG_ERROR("server.loading", "Camera file %s is damaged. File is smaller than header size.", filename.string().c_str());
             continue;
         }
 
@@ -256,19 +244,19 @@ TC_GAME_API void LoadM2Cameras(std::string const& dataPath)
 
         if (m2start + header->ofsCameras + sizeof(M2Camera) > static_cast<uint32 const>(fileSize))
         {
-            TC_LOG_ERROR("server.loading", "Camera file %s is damaged. Camera references position beyond file end", filename.string().c_str());
+            LOG_ERROR("server.loading", "Camera file %s is damaged. Camera references position beyond file end", filename.string().c_str());
             continue;
         }
 
         // Get camera(s) - Main header, then dump them.
         M2Camera const* cam = reinterpret_cast<M2Camera const*>(buffer.data() + m2start + header->ofsCameras);
         if (!readCamera(cam, fileSize - m2start, header, cameraEntry))
-            TC_LOG_ERROR("server.loading", "Camera file %s is damaged. Camera references position beyond file end", filename.string().c_str());
+            LOG_ERROR("server.loading", "Camera file %s is damaged. Camera references position beyond file end", filename.string().c_str());
     }
-    TC_LOG_INFO("server.loading", ">> Loaded " SZFMTD " cinematic waypoint sets in %u ms", sFlyByCameraStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded " SZFMTD " cinematic waypoint sets in %u ms", sFlyByCameraStore.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 std::vector<FlyByCamera> const* GetFlyByCameras(uint32 cinematicCameraId)
 {
-    return Trinity::Containers::MapGetValuePtr(sFlyByCameraStore, cinematicCameraId);
+    return Server::Containers::MapGetValuePtr(sFlyByCameraStore, cinematicCameraId);
 }

@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "WorldSession.h"
@@ -36,13 +24,13 @@ void WorldSession::HandleVoidStorageUnlock(WorldPackets::VoidStorage::UnlockVoid
     Creature* unit = _player->GetNPCIfCanInteractWith(unlockVoidStorage.Npc, UNIT_NPC_FLAG_VAULTKEEPER);
     if (!unit)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageUnlock - %s not found or player can't interact with it.", unlockVoidStorage.Npc.ToString().c_str());
+        LOG_DEBUG("network", "WORLD: HandleVoidStorageUnlock - %s not found or player can't interact with it.", unlockVoidStorage.Npc.ToString().c_str());
         return;
     }
 
     if (_player->IsVoidStorageUnlocked())
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageUnlock - Player (%s, name: %s) tried to unlock void storage a 2nd time.", _player->GetGUID().ToString().c_str(), _player->GetName().c_str());
+        LOG_DEBUG("network", "WORLD: HandleVoidStorageUnlock - Player (%s, name: %s) tried to unlock void storage a 2nd time.", _player->GetGUID().ToString().c_str(), _player->GetName().c_str());
         return;
     }
 
@@ -55,14 +43,14 @@ void WorldSession::HandleVoidStorageQuery(WorldPackets::VoidStorage::QueryVoidSt
     Creature* unit = _player->GetNPCIfCanInteractWith(queryVoidStorage.Npc, UNIT_NPC_FLAG_TRANSMOGRIFIER | UNIT_NPC_FLAG_VAULTKEEPER);
     if (!unit)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageQuery - %s not found or player can't interact with it.", queryVoidStorage.Npc.ToString().c_str());
+        LOG_DEBUG("network", "WORLD: HandleVoidStorageQuery - %s not found or player can't interact with it.", queryVoidStorage.Npc.ToString().c_str());
         SendPacket(WorldPackets::VoidStorage::VoidStorageFailed().Write());
         return;
     }
 
     if (!_player->IsVoidStorageUnlocked())
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageQuery - Player (%s, name: %s) queried void storage without unlocking it.", _player->GetGUID().ToString().c_str(), _player->GetName().c_str());
+        LOG_DEBUG("network", "WORLD: HandleVoidStorageQuery - Player (%s, name: %s) queried void storage without unlocking it.", _player->GetGUID().ToString().c_str(), _player->GetName().c_str());
         SendPacket(WorldPackets::VoidStorage::VoidStorageFailed().Write());
         return;
     }
@@ -98,13 +86,13 @@ void WorldSession::HandleVoidStorageTransfer(WorldPackets::VoidStorage::VoidStor
     Creature* unit = _player->GetNPCIfCanInteractWith(voidStorageTransfer.Npc, UNIT_NPC_FLAG_VAULTKEEPER);
     if (!unit)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - %s not found or player can't interact with it.", voidStorageTransfer.Npc.ToString().c_str());
+        LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - %s not found or player can't interact with it.", voidStorageTransfer.Npc.ToString().c_str());
         return;
     }
 
     if (!_player->IsVoidStorageUnlocked())
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - Player (%s, name: %s) queried void storage without unlocking it.", _player->GetGUID().ToString().c_str(), _player->GetName().c_str());
+        LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - Player (%s, name: %s) queried void storage without unlocking it.", _player->GetGUID().ToString().c_str(), _player->GetName().c_str());
         return;
     }
 
@@ -150,7 +138,7 @@ void WorldSession::HandleVoidStorageTransfer(WorldPackets::VoidStorage::VoidStor
         Item* item = _player->GetItemByGuid(voidStorageTransfer.Deposits[i]);
         if (!item)
         {
-            TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - %s %s wants to deposit an invalid item (%s).", _player->GetGUID().ToString().c_str(), _player->GetName().c_str(), voidStorageTransfer.Deposits[i].ToString().c_str());
+            LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - %s %s wants to deposit an invalid item (%s).", _player->GetGUID().ToString().c_str(), _player->GetName().c_str(), voidStorageTransfer.Deposits[i].ToString().c_str());
             continue;
         }
 
@@ -181,7 +169,7 @@ void WorldSession::HandleVoidStorageTransfer(WorldPackets::VoidStorage::VoidStor
         VoidStorageItem* itemVS = _player->GetVoidStorageItem(voidStorageTransfer.Withdrawals[i].GetCounter(), slot);
         if (!itemVS)
         {
-            TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - %s %s tried to withdraw an invalid item (id: %s)", _player->GetGUID().ToString().c_str(), _player->GetName().c_str(), voidStorageTransfer.Withdrawals[i].ToString().c_str());
+            LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - %s %s tried to withdraw an invalid item (id: %s)", _player->GetGUID().ToString().c_str(), _player->GetName().c_str(), voidStorageTransfer.Withdrawals[i].ToString().c_str());
             continue;
         }
 
@@ -190,7 +178,7 @@ void WorldSession::HandleVoidStorageTransfer(WorldPackets::VoidStorage::VoidStor
         if (msg != EQUIP_ERR_OK)
         {
             SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INVENTORY_FULL);
-            TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - %s %s couldn't withdraw item id %s because inventory was full.", _player->GetGUID().ToString().c_str(), _player->GetName().c_str(), voidStorageTransfer.Withdrawals[i].ToString().c_str());
+            LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - %s %s couldn't withdraw item id %s because inventory was full.", _player->GetGUID().ToString().c_str(), _player->GetName().c_str(), voidStorageTransfer.Withdrawals[i].ToString().c_str());
             return;
         }
 
@@ -216,20 +204,20 @@ void WorldSession::HandleVoidSwapItem(WorldPackets::VoidStorage::SwapVoidItem& s
     Creature* unit = _player->GetNPCIfCanInteractWith(swapVoidItem.Npc, UNIT_NPC_FLAG_VAULTKEEPER);
     if (!unit)
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleVoidSwapItem - %s not found or player can't interact with it.", swapVoidItem.Npc.ToString().c_str());
+        LOG_DEBUG("network", "WORLD: HandleVoidSwapItem - %s not found or player can't interact with it.", swapVoidItem.Npc.ToString().c_str());
         return;
     }
 
     if (!_player->IsVoidStorageUnlocked())
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleVoidSwapItem - Player (%s, name: %s) queried void storage without unlocking it.", _player->GetGUID().ToString().c_str(), _player->GetName().c_str());
+        LOG_DEBUG("network", "WORLD: HandleVoidSwapItem - Player (%s, name: %s) queried void storage without unlocking it.", _player->GetGUID().ToString().c_str(), _player->GetName().c_str());
         return;
     }
 
     uint8 oldSlot;
     if (!_player->GetVoidStorageItem(swapVoidItem.VoidItemGuid.GetCounter(), oldSlot))
     {
-        TC_LOG_DEBUG("network", "WORLD: HandleVoidSwapItem - %s %s requested swapping an invalid item (slot: %u, itemid: %s).", _player->GetGUID().ToString().c_str(), _player->GetName().c_str(), swapVoidItem.DstSlot, swapVoidItem.VoidItemGuid.ToString().c_str());
+        LOG_DEBUG("network", "WORLD: HandleVoidSwapItem - %s %s requested swapping an invalid item (slot: %u, itemid: %s).", _player->GetGUID().ToString().c_str(), _player->GetName().c_str(), swapVoidItem.DstSlot, swapVoidItem.VoidItemGuid.ToString().c_str());
         return;
     }
 

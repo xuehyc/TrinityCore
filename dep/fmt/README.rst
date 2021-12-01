@@ -186,7 +186,7 @@ Projects using this library
 
 * `Touch Surgery <https://www.touchsurgery.com/>`_: Surgery simulator
 
-* `TrinityCore <https://github.com/TrinityCore/TrinityCore>`_: Open-source MMORPG framework
+* `MobiusCore <https://github.com/MobiusDevelopment/MobiusCore>`_: Open-source MMORPG framework
 
 `More... <https://github.com/search?q=cppformat&type=Code>`_
 

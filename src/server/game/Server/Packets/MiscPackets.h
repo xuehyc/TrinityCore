@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef MiscPackets_h__
@@ -382,7 +370,7 @@ namespace WorldPackets
             uint32 Response = 0;
         };
 
-        class TC_GAME_API Weather final : public ServerPacket
+        class GAME_API Weather final : public ServerPacket
         {
         public:
             Weather();
@@ -608,7 +596,7 @@ namespace WorldPackets
             TaggedPosition<::Position::XYZ> Position;
         };
 
-        class TC_GAME_API PlaySound final : public ServerPacket
+        class GAME_API PlaySound final : public ServerPacket
         {
         public:
             PlaySound() : ServerPacket(SMSG_PLAY_SOUND, 20) { }
@@ -620,7 +608,7 @@ namespace WorldPackets
             int32 SoundKitID = 0;
         };
 
-        class TC_GAME_API PlaySpeakerbotSound final : public ServerPacket
+        class GAME_API PlaySpeakerbotSound final : public ServerPacket
         {
         public:
             PlaySpeakerbotSound() : ServerPacket(SMSG_PLAY_SPEAKERBOT_SOUND, 20) { }
@@ -896,7 +884,7 @@ namespace WorldPackets
             ObjectGuid SourceGuid;
         };
 
-        class TC_GAME_API OpenAlliedRaceDetailsGiver final : public ServerPacket
+        class GAME_API OpenAlliedRaceDetailsGiver final : public ServerPacket
         {
         public:
             OpenAlliedRaceDetailsGiver() : ServerPacket(SMSG_OPEN_ALLIED_RACE_DETAILS_GIVER, 12) { }

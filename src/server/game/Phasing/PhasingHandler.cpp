@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "PhasingHandler.h"
@@ -507,7 +495,7 @@ uint32 PhasingHandler::GetTerrainMapId(PhaseShift const& phaseShift, Map const* 
     if (phaseShift.VisibleMapIds.size() == 1)
         return phaseShift.VisibleMapIds.begin()->first;
 
-    GridCoord gridCoord = Trinity::ComputeGridCoord(x, y);
+    GridCoord gridCoord = Server::ComputeGridCoord(x, y);
     int32 gx = (MAX_NUMBER_OF_GRIDS - 1) - gridCoord.x_coord;
     int32 gy = (MAX_NUMBER_OF_GRIDS - 1) - gridCoord.y_coord;
 
@@ -546,8 +534,8 @@ void PhasingHandler::PrintToChat(ChatHandler* chat, PhaseShift const& phaseShift
     if (!phaseShift.Phases.empty())
     {
         std::ostringstream phases;
-        std::string cosmetic = sObjectMgr->GetTrinityString(LANG_PHASE_FLAG_COSMETIC, chat->GetSessionDbLocaleIndex());
-        std::string personal = sObjectMgr->GetTrinityString(LANG_PHASE_FLAG_PERSONAL, chat->GetSessionDbLocaleIndex());
+        std::string cosmetic = sObjectMgr->GetServerString(LANG_PHASE_FLAG_COSMETIC, chat->GetSessionDbLocaleIndex());
+        std::string personal = sObjectMgr->GetServerString(LANG_PHASE_FLAG_PERSONAL, chat->GetSessionDbLocaleIndex());
         for (PhaseShift::PhaseRef const& phase : phaseShift.Phases)
         {
             phases << phase.Id;

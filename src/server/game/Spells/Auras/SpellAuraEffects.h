@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_SPELLAURAEFFECTS_H
-#define TRINITY_SPELLAURAEFFECTS_H
+#ifndef SERVER_SPELLAURAEFFECTS_H
+#define SERVER_SPELLAURAEFFECTS_H
 
 class Unit;
 class AuraEffect;
@@ -27,7 +14,7 @@ class Aura;
 
 typedef void(AuraEffect::*pAuraEffectHandler)(AuraApplication const* aurApp, uint8 mode, bool apply) const;
 
-class TC_GAME_API AuraEffect
+class GAME_API AuraEffect
 {
     friend void Aura::_InitEffects(uint32 effMask, Unit* caster, int32* baseAmount);
     friend Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint32 effMask, Unit* caster, int32* baseAmount, Item* castItem, ObjectGuid casterGUID, bool resetPeriodicTimer, ObjectGuid castItemGuid, int32 castItemLevel);
@@ -345,7 +332,7 @@ class TC_GAME_API AuraEffect
         void HandleAuraPvpTalents(AuraApplication const* auraApp, uint8 mode, bool apply) const;
 };
 
-namespace Trinity
+namespace Server
 {
     // Binary predicate for sorting the priority of absorption aura effects
     class AbsorbAuraOrderPred

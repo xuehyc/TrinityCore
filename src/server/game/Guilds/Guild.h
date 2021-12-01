@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITYCORE_GUILD_H
-#define TRINITYCORE_GUILD_H
+#ifndef SERVERCORE_GUILD_H
+#define SERVERCORE_GUILD_H
 
 #include "AchievementMgr.h"
 #include "DatabaseEnvFwd.h"
@@ -253,7 +240,7 @@ struct GuildReward
 {
     uint32 ItemID;
     uint8 MinGuildRep;
-    Trinity::RaceMask<uint64> RaceMask;
+    Server::RaceMask<uint64> RaceMask;
     uint64 Cost;
     std::vector<uint32> AchievementsRequired;
 };
@@ -268,7 +255,7 @@ const uint32 GuildChallengeMaxLevelGoldReward[GUILD_CHALLENGES_TYPES] = { 0, 125
 const uint32 GuildChallengesMaxCount[GUILD_CHALLENGES_TYPES]          = { 0, 7,      1,       3,     0,     3 };
 
 // Emblem info
-class TC_GAME_API EmblemInfo
+class GAME_API EmblemInfo
 {
     public:
         EmblemInfo() : m_style(0), m_color(0), m_borderStyle(0), m_borderColor(0), m_backgroundColor(0) { }
@@ -324,7 +311,7 @@ typedef std::vector <GuildBankRightsAndSlots> GuildBankRightsAndSlotsVec;
 
 typedef std::set <uint8> SlotIds;
 
-class TC_GAME_API Guild
+class GAME_API Guild
 {
     private:
         // Class representing guild member

@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef METRIC_H__
@@ -26,7 +14,7 @@
 #include <memory>
 #include <string>
 
-namespace Trinity
+namespace Server
 {
     namespace Asio
     {
@@ -55,14 +43,14 @@ struct MetricData
     std::string Text;
 };
 
-class TC_COMMON_API Metric
+class COMMON_API Metric
 {
 private:
     std::iostream& GetDataStream() { return *_dataStream; }
     std::unique_ptr<std::iostream> _dataStream;
     MPSCQueue<MetricData> _queuedData;
-    std::unique_ptr<Trinity::Asio::DeadlineTimer> _batchTimer;
-    std::unique_ptr<Trinity::Asio::DeadlineTimer> _overallStatusTimer;
+    std::unique_ptr<Server::Asio::DeadlineTimer> _batchTimer;
+    std::unique_ptr<Server::Asio::DeadlineTimer> _overallStatusTimer;
     int32 _updateInterval = 0;
     int32 _overallStatusTimerInterval = 0;
     bool _enabled = false;
@@ -95,7 +83,7 @@ public:
     ~Metric();
     static Metric* instance();
 
-    void Initialize(std::string const& realmName, Trinity::Asio::IoContext& ioContext, std::function<void()> overallStatusLogger);
+    void Initialize(std::string const& realmName, Server::Asio::IoContext& ioContext, std::function<void()> overallStatusLogger);
     void LoadFromConfigs();
     void Update();
 
@@ -121,19 +109,19 @@ public:
 
 #define sMetric Metric::instance()
 
-#if TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS
-#define TC_METRIC_EVENT(category, title, description)                    \
+#if SERVER_PLATFORM != SERVER_PLATFORM_WINDOWS
+#define METRIC_EVENT(category, title, description)                    \
         do {                                                            \
             if (sMetric->IsEnabled())                              \
                 sMetric->LogEvent(category, title, description);   \
         } while (0)
-#define TC_METRIC_VALUE(category, value)                                 \
+#define METRIC_VALUE(category, value)                                 \
         do {                                                            \
             if (sMetric->IsEnabled())                              \
                 sMetric->LogValue(category, value);                \
         } while (0)
 #else
-#define TC_METRIC_EVENT(category, title, description)                    \
+#define METRIC_EVENT(category, title, description)                    \
         __pragma(warning(push))                                         \
         __pragma(warning(disable:4127))                                 \
         do {                                                            \
@@ -141,7 +129,7 @@ public:
                 sMetric->LogEvent(category, title, description);   \
         } while (0)                                                     \
         __pragma(warning(pop))
-#define TC_METRIC_VALUE(category, value)                                 \
+#define METRIC_VALUE(category, value)                                 \
         __pragma(warning(push))                                         \
         __pragma(warning(disable:4127))                                 \
         do {                                                            \

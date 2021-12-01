@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /**
@@ -609,7 +597,7 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_RELOAD_SPELL_TARGET_POSITION           = 701,
     RBAC_PERM_COMMAND_RELOAD_SPELL_THREATS                   = 702,
     RBAC_PERM_COMMAND_RELOAD_SPELL_GROUP_STACK_RULES         = 703,
-    RBAC_PERM_COMMAND_RELOAD_TRINITY_STRING                  = 704,
+    RBAC_PERM_COMMAND_RELOAD_SERVER_STRING                  = 704,
     RBAC_PERM_COMMAND_RELOAD_WARDEN_ACTION                   = 705,
     RBAC_PERM_COMMAND_RELOAD_WAYPOINT_SCRIPTS                = 706,
     RBAC_PERM_COMMAND_RELOAD_WAYPOINT_DATA                   = 707,
@@ -796,7 +784,7 @@ enum RBACCommandResult
 
 typedef std::set<uint32> RBACPermissionContainer;
 
-class TC_GAME_API RBACPermission
+class GAME_API RBACPermission
 {
     public:
         RBACPermission(uint32 id = 0, std::string const& name = ""):
@@ -831,7 +819,7 @@ class TC_GAME_API RBACPermission
  * - Granted permissions: through linked permissions and directly assigned
  * - Denied permissions: through linked permissions and directly assigned
  */
-class TC_GAME_API RBACData
+class GAME_API RBACData
 {
     public:
         RBACData(uint32 id, std::string const& name, int32 realmId, uint8 secLevel = 255):
@@ -891,7 +879,7 @@ class TC_GAME_API RBACData
          * // previously defined "RBACData* rbac" with proper initialization
          * uint32 permissionId = 2;
          * if (rbac->GrantRole(permissionId) == RBAC_IN_DENIED_LIST)
-         *     TC_LOG_DEBUG("entities.player", "Failed to grant permission %u, already denied", permissionId);
+         *     LOG_DEBUG("entities.player", "Failed to grant permission %u, already denied", permissionId);
          * @endcode
          */
         RBACCommandResult GrantPermission(uint32 permissionId, int32 realmId = 0);
@@ -915,7 +903,7 @@ class TC_GAME_API RBACData
          * // previously defined "RBACData* rbac" with proper initialization
          * uint32 permissionId = 2;
          * if (rbac->DenyRole(permissionId) == RBAC_ID_DOES_NOT_EXISTS)
-         *     TC_LOG_DEBUG("entities.player", "Role Id %u does not exists", permissionId);
+         *     LOG_DEBUG("entities.player", "Role Id %u does not exists", permissionId);
          * @endcode
          */
         RBACCommandResult DenyPermission(uint32 permissionId, int32 realmId = 0);
@@ -940,7 +928,7 @@ class TC_GAME_API RBACData
          * // previously defined "RBACData* rbac" with proper initialization
          * uint32 permissionId = 2;
          * if (rbac->RevokeRole(permissionId) == RBAC_OK)
-         *     TC_LOG_DEBUG("entities.player", "Permission %u succesfully removed", permissionId);
+         *     LOG_DEBUG("entities.player", "Permission %u succesfully removed", permissionId);
          * @endcode
          */
         RBACCommandResult RevokePermission(uint32 permissionId, int32 realmId = 0);

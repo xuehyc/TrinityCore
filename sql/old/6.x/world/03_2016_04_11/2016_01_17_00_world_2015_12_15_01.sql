@@ -1,2 +1,2 @@
--- trinity_string 2022 (ticket message)
-UPDATE `trinity_string` SET `content_default`='|cff00ff00Ticket Message|r: [%s]|r ' WHERE  `entry`=2022;
+-- server_string 2022 (ticket message)
+UPDATE `server_string` SET `content_default`='|cff00ff00Ticket Message|r: [%s]|r ' WHERE  `entry`=2022;

@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef GameTables_h__
@@ -207,23 +195,23 @@ private:
     std::vector<T> _data;
 };
 
-TC_GAME_API extern GameTable<GtArmorMitigationByLvlEntry>           sArmorMitigationByLvlGameTable;
-TC_GAME_API extern GameTable<GtArtifactKnowledgeMultiplierEntry>    sArtifactKnowledgeMultiplierGameTable;
-TC_GAME_API extern GameTable<GtArtifactLevelXPEntry>                sArtifactLevelXPGameTable;
-TC_GAME_API extern GameTable<GtBarberShopCostBaseEntry>             sBarberShopCostBaseGameTable;
-TC_GAME_API extern GameTable<GtBaseMPEntry>                         sBaseMPGameTable;
-TC_GAME_API extern GameTable<GtCombatRatingsEntry>                  sCombatRatingsGameTable;
-TC_GAME_API extern GameTable<GtCombatRatingsMultByILvl>             sCombatRatingsMultByILvlGameTable;
-TC_GAME_API extern GameTable<GtHonorLevelEntry>                     sHonorLevelGameTable;
-TC_GAME_API extern GameTable<GtHpPerStaEntry>                       sHpPerStaGameTable;
-TC_GAME_API extern GameTable<GtItemSocketCostPerLevelEntry>         sItemSocketCostPerLevelGameTable;
-TC_GAME_API extern GameTable<GtNpcDamageByClassEntry>               sNpcDamageByClassGameTable[MAX_EXPANSIONS];
-TC_GAME_API extern GameTable<GtNpcManaCostScalerEntry>              sNpcManaCostScalerGameTable;
-TC_GAME_API extern GameTable<GtNpcTotalHpEntry>                     sNpcTotalHpGameTable[MAX_EXPANSIONS];
-TC_GAME_API extern GameTable<GtSpellScalingEntry>                   sSpellScalingGameTable;
-TC_GAME_API extern GameTable<GtXpEntry>                             sXpGameTable;
+GAME_API extern GameTable<GtArmorMitigationByLvlEntry>           sArmorMitigationByLvlGameTable;
+GAME_API extern GameTable<GtArtifactKnowledgeMultiplierEntry>    sArtifactKnowledgeMultiplierGameTable;
+GAME_API extern GameTable<GtArtifactLevelXPEntry>                sArtifactLevelXPGameTable;
+GAME_API extern GameTable<GtBarberShopCostBaseEntry>             sBarberShopCostBaseGameTable;
+GAME_API extern GameTable<GtBaseMPEntry>                         sBaseMPGameTable;
+GAME_API extern GameTable<GtCombatRatingsEntry>                  sCombatRatingsGameTable;
+GAME_API extern GameTable<GtCombatRatingsMultByILvl>             sCombatRatingsMultByILvlGameTable;
+GAME_API extern GameTable<GtHonorLevelEntry>                     sHonorLevelGameTable;
+GAME_API extern GameTable<GtHpPerStaEntry>                       sHpPerStaGameTable;
+GAME_API extern GameTable<GtItemSocketCostPerLevelEntry>         sItemSocketCostPerLevelGameTable;
+GAME_API extern GameTable<GtNpcDamageByClassEntry>               sNpcDamageByClassGameTable[MAX_EXPANSIONS];
+GAME_API extern GameTable<GtNpcManaCostScalerEntry>              sNpcManaCostScalerGameTable;
+GAME_API extern GameTable<GtNpcTotalHpEntry>                     sNpcTotalHpGameTable[MAX_EXPANSIONS];
+GAME_API extern GameTable<GtSpellScalingEntry>                   sSpellScalingGameTable;
+GAME_API extern GameTable<GtXpEntry>                             sXpGameTable;
 
-TC_GAME_API void LoadGameTables(std::string const& dataPath);
+GAME_API void LoadGameTables(std::string const& dataPath);
 
 template<class T>
 inline float GetGameTableColumnForClass(T const* row, int32 class_)

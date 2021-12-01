@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "icecrown_citadel.h"
@@ -224,7 +212,7 @@ class ValithriaDespawner : public BasicEvent
 
         bool Execute(uint64 /*currTime*/, uint32 /*diff*/) override
         {
-            Trinity::CreatureWorker<ValithriaDespawner> worker(_creature, *this);
+            Server::CreatureWorker<ValithriaDespawner> worker(_creature, *this);
             Cell::VisitGridObjects(_creature, worker, 333.0f);
             return true;
         }
@@ -729,7 +717,7 @@ class npc_risen_archmage : public CreatureScript
                 {
                     std::list<Creature*> archmages;
                     RisenArchmageCheck check;
-                    Trinity::CreatureListSearcher<RisenArchmageCheck> searcher(me, archmages, check);
+                    Server::CreatureListSearcher<RisenArchmageCheck> searcher(me, archmages, check);
                     Cell::VisitGridObjects(me, searcher, 100.0f);
                     for (std::list<Creature*>::iterator itr = archmages.begin(); itr != archmages.end(); ++itr)
                         (*itr)->AI()->DoAction(ACTION_ENTER_COMBAT);
@@ -1103,8 +1091,8 @@ class npc_dream_cloud : public CreatureScript
                         case EVENT_CHECK_PLAYER:
                         {
                             Player* player = nullptr;
-                            Trinity::AnyPlayerInObjectRangeCheck check(me, 5.0f);
-                            Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, player, check);
+                            Server::AnyPlayerInObjectRangeCheck check(me, 5.0f);
+                            Server::PlayerSearcher<Server::AnyPlayerInObjectRangeCheck> searcher(me, player, check);
                             Cell::VisitWorldObjects(me, searcher, 7.5f);
                             _events.ScheduleEvent(player ? EVENT_EXPLODE : EVENT_CHECK_PLAYER, 1000);
                             break;
@@ -1225,11 +1213,11 @@ class spell_dreamwalker_summoner : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
-                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
+                targets.remove_if(Server::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
                 if (targets.empty())
                     return;
 
-                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                WorldObject* target = Server::Containers::SelectRandomContainerElement(targets);
                 targets.clear();
                 targets.push_back(target);
             }
@@ -1293,7 +1281,7 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
 
                 uint8 suppresserNumber = caster->GetAI()->GetData(DATA_SUPPRESSERS_COUNT);
                 for (uint8 i = 0; i < suppresserNumber; ++i)
-                    caster->CastSpell(Trinity::Containers::SelectRandomContainerElement(summoners), SPELL_SUMMON_SUPPRESSER, true);
+                    caster->CastSpell(Server::Containers::SelectRandomContainerElement(summoners), SPELL_SUMMON_SUPPRESSER, true);
             }
 
             void Register() override

@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_CONDITIONMGR_H
-#define TRINITY_CONDITIONMGR_H
+#ifndef SERVER_CONDITIONMGR_H
+#define SERVER_CONDITIONMGR_H
 
 #include "Define.h"
 #include "Hash.h"
@@ -195,7 +182,7 @@ enum MaxConditionTargets
     MAX_CONDITION_TARGETS = 3
 };
 
-struct TC_GAME_API ConditionSourceInfo
+struct GAME_API ConditionSourceInfo
 {
     WorldObject* mConditionTargets[MAX_CONDITION_TARGETS]; // an array of targets available for conditions
     Condition const* mLastFailedCondition;
@@ -208,7 +195,7 @@ struct TC_GAME_API ConditionSourceInfo
     }
 };
 
-struct TC_GAME_API Condition
+struct GAME_API Condition
 {
     ConditionSourceType     SourceType;        //SourceTypeOrReferenceId
     uint32                  SourceGroup;
@@ -260,7 +247,7 @@ typedef std::unordered_map<uint32, ConditionsByEntryMap> ConditionEntriesByCreat
 typedef std::unordered_map<std::pair<int32, uint32 /*SAI source_type*/>, ConditionsByEntryMap> SmartEventConditionContainer;
 typedef std::unordered_map<uint32, ConditionContainer> ConditionReferenceContainer;//only used for references
 
-class TC_GAME_API ConditionMgr
+class GAME_API ConditionMgr
 {
     private:
         ConditionMgr();

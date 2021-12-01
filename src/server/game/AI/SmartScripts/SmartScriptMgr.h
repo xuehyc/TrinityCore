@@ -1,22 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_SMARTSCRIPTMGR_H
-#define TRINITY_SMARTSCRIPTMGR_H
+#ifndef SERVER_SMARTSCRIPTMGR_H
+#define SERVER_SMARTSCRIPTMGR_H
 
 #include "Define.h"
 #include "ObjectGuid.h"
@@ -1595,7 +1583,7 @@ public:
 };
 typedef std::unordered_map<uint32, ObjectGuidList*> ObjectListMap;
 
-class TC_GAME_API SmartWaypointMgr
+class GAME_API SmartWaypointMgr
 {
     private:
         SmartWaypointMgr() { }
@@ -1628,7 +1616,7 @@ typedef std::unordered_map<int64, SmartAIEventList> SmartAIEventMap;
 typedef std::map<uint32 /*entry*/, std::pair<uint32 /*spellId*/, SpellEffIndex /*effIndex*/> > CacheSpellContainer;
 typedef std::pair<CacheSpellContainer::const_iterator, CacheSpellContainer::const_iterator> CacheSpellContainerBounds;
 
-class TC_GAME_API SmartAIMgr
+class GAME_API SmartAIMgr
 {
     private:
         SmartAIMgr() { }
@@ -1657,7 +1645,7 @@ class TC_GAME_API SmartAIMgr
         {
             if (pct < -100 || pct > 100)
             {
-                TC_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u has invalid Percent set (%d), skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), pct);
+                LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u has invalid Percent set (%d), skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), pct);
                 return false;
             }
             return true;

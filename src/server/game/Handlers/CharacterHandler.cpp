@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "WorldSession.h"
@@ -313,11 +300,11 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
 
             WorldPackets::Character::EnumCharactersResult::CharacterInfo& charInfo = charEnum.Characters.back();
 
-            TC_LOG_INFO("network", "Loading char guid %s from account %u.", charInfo.Guid.ToString().c_str(), GetAccountId());
+            LOG_INFO("network", "Loading char guid %s from account %u.", charInfo.Guid.ToString().c_str(), GetAccountId());
 
             if (!Player::ValidateAppearance(charInfo.Race, charInfo.Class, charInfo.Sex, charInfo.HairStyle, charInfo.HairColor, charInfo.Face, charInfo.FacialHair, charInfo.Skin, charInfo.CustomDisplay))
             {
-                TC_LOG_ERROR("entities.player.loading", "Player %s has wrong Appearance values (Hair/Skin/Color), forcing recustomize", charInfo.Guid.ToString().c_str());
+                LOG_ERROR("entities.player.loading", "Player %s has wrong Appearance values (Hair/Skin/Color), forcing recustomize", charInfo.Guid.ToString().c_str());
 
                 // Make sure customization always works properly - send all zeroes instead
                 charInfo.Skin = 0, charInfo.Face = 0, charInfo.HairStyle = 0, charInfo.HairColor = 0, charInfo.FacialHair = 0;
@@ -401,7 +388,7 @@ void WorldSession::HandleCharUndeleteEnum(PreparedQueryResult result)
             Field* fields = result->Fetch();
             WorldPackets::Character::EnumCharactersResult::CharacterInfo charInfo(fields);
 
-            TC_LOG_INFO("network", "Loading undeleted char guid %s from account %u.", charInfo.Guid.ToString().c_str(), GetAccountId());
+            LOG_INFO("network", "Loading undeleted char guid %s from account %u.", charInfo.Guid.ToString().c_str(), GetAccountId());
 
             if (!sCharacterCache->HasCharacterCacheEntry(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
                 sCharacterCache->AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.Sex, charInfo.Race, charInfo.Class, charInfo.Level, true);
@@ -461,7 +448,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPackets::Character::CreateCharact
     ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(charCreate.CreateInfo->Class);
     if (!classEntry)
     {
-        TC_LOG_ERROR("network", "Class (%u) not found in DBC while creating new char for account (ID: %u): wrong DBC files or cheater?", charCreate.CreateInfo->Class, GetAccountId());
+        LOG_ERROR("network", "Class (%u) not found in DBC while creating new char for account (ID: %u): wrong DBC files or cheater?", charCreate.CreateInfo->Class, GetAccountId());
         SendCharCreate(CHAR_CREATE_FAILED);
         return;
     }
@@ -469,7 +456,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPackets::Character::CreateCharact
     ChrRacesEntry const* raceEntry = sChrRacesStore.LookupEntry(charCreate.CreateInfo->Race);
     if (!raceEntry)
     {
-        TC_LOG_ERROR("network", "Race (%u) not found in DBC while creating new char for account (ID: %u): wrong DBC files or cheater?", charCreate.CreateInfo->Race, GetAccountId());
+        LOG_ERROR("network", "Race (%u) not found in DBC while creating new char for account (ID: %u): wrong DBC files or cheater?", charCreate.CreateInfo->Race, GetAccountId());
         SendCharCreate(CHAR_CREATE_FAILED);
         return;
     }
@@ -478,14 +465,14 @@ void WorldSession::HandleCharCreateOpcode(WorldPackets::Character::CreateCharact
     RaceUnlockRequirement const* raceExpansionRequirement = sObjectMgr->GetRaceUnlockRequirement(charCreate.CreateInfo->Race);
     if (!raceExpansionRequirement)
     {
-        TC_LOG_ERROR("entities.player.cheat", "Account %u tried to create character with unavailable race %u", GetAccountId(), charCreate.CreateInfo->Race);
+        LOG_ERROR("entities.player.cheat", "Account %u tried to create character with unavailable race %u", GetAccountId(), charCreate.CreateInfo->Race);
         SendCharCreate(CHAR_CREATE_FAILED);
         return;
     }
 
     if (raceExpansionRequirement->Expansion > GetAccountExpansion())
     {
-        TC_LOG_ERROR("entities.player.cheat", "Expansion %u account:[%d] tried to Create character with expansion %u race (%u)",
+        LOG_ERROR("entities.player.cheat", "Expansion %u account:[%d] tried to Create character with expansion %u race (%u)",
             GetAccountExpansion(), GetAccountId(), raceExpansionRequirement->Expansion, charCreate.CreateInfo->Race);
         SendCharCreate(CHAR_CREATE_EXPANSION);
         return;
@@ -493,7 +480,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPackets::Character::CreateCharact
 
     //if (raceExpansionRequirement->AchievementId && !)
     //{
-    //    TC_LOG_ERROR("entities.player.cheat", "Expansion %u account:[%d] tried to Create character without achievement %u race (%u)",
+    //    LOG_ERROR("entities.player.cheat", "Expansion %u account:[%d] tried to Create character without achievement %u race (%u)",
     //        GetAccountExpansion(), GetAccountId(), raceExpansionRequirement->AchievementId, charCreate.CreateInfo->Race);
     //    SendCharCreate(CHAR_CREATE_ALLIED_RACE_ACHIEVEMENT);
     //    return;
@@ -503,7 +490,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPackets::Character::CreateCharact
     uint8 classExpansionRequirement = sObjectMgr->GetClassExpansionRequirement(charCreate.CreateInfo->Class);
     if (classExpansionRequirement > GetAccountExpansion())
     {
-        TC_LOG_ERROR("entities.player.cheat", "Expansion %u account:[%d] tried to Create character with expansion %u class (%u)",
+        LOG_ERROR("entities.player.cheat", "Expansion %u account:[%d] tried to Create character with expansion %u class (%u)",
             GetAccountExpansion(), GetAccountId(), classExpansionRequirement, charCreate.CreateInfo->Class);
         SendCharCreate(CHAR_CREATE_EXPANSION_CLASS);
         return;
@@ -532,7 +519,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPackets::Character::CreateCharact
     // prevent character creating with invalid name
     if (!normalizePlayerName(charCreate.CreateInfo->Name))
     {
-        TC_LOG_ERROR("entities.player.cheat", "Account:[%d] but tried to Create character with empty [name] ", GetAccountId());
+        LOG_ERROR("entities.player.cheat", "Account:[%d] but tried to Create character with empty [name] ", GetAccountId());
         SendCharCreate(CHAR_NAME_NO_NAME);
         return;
     }
@@ -745,7 +732,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPackets::Character::CreateCharact
             {
                 if (success)
                 {
-                    TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Create Character: %s %s", GetAccountId(), GetRemoteAddress().c_str(), newChar->GetName().c_str(), newChar->GetGUID().ToString().c_str());
+                    LOG_INFO("entities.player.character", "Account: %u (IP: %s) Create Character: %s %s", GetAccountId(), GetRemoteAddress().c_str(), newChar->GetName().c_str(), newChar->GetGUID().ToString().c_str());
                     sScriptMgr->OnPlayerCreate(newChar.get());
                     sCharacterCache->AddCharacterCacheEntry(newChar->GetGUID(), GetAccountId(), newChar->GetName(), newChar->GetByteValue(PLAYER_BYTES_3, PLAYER_BYTES_3_OFFSET_GENDER), newChar->getRace(), newChar->getClass(), newChar->getLevel(), false);
 
@@ -815,7 +802,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPackets::Character::CharDelete& c
         return;
     }
 
-    TC_LOG_INFO("entities.player.character", "Account: %u, IP: %s deleted character: %s, %s, Level: %u", accountId, GetRemoteAddress().c_str(), name.c_str(), charDelete.Guid.ToString().c_str(), level);
+    LOG_INFO("entities.player.character", "Account: %u, IP: %s deleted character: %s, %s, Level: %u", accountId, GetRemoteAddress().c_str(), name.c_str(), charDelete.Guid.ToString().c_str(), level);
 
     // To prevent hook failure, place hook before removing reference from DB
     sScriptMgr->OnPlayerDelete(charDelete.Guid, initAccountId); // To prevent race conditioning, but as it also makes sense, we hand the accountId over for successful delete.
@@ -839,18 +826,18 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPackets::Character::PlayerLogin&
 {
     if (PlayerLoading() || GetPlayer() != NULL)
     {
-        TC_LOG_ERROR("network", "Player tries to login again, AccountId = %d", GetAccountId());
+        LOG_ERROR("network", "Player tries to login again, AccountId = %d", GetAccountId());
         KickPlayer();
         return;
     }
 
     m_playerLoading = playerLogin.Guid;
 
-    TC_LOG_DEBUG("network", "Character %s logging in", playerLogin.Guid.ToString().c_str());
+    LOG_DEBUG("network", "Character %s logging in", playerLogin.Guid.ToString().c_str());
 
     if (!IsLegitCharacterForAccount(playerLogin.Guid))
     {
-        TC_LOG_ERROR("network", "Account (%u) can't login with that character (%s).", GetAccountId(), playerLogin.Guid.ToString().c_str());
+        LOG_ERROR("network", "Account (%u) can't login with that character (%s).", GetAccountId(), playerLogin.Guid.ToString().c_str());
         KickPlayer();
         return;
     }
@@ -1039,7 +1026,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     }
 
     ObjectAccessor::AddObject(pCurrChar);
-    //TC_LOG_DEBUG("Player %s added to Map.", pCurrChar->GetName().c_str());
+    //LOG_DEBUG("Player %s added to Map.", pCurrChar->GetName().c_str());
 
     if (pCurrChar->GetGuildId())
     {
@@ -1048,7 +1035,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         else
         {
             // remove wrong guild data
-            TC_LOG_ERROR("misc", "Player %s (%s) marked as member of not existing guild (id: " UI64FMTD "), removing guild membership for player.", pCurrChar->GetName().c_str(), pCurrChar->GetGUID().ToString().c_str(), pCurrChar->GetGuildId());
+            LOG_ERROR("misc", "Player %s (%s) marked as member of not existing guild (id: " UI64FMTD "), removing guild membership for player.", pCurrChar->GetName().c_str(), pCurrChar->GetGUID().ToString().c_str(), pCurrChar->GetGuildId());
             pCurrChar->SetInGuild(UI64LIT(0));
         }
     }
@@ -1153,7 +1140,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     if (pCurrChar->IsGameMaster())
         SendNotification(LANG_GM_ON);
 
-    TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Login Character: [%s] (%s) Level: %d",
+    LOG_INFO("entities.player.character", "Account: %u (IP: %s) Login Character: [%s] (%s) Level: %d",
         GetAccountId(), GetRemoteAddress().c_str(), pCurrChar->GetName().c_str(), pCurrChar->GetGUID().ToString().c_str(), pCurrChar->getLevel());
 
     if (!pCurrChar->IsStandState() && !pCurrChar->HasUnitState(UNIT_STATE_STUNNED))
@@ -1166,7 +1153,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     sScriptMgr->OnPlayerLogin(pCurrChar, firstLogin);
 
-    TC_METRIC_EVENT("player_events", "Login", pCurrChar->GetName());
+    METRIC_EVENT("player_events", "Login", pCurrChar->GetName());
 
     delete holder;
 }
@@ -1222,7 +1209,7 @@ void WorldSession::HandleSetFactionNotAtWar(WorldPackets::Character::SetFactionN
 //I think this function is never used :/ I dunno, but i guess this opcode not exists
 void WorldSession::HandleSetFactionCheat(WorldPacket& /*recvData*/)
 {
-    TC_LOG_ERROR("network", "WORLD SESSION: HandleSetFactionCheat, not expected call, please report.");
+    LOG_ERROR("network", "WORLD SESSION: HandleSetFactionCheat, not expected call, please report.");
     GetPlayer()->GetReputationMgr().SendStates();
 }
 
@@ -1235,7 +1222,7 @@ void WorldSession::HandleTutorialFlag(WorldPackets::Misc::TutorialSetFlag& packe
             uint8 index = uint8(packet.TutorialBit >> 5);
             if (index >= MAX_ACCOUNT_TUTORIAL_VALUES)
             {
-                TC_LOG_ERROR("network", "CMSG_TUTORIAL_FLAG received bad TutorialBit %u.", packet.TutorialBit);
+                LOG_ERROR("network", "CMSG_TUTORIAL_FLAG received bad TutorialBit %u.", packet.TutorialBit);
                 return;
             }
             uint32 flag = GetTutorialInt(index);
@@ -1252,7 +1239,7 @@ void WorldSession::HandleTutorialFlag(WorldPackets::Misc::TutorialSetFlag& packe
                 SetTutorialInt(i, 0x00000000);
             break;
         default:
-            TC_LOG_ERROR("network", "CMSG_TUTORIAL_FLAG received unknown TutorialAction %u.", packet.Action);
+            LOG_ERROR("network", "CMSG_TUTORIAL_FLAG received unknown TutorialAction %u.", packet.Action);
             return;
     }
 }
@@ -1276,7 +1263,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPackets::Character::CharacterRena
 {
     if (!IsLegitCharacterForAccount(request.RenameInfo->Guid))
     {
-        TC_LOG_ERROR("network", "Account %u, IP: %s tried to rename character %s, but it does not belong to their account!",
+        LOG_ERROR("network", "Account %u, IP: %s tried to rename character %s, but it does not belong to their account!",
             GetAccountId(), GetRemoteAddress().c_str(), request.RenameInfo->Guid.ToString().c_str());
         KickPlayer();
         return;
@@ -1352,7 +1339,7 @@ void WorldSession::HandleCharRenameCallBack(std::shared_ptr<WorldPackets::Charac
 
     CharacterDatabase.CommitTransaction(trans);
 
-    TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Changed name to: %s",
+    LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (%s) Changed name to: %s",
         GetAccountId(), GetRemoteAddress().c_str(), oldName.c_str(), renameInfo->Guid.ToString().c_str(), renameInfo->NewName.c_str());
 
     SendCharRename(RESPONSE_SUCCESS, renameInfo.get());
@@ -1508,7 +1495,7 @@ void WorldSession::HandleCharCustomizeOpcode(WorldPackets::Character::CharCustom
 {
     if (!IsLegitCharacterForAccount(packet.CustomizeInfo->CharGUID))
     {
-        TC_LOG_ERROR("entities.player.cheat", "Account %u, IP: %s tried to customise %s, but it does not belong to their account!",
+        LOG_ERROR("entities.player.cheat", "Account %u, IP: %s tried to customise %s, but it does not belong to their account!",
             GetAccountId(), GetRemoteAddress().c_str(), packet.CustomizeInfo->CharGUID.ToString().c_str());
         KickPlayer();
         return;
@@ -1636,7 +1623,7 @@ void WorldSession::HandleCharCustomizeCallback(std::shared_ptr<WorldPackets::Cha
 
     SendCharCustomize(RESPONSE_SUCCESS, customizeInfo.get());
 
-    TC_LOG_INFO("entities.player.character", "Account: %u (IP: %s), Character[%s] (%s) Customized to: %s",
+    LOG_INFO("entities.player.character", "Account: %u (IP: %s), Character[%s] (%s) Customized to: %s",
         GetAccountId(), GetRemoteAddress().c_str(), oldName.c_str(), customizeInfo->CharGUID.ToString().c_str(), customizeInfo->CharName.c_str());
 }
 
@@ -1745,7 +1732,7 @@ void WorldSession::HandleUseEquipmentSet(WorldPackets::EquipmentSet::UseEquipmen
 
     for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
     {
-        TC_LOG_DEBUG("entities.player.items", "%s: ContainerSlot: %u, Slot: %u", useEquipmentSet.Items[i].Item.ToString().c_str(), useEquipmentSet.Items[i].ContainerSlot, useEquipmentSet.Items[i].Slot);
+        LOG_DEBUG("entities.player.items", "%s: ContainerSlot: %u, Slot: %u", useEquipmentSet.Items[i].Item.ToString().c_str(), useEquipmentSet.Items[i].ContainerSlot, useEquipmentSet.Items[i].Slot);
 
         // check if item slot is set to "ignored" (raw value == 1), must not be unequipped then
         if (useEquipmentSet.Items[i].Item == ignoredItemGuid)
@@ -1793,7 +1780,7 @@ void WorldSession::HandleCharRaceOrFactionChangeOpcode(WorldPackets::Character::
 {
     if (!IsLegitCharacterForAccount(packet.RaceOrFactionChangeInfo->Guid))
     {
-        TC_LOG_ERROR("entities.player.cheat", "Account %u, IP: %s tried to factionchange character %s, but it does not belong to their account!",
+        LOG_ERROR("entities.player.cheat", "Account %u, IP: %s tried to factionchange character %s, but it does not belong to their account!",
             GetAccountId(), GetRemoteAddress().c_str(), packet.RaceOrFactionChangeInfo->Guid.ToString().c_str());
         KickPlayer();
         return;
@@ -2031,7 +2018,7 @@ void WorldSession::HandleCharRaceOrFactionChangeCallback(std::shared_ptr<WorldPa
                     stmt->setUInt16(1, 2464);
                     break;
                 default:
-                    TC_LOG_ERROR("entities.player", "Could not find language data for race (%u).", factionChangeInfo->RaceID);
+                    LOG_ERROR("entities.player", "Could not find language data for race (%u).", factionChangeInfo->RaceID);
                     SendCharFactionChange(CHAR_CREATE_ERROR, factionChangeInfo.get());
                     return;
             }
@@ -2326,7 +2313,7 @@ void WorldSession::HandleCharRaceOrFactionChangeCallback(std::shared_ptr<WorldPa
 
     CharacterDatabase.CommitTransaction(trans);
 
-    TC_LOG_DEBUG("entities.player", "%s (IP: %s) changed race from %u to %u", GetPlayerInfo().c_str(), GetRemoteAddress().c_str(), oldRace, factionChangeInfo->RaceID);
+    LOG_DEBUG("entities.player", "%s (IP: %s) changed race from %u to %u", GetPlayerInfo().c_str(), GetRemoteAddress().c_str(), oldRace, factionChangeInfo->RaceID);
 
     SendCharFactionChange(RESPONSE_SUCCESS, factionChangeInfo.get());
 }
@@ -2335,13 +2322,13 @@ void WorldSession::HandleRandomizeCharNameOpcode(WorldPackets::Character::Genera
 {
     if (!Player::IsValidRace(packet.Race))
     {
-        TC_LOG_ERROR("misc", "Invalid race (%u) sent by accountId: %u", packet.Race, GetAccountId());
+        LOG_ERROR("misc", "Invalid race (%u) sent by accountId: %u", packet.Race, GetAccountId());
         return;
     }
 
     if (!Player::IsValidGender(packet.Sex))
     {
-        TC_LOG_ERROR("misc", "Invalid gender (%u) sent by accountId: %u", packet.Sex, GetAccountId());
+        LOG_ERROR("misc", "Invalid gender (%u) sent by accountId: %u", packet.Sex, GetAccountId());
         return;
     }
 

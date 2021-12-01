@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef BATTLEFIELD_WG_
@@ -37,7 +25,7 @@ typedef std::vector<WintergraspWorkshop*> WorkshopVect;
 extern uint32 const ClockWorldState[];
 
 // used in zone_wintergrasp.cpp
-TC_GAME_API extern uint32 const WintergraspFaction[];
+GAME_API extern uint32 const WintergraspFaction[];
 
 enum WintergraspSpells
 {
@@ -235,7 +223,7 @@ class WintergraspCapturePoint : public BfCapturePoint
  * WinterGrasp Battlefield   *
  * ######################### */
 
-class TC_GAME_API BattlefieldWG : public Battlefield
+class GAME_API BattlefieldWG : public Battlefield
 {
     public:
         ~BattlefieldWG();
@@ -537,7 +525,7 @@ enum WintergraspGameObject
 // ********************************************************************
 
 // Structure for different buildings that can be destroyed during battle
-struct TC_GAME_API BfWGGameObjectBuilding
+struct GAME_API BfWGGameObjectBuilding
 {
 private:
     // WG object
@@ -589,7 +577,7 @@ public:
 };
 
 // Structure for the 6 workshop
-struct TC_GAME_API WintergraspWorkshop
+struct GAME_API WintergraspWorkshop
 {
 private:
     BattlefieldWG* _wg;                             // Pointer to wintergrasp

@@ -1,22 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITYCORE_CHATLINK_H
-#define TRINITYCORE_CHATLINK_H
+#ifndef SERVERCORE_CHATLINK_H
+#define SERVERCORE_CHATLINK_H
 
 #include "SharedDefines.h"
 #include "Common.h"
@@ -36,7 +24,7 @@ class Quest;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // ChatLink - abstract base class for various links
-class TC_GAME_API ChatLink
+class GAME_API ChatLink
 {
 public:
     ChatLink() : _color(0), _startPos(0), _endPos(0) { }
@@ -56,7 +44,7 @@ protected:
 };
 
 // ItemChatLink - link to item
-class TC_GAME_API ItemChatLink : public ChatLink
+class GAME_API ItemChatLink : public ChatLink
 {
 public:
     ItemChatLink() : ChatLink(), _item(nullptr), _enchantId(0), _randomPropertyId(0), _randomPropertySeed(0), _reporterLevel(0), _reporterSpec(0), _context(0),
@@ -87,7 +75,7 @@ protected:
 };
 
 // QuestChatLink - link to quest
-class TC_GAME_API QuestChatLink : public ChatLink
+class GAME_API QuestChatLink : public ChatLink
 {
 public:
     QuestChatLink() : ChatLink(), _quest(nullptr), _questLevel(0) { }
@@ -100,7 +88,7 @@ protected:
 };
 
 // SpellChatLink - link to quest
-class TC_GAME_API SpellChatLink : public ChatLink
+class GAME_API SpellChatLink : public ChatLink
 {
 public:
     SpellChatLink() : ChatLink(), _spell(nullptr) { }
@@ -112,7 +100,7 @@ protected:
 };
 
 // AchievementChatLink - link to quest
-class TC_GAME_API AchievementChatLink : public ChatLink
+class GAME_API AchievementChatLink : public ChatLink
 {
 public:
     AchievementChatLink() : ChatLink(), _guid(0), _achievement(NULL)
@@ -129,7 +117,7 @@ protected:
 };
 
 // TradeChatLink - link to trade info
-class TC_GAME_API TradeChatLink : public SpellChatLink
+class GAME_API TradeChatLink : public SpellChatLink
 {
 public:
     TradeChatLink() : SpellChatLink(), _minSkillLevel(0), _maxSkillLevel(0), _guid(0) { }
@@ -142,7 +130,7 @@ private:
 };
 
 // TalentChatLink - link to talent
-class TC_GAME_API TalentChatLink : public SpellChatLink
+class GAME_API TalentChatLink : public SpellChatLink
 {
 public:
     TalentChatLink() : SpellChatLink(), _talentId(0), _rankId(0) { }
@@ -154,7 +142,7 @@ private:
 };
 
 // EnchantmentChatLink - link to enchantment
-class TC_GAME_API EnchantmentChatLink : public SpellChatLink
+class GAME_API EnchantmentChatLink : public SpellChatLink
 {
 public:
     EnchantmentChatLink() : SpellChatLink() { }
@@ -162,7 +150,7 @@ public:
 };
 
 // GlyphChatLink - link to glyph
-class TC_GAME_API GlyphChatLink : public SpellChatLink
+class GAME_API GlyphChatLink : public SpellChatLink
 {
 public:
     GlyphChatLink() : SpellChatLink(), _slotId(0), _glyph(NULL) { }
@@ -172,7 +160,7 @@ private:
     GlyphPropertiesEntry const* _glyph;
 };
 
-class TC_GAME_API LinkExtractor
+class GAME_API LinkExtractor
 {
 public:
     explicit LinkExtractor(const char* msg);
@@ -187,4 +175,4 @@ private:
 };
 
 
-#endif // TRINITYCORE_CHATLINK_H
+#endif // SERVERCORE_CHATLINK_H

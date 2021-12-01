@@ -1,22 +1,9 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-/// \addtogroup Trinityd
+/// \addtogroup Mobiusd
 /// @{
 /// \file
 
@@ -35,7 +22,7 @@
 #include "Player.h"
 #include "Util.h"
 
-#if TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS
+#if SERVER_PLATFORM != SERVER_PLATFORM_WINDOWS
 #include <readline/readline.h>
 #include <readline/history.h>
 
@@ -91,7 +78,7 @@ int cli_hook_func()
 
 void utf8print(void* /*arg*/, const char* str)
 {
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if SERVER_PLATFORM == SERVER_PLATFORM_WINDOWS
     wchar_t wtemp_buf[6000];
     size_t wtemp_len = 6000-1;
     if (!Utf8toWStr(str, strlen(str), wtemp_buf, wtemp_len))
@@ -108,7 +95,7 @@ void utf8print(void* /*arg*/, const char* str)
 
 void commandFinished(void*, bool /*success*/)
 {
-    printf("TC> ");
+    printf("MC> ");
     fflush(stdout);
 }
 
@@ -131,8 +118,8 @@ int kb_hit_return()
 void CliThread()
 {
     ///- Display the list of available CLI functions then beep
-    //TC_LOG_INFO("server.worldserver", "");
-#if TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS
+    //LOG_INFO("server.worldserver", "");
+#if SERVER_PLATFORM != SERVER_PLATFORM_WINDOWS
     rl_attempted_completion_function = cli_completion;
     rl_event_hook = cli_hook_func;
 #endif
@@ -142,7 +129,7 @@ void CliThread()
 
     // print this here the first time
     // later it will be printed after command queue updates
-    printf("TC>");
+    printf("MC>");
 
     ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it
     while (!World::IsStopped())
@@ -151,11 +138,11 @@ void CliThread()
 
         char *command_str ;             // = fgets(commandbuf, sizeof(commandbuf), stdin);
 
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if SERVER_PLATFORM == SERVER_PLATFORM_WINDOWS
         char commandbuf[256];
         command_str = fgets(commandbuf, sizeof(commandbuf), stdin);
 #else
-        command_str = readline("TC>");
+        command_str = readline("MC>");
         rl_bind_key('\t', rl_complete);
 #endif
 
@@ -170,8 +157,8 @@ void CliThread()
 
             if (!*command_str)
             {
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
-                printf("TC>");
+#if SERVER_PLATFORM == SERVER_PLATFORM_WINDOWS
+                printf("MC>");
 #else
                 free(command_str);
 #endif
@@ -181,8 +168,8 @@ void CliThread()
             std::string command;
             if (!consoleToUtf8(command_str, command))         // convert from console encoding to utf8
             {
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
-                printf("TC>");
+#if SERVER_PLATFORM == SERVER_PLATFORM_WINDOWS
+                printf("MC>");
 #else
                 free(command_str);
 #endif
@@ -191,7 +178,7 @@ void CliThread()
 
             fflush(stdout);
             sWorld->QueueCliCommand(new CliCommandHolder(NULL, command.c_str(), &utf8print, &commandFinished));
-#if TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS
+#if SERVER_PLATFORM != SERVER_PLATFORM_WINDOWS
             add_history(command.c_str());
             free(command_str);
 #endif

@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "PlayerDump.h"
@@ -113,7 +100,7 @@ void PlayerDump::InitializeColumnDefinition()
         } while (result->NextRow());
     }
 
-    TC_LOG_INFO("server.loading", ">> Initialized " SZFMTD " PlayerDump ColumnDefinitions in %u ms.", ColumnDefinitions.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Initialized " SZFMTD " PlayerDump ColumnDefinitions in %u ms.", ColumnDefinitions.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 // Low level functions
@@ -379,7 +366,7 @@ bool PlayerDumpWriter::DumpTable(std::string& dump, ObjectGuid::LowType guid, ch
                 {
                     if (result->GetFieldCount() <= GetColNumber(tableFrom, "deleteInfos_Account") - 1)     // avoid crashes on next check
                     {
-                        TC_LOG_FATAL("misc", "PlayerDumpWriter::DumpTable - Trying to access non-existing or wrong positioned field (`deleteInfos_Account`) in `characters` table.");
+                        LOG_FATAL("misc", "PlayerDumpWriter::DumpTable - Trying to access non-existing or wrong positioned field (`deleteInfos_Account`) in `characters` table.");
                         return false;
                     }
 
@@ -557,7 +544,7 @@ DumpReturn PlayerDumpReader::LoadDump(std::string const& file, uint32 account, s
         std::string tn = GetTableName(line);
         if (tn.empty())
         {
-            TC_LOG_ERROR("misc", "LoadPlayerDump: Can't extract table name from line: '%s'!", line.c_str());
+            LOG_ERROR("misc", "LoadPlayerDump: Can't extract table name from line: '%s'!", line.c_str());
             ROLLBACK(DUMP_FILE_BROKEN);
         }
 
@@ -574,7 +561,7 @@ DumpReturn PlayerDumpReader::LoadDump(std::string const& file, uint32 account, s
 
         if (i == dumpTablesCount)
         {
-            TC_LOG_ERROR("misc", "LoadPlayerDump: Unknown table: '%s'!", tn.c_str());
+            LOG_ERROR("misc", "LoadPlayerDump: Unknown table: '%s'!", tn.c_str());
             ROLLBACK(DUMP_FILE_BROKEN);
         }
 
@@ -743,7 +730,7 @@ DumpReturn PlayerDumpReader::LoadDump(std::string const& file, uint32 account, s
                 break;
             }
             default:
-                TC_LOG_ERROR("misc", "Unknown dump table type: %u", type);
+                LOG_ERROR("misc", "Unknown dump table type: %u", type);
                 break;
         }
 

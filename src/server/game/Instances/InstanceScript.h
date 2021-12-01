@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_INSTANCE_DATA_H
-#define TRINITY_INSTANCE_DATA_H
+#ifndef SERVER_INSTANCE_DATA_H
+#define SERVER_INSTANCE_DATA_H
 
 #include "ZoneScript.h"
 #include "Common.h"
@@ -26,11 +13,11 @@
 #include <set>
 #include <sstream>
 
-#define OUT_SAVE_INST_DATA             TC_LOG_DEBUG("scripts", "Saving Instance Data for Instance %s (Map %d, Instance Id %d)", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
-#define OUT_SAVE_INST_DATA_COMPLETE    TC_LOG_DEBUG("scripts", "Saving Instance Data for Instance %s (Map %d, Instance Id %d) completed.", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
-#define OUT_LOAD_INST_DATA(a)          TC_LOG_DEBUG("scripts", "Loading Instance Data for Instance %s (Map %d, Instance Id %d). Input is '%s'", instance->GetMapName(), instance->GetId(), instance->GetInstanceId(), a)
-#define OUT_LOAD_INST_DATA_COMPLETE    TC_LOG_DEBUG("scripts", "Instance Data Load for Instance %s (Map %d, Instance Id: %d) is complete.", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
-#define OUT_LOAD_INST_DATA_FAIL        TC_LOG_ERROR("scripts", "Unable to load Instance Data for Instance %s (Map %d, Instance Id: %d).", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
+#define OUT_SAVE_INST_DATA             LOG_DEBUG("scripts", "Saving Instance Data for Instance %s (Map %d, Instance Id %d)", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
+#define OUT_SAVE_INST_DATA_COMPLETE    LOG_DEBUG("scripts", "Saving Instance Data for Instance %s (Map %d, Instance Id %d) completed.", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
+#define OUT_LOAD_INST_DATA(a)          LOG_DEBUG("scripts", "Loading Instance Data for Instance %s (Map %d, Instance Id %d). Input is '%s'", instance->GetMapName(), instance->GetId(), instance->GetInstanceId(), a)
+#define OUT_LOAD_INST_DATA_COMPLETE    LOG_DEBUG("scripts", "Instance Data Load for Instance %s (Map %d, Instance Id: %d) is complete.", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
+#define OUT_LOAD_INST_DATA_FAIL        LOG_ERROR("scripts", "Unable to load Instance Data for Instance %s (Map %d, Instance Id: %d).", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
 
 class AreaBoundary;
 class Creature;
@@ -95,7 +82,7 @@ struct BossBoundaryEntry
     AreaBoundary const* Boundary;
 };
 
-struct TC_GAME_API BossBoundaryData
+struct GAME_API BossBoundaryData
 {
     typedef std::vector<BossBoundaryEntry> StorageType;
     typedef StorageType::const_iterator const_iterator;
@@ -152,7 +139,7 @@ typedef std::map<uint32 /*entry*/, MinionInfo> MinionInfoMap;
 typedef std::map<uint32 /*type*/, ObjectGuid /*guid*/> ObjectGuidMap;
 typedef std::map<uint32 /*entry*/, uint32 /*type*/> ObjectInfoMap;
 
-class TC_GAME_API InstanceScript : public ZoneScript
+class GAME_API InstanceScript : public ZoneScript
 {
     public:
         explicit InstanceScript(InstanceMap* map);
@@ -333,10 +320,10 @@ class TC_GAME_API InstanceScript : public ZoneScript
         uint8 _combatResurrectionCharges; // the counter for available battle resurrections
         bool _combatResurrectionTimerStarted;
 
-    #ifdef TRINITY_API_USE_DYNAMIC_LINKING
+    #ifdef SERVER_API_USE_DYNAMIC_LINKING
         // Strong reference to the associated script module
         std::shared_ptr<ModuleReference> module_reference;
-    #endif // #ifndef TRINITY_API_USE_DYNAMIC_LINKING
+    #endif // #ifndef SERVER_API_USE_DYNAMIC_LINKING
 };
 
-#endif // TRINITY_INSTANCE_DATA_H
+#endif // SERVER_INSTANCE_DATA_H

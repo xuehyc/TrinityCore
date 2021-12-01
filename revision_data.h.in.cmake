@@ -9,8 +9,8 @@
  #define _SOURCE_DIRECTORY          R"(@CMAKE_SOURCE_DIR@)"
  #define _BUILD_DIRECTORY           R"(@BUILDDIR@)"
  #define _MYSQL_EXECUTABLE          R"(@MYSQL_EXECUTABLE@)"
- #define _FULL_DATABASE             "TDB_world_735.00_2018_02_19.sql"
- #define _HOTFIXES_DATABASE         "TDB_hotfixes_735.00_2018_02_19.sql"
+ #define _FULL_DATABASE             "legion_world.sql"
+ #define _HOTFIXES_DATABASE         "legion_hotfixes.sql"
  #define VER_COMPANYNAME_STR        "Mobius Development"
  #define VER_LEGALCOPYRIGHT_STR     "(c) MobiusCore"
  #define VER_FILEVERSION            5,0,0

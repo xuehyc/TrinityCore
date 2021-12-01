@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "ScriptMgr.h"
@@ -32,7 +20,7 @@
 enum Spells
 {
     // Baleroc
-    //SPELL_LEASH                   = 101514, // Server-side, used to keep him in his encounter area? TrinityCore does not need a spell to handle this
+    //SPELL_LEASH                   = 101514, // Server-side, used to keep him in his encounter area? MobiusCore does not need a spell to handle this
     SPELL_BLADES_OF_BALEROC         = 99342,
     SPELL_INFERNO_BLADE             = 99350,
     SPELL_INFERNO_STRIKE            = 99351,
@@ -477,7 +465,7 @@ class spell_baleroc_countdown_aoe_dummy : public SpellScript
             return;
         }
 
-        Trinity::Containers::RandomResize(targets, 2);
+        Server::Containers::RandomResize(targets, 2);
 
         _targets.push_back(targets.front()->GetGUID());
         _targets.push_back(targets.back()->GetGUID());
@@ -536,7 +524,7 @@ class spell_baleroc_countdown_proximity_check : public SpellScript
     void FilterTargets(std::list<WorldObject*>& targets)
     {
         targets.remove(GetCaster());
-        targets.remove_if(Trinity::UnitAuraCheck(false, SPELL_COUNTDOWN_AURA));
+        targets.remove_if(Server::UnitAuraCheck(false, SPELL_COUNTDOWN_AURA));
     }
 
     void Register() override
@@ -629,7 +617,7 @@ class spell_baleroc_shards_of_torment_target_search : public SpellScript
     static WorldObject* GetRandomContainerElement(std::list<WorldObject*> const* list)
     {
         if (!list->empty())
-            return Trinity::Containers::SelectRandomContainerElement(*list);
+            return Server::Containers::SelectRandomContainerElement(*list);
 
         return nullptr;
     }
@@ -670,7 +658,7 @@ class spell_baleroc_torment_target_search : public SpellScript
         if (targets.empty())
             return;
 
-        targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
+        targets.sort(Server::ObjectDistanceOrderPred(GetCaster()));
         _target = targets.front()->GetGUID();
     }
 

@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "WorldSession.h"
@@ -29,7 +17,7 @@ void WorldSession::HandleDBQueryBulk(WorldPackets::Hotfix::DBQueryBulk& dbQuery)
     DB2StorageBase const* store = sDB2Manager.GetStorage(dbQuery.TableHash);
     if (!store)
     {
-        TC_LOG_ERROR("network", "CMSG_DB_QUERY_BULK: %s requested unsupported unknown hotfix type: %u", GetPlayerInfo().c_str(), dbQuery.TableHash);
+        LOG_ERROR("network", "CMSG_DB_QUERY_BULK: %s requested unsupported unknown hotfix type: %u", GetPlayerInfo().c_str(), dbQuery.TableHash);
         return;
     }
 
@@ -47,7 +35,7 @@ void WorldSession::HandleDBQueryBulk(WorldPackets::Hotfix::DBQueryBulk& dbQuery)
         }
         else
         {
-            TC_LOG_TRACE("network", "CMSG_DB_QUERY_BULK: %s requested non-existing entry %u in datastore: %u", GetPlayerInfo().c_str(), record.RecordID, dbQuery.TableHash);
+            LOG_TRACE("network", "CMSG_DB_QUERY_BULK: %s requested non-existing entry %u in datastore: %u", GetPlayerInfo().c_str(), record.RecordID, dbQuery.TableHash);
             dbReply.Timestamp = time(NULL);
         }
 
@@ -67,7 +55,7 @@ void WorldSession::HandleHotfixRequest(WorldPackets::Hotfix::HotfixRequest& hotf
     hotfixQueryResponse.Hotfixes.reserve(hotfixQuery.Hotfixes.size());
     for (uint64 hotfixId : hotfixQuery.Hotfixes)
     {
-        if (int32 const* hotfix = Trinity::Containers::MapGetValuePtr(hotfixes, hotfixId))
+        if (int32 const* hotfix = Server::Containers::MapGetValuePtr(hotfixes, hotfixId))
         {
             DB2StorageBase const* storage = sDB2Manager.GetStorage(PAIR64_HIPART(hotfixId));
 

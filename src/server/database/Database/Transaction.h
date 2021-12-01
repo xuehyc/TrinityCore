@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _TRANSACTION_H
@@ -27,7 +15,7 @@
 #include <vector>
 
 /*! Transactions, high level class. */
-class TC_DATABASE_API TransactionBase
+class DATABASE_API TransactionBase
 {
     friend class TransactionTask;
     friend class MySQLConnection;
@@ -43,7 +31,7 @@ class TC_DATABASE_API TransactionBase
         template<typename Format, typename... Args>
         void PAppend(Format&& sql, Args&&... args)
         {
-            Append(Trinity::StringFormat(std::forward<Format>(sql), std::forward<Args>(args)...).c_str());
+            Append(Server::StringFormat(std::forward<Format>(sql), std::forward<Args>(args)...).c_str());
         }
 
         std::size_t GetSize() const { return m_queries.size(); }
@@ -69,7 +57,7 @@ public:
 };
 
 /*! Low level class*/
-class TC_DATABASE_API TransactionTask : public SQLOperation
+class DATABASE_API TransactionTask : public SQLOperation
 {
     template <class T> friend class DatabaseWorkerPool;
     friend class DatabaseWorker;
@@ -88,7 +76,7 @@ class TC_DATABASE_API TransactionTask : public SQLOperation
         static std::mutex _deadlockLock;
 };
 
-class TC_DATABASE_API TransactionWithResultTask : public TransactionTask
+class DATABASE_API TransactionWithResultTask : public TransactionTask
 {
 public:
     TransactionWithResultTask(std::shared_ptr<TransactionBase> trans) : TransactionTask(trans) { }
@@ -101,7 +89,7 @@ protected:
     TransactionPromise m_result;
 };
 
-class TC_DATABASE_API TransactionCallback
+class DATABASE_API TransactionCallback
 {
 public:
     TransactionCallback(TransactionFuture&& future) : m_future(std::move(future)) { }

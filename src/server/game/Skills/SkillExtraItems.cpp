@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "SkillExtraItems.h"
@@ -60,7 +47,7 @@ void LoadSkillPerfectItemTable()
 
     if (!result)
     {
-        TC_LOG_ERROR("server.loading", ">> Loaded 0 spell perfection definitions. DB table `skill_perfect_item_template` is empty.");
+        LOG_ERROR("server.loading", ">> Loaded 0 spell perfection definitions. DB table `skill_perfect_item_template` is empty.");
         return;
     }
 
@@ -74,28 +61,28 @@ void LoadSkillPerfectItemTable()
 
         if (!sSpellMgr->GetSpellInfo(spellId))
         {
-            TC_LOG_ERROR("sql.sql", "Skill perfection data for spell %u has a non-existing spell id in the `skill_perfect_item_template`!", spellId);
+            LOG_ERROR("sql.sql", "Skill perfection data for spell %u has a non-existing spell id in the `skill_perfect_item_template`!", spellId);
             continue;
         }
 
         uint32 requiredSpecialization = fields[1].GetUInt32();
         if (!sSpellMgr->GetSpellInfo(requiredSpecialization))
         {
-            TC_LOG_ERROR("sql.sql", "Skill perfection data for spell %u has a non-existing required specialization spell id %u in the `skill_perfect_item_template`!", spellId, requiredSpecialization);
+            LOG_ERROR("sql.sql", "Skill perfection data for spell %u has a non-existing required specialization spell id %u in the `skill_perfect_item_template`!", spellId, requiredSpecialization);
             continue;
         }
 
         float perfectCreateChance = fields[2].GetFloat();
         if (perfectCreateChance <= 0.0f)
         {
-            TC_LOG_ERROR("sql.sql", "Skill perfection data for spell %u has impossibly low proc chance in the `skill_perfect_item_template`!", spellId);
+            LOG_ERROR("sql.sql", "Skill perfection data for spell %u has impossibly low proc chance in the `skill_perfect_item_template`!", spellId);
             continue;
         }
 
         uint32 perfectItemType = fields[3].GetUInt32();
         if (!sObjectMgr->GetItemTemplate(perfectItemType))
         {
-            TC_LOG_ERROR("sql.sql", "Skill perfection data for spell %u references a non-existing perfect item id %u in the `skill_perfect_item_template`!", spellId, perfectItemType);
+            LOG_ERROR("sql.sql", "Skill perfection data for spell %u references a non-existing perfect item id %u in the `skill_perfect_item_template`!", spellId, perfectItemType);
             continue;
         }
 
@@ -109,7 +96,7 @@ void LoadSkillPerfectItemTable()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u spell perfection definitions in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u spell perfection definitions in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 // struct to store information about extra item creation
@@ -147,7 +134,7 @@ void LoadSkillExtraItemTable()
 
     if (!result)
     {
-        TC_LOG_ERROR("server.loading", ">> Loaded 0 spell specialization definitions. DB table `skill_extra_item_template` is empty.");
+        LOG_ERROR("server.loading", ">> Loaded 0 spell specialization definitions. DB table `skill_extra_item_template` is empty.");
         return;
     }
 
@@ -161,28 +148,28 @@ void LoadSkillExtraItemTable()
 
         if (!sSpellMgr->GetSpellInfo(spellId))
         {
-            TC_LOG_ERROR("sql.sql", "Skill specialization %u has a non-existing spell id in the `skill_extra_item_template`!", spellId);
+            LOG_ERROR("sql.sql", "Skill specialization %u has a non-existing spell id in the `skill_extra_item_template`!", spellId);
             continue;
         }
 
         uint32 requiredSpecialization = fields[1].GetUInt32();
         if (!sSpellMgr->GetSpellInfo(requiredSpecialization))
         {
-            TC_LOG_ERROR("sql.sql", "Skill specialization %u has a non-existing required specialization spell id %u in the `skill_extra_item_template`!", spellId, requiredSpecialization);
+            LOG_ERROR("sql.sql", "Skill specialization %u has a non-existing required specialization spell id %u in the `skill_extra_item_template`!", spellId, requiredSpecialization);
             continue;
         }
 
         float additionalCreateChance = fields[2].GetFloat();
         if (additionalCreateChance <= 0.0f)
         {
-            TC_LOG_ERROR("sql.sql", "Skill specialization %u has too low additional create chance in the `skill_extra_item_template`!", spellId);
+            LOG_ERROR("sql.sql", "Skill specialization %u has too low additional create chance in the `skill_extra_item_template`!", spellId);
             continue;
         }
 
         uint8 additionalMaxNum = fields[3].GetUInt8();
         if (!additionalMaxNum)
         {
-            TC_LOG_ERROR("sql.sql", "Skill specialization %u has 0 max number of extra items in the `skill_extra_item_template`!", spellId);
+            LOG_ERROR("sql.sql", "Skill specialization %u has 0 max number of extra items in the `skill_extra_item_template`!", spellId);
             continue;
         }
 
@@ -196,7 +183,7 @@ void LoadSkillExtraItemTable()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u spell specialization definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u spell specialization definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 bool CanCreatePerfectItem(Player* player, uint32 spellId, float &perfectCreateChance, uint32 &perfectItemType)

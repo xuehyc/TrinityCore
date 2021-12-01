@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /* ScriptData
@@ -991,7 +979,7 @@ public:
 
         if (dontdel_str)
         {
-            //TC_LOG_ERROR("misc", "DEBUG: All 3 params are set");
+            //LOG_ERROR("misc", "DEBUG: All 3 params are set");
 
             // All 3 params are set
             // GUID
@@ -999,7 +987,7 @@ public:
             // doNotDEL
             if (stricmp(dontdel_str, "NODEL") == 0)
             {
-                //TC_LOG_ERROR("misc", "DEBUG: doNotDelete = true;");
+                //LOG_ERROR("misc", "DEBUG: doNotDelete = true;");
                 doNotDelete = true;
             }
         }
@@ -1008,10 +996,10 @@ public:
             // Only 2 params - but maybe NODEL is set
             if (type_str)
             {
-                TC_LOG_ERROR("misc", "DEBUG: Only 2 params ");
+                LOG_ERROR("misc", "DEBUG: Only 2 params ");
                 if (stricmp(type_str, "NODEL") == 0)
                 {
-                    //TC_LOG_ERROR("misc", "DEBUG: type_str, NODEL ");
+                    //LOG_ERROR("misc", "DEBUG: type_str, NODEL ");
                     doNotDelete = true;
                     type_str = nullptr;
                 }

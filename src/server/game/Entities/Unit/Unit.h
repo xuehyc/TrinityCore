@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef __UNIT_H
@@ -428,8 +415,8 @@ enum UnitState
     UNIT_STATE_ALL_STATE       = 0xffffffff                      //(UNIT_STATE_STOPPED | UNIT_STATE_MOVING | UNIT_STATE_IN_COMBAT | UNIT_STATE_IN_FLIGHT)
 };
 
-TC_GAME_API extern float baseMoveSpeed[MAX_MOVE_TYPE];
-TC_GAME_API extern float playerBaseMoveSpeed[MAX_MOVE_TYPE];
+GAME_API extern float baseMoveSpeed[MAX_MOVE_TYPE];
+GAME_API extern float playerBaseMoveSpeed[MAX_MOVE_TYPE];
 
 enum CombatRating
 {
@@ -547,7 +534,7 @@ struct CleanDamage
 struct CalcDamageInfo;
 struct SpellNonMeleeDamage;
 
-class TC_GAME_API DamageInfo
+class GAME_API DamageInfo
 {
     private:
         Unit* const m_attacker;
@@ -585,7 +572,7 @@ class TC_GAME_API DamageInfo
         uint32 GetHitMask() const;
 };
 
-class TC_GAME_API HealInfo
+class GAME_API HealInfo
 {
     private:
         Unit* const _healer;
@@ -614,7 +601,7 @@ class TC_GAME_API HealInfo
         uint32 GetHitMask() const;
 };
 
-class TC_GAME_API ProcEventInfo
+class GAME_API ProcEventInfo
 {
     public:
         ProcEventInfo(Unit* actor, Unit* actionTarget, Unit* procTarget, uint32 typeMask,
@@ -673,7 +660,7 @@ struct CalcDamageInfo
 };
 
 // Spell damage info structure based on structure sending in SMSG_SPELLNONMELEEDAMAGELOG opcode
-struct TC_GAME_API SpellNonMeleeDamage
+struct GAME_API SpellNonMeleeDamage
 {
     SpellNonMeleeDamage(Unit* _attacker, Unit* _target, uint32 _SpellID, uint32 _SpellXSpellVisualID, uint32 _schoolMask, ObjectGuid _castId = ObjectGuid::Empty);
 
@@ -801,7 +788,7 @@ enum ActionBarIndex
 
 #define MAX_UNIT_ACTION_BAR_INDEX (ACTION_BAR_INDEX_END-ACTION_BAR_INDEX_START)
 
-struct TC_GAME_API CharmInfo
+struct GAME_API CharmInfo
 {
     public:
         explicit CharmInfo(Unit* unit);
@@ -893,7 +880,7 @@ enum ReactiveType
 #define ATTACK_DISPLAY_DELAY 200
 #define MAX_PLAYER_STEALTH_DETECT_RANGE 30.0f               // max distance for detection targets by player
 
-class TC_GAME_API Unit : public WorldObject
+class GAME_API Unit : public WorldObject
 {
     public:
         typedef std::set<Unit*> AttackerSet;
@@ -2022,7 +2009,7 @@ class TC_GAME_API Unit : public WorldObject
         SpellHistory* _spellHistory;
 };
 
-namespace Trinity
+namespace Server
 {
     // Binary predicate for sorting Units based on percent value of a power
     class PowerPctOrderPred

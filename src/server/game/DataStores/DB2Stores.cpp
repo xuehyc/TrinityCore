@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "DB2Stores.h"
@@ -316,7 +304,7 @@ typedef std::unordered_map<uint32, std::vector<ItemSpecOverrideEntry const*>> It
 typedef std::unordered_map<uint32, DB2Manager::MountTypeXCapabilitySet> MountCapabilitiesByTypeContainer;
 typedef std::unordered_map<uint32, DB2Manager::MountXDisplayContainer> MountDisplaysCointainer;
 typedef std::unordered_map<uint32, std::array<std::vector<NameGenEntry const*>, 2>> NameGenContainer;
-typedef std::array<std::vector<Trinity::wregex>, TOTAL_LOCALES + 1> NameValidationRegexContainer;
+typedef std::array<std::vector<Server::wregex>, TOTAL_LOCALES + 1> NameValidationRegexContainer;
 typedef std::unordered_map<uint32, std::vector<uint32>> PhaseGroupContainer;
 typedef std::array<PowerTypeEntry const*, MAX_POWERS> PowerTypesContainer;
 typedef std::vector<PvpTalentEntry const*> PvpTalentsByPosition[MAX_CLASSES][MAX_PVP_TALENT_TIERS][MAX_PVP_TALENT_COLUMNS];
@@ -918,7 +906,7 @@ void DB2Manager::LoadStores(std::string const& dataPath, uint32 defaultLocale)
         std::wstring name;
         ASSERT(Utf8toWStr(namesProfanity->Name, name));
         if (namesProfanity->Language != -1)
-            _nameValidators[namesProfanity->Language].emplace_back(name, Trinity::regex::icase | Trinity::regex::optimize);
+            _nameValidators[namesProfanity->Language].emplace_back(name, Server::regex::icase | Server::regex::optimize);
         else
         {
             for (uint32 i = 0; i < TOTAL_LOCALES; ++i)
@@ -926,7 +914,7 @@ void DB2Manager::LoadStores(std::string const& dataPath, uint32 defaultLocale)
                 if (i == LOCALE_none)
                     continue;
 
-                _nameValidators[i].emplace_back(name, Trinity::regex::icase | Trinity::regex::optimize);
+                _nameValidators[i].emplace_back(name, Server::regex::icase | Server::regex::optimize);
             }
         }
     }
@@ -935,7 +923,7 @@ void DB2Manager::LoadStores(std::string const& dataPath, uint32 defaultLocale)
     {
         std::wstring name;
         ASSERT(Utf8toWStr(namesReserved->Name, name));
-        _nameValidators[TOTAL_LOCALES].emplace_back(name, Trinity::regex::icase | Trinity::regex::optimize);
+        _nameValidators[TOTAL_LOCALES].emplace_back(name, Server::regex::icase | Server::regex::optimize);
     }
 
     for (NamesReservedLocaleEntry const* namesReserved : sNamesReservedLocaleStore)
@@ -949,7 +937,7 @@ void DB2Manager::LoadStores(std::string const& dataPath, uint32 defaultLocale)
                 continue;
 
             if (namesReserved->LocaleMask & (1 << i))
-                _nameValidators[i].emplace_back(name, Trinity::regex::icase | Trinity::regex::optimize);
+                _nameValidators[i].emplace_back(name, Server::regex::icase | Server::regex::optimize);
         }
     }
 
@@ -1135,7 +1123,7 @@ void DB2Manager::LoadStores(std::string const& dataPath, uint32 defaultLocale)
     // error checks
     if (bad_db2_files.size() == _stores.size())
     {
-        TC_LOG_ERROR("misc", "\nIncorrect DataDir value in worldserver.conf or ALL required *.db2 files (" SZFMTD ") not found by path: %sdbc/%s/", _stores.size(), dataPath.c_str(), localeNames[defaultLocale]);
+        LOG_ERROR("misc", "\nIncorrect DataDir value in worldserver.conf or ALL required *.db2 files (" SZFMTD ") not found by path: %sdbc/%s/", _stores.size(), dataPath.c_str(), localeNames[defaultLocale]);
         exit(1);
     }
     else if (!bad_db2_files.empty())
@@ -1144,7 +1132,7 @@ void DB2Manager::LoadStores(std::string const& dataPath, uint32 defaultLocale)
         for (auto const& bad_db2_file : bad_db2_files)
             str += bad_db2_file + "\n";
 
-        TC_LOG_ERROR("misc", "\nSome required *.db2 files (" SZFMTD " from " SZFMTD ") not found or not compatible:\n%s", bad_db2_files.size(), _stores.size(), str.c_str());
+        LOG_ERROR("misc", "\nSome required *.db2 files (" SZFMTD " from " SZFMTD ") not found or not compatible:\n%s", bad_db2_files.size(), _stores.size(), str.c_str());
         exit(1);
     }
 
@@ -1157,11 +1145,11 @@ void DB2Manager::LoadStores(std::string const& dataPath, uint32 defaultLocale)
         !sMapStore.LookupEntry(1903) ||                      // last map added in 7.3.5 (25996)
         !sSpellStore.LookupEntry(263166))                    // last spell added in 7.3.5 (25996)
     {
-        TC_LOG_ERROR("misc", "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
+        LOG_ERROR("misc", "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
         exit(1);
     }
 
-    TC_LOG_INFO("server.loading", ">> Initialized " SZFMTD " DB2 data stores in %u ms", _stores.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Initialized " SZFMTD " DB2 data stores in %u ms", _stores.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 DB2StorageBase const* DB2Manager::GetStorage(uint32 type) const
@@ -1181,7 +1169,7 @@ void DB2Manager::LoadHotfixData()
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 hotfix info entries.");
+        LOG_INFO("server.loading", ">> Loaded 0 hotfix info entries.");
         return;
     }
 
@@ -1199,7 +1187,7 @@ void DB2Manager::LoadHotfixData()
         bool deleted = fields[3].GetBool();
         if (_stores.find(tableHash) == _stores.end())
         {
-            TC_LOG_ERROR("sql.sql", "Table `hotfix_data` references unknown DB2 store by hash 0x%X in hotfix id %d", tableHash, id);
+            LOG_ERROR("sql.sql", "Table `hotfix_data` references unknown DB2 store by hash 0x%X in hotfix id %d", tableHash, id);
             continue;
         }
 
@@ -1211,10 +1199,10 @@ void DB2Manager::LoadHotfixData()
 
     for (auto itr = deletedRecords.begin(); itr != deletedRecords.end(); ++itr)
         if (itr->second)
-            if (DB2StorageBase* store = Trinity::Containers::MapGetValuePtr(_stores, itr->first.first))
+            if (DB2StorageBase* store = Server::Containers::MapGetValuePtr(_stores, itr->first.first))
                 store->EraseRecord(itr->first.second);
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u hotfix records in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u hotfix records in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 std::map<uint64, int32> const& DB2Manager::GetHotfixData() const
@@ -1303,13 +1291,13 @@ bool DB2Manager::HasCharacterFacialHairStyle(uint8 race, uint8 gender, uint8 var
 
 bool DB2Manager::HasCharSections(uint8 race, uint8 gender, CharBaseSectionVariation variation) const
 {
-    auto range = Trinity::Containers::MapEqualRange(_charSections, std::make_tuple(race, gender, variation));
+    auto range = Server::Containers::MapEqualRange(_charSections, std::make_tuple(race, gender, variation));
     return range.begin() != range.end();
 }
 
 CharSectionsEntry const* DB2Manager::GetCharSectionEntry(uint8 race, uint8 gender, CharBaseSectionVariation variation, uint8 variationIndex, uint8 colorIndex) const
 {
-    for (auto const& section : Trinity::Containers::MapEqualRange(_charSections, std::make_tuple(race, gender, variation)))
+    for (auto const& section : Server::Containers::MapEqualRange(_charSections, std::make_tuple(race, gender, variation)))
         if (section.second->VariationIndex == variationIndex && section.second->ColorIndex == colorIndex)
             return section.second;
 
@@ -1875,7 +1863,7 @@ DB2Manager::MountTypeXCapabilitySet const* DB2Manager::GetMountCapabilities(uint
 
 DB2Manager::MountXDisplayContainer const* DB2Manager::GetMountDisplays(uint32 mountId) const
 {
-    return Trinity::Containers::MapGetValuePtr(_mountDisplays, mountId);
+    return Server::Containers::MapGetValuePtr(_mountDisplays, mountId);
 }
 
 std::string DB2Manager::GetNameGenEntry(uint8 race, uint8 gender) const
@@ -1888,18 +1876,18 @@ std::string DB2Manager::GetNameGenEntry(uint8 race, uint8 gender) const
     if (ritr->second[gender].empty())
         return "";
 
-    return Trinity::Containers::SelectRandomContainerElement(ritr->second[gender])->Name;
+    return Server::Containers::SelectRandomContainerElement(ritr->second[gender])->Name;
 }
 
 ResponseCodes DB2Manager::ValidateName(std::wstring const& name, LocaleConstant locale) const
 {
-    for (Trinity::wregex const& regex : _nameValidators[locale])
-        if (Trinity::regex_search(name, regex))
+    for (Server::wregex const& regex : _nameValidators[locale])
+        if (Server::regex_search(name, regex))
             return CHAR_NAME_PROFANE;
 
     // regexes at TOTAL_LOCALES are loaded from NamesReserved which is not locale specific
-    for (Trinity::wregex const& regex : _nameValidators[TOTAL_LOCALES])
-        if (Trinity::regex_search(name, regex))
+    for (Server::wregex const& regex : _nameValidators[TOTAL_LOCALES])
+        if (Server::regex_search(name, regex))
             return CHAR_NAME_RESERVED;
 
     return CHAR_NAME_SUCCESS;
@@ -2176,12 +2164,12 @@ bool DB2Manager::IsToyItem(uint32 toy) const
 
 std::vector<TransmogSetEntry const*> const* DB2Manager::GetTransmogSetsForItemModifiedAppearance(uint32 itemModifiedAppearanceId) const
 {
-    return Trinity::Containers::MapGetValuePtr(_transmogSetsByItemModifiedAppearance, itemModifiedAppearanceId);
+    return Server::Containers::MapGetValuePtr(_transmogSetsByItemModifiedAppearance, itemModifiedAppearanceId);
 }
 
 std::vector<TransmogSetItemEntry const*> const* DB2Manager::GetTransmogSetItems(uint32 transmogSetId) const
 {
-    return Trinity::Containers::MapGetValuePtr(_transmogSetItemsByTransmogSet, transmogSetId);
+    return Server::Containers::MapGetValuePtr(_transmogSetItemsByTransmogSet, transmogSetId);
 }
 
 WMOAreaTableEntry const* DB2Manager::GetWMOAreaTable(int32 rootId, int32 adtId, int32 groupId) const

@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2019 TrinityCore <http://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "CharacterCache.h"
@@ -74,7 +62,7 @@ void CharacterCache::LoadCharacterCacheStorage()
     QueryResult result = CharacterDatabase.Query("SELECT guid, name, account, race, gender, class, level, deleteDate FROM characters");
     if (!result)
     {
-        TC_LOG_INFO("server.loading", "No character name data loaded, empty query");
+        LOG_INFO("server.loading", "No character name data loaded, empty query");
         return;
     }
 
@@ -85,7 +73,7 @@ void CharacterCache::LoadCharacterCacheStorage()
             fields[4].GetUInt8() /*gender*/, fields[3].GetUInt8() /*race*/, fields[5].GetUInt8() /*class*/, fields[6].GetUInt8() /*level*/, fields[7].GetUInt32() != 0);
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", "Loaded character infos for " SZFMTD " characters in %u ms", _characterCacheStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", "Loaded character infos for " SZFMTD " characters in %u ms", _characterCacheStore.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 /*

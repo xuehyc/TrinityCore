@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef _ITEMPROTOTYPE_H
@@ -701,7 +688,7 @@ enum ItemLevelConstants : uint32
 class Player;
 struct ChrSpecializationEntry;
 
-struct TC_GAME_API ItemTemplate
+struct GAME_API ItemTemplate
 {
     ItemEntry const* BasicData;
     ItemSparseEntry const* ExtendedData;
@@ -721,7 +708,7 @@ struct TC_GAME_API ItemTemplate
     uint32 GetSellPrice() const { return ExtendedData->SellPrice; }
     InventoryType GetInventoryType() const { return InventoryType(ExtendedData->InventoryType); }
     int32 GetAllowableClass() const { return ExtendedData->AllowableClass; }
-    Trinity::RaceMask<int64> GetAllowableRace() const { return ExtendedData->AllowableRace; }
+    Server::RaceMask<int64> GetAllowableRace() const { return ExtendedData->AllowableRace; }
     uint32 GetBaseItemLevel() const { return ExtendedData->ItemLevel; }
     int32 GetBaseRequiredLevel() const { return ExtendedData->RequiredLevel; }
     uint32 GetRequiredSkill() const { return ExtendedData->RequiredSkill; }

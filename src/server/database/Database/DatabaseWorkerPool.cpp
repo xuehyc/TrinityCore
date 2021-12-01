@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "DatabaseWorkerPool.h"
@@ -54,8 +42,8 @@ DatabaseWorkerPool<T>::DatabaseWorkerPool()
       _async_threads(0), _synch_threads(0)
 {
     WPFatal(mysql_thread_safe(), "Used MySQL library isn't thread-safe.");
-    WPFatal(mysql_get_client_version() >= MIN_MYSQL_CLIENT_VERSION, "TrinityCore does not support MySQL versions below 5.1");
-    WPFatal(mysql_get_client_version() == MYSQL_VERSION_ID, "Used MySQL library version (%s) does not match the version used to compile TrinityCore (%s). Search on forum for TCE00011.",
+    WPFatal(mysql_get_client_version() >= MIN_MYSQL_CLIENT_VERSION, "MobiusCore does not support MySQL versions below 5.1");
+    WPFatal(mysql_get_client_version() == MYSQL_VERSION_ID, "Used MySQL library version (%s) does not match the version used to compile MobiusCore (%s). Search on forum for TCE00011.",
         mysql_get_client_info(), MYSQL_SERVER_VERSION);
 }
 
@@ -80,7 +68,7 @@ uint32 DatabaseWorkerPool<T>::Open()
 {
     WPFatal(_connectionInfo.get(), "Connection info was not set!");
 
-    TC_LOG_INFO("sql.driver", "Opening DatabasePool '%s'. "
+    LOG_INFO("sql.driver", "Opening DatabasePool '%s'. "
         "Asynchronous connections: %u, synchronous connections: %u.",
         GetDatabaseName(), _async_threads, _synch_threads);
 
@@ -93,7 +81,7 @@ uint32 DatabaseWorkerPool<T>::Open()
 
     if (!error)
     {
-        TC_LOG_INFO("sql.driver", "DatabasePool '%s' opened successfully. " SZFMTD
+        LOG_INFO("sql.driver", "DatabasePool '%s' opened successfully. " SZFMTD
                     " total connections running.", GetDatabaseName(),
                     (_connections[IDX_SYNCH].size() + _connections[IDX_ASYNC].size()));
     }
@@ -104,12 +92,12 @@ uint32 DatabaseWorkerPool<T>::Open()
 template <class T>
 void DatabaseWorkerPool<T>::Close()
 {
-    TC_LOG_INFO("sql.driver", "Closing down DatabasePool '%s'.", GetDatabaseName());
+    LOG_INFO("sql.driver", "Closing down DatabasePool '%s'.", GetDatabaseName());
 
     //! Closes the actualy MySQL connection.
     _connections[IDX_ASYNC].clear();
 
-    TC_LOG_INFO("sql.driver", "Asynchronous connections on DatabasePool '%s' terminated. "
+    LOG_INFO("sql.driver", "Asynchronous connections on DatabasePool '%s' terminated. "
                 "Proceeding with synchronous connections.",
         GetDatabaseName());
 
@@ -119,7 +107,7 @@ void DatabaseWorkerPool<T>::Close()
     //! meaning there can be no concurrent access at this point.
     _connections[IDX_SYNCH].clear();
 
-    TC_LOG_INFO("sql.driver", "All connections on DatabasePool '%s' closed.", GetDatabaseName());
+    LOG_INFO("sql.driver", "All connections on DatabasePool '%s' closed.", GetDatabaseName());
 }
 
 template <class T>
@@ -241,22 +229,22 @@ SQLTransaction<T> DatabaseWorkerPool<T>::BeginTransaction()
 template <class T>
 void DatabaseWorkerPool<T>::CommitTransaction(SQLTransaction<T> transaction)
 {
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     //! Only analyze transaction weaknesses in Debug mode.
     //! Ideally we catch the faults in Debug mode and then correct them,
     //! so there's no need to waste these CPU cycles in Release mode.
     switch (transaction->GetSize())
     {
     case 0:
-        TC_LOG_DEBUG("sql.driver", "Transaction contains 0 queries. Not executing.");
+        LOG_DEBUG("sql.driver", "Transaction contains 0 queries. Not executing.");
         return;
     case 1:
-        TC_LOG_DEBUG("sql.driver", "Warning: Transaction only holds 1 query, consider removing Transaction context in code.");
+        LOG_DEBUG("sql.driver", "Warning: Transaction only holds 1 query, consider removing Transaction context in code.");
         break;
     default:
         break;
     }
-#endif // TRINITY_DEBUG
+#endif // SERVER_DEBUG
 
     Enqueue(new TransactionTask(transaction));
 }
@@ -264,22 +252,22 @@ void DatabaseWorkerPool<T>::CommitTransaction(SQLTransaction<T> transaction)
 template <class T>
 TransactionCallback DatabaseWorkerPool<T>::AsyncCommitTransaction(SQLTransaction<T> transaction)
 {
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     //! Only analyze transaction weaknesses in Debug mode.
     //! Ideally we catch the faults in Debug mode and then correct them,
     //! so there's no need to waste these CPU cycles in Release mode.
     switch (transaction->GetSize())
     {
         case 0:
-            TC_LOG_DEBUG("sql.driver", "Transaction contains 0 queries. Not executing.");
+            LOG_DEBUG("sql.driver", "Transaction contains 0 queries. Not executing.");
             return;
         case 1:
-            TC_LOG_DEBUG("sql.driver", "Warning: Transaction only holds 1 query, consider removing Transaction context in code.");
+            LOG_DEBUG("sql.driver", "Warning: Transaction only holds 1 query, consider removing Transaction context in code.");
             break;
         default:
             break;
     }
-#endif // TRINITY_DEBUG
+#endif // SERVER_DEBUG
 
     TransactionWithResultTask* task = new TransactionWithResultTask(transaction);
     TransactionFuture result = task->GetFuture();
@@ -381,7 +369,7 @@ uint32 DatabaseWorkerPool<T>::OpenConnections(InternalIndex type, uint8 numConne
         }
         else if (connection->GetServerVersion() < MIN_MYSQL_SERVER_VERSION)
         {
-            TC_LOG_ERROR("sql.driver", "TrinityCore does not support MySQL versions below 5.1");
+            LOG_ERROR("sql.driver", "MobiusCore does not support MySQL versions below 5.1");
             return 1;
         }
         else
@@ -436,7 +424,7 @@ char const* DatabaseWorkerPool<T>::GetDatabaseName() const
 template <class T>
 void DatabaseWorkerPool<T>::Execute(const char* sql)
 {
-    if (Trinity::IsFormatEmptyOrNull(sql))
+    if (Server::IsFormatEmptyOrNull(sql))
         return;
 
     BasicStatementTask* task = new BasicStatementTask(sql);
@@ -453,7 +441,7 @@ void DatabaseWorkerPool<T>::Execute(PreparedStatement<T>* stmt)
 template <class T>
 void DatabaseWorkerPool<T>::DirectExecute(const char* sql)
 {
-    if (Trinity::IsFormatEmptyOrNull(sql))
+    if (Server::IsFormatEmptyOrNull(sql))
         return;
 
     T* connection = GetFreeConnection();
@@ -490,7 +478,7 @@ void DatabaseWorkerPool<T>::ExecuteOrAppend(SQLTransaction<T>& trans, PreparedSt
         trans->Append(stmt);
 }
 
-template class TC_DATABASE_API DatabaseWorkerPool<LoginDatabaseConnection>;
-template class TC_DATABASE_API DatabaseWorkerPool<WorldDatabaseConnection>;
-template class TC_DATABASE_API DatabaseWorkerPool<CharacterDatabaseConnection>;
-template class TC_DATABASE_API DatabaseWorkerPool<HotfixDatabaseConnection>;
+template class DATABASE_API DatabaseWorkerPool<LoginDatabaseConnection>;
+template class DATABASE_API DatabaseWorkerPool<WorldDatabaseConnection>;
+template class DATABASE_API DatabaseWorkerPool<CharacterDatabaseConnection>;
+template class DATABASE_API DatabaseWorkerPool<HotfixDatabaseConnection>;

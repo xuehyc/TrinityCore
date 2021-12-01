@@ -1,22 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_CONTAINERS_H
-#define TRINITY_CONTAINERS_H
+#ifndef SERVER_CONTAINERS_H
+#define SERVER_CONTAINERS_H
 
 #include "Define.h"
 #include "Random.h"
@@ -24,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-namespace Trinity
+namespace Server
 {
     template<class T>
     constexpr inline T* AddressOrSelf(T* ptr)
@@ -136,7 +124,7 @@ namespace Trinity
         }
 
         /**
-         * @fn void Trinity::Containers::RandomShuffle(C& container)
+         * @fn void Server::Containers::RandomShuffle(C& container)
          *
          * @brief Reorder the elements of the container randomly.
          *
@@ -149,7 +137,7 @@ namespace Trinity
         }
 
         /**
-         * @fn bool Trinity::Containers::Intersects(Iterator first1, Iterator last1, Iterator first2, Iterator last2)
+         * @fn bool Server::Containers::Intersects(Iterator first1, Iterator last1, Iterator first2, Iterator last2)
          *
          * @brief Checks if two SORTED containers have a common element
          *
@@ -177,7 +165,7 @@ namespace Trinity
         }
 
         /**
-         * @fn bool Trinity::Containers::Intersects(Iterator first1, Iterator last1, Iterator first2, Iterator last2, Predicate&& equalPred)
+         * @fn bool Server::Containers::Intersects(Iterator first1, Iterator last1, Iterator first2, Iterator last2, Predicate&& equalPred)
          *
          * @brief Checks if two SORTED containers have a common element
          *
@@ -232,6 +220,6 @@ namespace Trinity
     }
     //! namespace Containers
 }
-//! namespace Trinity
+//! namespace Server
 
-#endif //! #ifdef TRINITY_CONTAINERS_H
+#endif //! #ifdef SERVER_CONTAINERS_H

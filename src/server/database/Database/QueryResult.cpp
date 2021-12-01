@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "QueryResult.h"
@@ -68,7 +55,7 @@ static uint32 SizeForType(MYSQL_FIELD* field)
             MYSQL_TYPE_SET:
             */
         default:
-            TC_LOG_WARN("sql.sql", "SQL::SizeForType(): invalid field type %u", uint32(field->type));
+            LOG_WARN("sql.sql", "SQL::SizeForType(): invalid field type %u", uint32(field->type));
             return 0;
     }
 }
@@ -110,7 +97,7 @@ DatabaseFieldTypes MysqlTypeToFieldType(enum_field_types type)
         case MYSQL_TYPE_VAR_STRING:
             return DatabaseFieldTypes::Binary;
         default:
-            TC_LOG_WARN("sql.sql", "MysqlTypeToFieldType(): invalid field type %u", uint32(type));
+            LOG_WARN("sql.sql", "MysqlTypeToFieldType(): invalid field type %u", uint32(type));
             break;
     }
 
@@ -124,7 +111,7 @@ _result(result),
 _fields(fields)
 {
     _currentRow = new Field[_fieldCount];
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     for (uint32 i = 0; i < _fieldCount; i++)
         _currentRow[i].SetMetadata(&_fields[i], i);
 #endif
@@ -162,7 +149,7 @@ m_metadataResult(result)
     //- This is where we store the (entire) resultset
     if (mysql_stmt_store_result(m_stmt))
     {
-        TC_LOG_WARN("sql.sql", "%s:mysql_stmt_store_result, cannot bind result from MySQL server. Error: %s", __FUNCTION__, mysql_stmt_error(m_stmt));
+        LOG_WARN("sql.sql", "%s:mysql_stmt_store_result, cannot bind result from MySQL server. Error: %s", __FUNCTION__, mysql_stmt_error(m_stmt));
         delete[] m_rBind;
         delete[] m_isNull;
         delete[] m_length;
@@ -197,7 +184,7 @@ m_metadataResult(result)
     //- This is where we bind the bind the buffer to the statement
     if (mysql_stmt_bind_result(m_stmt, m_rBind))
     {
-        TC_LOG_WARN("sql.sql", "%s:mysql_stmt_bind_result, cannot bind result from MySQL server. Error: %s", __FUNCTION__, mysql_stmt_error(m_stmt));
+        LOG_WARN("sql.sql", "%s:mysql_stmt_bind_result, cannot bind result from MySQL server. Error: %s", __FUNCTION__, mysql_stmt_error(m_stmt));
         mysql_stmt_free_result(m_stmt);
         CleanUp();
         delete[] m_isNull;
@@ -251,7 +238,7 @@ m_metadataResult(result)
                     *m_rBind[fIndex].length);
             }
 
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
             m_rows[uint32(m_rowPosition) * m_fieldCount + fIndex].SetMetadata(&field[fIndex], fIndex);
 #endif
         }
@@ -290,7 +277,7 @@ bool ResultSet::NextRow()
     unsigned long* lengths = mysql_fetch_lengths(_result);
     if (!lengths)
     {
-        TC_LOG_WARN("sql.sql", "%s:mysql_fetch_lengths, cannot retrieve value lengths. Error %s.", __FUNCTION__, mysql_error(_result->handle));
+        LOG_WARN("sql.sql", "%s:mysql_fetch_lengths, cannot retrieve value lengths. Error %s.", __FUNCTION__, mysql_error(_result->handle));
         CleanUp();
         return false;
     }

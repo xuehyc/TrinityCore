@@ -23,14 +23,14 @@
 #include <google/protobuf/repeated_field.h>
 #include <google/protobuf/extension_set.h>
 #include "google/protobuf/descriptor.pb.h"
-#include "Define.h" // for TC_PROTO_API
+#include "Define.h" // for PROTO_API
 // @@protoc_insertion_point(includes)
 
 namespace bgs {
 namespace protocol {
 
 // Internal implementation detail -- do not call these.
-void TC_PROTO_API protobuf_AddDesc_global_5fextensions_2fservice_5foptions_2eproto();
+void PROTO_API protobuf_AddDesc_global_5fextensions_2fservice_5foptions_2eproto();
 void protobuf_AssignDesc_global_5fextensions_2fservice_5foptions_2eproto();
 void protobuf_ShutdownFile_global_5fextensions_2fservice_5foptions_2eproto();
 
@@ -44,11 +44,11 @@ void protobuf_ShutdownFile_global_5fextensions_2fservice_5foptions_2eproto();
 // ===================================================================
 
 static const int kOriginalFullyQualifiedDescriptorNameFieldNumber = 1001;
-TC_PROTO_API extern ::google::protobuf::internal::ExtensionIdentifier< ::google::protobuf::ServiceOptions,
+PROTO_API extern ::google::protobuf::internal::ExtensionIdentifier< ::google::protobuf::ServiceOptions,
     ::google::protobuf::internal::StringTypeTraits, 9, false >
   original_fully_qualified_descriptor_name;
 static const int kServiceIdFieldNumber = 50000;
-TC_PROTO_API extern ::google::protobuf::internal::ExtensionIdentifier< ::google::protobuf::ServiceOptions,
+PROTO_API extern ::google::protobuf::internal::ExtensionIdentifier< ::google::protobuf::ServiceOptions,
     ::google::protobuf::internal::PrimitiveTypeTraits< ::google::protobuf::uint32 >, 13, false >
   service_id;
 

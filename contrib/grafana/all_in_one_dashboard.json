@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_TRINITY",
-      "label": "trinity",
+      "name": "DS_SERVER",
+      "label": "mobius",
       "description": "",
       "type": "datasource",
       "pluginId": "influxdb",
@@ -38,7 +38,7 @@
   "annotations": {
     "list": [
       {
-        "datasource": "${DS_TRINITY}",
+        "datasource": "${DS_SERVER}",
         "enable": true,
         "iconColor": "#C0C6BE",
         "iconSize": 13,
@@ -72,7 +72,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_TRINITY}",
+          "datasource": "${DS_SERVER}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -182,7 +182,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_TRINITY}",
+          "datasource": "${DS_SERVER}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -296,7 +296,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_TRINITY}",
+          "datasource": "${DS_SERVER}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -405,7 +405,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_TRINITY}",
+          "datasource": "${DS_SERVER}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -528,7 +528,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_TRINITY}",
+          "datasource": "${DS_SERVER}",
           "editable": true,
           "error": false,
           "fill": 1,
@@ -669,7 +669,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_TRINITY}",
+          "datasource": "${DS_SERVER}",
           "editable": true,
           "error": false,
           "fill": 1,
@@ -798,7 +798,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_TRINITY}",
+          "datasource": "${DS_SERVER}",
           "editable": true,
           "error": false,
           "fill": 1,
@@ -880,7 +880,7 @@
                 {
                   "key": "realm",
                   "operator": "=",
-                  "value": "Trinity"
+                  "value": "Mobius"
                 }
               ]
             },
@@ -983,7 +983,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_TRINITY}",
+          "datasource": "${DS_SERVER}",
           "fill": 1,
           "id": 9,
           "legend": {
@@ -1134,7 +1134,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_TRINITY}",
+          "datasource": "${DS_SERVER}",
           "fill": 1,
           "id": 10,
           "legend": {
@@ -1253,7 +1253,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_TRINITY}",
+          "datasource": "${DS_SERVER}",
           "fill": 1,
           "id": 11,
           "legend": {
@@ -1420,7 +1420,7 @@
   "schemaVersion": 14,
   "style": "dark",
   "tags": [
-    "trinity"
+    "mobius"
   ],
   "templating": {
     "list": [
@@ -1428,7 +1428,7 @@
         "allFormat": "regex values",
         "allValue": null,
         "current": {},
-        "datasource": "${DS_TRINITY}",
+        "datasource": "${DS_SERVER}",
         "hide": 0,
         "includeAll": false,
         "label": null,
@@ -1479,6 +1479,6 @@
     ]
   },
   "timezone": "browser",
-  "title": "Trinity | General info",
+  "title": "Mobius | General info",
   "version": 7
 }

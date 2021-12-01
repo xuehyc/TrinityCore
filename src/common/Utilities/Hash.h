@@ -1,27 +1,15 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TrinityCore_Hash_h__
-#define TrinityCore_Hash_h__
+#ifndef MobiusCore_Hash_h__
+#define MobiusCore_Hash_h__
 
 #include <functional>
 #include <utility>
 
-namespace Trinity
+namespace Server
 {
     template<typename T>
     inline void hash_combine(std::size_t& seed, T const& val)
@@ -41,11 +29,11 @@ namespace std
         size_t operator()(std::pair<K, V> const& p) const
         {
             size_t hashVal = 0;
-            Trinity::hash_combine(hashVal, p.first);
-            Trinity::hash_combine(hashVal, p.second);
+            Server::hash_combine(hashVal, p.first);
+            Server::hash_combine(hashVal, p.second);
             return hashVal;
         }
     };
 }
 
-#endif // TrinityCore_Hash_h__
+#endif // MobiusCore_Hash_h__

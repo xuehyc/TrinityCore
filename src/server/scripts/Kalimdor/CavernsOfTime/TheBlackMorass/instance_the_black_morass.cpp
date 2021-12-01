@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /*
@@ -193,7 +180,7 @@ public:
                 {
                     if (data == IN_PROGRESS)
                     {
-                        TC_LOG_DEBUG("scripts", "Instance The Black Morass: Starting event.");
+                        LOG_DEBUG("scripts", "Instance The Black Morass: Starting event.");
                         InitWorldState();
                         m_auiEncounter[1] = IN_PROGRESS;
                         ScheduleEventNextPortal(15000);
@@ -202,7 +189,7 @@ public:
                     if (data == DONE)
                     {
                         //this may be completed further out in the post-event
-                        TC_LOG_DEBUG("scripts", "Instance The Black Morass: Event completed.");
+                        LOG_DEBUG("scripts", "Instance The Black Morass: Event completed.");
                         Map::PlayerList const& players = instance->GetPlayers();
 
                         if (!players.isEmpty())
@@ -267,7 +254,7 @@ public:
             if (entry == RIFT_BOSS)
                 entry = RandRiftBoss();
 
-            TC_LOG_DEBUG("scripts", "Instance The Black Morass: Summoning rift boss entry %u.", entry);
+            LOG_DEBUG("scripts", "Instance The Black Morass: Summoning rift boss entry %u.", entry);
 
             Position pos = me->GetRandomNearPosition(10.0f);
 
@@ -277,7 +264,7 @@ public:
             if (Creature* summon = me->SummonCreature(entry, pos, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 600000))
                 return summon;
 
-            TC_LOG_DEBUG("scripts", "Instance The Black Morass: What just happened there? No boss, no loot, no fun...");
+            LOG_DEBUG("scripts", "Instance The Black Morass: What just happened there? No boss, no loot, no fun...");
             return NULL;
         }
 
@@ -290,7 +277,7 @@ public:
                 if (tmp >= _currentRiftId)
                     ++tmp;
 
-                TC_LOG_DEBUG("scripts", "Instance The Black Morass: Creating Time Rift at locationId %i (old locationId was %u).", tmp, _currentRiftId);
+                LOG_DEBUG("scripts", "Instance The Black Morass: Creating Time Rift at locationId %i (old locationId was %u).", tmp, _currentRiftId);
 
                 _currentRiftId = tmp;
 

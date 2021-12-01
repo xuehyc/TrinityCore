@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "ScriptMgr.h"
@@ -521,8 +509,8 @@ class boss_hodir : public CreatureScript
             void FlashFreeze()
             {
                 std::list<Unit*> TargetList;
-                Trinity::AnyUnfriendlyUnitInObjectRangeCheck checker(me, me, 100.0f);
-                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, TargetList, checker);
+                Server::AnyUnfriendlyUnitInObjectRangeCheck checker(me, me, 100.0f);
+                Server::UnitListSearcher<Server::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, TargetList, checker);
                 Cell::VisitAllObjects(me, searcher, 100.0f);
                 for (std::list<Unit*>::iterator itr = TargetList.begin(); itr != TargetList.end(); ++itr)
                 {
@@ -695,8 +683,8 @@ class npc_hodir_priest : public CreatureScript
                         case EVENT_DISPEL_MAGIC:
                         {
                             std::list<Unit*> TargetList;
-                            Trinity::AnyFriendlyUnitInObjectRangeCheck checker(me, me, 30.0f);
-                            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, TargetList, checker);
+                            Server::AnyFriendlyUnitInObjectRangeCheck checker(me, me, 30.0f);
+                            Server::UnitListSearcher<Server::AnyFriendlyUnitInObjectRangeCheck> searcher(me, TargetList, checker);
                             Cell::VisitAllObjects(me, searcher, 30.0f);
                             for (std::list<Unit*>::iterator itr = TargetList.begin(); itr != TargetList.end(); ++itr)
                                 if ((*itr)->HasAura(SPELL_FREEZE))

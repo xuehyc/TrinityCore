@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "GameTime.h"
@@ -153,7 +141,7 @@ struct boss_four_horsemen_baseAI : public BossAI
                             uint32 deathTime = cBoss->AI()->GetData(DATA_DEATH_TIME);
                             if (!deathTime)
                             {
-                                TC_LOG_WARN("scripts", "FourHorsemenAI: Checking for achievement credit but horseman %s is reporting not dead", cBoss->GetName().c_str());
+                                LOG_WARN("scripts", "FourHorsemenAI: Checking for achievement credit but horseman %s is reporting not dead", cBoss->GetName().c_str());
                                 return 0;
                             }
                             if (!minTime || deathTime < minTime)
@@ -163,7 +151,7 @@ struct boss_four_horsemen_baseAI : public BossAI
                         }
                         else
                         {
-                            TC_LOG_WARN("scripts", "FourHorsemenAI: Checking for achievement credit but horseman with id %u is not present", uint32(boss));
+                            LOG_WARN("scripts", "FourHorsemenAI: Checking for achievement credit but horseman with id %u is not present", uint32(boss));
                             return 0;
                         }
                     return (getMSTimeDiff(minTime, maxTime) <= 15 * IN_MILLISECONDS) ? 1 : 0;
@@ -201,7 +189,7 @@ struct boss_four_horsemen_baseAI : public BossAI
                 }
                 else
                 {
-                    TC_LOG_WARN("scripts", "FourHorsemenAI: Checking if movement is finished but horseman with id %u is not present", uint32(boss));
+                    LOG_WARN("scripts", "FourHorsemenAI: Checking if movement is finished but horseman with id %u is not present", uint32(boss));
                     ResetEncounter();
                     return;
                 }
@@ -261,7 +249,7 @@ struct boss_four_horsemen_baseAI : public BossAI
                 }
                 else
                 {
-                    TC_LOG_WARN("scripts", "FourHorsemenAI: Encounter starting but horseman with id %u is not present", uint32(boss));
+                    LOG_WARN("scripts", "FourHorsemenAI: Encounter starting but horseman with id %u is not present", uint32(boss));
                     ResetEncounter();
                     return;
                 }
@@ -282,7 +270,7 @@ struct boss_four_horsemen_baseAI : public BossAI
                 }
                 else
                 {
-                    TC_LOG_WARN("scripts", "FourHorsemenAI: Encounter resetting but horseman with id %u is not present", uint32(boss));
+                    LOG_WARN("scripts", "FourHorsemenAI: Encounter resetting but horseman with id %u is not present", uint32(boss));
                 }
             }
         }
@@ -354,7 +342,7 @@ struct boss_four_horsemen_baseAI : public BossAI
                 }
                 else
                 {
-                    TC_LOG_WARN("scripts", "FourHorsemenAI: %s died but horseman with id %u is not present", me->GetName().c_str(), uint32(boss));
+                    LOG_WARN("scripts", "FourHorsemenAI: %s died but horseman with id %u is not present", me->GetName().c_str(), uint32(boss));
                     ResetEncounter();
                 }
             }

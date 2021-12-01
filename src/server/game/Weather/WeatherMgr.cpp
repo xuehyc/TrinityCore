@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /** \file
@@ -38,7 +25,7 @@ namespace
 
 WeatherData const* GetWeatherData(uint32 zone_id)
 {
-    return Trinity::Containers::MapGetValuePtr(_weatherData, zone_id);
+    return Server::Containers::MapGetValuePtr(_weatherData, zone_id);
 }
 
 void LoadWeatherData()
@@ -56,7 +43,7 @@ void LoadWeatherData()
 
     if (!result)
     {
-        TC_LOG_ERROR("server.loading", ">> Loaded 0 weather definitions. DB table `game_weather` is empty.");
+        LOG_ERROR("server.loading", ">> Loaded 0 weather definitions. DB table `game_weather` is empty.");
         return;
     }
 
@@ -77,19 +64,19 @@ void LoadWeatherData()
             if (wzc.data[season].rainChance > 100)
             {
                 wzc.data[season].rainChance = 25;
-                TC_LOG_ERROR("sql.sql", "Weather for zone %u season %u has wrong rain chance > 100%%", zone_id, season);
+                LOG_ERROR("sql.sql", "Weather for zone %u season %u has wrong rain chance > 100%%", zone_id, season);
             }
 
             if (wzc.data[season].snowChance > 100)
             {
                 wzc.data[season].snowChance = 25;
-                TC_LOG_ERROR("sql.sql", "Weather for zone %u season %u has wrong snow chance > 100%%", zone_id, season);
+                LOG_ERROR("sql.sql", "Weather for zone %u season %u has wrong snow chance > 100%%", zone_id, season);
             }
 
             if (wzc.data[season].stormChance > 100)
             {
                 wzc.data[season].stormChance = 25;
-                TC_LOG_ERROR("sql.sql", "Weather for zone %u season %u has wrong storm chance > 100%%", zone_id, season);
+                LOG_ERROR("sql.sql", "Weather for zone %u season %u has wrong storm chance > 100%%", zone_id, season);
             }
         }
 
@@ -99,7 +86,7 @@ void LoadWeatherData()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u weather definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u weather definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 } // namespace

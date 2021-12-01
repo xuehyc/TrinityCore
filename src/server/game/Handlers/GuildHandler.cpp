@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "WorldSession.h"
@@ -31,7 +18,7 @@
 
 void WorldSession::HandleGuildQueryOpcode(WorldPackets::Guild::QueryGuildInfo& query)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_QUERY [%s]: Guild: %s Target: %s",
+    LOG_DEBUG("guild", "CMSG_GUILD_QUERY [%s]: Guild: %s Target: %s",
         GetPlayerInfo().c_str(), query.GuildGuid.ToString().c_str(), query.PlayerGuid.ToString().c_str());
 
     if (Guild* guild = sGuildMgr->GetGuildByGuid(query.GuildGuid))
@@ -45,12 +32,12 @@ void WorldSession::HandleGuildQueryOpcode(WorldPackets::Guild::QueryGuildInfo& q
     response.GuildGuid = query.GuildGuid;
     SendPacket(response.Write());
 
-    TC_LOG_DEBUG("guild", "SMSG_GUILD_QUERY_RESPONSE [%s]", GetPlayerInfo().c_str());
+    LOG_DEBUG("guild", "SMSG_GUILD_QUERY_RESPONSE [%s]", GetPlayerInfo().c_str());
 }
 
 void WorldSession::HandleGuildInviteByName(WorldPackets::Guild::GuildInviteByName& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_INVITE [%s]: Invited: %s", GetPlayerInfo().c_str(), packet.Name.c_str());
+    LOG_DEBUG("guild", "CMSG_GUILD_INVITE [%s]: Invited: %s", GetPlayerInfo().c_str(), packet.Name.c_str());
     if (normalizePlayerName(packet.Name))
         if (Guild* guild = GetPlayer()->GetGuild())
             guild->HandleInviteMember(this, packet.Name);
@@ -58,7 +45,7 @@ void WorldSession::HandleGuildInviteByName(WorldPackets::Guild::GuildInviteByNam
 
 void WorldSession::HandleGuildOfficerRemoveMember(WorldPackets::Guild::GuildOfficerRemoveMember& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_REMOVE [%s]: Target: %s", GetPlayerInfo().c_str(), packet.Removee.ToString().c_str());
+    LOG_DEBUG("guild", "CMSG_GUILD_REMOVE [%s]: Target: %s", GetPlayerInfo().c_str(), packet.Removee.ToString().c_str());
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleRemoveMember(this, packet.Removee);
@@ -87,7 +74,7 @@ void WorldSession::HandleGuildGetRoster(WorldPackets::Guild::GuildGetRoster& /*p
 
 void WorldSession::HandleGuildPromoteMember(WorldPackets::Guild::GuildPromoteMember& promote)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_PROMOTE [%s]: Target: %s", GetPlayerInfo().c_str(), promote.Promotee.ToString().c_str());
+    LOG_DEBUG("guild", "CMSG_GUILD_PROMOTE [%s]: Target: %s", GetPlayerInfo().c_str(), promote.Promotee.ToString().c_str());
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleUpdateMemberRank(this, promote.Promotee, false);
@@ -95,7 +82,7 @@ void WorldSession::HandleGuildPromoteMember(WorldPackets::Guild::GuildPromoteMem
 
 void WorldSession::HandleGuildDemoteMember(WorldPackets::Guild::GuildDemoteMember& demote)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_DEMOTE [%s]: Target: %s", GetPlayerInfo().c_str(), demote.Demotee.ToString().c_str());
+    LOG_DEBUG("guild", "CMSG_GUILD_DEMOTE [%s]: Target: %s", GetPlayerInfo().c_str(), demote.Demotee.ToString().c_str());
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleUpdateMemberRank(this, demote.Demotee, true);
@@ -105,7 +92,7 @@ void WorldSession::HandleGuildAssignRank(WorldPackets::Guild::GuildAssignMemberR
 {
     ObjectGuid setterGuid = GetPlayer()->GetGUID();
 
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_ASSIGN_MEMBER_RANK [%s]: Target: %s Rank: %u, Issuer: %s",
+    LOG_DEBUG("guild", "CMSG_GUILD_ASSIGN_MEMBER_RANK [%s]: Target: %s Rank: %u, Issuer: %s",
         GetPlayerInfo().c_str(), packet.Member.ToString().c_str(), packet.RankOrder, setterGuid.ToString().c_str());
 
     if (Guild* guild = GetPlayer()->GetGuild())
@@ -126,7 +113,7 @@ void WorldSession::HandleGuildDelete(WorldPackets::Guild::GuildDelete& /*packet*
 
 void WorldSession::HandleGuildUpdateMotdText(WorldPackets::Guild::GuildUpdateMotdText& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_UPDATE_MOTD_TEXT [%s]: MOTD: %s", GetPlayerInfo().c_str(), packet.MotdText.c_str());
+    LOG_DEBUG("guild", "CMSG_GUILD_UPDATE_MOTD_TEXT [%s]: MOTD: %s", GetPlayerInfo().c_str(), packet.MotdText.c_str());
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleSetMOTD(this, packet.MotdText);
@@ -134,7 +121,7 @@ void WorldSession::HandleGuildUpdateMotdText(WorldPackets::Guild::GuildUpdateMot
 
 void WorldSession::HandleGuildSetMemberNote(WorldPackets::Guild::GuildSetMemberNote& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_SET_NOTE [%s]: Target: %s, Note: %s, Public: %u",
+    LOG_DEBUG("guild", "CMSG_GUILD_SET_NOTE [%s]: Target: %s, Note: %s, Public: %u",
         GetPlayerInfo().c_str(), packet.NoteeGUID.ToString().c_str(), packet.Note.c_str(), packet.IsPublic);
 
     if (Guild* guild = GetPlayer()->GetGuild())
@@ -143,7 +130,7 @@ void WorldSession::HandleGuildSetMemberNote(WorldPackets::Guild::GuildSetMemberN
 
 void WorldSession::HandleGuildGetRanks(WorldPackets::Guild::GuildGetRanks& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_GET_RANKS [%s]: Guild: %s",
+    LOG_DEBUG("guild", "CMSG_GUILD_GET_RANKS [%s]: Guild: %s",
         GetPlayerInfo().c_str(), packet.GuildGUID.ToString().c_str());
 
     if (Guild* guild = sGuildMgr->GetGuildByGuid(packet.GuildGUID))
@@ -153,7 +140,7 @@ void WorldSession::HandleGuildGetRanks(WorldPackets::Guild::GuildGetRanks& packe
 
 void WorldSession::HandleGuildAddRank(WorldPackets::Guild::GuildAddRank& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_ADD_RANK [%s]: Rank: %s", GetPlayerInfo().c_str(), packet.Name.c_str());
+    LOG_DEBUG("guild", "CMSG_GUILD_ADD_RANK [%s]: Rank: %s", GetPlayerInfo().c_str(), packet.Name.c_str());
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleAddNewRank(this, packet.Name);
@@ -161,7 +148,7 @@ void WorldSession::HandleGuildAddRank(WorldPackets::Guild::GuildAddRank& packet)
 
 void WorldSession::HandleGuildDeleteRank(WorldPackets::Guild::GuildDeleteRank& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_DELETE_RANK [%s]: Rank: %u", GetPlayerInfo().c_str(), packet.RankOrder);
+    LOG_DEBUG("guild", "CMSG_GUILD_DELETE_RANK [%s]: Rank: %u", GetPlayerInfo().c_str(), packet.RankOrder);
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleRemoveRank(this, packet.RankOrder);
@@ -169,7 +156,7 @@ void WorldSession::HandleGuildDeleteRank(WorldPackets::Guild::GuildDeleteRank& p
 
 void WorldSession::HandleGuildUpdateInfoText(WorldPackets::Guild::GuildUpdateInfoText& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_UPDATE_INFO_TEXT [%s]: %s", GetPlayerInfo().c_str(), packet.InfoText.c_str());
+    LOG_DEBUG("guild", "CMSG_GUILD_UPDATE_INFO_TEXT [%s]: %s", GetPlayerInfo().c_str(), packet.InfoText.c_str());
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleSetInfo(this, packet.InfoText);
@@ -180,7 +167,7 @@ void WorldSession::HandleSaveGuildEmblem(WorldPackets::Guild::SaveGuildEmblem& p
     EmblemInfo emblemInfo;
     emblemInfo.ReadPacket(packet);
 
-    TC_LOG_DEBUG("guild", "CMSG_SAVE_GUILD_EMBLEM [%s]: Guid: [%s] Style: %d, Color: %d, BorderStyle: %d, BorderColor: %d, BackgroundColor: %d"
+    LOG_DEBUG("guild", "CMSG_SAVE_GUILD_EMBLEM [%s]: Guid: [%s] Style: %d, Color: %d, BorderStyle: %d, BorderColor: %d, BackgroundColor: %d"
         , GetPlayerInfo().c_str(), packet.Vendor.ToString().c_str(), emblemInfo.GetStyle()
         , emblemInfo.GetColor(), emblemInfo.GetBorderStyle()
         , emblemInfo.GetBorderColor(), emblemInfo.GetBackgroundColor());
@@ -208,7 +195,7 @@ void WorldSession::HandleSaveGuildEmblem(WorldPackets::Guild::SaveGuildEmblem& p
 
 void WorldSession::HandleGuildEventLogQuery(WorldPackets::Guild::GuildEventLogQuery& /*packet*/)
 {
-    TC_LOG_DEBUG("guild", "MSG_GUILD_EVENT_LOG_QUERY [%s]", GetPlayerInfo().c_str());
+    LOG_DEBUG("guild", "MSG_GUILD_EVENT_LOG_QUERY [%s]", GetPlayerInfo().c_str());
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->SendEventLog(this);
@@ -229,7 +216,7 @@ void WorldSession::HandleGuildPermissionsQuery(WorldPackets::Guild::GuildPermiss
 // Called when clicking on Guild bank gameobject
 void WorldSession::HandleGuildBankActivate(WorldPackets::Guild::GuildBankActivate& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_ACTIVATE [%s]: [%s] AllSlots: %u"
+    LOG_DEBUG("guild", "CMSG_GUILD_BANK_ACTIVATE [%s]: [%s] AllSlots: %u"
         , GetPlayerInfo().c_str(), packet.Banker.ToString().c_str(), packet.FullUpdate);
 
     GameObject const* const go = GetPlayer()->GetGameObjectIfCanInteractWith(packet.Banker, GAMEOBJECT_TYPE_GUILD_BANK);
@@ -249,7 +236,7 @@ void WorldSession::HandleGuildBankActivate(WorldPackets::Guild::GuildBankActivat
 // Called when opening guild bank tab only (first one)
 void WorldSession::HandleGuildBankQueryTab(WorldPackets::Guild::GuildBankQueryTab& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_QUERY_TAB [%s]: %s, TabId: %u, ShowTabs: %u"
+    LOG_DEBUG("guild", "CMSG_GUILD_BANK_QUERY_TAB [%s]: %s, TabId: %u, ShowTabs: %u"
         , GetPlayerInfo().c_str(), packet.Banker.ToString().c_str(), packet.Tab, packet.FullUpdate);
 
     if (GetPlayer()->GetGameObjectIfCanInteractWith(packet.Banker, GAMEOBJECT_TYPE_GUILD_BANK))
@@ -259,7 +246,7 @@ void WorldSession::HandleGuildBankQueryTab(WorldPackets::Guild::GuildBankQueryTa
 
 void WorldSession::HandleGuildBankDepositMoney(WorldPackets::Guild::GuildBankDepositMoney& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_DEPOSIT_MONEY [%s]: [%s], money: " UI64FMTD,
+    LOG_DEBUG("guild", "CMSG_GUILD_BANK_DEPOSIT_MONEY [%s]: [%s], money: " UI64FMTD,
         GetPlayerInfo().c_str(), packet.Banker.ToString().c_str(), packet.Money);
 
     if (GetPlayer()->GetGameObjectIfCanInteractWith(packet.Banker, GAMEOBJECT_TYPE_GUILD_BANK))
@@ -270,7 +257,7 @@ void WorldSession::HandleGuildBankDepositMoney(WorldPackets::Guild::GuildBankDep
 
 void WorldSession::HandleGuildBankWithdrawMoney(WorldPackets::Guild::GuildBankWithdrawMoney& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_WITHDRAW_MONEY [%s]: [%s], money: " UI64FMTD,
+    LOG_DEBUG("guild", "CMSG_GUILD_BANK_WITHDRAW_MONEY [%s]: [%s], money: " UI64FMTD,
         GetPlayerInfo().c_str(), packet.Banker.ToString().c_str(), packet.Money);
 
     if (packet.Money && GetPlayer()->GetGameObjectIfCanInteractWith(packet.Banker, GAMEOBJECT_TYPE_GUILD_BANK))
@@ -304,7 +291,7 @@ void WorldSession::HandleGuildBankSwapItems(WorldPackets::Guild::GuildBankSwapIt
 
 void WorldSession::HandleGuildBankBuyTab(WorldPackets::Guild::GuildBankBuyTab& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_BUY_TAB [%s]: [%s[, TabId: %u", GetPlayerInfo().c_str(), packet.Banker.ToString().c_str(), packet.BankTab);
+    LOG_DEBUG("guild", "CMSG_GUILD_BANK_BUY_TAB [%s]: [%s[, TabId: %u", GetPlayerInfo().c_str(), packet.Banker.ToString().c_str(), packet.BankTab);
 
     if (!packet.Banker || GetPlayer()->GetGameObjectIfCanInteractWith(packet.Banker, GAMEOBJECT_TYPE_GUILD_BANK))
         if (Guild* guild = GetPlayer()->GetGuild())
@@ -313,7 +300,7 @@ void WorldSession::HandleGuildBankBuyTab(WorldPackets::Guild::GuildBankBuyTab& p
 
 void WorldSession::HandleGuildBankUpdateTab(WorldPackets::Guild::GuildBankUpdateTab& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_UPDATE_TAB [%s]: [%s], TabId: %u, Name: %s, Icon: %s"
+    LOG_DEBUG("guild", "CMSG_GUILD_BANK_UPDATE_TAB [%s]: [%s], TabId: %u, Name: %s, Icon: %s"
         , GetPlayerInfo().c_str(), packet.Banker.ToString().c_str(), packet.BankTab, packet.Name.c_str(), packet.Icon.c_str());
 
     if (!packet.Name.empty() && !packet.Icon.empty())
@@ -324,7 +311,7 @@ void WorldSession::HandleGuildBankUpdateTab(WorldPackets::Guild::GuildBankUpdate
 
 void WorldSession::HandleGuildBankLogQuery(WorldPackets::Guild::GuildBankLogQuery& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_LOG_QUERY [%s]: TabId: %u", GetPlayerInfo().c_str(), packet.Tab);
+    LOG_DEBUG("guild", "CMSG_GUILD_BANK_LOG_QUERY [%s]: TabId: %u", GetPlayerInfo().c_str(), packet.Tab);
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->SendBankLog(this, packet.Tab);
@@ -332,7 +319,7 @@ void WorldSession::HandleGuildBankLogQuery(WorldPackets::Guild::GuildBankLogQuer
 
 void WorldSession::HandleGuildBankTextQuery(WorldPackets::Guild::GuildBankTextQuery& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_QUERY_TEXT [%s]: TabId: %u", GetPlayerInfo().c_str(), packet.Tab);
+    LOG_DEBUG("guild", "CMSG_GUILD_BANK_QUERY_TEXT [%s]: TabId: %u", GetPlayerInfo().c_str(), packet.Tab);
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->SendBankTabText(this, packet.Tab);
@@ -340,7 +327,7 @@ void WorldSession::HandleGuildBankTextQuery(WorldPackets::Guild::GuildBankTextQu
 
 void WorldSession::HandleGuildBankSetTabText(WorldPackets::Guild::GuildBankSetTabText& packet)
 {
-    TC_LOG_DEBUG("guild", "CMSG_SET_GUILD_BANK_TEXT [%s]: TabId: %u, Text: %s", GetPlayerInfo().c_str(), packet.Tab, packet.TabText.c_str());
+    LOG_DEBUG("guild", "CMSG_SET_GUILD_BANK_TEXT [%s]: TabId: %u, Text: %s", GetPlayerInfo().c_str(), packet.Tab, packet.TabText.c_str());
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->SetBankTabText(packet.Tab, packet.TabText);
@@ -356,7 +343,7 @@ void WorldSession::HandleGuildSetRankPermissions(WorldPackets::Guild::GuildSetRa
     for (uint8 tabId = 0; tabId < GUILD_BANK_MAX_TABS; ++tabId)
         rightsAndSlots[tabId] = GuildBankRightsAndSlots(tabId, uint8(packet.TabFlags[tabId]), uint32(packet.TabWithdrawItemLimit[tabId]));
 
-    TC_LOG_DEBUG("guild", "CMSG_GUILD_SET_RANK_PERMISSIONS [%s]: Rank: %s (%u)", GetPlayerInfo().c_str(), packet.RankName.c_str(), packet.RankOrder);
+    LOG_DEBUG("guild", "CMSG_GUILD_SET_RANK_PERMISSIONS [%s]: Rank: %s (%u)", GetPlayerInfo().c_str(), packet.RankName.c_str(), packet.RankOrder);
 
     guild->HandleSetRankInfo(this, packet.RankOrder, packet.RankName, packet.Flags, packet.WithdrawGoldLimit, rightsAndSlots);
 }

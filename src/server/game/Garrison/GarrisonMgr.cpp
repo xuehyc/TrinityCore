@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "GarrisonMgr.h"
@@ -148,7 +136,7 @@ uint64 GarrisonMgr::GenerateFollowerDbId()
 {
     if (_followerDbIdGenerator >= std::numeric_limits<uint64>::max())
     {
-        TC_LOG_ERROR("misc", "Garrison follower db id overflow! Can't continue, shutting down server. ");
+        LOG_ERROR("misc", "Garrison follower db id overflow! Can't continue, shutting down server. ");
         World::StopNow(ERROR_EXIT_CODE);
     }
 
@@ -209,8 +197,8 @@ std::list<GarrAbilityEntry const*> GarrisonMgr::RollFollowerAbilities(uint32 gar
         }
     }
 
-    Trinity::Containers::RandomResize(abilityList, std::max<int32>(0, slots[0] - forcedAbilities.size()));
-    Trinity::Containers::RandomResize(traitList, std::max<int32>(0, slots[1] - forcedTraits.size()));
+    Server::Containers::RandomResize(abilityList, std::max<int32>(0, slots[0] - forcedAbilities.size()));
+    Server::Containers::RandomResize(traitList, std::max<int32>(0, slots[1] - forcedTraits.size()));
 
     // Add abilities specified in GarrFollowerXAbility.db2 before generic classspec ones on follower creation
     if (initial)
@@ -242,7 +230,7 @@ std::list<GarrAbilityEntry const*> GarrisonMgr::RollFollowerAbilities(uint32 gar
         std::set_difference(classSpecAbilities.begin(), classSpecAbilities.end(), forcedAbilities.begin(), forcedAbilities.end(), std::back_inserter(classSpecAbilitiesTemp));
         std::set_union(classSpecAbilitiesTemp.begin(), classSpecAbilitiesTemp.end(), classSpecAbilitiesTemp2.begin(), classSpecAbilitiesTemp2.end(), std::back_inserter(abilityList));
 
-        Trinity::Containers::RandomResize(abilityList, std::max<int32>(0, slots[0] - forcedAbilities.size()));
+        Server::Containers::RandomResize(abilityList, std::max<int32>(0, slots[0] - forcedAbilities.size()));
     }
 
     if (slots[1] > forcedTraits.size() + traitList.size())
@@ -343,7 +331,7 @@ void GarrisonMgr::LoadPlotFinalizeGOInfo()
         "allianceGameObjectId, allianceX, allianceY, allianceZ, allianceO, allianceAnimKitId FROM garrison_plot_finalize_info");
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 garrison follower class spec abilities. DB table `garrison_plot_finalize_info` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 garrison follower class spec abilities. DB table `garrison_plot_finalize_info` is empty.");
         return;
     }
 
@@ -359,21 +347,21 @@ void GarrisonMgr::LoadPlotFinalizeGOInfo()
 
         if (!sGarrPlotInstanceStore.LookupEntry(garrPlotInstanceId))
         {
-            TC_LOG_ERROR("sql.sql", "Non-existing GarrPlotInstance.db2 entry %u was referenced in `garrison_plot_finalize_info`.", garrPlotInstanceId);
+            LOG_ERROR("sql.sql", "Non-existing GarrPlotInstance.db2 entry %u was referenced in `garrison_plot_finalize_info`.", garrPlotInstanceId);
             continue;
         }
 
         GameObjectTemplate const* goTemplate = sObjectMgr->GetGameObjectTemplate(hordeGameObjectId);
         if (!goTemplate)
         {
-            TC_LOG_ERROR("sql.sql", "Non-existing gameobject_template entry %u was referenced in `garrison_plot_finalize_info`.`hordeGameObjectId` for garrPlotInstanceId %u.",
+            LOG_ERROR("sql.sql", "Non-existing gameobject_template entry %u was referenced in `garrison_plot_finalize_info`.`hordeGameObjectId` for garrPlotInstanceId %u.",
                 hordeGameObjectId, garrPlotInstanceId);
             continue;
         }
 
         if (goTemplate->type != GAMEOBJECT_TYPE_GOOBER)
         {
-            TC_LOG_ERROR("sql.sql", "Invalid gameobject type %u (entry %u) was referenced in `garrison_plot_finalize_info`.`hordeGameObjectId` for garrPlotInstanceId %u.",
+            LOG_ERROR("sql.sql", "Invalid gameobject type %u (entry %u) was referenced in `garrison_plot_finalize_info`.`hordeGameObjectId` for garrPlotInstanceId %u.",
                 goTemplate->type, hordeGameObjectId, garrPlotInstanceId);
             continue;
         }
@@ -381,28 +369,28 @@ void GarrisonMgr::LoadPlotFinalizeGOInfo()
         goTemplate = sObjectMgr->GetGameObjectTemplate(allianceGameObjectId);
         if (!goTemplate)
         {
-            TC_LOG_ERROR("sql.sql", "Non-existing gameobject_template entry %u was referenced in `garrison_plot_finalize_info`.`allianceGameObjectId` for garrPlotInstanceId %u.",
+            LOG_ERROR("sql.sql", "Non-existing gameobject_template entry %u was referenced in `garrison_plot_finalize_info`.`allianceGameObjectId` for garrPlotInstanceId %u.",
                 allianceGameObjectId, garrPlotInstanceId);
             continue;
         }
 
         if (goTemplate->type != GAMEOBJECT_TYPE_GOOBER)
         {
-            TC_LOG_ERROR("sql.sql", "Invalid gameobject type %u (entry %u) was referenced in `garrison_plot_finalize_info`.`allianceGameObjectId` for garrPlotInstanceId %u.",
+            LOG_ERROR("sql.sql", "Invalid gameobject type %u (entry %u) was referenced in `garrison_plot_finalize_info`.`allianceGameObjectId` for garrPlotInstanceId %u.",
                 goTemplate->type, allianceGameObjectId, garrPlotInstanceId);
             continue;
         }
 
         if (hordeAnimKitId && !sAnimKitStore.LookupEntry(hordeAnimKitId))
         {
-            TC_LOG_ERROR("sql.sql", "Non-existing AnimKit.dbc entry %u was referenced in `garrison_plot_finalize_info`.`hordeAnimKitId` for garrPlotInstanceId %u.",
+            LOG_ERROR("sql.sql", "Non-existing AnimKit.dbc entry %u was referenced in `garrison_plot_finalize_info`.`hordeAnimKitId` for garrPlotInstanceId %u.",
                 hordeAnimKitId, garrPlotInstanceId);
             continue;
         }
 
         if (allianceAnimKitId && !sAnimKitStore.LookupEntry(allianceAnimKitId))
         {
-            TC_LOG_ERROR("sql.sql", "Non-existing AnimKit.dbc entry %u was referenced in `garrison_plot_finalize_info`.`allianceAnimKitId` for garrPlotInstanceId %u.",
+            LOG_ERROR("sql.sql", "Non-existing AnimKit.dbc entry %u was referenced in `garrison_plot_finalize_info`.`allianceAnimKitId` for garrPlotInstanceId %u.",
                 allianceAnimKitId, garrPlotInstanceId);
             continue;
         }
@@ -418,7 +406,7 @@ void GarrisonMgr::LoadPlotFinalizeGOInfo()
 
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u garrison plot finalize entries in %u.", uint32(_finalizePlotGOInfo.size()), GetMSTimeDiffToNow(msTime));
+    LOG_INFO("server.loading", ">> Loaded %u garrison plot finalize entries in %u.", uint32(_finalizePlotGOInfo.size()), GetMSTimeDiffToNow(msTime));
 }
 
 void GarrisonMgr::LoadFollowerClassSpecAbilities()
@@ -426,7 +414,7 @@ void GarrisonMgr::LoadFollowerClassSpecAbilities()
     QueryResult result = WorldDatabase.Query("SELECT classSpecId, abilityId FROM garrison_follower_class_spec_abilities");
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 garrison follower class spec abilities. DB table `garrison_follower_class_spec_abilities` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 garrison follower class spec abilities. DB table `garrison_follower_class_spec_abilities` is empty.");
         return;
     }
 
@@ -440,14 +428,14 @@ void GarrisonMgr::LoadFollowerClassSpecAbilities()
 
         if (!sGarrClassSpecStore.LookupEntry(classSpecId))
         {
-            TC_LOG_ERROR("sql.sql", "Non-existing GarrClassSpec.db2 entry %u was referenced in `garrison_follower_class_spec_abilities` by row (%u, %u).", classSpecId, classSpecId, abilityId);
+            LOG_ERROR("sql.sql", "Non-existing GarrClassSpec.db2 entry %u was referenced in `garrison_follower_class_spec_abilities` by row (%u, %u).", classSpecId, classSpecId, abilityId);
             continue;
         }
 
         GarrAbilityEntry const* ability = sGarrAbilityStore.LookupEntry(abilityId);
         if (!ability)
         {
-            TC_LOG_ERROR("sql.sql", "Non-existing GarrAbility.db2 entry %u was referenced in `garrison_follower_class_spec_abilities` by row (%u, %u).", abilityId, classSpecId, abilityId);
+            LOG_ERROR("sql.sql", "Non-existing GarrAbility.db2 entry %u was referenced in `garrison_follower_class_spec_abilities` by row (%u, %u).", abilityId, classSpecId, abilityId);
             continue;
         }
 
@@ -459,5 +447,5 @@ void GarrisonMgr::LoadFollowerClassSpecAbilities()
     for (auto& pair : _garrisonFollowerClassSpecAbilities)
         pair.second.sort();
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u garrison follower class spec abilities in %u.", count, GetMSTimeDiffToNow(msTime));
+    LOG_INFO("server.loading", ">> Loaded %u garrison follower class spec abilities in %u.", count, GetMSTimeDiffToNow(msTime));
 }

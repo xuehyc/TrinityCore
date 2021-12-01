@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "LFG.h"
@@ -43,31 +31,31 @@ std::string GetRolesString(uint8 roles)
     std::string rolesstr = "";
 
     if (roles & PLAYER_ROLE_TANK)
-        rolesstr.append(sObjectMgr->GetTrinityStringForDBCLocale(LANG_LFG_ROLE_TANK));
+        rolesstr.append(sObjectMgr->GetServerStringForDBCLocale(LANG_LFG_ROLE_TANK));
 
     if (roles & PLAYER_ROLE_HEALER)
     {
         if (!rolesstr.empty())
             rolesstr.append(", ");
-        rolesstr.append(sObjectMgr->GetTrinityStringForDBCLocale(LANG_LFG_ROLE_HEALER));
+        rolesstr.append(sObjectMgr->GetServerStringForDBCLocale(LANG_LFG_ROLE_HEALER));
     }
 
     if (roles & PLAYER_ROLE_DAMAGE)
     {
         if (!rolesstr.empty())
             rolesstr.append(", ");
-        rolesstr.append(sObjectMgr->GetTrinityStringForDBCLocale(LANG_LFG_ROLE_DAMAGE));
+        rolesstr.append(sObjectMgr->GetServerStringForDBCLocale(LANG_LFG_ROLE_DAMAGE));
     }
 
     if (roles & PLAYER_ROLE_LEADER)
     {
         if (!rolesstr.empty())
             rolesstr.append(", ");
-        rolesstr.append(sObjectMgr->GetTrinityStringForDBCLocale(LANG_LFG_ROLE_LEADER));
+        rolesstr.append(sObjectMgr->GetServerStringForDBCLocale(LANG_LFG_ROLE_LEADER));
     }
 
     if (rolesstr.empty())
-        rolesstr.append(sObjectMgr->GetTrinityStringForDBCLocale(LANG_LFG_ROLE_NONE));
+        rolesstr.append(sObjectMgr->GetServerStringForDBCLocale(LANG_LFG_ROLE_NONE));
 
     return rolesstr;
 }
@@ -100,7 +88,7 @@ std::string GetStateString(LfgState state)
             break;
     }
 
-    return std::string(sObjectMgr->GetTrinityStringForDBCLocale(entry));
+    return std::string(sObjectMgr->GetServerStringForDBCLocale(entry));
 }
 
 } // namespace lfg

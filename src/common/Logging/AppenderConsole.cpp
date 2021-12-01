@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "AppenderConsole.h"
@@ -20,7 +8,7 @@
 #include "Util.h"
 #include <sstream>
 
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if SERVER_PLATFORM == SERVER_PLATFORM_WINDOWS
   #include <Windows.h>
 #endif
 
@@ -65,7 +53,7 @@ void AppenderConsole::InitColors(std::string const& str)
 
 void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
 {
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#if SERVER_PLATFORM == SERVER_PLATFORM_WINDOWS
     static WORD WinColorFG[MaxColors] =
     {
         0,                                                  // BLACK
@@ -152,7 +140,7 @@ void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
 
 void AppenderConsole::ResetColor(bool stdout_stream)
 {
-    #if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+    #if SERVER_PLATFORM == SERVER_PLATFORM_WINDOWS
     HANDLE hConsole = GetStdHandle(stdout_stream ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
     SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
     #else

@@ -1,23 +1,10 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
-#ifndef TRINITY_MAIL_H
-#define TRINITY_MAIL_H
+#ifndef SERVER_MAIL_H
+#define SERVER_MAIL_H
 
 #include "Common.h"
 #include "ObjectGuid.h"
@@ -82,7 +69,7 @@ enum MailShowFlags
     MAIL_SHOW_RETURN  = 0x0010
 };
 
-class TC_GAME_API MailSender
+class GAME_API MailSender
 {
     public:                                                 // Constructors
         MailSender(MailMessageType messageType, ObjectGuid::LowType sender_guidlow_or_entry, MailStationery stationery = MAIL_STATIONERY_DEFAULT)
@@ -105,7 +92,7 @@ class TC_GAME_API MailSender
         MailStationery m_stationery;
 };
 
-class TC_GAME_API MailReceiver
+class GAME_API MailReceiver
 {
     public:                                                 // Constructors
         explicit MailReceiver(ObjectGuid::LowType receiver_lowguid) : m_receiver(NULL), m_receiver_lowguid(receiver_lowguid) { }
@@ -119,7 +106,7 @@ class TC_GAME_API MailReceiver
         ObjectGuid::LowType m_receiver_lowguid;
 };
 
-class TC_GAME_API MailDraft
+class GAME_API MailDraft
 {
     typedef std::map<ObjectGuid::LowType, Item*> MailItemMap;
 
@@ -167,7 +154,7 @@ struct MailItemInfo
 };
 typedef std::vector<MailItemInfo> MailItemInfoVec;
 
-struct TC_GAME_API Mail
+struct GAME_API Mail
 {
     uint32 messageID;
     uint8 messageType;

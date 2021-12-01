@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "DatabaseEnv.h"
@@ -46,7 +33,7 @@ void WaypointMgr::Load()
 
     if (!result)
     {
-        TC_LOG_ERROR("server.loading", ">> Loaded 0 waypoints. DB table `waypoint_data` is empty!");
+        LOG_ERROR("server.loading", ">> Loaded 0 waypoints. DB table `waypoint_data` is empty!");
         return;
     }
 
@@ -65,8 +52,8 @@ void WaypointMgr::Load()
         float z = fields[4].GetFloat();
         float o = fields[5].GetFloat();
 
-        Trinity::NormalizeMapCoord(x);
-        Trinity::NormalizeMapCoord(y);
+        Server::NormalizeMapCoord(x);
+        Server::NormalizeMapCoord(y);
 
         wp->id = fields[1].GetUInt32();
         wp->x = x;
@@ -77,7 +64,7 @@ void WaypointMgr::Load()
 
         if (wp->move_type >= WAYPOINT_MOVE_TYPE_MAX)
         {
-            TC_LOG_ERROR("sql.sql", "Waypoint %u in waypoint_data has invalid move_type, ignoring", wp->id);
+            LOG_ERROR("sql.sql", "Waypoint %u in waypoint_data has invalid move_type, ignoring", wp->id);
             delete wp;
             continue;
         }
@@ -91,7 +78,7 @@ void WaypointMgr::Load()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u waypoints in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u waypoints in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 WaypointMgr* WaypointMgr::instance()
@@ -132,8 +119,8 @@ void WaypointMgr::ReloadPath(uint32 id)
         float z = fields[3].GetFloat();
         float o = fields[4].GetFloat();
 
-        Trinity::NormalizeMapCoord(x);
-        Trinity::NormalizeMapCoord(y);
+        Server::NormalizeMapCoord(x);
+        Server::NormalizeMapCoord(y);
 
         wp->id = fields[0].GetUInt32();
         wp->x = x;
@@ -144,7 +131,7 @@ void WaypointMgr::ReloadPath(uint32 id)
 
         if (wp->move_type >= WAYPOINT_MOVE_TYPE_MAX)
         {
-            TC_LOG_ERROR("sql.sql", "Waypoint %u in waypoint_data has invalid move_type, ignoring", wp->id);
+            LOG_ERROR("sql.sql", "Waypoint %u in waypoint_data has invalid move_type, ignoring", wp->id);
             delete wp;
             continue;
         }

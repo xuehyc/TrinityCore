@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "CellImpl.h"
@@ -343,13 +331,13 @@ public:
                 case EVENT_BLESS:
                 {
                     std::list<Unit*> TargetList;
-                    Trinity::AnyFriendlyUnitInObjectRangeCheck checker(me, me, 100.0f);
-                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, TargetList, checker);
+                    Server::AnyFriendlyUnitInObjectRangeCheck checker(me, me, 100.0f);
+                    Server::UnitListSearcher<Server::AnyFriendlyUnitInObjectRangeCheck> searcher(me, TargetList, checker);
                     Cell::VisitAllObjects(me, searcher, 100.0f);
 
                     if (!TargetList.empty())
                     {
-                        Unit* target = Trinity::Containers::SelectRandomContainerElement(TargetList);
+                        Unit* target = Server::Containers::SelectRandomContainerElement(TargetList);
                         DoCast(target, RAND(SPELL_BLESS_PROTECTION, SPELL_BLESS_SPELL_WARDING));
                     }
                     events.Repeat(Seconds(30), Seconds(45));

@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "QuestObjectiveCriteriaMgr.h"
@@ -97,7 +85,7 @@ void QuestObjectiveCriteriaMgr::LoadFromDB(PreparedQueryResult objectiveResult, 
             if (!criteria)
             {
                 // Removing non-existing criteria data for all characters
-                TC_LOG_ERROR("criteria.quest", "Non-existing quest objective criteria %u data has been removed from the table `character_queststatus_objectives_criteria_progress`.", criteriaId);
+                LOG_ERROR("criteria.quest", "Non-existing quest objective criteria %u data has been removed from the table `character_queststatus_objectives_criteria_progress`.", criteriaId);
 
                 CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_QUEST_PROGRESS_CRITERIA);
                 stmt->setUInt32(0, criteriaId);
@@ -163,7 +151,7 @@ void QuestObjectiveCriteriaMgr::SaveToDB(CharacterDatabaseTransaction& trans)
 
 void QuestObjectiveCriteriaMgr::ResetCriteria(CriteriaTypes type, uint64 miscValue1, uint64 miscValue2, bool evenIfCriteriaComplete)
 {
-    TC_LOG_DEBUG("criteria.quest", "QuestObjectiveCriteriaMgr::ResetCriteria(%u, " UI64FMTD ", " UI64FMTD ")", type, miscValue1, miscValue2);
+    LOG_DEBUG("criteria.quest", "QuestObjectiveCriteriaMgr::ResetCriteria(%u, " UI64FMTD ", " UI64FMTD ")", type, miscValue1, miscValue2);
 
     // disable for gamemasters with GM-mode enabled
     if (_owner->IsGameMaster())
@@ -235,7 +223,7 @@ void QuestObjectiveCriteriaMgr::CompletedObjective(QuestObjective const* questOb
 
     referencePlayer->KillCreditCriteriaTreeObjective(*questObjective);
 
-    TC_LOG_INFO("criteria.quest", "QuestObjectiveCriteriaMgr::CompletedObjective(%u). %s", questObjective->ID, GetOwnerInfo().c_str());
+    LOG_INFO("criteria.quest", "QuestObjectiveCriteriaMgr::CompletedObjective(%u). %s", questObjective->ID, GetOwnerInfo().c_str());
 
     _completedObjectives.insert(questObjective->ID);
 }
@@ -278,7 +266,7 @@ bool QuestObjectiveCriteriaMgr::CanUpdateCriteriaTree(Criteria const* criteria, 
 
     if (HasCompletedObjective(objective))
     {
-        TC_LOG_TRACE("criteria.quest", "QuestObjectiveCriteriaMgr::CanUpdateCriteriaTree: (Id: %u Type %s Quest Objective %u) Objective already completed",
+        LOG_TRACE("criteria.quest", "QuestObjectiveCriteriaMgr::CanUpdateCriteriaTree: (Id: %u Type %s Quest Objective %u) Objective already completed",
             criteria->ID, CriteriaMgr::GetCriteriaTypeString(criteria->Entry->Type), objective->ID);
         return false;
     }
@@ -311,7 +299,7 @@ void QuestObjectiveCriteriaMgr::SendPacket(WorldPacket const* data) const
 
 std::string QuestObjectiveCriteriaMgr::GetOwnerInfo() const
 {
-    return Trinity::StringFormat("%s %s", _owner->GetGUID().ToString().c_str(), _owner->GetName().c_str());
+    return Server::StringFormat("%s %s", _owner->GetGUID().ToString().c_str(), _owner->GetName().c_str());
 }
 
 CriteriaList const& QuestObjectiveCriteriaMgr::GetCriteriaByType(CriteriaTypes type) const

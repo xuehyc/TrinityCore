@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "MoveSpline.h"
@@ -176,7 +163,7 @@ void MoveSpline::init_spline(const MoveSplineInitArgs& args)
     /// @todo what to do in such cases? problem is in input data (all points are at same coords)
     if (spline.length() < minimal_duration)
     {
-        TC_LOG_ERROR("misc", "MoveSpline::init_spline: zero length spline, wrong input data?");
+        LOG_ERROR("misc", "MoveSpline::init_spline: zero length spline, wrong input data?");
         spline.set_length(spline.last(), spline.isCyclic() ? 1000 : 1);
     }
     point_Idx = spline.first();
@@ -232,7 +219,7 @@ bool MoveSplineInitArgs::Validate(Unit* unit) const
 #define CHECK(exp) \
     if (!(exp))\
     {\
-        TC_LOG_ERROR("misc.movesplineinitargs", "MoveSplineInitArgs::Validate: expression '%s' failed for %s Entry: %u", #exp, unit->GetGUID().ToString().c_str(), unit->GetEntry());\
+        LOG_ERROR("misc.movesplineinitargs", "MoveSplineInitArgs::Validate: expression '%s' failed for %s Entry: %u", #exp, unit->GetGUID().ToString().c_str(), unit->GetEntry());\
         return false;\
     }
     CHECK(path.size() > 1);

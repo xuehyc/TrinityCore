@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "AreaTrigger.h"
@@ -95,14 +83,14 @@ bool AreaTrigger::Create(uint32 spellMiscId, Unit* caster, Unit* target, SpellIn
     Relocate(pos);
     if (!IsPositionValid())
     {
-        TC_LOG_ERROR("entities.areatrigger", "AreaTrigger (spellMiscId %u) not created. Invalid coordinates (X: %f Y: %f)", spellMiscId, GetPositionX(), GetPositionY());
+        LOG_ERROR("entities.areatrigger", "AreaTrigger (spellMiscId %u) not created. Invalid coordinates (X: %f Y: %f)", spellMiscId, GetPositionX(), GetPositionY());
         return false;
     }
 
     _areaTriggerMiscTemplate = sAreaTriggerDataStore->GetAreaTriggerMiscTemplate(spellMiscId);
     if (!_areaTriggerMiscTemplate)
     {
-        TC_LOG_ERROR("entities.areatrigger", "AreaTrigger (spellMiscId %u) not created. Invalid areatrigger miscid (%u)", spellMiscId, spellMiscId);
+        LOG_ERROR("entities.areatrigger", "AreaTrigger (spellMiscId %u) not created. Invalid areatrigger miscid (%u)", spellMiscId, spellMiscId);
         return false;
     }
 
@@ -301,8 +289,8 @@ void AreaTrigger::SearchUnitInSphere(std::list<Unit*>& targetList)
         }
     }
 
-    Trinity::AnyUnitInObjectRangeCheck check(this, radius);
-    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(this, targetList, check);
+    Server::AnyUnitInObjectRangeCheck check(this, radius);
+    Server::UnitListSearcher<Server::AnyUnitInObjectRangeCheck> searcher(this, targetList, check);
     Cell::VisitAllObjects(this, searcher, GetTemplate()->MaxSearchRadius);
 }
 
@@ -312,8 +300,8 @@ void AreaTrigger::SearchUnitInBox(std::list<Unit*>& targetList)
     float extentsY = GetTemplate()->BoxDatas.Extents[1];
     float extentsZ = GetTemplate()->BoxDatas.Extents[2];
 
-    Trinity::AnyUnitInObjectRangeCheck check(this, GetTemplate()->MaxSearchRadius, false);
-    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(this, targetList, check);
+    Server::AnyUnitInObjectRangeCheck check(this, GetTemplate()->MaxSearchRadius, false);
+    Server::UnitListSearcher<Server::AnyUnitInObjectRangeCheck> searcher(this, targetList, check);
     Cell::VisitAllObjects(this, searcher, GetTemplate()->MaxSearchRadius);
 
     float halfExtentsX = extentsX / 2.0f;
@@ -339,8 +327,8 @@ void AreaTrigger::SearchUnitInBox(std::list<Unit*>& targetList)
 
 void AreaTrigger::SearchUnitInPolygon(std::list<Unit*>& targetList)
 {
-    Trinity::AnyUnitInObjectRangeCheck check(this, GetTemplate()->MaxSearchRadius, false);
-    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(this, targetList, check);
+    Server::AnyUnitInObjectRangeCheck check(this, GetTemplate()->MaxSearchRadius, false);
+    Server::UnitListSearcher<Server::AnyUnitInObjectRangeCheck> searcher(this, targetList, check);
     Cell::VisitAllObjects(this, searcher, GetTemplate()->MaxSearchRadius);
 
     float height = GetTemplate()->PolygonDatas.Height;
@@ -357,8 +345,8 @@ void AreaTrigger::SearchUnitInPolygon(std::list<Unit*>& targetList)
 
 void AreaTrigger::SearchUnitInCylinder(std::list<Unit*>& targetList)
 {
-    Trinity::AnyUnitInObjectRangeCheck check(this, GetTemplate()->MaxSearchRadius, false);
-    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(this, targetList, check);
+    Server::AnyUnitInObjectRangeCheck check(this, GetTemplate()->MaxSearchRadius, false);
+    Server::UnitListSearcher<Server::AnyUnitInObjectRangeCheck> searcher(this, targetList, check);
     Cell::VisitAllObjects(this, searcher, GetTemplate()->MaxSearchRadius);
 
     float height = GetTemplate()->CylinderDatas.Height;
@@ -751,7 +739,7 @@ void AreaTrigger::UpdateCircularMovementPosition(uint32 /*diff*/)
     Position pos = CalculateCircularMovementPosition();
 
     GetMap()->AreaTriggerRelocation(this, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     DebugVisualizePosition();
 #endif
 }
@@ -773,7 +761,7 @@ void AreaTrigger::UpdateSplinePosition(uint32 diff)
 
         G3D::Vector3 lastSplinePosition = _spline->getPoint(_lastSplineIndex);
         GetMap()->AreaTriggerRelocation(this, lastSplinePosition.x, lastSplinePosition.y, lastSplinePosition.z, GetOrientation());
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
         DebugVisualizePosition();
 #endif
 
@@ -792,7 +780,7 @@ void AreaTrigger::UpdateSplinePosition(uint32 diff)
         float progress = sDB2Manager.GetCurveValueAt(GetMiscTemplate()->MoveCurveId, currentTimePercent);
         if (progress < 0.f || progress > 1.f)
         {
-            TC_LOG_ERROR("entities.areatrigger", "AreaTrigger (Id: %u, SpellMiscId: %u) has wrong progress (%f) caused by curve calculation (MoveCurveId: %u)",
+            LOG_ERROR("entities.areatrigger", "AreaTrigger (Id: %u, SpellMiscId: %u) has wrong progress (%f) caused by curve calculation (MoveCurveId: %u)",
                 GetTemplate()->Id, GetMiscTemplate()->MiscId, progress, GetMiscTemplate()->MorphCurveId);
         }
         else
@@ -814,7 +802,7 @@ void AreaTrigger::UpdateSplinePosition(uint32 diff)
     }
 
     GetMap()->AreaTriggerRelocation(this, currentPosition.x, currentPosition.y, currentPosition.z, orientation);
-#ifdef TRINITY_DEBUG
+#ifdef SERVER_DEBUG
     DebugVisualizePosition();
 #endif
 

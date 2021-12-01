@@ -177,7 +177,7 @@ void BnetServiceGenerator::GenerateClientMethodImplementations(pb::io::Printer* 
         {
             printer->Print(sub_vars,
                 "void $classname$::$name$($input_type$ const* request, std::function<void($output_type$ const*)> responseCallback) {\n"
-                "  TC_LOG_DEBUG(\"service.protobuf\", \"%s Server called client method $full_name$($input_type_name${ %s })\",\n"
+                "  LOG_DEBUG(\"service.protobuf\", \"%s Server called client method $full_name$($input_type_name${ %s })\",\n"
                 "    GetCallerInfo().c_str(), request->ShortDebugString().c_str());\n"
                 "  std::function<void(MessageBuffer)> callback = [responseCallback](MessageBuffer buffer) -> void {\n"
                 "    $output_type$ response;\n"
@@ -192,7 +192,7 @@ void BnetServiceGenerator::GenerateClientMethodImplementations(pb::io::Printer* 
         {
             printer->Print(sub_vars,
                 "void $classname$::$name$($input_type$ const* request) {\n"
-                "  TC_LOG_DEBUG(\"service.protobuf\", \"%s Server called client method $full_name$($input_type_name${ %s })\",\n"
+                "  LOG_DEBUG(\"service.protobuf\", \"%s Server called client method $full_name$($input_type_name${ %s })\",\n"
                 "    GetCallerInfo().c_str(), request->ShortDebugString().c_str());\n"
                 "  SendRequest(service_hash_, $method_id$, request);\n"
                 "}\n"
@@ -227,7 +227,7 @@ void BnetServiceGenerator::GenerateServerCallMethod(pb::io::Printer* printer)
             "    case $method_id$: {\n"
             "      $input_type$ request;\n"
             "      if (!request.ParseFromArray(buffer.GetReadPointer(), buffer.GetActiveSize())) {\n"
-            "        TC_LOG_DEBUG(\"service.protobuf\", \"%s Failed to parse request for $full_name$ server method call.\", GetCallerInfo().c_str());\n"
+            "        LOG_DEBUG(\"service.protobuf\", \"%s Failed to parse request for $full_name$ server method call.\", GetCallerInfo().c_str());\n"
             "        SendResponse(service_hash_, $method_id$, token, ERROR_RPC_MALFORMED_REQUEST);\n"
             "        return;\n"
             "      }\n"
@@ -236,13 +236,13 @@ void BnetServiceGenerator::GenerateServerCallMethod(pb::io::Printer* printer)
         if (method->output_type()->name() != "NO_RESPONSE")
         {
             printer->Print(sub_vars,
-                "      TC_LOG_DEBUG(\"service.protobuf\", \"%s Client called server method $full_name$($input_type_name${ %s }).\",\n"
+                "      LOG_DEBUG(\"service.protobuf\", \"%s Client called server method $full_name$($input_type_name${ %s }).\",\n"
                 "        GetCallerInfo().c_str(), request.ShortDebugString().c_str());\n"
                 "      std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)> continuation = [token](ServiceBase* service, uint32 status, ::google::protobuf::Message const* response)\n"
                 "      {\n"
                 "        ASSERT(response->GetDescriptor() == $output_type$::descriptor());\n"
                 "        $classname$* self = static_cast<$classname$*>(service);\n"
-                "        TC_LOG_DEBUG(\"service.protobuf\", \"%s Client called server method $full_name$() returned $output_type_name${ %s } status %u.\",\n"
+                "        LOG_DEBUG(\"service.protobuf\", \"%s Client called server method $full_name$() returned $output_type_name${ %s } status %u.\",\n"
                 "          self->GetCallerInfo().c_str(), response->ShortDebugString().c_str(), status);\n"
                 "        if (!status)\n"
                 "          self->SendResponse(self->service_hash_, $method_id$, token, response);\n"
@@ -259,7 +259,7 @@ void BnetServiceGenerator::GenerateServerCallMethod(pb::io::Printer* printer)
         {
             printer->Print(sub_vars,
                 "      uint32 status = Handle$name$(&request);\n"
-                "      TC_LOG_DEBUG(\"service.protobuf\", \"%s Client called server method $full_name$($input_type_name${ %s }) status %u.\",\n"
+                "      LOG_DEBUG(\"service.protobuf\", \"%s Client called server method $full_name$($input_type_name${ %s }) status %u.\",\n"
                 "        GetCallerInfo().c_str(), request.ShortDebugString().c_str(), status);\n"
                 "      if (status)\n"
                 "        SendResponse(service_hash_, $method_id$, token, status);\n");
@@ -272,7 +272,7 @@ void BnetServiceGenerator::GenerateServerCallMethod(pb::io::Printer* printer)
 
     printer->Print(vars_,
         "    default:\n"
-        "      TC_LOG_ERROR(\"service.protobuf\", \"Bad method id %u.\", methodId);\n"
+        "      LOG_ERROR(\"service.protobuf\", \"Bad method id %u.\", methodId);\n"
         "      SendResponse(service_hash_, methodId, token, ERROR_RPC_INVALID_METHOD);\n"
         "      break;\n"
         "    }\n"
@@ -298,7 +298,7 @@ void BnetServiceGenerator::GenerateServerImplementations(pb::io::Printer* printe
         if (method->output_type()->name() != "NO_RESPONSE")
         {
             printer->Print(sub_vars, "uint32 $classname$::Handle$name$($input_type$ const* request, $output_type$* response, std::function<void(ServiceBase*, uint32, ::google::protobuf::Message const*)>& continuation) {\n"
-                "  TC_LOG_ERROR(\"service.protobuf\", \"%s Client tried to call not implemented method $full_name$({ %s })\",\n"
+                "  LOG_ERROR(\"service.protobuf\", \"%s Client tried to call not implemented method $full_name$({ %s })\",\n"
                 "    GetCallerInfo().c_str(), request->ShortDebugString().c_str());\n"
                 "  return ERROR_RPC_NOT_IMPLEMENTED;\n"
                 "}\n"
@@ -307,7 +307,7 @@ void BnetServiceGenerator::GenerateServerImplementations(pb::io::Printer* printe
         else
         {
             printer->Print(sub_vars, "uint32 $classname$::Handle$name$($input_type$ const* request) {\n"
-                "  TC_LOG_ERROR(\"service.protobuf\", \"%s Client tried to call not implemented method $full_name$({ %s })\",\n"
+                "  LOG_ERROR(\"service.protobuf\", \"%s Client tried to call not implemented method $full_name$({ %s })\",\n"
                 "    GetCallerInfo().c_str(), request->ShortDebugString().c_str());\n"
                 "  return ERROR_RPC_NOT_IMPLEMENTED;\n"
                 "}\n"

@@ -1,20 +1,7 @@
- /*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+/**
+* This file is part of the MobiusCore project.
+* See AUTHORS file for copyright information.
+*/
 
 /* ScriptData
 SDName: Azuremyst_Isle
@@ -572,8 +559,8 @@ public:
         {
             float radius = 50.0f;
             std::list<Player*> players;
-            Trinity::AnyPlayerInObjectRangeCheck checker(me, radius);
-            Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
+            Server::AnyPlayerInObjectRangeCheck checker(me, radius);
+            Server::PlayerListSearcher<Server::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
             Cell::VisitWorldObjects(me, searcher, radius);
 
             for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
@@ -597,7 +584,7 @@ public:
                 }
             }
             else
-                TC_LOG_ERROR("scripts", "SD2 ERROR: FlagList is empty!");
+                LOG_ERROR("scripts", "SD2 ERROR: FlagList is empty!");
         }
 
         void UpdateAI(uint32 diff) override

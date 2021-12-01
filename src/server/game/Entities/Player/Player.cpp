@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "Player.h"
@@ -418,7 +405,7 @@ bool Player::Create(ObjectGuid::LowType guidlow, WorldPackets::Character::Charac
     PlayerInfo const* info = sObjectMgr->GetPlayerInfo(createInfo->Race, createInfo->Class);
     if (!info)
     {
-        TC_LOG_ERROR("entities.player.cheat", "Player::Create: Possible hacking attempt: Account %u tried to create a character named '%s' with an invalid race/class pair (%u/%u) - refusing to do so.",
+        LOG_ERROR("entities.player.cheat", "Player::Create: Possible hacking attempt: Account %u tried to create a character named '%s' with an invalid race/class pair (%u/%u) - refusing to do so.",
                 GetSession()->GetAccountId(), m_name.c_str(), createInfo->Race, createInfo->Class);
         return false;
     }
@@ -431,14 +418,14 @@ bool Player::Create(ObjectGuid::LowType guidlow, WorldPackets::Character::Charac
     ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(createInfo->Class);
     if (!cEntry)
     {
-        TC_LOG_ERROR("entities.player.cheat", "Player::Create: Possible hacking attempt: Account %u tried to create a character named '%s' with an invalid character class (%u) - refusing to do so (wrong DBC-files?)",
+        LOG_ERROR("entities.player.cheat", "Player::Create: Possible hacking attempt: Account %u tried to create a character named '%s' with an invalid character class (%u) - refusing to do so (wrong DBC-files?)",
                 GetSession()->GetAccountId(), m_name.c_str(), createInfo->Class);
         return false;
     }
 
     if (!ValidateAppearance(createInfo->Race, createInfo->Class, createInfo->Sex, createInfo->HairStyle, createInfo->HairColor, createInfo->Face, createInfo->FacialHairStyle, createInfo->Skin, createInfo->CustomDisplay, true))
     {
-        TC_LOG_ERROR("entities.player.cheat", "Player::Create: Possible hacking-attempt: Account %u tried creating a character named '%s' with invalid appearance attributes - refusing to do so",
+        LOG_ERROR("entities.player.cheat", "Player::Create: Possible hacking-attempt: Account %u tried creating a character named '%s' with invalid appearance attributes - refusing to do so",
             GetSession()->GetAccountId(), m_name.c_str());
         return false;
     }
@@ -453,7 +440,7 @@ bool Player::Create(ObjectGuid::LowType guidlow, WorldPackets::Character::Charac
 
     if (!IsValidGender(createInfo->Sex))
     {
-        TC_LOG_ERROR("entities.player.cheat", "Player::Create: Possible hacking attempt: Account %u tried to create a character named '%s' with an invalid gender (%u) - refusing to do so",
+        LOG_ERROR("entities.player.cheat", "Player::Create: Possible hacking attempt: Account %u tried to create a character named '%s' with an invalid gender (%u) - refusing to do so",
                 GetSession()->GetAccountId(), m_name.c_str(), createInfo->Sex);
         return false;
     }
@@ -519,7 +506,7 @@ bool Player::Create(ObjectGuid::LowType guidlow, WorldPackets::Character::Charac
             }
         }
         else
-            TC_LOG_WARN("cheat", "Account: %u (IP: %s) tried to use a character template without given permission. Possible cheating attempt.", m_session->GetAccountId(), m_session->GetRemoteAddress().c_str());
+            LOG_WARN("cheat", "Account: %u (IP: %s) tried to use a character template without given permission. Possible cheating attempt.", m_session->GetAccountId(), m_session->GetRemoteAddress().c_str());
     }
 
     if (m_session->HasPermission(rbac::RBAC_PERM_USE_START_GM_LEVEL))
@@ -703,7 +690,7 @@ bool Player::Create(ObjectGuid::LowType guidlow, WorldPackets::Character::Charac
 
 bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
 {
-    TC_LOG_DEBUG("entities.player.items", "Player::StoreNewItemInBestSlots: Player '%s' (%s) creates initial item (ItemID: %u, Count: %u)",
+    LOG_DEBUG("entities.player.items", "Player::StoreNewItemInBestSlots: Player '%s' (%s) creates initial item (ItemID: %u, Count: %u)",
         GetName().c_str(), GetGUID().ToString().c_str(), titem_id, titem_amount);
 
     // attempt equip by one
@@ -733,7 +720,7 @@ bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
     }
 
     // item can't be added
-    TC_LOG_ERROR("entities.player.items", "Player::StoreNewItemInBestSlots: Player '%s' (%s) can't equip or store initial item (ItemID: %u, Race: %u, Class: %u, InventoryResult: %u)",
+    LOG_ERROR("entities.player.items", "Player::StoreNewItemInBestSlots: Player '%s' (%s) can't equip or store initial item (ItemID: %u, Race: %u, Class: %u, InventoryResult: %u)",
         GetName().c_str(), GetGUID().ToString().c_str(), titem_id, getRace(), getClass(), msg);
     return false;
 }
@@ -804,7 +791,7 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
     {
         if (type == DAMAGE_FALL)                               // DealDamage does not apply item durability loss from self-induced damage.
         {
-            TC_LOG_DEBUG("entities.player", "Player::EnvironmentalDamage: Player '%s' (%s) fall to death, loosing 10%% durability",
+            LOG_DEBUG("entities.player", "Player::EnvironmentalDamage: Player '%s' (%s) fall to death, loosing 10%% durability",
                 GetName().c_str(), GetGUID().ToString().c_str());
             DurabilityLossAll(0.10f, false);
             // durability lost message
@@ -1269,7 +1256,7 @@ void Player::Update(uint32 p_time)
         {
             // m_nextSave reset in SaveToDB call
             SaveToDB();
-            TC_LOG_DEBUG("entities.player", "Player::Update: Player '%s' (%s) saved", GetName().c_str(), GetGUID().ToString().c_str());
+            LOG_DEBUG("entities.player", "Player::Update: Player '%s' (%s) saved", GetName().c_str(), GetGUID().ToString().c_str());
         }
         else
             m_nextSave -= p_time;
@@ -1369,7 +1356,7 @@ void Player::setDeathState(DeathState s)
     {
         if (!oldIsAlive)
         {
-            TC_LOG_ERROR("entities.player", "Player::setDeathState: Attempted to kill a dead player '%s' (%s)", GetName().c_str(), GetGUID().ToString().c_str());
+            LOG_ERROR("entities.player", "Player::setDeathState: Attempted to kill a dead player '%s' (%s)", GetName().c_str(), GetGUID().ToString().c_str());
             return;
         }
 
@@ -1434,14 +1421,14 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 {
     if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
     {
-        TC_LOG_ERROR("maps", "Player::TeleportTo: Invalid map (%d) or invalid coordinates (X: %f, Y: %f, Z: %f, O: %f) given when teleporting player '%s' (%s, MapID: %d, X: %f, Y: %f, Z: %f, O: %f).",
+        LOG_ERROR("maps", "Player::TeleportTo: Invalid map (%d) or invalid coordinates (X: %f, Y: %f, Z: %f, O: %f) given when teleporting player '%s' (%s, MapID: %d, X: %f, Y: %f, Z: %f, O: %f).",
             mapid, x, y, z, orientation, GetGUID().ToString().c_str(), GetName().c_str(), GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
         return false;
     }
 
     if (!GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_DISABLE_MAP) && DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, mapid, this))
     {
-        TC_LOG_ERROR("entities.player.cheat", "Player::TeleportTo: Player '%s' (%s) tried to enter a forbidden map (MapID: %u)", GetGUID().ToString().c_str(), GetName().c_str(), mapid);
+        LOG_ERROR("entities.player.cheat", "Player::TeleportTo: Player '%s' (%s) tried to enter a forbidden map (MapID: %u)", GetGUID().ToString().c_str(), GetName().c_str(), mapid);
         SendTransferAborted(mapid, TRANSFER_ABORT_MAP_NOT_ALLOWED);
         return false;
     }
@@ -1459,7 +1446,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // client without expansion support
     if (GetSession()->GetExpansion() < mEntry->Expansion())
     {
-        TC_LOG_DEBUG("maps", "Player '%s' (%s) using client without required expansion tried teleporting to non accessible map (MapID: %u)",
+        LOG_DEBUG("maps", "Player '%s' (%s) using client without required expansion tried teleporting to non accessible map (MapID: %u)",
             GetName().c_str(), GetGUID().ToString().c_str(), mapid);
 
         if (Transport* transport = GetTransport())
@@ -1473,7 +1460,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         return false;                                       // normal client can't teleport to this map...
     }
     else
-        TC_LOG_DEBUG("maps", "Player %s (%s) is being teleported to map (MapID: %u)", GetName().c_str(), GetGUID().ToString().c_str(), mapid);
+        LOG_DEBUG("maps", "Player %s (%s) is being teleported to map (MapID: %u)", GetName().c_str(), GetGUID().ToString().c_str(), mapid);
 
     if (m_vehicle)
         ExitVehicle();
@@ -1770,7 +1757,7 @@ void Player::RemoveFromWorld()
     {
         if (WorldObject* viewpoint = GetViewpoint())
         {
-            TC_LOG_ERROR("entities.player", "Player::RemoveFromWorld: Player '%s' (%s) has viewpoint (Entry:%u, Type: %u) when removed from world",
+            LOG_ERROR("entities.player", "Player::RemoveFromWorld: Player '%s' (%s) has viewpoint (Entry:%u, Type: %u) when removed from world",
                 GetName().c_str(), GetGUID().ToString().c_str(), viewpoint->GetEntry(), viewpoint->GetTypeId());
             SetViewpoint(viewpoint, false);
         }
@@ -2115,7 +2102,7 @@ GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid const& guid) const
         if (go->IsWithinDistInMap(this, go->GetInteractionDistance()))
             return go;
 
-        TC_LOG_DEBUG("maps", "Player::GetGameObjectIfCanInteractWith: GameObject '%s' (%s) is too far away from player '%s' (%s) to be used by him (Distance: %f, maximal %f is allowed)",
+        LOG_DEBUG("maps", "Player::GetGameObjectIfCanInteractWith: GameObject '%s' (%s) is too far away from player '%s' (%s) to be used by him (Distance: %f, maximal %f is allowed)",
             go->GetGOInfo()->name.c_str(), go->GetGUID().ToString().c_str(), GetName().c_str(), GetGUID().ToString().c_str(), go->GetDistance(this), go->GetInteractionDistance());
     }
 
@@ -2131,7 +2118,7 @@ GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid const& guid, Gameo
             if (go->IsWithinDistInMap(this, go->GetInteractionDistance()))
                 return go;
 
-            TC_LOG_DEBUG("maps", "Player::GetGameObjectIfCanInteractWith: GameObject '%s' (%s) is too far away from player '%s' (%s) to be used by him (Distance: %f, maximal %f is allowed)",
+            LOG_DEBUG("maps", "Player::GetGameObjectIfCanInteractWith: GameObject '%s' (%s) is too far away from player '%s' (%s) to be used by him (Distance: %f, maximal %f is allowed)",
                 go->GetGOInfo()->name.c_str(), go->GetGUID().ToString().c_str(), GetName().c_str(), GetGUID().ToString().c_str(), go->GetDistance(this), go->GetInteractionDistance());
         }
     }
@@ -2817,13 +2804,13 @@ bool Player::AddTalent(TalentEntry const* talent, uint8 spec, bool learning)
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(talent->SpellID);
     if (!spellInfo)
     {
-        TC_LOG_ERROR("spells", "Player::AddTalent: Spell (ID: %u) does not exist.", talent->SpellID);
+        LOG_ERROR("spells", "Player::AddTalent: Spell (ID: %u) does not exist.", talent->SpellID);
         return false;
     }
 
     if (!SpellMgr::IsSpellValid(spellInfo, this, false))
     {
-        TC_LOG_ERROR("spells", "Player::AddTalent: Spell (ID: %u) is invalid", talent->SpellID);
+        LOG_ERROR("spells", "Player::AddTalent: Spell (ID: %u) is invalid", talent->SpellID);
         return false;
     }
 
@@ -2869,12 +2856,12 @@ bool Player::AddSpell(uint32 spellId, bool active, bool learning, bool dependent
         // do character spell book cleanup (all characters)
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            TC_LOG_ERROR("spells", "Player::AddSpell: Spell (ID: %u) does not exist. deleting for all characters in `character_spell`.", spellId);
+            LOG_ERROR("spells", "Player::AddSpell: Spell (ID: %u) does not exist. deleting for all characters in `character_spell`.", spellId);
 
             DeleteSpellFromAllPlayers(spellId);
         }
         else
-            TC_LOG_ERROR("spells", "Player::AddSpell: Spell (ID: %u) does not exist", spellId);
+            LOG_ERROR("spells", "Player::AddSpell: Spell (ID: %u) does not exist", spellId);
 
         return false;
     }
@@ -2884,12 +2871,12 @@ bool Player::AddSpell(uint32 spellId, bool active, bool learning, bool dependent
         // do character spell book cleanup (all characters)
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            TC_LOG_ERROR("spells", "Player::AddSpell: Spell (ID: %u) is invalid. deleting for all characters in `character_spell`.", spellId);
+            LOG_ERROR("spells", "Player::AddSpell: Spell (ID: %u) is invalid. deleting for all characters in `character_spell`.", spellId);
 
             DeleteSpellFromAllPlayers(spellId);
         }
         else
-            TC_LOG_ERROR("spells", "Player::AddSpell: Spell (ID: %u) is invalid", spellId);
+            LOG_ERROR("spells", "Player::AddSpell: Spell (ID: %u) is invalid", spellId);
 
         return false;
     }
@@ -4108,7 +4095,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
             break;
         }
         default:
-            TC_LOG_ERROR("entities.player.cheat", "Player::DeleteFromDB: Tried to delete player (%s) with unsupported delete method (%u).",
+            LOG_ERROR("entities.player.cheat", "Player::DeleteFromDB: Tried to delete player (%s) with unsupported delete method (%u).",
                 playerguid.ToString().c_str(), charDeleteMethod);
 
             if (trans->GetSize() > 0)
@@ -4145,7 +4132,7 @@ void Player::DeleteOldCharacters()
  */
 void Player::DeleteOldCharacters(uint32 keepDays)
 {
-    TC_LOG_INFO("entities.player", "Player::DeleteOldCharacters: Deleting all characters which have been deleted %u days before...", keepDays);
+    LOG_INFO("entities.player", "Player::DeleteOldCharacters: Deleting all characters which have been deleted %u days before...", keepDays);
 
     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_OLD_CHARS);
     stmt->setUInt32(0, uint32(time(nullptr) - time_t(keepDays * DAY)));
@@ -4153,7 +4140,7 @@ void Player::DeleteOldCharacters(uint32 keepDays)
 
     if (result)
     {
-         TC_LOG_DEBUG("entities.player", "Player::DeleteOldCharacters: Found " UI64FMTD " character(s) to delete", result->GetRowCount());
+         LOG_DEBUG("entities.player", "Player::DeleteOldCharacters: Found " UI64FMTD " character(s) to delete", result->GetRowCount());
          do
          {
             Field* fields = result->Fetch();
@@ -4185,7 +4172,7 @@ void Player::BuildPlayerRepop()
     WorldLocation corpseLocation = GetCorpseLocation();
     if (corpseLocation.GetMapId() == GetMapId())
     {
-        TC_LOG_ERROR("entities.player", "Player::BuildPlayerRepop: Player '%s' (%s) already has a corpse", GetName().c_str(), GetGUID().ToString().c_str());
+        LOG_ERROR("entities.player", "Player::BuildPlayerRepop: Player '%s' (%s) already has a corpse", GetName().c_str(), GetGUID().ToString().c_str());
         return;
     }
 
@@ -4193,7 +4180,7 @@ void Player::BuildPlayerRepop()
     Corpse* corpse = CreateCorpse();
     if (!corpse)
     {
-        TC_LOG_ERROR("entities.player", "Player::BuildPlayerRepop: Error creating corpse for player '%s' (%s)", GetName().c_str(), GetGUID().ToString().c_str());
+        LOG_ERROR("entities.player", "Player::BuildPlayerRepop: Error creating corpse for player '%s' (%s)", GetName().c_str(), GetGUID().ToString().c_str());
         return;
     }
     GetMap()->AddToMap(corpse);
@@ -4578,7 +4565,7 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
             DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(ditemProto->GetBaseItemLevel());
             if (!dcost)
             {
-                TC_LOG_ERROR("entities.player.items", "Player::DurabilityRepair: Player '%s' (%s) tried to repair an item (ItemID: %u) with invalid item level %u",
+                LOG_ERROR("entities.player.items", "Player::DurabilityRepair: Player '%s' (%s) tried to repair an item (ItemID: %u) with invalid item level %u",
                     GetName().c_str(), GetGUID().ToString().c_str(), ditemProto->GetId(), ditemProto->GetBaseItemLevel());
                 return TotalCost;
             }
@@ -4587,7 +4574,7 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
             DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
             if (!dQualitymodEntry)
             {
-                TC_LOG_ERROR("entities.player.items", "Player::DurabilityRepair: Player '%s' (%s) tried to repair an item (ItemID: %u) with invalid QualitymodEntry %u",
+                LOG_ERROR("entities.player.items", "Player::DurabilityRepair: Player '%s' (%s) tried to repair an item (ItemID: %u) with invalid QualitymodEntry %u",
                     GetName().c_str(), GetGUID().ToString().c_str(), ditemProto->GetId(), dQualitymodEntryId);
                 return TotalCost;
             }
@@ -4609,7 +4596,7 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
             {
                 if (!GetGuildId())
                 {
-                    TC_LOG_DEBUG("entities.player.items", "Player::DurabilityRepair: Player '%s' (%s) tried to repair item in a guild bank but is not member of a guild",
+                    LOG_DEBUG("entities.player.items", "Player::DurabilityRepair: Player '%s' (%s) tried to repair item in a guild bank but is not member of a guild",
                         GetName().c_str(), GetGUID().ToString().c_str());
                     return TotalCost;
                 }
@@ -4625,7 +4612,7 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
             }
             else if (!HasEnoughMoney(uint64(costs)))
             {
-                TC_LOG_DEBUG("entities.player.items", "Player::DurabilityRepair: Player '%s' (%s) has not enough money to repair item",
+                LOG_DEBUG("entities.player.items", "Player::DurabilityRepair: Player '%s' (%s) has not enough money to repair item",
                     GetName().c_str(), GetGUID().ToString().c_str());
                 return TotalCost;
             }
@@ -4733,7 +4720,7 @@ void Player::CleanupChannels()
                 cMgr->LeftChannel(ch->GetName());
         }
     }
-    TC_LOG_DEBUG("chat.system", "Player::CleanupChannels: Channels of player '%s' (%s) cleaned up.", GetName().c_str(), GetGUID().ToString().c_str());
+    LOG_DEBUG("chat.system", "Player::CleanupChannels: Channels of player '%s' (%s) cleaned up.", GetName().c_str(), GetGUID().ToString().c_str());
 }
 
 void Player::UpdateLocalChannels(uint32 newZone)
@@ -4823,7 +4810,7 @@ void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, floa
 {
     if (modGroup >= BASEMOD_END || modType >= MOD_END)
     {
-        TC_LOG_ERROR("spells", "Player::HandleBaseModValue: Invalid BaseModGroup/BaseModType (%u/%u) for player '%s' (%s)",
+        LOG_ERROR("spells", "Player::HandleBaseModValue: Invalid BaseModGroup/BaseModType (%u/%u) for player '%s' (%s)",
             modGroup, modType, GetName().c_str(), GetGUID().ToString().c_str());
         return;
     }
@@ -4849,7 +4836,7 @@ float Player::GetBaseModValue(BaseModGroup modGroup, BaseModType modType) const
 {
     if (modGroup >= BASEMOD_END || modType >= MOD_END)
     {
-        TC_LOG_ERROR("spells", "Player::GetBaseModValue: Invalid BaseModGroup/BaseModType (%u/%u) for player '%s' (%s)",
+        LOG_ERROR("spells", "Player::GetBaseModValue: Invalid BaseModGroup/BaseModType (%u/%u) for player '%s' (%s)",
             modGroup, modType, GetName().c_str(), GetGUID().ToString().c_str());
         return 0.0f;
     }
@@ -4864,7 +4851,7 @@ float Player::GetTotalBaseModValue(BaseModGroup modGroup) const
 {
     if (modGroup >= BASEMOD_END)
     {
-        TC_LOG_ERROR("spells", "Player::GetTotalBaseModValue: Invalid BaseModGroup (%u) for player '%s' (%s)",
+        LOG_ERROR("spells", "Player::GetTotalBaseModValue: Invalid BaseModGroup (%u) for player '%s' (%s)",
             modGroup, GetName().c_str(), GetGUID().ToString().c_str());
         return 0.0f;
     }
@@ -5249,7 +5236,7 @@ inline int SkillGainChance(uint32 SkillValue, uint32 GrayLevel, uint32 GreenLeve
 
 bool Player::UpdateCraftSkill(uint32 spellid)
 {
-    TC_LOG_DEBUG("entities.player.skills", "Player::UpdateCraftSkill: Player '%s' (%s), SpellID: %d",
+    LOG_DEBUG("entities.player.skills", "Player::UpdateCraftSkill: Player '%s' (%s), SpellID: %d",
         GetName().c_str(), GetGUID().ToString().c_str(), spellid);
 
     SkillLineAbilityMapBounds bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellid);
@@ -5282,7 +5269,7 @@ bool Player::UpdateCraftSkill(uint32 spellid)
 
 bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator)
 {
-    TC_LOG_DEBUG("entities.player.skills", "Player::UpdateGatherSkill: Player '%s' (%s), SkillID: %u, SkillLevel: %u,  RedLevel: %u)",
+    LOG_DEBUG("entities.player.skills", "Player::UpdateGatherSkill: Player '%s' (%s), SkillID: %u, SkillLevel: %u,  RedLevel: %u)",
         GetName().c_str(), GetGUID().ToString().c_str(), SkillId, SkillValue, RedLevel);
 
     uint32 gathering_skill_gain = sWorld->getIntConfig(CONFIG_SKILL_GAIN_GATHERING);
@@ -5322,7 +5309,7 @@ uint8 GetFishingStepsNeededToLevelUp(uint32 SkillValue)
 
 bool Player::UpdateFishingSkill()
 {
-    TC_LOG_DEBUG("entities.player.skills", "Player::UpdateFishingSkill: Player '%s' (%s)", GetName().c_str(), GetGUID().ToString().c_str());
+    LOG_DEBUG("entities.player.skills", "Player::UpdateFishingSkill: Player '%s' (%s)", GetName().c_str(), GetGUID().ToString().c_str());
 
     uint32 SkillValue = GetPureSkillValue(SKILL_FISHING);
 
@@ -5351,14 +5338,14 @@ bool Player::UpdateSkillPro(uint16 skillId, int32 chance, uint32 step)
     static uint32 bonusSkillLevels[] = { 75, 150, 225, 300, 375, 450, 525 };
     static const size_t bonusSkillLevelsSize = sizeof(bonusSkillLevels) / sizeof(uint32);
 
-    TC_LOG_DEBUG("entities.player.skills", "Player::UpdateSkillPro: Player '%s' (%s), SkillID: %u, Chance: %3.1f%%)",
+    LOG_DEBUG("entities.player.skills", "Player::UpdateSkillPro: Player '%s' (%s), SkillID: %u, Chance: %3.1f%%)",
         GetName().c_str(), GetGUID().ToString().c_str(), skillId, chance / 10.0f);
     if (!skillId)
         return false;
 
     if (chance <= 0)                                         // speedup in 0 chance case
     {
-        TC_LOG_DEBUG("entities.player.skills", "Player::UpdateSkillPro: Player '%s' (%s), SkillID: %u, Chance: %3.1f%% missed",
+        LOG_DEBUG("entities.player.skills", "Player::UpdateSkillPro: Player '%s' (%s), SkillID: %u, Chance: %3.1f%% missed",
             GetName().c_str(), GetGUID().ToString().c_str(), skillId, chance / 10.0f);
         return false;
     }
@@ -5378,7 +5365,7 @@ bool Player::UpdateSkillPro(uint16 skillId, int32 chance, uint32 step)
 
     if (irand(1, 1000) > chance)
     {
-        TC_LOG_DEBUG("entities.player.skills", "Player::UpdateSkillPro: Player '%s' (%s), SkillID: %u, Chance: %3.1f%% missed",
+        LOG_DEBUG("entities.player.skills", "Player::UpdateSkillPro: Player '%s' (%s), SkillID: %u, Chance: %3.1f%% missed",
             GetName().c_str(), GetGUID().ToString().c_str(), skillId, chance / 10.0f);
         return false;
     }
@@ -5403,7 +5390,7 @@ bool Player::UpdateSkillPro(uint16 skillId, int32 chance, uint32 step)
 
     UpdateSkillEnchantments(skillId, value, new_value);
     UpdateCriteria(CRITERIA_TYPE_REACH_SKILL_LEVEL, skillId);
-    TC_LOG_DEBUG("entities.player.skills", "Player::UpdateSkillPro: Player '%s' (%s), SkillID: %u, Chance: %3.1f%% taken",
+    LOG_DEBUG("entities.player.skills", "Player::UpdateSkillPro: Player '%s' (%s), SkillID: %u, Chance: %3.1f%% taken",
         GetName().c_str(), GetGUID().ToString().c_str(), skillId, chance / 10.0f);
     return true;
 }
@@ -5577,7 +5564,7 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
                 SkillLineEntry const* skillEntry = sSkillLineStore.LookupEntry(id);
                 if (!skillEntry)
                 {
-                    TC_LOG_ERROR("misc", "Player::SetSkill: Skill (SkillID: %u) not found in SkillLineStore for player '%s' (%s)",
+                    LOG_ERROR("misc", "Player::SetSkill: Skill (SkillID: %u) not found in SkillLineStore for player '%s' (%s)",
                         id, GetName().c_str(), GetGUID().ToString().c_str());
                     return;
                 }
@@ -5786,14 +5773,14 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type) co
 {
     if (button >= MAX_ACTION_BUTTONS)
     {
-        TC_LOG_ERROR("entities.player", "Player::IsActionButtonDataValid: Action %u not added into button %u for player %s (%s): button must be < %u",
+        LOG_ERROR("entities.player", "Player::IsActionButtonDataValid: Action %u not added into button %u for player %s (%s): button must be < %u",
             action, button, GetName().c_str(), GetGUID().ToString().c_str(), MAX_ACTION_BUTTONS);
         return false;
     }
 
     if (action >= MAX_ACTION_BUTTON_ACTION_VALUE)
     {
-        TC_LOG_ERROR("entities.player", "Player::IsActionButtonDataValid: Action %u not added into button %u for player %s (%s): action must be < %u",
+        LOG_ERROR("entities.player", "Player::IsActionButtonDataValid: Action %u not added into button %u for player %s (%s): action must be < %u",
             action, button, GetName().c_str(), GetGUID().ToString().c_str(), MAX_ACTION_BUTTON_ACTION_VALUE);
         return false;
     }
@@ -5803,14 +5790,14 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type) co
         case ACTION_BUTTON_SPELL:
             if (!sSpellMgr->GetSpellInfo(action))
             {
-                TC_LOG_DEBUG("entities.player", "Player::IsActionButtonDataValid: Spell action %u not added into button %u for player %s (%s): spell does not exist. This can be due to a character imported from a different expansion",
+                LOG_DEBUG("entities.player", "Player::IsActionButtonDataValid: Spell action %u not added into button %u for player %s (%s): spell does not exist. This can be due to a character imported from a different expansion",
                     action, button, GetName().c_str(), GetGUID().ToString().c_str());
                 return false;
             }
 
             if (!HasSpell(action))
             {
-                TC_LOG_DEBUG("entities.player", "Player::IsActionButtonDataValid: Spell action %u not added into button %u for player %s (%s): player does not known this spell, this can be due to a player changing their talents",
+                LOG_DEBUG("entities.player", "Player::IsActionButtonDataValid: Spell action %u not added into button %u for player %s (%s): player does not known this spell, this can be due to a player changing their talents",
                     action, button, GetName().c_str(), GetGUID().ToString().c_str());
                 return false;
             }
@@ -5818,7 +5805,7 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type) co
         case ACTION_BUTTON_ITEM:
             if (!sObjectMgr->GetItemTemplate(action))
             {
-                TC_LOG_ERROR("entities.player", "Player::IsActionButtonDataValid: Item action %u not added into button %u for player %s (%s): item not exist",
+                LOG_ERROR("entities.player", "Player::IsActionButtonDataValid: Item action %u not added into button %u for player %s (%s): item not exist",
                     action, button, GetName().c_str(), GetGUID().ToString().c_str());
                 return false;
             }
@@ -5828,14 +5815,14 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type) co
             auto mount = sDB2Manager.GetMountById(action);
             if (!mount)
             {
-                TC_LOG_ERROR("entities.player", "Player::IsActionButtonDataValid: Mount action %u not added into button %u for player %s (%s): mount does not exist",
+                LOG_ERROR("entities.player", "Player::IsActionButtonDataValid: Mount action %u not added into button %u for player %s (%s): mount does not exist",
                     action, button, GetName().c_str(), GetGUID().ToString().c_str());
                 return false;
             }
 
             if (!HasSpell(mount->SourceSpellID))
             {
-                TC_LOG_ERROR("entities.player", "Player::IsActionButtonDataValid: Mount action %u not added into button %u for player %s (%s): Player does not know this mount",
+                LOG_ERROR("entities.player", "Player::IsActionButtonDataValid: Mount action %u not added into button %u for player %s (%s): Player does not know this mount",
                     action, button, GetName().c_str(), GetGUID().ToString().c_str());
                 return false;
             }
@@ -5848,7 +5835,7 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type) co
         case ACTION_BUTTON_DROPDOWN:
             break;
         default:
-            TC_LOG_ERROR("entities.player", "Player::IsActionButtonDataValid: Unknown action type %u", type);
+            LOG_ERROR("entities.player", "Player::IsActionButtonDataValid: Unknown action type %u", type);
             return false;                                          // other cases not checked at this moment
     }
 
@@ -5866,7 +5853,7 @@ ActionButton* Player::AddActionButton(uint8 button, uint32 action, uint8 type)
     // set data and update to CHANGED if not NEW
     ab.SetActionAndType(action, ActionButtonType(type));
 
-    TC_LOG_DEBUG("entities.player", "Player::AddActionButton: Player '%s' (%s) added action '%u' (type %u) to button '%u'",
+    LOG_DEBUG("entities.player", "Player::AddActionButton: Player '%s' (%s) added action '%u' (type %u) to button '%u'",
         GetName().c_str(), GetGUID().ToString().c_str(), action, type, button);
     return &ab;
 }
@@ -5882,7 +5869,7 @@ void Player::RemoveActionButton(uint8 button)
     else
         buttonItr->second.uState = ACTIONBUTTON_DELETED;    // saved, will deleted at next save
 
-    TC_LOG_DEBUG("entities.player", "Player::RemoveActionButton: Player '%s' (%s) removed action button '%u'",
+    LOG_DEBUG("entities.player", "Player::RemoveActionButton: Player '%s' (%s) removed action button '%u'",
         GetName().c_str(), GetGUID().ToString().c_str(), button);
 }
 
@@ -5919,7 +5906,7 @@ void Player::SendMessageToSetInRange(WorldPacket const* data, float dist, bool s
     if (self)
         GetSession()->SendPacket(data);
 
-    Trinity::MessageDistDeliverer notifier(this, data, dist);
+    Server::MessageDistDeliverer notifier(this, data, dist);
     Cell::VisitWorldObjects(this, notifier, dist);
 }
 
@@ -5928,7 +5915,7 @@ void Player::SendMessageToSetInRange(WorldPacket const* data, float dist, bool s
     if (self)
         GetSession()->SendPacket(data);
 
-    Trinity::MessageDistDeliverer notifier(this, data, dist, own_team_only);
+    Server::MessageDistDeliverer notifier(this, data, dist, own_team_only);
     Cell::VisitWorldObjects(this, notifier, dist);
 }
 
@@ -5939,7 +5926,7 @@ void Player::SendMessageToSet(WorldPacket const* data, Player const* skipped_rcv
 
     // we use World::GetMaxVisibleDistance() because i cannot see why not use a distance
     // update: replaced by GetMap()->GetVisibilityDistance()
-    Trinity::MessageDistDeliverer notifier(this, data, GetVisibilityRange(), false, skipped_rcvr);
+    Server::MessageDistDeliverer notifier(this, data, GetVisibilityRange(), false, skipped_rcvr);
     Cell::VisitWorldObjects(this, notifier, GetVisibilityRange());
 }
 
@@ -5985,7 +5972,7 @@ void Player::CheckAreaExploreAndOutdoor()
 
     if (!areaEntry)
     {
-        TC_LOG_ERROR("entities.player", "Player '%s' (%s) discovered unknown area (x: %f y: %f z: %f map: %u)",
+        LOG_ERROR("entities.player", "Player '%s' (%s) discovered unknown area (x: %f y: %f z: %f map: %u)",
             GetName().c_str(), GetGUID().ToString().c_str(), GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId());
         return;
     }
@@ -5994,7 +5981,7 @@ void Player::CheckAreaExploreAndOutdoor()
 
     if (offset >= PLAYER_EXPLORED_ZONES_SIZE)
     {
-        TC_LOG_ERROR("entities.player", "Player::CheckAreaExploreAndOutdoor: Wrong area flag %u in map data for (X: %f Y: %f) point to field PLAYER_EXPLORED_ZONES_1 + %u ( %u must be < %u ).",
+        LOG_ERROR("entities.player", "Player::CheckAreaExploreAndOutdoor: Wrong area flag %u in map data for (X: %f Y: %f) point to field PLAYER_EXPLORED_ZONES_1 + %u ( %u must be < %u ).",
             areaId, GetPositionX(), GetPositionY(), offset, offset, PLAYER_EXPLORED_ZONES_SIZE);
         return;
     }
@@ -6038,7 +6025,7 @@ void Player::CheckAreaExploreAndOutdoor()
                 GiveXP(XP, nullptr);
                 SendExplorationExperience(areaId, XP);
             }
-            TC_LOG_DEBUG("entities.player", "Player '%s' (%s) discovered a new area: %u", GetName().c_str(),GetGUID().ToString().c_str(), areaId);
+            LOG_DEBUG("entities.player", "Player '%s' (%s) discovered a new area: %u", GetName().c_str(),GetGUID().ToString().c_str(), areaId);
         }
     }
 }
@@ -6052,10 +6039,10 @@ uint32 Player::TeamForRace(uint8 race)
             case 0: return ALLIANCE;
             case 1: return HORDE;
         }
-        TC_LOG_ERROR("entities.player", "Race (%u) has wrong teamid (%u) in DBC: wrong DBC files?", uint32(race), rEntry->Alliance);
+        LOG_ERROR("entities.player", "Race (%u) has wrong teamid (%u) in DBC: wrong DBC files?", uint32(race), rEntry->Alliance);
     }
     else
-        TC_LOG_ERROR("entities.player", "Race (%u) not found in DBC: wrong DBC files?", uint32(race));
+        LOG_ERROR("entities.player", "Race (%u) not found in DBC: wrong DBC files?", uint32(race));
 
     return ALLIANCE;
 }
@@ -6065,7 +6052,7 @@ TeamId Player::TeamIdForRace(uint8 race)
     if (ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(race))
         return TeamId(rEntry->Alliance);
 
-    TC_LOG_ERROR("entities.player", "Race (%u) not found in DBC: wrong DBC files?", race);
+    LOG_ERROR("entities.player", "Race (%u) not found in DBC: wrong DBC files?", race);
     return TEAM_NEUTRAL;
 }
 
@@ -6115,7 +6102,7 @@ int32 Player::CalculateReputationGain(ReputationSource source, uint32 creatureOr
             break;
     }
 
-    if (rate != 1.0f && creatureOrQuestLevel < Trinity::XP::GetGrayLevel(getLevel()))
+    if (rate != 1.0f && creatureOrQuestLevel < Server::XP::GetGrayLevel(getLevel()))
         percent *= rate;
 
     if (percent <= 0.0f)
@@ -6340,7 +6327,7 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
                 return false;
 
             uint8 k_level = getLevel();
-            uint8 k_grey = Trinity::XP::GetGrayLevel(k_level);
+            uint8 k_grey = Server::XP::GetGrayLevel(k_level);
             uint8 v_level = victim->GetLevelForTarget(this);
 
             if (v_level <= k_grey)
@@ -6367,7 +6354,7 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
             else
                 victim_guid.Clear();                     // Don't show HK: <rank> message, only log.
 
-            honor_f = std::ceil(Trinity::Honor::hk_honor_at_level_f(k_level) * (v_level - k_grey) / (k_level - k_grey));
+            honor_f = std::ceil(Server::Honor::hk_honor_at_level_f(k_level) * (v_level - k_grey) / (k_level - k_grey));
 
             // count the number of playerkills in one day
             ApplyModUInt16Value(PLAYER_FIELD_KILLS, PLAYER_FIELD_KILLS_OFFSET_TODAY_KILLS, 1, true);
@@ -7149,7 +7136,7 @@ void Player::DuelComplete(DuelCompleteType type)
     duel->isCompleted = true;
     duel->opponent->duel->isCompleted = true;
 
-    TC_LOG_DEBUG("entities.unit", "Player::DuelComplete: Player '%s' (%s), Opponent: '%s' (%s)",
+    LOG_DEBUG("entities.unit", "Player::DuelComplete: Player '%s' (%s), Opponent: '%s' (%s)",
         GetName().c_str(), GetGUID().ToString().c_str(), duel->opponent->GetName().c_str(), duel->opponent->GetGUID().ToString().c_str());
 
     WorldPackets::Duel::DuelComplete duelCompleted;
@@ -7274,7 +7261,7 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply, bool updateItemA
     if (item->IsBroken())
         return;
 
-    TC_LOG_DEBUG("entities.player.items", "Player::_ApplyItemMods: Applying mods for item %s", item->GetGUID().ToString().c_str());
+    LOG_DEBUG("entities.player.items", "Player::_ApplyItemMods: Applying mods for item %s", item->GetGUID().ToString().c_str());
 
     if (item->GetSocketColor(0))                              //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
         CorrectMetaGemEnchants(slot, apply);
@@ -7286,7 +7273,7 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply, bool updateItemA
     ApplyArtifactPowers(item, apply);
     ApplyEnchantment(item, apply);
 
-    TC_LOG_DEBUG("entities.player.items", "Player::_ApplyItemMods: completed");
+    LOG_DEBUG("entities.player.items", "Player::_ApplyItemMods: completed");
 }
 
 void Player::_ApplyItemBonuses(Item* item, uint8 slot, bool apply)
@@ -7748,7 +7735,7 @@ void Player::ApplyEquipSpell(SpellInfo const* spellInfo, Item* item, bool apply,
                     return;
         }
 
-        TC_LOG_DEBUG("entities.player", "Player::ApplyEquipSpell: Player '%s' (%s) cast %s equip spell (ID: %i)",
+        LOG_DEBUG("entities.player", "Player::ApplyEquipSpell: Player '%s' (%s) cast %s equip spell (ID: %i)",
             GetName().c_str(), GetGUID().ToString().c_str(), (item ? "item" : "itemset"), spellInfo->Id);
 
         CastSpell(this, spellInfo, true, item);
@@ -7956,7 +7943,7 @@ void Player::CastItemCombatSpell(DamageInfo const& damageInfo, Item* item, ItemT
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(effectData->SpellID);
             if (!spellInfo)
             {
-                TC_LOG_ERROR("entities.player.items", "Player::CastItemCombatSpell: Player '%s' (%s) cast unknown item spell (ID: %i)",
+                LOG_ERROR("entities.player.items", "Player::CastItemCombatSpell: Player '%s' (%s) cast unknown item spell (ID: %i)",
                     GetName().c_str(), GetGUID().ToString().c_str(), effectData->SpellID);
                 continue;
             }
@@ -8015,7 +8002,7 @@ void Player::CastItemCombatSpell(DamageInfo const& damageInfo, Item* item, ItemT
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(pEnchant->EffectArg[s]);
             if (!spellInfo)
             {
-                TC_LOG_ERROR("entities.player.items", "Player::CastItemCombatSpell: Player '%s' (%s) cast unknown spell (EnchantID: %u, SpellID: %i), ignoring",
+                LOG_ERROR("entities.player.items", "Player::CastItemCombatSpell: Player '%s' (%s) cast unknown spell (EnchantID: %u, SpellID: %i), ignoring",
                     GetName().c_str(), GetGUID().ToString().c_str(), enchant_id, pEnchant->EffectArg[s]);
                 continue;
             }
@@ -8085,7 +8072,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, Objec
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(learn_spell_id);
             if (!spellInfo)
             {
-                TC_LOG_ERROR("entities.player", "Player::CastItemUseSpell: Item (Entry: %u) has wrong spell id %u, ignoring", proto->GetId(), learn_spell_id);
+                LOG_ERROR("entities.player", "Player::CastItemUseSpell: Item (Entry: %u) has wrong spell id %u, ignoring", proto->GetId(), learn_spell_id);
                 SendEquipError(EQUIP_ERR_INTERNAL_BAG_ERROR, item, nullptr);
                 return;
             }
@@ -8117,7 +8104,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, Objec
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(effectData->SpellID);
         if (!spellInfo)
         {
-            TC_LOG_ERROR("entities.player", "Player::CastItemUseSpell: Item (Entry: %u) has wrong spell id %u, ignoring", proto->GetId(), effectData->SpellID);
+            LOG_ERROR("entities.player", "Player::CastItemUseSpell: Item (Entry: %u) has wrong spell id %u, ignoring", proto->GetId(), effectData->SpellID);
             continue;
         }
 
@@ -8151,7 +8138,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, Objec
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(pEnchant->EffectArg[s]);
             if (!spellInfo)
             {
-                TC_LOG_ERROR("entities.player", "Player::CastItemUseSpell: Enchant %i, cast unknown spell %i", enchant_id, pEnchant->EffectArg[s]);
+                LOG_ERROR("entities.player", "Player::CastItemUseSpell: Enchant %i, cast unknown spell %i", enchant_id, pEnchant->EffectArg[s]);
                 continue;
             }
 
@@ -8174,7 +8161,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, Objec
 
 void Player::_RemoveAllItemMods()
 {
-    TC_LOG_DEBUG("entities.player.items", "_RemoveAllItemMods start.");
+    LOG_DEBUG("entities.player.items", "_RemoveAllItemMods start.");
 
     for (uint8 i = 0; i < INVENTORY_SLOT_BAG_END; ++i)
     {
@@ -8209,12 +8196,12 @@ void Player::_RemoveAllItemMods()
         }
     }
 
-    TC_LOG_DEBUG("entities.player.items", "_RemoveAllItemMods complete.");
+    LOG_DEBUG("entities.player.items", "_RemoveAllItemMods complete.");
 }
 
 void Player::_ApplyAllItemMods()
 {
-    TC_LOG_DEBUG("entities.player.items", "_ApplyAllItemMods start.");
+    LOG_DEBUG("entities.player.items", "_ApplyAllItemMods start.");
 
     for (uint8 i = 0; i < INVENTORY_SLOT_BAG_END; ++i)
     {
@@ -8249,7 +8236,7 @@ void Player::_ApplyAllItemMods()
         }
     }
 
-    TC_LOG_DEBUG("entities.player.items", "_ApplyAllItemMods complete.");
+    LOG_DEBUG("entities.player.items", "_ApplyAllItemMods complete.");
 }
 
 void Player::_ApplyAllLevelScaleItemMods(bool apply)
@@ -8344,7 +8331,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type, bool aeLooting/* = fa
     Loot* loot;
     PermissionTypes permission = ALL_PERMISSION;
 
-    TC_LOG_DEBUG("loot", "Player::SendLoot: Player: '%s' (%s), Loot: %s",
+    LOG_DEBUG("loot", "Player::SendLoot: Player: '%s' (%s), Loot: %s",
         GetName().c_str(), GetGUID().ToString().c_str(), guid.ToString().c_str());
     if (guid.IsGameObject())
     {
@@ -10002,7 +9989,7 @@ void Player::SetInventorySlotCount(uint8 slots)
 
             auto sendItemsBatch = [this, &trans, &unstorableItems](std::size_t batchNumber, std::size_t batchSize)
             {
-                MailDraft draft(GetSession()->GetTrinityString(LANG_NOT_EQUIPPED_ITEM), "There were problems with equipping item(s).");
+                MailDraft draft(GetSession()->GetServerString(LANG_NOT_EQUIPPED_ITEM), "There were problems with equipping item(s).");
                 for (std::size_t j = 0; j < batchSize; ++j)
                     draft.AddItem(unstorableItems[batchNumber * MAX_MAIL_ITEMS + j]);
 
@@ -10523,7 +10510,7 @@ InventoryResult Player::CanStoreItem_InInventorySlots(uint8 slot_begin, uint8 sl
 
 InventoryResult Player::CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec &dest, uint32 entry, uint32 count, Item* pItem, bool swap, uint32* no_space_count) const
 {
-    TC_LOG_DEBUG("entities.player.items", "Player::CanStoreItem: Bag: %u, Slot: %u, Item: %u, Count: %u", bag, slot, entry, count);
+    LOG_DEBUG("entities.player.items", "Player::CanStoreItem: Bag: %u, Slot: %u, Item: %u, Count: %u", bag, slot, entry, count);
 
     ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(entry);
     if (!pProto)
@@ -11013,7 +11000,7 @@ InventoryResult Player::CanStoreItems(Item** items, int count, uint32* offending
         if (!item)
             continue;
 
-        TC_LOG_DEBUG("entities.player.items", "Player::CanStoreItems: Player '%s' (%s), Index: %i ItemID: %u, Count: %u",
+        LOG_DEBUG("entities.player.items", "Player::CanStoreItems: Player '%s' (%s), Index: %i ItemID: %u, Count: %u",
             GetName().c_str(), GetGUID().ToString().c_str(), k + 1, item->GetEntry(), item->GetCount());
         ItemTemplate const* pProto = item->GetTemplate();
 
@@ -11173,7 +11160,7 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
     dest = 0;
     if (pItem)
     {
-        TC_LOG_DEBUG("entities.player.items", "Player::CanEquipItem: Player '%s' (%s), Slot: %u, Item: %u, Count: %u",
+        LOG_DEBUG("entities.player.items", "Player::CanEquipItem: Player '%s' (%s), Slot: %u, Item: %u, Count: %u",
             GetName().c_str(), GetGUID().ToString().c_str(), slot, pItem->GetEntry(), pItem->GetCount());
         ItemTemplate const* pProto = pItem->GetTemplate();
         if (pProto)
@@ -11388,7 +11375,7 @@ InventoryResult Player::CanUnequipItem(uint16 pos, bool swap) const
     if (!pItem)
         return EQUIP_ERR_OK;
 
-    TC_LOG_DEBUG("entities.player.items", "Player::CanUnequipItem: Player '%s' (%s), Slot: %u, Item: %u, Count: %u",
+    LOG_DEBUG("entities.player.items", "Player::CanUnequipItem: Player '%s' (%s), Slot: %u, Item: %u, Count: %u",
         GetName().c_str(), GetGUID().ToString().c_str(), pos, pItem->GetEntry(), pItem->GetCount());
 
     ItemTemplate const* pProto = pItem->GetTemplate();
@@ -11425,7 +11412,7 @@ InventoryResult Player::CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec &dest
 
     uint32 count = pItem->GetCount();
 
-    TC_LOG_DEBUG("entities.player.items", "Player::CanBankItem: Player '%s' (%s), Bag: %u, Slot: %u, Item: %u, Count: %u",
+    LOG_DEBUG("entities.player.items", "Player::CanBankItem: Player '%s' (%s), Bag: %u, Slot: %u, Item: %u, Count: %u",
         GetName().c_str(), GetGUID().ToString().c_str(), bag, slot, pItem->GetEntry(), pItem->GetCount());
     ItemTemplate const* pProto = pItem->GetTemplate();
     if (!pProto)
@@ -11441,7 +11428,7 @@ InventoryResult Player::CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec &dest
     // Currency Tokenizer are not supposed to be swapped out of their hidden bag
     if (pItem->IsCurrencyToken())
     {
-        TC_LOG_ERROR("entities.player.cheat", "Possible hacking attempt: Player %s (%s) tried to move token [%s entry: %u] out of the currency bag!",
+        LOG_ERROR("entities.player.cheat", "Possible hacking attempt: Player %s (%s) tried to move token [%s entry: %u] out of the currency bag!",
             GetName().c_str(), GetGUID().ToString().c_str(), pItem->GetGUID().ToString().c_str(), pProto->GetId());
         return EQUIP_ERR_CANT_SWAP;
     }
@@ -11609,7 +11596,7 @@ InventoryResult Player::CanUseItem(Item* pItem, bool not_loading) const
 {
     if (pItem)
     {
-        TC_LOG_DEBUG("entities.player.items", "Player::CanUseItem: Player '%s' (%s),  Item: %u",
+        LOG_DEBUG("entities.player.items", "Player::CanUseItem: Player '%s' (%s),  Item: %u",
             GetName().c_str(), GetGUID().ToString().c_str(), pItem->GetEntry());
 
         if (!IsAlive() && not_loading)
@@ -11891,7 +11878,7 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
     uint8 bag = pos >> 8;
     uint8 slot = pos & 255;
 
-    TC_LOG_DEBUG("entities.player.items", "Player::_StoreItem: Player '%s' (%s), Bag: %u, Slot: %u, Item: %u (%s), Count: %u",
+    LOG_DEBUG("entities.player.items", "Player::_StoreItem: Player '%s' (%s), Bag: %u, Slot: %u, Item: %u (%s), Count: %u",
         GetName().c_str(), GetGUID().ToString().c_str(), bag, slot, pItem->GetEntry(), pItem->GetGUID().ToString().c_str(), count);
 
     Item* pItem2 = GetItemByPos(bag, slot);
@@ -12026,7 +12013,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
                 SpellInfo const* spellProto = sSpellMgr->GetSpellInfo(cooldownSpell);
 
                 if (!spellProto)
-                    TC_LOG_ERROR("entities.player", "Player::EquipItem: Weapon switch cooldown spell %u for player '%s' (%s) couldn't be found in Spell.dbc",
+                    LOG_ERROR("entities.player", "Player::EquipItem: Weapon switch cooldown spell %u for player '%s' (%s) couldn't be found in Spell.dbc",
                         cooldownSpell, GetName().c_str(), GetGUID().ToString().c_str());
                 else
                 {
@@ -12258,7 +12245,7 @@ void Player::VisualizeItem(uint8 slot, Item* pItem)
             GetSession()->GetCollectionMgr()->AddItemAppearance(pItem);
     }
 
-    TC_LOG_DEBUG("entities.player.items", "Player::SetVisibleItemSlot: Player '%s' (%s), Slot: %u, Item: %u",
+    LOG_DEBUG("entities.player.items", "Player::SetVisibleItemSlot: Player '%s' (%s), Slot: %u, Item: %u",
         GetName().c_str(), GetGUID().ToString().c_str(), slot, pItem->GetEntry());
 
     m_items[slot] = pItem;
@@ -12289,7 +12276,7 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
     Item* pItem = GetItemByPos(bag, slot);
     if (pItem)
     {
-        TC_LOG_DEBUG("entities.player.items", "Player::RemoveItem: Player '%s' (%s), Bag: %u, Slot: %u, Item: %u",
+        LOG_DEBUG("entities.player.items", "Player::RemoveItem: Player '%s' (%s), Bag: %u, Slot: %u, Item: %u",
             GetName().c_str(), GetGUID().ToString().c_str(), bag, slot, pItem->GetEntry());
 
         RemoveEnchantmentDurations(pItem);
@@ -12413,7 +12400,7 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
     Item* pItem = GetItemByPos(bag, slot);
     if (pItem)
     {
-        TC_LOG_DEBUG("entities.player.items", "Player::DestroyItem: Player '%s' (%s), Bag: %u, Slot: %u, Item: %u",
+        LOG_DEBUG("entities.player.items", "Player::DestroyItem: Player '%s' (%s), Bag: %u, Slot: %u, Item: %u",
             GetName().c_str(), GetGUID().ToString().c_str(), bag, slot, pItem->GetEntry());
         // Also remove all contained items if the item is a bag.
         // This if () prevents item saving crashes if the condition for a bag to be empty before being destroyed was bypassed somehow.
@@ -12505,7 +12492,7 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
 
 void Player::DestroyItemCount(uint32 itemEntry, uint32 count, bool update, bool unequip_check)
 {
-    TC_LOG_DEBUG("entities.player.items", "Player::DestroyItemCount: Player '%s' (%s), Item: %u, Count: %u",
+    LOG_DEBUG("entities.player.items", "Player::DestroyItemCount: Player '%s' (%s), Item: %u, Count: %u",
         GetName().c_str(), GetGUID().ToString().c_str(), itemEntry, count);
     uint32 remcount = 0;
 
@@ -12757,7 +12744,7 @@ void Player::DestroyItemCount(uint32 itemEntry, uint32 count, bool update, bool 
 
 void Player::DestroyZoneLimitedItem(bool update, uint32 new_zone)
 {
-    TC_LOG_DEBUG("entities.player.items", "Player::DestroyZoneLimitedItem: In map %u and area %u for player '%s' (%s)",
+    LOG_DEBUG("entities.player.items", "Player::DestroyZoneLimitedItem: In map %u and area %u for player '%s' (%s)",
         GetMapId(), new_zone, GetName().c_str(), GetGUID().ToString().c_str());
 
     // in inventory
@@ -12786,7 +12773,7 @@ void Player::DestroyConjuredItems(bool update)
 {
     // used when entering arena
     // destroys all conjured items
-    TC_LOG_DEBUG("entities.player.items", "Player::DestroyConjuredItems: Player '%s' (%s)",
+    LOG_DEBUG("entities.player.items", "Player::DestroyConjuredItems: Player '%s' (%s)",
         GetName().c_str(), GetGUID().ToString().c_str());
 
     // in inventory
@@ -12883,7 +12870,7 @@ void Player::DestroyItemCount(Item* pItem, uint32 &count, bool update)
     if (!pItem)
         return;
 
-    TC_LOG_DEBUG("entities.player.items", "Player::DestroyItemCount: Player '%s' (%s), Item (%s, Entry: %u), Count: %u",
+    LOG_DEBUG("entities.player.items", "Player::DestroyItemCount: Player '%s' (%s), Item (%s, Entry: %u), Count: %u",
         GetName().c_str(), GetGUID().ToString().c_str(), pItem->GetGUID().ToString().c_str(), pItem->GetEntry(), count);
 
     if (pItem->GetCount() <= count)
@@ -12947,7 +12934,7 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
             return;
     }
 
-    TC_LOG_DEBUG("entities.player.items", "Player::SplitItem: Player '%s' (%s), Bag: %u, Slot: %u, Item: %u, Count: %u",
+    LOG_DEBUG("entities.player.items", "Player::SplitItem: Player '%s' (%s), Bag: %u, Slot: %u, Item: %u, Count: %u",
         GetName().c_str(), GetGUID().ToString().c_str(), dstbag, dstslot, pSrcItem->GetEntry(), count);
     Item* pNewItem = pSrcItem->CloneItem(count, this);
     if (!pNewItem)
@@ -13060,7 +13047,7 @@ void Player::SwapItem(uint16 src, uint16 dst)
         }
     }
 
-    TC_LOG_DEBUG("entities.player.items", "Player::SwapItem: Player '%s' (%s), Bag: %u, Slot: %u, Item: %u",
+    LOG_DEBUG("entities.player.items", "Player::SwapItem: Player '%s' (%s), Bag: %u, Slot: %u, Item: %u",
         GetName().c_str(), GetGUID().ToString().c_str(), dstbag, dstslot, pSrcItem->GetEntry());
 
     if (!IsAlive())
@@ -13439,7 +13426,7 @@ void Player::AddItemToBuyBackSlot(Item* pItem)
         }
 
         RemoveItemFromBuyBackSlot(slot, true);
-        TC_LOG_DEBUG("entities.player.items", "Player::AddItemToBuyBackSlot: Player '%s' (%s), Item: %u, Slot: %u",
+        LOG_DEBUG("entities.player.items", "Player::AddItemToBuyBackSlot: Player '%s' (%s), Item: %u, Slot: %u",
             GetName().c_str(), GetGUID().ToString().c_str(), pItem->GetEntry(), slot);
 
         m_items[slot] = pItem;
@@ -13463,7 +13450,7 @@ void Player::AddItemToBuyBackSlot(Item* pItem)
 
 Item* Player::GetItemFromBuyBackSlot(uint32 slot)
 {
-    TC_LOG_DEBUG("entities.player.items", "Player::GetItemFromBuyBackSlot: Player '%s' (%s), Slot: %u",
+    LOG_DEBUG("entities.player.items", "Player::GetItemFromBuyBackSlot: Player '%s' (%s), Slot: %u",
         GetName().c_str(), GetGUID().ToString().c_str(), slot);
     if (slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END)
         return m_items[slot];
@@ -13472,7 +13459,7 @@ Item* Player::GetItemFromBuyBackSlot(uint32 slot)
 
 void Player::RemoveItemFromBuyBackSlot(uint32 slot, bool del)
 {
-    TC_LOG_DEBUG("entities.player.items", "Player::RemoveItemFromBuyBackSlot: Player '%s' (%s), Slot: %u",
+    LOG_DEBUG("entities.player.items", "Player::RemoveItemFromBuyBackSlot: Player '%s' (%s), Slot: %u",
         GetName().c_str(), GetGUID().ToString().c_str(), slot);
     if (slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END)
     {
@@ -13667,7 +13654,7 @@ void Player::UpdateItemDuration(uint32 time, bool realtimeonly)
     if (m_itemDuration.empty())
         return;
 
-    TC_LOG_DEBUG("entities.player.items", "Player::UpdateItemDuration: Player '%s' (%s), Time: %u, RealTimeOnly: %u",
+    LOG_DEBUG("entities.player.items", "Player::UpdateItemDuration: Player '%s' (%s), Time: %u, RealTimeOnly: %u",
         GetName().c_str(), GetGUID().ToString().c_str(), time, realtimeonly);
 
     for (ItemDurationList::const_iterator itr = m_itemDuration.begin(); itr != m_itemDuration.end();)
@@ -13999,81 +13986,81 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                         }
                     }
 
-                    TC_LOG_DEBUG("entities.player.items", "Adding %u to stat nb %u", enchant_amount, enchant_spell_id);
+                    LOG_DEBUG("entities.player.items", "Adding %u to stat nb %u", enchant_amount, enchant_spell_id);
                     switch (enchant_spell_id)
                     {
                         case ITEM_MOD_MANA:
-                            TC_LOG_DEBUG("entities.player.items", "+ %u MANA", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u MANA", enchant_amount);
                             HandleStatModifier(UNIT_MOD_MANA, BASE_VALUE, float(enchant_amount), apply);
                             break;
                         case ITEM_MOD_HEALTH:
-                            TC_LOG_DEBUG("entities.player.items", "+ %u HEALTH", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u HEALTH", enchant_amount);
                             HandleStatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(enchant_amount), apply);
                             break;
                         case ITEM_MOD_AGILITY:
-                            TC_LOG_DEBUG("entities.player.items", "+ %u AGILITY", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u AGILITY", enchant_amount);
                             HandleStatModifier(UNIT_MOD_STAT_AGILITY, TOTAL_VALUE, float(enchant_amount), apply);
                             ApplyStatBuffMod(STAT_AGILITY, (float)enchant_amount, apply);
                             break;
                         case ITEM_MOD_STRENGTH:
-                            TC_LOG_DEBUG("entities.player.items", "+ %u STRENGTH", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u STRENGTH", enchant_amount);
                             HandleStatModifier(UNIT_MOD_STAT_STRENGTH, TOTAL_VALUE, float(enchant_amount), apply);
                             ApplyStatBuffMod(STAT_STRENGTH, (float)enchant_amount, apply);
                             break;
                         case ITEM_MOD_INTELLECT:
-                            TC_LOG_DEBUG("entities.player.items", "+ %u INTELLECT", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u INTELLECT", enchant_amount);
                             HandleStatModifier(UNIT_MOD_STAT_INTELLECT, TOTAL_VALUE, float(enchant_amount), apply);
                             ApplyStatBuffMod(STAT_INTELLECT, (float)enchant_amount, apply);
                             break;
                         // case ITEM_MOD_SPIRIT:
-                        //     TC_LOG_DEBUG("entities.player.items", "+ %u SPIRIT", enchant_amount);
+                        //     LOG_DEBUG("entities.player.items", "+ %u SPIRIT", enchant_amount);
                         //     HandleStatModifier(UNIT_MOD_STAT_SPIRIT, TOTAL_VALUE, float(enchant_amount), apply);
                         //     ApplyStatBuffMod(STAT_SPIRIT, (float)enchant_amount, apply);
                         //     break;
                         case ITEM_MOD_STAMINA:
-                            TC_LOG_DEBUG("entities.player.items", "+ %u STAMINA", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u STAMINA", enchant_amount);
                             HandleStatModifier(UNIT_MOD_STAT_STAMINA, TOTAL_VALUE, float(enchant_amount), apply);
                             ApplyStatBuffMod(STAT_STAMINA, (float)enchant_amount, apply);
                             break;
                         case ITEM_MOD_DEFENSE_SKILL_RATING:
                             ApplyRatingMod(CR_DEFENSE_SKILL, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u DEFENSE", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u DEFENSE", enchant_amount);
                             break;
                         case  ITEM_MOD_DODGE_RATING:
                             ApplyRatingMod(CR_DODGE, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u DODGE", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u DODGE", enchant_amount);
                             break;
                         case ITEM_MOD_PARRY_RATING:
                             ApplyRatingMod(CR_PARRY, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u PARRY", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u PARRY", enchant_amount);
                             break;
                         case ITEM_MOD_BLOCK_RATING:
                             ApplyRatingMod(CR_BLOCK, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u SHIELD_BLOCK", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u SHIELD_BLOCK", enchant_amount);
                             break;
                         case ITEM_MOD_HIT_MELEE_RATING:
                             ApplyRatingMod(CR_HIT_MELEE, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u MELEE_HIT", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u MELEE_HIT", enchant_amount);
                             break;
                         case ITEM_MOD_HIT_RANGED_RATING:
                             ApplyRatingMod(CR_HIT_RANGED, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u RANGED_HIT", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u RANGED_HIT", enchant_amount);
                             break;
                         case ITEM_MOD_HIT_SPELL_RATING:
                             ApplyRatingMod(CR_HIT_SPELL, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u SPELL_HIT", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u SPELL_HIT", enchant_amount);
                             break;
                         case ITEM_MOD_CRIT_MELEE_RATING:
                             ApplyRatingMod(CR_CRIT_MELEE, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u MELEE_CRIT", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u MELEE_CRIT", enchant_amount);
                             break;
                         case ITEM_MOD_CRIT_RANGED_RATING:
                             ApplyRatingMod(CR_CRIT_RANGED, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u RANGED_CRIT", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u RANGED_CRIT", enchant_amount);
                             break;
                         case ITEM_MOD_CRIT_SPELL_RATING:
                             ApplyRatingMod(CR_CRIT_SPELL, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u SPELL_CRIT", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u SPELL_CRIT", enchant_amount);
                             break;
                         // Values from ITEM_STAT_MELEE_HA_RATING to ITEM_MOD_HASTE_RANGED_RATING are never used
                         // in Enchantments
@@ -14108,13 +14095,13 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                             ApplyRatingMod(CR_HIT_MELEE, enchant_amount, apply);
                             ApplyRatingMod(CR_HIT_RANGED, enchant_amount, apply);
                             ApplyRatingMod(CR_HIT_SPELL, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u HIT", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u HIT", enchant_amount);
                             break;
                         case ITEM_MOD_CRIT_RATING:
                             ApplyRatingMod(CR_CRIT_MELEE, enchant_amount, apply);
                             ApplyRatingMod(CR_CRIT_RANGED, enchant_amount, apply);
                             ApplyRatingMod(CR_CRIT_SPELL, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u CRITICAL", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u CRITICAL", enchant_amount);
                             break;
                         // case ITEM_MOD_HIT_TAKEN_RATING: // Unused since 3.3.5
                         //     ApplyRatingMod(CR_HIT_TAKEN_MELEE, enchant_amount, apply);
@@ -14128,60 +14115,60 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                         //     break;
                         case ITEM_MOD_RESILIENCE_RATING:
                             ApplyRatingMod(CR_RESILIENCE_PLAYER_DAMAGE, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u RESILIENCE", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u RESILIENCE", enchant_amount);
                             break;
                         case ITEM_MOD_HASTE_RATING:
                             ApplyRatingMod(CR_HASTE_MELEE, enchant_amount, apply);
                             ApplyRatingMod(CR_HASTE_RANGED, enchant_amount, apply);
                             ApplyRatingMod(CR_HASTE_SPELL, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u HASTE", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u HASTE", enchant_amount);
                             break;
                         case ITEM_MOD_EXPERTISE_RATING:
                             ApplyRatingMod(CR_EXPERTISE, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u EXPERTISE", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u EXPERTISE", enchant_amount);
                             break;
                         case ITEM_MOD_ATTACK_POWER:
                             HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE, float(enchant_amount), apply);
                             HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(enchant_amount), apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u ATTACK_POWER", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u ATTACK_POWER", enchant_amount);
                             break;
                         case ITEM_MOD_RANGED_ATTACK_POWER:
                             HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(enchant_amount), apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u RANGED_ATTACK_POWER", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u RANGED_ATTACK_POWER", enchant_amount);
                             break;
                         case ITEM_MOD_MANA_REGENERATION:
                             ApplyManaRegenBonus(enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u MANA_REGENERATION", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u MANA_REGENERATION", enchant_amount);
                             break;
                         case ITEM_MOD_ARMOR_PENETRATION_RATING:
                             ApplyRatingMod(CR_ARMOR_PENETRATION, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u ARMOR PENETRATION", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u ARMOR PENETRATION", enchant_amount);
                             break;
                         case ITEM_MOD_SPELL_POWER:
                             ApplySpellPowerBonus(enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u SPELL_POWER", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u SPELL_POWER", enchant_amount);
                             break;
                         case ITEM_MOD_HEALTH_REGEN:
                             ApplyHealthRegenBonus(enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u HEALTH_REGENERATION", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u HEALTH_REGENERATION", enchant_amount);
                             break;
                         case ITEM_MOD_SPELL_PENETRATION:
                             ApplySpellPenetrationBonus(enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u SPELL_PENETRATION", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u SPELL_PENETRATION", enchant_amount);
                             break;
                         case ITEM_MOD_BLOCK_VALUE:
                             HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(enchant_amount), apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u BLOCK_VALUE", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u BLOCK_VALUE", enchant_amount);
                             break;
                         case ITEM_MOD_MASTERY_RATING:
                             ApplyRatingMod(CR_MASTERY, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u MASTERY", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u MASTERY", enchant_amount);
                             break;
                         case ITEM_MOD_VERSATILITY:
                             ApplyRatingMod(CR_VERSATILITY_DAMAGE_DONE, enchant_amount, apply);
                             ApplyRatingMod(CR_VERSATILITY_HEALING_DONE, enchant_amount, apply);
                             ApplyRatingMod(CR_VERSATILITY_DAMAGE_TAKEN, enchant_amount, apply);
-                            TC_LOG_DEBUG("entities.player.items", "+ %u VERSATILITY", enchant_amount);
+                            LOG_DEBUG("entities.player.items", "+ %u VERSATILITY", enchant_amount);
                             break;
                         default:
                             break;
@@ -14218,7 +14205,7 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                     // nothing do..
                     break;
                 default:
-                    TC_LOG_ERROR("entities.player", "Player::ApplyEnchantment: Unknown item enchantment (ID: %u, DisplayType: %u) for player '%s' (%s)",
+                    LOG_ERROR("entities.player", "Player::ApplyEnchantment: Unknown item enchantment (ID: %u, DisplayType: %u) for player '%s' (%s)",
                         enchant_id, enchant_display_type, GetName().c_str(), GetGUID().ToString().c_str());
                     break;
             }
@@ -14394,7 +14381,7 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                     VendorItemData const* vendorItems = creature->GetVendorItems();
                     if (!vendorItems || vendorItems->Empty())
                     {
-                        TC_LOG_ERROR("sql.sql", "Creature %s (%s DB GUID: " UI64FMTD ") has UNIT_NPC_FLAG_VENDOR set but has an empty trading item list.", creature->GetName().c_str(), creature->GetGUID().ToString().c_str(), creature->GetSpawnId());
+                        LOG_ERROR("sql.sql", "Creature %s (%s DB GUID: " UI64FMTD ") has UNIT_NPC_FLAG_VENDOR set but has an empty trading item list.", creature->GetName().c_str(), creature->GetGUID().ToString().c_str(), creature->GetSpawnId());
                         canTalk = false;
                     }
                     break;
@@ -14436,7 +14423,7 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                         canTalk = false;
                     break;
                 default:
-                    TC_LOG_ERROR("sql.sql", "Creature entry %u has unknown gossip option %u for menu %u.", creature->GetEntry(), itr->second.OptionType, itr->second.MenuId);
+                    LOG_ERROR("sql.sql", "Creature entry %u has unknown gossip option %u for menu %u.", creature->GetEntry(), itr->second.OptionType, itr->second.MenuId);
                     canTalk = false;
                     break;
             }
@@ -14539,7 +14526,7 @@ void Player::OnGossipSelect(WorldObject* source, uint32 optionIndex, uint32 menu
     {
         if (gossipOptionType > GOSSIP_OPTION_QUESTGIVER)
         {
-            TC_LOG_ERROR("entities.player", "Player '%s' (%s) requests invalid gossip option for GameObject (Entry: %u)",
+            LOG_ERROR("entities.player", "Player '%s' (%s) requests invalid gossip option for GameObject (Entry: %u)",
                 GetName().c_str(), GetGUID().ToString().c_str(), source->GetEntry());
             return;
         }
@@ -14630,7 +14617,7 @@ void Player::OnGossipSelect(WorldObject* source, uint32 optionIndex, uint32 menu
 
             if (bgTypeId == BATTLEGROUND_TYPE_NONE)
             {
-                TC_LOG_ERROR("entities.player", "Player '%s' (%s) requested battlegroundlist from an invalid creature (%s)",
+                LOG_ERROR("entities.player", "Player '%s' (%s) requested battlegroundlist from an invalid creature (%s)",
                     GetName().c_str(), GetGUID().ToString().c_str(), source->GetGUID().ToString().c_str());
                 return;
             }
@@ -15683,7 +15670,7 @@ bool Player::SatisfyQuestSkill(Quest const* qInfo, bool msg) const
         if (msg)
         {
             SendCanTakeQuestResponse(QUEST_ERR_NONE);
-            TC_LOG_DEBUG("misc", "Player::SatisfyQuestSkill: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't have the required skill value.",
+            LOG_DEBUG("misc", "Player::SatisfyQuestSkill: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't have the required skill value.",
                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
         }
 
@@ -15700,7 +15687,7 @@ bool Player::SatisfyQuestLevel(Quest const* qInfo, bool msg) const
         if (msg)
         {
             SendCanTakeQuestResponse(QUEST_ERR_FAILED_LOW_LEVEL);
-            TC_LOG_DEBUG("misc", "Player::SatisfyQuestLevel: Sent QUEST_ERR_FAILED_LOW_LEVEL (QuestID: %u) because player '%s' (%s) doesn't have the required (min) level.",
+            LOG_DEBUG("misc", "Player::SatisfyQuestLevel: Sent QUEST_ERR_FAILED_LOW_LEVEL (QuestID: %u) because player '%s' (%s) doesn't have the required (min) level.",
                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
         }
         return false;
@@ -15711,7 +15698,7 @@ bool Player::SatisfyQuestLevel(Quest const* qInfo, bool msg) const
         if (msg)
         {
             SendCanTakeQuestResponse(QUEST_ERR_NONE); // There doesn't seem to be a specific response for too high player level
-            TC_LOG_DEBUG("misc", "Player::SatisfyQuestLevel: Sent QUEST_ERR_FAILED_LOW_LEVEL (QuestID: %u) because player '%s' (%s) doesn't have the required (max) level.",
+            LOG_DEBUG("misc", "Player::SatisfyQuestLevel: Sent QUEST_ERR_FAILED_LOW_LEVEL (QuestID: %u) because player '%s' (%s) doesn't have the required (max) level.",
                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
         }
         return false;
@@ -15772,7 +15759,7 @@ bool Player::SatisfyQuestPreviousQuest(Quest const* qInfo, bool msg)
                         if (msg)
                         {
                             SendCanTakeQuestResponse(QUEST_ERR_NONE);
-                            TC_LOG_DEBUG("misc", "Player::SatisfyQuestPreviousQuest: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't have the required quest (1).",
+                            LOG_DEBUG("misc", "Player::SatisfyQuestPreviousQuest: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't have the required quest (1).",
                                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
                         }
                         return false;
@@ -15806,7 +15793,7 @@ bool Player::SatisfyQuestPreviousQuest(Quest const* qInfo, bool msg)
                         if (msg)
                         {
                             SendCanTakeQuestResponse(QUEST_ERR_NONE);
-                            TC_LOG_DEBUG("misc", "Player::SatisfyQuestPreviousQuest: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't have the required quest (2).",
+                            LOG_DEBUG("misc", "Player::SatisfyQuestPreviousQuest: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't have the required quest (2).",
                                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
 
                         }
@@ -15823,7 +15810,7 @@ bool Player::SatisfyQuestPreviousQuest(Quest const* qInfo, bool msg)
     if (msg)
     {
         SendCanTakeQuestResponse(QUEST_ERR_NONE);
-        TC_LOG_DEBUG("misc", "Player::SatisfyQuestPreviousQuest: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't have required quest (3).",
+        LOG_DEBUG("misc", "Player::SatisfyQuestPreviousQuest: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't have required quest (3).",
             qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
     }
 
@@ -15842,7 +15829,7 @@ bool Player::SatisfyQuestClass(Quest const* qInfo, bool msg) const
         if (msg)
         {
             SendCanTakeQuestResponse(QUEST_ERR_NONE);
-            TC_LOG_DEBUG("misc", "Player::SatisfyQuestClass: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't have required class.",
+            LOG_DEBUG("misc", "Player::SatisfyQuestClass: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't have required class.",
                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
         }
 
@@ -15859,7 +15846,7 @@ bool Player::SatisfyQuestRace(Quest const* qInfo, bool msg) const
         if (msg)
         {
             SendCanTakeQuestResponse(QUEST_ERR_FAILED_WRONG_RACE);
-            TC_LOG_DEBUG("misc", "Player::SatisfyQuestRace: Sent QUEST_ERR_FAILED_WRONG_RACE (QuestID: %u) because player '%s' (%s) doesn't have required race.",
+            LOG_DEBUG("misc", "Player::SatisfyQuestRace: Sent QUEST_ERR_FAILED_WRONG_RACE (QuestID: %u) because player '%s' (%s) doesn't have required race.",
                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
 
         }
@@ -15876,7 +15863,7 @@ bool Player::SatisfyQuestReputation(Quest const* qInfo, bool msg)
         if (msg)
         {
             SendCanTakeQuestResponse(QUEST_ERR_NONE);
-            TC_LOG_DEBUG("misc", "Player::SatisfyQuestReputation: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't required reputation (min).",
+            LOG_DEBUG("misc", "Player::SatisfyQuestReputation: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't required reputation (min).",
                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
         }
         return false;
@@ -15888,7 +15875,7 @@ bool Player::SatisfyQuestReputation(Quest const* qInfo, bool msg)
         if (msg)
         {
             SendCanTakeQuestResponse(QUEST_ERR_NONE);
-            TC_LOG_DEBUG("misc", "SatisfyQuestReputation: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't required reputation (max).",
+            LOG_DEBUG("misc", "SatisfyQuestReputation: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't required reputation (max).",
                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
         }
         return false;
@@ -15903,7 +15890,7 @@ bool Player::SatisfyQuestReputation(Quest const* qInfo, bool msg)
         if (msg)
         {
             SendCanTakeQuestResponse(QUEST_ERR_NONE);
-            TC_LOG_DEBUG("misc", "SatisfyQuestReputation: Sent QUEST_ERR_NONE (questId: %u) because player does not have required reputation (ReputationObjective2).", qInfo->GetQuestId());
+            LOG_DEBUG("misc", "SatisfyQuestReputation: Sent QUEST_ERR_NONE (questId: %u) because player does not have required reputation (ReputationObjective2).", qInfo->GetQuestId());
         }
         return false;
     }**/
@@ -15918,7 +15905,7 @@ bool Player::SatisfyQuestStatus(Quest const* qInfo, bool msg) const
         if (msg)
         {
             SendCanTakeQuestResponse(QUEST_ERR_ALREADY_DONE);
-            TC_LOG_DEBUG("misc", "Player::SatisfyQuestStatus: Sent QUEST_STATUS_REWARDED (QuestID: %u) because player '%s' (%s) quest status is already REWARDED.",
+            LOG_DEBUG("misc", "Player::SatisfyQuestStatus: Sent QUEST_STATUS_REWARDED (QuestID: %u) because player '%s' (%s) quest status is already REWARDED.",
                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
         }
         return false;
@@ -15929,7 +15916,7 @@ bool Player::SatisfyQuestStatus(Quest const* qInfo, bool msg) const
         if (msg)
         {
             SendCanTakeQuestResponse(QUEST_ERR_ALREADY_ON1);
-            TC_LOG_DEBUG("misc", "Player::SatisfyQuestStatus: Sent QUEST_ERR_ALREADY_ON1 (QuestID: %u) because player '%s' (%s) quest status is not NONE.",
+            LOG_DEBUG("misc", "Player::SatisfyQuestStatus: Sent QUEST_ERR_ALREADY_ON1 (QuestID: %u) because player '%s' (%s) quest status is not NONE.",
                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
         }
         return false;
@@ -15944,10 +15931,10 @@ bool Player::SatisfyQuestConditions(Quest const* qInfo, bool msg)
         if (msg)
         {
             SendCanTakeQuestResponse(QUEST_ERR_NONE);
-            TC_LOG_DEBUG("misc", "Player::SatisfyQuestConditions: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't meet conditions.",
+            LOG_DEBUG("misc", "Player::SatisfyQuestConditions: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) doesn't meet conditions.",
                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
         }
-        TC_LOG_DEBUG("condition", "Player::SatisfyQuestConditions: conditions not met for quest %u", qInfo->GetQuestId());
+        LOG_DEBUG("condition", "Player::SatisfyQuestConditions: conditions not met for quest %u", qInfo->GetQuestId());
         return false;
     }
     return true;
@@ -15960,7 +15947,7 @@ bool Player::SatisfyQuestTimed(Quest const* qInfo, bool msg) const
         if (msg)
         {
             SendCanTakeQuestResponse(QUEST_ERR_ONLY_ONE_TIMED);
-            TC_LOG_DEBUG("misc", "Player::SatisfyQuestTimed: Sent QUEST_ERR_ONLY_ONE_TIMED (QuestID: %u) because player '%s' (%s) is already on a timed quest.",
+            LOG_DEBUG("misc", "Player::SatisfyQuestTimed: Sent QUEST_ERR_ONLY_ONE_TIMED (QuestID: %u) because player '%s' (%s) is already on a timed quest.",
                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
         }
         return false;
@@ -15992,7 +15979,7 @@ bool Player::SatisfyQuestExclusiveGroup(Quest const* qInfo, bool msg)
             if (msg)
             {
                 SendCanTakeQuestResponse(QUEST_ERR_NONE);
-                TC_LOG_DEBUG("misc", "Player::SatisfyQuestExclusiveGroup: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) already did daily quests in exclusive group.",
+                LOG_DEBUG("misc", "Player::SatisfyQuestExclusiveGroup: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) already did daily quests in exclusive group.",
                     qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
             }
 
@@ -16005,7 +15992,7 @@ bool Player::SatisfyQuestExclusiveGroup(Quest const* qInfo, bool msg)
             if (msg)
             {
                 SendCanTakeQuestResponse(QUEST_ERR_NONE);
-                TC_LOG_DEBUG("misc", "Player::SatisfyQuestExclusiveGroup: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) already did quest in exclusive group.",
+                LOG_DEBUG("misc", "Player::SatisfyQuestExclusiveGroup: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) already did quest in exclusive group.",
                     qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
             }
             return false;
@@ -16026,7 +16013,7 @@ bool Player::SatisfyQuestNextChain(Quest const* qInfo, bool msg) const
         if (msg)
         {
             SendCanTakeQuestResponse(QUEST_ERR_NONE);
-            TC_LOG_DEBUG("misc", "Player::SatisfyQuestNextChain: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) already did or started next quest in chain.",
+            LOG_DEBUG("misc", "Player::SatisfyQuestNextChain: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) already did or started next quest in chain.",
                 qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
         }
         return false;
@@ -16054,7 +16041,7 @@ bool Player::SatisfyQuestPrevChain(Quest const* qInfo, bool msg)
             if (msg)
             {
                 SendCanTakeQuestResponse(QUEST_ERR_NONE);
-                TC_LOG_DEBUG("misc", "Player::SatisfyQuestNextChain: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) already did or started next quest in chain.",
+                LOG_DEBUG("misc", "Player::SatisfyQuestNextChain: Sent QUEST_ERR_NONE (QuestID: %u) because player '%s' (%s) already did or started next quest in chain.",
                     qInfo->GetQuestId(), GetName().c_str(), GetGUID().ToString().c_str());
             }
             return false;
@@ -16332,7 +16319,7 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
     }
     default:
         // it's impossible, but check
-        TC_LOG_ERROR("entities.player.quest", "Player::GetQuestDialogStatus: Called with unexpected type (Entry: %u, Type: %u) by player '%s' (%s)",
+        LOG_ERROR("entities.player.quest", "Player::GetQuestDialogStatus: Called with unexpected type (Entry: %u, Type: %u) by player '%s' (%s)",
             questgiver->GetEntry(), questgiver->GetTypeId(), GetName().c_str(), GetGUID().ToString().c_str());
         return DIALOG_STATUS_NONE;
     }
@@ -16400,7 +16387,7 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
     return result;
 }
 
-// not used in Trinity, but used in scripting code
+// not used in server, but used in scripting code
 uint16 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry) const
 {
     Quest const* qInfo = sObjectMgr->GetQuestTemplate(quest_id);
@@ -16512,7 +16499,7 @@ void Player::AreaExploredOrEventHappens(uint32 questId)
         uint16 log_slot = FindQuestSlot(questId);
         if (log_slot < MAX_QUEST_LOG_SIZE)
         {
-            TC_LOG_ERROR("entities.player.quest", "Player::AreaExploredOrEventHappens:Deprecated function called for quest %u", questId);
+            LOG_ERROR("entities.player.quest", "Player::AreaExploredOrEventHappens:Deprecated function called for quest %u", questId);
             /** @todo
             This function was previously used for area triggers but now those are a part of quest objective system
             Currently this function is used to complete quests with no objectives (needs verifying) so probably rename it?
@@ -16532,7 +16519,7 @@ void Player::AreaExploredOrEventHappens(uint32 questId)
     }
 }
 
-//not used in Trinityd, function for external script library
+//not used in Mobiusd, function for external script library
 void Player::GroupEventHappens(uint32 questId, WorldObject const* pEventObject)
 {
     if (Group* group = GetGroup())
@@ -17062,14 +17049,14 @@ bool Player::HasQuestForItem(uint32 itemid) const
 int32 Player::GetQuestObjectiveData(Quest const* quest, int8 storageIndex) const
 {
     if (storageIndex < 0)
-        TC_LOG_ERROR("entities.player.quest", "Player::GetQuestObjectiveData: Called for quest %u with invalid StorageIndex %d (objective data is not tracked)",
+        LOG_ERROR("entities.player.quest", "Player::GetQuestObjectiveData: Called for quest %u with invalid StorageIndex %d (objective data is not tracked)",
             quest->GetQuestId(), storageIndex);
 
     auto itr = m_QuestStatus.find(quest->GetQuestId());
 
     if (itr == m_QuestStatus.end())
     {
-        TC_LOG_ERROR("entities.player.quest", "Player::GetQuestObjectiveData: Player '%s' (%s) doesn't have quest status data (QuestID: %u)",
+        LOG_ERROR("entities.player.quest", "Player::GetQuestObjectiveData: Player '%s' (%s) doesn't have quest status data (QuestID: %u)",
             GetName().c_str(), GetGUID().ToString().c_str(), quest->GetQuestId());
         return 0;
     }
@@ -17078,7 +17065,7 @@ int32 Player::GetQuestObjectiveData(Quest const* quest, int8 storageIndex) const
 
     if (uint8(storageIndex) >= status.ObjectiveData.size())
     {
-        TC_LOG_ERROR("entities.player.quest", "Player::GetQuestObjectiveData: Player '%s' (%s) quest %u out of range StorageIndex %u",
+        LOG_ERROR("entities.player.quest", "Player::GetQuestObjectiveData: Player '%s' (%s) quest %u out of range StorageIndex %u",
             GetName().c_str(), GetGUID().ToString().c_str(), quest->GetQuestId(), storageIndex);
         return 0;
     }
@@ -17134,7 +17121,7 @@ bool Player::IsQuestObjectiveComplete(QuestObjective const& objective) const
                 return false;
             break;
         default:
-            TC_LOG_ERROR("entities.player.quest", "Player::CanCompleteQuest: Player '%s' (%s) tried to complete a quest (ID: %u) with an unknown objective type %u",
+            LOG_ERROR("entities.player.quest", "Player::CanCompleteQuest: Player '%s' (%s) tried to complete a quest (ID: %u) with an unknown objective type %u",
                 GetName().c_str(), GetGUID().ToString().c_str(), objective.QuestID, objective.Type);
             return false;
     }
@@ -17146,7 +17133,7 @@ void Player::SetQuestObjectiveData(QuestObjective const& objective, int32 data)
 {
     if (objective.StorageIndex < 0)
     {
-        TC_LOG_ERROR("entities.player.quest", "Player::SetQuestObjectiveData: called for quest %u with invalid StorageIndex %d (objective data is not tracked)",
+        LOG_ERROR("entities.player.quest", "Player::SetQuestObjectiveData: called for quest %u with invalid StorageIndex %d (objective data is not tracked)",
             objective.QuestID, objective.StorageIndex);
         return;
     }
@@ -17155,7 +17142,7 @@ void Player::SetQuestObjectiveData(QuestObjective const& objective, int32 data)
 
     if (itr == m_QuestStatus.end())
     {
-        TC_LOG_ERROR("entities.player.quest", "Player::SetQuestObjectiveData: player '%s' (%s) doesn't have quest status data (QuestID: %u)",
+        LOG_ERROR("entities.player.quest", "Player::SetQuestObjectiveData: player '%s' (%s) doesn't have quest status data (QuestID: %u)",
             GetName().c_str(), GetGUID().ToString().c_str(), objective.QuestID);
         return;
     }
@@ -17164,7 +17151,7 @@ void Player::SetQuestObjectiveData(QuestObjective const& objective, int32 data)
 
     if (uint8(objective.StorageIndex) >= status.ObjectiveData.size())
     {
-        TC_LOG_ERROR("entities.player.quest", "Player::SetQuestObjectiveData: player '%s' (%s) quest %u out of range StorageIndex %u",
+        LOG_ERROR("entities.player.quest", "Player::SetQuestObjectiveData: player '%s' (%s) quest %u out of range StorageIndex %u",
             GetName().c_str(), GetGUID().ToString().c_str(), objective.QuestID, objective.StorageIndex);
         return;
     }
@@ -17421,7 +17408,7 @@ void Player::_LoadArenaTeamInfo(PreparedQueryResult result)
             ArenaTeam* arenaTeam = sArenaTeamMgr->GetArenaTeamById(arenaTeamId);
             if (!arenaTeam)
             {
-                TC_LOG_ERROR("entities.player", "Player::_LoadArenaTeamInfo: couldn't load arenateam %u", arenaTeamId);
+                LOG_ERROR("entities.player", "Player::_LoadArenaTeamInfo: couldn't load arenateam %u", arenaTeamId);
                 continue;
             }
 
@@ -17630,7 +17617,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
     {
         std::string name = "<unknown>";
         sCharacterCache->GetCharacterNameByGuid(guid, name);
-        TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player '%s' (%s) not found in table `characters`, can't load. ", name.c_str(), guid.ToString().c_str());
+        LOG_ERROR("entities.player", "Player::LoadFromDB: Player '%s' (%s) not found in table `characters`, can't load. ", name.c_str(), guid.ToString().c_str());
         return false;
     }
 
@@ -17642,13 +17629,13 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
     // player should be able to load/delete character only with correct account!
     if (dbAccountId != GetSession()->GetAccountId())
     {
-        TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) loading from wrong account (is: %u, should be: %u)", guid.ToString().c_str(), GetSession()->GetAccountId(), dbAccountId);
+        LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) loading from wrong account (is: %u, should be: %u)", guid.ToString().c_str(), GetSession()->GetAccountId(), dbAccountId);
         return false;
     }
 
     if (holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BANNED))
     {
-        TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) is banned, can't load.", guid.ToString().c_str());
+        LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) is banned, can't load.", guid.ToString().c_str());
         return false;
     }
 
@@ -17674,7 +17661,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
     uint8 gender = fields[5].GetUInt8();
     if (!IsValidGender(gender))
     {
-        TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has wrong gender (%u), can't load.", guid.ToString().c_str(), gender);
+        LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has wrong gender (%u), can't load.", guid.ToString().c_str(), gender);
         return false;
     }
 
@@ -17686,7 +17673,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
     PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
     if (!info)
     {
-        TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has wrong race/class (%u/%u), can't load.", guid.ToString().c_str(), getRace(), getClass());
+        LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has wrong race/class (%u/%u), can't load.", guid.ToString().c_str(), getRace(), getClass());
         return false;
     }
 
@@ -17739,7 +17726,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
         GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID),
         customDisplay))
     {
-        TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has wrong Appearance values (Hair/Skin/Color), can't load.", guid.ToString().c_str());
+        LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has wrong Appearance values (Hair/Skin/Color), can't load.", guid.ToString().c_str());
         return false;
     }
 
@@ -17760,7 +17747,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
         m_items[slot] = nullptr;
     }
 
-    TC_LOG_DEBUG("entities.player.loading", "Player::LoadFromDB: Load Basic value of player '%s' is: ", m_name.c_str());
+    LOG_DEBUG("entities.player.loading", "Player::LoadFromDB: Load Basic value of player '%s' is: ", m_name.c_str());
     outDebugValues();
 
     //Need to call it to initialize m_team (m_team can be calculated from race)
@@ -17824,7 +17811,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
     bool player_at_bg = false;
     if (!mapEntry || !IsPositionValid())
     {
-        TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has invalid coordinates (MapId: %u X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",
+        LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has invalid coordinates (MapId: %u X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",
             guid.ToString().c_str(), mapId, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
         RelocateToHomebind();
     }
@@ -17871,7 +17858,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
             //if (mapId == MAPID_INVALID) -- code kept for reference
             if (int16(mapId) == int16(-1)) // Battleground Entry Point not found (???)
             {
-                TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) was in BG in database, but BG was not found and entry point was invalid! Teleport to default race/class locations.",
+                LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) was in BG in database, but BG was not found and entry point was invalid! Teleport to default race/class locations.",
                     guid.ToString().c_str());
                 RelocateToHomebind();
             }
@@ -17897,13 +17884,13 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
             m_movementInfo.transport.pos.Relocate(x, y, z, o);
             transport->CalculatePassengerPosition(x, y, z, &o);
 
-            if (!Trinity::IsValidMapCoord(x, y, z, o) ||
+            if (!Server::IsValidMapCoord(x, y, z, o) ||
                 // transport size limited
                 std::fabs(m_movementInfo.transport.pos.GetPositionX()) > 250.0f ||
                 std::fabs(m_movementInfo.transport.pos.GetPositionY()) > 250.0f ||
                 std::fabs(m_movementInfo.transport.pos.GetPositionZ()) > 250.0f)
             {
-                TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to bind location.",
+                LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to bind location.",
                     guid.ToString().c_str(), x, y, z, o);
 
                 m_movementInfo.transport.Reset();
@@ -17920,7 +17907,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
         }
         else
         {
-            TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has problems with transport guid (" UI64FMTD "). Teleport to bind location.",
+            LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has problems with transport guid (" UI64FMTD "). Teleport to bind location.",
                 guid.ToString().c_str(), transLowGUID);
 
             RelocateToHomebind();
@@ -17946,12 +17933,12 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
 
             if (!nodeEntry)                                      // don't know taxi start node, teleport to homebind
             {
-                TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has wrong data in taxi destination list, teleport to homebind.", GetGUID().ToString().c_str());
+                LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has wrong data in taxi destination list, teleport to homebind.", GetGUID().ToString().c_str());
                 RelocateToHomebind();
             }
             else                                                // has start node, teleport to it
             {
-                TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has too short taxi destination list, teleport to original node.", GetGUID().ToString().c_str());
+                LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has too short taxi destination list, teleport to original node.", GetGUID().ToString().c_str());
                 mapId = nodeEntry->ContinentID;
                 Relocate(nodeEntry->Pos.X, nodeEntry->Pos.Y, nodeEntry->Pos.Z, 0.0f);
             }
@@ -17980,7 +17967,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
     {
         if (GetSession()->GetExpansion() < mapEntry->Expansion())
         {
-            TC_LOG_DEBUG("entities.player.loading", "Player::LoadFromDB: Player '%s' (%s) using client without required expansion tried login at non accessible map %u",
+            LOG_DEBUG("entities.player.loading", "Player::LoadFromDB: Player '%s' (%s) using client without required expansion tried login at non accessible map %u",
                 GetName().c_str(), GetGUID().ToString().c_str(), mapId);
             RelocateToHomebind();
         }
@@ -18014,7 +18001,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
                     SendTransferAborted(map->GetId(), TRANSFER_ABORT_DIFFICULTY, map->GetDifficultyID());
                     break;
                 case Map::CANNOT_ENTER_INSTANCE_BIND_MISMATCH:
-                    ChatHandler(GetSession()).PSendSysMessage(GetSession()->GetTrinityString(LANG_INSTANCE_BIND_MISMATCH), map->GetMapName());
+                    ChatHandler(GetSession()).PSendSysMessage(GetSession()->GetServerString(LANG_INSTANCE_BIND_MISMATCH), map->GetMapName());
                     break;
                 case Map::CANNOT_ENTER_TOO_MANY_INSTANCES:
                     SendTransferAborted(map->GetId(), TRANSFER_ABORT_TOO_MANY_INSTANCES);
@@ -18051,7 +18038,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
         }
         else
         {
-            TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player '%s' (%s) Map: %u, X: %f, Y: %f, Z: %f, O: %f. Areatrigger not found.",
+            LOG_ERROR("entities.player", "Player::LoadFromDB: Player '%s' (%s) Map: %u, X: %f, Y: %f, Z: %f, O: %f. Areatrigger not found.",
                 m_name.c_str(), guid.ToString().c_str(), mapId, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
             RelocateToHomebind();
             map = nullptr;
@@ -18065,7 +18052,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
         map = sMapMgr->CreateMap(mapId, this);
         if (!map)
         {
-            TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player '%s' (%s) Map: %u, X: %f, Y: %f, Z: %f, O: %f. Invalid default map coordinates or instance couldn't be created.",
+            LOG_ERROR("entities.player", "Player::LoadFromDB: Player '%s' (%s) Map: %u, X: %f, Y: %f, Z: %f, O: %f. Invalid default map coordinates or instance couldn't be created.",
                 m_name.c_str(), guid.ToString().c_str(), mapId, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
             return false;
         }
@@ -18114,7 +18101,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
     m_stableSlots = fields[43].GetUInt8();
     if (m_stableSlots > MAX_PET_STABLES)
     {
-        TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) can't have more stable slots than %u, but has %u in DB",
+        LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) can't have more stable slots than %u, but has %u in DB",
             GetGUID().ToString().c_str(), MAX_PET_STABLES, uint32(m_stableSlots));
         m_stableSlots = MAX_PET_STABLES;
     }
@@ -18123,7 +18110,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
 
     if (HasAtLoginFlag(AT_LOGIN_RENAME))
     {
-        TC_LOG_ERROR("entities.player.cheat", "Player::LoadFromDB: Player (%s) tried to login while forced to rename, can't load.'", GetGUID().ToString().c_str());
+        LOG_ERROR("entities.player.cheat", "Player::LoadFromDB: Player (%s) tried to login while forced to rename, can't load.'", GetGUID().ToString().c_str());
         return false;
     }
 
@@ -18294,7 +18281,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder* holder)
         }
     }
 
-    TC_LOG_DEBUG("entities.player.loading", "Player::LoadFromDB: The value of player '%s' after load item and aura is: ", m_name.c_str());
+    LOG_DEBUG("entities.player.loading", "Player::LoadFromDB: The value of player '%s' after load item and aura is: ", m_name.c_str());
     outDebugValues();
 
     // GM state
@@ -18415,7 +18402,7 @@ void Player::_LoadCUFProfiles(PreparedQueryResult result)
 
         if (id > MAX_CUF_PROFILES)
         {
-            TC_LOG_ERROR("entities.player", "Player::_LoadCUFProfiles: Player '%s' (%s) has an CUF profile with invalid id (ID: %u), max is %i.", GetName().c_str(), GetGUID().ToString().c_str(), id, MAX_CUF_PROFILES);
+            LOG_ERROR("entities.player", "Player::_LoadCUFProfiles: Player '%s' (%s) has an CUF profile with invalid id (ID: %u), max is %i.", GetName().c_str(), GetGUID().ToString().c_str(), id, MAX_CUF_PROFILES);
             continue;
         }
 
@@ -18487,7 +18474,7 @@ void Player::_LoadActions(PreparedQueryResult result)
                 ab->uState = ACTIONBUTTON_UNCHANGED;
             else
             {
-                TC_LOG_DEBUG("entities.player", "Player::_LoadActions: Player '%s' (%s) has an invalid action button (Button: %u, Action: %u, Type: %u). It will be deleted at next save. This can be due to a player changing their talents.",
+                LOG_DEBUG("entities.player", "Player::_LoadActions: Player '%s' (%s) has an invalid action button (Button: %u, Action: %u, Type: %u). It will be deleted at next save. This can be due to a player changing their talents.",
                     GetName().c_str(), GetGUID().ToString().c_str(), button, action, type);
 
                 // Will be deleted in DB at next save (it can create data until save but marked as deleted).
@@ -18499,7 +18486,7 @@ void Player::_LoadActions(PreparedQueryResult result)
 
 void Player::_LoadAuras(PreparedQueryResult auraResult, PreparedQueryResult effectResult, uint32 timediff)
 {
-    TC_LOG_DEBUG("entities.player.loading", "Player::_LoadAuras: Loading auras for %s", GetGUID().ToString().c_str());
+    LOG_DEBUG("entities.player.loading", "Player::_LoadAuras: Loading auras for %s", GetGUID().ToString().c_str());
 
     /*
                     0         1      2           3            4       5           6
@@ -18549,7 +18536,7 @@ void Player::_LoadAuras(PreparedQueryResult auraResult, PreparedQueryResult effe
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(key.SpellId);
             if (!spellInfo)
             {
-                TC_LOG_ERROR("entities.player", "Player::_LoadAuras: Player '%s' (%s) has an invalid aura (SpellID: %u), ignoring.",
+                LOG_ERROR("entities.player", "Player::_LoadAuras: Player '%s' (%s) has an invalid aura (SpellID: %u), ignoring.",
                     GetName().c_str(), GetGUID().ToString().c_str(), key.SpellId);
                 continue;
             }
@@ -18586,7 +18573,7 @@ void Player::_LoadAuras(PreparedQueryResult auraResult, PreparedQueryResult effe
 
                 aura->SetLoadedState(maxDuration, remainTime, remainCharges, stackCount, recalculateMask, info.Amounts.data());
                 aura->ApplyForTargets();
-                TC_LOG_DEBUG("entities.player", "Player::_LoadAuras: Added aura (SpellID: %u, EffectMask: %u) to player '%s (%s)",
+                LOG_DEBUG("entities.player", "Player::_LoadAuras: Added aura (SpellID: %u, EffectMask: %u) to player '%s (%s)",
                     spellInfo->Id, key.EffectMask, GetName().c_str(), GetGUID().ToString().c_str());
             }
         }
@@ -18781,7 +18768,7 @@ void Player::_LoadInventory(PreparedQueryResult result, PreparedQueryResult arti
                     }
                     else
                     {
-                        TC_LOG_ERROR("entities.player", "Player::_LoadInventory: Player '%s' (%s) has item (%s, entry: %u) which doesnt have a valid bag (Bag %s, slot: %u). Possible cheat?",
+                        LOG_ERROR("entities.player", "Player::_LoadInventory: Player '%s' (%s) has item (%s, entry: %u) which doesnt have a valid bag (Bag %s, slot: %u). Possible cheat?",
                             GetName().c_str(), GetGUID().ToString().c_str(), item->GetGUID().ToString().c_str(), item->GetEntry(), bagGuid.ToString().c_str(), slot);
                         item->DeleteFromInventoryDB(trans);
                         delete item;
@@ -18794,7 +18781,7 @@ void Player::_LoadInventory(PreparedQueryResult result, PreparedQueryResult arti
                     item->SetState(ITEM_UNCHANGED, this);
                 else
                 {
-                    TC_LOG_ERROR("entities.player", "Player::_LoadInventory: Player '%s' (%s) has item (%s, entry: %u) which can't be loaded into inventory (Bag %s, slot: %u) by reason %u. Item will be sent by mail.",
+                    LOG_ERROR("entities.player", "Player::_LoadInventory: Player '%s' (%s) has item (%s, entry: %u) which can't be loaded into inventory (Bag %s, slot: %u) by reason %u. Item will be sent by mail.",
                         GetName().c_str(), GetGUID().ToString().c_str(), item->GetGUID().ToString().c_str(), item->GetEntry(), bagGuid.ToString().c_str(), slot, uint32(err));
                     item->DeleteFromInventoryDB(trans);
                     problematicItems.push_back(item);
@@ -18807,7 +18794,7 @@ void Player::_LoadInventory(PreparedQueryResult result, PreparedQueryResult arti
         // Send problematic items by mail
         while (!problematicItems.empty())
         {
-            std::string subject = GetSession()->GetTrinityString(LANG_NOT_EQUIPPED_ITEM);
+            std::string subject = GetSession()->GetServerString(LANG_NOT_EQUIPPED_ITEM);
 
             MailDraft draft(subject, "There were problems with equipping item(s).");
             for (uint8 i = 0; !problematicItems.empty() && i < MAX_MAIL_ITEMS; ++i)
@@ -18851,21 +18838,21 @@ void Player::_LoadVoidStorage(PreparedQueryResult result)
 
         if (!itemId)
         {
-            TC_LOG_ERROR("entities.player", "Player::_LoadVoidStorage: Player '%s' (%s) has an item with an invalid id (item id: " UI64FMTD ", entry: %u).",
+            LOG_ERROR("entities.player", "Player::_LoadVoidStorage: Player '%s' (%s) has an item with an invalid id (item id: " UI64FMTD ", entry: %u).",
                 GetName().c_str(), GetGUID().ToString().c_str(), itemId, itemEntry);
             continue;
         }
 
         if (!sObjectMgr->GetItemTemplate(itemEntry))
         {
-            TC_LOG_ERROR("entities.player", "Player::_LoadVoidStorage: Player '%s' (%s) has an item with an invalid entry (item id: " UI64FMTD ", entry: %u).",
+            LOG_ERROR("entities.player", "Player::_LoadVoidStorage: Player '%s' (%s) has an item with an invalid entry (item id: " UI64FMTD ", entry: %u).",
                 GetName().c_str(), GetGUID().ToString().c_str(), itemId, itemEntry);
             continue;
         }
 
         if (slot >= VOID_STORAGE_MAX_SLOT)
         {
-            TC_LOG_ERROR("entities.player", "Player::_LoadVoidStorage: Player '%s' (%s) has an item with an invalid slot (item id: " UI64FMTD ", entry: %u, slot: %u).",
+            LOG_ERROR("entities.player", "Player::_LoadVoidStorage: Player '%s' (%s) has an item with an invalid slot (item id: " UI64FMTD ", entry: %u, slot: %u).",
                 GetName().c_str(), GetGUID().ToString().c_str(), itemId, itemEntry, slot);
             continue;
         }
@@ -18899,14 +18886,14 @@ Item* Player::_LoadItem(CharacterDatabaseTransaction& trans, uint32 zoneId, uint
             // Do not allow to have item limited to another map/zone in alive state
             if (IsAlive() && item->IsLimitedToAnotherMapOrZone(GetMapId(), zoneId))
             {
-                TC_LOG_DEBUG("entities.player.loading", "Player::_LoadInventory: player (%s, name: '%s', map: %u) has item (%s, entry: %u) limited to another map (%u). Deleting item.",
+                LOG_DEBUG("entities.player.loading", "Player::_LoadInventory: player (%s, name: '%s', map: %u) has item (%s, entry: %u) limited to another map (%u). Deleting item.",
                     GetGUID().ToString().c_str(), GetName().c_str(), GetMapId(), item->GetGUID().ToString().c_str(), item->GetEntry(), zoneId);
                 remove = true;
             }
             // "Conjured items disappear if you are logged out for more than 15 minutes"
             else if (timeDiff > 15 * MINUTE && proto->GetFlags() & ITEM_FLAG_CONJURED)
             {
-                TC_LOG_DEBUG("entities.player.loading", "Player::_LoadInventory: player (%s, name: '%s', diff: %u) has conjured item (%s, entry: %u) with expired lifetime (15 minutes). Deleting item.",
+                LOG_DEBUG("entities.player.loading", "Player::_LoadInventory: player (%s, name: '%s', diff: %u) has conjured item (%s, entry: %u) with expired lifetime (15 minutes). Deleting item.",
                     GetGUID().ToString().c_str(), GetName().c_str(), timeDiff, item->GetGUID().ToString().c_str(), item->GetEntry());
                 remove = true;
             }
@@ -18914,7 +18901,7 @@ Item* Player::_LoadItem(CharacterDatabaseTransaction& trans, uint32 zoneId, uint
             {
                 if (item->GetPlayedTime() > (2 * HOUR))
                 {
-                    TC_LOG_DEBUG("entities.player.loading", "Player::_LoadInventory: player (%s, name: '%s') has item (%s, entry: %u) with expired refund time (%u). Deleting refund data and removing refundable flag.",
+                    LOG_DEBUG("entities.player.loading", "Player::_LoadInventory: player (%s, name: '%s') has item (%s, entry: %u) with expired refund time (%u). Deleting refund data and removing refundable flag.",
                         GetGUID().ToString().c_str(), GetName().c_str(), item->GetGUID().ToString().c_str(), item->GetEntry(), item->GetPlayedTime());
 
                     stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_REFUND_INSTANCE);
@@ -18937,7 +18924,7 @@ Item* Player::_LoadItem(CharacterDatabaseTransaction& trans, uint32 zoneId, uint
                     }
                     else
                     {
-                        TC_LOG_DEBUG("entities.player.loading", "Player::_LoadInventory: player (%s, name: '%s') has item (%s, entry: %u) with refundable flags, but without data in item_refund_instance. Removing flag.",
+                        LOG_DEBUG("entities.player.loading", "Player::_LoadInventory: player (%s, name: '%s') has item (%s, entry: %u) with refundable flags, but without data in item_refund_instance. Removing flag.",
                             GetGUID().ToString().c_str(), GetName().c_str(), item->GetGUID().ToString().c_str(), item->GetEntry());
                         item->RemoveFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_REFUNDABLE);
                     }
@@ -18965,7 +18952,7 @@ Item* Player::_LoadItem(CharacterDatabaseTransaction& trans, uint32 zoneId, uint
                 }
                 else
                 {
-                    TC_LOG_DEBUG("entities.player.loading", "Player::_LoadInventory: player (%s, name: '%s') has item (%s, entry: %u) with ITEM_FIELD_FLAG_BOP_TRADEABLE flag, but without data in item_soulbound_trade_data. Removing flag.",
+                    LOG_DEBUG("entities.player.loading", "Player::_LoadInventory: player (%s, name: '%s') has item (%s, entry: %u) with ITEM_FIELD_FLAG_BOP_TRADEABLE flag, but without data in item_soulbound_trade_data. Removing flag.",
                         GetGUID().ToString().c_str(), GetName().c_str(), item->GetGUID().ToString().c_str(), item->GetEntry());
                     item->RemoveFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_BOP_TRADEABLE);
                 }
@@ -18987,7 +18974,7 @@ Item* Player::_LoadItem(CharacterDatabaseTransaction& trans, uint32 zoneId, uint
         }
         else
         {
-            TC_LOG_ERROR("entities.player", "Player::_LoadInventory: player (%s, name: '%s') has broken item (GUID: " UI64FMTD ", entry: %u) in inventory. Deleting item.",
+            LOG_ERROR("entities.player", "Player::_LoadInventory: player (%s, name: '%s') has broken item (GUID: " UI64FMTD ", entry: %u) in inventory. Deleting item.",
                 GetGUID().ToString().c_str(), GetName().c_str(), itemGuid, itemEntry);
             remove = true;
         }
@@ -19002,7 +18989,7 @@ Item* Player::_LoadItem(CharacterDatabaseTransaction& trans, uint32 zoneId, uint
     }
     else
     {
-        TC_LOG_ERROR("entities.player", "Player::_LoadInventory: player (%s, name: '%s') has unknown item (entry: %u) in inventory. Deleting item.",
+        LOG_ERROR("entities.player", "Player::_LoadInventory: player (%s, name: '%s') has unknown item (entry: %u) in inventory. Deleting item.",
             GetGUID().ToString().c_str(), GetName().c_str(), itemEntry);
         Item::DeleteFromInventoryDB(trans, itemGuid);
         Item::DeleteFromDB(trans, itemGuid);
@@ -19032,7 +19019,7 @@ void Player::_LoadMailedItems(Mail* mail)
         ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemEntry);
         if (!proto)
         {
-            TC_LOG_ERROR("entities.player", "Player '%s' (%s) has unknown item in mailed items (GUID: " UI64FMTD ", Entry: %u) in mail (%u), deleted.",
+            LOG_ERROR("entities.player", "Player '%s' (%s) has unknown item in mailed items (GUID: " UI64FMTD ", Entry: %u) in mail (%u), deleted.",
                 GetName().c_str(), GetGUID().ToString().c_str(), itemGuid, itemEntry, mail->messageID);
 
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_MAIL_ITEM);
@@ -19050,7 +19037,7 @@ void Player::_LoadMailedItems(Mail* mail)
         ObjectGuid ownerGuid = fields[45].GetUInt64() ? ObjectGuid::Create<HighGuid::Player>(fields[45].GetUInt64()) : ObjectGuid::Empty;
         if (!item->LoadFromDB(itemGuid, ownerGuid, fields, itemEntry))
         {
-            TC_LOG_ERROR("entities.player", "Player::_LoadMailedItems: Item (GUID: " UI64FMTD ") in mail (%u) doesn't exist, deleted from mail.", itemGuid, mail->messageID);
+            LOG_ERROR("entities.player", "Player::_LoadMailedItems: Item (GUID: " UI64FMTD ") in mail (%u) doesn't exist, deleted from mail.", itemGuid, mail->messageID);
 
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_MAIL_ITEM);
             stmt->setUInt64(0, itemGuid);
@@ -19113,7 +19100,7 @@ void Player::_LoadMail()
 
             if (m->mailTemplateId && !sMailTemplateStore.LookupEntry(m->mailTemplateId))
             {
-                TC_LOG_ERROR("entities.player", "Player::_LoadMail: Mail (%u) has nonexistent MailTemplateId (%u), remove at load", m->messageID, m->mailTemplateId);
+                LOG_ERROR("entities.player", "Player::_LoadMail: Mail (%u) has nonexistent MailTemplateId (%u), remove at load", m->messageID, m->mailTemplateId);
                 m->mailTemplateId = 0;
             }
 
@@ -19168,7 +19155,7 @@ void Player::_LoadQuestStatus(PreparedQueryResult result)
                 else
                 {
                     questStatusData.Status = QUEST_STATUS_INCOMPLETE;
-                    TC_LOG_ERROR("entities.player", "Player::_LoadQuestStatus: Player '%s' (%s) has invalid quest %d status (%u), replaced by QUEST_STATUS_INCOMPLETE(3).",
+                    LOG_ERROR("entities.player", "Player::_LoadQuestStatus: Player '%s' (%s) has invalid quest %d status (%u), replaced by QUEST_STATUS_INCOMPLETE(3).",
                         GetName().c_str(), GetGUID().ToString().c_str(), quest_id, qstatus);
                 }
 
@@ -19207,7 +19194,7 @@ void Player::_LoadQuestStatus(PreparedQueryResult result)
 
                 questStatusData.ObjectiveData.resize(maxStorageIndex+1);
 
-                TC_LOG_DEBUG("entities.player.loading", "Player::_LoadQuestStatus: Quest status is {%u} for quest {%u} for player (%s)", questStatusData.Status, quest_id, GetGUID().ToString().c_str());
+                LOG_DEBUG("entities.player.loading", "Player::_LoadQuestStatus: Quest status is {%u} for quest {%u} for player (%s)", questStatusData.Status, quest_id, GetGUID().ToString().c_str());
             }
         }
         while (result->NextRow());
@@ -19249,10 +19236,10 @@ void Player::_LoadQuestStatusObjectives(PreparedQueryResult result)
                         SetQuestSlotState(slot, 256 << objectiveIndex);
                 }
                 else
-                    TC_LOG_ERROR("entities.player", "Player::_LoadQuestStatusObjectives: Player '%s' (%s) has quest %d out of range objective index %u.", GetName().c_str(), GetGUID().ToString().c_str(), questID, objectiveIndex);
+                    LOG_ERROR("entities.player", "Player::_LoadQuestStatusObjectives: Player '%s' (%s) has quest %d out of range objective index %u.", GetName().c_str(), GetGUID().ToString().c_str(), questID, objectiveIndex);
             }
             else
-                TC_LOG_ERROR("entities.player", "Player::_LoadQuestStatusObjectives: Player %s (%s) does not have quest %d but has objective data for it.", GetName().c_str(), GetGUID().ToString().c_str(), questID);
+                LOG_ERROR("entities.player", "Player::_LoadQuestStatusObjectives: Player %s (%s) does not have quest %d but has objective data for it.", GetName().c_str(), GetGUID().ToString().c_str(), questID);
         }
         while (result->NextRow());
     }
@@ -19340,7 +19327,7 @@ void Player::_LoadDailyQuestStatus(PreparedQueryResult result)
             if (uint32 questBit = sDB2Manager.GetQuestUniqueBitFlag(quest_id))
                 SetQuestCompletedBit(questBit, true);
 
-            TC_LOG_DEBUG("entities.player.loading", "Player::_LoadDailyQuestStatus: Loaded daily quest cooldown (QuestID: %u) for player '%s' (%s)",
+            LOG_DEBUG("entities.player.loading", "Player::_LoadDailyQuestStatus: Loaded daily quest cooldown (QuestID: %u) for player '%s' (%s)",
                 quest_id, GetName().c_str(), GetGUID().ToString().c_str());
         }
         while (result->NextRow());
@@ -19367,7 +19354,7 @@ void Player::_LoadWeeklyQuestStatus(PreparedQueryResult result)
             if (uint32 questBit = sDB2Manager.GetQuestUniqueBitFlag(quest_id))
                 SetQuestCompletedBit(questBit, true);
 
-            TC_LOG_DEBUG("entities.player.loading", "Player::_LoadWeeklyQuestStatus: Loaded weekly quest cooldown (QuestID: %u) for player '%s' (%s)",
+            LOG_DEBUG("entities.player.loading", "Player::_LoadWeeklyQuestStatus: Loaded weekly quest cooldown (QuestID: %u) for player '%s' (%s)",
                 quest_id, GetName().c_str(), GetGUID().ToString().c_str());
         }
         while (result->NextRow());
@@ -19395,7 +19382,7 @@ void Player::_LoadSeasonalQuestStatus(PreparedQueryResult result)
             if (uint32 questBit = sDB2Manager.GetQuestUniqueBitFlag(quest_id))
                 SetQuestCompletedBit(questBit, true);
 
-            TC_LOG_DEBUG("entities.player.loading", "Player::_LoadSeasonalQuestStatus: Loaded seasonal quest cooldown (QuestID: %u) for player '%s' (%s)",
+            LOG_DEBUG("entities.player.loading", "Player::_LoadSeasonalQuestStatus: Loaded seasonal quest cooldown (QuestID: %u) for player '%s' (%s)",
                 quest_id, GetName().c_str(), GetGUID().ToString().c_str());
         }
         while (result->NextRow());
@@ -19422,7 +19409,7 @@ void Player::_LoadMonthlyQuestStatus(PreparedQueryResult result)
             if (uint32 questBit = sDB2Manager.GetQuestUniqueBitFlag(quest_id))
                 SetQuestCompletedBit(questBit, true);
 
-            TC_LOG_DEBUG("entities.player.loading", "Player::_LoadMonthlyQuestStatus: Loaded monthly quest cooldown (QuestID: %u) for player '%s' (%s)",
+            LOG_DEBUG("entities.player.loading", "Player::_LoadMonthlyQuestStatus: Loaded monthly quest cooldown (QuestID: %u) for player '%s' (%s)",
                 quest_id, GetName().c_str(), GetGUID().ToString().c_str());
         }
         while (result->NextRow());
@@ -19501,13 +19488,13 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
 
             if (!mapEntry || !mapEntry->IsDungeon())
             {
-                TC_LOG_ERROR("entities.player", "Player::_LoadBoundInstances: Player '%s' (%s) has bind to not existed or not dungeon map %d (%s)",
+                LOG_ERROR("entities.player", "Player::_LoadBoundInstances: Player '%s' (%s) has bind to not existed or not dungeon map %d (%s)",
                     GetName().c_str(), GetGUID().ToString().c_str(), mapId, mapname.c_str());
                 deleteInstance = true;
             }
             else if (difficulty >= MAX_DIFFICULTY)
             {
-                TC_LOG_ERROR("entities.player", "Player::_LoadBoundInstances: player '%s' (%s) has bind to not existed difficulty %d instance for map %u (%s)",
+                LOG_ERROR("entities.player", "Player::_LoadBoundInstances: player '%s' (%s) has bind to not existed difficulty %d instance for map %u (%s)",
                     GetName().c_str(), GetGUID().ToString().c_str(), difficulty, mapId, mapname.c_str());
                 deleteInstance = true;
             }
@@ -19516,13 +19503,13 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
                 MapDifficultyEntry const* mapDiff = sDB2Manager.GetMapDifficultyData(mapId, Difficulty(difficulty));
                 if (!mapDiff)
                 {
-                    TC_LOG_ERROR("entities.player", "Player::_LoadBoundInstances: player '%s' (%s) has bind to not existed difficulty %d instance for map %u (%s)",
+                    LOG_ERROR("entities.player", "Player::_LoadBoundInstances: player '%s' (%s) has bind to not existed difficulty %d instance for map %u (%s)",
                         GetName().c_str(), GetGUID().ToString().c_str(), difficulty, mapId, mapname.c_str());
                     deleteInstance = true;
                 }
                 else if (!perm && group)
                 {
-                    TC_LOG_ERROR("entities.player", "Player::_LoadBoundInstances: player '%s' (%s) is in group %s but has a non-permanent character bind to map %d (%s), %d, %d",
+                    LOG_ERROR("entities.player", "Player::_LoadBoundInstances: player '%s' (%s) is in group %s but has a non-permanent character bind to map %d (%s), %d, %d",
                         GetName().c_str(), GetGUID().ToString().c_str(), group->GetGUID().ToString().c_str(), mapId, mapname.c_str(), instanceId, difficulty);
                     deleteInstance = true;
                 }
@@ -19687,7 +19674,7 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave* save, bool permanent, B
         bind.perm = permanent;
         bind.extendState = extendState;
         if (!load)
-            TC_LOG_DEBUG("maps", "Player::BindToInstance: Player '%s' (%s) is now bound to map (ID: %d, Instance %d, Difficulty %d)", GetName().c_str(), GetGUID().ToString().c_str(), save->GetMapId(), save->GetInstanceId(), save->GetDifficultyID());
+            LOG_DEBUG("maps", "Player::BindToInstance: Player '%s' (%s) is now bound to map (ID: %d, Instance %d, Difficulty %d)", GetName().c_str(), GetGUID().ToString().c_str(), save->GetMapId(), save->GetInstanceId(), save->GetDifficultyID());
         sScriptMgr->OnPlayerBindToInstance(this, save->GetDifficultyID(), save->GetMapId(), permanent, uint8(extendState));
         return &bind;
     }
@@ -19789,7 +19776,7 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
 
         if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, target_map, this))
         {
-            GetSession()->SendNotification("%s", GetSession()->GetTrinityString(LANG_INSTANCE_CLOSED));
+            GetSession()->SendNotification("%s", GetSession()->GetServerString(LANG_INSTANCE_CLOSED));
             return false;
         }
 
@@ -19820,9 +19807,9 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
                 else if (mapDiff->Message->Str[sWorld->GetDefaultDbcLocale()][0] != '\0') // if (missingAchievement) covered by this case
                     SendTransferAborted(target_map, TRANSFER_ABORT_DIFFICULTY, target_difficulty);
                 else if (missingItem)
-                    GetSession()->SendNotification(GetSession()->GetTrinityString(LANG_LEVEL_MINREQUIRED_AND_ITEM), LevelMin, ASSERT_NOTNULL(sObjectMgr->GetItemTemplate(missingItem))->GetName(GetSession()->GetSessionDbcLocale()));
+                    GetSession()->SendNotification(GetSession()->GetServerString(LANG_LEVEL_MINREQUIRED_AND_ITEM), LevelMin, ASSERT_NOTNULL(sObjectMgr->GetItemTemplate(missingItem))->GetName(GetSession()->GetSessionDbcLocale()));
                 else if (LevelMin)
-                    GetSession()->SendNotification(GetSession()->GetTrinityString(LANG_LEVEL_MINREQUIRED), LevelMin);
+                    GetSession()->SendNotification(GetSession()->GetServerString(LANG_LEVEL_MINREQUIRED), LevelMin);
             }
             return false;
         }
@@ -19912,7 +19899,7 @@ bool Player::_LoadHomeBind(PreparedQueryResult result)
     PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
     if (!info)
     {
-        TC_LOG_ERROR("entities.player", "Player::_LoadHomeBind: Player '%s' (%s) has incorrect race/class (%u/%u) pair. Can't load.",
+        LOG_ERROR("entities.player", "Player::_LoadHomeBind: Player '%s' (%s) has incorrect race/class (%u/%u) pair. Can't load.",
             GetGUID().ToString().c_str(), GetName().c_str(), uint32(getRace()), uint32(getClass()));
         return false;
     }
@@ -19961,7 +19948,7 @@ bool Player::_LoadHomeBind(PreparedQueryResult result)
         CharacterDatabase.Execute(stmt);
     }
 
-    TC_LOG_DEBUG("entities.player", "Player::_LoadHomeBind: Setting home position (MapID: %u, AreaID: %u, X: %f, Y: %f, Z: %f) of player '%s' (%s)",
+    LOG_DEBUG("entities.player", "Player::_LoadHomeBind: Setting home position (MapID: %u, AreaID: %u, X: %f, Y: %f, Z: %f) of player '%s' (%s)",
         m_homebindMapId, m_homebindAreaId, m_homebindX, m_homebindY, m_homebindZ, GetName().c_str(), GetGUID().ToString().c_str());
 
     return true;
@@ -19997,7 +19984,7 @@ void Player::SaveToDB(LoginDatabaseTransaction loginTransaction, CharacterDataba
     // first save/honor gain after midnight will also update the player's honor fields
     UpdateHonorFields();
 
-    TC_LOG_DEBUG("entities.unit", "Player::SaveToDB: The value of player %s at save: ", m_name.c_str());
+    LOG_DEBUG("entities.unit", "Player::SaveToDB: The value of player %s at save: ", m_name.c_str());
     outDebugValues();
 
     if (!create)
@@ -20529,7 +20516,7 @@ void Player::_SaveInventory(CharacterDatabaseTransaction& trans)
         }
         else
         {
-            TC_LOG_ERROR("entities.player", "Player::_SaveInventory: Can't find item (%s) in refundable storage for player '%s' (%s), removing.",
+            LOG_ERROR("entities.player", "Player::_SaveInventory: Can't find item (%s) in refundable storage for player '%s' (%s), removing.",
                 itr->ToString().c_str(), GetName().c_str(), GetGUID().ToString().c_str());
             m_refundableItems.erase(itr);
         }
@@ -20559,7 +20546,7 @@ void Player::_SaveInventory(CharacterDatabaseTransaction& trans)
                 if (Item* test2 = GetItemByPos(INVENTORY_SLOT_BAG_0, item->GetBagSlot()))
                     bagTestGUID = test2->GetGUID().GetCounter();
 
-                TC_LOG_ERROR("entities.player", "Player::_SaveInventory: Player '%s' (%s) has incorrect values (Bag: %u, Slot: %u) for the item (%s, State: %d). The player doesn't have an item at that position.",
+                LOG_ERROR("entities.player", "Player::_SaveInventory: Player '%s' (%s) has incorrect values (Bag: %u, Slot: %u) for the item (%s, State: %d). The player doesn't have an item at that position.",
                     GetName().c_str(), GetGUID().ToString().c_str(), item->GetBagSlot(), item->GetSlot(), item->GetGUID().ToString().c_str(), (int32)item->GetState());
                 // according to the test that was just performed nothing should be in this slot, delete
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_INVENTORY_BY_BAG_SLOT);
@@ -20580,7 +20567,7 @@ void Player::_SaveInventory(CharacterDatabaseTransaction& trans)
             }
             else if (test != item)
             {
-                TC_LOG_ERROR("entities.player", "Player::_SaveInventory: Player '%s' (%s) has incorrect values (Bag: %u, Slot: %u) for the item (%s). %s is there instead!",
+                LOG_ERROR("entities.player", "Player::_SaveInventory: Player '%s' (%s) has incorrect values (Bag: %u, Slot: %u) for the item (%s). %s is there instead!",
                     GetName().c_str(), GetGUID().ToString().c_str(), item->GetBagSlot(), item->GetSlot(), item->GetGUID().ToString().c_str(), test->GetGUID().ToString().c_str());
                 // save all changes to the item...
                 if (item->GetState() != ITEM_NEW) // only for existing items, no duplicates
@@ -21099,18 +21086,18 @@ void Player::outDebugValues() const
     if (!sLog->ShouldLog("entities.unit", LOG_LEVEL_DEBUG))
         return;
 
-    TC_LOG_DEBUG("entities.unit", "HP is: \t\t\t" UI64FMTD "\t\tMP is: \t\t\t%u", GetMaxHealth(), GetMaxPower(POWER_MANA));
-    TC_LOG_DEBUG("entities.unit", "AGILITY is: \t\t%f\t\tSTRENGTH is: \t\t%f", GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH));
-    TC_LOG_DEBUG("entities.unit", "INTELLECT is: \t\t%f", GetStat(STAT_INTELLECT));
-    TC_LOG_DEBUG("entities.unit", "STAMINA is: \t\t%f", GetStat(STAT_STAMINA));
-    TC_LOG_DEBUG("entities.unit", "Armor is: \t\t%u\t\tBlock is: \t\t%f", GetArmor(), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-    TC_LOG_DEBUG("entities.unit", "HolyRes is: \t\t%u\t\tFireRes is: \t\t%u", GetResistance(SPELL_SCHOOL_HOLY), GetResistance(SPELL_SCHOOL_FIRE));
-    TC_LOG_DEBUG("entities.unit", "NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u", GetResistance(SPELL_SCHOOL_NATURE), GetResistance(SPELL_SCHOOL_FROST));
-    TC_LOG_DEBUG("entities.unit", "ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u", GetResistance(SPELL_SCHOOL_SHADOW), GetResistance(SPELL_SCHOOL_ARCANE));
-    TC_LOG_DEBUG("entities.unit", "MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f", GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
-    TC_LOG_DEBUG("entities.unit", "MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f", GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
-    TC_LOG_DEBUG("entities.unit", "MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f", GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-    TC_LOG_DEBUG("entities.unit", "ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u", GetBaseAttackTime(BASE_ATTACK), GetBaseAttackTime(RANGED_ATTACK));
+    LOG_DEBUG("entities.unit", "HP is: \t\t\t" UI64FMTD "\t\tMP is: \t\t\t%u", GetMaxHealth(), GetMaxPower(POWER_MANA));
+    LOG_DEBUG("entities.unit", "AGILITY is: \t\t%f\t\tSTRENGTH is: \t\t%f", GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH));
+    LOG_DEBUG("entities.unit", "INTELLECT is: \t\t%f", GetStat(STAT_INTELLECT));
+    LOG_DEBUG("entities.unit", "STAMINA is: \t\t%f", GetStat(STAT_STAMINA));
+    LOG_DEBUG("entities.unit", "Armor is: \t\t%u\t\tBlock is: \t\t%f", GetArmor(), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    LOG_DEBUG("entities.unit", "HolyRes is: \t\t%u\t\tFireRes is: \t\t%u", GetResistance(SPELL_SCHOOL_HOLY), GetResistance(SPELL_SCHOOL_FIRE));
+    LOG_DEBUG("entities.unit", "NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u", GetResistance(SPELL_SCHOOL_NATURE), GetResistance(SPELL_SCHOOL_FROST));
+    LOG_DEBUG("entities.unit", "ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u", GetResistance(SPELL_SCHOOL_SHADOW), GetResistance(SPELL_SCHOOL_ARCANE));
+    LOG_DEBUG("entities.unit", "MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f", GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
+    LOG_DEBUG("entities.unit", "MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f", GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
+    LOG_DEBUG("entities.unit", "MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f", GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
+    LOG_DEBUG("entities.unit", "ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u", GetBaseAttackTime(BASE_ATTACK), GetBaseAttackTime(RANGED_ATTACK));
 }
 
 /*********************************************************/
@@ -21399,7 +21386,7 @@ Pet* Player::GetPet() const
             return pet;
 
         // there may be a guardian in this slot
-        //TC_LOG_ERROR("entities.player", "Player::GetPet: Pet %u does not exist.", GUID_LOPART(pet_guid));
+        //LOG_ERROR("entities.player", "Player::GetPet: Pet %u does not exist.", GUID_LOPART(pet_guid));
         //const_cast<Player*>(this)->SetPetGUID(0);
     }
 
@@ -21413,7 +21400,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
 
     if (pet)
     {
-        TC_LOG_DEBUG("entities.pet", "Player::RemovePet: Player '%s' (%s), Pet (Entry: %u, Mode: %u, ReturnReagent: %u)",
+        LOG_DEBUG("entities.pet", "Player::RemovePet: Player '%s' (%s), Pet (Entry: %u, Mode: %u, ReturnReagent: %u)",
             GetName().c_str(), GetGUID().ToString().c_str(), pet->GetEntry(), mode, returnreagent);
 
         if (pet->m_removed)
@@ -21501,10 +21488,10 @@ void Player::StopCastingCharm()
 
     if (!GetCharmGUID().IsEmpty())
     {
-        TC_LOG_FATAL("entities.player", "Player::StopCastingCharm: Player '%s' (%s) is not able to uncharm unit (%s)", GetName().c_str(), GetGUID().ToString().c_str(), GetCharmGUID().ToString().c_str());
+        LOG_FATAL("entities.player", "Player::StopCastingCharm: Player '%s' (%s) is not able to uncharm unit (%s)", GetName().c_str(), GetGUID().ToString().c_str(), GetCharmGUID().ToString().c_str());
         if (!charm->GetCharmerGUID().IsEmpty())
         {
-            TC_LOG_FATAL("entities.player", "Player::StopCastingCharm: Charmed unit has charmer %s", charm->GetCharmerGUID().ToString().c_str());
+            LOG_FATAL("entities.player", "Player::StopCastingCharm: Charmed unit has charmer %s", charm->GetCharmerGUID().ToString().c_str());
             ABORT();
         }
 
@@ -21614,7 +21601,7 @@ void Player::Whisper(uint32 textId, Player* target, bool /*isBossWhisper = false
     BroadcastTextEntry const* bct = sBroadcastTextStore.LookupEntry(textId);
     if (!bct)
     {
-        TC_LOG_ERROR("entities.unit", "WorldObject::MonsterWhisper: `broadcast_text` was not %u found", textId);
+        LOG_ERROR("entities.unit", "WorldObject::MonsterWhisper: `broadcast_text` was not %u found", textId);
         return;
     }
 
@@ -21696,7 +21683,7 @@ void Player::PossessSpellInitialize()
 
     if (!charmInfo)
     {
-        TC_LOG_ERROR("entities.player", "Player::PossessSpellInitialize: charm (%s) has no charminfo!", charm->GetGUID().ToString().c_str());
+        LOG_ERROR("entities.player", "Player::PossessSpellInitialize: charm (%s) has no charminfo!", charm->GetGUID().ToString().c_str());
         return;
     }
 
@@ -21739,7 +21726,7 @@ void Player::VehicleSpellInitialize()
 
         if (!sConditionMgr->IsObjectMeetingVehicleSpellConditions(vehicle->GetEntry(), spellId, this, vehicle))
         {
-            TC_LOG_DEBUG("condition", "Player::VehicleSpellInitialize: Player '%s' (%s) doesn't meet conditions for vehicle (Entry: %u, Spell: %u)",
+            LOG_DEBUG("condition", "Player::VehicleSpellInitialize: Player '%s' (%s) doesn't meet conditions for vehicle (Entry: %u, Spell: %u)",
                 GetName().c_str(), GetGUID().ToString().c_str(), vehicle->ToCreature()->GetEntry(), spellId);
             continue;
         }
@@ -21765,7 +21752,7 @@ void Player::CharmSpellInitialize()
     CharmInfo* charmInfo = charm->GetCharmInfo();
     if (!charmInfo)
     {
-        TC_LOG_ERROR("entities.player", "Player::CharmSpellInitialize(): Player '%s' (%s) has a charm (%s) but no no charminfo!",
+        LOG_ERROR("entities.player", "Player::CharmSpellInitialize(): Player '%s' (%s) has a charm (%s) but no no charminfo!",
             GetName().c_str(), GetGUID().ToString().c_str(), charm->GetGUID().ToString().c_str());
         return;
     }
@@ -21918,13 +21905,13 @@ void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* s
     basevalue = T(float(basevalue + totalflat) * totalmul);
 }
 
-template TC_GAME_API void Player::ApplySpellMod(uint32 spellId, SpellModOp op, int32& basevalue, Spell* spell) const;
-template TC_GAME_API void Player::ApplySpellMod(uint32 spellId, SpellModOp op, uint32& basevalue, Spell* spell) const;
-template TC_GAME_API void Player::ApplySpellMod(uint32 spellId, SpellModOp op, float& basevalue, Spell* spell) const;
+template GAME_API void Player::ApplySpellMod(uint32 spellId, SpellModOp op, int32& basevalue, Spell* spell) const;
+template GAME_API void Player::ApplySpellMod(uint32 spellId, SpellModOp op, uint32& basevalue, Spell* spell) const;
+template GAME_API void Player::ApplySpellMod(uint32 spellId, SpellModOp op, float& basevalue, Spell* spell) const;
 
 void Player::AddSpellMod(SpellModifier* mod, bool apply)
 {
-    TC_LOG_DEBUG("spells", "Player::AddSpellMod: Player '%s' (%s), SpellID: %d", GetName().c_str(), GetGUID().ToString().c_str(), mod->spellId);
+    LOG_DEBUG("spells", "Player::AddSpellMod: Player '%s' (%s), SpellID: %d", GetName().c_str(), GetGUID().ToString().c_str(), mod->spellId);
 
     /// First, manipulate our spellmodifier container
     if (apply)
@@ -22334,7 +22321,7 @@ void Player::ContinueTaxiFlight() const
     if (!sourceNode)
         return;
 
-    TC_LOG_DEBUG("entities.unit", "Player::ContinueTaxiFlight: Restart %s taxi flight", GetGUID().ToString().c_str());
+    LOG_DEBUG("entities.unit", "Player::ContinueTaxiFlight: Restart %s taxi flight", GetGUID().ToString().c_str());
 
     uint32 mountDisplayId = sObjectMgr->GetTaxiMountDisplayId(sourceNode, GetTeam(), true);
     if (!mountDisplayId)
@@ -22407,7 +22394,7 @@ void Player::InitDisplayIds()
     PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
     if (!info)
     {
-        TC_LOG_ERROR("entities.player", "Player::InitDisplayIds: Player '%s' (%s) has incorrect race/class pair. Can't init display ids.", GetName().c_str(), GetGUID().ToString().c_str());
+        LOG_ERROR("entities.player", "Player::InitDisplayIds: Player '%s' (%s) has incorrect race/class pair. Can't init display ids.", GetName().c_str(), GetGUID().ToString().c_str());
         return;
     }
 
@@ -22423,7 +22410,7 @@ void Player::InitDisplayIds()
             SetNativeDisplayId(info->displayId_m);
             break;
         default:
-            TC_LOG_ERROR("entities.player", "Player::InitDisplayIds: Player '%s' (%s) has invalid gender %u", GetName().c_str(), GetGUID().ToString().c_str(), gender);
+            LOG_ERROR("entities.player", "Player::InitDisplayIds: Player '%s' (%s) has invalid gender %u", GetName().c_str(), GetGUID().ToString().c_str(), gender);
     }
 }
 
@@ -22515,7 +22502,7 @@ bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorSlot,
     Creature* creature = GetNPCIfCanInteractWith(vendorGuid, UNIT_NPC_FLAG_VENDOR);
     if (!creature)
     {
-        TC_LOG_DEBUG("network", "Player::BuyCurrencyFromVendorSlot: Vendor (%s) not found or player '%s' (%s) can't interact with him.",
+        LOG_DEBUG("network", "Player::BuyCurrencyFromVendorSlot: Vendor (%s) not found or player '%s' (%s) can't interact with him.",
             vendorGuid.ToString().c_str(), GetName().c_str(), GetGUID().ToString().c_str());
         SendBuyError(BUY_ERR_DISTANCE_TOO_FAR, nullptr, currency, 0);
         return false;
@@ -22555,7 +22542,7 @@ bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorSlot,
         iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
         if (!iece)
         {
-            TC_LOG_ERROR("entities.player", "Player::BuyCurrencyFromVendorSlot: Currency %u has wrong ExtendedCost field value %u", currency, crItem->ExtendedCost);
+            LOG_ERROR("entities.player", "Player::BuyCurrencyFromVendorSlot: Currency %u has wrong ExtendedCost field value %u", currency, crItem->ExtendedCost);
             return false;
         }
 
@@ -22683,7 +22670,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
     Creature* creature = GetNPCIfCanInteractWith(vendorguid, UNIT_NPC_FLAG_VENDOR);
     if (!creature)
     {
-        TC_LOG_DEBUG("network", "Player::BuyItemFromVendorSlot: Vendor (%s) not found or player '%s' (%s) can't interact with him.",
+        LOG_DEBUG("network", "Player::BuyItemFromVendorSlot: Vendor (%s) not found or player '%s' (%s) can't interact with him.",
             vendorguid.ToString().c_str(), GetName().c_str(), GetGUID().ToString().c_str());
         SendBuyError(BUY_ERR_DISTANCE_TOO_FAR, nullptr, item, 0);
         return false;
@@ -22691,7 +22678,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
 
     if (!sConditionMgr->IsObjectMeetingVendorItemConditions(creature->GetEntry(), item, this, creature))
     {
-        TC_LOG_DEBUG("condition", "Player::BuyItemFromVendorSlot: Player '%s' (%s) doesn't meed conditions for creature (Entry: %u, Item: %u)",
+        LOG_DEBUG("condition", "Player::BuyItemFromVendorSlot: Player '%s' (%s) doesn't meed conditions for creature (Entry: %u, Item: %u)",
             GetName().c_str(), GetGUID().ToString().c_str(), creature->GetEntry(), item);
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
         return false;
@@ -22756,7 +22743,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
         ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
         if (!iece)
         {
-            TC_LOG_ERROR("entities.player", "Player::BuyItemFromVendorSlot: Item %u has wrong ExtendedCost field value %u", pProto->GetId(), crItem->ExtendedCost);
+            LOG_ERROR("entities.player", "Player::BuyItemFromVendorSlot: Item %u has wrong ExtendedCost field value %u", pProto->GetId(), crItem->ExtendedCost);
             return false;
         }
 
@@ -22827,7 +22814,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
         uint64 maxCount = MAX_MONEY_AMOUNT / buyPricePerItem;
         if ((uint64)count > maxCount)
         {
-            TC_LOG_ERROR("entities.player.cheat", "Player::BuyItemFromVendorSlot: Player '%s' (%s) tried to buy item (ItemID: %u, Count: %u), causing overflow",
+            LOG_ERROR("entities.player.cheat", "Player::BuyItemFromVendorSlot: Player '%s' (%s) tried to buy item (ItemID: %u, Count: %u), causing overflow",
                 GetName().c_str(), GetGUID().ToString().c_str(), pProto->GetId(), (uint32)count);
             count = (uint8)maxCount;
         }
@@ -22925,7 +22912,7 @@ void Player::UpdateHomebindTime(uint32 time)
         m_HomebindTimer = 60000;
         // send message to player
         SendRaidGroupOnlyMessage(RAID_GROUP_ERR_REQUIREMENTS_UNMATCH, m_HomebindTimer);
-        TC_LOG_DEBUG("maps", "Player::UpdateHomebindTime: Player '%s' (%s) will be teleported to homebind in 60 seconds",
+        LOG_DEBUG("maps", "Player::UpdateHomebindTime: Player '%s' (%s) will be teleported to homebind in 60 seconds",
             GetName().c_str(), GetGUID().ToString().c_str());
     }
 }
@@ -23092,7 +23079,7 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
         }
     }
 
-    TC_LOG_DEBUG("entities.player.items", "Player::EnchantmentFitsRequirements: Checking Condition %u, there are %u Meta Gems, %u Red Gems, %u Yellow Gems and %u Blue Gems, Activate:%s",
+    LOG_DEBUG("entities.player.items", "Player::EnchantmentFitsRequirements: Checking Condition %u, there are %u Meta Gems, %u Red Gems, %u Yellow Gems and %u Blue Gems, Activate:%s",
         enchantmentcondition, curcount[0], curcount[1], curcount[2], curcount[3], activate ? "yes" : "no");
 
     return activate;
@@ -23205,7 +23192,7 @@ void Player::SetBattlegroundEntryPoint()
             if (const WorldSafeLocsEntry* entry = sObjectMgr->GetClosestGraveYard(*this, GetTeam(), this))
                 m_bgData.joinPos = WorldLocation(entry->MapID, entry->Loc.X, entry->Loc.Y, entry->Loc.Z, 0.0f);
             else
-                TC_LOG_ERROR("entities.player", "Player::SetBattlegroundEntryPoint: Dungeon (MapID: %u) has no linked graveyard, setting home location as entry point.", GetMapId());
+                LOG_ERROR("entities.player", "Player::SetBattlegroundEntryPoint: Dungeon (MapID: %u) has no linked graveyard, setting home location as entry point.", GetMapId());
         }
         // If new entry point is not BG or arena set it
         else if (!GetMap()->IsBattlegroundOrArena())
@@ -23435,8 +23422,8 @@ void Player::UpdateVisibilityOf(WorldObject* target)
             target->DestroyForPlayer(this);
             m_clientGUIDs.erase(target->GetGUID());
 
-            #ifdef TRINITY_DEBUG
-            TC_LOG_DEBUG("maps", "%s out of range for %s. Distance = %f", target->GetGUID().ToString().c_str(), GetGUID().ToString().c_str(), GetDistance(target));
+            #ifdef SERVER_DEBUG
+            LOG_DEBUG("maps", "%s out of range for %s. Distance = %f", target->GetGUID().ToString().c_str(), GetGUID().ToString().c_str(), GetDistance(target));
             #endif
         }
     }
@@ -23447,8 +23434,8 @@ void Player::UpdateVisibilityOf(WorldObject* target)
             target->SendUpdateToPlayer(this);
             m_clientGUIDs.insert(target->GetGUID());
 
-            #ifdef TRINITY_DEBUG
-            TC_LOG_DEBUG("maps", "%s is visible now for %s. Distance = %f", target->GetGUID().ToString().c_str(), GetGUID().ToString().c_str(), GetDistance(target));
+            #ifdef SERVER_DEBUG
+            LOG_DEBUG("maps", "%s is visible now for %s. Distance = %f", target->GetGUID().ToString().c_str(), GetGUID().ToString().c_str(), GetDistance(target));
             #endif
 
             // target aura duration for caster show only if target exist at caster client
@@ -23523,8 +23510,8 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, std::set<Unit*>& vi
             target->BuildOutOfRangeUpdateBlock(&data);
             m_clientGUIDs.erase(target->GetGUID());
 
-            #ifdef TRINITY_DEBUG
-            TC_LOG_DEBUG("maps", "Object %s (%u) is out of range for %s. Distance = %f", target->GetGUID().ToString().c_str(), target->GetEntry(), GetGUID().ToString().c_str(), GetDistance(target));
+            #ifdef SERVER_DEBUG
+            LOG_DEBUG("maps", "Object %s (%u) is out of range for %s. Distance = %f", target->GetGUID().ToString().c_str(), target->GetEntry(), GetGUID().ToString().c_str(), GetDistance(target));
             #endif
         }
     }
@@ -23535,8 +23522,8 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, std::set<Unit*>& vi
             target->BuildCreateUpdateBlockForPlayer(&data, this);
             UpdateVisibilityOf_helper(m_clientGUIDs, target, visibleNow);
 
-            #ifdef TRINITY_DEBUG
-            TC_LOG_DEBUG("maps", "Object %s (%u) is visible now for %s. Distance = %f", target->GetGUID().ToString().c_str(), target->GetEntry(), GetGUID().ToString().c_str(), GetDistance(target));
+            #ifdef SERVER_DEBUG
+            LOG_DEBUG("maps", "Object %s (%u) is visible now for %s. Distance = %f", target->GetGUID().ToString().c_str(), target->GetEntry(), GetGUID().ToString().c_str(), GetDistance(target));
             #endif
         }
     }
@@ -23568,7 +23555,7 @@ void Player::UpdateObjectVisibility(bool forced)
 void Player::UpdateVisibilityForPlayer()
 {
     // updates visibility of all objects around point of view for current player
-    Trinity::VisibleNotifier notifier(*this);
+    Server::VisibleNotifier notifier(*this);
     Cell::VisitAllObjects(m_seer, notifier, GetSightRange());
     notifier.SendToSelf();   // send gathered data
 }
@@ -24048,7 +24035,7 @@ void Player::LearnCustomSpells()
     for (PlayerCreateInfoSpells::const_iterator itr = info->customSpells.begin(); itr != info->customSpells.end(); ++itr)
     {
         uint32 tspell = *itr;
-        TC_LOG_DEBUG("entities.player.loading", "Player::LearnCustomSpells: Player '%s' (%s, Class: %u Race: %u): Adding initial spell (SpellID: %u)",
+        LOG_DEBUG("entities.player.loading", "Player::LearnCustomSpells: Player '%s' (%s, Class: %u Race: %u): Adding initial spell (SpellID: %u)",
             GetName().c_str(), GetGUID().ToString().c_str(), uint32(getClass()), uint32(getRace()), tspell);
         if (!IsInWorld())                                    // will send in INITIAL_SPELLS in list anyway at map add
             AddSpell(tspell, true, true, true, false);
@@ -24761,7 +24748,7 @@ void Player::AutoUnequipOffhandIfNeed(bool force /*= false*/)
         offItem->DeleteFromInventoryDB(trans);                   // deletes item from character's inventory
         offItem->SaveToDB(trans);                                // recursive and not have transaction guard into self, item not in inventory and can be save standalone
 
-        std::string subject = GetSession()->GetTrinityString(LANG_NOT_EQUIPPED_ITEM);
+        std::string subject = GetSession()->GetServerString(LANG_NOT_EQUIPPED_ITEM);
         MailDraft(subject, "There were problems with equipping one or several items").AddItem(offItem).SendMailTo(trans, this, MailSender(this, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_COPIED);
 
         CharacterDatabase.CommitTransaction(trans);
@@ -24823,7 +24810,7 @@ bool Player::HasItemFitToSpellRequirements(SpellInfo const* spellInfo, Item cons
             break;
         }
         default:
-            TC_LOG_ERROR("entities.player", "Player::HasItemFitToSpellRequirements: Not handled spell requirement for item class %u", spellInfo->EquippedItemClass);
+            LOG_ERROR("entities.player", "Player::HasItemFitToSpellRequirements: Not handled spell requirement for item class %u", spellInfo->EquippedItemClass);
             break;
     }
 
@@ -24911,7 +24898,7 @@ void Player::InitializeSelfResurrectionSpells()
 bool Player::isHonorOrXPTarget(Unit const* victim) const
 {
     uint8 v_level = victim->GetLevelForTarget(this);
-    uint8 k_grey  = Trinity::XP::GetGrayLevel(getLevel());
+    uint8 k_grey  = Server::XP::GetGrayLevel(getLevel());
 
     // Victim level less gray level
     if (v_level < k_grey)
@@ -25470,12 +25457,12 @@ void Player::SetViewpoint(WorldObject* target, bool apply)
 {
     if (apply)
     {
-        TC_LOG_DEBUG("maps", "Player::CreateViewpoint: Player '%s' (%s) creates seer (Entry: %u, TypeId: %u).",
+        LOG_DEBUG("maps", "Player::CreateViewpoint: Player '%s' (%s) creates seer (Entry: %u, TypeId: %u).",
             GetName().c_str(), GetGUID().ToString().c_str(), target->GetEntry(), target->GetTypeId());
 
         if (!AddGuidValue(PLAYER_FARSIGHT, target->GetGUID()))
         {
-            TC_LOG_FATAL("entities.player", "Player::CreateViewpoint: Player '%s' (%s) cannot add new viewpoint!", GetName().c_str(), GetGUID().ToString().c_str());
+            LOG_FATAL("entities.player", "Player::CreateViewpoint: Player '%s' (%s) cannot add new viewpoint!", GetName().c_str(), GetGUID().ToString().c_str());
             return;
         }
 
@@ -25488,11 +25475,11 @@ void Player::SetViewpoint(WorldObject* target, bool apply)
     }
     else
     {
-        TC_LOG_DEBUG("maps", "Player::CreateViewpoint: Player %s removed seer", GetName().c_str());
+        LOG_DEBUG("maps", "Player::CreateViewpoint: Player %s removed seer", GetName().c_str());
 
         if (!RemoveGuidValue(PLAYER_FARSIGHT, target->GetGUID()))
         {
-            TC_LOG_FATAL("entities.player", "Player::CreateViewpoint: Player '%s' (%s) cannot remove current viewpoint!", GetName().c_str(), GetGUID().ToString().c_str());
+            LOG_FATAL("entities.player", "Player::CreateViewpoint: Player '%s' (%s) cannot remove current viewpoint!", GetName().c_str(), GetGUID().ToString().c_str());
             return;
         }
 
@@ -25882,7 +25869,7 @@ void Player::_LoadSkills(PreparedQueryResult result)
             SkillRaceClassInfoEntry const* rcEntry = sDB2Manager.GetSkillRaceClassInfo(skill, getRace(), getClass());
             if (!rcEntry)
             {
-                TC_LOG_ERROR("entities.player", "Player::_LoadSkills: Player '%s' (%s, Race: %u, Class: %u) has forbidden skill %u for his race/class combination",
+                LOG_ERROR("entities.player", "Player::_LoadSkills: Player '%s' (%s, Race: %u, Class: %u) has forbidden skill %u for his race/class combination",
                     GetName().c_str(), GetGUID().ToString().c_str(), uint32(getRace()), uint32(getClass()), skill);
 
                 mSkillStatus.insert(SkillStatusMap::value_type(skill, SkillStatusData(0, SKILL_DELETED)));
@@ -25906,7 +25893,7 @@ void Player::_LoadSkills(PreparedQueryResult result)
 
             if (value == 0)
             {
-                TC_LOG_ERROR("entities.player", "Player::_LoadSkills: Player '%s' (%s) has skill %u with value 0, deleted.",
+                LOG_ERROR("entities.player", "Player::_LoadSkills: Player '%s' (%s) has skill %u with value 0, deleted.",
                     GetName().c_str(), GetGUID().ToString().c_str(), skill);
 
                 CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHARACTER_SKILL);
@@ -25953,7 +25940,7 @@ void Player::_LoadSkills(PreparedQueryResult result)
 
             if (count >= PLAYER_MAX_SKILLS)                      // client limit
             {
-                TC_LOG_ERROR("entities.player", "Player::_LoadSkills: Player '%s' (%s) has more than %u skills.",
+                LOG_ERROR("entities.player", "Player::_LoadSkills: Player '%s' (%s) has more than %u skills.",
                     GetName().c_str(), GetGUID().ToString().c_str(), PLAYER_MAX_SKILLS);
                 break;
             }
@@ -26051,7 +26038,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
 {
     // calculate total z distance of the fall
     float z_diff = m_lastFallZ - movementInfo.pos.GetPositionZ();
-    //TC_LOG_DEBUG("misc", "zDiff = %f", z_diff);
+    //LOG_DEBUG("misc", "zDiff = %f", z_diff);
 
     //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
     // 14.57 can be calculated by resolving damageperc formula below to 0
@@ -26093,7 +26080,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
             }
 
             //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
-            TC_LOG_DEBUG("entities.player", "FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d", movementInfo.pos.GetPositionZ(), height, GetPositionZ(), movementInfo.jump.fallTime, height, damage, safe_fall);
+            LOG_DEBUG("entities.player", "FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d", movementInfo.pos.GetPositionZ(), height, GetPositionZ(), movementInfo.jump.fallTime, height, damage, safe_fall);
         }
     }
 }
@@ -26235,7 +26222,7 @@ TalentLearnResult Player::LearnTalent(uint32 talentId, int32* spellOnCooldown)
     uint32 spellid = talentInfo->SpellID;
     if (!spellid)
     {
-        TC_LOG_ERROR("entities.player", "Player::LearnTalent: Talent.dbc has no spellInfo for talent: %u (spell id = 0)", talentId);
+        LOG_ERROR("entities.player", "Player::LearnTalent: Talent.dbc has no spellInfo for talent: %u (spell id = 0)", talentId);
         return TALENT_FAILED_UNKNOWN;
     }
 
@@ -26248,7 +26235,7 @@ TalentLearnResult Player::LearnTalent(uint32 talentId, int32* spellOnCooldown)
 
     LearnSpell(spellid, false);
 
-    TC_LOG_DEBUG("misc", "Player::LearnTalent: TalentID: %u Spell: %u Group: %u\n", talentId, spellid, GetActiveTalentGroup());
+    LOG_DEBUG("misc", "Player::LearnTalent: TalentID: %u Spell: %u Group: %u\n", talentId, spellid, GetActiveTalentGroup());
 
     return TALENT_LEARN_OK;
 }
@@ -26337,13 +26324,13 @@ bool Player::AddPvpTalent(PvpTalentEntry const* talent, uint8 activeTalentGroup,
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(talent->SpellID);
     if (!spellInfo)
     {
-        TC_LOG_ERROR("spells", "Player::AddTalent: Spell (ID: %u) does not exist.", talent->SpellID);
+        LOG_ERROR("spells", "Player::AddTalent: Spell (ID: %u) does not exist.", talent->SpellID);
         return false;
     }
 
     if (!SpellMgr::IsSpellValid(spellInfo, this, false))
     {
-        TC_LOG_ERROR("spells", "Player::AddTalent: Spell (ID: %u) is invalid", talent->SpellID);
+        LOG_ERROR("spells", "Player::AddTalent: Spell (ID: %u) is invalid", talent->SpellID);
         return false;
     }
 
@@ -26570,7 +26557,7 @@ void Player::SendTalentsInfoData()
             TalentEntry const* talentInfo = sTalentStore.LookupEntry(itr->first);
             if (!talentInfo)
             {
-                TC_LOG_ERROR("entities.player", "Player::SendTalentsInfoData: Player '%s' (%s) has unknown talent id: %u",
+                LOG_ERROR("entities.player", "Player::SendTalentsInfoData: Player '%s' (%s) has unknown talent id: %u",
                     GetName().c_str(), GetGUID().ToString().c_str(), itr->first);
                 continue;
             }
@@ -26581,7 +26568,7 @@ void Player::SendTalentsInfoData()
             SpellInfo const* spellEntry = sSpellMgr->GetSpellInfo(talentInfo->SpellID);
             if (!spellEntry)
             {
-                TC_LOG_ERROR("entities.player", "Player::SendTalentsInfoData: Player '%s' (%s) has unknown talent spell: %u",
+                LOG_ERROR("entities.player", "Player::SendTalentsInfoData: Player '%s' (%s) has unknown talent spell: %u",
                     GetName().c_str(), GetGUID().ToString().c_str(), talentInfo->SpellID);
                 continue;
             }
@@ -26597,7 +26584,7 @@ void Player::SendTalentsInfoData()
             PvpTalentEntry const* talentInfo = sPvpTalentStore.LookupEntry(itr->first);
             if (!talentInfo)
             {
-                TC_LOG_ERROR("entities.player", "Player::SendTalentsInfoData: Player '%s' (%s) has unknown pvp talent id: %u",
+                LOG_ERROR("entities.player", "Player::SendTalentsInfoData: Player '%s' (%s) has unknown pvp talent id: %u",
                     GetName().c_str(), GetGUID().ToString().c_str(), itr->first);
                 continue;
             }
@@ -26608,7 +26595,7 @@ void Player::SendTalentsInfoData()
             SpellInfo const* spellEntry = sSpellMgr->GetSpellInfo(talentInfo->SpellID);
             if (!spellEntry)
             {
-                TC_LOG_ERROR("entities.player", "Player::SendTalentsInfoData: Player '%s' (%s) has unknown pvp talent spell: %u",
+                LOG_ERROR("entities.player", "Player::SendTalentsInfoData: Player '%s' (%s) has unknown pvp talent spell: %u",
                     GetName().c_str(), GetGUID().ToString().c_str(), talentInfo->SpellID);
                 continue;
             }
@@ -26645,7 +26632,7 @@ void Player::SetEquipmentSet(EquipmentSetInfo::EquipmentSetData const& newEqSet)
         EquipmentSetContainer::const_iterator itr = _equipmentSets.find(newEqSet.Guid);
         if (itr == _equipmentSets.end() || itr->second.Data.Guid != newEqSet.Guid)
         {
-            TC_LOG_ERROR("entities.player", "Player::SetEquipmentSet: Player '%s' (%s) tried to save nonexistent equipment set " UI64FMTD " (index: %u)",
+            LOG_ERROR("entities.player", "Player::SetEquipmentSet: Player '%s' (%s) tried to save nonexistent equipment set " UI64FMTD " (index: %u)",
                 GetName().c_str(), GetGUID().ToString().c_str(), newEqSet.Guid, newEqSet.SetID);
             return;
         }
@@ -27196,7 +27183,7 @@ void Player::SendTimeSync()
     m_timeSyncServer = GameTime::GetGameTimeMS();
 
     if (m_timeSyncQueue.size() > 3)
-        TC_LOG_ERROR("network", "Player::SendTimeSync: Did not receive CMSG_TIME_SYNC_RESP for over 30 seconds from '%s' (%s), possible cheater",
+        LOG_ERROR("network", "Player::SendTimeSync: Did not receive CMSG_TIME_SYNC_RESP for over 30 seconds from '%s' (%s), possible cheater",
             GetName().c_str(), GetGUID().ToString().c_str());
 }
 
@@ -27233,13 +27220,13 @@ void Player::SendRefundInfo(Item* item)
 
     if (!item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_REFUNDABLE))
     {
-        TC_LOG_DEBUG("entities.player.items", "Item refund: item not refundable!");
+        LOG_DEBUG("entities.player.items", "Item refund: item not refundable!");
         return;
     }
 
     if (GetGUID() != item->GetRefundRecipient()) // Formerly refundable item got traded
     {
-        TC_LOG_DEBUG("entities.player.items", "Item refund: item was traded!");
+        LOG_DEBUG("entities.player.items", "Item refund: item was traded!");
         item->SetNotRefundable(this);
         return;
     }
@@ -27247,7 +27234,7 @@ void Player::SendRefundInfo(Item* item)
     ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(item->GetPaidExtendedCost());
     if (!iece)
     {
-        TC_LOG_DEBUG("entities.player.items", "Item refund: cannot find extendedcost data.");
+        LOG_DEBUG("entities.player.items", "Item refund: cannot find extendedcost data.");
         return;
     }
 
@@ -27329,7 +27316,7 @@ void Player::RefundItem(Item* item)
 {
     if (!item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_REFUNDABLE))
     {
-        TC_LOG_DEBUG("entities.player.items", "Item refund: item not refundable!");
+        LOG_DEBUG("entities.player.items", "Item refund: item not refundable!");
         return;
     }
 
@@ -27342,7 +27329,7 @@ void Player::RefundItem(Item* item)
 
     if (GetGUID() != item->GetRefundRecipient()) // Formerly refundable item got traded
     {
-        TC_LOG_DEBUG("entities.player.items", "Item refund: item was traded!");
+        LOG_DEBUG("entities.player.items", "Item refund: item was traded!");
         item->SetNotRefundable(this);
         return;
     }
@@ -27350,7 +27337,7 @@ void Player::RefundItem(Item* item)
     ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(item->GetPaidExtendedCost());
     if (!iece)
     {
-        TC_LOG_DEBUG("entities.player.items", "Item refund: cannot find extendedcost data.");
+        LOG_DEBUG("entities.player.items", "Item refund: cannot find extendedcost data.");
         return;
     }
 
@@ -27683,7 +27670,7 @@ void Player::SendPlayerChoice(ObjectGuid sender, int32 choiceId)
         playerChoiceResponse.Confirmation = playerChoiceResponseTemplate.Confirmation;
         if (playerChoiceLocale)
         {
-            if (PlayerChoiceResponseLocale const* playerChoiceResponseLocale = Trinity::Containers::MapGetValuePtr(playerChoiceLocale->Responses, playerChoiceResponseTemplate.ResponseId))
+            if (PlayerChoiceResponseLocale const* playerChoiceResponseLocale = Server::Containers::MapGetValuePtr(playerChoiceLocale->Responses, playerChoiceResponseTemplate.ResponseId))
             {
                 ObjectMgr::GetLocaleString(playerChoiceResponseLocale->Answer, locale, playerChoiceResponse.Answer);
                 ObjectMgr::GetLocaleString(playerChoiceResponseLocale->Header, locale, playerChoiceResponse.Header);
@@ -27835,7 +27822,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
     pet->Relocate(x, y, z, ang);
     if (!pet->IsPositionValid())
     {
-        TC_LOG_ERROR("misc", "Player::SummonPet: Pet (%s, Entry: %d) not summoned. Suggested coordinates aren't valid (X: %f Y: %f)", pet->GetGUID().ToString().c_str(), pet->GetEntry(), pet->GetPositionX(), pet->GetPositionY());
+        LOG_ERROR("misc", "Player::SummonPet: Pet (%s, Entry: %d) not summoned. Suggested coordinates aren't valid (X: %f Y: %f)", pet->GetGUID().ToString().c_str(), pet->GetEntry(), pet->GetPositionX(), pet->GetPositionY());
         delete pet;
         return nullptr;
     }
@@ -27844,7 +27831,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
     uint32 pet_number = sObjectMgr->GeneratePetNumber();
     if (!pet->Create(map->GenerateLowGuid<HighGuid::Pet>(), map, entry))
     {
-        TC_LOG_ERROR("misc", "Player::SummonPet: No such creature entry %u", entry);
+        LOG_ERROR("misc", "Player::SummonPet: No such creature entry %u", entry);
         delete pet;
         return nullptr;
     }
@@ -27909,12 +27896,12 @@ void Player::ValidateMovementInfo(MovementInfo* mi)
 {
     //! Anti-cheat checks. Please keep them in seperate if () blocks to maintain a clear overview.
     //! Might be subject to latency, so just remove improper flags.
-    #ifdef TRINITY_DEBUG
+    #ifdef SERVER_DEBUG
     #define REMOVE_VIOLATING_FLAGS(check, maskToRemove) \
     { \
         if (check) \
         { \
-            TC_LOG_DEBUG("entities.unit", "Player::ValidateMovementInfo: Violation of MovementFlags found (%s). " \
+            LOG_DEBUG("entities.unit", "Player::ValidateMovementInfo: Violation of MovementFlags found (%s). " \
                 "MovementFlags: %u, MovementFlags2: %u for player %s. Mask %u will be removed.", \
                 STRINGIZE(check), mi->GetMovementFlags(), mi->GetExtraMovementFlags(), GetGUID().ToString().c_str(), maskToRemove); \
             mi->RemoveMovementFlag((maskToRemove)); \

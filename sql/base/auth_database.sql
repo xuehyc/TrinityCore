@@ -1965,7 +1965,7 @@ INSERT INTO `rbac_permissions` VALUES
 (701,'Command: reload spell_target_position'),
 (702,'Command: reload spell_threats'),
 (703,'Command: reload spell_group_stack_rules'),
-(704,'Command: reload trinity_string'),
+(704,'Command: reload server_string'),
 (705,'Command: reload warden_action'),
 (706,'Command: reload waypoint_scripts'),
 (707,'Command: reload waypoint_data'),
@@ -2162,7 +2162,7 @@ CREATE TABLE `realmlist` (
 LOCK TABLES `realmlist` WRITE;
 /*!40000 ALTER TABLE `realmlist` DISABLE KEYS */;
 INSERT INTO `realmlist` VALUES
-(1,'Trinity','127.0.0.1','127.0.0.1','255.255.255.0',8085,0,0,1,0,0,26972,1,1);
+(1,'Ashbringer','127.0.0.1','127.0.0.1','255.255.255.0',8085,0,0,1,0,0,26972,1,1);
 /*!40000 ALTER TABLE `realmlist` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2361,7 +2361,7 @@ CREATE TABLE `uptime` (
   `starttime` int(10) unsigned NOT NULL DEFAULT '0',
   `uptime` int(10) unsigned NOT NULL DEFAULT '0',
   `maxplayers` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `revision` varchar(255) NOT NULL DEFAULT 'Trinitycore',
+  `revision` varchar(255) NOT NULL DEFAULT 'MobiusCore',
   PRIMARY KEY (`realmid`,`starttime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Uptime system';
 /*!40101 SET character_set_client = @saved_cs_client */;

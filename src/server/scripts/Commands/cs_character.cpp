@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /* ScriptData
@@ -270,7 +258,7 @@ public:
 
         LocaleConstant loc = handler->GetSessionDbcLocale();
         char const* targetName = target->GetName().c_str();
-        char const* knownStr = handler->GetTrinityString(LANG_KNOWN);
+        char const* knownStr = handler->GetServerString(LANG_KNOWN);
 
         // Search in CharTitles.dbc
         for (uint32 id = 0; id < sCharTitlesStore.GetNumRows(); id++)
@@ -284,10 +272,10 @@ public:
                     continue;
 
                 char const* activeStr = target->GetInt32Value(PLAYER_CHOSEN_TITLE) == titleInfo->MaskID
-                ? handler->GetTrinityString(LANG_ACTIVE)
+                ? handler->GetServerString(LANG_ACTIVE)
                 : "";
 
-                std::string titleNameStr = Trinity::StringFormat(name.c_str(), targetName);
+                std::string titleNameStr = Server::StringFormat(name.c_str(), targetName);
 
                 // send title in "id (idx:idx) - [namedlink locale]" format
                 if (handler->GetSession())
@@ -623,14 +611,14 @@ public:
 
         handler->PSendSysMessage(LANG_CHANGEACCOUNT_SUCCESS, targetName.c_str(), accountName.c_str());
 
-        std::string logString = Trinity::StringFormat("changed ownership of player %s (%s) from account %u to account %u", targetName.c_str(), targetGuid.ToString().c_str(), oldAccountId, newAccountId);
+        std::string logString = Server::StringFormat("changed ownership of player %s (%s) from account %u to account %u", targetName.c_str(), targetGuid.ToString().c_str(), oldAccountId, newAccountId);
         if (WorldSession* session = handler->GetSession())
         {
             if (Player* player = session->GetPlayer())
                 sLog->outCommand(session->GetAccountId(), "GM %s (Account: %u) %s", player->GetName().c_str(), session->GetAccountId(), logString.c_str());
         }
         else
-            sLog->outCommand(0, "%s %s", handler->GetTrinityString(LANG_CONSOLE), logString.c_str());
+            sLog->outCommand(0, "%s %s", handler->GetServerString(LANG_CONSOLE), logString.c_str());
         return true;
     }
 
@@ -649,7 +637,7 @@ public:
             FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction.ID);
             char const* factionName = factionEntry ? factionEntry->Name->Str[loc] : "#Not found#";
             ReputationRank rank = target->GetReputationMgr().GetRank(factionEntry);
-            std::string rankName = handler->GetTrinityString(ReputationRankStrIndex[rank]);
+            std::string rankName = handler->GetServerString(ReputationRankStrIndex[rank]);
             std::ostringstream ss;
             if (handler->GetSession())
                 ss << faction.ID << " - |cffffffff|Hfaction:" << faction.ID << "|h[" << factionName << ' ' << localeNames[loc] << "]|h|r";
@@ -659,17 +647,17 @@ public:
             ss << ' ' << rankName << " (" << target->GetReputationMgr().GetReputation(factionEntry) << ')';
 
             if (faction.Flags & FACTION_FLAG_VISIBLE)
-                ss << handler->GetTrinityString(LANG_FACTION_VISIBLE);
+                ss << handler->GetServerString(LANG_FACTION_VISIBLE);
             if (faction.Flags & FACTION_FLAG_AT_WAR)
-                ss << handler->GetTrinityString(LANG_FACTION_ATWAR);
+                ss << handler->GetServerString(LANG_FACTION_ATWAR);
             if (faction.Flags & FACTION_FLAG_PEACE_FORCED)
-                ss << handler->GetTrinityString(LANG_FACTION_PEACE_FORCED);
+                ss << handler->GetServerString(LANG_FACTION_PEACE_FORCED);
             if (faction.Flags & FACTION_FLAG_HIDDEN)
-                ss << handler->GetTrinityString(LANG_FACTION_HIDDEN);
+                ss << handler->GetServerString(LANG_FACTION_HIDDEN);
             if (faction.Flags & FACTION_FLAG_INVISIBLE_FORCED)
-                ss << handler->GetTrinityString(LANG_FACTION_INVISIBLE_FORCED);
+                ss << handler->GetServerString(LANG_FACTION_INVISIBLE_FORCED);
             if (faction.Flags & FACTION_FLAG_INACTIVE)
-                ss << handler->GetTrinityString(LANG_FACTION_INACTIVE);
+                ss << handler->GetServerString(LANG_FACTION_INACTIVE);
 
             handler->SendSysMessage(ss.str().c_str());
         }

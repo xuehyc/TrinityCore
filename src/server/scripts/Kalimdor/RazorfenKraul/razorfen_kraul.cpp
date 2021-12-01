@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2006-2013 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "ScriptMgr.h"
@@ -199,7 +186,7 @@ public:
                 return go->isSpawned() || !go->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
             });
 
-            tubbersInRange.sort(Trinity::ObjectDistanceOrderPred(me));
+            tubbersInRange.sort(Server::ObjectDistanceOrderPred(me));
 
             GameObject* nearestTubber = tubbersInRange.front();
             if (!nearestTubber)

@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 /* ScriptData
@@ -274,7 +262,7 @@ public:
                     return true;
                 }
 
-                char const* active = activeEvents.find(id) != activeEvents.end() ? handler->GetTrinityString(LANG_ACTIVE) : "";
+                char const* active = activeEvents.find(id) != activeEvents.end() ? handler->GetServerString(LANG_ACTIVE) : "";
 
                 if (handler->GetSession())
                     handler->PSendSysMessage(LANG_EVENT_ENTRY_LIST_CHAT, id, id, eventData.description.c_str(), active);
@@ -361,25 +349,25 @@ public:
                     if (factionState) // and then target != NULL also
                     {
                         uint32 index = target->GetReputationMgr().GetReputationRankStrIndex(factionEntry);
-                        std::string rankName = handler->GetTrinityString(index);
+                        std::string rankName = handler->GetServerString(index);
 
                         ss << ' ' << rankName << "|h|r (" << target->GetReputationMgr().GetReputation(factionEntry) << ')';
 
                         if (factionState->Flags & FACTION_FLAG_VISIBLE)
-                            ss << handler->GetTrinityString(LANG_FACTION_VISIBLE);
+                            ss << handler->GetServerString(LANG_FACTION_VISIBLE);
                         if (factionState->Flags & FACTION_FLAG_AT_WAR)
-                            ss << handler->GetTrinityString(LANG_FACTION_ATWAR);
+                            ss << handler->GetServerString(LANG_FACTION_ATWAR);
                         if (factionState->Flags & FACTION_FLAG_PEACE_FORCED)
-                            ss << handler->GetTrinityString(LANG_FACTION_PEACE_FORCED);
+                            ss << handler->GetServerString(LANG_FACTION_PEACE_FORCED);
                         if (factionState->Flags & FACTION_FLAG_HIDDEN)
-                            ss << handler->GetTrinityString(LANG_FACTION_HIDDEN);
+                            ss << handler->GetServerString(LANG_FACTION_HIDDEN);
                         if (factionState->Flags & FACTION_FLAG_INVISIBLE_FORCED)
-                            ss << handler->GetTrinityString(LANG_FACTION_INVISIBLE_FORCED);
+                            ss << handler->GetServerString(LANG_FACTION_INVISIBLE_FORCED);
                         if (factionState->Flags & FACTION_FLAG_INACTIVE)
-                            ss << handler->GetTrinityString(LANG_FACTION_INACTIVE);
+                            ss << handler->GetServerString(LANG_FACTION_INACTIVE);
                     }
                     else
-                        ss << handler->GetTrinityString(LANG_FACTION_NOREPUTATION);
+                        ss << handler->GetServerString(LANG_FACTION_NOREPUTATION);
 
                     handler->SendSysMessage(ss.str().c_str());
 
@@ -645,13 +633,13 @@ public:
                                 switch (status)
                                 {
                                     case QUEST_STATUS_COMPLETE:
-                                        statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_COMPLETE);
+                                        statusStr = handler->GetServerString(LANG_COMMAND_QUEST_COMPLETE);
                                         break;
                                     case QUEST_STATUS_INCOMPLETE:
-                                        statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_ACTIVE);
+                                        statusStr = handler->GetServerString(LANG_COMMAND_QUEST_ACTIVE);
                                         break;
                                     case QUEST_STATUS_REWARDED:
-                                        statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_REWARDED);
+                                        statusStr = handler->GetServerString(LANG_COMMAND_QUEST_REWARDED);
                                         break;
                                     default:
                                         break;
@@ -693,13 +681,13 @@ public:
                     switch (status)
                     {
                         case QUEST_STATUS_COMPLETE:
-                            statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_COMPLETE);
+                            statusStr = handler->GetServerString(LANG_COMMAND_QUEST_COMPLETE);
                             break;
                         case QUEST_STATUS_INCOMPLETE:
-                            statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_ACTIVE);
+                            statusStr = handler->GetServerString(LANG_COMMAND_QUEST_ACTIVE);
                             break;
                         case QUEST_STATUS_REWARDED:
-                            statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_REWARDED);
+                            statusStr = handler->GetServerString(LANG_COMMAND_QUEST_REWARDED);
                             break;
                         default:
                             break;
@@ -783,14 +771,14 @@ public:
                     char const* knownStr = "";
                     if (target && target->HasSkill(id))
                     {
-                        knownStr = handler->GetTrinityString(LANG_KNOWN);
+                        knownStr = handler->GetServerString(LANG_KNOWN);
                         uint32 curValue = target->GetPureSkillValue(id);
                         uint32 maxValue = target->GetPureMaxSkillValue(id);
                         uint32 permValue = target->GetSkillPermBonusValue(id);
                         uint32 tempValue = target->GetSkillTempBonusValue(id);
 
-                        char const* valFormat = handler->GetTrinityString(LANG_SKILL_VALUES);
-                        valStr = Trinity::StringFormat(valFormat, curValue, maxValue, permValue, tempValue);
+                        char const* valFormat = handler->GetServerString(LANG_SKILL_VALUES);
+                        valStr = Server::StringFormat(valFormat, curValue, maxValue, permValue, tempValue);
                     }
 
                     // send skill in "id - [namedlink locale]" format
@@ -891,21 +879,21 @@ public:
 
                     // include rank in link name
                     if (rank)
-                        ss << handler->GetTrinityString(LANG_SPELL_RANK) << rank;
+                        ss << handler->GetServerString(LANG_SPELL_RANK) << rank;
 
                     if (handler->GetSession())
                         ss << "]|h|r";
 
                     if (talent)
-                        ss << handler->GetTrinityString(LANG_TALENT);
+                        ss << handler->GetServerString(LANG_TALENT);
                     if (passive)
-                        ss << handler->GetTrinityString(LANG_PASSIVE);
+                        ss << handler->GetServerString(LANG_PASSIVE);
                     if (learn)
-                        ss << handler->GetTrinityString(LANG_LEARN);
+                        ss << handler->GetServerString(LANG_LEARN);
                     if (known)
-                        ss << handler->GetTrinityString(LANG_KNOWN);
+                        ss << handler->GetServerString(LANG_KNOWN);
                     if (active)
-                        ss << handler->GetTrinityString(LANG_ACTIVE);
+                        ss << handler->GetServerString(LANG_ACTIVE);
 
                     handler->SendSysMessage(ss.str().c_str());
 
@@ -964,7 +952,7 @@ public:
 
             // include rank in link name
             if (rank)
-                ss << handler->GetTrinityString(LANG_SPELL_RANK) << rank;
+                ss << handler->GetServerString(LANG_SPELL_RANK) << rank;
 
             if (handler->GetSession())
                 ss << ' ' << localeNames[locale] << "]|h|r";
@@ -972,15 +960,15 @@ public:
                 ss << ' ' << localeNames[locale];
 
             if (talent)
-                ss << handler->GetTrinityString(LANG_TALENT);
+                ss << handler->GetServerString(LANG_TALENT);
             if (passive)
-                ss << handler->GetTrinityString(LANG_PASSIVE);
+                ss << handler->GetServerString(LANG_PASSIVE);
             if (learn)
-                ss << handler->GetTrinityString(LANG_LEARN);
+                ss << handler->GetServerString(LANG_LEARN);
             if (known)
-                ss << handler->GetTrinityString(LANG_KNOWN);
+                ss << handler->GetServerString(LANG_KNOWN);
             if (active)
-                ss << handler->GetTrinityString(LANG_ACTIVE);
+                ss << handler->GetServerString(LANG_ACTIVE);
 
             handler->SendSysMessage(ss.str().c_str());
         }
@@ -1165,13 +1153,13 @@ public:
                             return true;
                         }
 
-                        char const* knownStr = target && target->HasTitle(titleInfo) ? handler->GetTrinityString(LANG_KNOWN) : "";
+                        char const* knownStr = target && target->HasTitle(titleInfo) ? handler->GetServerString(LANG_KNOWN) : "";
 
                         char const* activeStr = target && target->GetInt32Value(PLAYER_CHOSEN_TITLE) == titleInfo->MaskID
-                            ? handler->GetTrinityString(LANG_ACTIVE)
+                            ? handler->GetServerString(LANG_ACTIVE)
                             : "";
 
-                        std::string titleNameStr = Trinity::StringFormat(name.c_str(), targetName);
+                        std::string titleNameStr = Server::StringFormat(name.c_str(), targetName);
 
                         // send title in "id (idx:idx) - [namedlink locale]" format
                         if (handler->GetSession())
@@ -1245,21 +1233,21 @@ public:
                     ss << id << " - [" << name << ']';
 
                     if (mapInfo->IsContinent())
-                        ss << handler->GetTrinityString(LANG_CONTINENT);
+                        ss << handler->GetServerString(LANG_CONTINENT);
 
                     switch (mapInfo->InstanceType)
                     {
                         case MAP_INSTANCE:
-                            ss << handler->GetTrinityString(LANG_INSTANCE);
+                            ss << handler->GetServerString(LANG_INSTANCE);
                             break;
                         case MAP_RAID:
-                            ss << handler->GetTrinityString(LANG_RAID);
+                            ss << handler->GetServerString(LANG_RAID);
                             break;
                         case MAP_BATTLEGROUND:
-                            ss << handler->GetTrinityString(LANG_BATTLEGROUND);
+                            ss << handler->GetServerString(LANG_BATTLEGROUND);
                             break;
                         case MAP_ARENA:
-                            ss << handler->GetTrinityString(LANG_ARENA);
+                            ss << handler->GetServerString(LANG_ARENA);
                             break;
                     }
 

@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #ifndef SupportMgr_h__
@@ -51,7 +39,7 @@ enum SupportSpamType
 
 using ChatLog = WorldPackets::Ticket::SupportTicketSubmitComplaint::SupportTicketChatLog;
 
-class TC_GAME_API Ticket
+class GAME_API Ticket
 {
 public:
     Ticket();
@@ -104,7 +92,7 @@ protected:
     std::string _comment;
 };
 
-class TC_GAME_API BugTicket : public Ticket
+class GAME_API BugTicket : public Ticket
 {
 public:
     BugTicket();
@@ -126,7 +114,7 @@ private:
     std::string _note;
 };
 
-class TC_GAME_API ComplaintTicket : public Ticket
+class GAME_API ComplaintTicket : public Ticket
 {
 public:
     ComplaintTicket();
@@ -160,7 +148,7 @@ private:
     std::string _note;
 };
 
-class TC_GAME_API SuggestionTicket : public Ticket
+class GAME_API SuggestionTicket : public Ticket
 {
 public:
     SuggestionTicket();
@@ -185,7 +173,7 @@ typedef std::map<uint32, BugTicket*> BugTicketList;
 typedef std::map<uint32, ComplaintTicket*> ComplaintTicketList;
 typedef std::map<uint32, SuggestionTicket*> SuggestionTicketList;
 
-class TC_GAME_API SupportMgr
+class GAME_API SupportMgr
 {
 private:
     SupportMgr();

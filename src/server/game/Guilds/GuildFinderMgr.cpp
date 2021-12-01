@@ -1,18 +1,6 @@
-/*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * This file is part of the MobiusCore project.
+ * See AUTHORS file for copyright information.
  */
 
 #include "GuildFinderMgr.h"
@@ -51,7 +39,7 @@ void GuildFinderMgr::LoadFromDB()
 
 void GuildFinderMgr::LoadGuildSettings()
 {
-    TC_LOG_INFO("server.loading", "Loading guild finder guild-related settings...");
+    LOG_INFO("server.loading", "Loading guild finder guild-related settings...");
     //                                                           0                1             2                  3             4           5             6         7
     QueryResult result = CharacterDatabase.Query("SELECT gfgs.guildId, gfgs.availability, gfgs.classRoles, gfgs.interests, gfgs.level, gfgs.listed, gfgs.comment, c.race "
                                                  "FROM guild_finder_guild_settings gfgs "
@@ -60,7 +48,7 @@ void GuildFinderMgr::LoadGuildSettings()
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 guild finder guild-related settings. Table `guild_finder_guild_settings` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 guild finder guild-related settings. Table `guild_finder_guild_settings` is empty.");
         return;
     }
 
@@ -87,19 +75,19 @@ void GuildFinderMgr::LoadGuildSettings()
         ++count;
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u guild finder guild-related settings in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u guild finder guild-related settings in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void GuildFinderMgr::LoadMembershipRequests()
 {
-    TC_LOG_INFO("server.loading", "Loading guild finder membership requests...");
+    LOG_INFO("server.loading", "Loading guild finder membership requests...");
     //                                                      0         1           2            3           4         5         6
     QueryResult result = CharacterDatabase.Query("SELECT guildId, playerGuid, availability, classRole, interests, comment, submitTime "
                                                  "FROM guild_finder_applicant");
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 guild finder membership requests. Table `guild_finder_applicant` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 guild finder membership requests. Table `guild_finder_applicant` is empty.");
         return;
     }
 
@@ -124,7 +112,7 @@ void GuildFinderMgr::LoadMembershipRequests()
         ++count;
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u guild finder membership requests in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded %u guild finder membership requests in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void GuildFinderMgr::AddMembershipRequest(ObjectGuid const& guildGuid, MembershipRequest const& request)

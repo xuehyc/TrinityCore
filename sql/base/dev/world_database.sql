@@ -3928,13 +3928,13 @@ CREATE TABLE `transports` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `trinity_string`
+-- Table structure for table `server_string`
 --
 
-DROP TABLE IF EXISTS `trinity_string`;
+DROP TABLE IF EXISTS `server_string`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `trinity_string` (
+CREATE TABLE `server_string` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `content_default` text NOT NULL,
   `content_loc1` text,
