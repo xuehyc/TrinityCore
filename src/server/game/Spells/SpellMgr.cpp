@@ -3601,6 +3601,20 @@ void SpellMgr::LoadSpellInfoCorrections()
     });
     // ENDOF FIRELANDS SPELLS
 
+    //
+    // ANTORUS THE BURNING THRONE SPELLS
+    //
+
+    // Decimation
+    ApplySpellFix({ 244449 }, [](SpellInfo* spellInfo)
+    {
+        // For some reason there is a instakill effect that serves absolutely no purpose.
+        // Until we figure out what it's actually used for we disable it.
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_2))->Effect = 0;
+    });
+
+    // ENDOF ANTORUS THE BURNING THRONE SPELLS
+	
     // THE WANDERING ISLE SPELLS
     // Summon Pet
     ApplySpellFix({ 107924 }, [](SpellInfo* spellInfo)
