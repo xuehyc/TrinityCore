@@ -63,7 +63,7 @@ public:
     struct boss_baltharus_the_warbornAI : public BossAI
     {
         boss_baltharus_the_warbornAI(Creature* creature) : BossAI(creature, DATA_BALTHARUS_THE_WARBORN),
-            _introDone(false), _cloneCount(RAID_MODE<uint8>(1, 2, 2, 2)) { }
+            _cloneCount(RAID_MODE<uint8>(1, 2, 2, 2)), _introDone(false) { }
 
         void Reset() override
         {
