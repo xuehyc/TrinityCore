@@ -4940,6 +4940,90 @@ class spell_item_variable_pulse_lightning_capacitor : public AuraScript
     }
 };
 
+enum AuraProcRemoveSpells
+{
+    SPELL_TALISMAN_OF_ASCENDANCE    = 28200,
+    SPELL_JOM_GABBAR                = 29602,
+    SPELL_BATTLE_TRANCE             = 45040,
+    SPELL_WORLD_QUELLER_FOCUS       = 90900
+};
+
+// 28200 - Ascendance
+class spell_item_talisman_of_ascendance : public AuraScript
+{
+    bool Validate(SpellInfo const* /*spell*/) override
+    {
+        return ValidateSpellInfo({ SPELL_TALISMAN_OF_ASCENDANCE });
+    }
+
+    void OnRemove(AuraEffect const* /*effect*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_0].TriggerSpell);
+    }
+
+    void Register() override
+    {
+        OnEffectRemove.Register(&spell_item_talisman_of_ascendance::OnRemove, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+// 29602 - Jom Gabbar
+class spell_item_jom_gabbar : public AuraScript
+{
+    bool Validate(SpellInfo const* /*spell*/) override
+    {
+        return ValidateSpellInfo({ SPELL_JOM_GABBAR });
+    }
+
+    void OnRemove(AuraEffect const* /*effect*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_0].TriggerSpell);
+    }
+
+    void Register() override
+    {
+        OnEffectRemove.Register(&spell_item_jom_gabbar::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+// 45040 - Battle Trance
+class spell_item_battle_trance : public AuraScript
+{
+    bool Validate(SpellInfo const* /*spell*/) override
+    {
+        return ValidateSpellInfo({ SPELL_BATTLE_TRANCE });
+    }
+
+    void OnRemove(AuraEffect const* /*effect*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_0].TriggerSpell);
+    }
+
+    void Register() override
+    {
+        OnEffectRemove.Register(&spell_item_battle_trance::OnRemove, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+// 90900 - World-Queller Focus
+class spell_item_world_queller_focus : public AuraScript
+{
+    bool Validate(SpellInfo const* /*spell*/) override
+    {
+        return ValidateSpellInfo({ SPELL_WORLD_QUELLER_FOCUS });
+    }
+
+    void OnRemove(AuraEffect const* /*effect*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_0].TriggerSpell);
+    }
+
+    void Register() override
+    {
+        OnEffectRemove.Register(&spell_item_world_queller_focus::OnRemove, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 //item:64457 The Last Relic of Argus  spell:82674 Teleport With Error
 uint32 Teleport_With_Error_Area[3] = { 0, 1, 530 };
 Position const Teleport_With_Error_Pos[26] =
@@ -5059,7 +5143,7 @@ void AddSC_item_spell_scripts()
     new spell_item_underbelly_elixir();
     new spell_item_worn_troll_dice();
     new spell_item_red_rider_air_rifle();
-
+	
     new spell_item_create_heart_candy();
     new spell_item_book_of_glyph_mastery();
     new spell_item_gift_of_the_harvester();
@@ -5124,6 +5208,10 @@ void AddSC_item_spell_scripts()
     RegisterSpellScript(spell_item_tipping_of_the_scales);
     RegisterSpellScript(spell_item_blind_spot);
     RegisterSpellScript(spell_item_variable_pulse_lightning_capacitor);
-    
+    RegisterSpellScript(spell_item_talisman_of_ascendance);
+    RegisterSpellScript(spell_item_battle_trance);
+    RegisterSpellScript(spell_item_world_queller_focus);
+    RegisterSpellScript(spell_item_jom_gabbar);
     RegisterSpellScript(spell_Teleport_With_Error);//spell:82674 Teleport With Error
 }
+
