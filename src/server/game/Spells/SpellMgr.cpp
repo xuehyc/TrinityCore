@@ -637,7 +637,10 @@ SpellEnchantProcEntry const* SpellMgr::GetSpellEnchantProcEvent(uint32 enchId) c
 
 bool SpellMgr::IsArenaAllowedEnchancment(uint32 ench_id) const
 {
-    return mEnchantCustomAttr[ench_id];
+    if (SpellItemEnchantmentEntry const* enchantment = sSpellItemEnchantmentStore.LookupEntry(ench_id))
+        return enchantment->GetFlags().HasFlag(SpellItemEnchantmentFlags::AllowEnteringArena);
+
+    return false;
 }
 
 const std::vector<int32>* SpellMgr::GetSpellLinked(int32 spell_id) const
@@ -2096,46 +2099,6 @@ void SpellMgr::LoadSpellPetAuras()
     } while (result->NextRow());
 
     TC_LOG_INFO("server.loading", ">> Loaded %u spell pet auras in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-}
-
-// Fill custom data about enchancments
-void SpellMgr::LoadEnchantCustomAttr()
-{
-    uint32 oldMSTime = getMSTime();
-
-    uint32 size = sSpellItemEnchantmentStore.GetNumRows();
-    mEnchantCustomAttr.resize(size);
-
-    for (uint32 i = 0; i < size; ++i)
-       mEnchantCustomAttr[i] = 0;
-
-    uint32 count = 0;
-    for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)
-    {
-        SpellInfo const* spellInfo = GetSpellInfo(i);
-        if (!spellInfo)
-            continue;
-
-        /// @todo find a better check
-        if (!spellInfo->HasAttribute(SPELL_ATTR2_PRESERVE_ENCHANT_IN_ARENA) || !spellInfo->HasAttribute(SPELL_ATTR0_NOT_SHAPESHIFT))
-            continue;
-
-        for (uint32 j = 0; j < MAX_SPELL_EFFECTS; ++j)
-        {
-            if (spellInfo->Effects[j].Effect == SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY)
-            {
-                uint32 enchId = spellInfo->Effects[j].MiscValue;
-                SpellItemEnchantmentEntry const* ench = sSpellItemEnchantmentStore.LookupEntry(enchId);
-                if (!ench)
-                    continue;
-                mEnchantCustomAttr[enchId] = true;
-                ++count;
-                break;
-            }
-        }
-    }
-
-    TC_LOG_INFO("server.loading", ">> Loaded %u custom enchant attributes in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void SpellMgr::LoadSpellEnchantProcData()
@@ -4681,12 +4644,6 @@ void SpellMgr::LoadSpellInfoCorrections()
     });
 
     // Drahga Shadowburner
-    // Flaming Fixate
-    ApplySpellFix({ 82850 }, [](SpellInfo* spellInfo)
-    {
-        spellInfo->AttributesEx5 |= SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING;
-    });
-
     // Ride Vehicle
     ApplySpellFix({ 43671 }, [](SpellInfo* spellInfo)
     {
@@ -4719,7 +4676,7 @@ void SpellMgr::LoadSpellInfoCorrections()
     // Shadow Gale
     ApplySpellFix({ 75664, 91086 }, [](SpellInfo* spellInfo)
     {
-        spellInfo->AttributesEx5 &= ~SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING;
+        spellInfo->AttributesEx5 &= ~SPELL_ATTR5_ALLOW_ACTIONS_DURING_CHANNEL;
     });
 
     // Gronn Knockback Cosmetic
@@ -4773,6 +4730,12 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_3_YARDS);
     });
 
+    // Soul Fragment
+    ApplySpellFix({ 82224 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx5 |= SPELL_ATTR5_ALLOW_ACTIONS_DURING_CHANNEL;
+    });
+
     // Lockmaw and Augh
     // Dust Flail
     ApplySpellFix({ 81643, 81652 }, [](SpellInfo* spellInfo)
@@ -4808,16 +4771,6 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_45_YARDS);
     });
 
-    // Reverberating Hymn
-    ApplySpellFix({
-        75323,
-        90008
-    }, [](SpellInfo* spellInfo)
-    {
-        // Aura is refreshed at 3 seconds, and the tick should happen at the fourth.
-        spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
-    });
-
     // Destruction Protocoll
     ApplySpellFix({ 77437 }, [](SpellInfo* spellInfo)
     {
@@ -4848,7 +4801,7 @@ void SpellMgr::LoadSpellInfoCorrections()
     // Spore Cloud
     ApplySpellFix({ 75701 }, [](SpellInfo* spellInfo)
     {
-        spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_1;
+        spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED;
     });
 
     // Noxious Spores
@@ -4921,7 +4874,7 @@ void SpellMgr::LoadSpellInfoCorrections()
     // Gaze of Occu'thar
     ApplySpellFix({ 96942, 101009 }, [](SpellInfo* spellInfo)
     {
-        spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_1;
+        spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED;
     });
 
     // Meteor Slash
@@ -5000,6 +4953,31 @@ void SpellMgr::LoadSpellInfoCorrections()
     {
         spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
     });
+
+    // Summon Fragment of Rhyolith
+    ApplySpellFix({ 98136 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21); // Infinite
+    });
+
+    // Summon Spark of Rhyolith
+    ApplySpellFix({ 98552 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21); // Infinite
+    });
+
+    // Summon Armor Fragment
+    ApplySpellFix({ 98557 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21); // Infinite
+    });
+
+    // Immolation
+    ApplySpellFix({ 99845 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_100_YARDS);
+    });
+
     // ENDOF FIRELANDS SPELLS
 
     //
@@ -5173,7 +5151,7 @@ void SpellMgr::LoadSpellInfoCorrections()
     // Nurture
     ApplySpellFix({ 85425 }, [](SpellInfo* spellInfo)
     {
-        spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_2;
+        spellInfo->AttributesEx &= ~SPELL_ATTR1_SELF_CHANNELED;
     });
 
     // Soothing Breeze
@@ -5196,17 +5174,6 @@ void SpellMgr::LoadSpellInfoCorrections()
     }, [](SpellInfo* spellInfo)
     {
         spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_3_YARDS);
-    });
-
-    // Wind Blast
-    ApplySpellFix({
-        85483,
-        93138,
-        93139,
-        93140
-    }, [](SpellInfo* spellInfo)
-    {
-        spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CONE_ENEMY_104);
     });
 
     // Al'Akir
@@ -5920,6 +5887,16 @@ void SpellMgr::LoadSpellInfoCorrections()
     },[](SpellInfo* spellInfo)
     {
             spellInfo->SpellFamilyName = SPELLFAMILY_ROGUE;
+    });
+
+    // Serpent Spread
+    ApplySpellFix({
+        87934,
+        87935
+    }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+        spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
     });
 
     for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)

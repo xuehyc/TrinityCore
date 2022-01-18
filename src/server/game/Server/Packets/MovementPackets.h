@@ -248,6 +248,16 @@ namespace WorldPackets
             uint8 TransfertAbort = 0;
             uint8 Arg = 0;
         };
+
+        class MoveSetActiveMover final : public ServerPacket
+        {
+        public:
+            MoveSetActiveMover(ObjectGuid moverGuid) : ServerPacket(SMSG_MOVE_SET_ACTIVE_MOVER, 8), MoverGUID(moverGuid) { }
+
+            WorldPacket const* Write() override;
+
+            ObjectGuid MoverGUID;
+        };
     }
 
     ByteBuffer& operator<<(ByteBuffer& data, Movement::MovementSpline const& movementSpline);

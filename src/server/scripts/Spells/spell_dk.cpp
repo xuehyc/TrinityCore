@@ -47,6 +47,7 @@ enum DeathKnightSpells
     SPELL_DK_BLOOD_TAP                          = 45529,
     SPELL_DK_BUTCHERY                           = 50163,
     SPELL_DK_CORPSE_EXPLOSION_TRIGGERED         = 43999,
+    SPELL_DK_DANCING_RUNE_WEAPON_PARRY_BONUS    = 81256,
     SPELL_DK_DARK_TRANSFORMATION                = 63560,
     SPELL_DK_DARK_TRANSFORMATION_DUMMY          = 93426,
     SPELL_DK_DEATH_AND_DECAY_DAMAGE             = 52212,
@@ -61,9 +62,7 @@ enum DeathKnightSpells
     SPELL_DK_DEATH_STRIKE_HEAL                  = 45470,
     SPELL_DK_DEATH_STRIKE_ENABLER               = 89832,
     SPELL_DK_EBON_PLAGUE                        = 65142,
-    SPELL_DK_ENERGIZE_BLOOD_RUNE                = 81166,
-    SPELL_DK_ENERGIZE_FROST_RUNE                = 81168,
-    SPELL_DK_ENERGIZE_UNHOLY_RUNE               = 81169,
+    SPELL_DK_FLAMING_RUNE_WEAPON                = 101162,
     SPELL_DK_FLAMING_TORRENT                    = 99000,
     SPELL_DK_FROST_FEVER                        = 55095,
     SPELL_DK_FROST_PRESENCE                     = 48266,
@@ -79,6 +78,7 @@ enum DeathKnightSpells
     SPELL_DK_ITEM_SIGIL_VENGEFUL_HEART          = 64962,
     SPELL_DK_ITEM_T8_MELEE_4P_BONUS             = 64736,
     SPELL_DK_ITEM_T11_DPS_4P_BONUS              = 90459,
+    SPELL_DK_ITEM_T12_BLOOD_4P_BONUS            = 98966,
     SPELL_DK_MASTER_OF_GHOULS                   = 52143,
     SPELL_DK_OBLITERATE                         = 49020,
     SPELL_DK_OBLITERATE_OFFHAND                 = 66198,
@@ -274,6 +274,11 @@ class spell_dk_death_and_decay : public AuraScript
 // 47541 - Death Coil
 class spell_dk_death_coil : public SpellScript
 {
+    bool Load() override
+    {
+        return GetCaster()->IsPlayer();
+    }
+
     bool Validate(SpellInfo const* /*spell*/) override
     {
         return ValidateSpellInfo(
@@ -542,7 +547,9 @@ class spell_dk_death_strike_heal : public SpellScript
     void HandleBloodShield()
     {
         Unit* target = GetHitUnit();
-        if (!target)
+
+        // Patch 4.1.0 (2011-04-26): Now only works while in Blood Presence.
+        if (!target || !target->GetAuraEffect(SPELL_AURA_MOD_BASE_RESISTANCE_PCT, SPELLFAMILY_DEATHKNIGHT, 0x00800000, 0x0, 0x0, target->GetGUID()))
             return;
 
         AuraEffect const* bloodShieldAurEff = target->GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, DK_ICON_ID_BLOOD_SHIELD_MASTERY, EFFECT_0);
@@ -1142,13 +1149,7 @@ class spell_dk_runic_empowerment : public AuraScript
 {
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        return ValidateSpellInfo(
-            {
-                SPELL_DK_ENERGIZE_BLOOD_RUNE,
-                SPELL_DK_ENERGIZE_FROST_RUNE,
-                SPELL_DK_ENERGIZE_UNHOLY_RUNE,
-                SPELL_DK_RUNIC_CORRUPTION_TRIGGERED
-            });
+        return ValidateSpellInfo({ SPELL_DK_RUNIC_CORRUPTION_TRIGGERED });
     }
 
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
@@ -1166,37 +1167,36 @@ class spell_dk_runic_empowerment : public AuraScript
             return;
         }
 
-        std::vector<uint8> runesOnCooldown;
-        runesOnCooldown.reserve(MAX_RUNES);
+        std::vector<uint8> fullyDepletedRuneIndexes;
         for (uint8 i = 0; i < MAX_RUNES; ++i)
-            if (player->GetRuneCooldown(i))
-                runesOnCooldown.emplace_back(i);
-
-        if (runesOnCooldown.empty())
-            return;
-
-        uint8 runeIndex = Trinity::Containers::SelectRandomContainerElement(runesOnCooldown);
-        RuneType rune = player->GetCurrentRune(runeIndex);
-        switch (rune)
         {
-            case RUNE_BLOOD:
-            case RUNE_DEATH:
-                player->CastSpell(player, SPELL_DK_ENERGIZE_BLOOD_RUNE, aurEff);
-                break;
-            case RUNE_FROST:
-                player->CastSpell(player, SPELL_DK_ENERGIZE_FROST_RUNE, aurEff);
-                break;
-            case RUNE_UNHOLY:
-                player->CastSpell(player, SPELL_DK_ENERGIZE_UNHOLY_RUNE, aurEff);
-                break;
-            default:
-                break;
+            // Only activate fully depleted runes, which are being on hold until
+            if (player->GetRuneCooldown(i) != RUNE_BASE_COOLDOWN)
+                continue;
+
+            fullyDepletedRuneIndexes.push_back(i);
+        }
+
+        if (!fullyDepletedRuneIndexes.empty())
+        {
+            uint8 runeIndex = Trinity::Containers::SelectRandomContainerElement(fullyDepletedRuneIndexes);
+            ActivateRune(player, runeIndex);
         }
     }
 
     void Register() override
     {
         OnEffectProc.Register(&spell_dk_runic_empowerment::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+
+private:
+    // Sniffs do not show any spell cast to activate runes. We just copy the code part from Spell::EffectActivateRune in this case with some small tweaks
+    void ActivateRune(Player* player, uint8 runeIndex)
+    {
+        uint8 currentRuneState = player->GetRunesState();
+        player->SetRuneCooldown(runeIndex, 0);
+        uint8 runesState = player->GetRunesState() & ~currentRuneState;
+        player->AddRunePower(runesState);
     }
 };
 
@@ -1727,6 +1727,60 @@ class spell_dk_smoldering_rune : public AuraScript
     }
 };
 
+// 49028 - Dancing Rune Weapon
+class spell_dk_dancing_rune_weapon : public AuraScript
+{
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                SPELL_DK_ITEM_T12_BLOOD_4P_BONUS,
+                SPELL_DK_FLAMING_RUNE_WEAPON,
+                SPELL_DK_DANCING_RUNE_WEAPON_PARRY_BONUS
+            });
+    }
+
+    void HandleApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* target = GetTarget();
+        target->CastSpell(nullptr, SPELL_DK_DANCING_RUNE_WEAPON_PARRY_BONUS, aurEff);
+    }
+
+    void HandleEffectRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* target = GetTarget();
+        if (AuraEffect const* t12Bonus = target->GetAuraEffect(SPELL_DK_ITEM_T12_BLOOD_4P_BONUS, EFFECT_0))
+            target->CastSpell(nullptr, SPELL_DK_FLAMING_RUNE_WEAPON, CastSpellExtraArgs(aurEff).AddSpellBP0(t12Bonus->GetAmount()));
+
+        target->RemoveAurasDueToSpell(SPELL_DK_DANCING_RUNE_WEAPON_PARRY_BONUS);
+    }
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        return eventInfo.GetProcTarget() && eventInfo.GetProcSpell() && eventInfo.GetProcSpell()->GetCaster() == GetTarget();
+    }
+
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        std::list<Creature*> runeWeapon;
+        GetTarget()->GetAllMinionsByEntry(runeWeapon, GetSpellInfo()->Effects[EFFECT_0].MiscValue);
+        if (runeWeapon.empty())
+            return;
+
+        for (Creature* weapon : runeWeapon)
+            weapon->CastSpell(eventInfo.GetProcTarget(), eventInfo.GetSpellInfo()->Id, true);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply.Register(&spell_dk_dancing_rune_weapon::HandleApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove.Register(&spell_dk_dancing_rune_weapon::HandleEffectRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        DoCheckProc.Register(&spell_dk_dancing_rune_weapon::CheckProc);
+        OnEffectProc.Register(&spell_dk_dancing_rune_weapon::HandleProc, EFFECT_1, SPELL_AURA_DUMMY);
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     RegisterSpellScript(spell_dk_anti_magic_shell);
@@ -1737,6 +1791,7 @@ void AddSC_deathknight_spell_scripts()
     RegisterSpellScript(spell_dk_blood_rites);
     RegisterSpellScript(spell_dk_butchery);
     RegisterSpellScript(spell_dk_crimson_scourge);
+    RegisterSpellScript(spell_dk_dancing_rune_weapon);
     RegisterSpellScript(spell_dk_dark_transformation);
     RegisterSpellScript(spell_dk_dark_transformation_aura);
     RegisterSpellScript(spell_dk_death_and_decay);

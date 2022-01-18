@@ -28,6 +28,7 @@
 #include "Formulas.h"
 #include "GameObject.h"
 #include "GameObjectAI.h"
+#include "GameClient.h"
 #include "GossipDef.h"
 #include "GridNotifiers.h"
 #include "Group.h"
@@ -1864,6 +1865,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
     extraArgs.PrivateObjectOwner = privateObjectOwner;
 
     uint32 summonCount = 1;
+    bool useHardcodedRideSpell = false;
 
     if (uint8 const* parameter = sObjectMgr->GetSummonPropertiesParameter(properties->ID))
     {
@@ -1878,8 +1880,11 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                 summonCount = std::max<int32>(damage, 1);
                 break;
             case SummonPropertiesParamType::SeatNumber:
-                if (damage > 0 && damage < MAX_VEHICLE_SEATS)
+                if (damage < MAX_VEHICLE_SEATS)
+                {
+                    useHardcodedRideSpell = true;
                     extraArgs.SeatNumber = damage;
+                }
                 break;
             case SummonPropertiesParamType::RideSpell:
                 if (sSpellMgr->GetSpellInfo(damage))
@@ -1918,7 +1923,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
 
             if (summonCount == 1 && summon->IsVehicle())
             {
-                if (extraArgs.SeatNumber)
+                if (useHardcodedRideSpell)
                     m_originalCaster->CastSpell(summon, VEHICLE_SPELL_RIDE_HARDCODED, CastSpellExtraArgs(true).AddSpellBP0(extraArgs.SeatNumber));
                 else if (extraArgs.RideSpell)
                     m_originalCaster->CastSpell(summon, extraArgs.RideSpell, true);
@@ -2809,7 +2814,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             case RANGED_ATTACK: unitMod = UNIT_MOD_DAMAGE_RANGED;   break;
         }
 
-        float weapon_total_pct = m_caster->GetModifierValue(unitMod, TOTAL_PCT);
+        float weapon_total_pct = m_caster->GetPctModifierValue(unitMod, TOTAL_PCT);
         if (fixed_bonus)
             fixed_bonus = int32(fixed_bonus * weapon_total_pct);
     }
@@ -2932,9 +2937,12 @@ void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
 
     float x, y, z, o;
     if (m_targets.HasDst())
-        destTarget->GetPosition(x, y, z);
+        destTarget->GetPosition(x, y, z, o);
     else
+    {
         m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
+        o = target->GetOrientation();
+    }
 
     o = frand(0, float(M_PI * 2));
     QuaternionData rot = QuaternionData::fromEulerAnglesZYX(o, 0.f, 0.f);
@@ -2942,7 +2950,7 @@ void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
     Map* map = target->GetMap();
 
     if (!pGameObj->Create(map->GenerateLowGuid<HighGuid::GameObject>(), gameobject_id, map,
-        Position(x, y, z, target->GetOrientation()), rot, 255, GO_STATE_READY))
+        Position(x, y, z, o), rot, 255, GO_STATE_READY))
     {
         delete pGameObj;
         return;
@@ -3484,13 +3492,13 @@ void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)
     if (!unitTarget)
         return;
 
-    if (!m_caster->m_playerMovingMe)
+    if (!m_caster->IsMovedByClient())
         return;
 
     if (damage <= 0)
         return;
 
-    m_caster->m_playerMovingMe->AddComboPoints(unitTarget, damage, this);
+    m_caster->GetGameClientMovingMe()->GetBasePlayer()->AddComboPoints(unitTarget, damage, this);
 }
 
 void Spell::EffectDuel(SpellEffIndex effIndex)
@@ -3987,16 +3995,19 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
     else
         go = new GameObject();
 
-    float x, y, z;
+    float x, y, z, o;
     // If dest location if present
     if (m_targets.HasDst())
-        destTarget->GetPosition(x, y, z);
+        destTarget->GetPosition(x, y, z, o);
     // Summon in random point all other units if location present
     else
+    {
         m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
+        o = m_caster->GetOrientation();
+    }
 
     Map* map = m_caster->GetMap();
-    if (!go->Create(map->GenerateLowGuid<HighGuid::GameObject>(), go_id, map, Position(x, y, z, m_caster->GetOrientation()), QuaternionData(), 255, GO_STATE_READY))
+    if (!go->Create(map->GenerateLowGuid<HighGuid::GameObject>(), go_id, map, Position(x, y, z, o), QuaternionData(), 255, GO_STATE_READY))
     {
         delete go;
         return;
@@ -4308,7 +4319,7 @@ void Spell::EffectSkinning(SpellEffIndex /*effIndex*/)
     m_caster->ToPlayer()->UpdateGatherSkill(skill, skillValue, reqValue, creature->isElite() ? 2 : 1);
 }
 
-void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
+void Spell::EffectCharge(SpellEffIndex effIndex)
 {
     if (!unitTarget)
         return;
@@ -4330,21 +4341,23 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
         else
             m_caster->GetMotionMaster()->MoveCharge(*m_preGeneratedPath, speed);
     }
-
-    if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
+    else if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
     {
         // not all charge effects used in negative spells
         if (!m_spellInfo->IsPositive() && m_caster->GetTypeId() == TYPEID_PLAYER)
             m_caster->Attack(unitTarget, true);
+
+        if (int32 spellId = GetSpellInfo()->Effects[effIndex].TriggerSpell)
+            m_caster->CastSpell(unitTarget, spellId, CastSpellExtraArgs(TRIGGERED_FULL_MASK).SetOriginalCaster(m_originalCasterGUID));
     }
 }
 
-void Spell::EffectChargeDest(SpellEffIndex /*effIndex*/)
+void Spell::EffectChargeDest(SpellEffIndex effIndex)
 {
-    if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
+    if (!m_targets.HasDst())
         return;
 
-    if (m_targets.HasDst())
+    if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH)
     {
         Position pos = destTarget->GetPosition();
         float speed = G3D::fuzzyGt(m_spellInfo->Speed, 0.0f) ? m_spellInfo->Speed : SPEED_CHARGE;
@@ -4358,6 +4371,9 @@ void Spell::EffectChargeDest(SpellEffIndex /*effIndex*/)
 
         m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ, speed);
     }
+    else if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT)
+        if (int32 spellId = GetSpellInfo()->Effects[effIndex].TriggerSpell)
+            m_caster->CastSpell(nullptr, spellId, CastSpellExtraArgs(TRIGGERED_FULL_MASK).SetOriginalCaster(m_originalCasterGUID));
 }
 
 void Spell::EffectKnockBack(SpellEffIndex effIndex)
@@ -4768,6 +4784,7 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
     {
         float dis = m_spellInfo->Effects[effIndex].CalcRadius(m_originalCaster);
         m_caster->GetClosePoint(fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
+        fo = m_caster->GetOrientation();
     }
     else
     {
@@ -4777,12 +4794,13 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
         float dis = (float)rand_norm() * (max_dis - min_dis) + min_dis;
 
         m_caster->GetClosePoint(fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
+        fo = m_caster->GetOrientation();
     }
 
     Map* cMap = m_caster->GetMap();
     // if gameobject is summoning object, it should be spawned right on caster's position
     if (goinfo->type == GAMEOBJECT_TYPE_SUMMONING_RITUAL)
-        m_caster->GetPosition(fx, fy, fz);
+        m_caster->GetPosition(fx, fy, fz, fo);
 
     QuaternionData rot = QuaternionData::fromEulerAnglesZYX(fo, 0.f, 0.f);
 
@@ -4790,7 +4808,7 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
     if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
     {
         pGameObj = new Transport();
-        if (!pGameObj->Create(cMap->GenerateLowGuid<HighGuid::Transport>(), name_id, cMap, Position(fx, fy, fz, m_caster->GetOrientation()), rot, 255, GO_STATE_READY))
+        if (!pGameObj->Create(cMap->GenerateLowGuid<HighGuid::Transport>(), name_id, cMap, Position(fx, fy, fz, fo), rot, 255, GO_STATE_READY))
         {
             delete pGameObj;
             return;
@@ -4799,7 +4817,7 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
     else
     {
         pGameObj = new GameObject();
-        if (!pGameObj->Create(cMap->GenerateLowGuid<HighGuid::GameObject>(), name_id, cMap, Position(fx, fy, fz, m_caster->GetOrientation()), rot, 255, GO_STATE_READY))
+        if (!pGameObj->Create(cMap->GenerateLowGuid<HighGuid::GameObject>(), name_id, cMap, Position(fx, fy, fz, fo), rot, 255, GO_STATE_READY))
         {
             delete pGameObj;
             return;
@@ -5184,10 +5202,8 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
     uint32 count = damage;
     int32 miscValue = (1 << m_spellInfo->Effects[effIndex].MiscValue);
 
-    // Death and Blood runes may activate each other
-    if (miscValue & (1 << RUNE_BLOOD))
-        miscValue |= (1 << RUNE_DEATH);
-    else if (miscValue & (1 << RUNE_DEATH))
+    // Death Runes may also activate Blood Runes (Blood Tap)
+    if (miscValue & (1 << RUNE_DEATH))
         miscValue |= (1 << RUNE_BLOOD);
 
     for (uint32 i = 0; i < MAX_RUNES && count > 0; ++i)
@@ -5565,15 +5581,18 @@ void Spell::EffectSummonPersonalGameObject(SpellEffIndex effIndex)
     if (!goId)
         return;
 
-    float x, y, z;
+    float x, y, z, o;
     if (m_targets.HasDst())
-        destTarget->GetPosition(x, y, z);
+        destTarget->GetPosition(x, y, z, o);
     else
+    {
         m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
+        o = m_caster->GetOrientation();
+    }
 
     Map* map = m_caster->GetMap();
-    Position pos = Position(x, y, z, m_caster->GetOrientation());
-    QuaternionData rot = QuaternionData::fromEulerAnglesZYX(m_caster->GetOrientation(), 0.f, 0.f);
+    Position pos = Position(x, y, z, o);
+    QuaternionData rot = QuaternionData::fromEulerAnglesZYX(o, 0.f, 0.f);
     GameObject* go = new GameObject();
 
     if (!go->Create(map->GenerateLowGuid<HighGuid::GameObject>(), goId, map, pos, rot, 255, GO_STATE_READY))

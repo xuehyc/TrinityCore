@@ -21,6 +21,7 @@
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
+#include "GameClient.h"
 #include "GameObject.h"
 #include "GameObjectAI.h"
 #include "Guild.h"
@@ -93,7 +94,7 @@ void WorldSession::HandleUseItemOpcode(WorldPackets::Spells::UseItem& packet)
     Player* user = _player;
 
     // ignore for remote control state
-    if (user->m_unitMovedByMe != user)
+    if (user->IsCharming())
         return;
 
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(packet.Cast.SpellID);
@@ -111,7 +112,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
     Player* player = GetPlayer();
 
     // ignore for remote control state
-    if (player->m_unitMovedByMe != player)
+    if (player->IsCharming())
         return;
 
     // additional check, client outputs message on its own
@@ -232,8 +233,8 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recvData)
     if (GameObject* obj = GetPlayer()->GetGameObjectIfCanInteractWith(guid))
     {
         // ignore for remote control state
-        if (GetPlayer()->m_unitMovedByMe != GetPlayer())
-            if (!(GetPlayer()->IsOnVehicle(GetPlayer()->m_unitMovedByMe) || GetPlayer()->IsMounted()) && !obj->GetGOInfo()->IsUsableMounted())
+        if (GetPlayer()->IsCharming())
+            if (!(GetPlayer()->IsOnVehicle(GetPlayer()->GetCharmed()) || GetPlayer()->IsMounted()) && !obj->GetGOInfo()->IsUsableMounted())
                 return;
 
         obj->Use(GetPlayer());
@@ -248,7 +249,7 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
     TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_GAMEOBJ_REPORT_USE Message [%s]", guid.ToString().c_str());
 
     // ignore for remote control state
-    if (_player->m_unitMovedByMe != _player)
+    if (_player->IsCharming())
         return;
 
     if (GameObject* go = GetPlayer()->GetGameObjectIfCanInteractWith(guid))
@@ -263,8 +264,8 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
 void WorldSession::HandleCastSpellOpcode(WorldPackets::Spells::CastSpell& cast)
 {
     // ignore for remote control state (for player case)
-    Unit* mover = _player->m_unitMovedByMe;
-    if (mover != _player && mover->IsPlayer())
+    Unit* mover = GetGameClient()->GetActivelyMovedUnit();
+    if (!mover || (mover != _player && mover->IsPlayer()))
         return;
 
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(cast.Cast.SpellID);
@@ -364,7 +365,7 @@ void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (pet != GetPlayer()->GetGuardianPet() && pet != GetPlayer()->GetCharm())
+    if (pet != GetPlayer()->GetGuardianPet() && pet != GetPlayer()->GetCharmed())
     {
         TC_LOG_ERROR("network", "HandlePetCancelAura: %s is not a pet of player '%s'", guid.ToString().c_str(), GetPlayer()->GetName().c_str());
         return;
@@ -401,9 +402,10 @@ void WorldSession::HandleCancelChanneling(WorldPacket& recvData)
     if (spellInfo->HasAttribute(SPELL_ATTR0_CANT_CANCEL))
         return;
 
+    Unit* mover = GetGameClient()->GetActivelyMovedUnit();
+
     // ignore for remote control state (for player case)
-    Unit* mover = _player->m_unitMovedByMe;
-    if (mover != _player && mover->GetTypeId() == TYPEID_PLAYER)
+    if (!mover)
         return;
 
     mover->InterruptSpell(CURRENT_CHANNELED_SPELL);
@@ -412,7 +414,7 @@ void WorldSession::HandleCancelChanneling(WorldPacket& recvData)
 void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
 {
     // ignore for remote control state
-    if (_player->m_unitMovedByMe != _player)
+    if (_player->IsCharming())
         return;
 
     uint8 slotId;
@@ -601,7 +603,7 @@ void WorldSession::HandleRequestCategoryCooldowns(WorldPacket& /*recvPacket*/)
 
 void WorldSession::HandleCancelQueuedSpellOpcode(WorldPackets::Spells::CancelQueuedSpell& /*cancelQueuedSpell*/)
 {
-    Unit* mover = _player->m_unitMovedByMe;
+    Unit* mover = _player->GetCharmedOrSelf();
     if (mover != _player && mover->IsPlayer())
         return;
 

@@ -21,6 +21,7 @@
 #include "Common.h"
 
 #include <vector>
+#include <unordered_map>
 
 #ifndef _WIN32
     #include <stddef.h>
@@ -30,6 +31,11 @@
 #ifdef __linux__
     #include <errno.h>
 #endif
+
+namespace VMAP
+{
+    class VMapManager2;
+}
 
 namespace MMAP
 {
@@ -117,6 +123,21 @@ namespace MMAP
     #endif
 
         return LISTFILE_OK;
+    }
+
+    struct MapEntry
+    {
+        uint8 MapType = 0;
+        int8 InstanceType = 0;
+        int16 ParentMapID = -1;
+        int32 Flags = 0;
+    };
+
+    extern std::unordered_map<uint32, MapEntry> sMapStore;
+
+    namespace VMapFactory
+    {
+        std::unique_ptr<VMAP::VMapManager2> CreateVMapManager();
     }
 }
 

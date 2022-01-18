@@ -1243,7 +1243,7 @@ class spell_omnotron_recharging : public AuraScript
     {
         if (GetTargetApplication()->GetRemoveMode().HasFlag(AuraRemoveFlags::Expired))
             if (Creature* golem = GetTarget()->ToCreature())
-                if (golem->IsAIEnabled)
+                if (golem->IsAIEnabled())
                     golem->AI()->DoAction(ACTION_ACTIVATE_GOLEM);
     }
 
@@ -1264,7 +1264,6 @@ class spell_omnotron_activated : public AuraScript
     {
         PreventDefaultAction();
         if (Unit* caster = GetCaster())
-            if (caster->GetVictim())
             if (caster->GetVictim())
                 caster->CastSpell(GetCaster()->GetVictim(), GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_POWER_AND_REAGENT_COST));
     }
@@ -1293,7 +1292,7 @@ class spell_omnotron_inactive : public SpellScript
         Unit* target = GetHitUnit();
         target->CastSpell(target, SPELL_POWERED_DOWN, true);
         if (Creature* golem = target->ToCreature())
-            if (golem->IsAIEnabled)
+            if (golem->IsAIEnabled())
                 golem->AI()->DoAction(ACTION_DEACTIVATE_GOLEM);
     }
 
@@ -1555,7 +1554,7 @@ class spell_omnotron_flamethrower : public SpellScript
 
     void Register() override
     {
-        OnObjectAreaTargetSelect.Register(&spell_omnotron_flamethrower::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_104);
+        OnObjectAreaTargetSelect.Register(&spell_omnotron_flamethrower::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_CASTER_TO_DEST_ENEMY);
     }
 };
 

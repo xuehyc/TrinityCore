@@ -28,6 +28,7 @@
 #include <vector>
 #include <cmath>
 
+class Spell;
 class WorldPacket;
 struct ItemTemplate;
 enum class VisibilityDistanceType : uint8;
@@ -117,6 +118,9 @@ struct TC_GAME_API CreatureMovementData
     bool IsSwimAllowed() const { return Swim; }
     bool IsFlightAllowed() const { return Flight != CreatureFlightMovementType::None; }
     bool IsRooted() const { return Rooted; }
+    bool IsGravityDisabled() const { return  Flight == CreatureFlightMovementType::DisableGravity; }
+    bool CanFly() const { return  Flight == CreatureFlightMovementType::CanFly; }
+    bool IsHoverEnabled() const { return  Ground == CreatureGroundMovementType::Hover; }
 
     CreatureRandomMovementType GetRandom() const { return Random; }
 
@@ -394,5 +398,19 @@ struct CreatureMovementInfo
     bool HasWalkSpeedOverriden = false;
 };
 
+struct CreatureSpellFocusData
+{
+    Spell const* FocusSpell = nullptr;
+    ObjectGuid OriginalUnitTarget;
+    uint32 ReacquiringTargetDelay = 0;
+    float OriginalOrientation = 0.f;
+
+public:
+    void Reset()
+    {
+        FocusSpell = nullptr;
+        ReacquiringTargetDelay = 0;
+    }
+};
 
 #endif // CreatureData_h__

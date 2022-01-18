@@ -1042,7 +1042,7 @@ struct npc_conclave_of_wind_ravenous_creeper : public ScriptedAI
     {
         me->SetLastDamagedTime(0);
         me->SetCannotReachTarget(false);
-        me->DoNotReacquireSpellFocusTarget();
+        me->ResetSpellFocusInfo();
         me->GetMotionMaster()->MoveTargetedHome();
     }
 
@@ -1079,7 +1079,7 @@ class spell_conclave_of_wind_winds_pre_effect_warning : public AuraScript
         if (GetTargetApplication()->GetRemoveMode().HasFlag(AuraRemoveFlags::Expired))
             if (Unit* caster = GetCaster())
                 if (Creature* conclave = caster->ToCreature())
-                    if (conclave->IsAIEnabled)
+                    if (conclave->IsAIEnabled())
                         conclave->AI()->DoAction(ACTION_NO_NEARBY_PLAYER);
     }
 
@@ -1193,6 +1193,28 @@ class spell_conclave_of_wind_wind_blast_triggered : public SpellScript
     }
 };
 
+class spell_conclave_of_wind_wind_blast_effect : public SpellScript
+{
+    void CopyTargets(std::list<WorldObject*>& targets)
+    {
+        _targets = targets;
+    }
+
+    void StoreTargets(std::list<WorldObject*>& targets)
+    {
+        targets = _targets;
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect.Register(&spell_conclave_of_wind_wind_blast_effect::CopyTargets, EFFECT_0, TARGET_UNIT_CONE_CASTER_TO_DEST_ENEMY);
+        OnObjectAreaTargetSelect.Register(&spell_conclave_of_wind_wind_blast_effect::StoreTargets, EFFECT_1, TARGET_UNIT_CONE_CASTER_TO_DEST_ENTRY);
+    }
+
+private:
+    std::list<WorldObject*> _targets;
+};
+
 class spell_conclave_of_wind_hurricane : public SpellScript
 {
     bool Validate(SpellInfo const* /*spellInfo*/) override
@@ -1284,6 +1306,7 @@ void AddSC_boss_conclave_of_wind()
     RegisterSpellScript(spell_conclave_of_wind_winds);
     RegisterSpellAndAuraScriptPair(spell_conclave_of_wind_wind_blast, spell_conclave_of_wind_wind_blast_AuraScript);
     RegisterSpellScript(spell_conclave_of_wind_wind_blast_triggered);
+    RegisterSpellScript(spell_conclave_of_wind_wind_blast_effect);
     RegisterSpellScript(spell_conclave_of_wind_hurricane);
     RegisterSpellScript(spell_conclave_of_wind_hurricane_ride_vehicle);
     RegisterSpellScript(spell_conclave_of_wind_toxic_spores);

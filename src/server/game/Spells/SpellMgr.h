@@ -150,6 +150,10 @@ enum ProcFlags
 
     PROC_FLAG_JUMP                            = 0x02000000,    // 25 Jumped
 
+    PROC_FLAG_CLONE_SPELL                     = 0x04000000,    // Proc Clone Spell
+
+    PROC_FLAG_ENTER_COMBAT                    = 0x08000000,    // Enter Combat
+
     // flag masks
     AUTO_ATTACK_PROC_FLAG_MASK                = PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK
                                                 | PROC_FLAG_DONE_RANGED_AUTO_ATTACK | PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK,
@@ -553,7 +557,6 @@ struct PetDefaultSpellsEntry
 typedef std::map<int32, PetDefaultSpellsEntry> PetDefaultSpellsMap;
 
 typedef std::vector<uint32> SpellCustomAttribute;
-typedef std::vector<bool> EnchantCustomAttribute;
 
 typedef std::vector<SpellInfo*> SpellInfoMap;
 
@@ -694,7 +697,6 @@ class TC_GAME_API SpellMgr
         void LoadSpellThreats();
         void LoadSkillLineAbilityMap();
         void LoadSpellPetAuras();
-        void LoadEnchantCustomAttr();
         void LoadSpellEnchantProcData();
         void LoadSpellLinked();
         void LoadPetLevelupSpellMap();
@@ -728,7 +730,6 @@ class TC_GAME_API SpellMgr
         SpellPetAuraMap            mSpellPetAuraMap;
         SpellLinkedMap             mSpellLinkedMap;
         SpellEnchantProcEventMap   mSpellEnchantProcEventMap;
-        EnchantCustomAttribute     mEnchantCustomAttr;
         SpellAreaMap               mSpellAreaMap;
         SpellAreaForQuestMap       mSpellAreaForQuestMap;
         SpellAreaForQuestMap       mSpellAreaForQuestEndMap;

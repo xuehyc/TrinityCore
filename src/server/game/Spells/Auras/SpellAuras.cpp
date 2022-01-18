@@ -175,9 +175,6 @@ void AuraApplication::_HandleEffect(uint8 effIndex, bool apply)
         ASSERT(_flags & (1<<effIndex));
         _flags &= ~(1<<effIndex);
         aurEff->HandleEffect(this, AURA_EFFECT_HANDLE_REAL, false);
-
-        // Remove all triggered by aura spells vs unlimited duration
-        aurEff->CleanupTriggeredSpells(GetTarget());
     }
     SetNeedClientUpdate();
 }
@@ -772,7 +769,7 @@ void Aura::RefreshTimers()
 {
     m_maxDuration = CalcMaxDuration();
 
-    bool resetPeriodicTimer = !m_spellInfo->HasAttribute(SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER);
+    bool resetPeriodicTimer = !m_spellInfo->IsRollingDurationOver();
     if (!resetPeriodicTimer)
     {
         int32 minAmplitude = m_maxDuration;
@@ -1129,6 +1126,21 @@ bool Aura::HasEffectType(AuraType type) const
         if (HasEffect(i) && m_effects[i]->GetAuraType() == type)
             return true;
     }
+    return false;
+}
+
+bool Aura::EffectTypeNeedsSendingAmount(AuraType type)
+{
+    switch (type)
+    {
+        case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS:
+        case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_TRIGGERED:
+        case SPELL_AURA_MOD_SPELL_CATEGORY_COOLDOWN:
+            return true;
+        default:
+            break;
+    }
+
     return false;
 }
 

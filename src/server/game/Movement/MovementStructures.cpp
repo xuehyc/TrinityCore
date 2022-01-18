@@ -2496,6 +2496,31 @@ MovementStatusElements const MovementUpdateFlightSpeed[] =
     MSEEnd
 };
 
+MovementStatusElements const MovementSetCollisionHeight[] =
+{
+    MSEExtraElement,
+    MSEHasGuidByte6,
+    MSEHasGuidByte1,
+    MSEHasGuidByte4,
+    MSEHasGuidByte7,
+    MSEHasGuidByte5,
+    MSEHasGuidByte2,
+    MSEHasGuidByte0,
+    MSEHasGuidByte3,
+    MSEFlushBits,
+    MSEGuidByte6,
+    MSEGuidByte0,
+    MSEGuidByte4,
+    MSEGuidByte3,
+    MSEGuidByte5,
+    MSECounter,
+    MSEGuidByte1,
+    MSEGuidByte2,
+    MSEGuidByte7,
+    MSEExtraElement,
+    MSEEnd
+};
+
 MovementStatusElements const MovementUpdateCollisionHeight[] =
 {
     MSEPositionZ,
@@ -2646,15 +2671,14 @@ MovementStatusElements const MovementForceRunSpeedChangeAck[] =
 
 MovementStatusElements const MovementSetCollisionHeightAck[] =
 {
-    MSEExtraElement,
+    MSEExtraElement, // Height
     MSEPositionX,
     MSEPositionZ,
     MSECounter,
     MSEPositionY,
     MSEHasGuidByte6,
     MSEHasGuidByte4,
-    MSEZeroBit, // Reason bit 1 
-    MSEZeroBit, // Reason bit 2
+    MSEExtraElement, // Reason
     MSEHasPitch,
     MSEHasGuidByte5,
     MSEHasHeightChangeFailed,
@@ -5482,6 +5506,9 @@ void Movement::ExtraMovementStatusElement::ReadNextElement(ByteBuffer& packet)
         case MSEExtraInt8:
             packet >> Data.byteData;
             break;
+        case MSEExtraTwoBits:
+            Data.byteData = packet.ReadBits(2);
+            break;
         default:
             ASSERT(PrintInvalidSequenceElement(element, __FUNCTION__));
             break;
@@ -5520,6 +5547,9 @@ void Movement::ExtraMovementStatusElement::WriteNextElement(ByteBuffer& packet)
         case MSEExtraInt8:
             packet << Data.byteData;
             break;
+        case MSEExtraTwoBits:
+            packet.WriteBits(Data.byteData, 2);
+            break;
         default:
             ASSERT(PrintInvalidSequenceElement(element, __FUNCTION__));
             break;
@@ -5535,7 +5565,7 @@ bool Movement::PrintInvalidSequenceElement(MovementStatusElements const element,
 Movement::PacketSender::PacketSender(Unit* unit, uint16 serverControl, uint16 playerControl, uint16 broadcast /*= SMSG_PLAYER_MOVE*/, ExtraMovementStatusElement* extras /*= nullptr*/)
     : _extraElements(extras), _unit(unit)
 {
-    if (unit->GetTypeId() == TYPEID_PLAYER && unit->ToPlayer()->m_unitMovedByMe->GetTypeId() == TYPEID_PLAYER)
+    if (unit->IsPlayer() && unit->IsMovedByClient())
     {
         _selfOpcode = playerControl;
         _broadcast = broadcast;
@@ -5552,7 +5582,7 @@ void Movement::PacketSender::Send() const
     bool isPlayerMovement = false;
     if (Player* player = _unit->ToPlayer())
     {
-        isPlayerMovement = player->m_unitMovedByMe->GetTypeId() == TYPEID_PLAYER;
+        isPlayerMovement = player->IsMovedByClient();
         if (isPlayerMovement && _selfOpcode != NULL_OPCODE)
         {
             WorldPacket data(_selfOpcode);
@@ -5667,6 +5697,8 @@ MovementStatusElements const* GetMovementStatusElementsSequence(uint32 opcode)
             return MovementSetCanTransitionBetweenSwimAndFlyAck;
         case CMSG_MOVE_SET_COLLISION_HEIGHT_ACK:
             return MovementSetCollisionHeightAck;
+        case SMSG_MOVE_SET_COLLISION_HEIGHT:
+            return MovementSetCollisionHeight;
         case SMSG_MOVE_UPDATE_COLLISION_HEIGHT:
             return MovementUpdateCollisionHeight;
         case CMSG_MOVE_WATER_WALK_ACK:

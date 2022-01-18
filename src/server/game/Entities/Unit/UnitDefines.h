@@ -177,6 +177,7 @@ enum UnitFlags2 : uint32
     UNIT_FLAG2_PLAY_DEATH_ANIM                      = 0x00020000,   // Plays special death animation upon death
     UNIT_FLAG2_ALLOW_CHEAT_SPELLS                   = 0x00040000,   // Allows casting spells with AttributesEx7 & SPELL_ATTR7_IS_CHEAT_SPELL
     UNIT_FLAG2_NO_ACTIONS                           = 0x00800000,
+    UNIT_FLAG2_DISABLE_UNIT_FRAME                   = 0x04000000,   // Disables the unit frame when selecting the target
     UNIT_FLAG2_IGNORE_SPELL_MIN_RANGE_RESTRICTIONS  = 0x08000000    // Allows spells with a min range restriction to be cast when closer than given range value
 };
 
@@ -240,7 +241,7 @@ enum MovementFlags : uint32
     MOVEMENTFLAG_PENDING_STRAFE_RIGHT  = 0x00040000,
     MOVEMENTFLAG_PENDING_ROOT          = 0x00080000,
     MOVEMENTFLAG_SWIMMING              = 0x00100000,               // appears with fly flag also
-    MOVEMENTFLAG_ASCENDING             = 0x00200000,               // press "space" when flying
+    MOVEMENTFLAG_ASCENDING             = 0x00200000,               // press "space" when flying or swimming
     MOVEMENTFLAG_DESCENDING            = 0x00400000,
     MOVEMENTFLAG_CAN_FLY               = 0x00800000,               // Appears when unit can fly AND also walk
     MOVEMENTFLAG_FLYING                = 0x01000000,               // unit is actually flying. pretty sure this is only used for players. creatures use disable_gravity
@@ -296,6 +297,21 @@ enum MovementFlags2 : uint32
     MOVEMENTFLAG2_INTERPOLATED_TURNING      = 0x00004000,
     MOVEMENTFLAG2_INTERPOLATED_PITCHING     = 0x00008000
 };
+
+enum UnitMoveType
+{
+    MOVE_WALK           = 0,
+    MOVE_RUN            = 1,
+    MOVE_RUN_BACK       = 2,
+    MOVE_SWIM           = 3,
+    MOVE_SWIM_BACK      = 4,
+    MOVE_TURN_RATE      = 5,
+    MOVE_FLIGHT         = 6,
+    MOVE_FLIGHT_BACK    = 7,
+    MOVE_PITCH_RATE     = 8
+};
+
+#define MAX_MOVE_TYPE     9
 
 enum HitInfo
 {

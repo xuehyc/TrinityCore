@@ -1618,6 +1618,8 @@ struct PhaseEntry
     uint32  ID;                                             // 0
     char*   Name;                                           // 1
     uint32  Flags;                                          // 2
+
+    EnumFlag<PhaseEntryFlags> GetFlags() const { return static_cast<PhaseEntryFlags>(Flags); }
 };
 
 struct PhaseGroupEntry
@@ -2335,6 +2337,8 @@ struct SpellItemEnchantmentEntry
     uint32  RequiredSkillRank;                              // 20
     uint32  MinLevel;                                       // 21
     //uint32 ItemLevel;                                     // 22
+
+    EnumFlag<SpellItemEnchantmentFlags> GetFlags() const { return static_cast<SpellItemEnchantmentFlags>(Flags); }
 };
 
 struct SpellItemEnchantmentConditionEntry
