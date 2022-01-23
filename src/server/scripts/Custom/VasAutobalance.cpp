@@ -777,16 +777,16 @@ public:
         Powers pType = creature->GetPowerType();
 
         creature->SetArmor(newBaseArmor);
-        creature->SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, (float)newBaseArmor);
+        creature->SetStatFlatModifier(UNIT_MOD_ARMOR, BASE_VALUE, (float)newBaseArmor);
         creature->SetCreateHealth(scaledHealth);
         creature->SetMaxHealth(scaledHealth);
         creature->ResetPlayerDamageReq();
         creature->SetCreateMana(scaledMana);
         creature->SetMaxPower(POWER_MANA, scaledMana);
-        creature->SetModifierValue(UNIT_MOD_ENERGY, BASE_VALUE, (float)100.0f);
-        creature->SetModifierValue(UNIT_MOD_RAGE, BASE_VALUE, (float)100.0f);
-        creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)scaledHealth);
-        creature->SetModifierValue(UNIT_MOD_MANA, BASE_VALUE, (float)scaledMana);
+        creature->SetStatFlatModifier(UNIT_MOD_ENERGY, BASE_VALUE, (float)100.0f);
+        creature->SetStatFlatModifier(UNIT_MOD_RAGE, BASE_VALUE, (float)100.0f);
+        creature->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, (float)scaledHealth);
+        creature->SetStatFlatModifier(UNIT_MOD_MANA, BASE_VALUE, (float)scaledMana);
         creatureABInfo->DamageMultiplier = damageMul;
 
         uint32 scaledCurHealth = prevHealth && prevMaxHealth ? float(scaledHealth) / float(prevMaxHealth) * float(prevHealth) : 0;
