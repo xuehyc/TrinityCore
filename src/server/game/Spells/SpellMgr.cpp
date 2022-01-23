@@ -3334,6 +3334,8 @@ void SpellMgr::LoadSpellInfoCorrections()
         16177, // Ancestral Fortitude (Rank 1)
         16236, // Ancestral Fortitude (Rank 2)
         47930, // Grace
+		48714, // Compelled
+        7853,  // The Art of Being a Water Terror: Force Cast on Player
     }, [](SpellInfo* spellInfo)
     {
         spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13);
@@ -5904,6 +5906,24 @@ void SpellMgr::LoadSpellInfoCorrections()
         SpellInfo* spellInfo = mSpellInfoMap[i];
         if (!spellInfo)
             continue;
+
+        // Fix range for trajectory triggered spell
+        for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+        {
+            if (spellInfo->Effects[j].IsEffect() && (spellInfo->Effects[j].TargetA.GetTarget() == TARGET_DEST_TRAJ || spellInfo->Effects[j].TargetB.GetTarget() == TARGET_DEST_TRAJ))
+            {
+                // Get triggered spell if any
+                if (SpellInfo* spellInfoTrigger = const_cast<SpellInfo*>(GetSpellInfo(spellInfo->Effects[j].TriggerSpell)))
+                {
+                    float maxRangeMain = spellInfo->RangeEntry ? spellInfo->RangeEntry->RangeMax[0] : 0.0f;
+                    float maxRangeTrigger = spellInfoTrigger->RangeEntry ? spellInfoTrigger->RangeEntry->RangeMax[0] : 0.0f;
+
+                    // check if triggered spell has enough max range to cover trajectory
+                    if (maxRangeTrigger < maxRangeMain)
+                        spellInfoTrigger->RangeEntry = spellInfo->RangeEntry;
+                }
+            }
+        }
 
         for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
         {
