@@ -447,8 +447,6 @@ class GAME_API Quest
 
         typedef std::vector<int32> PrevQuests;
         PrevQuests prevQuests;
-        typedef std::vector<uint32> PrevChainQuests;
-        PrevChainQuests prevChainQuests;
 
     private:
         uint32 _rewChoiceItemsCount;
