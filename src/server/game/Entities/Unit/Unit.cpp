@@ -1285,7 +1285,7 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
        return;
     }
 
-    damage += CalculateDamage(damageInfo->attackType, IsInFeralForm(), true);
+    damage += CalculateDamage(damageInfo->attackType, false, true);
     // Add melee damage bonus
     damage = MeleeDamageBonusDone(damageInfo->target, damage, damageInfo->attackType);
     damage = damageInfo->target->MeleeDamageBonusTaken(this, damage, damageInfo->attackType);

@@ -121,6 +121,16 @@ namespace WorldPackets
             std::vector<LootItemData> Items;
             std::vector<LootCurrency> Currencies;
         };
+
+        class LootContents final : public ServerPacket
+        {
+        public:
+            LootContents() : ServerPacket(SMSG_LOOT_CONTENTS, 1) { }
+
+            WorldPacket const* Write() override;
+
+            std::vector<LootItemData> Items;
+        };
     }
 }
 

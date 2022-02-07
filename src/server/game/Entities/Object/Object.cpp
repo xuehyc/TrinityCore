@@ -80,6 +80,7 @@ Object::Object() : m_PackGUID(sizeof(uint64)+1)
 
     m_inWorld           = false;
     m_isNewObject       = false;
+    m_isDestroyedObject = false;
     m_objectUpdated     = false;
 }
 
@@ -274,6 +275,17 @@ void Object::DestroyForPlayer(Player* target, bool isDead /*= false*/) const
     //! OnDeath() does for eg trigger death animation and interrupts certain spells/missiles/auras/sounds...
     packet.IsDead = isDead;
     target->SendDirectMessage(packet.Write());
+}
+
+void Object::SendOutOfRangeForPlayer(Player* target) const
+{
+    ASSERT(target);
+
+    UpdateData updateData(target->GetMapId());
+    BuildOutOfRangeUpdateBlock(&updateData);
+    WorldPacket packet;
+    updateData.BuildPacket(&packet);
+    target->SendDirectMessage(&packet);
 }
 
 int32 Object::GetInt32Value(uint16 index) const
@@ -1265,7 +1277,7 @@ void WorldObject::RemoveFromWorld()
     if (!IsInWorld())
         return;
 
-    DestroyForNearbyPlayers();
+    UpdateObjectVisibilityOnDestroy();
 
     Object::RemoveFromWorld();
 }

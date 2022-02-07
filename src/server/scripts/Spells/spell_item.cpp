@@ -5024,6 +5024,41 @@ class spell_item_world_queller_focus : public AuraScript
     }
 };
 
+enum ChocolateCookie
+{
+    SPELL_BY_THE_TIME_YOURE_DONE_EATING_YOULL_FEEL_RIGHT_AS_RAIN = 99041 // Serverside spell
+};
+
+// 87649 - Satisfied
+class spell_item_satisfied : public SpellScript
+{
+    bool Load() override
+    {
+        return GetCaster()->IsPlayer();
+    }
+
+    void HandleAchievementCriteria()
+    {
+        Unit* caster = GetCaster();
+        if (!caster)
+            return;
+
+        if (Aura const* aura = GetHitAura())
+        {
+            if (aura->GetStackAmount() == 91)
+            {
+                Player* player = caster->ToPlayer();
+                player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_BY_THE_TIME_YOURE_DONE_EATING_YOULL_FEEL_RIGHT_AS_RAIN, 1);
+            }
+        }
+    }
+
+    void Register() override
+    {
+        AfterHit.Register(&spell_item_satisfied::HandleAchievementCriteria);
+    }
+};
+
 //item:64457 The Last Relic of Argus  spell:82674 Teleport With Error
 uint32 Teleport_With_Error_Area[3] = { 0, 1, 530 };
 Position const Teleport_With_Error_Pos[26] =
@@ -5078,7 +5113,6 @@ class spell_Teleport_With_Error : public SpellScript
         OnCast.Register(&spell_Teleport_With_Error::HandleCast);
     }
 };
-
 void AddSC_item_spell_scripts()
 {
     // 23074 Arcanite Dragonling
@@ -5212,6 +5246,7 @@ void AddSC_item_spell_scripts()
     RegisterSpellScript(spell_item_battle_trance);
     RegisterSpellScript(spell_item_world_queller_focus);
     RegisterSpellScript(spell_item_jom_gabbar);
+    RegisterSpellScript(spell_item_satisfied);
     RegisterSpellScript(spell_Teleport_With_Error);//spell:82674 Teleport With Error
 }
 

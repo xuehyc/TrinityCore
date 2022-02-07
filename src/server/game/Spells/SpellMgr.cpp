@@ -522,22 +522,6 @@ bool SpellMgr::CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcE
     if (eventInfo.GetTypeMask() & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH))
         return true;
 
-    // do triggered cast checks
-    // Do not consider autoattacks as triggered spells
-    if (!(procEntry.AttributesMask & PROC_ATTR_TRIGGERED_CAN_PROC) && !(eventInfo.GetTypeMask() & AUTO_ATTACK_PROC_FLAG_MASK))
-    {
-        if (Spell const* spell = eventInfo.GetProcSpell())
-        {
-            if (spell->IsTriggered())
-            {
-                SpellInfo const* spellInfo = spell->GetSpellInfo();
-                if (!spellInfo->HasAttribute(SPELL_ATTR3_TRIGGERED_CAN_TRIGGER_PROC_2) &&
-                    !spellInfo->HasAttribute(SPELL_ATTR2_TRIGGERED_CAN_TRIGGER_PROC))
-                    return false;
-            }
-        }
-    }
-
     // check school mask (if set) for other trigger types
     if (procEntry.SchoolMask && !(eventInfo.GetSchoolMask() & procEntry.SchoolMask))
         return false;
@@ -3072,16 +3056,6 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENEMY);
     });
 
-    ApplySpellFix({
-        63320, // Glyph of Life Tap
-        53228, // Rapid Killing (Rank 1)
-        53232  // Rapid Killing (Rank 2)
-               // Entries were not updated after spell effect change, we have to do that manually :/
-    }, [](SpellInfo* spellInfo)
-    {
-        spellInfo->AttributesEx3 |= SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED;
-    });
-
     // Improved Spell Reflection - aoe aura
     ApplySpellFix({ 59725 }, [](SpellInfo* spellInfo)
     {
@@ -4980,6 +4954,74 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_100_YARDS);
     });
 
+    // World in Flames
+    // There is no channel update packet in sniffs so we can assume that this is a leftover from a redesign
+    ApplySpellFix({
+        100171,
+        100190
+    }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED;
+    });
+
+    // Fixate
+    ApplySpellFix({ 99849 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx5 |= SPELL_ATTR5_ALLOW_ACTIONS_DURING_CHANNEL;
+    });
+
+    // Lava Bolt (25 player)
+    ApplySpellFix({
+        100289,
+        100291
+    }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->MaxAffectedTargets = 10;
+    });
+
+    // Lava Bolt (10 player)
+    ApplySpellFix({
+        98981,
+        100290
+    }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->MaxAffectedTargets = 4;
+    });
+
+    // Sulfuras Smash
+    // Sniffs cast packets show immunities so we can assume that Sulfuras Smash does have interrupt flags internally.
+    // We are going with SpellInterruptFlags::Stun so SMSG_SPELL_START sends the correct immunities
+    ApplySpellFix({
+        98710,
+        100890,
+        100891,
+        100892
+    }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->InterruptFlags |= SpellInterruptFlags::Stun;
+    });
+
+    // Sulfuras Smash
+    ApplySpellFix({
+        98708,
+        100256,
+        100257,
+        100258
+    }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx7 |= SPELL_ATTR7_CANT_MISS;
+    });
+
+    // Entrapping Roots
+    ApplySpellFix({
+        100653,
+        101237,
+    }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Effects[EFFECT_0].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
+        spellInfo->Effects[EFFECT_1].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
+    });
+
     // ENDOF FIRELANDS SPELLS
 
     //
@@ -5899,6 +5941,12 @@ void SpellMgr::LoadSpellInfoCorrections()
     {
         spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
         spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
+    });
+
+    // Furious Attacks
+    ApplySpellFix({ 56112 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(2); // Combat Range
     });
 
     for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)

@@ -35,6 +35,8 @@ typedef std::vector<AchievementCriteriaEntry const*> AchievementCriteriaEntryLis
 typedef std::vector<AchievementEntry const*>         AchievementEntryList;
 
 typedef std::unordered_map<uint32, AchievementCriteriaEntryList> AchievementCriteriaListByAchievement;
+typedef std::unordered_map<uint32, AchievementCriteriaEntryList> AchievementCriteriaListByMiscValue;
+typedef std::unordered_map<uint32, AchievementCriteriaEntryList> AchievementCriteriaListByCondition;
 typedef std::unordered_map<uint32, AchievementEntryList>         AchievementListByReferencedId;
 
 struct CriteriaProgress
@@ -199,7 +201,7 @@ struct AchievementCriteriaData
     }
 
     bool IsValid(AchievementCriteriaEntry const* criteria);
-    bool Meets(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscValue1 = 0) const;
+    bool Meets(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscValue1 = 0, uint32 miscValue2 = 0) const;
 };
 
 struct TC_GAME_API AchievementCriteriaDataSet
@@ -207,14 +209,14 @@ struct TC_GAME_API AchievementCriteriaDataSet
         AchievementCriteriaDataSet() : criteria_id(0) { }
         typedef std::vector<AchievementCriteriaData> Storage;
         void Add(AchievementCriteriaData const& data) { storage.push_back(data); }
-        bool Meets(Player const* source, Unit const* target, uint32 miscValue = 0) const;
+        bool Meets(Player const* source, Unit const* target, uint32 miscValue1 = 0, uint32 miscValue2 = 0) const;
         void SetCriteriaId(uint32 id) {criteria_id = id;}
     private:
         uint32 criteria_id;
         Storage storage;
 };
 
-typedef std::map<uint32, AchievementCriteriaDataSet> AchievementCriteriaDataMap;
+typedef std::unordered_map<uint32, AchievementCriteriaDataSet> AchievementCriteriaDataMap;
 
 struct AchievementReward
 {
@@ -264,7 +266,7 @@ class TC_GAME_API AchievementMgr
         static void DeleteFromDB(ObjectGuid lowguid);
         void LoadFromDB(PreparedQueryResult achievementResult, PreparedQueryResult criteriaResult);
         void SaveToDB(CharacterDatabaseTransaction& trans);
-        void ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1 = 0, uint64 miscValue2 = 0, bool evenIfCriteriaComplete = false);
+        void ResetAchievementCriteria(AchievementCriteriaCondition condition, uint64 value, bool evenIfCriteriaComplete);
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1 = 0, uint64 miscValue2 = 0, uint64 miscValue3 = 0, Unit const* unit = nullptr, Player* referencePlayer = nullptr, GameObject* go = nullptr);
         void CompletedAchievement(AchievementEntry const* entry, Player* referencePlayer);
         void CheckAllAchievementCriteria(Player* referencePlayer);
@@ -290,7 +292,7 @@ class TC_GAME_API AchievementMgr
         bool IsCompletedCriteria(AchievementCriteriaEntry const* achievementCriteria, AchievementEntry const* achievement);
         bool IsCompletedAchievement(AchievementEntry const* entry);
         bool CanUpdateCriteria(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement, uint64 miscValue1, uint64 miscValue2, uint64 miscValue3, Unit const* unit, Player* referencePlayer, GameObject* go = nullptr);
-        void SendPacket(WorldPacket* data) const;
+        void SendPacket(WorldPacket const* data) const;
 
         bool ConditionsSatisfied(AchievementCriteriaEntry const* criteria, Player* referencePlayer) const;
         bool RequirementsSatisfied(AchievementCriteriaEntry const* criteria, uint64 miscValue1, uint64 miscValue2, uint64 miscValue3, Unit const* unit, Player* referencePlayer, GameObject* go = nullptr) const;
@@ -315,14 +317,17 @@ class TC_GAME_API AchievementGlobalMgr
 
         static AchievementGlobalMgr* instance();
 
-        AchievementCriteriaEntryList const& GetAchievementCriteriaByType(AchievementCriteriaTypes type, bool guild = false) const
-        {
-            return guild ? m_GuildAchievementCriteriasByType[type] : m_AchievementCriteriasByType[type];
-        }
+        AchievementCriteriaEntryList const& GetAchievementCriteriaByType(AchievementCriteriaTypes type, uint32 miscValue, bool guild = false) const;
 
         AchievementCriteriaEntryList const& GetTimedAchievementCriteriaByType(AchievementCriteriaTimedTypes type) const
         {
             return m_AchievementCriteriasByTimedType[type];
+        }
+
+        AchievementCriteriaEntryList const* GetAchievementCriteriaByCondition(AchievementCriteriaCondition condition, uint32 val)
+        {
+            AchievementCriteriaListByCondition::const_iterator itr = m_AchievementCriteriasByCondition[condition].find(val);
+            return itr != m_AchievementCriteriasByCondition[condition].end() ? &itr->second : nullptr;
         }
 
         AchievementCriteriaEntryList const* GetAchievementCriteriaByAchievement(uint32 id) const
@@ -355,26 +360,6 @@ class TC_GAME_API AchievementGlobalMgr
             return iter != m_criteriaDataMap.end() ? &iter->second : nullptr;
         }
 
-        bool IsRealmCompleted(AchievementEntry const* achievement, uint32 instanceId) const
-        {
-            AllCompletedAchievements::const_iterator itr = m_allCompletedAchievements.find(achievement->ID);
-            if (itr == m_allCompletedAchievements.end())
-                return false;
-
-            if (achievement->Flags & ACHIEVEMENT_FLAG_REALM_FIRST_KILL)
-                return itr->second != instanceId;
-
-            return true;
-        }
-
-        void SetRealmCompleted(AchievementEntry const* achievement, uint32 instanceId)
-        {
-            if (IsRealmCompleted(achievement, instanceId))
-                return;
-
-            m_allCompletedAchievements[achievement->ID] = instanceId;
-        }
-
         bool IsGroupCriteriaType(AchievementCriteriaTypes type) const
         {
             switch (type)
@@ -392,9 +377,8 @@ class TC_GAME_API AchievementGlobalMgr
 
             return false;
         }
-
-        // Removes instanceId as valid id to complete realm first kill achievements
-        void OnInstanceDestroyed(uint32 instanceId);
+        bool IsRealmCompleted(AchievementEntry const* achievement) const;
+        void SetRealmCompleted(AchievementEntry const* achievement);
 
         void LoadAchievementCriteriaList();
         void LoadAchievementCriteriaData();
@@ -411,7 +395,13 @@ class TC_GAME_API AchievementGlobalMgr
         AchievementCriteriaEntryList m_AchievementCriteriasByType[ACHIEVEMENT_CRITERIA_TYPE_TOTAL];
         AchievementCriteriaEntryList m_GuildAchievementCriteriasByType[ACHIEVEMENT_CRITERIA_TYPE_TOTAL];
 
+        // store achievement criterias split by misc values
+        AchievementCriteriaListByMiscValue m_AchievementCriteriasByMiscValue[ACHIEVEMENT_CRITERIA_TYPE_TOTAL];
+        AchievementCriteriaListByMiscValue m_GuildAchievementCriteriasByMiscValue[ACHIEVEMENT_CRITERIA_TYPE_TOTAL];
+
         AchievementCriteriaEntryList m_AchievementCriteriasByTimedType[ACHIEVEMENT_TIMED_TYPE_MAX];
+
+        AchievementCriteriaListByCondition m_AchievementCriteriasByCondition[ACHIEVEMENT_CRITERIA_CONDITION_MAX];
 
         // store achievement criterias by achievement to speed up lookup
         AchievementCriteriaListByAchievement m_AchievementCriteriaListByAchievement;
@@ -419,8 +409,10 @@ class TC_GAME_API AchievementGlobalMgr
         // store achievements by referenced achievement id to speed up lookup
         AchievementListByReferencedId m_AchievementListByReferencedId;
 
-        typedef std::map<uint32 /*achievementId*/, uint32 /*instanceId*/> AllCompletedAchievements;
-        AllCompletedAchievements m_allCompletedAchievements;
+        // store realm first achievements
+        // std::chrono::system_clock::time_point::min() is a placeholder value for realm firsts not yet completed
+        // std::chrono::system_clock::time_point::max() is a value assigned to realm firsts complete before worldserver started
+        std::unordered_map<uint32 /*achievementId*/, std::chrono::system_clock::time_point /*completionTime*/> _allCompletedAchievements;
 
         AchievementRewards m_achievementRewards;
         AchievementRewardLocales m_achievementRewardLocales;

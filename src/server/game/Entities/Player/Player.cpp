@@ -1374,9 +1374,9 @@ void Player::setDeathState(DeathState s)
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DEATH_AT_MAP, 1);
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DEATH, 1);
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DEATH_IN_DUNGEON, 1);
-        ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
-        ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
-        ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
+
+        // reset all death criterias
+        ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH, 0);
     }
 
     Unit::setDeathState(s);
@@ -6023,7 +6023,7 @@ void Player::CheckAreaExploreAndOutdoor()
     {
         SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, (uint32)(currFields | val));
 
-        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EXPLORE_AREA);
+        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EXPLORE_AREA, GetAreaId());
 
         if (areaEntry->ExplorationLevel > 0)
         {
@@ -11735,7 +11735,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 
     // only for full equip instead adding to stack
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
-    UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, pItem->GetEntry(), slot);
+    UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, slot, pItem->GetEntry());
     if (Guild* guild = GetGuild())
         guild->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM, pItem->GetEntry(), 1, 0, nullptr, this);
 
@@ -11762,7 +11762,7 @@ void Player::QuickEquipItem(uint16 pos, Item* pItem)
             CheckTitanGripPenalty();
 
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
-        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, pItem->GetEntry(), slot);
+        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, slot, pItem->GetEntry());
     }
 }
 
@@ -23122,7 +23122,11 @@ void Player::UpdateVisibilityOf(WorldObject* target)
             if (target->GetTypeId() == TYPEID_UNIT)
                 BeforeVisibilityDestroy<Creature>(target->ToCreature(), this);
 
-            target->DestroyForPlayer(this);
+            if (!target->IsDestroyedObject())
+                target->SendOutOfRangeForPlayer(this);
+            else
+                target->DestroyForPlayer(this);
+
             m_clientGUIDs.erase(target->GetGUID());
 
             #ifdef TRINITY_DEBUG
@@ -23210,7 +23214,11 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, std::set<Unit*>& vi
         {
             BeforeVisibilityDestroy<T>(target, this);
 
-            target->BuildOutOfRangeUpdateBlock(&data);
+            if (!target->IsDestroyedObject())
+                target->BuildOutOfRangeUpdateBlock(&data);
+            else
+                target->DestroyForPlayer(this);
+
             m_clientGUIDs.erase(target->GetGUID());
 
             #ifdef TRINITY_DEBUG
@@ -23218,7 +23226,7 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, std::set<Unit*>& vi
             #endif
         }
     }
-    else //if (visibleNow.size() < 30 || target->GetTypeId() == TYPEID_UNIT && target->ToCreature()->IsVehicle())
+    else
     {
         if (CanSeeOrDetect(target, false, true))
         {
@@ -26087,9 +26095,9 @@ void Player::RemoveTimedAchievement(AchievementCriteriaTimedTypes type, uint32 e
     m_achievementMgr->RemoveTimedAchievement(type, entry);
 }
 
-void Player::ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1 /*= 0*/, uint64 miscValue2 /*= 0*/, bool evenIfCriteriaComplete /* = false*/)
+void Player::ResetAchievementCriteria(AchievementCriteriaCondition condition, uint64 value, bool evenIfCriteriaComplete /* = false*/)
 {
-    m_achievementMgr->ResetAchievementCriteria(type, miscValue1, miscValue2, evenIfCriteriaComplete);
+    m_achievementMgr->ResetAchievementCriteria(condition, value, evenIfCriteriaComplete);
 }
 
 void Player::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1 /*= 0*/, uint64 miscValue2 /*= 0*/, uint64 miscValue3 /*= 0*/, Unit* unit /*= nullptr*/, GameObject* go /*= nullptr*/)
