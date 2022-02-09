@@ -13,7 +13,7 @@ class XpWeekend : public PlayerScript
 {
 public:
     XpWeekend() : PlayerScript("XpWeekend") { }
-    void OnGiveXP(Player* player, uint32& amount, Unit* victim)override
+    void OnGiveXP(Player* /*player*/, uint32& amount, Unit* /*victim*/)override
     {
         if (sConfigMgr->GetBoolDefault("DoubleXP.Enable", true))
         {
@@ -27,7 +27,7 @@ public:
             }
         }
     }
-    void OnLogin(Player* player, bool firstLogin)
+    void OnLogin(Player* player, bool /*firstLogin*/)
     {
         if (sConfigMgr->GetBoolDefault("DoubleXP.Enable", true))
         {

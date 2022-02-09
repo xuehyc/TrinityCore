@@ -36,7 +36,6 @@ public:
             {
                 std::string plr = killed->GetName();
                 std::string creature_n = killer->GetName();
-                bool ingroup = killed->GetGroup();
                 std::string tag_colour = "7bbef7";
                 std::string plr_colour = "7bbef7";
                 std::string creature_colour = "ff0000";
@@ -52,7 +51,6 @@ public:
         {
             std::string plr = killed->GetName();
             std::string creature_n = killer->GetName();
-            bool ingroup = killed->GetGroup();
             std::string tag_colour = "7bbef7";
             std::string plr_colour = "7bbef7";
             std::string creature_colour = "ff0000";
@@ -67,7 +65,6 @@ public:
         {
             std::string plr = killed->GetName();
             std::string creature_n = killer->GetName();
-            bool ingroup = killed->GetGroup();
             std::string tag_colour = "7bbef7";
             std::string plr_colour = "7bbef7";
             std::string creature_colour = "ff0000";
@@ -87,7 +84,6 @@ public:
             {
                 std::string plr = killed->GetName();
                 std::string creature_n = killer->GetName();
-                bool ingroup = killed->GetGroup();
                 std::string tag_colour = "7bbef7";
                 std::string plr_colour = "7bbef7";
                 std::string creature_colour = "ff0000";

@@ -345,7 +345,7 @@ public:
             return true;
         }
 
-        bool OnGossipSelect(Player* player, Creature* _creature, uint32 /*sender*/, uint32 gossipListId)
+        bool OnGossipSelect(Player* player, Creature* /*_creature*/, uint32 /*sender*/, uint32 gossipListId)
         {
             int DKL = sConfigMgr->GetFloatDefault("Skip.Deathknight.Start.Level", 58);
             ClearGossipMenuFor(player);
@@ -504,7 +504,7 @@ public:
             return true;
         }
 
-        bool OnGossipSelect(Player* player, Creature* _creature, uint32 /*sender*/, uint32 gossipListId)
+        bool OnGossipSelect(Player* player, Creature* /*_creature*/, uint32 /*sender*/, uint32 gossipListId)
         {
             int GBL = sConfigMgr->GetFloatDefault("Skip.Goblin.Start.Level", 16);
             ClearGossipMenuFor(player);
@@ -621,7 +621,7 @@ public:
             return true;
         }
 
-        bool OnGossipSelect(Player* player, Creature* _creature, uint32 /*sender*/, uint32 gossipListId)
+        bool OnGossipSelect(Player* player, Creature* /*_creature*/, uint32 /*sender*/, uint32 gossipListId)
         {
             int WGL = sConfigMgr->GetFloatDefault("Skip.Worgen.Start.Level", 16);
             ClearGossipMenuFor(player);

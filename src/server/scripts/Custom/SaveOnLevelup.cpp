@@ -15,7 +15,7 @@ class spp_save_on_levelup : public PlayerScript
 public:
     spp_save_on_levelup() : PlayerScript("spp_save_on_levelup") { };
 
-    void OnLevelChanged(Player* player, uint8 oldLevel)
+    void OnLevelChanged(Player* player, uint8 /*oldLevel*/)
     {
         if (sConfigMgr->GetBoolDefault("Save.On.LevelUp", true))
         {
