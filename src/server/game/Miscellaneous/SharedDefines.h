@@ -3589,6 +3589,8 @@ enum CorpseDynFlags
     CORPSE_DYNFLAG_LOOTABLE        = 0x0001
 };
 
+#define PLAYER_CORPSE_LOOT_ENTRY 1
+
 enum WeatherType
 {
     WEATHER_TYPE_FINE       = 0,
@@ -4290,6 +4292,17 @@ enum WeaponAttackType : uint8
     OFF_ATTACK    = 1,
     RANGED_ATTACK = 2,
     MAX_ATTACK
+};
+
+enum CharterTypes
+{
+    CHARTER_TYPE_NONE = 0,
+    CHARTER_TYPE_ANY = 10,
+
+    GUILD_CHARTER_TYPE = 9,
+    ARENA_TEAM_CHARTER_2v2_TYPE = 2,
+    ARENA_TEAM_CHARTER_3v3_TYPE = 3,
+    ARENA_TEAM_CHARTER_5v5_TYPE = 5
 };
 
 enum LineOfSightChecks
