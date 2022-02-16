@@ -37,7 +37,6 @@ void AddSC_racial_traits_npc();
 void AddSC_Band_aid();
 void AddSC_announce_login();
 
-
 void AddCustomScripts()
 {
     AddSC_FireWorksOnLevelUp();
