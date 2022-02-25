@@ -519,7 +519,7 @@ bool SpellMgr::CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcE
                 return false;
 
     // always trigger for these types
-    if (eventInfo.GetTypeMask() & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_DEATH))
+    if (eventInfo.GetTypeMask() & (PROC_FLAG_HEARTBEAT | PROC_FLAG_KILL | PROC_FLAG_DEATH))
         return true;
 
     // check school mask (if set) for other trigger types
@@ -1710,24 +1710,18 @@ void SpellMgr::LoadSpellProcs()
     TC_LOG_INFO("server.loading", ">> Loaded %u spell proc conditions and data in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 
     // Define can trigger auras
-    bool isTriggerAura[TOTAL_AURAS];
+    bool isTriggerAura[TOTAL_AURAS] = { };
     // Triggered always, even from triggered spells
-    bool isAlwaysTriggeredAura[TOTAL_AURAS];
+    bool isAlwaysTriggeredAura[TOTAL_AURAS] = { };
     // SpellTypeMask to add to the proc
-    uint32 spellTypeMask[TOTAL_AURAS];
+    std::array<uint32, TOTAL_AURAS> spellTypeMask = { };
+    spellTypeMask.fill(PROC_SPELL_TYPE_MASK_ALL);
 
     // List of auras that CAN trigger but may not exist in spell_proc
     // in most cases needed to drop charges
 
     // some aura types need additional checks (eg SPELL_AURA_MECHANIC_IMMUNITY needs mechanic check)
     // see AuraEffect::CheckEffectProc
-    for (uint16 i = 0; i < TOTAL_AURAS; ++i)
-    {
-        isTriggerAura[i] = false;
-        isAlwaysTriggeredAura[i] = false;
-        spellTypeMask[i] = PROC_SPELL_TYPE_MASK_ALL;
-    }
-
     isTriggerAura[SPELL_AURA_DUMMY] = true;                                 // Most dummy auras should require scripting, but there are some exceptions (ie 12311)
     isTriggerAura[SPELL_AURA_MOD_CONFUSE] = true;                           // "Any direct damaging attack will revive targets"
     isTriggerAura[SPELL_AURA_MOD_THREAT] = true;                            // Only one spell: 28762 part of Mage T3 8p bonus
@@ -2624,7 +2618,7 @@ void SpellMgr::UnloadSpellInfoImplicitTargetConditionLists()
 
 void SpellMgr::UnloadSpellAreaConditions()
 {
-    for (auto spellAreaData : mSpellAreaForAreaMap)
+    for (auto& spellAreaData : mSpellAreaForAreaMap)
         spellAreaData.second->Conditions.clear();
 }
 
@@ -3252,25 +3246,12 @@ void SpellMgr::LoadSpellInfoCorrections()
     });
 
     // Tree of Life passives
-
     ApplySpellFix({
         5420,
         81097 
     }, [](SpellInfo* spellInfo)
     {
-        spellInfo->Stances = 1 << (FORM_TREE - 1);
-    });
-
-    // Elemental Oath
-    ApplySpellFix({
-        51466, // (Rank 1)
-        51470  // (Rank 2)
-    }, [](SpellInfo* spellInfo)
-    {
-        spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
-        spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
-        spellInfo->Effects[EFFECT_1].MiscValue = SPELLMOD_EFFECT2;
-        spellInfo->Effects[EFFECT_1].SpellClassMask = flag96(0x00000000, 0x00004000, 0x00000000);
+        spellInfo->Stances = UI64LIT(1) << (FORM_TREE - 1);
     });
 
     // Improved Shadowform (Rank 1)
@@ -3342,7 +3323,7 @@ void SpellMgr::LoadSpellInfoCorrections()
     // Improved Devouring Plague
     ApplySpellFix({ 63675 }, [](SpellInfo* spellInfo)
     {
-        spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
+        spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
     });
 
     // Tremor Totem (instant pulse)
@@ -5948,6 +5929,19 @@ void SpellMgr::LoadSpellInfoCorrections()
     ApplySpellFix({ 56112 }, [](SpellInfo* spellInfo)
     {
         spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(2); // Combat Range
+    });
+
+    // Expose Armor
+    ApplySpellFix({ 8647 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx |= SPELL_ATTR1_FINISHING_MOVE_DURATION;
+        spellInfo->AttributesEx &= ~SPELL_ATTR1_FINISHING_MOVE_DAMAGE;
+    });
+
+    // Rupture
+    ApplySpellFix({ 1943 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx |= SPELL_ATTR1_FINISHING_MOVE_DURATION;
     });
 
     for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)
