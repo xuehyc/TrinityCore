@@ -3161,7 +3161,6 @@ void Creature::SetSpellFocus(Spell const* focusSpell, WorldObject const* target)
     if (!_spellFocusInfo.ReacquiringTargetDelay)
     { // only overwrite these fields if we aren't transitioning from one spell focus to another
         _spellFocusInfo.OriginalUnitTarget = GetGuidValue(UNIT_FIELD_TARGET);
-        _spellFocusInfo.OriginalOrientation = GetOrientation();
     }
     else // don't automatically reacquire target for the previous spellcast
         _spellFocusInfo.ReacquiringTargetDelay = 0;
@@ -3266,8 +3265,6 @@ void Creature::ReacquireSpellFocusTarget()
             if (WorldObject const* objTarget = ObjectAccessor::GetWorldObject(*this, _spellFocusInfo.OriginalUnitTarget))
                 SetFacingToObject(objTarget, false);
         }
-        else
-            SetFacingTo(_spellFocusInfo.OriginalOrientation, false);
     }
     _spellFocusInfo.ReacquiringTargetDelay = 0;
 }
