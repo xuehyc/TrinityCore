@@ -1121,7 +1121,7 @@ class spell_dru_wild_growth : public SpellScript
     {
         targets.remove_if(RaidCheck(GetCaster()));
 
-        uint8 maxTargets = GetSpellInfo()->Effects[EFFECT_2].BasePoints;
+        uint32 maxTargets = static_cast<uint32>(GetSpellInfo()->Effects[EFFECT_2].CalcValue(GetCaster()));
 
         // Tree of Life bonus
         if (GetCaster()->HasAura(SPELL_DRUID_TREE_OF_LIFE))
