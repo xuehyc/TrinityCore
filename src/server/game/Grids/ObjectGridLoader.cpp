@@ -26,7 +26,6 @@
 #include "GameObject.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
-#include "Transport.h"
 #include "World.h"
 #include "ScriptMgr.h"
 
@@ -80,35 +79,19 @@ class ObjectWorldLoader
         uint32& i_corpses;
 };
 
-template<class T> void ObjectGridLoader::SetObjectCell(T* /*obj*/, CellCoord const& /*cellCoord*/) { }
-
-template<> void ObjectGridLoader::SetObjectCell(Creature* obj, CellCoord const& cellCoord)
-{
-    Cell cell(cellCoord);
-    obj->SetCurrentCell(cell);
-}
-
-template<> void ObjectGridLoader::SetObjectCell(GameObject* obj, CellCoord const& cellCoord)
+void ObjectGridLoader::SetObjectCell(MapObject* obj, CellCoord const& cellCoord)
 {
     Cell cell(cellCoord);
     obj->SetCurrentCell(cell);
 }
 
 template <class T>
-void AddObjectHelper(CellCoord &cell, GridRefManager<T> &m, uint32 &count, Map* /*map*/, T *obj)
+void AddObjectHelper(CellCoord &cell, GridRefManager<T> &m, uint32 &count, Map* map, T *obj)
 {
     obj->AddToGrid(m);
     ObjectGridLoader::SetObjectCell(obj, cell);
     obj->AddToWorld();
-    ++count;
-}
 
-template <>
-void AddObjectHelper(CellCoord &cell, CreatureMapType &m, uint32 &count, Map* map, Creature *obj)
-{
-    obj->AddToGrid(m);
-    ObjectGridLoader::SetObjectCell(obj, cell);
-    obj->AddToWorld();
     if (obj->isActiveObject())
         map->AddToActive(obj);
 
@@ -126,33 +109,6 @@ void LoadHelper(CellGuidSet const& guid_set, CellCoord &cell, GridRefManager<T> 
             continue;
 
         T* obj = new T;
-        //TC_LOG_INFO("misc", "DEBUG: LoadHelper from table: %s for (guid: %u) Loading", table, guid);
-        if (!obj->LoadFromDB(guid, map, false, false))
-        {
-            delete obj;
-            continue;
-        }
-        AddObjectHelper(cell, m, count, map, obj);
-    }
-}
-
-template <>
-void LoadHelper(CellGuidSet const& guid_set, CellCoord& cell, GridRefManager<GameObject>& m, uint32& count, Map* map)
-{
-    for (CellGuidSet::const_iterator i_guid = guid_set.begin(); i_guid != guid_set.end(); ++i_guid)
-    {
-        // Don't spawn at all if there's a respawn timer
-        ObjectGuid::LowType guid = *i_guid;
-        if (!map->ShouldBeSpawnedOnGridLoad<GameObject>(guid))
-            continue;
-
-        GameObject* obj = nullptr;
-        GameObjectData const* data = sObjectMgr->GetGameObjectData(guid);
-        if (data && sObjectMgr->GetGameObjectTypeByEntry(data->id) == GAMEOBJECT_TYPE_TRANSPORT)
-            obj = new Transport();
-        else
-            obj = new GameObject();
-
         //TC_LOG_INFO("misc", "DEBUG: LoadHelper from table: %s for (guid: %u) Loading", table, guid);
         if (!obj->LoadFromDB(guid, map, false, false))
         {

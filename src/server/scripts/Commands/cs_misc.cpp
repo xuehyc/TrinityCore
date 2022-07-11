@@ -23,6 +23,7 @@
 #include "ChaseMovementGenerator.h"
 #include "Chat.h"
 #include "DatabaseEnv.h"
+#include "DBCStores.h"
 #include "DB2Stores.h"
 #include "DisableMgr.h"
 #include "FollowMovementGenerator.h"
@@ -281,14 +282,10 @@ public:
             zoneId, (zoneEntry ? zoneEntry->AreaName : unknown),
             areaId, (areaEntry ? areaEntry->AreaName : unknown),
             object->GetPositionX(), object->GetPositionY(), object->GetPositionZ(), object->GetOrientation());
-        if (Transport* transport = object->GetTransport())
+        if (Transport* transport = dynamic_cast<Transport*>(object->GetTransport()))
         {
-            int32 transMapID = -1;
-            if (transport->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT)
-                transMapID = transport->GetGOInfo()->moTransport.mapID;
-
             handler->PSendSysMessage(LANG_TRANSPORT_POSITION,
-                transMapID, object->GetTransOffsetX(), object->GetTransOffsetY(), object->GetTransOffsetZ(), object->GetTransOffsetO(),
+                transport->GetGOInfo()->moTransport.mapID, object->GetTransOffsetX(), object->GetTransOffsetY(), object->GetTransOffsetZ(), object->GetTransOffsetO(),
                 transport->GetEntry(), transport->GetName().c_str());
         }
         handler->PSendSysMessage(LANG_GRID_POSITION,
@@ -456,9 +453,9 @@ public:
 
             // to point to see at target with same orientation
             float x, y, z;
-            target->GetPosition(x, y, z);
+            target->GetContactPoint(_player, x, y, z);
 
-            _player->TeleportTo(target->GetMapId(), x, y, z, _player->GetAngle(target), TELE_TO_GM_MODE, target->GetTransport());
+            _player->TeleportTo(target->GetMapId(), x, y, z, _player->GetAngle(target), TELE_TO_GM_MODE);
             PhasingHandler::InheritPhaseShift(_player, target);
             _player->UpdateObjectVisibility();
         }
@@ -589,7 +586,7 @@ public:
             // before GM
             float x, y, z;
             _player->GetPosition(x, y, z);
-            target->TeleportTo(_player->GetMapId(), x, y, z, target->GetOrientation(), 0, _player->GetTransport());
+            target->TeleportTo(_player->GetMapId(), x, y, z, target->GetOrientation());
             PhasingHandler::InheritPhaseShift(target, handler->GetSession()->GetPlayer());
             target->UpdateObjectVisibility();
         }

@@ -28,6 +28,7 @@ EndScriptData */
 #include "BattlegroundMgr.h"
 #include "CellImpl.h"
 #include "Chat.h"
+#include "DBCStores.h"
 #include "GossipDef.h"
 #include "GridNotifiersImpl.h"
 #include "InstanceScript.h"
@@ -1568,7 +1569,7 @@ public:
 
     static bool HandleDebugTransportCommand(ChatHandler* handler, char const* args)
     {
-        MapTransport* transport = handler->GetSession()->GetPlayer()->GetMapTransport();
+        Transport* transport = dynamic_cast<Transport*>(handler->GetSession()->GetPlayer()->GetTransport());
         if (!transport)
             return false;
 

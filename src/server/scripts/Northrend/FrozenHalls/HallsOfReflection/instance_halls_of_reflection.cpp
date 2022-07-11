@@ -393,7 +393,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                             _teamInInstance = player->GetTeam();
                 }
 
-                if (MapTransport* gunship = sTransportMgr->CreateTransport(_teamInInstance == HORDE ? GO_ORGRIMS_HAMMER : GO_THE_SKYBREAKER, 0, instance))
+                if (Transport* gunship = sTransportMgr->CreateTransport(_teamInInstance == HORDE ? GO_ORGRIMS_HAMMER : GO_THE_SKYBREAKER, instance))
                     gunship->EnableMovement(GetBossState(DATA_THE_LICH_KING_ESCAPE) == DONE);
             }
 
@@ -444,7 +444,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                         break;
                     case DATA_WAVE_COUNT:
                         if (_waveCount && data == NOT_STARTED)
-                            ProcessEvent(nullptr, EVENT_DO_WIPE);
+                            ProcessEvent(nullptr, EVENT_DO_WIPE, nullptr);
                         break;
                     case DATA_FROSTSWORN_GENERAL:
                         if (data == DONE)
@@ -522,7 +522,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                 switch (events.ExecuteEvent())
                 {
                     case EVENT_NEXT_WAVE:
-                        ProcessEvent(nullptr, EVENT_ADD_WAVE);
+                        ProcessEvent(nullptr, EVENT_ADD_WAVE, nullptr);
                         break;
                     case EVENT_SPAWN_ESCAPE_EVENT:
                         SpawnEscapeEvent();
@@ -533,7 +533,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                 }
             }
 
-            void ProcessEvent(WorldObject* /*obj*/, uint32 eventId) override
+            void ProcessEvent(WorldObject* /*obj*/, uint32 eventId, WorldObject* /*invoker*/) override
             {
                 switch (eventId)
                 {
@@ -640,7 +640,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                         if (GetBossState(DATA_THE_LICH_KING_ESCAPE) == DONE)
                             break;
 
-                        if (MapTransport* gunship = instance->GetMapTransport(GunshipGUID))
+                        if (Transport* gunship = instance->GetTransport(GunshipGUID))
                             gunship->EnableMovement(false);
 
                         if (Creature* jainaOrSylvanas = instance->GetCreature(JainaOrSylvanasEscapeGUID))
@@ -658,7 +658,7 @@ class instance_halls_of_reflection : public InstanceMapScript
                         }
                         break;
                     case EVENT_GUNSHIP_ARRIVAL_2:
-                        if (MapTransport* gunship = instance->GetMapTransport(GunshipGUID))
+                        if (Transport* gunship = instance->GetTransport(GunshipGUID))
                             gunship->EnableMovement(false);
 
                         for (ObjectGuid guid : GunshipStairGUIDs)

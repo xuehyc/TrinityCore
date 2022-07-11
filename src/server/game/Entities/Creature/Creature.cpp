@@ -1280,7 +1280,11 @@ void Creature::SaveToDB()
         return;
     }
 
-    uint32 mapId = GetTransport() ? GetTransport()->GetGOInfo()->moTransport.mapID : GetMapId();
+    uint32 mapId = GetMapId();
+    if (TransportBase* transport = GetTransport())
+        if (transport->GetMapIdForSpawning() >= 0)
+            mapId = transport->GetMapIdForSpawning();
+
     SaveToDB(mapId, data->spawnMask);
 }
 
@@ -3234,8 +3238,7 @@ void Creature::ReleaseSpellFocus(Spell const* focusSpell, bool withDelay)
     if (focusSpell && focusSpell != _spellFocusInfo.FocusSpell)
         return;
 
-    if (_spellFocusInfo.FocusSpell->GetSpellInfo()->HasAttribute(SPELL_ATTR5_DONT_TURN_DURING_CAST))
-        ClearUnitState(UNIT_STATE_FOCUSING);
+     ClearUnitState(UNIT_STATE_FOCUSING);
 
     if (IsPet()) // player pets do not use delay system
     {

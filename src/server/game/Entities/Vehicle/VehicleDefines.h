@@ -22,6 +22,8 @@
 #include <vector>
 #include <map>
 
+class Map;
+class WorldObject;
 struct VehicleSeatEntry;
 
 enum PowerType : uint32
@@ -151,11 +153,21 @@ protected:
     virtual ~TransportBase() { }
 
 public:
+    virtual ObjectGuid GetTransportGUID() const = 0;
+
     /// This method transforms supplied transport offsets into global coordinates
     virtual void CalculatePassengerPosition(float& x, float& y, float& z, float* o = nullptr) const = 0;
 
     /// This method transforms supplied global coordinates into local offsets
     virtual void CalculatePassengerOffset(float& x, float& y, float& z, float* o = nullptr) const = 0;
+
+    virtual float GetTransportOrientation() const = 0;
+
+    virtual void AddPassenger(WorldObject* passenger) = 0;
+
+    virtual TransportBase* RemovePassenger(WorldObject* passenger) = 0;
+
+    void UpdatePassengerPosition(Map* map, WorldObject* passenger, float x, float y, float z, float o, bool setHomePosition);
 
     static void CalculatePassengerPosition(float& x, float& y, float& z, float* o, float transX, float transY, float transZ, float transO)
     {
@@ -180,6 +192,8 @@ public:
         y = (iny - inx * std::tan(transO)) / (std::cos(transO) + std::sin(transO) * std::tan(transO));
         x = (inx + iny * std::tan(transO)) / (std::cos(transO) + std::sin(transO) * std::tan(transO));
     }
+
+    virtual int32 GetMapIdForSpawning() const = 0;
 };
 
 #endif

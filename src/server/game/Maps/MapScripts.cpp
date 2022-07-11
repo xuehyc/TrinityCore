@@ -32,7 +32,7 @@
 #include "World.h"
 
 /// Put scripts in the execution queue
-void Map::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, Object* target)
+void Map::ScriptsStart(std::map<uint32, std::multimap<uint32, ScriptInfo>> const& scripts, uint32 id, Object* source, Object* target)
 {
     ///- Find the script map
     ScriptMapMap::const_iterator s = scripts.find(id);
@@ -315,6 +315,9 @@ void Map::ScriptsProcess()
                 case HighGuid::Corpse:
                     source = GetCorpse(step.sourceGUID);
                     break;
+                case HighGuid::Mo_Transport:
+                    source = GetTransport(step.sourceGUID);
+                    break;
                 default:
                     TC_LOG_ERROR("scripts", "%s source with unsupported high guid %s.",
                         step.script->GetDebugInfo().c_str(), step.sourceGUID.ToString().c_str());
@@ -343,6 +346,9 @@ void Map::ScriptsProcess()
                     break;
                 case HighGuid::Corpse:
                     target = GetCorpse(step.targetGUID);
+                    break;
+                case HighGuid::Mo_Transport:
+                    target = GetTransport(step.targetGUID);
                     break;
                 default:
                     TC_LOG_ERROR("scripts", "%s target with unsupported high guid %s.",

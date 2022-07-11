@@ -20,6 +20,7 @@
 #include "CellImpl.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
+#include "DBCStores.h"
 #include "DisableMgr.h"
 #include "DynamicTree.h"
 #include "GameObjectModel.h"
@@ -363,9 +364,10 @@ i_scriptLock(false), _respawnCheckTimer(0)
     //lets initialize visibility distance for map
     Map::InitVisibilityDistance();
 
-    GetGuidSequenceGenerator<HighGuid::Transport>().Set(sObjectMgr->GetGenerator<HighGuid::Transport>().GetNextAfterMaxUsed());
-
     _weatherUpdateTimer.SetInterval(time_t(1 * IN_MILLISECONDS));
+
+    sTransportMgr->CreateTransportsForMap(this);
+
     MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld->GetDataPath(), GetId(), i_InstanceId);
 
     sScriptMgr->OnCreateMap(this);
@@ -547,13 +549,6 @@ void Map::DeleteFromWorld(Player* player)
     ObjectAccessor::RemoveObject(player);
     RemoveUpdateObject(player); /// @todo I do not know why we need this, it should be removed in ~Object anyway
     delete player;
-}
-
-template<>
-void Map::DeleteFromWorld(MapTransport* transport)
-{
-    ObjectAccessor::RemoveObject(transport);
-    delete transport;
 }
 
 void Map::EnsureGridCreated(const GridCoord &p)
@@ -764,7 +759,7 @@ bool Map::AddToMap(T* obj)
 }
 
 template<>
-bool Map::AddToMap(MapTransport* obj)
+bool Map::AddToMap(Transport* obj)
 {
     //TODO: Needs clean up. An object should not be added to map twice.
     if (obj->IsInWorld())
@@ -777,15 +772,16 @@ bool Map::AddToMap(MapTransport* obj)
         return false; //Should delete object
     }
 
-    obj->AddToWorld();
     _transports.insert(obj);
 
-    // Broadcast creation to players
-    if (!GetPlayers().isEmpty())
+    if (obj->GetExpectedMapId() == GetId())
     {
+        obj->AddToWorld();
+
+        // Broadcast creation to players
         for (Map::PlayerList::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
         {
-            if (itr->GetSource()->GetMapTransport() != obj)
+            if (itr->GetSource()->GetTransport() != obj && itr->GetSource()->IsInPhase(obj))
             {
                 UpdateData data(GetId());
                 obj->BuildCreateUpdateBlockForPlayer(&data, itr->GetSource());
@@ -955,9 +951,6 @@ void Map::Update(uint32 t_diff)
         WorldObject* obj = *_transportsUpdateIter;
         ++_transportsUpdateIter;
 
-        if (!obj->IsInWorld())
-            continue;
-
         obj->Update(t_diff);
     }
 
@@ -1124,20 +1117,21 @@ void Map::RemoveFromMap(T *obj, bool remove)
 }
 
 template<>
-void Map::RemoveFromMap(MapTransport* obj, bool remove)
+void Map::RemoveFromMap(Transport* obj, bool remove)
 {
-    obj->RemoveFromWorld();
-
-    Map::PlayerList const& players = GetPlayers();
-    if (!players.isEmpty())
+    if (obj->IsInWorld())
     {
+        obj->RemoveFromWorld();
+
         UpdateData data(GetId());
         obj->BuildOutOfRangeUpdateBlock(&data);
+
+
         WorldPacket packet;
         data.BuildPacket(&packet);
-        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        for (Map::PlayerList::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
         {
-            if (itr->GetSource()->GetTransport() != obj)
+            if (itr->GetSource()->GetTransport() != obj && itr->GetSource()->m_visibleTransports.count(obj->GetGUID()))
             {
                 itr->GetSource()->SendDirectMessage(&packet);
                 itr->GetSource()->m_visibleTransports.erase(obj->GetGUID());
@@ -1261,9 +1255,7 @@ void Map::GameObjectRelocation(GameObject* go, float x, float y, float z, float 
     else
     {
         go->Relocate(x, y, z, orientation);
-        go->UpdateModelPosition();
-        go->UpdatePositionData();
-        go->UpdateObjectVisibility(false);
+        go->AfterRelocation();
         RemoveGameObjectFromMoveList(go);
     }
 }
@@ -1435,9 +1427,7 @@ void Map::MoveAllGameObjectsInMoveList()
         {
             // update pos
             go->Relocate(go->_newPosition);
-            go->UpdateModelPosition();
-            go->UpdatePositionData();
-            go->UpdateObjectVisibility(false);
+            go->AfterRelocation();
         }
         else
         {
@@ -1736,10 +1726,10 @@ void Map::UnloadAll()
 
     for (TransportsContainer::iterator itr = _transports.begin(); itr != _transports.end();)
     {
-        MapTransport* transport = *itr;
+        Transport* transport = *itr;
         ++itr;
 
-        RemoveFromMap<MapTransport>(transport, true);
+        RemoveFromMap<Transport>(transport, true);
     }
 
     for (auto& cellCorpsePair : _corpsesByCell)
@@ -2863,7 +2853,7 @@ void Map::SendInitSelf(Player* player)
     UpdateData data(player->GetMapId());
 
     // attach to player data current transport data
-    if (Transport* transport = player->GetTransport())
+    if (Transport* transport = dynamic_cast<Transport*>(player->GetTransport()))
     {
         transport->BuildCreateUpdateBlockForPlayer(&data, player);
         player->m_visibleTransports.insert(transport->GetGUID());
@@ -2873,7 +2863,7 @@ void Map::SendInitSelf(Player* player)
     player->BuildCreateUpdateBlockForPlayer(&data, player);
 
     // build other passengers at transport also (they always visible and marked as visible and will not send at visibility update at add to map
-    if (MapTransport* transport = player->GetMapTransport())
+    if (Transport* transport = dynamic_cast<Transport*>(player->GetTransport()))
         for (WorldObject* passenger : transport->GetPassengers())
             if (player != passenger && player->HaveAtClient(passenger))
                 passenger->BuildCreateUpdateBlockForPlayer(&data, player);
@@ -2886,10 +2876,10 @@ void Map::SendInitSelf(Player* player)
 void Map::SendInitTransports(Player* player)
 {
     // Hack to send out transports
-    UpdateData transData(player->GetMapId());
+    UpdateData transData(GetId());
     for (Transport* transport : _transports)
     {
-        if (transport != player->GetMapTransport() && player->IsInPhase(transport))
+        if (transport->IsInWorld() && transport != player->GetTransport() && player->IsInPhase(transport))
         {
             transport->BuildCreateUpdateBlockForPlayer(&transData, player);
             player->m_visibleTransports.insert(transport->GetGUID());
@@ -2907,7 +2897,7 @@ void Map::SendRemoveTransports(Player* player)
     UpdateData transData(player->GetMapId());
     for (Transport* transport : _transports)
     {
-        if (transport != player->GetMapTransport())
+        if (player->m_visibleTransports.count(transport->GetGUID()) && transport != player->GetTransport())
         {
             transport->BuildOutOfRangeUpdateBlock(&transData);
             player->m_visibleTransports.erase(transport->GetGUID());
@@ -2925,6 +2915,9 @@ void Map::SendUpdateTransportVisibility(Player* player)
     UpdateData transData(player->GetMapId());
     for (Transport* transport : _transports)
     {
+        if (!transport->IsInWorld())
+            continue;
+
         auto transportItr = player->m_visibleTransports.find(transport->GetGUID());
         if (player->IsInPhase(transport))
         {
@@ -3458,17 +3451,6 @@ bool Map::IsSpawnGroupActive(uint32 groupId) const
 
 void Map::DelayedUpdate(uint32 t_diff)
 {
-    for (_transportsUpdateIter = _transports.begin(); _transportsUpdateIter != _transports.end();)
-    {
-        MapTransport* transport = *_transportsUpdateIter;
-        ++_transportsUpdateIter;
-
-        if (!transport->IsInWorld())
-            continue;
-
-        transport->DelayedUpdate(t_diff);
-    }
-
     RemoveAllObjectsInRemoveList();
 
     // Don't unload grids if it's battleground, since we may have manually added GOs, creatures, those doesn't load from DB at grid re-load !
@@ -3565,7 +3547,7 @@ void Map::RemoveAllObjectsInRemoveList()
             case TYPEID_GAMEOBJECT:
             {
                 GameObject* go = obj->ToGameObject();
-                if (MapTransport* transport = go->ToMapTransport())
+                if (Transport* transport = go->ToTransport())
                     RemoveFromMap(transport, true);
                 else
                     RemoveFromMap(go, true);
@@ -3640,69 +3622,82 @@ bool Map::ActiveObjectsNearGrid(NGridType const& ngrid) const
     return false;
 }
 
-template<class T>
-void Map::AddToActive(T* obj)
+void Map::AddToActive(WorldObject* obj)
 {
     AddToActiveHelper(obj);
-}
 
-template <>
-void Map::AddToActive(Creature* c)
-{
-    AddToActiveHelper(c);
-
-    // also not allow unloading spawn grid to prevent creating creature clone at load
-    if (!c->IsPet() && c->GetSpawnId())
+    Optional<Position> respawnLocation;
+    switch (obj->GetTypeId())
     {
-        float x, y, z;
-        c->GetRespawnPosition(x, y, z);
-        GridCoord p = Trinity::ComputeGridCoord(x, y);
+        case TYPEID_UNIT:
+            if (Creature* creature = obj->ToCreature(); !creature->IsPet() && creature->GetSpawnId())
+            {
+                respawnLocation.emplace();
+                creature->GetRespawnPosition(respawnLocation->m_positionX, respawnLocation->m_positionY, respawnLocation->m_positionZ);
+            }
+            break;
+        case TYPEID_GAMEOBJECT:
+            if (GameObject* gameObject = obj->ToGameObject(); gameObject->GetSpawnId())
+            {
+                respawnLocation.emplace();
+                gameObject->GetRespawnPosition(respawnLocation->m_positionX, respawnLocation->m_positionY, respawnLocation->m_positionZ);
+            }
+            break;
+        default:
+            break;
+    }
+
+    if (respawnLocation)
+    {
+        GridCoord p = Trinity::ComputeGridCoord(respawnLocation->GetPositionX(), respawnLocation->GetPositionY());
         if (getNGrid(p.x_coord, p.y_coord))
             getNGrid(p.x_coord, p.y_coord)->incUnloadActiveLock();
         else
         {
-            GridCoord p2 = Trinity::ComputeGridCoord(c->GetPositionX(), c->GetPositionY());
-            TC_LOG_ERROR("maps", "Active creature (GUID: %u Entry: %u) added to grid[%u, %u] but spawn grid[%u, %u] was not loaded.",
-                c->GetGUID().GetCounter(), c->GetEntry(), p.x_coord, p.y_coord, p2.x_coord, p2.y_coord);
+            GridCoord p2 = Trinity::ComputeGridCoord(obj->GetPositionX(), obj->GetPositionY());
+            TC_LOG_ERROR("maps", "Active object %s added to grid[%u, %u] but spawn grid[%u, %u] was not loaded.",
+                obj->GetGUID().ToString().c_str(), p.x_coord, p.y_coord, p2.x_coord, p2.y_coord);
         }
     }
 }
 
-template<>
-void Map::AddToActive(DynamicObject* d)
+void Map::RemoveFromActive(WorldObject* obj)
 {
-    AddToActiveHelper(d);
-}
+    RemoveFromActiveHelper(obj);
 
-template<class T>
-void Map::RemoveFromActive(T* /*obj*/) { }
-
-template <>
-void Map::RemoveFromActive(Creature* c)
-{
-    RemoveFromActiveHelper(c);
-
-    // also allow unloading spawn grid
-    if (!c->IsPet() && c->GetSpawnId())
+    Optional<Position> respawnLocation;
+    switch (obj->GetTypeId())
     {
-        float x, y, z;
-        c->GetRespawnPosition(x, y, z);
-        GridCoord p = Trinity::ComputeGridCoord(x, y);
+        case TYPEID_UNIT:
+            if (Creature* creature = obj->ToCreature(); !creature->IsPet() && creature->GetSpawnId())
+            {
+                respawnLocation.emplace();
+                creature->GetRespawnPosition(respawnLocation->m_positionX, respawnLocation->m_positionY, respawnLocation->m_positionZ);
+            }
+            break;
+        case TYPEID_GAMEOBJECT:
+            if (GameObject* gameObject = obj->ToGameObject(); gameObject->GetSpawnId())
+            {
+                respawnLocation.emplace();
+                gameObject->GetRespawnPosition(respawnLocation->m_positionX, respawnLocation->m_positionY, respawnLocation->m_positionZ);
+            }
+            break;
+        default:
+            break;
+    }
+
+    if (respawnLocation)
+    {
+        GridCoord p = Trinity::ComputeGridCoord(respawnLocation->GetPositionX(), respawnLocation->GetPositionY());
         if (getNGrid(p.x_coord, p.y_coord))
             getNGrid(p.x_coord, p.y_coord)->decUnloadActiveLock();
         else
         {
-            GridCoord p2 = Trinity::ComputeGridCoord(c->GetPositionX(), c->GetPositionY());
-            TC_LOG_ERROR("maps", "Active creature (GUID: %u Entry: %u) removed from grid[%u, %u] but spawn grid[%u, %u] was not loaded.",
-                c->GetGUID().GetCounter(), c->GetEntry(), p.x_coord, p.y_coord, p2.x_coord, p2.y_coord);
+            GridCoord p2 = Trinity::ComputeGridCoord(obj->GetPositionX(), obj->GetPositionY());
+            TC_LOG_ERROR("maps", "Active object %s removed from to grid[%u, %u] but spawn grid[%u, %u] was not loaded.",
+                obj->GetGUID().ToString().c_str(), p.x_coord, p.y_coord, p2.x_coord, p2.y_coord);
         }
     }
-}
-
-template<>
-void Map::RemoveFromActive(DynamicObject* obj)
-{
-    RemoveFromActiveHelper(obj);
 }
 
 template TC_GAME_API bool Map::AddToMap(Corpse*);
@@ -4343,20 +4338,11 @@ Pet* Map::GetPet(ObjectGuid const& guid)
 
 Transport* Map::GetTransport(ObjectGuid const& guid)
 {
-    if (!guid.IsTransport())
+    if (!guid.IsMOTransport())
         return nullptr;
 
     GameObject* go = GetGameObject(guid);
     return go ? go->ToTransport() : nullptr;
-}
-
-MapTransport* Map::GetMapTransport(ObjectGuid const& guid)
-{
-    if (!guid.IsTransport())
-        return nullptr;
-
-    GameObject* go = GetGameObject(guid);
-    return go ? go->ToMapTransport() : nullptr;
 }
 
 void Map::UpdateIteratorBack(Player* player)

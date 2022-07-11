@@ -22,6 +22,7 @@
 #include "Opcodes.h"
 #include "Log.h"
 #include "Corpse.h"
+#include "DBCStores.h"
 #include "Player.h"
 #include "MapManager.h"
 #include "MotionMaster.h"
@@ -77,6 +78,10 @@ void WorldSession::HandleMoveWorldportAck()
     Map* oldMap = GetPlayer()->GetMap();
     Map* newMap = sMapMgr->CreateMap(loc.GetMapId(), GetPlayer());
 
+    MovementInfo::TransportInfo transportInfo = GetPlayer()->m_movementInfo.transport;
+    if (TransportBase* transport = GetPlayer()->GetTransport())
+        transport->RemovePassenger(GetPlayer());
+
     if (GetPlayer()->IsInWorld())
     {
         TC_LOG_ERROR("network", "%s %s is still in world when teleported from map %s (%u) to new map %s (%u)", GetPlayer()->GetGUID().ToString().c_str(), GetPlayer()->GetName().c_str(), oldMap->GetMapName(), oldMap->GetId(), newMap ? newMap->GetMapName() : "Unknown", loc.GetMapId());
@@ -93,18 +98,23 @@ void WorldSession::HandleMoveWorldportAck()
         return;
     }
 
-    float x = loc.GetPositionX();
-    float y = loc.GetPositionY();
-    float o = loc.GetOrientation();
     float z = loc.GetPositionZ() + GetPlayer()->GetHoverOffset();
 
-    GetPlayer()->Relocate(x, y, z, o);
+    GetPlayer()->Relocate(loc.GetPositionX(), loc.GetPositionY(), z, loc.GetOrientation());
     GetPlayer()->SetFallInformation(0, GetPlayer()->GetPositionZ());
 
     GetPlayer()->ResetMap();
     GetPlayer()->SetMap(newMap);
 
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
+
+    // move player between transport copies on each map
+    if (Transport* newTransport = newMap->GetTransport(transportInfo.guid))
+    {
+        GetPlayer()->m_movementInfo.transport = transportInfo;
+        newTransport->AddPassenger(GetPlayer());
+    }
+
     if (!GetPlayer()->GetMap()->AddPlayerToMap(GetPlayer()))
     {
         TC_LOG_ERROR("network", "WORLD: failed to teleport player %s (%d) to map %d (%s) because of unknown reason!",
@@ -113,16 +123,6 @@ void WorldSession::HandleMoveWorldportAck()
         GetPlayer()->SetMap(oldMap);
         GetPlayer()->TeleportTo(GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation());
         return;
-    }
-
-    if (Transport* transport = _player->GetTeleportTransport())
-    {
-        transport->CalculatePassengerOffset(x, y, z, &o);
-        _player->m_movementInfo.transport.pos.Relocate(x, y, z, o);
-
-        transport->AddPassenger(_player);
-
-        _player->ResetTeleportTransport();
     }
 
     // battleground state prepare (in case join to BG), at relogin/tele player not invited
@@ -352,14 +352,20 @@ void WorldSession::HandleMovementOpcode(uint16 opcode, MovementInfo& movementInf
         {
             if (!plrMover->GetTransport())
             {
-                if (Transport* transport = plrMover->GetMap()->GetTransport(movementInfo.transport.guid))
-                    transport->AddPassenger(plrMover);
+                if (GameObject* go = plrMover->GetMap()->GetGameObject(movementInfo.transport.guid))
+                    if (TransportBase* transport = go->ToTransportBase())
+                        transport->AddPassenger(plrMover);
             }
-            else if (plrMover->GetTransport()->GetGUID() != movementInfo.transport.guid)
+            else if (plrMover->GetTransport()->GetTransportGUID() != movementInfo.transport.guid)
             {
                 plrMover->GetTransport()->RemovePassenger(plrMover);
-                if (Transport* transport = plrMover->GetMap()->GetTransport(movementInfo.transport.guid))
-                    transport->AddPassenger(plrMover);
+                if (GameObject* go = plrMover->GetMap()->GetGameObject(movementInfo.transport.guid))
+                {
+                    if (TransportBase* transport = go->ToTransportBase())
+                        transport->AddPassenger(plrMover);
+                    else
+                        movementInfo.ResetTransport();
+                }
                 else
                     movementInfo.ResetTransport();
             }
@@ -369,7 +375,7 @@ void WorldSession::HandleMovementOpcode(uint16 opcode, MovementInfo& movementInf
             movementInfo.transport.Reset();
     }
     else if (plrMover && plrMover->GetTransport())                // if we were on a transport, leave
-        plrMover->m_transport->RemovePassenger(plrMover);
+        plrMover->GetTransport()->RemovePassenger(plrMover);
 
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
     if (opcode == MSG_MOVE_FALL_LAND && plrMover && !plrMover->IsInFlight())

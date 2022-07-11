@@ -1855,13 +1855,14 @@ enum GameObjectFlags
     GO_FLAG_DESTROYED       = 0x00000400
 };
 
-enum GameObjectDynamicLowFlags
+enum GameObjectDynamicLowFlags : uint16
 {
     GO_DYNFLAG_LO_ACTIVATE          = 0x01,                 // enables interaction with GO
     GO_DYNFLAG_LO_ANIMATE           = 0x02,                 // possibly more distinct animation of GO
     GO_DYNFLAG_LO_NO_INTERACT       = 0x04,                 // appears to disable interaction (not fully verified)
     GO_DYNFLAG_LO_SPARKLE           = 0x08,                 // makes GO sparkle
-    GO_DYNFLAG_LO_STOPPED           = 0x10                  // Transport is stopped
+    GO_DYNFLAG_LO_STOPPED           = 0x10,                 // Transport is stopped
+    GO_DYNFLAG_LO_INVERTED_MOVEMENT = 0x40,                 // GAMEOBJECT_TYPE_TRANSPORT only
 };
 
 // client side GO show states
@@ -1870,7 +1871,7 @@ enum GOState : uint8
     GO_STATE_ACTIVE             = 0,                        // show in world as used and not reset (closed door open)
     GO_STATE_READY              = 1,                        // show in world as ready (closed door close)
     GO_STATE_ACTIVE_ALTERNATIVE = 2,                        // show in world as used in alt way and not reset (closed door open by cannon fire)
-    GO_STATE_TRANSPORT_ACTIVE   = 24,                       // transport exclusive: transport moves to first stop frame
+    GO_STATE_TRANSPORT_ACTIVE   = 24,                       // transport exclusive: transport may always move
     GO_STATE_TRANSPORT_STOPPED  = 25                        // transport exclusive: transport is going to stop at provided stop frame
 };
 

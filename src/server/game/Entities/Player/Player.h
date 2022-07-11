@@ -96,8 +96,9 @@ typedef std::deque<Mail*> PlayerMails;
 // Note: SPELLMOD_* values is aura types in fact
 enum SpellModType : uint8
 {
-    SPELLMOD_FLAT = SPELL_AURA_ADD_FLAT_MODIFIER,
-    SPELLMOD_PCT  = SPELL_AURA_ADD_PCT_MODIFIER
+    SPELLMOD_FLAT         = 0,                            // SPELL_AURA_ADD_FLAT_MODIFIER
+    SPELLMOD_PCT          = 1,                            // SPELL_AURA_ADD_PCT_MODIFIER
+    SPELLMOD_END
 };
 
 // 2^n values, Player::m_isunderwater is a bitmask. These are Trinity internal values, they are never send to any client
@@ -1018,8 +1019,8 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
 
         void SetObjectScale(float scale) override;
 
-        bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0, Transport* transport = nullptr);
-        bool TeleportTo(WorldLocation const& loc, uint32 options = 0, Transport* transport = nullptr);
+        bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
+        bool TeleportTo(WorldLocation const& loc, uint32 options = 0);
         bool TeleportToBGEntryPoint();
 
         bool HasSummonPending() const;
@@ -1883,8 +1884,8 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void DurabilityPointsLossAll(int32 points, bool inventory);
         void DurabilityPointsLoss(Item* item, int32 points);
         void DurabilityPointLossForEquipSlot(EquipmentSlots slot);
-        uint32 DurabilityRepairAll(bool cost, float discountMod, bool guildBank);
-        uint32 DurabilityRepair(uint16 pos, bool cost, float discountMod, bool guildBank);
+        void DurabilityRepairAll(bool takeCost, float discountMod, bool guildBank);
+        void DurabilityRepair(uint16 pos, bool takeCost, float discountMod);
 
         void UpdateMirrorTimers();
         void StopMirrorTimers();
@@ -1923,8 +1924,6 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void SetSkillPermBonus(uint8 pos, uint16 value);
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }
-        Transport* GetTeleportTransport() const { return m_teleport_transport; }
-        void ResetTeleportTransport() { m_teleport_transport = nullptr; }
         bool IsBeingTeleported() const { return mSemaphoreTeleport_Near || mSemaphoreTeleport_Far; }
         bool IsBeingTeleportedNear() const { return mSemaphoreTeleport_Near; }
         bool IsBeingTeleportedFar() const { return mSemaphoreTeleport_Far; }
@@ -2389,9 +2388,6 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void DeleteFromPlayerPetDataStore(uint32 petNumber);
         void AddToPlayerPetDataStore(PlayerPetData* playerPetData);
 
-        uint32 GetTransportSpawnID() const { return _transportSpawnID; }
-        void SetTransportSpawnID(uint32 spawnId) { _transportSpawnID = spawnId; }
-
     protected:
         // Gamemaster whisper whitelist
         GuidList WhisperList;
@@ -2595,7 +2591,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         uint32 m_baseHealthRegen;
         int32 m_spellPenetrationItemMod;
 
-        SpellModContainer m_spellMods[MAX_SPELLMOD];
+        SpellModContainer m_spellMods[MAX_SPELLMOD][SPELLMOD_END];
 
         EnchantDurationList m_enchantDuration;
         ItemDurationList m_itemDuration;
@@ -2727,7 +2723,6 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         // Current teleport data
         WorldLocation m_teleport_dest;
         uint32 m_teleport_options;
-        Transport* m_teleport_transport;
         bool mSemaphoreTeleport_Near;
         bool mSemaphoreTeleport_Far;
 
@@ -2765,8 +2760,6 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
 
         TimeTrackerSmall m_petScalingSynchTimer;
         TimeTrackerSmall m_groupUpdateTimer;
-
-        uint32 _transportSpawnID;
 };
 
 TC_GAME_API void AddItemsSetItem(Player* player, Item* item);

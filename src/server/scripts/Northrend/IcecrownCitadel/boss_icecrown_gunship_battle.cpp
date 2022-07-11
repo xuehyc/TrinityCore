@@ -384,7 +384,7 @@ public:
         ResetSlots(HORDE);
     }
 
-    void SetTransport(MapTransport* transport) { _transport = transport; }
+    void SetTransport(Transport* transport) { _transport = transport; }
 
     void ResetSlots(uint32 team)
     {
@@ -455,7 +455,7 @@ private:
         return newPos;
     }
 
-    MapTransport* _transport;
+    Transport* _transport;
     ObjectGuid _controlledSlots[MAX_SLOTS];
     time_t _respawnCooldowns[MAX_SLOTS];
     Position const* _spawnPoint;
@@ -488,14 +488,17 @@ private:
 class ResetEncounterEvent : public BasicEvent
 {
 public:
-    ResetEncounterEvent(Unit* caster, uint32 spellId, ObjectGuid otherTransport) : _caster(caster), _spellId(spellId), _otherTransport(otherTransport) { }
+    ResetEncounterEvent(Unit* caster, uint32 spellId, ObjectGuid transport, ObjectGuid otherTransport) : _caster(caster), _spellId(spellId),
+        _transport(transport), _otherTransport(otherTransport) { }
 
     bool Execute(uint64, uint32) override
     {
         _caster->CastSpell(_caster, _spellId, true);
-        _caster->GetTransport()->AddObjectToRemoveList();
 
-        if (MapTransport* go = ObjectAccessor::GetMapTransport(_otherTransport))
+        if (Transport* go = ObjectAccessor::GetTransport(*_caster, _transport))
+            go->AddObjectToRemoveList();
+
+        if (Transport* go = ObjectAccessor::GetTransport(*_caster, _otherTransport))
             go->AddObjectToRemoveList();
 
         return true;
@@ -504,6 +507,7 @@ public:
 private:
     Unit* _caster;
     uint32 _spellId;
+    ObjectGuid _transport;
     ObjectGuid _otherTransport;
 };
 
@@ -686,7 +690,7 @@ class npc_gunship : public CreatureScript
                 if (_summonedFirstMage)
                     return;
 
-                if (me->GetTransport()->GetEntry() != uint32(_teamInInstance == HORDE ? GO_THE_SKYBREAKER_H : GO_ORGRIMS_HAMMER_A))
+                if (me->GetTransport()->GetTransportGUID() != me->GetInstanceScript()->GetGuidData(DATA_ENEMY_GUNSHIP))
                     return;
 
                 if (!me->HealthBelowPctDamaged(90, damage))
@@ -704,8 +708,8 @@ class npc_gunship : public CreatureScript
 
                 _died = true;
 
-                bool isVictory = me->GetTransport()->GetEntry() == GO_THE_SKYBREAKER_H || me->GetTransport()->GetEntry() == GO_ORGRIMS_HAMMER_A;
                 InstanceScript* instance = me->GetInstanceScript();
+                bool isVictory = me->GetTransport()->GetTransportGUID() == instance->GetGuidData(DATA_ENEMY_GUNSHIP);
                 instance->SetBossState(DATA_ICECROWN_GUNSHIP_BATTLE, isVictory ? DONE : FAIL);
                 if (Creature* creature = me->FindNearestCreature(me->GetEntry() == NPC_ORGRIMS_HAMMER ? NPC_THE_SKYBREAKER : NPC_ORGRIMS_HAMMER, 200.0f))
                 {
@@ -765,10 +769,11 @@ class npc_gunship : public CreatureScript
 
                 if (isVictory)
                 {
-                    if (MapTransport* trans = ObjectAccessor::GetMapTransport(instance->GetGuidData(DATA_ICECROWN_GUNSHIP_BATTLE)))
-                        trans->EnableMovement(true);
+                    if (Transport* otherTransport = ObjectAccessor::GetTransport(*me, instance->GetGuidData(DATA_ICECROWN_GUNSHIP_BATTLE)))
+                        otherTransport->EnableMovement(true);
 
-                    me->GetMapTransport()->EnableMovement(true);
+                    if (Transport* transport = dynamic_cast<Transport*>(me->GetTransport()))
+                        transport->EnableMovement(true);
 
                     if (Creature* ship = me->FindNearestCreature(_teamInInstance == HORDE ? NPC_ORGRIMS_HAMMER : NPC_THE_SKYBREAKER, 200.0f))
                     {
@@ -788,8 +793,8 @@ class npc_gunship : public CreatureScript
                 else
                 {
                     uint32 teleportSpellId = _teamInInstance == HORDE ? SPELL_TELEPORT_PLAYERS_ON_RESET_H : SPELL_TELEPORT_PLAYERS_ON_RESET_A;
-                    me->m_Events.AddEvent(new ResetEncounterEvent(me, teleportSpellId, me->GetInstanceScript()->GetGuidData(DATA_ENEMY_GUNSHIP)),
-                        me->m_Events.CalculateTime(8000));
+                    me->m_Events.AddEventAtOffset(new ResetEncounterEvent(me, teleportSpellId, instance->GetGuidData(DATA_ICECROWN_GUNSHIP_BATTLE),
+                        instance->GetGuidData(DATA_ENEMY_GUNSHIP)), 8s);
                 }
             }
 
@@ -844,7 +849,7 @@ class npc_high_overlord_saurfang_igb : public CreatureScript
                 _instance(creature->GetInstanceScript())
             {
                 _controller.ResetSlots(HORDE);
-                _controller.SetTransport(creature->GetMapTransport());
+                _controller.SetTransport(dynamic_cast<Transport*>(creature->GetTransport()));
                 me->setRegeneratingHealth(false);
                 me->m_CombatDistance = 70.0f;
                 _firstMageCooldown = GameTime::GetGameTime() + 60;
@@ -954,7 +959,8 @@ class npc_high_overlord_saurfang_igb : public CreatureScript
             bool GossipSelect(Player* /*player*/, uint32 /*menuId*/, uint32 /*gossipListId*/) override
             {
                 me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                me->GetMapTransport()->EnableMovement(true);
+                if (Transport* transport = dynamic_cast<Transport*>(me->GetTransport()))
+                    transport->EnableMovement(true);
                 _events.SetPhase(PHASE_INTRO);
                 _events.ScheduleEvent(EVENT_INTRO_H_1, 5000, 0, PHASE_INTRO);
                 _events.ScheduleEvent(EVENT_INTRO_H_2, 16000, 0, PHASE_INTRO);
@@ -991,7 +997,7 @@ class npc_high_overlord_saurfang_igb : public CreatureScript
                             Talk(SAY_SAURFANG_INTRO_2);
                             break;
                         case EVENT_INTRO_SUMMON_SKYBREAKER:
-                            sTransportMgr->CreateTransport(GO_THE_SKYBREAKER_H, 0, me->GetMap());
+                            sTransportMgr->CreateTransport(GO_THE_SKYBREAKER_H, me->GetMap());
                             break;
                         case EVENT_INTRO_H_3:
                             Talk(SAY_SAURFANG_INTRO_3);
@@ -1022,10 +1028,10 @@ class npc_high_overlord_saurfang_igb : public CreatureScript
                             _controller.SummonCreatures(SLOT_MAGE_1, SLOT_MAGE_2);
                             _controller.SummonCreatures(SLOT_MARINE_1, Is25ManRaid() ? SLOT_MARINE_4 : SLOT_MARINE_2);
                             _controller.SummonCreatures(SLOT_SERGEANT_1, Is25ManRaid() ? SLOT_SERGEANT_2 : SLOT_SERGEANT_1);
-                            if (MapTransport* orgrimsHammer = me->GetMapTransport())
+                            if (Transport* orgrimsHammer = dynamic_cast<Transport*>(me->GetTransport()))
                                 orgrimsHammer->SummonPassenger(NPC_TELEPORT_PORTAL, OrgrimsHammerTeleportPortal, TEMPSUMMON_TIMED_DESPAWN, nullptr, 21000);
 
-                            if (MapTransport* skybreaker = ObjectAccessor::GetMapTransport(_instance->GetGuidData(DATA_ICECROWN_GUNSHIP_BATTLE)))
+                            if (Transport* skybreaker = ObjectAccessor::GetTransport(*me, _instance->GetGuidData(DATA_ICECROWN_GUNSHIP_BATTLE)))
                                 skybreaker->SummonPassenger(NPC_TELEPORT_EXIT, SkybreakerTeleportExit, TEMPSUMMON_TIMED_DESPAWN, nullptr, 23000);
 
                             _events.ScheduleEvent(EVENT_ADDS_BOARD_YELL, 6000);
@@ -1108,7 +1114,7 @@ class npc_muradin_bronzebeard_igb : public CreatureScript
                 _instance(creature->GetInstanceScript())
             {
                 _controller.ResetSlots(ALLIANCE);
-                _controller.SetTransport(creature->GetMapTransport());
+                _controller.SetTransport(dynamic_cast<Transport*>(creature->GetTransport()));
                 me->setRegeneratingHealth(false);
                 me->m_CombatDistance = 70.0f;
                 _firstMageCooldown = GameTime::GetGameTime() + 60;
@@ -1218,7 +1224,8 @@ class npc_muradin_bronzebeard_igb : public CreatureScript
             bool GossipSelect(Player* /*player*/, uint32 /*menuId*/, uint32 /*gossipListId*/) override
             {
                 me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                me->GetMapTransport()->EnableMovement(true);
+                if (Transport* transport = dynamic_cast<Transport*>(me->GetTransport()))
+                    transport->EnableMovement(true);
                 _events.SetPhase(PHASE_INTRO);
                 _events.ScheduleEvent(EVENT_INTRO_A_1, 5000);
                 _events.ScheduleEvent(EVENT_INTRO_A_2, 10000, 0, PHASE_INTRO);
@@ -1256,7 +1263,7 @@ class npc_muradin_bronzebeard_igb : public CreatureScript
                             Talk(SAY_MURADIN_INTRO_2);
                             break;
                         case EVENT_INTRO_SUMMON_ORGRIMS_HAMMER:
-                            sTransportMgr->CreateTransport(GO_ORGRIMS_HAMMER_A, 0, me->GetMap());
+                            sTransportMgr->CreateTransport(GO_ORGRIMS_HAMMER_A, me->GetMap());
                             break;
                         case EVENT_INTRO_A_3:
                             Talk(SAY_MURADIN_INTRO_3);
@@ -1290,10 +1297,10 @@ class npc_muradin_bronzebeard_igb : public CreatureScript
                             _controller.SummonCreatures(SLOT_MAGE_1, SLOT_MAGE_2);
                             _controller.SummonCreatures(SLOT_MARINE_1, Is25ManRaid() ? SLOT_MARINE_4 : SLOT_MARINE_2);
                             _controller.SummonCreatures(SLOT_SERGEANT_1, Is25ManRaid() ? SLOT_SERGEANT_2 : SLOT_SERGEANT_1);
-                            if (MapTransport* skybreaker = me->GetMapTransport())
+                            if (Transport* skybreaker = dynamic_cast<Transport*>(me->GetTransport()))
                                 skybreaker->SummonPassenger(NPC_TELEPORT_PORTAL, SkybreakerTeleportPortal, TEMPSUMMON_TIMED_DESPAWN, nullptr, 21000);
 
-                            if (MapTransport* orgrimsHammer = ObjectAccessor::GetMapTransport(_instance->GetGuidData(DATA_ICECROWN_GUNSHIP_BATTLE)))
+                            if (Transport* orgrimsHammer = ObjectAccessor::GetTransport(*me, _instance->GetGuidData(DATA_ICECROWN_GUNSHIP_BATTLE)))
                                 orgrimsHammer->SummonPassenger(NPC_TELEPORT_EXIT, OrgrimsHammerTeleportExit, TEMPSUMMON_TIMED_DESPAWN, nullptr, 23000);
 
                             _events.ScheduleEvent(EVENT_ADDS_BOARD_YELL, 6000);
@@ -1435,11 +1442,11 @@ struct npc_gunship_boarding_addAI : public gunship_npc_AI
             float x, y, z, o;
             otherTransportPos.GetPosition(x, y, z, o);
 
-            Transport* myTransport = me->GetTransport();
+            TransportBase* myTransport = me->GetTransport();
             if (!myTransport)
                 return;
 
-            if (MapTransport* destTransport = ObjectAccessor::GetMapTransport(Instance->GetGuidData(DATA_ICECROWN_GUNSHIP_BATTLE)))
+            if (Transport* destTransport = ObjectAccessor::GetTransport(*me, Instance->GetGuidData(DATA_ICECROWN_GUNSHIP_BATTLE)))
                 destTransport->CalculatePassengerPosition(x, y, z, &o);
 
             float angle = frand(0, float(M_PI) * 2.0f);
@@ -2154,7 +2161,7 @@ class spell_igb_burning_pitch_selector : public SpellScriptLoader
 
                 targets.remove_if([team](WorldObject* target) -> bool
                 {
-                    if (Transport* transport = target->GetTransport())
+                    if (Transport* transport = dynamic_cast<Transport*>(target->GetTransport()))
                         return transport->GetEntry() != uint32(team == HORDE ? GO_ORGRIMS_HAMMER_H : GO_THE_SKYBREAKER_A);
                     return true;
                 });
@@ -2288,7 +2295,7 @@ class spell_igb_gunship_fall_teleport : public SpellScriptLoader
             void SelectTransport(WorldObject*& target)
             {
                 if (InstanceScript* instance = target->GetInstanceScript())
-                    target = ObjectAccessor::GetMapTransport(instance->GetGuidData(DATA_ICECROWN_GUNSHIP_BATTLE));
+                    target = ObjectAccessor::GetTransport(*GetCaster(), instance->GetGuidData(DATA_ICECROWN_GUNSHIP_BATTLE));
             }
 
             void RelocateDest(SpellEffIndex /*effIndex*/)

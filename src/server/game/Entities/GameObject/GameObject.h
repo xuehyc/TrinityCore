@@ -25,25 +25,56 @@
 #include "MapObject.h"
 #include "SharedDefines.h"
 
+class GameObject;
 class GameObjectAI;
 class GameObjectModel;
 class Group;
 class OPvPCapturePoint;
 class SpellInfo;
 class Transport;
+class TransportBase;
 class Unit;
 struct TransportAnimation;
 enum TriggerCastFlags : uint32;
 
+// Base class for GameObject type specific implementations
+class GameObjectTypeBase
+{
+public:
+    class TC_GAME_API CustomCommand
+    {
+    public:
+        virtual ~CustomCommand();
+        virtual void Execute(GameObjectTypeBase& type) const = 0;
+    };
+
+    explicit GameObjectTypeBase(GameObject& owner) : _owner(owner) { }
+    virtual ~GameObjectTypeBase() = default;
+
+    virtual void Update([[maybe_unused]] uint32 diff) { }
+    virtual void OnStateChanged([[maybe_unused]] GOState oldState, [[maybe_unused]] GOState newState) { }
+    virtual void OnRelocated() { }
+
+protected:
+    GameObject& _owner;
+};
+
+namespace GameObjectType
+{
+class TC_GAME_API SetTransportAutoCycleBetweenStopFrames : public GameObjectTypeBase::CustomCommand
+{
+public:
+    explicit SetTransportAutoCycleBetweenStopFrames(bool on);
+
+    void Execute(GameObjectTypeBase& type) const override;
+
+private:
+    bool _on;
+};
+}
+
 union GameObjectValue
 {
-    //11 GAMEOBJECT_TYPE_TRANSPORT
-    struct
-    {
-        uint32 PathProgress;
-        TransportAnimation const* AnimationInfo;
-        std::vector<uint32>* StopFrames;
-    } Transport;
     //25 GAMEOBJECT_TYPE_FISHINGHOLE
     struct
     {
@@ -89,7 +120,7 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         void RemoveFromWorld() override;
         void CleanupsBeforeDelete(bool finalCleanup = true) override;
 
-        virtual bool Create(ObjectGuid::LowType guidlow, uint32 name_id, Map* map, Position const& pos, QuaternionData const& rotation, uint32 animprogress, GOState go_state, uint32 artKit = 0, bool dynamic = false, ObjectGuid::LowType spawnid = 0);
+        bool Create(ObjectGuid::LowType guidlow, uint32 name_id, Map* map, Position const& pos, QuaternionData const& rotation, uint32 animprogress, GOState go_state, uint32 artKit = 0, bool dynamic = false, ObjectGuid::LowType spawnid = 0);
         void Update(uint32 p_time) override;
         GameObjectTemplate const* GetGOInfo() const { return m_goInfo; }
         GameObjectTemplateAddon const* GetTemplateAddon() const { return m_goTemplateAddon; }
@@ -168,6 +199,9 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         uint8 GetGoAnimProgress() const { return GetByteValue(GAMEOBJECT_BYTES_1, 3); }
         void SetGoAnimProgress(uint8 animprogress) { SetByteValue(GAMEOBJECT_BYTES_1, 3, animprogress); }
         static void SetGoArtKit(uint8 artkit, GameObject* go, ObjectGuid::LowType lowguid = 0);
+
+        std::vector<uint32> const* GetPauseTimes() const;
+        void SetPathProgressForClient(float progress);
 
         void PlayAnimKit(int32 animKit);
 
@@ -256,8 +290,6 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
             return GO_DESTRUCTIBLE_INTACT;
         }
 
-        void EventInform(uint32 eventId, WorldObject* invoker = nullptr);
-
         // There's many places not ready for dynamic spawns. This allows them to live on for now.
         void SetRespawnCompatibilityMode(bool mode = true) { m_respawnCompatibilityMode = mode; }
         bool GetRespawnCompatibilityMode() { return m_respawnCompatibilityMode; }
@@ -275,17 +307,21 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         GameObjectModel* m_model;
         void GetRespawnPosition(float &x, float &y, float &z, float* ori = nullptr) const;
 
-        Transport* ToTransport();
-        Transport const* ToTransport() const;
+        TransportBase* ToTransportBase() { return const_cast<TransportBase*>(const_cast<GameObject const*>(this)->ToTransportBase()); }
+        TransportBase const* ToTransportBase() const;
 
-        MapTransport* ToMapTransport();
-        MapTransport const* ToMapTransport() const;
 
-        float GetStationaryX() const override;
-        float GetStationaryY() const override;
-        float GetStationaryZ() const override;
-        float GetStationaryO() const override;
-        void RelocateStationaryPosition(float x, float y, float z, float o);
+        Transport* ToTransport() { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport*>(this); else return nullptr; }
+        Transport const* ToTransport() const { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport const*>(this); else return nullptr; }
+
+        float GetStationaryX() const override { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionX(); return GetPositionX(); }
+        float GetStationaryY() const override { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionY(); return GetPositionY(); }
+        float GetStationaryZ() const override { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionZ(); return GetPositionZ(); }
+        float GetStationaryO() const override { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetOrientation(); return GetOrientation(); }
+        Position const& GetStationaryPosition() const { return m_stationaryPosition; }
+        void RelocateStationaryPosition(float x, float y, float z, float o) { m_stationaryPosition.Relocate(x, y, z, o); }
+
+        void AfterRelocation();
 
         float GetInteractionDistance() const;
 
@@ -302,7 +338,7 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         void AIM_Destroy();
         bool AIM_Initialize();
 
-        void SetSpawnId(uint32 spawnId) { m_spawnId = spawnId; }
+        void HandleCustomTypeCommand(GameObjectTypeBase::CustomCommand const& command) const;
 
     protected:
         GameObjectModel* CreateModel();
@@ -334,7 +370,9 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         GameObjectTemplate const* m_goInfo;
         GameObjectTemplateAddon const* m_goTemplateAddon;
         GameObjectData const* m_goData;
-        GameObjectValue m_goValue;
+        std::unique_ptr<GameObjectTypeBase> m_goTypeImpl;
+        GameObjectValue m_goValue; // TODO: replace with m_goTypeImpl
+
 
         int64 m_packedRotation;
         QuaternionData m_localRotation;

@@ -212,7 +212,6 @@ Player::Player(WorldSession* session): Unit(true)
     m_bCanDelayTeleport = false;
     m_bHasDelayedTeleport = false;
     m_teleport_options = 0;
-    m_teleport_transport = nullptr;
 
     m_trade = nullptr;
 
@@ -373,8 +372,6 @@ Player::Player(WorldSession* session): Unit(true)
     _archaeology = new Archaeology(this);
     m_petScalingSynchTimer.Reset(1000);
     m_groupUpdateTimer.Reset(5000);
-
-    _transportSpawnID = 0;
 }
 
 Player::~Player()
@@ -1338,7 +1335,7 @@ void Player::Update(uint32 p_time)
     //we should execute delayed teleports only for alive(!) players
     //because we don't want player's ghost teleported from graveyard
     if (IsHasDelayedTeleport() && IsAlive())
-        TeleportTo(m_teleport_dest, m_teleport_options, m_teleport_transport);
+        TeleportTo(m_teleport_dest, m_teleport_options);
 
 }
 
@@ -1421,7 +1418,7 @@ uint8 Player::GetChatTag() const
     return tag;
 }
 
-bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options, Transport* transport)
+bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options)
 {
     if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
     {
@@ -1453,7 +1450,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         TC_LOG_DEBUG("maps", "Player '%s' (%s) using client without required expansion tried teleport to non accessible map (MapID: %u)",
             GetName().c_str(), GetGUID().ToString().c_str(), mapid);
 
-        if (Transport* transport = GetTransport())
+        if (TransportBase* transport = GetTransport())
         {
             transport->RemovePassenger(this);
             RepopAtGraveyard();                             // teleport to near graveyard if on transport, looks blizz like :)
@@ -1474,7 +1471,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     m_movementInfo.ResetJump();
     DisableSpline();
 
-    if (Transport* transport = GetTransport())
+    if (TransportBase* transport = GetTransport())
     {
         if (!(options & TELE_TO_NOT_LEAVE_TRANSPORT))
             transport->RemovePassenger(this);
@@ -1500,7 +1497,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             //lets save teleport destination for player
             m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
             m_teleport_options = options;
-            m_teleport_transport = transport;
             return true;
         }
 
@@ -1518,12 +1514,10 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
         m_teleport_options = options;
         SetFallInformation(0, GetPositionZ());
-        m_teleport_transport = transport;
 
         // code for finish transfer called in WorldSession::HandleMovementOpcodes()
         // at client packet CMSG_MOVE_TELEPORT_ACK
-        if (!GetTransport())
-            SetSemaphoreTeleportNear(true);
+        SetSemaphoreTeleportNear(true);
         // near teleport, triggering send CMSG_MOVE_TELEPORT_ACK from client at landing
         if (!GetSession()->PlayerLogout())
         {
@@ -1564,7 +1558,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 //lets save teleport destination for player
                 m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
                 m_teleport_options = options;
-                m_teleport_transport = transport;
                 return true;
             }
 
@@ -1614,7 +1607,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 // send transfer packets
                 WorldPackets::Movement::TransferPending transferPending;
                 transferPending.MapID = mapid;
-                if (Transport* transport = GetTransport())
+                if (Transport* transport = dynamic_cast<Transport*>(GetTransport()))
                 {
                     transferPending.Ship.emplace();
                     transferPending.Ship->ID = transport->GetEntry();
@@ -1632,7 +1625,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             PurgeAndApplyPendingMovementChanges(false);
 
             m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
-            m_teleport_transport = transport;
             m_teleport_options = options;
             SetFallInformation(0, GetPositionZ());
             // if the player is saved before worldportack (at logout for example)
@@ -1656,9 +1648,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     return true;
 }
 
-bool Player::TeleportTo(WorldLocation const& loc, uint32 options /*= 0*/, Transport* transport /*=nullptr*/)
+bool Player::TeleportTo(WorldLocation const& loc, uint32 options /*= 0*/)
 {
-    return TeleportTo(loc.GetMapId(), loc.GetPositionX(), loc.GetPositionY(), loc.GetPositionZ(), loc.GetOrientation(), options, transport);
+    return TeleportTo(loc.GetMapId(), loc.GetPositionX(), loc.GetPositionY(), loc.GetPositionZ(), loc.GetOrientation(), options);
 }
 
 bool Player::TeleportToBGEntryPoint()
@@ -4418,104 +4410,130 @@ void Player::DurabilityPointLossForEquipSlot(EquipmentSlots slot)
         DurabilityPointsLoss(pItem, 1);
 }
 
-uint32 Player::DurabilityRepairAll(bool cost, float discountMod, bool guildBank)
+void Player::DurabilityRepairAll(bool takeCost, float discountMod, bool guildBank)
 {
-    uint32 TotalCost = 0;
+    // Collecting all items that can be repaired and repair costs
+    std::list<std::pair<Item*, uint32>> itemRepairCostStore;
+
     // equipped, backpack, bags itself
     for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
-        TotalCost += DurabilityRepair(((INVENTORY_SLOT_BAG_0 << 8) | i), cost, discountMod, guildBank);
+        if (Item* item = GetItemByPos(((INVENTORY_SLOT_BAG_0 << 8) | i)))
+            if (uint32 cost = item->CalculateDurabilityRepairCost(discountMod))
+                itemRepairCostStore.push_back(std::make_pair(item, cost));
+
 
     // bank, buyback and keys not repaired
 
     // items in inventory bags
     for (uint8 j = INVENTORY_SLOT_BAG_START; j < INVENTORY_SLOT_BAG_END; j++)
         for (uint8 i = 0; i < MAX_BAG_SIZE; i++)
-            TotalCost += DurabilityRepair(((j << 8) | i), cost, discountMod, guildBank);
-    return TotalCost;
-}
+            if (Item* item = GetItemByPos(((j << 8) | i)))
+                if (uint32 cost = item->CalculateDurabilityRepairCost(discountMod))
+                    itemRepairCostStore.push_back(std::make_pair(item, cost));
 
-uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool guildBank)
-{
-    Item* item = GetItemByPos(pos);
-
-    uint32 TotalCost = 0;
-    if (!item)
-        return TotalCost;
-
-    uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
-    if (!maxDurability)
-        return TotalCost;
-
-    uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
-
-    if (cost)
+    // Handling a free repair case - just repair every item without taking cost.
+    if (!takeCost)
     {
-        uint32 LostDurability = maxDurability - curDurability;
-        if (LostDurability>0)
-        {
-            ItemTemplate const* ditemProto = item->GetTemplate();
+        for (auto const& [item, cost] : itemRepairCostStore)
+            DurabilityRepair(item->GetPos(), false, 0.f);
 
-            DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(ditemProto->GetBaseItemLevel());
-            if (!dcost)
-            {
-                TC_LOG_ERROR("entities.player.items", "Player::DurabilityRepair: Player '%s' (%s) tried to repair an item (ItemID: %u) with invalid item level %u",
-                    GetName().c_str(), GetGUID().ToString().c_str(), ditemProto->GetId(), ditemProto->GetBaseItemLevel());
-                return TotalCost;
-            }
-
-            uint32 dQualitymodEntryId = (ditemProto->GetQuality() + 1) * 2;
-            DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
-            if (!dQualitymodEntry)
-            {
-                TC_LOG_ERROR("entities.player.items", "Player::DurabilityRepair: Player '%s' (%s) tried to repair an item (ItemID: %u) with invalid QualitymodEntry %u",
-                    GetName().c_str(), GetGUID().ToString().c_str(), ditemProto->GetId(), dQualitymodEntryId);
-                return TotalCost;
-            }
-
-            uint32 dmultiplier = dcost->Multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->GetClass(), ditemProto->GetSubClass())];
-            uint32 costs = uint32(LostDurability*dmultiplier*double(dQualitymodEntry->Data));
-
-            costs = uint32(costs * discountMod * sWorld->getRate(RATE_REPAIRCOST));
-
-            if (costs == 0)                                   //fix for ITEM_QUALITY_ARTIFACT
-                costs = 1;
-
-            if (guildBank)
-            {
-                if (GetGuildId() == 0)
-                {
-                    TC_LOG_DEBUG("entities.player.items", "Player::DurabilityRepair: Player '%s' (%s) tried to repair item in a guild bank but is not member of a guild",
-                        GetName().c_str(), GetGUID().ToString().c_str());
-                    return TotalCost;
-                }
-
-                Guild* guild = sGuildMgr->GetGuildById(GetGuildId());
-                if (!guild)
-                    return TotalCost;
-
-                if (!guild->HandleMemberWithdrawMoney(GetSession(), costs, true))
-                    return TotalCost;
-
-                TotalCost = costs;
-            }
-            else if (!HasEnoughMoney(uint64(costs)))
-            {
-                TC_LOG_DEBUG("entities.player.items", "Player::DurabilityRepair: Player '%s' (%s) has not enough money to repair item",
-                    GetName().c_str(), GetGUID().ToString().c_str());
-                return TotalCost;
-            }
-            else
-                ModifyMoney(-int64(costs));
-        }
+        return;
     }
 
-    item->SetUInt32Value(ITEM_FIELD_DURABILITY, maxDurability);
+    // Handling a free repair case - just repair every item without taking cost.
+    if (!takeCost)
+    {
+        for (auto const& [item, cost] : itemRepairCostStore)
+            DurabilityRepair(item->GetPos(), false, 0.f);
+
+        return;
+    }
+
+    if (guildBank)
+    {
+        // Handling a repair for guild money case.
+        // We have to repair items one by one until the guild bank has enough money available for withdrawal or until all items are repaired.
+
+        Guild* guild = GetGuild();
+        if (!guild)
+            return; // silent return, client shouldn't display this button for players without guild.
+
+        uint64 const availableGuildMoney = guild->GetMemberAvailableMoneyForRepairItems(GetGUID());
+        if (availableGuildMoney == 0)
+            return;
+
+        // Sort the items by repair cost from lowest to highest
+        itemRepairCostStore.sort([](auto const& a, auto const& b) -> bool
+        {
+            return a.second < b.second;
+        });
+
+        // We must calculate total repair cost and take money once to avoid spam in the guild bank log and reduce number of transactions in the database
+        uint32 totalCost = 0;
+
+        for (auto const& [item, cost] : itemRepairCostStore)
+        {
+            uint64 newTotalCost = totalCost + cost;
+            if (newTotalCost > availableGuildMoney || newTotalCost > MAX_MONEY_AMOUNT)
+                break;
+
+            totalCost = static_cast<uint32>(newTotalCost);
+
+            // Repair item without taking cost. We'll do it later.
+            DurabilityRepair(item->GetPos(), false, 0.f);
+        }
+
+        // Take money for repairs from the guild bank
+        guild->HandleMemberWithdrawMoney(GetSession(), totalCost, true);
+    }
+    else
+    {
+        // Handling a repair for player's money case.
+        // Unlike repairing for guild money, in this case we must first check if player has enough money to repair all the items at once.
+
+        uint32 totalCost = 0;
+        for (auto const& [item, cost] : itemRepairCostStore)
+            totalCost += cost;
+
+        if (!HasEnoughMoney(uint64(totalCost)))
+            return; // silent return, client should display error by itself and not send opcode.
+
+        ModifyMoney(-int32(totalCost));
+
+        // Payment for repair has already been taken, so just repair every item without taking cost.
+        for (auto const& [item, cost] : itemRepairCostStore)
+            DurabilityRepair(item->GetPos(), false, 0.f);
+    }
+}
+
+void Player::DurabilityRepair(uint16 pos, bool takeCost, float discountMod)
+{
+    Item* item = GetItemByPos(pos);
+    if (!item)
+        return;
+
+    if (takeCost)
+    {
+        uint32 cost = item->CalculateDurabilityRepairCost(discountMod);
+
+        if (!HasEnoughMoney(uint64(cost)))
+        {
+            TC_LOG_DEBUG("entities.player.items", "Player::DurabilityRepair: Player '%s' (%s) has not enough money to repair item",
+                GetName().c_str(), GetGUID().ToString().c_str());
+            return;
+        }
+
+        ModifyMoney(-int32(cost));
+    }
+
+    bool isBroken = item->IsBroken();
+
+    item->SetUInt32Value(ITEM_FIELD_DURABILITY, item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY));
     item->SetState(ITEM_CHANGED, this);
 
     // reapply mods for total broken and repaired item if equipped
-    if (IsEquipmentPos(pos) && !curDurability)
+    if (IsEquipmentPos(pos) && isBroken)
         _ApplyItemMods(item, pos & 255, true);
-    return TotalCost;
 }
 
 void Player::RepopAtGraveyard()
@@ -17034,8 +17052,8 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder const& hol
     //"totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, "
     // 51      52      53      54      55      56      57           58         59          60             61
     //"health, power1, power2, power3, power4, power5, instance_id, speccount, activespec, exploredZones, equipmentCache, "
-    // 62           63          64               65             66
-    //"knownTitles, actionBars, grantableLevels, fishing_steps, trans_spawn_id FROM characters WHERE guid = '%u'", guid);
+    // 62           63          64               65
+    //"knownTitles, actionBars, grantableLevels, fishing_steps FROM characters WHERE guid = '%u'", guid);
 
     PreparedQueryResult result = holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_FROM);
     if (!result)
@@ -17178,7 +17196,6 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder const& hol
 
     // init saved position, and fix it later if problematic
     ObjectGuid::LowType transLowGUID = fields[36].GetUInt32();
-    uint32 transSpawnId = fields[66].GetUInt32();
 
     Relocate(fields[17].GetFloat(), fields[18].GetFloat(), fields[19].GetFloat(), fields[21].GetFloat());
 
@@ -17293,120 +17310,59 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder const& hol
     // currently we do not support transport in bg
     else if (transLowGUID)
     {
-        // if transSpawnId presents, then search for static transport (e.g. elevator)
-        // else - needs motiontransport
-        if (transSpawnId)
+        ObjectGuid transGUID(HighGuid::Mo_Transport, transLowGUID);
+
+        Transport* transport = nullptr;
+        if (Map* transportMap = sMapMgr->CreateMap(mapId, this, instanceId))
         {
-            map = sMapMgr->CreateMap(mapId, this, instanceId);
-            if (map)
+            if (Transport* transportOnMap = transportMap->GetTransport(transGUID))
             {
-                auto bounds = map->GetGameObjectBySpawnIdStore().equal_range(transSpawnId);
-                if (bounds.first != bounds.second)
-                    m_transport = bounds.first->second->ToTransport();
-            }
-
-            if (m_transport)
-            {
-                float x = fields[32].GetFloat(), y = fields[33].GetFloat(), z = fields[34].GetFloat(), o = fields[35].GetFloat();
-                m_movementInfo.transport.pos.Relocate(x, y, z, o);
-                m_transport->CalculatePassengerPosition(x, y, z, &o);
-
-                if (!Trinity::IsValidMapCoord(x, y, z, o) ||
-                    // transport size limited
-                    std::fabs(m_movementInfo.transport.pos.GetPositionX()) > 250.0f ||
-                    std::fabs(m_movementInfo.transport.pos.GetPositionY()) > 250.0f ||
-                    std::fabs(m_movementInfo.transport.pos.GetPositionZ()) > 250.0f)
+                if (transportOnMap->GetExpectedMapId() != mapId)
                 {
-                    TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to bind location.",
-                        guid.ToString().c_str(), x, y, z, o);
-
-                    m_transport = nullptr;
-                    m_movementInfo.transport.Reset();
-
-                    RelocateToHomebind();
+                    mapId = transportOnMap->GetExpectedMapId();
+                    instanceId = 0;
+                    transportMap = sMapMgr->CreateMap(mapId, this, instanceId);
+                    if (transportMap)
+                        transport = transportMap->GetTransport(transGUID);
                 }
                 else
-                {
-                    Relocate(x, y, z, o);
-                    mapId = m_transport->GetMapId();
-                    m_transport->AddPassenger(this);
-                }
+                    transport = transportOnMap;
+            }
+        }
+
+        if (transport)
+        {
+            float x = fields[32].GetFloat(), y = fields[33].GetFloat(), z = fields[34].GetFloat(), o = fields[35].GetFloat();
+            m_movementInfo.transport.pos.Relocate(x, y, z, o);
+            transport->CalculatePassengerPosition(x, y, z, &o);
+
+            if (!Trinity::IsValidMapCoord(x, y, z, o) ||
+                // transport size limited
+                std::fabs(m_movementInfo.transport.pos.GetPositionX()) > 250.0f ||
+                std::fabs(m_movementInfo.transport.pos.GetPositionY()) > 250.0f ||
+                std::fabs(m_movementInfo.transport.pos.GetPositionZ()) > 250.0f)
+            {
+                TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to bind location.",
+                    guid.ToString().c_str(), x, y, z, o);
+
+                m_movementInfo.transport.Reset();
+
+                RelocateToHomebind();
             }
             else
             {
-                // transport not presents in world - just take go position from db
-                if (GameObjectData const* data = sObjectMgr->GetGameObjectData(transSpawnId))
-                {
-                    float dataX = data->spawnPoint.GetPositionX();
-                    float dataY = data->spawnPoint.GetPositionY();
-                    float dataZ = data->spawnPoint.GetPositionZ();
-                    float dataOrient = data->spawnPoint.GetOrientation();
+                Relocate(x, y, z, o);
+                mapId = transport->GetMapId();
 
-                    float x = fields[32].GetFloat(), y = fields[33].GetFloat(), z = fields[34].GetFloat(), o = fields[35].GetFloat();
-                    m_movementInfo.transport.pos.Relocate(x, y, z, o);
-                    TransportBase::CalculatePassengerPosition(x, y, z, &o, dataX, dataY, dataZ, dataOrient);
-
-                    if (!Trinity::IsValidMapCoord(x, y, z, o) ||
-                        // transport size limited
-                        std::fabs(m_movementInfo.transport.pos.GetPositionX()) > 250.0f ||
-                        std::fabs(m_movementInfo.transport.pos.GetPositionY()) > 250.0f ||
-                        std::fabs(m_movementInfo.transport.pos.GetPositionZ()) > 250.0f)
-                    {
-                        TC_LOG_ERROR("entities.player", "Player (%s) have invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to bind location.",
-                            guid.ToString().c_str(), x, y, z, o);
-
-                        m_movementInfo.transport.Reset();
-                        RelocateToHomebind();
-                    }
-                    else
-                    {
-                        Relocate(x, y, z, o);
-                        SetTransportSpawnID(transSpawnId);
-                    }
-                }
+                transport->AddPassenger(this);
             }
         }
         else
         {
-            ObjectGuid transGUID = ObjectGuid::Create<HighGuid::Transport>(transLowGUID);
+            TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has problems with transport guid (%u). Teleport to bind location.",
+                guid.ToString().c_str(), transLowGUID);
 
-            if (MapTransport* go = ObjectAccessor::GetMapTransport(transGUID))
-                m_transport = go;
-
-            if (m_transport)
-            {
-                float x = fields[32].GetFloat(), y = fields[33].GetFloat(), z = fields[34].GetFloat(), o = fields[35].GetFloat();
-                m_movementInfo.transport.pos.Relocate(x, y, z, o);
-                m_transport->CalculatePassengerPosition(x, y, z, &o);
-
-                if (!Trinity::IsValidMapCoord(x, y, z, o) ||
-                    // transport size limited
-                    std::fabs(m_movementInfo.transport.pos.GetPositionX()) > 250.0f ||
-                    std::fabs(m_movementInfo.transport.pos.GetPositionY()) > 250.0f ||
-                    std::fabs(m_movementInfo.transport.pos.GetPositionZ()) > 250.0f)
-                {
-                    TC_LOG_ERROR("entities.player", "Player (%s) have invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to bind location.",
-                        guid.ToString().c_str(), x, y, z, o);
-
-                    m_transport = nullptr;
-                    m_movementInfo.transport.Reset();
-
-                    RelocateToHomebind();
-                }
-                else
-                {
-                    Relocate(x, y, z, o);
-                    mapId = m_transport->GetMapId();
-                    m_transport->AddPassenger(this);
-                }
-            }
-            else
-            {
-                TC_LOG_ERROR("entities.player", "Player (%s) have problems with transport guid (%u). Teleport to bind location.",
-                    guid.ToString().c_str(), transLowGUID);
-
-                RelocateToHomebind();
-            }
+            RelocateToHomebind();
         }
     }
     // currently we do not support taxi in instance
@@ -19585,14 +19541,9 @@ void Player::SaveToDB(CharacterDatabaseTransaction trans, bool create /* = false
         stmt->setFloat(index++, finiteAlways(GetTransOffsetZ()));
         stmt->setFloat(index++, finiteAlways(GetTransOffsetO()));
         ObjectGuid::LowType transLowGUID = 0;
-        uint32 transSpawnId = 0;
-        if (Transport* transport = GetTransport())
-        {
+        if (Transport* transport = dynamic_cast<Transport*>(GetTransport()))
             transLowGUID = transport->GetGUID().GetCounter();
-            transSpawnId = transport->GetSpawnId();
-        }
         stmt->setUInt32(index++, transLowGUID);
-        stmt->setUInt32(index++, transSpawnId);
 
         std::ostringstream ss;
         ss << m_taxi;
@@ -19725,14 +19676,9 @@ void Player::SaveToDB(CharacterDatabaseTransaction trans, bool create /* = false
         stmt->setFloat(index++, finiteAlways(GetTransOffsetZ()));
         stmt->setFloat(index++, finiteAlways(GetTransOffsetO()));
         ObjectGuid::LowType transLowGUID = 0;
-        uint32 transSpawnId = 0;
-        if (Transport* transport = GetTransport())
-        {
+        if (Transport* transport = dynamic_cast<Transport*>(GetTransport()))
             transLowGUID = transport->GetGUID().GetCounter();
-            transSpawnId = transport->GetSpawnId();
-        }
         stmt->setUInt32(index++, transLowGUID);
-        stmt->setUInt32(index++, transSpawnId);
 
         std::ostringstream ss;
         ss << m_taxi;
@@ -21489,7 +21435,7 @@ void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* s
         case SPELLMOD_CASTING_TIME:
         {
             SpellModifier* modInstantSpell = nullptr;
-            for (SpellModifier* mod : m_spellMods[op])
+            for (SpellModifier* mod : m_spellMods[op][SPELLMOD_PCT])
             {
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
@@ -21513,7 +21459,7 @@ void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* s
         case SPELLMOD_CRITICAL_CHANCE:
         {
             SpellModifier* modCritical = nullptr;
-            for (SpellModifier* mod : m_spellMods[op])
+            for (SpellModifier* mod : m_spellMods[op][SPELLMOD_FLAT])
             {
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
@@ -21537,44 +21483,38 @@ void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* s
             break;
     }
 
-    for (SpellModifier* mod : m_spellMods[op])
+    for (SpellModifier* mod : m_spellMods[op][SPELLMOD_FLAT])
     {
         if (!IsAffectedBySpellmod(spellInfo, mod, spell))
             continue;
 
-        switch (mod->type)
-        {
-            case SPELLMOD_FLAT:
-                totalflat += mod->value;
-                break;
-            case SPELLMOD_PCT:
-            {
-                // skip percent mods with null basevalue (most important for spell mods with charges)
-                if (basevalue == T(0))
-                    continue;
+        if (mod->value == 0)
+            continue;
 
-                // special case (skip > 10sec spell casts for instant cast setting)
-                if (op == SPELLMOD_CASTING_TIME && mod->value <= -100 && basevalue >= T(10000))
-                    continue;
-                else if (!Player::HasSpellModApplied(mod, spell))
-                {
-                    // special case for Surge of Light, don't apply critical chance reduction if other mods not applied (ie procs while casting another spell)
-                    // (Surge of Light is the only PCT_MOD on critical chance)
-                    if (op == SPELLMOD_CRITICAL_CHANCE)
-                        continue;
-                    // special case for Backdraft, dont' apply GCD reduction if cast time reduction wasn't applied (ie when Backlash is consumed first)
-                    // (Backdraft is the only PCT_MOD on global cooldown)
-                    else if (op == SPELLMOD_GLOBAL_COOLDOWN)
-                        continue;
-                }
-
-                totalmul += CalculatePct(1.0f, mod->value);
-                break;
-            }
-        }
-
+        totalflat += mod->value;
         Player::ApplyModToSpell(mod, spell);
     }
+
+    for (SpellModifier* mod : m_spellMods[op][SPELLMOD_PCT])
+    {
+        if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+            continue;
+
+        // skip percent mods for null basevalue (most important for spell mods with charges)
+        if (basevalue + totalflat == T(0))
+            continue;
+
+        if (mod->value == 0)
+            continue;
+
+        // special case (skip > 10sec spell casts for instant cast setting)
+        if (mod->op == SPELLMOD_CASTING_TIME && basevalue >= T(10000) && mod->value <= -100)
+            continue;
+
+        totalmul *= 1.0f + CalculatePct(1.0f, mod->value);
+        Player::ApplyModToSpell(mod, spell);
+    }
+
     basevalue = T(float(basevalue + totalflat) * totalmul);
 }
 
@@ -21588,9 +21528,9 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
 
     /// First, manipulate our spellmodifier container
     if (apply)
-        m_spellMods[mod->op].insert(mod);
+        m_spellMods[mod->op][mod->type].insert(mod);
     else
-        m_spellMods[mod->op].erase(mod);
+        m_spellMods[mod->op][mod->type].erase(mod);
 
     /// Now, send spellmodifier packet
     if (!IsLoading())
@@ -21605,7 +21545,7 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
 
         spellMod.ModIndex = mod->op;
 
-        for (int eff = 0; eff < 96; ++eff)
+        for (uint8 eff = 0; eff < 96; ++eff)
         {
             flag96 mask;
             mask[eff / 32] = 1u << (eff % 32);
@@ -21613,9 +21553,20 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
             {
                 WorldPackets::Spells::SpellModifierData modData;
 
-                for (SpellModifier* spellMod : m_spellMods[mod->op])
-                    if (spellMod->mask & mask)
-                        modData.ModifierValue += spellMod->value;
+                if (mod->type == SPELLMOD_FLAT)
+                {
+                    modData.ModifierValue = 0.0f;
+                    for (SpellModifier* mod : m_spellMods[mod->op][SPELLMOD_FLAT])
+                        if (mod->mask & mask)
+                            modData.ModifierValue += mod->value;
+                }
+                else
+                {
+                    modData.ModifierValue = 1.0f;
+                    for (SpellModifier* mod : m_spellMods[mod->op][SPELLMOD_PCT])
+                        if (mod->mask & mask)
+                            modData.ModifierValue *= 1.0f + CalculatePct(1.0f, mod->value);
+                }
 
                 modData.ClassIndex = eff;
 
@@ -21680,9 +21631,13 @@ void Player::SendSpellModifiers() const
             pctMod.ModifierData[j].ClassIndex = j;
             pctMod.ModifierData[j].ModifierValue = 0.0f;
 
-            for (SpellModifier* mod : m_spellMods[i])
+            for (SpellModifier* mod : m_spellMods[i][SPELLMOD_FLAT])
                 if (mod->mask & mask)
                     flatMod.ModifierData[j].ModifierValue += mod->value;
+
+            for (SpellModifier* mod : m_spellMods[i][SPELLMOD_PCT])
+                if (mod->mask & mask)
+                    pctMod.ModifierData[j].ModifierValue *= 1.0f + CalculatePct(1.0f, mod->value);
         }
 
         flatMod.ModifierData.erase(std::remove_if(flatMod.ModifierData.begin(), flatMod.ModifierData.end(), [](WorldPackets::Spells::SpellModifierData const& mod)
@@ -21692,7 +21647,7 @@ void Player::SendSpellModifiers() const
 
         pctMod.ModifierData.erase(std::remove_if(pctMod.ModifierData.begin(), pctMod.ModifierData.end(), [](WorldPackets::Spells::SpellModifierData const& mod)
         {
-            return G3D::fuzzyEq(mod.ModifierValue, 0.0f);
+            return G3D::fuzzyEq(mod.ModifierValue, 1.0f);
         }), pctMod.ModifierData.end());
 
         flatMods.Modifiers.emplace_back(std::move(flatMod));
@@ -27909,17 +27864,6 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
         pet->SetReactState(REACT_ASSIST);
 
         SetMinion(pet, true);
-
-        Transport* transport = GetTransGUID().IsEmpty() ? GetTransport() : nullptr;
-        if (transport)
-        {
-            float x, y, z, o;
-            pet->GetPosition(x, y, z, o);
-            transport->CalculatePassengerOffset(x, y, z, &o);
-            pet->m_movementInfo.transport.pos.Relocate(x, y, z, o);
-
-            transport->AddPassenger(pet);
-        }
 
         switch (petType)
         {

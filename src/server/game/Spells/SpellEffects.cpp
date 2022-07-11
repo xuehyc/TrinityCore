@@ -26,6 +26,7 @@
 #include "DatabaseEnv.h"
 #include "DynamicObject.h"
 #include "Formulas.h"
+#include "GameEventSender.h"
 #include "GameObject.h"
 #include "GameObjectAI.h"
 #include "GameClient.h"
@@ -1035,12 +1036,7 @@ void Spell::EffectSendEvent(SpellEffIndex effIndex)
 
     TC_LOG_DEBUG("spells", "Spell ScriptStart %u for spellid %u in EffectSendEvent ", m_spellInfo->Effects[effIndex].MiscValue, m_spellInfo->Id);
 
-    if (ZoneScript* zoneScript = m_caster->GetZoneScript())
-        zoneScript->ProcessEvent(target, m_spellInfo->Effects[effIndex].MiscValue);
-    else if (InstanceScript* instanceScript = m_caster->GetInstanceScript())    // needed in case Player is the caster
-        instanceScript->ProcessEvent(target, m_spellInfo->Effects[effIndex].MiscValue);
-
-    m_caster->GetMap()->ScriptsStart(sEventScripts, m_spellInfo->Effects[effIndex].MiscValue, m_caster, target);
+    GameEvents::Trigger(m_spellInfo->Effects[effIndex].MiscValue, m_caster, target);
 }
 
 void Spell::EffectPowerBurn(SpellEffIndex effIndex)
@@ -1591,7 +1587,7 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype)
                 if (gameObjTarget->GetGOInfo()->chest.eventId)
                 {
                     TC_LOG_DEBUG("spells", "Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->chest.eventId, gameObjTarget->GetSpawnId());
-                    player->GetMap()->ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
+                    GameEvents::Trigger(gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
                 }
 
                 // triggering linked GO
@@ -2969,11 +2965,7 @@ void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
 
     uint32 gameobject_id = m_spellInfo->Effects[effIndex].MiscValue;
 
-    GameObject* pGameObj = nullptr;
-    if (sObjectMgr->GetGameObjectTypeByEntry(gameobject_id) == GAMEOBJECT_TYPE_TRANSPORT)
-        pGameObj = new Transport();
-    else
-        pGameObj = new GameObject();
+    GameObject* pGameObj = new GameObject;
 
     WorldObject* target = focusObject;
     if (!target)
@@ -3787,12 +3779,12 @@ void Spell::EffectActivateObject(SpellEffIndex effIndex)
         case GameObjectActions::GoTo8thFloor:
         case GameObjectActions::GoTo9thFloor:
         case GameObjectActions::GoTo10thFloor:
-        {
-            // Cast is kind of loose but it'll do
-            if (Transport* transportTarget = gameObjTarget->ToTransport())
-                transportTarget->SetTransportState(GO_STATE_TRANSPORT_STOPPED, uint32_t(action) - uint32(GameObjectActions::GoTo1stFloor));
+            static_assert(int32(GO_STATE_TRANSPORT_ACTIVE) == int32(GameObjectActions::GoTo1stFloor));
+            if (gameObjTarget->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT)
+                gameObjTarget->SetGoState(GOState(action));
+            else
+                TC_LOG_ERROR("spell", "Spell %d targeted non-transport gameobject for transport only action \"Go to Floor\" %d in effect %d", m_spellInfo->Id, int32(action), int32(effIndex));
             break;
-        }
         case GameObjectActions::None:
             TC_LOG_FATAL("spell", "Spell %d has action type NONE in effect %d", m_spellInfo->Id, int32(effIndex));
             break;
@@ -4032,11 +4024,7 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
         m_caster->m_ObjectSlot[slot].Clear();
     }
 
-    GameObject* go = nullptr;
-    if (sObjectMgr->GetGameObjectTypeByEntry(go_id) == GAMEOBJECT_TYPE_TRANSPORT)
-        go = new Transport();
-    else
-        go = new GameObject();
+    GameObject* go = new GameObject();
 
     float x, y, z, o;
     // If dest location if present
@@ -4847,24 +4835,12 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
 
     QuaternionData rot = QuaternionData::fromEulerAnglesZYX(fo, 0.f, 0.f);
 
-    GameObject* pGameObj = nullptr;
-    if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+    GameObject* pGameObj = new GameObject;
+
+    if (!pGameObj->Create(cMap->GenerateLowGuid<HighGuid::GameObject>(), name_id, cMap, Position(fx, fy, fz, m_caster->GetOrientation()), rot, 255, GO_STATE_READY))
     {
-        pGameObj = new Transport();
-        if (!pGameObj->Create(cMap->GenerateLowGuid<HighGuid::Transport>(), name_id, cMap, Position(fx, fy, fz, fo), rot, 255, GO_STATE_READY))
-        {
-            delete pGameObj;
-            return;
-        }
-    }
-    else
-    {
-        pGameObj = new GameObject();
-        if (!pGameObj->Create(cMap->GenerateLowGuid<HighGuid::GameObject>(), name_id, cMap, Position(fx, fy, fz, fo), rot, 255, GO_STATE_READY))
-        {
-            delete pGameObj;
-            return;
-        }
+        delete pGameObj;
+        return;
     }
 
     PhasingHandler::InheritPhaseShift(pGameObj, m_caster);

@@ -39,8 +39,9 @@
 #include "CreatureGroups.h"
 #include "CreatureTextMgr.h"
 #include "DatabaseEnv.h"
-#include "DB2Stores.h"
 #include "DBCStores.h"
+#include "DB2Stores.h"
+#include "DetourMemoryFunctions.h"
 #include "DisableMgr.h"
 #include "GameEventMgr.h"
 #include "GameObjectModel.h"
@@ -59,7 +60,6 @@
 #include "LootMgr.h"
 #include "M2Stores.h"
 #include "MapManager.h"
-#include "Memory.h"
 #include "Metric.h"
 #include "MMapFactory.h"
 #include "ObjectAccessor.h"
@@ -1801,6 +1801,9 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Transport animations and rotations...");
     sTransportMgr->LoadTransportAnimationAndRotation();
 
+    TC_LOG_INFO("server.loading", "Loading Transport spawns...");
+    sTransportMgr->LoadTransportSpawns();
+
     TC_LOG_INFO("server.loading", "Loading Spell Rank Data...");
     sSpellMgr->LoadSpellRanks();
 
@@ -2302,9 +2305,6 @@ void World::SetInitialWorldSettings()
     ///- Initialize Battlefield
     TC_LOG_INFO("server.loading", "Starting Battlefield System");
     sBattlefieldMgr->InitBattlefield();
-
-    TC_LOG_INFO("server.loading", "Loading Transports...");
-    sTransportMgr->SpawnContinentTransports();
 
     ///- Initialize Warden
     TC_LOG_INFO("server.loading", "Loading Warden Checks...");

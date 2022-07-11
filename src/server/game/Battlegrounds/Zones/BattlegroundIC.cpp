@@ -17,6 +17,7 @@
 
 #include "BattlegroundIC.h"
 #include "Battleground.h"
+#include "DBCStores.h"
 #include "GameObject.h"
 #include "Log.h"
 #include "Map.h"
@@ -356,8 +357,8 @@ bool BattlegroundIC::SetupBattleground()
         return false;
     }
 
-    gunshipHorde = sTransportMgr->CreateTransport(GO_HORDE_GUNSHIP, 0, GetBgMap());
-    gunshipAlliance = sTransportMgr->CreateTransport(GO_ALLIANCE_GUNSHIP, 0, GetBgMap());
+    gunshipHorde = sTransportMgr->CreateTransport(GO_HORDE_GUNSHIP, GetBgMap());
+    gunshipAlliance = sTransportMgr->CreateTransport(GO_ALLIANCE_GUNSHIP, GetBgMap());
 
     if (!gunshipAlliance || !gunshipHorde)
     {

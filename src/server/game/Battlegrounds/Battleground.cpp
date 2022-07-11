@@ -25,6 +25,7 @@
 #include "CreatureTextMgr.h"
 #include "DatabaseEnv.h"
 #include "Formulas.h"
+#include "GameEventSender.h"
 #include "GameTime.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
@@ -1457,28 +1458,13 @@ bool Battleground::AddObject(uint32 type, uint32 entry, float x, float y, float 
     // Must be created this way, adding to godatamap would add it to the base map of the instance
     // and when loading it (in go::LoadFromDB()), a new guid would be assigned to the object, and a new object would be created
     // So we must create it specific for this instance
-    GameObject* go = nullptr;
-    if (sObjectMgr->GetGameObjectTypeByEntry(entry) == GAMEOBJECT_TYPE_TRANSPORT)
+    GameObject* go = new GameObject;
+    if (!go->Create(GetBgMap()->GenerateLowGuid<HighGuid::GameObject>(), entry, GetBgMap(), Position(x, y, z, o), rot, 255, goState))
     {
-        go = new Transport();
-        if (!go->Create(GetBgMap()->GenerateLowGuid<HighGuid::Transport>(), entry, GetBgMap(), Position(x, y, z, o), rot, 255, goState))
-        {
-            TC_LOG_ERROR("bg.battleground", "Battleground::AddObject: cannot create transport (entry: %u) for BG (map: %u, instance id: %u)!",
-                entry, m_MapId, m_InstanceID);
-            delete go;
-            return false;
-        }
-    }
-    else
-    {
-        go = new GameObject();
-        if (!go->Create(GetBgMap()->GenerateLowGuid<HighGuid::GameObject>(), entry, GetBgMap(), Position(x, y, z, o), rot, 255, goState))
-        {
-            TC_LOG_ERROR("bg.battleground", "Battleground::AddObject: cannot create gameobject (entry: %u) for BG (map: %u, instance id: %u)!",
-                entry, m_MapId, m_InstanceID);
-            delete go;
-            return false;
-        }
+        TC_LOG_ERROR("bg.battleground", "Battleground::AddObject: cannot create gameobject (entry: %u) for BG (map: %u, instance id: %u)!",
+            entry, m_MapId, m_InstanceID);
+        delete go;
+        return false;
     }
 
 /*
@@ -1594,7 +1580,7 @@ void Battleground::SpawnBGObject(uint32 type, uint32 respawntime)
         }
 }
 
-Creature* Battleground::AddCreature(uint32 entry, uint32 type, float x, float y, float z, float o, TeamId /*teamId = TEAM_NEUTRAL*/, uint32 respawntime /*= 0*/, MapTransport* transport)
+Creature* Battleground::AddCreature(uint32 entry, uint32 type, float x, float y, float z, float o, TeamId /*teamId = TEAM_NEUTRAL*/, uint32 respawntime /*= 0*/, Transport* transport)
 {
     // If the assert is called, means that BgCreatures must be resized!
     ASSERT(type < BgCreatures.size());
@@ -1648,7 +1634,7 @@ Creature* Battleground::AddCreature(uint32 entry, uint32 type, float x, float y,
     return creature;
 }
 
-Creature* Battleground::AddCreature(uint32 entry, uint32 type, Position const& pos, TeamId teamId /*= TEAM_NEUTRAL*/, uint32 respawntime /*= 0*/, MapTransport* transport)
+Creature* Battleground::AddCreature(uint32 entry, uint32 type, Position const& pos, TeamId teamId /*= TEAM_NEUTRAL*/, uint32 respawntime /*= 0*/, Transport* transport)
 {
     return AddCreature(entry, type, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teamId, respawntime, transport);
 }
@@ -1910,11 +1896,12 @@ WorldSafeLocsEntry const* Battleground::GetClosestGraveyard(Player* player)
     return sObjectMgr->GetClosestGraveyard(*player, player->GetTeam(), player);
 }
 
-void Battleground::StartTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry)
+void Battleground::TriggerGameEvent(uint32 gameEventId)
 {
+    GameEvents::TriggerForMap(gameEventId, GetBgMap());
     for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
         if (Player* player = ObjectAccessor::FindPlayer(itr->first))
-            player->StartTimedAchievement(type, entry);
+            GameEvents::TriggerForPlayer(gameEventId, player);
 }
 
 void Battleground::SetBracket(PvPDifficultyEntry const* bracketEntry)

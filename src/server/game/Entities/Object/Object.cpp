@@ -23,6 +23,7 @@
 #include "CinematicMgr.h"
 #include "Common.h"
 #include "Creature.h"
+#include "DBCStores.h"
 #include "DynamicTree.h"
 #include "G3DPosition.hpp"
 #include "GameTime.h"
@@ -350,10 +351,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
     bool hasMovementAnimKit = false;
     bool hasMeleeAnimKit = false;
 
-    uint32 stopFrameCount = 0;
+    std::vector<uint32> const* PauseTimes = nullptr;
     if (GameObject const* go = ToGameObject())
-        if (go->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT)
-            stopFrameCount = go->GetGOValue()->Transport.StopFrames->size();
+        PauseTimes = go->GetPauseTimes();
 
     // Bit content
     data->WriteBit(flags & UPDATEFLAG_PLAY_HOVER_ANIM);
@@ -364,7 +364,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
     data->WriteBit(flags & UPDATEFLAG_SELF);
     data->WriteBit(flags & UPDATEFLAG_VEHICLE);
     data->WriteBit(flags & UPDATEFLAG_LIVING);
-    data->WriteBits(stopFrameCount, 24);
+    data->WriteBits(PauseTimes ? PauseTimes->size() : 0, 24);
     data->WriteBit(flags & UPDATEFLAG_NO_BIRTH_ANIM);
     data->WriteBit(flags & UPDATEFLAG_GO_TRANSPORT_POSITION);
     data->WriteBit(flags & UPDATEFLAG_STATIONARY_POSITION);
@@ -481,10 +481,8 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
 
     data->FlushBits();
 
-    // Data
-    if (GameObject const* go = ToGameObject())
-        for (uint32 i = 0; i < stopFrameCount; ++i)
-            *data << uint32(go->GetGOValue()->Transport.StopFrames->at(i));
+    if (PauseTimes && !PauseTimes->empty())
+        data->append(PauseTimes->data(), PauseTimes->size());
 
     if (flags & UPDATEFLAG_LIVING)
     {
@@ -658,17 +656,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
     }
 
     if (flags & UPDATEFLAG_TRANSPORT)
-    {
-        if (GameObject const* go = ToGameObject())
-        {
-            if (MapTransport const* transport = go->ToMapTransport())
-                *data << uint32(transport->GetTimer());
-            else if (Transport const* transport = go->ToTransport())
-                *data << uint32(transport->IsDynamicTransport() ? transport->GetTimer() : getMSTime());
-            else
-                *data << uint32(getMSTime());
-        }
-    }
+        *data << uint32(GameTime::GetGameTimeMS());
 }
 
 void Object::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target) const
@@ -1202,19 +1190,9 @@ void WorldObject::setActive(bool on)
         return;
 
     if (on)
-    {
-        if (GetTypeId() == TYPEID_UNIT)
-            map->AddToActive(this->ToCreature());
-        else if (GetTypeId() == TYPEID_DYNAMICOBJECT)
-            map->AddToActive((DynamicObject*)this);
-    }
+        map->AddToActive(this);
     else
-    {
-        if (GetTypeId() == TYPEID_UNIT)
-            map->RemoveFromActive(this->ToCreature());
-        else if (GetTypeId() == TYPEID_DYNAMICOBJECT)
-            map->RemoveFromActive((DynamicObject*)this);
-    }
+        map->RemoveFromActive(this);
 }
 
 void WorldObject::SetFarVisible(bool on)
@@ -1239,7 +1217,7 @@ void WorldObject::CleanupsBeforeDelete(bool /*finalCleanup*/)
     if (IsInWorld())
         RemoveFromWorld();
 
-    if (Transport* transport = GetTransport())
+    if (TransportBase* transport = GetTransport())
         transport->RemovePassenger(this);
 }
 
@@ -1306,7 +1284,7 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
     Position const* thisOrTransport = this;
     Position const* objOrObjTransport = obj;
 
-    if (GetTransport() && obj->GetTransport() && obj->GetTransport()->GetGUID().GetCounter() == GetTransport()->GetGUID().GetCounter())
+    if (GetTransport() && obj->GetTransport() && obj->GetTransport()->GetTransportGUID() == GetTransport()->GetTransportGUID())
     {
         thisOrTransport = &m_movementInfo.transport.pos;
         objOrObjTransport = &obj->m_movementInfo.transport.pos;
@@ -2094,23 +2072,21 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonCreatur
         return nullptr;
     }
 
-    // Add summon to transport if summoner is on a transport as well
-    if (summon->GetTransGUID().IsEmpty() && summonArgs.Summoner)
-    {
-        if (Transport* transport = summonArgs.Summoner->GetTransport())
-        {
-            float x, y, z, o;
-            pos.GetPosition(x, y, z, o);
-            transport->CalculatePassengerOffset(x, y, z, &o);
-            summon->m_movementInfo.transport.pos.Relocate(x, y, z, o);
-
-            transport->AddPassenger(summon);
-        }
-    }
-
     // Inherit summoner's Phaseshift
     if (summonArgs.Summoner)
         PhasingHandler::InheritPhaseShift(summon, summonArgs.Summoner);
+
+    TransportBase* transport = summonArgs.Summoner ? summonArgs.Summoner->GetTransport() : nullptr;
+    if (transport)
+    {
+        float x, y, z, o;
+        pos.GetPosition(x, y, z, o);
+        transport->CalculatePassengerOffset(x, y, z, &o);
+        summon->m_movementInfo.transport.pos.Relocate(x, y, z, o);
+
+        // This object must be added to transport before adding to map for the client to properly display it
+        transport->AddPassenger(summon);
+    }
 
     // Initialize tempsummon fields
     summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, summonArgs.SummonSpellId);
@@ -2129,7 +2105,16 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonCreatur
     if (summonArgs.CreatureLevel)
         summon->SetLevel(summonArgs.CreatureLevel);
 
-    AddToMap(summon->ToCreature());
+    if (!AddToMap(summon->ToCreature()))
+    {
+        // Returning false will cause the object to be deleted - remove from transport
+        if (transport)
+            transport->RemovePassenger(summon);
+
+        delete summon;
+        return nullptr;
+    }
+
     summon->InitSummon();
 
     // call MoveInLineOfSight for nearby creatures
@@ -2158,21 +2143,28 @@ void Map::SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list /*= null
                 list->push_back(summon);
 }
 
-void WorldObject::SetZoneScript()
+ZoneScript* WorldObject::FindZoneScript() const
 {
     if (Map* map = FindMap())
     {
-        if (map->IsDungeon())
-            m_zoneScript = (ZoneScript*)((InstanceMap*)map)->GetInstanceScript();
+        if (InstanceMap* instanceMap = map->ToInstanceMap())
+            return reinterpret_cast<ZoneScript*>(instanceMap->GetInstanceScript());
         else if (!map->IsBattlegroundOrArena())
         {
             if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(GetZoneId()))
-                m_zoneScript = bf;
+                return bf;
             else
-                m_zoneScript = sOutdoorPvPMgr->GetZoneScript(GetZoneId());
+                return sOutdoorPvPMgr->GetZoneScript(GetZoneId());
         }
     }
+    return nullptr;
 }
+
+void WorldObject::SetZoneScript()
+{
+    m_zoneScript = FindZoneScript();
+}
+
 
 void WorldObject::ClearZoneScript()
 {
@@ -2221,24 +2213,11 @@ GameObject* WorldObject::SummonGameObject(uint32 entry, Position const& pos, Qua
     }
 
     Map* map = GetMap();
-    GameObject* go = nullptr;
-    if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+    GameObject* go = new GameObject();
+    if (!go->Create(map->GenerateLowGuid<HighGuid::GameObject>(), entry, map, pos, rot, 255, GO_STATE_READY))
     {
-        go = new Transport();
-        if (!go->Create(map->GenerateLowGuid<HighGuid::Transport>(), entry, map, pos, rot, 255, GO_STATE_READY))
-        {
-            delete go;
-            return nullptr;
-        }
-    }
-    else
-    {
-        go = new GameObject();
-        if (!go->Create(map->GenerateLowGuid<HighGuid::GameObject>(), entry, map, pos, rot, 255, GO_STATE_READY))
-        {
-            delete go;
-            return nullptr;
-        }
+        delete go;
+        return nullptr;
     }
 
     PhasingHandler::InheritPhaseShift(go, this);
@@ -2248,17 +2227,6 @@ GameObject* WorldObject::SummonGameObject(uint32 entry, Position const& pos, Qua
         ToUnit()->AddGameObject(go);
     else
         go->SetSpawnedByDefault(false);
-
-    Transport* transport = GetTransGUID().IsEmpty() ? GetTransport() : nullptr;
-    if (transport)
-    {
-        float x, y, z, o;
-        go->GetPosition(x, y, z, o);
-        transport->CalculatePassengerOffset(x, y, z, &o);
-        go->m_movementInfo.transport.pos.Relocate(x, y, z, o);
-
-        transport->AddPassenger(go);
-    }
 
     map->AddToMap(go);
     return go;
@@ -2793,16 +2761,8 @@ void WorldObject::RemoveFromObjectUpdate()
 ObjectGuid WorldObject::GetTransGUID() const
 {
     if (GetTransport())
-        return GetTransport()->GetGUID();
+        return GetTransport()->GetTransportGUID();
     return ObjectGuid::Empty;
-}
-
-MapTransport* WorldObject::GetMapTransport() const
-{
-    if (GetTransport())
-        return GetTransport()->ToMapTransport();
-
-    return nullptr;
 }
 
 float WorldObject::GetFloorZ() const

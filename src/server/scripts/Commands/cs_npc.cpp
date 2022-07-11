@@ -27,6 +27,7 @@ EndScriptData */
 #include "CreatureAI.h"
 #include "CreatureGroups.h"
 #include "DatabaseEnv.h"
+#include "DBCStores.h"
 #include "FollowMovementGenerator.h"
 #include "GameTime.h"
 #include "Language.h"
@@ -349,7 +350,7 @@ public:
         Player* chr = handler->GetSession()->GetPlayer();
         Map* map = chr->GetMap();
 
-        if (MapTransport* trans = chr->GetMapTransport())
+        if (Transport* trans = dynamic_cast<Transport*>(chr->GetTransport()))
         {
             ObjectGuid::LowType guid = sObjectMgr->GenerateCreatureSpawnId();
             CreatureData& data = sObjectMgr->NewOrExistCreatureData(guid);

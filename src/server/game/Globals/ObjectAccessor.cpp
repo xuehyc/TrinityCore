@@ -33,9 +33,8 @@
 template<class T>
 void HashMapHolder<T>::Insert(T* o)
 {
-    static_assert(std::is_same<Player, T>::value
-        || std::is_same<MapTransport, T>::value,
-        "Only Player and MapTransport can be registered in global HashMapHolder");
+    static_assert(std::is_same<Player, T>::value,
+        "Only Player can be registered in global HashMapHolder");
 
     std::unique_lock<std::shared_mutex> lock(*GetLock());
 
@@ -79,7 +78,6 @@ HashMapHolder<Player>::MapType const& ObjectAccessor::GetPlayers()
 }
 
 template class TC_GAME_API HashMapHolder<Player>;
-template class TC_GAME_API HashMapHolder<MapTransport>;
 
 namespace PlayerNameMapHolder
 {
@@ -113,6 +111,7 @@ WorldObject* ObjectAccessor::GetWorldObject(WorldObject const& p, ObjectGuid con
     {
         case HighGuid::Player:        return GetPlayer(p, guid);
         case HighGuid::Transport:
+        case HighGuid::Mo_Transport:
         case HighGuid::GameObject:    return GetGameObject(p, guid);
         case HighGuid::Vehicle:
         case HighGuid::Unit:          return GetCreature(p, guid);
@@ -137,6 +136,7 @@ Object* ObjectAccessor::GetObjectByTypeMask(WorldObject const& p, ObjectGuid con
                 return GetPlayer(p, guid);
             break;
         case HighGuid::Transport:
+        case HighGuid::Mo_Transport:
         case HighGuid::GameObject:
             if (typemask & TYPEMASK_GAMEOBJECT)
                 return GetGameObject(p, guid);
@@ -177,19 +177,9 @@ GameObject* ObjectAccessor::GetGameObject(WorldObject const& u, ObjectGuid const
     return u.GetMap()->GetGameObject(guid);
 }
 
-Transport* ObjectAccessor::GetTransportOnMap(WorldObject const& u, ObjectGuid const& guid)
+Transport* ObjectAccessor::GetTransport(WorldObject const& u, ObjectGuid const& guid)
 {
     return u.GetMap()->GetTransport(guid);
-}
-
-MapTransport* ObjectAccessor::GetMapTransportOnMap(WorldObject const& u, ObjectGuid const& guid)
-{
-    return u.GetMap()->GetMapTransport(guid);
-}
-
-MapTransport* ObjectAccessor::GetMapTransport(ObjectGuid const& guid)
-{
-    return HashMapHolder<MapTransport>::Find(guid);
 }
 
 DynamicObject* ObjectAccessor::GetDynamicObject(WorldObject const& u, ObjectGuid const& guid)
