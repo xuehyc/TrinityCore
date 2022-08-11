@@ -47,10 +47,11 @@ public:
     {
         static std::vector<ChatCommand> questCommandTable =
         {
-            { "add",      rbac::RBAC_PERM_COMMAND_QUEST_ADD,      false, &HandleQuestAdd,      "" },
-            { "complete", rbac::RBAC_PERM_COMMAND_QUEST_COMPLETE, false, &HandleQuestComplete, "" },
-            { "remove",   rbac::RBAC_PERM_COMMAND_QUEST_REMOVE,   false, &HandleQuestRemove,   "" },
-            { "reward",   rbac::RBAC_PERM_COMMAND_QUEST_REWARD,   false, &HandleQuestReward,   "" },
+            { "add",               rbac::RBAC_PERM_COMMAND_QUEST_ADD,                false, &HandleQuestAdd,               "" },
+            { "complete",          rbac::RBAC_PERM_COMMAND_QUEST_COMPLETE,           false, &HandleQuestComplete,          "" },
+            { "completeobjective", rbac::RBAC_PERM_COMMAND_QUEST_COMPLETE_OBJECTIVE, false, &HandleQuestCompleteObjective, "" },
+            { "remove",            rbac::RBAC_PERM_COMMAND_QUEST_REMOVE,             false, &HandleQuestRemove,            "" },
+            { "reward",            rbac::RBAC_PERM_COMMAND_QUEST_REWARD,             false, &HandleQuestReward,            "" },
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -176,6 +177,65 @@ public:
         }
     }
 
+    static void CompleteObjective(Player* player, QuestObjective const& obj)
+    {
+        switch (obj.Type)
+        {
+            case QUEST_OBJECTIVE_ITEM:
+            {
+                uint32 curItemCount = player->GetItemCount(obj.ObjectID, true);
+                ItemPosCountVec dest;
+                uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, obj.ObjectID, obj.Amount - curItemCount);
+                if (msg == EQUIP_ERR_OK)
+                {
+                    Item* item = player->StoreNewItem(dest, obj.ObjectID, true);
+                    player->SendNewItem(item, obj.Amount - curItemCount, true, false);
+                }
+                break;
+            }
+            case QUEST_OBJECTIVE_MONSTER:
+            {
+                if (CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(obj.ObjectID))
+                    for (uint16 z = 0; z < obj.Amount; ++z)
+                        player->KilledMonster(creatureInfo, ObjectGuid::Empty);
+                break;
+            }
+            case QUEST_OBJECTIVE_GAMEOBJECT:
+            {
+                for (uint16 z = 0; z < obj.Amount; ++z)
+                    player->KillCreditGO(obj.ObjectID);
+                break;
+            }
+            case QUEST_OBJECTIVE_MIN_REPUTATION:
+            {
+                uint32 curRep = player->GetReputationMgr().GetReputation(obj.ObjectID);
+                if (curRep < uint32(obj.Amount))
+                    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(obj.ObjectID))
+                        player->GetReputationMgr().SetReputation(factionEntry, obj.Amount);
+                break;
+            }
+            case QUEST_OBJECTIVE_MAX_REPUTATION:
+            {
+                uint32 curRep = player->GetReputationMgr().GetReputation(obj.ObjectID);
+                if (curRep > uint32(obj.Amount))
+                    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(obj.ObjectID))
+                        player->GetReputationMgr().SetReputation(factionEntry, obj.Amount);
+                break;
+            }
+            case QUEST_OBJECTIVE_MONEY:
+            {
+                player->ModifyMoney(obj.Amount);
+                break;
+            }
+            case QUEST_OBJECTIVE_PLAYERKILLS:
+            {
+                for (uint16 z = 0; z < obj.Amount; ++z)
+                    player->KilledPlayerCredit(ObjectGuid::Empty);
+                break;
+            }
+        }
+    }
+
     static bool HandleQuestComplete(ChatHandler* handler, char const* args)
     {
         Player* player = handler->getSelectedPlayerOrSelf();
@@ -200,7 +260,7 @@ public:
         if (!quest || player->GetQuestStatus(entry) == QUEST_STATUS_NONE
             || DisableMgr::IsDisabledFor(DISABLE_TYPE_QUEST, entry, nullptr))
         {
-            handler->PSendSysMessage(LANG_COMMAND_QUEST_NOTFOUND, entry);
+            handler->PSendSysMessage(LANG_COMMAND_QUEST_OBJECTIVE_NOTFOUND, entry);
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -208,62 +268,7 @@ public:
         for (uint32 i = 0; i < quest->Objectives.size(); ++i)
         {
             QuestObjective const& obj = quest->Objectives[i];
-
-            switch (obj.Type)
-            {
-                case QUEST_OBJECTIVE_ITEM:
-                {
-                    uint32 curItemCount = player->GetItemCount(obj.ObjectID, true);
-                    ItemPosCountVec dest;
-                    uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, obj.ObjectID, obj.Amount - curItemCount);
-                    if (msg == EQUIP_ERR_OK)
-                    {
-                        Item* item = player->StoreNewItem(dest, obj.ObjectID, true);
-                        player->SendNewItem(item, obj.Amount - curItemCount, true, false);
-                    }
-                    break;
-                }
-                case QUEST_OBJECTIVE_MONSTER:
-                {
-                    if (CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(obj.ObjectID))
-                        for (uint16 z = 0; z < obj.Amount; ++z)
-                            player->KilledMonster(creatureInfo, ObjectGuid::Empty);
-                    break;
-                }
-                case QUEST_OBJECTIVE_GAMEOBJECT:
-                {
-                    for (uint16 z = 0; z < obj.Amount; ++z)
-                        player->KillCreditGO(obj.ObjectID);
-                    break;
-                }
-                case QUEST_OBJECTIVE_MIN_REPUTATION:
-                {
-                    uint32 curRep = player->GetReputationMgr().GetReputation(obj.ObjectID);
-                    if (curRep < uint32(obj.Amount))
-                        if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(obj.ObjectID))
-                            player->GetReputationMgr().SetReputation(factionEntry, obj.Amount);
-                    break;
-                }
-                case QUEST_OBJECTIVE_MAX_REPUTATION:
-                {
-                    uint32 curRep = player->GetReputationMgr().GetReputation(obj.ObjectID);
-                    if (curRep > uint32(obj.Amount))
-                        if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(obj.ObjectID))
-                            player->GetReputationMgr().SetReputation(factionEntry, obj.Amount);
-                    break;
-                }
-                case QUEST_OBJECTIVE_MONEY:
-                {
-                    player->ModifyMoney(obj.Amount);
-                    break;
-                }
-                case QUEST_OBJECTIVE_PLAYERKILLS:
-                {
-                    for (uint16 z = 0; z < obj.Amount; ++z)
-                        player->KilledPlayerCredit(ObjectGuid::Empty);
-                    break;
-                }
-            }
+            CompleteObjective(player, obj);
         }
 
         if (sWorld->getBoolConfig(CONFIG_QUEST_ENABLE_QUEST_TRACKER)) // check if Quest Tracker is enabled
@@ -278,6 +283,28 @@ public:
         }
 
         player->CompleteQuest(entry);
+        return true;
+    }
+
+    static bool HandleQuestCompleteObjective(ChatHandler* handler, uint32 objectiveId)
+    {
+        Player* player = handler->getSelectedPlayerOrSelf();
+        if (!player)
+        {
+            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        QuestObjective const* obj = sObjectMgr->GetQuestObjective(objectiveId);
+        if (!obj)
+        {
+            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        CompleteObjective(player, *obj);
         return true;
     }
 
