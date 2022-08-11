@@ -1306,6 +1306,7 @@ INSERT INTO `rbac_linked_permissions` VALUES
 (196,879),
 (196,881),
 (196,882),
+(196,883),
 (197,232),
 (197,236),
 (197,237),
@@ -2229,7 +2230,8 @@ INSERT INTO `rbac_permissions` VALUES
 (879,'Command: debug poolstatus'),
 (880,'Command: pdump copy'),
 (881,'Command: reload vehicle_template'),
-(882,'Command: reload spell_script_names');
+(882,'Command: reload spell_script_names'),
+(883,'Command: quest completeobjective');
 /*!40000 ALTER TABLE `rbac_permissions` ENABLE KEYS */;
 UNLOCK TABLES;
 
