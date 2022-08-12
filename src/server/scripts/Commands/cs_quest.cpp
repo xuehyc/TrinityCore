@@ -260,7 +260,7 @@ public:
         if (!quest || player->GetQuestStatus(entry) == QUEST_STATUS_NONE
             || DisableMgr::IsDisabledFor(DISABLE_TYPE_QUEST, entry, nullptr))
         {
-            handler->PSendSysMessage(LANG_COMMAND_QUEST_OBJECTIVE_NOTFOUND, entry);
+            handler->PSendSysMessage(LANG_COMMAND_QUEST_NOTFOUND, entry);
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -299,7 +299,7 @@ public:
         QuestObjective const* obj = sObjectMgr->GetQuestObjective(objectiveId);
         if (!obj)
         {
-            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+            handler->SendSysMessage(LANG_COMMAND_QUEST_OBJECTIVE_NOTFOUND);
             handler->SetSentErrorMessage(true);
             return false;
         }
