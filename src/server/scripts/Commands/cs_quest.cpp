@@ -49,7 +49,7 @@ public:
         {
             { "add",               rbac::RBAC_PERM_COMMAND_QUEST_ADD,                false, &HandleQuestAdd,               "" },
             { "complete",          rbac::RBAC_PERM_COMMAND_QUEST_COMPLETE,           false, &HandleQuestComplete,          "" },
-            { "completeobjective", rbac::RBAC_PERM_COMMAND_QUEST_COMPLETE_OBJECTIVE, false, &HandleQuestCompleteObjective, "" },
+            { "objectivecomplete", rbac::RBAC_PERM_COMMAND_QUEST_OBJECTIVE_COMPLETE, false, &HandleQuestObjectiveComplete, "" },
             { "remove",            rbac::RBAC_PERM_COMMAND_QUEST_REMOVE,             false, &HandleQuestRemove,            "" },
             { "reward",            rbac::RBAC_PERM_COMMAND_QUEST_REWARD,             false, &HandleQuestReward,            "" },
         };
@@ -286,7 +286,7 @@ public:
         return true;
     }
 
-    static bool HandleQuestCompleteObjective(ChatHandler* handler, uint32 objectiveId)
+    static bool HandleQuestObjectiveComplete(ChatHandler* handler, uint32 objectiveId)
     {
         Player* player = handler->getSelectedPlayerOrSelf();
         if (!player)
