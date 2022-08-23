@@ -4760,7 +4760,7 @@ struct QuestPoiPointLoadInfo
 {
     static DB2LoadInfo const* Instance()
     {
-        static DB2FieldMeta const fields[] =
+        static constexpr DB2FieldMeta fields[] =
         {
             { false, FT_INT, "ID" },
             { true, FT_SHORT, "X" },
