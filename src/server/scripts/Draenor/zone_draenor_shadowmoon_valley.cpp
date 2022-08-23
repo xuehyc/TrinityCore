@@ -30,8 +30,7 @@ enum BarosAlexstonMisc
     QUEST_ESTABLISH_YOUR_GARRISON                    = 34586,
 
     // Gossip
-    OPTION_GOSSIP_0                                  = 0,
-    GOSSIP_START_GARRISON                            = 16871,
+    GOSSIP_OPTION_ESTABLISH_GARRISON                 = 0,
 
     // Text
     SAY_START_CONSTRUCTION                           = 0,
@@ -44,67 +43,21 @@ enum BarosAlexstonMisc
 
 Position const GarrisonLevelOneCreationPlayerPosition = { 1904.58f, 312.906f, 88.9542f, 4.303615f };
 
-class DelayedCastEvent : public BasicEvent
-{
-public:
-    DelayedCastEvent(Player* player, uint32 spellId) : _player(player), _spellId(spellId) { }
-
-    bool Execute(uint64 /*time*/, uint32 /*diff*/) override
-    {
-        _player->CastSpell(_player, _spellId, true);
-        return true;
-    }
-
-private:
-    Player* _player;
-    uint32 _spellId;
-};
-
-class DelayedTeleportEvent : public BasicEvent
-{
-public:
-    DelayedTeleportEvent(Player* player) : _player(player) { }
-
-    bool Execute(uint64 /*time*/, uint32 /*diff*/) override
-    {
-        _player->NearTeleportTo(GarrisonLevelOneCreationPlayerPosition);
-        return true;
-    }
-
-private:
-    Player* _player;
-};
-
 struct npc_baros_alexston : public ScriptedAI
 {
     npc_baros_alexston(Creature* creature) : ScriptedAI(creature) { }
 
-    bool OnGossipHello(Player* player) override
-    {
-        if (me->IsQuestGiver())
-            player->PrepareQuestMenu(me->GetGUID());
-
-        if (player->GetQuestStatus(QUEST_ESTABLISH_YOUR_GARRISON) == QUEST_STATUS_INCOMPLETE)
-        {
-            AddGossipItemFor(player, GOSSIP_START_GARRISON, OPTION_GOSSIP_0, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-            SendGossipMenuFor(player, GOSSIP_START_GARRISON, me->GetGUID());
-        }
-        else
-            SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
-
-        return true;
-    }
-
     bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
     {
-        uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
-        if (action == GOSSIP_ACTION_INFO_DEF)
+        if (gossipListId == GOSSIP_OPTION_ESTABLISH_GARRISON)
         {
             CloseGossipMenuFor(player);
             player->CastSpell(player, SPELL_QUEST_34586_KILLCREDIT, true);
-            player->m_Events.AddEventAtOffset(new DelayedCastEvent(player, SPELL_CREATE_GARRISON_SHADOWMOON_VALLEY_ALLIANCE), 1s);
-            player->m_Events.AddEventAtOffset(new DelayedCastEvent(player, SPELL_DESPAWN_ALL_SUMMONS_GARRISON_INTRO_ONLY), 2s);
-            player->m_Events.AddEventAtOffset(new DelayedTeleportEvent(player), 3s);
+            player->CastSpell(player, SPELL_CREATE_GARRISON_SHADOWMOON_VALLEY_ALLIANCE, true);
+            player->CastSpell(player, SPELL_DESPAWN_ALL_SUMMONS_GARRISON_INTRO_ONLY, true);
+            player->NearTeleportTo(GarrisonLevelOneCreationPlayerPosition);
+
+            PhasingHandler::OnConditionChange(player);
         }
 
         return true;
@@ -124,8 +77,11 @@ class spell_despawn_all_summons_garrison_intro_only : public SpellScript
 
     void HandleScript(SpellEffIndex /*effIndex*/)
     {
-        if (GetHitCreature() && GetHitCreature()->GetOwner() == GetCaster())
-            GetHitCreature()->DespawnOrUnsummon();
+        if (Creature* hitCreature = GetHitCreature())
+        {
+            if (hitCreature->GetOwner() == GetCaster())
+                hitCreature->DespawnOrUnsummon();
+        }
     }
 
     void Register() override
