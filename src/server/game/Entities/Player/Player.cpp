@@ -7582,23 +7582,11 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply, bool updateItemA
     TC_LOG_DEBUG("entities.player.items", "Player::_ApplyItemMods: completed");
 }
 
-void Player::_ApplyItemBonuses(Item* item, uint8 slot, bool apply, bool forced /*= false*/)
+void Player::_ApplyItemBonuses(Item* item, uint8 slot, bool apply)
 {
     ItemTemplate const* proto = item->GetTemplate();
     if (slot >= INVENTORY_SLOT_BAG_END || !proto)
         return;
-
-    if (HasAuraType(SPELL_AURA_CANCEL_EQUIPMENT_STATS) && !forced)
-    {
-        WeaponAttackType attType = BASE_ATTACK;
-        if (slot == EQUIPMENT_SLOT_MAINHAND && (proto->GetInventoryType() == INVTYPE_RANGED || proto->GetInventoryType() == INVTYPE_RANGEDRIGHT))
-            attType = RANGED_ATTACK;
-        else if (slot == EQUIPMENT_SLOT_OFFHAND)
-            attType = OFF_ATTACK;
-        if (attType != MAX_ATTACK)
-            _ApplyWeaponDamage(slot, item, apply);
-        return;
-    }
 
     uint32 itemLevel = item->GetItemLevel(this);
     float combatRatingMultiplier = 1.0f;
@@ -7845,12 +7833,7 @@ void Player::_ApplyItemBonuses(Item* item, uint8 slot, bool apply, bool forced /
 
     WeaponAttackType attType = Player::GetAttackBySlot(slot, proto->GetInventoryType());
     if (attType != MAX_ATTACK)
-    {
-        if (forced)
-            UpdateDamagePhysical(attType);
-        else
-            _ApplyWeaponDamage(slot, item, apply);
-    }
+        _ApplyWeaponDamage(slot, item, apply);
 }
 
 void Player::_ApplyWeaponDamage(uint8 slot, Item* item, bool apply)
@@ -8030,12 +8013,9 @@ bool Player::CheckAttackFitToAuraRequirement(WeaponAttackType attackType, AuraEf
     return true;
 }
 
-void Player::ApplyItemEquipSpell(Item* item, bool apply, bool formChange /*= false*/, bool forced /*= false*/)
+void Player::ApplyItemEquipSpell(Item* item, bool apply, bool formChange /*= false*/)
 {
     if (!item || item->GetTemplate()->HasFlag(ITEM_FLAG_LEGACY))
-        return;
-
-    if (HasAuraType(SPELL_AURA_CANCEL_EQUIPMENT_STATS) && !forced)
         return;
 
     for (ItemEffectEntry const* effectData : item->GetEffects())
@@ -8087,9 +8067,9 @@ void Player::ApplyEquipSpell(SpellInfo const* spellInfo, Item* item, bool apply,
         }
 
         if (item)
-            RemoveAllAurasDueToItemSpell(spellInfo->Id, item->GetGUID());  // un-apply all spells, not only at-equipped
+            RemoveAurasDueToItemSpell(spellInfo->Id, item->GetGUID());  // un-apply all spells, not only at-equipped
         else
-            RemoveAllAurasDueToSpell(spellInfo->Id);           // un-apply spell (item set case)
+            RemoveAurasDueToSpell(spellInfo->Id);           // un-apply spell (item set case)
     }
 }
 
@@ -8107,14 +8087,8 @@ void Player::UpdateEquipSpellsAtFormChange()
     UpdateItemSetAuras(true);
 }
 
-void Player::UpdateItemSetAuras(bool formChange /*= false*/, bool forced /*= false*/, bool apply /* = false*/)
+void Player::UpdateItemSetAuras(bool formChange /*= false*/)
 {
-    if (HasAuraType(SPELL_AURA_CANCEL_EQUIPMENT_STATS) && !forced)
-        return;
-
-    // item set auras should always be applicable (if player fits conditions), except if SPELL_AURA_CANCEL_EQUIPMENT_STATS is applied
-    bool canBenefitFromSetBonuses = forced ? apply : true;
-
     // item set bonuses not dependent from item broken state
     for (size_t setindex = 0; setindex < ItemSetEff.size(); ++setindex)
     {
@@ -8130,9 +8104,8 @@ void Player::UpdateItemSetAuras(bool formChange /*= false*/, bool forced /*= fal
                 ApplyEquipSpell(spellInfo, nullptr, false, false);  // item set aura is not for current spec
             else
             {
-                // add / remove auras fitting current item equipped & shapeshift form
                 ApplyEquipSpell(spellInfo, nullptr, false, formChange); // remove spells that not fit to form - removal is skipped if shapeshift condition is satisfied
-                ApplyEquipSpell(spellInfo, nullptr, canBenefitFromSetBonuses, formChange);  // add spells that fit form but not active
+                ApplyEquipSpell(spellInfo, nullptr, true, formChange);  // add spells that fit form but not active
             }
         }
     }
@@ -13534,13 +13507,13 @@ void Player::AddEnchantmentDuration(Item* item, EnchantmentSlot slot, uint32 dur
     }
 }
 
-void Player::ApplyEnchantment(Item* item, bool apply, bool forced /* = false */)
+void Player::ApplyEnchantment(Item* item, bool apply)
 {
     for (uint32 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
-        ApplyEnchantment(item, EnchantmentSlot(slot), apply, true, false, forced);
+        ApplyEnchantment(item, EnchantmentSlot(slot), apply);
 }
 
-void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur, bool ignore_condition, bool forced /*= false*/)
+void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur, bool ignore_condition)
 {
     if (!item || !item->IsEquipped())
         return;
@@ -13563,9 +13536,6 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
         return;
 
     if (pEnchant->RequiredSkillID > 0 && pEnchant->RequiredSkillRank > GetSkillValue(pEnchant->RequiredSkillID))
-        return;
-
-    if (HasAuraType(SPELL_AURA_CANCEL_EQUIPMENT_STATS) && !forced)
         return;
 
     // If we're dealing with a gem inside a prismatic socket we need to check the prismatic socket requirements
@@ -14033,87 +14003,60 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
             if (!(itr->second.OptionNpcFlag & npcflags))
                 continue;
 
-            switch (itr->second.OptionIcon)
+            switch (itr->second.OptionType)
             {
-                case GossipOptionIcon::TaxiNode:
-                    if (GetSession()->SendLearnNewTaxiNode(creature))
-                        return;
+                case GOSSIP_OPTION_ARMORER:
+                    canTalk = false;                       // added in special mode
                     break;
-                case GossipOptionIcon::SpiritHealer:
+                case GOSSIP_OPTION_SPIRITHEALER:
                     if (!isDead())
                         canTalk = false;
                     break;
-                case GossipOptionIcon::BattleMaster:
-                case GossipOptionIcon::WorldPVPQueue:
+                case GOSSIP_OPTION_LEARNDUALSPEC:
+                    canTalk = false;
+                    break;
+                case GOSSIP_OPTION_UNLEARNTALENTS:
+                    if (!creature->CanResetTalents(this))
+                        canTalk = false;
+                    break;
+                case GOSSIP_OPTION_TAXIVENDOR:
+                    if (GetSession()->SendLearnNewTaxiNode(creature))
+                        return;
+                    break;
+                case GOSSIP_OPTION_BATTLEFIELD:
                     if (!creature->isCanInteractWithBattleMaster(this, false))
                         canTalk = false;
                     break;
-                case GossipOptionIcon::StableMaster:
+                case GOSSIP_OPTION_STABLEPET:
                     if (GetClass() != CLASS_HUNTER)
                         canTalk = false;
                     break;
-                case GossipOptionIcon::DisableXPGain:
-                    if (HasPlayerFlag(PLAYER_FLAGS_NO_XP_GAIN))
-                        canTalk = false;
+                case GOSSIP_OPTION_QUESTGIVER:
+                    canTalk = false;
                     break;
-                case GossipOptionIcon::EnableXPGain:
-                    if (!HasPlayerFlag(PLAYER_FLAGS_NO_XP_GAIN))
-                        canTalk = false;
-                    break;
-                case GossipOptionIcon::None:
-                case GossipOptionIcon::Vendor:
-                case GossipOptionIcon::Trainer:
-                case GossipOptionIcon::Binder:
-                case GossipOptionIcon::Banker:
-                case GossipOptionIcon::PetitionVendor:
-                case GossipOptionIcon::TabardVendor:
-                case GossipOptionIcon::Auctioneer:
-                case GossipOptionIcon::Mailbox:
-                case GossipOptionIcon::Transmogrify:
-                    break;                                         // No checks
-                case GossipOptionIcon::TalentMaster:
-                case GossipOptionIcon::PetSpecializationMaster:
-                case GossipOptionIcon::GuildBanker:
-                case GossipOptionIcon::SpellClick:
-                case GossipOptionIcon::CemeterySelect:
-                case GossipOptionIcon::SpecializationMaster:
-                case GossipOptionIcon::GlyphMaster:
-                    canTalk = false;                               // Deprecated
-                    break;
-                case GossipOptionIcon::LFGDungeon:
-                case GossipOptionIcon::ArtifactRespec:
-                case GossipOptionIcon::QueueScenario:
-                case GossipOptionIcon::GarrisonArchitect:
-                case GossipOptionIcon::GarrisonMission:
-                case GossipOptionIcon::ShipmentCrafter:
-                case GossipOptionIcon::GarrisonTradeskill:
-                case GossipOptionIcon::GarrisonRecruitment:
-                case GossipOptionIcon::AdventureMap:
-                case GossipOptionIcon::GarrisonTalent:
-                case GossipOptionIcon::ContributionCollector:
-                case GossipOptionIcon::AzeriteRespec:
-                case GossipOptionIcon::IslandsMission:
-                case GossipOptionIcon::UIItemInteraction:
-                case GossipOptionIcon::WorldMap:
-                case GossipOptionIcon::Soulbind:
-                case GossipOptionIcon::ChromieTime:
-                case GossipOptionIcon::CovenantPreview:
-                case GossipOptionIcon::RuneforgeLegendaryCrafting:
-                case GossipOptionIcon::NewPlayerGuide:
-                case GossipOptionIcon::RuneforgeLegendaryUpgrade:
-                case GossipOptionIcon::CovenantRenown:
-                    break;                                         // NYI
+                case GOSSIP_OPTION_GOSSIP:
+                case GOSSIP_OPTION_VENDOR:
+                case GOSSIP_OPTION_TRAINER:
+                case GOSSIP_OPTION_SPIRITGUIDE:
+                case GOSSIP_OPTION_INNKEEPER:
+                case GOSSIP_OPTION_BANKER:
+                case GOSSIP_OPTION_PETITIONER:
+                case GOSSIP_OPTION_TABARDDESIGNER:
+                case GOSSIP_OPTION_AUCTIONEER:
+                case GOSSIP_OPTION_TRANSMOGRIFIER:
+                case GOSSIP_OPTION_MAILBOX:
+                    break;                                  // no checks
                 default:
-                    TC_LOG_ERROR("sql.sql", "Creature entry %u has an unknown gossip option icon %u for menu %u.", creature->GetEntry(), AsUnderlyingType(itr->second.OptionIcon), itr->second.MenuID);
+                    TC_LOG_ERROR("sql.sql", "Creature entry %u has unknown gossip option %u for menu %u.", creature->GetEntry(), itr->second.OptionType, itr->second.MenuID);
                     canTalk = false;
                     break;
             }
         }
         else if (GameObject* go = source->ToGameObject())
         {
-            switch (itr->second.OptionIcon)
+            switch (itr->second.OptionType)
             {
-                case GossipOptionIcon::None:
+                case GOSSIP_OPTION_GOSSIP:
                     if (go->GetGoType() != GAMEOBJECT_TYPE_QUESTGIVER && go->GetGoType() != GAMEOBJECT_TYPE_GOOBER)
                         canTalk = false;
                     break;
@@ -14157,7 +14100,7 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                 }
             }
 
-            menu->GetGossipMenu().AddMenuItem(itr->second.OptionID, itr->second.OptionIcon, strOptionText, 0, AsUnderlyingType(itr->second.OptionIcon), strBoxText, itr->second.BoxMoney, itr->second.BoxCoded);
+            menu->GetGossipMenu().AddMenuItem(itr->second.OptionID, itr->second.OptionIcon, strOptionText, 0, itr->second.OptionType, strBoxText, itr->second.BoxMoney, itr->second.BoxCoded);
             menu->GetGossipMenu().AddGossipMenuItemData(itr->second.OptionID, itr->second.ActionMenuID, itr->second.ActionPoiID);
         }
     }
@@ -14200,12 +14143,12 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
     if (!item)
         return;
 
-    GossipOptionIcon gossipOptionIcon = item->MenuItemIcon;
+    uint32 gossipOptionType = item->OptionType;
     ObjectGuid guid = source->GetGUID();
 
     if (source->GetTypeId() == TYPEID_GAMEOBJECT)
     {
-        if (gossipOptionIcon != GossipOptionIcon::None)
+        if (gossipOptionType > GOSSIP_OPTION_QUESTGIVER)
         {
             TC_LOG_ERROR("entities.player", "Player '%s' (%s) requests invalid gossip option for GameObject (Entry: %u)",
                 GetName().c_str(), GetGUID().ToString().c_str(), source->GetEntry());
@@ -14225,9 +14168,9 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
         return;
     }
 
-    switch (gossipOptionIcon)
+    switch (gossipOptionType)
     {
-        case GossipOptionIcon::None:
+        case GOSSIP_OPTION_GOSSIP:
         {
             if (menuItemData->GossipActionPoi)
                 PlayerTalkClass->SendPointOfInterest(menuItemData->GossipActionPoi);
@@ -14240,37 +14183,57 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
 
             break;
         }
-        case GossipOptionIcon::Vendor:
-            GetSession()->SendListInventory(guid);
-            break;
-        case GossipOptionIcon::TaxiNode:
-            GetSession()->SendTaxiMenu(source->ToCreature());
-            break;
-        case GossipOptionIcon::Trainer:
-            GetSession()->SendTrainerList(source->ToCreature(), sObjectMgr->GetCreatureTrainerForGossipOption(source->GetEntry(), menuId, gossipListId));
-            break;
-        case GossipOptionIcon::SpiritHealer:
+        case GOSSIP_OPTION_SPIRITHEALER:
             if (isDead())
                 source->ToCreature()->CastSpell(source->ToCreature(), 17251, CastSpellExtraArgs(TRIGGERED_FULL_MASK)
                     .SetOriginalCaster(GetGUID()));
             break;
-        case GossipOptionIcon::Binder:
+        case GOSSIP_OPTION_QUESTGIVER:
+            PrepareQuestMenu(guid);
+            SendPreparedQuest(source);
+            break;
+        case GOSSIP_OPTION_VENDOR:
+        case GOSSIP_OPTION_ARMORER:
+            GetSession()->SendListInventory(guid);
+            break;
+        case GOSSIP_OPTION_STABLEPET:
+            GetSession()->SendStablePet(guid);
+            break;
+        case GOSSIP_OPTION_TRAINER:
+            GetSession()->SendTrainerList(source->ToCreature(), sObjectMgr->GetCreatureTrainerForGossipOption(source->GetEntry(), menuId, gossipListId));
+            break;
+        case GOSSIP_OPTION_LEARNDUALSPEC:
+            break;
+        case GOSSIP_OPTION_UNLEARNTALENTS:
+            PlayerTalkClass->SendCloseGossip();
+            SendRespecWipeConfirm(guid, sWorld->getBoolConfig(CONFIG_NO_RESET_TALENT_COST) ? 0 : GetNextResetTalentsCost());
+            break;
+        case GOSSIP_OPTION_TAXIVENDOR:
+            GetSession()->SendTaxiMenu(source->ToCreature());
+            break;
+        case GOSSIP_OPTION_INNKEEPER:
             PlayerTalkClass->SendCloseGossip();
             SetBindPoint(guid);
             break;
-        case GossipOptionIcon::Banker:
+        case GOSSIP_OPTION_BANKER:
             GetSession()->SendShowBank(guid);
             break;
-        case GossipOptionIcon::PetitionVendor:
+        case GOSSIP_OPTION_PETITIONER:
             PlayerTalkClass->SendCloseGossip();
             GetSession()->SendPetitionShowList(guid);
             break;
-        case GossipOptionIcon::TabardVendor:
+        case GOSSIP_OPTION_TABARDDESIGNER:
             PlayerTalkClass->SendCloseGossip();
             GetSession()->SendTabardVendorActivate(guid);
             break;
-        case GossipOptionIcon::BattleMaster:
-        case GossipOptionIcon::WorldPVPQueue:
+        case GOSSIP_OPTION_AUCTIONEER:
+            GetSession()->SendAuctionHello(guid, source->ToCreature());
+            break;
+        case GOSSIP_OPTION_SPIRITGUIDE:
+            PrepareGossipMenu(source);
+            SendPreparedGossip(source);
+            break;
+        case GOSSIP_OPTION_BATTLEFIELD:
         {
             BattlegroundTypeId bgTypeId = sBattlegroundMgr->GetBattleMasterBG(source->GetEntry());
 
@@ -14284,27 +14247,11 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
             sBattlegroundMgr->SendBattlegroundList(this, guid, bgTypeId);
             break;
         }
-        case GossipOptionIcon::Auctioneer:
-            GetSession()->SendAuctionHello(guid, source->ToCreature());
-            break;
-        case GossipOptionIcon::StableMaster:
-            GetSession()->SendStablePet(guid);
-            break;
-        case GossipOptionIcon::DisableXPGain:
-            PlayerTalkClass->SendCloseGossip();
-            SetPlayerFlag(PLAYER_FLAGS_NO_XP_GAIN);
-            break;
-        case GossipOptionIcon::EnableXPGain:
-            PlayerTalkClass->SendCloseGossip();
-            RemovePlayerFlag(PLAYER_FLAGS_NO_XP_GAIN);
-            break;
-        case GossipOptionIcon::Mailbox:
-            GetSession()->SendShowMailBox(guid);
-            break;
-        case GossipOptionIcon::Transmogrify:
+        case GOSSIP_OPTION_TRANSMOGRIFIER:
             GetSession()->SendOpenTransmogrifier(guid);
             break;
-        default:
+        case GOSSIP_OPTION_MAILBOX:
+            GetSession()->SendShowMailBox(guid);
             break;
     }
 
@@ -28876,24 +28823,4 @@ void Player::SendDisplayToast(uint32 entry, DisplayToastType type, bool isBonusR
     }
 
     SendDirectMessage(displayToast.Write());
-}
-
-Item* Player::GetFirstMatchingItemInInventoryOrEquipment(uint32 entry) const
-{
-    // inventory items
-    for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
-        if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-            if (item->GetEntry() == entry)
-                return item;
-
-    for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
-        if (Bag* bag = GetBagByPos(i))
-        {
-            for (uint32 j = 0; j < bag->GetBagSize(); j++)
-                if (Item* item = bag->GetItemByPos(j))
-                    if (item->GetEntry() == entry)
-                        return item;
-        }
-
-    return nullptr;
 }
