@@ -24,6 +24,7 @@
 #include "GameObjectAI.h"
 #include "GridNotifiersImpl.h"
 #include "Log.h"
+#include "MiscPackets.h"
 #include "MotionMaster.h"
 #include "MoveSplineInit.h"
 #include "ObjectAccessor.h"
@@ -2291,6 +2292,36 @@ private:
     TaskScheduler _scheduler;
 };
 
+// 164937
+struct npc_runecarver_open_npc : public ScriptedAI
+{
+    npc_runecarver_open_npc(Creature* creature) : ScriptedAI(creature) { }
+
+    bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
+    {
+        if (gossipListId == 3)
+        {
+            WorldPackets::Misc::RuneforgeLegendaryCraftingOpenNpc packet;
+            packet.RunecarverGUID = me->GetGUID();
+            packet.IsUpgrade = true;
+            player->SendDirectMessage(packet.Write());
+
+            return true;
+        }
+        if (gossipListId == 2)
+        {
+            WorldPackets::Misc::RuneforgeLegendaryCraftingOpenNpc packet;
+            packet.RunecarverGUID = me->GetGUID();
+            packet.IsUpgrade = false;
+            player->SendDirectMessage(packet.Write());
+
+            return true;
+        }
+
+        return false;
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -2314,4 +2345,5 @@ void AddSC_npcs_special()
     new npc_argent_squire_gruntling();
     new npc_bountiful_table();
     RegisterCreatureAI(npc_gen_void_zone);
+    RegisterCreatureAI(npc_runecarver_open_npc);
 }
