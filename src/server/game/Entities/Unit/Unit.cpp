@@ -3968,10 +3968,10 @@ bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags flag, Unit const* un
         case SpellAuraInterruptFlags::ActionDelayed:
             if (interruptSource)
             {
-                if (interruptSource->HasAttribute(SPELL_ATTR1_ALLOW_WHILE_STEALTHED) && auraSpellInfo->HasAura(SPELL_AURA_MOD_STEALTH))
+                if (interruptSource->HasAttribute(SPELL_ATTR1_ALLOW_WHILE_STEALTHED) && auraSpellInfo->Dispel == DISPEL_STEALTH)
                     return true;
 
-                if (interruptSource->HasAttribute(SPELL_ATTR2_ALLOW_WHILE_INVISIBLE) && auraSpellInfo->HasAura(SPELL_AURA_MOD_INVISIBILITY))
+                if (interruptSource->HasAttribute(SPELL_ATTR2_ALLOW_WHILE_INVISIBLE) && auraSpellInfo->Dispel == DISPEL_INVISIBILITY)
                     return true;
             }
             break;
@@ -10686,9 +10686,8 @@ void Unit::SetMeleeAnimKitId(uint16 animKitId)
         // Generate loot before updating looter
         if (creature)
         {
-            creature->m_loot.reset(new Loot());
+            creature->m_loot.reset(new Loot(creature->GetMap(), creature->GetGUID(), LOOT_CORPSE));
             Loot* loot = creature->m_loot.get();
-            loot->SetGUID(ObjectGuid::Create<HighGuid::LootObject>(creature->GetMapId(), 0, creature->GetMap()->GenerateLowGuid<HighGuid::LootObject>()));
             if (creature->GetMap()->Is25ManRaid())
                 loot->maxDuplicates = 3;
 
