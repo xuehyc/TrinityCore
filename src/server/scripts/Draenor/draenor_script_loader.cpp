@@ -18,6 +18,7 @@
  // This is where scripts' loading functions should be declared:
 void AddSC_draenor_shadowmoon_valley();
 void AddSC_frostfire_ridge();
+void AddSC_instance_garrison();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -25,4 +26,5 @@ void AddDraenorScripts()
 {
     AddSC_draenor_shadowmoon_valley();
     AddSC_frostfire_ridge();
+    AddSC_instance_garrison();
 }
