@@ -24,9 +24,6 @@ void AddSC_boss_slabhide();
 void AddSC_boss_ozruk();
 void AddSC_boss_high_priestess_azil();
 
-// Zones
-void AddSC_deepholm();
-
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddMaelstromScripts()
@@ -38,7 +35,4 @@ void AddMaelstromScripts()
     AddSC_boss_slabhide();
     AddSC_boss_ozruk();
     AddSC_boss_high_priestess_azil();
-
-// Zones
-    AddSC_deepholm();
 }
