@@ -22,6 +22,7 @@ void AddSC_instance_garrison();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
+void AddDraenorScripts()
 {
     AddSC_draenor_shadowmoon_valley();
     AddSC_frostfire_ridge();
