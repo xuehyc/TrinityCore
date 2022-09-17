@@ -13946,10 +13946,11 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
         bool canTalk = true;
         if (Creature* creature = source->ToCreature())
         {
-            if (!(itr->second.OptionNpcFlag & npcflags))
+            GossipOptionNpc optionNpc = itr->second.OptionNpc;
+            if (!(GossipMenu::GetRequiredNpcFlagForOption(optionNpc) & npcflags))
                 continue;
 
-            switch (itr->second.OptionNpc)
+            switch (optionNpc)
             {
                 case GossipOptionNpc::TaxiNode:
                     if (GetSession()->SendLearnNewTaxiNode(creature))
