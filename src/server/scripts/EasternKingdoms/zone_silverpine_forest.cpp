@@ -105,8 +105,8 @@ enum QuestTheWarchiefCometh
     EVENT_START_SCENE_COMETH                = 1,
     EVENT_SUMMON_PORTAL_COMETH              = 2,
     EVENT_SUMMON_GARROSH_COMETH             = 3,
-    EVENT_AGATHA_RAISE_FORSAKEN             = 4,
-    EVENT_SCENE_TALK_COMETH                 = 9,
+    EVENT_AGATHA_RAISE_FORSAKEN             = 4, // Note: 4-8 are used
+    EVENT_SCENE_TALK_COMETH                 = 9, // Note: 9-36 are used
 
     ACTION_START_SCENE_COMETH               = 1,
 
@@ -291,7 +291,6 @@ struct npc_silverpine_grand_executor_mortuus : public ScriptedAI
                         sylvanas->SetFacingTo(3.924652f);
 
                         _events.ScheduleEvent(EVENT_SCENE_TALK_COMETH + 4, 1s);
-
                     }
                     break;
                 }
@@ -634,7 +633,7 @@ struct npc_silverpine_grand_executor_mortuus : public ScriptedAI
                         if (garrosh->IsAIEnabled())
                             garrosh->AI()->Talk(TALK_GARROSH_COMETH_8);
 
-                        _events.ScheduleEvent(EVENT_SCENE_TALK_COMETH + 25, 7s);
+                        _events.ScheduleEvent(EVENT_SCENE_TALK_COMETH + 25, 8s + 500ms);
                     }
                     break;
                 }
@@ -643,25 +642,19 @@ struct npc_silverpine_grand_executor_mortuus : public ScriptedAI
                 {
                     if (Creature* garrosh = ObjectAccessor::GetCreature(*me, _garroshGUID))
                     {
+                        garrosh->CastSpell(garrosh, SPELL_WELCOME_TO_SILVERPINE_CREDIT, true);
+
                         garrosh->GetMotionMaster()->MovePath(PATH_GARROSH, false);
 
-                        _events.ScheduleEvent(EVENT_SCENE_TALK_COMETH + 26, 10s);
+                        _events.ScheduleEvent(EVENT_SCENE_TALK_COMETH + 26, 9s);
                     }
                     break;
                 }
 
                 case EVENT_SCENE_TALK_COMETH + 26:
-                {
                     DespawnGarroshAndHisEliteGuards();
-
-                    if (Creature* garrosh = ObjectAccessor::GetCreature(*me, _garroshGUID))
-                    {
-                        garrosh->CastSpell(garrosh, SPELL_WELCOME_TO_SILVERPINE_CREDIT, true);
-
-                        _events.ScheduleEvent(EVENT_SCENE_TALK_COMETH + 27, 500ms);
-                    }
+                    _events.ScheduleEvent(EVENT_SCENE_TALK_COMETH + 27, 500ms);
                     break;
-                }
 
                 case EVENT_SCENE_TALK_COMETH + 27:
                     _summons.DespawnAll();
@@ -681,19 +674,19 @@ struct npc_silverpine_grand_executor_mortuus : public ScriptedAI
 
     void SummonPortalsFromOrgrimmar()
     {
-        for (auto pos : OrgrimmarPortalPos)
+        for (Position const& pos : OrgrimmarPortalPos)
             me->SummonCreature(NPC_PORTAL_FROM_ORGRIMMAR, pos, TEMPSUMMON_TIMED_DESPAWN, 300s);
 
-        std::list<Creature*> portals;
-        GetCreatureListWithEntryInGrid(portals, me, NPC_PORTAL_FROM_ORGRIMMAR, 100.0f);
+        std::list<Creature*> orgrimmarPortals;
+        GetCreatureListWithEntryInGrid(orgrimmarPortals, me, NPC_PORTAL_FROM_ORGRIMMAR, 100.0f);
 
-        for (std::list<Creature*>::const_iterator itr = portals.begin(); itr != portals.end(); ++itr)
-            (*itr)->CastSpell(*itr, SPELL_AIR_REVENANT_ENTRANCE);
+        for (Creature* portal : orgrimmarPortals)
+            portal->CastSpell(portal, SPELL_AIR_REVENANT_ENTRANCE);
     }
 
     void SummonGarroshAndHisEliteGuards()
     {
-        for (auto pos : HellscreamElitePos)
+        for (Position const& pos : HellscreamElitePos)
             me->SummonCreature(NPC_HELLSCREAM_ELITE_COMETH, pos, TEMPSUMMON_TIMED_DESPAWN, 300s);
 
         me->SummonCreature(NPC_GARROSH_HELLSCREAM, GarroshPos, TEMPSUMMON_TIMED_DESPAWN, 300s);
@@ -709,10 +702,10 @@ struct npc_silverpine_grand_executor_mortuus : public ScriptedAI
 
     void DespawnGarroshAndHisEliteGuards()
     {
-        for (std::list<ObjectGuid>::const_iterator itr = _summons.begin(); itr != _summons.end(); itr++)
+        for (ObjectGuid const& summonedCreature : _summons)
         {
-            if (Creature* npc = ObjectAccessor::GetCreature(*me, (*itr)))
-                npc->CastSpell(npc, SPELL_SIMPLE_TELEPORT);
+            if (Creature* summon = ObjectAccessor::GetCreature(*me, summonedCreature))
+                summon->CastSpell(summon, SPELL_SIMPLE_TELEPORT);
         }
     }
 
@@ -744,32 +737,30 @@ class spell_silverpine_raise_forsaken_83173 : public AuraScript
 
     void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
-        if (Unit* unit = GetTarget())
+        Unit* target = GetTarget();
+
+        if (Creature* fallenHuman = target->ToCreature())
         {
-            if (Creature* fallenHuman = unit->ToCreature())
-            {
-                if (fallenHuman->IsAIEnabled())
-                    fallenHuman->AI()->DoAction(ACTION_RISE_DURING_RAISE);
-            }
+            if (fallenHuman->IsAIEnabled())
+                fallenHuman->AI()->DoAction(ACTION_RISE_DURING_RAISE);
         }
     }
 
     void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
-        if (Unit* unit = GetTarget())
+        Unit* target = GetTarget();
+
+        if (Creature* fallenHuman = target->ToCreature())
         {
-            if (Creature* fallenHuman = unit->ToCreature())
-            {
-                if (fallenHuman->IsAIEnabled())
-                    fallenHuman->AI()->DoAction(ACTION_DESCEND_AFTER_RAISE);
-            }
+            if (fallenHuman->IsAIEnabled())
+                fallenHuman->AI()->DoAction(ACTION_DESCEND_AFTER_RAISE);
         }
     }
 
     void Register() override
     {
         OnEffectApply += AuraEffectApplyFn(spell_silverpine_raise_forsaken_83173::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-        AfterEffectRemove += AuraEffectRemoveFn(spell_silverpine_raise_forsaken_83173::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        OnEffectRemove += AuraEffectRemoveFn(spell_silverpine_raise_forsaken_83173::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
     }
 };
 
@@ -906,33 +897,41 @@ class spell_silverpine_forsaken_trooper_masterscript_high_command : public Spell
 
     void HandleScriptEffect(SpellEffIndex /*effIndex*/)
     {
-        if (Unit* unit = GetCaster())
+        if (Unit* caster = GetCaster())
         {
-            unit->RemoveAura(SPELL_FEIGNED);
+            caster->RemoveAura(SPELL_FEIGNED);
 
-            if (unit->GetDisplayId() == DISPLAY_MALE_01_HC)
-                unit->CastSpell(unit, SPELL_FORSAKEN_TROOPER_MALE_01_HC, true);
-
-            if (unit->GetDisplayId() == DISPLAY_MALE_02_HC)
-                unit->CastSpell(unit, SPELL_FORSAKEN_TROOPER_MALE_02_HC, true);
-
-            if (unit->GetDisplayId() == DISPLAY_MALE_03_HC)
-                unit->CastSpell(unit, SPELL_FORSAKEN_TROOPER_MALE_03_HC, true);
-
-            if (unit->GetDisplayId() == DISPLAY_MALE_04_HC)
-                unit->CastSpell(unit, SPELL_FORSAKEN_TROOPER_MALE_04_HC, true);
-
-            if (unit->GetDisplayId() == DISPLAY_FEMALE_01_HC)
-                unit->CastSpell(unit, SPELL_FORSAKEN_TROOPER_FEMALE_01_HC, true);
-
-            if (unit->GetDisplayId() == DISPLAY_FEMALE_02_HC)
-                unit->CastSpell(unit, SPELL_FORSAKEN_TROOPER_FEMALE_02_HC, true);
-
-            if (unit->GetDisplayId() == DISPLAY_FEMALE_03_HC)
-                unit->CastSpell(unit, SPELL_FORSAKEN_TROOPER_FEMALE_03_HC, true);
-
-            if (unit->GetDisplayId() == DISPLAY_FEMALE_04_HC)
-                unit->CastSpell(unit, SPELL_FORSAKEN_TROOPER_FEMALE_04_HC, true);
+            uint32 spellId = SPELL_FORSAKEN_TROOPER_MALE_01_HC;
+            switch (caster->GetDisplayId())
+            {
+                case DISPLAY_MALE_01_HC:
+                    spellId = SPELL_FORSAKEN_TROOPER_MALE_01_HC;
+                    break;
+                case DISPLAY_MALE_02_HC:
+                    spellId = SPELL_FORSAKEN_TROOPER_MALE_02_HC;
+                    break;
+                case DISPLAY_MALE_03_HC:
+                    spellId = SPELL_FORSAKEN_TROOPER_MALE_03_HC;
+                    break;
+                case DISPLAY_MALE_04_HC:
+                    spellId = SPELL_FORSAKEN_TROOPER_MALE_04_HC;
+                    break;
+                case DISPLAY_FEMALE_01_HC:
+                    spellId = SPELL_FORSAKEN_TROOPER_FEMALE_01_HC;
+                    break;
+                case DISPLAY_FEMALE_02_HC:
+                    spellId = SPELL_FORSAKEN_TROOPER_FEMALE_02_HC;
+                    break;
+                case DISPLAY_FEMALE_03_HC:
+                    spellId = SPELL_FORSAKEN_TROOPER_FEMALE_03_HC;
+                    break;
+                case DISPLAY_FEMALE_04_HC:
+                    spellId = SPELL_FORSAKEN_TROOPER_FEMALE_04_HC;
+                    break;
+                default:
+                    break;
+            }
+            caster->CastSpell(caster, spellId, true);
         }
     }
 
