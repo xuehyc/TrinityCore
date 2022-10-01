@@ -40,251 +40,6 @@
 #include "Vehicle.h"
 #include "WorldSession.h"
 
-enum HordeHauler
-{
-    NPC_HORDE_ENGINEER_HAULER               = 44734,
-    NPC_SUBDUED_FOREST_ETTIN_HAULER         = 44737,
-    NPC_FORSAKEN_TROOPER_F                  = 44732,
-    NPC_FORSAKEN_TROOPER_M                  = 44733,
-
-    SPELL_EJECT_PASSENGERS_3_8              = 83477,
-
-    EVENT_START_PATH                        = 1,
-    EVENT_YELL_ON_FORSAKEN_HIGH             = 2,
-    EVENT_YELL_ON_SEPULCHER                 = 3,
-    EVENT_YELL_ON_FORSAKEN_FRONT            = 4,
-    EVENT_TROOPERS_RUN                      = 5,
-
-    TALK_HAULER_BOARDED                     = 0,
-    TALK_ON_FORSAKEN_HIGH                   = 1,
-    TALK_ON_SEPULCHER                       = 2,
-    TALK_ON_FORSAKEN_FRONT                  = 3,
-
-    PATH_FROM_NORTH_TO_SOUTH                = 447310,
-    PATH_TROOPER_1                          = 447320,
-    PATH_TROOPER_2                          = 447321,
-    PATH_TROOPER_3                          = 447322,
-    PATH_TROOPER_4                          = 447323,
-    PATH_TROOPER_5                          = 447324,
-
-    WAYPOINT_ON_FORSAKEN_HIGH               = 11,
-    WAYPOINT_ON_SEPULCHER                   = 35,
-    WAYPOINT_ON_FORSAKEN_FRONT              = 60,
-    WAYPOINT_ON_DESPAWN_POINT_SOUTH         = 63,
-    WAYPOINT_ON_TROOPER_DESPAWN             = 1,
-
-    SEAT_HAULER_PLAYER                      = 2,
-    SEAT_HAULER_TROOPER_1                   = 3,
-    SEAT_HAULER_TROOPER_2                   = 4,
-    SEAT_HAULER_TROOPER_3                   = 5,
-    SEAT_HAULER_TROOPER_4                   = 6,
-    SEAT_HAULER_TROOPER_5                   = 7
-};
-
-// Horde Hauler - 44731
-struct npc_silverpine_horde_hauler : public ScriptedAI
-{
-    npc_silverpine_horde_hauler(Creature* creature) : ScriptedAI(creature)
-    {
-        Initialize();
-    }
-
-    void Initialize()
-    {
-        // Note: it needs to be active to be able to travel the map correctly.
-        me->setActive(true);
-    }
-
-    void JustAppeared() override
-    {
-        _events.ScheduleEvent(EVENT_START_PATH, 8s);
-    }
-
-    void JustSummoned(Creature* summon) override
-    {
-        // Note: its summons need to be active to be able to perform their actions correctly.
-        summon->setActive(true);
-    }
-
-    void PassengerBoarded(Unit* passenger, int8 seatId, bool apply) override
-    {
-        if (apply && passenger->IsPlayer())
-        {
-            _playerGUID = passenger->GetGUID();
-
-            if (seatId == SEAT_HAULER_PLAYER)
-            {
-                if (Creature* engineer = me->FindNearestCreature(NPC_HORDE_ENGINEER_HAULER, 15.0f, true))
-                {
-                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
-                    {
-                        if (engineer->IsAIEnabled())
-                            engineer->AI()->Talk(TALK_HAULER_BOARDED, player);
-                    }
-                }
-            }
-        }
-
-        if (!apply && !passenger->IsPlayer())
-        {
-            uint32 pathId = 0;
-
-            switch (seatId)
-            {
-                case SEAT_HAULER_TROOPER_1:
-                    pathId = PATH_TROOPER_1;
-                    break;
-                case SEAT_HAULER_TROOPER_2:
-                    pathId = PATH_TROOPER_2;
-                    break;
-                case SEAT_HAULER_TROOPER_3:
-                    pathId = PATH_TROOPER_3;
-                    break;
-                case SEAT_HAULER_TROOPER_4:
-                    pathId = PATH_TROOPER_4;
-                    break;
-                case SEAT_HAULER_TROOPER_5:
-                    pathId = PATH_TROOPER_5;
-                    break;
-
-                default:
-                    break;
-            }
-
-            passenger->GetMotionMaster()->MovePath(pathId, false);
-        }
-    }
-
-    void WaypointReached(uint32 waypointId, uint32 pathId) override
-    {
-        if (pathId == PATH_FROM_NORTH_TO_SOUTH)
-        {
-            if (waypointId == WAYPOINT_ON_FORSAKEN_HIGH)
-                _events.ScheduleEvent(EVENT_YELL_ON_FORSAKEN_HIGH, 1s);
-
-            if (waypointId == WAYPOINT_ON_SEPULCHER)
-                _events.ScheduleEvent(EVENT_YELL_ON_SEPULCHER, 1s);
-
-            if (waypointId == WAYPOINT_ON_FORSAKEN_FRONT)
-                _events.ScheduleEvent(EVENT_YELL_ON_FORSAKEN_FRONT, 1s);
-
-            if (waypointId == WAYPOINT_ON_DESPAWN_POINT_SOUTH)
-                me->DespawnOrUnsummon(1s);
-        }
-    }
-
-    void UpdateAI(uint32 diff) override
-    {
-        _events.Update(diff);
-
-        while (uint32 eventId = _events.ExecuteEvent())
-        {
-            switch (eventId)
-            {
-                case EVENT_START_PATH:
-                    me->GetMotionMaster()->MovePath(PATH_FROM_NORTH_TO_SOUTH, false);
-                    break;
-
-                case EVENT_YELL_ON_FORSAKEN_HIGH:
-                {
-                    if (Creature* engineer = me->FindNearestCreature(NPC_HORDE_ENGINEER_HAULER, 15.0f, true))
-                    {
-                        if (engineer->IsAIEnabled())
-                            engineer->AI()->Talk(TALK_ON_FORSAKEN_HIGH);
-                    }
-                    break;
-                }
-
-                case EVENT_YELL_ON_SEPULCHER:
-                {
-                    if (Creature* engineer = me->FindNearestCreature(NPC_HORDE_ENGINEER_HAULER, 15.0f, true))
-                    {
-                        if (engineer->IsAIEnabled())
-                            engineer->AI()->Talk(TALK_ON_SEPULCHER);
-                    }
-                    break;
-                }
-
-                case EVENT_YELL_ON_FORSAKEN_FRONT:
-                {
-                    if (Creature* engineer = me->FindNearestCreature(NPC_HORDE_ENGINEER_HAULER, 15.0f, true))
-                    {
-                        if (engineer->IsAIEnabled())
-                            engineer->AI()->Talk(TALK_ON_FORSAKEN_FRONT);
-                    }
-
-                    DoCastSelf(SPELL_EJECT_PASSENGERS_3_8);
-
-                    me->SetUnitFlag3(UnitFlags3::UNIT_FLAG3_UNTARGETABLE_FROM_UI);
-                    break;
-                }
-
-                default:
-                    break;
-            }
-        }
-    }
-
-private:
-    EventMap _events;
-    ObjectGuid _playerGUID;
-};
-
-enum MagicalChainsHauler
-{
-    SPELL_CHAIN_RIGHT_HAULER                = 83467,
-    SPELL_CHAIN_LEFT_HAULER                 = 83464
-};
-
-// Magical Chains (Hauler) - 84238
-class spell_silverpine_magical_chains_hauler : public AuraScript
-{
-    PrepareAuraScript(spell_silverpine_magical_chains_hauler);
-
-    bool Validate(SpellInfo const* /*spellInfo*/) override
-    {
-        return ValidateSpellInfo
-        ({
-            SPELL_CHAIN_RIGHT_HAULER,
-            SPELL_CHAIN_LEFT_HAULER
-        });
-    }
-
-    void HandlePeriodic(AuraEffect const* /*aurEff*/)
-    {
-        GetTarget()->CastSpell(nullptr, SPELL_CHAIN_RIGHT_HAULER, true);
-        GetTarget()->CastSpell(nullptr, SPELL_CHAIN_LEFT_HAULER, true);
-    }
-
-    void Register() override
-    {
-        OnEffectPeriodic += AuraEffectPeriodicFn(spell_silverpine_magical_chains_hauler::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
-    }
-};
-
-// Eject Passengers 3-8 - 83477
-class spell_silverpine_eject_passengers_3_8 : public SpellScript
-{
-    PrepareSpellScript(spell_silverpine_eject_passengers_3_8);
-
-    void HandleScriptEffect(SpellEffIndex /*effIndex*/)
-    {
-        if (GetHitUnit()->IsAIEnabled())
-        {
-            for (uint8 i = 0; i < 5; i++)
-            {
-                if (Unit* passenger = GetHitUnit()->GetVehicleKit()->GetPassenger(SEAT_HAULER_PLAYER + i))
-                    passenger->ExitVehicle();
-            }
-        }
-    }
-
-    void Register() override
-    {
-        OnEffectHitTarget += SpellEffectFn(spell_silverpine_eject_passengers_3_8::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-    }
-};
-
 Position const OrgrimmarPortalPos[3] =
 {
     { 1358.62f, 1054.72f, 53.1200f, 0.0f },
@@ -1220,6 +975,7 @@ struct npc_silverpine_deathstalker : public ScriptedAI
 
     void JustAppeared() override
     {
+        // @TODO: figure out some common thing why powertype energy is used here
         me->SetPowerType(POWER_ENERGY);
         me->SetMaxPower(POWER_ENERGY, 100);
         me->SetPower(POWER_ENERGY, 100, true);
@@ -1265,6 +1021,9 @@ struct npc_silverpine_worgen_renegade : public ScriptedAI
 
     void UpdateAI(uint32 diff) override
     {
+        if (!UpdateVictim())
+            return;
+
         _events.Update(diff);
 
         while (uint32 eventId = _events.ExecuteEvent())
@@ -1280,9 +1039,6 @@ struct npc_silverpine_worgen_renegade : public ScriptedAI
                     break;
             }
         }
-
-        if (!UpdateVictim())
-            return;
 
         DoMeleeAttackIfReady();
     }
@@ -1354,6 +1110,9 @@ struct npc_silverpine_forsaken_trooper : public ScriptedAI
 
     void UpdateAI(uint32 diff) override
     {
+        if (!UpdateVictim())
+            return;
+
         _events.Update(diff);
 
         while (uint32 eventId = _events.ExecuteEvent())
@@ -1369,9 +1128,6 @@ struct npc_silverpine_forsaken_trooper : public ScriptedAI
                     break;
             }
         }
-
-        if (!UpdateVictim())
-            return;
 
         DoMeleeAttackIfReady();
     }
@@ -1495,7 +1251,6 @@ struct npc_silverpine_forsaken_bat : public VehicleAI
                     me->SetUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
 
                     me->SetSpeed(UnitMoveType::MOVE_RUN, 17.794235f);
-
                     me->GetMotionMaster()->MovePath(PATH_BAT_TO_LAKE, false);
 
                     _events.ScheduleEvent(EVENT_CHECK_FINISH_ITERATING, 500ms);
@@ -1513,7 +1268,6 @@ struct npc_silverpine_forsaken_bat : public VehicleAI
                 if (waypointId == WAYPOINT_LAST_POINT_TO_LAKE)
                 {
                     me->SetSpeed(UnitMoveType::MOVE_RUN, 17.982668f);
-
                     me->GetMotionMaster()->MovePath(PATH_BAT_AROUND_LAKE, false);
 
                     SetCircularActionBar();
@@ -1546,7 +1300,6 @@ struct npc_silverpine_forsaken_bat : public VehicleAI
                 if (waypointId == WAYPOINT_LAST_POINT_TO_HOME)
                 {
                     me->GetVehicleKit()->RemoveAllPassengers();
-
                     me->DespawnOrUnsummon();
                 }
                 break;
@@ -1572,14 +1325,11 @@ struct npc_silverpine_forsaken_bat : public VehicleAI
                 if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
                 {
                     me->PauseMovement();
-
                     me->GetMotionMaster()->Clear();
-
                     me->SetSpeed(UnitMoveType::MOVE_RUN, 35.78791f);
-
                     me->GetMotionMaster()->MovePath(PATH_BAT_TO_HOME, false);
 
-                    SetupFinishActionBar();
+                    SetFinishActionBar();
 
                     player->VehicleSpellInitialize();
 
@@ -1631,7 +1381,7 @@ struct npc_silverpine_forsaken_bat : public VehicleAI
         me->m_spells[1] = SPELL_GO_HOME;
     }
 
-    void SetupFinishActionBar()
+    void SetFinishActionBar()
     {
         me->m_spells[0] = 0;
         me->m_spells[1] = 0;
@@ -1644,14 +1394,6 @@ private:
 
 void AddSC_silverpine_forest()
 {
-    /* Vehicles */
-
-    RegisterCreatureAI(npc_silverpine_horde_hauler);
-    RegisterSpellScript(spell_silverpine_magical_chains_hauler);
-    RegisterSpellScript(spell_silverpine_eject_passengers_3_8);
-
-    /* Forsaken High Command */
-
     RegisterCreatureAI(npc_silverpine_grand_executor_mortuus);
     RegisterSpellScript(spell_silverpine_raise_forsaken_83173);
     RegisterCreatureAI(npc_silverpine_fallen_human);
