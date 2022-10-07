@@ -452,4 +452,17 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         uint16 _animKitId;
         uint32 _worldEffectID;
 };
+
+// todo can we merge this one with the one in Creature?
+class TC_GAME_API ForcedGameObjectDespawnDelayEvent : public BasicEvent
+{
+public:
+    ForcedGameObjectDespawnDelayEvent(GameObject& owner, Seconds respawnTimer) : BasicEvent(), m_owner(owner), m_respawnTimer(respawnTimer) { }
+    bool Execute(uint64 e_time, uint32 p_time) override;
+
+private:
+    GameObject& m_owner;
+    Seconds const m_respawnTimer;
+};
+
 #endif
