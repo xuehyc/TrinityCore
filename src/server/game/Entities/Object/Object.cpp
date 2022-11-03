@@ -178,14 +178,14 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
             flags.CombatVictim = true;
     }
 
-    ByteBuffer buf(0x400, ByteBuffer::Reserve{});
+    ByteBuffer& buf = data->GetBuffer();
     buf << uint8(updateType);
     buf << GetGUID();
     buf << uint8(objectType);
 
     BuildMovementUpdate(&buf, flags, target);
     BuildValuesCreate(&buf, target);
-    data->AddUpdateBlock(buf);
+    data->AddUpdateBlock();
 }
 
 void Object::SendUpdateToPlayer(Player* player)
@@ -204,20 +204,20 @@ void Object::SendUpdateToPlayer(Player* player)
 
 void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player const* target) const
 {
-    ByteBuffer buf = PrepareValuesUpdateBuffer();
+    ByteBuffer& buf = PrepareValuesUpdateBuffer(data);
 
     BuildValuesUpdate(&buf, target);
 
-    data->AddUpdateBlock(buf);
+    data->AddUpdateBlock();
 }
 
 void Object::BuildValuesUpdateBlockForPlayerWithFlag(UpdateData* data, UF::UpdateFieldFlag flags, Player const* target) const
 {
-    ByteBuffer buf = PrepareValuesUpdateBuffer();
+    ByteBuffer& buf = PrepareValuesUpdateBuffer(data);
 
     BuildValuesUpdateWithFlag(&buf, flags, target);
 
-    data->AddUpdateBlock(buf);
+    data->AddUpdateBlock();
 }
 
 void Object::BuildDestroyUpdateBlock(UpdateData* data) const
@@ -230,9 +230,9 @@ void Object::BuildOutOfRangeUpdateBlock(UpdateData* data) const
     data->AddOutOfRangeGUID(GetGUID());
 }
 
-ByteBuffer Object::PrepareValuesUpdateBuffer() const
+ByteBuffer& Object::PrepareValuesUpdateBuffer(UpdateData* data) const
 {
-    ByteBuffer buffer(500, ByteBuffer::Reserve{});
+    ByteBuffer& buffer = data->GetBuffer();
     buffer << uint8(UPDATETYPE_VALUES);
     buffer << GetGUID();
     return buffer;
@@ -1452,7 +1452,7 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
         if (smoothPhasing->IsBeingReplacedForSeer(GetGUID()))
             return false;
 
-    if (!sConditionMgr->IsObjectMeetingVisibilityByObjectIdConditions(obj->GetTypeId(), obj->GetEntry(), const_cast<WorldObject*>(this)))
+    if (!sConditionMgr->IsObjectMeetingVisibilityByObjectIdConditions(obj->GetTypeId(), obj->GetEntry(), this))
         return false;
 
     bool corpseVisibility = false;
@@ -1521,7 +1521,7 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
             return false;
     }
 
-    if (obj->IsInvisibleDueToDespawn())
+    if (obj->IsInvisibleDueToDespawn(this))
         return false;
 
     if (!CanDetect(obj, ignoreStealth, checkAlert))
@@ -2071,6 +2071,15 @@ Creature* WorldObject::FindNearestCreature(uint32 entry, float range, bool alive
     Creature* creature = nullptr;
     Trinity::NearestCreatureEntryWithLiveStateInObjectRangeCheck checker(*this, entry, alive, range);
     Trinity::CreatureLastSearcher<Trinity::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(this, creature, checker);
+    Cell::VisitAllObjects(this, searcher, range);
+    return creature;
+}
+
+Creature* WorldObject::FindNearestCreatureWithAura(uint32 entry, uint32 spellId, float range, bool alive) const
+{
+    Creature* creature = nullptr;
+    Trinity::NearestCreatureEntryWithLiveStateAndAuraInObjectRangeCheck checker(*this, entry, spellId, alive, range);
+    Trinity::CreatureLastSearcher<Trinity::NearestCreatureEntryWithLiveStateAndAuraInObjectRangeCheck> searcher(this, creature, checker);
     Cell::VisitAllObjects(this, searcher, range);
     return creature;
 }

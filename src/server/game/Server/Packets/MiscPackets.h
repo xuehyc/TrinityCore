@@ -995,6 +995,17 @@ namespace WorldPackets
             ::Gender Gender = GENDER_NONE;
             uint32 CurrencyID = 0;
         };
+
+        class RuneforgeLegendaryCraftingOpenNpc final : public ServerPacket
+        {
+        public:
+            RuneforgeLegendaryCraftingOpenNpc() : ServerPacket(SMSG_RUNEFORGE_LEGENDARY_CRAFTING_OPEN_NPC, 16 + 1) { }
+
+            WorldPacket const* Write() override;
+
+            ObjectGuid RunecarverGUID;
+            bool IsUpgrade = false;
+        };
     }
 }
 

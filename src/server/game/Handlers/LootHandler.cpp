@@ -295,10 +295,10 @@ void WorldSession::DoLootRelease(Loot* loot)
                 else
                     go->SetLootState(GO_READY);
             }
-            else
+            else if (go->GetGoType() != GAMEOBJECT_TYPE_GATHERING_NODE && go->IsFullyLooted())
                 go->SetLootState(GO_JUST_DEACTIVATED);
 
-            loot->clear();
+            go->OnLootRelease(player);
         }
         else
         {
@@ -356,11 +356,14 @@ void WorldSession::DoLootRelease(Loot* loot)
 
         if (loot->isLooted())
         {
-            creature->RemoveDynamicFlag(UNIT_DYNFLAG_LOOTABLE);
+            if (creature->IsFullyLooted())
+            {
+                creature->RemoveDynamicFlag(UNIT_DYNFLAG_LOOTABLE);
 
-            // skip pickpocketing loot for speed, skinning timer reduction is no-op in fact
-            if (!creature->IsAlive())
-                creature->AllLootRemovedFromCorpse();
+                // skip pickpocketing loot for speed, skinning timer reduction is no-op in fact
+                if (!creature->IsAlive())
+                    creature->AllLootRemovedFromCorpse();
+            }
         }
         else
         {
@@ -370,9 +373,9 @@ void WorldSession::DoLootRelease(Loot* loot)
                 loot->roundRobinPlayer.Clear();
                 loot->NotifyLootList(creature->GetMap());
             }
-            // force dynflag update to update looter and lootable info
-            creature->ForceUpdateFieldChange(creature->m_values.ModifyValue(&Object::m_objectData).ModifyValue(&UF::ObjectData::DynamicFlags));
         }
+        // force dynflag update to update looter and lootable info
+        creature->ForceUpdateFieldChange(creature->m_values.ModifyValue(&Object::m_objectData).ModifyValue(&UF::ObjectData::DynamicFlags));
     }
 }
 

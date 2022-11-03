@@ -64,10 +64,10 @@ enum class GossipOptionNpc : uint8
     GarrisonTradeskill         = 29,   /*NYI*/ // White chat bubble
     GarrisonRecruitment        = 30,   /*NYI*/ // White chat bubble
     AdventureMap               = 31,   /*NYI*/ // White chat bubble
-    GarrisonTalent             = 32,   /*NYI*/ // White chat bubble
+    GarrisonTalent             = 32,   // White chat bubble
     ContributionCollector      = 33,   /*NYI*/ // White chat bubble
     Transmogrify               = 34,   // Purple helm
-    AzeriteRespec              = 35,   /*NYI*/ // White chat bubble
+    AzeriteRespec              = 35,   // White chat bubble
     IslandsMission             = 36,   /*NYI*/ // White chat bubble
     UIItemInteraction          = 37,   /*NYI*/ // White chat bubble
     WorldMap                   = 38,   /*NYI*/ // White chat bubble
@@ -182,6 +182,8 @@ class TC_GAME_API GossipMenu
         {
             return _menuItems;
         }
+
+        static uint64 GetRequiredNpcFlagForOption(GossipOptionNpc optionNpc);
 
     private:
         GossipMenuItemContainer _menuItems;

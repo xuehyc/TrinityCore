@@ -1355,7 +1355,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         InventoryResult CanUseItem(Item* pItem, bool not_loading = true) const;
         bool HasItemTotemCategory(uint32 TotemCategory) const;
         InventoryResult CanUseItem(ItemTemplate const* pItem, bool skipRequiredLevelCheck = false) const;
-        InventoryResult CanRollForItemInLFG(ItemTemplate const* item, Map const* map) const;
+        InventoryResult CanRollNeedForItem(ItemTemplate const* item, Map const* map, bool restrictOnlyLfg) const;
         Item* StoreNewItem(ItemPosCountVec const& pos, uint32 itemId, bool update, ItemRandomBonusListId randomBonusListId = 0, GuidSet const& allowedLooters = GuidSet(), ItemContext context = ItemContext::NONE, std::vector<int32> const& bonusListIDs = std::vector<int32>(), bool addToCollection = true);
         Item* StoreItem(ItemPosCountVec const& pos, Item* pItem, bool update);
         Item* EquipNewItem(uint16 pos, uint32 item, ItemContext context, bool update);
@@ -1479,7 +1479,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         /***                    GOSSIP SYSTEM                  ***/
         /*********************************************************/
 
-        void PrepareGossipMenu(WorldObject* source, uint32 menuId = 0, bool showQuests = false);
+        void PrepareGossipMenu(WorldObject* source, uint32 menuId, bool showQuests = false);
         void SendPreparedGossip(WorldObject* source);
         void OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 menuId);
 
@@ -1549,7 +1549,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         QuestGiverStatus GetQuestDialogStatus(Object* questGiver);
 
         void SetDailyQuestStatus(uint32 quest_id);
-        bool IsDailyQuestDone(uint32 quest_id);
+        bool IsDailyQuestDone(uint32 quest_id) const;
         void SetWeeklyQuestStatus(uint32 quest_id);
         void SetMonthlyQuestStatus(uint32 quest_id);
         void SetSeasonalQuestStatus(uint32 quest_id);
@@ -1842,7 +1842,6 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         uint32 GetLastPotionId() const { return m_lastPotionId; }
         void SetLastPotionId(uint32 item_id) { m_lastPotionId = item_id; }
         void UpdatePotionCooldown(Spell* spell = nullptr);
-        void UpdateReviveBattlePetCooldown();
 
         void SetResurrectRequestData(WorldObject const* caster, uint32 health, uint32 mana, uint32 appliedAura);
         void ClearResurrectRequestData()
@@ -1948,7 +1947,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
 
         bool UpdateSkillPro(uint16 skillId, int32 chance, uint32 step);
         bool UpdateCraftSkill(SpellInfo const* spellInfo);
-        bool UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator = 1);
+        bool UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator = 1, WorldObject const* object = nullptr);
         bool UpdateFishingSkill();
 
         float GetHealthBonusFromStamina() const;
@@ -2168,7 +2167,6 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
 
         bool IsAtGroupRewardDistance(WorldObject const* pRewardSource) const;
         bool IsAtRecruitAFriendDistance(WorldObject const* pOther) const;
-        void RewardPlayerAndGroupAtKill(Unit* victim, bool isBattleGround);
         void RewardPlayerAndGroupAtEvent(uint32 creature_id, WorldObject* pRewardSource);
         bool isHonorOrXPTarget(Unit const* victim) const;
 
@@ -2771,6 +2769,8 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void SetWarModeLocal(bool enabled);
         bool CanEnableWarModeInArea() const;
         void UpdateWarModeAuras();
+
+        void SendGarrisonOpenTalentNpc(ObjectGuid guid, int32 garrTalentTreeId, int32 friendshipFactionId);
 
         std::string GetDebugInfo() const override;
 

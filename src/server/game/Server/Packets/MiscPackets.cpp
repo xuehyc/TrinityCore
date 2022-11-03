@@ -773,3 +773,12 @@ WorldPacket const* WorldPackets::Misc::DisplayToast::Write()
 
     return &_worldPacket;
 }
+
+WorldPacket const* WorldPackets::Misc::RuneforgeLegendaryCraftingOpenNpc::Write()
+{
+    _worldPacket << RunecarverGUID;
+    _worldPacket.WriteBit(IsUpgrade);
+    _worldPacket.FlushBits();
+
+    return &_worldPacket;
+}

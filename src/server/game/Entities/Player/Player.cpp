@@ -56,6 +56,7 @@
 #include "GameEventMgr.h"
 #include "GameObjectAI.h"
 #include "Garrison.h"
+#include "GarrisonMgr.h"
 #include "GitRevision.h"
 #include "GossipDef.h"
 #include "GridNotifiers.h"
@@ -70,7 +71,6 @@
 #include "InstancePackets.h"
 #include "InstanceScript.h"
 #include "ItemPackets.h"
-#include "KillRewarder.h"
 #include "Language.h"
 #include "LanguageMgr.h"
 #include "LFGMgr.h"
@@ -136,6 +136,11 @@
 // corpse reclaim times
 #define DEATH_EXPIRE_STEP (5*MINUTE)
 #define MAX_DEATH_COUNT 3
+
+enum PlayerSpells
+{
+    SPELL_EXPERIENCE_ELIMINATED = 206662
+};
 
 static uint32 copseReclaimDelay[MAX_DEATH_COUNT] = { 30, 60, 120 };
 
@@ -3639,7 +3644,7 @@ void Player::BuildValuesUpdateForPlayerWithMask(UpdateData* data, UF::ObjectData
     if (target == this && requestedActivePlayerMask.IsAnySet())
         valuesMask.Set(TYPEID_ACTIVE_PLAYER);
 
-    ByteBuffer buffer = PrepareValuesUpdateBuffer();
+    ByteBuffer& buffer = PrepareValuesUpdateBuffer(data);
     std::size_t sizePos = buffer.wpos();
     buffer << uint32(0);
     buffer << uint32(valuesMask.GetBlock(0));
@@ -3658,7 +3663,7 @@ void Player::BuildValuesUpdateForPlayerWithMask(UpdateData* data, UF::ObjectData
 
     buffer.put<uint32>(sizePos, buffer.wpos() - sizePos - 4);
 
-    data->AddUpdateBlock(buffer);
+    data->AddUpdateBlock();
 }
 
 void Player::ValuesUpdateForPlayerWithMaskSender::operator()(Player const* player) const
@@ -5497,12 +5502,26 @@ bool Player::UpdateCraftSkill(SpellInfo const* spellInfo)
     return false;
 }
 
-bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator)
+bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator /*= 1*/, WorldObject const* object /*= nullptr*/)
 {
     TC_LOG_DEBUG("entities.player.skills", "Player::UpdateGatherSkill: Player '%s' (%s), SkillID: %u, SkillLevel: %u,  RedLevel: %u)",
         GetName().c_str(), GetGUID().ToString().c_str(), SkillId, SkillValue, RedLevel);
 
     uint32 gathering_skill_gain = sWorld->getIntConfig(CONFIG_SKILL_GAIN_GATHERING);
+
+    uint32 grayLevel = RedLevel + 100;
+    uint32 greenLevel = RedLevel + 50;
+    uint32 yellowLevel = RedLevel + 25;
+    if (GameObject const* go = Object::ToGameObject(object))
+    {
+        if (go->GetGOInfo()->GetTrivialSkillLow())
+            yellowLevel = go->GetGOInfo()->GetTrivialSkillLow();
+
+        if (go->GetGOInfo()->GetTrivialSkillHigh())
+            grayLevel = go->GetGOInfo()->GetTrivialSkillHigh();
+
+        greenLevel = (yellowLevel + grayLevel) / 2;
+    }
 
     // For skinning and Mining chance decrease with level. 1-74 - no decrease, 75-149 - 2 times, 225-299 - 8 times
     switch (SkillId)
@@ -5518,7 +5537,7 @@ bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLeve
         case SKILL_KUL_TIRAN_HERBALISM:
         case SKILL_JEWELCRAFTING:
         case SKILL_INSCRIPTION:
-            return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator, gathering_skill_gain);
+            return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * Multiplicator, gathering_skill_gain);
         case SKILL_SKINNING:
         case SKILL_SKINNING_2:
         case SKILL_OUTLAND_SKINNING:
@@ -5529,9 +5548,9 @@ bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLeve
         case SKILL_LEGION_SKINNING:
         case SKILL_KUL_TIRAN_SKINNING:
             if (sWorld->getIntConfig(CONFIG_SKILL_CHANCE_SKINNING_STEPS) == 0)
-                return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator, gathering_skill_gain);
+                return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * Multiplicator, gathering_skill_gain);
             else
-                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator) >> (SkillValue/sWorld->getIntConfig(CONFIG_SKILL_CHANCE_SKINNING_STEPS)), gathering_skill_gain);
+                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * Multiplicator) >> (SkillValue / sWorld->getIntConfig(CONFIG_SKILL_CHANCE_SKINNING_STEPS)), gathering_skill_gain);
         case SKILL_MINING:
         case SKILL_MINING_2:
         case SKILL_OUTLAND_MINING:
@@ -5542,9 +5561,9 @@ bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLeve
         case SKILL_LEGION_MINING:
         case SKILL_KUL_TIRAN_MINING:
             if (sWorld->getIntConfig(CONFIG_SKILL_CHANCE_MINING_STEPS) == 0)
-                return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator, gathering_skill_gain);
+                return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * Multiplicator, gathering_skill_gain);
             else
-                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator) >> (SkillValue/sWorld->getIntConfig(CONFIG_SKILL_CHANCE_MINING_STEPS)), gathering_skill_gain);
+                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, grayLevel, greenLevel, yellowLevel) * Multiplicator) >> (SkillValue / sWorld->getIntConfig(CONFIG_SKILL_CHANCE_MINING_STEPS)), gathering_skill_gain);
     }
     return false;
 }
@@ -11066,14 +11085,17 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto, bool skipRequiredL
     return EQUIP_ERR_OK;
 }
 
-InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, Map const* map) const
+InventoryResult Player::CanRollNeedForItem(ItemTemplate const* proto, Map const* map, bool restrictOnlyLfg) const
 {
-    if (!GetGroup() || !GetGroup()->isLFGGroup())
-        return EQUIP_ERR_OK;    // not in LFG group
+    if (restrictOnlyLfg)
+    {
+        if (!GetGroup() || !GetGroup()->isLFGGroup())
+            return EQUIP_ERR_OK;    // not in LFG group
 
-    // check if looted object is inside the lfg dungeon
-    if (!sLFGMgr->inLfgDungeonMap(GetGroup()->GetGUID(), map->GetId(), map->GetDifficultyID()))
-        return EQUIP_ERR_OK;
+        // check if looted object is inside the lfg dungeon
+        if (!sLFGMgr->inLfgDungeonMap(GetGroup()->GetGUID(), map->GetId(), map->GetDifficultyID()))
+            return EQUIP_ERR_OK;
+    }
 
     if (!proto)
         return EQUIP_ERR_ITEM_NOT_FOUND;
@@ -11093,41 +11115,14 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, Map const
             return EQUIP_ERR_CANT_EQUIP_SKILL;
     }
 
-    uint8 _class = GetClass();
-
     if (proto->GetClass() == ITEM_CLASS_WEAPON && GetSkillValue(proto->GetSkill()) == 0)
         return EQUIP_ERR_PROFICIENCY_NEEDED;
 
-    if (proto->GetClass() == ITEM_CLASS_ARMOR && proto->GetSubClass() > ITEM_SUBCLASS_ARMOR_MISCELLANEOUS && proto->GetSubClass() < ITEM_SUBCLASS_ARMOR_COSMETIC && proto->GetInventoryType() != INVTYPE_CLOAK)
+    if (proto->GetClass() == ITEM_CLASS_ARMOR && proto->GetInventoryType() != INVTYPE_CLOAK)
     {
-        if (_class == CLASS_WARRIOR || _class == CLASS_PALADIN || _class == CLASS_DEATH_KNIGHT)
-        {
-            if (GetLevel() < 40)
-            {
-                if (proto->GetSubClass() != ITEM_SUBCLASS_ARMOR_MAIL)
-                    return EQUIP_ERR_CLIENT_LOCKED_OUT;
-            }
-            else if (proto->GetSubClass() != ITEM_SUBCLASS_ARMOR_PLATE)
-                return EQUIP_ERR_CLIENT_LOCKED_OUT;
-        }
-        else if (_class == CLASS_HUNTER || _class == CLASS_SHAMAN)
-        {
-            if (GetLevel() < 40)
-            {
-                if (proto->GetSubClass() != ITEM_SUBCLASS_ARMOR_LEATHER)
-                    return EQUIP_ERR_CLIENT_LOCKED_OUT;
-            }
-            else if (proto->GetSubClass() != ITEM_SUBCLASS_ARMOR_MAIL)
-                return EQUIP_ERR_CLIENT_LOCKED_OUT;
-        }
-
-        if (_class == CLASS_ROGUE || _class == CLASS_DRUID)
-            if (proto->GetSubClass() != ITEM_SUBCLASS_ARMOR_LEATHER)
-                return EQUIP_ERR_CLIENT_LOCKED_OUT;
-
-        if (_class == CLASS_MAGE || _class == CLASS_PRIEST || _class == CLASS_WARLOCK)
-            if (proto->GetSubClass() != ITEM_SUBCLASS_ARMOR_CLOTH)
-                return EQUIP_ERR_CLIENT_LOCKED_OUT;
+        ChrClassesEntry const* classesEntry = sChrClassesStore.AssertEntry(GetClass());
+        if (!(classesEntry->ArmorTypeMask & 1 << proto->GetSubClass()))
+            return EQUIP_ERR_CLIENT_LOCKED_OUT;
     }
 
     return EQUIP_ERR_OK;
@@ -13625,43 +13620,33 @@ void Player::SendNewItem(Item* item, uint32 quantity, bool pushed, bool created,
 /***                    GOSSIP SYSTEM                  ***/
 /*********************************************************/
 
-void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool showQuests /*= false*/)
+void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId, bool showQuests /*= false*/)
 {
     PlayerMenu* menu = PlayerTalkClass;
     menu->ClearMenus();
 
     menu->GetGossipMenu().SetMenuId(menuId);
 
-    GossipMenuItemsMapBounds menuItemBounds = sObjectMgr->GetGossipMenuItemsMapBounds(menuId);
-
-    // if default menuId and no menu options exist for this, use options from default options
-    if (menuItemBounds.first == menuItemBounds.second && menuId == GetDefaultGossipMenuForSource(source))
-        menuItemBounds = sObjectMgr->GetGossipMenuItemsMapBounds(0);
-
-    uint64 npcflags = 0;
+    Trinity::IteratorPair menuItemBounds = sObjectMgr->GetGossipMenuItemsMapBounds(menuId);
 
     if (source->GetTypeId() == TYPEID_UNIT)
     {
-        npcflags = (uint64(source->ToUnit()->m_unitData->NpcFlags[1]) << 32) | source->ToUnit()->m_unitData->NpcFlags[0];
-        if (showQuests && npcflags & UNIT_NPC_FLAG_QUESTGIVER)
+        if (showQuests && source->ToUnit()->IsQuestGiver())
             PrepareQuestMenu(source->GetGUID());
     }
     else if (source->GetTypeId() == TYPEID_GAMEOBJECT)
         if (showQuests && source->ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
             PrepareQuestMenu(source->GetGUID());
 
-    for (GossipMenuItemsContainer::const_iterator itr = menuItemBounds.first; itr != menuItemBounds.second; ++itr)
+    for (auto const& [_, gossipMenuItem] : menuItemBounds)
     {
-        if (!sConditionMgr->IsObjectMeetToConditions(this, source, itr->second.Conditions))
+        if (!sConditionMgr->IsObjectMeetToConditions(this, source, gossipMenuItem.Conditions))
             continue;
 
         bool canTalk = true;
         if (Creature* creature = source->ToCreature())
         {
-            if (!(itr->second.OptionNpcFlag & npcflags))
-                continue;
-
-            switch (itr->second.OptionNpc)
+            switch (gossipMenuItem.OptionNpc)
             {
                 case GossipOptionNpc::TaxiNode:
                     if (GetSession()->SendLearnNewTaxiNode(creature))
@@ -13687,11 +13672,11 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                         canTalk = false;
                     break;
                 case GossipOptionNpc::DisableXPGain:
-                    if (HasPlayerFlag(PLAYER_FLAGS_NO_XP_GAIN))
+                    if (HasPlayerFlag(PLAYER_FLAGS_NO_XP_GAIN) || IsMaxLevel())
                         canTalk = false;
                     break;
                 case GossipOptionNpc::EnableXPGain:
-                    if (!HasPlayerFlag(PLAYER_FLAGS_NO_XP_GAIN))
+                    if (!HasPlayerFlag(PLAYER_FLAGS_NO_XP_GAIN) || IsMaxLevel())
                         canTalk = false;
                     break;
                 case GossipOptionNpc::None:
@@ -13704,6 +13689,7 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                 case GossipOptionNpc::Auctioneer:
                 case GossipOptionNpc::Mailbox:
                 case GossipOptionNpc::Transmogrify:
+                case GossipOptionNpc::AzeriteRespec:
                     break;                                         // No checks
                 case GossipOptionNpc::CemeterySelect:
                     canTalk = false;                               // Deprecated
@@ -13722,7 +13708,6 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                 case GossipOptionNpc::AdventureMap:
                 case GossipOptionNpc::GarrisonTalent:
                 case GossipOptionNpc::ContributionCollector:
-                case GossipOptionNpc::AzeriteRespec:
                 case GossipOptionNpc::IslandsMission:
                 case GossipOptionNpc::UIItemInteraction:
                 case GossipOptionNpc::WorldMap:
@@ -13735,14 +13720,14 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                 case GossipOptionNpc::CovenantRenown:
                     break;                                         // NYI
                 default:
-                    TC_LOG_ERROR("sql.sql", "Creature entry %u has an unknown gossip option icon %u for menu %u.", creature->GetEntry(), AsUnderlyingType(itr->second.OptionNpc), itr->second.MenuID);
+                    TC_LOG_ERROR("sql.sql", "Creature entry %u has an unknown gossip option icon %u for menu %u.", creature->GetEntry(), AsUnderlyingType(gossipMenuItem.OptionNpc), gossipMenuItem.MenuID);
                     canTalk = false;
                     break;
             }
         }
         else if (GameObject* go = source->ToGameObject())
         {
-            switch (itr->second.OptionNpc)
+            switch (gossipMenuItem.OptionNpc)
             {
                 case GossipOptionNpc::None:
                     if (go->GetGoType() != GAMEOBJECT_TYPE_QUESTGIVER && go->GetGoType() != GAMEOBJECT_TYPE_GOOBER)
@@ -13757,39 +13742,39 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
         if (canTalk)
         {
             std::string strOptionText, strBoxText;
-            BroadcastTextEntry const* optionBroadcastText = sBroadcastTextStore.LookupEntry(itr->second.OptionBroadcastTextID);
-            BroadcastTextEntry const* boxBroadcastText = sBroadcastTextStore.LookupEntry(itr->second.BoxBroadcastTextID);
+            BroadcastTextEntry const* optionBroadcastText = sBroadcastTextStore.LookupEntry(gossipMenuItem.OptionBroadcastTextID);
+            BroadcastTextEntry const* boxBroadcastText = sBroadcastTextStore.LookupEntry(gossipMenuItem.BoxBroadcastTextID);
             LocaleConstant locale = GetSession()->GetSessionDbLocaleIndex();
 
             if (optionBroadcastText)
                 strOptionText = DB2Manager::GetBroadcastTextValue(optionBroadcastText, locale, GetGender());
             else
-                strOptionText = itr->second.OptionText;
+                strOptionText = gossipMenuItem.OptionText;
 
             if (boxBroadcastText)
                 strBoxText = DB2Manager::GetBroadcastTextValue(boxBroadcastText, locale, GetGender());
             else
-                strBoxText = itr->second.BoxText;
+                strBoxText = gossipMenuItem.BoxText;
 
             if (locale != DEFAULT_LOCALE)
             {
                 if (!optionBroadcastText)
                 {
                     /// Find localizations from database.
-                    if (GossipMenuItemsLocale const* gossipMenuLocale = sObjectMgr->GetGossipMenuItemsLocale(menuId, itr->second.OptionID))
+                    if (GossipMenuItemsLocale const* gossipMenuLocale = sObjectMgr->GetGossipMenuItemsLocale(menuId, gossipMenuItem.OptionID))
                         ObjectMgr::GetLocaleString(gossipMenuLocale->OptionText, locale, strOptionText);
                 }
 
                 if (!boxBroadcastText)
                 {
                     /// Find localizations from database.
-                    if (GossipMenuItemsLocale const* gossipMenuLocale = sObjectMgr->GetGossipMenuItemsLocale(menuId, itr->second.OptionID))
+                    if (GossipMenuItemsLocale const* gossipMenuLocale = sObjectMgr->GetGossipMenuItemsLocale(menuId, gossipMenuItem.OptionID))
                         ObjectMgr::GetLocaleString(gossipMenuLocale->BoxText, locale, strBoxText);
                 }
             }
 
-            menu->GetGossipMenu().AddMenuItem(itr->second.OptionID, itr->second.OptionNpc, strOptionText, 0, AsUnderlyingType(itr->second.OptionNpc), strBoxText, itr->second.BoxMoney, itr->second.BoxCoded);
-            menu->GetGossipMenu().AddGossipMenuItemData(itr->second.OptionID, itr->second.ActionMenuID, itr->second.ActionPoiID);
+            menu->GetGossipMenu().AddMenuItem(gossipMenuItem.OptionID, gossipMenuItem.OptionNpc, strOptionText, 0, AsUnderlyingType(gossipMenuItem.OptionNpc), strBoxText, gossipMenuItem.BoxMoney, gossipMenuItem.BoxCoded);
+            menu->GetGossipMenu().AddGossipMenuItemData(gossipMenuItem.OptionID, gossipMenuItem.ActionMenuID, gossipMenuItem.ActionPoiID);
         }
     }
 }
@@ -13930,10 +13915,12 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
             break;
         case GossipOptionNpc::DisableXPGain:
             PlayerTalkClass->SendCloseGossip();
+            CastSpell(nullptr, SPELL_EXPERIENCE_ELIMINATED, true);
             SetPlayerFlag(PLAYER_FLAGS_NO_XP_GAIN);
             break;
         case GossipOptionNpc::EnableXPGain:
             PlayerTalkClass->SendCloseGossip();
+            RemoveAurasDueToSpell(SPELL_EXPERIENCE_ELIMINATED);
             RemovePlayerFlag(PLAYER_FLAGS_NO_XP_GAIN);
             break;
         case GossipOptionNpc::Mailbox:
@@ -13947,8 +13934,19 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
             PlayerTalkClass->SendCloseGossip();
             SendRespecWipeConfirm(guid, 0, SPEC_RESET_GLYPHS);
             break;
+        case GossipOptionNpc::GarrisonTalent:
+        {
+            GossipMenuAddon const* addon = sObjectMgr->GetGossipMenuAddon(menuId);
+            GossipMenuItemAddon const* itemAddon = sObjectMgr->GetGossipMenuItemAddon(menuId, gossipListId);
+            SendGarrisonOpenTalentNpc(guid, itemAddon ? itemAddon->GarrTalentTreeID.value_or(0) : 0, addon ? addon->FriendshipFactionID : 0);
+            break;
+        }
         case GossipOptionNpc::Transmogrify:
             GetSession()->SendOpenTransmogrifier(guid);
+            break;
+        case GossipOptionNpc::AzeriteRespec:
+            PlayerTalkClass->SendCloseGossip();
+            GetSession()->SendAzeriteRespecNPC(guid);
             break;
         default:
             break;
@@ -14123,8 +14121,10 @@ void Player::SendPreparedQuest(WorldObject* source)
                 if (quest->IsAutoAccept() && CanAddQuest(quest, true) && CanTakeQuest(quest, true))
                     AddQuestAndCheckCompletion(quest, source);
 
-                if (quest->IsAutoComplete() && quest->IsRepeatable() && !quest->IsDailyOrWeekly())
+                if (quest->IsAutoComplete() && quest->IsRepeatable() && !quest->IsDailyOrWeekly() && !quest->IsMonthly())
                     PlayerTalkClass->SendQuestGiverRequestItems(quest, source->GetGUID(), CanCompleteRepeatableQuest(quest), true);
+                else if (quest->IsAutoComplete() && !quest->IsDailyOrWeekly() && !quest->IsMonthly())
+                    PlayerTalkClass->SendQuestGiverRequestItems(quest, source->GetGUID(), CanRewardQuest(quest, false), true);
                 else
                     PlayerTalkClass->SendQuestGiverQuestDetails(quest, source->GetGUID(), true, false);
             }
@@ -15348,7 +15348,7 @@ bool Player::SatisfyQuestStatus(Quest const* qInfo, bool msg) const
 
 bool Player::SatisfyQuestConditions(Quest const* qInfo, bool msg) const
 {
-    if (!sConditionMgr->IsObjectMeetingNotGroupedConditions(CONDITION_SOURCE_TYPE_QUEST_AVAILABLE, qInfo->GetQuestId(), const_cast<Player*>(this)))
+    if (!sConditionMgr->IsObjectMeetingNotGroupedConditions(CONDITION_SOURCE_TYPE_QUEST_AVAILABLE, qInfo->GetQuestId(), this))
     {
         if (msg)
         {
@@ -17851,7 +17851,7 @@ void Player::_LoadCUFProfiles(PreparedQueryResult result)
 
 bool Player::isAllowedToLoot(const Creature* creature) const
 {
-    if (!creature->isDead() || !creature->IsDamageEnoughForLootingAndReward())
+    if (!creature->isDead())
         return false;
 
     if (HasPendingBind())
@@ -17863,19 +17863,9 @@ bool Player::isAllowedToLoot(const Creature* creature) const
     if (!loot->HasAllowedLooter(GetGUID()) || (!loot->hasItemForAll() && !loot->hasItemFor(this))) // no loot in creature for this player
         return false;
 
-    if (loot->loot_type == LOOT_SKINNING)
-        return creature->GetLootRecipientGUID() == GetGUID();
-
-    Group const* thisGroup = GetGroup();
-    if (!thisGroup)
-        return this == creature->GetLootRecipient();
-    else if (thisGroup != creature->GetLootRecipientGroup())
-        return false;
-
     switch (loot->GetLootMethod())
     {
-        case PERSONAL_LOOT: /// @todo implement personal loot (http://wow.gamepedia.com/Loot#Personal_Loot)
-            return false;
+        case PERSONAL_LOOT:
         case FREE_FOR_ALL:
             return true;
         case ROUND_ROBIN:
@@ -22577,25 +22567,6 @@ void Player::UpdatePotionCooldown(Spell* spell)
     m_lastPotionId = 0;
 }
 
-void Player::UpdateReviveBattlePetCooldown()
-{
-    SpellInfo const* reviveBattlePetSpellInfo = sSpellMgr->GetSpellInfo(BattlePets::SPELL_REVIVE_BATTLE_PETS, DIFFICULTY_NONE);
-
-    if (reviveBattlePetSpellInfo && HasSpell(BattlePets::SPELL_REVIVE_BATTLE_PETS))
-    {
-        SpellHistory::Duration remainingCooldown = GetSpellHistory()->GetRemainingCategoryCooldown(reviveBattlePetSpellInfo);
-        if (remainingCooldown > SpellHistory::Duration::zero())
-        {
-            if (remainingCooldown < BattlePets::REVIVE_BATTLE_PETS_COOLDOWN)
-                GetSpellHistory()->ModifyCooldown(reviveBattlePetSpellInfo, BattlePets::REVIVE_BATTLE_PETS_COOLDOWN - remainingCooldown);
-        }
-        else
-        {
-            GetSpellHistory()->StartCooldown(reviveBattlePetSpellInfo, 0, nullptr, false, BattlePets::REVIVE_BATTLE_PETS_COOLDOWN);
-        }
-    }
-}
-
 void Player::SetResurrectRequestData(WorldObject const* caster, uint32 health, uint32 mana, uint32 appliedAura)
 {
     ASSERT(!IsResurrectRequested());
@@ -23910,7 +23881,7 @@ void Player::SetDailyQuestStatus(uint32 quest_id)
     }
 }
 
-bool Player::IsDailyQuestDone(uint32 quest_id)
+bool Player::IsDailyQuestDone(uint32 quest_id) const
 {
     return m_activePlayerData->DailyQuestsCompleted.FindIndex(quest_id) >= 0;
 }
@@ -24270,6 +24241,7 @@ void Player::UpdateVisibleGameobjectsOrSpellClicks()
                     case GAMEOBJECT_TYPE_CHEST:
                     case GAMEOBJECT_TYPE_GOOBER:
                     case GAMEOBJECT_TYPE_GENERIC:
+                    case GAMEOBJECT_TYPE_GATHERING_NODE:
                         if (sObjectMgr->IsGameObjectForQuests(obj->GetEntry()))
                             objMask.MarkChanged(&UF::ObjectData::DynamicFlags);
                         break;
@@ -24651,11 +24623,6 @@ bool Player::GetsRecruitAFriendBonus(bool forXP)
         }
     }
     return recruitAFriend;
-}
-
-void Player::RewardPlayerAndGroupAtKill(Unit* victim, bool isBattleGround)
-{
-    KillRewarder(this, victim, isBattleGround).Reward();
 }
 
 void Player::RewardPlayerAndGroupAtEvent(uint32 creature_id, WorldObject* pRewardSource)
@@ -26161,7 +26128,7 @@ bool Player::CanSeeSpellClickOn(Creature const* c) const
         if (!clickPair.second.IsFitToRequirements(this, c))
             return false;
 
-        if (sConditionMgr->IsObjectMeetingSpellClickConditions(c->GetEntry(), clickPair.second.spellId, const_cast<Player*>(this), const_cast<Creature*>(c)))
+        if (sConditionMgr->IsObjectMeetingSpellClickConditions(c->GetEntry(), clickPair.second.spellId, this, c))
             return true;
     }
 
@@ -28165,4 +28132,13 @@ void Player::SendDisplayToast(uint32 entry, DisplayToastType type, bool isBonusR
     }
 
     SendDirectMessage(displayToast.Write());
+}
+
+void Player::SendGarrisonOpenTalentNpc(ObjectGuid guid, int32 garrTalentTreeId, int32 friendshipFactionId)
+{
+    WorldPackets::Garrison::GarrisonOpenTalentNpc openTalentNpc;
+    openTalentNpc.NpcGUID = guid;
+    openTalentNpc.GarrTalentTreeID = garrTalentTreeId;
+    openTalentNpc.FriendshipFactionID = friendshipFactionId;
+    SendDirectMessage(openTalentNpc.Write());
 }

@@ -27,7 +27,6 @@
 class GameObject;
 class GameObjectAI;
 class GameObjectModel;
-class Group;
 class OPvPCapturePoint;
 class Transport;
 class TransportBase;
@@ -223,6 +222,7 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         uint32 GetRespawnDelay() const { return m_respawnDelayTime; }
         void Refresh();
         void DespawnOrUnsummon(Milliseconds delay = 0ms, Seconds forceRespawnTime = 0s);
+        void DespawnForPlayer(Player* seer, Seconds respawnTime);
         void Delete();
         void SendGameObjectDespawn();
         Loot* GetFishLoot(Player* lootOwner);
@@ -238,6 +238,8 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         void SetGoType(GameobjectTypes type) { SetUpdateFieldValue(m_values.ModifyValue(&GameObject::m_gameObjectData).ModifyValue(&UF::GameObjectData::TypeID), type); }
         GOState GetGoState() const { return GOState(*m_gameObjectData->State); }
         void SetGoState(GOState state);
+        GOState GetGoStateFor(ObjectGuid const& viewer) const;
+        void SetGoStateFor(GOState state, Player const* viewer);
         uint32 GetGoArtKit() const { return m_gameObjectData->ArtKit; }
         void SetGoArtKit(uint32 artkit);
         uint8 GetGoAnimProgress() const { return m_gameObjectData->PercentHealth; }
@@ -261,8 +263,8 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         void AddLootMode(uint16 lootMode) { m_LootMode |= lootMode; }
         void RemoveLootMode(uint16 lootMode) { m_LootMode &= ~lootMode; }
         void ResetLootMode() { m_LootMode = LOOT_MODE_DEFAULT; }
-        void SetLootGenerationTime();
-        uint32 GetLootGenerationTime() const { return m_lootGenerationTime; }
+        bool IsFullyLooted() const;
+        void OnLootRelease(Player* looter);
 
         void AddToSkillupList(ObjectGuid const& PlayerGuidLow) { m_SkillupList.insert(PlayerGuidLow); }
         bool IsInSkillupList(ObjectGuid const& playerGuid) const
@@ -282,11 +284,10 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         std::unique_ptr<Loot> m_loot;
         std::unordered_map<ObjectGuid, std::unique_ptr<Loot>> m_personalLoot;
 
-        Player* GetLootRecipient() const;
-        Group* GetLootRecipientGroup() const;
-        void SetLootRecipient(Unit* unit, Group* group = nullptr);
+        GuidUnorderedSet const& GetTapList() const { return m_tapList; }
+        void SetTapList(GuidUnorderedSet tapList) { m_tapList = std::move(tapList); }
         bool IsLootAllowedFor(Player const* player) const;
-        bool HasLootRecipient() const { return !m_lootRecipient.IsEmpty() || !m_lootRecipientGroup.IsEmpty(); }
+        bool HasLootRecipient() const { return !m_tapList.empty(); }
         Loot* GetLootForPlayer(Player const* /*player*/) const override;
 
         GameObject* GetLinkedTrap();
@@ -304,7 +305,7 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
 
         bool IsNeverVisibleFor(WorldObject const* seer) const override;
         bool IsAlwaysVisibleFor(WorldObject const* seer) const override;
-        bool IsInvisibleDueToDespawn() const override;
+        bool IsInvisibleDueToDespawn(WorldObject const* seer) const override;
 
         uint8 GetLevelForTarget(WorldObject const* target) const override;
 
@@ -381,12 +382,14 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         void UpdateCapturePoint();
         bool CanInteractWithCapturePoint(Player const* target) const;
 
+        bool MeetsInteractCondition(Player const* user) const;
+
         void AIM_Destroy();
         bool AIM_Initialize();
 
         std::string GetDebugInfo() const override;
 
-        void UpdateDynamicFlagsForNearbyPlayers() const;
+        void UpdateDynamicFlagsForNearbyPlayers();
 
         void HandleCustomTypeCommand(GameObjectTypeBase::CustomCommand const& command) const;
 
@@ -428,10 +431,8 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         QuaternionData m_localRotation;
         Position m_stationaryPosition;
 
-        ObjectGuid m_lootRecipient;
-        ObjectGuid m_lootRecipientGroup;
+        GuidUnorderedSet m_tapList;
         uint16 m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
-        uint32 m_lootGenerationTime;
 
         ObjectGuid m_linkedTrap;
 
@@ -451,5 +452,29 @@ class TC_GAME_API GameObject : public WorldObject, public GridObject<GameObject>
         bool m_respawnCompatibilityMode;
         uint16 _animKitId;
         uint32 _worldEffectID;
+
+        struct PerPlayerState
+        {
+            SystemTimePoint ValidUntil = SystemTimePoint::min();
+            Optional<GOState> State;
+            bool Despawned = false;
+        };
+
+        std::unique_ptr<std::unordered_map<ObjectGuid, PerPlayerState>> m_perPlayerState;
+
+        std::unordered_map<ObjectGuid, PerPlayerState>& GetOrCreatePerPlayerStates();
 };
+
+// todo can we merge this one with the one in Creature?
+class TC_GAME_API ForcedGameObjectDespawnDelayEvent : public BasicEvent
+{
+public:
+    ForcedGameObjectDespawnDelayEvent(GameObject& owner, Seconds respawnTimer) : BasicEvent(), m_owner(owner), m_respawnTimer(respawnTimer) { }
+    bool Execute(uint64 e_time, uint32 p_time) override;
+
+private:
+    GameObject& m_owner;
+    Seconds const m_respawnTimer;
+};
+
 #endif

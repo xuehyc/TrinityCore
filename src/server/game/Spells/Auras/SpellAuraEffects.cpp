@@ -1449,6 +1449,8 @@ void AuraEffect::HandleModInvisibility(AuraApplication const* aurApp, uint8 mode
 
         target->m_invisibility.AddFlag(type);
         target->m_invisibility.AddValue(type, GetAmount());
+
+        target->SetVisFlag(UNIT_VIS_FLAGS_INVISIBLE);
     }
     else
     {
@@ -1460,6 +1462,8 @@ void AuraEffect::HandleModInvisibility(AuraApplication const* aurApp, uint8 mode
                 playerTarget->RemoveAuraVision(PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
 
             target->m_invisibility.DelFlag(type);
+
+            target->RemoveVisFlag(UNIT_VIS_FLAGS_INVISIBLE);
         }
         else
         {
@@ -1537,7 +1541,7 @@ void AuraEffect::HandleModStealth(AuraApplication const* aurApp, uint8 mode, boo
         target->m_stealth.AddFlag(type);
         target->m_stealth.AddValue(type, GetAmount());
 
-        target->SetVisFlag(UNIT_VIS_FLAGS_CREEP);
+        target->SetVisFlag(UNIT_VIS_FLAGS_STEALTHED);
         if (Player * playerTarget = target->ToPlayer())
             playerTarget->AddAuraVision(PLAYER_FIELD_BYTE2_STEALTH);
     }
@@ -1549,7 +1553,7 @@ void AuraEffect::HandleModStealth(AuraApplication const* aurApp, uint8 mode, boo
         {
             target->m_stealth.DelFlag(type);
 
-            target->RemoveVisFlag(UNIT_VIS_FLAGS_CREEP);
+            target->RemoveVisFlag(UNIT_VIS_FLAGS_STEALTHED);
             if (Player * playerTarget = target->ToPlayer())
                 playerTarget->RemoveAuraVision(PLAYER_FIELD_BYTE2_STEALTH);
         }
@@ -3173,6 +3177,18 @@ void AuraEffect::HandleAuraModEffectImmunity(AuraApplication const* aurApp, uint
         }
         else
             sOutdoorPvPMgr->HandleDropFlag(player, GetSpellInfo()->Id);
+
+        if (GameObject* gameObjectCaster = player->GetMap()->GetGameObject(GetCasterGUID()))
+        {
+            if (gameObjectCaster->GetGoType() == GAMEOBJECT_TYPE_NEW_FLAG)
+            {
+                if (GameObject* droppedFlag = gameObjectCaster->SummonGameObject(gameObjectCaster->GetGOInfo()->newflag.FlagDrop, player->GetPosition(), QuaternionData::fromEulerAnglesZYX(player->GetOrientation(), 0.f, 0.f), Seconds(gameObjectCaster->GetGOInfo()->newflag.ExpireDuration / 1000), GO_SUMMON_TIMED_DESPAWN))
+                {
+                    droppedFlag->m_Events.AddEvent(new ForcedGameObjectDespawnDelayEvent(*droppedFlag, 0s), Milliseconds(gameObjectCaster->GetGOInfo()->newflag.ExpireDuration));
+                    droppedFlag->SetOwnerGUID(gameObjectCaster->GetGUID());
+                }
+            }
+        }
     }
 }
 
