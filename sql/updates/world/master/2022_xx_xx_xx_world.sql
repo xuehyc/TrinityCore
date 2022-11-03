@@ -1,3 +1,22 @@
+-- waypoints
+ALTER TABLE `waypoints` 
+	ADD COLUMN `smoothTransition` tinyint UNSIGNED NOT NULL DEFAULT 0 AFTER `delay`;
+
+-- waypoint_data
+ALTER TABLE `waypoint_data`
+	ADD COLUMN `velocity` FLOAT NOT NULL DEFAULT 0 AFTER `orientation`,
+	ADD COLUMN `smoothTransition` TINYINT UNSIGNED NOT NULL DEFAULT 0 AFTER `delay`;
+
+-- waypoint_data_addon
+DROP TABLE IF EXISTS `waypoint_data_addon`;
+CREATE TABLE `waypoint_data_addon` (  
+  `PathID` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  `PointID` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  `SplinePointIndex` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
+  `PositionX` FLOAT NOT NULL DEFAULT 0,
+  `PositionY` FLOAT NOT NULL DEFAULT 0,
+  `PositionZ` FLOAT NOT NULL DEFAULT 0
+);
 -- Grand Executor Mortuus
 UPDATE `creature_template` SET `ScriptName`='npc_silverpine_grand_executor_mortuus' WHERE `entry`=44615;
 
@@ -76,3 +95,4 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 DELETE FROM `spell_script_names` WHERE `spell_id` = 83149 AND `ScriptName` = 'spell_silverpine_forsaken_trooper_masterscript_high_command';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES 
 (83149, 'spell_silverpine_forsaken_trooper_masterscript_high_command');
+
