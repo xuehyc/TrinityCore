@@ -53,7 +53,7 @@ public:
         {
             if (sConfigMgr->GetBoolDefault(MFKAnnounce, true))
             {
-                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cffffcc00SPP Cata Money For Kills |rmodule.");
+                ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cFFB8860BSPP Cata Money For Kills |rmodule.");
             }
         }
     }
