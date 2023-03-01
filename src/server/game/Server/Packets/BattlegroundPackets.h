@@ -450,16 +450,26 @@ namespace WorldPackets
                 int32 Unused2 = 0;
                 int32 WeeklyPlayed = 0;
                 int32 WeeklyWon = 0;
+                int32 RoundsSeasonPlayed = 0;
+                int32 RoundsSeasonWon = 0;
+                int32 RoundsWeeklyPlayed = 0;
+                int32 RoundsWeeklyWon = 0;
                 int32 BestWeeklyRating = 0;
                 int32 LastWeeksBestRating = 0;
                 int32 BestSeasonRating = 0;
                 int32 PvpTierID = 0;
                 int32 Unused3 = 0;
-                int32 WeeklyBestWinPvpTierID = 0;
                 int32 Unused4 = 0;
                 int32 Rank = 0;
                 bool Disqualified = false;
             } Bracket[6];
+        };
+
+        struct RatedMatchDeserterPenalty
+        {
+            int32 PersonalRatingChange = 0;
+            int32 QueuePenaltySpellID = 0;
+            WorldPackets::Duration<Milliseconds, int32> QueuePenaltyDuration;
         };
 
         class PVPMatchInitialize final : public ServerPacket
@@ -480,6 +490,7 @@ namespace WorldPackets
             MatchState State = Inactive;
             Timestamp<> StartTime;
             WorldPackets::Duration<Seconds> Duration;
+            Optional<RatedMatchDeserterPenalty> DeserterPenalty;
             uint8 ArenaFaction = 0;
             uint32 BattlemasterListID = 0;
             bool Registered = false;

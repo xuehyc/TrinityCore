@@ -256,6 +256,7 @@ class TC_GAME_API Spell
         void EffectHeal();
         void EffectBind();
         void EffectTeleportToReturnPoint();
+        void EffectIncreaseCurrencyCap();
         void EffectHealthLeech();
         void EffectQuestComplete();
         void EffectCreateItem();
@@ -372,12 +373,15 @@ class TC_GAME_API Spell
         void EffectRemoveTalent();
         void EffectDestroyItem();
         void EffectLearnGarrisonBuilding();
+        void EffectRemoveAuraBySpellLabel();
         void EffectCreateGarrison();
         void EffectCreateConversation();
         void EffectCancelConversation();
         void EffectAddGarrisonFollower();
         void EffectActivateGarrisonBuilding();
         void EffectGrantBattlePetLevel();
+        void EffectGiveExperience();
+        void EffectGiveRestedExperience();
         void EffectHealBattlePetPct();
         void EffectEnableBattlePets();
         void EffectChangeBattlePetQuality();
@@ -403,6 +407,13 @@ class TC_GAME_API Spell
         void EffectSendChatMessage();
         void EffectGrantBattlePetExperience();
         void EffectLearnTransmogIllusion();
+        void EffectModifyAuraStacks();
+        void EffectModifyCooldown();
+        void EffectModifyCooldowns();
+        void EffectModifyCooldownsByCategory();
+        void EffectModifySpellCharges();
+        void EffectCreateTraitTreeConfig();
+        void EffectChangeActiveCombatTraitConfig();
 
         typedef std::unordered_set<Aura*> UsedSpellMods;
 
@@ -442,7 +453,7 @@ class TC_GAME_API Spell
         void cancel();
         void update(uint32 difftime);
         void cast(bool skipCheck = false);
-        void finish(bool ok = true);
+        void finish(SpellCastResult result = SPELL_CAST_OK);
         void TakePower();
 
         void TakeRunePower(bool didHit);
@@ -571,6 +582,7 @@ class TC_GAME_API Spell
                 uint32 Data[2];
             } Raw;
         } m_misc;
+        std::any m_customArg;
         SpellCastVisual m_SpellVisual;
         SpellCastTargets m_targets;
         int8 m_comboPointGain;

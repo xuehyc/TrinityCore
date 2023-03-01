@@ -56,6 +56,7 @@ struct GameObjectTemplate
             uint32 InfiniteAOI;                             // 10 Infinite AOI, enum { false, true, }; Default: false
             uint32 NotLOSBlocking;                          // 11 Not LOS Blocking, enum { false, true, }; Default: false
             uint32 InteractRadiusOverride;                  // 12 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            uint32 Collisionupdatedelayafteropen;           // 13 Collision update delay(ms) after open, int, Min value: 0, Max value: 2147483647, Default value: 0
         } door;
         // 1 GAMEOBJECT_TYPE_BUTTON
         struct
@@ -196,6 +197,13 @@ struct GameObjectTemplate
             uint32 floatOnWater;                            // 7 floatOnWater, enum { false, true, }; Default: false
             uint32 conditionID1;                            // 8 conditionID1, References: PlayerCondition, NoValue = 0
             uint32 InteractRadiusOverride;                  // 9 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            uint32 gossipID;                                // 10 gossipID, References: Gossip, NoValue = 0
+            uint32 spellFocusType2;                         // 11 spellFocusType 2, References: SpellFocusObject, NoValue = 0
+            uint32 spellFocusType3;                         // 12 spellFocusType 3, References: SpellFocusObject, NoValue = 0
+            uint32 spellFocusType4;                         // 13 spellFocusType 4, References: SpellFocusObject, NoValue = 0
+            uint32 Profession;                              // 14 Profession, enum { First Aid, Blacksmithing, Leatherworking, Alchemy, Herbalism, Cooking, Mining, Tailoring, Engineering, Enchanting, Fishing, Skinning, Jewelcrafting, Inscription, Archaeology, }; Default: Blacksmithing
+            uint32 Profession2;                             // 15 Profession 2, enum { First Aid, Blacksmithing, Leatherworking, Alchemy, Herbalism, Cooking, Mining, Tailoring, Engineering, Enchanting, Fishing, Skinning, Jewelcrafting, Inscription, Archaeology, }; Default: Blacksmithing
+            uint32 Profession3;                             // 16 Profession 3, enum { First Aid, Blacksmithing, Leatherworking, Alchemy, Herbalism, Cooking, Mining, Tailoring, Engineering, Enchanting, Fishing, Skinning, Jewelcrafting, Inscription, Archaeology, }; Default: Blacksmithing
         } spellFocus;
         // 9 GAMEOBJECT_TYPE_TEXT
         struct
@@ -483,7 +491,7 @@ struct GameObjectTemplate
         // 31 GAMEOBJECT_TYPE_DUNGEON_DIFFICULTY
         struct
         {
-            uint32 InstanceType;                            // 0 Instance Type, enum { Not Instanced, Party Dungeon, Raid Dungeon, PVP Battlefield, Arena Battlefield, Scenario, }; Default: Party Dungeon
+            uint32 InstanceType;                            // 0 Instance Type, enum { Not Instanced, Party Dungeon, Raid Dungeon, PVP Battlefield, Arena Battlefield, Scenario, WoWLabs, }; Default: Party Dungeon
             uint32 DifficultyNormal;                        // 1 Difficulty Normal, References: animationdata, NoValue = 0
             uint32 DifficultyHeroic;                        // 2 Difficulty Heroic, References: animationdata, NoValue = 0
             uint32 DifficultyEpic;                          // 3 Difficulty Epic, References: animationdata, NoValue = 0
@@ -503,6 +511,8 @@ struct GameObjectTemplate
             int32 HeightOffset;                             // 1 Height Offset (inches), int, Min value: -100, Max value: 100, Default value: 0
             uint32 SitAnimKit;                              // 2 Sit Anim Kit, References: AnimKit, NoValue = 0
             uint32 InteractRadiusOverride;                  // 3 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            uint32 CustomizationScope;                      // 4 Customization Scope, int, Min value: 0, Max value: 2147483647, Default value: 0
+            uint32 Preventteleportingtheplayeroutofthebarbershopchair;// 5 Prevent teleporting the player out of the barbershop chair, enum { false, true, }; Default: false
         } barberChair;
         // 33 GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING
         struct
@@ -794,6 +804,7 @@ struct GameObjectTemplate
             uint32 WhenAvailable;                           // 0 When Available, References: GameObjectDisplayInfo, NoValue = 0
             uint32 open;                                    // 1 open, References: Lock_, NoValue = 0
             uint32 InteractRadiusOverride;                  // 2 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            uint32 ExpansionLevel;                          // 3 Expansion Level, int, Min value: 0, Max value: 2147483647, Default value: 0
         } weeklyRewardChest;
         // 60 GAMEOBJECT_TYPE_CLIENT_MODEL
         struct
@@ -803,6 +814,17 @@ struct GameObjectTemplate
             uint32 InfiniteAOI;                             // 2 Infinite AOI, enum { false, true, }; Default: false
             uint32 TrueInfiniteAOI;                         // 3 True Infinite AOI (programmer only!), enum { false, true, }; Default: false
         } clientModel;
+        // 61 GAMEOBJECT_TYPE_CRAFTING_TABLE
+        struct
+        {
+            uint32 Profession;                              // 0 Profession, enum { First Aid, Blacksmithing, Leatherworking, Alchemy, Herbalism, Cooking, Mining, Tailoring, Engineering, Enchanting, Fishing, Skinning, Jewelcrafting, Inscription, Archaeology, }; Default: Blacksmithing
+        } craftingTable;
+        // 62 GAMEOBJECT_TYPE_PERKS_PROGRAM_CHEST
+        struct
+        {
+            uint32 Script;                                  // 0 Script, References: SpellScript, NoValue = 0
+            uint32 autoClose;                               // 1 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 3000
+        } PerksProgramChest;
         struct
         {
             uint32 data[MAX_GAMEOBJECT_DATA];
@@ -1037,13 +1059,14 @@ struct GameObjectTemplate
     {
         switch (type)
         {
-            case GAMEOBJECT_TYPE_DOOR:          return door.autoClose;
-            case GAMEOBJECT_TYPE_BUTTON:        return button.autoClose;
-            case GAMEOBJECT_TYPE_TRAP:          return trap.autoClose;
-            case GAMEOBJECT_TYPE_GOOBER:        return goober.autoClose;
-            case GAMEOBJECT_TYPE_TRANSPORT:     return transport.autoClose;
-            case GAMEOBJECT_TYPE_AREADAMAGE:    return areaDamage.autoClose;
-            case GAMEOBJECT_TYPE_TRAPDOOR:      return trapdoor.autoClose;
+            case GAMEOBJECT_TYPE_DOOR:                  return door.autoClose;
+            case GAMEOBJECT_TYPE_BUTTON:                return button.autoClose;
+            case GAMEOBJECT_TYPE_TRAP:                  return trap.autoClose;
+            case GAMEOBJECT_TYPE_GOOBER:                return goober.autoClose;
+            case GAMEOBJECT_TYPE_TRANSPORT:             return transport.autoClose;
+            case GAMEOBJECT_TYPE_AREADAMAGE:            return areaDamage.autoClose;
+            case GAMEOBJECT_TYPE_TRAPDOOR:              return trapdoor.autoClose;
+            case GAMEOBJECT_TYPE_PERKS_PROGRAM_CHEST:   return PerksProgramChest.autoClose;
             default: return 0;
         }
     }
@@ -1174,6 +1197,18 @@ struct GameObjectTemplate
             case GAMEOBJECT_TYPE_GATHERING_NODE:        return gatheringNode.LargeAOI != 0;
             case GAMEOBJECT_TYPE_CLIENT_MODEL:          return clientModel.LargeAOI != 0;
             default: return false;
+        }
+    }
+
+    uint32 GetServerOnly() const
+    {
+        switch (type)
+        {
+            case GAMEOBJECT_TYPE_GENERIC: return generic.serverOnly;
+            case GAMEOBJECT_TYPE_TRAP: return trap.serverOnly;
+            case GAMEOBJECT_TYPE_SPELL_FOCUS: return spellFocus.serverOnly;
+            case GAMEOBJECT_TYPE_AURA_GENERATOR: return auraGenerator.serverOnly;
+            default: return 0;
         }
     }
 

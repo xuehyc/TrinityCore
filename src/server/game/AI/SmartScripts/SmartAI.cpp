@@ -117,7 +117,7 @@ void SmartAI::PausePath(uint32 delay, bool forced)
 
     if (HasEscortState(SMART_ESCORT_PAUSED))
     {
-        TC_LOG_ERROR("scripts.ai.sai", "SmartAI::PausePath: Creature wanted to pause waypoint (current waypoint: %u) movement while already paused, ignoring. (%s)", _currentWaypointNode, me->GetGUID().ToString().c_str());
+        TC_LOG_ERROR("scripts.ai.sai", "SmartAI::PausePath: Creature wanted to pause waypoint (current waypoint: {}) movement while already paused, ignoring. ({})", _currentWaypointNode, me->GetGUID().ToString());
         return;
     }
 
@@ -716,7 +716,7 @@ void SmartAI::OnCharmed(bool isNew)
             me->LastCharmerGUID.Clear();
 
             if (!me->IsInCombat())
-                EnterEvadeMode(EVADE_REASON_NO_HOSTILES);
+                EnterEvadeMode(EvadeReason::NoHostiles);
         }
     }
 
@@ -1138,7 +1138,7 @@ class SmartTrigger : public AreaTriggerScript
             if (!player->IsAlive())
                 return false;
 
-            TC_LOG_DEBUG("scripts.ai", "AreaTrigger %u is using SmartTrigger script", trigger->ID);
+            TC_LOG_DEBUG("scripts.ai", "AreaTrigger {} is using SmartTrigger script", trigger->ID);
             SmartScript script;
             script.OnInitialize(player, trigger);
             script.ProcessEventsFor(SMART_EVENT_AREATRIGGER_ONTRIGGER, player, trigger->ID);
@@ -1187,28 +1187,28 @@ public:
     void OnSceneStart(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* sceneTemplate) override
     {
         SmartScript smartScript;
-        smartScript.OnInitialize(nullptr, nullptr, sceneTemplate);
+        smartScript.OnInitialize(player, nullptr, sceneTemplate);
         smartScript.ProcessEventsFor(SMART_EVENT_SCENE_START, player);
     }
 
     void OnSceneTriggerEvent(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* sceneTemplate, std::string const& triggerName) override
     {
         SmartScript smartScript;
-        smartScript.OnInitialize(nullptr, nullptr, sceneTemplate);
+        smartScript.OnInitialize(player, nullptr, sceneTemplate);
         smartScript.ProcessEventsFor(SMART_EVENT_SCENE_TRIGGER, player, 0, 0, false, nullptr, nullptr, triggerName);
     }
 
     void OnSceneCancel(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* sceneTemplate) override
     {
         SmartScript smartScript;
-        smartScript.OnInitialize(nullptr, nullptr, sceneTemplate);
+        smartScript.OnInitialize(player, nullptr, sceneTemplate);
         smartScript.ProcessEventsFor(SMART_EVENT_SCENE_CANCEL, player);
     }
 
     void OnSceneComplete(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* sceneTemplate) override
     {
         SmartScript smartScript;
-        smartScript.OnInitialize(nullptr, nullptr, sceneTemplate);
+        smartScript.OnInitialize(player, nullptr, sceneTemplate);
         smartScript.ProcessEventsFor(SMART_EVENT_SCENE_COMPLETE, player);
     }
 };
@@ -1222,7 +1222,7 @@ public:
     void OnQuestStatusChange(Player* player, Quest const* quest, QuestStatus /*oldStatus*/, QuestStatus newStatus) override
     {
         SmartScript smartScript;
-        smartScript.OnInitialize(nullptr, nullptr, nullptr, quest);
+        smartScript.OnInitialize(player, nullptr, nullptr, quest);
         switch (newStatus)
         {
             case QUEST_STATUS_INCOMPLETE:
@@ -1250,7 +1250,7 @@ public:
         if (slot < MAX_QUEST_LOG_SIZE && player->IsQuestObjectiveComplete(slot, quest, objective))
         {
             SmartScript smartScript;
-            smartScript.OnInitialize(nullptr, nullptr, nullptr, quest);
+            smartScript.OnInitialize(player, nullptr, nullptr, quest);
             smartScript.ProcessEventsFor(SMART_EVENT_QUEST_OBJ_COMPLETION, player, objective.ID);
         }
     }

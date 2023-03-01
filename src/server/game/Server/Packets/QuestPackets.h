@@ -49,6 +49,16 @@ namespace WorldPackets
             void Read() override { }
         };
 
+        class QuestGiverStatusTrackedQuery final : public ClientPacket
+        {
+        public:
+            QuestGiverStatusTrackedQuery(WorldPacket&& packet) : ClientPacket(CMSG_QUEST_GIVER_STATUS_TRACKED_QUERY, std::move(packet)) { }
+
+            void Read() override;
+
+            GuidUnorderedSet QuestGiverGUIDs;
+        };
+
         struct QuestGiverInfo
         {
             QuestGiverInfo() { }
@@ -113,6 +123,13 @@ namespace WorldPackets
             int32 PlayerConditionID = 0;
         };
 
+        struct ConditionalQuestText
+        {
+            int32 PlayerConditionID = 0;
+            int32 QuestGiverCreatureID = 0;
+            std::string_view Text;
+        };
+
         struct QuestInfo
         {
             int32 QuestID                   = 0;
@@ -171,7 +188,10 @@ namespace WorldPackets
             int32 Expansion                 = 0;
             int32 ManagedWorldStateID       = 0;
             int32 QuestSessionBonus         = 0;
+            int32 QuestGiverCreatureID      = 0; // used to select ConditionalQuestText
             std::vector<QuestObjective> Objectives;
+            std::vector<ConditionalQuestText> ConditionalQuestDescription;
+            std::vector<ConditionalQuestText> ConditionalQuestCompletionLog;
             int32 RewardItems[QUEST_REWARD_ITEM_COUNT] = { };
             int32 RewardAmount[QUEST_REWARD_ITEM_COUNT] = { };
             int32 ItemDrop[QUEST_ITEM_DROP_COUNT] = { };
@@ -287,7 +307,7 @@ namespace WorldPackets
             int32 SuggestedPartyMembers     = 0;
             QuestRewards Rewards;
             std::vector<QuestDescEmote> Emotes;
-            int32 QuestFlags[2]             = { }; // Flags and FlagsEx
+            int32 QuestFlags[3]             = { }; // Flags and FlagsEx
         };
 
         class QuestGiverOfferRewardMessage final : public ServerPacket
@@ -301,12 +321,14 @@ namespace WorldPackets
             int32 PortraitGiver = 0;
             int32 PortraitGiverMount = 0;
             int32 PortraitGiverModelSceneID = 0;
+            int32 QuestGiverCreatureID = 0;
             std::string QuestTitle;
             std::string RewardText;
             std::string PortraitGiverText;
             std::string PortraitGiverName;
             std::string PortraitTurnInText;
             std::string PortraitTurnInName;
+            std::vector<ConditionalQuestText> ConditionalRewardText;
             QuestGiverOfferReward QuestData;
             int32 QuestPackageID = 0;
         };
@@ -383,7 +405,7 @@ namespace WorldPackets
             ObjectGuid InformUnit;
             int32 QuestID           = 0;
             int32 QuestPackageID    = 0;
-            uint32 QuestFlags[2]    = { };
+            uint32 QuestFlags[3]    = { };
             int32 SuggestedPartyMembers = 0;
             QuestRewards Rewards;
             std::vector<QuestObjectiveSimple> Objectives;
@@ -395,6 +417,7 @@ namespace WorldPackets
             int32 PortraitGiverModelSceneID = 0;
             int32 QuestStartItemID = 0;
             int32 QuestSessionBonus = 0;
+            int32 QuestGiverCreatureID = 0;
             std::string PortraitGiverText;
             std::string PortraitGiverName;
             std::string PortraitTurnInText;
@@ -402,6 +425,7 @@ namespace WorldPackets
             std::string QuestTitle;
             std::string LogDescription;
             std::string DescriptionText;
+            std::vector<ConditionalQuestText> ConditionalDescriptionText;
             bool DisplayPopup = false;
             bool StartCheat = false;
             bool AutoLaunched = false;
@@ -440,9 +464,10 @@ namespace WorldPackets
             std::vector<QuestObjectiveCollect> Collect;
             std::vector<QuestCurrency> Currency;
             int32 StatusFlags           = 0;
-            uint32 QuestFlags[2]        = { };
+            uint32 QuestFlags[3]        = { };
             std::string QuestTitle;
             std::string CompletionText;
+            std::vector<ConditionalQuestText> ConditionalCompletionText;
         };
 
         class QuestGiverRequestReward final : public ClientPacket

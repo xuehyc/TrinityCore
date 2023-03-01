@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.31, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.32, for Linux (x86_64)
 --
 -- Host: localhost    Database: world
 -- ------------------------------------------------------
--- Server version	8.0.31-0ubuntu0.20.04.1
+-- Server version	8.0.32-0ubuntu0.20.04.2
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -608,6 +608,7 @@ CREATE TABLE `creature` (
   `unit_flags3` int unsigned NOT NULL DEFAULT '0',
   `dynamicflags` int unsigned NOT NULL DEFAULT '0',
   `ScriptName` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `StringId` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `VerifiedBuild` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`),
   KEY `idx_map` (`map`),
@@ -627,8 +628,11 @@ CREATE TABLE `creature_addon` (
   `path_id` int unsigned NOT NULL DEFAULT '0',
   `mount` int unsigned NOT NULL DEFAULT '0',
   `MountCreatureID` int unsigned NOT NULL DEFAULT '0',
-  `bytes1` int unsigned NOT NULL DEFAULT '0',
-  `bytes2` int unsigned NOT NULL DEFAULT '1',
+  `StandState` tinyint unsigned NOT NULL DEFAULT '0',
+  `AnimTier` tinyint unsigned NOT NULL DEFAULT '0',
+  `VisFlags` tinyint unsigned NOT NULL DEFAULT '0',
+  `SheathState` tinyint unsigned NOT NULL DEFAULT '1',
+  `PvPFlags` tinyint unsigned NOT NULL DEFAULT '0',
   `emote` int unsigned NOT NULL DEFAULT '0',
   `aiAnimKit` smallint NOT NULL DEFAULT '0',
   `movementAnimKit` smallint NOT NULL DEFAULT '0',
@@ -948,10 +952,11 @@ CREATE TABLE `creature_template` (
   `WidgetSetID` int NOT NULL DEFAULT '0',
   `WidgetSetUnitConditionID` int NOT NULL DEFAULT '0',
   `RegenHealth` tinyint unsigned NOT NULL DEFAULT '1',
-  `mechanic_immune_mask` int unsigned NOT NULL DEFAULT '0',
+  `mechanic_immune_mask` bigint unsigned NOT NULL DEFAULT '0',
   `spell_school_immune_mask` int unsigned NOT NULL DEFAULT '0',
   `flags_extra` int unsigned NOT NULL DEFAULT '0',
   `ScriptName` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `StringId` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `VerifiedBuild` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Creature System';
@@ -969,8 +974,11 @@ CREATE TABLE `creature_template_addon` (
   `path_id` int unsigned NOT NULL DEFAULT '0',
   `mount` int unsigned NOT NULL DEFAULT '0',
   `MountCreatureID` int unsigned NOT NULL DEFAULT '0',
-  `bytes1` int unsigned NOT NULL DEFAULT '0',
-  `bytes2` int unsigned NOT NULL DEFAULT '1',
+  `StandState` tinyint unsigned NOT NULL DEFAULT '0',
+  `AnimTier` tinyint unsigned NOT NULL DEFAULT '0',
+  `VisFlags` tinyint unsigned NOT NULL DEFAULT '0',
+  `SheathState` tinyint unsigned NOT NULL DEFAULT '1',
+  `PvPFlags` tinyint unsigned NOT NULL DEFAULT '0',
   `emote` int unsigned NOT NULL DEFAULT '0',
   `aiAnimKit` smallint NOT NULL DEFAULT '0',
   `movementAnimKit` smallint NOT NULL DEFAULT '0',
@@ -1518,7 +1526,7 @@ CREATE TABLE `game_tele` (
   `map` smallint unsigned NOT NULL DEFAULT '0',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1951 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tele Command';
+) ENGINE=InnoDB AUTO_INCREMENT=1965 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tele Command';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1866,33 +1874,22 @@ DROP TABLE IF EXISTS `gossip_menu_option`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `gossip_menu_option` (
   `MenuID` int unsigned NOT NULL DEFAULT '0',
+  `GossipOptionID` int NOT NULL DEFAULT '0',
   `OptionID` int unsigned NOT NULL DEFAULT '0',
   `OptionNpc` tinyint unsigned NOT NULL DEFAULT '0',
   `OptionText` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `OptionBroadcastTextID` int unsigned NOT NULL DEFAULT '0',
   `Language` int unsigned NOT NULL DEFAULT '0',
+  `Flags` int NOT NULL DEFAULT '0',
   `ActionMenuID` int unsigned NOT NULL DEFAULT '0',
   `ActionPoiID` int unsigned NOT NULL DEFAULT '0',
+  `GossipNpcOptionID` int DEFAULT NULL,
   `BoxCoded` tinyint unsigned NOT NULL DEFAULT '0',
   `BoxMoney` int unsigned NOT NULL DEFAULT '0',
   `BoxText` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `BoxBroadcastTextID` int unsigned NOT NULL DEFAULT '0',
-  `VerifiedBuild` int NOT NULL DEFAULT '0',
-  PRIMARY KEY (`MenuID`,`OptionID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `gossip_menu_option_addon`
---
-
-DROP TABLE IF EXISTS `gossip_menu_option_addon`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `gossip_menu_option_addon` (
-  `MenuID` int unsigned NOT NULL DEFAULT '0',
-  `OptionID` int unsigned NOT NULL DEFAULT '0',
-  `GarrTalentTreeID` int DEFAULT NULL,
+  `SpellID` int DEFAULT NULL,
+  `OverrideIconID` int DEFAULT NULL,
   `VerifiedBuild` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`MenuID`,`OptionID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2951,6 +2948,44 @@ CREATE TABLE `prospecting_loot_template` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `quest_completion_log_conditional`
+--
+
+DROP TABLE IF EXISTS `quest_completion_log_conditional`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `quest_completion_log_conditional` (
+  `QuestId` int NOT NULL,
+  `PlayerConditionId` int NOT NULL,
+  `QuestgiverCreatureId` int NOT NULL,
+  `locale` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `OrderIndex` int NOT NULL DEFAULT '0',
+  `VerifiedBuild` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`QuestId`,`PlayerConditionId`,`QuestgiverCreatureId`,`locale`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `quest_description_conditional`
+--
+
+DROP TABLE IF EXISTS `quest_description_conditional`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `quest_description_conditional` (
+  `QuestId` int NOT NULL,
+  `PlayerConditionId` int NOT NULL,
+  `QuestgiverCreatureId` int NOT NULL,
+  `locale` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `OrderIndex` int NOT NULL DEFAULT '0',
+  `VerifiedBuild` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`QuestId`,`PlayerConditionId`,`QuestgiverCreatureId`,`locale`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `quest_details`
 --
 
@@ -3087,6 +3122,25 @@ CREATE TABLE `quest_offer_reward` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `quest_offer_reward_conditional`
+--
+
+DROP TABLE IF EXISTS `quest_offer_reward_conditional`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `quest_offer_reward_conditional` (
+  `QuestId` int NOT NULL,
+  `PlayerConditionId` int NOT NULL,
+  `QuestgiverCreatureId` int NOT NULL,
+  `locale` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `OrderIndex` int NOT NULL DEFAULT '0',
+  `VerifiedBuild` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`QuestId`,`PlayerConditionId`,`QuestgiverCreatureId`,`locale`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `quest_offer_reward_locale`
 --
 
@@ -3198,6 +3252,25 @@ CREATE TABLE `quest_request_items` (
   `CompletionText` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `VerifiedBuild` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `quest_request_items_conditional`
+--
+
+DROP TABLE IF EXISTS `quest_request_items_conditional`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `quest_request_items_conditional` (
+  `QuestId` int NOT NULL,
+  `PlayerConditionId` int NOT NULL,
+  `QuestgiverCreatureId` int NOT NULL,
+  `locale` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `OrderIndex` int NOT NULL DEFAULT '0',
+  `VerifiedBuild` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`QuestId`,`PlayerConditionId`,`QuestgiverCreatureId`,`locale`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3717,6 +3790,10 @@ CREATE TABLE `serverside_spell` (
   `TargetAuraSpell` int unsigned NOT NULL DEFAULT '0',
   `ExcludeCasterAuraSpell` int unsigned NOT NULL DEFAULT '0',
   `ExcludeTargetAuraSpell` int unsigned NOT NULL DEFAULT '0',
+  `CasterAuraType` int NOT NULL DEFAULT '0',
+  `TargetAuraType` int NOT NULL DEFAULT '0',
+  `ExcludeCasterAuraType` int NOT NULL DEFAULT '0',
+  `ExcludeTargetAuraType` int NOT NULL DEFAULT '0',
   `CastingTimeIndex` int unsigned NOT NULL DEFAULT '1',
   `RecoveryTime` int unsigned NOT NULL DEFAULT '0',
   `CategoryRecoveryTime` int unsigned NOT NULL DEFAULT '0',
@@ -3952,6 +4029,7 @@ CREATE TABLE `smart_scripts` (
   `action_param4` int unsigned NOT NULL DEFAULT '0',
   `action_param5` int unsigned NOT NULL DEFAULT '0',
   `action_param6` int unsigned NOT NULL DEFAULT '0',
+  `action_param7` int unsigned NOT NULL DEFAULT '0',
   `target_type` tinyint unsigned NOT NULL DEFAULT '0',
   `target_param1` int unsigned NOT NULL DEFAULT '0',
   `target_param2` int unsigned NOT NULL DEFAULT '0',
@@ -4796,4 +4874,4 @@ CREATE TABLE `world_state` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-20 11:05:24
+-- Dump completed on 2023-02-03  1:13:57
