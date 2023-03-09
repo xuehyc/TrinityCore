@@ -24,20 +24,25 @@
 
 class Creature;
 class Unit;
-struct WaypointNode;
 struct WaypointPath;
 
 template<class T>
 class WaypointMovementGenerator;
 
 template<>
-class WaypointMovementGenerator<Creature> : public MovementGeneratorMedium<Creature, WaypointMovementGenerator<Creature>>, public PathMovementBase<Creature, WaypointPath const*>
+class WaypointMovementGenerator<Creature> : public MovementGeneratorMedium<Creature, WaypointMovementGenerator<Creature>>,
+    public PathMovementBase<Creature, WaypointPath const*>
 {
     public:
-        explicit WaypointMovementGenerator(uint32 pathId = 0, bool repeating = true);
-        explicit WaypointMovementGenerator(WaypointPath& path, bool repeating = true);
-
-        ~WaypointMovementGenerator() { _path = nullptr; }
+        explicit WaypointMovementGenerator(uint32 pathId, bool repeating, Optional<Milliseconds> duration = {}, Optional<float> speed = {},
+            MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode::Default,
+            Optional<std::pair<Milliseconds, Milliseconds>> waitTimeRangeAtPathEnd = {}, Optional<float> wanderDistanceAtPathEnds = {},
+            bool followPathBackwardsFromEndToStart = false, bool generatePath = true);
+        explicit WaypointMovementGenerator(WaypointPath const& path, bool repeating, Optional<Milliseconds> duration, Optional<float> speed,
+            MovementWalkRunSpeedSelectionMode speedSelectionMode,
+            Optional<std::pair<Milliseconds, Milliseconds>> waitTimeRangeAtPathEnd, Optional<float> wanderDistanceAtPathEnds,
+            bool followPathBackwardsFromEndToStart, bool generatePath);
+        ~WaypointMovementGenerator();
 
         MovementGeneratorType GetMovementGeneratorType() const override;
 
@@ -55,21 +60,34 @@ class WaypointMovementGenerator<Creature> : public MovementGeneratorMedium<Creat
         std::string GetDebugInfo() const override;
 
     private:
-        void ProcessWaypointArrival(Creature*, WaypointNode const&);
+        void MovementInform(Creature*);
+        void OnArrived(Creature*);
         void StartMove(Creature*, bool relaunch = false);
-        bool IsAllowedToMove(Creature*);
+        bool ComputeNextNode();
+        bool UpdateTimer(uint32 diff)
+        {
+            _nextMoveTime.Update(diff);
+            if (_nextMoveTime.Passed())
+            {
+                _nextMoveTime.Reset(0);
+                return true;
+            }
+            return false;
+        }
 
-        uint32 _lastSplineId;
+        TimeTracker _nextMoveTime;
         uint32 _pathId;
-        int32 _waypointDelay;
-        int32 _pauseTime;
-        bool _waypointReached;
-        bool _recalculateSpeed;
         bool _repeating;
         bool _loadedFromDB;
-        bool _stalled;
-        bool _hasBeenStalled;
-        bool _done;
+
+        Optional<TimeTracker> _duration;
+        Optional<float> _speed;
+        MovementWalkRunSpeedSelectionMode _speedSelectionMode;
+        Optional<std::pair<Milliseconds, Milliseconds>> _waitTimeRangeAtPathEnd;
+        Optional<float> _wanderDistanceAtPathEnds;
+        bool _followPathBackwardsFromEndToStart;
+        bool _isReturningToStart;
+        bool _generatePath;
 };
 
 #endif
