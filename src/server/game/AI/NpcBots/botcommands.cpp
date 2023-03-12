@@ -20,11 +20,14 @@
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "Spell.h"
+#include "TemporarySummon.h"
 #include "Vehicle.h"
 #include "World.h"
 #include "WorldDatabase.h"
 #include "WorldSession.h"
 #include "QueryPackets.h"
+
+#include <iomanip>
 
 /*
 Name: script_bot_commands
@@ -33,7 +36,14 @@ Comment: Npc Bot related commands by Trickerer (onlysuffering@gmail.com)
 Category: commandscripts/custom/
 */
 
+#ifdef _MSC_VER
+# pragma warning(push, 4)
+#endif
+
 using namespace Trinity::ChatCommands;
+
+static uint32 nextWPId = 0;
+static bool allWPsLoaded = false;
 
 class script_bot_commands : public CommandScript
 {
@@ -288,11 +298,217 @@ private:
 public:
     script_bot_commands() : CommandScript("script_bot_commands") { }
 
+    class WanderPoint_AI : public CreatureAI
+    {
+        using node_ltype = std::list<Unit*>;
+        using node_mtype = std::unordered_map<uint32 /*mapId*/, node_ltype>;
+
+        static node_ltype ALL_WPS;
+        static node_mtype ALL_WPS_PER_MAP;
+        static node_mtype ALL_WPS_PER_ZONE;
+        static node_mtype ALL_WPS_PER_AREA;
+
+    public:
+        enum BotWPFlags : uint32 {
+            BOTWP_FLAG_SPAWN            = 0x00000001,
+            BOTWP_FLAG_ALLIANCE_ONLY    = 0x00000002,
+            BOTWP_FLAG_HORDE_ONLY       = 0x00000004,
+            BOTWP_FLAG_CAN_BACKTRACK_TO = 0x00000008,
+            BOTWP_FLAG_END              = 0x00000010
+        };
+
+        static node_ltype const* GetAllWPs() {
+            return &ALL_WPS;
+        }
+        static node_ltype const* GetMapWPs(uint32 mapId) {
+            if (ALL_WPS_PER_MAP.find(mapId) == ALL_WPS_PER_MAP.cend())
+                return nullptr;
+            return &ALL_WPS_PER_MAP.at(mapId);
+        }
+        static node_ltype const* GetZoneWPs(uint32 zoneId) {
+            if (ALL_WPS_PER_ZONE.find(zoneId) == ALL_WPS_PER_ZONE.cend())
+                return nullptr;
+            return &ALL_WPS_PER_ZONE.at(zoneId);
+        }
+        static node_ltype const* GetAreaWPs(uint32 areaId) {
+            if (ALL_WPS_PER_AREA.find(areaId) == ALL_WPS_PER_AREA.cend())
+                return nullptr;
+            return &ALL_WPS_PER_AREA.at(areaId);
+        }
+        static bool IsWP(Unit const* unit) {
+            return std::find(ALL_WPS.cbegin(), ALL_WPS.cend(), unit) != ALL_WPS.cend();
+        }
+        static Unit* FindInAllWPs(uint32 wpId) {
+            auto ci = std::find_if(ALL_WPS.cbegin(), ALL_WPS.cend(), [wpId = wpId](Unit const* u) {
+                return dynamic_cast<WanderPoint_AI*>(u->GetAI())->GetWPId() == wpId;
+            });
+            return ci == ALL_WPS.cend() ? nullptr : *ci;
+        }
+        static Unit* FindInMapWPs(uint32 wpId, uint32 mapId) {
+            auto cim = ALL_WPS_PER_MAP.find(mapId);
+            if (cim == ALL_WPS_PER_MAP.cend())
+                return nullptr;
+            auto ci = std::find_if(ALL_WPS_PER_MAP.at(mapId).cbegin(), ALL_WPS_PER_MAP.at(mapId).cend(), [wpId = wpId](Unit const* u) {
+                return dynamic_cast<WanderPoint_AI*>(u->GetAI())->GetWPId() == wpId;
+            });
+            return ci == ALL_WPS_PER_MAP.at(mapId).cend() ? nullptr : *ci;
+        }
+
+        WanderPoint_AI(Unit* unit, uint32 wpId, uint32 mapId, uint32 zoneId, uint32 areaId, std::string const& name) : CreatureAI(unit->ToCreature()),
+            _wpId(wpId), _mapId(mapId), _zoneId(zoneId), _areaId(areaId), _name(name), _minLevel(1u), _maxLevel(MAX_LEVEL), _flags(0)
+        {
+            ASSERT_NOTNULL(sMapStore.LookupEntry(_mapId));
+            ASSERT_NOTNULL(sAreaTableStore.LookupEntry(_zoneId));
+            ASSERT_NOTNULL(sAreaTableStore.LookupEntry(_areaId));
+            ALL_WPS.push_back(me);
+            ALL_WPS_PER_MAP[_mapId].push_back(me);
+            ALL_WPS_PER_ZONE[_zoneId].push_back(me);
+            ALL_WPS_PER_AREA[_areaId].push_back(me);
+        }
+        ~WanderPoint_AI() {
+            ALL_WPS_PER_AREA.at(_areaId).remove(me);
+            ALL_WPS_PER_ZONE.at(_zoneId).remove(me);
+            ALL_WPS_PER_MAP.at(_mapId).remove(me);
+            ALL_WPS.remove(me);
+            while (!_links.empty())
+                UnLink(_links.front());
+        }
+
+        //Overrides
+        bool CanAIAttack(Unit const*) const override { return false; }
+        void UpdateAI(uint32) override {}
+
+        //this
+        std::string FormatLinks() const {
+            std::ostringstream lss;
+            for (Unit* lwp : _links)
+                lss << dynamic_cast<WanderPoint_AI*>(lwp->GetAI())->GetWPId() << ":0 "; //TODO: chance
+            return lss.str();
+        };
+
+        void Link(Unit* wp) {
+            if (!HasLink(wp))
+            {
+                _links.push_back(wp);
+                dynamic_cast<WanderPoint_AI*>(wp->GetAI())->Link(me);
+            }
+        }
+
+        void UnLink(Unit* wp) {
+            if (HasLink(wp))
+            {
+                _links.remove(wp);
+                dynamic_cast<WanderPoint_AI*>(wp->GetAI())->UnLink(me);
+            }
+        }
+
+        bool HasLink(Unit const* wp) const {
+            return std::find(_links.cbegin(), _links.cend(), wp) != _links.cend();
+        }
+
+        auto GetLinks() const -> typename std::add_const_t<WanderPoint_AI::node_ltype>& {
+            return _links;
+        }
+
+        void SetLevels(uint8 minLevel, uint8 maxLevel) {
+            std::tie(_minLevel, _maxLevel) = { minLevel, maxLevel };
+        }
+
+        void SetFlags(BotWPFlags flags) {
+            _flags |= AsUnderlyingType(flags);
+        }
+
+        void RemoveFlags(BotWPFlags flags) {
+            _flags &= ~AsUnderlyingType(flags);
+        }
+
+        bool HasFlag(BotWPFlags flags) const {
+            return !!(_flags & AsUnderlyingType(flags));
+        }
+
+        std::string ToString() const {
+            std::ostringstream wps;
+            wps << "WP " << _wpId << " '" << _name << "', " << uint32(_links.size()) << " link(s)" << ", Map " << _mapId
+                << ", Zone " << _zoneId << " (" << std::string(sAreaTableStore.LookupEntry(_zoneId)->AreaName[0])
+                << "), Area " << _areaId << " (" << std::string(sAreaTableStore.LookupEntry(_areaId)->AreaName[0])
+                << "), minLvl " << uint32(_minLevel) << ", maxLvl " << uint32(_maxLevel)
+                << " (" << static_cast<Position*>(me)->ToString() << ')'
+                << ", flags: 0x" << std::hex << std::setw(8) << std::setfill('0') << _flags << std::dec;
+
+            return wps.str();
+        }
+
+        uint32 GetWPId() const {
+            return _wpId;
+        }
+
+        uint32 GetMapId() const {
+            return _mapId;
+        }
+
+        uint32 GetZoneId() const {
+            return _zoneId;
+        }
+
+        uint32 GetAreaId() const {
+            return _areaId;
+        }
+
+        std::string const& GetName() const {
+            return _name;
+        }
+
+        std::pair<uint8, uint8> GetLevels() const {
+            return { _minLevel, _maxLevel };
+        }
+
+        uint32 GetFlags() const {
+            return _flags;
+        }
+
+    private:
+        const uint32 _wpId;
+        const uint32 _mapId;
+        const uint32 _zoneId;
+        const uint32 _areaId;
+        const std::string _name;
+        uint8 _minLevel;
+        uint8 _maxLevel;
+        uint32 _flags;
+
+        node_ltype _links;
+    };
+
     ChatCommandTable GetCommands() const override
     {
         static ChatCommandTable npcbotToggleCommandTable =
         {
             { "flags",      HandleNpcBotToggleFlagsCommand,         rbac::RBAC_PERM_COMMAND_NPCBOT_TOGGLE_FLAGS,       Console::No  },
+        };
+
+        static ChatCommandTable npcbotWPLinksCommandTable =
+        {
+            { "",           HandleNpcBotWPLinksCommand,             rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
+            { "set",        HandleNpcBotWPLinksSetCommand,          rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
+        };
+
+        static ChatCommandTable npcbotWPInfoCommandTable =
+        {
+            { "",           HandleNpcBotWPInfoCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
+            { "setlevels",  HandleNpcBotWPInfoSetLevelsCommand,     rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
+            { "setflags",   HandleNpcBotWPInfoSetFlagsCommand,      rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
+        };
+
+        static ChatCommandTable npcbotWPCommandTable =
+        {
+            { "loadall",    HandleNpcBotWPLoadAllCommand,           rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::Yes },
+            { "add",        HandleNpcBotWPAddCommand,               rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
+            { "del",        HandleNpcBotWPDeleteCommand,            rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
+            { "list",       HandleNpcBotWPListCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
+            { "list all",   HandleNpcBotWPListAllCommand,           rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
+            { "go",         HandleNpcBotWPGoCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
+            { "links",      npcbotWPLinksCommandTable                                                                               },
+            { "info",       npcbotWPInfoCommandTable                                                                                },
         };
 
         static ChatCommandTable npcbotDebugCommandTable =
@@ -419,6 +635,7 @@ public:
             { "order",      npcbotOrderCommandTable                                                                                 },
             { "vehicle",    npcbotVehicleCommandTable                                                                               },
             { "dump",       npcbotDumpCommandTable                                                                                  },
+            { "wp",         npcbotWPCommandTable                                                                                    },
         };
 
         static ChatCommandTable commandTable =
@@ -426,6 +643,564 @@ public:
             { "npcbot",     npcbotCommandTable                                                                                      },
         };
         return commandTable;
+    }
+
+    static TempSummon* HandleWPSummon(uint32 id, WorldLocation const& sloc, uint32 zoneId, uint32 areaId, std::string const& name)
+    {
+        CellCoord c = Trinity::ComputeCellCoord(sloc.m_positionX, sloc.m_positionY);
+        GridCoord g = Trinity::ComputeGridCoord(sloc.m_positionX, sloc.m_positionY);
+        ASSERT(c.IsCoordValid(), "Invalid Cell coord!");
+        ASSERT(g.IsCoordValid(), "Invalid Grid coord!");
+        Map* map = sMapMgr->CreateBaseMap(sloc.m_mapId);
+        map->LoadGrid(sloc.m_positionX, sloc.m_positionY);
+        ASSERT(!map->Instanceable(), map->GetDebugInfo().c_str());
+
+        TempSummon* wp = sMapMgr->CreateBaseMap(sloc.m_mapId)->SummonCreature(VISUAL_WAYPOINT, sloc);
+        wp->SetTempSummonType(TEMPSUMMON_CORPSE_DESPAWN);
+        wp->AIM_Destroy();
+        wp->AIM_Create(new WanderPoint_AI(wp, id, sloc.m_mapId, zoneId, areaId, name));
+        wp->setActive(true);
+        wp->SetFarVisible(true);
+        wp->AddUnitState(UNIT_STATE_EVADE);
+        wp->SetUnitFlag(UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+        wp->SetMaxHealth(id);
+        wp->SetFullHealth();
+        wp->SetObjectScale(5.0f);
+        return wp;
+    }
+
+    static bool HandleNpcBotWPLoadAllCommand(ChatHandler* handler, Optional<bool> force)
+    {
+        if (allWPsLoaded)
+        {
+            if (!(force && *force))
+            {
+                handler->SendSysMessage("Already loaded!");
+                return true;
+            }
+
+            allWPsLoaded = false;
+            for (Unit* wp : *WanderPoint_AI::GetAllWPs())
+                wp->ToTempSummon()->DespawnOrUnsummon();
+        }
+
+        QueryResult wres = WorldDatabase.Query("SELECT id,mapid,x,y,z,o,zoneId,areaId,minlevel,maxlevel,flags,name,links FROM creature_template_npcbot_wander_nodes ORDER BY mapid,id");
+        if (!wres)
+        {
+            handler->SendSysMessage("No wander points loaded, table `creature_template_npcbot_wander_nodes` is empty!");
+            allWPsLoaded = true;
+            return true;
+        }
+
+        std::unordered_map<uint32, std::pair<Unit*, std::vector<std::vector<std::string_view>>>> links_to_create;
+        do
+        {
+            Field* fields = wres->Fetch();
+            uint32 index = 0;
+
+            uint32 id        = fields[  index].GetUInt32();
+            uint32 mapId     = fields[++index].GetUInt16();
+            float x          = fields[++index].GetFloat();
+            float y          = fields[++index].GetFloat();
+            float z          = fields[++index].GetFloat();
+            float o          = fields[++index].GetFloat();
+            uint32 zoneId    = fields[++index].GetUInt32();
+            uint32 areaId    = fields[++index].GetUInt32();
+            uint8 minLevel   = fields[++index].GetUInt8();
+            uint8 maxLevel   = fields[++index].GetUInt8();
+            uint32 flags     = fields[++index].GetUInt32();
+            std::string name = fields[++index].GetString();
+            char const* lstr = fields[++index].GetCString();
+
+            nextWPId = std::max<uint32>(nextWPId, id);
+
+            if (!minLevel || !maxLevel || minLevel > MAX_LEVEL || maxLevel > MAX_LEVEL || minLevel > maxLevel)
+            {
+                handler->PSendSysMessage("WP %u has invalid levels min %u max %u! Setting to default...",
+                    id, uint32(minLevel), uint32(maxLevel));
+                minLevel = 1;
+                maxLevel = MAX_LEVEL;
+            }
+
+            if (flags >= AsUnderlyingType(WanderPoint_AI::BotWPFlags::BOTWP_FLAG_END))
+            {
+                handler->PSendSysMessage("WP %u has invalid flags %u! Removing all invalid flags...",
+                    id, flags);
+                flags &= (AsUnderlyingType(WanderPoint_AI::BotWPFlags::BOTWP_FLAG_END) - 1);
+            }
+
+            TempSummon* wp = HandleWPSummon(id, WorldLocation(mapId, { x,y,z,o }), zoneId, areaId, name);
+            ASSERT_NOTNULL(wp);
+            dynamic_cast<WanderPoint_AI*>(wp->GetAI())->SetLevels(minLevel, maxLevel);
+            dynamic_cast<WanderPoint_AI*>(wp->GetAI())->SetFlags(WanderPoint_AI::BotWPFlags(flags));
+
+            if (!lstr)
+            {
+                handler->PSendSysMessage("WP %u has not links!", id);
+                continue;
+            }
+            std::vector<std::string_view> tok = Trinity::Tokenize(lstr, ' ', false);
+            for (std::vector<std::string_view>::size_type i = 0; i != tok.size(); ++i)
+            {
+                std::vector<std::string_view> link_str = Trinity::Tokenize(tok[i], ':', false);
+                ASSERT(link_str.size() == 2u, "Invalid links_str format: '%s'", tok[i].data());
+                ASSERT(Trinity::StringTo<uint32>(link_str[0]) != std::nullopt, "Invalid links_str format: '%s'", tok[i].data());
+                ASSERT(Trinity::StringTo<uint32>(link_str[1]) != std::nullopt, "Invalid links_str format: '%s'", tok[i].data());
+
+                if (links_to_create.find(id) == links_to_create.cend())
+                    links_to_create[id] = { wp->ToUnit(), {std::move(link_str)} };
+                else
+                    links_to_create.at(id).second.push_back(std::move(link_str));
+            }
+
+        } while (wres->NextRow());
+
+        for (auto const& vt : links_to_create)
+        {
+            for (auto const& vec : vt.second.second)
+            {
+                uint32 lid = *Trinity::StringTo<uint32>(vec[0]);
+                if (lid == vt.first)
+                {
+                    handler->PSendSysMessage("WP %u has link %u which links to itself! Skipped.", vt.first, lid);
+                    continue;
+                }
+
+                Unit* lwp = WanderPoint_AI::FindInAllWPs(lid);
+                if (!lwp)
+                {
+                    handler->PSendSysMessage("WP %u has link %u which does not exist!", vt.first, lid);
+                    continue;
+                }
+                if (lwp->GetMapId() != vt.second.first->GetMapId())
+                {
+                    handler->PSendSysMessage("WP %u map id %u has link %u ON A DIFFERENT MAP %u!",
+                        vt.first, vt.second.first->GetMapId(), lid, lwp->GetMapId());
+                    continue;
+                }
+                if (vt.second.first->GetExactDist2d(lwp) > MAX_VISIBILITY_DISTANCE)
+                    handler->PSendSysMessage("Warning! Link distance between WP %u and %u is too great (%.2f)",
+                        vt.first, lid, vt.second.first->GetExactDist2d(lwp));
+
+                dynamic_cast<WanderPoint_AI*>(vt.second.first->GetAI())->Link(lwp);
+            }
+        }
+
+        allWPsLoaded = true;
+        return true;
+    }
+
+    static bool HandleNpcBotWPLinksCommand(ChatHandler* handler)
+    {
+        Player* player = handler->GetPlayer();
+        Unit* wp = player->GetSelectedUnit();
+
+        if (!allWPsLoaded)
+        {
+            handler->SendSysMessage("Load WPs first");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!wp || !WanderPoint_AI::IsWP(wp))
+        {
+            handler->SendSysMessage("No WP selected");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        auto const& links = dynamic_cast<WanderPoint_AI*>(wp->GetAI())->GetLinks();
+
+        std::ostringstream ss;
+        ss.setf(std::ios_base::fixed);
+        ss.precision(2);
+        uint32 counter = 0;
+        ss << "WP " << dynamic_cast<WanderPoint_AI*>(wp->GetAI())->GetWPId() << " has " << uint32(links.size()) << " links:";
+        for (Unit* lwp : links)
+        {
+            ss << "\n" << ++counter << ") " << dynamic_cast<WanderPoint_AI*>(lwp->GetAI())->ToString()
+                << " (dist2d: " << wp->GetExactDist2d(lwp) << ")";
+        }
+
+        handler->SendSysMessage(ss.str().c_str());
+
+        for (Unit* lwp : links)
+        {
+            wp->CastSpell(lwp, 2400, true);
+            wp->CastSpell(lwp, 41637, true);
+        }
+
+        return true;
+    }
+    static void HandleWPUpdateLinks(ChatHandler* handler, Unit* wp, std::vector<uint32> linkIds)
+    {
+        auto const linksCopy = dynamic_cast<WanderPoint_AI*>(wp->GetAI())->GetLinks();
+
+        std::set<decltype(linksCopy)::value_type> wps_updates;
+
+        std::copy(std::cbegin(linksCopy), std::cend(linksCopy), std::inserter(wps_updates, wps_updates.begin()));
+        wps_updates.insert(wp);
+
+        if (linksCopy.empty())
+            handler->PSendSysMessage("WP %u had no links...", dynamic_cast<WanderPoint_AI*>(wp->GetAI())->GetWPId());
+        else
+        {
+            for (Unit* lwp : linksCopy)
+            {
+                handler->PSendSysMessage("Removing link %u...", dynamic_cast<WanderPoint_AI*>(lwp->GetAI())->GetWPId());
+                dynamic_cast<WanderPoint_AI*>(wp->GetAI())->UnLink(lwp);
+            }
+        }
+
+        for (uint32 lid : linkIds)
+        {
+            if (lid == dynamic_cast<WanderPoint_AI*>(wp->GetAI())->GetWPId())
+            {
+                handler->PSendSysMessage("Trying to add WP %u to its own links! Are you dumb?", lid);
+                continue;
+            }
+
+            Unit* lwp = WanderPoint_AI::FindInMapWPs(lid, wp->GetMapId());
+            if (!lwp)
+            {
+                handler->PSendSysMessage("WP %u is not found in map %u!", lid, wp->GetMapId());
+                continue;
+            }
+
+            handler->PSendSysMessage("Adding link %u...", lid);
+            if (wp->GetExactDist2d(lwp) > MAX_VISIBILITY_DISTANCE)
+                handler->PSendSysMessage("Warning! Link distance is too great (%.2f)", wp->GetExactDist2d(lwp));
+
+            dynamic_cast<WanderPoint_AI*>(wp->GetAI())->Link(lwp);
+            wps_updates.insert(lwp);
+        }
+
+        WorldDatabaseTransaction trans = WorldDatabase.BeginTransaction();
+        for (Unit const* uwp : wps_updates)
+        {
+            uint32 uwpId = dynamic_cast<WanderPoint_AI*>(uwp->GetAI())->GetWPId();
+            std::string uwp_links_str = dynamic_cast<WanderPoint_AI*>(uwp->GetAI())->FormatLinks();
+            trans->PAppend("UPDATE creature_template_npcbot_wander_nodes SET links='%s' WHERE id=%u", uwp_links_str.c_str(), uwpId);
+        }
+        WorldDatabase.DirectCommitTransaction(trans);
+    }
+    static bool HandleNpcBotWPLinksSetCommand(ChatHandler* handler, Optional<std::vector<uint32>> linkIds)
+    {
+        Player* player = handler->GetPlayer();
+        Unit* wp = player->GetSelectedUnit();
+
+        if (!allWPsLoaded)
+        {
+            handler->SendSysMessage("Load WPs first");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!wp || !WanderPoint_AI::IsWP(wp))
+        {
+            handler->SendSysMessage("No WP selected");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!linkIds)
+        {
+            handler->SendSysMessage("Syntax: npcbot wp links set #[ids...]");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        HandleWPUpdateLinks(handler, wp, *linkIds);
+
+        return true;
+    }
+
+    static bool HandleNpcBotWPInfoCommand(ChatHandler* handler, Optional<uint32> wpId)
+    {
+        Player* player = handler->GetPlayer();
+        Unit* wp = player->GetSelectedUnit();
+
+        if (!allWPsLoaded)
+        {
+            handler->SendSysMessage("Load WPs first");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!wp && wpId)
+            wp = WanderPoint_AI::FindInAllWPs(*wpId);
+
+        if (!wp || !WanderPoint_AI::IsWP(wp))
+        {
+            handler->SendSysMessage("Syntax: npcbot wp info #[id_or_selection]");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        handler->SendSysMessage(dynamic_cast<WanderPoint_AI*>(wp->GetAI())->ToString());
+
+        return true;
+    }
+    static bool HandleNpcBotWPInfoSetLevelsCommand(ChatHandler* handler, Optional<uint8> minlevel, Optional<uint8> maxlevel)
+    {
+        Player* player = handler->GetPlayer();
+        Unit* wp = player->GetSelectedUnit();
+
+        if (!allWPsLoaded)
+        {
+            handler->SendSysMessage("Load WPs first");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!wp || !WanderPoint_AI::IsWP(wp))
+        {
+            handler->SendSysMessage("No WP selected");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!minlevel || !maxlevel)
+        {
+            handler->SendSysMessage("Syntax: npcbot wp info setlevels #[minlevel] #[maxlevel]");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        dynamic_cast<WanderPoint_AI*>(wp->GetAI())->SetLevels(*minlevel, *maxlevel);
+        uint32 wpId = dynamic_cast<WanderPoint_AI*>(wp->GetAI())->GetWPId();
+        WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET minlevel=%u, maxlevel=%u WHERE id=%u",
+            uint32(*minlevel), uint32(*maxlevel), wpId);
+
+        return true;
+    }
+    static bool HandleNpcBotWPInfoSetFlagsCommand(ChatHandler* handler, Optional<int32> flags)
+    {
+        Player* player = handler->GetPlayer();
+        Unit* wp = player->GetSelectedUnit();
+
+        if (!allWPsLoaded)
+        {
+            handler->SendSysMessage("Load WPs first");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!wp || !WanderPoint_AI::IsWP(wp))
+        {
+            handler->SendSysMessage("No WP selected");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!flags)
+        {
+            handler->SendSysMessage("Syntax: npcbot wp info setflags #[flag]. Use negative value to remove");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        WanderPoint_AI* ai = dynamic_cast<WanderPoint_AI*>(wp->GetAI());
+        if (*flags < 0)
+            ai->RemoveFlags(WanderPoint_AI::BotWPFlags(-*flags));
+        else
+            ai->SetFlags(WanderPoint_AI::BotWPFlags(*flags));
+
+        uint32 wpId = dynamic_cast<WanderPoint_AI*>(wp->GetAI())->GetWPId();
+        uint32 wpFlags = dynamic_cast<WanderPoint_AI*>(wp->GetAI())->GetFlags();
+        WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET flags=%u WHERE id=%u", wpFlags, wpId);
+
+        return true;
+    }
+
+    static bool HandleNpcBotWPAddCommand(ChatHandler* handler, Optional<std::string> name,
+        Optional<uint8> minlevel, Optional<uint8> maxlevel, Optional<uint32> flags)
+    {
+        Player* player = handler->GetPlayer();
+
+        if (!allWPsLoaded)
+        {
+            handler->SendSysMessage("Load WPs first");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!name || !player->GetMap()->GetEntry()->IsContinent())
+        {
+            handler->SendSysMessage("Syntax: npcbot wp add #[name] #[minlevel #maxlevel] #[flags]. World maps only");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (minlevel)
+        {
+            if (!*minlevel || *minlevel > MAX_LEVEL)
+            {
+                handler->SendSysMessage("Minlevel must be between 1 and MAX_LEVEL!");
+                handler->SetSentErrorMessage(true);
+                return false;
+            }
+            if (maxlevel)
+            {
+                if (!*maxlevel || *maxlevel > MAX_LEVEL)
+                {
+                    handler->SendSysMessage("Maxlevel must be between 1 and MAX_LEVEL!");
+                    handler->SetSentErrorMessage(true);
+                    return false;
+                }
+                if (*minlevel > *maxlevel)
+                {
+                    handler->SendSysMessage("Minlevel can't be greater than maxlevel");
+                    handler->SetSentErrorMessage(true);
+                    return false;
+                }
+            }
+        }
+
+        if (flags)
+        {
+            if (*flags >= AsUnderlyingType(WanderPoint_AI::BotWPFlags::BOTWP_FLAG_END))
+            {
+                handler->PSendSysMessage("Flags must below %u!", AsUnderlyingType(WanderPoint_AI::BotWPFlags::BOTWP_FLAG_END));
+                handler->SetSentErrorMessage(true);
+                return false;
+            }
+        }
+
+        uint32 zoneId, areaId;
+        player->GetZoneAndAreaId(zoneId, areaId);
+        TempSummon* wp = HandleWPSummon(++nextWPId, *player, zoneId, areaId, *name);
+        ASSERT_NOTNULL(wp);
+
+        WanderPoint_AI* ai = dynamic_cast<WanderPoint_AI*>(wp->GetAI());
+
+        if (minlevel)
+            ai->SetLevels(*minlevel, maxlevel ? *maxlevel : MAX_LEVEL);
+        if (flags)
+            ai->SetFlags(WanderPoint_AI::BotWPFlags(*flags));
+
+        auto [minl, maxl] = ai->GetLevels();
+        std::ostringstream ss;
+        ss << "INSERT INTO creature_template_npcbot_wander_nodes (id,mapid,x,y,z,o,zoneId,areaId,minlevel,maxlevel,flags,name,links)"
+            << " VALUES "
+            << '(' << ai->GetWPId() << ',' << ai->GetMapId()
+            << ',' << wp->GetPositionX() << ',' << wp->GetPositionY() << ',' << wp->GetPositionZ() << ',' << wp->GetOrientation()
+            << ',' << ai->GetZoneId() << ',' << ai->GetAreaId() << ',' << uint32(minl) << ',' << uint32(maxl)
+            << ',' << ai->GetFlags() << ",'" << ai->GetName() << "','" << ai->FormatLinks() << "')";
+
+        WorldDatabase.Execute(ss.str().c_str());
+
+        return true;
+    }
+    static bool HandleNpcBotWPDeleteCommand(ChatHandler* handler)
+    {
+        Player* player = handler->GetPlayer();
+        Unit* wp = player->GetSelectedUnit();
+
+        if (!allWPsLoaded)
+        {
+            handler->SendSysMessage("Load WPs first");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!wp || !WanderPoint_AI::IsWP(wp))
+        {
+            handler->SendSysMessage("No WP selected");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        HandleWPUpdateLinks(handler, wp, {});
+
+        uint32 wpId = dynamic_cast<WanderPoint_AI*>(wp->GetAI())->GetWPId();
+
+        wp->ToCreature()->AIM_Destroy();
+        wp->ToTempSummon()->DespawnOrUnsummon();
+
+        WorldDatabase.PExecute("DELETE FROM creature_template_npcbot_wander_nodes WHERE id=%u", wpId);
+
+        handler->PSendSysMessage("WP %u was successfully deleted.");
+
+        return true;
+    }
+
+    static bool HandleNpcBotWPListCommand(ChatHandler* handler, Optional<uint32> ozoneId, Optional<uint32> oareaId)
+    {
+        Player* player = handler->GetPlayer();
+
+        if (!allWPsLoaded)
+        {
+            handler->SendSysMessage("Load WPs first");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        uint32 zoneId = 0, areaId = 0;
+        if (!ozoneId && !oareaId)
+            player->GetZoneAndAreaId(zoneId, areaId);
+        else
+        {
+            if (ozoneId)
+                zoneId = *ozoneId;
+            if (oareaId)
+                areaId = *oareaId;
+        }
+
+        std::ostringstream ss;
+        ss << "Zone " << zoneId << " (" << std::string(sAreaTableStore.LookupEntry(zoneId)->AreaName[0]) << ") wps:";
+        if (auto const* zwps = WanderPoint_AI::GetZoneWPs(zoneId))
+            for (Unit* zwp : *zwps)
+                ss << "\n" << dynamic_cast<WanderPoint_AI*>(zwp->GetAI())->ToString();
+        ss << "\nArea " << areaId << " (" << std::string(sAreaTableStore.LookupEntry(areaId)->AreaName[0]) << ") wps:";
+        if (auto const* awps = WanderPoint_AI::GetAreaWPs(areaId))
+            for (Unit* awp : *awps)
+                ss << "\n" << dynamic_cast<WanderPoint_AI*>(awp->GetAI())->ToString();
+
+        handler->SendSysMessage(ss.str().c_str());
+        return true;
+    }
+    static bool HandleNpcBotWPListAllCommand(ChatHandler* handler)
+    {
+        if (!allWPsLoaded)
+        {
+            handler->SendSysMessage("Load WPs first");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        std::ostringstream ss;
+        ss << "ALL wps:";
+        if (auto const* wps = WanderPoint_AI::GetAllWPs())
+            for (Unit* wp : *wps)
+                ss << "\n" << dynamic_cast<WanderPoint_AI*>(wp->GetAI())->ToString();
+
+        handler->SendSysMessage(ss.str().c_str());
+        return true;
+    }
+
+    static bool HandleNpcBotWPGoCommand(ChatHandler* handler, uint32 wpId)
+    {
+        Player* player = handler->GetPlayer();
+
+        if (!allWPsLoaded)
+        {
+            handler->SendSysMessage("Load WPs first");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        Unit const* wp = WanderPoint_AI::FindInAllWPs(wpId);
+        if (!wp)
+        {
+            handler->PSendSysMessage("WP %u not found", wpId);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        player->TeleportTo(*wp, TELE_TO_GM_MODE);
+
+        return true;
     }
 
     static bool HandleNpcBotDebugNamesCommand(ChatHandler* handler, Optional<std::string_view> name)
@@ -2775,3 +3550,12 @@ void AddSC_script_bot_commands()
 {
     new script_bot_commands();
 }
+
+script_bot_commands::WanderPoint_AI::node_ltype script_bot_commands::WanderPoint_AI::ALL_WPS = {};
+script_bot_commands::WanderPoint_AI::node_mtype script_bot_commands::WanderPoint_AI::ALL_WPS_PER_MAP = {};
+script_bot_commands::WanderPoint_AI::node_mtype script_bot_commands::WanderPoint_AI::ALL_WPS_PER_ZONE = {};
+script_bot_commands::WanderPoint_AI::node_mtype script_bot_commands::WanderPoint_AI::ALL_WPS_PER_AREA = {};
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
